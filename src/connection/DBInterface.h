@@ -60,6 +60,7 @@ public:
 
     /// @brief Initializes a database connection based on the supplied type
     void initConnection (DBConnectionInfo *info);
+    void openDatabase (std::string database_name);
 
     /// @brief Returns a buffer with all data sources for a DBO type
     Buffer *getDataSourceDescription (DB_OBJECT_TYPE type);
@@ -172,12 +173,16 @@ public:
 
     Buffer *getTrackMatches (bool has_mode_a, unsigned int mode_a, bool has_ta, unsigned int ta, bool has_ti, std::string ti);
 
-    void setDatabaseName (std::string database_name) { database_name_=database_name;}
-    std::string getDatabaseName ()  { return database_name_; }
+//    void setDatabaseName (std::string database_name) { database_name_=database_name;}
+//    std::string getDatabaseName ()  { return database_name_; }
 
 private:
     /// Last used database name
-    std::string database_name_;
+    //std::string database_name_;
+    /// Connection exists
+    bool connected_;
+    /// Database opened
+    bool database_opened_;
     /// Container with all prepared flags (for incremental reading)
     std::map <DB_OBJECT_TYPE, bool> prepared_;
     /// Container with all reading done flags (for incremental reading)

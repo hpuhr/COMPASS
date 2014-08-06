@@ -42,13 +42,19 @@ class DBSelectionWidget : public QFrame, public Configurable
 {
     Q_OBJECT
 
-private slots:
+public slots:
     /// @brief Starts the open file dialog
-    void selectFile();
+    //void selectFile();
     /// @brief Sets database system based on radio buttons
     void selectDBType();
     /// @brief Sets MySQL parameters
     void updateMySQLInfo ();
+
+    void connectDB ();
+    void openDB ();
+
+signals:
+    void databaseOpened ();
 
 public:
     /// @brief Constructor
@@ -64,7 +70,7 @@ public:
     /// @brief Sets the database system
     void setDBType (std::string value);
     /// @brief Sets the filename for SQLite3 databases
-    void setDBFilename (std::string value);
+    //void setDBFilename (std::string value);
     /// @brief Sets the server address for MySQL databases
     void setDBServer (std::string value);
     /// @brief Sets the database name for MySQL databases
@@ -80,9 +86,9 @@ public:
 
 protected:
     /// SQLite3 selection radio button
-    QRadioButton *file_radio_;
+    //QRadioButton *file_radio_;
     /// MySQL++ selection radio button
-    QRadioButton *mysqlpp_radio_;
+    //QRadioButton *mysqlpp_radio_;
     /// MySQL Connector selection radio button
     QRadioButton *mysqlcon_radio_;
     /// Database type, 0 undefined, 1 sqlite file, 2 mysqlpp, 3 mysqlcon
@@ -93,8 +99,6 @@ protected:
     /// Filename
     std::string filename_;
 
-    /// MySQL database name edit field
-    QLineEdit *mysql_db_name_edit_;
     /// MySQL ip address edit field
     QLineEdit *mysql_db_ip_edit_;
     /// MySQL port edit field
@@ -103,6 +107,14 @@ protected:
     QLineEdit *mysql_db_username_edit_;
     /// MySQL password edit field
     QLineEdit *mysql_db_password_edit_;
+
+    /// Open connection button
+    QPushButton *connect_button_;
+
+    /// MySQL database name edit field
+    QLineEdit *mysql_db_name_edit_;
+
+    QPushButton *open_button_;
 
     /// MySQL database name
     std::string mysql_db_name_;

@@ -58,7 +58,7 @@ MySQLConConnection::~MySQLConConnection()
     }
 }
 
-void MySQLConConnection::init()
+void MySQLConConnection::connect()
 {
     assert (info_->getType() == DB_TYPE_MYSQLCon);
     assert (!connection_);
@@ -84,19 +84,27 @@ void MySQLConConnection::init()
 
     assert (connection_);
 
+    loginf  << "MySQLConConnection: init: successfully connected to server '" << connection_->getClientInfo() << "'";
+}
 
-//    if (info_ ->isNew())
-//    {
-//        std::string drop_db = "DROP DATABASE IF EXISTS "+info->getDB()+";";
-//        executeSQL (drop_db); // drop if exists
-//        std::string create_db = "CREATE DATABASE "+info->getDB()+";";
-//        executeSQL (create_db);
-//    }
+void MySQLConConnection::openDatabase (std::string database_name)
+{
+    assert (connection_);
 
-    std::string use_db = "USE "+info->getDB()+";";
+    //    if (info_ ->isNew())
+    //    {
+    //        std::string drop_db = "DROP DATABASE IF EXISTS "+info->getDB()+";";
+    //        executeSQL (drop_db); // drop if exists
+    //        std::string create_db = "CREATE DATABASE "+info->getDB()+";";
+    //        executeSQL (create_db);
+    //    }
+
+    std::string use_db = "USE "+database_name+";";
     executeSQL (use_db);
 
-    loginf  << "MySQLConConnection: init: successfully connected to server '" << connection_->getClientInfo() << "'";
+    DBConnection::openDatabase(database_name);
+
+    loginf  << "MySQLConConnection: openDatabase: successfully opened database '" << database_name << "'";
 }
 
 void MySQLConConnection::executeSQL(std::string sql)
@@ -522,7 +530,7 @@ void MySQLConConnection::finalizeCommand ()
     logdbg  << "MySQLConConnection: finalizeCommand: done";
 }
 
-Buffer *MySQLConConnection::getTableList(std::string database_name)  // buffer of table name strings
+Buffer *MySQLConConnection::getTableList()  // buffer of table name strings
 {
     logdbg << "MySQLConConnection: getTableList";
 
@@ -541,16 +549,24 @@ Buffer *MySQLConConnection::getTableList(std::string database_name)  // buffer o
     return buffer;
 }
 
-Buffer *MySQLConConnection::getColumnList(std::string database_name, std::string table) // buffer of column name string, data type
+Buffer *MySQLConConnection::getColumnList(std::string table) // buffer of column name string, data type
 {
     logdbg << "MySQLConConnection: getColumnList: table " << table;
 
     DBCommand command;
-    command.setCommandString ("SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '"+database_name+"' AND TABLE_NAME = '"+table+"' ORDER BY COLUMN_NAME DESC;");
+    command.setCommandString ("SHOW COLUMNS FROM "+table);
+    //command.setCommandString ("SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '"+database_name+"' AND TABLE_NAME = '"+table+"' ORDER BY COLUMN_NAME DESC;");
+
     PropertyList list;
     list.addProperty ("name", P_TYPE_STRING);
     list.addProperty ("type", P_TYPE_STRING);
+    list.addProperty ("null", P_TYPE_BOOL);
     list.addProperty ("key_string", P_TYPE_STRING);
+    list.addProperty ("default", P_TYPE_STRING);
+    list.addProperty ("extra", P_TYPE_STRING);
+//    list.addProperty ("name", P_TYPE_STRING);
+//    list.addProperty ("type", P_TYPE_STRING);
+//    list.addProperty ("key_string", P_TYPE_STRING);
     command.setPropertyList (list);
 
     DBResult *result = execute(&command);

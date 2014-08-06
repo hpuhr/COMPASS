@@ -57,7 +57,7 @@ MySQLppConnection::~MySQLppConnection()
     connection_.disconnect();
 }
 
-void MySQLppConnection::init()
+void MySQLppConnection::connect()
 {
     assert (info_->getType() == DB_TYPE_MYSQLpp);
 
@@ -70,19 +70,24 @@ void MySQLppConnection::init()
         throw std::runtime_error ("MySQLppConnection: init: DB connection failed");
     }
 
-//    if (info_ ->isNew())
-//    {
-//        std::string drop_db = "DROP DATABASE IF EXISTS "+info->getDB()+";";
-//        executeSQL (drop_db); // drop if exists
-//        connection_.create_db(info->getDB().c_str()); // so, no database? create it first then.
-//    }
-    connection_.select_db(info->getDB().c_str());
-
     assert (connection_.connected ());
+
     loginf  << "MySQLppConnection: init: sucessfully connected to server '" << connection_.server_version ();
 
     //  loginf  << "MySQLppConnection: init: performance test";
     //  performanceTest ();
+}
+
+void MySQLppConnection::openDatabase (std::string database_name)
+{
+    //    if (info_ ->isNew())
+    //    {
+    //        std::string drop_db = "DROP DATABASE IF EXISTS "+info->getDB()+";";
+    //        executeSQL (drop_db); // drop if exists
+    //        connection_.create_db(info->getDB().c_str()); // so, no database? create it first then.
+    //    }
+    connection_.select_db(database_name);
+    loginf  << "MySQLppConnection: openDatabase: successfully opened database '" << database_name << "'";
 }
 
 void MySQLppConnection::executeSQL(std::string sql)
@@ -521,7 +526,7 @@ void MySQLppConnection::finalizeCommand ()
     logdbg  << "MySQLppConnection: finalizeCommand: done";
 }
 
-Buffer *MySQLppConnection::getTableList(std::string database_name)  // buffer of table name strings
+Buffer *MySQLppConnection::getTableList()  // buffer of table name strings
 {
     DBCommand command;
     //command.setCommandString ("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '"+db_name+"' ORDER BY TABLE_NAME DESC;");
@@ -538,15 +543,22 @@ Buffer *MySQLppConnection::getTableList(std::string database_name)  // buffer of
     return buffer;
 }
 
-Buffer *MySQLppConnection::getColumnList(std::string database_name, std::string table) // buffer of column name string, data type
+Buffer *MySQLppConnection::getColumnList(std::string table) // buffer of column name string, data type
 {
     DBCommand command;
-    command.setCommandString ("SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '"
-            +database_name+"' AND TABLE_NAME = '"+table+"' ORDER BY COLUMN_NAME DESC;");
+//    command.setCommandString ("SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '"
+//            +database_name+"' AND TABLE_NAME = '"+table+"' ORDER BY COLUMN_NAME DESC;");
+    command.setCommandString ("SHOW COLUMNS FROM "+table);
+
+    //SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'job_awam_0019' AND TABLE_NAME = 'sd_track' ORDER BY COLUMN_NAME DESC;
+
     PropertyList list;
     list.addProperty ("name", P_TYPE_STRING);
     list.addProperty ("type", P_TYPE_STRING);
+    list.addProperty ("null", P_TYPE_BOOL);
     list.addProperty ("key_string", P_TYPE_STRING);
+    list.addProperty ("default", P_TYPE_STRING);
+    list.addProperty ("extra", P_TYPE_STRING);
     command.setPropertyList (list);
 
     DBResult *result = execute(&command);

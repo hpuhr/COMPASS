@@ -32,6 +32,7 @@
 #include <QLineEdit>
 #include <QComboBox>
 
+#include "ATSDB.h"
 #include "DBSelectionWidget.h"
 #include "DBConnectionInfo.h"
 #include "Logger.h"
@@ -41,8 +42,9 @@ using namespace Utils::String;
 
 
 DBSelectionWidget::DBSelectionWidget(std::string class_id, std::string instance_id, Configurable *parent)
- : Configurable (class_id, instance_id, parent), filename_edit_(0), file_radio_(0), mysqlpp_radio_(0), mysqlcon_radio_(0),
-   mysql_db_name_edit_ (0), mysql_db_ip_edit_(0), mysql_db_port_edit_ (0), mysql_db_username_edit_ (0), mysql_db_password_edit_(0)
+ : Configurable (class_id, instance_id, parent), /*filename_edit_(0), file_radio_(0), mysqlpp_radio_(0),*/ mysqlcon_radio_(0),
+  mysql_db_ip_edit_(0), mysql_db_port_edit_ (0), mysql_db_username_edit_ (0), mysql_db_password_edit_(0),
+  connect_button_(0),  mysql_db_name_edit_ (0), open_button_(0)
 {
   registerParameter ("filename", &filename_, (std::string)"");
 
@@ -69,25 +71,26 @@ void DBSelectionWidget::checkSubConfigurables ()
 
 }
 
-void DBSelectionWidget::selectFile()
-{
-  logdbg  << "DBSelectionWidget: selectFile";
-
-  QString filename = QFileDialog::getOpenFileName(this, QObject::tr("Open RDB File"), tr("../data/"),
-      QObject::tr("RDB files (*.rdb)"), 0, QFileDialog::DontUseNativeDialog);
-
-  filename_ = filename.toStdString ();
-  filename_edit_->setText (filename);
-}
+//void DBSelectionWidget::selectFile()
+//{
+//  logdbg  << "DBSelectionWidget: selectFile";
+//
+//  QString filename = QFileDialog::getOpenFileName(this, QObject::tr("Open RDB File"), tr("../data/"),
+//      QObject::tr("RDB files (*.rdb)"), 0, QFileDialog::DontUseNativeDialog);
+//
+//  filename_ = filename.toStdString ();
+//  filename_edit_->setText (filename);
+//}
 
 void DBSelectionWidget::selectDBType()
 {
   // 0 undefined, 1 file, 2 mysqlpp, 3 mysqlcon
-  if (file_radio_->isDown ())
-    db_type_selection_ = 1;
-  else if (mysqlpp_radio_->isDown())
-    db_type_selection_ = 2;
-  else if (mysqlcon_radio_->isDown())
+//  if (file_radio_->isDown ())
+//    db_type_selection_ = 1;
+//  else if (mysqlpp_radio_->isDown())
+//    db_type_selection_ = 2;
+//  else
+  if (mysqlcon_radio_->isDown())
     db_type_selection_ = 3;
   else
     db_type_selection_ = 0;
@@ -149,125 +152,135 @@ void DBSelectionWidget::createElements ()
   setFrameStyle(QFrame::Panel | QFrame::Raised);
   setLineWidth(frame_width);
 
-  QVBoxLayout *db_type_layout = new QVBoxLayout ();
+  QVBoxLayout *layout = new QVBoxLayout ();
 
-  QLabel *db_type_label = new QLabel (tr("Please select a Database"));
+  QLabel *db_type_label = new QLabel ("Database System");
   db_type_label->setFont (font_big);
-  db_type_layout->addWidget (db_type_label);
+  layout->addWidget (db_type_label);
 
-  file_radio_ = new QRadioButton("File container", this);
-  connect(file_radio_, SIGNAL(pressed()), this, SLOT(selectDBType()));
-  if (db_type_selection_ == 1)
-    file_radio_->setChecked (true);
-  file_radio_->setFont (font_bold);
-  db_type_layout->addWidget (file_radio_);
-
-  filename_edit_ = new QTextEdit (tr(filename_.c_str()));
-  filename_edit_->setReadOnly (true);
-  filename_edit_->setMaximumHeight (50);
-  db_type_layout->addWidget (filename_edit_);
-
-  QPushButton *select_file = new QPushButton(tr("Select"));
-  connect(select_file, SIGNAL( clicked() ), this, SLOT( selectFile() ));
-  db_type_layout->addWidget(select_file);
-
-  mysqlpp_radio_ = new QRadioButton("MySQLpp database", this);
-  connect(mysqlpp_radio_, SIGNAL(pressed()), this, SLOT(selectDBType()));
-  if (db_type_selection_ == 2)
-      mysqlpp_radio_->setChecked (true);
-  mysqlpp_radio_->setFont (font_bold);
-  db_type_layout->addWidget (mysqlpp_radio_);
+//  file_radio_ = new QRadioButton("File container", this);
+//  connect(file_radio_, SIGNAL(pressed()), this, SLOT(selectDBType()));
+//  if (db_type_selection_ == 1)
+//    file_radio_->setChecked (true);
+//  file_radio_->setFont (font_bold);
+//  db_type_layout->addWidget (file_radio_);
+//
+//  filename_edit_ = new QTextEdit (tr(filename_.c_str()));
+//  filename_edit_->setReadOnly (true);
+//  filename_edit_->setMaximumHeight (50);
+//  db_type_layout->addWidget (filename_edit_);
+//
+//  QPushButton *select_file = new QPushButton(tr("Select"));
+//  connect(select_file, SIGNAL( clicked() ), this, SLOT( selectFile() ));
+//  db_type_layout->addWidget(select_file);
+//
+//  mysqlpp_radio_ = new QRadioButton("MySQLpp database", this);
+//  connect(mysqlpp_radio_, SIGNAL(pressed()), this, SLOT(selectDBType()));
+//  if (db_type_selection_ == 2)
+//      mysqlpp_radio_->setChecked (true);
+//  mysqlpp_radio_->setFont (font_bold);
+//  db_type_layout->addWidget (mysqlpp_radio_);
 
   mysqlcon_radio_ = new QRadioButton("MySQL connector database", this);
   connect(mysqlcon_radio_, SIGNAL(pressed()), this, SLOT(selectDBType()));
   if (db_type_selection_ == 3)
       mysqlcon_radio_->setChecked (true);
   mysqlcon_radio_->setFont (font_bold);
-  db_type_layout->addWidget (mysqlcon_radio_);
+  layout->addWidget (mysqlcon_radio_);
 
-  QHBoxLayout *db_name_layout = new QHBoxLayout ();
+  QLabel *db_system_label = new QLabel (tr("Database Server"));
+  db_system_label->setFont (font_big);
+  layout->addWidget (db_system_label);
+
+  QLabel *db_ip_label = new QLabel("Server Name or IP address");
+  layout->addWidget (db_ip_label);
+
+  mysql_db_ip_edit_ = new QLineEdit ();
+  mysql_db_ip_edit_->setText (mysql_db_ip_.c_str());
+  connect(mysql_db_ip_edit_, SIGNAL( returnPressed() ), this, SLOT(updateMySQLInfo()));
+  layout->addWidget (mysql_db_ip_edit_);
+
+  QLabel *db_port_label = new QLabel("Port number");
+  layout->addWidget (db_port_label);
+
+  mysql_db_port_edit_ = new QLineEdit ();
+  mysql_db_port_edit_->setText (mysql_db_port_.c_str());
+  connect(mysql_db_port_edit_, SIGNAL( returnPressed() ), this, SLOT(updateMySQLInfo()));
+  layout->addWidget (mysql_db_port_edit_);
+
+  QLabel *db_username_label = new QLabel("Username");
+  layout->addWidget (db_username_label);
+
+  mysql_db_username_edit_ = new QLineEdit ();
+  mysql_db_username_edit_->setText (mysql_db_username_.c_str());
+  connect(mysql_db_username_edit_, SIGNAL( returnPressed() ), this, SLOT(updateMySQLInfo()));
+  layout->addWidget (mysql_db_username_edit_);
+
+  QLabel *db_password_label = new QLabel("Password");
+  layout->addWidget (db_password_label);
+
+  mysql_db_password_edit_ = new QLineEdit ();
+  mysql_db_password_edit_->setText (mysql_db_password_.c_str());
+  connect(mysql_db_password_edit_, SIGNAL( returnPressed() ), this, SLOT(updateMySQLInfo()));
+  layout->addWidget (mysql_db_password_edit_);
+
+  connect_button_ = new QPushButton ("Connect");
+  connect_button_->setFont(font_bold);
+  connect (connect_button_, SIGNAL(clicked()), this, SLOT(connectDB()));
+  layout->addWidget(connect_button_);
+
   QLabel *db_name_label = new QLabel("Database name");
-  db_name_layout->addWidget (db_name_label);
+  layout->addWidget (db_name_label);
 
   mysql_db_name_edit_ = new QLineEdit ();
   mysql_db_name_edit_->setText (mysql_db_name_.c_str());
   connect(mysql_db_name_edit_, SIGNAL( returnPressed() ), this, SLOT( updateMySQLInfo() ));
-  db_name_layout->addWidget (mysql_db_name_edit_);
-  db_type_layout->addLayout (db_name_layout);
+  layout->addWidget (mysql_db_name_edit_);
 
-  QHBoxLayout *db_ip_layout = new QHBoxLayout ();
-  QLabel *db_ip_label = new QLabel("IP address");
-  db_ip_layout->addWidget (db_ip_label);
+  open_button_ = new QPushButton ("Open");
+  open_button_->setFont(font_bold);
+  connect (open_button_, SIGNAL(clicked()), this, SLOT(openDB()));
+  open_button_->setDisabled(true);
+  layout->addWidget(open_button_);
 
-  mysql_db_ip_edit_ = new QLineEdit ();
-  mysql_db_ip_edit_->setText (mysql_db_ip_.c_str());
-  connect(mysql_db_ip_edit_, SIGNAL( returnPressed() ), this, SLOT( updateMySQLInfo() ));
-  db_ip_layout->addWidget (mysql_db_ip_edit_);
-  db_type_layout->addLayout(db_ip_layout);
-
-  QHBoxLayout *db_port_layout = new QHBoxLayout ();
-  QLabel *db_port_label = new QLabel("Port number");
-  db_port_layout->addWidget (db_port_label);
-
-  mysql_db_port_edit_ = new QLineEdit ();
-  mysql_db_port_edit_->setText (mysql_db_port_.c_str());
-  connect(mysql_db_port_edit_, SIGNAL( returnPressed() ), this, SLOT( updateMySQLInfo() ));
-  db_port_layout->addWidget (mysql_db_port_edit_);
-  db_type_layout->addLayout(db_port_layout);
-
-  QHBoxLayout *db_user_layout = new QHBoxLayout ();
-  QLabel *db_username_label = new QLabel("Username");
-  db_user_layout->addWidget (db_username_label);
-
-  mysql_db_username_edit_ = new QLineEdit ();
-  mysql_db_username_edit_->setText (mysql_db_username_.c_str());
-  connect(mysql_db_username_edit_, SIGNAL( returnPressed() ), this, SLOT( updateMySQLInfo() ));
-  db_user_layout->addWidget (mysql_db_username_edit_);
-  db_type_layout->addLayout(db_user_layout);
-
-  QHBoxLayout *db_password_layout = new QHBoxLayout ();
-  QLabel *db_password_label = new QLabel("Password");
-  db_password_layout->addWidget (db_password_label);
-
-  mysql_db_password_edit_ = new QLineEdit ();
-  mysql_db_password_edit_->setText (mysql_db_password_.c_str());
-  connect(mysql_db_password_edit_, SIGNAL( returnPressed() ), this, SLOT( updateMySQLInfo() ));
-  db_password_layout->addWidget (mysql_db_password_edit_);
-  db_type_layout->addLayout(db_password_layout);
-
-  setLayout (db_type_layout);
+  setLayout (layout);
 }
 
 void DBSelectionWidget::setDBType (std::string value)
 {
-  assert (file_radio_);
-  assert (mysqlpp_radio_);
+//  assert (file_radio_);
+//  assert (mysqlpp_radio_);
   assert (mysqlcon_radio_);
 
-  if (value.compare ("sqlite") == 0)
-  {
-    file_radio_->click();
-    db_type_selection_ = 1;
-  }
-  if (value.compare ("mysqlpp") == 0)
-  {
-    mysqlpp_radio_->click();
-    db_type_selection_ = 2;
-  }
+//  if (value.compare ("sqlite") == 0)
+//  {
+//    file_radio_->click();
+//    db_type_selection_ = 1;
+//  }
+//  if (value.compare ("mysqlpp") == 0)
+//  {
+//    mysqlpp_radio_->click();
+//    db_type_selection_ = 2;
+//  }
   if (value.compare ("mysqlcon") == 0)
   {
     mysqlcon_radio_->click();
     db_type_selection_ = 3;
   }
   else
+  {
     logerr  << "DBSelectionWidget: setDBType: unknown value '" << value << "'";
+    mysqlcon_radio_->click();
+    db_type_selection_ = 3;
+
+  }
 }
-void DBSelectionWidget::setDBFilename (std::string value)
-{
-  assert (filename_edit_);
-  filename_edit_->setText(value.c_str());
-  filename_=value;
-}
+//void DBSelectionWidget::setDBFilename (std::string value)
+//{
+//  assert (filename_edit_);
+//  filename_edit_->setText(value.c_str());
+//  filename_=value;
+//}
 void DBSelectionWidget::setDBServer (std::string value)
 {
   assert (mysql_db_ip_edit_);
@@ -305,4 +318,17 @@ void DBSelectionWidget::setDBNoPassword ()
   assert (mysql_db_password_edit_);
   mysql_db_password_edit_->setText("");
   mysql_db_password_="";
+}
+
+void DBSelectionWidget::connectDB ()
+{
+    ATSDB::getInstance().connect(getConnectionInfo());
+    connect_button_->setDisabled(true);
+    open_button_->setDisabled(false);
+}
+void DBSelectionWidget::openDB ()
+{
+    ATSDB::getInstance().open(mysql_db_name_);
+    open_button_->setDisabled(true);
+    emit databaseOpened();
 }

@@ -118,43 +118,49 @@ ATSDB::~ATSDB()
  *
  * \param info DBConnectionInfo pointer defining what database system and parameters to use
  */
-void ATSDB::init (DBConnectionInfo *info)
+void ATSDB::connect (DBConnectionInfo *info)
 {
-    logdbg  << "ATSDB: init: start";
+    logdbg  << "ATSDB: connect: start";
 
     assert (info);
 
-    loginf  << "ATSDB: init: initialising connection";
+    loginf  << "ATSDB: connect: initialising connection";
     db_interface_->initConnection(info);
 
-    loginf  << "ATSDB: init: data sources";
+}
+
+void ATSDB::open (std::string database_name)
+{
+    db_interface_->openDatabase(database_name);
+
+    loginf  << "ATSDB: open: data sources";
     buildDataSources();
 
-    logdbg  << "ATSDB: init: checking if new";
+//    logdbg  << "ATSDB: open: checking if new";
 
 //    if (!info->isNew())
 //    {
         if (db_interface_->existsPropertiesTable())
         {
             loadActiveDataSources ();
-            loginf  << "ATSDB: init: building active data sources";
+            loginf  << "ATSDB: open: building active data sources";
         }
         if (db_interface_->existsMinMaxTable())
         {
-            loginf  << "ATSDB: init: building minmax values";
+            loginf  << "ATSDB: open: building minmax values";
             loadMinMaxValues();
         }
 //    }
 
     // Now we have opened the database
     //loginf  <<  "ATSDB: init: database '" << filename << "' opened";
-    logdbg  << "ATSDB: init: state to 'DB_STATE_READ_IDLE'";
+    logdbg  << "ATSDB: open: state to 'DB_STATE_READ_IDLE'";
 
     db_opened_=true;
 
     //testUpdate();
 
-    loginf  << "ATSDB: init: end";
+    logdbg  << "ATSDB: open: end";
 }
 
 /**

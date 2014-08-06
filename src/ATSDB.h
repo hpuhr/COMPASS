@@ -97,8 +97,9 @@ public:
     ///@brief Destructor.
     virtual ~ATSDB();
 
-    ///@brief Initializes class using a DBConnectionInfo pointer specifying the DB system and parameters.
-    void init (DBConnectionInfo *info);
+    ///@brief Connnects to a database system using a DBConnectionInfo pointer specifying the DB system and parameters.
+    void connect (DBConnectionInfo *info);
+    void open (std::string database_name);
     ///@brief Shuts down the DB access.
     void shutdown ();
 

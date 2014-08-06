@@ -23,9 +23,9 @@
  */
 
 #include "boost/date_time/posix_time/posix_time.hpp"
-#include <QProgressDialog>
-#include <QCoreApplication>
-#include <QApplication>
+//#include <QProgressDialog>
+//#include <QCoreApplication>
+//#include <QApplication>
 
 #include "Buffer.h"
 #include "BufferWriter.h"
@@ -43,7 +43,7 @@
 #include "MySQLConConnection.h"
 #include "SQLGenerator.h"
 #include "SQLiteConnection.h"
-#include "StructureDescriptionManager.h"
+//#include "StructureDescriptionManager.h"
 #include "DBSchemaManager.h"
 #include "DBSchema.h"
 #include "DBTable.h"
@@ -63,17 +63,13 @@ using namespace Utils::String;
  * write_table_names_,
  */
 DBInterface::DBInterface()
-: Configurable ("DBInterface", "DBInterface0")
+: Configurable ("DBInterface", "DBInterface0"), connected_(false), database_opened_ (false), info_(0), buffer_writer_(0), connection_(0)
 {
     boost::mutex::scoped_lock l(mutex_);
-    registerParameter ("database_name", &database_name_, "");
+    //registerParameter ("database_name", &database_name_, "");
     registerParameter ("read_chunk_size", &read_chunk_size_, 20000);
 
     sql_generator_ = new SQLGenerator (this);
-
-    info_=0;
-    buffer_writer_ = 0;
-    connection_=0;
 
     std::map <DB_OBJECT_TYPE, DBObject*> &objects = DBObjectManager::getInstance().getDBObjects ();
     std::map <DB_OBJECT_TYPE, DBObject*>::iterator it;
@@ -138,6 +134,8 @@ void DBInterface::initConnection (DBConnectionInfo *info)
 
     info_=info;
 
+    assert (!connection_);
+
     if (info->getType() == DB_TYPE_SQLITE)
     {
         connection_ = new SQLiteConnection (info);
@@ -153,19 +151,30 @@ void DBInterface::initConnection (DBConnectionInfo *info)
     else
         throw std::runtime_error ("DBInterface::initConnection: unknown db type");
 
-    connection_->init();
-
-//    if (info->isNew())
-//    {
-//        buffer_writer_ = new BufferWriter (connection_, sql_generator_);
-//    }
-//    else
-//    {
-        updateExists();
-        updateCount();
-//    }
+    assert (connection_);
+    connection_->connect();
 
 }
+
+void DBInterface::openDatabase (std::string database_name)
+{
+
+    assert (connection_);
+    connection_->openDatabase(database_name);
+
+    //    if (info->isNew())
+    //    {
+    //        buffer_writer_ = new BufferWriter (connection_, sql_generator_);
+    //    }
+    //    else
+    //    {
+            updateExists();
+            updateCount();
+    //    }
+
+}
+
+
 
 /**
  * Calls queryContains for all DBOs in exists_.
@@ -215,19 +224,34 @@ bool DBInterface::existsTable (std::string table_name)
     DBCommand command;
     command.setCommandString(sql_generator_->getContainsStatement(table_name));
 
+//    PropertyList list;
+//    list.addProperty("exists", P_TYPE_INT);
+//    command.setPropertyList(list);
+//
+//    DBResult *result = connection_->execute(&command);
+//
+//    assert (result->containsData());
+//    int tmp = *((int*) result->getBuffer()->get(0,0));
+//
+//    delete result;
+//
+//    loginf  << "DBInterface: existsTable: '" <<  tmp << "'";
+//    return tmp > 0;
+
     PropertyList list;
-    list.addProperty("exists", P_TYPE_INT);
+    list.addProperty("table", P_TYPE_STRING);
     command.setPropertyList(list);
 
     DBResult *result = connection_->execute(&command);
 
     assert (result->containsData());
-    int tmp = *((int*) result->getBuffer()->get(0,0));
+    std::string tmp = *((std::string*) result->getBuffer()->get(0,0));
 
     delete result;
 
-    logdbg  << "DBInterface: existsTable: end " <<  tmp;
-    return tmp > 0;
+    logdbg  << "DBInterface: existsTable: '" <<  tmp << "'";
+    return tmp == table_name;
+
 }
 
 /**
@@ -930,18 +954,14 @@ std::pair<float, float> DBInterface::getContextReferencePoint ()
 
 Buffer *DBInterface::getTableList()
 {
-    assert (database_name_.size() != 0);
-
     boost::mutex::scoped_lock l(mutex_);
-    return connection_->getTableList (database_name_);
+    return connection_->getTableList ();
 }
 
 Buffer *DBInterface::getColumnList(std::string table)
 {
-    assert (database_name_.size() != 0);
-
     boost::mutex::scoped_lock l(mutex_);
-    return connection_->getColumnList(database_name_, table);
+    return connection_->getColumnList(table);
 }
 
 void DBInterface::printDBSchema ()

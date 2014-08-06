@@ -45,12 +45,14 @@ public:
    *
    * \param info defines what database system is used
    */
-  DBConnection(DBConnectionInfo *info) {info_=info;}
+  DBConnection(DBConnectionInfo *info) : database_opened_(false) {info_=info;}
   /// @brief Destructor
   virtual ~DBConnection() {};
 
   /// @brief Initializes the connection to the database
-  virtual void init ()=0;
+  virtual void connect ()=0;
+  /// @brief Initializes the connection to the database
+  virtual void openDatabase (std::string database_name){ database_opened_=true; }
   /// @brief Executes a simple SQL command, returned data is not retrieved
   virtual void executeSQL(std::string sql)=0;
 
@@ -89,9 +91,9 @@ public:
   virtual bool getPreparedCommandDone ()=0;
 
   /// @brief Return a Buffer with all table names (as strings) in the database
-  virtual Buffer *getTableList(std::string database_name)=0;
+  virtual Buffer *getTableList()=0;
   /// @brief Return a Buffer with all columns and data types for a table
-  virtual Buffer *getColumnList(std::string database_name, std::string table)=0;
+  virtual Buffer *getColumnList(std::string table)=0;
 
   /// @brief Return the DBConnectionInfo defining the database system and parameters
   DBConnectionInfo *getDBInfo () { return info_; }
@@ -99,6 +101,7 @@ public:
 protected:
   /// Defines the database system and parameters
   DBConnectionInfo *info_;
+  bool database_opened_;
 
   /// @brief Creates a prepared query (internal)
   virtual void prepareStatement (const char *sql)=0;

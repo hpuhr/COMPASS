@@ -57,7 +57,7 @@ SQLiteConnection::~SQLiteConnection()
     }
 }
 
-void SQLiteConnection::init()
+void SQLiteConnection::connect()
 {
     assert (info_->getType() == DB_TYPE_SQLITE);
 
@@ -76,6 +76,12 @@ void SQLiteConnection::init()
 
     char * sErrMsg = 0;
     sqlite3_exec(db_handle_, "PRAGMA synchronous = OFF", NULL, NULL, &sErrMsg);
+}
+
+void SQLiteConnection::openDatabase (std::string database_name)
+{
+    // has nothing to do
+    DBConnection::openDatabase(database_name);
 }
 
 void SQLiteConnection::executeSQL(std::string sql)
@@ -506,7 +512,7 @@ void SQLiteConnection::finalizeCommand ()
     prepared_command_done_=true;
 }
 
-Buffer *SQLiteConnection::getTableList(std::string database_name)  // buffer of table name strings
+Buffer *SQLiteConnection::getTableList()  // buffer of table name strings
 {
 //    MySQLConnectionInfo *info = (MySQLConnectionInfo*) info_;
 //    std::string db_name = info->getDB();
@@ -524,7 +530,7 @@ Buffer *SQLiteConnection::getTableList(std::string database_name)  // buffer of 
 
     return buffer;
 }
-Buffer *SQLiteConnection::getColumnList(std::string database_name, std::string table) // buffer of column name string, data type
+Buffer *SQLiteConnection::getColumnList(std::string table) // buffer of column name string, data type
 {
     DBCommand command;
     command.setCommandString ("PRAGMA table_info("+table+")");

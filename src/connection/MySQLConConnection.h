@@ -44,7 +44,8 @@ public:
     MySQLConConnection(DBConnectionInfo *info);
     virtual ~MySQLConConnection();
 
-    void init ();
+    virtual void connect ();
+    virtual void openDatabase (std::string database_name);
 
     void executeSQL(std::string sql);
 
@@ -67,8 +68,8 @@ public:
     void finalizeCommand ();
     bool getPreparedCommandDone () { return prepared_command_done_; };
 
-    Buffer *getTableList(std::string database_name);
-    Buffer *getColumnList(std::string database_name, std::string table);
+    Buffer *getTableList();
+    Buffer *getColumnList(std::string table);
 
 protected:
     sql::Driver *driver_;
