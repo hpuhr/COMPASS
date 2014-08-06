@@ -61,7 +61,8 @@ void MySQLppConnection::init()
 {
     assert (info_->getType() == DB_TYPE_MYSQLpp);
 
-    MySQLppConnectionInfo *info = (MySQLppConnectionInfo*) info_;
+    MySQLConnectionInfo *info = dynamic_cast<MySQLConnectionInfo*> (info_);
+    assert (info);
 
     if (!connection_.connect("", info->getServer().c_str(), info->getUser().c_str(), info->getPassword().c_str(), info->getPort()))
     {
@@ -520,11 +521,8 @@ void MySQLppConnection::finalizeCommand ()
     logdbg  << "MySQLppConnection: finalizeCommand: done";
 }
 
-Buffer *MySQLppConnection::getTableList()  // buffer of table name strings
+Buffer *MySQLppConnection::getTableList(std::string database_name)  // buffer of table name strings
 {
-    MySQLppConnectionInfo *info = (MySQLppConnectionInfo*) info_;
-    std::string db_name = info->getDB();
-
     DBCommand command;
     //command.setCommandString ("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '"+db_name+"' ORDER BY TABLE_NAME DESC;");
     command.setCommandString ("SHOW TABLES;");
@@ -540,13 +538,11 @@ Buffer *MySQLppConnection::getTableList()  // buffer of table name strings
     return buffer;
 }
 
-Buffer *MySQLppConnection::getColumnList(std::string table) // buffer of column name string, data type
+Buffer *MySQLppConnection::getColumnList(std::string database_name, std::string table) // buffer of column name string, data type
 {
-    MySQLppConnectionInfo *info = (MySQLppConnectionInfo*) info_;
-    std::string db_name = info->getDB();
-
     DBCommand command;
-    command.setCommandString ("SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '"+db_name+"' AND TABLE_NAME = '"+table+"' ORDER BY COLUMN_NAME DESC;");
+    command.setCommandString ("SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '"
+            +database_name+"' AND TABLE_NAME = '"+table+"' ORDER BY COLUMN_NAME DESC;");
     PropertyList list;
     list.addProperty ("name", P_TYPE_STRING);
     list.addProperty ("type", P_TYPE_STRING);

@@ -66,6 +66,7 @@ DBInterface::DBInterface()
 : Configurable ("DBInterface", "DBInterface0")
 {
     boost::mutex::scoped_lock l(mutex_);
+    registerParameter ("database_name", &database_name_, "");
     registerParameter ("read_chunk_size", &read_chunk_size_, 20000);
 
     sql_generator_ = new SQLGenerator (this);
@@ -929,14 +930,18 @@ std::pair<float, float> DBInterface::getContextReferencePoint ()
 
 Buffer *DBInterface::getTableList()
 {
+    assert (database_name_.size() != 0);
+
     boost::mutex::scoped_lock l(mutex_);
-    return connection_->getTableList ();
+    return connection_->getTableList (database_name_);
 }
 
 Buffer *DBInterface::getColumnList(std::string table)
 {
+    assert (database_name_.size() != 0);
+
     boost::mutex::scoped_lock l(mutex_);
-    return connection_->getColumnList(table);
+    return connection_->getColumnList(database_name_, table);
 }
 
 void DBInterface::printDBSchema ()

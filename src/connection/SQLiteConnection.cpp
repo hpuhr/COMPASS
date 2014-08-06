@@ -506,7 +506,7 @@ void SQLiteConnection::finalizeCommand ()
     prepared_command_done_=true;
 }
 
-Buffer *SQLiteConnection::getTableList()  // buffer of table name strings
+Buffer *SQLiteConnection::getTableList(std::string database_name)  // buffer of table name strings
 {
 //    MySQLConnectionInfo *info = (MySQLConnectionInfo*) info_;
 //    std::string db_name = info->getDB();
@@ -524,7 +524,7 @@ Buffer *SQLiteConnection::getTableList()  // buffer of table name strings
 
     return buffer;
 }
-Buffer *SQLiteConnection::getColumnList(std::string table) // buffer of column name string, data type
+Buffer *SQLiteConnection::getColumnList(std::string database_name, std::string table) // buffer of column name string, data type
 {
     DBCommand command;
     command.setCommandString ("PRAGMA table_info("+table+")");

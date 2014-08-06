@@ -294,13 +294,11 @@ std::string SQLGenerator::getContainsStatement (std::string table_name)
         return "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='" + table_name + "';";
     else if (db_type_ == DB_TYPE_MYSQLpp)
     {
-        MySQLppConnectionInfo *info = (MySQLppConnectionInfo*) db_interface_->getDBInfo();
-        return "SELECT COUNT(*)  FROM information_schema.tables WHERE table_schema = '"+info->getDB()+"' AND table_name ='" + table_name + "';";
+        return "SELECT COUNT(*)  FROM information_schema.tables WHERE table_schema = '"+db_interface_->getDatabaseName()+"' AND table_name ='" + table_name + "';";
     }
     else if (db_type_ == DB_TYPE_MYSQLCon)
     {
-        MySQLConConnectionInfo *info = (MySQLConConnectionInfo*) db_interface_->getDBInfo();
-        return "SELECT COUNT(*)  FROM information_schema.tables WHERE table_schema = '"+info->getDB()+"' AND table_name ='" + table_name + "';";
+        return "SELECT COUNT(*)  FROM information_schema.tables WHERE table_schema = '"+db_interface_->getDatabaseName()+"' AND table_name ='" + table_name + "';";
     }
     else
         throw std::runtime_error ("SQLGenerator: getContainsStatement: unknown db type");

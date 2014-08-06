@@ -67,23 +67,21 @@ public:
 
   std::string getIdString () { return "SQLite3 File: '"+filename_+"'";}
 
-  //virtual std::string getDBName () { return filename_;}
-
 private:
   /// Path and filename of the SQLite3 database file
   std::string filename_;
 };
 
 /**
- * @brief Definition of a MySQL++ based database system
+ * @brief Definition of a MySQL Connector based database system
  *
  */
-class MySQLppConnectionInfo : public DBConnectionInfo
+class MySQLConnectionInfo : public DBConnectionInfo
 {
 public:
-  MySQLppConnectionInfo (std::string db, std::string server, std::string user, std::string password, unsigned int port)
-   : DBConnectionInfo(DB_TYPE_MYSQLpp), db_(db), server_(server), user_(user), password_(password), port_(port) {}
-  virtual ~MySQLppConnectionInfo () {}
+    MySQLConnectionInfo (DB_CONNECTION_TYPE type, std::string db, std::string server, std::string user, std::string password, unsigned int port)
+   : DBConnectionInfo(type), db_(db), server_(server), user_(user), password_(password), port_(port) {}
+  virtual ~MySQLConnectionInfo () {}
 
   /// Returns the database name
   std::string getDB () { return db_; }
@@ -97,8 +95,6 @@ public:
   unsigned int getPort () { return port_; }
 
   std::string getIdString () { return "MySQL Server: '"+server_+"' Database: '"+db_+"'";}
-
-  //virtual std::string getDBName () { return db_;}
 
 private:
   /// Database name
@@ -114,43 +110,80 @@ private:
 };
 
 /**
+ * @brief Definition of a MySQL++ based database system
+ *
+ */
+//class MySQLppConnectionInfo : public DBConnectionInfo
+//{
+//public:
+//  MySQLppConnectionInfo (std::string db, std::string server, std::string user, std::string password, unsigned int port)
+//   : DBConnectionInfo(DB_TYPE_MYSQLpp), server_(server), user_(user), password_(password), port_(port) {}
+//  virtual ~MySQLppConnectionInfo () {}
+//
+//  /// Returns the database server name or IP address
+//  std::string getServer () { return server_; }
+//  /// Returns the username
+//  std::string getUser () { return user_; }
+//  /// Returns the password
+//  std::string getPassword () { return password_; }
+//  /// Returns the port number
+//  unsigned int getPort () { return port_; }
+//
+//  std::string getIdString () { return "MySQL Server: '"+server_+"' User: '"+user_+"' Password: '" << password_ << "'";}
+//
+//  //virtual std::string getDBName () { return db_;}
+//
+//private:
+//  /// Database name
+////  std::string db_;
+//  /// Database server name or IP address
+//  std::string server_;
+//  /// Username
+//  std::string user_;
+//  /// Password
+//  std::string password_;
+//  /// Port number
+//  unsigned int port_;
+//};
+
+/**
  * @brief Definition of a MySQL Connector based database system
  *
  */
-class MySQLConConnectionInfo : public DBConnectionInfo
-{
-public:
-    MySQLConConnectionInfo (std::string db, std::string server, std::string user, std::string password, unsigned int port)
-   : DBConnectionInfo(DB_TYPE_MYSQLCon), db_(db), server_(server), user_(user), password_(password), port_(port) {}
-  virtual ~MySQLConConnectionInfo () {}
-
-  /// Returns the database name
-  std::string getDB () { return db_; }
-  /// Returns the database server name or IP address
-  std::string getServer () { return server_; }
-  /// Returns the username
-  std::string getUser () { return user_; }
-  /// Returns the password
-  std::string getPassword () { return password_; }
-  /// Returns the port number
-  unsigned int getPort () { return port_; }
-
-  std::string getIdString () { return "MySQL Server: '"+server_+"' Database: '"+db_+"'";}
-
-  //virtual std::string getDBName () { return db_;}
-
-private:
-  /// Database name
-  std::string db_;
-  /// Database server name or IP address
-  std::string server_;
-  /// Username
-  std::string user_;
-  /// Password
-  std::string password_;
-  /// Port number
-  unsigned int port_;
-};
+//class MySQLConConnectionInfo : public DBConnectionInfo
+//{
+//public:
+//    MySQLConConnectionInfo (std::string db, std::string server, std::string user, std::string password, unsigned int port)
+//   : DBConnectionInfo(DB_TYPE_MYSQLCon), db_(db), server_(server), user_(user), password_(password), port_(port) {}
+//  virtual ~MySQLConConnectionInfo () {}
+//
+//  /// Returns the database name
+//  std::string getDB () { return db_; }
+//  /// Returns the database server name or IP address
+//  std::string getServer () { return server_; }
+//  /// Returns the username
+//  std::string getUser () { return user_; }
+//  /// Returns the password
+//  std::string getPassword () { return password_; }
+//  /// Returns the port number
+//  unsigned int getPort () { return port_; }
+//
+//  std::string getIdString () { return "MySQL Server: '"+server_+"' Database: '"+db_+"'";}
+//
+//  //virtual std::string getDBName () { return db_;}
+//
+//private:
+//  /// Database name
+//  std::string db_;
+//  /// Database server name or IP address
+//  std::string server_;
+//  /// Username
+//  std::string user_;
+//  /// Password
+//  std::string password_;
+//  /// Port number
+//  unsigned int port_;
+//};
 
 
 #endif /* DBCONNECTIONINFO_H_ */

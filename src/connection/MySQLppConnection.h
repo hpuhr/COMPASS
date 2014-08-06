@@ -68,8 +68,8 @@ public:
     /// @brief Added for performance test. Do not use.
     DBResult *readBulkCommand (DBCommand *command, std::string main_statement, std::string order_statement, unsigned int max_results=0);
 
-    Buffer *getTableList();
-    Buffer *getColumnList(std::string table);
+    Buffer *getTableList(std::string database_name);
+    Buffer *getColumnList(std::string database_name, std::string table);
 
 private:
     /// Used for all database queries

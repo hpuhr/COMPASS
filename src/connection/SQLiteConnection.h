@@ -64,8 +64,8 @@ public:
     void finalizeCommand ();
     bool getPreparedCommandDone () { return prepared_command_done_; };
 
-    Buffer *getTableList();
-    Buffer *getColumnList(std::string table);
+    Buffer *getTableList(std::string database_name);
+    Buffer *getColumnList(std::string database_name, std::string table);
 
 protected:
     /// Database handle to execute queries

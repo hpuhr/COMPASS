@@ -89,9 +89,9 @@ public:
   virtual bool getPreparedCommandDone ()=0;
 
   /// @brief Return a Buffer with all table names (as strings) in the database
-  virtual Buffer *getTableList()=0;
+  virtual Buffer *getTableList(std::string database_name)=0;
   /// @brief Return a Buffer with all columns and data types for a table
-  virtual Buffer *getColumnList(std::string table)=0;
+  virtual Buffer *getColumnList(std::string database_name, std::string table)=0;
 
   /// @brief Return the DBConnectionInfo defining the database system and parameters
   DBConnectionInfo *getDBInfo () { return info_; }

@@ -125,11 +125,13 @@ DBConnectionInfo *DBSelectionWidget::getConnectionInfo ()
   }
   else if (db_type_selection_ == 2)
   {
-    return new MySQLppConnectionInfo (mysql_db_name_, mysql_db_ip_, mysql_db_username_, mysql_db_password_, intFromString(mysql_db_port_));
+    return new MySQLConnectionInfo (DB_TYPE_MYSQLpp, mysql_db_name_, mysql_db_ip_, mysql_db_username_, mysql_db_password_,
+            intFromString(mysql_db_port_));
   }
   else if (db_type_selection_ == 3)
   {
-    return new MySQLConConnectionInfo (mysql_db_name_, mysql_db_ip_, mysql_db_username_, mysql_db_password_, intFromString(mysql_db_port_));
+    return new MySQLConnectionInfo (DB_TYPE_MYSQLCon, mysql_db_name_, mysql_db_ip_, mysql_db_username_, mysql_db_password_,
+            intFromString(mysql_db_port_));
   }
   else
     throw std::runtime_error ("DBSelectionWidget: getConnectionInfo: undefined connection");
