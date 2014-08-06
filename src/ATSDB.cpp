@@ -127,15 +127,13 @@ void ATSDB::init (DBConnectionInfo *info)
     loginf  << "ATSDB: init: initialising connection";
     db_interface_->initConnection(info);
 
-    logdbg  << "ATSDB: init: isNew " << info->isNew();
-    //logdbg  << "ATSDB: init: isPostProcessed " << isPostProcessed();
-
     loginf  << "ATSDB: init: data sources";
     buildDataSources();
 
     logdbg  << "ATSDB: init: checking if new";
-    if (!info->isNew())
-    {
+
+//    if (!info->isNew())
+//    {
         if (db_interface_->existsPropertiesTable())
         {
             loadActiveDataSources ();
@@ -146,7 +144,7 @@ void ATSDB::init (DBConnectionInfo *info)
             loginf  << "ATSDB: init: building minmax values";
             loadMinMaxValues();
         }
-    }
+//    }
 
     // Now we have opened the database
     //loginf  <<  "ATSDB: init: database '" << filename << "' opened";

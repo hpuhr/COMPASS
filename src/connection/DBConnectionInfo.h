@@ -38,27 +38,19 @@ class DBConnectionInfo
 {
 public:
   /// @brief Constructor
-  DBConnectionInfo(DB_CONNECTION_TYPE type) : type_(type), new_(false) {}
+  DBConnectionInfo(DB_CONNECTION_TYPE type) : type_(type) {}
   /// @brief Destructor
   virtual ~DBConnectionInfo() {}
 
   /// @brief Returns database system type
   DB_CONNECTION_TYPE getType () { return type_; }
-  /// @brief Sets if database is being generated
-  void setNew (bool is_new) { new_=is_new; }
-  /// @brief Returns if database is being generated
-  bool isNew () { return new_; };
 
   /// @brief Returns string identifying database system and database
   virtual std::string getIdString ()=0;
 
-  virtual std::string getDBName ()=0;
-
 protected:
   /// Database system type
   DB_CONNECTION_TYPE type_;
-  /// Flag indicating if database is being generated
-  bool new_;
 };
 
 /**
@@ -75,7 +67,7 @@ public:
 
   std::string getIdString () { return "SQLite3 File: '"+filename_+"'";}
 
-  virtual std::string getDBName () { return filename_;}
+  //virtual std::string getDBName () { return filename_;}
 
 private:
   /// Path and filename of the SQLite3 database file
@@ -106,7 +98,7 @@ public:
 
   std::string getIdString () { return "MySQL Server: '"+server_+"' Database: '"+db_+"'";}
 
-  virtual std::string getDBName () { return db_;}
+  //virtual std::string getDBName () { return db_;}
 
 private:
   /// Database name
@@ -145,7 +137,7 @@ public:
 
   std::string getIdString () { return "MySQL Server: '"+server_+"' Database: '"+db_+"'";}
 
-  virtual std::string getDBName () { return db_;}
+  //virtual std::string getDBName () { return db_;}
 
 private:
   /// Database name

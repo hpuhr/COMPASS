@@ -66,7 +66,7 @@ class BufferReceiver;
  * class, which itself holds filter conditions based on the DBFilterCondition class. For each DBObject, the current conditions in the
  * SQL query can be retrieved from the active filters.
  *
- * The moste common data storage container is a Buffer, a dynamic and fast mechanism for data storage and retrieval. It is based on
+ * The most common data storage container is a Buffer, a dynamic and fast mechanism for data storage and retrieval. It is based on
  * memory pages based on the ArrayTemplate in interplay with the ArrayTemplateManager, and the MemoryManager which is the main
  * access point for memory allocation and management.
  * <p/> <br/>
@@ -89,6 +89,7 @@ class BufferReceiver;
  *
  * \todo Change sorting if export is active
  * \todo Maybe extend some classes to observer pattern
+ * \todo Removed writing of new databases. Re-integrated if necessary
  */
 class ATSDB : public Singleton, public JobOrderer
 {

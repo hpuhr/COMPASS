@@ -69,12 +69,12 @@ void MySQLppConnection::init()
         throw std::runtime_error ("MySQLppConnection: init: DB connection failed");
     }
 
-    if (info_ ->isNew())
-    {
-        std::string drop_db = "DROP DATABASE IF EXISTS "+info->getDB()+";";
-        executeSQL (drop_db); // drop if exists
-        connection_.create_db(info->getDB().c_str()); // so, no database? create it first then.
-    }
+//    if (info_ ->isNew())
+//    {
+//        std::string drop_db = "DROP DATABASE IF EXISTS "+info->getDB()+";";
+//        executeSQL (drop_db); // drop if exists
+//        connection_.create_db(info->getDB().c_str()); // so, no database? create it first then.
+//    }
     connection_.select_db(info->getDB().c_str());
 
     assert (connection_.connected ());

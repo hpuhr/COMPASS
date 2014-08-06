@@ -154,15 +154,15 @@ void DBInterface::initConnection (DBConnectionInfo *info)
 
     connection_->init();
 
-    if (info->isNew())
-    {
-        buffer_writer_ = new BufferWriter (connection_, sql_generator_);
-    }
-    else
-    {
+//    if (info->isNew())
+//    {
+//        buffer_writer_ = new BufferWriter (connection_, sql_generator_);
+//    }
+//    else
+//    {
         updateExists();
         updateCount();
-    }
+//    }
 
 }
 

@@ -84,13 +84,13 @@ void MySQLConConnection::init()
     assert (connection_);
 
 
-    if (info_ ->isNew())
-    {
-        std::string drop_db = "DROP DATABASE IF EXISTS "+info->getDB()+";";
-        executeSQL (drop_db); // drop if exists
-        std::string create_db = "CREATE DATABASE "+info->getDB()+";";
-        executeSQL (create_db);
-    }
+//    if (info_ ->isNew())
+//    {
+//        std::string drop_db = "DROP DATABASE IF EXISTS "+info->getDB()+";";
+//        executeSQL (drop_db); // drop if exists
+//        std::string create_db = "CREATE DATABASE "+info->getDB()+";";
+//        executeSQL (create_db);
+//    }
 
     std::string use_db = "USE "+info->getDB()+";";
     executeSQL (use_db);
