@@ -201,6 +201,8 @@ public:
     // Parameters in decimal, return buffer with track_num, min(tod), max(tod)
     Buffer *getTrackMatches (bool has_mode_a, unsigned int mode_a, bool has_ta, unsigned int ta, bool has_ti, std::string ti);
 
+    const std::vector<std::string> &getDatabaseNames ();
+
 protected:
     /// Flag indicating if database was opened.
     bool db_opened_;
@@ -222,11 +224,15 @@ protected:
     boost::mutex finalize_jobs_mutex_;
     std::map <FinalizeDBOReadJob*, BufferReceiver*> dbo_finalize_jobs_;
 
+    std::vector <std::string> databases_;
+
     ///@brief Constructor.
     ATSDB();
 
     ///@brief Quits all reading processes.
     void quitReading ();
+
+    void buildDatabases ();
 
     ///@brief Generates minimum and maximum information from previous post-processing.
     void loadMinMaxValues ();

@@ -127,6 +127,7 @@ void ATSDB::connect (DBConnectionInfo *info)
     loginf  << "ATSDB: connect: initialising connection";
     db_interface_->initConnection(info);
 
+    buildDatabases ();
 }
 
 void ATSDB::open (std::string database_name)
@@ -520,6 +521,12 @@ void ATSDB::getDistinctStatistics (JobOrderer *orderer, boost::function<void (Jo
 {
     DBOVariableDistinctStatisticsDBJob *distinct_job = new DBOVariableDistinctStatisticsDBJob (orderer, done_function,
             obsolete_function, db_interface_, type, variable, sensor_number);
+}
+
+void ATSDB::buildDatabases ()
+{
+    assert (db_interface_);
+    databases_ = db_interface_->getDatabases();
 }
 
 void ATSDB::loadMinMaxValues ()
@@ -928,4 +935,9 @@ Buffer *ATSDB::getTrackMatches (bool has_mode_a, unsigned int mode_a, bool has_t
 {
     assert (db_interface_);
     return db_interface_->getTrackMatches(has_mode_a, mode_a, has_ta, ta, has_ti, ti);
+}
+
+const std::vector<std::string> &ATSDB::getDatabaseNames ()
+{
+    return databases_;
 }

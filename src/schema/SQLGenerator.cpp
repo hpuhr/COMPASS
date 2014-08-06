@@ -893,3 +893,8 @@ std::string SQLGenerator::getDistinctSelectStatement (DBTableColumn *column, std
      return ss.str();
 }
 
+std::string SQLGenerator::getShowDatabasesStatement ()
+{
+    return "SHOW DATABASES;"; // wow so hard so many dabes
+}
+

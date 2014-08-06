@@ -173,9 +173,7 @@ public:
 
     Buffer *getTrackMatches (bool has_mode_a, unsigned int mode_a, bool has_ta, unsigned int ta, bool has_ti, std::string ti);
 
-//    void setDatabaseName (std::string database_name) { database_name_=database_name;}
-//    std::string getDatabaseName ()  { return database_name_; }
-
+    std::vector <std::string> getDatabases ();
 private:
     /// Last used database name
     //std::string database_name_;

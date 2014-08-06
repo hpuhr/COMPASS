@@ -188,6 +188,8 @@ void DBSelectionWidget::createElements ()
   mysqlcon_radio_->setFont (font_bold);
   layout->addWidget (mysqlcon_radio_);
 
+  layout->addStretch();
+
   QLabel *db_system_label = new QLabel (tr("Database Server"));
   db_system_label->setFont (font_big);
   layout->addWidget (db_system_label);
@@ -229,7 +231,10 @@ void DBSelectionWidget::createElements ()
   connect (connect_button_, SIGNAL(clicked()), this, SLOT(connectDB()));
   layout->addWidget(connect_button_);
 
+  layout->addStretch();
+
   QLabel *db_name_label = new QLabel("Database name");
+  db_name_label->setFont(font_big);
   layout->addWidget (db_name_label);
 
   mysql_db_name_edit_ = new QLineEdit ();

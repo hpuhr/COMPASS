@@ -132,6 +132,7 @@ public:
     /// @brief Minimum/Maximum select statment for a number of variables in one table
     std::string getMinMaxSelectStatements (std::vector <std::string> variables, std::string table);
     std::string getDistinctSelectStatement (DBTableColumn *column, std::string filter_condition="");
+    std::string getShowDatabasesStatement ();
 };
 
 #endif /* SQLGENERATOR_H_ */

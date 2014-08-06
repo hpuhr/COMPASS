@@ -1453,3 +1453,35 @@ Buffer *DBInterface::getTrackMatches (bool has_mode_a, unsigned int mode_a, bool
 
     return buffer;
 }
+
+std::vector <std::string> DBInterface::getDatabases ()
+{
+    std::vector <std::string> names;
+
+    boost::mutex::scoped_lock l(mutex_);
+
+    DBCommand command;
+    command.setCommandString(sql_generator_->getShowDatabasesStatement());
+
+    PropertyList list;
+    list.addProperty("name", P_TYPE_STRING);
+    command.setPropertyList(list);
+
+    DBResult *result = connection_->execute(&command);
+    assert (result->containsData());
+
+    Buffer *buffer = result->getBuffer();
+    if (!buffer->getFirstWrite())
+    {
+        for (unsigned int cnt=0; cnt < buffer->getSize(); cnt++)
+        {
+            std::string tmp = *((std::string*) result->getBuffer()->get(cnt,0));
+            names.push_back(tmp);
+        }
+    }
+
+    delete buffer;
+    delete result;
+
+    return names;
+}
