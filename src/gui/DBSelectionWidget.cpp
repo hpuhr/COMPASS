@@ -44,7 +44,7 @@ using namespace Utils::String;
 DBSelectionWidget::DBSelectionWidget(std::string class_id, std::string instance_id, Configurable *parent)
  : Configurable (class_id, instance_id, parent), /*filename_edit_(0), file_radio_(0), mysqlpp_radio_(0),*/ mysqlcon_radio_(0),
   mysql_db_ip_edit_(0), mysql_db_port_edit_ (0), mysql_db_username_edit_ (0), mysql_db_password_edit_(0),
-  connect_button_(0),  mysql_db_name_edit_ (0), open_button_(0)
+  connect_button_(0),  mysql_db_name_box_ (0), open_button_(0)
 {
   registerParameter ("filename", &filename_, (std::string)"");
 
@@ -96,13 +96,17 @@ void DBSelectionWidget::selectDBType()
     db_type_selection_ = 0;
 }
 
-void DBSelectionWidget::updateMySQLInfo ()
+void DBSelectionWidget::updateMySQLConnectInfo ()
 {
-  mysql_db_name_ = mysql_db_name_edit_->text().toStdString();
   mysql_db_ip_ = mysql_db_ip_edit_->text().toStdString();
   mysql_db_port_ = mysql_db_port_edit_->text().toStdString();
   mysql_db_username_ = mysql_db_username_edit_->text().toStdString();
   mysql_db_password_ = mysql_db_password_edit_->text().toStdString();
+}
+
+void DBSelectionWidget::updateMySQLDatabaseInfo ()
+{
+    mysql_db_name_ = mysql_db_name_box_->getDatabaseName();
 }
 
 
@@ -199,7 +203,7 @@ void DBSelectionWidget::createElements ()
 
   mysql_db_ip_edit_ = new QLineEdit ();
   mysql_db_ip_edit_->setText (mysql_db_ip_.c_str());
-  connect(mysql_db_ip_edit_, SIGNAL( returnPressed() ), this, SLOT(updateMySQLInfo()));
+  connect(mysql_db_ip_edit_, SIGNAL( returnPressed() ), this, SLOT(updateMySQLConnectInfo()));
   layout->addWidget (mysql_db_ip_edit_);
 
   QLabel *db_port_label = new QLabel("Port number");
@@ -207,7 +211,7 @@ void DBSelectionWidget::createElements ()
 
   mysql_db_port_edit_ = new QLineEdit ();
   mysql_db_port_edit_->setText (mysql_db_port_.c_str());
-  connect(mysql_db_port_edit_, SIGNAL( returnPressed() ), this, SLOT(updateMySQLInfo()));
+  connect(mysql_db_port_edit_, SIGNAL( returnPressed() ), this, SLOT(updateMySQLConnectInfo()));
   layout->addWidget (mysql_db_port_edit_);
 
   QLabel *db_username_label = new QLabel("Username");
@@ -215,7 +219,7 @@ void DBSelectionWidget::createElements ()
 
   mysql_db_username_edit_ = new QLineEdit ();
   mysql_db_username_edit_->setText (mysql_db_username_.c_str());
-  connect(mysql_db_username_edit_, SIGNAL( returnPressed() ), this, SLOT(updateMySQLInfo()));
+  connect(mysql_db_username_edit_, SIGNAL( returnPressed() ), this, SLOT(updateMySQLConnectInfo()));
   layout->addWidget (mysql_db_username_edit_);
 
   QLabel *db_password_label = new QLabel("Password");
@@ -223,7 +227,7 @@ void DBSelectionWidget::createElements ()
 
   mysql_db_password_edit_ = new QLineEdit ();
   mysql_db_password_edit_->setText (mysql_db_password_.c_str());
-  connect(mysql_db_password_edit_, SIGNAL( returnPressed() ), this, SLOT(updateMySQLInfo()));
+  connect(mysql_db_password_edit_, SIGNAL( returnPressed() ), this, SLOT(updateMySQLConnectInfo()));
   layout->addWidget (mysql_db_password_edit_);
 
   connect_button_ = new QPushButton ("Connect");
@@ -237,10 +241,8 @@ void DBSelectionWidget::createElements ()
   db_name_label->setFont(font_big);
   layout->addWidget (db_name_label);
 
-  mysql_db_name_edit_ = new QLineEdit ();
-  mysql_db_name_edit_->setText (mysql_db_name_.c_str());
-  connect(mysql_db_name_edit_, SIGNAL( returnPressed() ), this, SLOT( updateMySQLInfo() ));
-  layout->addWidget (mysql_db_name_edit_);
+  mysql_db_name_box_ = new DatabaseNameComboBox ();
+  layout->addWidget (mysql_db_name_box_);
 
   open_button_ = new QPushButton ("Open");
   open_button_->setFont(font_bold);
@@ -294,8 +296,12 @@ void DBSelectionWidget::setDBServer (std::string value)
 }
 void DBSelectionWidget::setDBName (std::string value)
 {
-  assert (mysql_db_name_edit_);
-  mysql_db_name_edit_->setText(value.c_str());
+  assert (mysql_db_name_box_);
+
+  if (mysql_db_name_box_->hasDatabaseName(value))
+      mysql_db_name_box_->setDatabaseName(value);
+  else
+      value = mysql_db_name_box_->getDatabaseName();
   mysql_db_name_=value;
 }
 void DBSelectionWidget::setDBPort (std::string value)
@@ -328,6 +334,16 @@ void DBSelectionWidget::setDBNoPassword ()
 void DBSelectionWidget::connectDB ()
 {
     ATSDB::getInstance().connect(getConnectionInfo());
+
+    assert (mysql_db_name_box_);
+    mysql_db_name_box_->loadDatabaseNames();
+
+    if (mysql_db_name_box_->hasDatabaseName(mysql_db_name_))
+        mysql_db_name_box_->setDatabaseName (mysql_db_name_);
+    else
+        mysql_db_name_=mysql_db_name_box_->getDatabaseName();
+    connect(mysql_db_name_box_, SIGNAL( currentIndexChanged (const QString &) ), this, SLOT( updateMySQLDatabaseInfo() ));
+
     connect_button_->setDisabled(true);
     open_button_->setDisabled(false);
 }

@@ -895,6 +895,6 @@ std::string SQLGenerator::getDistinctSelectStatement (DBTableColumn *column, std
 
 std::string SQLGenerator::getShowDatabasesStatement ()
 {
-    return "SHOW DATABASES;"; // wow so hard so many dabes
+    return "SHOW DATABASES LIKE 'job%';"; // wow so hard so many dabes
 }
 

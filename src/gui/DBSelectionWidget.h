@@ -26,14 +26,61 @@
 #define DBSELECTIONWIDGET_H_
 
 #include <QFrame>
+#include <QComboBox>
 #include "Configurable.h"
+#include "ATSDB.h"
 
 class QTextEdit;
 class QRadioButton;
 class QLineEdit;
-class QComboBox;
 class QPushButton;
 class DBConnectionInfo;
+
+
+class DatabaseNameComboBox : public QComboBox
+{
+    Q_OBJECT
+public:
+    /// @brief Constructor.
+    DatabaseNameComboBox (QWidget *parent = 0)
+    : QComboBox (parent)
+    {
+    }
+
+    /// @brief Destructor.
+    virtual ~DatabaseNameComboBox () { }
+
+    void loadDatabaseNames ()
+    {
+        std::vector<std::string> names = ATSDB::getInstance().getDatabaseNames();
+        std::vector<std::string>::iterator it;
+
+        for (it = names.begin(); it != names.end(); it++)
+        {
+            addItem((*it).c_str());
+        }
+    }
+
+    /// @brief Returns the currently selected data source
+    std::string getDatabaseName ()
+    {
+        return currentText().toStdString();
+    }
+
+    bool hasDatabaseName (std::string name)
+    {
+        int index = findText(name.c_str());
+        return index >= 0;
+    }
+
+    /// @brief Sets the current data source
+    void setDatabaseName (std::string name)
+    {
+        int index = findText(name.c_str());
+        assert (index >= 0);
+        setCurrentIndex(index);
+    }
+};
 
 /**
  * @brief Widget for choosing a database system and parameters
@@ -48,7 +95,8 @@ public slots:
     /// @brief Sets database system based on radio buttons
     void selectDBType();
     /// @brief Sets MySQL parameters
-    void updateMySQLInfo ();
+    void updateMySQLConnectInfo ();
+    void updateMySQLDatabaseInfo ();
 
     void connectDB ();
     void openDB ();
@@ -112,7 +160,8 @@ protected:
     QPushButton *connect_button_;
 
     /// MySQL database name edit field
-    QLineEdit *mysql_db_name_edit_;
+    //QLineEdit *mysql_db_name_edit_;
+    DatabaseNameComboBox *mysql_db_name_box_;
 
     QPushButton *open_button_;
 
