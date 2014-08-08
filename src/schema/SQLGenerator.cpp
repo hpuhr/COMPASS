@@ -483,9 +483,9 @@ std::string SQLGenerator::createDBInsertStringBind(Buffer *buffer, std::string t
     }
 
     if (db_type_ == DB_TYPE_SQLITE)
-        ss << " VALUES(@VAR0, ";
+        ss << " VALUES (@VAR0, ";
     else if (db_type_ == DB_TYPE_MYSQLpp || db_type_ == DB_TYPE_MYSQLCon)
-        ss << " VALUES(";
+        ss << " VALUES (";
     else
         throw std::runtime_error ("SQLGenerator: createDBCreateString: unknown db type");
 
@@ -494,8 +494,12 @@ std::string SQLGenerator::createDBInsertStringBind(Buffer *buffer, std::string t
     {
         if (db_type_ == DB_TYPE_SQLITE)
             ss << "@VAR"+intToString(cnt+1);
-        else if (db_type_ == DB_TYPE_MYSQLpp || db_type_ == DB_TYPE_MYSQLCon)
+        else if (db_type_ == DB_TYPE_MYSQLpp)
             ss << "%"+intToString(cnt);
+        else if (db_type_ == DB_TYPE_MYSQLCon)
+            ss << "?";
+        else
+            throw std::runtime_error ("SQLGenerator: createDBInsertStringBind: unknown database type");
 
         if (cnt != size-1)
         {

@@ -119,7 +119,7 @@ void MySQLConConnection::executeSQL(std::string sql)
 
 void MySQLConConnection::prepareBindStatement (std::string statement)
 {
-    loginf  << "MySQLConConnection: prepareBindStatement: statement prepare '" <<statement << "'";
+    logdbg  << "MySQLConConnection: prepareBindStatement: statement prepare '" <<statement << "'";
 
     assert (connection_);
     assert (!prepared_statement_);

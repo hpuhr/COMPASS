@@ -151,8 +151,10 @@ void BufferWriter::insertBindStatementForCurrentIndex (Buffer *buffer)
 
         if (db_type_ == DB_TYPE_SQLITE)
             index_cnt=cnt+2;
-        else if (db_type_ == DB_TYPE_MYSQLpp || db_type_ == DB_TYPE_MYSQLCon)
+        else if (db_type_ == DB_TYPE_MYSQLpp)
             index_cnt=cnt;
+        else if (db_type_ == DB_TYPE_MYSQLCon)
+            index_cnt=cnt+1;
         else
             throw std::runtime_error ("BufferWriter: insertBindStatementForCurrentIndex: unknown db type");
 
