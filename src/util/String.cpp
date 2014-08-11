@@ -570,6 +570,105 @@ std::string getHexString (void *data, unsigned int num_bytes)
     return ss.str();
 }
 
+double doubleFromLatitudeString(std::string &latitude_str, bool &ok)
+{
+    ok = true;
+    unsigned int len = latitude_str.size();
+    assert (len == 12);
+    char last_char = latitude_str.at(len-1);
+    assert (last_char == 'N' || last_char == 'S');
+
+    double x=0.0;
+    double tmp=0.0;
+    std::stringstream ss;
+
+    ss << latitude_str.substr(0, 2);
+    ok = (ss >> tmp);
+
+    if(!ok)
+    {
+        logwrn  << "Util: doubleFromLatitudeString: bad operation: '" << latitude_str << "'";
+        return 0.0;
+    }
+    x = tmp;
+
+    ss.str(std::string());
+    ss << latitude_str.substr(2, 2);
+    ok = (ss >> tmp);
+
+    if(!ok)
+    {
+        logwrn  << "Util: doubleFromLatitudeString: bad operation: '" << latitude_str << "'";
+        return 0.0;
+    }
+    x += tmp/60.0;
+
+    ss.str(std::string());
+    ss << latitude_str.substr(4, 7);
+    ok = (ss >> tmp);
+
+    if(!ok)
+    {
+        logwrn  << "Util: doubleFromLatitudeString: bad operation: '" << latitude_str << "'";
+        return 0.0;
+    }
+    x += tmp/3600.0;
+
+    if (last_char == 'S')
+        x *= -1.0;
+
+    return x;
+}
+
+double doubleFromLongitudeString(std::string &longitude_str, bool &ok)
+{
+    ok = true;
+    unsigned int len = longitude_str.size();
+    assert (len == 12);
+    char last_char = longitude_str.at(len-1);
+    assert (last_char == 'E' || last_char == 'W');
+
+    double x=0.0;
+    double tmp=0.0;
+    std::stringstream ss;
+
+    ss << longitude_str.substr(0, 2);
+    ok = (ss >> tmp);
+
+    if(!ok)
+    {
+        logwrn  << "Util: doubleFromLongitudeString: bad operation: '" << longitude_str << "'";
+        return 0.0;
+    }
+    x = tmp;
+
+    ss.str(std::string());
+    ss << longitude_str.substr(2, 2);
+    ok = (ss >> tmp);
+
+    if(!ok)
+    {
+        logwrn  << "Util: doubleFromLongitudeString: bad operation: '" << longitude_str << "'";
+        return 0.0;
+    }
+    x += tmp/60.0;
+
+    ss.str(std::string());
+    ss << longitude_str.substr(4, 7);
+    ok = (ss >> tmp);
+
+    if(!ok)
+    {
+        logwrn  << "Util: doubleFromLongitudeString: bad operation: '" << longitude_str << "'";
+        return 0.0;
+    }
+    x += tmp/3600.0;
+
+    if (last_char == 'W')
+        x *= -1.0;
+
+    return x;
+}
 
 
 }

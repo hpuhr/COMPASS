@@ -147,6 +147,8 @@ set ( atsdb_HDRS
         src/polygon/GeographicPoint.h
         src/polygon/Polygon4DDI.h
         src/polygon/acgxml/ACGXMLParser.h
+        src/polygon/acgxml/Abd.h
+        src/polygon/acgxml/Ase.h
         src/polygon/shapefile/ShapeFileParser.h
         src/projection/ProjectionManager.h
         src/property/Property.h
@@ -316,6 +318,8 @@ set ( atsdb_SRCS
         src/polygon/AirspaceSectorTreeWidget.cpp
         src/polygon/AirspaceSectorWidget.cpp
         src/polygon/acgxml/ACGXMLParser.cpp
+        src/polygon/acgxml/Abd.cpp
+        src/polygon/acgxml/Ase.cpp
         src/polygon/shapefile/ShapeFileParser.cpp
         src/projection/ProjectionManager.cpp
         src/property/Property.cpp

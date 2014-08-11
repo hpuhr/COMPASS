@@ -78,6 +78,8 @@ extern bool isLargerAs (std::string org, std::string val, PROPERTY_DATA_TYPE typ
 /// @brief Returns equivalent PROPERTY_DATA_TYPE from SQL data type
 extern PROPERTY_DATA_TYPE getDataTypeFromDB (std::string type);
 
+extern double doubleFromLatitudeString(std::string &latitude_str, bool &ok);
+extern double doubleFromLongitudeString(std::string &longitude_str, bool &ok);
 
 template <typename T> std::string formatBinaryString (T val)
 {
