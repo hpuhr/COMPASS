@@ -84,6 +84,8 @@ include_directories (
 	src/job
 	src/gui
 	src/polygon
+	src/polygon/acgxml
+	src/polygon/shapefile
     src/projection
 	src/property
 	src/buffer
@@ -140,9 +142,11 @@ set ( atsdb_HDRS
         src/object/DBOVariableSet.h
         src/object/DBOVariableOrderedSet.h
         src/polygon/AirspaceSector.h
+        src/polygon/AirspaceSectorParser.h
         src/polygon/AirspaceSectorManager.h
         src/polygon/GeographicPoint.h
         src/polygon/Polygon4DDI.h
+        src/polygon/shapefile/ShapeFileParser.h
         src/projection/ProjectionManager.h
         src/property/Property.h
         src/property/PropertyList.h
@@ -310,6 +314,7 @@ set ( atsdb_SRCS
         src/polygon/AirspaceSectorManagerWidget.cpp
         src/polygon/AirspaceSectorTreeWidget.cpp
         src/polygon/AirspaceSectorWidget.cpp
+        src/polygon/shapefile/ShapeFileParser.cpp
         src/projection/ProjectionManager.cpp
         src/property/Property.cpp
         src/property/PropertyContainer.cpp
