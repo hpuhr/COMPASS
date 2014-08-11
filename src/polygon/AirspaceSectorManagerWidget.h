@@ -36,6 +36,7 @@ class AirspaceSectorManagerWidget : public QWidget
 public slots:
     void addNewSector ();
     void addSectorsByShapeFile ();
+    void addSectorsByACGXMLFile ();
 
 public:
     AirspaceSectorManagerWidget(QWidget *parent = 0, Qt::WindowFlags f = 0);

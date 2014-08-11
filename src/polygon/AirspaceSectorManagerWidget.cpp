@@ -65,12 +65,14 @@ void AirspaceSectorManagerWidget::createElements ()
 
     QPushButton *new_button = new QPushButton("Add Sector");
     connect(new_button, SIGNAL( clicked() ), this, SLOT( addNewSector() ));
-    //new_button_->setDisabled (true);
     blayout->addWidget (new_button);
+
+    QPushButton *acg_button = new QPushButton("Add Sector By ACG XML File");
+    connect(acg_button, SIGNAL( clicked() ), this, SLOT( addSectorsByACGXMLFile() ));
+    blayout->addWidget (acg_button);
 
     QPushButton *shp_button = new QPushButton("Add Sector By Shapefile");
     connect(shp_button, SIGNAL( clicked() ), this, SLOT( addSectorsByShapeFile() ));
-    //new_button_->setDisabled (true);
     blayout->addWidget (shp_button);
 
     vlayout->addLayout (blayout);
@@ -107,6 +109,15 @@ void AirspaceSectorManagerWidget::addNewSector ()
     }
 }
 
+void AirspaceSectorManagerWidget::addSectorsByACGXMLFile ()
+{
+    QString filename = QFileDialog::getOpenFileName (this, tr("Please select a XML File"), tr("/home/sk"),tr("XML FIles (*.xml)"));
+    AirspaceSectorManager::getInstance().createNewSectorFromACGXMLFile(filename.toStdString());
+
+    yggdrasil_->updateLayerListSlot();
+    sector_widget_->disableWidgets();
+}
+
 void AirspaceSectorManagerWidget::addSectorsByShapeFile ()
 {
     QString filename = QFileDialog::getOpenFileName (this, tr("Please select a shapefile"), tr("/home/sk"),tr("Shapefiles (*.shp)"));
@@ -115,3 +126,5 @@ void AirspaceSectorManagerWidget::addSectorsByShapeFile ()
     yggdrasil_->updateLayerListSlot();
     sector_widget_->disableWidgets();
 }
+
+

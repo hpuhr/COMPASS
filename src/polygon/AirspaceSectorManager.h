@@ -27,6 +27,7 @@
 
 #include "Singleton.h"
 #include "Configurable.h"
+#include "ACGXMLParser.h"
 #include "ShapeFileParser.h"
 
 class AirspaceSector;
@@ -52,6 +53,7 @@ public:
     bool deleteSectorIfPossible (AirspaceSector *sector);
     void removeSector (AirspaceSector *sector);
 
+    void createNewSectorFromACGXMLFile (std::string path);
     void createNewSectorFromShapefile (std::string path);
 
     std::map <std::string, bool> &isPointInsideSector (double latitude, double longitude, bool height_given,
@@ -66,6 +68,7 @@ public:
     void rebuildSectorNames ();
 
 protected:
+    ACGXMLParser acg_parser_;
     ShapeFileParser shapefile_parser_;
 
     std::map <std::string, AirspaceSector*> sectors_;
