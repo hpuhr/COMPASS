@@ -121,7 +121,7 @@ void ACGXMLParser::parseAdb (tinyxml2::XMLElement *adb_elem)
 
             assert (abds_.find(mid_num) == abds_.end());
             Abd &adb = abds_[mid_num];
-            adb.setMid(mid_num);
+            adb.mid_=mid_num;
 
             XMLElement *child;
             for (child = element->FirstChildElement(); child != 0; child = child->NextSiblingElement())
@@ -178,8 +178,8 @@ void ACGXMLParser::parseAdbAseUid (tinyxml2::XMLElement *elem, ACGXML::Abd &adb)
     unsigned int mid_num = intFromString(mid, &ok);
     assert (ok);
 
-    AseUid ast_uid;
-    ast_uid.mid_ = mid_num;
+    AseUid ase_uid;
+    ase_uid.mid_ = mid_num;
 
     XMLElement *child;
 
@@ -188,17 +188,17 @@ void ACGXMLParser::parseAdbAseUid (tinyxml2::XMLElement *elem, ACGXML::Abd &adb)
         loginf  << "ACGXMLParser: parseAdbAseUid: found child '" << child->Value() << "' text '" << child->GetText() << "'" ;
 
         if (strcmp ("codeType", child->Value() ) == 0)
-            ast_uid.code_type_ = child->GetText();
+            ase_uid.code_type_ = child->GetText();
         else if (strcmp ("codeId", child->Value() ) == 0)
-            ast_uid.code_id_ = child->GetText();
+            ase_uid.code_id_ = child->GetText();
         else
             throw std::runtime_error (std::string ("ACGXMLParser: parseAdbAseUid: unknown attribute ")+child->Value());
     }
 
-    assert (ast_uid.code_type_.size() != 0);
-    assert (ast_uid.code_id_.size() != 0);
+    assert (ase_uid.code_type_.size() != 0);
+    assert (ase_uid.code_id_.size() != 0);
 
-    adb.setAseUid(ast_uid);
+    adb.ase_uid_=ase_uid;
 }
 
 void ACGXMLParser::parseAdbAvx (tinyxml2::XMLElement *elem, ACGXML::Abd &adb)
@@ -340,11 +340,161 @@ void ACGXMLParser::parseAdbAvx (tinyxml2::XMLElement *elem, ACGXML::Abd &adb)
         assert (avx.uom_radius_arc_.size() != 0);
     }
 
-    adb.addAvx(avx);
+    adb.avxes_.push_back (avx);
 }
 
 void ACGXMLParser::parseAse (tinyxml2::XMLElement *ase_elem)
 {
-    loginf  << "ACGXMLParser: parseAse";
+    loginf << "ACGXMLParser: parseAse: element '" << ase_elem->Value() << "'";
+
+    Ase ase;
+    bool ok=false;
+    XMLElement *child;
+
+    ase.has_minimum_=false;
+
+    bool has_uid_mid=false;
+    bool has_val_dist_ver_upper=false;
+    bool has_val_dist_ver_lower=false;
+    bool val_dist_ver_minimum=false;
+
+    double tmp_num;
+    std::string tmp_str;
+
+    for (child = ase_elem->FirstChildElement(); child != 0; child = child->NextSiblingElement())
+    {
+        loginf  << "ACGXMLParser: parseAse: found Ase child '" << child->Value() << "' text '" << child->GetText() << "'" ;
+
+        //        <AseUid mid="1395">
+        //            <codeType>RAS</codeType>
+        //            <codeId>LO61</codeId>
+        //        </AseUid>
+        //        <txtLocalType>MFA-ASR</txtLocalType>
+        //        <codeMil>CIVIL</codeMil>
+        //        <codeDistVerUpper>STD</codeDistVerUpper>
+        //        <valDistVerUpper>999</valDistVerUpper>
+        //        <uomDistVerUpper>FL</uomDistVerUpper>
+        //        <codeDistVerLower>ALT</codeDistVerLower>
+        //        <valDistVerLower>7700</valDistVerLower>
+        //        <uomDistVerLower>FT</uomDistVerLower>
+
+//        <codeDistVerMnm>ALT</codeDistVerMnm>
+//        <valDistVerMnm>5500</valDistVerMnm>
+//        <uomDistVerMnm>FT</uomDistVerMnm>
+
+        //        <Att>
+        //            <codeWorkHr>H24</codeWorkHr>
+        //        </Att>
+
+        if (strcmp ("AseUid", child->Value() ) == 0)
+        {
+            tmp_str = child->Attribute("mid");
+            assert (tmp_str.size() != 0);
+            tmp_num = intFromString(tmp_str, &ok);
+            assert (ok);
+
+            has_uid_mid=true;
+            ase.uid_mid_= tmp_num;
+
+            XMLElement *aseuidchild;
+            for (aseuidchild = child->FirstChildElement(); aseuidchild != 0; aseuidchild = aseuidchild->NextSiblingElement())
+            {
+                if (strcmp ("codeType", aseuidchild->Value()) == 0)
+                {
+                    tmp_str = aseuidchild->GetText();
+                    assert (tmp_str.size() != 0);
+                    ase.uid_code_type_ = tmp_str;
+                }
+                else if(strcmp ("codeId", aseuidchild->Value()) == 0)
+                {
+                    tmp_str = aseuidchild->GetText();
+                    assert (tmp_str.size() != 0);
+                    ase.uid_code_id_ = tmp_str;
+                }
+                else
+                    throw std::runtime_error (std::string ("ACGXMLParser: parseAse: unknown attribute ")+aseuidchild->Value());
+            }
+        }
+        else if (strcmp ("txtLocalType", child->Value() ) == 0)
+            ase.txt_local_type_ = child->GetText();
+        else if (strcmp ("codeMil", child->Value() ) == 0)
+            ase.code_mil_ = child->GetText();
+        else if (strcmp ("codeDistVerUpper", child->Value() ) == 0)
+            ase.code_dist_ver_upper_ = child->GetText();
+        else if (strcmp ("valDistVerUpper", child->Value() ) == 0)
+        {
+            tmp_str = child->GetText();
+            tmp_num = doubleFromString(tmp_str, &ok);
+            assert (ok);
+            ase.val_dist_ver_upper_=tmp_num;
+            has_val_dist_ver_upper=true;
+        }
+        else if (strcmp ("uomDistVerUpper", child->Value() ) == 0)
+            ase.uom_dist_ver_upper_ = child->GetText();
+        else if (strcmp ("codeDistVerLower", child->Value() ) == 0)
+            ase.code_dist_ver_lower_= child->GetText();
+        else if (strcmp ("valDistVerLower", child->Value() ) == 0)
+        {
+            tmp_str = child->GetText();
+            tmp_num = doubleFromString(tmp_str, &ok);
+            assert (ok);
+            ase.val_dist_ver_lower_=tmp_num;
+            has_val_dist_ver_lower=true;
+        }
+        else if (strcmp ("uomDistVerLower", child->Value() ) == 0)
+            ase.uom_dist_ver_lower_ = child->GetText();
+        else if (strcmp ("codeDistVerMnm", child->Value() ) == 0)
+        {
+            ase.code_dist_ver_minimum_= child->GetText();
+            ase.has_minimum_=true;
+        }
+        else if (strcmp ("valDistVerMnm", child->Value() ) == 0)
+        {
+            tmp_str = child->GetText();
+            tmp_num = doubleFromString(tmp_str, &ok);
+            assert (ok);
+            ase.val_dist_ver_minimum_=tmp_num;
+            ase.has_minimum_=true;
+            val_dist_ver_minimum=true;
+        }
+        else if (strcmp ("uomDistVerMnm", child->Value() ) == 0)
+        {
+            ase.has_minimum_=true;
+            ase.uom_dist_ver_minimum_ = child->GetText();
+        }
+        else if (strcmp ("Att", child->Value() ) == 0)
+        {
+            assert (strcmp ("codeWorkHr", child->FirstChildElement()->Value()) == 0);
+            tmp_str = child->FirstChildElement()->GetText();
+            assert (tmp_str.size() != 0);
+            ase.code_work_hr_ = tmp_str;
+        }
+        else
+            throw std::runtime_error (std::string ("ACGXMLParser: parseAse: unknown attribute ")+child->Value());
+    }
+
+    assert (has_uid_mid);
+    assert (ase.uid_code_type_.size() != 0);
+    assert (ase.uid_code_id_.size() != 0);
+    assert (ase.txt_local_type_.size() != 0);
+    assert (ase.code_mil_.size() != 0);
+    assert (ase.code_dist_ver_upper_.size() != 0);
+    assert (has_val_dist_ver_upper);
+    assert (ase.uom_dist_ver_upper_.size() != 0);
+    assert (ase.code_dist_ver_lower_.size() != 0);
+    assert (has_val_dist_ver_lower);
+    assert (ase.uom_dist_ver_lower_.size() != 0);
+
+    if (ase.has_minimum_)
+    {
+        assert (ase.code_dist_ver_minimum_.size() != 0);
+        assert (val_dist_ver_minimum);
+        assert (ase.uom_dist_ver_minimum_.size() != 0);
+    }
+
+    assert (ase.code_work_hr_.size() != 0);
+
+    assert (ases_.find (ase.uid_mid_) == ases_.end());
+    ases_[ase.uid_mid_] = ase;
 }
 
