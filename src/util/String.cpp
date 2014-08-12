@@ -587,29 +587,29 @@ double doubleFromLatitudeString(std::string &latitude_str, bool &ok)
 
     if(!ok)
     {
-        logwrn  << "Util: doubleFromLatitudeString: bad operation: '" << latitude_str << "'";
+        logwrn  << "Util: doubleFromLatitudeString: bad operation: '" << latitude_str.substr(0, 2) << "'";
         return 0.0;
     }
     x = tmp;
 
-    ss.str(std::string());
+    ss.clear();
     ss << latitude_str.substr(2, 2);
     ok = (ss >> tmp);
 
     if(!ok)
     {
-        logwrn  << "Util: doubleFromLatitudeString: bad operation: '" << latitude_str << "'";
+        logwrn  << "Util: doubleFromLatitudeString: bad operation: '" << latitude_str.substr(2, 2) << "'";
         return 0.0;
     }
     x += tmp/60.0;
 
-    ss.str(std::string());
+    ss.clear();
     ss << latitude_str.substr(4, 7);
     ok = (ss >> tmp);
 
     if(!ok)
     {
-        logwrn  << "Util: doubleFromLatitudeString: bad operation: '" << latitude_str << "'";
+        logwrn  << "Util: doubleFromLatitudeString: bad operation: '" << latitude_str.substr(4, 7) << "'";
         return 0.0;
     }
     x += tmp/3600.0;
@@ -624,7 +624,7 @@ double doubleFromLongitudeString(std::string &longitude_str, bool &ok)
 {
     ok = true;
     unsigned int len = longitude_str.size();
-    assert (len == 12);
+    assert (len == 13);
     char last_char = longitude_str.at(len-1);
     assert (last_char == 'E' || last_char == 'W');
 
@@ -632,34 +632,34 @@ double doubleFromLongitudeString(std::string &longitude_str, bool &ok)
     double tmp=0.0;
     std::stringstream ss;
 
-    ss << longitude_str.substr(0, 2);
+    ss << longitude_str.substr(0, 3);
     ok = (ss >> tmp);
 
     if(!ok)
     {
-        logwrn  << "Util: doubleFromLongitudeString: bad operation: '" << longitude_str << "'";
+        logwrn  << "Util: doubleFromLongitudeString: bad operation: '" << longitude_str.substr(0, 2) << "'";
         return 0.0;
     }
     x = tmp;
 
-    ss.str(std::string());
-    ss << longitude_str.substr(2, 2);
+    ss.clear();
+    ss << longitude_str.substr(3, 2);
     ok = (ss >> tmp);
 
     if(!ok)
     {
-        logwrn  << "Util: doubleFromLongitudeString: bad operation: '" << longitude_str << "'";
+        logwrn  << "Util: doubleFromLongitudeString: bad operation: '" << longitude_str.substr(2, 2) << "'";
         return 0.0;
     }
     x += tmp/60.0;
 
-    ss.str(std::string());
-    ss << longitude_str.substr(4, 7);
+    ss.clear();
+    ss << longitude_str.substr(5, 7);
     ok = (ss >> tmp);
 
     if(!ok)
     {
-        logwrn  << "Util: doubleFromLongitudeString: bad operation: '" << longitude_str << "'";
+        logwrn  << "Util: doubleFromLongitudeString: bad operation: '" << longitude_str.substr(4, 7) << "'";
         return 0.0;
     }
     x += tmp/3600.0;

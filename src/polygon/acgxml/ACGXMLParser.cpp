@@ -216,6 +216,15 @@ void ACGXMLParser::parseAdbAvx (tinyxml2::XMLElement *elem, ACGXML::Abd &adb)
     avx.geo_long_arc_=0.0;
     avx.val_radius_arc_=0.0;
 
+    bool has_geo_lat=false;
+    bool has_geo_long=false;
+    bool has_geo_lat_arc=false;
+    bool has_geo_long_arc=false;
+    bool has_val_radius_arc=false;
+
+    double tmp_num;
+    std::string tmp_str;
+
     for (child = elem->FirstChildElement(); child != 0; child = child->NextSiblingElement())
     {
         loginf  << "ACGXMLParser: parseAdbAvx: found Avx child '" << child->Value() << "' text '" << child->GetText() << "'" ;
@@ -233,41 +242,105 @@ void ACGXMLParser::parseAdbAvx (tinyxml2::XMLElement *elem, ACGXML::Abd &adb)
 //        <valRadiusArc>3.0150</valRadiusArc>
 //        <uomRadiusArc>NM</uomRadiusArc>
 
+//        <VorUidCen mid="16"> ignored
+//            <codeId>FMD</codeId>
+//            <geoLat>480618.4050N</geoLat>
+//            <geoLong>0163745.3503E</geoLong>
+//        </VorUidCen>
+
         if (strcmp ("GbrUid", child->Value() ) == 0)
         {
-            std::string grb_uid_mid = child->Attribute("mid");
-            assert (grb_uid_mid.size() != 0);
-            unsigned int grb_uid_mid_num = intFromString(grb_uid_mid, &ok);
+            tmp_str = child->Attribute("mid");
+            assert (tmp_str.size() != 0);
+            tmp_num = intFromString(tmp_str, &ok);
             assert (ok);
 
-            assert (strcmp ("txtName", child->FirstChildElement()->Value()) == 0);
-            std::string gbr_uid_text_name = child->FirstChildElement()->GetText();
-            assert (gbr_uid_text_name.size() != 0);
-
             avx.has_gbr_uid_=true;
-            avx.gbr_mid_= grb_uid_mid_num;
-            avx.gbr_txt_name_ = gbr_uid_text_name;
+            avx.gbr_mid_= tmp_num;
+
+            assert (strcmp ("txtName", child->FirstChildElement()->Value()) == 0);
+            tmp_str = child->FirstChildElement()->GetText();
+            assert (tmp_str.size() != 0);
+
+            avx.gbr_txt_name_ = tmp_str;
         }
         else if (strcmp ("codeType", child->Value() ) == 0)
             avx.code_type_ = child->GetText();
         else if (strcmp ("geoLat", child->Value() ) == 0)
         {
-            std::string geo = child->GetText();
+            tmp_str = child->GetText();
+            tmp_num = doubleFromLatitudeString(tmp_str, ok);
+            assert (ok);
+            //loginf << "ACGXMLParser: parseAdbAvx: lat '" << lat_str << "' num " <<  lat;
+            avx.geo_lat_=tmp_num;
+            has_geo_lat=true;
         }
         else if (strcmp ("geoLong", child->Value() ) == 0)
         {
-            std::string geo = child->GetText();
+            tmp_str = child->GetText();
+            tmp_num = doubleFromLongitudeString(tmp_str, ok);
+            assert (ok);
+            //loginf << "ACGXMLParser: parseAdbAvx: long '" << lon_str << "' num " <<  lon;
+            avx.geo_long_=tmp_num;
+            has_geo_long=true;
         }
         else if (strcmp ("codeDatum", child->Value() ) == 0)
             avx.code_datum_ = child->GetText();
+        else if (strcmp ("geoLatArc", child->Value() ) == 0)
+        {
+            tmp_str = child->GetText();
+            tmp_num = doubleFromLatitudeString(tmp_str, ok);
+            assert (ok);
+            //loginf << "ACGXMLParser: parseAdbAvx: lat '" << lat_str << "' num " <<  lat;
+            avx.geo_lat_arc_=tmp_num;
+            avx.has_arc_=true;
+            has_geo_lat_arc=true;
+        }
+        else if (strcmp ("geoLongArc", child->Value() ) == 0)
+        {
+            tmp_str = child->GetText();
+            tmp_num = doubleFromLongitudeString(tmp_str, ok);
+            assert (ok);
+            //loginf << "ACGXMLParser: parseAdbAvx: long '" << lon_str << "' num " <<  lon;
+            avx.geo_long_arc_=tmp_num;
+            avx.has_arc_=true;
+        }
+        else if (strcmp ("valRadiusArc", child->Value() ) == 0)
+        {
+            tmp_str = child->GetText();
+            tmp_num = doubleFromString(tmp_str, &ok);
+            assert (ok);
+            //loginf << "ACGXMLParser: parseAdbAvx: long '" << lon_str << "' num " <<  lon;
+            avx.val_radius_arc_=tmp_num;
+            avx.has_arc_=true;
+            has_geo_long_arc=true;
+            has_val_radius_arc=true;
+        }
+        else if (strcmp ("uomRadiusArc", child->Value() ) == 0)
+        {
+            avx.uom_radius_arc_ = child->GetText();
+            avx.has_arc_=true;
+        }
+        else if (strcmp ("VorUidCen", child->Value() ) == 0) // no can do - what's that a please near katmandu
+            continue;
         else
             throw std::runtime_error (std::string ("ACGXMLParser: parseAdbAvx: unknown attribute ")+child->Value());
     }
 
-//    assert (ast_uid.code_type_.size() != 0);
-//    assert (ast_uid.code_id_.size() != 0);
-//
-//    adb.setAseUid(ast_uid);
+    assert (avx.code_type_.size() != 0);
+    assert (has_geo_lat);
+    assert (has_geo_long);
+    assert (avx.code_datum_.size() != 0);
+
+    if (avx.has_arc_)
+    {
+        assert (has_geo_lat_arc);
+        assert (has_geo_long_arc);
+        assert (has_val_radius_arc);
+        assert (avx.uom_radius_arc_.size() != 0);
+    }
+
+    adb.addAvx(avx);
 }
 
 void ACGXMLParser::parseAse (tinyxml2::XMLElement *ase_elem)
