@@ -10,6 +10,8 @@
 #include "Abd.h"
 #include "Ase.h"
 #include "String.h"
+#include "AirspaceSectorManager.h"
+#include "AirspaceSector.h"
 
 using namespace tinyxml2;
 using namespace Utils::String;
@@ -27,7 +29,7 @@ ACGXMLParser::~ACGXMLParser()
 
 void ACGXMLParser::parse (std::string filename)
 {
-    loginf  << "ACGXMLParser: parse: opening '" << filename << "'";
+    logdbg  << "ACGXMLParser: parse: opening '" << filename << "'";
     XMLDocument *config_file_doc = new XMLDocument ();
 
     if (config_file_doc->LoadFile(filename.c_str()) == 0)
@@ -46,19 +48,19 @@ void ACGXMLParser::parse (std::string filename)
                 break;
             }
 
-            loginf  << "ACGXMLParser: parse: found AIXM-Snapshot";
+            logdbg  << "ACGXMLParser: parse: found AIXM-Snapshot";
 
             for (child = doc->FirstChildElement(); child != 0; child = child->NextSiblingElement())
             {
-                loginf  << "ACGXMLParser: parse: found element '" << child->Value() << "'";
+                logdbg  << "ACGXMLParser: parse: found element '" << child->Value() << "'";
                 if (strcmp ("Abd", child->Value() ) == 0)
                 {
-                    loginf  << "ACGXMLParser: parse: is Abd";
+                    logdbg  << "ACGXMLParser: parse: is Abd";
                     parseAdb (child);
                 }
                 else if (strcmp ("Ase", child->Value() ) == 0)
                 {
-                    loginf  << "ACGXMLParser: parse: is Ase";
+                    logdbg  << "ACGXMLParser: parse: is Ase";
                     parseAse (child);
                 }
                 else
@@ -74,8 +76,14 @@ void ACGXMLParser::parse (std::string filename)
         throw std::runtime_error ("ACGXMLParser: parse: load error");
     }
 
-    loginf  << "ACGXMLParser: parse: file '" << filename << "' read";
+    loginf  << "ACGXMLParser: parse: file '" << filename << "' read, found " << abds_.size() << " Abds and " << ases_.size() << " Ases";
     delete config_file_doc;
+
+    checkConistency();
+    loginf << "ACGXMLParser: parse: checking consistency done";
+
+    createSectors();
+
 }
 
 void ACGXMLParser::clear()
@@ -86,7 +94,7 @@ void ACGXMLParser::clear()
 
 void ACGXMLParser::parseAdb (tinyxml2::XMLElement *adb_elem)
 {
-    loginf  << "ACGXMLParser: parseAdb: element '" << adb_elem->Value() << "'" ;
+    logdbg  << "ACGXMLParser: parseAdb: element '" << adb_elem->Value() << "'" ;
 
     Abd *abd_ptr=0;
 
@@ -101,7 +109,7 @@ void ACGXMLParser::parseAdb (tinyxml2::XMLElement *adb_elem)
             const XMLAttribute* attribute=element->FirstAttribute();
             while (attribute)
             {
-                loginf  << "ACGXMLParser: parseAdb: attribute '" << attribute->Name() << "' value '"<< attribute->Value() << "'";
+                logdbg  << "ACGXMLParser: parseAdb: attribute '" << attribute->Name() << "' value '"<< attribute->Value() << "'";
                 if (strcmp ("mid", attribute->Name()) == 0)
                 {
                     assert (mid.size() == 0); //undefined
@@ -126,7 +134,7 @@ void ACGXMLParser::parseAdb (tinyxml2::XMLElement *adb_elem)
             XMLElement *child;
             for (child = element->FirstChildElement(); child != 0; child = child->NextSiblingElement())
             {
-                loginf  << "ACGXMLParser: parseAdb: found child '" << child->Value() << "'";
+                logdbg  << "ACGXMLParser: parseAdb: found child '" << child->Value() << "'";
 
                 if (strcmp ("AseUid", child->Value() ) == 0)
                 {
@@ -154,14 +162,14 @@ void ACGXMLParser::parseAdb (tinyxml2::XMLElement *adb_elem)
 
 void ACGXMLParser::parseAdbAseUid (tinyxml2::XMLElement *elem, ACGXML::Abd &adb)
 {
-    loginf << "ACGXMLParser: parseAdbAseUid: element '" << elem->Value();
+    logdbg << "ACGXMLParser: parseAdbAseUid: element '" << elem->Value();
 
     std::string mid;
 
     const XMLAttribute* attribute=elem->FirstAttribute();
     while (attribute)
     {
-        loginf  << "ACGXMLParser: parseAdbAseUid: attribute '" << attribute->Name() << "' value '"<< attribute->Value() << "'";
+        logdbg  << "ACGXMLParser: parseAdbAseUid: attribute '" << attribute->Name() << "' value '"<< attribute->Value() << "'";
         if (strcmp ("mid", attribute->Name()) == 0)
         {
             assert (mid.size() == 0); //undefined
@@ -185,7 +193,7 @@ void ACGXMLParser::parseAdbAseUid (tinyxml2::XMLElement *elem, ACGXML::Abd &adb)
 
     for (child = elem->FirstChildElement(); child != 0; child = child->NextSiblingElement())
     {
-        loginf  << "ACGXMLParser: parseAdbAseUid: found child '" << child->Value() << "' text '" << child->GetText() << "'" ;
+        logdbg  << "ACGXMLParser: parseAdbAseUid: found child '" << child->Value() << "' text '" << child->GetText() << "'" ;
 
         if (strcmp ("codeType", child->Value() ) == 0)
             ase_uid.code_type_ = child->GetText();
@@ -203,7 +211,7 @@ void ACGXMLParser::parseAdbAseUid (tinyxml2::XMLElement *elem, ACGXML::Abd &adb)
 
 void ACGXMLParser::parseAdbAvx (tinyxml2::XMLElement *elem, ACGXML::Abd &adb)
 {
-    loginf << "ACGXMLParser: parseAdbAvx: element '" << elem->Value() << "'";
+    logdbg << "ACGXMLParser: parseAdbAvx: element '" << elem->Value() << "'";
 
     Avx avx;
     bool ok=false;
@@ -227,7 +235,7 @@ void ACGXMLParser::parseAdbAvx (tinyxml2::XMLElement *elem, ACGXML::Abd &adb)
 
     for (child = elem->FirstChildElement(); child != 0; child = child->NextSiblingElement())
     {
-        loginf  << "ACGXMLParser: parseAdbAvx: found Avx child '" << child->Value() << "' text '" << child->GetText() << "'" ;
+        logdbg  << "ACGXMLParser: parseAdbAvx: found Avx child '" << child->Value() << "' text '" << child->GetText() << "'" ;
 
 //        <GbrUid mid="7">
 //            <txtName>AUSTRIA_SWITZERLAND</txtName>
@@ -345,7 +353,7 @@ void ACGXMLParser::parseAdbAvx (tinyxml2::XMLElement *elem, ACGXML::Abd &adb)
 
 void ACGXMLParser::parseAse (tinyxml2::XMLElement *ase_elem)
 {
-    loginf << "ACGXMLParser: parseAse: element '" << ase_elem->Value() << "'";
+    logdbg << "ACGXMLParser: parseAse: element '" << ase_elem->Value() << "'";
 
     Ase ase;
     bool ok=false;
@@ -363,7 +371,7 @@ void ACGXMLParser::parseAse (tinyxml2::XMLElement *ase_elem)
 
     for (child = ase_elem->FirstChildElement(); child != 0; child = child->NextSiblingElement())
     {
-        loginf  << "ACGXMLParser: parseAse: found Ase child '" << child->Value() << "' text '" << child->GetText() << "'" ;
+        logdbg  << "ACGXMLParser: parseAse: found Ase child '" << child->Value() << "' text '" << child->GetText() << "'" ;
 
         //        <AseUid mid="1395">
         //            <codeType>RAS</codeType>
@@ -498,3 +506,73 @@ void ACGXMLParser::parseAse (tinyxml2::XMLElement *ase_elem)
     ases_[ase.uid_mid_] = ase;
 }
 
+void ACGXMLParser::checkConistency ()
+{
+    std::map <unsigned int, Abd>::iterator it;
+
+    unsigned int ase_mid;
+    for (it = abds_.begin(); it != abds_.end(); it++)
+    {
+        ase_mid = it->second.ase_uid_.mid_;
+        assert (ases_.find(ase_mid) != ases_.end());
+    }
+}
+
+void ACGXMLParser::createSectors ()
+{
+    loginf << "ACGXMLParser: createSectors";
+
+    std::map <unsigned int, Abd>::iterator it;
+
+    unsigned int ase_mid;
+    std::string name;
+
+    for (it = abds_.begin(); it != abds_.end(); it++)
+    {
+        Abd &abd = it->second;
+
+        ase_mid = abd.ase_uid_.mid_;
+        name = abd.ase_uid_.code_id_;
+
+        loginf << "ACGXMLParser: createSectors: sector '" << name << "' with " << abd.avxes_.size() << " points";
+
+        assert (ases_.find(ase_mid) != ases_.end());
+        Ase &ase = ases_.at(ase_mid);
+
+        if (AirspaceSectorManager::getInstance().hasSector(name))
+        {
+            logwrn << "ACGXMLParser: createSectors: sector '" << name << "' already exists, deleting";
+            AirspaceSectorManager::getInstance().deleteSectorIfPossible(name);
+            assert (!AirspaceSectorManager::getInstance().hasSector(name));
+        }
+
+        AirspaceSectorManager::getInstance().addNewSector(name);
+        assert (AirspaceSectorManager::getInstance().hasSector(name));
+        AirspaceSector *sector = AirspaceSectorManager::getInstance().getSector(name);
+
+        std::vector <Avx>::iterator it2;
+        for (it2 = abd.avxes_.begin(); it2 != abd.avxes_.end(); it2++)
+        {
+            Avx &avx = *it2;
+
+            sector->addPoint(avx.geo_lat_, avx.geo_long_);
+        }
+
+        sector->setHasOwnVolume(true);
+        if (ase.has_minimum_)
+            sector->setHeightMin(getHeight(ase.val_dist_ver_minimum_, ase.uom_dist_ver_minimum_));
+        else
+            sector->setHeightMin(getHeight(ase.val_dist_ver_lower_, ase.uom_dist_ver_lower_));
+        sector->setHeightMax(getHeight(ase.val_dist_ver_upper_, ase.uom_dist_ver_upper_));
+    }
+}
+
+double ACGXMLParser::getHeight (double value, std::string dist)
+{
+    if (dist == "FL")
+        return value*100.0;
+    else if (dist == "FT")
+        return value;
+    else
+        throw std::runtime_error ("ACGXMLParser: getHeight: unknown dist '"+dist+"'");
+}

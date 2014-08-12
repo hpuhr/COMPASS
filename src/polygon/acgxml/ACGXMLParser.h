@@ -37,6 +37,11 @@ protected:
     void parseAdbAvx (tinyxml2::XMLElement *elem, ACGXML::Abd &adb);
 
     void parseAse (tinyxml2::XMLElement *ase_elem);
+
+    void checkConistency ();
+    void createSectors ();
+
+    double getHeight (double value, std::string dist);
 };
 
 #endif /* ACGXMLPARSER_H_ */
