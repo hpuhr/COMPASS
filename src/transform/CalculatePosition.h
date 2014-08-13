@@ -85,7 +85,7 @@ protected:
     /// @brief Execute for WAM
     bool executeMLAT();
     /// @brief Execute for Reference trajectories
-    bool executeRefTraj();
+    //bool executeRefTraj();
 
     /// Input var longitude key
     unsigned int pos_u_key_;

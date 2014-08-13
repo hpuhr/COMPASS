@@ -211,9 +211,9 @@ bool CalculatePosition::execute()
         case DBO_MLAT:
             ok = executeMLAT();
             break;
-        case DBO_REFERENCE_TRAJECTORIES:
-            ok = executeRefTraj();
-            break;
+//        case DBO_REFERENCE_TRAJECTORIES:
+//            ok = executeRefTraj();
+//            break;
         default:
             throw std::runtime_error( "CalculatePosition: execute: Invalid dbo type." );
     }
@@ -592,72 +592,72 @@ bool CalculatePosition::executeMLAT()
 
 /**
  */
-bool CalculatePosition::executeRefTraj()
-{
-    assert( input_ );
-
-    if( append_ )
-    {
-      input_->setIndex( 0 );
-    }
-    else
-    {
-      input_->setIndex( 0 );
-      output_->setIndex( 0 );
-    }
-
-    unsigned int col, sym, cnt, n = input_->getSize();
-    for( cnt=0; cnt<n; ++cnt )
-    {
-        if( cnt != 0 )
-        {
-            if (append_)
-            {
-                input_->incrementIndex();
-            }
-            else
-            {
-                input_->incrementIndex( );
-                output_->incrementIndex( );
-            }
-        }
-
-        iSetAddresses(  input_->getAdresses() );
-        oSetAddresses( output_->getAdresses() );
-
-        //x
-        if( iIsNan( pos_u_key_ ) )
-            oSetNan( ogre_pos_x_key_ );
-        else
-            *(float*)oPtr( ogre_pos_x_key_ ) = proj_->transformPositionX( *(double*)iPtr( pos_u_key_ ) );
-
-        //y
-        if( iIsNan( pos_h_key_ ) )
-            *(float*)oPtr( ogre_pos_y_key_ ) = 0.0;
-        else
-            *(float*)oPtr( ogre_pos_y_key_ ) = proj_->transformHeight( *(int*)iPtr( pos_h_key_ ) );
-
-        //z
-        if( iIsNan( pos_v_key_ ) )
-            oSetNan( ogre_pos_z_key_ );
-        else
-            *(float*)oPtr( ogre_pos_z_key_ ) = proj_->transformPositionY( *(double*)iPtr( pos_v_key_ ) );
-
-        //color & symbol
-        if( p_mode_ == PRESENTATION_MODE_POINT_DETECTION ||
-            p_mode_ == PRESENTATION_MODE_POINT_RADAR )
-            sym = 0;
-        else
-            sym = 1;
-        col = 0;
-
-        *(unsigned int*)oPtr( ogre_color_key_  ) = col;
-        *(unsigned int*)oPtr( ogre_symbol_key_ ) = sym;
-    }
-
-    outputReady();
-
-    return true;
-}
+//bool CalculatePosition::executeRefTraj()
+//{
+//    assert( input_ );
+//
+//    if( append_ )
+//    {
+//      input_->setIndex( 0 );
+//    }
+//    else
+//    {
+//      input_->setIndex( 0 );
+//      output_->setIndex( 0 );
+//    }
+//
+//    unsigned int col, sym, cnt, n = input_->getSize();
+//    for( cnt=0; cnt<n; ++cnt )
+//    {
+//        if( cnt != 0 )
+//        {
+//            if (append_)
+//            {
+//                input_->incrementIndex();
+//            }
+//            else
+//            {
+//                input_->incrementIndex( );
+//                output_->incrementIndex( );
+//            }
+//        }
+//
+//        iSetAddresses(  input_->getAdresses() );
+//        oSetAddresses( output_->getAdresses() );
+//
+//        //x
+//        if( iIsNan( pos_u_key_ ) )
+//            oSetNan( ogre_pos_x_key_ );
+//        else
+//            *(float*)oPtr( ogre_pos_x_key_ ) = proj_->transformPositionX( *(double*)iPtr( pos_u_key_ ) );
+//
+//        //y
+//        if( iIsNan( pos_h_key_ ) )
+//            *(float*)oPtr( ogre_pos_y_key_ ) = 0.0;
+//        else
+//            *(float*)oPtr( ogre_pos_y_key_ ) = proj_->transformHeight( *(int*)iPtr( pos_h_key_ ) );
+//
+//        //z
+//        if( iIsNan( pos_v_key_ ) )
+//            oSetNan( ogre_pos_z_key_ );
+//        else
+//            *(float*)oPtr( ogre_pos_z_key_ ) = proj_->transformPositionY( *(double*)iPtr( pos_v_key_ ) );
+//
+//        //color & symbol
+//        if( p_mode_ == PRESENTATION_MODE_POINT_DETECTION ||
+//            p_mode_ == PRESENTATION_MODE_POINT_RADAR )
+//            sym = 0;
+//        else
+//            sym = 1;
+//        col = 0;
+//
+//        *(unsigned int*)oPtr( ogre_color_key_  ) = col;
+//        *(unsigned int*)oPtr( ogre_symbol_key_ ) = sym;
+//    }
+//
+//    outputReady();
+//
+//    return true;
+//}
 
 

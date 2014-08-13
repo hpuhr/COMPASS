@@ -46,13 +46,6 @@ protected:
     double center_latitude_;
     /// System center longitude
     double center_longitude_;
-    /// System center altitude
-    double center_altitude_;
-
-    /// Radians to degrees conversion constant
-    double degree_to_radian_;
-    /// Degrees to radians conversion constant
-    double radian_to_degree_;
 
     /// World scale plane width
     double projection_plane_width_;
@@ -61,11 +54,13 @@ protected:
     /// World height scale factor
     double height_scale_;
     /// World center point in x
-    double world_center_x_;
+    //double world_center_x_;
     /// World center point in y
-    double world_center_y_;
+    //double world_center_y_;
 
     double mult_factor_;
+    double trans_x_factor_;
+    double trans_y_factor_;
 
     OGRSpatialReference geo_;
     OGRSpatialReference cart_;
@@ -83,9 +78,9 @@ public:
     double getWorldSize (double size);
 
     /// @brief Scales/translates world position x
-    float transformPositionX (float value);
-    /// @brief Scales/translates world position y
-    float transformPositionY (float value);
+//    float transformPositionX (float value);
+//    /// @brief Scales/translates world position y
+//    float transformPositionY (float value);
     /// @brief Scales world position height
     float transformHeight (float value);
 
@@ -101,11 +96,9 @@ public:
 
     double getCenterLatitude () { return center_latitude_; }
     double getCenterLongitude () { return center_longitude_; }
-    double getCenterAltitude () { return center_altitude_; }
 
     void setCenterLatitude (double value) { center_latitude_ = value; }
     void setCenterLongitude (double value) { center_longitude_ = value; }
-    void setCenterAltitude (double value) { center_altitude_ = value; }
 
 public:
     /// @brief Returns static instance

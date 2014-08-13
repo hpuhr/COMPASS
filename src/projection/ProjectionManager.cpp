@@ -29,17 +29,6 @@
 #include "Config.h"
 #include "ProjectionManager.h"
 
-//static const double earth_a = 6378137.00;
-//                   // Semi major axis of earth; meters
-//static const double earth_b = 6356752.3142;
-//                   // Semi minor axis of earth; meters
-//static const double earth_e1sq = 0.0066943844;
-//                   // Square of first excentricity of earth
-
-//proj +proj=lcc +lat_0=47 +lat_1=46 +lat_2=49 +lon_0=13d20 +ellps=WGS84 | perl
-//circle_inter.pl |
-//proj +proj=lcc +lat_0=47 +lat_1=46 +lat_2=49 +lon_0=13d20 +ellps=WGS84 -I -f "%.6f"
-
 ProjectionManager::ProjectionManager()
 : Configurable ("ProjectionManager", "ProjectionManager0", 0), geo2cart_(0), cart2geo_(0)
 {
@@ -47,22 +36,13 @@ ProjectionManager::ProjectionManager()
 
     registerParameter("center_latitude", &center_latitude_, 47.5);
     registerParameter("center_longitude", &center_longitude_, 14.0);
-    registerParameter("center_altitude", &center_altitude_, 0.0);
 
     registerParameter("minimal_height", &minimal_height_, 0.0);
     registerParameter("projection_plane_width", &projection_plane_width_, 1e6);
     registerParameter("world_scale", &world_scale_, 2000);
     registerParameter("height_scale", &height_scale_, 2000);
-    registerParameter("world_center_x", &world_center_x_, 1000);
-    registerParameter("world_center_y", &world_center_y_, 1000);
-
-    mult_factor_ = world_scale_/projection_plane_width_;
-
-    degree_to_radian_ = 2.0*M_PI/360.0;
-    radian_to_degree_ = 360.0/2.0*M_PI;
-
-    loginf << "ProjectionManager: constructor: center lat " << center_latitude_ << " long " << center_longitude_
-           << " alt " << center_altitude_;
+//    registerParameter("world_center_x", &world_center_x_, 1000);
+//    registerParameter("world_center_y", &world_center_y_, 1000);
 
     geo_.SetWellKnownGeogCS("WGS84");
     //cart_.SetWellKnownGeogCS( "EPSG:31258" );
@@ -74,12 +54,28 @@ ProjectionManager::ProjectionManager()
     assert (cart2geo_);
 
     double center_pos_x, center_pos_y;
+    double center_lat, center_long;
+
+    mult_factor_ = world_scale_/projection_plane_width_;
+    trans_x_factor_=0;
+    trans_x_factor_=0;
+
+    loginf << "ProjectionManager: constructor: center lat " << center_latitude_ << " long " << center_longitude_;
 
     geo2Cart(center_latitude_, center_longitude_, center_pos_x, center_pos_y);
-    loginf << "got x " << center_pos_x << " y " << center_pos_y;
+    loginf << "ProjectionManager: constructor: center there x " << center_pos_x << " y " << center_pos_y;
 
-    geo2Cart(center_longitude_, center_latitude_, center_pos_x, center_pos_y);
-    loginf << "got reverse x " << center_pos_x << " y " << center_pos_y;
+    cart2geo(center_pos_x, center_pos_y, center_lat, center_long);
+    loginf << "ProjectionManager: constructor: center back again lat " << center_lat << " long " << center_long;
+//
+//    trans_x_factor_ = -center_pos_x;
+//    trans_y_factor_ = -center_pos_y;
+//
+//    geo2Cart(center_latitude_, center_longitude_, center_pos_x, center_pos_y);
+//    loginf << "ProjectionManager: constructor: 2 got x " << center_pos_x << " y " << center_pos_y;
+
+
+
 }
 
 ProjectionManager::~ProjectionManager()
@@ -98,52 +94,18 @@ double  ProjectionManager::getWorldSize (double size)
     return size*mult_factor_;
 }
 
-float ProjectionManager::transformPositionX (float value)
-{
-    return value*mult_factor_+world_center_x_;
-}
-float ProjectionManager::transformPositionY (float value)
-{
-    return -value*mult_factor_+world_center_y_;
-}
+//float ProjectionManager::transformPositionX (float value)
+//{
+//    return value*mult_factor_+world_center_x_;
+//}
+//float ProjectionManager::transformPositionY (float value)
+//{
+//    return value*mult_factor_+world_center_y_;
+//}
 float ProjectionManager::transformHeight (float value)
 {
     return value*height_scale_;///projection_plane_width_;
 }
-
-//void ProjectionManager::project(double latitude, double longitude, float &pos_x, float &pos_y)
-//{
-//    double x=0.;
-//    double y=0.;
-//    projectPoint(latitude, longitude, x, y);
-//
-//    pos_x = x*world_scale_/projection_plane_width_+world_center_x_;
-//    pos_y = -y*world_scale_/projection_plane_width_+world_center_y_;
-//}
-//
-//void ProjectionManager::projectZeroHeight(double latitude, double longitude, float &pos_x, float &pos_y, float &pos_z)
-//{
-//    double x=0.;
-//    double y=0.;
-//    projectPoint(latitude, longitude, x, y);
-//    pos_x = x*world_scale_/projection_plane_width_+world_center_x_;
-//    pos_y=0;
-//    pos_z = -y*world_scale_/projection_plane_width_+world_center_y_;
-//}
-//
-//std::pair<double, double> ProjectionManager::projectZeroHeight(double latitude, double longitude)
-//{
-//    std::pair<double, double> result;
-//
-//    double x=0.;
-//    double y=0.;
-//    projectPoint(latitude, longitude, x, y);
-//    result.first = x*world_scale_/projection_plane_width_+world_center_x_;
-//    //pos_y=0;
-//    result.second = -y*world_scale_/projection_plane_width_+world_center_y_;
-//
-//    return result;
-//}
 
 void ProjectionManager::geo2Cart (double latitude, double longitude, double &x_pos, double &y_pos)
 {
@@ -154,13 +116,18 @@ void ProjectionManager::geo2Cart (double latitude, double longitude, double &x_p
     assert (ret);
 
     x_pos *= mult_factor_;
-    y_pos *= mult_factor_;
+    y_pos *= -mult_factor_;
+
+//    x_pos += trans_x_factor_;
+//    y_pos += trans_y_factor_;
+
+//    y_pos *= -1;
 }
 
 void ProjectionManager::cart2geo (double x_pos, double y_pos, double &latitude, double &longitude)
 {
-    longitude = x_pos/mult_factor_;
-    latitude = y_pos/mult_factor_;
+    longitude = (x_pos)/mult_factor_; //-trans_x_factor_
+    latitude = (-y_pos)/mult_factor_; //-trans_y_factor_
 
     bool ret = cart2geo_->Transform(1, &longitude, &latitude);
     assert (ret);
