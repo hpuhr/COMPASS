@@ -245,7 +245,7 @@ bool CalculatePosition::executePlots()
     //iterate over buffer entries
     bool det_valid;
     char det;
-    float x, y;
+    double x, y;
     unsigned int col, sym, radar_num, cnt, n = input_->getSize();
     for( cnt=0; cnt<n; ++cnt )
     {
@@ -277,7 +277,7 @@ bool CalculatePosition::executePlots()
         else
         {
             //geographical projection
-            proj_->project( *(double*)iPtr( pos_v_key_ ), *(double*)iPtr( pos_u_key_ ), x, y );
+            proj_->geo2Cart( *(double*)iPtr( pos_v_key_ ), *(double*)iPtr( pos_u_key_ ), x, y );
             *(float*)oPtr( ogre_pos_x_key_ ) = x;
             *(float*)oPtr( ogre_pos_z_key_ ) = y;
         }
@@ -373,7 +373,7 @@ bool CalculatePosition::executeSysTracks()
 
     bool data_source_present = iExists( ds_key_ );
 
-    float x, y;
+    double x, y;
     unsigned int col, sym, source, cnt, n = input_->getSize();
     for( cnt=0; cnt<n; ++cnt )
     {
@@ -401,7 +401,7 @@ bool CalculatePosition::executeSysTracks()
         }
         else
         {
-            proj_->project( *(double*)iPtr( pos_v_key_ ), *(double*)iPtr( pos_u_key_ ), x, y );
+            proj_->geo2Cart( *(double*)iPtr( pos_v_key_ ), *(double*)iPtr( pos_u_key_ ), x, y );
             *(float *)oPtr( ogre_pos_x_key_ ) = x;
             *(float *)oPtr( ogre_pos_z_key_ ) = y;
         }
@@ -455,7 +455,7 @@ bool CalculatePosition::executeADSB()
       output_->setIndex( 0 );
     }
 
-    float x, y;
+    double x, y;
     //double rad2deg = 180.0 / M_PI;
     unsigned int col, sym, cnt, n = input_->getSize();
     for( cnt=0; cnt<n; ++cnt )
@@ -484,7 +484,7 @@ bool CalculatePosition::executeADSB()
         }
         else
         {
-            proj_->project( *(double*)iPtr( pos_v_key_ ), *(double*)iPtr( pos_u_key_ ), x, y );
+            proj_->geo2Cart( *(double*)iPtr( pos_v_key_ ), *(double*)iPtr( pos_u_key_ ), x, y );
             //proj_->project( *(double*)iPtr( pos_v_key_ ) * rad2deg, *(double*)iPtr( pos_u_key_ ) * rad2deg, x, y );
             *(float*)oPtr( ogre_pos_x_key_ ) = x;
             *(float*)oPtr( ogre_pos_z_key_ ) = y;
@@ -527,7 +527,7 @@ bool CalculatePosition::executeMLAT()
       output_->setIndex( 0 );
     }
 
-    float x, y;
+    double x, y;
     //double rad2deg = 180.0/M_PI;
     unsigned int col, sym, cnt, n = input_->getSize();
     for( cnt=0; cnt<n; ++cnt )
@@ -557,7 +557,7 @@ bool CalculatePosition::executeMLAT()
         else
         {
             //proj_->project( *(double*)iPtr( pos_v_key_ ) * rad2deg, *(double*)iPtr( pos_u_key_ ) * rad2deg, x, y );
-            proj_->project( *(double*)iPtr( pos_v_key_ ), *(double*)iPtr( pos_u_key_ ), x, y );
+            proj_->geo2Cart( *(double*)iPtr( pos_v_key_ ), *(double*)iPtr( pos_u_key_ ), x, y );
             *(float*)oPtr( ogre_pos_x_key_ ) = x;
             *(float*)oPtr( ogre_pos_z_key_ ) = y;
         }

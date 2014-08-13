@@ -25,6 +25,8 @@
 #ifndef PROJECTIONMANAGER_H_
 #define PROJECTIONMANAGER_H_
 
+#include <ogr_spatialref.h>
+
 #include "Configurable.h"
 #include "Singleton.h"
 
@@ -63,11 +65,16 @@ protected:
     /// World center point in y
     double world_center_y_;
 
+    double mult_factor_;
+
+    OGRSpatialReference geo_;
+    OGRSpatialReference cart_;
+
+    OGRCoordinateTransformation *geo2cart_;
+    OGRCoordinateTransformation *cart2geo_;
+
     /// @brief Constructor
     ProjectionManager();
-
-    /// @brief Projects geo-coordinate to cartesian coordinate in WGS-84
-    void projectPoint (double latitude, double longitude, double &x_pos, double &y_pos);
 
 public:
     /// @brief Desctructor
@@ -82,11 +89,15 @@ public:
     /// @brief Scales world position height
     float transformHeight (float value);
 
-    /// @brief Projects geo-coordinate to cartesian coordinate with scaling and translation
-    void project(double latitude, double longitude, float &pos_x, float &pos_y);
-    /// @brief Projects geo-coordinate to cartesian coordinate without hight
-    void projectZeroHeight(double latitude, double longitude, float &pos_x, float &pos_y, float &pos_z);
-    std::pair<double, double> projectZeroHeight(double latitude, double longitude);
+//    /// @brief Projects geo-coordinate to cartesian coordinate with scaling and translation
+//    void project(double latitude, double longitude, float &pos_x, float &pos_y);
+//    /// @brief Projects geo-coordinate to cartesian coordinate without hight
+//    void projectZeroHeight(double latitude, double longitude, float &pos_x, float &pos_y, float &pos_z);
+//    std::pair<double, double> projectZeroHeight(double latitude, double longitude);
+
+    /// @brief Projects geo-coordinate to cartesian coordinate in WGS-84
+    void geo2Cart (double latitude, double longitude, double &x_pos, double &y_pos);
+    void cart2geo (double x_pos, double y_pos, double &latitude, double &longitude);
 
     double getCenterLatitude () { return center_latitude_; }
     double getCenterLongitude () { return center_longitude_; }

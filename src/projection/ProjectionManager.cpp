@@ -29,15 +29,19 @@
 #include "Config.h"
 #include "ProjectionManager.h"
 
-static const double earth_a = 6378137.00;
-                   // Semi major axis of earth; meters
-static const double earth_b = 6356752.3142;
-                   // Semi minor axis of earth; meters
-static const double earth_e1sq = 0.0066943844;
-                   // Square of first excentricity of earth
+//static const double earth_a = 6378137.00;
+//                   // Semi major axis of earth; meters
+//static const double earth_b = 6356752.3142;
+//                   // Semi minor axis of earth; meters
+//static const double earth_e1sq = 0.0066943844;
+//                   // Square of first excentricity of earth
+
+//proj +proj=lcc +lat_0=47 +lat_1=46 +lat_2=49 +lon_0=13d20 +ellps=WGS84 | perl
+//circle_inter.pl |
+//proj +proj=lcc +lat_0=47 +lat_1=46 +lat_2=49 +lon_0=13d20 +ellps=WGS84 -I -f "%.6f"
 
 ProjectionManager::ProjectionManager()
-: Configurable ("ProjectionManager", "ProjectionManager0", 0)
+: Configurable ("ProjectionManager", "ProjectionManager0", 0), geo2cart_(0), cart2geo_(0)
 {
     logdbg  << "ProjectionManager: constructor";
 
@@ -52,176 +56,113 @@ ProjectionManager::ProjectionManager()
     registerParameter("world_center_x", &world_center_x_, 1000);
     registerParameter("world_center_y", &world_center_y_, 1000);
 
+    mult_factor_ = world_scale_/projection_plane_width_;
+
     degree_to_radian_ = 2.0*M_PI/360.0;
     radian_to_degree_ = 360.0/2.0*M_PI;
 
     loginf << "ProjectionManager: constructor: center lat " << center_latitude_ << " long " << center_longitude_
            << " alt " << center_altitude_;
+
+    geo_.SetWellKnownGeogCS("WGS84");
+    //cart_.SetWellKnownGeogCS( "EPSG:31258" );
+    cart_.importFromEPSG(31258);
+
+    geo2cart_ = OGRCreateCoordinateTransformation( &geo_, &cart_ );
+    assert (geo2cart_);
+    cart2geo_ = OGRCreateCoordinateTransformation( &cart_, &geo_ );
+    assert (cart2geo_);
+
+    double center_pos_x, center_pos_y;
+
+    geo2Cart(center_latitude_, center_longitude_, center_pos_x, center_pos_y);
+    loginf << "got x " << center_pos_x << " y " << center_pos_y;
+
+    geo2Cart(center_longitude_, center_latitude_, center_pos_x, center_pos_y);
+    loginf << "got reverse x " << center_pos_x << " y " << center_pos_y;
 }
 
 ProjectionManager::~ProjectionManager()
 {
+    assert (geo2cart_);
+    delete geo2cart_;
+    geo2cart_=0;
+
+    assert (cart2geo_);
+    delete cart2geo_;
+    cart2geo_=0;
 }
 
 double  ProjectionManager::getWorldSize (double size)
 {
-    return size*world_scale_/projection_plane_width_;
+    return size*mult_factor_;
 }
 
 float ProjectionManager::transformPositionX (float value)
 {
-    return value*world_scale_/projection_plane_width_+world_center_x_;
+    return value*mult_factor_+world_center_x_;
 }
 float ProjectionManager::transformPositionY (float value)
 {
-    return -value*world_scale_/projection_plane_width_+world_center_y_;
+    return -value*mult_factor_+world_center_y_;
 }
 float ProjectionManager::transformHeight (float value)
 {
     return value*height_scale_;///projection_plane_width_;
 }
 
-void ProjectionManager::project(double latitude, double longitude, float &pos_x, float &pos_y)
-{
-    double x=0.;
-    double y=0.;
-    projectPoint(latitude, longitude, x, y);
+//void ProjectionManager::project(double latitude, double longitude, float &pos_x, float &pos_y)
+//{
+//    double x=0.;
+//    double y=0.;
+//    projectPoint(latitude, longitude, x, y);
+//
+//    pos_x = x*world_scale_/projection_plane_width_+world_center_x_;
+//    pos_y = -y*world_scale_/projection_plane_width_+world_center_y_;
+//}
+//
+//void ProjectionManager::projectZeroHeight(double latitude, double longitude, float &pos_x, float &pos_y, float &pos_z)
+//{
+//    double x=0.;
+//    double y=0.;
+//    projectPoint(latitude, longitude, x, y);
+//    pos_x = x*world_scale_/projection_plane_width_+world_center_x_;
+//    pos_y=0;
+//    pos_z = -y*world_scale_/projection_plane_width_+world_center_y_;
+//}
+//
+//std::pair<double, double> ProjectionManager::projectZeroHeight(double latitude, double longitude)
+//{
+//    std::pair<double, double> result;
+//
+//    double x=0.;
+//    double y=0.;
+//    projectPoint(latitude, longitude, x, y);
+//    result.first = x*world_scale_/projection_plane_width_+world_center_x_;
+//    //pos_y=0;
+//    result.second = -y*world_scale_/projection_plane_width_+world_center_y_;
+//
+//    return result;
+//}
 
-    pos_x = x*world_scale_/projection_plane_width_+world_center_x_;
-    pos_y = -y*world_scale_/projection_plane_width_+world_center_y_;
+void ProjectionManager::geo2Cart (double latitude, double longitude, double &x_pos, double &y_pos)
+{
+    x_pos = longitude;
+    y_pos = latitude;
+
+    bool ret = geo2cart_->Transform(1, &x_pos, &y_pos);
+    assert (ret);
+
+    x_pos *= mult_factor_;
+    y_pos *= mult_factor_;
 }
 
-void ProjectionManager::projectZeroHeight(double latitude, double longitude, float &pos_x, float &pos_y, float &pos_z)
+void ProjectionManager::cart2geo (double x_pos, double y_pos, double &latitude, double &longitude)
 {
-    double x=0.;
-    double y=0.;
-    projectPoint(latitude, longitude, x, y);
-    pos_x = x*world_scale_/projection_plane_width_+world_center_x_;
-    pos_y=0;
-    pos_z = -y*world_scale_/projection_plane_width_+world_center_y_;
+    longitude = x_pos/mult_factor_;
+    latitude = y_pos/mult_factor_;
+
+    bool ret = cart2geo_->Transform(1, &longitude, &latitude);
+    assert (ret);
 }
 
-std::pair<double, double> ProjectionManager::projectZeroHeight(double latitude, double longitude)
-{
-    std::pair<double, double> result;
-
-    double x=0.;
-    double y=0.;
-    projectPoint(latitude, longitude, x, y);
-    result.first = x*world_scale_/projection_plane_width_+world_center_x_;
-    //pos_y=0;
-    result.second = -y*world_scale_/projection_plane_width_+world_center_y_;
-
-    return result;
-}
-
-void ProjectionManager::projectPoint (double latitude, double longitude, double &x_pos, double &y_pos)
-{
-    double a11, a21, a31;
-                  // Transformation coefficients
-    double c;        // Auxiliary
-    double cplat;    // Cosine of center latitude
-    double cprlong;  // Cosine of difference of longitudes
-    double cpsi;     // Cosine of geocentric latitude
-    double crlat;    // Cosine of intermediate latitude
-    double f1;       // Auxiliary
-    double f2;       // Auxiliary
-    double gn;       // "Grande Normale"; meters
-    double prlong;   // Difference of longitudes; degrees
-    double psi;      // Geocentric latitude of projection point; radians
-    double rlat;     // Intermediate latitude; radians
-    double rrad;     // Radial distance of projection point; meters
-    double splat;    // Sine of center latitude
-    double sprlong;  // Sine of difference of longitudes
-    double spsi;     // Sine of geocentric latitude
-    double srlat;    // Sine of intermediate latitude
-
-                  // Preset return value(s)
-//   if (xpos_ptr != NULL)
-//       *xpos_ptr = 0.0;
-//   if (ypos_ptr != NULL)
-//       *ypos_ptr = 0.0;
-
-                  // Check parameter(s)
-   //TODO include
-//  Assert (-90.0 <= center.latitude && center.latitude <= 90.0,
-//          "Invalid parameter");
-//  Assert (-180.0 <= center.longitude && center.longitude <= 180.0,
-//            "Invalid parameter");
-//  Assert (-90.0 <= latitude && latitude <= 90.0, "Invalid parameter");
-//  Assert (-180.0 <= longitude && longitude <= 180.0, "Invalid parameter");
-//  Assert (xpos_ptr != NULL, "Invalid parameter");
-//  Assert (ypos_ptr != NULL, "Invalid parameter");
-
-                  // Compute geocentric latitude of projection point
-   f1 = (1.0 - earth_e1sq) * std::sin (degree_to_radian_ * latitude);
-   f2 = std::cos (degree_to_radian_ * latitude);
-   psi = std::atan2 (f1, f2);
-   //cout<<"f1:"<<f1<<" f2:"<<f2<<" psi:"<<psi<<endl;
-                  // Is in radians, not in degrees
-
-                  // Sine and cosine of geocentric latitude
-   spsi = std::sin (psi);
-   cpsi = std::cos (psi);
-   //cout<<"spsi:"<<spsi<<" cpsi:"<<cpsi<<endl;
-                  // Compute distance from projection point to
-                  // the center of earth
-   f1 = 1.0 - earth_e1sq * cpsi * cpsi;
-   //cout<<"f1:"<<f1<<endl;
-      //Assume (f1 > 0.0, "Domain error");
-       if (f1 < 0.0) {
-         throw std::runtime_error("Domain error");
-       }
-   rrad = earth_b / std::sqrt (f1);
-   //cout<<"rrad:"<<rrad<<endl;
-                  // Sine and cosine of center latitude
-   f1 = degree_to_radian_ * center_latitude_;
-   splat = std::sin (f1);
-   cplat = std::cos (f1);
-   //cout<<"f1:"<<f1<<" splat:"<<splat<<" cplat:"<<cplat<<endl;
-
-                  // Compute "Grande Normale"
-   f1 = 1.0 - earth_e1sq * splat * splat;
-   //cout<<"f1:"<<f1<<endl;
-      //Assume (f1 > 0.0, "Domain error");
-       if (f1 < 0.0) {
-         throw std::runtime_error("Domain error");
-       }
-   gn = earth_a / std::sqrt (f1);
-
-                  // Compute some intermediate value
-   c = earth_e1sq * gn * splat;
-
-                  // Compute intermediate latitude
-   f1 = c + rrad * spsi;
-   f2 = rrad * cpsi;
-   rlat = std::atan2 (f1, f2);
-                  // Is in radians, not in degrees
-
-                  // Sine and cosine of intermediate latitude
-   srlat = std::sin (rlat);
-   crlat = std::cos (rlat);
-
-                  // Compute difference of longitudes
-   prlong = center_longitude_ - longitude;
-
-                  // Sine and cosine of difference of longitudes
-   sprlong = std::sin (degree_to_radian_ * prlong);
-   cprlong = std::cos (degree_to_radian_ * prlong);
-
-                  // Compute some coefficients of transformation matrix
-   a11 = crlat * cplat * cprlong + srlat * splat;
-   a21 = - crlat * sprlong;
-   a31 = srlat * cplat - crlat * splat * cprlong;
-
-                  // Stereographic projection of position onto
-                  // plane tangential to earth at reference point
-
-   f1 = 2.0 * gn / (1.0 + a11);
-
-   x_pos = a21 * f1;
-   y_pos = a31 * f1;
-
-//  done:          // We are done
-   return;
-}
