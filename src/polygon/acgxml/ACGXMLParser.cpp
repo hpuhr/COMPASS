@@ -12,6 +12,9 @@
 #include "String.h"
 #include "AirspaceSectorManager.h"
 #include "AirspaceSector.h"
+#include "ProjectionManager.h"
+
+#include <cmath>
 
 using namespace tinyxml2;
 using namespace Utils::String;
@@ -527,6 +530,11 @@ void ACGXMLParser::createSectors ()
     unsigned int ase_mid;
     std::string name;
 
+    ProjectionManager &proj_man = ProjectionManager::getInstance ();
+    double rad2deg = 360.0/(2.0*M_PI);
+    double deg2rad = 1.0/rad2deg;
+    //double pi_half = M_PI/2.0;
+
     for (it = abds_.begin(); it != abds_.end(); it++)
     {
         Abd &abd = it->second;
@@ -550,12 +558,140 @@ void ACGXMLParser::createSectors ()
         assert (AirspaceSectorManager::getInstance().hasSector(name));
         AirspaceSector *sector = AirspaceSectorManager::getInstance().getSector(name);
 
+        unsigned int cnt=0;
         std::vector <Avx>::iterator it2;
         for (it2 = abd.avxes_.begin(); it2 != abd.avxes_.end(); it2++)
         {
             Avx &avx = *it2;
 
-            sector->addPoint(avx.geo_lat_, avx.geo_long_);
+            if (avx.code_type_ == "GRC") //normal polygon point
+                sector->addPoint(avx.geo_lat_, avx.geo_long_);
+            else if (avx.code_type_ == "FNT") // border point
+            {
+                sector->addPoint(avx.geo_lat_, avx.geo_long_); //TODO shoot & cut
+            }
+            else if (avx.code_type_ == "CCA" || avx.code_type_ == "CWA") // circle
+            {
+                loginf << "ACGXMLParser: createSectors: starting circle in sector '" << name << "'";
+                assert (avx.has_arc_);
+                assert (avx.uom_radius_arc_ == "NM");
+
+                double center_lat = avx.geo_lat_arc_;
+                double center_long = avx.geo_long_arc_;
+
+                double rad_nm = avx.val_radius_arc_;
+                double rad_meter = rad_nm * 1852.0;
+
+                double start_lat = avx.geo_lat_;
+                double start_long = avx.geo_long_;
+                sector->addPoint(start_lat, start_long);
+
+                double end_lat;
+                double end_long;
+
+                if (cnt == abd.avxes_.size()-1)
+                {
+                    end_lat = abd.avxes_.at(0).geo_lat_;
+                    end_long  = abd.avxes_.at(0).geo_long_;
+                }
+                else
+                {
+                    end_lat = abd.avxes_.at(cnt+1).geo_lat_;
+                    end_long  = abd.avxes_.at(cnt+1).geo_long_;
+                }
+
+                //project stuff
+                double center_x, center_y;
+                proj_man.geo2Cart(center_lat, center_long, center_x, center_y, false);
+                double start_x, start_y;
+                proj_man.geo2Cart(start_lat, start_long, start_x, start_y, false);
+                double end_x, end_y;
+                proj_man.geo2Cart(end_lat, end_long, end_x, end_y, false);
+
+                loginf << "rad " << rad_meter <<" rad 1 " << sqrt (pow(center_x-start_x, 2)+pow(center_y-start_y, 2))
+                        << " rad 2" << sqrt (pow(center_x-end_x, 2)+pow(center_y-end_y, 2));
+                assert (sqrt (pow(center_x-start_x, 2)+pow(center_y-start_y, 2)) - rad_meter < 500.0); // should be exact to 10 m
+                assert (sqrt (pow(center_x-end_x, 2)+pow(center_y-end_y, 2)) - rad_meter < 500.0);
+
+//                double atan2(double y, double x);
+//                Compute arc tangent with two parameters
+//                Returns the principal value of the arc tangent of y/x, expressed in radians.
+//                To compute the value, the function takes into account the sign of both arguments in order to determine the quadrant.
+//                Return Value
+//                Principal arc tangent of y/x, in the interval [-pi,+pi] radians.
+
+                double start_azimuth = atan2 (start_y-center_y, start_x-center_x);
+                double end_azimuth = atan2 (end_y-center_y, end_x-center_x);
+
+                loginf << "ACGXMLParser: createSectors: start_azimuth " << start_azimuth << " end_azimuth "
+                        << end_azimuth << " type " << avx.code_type_;
+                double current;
+                double step;
+                double end;
+
+                double current_x, current_y;
+                double current_lat, current_long;
+
+                if (avx.code_type_ == "CCA")
+                {
+                    current = deg2rad* ceil(rad2deg*start_azimuth);
+                    step = 1.0 * deg2rad;
+                    end = deg2rad*floor (rad2deg*end_azimuth);
+
+                    if (end < current)
+                        end += 2*M_PI;
+                }
+                else
+                {
+                    current = deg2rad*floor (rad2deg*start_azimuth);
+                    step = -1.0 * deg2rad;
+                    end = deg2rad*ceil (rad2deg*end_azimuth);
+
+                    if (end > current)
+                        end -= 2*M_PI;
+                }
+                loginf << "ACGXMLParser: createSectors: current " << current << " step " << step << " end " << end;
+
+                unsigned int cnt2=0;
+                while (1)
+                {
+                    if (name == "LO71")
+                        loginf << "ACGXMLParser: createSectors: adding point, current " << current << " end " << end << " step " << step;
+
+                    current_x = center_x + rad_meter * cos (current);
+                    current_y = center_y + rad_meter * sin (current);
+
+                    proj_man.cart2geo(current_x, current_y, current_lat, current_long, false);
+
+                    sector->addPoint(current_lat, current_long);
+
+                    current += step;
+
+//                    if (current > M_PI)
+//                        current = current-(2*M_PI);
+//                    if (current < -M_PI)
+//                        current = current+(2*M_PI);
+
+                    if (avx.code_type_ == "CCA")
+                    {
+                        if (current > end)
+                            break;
+                    }
+                    else
+                    {
+                        if (current < end)
+                            break;
+                    }
+                    cnt2++;
+                    assert (cnt2 < 360);
+                }
+                loginf << "ACGXMLParser: createSectors: circle part with " << cnt2 << " points";
+            }
+            else
+                throw std::runtime_error ("ACGXMLParser: createSectors: unknown code type '" + avx.code_type_ +"'");
+
+
+            cnt++;
         }
 
         sector->setHasOwnVolume(true);
