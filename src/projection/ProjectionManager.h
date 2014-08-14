@@ -47,6 +47,9 @@ protected:
     /// System center longitude
     double center_longitude_;
 
+    double center_system_x_; //without transform
+    double center_system_y_; //without transform
+
     /// World scale plane width
     double projection_plane_width_;
     /// World scale constant
@@ -54,9 +57,6 @@ protected:
     /// World height scale factor
     double height_scale_;
     /// World center point in x
-    //double world_center_x_;
-    /// World center point in y
-    //double world_center_y_;
 
     double mult_factor_;
     double trans_x_factor_;
@@ -77,25 +77,19 @@ public:
     /// @brief Return world plane size
     double getWorldSize (double size);
 
-    /// @brief Scales/translates world position x
-//    float transformPositionX (float value);
-//    /// @brief Scales/translates world position y
-//    float transformPositionY (float value);
     /// @brief Scales world position height
     float transformHeight (float value);
 
-//    /// @brief Projects geo-coordinate to cartesian coordinate with scaling and translation
-//    void project(double latitude, double longitude, float &pos_x, float &pos_y);
-//    /// @brief Projects geo-coordinate to cartesian coordinate without hight
-//    void projectZeroHeight(double latitude, double longitude, float &pos_x, float &pos_y, float &pos_z);
-//    std::pair<double, double> projectZeroHeight(double latitude, double longitude);
-
-    /// @brief Projects geo-coordinate to cartesian coordinate in WGS-84
-    void geo2Cart (double latitude, double longitude, double &x_pos, double &y_pos);
-    void cart2geo (double x_pos, double y_pos, double &latitude, double &longitude);
+    /// @brief Projects geo-coordinate in WGS-84 to cartesian coordinate, transform flag to ogre coordinates, else meters
+    void geo2Cart (double latitude, double longitude, double &x_pos, double &y_pos, bool transform=true);
+    /// @brief Projects cartesian coordinate to geo-coordinate in WGS-84
+    void cart2geo (double x_pos, double y_pos, double &latitude, double &longitude, bool transform=true);
 
     double getCenterLatitude () { return center_latitude_; }
     double getCenterLongitude () { return center_longitude_; }
+
+    double getCenterSystemX () { return center_system_x_; } // without transform
+    double getCenterSystemY () { return center_system_y_; } // without transform
 
     void setCenterLatitude (double value) { center_latitude_ = value; }
     void setCenterLongitude (double value) { center_longitude_ = value; }

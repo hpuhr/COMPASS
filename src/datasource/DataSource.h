@@ -55,7 +55,8 @@ public:
 
     void finalize ();
 
-    std::pair <double, double> calculateWorldCoordinates (double azimuth, double slant_range, double altitude);
+    // azimuth degrees, range & altitude in meters
+    void calculateSystemCoordinates (double azimuth, double slant_range, double altitude, double &sys_x, double &sys_y);
 
 protected:
     bool finalized_;
@@ -69,19 +70,13 @@ protected:
     double longitude_; // degrees
     double altitude_;  // meter above msl
 
-    double a11_, a12_, a13_, a21_, a22_, a23_, a31_, a32_, a33_;
-    /* Transformation coefficients */
-    double b1_, b2_, b3_;
-    /* Translation vector */
-    double best_radius_;
-    /* Local "best" earth radius; metres */
-    double grande_normale_;
-    /* "Grande Normale"; metres */
+    double system_x_;
+    double system_y_;
 
-    double sys_x_, sys_y_, sys_z_;
+    double local_trans_x_;
+    double local_trans_y_;
 
-    double calculateElevation (double range, double height);
-
+    double deg2rad_;
 };
 
 #endif /* DATASOURCE_H_ */

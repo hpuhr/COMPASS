@@ -1074,7 +1074,6 @@ void Computation::generateSubConfigurable( std::string class_id, std::string ins
 
     if( class_id == "BufferFilter" )
     {
-        loginf << "adding filter";
         filter_ = new BufferFilter( class_id, instance_id, this );
     }
 }

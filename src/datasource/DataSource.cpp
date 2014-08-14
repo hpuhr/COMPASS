@@ -24,6 +24,7 @@
 
 #include "DataSource.h"
 #include "Logger.h"
+#include "ProjectionManager.h"
 #include <cmath>
 
 #include "String.h"
@@ -32,10 +33,9 @@ using namespace Utils::String;
 
 DataSource::DataSource()
 : finalized_(false), dbo_type_(DBO_UNDEFINED), id_(0), sac_(255), sic_(255), latitude_(360.0), longitude_(360), altitude_(1701),
- a11_(0), a12_(0), a13_(0), a21_(0), a22_(0), a23_(0), a31_(0), a32_(0), a33_(0), b1_(0), b2_(0), b3_(0),best_radius_(0),
- grande_normale_(0), sys_x_(0), sys_y_(0), sys_z_(0)
+  system_x_(0), system_y_(0), local_trans_x_(0), local_trans_y_(0)
 {
-
+    deg2rad_ = 2*M_PI/360.0;
 }
 
 DataSource::~DataSource()
@@ -47,259 +47,46 @@ void DataSource::finalize ()
 {
     assert (!finalized_);
 
-    double alt;    // WGS-84 altitude of reference point; metres
-    double f;      // Auxiliary
-    double gn;     // The so-called "Grande Normale"; metres
-    double lat;    // Geodetical latitude of reference point; radians
-    double lon;    // Geodetical longitude of reference point; radians
+    ProjectionManager::getInstance().geo2Cart(latitude_, longitude_, system_x_, system_y_, false);
+    double center_system_x = ProjectionManager::getInstance().getCenterSystemX();
+    double center_system_y = ProjectionManager::getInstance().getCenterSystemY();
 
-    // Extract geodetical coordinates of reference point
-    alt = 0.0;
-    lat = latitude_ * 0.0174532925; //47.5
-    lon = longitude_ * 0.0174532925; // 14
-
-    const double earth_a =   6378137.00;
-    // Semi major axis of earth; meters
-    //const double earth_b = 6356752.3142;
-    // Semi minor axis of earth; meters
-    const double earth_e1sq = 0.0066943844;
-
-    // Check geodetical latitude and longitude
-    assert (-M_PI/2 <= lat && lat <= M_PI/2);
-    assert (-M_PI <= lon && lon <= M_PI);
-
-    // Compute the so-called "Grande Normale"
-    f = 1.0 - earth_e1sq * ::sin (lat) * ::sin (lat);
-
-    assert (f > 0.0);
-
-    gn = earth_a / ::sqrt (f);
-
-    // Set the coefficients of the rotation matrix
-    a11_ = - ::sin (lon);
-    a12_ = - ::sin (lat) * ::cos (lon);
-    a13_ = ::cos (lat) * ::cos (lon);
-    a21_ = ::cos (lon);
-    a22_ = - ::sin (lat) * ::sin (lon);
-    a23_ = ::cos (lat) * ::sin (lon);
-    a31_ = 0.0;
-    a32_ = ::cos (lat);
-    a33_ = ::sin (lat);
-
-    // Set the elements of the translation vector
-    b1_ = (gn + alt) * ::cos (lat) * ::cos (lon);
-    b2_ = (gn + alt) * ::cos (lat) * ::sin (lon);
-    b3_ = ((1.0 - earth_e1sq) * gn + alt) * ::sin (lat);
-
-    // Compute the local "best" earth radius
-    best_radius_ = earth_a * (1.0 - 0.5 * earth_e1sq * ::cos (2.0 * lat));
-
-    // Store the so-called "Grande Normale"
-    grande_normale_ = gn;
-
-    // Remember WGS-84 height of reference point
-
-//    loginf << "DataSource: finalize: dbo " << DB_OBJECT_TYPE_STRINGS.at((DB_OBJECT_TYPE)dbo_type_) << " id " << id_ << " name " << name_
-//            << " short name "  << short_name_ << " sac " << (int)sac_ << " sic " << (int)sic_ << " lat " << latitude_
-//            << " long " << longitude_ << " alt " << altitude_;
+    local_trans_x_ = center_system_x-system_x_;
+    local_trans_y_ = center_system_y-system_y_;
 
     finalized_=true;
 }
 
-std::pair <double, double> DataSource::calculateWorldCoordinates (double azimuth, double slant_range, double altitude)
+// azimuth degrees, range & altitude in meters
+void DataSource::calculateSystemCoordinates (double azimuth, double slant_range, double altitude, double &sys_x, double &sys_y)
 {
     assert (finalized_);
 
-    double calc_altitude = calculateElevation (slant_range, altitude);
+    double range;
 
-    //loginf << "calc alt " << calc_altitude *57.3 ;
-
-    double azimuth_rad = azimuth * 0.01745329251;
-
-    //    t_Retc c_Geomap :: map_lpc_to_lcl
-    //       (t_Real range, t_Real azimuth, t_Real elevation, t_Cpos lcl_pos)
-    //   {
-    double lx;     // Local x coordinate; metres
-    double ly;     // Local y coordinate; metres
-    double lz;     // Local z coordinate; metres
-
-    // Check parameters
-    assert (slant_range > 0.0);
-    assert (0.0 <= azimuth_rad && azimuth_rad < 2*M_PI);
-    assert (-M_PI <= calc_altitude && calc_altitude <= M_PI);
-//    {
-//        logerr << "DataSource: calculateWorldCoordinates: got wrong altitude " << calc_altitude;
-//        return std::pair <double, double> (0,0);
-//    }
-
-    // Compute local coordinates
-    lx = slant_range * ::sin (azimuth_rad) * ::cos (calc_altitude);
-    ly = slant_range * ::cos (azimuth_rad) * ::cos (calc_altitude);
-    lz = slant_range * ::sin (calc_altitude);
-
-    //loginf << " lx " << lx << " ly " << ly << " lz " << lz;
-
-    //    t_Retc c_Geomap :: map_lcl_to_ecef // UGA 2
-    //       (t_Mapping_Info *info_ptr, t_Cpos lcl_pos, t_Cpos ecef_pos) // lcl local pos in radar coord, ecef result
-    //   {
-    double ex;     // ECEF x coordinate; metres
-    double ey;     // ECEF y coordinate; metres
-    double ez;     // ECEF z coordinate; metres
-    //    double lx;     // Local x coordinate; metres
-    //    double ly;     // Local y coordinate; metres
-    //    double lz;     // Local z coordinate; metres
-
-    // Extract the local coordinates
-    //    lx = lcl_pos[M_CPOS_X];
-    //    ly = lcl_pos[M_CPOS_Y];
-    //    lz = lcl_pos[M_CPOS_Z];
-    //
-    //    Assert (info_ptr->defined, "Mapping information not defined");
-
-    // Multiply with rotation matrix
-    ex = a11_ * lx + a12_ * ly + a13_ * lz;
-    ey = a21_ * lx + a22_ * ly + a23_ * lz;
-    ez = a31_ * lx + a32_ * ly + a33_ * lz;
-
-    // Add translation vector, results in ECEF coordinates
-    ex = ex + b1_;
-    ey = ey + b2_;
-    ez = ez + b3_;
-
-    //loginf << " ex " << ex << " ey " << ey << " ez " << ez;
-
-    //    t_Retc c_Geomap :: map_ecef_to_llh (t_Cpos ecef_pos, t_Geo_Pos *geo_ptr) // uga 3
-    //   {
-    //double alt;    // Geographical altitude; metres
-    double cos_phi;
-    // Auxiliary
-    //double ex, ey, ez;
-    // Auxiliaries
-    double f, f1, f2, f3;
-    // Auxiliaries
-    //double gn;     // So-called "grande normale"; metres
-    double lat;    // Geodetical latitude; radians
-    double lon;    // Geodetical longitude; radians
-    double phi;    // Auxiliary
-    double rho;    // Auxiliary
-
-    double sin_lat;
-    // Auxiliary
-    double sin_phi;
-    // Auxiliary
-
-    const double earth_a = 6378137.00;
-    // Semi major axis of earth; meters
-    const double earth_b = 6356752.3142;
-    // Semi minor axis of earth; meters
-    const double earth_e1sq = 0.0066943844;
-
-    // We are using Bowring's approximation
-
-    rho = ::sqrt (ex * ex + ey * ey);
-
-    //phi = utl_azimuth (ez * earth_a, rho * earth_b);
-
-    phi = atan (ez * earth_a / rho * earth_b);
-
-    sin_phi = ::sin (phi);
-    cos_phi = ::cos (phi);
-
-    f3 = earth_a / earth_b;
-    f3 = f3 * f3 * earth_e1sq;
-
-    f1 = ez + earth_b * f3 * sin_phi * sin_phi * sin_phi;
-    f2 = rho - earth_a * earth_e1sq * cos_phi * cos_phi * cos_phi;
-
-    //lat = utl_azimuth (f1, f2);
-
-    lat = atan (f1 / f2);
-
-    //lon = utl_azimuth (ey, ex);
-
-    lon = atan (ey / ex);
-
-    if (lat > M_PI/2)
+    if (slant_range <= altitude)
     {
-        lat -= 2*M_PI;
+        logerr << "DataSource: calculateSystemCoordinates: a " << azimuth << " sr " << slant_range << " alt " << altitude
+                << ", assuming range = slant range";
+        range = slant_range; // TODO pure act of desperation
     }
+    else
+        range = sqrt (slant_range*slant_range-altitude*altitude); // TODO: flatland
 
-    if (lon > M_PI)
+    azimuth *= deg2rad_;
+
+    sys_x = range * cos (azimuth);
+    sys_y = range * sin (azimuth);
+
+    sys_x += local_trans_x_;
+    sys_y += local_trans_y_;
+
+    if (sys_x != sys_x || sys_y != sys_y)
     {
-        lon -= 2*M_PI;
+        logerr << "DataSource: calculateSystemCoordinates: a " << azimuth << " sr " << slant_range << " alt " << altitude
+                << " range " << range << " sys_x " << sys_x << " sys_y " << sys_y;
+        assert (false);
     }
-
-    sin_lat = ::sin (lat);
-    f = 1.0 - earth_e1sq * sin_lat * sin_lat;
-    assert (f > 0.0);
-//    {
-//        logerr << "DataSource: calculateWorldCoordinates: f is " << f;
-//        return std::pair <double, double> (0,0);
-//    }
-    //gn = earth_a / ::sqrt (f);
-
-    //alt = rho / ::cos (lat) - gn;
-
-    //    geo_ptr->latitude = lat;
-    //    geo_ptr->longitude = lon;
-    //    geo_ptr->altitude = alt;
-
-    // Set return code
-    //         ret = RC_OKAY;
-
-
-    return std::pair<double, double> ((360.0 * lat / (2*M_PI))-0.0663, 360.0 * lon/ (2*M_PI));
-}
-
-//return angle above horizon
-double DataSource::calculateElevation (double range, double height)
-{
-    assert (finalized_);
-    double elv;    // Elevation of plot above radar plane; radians
-    double er;     // Local "best" earth radius; metres
-    double f;      // Auxiliary
-    double f1;     // Auxiliary
-    double f2;     // Auxiliary
-    double hp;     // Height of plot; metres above WGS-84 ellipsoid
-    double hs;     // Height of sensor; metres above WGS-84 ellipsoid
-
-    assert (range > 0.0);
-
-    // Set the "best" local earth radius
-    er = best_radius_;
-
-    // Set the plot (or whatever) height
-    hp = height;
-
-    // Set the reference height
-    hs = altitude_;
-
-    //loginf << " UGA best rad " << best_radius_ << " hp " << hp << " has " << hs << " range " << range;
-
-    // Compute auxiliaries
-    f1 = (2.0 * er + hp + hs) * (hp - hs) - range * range;
-    f2 = 2.0 * (er + hs) * range;
-
-    if (f2 <= 0.0)
-        throw std::runtime_error ("DataSource: calculateElevation: f2 <= 0, value "+doubleToString(f2));;
-
-//    {
-//        throw std::runtime_error ("DataSource: calculateElevation: f2 is zero");
-//    }
-
-    f = f1 / f2;
-
-    // Check against allowable range [-1.0, +1.0]
-    if (::fabs (f) > 1.0)
-    {
-        throw std::runtime_error ("DataSource: calculateElevation: |f| > 1, value "+doubleToString(f));
-    }
-
-    // Compute elevation
-    elv = ::asin (f);
-
-    // Store result value
-    return elv;
 }
 
 double DataSource::getAltitude() const
