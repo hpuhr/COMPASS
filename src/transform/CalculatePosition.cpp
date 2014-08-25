@@ -30,6 +30,11 @@
 #include "ATSDB.h"
 #include "ProjectionManager.h"
 
+//HACK
+#include "AirspaceSectorManager.h"
+#include "AirspaceSector.h"
+//\HACK
+
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -527,6 +532,12 @@ bool CalculatePosition::executeMLAT()
       output_->setIndex( 0 );
     }
 
+    //HACK
+    //bool filter;
+    //double height;
+    //AirspaceSector *sector = AirspaceSectorManager::getInstance().getSector("LowerHeightFilter");
+    //\HACK
+
     double x, y;
     //double rad2deg = 180.0/M_PI;
     unsigned int col, sym, cnt, n = input_->getSize();
@@ -564,11 +575,25 @@ bool CalculatePosition::executeMLAT()
 
         //y
         if( iIsNan( pos_h_key_ ) )
+        {
             *(float*)oPtr( ogre_pos_y_key_ ) = 0.0;
+
+            //HACK
+            //filter = true;
+            //\HACK
+
+        }
         else
         {
             *(float*)oPtr( ogre_pos_y_key_ ) = proj_->transformHeight( *(int*)iPtr( pos_h_key_ ) );
             //loginf << "UGA to height org " << *(int*)iPtr( pos_h_key_ ) << " transformed " << *(float*)oPtr( ogre_pos_y_key_ );
+
+            //HACK
+            //height =*(int*)iPtr( pos_h_key_ );
+            //loginf << "UGA to height org " << *(int*)iPtr( pos_h_key_ ) << " double " << height;
+            //bool isPointInside (double latitude, double longitude, double height_ft, bool debug);
+            //filter = !sector->isPointInside(*(double*)iPtr( pos_v_key_ ), *(double*)iPtr( pos_u_key_ ), *(int*)iPtr( pos_h_key_ ), false);
+            //\HACK
         }
 
         //color & symbol
@@ -579,7 +604,12 @@ bool CalculatePosition::executeMLAT()
             sym = 4;
         col = 20;
 
-        *(unsigned int*)oPtr( ogre_color_key_  ) = col;
+        //HACK
+        //if (!filter)
+            *(unsigned int*)oPtr( ogre_color_key_  ) = col; // not HACK
+        //else
+        //    *(unsigned int*)oPtr( ogre_color_key_  ) = 0;
+        //\HACK
         *(unsigned int*)oPtr( ogre_symbol_key_ ) = sym;
     }
 

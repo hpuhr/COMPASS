@@ -27,6 +27,7 @@
 
 #include <vector>
 #include <string>
+#include <cassert>
 
 enum POLYGON_SELECTION {POLYGON_FIR_UPPER=0, POLYGON_FIR_EAST, POLYGON_FIR_WEST, POLYGON_FIR_TMA_VIENNA, POLYGON_FIR_TMA_GRAZ,
     POLYGON_FIR_TMA_LINZ, POLYGON_FIR_TMA_SALZBURG, POLYGON_FIR_TMA_KLAGENFURT, POLYGON_FIR_TMA_INNSBRUCK};
@@ -49,11 +50,11 @@ public:
 
     const std::vector< std::pair<double, double> > &getPoints () { return points_; }
 
-    double getLatitudeMinRounded ();
-    double getLatitudeMaxRounded ();
+    double getLatitudeMin () { assert (finalized_); return latitude_min_; }
+    double getLatitudeMax () { assert (finalized_); return latitude_max_; }
 
-    double getLongitudeMinRounded ();
-    double getLongitudeMaxRounded ();
+    double getLongitudeMin () { assert (finalized_); return longitude_min_; }
+    double getLongitudeMax () { assert (finalized_); return longitude_max_; }
 
 protected:
     bool finalized_;

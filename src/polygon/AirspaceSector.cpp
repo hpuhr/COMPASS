@@ -33,7 +33,8 @@
 using namespace Utils::String;
 
 AirspaceSector::AirspaceSector(std::string class_id, std::string instance_id, Configurable *parent)
- : Configurable(class_id, instance_id, parent)
+ : Configurable(class_id, instance_id, parent), latitude_min_(0), latitude_max_(0), longitude_min_(0), longitude_max_(0),
+   altitude_min_(0), altitude_max_(0)
 {
     registerParameter("name", &name_, "");
     registerParameter("own_volume", &has_own_volume_, false);
@@ -46,19 +47,24 @@ AirspaceSector::AirspaceSector(std::string class_id, std::string instance_id, Co
         logerr << "AirspaceSector: constructor: name is null, setting to instance id '" << instance_id << "'";
         name_=instance_id;
     }
-    misnomer_.setAltitudeMinMax(own_height_min_, own_height_max_);
+
+    if (has_own_volume_)
+        misnomer_.setAltitudeMinMax(own_height_min_, own_height_max_);
 
     createSubConfigurables ();
 
-    update();
+    if (has_own_volume_)
+        update();
+    else
+        updateMinMax();
 }
 
 AirspaceSector::~AirspaceSector()
 {
-    std::vector<AirspaceSector *>::iterator it;
-    for (it = sub_sectors_.begin(); it != sub_sectors_.end(); it++)
-        delete *it;
-    sub_sectors_.clear();
+    std::map<std::string, AirspaceSector *>::iterator it;
+    for (it = sectors_.begin(); it != sectors_.end(); it++)
+        delete it->second;
+    sectors_.clear();
 
     clearPoints ();
 }
@@ -74,11 +80,17 @@ void AirspaceSector::generateSubConfigurable (std::string class_id, std::string 
     {
         AirspaceSector *sector = new AirspaceSector (class_id, instance_id, this);
         //assert (sub_sectors_.find (sector->getName()) == sub_sectors_.end());
-        sub_sectors_.push_back(sector);
+        //sub_sectors_.push_back(sector);
+        assert (sectors_.find(sector->getName()) == sectors_.end());
+        sectors_[sector->getName()] = sector;
         //loginf << "AirspaceSector: generateSubConfigurable: name " << name_ << " has new sub sector " << sector->getName();
+
+        updateMinMax();
     }
     else if (class_id.compare ("GeographicPoint") == 0)
     {
+        assert (has_own_volume_);
+
         GeographicPoint *point = new GeographicPoint (class_id, instance_id, this);
         assert (own_points_config_.find(point->getIndex()) == own_points_config_.end());
         own_points_config_[point->getIndex()] = point;
@@ -92,6 +104,7 @@ void AirspaceSector::generateSubConfigurable (std::string class_id, std::string 
 
 void AirspaceSector::update ()
 {
+    assert (has_own_volume_);
     misnomer_.clearPoints();
     own_points_.clear();
 
@@ -110,7 +123,74 @@ void AirspaceSector::update ()
         misnomer_.addPoint(it->second->getLatitude(), it->second->getLongitude());
     }
 
+    misnomer_.finalize(name_);
+    updateMinMax ();
 }
+
+void AirspaceSector::updateMinMax ()
+{
+    if (has_own_volume_)
+    {
+        assert (sectors_.size() == 0);
+        latitude_min_ = misnomer_.getLatitudeMin();
+        latitude_max_ = misnomer_.getLatitudeMax();
+        longitude_min_ = misnomer_.getLongitudeMin();
+        longitude_max_ = misnomer_.getLongitudeMax();
+    }
+    else
+    {
+        assert (sectors_.size() != 0);
+
+        std::map <std::string, AirspaceSector*>::iterator it;
+
+        for (it = sectors_.begin(); it != sectors_.end(); it++)
+        {
+            if (it == sectors_.begin())
+            {
+                latitude_min_ = it->second->getLatitudeMin();
+                latitude_max_ = it->second->getLatitudeMax();
+                longitude_min_ = it->second->getLongitudeMin();
+                longitude_max_ = it->second->getLongitudeMax();
+                altitude_min_ = it->second->getAltitudeMin();
+                altitude_max_ = it->second->getAltitudeMax();
+            }
+            else
+            {
+                if (it->second->getLatitudeMin() < latitude_min_)
+                    latitude_min_ = it->second->getLatitudeMin();
+                if (it->second->getLatitudeMax() > latitude_max_)
+                    latitude_max_ = it->second->getLatitudeMax();
+                if (it->second->getLongitudeMin() < longitude_min_)
+                    longitude_min_ = it->second->getLongitudeMin();
+                if (it->second->getLongitudeMax() > longitude_max_)
+                    longitude_max_ = it->second->getLongitudeMax();
+                if (it->second->getAltitudeMin() < altitude_min_)
+                    altitude_min_=it->second->getAltitudeMin();
+                if (it->second->getAltitudeMax() > altitude_max_)
+                    altitude_max_=it->second->getAltitudeMax();
+            }
+        }
+    }
+}
+
+double AirspaceSector::getLatitudeMinRounded ()
+{
+    return floor(4*latitude_min_)/4;
+}
+double AirspaceSector::getLatitudeMaxRounded ()
+{
+    return ceil(4*latitude_max_)/4;
+}
+
+double AirspaceSector::getLongitudeMinRounded ()
+{
+    return floor(4*longitude_min_)/4;
+}
+double AirspaceSector::getLongitudeMaxRounded ()
+{
+    return ceil(4*longitude_max_)/4;
+}
+
 
 void AirspaceSector::addPoint (double latitude, double longitude)
 {
@@ -190,18 +270,33 @@ void AirspaceSector::clearPoints ()
     misnomer_.clearPoints();
 }
 
+bool AirspaceSector::hasSubSector (std::string name)
+{
+    return sectors_.find(name) != sectors_.end();
+}
+
 AirspaceSector *AirspaceSector::addNewSubSector (std::string name)
 {
     Configuration &configuration = addNewSubConfiguration ("AirspaceSector");
     configuration.addParameterString ("name", name);
     generateSubConfigurable(configuration.getClassId(), configuration.getInstanceId());
-    return sub_sectors_.back();
+
+    assert (hasSubSector(name));
+    return sectors_.at(name);
 }
 
 void AirspaceSector::removeSubSector (AirspaceSector *sector)
 {
-    assert (find (sub_sectors_.begin(), sub_sectors_.end(), sector) != sub_sectors_.end());
-    sub_sectors_.erase(find (sub_sectors_.begin(), sub_sectors_.end(), sector));
+    assert (sector);
+    assert (sectors_.find(sector->getName()) != sectors_.end());
+    sectors_.erase (sectors_.find(sector->getName()));
+}
+
+void AirspaceSector::deleteSubSector (std::string name)
+{
+    assert (hasSubSector(name));
+    delete sectors_.at(name);
+    sectors_.erase (name);
 }
 
 void AirspaceSector::addAllVolumeSectors (std::vector<AirspaceSector *>& sectors)
@@ -212,9 +307,9 @@ void AirspaceSector::addAllVolumeSectors (std::vector<AirspaceSector *>& sectors
         sectors.push_back(this);
     }
 
-    std::vector<AirspaceSector *>::iterator it;
-    for (it = sub_sectors_.begin(); it != sub_sectors_.end(); it++)
-        (*it)->addAllVolumeSectors(sectors);
+    std::map<std::string, AirspaceSector *>::iterator it;
+    for (it = sectors_.begin(); it != sectors_.end(); it++)
+        it->second->addAllVolumeSectors(sectors);
 }
 
 std::vector <Vector2>& AirspaceSector::getOwnPoints ()
@@ -226,42 +321,108 @@ std::vector <Vector2>& AirspaceSector::getOwnPoints ()
 
 void AirspaceSector::setHeightMin (double value)
 {
+    assert (has_own_volume_);
     own_height_min_=value;
     misnomer_.setAltitudeMinMax(own_height_min_, own_height_max_);
 }
 
 void AirspaceSector::setHeightMax (double value)
 {
+    assert (has_own_volume_);
     own_height_max_=value;
     misnomer_.setAltitudeMinMax(own_height_min_, own_height_max_);
 }
 
 bool AirspaceSector::isPointInside (double latitude, double longitude, double height_ft, bool debug)
 {
-    if (!misnomer_.isFinalized())
-        misnomer_.finalize(name_);
+    //loginf << "AirspaceSector: isPointInside: height_ft " << height_ft;
+    if (has_own_volume_)
+    {
+        assert (misnomer_.isFinalized());
+        return misnomer_.inside(latitude, longitude, height_ft, debug);
+    }
+    else
+    {
+        assert (sectors_.size() != 0);
 
-    return misnomer_.inside(latitude, longitude, height_ft, debug);
+//        if (latitude < latitude_min_ || latitude > latitude_max_)
+//            return false;
+//        if (longitude < longitude_min_ || longitude > longitude_max_)
+//            return false;
+//        if (height_ft < altitude_min_ || height_ft > altitude_max_)
+//            return false;
+
+        std::map <std::string, AirspaceSector*>::iterator it;
+        for (it = sectors_.begin(); it != sectors_.end(); it++)
+        {
+            if (it->second->isPointInside(latitude, longitude, height_ft, debug))
+                return true;
+            else
+                continue;
+        }
+
+        return false;
+    }
 }
 
 bool AirspaceSector::isPointInside (double latitude, double longitude, bool debug)
 {
-    if (!misnomer_.isFinalized())
-        misnomer_.finalize(name_);
+    if (has_own_volume_)
+    {
+        assert (misnomer_.isFinalized());
+        return misnomer_.inside(latitude, longitude, debug);
+    }
+    else
+    {
+        assert (sectors_.size() != 0);
 
-    return misnomer_.inside(latitude, longitude, debug);
+        if (latitude < latitude_min_ || latitude > latitude_max_)
+            return false;
+        if (longitude < longitude_min_ || longitude > longitude_max_)
+            return false;
+
+        std::map <std::string, AirspaceSector*>::iterator it;
+        for (it = sectors_.begin(); it != sectors_.end(); it++)
+        {
+            if (it->second->isPointInside(latitude, longitude, debug))
+                return true;
+            else
+                continue;
+        }
+
+        return false;
+    }
 }
 
 void AirspaceSector::setName (std::string name)
 {
     name_ = name;
 
-    AirspaceSectorManager::getInstance().rebuildSectorNames();
+    AirspaceSector *parent = dynamic_cast <AirspaceSector*> (parent_);
+
+    if (parent)
+        parent->rebuildSectorNames();
+    else
+        AirspaceSectorManager::getInstance().rebuildSectorNames();
+}
+
+void AirspaceSector::rebuildSectorNames ()
+{
+    std::map <std::string, AirspaceSector*> old_sectors = sectors_;
+    sectors_.clear();
+
+    std::map <std::string, AirspaceSector*>::iterator it;
+
+    for (it = old_sectors.begin(); it != old_sectors.end(); it++)
+    {
+        assert (sectors_.find(it->second->getName()) == sectors_.end());
+        sectors_[it->second->getName()] = it->second;
+    }
 }
 
 std::vector <Vector2> AirspaceSector::getPointsBetween (double p1_lat, double p1_long, double p2_lat, double p2_long)
 {
-    loginf << "AirspaceSector: getPointsBetween: name " << name_;
+    logdbg << "AirspaceSector: getPointsBetween: name " << name_;
     Vector2 start_point;
     start_point.x_=p1_lat;
     start_point.y_=p1_long;
@@ -276,7 +437,7 @@ std::vector <Vector2> AirspaceSector::getPointsBetween (double p1_lat, double p1
     double tmp_distance;
     Vector2 tmp;
 
-    loginf << "AirspaceSector::getPointsBetween: searching for start point";
+    logdbg << "AirspaceSector::getPointsBetween: searching for start point";
 
     int cnt=0;
     int size = own_points_.size();
@@ -304,7 +465,7 @@ std::vector <Vector2> AirspaceSector::getPointsBetween (double p1_lat, double p1
     int stop_cnt;
     double stop_distance;
 
-    loginf << "AirspaceSector::getPointsBetween: searching for stop point";
+    logdbg << "AirspaceSector::getPointsBetween: searching for stop point";
     cnt=0;
 
     for (cnt=0; cnt < size; cnt++)
@@ -325,7 +486,7 @@ std::vector <Vector2> AirspaceSector::getPointsBetween (double p1_lat, double p1
             }
         }
     }
-    loginf << "AirspaceSector::getPointsBetween: assembling result, start cnt " << start_cnt << " stop cnt " << stop_cnt << " size " << size;
+    logdbg << "AirspaceSector::getPointsBetween: assembling result, start cnt " << start_cnt << " stop cnt " << stop_cnt << " size " << size;
     std::vector <Vector2> result;
 
     int distance_pos = stop_cnt-start_cnt;
@@ -342,11 +503,11 @@ std::vector <Vector2> AirspaceSector::getPointsBetween (double p1_lat, double p1
 
     if (distance_pos <= distance_neg)
     {
-        loginf << "AirspaceSector::getPointsBetween: pos " << distance_pos;
+        logdbg << "AirspaceSector::getPointsBetween: pos " << distance_pos;
 
         while (cnt != stop_cnt)
         {
-            loginf << "AirspaceSector::getPointsBetween: pos cnt " << cnt << " " << own_points_.at(cnt).x_ << ", " << own_points_.at(cnt).y_;
+            logdbg << "AirspaceSector::getPointsBetween: pos cnt " << cnt << " " << own_points_.at(cnt).x_ << ", " << own_points_.at(cnt).y_;
             result.push_back(own_points_.at(cnt));
 
             cnt++;
@@ -357,11 +518,11 @@ std::vector <Vector2> AirspaceSector::getPointsBetween (double p1_lat, double p1
     }
     else
     {
-        loginf << "AirspaceSector::getPointsBetween: neg " << distance_neg;
+        logdbg << "AirspaceSector::getPointsBetween: neg " << distance_neg;
 
         while (cnt != stop_cnt)
         {
-            loginf << "AirspaceSector::getPointsBetween: neg cnt " << cnt << " " << own_points_.at(cnt).x_ << ", " << own_points_.at(cnt).y_;
+            logdbg << "AirspaceSector::getPointsBetween: neg cnt " << cnt << " " << own_points_.at(cnt).x_ << ", " << own_points_.at(cnt).y_;
             result.push_back(own_points_.at(cnt));
 
             cnt--;
@@ -371,7 +532,7 @@ std::vector <Vector2> AirspaceSector::getPointsBetween (double p1_lat, double p1
         }
     }
 
-    loginf << "AirspaceSector::getPointsBetween: done with " << result.size() << " points";
+    logdbg << "AirspaceSector::getPointsBetween: done with " << result.size() << " points";
 
     return result;
 }

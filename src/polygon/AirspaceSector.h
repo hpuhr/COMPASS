@@ -46,9 +46,9 @@ public:
     bool hasOwnVolume () { return has_own_volume_; }
     void setHasOwnVolume (bool value) { has_own_volume_ = value; }
 
-    double getHeightMin () { return own_height_min_; } // in feet
+    double getHeightMin () { assert (has_own_volume_); return own_height_min_; } // in feet
     void setHeightMin (double value);
-    double getHeightMax () { return own_height_max_; }
+    double getHeightMax () { assert (has_own_volume_); return own_height_max_; }
     void setHeightMax (double value);
 
     void addPoint (double latitude, double longitude);
@@ -56,12 +56,14 @@ public:
     void addPoints (std::string list);
     void clearPoints ();
 
-    std::vector<AirspaceSector *> &getSubSectors () { return sub_sectors_; }
+    const std::map<std::string, AirspaceSector *> &getSubSectors () { return sectors_; }
     void addAllVolumeSectors (std::vector<AirspaceSector *>& sectors); //adds itself as well
     std::vector <Vector2>& getOwnPoints ();
 
+    bool hasSubSector (std::string name);
     AirspaceSector *addNewSubSector (std::string name);
     void removeSubSector (AirspaceSector *sector);
+    void deleteSubSector (std::string name);
 
     bool isPointInside (double latitude, double longitude, bool debug);
     bool isPointInside (double latitude, double longitude, double height_ft, bool debug);
@@ -69,15 +71,26 @@ public:
     bool getUsedForChecking () { return used_for_checking_; }
     void setUsedForChecking (bool value) { used_for_checking_=value; }
 
-    const std::vector <std::pair<double, double> > &getPoints () { return misnomer_.getPoints(); }
+    const std::vector <std::pair<double, double> > &getPoints () { assert (sectors_.size() == 0); return misnomer_.getPoints(); }
 
-    double getLatitudeMinRounded () { return misnomer_.getLatitudeMinRounded(); }
-    double getLatitudeMaxRounded () { return misnomer_.getLatitudeMaxRounded(); }
+    double getLatitudeMin () { return latitude_min_; }
+    double getLatitudeMax () { return latitude_max_; }
 
-    double getLongitudeMinRounded () { return misnomer_.getLongitudeMinRounded(); }
-    double getLongitudeMaxRounded () { return misnomer_.getLongitudeMaxRounded(); }
+    double getLongitudeMin () { return longitude_min_; }
+    double getLongitudeMax () { return longitude_max_; }
+
+    double getAltitudeMin () { return altitude_min_; }
+    double getAltitudeMax () { return altitude_max_; }
+
+    double getLatitudeMinRounded ();
+    double getLatitudeMaxRounded ();
+
+    double getLongitudeMinRounded ();
+    double getLongitudeMaxRounded ();
 
     std::vector <Vector2> getPointsBetween (double p1_lat, double p1_long, double p2_lat, double p2_long);
+
+    void rebuildSectorNames ();
 
 protected:
     std::string name_;
@@ -90,11 +103,21 @@ protected:
 
     bool used_for_checking_;
 
+    double latitude_min_;
+    double latitude_max_;
+
+    double longitude_min_;
+    double longitude_max_;
+
+    double altitude_min_;
+    double altitude_max_;
+
     Polygon4DDI misnomer_;
 
-    std::vector<AirspaceSector *> sub_sectors_;
+    std::map <std::string, AirspaceSector*> sectors_;
 
     void update ();
+    void updateMinMax ();
 
     virtual void checkSubConfigurables ();
     //double distanceFromLineSegmentToPoint( const Vector2 v, const Vector2 w, const Vector2 p, Vector2 * const q);

@@ -94,12 +94,12 @@ void AirspaceSectorTreeWidget::buildRecursive( AirspaceSector* parent_sector, QT
 
     }
 
-    std::vector<AirspaceSector *> &subsectors = parent_sector->getSubSectors();
-    std::vector<AirspaceSector *>::iterator it;
+    const std::map<std::string, AirspaceSector *> &subsectors = parent_sector->getSubSectors();
+    std::map<std::string, AirspaceSector *>::const_iterator it;
 
     for( it= subsectors.begin(); it != subsectors.end(); ++it )
     {
-        AirspaceSector* sector = *it;
+        AirspaceSector* sector = it->second;
 
         QTreeWidgetItem* item = new QTreeWidgetItem;
         //item->setChildIndicatorPolicy(QTreeWidgetItem::DontShowIndicatorWhenChildless);

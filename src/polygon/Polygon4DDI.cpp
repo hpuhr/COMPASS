@@ -277,28 +277,4 @@ void Polygon4DDI::clearPoints ()
 }
 
 
-double Polygon4DDI::getLatitudeMinRounded ()
-{
-    assert (finalized_);
-    //loginf << "Polygon4DDI::getLatitudeMinRounded: lat min " << latitude_min_ << " returning " << floor(2*latitude_min_)/2;
-    return floor(4*latitude_min_)/4;
-}
-double Polygon4DDI::getLatitudeMaxRounded ()
-{
-    assert (finalized_);
-    //loginf << "Polygon4DDI::getLatitudeMaxRounded: lat max " << latitude_max_ << " returning " << ceil(2*latitude_max_)/2;
-    return ceil(4*latitude_max_)/4;
-}
 
-double Polygon4DDI::getLongitudeMinRounded ()
-{
-    assert (finalized_);
-    //loginf << "Polygon4DDI::getLongitudeMinRounded: lon min " << longitude_min_ << " returning " << floor(2*longitude_min_)/2;
-    return floor(4*longitude_min_)/4;
-}
-double Polygon4DDI::getLongitudeMaxRounded ()
-{
-    assert (finalized_);
-    //loginf << "Polygon4DDI::getLongitudeMaxRounded: lon max " << longitude_max_ << " returning " << ceil(2*longitude_max_)/2;
-    return ceil(4*longitude_max_)/4;
-}

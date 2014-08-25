@@ -33,6 +33,7 @@ ACGXMLParser::~ACGXMLParser()
 void ACGXMLParser::parse (std::string filename, AirspaceSector *base_sector)
 {
     logdbg  << "ACGXMLParser: parse: opening '" << filename << "'";
+
     XMLDocument *config_file_doc = new XMLDocument ();
 
     if (config_file_doc->LoadFile(filename.c_str()) == 0)
@@ -537,6 +538,19 @@ void ACGXMLParser::createSectors (AirspaceSector *base_sector)
     double deg2rad = 1.0/rad2deg;
     //double pi_half = M_PI/2.0;
 
+    assert (abds_.size() != 0);
+
+    if (AirspaceSectorManager::getInstance().hasSector("ACGXML"))
+    {
+        logwrn << "ACGXMLParser: createSectors: sector '" << "ACGXML" << "' already exists, deleting";
+        AirspaceSectorManager::getInstance().deleteSectorIfPossible("ACGXML");
+        assert (!AirspaceSectorManager::getInstance().hasSector("ACGXML"));
+    }
+
+    AirspaceSectorManager::getInstance().addNewSector("ACGXML");
+    assert (AirspaceSectorManager::getInstance().hasSector("ACGXML"));
+    AirspaceSector *sector_container = AirspaceSectorManager::getInstance().getSector("ACGXML");
+
     for (it = abds_.begin(); it != abds_.end(); it++)
     {
         Abd &abd = it->second;
@@ -549,16 +563,15 @@ void ACGXMLParser::createSectors (AirspaceSector *base_sector)
         assert (ases_.find(ase_mid) != ases_.end());
         Ase &ase = ases_.at(ase_mid);
 
-        if (AirspaceSectorManager::getInstance().hasSector(name))
+        if (sector_container->hasSubSector(name))
         {
             logwrn << "ACGXMLParser: createSectors: sector '" << name << "' already exists, deleting";
-            AirspaceSectorManager::getInstance().deleteSectorIfPossible(name);
-            assert (!AirspaceSectorManager::getInstance().hasSector(name));
+            sector_container->deleteSubSector(name);
+            assert (!sector_container->hasSubSector(name));
         }
 
-        AirspaceSectorManager::getInstance().addNewSector(name);
-        assert (AirspaceSectorManager::getInstance().hasSector(name));
-        AirspaceSector *sector = AirspaceSectorManager::getInstance().getSector(name);
+        AirspaceSector *sector = sector_container->addNewSubSector(name);
+        assert (sector);
 
         unsigned int size = abd.avxes_.size();
         for (unsigned int cnt=0; cnt < size; cnt++)
@@ -704,9 +717,9 @@ void ACGXMLParser::createSectors (AirspaceSector *base_sector)
 
         sector->setHasOwnVolume(true);
         if (ase.has_minimum_)
-            sector->setHeightMin(getHeight(ase.val_dist_ver_minimum_, ase.uom_dist_ver_minimum_));
+            sector->setHeightMin(getHeight(ase.val_dist_ver_minimum_, ase.uom_dist_ver_minimum_)-500.0); // 500 ft below radar coverage
         else
-            sector->setHeightMin(getHeight(ase.val_dist_ver_lower_, ase.uom_dist_ver_lower_));
+            sector->setHeightMin(getHeight(ase.val_dist_ver_lower_, ase.uom_dist_ver_lower_)-500.0);
         sector->setHeightMax(getHeight(ase.val_dist_ver_upper_, ase.uom_dist_ver_upper_));
     }
 }
