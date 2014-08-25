@@ -18,13 +18,15 @@ namespace ACGXML
     class Ase;
 }
 
+class AirspaceSector;
+
 class ACGXMLParser : public AirspaceSectorParser
 {
 public:
     ACGXMLParser();
     virtual ~ACGXMLParser();
 
-    virtual void parse (std::string filename);
+    void parse (std::string filename, AirspaceSector *base_sector);
 
 protected:
     std::map <unsigned int, ACGXML::Abd> abds_;
@@ -39,7 +41,7 @@ protected:
     void parseAse (tinyxml2::XMLElement *ase_elem);
 
     void checkConistency ();
-    void createSectors ();
+    void createSectors (AirspaceSector *base_sector);
 
     double getHeight (double value, std::string dist);
 };

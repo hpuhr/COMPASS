@@ -95,11 +95,18 @@ void AirspaceSector::update ()
     misnomer_.clearPoints();
     own_points_.clear();
 
+    Vector2 tmp;
+
     std::map <unsigned int, GeographicPoint *>::iterator it;
 
     for (it = own_points_config_.begin(); it != own_points_config_.end(); it++)
     {
-        own_points_.push_back (std::pair<double, double> (it->second->getLatitude(), it->second->getLongitude()));
+        //own_points_.push_back (std::pair<double, double> (it->second->getLatitude(), it->second->getLongitude()));
+
+        tmp.x_ = it->second->getLatitude();
+        tmp.y_ = it->second->getLongitude();
+
+        own_points_.push_back (tmp);
         misnomer_.addPoint(it->second->getLatitude(), it->second->getLongitude());
     }
 
@@ -114,6 +121,23 @@ void AirspaceSector::addPoint (double latitude, double longitude)
     configuration.addParameterUnsignedInt ("index", own_points_config_.size());
     generateSubConfigurable(configuration.getClassId(), configuration.getInstanceId());
 
+    update();
+}
+
+void AirspaceSector::addPoints (std::vector <Vector2> points)
+{
+    has_own_volume_=true;
+
+    std::vector <Vector2>::iterator it;
+
+    for (it = points.begin(); it != points.end(); it++)
+    {
+        Configuration &configuration = addNewSubConfiguration ("GeographicPoint");
+        configuration.addParameterDouble ("latitude", it->x_);
+        configuration.addParameterDouble ("longitude", it->y_);
+        configuration.addParameterUnsignedInt ("index", own_points_config_.size());
+        generateSubConfigurable(configuration.getClassId(), configuration.getInstanceId());
+    }
     update();
 }
 
@@ -193,18 +217,9 @@ void AirspaceSector::addAllVolumeSectors (std::vector<AirspaceSector *>& sectors
         (*it)->addAllVolumeSectors(sectors);
 }
 
-std::vector < std::pair<double, double> >& AirspaceSector::getOwnPoints ()
+std::vector <Vector2>& AirspaceSector::getOwnPoints ()
 {
     assert (has_own_volume_);
-
-//    if (own_points_.size() != own_points_config_.size())
-//    {
-//        own_points_.clear();
-//        std::map <unsigned int, GeographicPoint *>::iterator it;
-//
-//        for (it = own_points_config_.begin(); it != own_points_config_.end(); it++)
-//            own_points_.push_back (std::pair<double, double> (it->second->getLatitude(), it->second->getLongitude()));
-//    }
 
     return own_points_;
 }
@@ -243,3 +258,173 @@ void AirspaceSector::setName (std::string name)
 
     AirspaceSectorManager::getInstance().rebuildSectorNames();
 }
+
+std::vector <Vector2> AirspaceSector::getPointsBetween (double p1_lat, double p1_long, double p2_lat, double p2_long)
+{
+    loginf << "AirspaceSector: getPointsBetween: name " << name_;
+    Vector2 start_point;
+    start_point.x_=p1_lat;
+    start_point.y_=p1_long;
+
+    Vector2 stop_point;
+    stop_point.x_=p2_lat;
+    stop_point.y_=p2_long;
+
+    int start_cnt;
+    double start_distance;
+
+    double tmp_distance;
+    Vector2 tmp;
+
+    loginf << "AirspaceSector::getPointsBetween: searching for start point";
+
+    int cnt=0;
+    int size = own_points_.size();
+    int max_cnt=own_points_.size()-1;
+
+    for (cnt=0; cnt < size; cnt++)
+    {
+        tmp_distance = sqrt(pow(start_point.x_ - own_points_.at(cnt).x_,2)+pow(start_point.y_ - own_points_.at(cnt).y_,2));
+
+        if (cnt == 0)
+        {
+            start_cnt = cnt;
+            start_distance = tmp_distance;
+        }
+        else
+        {
+            if (tmp_distance < start_distance)
+            {
+                start_cnt = cnt;
+                start_distance = tmp_distance;
+            }
+        }
+    }
+
+    int stop_cnt;
+    double stop_distance;
+
+    loginf << "AirspaceSector::getPointsBetween: searching for stop point";
+    cnt=0;
+
+    for (cnt=0; cnt < size; cnt++)
+    {
+        tmp_distance = sqrt(pow(stop_point.x_ - own_points_.at(cnt).x_,2)+pow(stop_point.y_ - own_points_.at(cnt).y_,2));
+
+        if (cnt == 0)
+        {
+            stop_cnt = cnt;
+            stop_distance = tmp_distance;
+        }
+        else
+        {
+            if (tmp_distance < stop_distance)
+            {
+                stop_cnt = cnt;
+                stop_distance = tmp_distance;
+            }
+        }
+    }
+    loginf << "AirspaceSector::getPointsBetween: assembling result, start cnt " << start_cnt << " stop cnt " << stop_cnt << " size " << size;
+    std::vector <Vector2> result;
+
+    int distance_pos = stop_cnt-start_cnt;
+
+    if (distance_pos < 0)
+        distance_pos += own_points_.size();
+
+    int distance_neg = start_cnt-stop_cnt;
+
+    if (distance_neg < 0)
+        distance_neg += own_points_.size();
+
+    cnt = start_cnt;
+
+    if (distance_pos <= distance_neg)
+    {
+        loginf << "AirspaceSector::getPointsBetween: pos " << distance_pos;
+
+        while (cnt != stop_cnt)
+        {
+            loginf << "AirspaceSector::getPointsBetween: pos cnt " << cnt << " " << own_points_.at(cnt).x_ << ", " << own_points_.at(cnt).y_;
+            result.push_back(own_points_.at(cnt));
+
+            cnt++;
+
+            if (cnt > max_cnt)
+                cnt = 0;
+        }
+    }
+    else
+    {
+        loginf << "AirspaceSector::getPointsBetween: neg " << distance_neg;
+
+        while (cnt != stop_cnt)
+        {
+            loginf << "AirspaceSector::getPointsBetween: neg cnt " << cnt << " " << own_points_.at(cnt).x_ << ", " << own_points_.at(cnt).y_;
+            result.push_back(own_points_.at(cnt));
+
+            cnt--;
+
+            if (cnt == -1)
+                cnt = max_cnt;
+        }
+    }
+
+    loginf << "AirspaceSector::getPointsBetween: done with " << result.size() << " points";
+
+    return result;
+}
+
+//double AirspaceSector::distanceFromLineSegmentToPoint( const Vector2 v, const Vector2 w, const Vector2 p, Vector2 * const q )
+//{
+//    const float distSq = v.DistanceToSquared( w ); // i.e. |w-v|^2 ... avoid a sqrt
+//    if ( distSq == 0.0 )
+//    {
+//        // v == w case
+//        (*q) = v;
+//
+//        return v.DistanceTo( p );
+//    }
+//
+//    // consider the line extending the segment, parameterized as v + t (w - v)
+//    // we find projection of point p onto the line
+//    // it falls where t = [(p-v) . (w-v)] / |w-v|^2
+//
+//    const float t = ( p - v ).DotProduct( w - v ) / distSq;
+//    if ( t < 0.0 )
+//    {
+//        // beyond the v end of the segment
+//        (*q) = v;
+//
+//        //return v.DistanceTo( p );
+//        return NAN;
+//    }
+//    else if ( t > 1.0 )
+//    {
+//        // beyond the w end of the segment
+//        (*q) = w;
+//
+//        return NAN;
+//        //return w.DistanceTo( p );
+//    }
+//
+//    // projection falls on the segment
+//    const Vector2 projection = v + ( ( w - v ) * t );
+//
+//    (*q) = projection;
+//
+//    return p.DistanceTo( projection );
+//}
+
+//double AirspaceSector::distanceFromLineSegmentToPoint( double segmentX1, float segmentY1, float segmentX2, float segmentY2, float pX, float pY, float *qX, float *qY )
+//{
+//    Vector2 q;
+//
+//    float distance = DistanceFromLineSegmentToPoint( Vector2( segmentX1, segmentY1 ), Vector2( segmentX2, segmentY2 ), Vector2( pX, pY ), &q );
+//
+//    (*qX) = q.x_;
+//    (*qY) = q.y_;
+//
+//    return distance;
+//}

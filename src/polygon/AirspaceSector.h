@@ -27,8 +27,10 @@
 
 #include "Configurable.h"
 #include "Polygon4DDI.h"
+#include "Vector2.h"
 
 class GeographicPoint;
+class vec2 {float x,y;};
 
 class AirspaceSector : public Configurable
 {
@@ -50,12 +52,13 @@ public:
     void setHeightMax (double value);
 
     void addPoint (double latitude, double longitude);
+    void addPoints (std::vector <Vector2> points);
     void addPoints (std::string list);
     void clearPoints ();
 
     std::vector<AirspaceSector *> &getSubSectors () { return sub_sectors_; }
     void addAllVolumeSectors (std::vector<AirspaceSector *>& sectors); //adds itself as well
-    std::vector < std::pair<double, double> >& getOwnPoints ();
+    std::vector <Vector2>& getOwnPoints ();
 
     AirspaceSector *addNewSubSector (std::string name);
     void removeSubSector (AirspaceSector *sector);
@@ -74,12 +77,14 @@ public:
     double getLongitudeMinRounded () { return misnomer_.getLongitudeMinRounded(); }
     double getLongitudeMaxRounded () { return misnomer_.getLongitudeMaxRounded(); }
 
+    std::vector <Vector2> getPointsBetween (double p1_lat, double p1_long, double p2_lat, double p2_long);
+
 protected:
     std::string name_;
 
     bool has_own_volume_;
     std::map <unsigned int, GeographicPoint *> own_points_config_;
-    std::vector < std::pair<double, double> > own_points_;
+    std::vector < Vector2 > own_points_;
     double own_height_min_; // in feet
     double own_height_max_;
 
@@ -92,6 +97,8 @@ protected:
     void update ();
 
     virtual void checkSubConfigurables ();
+    //double distanceFromLineSegmentToPoint( const Vector2 v, const Vector2 w, const Vector2 p, Vector2 * const q);
+    //double distanceFromLineSegmentToPoint( double segmentX1, double segmentY1, double segmentX2, double segmentY2, double pX, double pY, double *qX, double *qY );
 };
 
 #endif /* AIRSPACESECTOR_H_ */

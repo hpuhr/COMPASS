@@ -111,8 +111,14 @@ void AirspaceSectorManagerWidget::addNewSector ()
 
 void AirspaceSectorManagerWidget::addSectorsByACGXMLFile ()
 {
-    QString filename = QFileDialog::getOpenFileName (this, tr("Please select a XML File"), tr("/home/sk"),tr("XML FIles (*.xml)"));
-    AirspaceSectorManager::getInstance().createNewSectorFromACGXMLFile(filename.toStdString());
+    ACGXMLImportDialog import;
+
+    import.exec();
+
+    if (import.result() == QDialog::Accepted)
+    {
+        AirspaceSectorManager::getInstance().createNewSectorFromACGXMLFile(import.getFilename(), import.getSectorName());
+    }
 
     yggdrasil_->updateLayerListSlot();
     sector_widget_->disableWidgets();

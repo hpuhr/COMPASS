@@ -253,8 +253,8 @@ void AirspaceSectorWidget::updatePointsTable ()
 {
     assert (current_);
 
-    std::vector < std::pair<double, double> > &points = current_->getOwnPoints ();
-    std::vector < std::pair<double, double> >::iterator it;
+    std::vector <Vector2> &points = current_->getOwnPoints ();
+    std::vector <Vector2>::iterator it;
 
     table_->setRowCount(points.size());
 
@@ -264,8 +264,8 @@ void AirspaceSectorWidget::updatePointsTable ()
 
          QTableWidgetItem *newItem;
 
-         std::string latitude = doubleToStringPrecision(it->first, 12);
-         std::string longitude = doubleToStringPrecision(it->second, 12);
+         std::string latitude = doubleToStringPrecision(it->x_, 12);
+         std::string longitude = doubleToStringPrecision(it->y_, 12);
 
          newItem = new QTableWidgetItem(latitude.c_str());
          newItem->setFlags(Qt::ItemIsEnabled);
@@ -339,13 +339,13 @@ void AirspaceSectorWidget::copyPoints ()
 
     assert (current_);
 
-    std::vector < std::pair<double, double> > &points = current_->getOwnPoints ();
-    std::vector < std::pair<double, double> >::iterator it;
+    std::vector <Vector2> &points = current_->getOwnPoints ();
+    std::vector <Vector2>::iterator it;
     std::stringstream ss;
 
     for (it = points.begin(); it != points.end(); it++)
     {
-        ss << doubleToStringPrecision(it->first, 12) << "," << doubleToStringPrecision(it->second, 12) << std::endl;
+        ss << doubleToStringPrecision(it->x_, 12) << "," << doubleToStringPrecision(it->y_, 12) << std::endl;
     }
 
     QClipboard *clipboard = QApplication::clipboard();

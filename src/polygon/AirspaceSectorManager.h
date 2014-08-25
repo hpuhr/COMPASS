@@ -53,7 +53,7 @@ public:
     bool deleteSectorIfPossible (AirspaceSector *sector);
     void removeSector (AirspaceSector *sector);
 
-    void createNewSectorFromACGXMLFile (std::string path);
+    void createNewSectorFromACGXMLFile (std::string path, std::string sector_name);
     void createNewSectorFromShapefile (std::string path);
 
     std::map <std::string, bool> &isPointInsideSector (double latitude, double longitude, bool height_given,

@@ -16,7 +16,7 @@ public:
     AirspaceSectorParser () {}
     virtual ~AirspaceSectorParser() {}
 
-    virtual void parse (std::string filename)=0;
+    //virtual void parse (std::string filename)=0;
 };
 
 

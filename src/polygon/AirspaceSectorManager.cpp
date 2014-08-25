@@ -105,10 +105,12 @@ void AirspaceSectorManager::removeSector (AirspaceSector *sector)
     sectors_.erase (sectors_.find(sector->getName()));
 }
 
-void AirspaceSectorManager::createNewSectorFromACGXMLFile (std::string path)
+void AirspaceSectorManager::createNewSectorFromACGXMLFile (std::string path, std::string sector_name)
 {
-    loginf << "AirspaceSectorManager: createNewSectorFromACGXMLFile: path " << path;
-    acg_parser_.parse(path);
+    loginf << "AirspaceSectorManager: createNewSectorFromACGXMLFile: path " << path << " sector name " << sector_name;
+
+    assert (hasSector(sector_name));
+    acg_parser_.parse(path, sectors_.at(sector_name));
 }
 
 void AirspaceSectorManager::createNewSectorFromShapefile (std::string path)

@@ -150,6 +150,7 @@ set ( atsdb_HDRS
         src/polygon/AirspaceSectorManager.h
         src/polygon/GeographicPoint.h
         src/polygon/Polygon4DDI.h
+        src/polygon/Vector2.h
         src/polygon/acgxml/ACGXMLParser.h
         src/polygon/acgxml/Abd.h
         src/polygon/acgxml/Ase.h

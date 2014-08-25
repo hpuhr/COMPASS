@@ -30,7 +30,7 @@ ACGXMLParser::~ACGXMLParser()
 {
 }
 
-void ACGXMLParser::parse (std::string filename)
+void ACGXMLParser::parse (std::string filename, AirspaceSector *base_sector)
 {
     logdbg  << "ACGXMLParser: parse: opening '" << filename << "'";
     XMLDocument *config_file_doc = new XMLDocument ();
@@ -85,7 +85,7 @@ void ACGXMLParser::parse (std::string filename)
     checkConistency();
     loginf << "ACGXMLParser: parse: checking consistency done";
 
-    createSectors();
+    createSectors(base_sector);
 
 }
 
@@ -521,9 +521,11 @@ void ACGXMLParser::checkConistency ()
     }
 }
 
-void ACGXMLParser::createSectors ()
+void ACGXMLParser::createSectors (AirspaceSector *base_sector)
 {
     loginf << "ACGXMLParser: createSectors";
+
+    assert (base_sector);
 
     std::map <unsigned int, Abd>::iterator it;
 
@@ -542,7 +544,7 @@ void ACGXMLParser::createSectors ()
         ase_mid = abd.ase_uid_.mid_;
         name = abd.ase_uid_.code_id_;
 
-        loginf << "ACGXMLParser: createSectors: sector '" << name << "' with " << abd.avxes_.size() << " points";
+        loginf << "ACGXMLParser: createSectors: sector '" << name << "' with " << abd.avxes_.size() << " points and base sector " << base_sector->getName();
 
         assert (ases_.find(ase_mid) != ases_.end());
         Ase &ase = ases_.at(ase_mid);
@@ -558,17 +560,28 @@ void ACGXMLParser::createSectors ()
         assert (AirspaceSectorManager::getInstance().hasSector(name));
         AirspaceSector *sector = AirspaceSectorManager::getInstance().getSector(name);
 
-        unsigned int cnt=0;
-        std::vector <Avx>::iterator it2;
-        for (it2 = abd.avxes_.begin(); it2 != abd.avxes_.end(); it2++)
+        unsigned int size = abd.avxes_.size();
+        for (unsigned int cnt=0; cnt < size; cnt++)
         {
-            Avx &avx = *it2;
+            Avx &avx = abd.avxes_.at(cnt);
 
             if (avx.code_type_ == "GRC") //normal polygon point
                 sector->addPoint(avx.geo_lat_, avx.geo_long_);
-            else if (avx.code_type_ == "FNT") // border point
+            else if (avx.code_type_ == "FNT") // border point start
             {
-                sector->addPoint(avx.geo_lat_, avx.geo_long_); //TODO shoot & cut
+                loginf << "ACGXMLParser: createSectors: sector '" << name << " with FNT point at cnt " << cnt << " size " << abd.avxes_.size();
+
+                sector->addPoint(avx.geo_lat_, avx.geo_long_);
+
+                Avx avx2;
+                if (cnt == abd.avxes_.size()-1)
+                    avx2 = abd.avxes_.at(0);
+                else
+                    avx2 = abd.avxes_.at(cnt+1); // border point end
+                //assert (avx2.code_type_ == "FNT");
+
+                sector->addPoints(base_sector->getPointsBetween (avx.geo_lat_, avx.geo_long_, avx2.geo_lat_, avx2.geo_long_)); // shot & cut
+//                cnt++;
             }
             else if (avx.code_type_ == "CCA" || avx.code_type_ == "CWA") // circle
             {
@@ -608,7 +621,7 @@ void ACGXMLParser::createSectors ()
                 double end_x, end_y;
                 proj_man.geo2Cart(end_lat, end_long, end_x, end_y, false);
 
-                loginf << "rad " << rad_meter <<" rad 1 " << sqrt (pow(center_x-start_x, 2)+pow(center_y-start_y, 2))
+                logdbg << "rad " << rad_meter <<" rad 1 " << sqrt (pow(center_x-start_x, 2)+pow(center_y-start_y, 2))
                         << " rad 2" << sqrt (pow(center_x-end_x, 2)+pow(center_y-end_y, 2));
                 assert (sqrt (pow(center_x-start_x, 2)+pow(center_y-start_y, 2)) - rad_meter < 500.0); // should be exact to 10 m
                 assert (sqrt (pow(center_x-end_x, 2)+pow(center_y-end_y, 2)) - rad_meter < 500.0);
@@ -623,7 +636,7 @@ void ACGXMLParser::createSectors ()
                 double start_azimuth = atan2 (start_y-center_y, start_x-center_x);
                 double end_azimuth = atan2 (end_y-center_y, end_x-center_x);
 
-                loginf << "ACGXMLParser: createSectors: start_azimuth " << start_azimuth << " end_azimuth "
+                logdbg << "ACGXMLParser: createSectors: start_azimuth " << start_azimuth << " end_azimuth "
                         << end_azimuth << " type " << avx.code_type_;
                 double current;
                 double step;
@@ -650,13 +663,11 @@ void ACGXMLParser::createSectors ()
                     if (end > current)
                         end -= 2*M_PI;
                 }
-                loginf << "ACGXMLParser: createSectors: current " << current << " step " << step << " end " << end;
+                logdbg << "ACGXMLParser: createSectors: current " << current << " step " << step << " end " << end;
 
                 unsigned int cnt2=0;
                 while (1)
                 {
-                    if (name == "LO71")
-                        loginf << "ACGXMLParser: createSectors: adding point, current " << current << " end " << end << " step " << step;
 
                     current_x = center_x + rad_meter * cos (current);
                     current_y = center_y + rad_meter * sin (current);
@@ -689,9 +700,6 @@ void ACGXMLParser::createSectors ()
             }
             else
                 throw std::runtime_error ("ACGXMLParser: createSectors: unknown code type '" + avx.code_type_ +"'");
-
-
-            cnt++;
         }
 
         sector->setHasOwnVolume(true);

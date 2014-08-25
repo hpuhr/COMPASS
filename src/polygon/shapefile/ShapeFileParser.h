@@ -21,7 +21,7 @@ public:
     ShapeFileParser();
     virtual ~ShapeFileParser();
 
-    virtual void parse (std::string filename);
+    void parse (std::string filename);
 
 protected:
     void addLineString( const OGRLineString* obj, AirspaceSector* sector, bool new_line );
