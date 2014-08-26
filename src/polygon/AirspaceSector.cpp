@@ -136,6 +136,8 @@ void AirspaceSector::updateMinMax ()
         latitude_max_ = misnomer_.getLatitudeMax();
         longitude_min_ = misnomer_.getLongitudeMin();
         longitude_max_ = misnomer_.getLongitudeMax();
+        altitude_min_ = own_height_min_;
+        altitude_max_ = own_height_max_;
     }
     else
     {
@@ -171,6 +173,9 @@ void AirspaceSector::updateMinMax ()
             }
         }
     }
+
+//    loginf << "AirspaceSector: updateMinMax: name " << name_ << " lat " << latitude_min_ << ", " << latitude_max_
+//            << " long " << longitude_min_ << ", " << longitude_max_ << " alt " << altitude_min_ << ", " << altitude_max_;
 }
 
 double AirspaceSector::getLatitudeMinRounded ()
@@ -345,12 +350,12 @@ bool AirspaceSector::isPointInside (double latitude, double longitude, double he
     {
         assert (sectors_.size() != 0);
 
-//        if (latitude < latitude_min_ || latitude > latitude_max_)
-//            return false;
-//        if (longitude < longitude_min_ || longitude > longitude_max_)
-//            return false;
-//        if (height_ft < altitude_min_ || height_ft > altitude_max_)
-//            return false;
+        if (latitude < latitude_min_ || latitude > latitude_max_)
+            return false;
+        if (longitude < longitude_min_ || longitude > longitude_max_)
+            return false;
+        if (height_ft < altitude_min_ || height_ft > altitude_max_)
+            return false;
 
         std::map <std::string, AirspaceSector*>::iterator it;
         for (it = sectors_.begin(); it != sectors_.end(); it++)

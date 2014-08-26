@@ -533,9 +533,9 @@ bool CalculatePosition::executeMLAT()
     }
 
     //HACK
-    //bool filter;
+    bool filter;
     //double height;
-    //AirspaceSector *sector = AirspaceSectorManager::getInstance().getSector("LowerHeightFilter");
+    AirspaceSector *sector = AirspaceSectorManager::getInstance().getSector("LowerHeightFilter");
     //\HACK
 
     double x, y;
@@ -579,7 +579,7 @@ bool CalculatePosition::executeMLAT()
             *(float*)oPtr( ogre_pos_y_key_ ) = 0.0;
 
             //HACK
-            //filter = true;
+            filter = true;
             //\HACK
 
         }
@@ -592,7 +592,7 @@ bool CalculatePosition::executeMLAT()
             //height =*(int*)iPtr( pos_h_key_ );
             //loginf << "UGA to height org " << *(int*)iPtr( pos_h_key_ ) << " double " << height;
             //bool isPointInside (double latitude, double longitude, double height_ft, bool debug);
-            //filter = !sector->isPointInside(*(double*)iPtr( pos_v_key_ ), *(double*)iPtr( pos_u_key_ ), *(int*)iPtr( pos_h_key_ ), false);
+            filter = !sector->isPointInside(*(double*)iPtr( pos_v_key_ ), *(double*)iPtr( pos_u_key_ ), *(int*)iPtr( pos_h_key_ ), false);
             //\HACK
         }
 
@@ -605,10 +605,10 @@ bool CalculatePosition::executeMLAT()
         col = 20;
 
         //HACK
-        //if (!filter)
+        if (!filter)
             *(unsigned int*)oPtr( ogre_color_key_  ) = col; // not HACK
-        //else
-        //    *(unsigned int*)oPtr( ogre_color_key_  ) = 0;
+        else
+            *(unsigned int*)oPtr( ogre_color_key_  ) = 0;
         //\HACK
         *(unsigned int*)oPtr( ogre_symbol_key_ ) = sym;
     }
