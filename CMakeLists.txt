@@ -1,5 +1,5 @@
 cmake_minimum_required( VERSION 2.6 )
-set ( CMAKE_BUILD_TYPE Debug )
+set ( CMAKE_BUILD_TYPE Release )
 
 set(ATSDB_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 message("  Path: ${ATSDB_PATH}")
