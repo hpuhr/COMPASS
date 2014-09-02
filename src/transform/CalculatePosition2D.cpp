@@ -230,7 +230,9 @@ bool CalculatePosition2D::execute ()
         //x
         if( isNan( x_prop->data_type_int_, input_adresses->at( x_ind ) ) )
         {
-            setNan( ogre_pos_x_prop->data_type_int_, output_adresses->at( ogre_pos_x_ind ) );
+            //setNan( ogre_pos_x_prop->data_type_int_, output_adresses->at( ogre_pos_x_ind ) );
+            *(float*)output_adresses->at( ogre_pos_x_ind ) = - min_[ 0 ]  / w_x;
+            //HACK
         }
         else
         {
@@ -257,7 +259,8 @@ bool CalculatePosition2D::execute ()
         //y
         if( isNan( y_prop->data_type_int_, input_adresses->at( y_ind ) ) )
         {
-            setNan( ogre_pos_z_prop->data_type_int_, output_adresses->at( ogre_pos_z_ind ) );
+            //setNan( ogre_pos_z_prop->data_type_int_, output_adresses->at( ogre_pos_z_ind ) );
+            *(float*)output_adresses->at( ogre_pos_z_ind ) = - min_[ 1 ] / w_y;
         }
         else
         {
