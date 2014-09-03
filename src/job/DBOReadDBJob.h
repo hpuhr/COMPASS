@@ -27,7 +27,6 @@
 
 #include "DBJob.h"
 #include "Global.h"
-//#include "DBDataSet.h"
 #include "DBOVariableSet.h"
 
 class Buffer;
@@ -42,7 +41,7 @@ class DBOReadDBJob : public DBJob
 {
 public:
     /// Emitted signal if Job was performed
-    boost::signal<void (Job*, Buffer*)> intermediate_signal_;
+    boost::signals2::signal<void (Job*, Buffer*)> intermediate_signal_;
 
     DBOReadDBJob(JobOrderer *orderer, boost::function<void (Job*, Buffer*)> intermediate_function,
             boost::function<void (Job*)> done_function, boost::function<void (Job*)> obsolete_function,

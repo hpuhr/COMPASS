@@ -18,7 +18,7 @@
 #ifndef COMPUTATION_H
 #define COMPUTATION_H
 
-#include <QObject>
+//#include <QObject>
 
 #include <set>
 #include <map>
@@ -34,7 +34,7 @@
 #include "TimedThread.h"
 #include "BufferFilter.h"
 
-#include "signalslib.h"
+#include <boost/signals2.hpp>
 #include <boost/function.hpp>
 
 class Buffer;
@@ -205,17 +205,17 @@ public:
     bool isCleared();
 
     /// Sends a finished buffer forth. Catch the signal to retrieve buffer data from the computation.
-    boost::signal<void (Buffer*)> distribute_signal_;
+    boost::signals2::signal<void (Buffer*)> distribute_signal_;
     /// Signals that the Computation has been cleared (e.g. for attached generators)
-    boost::signal<void (Computation*)> clear_signal_;
+    boost::signals2::signal<void (Computation*)> clear_signal_;
     /// Signals that the Computation is deleting (e.g. for attached generators or views)
-    boost::signal<void ()> delete_signal_;
+    boost::signals2::signal<void ()> delete_signal_;
     /// Sends an error message for debugging purpose.
-    boost::signal<void (const std::string& msg)> error_signal_;
+    boost::signals2::signal<void (const std::string& msg)> error_signal_;
     /// Sends an warning message for debugging purpose.
-    boost::signal<void (const std::string& msg)> warn_signal_;
+    boost::signals2::signal<void (const std::string& msg)> warn_signal_;
     /// Sends an input buffer filter specific message for debugging purpose.
-    boost::signal<void (const std::string& msg)> filter_signal_;
+    boost::signals2::signal<void (const std::string& msg)> filter_signal_;
 
     virtual void generateSubConfigurable( std::string class_id, std::string instance_id );
 

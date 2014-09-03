@@ -25,7 +25,7 @@
 #ifndef JOB_H_
 #define JOB_H_
 
-#include "signalslib.h"
+#include <boost/signals2.hpp>
 #include <boost/function.hpp>
 
 class JobOrderer;
@@ -43,9 +43,9 @@ class Job
 {
 public:
   /// Emitted signal if Job was performed
-  boost::signal<void (Job*)> done_signal_;
+  boost::signals2::signal<void (Job*)> done_signal_;
   /// Emitted signal if Job is obsolete
-  boost::signal<void (Job*)> obsolete_signal_;
+  boost::signals2::signal<void (Job*)> obsolete_signal_;
 
 public:
   /// @brief Constructor

@@ -23,7 +23,7 @@
 #include <map>
 #include <string>
 
-#include "signalslib.h"
+#include <boost/signals2.hpp>
 #include <boost/function.hpp>
 
 class ComputationElement;
@@ -115,11 +115,11 @@ public:
     virtual void generateSubConfigurable( std::string class_id, std::string instance_id );
 
     /// Sends errors produced in the computations
-    boost::signal<void (const std::string& msg)> error_signal_;
+    boost::signals2::signal<void (const std::string& msg)> error_signal_;
     /// Sends warnings produced in the computations
-    boost::signal<void (const std::string& msg)> warn_signal_;
+    boost::signals2::signal<void (const std::string& msg)> warn_signal_;
     /// Sends filter debug output produced in the computations
-    boost::signal<void (const std::string& msg)> filter_signal_;
+    boost::signals2::signal<void (const std::string& msg)> filter_signal_;
 
 protected:
     virtual void checkSubConfigurables();

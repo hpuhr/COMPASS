@@ -1,5 +1,5 @@
 cmake_minimum_required( VERSION 2.6 )
-set ( CMAKE_BUILD_TYPE Release )
+set ( CMAKE_BUILD_TYPE Debug )
 
 set(ATSDB_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 message("  Path: ${ATSDB_PATH}")
@@ -108,7 +108,6 @@ set ( LIBRARY_OUTPUT_PATH dist/lib )
 
 set ( atsdb_HDRS
         src/ATSDB.h
-        src/signalslib.hpp
         src/buffer/Buffer.h
         src/buffer/BufferFilter.h
         src/config/Configurable.h

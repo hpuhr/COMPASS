@@ -133,7 +133,7 @@ public:
     virtual void generateSubConfigurable( std::string class_id, std::string instance_id );
 
     /// Signals that the name of the computation changed (e.g. for attached generators or views)
-    boost::signal<void (const std::string& name)> name_changed_signal_;
+    boost::signals2::signal<void (const std::string& name)> name_changed_signal_;
 
 protected:
     virtual void checkSubConfigurables();

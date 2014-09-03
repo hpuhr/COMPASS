@@ -25,7 +25,6 @@
 #ifndef TRANSFORMATIONJOB_H_
 #define TRANSFORMATIONJOB_H_
 
-#include "signalslib.h"
 #include "Job.h"
 
 class Transformation;
