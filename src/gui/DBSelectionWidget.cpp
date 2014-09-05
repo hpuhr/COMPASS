@@ -128,12 +128,14 @@ DBConnectionInfo *DBSelectionWidget::getConnectionInfo ()
 
   if (db_type_selection_ == 1)
   {
-    return new SQLite3ConnectionInfo (filename_);
+      throw std::runtime_error ("DBSelectionWidget: getConnectionInfo: SQLite3 connection not supported at the moment");
+    //return new SQLite3ConnectionInfo (filename_);
   }
   else if (db_type_selection_ == 2)
   {
-    return new MySQLConnectionInfo (DB_TYPE_MYSQLpp, mysql_db_name_, mysql_db_ip_, mysql_db_username_, mysql_db_password_,
-            intFromString(mysql_db_port_));
+      throw std::runtime_error ("DBSelectionWidget: getConnectionInfo: MySql++ connection not supported at the moment");
+//    return new MySQLConnectionInfo (DB_TYPE_MYSQLpp, mysql_db_name_, mysql_db_ip_, mysql_db_username_, mysql_db_password_,
+//            intFromString(mysql_db_port_));
   }
   else if (db_type_selection_ == 3)
   {

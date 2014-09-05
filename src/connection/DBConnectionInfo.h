@@ -56,21 +56,21 @@ protected:
 /**
  * @brief Definition of a SQLite3 based database system
  */
-class SQLite3ConnectionInfo : public DBConnectionInfo
-{
-public:
-  SQLite3ConnectionInfo (std::string filename) : DBConnectionInfo(DB_TYPE_SQLITE), filename_(filename) {}
-  virtual ~SQLite3ConnectionInfo () {}
-
-  /// Returns the path and filename of the SQLite3 database file
-  std::string getFilename () { return filename_; }
-
-  std::string getIdString () { return "SQLite3 File: '"+filename_+"'";}
-
-private:
-  /// Path and filename of the SQLite3 database file
-  std::string filename_;
-};
+//class SQLite3ConnectionInfo : public DBConnectionInfo
+//{
+//public:
+//  SQLite3ConnectionInfo (std::string filename) : DBConnectionInfo(DB_TYPE_SQLITE), filename_(filename) {}
+//  virtual ~SQLite3ConnectionInfo () {}
+//
+//  /// Returns the path and filename of the SQLite3 database file
+//  std::string getFilename () { return filename_; }
+//
+//  std::string getIdString () { return "SQLite3 File: '"+filename_+"'";}
+//
+//private:
+//  /// Path and filename of the SQLite3 database file
+//  std::string filename_;
+//};
 
 /**
  * @brief Definition of a MySQL Connector based database system
