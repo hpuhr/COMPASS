@@ -1,10 +1,11 @@
-cmake_minimum_required( VERSION 2.6 )
-set ( CMAKE_BUILD_TYPE Debug )
-
 set(ATSDB_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 message("  Path: ${ATSDB_PATH}")
 SET(CMAKE_INSTALL_PREFIX "${ATSDB_PATH}/dist")
 message("  Install Path: ${CMAKE_INSTALL_PREFIX}")
+
+
+cmake_minimum_required( VERSION 2.6 )
+set ( CMAKE_BUILD_TYPE Debug )
 
 project( ATSDBProject )
 
@@ -13,7 +14,7 @@ message("  System: ${CMAKE_SYSTEM}")
 IF(WIN32 AND NOT UNIX)
   message("  Platform: Windows") 
 
-  set(INSTALL_PATH ${ATSDB_PATH}/install)
+set(INSTALL_PATH ${ATSDB_PATH}/install)
   
 #  find_library( SQLITE3 NAMES sqlite3  PATHS ${SQLITE3_PATH})
 ELSE(WIN32 AND NOT UNIX)
@@ -382,10 +383,10 @@ add_library ( atsdb SHARED ${atsdb_SRCS} ${UIS} ${UI_HDRS} ${RSCS} ${TRS} ${atsd
 target_link_libraries ( atsdb  ${GDAL_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${TINYXML2_LIBRARY} ${GDAL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_DATA_TIME_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_IOSTREAMS_LIBRARY} -lmysqlcppconn ${LOG4CPP_LIBRARIES} )
 # ${SQLITE3_LIBRARIES} ${MySQLpp_LIBRARY}
 
-
-INSTALL_FILES(/include .h ${atsdb_HDRS})
-INSTALL_FILES(/include .h ${atsdb_MOC_HEADERS})
-INSTALL_FILES(/include .h ${UI_HDRS})  
+INSTALL_FILES(${CMAKE_INSTALL_PREFIX}/include .h ${atsdb_HDRS})
+ #INSTALL_FILES(/include .h ${atsdb_HDRS})
+#INSTALL_FILES(/include .h ${atsdb_MOC_HEADERS})
+#INSTALL_FILES(/include .h ${UI_HDRS})  
 
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
