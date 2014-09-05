@@ -63,7 +63,7 @@ using namespace Utils::String;
  * write_table_names_,
  */
 DBInterface::DBInterface()
-: Configurable ("DBInterface", "DBInterface0"), connected_(false), database_opened_ (false), info_(0), buffer_writer_(0), connection_(0)
+: Configurable ("DBInterface", "DBInterface0"), connected_(false), database_opened_ (false), info_(0), connection_(0), buffer_writer_(0)
 {
     boost::mutex::scoped_lock l(mutex_);
     //registerParameter ("database_name", &database_name_, "");
