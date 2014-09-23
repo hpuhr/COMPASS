@@ -209,6 +209,7 @@ bool CalculatePosition2D::execute ()
     std::vector<void*>* input_adresses;
     std::vector<void*>* output_adresses;
     unsigned int i, n = input_->getSize();
+    unsigned int col=0;
     for( i=0; i<n; ++i )
     {
         if( i != 0 )
@@ -285,8 +286,21 @@ bool CalculatePosition2D::execute ()
         }
 
         *(float*)output_adresses->at( ogre_pos_y_ind ) = 0.0;
+
+        col = (unsigned int)input_->getDBOType();
+
+        if (col == DBO_PLOTS)
+            *(unsigned int*)output_adresses->at( ogre_col_ind )=1;
+        else if (col == DBO_SYSTEM_TRACKS)
+            *(unsigned int*)output_adresses->at( ogre_col_ind )=0;
+        else if (col == DBO_MLAT)
+            *(unsigned int*)output_adresses->at( ogre_col_ind )=20;
+        else if (col == DBO_ADS_B)
+            *(unsigned int*)output_adresses->at( ogre_col_ind )=15;
+        else
+            throw std::runtime_error ("CalculatePosition2d: setColorId: unknown dbo type");
         //*(unsigned int*)output_adresses->at( ogre_col_ind ) = col_; HACK
-        *(unsigned int*)output_adresses->at( ogre_col_ind ) = (unsigned int)input_->getDBOType();
+        //*(unsigned int*)output_adresses->at( ogre_col_ind ) = (unsigned int)input_->getDBOType();
     }
 
     outputReady();

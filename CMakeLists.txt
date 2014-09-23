@@ -384,6 +384,8 @@ target_link_libraries ( atsdb  ${GDAL_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTGUI
 # ${SQLITE3_LIBRARIES} ${MySQLpp_LIBRARY}
 
 INSTALL_FILES(${CMAKE_INSTALL_PREFIX}/include .h ${atsdb_HDRS})
+INSTALL_FILES(${CMAKE_INSTALL_PREFIX}/include .h ${atsdb_MOC_HEADERS})
+INSTALL_FILES(${CMAKE_INSTALL_PREFIX}/include .h ${UI_HDRS})
  #INSTALL_FILES(/include .h ${atsdb_HDRS})
 #INSTALL_FILES(/include .h ${atsdb_MOC_HEADERS})
 #INSTALL_FILES(/include .h ${UI_HDRS})  
