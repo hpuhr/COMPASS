@@ -40,10 +40,10 @@ fi
 echo "QT4 Dev library installed"
 
 if ! dpkg -l | grep libboost-dev >/dev/null; then
-echo "Installing Boost library"
-if ! sudo apt-get install -y libboost-dev ; then echo "Installing Boost library failed"; exit 1; fi
+echo "Installing Boost Dev library"
+if ! sudo apt-get install -y libboost-dev ; then echo "Installing Boost Dev library failed"; exit 1; fi
 fi
-echo "Boost library installed"
+echo "Boost library Dev installed"
 
 if ! dpkg -l | grep libmysqlcppconn-dev >/dev/null; then
 echo "Installing MySQL Connector library"

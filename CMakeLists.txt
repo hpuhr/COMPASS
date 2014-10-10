@@ -4,22 +4,14 @@ message("  Path: ${ATSDB_PATH}")
 cmake_minimum_required( VERSION 2.6 )
 set ( CMAKE_BUILD_TYPE Debug )
 
-project( ATSDBProject )
+project( ATSDB )
 
 message("  System: ${CMAKE_SYSTEM}")
 SET(CMAKE_INSTALL_PREFIX ${ATSDB_PATH}/dist)
 message("  Install Path: ${CMAKE_INSTALL_PREFIX}")
 
-#IF(WIN32 AND NOT UNIX)
-#  message("  Platform: Windows") 
-
-#set(INSTALL_PATH ${ATSDB_PATH}/install)
-  
-#  find_library( SQLITE3 NAMES sqlite3  PATHS ${SQLITE3_PATH})
-#ELSE(WIN32 AND NOT UNIX)
-  message("  Platform: Linux")
-  add_definitions ( -Wall )
-#ENDIF(WIN32 AND NOT UNIX)
+message("  Platform: Linux")
+add_definitions ( -Wall )
 
 find_package ( Qt4 REQUIRED )
 message("  QT_QTCORE_LIBRARY: ${QT_QTCORE_LIBRARY}") 
@@ -398,6 +390,39 @@ ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile
 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc
 COMMENT "Generating API documentation with Doxygen" VERBATIM
 )
+
+file(GLOB DOT ".*")
+file(GLOB TILD "*~")
+file(GLOB TEMP "*.cmake")
+
+set(CPACK_PACKAGE_VERSION_MAJOR "0")
+set(CPACK_PACKAGE_VERSION_MINOR "0")
+set(CPACK_PACKAGE_VERSION_PATCH "1")
+set(CPACK_SOURCE_GENERATOR "TGZ")
+set(CPACK_SOURCE_PACKAGE_FILE_NAME
+  "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-src")
+set(CPACK_SOURCE_IGNORE_FILES 
+"/CMakeFiles/"
+"/_CPack_Packages/"
+"/dist/"
+"/.git/"
+"CMakeCache\\\\.txt"
+".gz$"
+"install_manifest.txt"
+"Makefile$"
+"ui_.*$"
+"${DOT};${TILD};${TEMP}"
+"${CPACK_SOURCE_IGNORE_FILES}")
+include(CPack)
+message("CPACK_SOURCE_IGNORE_FILES = ${CPACK_SOURCE_IGNORE_FILES}")
+
+set(CPACK_BIN_PACKAGE_FILE_NAME
+  "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-bin")
+
+add_custom_target(package_binary ALL COMMAND
+    ${CMAKE_COMMAND} -E tar "cfvz" "${CPACK_BIN_PACKAGE_FILE_NAME}.tar.gz" "dist/")
+add_dependencies(package_binary foo)
+
 endif(DOXYGEN_FOUND)
 
 
