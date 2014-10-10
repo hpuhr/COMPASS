@@ -37,6 +37,7 @@ After installation, the project can be built. The first step is to create the bu
 
 In the main installation folder 'atsdb', execute the console command 'cmake .'. This generates the actual make files four your platform. If no errors occured, execute 'make' and 'make install'. This generates the library and copies the header files. After these steps, the build library can be found under 'dist/lib' and the headers under 'dist/include'. Please use them locally or copy them to the system paths with wanted.
 
+To package the binary or source code please use the respective "make package_binary" or "make package_source" commands.
 
 Author
 ------
