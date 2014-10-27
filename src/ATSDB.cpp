@@ -634,7 +634,7 @@ void ATSDB::buildDataSources()
                 data_source->setLongitude(longitude);
                 data_source->setAltitude(altitude);
 
-                data_source->finalize();
+                //data_source->finalize();
 
                 cnt++;
             }

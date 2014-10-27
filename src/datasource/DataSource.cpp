@@ -60,6 +60,9 @@ void DataSource::finalize ()
 // azimuth degrees, range & altitude in meters
 void DataSource::calculateSystemCoordinates (double azimuth, double slant_range, double altitude, double &sys_x, double &sys_y)
 {
+    if (!finalized_)
+        finalize ();
+
     assert (finalized_);
 
     double range;

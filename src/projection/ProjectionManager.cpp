@@ -32,7 +32,7 @@
 ProjectionManager::ProjectionManager()
 : Configurable ("ProjectionManager", "ProjectionManager0", 0), geo2cart_(0), cart2geo_(0)
 {
-    logdbg  << "ProjectionManager: constructor";
+    loginf  << "ProjectionManager: constructor";
 
     registerParameter("center_latitude", &center_latitude_, 47.5);
     registerParameter("center_longitude", &center_longitude_, 14.0);
@@ -103,6 +103,8 @@ float ProjectionManager::transformHeight (float value)
 
 void ProjectionManager::geo2Cart (double latitude, double longitude, double &x_pos, double &y_pos, bool transform)
 {
+    loginf << "ProjectionManager: geo2Cart: lat " << latitude << " long " << longitude;
+
     x_pos = longitude;
     y_pos = latitude;
 

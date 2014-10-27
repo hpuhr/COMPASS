@@ -390,6 +390,7 @@ ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile
 WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc
 COMMENT "Generating API documentation with Doxygen" VERBATIM
 )
+endif(DOXYGEN_FOUND)
 
 file(GLOB DOT ".*")
 file(GLOB TILD "*~")
@@ -423,7 +424,7 @@ add_custom_target(package_binary ALL COMMAND
     ${CMAKE_COMMAND} -E tar "cfvz" "${CPACK_BIN_PACKAGE_FILE_NAME}.tar.gz" "dist/" "readme*.txt")
 add_dependencies(package_binary foo)
 
-endif(DOXYGEN_FOUND)
+
 
 
         
