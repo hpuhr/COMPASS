@@ -193,8 +193,8 @@ public:
     /// @brief Callback function for aborted jobs
     void jobAborted( Job *job );
 
-    void deleteAllRowsWithVariableValue (DBOVariable *variable, std::string value);
-    void updateAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string new_value);
+    void deleteAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string filter);
+    void updateAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string new_value, std::string filter);
     void getMinMaxOfVariable (DBOVariable *variable, std::string filter_condition, std::string &min, std::string &max);
     //void getDistinctValues (DBOVariable *variable, std::string filter_condition, std::vector<std::string> &values);
 

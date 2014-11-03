@@ -869,18 +869,18 @@ DBCommand *SQLGenerator::getSelectCommand (PropertyList variables, MetaDBTable *
     return command;
 }
 
-std::string SQLGenerator::getDeleteStatement (DBTableColumn *column, std::string value)
+std::string SQLGenerator::getDeleteStatement (DBTableColumn *column, std::string value, std::string filter)
 {
     assert (column);
     // DELETE FROM table_name [WHERE Clause]
-    return "DELETE FROM "+column->getDBTableName()+" WHERE "+column->getName()+"="+value+";";
+    return "DELETE FROM "+column->getDBTableName()+" WHERE "+column->getName()+"="+value+" AND "+filter+";";
 }
 
-std::string SQLGenerator::getUpdateStatement (DBTableColumn *column, std::string value, std::string new_value)
+std::string SQLGenerator::getUpdateStatement (DBTableColumn *column, std::string value, std::string new_value, std::string filter)
 {
     assert (column);
     // update students set first_name=’Suba’ where rec_id=678;
-    return "UPDATE "+column->getDBTableName()+" SET "+column->getName()+"="+new_value+" WHERE "+column->getName()+"="+value+";";
+    return "UPDATE "+column->getDBTableName()+" SET "+column->getName()+"="+new_value+" WHERE "+column->getName()+"="+value+" AND "+filter+";";
 }
 
 std::string SQLGenerator::getDistinctSelectStatement (DBTableColumn *column, std::string filter_condition)

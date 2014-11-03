@@ -908,16 +908,26 @@ unsigned int ATSDB::getNumJobsForBufferReceiver (BufferReceiver *receiver)
     return cnt;
 }
 
-void ATSDB::deleteAllRowsWithVariableValue (DBOVariable *variable, std::string value)
+void ATSDB::deleteAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string filter)
 {
     assert (db_interface_);
-    db_interface_->deleteAllRowsWithVariableValue(variable, value);
+    assert (variable);
+    assert (value.size() != 0);
+    assert (filter.size() != 0);
+
+    db_interface_->deleteAllRowsWithVariableValue(variable, value, filter);
 }
 
-void ATSDB::updateAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string new_value)
+void ATSDB::updateAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string new_value, std::string filter)
 {
     assert (db_interface_);
-    db_interface_->updateAllRowsWithVariableValue(variable, value, new_value);
+    assert (variable);
+    assert (value.size() != 0);
+    assert (new_value.size() != 0);
+    assert (filter.size() != 0);
+
+
+    db_interface_->updateAllRowsWithVariableValue(variable, value, new_value, filter);
 }
 
 void ATSDB::getMinMaxOfVariable (DBOVariable *variable, std::string filter_condition, std::string &min, std::string &max)

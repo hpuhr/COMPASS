@@ -1324,7 +1324,7 @@ Buffer *DBInterface::createFromMinMaxStringBuffer (Buffer *string_buffer, PROPER
     return result_buffer;
 }
 
-void DBInterface::deleteAllRowsWithVariableValue (DBOVariable *variable, std::string value)
+void DBInterface::deleteAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string filter)
 {
     assert (sql_generator_);
 
@@ -1332,17 +1332,17 @@ void DBInterface::deleteAllRowsWithVariableValue (DBOVariable *variable, std::st
     assert (variable->hasCurrentDBColumn());
 
     boost::mutex::scoped_lock l(mutex_);
-    connection_->executeSQL(sql_generator_->getDeleteStatement(variable->getCurrentDBColumn(), value));
+    connection_->executeSQL(sql_generator_->getDeleteStatement(variable->getCurrentDBColumn(), value, filter));
 }
 
-void DBInterface::updateAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string new_value)
+void DBInterface::updateAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string new_value, std::string filter)
 {
     assert (sql_generator_);
 
     assert (!variable->isMetaVariable());
     assert (variable->hasCurrentDBColumn());
 
-    connection_->executeSQL(sql_generator_->getUpdateStatement(variable->getCurrentDBColumn(), value, new_value));
+    connection_->executeSQL(sql_generator_->getUpdateStatement(variable->getCurrentDBColumn(), value, new_value, filter));
 }
 
 void DBInterface::getMinMaxOfVariable (DBOVariable *variable, std::string filter_condition, std::string &min, std::string &max)

@@ -124,8 +124,8 @@ public:
     DBCommand *getTableSelectMinMaxNormalStatement (std::string table_name);
     DBCommand *getColumnSelectMinMaxStatement (DBTableColumn *column, std::string table_name);
 
-    std::string getDeleteStatement (DBTableColumn *column, std::string value);
-    std::string getUpdateStatement (DBTableColumn *column, std::string value, std::string new_value);
+    std::string getDeleteStatement (DBTableColumn *column, std::string value, std::string filter);
+    std::string getUpdateStatement (DBTableColumn *column, std::string value, std::string new_value, std::string filter);
 
     /// @brief Minimum/Maximum select statement for one variable in one table
     std::string getMinMaxSelectStatement (std::string variable, std::string table, std::string condition="");
