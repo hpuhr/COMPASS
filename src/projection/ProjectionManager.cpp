@@ -26,6 +26,8 @@
 #include <math.h>
 #include <cmath>
 
+#include "cpl_conv.h"
+
 #include "Config.h"
 #include "ProjectionManager.h"
 
@@ -42,14 +44,10 @@ ProjectionManager::ProjectionManager()
     registerParameter("world_scale", &world_scale_, 2000);
     registerParameter("height_scale", &height_scale_, 2000);
 
-    geo_.SetWellKnownGeogCS("WGS84");
-    //cart_.SetWellKnownGeogCS( "EPSG:31258" );
-    cart_.importFromEPSG(31258);
+    registerParameter ("epsg_value", &epsg_value_, 31258);
 
-    geo2cart_ = OGRCreateCoordinateTransformation( &geo_, &cart_ );
-    assert (geo2cart_);
-    cart2geo_ = OGRCreateCoordinateTransformation( &cart_, &geo_ );
-    assert (cart2geo_);
+    geo_.SetWellKnownGeogCS("WGS84");
+    createProjection();
 
     mult_factor_ = 1.0;
 
@@ -136,3 +134,56 @@ void ProjectionManager::cart2geo (double x_pos, double y_pos, double &latitude, 
     assert (ret);
 }
 
+std::string ProjectionManager::getWorldPROJ4Info ()
+{
+    char *tmp=0;
+    geo_.exportToProj4(&tmp);
+    std::string info = tmp;
+    CPLFree (tmp);
+
+    loginf << "ProjectionManager: getWorldPROJ4Info: '" << info << "'";
+
+    return info;
+}
+
+void ProjectionManager::setNewCartesianEPSG (unsigned int epsg_value)
+{
+    epsg_value_=epsg_value;
+    createProjection();
+}
+
+void ProjectionManager::createProjection ()
+{
+    OGRErr error = cart_.importFromEPSG(epsg_value_);
+    if (error != OGRERR_NONE)
+        throw std::runtime_error ("ProjectionManager: createProjection: cartesian EPSG value "+Utils::String::intToString(epsg_value_)+" caused ORG error "
+        +Utils::String::intToString((int)error));
+
+    if (geo2cart_)
+    {
+        delete geo2cart_;
+        geo2cart_=0;
+    }
+    geo2cart_ = OGRCreateCoordinateTransformation( &geo_, &cart_ );
+    assert (geo2cart_);
+
+    if (cart2geo_)
+    {
+        delete cart2geo_;
+        cart2geo_=0;
+    }
+    cart2geo_ = OGRCreateCoordinateTransformation( &cart_, &geo_ );
+    assert (cart2geo_);
+}
+
+std::string ProjectionManager::getCartesianPROJ4Info ()
+{
+    char *tmp=0;
+    cart_.exportToProj4(&tmp);
+    std::string info = tmp;
+    CPLFree (tmp);
+
+    loginf << "ProjectionManager: getCartesianPROJ4Info: '" << info << "'";
+
+    return info;
+}

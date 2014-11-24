@@ -62,6 +62,8 @@ protected:
     double trans_x_factor_;
     double trans_y_factor_;
 
+    unsigned int epsg_value_;
+
     OGRSpatialReference geo_;
     OGRSpatialReference cart_;
 
@@ -70,6 +72,8 @@ protected:
 
     /// @brief Constructor
     ProjectionManager();
+
+    void createProjection ();
 
 public:
     /// @brief Desctructor
@@ -94,7 +98,14 @@ public:
     void setCenterLatitude (double value) { center_latitude_ = value; }
     void setCenterLongitude (double value) { center_longitude_ = value; }
 
-public:
+    //std::string getWorldWKTInfo ();
+    std::string getWorldPROJ4Info ();
+    void setNewCartesianEPSG (unsigned int epsg_value);
+    //std::string getCartesianWKTInfo ();
+    std::string getCartesianPROJ4Info ();
+
+    unsigned int getEPSG () { return epsg_value_; }
+
     /// @brief Returns static instance
     static ProjectionManager& getInstance()
     {

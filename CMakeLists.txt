@@ -2,7 +2,7 @@ set(ATSDB_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 message("  Path: ${ATSDB_PATH}")
 
 cmake_minimum_required( VERSION 2.6 )
-set ( CMAKE_BUILD_TYPE Debug )
+set ( CMAKE_BUILD_TYPE Release )
 
 project( ATSDB )
 
@@ -232,6 +232,7 @@ set (atsdb_MOC_HEADERS
         src/polygon/AirspaceSectorManagerWidget.h
         src/polygon/AirspaceSectorTreeWidget.h
         src/polygon/AirspaceSectorWidget.h
+        src/projection/ProjectionManagerWidget.h
         src/schema/DBTableColumnComboBox.h
         src/schema/DBSchemaWidget.h
         src/schema/DBSchemaEditWidget.h
@@ -318,6 +319,7 @@ set ( atsdb_SRCS
         src/polygon/acgxml/Ase.cpp
         src/polygon/shapefile/ShapeFileParser.cpp
         src/projection/ProjectionManager.cpp
+        src/projection/ProjectionManagerWidget.cpp
         src/property/Property.cpp
         src/property/PropertyContainer.cpp
         src/result/BufferSet.cpp
