@@ -101,7 +101,7 @@ float ProjectionManager::transformHeight (float value)
 
 void ProjectionManager::geo2Cart (double latitude, double longitude, double &x_pos, double &y_pos, bool transform)
 {
-    loginf << "ProjectionManager: geo2Cart: lat " << latitude << " long " << longitude;
+    //loginf << "ProjectionManager: geo2Cart: lat " << latitude << " long " << longitude;
 
     x_pos = longitude;
     y_pos = latitude;
@@ -141,7 +141,7 @@ std::string ProjectionManager::getWorldPROJ4Info ()
     std::string info = tmp;
     CPLFree (tmp);
 
-    loginf << "ProjectionManager: getWorldPROJ4Info: '" << info << "'";
+    //loginf << "ProjectionManager: getWorldPROJ4Info: '" << info << "'";
 
     return info;
 }
@@ -183,7 +183,7 @@ std::string ProjectionManager::getCartesianPROJ4Info ()
     std::string info = tmp;
     CPLFree (tmp);
 
-    loginf << "ProjectionManager: getCartesianPROJ4Info: '" << info << "'";
+    //loginf << "ProjectionManager: getCartesianPROJ4Info: '" << info << "'";
 
     return info;
 }

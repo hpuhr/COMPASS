@@ -941,10 +941,11 @@ void ATSDB::getMinMaxOfVariable (DBOVariable *variable, std::string filter_condi
 //
 //}
 
-Buffer *ATSDB::getTrackMatches (bool has_mode_a, unsigned int mode_a, bool has_ta, unsigned int ta, bool has_ti, std::string ti)
+Buffer *ATSDB::getTrackMatches (bool has_mode_a, unsigned int mode_a, bool has_ta, unsigned int ta, bool has_ti, std::string ti,
+        bool has_tod, double tod_min, double tod_max)
 {
     assert (db_interface_);
-    return db_interface_->getTrackMatches(has_mode_a, mode_a, has_ta, ta, has_ti, ti);
+    return db_interface_->getTrackMatches(has_mode_a, mode_a, has_ta, ta, has_ti, ti, has_tod, tod_min, tod_max);
 }
 
 const std::vector<std::string> &ATSDB::getDatabaseNames ()

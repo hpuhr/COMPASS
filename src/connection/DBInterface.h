@@ -171,7 +171,8 @@ public:
     void getMinMaxOfVariable (DBOVariable *variable, std::string filter_condition, std::string &min, std::string &max);
 //    void getDistinctValues (DBOVariable *variable, std::string filter_condition, std::vector<std::string> &values);
 
-    Buffer *getTrackMatches (bool has_mode_a, unsigned int mode_a, bool has_ta, unsigned int ta, bool has_ti, std::string ti);
+    Buffer *getTrackMatches (bool has_mode_a, unsigned int mode_a, bool has_ta, unsigned int ta, bool has_ti, std::string ti,
+            bool has_tod, double tod_min, double tod_max);
 
     std::vector <std::string> getDatabases ();
 private:

@@ -1403,7 +1403,8 @@ void DBInterface::getMinMaxOfVariable (DBOVariable *variable, std::string filter
 //
 //}
 
-Buffer *DBInterface::getTrackMatches (bool has_mode_a, unsigned int mode_a, bool has_ta, unsigned int ta, bool has_ti, std::string ti)
+Buffer *DBInterface::getTrackMatches (bool has_mode_a, unsigned int mode_a, bool has_ta, unsigned int ta, bool has_ti, std::string ti,
+        bool has_tod, double tod_min, double tod_max)
 {
     assert (sql_generator_);
     assert (has_mode_a || has_ta || has_ti);
@@ -1430,7 +1431,10 @@ Buffer *DBInterface::getTrackMatches (bool has_mode_a, unsigned int mode_a, bool
     if (has_ti)
         ss << "='" << ti <<"'";
     else
-        ss << "=''";
+        ss << "='        '";
+
+    if (has_tod)
+        ss << " AND TOD>"+doubleToStringNoScientific(tod_min)+" AND TOD<"+doubleToStringNoScientific(tod_max);
 
     ss << " group by track_num;";
 
