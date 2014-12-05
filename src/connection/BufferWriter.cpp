@@ -183,7 +183,8 @@ void BufferWriter::insertBindStatementForCurrentIndex (Buffer *buffer)
             if (db_type_ == DB_TYPE_SQLITE)
                 db_connection_->bindVariable (index_cnt, (*((std::string*)ptr)).c_str());
             else if (db_type_ == DB_TYPE_MYSQLpp || db_type_ == DB_TYPE_MYSQLCon)
-                db_connection_->bindVariable (index_cnt, ("'"+*((std::string*)ptr)+"'").c_str());
+                db_connection_->bindVariable (index_cnt, (*((std::string*)ptr)).c_str());
+                //db_connection_->bindVariable (index_cnt, ("'"+*((std::string*)ptr)+"'").c_str());
             break;
         case P_TYPE_FLOAT:
         case P_TYPE_DOUBLE:
