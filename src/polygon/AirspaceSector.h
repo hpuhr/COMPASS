@@ -71,7 +71,9 @@ public:
     bool getUsedForChecking () { return used_for_checking_; }
     void setUsedForChecking (bool value) { used_for_checking_=value; }
 
-    const std::vector <std::pair<double, double> > &getPoints () { assert (sectors_.size() == 0); return misnomer_.getPoints(); }
+    const std::vector <std::pair<double, double> > &getHorizontalPoints () { assert (sectors_.size() == 0); return misnomer_.getPoints(); }
+    std::vector <std::pair<double, double> > getVerticalPointsLatitude ();
+    std::vector <std::pair<double, double> > getVerticalPointsLongitude ();
 
     double getLatitudeMin () { return latitude_min_; }
     double getLatitudeMax () { return latitude_max_; }

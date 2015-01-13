@@ -370,6 +370,34 @@ bool AirspaceSector::isPointInside (double latitude, double longitude, double he
     }
 }
 
+std::vector <std::pair<double, double> > AirspaceSector::getVerticalPointsLatitude ()
+{
+    assert (has_own_volume_);
+
+    std::vector <std::pair<double, double> > ret;
+
+    ret.push_back (std::pair<double, double> (getLatitudeMinRounded(), altitude_min_));
+    ret.push_back (std::pair<double, double> (getLatitudeMinRounded(), altitude_max_));
+    ret.push_back (std::pair<double, double> (getLatitudeMaxRounded(), altitude_min_));
+    ret.push_back (std::pair<double, double> (getLatitudeMaxRounded(), altitude_max_));
+
+    return ret;
+}
+std::vector <std::pair<double, double> > AirspaceSector::getVerticalPointsLongitude ()
+{
+    assert (has_own_volume_);
+
+    std::vector <std::pair<double, double> > ret;
+
+    ret.push_back (std::pair<double, double> (getLongitudeMinRounded(), altitude_min_));
+    ret.push_back (std::pair<double, double> (getLongitudeMinRounded(), altitude_max_));
+    ret.push_back (std::pair<double, double> (getLongitudeMaxRounded(), altitude_min_));
+    ret.push_back (std::pair<double, double> (getLongitudeMaxRounded(), altitude_max_));
+
+    return ret;
+}
+
+
 bool AirspaceSector::isPointInside (double latitude, double longitude, bool debug)
 {
     if (has_own_volume_)
