@@ -376,10 +376,11 @@ std::vector <std::pair<double, double> > AirspaceSector::getVerticalPointsLatitu
 
     std::vector <std::pair<double, double> > ret;
 
-    ret.push_back (std::pair<double, double> (getLatitudeMinRounded(), altitude_min_));
-    ret.push_back (std::pair<double, double> (getLatitudeMinRounded(), altitude_max_));
-    ret.push_back (std::pair<double, double> (getLatitudeMaxRounded(), altitude_min_));
-    ret.push_back (std::pair<double, double> (getLatitudeMaxRounded(), altitude_max_));
+    ret.push_back (std::pair<double, double> (altitude_min_/100.0, getLatitudeMinRounded()));
+    ret.push_back (std::pair<double, double> (altitude_max_/100.0, getLatitudeMinRounded()));
+    ret.push_back (std::pair<double, double> (altitude_max_/100.0, getLatitudeMaxRounded()));
+    ret.push_back (std::pair<double, double> (altitude_min_/100.0, getLatitudeMaxRounded()));
+    ret.push_back (std::pair<double, double> (altitude_min_/100.0, getLatitudeMinRounded()));
 
     return ret;
 }
@@ -389,10 +390,11 @@ std::vector <std::pair<double, double> > AirspaceSector::getVerticalPointsLongit
 
     std::vector <std::pair<double, double> > ret;
 
-    ret.push_back (std::pair<double, double> (getLongitudeMinRounded(), altitude_min_));
-    ret.push_back (std::pair<double, double> (getLongitudeMinRounded(), altitude_max_));
-    ret.push_back (std::pair<double, double> (getLongitudeMaxRounded(), altitude_min_));
-    ret.push_back (std::pair<double, double> (getLongitudeMaxRounded(), altitude_max_));
+    ret.push_back (std::pair<double, double> (altitude_min_/100.0, getLongitudeMinRounded()));
+    ret.push_back (std::pair<double, double> (altitude_max_/100.0, getLongitudeMinRounded()));
+    ret.push_back (std::pair<double, double> (altitude_max_/100.0, getLongitudeMaxRounded()));
+    ret.push_back (std::pair<double, double> (altitude_min_/100.0, getLongitudeMaxRounded()));
+    ret.push_back (std::pair<double, double> (altitude_min_/100.0, getLongitudeMinRounded()));
 
     return ret;
 }
