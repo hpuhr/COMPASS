@@ -67,9 +67,14 @@ public:
 
     void rebuildSectorNames ();
 
+    bool useLowerHeightFilter () { return use_lower_height_filter_; }
+    void setUseLowerHeightFilter (bool value) { use_lower_height_filter_=value; }
+
 protected:
     ACGXMLParser acg_parser_;
     ShapeFileParser shapefile_parser_;
+
+    bool use_lower_height_filter_;
 
     std::map <std::string, AirspaceSector*> sectors_;
 

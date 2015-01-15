@@ -31,6 +31,8 @@ using namespace Utils::String;
 AirspaceSectorManager::AirspaceSectorManager()
 : Configurable ("AirspaceSectorManager", "AirspaceSectorManager0", 0, "conf/config_airspace.xml")
 {
+    registerParameter ("use_lower_height_filter", &use_lower_height_filter_, true);
+
     createSubConfigurables ();
 
     createAllSectorsFlat();
