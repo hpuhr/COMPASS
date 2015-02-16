@@ -42,7 +42,7 @@ using namespace Utils::String;
 
 
 DBSelectionWidget::DBSelectionWidget(std::string class_id, std::string instance_id, Configurable *parent)
- : Configurable (class_id, instance_id, parent), /*filename_edit_(0), file_radio_(0), mysqlpp_radio_(0),*/ mysqlcon_radio_(0),
+ : Configurable (class_id, instance_id, parent), /*filename_edit_(0), file_radio_(0),*/ mysqlpp_radio_(0), mysqlcon_radio_(0),
   mysql_db_ip_edit_(0), mysql_db_port_edit_ (0), mysql_db_username_edit_ (0), mysql_db_password_edit_(0),
   connect_button_(0),  mysql_db_name_box_ (0), open_button_(0)
 {
@@ -87,10 +87,9 @@ void DBSelectionWidget::selectDBType()
   // 0 undefined, 1 file, 2 mysqlpp, 3 mysqlcon
 //  if (file_radio_->isDown ())
 //    db_type_selection_ = 1;
-//  else if (mysqlpp_radio_->isDown())
-//    db_type_selection_ = 2;
-//  else
-  if (mysqlcon_radio_->isDown())
+  if (mysqlpp_radio_->isDown())
+    db_type_selection_ = 2;
+  else if (mysqlcon_radio_->isDown())
     db_type_selection_ = 3;
   else
     db_type_selection_ = 0;
@@ -133,9 +132,9 @@ DBConnectionInfo *DBSelectionWidget::getConnectionInfo ()
   }
   else if (db_type_selection_ == 2)
   {
-      throw std::runtime_error ("DBSelectionWidget: getConnectionInfo: MySql++ connection not supported at the moment");
-//    return new MySQLConnectionInfo (DB_TYPE_MYSQLpp, mysql_db_name_, mysql_db_ip_, mysql_db_username_, mysql_db_password_,
-//            intFromString(mysql_db_port_));
+//      throw std::runtime_error ("DBSelectionWidget: getConnectionInfo: MySql++ connection not supported at the moment");
+    return new MySQLConnectionInfo (DB_TYPE_MYSQLpp, mysql_db_name_, mysql_db_ip_, mysql_db_username_, mysql_db_password_,
+            intFromString(mysql_db_port_));
   }
   else if (db_type_selection_ == 3)
   {
@@ -180,12 +179,12 @@ void DBSelectionWidget::createElements ()
 //  connect(select_file, SIGNAL( clicked() ), this, SLOT( selectFile() ));
 //  db_type_layout->addWidget(select_file);
 //
-//  mysqlpp_radio_ = new QRadioButton("MySQLpp database", this);
-//  connect(mysqlpp_radio_, SIGNAL(pressed()), this, SLOT(selectDBType()));
-//  if (db_type_selection_ == 2)
-//      mysqlpp_radio_->setChecked (true);
-//  mysqlpp_radio_->setFont (font_bold);
-//  db_type_layout->addWidget (mysqlpp_radio_);
+  mysqlpp_radio_ = new QRadioButton("MySQLpp database", this);
+  connect(mysqlpp_radio_, SIGNAL(pressed()), this, SLOT(selectDBType()));
+  if (db_type_selection_ == 2)
+      mysqlpp_radio_->setChecked (true);
+  mysqlpp_radio_->setFont (font_bold);
+  layout->addWidget (mysqlpp_radio_);
 
   mysqlcon_radio_ = new QRadioButton("MySQL connector database", this);
   connect(mysqlcon_radio_, SIGNAL(pressed()), this, SLOT(selectDBType()));
@@ -266,11 +265,11 @@ void DBSelectionWidget::setDBType (std::string value)
 //    file_radio_->click();
 //    db_type_selection_ = 1;
 //  }
-//  if (value.compare ("mysqlpp") == 0)
-//  {
-//    mysqlpp_radio_->click();
-//    db_type_selection_ = 2;
-//  }
+  if (value.compare ("mysqlpp") == 0)
+  {
+    mysqlpp_radio_->click();
+    db_type_selection_ = 2;
+  }
   if (value.compare ("mysqlcon") == 0)
   {
     mysqlcon_radio_->click();

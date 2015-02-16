@@ -577,10 +577,14 @@ void ATSDB::buildDataSources()
 
         if (!buffer->getFirstWrite())
         {
+            //buffer->print(buffer->getSize ());
+
             buffer->setIndex(0);
             unsigned int size = buffer->getSize ();
 
             unsigned int cnt=0;
+
+
 
             while (cnt < size)
             {
@@ -611,7 +615,7 @@ void ATSDB::buildDataSources()
                 if (sensor_name.size() == 0)
                     sensor_name = sensor_name_long;
 
-                logdbg  << "ATSDB: buildDataSources: at index " << cnt << " number " <<  sensor_number << " name " << sensor_name;
+                logdbg  << "ATSDB: buildDataSources: at index " << cnt << " number " <<  sensor_number << " name " << sensor_name << " lat " << latitude+0.1 << " lon " << longitude;
 
                 assert (data_sources.find (sensor_number) == data_sources.end());
                 data_sources [sensor_number] = sensor_name;
@@ -634,7 +638,7 @@ void ATSDB::buildDataSources()
                 data_source->setLongitude(longitude);
                 data_source->setAltitude(altitude);
 
-                //data_source->finalize();
+                data_source->finalize();
 
                 cnt++;
             }

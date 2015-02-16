@@ -48,11 +48,12 @@ DBOReadDBJob::DBOReadDBJob(JobOrderer *orderer, boost::function<void (Job*, Buff
 {
     assert (type_ != DBO_UNDEFINED);
 
-    if (order == 0)
-    {
-        order_ = DBObjectManager::getInstance().getDBOVariable (DBO_UNDEFINED, "id");
-        assert (order_->existsIn (type));
-    }
+    // AVIBIT HACK
+//    if (order == 0)
+//    {
+//        order_ = DBObjectManager::getInstance().getDBOVariable (DBO_UNDEFINED, "id");
+//        assert (order_->existsIn (type));
+//    }
 
     intermediate_signal_.connect( intermediate_function );
 }
@@ -76,7 +77,11 @@ void DBOReadDBJob::execute ()
     while (!db_interface_->getReadingDone(type_) && !obsolete_)
     {
         boost::this_thread::sleep( boost::posix_time::milliseconds(10) );
-        Buffer *buffer = db_interface_->readDataChunk(type_, order_->getName() == "id");
+
+        // AVIBIT HACK
+        //Buffer *buffer = db_interface_->readDataChunk(type_, order_->getName() == "id");
+        Buffer *buffer = db_interface_->readDataChunk(type_, true);
+
         assert (buffer->getDBOType() != DBO_UNDEFINED && buffer->getDBOType() == type_);
 
         if (!buffer)

@@ -80,12 +80,14 @@ DBCommand *SQLGenerator::getSelectCommand(DB_OBJECT_TYPE type, DBOVariableSet re
     //DBOVariableSet &read_list = DBObjectManager::getInstance().getDBObject(type)->getReadList();
     MetaDBTable *table = DBObjectManager::getInstance().getDBObject(type)->getCurrentMetaTable ();
 
-    if (order == 0)
-    {
-        order = DBObjectManager::getInstance().getDBOVariable (DBO_UNDEFINED, "id");
-        assert (order->existsIn (type));
-    }
-    std::string idname = order->getFor (type)->getCurrentVariableName();
+// AVIBIT HACK
+//    if (order == 0)
+//    {
+//        order = DBObjectManager::getInstance().getDBOVariable (DBO_UNDEFINED, "id");
+//        assert (order->existsIn (type));
+    //std::string idname = order->getFor (type)->getCurrentVariableName();
+//    }
+
 
     std::vector <std::string> filtered_variable_names; // what
 
@@ -95,7 +97,7 @@ DBCommand *SQLGenerator::getSelectCommand(DB_OBJECT_TYPE type, DBOVariableSet re
         custom_filter_clause = FilterManager::getInstance().getSQLCondition(type, filtered_variable_names);
     }
     //return getSelectCommand (read_list.getPropertyList(type), table, filtered_variable_names, custom_filter_clause,idname);
-    return getSelectCommand (read_list.getPropertyList(type), table, filtered_variable_names, custom_filter_clause,idname,
+    return getSelectCommand (read_list.getPropertyList(type), table, filtered_variable_names, custom_filter_clause, "",
             "", false, true);
     //(PropertyList variables, MetaDBTable *table,
     //    std::vector <std::string> &filtered_variable_names, std::string filter, std::string order, std::string limit,

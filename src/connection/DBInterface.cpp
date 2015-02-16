@@ -39,7 +39,7 @@
 #include "DBOVariable.h"
 #include "DBResult.h"
 #include "MetaDBTable.h"
-//#include "MySQLppConnection.h"
+#include "MySQLppConnection.h"
 #include "MySQLConConnection.h"
 #include "SQLGenerator.h"
 //#include "SQLiteConnection.h"
@@ -143,8 +143,8 @@ void DBInterface::initConnection (DBConnectionInfo *info)
     }
     else if (info->getType() == DB_TYPE_MYSQLpp)
     {
-        //connection_ = new MySQLppConnection (info);
-        throw std::runtime_error ("DBInterface: initConnection: MySQL++ connection not supported at the moment");
+        connection_ = new MySQLppConnection (info);
+        //throw std::runtime_error ("DBInterface: initConnection: MySQL++ connection not supported at the moment");
     }
     else if (info->getType() == DB_TYPE_MYSQLCon)
     {

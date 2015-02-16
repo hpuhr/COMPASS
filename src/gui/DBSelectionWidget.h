@@ -136,7 +136,7 @@ protected:
     /// SQLite3 selection radio button
     //QRadioButton *file_radio_;
     /// MySQL++ selection radio button
-    //QRadioButton *mysqlpp_radio_;
+    QRadioButton *mysqlpp_radio_;
     /// MySQL Connector selection radio button
     QRadioButton *mysqlcon_radio_;
     /// Database type, 0 undefined, 1 sqlite file, 2 mysqlpp, 3 mysqlcon

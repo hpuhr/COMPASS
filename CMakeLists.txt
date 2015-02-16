@@ -2,7 +2,7 @@ set(ATSDB_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 message("  Path: ${ATSDB_PATH}")
 
 cmake_minimum_required( VERSION 2.6 )
-set ( CMAKE_BUILD_TYPE Release )
+set ( CMAKE_BUILD_TYPE Debug )
 
 project( ATSDB )
 
@@ -24,9 +24,9 @@ message("  Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH};${ATSDB_PATH}/cmake_modules)
 message("  CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}") 
 
-#find_package ( MySQLpp REQUIRED )
-#message("  MySQLpp_INCLUDE_DIR: ${MySQLpp_INCLUDE_DIR}") 
-#message("  MySQLpp_LIBRARY: ${MySQLpp_LIBRARY}") 
+find_package ( MySQLpp REQUIRED )
+message("  MySQLpp_INCLUDE_DIR: ${MySQLpp_INCLUDE_DIR}") 
+message("  MySQLpp_LIBRARY: ${MySQLpp_LIBRARY}") 
 
 find_package ( MySQL REQUIRED )
 message("  MYSQL_INCLUDE_DIR: ${MYSQL_INCLUDE_DIR}") 
@@ -59,7 +59,7 @@ include_directories (
 	${QT_QTGUI_INCLUDE_DIR}
 	${Boost_INCLUDE_DIRS}
 	#${SQLITE3_INCLUDE_DIR}
-	#${MySQLpp_INCLUDE_DIR}
+	${MySQLpp_INCLUDE_DIR}
 	${MYSQL_INCLUDE_DIR}
 	${LOG4CPP_INCLUDE_DIR}
 	${GDAL_INCLUDE_DIRS}
@@ -111,7 +111,7 @@ set ( atsdb_HDRS
         src/connection/DBConnection.h
         src/connection/DBConnectionInfo.h
         src/connection/MySQLConConnection.h
-#        src/connection/MySQLppConnection.h
+        src/connection/MySQLppConnection.h
 #        src/connection/SQLiteConnection.h
         src/datasource/DataSource.h
         src/filter/DBFilter.h
@@ -253,7 +253,7 @@ set ( atsdb_SRCS
         src/connection/BufferWriter.cpp
         src/connection/DBInterface.cpp
         src/connection/MySQLConConnection.cpp
-#        src/connection/MySQLppConnection.cpp
+        src/connection/MySQLppConnection.cpp
 #        src/connection/SQLiteConnection.cpp
         src/datasource/DataSource.cpp
         src/filter/DBFilter.cpp
@@ -373,8 +373,8 @@ set ( atsdb_UI
 QT4_WRAP_UI( UI_HDRS ${atsdb_UI} )
 qt4_wrap_cpp (atsdb_MOC_OUTFILES ${atsdb_MOC_HEADERS})
 add_library ( atsdb SHARED ${atsdb_SRCS} ${UIS} ${UI_HDRS} ${RSCS} ${TRS} ${atsdb_MOC_OUTFILES} )
-target_link_libraries ( atsdb  ${GDAL_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${TINYXML2_LIBRARY} ${GDAL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_DATA_TIME_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_IOSTREAMS_LIBRARY} -lmysqlcppconn ${LOG4CPP_LIBRARIES} )
-# ${SQLITE3_LIBRARIES} ${MySQLpp_LIBRARY}
+target_link_libraries ( atsdb  ${GDAL_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${TINYXML2_LIBRARY} ${GDAL_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_DATA_TIME_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_IOSTREAMS_LIBRARY} -lmysqlcppconn ${LOG4CPP_LIBRARIES} ${MySQLpp_LIBRARY})
+# ${SQLITE3_LIBRARIES} 
 
 INSTALL_FILES(/include .h ${atsdb_HDRS})
 INSTALL_FILES(/include .h ${atsdb_MOC_HEADERS})
