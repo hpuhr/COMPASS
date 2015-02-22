@@ -290,7 +290,7 @@ bool CalculatePosition2D::execute ()
         col = (unsigned int)input_->getDBOType();
 
         if (col == DBO_PLOTS)
-            *(unsigned int*)output_adresses->at( ogre_col_ind )=1;
+            *(unsigned int*)output_adresses->at( ogre_col_ind )=2;
         else if (col == DBO_SYSTEM_TRACKS)
             *(unsigned int*)output_adresses->at( ogre_col_ind )=0;
         else if (col == DBO_MLAT)
