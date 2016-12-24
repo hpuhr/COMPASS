@@ -45,10 +45,10 @@ public:
     virtual ~ArrayListBase ();
 
     /// @brief Returns size of the list
-    size_t getSize ();
+    size_t size ();
 
     /// @brief Returns current maximum size of the list
-    size_t getMaximumSize ();
+    size_t maximumSize ();
 
     /// @brief Sets specific element to None value
     virtual void setNone(size_t size_t);
@@ -110,10 +110,10 @@ public:
     const T &get (size_t index)
     {
         if (index > size_)
-            throw std::out_of_range ("ArrayListBool: get out of index");
+            throw std::out_of_range ("ArrayListTemplate: get out of index");
 
         if (isNone(index))
-            throw std::out_of_range ("ArrayListBool: get of None value");
+            throw std::out_of_range ("ArrayListTemplate: get of None value");
 
         return data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
     };
@@ -122,10 +122,10 @@ public:
     const std::string &getAsString (size_t index)
     {
         if (index > size_)
-            throw std::out_of_range ("ArrayListBool: get out of index");
+            throw std::out_of_range ("ArrayListTemplate: get out of index");
 
         if (isNone(index))
-            throw std::out_of_range ("ArrayListBool: get of None value");
+            throw std::out_of_range ("ArrayListTemplate: get of None value");
 
         return std::string (data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE));
     };
@@ -137,17 +137,19 @@ public:
 
         if (index >= max_size_)
         {
-            logdbg << "ArrayListBool:set: adding new arrays for index " << index << " current max size " << max_size_;
+            logdbg << "ArrayListTemplate:set: adding new arrays for index " << index << " current max size " << max_size_;
             while (index >= max_size_)
                 allocateNewArray ();
         }
 
-        logdbg << "ArrayListBool:set: setting index " << index << " to value " << value << " using array " << index/BUFFER_ARRAY_SIZE << " array_index " << index%BUFFER_ARRAY_SIZE;
+        logdbg << "ArrayListTemplate: set: setting index " << index << " to value " << value << " using array " << index/BUFFER_ARRAY_SIZE << " array_index " << index%BUFFER_ARRAY_SIZE;
 
         data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE) = value;
 
         if (index >= size_)
             size_= index+1;
+
+        logdbg << "ArrayListTemplate: set: size " << size_ << " max_size " << max_size_;
 
         unsetNone(index);
     };
@@ -157,7 +159,7 @@ public:
     {
         if (index >= max_size_)
         {
-            logdbg << "ArrayListBool:setNone: adding new arrays for index " << index << " current max size " << max_size_;
+            logdbg << "ArrayListTemplate:setNone: adding new arrays for index " << index << " current max size " << max_size_;
             while (index >= max_size_)
                 allocateNewArray ();
         }
@@ -180,7 +182,7 @@ protected:
 
         assert (data_.size() == none_flags_.size());
 
-        logdbg << "ArrayListBool:allocateNewArray: added new array current max size " << max_size_;
+        logdbg << "ArrayListTemplate: allocateNewArray: added new array current max size " << max_size_;
     };
 };
 

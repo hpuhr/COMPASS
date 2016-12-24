@@ -66,7 +66,7 @@ public:
 //    void printLong (unsigned int num_elements);
 
     /// @brief Returns boolean indicating if any data was ever written.
-    //bool firstWrite () { return first_write_;};
+    bool firstWrite ();
     /// @brief Sets data was written flag.
     //void setWritten () { first_write_=false; };
 
@@ -111,7 +111,9 @@ private:
     /// Maximal index for currently allocated size
     //unsigned int num_properties_index_;
 
-    /// Vectors with all ArrayLists, one for each Property type, identified by
+    /// Vector with all ArrayList
+    std::vector <ArrayListBase *> arrays_;
+    /// Map with all ArrayListTemplates, one for each Property type, identified by
     std::map <std::string, ArrayListTemplate<bool> > arrays_bool_;
     std::map <std::string, ArrayListTemplate<char> > arrays_char_;
     std::map <std::string, ArrayListTemplate<unsigned char> > arrays_uchar_;
@@ -140,7 +142,7 @@ private:
     static unsigned int ids_;
 
     /// @brief Initialization
-    void init();
+    //void init();
     /// @brief Allocates memory up to index
     //void allocateUpTo (unsigned int index);
 
@@ -157,13 +159,8 @@ public:
     ArrayListTemplate<std::string> &getString (const std::string &id);
 
     /// @brief  Returns maximal used index size
-//    const size_t size ()
-//    {
-//        if (containers_.size() == 0)
-//            return 0;
+    const size_t size ();
 
-//        return containers_.front()->size();
-//    };
 
     /// @brief Returns current maximal size for current allocation
 //    const size_t maxSize ()

@@ -76,16 +76,21 @@ Buffer::~Buffer()
 {
     logdbg  << "Buffer: destructor: start";
 
-//    std::vector <ArrayContainerBase *>::iterator it;
-
-//    for (it = containers_.begin(); it != containers_.end(); it++)
-//        delete *it;
-//    containers_.clear();
-
     properties_.clear();
+    arrays_.clear();
+    arrays_bool_.clear();
+    arrays_char_.clear();
+    arrays_uchar_.clear();
+    arrays_int_.clear();
+    arrays_uint_.clear();
+    arrays_long_int_.clear();
+    arrays_ulong_int_.clear();
+    arrays_float_.clear();
+    arrays_double_.clear();
+    arrays_string_.clear();
+
     dbo_type_="";
 //    last_one_=false;
-//    first_write_=true;
 
     logdbg  << "Buffer: destructor: end";
 }
@@ -200,42 +205,52 @@ void Buffer::addProperty (std::string id, PropertyDataType type)
     case PropertyDataType::BOOL:
         assert (arrays_bool_.count(id) == 0);
         arrays_bool_ [id] = ArrayListTemplate<bool> ();
+        arrays_.push_back(dynamic_cast<ArrayListBase *> (&arrays_bool_ [id]));
         break;
     case PropertyDataType::CHAR:
         assert (arrays_char_.count(id) == 0);
         arrays_char_ [id] = ArrayListTemplate<char> ();
+        arrays_.push_back(dynamic_cast<ArrayListBase *> (&arrays_char_ [id]));
         break;
     case PropertyDataType::UCHAR:
         assert (arrays_uchar_.count(id) == 0);
         arrays_uchar_ [id] = ArrayListTemplate<unsigned char> ();
+        arrays_.push_back(dynamic_cast<ArrayListBase *> (&arrays_uchar_ [id]));
         break;
     case PropertyDataType::INT:
         assert (arrays_int_.count(id) == 0);
         arrays_int_ [id] = ArrayListTemplate<int> ();
+        arrays_.push_back(dynamic_cast<ArrayListBase *> (&arrays_int_ [id]));
         break;
     case PropertyDataType::UINT:
         assert (arrays_uint_.count(id) == 0);
         arrays_uint_ [id] = ArrayListTemplate<unsigned int> ();
+        arrays_.push_back(dynamic_cast<ArrayListBase *> (&arrays_uint_ [id]));
         break;
     case PropertyDataType::LONGINT:
         assert (arrays_long_int_.count(id) == 0);
         arrays_long_int_ [id] = ArrayListTemplate<long int> ();
+        arrays_.push_back(dynamic_cast<ArrayListBase *> (&arrays_long_int_ [id]));
         break;
     case PropertyDataType::ULONGINT:
         assert (arrays_ulong_int_.count(id) == 0);
         arrays_ulong_int_ [id] = ArrayListTemplate<unsigned long int> ();
+        arrays_.push_back(dynamic_cast<ArrayListBase *> (&arrays_ulong_int_ [id]));
         break;
     case PropertyDataType::FLOAT:
         assert (arrays_float_.count(id) == 0);
         arrays_float_ [id] = ArrayListTemplate<float> ();
+        arrays_.push_back(dynamic_cast<ArrayListBase *> (&arrays_float_ [id]));
         break;
     case PropertyDataType::DOUBLE:
         assert (arrays_double_.count(id) == 0);
         arrays_double_ [id] = ArrayListTemplate<double> ();
+        arrays_.push_back(dynamic_cast<ArrayListBase *> (&arrays_double_ [id]));
         break;
     case PropertyDataType::STRING:
         assert (arrays_string_.count(id) == 0);
         arrays_string_ [id] = ArrayListTemplate<std::string> ();
+        arrays_.push_back(dynamic_cast<ArrayListBase *> (&arrays_string_ [id]));
         break;
     default:
         logerr  <<  "Buffer: addProperty: unknown property type " << Property::asString(type);
@@ -579,3 +594,30 @@ ArrayListTemplate<std::string> &Buffer::getString (const std::string &id)
 //        Utils::Data::copy(srcadresses->at(cnt), adresses_->at(cnt), srcprops->at(cnt)->data_type_int_, srcprops->at(cnt)->size_, false, false);
 //    }
 //}
+
+const size_t Buffer::size ()
+{
+    size_t size = 0;
+
+    std::vector <ArrayListBase *>::const_iterator it;
+
+    for (it = arrays_.begin(); it != arrays_.end(); it++)
+    {
+        if (size < (*it)->size())
+            size = (*it)->size();
+    }
+    return size;
+}
+
+bool Buffer::firstWrite ()
+{
+    std::vector <ArrayListBase *>::const_iterator it;
+
+    for (it = arrays_.begin(); it != arrays_.end(); it++)
+    {
+        if ((*it)->size() > 0)
+            return false;
+    }
+
+    return true;
+}

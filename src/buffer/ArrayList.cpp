@@ -36,12 +36,13 @@ ArrayListBase::~ArrayListBase ()
 
 }
 
-size_t ArrayListBase::getSize ()
+size_t ArrayListBase::size ()
 {
+    logdbg << "ArrayListBase: size: size " << size_;
     return size_;
 }
 
-size_t ArrayListBase::getMaximumSize ()
+size_t ArrayListBase::maximumSize ()
 {
     return max_size_;
 }
