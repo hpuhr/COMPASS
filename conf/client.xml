@@ -1,0 +1,13 @@
+<?1.0?>
+<ATSDBClientConfiguration>
+    <!--------------------------------------------------------------------------------------->
+    <!------- FileSection: SubConfigurationFiles are to be placed here                ------->
+    <!--------------------------------------------------------------------------------------->
+    <FileSection>
+    </FileSection>
+    <!--------------------------------------------------------------------------------------->
+    <!------- ConfigurationSection: Configurations are to be placed here              ------->
+    <!--------------------------------------------------------------------------------------->
+    <ConfigurationSection>
+    </ConfigurationSection>
+</ATSDBClientConfiguration>
