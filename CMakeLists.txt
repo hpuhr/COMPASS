@@ -370,11 +370,11 @@ set ( atsdb_SRCS
         )
 
 set ( atsdb_UI
-        src/gui/FilterEditDialogBase.ui
-        src/gui/ComputationEditDialogBase.ui
-        src/gui/TransformationEditDialogBase.ui
-        src/gui/TransformationVariableEditDialogBase.ui
-        src/gui/WorkflowSettingsEditDialogBase.ui
+#        src/gui/FilterEditDialogBase.ui
+#        src/gui/ComputationEditDialogBase.ui
+#        src/gui/TransformationEditDialogBase.ui
+#        src/gui/TransformationVariableEditDialogBase.ui
+#        src/gui/WorkflowSettingsEditDialogBase.ui
         )
 
 set ( client_SRCS

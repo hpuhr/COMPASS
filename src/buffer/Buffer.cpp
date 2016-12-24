@@ -34,13 +34,28 @@
 unsigned int Buffer::ids_ = 0;
 
 /**
- * Creates a buffer from a PropertyList and a DBO type. Sets member to initial values and calls init().
+ * Creates an empty buffer withput an DBO type
+ *
+ */
+Buffer::Buffer()
+{
+    logdbg  << "Buffer: constructor: start";
+
+    id_ = ids_;
+    ++ids_;
+
+    logdbg  << "Buffer: constructor: end";
+}
+
+
+/**
+ * Creates a buffer from a PropertyList and a DBO type. Sets member to initial values.
  *
  * \param member_list PropertyList defining all properties
  * \param type DBO type
  */
-Buffer::Buffer(PropertyList properties, DB_OBJECT_TYPE type)
-: properties_(properties), dbo_type_(type)
+Buffer::Buffer(PropertyList properties, std::string dbo_type)
+: properties_(properties), dbo_type_(dbo_type)
 //, first_write_(true), last_one_(false)
 //search_active_(false), search_key_pos_(-1), search_key_min_ (-1), search_key_max_ (-1)
 {
@@ -68,7 +83,7 @@ Buffer::~Buffer()
 //    containers_.clear();
 
     properties_.clear();
-    dbo_type_=DBO_UNDEFINED;
+    dbo_type_="";
 //    last_one_=false;
 //    first_write_=true;
 

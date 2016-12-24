@@ -46,8 +46,10 @@
 class Buffer
 {
 public:
+    /// @brief Default constructor.
+    Buffer ();
     /// @brief Constructor.
-    Buffer(PropertyList properties, DB_OBJECT_TYPE type=DBO_UNDEFINED);
+    Buffer(PropertyList properties, std::string db_type="");
     /// @brief Desctructor.
     virtual ~Buffer();
 
@@ -104,7 +106,7 @@ private:
     /// List of all properties
     PropertyList properties_;
     /// DBO type
-    DB_OBJECT_TYPE dbo_type_;
+    std::string dbo_type_;
 
     /// Maximal index for currently allocated size
     //unsigned int num_properties_index_;
@@ -168,10 +170,10 @@ public:
     }
 
     /// @brief Returns DBO type
-    DB_OBJECT_TYPE dboType () { return dbo_type_; };
+    const std::string dboType () { return dbo_type_; };
 
     /// @brief Sets DBO type
-    void setDBOType (DB_OBJECT_TYPE type) { dbo_type_=type;};
+    void setDBOType (const std::string &dbo_type) { dbo_type_=dbo_type;};
 };
 
 #endif /* BUFFER_H_ */

@@ -30,22 +30,22 @@
 #include <iomanip>
 #include <boost/regex.hpp>
 
-std::map<DB_OBJECT_TYPE,std::string> DB_OBJECT_TYPE_STRINGS = boost::assign::map_list_of
-        (DBO_UNDEFINED,     "DBO_UNDEFINED"    )
-        (DBO_PLOTS,     "DBO_PLOTS"    )
-        (DBO_SYSTEM_TRACKS, "DBO_SYSTEM_TRACKS")
-        (DBO_ADS_B, "DBO_ADS_B")
-        (DBO_MLAT, "DBO_MLAT")
-        (DBO_REFERENCE_TRAJECTORIES, "DBO_REFERENCE_TRAJECTORIES")
-        (DBO_SENSOR_INFORMATION,    "DBO_SENSOR_INFORMATION"   );
+//std::map<DB_OBJECT_TYPE,std::string> DB_OBJECT_TYPE_STRINGS = boost::assign::map_list_of
+//        (DBO_UNDEFINED,     "DBO_UNDEFINED"    )
+//        (DBO_PLOTS,     "DBO_PLOTS"    )
+//        (DBO_SYSTEM_TRACKS, "DBO_SYSTEM_TRACKS")
+//        (DBO_ADS_B, "DBO_ADS_B")
+//        (DBO_MLAT, "DBO_MLAT")
+//        (DBO_REFERENCE_TRAJECTORIES, "DBO_REFERENCE_TRAJECTORIES")
+//        (DBO_SENSOR_INFORMATION,    "DBO_SENSOR_INFORMATION"   );
 
-std::map<STRING_REPRESENTATION,std::string> STRING_REPRESENTATION_STRINGS = boost::assign::map_list_of
-        (R_STANDARD,     "R_STANDARD"    )
-        (R_TIME_SECONDS,     "R_TIME_SECONDS"    )
-        (R_OCTAL, "R_OCTAL")
-        (R_FLIGHT_LEVEL, "R_FLIGHT_LEVEL")
-        (R_SENSOR_NAME, "R_SENSOR_NAME")
-        (R_HEX, "R_HEX");
+//std::map<STRING_REPRESENTATION,std::string> STRING_REPRESENTATION_STRINGS = boost::assign::map_list_of
+//        (R_STANDARD,     "R_STANDARD"    )
+//        (R_TIME_SECONDS,     "R_TIME_SECONDS"    )
+//        (R_OCTAL, "R_OCTAL")
+//        (R_FLIGHT_LEVEL, "R_FLIGHT_LEVEL")
+//        (R_SENSOR_NAME, "R_SENSOR_NAME")
+//        (R_HEX, "R_HEX");
 
 using namespace std;
 using boost::algorithm::iequals;

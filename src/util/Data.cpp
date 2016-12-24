@@ -32,11 +32,11 @@
 #include <limits>
 #include <cstring>
 #include "String.h"
-#include "DBOVariable.h"
-#include "DBSchemaManager.h"
-#include "DBSchema.h"
-#include "MetaDBTable.h"
-#include "DBTableColumn.h"
+//#include "DBOVariable.h"
+//#include "DBSchemaManager.h"
+//#include "DBSchema.h"
+//#include "MetaDBTable.h"
+//#include "DBTableColumn.h"
 #include "UnitManager.h"
 
 using namespace Utils::String;
@@ -375,326 +375,326 @@ void check_reverse (char *data, char*check_value, unsigned int num_bytes)
     //loginf << "check_reverse approves";
 }
 
-void setSpecialNullsNan (Buffer *buffer, unsigned int column, unsigned int data_type, std::string special_null)
-{
-    assert (buffer);
-    assert (special_null.size() > 0);
+//void setSpecialNullsNan (Buffer *buffer, unsigned int column, unsigned int data_type, std::string special_null)
+//{
+//    assert (buffer);
+//    assert (special_null.size() > 0);
 
-    buffer->setIndex( 0 );
+//    buffer->setIndex( 0 );
 
-    std::vector<void*>* output_adresses;
-    unsigned int cnt;
-    unsigned n = buffer->getSize();
-
-
-    switch (data_type)
-    {
-    case P_TYPE_BOOL:
-    {
-        bool special_null_value = intFromString(special_null);
-        for( cnt=0; cnt<n; ++cnt )
-        {
-            if( cnt != 0 )
-            {
-                buffer->incrementIndex();
-            }
-
-            output_adresses = buffer->getAdresses();
-
-            if (isNan(data_type, output_adresses->at( column )))
-                continue;
-
-            if (special_null_value == *((bool*)output_adresses->at( column )))
-                setNan(data_type, output_adresses->at( column ));
-        }
-    }
-    break;
-    case P_TYPE_UCHAR:
-    {
-        unsigned char special_null_value = intFromString(special_null);
-        for( cnt=0; cnt<n; ++cnt )
-        {
-            if( cnt != 0 )
-            {
-                buffer->incrementIndex();
-            }
-
-            output_adresses = buffer->getAdresses();
-
-            if (isNan(data_type, output_adresses->at( column )))
-                continue;
-
-            if (special_null_value == *((unsigned char*)output_adresses->at( column )))
-                setNan(data_type, output_adresses->at( column ));
-        }
-    }
-    break;
-    case P_TYPE_CHAR:
-    {
-        char special_null_value = intFromString(special_null);
-        for( cnt=0; cnt<n; ++cnt )
-        {
-            if( cnt != 0 )
-            {
-                buffer->incrementIndex();
-            }
-
-            output_adresses = buffer->getAdresses();
-
-            if (isNan(data_type, output_adresses->at( column )))
-                continue;
-
-            if (special_null_value == *((char*)output_adresses->at( column )))
-                setNan(data_type, output_adresses->at( column ));
-        }
-
-    }
-    break;
-    case P_TYPE_INT:
-    {
-        int special_null_value = intFromString(special_null);
-        for( cnt=0; cnt<n; ++cnt )
-        {
-            if( cnt != 0 )
-            {
-                buffer->incrementIndex();
-            }
-
-            output_adresses = buffer->getAdresses();
-
-            if (isNan(data_type, output_adresses->at( column )))
-                continue;
-
-            if (special_null_value == *((int*)output_adresses->at( column )))
-                setNan(data_type, output_adresses->at( column ));
-        }
-
-    }
-    break;
-    case P_TYPE_UINT:
-    {
-        unsigned int special_null_value = intFromString(special_null);
-        for( cnt=0; cnt<n; ++cnt )
-        {
-            if( cnt != 0 )
-            {
-                buffer->incrementIndex();
-            }
-
-            output_adresses = buffer->getAdresses();
-
-            if (isNan(data_type, output_adresses->at( column )))
-                continue;
-
-            if (special_null_value == *((unsigned int*)output_adresses->at( column )))
-                setNan(data_type, output_adresses->at( column ));
-        }
-
-    }
-    break;
-    case P_TYPE_STRING:
-    {
-        for( cnt=0; cnt<n; ++cnt )
-        {
-            if( cnt != 0 )
-            {
-                buffer->incrementIndex();
-            }
-
-            output_adresses = buffer->getAdresses();
-
-            if (isNan(data_type, output_adresses->at( column )))
-                continue;
-
-            if (special_null.compare( *((std::string*)output_adresses->at( column ))) == 0)
-                setNan(data_type, output_adresses->at( column ));
-        }
-
-    }
-    break;
-    case P_TYPE_FLOAT:
-    {
-        float special_null_value = doubleFromString(special_null);
-        for( cnt=0; cnt<n; ++cnt )
-        {
-            if( cnt != 0 )
-            {
-                buffer->incrementIndex();
-            }
-
-            output_adresses = buffer->getAdresses();
-
-            if (isNan(data_type, output_adresses->at( column )))
-                continue;
-
-            if (special_null_value == *((float*)output_adresses->at( column )))
-                setNan(data_type, output_adresses->at( column ));
-        }
-
-    }
-    break;
-    case P_TYPE_DOUBLE:
-    {
-        double special_null_value = doubleFromString(special_null);
-        for( cnt=0; cnt<n; ++cnt )
-        {
-            if( cnt != 0 )
-            {
-                buffer->incrementIndex();
-            }
-
-            output_adresses = buffer->getAdresses();
-
-            if (isNan(data_type, output_adresses->at( column )))
-                continue;
-
-            if (special_null_value == *((double*)output_adresses->at( column )))
-                setNan(data_type, output_adresses->at( column ));
-        }
-
-    }
-    break;
-    case P_TYPE_POINTER:
-    {
-        throw std::runtime_error ("Util: setSpecialNullsNan: unknown for property type pointer");
-    }
-    break;
-    default:
-        //logerr  <<  "Property: isNan: unknown property type";
-        throw std::runtime_error ("Util: setSpecialNullsNan: unknown property type "+intToString (data_type));
-        //return false;
-    }
-
-}
+//    std::vector<void*>* output_adresses;
+//    unsigned int cnt;
+//    unsigned n = buffer->getSize();
 
 
-void multiplyData (void *ptr, PROPERTY_DATA_TYPE data_type, double factor)
-{
-    if (data_type == P_TYPE_CHAR)
-        *(char*)ptr *= factor;
-    else if (data_type == P_TYPE_INT)
-        *(int*)ptr *= factor;
-    else if (data_type == P_TYPE_UCHAR)
-        *(unsigned char*)ptr *= factor;
-    else if (data_type == P_TYPE_UINT)
-        *(unsigned int*)ptr *= factor;
-    else if (data_type == P_TYPE_FLOAT)
-    {
-        //loginf << "pre" << *(float*)ptr;
-        *(float*)ptr *= factor;
-        //loginf << "post"  << *(float*)ptr;
-    }
-    else if (data_type == P_TYPE_DOUBLE)
-    {
-        //loginf << "pre" << *(double*)ptr;
-        *(double*)ptr *= factor;
-        //loginf << "post"  << *(double*)ptr;
+//    switch (data_type)
+//    {
+//    case P_TYPE_BOOL:
+//    {
+//        bool special_null_value = intFromString(special_null);
+//        for( cnt=0; cnt<n; ++cnt )
+//        {
+//            if( cnt != 0 )
+//            {
+//                buffer->incrementIndex();
+//            }
 
-    }
-    else
-        throw std::runtime_error ("Util: multiplyData: incorrect data type "+intToString (data_type));
-}
+//            output_adresses = buffer->getAdresses();
 
-void copyPropertyData (void *src, void *target, Property *property)
-{
-    if (property->data_type_int_ == P_TYPE_STRING)
-    {
-        ((std::string *) target)->assign (*(std::string*) src);
-    }
-    else
-        memcpy (src,target, property->size_);
-}
+//            if (isNan(data_type, output_adresses->at( column )))
+//                continue;
 
-void finalizeDBData (DB_OBJECT_TYPE type, Buffer *buffer, DBOVariableSet read_list)
-{
-    logdbg << "Util: finalizeDBData";
+//            if (special_null_value == *((bool*)output_adresses->at( column )))
+//                setNan(data_type, output_adresses->at( column ));
+//        }
+//    }
+//    break;
+//    case P_TYPE_UCHAR:
+//    {
+//        unsigned char special_null_value = intFromString(special_null);
+//        for( cnt=0; cnt<n; ++cnt )
+//        {
+//            if( cnt != 0 )
+//            {
+//                buffer->incrementIndex();
+//            }
 
-    assert (type != DBO_UNDEFINED);
+//            output_adresses = buffer->getAdresses();
 
-    DBOVariableSet *type_set = read_list.getFor (type);
-    std::vector <DBOVariable*> &variables =type_set->getSet();
-    std::vector <DBOVariable*>::iterator it;
+//            if (isNan(data_type, output_adresses->at( column )))
+//                continue;
 
-    PropertyList *buffer_list = buffer->getPropertyList ();
+//            if (special_null_value == *((unsigned char*)output_adresses->at( column )))
+//                setNan(data_type, output_adresses->at( column ));
+//        }
+//    }
+//    break;
+//    case P_TYPE_CHAR:
+//    {
+//        char special_null_value = intFromString(special_null);
+//        for( cnt=0; cnt<n; ++cnt )
+//        {
+//            if( cnt != 0 )
+//            {
+//                buffer->incrementIndex();
+//            }
 
-    logdbg << "Util: finalizeDBData: vars " << buffer_list->getNumProperties();
+//            output_adresses = buffer->getAdresses();
 
-    for (it = variables.begin(); it != variables.end(); it++)
-    {
-        DBOVariable *variable = *it;
+//            if (isNan(data_type, output_adresses->at( column )))
+//                continue;
 
-        assert (!variable->isMetaVariable());
+//            if (special_null_value == *((char*)output_adresses->at( column )))
+//                setNan(data_type, output_adresses->at( column ));
+//        }
 
-        std::string meta_tablename = variable->getCurrentMetaTable ();
-        std::string table_varname = variable->getCurrentVariableName ();
+//    }
+//    break;
+//    case P_TYPE_INT:
+//    {
+//        int special_null_value = intFromString(special_null);
+//        for( cnt=0; cnt<n; ++cnt )
+//        {
+//            if( cnt != 0 )
+//            {
+//                buffer->incrementIndex();
+//            }
 
-        DBTableColumn *table_column = DBSchemaManager::getInstance().getCurrentSchema ()->getMetaTable(meta_tablename)->getTableColumn(table_varname);
+//            output_adresses = buffer->getAdresses();
 
-        logdbg  << "Util: finalizeDBData: type " << type << " variable " << table_column->getName();
-        if (!buffer_list->hasProperty(table_column->getName()))
-        {
-            logwrn  << "Util: finalizeDBData: variable information not synchronized";
-            continue;
-        }
+//            if (isNan(data_type, output_adresses->at( column )))
+//                continue;
 
-        unsigned col = buffer_list->getPropertyIndex(table_column->getName());
-        PROPERTY_DATA_TYPE data_type = (PROPERTY_DATA_TYPE) buffer->getPropertyList()->getProperty(col)->data_type_int_;
+//            if (special_null_value == *((int*)output_adresses->at( column )))
+//                setNan(data_type, output_adresses->at( column ));
+//        }
 
-        if (table_column->hasSpecialNull())
-        {
-            logdbg << "Util: finalizeDBData: setting special null '" << table_column->getSpecialNull()
-                                                            << "' col " << col;
-            setSpecialNullsNan (buffer, col, data_type, table_column->getSpecialNull());
-        }
+//    }
+//    break;
+//    case P_TYPE_UINT:
+//    {
+//        unsigned int special_null_value = intFromString(special_null);
+//        for( cnt=0; cnt<n; ++cnt )
+//        {
+//            if( cnt != 0 )
+//            {
+//                buffer->incrementIndex();
+//            }
 
-        if (variable->hasUnit () || table_column->hasUnit())
-        {
-            logdbg  << "Util: finalizeDBData: unit var type " << variable->getDBOType() << " dim '" << variable->getUnitDimension() << "'";
-            if (variable->hasUnit () != table_column->hasUnit())
-            {
-                logerr << "Util: finalizeDBData: unit transformation inconsistent: var " << variable->getName () << " has unit " << variable->hasUnit ()
-                                                                                  << " table column " << table_column->getName() << " has unit " << table_column->hasUnit();
-                continue;
-            }
+//            output_adresses = buffer->getAdresses();
 
-            if (variable->getUnitDimension().compare(table_column->getUnitDimension()) != 0)
-            {
-                logerr << "Util: finalizeDBData: unit transformation inconsistent: var " << variable->getName () << " has dimension " << variable->getUnitDimension ()
-                                                                                  << " table column " << table_column->getName() << " has dimension " << table_column->getUnitDimension();
-                continue;
-            }
+//            if (isNan(data_type, output_adresses->at( column )))
+//                continue;
 
-            Unit *unit = UnitManager::getInstance().getUnit (variable->getUnitDimension());
-            double factor = unit->getFactor (table_column->getUnitUnit(), variable->getUnitUnit());
-            logdbg  << "Util: finalizeDBData: correct unit transformation with factor " << factor;
+//            if (special_null_value == *((unsigned int*)output_adresses->at( column )))
+//                setNan(data_type, output_adresses->at( column ));
+//        }
 
-            buffer->setIndex( 0 );
+//    }
+//    break;
+//    case P_TYPE_STRING:
+//    {
+//        for( cnt=0; cnt<n; ++cnt )
+//        {
+//            if( cnt != 0 )
+//            {
+//                buffer->incrementIndex();
+//            }
 
-            std::vector<void*>* output_adresses;
-            unsigned int cnt;
-            unsigned n = buffer->getSize();
+//            output_adresses = buffer->getAdresses();
 
-            for( cnt=0; cnt<n; ++cnt )
-            {
-                if( cnt != 0 )
-                {
-                    assert (buffer);
-                    buffer->incrementIndex();
-                }
+//            if (isNan(data_type, output_adresses->at( column )))
+//                continue;
 
-                output_adresses = buffer->getAdresses();
+//            if (special_null.compare( *((std::string*)output_adresses->at( column ))) == 0)
+//                setNan(data_type, output_adresses->at( column ));
+//        }
 
-                if (isNan(data_type, output_adresses->at( col )))
-                    continue;
+//    }
+//    break;
+//    case P_TYPE_FLOAT:
+//    {
+//        float special_null_value = doubleFromString(special_null);
+//        for( cnt=0; cnt<n; ++cnt )
+//        {
+//            if( cnt != 0 )
+//            {
+//                buffer->incrementIndex();
+//            }
 
-                multiplyData(output_adresses->at( col ), data_type, factor);
-            }
-        }
-    }
-    delete type_set;
+//            output_adresses = buffer->getAdresses();
 
-    logdbg << "Util: finalizeDBData: done";
-}
+//            if (isNan(data_type, output_adresses->at( column )))
+//                continue;
+
+//            if (special_null_value == *((float*)output_adresses->at( column )))
+//                setNan(data_type, output_adresses->at( column ));
+//        }
+
+//    }
+//    break;
+//    case P_TYPE_DOUBLE:
+//    {
+//        double special_null_value = doubleFromString(special_null);
+//        for( cnt=0; cnt<n; ++cnt )
+//        {
+//            if( cnt != 0 )
+//            {
+//                buffer->incrementIndex();
+//            }
+
+//            output_adresses = buffer->getAdresses();
+
+//            if (isNan(data_type, output_adresses->at( column )))
+//                continue;
+
+//            if (special_null_value == *((double*)output_adresses->at( column )))
+//                setNan(data_type, output_adresses->at( column ));
+//        }
+
+//    }
+//    break;
+//    case P_TYPE_POINTER:
+//    {
+//        throw std::runtime_error ("Util: setSpecialNullsNan: unknown for property type pointer");
+//    }
+//    break;
+//    default:
+//        //logerr  <<  "Property: isNan: unknown property type";
+//        throw std::runtime_error ("Util: setSpecialNullsNan: unknown property type "+intToString (data_type));
+//        //return false;
+//    }
+
+//}
+
+
+//void multiplyData (void *ptr, PROPERTY_DATA_TYPE data_type, double factor)
+//{
+//    if (data_type == P_TYPE_CHAR)
+//        *(char*)ptr *= factor;
+//    else if (data_type == P_TYPE_INT)
+//        *(int*)ptr *= factor;
+//    else if (data_type == P_TYPE_UCHAR)
+//        *(unsigned char*)ptr *= factor;
+//    else if (data_type == P_TYPE_UINT)
+//        *(unsigned int*)ptr *= factor;
+//    else if (data_type == P_TYPE_FLOAT)
+//    {
+//        //loginf << "pre" << *(float*)ptr;
+//        *(float*)ptr *= factor;
+//        //loginf << "post"  << *(float*)ptr;
+//    }
+//    else if (data_type == P_TYPE_DOUBLE)
+//    {
+//        //loginf << "pre" << *(double*)ptr;
+//        *(double*)ptr *= factor;
+//        //loginf << "post"  << *(double*)ptr;
+
+//    }
+//    else
+//        throw std::runtime_error ("Util: multiplyData: incorrect data type "+intToString (data_type));
+//}
+
+//void copyPropertyData (void *src, void *target, Property *property)
+//{
+//    if (property->data_type_int_ == P_TYPE_STRING)
+//    {
+//        ((std::string *) target)->assign (*(std::string*) src);
+//    }
+//    else
+//        memcpy (src,target, property->size_);
+//}
+
+//void finalizeDBData (DB_OBJECT_TYPE type, Buffer *buffer, DBOVariableSet read_list)
+//{
+//    logdbg << "Util: finalizeDBData";
+
+//    assert (type != DBO_UNDEFINED);
+
+//    DBOVariableSet *type_set = read_list.getFor (type);
+//    std::vector <DBOVariable*> &variables =type_set->getSet();
+//    std::vector <DBOVariable*>::iterator it;
+
+//    PropertyList *buffer_list = buffer->getPropertyList ();
+
+//    logdbg << "Util: finalizeDBData: vars " << buffer_list->getNumProperties();
+
+//    for (it = variables.begin(); it != variables.end(); it++)
+//    {
+//        DBOVariable *variable = *it;
+
+//        assert (!variable->isMetaVariable());
+
+//        std::string meta_tablename = variable->getCurrentMetaTable ();
+//        std::string table_varname = variable->getCurrentVariableName ();
+
+//        DBTableColumn *table_column = DBSchemaManager::getInstance().getCurrentSchema ()->getMetaTable(meta_tablename)->getTableColumn(table_varname);
+
+//        logdbg  << "Util: finalizeDBData: type " << type << " variable " << table_column->getName();
+//        if (!buffer_list->hasProperty(table_column->getName()))
+//        {
+//            logwrn  << "Util: finalizeDBData: variable information not synchronized";
+//            continue;
+//        }
+
+//        unsigned col = buffer_list->getPropertyIndex(table_column->getName());
+//        PROPERTY_DATA_TYPE data_type = (PROPERTY_DATA_TYPE) buffer->getPropertyList()->getProperty(col)->data_type_int_;
+
+//        if (table_column->hasSpecialNull())
+//        {
+//            logdbg << "Util: finalizeDBData: setting special null '" << table_column->getSpecialNull()
+//                                                            << "' col " << col;
+//            setSpecialNullsNan (buffer, col, data_type, table_column->getSpecialNull());
+//        }
+
+//        if (variable->hasUnit () || table_column->hasUnit())
+//        {
+//            logdbg  << "Util: finalizeDBData: unit var type " << variable->getDBOType() << " dim '" << variable->getUnitDimension() << "'";
+//            if (variable->hasUnit () != table_column->hasUnit())
+//            {
+//                logerr << "Util: finalizeDBData: unit transformation inconsistent: var " << variable->getName () << " has unit " << variable->hasUnit ()
+//                                                                                  << " table column " << table_column->getName() << " has unit " << table_column->hasUnit();
+//                continue;
+//            }
+
+//            if (variable->getUnitDimension().compare(table_column->getUnitDimension()) != 0)
+//            {
+//                logerr << "Util: finalizeDBData: unit transformation inconsistent: var " << variable->getName () << " has dimension " << variable->getUnitDimension ()
+//                                                                                  << " table column " << table_column->getName() << " has dimension " << table_column->getUnitDimension();
+//                continue;
+//            }
+
+//            Unit *unit = UnitManager::getInstance().getUnit (variable->getUnitDimension());
+//            double factor = unit->getFactor (table_column->getUnitUnit(), variable->getUnitUnit());
+//            logdbg  << "Util: finalizeDBData: correct unit transformation with factor " << factor;
+
+//            buffer->setIndex( 0 );
+
+//            std::vector<void*>* output_adresses;
+//            unsigned int cnt;
+//            unsigned n = buffer->getSize();
+
+//            for( cnt=0; cnt<n; ++cnt )
+//            {
+//                if( cnt != 0 )
+//                {
+//                    assert (buffer);
+//                    buffer->incrementIndex();
+//                }
+
+//                output_adresses = buffer->getAdresses();
+
+//                if (isNan(data_type, output_adresses->at( col )))
+//                    continue;
+
+//                multiplyData(output_adresses->at( col ), data_type, factor);
+//            }
+//        }
+//    }
+//    delete type_set;
+
+//    logdbg << "Util: finalizeDBData: done";
+//}
 }
 }
 

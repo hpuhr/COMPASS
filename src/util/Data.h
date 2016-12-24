@@ -26,7 +26,7 @@
 #define DATA_H_
 
 #include "Global.h"
-#include "DBOVariableSet.h"
+//#include "DBOVariableSet.h"
 
 class Buffer;
 
@@ -49,13 +49,13 @@ extern void copy (void *src, void *dest, unsigned int data_type, unsigned int nu
 extern void add (void *data, unsigned int data_type, int constant);
 extern void memcpy_reverse (char *dest, char* src, unsigned int num_bytes, bool verbose);
 extern void check_reverse (char *data, char* check_value, unsigned int num_bytes); // throws exception if not
-extern void setSpecialNullsNan (Buffer *buffer, unsigned int column, unsigned int data_type, std::string special_null);
+//extern void setSpecialNullsNan (Buffer *buffer, unsigned int column, unsigned int data_type, std::string special_null);
 /// @brief Multiplies given data with a factor
-extern void multiplyData (void *ptr, PropertyDataType data_type, double factor);
+//extern void multiplyData (void *ptr, PropertyDataType data_type, double factor);
 /// @brief Copies data from src to target
-extern void copyPropertyData (void *src, void *target, PropertyDataType type);
+//extern void copyPropertyData (void *src, void *target, PropertyDataType type);
 
-extern void finalizeDBData (DB_OBJECT_TYPE type, Buffer *buffer, DBOVariableSet read_list);
+//extern void finalizeDBData (DB_OBJECT_TYPE type, Buffer *buffer, DBOVariableSet read_list);
 }
 }
 #endif
