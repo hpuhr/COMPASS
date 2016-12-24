@@ -118,7 +118,7 @@ private:
     std::map <std::string, ArrayListTemplate<int> > arrays_int_;
     std::map <std::string, ArrayListTemplate<unsigned int> > arrays_uint_;
     std::map <std::string, ArrayListTemplate<long int> > arrays_long_int_;
-    std::map <std::string, ArrayListTemplate<unsigned long int> > arrays_long_uint_;
+    std::map <std::string, ArrayListTemplate<unsigned long int> > arrays_ulong_int_;
     std::map <std::string, ArrayListTemplate<float> > arrays_float_;
     std::map <std::string, ArrayListTemplate<double> > arrays_double_;
     std::map <std::string, ArrayListTemplate<std::string> > arrays_string_;
@@ -145,6 +145,17 @@ private:
     //void allocateUpTo (unsigned int index);
 
 public:
+    ArrayListTemplate<bool> &getBool (const std::string &id);
+    ArrayListTemplate<char> &getChar (const std::string id);
+    ArrayListTemplate<unsigned char> &getUChar (const std::string &id);
+    ArrayListTemplate<int> &getInt (const std::string &id);
+    ArrayListTemplate<unsigned int> &getUInt (const std::string &id);
+    ArrayListTemplate<long int> &getLongInt (const std::string &id);
+    ArrayListTemplate<unsigned long int> &getULongInt (const std::string &id);
+    ArrayListTemplate<float> &getFloat (const std::string &id);
+    ArrayListTemplate<double> &getDouble (const std::string &id);
+    ArrayListTemplate<std::string> &getString (const std::string &id);
+
     /// @brief  Returns maximal used index size
 //    const size_t size ()
 //    {

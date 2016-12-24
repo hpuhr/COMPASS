@@ -50,16 +50,13 @@ public:
     /// @brief Returns current maximum size of the list
     size_t getMaximumSize ();
 
-    /// @brief Sets all elements to None value
-    void setAllNone();
-
     /// @brief Sets specific element to None value
     virtual void setNone(size_t size_t);
 
     /// @brief Checks if specific element is None
     bool isNone(size_t size_t);
 
-    /// @brief Sets all elements to false
+    /// @brief Sets all elements to initial value and None information to true
     virtual void clear()=0;
 
 protected:
@@ -72,7 +69,10 @@ protected:
 
     std::vector < std::shared_ptr< std::array<bool,BUFFER_ARRAY_SIZE> > > none_flags_;
 
+    /// @brief Allocates a new none array
     void allocatedNewNoneArray ();
+    /// @brief Sets all elements to None value
+    void setAllNone();
     /// @brief Sets specific element to not None value
     void unsetNone (size_t index);
 };
@@ -102,6 +102,8 @@ public:
         for (it = data_.begin(); it != data_.end(); it++)
             for (unsigned int cnt=0; cnt < BUFFER_ARRAY_SIZE; cnt++)
                 it->get()->at(cnt)=T();
+
+        setAllNone();
     };
 
     /// @brief Returns const reference to a specific value

@@ -222,8 +222,8 @@ void Buffer::addProperty (std::string id, PropertyDataType type)
         arrays_long_int_ [id] = ArrayListTemplate<long int> ();
         break;
     case PropertyDataType::ULONGINT:
-        assert (arrays_long_uint_.count(id) == 0);
-        arrays_long_uint_ [id] = ArrayListTemplate<unsigned long int> ();
+        assert (arrays_ulong_int_.count(id) == 0);
+        arrays_ulong_int_ [id] = ArrayListTemplate<unsigned long int> ();
         break;
     case PropertyDataType::FLOAT:
         assert (arrays_float_.count(id) == 0);
@@ -246,6 +246,86 @@ void Buffer::addProperty (std::string id, PropertyDataType type)
 
     logdbg  << "Buffer: addProperty: end";
 };
+
+ArrayListTemplate<bool> &Buffer::getBool (const std::string &id)
+{
+    if (arrays_bool_.count(id) == 0)
+        throw std::runtime_error ("Buffer: getBool: unknown id "+id);
+
+    return arrays_bool_[id];
+}
+
+ArrayListTemplate<char> &Buffer::getChar (const std::string id)
+{
+    if (arrays_char_.count(id) == 0)
+        throw std::runtime_error ("Buffer: getChar: unknown id "+id);
+
+    return arrays_char_[id];
+}
+
+ArrayListTemplate<unsigned char> &Buffer::getUChar (const std::string &id)
+{
+    if (arrays_uchar_.count(id) == 0)
+        throw std::runtime_error ("Buffer: getUChar: unknown id "+id);
+
+    return arrays_uchar_[id];
+}
+
+ArrayListTemplate<int> &Buffer::getInt (const std::string &id)
+{
+    if (arrays_int_.count(id) == 0)
+        throw std::runtime_error ("Buffer: getInt: unknown id "+id);
+
+    return arrays_int_[id];
+}
+
+ArrayListTemplate<unsigned int> &Buffer::getUInt (const std::string &id)
+{
+    if (arrays_uint_.count(id) == 0)
+        throw std::runtime_error ("Buffer: getUInt: unknown id "+id);
+
+    return arrays_uint_[id];
+}
+
+ArrayListTemplate<long int> &Buffer::getLongInt (const std::string &id)
+{
+    if (arrays_long_int_.count(id) == 0)
+        throw std::runtime_error ("Buffer: getLongInt: unknown id "+id);
+
+    return arrays_long_int_[id];
+}
+
+ArrayListTemplate<unsigned long int> &Buffer::getULongInt (const std::string &id)
+{
+    if (arrays_ulong_int_.count(id) == 0)
+        throw std::runtime_error ("Buffer: getULongInt: unknown id "+id);
+
+    return arrays_ulong_int_[id];
+}
+
+ArrayListTemplate<float> &Buffer::getFloat (const std::string &id)
+{
+    if (arrays_float_.count(id) == 0)
+        throw std::runtime_error ("Buffer: getFloat: unknown id "+id);
+
+    return arrays_float_[id];
+}
+
+ArrayListTemplate<double> &Buffer::getDouble (const std::string &id)
+{
+    if (arrays_double_.count(id) == 0)
+        throw std::runtime_error ("Buffer: getDouble: unknown id "+id);
+
+    return arrays_double_[id];
+}
+
+ArrayListTemplate<std::string> &Buffer::getString (const std::string &id)
+{
+    if (arrays_string_.count(id) == 0)
+        throw std::runtime_error ("Buffer: getString: unknown id "+id);
+
+    return arrays_string_[id];
+}
 
 //void Buffer::seizeBuffer (Buffer *org_buffer)
 //{
