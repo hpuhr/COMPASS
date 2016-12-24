@@ -28,11 +28,6 @@
  * If new data type is added, add to PROPERTY_DATA_TYPE and at least ArrayTemplateManager.
  *
  */
-enum PROPERTY_DATA_TYPE { P_TYPE_BOOL=0, P_TYPE_CHAR, P_TYPE_INT, P_TYPE_UCHAR, P_TYPE_UINT,
-    P_TYPE_STRING, P_TYPE_FLOAT, P_TYPE_DOUBLE, P_TYPE_POINTER, P_TYPE_LONGINT, P_TYPE_ULONGINT, P_TYPE_SENTINEL };
-
-/// Mappings from PROPERTY_DATA_TYPE to strings, for debug output. defined in util.cpp.
-extern std::map<PROPERTY_DATA_TYPE,std::string> PROPERTY_DATA_TYPE_STRINGS;
 
 /// C struct data type, if any new data types are added also add them to the conversion mechanism in StructureConverter.cpp
 enum SE_DATA_TYPE {

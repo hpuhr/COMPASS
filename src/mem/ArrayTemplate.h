@@ -29,6 +29,8 @@
 #include "Logger.h"
 #include "Data.h"
 
+static const unsigned int BUFFER_ARRAY_SIZE=10000;
+
 /**
  * @brief Common interface for templates for an fixed-size array
  *
@@ -38,17 +40,17 @@ class ArrayTemplateBase
 {
 public:
   /// @brief Constructor
-	ArrayTemplateBase () {};
-	/// @brief Destructor
-	virtual ~ArrayTemplateBase () {};
-	/// @brief Pointer to the first element of the array
-	virtual void *getArrayBasePointer () = 0;
-	/// @brief Returns size of one element
-	virtual unsigned int getSize ()=0;
-	/// @brief Sets all elements to 0
-	virtual void clear() =0;
-	/// @brief Sets all elements to NaN
-	virtual void setArrayNan()=0;
+    ArrayTemplateBase () {};
+    /// @brief Destructor
+    virtual ~ArrayTemplateBase () {};
+    /// @brief Pointer to the first element of the array
+    virtual void *getArrayBasePointer () = 0;
+    /// @brief Returns size of one element
+    virtual unsigned int getSize ()=0;
+    /// @brief Sets all elements to 0
+    virtual void clear() =0;
+    /// @brief Sets all elements to NaN
+    virtual void setArrayNan()=0;
 };
 
 /**
@@ -67,7 +69,7 @@ public:
    * \param type element data type
    * \param size number of elements (default 10000)
    */
-	ArrayTemplate(PROPERTY_DATA_TYPE type, unsigned int size = 10000)
+    ArrayTemplate(PROPERTY_DATA_TYPE type, unsigned int size = 10000)
   {
     logdbg  << "ArrayTemplate: contructor";
     size_ = size;
@@ -77,11 +79,11 @@ public:
     init ();
   };
 
-	/**
-	 * @brief Destructor
-	 *
-	 * Deletes buffer_.
-	 */
+    /**
+     * @brief Destructor
+     *
+     * Deletes buffer_.
+     */
   virtual ~ArrayTemplate()
   {
     logdbg  << "ArrayTemplate: destructor";
@@ -93,18 +95,18 @@ public:
   /// @brief Returns reference to the ith element.
   T& operator[] (const unsigned int i)
   {
-  	assert (i < size_);
+    assert (i < size_);
     return (buffer_[i]);
   };
 
   void *getArrayBasePointer ()
   {
-  	return (void*) buffer_;
+    return (void*) buffer_;
   };
 
   unsigned int getSize ()
   {
-  	return sizeof(T);
+    return sizeof(T);
   }
 
   void clear ()
@@ -150,4 +152,96 @@ private:
 
 };
 
+#include <array>
+
+class ArrayBase
+{
+public:
+  /// @brief Constructor
+    ArrayBase () {};
+    /// @brief Destructor
+    virtual ~ArrayBase () {};
+    /// @brief Pointer to the first element of the array
+    //virtual void *getArrayBasePointer () = 0;
+    /// @brief Returns size of one element
+    virtual unsigned int getSize ()=0;
+    /// @brief Sets all elements to 0
+    virtual void clear() =0;
+    /// @brief Sets all elements to NaN
+    virtual void setArrayNan()=0;
+};
+
+template <class T>
+class ArrayTemplate2 : public ArrayBase
+{
+public:
+    ArrayTemplate2()
+    : array_(0), is_shallow_copy_(false)
+  {
+  };
+
+  virtual ~ArrayTemplate2()
+  {
+  };
+
+  ArrayTemplate2(const ArrayTemplate2& obj, bool deep) // deep copy, shallow copy
+  {
+      // TODO
+      *this=obj;
+  }
+
+  void clear()
+  {
+      // TODO template specialization
+  }
+
+  void setArrayNan()
+  {
+      // TODO template specialization
+  }
+
+  const bool isShallowCopy () { return is_shallow_copy_; }
+  void setIsShallowCopy (bool val) { is_shallow_copy_=val; } // TODO should be done by copy ctor
+protected:
+  std::array<T,BUFFER_ARRAY_SIZE> *array_;
+
+  bool is_shallow_copy_;
+};
+
+//class ArrayTemplateBool : public ArrayTemplate2<bool>
+//{
+//public:
+//    ArrayTemplateBool () {};
+//    ~ArrayTemplateBool () {};
+//};
+
+//case P_TYPE_CHAR:
+//                manager_ = new ArrayTemplateManager<char> (type_, size_);
+//                break;
+//            case P_TYPE_INT:
+//                manager_ = new ArrayTemplateManager<int> (type_, size_);
+//                break;
+//            case P_TYPE_UCHAR:
+//                manager_ = new ArrayTemplateManager<unsigned char> (type_, size_);
+//                break;
+//            case P_TYPE_UINT:
+//                manager_ = new ArrayTemplateManager<unsigned int> (type_, size_);
+//                break;
+//            case P_TYPE_LONGINT:
+//                manager_ = new ArrayTemplateManager<long int> (type_, size_);
+//                break;
+//            case P_TYPE_ULONGINT:
+//                manager_ = new ArrayTemplateManager<unsigned long int> (type_, size_);
+//                break;
+//            case P_TYPE_STRING:
+//                manager_ = new ArrayTemplateManager<std::string> (type_, size_);
+//                break;
+//            case P_TYPE_FLOAT:
+//                manager_ = new ArrayTemplateManager<float> (type_, size_);
+//                break;
+//            case P_TYPE_DOUBLE:
+//                manager_ = new ArrayTemplateManager<double> (type_, size_);
+//                break;
+//      case P_TYPE_POINTER:
+//        manager_ = new ArrayTemplateManager<void*> (type_, size_);
 #endif /* MEMORYPAGETEMPLATE_H_ */

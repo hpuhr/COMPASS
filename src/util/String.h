@@ -26,6 +26,7 @@
 #define STRINGMANIPULATION_H_
 
 #include "Global.h"
+#include "Property.h"
 #include <vector>
 
 namespace Utils
@@ -45,13 +46,13 @@ extern std::string doubleToStringNoScientific(double number);
 /// @brief Returns string with number in percent
 extern std::string percentToString(double number);
 /// @brief Returns unsigned int from parsed octal string
-extern unsigned int intFromOctalString (std::string number, bool* ok=0);
-extern unsigned int intFromHexString (std::string number, bool* ok=0);
+extern unsigned int intFromOctalString (std::string number);
+extern unsigned int intFromHexString (std::string number);
 /// @brief Returns int from parsed string
-extern int intFromString (std::string number, bool* ok=0);
-extern unsigned int uIntFromString (std::string number, bool* ok=0);
+extern int intFromString (std::string number);
+extern unsigned int uIntFromString (std::string number);
 /// @brief Returns double from parsed string
-extern double doubleFromString (std::string number, bool* ok=0);
+extern double doubleFromString (std::string number);
 /// @brief Returns container with strings, which are the contents of the supplied strings split by character delim
 extern std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems);
 /// @brief Returns container with strings, which are elems and the contents of the supplied strings split by character delim
@@ -59,7 +60,7 @@ extern std::vector<std::string> split(const std::string &s, char delim);
 /// @brief Returns time string from number in seconds
 extern std::string timeStringFromDouble (double seconds);
 /// @brief Returns number from parsed time string
-extern double timeFromString (std::string seconds, bool* ok=0);
+extern double timeFromString (std::string seconds);
 /// @brief Returns string with octal representation of decimal number
 extern std::string octStringFromInt (int number);
 extern std::string octStringFromInt (int number, int width, char c);
@@ -68,18 +69,18 @@ extern std::string hexStringFromInt (int number, int width, char c);
 /// @brief Returns appended number from a string
 extern int getAppendedInt (std::string text);
 extern int getLeadingInt (std::string text);
-extern void multiplyString (std::string &text, PROPERTY_DATA_TYPE data_type, double factor);
+//extern void multiplyString (std::string &text, PropertyDataType data_type, double factor);
 
-extern std::string getPropertyValueString (void *data, PROPERTY_DATA_TYPE data_type);
-extern std::string getPropertyValueHexString (void *data, PROPERTY_DATA_TYPE data_type);
-extern std::string getHexString (void *data, unsigned int num_bytes);
+//extern std::string getPropertyValueString (void *data, PropertyDataType data_type);
+//extern std::string getPropertyValueHexString (void *data, PropertyDataType data_type);
+//extern std::string getHexString (void *data, unsigned int num_bytes);
 
-extern bool isLargerAs (std::string org, std::string val, PROPERTY_DATA_TYPE type);
+//extern bool isLargerAs (std::string org, std::string val, PropertyDataType type);
 /// @brief Returns equivalent PROPERTY_DATA_TYPE from SQL data type
-extern PROPERTY_DATA_TYPE getDataTypeFromDB (std::string type);
+//extern PropertyDataType getDataTypeFromDB (std::string type);
 
-extern double doubleFromLatitudeString(std::string &latitude_str, bool &ok);
-extern double doubleFromLongitudeString(std::string &longitude_str, bool &ok);
+extern double doubleFromLatitudeString(std::string &latitude_str);
+extern double doubleFromLongitudeString(std::string &longitude_str);
 
 template <typename T> std::string formatBinaryString (T val)
 {

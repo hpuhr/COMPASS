@@ -31,34 +31,21 @@
 #include <boost/regex.hpp>
 
 std::map<DB_OBJECT_TYPE,std::string> DB_OBJECT_TYPE_STRINGS = boost::assign::map_list_of
-(DBO_UNDEFINED,     "DBO_UNDEFINED"    )
-(DBO_PLOTS,     "DBO_PLOTS"    )
-(DBO_SYSTEM_TRACKS, "DBO_SYSTEM_TRACKS")
-(DBO_ADS_B, "DBO_ADS_B")
-(DBO_MLAT, "DBO_MLAT")
-(DBO_REFERENCE_TRAJECTORIES, "DBO_REFERENCE_TRAJECTORIES")
-(DBO_SENSOR_INFORMATION,    "DBO_SENSOR_INFORMATION"   );
-
-std::map<PROPERTY_DATA_TYPE,std::string> PROPERTY_DATA_TYPE_STRINGS = boost::assign::map_list_of
-(P_TYPE_BOOL,     "P_TYPE_BOOL"    )
-(P_TYPE_CHAR,     "P_TYPE_CHAR"    )
-(P_TYPE_INT, "P_TYPE_INT")
-(P_TYPE_UCHAR, "P_TYPE_UCHAR")
-(P_TYPE_UINT, "P_TYPE_UINT")
-(P_TYPE_STRING, "P_TYPE_STRING")
-(P_TYPE_FLOAT,    "P_TYPE_FLOAT"   )
-(P_TYPE_DOUBLE,    "P_TYPE_DOUBLE"   )
-(P_TYPE_POINTER,    "P_TYPE_POINTER"   )
-(P_TYPE_LONGINT, "P_TYPE_LONGINT")
-(P_TYPE_ULONGINT, "P_TYPE_ULONGINT");
+        (DBO_UNDEFINED,     "DBO_UNDEFINED"    )
+        (DBO_PLOTS,     "DBO_PLOTS"    )
+        (DBO_SYSTEM_TRACKS, "DBO_SYSTEM_TRACKS")
+        (DBO_ADS_B, "DBO_ADS_B")
+        (DBO_MLAT, "DBO_MLAT")
+        (DBO_REFERENCE_TRAJECTORIES, "DBO_REFERENCE_TRAJECTORIES")
+        (DBO_SENSOR_INFORMATION,    "DBO_SENSOR_INFORMATION"   );
 
 std::map<STRING_REPRESENTATION,std::string> STRING_REPRESENTATION_STRINGS = boost::assign::map_list_of
-(R_STANDARD,     "R_STANDARD"    )
-(R_TIME_SECONDS,     "R_TIME_SECONDS"    )
-(R_OCTAL, "R_OCTAL")
-(R_FLIGHT_LEVEL, "R_FLIGHT_LEVEL")
-(R_SENSOR_NAME, "R_SENSOR_NAME")
-(R_HEX, "R_HEX");
+        (R_STANDARD,     "R_STANDARD"    )
+        (R_TIME_SECONDS,     "R_TIME_SECONDS"    )
+        (R_OCTAL, "R_OCTAL")
+        (R_FLIGHT_LEVEL, "R_FLIGHT_LEVEL")
+        (R_SENSOR_NAME, "R_SENSOR_NAME")
+        (R_HEX, "R_HEX");
 
 using namespace std;
 using boost::algorithm::iequals;
@@ -119,79 +106,46 @@ std::string percentToString(double number)
     return ss.str();//return a string with the contents of the stream
 }
 
-unsigned int intFromOctalString (std::string number, bool* ok)
+unsigned int intFromOctalString (std::string number)
 {
-    unsigned int x=0;
-    std::stringstream ss;
-    ss << std::oct << number;
-    bool ssok = ( ss >> x );
-    if( ok )
-        *ok = ssok;
-
-    if( !ssok )
-        logdbg  << "Util: intFromOctalString: Bad operation: '" << number << "'";
+    unsigned int x = std::stoi( number, 0, 8 );
+    logdbg << "Util: intFromOctalString: returning " << x << " from " << number;
 
     return x;
 }
 
-unsigned int intFromHexString (std::string number, bool* ok)
+unsigned int intFromHexString (std::string number)
 {
-    unsigned int x=0;
-    std::stringstream ss;
-    ss << std::hex << number;
-    bool ssok = ( ss >> x );
-    if( ok )
-        *ok = ssok;
+    unsigned int x = std::stoi( number, 0, 16 );
 
-    if( !ssok )
-        logdbg  << "Util: intFromHexString: Bad operation: '" << number << "'";
-
-    loginf << "Util: intFromHexString: returning " << x << " from " << number;
+    logdbg << "Util: intFromHexString: returning " << x << " from " << number;
 
     return x;
 }
 
-int intFromString (std::string number, bool* ok)
+int intFromString (std::string number)
 {
-    int x=0;
-    std::stringstream ss;
-    ss <<  number;
-    bool ssok = ( ss >> x );
-    if( ok )
-        *ok = ssok;
+    int x = std::stoi( number );
 
-    if( !ssok )
-        logdbg  << "Util: intFromString: Bad operation: '" << number << "'";
+    logdbg << "Util: intFromString: returning " << x << " from " << number;
 
     return x;
 }
 
-unsigned int uIntFromString (std::string number, bool* ok)
+unsigned int uIntFromString (std::string number)
 {
-    unsigned int x=0;
-    std::stringstream ss;
-    ss <<  number;
-    bool ssok = ( ss >> x );
-    if( ok )
-        *ok = ssok;
+    int x = std::stoi( number );
 
-    if( !ssok )
-        logdbg  << "Util: intFromString: Bad operation: '" << number << "'";
+    logdbg << "Util: uIntFromString: returning " << x << " from " << number;
 
     return x;
 }
 
-double doubleFromString (std::string number, bool* ok)
+double doubleFromString (std::string number)
 {
-    double x=0.0;
-    std::stringstream ss;
-    ss << fixed << number;
-    bool ssok = ( ss >> x );
-    if( ok )
-        *ok = ssok;
+    double x = std::stod( number );
 
-    if( !ssok )
-        logdbg  << "Util: doubleFromString: Bad operation: '" << number << "'";
+    logdbg << "Util: doubleFromString: returning " << x << " from " << number;
 
     return x;
 }
@@ -208,58 +162,58 @@ std::vector<std::string> &split(const std::string &s, char delim, std::vector<st
 }
 
 
-bool isLargerAs (std::string org, std::string val, PROPERTY_DATA_TYPE type)
-{
-    logdbg << "Util: isLargerAs: org '" << org << "' val '" << val << "'";
-    if (type == P_TYPE_BOOL)
-    {
-        bool org_val = intFromString (org);
-        bool val_val = intFromString (val);
-        return val_val > org_val;
-    }
-    else if (type == P_TYPE_CHAR)
-    {
-        char org_val = intFromString (org);
-        char val_val = intFromString (val);
-        return val_val > org_val;
-    }
-    else if (type == P_TYPE_INT)
-    {
-        int org_val = intFromString (org);
-        int val_val = intFromString (val);
-        return val_val > org_val;
-    }
-    else if (type == P_TYPE_UCHAR)
-    {
-        unsigned char org_val = intFromString (org);
-        unsigned char val_val = intFromString (val);
-        return val_val > org_val;
-    }
-    else if (type == P_TYPE_UINT)
-    {
-        unsigned int org_val = intFromString (org);
-        unsigned int val_val = intFromString (val);
-        return val_val > org_val;
-    }
-    else if (type == P_TYPE_STRING)
-    {
-        return org.compare(val) > 0;
-    }
-    else if (type == P_TYPE_FLOAT)
-    {
-        float org_val = doubleFromString (org);
-        float val_val = doubleFromString (val);
-        return val_val > org_val;
-    }
-    else if (type == P_TYPE_DOUBLE)
-    {
-        double org_val = doubleFromString (org);
-        double val_val = doubleFromString (val);
-        return val_val > org_val;
-    }
-    else
-        throw std::runtime_error ("Util: createDataFromStringBuffer: unknown property type");
-}
+//bool isLargerAs (std::string org, std::string val, PropertyDataType type)
+//{
+//    logdbg << "Util: isLargerAs: org '" << org << "' val '" << val << "'";
+//    if (type == P_TYPE_BOOL)
+//    {
+//        bool org_val = intFromString (org);
+//        bool val_val = intFromString (val);
+//        return val_val > org_val;
+//    }
+//    else if (type == P_TYPE_CHAR)
+//    {
+//        char org_val = intFromString (org);
+//        char val_val = intFromString (val);
+//        return val_val > org_val;
+//    }
+//    else if (type == P_TYPE_INT)
+//    {
+//        int org_val = intFromString (org);
+//        int val_val = intFromString (val);
+//        return val_val > org_val;
+//    }
+//    else if (type == P_TYPE_UCHAR)
+//    {
+//        unsigned char org_val = intFromString (org);
+//        unsigned char val_val = intFromString (val);
+//        return val_val > org_val;
+//    }
+//    else if (type == P_TYPE_UINT)
+//    {
+//        unsigned int org_val = intFromString (org);
+//        unsigned int val_val = intFromString (val);
+//        return val_val > org_val;
+//    }
+//    else if (type == P_TYPE_STRING)
+//    {
+//        return org.compare(val) > 0;
+//    }
+//    else if (type == P_TYPE_FLOAT)
+//    {
+//        float org_val = doubleFromString (org);
+//        float val_val = doubleFromString (val);
+//        return val_val > org_val;
+//    }
+//    else if (type == P_TYPE_DOUBLE)
+//    {
+//        double org_val = doubleFromString (org);
+//        double val_val = doubleFromString (val);
+//        return val_val > org_val;
+//    }
+//    else
+//        throw std::runtime_error ("Util: createDataFromStringBuffer: unknown property type");
+//}
 
 std::vector<std::string> split(const std::string &s, char delim)
 {
@@ -282,7 +236,7 @@ std::string timeStringFromDouble (double seconds)
     return ss.str();
 }
 
-double timeFromString (std::string seconds, bool* ok)
+double timeFromString (std::string seconds)
 {
     std::vector<std::string> chunks = split(seconds, ':');
 
@@ -291,18 +245,12 @@ double timeFromString (std::string seconds, bool* ok)
     if (chunks.size() != 3)
         throw std::runtime_error( "Util: timeFromString: wrong number of chunks" );
 
-    bool ok0, ok1, ok2;
-    time =  doubleFromString(chunks[0], &ok0) * 3600.0;
-    time += doubleFromString(chunks[1], &ok1) * 60.0;
-    time += doubleFromString(chunks[2], &ok2);
+    time =  doubleFromString(chunks[0]) * 3600.0;
+    time += doubleFromString(chunks[1]) * 60.0;
+    time += doubleFromString(chunks[2]);
 
-    if( ok )
-    {
-        *ok = ok0 && ok1 && ok2;
-        if (!*ok)
-            logwrn << "Util: timeFromString: time conversion failed 0: " << chunks[0] << " " << ok0
-            << " 1: " << chunks[1] << " " << ok1 << " 2: " << chunks[2] << " " << ok2;
-    }
+    logdbg << "Util: timeFromString: returning " << time << " from " << seconds;
+
     return time;
 }
 
@@ -371,187 +319,187 @@ int getLeadingInt (std::string text)
 }
 
 //P_TYPE_BOOL=0, P_TYPE_CHAR, P_TYPE_INT, P_TYPE_UCHAR, P_TYPE_UINT, P_TYPE_STRING, P_TYPE_FLOAT, P_TYPE_DOUBLE, P_TYPE_SENTINEL
-PROPERTY_DATA_TYPE getDataTypeFromDB (std::string type)
-{
-    boost::cmatch what;
-    //TODO hacked data types smallint, enum?, bigint, tinyblob, blob, mediumblob
-    if (boost::iequals (type,"boolean"))
-    {
-        return P_TYPE_BOOL;
-    }
-    else if (boost::iequals (type,"tinyint"))
-    {
-        return P_TYPE_CHAR;
-    }
-    else if (boost::iequals (type,"char"))
-    {
-        return P_TYPE_CHAR;
-    }
-    else if (boost::iequals (type,"smallint"))
-    {
-        return P_TYPE_INT;
-    }
-    else if (boost::iequals (type,"int") || boost::iequals (type,"integer"))
-    {
-        return P_TYPE_INT;
-    }
-    else if (boost::iequals (type,"mediumint"))
-    {
-        return P_TYPE_INT;
-    }
-    else if (boost::iequals (type,"bigint"))
-    {
-        return P_TYPE_INT;
-    }
-    else if (boost::iequals (type,"double"))
-    {
-        return P_TYPE_DOUBLE;
-    }
-    else if (boost::iequals (type,"enum"))
-    {
-        return P_TYPE_STRING;
-    }
-    else if (boost::iequals (type,"varchar") || boost::regex_match(type.c_str(), what, boost::regex ("VARCHAR.*")))
-    {
-        return P_TYPE_STRING;
-    }
-    else if (boost::iequals (type,"tinyblob"))
-    {
-        return P_TYPE_STRING;
-    }
-    else if (boost::iequals (type,"blob"))
-    {
-        return P_TYPE_STRING;
-    }
-    else if (boost::iequals (type,"mediumblob"))
-    {
-        return P_TYPE_STRING;
-    }
-    else if (boost::iequals (type,"binary"))
-    {
-        return P_TYPE_STRING;
-    }
-    else
-        throw std::runtime_error ("Util: getDataTypeFromDB: unknown db type '"+type+"'");
+//PropertyDataType getDataTypeFromDB (std::string type)
+//{
+//    boost::cmatch what;
+//    //TODO hacked data types smallint, enum?, bigint, tinyblob, blob, mediumblob
+//    if (boost::iequals (type,"boolean"))
+//    {
+//        return P_TYPE_BOOL;
+//    }
+//    else if (boost::iequals (type,"tinyint"))
+//    {
+//        return P_TYPE_CHAR;
+//    }
+//    else if (boost::iequals (type,"char"))
+//    {
+//        return P_TYPE_CHAR;
+//    }
+//    else if (boost::iequals (type,"smallint"))
+//    {
+//        return P_TYPE_INT;
+//    }
+//    else if (boost::iequals (type,"int") || boost::iequals (type,"integer"))
+//    {
+//        return P_TYPE_INT;
+//    }
+//    else if (boost::iequals (type,"mediumint"))
+//    {
+//        return P_TYPE_INT;
+//    }
+//    else if (boost::iequals (type,"bigint"))
+//    {
+//        return P_TYPE_INT;
+//    }
+//    else if (boost::iequals (type,"double"))
+//    {
+//        return P_TYPE_DOUBLE;
+//    }
+//    else if (boost::iequals (type,"enum"))
+//    {
+//        return P_TYPE_STRING;
+//    }
+//    else if (boost::iequals (type,"varchar") || boost::regex_match(type.c_str(), what, boost::regex ("VARCHAR.*")))
+//    {
+//        return P_TYPE_STRING;
+//    }
+//    else if (boost::iequals (type,"tinyblob"))
+//    {
+//        return P_TYPE_STRING;
+//    }
+//    else if (boost::iequals (type,"blob"))
+//    {
+//        return P_TYPE_STRING;
+//    }
+//    else if (boost::iequals (type,"mediumblob"))
+//    {
+//        return P_TYPE_STRING;
+//    }
+//    else if (boost::iequals (type,"binary"))
+//    {
+//        return P_TYPE_STRING;
+//    }
+//    else
+//        throw std::runtime_error ("Util: getDataTypeFromDB: unknown db type '"+type+"'");
 
-}
-
-
-void multiplyString (std::string &text, PROPERTY_DATA_TYPE data_type, double factor)
-{
-    if (data_type == P_TYPE_CHAR)
-        text = intToString(intFromString(text)*factor);
-    else if (data_type == P_TYPE_INT)
-        text = intToString(intFromString(text)*factor);
-    else if (data_type == P_TYPE_UCHAR)
-        text = intToString(intFromString(text)*factor);
-    else if (data_type == P_TYPE_UINT)
-        text = intToString(intFromString(text)*factor);
-    else if (data_type == P_TYPE_FLOAT)
-        text = doubleToString(doubleFromString(text)*factor);
-    else if (data_type == P_TYPE_DOUBLE)
-        text = doubleToString(doubleFromString(text)*factor);
-    else
-    {
-        logerr << "Util: multiplyString: text '" << text << "' data_type " << PROPERTY_DATA_TYPE_STRINGS[data_type]
-               << " factor " << factor;
-        throw std::runtime_error ("Util: multiplyString: incorrect data type "+intToString (data_type));
-
-    }
-}
-
-std::string getPropertyValueString (void *data, PROPERTY_DATA_TYPE data_type)
-{
-    std::stringstream ss;
-
-    switch (data_type)
-    {
-    case P_TYPE_BOOL:
-        ss << *(bool *) data;
-        break;
-    case P_TYPE_UCHAR:
-        ss << (int) *(unsigned char *) data;
-        break;
-    case P_TYPE_CHAR:
-    case P_TYPE_INT:
-        ss << (int)*(char *) data;
-        break;
-    case P_TYPE_UINT:
-        ss << *(unsigned int *) data;
-        break;
-    case P_TYPE_STRING:
-        ss << *(std::string *) data;
-        break;
-    case P_TYPE_FLOAT:
-        ss << *(float *) data;
-        break;
-    case P_TYPE_DOUBLE:
-        ss << *(double *) data;
-        break;
-    case P_TYPE_POINTER:
-        ss << std::hex << *(void**) data;
-        break;
-    case P_TYPE_ULONGINT:
-        ss << *(unsigned long int *) data;
-        break;
-    case P_TYPE_LONGINT:
-        ss << *(long int *) data;
-        break;
-    default:
-        logerr  <<  "Util: getPropertyValueString: unknown property type";
-        throw std::runtime_error ("Util: getPropertyValueString: unknown property type");
-    }
-
-    return ss.str();
-}
+//}
 
 
-std::string getPropertyValueHexString (void *data, PROPERTY_DATA_TYPE data_type)
-{
-    std::stringstream ss;
+//void multiplyString (std::string &text, PropertyDataType data_type, double factor)
+//{
+//    if (data_type == P_TYPE_CHAR)
+//        text = intToString(intFromString(text)*factor);
+//    else if (data_type == P_TYPE_INT)
+//        text = intToString(intFromString(text)*factor);
+//    else if (data_type == P_TYPE_UCHAR)
+//        text = intToString(intFromString(text)*factor);
+//    else if (data_type == P_TYPE_UINT)
+//        text = intToString(intFromString(text)*factor);
+//    else if (data_type == P_TYPE_FLOAT)
+//        text = doubleToString(doubleFromString(text)*factor);
+//    else if (data_type == P_TYPE_DOUBLE)
+//        text = doubleToString(doubleFromString(text)*factor);
+//    else
+//    {
+//        logerr << "Util: multiplyString: text '" << text << "' data_type " << Property::getDataTypeStr(data_type)
+//               << " factor " << factor;
+//        throw std::runtime_error ("Util: multiplyString: incorrect data type "+intToString (data_type));
 
-    ss << hex;
+//    }
+//}
 
-    switch (data_type)
-    {
-    case P_TYPE_BOOL:
-        ss << *(bool *) data;
-        break;
-    case P_TYPE_UCHAR:
-        ss << (int) *(unsigned char *) data;
-        break;
-    case P_TYPE_CHAR:
-    case P_TYPE_INT:
-        ss << (int)*(char *) data;
-        break;
-    case P_TYPE_UINT:
-        ss << *(unsigned int *) data;
-        break;
-    case P_TYPE_STRING:
-        ss << *(std::string *) data;
-        break;
-    case P_TYPE_FLOAT:
-        ss << *(float *) data;
-        break;
-    case P_TYPE_DOUBLE:
-        ss << *(double *) data;
-        break;
-    case P_TYPE_POINTER:
-        ss << std::hex << *(void**) data;
-        break;
-    case P_TYPE_ULONGINT:
-        ss << std::hex << *(unsigned long int *) data;
-        break;
-    case P_TYPE_LONGINT:
-        ss << std::hex << *(long int *) data;
-        break;
-    default:
-        logerr  <<  "Util: getPropertyValueString: unknown property type";
-        throw std::runtime_error ("Util: getPropertyValueString: unknown property type");
-    }
+//std::string getPropertyValueString (void *data, PropertyDataType data_type)
+//{
+//    std::stringstream ss;
 
-    return ss.str();
-}
+//    switch (data_type)
+//    {
+//    case P_TYPE_BOOL:
+//        ss << *(bool *) data;
+//        break;
+//    case P_TYPE_UCHAR:
+//        ss << (int) *(unsigned char *) data;
+//        break;
+//    case P_TYPE_CHAR:
+//    case P_TYPE_INT:
+//        ss << (int)*(char *) data;
+//        break;
+//    case P_TYPE_UINT:
+//        ss << *(unsigned int *) data;
+//        break;
+//    case P_TYPE_STRING:
+//        ss << *(std::string *) data;
+//        break;
+//    case P_TYPE_FLOAT:
+//        ss << *(float *) data;
+//        break;
+//    case P_TYPE_DOUBLE:
+//        ss << *(double *) data;
+//        break;
+//    case P_TYPE_POINTER:
+//        ss << std::hex << *(void**) data;
+//        break;
+//    case P_TYPE_ULONGINT:
+//        ss << *(unsigned long int *) data;
+//        break;
+//    case P_TYPE_LONGINT:
+//        ss << *(long int *) data;
+//        break;
+//    default:
+//        logerr  <<  "Util: getPropertyValueString: unknown property type";
+//        throw std::runtime_error ("Util: getPropertyValueString: unknown property type");
+//    }
+
+//    return ss.str();
+//}
+
+
+//std::string getPropertyValueHexString (void *data, PropertyDataType data_type)
+//{
+//    std::stringstream ss;
+
+//    ss << hex;
+
+//    switch (data_type)
+//    {
+//    case P_TYPE_BOOL:
+//        ss << *(bool *) data;
+//        break;
+//    case P_TYPE_UCHAR:
+//        ss << (int) *(unsigned char *) data;
+//        break;
+//    case P_TYPE_CHAR:
+//    case P_TYPE_INT:
+//        ss << (int)*(char *) data;
+//        break;
+//    case P_TYPE_UINT:
+//        ss << *(unsigned int *) data;
+//        break;
+//    case P_TYPE_STRING:
+//        ss << *(std::string *) data;
+//        break;
+//    case P_TYPE_FLOAT:
+//        ss << *(float *) data;
+//        break;
+//    case P_TYPE_DOUBLE:
+//        ss << *(double *) data;
+//        break;
+//    case P_TYPE_POINTER:
+//        ss << std::hex << *(void**) data;
+//        break;
+//    case P_TYPE_ULONGINT:
+//        ss << std::hex << *(unsigned long int *) data;
+//        break;
+//    case P_TYPE_LONGINT:
+//        ss << std::hex << *(long int *) data;
+//        break;
+//    default:
+//        logerr  <<  "Util: getPropertyValueString: unknown property type";
+//        throw std::runtime_error ("Util: getPropertyValueString: unknown property type");
+//    }
+
+//    return ss.str();
+//}
 
 std::string getHexString (void *data, unsigned int num_bytes)
 {
@@ -570,49 +518,18 @@ std::string getHexString (void *data, unsigned int num_bytes)
     return ss.str();
 }
 
-double doubleFromLatitudeString(std::string &latitude_str, bool &ok)
+double doubleFromLatitudeString(std::string &latitude_str)
 {
-    ok = true;
     unsigned int len = latitude_str.size();
     assert (len == 12);
     char last_char = latitude_str.at(len-1);
     assert (last_char == 'N' || last_char == 'S');
 
     double x=0.0;
-    double tmp=0.0;
-    std::stringstream ss;
 
-    ss << latitude_str.substr(0, 2);
-    ok = (ss >> tmp);
-
-    if(!ok)
-    {
-        logwrn  << "Util: doubleFromLatitudeString: bad operation: '" << latitude_str.substr(0, 2) << "'";
-        return 0.0;
-    }
-    x = tmp;
-
-    ss.clear();
-    ss << latitude_str.substr(2, 2);
-    ok = (ss >> tmp);
-
-    if(!ok)
-    {
-        logwrn  << "Util: doubleFromLatitudeString: bad operation: '" << latitude_str.substr(2, 2) << "'";
-        return 0.0;
-    }
-    x += tmp/60.0;
-
-    ss.clear();
-    ss << latitude_str.substr(4, 7);
-    ok = (ss >> tmp);
-
-    if(!ok)
-    {
-        logwrn  << "Util: doubleFromLatitudeString: bad operation: '" << latitude_str.substr(4, 7) << "'";
-        return 0.0;
-    }
-    x += tmp/3600.0;
+    x = doubleFromString(latitude_str.substr(0, 2));
+    x += doubleFromString(latitude_str.substr(2, 2))/60.0;
+    x += doubleFromString(latitude_str.substr(4, 7))/3600.0;
 
     if (last_char == 'S')
         x *= -1.0;
@@ -620,49 +537,18 @@ double doubleFromLatitudeString(std::string &latitude_str, bool &ok)
     return x;
 }
 
-double doubleFromLongitudeString(std::string &longitude_str, bool &ok)
+double doubleFromLongitudeString(std::string &longitude_str)
 {
-    ok = true;
     unsigned int len = longitude_str.size();
     assert (len == 13);
     char last_char = longitude_str.at(len-1);
     assert (last_char == 'E' || last_char == 'W');
 
     double x=0.0;
-    double tmp=0.0;
-    std::stringstream ss;
 
-    ss << longitude_str.substr(0, 3);
-    ok = (ss >> tmp);
-
-    if(!ok)
-    {
-        logwrn  << "Util: doubleFromLongitudeString: bad operation: '" << longitude_str.substr(0, 2) << "'";
-        return 0.0;
-    }
-    x = tmp;
-
-    ss.clear();
-    ss << longitude_str.substr(3, 2);
-    ok = (ss >> tmp);
-
-    if(!ok)
-    {
-        logwrn  << "Util: doubleFromLongitudeString: bad operation: '" << longitude_str.substr(2, 2) << "'";
-        return 0.0;
-    }
-    x += tmp/60.0;
-
-    ss.clear();
-    ss << longitude_str.substr(5, 7);
-    ok = (ss >> tmp);
-
-    if(!ok)
-    {
-        logwrn  << "Util: doubleFromLongitudeString: bad operation: '" << longitude_str.substr(4, 7) << "'";
-        return 0.0;
-    }
-    x += tmp/3600.0;
+    x = doubleFromString(longitude_str.substr(0, 3));
+    x += doubleFromString(longitude_str.substr(3, 2))/60.0;
+    x += doubleFromString(longitude_str.substr(5, 7))/3600.0;
 
     if (last_char == 'W')
         x *= -1.0;

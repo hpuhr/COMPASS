@@ -27,32 +27,58 @@
 
 #include "Global.h"
 
+enum class PropertyDataType { BOOL, CHAR, UCHAR, INT, UINT, LONGINT, ULONGINT,
+    FLOAT, DOUBLE, STRING }; // P_TYPE_POINTER and SENTINEL removed
+
 /**
  * @brief Base class for a data item identifier
  *
  * Contains a data type (based on PROPERTY_DATA_TYPE) and a string identifier. Also a size in bytes is stored,
  * which is based on the data type.
  *
- * Uses public members for fast access
- *
- * \todo Public members should be changed into getter and setter methods
  */
 class Property
 {
 public:
-  /// Data type (based on PROPERTY_DATA_TYPE)
-  unsigned int data_type_int_;
+  /// @brief Default constructor. Use only if members are overwritten.
+  //Property();
+  /// @brief Constructor
+  Property(std::string id, PropertyDataType type);
+  /// @brief Destructor
+  virtual ~Property() {};
+
+  PropertyDataType getDataType() const { return data_type_; };
+
+  const std::string &asString() const { return Property::asString(data_type_); };
+
+  std::string getId() const { return id_; };
+
+  //unsigned int getSize() const;
+
+  static const std::string &asString (PropertyDataType type)
+  {
+      assert (data_types_2_strings_.count(type) > 0);
+      return data_types_2_strings_[type];
+  };
+
+  static PropertyDataType &asDataType (const std::string &type)
+  {
+      assert (strings_2_data_types_.count(type) > 0);
+      return strings_2_data_types_[type];
+  };
+
+
+protected:
+  /// Data type
+  PropertyDataType data_type_;
   /// String identifier
   std::string id_;
   /// Size of data item in bytes
-  unsigned int size_;
+//  unsigned int size_;
 
-  /// @brief Default constructor. Use only if members are overwritten.
-  Property();
-  /// @brief Constructor
-  Property(std::string id, PROPERTY_DATA_TYPE type);
-  /// @brief Destructor
-  virtual ~Property() {};
+  /// Mappings from PropertyDataType to strings, and back.
+  static std::map<PropertyDataType,std::string> data_types_2_strings_;
+  static std::map<std::string, PropertyDataType> strings_2_data_types_;
 };
 
 #endif /* PROPERTY_H_ */

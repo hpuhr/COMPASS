@@ -25,19 +25,66 @@
 #include <limits>
 
 #include "Property.h"
-#include "MemoryManager.h"
+//#include "MemoryManager.h"
 
-Property::Property()
+#include <boost/assign/list_of.hpp>
+
+
+std::map<PropertyDataType,std::string> Property::data_types_2_strings_ = boost::assign::map_list_of
+        (PropertyDataType::BOOL,       "BOOL")
+        (PropertyDataType::CHAR,       "CHAR")
+        (PropertyDataType::UCHAR,      "UCHAR")
+        (PropertyDataType::INT,        "INT")
+        (PropertyDataType::UCHAR,      "UINT")
+        (PropertyDataType::LONGINT,    "LONGINT")
+        (PropertyDataType::ULONGINT,   "ULONGINT")
+        (PropertyDataType::FLOAT,      "FLOAT")
+        (PropertyDataType::DOUBLE,     "DOUBLE")
+        (PropertyDataType::STRING,     "STRING");
+
+std::map<std::string, PropertyDataType> Property::strings_2_data_types_ = boost::assign::map_list_of
+        ("BOOL", PropertyDataType::BOOL)
+        ("CHAR", PropertyDataType::CHAR)
+        ("UCHAR", PropertyDataType::UCHAR)
+        ("INT", PropertyDataType::INT)
+        ("UINT", PropertyDataType::UCHAR)
+        ("LONGINT", PropertyDataType::LONGINT)
+        ("ULONGINT", PropertyDataType::ULONGINT)
+        ("FLOAT", PropertyDataType::FLOAT)
+        ("DOUBLE", PropertyDataType::DOUBLE)
+        ("STRING", PropertyDataType::STRING);
+
+Property::Property(std::string id, PropertyDataType type)
+    : data_type_(type), id_(id)
 {
-  data_type_int_ = P_TYPE_SENTINEL;
-  size_=0;
+    //size_ = MemoryManager::getInstance().getBaseSizesInBytes(data_type_int_);
 }
 
-Property::Property(std::string id, PROPERTY_DATA_TYPE type)
-: data_type_int_(type), id_(id)
-{
-  size_ = MemoryManager::getInstance().getBaseSizesInBytes(data_type_int_);
-}
+//PROPERTY_DATA_TYPE Property::getDataType() const
+//{
+//    return (PROPERTY_DATA_TYPE) data_type_int_;
+//}
+
+//unsigned int Property::getDataTypeInt() const
+//{
+//    return data_type_int_;
+//}
+
+//std::string &Property::getDataTypeStr() const
+//{
+//    assert (data_type_int_ > 0 && data_type_int_ < P_TYPE_SENTINEL);
+//    return data_type_strings[(PROPERTY_DATA_TYPE) data_type_int_];
+//}
+
+//std::string Property::getID() const
+//{
+//    return id_;
+//}
+
+//unsigned int Property::getSize() const
+//{
+//    return size_;
+//}
 
 //bool Property::isNan (void *ptr)
 //{

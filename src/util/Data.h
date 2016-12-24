@@ -51,9 +51,9 @@ extern void memcpy_reverse (char *dest, char* src, unsigned int num_bytes, bool 
 extern void check_reverse (char *data, char* check_value, unsigned int num_bytes); // throws exception if not
 extern void setSpecialNullsNan (Buffer *buffer, unsigned int column, unsigned int data_type, std::string special_null);
 /// @brief Multiplies given data with a factor
-extern void multiplyData (void *ptr, PROPERTY_DATA_TYPE data_type, double factor);
+extern void multiplyData (void *ptr, PropertyDataType data_type, double factor);
 /// @brief Copies data from src to target
-extern void copyPropertyData (void *src, void *target, PROPERTY_DATA_TYPE type);
+extern void copyPropertyData (void *src, void *target, PropertyDataType type);
 
 extern void finalizeDBData (DB_OBJECT_TYPE type, Buffer *buffer, DBOVariableSet read_list);
 }

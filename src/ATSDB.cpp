@@ -460,14 +460,14 @@ void ATSDB::update (Buffer *data)
 
     assert (data);
 
-    DB_OBJECT_TYPE dbotype = data->getDBOType();
+    DB_OBJECT_TYPE dbotype = data->dboType();
 
     assert (DBObjectManager::getInstance().existsDBOVariable(DBO_UNDEFINED, "id"));
     DBOVariable *idvar = DBObjectManager::getInstance().getDBOVariable(DBO_UNDEFINED, "id");
     assert (idvar->existsIn(dbotype));
     std::string dboidvar_name = idvar->getFor(dbotype)->getCurrentVariableName();
 
-    PropertyList *list = data->getPropertyList();
+    PropertyList *list = data->properties();
     assert (list->hasProperty(dboidvar_name));
 
     UpdateBufferDBJob *job = new UpdateBufferDBJob (this, boost::bind( &ATSDB::updateDBODone, this, _1 ),
@@ -575,75 +575,76 @@ void ATSDB::buildDataSources()
         std::map<int, std::string> &data_sources = data_sources_[ito->first];
         std::map <std::pair<unsigned char, unsigned char>, DataSource* > &dbo_data_sources = data_sources_instances_ [ito->first];
 
-        if (!buffer->getFirstWrite())
+        if (!buffer->firstWrite())
         {
             //buffer->print(buffer->getSize ());
 
-            buffer->setIndex(0);
-            unsigned int size = buffer->getSize ();
-
-            unsigned int cnt=0;
-
-
-
-            while (cnt < size)
-            {
-                if (cnt != 0)
-                    buffer->incrementIndex();
-
-                std::vector<void *>*addresses = buffer->getAdresses();
-                assert (addresses->size() == 8);
-
-//                list.addProperty (ds->getForeignKey(), P_TYPE_INT);
-//                list.addProperty (ds->getNameColumn(), P_TYPE_STRING); //DS_NAME SAC SIC
-//                list.addProperty ("DS_NAME", P_TYPE_STRING);
-//                list.addProperty ("SAC", P_TYPE_UCHAR);
-//                list.addProperty ("SIC", P_TYPE_UCHAR);
-//                list.addProperty ("POS_LAT_DEG", P_TYPE_DOUBLE);
-//                list.addProperty ("POS_LONG_DEG", P_TYPE_DOUBLE);
-//                list.addProperty ("GROUND_ALTITUDE_AMSL_M", P_TYPE_DOUBLE);
-
-                int sensor_number = *((int*)addresses->at(0));
-                std::string sensor_name = *((std::string*)addresses->at(1));
-                std::string sensor_name_long = *((std::string*)addresses->at(2));
-                unsigned char sac = *((unsigned char*)addresses->at(3));
-                unsigned char sic = *((unsigned char*)addresses->at(4));
-                double latitude = *((double*)addresses->at(5));
-                double longitude = *((double*)addresses->at(6));
-                double altitude = *((double*)addresses->at(7));
-
-                if (sensor_name.size() == 0)
-                    sensor_name = sensor_name_long;
-
-                logdbg  << "ATSDB: buildDataSources: at index " << cnt << " number " <<  sensor_number << " name " << sensor_name << " lat " << latitude+0.1 << " lon " << longitude;
-
-                assert (data_sources.find (sensor_number) == data_sources.end());
-                data_sources [sensor_number] = sensor_name;
-
-                //std::map <DB_OBJECT_TYPE, std::map <std::pair<unsigned char, unsigned char>, DataSource* > > data_sources_instances_;
-
-                std::pair <unsigned char, unsigned char > sac_sic_key (sac, sic);
-
-                assert (dbo_data_sources.find (sac_sic_key) == dbo_data_sources.end());
-
-                dbo_data_sources [sac_sic_key] = new DataSource ();
-                DataSource *data_source = dbo_data_sources [sac_sic_key];
-                data_source->setDBOType(ito->first);
-                data_source->setId(sensor_number);
-                data_source->setShortName(sensor_name);
-                data_source->setName(sensor_name_long);
-                data_source->setSac(sac);
-                data_source->setSic(sic);
-                data_source->setLatitude(latitude);
-                data_source->setLongitude(longitude);
-                data_source->setAltitude(altitude);
-
-                data_source->finalize();
-
-                cnt++;
-            }
-
-            loginf  << "ATSDB: buildDataSources: found " << data_sources.size() << " data sources for " << ito->second->getName();
+            //TODO
+//            buffer->setIndex(0);
+//            unsigned int size = buffer->getSize ();
+//
+//            unsigned int cnt=0;
+//
+//
+//
+//            while (cnt < size)
+//            {
+//                if (cnt != 0)
+//                    buffer->incrementIndex();
+//
+//                std::vector<void *>*addresses = buffer->getAdresses();
+//                assert (addresses->size() == 8);
+//
+////                list.addProperty (ds->getForeignKey(), P_TYPE_INT);
+////                list.addProperty (ds->getNameColumn(), P_TYPE_STRING); //DS_NAME SAC SIC
+////                list.addProperty ("DS_NAME", P_TYPE_STRING);
+////                list.addProperty ("SAC", P_TYPE_UCHAR);
+////                list.addProperty ("SIC", P_TYPE_UCHAR);
+////                list.addProperty ("POS_LAT_DEG", P_TYPE_DOUBLE);
+////                list.addProperty ("POS_LONG_DEG", P_TYPE_DOUBLE);
+////                list.addProperty ("GROUND_ALTITUDE_AMSL_M", P_TYPE_DOUBLE);
+//
+//                int sensor_number = *((int*)addresses->at(0));
+//                std::string sensor_name = *((std::string*)addresses->at(1));
+//                std::string sensor_name_long = *((std::string*)addresses->at(2));
+//                unsigned char sac = *((unsigned char*)addresses->at(3));
+//                unsigned char sic = *((unsigned char*)addresses->at(4));
+//                double latitude = *((double*)addresses->at(5));
+//                double longitude = *((double*)addresses->at(6));
+//                double altitude = *((double*)addresses->at(7));
+//
+//                if (sensor_name.size() == 0)
+//                    sensor_name = sensor_name_long;
+//
+//                logdbg  << "ATSDB: buildDataSources: at index " << cnt << " number " <<  sensor_number << " name " << sensor_name << " lat " << latitude+0.1 << " lon " << longitude;
+//
+//                assert (data_sources.find (sensor_number) == data_sources.end());
+//                data_sources [sensor_number] = sensor_name;
+//
+//                //std::map <DB_OBJECT_TYPE, std::map <std::pair<unsigned char, unsigned char>, DataSource* > > data_sources_instances_;
+//
+//                std::pair <unsigned char, unsigned char > sac_sic_key (sac, sic);
+//
+//                assert (dbo_data_sources.find (sac_sic_key) == dbo_data_sources.end());
+//
+//                dbo_data_sources [sac_sic_key] = new DataSource ();
+//                DataSource *data_source = dbo_data_sources [sac_sic_key];
+//                data_source->setDBOType(ito->first);
+//                data_source->setId(sensor_number);
+//                data_source->setShortName(sensor_name);
+//                data_source->setName(sensor_name_long);
+//                data_source->setSac(sac);
+//                data_source->setSic(sic);
+//                data_source->setLatitude(latitude);
+//                data_source->setLongitude(longitude);
+//                data_source->setAltitude(altitude);
+//
+//                data_source->finalize();
+//
+//                cnt++;
+//            }
+//
+//            loginf  << "ATSDB: buildDataSources: found " << data_sources.size() << " data sources for " << ito->second->getName();
         }
 
         delete buffer;
@@ -762,7 +763,7 @@ void ATSDB::readDBOIntermediate( Job *job, Buffer *buffer )
     logdbg << "ATSDB: readDBOIntermidiate";
 
     assert (buffer);
-    assert (buffer->getDBOType() != DBO_UNDEFINED);
+    assert (buffer->dboType() != DBO_UNDEFINED);
 
     DBOReadDBJob *read_job = (DBOReadDBJob*) job;
     DBOVariableSet read_list = read_job->getReadList();
