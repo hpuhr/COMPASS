@@ -44,21 +44,21 @@ public:
   DBOVariableDefinition(std::string class_id, std::string instance_id, Configurable *parent)
   : Configurable (class_id, instance_id, parent)
   {
-    registerParameter ("dbo_type", &dbo_type_int_, DBO_UNDEFINED);
+    registerParameter ("dbo_type_", &dbo_type_, "");
     registerParameter ("id", &id_, "");
 
     assert (id_.size() > 0);
   }
   virtual ~DBOVariableDefinition() {}
 
-  DB_OBJECT_TYPE getDBOType () { return (DB_OBJECT_TYPE) dbo_type_int_; }
-  void setDBOType (DB_OBJECT_TYPE type) { dbo_type_int_=type; }
+  const std::string &getDBOType () { return dbo_type_; }
+  void setDBOType (const std::string &dbo_type) { dbo_type_=dbo_type; }
 
   std::string getId () { return id_; }
   void setId (std::string id) { id_=id; }
 
 protected:
-  unsigned int dbo_type_int_;
+  std::string dbo_type_;
   std::string id_;
 };
 
@@ -113,7 +113,7 @@ class DBOVariable : public Property, public Configurable
 {
 public:
   /// DBO type
-  unsigned int dbo_type_int_;
+  std::string dbo_type_;
   /// Value representation type, based on enum STRING_REPRESENTATION
   unsigned int representation_int_;
   /// Description
@@ -126,34 +126,34 @@ public:
   virtual ~DBOVariable();
 
   /// @brief Return if variable exist in DBO of type
-  bool existsIn (DB_OBJECT_TYPE dbo_type);
+  bool existsIn (const std::string &dbo_type);
   /// @brief Returns variable existing in DBO of type
-  DBOVariable *getFor (DB_OBJECT_TYPE dbo_type);
+  DBOVariable *getFor (const std::string &dbo_type);
   /// @brief Returns first available variable
   DBOVariable *getFirst ();
   /// @brief Return variable identifier in DBO of type
-  std::string getNameFor (DB_OBJECT_TYPE dbo_type);
+  std::string getNameFor (const std::string &dbo_type);
   /// @brief Returns flag indicating if variable is meta variable
   bool isMetaVariable ();
 
-  /// @brief Returns container with sub variable names
-  std::map <DB_OBJECT_TYPE, std::string> &getSubVariables () { return sub_variables_; }
+  /// @brief Returns container with sub variable names, dbo type -> sub variable name
+  std::map <std::string, std::string> &getSubVariables () { return sub_variables_; }
   /// @brief Sets sub-variable name for DBO of type
-  void setSubVariable (DB_OBJECT_TYPE type, std::string name);
+  void setSubVariable (const std::string &type, std::string name);
 
   /// @brief Comparison operator
   bool operator==(const DBOVariable &var);
 
   /// @brief Sets the value string representation
-  void setStringRepresentation (STRING_REPRESENTATION representation);
-  /// @brief Returns value string representation
-  STRING_REPRESENTATION getRepresentation () { return (STRING_REPRESENTATION)representation_int_;}
-  /// @brief Returns value from void pointer as string
-  std::string getValueFrom (void *ptr);
-  /// @brief Returns value string from representation string
-  std::string getValueFromRepresentation (std::string representation_string, bool transform=false, bool* ok=NULL);
-  /// @brief Returns representation string from value string
-  std::string getRepresentationFromValue (std::string value_string);
+//  void setStringRepresentation (STRING_REPRESENTATION representation);
+//  /// @brief Returns value string representation
+//  STRING_REPRESENTATION getRepresentation () { return (STRING_REPRESENTATION)representation_int_;}
+//  /// @brief Returns value from void pointer as string
+//  std::string getValueFrom (void *ptr);
+//  /// @brief Returns value string from representation string
+//  std::string getValueFromRepresentation (std::string representation_string, bool transform=false, bool* ok=NULL);
+//  /// @brief Returns representation string from value string
+//  std::string getRepresentationFromValue (std::string value_string);
 
   /// @brief Prints information for debugging
   void print ();
@@ -171,14 +171,14 @@ public:
   void setInfo (std::string info) { description_=info; };
 
   /// @brief Returns variable data type
-  PROPERTY_DATA_TYPE getDataType () { return (PROPERTY_DATA_TYPE) data_type_int_;}
+  PropertyDataType getDataType () { return data_type_;}
   /// @brief Sets variable data type
-  void setDataType (PROPERTY_DATA_TYPE type) { data_type_int_=type; }
+  void setDataType (PropertyDataType type) { data_type_=type; }
 
   /// @brief Returns DBO type
-  DB_OBJECT_TYPE getDBOType () { return (DB_OBJECT_TYPE)dbo_type_int_;}
-  /// @brief Returns DBO type string identifier
-  std::string getDBOTypeString () { return DB_OBJECT_TYPE_STRINGS.at((DB_OBJECT_TYPE)dbo_type_int_);}
+  const std::string &getDBOType () { return dbo_type_; }
+//  /// @brief Returns DBO type string identifier
+//  std::string getDBOTypeString () { return DB_OBJECT_TYPE_STRINGS.at((DB_OBJECT_TYPE)dbo_type_int_);}
 
   /// @brief Returns of schema is present in schema_variables_
   bool hasSchema (std::string schema);
@@ -205,26 +205,26 @@ public:
   std::string &getUnitUnit () { return unit_unit_; }
 
   /// @brief Returns flag if minimum/maximum information is available
-  bool hasMinMaxInfo ();
+  //bool hasMinMaxInfo ();
   /// @brief Triggers generation of the minimum/maximum information
-  void buildMinMaxInfo ();
+  //void buildMinMaxInfo ();
   /// @brief Callback used to the the minimum/maximum information
-  void setMinMax (std::string min, std::string max);
+  //void setMinMax (std::string min, std::string max);
 
-  std::string getMinString ();
-  std::string getMaxString ();
+  //std::string getMinString ();
+  //std::string getMaxString ();
 
   /// @brief Registers an observer of the minimum/maximum information
-  void addMinMaxObserver (DBOVariableMinMaxObserver *observer);
-  /// @brief Removes an observer of the minimum/maximum information
-  void removeMinMaxObserver (DBOVariableMinMaxObserver *observer);
+  //void addMinMaxObserver (DBOVariableMinMaxObserver *observer);
+  ///// @brief Removes an observer of the minimum/maximum information
+  ///void removeMinMaxObserver (DBOVariableMinMaxObserver *observer);
 
   /// @brief Registers meta-variables as parents of sub-variables
   void registerAsParent ();
   /// @brief Unregisters meta-variables as parents of sub-variables
   void unregisterAsParent ();
   /// @brief Checks if min/max info is present for meta-variables
-  void subVariableHasMinMaxInfo ();
+  //void subVariableHasMinMaxInfo ();
 
 protected:
   /// Minimum as string
@@ -245,7 +245,7 @@ protected:
   /// Container of sub-variable definitions, for meta variables
   std::vector<DBOVariableDefinition *> sub_variable_definitions_;
   /// Container for sub variables (DBO type -> variable identifier), for meta variables
-  std::map <DB_OBJECT_TYPE, std::string> sub_variables_;
+  std::map <std::string, std::string> sub_variables_;
 
   /// Container with schema-variable definitions
   std::vector <DBOSchemaVariableDefinition *> schema_variables_definitions_;

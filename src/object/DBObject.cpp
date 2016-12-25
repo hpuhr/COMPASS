@@ -32,8 +32,8 @@
 #include "StructureDescriptionManager.h"
 #include "PropertyList.h"
 #include "MetaDBTable.h"
-#include "ActiveSourcesObserver.h"
-#include "ATSDB.h"
+//#include "ActiveSourcesObserver.h"
+//#include "ATSDB.h"
 
 /**
  * Registers parameters, creates sub configurables
@@ -42,9 +42,9 @@ DBObject::DBObject(std::string class_id, std::string instance_id, Configurable *
  : Configurable (class_id, instance_id, parent), current_meta_table_(0), variables_checked_(false),
    has_active_data_sources_info_(false)
 {
-  registerParameter ("name" , &name_, (std::string)"Undefined");
-  registerParameter ("info" , &info_, (std::string)"");
-  registerParameter ("dbo_type" , &type_int_, DBO_UNDEFINED);
+  registerParameter ("name" , &name_, "Undefined");
+  registerParameter ("info" , &info_, "");
+  registerParameter ("dbo_type" , &dbo_type_, "");
   registerParameter ("is_loadable" , &is_loadable_, false);
   registerParameter ("is_meta" , &is_meta_, false);
 
@@ -202,8 +202,8 @@ void DBObject::generateSubConfigurable (std::string class_id, std::string instan
   if (class_id.compare ("DBOVariable") == 0)
   {
     DBOVariable *variable = new DBOVariable (class_id, instance_id, this);
-    assert (variables_.find (variable->id_) == variables_.end());
-    variables_[variable->id_]=variable;
+    assert (variables_.find (variable->getId()) == variables_.end());
+    variables_[variable->getId()]=variable;
   }
   else if (class_id.compare ("DBOSchemaMetaTableDefinition") == 0)
   {
@@ -249,45 +249,45 @@ void DBObject::checkVariables ()
   variables_checked_=true;
 }
 
-void DBObject::addActiveSourcesObserver (ActiveSourcesObserver *observer)
-{
-    assert (find (active_sources_observers_.begin(), active_sources_observers_.end(), observer) ==
-            active_sources_observers_.end());
-    active_sources_observers_.push_back (observer);
-}
+//void DBObject::addActiveSourcesObserver (ActiveSourcesObserver *observer)
+//{
+//    assert (find (active_sources_observers_.begin(), active_sources_observers_.end(), observer) ==
+//            active_sources_observers_.end());
+//    active_sources_observers_.push_back (observer);
+//}
 
-void DBObject::removeActiveSourcesObserver (ActiveSourcesObserver *observer)
-{
-    assert (find (active_sources_observers_.begin(), active_sources_observers_.end(), observer) !=
-            active_sources_observers_.end());
-    active_sources_observers_.erase (find (active_sources_observers_.begin(), active_sources_observers_.end(), observer));
-}
+//void DBObject::removeActiveSourcesObserver (ActiveSourcesObserver *observer)
+//{
+//    assert (find (active_sources_observers_.begin(), active_sources_observers_.end(), observer) !=
+//            active_sources_observers_.end());
+//    active_sources_observers_.erase (find (active_sources_observers_.begin(), active_sources_observers_.end(), observer));
+//}
 
-void DBObject::notifyActiveDataSourcesObservers ()
-{
-    std::vector <ActiveSourcesObserver *>::iterator it;
-    for (it=active_sources_observers_.begin(); it != active_sources_observers_.end(); it++)
-        (*it)->notifyActiveSources ();
-}
+//void DBObject::notifyActiveDataSourcesObservers ()
+//{
+//    std::vector <ActiveSourcesObserver *>::iterator it;
+//    for (it=active_sources_observers_.begin(); it != active_sources_observers_.end(); it++)
+//        (*it)->notifyActiveSources ();
+//}
 
-bool DBObject::hasActiveDataSourcesInfo ()
-{
-    return ATSDB::getInstance().hasActiveDataSourcesInfo((DB_OBJECT_TYPE)type_int_);
-}
+//bool DBObject::hasActiveDataSourcesInfo ()
+//{
+//    return ATSDB::getInstance().hasActiveDataSourcesInfo(dbo_type_);
+//}
 
-void DBObject::buildActiveDataSourcesInfo ()
-{
-    assert (hasCurrentDataSource());
-    assert (!hasActiveDataSourcesInfo());
-    ATSDB::getInstance().buildActiveDataSourcesInfo((DB_OBJECT_TYPE)type_int_);
-}
+//void DBObject::buildActiveDataSourcesInfo ()
+//{
+//    assert (hasCurrentDataSource());
+//    assert (!hasActiveDataSourcesInfo());
+//    ATSDB::getInstance().buildActiveDataSourcesInfo(dbo_type_);
+//}
 
-void DBObject::setActiveDataSources (std::set<int> active_data_sources)
-{
-    assert (hasCurrentDataSource());
-    active_data_sources_= active_data_sources;
-    notifyActiveDataSourcesObservers();
-}
+//void DBObject::setActiveDataSources (std::set<int> active_data_sources)
+//{
+//    assert (hasCurrentDataSource());
+//    active_data_sources_= active_data_sources;
+//    notifyActiveDataSourcesObservers();
+//}
 
 /**
  * Bit of a hack, explanation at DBOVariable::registerAsParent ().

@@ -28,7 +28,7 @@
 #include "Configuration.h"
 #include "ConfigurationManager.h"
 #include "DBOVariable.h"
-#include "ATSDB.h"
+//#include "ATSDB.h"
 #include "DBObjectManager.h"
 #include "DBSchemaManager.h"
 #include "DBSchema.h"
@@ -36,19 +36,19 @@
 #include "MetaDBTable.h"
 #include "Unit.h"
 #include "UnitManager.h"
-#include "DBOVariableMinMaxObserver.h"
+//#include "DBOVariableMinMaxObserver.h"
 
 #include "String.h"
 
-using namespace Utils::String;
+using namespace Utils;
 
 DBOVariable::DBOVariable(std::string class_id, std::string instance_id, Configurable *parent)
 : Property (), Configurable (class_id, instance_id, parent), registered_as_parent_(false)
 {
     registerParameter ("id", &id_, "");
     registerParameter ("description", &description_, "");
-    registerParameter ("data_type", &data_type_int_, P_TYPE_BOOL);
-    registerParameter ("dbo_type", &dbo_type_int_, DBO_UNDEFINED);
+    registerParameter ("data_type_str", &data_type_str_, "");
+    registerParameter ("dbo_type", &dbo_type_, "");
     registerParameter ("representation", &representation_int_, R_STANDARD);
     registerParameter ("unit_dimension", &unit_dimension_, "");
     registerParameter ("unit_unit", &unit_unit_, "");
@@ -71,9 +71,9 @@ DBOVariable::~DBOVariable()
     schema_variables_definitions_.clear();
 }
 
-bool DBOVariable::existsIn (DB_OBJECT_TYPE dbo_type)
+bool DBOVariable::existsIn (const std::string &dbo_type)
 {
-    bool ret = (dbo_type_int_ == dbo_type);
+    bool ret = (dbo_type_ == dbo_type);
 
     if (!ret && sub_variables_.find(dbo_type) != sub_variables_.end() && sub_variables_[dbo_type].size() != 0)
     {
@@ -84,9 +84,9 @@ bool DBOVariable::existsIn (DB_OBJECT_TYPE dbo_type)
     return ret;
 }
 
-DBOVariable *DBOVariable::getFor (DB_OBJECT_TYPE dbo_type)
+DBOVariable *DBOVariable::getFor (const std::string &dbo_type)
 {
-    assert (dbo_type != DBO_UNDEFINED);
+    //assert (dbo_type != DBO_UNDEFINED);
 
     if (!isMetaVariable())
     {
@@ -95,7 +95,7 @@ DBOVariable *DBOVariable::getFor (DB_OBJECT_TYPE dbo_type)
     }
     else
     {
-        if (dbo_type == dbo_type_int_)
+        if (dbo_type == dbo_type_)
             return this;
 
         if (sub_variables_.find(dbo_type) != sub_variables_.end())
@@ -105,7 +105,7 @@ DBOVariable *DBOVariable::getFor (DB_OBJECT_TYPE dbo_type)
             return var;
         }
 
-        throw std::runtime_error ("DBOVariable: getFor: id '"+id_+"' type "+intToString(dbo_type_int_)+": impossible for type "+intToString(dbo_type));
+        throw std::runtime_error ("DBOVariable: getFor: id '"+id_+"' type "+dbo_type_+": impossible for type "+dbo_type);
     }
 }
 
@@ -125,7 +125,7 @@ DBOVariable *DBOVariable::getFirst ()
 }
 
 
-std::string DBOVariable::getNameFor (DB_OBJECT_TYPE dbo_type)
+std::string DBOVariable::getNameFor (const std::string &dbo_type)
 {
     assert (existsIn (dbo_type));
     return sub_variables_[dbo_type];
@@ -136,18 +136,18 @@ bool DBOVariable::isMetaVariable ()
     return sub_variable_definitions_.size() > 0;
 }
 
-void DBOVariable::setSubVariable (DB_OBJECT_TYPE type, std::string name)
+void DBOVariable::setSubVariable (const std::string &dbo_type, std::string name)
 {
-    logdbg  << "DBOVariable: changed: type " << type << " varname " << name;
+    logdbg  << "DBOVariable: changed: type " << dbo_type << " varname " << name;
 
     bool set=false;
-    if (sub_variables_.find(type) != sub_variables_.end())
+    if (sub_variables_.find(dbo_type) != sub_variables_.end())
     {
         logdbg  << "DBOVariable: changed: sub variable should exist";
         std::vector<DBOVariableDefinition *>::iterator it;
         for (it = sub_variable_definitions_.begin(); it != sub_variable_definitions_.end(); it++)
         {
-            if ((*it)->getDBOType() == type)
+            if ((*it)->getDBOType() == dbo_type)
             {
                 (*it)->setId (name);
                 set=true;
@@ -159,16 +159,16 @@ void DBOVariable::setSubVariable (DB_OBJECT_TYPE type, std::string name)
             }
         }
         if (!set)
-            throw std::runtime_error ("DBOVariable: setSubVariable: not found though exists, type "+intToString(type)+" name "+name);
+            throw std::runtime_error ("DBOVariable: setSubVariable: not found though exists, type "+dbo_type+" name "+name);
     }
     else
     {
-        std::string instance_id = "DBOVariableDefinition"+intToString(type)+id_+name+"0";
+        std::string instance_id = "DBOVariableDefinition"+dbo_type+id_+name+"0";
 
-        logdbg  << "DBOVariable: setSubVariable: generating subvar type " << type << " name " << name << " instance " << instance_id;
+        logdbg  << "DBOVariable: setSubVariable: generating subvar type " << dbo_type << " name " << name << " instance " << instance_id;
 
         Configuration &config = addNewSubConfiguration ("DBOVariableDefinition", instance_id);
-        config.addParameterUnsignedInt ("dbo_type", type);
+        config.addParameterString ("dbo_type", dbo_type);
         config.addParameterString ("id", name);
         generateSubConfigurable ("DBOVariableDefinition", instance_id);
     }
@@ -176,9 +176,9 @@ void DBOVariable::setSubVariable (DB_OBJECT_TYPE type, std::string name)
 
 bool DBOVariable::operator==(const DBOVariable &var)
                 {
-    if (dbo_type_int_ != var.dbo_type_int_)
+    if (dbo_type_ != var.dbo_type_)
         return false;
-    if (data_type_int_ != var.data_type_int_)
+    if (data_type_ != var.data_type_)
         return false;
     if (id_.compare (var.id_) != 0)
         return false;
@@ -188,7 +188,7 @@ bool DBOVariable::operator==(const DBOVariable &var)
 
 void DBOVariable::print ()
 {
-    loginf  << "DBOVariable: print: dbo type " << dbo_type_int_ << " id " << id_ << " type " << data_type_int_;
+    loginf  << "DBOVariable: print: dbo type " << dbo_type_ << " id " << id_ << " data type " << data_type_str_;
 
     if (sub_variable_definitions_.size() > 0)
     {
@@ -202,214 +202,214 @@ void DBOVariable::print ()
     }
 }
 
-std::string DBOVariable::getValueFrom (void *ptr)
-{
-    std::stringstream ss;
+//std::string DBOVariable::getValueFrom (void *ptr)
+//{
+//    std::stringstream ss;
 
-    if (data_type_int_ == P_TYPE_BOOL)
-    {
-        ss << *(bool *) ptr;
-    }
-    else if (data_type_int_ == P_TYPE_CHAR)
-    {
-        ss << (int)*(char *) ptr;
-    }
-    else if (data_type_int_ == P_TYPE_INT)
-    {
-        ss << *(int *) ptr;
-    }
-    else if (data_type_int_ == P_TYPE_UCHAR)
-    {
-        ss << (int) *(unsigned char *) ptr;
-    }
-    else if (data_type_int_ == P_TYPE_UINT)
-    {
-        ss << *(unsigned int *) ptr;
-    }
-    else if (data_type_int_ == P_TYPE_STRING)
-    {
-        ss << *(std::string *) ptr;
-    }
-    else if (data_type_int_ == P_TYPE_POINTER)
-    {
-        ss << std::hex << *(void**) ptr;
-    }
-    else if (data_type_int_ == P_TYPE_FLOAT)
-    {
-        ss << *(float *) ptr;
-    }
-    else if (data_type_int_ == P_TYPE_DOUBLE)
-    {
-        ss << *(double *) ptr;
-    }
+//    if (data_type_int_ == P_TYPE_BOOL)
+//    {
+//        ss << *(bool *) ptr;
+//    }
+//    else if (data_type_int_ == P_TYPE_CHAR)
+//    {
+//        ss << (int)*(char *) ptr;
+//    }
+//    else if (data_type_int_ == P_TYPE_INT)
+//    {
+//        ss << *(int *) ptr;
+//    }
+//    else if (data_type_int_ == P_TYPE_UCHAR)
+//    {
+//        ss << (int) *(unsigned char *) ptr;
+//    }
+//    else if (data_type_int_ == P_TYPE_UINT)
+//    {
+//        ss << *(unsigned int *) ptr;
+//    }
+//    else if (data_type_int_ == P_TYPE_STRING)
+//    {
+//        ss << *(std::string *) ptr;
+//    }
+//    else if (data_type_int_ == P_TYPE_POINTER)
+//    {
+//        ss << std::hex << *(void**) ptr;
+//    }
+//    else if (data_type_int_ == P_TYPE_FLOAT)
+//    {
+//        ss << *(float *) ptr;
+//    }
+//    else if (data_type_int_ == P_TYPE_DOUBLE)
+//    {
+//        ss << *(double *) ptr;
+//    }
 
-    return ss.str();
-}
+//    return ss.str();
+//}
 
 
-std::string DBOVariable::getValueFromRepresentation (std::string representation_string, bool transform, bool* ok)
-{
+//std::string DBOVariable::getValueFromRepresentation (std::string representation_string, bool transform, bool* ok)
+//{
 
-    std::stringstream ss;
-    bool ssok = true;
+//    std::stringstream ss;
+//    bool ssok = true;
 
-    if (representation_int_ == R_STANDARD)
-    {
-        ss << representation_string;
-    }
-    else if (representation_int_ == R_TIME_SECONDS)
-    {
-        ss << timeFromString (representation_string, &ssok);
-    }
-    else if (representation_int_ == R_OCTAL)
-    {
-        ss << intFromOctalString (representation_string, &ssok);
-    }
-    else if (representation_int_ ==R_FLIGHT_LEVEL)
-    {
-        std::stringstream ss2;
-        ss2 << representation_string;
-        double value;
-        ssok = ( ss2 >> value );
-        if( !ssok )
-            logerr << "DBOVariable: getValueFromRepresentation: Could not convert to flight level";
-        ss << value*100.0;
-    }
-    else if (representation_int_ == R_SENSOR_NAME)
-    {
-        throw std::runtime_error ("DBOVariable: getRepresentationFromValue: unknown for sensor name");
-    }
-    else if (representation_int_ == R_HEX)
-    {
-        ss << intFromHexString (representation_string, &ssok);
-    }
-    else
-    {
-        throw std::runtime_error ("DBOVariable: getRepresentationFromValue: unknown representation");
-    }
+//    if (representation_int_ == R_STANDARD)
+//    {
+//        ss << representation_string;
+//    }
+//    else if (representation_int_ == R_TIME_SECONDS)
+//    {
+//        ss << timeFromString (representation_string, &ssok);
+//    }
+//    else if (representation_int_ == R_OCTAL)
+//    {
+//        ss << intFromOctalString (representation_string, &ssok);
+//    }
+//    else if (representation_int_ ==R_FLIGHT_LEVEL)
+//    {
+//        std::stringstream ss2;
+//        ss2 << representation_string;
+//        double value;
+//        ssok = ( ss2 >> value );
+//        if( !ssok )
+//            logerr << "DBOVariable: getValueFromRepresentation: Could not convert to flight level";
+//        ss << value*100.0;
+//    }
+//    else if (representation_int_ == R_SENSOR_NAME)
+//    {
+//        throw std::runtime_error ("DBOVariable: getRepresentationFromValue: unknown for sensor name");
+//    }
+//    else if (representation_int_ == R_HEX)
+//    {
+//        ss << intFromHexString (representation_string, &ssok);
+//    }
+//    else
+//    {
+//        throw std::runtime_error ("DBOVariable: getRepresentationFromValue: unknown representation");
+//    }
 
-    if( ok )
-        *ok = ssok;
+//    if( ok )
+//        *ok = ssok;
 
-    if (transform)
-    {
-        logdbg  << "DBOVariable: getValueFromRepresentation: var " << id_ << " representation " << representation_string;
+//    if (transform)
+//    {
+//        logdbg  << "DBOVariable: getValueFromRepresentation: var " << id_ << " representation " << representation_string;
 
-        DBOVariable *variable;
+//        DBOVariable *variable;
 
-        if (isMetaVariable())
-            variable = getFirst();
-        else
-            variable = this;
+//        if (isMetaVariable())
+//            variable = getFirst();
+//        else
+//            variable = this;
 
-        std::string meta_tablename = variable->getCurrentMetaTable ();
-        std::string table_varname = variable->getCurrentVariableName ();
+//        std::string meta_tablename = variable->getCurrentMetaTable ();
+//        std::string table_varname = variable->getCurrentVariableName ();
 
-        DBTableColumn *table_column = DBSchemaManager::getInstance().getCurrentSchema ()->getMetaTable(meta_tablename)->getTableColumn(table_varname);
+//        DBTableColumn *table_column = DBSchemaManager::getInstance().getCurrentSchema ()->getMetaTable(meta_tablename)->getTableColumn(table_varname);
 
-        if (hasUnit () || table_column->hasUnit())
-        {
-            //loginf  << "UGA var type " << variable->getDBOType() << " dim '" << variable->getUnitDimension() << "'";
-            if (variable->hasUnit () != table_column->hasUnit())
-            {
-                logerr << "DBOVariable: getValueFromRepresentation: unit transformation inconsistent: var " << variable->getName ()
-                                            << " has unit " << hasUnit () << " table column " << table_column->getName() << " has unit "
-                                            << table_column->hasUnit();
-                throw std::runtime_error ("DBOVariable: getValueFromRepresentation: tranformation error 1");
-            }
+//        if (hasUnit () || table_column->hasUnit())
+//        {
+//            //loginf  << "UGA var type " << variable->getDBOType() << " dim '" << variable->getUnitDimension() << "'";
+//            if (variable->hasUnit () != table_column->hasUnit())
+//            {
+//                logerr << "DBOVariable: getValueFromRepresentation: unit transformation inconsistent: var " << variable->getName ()
+//                                            << " has unit " << hasUnit () << " table column " << table_column->getName() << " has unit "
+//                                            << table_column->hasUnit();
+//                throw std::runtime_error ("DBOVariable: getValueFromRepresentation: tranformation error 1");
+//            }
 
-            if (variable->getUnitDimension().compare(table_column->getUnitDimension()) != 0)
-            {
-                logerr << "DBOVariable: getValueFromRepresentation: unit transformation inconsistent: var "
-                        << variable->getName () << " has dimension " << getUnitDimension () << " table column "
-                        << table_column->getName() << " has dimension " << table_column->getUnitDimension();
-                throw std::runtime_error ("DBOVariable: getValueFromRepresentation: tranformation error 2");
-            }
+//            if (variable->getUnitDimension().compare(table_column->getUnitDimension()) != 0)
+//            {
+//                logerr << "DBOVariable: getValueFromRepresentation: unit transformation inconsistent: var "
+//                        << variable->getName () << " has dimension " << getUnitDimension () << " table column "
+//                        << table_column->getName() << " has dimension " << table_column->getUnitDimension();
+//                throw std::runtime_error ("DBOVariable: getValueFromRepresentation: tranformation error 2");
+//            }
 
-            Unit *unit = UnitManager::getInstance().getUnit (variable->getUnitDimension());
-            double factor = unit->getFactor (variable->getUnitUnit(), table_column->getUnitUnit());
-            logdbg  << "DBOVariable: getValueFromRepresentation: correct unit transformation with factor " << factor;
+//            Unit *unit = UnitManager::getInstance().getUnit (variable->getUnitDimension());
+//            double factor = unit->getFactor (variable->getUnitUnit(), table_column->getUnitUnit());
+//            logdbg  << "DBOVariable: getValueFromRepresentation: correct unit transformation with factor " << factor;
 
-            double var = doubleFromString(ss.str());
-            var *= factor;
-            std::string transformed = doubleToString (var);
+//            double var = doubleFromString(ss.str());
+//            var *= factor;
+//            std::string transformed = doubleToString (var);
 
-            logdbg  << "DBOVariable: getValueFromRepresentation: var " << id_ << " transformed representation " << transformed;
-            return transformed;
-        }
-        else
-            return ss.str();
-    }
-    else
-        return ss.str();
-}
-std::string DBOVariable::getRepresentationFromValue (std::string value_string)
-{
-    std::stringstream ss;
+//            logdbg  << "DBOVariable: getValueFromRepresentation: var " << id_ << " transformed representation " << transformed;
+//            return transformed;
+//        }
+//        else
+//            return ss.str();
+//    }
+//    else
+//        return ss.str();
+//}
+//std::string DBOVariable::getRepresentationFromValue (std::string value_string)
+//{
+//    std::stringstream ss;
 
-    if (representation_int_ == R_STANDARD)
-    {
-        ss << value_string;
-    }
-    else if (representation_int_ == R_TIME_SECONDS)
-    {
-        std::stringstream ss2;
-        ss2 << value_string;
-        double value;
-        ss2 >> value;
-        ss << timeStringFromDouble (value);
-    }
-    else if (representation_int_ == R_OCTAL)
-    {
-        std::stringstream ss2;
-        ss2 << value_string;
-        unsigned int value;
-        ss2 >> value;
-        ss << std::oct << std::setfill ('0') << std::setw (4) << value;
-    }
-    else if (representation_int_ ==R_FLIGHT_LEVEL)
-    {
-        std::stringstream ss2;
-        ss2 << value_string;
-        int value;
-        ss2 >> value;
-        ss << ((double)value)/100.0;
-    }
-    else if (representation_int_ == R_HEX)
-    {
-        std::stringstream ss2;
-        ss2 << value_string;
-        unsigned int value;
-        ss2 >> value;
-        ss << std::uppercase << std::hex << value;
-    }
-    else if (representation_int_ == R_SENSOR_NAME)
-    {
-        std::stringstream ss2;
-        ss2 << value_string;
-        unsigned int value;
-        ss2 >> value;
-        ss << "TODO"; // TODO HACK
-    }
-    else
-    {
-        throw std::runtime_error ("DBOVariable: getRepresentationFromValue: unknown representation");
-    }
+//    if (representation_int_ == R_STANDARD)
+//    {
+//        ss << value_string;
+//    }
+//    else if (representation_int_ == R_TIME_SECONDS)
+//    {
+//        std::stringstream ss2;
+//        ss2 << value_string;
+//        double value;
+//        ss2 >> value;
+//        ss << timeStringFromDouble (value);
+//    }
+//    else if (representation_int_ == R_OCTAL)
+//    {
+//        std::stringstream ss2;
+//        ss2 << value_string;
+//        unsigned int value;
+//        ss2 >> value;
+//        ss << std::oct << std::setfill ('0') << std::setw (4) << value;
+//    }
+//    else if (representation_int_ ==R_FLIGHT_LEVEL)
+//    {
+//        std::stringstream ss2;
+//        ss2 << value_string;
+//        int value;
+//        ss2 >> value;
+//        ss << ((double)value)/100.0;
+//    }
+//    else if (representation_int_ == R_HEX)
+//    {
+//        std::stringstream ss2;
+//        ss2 << value_string;
+//        unsigned int value;
+//        ss2 >> value;
+//        ss << std::uppercase << std::hex << value;
+//    }
+//    else if (representation_int_ == R_SENSOR_NAME)
+//    {
+//        std::stringstream ss2;
+//        ss2 << value_string;
+//        unsigned int value;
+//        ss2 >> value;
+//        ss << "TODO"; // TODO HACK
+//    }
+//    else
+//    {
+//        throw std::runtime_error ("DBOVariable: getRepresentationFromValue: unknown representation");
+//    }
 
-    return ss.str();
-}
+//    return ss.str();
+//}
 
-void DBOVariable::setStringRepresentation (STRING_REPRESENTATION representation)
-{
-    logdbg  << " DBOVariable: setStringRepresentation " << representation;
-    representation_int_=representation;
+//void DBOVariable::setStringRepresentation (STRING_REPRESENTATION representation)
+//{
+//    logdbg  << " DBOVariable: setStringRepresentation " << representation;
+//    representation_int_=representation;
 
-    for (unsigned int cnt=0; cnt < sub_variable_definitions_.size(); cnt++)
-    {
-        DBOVariable *variable = DBObjectManager::getInstance().getDBOVariable (sub_variable_definitions_.at(cnt)->getDBOType(), sub_variable_definitions_.at(cnt)->getId());
-        variable->setStringRepresentation (representation);
-    }
-}
+//    for (unsigned int cnt=0; cnt < sub_variable_definitions_.size(); cnt++)
+//    {
+//        DBOVariable *variable = DBObjectManager::getInstance().getDBOVariable (sub_variable_definitions_.at(cnt)->getDBOType(), sub_variable_definitions_.at(cnt)->getId());
+//        variable->setStringRepresentation (representation);
+//    }
+//}
 
 
 void DBOVariable::generateSubConfigurable (std::string class_id, std::string instance_id)
@@ -419,11 +419,11 @@ void DBOVariable::generateSubConfigurable (std::string class_id, std::string ins
         DBOVariableDefinition *definition = new DBOVariableDefinition (class_id, instance_id, this);
         sub_variable_definitions_.push_back (definition);
 
-        DB_OBJECT_TYPE type = definition->getDBOType();
+        const std::string &dbo_type = definition->getDBOType();
         std::string name = definition->getId();
 
-        assert (sub_variables_.find(type) == sub_variables_.end());
-        sub_variables_[type] = name;
+        assert (sub_variables_.find(dbo_type) == sub_variables_.end());
+        sub_variables_[dbo_type] = name;
     }
     else if (class_id.compare("DBOSchemaVariableDefinition") == 0)
     {
@@ -517,192 +517,192 @@ std::string DBOVariable::getCurrentVariableName ()
     return schema_variables_[schema].second;
 }
 
-bool DBOVariable::hasMinMaxInfo ()
-{
-    if (isMetaVariable())
-    {
-        std::map <DB_OBJECT_TYPE, std::string>::iterator it;
-        bool info_present=true;
-        for (it = sub_variables_.begin(); it != sub_variables_.end(); it++)
-            info_present &= DBObjectManager::getInstance().getDBOVariable(it->first, it->second)->hasMinMaxInfo();
-        return info_present;
-    }
-    else
-        return !(min_.size() == 0 && max_.size() == 0);
-}
+//bool DBOVariable::hasMinMaxInfo ()
+//{
+//    if (isMetaVariable())
+//    {
+//        std::map <DB_OBJECT_TYPE, std::string>::iterator it;
+//        bool info_present=true;
+//        for (it = sub_variables_.begin(); it != sub_variables_.end(); it++)
+//            info_present &= DBObjectManager::getInstance().getDBOVariable(it->first, it->second)->hasMinMaxInfo();
+//        return info_present;
+//    }
+//    else
+//        return !(min_.size() == 0 && max_.size() == 0);
+//}
 
-void DBOVariable::buildMinMaxInfo ()
-{
-    assert (!hasMinMaxInfo());
+//void DBOVariable::buildMinMaxInfo ()
+//{
+//    assert (!hasMinMaxInfo());
 
-    if (!isMetaVariable())
-        ATSDB::getInstance().buildMinMaxInfo(this);
-    else
-    {
-        std::map <DB_OBJECT_TYPE, std::string>::iterator it;
+//    if (!isMetaVariable())
+//        ATSDB::getInstance().buildMinMaxInfo(this);
+//    else
+//    {
+//        std::map <DB_OBJECT_TYPE, std::string>::iterator it;
 
-        for (it = sub_variables_.begin(); it != sub_variables_.end(); it++)
-        {
-            assert (DBObjectManager::getInstance().existsDBOVariable(it->first, it->second));
-            DBOVariable *var = DBObjectManager::getInstance().getDBOVariable(it->first, it->second);
+//        for (it = sub_variables_.begin(); it != sub_variables_.end(); it++)
+//        {
+//            assert (DBObjectManager::getInstance().existsDBOVariable(it->first, it->second));
+//            DBOVariable *var = DBObjectManager::getInstance().getDBOVariable(it->first, it->second);
 
-            if (!var->hasMinMaxInfo())
-                ATSDB::getInstance().buildMinMaxInfo(var);
-        }
-    }
-}
+//            if (!var->hasMinMaxInfo())
+//                ATSDB::getInstance().buildMinMaxInfo(var);
+//        }
+//    }
+//}
 
-void DBOVariable::setMinMax (std::string min, std::string max)
-{
-    if (isMetaVariable())
-        throw std::runtime_error ("DBOVariable: setMinString: "+id_+" not possible when meta");
+//void DBOVariable::setMinMax (std::string min, std::string max)
+//{
+//    if (isMetaVariable())
+//        throw std::runtime_error ("DBOVariable: setMinString: "+id_+" not possible when meta");
 
-    min_=min;
-    max_=max;
+//    min_=min;
+//    max_=max;
 
-    logdbg << "DBOVariable: setMinMax: min " << min_ << " max " << max_;
+//    logdbg << "DBOVariable: setMinMax: min " << min_ << " max " << max_;
 
-    assert (hasMinMaxInfo());
-    notifyMinMaxObservers ();
+//    assert (hasMinMaxInfo());
+//    notifyMinMaxObservers ();
 
-    if (parent_variables_.size() > 0)
-    {
-        logdbg << "DBOVariable: setMinMax: " << id_ << " updating parents";
-        std::vector <DBOVariable*>::iterator it;
-        for (it = parent_variables_.begin(); it != parent_variables_.end(); it++)
-            (*it)->subVariableHasMinMaxInfo();
-    }
-}
+//    if (parent_variables_.size() > 0)
+//    {
+//        logdbg << "DBOVariable: setMinMax: " << id_ << " updating parents";
+//        std::vector <DBOVariable*>::iterator it;
+//        for (it = parent_variables_.begin(); it != parent_variables_.end(); it++)
+//            (*it)->subVariableHasMinMaxInfo();
+//    }
+//}
 
-std::string DBOVariable::getMinString ()
-{
-    std::string min;
-    if (isMetaVariable())
-    {
-        std::map <DB_OBJECT_TYPE, std::string>::iterator it;
-        for (it = sub_variables_.begin(); it != sub_variables_.end(); it++)
-        {
-            DBOVariable *var = DBObjectManager::getInstance().getDBOVariable(it->first, it->second);
-            if (it == sub_variables_.begin())
-                min = var->getMinString();
-            else if (!isLargerAs(min, var->getMinString(), (PROPERTY_DATA_TYPE) data_type_int_))
-            {
-                logdbg << "DBOVariable: getMinString: new min " << var->getMinString() << " old " << min;
-                min = var->getMinString();
-            }
-        }
-    }
-    else
-        min = min_;
+//std::string DBOVariable::getMinString ()
+//{
+//    std::string min;
+//    if (isMetaVariable())
+//    {
+//        std::map <DB_OBJECT_TYPE, std::string>::iterator it;
+//        for (it = sub_variables_.begin(); it != sub_variables_.end(); it++)
+//        {
+//            DBOVariable *var = DBObjectManager::getInstance().getDBOVariable(it->first, it->second);
+//            if (it == sub_variables_.begin())
+//                min = var->getMinString();
+//            else if (!isLargerAs(min, var->getMinString(), (PROPERTY_DATA_TYPE) data_type_int_))
+//            {
+//                logdbg << "DBOVariable: getMinString: new min " << var->getMinString() << " old " << min;
+//                min = var->getMinString();
+//            }
+//        }
+//    }
+//    else
+//        min = min_;
 
-    DBOVariable *tmpvar = getFirst();
+//    DBOVariable *tmpvar = getFirst();
 
-    std::string meta_tablename = tmpvar->getCurrentMetaTable ();
-    std::string table_varname = tmpvar->getCurrentVariableName ();
+//    std::string meta_tablename = tmpvar->getCurrentMetaTable ();
+//    std::string table_varname = tmpvar->getCurrentVariableName ();
 
-    DBTableColumn *table_column = DBSchemaManager::getInstance().getCurrentSchema ()->getMetaTable(meta_tablename)->getTableColumn(table_varname);
+//    DBTableColumn *table_column = DBSchemaManager::getInstance().getCurrentSchema ()->getMetaTable(meta_tablename)->getTableColumn(table_varname);
 
-    if (!isMetaVariable() && (tmpvar->hasUnit () || table_column->hasUnit()))
-    {
-        if (tmpvar->hasUnit () != table_column->hasUnit())
-        {
-            logerr << "DBOVariable: getMinString: unit transformation inconsistent: var " << tmpvar->getName () << " has unit " << tmpvar->hasUnit ()
-                                                                      << " table column " << table_column->getName() << " has unit " << table_column->hasUnit();
-            throw std::runtime_error ("DBOVariable: getMinString: unit transformation error 1");
-        }
+//    if (!isMetaVariable() && (tmpvar->hasUnit () || table_column->hasUnit()))
+//    {
+//        if (tmpvar->hasUnit () != table_column->hasUnit())
+//        {
+//            logerr << "DBOVariable: getMinString: unit transformation inconsistent: var " << tmpvar->getName () << " has unit " << tmpvar->hasUnit ()
+//                                                                      << " table column " << table_column->getName() << " has unit " << table_column->hasUnit();
+//            throw std::runtime_error ("DBOVariable: getMinString: unit transformation error 1");
+//        }
 
-        if (tmpvar->getUnitDimension().compare(table_column->getUnitDimension()) != 0)
-        {
-            logerr << "DBOVariable: getMinString: unit transformation inconsistent: var " << tmpvar->getName () << " has dimension " << tmpvar->getUnitDimension ()
-                                                                      << " table column " << table_column->getName() << " has dimension " << table_column->getUnitDimension();
-            throw std::runtime_error ("DBOVariable: getMinString: unit transformation error 2");
-        }
+//        if (tmpvar->getUnitDimension().compare(table_column->getUnitDimension()) != 0)
+//        {
+//            logerr << "DBOVariable: getMinString: unit transformation inconsistent: var " << tmpvar->getName () << " has dimension " << tmpvar->getUnitDimension ()
+//                                                                      << " table column " << table_column->getName() << " has dimension " << table_column->getUnitDimension();
+//            throw std::runtime_error ("DBOVariable: getMinString: unit transformation error 2");
+//        }
 
-        Unit *unit = UnitManager::getInstance().getUnit (tmpvar->getUnitDimension());
-        double factor = unit->getFactor (table_column->getUnitUnit(), tmpvar->getUnitUnit());
-        logdbg  << "DBOVariable: getMinString: adapting " << tmpvar->getName () << " unit transformation with factor " << factor;
+//        Unit *unit = UnitManager::getInstance().getUnit (tmpvar->getUnitDimension());
+//        double factor = unit->getFactor (table_column->getUnitUnit(), tmpvar->getUnitUnit());
+//        logdbg  << "DBOVariable: getMinString: adapting " << tmpvar->getName () << " unit transformation with factor " << factor;
 
-        multiplyString (min, (PROPERTY_DATA_TYPE) tmpvar->data_type_int_, factor);
-    }
+//        multiplyString (min, (PROPERTY_DATA_TYPE) tmpvar->data_type_int_, factor);
+//    }
 
-    logdbg << "DBOVariable: getMinString: type " << dbo_type_int_ << " name " << id_ << " returning " << min;
-    return min;
-}
+//    logdbg << "DBOVariable: getMinString: type " << dbo_type_int_ << " name " << id_ << " returning " << min;
+//    return min;
+//}
 
-std::string DBOVariable::getMaxString ()
-{
-    std::string max;
-    if (isMetaVariable())
-    {
-        std::map <DB_OBJECT_TYPE, std::string>::iterator it;
-        for (it = sub_variables_.begin(); it != sub_variables_.end(); it++)
-        {
-            DBOVariable *var = DBObjectManager::getInstance().getDBOVariable(it->first, it->second);
-            if (it == sub_variables_.begin())
-                max = var->getMaxString();
-            else if (isLargerAs(max, var->getMaxString(), (PROPERTY_DATA_TYPE) data_type_int_))
-            {
-                logdbg << "DBOVariable: getMaxString: new max " << var->getMaxString() << " old " << max;
-                max = var->getMaxString();
-            }
-        }
-    }
-    else
-        max = max_;
+//std::string DBOVariable::getMaxString ()
+//{
+//    std::string max;
+//    if (isMetaVariable())
+//    {
+//        std::map <DB_OBJECT_TYPE, std::string>::iterator it;
+//        for (it = sub_variables_.begin(); it != sub_variables_.end(); it++)
+//        {
+//            DBOVariable *var = DBObjectManager::getInstance().getDBOVariable(it->first, it->second);
+//            if (it == sub_variables_.begin())
+//                max = var->getMaxString();
+//            else if (isLargerAs(max, var->getMaxString(), (PROPERTY_DATA_TYPE) data_type_int_))
+//            {
+//                logdbg << "DBOVariable: getMaxString: new max " << var->getMaxString() << " old " << max;
+//                max = var->getMaxString();
+//            }
+//        }
+//    }
+//    else
+//        max = max_;
 
-    DBOVariable *tmpvar = getFirst();
+//    DBOVariable *tmpvar = getFirst();
 
-    std::string meta_tablename = tmpvar->getCurrentMetaTable ();
-    std::string table_varname = tmpvar->getCurrentVariableName ();
+//    std::string meta_tablename = tmpvar->getCurrentMetaTable ();
+//    std::string table_varname = tmpvar->getCurrentVariableName ();
 
-    DBTableColumn *table_column = DBSchemaManager::getInstance().getCurrentSchema ()->getMetaTable(meta_tablename)->getTableColumn(table_varname);
+//    DBTableColumn *table_column = DBSchemaManager::getInstance().getCurrentSchema ()->getMetaTable(meta_tablename)->getTableColumn(table_varname);
 
-    if (!isMetaVariable() && (tmpvar->hasUnit () || table_column->hasUnit()))
-    {
-        if (tmpvar->hasUnit () != table_column->hasUnit())
-        {
-            logerr << "DBOVariable: getMinString: unit transformation inconsistent: var " << tmpvar->getName () << " has unit " << tmpvar->hasUnit ()
-                                                                      << " table column " << table_column->getName() << " has unit " << table_column->hasUnit();
-            throw std::runtime_error ("DBOVariable: getMinString: unit transformation error 1");
-        }
+//    if (!isMetaVariable() && (tmpvar->hasUnit () || table_column->hasUnit()))
+//    {
+//        if (tmpvar->hasUnit () != table_column->hasUnit())
+//        {
+//            logerr << "DBOVariable: getMinString: unit transformation inconsistent: var " << tmpvar->getName () << " has unit " << tmpvar->hasUnit ()
+//                                                                      << " table column " << table_column->getName() << " has unit " << table_column->hasUnit();
+//            throw std::runtime_error ("DBOVariable: getMinString: unit transformation error 1");
+//        }
 
-        if (tmpvar->getUnitDimension().compare(table_column->getUnitDimension()) != 0)
-        {
-            logerr << "DBOVariable: getMinString: unit transformation inconsistent: var " << tmpvar->getName () << " has dimension " << tmpvar->getUnitDimension ()
-                                                                      << " table column " << table_column->getName() << " has dimension " << table_column->getUnitDimension();
-            throw std::runtime_error ("DBOVariable: getMinString: unit transformation error 2");
-        }
+//        if (tmpvar->getUnitDimension().compare(table_column->getUnitDimension()) != 0)
+//        {
+//            logerr << "DBOVariable: getMinString: unit transformation inconsistent: var " << tmpvar->getName () << " has dimension " << tmpvar->getUnitDimension ()
+//                                                                      << " table column " << table_column->getName() << " has dimension " << table_column->getUnitDimension();
+//            throw std::runtime_error ("DBOVariable: getMinString: unit transformation error 2");
+//        }
 
-        Unit *unit = UnitManager::getInstance().getUnit (tmpvar->getUnitDimension());
-        double factor = unit->getFactor (table_column->getUnitUnit(), tmpvar->getUnitUnit());
-        logdbg  << "DBOVariable: getMinString: adapting " << tmpvar->getName () << " unit transformation with factor " << factor;
+//        Unit *unit = UnitManager::getInstance().getUnit (tmpvar->getUnitDimension());
+//        double factor = unit->getFactor (table_column->getUnitUnit(), tmpvar->getUnitUnit());
+//        logdbg  << "DBOVariable: getMinString: adapting " << tmpvar->getName () << " unit transformation with factor " << factor;
 
-        multiplyString (max, (PROPERTY_DATA_TYPE) tmpvar->data_type_int_, factor);
-    }
+//        multiplyString (max, (PROPERTY_DATA_TYPE) tmpvar->data_type_int_, factor);
+//    }
 
-    logdbg << "DBOVariable: getMaxString: type " << dbo_type_int_ << " name " << id_ << " returning " << max;
-    return max;
-}
+//    logdbg << "DBOVariable: getMaxString: type " << dbo_type_int_ << " name " << id_ << " returning " << max;
+//    return max;
+//}
 
-void DBOVariable::addMinMaxObserver (DBOVariableMinMaxObserver *observer)
-{
-    assert (find (min_max_observers_.begin(), min_max_observers_.end(), observer) ==
-            min_max_observers_.end());
-    min_max_observers_.push_back (observer);
-}
-void DBOVariable::removeMinMaxObserver (DBOVariableMinMaxObserver *observer)
-{
-    assert (find (min_max_observers_.begin(), min_max_observers_.end(), observer) !=
-            min_max_observers_.end());
-    min_max_observers_.erase (find (min_max_observers_.begin(), min_max_observers_.end(), observer));
-}
+//void DBOVariable::addMinMaxObserver (DBOVariableMinMaxObserver *observer)
+//{
+//    assert (find (min_max_observers_.begin(), min_max_observers_.end(), observer) ==
+//            min_max_observers_.end());
+//    min_max_observers_.push_back (observer);
+//}
+//void DBOVariable::removeMinMaxObserver (DBOVariableMinMaxObserver *observer)
+//{
+//    assert (find (min_max_observers_.begin(), min_max_observers_.end(), observer) !=
+//            min_max_observers_.end());
+//    min_max_observers_.erase (find (min_max_observers_.begin(), min_max_observers_.end(), observer));
+//}
 
-void DBOVariable::notifyMinMaxObservers ()
-{
-    std::vector <DBOVariableMinMaxObserver *>::iterator it;
-    for (it=min_max_observers_.begin(); it != min_max_observers_.end(); it++)
-        (*it)->notifyMinMax (this);
-}
+//void DBOVariable::notifyMinMaxObservers ()
+//{
+//    std::vector <DBOVariableMinMaxObserver *>::iterator it;
+//    for (it=min_max_observers_.begin(); it != min_max_observers_.end(); it++)
+//        (*it)->notifyMinMax (this);
+//}
 
 void DBOVariable::registerParentVariable (DBOVariable *parent)
 {
@@ -728,17 +728,17 @@ void DBOVariable::registerAsParent ()
     logdbg << "DBOVariable: registerAsParent: " << id_;
     assert (isMetaVariable());
     assert (!registered_as_parent_);
-    std::map <DB_OBJECT_TYPE, std::string>::iterator it;
+    std::map <std::string, std::string>::iterator it;
     for (it = sub_variables_.begin(); it != sub_variables_.end(); it++)
     {
         assert (DBObjectManager::getInstance().existsDBOVariable(it->first, it->second));
         DBOVariable *var = DBObjectManager::getInstance().getDBOVariable(it->first, it->second);
         var->registerParentVariable(this);
 
-        if (data_type_int_ != var->data_type_int_)
+        if (data_type_ != var->data_type_)
             logwrn << "DBOVariable: registerAsParent: meta variable " << id_ << " has different data type " <<
-            PROPERTY_DATA_TYPE_STRINGS[(PROPERTY_DATA_TYPE)data_type_int_] << " than sub variable " << var->id_ << " data type "
-            << PROPERTY_DATA_TYPE_STRINGS[(PROPERTY_DATA_TYPE)var->data_type_int_];
+            data_type_str_ << " than sub variable " << var->id_ << " data type "
+            << var->data_type_str_;
     }
     registered_as_parent_=true;
 }
@@ -748,7 +748,7 @@ void DBOVariable::unregisterAsParent ()
     logdbg << "DBOVariable: unregisterAsParent: " << id_;
     assert (isMetaVariable());
     assert (registered_as_parent_);
-    std::map <DB_OBJECT_TYPE, std::string>::iterator it;
+    std::map <std::string, std::string>::iterator it;
     for (it = sub_variables_.begin(); it != sub_variables_.end(); it++)
     {
         assert (DBObjectManager::getInstance().existsDBOVariable(it->first, it->second));
@@ -758,23 +758,23 @@ void DBOVariable::unregisterAsParent ()
     registered_as_parent_=false;
 }
 
-void DBOVariable::subVariableHasMinMaxInfo ()
-{
-    assert (isMetaVariable());
+//void DBOVariable::subVariableHasMinMaxInfo ()
+//{
+//    assert (isMetaVariable());
 
-    std::map <DB_OBJECT_TYPE, std::string>::iterator it;
-    bool min_max_valid = true;
-    for (it = sub_variables_.begin(); it != sub_variables_.end(); it++)
-    {
-        DBOVariable *var = DBObjectManager::getInstance().getDBOVariable(it->first, it->second);
-        min_max_valid &= var->hasMinMaxInfo();
-    }
+//    std::map <std::string, std::string>::iterator it;
+//    bool min_max_valid = true;
+//    for (it = sub_variables_.begin(); it != sub_variables_.end(); it++)
+//    {
+//        DBOVariable *var = DBObjectManager::getInstance().getDBOVariable(it->first, it->second);
+//        min_max_valid &= var->hasMinMaxInfo();
+//    }
 
-    if (min_max_valid)
-    {
-        logdbg << "DBOVariable: subVariableHasMinMaxInfo: " << id_ << " has now valid info";
-        notifyMinMaxObservers();
-    }
-    else
-        logdbg << "DBOVariable: subVariableHasMinMaxInfo: " << id_ << " has incomplete info";
-}
+//    if (min_max_valid)
+//    {
+//        logdbg << "DBOVariable: subVariableHasMinMaxInfo: " << id_ << " has now valid info";
+//        notifyMinMaxObservers();
+//    }
+//    else
+//        logdbg << "DBOVariable: subVariableHasMinMaxInfo: " << id_ << " has incomplete info";
+//}

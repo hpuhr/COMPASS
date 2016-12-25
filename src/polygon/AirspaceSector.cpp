@@ -30,7 +30,7 @@
 #include <algorithm>
 #include "String.h"
 
-using namespace Utils::String;
+using namespace Utils;
 
 AirspaceSector::AirspaceSector(std::string class_id, std::string instance_id, Configurable *parent)
  : Configurable(class_id, instance_id, parent), latitude_min_(0), latitude_max_(0), longitude_min_(0), longitude_max_(0),
@@ -232,7 +232,7 @@ void AirspaceSector::addPoints (std::string list)
 
     list.erase (std::remove(list.begin(), list.end(), ' '), list.end()); //remove blanks
 
-    std::vector<std::string>line_splits =  split(list, '\n');
+    std::vector<std::string>line_splits =  String::split(list, '\n');
 
     std::vector<std::string>::iterator it;
     std::vector<std::string>::iterator it2;
@@ -241,7 +241,7 @@ void AirspaceSector::addPoints (std::string list)
 
     for (it = line_splits.begin(); it != line_splits.end(); it++)
     {
-        std::vector<std::string>number_splits =  split(*it, ',');
+        std::vector<std::string>number_splits =  String::split(*it, ',');
 
         loginf << "AirspaceSector: addPoints: split '" << *it << "' into " << number_splits.size() << " pieces";
 
@@ -255,7 +255,7 @@ void AirspaceSector::addPoints (std::string list)
         {
             latitude_str = *it2;
             longitude_str = *(it2+1);
-            addPoint (doubleFromString(latitude_str), doubleFromString(longitude_str));
+            addPoint (String::doubleFromString(latitude_str), String::doubleFromString(longitude_str));
         }
     }
 

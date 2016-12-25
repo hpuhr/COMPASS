@@ -166,9 +166,9 @@ public:
   bool isLoadable () { return is_loadable_; }
 
   /// @brief Returns the type of the object
-  DB_OBJECT_TYPE getType () { return (DB_OBJECT_TYPE) type_int_; }
+  const std::string &getType () { return dbo_type_; }
   /// @brief Sets the type of the object
-  void setType (DB_OBJECT_TYPE type) { type_int_=type; }
+  void setType (const std::string &dbo_type) { dbo_type_=dbo_type; }
 
   /// @brief Returns container with all meta tables
   std::map <std::string, std::string> &getMetaTables () { return meta_tables_; }
@@ -192,17 +192,17 @@ public:
 
   virtual void generateSubConfigurable (std::string class_id, std::string instance_id);
 
-  /// @brief Registers an observer to the active data sources information
-  void addActiveSourcesObserver (ActiveSourcesObserver *observer);
-  /// @brief Removes an observer to the active data sources information
-  void removeActiveSourcesObserver (ActiveSourcesObserver *observer);
+//  /// @brief Registers an observer to the active data sources information
+//  void addActiveSourcesObserver (ActiveSourcesObserver *observer);
+//  /// @brief Removes an observer to the active data sources information
+//  void removeActiveSourcesObserver (ActiveSourcesObserver *observer);
 
-  /// @brief Return if active data sources info is available
-  bool hasActiveDataSourcesInfo ();
-  /// @brief Triggers build process of the active data sources ino
-  void buildActiveDataSourcesInfo ();
-  /// @brief Sets the container with the active data sources information
-  void setActiveDataSources (std::set<int> active_data_sources);
+//  /// @brief Return if active data sources info is available
+//  bool hasActiveDataSourcesInfo ();
+//  /// @brief Triggers build process of the active data sources ino
+//  void buildActiveDataSourcesInfo ();
+//  /// @brief Sets the container with the active data sources information
+//  void setActiveDataSources (std::set<int> active_data_sources);
 
   /// @brief Returns container with the active data sources information
   std::set<int> getActiveDataSources () { return active_data_sources_; }
@@ -213,8 +213,8 @@ public:
   void unregisterParentVariables ();
 
 protected:
-  /// DBO type, as in enum DB_OBJECT_TYPE
-  unsigned int type_int_;
+  /// DBO type
+  std::string dbo_type_;
   /// DBO name
   std::string name_;
   /// DBO description

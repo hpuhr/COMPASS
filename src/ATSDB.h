@@ -104,38 +104,38 @@ public:
     void shutdown ();
 
     ///@brief Adds data to a DBO from a C struct data pointer.
-    void insert (DB_OBJECT_TYPE type, void *data);
+    void insert (const std::string &dbo_type, void *data);
     void insert (Buffer *buffer, std::string table_name);
     ///@brief Updates data records for a DBObject, delete buffer after execution
     void update (Buffer *data);
 
     ///@brief Clears previous result and start reading of data for all existing DBOs.
     void startReading (BufferReceiver *receiver, DBOVariableSet read_list);
-    void startReading (BufferReceiver *receiver, DB_OBJECT_TYPE type, DBOVariableSet read_list, std::string custom_filter_clause,
+    void startReading (BufferReceiver *receiver, const std::string &dbo_type, DBOVariableSet read_list, std::string custom_filter_clause,
             DBOVariable *order);
     ///@brief Returns flag indicating if reading of data is done.
     bool isReadingDone ();
 
-    ///@brief Returns container with all defined data sources.
-    std::map <DB_OBJECT_TYPE, std::map<int, std::string> > &getAllDataSources () { return data_sources_; }
-    std::map <std::pair<unsigned char, unsigned char>, DataSource* > &getDataSourceInstances (DB_OBJECT_TYPE type)
-            { assert (data_sources_instances_.find(type) != data_sources_instances_.end()); return data_sources_instances_[type]; }
+    ///@brief Returns container with all defined data sources, DBO type -> data sources
+    std::map <std::string, std::map<int, std::string> > &getAllDataSources () { return data_sources_; }
+    std::map <std::pair<unsigned char, unsigned char>, DataSource* > &getDataSourceInstances (const std::string &dbo_type)
+            { assert (data_sources_instances_.find(dbo_type) != data_sources_instances_.end()); return data_sources_instances_[dbo_type]; }
 
     ///@brief Returns flag if data sources are defined for DBO type.
-    bool hasDataSources (DB_OBJECT_TYPE type);
+    bool hasDataSources (const std::string &dbo_type);
     ///@brief Returns container with all defined data source for DBO type.
-    std::map<int, std::string> &getDataSources (DB_OBJECT_TYPE type);
+    std::map<int, std::string> &getDataSources (const std::string &dbo_type);
     ///@brief Returns data source name for a DBO type and data source number.
-    std::string getNameOfSensor (DB_OBJECT_TYPE type, unsigned int num);
+    std::string getNameOfSensor (const std::string &dbo_type, unsigned int num);
     /// @brief Return if a DBObject has information about its active data sources
-    bool hasActiveDataSourcesInfo (DB_OBJECT_TYPE type);
+    bool hasActiveDataSourcesInfo (const std::string &dbo_type);
     /// @brief Creates information about a DBObject's active data sources
-    void buildActiveDataSourcesInfo (DB_OBJECT_TYPE type);
+    void buildActiveDataSourcesInfo (const std::string &dbo_type);
 
     ///@brief Returns flag indicating if data exists for DBO type.
-    bool contains (DB_OBJECT_TYPE type);
+    bool contains (const std::string &dbo_type);
     ///@brief Returns number of elements existing for DBO type.
-    unsigned int count (DB_OBJECT_TYPE type);
+    unsigned int count (const std::string &dbo_type);
     ///@brief Returns flag indicating if error state was set.
     //bool error();
 
@@ -147,18 +147,18 @@ public:
 
     ///@brief Returns buffer with data from a DBO type, from a specific id and variables.
     void getInfo (JobOrderer *orderer, boost::function<void (Job*)> done_function,
-            boost::function<void (Job*)> obsolete_function, DB_OBJECT_TYPE type, unsigned int id, DBOVariableSet read_list);
+            boost::function<void (Job*)> obsolete_function, const std::string &dbo_type, unsigned int id, DBOVariableSet read_list);
     ///@brief Returns buffer with data from a DBO type, from specific ids and other parameters.
     void getInfo (JobOrderer *orderer, boost::function<void (Job*)> done_function,
-            boost::function<void (Job*)> obsolete_function, DB_OBJECT_TYPE type,
+            boost::function<void (Job*)> obsolete_function, const std::string &dbo_type,
             std::vector<unsigned int> ids, DBOVariableSet read_list, bool use_filters, std::string order_by_variable,
             bool ascending, unsigned int limit_min=0, unsigned int limit_max=0, bool finalize=true);
 
     void getCount (JobOrderer *orderer, boost::function<void (Job*)> done_function,
-            boost::function<void (Job*)> obsolete_function, DB_OBJECT_TYPE type, unsigned int sensor_number);
+            boost::function<void (Job*)> obsolete_function, const std::string &dbo_type, unsigned int sensor_number);
 
     void getDistinctStatistics (JobOrderer *orderer, boost::function<void (Job*)> done_function,
-            boost::function<void (Job*)> obsolete_function, DB_OBJECT_TYPE type, DBOVariable *variable,
+            boost::function<void (Job*)> obsolete_function, const std::string &dbo_type, DBOVariable *variable,
             unsigned int sensor_number);
 
     ///@brief Returns a Buffer with all table names in the DB. May throw exception.
@@ -215,8 +215,8 @@ protected:
     /// Structure reader, can read data from defined C structs.
     StructureReader *struct_reader_;
     /// Map containg all existing data sources (DBO type -> data source number, data source name).
-    std::map <DB_OBJECT_TYPE, std::map<int, std::string> > data_sources_;
-    std::map <DB_OBJECT_TYPE, std::map <std::pair<unsigned char, unsigned char>, DataSource* > > data_sources_instances_;
+    std::map <std::string, std::map<int, std::string> > data_sources_;
+    std::map <std::string, std::map <std::pair<unsigned char, unsigned char>, DataSource* > > data_sources_instances_;
 
     /// Container with all current read jobs (one per loaded DBObject)
     //std::vector <DBOReadDBJob*> read_jobs_;

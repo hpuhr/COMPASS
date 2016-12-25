@@ -67,9 +67,9 @@ void AirspaceSectorManagerWidget::createElements ()
     connect(new_button, SIGNAL( clicked() ), this, SLOT( addNewSector() ));
     blayout->addWidget (new_button);
 
-    QPushButton *acg_button = new QPushButton("Add Sector By ACG XML File");
-    connect(acg_button, SIGNAL( clicked() ), this, SLOT( addSectorsByACGXMLFile() ));
-    blayout->addWidget (acg_button);
+//    QPushButton *acg_button = new QPushButton("Add Sector By ACG XML File");
+//    connect(acg_button, SIGNAL( clicked() ), this, SLOT( addSectorsByACGXMLFile() ));
+//    blayout->addWidget (acg_button);
 
     QPushButton *shp_button = new QPushButton("Add Sector By Shapefile");
     connect(shp_button, SIGNAL( clicked() ), this, SLOT( addSectorsByShapeFile() ));
@@ -109,20 +109,20 @@ void AirspaceSectorManagerWidget::addNewSector ()
     }
 }
 
-void AirspaceSectorManagerWidget::addSectorsByACGXMLFile ()
-{
-    ACGXMLImportDialog import;
+//void AirspaceSectorManagerWidget::addSectorsByACGXMLFile ()
+//{
+//    ACGXMLImportDialog import;
 
-    import.exec();
+//    import.exec();
 
-    if (import.result() == QDialog::Accepted)
-    {
-        AirspaceSectorManager::getInstance().createNewSectorFromACGXMLFile(import.getFilename(), import.getSectorName());
-    }
+//    if (import.result() == QDialog::Accepted)
+//    {
+//        AirspaceSectorManager::getInstance().createNewSectorFromACGXMLFile(import.getFilename(), import.getSectorName());
+//    }
 
-    yggdrasil_->updateLayerListSlot();
-    sector_widget_->disableWidgets();
-}
+//    yggdrasil_->updateLayerListSlot();
+//    sector_widget_->disableWidgets();
+//}
 
 void AirspaceSectorManagerWidget::addSectorsByShapeFile ()
 {

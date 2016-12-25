@@ -30,7 +30,7 @@
 
 #include "String.h"
 
-using namespace Utils::String;
+using namespace Utils;
 
 
 const std::string Configuration::UNDEFINED_NAME="undefined";
@@ -940,14 +940,14 @@ Configuration &Configuration::addNewSubConfiguration (std::string class_id)
     {
         if (it->first.first.compare (class_id) == 0)
         {
-            int num = getAppendedInt (it->first.second);
+            int num = String::getAppendedInt (it->first.second);
             if (num > instance_number)
                 instance_number=num;
         }
     }
     instance_number++;
 
-    return addNewSubConfiguration (class_id, class_id+intToString (instance_number));
+    return addNewSubConfiguration (class_id, class_id+String::intToString (instance_number));
 }
 
 Configuration &Configuration::addNewSubConfiguration (Configuration &configuration)

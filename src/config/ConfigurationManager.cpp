@@ -258,7 +258,7 @@ void ConfigurationManager::saveConfiguration ()
     {
         Configurable *root_configurable = it->second;
 
-        XMLDocument *document;
+        XMLDocument *document=0;
 
         std::string root_config_filename;
 

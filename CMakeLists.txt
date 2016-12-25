@@ -17,7 +17,7 @@ find_package ( Qt4 REQUIRED )
 message("  QT_QTCORE_LIBRARY: ${QT_QTCORE_LIBRARY}") 
 include ( ${QT_USE_FILE} )
 
-find_package ( Boost REQUIRED COMPONENTS regex)
+find_package ( Boost REQUIRED COMPONENTS regex system thread)
 message("  Boost_INCLUDE_DIR: ${Boost_INCLUDE_DIR}")
 message("  Boost_LIBRARY_DIR: ${Boost_LIBRARY_DIR}")
 
@@ -104,11 +104,11 @@ set ( atsdb_HDRS
 #        src/buffer/ArrayContainer.h
         src/buffer/Buffer.h
 #        src/buffer/BufferFilter.h
-#        src/config/Configurable.h
-#        src/config/Configuration.h
-#        src/config/ConfigurationManager.h
-#        src/command/DBCommand.h
-#        src/command/DBCommandList.h
+        src/config/Configurable.h
+        src/config/Configuration.h
+        src/config/ConfigurationManager.h
+        src/command/DBCommand.h
+        src/command/DBCommandList.h
 #        src/connection/BufferWriter.h
 #        src/connection/DBConnection.h
 #        src/connection/DBConnectionInfo.h
@@ -137,28 +137,28 @@ set ( atsdb_HDRS
 #        src/mem/ArrayTemplate.h
 #        src/mem/BufferTemplate.h
 #        src/mem/MemoryManager.h
-#        src/object/DBObject.h
-#        src/object/DBObjectManager.h
-#        src/object/DBOVariable.h
+        src/object/DBObject.h
+        src/object/DBObjectManager.h
+        src/object/DBOVariable.h
 #        src/object/DBOVariableSet.h
 #        src/object/DBOVariableOrderedSet.h
-#        src/polygon/AirspaceSector.h
-#        src/polygon/AirspaceSectorParser.h
-#        src/polygon/AirspaceSectorManager.h
-#        src/polygon/GeographicPoint.h
-#        src/polygon/Polygon4DDI.h
-#        src/polygon/Vector2.h
+        src/polygon/AirspaceSector.h
+        src/polygon/AirspaceSectorParser.h
+        src/polygon/AirspaceSectorManager.h
+        src/polygon/GeographicPoint.h
+        src/polygon/Polygon4DDI.h
+        src/polygon/Vector2.h
 #        src/polygon/acgxml/ACGXMLParser.h
 #        src/polygon/acgxml/Abd.h
 #        src/polygon/acgxml/Ase.h
-#        src/polygon/shapefile/ShapeFileParser.h
-#        src/projection/ProjectionManager.h
+        src/polygon/shapefile/ShapeFileParser.h
+        src/projection/ProjectionManager.h
         src/property/Property.h
         src/property/PropertyList.h
 #        src/property/PropertyArray.h
 #        src/property/PropertyContainer.h
-#        src/result/BufferSet.h
-#        src/result/DBResult.h
+        src/result/BufferSet.h
+        src/result/DBResult.h
 #        src/result/BufferReceiver.h
 #        src/struct/StructureDescription.h
 ##        src/struct/StructureDescriptionPlot.h
@@ -170,16 +170,16 @@ set ( atsdb_HDRS
 #        src/struct/StructureElement.h
 #        src/struct/StructureReader.h
 #        src/struct/StructureVariable.h
-#        src/schema/DBTable.h
-#        src/schema/DBTableColumn.h
-#        src/schema/DBSchema.h
-#        src/schema/DBSchemaManager.h
-#        src/schema/MetaDBTable.h
-#        src/schema/SQLGenerator.h
-#        src/thread/Thread.h
-#        src/thread/TimedThread.h
-#        src/thread/WorkerThread.h
-#        src/thread/WorkerThreadManager.h
+        src/schema/DBTable.h
+        src/schema/DBTableColumn.h
+        src/schema/DBSchema.h
+        src/schema/DBSchemaManager.h
+        src/schema/MetaDBTable.h
+        src/schema/SQLGenerator.h
+        src/thread/Thread.h
+        src/thread/TimedThread.h
+        src/thread/WorkerThread.h
+        src/thread/WorkerThreadManager.h
 #        src/computation/Workflow.h
 #        src/computation/Computation.h
 #        src/computation/ComputationElement.h
@@ -236,10 +236,10 @@ set (atsdb_MOC_HEADERS
 #        src/object/MetaDBObjectEditWidget.h
 #        src/object/StringRepresentationComboBox.h
 #        src/object/UnitSelectionWidget.h
-#        src/polygon/AirspaceSectorManagerWidget.h
-#        src/polygon/AirspaceSectorTreeWidget.h
-#        src/polygon/AirspaceSectorWidget.h
-#        src/projection/ProjectionManagerWidget.h
+        src/polygon/AirspaceSectorManagerWidget.h
+        src/polygon/AirspaceSectorTreeWidget.h
+        src/polygon/AirspaceSectorWidget.h
+        src/projection/ProjectionManagerWidget.h
 #        src/schema/DBTableColumnComboBox.h
 #        src/schema/DBSchemaWidget.h
 #        src/schema/DBSchemaEditWidget.h
@@ -252,11 +252,11 @@ set ( atsdb_SRCS
          src/buffer/ArrayList.cpp
          src/buffer/Buffer.cpp
 #        src/buffer/BufferFilter.cpp
-#        src/config/Configurable.cpp
-#        src/config/Configuration.cpp
-#        src/config/ConfigurationManager.cpp
-#        src/command/DBCommand.cpp
-#        src/command/DBCommandList.cpp
+        src/config/Configurable.cpp
+        src/config/Configuration.cpp
+        src/config/ConfigurationManager.cpp
+        src/command/DBCommand.cpp
+        src/command/DBCommandList.cpp
 #        src/connection/BufferWriter.cpp
 #        src/connection/DBInterface.cpp
 #        src/connection/MySQLConConnection.cpp
@@ -309,42 +309,42 @@ set ( atsdb_SRCS
 #        src/object/DBObjectWidget.cpp
 #        src/object/MetaDBObjectEditWidget.cpp
 #        src/object/UnitSelectionWidget.cpp
-#        src/object/DBObject.cpp
-#        src/object/DBObjectManager.cpp
-#        src/object/DBOVariable.cpp
+        src/object/DBObject.cpp
+        src/object/DBObjectManager.cpp
+        src/object/DBOVariable.cpp
 #        src/object/DBOVariableSet.cpp
 #        src/object/DBOVariableOrderedSet.cpp
-#        src/polygon/Polygon4DDI.cpp
-#        src/polygon/GeographicPoint.cpp
-#        src/polygon/AirspaceSector.cpp
-#        src/polygon/AirspaceSectorManager.cpp
-#        src/polygon/AirspaceSectorManagerWidget.cpp
-#        src/polygon/AirspaceSectorTreeWidget.cpp
-#        src/polygon/AirspaceSectorWidget.cpp
+        src/polygon/Polygon4DDI.cpp
+        src/polygon/GeographicPoint.cpp
+        src/polygon/AirspaceSector.cpp
+        src/polygon/AirspaceSectorManager.cpp
+        src/polygon/AirspaceSectorManagerWidget.cpp
+        src/polygon/AirspaceSectorTreeWidget.cpp
+        src/polygon/AirspaceSectorWidget.cpp
 #        src/polygon/acgxml/ACGXMLParser.cpp
 #        src/polygon/acgxml/Abd.cpp
 #        src/polygon/acgxml/Ase.cpp
-#        src/polygon/shapefile/ShapeFileParser.cpp
-#        src/projection/ProjectionManager.cpp
-#        src/projection/ProjectionManagerWidget.cpp
+        src/polygon/shapefile/ShapeFileParser.cpp
+        src/projection/ProjectionManager.cpp
+        src/projection/ProjectionManagerWidget.cpp
         src/property/Property.cpp
 #        src/property/PropertyContainer.cpp
 #        src/result/BufferSet.cpp
 #        src/result/DBResult.cpp
-#        src/schema/DBTable.cpp
-#        src/schema/DBTableColumn.cpp
-#        src/schema/DBSchema.cpp
-#        src/schema/DBSchemaManager.cpp
-#        src/schema/MetaDBTable.cpp
+        src/schema/DBTable.cpp
+        src/schema/DBTableColumn.cpp
+        src/schema/DBSchema.cpp
+        src/schema/DBSchemaManager.cpp
+        src/schema/MetaDBTable.cpp
 #        src/schema/SQLGenerator.cpp
 #        src/struct/StructureDescription.cpp
 #        src/struct/StructureReader.cpp
 #        src/struct/StructureDescriptionManager.cpp
 #        src/struct/StructureVariable.cpp
-#        src/thread/Thread.cpp
-#        src/thread/TimedThread.cpp
-#        src/thread/WorkerThread.cpp
-#        src/thread/WorkerThreadManager.cpp
+        src/thread/Thread.cpp
+        src/thread/TimedThread.cpp
+        src/thread/WorkerThread.cpp
+        src/thread/WorkerThreadManager.cpp
 #        src/computation/Workflow.cpp
 #        src/computation/Computation.cpp
 #        src/computation/ComputationElement.cpp

@@ -17,7 +17,7 @@
 #include "ogrsf_frmts.h"
 #include "ogr_api.h"
 
-using namespace Utils::String;
+using namespace Utils;
 
 ShapeFileParser::ShapeFileParser()
  : AirspaceSectorParser()
@@ -52,7 +52,7 @@ void ShapeFileParser::parse (std::string filename)
         loginf << "ShapeFileParser: parse: got layer " << i;
 
         //id = QString::number( i );
-        idstd = intToString(i);//id.toStdString();
+        idstd = String::intToString(i);//id.toStdString();
 
         //set correct transform
 //        updateGeometryTransform( layer );
@@ -105,7 +105,7 @@ void ShapeFileParser::parse (std::string filename)
             }
 
             if (name.size() == 0)
-                name = "Layer"+intToString(i);
+                name = "Layer"+String::intToString(i);
 
             loginf <<"ShapeFileParser: parse: name " << name << " min_alt " << min_alt
                     << " max_alt " << max_alt << " min_agl " << min_agl;
@@ -281,7 +281,7 @@ void ShapeFileParser::addPoly( OGRPolygon* obj, AirspaceSector* sector )
     for( i=0; i<n; ++i )
     {
 
-        AirspaceSector *sub_sector = sector->addNewSubSector(name+"_"+intToString(i));
+        AirspaceSector *sub_sector = sector->addNewSubSector(name+"_"+String::intToString(i));
 
         const OGRLinearRing* ring = obj->getInteriorRing( i );
         addLinearRing( ring, sub_sector, false );

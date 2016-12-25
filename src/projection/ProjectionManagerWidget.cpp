@@ -77,10 +77,13 @@ void ProjectionManagerWidget::changeEPSG ()
 
     std::string value_str = epsg_edit_->text().toStdString();
 
-    bool ok;
-    unsigned int value = Utils::String::intFromString(value_str, &ok);
-
-    if (!ok)
+    try
+    {
+        unsigned int value = Utils::String::intFromString(value_str);
+        ProjectionManager::getInstance().setNewCartesianEPSG(value);
+        cart_proj_info_label_->setText(ProjectionManager::getInstance().getCartesianPROJ4Info().c_str());
+    }
+    catch (...)
     {
         std::string msg = "Forbidden value '"+value_str+"\n Please refer to http://spatialreference.org/ref/epsg/ for possible numbers";
         QMessageBox::warning ( this, "Change Cartesian Coordinate", msg.c_str());
@@ -88,6 +91,5 @@ void ProjectionManagerWidget::changeEPSG ()
         return;
     }
 
-    ProjectionManager::getInstance().setNewCartesianEPSG(value);
-    cart_proj_info_label_->setText(ProjectionManager::getInstance().getCartesianPROJ4Info().c_str());
+
 }

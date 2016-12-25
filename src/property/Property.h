@@ -39,21 +39,22 @@ enum class PropertyDataType { BOOL, CHAR, UCHAR, INT, UINT, LONGINT, ULONGINT,
  */
 class Property
 {
-public:
+protected:
   /// @brief Default constructor. Use only if members are overwritten.
-  //Property();
-  /// @brief Constructor
+  Property() {};
+public:
+    /// @brief Constructor
   Property(std::string id, PropertyDataType type);
   /// @brief Destructor
   virtual ~Property() {};
 
   PropertyDataType getDataType() const { return data_type_; };
 
-  const std::string &asString() const { return Property::asString(data_type_); };
+  const std::string &asDataTypeString() const { return data_type_str_; };
+
+  void setDataType(PropertyDataType type) { data_type_ = type; data_type_str_ = asString(data_type_); }
 
   std::string getId() const { return id_; };
-
-  //unsigned int getSize() const;
 
   static const std::string &asString (PropertyDataType type)
   {
@@ -71,10 +72,9 @@ public:
 protected:
   /// Data type
   PropertyDataType data_type_;
+  std::string data_type_str_;
   /// String identifier
   std::string id_;
-  /// Size of data item in bytes
-//  unsigned int size_;
 
   /// Mappings from PropertyDataType to strings, and back.
   static std::map<PropertyDataType,std::string> data_types_2_strings_;

@@ -50,12 +50,16 @@ DBObjectManager::~DBObjectManager()
     if (registered_parent_variables_)
     {
         //loginf << "DBObjectManager: registerParentVariablesIfRequired: registering";
-        if (objects_.find(DBO_UNDEFINED) != objects_.end())
-            objects_[DBO_UNDEFINED]->unregisterParentVariables();
+        std::map <std::string, DBObject*>::iterator it;
+
+        for (it = objects_.begin(); it != objects_.end(); it++)
+            if (it->second->isMeta())
+                it->second->unregisterParentVariables();
+
         registered_parent_variables_=false;
     }
 
-    std::map <DB_OBJECT_TYPE, DBObject*>::iterator it;
+    std::map <std::string, DBObject*>::iterator it;
 
     for (it = objects_.begin(); it != objects_.end(); it++)
     {
@@ -87,23 +91,23 @@ void DBObjectManager::checkSubConfigurables ()
     // nothing to do, must be defined in configuration
 }
 
-bool DBObjectManager::existsDBObject (DB_OBJECT_TYPE type)
+bool DBObjectManager::existsDBObject (const std::string &dbo_type)
 {
     registerParentVariablesIfRequired();
 
-    return (objects_.find(type) != objects_.end());
+    return (objects_.find(dbo_type) != objects_.end());
 }
 
-DBObject *DBObjectManager::getDBObject (DB_OBJECT_TYPE type)
+DBObject *DBObjectManager::getDBObject (const std::string &dbo_type)
 {
-    logdbg  << "DBObjectManager: getDBObject: type " << type;
+    logdbg  << "DBObjectManager: getDBObject: type " << dbo_type;
 
     registerParentVariablesIfRequired();
 
-    assert (objects_.find(type) != objects_.end());
-    assert (objects_.at(type));
+    assert (objects_.find(dbo_type) != objects_.end());
+    assert (objects_.at(dbo_type));
 
-    return objects_.at(type);
+    return objects_.at(dbo_type);
 }
 
 /**
@@ -111,39 +115,39 @@ DBObject *DBObjectManager::getDBObject (DB_OBJECT_TYPE type)
  *
  * \exception std::runtime_error if variable not found.
  */
-DBOVariable *DBObjectManager::getDBOVariable (DB_OBJECT_TYPE type, std::string id)
+DBOVariable *DBObjectManager::getDBOVariable (const std::string &dbo_type, std::string id)
 {
-    logdbg  << "DBObjectManager: getDBOVariable: type " << type << " id " << id;
+    logdbg  << "DBObjectManager: getDBOVariable: type " << dbo_type << " id " << id;
 
     registerParentVariablesIfRequired();
 
-    assert (existsDBObject(type));
+    assert (existsDBObject(dbo_type));
     assert (id.size() > 0);
 
-    if (!existsDBOVariable (type, id))
+    if (!existsDBOVariable (dbo_type, id))
     {
-        logerr  << "DBObjectManager: getDBOVariable: variable unknown type " << type << " id " << id;
+        logerr  << "DBObjectManager: getDBOVariable: variable unknown type " << dbo_type << " id " << id;
         throw std::runtime_error("DBObjectManager: getDBOVariable: variable unknown");
     }
 
-    return getDBObject (type)->getVariable(id);
+    return getDBObject (dbo_type)->getVariable(id);
 }
 
-std::map <std::string, DBOVariable*> &DBObjectManager::getDBOVariables (DB_OBJECT_TYPE type)
+std::map <std::string, DBOVariable*> &DBObjectManager::getDBOVariables (const std::string &dbo_type)
 {
     registerParentVariablesIfRequired();
 
-    assert (existsDBObject(type));
-    return getDBObject (type)->getVariables();
+    assert (existsDBObject(dbo_type));
+    return getDBObject (dbo_type)->getVariables();
 }
 
-bool DBObjectManager::existsDBOVariable (DB_OBJECT_TYPE type, std::string id)
+bool DBObjectManager::existsDBOVariable (const std::string &dbo_type, std::string id)
 {
     registerParentVariablesIfRequired();
 
-    if (!existsDBObject(type))
+    if (!existsDBObject(dbo_type))
         return false;
-    return getDBObject (type)->hasVariable(id);
+    return getDBObject (dbo_type)->hasVariable(id);
 }
 
 void DBObjectManager::registerParentVariablesIfRequired ()
@@ -151,8 +155,12 @@ void DBObjectManager::registerParentVariablesIfRequired ()
     if (!registered_parent_variables_)
     {
         //loginf << "DBObjectManager: registerParentVariablesIfRequired: registering";
+        std::map <std::string, DBObject*>::iterator it;
+
+        for (it = objects_.begin(); it != objects_.end(); it++)
+            if (it->second->isMeta())
+                it->second->registerParentVariables();
+
         registered_parent_variables_=true;
-        if (objects_.find(DBO_UNDEFINED) != objects_.end())
-            objects_[DBO_UNDEFINED]->registerParentVariables();
     }
 }

@@ -39,7 +39,7 @@
 
 #include "String.h"
 
-using namespace Utils::String;
+using namespace Utils;
 
 AirspaceSectorWidget::AirspaceSectorWidget(QWidget *parent, Qt::WindowFlags f)
 : QWidget (parent, f), current_(0), table_ (0)
@@ -176,8 +176,8 @@ void AirspaceSectorWidget::showSector (AirspaceSector *sector)
     }
     else
     {
-        height_min_edit_->setText(doubleToString(current_->getHeightMin()).c_str());
-        height_max_edit_->setText(doubleToString(current_->getHeightMax()).c_str());
+        height_min_edit_->setText(String::doubleToString(current_->getHeightMin()).c_str());
+        height_max_edit_->setText(String::doubleToString(current_->getHeightMax()).c_str());
 
         updatePointsTable ();
     }
@@ -264,8 +264,8 @@ void AirspaceSectorWidget::updatePointsTable ()
 
          QTableWidgetItem *newItem;
 
-         std::string latitude = doubleToStringPrecision(it->x_, 12);
-         std::string longitude = doubleToStringPrecision(it->y_, 12);
+         std::string latitude = String::doubleToStringPrecision(it->x_, 12);
+         std::string longitude = String::doubleToStringPrecision(it->y_, 12);
 
          newItem = new QTableWidgetItem(latitude.c_str());
          newItem->setFlags(Qt::ItemIsEnabled);
@@ -296,14 +296,14 @@ void AirspaceSectorWidget::setHasOwnVolume ()
 }
 void AirspaceSectorWidget::setHeightMin()
 {
-    double value = doubleFromString(height_min_edit_->text().toStdString());
+    double value = String::doubleFromString(height_min_edit_->text().toStdString());
     assert (current_);
     assert (current_->hasOwnVolume());
     current_->setHeightMin(value);
 }
 void AirspaceSectorWidget::setHeightMax ()
 {
-    double value = doubleFromString(height_max_edit_->text().toStdString());
+    double value = String::doubleFromString(height_max_edit_->text().toStdString());
     assert (current_);
     assert (current_->hasOwnVolume());
     current_->setHeightMax(value);
@@ -345,7 +345,7 @@ void AirspaceSectorWidget::copyPoints ()
 
     for (it = points.begin(); it != points.end(); it++)
     {
-        ss << doubleToStringPrecision(it->x_, 12) << "," << doubleToStringPrecision(it->y_, 12) << std::endl;
+        ss << String::doubleToStringPrecision(it->x_, 12) << "," << String::doubleToStringPrecision(it->y_, 12) << std::endl;
     }
 
     QClipboard *clipboard = QApplication::clipboard();

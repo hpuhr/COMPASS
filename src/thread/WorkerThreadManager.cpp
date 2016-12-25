@@ -33,7 +33,7 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include "String.h"
 
-using namespace Utils::String;
+using namespace Utils;
 
 WorkerThreadManager::WorkerThreadManager()
 : Configurable ("WorkerThreadManager", "WorkerThreadManager0"),
@@ -49,7 +49,7 @@ WorkerThreadManager::WorkerThreadManager()
 
   for (unsigned int cnt=0; cnt < num_workers_; cnt++)
   {
-    std::string name = "Worker"+intToString(cnt);
+    std::string name = "Worker"+String::intToString(cnt);
     WorkerThread *worker = new WorkerThread (name);
     assert (worker);
     workers_.push_back(worker);

@@ -42,15 +42,15 @@ public:
   virtual ~StructureDescriptionManager();
 
   /// @brief Returns StructureDescription for a given DBO type
-  StructureDescription *getStructureDescription (DB_OBJECT_TYPE type);
+  StructureDescription *getStructureDescription (const std::string &dbo_type);
   /// @brief Returns container with all StructureDesciptions
-  std::map <DB_OBJECT_TYPE, StructureDescription *> &getStructureDescriptions () { return structure_descriptions_; }
+  std::map <std::string, StructureDescription *> &getStructureDescriptions () { return structure_descriptions_; }
 
 private:
   /// @brief Constructor
   StructureDescriptionManager();
-  /// @brief Container with all StructureDescriptions
-  std::map <DB_OBJECT_TYPE, StructureDescription *> structure_descriptions_;
+  /// @brief Container with all StructureDescriptions, DBO type -> StructureDescription
+  std::map <std::string, StructureDescription *> structure_descriptions_;
 
 public:
   static StructureDescriptionManager& getInstance()

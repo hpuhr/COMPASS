@@ -63,13 +63,13 @@ StructureDescriptionManager::~StructureDescriptionManager()
    */
 }
 
-StructureDescription *StructureDescriptionManager::getStructureDescription (DB_OBJECT_TYPE type)
+StructureDescription *StructureDescriptionManager::getStructureDescription (const std::string &dbo_type)
 {
-  assert (structure_descriptions_.find(type) != structure_descriptions_.end());
+  assert (structure_descriptions_.find(dbo_type) != structure_descriptions_.end());
 
-  logdbg  << "StructureDescriptionManager: getStructureDescription: type " << type;
+  logdbg  << "StructureDescriptionManager: getStructureDescription: type " << dbo_type;
 
-  return structure_descriptions_.at(type);
+  return structure_descriptions_.at(dbo_type);
 }
 
 //std::map <DB_OBJECT_TYPE, ConfigurableDefinition> StructureDescriptionManager::createAllDBObjects ()

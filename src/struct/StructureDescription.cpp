@@ -34,7 +34,7 @@
 
 using namespace std;
 
-StructureDescription::StructureDescription(DB_OBJECT_TYPE dbo_type, string id, string description, size_t offset)
+StructureDescription::StructureDescription(const std::string &dbo_type, string id, string description, size_t offset)
 : dbo_type_(dbo_type), id_(id), description_ (description), offset_(offset)
 {
   logdbg  << "StructureDescription: constructor: dbo " << dbo_type << " id " << id;

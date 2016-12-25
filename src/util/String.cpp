@@ -24,6 +24,7 @@
 
 #include "String.h"
 #include "Logger.h"
+#include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/assign/list_of.hpp>
 #include <boost/format.hpp>
@@ -52,30 +53,39 @@ using boost::algorithm::iequals;
 
 namespace Utils
 {
-namespace String
+
+String::String()
 {
-std::string intToString(int number)
+}
+
+String::~String()
+{
+}
+
+
+
+std::string String::intToString(int number)
 {
     std::stringstream ss;//create a stringstream
     ss << number;//add number to the stream
     return ss.str();//return a string with the contents of the stream
 }
 
-std::string uIntToString(unsigned int number)
+std::string String::uIntToString(unsigned int number)
 {
     std::stringstream ss;//create a stringstream
     ss << number;//add number to the stream
     return ss.str();//return a string with the contents of the stream
 }
 
-std::string intToString(int number, int width, char c)
+std::string String::intToString(int number, int width, char c)
 {
     std::stringstream ss;//create a stringstream
     ss << std::setfill(c) << std::setw(width) << number;//add number to the stream
     return ss.str();//return a string with the contents of the stream
 }
 
-std::string doubleToString(double number)
+std::string String::doubleToString(double number)
 {
     std::stringstream ss;//create a stringstream
     ss << boost::format("%g") % number;
@@ -83,7 +93,7 @@ std::string doubleToString(double number)
     return ss.str();//return a string with the contents of the stream
 }
 
-std::string doubleToStringPrecision(double number, unsigned int precision)
+std::string String::doubleToStringPrecision(double number, unsigned int precision)
 {
     std::stringstream ss;//create a stringstream
     ss << std::fixed << setprecision(precision) << number;
@@ -91,7 +101,7 @@ std::string doubleToStringPrecision(double number, unsigned int precision)
     return ss.str();//return a string with the contents of the stream
 }
 
-std::string doubleToStringNoScientific(double number)
+std::string String::doubleToStringNoScientific(double number)
 {
     std::stringstream ss;//create a stringstream
     //ss << boost::format("%g") % number;
@@ -99,14 +109,14 @@ std::string doubleToStringNoScientific(double number)
     return ss.str();//return a string with the contents of the stream
 }
 
-std::string percentToString(double number)
+std::string String::percentToString(double number)
 {
     std::stringstream ss;//create a stringstream
     ss << fixed << setprecision(2) << number;//add number to the stream
     return ss.str();//return a string with the contents of the stream
 }
 
-unsigned int intFromOctalString (std::string number)
+unsigned int String::intFromOctalString (std::string number)
 {
     unsigned int x = std::stoi( number, 0, 8 );
     logdbg << "Util: intFromOctalString: returning " << x << " from " << number;
@@ -114,7 +124,7 @@ unsigned int intFromOctalString (std::string number)
     return x;
 }
 
-unsigned int intFromHexString (std::string number)
+unsigned int String::intFromHexString (std::string number)
 {
     unsigned int x = std::stoi( number, 0, 16 );
 
@@ -123,34 +133,34 @@ unsigned int intFromHexString (std::string number)
     return x;
 }
 
-int intFromString (std::string number)
+int String::intFromString (std::string number)
 {
-    int x = std::stoi( number );
+    int x = boost::lexical_cast<int>(number);
 
     logdbg << "Util: intFromString: returning " << x << " from " << number;
 
     return x;
 }
 
-unsigned int uIntFromString (std::string number)
+unsigned int String::uIntFromString (std::string number)
 {
-    int x = std::stoi( number );
+    unsigned int x = boost::lexical_cast<unsigned int>(number);
 
     logdbg << "Util: uIntFromString: returning " << x << " from " << number;
 
     return x;
 }
 
-double doubleFromString (std::string number)
+double String::doubleFromString (std::string number)
 {
-    double x = std::stod( number );
+    double x = boost::lexical_cast<double>(number);
 
     logdbg << "Util: doubleFromString: returning " << x << " from " << number;
 
     return x;
 }
 
-std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems)
+std::vector<std::string> &String::split(const std::string &s, char delim, std::vector<std::string> &elems)
 {
     std::stringstream ss(s);
     std::string item;
@@ -215,13 +225,13 @@ std::vector<std::string> &split(const std::string &s, char delim, std::vector<st
 //        throw std::runtime_error ("Util: createDataFromStringBuffer: unknown property type");
 //}
 
-std::vector<std::string> split(const std::string &s, char delim)
+std::vector<std::string> String::split(const std::string &s, char delim)
 {
     std::vector<std::string> elems;
     return split(s, delim, elems);
 }
 
-std::string timeStringFromDouble (double seconds)
+std::string String::timeStringFromDouble (double seconds)
 {
     int hours, minutes;
     std::string text;
@@ -236,7 +246,7 @@ std::string timeStringFromDouble (double seconds)
     return ss.str();
 }
 
-double timeFromString (std::string seconds)
+double String::timeFromString (std::string seconds)
 {
     std::vector<std::string> chunks = split(seconds, ':');
 
@@ -254,14 +264,14 @@ double timeFromString (std::string seconds)
     return time;
 }
 
-std::string octStringFromInt (int number)
+std::string String::octStringFromInt (int number)
 {
     std::stringstream ss;
     ss <<  std::oct << number;
     return ss.str();
 }
 
-std::string octStringFromInt(int number, int width, char c)
+std::string String::octStringFromInt(int number, int width, char c)
 {
     std::stringstream ss;//create a stringstream
     ss << std::oct << std::setfill(c) << std::setw(width) << number;//add number to the stream
@@ -269,14 +279,14 @@ std::string octStringFromInt(int number, int width, char c)
 }
 
 
-std::string hexStringFromInt (int number)
+std::string String::hexStringFromInt (int number)
 {
     std::stringstream ss;
     ss <<  std::hex << number;
     return ss.str();
 }
 
-std::string hexStringFromInt (int number, int width, char c)
+std::string String::hexStringFromInt (int number, int width, char c)
 {
     std::stringstream ss;
     ss <<  std::hex << std::setfill(c) << std::setw(width) << number;
@@ -284,7 +294,7 @@ std::string hexStringFromInt (int number, int width, char c)
 }
 
 
-int getAppendedInt (std::string text)
+int String::getAppendedInt (std::string text)
 {
     int ret=0;
     boost::regex re("[0-9]+");
@@ -304,7 +314,7 @@ int getAppendedInt (std::string text)
     return ret;
 }
 
-int getLeadingInt (std::string text)
+int String::getLeadingInt (std::string text)
 {
     boost::regex re("[0-9]+");
     boost::sregex_token_iterator i(text.begin(), text.end(), re, 0);
@@ -501,7 +511,7 @@ int getLeadingInt (std::string text)
 //    return ss.str();
 //}
 
-std::string getHexString (void *data, unsigned int num_bytes)
+std::string String::getHexString (void *data, unsigned int num_bytes)
 {
     assert (num_bytes > 0);
     std::stringstream ss;
@@ -518,7 +528,7 @@ std::string getHexString (void *data, unsigned int num_bytes)
     return ss.str();
 }
 
-double doubleFromLatitudeString(std::string &latitude_str)
+double String::doubleFromLatitudeString(std::string &latitude_str)
 {
     unsigned int len = latitude_str.size();
     assert (len == 12);
@@ -537,7 +547,7 @@ double doubleFromLatitudeString(std::string &latitude_str)
     return x;
 }
 
-double doubleFromLongitudeString(std::string &longitude_str)
+double String::doubleFromLongitudeString(std::string &longitude_str)
 {
     unsigned int len = longitude_str.size();
     assert (len == 13);
@@ -556,6 +566,4 @@ double doubleFromLongitudeString(std::string &longitude_str)
     return x;
 }
 
-
-}
 }

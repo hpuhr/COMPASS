@@ -43,7 +43,7 @@ class StructureDescription: public StructureElement
 {
 public:
   /// @brief Constructor
-  StructureDescription(DB_OBJECT_TYPE dbo_type, std::string id, std::string description, size_t offset);
+  StructureDescription(const std::string &dbo_type, std::string id, std::string description, size_t offset);
   /// @brief Desctructor
   virtual ~StructureDescription();
 
@@ -68,7 +68,7 @@ public:
 
 protected:
   /// DBO type
-  DB_OBJECT_TYPE dbo_type_;
+  std::string dbo_type_;
   /// Name identifier
   std::string id_;
   /// Description
