@@ -39,7 +39,7 @@ class BufferFilterEntry : public Configurable
 {
 public:
     /// @brief Constructor
-    BufferFilterEntry( int dbo_type );
+    BufferFilterEntry( const std::string &dbo_type );
     /// @brief Configurable constructor
     BufferFilterEntry( const std::string& class_id,
                        const std::string& instance_id,
@@ -50,7 +50,7 @@ public:
     /// @brief Sets the filter Property
     void setProperty( const Property& prop );
     /// @brief Sets the filter Property
-    void setProperty( const std::string& id, int data_type=-1 );
+    void setProperty( const std::string& id, PropertyDataType data_type );
     /// @brief Sets the filter Property from a DBO variable
     void setProperty( DBOVariable* var );
 
@@ -61,24 +61,25 @@ public:
     bool exists( Buffer* buffer ) const;
 
     /// @brief Retrieves the Property from the entry
-    void getProperty( Property& prop ) const;
+    Property getProperty() const;
     /// @brief Returns the Property id of the entry
     const std::string& getID() const;
     /// @brief Returns the data type of the entry as integer number
-    int dataType() const;
+    PropertyDataType dataType() const;
     /// @brief Returns the DBO type the Property is assigned to as integer number
-    int dboType() const;
+    const std::string &dboType() const;
 
     /// @brief Retrieves a configuration and fills in the given filter entry data
-    static void getConfig( Configuration& config, int dbo_type, const std::string& id, int data_type );
+    static void getConfig( Configuration& config, const std::string &dbo_type, const std::string& id, PropertyDataType data_type );
 
 private:
     /// DBO type of the Property
-    int dbo_type_;
+    std::string dbo_type_;
     /// Property id
     std::string id_;
     /// Property data type
-    int data_type_;
+    PropertyDataType data_type_;
+    std::string data_type_str_;
 };
 
 /**
@@ -91,7 +92,7 @@ class BufferFilterRuleEntry : public Configurable
 {
 public:
     /// @brief Constructor
-    BufferFilterRuleEntry( int dbo_type, int filter_rule );
+    BufferFilterRuleEntry( const std::string &dbo_type, int filter_rule );
     /// @brief Configurable constructor
     BufferFilterRuleEntry( const std::string& class_id,
                            const std::string& instance_id,
@@ -102,16 +103,16 @@ public:
     /// @brief Sets the filter rule as integer number
     void setRule( int filter_rule );
     /// @brief Returns the DBO type as integer number
-    int dboType() const;
+    const std::string &dboType() const;
     /// @brief Returns the filter rule as integer number
     int filterRule() const;
 
     /// @brief Retrieves a configuration and fills in the given rule entry data
-    static void getConfig( Configuration& config, int dbo_type, int filter_rule );
+    static void getConfig( Configuration& config, const std::string &dbo_type, int filter_rule );
 
 private:
     /// DBO type the rule is assigned to
-    int dbo_type_;
+    std::string dbo_type_;
     /// Filter rule, possible values defined in enum BufferFilterRule
     int filter_rule_;
 };
@@ -168,9 +169,9 @@ public:
     */
     enum BufferFilterRule { FORWARD=0, BLOCK, TRANSFORM };
 
-    typedef std::map<DB_OBJECT_TYPE,BufferFilterRuleEntry*> Rules;
+    typedef std::map<std::string,BufferFilterRuleEntry*> Rules; // by dbo type
     typedef std::map<std::string,BufferFilterEntry*> FilterEntries;
-    typedef std::map<DB_OBJECT_TYPE,FilterEntries> PropertyFilter;
+    typedef std::map<std::string,FilterEntries> PropertyFilter; // by dbo type
 
     /// @brief Constructor
     BufferFilter();
@@ -182,9 +183,9 @@ public:
     virtual ~BufferFilter();
 
     /// @brief Adds a DBO type specific Property to the filter
-    void addPropertyToFilter( DB_OBJECT_TYPE dbo_type, const Property& id );
+    void addPropertyToFilter( const std::string &dbo_type, const Property& id );
     /// @brief Adds a DBO type specific Property to the filter
-    void addPropertyToFilter( DB_OBJECT_TYPE dbo_type, const std::string& id, int data_type );
+    void addPropertyToFilter( const std::string &dbo_type, const std::string& id, PropertyDataType data_type );
     /// @brief Adds one or more DBO type specific properties to the filter
     void addPropertyToFilter( DBOVariable* var );
     /// @brief Clears all properties
@@ -192,12 +193,12 @@ public:
     /// @brief Checks the existence of all defined properties in the given buffer
     bool checkProperties( Buffer* buffer );
     /// @brief Checks if the given Property id already exists for the given DBO type
-    bool hasProperty( DB_OBJECT_TYPE dbo_type, const std::string& id );
+    bool hasProperty( const std::string &dbo_type, const std::string& id );
     /// @brief Returns all defined properties
-    std::multimap<DB_OBJECT_TYPE,Property> getProperties() const;
+    std::multimap<std::string,Property> getProperties() const; // by dbo type
 
     /// @brief Sets a filter rule for the given DBO type
-    void setRule( DB_OBJECT_TYPE dbo_type, BufferFilterRule rule );
+    void setRule( const std::string &dbo_type, BufferFilterRule rule );
     /// @brief Sets one or more filter rules using the given DBOVariable
     void setRule( DBOVariable* var, BufferFilterRule rule );
     /// @brief Sets a base filter rule
@@ -205,11 +206,11 @@ public:
     /// @brief Returns a filter rule for the given buffer
     BufferFilterRule getRule( Buffer* buffer );
     /// @brief Returns a filter rule for the given DBO type
-    BufferFilterRule getRule( DB_OBJECT_TYPE type );
+    BufferFilterRule getRule( const std::string &type );
     /// @brief Returns all defined filter rules
-    std::map<DB_OBJECT_TYPE,BufferFilterRule> getRules() const;
+    std::map<std::string,BufferFilterRule> getRules() const; // by dbo type
     /// @brief Checks if a specific rule has been defined for the given DBO type
-    bool hasRule( DB_OBJECT_TYPE type ) const;
+    bool hasRule( const std::string &type ) const;
     /// @brief Checks if a base filter rule has been defined
     bool hasBaseRule() const;
     /// @brief Returns the base filter rule

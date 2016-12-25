@@ -43,13 +43,13 @@
 #include "MetaDBTable.h"
 #include "Logger.h"
 #include "DBOVariableDataTypeComboBox.h"
-#include "StringRepresentationComboBox.h"
+//#include "StringRepresentationComboBox.h"
 #include "DBTableColumnComboBox.h"
 #include "UnitSelectionWidget.h"
 
 #include "String.h"
 
-using namespace Utils::String;
+using namespace Utils;
 
 DBObjectEditWidget::DBObjectEditWidget(DBObject *object, QWidget * parent, Qt::WindowFlags f)
  : QWidget (parent, f), object_(object), name_edit_(0), info_edit_(0), type_box_(0), loadable_check_(0),
@@ -728,9 +728,12 @@ void DBObjectEditWidget::addAllVariables ()
     std::string instance = "DBOVariable"+object_->getName()+column_name+"0";
 
     Configuration &config = object_->addNewSubConfiguration ("DBOVariable", instance);
-    config.addParameterString ("id", column_name);
-    config.addParameterUnsignedInt ("data_type", getDataTypeFromDB(it->second->getType()));
-    config.addParameterUnsignedInt ("dbo_type", object_->getType());
+
+    assert (false);
+    // TODO
+//    config.addParameterString ("id", column_name);
+//    config.addParameterUnsignedInt ("data_type", getDataTypeFromDB(it->second->getType()));
+//    config.addParameterUnsignedInt ("dbo_type", object_->getType());
 
     std::string var_instance = "DBOSchemaVariableDefinition"+object_->getName()+column_name+"0";
 
@@ -772,8 +775,10 @@ void DBObjectEditWidget::addNewVariables ()
 
     Configuration &config = object_->addNewSubConfiguration ("DBOVariable", instance);
     config.addParameterString ("id", column_name);
-    config.addParameterUnsignedInt ("data_type", getDataTypeFromDB(it->second->getType()));
-    config.addParameterUnsignedInt ("dbo_type", object_->getType());
+    //TODO
+    assert (false);
+//    config.addParameterUnsignedInt ("data_type", getDataTypeFromDB(it->second->getType()));
+//    config.addParameterUnsignedInt ("dbo_type", object_->getType());
 
     std::string var_instance = "DBOSchemaVariableDefinition"+object_->getName()+column_name+"0";
 
@@ -917,10 +922,12 @@ void DBObjectEditWidget::updateDBOVarsGrid ()
     dbovars_grid_->addWidget (type, row, 3);
 
     //logdbg  << "DBObjectEditWidget: updateDBOVarsGrid: creating variable row for " << it->first << " stringrep";
-    StringRepresentationComboBox *repr = new StringRepresentationComboBox (it->second);
-    assert (dbo_vars_grid_representation_boxes_.find(repr) == dbo_vars_grid_representation_boxes_.end());
-    dbo_vars_grid_representation_boxes_[repr] = it->second;
-    dbovars_grid_->addWidget (repr, row, 4);
+    assert (false);
+    // TODO
+//    StringRepresentationComboBox *repr = new StringRepresentationComboBox (it->second);
+//    assert (dbo_vars_grid_representation_boxes_.find(repr) == dbo_vars_grid_representation_boxes_.end());
+//    dbo_vars_grid_representation_boxes_[repr] = it->second;
+//    dbovars_grid_->addWidget (repr, row, 4);
 
     //logdbg  << "DBObjectEditWidget: updateDBOVarsGrid: creating variable row for " << it->first << " unit";
     UnitSelectionWidget *unit_sel = new UnitSelectionWidget (it->second->getUnitDimension(), it->second->getUnitUnit());

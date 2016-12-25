@@ -58,12 +58,12 @@ public:
     void clearChanged ();
 
     /// @brief Returns of data of a DBO should be loaded
-    bool getLoad (DB_OBJECT_TYPE type);
+    bool getLoad (const std::string &dbo_type);
     /// @brief Sets if data of a DBO should be loaded
-    void setLoad (DB_OBJECT_TYPE type, bool show);
+    void setLoad (const std::string &dbo_type, bool show);
 
     /// @brief Returns the SQL condition for a DBO and sets all used variable names
-    std::string getSQLCondition (DB_OBJECT_TYPE type, std::vector<std::string> &variable_names);
+    std::string getSQLCondition (const std::string &dbo_type, std::vector<std::string> &variable_names);
 
     /// @brief Returns number of existing filters
     unsigned int getNumFilters ();
@@ -79,8 +79,8 @@ public:
     void deleteFilter (DBFilter *filter);
 
 protected:
-    /// Container with all load flags
-    std::map<DB_OBJECT_TYPE, bool*> load_;
+    /// Container with all load flags, dbo type -> loading
+    std::map<std::string, bool*> load_;
     /// Changed flag
     bool changed_;
     /// Database definition, resets if changed
@@ -91,7 +91,7 @@ protected:
     /// @brief Constructor
     FilterManager();
     /// @brief Returns the SQL condition for a DBO and sets all used variable names
-    std::string getActiveFilterSQLCondition (DB_OBJECT_TYPE type, std::vector<std::string> &variable_names);
+    std::string getActiveFilterSQLCondition (const std::string &dbo_type, std::vector<std::string> &variable_names);
 
     virtual void checkSubConfigurables ();
 

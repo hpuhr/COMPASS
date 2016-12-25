@@ -31,35 +31,40 @@
 
 #include "String.h"
 
-using namespace Utils::String;
+using namespace Utils;
 
 SensorFilter::SensorFilter(std::string class_id, std::string instance_id, Configurable *parent)
 : DBFilter(class_id, instance_id, parent, false)
 {
-    registerParameter ("dbo_type", &dbo_type_int_, (int) DBO_UNDEFINED);
+    registerParameter ("dbo_type", &dbo_type_, "");
 
-    assert (DBObjectManager::getInstance().existsDBObject ((DB_OBJECT_TYPE) dbo_type_int_));
-    DBObject *object = DBObjectManager::getInstance().getDBObject ((DB_OBJECT_TYPE) dbo_type_int_);
+    assert (DBObjectManager::getInstance().existsDBObject (dbo_type_));
+    DBObject *object = DBObjectManager::getInstance().getDBObject (dbo_type_);
     assert (object->hasCurrentDataSource());
-    object->addActiveSourcesObserver(this);
 
-    sensor_column_name_ = DBObjectManager::getInstance().getDBObject ((DB_OBJECT_TYPE) dbo_type_int_)->getCurrentDataSource()->getLocalKey();
+    assert (false);
+    // TODO FIX OBSERVER
+//    object->addActiveSourcesObserver(this);
 
-    updateDataSources ();
+//    sensor_column_name_ = DBObjectManager::getInstance().getDBObject ((DB_OBJECT_TYPE) dbo_type_int_)->getCurrentDataSource()->getLocalKey();
 
-    if (object->hasActiveDataSourcesInfo())
-        updateDataSourcesActive();
+//    updateDataSources ();
+
+//    if (object->hasActiveDataSourcesInfo())
+//        updateDataSourcesActive();
 
     createSubConfigurables();
 }
 
 SensorFilter::~SensorFilter()
 {
-    DBObject *object = DBObjectManager::getInstance().getDBObject ((DB_OBJECT_TYPE) dbo_type_int_);
-    object->removeActiveSourcesObserver(this);
+    assert (false);
+    // TODO FIX OBSERVER
+//    DBObject *object = DBObjectManager::getInstance().getDBObject ((DB_OBJECT_TYPE) dbo_type_int_);
+//    object->removeActiveSourcesObserver(this);
 }
 
-std::string SensorFilter::getConditionString (DB_OBJECT_TYPE dbo_type, bool &first, std::vector<std::string> &variable_names)
+std::string SensorFilter::getConditionString (const std::string &dbo_type, bool &first, std::vector<std::string> &variable_names)
 {
     logdbg  << "SensorFilter: getConditionString ";
 
@@ -68,7 +73,7 @@ std::string SensorFilter::getConditionString (DB_OBJECT_TYPE dbo_type, bool &fir
     if (active_)
     {
 
-        if (dbo_type == (DB_OBJECT_TYPE) dbo_type_int_)
+        if (dbo_type == dbo_type_)
         {
             bool got_radars=false;
             bool got_all=true;
@@ -117,13 +122,13 @@ std::string SensorFilter::getConditionString (DB_OBJECT_TYPE dbo_type, bool &fir
 
 void SensorFilter::updateDataSources ()
 {
-    if (!ATSDB::getInstance().hasDataSources ((DB_OBJECT_TYPE) dbo_type_int_))
+    if (!ATSDB::getInstance().hasDataSources (dbo_type_))
     {
-        logerr  << "SensorFilter: updateDataSources: type " << dbo_type_int_ << " has no data sources";
+        logerr  << "SensorFilter: updateDataSources: type " << dbo_type_ << " has no data sources";
         return;
     }
 
-    std::map<int, std::string> &sources = ATSDB::getInstance().getDataSources ((DB_OBJECT_TYPE) dbo_type_int_);
+    std::map<int, std::string> &sources = ATSDB::getInstance().getDataSources (dbo_type_);
     std::map<int, std::string>::iterator it;
 
     for (it = sources.begin(); it != sources.end(); it++)
@@ -135,7 +140,7 @@ void SensorFilter::updateDataSources ()
             data_sources_[it->first].setActiveInFilter(true);
             data_sources_[it->first].setActiveInData(true);
 
-            registerParameter ("LoadRadarNumber"+intToString(it->first), data_sources_[it->first].getActiveInFilterPointer(),
+            registerParameter ("LoadRadarNumber"+String::intToString(it->first), data_sources_[it->first].getActiveInFilterPointer(),
                     true);
         }
     }
@@ -145,32 +150,36 @@ void SensorFilter::updateDataSourcesActive ()
 {
     logdbg << "SensorFilter: updateDataSourcesActive";
 
-    DBObject *object = DBObjectManager::getInstance().getDBObject ((DB_OBJECT_TYPE) dbo_type_int_);
-    if (!object->hasActiveDataSourcesInfo())
-    {
-        logerr  << "SensorFilter: updateDataSourcesActive: type " << dbo_type_int_ << " has no active data sources info";
-        return;
-    }
+    DBObject *object = DBObjectManager::getInstance().getDBObject (dbo_type_);
 
-    std::map<int, SensorFilterDataSource>::iterator srcit;
-    for (srcit =  data_sources_.begin(); srcit !=  data_sources_.end(); srcit++)
-        srcit->second.setActiveInData(false);
+    assert (false);
+    // TODO FIX OBSERVER
 
-    std::set<int> active_radars = object->getActiveDataSources();
-    std::set<int>::iterator it;
+//    if (!object->hasActiveDataSourcesInfo())
+//    {
+//        logerr  << "SensorFilter: updateDataSourcesActive: type " << dbo_type_int_ << " has no active data sources info";
+//        return;
+//    }
 
-    for (it = active_radars.begin(); it != active_radars.end(); it++)
-    {
-        assert (data_sources_.find(*it) != data_sources_.end());
-        SensorFilterDataSource &src = data_sources_[*it];
-        src.setActiveInData(true);
-    }
+//    std::map<int, SensorFilterDataSource>::iterator srcit;
+//    for (srcit =  data_sources_.begin(); srcit !=  data_sources_.end(); srcit++)
+//        srcit->second.setActiveInData(false);
 
-    for (srcit =  data_sources_.begin(); srcit !=  data_sources_.end(); srcit++)
-    {
-        if (!srcit->second.isActiveInData())
-            srcit->second.setActiveInFilter(false);
-    }
+//    std::set<int> active_radars = object->getActiveDataSources();
+//    std::set<int>::iterator it;
+
+//    for (it = active_radars.begin(); it != active_radars.end(); it++)
+//    {
+//        assert (data_sources_.find(*it) != data_sources_.end());
+//        SensorFilterDataSource &src = data_sources_[*it];
+//        src.setActiveInData(true);
+//    }
+
+//    for (srcit =  data_sources_.begin(); srcit !=  data_sources_.end(); srcit++)
+//    {
+//        if (!srcit->second.isActiveInData())
+//            srcit->second.setActiveInFilter(false);
+//    }
 }
 
 

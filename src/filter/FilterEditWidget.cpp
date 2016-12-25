@@ -46,7 +46,7 @@
 
 #include "String.h"
 
-using namespace Utils::String;
+using namespace Utils;
 
 FilterEditWidget::FilterEditWidget(DBFilter *filter, QWidget *parent)
 : QWidget (parent), filter_ (filter)
@@ -181,15 +181,23 @@ void FilterEditWidget::loadMin ()
 {
   assert (condition_variable_widget_);
   DBOVariable *var = condition_variable_widget_->getSelectedVariable();
-  std::string min = var->getRepresentationFromValue(ATSDB::getInstance().getMinAsString (var));
-  condition_value_->setText (tr(min.c_str()));
+
+  // FIX REPRESENTATION
+  assert (false);
+
+//  std::string min = var->getRepresentationFromValue(ATSDB::getInstance().getMinAsString (var));
+//  condition_value_->setText (tr(min.c_str()));
 }
 void FilterEditWidget::loadMax ()
 {
   assert (condition_variable_widget_);
   DBOVariable *var = condition_variable_widget_->getSelectedVariable();
-  std::string max = var->getRepresentationFromValue(ATSDB::getInstance().getMaxAsString (var));
-  condition_value_->setText (tr(max.c_str()));
+
+  // FIX REPRESENTATION
+  assert (false);
+
+//  std::string max = var->getRepresentationFromValue(ATSDB::getInstance().getMaxAsString (var));
+//  condition_value_->setText (tr(max.c_str()));
 }
 
 void FilterEditWidget::addCondition ()
@@ -208,13 +216,13 @@ void FilterEditWidget::addCondition ()
   std::string value = condition_value_->text().toStdString();
   std::string reset_value_str = condition_reset_combo_->currentText().toStdString();
 
-  std::string condition_name = filter_name+condition_variable_widget_->getSelectedVariable()->id_+
-      "Condition"+intToString(filter_->getNumConditions()); // TODO not the best way
+  std::string condition_name = filter_name+condition_variable_widget_->getSelectedVariable()->getId()+
+      "Condition"+String::intToString(filter_->getNumConditions()); // TODO not the best way
 
   Configuration &condition_configuration = filter_->addNewSubConfiguration ("DBFilterCondition", condition_name);
   condition_configuration.addParameterString ("operator", operator_str);
-  condition_configuration.addParameterString ("variable_name", condition_variable_widget_->getSelectedVariable()->id_);
-  condition_configuration.addParameterInt ("variable_type", condition_variable_widget_->getSelectedVariable()->dbo_type_int_);
+  condition_configuration.addParameterString ("variable_name", condition_variable_widget_->getSelectedVariable()->getId());
+  condition_configuration.addParameterString ("variable_dbo_type", condition_variable_widget_->getSelectedVariable()->getDBOType());
   condition_configuration.addParameterBool ("absolute_value", condition_absolute_->checkState() == Qt::Checked);
   condition_configuration.addParameterString ("value", value);
   std::string reset_value;

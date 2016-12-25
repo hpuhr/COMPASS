@@ -84,7 +84,7 @@ void DBOVariableOrderedSet::add (DBOVariable *var)
     std::string var_name = var->getName();
 
     Configuration &id_configuration = addNewSubConfiguration ("DBOVariableOrderDefinition", "DBOVariableOrderDefinition"+var_name+"0");
-    id_configuration.addParameterUnsignedInt ("dbo_type", (int) var->getDBOType());
+    id_configuration.addParameterString ("dbo_type", var->getDBOType());
     id_configuration.addParameterString ("id", var_name);
     id_configuration.addParameterUnsignedInt ("index", (unsigned int)set_.size());
     generateSubConfigurable("DBOVariableOrderDefinition", "DBOVariableOrderDefinition"+var_name+"0");
@@ -114,7 +114,7 @@ void DBOVariableOrderedSet::add (DBOVariableOrderedSet &set)
   }
 }
 
-void DBOVariableOrderedSet::addOnly (DBOVariableOrderedSet &set, DB_OBJECT_TYPE dbo_type)
+void DBOVariableOrderedSet::addOnly (DBOVariableOrderedSet &set, const std::string &dbo_type)
 {
   logdbg  << "DBOVariableOrderedSet: addOnly: type " << dbo_type;
   std::vector <DBOVariable*> &setset = set.getSet();
@@ -222,7 +222,7 @@ void DBOVariableOrderedSet::moveVariableDown (unsigned int index)
 }
 
 
-DBOVariableSet *DBOVariableOrderedSet::getFor (DB_OBJECT_TYPE dbo_type)
+DBOVariableSet *DBOVariableOrderedSet::getFor (const std::string &dbo_type)
 {
   logdbg  << "DBOVariableOrderedSet: getFor: type " << dbo_type;
 
@@ -279,7 +279,7 @@ bool DBOVariableOrderedSet::hasVariable (DBOVariable *variable)
   return find (set_.begin(), set_.end(), variable) != set_.end();
 }
 
-PropertyList DBOVariableOrderedSet::getPropertyList (DB_OBJECT_TYPE dbo_type)
+PropertyList DBOVariableOrderedSet::getPropertyList (const std::string &dbo_type)
 {
   std::vector <DBOVariable*>::iterator it;
   PropertyList list;
@@ -290,7 +290,7 @@ PropertyList DBOVariableOrderedSet::getPropertyList (DB_OBJECT_TYPE dbo_type)
     {
       logdbg  << "DBOVariableOrderedSet: getPropertyList: getfor";
       DBOVariable *var = (*it)->getFor(dbo_type);
-      list.addProperty (var->id_, (PROPERTY_DATA_TYPE) var->data_type_int_);
+      list.addProperty (var->getId(), var->getDataType());
     }
   }
 
@@ -303,7 +303,7 @@ void DBOVariableOrderedSet::updateDBOVariableSet ()
   std::map <unsigned int, DBOVariableOrderDefinition*>::iterator it;
   for (it = variable_definitions_.begin(); it != variable_definitions_.end(); it++)
   {
-    DB_OBJECT_TYPE type = it->second->getDBOType();
+    const std::string &type = it->second->getDBOType();
     std::string name = it->second->getId();
 
     assert (DBObjectManager::getInstance().existsDBOVariable (type, name));

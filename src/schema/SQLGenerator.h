@@ -81,15 +81,15 @@ public:
     std::string createDBCreateString (Buffer *buffer, std::string tablename);
 
     /// @brief Returns general select command
-    DBCommand *getSelectCommand(DB_OBJECT_TYPE type, DBOVariableSet read_list, std::string custom_filter_clause="",
+    DBCommand *getSelectCommand(const std::string &dbo_type, DBOVariableSet read_list, std::string custom_filter_clause="",
             DBOVariable *order=0);
     /// @brief Returns command for all data sources select
-    DBCommand *getDataSourcesSelectCommand (DB_OBJECT_TYPE type);
+    DBCommand *getDataSourcesSelectCommand (const std::string &dbo_type);
     /// @brief Returns command for active data sources select
-    DBCommand *getDistinctDataSourcesSelectCommand (DB_OBJECT_TYPE type);
-    DBCommand *getCountStatement (DB_OBJECT_TYPE type, unsigned int sensor_number);
+    DBCommand *getDistinctDataSourcesSelectCommand (const std::string &dbo_type);
+    DBCommand *getCountStatement (const std::string &dbo_type, unsigned int sensor_number);
 
-    DBCommand *getDistinctStatistics (DB_OBJECT_TYPE type, DBOVariable *variable, unsigned int sensor_number);
+    DBCommand *getDistinctStatistics (const std::string &dbo_type, DBOVariable *variable, unsigned int sensor_number);
 
     /// @brief Returns minimum/maximum table name
     std::string getMinMaxTableName () { return table_name_minxmax_; }
@@ -99,7 +99,7 @@ public:
     /// @brief Returns statement to check table existence
     std::string getContainsStatement (std::string table_name);
     /// @brief Returns statement to query number of records
-    std::string getCountStatement (DB_OBJECT_TYPE type);
+    std::string getCountStatement (const std::string &dbo_type);
 
     /// @brief Returns minimum/maximum table creation statement
     std::string getTableMinMaxCreateStatement ();
@@ -112,13 +112,13 @@ public:
     std::string getSelectPropertyStatement (std::string id);
 
     /// @brief Returns minimum/maximum insertion statement
-    std::string getInsertMinMaxStatement (std::string id, DB_OBJECT_TYPE type, std::string min, std::string max);
+    std::string getInsertMinMaxStatement (std::string id, const std::string &dbo_type, std::string min, std::string max);
     /// @brief Returns minimum/maximum selection statement
-    std::string getSelectMinMaxStatement (std::string id, DB_OBJECT_TYPE type);
+    std::string getSelectMinMaxStatement (std::string id, const std::string &dbo_type);
     std::string getSelectMinMaxStatement ();
 
     /// @brief Returns general info select statement
-    DBCommand *getSelectInfoCommand(DB_OBJECT_TYPE type, std::vector<unsigned int> ids, DBOVariableSet read_list,
+    DBCommand *getSelectInfoCommand(const std::string &dbo_type, std::vector<unsigned int> ids, DBOVariableSet read_list,
             bool use_filters, std::string order_by_variable, bool ascending, unsigned int limit_min=0,
             unsigned int limit_max=0);
     DBCommand *getTableSelectMinMaxNormalStatement (std::string table_name);

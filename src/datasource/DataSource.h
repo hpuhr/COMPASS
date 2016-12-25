@@ -35,22 +35,22 @@ public:
 
     double getAltitude() const;
     unsigned int getId() const;
-    DB_OBJECT_TYPE getDBOType () const;
+    const std::string &getDBOType () const;
     double getLatitude() const;
     double getLongitude() const;
-    std::string getName() const;
+    const std::string &getName() const;
     unsigned char getSac() const;
-    std::string getShortName() const;
+    const std::string &getShortName() const;
     unsigned char getSic() const;
 
     void setAltitude(double altitude);
     void setId(unsigned int id);
-    void setDBOType (DB_OBJECT_TYPE type);
+    void setDBOType (const std::string &type);
     void setLatitude(double latitiude);
     void setLongitude(double longitude_);
-    void setName(std::string name);
+    void setName(const std::string &name);
     void setSac(unsigned char sac);
-    void setShortName(std::string short_name);
+    void setShortName(const std::string &short_name);
     void setSic(unsigned char sic);
 
     void finalize ();
@@ -60,7 +60,7 @@ public:
 
 protected:
     bool finalized_;
-    unsigned int dbo_type_;
+    std::string dbo_type_;
     unsigned int id_;
     std::string name_;
     std::string short_name_;

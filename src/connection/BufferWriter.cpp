@@ -33,7 +33,7 @@
 #include "Data.h"
 #include "String.h"
 
-using namespace Utils::String;
+using namespace Utils;
 
 using namespace Utils::Data;
 
@@ -56,7 +56,7 @@ BufferWriter::~BufferWriter()
  */
 void BufferWriter::write (Buffer *data, std::string tablename)
 {
-    logdbg  << "BufferWriter: write: buffer size " << data->getSize() << " into table " << tablename;
+    logdbg  << "BufferWriter: write: buffer size " << data->size() << " into table " << tablename;
     if (!existsTableForBuffer(tablename))
     {
         createTableForBuffer (data, tablename);
@@ -71,16 +71,17 @@ void BufferWriter::write (Buffer *data, std::string tablename)
     db_connection_->prepareBindStatement(bind_statement);
     db_connection_->beginBindTransaction();
 
-    data->setIndex(0);
+    // TODO INSERT DATA HERE
+//    data->setIndex(0);
 
-    logdbg  << "BufferWriter: write: starting inserts";
-    for (unsigned int cnt=0; cnt < data->getSize(); cnt++)
-    {
-        if (cnt != 0)
-            data->incrementIndex();
+//    logdbg  << "BufferWriter: write: starting inserts";
+//    for (unsigned int cnt=0; cnt < data->getSize(); cnt++)
+//    {
+//        if (cnt != 0)
+//            data->incrementIndex();
 
-        insertBindStatementForCurrentIndex(data);
-    }
+//        insertBindStatementForCurrentIndex(data);
+//    }
 
     logdbg  << "BufferWriter: write: ending bind transactions";
     db_connection_->endBindTransaction();
@@ -92,7 +93,7 @@ void BufferWriter::write (Buffer *data, std::string tablename)
 
 void BufferWriter::update (Buffer *data, std::string tablename)
 {
-    loginf  << "BufferWriter: update: buffer size " << data->getSize() << " into table " << tablename;
+    loginf  << "BufferWriter: update: buffer size " << data->size() << " into table " << tablename;
 
     std::string bind_statement =  sql_generator_->createDBUpdateStringBind(data, tablename);
 
@@ -100,16 +101,17 @@ void BufferWriter::update (Buffer *data, std::string tablename)
     db_connection_->prepareBindStatement(bind_statement);
     db_connection_->beginBindTransaction();
 
-    data->setIndex(0);
+    // TODO INSERT DATA HERE
+//    data->setIndex(0);
 
-    loginf  << "BufferWriter: update: starting inserts";
-    for (unsigned int cnt=0; cnt < data->getSize(); cnt++)
-    {
-        if (cnt != 0)
-            data->incrementIndex();
+//    loginf  << "BufferWriter: update: starting inserts";
+//    for (unsigned int cnt=0; cnt < data->getSize(); cnt++)
+//    {
+//        if (cnt != 0)
+//            data->incrementIndex();
 
-        insertBindStatementUpdateForCurrentIndex(data);
-    }
+//        insertBindStatementUpdateForCurrentIndex(data);
+//    }
 
     loginf  << "BufferWriter: update: ending bind transactions";
     db_connection_->endBindTransaction();
@@ -129,72 +131,73 @@ void BufferWriter::insertBindStatementForCurrentIndex (Buffer *buffer)
 {
     assert (buffer);
     logdbg  << "BufferWriter: insertBindStatementForCurrentIndex: start";
-    PropertyList *list =buffer->getPropertyList();
-    unsigned int size = list->getNumProperties();
+    const PropertyList &list =buffer->properties();
+    unsigned int size = list.size();
     logdbg  << "BufferWriter: insertBindStatementForCurrentIndex: creating bind for " << size << " elements";
 
     DB_CONNECTION_TYPE db_type_=db_connection_->getDBInfo()->getType();
 
-    std::vector <void *> *adresses = buffer->getAdresses();
-    void *ptr;
-    unsigned int index_cnt=0;
+    // TODO INSERT DATA HERE
+//    std::vector <void *> *adresses = buffer->getAdresses();
+//    void *ptr;
+//    unsigned int index_cnt=0;
 
-    logdbg << "BufferWriter: insertBindStatementForCurrentIndex: starting for loop";
-    for (unsigned int cnt=0; cnt < size; cnt++)
-    {
-        Property *prop = list->getProperty(cnt);
-        logdbg  << "BufferWriter: insertBindStatementForCurrentIndex: for at cnt " << cnt;
+//    logdbg << "BufferWriter: insertBindStatementForCurrentIndex: starting for loop";
+//    for (unsigned int cnt=0; cnt < size; cnt++)
+//    {
+//        Property *prop = list->getProperty(cnt);
+//        logdbg  << "BufferWriter: insertBindStatementForCurrentIndex: for at cnt " << cnt;
 
-        assert (prop);
+//        assert (prop);
 
-        ptr = adresses->at(cnt);
+//        ptr = adresses->at(cnt);
 
-        if (db_type_ == DB_TYPE_SQLITE)
-            index_cnt=cnt+2;
-        else if (db_type_ == DB_TYPE_MYSQLpp)
-            index_cnt=cnt;
-        else if (db_type_ == DB_TYPE_MYSQLCon)
-            index_cnt=cnt+1;
-        else
-            throw std::runtime_error ("BufferWriter: insertBindStatementForCurrentIndex: unknown db type");
+//        if (db_type_ == DB_TYPE_SQLITE)
+//            index_cnt=cnt+2;
+//        else if (db_type_ == DB_TYPE_MYSQLpp)
+//            index_cnt=cnt;
+//        else if (db_type_ == DB_TYPE_MYSQLCon)
+//            index_cnt=cnt+1;
+//        else
+//            throw std::runtime_error ("BufferWriter: insertBindStatementForCurrentIndex: unknown db type");
 
-        if (isNan(prop->data_type_int_, ptr))
-        {
-            db_connection_->bindVariableNull (index_cnt);
-            continue;
-        }
-        PROPERTY_DATA_TYPE type = (PROPERTY_DATA_TYPE) prop->data_type_int_;
+//        if (isNan(prop->data_type_int_, ptr))
+//        {
+//            db_connection_->bindVariableNull (index_cnt);
+//            continue;
+//        }
+//        PROPERTY_DATA_TYPE type = (PROPERTY_DATA_TYPE) prop->data_type_int_;
 
-        switch (type)
-        {
-        case P_TYPE_UCHAR:
-        case P_TYPE_CHAR:
-        case P_TYPE_BOOL:
-            logdbg  << "BufferWriter: insertBindStatementForCurrentIndex: loop byte";
-            db_connection_->bindVariable (index_cnt, (int)*((unsigned char*)ptr));
-            break;
-        case P_TYPE_INT:
-        case P_TYPE_UINT:
-            logdbg  << "BufferWriter: insertBindStatementForCurrentIndex: loop int";
-            db_connection_->bindVariable (index_cnt, *((int*)ptr));
-            break;
-        case P_TYPE_STRING:
-            logdbg  << "BufferWriter: insertBindStatementForCurrentIndex: loop string '" << *((std::string*)ptr) << "' size " << ((std::string*)ptr)->size();
-            if (db_type_ == DB_TYPE_SQLITE)
-                db_connection_->bindVariable (index_cnt, (*((std::string*)ptr)).c_str());
-            else if (db_type_ == DB_TYPE_MYSQLpp || db_type_ == DB_TYPE_MYSQLCon)
-                db_connection_->bindVariable (index_cnt, (*((std::string*)ptr)).c_str());
-                //db_connection_->bindVariable (index_cnt, ("'"+*((std::string*)ptr)+"'").c_str());
-            break;
-        case P_TYPE_FLOAT:
-        case P_TYPE_DOUBLE:
-            logdbg  << "BufferWriter: insertBindStatementForCurrentIndex: loop double";
-            db_connection_->bindVariable (index_cnt, *((double*)ptr));
-            break;
-        default:
-            throw std::runtime_error("SQLGenerator: insertBindStatementForCurrentIndex: unspecified data type "+intToString(type));
-        }
-    }
+//        switch (type)
+//        {
+//        case P_TYPE_UCHAR:
+//        case P_TYPE_CHAR:
+//        case P_TYPE_BOOL:
+//            logdbg  << "BufferWriter: insertBindStatementForCurrentIndex: loop byte";
+//            db_connection_->bindVariable (index_cnt, (int)*((unsigned char*)ptr));
+//            break;
+//        case P_TYPE_INT:
+//        case P_TYPE_UINT:
+//            logdbg  << "BufferWriter: insertBindStatementForCurrentIndex: loop int";
+//            db_connection_->bindVariable (index_cnt, *((int*)ptr));
+//            break;
+//        case P_TYPE_STRING:
+//            logdbg  << "BufferWriter: insertBindStatementForCurrentIndex: loop string '" << *((std::string*)ptr) << "' size " << ((std::string*)ptr)->size();
+//            if (db_type_ == DB_TYPE_SQLITE)
+//                db_connection_->bindVariable (index_cnt, (*((std::string*)ptr)).c_str());
+//            else if (db_type_ == DB_TYPE_MYSQLpp || db_type_ == DB_TYPE_MYSQLCon)
+//                db_connection_->bindVariable (index_cnt, (*((std::string*)ptr)).c_str());
+//                //db_connection_->bindVariable (index_cnt, ("'"+*((std::string*)ptr)+"'").c_str());
+//            break;
+//        case P_TYPE_FLOAT:
+//        case P_TYPE_DOUBLE:
+//            logdbg  << "BufferWriter: insertBindStatementForCurrentIndex: loop double";
+//            db_connection_->bindVariable (index_cnt, *((double*)ptr));
+//            break;
+//        default:
+//            throw std::runtime_error("SQLGenerator: insertBindStatementForCurrentIndex: unspecified data type "+intToString(type));
+//        }
+//    }
 
     db_connection_->stepAndClearBindings();
 
@@ -205,69 +208,71 @@ void BufferWriter::insertBindStatementUpdateForCurrentIndex (Buffer *buffer)
 {
     assert (buffer);
     logdbg  << "BufferWriter: insertBindStatementUpdateForCurrentIndex: start";
-    PropertyList *list =buffer->getPropertyList();
-    unsigned int size = list->getNumProperties();
+    const PropertyList &list =buffer->properties();
+    unsigned int size = list.size();
     logdbg  << "BufferWriter: insertBindStatementUpdateForCurrentIndex: creating bind for " << size << " elements";
 
     DB_CONNECTION_TYPE db_type_=db_connection_->getDBInfo()->getType();
 
-    std::vector <void *> *adresses = buffer->getAdresses();
-    void *ptr;
-    unsigned int index_cnt=0;
+    // insert data here TODO
 
-    logdbg << "BufferWriter: insertBindStatementUpdateForCurrentIndex: starting for loop";
-    for (unsigned int cnt=0; cnt < size; cnt++)
-    {
-        Property *prop = list->getProperty(cnt);
-        logdbg  << "BufferWriter: insertBindStatementUpdateForCurrentIndex: for at cnt " << cnt << " id " << prop->id_;
+//    std::vector <void *> *adresses = buffer->getAdresses();
+//    void *ptr;
+//    unsigned int index_cnt=0;
 
-        assert (prop);
+//    logdbg << "BufferWriter: insertBindStatementUpdateForCurrentIndex: starting for loop";
+//    for (unsigned int cnt=0; cnt < size; cnt++)
+//    {
+//        Property *prop = list->getProperty(cnt);
+//        logdbg  << "BufferWriter: insertBindStatementUpdateForCurrentIndex: for at cnt " << cnt << " id " << prop->id_;
 
-        ptr = adresses->at(cnt);
+//        assert (prop);
 
-        if (db_type_ == DB_TYPE_SQLITE)
-            index_cnt=cnt+2;
-        else if (db_type_ == DB_TYPE_MYSQLpp || db_type_ == DB_TYPE_MYSQLCon)
-            index_cnt=cnt+1;
-        else
-            throw std::runtime_error ("BufferWriter: insertBindStatementForCurrentIndex: unknown db type");
+//        ptr = adresses->at(cnt);
 
-        if (isNan(prop->data_type_int_, ptr))
-        {
-            db_connection_->bindVariableNull (index_cnt);
-            continue;
-        }
-        PROPERTY_DATA_TYPE type = (PROPERTY_DATA_TYPE) prop->data_type_int_;
+//        if (db_type_ == DB_TYPE_SQLITE)
+//            index_cnt=cnt+2;
+//        else if (db_type_ == DB_TYPE_MYSQLpp || db_type_ == DB_TYPE_MYSQLCon)
+//            index_cnt=cnt+1;
+//        else
+//            throw std::runtime_error ("BufferWriter: insertBindStatementForCurrentIndex: unknown db type");
 
-        switch (type)
-        {
-        case P_TYPE_UCHAR:
-        case P_TYPE_CHAR:
-        case P_TYPE_BOOL:
-            logdbg  << "BufferWriter: insertBindStatementUpdateForCurrentIndex: loop byte";
-            db_connection_->bindVariable (index_cnt, (int)*((unsigned char*)ptr));
-            break;
-        case P_TYPE_INT:
-        case P_TYPE_UINT:
-            logdbg  << "BufferWriter: insertBindStatementUpdateForCurrentIndex: loop int, index" << index_cnt << " value " << *((int*)ptr);
-            db_connection_->bindVariable (index_cnt, *((int*)ptr));
-            break;
-        case P_TYPE_STRING:
-            logdbg  << "BufferWriter: insertBindStatementUpdateForCurrentIndex: loop string '" << *((std::string*)ptr) << "' size " << ((std::string*)ptr)->size();
-            if (db_type_ == DB_TYPE_SQLITE)
-                db_connection_->bindVariable (index_cnt, (*((std::string*)ptr)).c_str());
-            else if (db_type_ == DB_TYPE_MYSQLpp || db_type_ == DB_TYPE_MYSQLCon)
-                db_connection_->bindVariable (index_cnt, ("'"+*((std::string*)ptr)+"'").c_str());
-            break;
-        case P_TYPE_FLOAT:
-        case P_TYPE_DOUBLE:
-            logdbg  << "BufferWriter: insertBindStatementUpdateForCurrentIndex: loop double, index" << index_cnt << " value " << *((double*)ptr);
-            db_connection_->bindVariable (index_cnt, *((double*)ptr));
-            break;
-        default:
-            throw std::runtime_error("SQLGenerator: insertBindStatementUpdateForCurrentIndex: unspecified data type "+intToString(type));
-        }
-    }
+//        if (isNan(prop->data_type_int_, ptr))
+//        {
+//            db_connection_->bindVariableNull (index_cnt);
+//            continue;
+//        }
+//        PROPERTY_DATA_TYPE type = (PROPERTY_DATA_TYPE) prop->data_type_int_;
+
+//        switch (type)
+//        {
+//        case P_TYPE_UCHAR:
+//        case P_TYPE_CHAR:
+//        case P_TYPE_BOOL:
+//            logdbg  << "BufferWriter: insertBindStatementUpdateForCurrentIndex: loop byte";
+//            db_connection_->bindVariable (index_cnt, (int)*((unsigned char*)ptr));
+//            break;
+//        case P_TYPE_INT:
+//        case P_TYPE_UINT:
+//            logdbg  << "BufferWriter: insertBindStatementUpdateForCurrentIndex: loop int, index" << index_cnt << " value " << *((int*)ptr);
+//            db_connection_->bindVariable (index_cnt, *((int*)ptr));
+//            break;
+//        case P_TYPE_STRING:
+//            logdbg  << "BufferWriter: insertBindStatementUpdateForCurrentIndex: loop string '" << *((std::string*)ptr) << "' size " << ((std::string*)ptr)->size();
+//            if (db_type_ == DB_TYPE_SQLITE)
+//                db_connection_->bindVariable (index_cnt, (*((std::string*)ptr)).c_str());
+//            else if (db_type_ == DB_TYPE_MYSQLpp || db_type_ == DB_TYPE_MYSQLCon)
+//                db_connection_->bindVariable (index_cnt, ("'"+*((std::string*)ptr)+"'").c_str());
+//            break;
+//        case P_TYPE_FLOAT:
+//        case P_TYPE_DOUBLE:
+//            logdbg  << "BufferWriter: insertBindStatementUpdateForCurrentIndex: loop double, index" << index_cnt << " value " << *((double*)ptr);
+//            db_connection_->bindVariable (index_cnt, *((double*)ptr));
+//            break;
+//        default:
+//            throw std::runtime_error("SQLGenerator: insertBindStatementUpdateForCurrentIndex: unspecified data type "+intToString(type));
+//        }
+//    }
 
     db_connection_->stepAndClearBindings();
 

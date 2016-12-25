@@ -31,25 +31,24 @@
 /*
  */
 DBOVariableSelectionWidget::DBOVariableSelectionWidget( bool h_box, QWidget* parent )
-:   QGroupBox( "Select DBO Variable", parent ), sel_var_(0), h_box_(h_box)
+    :   QGroupBox( "Select DBO Variable", parent ), sel_var_(0), h_box_(h_box)
 {
-  createControls();
+    createControls();
 }
 
 /*
  */
 DBOVariableSelectionWidget::DBOVariableSelectionWidget( DBOVariable *init, bool h_box, QWidget* parent )
-:   QGroupBox( "Select DBO Variable", parent ), sel_var_( init ), h_box_(h_box)
+    :   QGroupBox( "Select DBO Variable", parent ), sel_var_( init ), h_box_(h_box)
 {
-  assert (sel_var_);
+    assert (sel_var_);
 
-  createControls();
+    createControls();
 
-  DB_OBJECT_TYPE type = (DB_OBJECT_TYPE) sel_var_->dbo_type_int_;
-  QString str = QString::fromStdString( DBObjectManager::getInstance().getDBObject( type )->getName() );
+    QString str = QString::fromStdString( DBObjectManager::getInstance().getDBObject( sel_var_->getDBOType() )->getName() );
 
-  sel_edit_type_->setText( str );
-  sel_edit_id_->setText( QString::fromStdString( sel_var_->id_ ) );
+    sel_edit_type_->setText( str );
+    sel_edit_id_->setText( QString::fromStdString( sel_var_->getId() ) );
 }
 
 /*
@@ -62,146 +61,152 @@ DBOVariableSelectionWidget::~DBOVariableSelectionWidget()
  */
 void DBOVariableSelectionWidget::createControls()
 {
-  QBoxLayout *layout;
+    QBoxLayout *layout;
 
-  QPixmap* pixmapmanage = new QPixmap("./Data/icons/expand.png");
-  sel_button_ = new QPushButton(this);
-  sel_button_->setIcon(QIcon(*pixmapmanage));
-  sel_button_->setFixedSize ( 25, 25 );
+    QPixmap* pixmapmanage = new QPixmap("./Data/icons/expand.png");
+    sel_button_ = new QPushButton(this);
+    sel_button_->setIcon(QIcon(*pixmapmanage));
+    sel_button_->setFixedSize ( 25, 25 );
 
-  if (h_box_)
-  {
-    layout = new QHBoxLayout;
-    //QHBoxLayout *select_layout = new QHBoxLayout ();
-    sel_edit_type_ = new QLineEdit( this );
-    sel_edit_type_->setReadOnly( true );
-    layout->addWidget( sel_edit_type_);
+    if (h_box_)
+    {
+        layout = new QHBoxLayout;
+        //QHBoxLayout *select_layout = new QHBoxLayout ();
+        sel_edit_type_ = new QLineEdit( this );
+        sel_edit_type_->setReadOnly( true );
+        layout->addWidget( sel_edit_type_);
 
-    //layout->addLayout (select_layout);
+        //layout->addLayout (select_layout);
 
-    sel_edit_id_ = new QLineEdit( this );
-    sel_edit_id_->setReadOnly( true );
-    layout->addWidget( sel_edit_id_);
+        sel_edit_id_ = new QLineEdit( this );
+        sel_edit_id_->setReadOnly( true );
+        layout->addWidget( sel_edit_id_);
 
-    layout->addWidget(sel_button_);
-  }
-  else
-  {
-    layout = new QVBoxLayout;
-    QHBoxLayout *select_layout = new QHBoxLayout ();
-    sel_edit_type_ = new QLineEdit( this );
-    sel_edit_type_->setReadOnly( true );
-    select_layout->addWidget( sel_edit_type_);
-    select_layout->addWidget(sel_button_);
-    layout->addLayout (select_layout);
+        layout->addWidget(sel_button_);
+    }
+    else
+    {
+        layout = new QVBoxLayout;
+        QHBoxLayout *select_layout = new QHBoxLayout ();
+        sel_edit_type_ = new QLineEdit( this );
+        sel_edit_type_->setReadOnly( true );
+        select_layout->addWidget( sel_edit_type_);
+        select_layout->addWidget(sel_button_);
+        layout->addLayout (select_layout);
 
-    sel_edit_id_ = new QLineEdit( this );
-    sel_edit_id_->setReadOnly( true );
-    layout->addWidget( sel_edit_id_);
+        sel_edit_id_ = new QLineEdit( this );
+        sel_edit_id_->setReadOnly( true );
+        layout->addWidget( sel_edit_id_);
 
-  }
-  setLayout( layout );
+    }
+    setLayout( layout );
 
-  connect( &menu_, SIGNAL(triggered(QAction*)), this, SLOT(triggerSlot(QAction*)));
-  connect( sel_button_, SIGNAL(clicked()), this, SLOT(showMenuSlot()) );
+    connect( &menu_, SIGNAL(triggered(QAction*)), this, SLOT(triggerSlot(QAction*)));
+    connect( sel_button_, SIGNAL(clicked()), this, SLOT(showMenuSlot()) );
 
-  updateEntries();
+    updateEntries();
 }
 
 /*
  */
 void DBOVariableSelectionWidget::updateEntries()
 {
-  menu_.clear();
+    menu_.clear();
 
-  QString str;
-  std::string typestr;
-  std::map<std::string,DBOVariable*>::const_iterator it, itend;
+    QString str;
+    std::string typestr;
+    std::map<std::string,DBOVariable*>::const_iterator it, itend;
 
-  DB_OBJECT_TYPE type;
+    std::string type;
 
-  std::map <DB_OBJECT_TYPE, DBObject*> &dobs = DBObjectManager::getInstance().getDBObjects ();
-  std::map <DB_OBJECT_TYPE, DBObject*>::iterator dobit;
+    const std::map <std::string, DBObject*> &dobs = DBObjectManager::getInstance().getDBObjects ();
+    std::map <std::string, DBObject*>::const_iterator dobit;
 
-  for( dobit = dobs.begin(); dobit != dobs.end(); dobit++ )
-  {
-    type = dobit->second->getType();
-
-    logdbg  << "DBOVariableSelectionWidget: updateEntries: looking for type " << type << " contained " << ATSDB::getInstance().contains (type);
-
-    if (!ATSDB::getInstance().contains (type))
-      continue;
-
-    typestr = DBObjectManager::getInstance().getDBObject( type )->getName();
-
-    logdbg  << "DBOVariableSelectionWidget: updateEntries: found dbo " << typestr;
-
-    std::map<std::string,DBOVariable*>& vars = DBObjectManager::getInstance().getDBOVariables( type );
-
-    QMenu* m2 = menu_.addMenu( QString::fromStdString( typestr ) );
-
-    itend = vars.end();
-    for( it=vars.begin(); it!=itend; ++it )
+    for( dobit = dobs.begin(); dobit != dobs.end(); dobit++ )
     {
-//      if( it->second->data_type_int_ == P_TYPE_STRING )
-//        continue;
-        // HACK HACK
+        type = dobit->second->getType();
 
-      str = QString::fromStdString( it->first );
-      if( str == "id" )
-        continue;
+        logdbg  << "DBOVariableSelectionWidget: updateEntries: looking for type " << type << " contained " << ATSDB::getInstance().contains (type);
 
-      QAction* action = m2->addAction( str );
+        if (!ATSDB::getInstance().contains (type))
+            continue;
 
-      QVariantMap vmap;
-      vmap.insert( str, QVariant( type ) );
-      action->setData( QVariant( vmap ) );
+        typestr = DBObjectManager::getInstance().getDBObject( type )->getName();
+
+        logdbg  << "DBOVariableSelectionWidget: updateEntries: found dbo " << typestr;
+
+        std::map<std::string,DBOVariable*>& vars = DBObjectManager::getInstance().getDBOVariables( type );
+
+        QMenu* m2 = menu_.addMenu( QString::fromStdString( typestr ) );
+
+        itend = vars.end();
+        for( it=vars.begin(); it!=itend; ++it )
+        {
+            //      if( it->second->data_type_int_ == P_TYPE_STRING )
+            //        continue;
+            // HACK HACK
+
+            str = QString::fromStdString( it->first );
+            if( str == "id" )
+                continue;
+
+            QAction* action = m2->addAction( str );
+
+            assert (false);
+            // TODO FIXMEE
+
+            //      QVariantMap vmap;
+            //      vmap.insert( str, QVariant( type ) );
+            //      action->setData( QVariant( vmap ) );
+        }
     }
-  }
 }
 
 /*
  */
 void DBOVariableSelectionWidget::showMenuSlot()
 {
-  menu_.exec( QCursor::pos() );
+    menu_.exec( QCursor::pos() );
 }
 
 /*
  */
 void DBOVariableSelectionWidget::triggerSlot( QAction* action )
 {
-  QVariantMap vmap = action->data().toMap();
-  std::string id = vmap.begin().key().toStdString();
-  DB_OBJECT_TYPE type = (DB_OBJECT_TYPE)( vmap.begin().value().toUInt() );
+    assert (false);
+    // TODO FIXMEE
 
-  sel_var_ = DBObjectManager::getInstance().getDBOVariable( type, id );
+    //  QVariantMap vmap = action->data().toMap();
+    //  std::string id = vmap.begin().key().toStdString();
+    //  DB_OBJECT_TYPE type = (DB_OBJECT_TYPE)( vmap.begin().value().toUInt() );
 
-  QString str = QString::fromStdString( DBObjectManager::getInstance().getDBObject( type )->getName() );
+    //  sel_var_ = DBObjectManager::getInstance().getDBOVariable( type, id );
 
-  sel_edit_type_->setText( str );
-  sel_edit_id_->setText( action->text() );
+    //  QString str = QString::fromStdString( DBObjectManager::getInstance().getDBObject( type )->getName() );
 
-  emit selectionChanged();
+    //  sel_edit_type_->setText( str );
+    //  sel_edit_id_->setText( action->text() );
+
+    //  emit selectionChanged();
 }
 
 void DBOVariableSelectionWidget::setSelectedVariable (DBOVariable *var)
 {
-  DB_OBJECT_TYPE type = (DB_OBJECT_TYPE) var->dbo_type_int_;
-  std::string name = var->id_;
+    const std::string &type = var->getDBOType();
+    std::string name = var->getId();
 
-  QString str = QString::fromStdString( DBObjectManager::getInstance().getDBObject( type )->getName() );
+    QString str = QString::fromStdString( DBObjectManager::getInstance().getDBObject( type )->getName() );
 
-  sel_edit_type_->setText( str );
-  sel_edit_id_->setText( name.c_str() );
+    sel_edit_type_->setText( str );
+    sel_edit_id_->setText( name.c_str() );
 
-  sel_var_=var;
+    sel_var_=var;
 }
 
 /*
  */
 DBOVariable* DBOVariableSelectionWidget::getSelectedVariable() const
 {
-  assert (sel_var_);
-  return sel_var_;
+    assert (sel_var_);
+    return sel_var_;
 }

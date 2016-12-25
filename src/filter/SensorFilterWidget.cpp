@@ -38,13 +38,16 @@
 SensorFilterWidget::SensorFilterWidget(SensorFilter &filter, std::string class_id, std::string instance_id)
 : DBFilterWidget (filter, "SensorFilterWidget", instance_id), filter_ (filter), data_sources_(filter_.getDataSources())
 {
-    type_ = filter_.getDBOType();
+    dbo_type_ = filter_.getDBOType();
 
-    if (!ATSDB::getInstance().contains(type_))
-        throw std::runtime_error ("SensorFilterWidget: constructor: type "+DB_OBJECT_TYPE_STRINGS.at(type_)+" not contained");
+    if (!ATSDB::getInstance().contains(dbo_type_))
+        throw std::runtime_error ("SensorFilterWidget: constructor: type "+dbo_type_+" not contained");
 
     createGUIElements();
-    createMenu (DBObjectManager::getInstance().getDBObject(type_)->hasActiveDataSourcesInfo());
+
+    assert (false);
+    // TODO fix sources observer
+    //createMenu (DBObjectManager::getInstance().getDBObject(dbo_type_)->hasActiveDataSourcesInfo());
 
     updateCheckboxesChecked ();
     updateCheckboxesDisabled ();
@@ -190,9 +193,13 @@ void SensorFilterWidget::toggleDataSource ()
 void SensorFilterWidget::setSourcesInactive ()
 {
     logdbg << "SensorFilterWidget: setSourcesInactive";
-    DBObject *object = DBObjectManager::getInstance().getDBObject (type_);
-    assert (!object->hasActiveDataSourcesInfo());
-    object->buildActiveDataSourcesInfo();
+    DBObject *object = DBObjectManager::getInstance().getDBObject (dbo_type_);
+
+    assert (false);
+    // TODO fix sources observer
+
+//    assert (!object->hasActiveDataSourcesInfo());
+//    object->buildActiveDataSourcesInfo();
     createMenu(true);
 }
 

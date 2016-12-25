@@ -37,7 +37,7 @@
 #include "FilterManager.h"
 #include "String.h"
 
-using namespace Utils::String;
+using namespace Utils;
 
 FilterGeneratorWidget::FilterGeneratorWidget(QWidget *parent)
  : QWidget (parent)
@@ -175,15 +175,21 @@ void FilterGeneratorWidget::loadMin ()
 {
   assert (condition_variable_widget_);
   DBOVariable *var = condition_variable_widget_->getSelectedVariable();
-  std::string min = var->getRepresentationFromValue(ATSDB::getInstance().getMinAsString (var));
-  condition_value_->setText (tr(min.c_str()));
+
+  // TOFO FIX REPRESENTATION
+  assert (false);
+//  std::string min = var->getRepresentationFromValue(ATSDB::getInstance().getMinAsString (var));
+//  condition_value_->setText (tr(min.c_str()));
 }
 void FilterGeneratorWidget::loadMax ()
 {
   assert (condition_variable_widget_);
   DBOVariable *var = condition_variable_widget_->getSelectedVariable();
-  std::string max = var->getRepresentationFromValue(ATSDB::getInstance().getMaxAsString (var));
-  condition_value_->setText (tr(max.c_str()));
+
+  // TOFO FIX REPRESENTATION
+  assert (false);
+//  std::string max = var->getRepresentationFromValue(ATSDB::getInstance().getMaxAsString (var));
+//  condition_value_->setText (tr(max.c_str()));
 }
 
 void FilterGeneratorWidget::addCondition ()
@@ -194,8 +200,8 @@ void FilterGeneratorWidget::addCondition ()
   const DBOVariable *var = condition_variable_widget_->getSelectedVariable();
 
   ConditionTemplate data_condition;
-  data_condition.variable_name_=var->id_;
-  data_condition.variable_type_=var->dbo_type_int_;
+  data_condition.variable_name_=var->getId();
+  data_condition.variable_dbo_type_=var->getDBOType();
   data_condition.absolute_value_=condition_absolute_->checkState() == Qt::Checked;
   data_condition.operator_=condition_combo_->currentText().toStdString();
   data_condition.value_=condition_value_->text().toStdString();
@@ -235,12 +241,12 @@ void FilterGeneratorWidget::accept ()
   for (unsigned int cnt=0; cnt < data_conditions_.size(); cnt++)
   {
     ConditionTemplate &data_condition = data_conditions_.at(cnt);
-    std::string condition_name = filter_name+"Condition"+intToString(cnt);
+    std::string condition_name = filter_name+"Condition"+String::intToString(cnt);
 
     Configuration &condition_configuration = configuration.addNewSubConfiguration ("DBFilterCondition", condition_name);
     condition_configuration.addParameterString ("operator", data_condition.operator_);
     condition_configuration.addParameterString ("variable_name", data_condition.variable_name_);
-    condition_configuration.addParameterUnsignedInt ("variable_type", data_condition.variable_type_);
+    condition_configuration.addParameterString ("variable_dbo_type", data_condition.variable_dbo_type_);
     condition_configuration.addParameterBool ("absolute_value", data_condition.absolute_value_);
     condition_configuration.addParameterString ("value", data_condition.value_);
     std::string reset_value;

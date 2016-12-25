@@ -45,13 +45,13 @@ public slots:
 
 public:
     /// @brief Constructor
-    DBOVariableComboBox(DB_OBJECT_TYPE dbo_type, DBOVariable *variable, QWidget * parent = 0);
+    DBOVariableComboBox(const std::string &dbo_type, DBOVariable *variable, QWidget * parent = 0);
     /// @brief Destructor
     virtual ~DBOVariableComboBox();
 
 private:
     /// Given DBObject type
-    DB_OBJECT_TYPE dbo_type_;
+    std::string dbo_type_;
     /// Selected DBOVariable
     DBOVariable *variable_;
 };

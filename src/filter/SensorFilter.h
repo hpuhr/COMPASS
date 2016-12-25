@@ -109,14 +109,14 @@ public:
   /// @brief Desctructor
   virtual ~SensorFilter();
 
-  virtual std::string getConditionString (DB_OBJECT_TYPE dbo_type, bool &first, std::vector<std::string> &variable_names);
+  virtual std::string getConditionString (const std::string &dbo_type, bool &first, std::vector<std::string> &variable_names);
 
   /// @brief Should not have sub-configurables. Do not call.
   virtual void generateSubConfigurable (std::string class_id, std::string instance_id);
 
   virtual void reset ();
 
-  DB_OBJECT_TYPE getDBOType () { return (DB_OBJECT_TYPE) dbo_type_int_; }
+  const std::string &getDBOType () { return dbo_type_; }
 
   virtual void notifyActiveSources ();
 
@@ -124,7 +124,7 @@ public:
 
 protected:
   /// DBO type
-  int dbo_type_int_;
+  std::string dbo_type_;
   /// Sensor id column name in database table
   std::string sensor_column_name_;
   /// Container with all possible data sources and active flag pointers

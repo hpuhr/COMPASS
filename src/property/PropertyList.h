@@ -107,10 +107,15 @@ public:
     };
 
     /// @brief Return container with all properties
-    const std::vector <Property> &getProperties ()
+//    const std::vector <Property> &getProperties ()
+//    {
+//        return properties_;
+//    };
+    const Property &at (unsigned int index) const
     {
-        return properties_;
-    };
+        assert (index < properties_.size());
+        return properties_.at(index);
+    }
 
     /**
      * @brief Removes a property
@@ -135,6 +140,29 @@ public:
             }
         }
         throw std::runtime_error("PropteryList: removeProperty: property "+id+" could not be removed");
+    };
+
+    /**
+     * @brief Returns a property by id
+     *
+     * \exception std::runtime_error if identifier not found
+     */
+    const Property &get (std::string id) const
+    {
+        logdbg << "PropertyList: get: start";
+        if (!hasProperty(id))
+            throw std::runtime_error ("PropteryList: get: property "+id+" does not exists");
+
+        std::vector <Property>::const_iterator it;
+
+        for (it=properties_.begin(); it != properties_.end(); it++)
+        {
+            if (it->getId().compare (id) == 0)
+            {
+                return *it;
+            }
+        }
+        throw std::runtime_error("PropteryList: get: property "+id+" not found");
     };
 
     /**
@@ -186,16 +214,9 @@ public:
     }
 
     /// @brief Return number of properties in list
-    unsigned int getNumProperties () const
+    unsigned int size () const
     {
         return properties_.size();
-    }
-
-    /// @brief Returns property at index i
-    Property getProperty (unsigned int i) const
-    {
-        assert (i < properties_.size());
-        return properties_.at(i);
     }
 };
 

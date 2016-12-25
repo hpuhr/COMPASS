@@ -55,36 +55,45 @@ public:
     DBOVariableDataTypeComboBox(DBOVariable *variable, QWidget * parent = 0)
     : QComboBox(parent), variable_(variable)
     {
-        for (unsigned int cnt = 0; cnt < P_TYPE_SENTINEL; cnt++)
-        {
-            addItem (PROPERTY_DATA_TYPE_STRINGS.at((PROPERTY_DATA_TYPE) cnt).c_str());
-        }
-        setCurrentIndex (variable_->getDataType());
-        connect(this, SIGNAL( activated(const QString &) ), this, SIGNAL( changedType() ));
-        connect(this, SIGNAL( activated(const QString &) ), this, SLOT( changed() ));
+        assert (false);
+        //TODO FIXXME
+
+//        for (unsigned int cnt = 0; cnt < P_TYPE_SENTINEL; cnt++)
+//        {
+//            addItem (PROPERTY_DATA_TYPE_STRINGS.at((PROPERTY_DATA_TYPE) cnt).c_str());
+//        }
+//        setCurrentIndex (variable_->getDataType());
+//        connect(this, SIGNAL( activated(const QString &) ), this, SIGNAL( changedType() ));
+//        connect(this, SIGNAL( activated(const QString &) ), this, SLOT( changed() ));
 
     }
     /// @brief Destructor
     virtual ~DBOVariableDataTypeComboBox() {}
     /// @brief Returns the currently selected data type
-    PROPERTY_DATA_TYPE getType ()
+    PropertyDataType getType ()
     {
-        std::string text = currentText().toStdString();
-        for (unsigned int cnt = 0; cnt < P_TYPE_SENTINEL; cnt++)
-        {
-            if (text.compare (PROPERTY_DATA_TYPE_STRINGS.at((PROPERTY_DATA_TYPE) cnt)) == 0)
-                return (PROPERTY_DATA_TYPE) cnt;
-        }
-        throw std::runtime_error ("DBOVariableDataTypeComboBox: getType: unknown type");
+        assert (false);
+        //TODO FIXXME
+
+        return PropertyDataType::BOOL;
+//        return currentText().toStdString();
+//        for (unsigned int cnt = 0; cnt < P_TYPE_SENTINEL; cnt++)
+//        {
+//            if (text.compare (PROPERTY_DATA_TYPE_STRINGS.at((PROPERTY_DATA_TYPE) cnt)) == 0)
+//                return (PROPERTY_DATA_TYPE) cnt;
+//        }
+//        throw std::runtime_error ("DBOVariableDataTypeComboBox: getType: unknown type");
     }
     /// @brief Sets the currently selected data type
-    void setType (PROPERTY_DATA_TYPE type)
+    void setType (PropertyDataType type)
     {
-        setCurrentIndex (type);
+        assert (false);
+        //TODO FIXXME
+        //setCurrentIndex (type);
     }
 
 protected:
-    /// Used varaible
+    /// Used variable
     DBOVariable *variable_;
 };
 

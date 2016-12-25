@@ -42,7 +42,7 @@
 
 #include "String.h"
 
-using namespace Utils::String;
+using namespace Utils;
 
 DBTableEditWidget::DBTableEditWidget(DBTable *table, QWidget * parent, Qt::WindowFlags f)
 : QWidget (parent, f), table_(table), name_edit_ (0), db_name_box_ (0), info_edit_(0), key_box_ (0), column_grid_(0)
@@ -177,7 +177,7 @@ void DBTableEditWidget::updateTableSelection()
 
     std::string dbname = table_->getDBName();
 
-    if (tables->getFirstWrite())
+    if (tables->firstWrite())
     {
         delete tables;
         return;
@@ -187,28 +187,31 @@ void DBTableEditWidget::updateTableSelection()
     while (db_name_box_->count() > 0)
         db_name_box_->removeItem (0);
 
-    tables->setIndex(0);
-    std::string table_name;
+    // TODO FIX READING
+    assert (false);
 
-    int index=-1;
-    for (unsigned int cnt=0; cnt < tables->getSize(); cnt++)
-    {
-        if (cnt != 0)
-            tables->incrementIndex();
+//    tables->setIndex(0);
+//    std::string table_name;
 
-        table_name = *(std::string *) tables->get(0);
-        db_name_box_->addItem (table_name.c_str());
+//    int index=-1;
+//    for (unsigned int cnt=0; cnt < tables->getSize(); cnt++)
+//    {
+//        if (cnt != 0)
+//            tables->incrementIndex();
 
-        if (table_name.compare(dbname) == 0)
-            index=cnt;
-    }
+//        table_name = *(std::string *) tables->get(0);
+//        db_name_box_->addItem (table_name.c_str());
 
-    if (index != -1)
-    {
-        db_name_box_->setCurrentIndex (index);
-    }
+//        if (table_name.compare(dbname) == 0)
+//            index=cnt;
+//    }
 
-    delete tables;
+//    if (index != -1)
+//    {
+//        db_name_box_->setCurrentIndex (index);
+//    }
+
+//    delete tables;
 }
 
 void DBTableEditWidget::updateKeySelection()
@@ -216,7 +219,7 @@ void DBTableEditWidget::updateKeySelection()
     assert (ATSDB::getInstance().getDBOpened ());
     Buffer *columns = ATSDB::getInstance().getColumnList (table_->getDBName());
 
-    if (columns->getFirstWrite())
+    if (columns->firstWrite())
     {
         delete columns;
         return;
@@ -226,52 +229,55 @@ void DBTableEditWidget::updateKeySelection()
     while (key_box_->count() > 0)
         key_box_->removeItem (0);
 
-    columns->setIndex(0);
-    std::string column_name;
-    bool key;
+    // TODO FIX READING
+    assert (false);
 
-    PropertyList *list = columns->getPropertyList();
-    unsigned int name_index = list->getPropertyIndex ("name");
-    unsigned int key_index = list->getPropertyIndex ("key");
+//    columns->setIndex(0);
+//    std::string column_name;
+//    bool key;
 
-    key_box_->addItem ("");
+//    PropertyList *list = columns->getPropertyList();
+//    unsigned int name_index = list->getPropertyIndex ("name");
+//    unsigned int key_index = list->getPropertyIndex ("key");
 
-    bool found_key = false;
-    for (unsigned int cnt=0; cnt < columns->getSize(); cnt++)
-    {
-        if (cnt != 0)
-            columns->incrementIndex();
+//    key_box_->addItem ("");
 
-        column_name = *(std::string *) columns->get(name_index);
-        key = *(bool *) columns->get(key_index);
+//    bool found_key = false;
+//    for (unsigned int cnt=0; cnt < columns->getSize(); cnt++)
+//    {
+//        if (cnt != 0)
+//            columns->incrementIndex();
 
-        if (key)
-        {
-            key_box_->addItem (column_name.c_str());
-            found_key=true;
-        }
+//        column_name = *(std::string *) columns->get(name_index);
+//        key = *(bool *) columns->get(key_index);
 
-    }
+//        if (key)
+//        {
+//            key_box_->addItem (column_name.c_str());
+//            found_key=true;
+//        }
 
-    if (found_key)
-    {
-        key_box_->setCurrentIndex (1);
-    }
-    else // no key defined
-    {
-        columns->setIndex(0);
-        for (unsigned int cnt=0; cnt < columns->getSize(); cnt++)
-        {
-            if (cnt != 0)
-                columns->incrementIndex();
+//    }
 
-            column_name = *(std::string *) columns->get(name_index);
+//    if (found_key)
+//    {
+//        key_box_->setCurrentIndex (1);
+//    }
+//    else // no key defined
+//    {
+//        columns->setIndex(0);
+//        for (unsigned int cnt=0; cnt < columns->getSize(); cnt++)
+//        {
+//            if (cnt != 0)
+//                columns->incrementIndex();
 
-                key_box_->addItem (column_name.c_str());
-        }
-    }
+//            column_name = *(std::string *) columns->get(name_index);
 
-    delete columns;
+//                key_box_->addItem (column_name.c_str());
+//        }
+//    }
+
+//    delete columns;
 }
 
 void DBTableEditWidget::updateColumnGrid ()
@@ -336,7 +342,7 @@ void DBTableEditWidget::updateColumnGrid ()
         QLabel *type = new QLabel (it->second->getType().c_str());
         column_grid_->addWidget (type, row,2);
 
-        QLabel *key = new QLabel (intToString((int)it->second->isKey()).c_str());
+        QLabel *key = new QLabel (String::intToString((int)it->second->isKey()).c_str());
         column_grid_->addWidget (key, row,3);
 
         UnitSelectionWidget *unit_widget = new UnitSelectionWidget (it->second->getUnitDimension (), it->second->getUnitUnit());
@@ -359,41 +365,44 @@ void DBTableEditWidget::createColumnsFromDB ()
     assert (ATSDB::getInstance().getDBOpened ());
     Buffer *columns = ATSDB::getInstance().getColumnList (table_->getDBName());
 
-    if (columns->getFirstWrite())
+    if (columns->firstWrite())
     {
         delete columns;
         return;
     }
 
-    columns->setIndex(0);
-    std::string column_name;
-    std::string type_name;
-    bool key;
+    // TODO FIX READING
+    assert (false);
 
-    PropertyList *list = columns->getPropertyList();
-    unsigned int name_index = list->getPropertyIndex ("name");
-    unsigned int type_index = list->getPropertyIndex ("type");
-    unsigned int key_index = list->getPropertyIndex ("key");
+//    columns->setIndex(0);
+//    std::string column_name;
+//    std::string type_name;
+//    bool key;
 
-    for (unsigned int cnt=0; cnt < columns->getSize(); cnt++)
-    {
-        if (cnt != 0)
-            columns->incrementIndex();
+//    PropertyList *list = columns->getPropertyList();
+//    unsigned int name_index = list->getPropertyIndex ("name");
+//    unsigned int type_index = list->getPropertyIndex ("type");
+//    unsigned int key_index = list->getPropertyIndex ("key");
 
-        column_name = *(std::string *) columns->get(name_index);
-        type_name = *(std::string *) columns->get(type_index);
-        key = *(bool *) columns->get(key_index);
+//    for (unsigned int cnt=0; cnt < columns->getSize(); cnt++)
+//    {
+//        if (cnt != 0)
+//            columns->incrementIndex();
 
-        std::string instance_id = "DBTableColumn"+table_->getDBName()+column_name+"0";
+//        column_name = *(std::string *) columns->get(name_index);
+//        type_name = *(std::string *) columns->get(type_index);
+//        key = *(bool *) columns->get(key_index);
 
-        Configuration &configuration = table_->addNewSubConfiguration ("DBTableColumn", instance_id);
-        configuration.addParameterString ("name", column_name);
-        configuration.addParameterString ("type", type_name);
-        configuration.addParameterBool ("is_key", key);
-        table_->generateSubConfigurable ("DBTableColumn", instance_id);
-    }
+//        std::string instance_id = "DBTableColumn"+table_->getDBName()+column_name+"0";
 
-    delete columns;
+//        Configuration &configuration = table_->addNewSubConfiguration ("DBTableColumn", instance_id);
+//        configuration.addParameterString ("name", column_name);
+//        configuration.addParameterString ("type", type_name);
+//        configuration.addParameterBool ("is_key", key);
+//        table_->generateSubConfigurable ("DBTableColumn", instance_id);
+//    }
+
+//    delete columns;
 
     updateColumnGrid ();
 
@@ -407,44 +416,47 @@ void DBTableEditWidget::createNewColumnsFromDB ()
     assert (ATSDB::getInstance().getDBOpened ());
     Buffer *columns = ATSDB::getInstance().getColumnList (table_->getDBName());
 
-    if (columns->getFirstWrite())
+    if (columns->firstWrite())
     {
         delete columns;
         return;
     }
 
-    columns->setIndex(0);
-    std::string column_name;
-    std::string type_name;
-    bool key;
+    // TODO FIX READING
+    assert (false);
 
-    PropertyList *list = columns->getPropertyList();
-    unsigned int name_index = list->getPropertyIndex ("name");
-    unsigned int type_index = list->getPropertyIndex ("type");
-    unsigned int key_index = list->getPropertyIndex ("key");
+//    columns->setIndex(0);
+//    std::string column_name;
+//    std::string type_name;
+//    bool key;
 
-    for (unsigned int cnt=0; cnt < columns->getSize(); cnt++)
-    {
-        if (cnt != 0)
-            columns->incrementIndex();
+//    PropertyList *list = columns->getPropertyList();
+//    unsigned int name_index = list->getPropertyIndex ("name");
+//    unsigned int type_index = list->getPropertyIndex ("type");
+//    unsigned int key_index = list->getPropertyIndex ("key");
 
-        column_name = *(std::string *) columns->get(name_index);
-        type_name = *(std::string *) columns->get(type_index);
-        key = *(bool *) columns->get(key_index);
+//    for (unsigned int cnt=0; cnt < columns->getSize(); cnt++)
+//    {
+//        if (cnt != 0)
+//            columns->incrementIndex();
 
-        if (table_->hasTableColumn(column_name))
-            continue;
+//        column_name = *(std::string *) columns->get(name_index);
+//        type_name = *(std::string *) columns->get(type_index);
+//        key = *(bool *) columns->get(key_index);
 
-        std::string instance_id = "DBTableColumn"+table_->getDBName()+column_name+"0";
+//        if (table_->hasTableColumn(column_name))
+//            continue;
 
-        Configuration &configuration = table_->addNewSubConfiguration ("DBTableColumn", instance_id);
-        configuration.addParameterString ("name", column_name);
-        configuration.addParameterString ("type", type_name);
-        configuration.addParameterBool ("is_key", key);
-        table_->generateSubConfigurable ("DBTableColumn", instance_id);
-    }
+//        std::string instance_id = "DBTableColumn"+table_->getDBName()+column_name+"0";
 
-    delete columns;
+//        Configuration &configuration = table_->addNewSubConfiguration ("DBTableColumn", instance_id);
+//        configuration.addParameterString ("name", column_name);
+//        configuration.addParameterString ("type", type_name);
+//        configuration.addParameterBool ("is_key", key);
+//        table_->generateSubConfigurable ("DBTableColumn", instance_id);
+//    }
+
+//    delete columns;
 
     updateColumnGrid ();
 

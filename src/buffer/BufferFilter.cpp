@@ -29,7 +29,7 @@ BufferFilterEntry
 Constructor
 @param dbo_type DBO type the entry is assigned to.
   */
-BufferFilterEntry::BufferFilterEntry( int dbo_type )
+BufferFilterEntry::BufferFilterEntry( const std::string &dbo_type )
 :   dbo_type_( dbo_type )
 {
 }
@@ -46,9 +46,11 @@ BufferFilterEntry::BufferFilterEntry( const std::string& class_id,
                                       Configurable* parent )
 :   Configurable( class_id, instance_id, parent )
 {
-    registerParameter( "dbo_type", &dbo_type_, -1 );
+    registerParameter( "dbo_type", &dbo_type_, "" );
     registerParameter( "id", &id_, "" );
-    registerParameter( "data_type", &data_type_, -1 );
+    registerParameter( "data_type_str", &data_type_str_, "" );
+
+    data_type_ = Property::asDataType(data_type_str_);
 }
 
 /**
@@ -64,8 +66,9 @@ Sets the entries Property.
   */
 void BufferFilterEntry::setProperty( const Property& prop )
 {
-    id_ = prop.id_;
-    data_type_ = prop.data_type_int_;
+    id_ = prop.getId();
+    data_type_ = prop.getDataType();
+    data_type_str_ = prop.asDataTypeString();
 }
 
 /**
@@ -73,10 +76,11 @@ Sets the entries Property.
 @param id The new Property id.
 @param data_type The new Property data type given as integer.
   */
-void BufferFilterEntry::setProperty( const std::string& id, int data_type )
+void BufferFilterEntry::setProperty( const std::string& id, PropertyDataType data_type )
 {
     id_ = id;
     data_type_ = data_type;
+    data_type_str_ = Property::asString(data_type_);
 }
 
 /**
@@ -92,8 +96,8 @@ void BufferFilterEntry::setProperty( DBOVariable* var )
     if( var->isMetaVariable() )
         throw std::runtime_error( "BufferFilterEntry: setProperty: Cannot set entry from meta variable." );
 
-    id_ = var->id_;
-    data_type_ = var->data_type_int_;
+    id_ = var->getId();
+    data_type_ = var->getDataType();
 }
 
 /**
@@ -103,9 +107,7 @@ Smaller operator (used for ordering).
   */
 bool BufferFilterEntry::operator<( const BufferFilterEntry& other ) const
 {
-    Property prop;
-    other.getProperty( prop );
-    return ( id_.compare( prop.id_ ) < 0 );
+    return ( id_.compare( other.getProperty().getId() ) < 0 );
 }
 
 /**
@@ -118,12 +120,11 @@ bool BufferFilterEntry::exists( Buffer* buffer ) const
 {
     assert( buffer );
 
-    PropertyList* props = buffer->getPropertyList();
-    if( !props->hasProperty( id_ ) )
+    const PropertyList &props = buffer->properties();
+    if( !props.hasProperty( id_ ) )
         return false;
 
-    int idx = props->getPropertyIndex( id_ );
-    if( (signed)props->getProperty( idx )->data_type_int_ != data_type_ )
+    if( props.get(id_).getDataType() != data_type_ )
         return false;
 
     return true;
@@ -131,12 +132,10 @@ bool BufferFilterEntry::exists( Buffer* buffer ) const
 
 /**
 Retrieves the Property from the entry.
-@param prop The Property to be filled.
   */
-void BufferFilterEntry::getProperty( Property& prop ) const
+Property BufferFilterEntry::getProperty() const
 {
-    prop.id_ = id_;
-    prop.data_type_int_ = data_type_;
+    return Property (id_, data_type_);
 }
 
 /**
@@ -146,11 +145,11 @@ Retrieves a Configuration with the given data filled in. Use this method for you
 @param id Property id.
 @param data_type Property data type as integer number.
   */
-void BufferFilterEntry::getConfig( Configuration& config, int dbo_type, const std::string& id, int data_type )
+void BufferFilterEntry::getConfig( Configuration& config, const std::string &dbo_type, const std::string& id, PropertyDataType data_type )
 {
-    config.addParameterInt( "dbo_type", dbo_type );
+    config.addParameterString( "dbo_type", dbo_type );
     config.addParameterString( "id", id );
-    config.addParameterInt( "data_type", data_type );
+    config.addParameterString( "data_type_str", Property::asString(data_type) );
 }
 
 /**
@@ -166,7 +165,7 @@ const std::string& BufferFilterEntry::getID() const
 Returns the Property data type of the entry as integer number.
 @return Property data type as integer number.
   */
-int BufferFilterEntry::dataType() const
+PropertyDataType BufferFilterEntry::dataType() const
 {
     return data_type_;
 }
@@ -175,7 +174,7 @@ int BufferFilterEntry::dataType() const
 Returns the DBO type the entry is assigned to as integer number.
 @return DBO type as integer number.
   */
-int BufferFilterEntry::dboType() const
+const std::string &BufferFilterEntry::dboType() const
 {
     return dbo_type_;
 }
@@ -189,7 +188,7 @@ Constructor.
 @param dbo_type DBO type as integer number.
 @param filter_rule Filter rule as integer number (see class BufferFilter).
   */
-BufferFilterRuleEntry::BufferFilterRuleEntry( int dbo_type, int filter_rule )
+BufferFilterRuleEntry::BufferFilterRuleEntry( const std::string &dbo_type, int filter_rule )
 :   dbo_type_( dbo_type ),
     filter_rule_( filter_rule )
 {
@@ -207,7 +206,7 @@ BufferFilterRuleEntry::BufferFilterRuleEntry( const std::string& class_id,
                                               Configurable* parent )
 :   Configurable( class_id, instance_id, parent )
 {
-    registerParameter( "dbo_type", &dbo_type_, -1 );
+    registerParameter( "dbo_type", &dbo_type_, "" );
     registerParameter( "filter_rule", &filter_rule_, -1 );
 }
 
@@ -224,9 +223,9 @@ Retrieves a Configuration with the given data filled in. Use this method for you
 @param dbo_type DBO type.
 @param filter_rule Filter rule as integer number (see class BufferFilter).
   */
-void BufferFilterRuleEntry::getConfig( Configuration& config, int dbo_type, int filter_rule )
+void BufferFilterRuleEntry::getConfig( Configuration& config, const std::string &dbo_type, int filter_rule )
 {
-    config.addParameterInt( "dbo_type", dbo_type );
+    config.addParameterString( "dbo_type", dbo_type );
     config.addParameterInt( "filter_rule", filter_rule );
 }
 
@@ -243,7 +242,7 @@ void BufferFilterRuleEntry::setRule( int filter_rule )
 Returns the DBO type the entry is assigned to.
 @return DBO type as integer number.
   */
-int BufferFilterRuleEntry::dboType() const
+const std::string &BufferFilterRuleEntry::dboType() const
 {
     return dbo_type_;
 }
@@ -267,7 +266,9 @@ Constructor.
 BufferFilter::BufferFilter()
 :   base_rule_( NULL )
 {
-    base_rule_ = new BufferFilterRuleEntry( DBO_UNDEFINED, BLOCK );
+    // TODO FIXXMEE
+    assert (false);
+    //base_rule_ = new BufferFilterRuleEntry( DBO_UNDEFINED, BLOCK );
 }
 
 /**
@@ -298,22 +299,22 @@ Adds a new filter Property to the filter.
 @param dbo_type DBO type the Property is assigned to.
 @param prop New filter Property.
   */
-void BufferFilter::addPropertyToFilter( DB_OBJECT_TYPE dbo_type, const Property& prop )
+void BufferFilter::addPropertyToFilter( const std::string &dbo_type, const Property& prop )
 {
     FilterEntries& entries = property_filter_[ dbo_type ];
-    if( entries.find( prop.id_ ) != entries.end() )
+    if( entries.find( prop.getId() ) != entries.end() )
         throw std::runtime_error( "BufferFilter: addEntry: Duplicate entry id." );
 
     if( unusable_ )
     {
-        BufferFilterEntry* entry = new BufferFilterEntry( (int)dbo_type );
+        BufferFilterEntry* entry = new BufferFilterEntry( dbo_type );
         entry->setProperty( prop );
-        property_filter_[ dbo_type ][ prop.id_ ] = entry;
+        property_filter_[ dbo_type ][ prop.getId() ] = entry;
     }
     else
     {
         Configuration& config = addNewSubConfiguration( "BufferFilterEntry" );
-        BufferFilterEntry::getConfig( config, (int)dbo_type, prop.id_, prop.data_type_int_ );
+        BufferFilterEntry::getConfig( config, dbo_type, prop.getId(), prop.getDataType() );
         generateSubConfigurable( config.getClassId(), config.getInstanceId() );
     }
 }
@@ -325,7 +326,7 @@ an exception will be thrown.
 @param id Property id string.
 @param data_type Property data type as integer number.
   */
-void BufferFilter::addPropertyToFilter( DB_OBJECT_TYPE dbo_type, const std::string& id, int data_type )
+void BufferFilter::addPropertyToFilter( const std::string &dbo_type, const std::string& id, PropertyDataType data_type )
 {
     FilterEntries& entries = property_filter_[ dbo_type ];
     if( entries.find( id ) != entries.end() )
@@ -333,14 +334,14 @@ void BufferFilter::addPropertyToFilter( DB_OBJECT_TYPE dbo_type, const std::stri
 
     if( unusable_ )
     {
-        BufferFilterEntry* entry = new BufferFilterEntry( (int)dbo_type );
+        BufferFilterEntry* entry = new BufferFilterEntry( dbo_type );
         entry->setProperty( id, data_type );
         property_filter_[ dbo_type ][ id ] = entry;
     }
     else
     {
         Configuration& config = addNewSubConfiguration( "BufferFilterEntry", "" );
-        BufferFilterEntry::getConfig( config, (int)dbo_type, id, data_type );
+        BufferFilterEntry::getConfig( config, dbo_type, id, data_type );
         generateSubConfigurable( config.getClassId(), config.getInstanceId() );
     }
 }
@@ -362,10 +363,10 @@ void BufferFilter::addPropertyToFilter( DBOVariable* var )
     }
 
     //add subvariables
-    std::map<DB_OBJECT_TYPE,std::string>& subs = var->getSubVariables();
-    std::map<DB_OBJECT_TYPE,std::string>::iterator it, itend = subs.end();
+    std::map<std::string,std::string>& subs = var->getSubVariables();
+    std::map<std::string,std::string>::iterator it, itend = subs.end();
     for( it=subs.begin(); it!=itend; ++it )
-        addPropertyToFilter( it->first, it->second, var->data_type_int_ );
+        addPropertyToFilter( it->first, it->second, var->getDataType() );
 }
 
 /**
@@ -374,7 +375,7 @@ Checks if the given Property id already exists for the given DBO type.
 @param id String id.
 @return True if a Property with the given id already exists for the given DBO type, otherwise false.
   */
-bool BufferFilter::hasProperty( DB_OBJECT_TYPE dbo_type, const std::string& id )
+bool BufferFilter::hasProperty( const std::string &dbo_type, const std::string& id )
 {
     if( property_filter_.find( dbo_type ) == property_filter_.end() )
         return false;
@@ -405,10 +406,9 @@ void BufferFilter::clearPropertyFilter()
 Returns all defined filter properties.
 @return Defined filter properties.
   */
-std::multimap<DB_OBJECT_TYPE,Property> BufferFilter::getProperties() const
+std::multimap<std::string,Property> BufferFilter::getProperties() const
 {
-    std::multimap<DB_OBJECT_TYPE,Property> props;
-    Property prop;
+    std::multimap<std::string,Property> props;
 
     PropertyFilter::const_iterator itm, itmend = property_filter_.end();
     FilterEntries::const_iterator it, itend;
@@ -419,8 +419,7 @@ std::multimap<DB_OBJECT_TYPE,Property> BufferFilter::getProperties() const
         itend = entries.end();
         for( ; it!=itend; ++it )
         {
-            it->second->getProperty( prop );
-            props.insert( std::pair<DB_OBJECT_TYPE,Property>( itm->first, prop ) );
+            props.insert( std::pair<std::string,Property>( itm->first, it->second->getProperty() ) );
         }
     }
 
@@ -433,7 +432,7 @@ will just get overwritten by new ones.
 @param dbo_type DBO type associated with the given filter rule.
 @param rule Filter rule for buffers of the given DBO type.
   */
-void BufferFilter::setRule( DB_OBJECT_TYPE dbo_type, BufferFilterRule rule )
+void BufferFilter::setRule( const std::string &dbo_type, BufferFilterRule rule )
 {
     if( rules_.find( dbo_type ) != rules_.end() )
     {
@@ -443,12 +442,12 @@ void BufferFilter::setRule( DB_OBJECT_TYPE dbo_type, BufferFilterRule rule )
 
     if( unusable_ )
     {
-        rules_[ dbo_type ] = new BufferFilterRuleEntry( (int)dbo_type, (int)rule );
+        rules_[ dbo_type ] = new BufferFilterRuleEntry( dbo_type, (int)rule );
     }
     else
     {
         Configuration& config = addNewSubConfiguration( "BufferFilterRuleEntry" );
-        BufferFilterRuleEntry::getConfig( config, (int)dbo_type, (int)rule );
+        BufferFilterRuleEntry::getConfig( config, dbo_type, (int)rule );
         generateSubConfigurable( config.getClassId(), config.getInstanceId() );
     }
 }
@@ -471,8 +470,8 @@ void BufferFilter::setRule( DBOVariable* var, BufferFilterRule rule )
     }
 
     //add subvariables
-    std::map<DB_OBJECT_TYPE,std::string>& subs = var->getSubVariables();
-    std::map<DB_OBJECT_TYPE,std::string>::iterator it, itend = subs.end();
+    std::map<std::string,std::string>& subs = var->getSubVariables();
+    std::map<std::string,std::string>::iterator it, itend = subs.end();
     for( it=subs.begin(); it!=itend; ++it )
         setRule( it->first, rule );
 }
@@ -489,16 +488,18 @@ void BufferFilter::setBaseRule( BufferFilterRule rule )
         return;
     }
 
-    if( unusable_ )
-    {
-        base_rule_ = new BufferFilterRuleEntry( DBO_UNDEFINED, (int)rule );
-    }
-    else
-    {
-        Configuration& config = addNewSubConfiguration( "BufferFilterRuleEntryBase" );
-        BufferFilterRuleEntry::getConfig( config, (int)DBO_UNDEFINED, (int)rule );
-        generateSubConfigurable( config.getClassId(), config.getInstanceId() );
-    }
+    // TODO FIXXMEE
+    assert (false);
+//    if( unusable_ )
+//    {
+//        base_rule_ = new BufferFilterRuleEntry( DBO_UNDEFINED, (int)rule );
+//    }
+//    else
+//    {
+//        Configuration& config = addNewSubConfiguration( "BufferFilterRuleEntryBase" );
+//        BufferFilterRuleEntry::getConfig( config, (int)DBO_UNDEFINED, (int)rule );
+//        generateSubConfigurable( config.getClassId(), config.getInstanceId() );
+//    }
 }
 
 /**
@@ -512,7 +513,7 @@ BufferFilter::BufferFilterRule BufferFilter::getRule( Buffer* buffer )
 {
     assert( buffer );
 
-    DB_OBJECT_TYPE dbo_type = buffer->getDBOType();
+    const std::string &dbo_type = buffer->dboType();
     if( rules_.find( dbo_type ) != rules_.end() )
         return (BufferFilterRule)(rules_[ dbo_type ]->filterRule());
 
@@ -527,9 +528,9 @@ BufferFilter::BufferFilterRule BufferFilter::getRule( Buffer* buffer )
 Returns all defined filter rules.
 @return Defined filter rules.
   */
-std::map<DB_OBJECT_TYPE,BufferFilter::BufferFilterRule> BufferFilter::getRules() const
+std::map<std::string,BufferFilter::BufferFilterRule> BufferFilter::getRules() const
 {
-    std::map<DB_OBJECT_TYPE,BufferFilter::BufferFilterRule> rules;
+    std::map<std::string,BufferFilter::BufferFilterRule> rules;
 
     Rules::const_iterator it, itend = rules_.end();
     for( it=rules_.begin(); it!=itend; ++it )
@@ -548,7 +549,7 @@ bool BufferFilter::checkProperties( Buffer* buffer )
 {
     assert( buffer );
 
-    DB_OBJECT_TYPE dbo_type = buffer->getDBOType();
+    const std::string &dbo_type = buffer->dboType();
 
     if( property_filter_.find( dbo_type ) == property_filter_.end() )
         return true;
@@ -574,7 +575,7 @@ std::string BufferFilter::getErrorProperties( Buffer* buffer )
 {
     assert( buffer );
 
-    DB_OBJECT_TYPE dbo_type = buffer->getDBOType();
+    const std::string & dbo_type = buffer->dboType();
     std::string ret = "";
 
     if( property_filter_.find( dbo_type ) == property_filter_.end() )
@@ -640,13 +641,13 @@ void BufferFilter::generateSubConfigurable( std::string class_id, std::string in
     if( class_id == "BufferFilterRuleEntry" )
     {
         BufferFilterRuleEntry* entry = new BufferFilterRuleEntry( class_id, instance_id, this );
-        rules_[ (DB_OBJECT_TYPE)entry->dboType() ] = entry;
+        rules_[ entry->dboType() ] = entry;
     }
 
     if( class_id == "BufferFilterEntry" )
     {
         BufferFilterEntry* entry = new BufferFilterEntry( class_id, instance_id, this );
-        property_filter_[ (DB_OBJECT_TYPE)entry->dboType() ][ entry->getID() ] = entry;
+        property_filter_[ entry->dboType() ][ entry->getID() ] = entry;
     }
 }
 
@@ -661,7 +662,7 @@ Checks if a specific rule has already been added for the given DBO type.
 @param type DBO type.
 @return True if a specific filter rule exists for the given DBO type, otherwise false.
   */
-bool BufferFilter::hasRule( DB_OBJECT_TYPE type ) const
+bool BufferFilter::hasRule( const std::string &type ) const
 {
     return ( rules_.find( type ) != rules_.end() );
 }
@@ -691,7 +692,7 @@ Returns the specific rule for the given DBO type.
 @param type DBO type.
 @return Specific filter rule for the given DBO type.
   */
-BufferFilter::BufferFilterRule BufferFilter::getRule( DB_OBJECT_TYPE type )
+BufferFilter::BufferFilterRule BufferFilter::getRule( const std::string &type )
 {
     if( !hasRule( type ) )
         throw std::runtime_error( "BufferFilter: getRule: No rule for given DBO type." );

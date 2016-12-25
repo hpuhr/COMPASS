@@ -63,10 +63,10 @@ public:
     void openDatabase (std::string database_name);
 
     /// @brief Returns a buffer with all data sources for a DBO type
-    Buffer *getDataSourceDescription (DB_OBJECT_TYPE type);
-    bool hasActiveDataSourcesInfo (DB_OBJECT_TYPE type);
+    Buffer *getDataSourceDescription (const std::string &dbo_type);
+    bool hasActiveDataSourcesInfo (const std::string &dbo_type);
     /// @brief Returns a set with all active data source ids for a DBO type
-    std::set<int> getActiveSensorNumbers (DB_OBJECT_TYPE type);
+    std::set<int> getActiveSensorNumbers (const std::string &dbo_type);
 
     /// @brief Writes a buffer to the database, into a table defined by write_table_names_ and DBO type
     void writeBuffer (Buffer *data);
@@ -74,26 +74,26 @@ public:
     void updateBuffer (Buffer *data);
 
     /// @brief Prepares incremental read of DBO type
-    void prepareRead (DB_OBJECT_TYPE type, DBOVariableSet read_list, std::string custom_filter_clause="",
+    void prepareRead (const std::string &dbo_type, DBOVariableSet read_list, std::string custom_filter_clause="",
             DBOVariable *order=0);
     /// @brief Returns data chunk of DBO type
-    Buffer *readDataChunk (DB_OBJECT_TYPE type, bool activate_key_search);
+    Buffer *readDataChunk (const std::string &dbo_type, bool activate_key_search);
     /// @brief Cleans up incremental read of DBO type
-    void finalizeReadStatement (DB_OBJECT_TYPE type);
+    void finalizeReadStatement (const std::string &dbo_type);
     /// @brief Sets reading_done_ flags
     void clearResult ();
 
     /// @brief Returns if incremental read for DBO type was prepared
-    bool isPrepared (DB_OBJECT_TYPE type);
+    bool isPrepared (const std::string &dbo_type);
     /// @brief Returns if incremental read for DBO type was finished
-    bool getReadingDone (DB_OBJECT_TYPE type);
+    bool getReadingDone (const std::string &dbo_type);
     /// @brief Returns if all incremental reads were finished
     bool isReadingDone ();
     /// @brief Returns if DBO exists and has data in the database
-    bool exists (DB_OBJECT_TYPE type);
+    bool exists (const std::string &dbo_type);
     /// @brief Returns number of elements for DBO type
-    unsigned int count (DB_OBJECT_TYPE type);
-    DBResult *count (DB_OBJECT_TYPE type, unsigned int sensor_number);
+    unsigned int count (const std::string &dbo_type);
+    DBResult *count (const std::string &dbo_type, unsigned int sensor_number);
 
     /// @brief Creates the properties table
     void createPropertiesTable ();
@@ -107,9 +107,10 @@ public:
     void createMinMaxTable ();
     /// @brief Returns buffer with the minimum/maximum of a DBO variable
     Buffer *getMinMaxString (DBOVariable *var);
-    std::map <std::pair<DB_OBJECT_TYPE, std::string>, std::pair<std::string, std::string> > getMinMaxInfo ();
+    /// (dbo type, id) -> (min, max)
+    std::map <std::pair<std::string, std::string>, std::pair<std::string, std::string> > getMinMaxInfo ();
     /// @brief Inserts a minimum/maximum value pair
-    void insertMinMax (std::string id, DB_OBJECT_TYPE type, std::string min, std::string max);
+    void insertMinMax (std::string id, const std::string &dbo_type, std::string min, std::string max);
 
     /// @brief Returns if database was post processed
     bool isPostProcessed ();
@@ -117,7 +118,7 @@ public:
     //void postProcess ();
 
     /// @brief Returns variable values for a number of DBO type elements
-    Buffer *getInfo (DB_OBJECT_TYPE type, std::vector<unsigned int> ids, DBOVariableSet read_list, bool use_filters,
+    Buffer *getInfo (const std::string &dbo_type, std::vector<unsigned int> ids, DBOVariableSet read_list, bool use_filters,
             std::string order_by_variable, bool ascending, unsigned int limit_min=0, unsigned int limit_max=0,
             bool finalize=0);
 
@@ -160,10 +161,10 @@ public:
     /// @brief Returns minimum/maximum information for a given column in a table
     DBResult *queryMinMaxForColumn (DBTableColumn *column, std::string table);
 
-    DBResult *getDistinctStatistics (DB_OBJECT_TYPE type, DBOVariable *variable, unsigned int sensor_number);
+    DBResult *getDistinctStatistics (const std::string &dbo_type, DBOVariable *variable, unsigned int sensor_number);
 
     /// @brief Executes query and returns numbers for all active sensors
-    std::set<int> queryActiveSensorNumbers (DB_OBJECT_TYPE type);
+    std::set<int> queryActiveSensorNumbers (const std::string &dbo_type);
 
     void deleteAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string filter);
     void updateAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string new_value, std::string filter);
@@ -183,19 +184,20 @@ private:
     /// Database opened
     bool database_opened_;
     /// Container with all prepared flags (for incremental reading)
-    std::map <DB_OBJECT_TYPE, bool> prepared_;
+    std::map <std::string, bool> prepared_;
     /// Container with all reading done flags (for incremental reading)
-    std::map <DB_OBJECT_TYPE, bool> reading_done_;
+    std::map <std::string, bool> reading_done_;
     /// Container with all exists flags, indicating if DBO has data in the database
-    std::map <DB_OBJECT_TYPE, bool> exists_;
+    std::map <std::string, bool> exists_;
     /// Container with all DBO element counts
-    std::map <DB_OBJECT_TYPE, unsigned int> count_;
+    std::map <std::string, unsigned int> count_;
 
     /// Protects the database
     boost::mutex mutex_;
 
     /// Container with all table names, based on DBO type
-    std::map <DB_OBJECT_TYPE, std::string> write_table_names_;
+    // TODO solve this
+    //std::map <std::string, std::string> write_table_names_;
     /// Size of a read chunk in incremental reading process
     unsigned int read_chunk_size_;
 
@@ -212,12 +214,12 @@ private:
     bool existsTable (std::string table_name);
 
     /// @brief Queries if DBO has data in database
-    bool queryContains (DB_OBJECT_TYPE type);
+    bool queryContains (const std::string &dbo_type);
     /// @brief Returns element count for DBO
-    unsigned int queryCount (DB_OBJECT_TYPE type);
+    unsigned int queryCount (const std::string &dbo_type);
 
     /// @brief Returns buffer with min/max data from another Buffer with the string contents. Delete returned buffer yourself.
-    Buffer *createFromMinMaxStringBuffer (Buffer *string_buffer, PROPERTY_DATA_TYPE type);
+    Buffer *createFromMinMaxStringBuffer (Buffer *string_buffer, PropertyDataType data_type);
 };
 
 #endif /* SQLITE3CONNECTION_H_ */

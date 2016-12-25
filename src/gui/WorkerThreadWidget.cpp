@@ -31,7 +31,7 @@
 #include "Logger.h"
 #include "String.h"
 
-using namespace Utils::String;
+using namespace Utils;
 
 WorkerThreadWidget::WorkerThreadWidget()  : QFrame (), manager_ (WorkerThreadManager::getInstance()),
  timer_id_ (0)
@@ -68,7 +68,7 @@ void WorkerThreadWidget::createWidgets ()
   head->setFont (font_big);
   layout->addWidget(head);
 
-  std::string threads_info = "Number of workers: <b>" + intToString(num_workers_)+"</b>";
+  std::string threads_info = "Number of workers: <b>" + String::intToString(num_workers_)+"</b>";
   QLabel *number= new QLabel (tr(threads_info.c_str()));
   layout->addWidget(number);
 
@@ -89,7 +89,7 @@ void WorkerThreadWidget::createWidgets ()
     if (cnt == 0)
       name = "<b>DB Thread</b>";
     else
-      name = "<b>Thread " + intToString(cnt)+"</b>";
+      name = "<b>Thread " + String::intToString(cnt)+"</b>";
 
     QLabel *label_name = new QLabel (tr(name.c_str()));
     threads_layout->addWidget(label_name, row, 0);
@@ -137,7 +137,7 @@ void WorkerThreadWidget::createWidgets ()
 
 void WorkerThreadWidget::update ()
 {
-  std::string jobs_info = "Number of jobs: <b>" + intToString(manager_.getJobNumber())+"</b>";
+  std::string jobs_info = "Number of jobs: <b>" + String::intToString(manager_.getJobNumber())+"</b>";
   jobs_->setText (tr(jobs_info.c_str()));
 
   for (unsigned int cnt=0; cnt < num_workers_; cnt ++)
@@ -153,11 +153,11 @@ void WorkerThreadWidget::update ()
 //    else
 //      thread_states_.at(cnt)->setText("Idle");
 
-    std::string working = percentToString(usage.first/sum * 100.0)+"%";
+    std::string working = String::percentToString(usage.first/sum * 100.0)+"%";
     thread_working_.at(cnt)->setText(tr(working.c_str()));
-    std::string idle = percentToString(usage.second/sum * 100.0)+"%";
+    std::string idle = String::percentToString(usage.second/sum * 100.0)+"%";
     thread_idle_.at(cnt)->setText(tr(idle.c_str()));
-    thread_jobs_.at(cnt)->setText(tr(intToString(worker->getJobNumber()).c_str()));
+    thread_jobs_.at(cnt)->setText(tr(String::intToString(worker->getJobNumber()).c_str()));
   }
 }
 

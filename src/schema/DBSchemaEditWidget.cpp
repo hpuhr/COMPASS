@@ -47,7 +47,7 @@
 
 #include "String.h"
 
-using namespace Utils::String;
+using namespace Utils;
 
 DBSchemaEditWidget::DBSchemaEditWidget(DBSchema *schema, QWidget * parent, Qt::WindowFlags f)
 : QWidget (parent, f), schema_(schema), name_edit_(0), new_table_name_edit_(0), new_table_dbname_ (0), new_meta_table_name_edit_(0),
@@ -288,28 +288,30 @@ void DBSchemaEditWidget::updateDBTableComboBox ()
     assert (ATSDB::getInstance().getDBOpened ());
     Buffer *tables = ATSDB::getInstance().getTableList ();
 
-    if (tables->getFirstWrite())
+    if (tables->firstWrite())
     {
         delete tables;
         return;
     }
 
-    tables->setIndex(0);
-    std::string table_name;
+    // TODO FIX READING
+    assert (false);
+//    tables->setIndex(0);
+//    std::string table_name;
 
-    assert (new_table_dbname_);
-    while (new_table_dbname_->count() > 0)
-        new_table_dbname_->removeItem (0);
+//    assert (new_table_dbname_);
+//    while (new_table_dbname_->count() > 0)
+//        new_table_dbname_->removeItem (0);
 
-    for (unsigned int cnt=0; cnt < tables->getSize(); cnt++)
-    {
-        if (cnt != 0)
-            tables->incrementIndex();
+//    for (unsigned int cnt=0; cnt < tables->getSize(); cnt++)
+//    {
+//        if (cnt != 0)
+//            tables->incrementIndex();
 
-        table_name = *(std::string *) tables->get(0);
-        new_table_dbname_->addItem (table_name.c_str());
-    }
-    delete tables;
+//        table_name = *(std::string *) tables->get(0);
+//        new_table_dbname_->addItem (table_name.c_str());
+//    }
+//    delete tables;
 }
 
 void DBSchemaEditWidget::updateTableComboBox ()
@@ -382,7 +384,7 @@ void DBSchemaEditWidget::updateTableGrid()
         QLabel *dbname = new QLabel (it->second->getDBName().c_str());
         table_grid_->addWidget (dbname, row, 2);
 
-        QLabel *numel = new QLabel (intToString(it->second->getNumColumns()).c_str());
+        QLabel *numel = new QLabel (String::intToString(it->second->getNumColumns()).c_str());
         table_grid_->addWidget (numel, row, 3);
 
         QLabel *key = new QLabel (it->second->getKeyName().c_str());
@@ -456,7 +458,7 @@ void DBSchemaEditWidget::updateMetaTablesGrid()
 
         meta_table_grid_->addWidget (sub, row, 3);
 
-        QLabel *numcols = new QLabel (intToString(it->second->getNumColumns()).c_str());
+        QLabel *numcols = new QLabel (String::intToString(it->second->getNumColumns()).c_str());
         meta_table_grid_->addWidget (numcols, row, 4);
 
         QPushButton *edit = new QPushButton ("Edit");

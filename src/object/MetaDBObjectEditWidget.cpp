@@ -42,7 +42,7 @@
 #include "MetaDBTable.h"
 #include "Logger.h"
 #include "DBOVariableDataTypeComboBox.h"
-#include "StringRepresentationComboBox.h"
+//#include "StringRepresentationComboBox.h"
 #include "DBOVariableComboBox.h"
 #include "DBSchemaManager.h"
 
@@ -51,7 +51,10 @@ MetaDBObjectEditWidget::MetaDBObjectEditWidget(DBObject *object, QWidget * paren
 {
   assert (object_);
   assert (object_->isMeta());
-  assert (object_->getType() == DBO_UNDEFINED);
+
+  //TODO
+  assert (false);
+  //assert (object_->getType() == DBO_UNDEFINED);
   assert (!object_->isLoadable());
 
   setMinimumSize(QSize(1000, 800));
@@ -228,8 +231,8 @@ void MetaDBObjectEditWidget::updateDBOVarsGrid ()
   repr_label->setFont (font_bold);
   dbovars_grid_->addWidget (repr_label, 0, 4);
 
-  std::map <DB_OBJECT_TYPE, DBObject*> &objects = DBObjectManager::getInstance().getDBObjects ();
-  std::map <DB_OBJECT_TYPE, DBObject*>::iterator it;
+  const std::map <std::string, DBObject*> &objects = DBObjectManager::getInstance().getDBObjects ();
+  std::map <std::string, DBObject*>::const_iterator it;
 
   unsigned col=5;
   for (it = objects.begin(); it != objects.end(); it++)
@@ -272,11 +275,17 @@ void MetaDBObjectEditWidget::updateDBOVarsGrid ()
     dbo_vars_grid_data_type_boxes_[type] = it2->second;
     dbovars_grid_->addWidget (type, row, 3);
 
-    StringRepresentationComboBox *repr = new StringRepresentationComboBox (it2->second);
-    //repr->setRepresentation (it2->second->getRepresentation());
-    dbo_vars_grid_representation_boxes_[repr] = it2->second;
-    dbovars_grid_->addWidget (repr, row, 4);
-//
+    assert (false);
+    // TODO
+
+//    StringRepresentationComboBox *repr = new StringRepresentationComboBox (it2->second);
+//    //repr->setRepresentation (it2->second->getRepresentation());
+//    dbo_vars_grid_representation_boxes_[repr] = it2->second;
+//    dbovars_grid_->addWidget (repr, row, 4);
+
+
+
+
 //    unsigned col=5;
 //    for (sit = schemas.begin(); sit != schemas.end(); sit++)
 //    {

@@ -176,7 +176,7 @@ public:
   void setDataType (PropertyDataType type) { data_type_=type; }
 
   /// @brief Returns DBO type
-  const std::string &getDBOType () { return dbo_type_; }
+  const std::string &getDBOType () const { return dbo_type_; }
 //  /// @brief Returns DBO type string identifier
 //  std::string getDBOTypeString () { return DB_OBJECT_TYPE_STRINGS.at((DB_OBJECT_TYPE)dbo_type_int_);}
 

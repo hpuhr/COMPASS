@@ -40,7 +40,7 @@ class FilterRuleWidget : public QWidget
     Q_OBJECT
 public:
     /// @brief Constructor
-    FilterRuleWidget( DB_OBJECT_TYPE dbo_type, QWidget* parent=NULL );
+    FilterRuleWidget( const std::string &dbo_type, QWidget* parent=NULL );
     /// @brief Destructor
     ~FilterRuleWidget();
 
@@ -52,7 +52,7 @@ public:
     /// @brief Returns the widgets filter rule
     BufferFilter::BufferFilterRule getRule() const;
     /// @brief Returns the DBO type assigned to the widget
-    DB_OBJECT_TYPE getDBOType() const;
+    const std::string &getDBOType() const;
 
 signals:
     /// @brief Sends a delete request
@@ -64,7 +64,7 @@ private:
     QPushButton* delete_button_;
 
     /// DBO type assigned to the widget
-    DB_OBJECT_TYPE dbo_type_;
+    std::string dbo_type_;
 };
 
 /**
@@ -89,12 +89,12 @@ public:
     /// @brief Returns the widgets Property
     Property getProperty() const;
     /// @brief Returns the DBO type assigned to the widget
-    DB_OBJECT_TYPE getDBOType() const;
+    const std::string &getDBOType() const;
 
     /// @brief Sets the DBO type assigned to the widget
-    void setDBOType( DB_OBJECT_TYPE dbo_type );
+    void setDBOType( const std::string &dbo_type );
     /// @brief Sets the properties data type
-    void setDataType( PROPERTY_DATA_TYPE dtype );
+    void setDataType( PropertyDataType dtype );
     /// @brief Sets the properties string id
     void setPropertyName( const QString& name );
 
@@ -109,7 +109,7 @@ private:
     QPushButton* delete_button_;
 
     /// DBO type assigned to the widget
-    DB_OBJECT_TYPE dbo_type_;
+    std::string dbo_type_;
 };
 
 /**
@@ -125,9 +125,9 @@ class FilterEditDialog : public QDialog, private Ui::FilterEditDialogBase
 {
     Q_OBJECT
 public:
-    typedef std::map<DB_OBJECT_TYPE,FilterRuleWidget*> RuleWidgets;
+    typedef std::map<std::string,FilterRuleWidget*> RuleWidgets; // by dbo type
     typedef std::map<std::string,PropertyRuleWidget*> PropertyWidgetsMap;
-    typedef std::map<DB_OBJECT_TYPE,PropertyWidgetsMap> PropertyWidgets;
+    typedef std::map<std::string,PropertyWidgetsMap> PropertyWidgets; // by dbo type
 
     /// @brief Constructor
     FilterEditDialog( BufferFilter* filter, QWidget* parent=NULL );

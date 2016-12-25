@@ -39,7 +39,7 @@
 
 #include "String.h"
 
-using namespace Utils::String;
+using namespace Utils;
 
 /**
  * Initializes members, registers parameters, create GUI elements.
@@ -50,14 +50,16 @@ DBFilterCondition::DBFilterCondition(std::string instance_id, DBFilter *filter_p
     registerParameter ("operator", &operator_, ">");
     registerParameter ("op_and", &op_and_, true);
     registerParameter ("absolute_value", &absolute_value_, false);
-    registerParameter ("variable_type", &variable_type_, DBO_UNDEFINED);
+    registerParameter ("variable_type", &variable_dbo_type_, "");
     registerParameter ("variable_name", &variable_name_, "");
 
-    if (!DBObjectManager::getInstance().existsDBOVariable ((DB_OBJECT_TYPE) variable_type_, variable_name_))
+    if (!DBObjectManager::getInstance().existsDBOVariable (variable_dbo_type_, variable_name_))
         throw std::runtime_error ("DBFilterCondition: constructor: dbo variable '"+variable_name_+"' does not exist");
 
-    variable_ = DBObjectManager::getInstance().getDBOVariable ((DB_OBJECT_TYPE) variable_type_, variable_name_);
-    variable_->addMinMaxObserver(this);
+    variable_ = DBObjectManager::getInstance().getDBOVariable (variable_dbo_type_, variable_name_);
+
+    // TODO ADD THIS LATER
+    //variable_->addMinMaxObserver(this);
 
     registerParameter ("reset_value", &reset_value_, std::string("value"));
     registerParameter ("value", &value_, "");
@@ -79,7 +81,8 @@ DBFilterCondition::DBFilterCondition(std::string instance_id, DBFilter *filter_p
 
 DBFilterCondition::~DBFilterCondition()
 {
-    variable_->removeMinMaxObserver(this);
+    //TODO ADD THIS LATER
+    //variable_->removeMinMaxObserver(this);
 }
 
 void DBFilterCondition::invert ()
@@ -91,12 +94,12 @@ void DBFilterCondition::invert ()
 /**
  * Returns if variable_ exists in DBObject of type
  */
-bool DBFilterCondition::filters (DB_OBJECT_TYPE dbo_type)
+bool DBFilterCondition::filters (const std::string &dbo_type)
 {
     return variable_->existsIn(dbo_type);
 }
 
-std::string DBFilterCondition::getConditionString (DB_OBJECT_TYPE dbo_type, bool &first, std::vector<std::string> &variable_names)
+std::string DBFilterCondition::getConditionString (const std::string &dbo_type, bool &first, std::vector<std::string> &variable_names)
 {
     std::stringstream ss;
 
@@ -113,7 +116,7 @@ std::string DBFilterCondition::getConditionString (DB_OBJECT_TYPE dbo_type, bool
 
     if (operator_.compare("|=") == 0)
     {
-        std::vector<std::string> chunks = split(value_, ',');
+        std::vector<std::string> chunks = String::split(value_, ',');
 
         if (chunks.size() > 0)
         {
@@ -123,10 +126,10 @@ std::string DBFilterCondition::getConditionString (DB_OBJECT_TYPE dbo_type, bool
                 std::string meta_table_name = variable_->getCurrentMetaTable();
                 assert (DBSchemaManager::getInstance().getCurrentSchema()->hasMetaTable(meta_table_name));
                 MetaDBTable *table =DBSchemaManager::getInstance().getCurrentSchema()->getMetaTable(meta_table_name);
-                std::string table_db_name = table->getTableDBNameForVariable(variable_->id_);
+                std::string table_db_name = table->getTableDBNameForVariable(variable_->getId());
                 //ss << table_db_name << "." << variable_->id_;
 
-                if (variable_->dbo_type_int_ == dbo_type)
+                if (variable_->getDBOType() == dbo_type)
                 {
                     if (!first)
                     {
@@ -145,22 +148,24 @@ std::string DBFilterCondition::getConditionString (DB_OBJECT_TYPE dbo_type, bool
                         if (cnt2 != 0)
                             ss << " OR ";
 
-                        ss << variable_prefix << table_db_name << "." << variable_->id_  << variable_suffix << " = "
-                                << variable_->getValueFromRepresentation(chunks.at(cnt2), true);
+                        assert (false);
+                        // FIX representation
+//                        ss << variable_prefix << table_db_name << "." << variable_->getId()  << variable_suffix << " = "
+//                                << variable_->getValueFromRepresentation(chunks.at(cnt2), true);
                     }
                     ss  << ")";
 
                     if (chunks.size() > 0) // variable added
                     {
-                        if (find (variable_names.begin(), variable_names.end(), variable_->id_) == variable_names.end())
-                            variable_names.push_back(variable_->id_);
+                        if (find (variable_names.begin(), variable_names.end(), variable_->getId()) == variable_names.end())
+                            variable_names.push_back(variable_->getId());
                     }
                 }
             }
             else // is meta
             {
-                std::map <DB_OBJECT_TYPE, std::string> &subvars = variable_->getSubVariables ();
-                std::map <DB_OBJECT_TYPE, std::string>::iterator it;
+                std::map <std::string, std::string> &subvars = variable_->getSubVariables ();
+                std::map <std::string, std::string>::iterator it;
 
                 for (it =subvars.begin(); it != subvars.end(); it++)
                 {
@@ -169,11 +174,11 @@ std::string DBFilterCondition::getConditionString (DB_OBJECT_TYPE dbo_type, bool
                     std::string meta_table_name = tmpvar->getCurrentMetaTable();
                     assert (DBSchemaManager::getInstance().getCurrentSchema()->hasMetaTable(meta_table_name));
                     MetaDBTable *table =DBSchemaManager::getInstance().getCurrentSchema()->getMetaTable(meta_table_name);
-                    std::string table_db_name = table->getTableDBNameForVariable(tmpvar->id_);
+                    std::string table_db_name = table->getTableDBNameForVariable(tmpvar->getId());
                     //ss << table_db_name << "." << variable_->id_;
 
 
-                    if (tmpvar->dbo_type_int_ == dbo_type)
+                    if (tmpvar->getDBOType() == dbo_type)
                     {
                         if (!first)
                         {
@@ -192,15 +197,17 @@ std::string DBFilterCondition::getConditionString (DB_OBJECT_TYPE dbo_type, bool
                             if (cnt2 != 0)
                                 ss << " OR ";
 
-                            ss << variable_prefix << table_db_name<<"." <<tmpvar->id_  << variable_suffix << " = "
-                                    << variable_->getValueFromRepresentation(chunks.at(cnt2), true);
+                            //TODO FIX REPRESENTATION
+                            assert (false);
+/*                            ss << variable_prefix << table_db_name<<"." <<tmpvar->id_  << variable_suffix << " = "
+                                    << variable_->getValueFromRepresentation(chunks.at(cnt2), true)*/;
                         }
                         ss  << ")";
 
                         if (chunks.size() > 0) // variable added
                         {
-                            if (find (variable_names.begin(), variable_names.end(), tmpvar->id_) == variable_names.end())
-                                variable_names.push_back(tmpvar->id_);
+                            if (find (variable_names.begin(), variable_names.end(), tmpvar->getId()) == variable_names.end())
+                                variable_names.push_back(tmpvar->getId());
                         }
 
                     }
@@ -215,10 +222,10 @@ std::string DBFilterCondition::getConditionString (DB_OBJECT_TYPE dbo_type, bool
             std::string meta_table_name = variable_->getCurrentMetaTable();
             assert (DBSchemaManager::getInstance().getCurrentSchema()->hasMetaTable(meta_table_name));
             MetaDBTable *table =DBSchemaManager::getInstance().getCurrentSchema()->getMetaTable(meta_table_name);
-            std::string table_db_name = table->getTableDBNameForVariable(variable_->id_);
+            std::string table_db_name = table->getTableDBNameForVariable(variable_->getId());
             //ss << table_db_name << "." << variable_->id_;
 
-            if (variable_->dbo_type_int_ == dbo_type)
+            if (variable_->getDBOType() == dbo_type)
             {
                 if (!first)
                 {
@@ -230,17 +237,19 @@ std::string DBFilterCondition::getConditionString (DB_OBJECT_TYPE dbo_type, bool
                     first=false;
                 }
 
-                ss << variable_prefix << table_db_name << "." << variable_->id_  << variable_suffix  << " " << operator_ << " "
-                        << variable_->getValueFromRepresentation(value_, true);
+                //TODO FIX REPRESENATION
+                assert (false);
+//                ss << variable_prefix << table_db_name << "." << variable_->id_  << variable_suffix  << " " << operator_ << " "
+//                        << variable_->getValueFromRepresentation(value_, true);
 
-                if (find (variable_names.begin(), variable_names.end(), variable_->id_) == variable_names.end())
-                    variable_names.push_back(variable_->id_);
+                if (find (variable_names.begin(), variable_names.end(), variable_->getId()) == variable_names.end())
+                    variable_names.push_back(variable_->getId());
             }
         }
         else // is meta
         {
-            std::map <DB_OBJECT_TYPE, std::string> &subvars = variable_->getSubVariables ();
-            std::map <DB_OBJECT_TYPE, std::string>::iterator it;
+            std::map <std::string, std::string> &subvars = variable_->getSubVariables ();
+            std::map <std::string, std::string>::iterator it;
 
             for (it =subvars.begin(); it != subvars.end(); it++)
             {
@@ -249,10 +258,10 @@ std::string DBFilterCondition::getConditionString (DB_OBJECT_TYPE dbo_type, bool
                 std::string meta_table_name = tmpvar->getCurrentMetaTable();
                 assert (DBSchemaManager::getInstance().getCurrentSchema()->hasMetaTable(meta_table_name));
                 MetaDBTable *table =DBSchemaManager::getInstance().getCurrentSchema()->getMetaTable(meta_table_name);
-                std::string table_db_name = table->getTableDBNameForVariable(tmpvar->id_);
+                std::string table_db_name = table->getTableDBNameForVariable(tmpvar->getId());
                 //ss << table_db_name << "." << variable_->id_;
 
-                if (tmpvar->dbo_type_int_ == dbo_type)
+                if (tmpvar->getDBOType() == dbo_type)
                 {
                     if (!first)
                     {
@@ -263,11 +272,13 @@ std::string DBFilterCondition::getConditionString (DB_OBJECT_TYPE dbo_type, bool
 
                         first=false;
                     }
-                    ss << variable_prefix << table_db_name << "." << tmpvar->id_  << variable_suffix  << " " << operator_ << " "
-                            << variable_->getValueFromRepresentation(value_, true);
+                    //TODO FIX REPRESENTATION
+                    assert (false);
+//                    ss << variable_prefix << table_db_name << "." << tmpvar->id_  << variable_suffix  << " " << operator_ << " "
+//                            << variable_->getValueFromRepresentation(value_, true);
 
-                    if (find (variable_names.begin(), variable_names.end(), tmpvar->id_) == variable_names.end())
-                        variable_names.push_back(tmpvar->id_);
+                    if (find (variable_names.begin(), variable_names.end(), tmpvar->getId()) == variable_names.end())
+                        variable_names.push_back(tmpvar->getId());
 
                 }
             }
@@ -327,24 +338,26 @@ void DBFilterCondition::reset ()
 
     if (reset_value_.compare ("MIN") == 0 || reset_value_.compare ("MAX") == 0)
     {
-        if (!variable_->hasMinMaxInfo())
-        {
-            value = "LOADING";
-            variable_->buildMinMaxInfo();
-        }
-        else
-        {
-            if (reset_value_.compare ("MIN") == 0)
-            {
-                value = variable_->getRepresentationFromValue(variable_->getMinString());
-                loginf << "DBFilterCondition: reset: value " << variable_->getMinString() << " repr " << value;
-            }
-            else if (reset_value_.compare ("MAX") == 0)
-            {
-                value = variable_->getRepresentationFromValue(variable_->getMaxString());
-                loginf << "DBFilterCondition: reset: value " << variable_->getMaxString() << " repr " << value;
-            }
-        }
+        // FIX MINMAX
+        assert (false);
+//        if (!variable_->hasMinMaxInfo())
+//        {
+//            value = "LOADING";
+//            variable_->buildMinMaxInfo();
+//        }
+//        else
+//        {
+//            if (reset_value_.compare ("MIN") == 0)
+//            {
+//                value = variable_->getRepresentationFromValue(variable_->getMinString());
+//                loginf << "DBFilterCondition: reset: value " << variable_->getMinString() << " repr " << value;
+//            }
+//            else if (reset_value_.compare ("MAX") == 0)
+//            {
+//                value = variable_->getRepresentationFromValue(variable_->getMaxString());
+//                loginf << "DBFilterCondition: reset: value " << variable_->getMaxString() << " repr " << value;
+//            }
+//        }
     }
     else
         value=reset_value_;
@@ -360,11 +373,14 @@ void DBFilterCondition::notifyMinMax (DBOVariable *variable)
 
     std::string value;
 
-    assert (variable_->hasMinMaxInfo());
-    if (reset_value_.compare ("MIN") == 0)
-        value = variable_->getRepresentationFromValue(variable_->getMinString());
-    else if (reset_value_.compare ("MAX") == 0)
-        value = variable_->getRepresentationFromValue(variable_->getMaxString());
+    //TODO FIX MINMAX
+    assert (false);
+
+//    assert (variable_->hasMinMaxInfo());
+//    if (reset_value_.compare ("MIN") == 0)
+//        value = variable_->getRepresentationFromValue(variable_->getMinString());
+//    else if (reset_value_.compare ("MAX") == 0)
+//        value = variable_->getRepresentationFromValue(variable_->getMaxString());
 
     value_=value;
     update();

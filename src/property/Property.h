@@ -54,7 +54,7 @@ public:
 
   void setDataType(PropertyDataType type) { data_type_ = type; data_type_str_ = asString(data_type_); }
 
-  std::string getId() const { return id_; };
+  const std::string &getId() const { return id_; };
 
   static const std::string &asString (PropertyDataType type)
   {

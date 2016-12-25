@@ -109,16 +109,16 @@ set ( atsdb_HDRS
         src/config/ConfigurationManager.h
         src/command/DBCommand.h
         src/command/DBCommandList.h
-#        src/connection/BufferWriter.h
-#        src/connection/DBConnection.h
-#        src/connection/DBConnectionInfo.h
+        src/connection/BufferWriter.h
+        src/connection/DBConnection.h
+        src/connection/DBConnectionInfo.h
 #        src/connection/MySQLConConnection.h
-#        src/connection/MySQLppConnection.h
+        src/connection/MySQLppConnection.h
 ##        src/connection/SQLiteConnection.h
-#        src/datasource/DataSource.h
-#        src/filter/DBFilter.h
-#        src/filter/SensorFilter.h
-#        src/filter/FilterManager.h
+        src/datasource/DataSource.h
+        src/filter/DBFilter.h
+        src/filter/SensorFilter.h
+        src/filter/FilterManager.h
 #        src/job/DBJob.h
 #        src/job/Job.h
 #        src/job/JobOrderer.h
@@ -140,8 +140,8 @@ set ( atsdb_HDRS
         src/object/DBObject.h
         src/object/DBObjectManager.h
         src/object/DBOVariable.h
-#        src/object/DBOVariableSet.h
-#        src/object/DBOVariableOrderedSet.h
+        src/object/DBOVariableSet.h
+        src/object/DBOVariableOrderedSet.h
         src/polygon/AirspaceSector.h
         src/polygon/AirspaceSectorParser.h
         src/polygon/AirspaceSectorManager.h
@@ -209,78 +209,78 @@ set ( atsdb_HDRS
         )
 
 set (atsdb_MOC_HEADERS
-#        src/filter/DBFilterCondition.h
-#        src/filter/DBFilterWidget.h
-#        src/filter/FilterEditWidget.h
-#        src/filter/FilterGeneratorWidget.h
-#        src/filter/SensorFilterWidget.h
-#        src/gui/DBSelectionWidget.h
-#        src/gui/QCollapsableWidget.h
-#        src/gui/WorkerThreadWidget.h
+        src/filter/DBFilterCondition.h
+        src/filter/DBFilterWidget.h
+        src/filter/FilterEditWidget.h
+        src/filter/FilterGeneratorWidget.h
+        src/filter/SensorFilterWidget.h
+        src/gui/DBSelectionWidget.h
+        src/gui/QCollapsableWidget.h
+        src/gui/WorkerThreadWidget.h
 #        src/gui/WorkflowEditWidget.h
 #        src/gui/WorkflowEditDialog.h
 #        src/gui/WorkflowSettingsEditDialog.h
 #        src/gui/ComputationEditDialog.h
 #        src/gui/TransformationEditDialog.h
 #        src/gui/TransformationVariableEditDialog.h
-#        src/gui/FilterEditDialog.h
-#        src/object/DBOTypeComboBox.h
-#        src/object/DBObjectWidget.h
-#        src/object/DBObjectEditWidget.h
-#        src/object/DBOVariableComboBox.h
-#        src/object/DBOVariableSetWidget.h
-#        src/object/DBOVariableOrderedSetWidget.h
-#        src/object/DBOVariableSelectionWidget.h
+        src/gui/FilterEditDialog.h
+        src/object/DBOTypeComboBox.h
+        src/object/DBObjectWidget.h
+        src/object/DBObjectEditWidget.h
+        src/object/DBOVariableComboBox.h
+        src/object/DBOVariableSetWidget.h
+        src/object/DBOVariableOrderedSetWidget.h
+        src/object/DBOVariableSelectionWidget.h
 #        src/object/DBOVariableDataTypeComboBox.h
-#        src/object/PropertyDataTypeComboBox.h
-#        src/object/MetaDBObjectEditWidget.h
+        src/object/PropertyDataTypeComboBox.h
+        src/object/MetaDBObjectEditWidget.h
 #        src/object/StringRepresentationComboBox.h
-#        src/object/UnitSelectionWidget.h
+        src/object/UnitSelectionWidget.h
         src/polygon/AirspaceSectorManagerWidget.h
         src/polygon/AirspaceSectorTreeWidget.h
         src/polygon/AirspaceSectorWidget.h
         src/projection/ProjectionManagerWidget.h
-#        src/schema/DBTableColumnComboBox.h
-#        src/schema/DBSchemaWidget.h
-#        src/schema/DBSchemaEditWidget.h
-#        src/schema/DBTableEditWidget.h
-#        src/schema/MetaDBTableEditWidget.h
+        src/schema/DBTableColumnComboBox.h
+        src/schema/DBSchemaWidget.h
+        src/schema/DBSchemaEditWidget.h
+        src/schema/DBTableEditWidget.h
+        src/schema/MetaDBTableEditWidget.h
         )
 
 set ( atsdb_SRCS
 #        src/ATSDB.cpp
          src/buffer/ArrayList.cpp
          src/buffer/Buffer.cpp
-#        src/buffer/BufferFilter.cpp
+        src/buffer/BufferFilter.cpp
         src/config/Configurable.cpp
         src/config/Configuration.cpp
         src/config/ConfigurationManager.cpp
         src/command/DBCommand.cpp
         src/command/DBCommandList.cpp
-#        src/connection/BufferWriter.cpp
-#        src/connection/DBInterface.cpp
+        src/connection/BufferWriter.cpp
+        src/connection/DBInterface.cpp
 #        src/connection/MySQLConConnection.cpp
-#        src/connection/MySQLppConnection.cpp
-##        src/connection/SQLiteConnection.cpp
-#        src/datasource/DataSource.cpp
-#        src/filter/DBFilter.cpp
-#        src/filter/DBFilterCondition.cpp
-#        src/filter/DBFilterWidget.cpp
-#        src/filter/FilterManager.cpp
-#        src/filter/SensorFilter.cpp
-#        src/filter/SensorFilterWidget.cpp
-#        src/filter/FilterEditWidget.cpp
-#        src/filter/FilterGeneratorWidget.cpp
-#        src/gui/DBSelectionWidget.cpp
-#        src/gui/QCollapsableWidget.cpp
-#        src/gui/WorkerThreadWidget.cpp
+        src/connection/MySQLppConnection.cpp
+#        src/connection/SQLiteConnection.cpp
+        src/datasource/DataSource.cpp
+        src/filter/DBFilter.cpp
+        src/filter/DBFilterCondition.cpp
+        src/filter/DBFilterWidget.cpp
+        src/filter/FilterManager.cpp
+        src/filter/SensorFilter.cpp
+        src/filter/SensorFilterWidget.cpp
+        src/filter/FilterEditWidget.cpp
+        src/filter/FilterGeneratorWidget.cpp
+        src/gui/DBSelectionWidget.cpp
+        src/gui/QCollapsableWidget.cpp
+        src/gui/WorkerThreadWidget.cpp
 #        src/gui/WorkflowEditWidget.cpp
 #        src/gui/WorkflowEditDialog.cpp
 #        src/gui/WorkflowSettingsEditDialog.cpp
 #        src/gui/ComputationEditDialog.cpp
 #        src/gui/TransformationEditDialog.cpp
 #        src/gui/TransformationVariableEditDialog.cpp
-#        src/gui/FilterEditDialog.cpp
+        src/gui/FilterEditDialog.cpp
 #        src/job/DBOActiveDataSourcesDBJob.cpp
 #        src/job/DBOVariableDistinctStatisticsDBJob.cpp
 #        src/job/DBOVariableMinMaxDBJob.cpp
@@ -296,24 +296,24 @@ set ( atsdb_SRCS
 #        src/job/PostProcessDBJob.cpp
 #        src/job/TransformationJob.cpp
 #        src/mem/MemoryManager.cpp
-#        src/schema/DBSchemaWidget.cpp
-#        src/schema/DBSchemaEditWidget.cpp
-#        src/schema/DBTableEditWidget.cpp
-#        src/schema/DBTableColumnComboBox.cpp
-#        src/schema/MetaDBTableEditWidget.cpp
-#        src/object/DBOVariableComboBox.cpp
-#        src/object/DBOVariableSetWidget.cpp
-#        src/object/DBOVariableOrderedSetWidget.cpp
-#        src/object/DBOVariableSelectionWidget.cpp
-#        src/object/DBObjectEditWidget.cpp
-#        src/object/DBObjectWidget.cpp
-#        src/object/MetaDBObjectEditWidget.cpp
-#        src/object/UnitSelectionWidget.cpp
+        src/schema/DBSchemaWidget.cpp
+        src/schema/DBSchemaEditWidget.cpp
+        src/schema/DBTableEditWidget.cpp
+        src/schema/DBTableColumnComboBox.cpp
+        src/schema/MetaDBTableEditWidget.cpp
+        src/object/DBOVariableComboBox.cpp
+        src/object/DBOVariableSetWidget.cpp
+        src/object/DBOVariableOrderedSetWidget.cpp
+        src/object/DBOVariableSelectionWidget.cpp
+        src/object/DBObjectEditWidget.cpp
+        src/object/DBObjectWidget.cpp
+        src/object/MetaDBObjectEditWidget.cpp
+        src/object/UnitSelectionWidget.cpp
         src/object/DBObject.cpp
         src/object/DBObjectManager.cpp
         src/object/DBOVariable.cpp
-#        src/object/DBOVariableSet.cpp
-#        src/object/DBOVariableOrderedSet.cpp
+        src/object/DBOVariableSet.cpp
+        src/object/DBOVariableOrderedSet.cpp
         src/polygon/Polygon4DDI.cpp
         src/polygon/GeographicPoint.cpp
         src/polygon/AirspaceSector.cpp
@@ -336,7 +336,7 @@ set ( atsdb_SRCS
         src/schema/DBSchema.cpp
         src/schema/DBSchemaManager.cpp
         src/schema/MetaDBTable.cpp
-#        src/schema/SQLGenerator.cpp
+        src/schema/SQLGenerator.cpp
 #        src/struct/StructureDescription.cpp
 #        src/struct/StructureReader.cpp
 #        src/struct/StructureDescriptionManager.cpp
@@ -370,11 +370,11 @@ set ( atsdb_SRCS
         )
 
 set ( atsdb_UI
-#        src/gui/FilterEditDialogBase.ui
-#        src/gui/ComputationEditDialogBase.ui
-#        src/gui/TransformationEditDialogBase.ui
-#        src/gui/TransformationVariableEditDialogBase.ui
-#        src/gui/WorkflowSettingsEditDialogBase.ui
+        src/gui/FilterEditDialogBase.ui
+        src/gui/ComputationEditDialogBase.ui
+        src/gui/TransformationEditDialogBase.ui
+        src/gui/TransformationVariableEditDialogBase.ui
+        src/gui/WorkflowSettingsEditDialogBase.ui
         )
 
 set ( client_SRCS

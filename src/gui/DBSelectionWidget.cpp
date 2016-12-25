@@ -38,7 +38,7 @@
 #include "Logger.h"
 #include "String.h"
 
-using namespace Utils::String;
+using namespace Utils;
 
 
 DBSelectionWidget::DBSelectionWidget(std::string class_id, std::string instance_id, Configurable *parent)
@@ -134,12 +134,12 @@ DBConnectionInfo *DBSelectionWidget::getConnectionInfo ()
   {
 //      throw std::runtime_error ("DBSelectionWidget: getConnectionInfo: MySql++ connection not supported at the moment");
     return new MySQLConnectionInfo (DB_TYPE_MYSQLpp, mysql_db_name_, mysql_db_ip_, mysql_db_username_, mysql_db_password_,
-            intFromString(mysql_db_port_));
+            String::intFromString(mysql_db_port_));
   }
   else if (db_type_selection_ == 3)
   {
     return new MySQLConnectionInfo (DB_TYPE_MYSQLCon, mysql_db_name_, mysql_db_ip_, mysql_db_username_, mysql_db_password_,
-            intFromString(mysql_db_port_));
+            String::intFromString(mysql_db_port_));
   }
   else
     throw std::runtime_error ("DBSelectionWidget: getConnectionInfo: undefined connection");

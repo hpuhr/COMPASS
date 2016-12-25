@@ -76,7 +76,7 @@ bool DBOVariableSet::add (DBOVariableSet &set)
   return added;
 }
 
-bool DBOVariableSet::addOnly (DBOVariableSet &set, DB_OBJECT_TYPE dbo_type)
+bool DBOVariableSet::addOnly (DBOVariableSet &set, const std::string &dbo_type)
 {
   logdbg  << "DBOVariableSet: addOnly: type " << dbo_type;
   std::vector <DBOVariable*> &setset = set.getSet();
@@ -111,7 +111,7 @@ void DBOVariableSet::removeVariableAt (unsigned int index)
   changed_=true;
 }
 
-DBOVariableSet *DBOVariableSet::getFor (DB_OBJECT_TYPE dbo_type)
+DBOVariableSet *DBOVariableSet::getFor (const std::string &dbo_type)
 {
   logdbg  << "DBOVariableSet: getFor: type " << dbo_type;
 
@@ -207,7 +207,7 @@ bool DBOVariableSet::hasVariable (DBOVariable *variable)
   return find (set_.begin(), set_.end(), variable) != set_.end();
 }
 
-PropertyList DBOVariableSet::getPropertyList (DB_OBJECT_TYPE dbo_type)
+PropertyList DBOVariableSet::getPropertyList (const std::string &dbo_type)
 {
   std::vector <DBOVariable*>::iterator it;
   PropertyList list;
@@ -218,7 +218,7 @@ PropertyList DBOVariableSet::getPropertyList (DB_OBJECT_TYPE dbo_type)
     {
       logdbg  << "DBOVariableSet: getPropertyList: getfor";
       DBOVariable *var = (*it)->getFor(dbo_type);
-      list.addProperty (var->id_, (PROPERTY_DATA_TYPE) var->data_type_int_);
+      list.addProperty (var->getId(), var->getDataType());
     }
   }
 

@@ -36,7 +36,7 @@
 #include "Data.h"
 #include "String.h"
 
-using namespace Utils::String;
+using namespace Utils;
 using namespace Utils::Data;
 
 
@@ -175,7 +175,7 @@ DBResult *MySQLppConnection::execute (DBCommand *command)
     std::string sql = command->getCommandString();
 
     Buffer *buffer=0;
-    if (command->getResultList()->getNumProperties() > 0) // data should be returned
+    if (command->getResultList()->size() > 0) // data should be returned
     {
         buffer = new Buffer (*(command->getResultList()));
         dbresult->setBuffer(buffer);
@@ -198,21 +198,24 @@ DBResult *MySQLppConnection::execute (DBCommandList *command_list)
 
     Buffer *buffer=0;
 
-    if (command_list->getResultList()->getNumProperties() > 0) // data should be returned
+    if (command_list->getResultList()->size() > 0) // data should be returned
     {
         buffer = new Buffer (*(command_list->getResultList()));
         dbresult->setBuffer(buffer);
     }
 
-    for (unsigned int cnt=0; cnt < num_commands; cnt++)
-    {
-        if (cnt != 0)
-            buffer->incrementIndex();
+    assert (false);
+    // TODO FIXME
 
-        std::string sql = command_list->getCommandString(cnt);
+//    for (unsigned int cnt=0; cnt < num_commands; cnt++)
+//    {
+//        if (cnt != 0)
+//            buffer->incrementIndex();
 
-        execute (sql, buffer);
-    }
+//        std::string sql = command_list->getCommandString(cnt);
+
+//        execute (sql, buffer);
+//    }
     logdbg  << "MySQLppConnection: execute: end";
 
     return dbresult;
@@ -223,16 +226,16 @@ void MySQLppConnection::execute (std::string command, Buffer *buffer)
     logdbg  << "MySQLppConnection: execute: command '" << command << "'";
 
     unsigned int num_properties=0;
-    PropertyList *list=0;
+
     Property *prop=0;
     std::vector <Property*> *properties = 0;
     std::vector<void*>* adresses;
 
     if (buffer)
     {
-        list = buffer->getPropertyList();
-        num_properties = list->getNumProperties();
-        properties = list->getProperties();
+        const PropertyList &list = buffer->properties();
+        num_properties = list.size();
+        //properties = list->getProperties();
     }
 
     logdbg  << "MySQLppConnection: execute: creating query";
@@ -240,97 +243,100 @@ void MySQLppConnection::execute (std::string command, Buffer *buffer)
     logdbg  << "MySQLppConnection: execute: creating storequeryresult";
     mysqlpp::StoreQueryResult res = query.store();
 
+    assert (false);
+    // TODO FIXME
+
     logdbg  << "MySQLppConnection: execute: iterating result";
     // Display results
-    unsigned int cnt=0;
-    mysqlpp::StoreQueryResult::const_iterator it;
-    for (it = res.begin(); it != res.end(); ++it)
-    {
-        mysqlpp::Row row = *it;
+//    unsigned int cnt=0;
+//    mysqlpp::StoreQueryResult::const_iterator it;
+//    for (it = res.begin(); it != res.end(); ++it)
+//    {
+//        mysqlpp::Row row = *it;
 
-        if (buffer && cnt != 0)
-        {
-            buffer->incrementIndex();
-        }
-        if (buffer && cnt == 0)
-            buffer->unsetFirstWrite();
+//        if (buffer && cnt != 0)
+//        {
+//            buffer->incrementIndex();
+//        }
+//        if (buffer && cnt == 0)
+//            buffer->unsetFirstWrite();
 
-        if (buffer)
-            adresses = buffer->getAdresses();
+//        if (buffer)
+//            adresses = buffer->getAdresses();
 
-        for (unsigned int cnt2=0; cnt2 < num_properties; cnt2++)
-        {
-            assert (buffer);
-            prop=properties->at(cnt2);
+//        for (unsigned int cnt2=0; cnt2 < num_properties; cnt2++)
+//        {
+//            assert (buffer);
+//            prop=properties->at(cnt2);
 
-            if(row[cnt2] == mysqlpp::null)
-                setNan(prop->data_type_int_, adresses->at(cnt2));
-            else
-            {
-                switch (prop->data_type_int_)
-                {
-                case P_TYPE_BOOL:
-                {
-                    *(bool*) adresses->at(cnt2) = (bool) row[cnt2];
-                    //loginf  << "sqlex: bool " << prop->id_ << " val " << *ptr;
-                }
-                break;
-                case P_TYPE_UCHAR:
-                {
-                    *(unsigned char*) adresses->at(cnt2) = (unsigned int) row[cnt2];
-                    //loginf  << "sqlex: uchar " << prop->id_ << " val " << *ptr;
-                }
-                break;
-                case P_TYPE_CHAR:
-                {
-                    *(char*) adresses->at(cnt2) = (int) row[cnt2];
-                    //loginf  << "sqlex: char " << prop->id_ << " val " << *ptr;
-                }
-                break;
-                case P_TYPE_INT:
-                {
-                    *(int*) adresses->at(cnt2) = (int) row[cnt2];
-                    //loginf  << "sqlex: int " << prop->id_ << " val " << *ptr;
-                }
-                break;
-                case P_TYPE_UINT:
-                {
-                    *(unsigned int*) adresses->at(cnt2) = (unsigned int) row[cnt2];
-                    //loginf  << "sqlex: uint " << prop->id_ << " val " << *ptr;
-                }
-                break;
-                case P_TYPE_STRING:
-                {
-                    *(std::string*) adresses->at(cnt2) = (const char *) row[cnt2];
-                    //loginf  << "sqlex: string " << prop->id_ << " val " << *ptr;
-                }
-                break;
-                case P_TYPE_FLOAT:
-                {
-                    *(float*) adresses->at(cnt2) = (float) row[cnt2];
-                    //loginf  << "sqlex: float " << prop->id_ << " val " << *ptr;
-                }
-                break;
-                case P_TYPE_DOUBLE:
-                {
-                    *(double*) adresses->at(cnt2) = (double) row[cnt2];
-                    //loginf  << "sqlex: double " << prop->id_ << " val " << *ptr;
-                }
-                break;
-                default:
-                    logerr  <<  "MySQLppConnection: execute: unknown property type";
-                    throw std::runtime_error ("MySQLppConnection: execute: unknown property type");
-                    break;
-                }
-            }
-        }
-        cnt++;
-    }
+//            if(row[cnt2] == mysqlpp::null)
+//                setNan(prop->data_type_int_, adresses->at(cnt2));
+//            else
+//            {
+//                switch (prop->data_type_int_)
+//                {
+//                case P_TYPE_BOOL:
+//                {
+//                    *(bool*) adresses->at(cnt2) = (bool) row[cnt2];
+//                    //loginf  << "sqlex: bool " << prop->id_ << " val " << *ptr;
+//                }
+//                break;
+//                case P_TYPE_UCHAR:
+//                {
+//                    *(unsigned char*) adresses->at(cnt2) = (unsigned int) row[cnt2];
+//                    //loginf  << "sqlex: uchar " << prop->id_ << " val " << *ptr;
+//                }
+//                break;
+//                case P_TYPE_CHAR:
+//                {
+//                    *(char*) adresses->at(cnt2) = (int) row[cnt2];
+//                    //loginf  << "sqlex: char " << prop->id_ << " val " << *ptr;
+//                }
+//                break;
+//                case P_TYPE_INT:
+//                {
+//                    *(int*) adresses->at(cnt2) = (int) row[cnt2];
+//                    //loginf  << "sqlex: int " << prop->id_ << " val " << *ptr;
+//                }
+//                break;
+//                case P_TYPE_UINT:
+//                {
+//                    *(unsigned int*) adresses->at(cnt2) = (unsigned int) row[cnt2];
+//                    //loginf  << "sqlex: uint " << prop->id_ << " val " << *ptr;
+//                }
+//                break;
+//                case P_TYPE_STRING:
+//                {
+//                    *(std::string*) adresses->at(cnt2) = (const char *) row[cnt2];
+//                    //loginf  << "sqlex: string " << prop->id_ << " val " << *ptr;
+//                }
+//                break;
+//                case P_TYPE_FLOAT:
+//                {
+//                    *(float*) adresses->at(cnt2) = (float) row[cnt2];
+//                    //loginf  << "sqlex: float " << prop->id_ << " val " << *ptr;
+//                }
+//                break;
+//                case P_TYPE_DOUBLE:
+//                {
+//                    *(double*) adresses->at(cnt2) = (double) row[cnt2];
+//                    //loginf  << "sqlex: double " << prop->id_ << " val " << *ptr;
+//                }
+//                break;
+//                default:
+//                    logerr  <<  "MySQLppConnection: execute: unknown property type";
+//                    throw std::runtime_error ("MySQLppConnection: execute: unknown property type");
+//                    break;
+//                }
+//            }
+//        }
+//        cnt++;
+//    }
 
-    if (buffer)
-        logdbg  << "MySQLppConnection: execute done with size " << buffer->getSize();
-    else
-        logdbg  << "MySQLppConnection: execute done";
+//    if (buffer)
+//        logdbg  << "MySQLppConnection: execute done with size " << buffer->getSize();
+//    else
+//        logdbg  << "MySQLppConnection: execute done";
 }
 
 void MySQLppConnection::prepareStatement (const char *sql)
@@ -383,134 +389,137 @@ DBResult *MySQLppConnection::stepPreparedCommand (unsigned int max_results)
     std::string sql = prepared_command_->getCommandString();
 
     Buffer *buffer=0;
-    if (prepared_command_->getResultList()->getNumProperties() > 0) // data should be returned
+    if (prepared_command_->getResultList()->size() > 0) // data should be returned
     {
         buffer = new Buffer (*(prepared_command_->getResultList()));
         dbresult->setBuffer(buffer);
     }
 
-    unsigned int num_properties=0;
-    PropertyList *list=0;
-    Property *prop=0;
-    std::vector <Property*> *properties = 0;
-    unsigned int result_cnt=0;
-    std::vector<void*>* adresses;
+    assert (false);
+    // TODO FIXME
 
-    if (buffer)
-    {
-        list = buffer->getPropertyList();
-        num_properties = list->getNumProperties();
-        properties = list->getProperties();
-        buffer->setIndex(0);
-    }
+//    unsigned int num_properties=0;
+//    PropertyList *list=0;
+//    Property *prop=0;
+//    std::vector <Property*> *properties = 0;
+//    unsigned int result_cnt=0;
+//    std::vector<void*>* adresses;
 
-    unsigned int row_counter;
-    bool done=true;
+//    if (buffer)
+//    {
+//        list = buffer->getPropertyList();
+//        num_properties = list->getNumProperties();
+//        properties = list->getProperties();
+//        buffer->setIndex(0);
+//    }
 
-    max_results--;
+//    unsigned int row_counter;
+//    bool done=true;
 
-    //  try
-    //  {
-    row_counter=0;
-    while (mysqlpp::Row row = result_step_.fetch_row())
-    {
-        if (buffer && row_counter != 0)
-        {
-            buffer->incrementIndex();
-        }
+//    max_results--;
 
-        for (unsigned int cnt2=0; cnt2 < num_properties; cnt2++)
-        {
-            assert (buffer);
-            prop=properties->at(cnt2);
+//    //  try
+//    //  {
+//    row_counter=0;
+//    while (mysqlpp::Row row = result_step_.fetch_row())
+//    {
+//        if (buffer && row_counter != 0)
+//        {
+//            buffer->incrementIndex();
+//        }
 
-            if (buffer)
-                adresses = buffer->getAdresses();
+//        for (unsigned int cnt2=0; cnt2 < num_properties; cnt2++)
+//        {
+//            assert (buffer);
+//            prop=properties->at(cnt2);
 
-            if(row[cnt2] == mysqlpp::null)
-                setNan(prop->data_type_int_, adresses->at(cnt2));
-            else
-            {
-                switch (prop->data_type_int_)
-                {
-                case P_TYPE_BOOL:
-                {
-                    *(bool*) adresses->at(cnt2) = (bool) row[cnt2];
-                    //loginf  << "sqlex: bool " << prop->id_ << " val " << *ptr;
-                }
-                break;
-                case P_TYPE_UCHAR:
-                {
-                    *(unsigned char*) adresses->at(cnt2) = (unsigned int) row[cnt2];
-                    //loginf  << "sqlex: uchar " << prop->id_ << " val " << *ptr;
-                }
-                break;
-                case P_TYPE_CHAR:
-                {
-                    *(char*) adresses->at(cnt2) = (int) row[cnt2];
-                    //loginf  << "sqlex: char " << prop->id_ << " val " << *ptr;
-                }
-                break;
-                case P_TYPE_INT:
-                {
-                    *(int*) adresses->at(cnt2) = (int) row[cnt2];
-                    //loginf  << "sqlex: int " << prop->id_ << " val " << *ptr;
-                }
-                break;
-                case P_TYPE_UINT:
-                {
-                    *(unsigned int*) adresses->at(cnt2) = (unsigned int) row[cnt2];
-                    //loginf  << "sqlex: uint " << prop->id_ << " val " << *ptr;
-                }
-                break;
-                case P_TYPE_STRING:
-                {
-                    *(std::string*) adresses->at(cnt2) = (const char *) row[cnt2];
-                    //loginf  << "sqlex: string " << prop->id_ << " val " << *ptr;
-                }
-                break;
-                case P_TYPE_FLOAT:
-                {
-                    *(float*) adresses->at(cnt2) = (float) row[cnt2];
-                    //loginf  << "sqlex: float " << prop->id_ << " val " << *ptr;
-                }
-                break;
-                case P_TYPE_DOUBLE:
-                {
-                    *(double*) adresses->at(cnt2) = (double) row[cnt2];
-                    //loginf  << "sqlex: double " << prop->id_ << " val " << *ptr;
-                }
-                break;
-                default:
-                    logerr  <<  "MySQLppConnection: execute: unknown property type";
-                    throw std::runtime_error ("MySQLppConnection: execute: unknown property type");
-                    break;
-                }
-            }
-        }
+//            if (buffer)
+//                adresses = buffer->getAdresses();
 
-        if (max_results != 0 && row_counter >= max_results)
-        {
-            done=false;
-            break;
-        }
+//            if(row[cnt2] == mysqlpp::null)
+//                setNan(prop->data_type_int_, adresses->at(cnt2));
+//            else
+//            {
+//                switch (prop->data_type_int_)
+//                {
+//                case P_TYPE_BOOL:
+//                {
+//                    *(bool*) adresses->at(cnt2) = (bool) row[cnt2];
+//                    //loginf  << "sqlex: bool " << prop->id_ << " val " << *ptr;
+//                }
+//                break;
+//                case P_TYPE_UCHAR:
+//                {
+//                    *(unsigned char*) adresses->at(cnt2) = (unsigned int) row[cnt2];
+//                    //loginf  << "sqlex: uchar " << prop->id_ << " val " << *ptr;
+//                }
+//                break;
+//                case P_TYPE_CHAR:
+//                {
+//                    *(char*) adresses->at(cnt2) = (int) row[cnt2];
+//                    //loginf  << "sqlex: char " << prop->id_ << " val " << *ptr;
+//                }
+//                break;
+//                case P_TYPE_INT:
+//                {
+//                    *(int*) adresses->at(cnt2) = (int) row[cnt2];
+//                    //loginf  << "sqlex: int " << prop->id_ << " val " << *ptr;
+//                }
+//                break;
+//                case P_TYPE_UINT:
+//                {
+//                    *(unsigned int*) adresses->at(cnt2) = (unsigned int) row[cnt2];
+//                    //loginf  << "sqlex: uint " << prop->id_ << " val " << *ptr;
+//                }
+//                break;
+//                case P_TYPE_STRING:
+//                {
+//                    *(std::string*) adresses->at(cnt2) = (const char *) row[cnt2];
+//                    //loginf  << "sqlex: string " << prop->id_ << " val " << *ptr;
+//                }
+//                break;
+//                case P_TYPE_FLOAT:
+//                {
+//                    *(float*) adresses->at(cnt2) = (float) row[cnt2];
+//                    //loginf  << "sqlex: float " << prop->id_ << " val " << *ptr;
+//                }
+//                break;
+//                case P_TYPE_DOUBLE:
+//                {
+//                    *(double*) adresses->at(cnt2) = (double) row[cnt2];
+//                    //loginf  << "sqlex: double " << prop->id_ << " val " << *ptr;
+//                }
+//                break;
+//                default:
+//                    logerr  <<  "MySQLppConnection: execute: unknown property type";
+//                    throw std::runtime_error ("MySQLppConnection: execute: unknown property type");
+//                    break;
+//                }
+//            }
+//        }
 
-        ++result_cnt;
-        ++row_counter;
-    }
-    //  }
-    //  catch (...)
-    //  {
-    //    logerr  << "MySQLppConnection: stepPreparedCommand: exception caught";
-    //    done=true;
-    //    return 0;
-    //  }
-    //
-    if (done)
-    {
-        logdbg  << "MySQLppConnection: stepPreparedCommand: reading done";
-        prepared_command_done_=true;
-    }
+//        if (max_results != 0 && row_counter >= max_results)
+//        {
+//            done=false;
+//            break;
+//        }
+
+//        ++result_cnt;
+//        ++row_counter;
+//    }
+//    //  }
+//    //  catch (...)
+//    //  {
+//    //    logerr  << "MySQLppConnection: stepPreparedCommand: exception caught";
+//    //    done=true;
+//    //    return 0;
+//    //  }
+//    //
+//    if (done)
+//    {
+//        logdbg  << "MySQLppConnection: stepPreparedCommand: reading done";
+//        prepared_command_done_=true;
+//    }
 
     logdbg  << "MySQLppConnection: stepPreparedCommand: done";
     return dbresult;
@@ -532,7 +541,7 @@ Buffer *MySQLppConnection::getTableList()  // buffer of table name strings
     //command.setCommandString ("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '"+db_name+"' ORDER BY TABLE_NAME DESC;");
     command.setCommandString ("SHOW TABLES;");
     PropertyList list;
-    list.addProperty ("name", P_TYPE_STRING);
+    list.addProperty ("name", PropertyDataType::STRING);
     command.setPropertyList (list);
 
     DBResult *result = execute(&command);
@@ -553,12 +562,12 @@ Buffer *MySQLppConnection::getColumnList(std::string table) // buffer of column 
     //SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'job_awam_0019' AND TABLE_NAME = 'sd_track' ORDER BY COLUMN_NAME DESC;
 
     PropertyList list;
-    list.addProperty ("name", P_TYPE_STRING);
-    list.addProperty ("type", P_TYPE_STRING);
-    list.addProperty ("null", P_TYPE_BOOL);
-    list.addProperty ("key_string", P_TYPE_STRING);
-    list.addProperty ("default", P_TYPE_STRING);
-    list.addProperty ("extra", P_TYPE_STRING);
+    list.addProperty ("name", PropertyDataType::STRING);
+    list.addProperty ("type", PropertyDataType::STRING);
+    list.addProperty ("null", PropertyDataType::BOOL);
+    list.addProperty ("key_string", PropertyDataType::STRING);
+    list.addProperty ("default", PropertyDataType::STRING);
+    list.addProperty ("extra", PropertyDataType::STRING);
     command.setPropertyList (list);
 
     DBResult *result = execute(&command);
@@ -566,17 +575,13 @@ Buffer *MySQLppConnection::getColumnList(std::string table) // buffer of column 
     Buffer *buffer = result->getBuffer();
     delete result;
 
-    buffer->addProperty ("key", P_TYPE_BOOL);
-    buffer->setIndex(0);
+    buffer->addProperty ("key", PropertyDataType::BOOL);
+    //buffer->setIndex(0);
 
-    for (unsigned int cnt=0; cnt < buffer->getSize(); cnt++)
+    for (unsigned int cnt=0; cnt < buffer->size(); cnt++)
     {
-        if (cnt != 0)
-            buffer->incrementIndex();
-
-        std::string key_string = *(std::string*) buffer->get(2);
-
-        *(bool*)buffer->get(3) = (key_string.compare("PRI") == 0);
+        std::string key_string = buffer->getString("key_string").get(cnt);
+        buffer->getBool("key").set(cnt, key_string.compare("PRI") == 0);
     }
 
     return buffer;
@@ -602,13 +607,13 @@ void MySQLppConnection::performanceTest ()
     //ORDER BY REC_NUM
 
     PropertyList list;
-    list.addProperty ("id", P_TYPE_INT);
-    list.addProperty ("posx", P_TYPE_DOUBLE);
-    list.addProperty ("posy", P_TYPE_DOUBLE);
-    list.addProperty ("modec", P_TYPE_INT);
-    list.addProperty ("time", P_TYPE_DOUBLE);
-    list.addProperty ("det", P_TYPE_INT);
-    list.addProperty ("ds", P_TYPE_INT);
+    list.addProperty ("id", PropertyDataType::INT);
+    list.addProperty ("posx", PropertyDataType::DOUBLE);
+    list.addProperty ("posy", PropertyDataType::DOUBLE);
+    list.addProperty ("modec", PropertyDataType::INT);
+    list.addProperty ("time", PropertyDataType::DOUBLE);
+    list.addProperty ("det", PropertyDataType::INT);
+    list.addProperty ("ds", PropertyDataType::INT);
     command.setPropertyList (list);
 
     //  prepareCommand (&command);
@@ -640,29 +645,29 @@ void MySQLppConnection::performanceTest ()
     loginf  << "MySQLppConnection: performanceTest: end after load time " << load_time << "s";
 }
 
-DBResult *MySQLppConnection::readBulkCommand (DBCommand *command, std::string main_statement, std::string order_statement, unsigned int max_results)
-{
-    assert (command);
-    DBResult *dbresult = new DBResult ();
+//DBResult *MySQLppConnection::readBulkCommand (DBCommand *command, std::string main_statement, std::string order_statement, unsigned int max_results)
+//{
+//    assert (command);
+//    DBResult *dbresult = new DBResult ();
 
-    std::string sql = main_statement+" WHERE REC_NUM > "+intToString(last_key_)+" "+ order_statement+" LIMIT 0,"+intToString(max_results)+";";
+//    std::string sql = main_statement+" WHERE REC_NUM > "+String::intToString(last_key_)+" "+ order_statement+" LIMIT 0,"+intToString(max_results)+";";
 
-    loginf  << "MySQLppConnection: readBulkCommand: sql '" << sql << "'";
+//    loginf  << "MySQLppConnection: readBulkCommand: sql '" << sql << "'";
 
-    Buffer *buffer=0;
-    if (command->getResultList()->getNumProperties() > 0) // data should be returned
-    {
-        buffer = new Buffer (*(command->getResultList()));
-        dbresult->setBuffer(buffer);
-    }
+//    Buffer *buffer=0;
+//    if (command->getResultList()->getNumProperties() > 0) // data should be returned
+//    {
+//        buffer = new Buffer (*(command->getResultList()));
+//        dbresult->setBuffer(buffer);
+//    }
 
-    logdbg  << "MySQLppConnection: execute: executing";
-    execute (sql, buffer);
+//    logdbg  << "MySQLppConnection: execute: executing";
+//    execute (sql, buffer);
 
-    unsigned int size = buffer->getSize();
-    last_key_ = *((unsigned int*)buffer->get(size-1, 0));
+//    unsigned int size = buffer->getSize();
+//    last_key_ = *((unsigned int*)buffer->get(size-1, 0));
 
-    logdbg  << "MySQLppConnection: execute: end last_key " << last_key_;
+//    logdbg  << "MySQLppConnection: execute: end last_key " << last_key_;
 
-    return dbresult;
-}
+//    return dbresult;
+//}

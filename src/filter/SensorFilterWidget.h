@@ -75,7 +75,7 @@ protected:
   /// Represented sensor filter
   SensorFilter &filter_;
   /// Filtered DBObject type
-  DB_OBJECT_TYPE type_;
+  std::string dbo_type_;
   /// Grid layout for all sensor checkboxes
   //QGridLayout *sensorboxlay_;
   /// Container with checkboxes for all sensors (sensor number -> checkbox)

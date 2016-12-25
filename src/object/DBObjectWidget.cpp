@@ -142,7 +142,7 @@ void DBObjectWidget::createElements()
   new_layout->addWidget (new_edit_);
 
   new_type_ = new DBOTypeComboBox ();
-  new_type_->setType (DBO_UNDEFINED);
+  new_type_->setType ("");
   new_type_->setDisabled (true);
   new_layout->addWidget (new_type_);
   //connect(type_box_, SIGNAL( changedType( ) ), this, SLOT( changedType() ));
@@ -195,12 +195,12 @@ void DBObjectWidget::addDBO ()
 
   std::string instance = "DBObject"+name+"0";
 
-  DB_OBJECT_TYPE type = new_type_->getType ();
+  const std::string &type = new_type_->getType ();
 
   Configuration &config = DBObjectManager::getInstance().addNewSubConfiguration ("DBObject", instance);
   config.addParameterString ("name", name);
   config.addParameterString ("meta_table", meta_table_name);
-  config.addParameterInt ("dbo_type", type);
+  config.addParameterString ("dbo_type", type);
 
   DBObjectManager::getInstance().generateSubConfigurable("DBObject", instance);
 
@@ -285,8 +285,8 @@ void DBObjectWidget::updateDBOs ()
 
   unsigned int row=1;
 
-  std::map <DB_OBJECT_TYPE, DBObject*> &objects = DBObjectManager::getInstance().getDBObjects ();
-  std::map <DB_OBJECT_TYPE, DBObject*>::iterator it;
+  const std::map <std::string, DBObject*> &objects = DBObjectManager::getInstance().getDBObjects ();
+  std::map <std::string, DBObject*>::const_iterator it;
 
   for (it = objects.begin(); it != objects.end(); it++)
   {

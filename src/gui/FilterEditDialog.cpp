@@ -35,12 +35,12 @@ Constructor.
 @param dbo_type DBO type assigned to the widget.
 @param parent Parent widget.
   */
-FilterRuleWidget::FilterRuleWidget( DB_OBJECT_TYPE dbo_type, QWidget* parent )
+FilterRuleWidget::FilterRuleWidget( const std::string &dbo_type, QWidget* parent )
 :   QWidget( parent ),
     dbo_type_( dbo_type )
 {
     QHBoxLayout* layout = new QHBoxLayout;
-    dbo_label_ = new QLabel( QString::fromStdString( DB_OBJECT_TYPE_STRINGS[ dbo_type ] ), this );
+    dbo_label_ = new QLabel( QString::fromStdString( dbo_type ), this );
     rule_combo_ = new QComboBox( this );
     QPushButton* button = new QPushButton( this );
     button->setText( "Delete" );
@@ -89,7 +89,7 @@ BufferFilter::BufferFilterRule FilterRuleWidget::getRule() const
 Returns the DBO type assigned to the widget.
 @return The widgets DBO type.
   */
-DB_OBJECT_TYPE FilterRuleWidget::getDBOType() const
+const std::string &FilterRuleWidget::getDBOType() const
 {
     return dbo_type_;
 }
@@ -164,7 +164,11 @@ Returns the widgets Property.
 Property PropertyRuleWidget::getProperty() const
 {
     const QString& name = name_edit_->text();
-    PROPERTY_DATA_TYPE dtype = (PROPERTY_DATA_TYPE)(dtype_combo_->itemData( dtype_combo_->currentIndex() ).toInt());
+    //PROPERTY_DATA_TYPE dtype = (PROPERTY_DATA_TYPE)(dtype_combo_->itemData( dtype_combo_->currentIndex() ).toInt());
+    // TODO FIX WIDGET
+    assert (false);
+
+    PropertyDataType dtype = PropertyDataType::STRING;
 
     return Property( name.toStdString(), dtype );
 }
@@ -173,7 +177,7 @@ Property PropertyRuleWidget::getProperty() const
 Returns the DBO type assigned to the widget.
 @return DBO type assigned to the widget.
   */
-DB_OBJECT_TYPE PropertyRuleWidget::getDBOType() const
+const std::string &PropertyRuleWidget::getDBOType() const
 {
     return dbo_type_;
 }
@@ -182,29 +186,32 @@ DB_OBJECT_TYPE PropertyRuleWidget::getDBOType() const
 Sets the DBO type assigned to the widget.
 @param dbo_type The new DBO type.
   */
-void PropertyRuleWidget::setDBOType( DB_OBJECT_TYPE dbo_type )
+void PropertyRuleWidget::setDBOType( const std::string &dbo_type )
 {
     dbo_type_ = dbo_type;
-    dbo_edit_->setText( QString::fromStdString( DB_OBJECT_TYPE_STRINGS[ dbo_type ] ) );
+    dbo_edit_->setText( QString::fromStdString( dbo_type ) );
 }
 
 /**
 Sets the properties data type.
 @param dtype New data type.
   */
-void PropertyRuleWidget::setDataType( PROPERTY_DATA_TYPE dtype )
+void PropertyRuleWidget::setDataType( PropertyDataType dtype )
 {
-    PROPERTY_DATA_TYPE type;
-    int i, n = dtype_combo_->count();
-    for( i=0; i<n; ++i )
-    {
-        type = (PROPERTY_DATA_TYPE)(dtype_combo_->itemData( i ).toInt());
-        if( dtype == type )
-        {
-            dtype_combo_->setCurrentIndex( i );
-            break;
-        }
-    }
+    // TODO FIX WIDGET
+    assert (false);
+
+//    PROPERTY_DATA_TYPE type;
+//    int i, n = dtype_combo_->count();
+//    for( i=0; i<n; ++i )
+//    {
+//        type = (PROPERTY_DATA_TYPE)(dtype_combo_->itemData( i ).toInt());
+//        if( dtype == type )
+//        {
+//            dtype_combo_->setCurrentIndex( i );
+//            break;
+//        }
+//    }
 }
 
 /**
@@ -305,19 +312,21 @@ void FilterEditDialog::fillDBOTypeCombo( QComboBox* box )
 {
     box->clear();
 
-    DB_OBJECT_TYPE type;
+    std::string dbo_type;
 
-    std::map <DB_OBJECT_TYPE,DBObject*>& dobs = DBObjectManager::getInstance().getDBObjects();
-    std::map <DB_OBJECT_TYPE,DBObject*>::iterator it, itend = dobs.end();
+    const std::map <std::string,DBObject*>& dobs = DBObjectManager::getInstance().getDBObjects();
+    std::map <std::string,DBObject*>::const_iterator it, itend = dobs.end();
 
     for( it=dobs.begin(); it!=itend; ++it )
     {
-        type = it->second->getType();
+        dbo_type = it->second->getType();
 
-        if( type == DBO_UNDEFINED )
-            continue;
+//        if( type == DBO_UNDEFINED )
+//            continue;
+        //TODO FIX WIDGET
+        assert (false);
 
-        box->addItem( QString::fromStdString( DB_OBJECT_TYPE_STRINGS[ type ] ), QVariant( (int)type ) );
+        //box->addItem( QString::fromStdString( dbo_type ), QVariant( QString(dbo_type) ) );
     }
 }
 
@@ -327,16 +336,19 @@ Fills a data type combo.
   */
 void FilterEditDialog::fillDataTypeCombo( QComboBox* box )
 {
-    box->clear();
-    box->addItem( "BOOL", QVariant( (int)P_TYPE_BOOL ) );
-    box->addItem( "CHAR", QVariant( (int)P_TYPE_CHAR ) );
-    box->addItem( "INT", QVariant( (int)P_TYPE_INT ) );
-    box->addItem( "UCHAR", QVariant( (int)P_TYPE_UCHAR ) );
-    box->addItem( "UINT", QVariant( (int)P_TYPE_UINT ) );
-    box->addItem( "STRING", QVariant( (int)P_TYPE_STRING ) );
-    box->addItem( "FLOAT", QVariant( (int)P_TYPE_FLOAT ) );
-    box->addItem( "DOUBLE", QVariant( (int)P_TYPE_DOUBLE ) );
-    box->addItem( "POINTER", QVariant( (int)P_TYPE_POINTER ) );
+    //TODO FIX WIDGET
+    assert (false);
+
+//    box->clear();
+//    box->addItem( "BOOL", QVariant( (int)P_TYPE_BOOL ) );
+//    box->addItem( "CHAR", QVariant( (int)P_TYPE_CHAR ) );
+//    box->addItem( "INT", QVariant( (int)P_TYPE_INT ) );
+//    box->addItem( "UCHAR", QVariant( (int)P_TYPE_UCHAR ) );
+//    box->addItem( "UINT", QVariant( (int)P_TYPE_UINT ) );
+//    box->addItem( "STRING", QVariant( (int)P_TYPE_STRING ) );
+//    box->addItem( "FLOAT", QVariant( (int)P_TYPE_FLOAT ) );
+//    box->addItem( "DOUBLE", QVariant( (int)P_TYPE_DOUBLE ) );
+//    box->addItem( "POINTER", QVariant( (int)P_TYPE_POINTER ) );
 }
 
 /**
@@ -354,30 +366,30 @@ void FilterEditDialog::updateRuleEntries()
 
     //read rule widgets from the filter
     {
-        std::map<DB_OBJECT_TYPE,DBObject*>& dobs = DBObjectManager::getInstance().getDBObjects();
-        DB_OBJECT_TYPE type;
+        const std::map<std::string,DBObject*>& dobs = DBObjectManager::getInstance().getDBObjects();
+        std::string dbo_type;
         bool errors = false;
-        std::map<DB_OBJECT_TYPE,BufferFilter::BufferFilterRule> rules = filter_->getRules();
-        std::map<DB_OBJECT_TYPE,BufferFilter::BufferFilterRule>::const_iterator it, itend = rules.end();
+        std::map<std::string,BufferFilter::BufferFilterRule> rules = filter_->getRules();
+        std::map<std::string,BufferFilter::BufferFilterRule>::const_iterator it, itend = rules.end();
         for( it=rules.begin(); it!=itend; ++it )
         {
-            type = it->first;
+            dbo_type = it->first;
 
             //DBO type not found, skip and show error later
-            if( dobs.find( type ) == dobs.end() )
+            if( dobs.find( dbo_type ) == dobs.end() )
             {
                 errors = true;
                 continue;
             }
 
             //create widget
-            FilterRuleWidget* widget = new FilterRuleWidget( type, this );
+            FilterRuleWidget* widget = new FilterRuleWidget( dbo_type, this );
             fillRuleCombo( widget->getRuleCombo() );
             widget->setRule( it->second );
 
             //add widget
             rule_layout_->addWidget( widget );
-            rule_widgets_[ type ] = widget;
+            rule_widgets_[ dbo_type ] = widget;
 
             connect( widget, SIGNAL(deleteMe()), this, SLOT(deleteRuleSlot()) );
         }
@@ -413,17 +425,17 @@ void FilterEditDialog::updatePropertyEntries()
 
     //read new properties from the filter
     {
-        std::map<DB_OBJECT_TYPE,DBObject*>& dobs = DBObjectManager::getInstance().getDBObjects();
-        DB_OBJECT_TYPE type;
+        const std::map<std::string,DBObject*>& dobs = DBObjectManager::getInstance().getDBObjects();
+        std::string dbo_type;
         bool errors = false;
-        std::multimap<DB_OBJECT_TYPE,Property> props = filter_->getProperties();
-        std::multimap<DB_OBJECT_TYPE,Property>::const_iterator it, itend = props.end();
+        std::multimap<std::string,Property> props = filter_->getProperties();
+        std::multimap<std::string,Property>::const_iterator it, itend = props.end();
         for( it=props.begin(); it!=itend; ++it )
         {
-            type = it->first;
+            dbo_type = it->first;
 
             //DBO type not found, skip and show error later
-            if( dobs.find( type ) == dobs.end() )
+            if( dobs.find( dbo_type ) == dobs.end() )
             {
                 errors = true;
                 continue;
@@ -432,13 +444,13 @@ void FilterEditDialog::updatePropertyEntries()
             //create widget
             PropertyRuleWidget* widget = new PropertyRuleWidget( this );
             fillDataTypeCombo( widget->getDataTypeCombo() );
-            widget->setDBOType( type );
-            widget->setDataType( (PROPERTY_DATA_TYPE)it->second.data_type_int_ );
-            widget->setPropertyName( QString::fromStdString( it->second.id_ ) );
+            widget->setDBOType( dbo_type );
+            widget->setDataType( it->second.getDataType() );
+            widget->setPropertyName( QString::fromStdString( it->second.getId() ) );
 
             //add widget
             prop_layout_->addWidget( widget );
-            prop_widgets_[ type ][ it->second.id_ ] = widget;
+            prop_widgets_[ dbo_type ][ it->second.getId() ] = widget;
 
             connect( widget, SIGNAL(deleteMe()), this, SLOT(deletePropertySlot()) );
         }
@@ -458,27 +470,30 @@ Rule widgets that are already present for some DBO type will just get updated.
   */
 void FilterEditDialog::addRuleSlot()
 {
-    //get data
-    int dbo_type_int = rule_dbo_combo_->itemData( rule_dbo_combo_->currentIndex() ).toInt();
-    DB_OBJECT_TYPE type = (DB_OBJECT_TYPE)dbo_type_int;
+    // TODO FIX WIDGET
+    assert (false);
 
-    //widget already present
-    if( rule_widgets_.find( type ) != rule_widgets_.end() )
-    {
-        rule_widgets_[ type ]->getRuleCombo()->setCurrentIndex( rule_combo_->currentIndex() );
-        return;
-    }
+//    //get data
+//    int dbo_type_int = rule_dbo_combo_->itemData( rule_dbo_combo_->currentIndex() ).toInt();
+//    DB_OBJECT_TYPE type = (DB_OBJECT_TYPE)dbo_type_int;
 
-    //create widget
-    FilterRuleWidget* widget = new FilterRuleWidget( type, this );
-    fillRuleCombo( widget->getRuleCombo() );
-    widget->getRuleCombo()->setCurrentIndex( rule_combo_->currentIndex() );
+//    //widget already present
+//    if( rule_widgets_.find( type ) != rule_widgets_.end() )
+//    {
+//        rule_widgets_[ type ]->getRuleCombo()->setCurrentIndex( rule_combo_->currentIndex() );
+//        return;
+//    }
 
-    //add widget
-    rule_widgets_[ type ] = widget;
-    rule_layout_->addWidget( widget );
+//    //create widget
+//    FilterRuleWidget* widget = new FilterRuleWidget( type, this );
+//    fillRuleCombo( widget->getRuleCombo() );
+//    widget->getRuleCombo()->setCurrentIndex( rule_combo_->currentIndex() );
 
-    connect( widget, SIGNAL(deleteMe()), this, SLOT(deleteRuleSlot()) );
+//    //add widget
+//    rule_widgets_[ type ] = widget;
+//    rule_layout_->addWidget( widget );
+
+//    connect( widget, SIGNAL(deleteMe()), this, SLOT(deleteRuleSlot()) );
 }
 
 /**
@@ -501,18 +516,18 @@ void FilterEditDialog::addPropertyFromVarSlot()
 
     //read properties from filter
     {
-        std::map<DB_OBJECT_TYPE,DBObject*>& dobs = DBObjectManager::getInstance().getDBObjects();
-        DB_OBJECT_TYPE dbo_type;
-        PROPERTY_DATA_TYPE dtype;
+        const std::map<std::string,DBObject*>& dobs = DBObjectManager::getInstance().getDBObjects();
+        std::string dbo_type;
+        PropertyDataType dtype;
         std::string name;
         bool errors = false;
-        std::multimap<DB_OBJECT_TYPE,Property> props = filter_tmp_.getProperties();
-        std::multimap<DB_OBJECT_TYPE,Property>::const_iterator it, itend = props.end();
+        std::multimap<std::string,Property> props = filter_tmp_.getProperties();
+        std::multimap<std::string,Property>::const_iterator it, itend = props.end();
         for( it=props.begin(); it!=itend; ++it )
         {
             dbo_type = it->first;
-            dtype = (PROPERTY_DATA_TYPE)it->second.data_type_int_;
-            name = it->second.id_;
+            dtype = it->second.getDataType();
+            name = it->second.getId();
 
             //DBO type not found, skip property and show error later
             if( dobs.find( dbo_type ) == dobs.end() )
@@ -560,47 +575,50 @@ Adds a filter Property from manually provided information.
   */
 void FilterEditDialog::addPropertyManualSlot()
 {
-    //get data
-    int dbo_type_int = prop_dbotype_combo_->itemData( prop_dbotype_combo_->currentIndex() ).toInt();
-    DB_OBJECT_TYPE dbo_type = (DB_OBJECT_TYPE)dbo_type_int;
+    // TODO FIX WIDGET
+    assert (false);
 
-    int dtype_int = prop_datatype_combo_->itemData( prop_datatype_combo_->currentIndex() ).toInt();
-    PROPERTY_DATA_TYPE dtype = (PROPERTY_DATA_TYPE)dtype_int;
+//    //get data
+//    int dbo_type_int = prop_dbotype_combo_->itemData( prop_dbotype_combo_->currentIndex() ).toInt();
+//    DB_OBJECT_TYPE dbo_type = (DB_OBJECT_TYPE)dbo_type_int;
 
-    std::string name = manual_prop_edit_->text().toStdString();
+//    int dtype_int = prop_datatype_combo_->itemData( prop_datatype_combo_->currentIndex() ).toInt();
+//    PROPERTY_DATA_TYPE dtype = (PROPERTY_DATA_TYPE)dtype_int;
 
-    //name not valid
-    if( name.empty() )
-    {
-        QMessageBox::warning( this, "Warning", "Please provide a valid property name." );
-        return;
-    }
+//    std::string name = manual_prop_edit_->text().toStdString();
 
-    //widget already present
-    if( prop_widgets_.find( dbo_type ) != prop_widgets_.end() &&
-        prop_widgets_[ dbo_type ].find( name ) != prop_widgets_[ dbo_type ].end() )
-    {
-        PropertyRuleWidget* widget = prop_widgets_[ dbo_type ][ name ];
-        widget->setDataType( dtype );
-        widget->setDBOType( dbo_type );
-        widget->setPropertyName( QString::fromStdString( name ) );
-        return;
-    }
+//    //name not valid
+//    if( name.empty() )
+//    {
+//        QMessageBox::warning( this, "Warning", "Please provide a valid property name." );
+//        return;
+//    }
 
-    //create widget
-    PropertyRuleWidget* widget = new PropertyRuleWidget( this );
-    fillDataTypeCombo( widget->getDataTypeCombo() );
-    widget->setDataType( dtype );
-    widget->setDBOType( dbo_type );
-    widget->setPropertyName( QString::fromStdString( name ) );
+//    //widget already present
+//    if( prop_widgets_.find( dbo_type ) != prop_widgets_.end() &&
+//        prop_widgets_[ dbo_type ].find( name ) != prop_widgets_[ dbo_type ].end() )
+//    {
+//        PropertyRuleWidget* widget = prop_widgets_[ dbo_type ][ name ];
+//        widget->setDataType( dtype );
+//        widget->setDBOType( dbo_type );
+//        widget->setPropertyName( QString::fromStdString( name ) );
+//        return;
+//    }
 
-    //add widget
-    prop_layout_->addWidget( widget );
-    prop_widgets_[ dbo_type ][ name ] = widget;
+//    //create widget
+//    PropertyRuleWidget* widget = new PropertyRuleWidget( this );
+//    fillDataTypeCombo( widget->getDataTypeCombo() );
+//    widget->setDataType( dtype );
+//    widget->setDBOType( dbo_type );
+//    widget->setPropertyName( QString::fromStdString( name ) );
 
-    manual_prop_edit_->clear();
+//    //add widget
+//    prop_layout_->addWidget( widget );
+//    prop_widgets_[ dbo_type ][ name ] = widget;
 
-    connect( widget, SIGNAL(deleteMe()), this, SLOT(deleteRuleSlot()) );
+//    manual_prop_edit_->clear();
+
+//    connect( widget, SIGNAL(deleteMe()), this, SLOT(deleteRuleSlot()) );
 }
 
 /**
@@ -628,8 +646,8 @@ Deletes the clicked filter Property.
 void FilterEditDialog::deletePropertySlot()
 {
     PropertyRuleWidget* widget = (PropertyRuleWidget*)(QObject::sender());
-    DB_OBJECT_TYPE dbo_type = widget->getDBOType();
-    prop_widgets_[ dbo_type ].erase( widget->getProperty().id_ );
+    const std::string &dbo_type = widget->getDBOType();
+    prop_widgets_[ dbo_type ].erase( widget->getProperty().getId() );
 
     if( prop_widgets_[ dbo_type ].empty() )
         prop_widgets_.erase( dbo_type );

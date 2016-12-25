@@ -93,10 +93,10 @@ void DBOVariableSetWidget::updateEntries()
   std::string typestr;
   std::map<std::string,DBOVariable*>::const_iterator it, itend;
 
-  DB_OBJECT_TYPE type;
+  std::string type;
 
-  std::map <DB_OBJECT_TYPE, DBObject*> &dobs = DBObjectManager::getInstance().getDBObjects ();
-  std::map <DB_OBJECT_TYPE, DBObject*>::iterator dobit;
+  const std::map <std::string, DBObject*> &dobs = DBObjectManager::getInstance().getDBObjects ();
+  std::map <std::string, DBObject*>::const_iterator dobit;
 
   for( dobit = dobs.begin(); dobit != dobs.end(); dobit++ )
   {
@@ -128,7 +128,11 @@ void DBOVariableSetWidget::updateEntries()
       QAction* action = m2->addAction( str );
 
       QVariantMap vmap;
-      vmap.insert( str, QVariant( type ) );
+
+      assert (false);
+      //TODO FIXXMEE
+
+      //vmap.insert( str, QVariant( type ) );
       action->setData( QVariant( vmap ) );
     }
   }
@@ -145,18 +149,22 @@ void DBOVariableSetWidget::triggerSlot( QAction* action )
 {
   QVariantMap vmap = action->data().toMap();
   std::string id = vmap.begin().key().toStdString();
-  DB_OBJECT_TYPE type = (DB_OBJECT_TYPE)( vmap.begin().value().toUInt() );
 
-  assert (DBObjectManager::getInstance().existsDBOVariable(type, id));
+  //TODO FIXXMEE
+  assert (false);
 
-  set_.add (DBObjectManager::getInstance().getDBOVariable(type, id));
+//  const std::string &type = (DB_OBJECT_TYPE)( vmap.begin().value().toUInt() );
 
-  if (set_.getChanged())
-  {
-    updateVariableList ();
-    set_.setChanged (false);
-    emit setChanged();
-  }
+//  assert (DBObjectManager::getInstance().existsDBOVariable(type, id));
+
+//  set_.add (DBObjectManager::getInstance().getDBOVariable(type, id));
+
+//  if (set_.getChanged())
+//  {
+//    updateVariableList ();
+//    set_.setChanged (false);
+//    emit setChanged();
+//  }
 }
 
 void DBOVariableSetWidget::remove ()

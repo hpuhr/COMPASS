@@ -29,10 +29,10 @@
 
 #include "String.h"
 
-using namespace Utils::String;
+using namespace Utils;
 
 DataSource::DataSource()
-: finalized_(false), dbo_type_(DBO_UNDEFINED), id_(0), sac_(255), sic_(255), latitude_(360.0), longitude_(360), altitude_(1701),
+: finalized_(false), dbo_type_(""), id_(0), sac_(255), sic_(255), latitude_(360.0), longitude_(360), altitude_(1701),
   system_x_(0), system_y_(0)//, local_trans_x_(0), local_trans_y_(0)
 {
     deg2rad_ = 2*M_PI/360.0;
@@ -104,9 +104,9 @@ double DataSource::getAltitude() const
     return altitude_;
 }
 
-DB_OBJECT_TYPE DataSource::getDBOType () const
+const std::string &DataSource::getDBOType () const
 {
-    return (DB_OBJECT_TYPE) dbo_type_;
+    return dbo_type_;
 }
 
 unsigned int DataSource::getId() const
@@ -124,7 +124,7 @@ double DataSource::getLongitude() const
     return longitude_;
 }
 
-std::string DataSource::getName() const
+const std::string &DataSource::getName() const
 {
     return name_;
 }
@@ -134,7 +134,7 @@ unsigned char DataSource::getSac() const
     return sac_;
 }
 
-std::string DataSource::getShortName() const
+const std::string &DataSource::getShortName() const
 {
     return short_name_;
 }
@@ -149,9 +149,8 @@ void DataSource::setAltitude(double altitude)
     this->altitude_ = altitude;
 }
 
-void DataSource::setDBOType (DB_OBJECT_TYPE type)
+void DataSource::setDBOType (const std::string &type)
 {
-    assert (type != DBO_UNDEFINED);
     dbo_type_=type;
 }
 
@@ -170,7 +169,7 @@ void DataSource::setLongitude(double longitude)
     this->longitude_ = longitude;
 }
 
-void DataSource::setName(std::string name)
+void DataSource::setName(const std::string &name)
 {
     this->name_ = name;
 }
@@ -180,7 +179,7 @@ void DataSource::setSac(unsigned char sac)
     this->sac_ = sac;
 }
 
-void DataSource::setShortName(std::string short_name)
+void DataSource::setShortName(const std::string &short_name)
 {
     this->short_name_ = short_name;
 }

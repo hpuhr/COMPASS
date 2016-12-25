@@ -30,7 +30,7 @@
 #include "DBObject.h"
 #include "Logger.h"
 
-DBOVariableComboBox::DBOVariableComboBox(DB_OBJECT_TYPE dbo_type, DBOVariable *variable, QWidget * parent)
+DBOVariableComboBox::DBOVariableComboBox(const std::string &dbo_type, DBOVariable *variable, QWidget * parent)
  : dbo_type_ (dbo_type),  variable_(variable)
 {
   assert (variable);

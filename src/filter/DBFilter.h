@@ -57,7 +57,7 @@ public:
     /// @brief Adds a sub-filter. Not used yet.
     void addSubFilter (DBFilter *filter);
     /// @brief Returns if the DBObject of type is filtered by this filter
-    bool filters (DB_OBJECT_TYPE dbo_type);
+    bool filters (const std::string &dbo_type);
 
     /// @brief Get if the filter configuration has changed
     bool getChanged ();
@@ -78,7 +78,7 @@ public:
     bool isGeneric () { return is_generic_; }
 
     /// @brief Returns the condition string for a DBObject
-    virtual std::string getConditionString (DB_OBJECT_TYPE dbo_type, bool &first, std::vector<std::string> &variable_names);
+    virtual std::string getConditionString (const std::string &dbo_type, bool &first, std::vector<std::string> &variable_names);
     /// @brief Returns if only sub-filters and no own conditions exist
     bool onlyHasSubFilter () { return conditions_.size()>0; };
 

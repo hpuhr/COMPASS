@@ -48,52 +48,50 @@ public:
     {
         connect(this, SIGNAL( activated(const QString &) ), this, SIGNAL( changedType() ));
 
-        int index=0;
+        assert (false);
+        //TODO FIXXME
+//        int index=0;
 
-        for (unsigned int cnt = 0; cnt <= DBO_SENSOR_INFORMATION; cnt++)
-        {
-            if (show_non_existent)
-            {
-                addItem (DB_OBJECT_TYPE_STRINGS.at((DB_OBJECT_TYPE) cnt).c_str());
-                indexes_[(DB_OBJECT_TYPE)cnt] = index;
-                index++;
-            }
-            else
-            {
-                if (DBObjectManager::getInstance().existsDBObject((DB_OBJECT_TYPE) cnt))
-                {
-                    addItem (DB_OBJECT_TYPE_STRINGS.at((DB_OBJECT_TYPE) cnt).c_str());
-                    indexes_[(DB_OBJECT_TYPE)cnt] = index;
-                    index++;
-                }
-            }
-        }
+//        for (unsigned int cnt = 0; cnt <= DBO_SENSOR_INFORMATION; cnt++)
+//        {
+//            if (show_non_existent)
+//            {
+//                addItem (DB_OBJECT_TYPE_STRINGS.at((DB_OBJECT_TYPE) cnt).c_str());
+//                indexes_[(DB_OBJECT_TYPE)cnt] = index;
+//                index++;
+//            }
+//            else
+//            {
+//                if (DBObjectManager::getInstance().existsDBObject((DB_OBJECT_TYPE) cnt))
+//                {
+//                    addItem (DB_OBJECT_TYPE_STRINGS.at((DB_OBJECT_TYPE) cnt).c_str());
+//                    indexes_[(DB_OBJECT_TYPE)cnt] = index;
+//                    index++;
+//                }
+//            }
+//        }
     }
     /// @brief Desctructor
     virtual ~DBOTypeComboBox() {}
 
     /// @brief Returns current DBObject type
-    DB_OBJECT_TYPE getType ()
+    std::string getType ()
     {
-        std::string text = currentText().toStdString();
-        for (unsigned int cnt = 0; cnt <= DBO_SENSOR_INFORMATION; cnt++)
-        {
-            if (text.compare (DB_OBJECT_TYPE_STRINGS.at((DB_OBJECT_TYPE) cnt)) == 0)
-                return (DB_OBJECT_TYPE) cnt;
-        }
-        throw std::runtime_error ("DBOTypeComboBox: getType: unknown type");
+        return currentText().toStdString();
     }
 
     /// @brief Sets current DBObject type
-    void setType (DB_OBJECT_TYPE type)
+    void setType (const std::string &type)
     {
-        assert (indexes_.find (type) != indexes_.end());
+        assert (false);
+        //TODO FIXXME
+//        assert (indexes_.find (type) != indexes_.end());
 
-        setCurrentIndex (indexes_[type]);
+//        setCurrentIndex (indexes_[type]);
     }
 
 protected:
-    std::map <DB_OBJECT_TYPE, int> indexes_; // type to index
+    std::map <std::string, int> indexes_; // type to index
 };
 
 #endif /* DBOBJECTEDITWIDGET_H_ */

@@ -167,7 +167,7 @@ void DBFilter::addSubFilter (DBFilter *filter)
 /**
  * Checks if any sub-filter or sub-condition filter the DBO of the supplied type.
  */
-bool DBFilter::filters (DB_OBJECT_TYPE dbo_type)
+bool DBFilter::filters (const std::string &dbo_type)
 {
     bool ret = false;
 
@@ -187,7 +187,7 @@ bool DBFilter::filters (DB_OBJECT_TYPE dbo_type)
 /**
  * If active, returns concatenated condition strings from all sub-conditions and sub-filters, else returns empty string.
  */
-std::string DBFilter::getConditionString (DB_OBJECT_TYPE dbo_type, bool &first, std::vector<std::string> &variable_names)
+std::string DBFilter::getConditionString (const std::string &dbo_type, bool &first, std::vector<std::string> &variable_names)
 {
     std::stringstream ss;
 
