@@ -99,7 +99,7 @@ link_directories(
 set ( LIBRARY_OUTPUT_PATH dist/lib )
 
 set ( atsdb_HDRS
-#        src/ATSDB.h
+        src/ATSDB.h
         src/buffer/ArrayList.h
 #        src/buffer/ArrayContainer.h
         src/buffer/Buffer.h
@@ -159,7 +159,7 @@ set ( atsdb_HDRS
 #        src/property/PropertyContainer.h
         src/result/BufferSet.h
         src/result/DBResult.h
-#        src/result/BufferReceiver.h
+        src/result/BufferReceiver.h
 #        src/struct/StructureDescription.h
 ##        src/struct/StructureDescriptionPlot.h
 ##        src/struct/StructureDescriptionSystemTrack.h
@@ -248,7 +248,7 @@ set (atsdb_MOC_HEADERS
         )
 
 set ( atsdb_SRCS
-#        src/ATSDB.cpp
+        src/ATSDB.cpp
         src/buffer/ArrayList.cpp
         src/buffer/Buffer.cpp
         src/buffer/BufferFilter.cpp

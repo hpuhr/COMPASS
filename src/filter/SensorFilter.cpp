@@ -128,8 +128,8 @@ void SensorFilter::updateDataSources ()
         return;
     }
 
-    std::map<int, std::string> &sources = ATSDB::getInstance().getDataSources (dbo_type_);
-    std::map<int, std::string>::iterator it;
+    const std::map<int, std::string> &sources = ATSDB::getInstance().getDataSources (dbo_type_);
+    std::map<int, std::string>::const_iterator it;
 
     for (it = sources.begin(); it != sources.end(); it++)
     {

@@ -43,8 +43,8 @@ class DBInterface;
 class StructureReader;
 class DBOVariable;
 class Job;
-class DBOReadDBJob;
-class FinalizeDBOReadJob;
+//class DBOReadDBJob;
+//class FinalizeDBOReadJob;
 class BufferReceiver;
 
 /**
@@ -104,7 +104,7 @@ public:
     void shutdown ();
 
     ///@brief Adds data to a DBO from a C struct data pointer.
-    void insert (const std::string &dbo_type, void *data);
+    //void insert (const std::string &dbo_type, void *data);
     void insert (Buffer *buffer, std::string table_name);
     ///@brief Updates data records for a DBObject, delete buffer after execution
     void update (Buffer *data);
@@ -124,7 +124,7 @@ public:
     ///@brief Returns flag if data sources are defined for DBO type.
     bool hasDataSources (const std::string &dbo_type);
     ///@brief Returns container with all defined data source for DBO type.
-    std::map<int, std::string> &getDataSources (const std::string &dbo_type);
+    const std::map<int, std::string> &getDataSources (const std::string &dbo_type);
     ///@brief Returns data source name for a DBO type and data source number.
     std::string getNameOfSensor (const std::string &dbo_type, unsigned int num);
     /// @brief Return if a DBObject has information about its active data sources
@@ -139,11 +139,11 @@ public:
     ///@brief Returns flag indicating if error state was set.
     //bool error();
 
-    void buildMinMaxInfo (DBOVariable *var);
+    //void buildMinMaxInfo (DBOVariable *var);
     ///@brief Returns string minimum for DBO variable.
-    std::string getMinAsString (DBOVariable *var);
+    //std::string getMinAsString (DBOVariable *var);
     ///@brief Returns string maximum for DBO variable.
-    std::string getMaxAsString (DBOVariable *var);
+    //std::string getMaxAsString (DBOVariable *var);
 
     ///@brief Returns buffer with data from a DBO type, from a specific id and variables.
     void getInfo (JobOrderer *orderer, boost::function<void (Job*)> done_function,
@@ -213,17 +213,17 @@ protected:
     /// DB interface, encapsulating all database functionality.
     DBInterface *db_interface_;
     /// Structure reader, can read data from defined C structs.
-    StructureReader *struct_reader_;
+    //StructureReader *struct_reader_;
     /// Map containg all existing data sources (DBO type -> data source number, data source name).
     std::map <std::string, std::map<int, std::string> > data_sources_;
     std::map <std::string, std::map <std::pair<unsigned char, unsigned char>, DataSource* > > data_sources_instances_;
 
     /// Container with all current read jobs (one per loaded DBObject)
     //std::vector <DBOReadDBJob*> read_jobs_;
-    boost::mutex read_jobs_mutex_;
-    std::map <DBOReadDBJob*, BufferReceiver*> dbo_read_jobs_;
-    boost::mutex finalize_jobs_mutex_;
-    std::map <FinalizeDBOReadJob*, BufferReceiver*> dbo_finalize_jobs_;
+//    boost::mutex read_jobs_mutex_;
+//    std::map <DBOReadDBJob*, BufferReceiver*> dbo_read_jobs_;
+//    boost::mutex finalize_jobs_mutex_;
+//    std::map <FinalizeDBOReadJob*, BufferReceiver*> dbo_finalize_jobs_;
 
     std::vector <std::string> databases_;
 
