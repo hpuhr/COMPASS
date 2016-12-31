@@ -56,7 +56,7 @@ public:
     /// @brief Set addresses to point to values of element at index.
 
     /// @brief Adds all containers of org_buffer and removes them from org_buffer.
-    //void seizeBuffer (Buffer &org_buffer);
+    void seizeBuffer (Buffer &org_buffer);
 
     /// @brief Adds an additional property.
     void addProperty (std::string id, PropertyDataType type);
@@ -71,15 +71,15 @@ public:
     //void setWritten () { first_write_=false; };
 
     /// @brief Returns boolean indicating if buffer is the last of one DB operation.
-    //bool getLastOne () { return last_one_;};
+    bool getLastOne () { return last_one_;};
     /// @brief Sets if buffer is the last one of one DB operation.
-    //void setLastOne (bool last_one) { last_one_=last_one; };
+    void setLastOne (bool last_one) { last_one_=last_one; };
 
     /// @brief Returns buffer containing the data of this buffer and re-initializes.
     //Buffer *transferData ();
 
     /// @brief Returns a shallow copy of the this buffer.
-    //Buffer *getShallowCopy ();
+    Buffer *getShallowCopy ();
 
     /// @brief Activates key search on given property index.
     //void activateKeySearch (unsigned int key_pos);
@@ -91,7 +91,7 @@ public:
     //void setPropertyValuesNan (unsigned int property_index);
 
     /// @brief Returns flag indicating if buffer is filled to a multiple of BUFFER_ARRAY_SIZE.
-    //bool isFilled ();
+    bool isFull ();
 
     /// @brief Returns the buffers id
     unsigned int getId() const { return id_; }
@@ -128,7 +128,7 @@ private:
     //bool first_write_;
 
     /// Flag indicating if buffer is the last of a DB operation
-    //bool last_one_;
+    bool last_one_;
 
     /// Flag indicating if key search is possible
 //    bool search_active_;

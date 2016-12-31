@@ -363,8 +363,8 @@ void BufferFilter::addPropertyToFilter( DBOVariable* var )
     }
 
     //add subvariables
-    std::map<std::string,std::string>& subs = var->getSubVariables();
-    std::map<std::string,std::string>::iterator it, itend = subs.end();
+    const std::map<std::string,std::string>& subs = var->getSubVariables();
+    std::map<std::string,std::string>::const_iterator it, itend = subs.end();
     for( it=subs.begin(); it!=itend; ++it )
         addPropertyToFilter( it->first, it->second, var->getDataType() );
 }
@@ -470,8 +470,8 @@ void BufferFilter::setRule( DBOVariable* var, BufferFilterRule rule )
     }
 
     //add subvariables
-    std::map<std::string,std::string>& subs = var->getSubVariables();
-    std::map<std::string,std::string>::iterator it, itend = subs.end();
+    const std::map<std::string,std::string>& subs = var->getSubVariables();
+    std::map<std::string,std::string>::const_iterator it, itend = subs.end();
     for( it=subs.begin(); it!=itend; ++it )
         setRule( it->first, rule );
 }

@@ -27,7 +27,7 @@
 #include <boost/function.hpp>
 #include "String.h"
 
-using namespace Utils::String;
+using namespace Utils;
 
 /*****************************************************************************************
 TransformationEntry
@@ -39,7 +39,7 @@ Constructor.
 @param id String id the stored transformation is constructed from. Note that the transformation
     pointer may remain NULL if the string id is an empty string.
   */
-TransformationEntry::TransformationEntry( int dbo_type,
+TransformationEntry::TransformationEntry( const std::string &dbo_type,
                                           const std::string& id )
 :   id_( id ),
     dbo_type_( dbo_type ),
@@ -63,7 +63,7 @@ TransformationEntry::TransformationEntry( const std::string& class_id,
     trafo_( NULL )
 {
     registerParameter( "id", &id_, "" );
-    registerParameter( "dbo_type", &dbo_type_, -1 );
+    registerParameter( "dbo_type", &dbo_type_, "" );
 
     createSubConfigurables();
 }
@@ -83,10 +83,10 @@ Retrieves a Configuration with the given data filled in. Use this method for you
 @param dbo_type DBO type the entry is assigned to.
 @param id String id of the stored transformation.
   */
-void TransformationEntry::getConfig( Configuration& config, int dbo_type, const std::string& id )
+void TransformationEntry::getConfig( Configuration& config, const std::string &dbo_type, const std::string& id )
 {
     config.addParameterString( "id", id );
-    config.addParameterInt( "dbo_type", dbo_type );
+    config.addParameterString( "dbo_type", dbo_type );
 }
 
 /**
@@ -126,7 +126,7 @@ const std::string& TransformationEntry::getID() const
 Returns the DBO type the TransformationEntry is assigned to.
 @return DBO type the TransformationEntry is assigned to.
   */
-int TransformationEntry::getDBOType() const
+const std::string &TransformationEntry::getDBOType() const
 {
     return dbo_type_;
 }
@@ -332,7 +332,7 @@ order the transformations are applied to a buffer.
 @param trafo_id String identifier of the Transformation to be added.
 @return The created Transformation.
   */
-Transformation* Computation::addTransformation( DB_OBJECT_TYPE dbo_type, const std::string& trafo_id )
+Transformation* Computation::addTransformation( const std::string &dbo_type, const std::string& trafo_id )
 {
     boost::mutex::scoped_lock l( dispatch_mutex_ );
 
@@ -340,7 +340,7 @@ Transformation* Computation::addTransformation( DB_OBJECT_TYPE dbo_type, const s
 
     if( unusable_ )
     {
-        TransformationEntry* entry = new TransformationEntry( (int)dbo_type, trafo_id );
+        TransformationEntry* entry = new TransformationEntry( dbo_type, trafo_id );
         trafos_[ dbo_type ].push_back( entry );
 
         //register the transformation with the computation queue if sustainable
@@ -354,7 +354,7 @@ Transformation* Computation::addTransformation( DB_OBJECT_TYPE dbo_type, const s
         unsigned int size = trafos_[ dbo_type ].size();
 
         Configuration& config = addNewSubConfiguration( "TransformationEntry" );
-        TransformationEntry::getConfig( config, (int)dbo_type, trafo_id );
+        TransformationEntry::getConfig( config, dbo_type, trafo_id );
         generateSubConfigurable( config.getClassId(), config.getInstanceId() );
 
         assert( trafos_[ dbo_type ].size() > size );
@@ -370,13 +370,13 @@ order the transformations are applied to a buffer.
 @param dbo_type DBO type the Transformation is assigned to.
 @param trafo An external Transformation that will be cloned and added.
   */
-void Computation::addTransformation( DB_OBJECT_TYPE dbo_type, Transformation* trafo )
+void Computation::addTransformation( const std::string &dbo_type, Transformation* trafo )
 {
     boost::mutex::scoped_lock l( dispatch_mutex_ );
 
     if( unusable_ )
     {
-        TransformationEntry* entry = new TransformationEntry( (int)dbo_type );
+        TransformationEntry* entry = new TransformationEntry( dbo_type );
         entry->setTransformation( trafo );
         trafos_[ dbo_type ].push_back( entry );
 
@@ -389,7 +389,7 @@ void Computation::addTransformation( DB_OBJECT_TYPE dbo_type, Transformation* tr
         unsigned int size = trafos_[ dbo_type ].size();
 
         Configuration& config = addNewSubConfiguration( "TransformationEntry" );
-        TransformationEntry::getConfig( config, (int)dbo_type );
+        TransformationEntry::getConfig( config, dbo_type );
         generateSubConfigurable( config.getClassId(), config.getInstanceId() );
 
         assert( trafos_[ dbo_type ].size() > size );
@@ -424,11 +424,11 @@ void Computation::copyTransformations( Computation* comp )
         n = trafos.size();
         for( i=0; i<n; ++i )
         {
-            //common or DBO type specific?
-            if( it->first == -1 )
+            //common or DBO type specific? TODO what is this?
+            if( it->first == "" )
                 addCommonTransformation( trafos[ i ]->getTransformation() );
             else
-                addTransformation( (DB_OBJECT_TYPE)it->first, trafos[ i ]->getTransformation() );
+                addTransformation( it->first, trafos[ i ]->getTransformation() );
         }
     }
 }
@@ -463,7 +463,7 @@ void Computation::deleteTransformations()
 Deletes all stored trafos assigned to the given DBO type.
 @param dbo_type DBO type of the Transformation entries to be deleted.
   */
-void Computation::deleteTransformations( DB_OBJECT_TYPE dbo_type )
+void Computation::deleteTransformations( const std::string &dbo_type )
 {
     boost::mutex::scoped_lock l( dispatch_mutex_ );
 
@@ -490,7 +490,7 @@ Returns the idx'th transformation added for the given DBO type.
 @param idx Index of the desired Transformation.
 @return The desired Transformation.
   */
-Transformation* Computation::getTransformation( DB_OBJECT_TYPE dbo_type, int idx )
+Transformation* Computation::getTransformation( const std::string &dbo_type, int idx )
 {
     if( trafos_.find( dbo_type ) == trafos_.end() )
         throw std::runtime_error( "Computation: getTransformation: DBO type not found." );
@@ -514,8 +514,8 @@ Transformation* Computation::addCommonTransformation( const std::string& trafo_i
 
     if( unusable_ )
     {
-        TransformationEntry* entry = new TransformationEntry( -1, trafo_id );
-        trafos_[ -1 ].push_back( entry );
+        TransformationEntry* entry = new TransformationEntry( "", trafo_id );
+        trafos_[ "" ].push_back( entry );
 
         //register the transformation with the computation queue if sustainable
         if( entry->getTransformation()->isSustainable() )
@@ -525,15 +525,15 @@ Transformation* Computation::addCommonTransformation( const std::string& trafo_i
     }
     else
     {
-        unsigned int size = trafos_[ -1 ].size();
+        unsigned int size = trafos_[ "" ].size();
 
         Configuration& config = addNewSubConfiguration( "TransformationEntry" );
-        TransformationEntry::getConfig( config, -1, trafo_id );
+        TransformationEntry::getConfig( config, "", trafo_id );
         generateSubConfigurable( config.getClassId(), config.getInstanceId() );
 
-        assert( trafos_[ -1 ].size() > size );
+        assert( trafos_[ "" ].size() > size );
 
-        return trafos_[ -1 ].back()->getTransformation();
+        return trafos_[ "" ].back()->getTransformation();
     }
 }
 
@@ -551,9 +551,9 @@ void Computation::addCommonTransformation( Transformation* trafo )
 
     if( unusable_ )
     {
-        TransformationEntry* entry = new TransformationEntry( -1 );
+        TransformationEntry* entry = new TransformationEntry( "" );
         entry->setTransformation( trafo );
-        trafos_[ -1 ].push_back( entry );
+        trafos_[ "" ].push_back( entry );
 
         //register the transformation with the computation queue if sustainable
         if( entry->getTransformation()->isSustainable() )
@@ -561,15 +561,15 @@ void Computation::addCommonTransformation( Transformation* trafo )
     }
     else
     {
-        unsigned int size = trafos_[ -1 ].size();
+        unsigned int size = trafos_[ "" ].size();
 
         Configuration& config = addNewSubConfiguration( "TransformationEntry" );
-        TransformationEntry::getConfig( config, -1 );
+        TransformationEntry::getConfig( config, "" );
         generateSubConfigurable( config.getClassId(), config.getInstanceId() );
 
-        assert( trafos_[ -1 ].size() > size );
+        assert( trafos_[ "" ].size() > size );
 
-        TransformationEntry* entry = trafos_[ -1 ].back();
+        TransformationEntry* entry = trafos_[ "" ].back();
         entry->setTransformation( trafo );
 
         //register the transformation with the computation queue if sustainable
@@ -585,10 +585,10 @@ void Computation::deleteCommonTransformations()
 {
     boost::mutex::scoped_lock l( dispatch_mutex_ );
 
-    if( trafos_.find( -1 ) == trafos_.end() )
+    if( trafos_.find( "" ) == trafos_.end() )
         return;
 
-    Transformations& trafos = trafos_[ -1 ];
+    Transformations& trafos = trafos_[ "" ];
     unsigned int i, n = trafos.size();
     for( i=0; i<n; ++i )
     {
@@ -598,7 +598,7 @@ void Computation::deleteCommonTransformations()
         delete trafos[ i ];
     }
 
-    trafos_.erase( -1 );
+    trafos_.erase( "" );
 }
 
 /**
@@ -621,11 +621,11 @@ Returns the idx'th stored common transformation.
   */
 Transformation* Computation::getCommonTransformation( int idx )
 {
-    if( trafos_.find( -1 ) == trafos_.end() )
+    if( trafos_.find( "" ) == trafos_.end() )
         throw std::runtime_error( "Computation: getCommonTransformation: No common transformations set." );
-    if( idx < 0 || idx >= (signed)trafos_[ -1 ].size() )
+    if( idx < 0 || idx >= (signed)trafos_[ "" ].size() )
         throw std::runtime_error( "Computation: getCommonTransformation: Index out of bounds." );
-    return trafos_[ -1 ][ idx ]->getTransformation();
+    return trafos_[ "" ][ idx ]->getTransformation();
 }
 
 /**
@@ -700,7 +700,7 @@ void Computation::processBufferSlot( Buffer* buffer )
     //check buffer input filter if buffer is accepted
     if( shutdown_ || rule == BufferFilter::BLOCK )
     {
-        std::string msg = "[COMPUTATION:" + name() + "][FILTER] Blocked. DBO type=" + intToString( (int)buffer->getDBOType() );
+        std::string msg = "[COMPUTATION:" + name() + "][FILTER] Blocked. DBO type=" + buffer->dboType();
         filter_signal_( msg );
         return;
     }
@@ -709,7 +709,7 @@ void Computation::processBufferSlot( Buffer* buffer )
     if( !filter_->checkProperties( buffer ) )
     {
         std::string props = filter_->getErrorProperties( buffer );
-        std::string msg = "[COMPUTATION:" + name() + "][FILTER] Property-filtered. DBO type=" + intToString( (int)buffer->getDBOType() ) + props;
+        std::string msg = "[COMPUTATION:" + name() + "][FILTER] Property-filtered. DBO type=" + buffer->dboType() + props;
         filter_signal_( msg );
 
         return;
@@ -722,7 +722,7 @@ void Computation::processBufferSlot( Buffer* buffer )
         idle_ = false;
         ++buffers_in_cnt_;
 
-        std::string msg = "[COMPUTATION:" + name() + "][FILTER] Forwarded. DBO type=" + intToString( (int)buffer->getDBOType() );
+        std::string msg = "[COMPUTATION:" + name() + "][FILTER] Forwarded. DBO type=" + buffer->dboType();
         filter_signal_( msg );
 
         return;
@@ -744,9 +744,9 @@ by the input buffer filter and shallow copied.
   */
 bool Computation::transform( Buffer* buffer )
 {
-    int type = (int)buffer->getDBOType();
+    std::string type = buffer->dboType();
     if( use_common_ )
-        type = -1;
+        type = "";
 
     ++buffers_in_cnt_;
 
@@ -757,13 +757,13 @@ bool Computation::transform( Buffer* buffer )
         ++buffers_error_cnt_;
         logdbg << "Computation: transform: No trafo found";
 
-        std::string msg = "[COMPUTATION:" + name() + "][WRN] No trafo found. DBO type=" + intToString( (int)buffer->getDBOType() );
+        std::string msg = "[COMPUTATION:" + name() + "][WRN] No trafo found. DBO type=" + buffer->dboType();
         warn_signal_( msg );
 
         return false;
     }
 
-    logdbg << "Computation: transform: New pipe for buffer, dbo_type=" << (int)buffer->getDBOType();
+    logdbg << "Computation: transform: New pipe for buffer, dbo_type=" << buffer->dboType();
 
     //fetch trafos from the entries
     std::vector<TransformationEntry*>& trafo_entries = trafos_[ type ];
@@ -1064,7 +1064,7 @@ void Computation::generateSubConfigurable( std::string class_id, std::string ins
     if( class_id == "TransformationEntry" )
     {
         TransformationEntry* entry = new TransformationEntry( class_id, instance_id, this );
-        int dbo_type = entry->getDBOType();
+        std::string dbo_type = entry->getDBOType();
         trafos_[ dbo_type ].push_back( entry );
 
         //register the transformation with the computation queue if sustainable

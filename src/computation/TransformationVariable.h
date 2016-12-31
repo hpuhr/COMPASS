@@ -41,7 +41,7 @@ class TransformationVariablePropertyEntry : public Configurable
 {
 public:
     /// @brief Constructor
-    TransformationVariablePropertyEntry( DB_OBJECT_TYPE dbo_type,
+    TransformationVariablePropertyEntry( const std::string &dbo_type,
                                          const Property& property,
                                          DBOVariable* var=NULL );
     /// @brief Configurable constructor
@@ -54,29 +54,30 @@ public:
     virtual ~TransformationVariablePropertyEntry();
 
     /// @brief Sets the entries data
-    void setup( DB_OBJECT_TYPE dbo_type,
+    void setup( const std::string &dbo_type,
                 const Property& property,
                 DBOVariable* var );
 
     /// @brief Returns the DBO type that is assigned to the entry
-    DB_OBJECT_TYPE getDBOType() const;
+    const std::string &getDBOType() const;
     /// @brief Returns the entries Property
     Property getProperty() const;
     /// @brief Returns the DBOVariable that yielded the entry
     DBOVariable* getVariable();
 
     /// @brief Retrieves a configuration and fills in the given entry data
-    static void getConfig( Configuration& config, DB_OBJECT_TYPE dbo_type, const Property& prop, bool is_var );
+    static void getConfig( Configuration& config, const std::string &dbo_type, const Property& prop, bool is_var );
     /// @brief Retrieves a configuration and fills in the given entry data
-    static void getConfig( Configuration& config, DB_OBJECT_TYPE dbo_type, const std::string& id );
+    static void getConfig( Configuration& config, const std::string &dbo_type, const std::string& id );
 
 private:
     /// The entries DBO type as integer number
-    int dbo_type_;
+    std::string dbo_type_;
     /// The properties string identifier
     std::string id_;
-    /// The properties data type as integer number
-    int data_type_;
+    /// The properties data type
+    PropertyDataType data_type_;
+    std::string data_type_str_;
     /// DBOVariable assigned to the entry
     DBOVariable* var_;
     /// DBOVariable present flag
@@ -117,13 +118,13 @@ obtain a read set from all transformation variables.
 class TransformationVariable : public Configurable
 {
 public:
-    typedef std::map<DB_OBJECT_TYPE,TransformationVariablePropertyEntry*> PropertyMap;
+    typedef std::map<std::string,TransformationVariablePropertyEntry*> PropertyMap;
 
     /// @brief Constructor
     TransformationVariable( const std::string& name );
     /// @brief Constructor
     TransformationVariable( const std::string& name,
-                            PROPERTY_DATA_TYPE data_type,
+                            PropertyDataType data_type,
                             const std::string& default_id="" );
     /// @brief Configurable constructor
     TransformationVariable( std::string class_id, std::string instance_id, Configurable *parent );
@@ -133,15 +134,15 @@ public:
     ~TransformationVariable();
 
     /// @brief Adds a new Property for a specific DBO type
-    void addProperty( DB_OBJECT_TYPE dbo_type, const Property& prop, DBOVariable* var=NULL );
+    void addProperty( const std::string &dbo_type, const Property& prop, DBOVariable* var=NULL );
     /// @brief Adds a new Property for a specific DBO type
-    void addProperty( DB_OBJECT_TYPE dbo_type, const std::string& id );
+    void addProperty( const std::string &dbo_type, const std::string& id );
     /// @brief Adds a one or more new properties from the given DBOVariable
     void addProperty( DBOVariable* var );
     /// @brief Sets the variables properties from the given DBOVariable
     void setProperties( DBOVariable* var );
     /// @brief Removes the Property assigned to the given DBO type
-    void removeProperty( DB_OBJECT_TYPE dbo_type );
+    void removeProperty( const std::string &dbo_type );
     /// @brief Clears all added properties
     void clearProperties();
     /// @brief Sets the default Property
@@ -154,19 +155,21 @@ public:
     /// @brief Returns the variables name
     const std::string& name() const;
     /// @brief Checks if the variable obtains a Property for the given DBO type
-    bool hasProperty( DB_OBJECT_TYPE dbo_type ) const;
+    bool hasProperty( const std::string &dbo_type ) const;
     /// @brief Checks if this variable is marked as optional
     bool isOptional() const;
     /// @brief Returns the data type of this variable
-    PROPERTY_DATA_TYPE dataType() const;
+    PropertyDataType dataType() const;
     /// @brief Checks if the data type check is enabled
     bool dataTypeChecked() const;
     /// @brief Returns the property that is assigned the given DBO type
-    Property getProperty( DB_OBJECT_TYPE dbo_type );
+    Property getProperty( const std::string& dbo_type );
     /// @brief Sets the variable optional
     void setOptional( bool optional );
+    /// @brief Returns the if correct Property exists in the buffer
+    bool hasProperty( Buffer* buffer );
     /// @brief Returns the correct Property in the buffer according to its DBO type
-    Property* property( Buffer* buffer );
+    const Property& property( Buffer* buffer );
     /// @brief Returns the correct Property index in the buffer according to its DBO type
     int propertyIndex( Buffer* buffer );
     /// @brief Returns all added properties
@@ -175,7 +178,7 @@ public:
     bool getDefaultProperty( Property& prop ) const;
 
     /// @brief Sets the variables data type
-    void setDataType( PROPERTY_DATA_TYPE data_type, bool clear=false );
+    void setDataType( PropertyDataType data_type, bool clear=false );
     /// @brief Enables/disables the data type check for newly added properties
     void enableDataTypeCheck( bool enable );
 
@@ -192,7 +195,7 @@ public:
     /// @brief Retrieves a configuration and fills in the given variable data
     static void getConfig( Configuration& config,
                            const std::string& name,
-                           PROPERTY_DATA_TYPE data_type,
+                           PropertyDataType data_type,
                            const std::string& default_id );
 
 
@@ -201,7 +204,7 @@ protected:
 
 private:
     /// @brief Checks if the given DBOVariable exists in the DBO manager
-    bool existsDBOVariable( DB_OBJECT_TYPE dbo_type, const std::string& id );
+    bool existsDBOVariable( const std::string & dbo_type, const std::string& id );
     /// @brief Deletes all properties including the default property
     void deleteEntries();
     /// @brief Checks all properties including the default property against the current data type
@@ -216,7 +219,8 @@ private:
     /// Optional flag
     bool optional_;
     /// Variable data type
-    int data_type_;
+    PropertyDataType data_type_;
+    std::string data_type_str_;
     /// Data type check flag
     bool check_data_type_;
 };
@@ -252,7 +256,7 @@ public:
     /// @brief Adds the given variable by copying it
     TransformationVariable* addVariable( TransformationVariable* var );
     /// @brief Adds a new variable
-    TransformationVariable* addVariable( const std::string& name, PROPERTY_DATA_TYPE data_type, const std::string& default_id="" );
+    TransformationVariable* addVariable( const std::string& name, PropertyDataType data_type, const std::string& default_id="" );
     /// @brief Removes and deletes the variable of the given name
     void removeVariable( const std::string& name );
     /// @brief Clears all variables

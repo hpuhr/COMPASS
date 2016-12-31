@@ -300,9 +300,10 @@ std::string SQLGenerator::getContainsStatement (std::string table_name)
         db_type_set_=true;
     }
 
-    if (db_type_ == DB_TYPE_SQLITE)
-        return "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='" + table_name + "';";
-    else if (db_type_ == DB_TYPE_MYSQLpp || db_type_ == DB_TYPE_MYSQLCon)
+//    if (db_type_ == DB_TYPE_SQLITE)
+//        return "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='" + table_name + "';";
+//    else  || db_type_ == DB_TYPE_MYSQLCon
+    if (db_type_ == DB_TYPE_MYSQLpp)
     {
         //return "SELECT COUNT(*)  FROM information_schema.tables WHERE table_schema = '"+db_interface_->getDatabaseName()+"' AND table_name ='" + table_name + "';";
         return "SHOW TABLES LIKE '"+table_name+"';";
@@ -476,7 +477,7 @@ std::string SQLGenerator::createDBInsertStringBind(Buffer *buffer, std::string t
         db_type_set_=true;
     }
 
-    if (db_type_ == DB_TYPE_MYSQLpp || db_type_ == DB_TYPE_MYSQLCon)
+    if (db_type_ == DB_TYPE_MYSQLpp) // || db_type_ == DB_TYPE_MYSQLCon
     {
         //const std::vector <Property> &properties = list.getProperties();
         ss << "(";
@@ -492,9 +493,10 @@ std::string SQLGenerator::createDBInsertStringBind(Buffer *buffer, std::string t
         ss << ")";
     }
 
-    if (db_type_ == DB_TYPE_SQLITE)
-        ss << " VALUES (@VAR0, ";
-    else if (db_type_ == DB_TYPE_MYSQLpp || db_type_ == DB_TYPE_MYSQLCon)
+//    if (db_type_ == DB_TYPE_SQLITE)
+//        ss << " VALUES (@VAR0, ";
+//    else   || db_type_ == DB_TYPE_MYSQLCon
+    if (db_type_ == DB_TYPE_MYSQLpp)
         ss << " VALUES (";
     else
         throw std::runtime_error ("SQLGenerator: createDBCreateString: unknown db type");
@@ -502,12 +504,13 @@ std::string SQLGenerator::createDBInsertStringBind(Buffer *buffer, std::string t
 
     for (unsigned int cnt=0; cnt < size; cnt++)
     {
-        if (db_type_ == DB_TYPE_SQLITE)
-            ss << "@VAR"+String::intToString(cnt+1);
-        else if (db_type_ == DB_TYPE_MYSQLpp)
+//        if (db_type_ == DB_TYPE_SQLITE)
+//            ss << "@VAR"+String::intToString(cnt+1);
+//        else
+        if (db_type_ == DB_TYPE_MYSQLpp)
             ss << "%"+String::intToString(cnt);
-        else if (db_type_ == DB_TYPE_MYSQLCon)
-            ss << "?";
+//        else if (db_type_ == DB_TYPE_MYSQLCon)
+//            ss << "?";
         else
             throw std::runtime_error ("SQLGenerator: createDBInsertStringBind: unknown database type");
 
@@ -624,9 +627,10 @@ std::string SQLGenerator::createDBCreateString (Buffer *buffer, std::string tabl
         db_type_set_=true;
     }
 
-    if (db_type_ == DB_TYPE_SQLITE)
-        ss << "AUTOINCREMENT, ";
-    else if (db_type_ == DB_TYPE_MYSQLpp || db_type_ == DB_TYPE_MYSQLCon)
+//    if (db_type_ == DB_TYPE_SQLITE)
+//        ss << "AUTOINCREMENT, ";
+//    else  || db_type_ == DB_TYPE_MYSQLCon
+    if (db_type_ == DB_TYPE_MYSQLpp)
         ss << "AUTO_INCREMENT, ";
     else
         throw std::runtime_error ("SQLGenerator: createDBCreateString: unknown db type");

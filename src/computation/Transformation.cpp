@@ -146,7 +146,7 @@ bool Transformation::doExecute()
     {
         /// @todo Hidden properties not automatically handled here...
         resetProperties();
-        bufferFromOutputVariables( &output_, input_->getDBOType() );
+        bufferFromOutputVariables( &output_, input_->dboType() );
         createInputProperties( input_ );
         createOutputProperties( output_ );
         ok = execute();
@@ -325,7 +325,7 @@ CAREFUL: only transfer full buffers!
 void Transformation::outputReady()
 {
     //nothing to transfer.
-    if( !output_ || output_->getSize() == 0 )
+    if( !output_ || output_->size() == 0 )
         throw std::runtime_error( "Transformation::outputReady(): Nothing to transfer! Empty or NULL." );
 
     if( !ready_buffer_ )
@@ -340,7 +340,7 @@ void Transformation::outputReady()
             throw std::runtime_error( "Transformation::outputReady(): Only call once when appending." );
 
         //add to existing ready buffer
-        ready_buffer_->seizeBuffer( output_ );
+        ready_buffer_->seizeBuffer( *output_ );
         delete output_;
         output_ = NULL;
     }
@@ -369,7 +369,7 @@ Switches to a new output buffer. Maybe backup your old one before calling this.
 void Transformation::changeBuffer()
 {
     output_ = NULL;
-    bufferFromOutputVariables( &output_, input_->getDBOType() );
+    bufferFromOutputVariables( &output_, input_->dboType() );
 }
 
 /**
@@ -435,24 +435,27 @@ bool Transformation::getPropertyIndex( const std::string& var_name, bool is_meta
     if( !input_ )
         return false;
 
-    DB_OBJECT_TYPE type = input_->getDBOType();
+    const std::string &type = input_->dboType();
 
     if( is_meta )
     {
-        if( !DBObjectManager::getInstance().existsDBObject( DBO_UNDEFINED ) ||
-            !DBObjectManager::getInstance().existsDBOVariable( DBO_UNDEFINED, var_name ) ||
-            !DBObjectManager::getInstance().getDBOVariable( DBO_UNDEFINED, var_name )->existsIn( type ) )
-            return false;
+        // TODO
+        assert (false);
 
-        try
-        {
-            const std::string& id = DBObjectManager::getInstance().getDBOVariable( DBO_UNDEFINED, var_name )->getFor( type )->id_;
-            index = input_->getPropertyList()->getPropertyIndex( id );
-        }
-        catch( ... )
-        {
-            return false;
-        }
+//        if( !DBObjectManager::getInstance().existsDBObject( DBO_UNDEFINED ) ||
+//            !DBObjectManager::getInstance().existsDBOVariable( DBO_UNDEFINED, var_name ) ||
+//            !DBObjectManager::getInstance().getDBOVariable( DBO_UNDEFINED, var_name )->existsIn( type ) )
+//            return false;
+
+//        try
+//        {
+//            const std::string& id = DBObjectManager::getInstance().getDBOVariable( DBO_UNDEFINED, var_name )->getFor( type )->id_;
+//            index = input_->getPropertyList()->getPropertyIndex( id );
+//        }
+//        catch( ... )
+//        {
+//            return false;
+//        }
 
         return true;
     }
@@ -462,8 +465,8 @@ bool Transformation::getPropertyIndex( const std::string& var_name, bool is_meta
 
     try
     {
-        const std::string& id = DBObjectManager::getInstance().getDBOVariable( type, var_name )->id_;
-        index = input_->getPropertyList()->getPropertyIndex( id );
+        const std::string& id = DBObjectManager::getInstance().getDBOVariable( type, var_name )->getId();
+        index = input_->properties().getPropertyIndex( id );
     }
     catch( ... )
     {
@@ -480,13 +483,13 @@ bool Transformation::getPropertyIndex( DBOVariable* var, unsigned int& index )
 {
     if( !var )
         return false;
-    DB_OBJECT_TYPE dbo_type = input_->getDBOType();
+    const std::string &dbo_type = input_->dboType();
     if( !var->existsIn( dbo_type ) )
         return false;
     DBOVariable* var_for_dbo_type = var->getFor( dbo_type );
-    if( !input_->getPropertyList()->hasProperty( var_for_dbo_type->id_ ) )
+    if( !input_->properties().hasProperty( var_for_dbo_type->getId() ) )
         return false;
-    index = input_->getPropertyList()->getPropertyIndex( var_for_dbo_type->id_ );
+    index = input_->properties().getPropertyIndex(var_for_dbo_type->getId() );
     return true;
 }
 

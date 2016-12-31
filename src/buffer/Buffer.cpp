@@ -55,8 +55,8 @@ Buffer::Buffer()
  * \param type DBO type
  */
 Buffer::Buffer(PropertyList properties, std::string dbo_type)
-: properties_(properties), dbo_type_(dbo_type)
-//, first_write_(true), last_one_(false)
+: properties_(properties), dbo_type_(dbo_type), last_one_(false)
+//, first_write_(true),
 //search_active_(false), search_key_pos_(-1), search_key_min_ (-1), search_key_max_ (-1)
 {
     logdbg  << "Buffer: constructor: start";
@@ -342,8 +342,10 @@ ArrayListTemplate<std::string> &Buffer::getString (const std::string &id)
     return arrays_string_[id];
 }
 
-//void Buffer::seizeBuffer (Buffer *org_buffer)
-//{
+void Buffer::seizeBuffer (Buffer &org_buffer)
+{
+    // TODO
+    assert (false);
 //    logdbg  << "Buffer: seizeBuffer: start";
 
 //    logdbg  << "Buffer: seizeBuffer: this: cont " << containers_.size() << " max_index " << max_index_ << " max_used_index " << max_used_index_ << " first " << first_write_;
@@ -388,7 +390,7 @@ ArrayListTemplate<std::string> &Buffer::getString (const std::string &id)
 //    }
 
 //    logdbg  << "Buffer: seizeBuffer: end";
-//}
+}
 
 //Buffer *Buffer::transferData ()
 //{
@@ -407,11 +409,14 @@ ArrayListTemplate<std::string> &Buffer::getString (const std::string &id)
 //    return buffer;
 //}
 
-///**
-// * Creates exact copy of this buffer, but data contents are shallow copied by getting shallow copies of the PropertyContainers.
-// */
-//Buffer *Buffer::getShallowCopy ()
-//{
+/**
+ * Creates exact copy of this buffer, but data contents are shallow copied by getting shallow copies of the PropertyContainers.
+ */
+Buffer *Buffer::getShallowCopy ()
+{
+    //TODO FIXME
+    assert (false);
+    return new Buffer();
 //    Buffer *shallow_copy = new Buffer (member_list_, dbo_type_);
 //    shallow_copy->id_ = id_;
 
@@ -440,12 +445,12 @@ ArrayListTemplate<std::string> &Buffer::getString (const std::string &id)
 //    }
 
 //    return shallow_copy;
-//}
+}
 
-//bool Buffer::isFull ()
-//{
-//    return (max_used_index_ == max_index_);
-//}
+bool Buffer::isFull ()
+{
+    return size()%BUFFER_ARRAY_SIZE == 0;
+}
 /**
  * Only to be called if all values have been written into buffer. Key search is not updated on by
  * setIndex or incrementBuffer!

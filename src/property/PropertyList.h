@@ -170,25 +170,25 @@ public:
      *
      * \exception std::runtime_error if identifier not found
      */
-//    unsigned int getPropertyIndex (std::string id)
-//    {
-//        logdbg << "PropertyList: getPropertyIndex: start";
-//        if (!hasProperty(id))
-//            throw std::runtime_error ("PropteryList: getPropertyIndex: property "+id+" does not exists");
+    unsigned int getPropertyIndex (const std::string &id) const
+    {
+        logdbg << "PropertyList: getPropertyIndex: start";
+        if (!hasProperty(id))
+            throw std::runtime_error ("PropteryList: getPropertyIndex: property "+id+" does not exists");
 
-//        std::vector <Property *>::iterator it;
+        std::vector <Property>::const_iterator it;
 
-//        unsigned int cnt=0;
-//        for (it=properties_.begin(); it != properties_.end(); it++)
-//        {
-//            if ((*it)->id_.compare (id) == 0)
-//            {
-//                return cnt;
-//            }
-//            cnt++;
-//        }
-//        throw std::runtime_error("PropteryList: getPropertyIndex: property "+id+" not found");
-//    };
+        unsigned int cnt=0;
+        for (it=properties_.begin(); it != properties_.end(); it++)
+        {
+            if (it->getId().compare (id) == 0)
+            {
+                return cnt;
+            }
+            cnt++;
+        }
+        throw std::runtime_error("PropteryList: getPropertyIndex: property "+id+" not found");
+    };
 
     /// @brief Returns flag indicating if property is in list
     bool hasProperty (std::string id) const
@@ -205,6 +205,11 @@ public:
         return false;
     };
 
+    /// @brief Returns flag indicating if property with given indexis in list
+    bool hasProperty (unsigned int index) const
+    {
+        return index < properties_.size();
+    }
     /// @brief Removes all properties
     void clear ()
     {

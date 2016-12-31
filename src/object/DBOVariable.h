@@ -137,7 +137,7 @@ public:
   bool isMetaVariable ();
 
   /// @brief Returns container with sub variable names, dbo type -> sub variable name
-  std::map <std::string, std::string> &getSubVariables () { return sub_variables_; }
+  const std::map <std::string, std::string> &getSubVariables () { return sub_variables_; }
   /// @brief Sets sub-variable name for DBO of type
   void setSubVariable (const std::string &type, std::string name);
 

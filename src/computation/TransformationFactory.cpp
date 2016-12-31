@@ -15,12 +15,15 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <cassert>
+
 #include "TransformationFactory.h"
-#include "CalculateLines.h"
-#include "CalculateHistogram.h"
-#include "CalculatePosition.h"
-#include "CalculatePosition2D.h"
-#include "CalculateHistogram2D.h"
+#include "Transformation.h"
+//#include "CalculateLines.h"
+//#include "CalculateHistogram.h"
+//#include "CalculatePosition.h"
+//#include "CalculatePosition2D.h"
+//#include "CalculateHistogram2D.h"
 
 
 /**
@@ -57,11 +60,15 @@ you want to use them.
 void TransformationFactory::registerAll()
 {
     //register trafos here
-    registerTransformation( new CalculatePosition    );
-    registerTransformation( new CalculatePosition2D  );
-    registerTransformation( new CalculateHistogram   );
-    registerTransformation( new CalculateHistogram2D );
-    registerTransformation( new CalculateLines       );
+
+    // TODO
+    assert (false);
+
+//    registerTransformation( new CalculatePosition    );
+//    registerTransformation( new CalculatePosition2D  );
+//    registerTransformation( new CalculateHistogram   );
+//    registerTransformation( new CalculateHistogram2D );
+//    registerTransformation( new CalculateLines       );
 }
 
 /**

@@ -587,63 +587,63 @@ Buffer *MySQLppConnection::getColumnList(std::string table) // buffer of column 
     return buffer;
 }
 
-void MySQLppConnection::performanceTest ()
-{
-    //SELECT sd_radar.POS_SYS_X_NM, sd_radar.POS_SYS_Y_NM, sd_radar.MODEC_CODE_FT, sd_radar.TOD, sd_radar.DETECTION_TYPE, sd_radar.DS_ID, sd_radar.REC_NUM FROM sd_radar ORDER BY REC_NUM;'
-    boost::posix_time::ptime start_time;
-    boost::posix_time::ptime stop_time;
+//void MySQLppConnection::performanceTest ()
+//{
+//    //SELECT sd_radar.POS_SYS_X_NM, sd_radar.POS_SYS_Y_NM, sd_radar.MODEC_CODE_FT, sd_radar.TOD, sd_radar.DETECTION_TYPE, sd_radar.DS_ID, sd_radar.REC_NUM FROM sd_radar ORDER BY REC_NUM;'
+//    boost::posix_time::ptime start_time;
+//    boost::posix_time::ptime stop_time;
 
-    unsigned int num_reads=20;
-    unsigned int chunk_size=100000;
+//    unsigned int num_reads=20;
+//    unsigned int chunk_size=100000;
 
-    last_key_=0;
+//    last_key_=0;
 
-    loginf  << "MySQLppConnection: performanceTest: start";
+//    loginf  << "MySQLppConnection: performanceTest: start";
 
-    start_time = boost::posix_time::microsec_clock::local_time();
+//    start_time = boost::posix_time::microsec_clock::local_time();
 
-    DBCommand command;
-    command.setCommandString("SELECT sd_radar.REC_NUM, sd_radar.POS_SYS_X_NM, sd_radar.POS_SYS_Y_NM, sd_radar.MODEC_CODE_FT, sd_radar.TOD, sd_radar.DETECTION_TYPE, sd_radar.DS_ID FROM sd_radar;");
-    //ORDER BY REC_NUM
+//    DBCommand command;
+//    command.setCommandString("SELECT sd_radar.REC_NUM, sd_radar.POS_SYS_X_NM, sd_radar.POS_SYS_Y_NM, sd_radar.MODEC_CODE_FT, sd_radar.TOD, sd_radar.DETECTION_TYPE, sd_radar.DS_ID FROM sd_radar;");
+//    //ORDER BY REC_NUM
 
-    PropertyList list;
-    list.addProperty ("id", PropertyDataType::INT);
-    list.addProperty ("posx", PropertyDataType::DOUBLE);
-    list.addProperty ("posy", PropertyDataType::DOUBLE);
-    list.addProperty ("modec", PropertyDataType::INT);
-    list.addProperty ("time", PropertyDataType::DOUBLE);
-    list.addProperty ("det", PropertyDataType::INT);
-    list.addProperty ("ds", PropertyDataType::INT);
-    command.setPropertyList (list);
+//    PropertyList list;
+//    list.addProperty ("id", PropertyDataType::INT);
+//    list.addProperty ("posx", PropertyDataType::DOUBLE);
+//    list.addProperty ("posy", PropertyDataType::DOUBLE);
+//    list.addProperty ("modec", PropertyDataType::INT);
+//    list.addProperty ("time", PropertyDataType::DOUBLE);
+//    list.addProperty ("det", PropertyDataType::INT);
+//    list.addProperty ("ds", PropertyDataType::INT);
+//    command.setPropertyList (list);
 
-    //  prepareCommand (&command);
+//    //  prepareCommand (&command);
 
-    //  for (unsigned int cnt=0; cnt < num_reads; cnt++)
-    //  {
-    //      DBResult *result = stepPreparedCommand(chunk_size);
-    //      Buffer *buffer = result->getBuffer();
-    //      delete result;
-    //      delete buffer;
-    //  }
-    //
-    //  finalizeCommand ();
+//    //  for (unsigned int cnt=0; cnt < num_reads; cnt++)
+//    //  {
+//    //      DBResult *result = stepPreparedCommand(chunk_size);
+//    //      Buffer *buffer = result->getBuffer();
+//    //      delete result;
+//    //      delete buffer;
+//    //  }
+//    //
+//    //  finalizeCommand ();
 
-    for (unsigned int cnt=0; cnt < num_reads; cnt++)
-    {
-        DBResult *result = readBulkCommand(&command,
-                "SELECT sd_radar.REC_NUM, sd_radar.POS_SYS_X_NM, sd_radar.POS_SYS_Y_NM, sd_radar.MODEC_CODE_FT, sd_radar.TOD, sd_radar.DETECTION_TYPE, sd_radar.DS_ID FROM sd_radar",
-                "",  chunk_size);
-        Buffer *buffer = result->getBuffer();
-        delete result;
-        delete buffer;
-    }
+//    for (unsigned int cnt=0; cnt < num_reads; cnt++)
+//    {
+//        DBResult *result = readBulkCommand(&command,
+//                "SELECT sd_radar.REC_NUM, sd_radar.POS_SYS_X_NM, sd_radar.POS_SYS_Y_NM, sd_radar.MODEC_CODE_FT, sd_radar.TOD, sd_radar.DETECTION_TYPE, sd_radar.DS_ID FROM sd_radar",
+//                "",  chunk_size);
+//        Buffer *buffer = result->getBuffer();
+//        delete result;
+//        delete buffer;
+//    }
 
-    stop_time = boost::posix_time::microsec_clock::local_time();
-    boost::posix_time::time_duration diff = stop_time - start_time;
-    double load_time = diff.total_milliseconds()/1000.0;
+//    stop_time = boost::posix_time::microsec_clock::local_time();
+//    boost::posix_time::time_duration diff = stop_time - start_time;
+//    double load_time = diff.total_milliseconds()/1000.0;
 
-    loginf  << "MySQLppConnection: performanceTest: end after load time " << load_time << "s";
-}
+//    loginf  << "MySQLppConnection: performanceTest: end after load time " << load_time << "s";
+//}
 
 //DBResult *MySQLppConnection::readBulkCommand (DBCommand *command, std::string main_statement, std::string order_statement, unsigned int max_results)
 //{

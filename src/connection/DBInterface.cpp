@@ -40,7 +40,7 @@
 #include "DBResult.h"
 #include "MetaDBTable.h"
 #include "MySQLppConnection.h"
-#include "MySQLConConnection.h"
+//#include "MySQLConConnection.h"
 #include "SQLGenerator.h"
 //#include "SQLiteConnection.h"
 //#include "StructureDescriptionManager.h"
@@ -136,20 +136,20 @@ void DBInterface::initConnection (DBConnectionInfo *info)
 
     assert (!connection_);
 
-    if (info->getType() == DB_TYPE_SQLITE)
-    {
-        //connection_ = new SQLiteConnection (info);
-        throw std::runtime_error ("DBInterface: initConnection: SQLite3 connection not supported at the moment");
-    }
-    else if (info->getType() == DB_TYPE_MYSQLpp)
+//    if (info->getType() == DB_TYPE_SQLITE)
+//    {
+//        //connection_ = new SQLiteConnection (info);
+//        throw std::runtime_error ("DBInterface: initConnection: SQLite3 connection not supported at the moment");
+//    }
+    if (info->getType() == DB_TYPE_MYSQLpp)
     {
         connection_ = new MySQLppConnection (info);
         //throw std::runtime_error ("DBInterface: initConnection: MySQL++ connection not supported at the moment");
     }
-    else if (info->getType() == DB_TYPE_MYSQLCon)
-    {
-        connection_ = new MySQLConConnection (info);
-    }
+//    else if (info->getType() == DB_TYPE_MYSQLCon)
+//    {
+//        connection_ = new MySQLConConnection (info);
+//    }
     else
         throw std::runtime_error ("DBInterface::initConnection: unknown db type");
 

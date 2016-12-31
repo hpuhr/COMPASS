@@ -26,7 +26,7 @@
 #define DBCONNECTIONINFO_H_
 
 /// Database system identifier
-enum DB_CONNECTION_TYPE { DB_TYPE_SQLITE=0, DB_TYPE_MYSQLpp, DB_TYPE_MYSQLCon };
+enum DB_CONNECTION_TYPE { DB_TYPE_MYSQLpp=0 }; // DB_TYPE_SQLITE=0, DB_TYPE_MYSQLCon
 
 /**
  * @brief Base interface for definition of a used database system

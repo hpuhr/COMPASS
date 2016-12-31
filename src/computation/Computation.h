@@ -54,7 +54,7 @@ class TransformationEntry : public Configurable
 {
 public:
     /// @brief Constructor
-    TransformationEntry( int dbo_type,
+    TransformationEntry( const std::string &dbo_type,
                          const std::string& id="" );
     /// @brief Configurable constructor
     TransformationEntry( const std::string& class_id,
@@ -66,7 +66,7 @@ public:
     /// @brief Returns the transformation string id
     const std::string& getID() const;
     /// @brief Returns the entries DBO type
-    int getDBOType() const;
+    const std::string & getDBOType() const;
     /// @brief Returns the stored transformation
     Transformation* getTransformation();
 
@@ -76,7 +76,7 @@ public:
     void setTransformation( const std::string& id );
 
     /// @brief Retrieves a configuration and fills in the given transformation entry data
-    static void getConfig( Configuration& config, int dbo_type, const std::string& id="" );
+    static void getConfig( Configuration& config, const std::string &dbo_type, const std::string& id="" );
 
     virtual void generateSubConfigurable( std::string class_id, std::string instance_id );
 
@@ -87,7 +87,7 @@ private:
     /// The string id of the stored transformation
     std::string id_;
     /// The DBO type the entry is assigned to
-    int dbo_type_;
+    std::string dbo_type_;
     /// The stored transformation
     Transformation* trafo_;
 };
@@ -143,7 +143,7 @@ public:
     friend class ComputationThread;
 
     typedef std::vector<TransformationEntry*> Transformations;
-    typedef std::map<int,Transformations> TransformationMap;
+    typedef std::map<std::string,Transformations> TransformationMap;
     typedef std::vector<ComputationPipeline*> ComputationPipelines;
     typedef std::vector<Buffer*> BufferQueue;
 
@@ -157,17 +157,17 @@ public:
     virtual ~Computation();
 
     /// @brief Adds a new transformation for the given DBO type
-    Transformation* addTransformation( DB_OBJECT_TYPE dbo_type, const std::string& trafo_id );
+    Transformation* addTransformation( const std::string &dbo_type, const std::string& trafo_id );
     /// @brief Adds a new transformation for the given DBO type
-    void addTransformation( DB_OBJECT_TYPE dbo_type, Transformation* trafo );
+    void addTransformation( const std::string &dbo_type, Transformation* trafo );
     /// @brief Deepcopies the transformations of the given Computation
     void copyTransformations( Computation* comp );
     /// @brief Deletes all added transformations
     void deleteTransformations();
     /// @brief Deletes all transformations added for the given DBO type
-    void deleteTransformations( DB_OBJECT_TYPE dbo_type );
+    void deleteTransformations( const std::string &dbo_type );
     /// @brief Returns the idx'th transformation added for the given DBO type
-    Transformation* getTransformation( DB_OBJECT_TYPE dbo_type, int idx );
+    Transformation* getTransformation( const std::string &dbo_type, int idx );
 
     /// @brief Adds a new transformation common to all DBO types
     Transformation* addCommonTransformation( const std::string& trafo_id );

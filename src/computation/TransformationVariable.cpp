@@ -31,7 +31,7 @@ Constructor.
 @param property The entries Property.
 @param var Optional DBOVariable to be stored with the entry.
  */
-TransformationVariablePropertyEntry::TransformationVariablePropertyEntry( DB_OBJECT_TYPE dbo_type,
+TransformationVariablePropertyEntry::TransformationVariablePropertyEntry( const std::string &dbo_type,
         const Property& property,
         DBOVariable* var )
 {
@@ -49,15 +49,15 @@ TransformationVariablePropertyEntry::TransformationVariablePropertyEntry( std::s
         std::string instance_id,
         Configurable *parent )
 :   Configurable( class_id, instance_id, parent ),
-    dbo_type_( DBO_UNDEFINED ),
+    dbo_type_( "" ),
     id_( "" ),
-    data_type_( P_TYPE_INT ),
+    data_type_( PropertyDataType::INT ), //TODO HACK
     var_( NULL ),
     has_variable_( false )
 {
-    registerParameter( "dbo_type", &dbo_type_, (int)DBO_UNDEFINED );
+    registerParameter( "dbo_type", &dbo_type_, "" );
     registerParameter( "id", &id_, "" );
-    registerParameter( "data_type", &data_type_, (int)P_TYPE_INT );
+    registerParameter( "data_type_str", &data_type_str_, "" );
     registerParameter( "has_variable", &has_variable_, false );
 }
 
@@ -88,11 +88,11 @@ Retrieves a Configuration with the given data filled in. Use this method for you
 @param property The entries Property.
 @param is_var Flag if the Property was added to the TransformationVariable from a DBOVariable.
  */
-void TransformationVariablePropertyEntry::getConfig( Configuration& config, DB_OBJECT_TYPE dbo_type, const Property& prop, bool is_var )
+void TransformationVariablePropertyEntry::getConfig( Configuration& config, const std::string &dbo_type, const Property& prop, bool is_var )
 {
-    config.addParameterInt( "dbo_type", (int)dbo_type );
-    config.addParameterString( "id", prop.id_ );
-    config.addParameterInt( "data_type", (int)prop.data_type_int_ );
+    config.addParameterString( "dbo_type", dbo_type );
+    config.addParameterString( "id", prop.getId() );
+    config.addParameterString( "data_type_str", prop.asDataTypeString() );
     config.addParameterBool( "has_variable", is_var );
 }
 
@@ -102,11 +102,11 @@ Retrieves a Configuration with the given data filled in. Use this method for you
 @param dbo_type DBO type assigned to the entry.
 @param id Property string identifier.
  */
-void TransformationVariablePropertyEntry::getConfig( Configuration& config, DB_OBJECT_TYPE dbo_type, const std::string& id )
+void TransformationVariablePropertyEntry::getConfig( Configuration& config, const std::string &dbo_type, const std::string& id )
 {
-    config.addParameterInt( "dbo_type", (int)dbo_type );
+    config.addParameterString( "dbo_type", dbo_type );
     config.addParameterString( "id", id );
-    config.addParameterInt( "data_type", (int)P_TYPE_INT );
+    config.addParameterString( "data_type_str", Property::asString(PropertyDataType::INT) );
     config.addParameterBool( "has_variable", false );
 }
 
@@ -116,13 +116,14 @@ Sets the entries data.
 @param property The entries Property.
 @param is_var Flag if the Property was added to the TransformationVariable from a DBOVariable.
  */
-void TransformationVariablePropertyEntry::setup( DB_OBJECT_TYPE dbo_type,
+void TransformationVariablePropertyEntry::setup( const std::string &dbo_type,
         const Property& property,
         DBOVariable* var )
 {
     dbo_type_ = dbo_type;
-    id_ = property.id_;
-    data_type_ = property.data_type_int_;
+    id_ = property.getId();
+    data_type_ = property.getDataType();
+    data_type_str_ = property.asDataTypeString();
     var_ = var;
     has_variable_ = ( var != NULL );
 }
@@ -131,9 +132,9 @@ void TransformationVariablePropertyEntry::setup( DB_OBJECT_TYPE dbo_type,
 Returns the DBO type that is assigned to the entry.
 @return DBO type that is assigned to the entry.
  */
-DB_OBJECT_TYPE TransformationVariablePropertyEntry::getDBOType() const
+const std::string &TransformationVariablePropertyEntry::getDBOType() const
 {
-    return (DB_OBJECT_TYPE)dbo_type_;
+    return dbo_type_;
 }
 
 /**
@@ -142,7 +143,7 @@ Returns the Property that is stored in the entry.
  */
 Property TransformationVariablePropertyEntry::getProperty() const
 {
-    return Property( id_, (PROPERTY_DATA_TYPE)data_type_ );
+    return Property( id_, data_type_ );
 }
 
 /**
@@ -153,9 +154,9 @@ DBOVariable* TransformationVariablePropertyEntry::getVariable()
 {
     if( has_variable_ && !var_ )
     {
-        if( !DBObjectManager::getInstance().existsDBOVariable( (DB_OBJECT_TYPE)dbo_type_, id_ ) )
+        if( !DBObjectManager::getInstance().existsDBOVariable( dbo_type_, id_ ) )
             throw std::runtime_error( "TransformationVariablePropertyEntry: getVariable: Saved property is not a dbo variable." );
-        var_ = DBObjectManager::getInstance().getDBOVariable( (DB_OBJECT_TYPE)dbo_type_, id_ );
+        var_ = DBObjectManager::getInstance().getDBOVariable( dbo_type_, id_ );
     }
 
     return var_;
@@ -174,7 +175,8 @@ TransformationVariable::TransformationVariable( const std::string& name )
 :   name_( name ),
     default_prop_( NULL ),
     optional_( false ),
-    data_type_( P_TYPE_INT ),
+    data_type_( PropertyDataType::INT ),
+    data_type_str_ ( Property::asString(PropertyDataType::INT)),
     check_data_type_( false )
 {
 }
@@ -187,15 +189,16 @@ will be used together with the variables data type to set up a default Property.
 @param data_type The variables data type.
 @param default_id Optional default Property id.
  */
-TransformationVariable::TransformationVariable( const std::string& name, PROPERTY_DATA_TYPE data_type, const std::string& default_id )
+TransformationVariable::TransformationVariable( const std::string& name, PropertyDataType data_type, const std::string& default_id )
 :   name_( name ),
     default_prop_( NULL ),
     optional_( false ),
     data_type_( data_type ),
+    data_type_str_ (Property::asString(data_type)),
     check_data_type_( true )
 {
     if( !default_id.empty() )
-        default_prop_ = new TransformationVariablePropertyEntry( DBO_UNDEFINED, Property( default_id, data_type ), NULL );
+        default_prop_ = new TransformationVariablePropertyEntry( "", Property( default_id, data_type ), NULL ); // TODO HACK
 }
 
 /**
@@ -210,12 +213,13 @@ TransformationVariable::TransformationVariable( std::string class_id, std::strin
     name_( "" ),
     default_prop_( NULL ),
     optional_( false ),
-    data_type_( P_TYPE_INT ),
+    data_type_( PropertyDataType::INT ),
+    data_type_str_ ( Property::asString(PropertyDataType::INT)),
     check_data_type_( false )
 {
     registerParameter( "name", &name_, "" );
     registerParameter( "optional", &optional_, false );
-    registerParameter( "data_type", &data_type_, (int)P_TYPE_INT );
+    registerParameter( "data_type_str", &data_type_str_, Property::asString(PropertyDataType::INT) );
     registerParameter( "check_data_type", &check_data_type_, false );
 
     createSubConfigurables();
@@ -258,7 +262,7 @@ void TransformationVariable::getConfig( Configuration& config, const std::string
 {
     config.addParameterString( "name", name );
     config.addParameterBool( "optional", false );
-    config.addParameterInt( "data_type", (int)P_TYPE_INT );
+    config.addParameterString( "data_type_str", Property::asString(PropertyDataType::INT) );
     config.addParameterBool( "check_data_type", false );
 }
 
@@ -271,12 +275,12 @@ Retrieves a Configuration with the given data filled in. Use this method for you
  */
 void TransformationVariable::getConfig( Configuration& config,
         const std::string& name,
-        PROPERTY_DATA_TYPE data_type,
+        PropertyDataType data_type,
         const std::string& default_id )
 {
     config.addParameterString( "name", name );
     config.addParameterBool( "optional", false );
-    config.addParameterInt( "data_type", (int)data_type );
+    config.addParameterString( "data_type_str", Property::asString(data_type) );
     config.addParameterBool( "check_data_type", true );
 
     //add default property as a new subconfiguration
@@ -284,7 +288,7 @@ void TransformationVariable::getConfig( Configuration& config,
     {
         Configuration& def_config = config.addNewSubConfiguration( "TransformationVariablePropertyEntryDefault",
                 "TransformationVariablePropertyEntryDefault0" );
-        TransformationVariablePropertyEntry::getConfig( def_config, DBO_UNDEFINED, Property( default_id, data_type ), NULL );
+        TransformationVariablePropertyEntry::getConfig( def_config, "", Property( default_id, data_type ), NULL ); //TODO HACK
     }
 }
 
@@ -308,15 +312,15 @@ Adds a new Property for a specific DBO type.
 @param prop The Property to be added.
 @param var Optional pointer to the DBOVariable that yielded the entry.
  */
-void TransformationVariable::addProperty( DB_OBJECT_TYPE dbo_type, const Property& prop, DBOVariable* var )
+void TransformationVariable::addProperty( const std::string &dbo_type, const Property& prop, DBOVariable* var )
 {
     //check data type consistency if activated
-    if( check_data_type_ && ( (signed)prop.data_type_int_ != data_type_ ) )
-        throw std::runtime_error( "TransformationVariable: addProperty: Wrong Data Type, name=" + name_ + ", id=" + prop.id_ );
+    if( check_data_type_ && prop.getDataType() != data_type_ )
+        throw std::runtime_error( "TransformationVariable: addProperty: Wrong Data Type, name=" + name_ + ", id=" + prop.getId() );
 
     //if not added from a variable check if the name is not used by another variable
-    if( !var && existsDBOVariable( dbo_type, prop.id_ ) )
-        throw std::runtime_error( "TransformationVariable: addProperty: DBOVariable already exists, name=" + name_ + ", id=" + prop.id_ );
+    if( !var && existsDBOVariable( dbo_type, prop.getId()) )
+        throw std::runtime_error( "TransformationVariable: addProperty: DBOVariable already exists, name=" + name_ + ", id=" + prop.getId() );
 
     if( unusable_ )
     {
@@ -338,7 +342,7 @@ Data type checking must be enabled.
 @param dbo_type DBO type the Property is assigned to.
 @param id String identifier of the new Property.
  */
-void TransformationVariable::addProperty( DB_OBJECT_TYPE dbo_type, const std::string& id )
+void TransformationVariable::addProperty( const std::string &dbo_type, const std::string& id )
 {
     //no data type provided...
     if( !check_data_type_ )
@@ -352,14 +356,14 @@ void TransformationVariable::addProperty( DB_OBJECT_TYPE dbo_type, const std::st
     {
         if( properties_.find( dbo_type ) != properties_.end() )
             delete properties_[ dbo_type ];
-        properties_[ dbo_type ] = new TransformationVariablePropertyEntry( dbo_type, Property( id, (PROPERTY_DATA_TYPE)data_type_ ), NULL );
+        properties_[ dbo_type ] = new TransformationVariablePropertyEntry( dbo_type, Property( id, data_type_ ), NULL );
     }
     else
     {
         std::string name = "TransformationVariablePropertyEntry_" + id + "0";
 
         Configuration &config = addNewSubConfiguration( "TransformationVariablePropertyEntry", name );
-        TransformationVariablePropertyEntry::getConfig( config, dbo_type, Property( id, (PROPERTY_DATA_TYPE)data_type_ ), false );
+        TransformationVariablePropertyEntry::getConfig( config, dbo_type, Property( id, data_type_ ), false );
         generateSubConfigurable( "TransformationVariablePropertyEntry", name );
     }
 }
@@ -375,8 +379,8 @@ void TransformationVariable::addProperty( DBOVariable* var )
 
     if( var->isMetaVariable() )
     {
-        std::map<DB_OBJECT_TYPE,std::string>& subs = var->getSubVariables();
-        std::map<DB_OBJECT_TYPE,std::string>::iterator it, itend = subs.end();
+        const std::map<std::string,std::string>& subs = var->getSubVariables();
+        std::map<std::string,std::string>::const_iterator it, itend = subs.end();
         for( it=subs.begin(); it!=itend; ++it )
         {
             if( !DBObjectManager::getInstance().existsDBOVariable( it->first, it->second ) )
@@ -384,7 +388,7 @@ void TransformationVariable::addProperty( DBOVariable* var )
 
             //get the subvariable and store it with the Property
             DBOVariable* subvar = DBObjectManager::getInstance().getDBOVariable( it->first, it->second );
-            addProperty( it->first, Property( it->second, (PROPERTY_DATA_TYPE)var->data_type_int_ ), subvar );
+            addProperty( it->first, Property( it->second, var->getDataType() ), subvar );
         }
         return;
     }
@@ -409,7 +413,7 @@ void TransformationVariable::setProperties( DBOVariable* var )
 Removes the Property assigned to the given DBO type.
 @param dbo_type DBO type of the entry that should be removed.
  */
-void TransformationVariable::removeProperty( DB_OBJECT_TYPE dbo_type )
+void TransformationVariable::removeProperty( const std::string &dbo_type )
 {
     if( properties_.find( dbo_type ) == properties_.end() )
         throw std::runtime_error( "TransformationVariable: removeProperty: DBO Type not found." );
@@ -442,7 +446,7 @@ Checks if the variable obtains a Property for the given DBO type.
 @param dbo_type DBO type that should be checked.
 @return True if a Property exists for the given DBO type, otherwise false.
  */
-bool TransformationVariable::hasProperty( DB_OBJECT_TYPE dbo_type ) const
+bool TransformationVariable::hasProperty( const std::string &dbo_type ) const
 {
     return ( properties_.find( dbo_type ) != properties_.end() || default_prop_ != NULL );
 }
@@ -452,7 +456,7 @@ Returns the property that is assigned the given DBO type.
 @param DBO type assigned to the desired Property entry.
 @return Property that is assigned the given DBO type.
  */
-Property TransformationVariable::getProperty( DB_OBJECT_TYPE dbo_type )
+Property TransformationVariable::getProperty( const std::string &dbo_type )
 {
     if( properties_.find( dbo_type ) == properties_.end() )
     {
@@ -466,19 +470,13 @@ Property TransformationVariable::getProperty( DB_OBJECT_TYPE dbo_type )
     return properties_[ dbo_type ]->getProperty();
 }
 
-/**
-Returns the correct Property realization of the variable in the given buffer.
-Note that additionally to the name, the data type is also checked.
-@param buffer Buffer to return the Property from.
-@return Property realization of the variable in the given buffer. May return NULL if not found.
- */
-Property* TransformationVariable::property( Buffer* buffer )
+/// @brief Returns the if correct Property exists in the buffer
+bool TransformationVariable::hasProperty( Buffer* buffer )
 {
     assert( buffer );
 
-    DB_OBJECT_TYPE type = buffer->getDBOType();
-    PropertyList* props = buffer->getPropertyList();
-    Property prop;
+    const std::string &type = buffer->dboType();
+    const PropertyList& props = buffer->properties();
     int idx;
 
     //check property entries first
@@ -486,46 +484,93 @@ Property* TransformationVariable::property( Buffer* buffer )
     {
         assert( properties_[ type ] );
 
-        prop = properties_[ type ]->getProperty();
-        logdbg << "TransformationVariable: property; prop found '" << prop.id_ << "'";
+        const Property &prop = properties_[ type ]->getProperty();
+        logdbg << "TransformationVariable: hasProperty; prop found '" << prop.getId() << "'";
 
-        if( props->hasProperty( prop.id_ ) )
+        if( props.hasProperty( prop.getId() ) )
         {
-            idx = props->getPropertyIndex( prop.id_ );
+            idx = props.getPropertyIndex( prop.getId() );
 
             //check data type
-            if( props->getProperty( idx )->data_type_int_ == prop.data_type_int_ )
-                return props->getProperty( idx );
-            else
-                logerr << "TransformationVariable: property: prop found in buffer but wrong data type "
-                << props->getProperty( idx )->data_type_int_ << " instead of " << prop.data_type_int_;
+            if( props.at( idx ).getDataType() == prop.getDataType() )
+                return true;
         }
-        else
-            logerr << "TransformationVariable: property: prop not found in buffer (prop size " << props->getNumProperties()
-            << ")";
+        return false;
     }
 
     if(default_prop_ )
     {
         //no entry found, check default prop
         Property def = default_prop_->getProperty();
-        logdbg << "TransformationVariable: property; def prop found '" << def.id_ << "'";
+        logdbg << "TransformationVariable: hasProperty; def prop found '" << def.getId() << "'";
 
-        if( props->hasProperty( def.id_ ) )
+        if( props.hasProperty( def.getId() ) )
         {
-            idx = props->getPropertyIndex( def.id_ );
+            idx = props.getPropertyIndex( def.getId() );
 
             //check data type
-            if( props->getProperty( idx )->data_type_int_ == def.data_type_int_ )
-                return props->getProperty( idx );
-            else
-                logerr << "TransformationVariable: property: def prop found in buffer but wrong data type "
-                << props->getProperty( idx )->data_type_int_ << " instead of " << def.data_type_int_;
+            if( props.at( idx ).getDataType() == def.getDataType() )
+                return true;
         }
     }
-    logerr << "TransformationVariable: property: DBO type " << type << " not found";
 
-    return NULL;
+    return false;
+}
+
+
+/**
+Returns the correct Property realization of the variable in the given buffer.
+Note that additionally to the name, the data type is also checked.
+@param buffer Buffer to return the Property from.
+@return Property realization of the variable in the given buffer. May return NULL if not found.
+ */
+const Property &TransformationVariable::property( Buffer* buffer )
+{
+    assert( buffer );
+    assert (hasProperty(buffer));
+
+    const std::string &type = buffer->dboType();
+    const PropertyList& props = buffer->properties();
+    int idx;
+
+    //check property entries first
+    if( properties_.find( type ) != properties_.end() )
+    {
+        assert( properties_[ type ] );
+
+        const Property &prop = properties_[ type ]->getProperty();
+        logdbg << "TransformationVariable: property; prop found '" << prop.getId() << "'";
+
+        if( props.hasProperty( prop.getId() ) )
+        {
+            idx = props.getPropertyIndex( prop.getId() );
+
+            //check data type
+            if( props.at( idx ).getDataType() == prop.getDataType() )
+                return props.at( idx );
+        }
+        else
+            throw std::runtime_error ("TransformationVariable: property: prop not found in buffer");
+    }
+
+    if(default_prop_ )
+    {
+        //no entry found, check default prop
+        Property def = default_prop_->getProperty();
+        logdbg << "TransformationVariable: property; def prop found '" << def.getId() << "'";
+
+        if( props.hasProperty( def.getId() ) )
+        {
+            idx = props.getPropertyIndex( def.getId() );
+
+            //check data type
+            if( props.at( idx ).getDataType() == def.getDataType() )
+                return props.at( idx );
+            else
+                throw std::runtime_error ("TransformationVariable: property: def prop found in buffer but wrong data type");
+        }
+    }
+    throw std::runtime_error ("TransformationVariable: property: DBO type " + type + " not found");
 }
 
 /**
@@ -538,9 +583,8 @@ int TransformationVariable::propertyIndex( Buffer* buffer )
 {
     assert( buffer );
 
-    DB_OBJECT_TYPE type = buffer->getDBOType();
-    PropertyList* props = buffer->getPropertyList();
-    Property prop;
+    const std::string type = buffer->dboType();
+    const PropertyList &props = buffer->properties();
     int idx;
 
     //check property entries first
@@ -548,13 +592,13 @@ int TransformationVariable::propertyIndex( Buffer* buffer )
     {
         assert( properties_[ type ] );
 
-        prop = properties_[ type ]->getProperty();
-        if( props->hasProperty( prop.id_ ) )
+        const Property &prop = properties_[ type ]->getProperty();
+        if( props.hasProperty( prop.getId() ) )
         {
-            idx = props->getPropertyIndex( prop.id_ );
+            idx = props.getPropertyIndex( prop.getId() );
 
             //check data type
-            if( props->getProperty( idx )->data_type_int_ == prop.data_type_int_ )
+            if( props.at( idx ).getDataType() == prop.getDataType() )
                 return idx;
         }
     }
@@ -564,12 +608,12 @@ int TransformationVariable::propertyIndex( Buffer* buffer )
 
     //no entry found, check default prop
     Property def = default_prop_->getProperty();
-    if( props->hasProperty( def.id_ ) )
+    if( props.hasProperty( def.getId() ) )
     {
-        int idx = props->getPropertyIndex( def.id_ );
+        int idx = props.getPropertyIndex( def.getId() );
 
         //check data type
-        if( props->getProperty( idx )->data_type_int_ == def.data_type_int_ )
+        if( props.at( idx ).getDataType() == def.getDataType() )
             return idx;
     }
 
@@ -592,21 +636,21 @@ Sets a default Property. The default property will be used if no specific entry 
 void TransformationVariable::setDefaultProperty( const Property& prop )
 {
     //check data type if enabled
-    if( check_data_type_ && (signed)prop.data_type_int_ != data_type_ )
+    if( check_data_type_ && prop.getDataType() != data_type_ )
         throw std::runtime_error( "TransformationVariable: setDefaultProperty: Wrong Data Type." );
 
     if( unusable_ )
     {
         if( default_prop_ )
             delete default_prop_;
-        default_prop_ = new TransformationVariablePropertyEntry( DBO_UNDEFINED, prop, NULL );
+        default_prop_ = new TransformationVariablePropertyEntry( "", prop, NULL ); // TODO HACK
     }
     else
     {
         std::string name = "TransformationVariablePropertyEntryDefault0";
 
         Configuration &config = addNewSubConfiguration( "TransformationVariablePropertyEntryDefault", name );
-        TransformationVariablePropertyEntry::getConfig( config, DBO_UNDEFINED, prop, false );
+        TransformationVariablePropertyEntry::getConfig( config, "", prop, false ); // TODO HACK
         generateSubConfigurable( "TransformationVariablePropertyEntryDefault", name );
     }
 }
@@ -626,14 +670,14 @@ void TransformationVariable::setDefaultProperty( const std::string& id )
     {
         if( default_prop_ )
             delete default_prop_;
-        default_prop_ = new TransformationVariablePropertyEntry( DBO_UNDEFINED, Property( id, (PROPERTY_DATA_TYPE)data_type_ ), NULL );
+        default_prop_ = new TransformationVariablePropertyEntry( "", Property( id, data_type_ ), NULL ); // TODO HACK
     }
     else
     {
         std::string name = "TransformationVariablePropertyEntryDefault0";
 
         Configuration &config = addNewSubConfiguration( "TransformationVariablePropertyEntryDefault", name );
-        TransformationVariablePropertyEntry::getConfig( config, DBO_UNDEFINED, Property( id, (PROPERTY_DATA_TYPE)data_type_ ), NULL );
+        TransformationVariablePropertyEntry::getConfig( config, "", Property( id, data_type_ ), NULL ); // TODO HACK
         generateSubConfigurable( "TransformationVariablePropertyEntryDefault", name );
     }
 }
@@ -661,21 +705,21 @@ void TransformationVariable::setDefaultProperty( DBOVariable* var )
         throw std::runtime_error( "TransformationVariable: setDefaultProperty: Cannot set from DBO meta variable." );
 
     //check data type if needed
-    if( check_data_type_ && (signed)var->data_type_int_ != data_type_ )
+    if( check_data_type_ && var->getDataType() != data_type_ )
         throw std::runtime_error( "TransformationVariable: setDefaultProperty: Wrong Data Type." );
 
     if( unusable_ )
     {
         if( default_prop_ )
             delete default_prop_;
-        default_prop_ = new TransformationVariablePropertyEntry( DBO_UNDEFINED, *var, NULL );
+        default_prop_ = new TransformationVariablePropertyEntry( "", *var, NULL ); // TODO HACK
     }
     else
     {
         std::string name = "TransformationVariablePropertyEntryDefault0";
 
         Configuration &config = addNewSubConfiguration( "TransformationVariablePropertyEntryDefault", name );
-        TransformationVariablePropertyEntry::getConfig( config, DBO_UNDEFINED, *var, false );
+        TransformationVariablePropertyEntry::getConfig( config, "", *var, false ); // TODO HACK
         generateSubConfigurable( "TransformationVariablePropertyEntryDefault", name );
     }
 }
@@ -716,9 +760,9 @@ bool TransformationVariable::isOptional() const
 Returns the data type of this variable.
 @return The variables data type.
  */
-PROPERTY_DATA_TYPE TransformationVariable::dataType() const
+PropertyDataType TransformationVariable::dataType() const
 {
-    return (PROPERTY_DATA_TYPE)data_type_;
+    return data_type_;
 }
 
 /**
@@ -737,7 +781,7 @@ void TransformationVariable::print()
 {
     PropertyMap::iterator it, itend = properties_.end();
     for( it=properties_.begin(); it!=itend; ++it )
-        loginf << "Variable " << name_.c_str() << ": dbo_type=" << (int)it->first << ", id=" << it->second->getProperty().id_.c_str();
+        loginf << "Variable " << name_ << ": dbo_type=" << it->first << ", id=" << it->second->getProperty().getId();
 }
 
 /**
@@ -762,7 +806,7 @@ Checks if the given DBOVariable exists in the DBO manager.
 @param id The DBOVariable's string identifier.
 @return True if the DBOVariable exists in the DBO manager, otherwise false.
  */
-bool TransformationVariable::existsDBOVariable( DB_OBJECT_TYPE dbo_type, const std::string& id )
+bool TransformationVariable::existsDBOVariable( const std::string &dbo_type, const std::string& id )
 {
     return ( DBObjectManager::getInstance().existsDBOVariable( dbo_type, id ) );
 }
@@ -774,12 +818,12 @@ be checked against the new data type, which may result in an exception.
 @param data_type New data type.
 @param clear If true the variable will be emptied after the data type change.
  */
-void TransformationVariable::setDataType( PROPERTY_DATA_TYPE data_type, bool clear )
+void TransformationVariable::setDataType( PropertyDataType data_type, bool clear )
 {
     if( data_type_ == data_type )
         return;
 
-    data_type_ = (int)data_type;
+    data_type_ = data_type;
 
     //easy solution, just clear :b
     if( clear )
@@ -803,12 +847,12 @@ bool TransformationVariable::checkDataTypes()
     PropertyMap::iterator it, itend = properties_.end();
     for( it=properties_.begin(); it!=itend; ++it )
     {
-        if( (signed)it->second->getProperty().data_type_int_ != data_type_ )
+        if( it->second->getProperty().getDataType() != data_type_ )
             return false;
     }
 
     //check default property against new data type
-    if( default_prop_ && (signed)default_prop_->getProperty().data_type_int_ != data_type_ )
+    if( default_prop_ && default_prop_->getProperty().getDataType() != data_type_ )
         return false;
 
     return true;
@@ -835,7 +879,7 @@ void TransformationVariable::generateSubConfigurable( std::string class_id, std:
     if( class_id == "TransformationVariablePropertyEntry" )
     {
         TransformationVariablePropertyEntry* entry = new TransformationVariablePropertyEntry( class_id, instance_id, this );
-        DB_OBJECT_TYPE dbo_type = entry->getDBOType();
+        const std::string &dbo_type = entry->getDBOType();
         if( properties_.find( dbo_type ) != properties_.end() )
             delete properties_[ dbo_type ];
         properties_[ dbo_type ] = entry;
@@ -1000,7 +1044,7 @@ Adds a new variable.
 @param data_type Data type of the new variable.
 @param default_id Default Property id of the new variable.
  */
-TransformationVariable* TransformationVariables::addVariable( const std::string& name, PROPERTY_DATA_TYPE data_type, const std::string& default_id )
+TransformationVariable* TransformationVariables::addVariable( const std::string& name, PropertyDataType data_type, const std::string& default_id )
 {
     if( map_.find( name ) != map_.end() )
         throw std::runtime_error( "TransformationVariables: addVariable: Duplicate name." );

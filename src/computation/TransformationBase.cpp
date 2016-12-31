@@ -211,7 +211,7 @@ Adds a new input transformation variable.
 @return The new variable.
   */
 TransformationVariable* TransformationBase::addInputVariable( const std::string& name,
-                                                           PROPERTY_DATA_TYPE data_type,
+                                                           PropertyDataType data_type,
                                                            const std::string& default_id )
 {
     return vars_in_->addVariable( name, data_type, default_id );
@@ -235,7 +235,7 @@ Adds a new output transformation variable.
 @return The new variable.
   */
 TransformationVariable* TransformationBase::addOutputVariable( const std::string& name,
-                                                            PROPERTY_DATA_TYPE data_type,
+                                                            PropertyDataType data_type,
                                                             const std::string& default_id )
 {
     return vars_out_->addVariable( name, data_type, default_id );
@@ -260,7 +260,7 @@ Adds a new hidden transformation variable.
 @return The new variable.
   */
 TransformationVariable* TransformationBase::addHiddenVariable( const std::string& name,
-                                                               PROPERTY_DATA_TYPE data_type,
+                                                               PropertyDataType data_type,
                                                                const std::string& default_id )
 {
     return vars_hidden_->addVariable( name, data_type, default_id );
@@ -279,8 +279,7 @@ void TransformationBase::createInputProperties( Buffer* buffer )
     indices_in_.clear();
     properties_in_.clear();
 
-    PropertyList* p  = buffer->getPropertyList();
-    assert( p );
+    const PropertyList &p  = buffer->properties();
 
     int idx;
     unsigned int i, n = vars_in_->numberOfVariables();
@@ -291,10 +290,13 @@ void TransformationBase::createInputProperties( Buffer* buffer )
         const std::string& name = var->name();
         keys_in_[ name ] = i;
         indices_in_.push_back( idx );
-        if( idx < 0 )
-            properties_in_.push_back( NULL );   //store NULL pointer if not existing in buffer
-        else
-            properties_in_.push_back( p->getProperty( idx ) );
+
+        //TODO WHAT THE HELL IS HAPPENING?
+        assert (false);
+//        if( idx < 0 )
+//            properties_in_.push_back( NULL );   //store NULL pointer if not existing in buffer
+//        else
+//            properties_in_.push_back( p->getProperty( idx ) );
     }
 }
 
@@ -311,7 +313,7 @@ void TransformationBase::createOutputProperties( Buffer* buffer )
     indices_out_.clear();
     properties_out_.clear();
 
-    PropertyList* p = buffer->getPropertyList();
+    const PropertyList& p = buffer->properties();
 
     int idx;
     unsigned int i, n = vars_out_->numberOfVariables();
@@ -322,10 +324,14 @@ void TransformationBase::createOutputProperties( Buffer* buffer )
         const std::string& name = var->name();
         keys_out_[ name ] = i;
         indices_out_.push_back( idx );
-        if( idx < 0 )
-            properties_out_.push_back( NULL );   //store NULL pointer if not existing in buffer
-        else
-            properties_out_.push_back( p->getProperty( idx ) );
+
+        //TODO WHAT THE HELL IS HAPPENING?
+        assert (false);
+
+//        if( idx < 0 )
+//            properties_out_.push_back( NULL );   //store NULL pointer if not existing in buffer
+//        else
+//            properties_out_.push_back( p->getProperty( idx ) );
     }
 }
 
@@ -343,7 +349,7 @@ void TransformationBase::createHiddenProperties( Buffer* buffer )
     indices_hidden_.clear();
     properties_hidden_.clear();
 
-    PropertyList* p = buffer->getPropertyList();
+    const PropertyList& p = buffer->properties();
 
     int idx;
     unsigned int i, n = vars_hidden_->numberOfVariables();
@@ -354,10 +360,14 @@ void TransformationBase::createHiddenProperties( Buffer* buffer )
         const std::string& name = var->name();
         keys_hidden_[ name ] = i;
         indices_hidden_.push_back( idx );
-        if( idx < 0 )
-            properties_hidden_.push_back( NULL );   //store NULL pointer if not existing in buffer
-        else
-            properties_hidden_.push_back( p->getProperty( idx ) );
+
+        //TODO WHAT THE HELL IS HAPPENING?
+        assert (false);
+
+//        if( idx < 0 )
+//            properties_hidden_.push_back( NULL );   //store NULL pointer if not existing in buffer
+//        else
+//            properties_hidden_.push_back( p->getProperty( idx ) );
     }
 }
 
@@ -377,7 +387,7 @@ bool TransformationBase::checkInputVariables( Buffer* buffer )
     {
         //optional variables are skipped here
         if( !vars_in_->getVariable( i )->isOptional() &&
-            !vars_in_->getVariable( i )->property( buffer ) )
+            !vars_in_->getVariable( i )->hasProperty( buffer ) )
         {
             //DBOVariable *notfound =  vars_in_->getVariable( i )->getVariable();
             logerr << "TransformationBase: checkInputVariables: variable not found: '" << vars_in_->getVariable( i )->name() << "'";
@@ -402,7 +412,7 @@ std::string TransformationBase::getErrorVariables( Buffer* buffer )
     unsigned int i, n = vars_in_->numberOfVariables();
     for( i=0; i<n; ++i )
     {
-        if( !vars_in_->getVariable( i )->property( buffer ) &&
+        if( !vars_in_->getVariable( i )->hasProperty( buffer ) &&
             !vars_in_->getVariable( i )->isOptional() )
         {
             ret += "<br>\t" + vars_in_->getVariable( i )->name();
@@ -420,7 +430,7 @@ eventually resulting in an exception.
 @param output Pointer to a buffer pointer.
 @param dbo_type The buffers DBO type. Needed because the buffer may not be created yet.
   */
-void TransformationBase::bufferFromOutputVariables( Buffer** output, DB_OBJECT_TYPE dbo_type )
+void TransformationBase::bufferFromOutputVariables( Buffer** output, const std::string &dbo_type )
 {
     assert( output );
 
@@ -450,7 +460,7 @@ void TransformationBase::bufferFromOutputVariables( Buffer** output, DB_OBJECT_T
     }
 
     //buffer exists already, check properties and add if needed
-    PropertyList* props = (*output)->getPropertyList();
+    const PropertyList &props = (*output)->properties();
     for( i=0; i<n; ++i )
     {
         var = vars_out_->getVariable( i );
@@ -465,16 +475,16 @@ void TransformationBase::bufferFromOutputVariables( Buffer** output, DB_OBJECT_T
         Property p = var->getProperty( dbo_type );
 
         //variable already present in buffer
-        if( props->hasProperty( p.id_ ) )
+        if( props.hasProperty( p.getId() ) )
         {
             //variable seems to exist in buffer but try to retrieve it anyways, to check datatype etc.
-            if( !var->property( *output ) )
+            if( !var->hasProperty( *output ) )
                 throw std::runtime_error( "TransformationBase: bufferFromOutputVariables: Variable in buffer, but not properly configured." );
             continue;
         }
 
         //needs to be added to buffer
-        (*output)->addProperty( p.id_, (PROPERTY_DATA_TYPE)p.data_type_int_ );
+        (*output)->addProperty( p.getId(), p.getDataType() );
     }
 }
 
@@ -489,8 +499,8 @@ void TransformationBase::addHiddenProperties( Buffer* buffer )
 {
     assert( buffer );
 
-    DB_OBJECT_TYPE dbo_type = buffer->getDBOType();
-    PropertyList* props = buffer->getPropertyList();
+    const std::string &dbo_type = buffer->dboType();
+    const PropertyList& props = buffer->properties();
 
     TransformationVariable* var;
     unsigned int i, n = vars_hidden_->numberOfVariables();
@@ -508,16 +518,16 @@ void TransformationBase::addHiddenProperties( Buffer* buffer )
         Property p = var->getProperty( dbo_type );
 
         //variable already present in buffer
-        if( props->hasProperty( p.id_ ) )
+        if( props.hasProperty( p.getId() ) )
         {
             //variable seems to exist in buffer but try to retrieve it anyways, to check datatype etc.
-            if( !var->property( buffer ) )
+            if( !var->hasProperty( buffer ) )
                 throw std::runtime_error( "TransformationBase: addHiddenProperties: Variable in buffer, but not properly configured." );
             continue;
         }
 
         //needs to be added to buffer
-        buffer->addProperty( p.id_, (PROPERTY_DATA_TYPE)p.data_type_int_ );
+        buffer->addProperty( p.getId(), p.getDataType() );
     }
 }
 
@@ -532,8 +542,8 @@ void TransformationBase::resetProperties()
     indices_out_.clear();
     properties_in_.clear();
     properties_out_.clear();
-    addresses_in_ = NULL;
-    addresses_out_ = NULL;
+//    addresses_in_ = NULL;
+//    addresses_out_ = NULL;
 }
 
 /**

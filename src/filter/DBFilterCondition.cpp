@@ -164,8 +164,8 @@ std::string DBFilterCondition::getConditionString (const std::string &dbo_type, 
             }
             else // is meta
             {
-                std::map <std::string, std::string> &subvars = variable_->getSubVariables ();
-                std::map <std::string, std::string>::iterator it;
+                const std::map <std::string, std::string> &subvars = variable_->getSubVariables ();
+                std::map <std::string, std::string>::const_iterator it;
 
                 for (it =subvars.begin(); it != subvars.end(); it++)
                 {
@@ -248,8 +248,8 @@ std::string DBFilterCondition::getConditionString (const std::string &dbo_type, 
         }
         else // is meta
         {
-            std::map <std::string, std::string> &subvars = variable_->getSubVariables ();
-            std::map <std::string, std::string>::iterator it;
+            const std::map <std::string, std::string> &subvars = variable_->getSubVariables ();
+            std::map <std::string, std::string>::const_iterator it;
 
             for (it =subvars.begin(); it != subvars.end(); it++)
             {

@@ -60,7 +60,7 @@ class TransformationBase : public Configurable
 public:
     typedef std::map<std::string,int> PropertyKeyMap;
     typedef std::vector<int> PropertyIndices;
-    typedef std::vector<Property*> Properties;
+    //typedef std::vector<Property*> Properties;
 
     /// @brief Constructor
     TransformationBase();
@@ -103,15 +103,15 @@ protected:
     /// @brief Adds an input transformation variable of the given name
     TransformationVariable* addInputVariable( const std::string& name );
     /// @brief Adds an input transformation variable
-    TransformationVariable* addInputVariable( const std::string& name, PROPERTY_DATA_TYPE data_type, const std::string& default_id="" );
+    TransformationVariable* addInputVariable( const std::string& name, PropertyDataType data_type, const std::string& default_id="" );
     /// @brief Adds an output transformation variable of the given name
     TransformationVariable* addOutputVariable( const std::string& name );
     /// @brief Adds an output transformation variable
-    TransformationVariable* addOutputVariable( const std::string& name, PROPERTY_DATA_TYPE data_type, const std::string& default_id="" );
+    TransformationVariable* addOutputVariable( const std::string& name, PropertyDataType data_type, const std::string& default_id="" );
     /// @brief Adds a hidden transformation variable of the given name
     TransformationVariable* addHiddenVariable( const std::string& name );
     /// @brief Adds a hidden transformation variable
-    TransformationVariable* addHiddenVariable( const std::string& name, PROPERTY_DATA_TYPE data_type, const std::string& default_id="" );
+    TransformationVariable* addHiddenVariable( const std::string& name, PropertyDataType data_type, const std::string& default_id="" );
 
     /// @brief Return the number of hidden transformation variables
     unsigned int numberHiddenVariables() const;
@@ -129,7 +129,7 @@ protected:
     /// @brief Checks all input variables for existence in the given buffer
     bool checkInputVariables( Buffer* buffer );
     /// @brief Checks if the output variables are present in the given buffer and adds them if needed
-    void bufferFromOutputVariables( Buffer** output, DB_OBJECT_TYPE dbo_type );
+    void bufferFromOutputVariables( Buffer** output, const std::string &dbo_type );
     /// @brief Adds the hidden variables to the given buffer if not already present
     void addHiddenProperties( Buffer* buffer );
     /// @brief Clears all stored Property data created by the create*Properties() methods
@@ -138,51 +138,51 @@ protected:
     /// @brief Returns the quick access id for the input variable of the given name
     inline int iKey( const std::string& name );
     /// @brief Checks if the input property with the given quick access key exists
-    inline bool iExists( int key ) { return ( properties_in_[ key ] != NULL ); }
+    inline bool iExists( int key ) { return ( properties_in_.hasProperty(key) != 0 ); }
     /// @brief Returns the input property with the given quick access key
-    inline Property* iProperty( int key ) { return properties_in_[ key ]; }
+    inline const Property& iProperty( int key ) { return properties_in_.at(key); }
     /// @brief Returns the index of the input property with the given quick access key
     inline int iIndex( int key ) { return indices_in_[ key ]; }
     /// @brief Checks if the input property with the given quick access key is NaN
-    inline bool iIsNan( int key ) { return isNan( properties_in_[ key ]->data_type_int_, (*addresses_in_)[ indices_in_[ key ] ] ); }
+    //inline bool iIsNan( int key ) { return isNan( properties_in_[ key ]->g, (*addresses_in_)[ indices_in_[ key ] ] ); }
     /// @brief Sets the input property with the given quick access key to NaN
-    inline void iSetNan( int key ) { setNan( properties_in_[ key ]->data_type_int_, (*addresses_in_)[ indices_in_[ key ] ] ); }
+    //inline void iSetNan( int key ) { setNan( properties_in_[ key ]->data_type_int_, (*addresses_in_)[ indices_in_[ key ] ] ); }
     /// @brief Returns the current data address pointer of the input property with the given quick access key
-    inline void* iPtr( int key ) { return (*addresses_in_)[ indices_in_[ key ] ]; }
+    //inline void* iPtr( int key ) { return (*addresses_in_)[ indices_in_[ key ] ]; }
     /// @brief Sets the current address pointer vector of the input buffer
-    inline void iSetAddresses( std::vector<void*>* addresses ) { addresses_in_ = addresses; }
+    //inline void iSetAddresses( std::vector<void*>* addresses ) { addresses_in_ = addresses; }
 
     /// @brief Returns the quick access id for the output variable of the given name
     inline int oKey( const std::string& name );
     /// @brief Checks if the output property with the given quick access key exists
-    inline bool oExists( int key ) { return ( properties_out_[ key ] != NULL ); }
+    inline bool oExists( int key ) { return ( properties_out_.hasProperty(key) != 0 ); }
     /// @brief Returns the output property with the given quick access key
-    inline Property* oProperty( int key ) { return properties_out_[ key ]; }
+    inline const Property& oProperty( int key ) { return properties_out_.at(key); }
     /// @brief Returns the index of the output property with the given quick access key
     inline int oIndex( int key ) { return indices_out_[ key ]; }
     /// @brief Checks if the output property with the given quick access key is NaN
-    inline bool oIsNan( int key ) { return isNan( properties_out_[ key ]->data_type_int_, (*addresses_out_)[ indices_out_[ key ] ] ); }
+    //inline bool oIsNan( int key ) { return isNan( properties_out_[ key ]->data_type_int_, (*addresses_out_)[ indices_out_[ key ] ] ); }
     /// @brief Sets the output property with the given quick access key to NaN
-    inline void oSetNan( int key ) { setNan( properties_out_[ key ]->data_type_int_, (*addresses_out_)[ indices_out_[ key ] ] ); }
+    //inline void oSetNan( int key ) { setNan( properties_out_[ key ]->data_type_int_, (*addresses_out_)[ indices_out_[ key ] ] ); }
     /// @brief Returns the current data address pointer of the output property with the given quick access key
-    inline void* oPtr( int key ) { return (*addresses_out_)[ indices_out_[ key ] ]; }
+    //inline void* oPtr( int key ) { return (*addresses_out_)[ indices_out_[ key ] ]; }
     /// @brief Sets the current address pointer vector of the output buffer
-    inline void oSetAddresses( std::vector<void*>* addresses ) { addresses_out_ = addresses; }
+    //inline void oSetAddresses( std::vector<void*>* addresses ) { addresses_out_ = addresses; }
 
     /// @brief Returns the quick access id for the hidden variable of the given name
     inline int hKey( const std::string& name );
     /// @brief Checks if the hidden property with the given quick access key exists
-    inline bool hExists( int key ) { return ( properties_hidden_[ key ] != NULL ); }
+    inline bool hExists( int key ) { return ( properties_hidden_.hasProperty(key) != 0 ); }
     /// @brief Returns the hidden property with the given quick access key
-    inline Property* hProperty( int key ) { return properties_hidden_[ key ]; }
+    inline const Property& hProperty( int key ) { return properties_hidden_.at(key); }
     /// @brief Returns the index of the hidden property with the given quick access key
     inline int hIndex( int key ) { return indices_hidden_[ key ]; }
     /// @brief Checks if the hidden property with the given quick access key is NaN
-    inline bool hIsNan( int key ) { return isNan( properties_hidden_[ key ]->data_type_int_, (*addresses_in_)[ indices_hidden_[ key ] ] ); }
+    //inline bool hIsNan( int key ) { return isNan( properties_hidden_[ key ]->data_type_int_, (*addresses_in_)[ indices_hidden_[ key ] ] ); }
     /// @brief Sets the hidden property with the given quick access key to NaN
-    inline void hSetNan( int key ) { setNan( properties_hidden_[ key ]->data_type_int_, (*addresses_in_)[ indices_hidden_[ key ] ] ); }
+    //inline void hSetNan( int key ) { setNan( properties_hidden_[ key ]->data_type_int_, (*addresses_in_)[ indices_hidden_[ key ] ] ); }
     /// @brief Returns the current data address pointer of the hidden property with the given quick access key
-    inline void* hPtr( int key ) { return (*addresses_in_)[ indices_hidden_[ key ] ]; }
+    //inline void* hPtr( int key ) { return (*addresses_in_)[ indices_hidden_[ key ] ]; }
 
 private:
     /// Input transformation variables
@@ -204,15 +204,15 @@ private:
     /// Hidden property indices
     PropertyIndices indices_hidden_;
     /// Input properties
-    Properties properties_in_;
+    PropertyList properties_in_;
     /// Output properties
-    Properties properties_out_;
+    PropertyList properties_out_;
     /// Hidden properties
-    Properties properties_hidden_;
+    PropertyList properties_hidden_;
     /// Current input data address pointers
-    std::vector<void*>* addresses_in_;
+    //std::vector<void*>* addresses_in_;
     /// Current output data address pointers
-    std::vector<void*>* addresses_out_;
+    //std::vector<void*>* addresses_out_;
 };
 
 /**

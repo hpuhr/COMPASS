@@ -101,7 +101,7 @@ private:
     void execute (std::string command, Buffer *buffer);
 
     /// @brief Used for performance tests.
-    void performanceTest ();
+    // void performanceTest ();
 };
 
 #endif /* MySQLppConnection_H_ */

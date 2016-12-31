@@ -119,9 +119,9 @@ set ( atsdb_HDRS
         src/filter/DBFilter.h
         src/filter/SensorFilter.h
         src/filter/FilterManager.h
-#        src/job/DBJob.h
-#        src/job/Job.h
-#        src/job/JobOrderer.h
+        src/job/DBJob.h
+        src/job/Job.h
+        src/job/JobOrderer.h
 #        src/job/DBOActiveDataSourcesDBJob.h
 #        src/job/DBOVariableDistinctStatisticsDBJob.h
 #        src/job/DBOVariableMinMaxDBJob.h
@@ -132,7 +132,7 @@ set ( atsdb_HDRS
 #        src/job/UpdateBufferDBJob.h
 #        src/job/WriteBufferDBJob.h
 #        src/job/PostProcessDBJob.h
-#        src/job/TransformationJob.h
+        src/job/TransformationJob.h
 #        src/mem/ArrayTemplateManager.h
 #        src/mem/ArrayTemplate.h
 #        src/mem/BufferTemplate.h
@@ -180,15 +180,15 @@ set ( atsdb_HDRS
         src/thread/TimedThread.h
         src/thread/WorkerThread.h
         src/thread/WorkerThreadManager.h
-#        src/computation/Workflow.h
-#        src/computation/Computation.h
-#        src/computation/ComputationElement.h
-#        src/computation/ComputationPipeline.h
-#        src/computation/ComputationPipelineQueue.h
-#        src/computation/TransformationBase.h
-#        src/computation/Transformation.h
-#        src/computation/TransformationVariable.h
-#        src/computation/TransformationFactory.h
+        src/computation/Workflow.h
+        src/computation/Computation.h
+        src/computation/ComputationElement.h
+        src/computation/ComputationPipeline.h
+        src/computation/ComputationPipelineQueue.h
+        src/computation/TransformationBase.h
+        src/computation/Transformation.h
+        src/computation/TransformationVariable.h
+        src/computation/TransformationFactory.h
 #        src/transform/CalculateHistogram.h
 #        src/transform/CalculateHistogram2D.h
 #        src/transform/CalculatePosition.h
@@ -231,7 +231,7 @@ set (atsdb_MOC_HEADERS
         src/object/DBOVariableSetWidget.h
         src/object/DBOVariableOrderedSetWidget.h
         src/object/DBOVariableSelectionWidget.h
-#        src/object/DBOVariableDataTypeComboBox.h
+        src/object/DBOVariableDataTypeComboBox.h
         src/object/PropertyDataTypeComboBox.h
         src/object/MetaDBObjectEditWidget.h
 #        src/object/StringRepresentationComboBox.h
@@ -249,8 +249,8 @@ set (atsdb_MOC_HEADERS
 
 set ( atsdb_SRCS
 #        src/ATSDB.cpp
-         src/buffer/ArrayList.cpp
-         src/buffer/Buffer.cpp
+        src/buffer/ArrayList.cpp
+        src/buffer/Buffer.cpp
         src/buffer/BufferFilter.cpp
         src/config/Configurable.cpp
         src/config/Configuration.cpp
@@ -287,14 +287,14 @@ set ( atsdb_SRCS
 #        src/job/DBOCountDBJob.cpp
 #        src/job/DBOReadDBJob.cpp
 #        src/job/DBOInfoDBJob.cpp
-#        src/job/DBJob.cpp
-#        src/job/Job.cpp
-#        src/job/JobOrderer.cpp
+        src/job/DBJob.cpp
+        src/job/Job.cpp
+        src/job/JobOrderer.cpp
 #        src/job/FinalizeDBOReadJob.cpp
 #        src/job/UpdateBufferDBJob.cpp
 #        src/job/WriteBufferDBJob.cpp
 #        src/job/PostProcessDBJob.cpp
-#        src/job/TransformationJob.cpp
+        src/job/TransformationJob.cpp
 #        src/mem/MemoryManager.cpp
         src/schema/DBSchemaWidget.cpp
         src/schema/DBSchemaEditWidget.cpp
@@ -329,8 +329,8 @@ set ( atsdb_SRCS
         src/projection/ProjectionManagerWidget.cpp
         src/property/Property.cpp
 #        src/property/PropertyContainer.cpp
-#        src/result/BufferSet.cpp
-#        src/result/DBResult.cpp
+        src/result/BufferSet.cpp
+        src/result/DBResult.cpp
         src/schema/DBTable.cpp
         src/schema/DBTableColumn.cpp
         src/schema/DBSchema.cpp
@@ -345,15 +345,15 @@ set ( atsdb_SRCS
         src/thread/TimedThread.cpp
         src/thread/WorkerThread.cpp
         src/thread/WorkerThreadManager.cpp
-#        src/computation/Workflow.cpp
-#        src/computation/Computation.cpp
-#        src/computation/ComputationElement.cpp
-#        src/computation/ComputationPipeline.cpp
-#        src/computation/ComputationPipelineQueue.cpp
-#        src/computation/TransformationBase.cpp
-#        src/computation/Transformation.cpp
-#        src/computation/TransformationVariable.cpp
-#        src/computation/TransformationFactory.cpp
+        src/computation/Workflow.cpp
+        src/computation/Computation.cpp
+        src/computation/ComputationElement.cpp
+        src/computation/ComputationPipeline.cpp
+        src/computation/ComputationPipelineQueue.cpp
+        src/computation/TransformationBase.cpp
+        src/computation/Transformation.cpp
+        src/computation/TransformationVariable.cpp
+        src/computation/TransformationFactory.cpp
 #        src/transform/CalculateHistogram.cpp
 #        src/transform/CalculateHistogram2D.cpp
 #        src/transform/CalculatePosition.cpp
