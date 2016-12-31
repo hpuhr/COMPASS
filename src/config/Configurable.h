@@ -103,13 +103,13 @@ protected:
     /// @brief Registers a bool parameter
     void registerParameter (std::string parameter_id, bool *pointer, bool default_value);
     /// @brief Registers a char parameter
-    void registerParameter (std::string parameter_id, char *pointer, char default_value);
-    /// @brief Registers a unsigned char parameter
-    void registerParameter (std::string parameter_id, unsigned char *pointer, unsigned char default_value);
-    /// @brief Registers a short int parameter
-    void registerParameter (std::string parameter_id, short int *pointer, short int default_value);
-    /// @brief Registers a unsigned short int parameter
-    void registerParameter (std::string parameter_id, unsigned short int *pointer, unsigned short int default_value);
+//    void registerParameter (std::string parameter_id, char *pointer, char default_value);
+//    /// @brief Registers a unsigned char parameter
+//    void registerParameter (std::string parameter_id, unsigned char *pointer, unsigned char default_value);
+//    /// @brief Registers a short int parameter
+//    void registerParameter (std::string parameter_id, short int *pointer, short int default_value);
+//    /// @brief Registers a unsigned short int parameter
+//    void registerParameter (std::string parameter_id, unsigned short int *pointer, unsigned short int default_value);
     /// @brief Registers a int parameter
     void registerParameter (std::string parameter_id, int *pointer, int default_value);
     /// @brief Registers a unsigned int parameter

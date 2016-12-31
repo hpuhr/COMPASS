@@ -98,42 +98,42 @@ void Configurable::registerParameter (std::string parameter_id, bool *pointer, b
 
     configuration_.registerParameter (parameter_id, pointer, default_value);
 }
-void Configurable::registerParameter (std::string parameter_id, char *pointer, char default_value)
-{
-    if (unusable_)
-        throw std::runtime_error ("Configurable: registerParameter: configurable unusable");
+//void Configurable::registerParameter (std::string parameter_id, char *pointer, char default_value)
+//{
+//    if (unusable_)
+//        throw std::runtime_error ("Configurable: registerParameter: configurable unusable");
 
-    logdbg << "Configurable " << instance_id_ << ": registerParameter: char parameter_id " << parameter_id;
+//    logdbg << "Configurable " << instance_id_ << ": registerParameter: char parameter_id " << parameter_id;
 
-    configuration_.registerParameter (parameter_id, pointer, default_value);
-}
-void Configurable::registerParameter (std::string parameter_id, unsigned char *pointer, unsigned char default_value)
-{
-    if (unusable_)
-        throw std::runtime_error ("Configurable: registerParameter: configurable unusable");
+//    configuration_.registerParameter (parameter_id, pointer, default_value);
+//}
+//void Configurable::registerParameter (std::string parameter_id, unsigned char *pointer, unsigned char default_value)
+//{
+//    if (unusable_)
+//        throw std::runtime_error ("Configurable: registerParameter: configurable unusable");
 
-    logdbg << "Configurable " << instance_id_ << ": registerParameter: unsigned char parameter_id " << parameter_id;
+//    logdbg << "Configurable " << instance_id_ << ": registerParameter: unsigned char parameter_id " << parameter_id;
 
-    configuration_.registerParameter (parameter_id, pointer, default_value);
-}
-void Configurable::registerParameter (std::string parameter_id, short int *pointer, short int default_value)
-{
-    if (unusable_)
-        throw std::runtime_error ("Configurable: registerParameter: configurable unusable");
+//    configuration_.registerParameter (parameter_id, pointer, default_value);
+//}
+//void Configurable::registerParameter (std::string parameter_id, short int *pointer, short int default_value)
+//{
+//    if (unusable_)
+//        throw std::runtime_error ("Configurable: registerParameter: configurable unusable");
 
-    logdbg << "Configurable " << instance_id_ << ": registerParameter: short int parameter_id " << parameter_id;
+//    logdbg << "Configurable " << instance_id_ << ": registerParameter: short int parameter_id " << parameter_id;
 
-    configuration_.registerParameter (parameter_id, pointer, default_value);
-}
-void Configurable::registerParameter (std::string parameter_id, unsigned short int *pointer, unsigned short int default_value)
-{
-    if (unusable_)
-        throw std::runtime_error ("Configurable: registerParameter: configurable unusable");
+//    configuration_.registerParameter (parameter_id, pointer, default_value);
+//}
+//void Configurable::registerParameter (std::string parameter_id, unsigned short int *pointer, unsigned short int default_value)
+//{
+//    if (unusable_)
+//        throw std::runtime_error ("Configurable: registerParameter: configurable unusable");
 
-    logdbg << "Configurable " << instance_id_ << ": registerParameter: unsigned short int parameter_id " << parameter_id;
+//    logdbg << "Configurable " << instance_id_ << ": registerParameter: unsigned short int parameter_id " << parameter_id;
 
-    configuration_.registerParameter (parameter_id, pointer, default_value);
-}
+//    configuration_.registerParameter (parameter_id, pointer, default_value);
+//}
 
 void Configurable::registerParameter (std::string parameter_id, int *pointer, int default_value)
 {

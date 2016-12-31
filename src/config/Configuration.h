@@ -36,39 +36,6 @@
 class Configurable;
 
 /**
- * @brief Configuration parameter base class
- *
- * @details Any class deriving from this class has to override the following functions:
- *
- * @code
- * public:
- *   virtual std::string getParameterType ();
- *   virtual std::string getParameterId ();
- *   virtual std::string getParameterValue ();
- *   virtual void resetToDefault ();
- * @endcode
- */
-class ConfigurableParameterBase
-{
-public:
-    /// Constructor
-    ConfigurableParameterBase () {}
-    /// Destructor
-    virtual ~ConfigurableParameterBase () {}
-
-    virtual ConfigurableParameterBase *clone () = 0;
-
-    /// Returns parameter type
-    virtual std::string getParameterType ()=0;
-    /// Returns parameter identifier
-    virtual std::string getParameterId ()=0;
-    /// Returns parameter value as string
-    virtual std::string getParameterValue ()=0;
-    /// Resets parameter to its default value
-    virtual void resetToDefault ()=0;
-};
-
-/**
  * @brief Configuration parameter template class
  *
  * @details Several types of parameters are implement here:
@@ -76,7 +43,7 @@ public:
  *
  * For all such types one template class was implemented to unify setting and retrieving the XML configuration.
  */
-template <class T> class ConfigurableParameter : public ConfigurableParameterBase
+template <class T> class ConfigurableParameter //: public ConfigurableParameterBase
 {
 public:
     /// Constructor, initializes members
@@ -109,12 +76,6 @@ public:
         return *this;
     }
 
-    /// Clones the current instance with the copy constructor
-    virtual ConfigurableParameterBase *clone ()
-    {
-        return new ConfigurableParameter(*this);
-    }
-
     /// Desctructor
     virtual ~ConfigurableParameter () {};
     /// Parameter identifier
@@ -139,10 +100,9 @@ public:
 
             if (typeid(T) == typeid(bool))
                 config_value_ = attribute->BoolValue();
-            else if (typeid(T) == typeid(char) || typeid(T) == typeid(short int) || typeid(T) == typeid(int))
+            else if (typeid(T) == typeid(int))
                 config_value_ = attribute->IntValue();
-            else if (typeid(T) == typeid(unsigned char) || typeid(T) == typeid(unsigned short int)
-                    || typeid(T) == typeid(unsigned int))
+            else if (typeid(T) == typeid(unsigned int))
                 config_value_ = attribute->UnsignedValue();
             else if (typeid(T) == typeid(float))
                 config_value_ = attribute->FloatValue();
@@ -165,14 +125,6 @@ public:
     {
         if (typeid(T) == typeid(bool))
             return "ParameterBool";
-        else if (typeid(T) == typeid(char))
-            return "ParameterChar";
-        else if (typeid(T) == typeid(unsigned char))
-            return "ParameterUnsignedChar";
-        else if (typeid(T) == typeid(short int))
-            return "ParameterShortInt";
-        else if (typeid(T) == typeid(unsigned short int))
-            return "ParameterUnsignedShortInt";
         else if (typeid(T) == typeid(int))
             return "ParameterInt";
         else if (typeid(T) == typeid(unsigned int))
@@ -232,7 +184,7 @@ public:
     }
 };
 
-template <> class ConfigurableParameter <std::string>: public ConfigurableParameterBase
+template <> class ConfigurableParameter <std::string> //: public ConfigurableParameterBase
 {
 public:
     /// Constructor, initializes members
@@ -263,12 +215,6 @@ public:
         default_value_ = source.default_value_;
 
         return *this;
-    }
-
-    /// Clones the current instance with the copy constructor
-    virtual ConfigurableParameterBase *clone ()
-    {
-        return new ConfigurableParameter(*this);
     }
 
     /// Desctructor
@@ -373,14 +319,6 @@ public:
 
     /// @brief Registers a boolean parameter
     void registerParameter (std::string parameter_id, bool *pointer, bool default_value);
-    /// @brief Registers an char parameter
-    void registerParameter (std::string parameter_id, char *pointer, char default_value);
-    /// @brief Registers an unsigned char parameter
-    void registerParameter (std::string parameter_id, unsigned char *pointer, unsigned char default_value);
-    /// @brief Registers an short int parameter
-    void registerParameter (std::string parameter_id, short int *pointer, short int default_value);
-    /// @brief Registers an unsigned short int parameter
-    void registerParameter (std::string parameter_id, unsigned short int *pointer, unsigned short int default_value);
     /// @brief Registers an int parameter
     void registerParameter (std::string parameter_id, int *pointer, int default_value);
     /// @brief Registers an unsigned int parameter
@@ -394,14 +332,6 @@ public:
 
     /// @brief Adds a boolean parameter
     void addParameterBool (std::string parameter_id, bool default_value);
-    /// @brief Adds a char parameter
-    void addParameterChar (std::string parameter_id, char default_value);
-    /// @brief Adds a unsigned char parameter
-    void addParameterUnsignedChar (std::string parameter_id, unsigned char default_value);
-    /// @brief Adds a short int parameter
-    void addParameterShortInt (std::string parameter_id, short int default_value);
-    /// @brief Adds a unsigned short parameter
-    void addParameterUnsignedShortInt (std::string parameter_id, unsigned short int default_value);
     /// @brief Adds an integer parameter
     void addParameterInt (std::string parameter_id, int default_value);
     /// @brief Adds an unsigned int parameter
@@ -412,9 +342,6 @@ public:
     void addParameterDouble (std::string parameter_id, double default_value);
     /// @brief Adds a string parameter
     void addParameterString (std::string parameter_id, std::string default_value);
-
-    /// @brief Returns if an parameter exists
-    bool existsParameter (std::string parameter_id);
 
     /// @brief Writes data value if a boolean parameter to an argument
     void getParameter (std::string parameter_id, bool &value);
@@ -495,10 +422,14 @@ protected:
     std::string configuration_filename_;
 
     /// Container for all parameters (parameter identifier -> ConfigurableParameterBase)
-    std::map <std::string, ConfigurableParameterBase *> parameters_;
+    std::map <std::string, ConfigurableParameter<bool> > parameters_bool_;
+    std::map <std::string, ConfigurableParameter<int> > parameters_int_;
+    std::map <std::string, ConfigurableParameter<unsigned int> > parameters_uint_;
+    std::map <std::string, ConfigurableParameter<float> > parameters_float_;
+    std::map <std::string, ConfigurableParameter<double> > parameters_double_;
+    std::map <std::string, ConfigurableParameter<std::string> > parameters_string_;
     /// Container for all added sub-configurables
-    //std::vector <ConfigurableDefinition> sub_configurables_;
-    std::map<std::pair<std::string, std::string>, Configuration > sub_configurations_;
+    std::map<std::pair<std::string, std::string>, Configuration> sub_configurations_;
 
     /// Flag which indicates if instance is a template
     bool template_flag_;
