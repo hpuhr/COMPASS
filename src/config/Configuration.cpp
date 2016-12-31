@@ -41,7 +41,7 @@ using namespace tinyxml2;
  * \param configuration_id configuration identifier
  * \param configuration_filename special filename, default ""
  */
-Configuration::Configuration(std::string class_id, std::string instance_id, std::string configuration_filename)
+Configuration::Configuration(const std::string &class_id, const std::string &instance_id, const std::string &configuration_filename)
 : class_id_(class_id), instance_id_(instance_id), used_(false), configuration_filename_(configuration_filename),
   template_flag_ (false)
 {
@@ -120,7 +120,7 @@ void Configuration::resetToDefault ()
         it->second.resetToDefault();
 }
 
-void Configuration::registerParameter (std::string parameter_id, bool *pointer, bool default_value)
+void Configuration::registerParameter (const std::string &parameter_id, bool *pointer, bool default_value)
 {
     logdbg  << "Configuration " << instance_id_ << ": registerParameter: bool: " << parameter_id;
 
@@ -142,7 +142,7 @@ void Configuration::registerParameter (std::string parameter_id, bool *pointer, 
 }
 
 
-void Configuration::registerParameter (std::string parameter_id, int *pointer, int default_value)
+void Configuration::registerParameter (const std::string &parameter_id, int *pointer, int default_value)
 {
     logdbg  << "Configuration " << instance_id_ << ": registerParameter: int: " << parameter_id;
 
@@ -163,7 +163,7 @@ void Configuration::registerParameter (std::string parameter_id, int *pointer, i
     logdbg << "Configuration " << instance_id_ << ": registerParameter "<< parameter_id << ": int, value is " << *(parameters_int_.at(parameter_id).pointer_);
 }
 
-void Configuration::registerParameter (std::string parameter_id, unsigned int *pointer, unsigned int default_value)
+void Configuration::registerParameter (const std::string &parameter_id, unsigned int *pointer, unsigned int default_value)
 {
     logdbg  << "Configuration " << instance_id_ << ": registerParameter: unsigned int: " << parameter_id;
 
@@ -184,7 +184,7 @@ void Configuration::registerParameter (std::string parameter_id, unsigned int *p
     logdbg << "Configuration " << instance_id_ << ": registerParameter "<< parameter_id << ": unsigned int, value is " << *(parameters_uint_.at(parameter_id).pointer_);
 }
 
-void Configuration::registerParameter (std::string parameter_id, float *pointer, float default_value)
+void Configuration::registerParameter (const std::string &parameter_id, float *pointer, float default_value)
 {
     logdbg  << "Configuration " << instance_id_ << ": registerParameter: float: " << parameter_id;
 
@@ -205,7 +205,7 @@ void Configuration::registerParameter (std::string parameter_id, float *pointer,
     logdbg << "Configuration " << instance_id_ << ": registerParameter "<< parameter_id << ": float, value is " << *(parameters_float_.at(parameter_id).pointer_);
 }
 
-void Configuration::registerParameter (std::string parameter_id, double *pointer, double default_value)
+void Configuration::registerParameter (const std::string &parameter_id, double *pointer, double default_value)
 {
     logdbg  << "Configuration " << instance_id_ << ": registerParameter: double: " << parameter_id;
 
@@ -226,7 +226,7 @@ void Configuration::registerParameter (std::string parameter_id, double *pointer
     logdbg << "Configuration " << instance_id_ << ": registerParameter "<< parameter_id << ": double, value is " << *(parameters_double_.at(parameter_id).pointer_);
 }
 
-void Configuration::registerParameter (std::string parameter_id, std::string *pointer, std::string default_value)
+void Configuration::registerParameter (const std::string &parameter_id, std::string *pointer, const std::string &default_value)
 {
     logdbg  << "Configuration " << instance_id_ << ": registerParameter: string: " << parameter_id;
 
@@ -247,8 +247,7 @@ void Configuration::registerParameter (std::string parameter_id, std::string *po
     logdbg << "Configuration " << instance_id_ << ": registerParameter "<< parameter_id << ": string, value is " << *(parameters_string_.at(parameter_id).pointer_);
 }
 
-//TODO addParameter logwrn
-void Configuration::addParameterBool (std::string parameter_id, bool default_value)
+void Configuration::addParameterBool (const std::string &parameter_id, bool default_value)
 {
     logdbg  << "Configuration: addParameterBool: parameter " << parameter_id << " default " << default_value;
     if (parameters_bool_.find(parameter_id) != parameters_bool_.end())
@@ -264,7 +263,7 @@ void Configuration::addParameterBool (std::string parameter_id, bool default_val
     parameters_bool_.at(parameter_id).config_value_=default_value;
 }
 
-void Configuration::addParameterInt (std::string parameter_id, int default_value)
+void Configuration::addParameterInt (const std::string &parameter_id, int default_value)
 {
     logdbg  << "Configuration: addParameterInt: parameter " << parameter_id << " default " << default_value;
     if (parameters_int_.find(parameter_id) != parameters_int_.end())
@@ -281,7 +280,7 @@ void Configuration::addParameterInt (std::string parameter_id, int default_value
 
 }
 
-void Configuration::addParameterUnsignedInt (std::string parameter_id, unsigned int default_value)
+void Configuration::addParameterUnsignedInt (const std::string &parameter_id, unsigned int default_value)
 {
     logdbg  << "Configuration: addParameterUnsignedInt: parameter " << parameter_id << " default " << default_value;
     if (parameters_uint_.find(parameter_id) != parameters_uint_.end())
@@ -297,7 +296,7 @@ void Configuration::addParameterUnsignedInt (std::string parameter_id, unsigned 
     parameters_uint_.at(parameter_id).config_value_=default_value;
 }
 
-void Configuration::addParameterFloat (std::string parameter_id, float default_value)
+void Configuration::addParameterFloat (const std::string &parameter_id, float default_value)
 {
     logdbg  << "Configuration: addParameterFloat: parameter " << parameter_id << " default " << default_value;
     if (parameters_float_.find(parameter_id) != parameters_float_.end())
@@ -313,7 +312,7 @@ void Configuration::addParameterFloat (std::string parameter_id, float default_v
     parameters_float_.at(parameter_id).config_value_=default_value;
 }
 
-void Configuration::addParameterDouble (std::string parameter_id, double default_value)
+void Configuration::addParameterDouble (const std::string &parameter_id, double default_value)
 {
     logdbg  << "Configuration: addParameterDouble: parameter " << parameter_id << " default " << default_value;
     if (parameters_double_.find(parameter_id) != parameters_double_.end())
@@ -329,7 +328,7 @@ void Configuration::addParameterDouble (std::string parameter_id, double default
     parameters_double_.at(parameter_id).config_value_=default_value;
 }
 
-void Configuration::addParameterString (std::string parameter_id, std::string default_value)
+void Configuration::addParameterString (const std::string &parameter_id, const std::string &default_value)
 {
     logdbg  << "Configuration: addParameterString: parameter " << parameter_id << " default " << default_value;
     if (parameters_string_.find(parameter_id) != parameters_string_.end())
@@ -345,7 +344,7 @@ void Configuration::addParameterString (std::string parameter_id, std::string de
     parameters_string_.at(parameter_id).config_value_=default_value;
 }
 
-void Configuration::getParameter (std::string parameter_id, bool &value)
+void Configuration::getParameter (const std::string &parameter_id, bool &value)
 {
     if (parameters_bool_.count(parameter_id) == 0)
         throw std::runtime_error ("Configuration: getParameter: bool: unknown parameter id "+parameter_id);
@@ -358,7 +357,7 @@ void Configuration::getParameter (std::string parameter_id, bool &value)
    value = *(parameters_bool_.at(parameter_id).pointer_);
 }
 
-void Configuration::getParameter (std::string parameter_id, int &value)
+void Configuration::getParameter (const std::string &parameter_id, int &value)
 {
     if (parameters_int_.count(parameter_id) == 0)
         throw std::runtime_error ("Configuration: getParameter: int: unknown parameter id "+parameter_id);
@@ -371,7 +370,7 @@ void Configuration::getParameter (std::string parameter_id, int &value)
    value = *(parameters_int_.at(parameter_id).pointer_);
 }
 
-void Configuration::getParameter (std::string parameter_id, unsigned int &value)
+void Configuration::getParameter (const std::string &parameter_id, unsigned int &value)
 {
     if (parameters_uint_.count(parameter_id) == 0)
         throw std::runtime_error ("Configuration: getParameter: uint: unknown parameter id "+parameter_id);
@@ -384,7 +383,7 @@ void Configuration::getParameter (std::string parameter_id, unsigned int &value)
    value = *(parameters_uint_.at(parameter_id).pointer_);
 }
 
-void Configuration::getParameter (std::string parameter_id, float &value)
+void Configuration::getParameter (const std::string &parameter_id, float &value)
 {
     if (parameters_float_.count(parameter_id) == 0)
         throw std::runtime_error ("Configuration: getParameter: float: unknown parameter id "+parameter_id);
@@ -397,7 +396,7 @@ void Configuration::getParameter (std::string parameter_id, float &value)
    value = *(parameters_float_.at(parameter_id).pointer_);
 }
 
-void Configuration::getParameter (std::string parameter_id, double &value)
+void Configuration::getParameter (const std::string &parameter_id, double &value)
 {
     if (parameters_double_.count(parameter_id) == 0)
         throw std::runtime_error ("Configuration: getParameter: double: unknown parameter id "+parameter_id);
@@ -409,7 +408,7 @@ void Configuration::getParameter (std::string parameter_id, double &value)
 
    value = *(parameters_double_.at(parameter_id).pointer_);
 }
-void Configuration::getParameter (std::string parameter_id, std::string &value)
+void Configuration::getParameter (const std::string &parameter_id, std::string &value)
 {
     if (parameters_string_.count(parameter_id) == 0)
         throw std::runtime_error ("Configuration: getParameter: string: unknown parameter id "+parameter_id);
@@ -653,7 +652,7 @@ void Configuration::createSubConfigurables (Configurable *configurable)
 
 }
 
-void Configuration::setConfigurationFilename (std::string configuration_filename)
+void Configuration::setConfigurationFilename (const std::string &configuration_filename)
 {
     assert (configuration_filename.size() > 0);
     configuration_filename_=configuration_filename;
@@ -663,13 +662,13 @@ bool Configuration::hasConfigurationFilename ()
 {
     return configuration_filename_.size() != 0;
 }
-std::string Configuration::getConfigurationFilename ()
+const std::string &Configuration::getConfigurationFilename ()
 {
     assert (hasConfigurationFilename());
     return configuration_filename_;
 }
 
-Configuration &Configuration::addNewSubConfiguration (std::string class_id, std::string instance_id)
+Configuration &Configuration::addNewSubConfiguration (const std::string &class_id, const std::string &instance_id)
 {
     std::pair<std::string, std::string> key (class_id, instance_id);
     assert (sub_configurations_.find (key) == sub_configurations_.end());
@@ -677,7 +676,7 @@ Configuration &Configuration::addNewSubConfiguration (std::string class_id, std:
     return sub_configurations_.at(key);
 }
 
-Configuration &Configuration::addNewSubConfiguration (std::string class_id)
+Configuration &Configuration::addNewSubConfiguration (const std::string &class_id)
 {
     int instance_number=-1;
 
@@ -705,7 +704,7 @@ Configuration &Configuration::addNewSubConfiguration (Configuration &configurati
     return sub_configurations_.at(key);
 }
 
-Configuration &Configuration::getSubConfiguration (std::string class_id, std::string instance_id)
+Configuration &Configuration::getSubConfiguration (const std::string &class_id, const std::string &instance_id)
 {
     std::pair<std::string, std::string> key (class_id, instance_id);
 
@@ -720,7 +719,7 @@ Configuration &Configuration::getSubConfiguration (std::string class_id, std::st
     return sub_configurations_.at(key);
 }
 
-void Configuration::removeSubConfiguration (std::string class_id, std::string instance_id)
+void Configuration::removeSubConfiguration (const std::string &class_id, const std::string &instance_id)
 {
 //    loginf << "Configuration: removeSubConfiguration: me "  << class_id_ << " " << instance_id_
 //            << " you " << class_id << " " << instance_id;
@@ -730,7 +729,7 @@ void Configuration::removeSubConfiguration (std::string class_id, std::string in
     sub_configurations_.erase(sub_configurations_.find (key));
 }
 
-void Configuration::setTemplate (bool template_flag, std::string template_name)
+void Configuration::setTemplate (bool template_flag, const std::string &template_name)
 {
     template_flag_ = template_flag;
     template_name_ = template_name;
@@ -740,12 +739,12 @@ void Configuration::setTemplate (bool template_flag, std::string template_name)
 
 }
 
-bool Configuration::getSubTemplateNameFree (std::string template_name)
+bool Configuration::getSubTemplateNameFree (const std::string &template_name)
 {
     return configuration_templates_.find (template_name) == configuration_templates_.end();
 }
 
-void Configuration::addSubTemplate (Configuration *configuration, std::string template_name)
+void Configuration::addSubTemplate (Configuration *configuration, const std::string &template_name)
 {
     assert (getSubTemplateNameFree(template_name));
     configuration_templates_.insert (std::pair<std::string, Configuration> (template_name, *configuration));

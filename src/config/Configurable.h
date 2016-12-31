@@ -58,9 +58,7 @@ class Configurable
 {
 public:
     /// @brief Constructor
-    Configurable (std::string class_id, std::string instance_id, Configurable *parent=0, std::string configuration_filename="");
-    /// @brief Constructor (only use for copy constructors etc.)
-    //Configurable ();
+    Configurable (const std::string &class_id, const std::string &instance_id, Configurable *parent=0, const std::string &configuration_filename="");
     /// @brief Destructor
     virtual ~Configurable();
 
@@ -68,22 +66,22 @@ public:
     virtual void resetToDefault ();
 
     /// @brief Adds a new sub-configuration based on class id and instance id
-    Configuration &addNewSubConfiguration (std::string class_id, std::string instance_id);
+    Configuration &addNewSubConfiguration (const std::string &class_id, const std::string &instance_id);
     /// @brief Adds a new sub-configuration based on class id, instance id is generated
-    Configuration &addNewSubConfiguration (std::string class_id);
+    Configuration &addNewSubConfiguration (const std::string &class_id);
     /// @brief Adds a new sub-configuration by reference and copy constructor
     Configuration &addNewSubConfiguration (Configuration &configuration);
     /// @brief Creates sub-configurables according to configuration
     void createSubConfigurables ();
     /// @brief Override for creation of sub-configurables
-    virtual void generateSubConfigurable (std::string class_id, std::string instance_id);
+    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
     /// @brief Returns if a specified sub-configurable exists
-    bool hasSubConfigurable(std::string class_id, std::string instance_id);
+    bool hasSubConfigurable(const std::string &class_id, const std::string &instance_id);
 
     /// @brief Returns configuration for this class
     Configuration &getConfiguration () { return configuration_; }
     /// @brief Saves the current configuration as template at its parent
-    void saveConfigurationAsTemplate (std::string template_name);
+    void saveConfigurationAsTemplate (const std::string &template_name);
 
 protected:
     /// Class identifier
@@ -101,22 +99,22 @@ protected:
     std::map <std::string, Configurable&> children_;
 
     /// @brief Registers a bool parameter
-    void registerParameter (std::string parameter_id, bool *pointer, bool default_value);
+    void registerParameter (const std::string &parameter_id, bool *pointer, bool default_value);
     /// @brief Registers a int parameter
-    void registerParameter (std::string parameter_id, int *pointer, int default_value);
+    void registerParameter (const std::string &parameter_id, int *pointer, int default_value);
     /// @brief Registers a unsigned int parameter
-    void registerParameter (std::string parameter_id, unsigned int *pointer, unsigned int default_value);
+    void registerParameter (const std::string &parameter_id, unsigned int *pointer, unsigned int default_value);
     /// @brief Registers a float parameter
-    void registerParameter (std::string parameter_id, float *pointer, float default_value);
+    void registerParameter (const std::string &parameter_id, float *pointer, float default_value);
     /// @brief Registers a double parameter
-    void registerParameter (std::string parameter_id, double *pointer, double default_value);
+    void registerParameter (const std::string &parameter_id, double *pointer, double default_value);
     /// @brief Registers a string parameter
-    void registerParameter (std::string parameter_id, std::string *pointer, std::string default_value);
+    void registerParameter (const std::string &parameter_id, std::string *pointer, const std::string &default_value);
 
     /// @brief Override to check if required sub-configurables exist
     virtual void checkSubConfigurables ();
     /// @brief Saves the specified child's configuration as template
-    void saveTemplateConfiguration (Configurable *child, std::string template_name);
+    void saveTemplateConfiguration (Configurable *child, const std::string &template_name);
 
     /// @brief Adds a configurable as a child
     Configuration &registerSubConfigurable (Configurable &child);

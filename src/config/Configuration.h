@@ -179,7 +179,7 @@ class Configuration
 {
 public:
     /// @brief Constructor
-    Configuration(std::string class_id, std::string instance_id, std::string configuration_filename="");
+    Configuration(const std::string &class_id, const std::string &instance_id, const std::string &configuration_filename="");
 
     /// @brief Copy constructor
     Configuration(const Configuration &source);
@@ -190,43 +190,43 @@ public:
     Configuration *clone ();
 
     /// @brief Registers a boolean parameter
-    void registerParameter (std::string parameter_id, bool *pointer, bool default_value);
+    void registerParameter (const std::string &parameter_id, bool *pointer, bool default_value);
     /// @brief Registers an int parameter
-    void registerParameter (std::string parameter_id, int *pointer, int default_value);
+    void registerParameter (const std::string &parameter_id, int *pointer, int default_value);
     /// @brief Registers an unsigned int parameter
-    void registerParameter (std::string parameter_id, unsigned int *pointer, unsigned int default_value);
+    void registerParameter (const std::string &parameter_id, unsigned int *pointer, unsigned int default_value);
     /// @brief Registers a float parameter
-    void registerParameter (std::string parameter_id, float *pointer, float default_value);
+    void registerParameter (const std::string &parameter_id, float *pointer, float default_value);
     /// @brief Registers a double parameter
-    void registerParameter (std::string parameter_id, double *pointer, double default_value);
+    void registerParameter (const std::string &parameter_id, double *pointer, double default_value);
     /// @brief Registers a string parameter
-    void registerParameter (std::string parameter_id, std::string *pointer, std::string default_value);
+    void registerParameter (const std::string &parameter_id, std::string *pointer, const std::string &default_value);
 
     /// @brief Adds a boolean parameter
-    void addParameterBool (std::string parameter_id, bool default_value);
+    void addParameterBool (const std::string &parameter_id, bool default_value);
     /// @brief Adds an integer parameter
-    void addParameterInt (std::string parameter_id, int default_value);
+    void addParameterInt (const std::string &parameter_id, int default_value);
     /// @brief Adds an unsigned int parameter
-    void addParameterUnsignedInt (std::string parameter_id, unsigned int default_value);
+    void addParameterUnsignedInt (const std::string &parameter_id, unsigned int default_value);
     /// @brief Adds a float parameter
-    void addParameterFloat (std::string parameter_id, float default_value);
+    void addParameterFloat (const std::string &parameter_id, float default_value);
     /// @brief Adds a double parameter
-    void addParameterDouble (std::string parameter_id, double default_value);
+    void addParameterDouble (const std::string &parameter_id, double default_value);
     /// @brief Adds a string parameter
-    void addParameterString (std::string parameter_id, std::string default_value);
+    void addParameterString (const std::string &, const std::string &default_value);
 
     /// @brief Writes data value if a boolean parameter to an argument
-    void getParameter (std::string parameter_id, bool &value);
+    void getParameter (const std::string &parameter_id, bool &value);
     /// @brief Writes data value if an integer parameter to an argument
-    void getParameter (std::string parameter_id, int &value);
+    void getParameter (const std::string &parameter_id, int &value);
     /// @brief Writes data value if an unsigned int parameter to an argument
-    void getParameter (std::string parameter_id, unsigned int &value);
+    void getParameter (const std::string &parameter_id, unsigned int &value);
     /// @brief Writes data value if a float parameter to an argument
-    void getParameter (std::string parameter_id, float &value);
+    void getParameter (const std::string &parameter_id, float &value);
     /// @brief Writes data value if a double parameter to an argument
-    void getParameter (std::string parameter_id, double &value);
+    void getParameter (const std::string &parameter_id, double &value);
     /// @brief Writes data value if a string parameter to an argument
-    void getParameter (std::string parameter_id, std::string &value);
+    void getParameter (const std::string &parameter_id, std::string &value);
 
     /// @brief Parses an XML configuration element
     void parseXMLElement (tinyxml2::XMLElement *element);
@@ -243,45 +243,45 @@ public:
     bool getUsed () {return used_; };
 
     /// @brief Sets special filename for XML configuration
-    void setConfigurationFilename (std::string configuration_filename);
+    void setConfigurationFilename (const std::string &configuration_filename);
     /// @brief Returns flag if special filename has been set
     bool hasConfigurationFilename ();
     /// @brief Return special filename
-    std::string getConfigurationFilename ();
+    const std::string & getConfigurationFilename ();
 
     /// @brief Adds a new sub-configuration and returns reference
-    Configuration &addNewSubConfiguration (std::string class_id, std::string instance_id);
+    Configuration &addNewSubConfiguration (const std::string &class_id, const std::string &instance_id);
     /// @brief Adds a new sub-configuration and returns reference
-    Configuration &addNewSubConfiguration (std::string class_id);
+    Configuration &addNewSubConfiguration (const std::string &class_id);
     /// @brief Returns a sub-configuration, creates new empty one if non-existing
     Configuration &addNewSubConfiguration (Configuration &configuration);
     /// @brief Returns a specfigied sub-configuration
-    Configuration &getSubConfiguration (std::string class_id, std::string instance_id);
+    Configuration &getSubConfiguration (const std::string &class_id, const std::string &instance_id);
     /// @brief Removes a sub-configuration
-    void removeSubConfiguration (std::string class_id, std::string instance_id);
+    void removeSubConfiguration (const std::string &class_id, const std::string &instance_id);
 
     /// @brief Returns the instance identifier
-    std::string getInstanceId () { return instance_id_; }
+    const std::string &getInstanceId () { return instance_id_; }
     /// @brief Returns the class identifier
-    std::string getClassId () { return class_id_; }
+    const std::string &getClassId () { return class_id_; }
 
     /// @brief Sets the template flag and name
-    void setTemplate (bool template_flag, std::string template_name_);
+    void setTemplate (bool template_flag, const std::string &template_name_);
     /// @brief Returns the template flag
     bool getTemplateFlag () { return template_flag_; }
     /// @brief Returns the template name
-    std::string getTemplateName () { return template_name_; }
+    const std::string &getTemplateName () { return template_name_; }
 
     /// @brief Checks if a specific template_name is already taken, true if free
-    bool getSubTemplateNameFree (std::string template_name);
+    bool getSubTemplateNameFree (const std::string & template_name);
     /// @brief Adds a template configuration with a name
-    void addSubTemplate (Configuration *configuration, std::string template_name);
+    void addSubTemplate (Configuration *configuration, const std::string &template_name);
 
     /// @brief Return contaienr with all configuration templates
     std::map<std::string, Configuration> &getConfigurationTemplates () { return configuration_templates_; }
 
     // only use in special case of configuration copy
-    void setInstanceId (std::string instance_id) { instance_id_ = instance_id; }
+    void setInstanceId (const std::string &instance_id) { instance_id_ = instance_id; }
 
 protected:
     /// Class identifier

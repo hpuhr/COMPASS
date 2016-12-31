@@ -38,7 +38,7 @@
  *
  * \todo Extend registerParameter to template function.
  */
-Configurable::Configurable(std::string class_id, std::string instance_id, Configurable *parent, std::string configuration_filename)
+Configurable::Configurable(const std::string &class_id, const std::string &instance_id, Configurable *parent, const std::string &configuration_filename)
 : class_id_(class_id), instance_id_(instance_id), key_id_(class_id+instance_id), parent_(parent),
   configuration_ (parent_ ? parent_->registerSubConfigurable(*this) : ConfigurationManager::getInstance().registerRootConfigurable(*this))
 {
@@ -77,37 +77,37 @@ Configurable::~Configurable()
     }
 }
 
-void Configurable::registerParameter (std::string parameter_id, bool *pointer, bool default_value)
+void Configurable::registerParameter (const std::string &parameter_id, bool *pointer, bool default_value)
 {
     logdbg << "Configurable " << instance_id_ << ": registerParameter: bool parameter_id " << parameter_id;
     configuration_.registerParameter (parameter_id, pointer, default_value);
 }
 
-void Configurable::registerParameter (std::string parameter_id, int *pointer, int default_value)
+void Configurable::registerParameter (const std::string &parameter_id, int *pointer, int default_value)
 {
     logdbg << "Configurable " << instance_id_ << ": registerParameter: int parameter_id " << parameter_id;
     configuration_.registerParameter (parameter_id, pointer, default_value);
 }
 
-void Configurable::registerParameter (std::string parameter_id, unsigned int *pointer, unsigned int default_value)
+void Configurable::registerParameter (const std::string &parameter_id, unsigned int *pointer, unsigned int default_value)
 {
     logdbg << "Configurable " << instance_id_ << ": registerParameter: unsigned int parameter_id " << parameter_id;
     configuration_.registerParameter (parameter_id, pointer, default_value);
 }
 
-void Configurable::registerParameter (std::string parameter_id, float *pointer, float default_value)
+void Configurable::registerParameter (const std::string &parameter_id, float *pointer, float default_value)
 {
     logdbg << "Configurable " << instance_id_ << ": registerParameter: float parameter_id " << parameter_id;
     configuration_.registerParameter (parameter_id, pointer, default_value);
 }
 
-void Configurable::registerParameter (std::string parameter_id, double *pointer, double default_value)
+void Configurable::registerParameter (const std::string &parameter_id, double *pointer, double default_value)
 {
     logdbg << "Configurable " << instance_id_ << ": registerParameter: double parameter_id " << parameter_id;
     configuration_.registerParameter (parameter_id, pointer, default_value);
 }
 
-void Configurable::registerParameter (std::string parameter_id, std::string *pointer, std::string default_value)
+void Configurable::registerParameter (const std::string &parameter_id, std::string *pointer, const std::string &default_value)
 {
     logdbg << "Configurable " << instance_id_ << ": registerParameter: string parameter_id " << parameter_id;
     configuration_.registerParameter (parameter_id, pointer, default_value);
@@ -159,12 +159,12 @@ void Configurable::resetToDefault ()
     }
 }
 
-Configuration &Configurable::addNewSubConfiguration (std::string class_id, std::string instance_id)
+Configuration &Configurable::addNewSubConfiguration (const std::string &class_id, const std::string &instance_id)
 {
     return configuration_.addNewSubConfiguration (class_id, instance_id);
 }
 
-Configuration &Configurable::addNewSubConfiguration (std::string class_id)
+Configuration &Configurable::addNewSubConfiguration (const std::string &class_id)
 {
     return configuration_.addNewSubConfiguration (class_id);
 }
@@ -185,23 +185,23 @@ void Configurable::checkSubConfigurables ()
     logerr  << "Configurable: checkSubConfigurables: class " << class_id_ << " failed to override me";
 }
 
-void Configurable::generateSubConfigurable (std::string class_id, std::string instance_id)
+void Configurable::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
     loginf  << "Configurable: generateSubConfigurable: class " << class_id_ << " failed to override me to generate subconfigurable " << class_id;
 }
 
-bool Configurable::hasSubConfigurable(std::string class_id, std::string instance_id)
+bool Configurable::hasSubConfigurable(const std::string &class_id, const std::string &instance_id)
 {
     return ( children_.find(class_id+instance_id) != children_.end() );
 }
 
-void Configurable::saveConfigurationAsTemplate (std::string template_name)
+void Configurable::saveConfigurationAsTemplate (const std::string &template_name)
 {
     assert (parent_);
     parent_->saveTemplateConfiguration(this, template_name);
 }
 
-void Configurable::saveTemplateConfiguration (Configurable *child, std::string template_name)
+void Configurable::saveTemplateConfiguration (Configurable *child, const std::string &template_name)
 {
     assert (configuration_.getSubTemplateNameFree(template_name));
     configuration_.addSubTemplate(child->getConfiguration().clone(), template_name);
