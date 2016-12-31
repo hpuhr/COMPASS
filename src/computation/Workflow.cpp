@@ -23,14 +23,14 @@
 Constructor.
 @param name Name of the workflow.
   */
-Workflow::Workflow( const std::string& name )
-:   name_( name )
-{
-    //root node always present, forward all buffers is default
-    root_ = new ComputationElement( "root" );
-    root_->getFilter()->setBaseRule( BufferFilter::FORWARD );
-    computations_[ "root" ] = root_;
-}
+//Workflow::Workflow( const std::string& name )
+//:   name_( name )
+//{
+//    //root node always present, forward all buffers is default
+//    root_ = new ComputationElement( "root" );
+//    root_->getFilter()->setBaseRule( BufferFilter::FORWARD );
+//    computations_[ "root" ] = root_;
+//}
 
 /**
 Configurable constructor.
@@ -132,19 +132,19 @@ ComputationElement* Workflow::addComputation( ComputationElement* parent, const 
     if( computations_.find( name ) != computations_.end() )
         throw std::runtime_error( "Workflow: addComputation: Duplicate name." );
 
-    if( unusable_ )
-    {
-        ComputationElement* elem = new ComputationElement( name, parent );
-        computations_[ name ] = elem;
-    }
-    else
-    {
+//    if( unusable_ )
+//    {
+//        ComputationElement* elem = new ComputationElement( name, parent );
+//        computations_[ name ] = elem;
+//    }
+//    else
+//    {
         Configuration& config = addNewSubConfiguration( "ComputationElement" );
         config.addParameterString( "name", name );
         generateSubConfigurable( config.getClassId(), config.getInstanceId() );
         if( parent )
             parent->addChild( computations_[ name ] );
-    }
+//    }
 
     //reroute debug signals
     computations_[ name ]->error_signal_.connect( error_signal_ );
@@ -171,16 +171,16 @@ ComputationElement* Workflow::addComputationBefore( ComputationElement* child, c
     if( computations_.find( name ) != computations_.end() )
         throw std::runtime_error( "Workflow: addComputation: Duplicate name." );
 
-    if( unusable_ )
-    {
-        ComputationElement* elem = new ComputationElement( name, child->parent() );
-        child->detach();
-        elem->addChild( child );
+//    if( unusable_ )
+//    {
+//        ComputationElement* elem = new ComputationElement( name, child->parent() );
+//        child->detach();
+//        elem->addChild( child );
 
-        computations_[ name ] = elem;
-    }
-    else
-    {
+//        computations_[ name ] = elem;
+//    }
+//    else
+//    {
         Configuration& config = addNewSubConfiguration( "ComputationElement" );
         config.addParameterString( "name", name );
         generateSubConfigurable( config.getClassId(), config.getInstanceId() );
@@ -189,7 +189,7 @@ ComputationElement* Workflow::addComputationBefore( ComputationElement* child, c
         child->parent()->addChild( computations_[ name ] );
         child->detach();
         computations_[ name ]->addChild( child );
-    }
+//    }
 
     computations_[ name ]->error_signal_.connect( error_signal_ );
     computations_[ name ]->filter_signal_.connect( filter_signal_ );

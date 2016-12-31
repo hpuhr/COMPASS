@@ -35,18 +35,18 @@ Constructor.
 Starts in appending mode.
 @param input Input buffer.
   */
-Transformation::Transformation( Buffer* input )
-:   id_( "Transformation" ),
-    input_( input ),
-    output_( input ),
-    ready_buffer_( NULL ),
-    append_( true ),
-    sustainable_( false ),
-    available_( true ),
-    state_( TRAFO_OK ),
-    error_msg_( "Unknown error" )
-{
-}
+//Transformation::Transformation( Buffer* input )
+//:   id_( "Transformation" ),
+//    input_( input ),
+//    output_( input ),
+//    ready_buffer_( NULL ),
+//    append_( true ),
+//    sustainable_( false ),
+//    available_( true ),
+//    state_( TRAFO_OK ),
+//    error_msg_( "Unknown error" )
+//{
+//}
 
 /**
 Configurable constructor.
@@ -80,10 +80,10 @@ Transformation::Transformation( std::string class_id,
 Copy constructor.
 @param copy The instance to copy.
   */
-Transformation::Transformation( const Transformation& copy )
-{
-    *this = copy;
-}
+//Transformation::Transformation( const Transformation& copy )
+//{
+//    *this = copy;
+//}
 
 /**
 Nothing gets cleaned up, handle cleanup of the buffers on the outside!

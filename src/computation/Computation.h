@@ -54,8 +54,8 @@ class TransformationEntry : public Configurable
 {
 public:
     /// @brief Constructor
-    TransformationEntry( const std::string &dbo_type,
-                         const std::string& id="" );
+//    TransformationEntry( const std::string &dbo_type,
+//                         const std::string& id="" );
     /// @brief Configurable constructor
     TransformationEntry( const std::string& class_id,
                          const std::string& instance_id,
@@ -148,7 +148,7 @@ public:
     typedef std::vector<Buffer*> BufferQueue;
 
     /// @brief Constructor
-    Computation( const std::string& name );
+    //Computation( const std::string& name );
     /// @brief Configurable constructor
     Computation( std::string class_id,
                  std::string instance_id,

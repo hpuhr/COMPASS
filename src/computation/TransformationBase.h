@@ -63,9 +63,9 @@ public:
     //typedef std::vector<Property*> Properties;
 
     /// @brief Constructor
-    TransformationBase();
+    //TransformationBase();
     /// @brief Copy constructor
-    TransformationBase( const TransformationBase& cpy );
+    //TransformationBase( const TransformationBase& cpy );
     /// @brief Configurable constructor
     TransformationBase( std::string class_id, std::string instance_id, Configurable *parent );
     /// @brief Destructor

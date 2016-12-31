@@ -31,12 +31,12 @@ Constructor.
 @param property The entries Property.
 @param var Optional DBOVariable to be stored with the entry.
  */
-TransformationVariablePropertyEntry::TransformationVariablePropertyEntry( const std::string &dbo_type,
-        const Property& property,
-        DBOVariable* var )
-{
-    setup( dbo_type, property, var );
-}
+//TransformationVariablePropertyEntry::TransformationVariablePropertyEntry( const std::string &dbo_type,
+//        const Property& property,
+//        DBOVariable* var )
+//{
+//    setup( dbo_type, property, var );
+//}
 
 /**
 Configurable constructor.
@@ -65,14 +65,14 @@ TransformationVariablePropertyEntry::TransformationVariablePropertyEntry( std::s
 Copy constructor.
 @param cpy Instance to copy.
  */
-TransformationVariablePropertyEntry::TransformationVariablePropertyEntry( const TransformationVariablePropertyEntry& cpy )
-{
-    dbo_type_ = cpy.dbo_type_;
-    id_ = cpy.id_;
-    data_type_ = cpy.data_type_;
-    var_ = cpy.var_;
-    has_variable_ = cpy.has_variable_;
-}
+//TransformationVariablePropertyEntry::TransformationVariablePropertyEntry( const TransformationVariablePropertyEntry& cpy )
+//{
+//    dbo_type_ = cpy.dbo_type_;
+//    id_ = cpy.id_;
+//    data_type_ = cpy.data_type_;
+//    var_ = cpy.var_;
+//    has_variable_ = cpy.has_variable_;
+//}
 
 /**
 Destructor.
@@ -171,15 +171,15 @@ Constructor.
 With this constructor the data type check will be disabled by default.
 @param name Name of the variable.
  */
-TransformationVariable::TransformationVariable( const std::string& name )
-:   name_( name ),
-    default_prop_( NULL ),
-    optional_( false ),
-    data_type_( PropertyDataType::INT ),
-    data_type_str_ ( Property::asString(PropertyDataType::INT)),
-    check_data_type_( false )
-{
-}
+//TransformationVariable::TransformationVariable( const std::string& name )
+//:   name_( name ),
+//    default_prop_( NULL ),
+//    optional_( false ),
+//    data_type_( PropertyDataType::INT ),
+//    data_type_str_ ( Property::asString(PropertyDataType::INT)),
+//    check_data_type_( false )
+//{
+//}
 
 /**
 Constructor.
@@ -189,17 +189,17 @@ will be used together with the variables data type to set up a default Property.
 @param data_type The variables data type.
 @param default_id Optional default Property id.
  */
-TransformationVariable::TransformationVariable( const std::string& name, PropertyDataType data_type, const std::string& default_id )
-:   name_( name ),
-    default_prop_( NULL ),
-    optional_( false ),
-    data_type_( data_type ),
-    data_type_str_ (Property::asString(data_type)),
-    check_data_type_( true )
-{
-    if( !default_id.empty() )
-        default_prop_ = new TransformationVariablePropertyEntry( "", Property( default_id, data_type ), NULL ); // TODO HACK
-}
+//TransformationVariable::TransformationVariable( const std::string& name, PropertyDataType data_type, const std::string& default_id )
+//:   name_( name ),
+//    default_prop_( NULL ),
+//    optional_( false ),
+//    data_type_( data_type ),
+//    data_type_str_ (Property::asString(data_type)),
+//    check_data_type_( true )
+//{
+//    if( !default_id.empty() )
+//        default_prop_ = new TransformationVariablePropertyEntry( "", Property( default_id, data_type ), NULL ); // TODO HACK
+//}
 
 /**
 Configurable constructor.
@@ -229,21 +229,21 @@ TransformationVariable::TransformationVariable( std::string class_id, std::strin
 Copy constructor.
 @param cpy Instance to copy.
  */
-TransformationVariable::TransformationVariable( const TransformationVariable& cpy )
-:   default_prop_( NULL )
-{
-    name_ = cpy.name_;
-    if( cpy.default_prop_ )
-        default_prop_ = new TransformationVariablePropertyEntry( *(cpy.default_prop_) );
+//TransformationVariable::TransformationVariable( const TransformationVariable& cpy )
+//:   default_prop_( NULL )
+//{
+//    name_ = cpy.name_;
+//    if( cpy.default_prop_ )
+//        default_prop_ = new TransformationVariablePropertyEntry( *(cpy.default_prop_) );
 
-    PropertyMap::const_iterator it, itend = cpy.properties_.end();
-    for( it=cpy.properties_.begin(); it!=itend; ++it )
-        properties_[ it->first ] = new TransformationVariablePropertyEntry( *(it->second) );
+//    PropertyMap::const_iterator it, itend = cpy.properties_.end();
+//    for( it=cpy.properties_.begin(); it!=itend; ++it )
+//        properties_[ it->first ] = new TransformationVariablePropertyEntry( *(it->second) );
 
-    optional_ = cpy.optional_;
-    data_type_ = cpy.data_type_;
-    check_data_type_ = cpy.check_data_type_;
-}
+//    optional_ = cpy.optional_;
+//    data_type_ = cpy.data_type_;
+//    check_data_type_ = cpy.check_data_type_;
+//}
 
 /**
 Destructor.
@@ -322,18 +322,18 @@ void TransformationVariable::addProperty( const std::string &dbo_type, const Pro
     if( !var && existsDBOVariable( dbo_type, prop.getId()) )
         throw std::runtime_error( "TransformationVariable: addProperty: DBOVariable already exists, name=" + name_ + ", id=" + prop.getId() );
 
-    if( unusable_ )
-    {
-        if( properties_.find( dbo_type ) != properties_.end() )
-            delete properties_[ dbo_type ];
-        properties_[ dbo_type ] = new TransformationVariablePropertyEntry( dbo_type, prop , var );
-    }
-    else
-    {
+//    if( unusable_ )
+//    {
+//        if( properties_.find( dbo_type ) != properties_.end() )
+//            delete properties_[ dbo_type ];
+//        properties_[ dbo_type ] = new TransformationVariablePropertyEntry( dbo_type, prop , var );
+//    }
+//    else
+//    {
         Configuration &config = addNewSubConfiguration( "TransformationVariablePropertyEntry" );
         TransformationVariablePropertyEntry::getConfig( config, dbo_type, prop, var!=NULL );
         generateSubConfigurable( config.getClassId(), config.getInstanceId() );
-    }
+//    }
 }
 
 /**
@@ -352,20 +352,20 @@ void TransformationVariable::addProperty( const std::string &dbo_type, const std
     if( existsDBOVariable( dbo_type, id ) )
         throw std::runtime_error( "TransformationVariable: addProperty: DBOVariable already exists, name=" + name_ + ", id=" + id );
 
-    if( unusable_ )
-    {
-        if( properties_.find( dbo_type ) != properties_.end() )
-            delete properties_[ dbo_type ];
-        properties_[ dbo_type ] = new TransformationVariablePropertyEntry( dbo_type, Property( id, data_type_ ), NULL );
-    }
-    else
-    {
+//    if( unusable_ )
+//    {
+//        if( properties_.find( dbo_type ) != properties_.end() )
+//            delete properties_[ dbo_type ];
+//        properties_[ dbo_type ] = new TransformationVariablePropertyEntry( dbo_type, Property( id, data_type_ ), NULL );
+//    }
+//    else
+//    {
         std::string name = "TransformationVariablePropertyEntry_" + id + "0";
 
         Configuration &config = addNewSubConfiguration( "TransformationVariablePropertyEntry", name );
         TransformationVariablePropertyEntry::getConfig( config, dbo_type, Property( id, data_type_ ), false );
         generateSubConfigurable( "TransformationVariablePropertyEntry", name );
-    }
+//    }
 }
 
 /**
@@ -639,20 +639,20 @@ void TransformationVariable::setDefaultProperty( const Property& prop )
     if( check_data_type_ && prop.getDataType() != data_type_ )
         throw std::runtime_error( "TransformationVariable: setDefaultProperty: Wrong Data Type." );
 
-    if( unusable_ )
-    {
-        if( default_prop_ )
-            delete default_prop_;
-        default_prop_ = new TransformationVariablePropertyEntry( "", prop, NULL ); // TODO HACK
-    }
-    else
-    {
+//    if( unusable_ )
+//    {
+//        if( default_prop_ )
+//            delete default_prop_;
+//        default_prop_ = new TransformationVariablePropertyEntry( "", prop, NULL ); // TODO HACK
+//    }
+//    else
+//    {
         std::string name = "TransformationVariablePropertyEntryDefault0";
 
         Configuration &config = addNewSubConfiguration( "TransformationVariablePropertyEntryDefault", name );
         TransformationVariablePropertyEntry::getConfig( config, "", prop, false ); // TODO HACK
         generateSubConfigurable( "TransformationVariablePropertyEntryDefault", name );
-    }
+//    }
 }
 
 /**
@@ -666,20 +666,20 @@ void TransformationVariable::setDefaultProperty( const std::string& id )
     if( !check_data_type_ )
         throw std::runtime_error( "TransformationVariable: setDefaultProperty: No data type provided." );
 
-    if( unusable_ )
-    {
-        if( default_prop_ )
-            delete default_prop_;
-        default_prop_ = new TransformationVariablePropertyEntry( "", Property( id, data_type_ ), NULL ); // TODO HACK
-    }
-    else
-    {
+//    if( unusable_ )
+//    {
+//        if( default_prop_ )
+//            delete default_prop_;
+//        default_prop_ = new TransformationVariablePropertyEntry( "", Property( id, data_type_ ), NULL ); // TODO HACK
+//    }
+//    else
+//    {
         std::string name = "TransformationVariablePropertyEntryDefault0";
 
         Configuration &config = addNewSubConfiguration( "TransformationVariablePropertyEntryDefault", name );
         TransformationVariablePropertyEntry::getConfig( config, "", Property( id, data_type_ ), NULL ); // TODO HACK
         generateSubConfigurable( "TransformationVariablePropertyEntryDefault", name );
-    }
+    //}
 }
 
 /**
@@ -708,20 +708,20 @@ void TransformationVariable::setDefaultProperty( DBOVariable* var )
     if( check_data_type_ && var->getDataType() != data_type_ )
         throw std::runtime_error( "TransformationVariable: setDefaultProperty: Wrong Data Type." );
 
-    if( unusable_ )
-    {
-        if( default_prop_ )
-            delete default_prop_;
-        default_prop_ = new TransformationVariablePropertyEntry( "", *var, NULL ); // TODO HACK
-    }
-    else
-    {
+//    if( unusable_ )
+//    {
+//        if( default_prop_ )
+//            delete default_prop_;
+//        default_prop_ = new TransformationVariablePropertyEntry( "", *var, NULL ); // TODO HACK
+//    }
+//    else
+//    {
         std::string name = "TransformationVariablePropertyEntryDefault0";
 
         Configuration &config = addNewSubConfiguration( "TransformationVariablePropertyEntryDefault", name );
         TransformationVariablePropertyEntry::getConfig( config, "", *var, false ); // TODO HACK
         generateSubConfigurable( "TransformationVariablePropertyEntryDefault", name );
-    }
+//    }
 }
 
 /**
@@ -906,9 +906,9 @@ TransformationVariables
 /**
 Constructor.
  */
-TransformationVariables::TransformationVariables()
-{
-}
+//TransformationVariables::TransformationVariables()
+//{
+//}
 
 /**
 Configurable constructor.
@@ -926,10 +926,10 @@ TransformationVariables::TransformationVariables( std::string class_id, std::str
 Copy constructor.
 @param cpy Instance to copy.
  */
-TransformationVariables::TransformationVariables( const TransformationVariables& cpy )
-{
-    *this = cpy;
-}
+//TransformationVariables::TransformationVariables( const TransformationVariables& cpy )
+//{
+//    *this = cpy;
+//}
 
 /**
 Destructor.
@@ -1001,20 +1001,20 @@ TransformationVariable* TransformationVariables::addVariable( const std::string&
     if( map_.find( name ) != map_.end() )
         throw std::runtime_error( "TransformationVariables: addVariable: Duplicate name." );
 
-    if( unusable_ )
-    {
-        TransformationVariable* var = new TransformationVariable( name );
-        map_[ name ] = var;
-        vars_.push_back( var );
-    }
-    else
-    {
+//    if( unusable_ )
+//    {
+//        TransformationVariable* var = new TransformationVariable( name );
+//        map_[ name ] = var;
+//        vars_.push_back( var );
+//    }
+//    else
+//    {
         std::string config_name = "TransformationVariable_" + name;
 
         Configuration &config = addNewSubConfiguration( "TransformationVariable", config_name );
         TransformationVariable::getConfig( config, name );
         generateSubConfigurable( "TransformationVariable", config_name );
-    }
+//    }
 
     return map_[ name ];
 }
@@ -1049,20 +1049,20 @@ TransformationVariable* TransformationVariables::addVariable( const std::string&
     if( map_.find( name ) != map_.end() )
         throw std::runtime_error( "TransformationVariables: addVariable: Duplicate name." );
 
-    if( unusable_ )
-    {
-        TransformationVariable* var = new TransformationVariable( name, data_type, default_id );
-        map_[ name ] = var;
-        vars_.push_back( var );
-    }
-    else
-    {
+//    if( unusable_ )
+//    {
+//        TransformationVariable* var = new TransformationVariable( name, data_type, default_id );
+//        map_[ name ] = var;
+//        vars_.push_back( var );
+//    }
+//    else
+//    {
         std::string config_name = "TransformationVariable_" + name;
 
         Configuration &config = addNewSubConfiguration( "TransformationVariable", config_name );
         TransformationVariable::getConfig( config, name, data_type, default_id );
         generateSubConfigurable( "TransformationVariable", config_name );
-    }
+//    }
 
     return map_[ name ];
 }

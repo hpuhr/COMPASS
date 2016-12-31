@@ -105,13 +105,13 @@ class Transformation : public TransformationBase
 {
 public:
     /// @brief Constructor
-    Transformation( Buffer* input=NULL );
+    //Transformation( Buffer* input=NULL );
     /// @brief Configurable constructor
     Transformation( std::string class_id,
                     std::string instance_id,
                     Configurable* parent );
     /// @brief Copy constructor
-    Transformation( const Transformation& copy );
+    //Transformation( const Transformation& copy );
     /// @brief Destructor
     virtual ~Transformation();
 

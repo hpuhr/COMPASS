@@ -33,8 +33,6 @@
 using namespace Utils;
 
 
-const std::string Configuration::UNDEFINED_NAME="undefined";
-
 using namespace tinyxml2;
 
 /**

@@ -60,7 +60,7 @@ public:
     /// @brief Constructor
     Configurable (std::string class_id, std::string instance_id, Configurable *parent=0, std::string configuration_filename="");
     /// @brief Constructor (only use for copy constructors etc.)
-    Configurable ();
+    //Configurable ();
     /// @brief Destructor
     virtual ~Configurable();
 
@@ -86,30 +86,22 @@ public:
     void saveConfigurationAsTemplate (std::string template_name);
 
 protected:
-    /// Determines if configurable is usable
-    bool unusable_;
     /// Class identifier
     std::string class_id_;
     /// Instance identifier
     std::string instance_id_;
+    /// Key identifier
+    std::string key_id_;
     /// Parent pointer, null if Singleton
     Configurable *parent_;
     /// Configuration
     Configuration &configuration_;
 
     /// Container for all sub-configurables (class id + instance id -> Configurable)
-    std::map <std::string, Configurable*> children_;
+    std::map <std::string, Configurable&> children_;
 
     /// @brief Registers a bool parameter
     void registerParameter (std::string parameter_id, bool *pointer, bool default_value);
-    /// @brief Registers a char parameter
-//    void registerParameter (std::string parameter_id, char *pointer, char default_value);
-//    /// @brief Registers a unsigned char parameter
-//    void registerParameter (std::string parameter_id, unsigned char *pointer, unsigned char default_value);
-//    /// @brief Registers a short int parameter
-//    void registerParameter (std::string parameter_id, short int *pointer, short int default_value);
-//    /// @brief Registers a unsigned short int parameter
-//    void registerParameter (std::string parameter_id, unsigned short int *pointer, unsigned short int default_value);
     /// @brief Registers a int parameter
     void registerParameter (std::string parameter_id, int *pointer, int default_value);
     /// @brief Registers a unsigned int parameter
@@ -127,15 +119,17 @@ protected:
     void saveTemplateConfiguration (Configurable *child, std::string template_name);
 
     /// @brief Adds a configurable as a child
-    Configuration &registerSubConfigurable (Configurable *child);
+    Configuration &registerSubConfigurable (Configurable &child);
     /// @brief Removes a child configurable
-    void removeChildConfigurable (Configurable *child);
+    void removeChildConfigurable (Configurable &child);
 
 public:
     /// @brief Returns instance identifier
     const std::string &getInstanceId () const { return instance_id_; }
     /// @brief Returns class identifier
     const std::string &getClassId () const { return class_id_; }
+    /// @brief Returns key identifier (class_id + instance_id)
+    const std::string &getKeyId () const { return key_id_; }
 };
 
 #endif /* CONFIGURABLE_H_ */

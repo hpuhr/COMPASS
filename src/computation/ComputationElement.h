@@ -42,7 +42,7 @@ public:
     Constructor.
     @param id Name of a computation element.
       */
-    ComputationElementID( const std::string& id ) : id_( id ) {}
+    //ComputationElementID( const std::string& id ) : id_( id ) {}
 
     /**
     @brief Configurable constructor

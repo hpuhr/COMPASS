@@ -70,7 +70,7 @@ public:
     typedef std::map<std::string,ComputationElement*> ComputationElements;
 
     /// @brief Constructor
-    Workflow( const std::string& name );
+    //Workflow( const std::string& name );
     /// @brief Configurable constructor
     Workflow( std::string class_id,
               std::string instance_id,

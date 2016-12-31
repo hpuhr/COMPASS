@@ -39,15 +39,15 @@ Constructor.
 @param id String id the stored transformation is constructed from. Note that the transformation
     pointer may remain NULL if the string id is an empty string.
   */
-TransformationEntry::TransformationEntry( const std::string &dbo_type,
-                                          const std::string& id )
-:   id_( id ),
-    dbo_type_( dbo_type ),
-    trafo_( NULL )
-{
-    if( !id_.empty() )
-        trafo_ = TransformationFactory::getInstance().createTransformation( id_ );
-}
+//TransformationEntry::TransformationEntry( const std::string &dbo_type,
+//                                          const std::string& id )
+//:   id_( id ),
+//    dbo_type_( dbo_type ),
+//    trafo_( NULL )
+//{
+//    if( !id_.empty() )
+//        trafo_ = TransformationFactory::getInstance().createTransformation( id_ );
+//}
 
 /**
 Configurable constructor.
@@ -152,15 +152,15 @@ void TransformationEntry::setTransformation( Transformation* trafo )
 
     id_ = trafo->getId();
 
-    if( unusable_ )
-    {
-        trafo_ = trafo->clone();
-    }
-    else
-    {
+//    if( unusable_ )
+//    {
+//        trafo_ = trafo->clone();
+//    }
+//    else
+//    {
         Configuration& config = addNewSubConfiguration( "Transformation" );
         trafo_ = trafo->clone( config.getClassId(), config.getInstanceId(), this, true );
-    }
+//    }
 }
 
 /**
@@ -177,15 +177,15 @@ void TransformationEntry::setTransformation( const std::string& id )
     if( id_.empty() )
         return;
 
-    if( unusable_ )
-    {
-        trafo_ = TransformationFactory::getInstance().createTransformation( id_ );
-    }
-    else
-    {
+//    if( unusable_ )
+//    {
+//        trafo_ = TransformationFactory::getInstance().createTransformation( id_ );
+//    }
+//    else
+//    {
         Configuration& config = addNewSubConfiguration( "Transformation" );
         generateSubConfigurable( config.getClassId(), config.getInstanceId() );
-    }
+//    }
 }
 
 /*****************************************************************************************
@@ -196,26 +196,26 @@ Computation
 Constructor.
 @param name Name of the Computation.
   */
-Computation::Computation( const std::string& name )
-:   name_( name ),
-    shutdown_( false ),
-    aborting_( false ),
-    use_common_( false ),
-    active_pipes_( 0 ),
-    buffers_waiting_( 0 ),
-    buffers_in_cnt_( 0 ),
-    buffers_out_cnt_( 0 ),
-    buffers_aborted_cnt_( 0 ),
-    buffers_error_cnt_( 0 ), 
-    dispatch_thread_( NULL ),
-    thread_running_( false ),
-    idle_( true )
-{
-    filter_ = new BufferFilter;
+//Computation::Computation( const std::string& name )
+//:   name_( name ),
+//    shutdown_( false ),
+//    aborting_( false ),
+//    use_common_( false ),
+//    active_pipes_( 0 ),
+//    buffers_waiting_( 0 ),
+//    buffers_in_cnt_( 0 ),
+//    buffers_out_cnt_( 0 ),
+//    buffers_aborted_cnt_( 0 ),
+//    buffers_error_cnt_( 0 ),
+//    dispatch_thread_( NULL ),
+//    thread_running_( false ),
+//    idle_( true )
+//{
+//    filter_ = new BufferFilter;
 
-    dispatch_thread_ = new ComputationThread( this, 20 );
-    startThread();
-}
+//    dispatch_thread_ = new ComputationThread( this, 20 );
+//    startThread();
+//}
 
 /**
 Configurable constructor.
@@ -338,19 +338,19 @@ Transformation* Computation::addTransformation( const std::string &dbo_type, con
 
     assert( !trafo_id.empty() );
 
-    if( unusable_ )
-    {
-        TransformationEntry* entry = new TransformationEntry( dbo_type, trafo_id );
-        trafos_[ dbo_type ].push_back( entry );
+//    if( unusable_ )
+//    {
+//        TransformationEntry* entry = new TransformationEntry( dbo_type, trafo_id );
+//        trafos_[ dbo_type ].push_back( entry );
 
-        //register the transformation with the computation queue if sustainable
-        if( entry->getTransformation()->isSustainable() )
-            computation_queue_.registerTransformation( entry->getTransformation() );
+//        //register the transformation with the computation queue if sustainable
+//        if( entry->getTransformation()->isSustainable() )
+//            computation_queue_.registerTransformation( entry->getTransformation() );
 
-        return entry->getTransformation();
-    }
-    else
-    {
+//        return entry->getTransformation();
+//    }
+//    else
+//    {
         unsigned int size = trafos_[ dbo_type ].size();
 
         Configuration& config = addNewSubConfiguration( "TransformationEntry" );
@@ -360,7 +360,7 @@ Transformation* Computation::addTransformation( const std::string &dbo_type, con
         assert( trafos_[ dbo_type ].size() > size );
 
         return trafos_[ dbo_type ].back()->getTransformation();
-    }
+//    }
 }
 
 /**
@@ -374,18 +374,18 @@ void Computation::addTransformation( const std::string &dbo_type, Transformation
 {
     boost::mutex::scoped_lock l( dispatch_mutex_ );
 
-    if( unusable_ )
-    {
-        TransformationEntry* entry = new TransformationEntry( dbo_type );
-        entry->setTransformation( trafo );
-        trafos_[ dbo_type ].push_back( entry );
+//    if( unusable_ )
+//    {
+//        TransformationEntry* entry = new TransformationEntry( dbo_type );
+//        entry->setTransformation( trafo );
+//        trafos_[ dbo_type ].push_back( entry );
 
-        //register the transformation with the computation queue if sustainable
-        if( entry->getTransformation()->isSustainable() )
-            computation_queue_.registerTransformation( entry->getTransformation() );
-    }
-    else
-    {
+//        //register the transformation with the computation queue if sustainable
+//        if( entry->getTransformation()->isSustainable() )
+//            computation_queue_.registerTransformation( entry->getTransformation() );
+//    }
+//    else
+//    {
         unsigned int size = trafos_[ dbo_type ].size();
 
         Configuration& config = addNewSubConfiguration( "TransformationEntry" );
@@ -400,7 +400,7 @@ void Computation::addTransformation( const std::string &dbo_type, Transformation
         //register the transformation with the computation queue if sustainable
         if( entry->getTransformation()->isSustainable() )
             computation_queue_.registerTransformation( entry->getTransformation() );
-    }
+//    }
 }
 
 /**
@@ -512,19 +512,19 @@ Transformation* Computation::addCommonTransformation( const std::string& trafo_i
 {
     boost::mutex::scoped_lock l( dispatch_mutex_ );
 
-    if( unusable_ )
-    {
-        TransformationEntry* entry = new TransformationEntry( "", trafo_id );
-        trafos_[ "" ].push_back( entry );
+//    if( unusable_ )
+//    {
+//        TransformationEntry* entry = new TransformationEntry( "", trafo_id );
+//        trafos_[ "" ].push_back( entry );
 
-        //register the transformation with the computation queue if sustainable
-        if( entry->getTransformation()->isSustainable() )
-            computation_queue_.registerTransformation( entry->getTransformation() );
+//        //register the transformation with the computation queue if sustainable
+//        if( entry->getTransformation()->isSustainable() )
+//            computation_queue_.registerTransformation( entry->getTransformation() );
 
-        return entry->getTransformation();
-    }
-    else
-    {
+//        return entry->getTransformation();
+//    }
+//    else
+//    {
         unsigned int size = trafos_[ "" ].size();
 
         Configuration& config = addNewSubConfiguration( "TransformationEntry" );
@@ -534,7 +534,7 @@ Transformation* Computation::addCommonTransformation( const std::string& trafo_i
         assert( trafos_[ "" ].size() > size );
 
         return trafos_[ "" ].back()->getTransformation();
-    }
+//    }
 }
 
 /**
@@ -549,18 +549,18 @@ void Computation::addCommonTransformation( Transformation* trafo )
 {
     boost::mutex::scoped_lock l( dispatch_mutex_ );
 
-    if( unusable_ )
-    {
-        TransformationEntry* entry = new TransformationEntry( "" );
-        entry->setTransformation( trafo );
-        trafos_[ "" ].push_back( entry );
+//    if( unusable_ )
+//    {
+//        TransformationEntry* entry = new TransformationEntry( "" );
+//        entry->setTransformation( trafo );
+//        trafos_[ "" ].push_back( entry );
 
-        //register the transformation with the computation queue if sustainable
-        if( entry->getTransformation()->isSustainable() )
-            computation_queue_.registerTransformation( entry->getTransformation() );
-    }
-    else
-    {
+//        //register the transformation with the computation queue if sustainable
+//        if( entry->getTransformation()->isSustainable() )
+//            computation_queue_.registerTransformation( entry->getTransformation() );
+//    }
+//    else
+//    {
         unsigned int size = trafos_[ "" ].size();
 
         Configuration& config = addNewSubConfiguration( "TransformationEntry" );
@@ -575,7 +575,7 @@ void Computation::addCommonTransformation( Transformation* trafo )
         //register the transformation with the computation queue if sustainable
         if( entry->getTransformation()->isSustainable() )
             computation_queue_.registerTransformation( entry->getTransformation() );
-    }
+//    }
 }
 
 /**

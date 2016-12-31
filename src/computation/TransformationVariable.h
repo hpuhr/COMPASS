@@ -41,15 +41,15 @@ class TransformationVariablePropertyEntry : public Configurable
 {
 public:
     /// @brief Constructor
-    TransformationVariablePropertyEntry( const std::string &dbo_type,
-                                         const Property& property,
-                                         DBOVariable* var=NULL );
+//    TransformationVariablePropertyEntry( const std::string &dbo_type,
+//                                         const Property& property,
+//                                         DBOVariable* var=NULL );
     /// @brief Configurable constructor
     TransformationVariablePropertyEntry( std::string class_id,
                                          std::string instance_id,
                                          Configurable *parent );
     /// @brief Copy constructor
-    TransformationVariablePropertyEntry( const TransformationVariablePropertyEntry& cpy );
+    //TransformationVariablePropertyEntry( const TransformationVariablePropertyEntry& cpy );
     /// @brief Destructor
     virtual ~TransformationVariablePropertyEntry();
 
@@ -121,15 +121,15 @@ public:
     typedef std::map<std::string,TransformationVariablePropertyEntry*> PropertyMap;
 
     /// @brief Constructor
-    TransformationVariable( const std::string& name );
-    /// @brief Constructor
-    TransformationVariable( const std::string& name,
-                            PropertyDataType data_type,
-                            const std::string& default_id="" );
+//    TransformationVariable( const std::string& name );
+//    /// @brief Constructor
+//    TransformationVariable( const std::string& name,
+//                            PropertyDataType data_type,
+//                            const std::string& default_id="" );
     /// @brief Configurable constructor
     TransformationVariable( std::string class_id, std::string instance_id, Configurable *parent );
     /// @brief Copy constructor
-    TransformationVariable( const TransformationVariable& cpy );
+    //TransformationVariable( const TransformationVariable& cpy );
     /// @brief Destructor
     ~TransformationVariable();
 
@@ -237,9 +237,9 @@ public:
     typedef std::vector<TransformationVariable*> TransformationVariableVector;
 
     /// @brief Constructor
-    TransformationVariables();
+    //TransformationVariables();
     /// @brief Copy constructor
-    TransformationVariables( const TransformationVariables& cpy );
+    //TransformationVariables( const TransformationVariables& cpy );
     /// @brief Configurable constructor
     TransformationVariables( std::string class_id, std::string instance_id, Configurable *parent );
     /// @brief Destructor

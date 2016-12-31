@@ -39,8 +39,8 @@
  * \todo Extend registerParameter to template function.
  */
 Configurable::Configurable(std::string class_id, std::string instance_id, Configurable *parent, std::string configuration_filename)
-: unusable_ (false), class_id_(class_id), instance_id_(instance_id), parent_(parent),
-  configuration_ (parent_ ? parent_->registerSubConfigurable(this) : ConfigurationManager::getInstance().registerRootConfigurable(*this))
+: class_id_(class_id), instance_id_(instance_id), key_id_(class_id+instance_id), parent_(parent),
+  configuration_ (parent_ ? parent_->registerSubConfigurable(*this) : ConfigurationManager::getInstance().registerRootConfigurable(*this))
 {
     logdbg  << "Configurable: constructor: class_id " << class_id_ << " instance_id " << instance_id_;
 
@@ -54,15 +54,6 @@ Configurable::Configurable(std::string class_id, std::string instance_id, Config
 }
 
 /**
- * Sets the unusable flag and sets parameters to null or dummy values.
- */
-Configurable::Configurable ()
-: unusable_ (true), parent_ (0), configuration_ (ConfigurationManager::getInstance().getDummyConfiguration()) // TODO HACK
-{
-
-}
-
-/**
  * If parent is set, unregisters from it using removeChildConfigurable, if not, calls unregisterRootConfigurable.
  *
  * Displays warning message if undeleted sub-configurables exist.
@@ -71,119 +62,61 @@ Configurable::~Configurable()
 {
     logdbg  << "Configurable: destructor: class_id " << class_id_ << " instance_id " << instance_id_;
 
-    if (!unusable_)
+    if (parent_)
     {
-        if (parent_)
-        {
-            parent_->removeChildConfigurable (this);
-        }
-        else
-        {
-            ConfigurationManager::getInstance().unregisterRootConfigurable(*this);
-        }
+        parent_->removeChildConfigurable (*this);
+    }
+    else
+    {
+        ConfigurationManager::getInstance().unregisterRootConfigurable(*this);
+    }
 
-        if (children_.size() != 0)
-        {
-            logwrn << "Configurable: destructor: class_id " << class_id_ << " instance_id " << instance_id_ << " still " << children_.size() << " undeleted";
-        }
+    if (children_.size() != 0)
+    {
+        logwrn << "Configurable: destructor: class_id " << class_id_ << " instance_id " << instance_id_ << " still " << children_.size() << " undeleted";
     }
 }
 
 void Configurable::registerParameter (std::string parameter_id, bool *pointer, bool default_value)
 {
-    if (unusable_)
-        throw std::runtime_error ("Configurable: registerParameter: configurable unusable");
-
     logdbg << "Configurable " << instance_id_ << ": registerParameter: bool parameter_id " << parameter_id;
-
     configuration_.registerParameter (parameter_id, pointer, default_value);
 }
-//void Configurable::registerParameter (std::string parameter_id, char *pointer, char default_value)
-//{
-//    if (unusable_)
-//        throw std::runtime_error ("Configurable: registerParameter: configurable unusable");
-
-//    logdbg << "Configurable " << instance_id_ << ": registerParameter: char parameter_id " << parameter_id;
-
-//    configuration_.registerParameter (parameter_id, pointer, default_value);
-//}
-//void Configurable::registerParameter (std::string parameter_id, unsigned char *pointer, unsigned char default_value)
-//{
-//    if (unusable_)
-//        throw std::runtime_error ("Configurable: registerParameter: configurable unusable");
-
-//    logdbg << "Configurable " << instance_id_ << ": registerParameter: unsigned char parameter_id " << parameter_id;
-
-//    configuration_.registerParameter (parameter_id, pointer, default_value);
-//}
-//void Configurable::registerParameter (std::string parameter_id, short int *pointer, short int default_value)
-//{
-//    if (unusable_)
-//        throw std::runtime_error ("Configurable: registerParameter: configurable unusable");
-
-//    logdbg << "Configurable " << instance_id_ << ": registerParameter: short int parameter_id " << parameter_id;
-
-//    configuration_.registerParameter (parameter_id, pointer, default_value);
-//}
-//void Configurable::registerParameter (std::string parameter_id, unsigned short int *pointer, unsigned short int default_value)
-//{
-//    if (unusable_)
-//        throw std::runtime_error ("Configurable: registerParameter: configurable unusable");
-
-//    logdbg << "Configurable " << instance_id_ << ": registerParameter: unsigned short int parameter_id " << parameter_id;
-
-//    configuration_.registerParameter (parameter_id, pointer, default_value);
-//}
 
 void Configurable::registerParameter (std::string parameter_id, int *pointer, int default_value)
 {
-    if (unusable_)
-        throw std::runtime_error ("Configurable: registerParameter: configurable unusable");
-
     logdbg << "Configurable " << instance_id_ << ": registerParameter: int parameter_id " << parameter_id;
     configuration_.registerParameter (parameter_id, pointer, default_value);
 }
+
 void Configurable::registerParameter (std::string parameter_id, unsigned int *pointer, unsigned int default_value)
 {
-    if (unusable_)
-        throw std::runtime_error ("Configurable: registerParameter: configurable unusable");
-
     logdbg << "Configurable " << instance_id_ << ": registerParameter: unsigned int parameter_id " << parameter_id;
     configuration_.registerParameter (parameter_id, pointer, default_value);
 }
+
 void Configurable::registerParameter (std::string parameter_id, float *pointer, float default_value)
 {
-    if (unusable_)
-        throw std::runtime_error ("Configurable: registerParameter: configurable unusable");
-
     logdbg << "Configurable " << instance_id_ << ": registerParameter: float parameter_id " << parameter_id;
     configuration_.registerParameter (parameter_id, pointer, default_value);
 }
+
 void Configurable::registerParameter (std::string parameter_id, double *pointer, double default_value)
 {
-    if (unusable_)
-        throw std::runtime_error ("Configurable: registerParameter: configurable unusable");
-
     logdbg << "Configurable " << instance_id_ << ": registerParameter: double parameter_id " << parameter_id;
     configuration_.registerParameter (parameter_id, pointer, default_value);
 }
+
 void Configurable::registerParameter (std::string parameter_id, std::string *pointer, std::string default_value)
 {
-    if (unusable_)
-        throw std::runtime_error ("Configurable: registerParameter: configurable unusable");
-
     logdbg << "Configurable " << instance_id_ << ": registerParameter: string parameter_id " << parameter_id;
     configuration_.registerParameter (parameter_id, pointer, default_value);
 }
 
-Configuration &Configurable::registerSubConfigurable (Configurable *child)
+Configuration &Configurable::registerSubConfigurable (Configurable &child)
 {
-    if (unusable_)
-        throw std::runtime_error ("Configurable: registerParameter: configurable unusable");
-
-    logdbg  << "Configurable: registerSubConfigurable: child " << child->getInstanceId();
-    assert (child);
-    std::string key = child->getClassId()+child->getInstanceId();
+    logdbg  << "Configurable: registerSubConfigurable: child " << child.getInstanceId();
+    const std::string &key = child.getKeyId();
 
     if (children_.find (key) != children_.end())
     {
@@ -191,24 +124,21 @@ Configuration &Configurable::registerSubConfigurable (Configurable *child)
     }
 
     logdbg  << "Configurable " << instance_id_ << ": registerSubConfigurable: " << key;
-    children_[key] = child;
+    children_.insert (std::pair<std::string, Configurable&> (key, child));
 
-    return configuration_.getSubConfiguration(child->getClassId(), child->getInstanceId());
+    return configuration_.getSubConfiguration(child.getClassId(), child.getInstanceId());
 }
 
-void Configurable::removeChildConfigurable (Configurable *child)
+void Configurable::removeChildConfigurable (Configurable &child)
 {
-    if (unusable_)
-        throw std::runtime_error ("Configurable: registerParameter: configurable unusable");
+    logdbg  << "Configurable: removeChildConfigurable: child " << child.getInstanceId();
 
-    logdbg  << "Configurable: removeChildConfigurable: child " << child->getInstanceId();
-    assert (child);
-    std::string key = child->getClassId()+child->getInstanceId();
+    const std::string &key = child.getKeyId();
     assert (children_.find (key) != children_.end());
     logdbg  << "Configurable " << instance_id_ << ": removeChildConfigurable: " << key;
     children_.erase(children_.find(key));
 
-    configuration_.removeSubConfiguration(child->getClassId(), child->getInstanceId());
+    configuration_.removeSubConfiguration(child.getClassId(), child.getInstanceId());
 }
 
 
@@ -217,51 +147,35 @@ void Configurable::removeChildConfigurable (Configurable *child)
  */
 void Configurable::resetToDefault ()
 {
-    if (unusable_)
-        throw std::runtime_error ("Configurable: registerParameter: configurable unusable");
-
     logdbg  << "Configurable " << instance_id_ << ": resetToDefault";
     configuration_.resetToDefault();
 
-    std::map <std::string, Configurable*>::iterator it;
+    std::map <std::string, Configurable&>::iterator it;
 
     for (it = children_.begin(); it != children_.end(); it++)
     {
         //loginf  << "Configurable " << instance_id_ << ": resetToDefault: child " << it->first;
-        Configurable *configurable = it->second;
-        configurable->resetToDefault();
+        it->second.resetToDefault();
     }
 }
 
 Configuration &Configurable::addNewSubConfiguration (std::string class_id, std::string instance_id)
 {
-    if (unusable_)
-        throw std::runtime_error ("Configurable: registerParameter: configurable unusable");
-
     return configuration_.addNewSubConfiguration (class_id, instance_id);
 }
 
 Configuration &Configurable::addNewSubConfiguration (std::string class_id)
 {
-    if (unusable_)
-        throw std::runtime_error ("Configurable: registerParameter: configurable unusable");
-
     return configuration_.addNewSubConfiguration (class_id);
 }
 
 Configuration &Configurable::addNewSubConfiguration (Configuration &configuration)
 {
-    if (unusable_)
-        throw std::runtime_error ("Configurable: registerParameter: configurable unusable");
-
     return configuration_.addNewSubConfiguration (configuration);
 }
 
 void Configurable::createSubConfigurables ()
 {
-    if (unusable_)
-        throw std::runtime_error ("Configurable: registerParameter: configurable unusable");
-
     configuration_.createSubConfigurables (this);
     checkSubConfigurables ();
 }

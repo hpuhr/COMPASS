@@ -39,7 +39,7 @@ class BufferFilterEntry : public Configurable
 {
 public:
     /// @brief Constructor
-    BufferFilterEntry( const std::string &dbo_type );
+    //BufferFilterEntry( const std::string &dbo_type );
     /// @brief Configurable constructor
     BufferFilterEntry( const std::string& class_id,
                        const std::string& instance_id,
@@ -92,7 +92,7 @@ class BufferFilterRuleEntry : public Configurable
 {
 public:
     /// @brief Constructor
-    BufferFilterRuleEntry( const std::string &dbo_type, int filter_rule );
+    //BufferFilterRuleEntry( const std::string &dbo_type, int filter_rule );
     /// @brief Configurable constructor
     BufferFilterRuleEntry( const std::string& class_id,
                            const std::string& instance_id,
@@ -174,7 +174,7 @@ public:
     typedef std::map<std::string,FilterEntries> PropertyFilter; // by dbo type
 
     /// @brief Constructor
-    BufferFilter();
+    //BufferFilter();
     /// @brief Configurable constructor
     BufferFilter( const std::string& class_id,
                   const std::string& instance_id,

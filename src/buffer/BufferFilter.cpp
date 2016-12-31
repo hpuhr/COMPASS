@@ -29,10 +29,10 @@ BufferFilterEntry
 Constructor
 @param dbo_type DBO type the entry is assigned to.
   */
-BufferFilterEntry::BufferFilterEntry( const std::string &dbo_type )
-:   dbo_type_( dbo_type )
-{
-}
+//BufferFilterEntry::BufferFilterEntry( const std::string &dbo_type )
+//:   dbo_type_( dbo_type )
+//{
+//}
 
 /**
 Configurable constructor.
@@ -188,11 +188,11 @@ Constructor.
 @param dbo_type DBO type as integer number.
 @param filter_rule Filter rule as integer number (see class BufferFilter).
   */
-BufferFilterRuleEntry::BufferFilterRuleEntry( const std::string &dbo_type, int filter_rule )
-:   dbo_type_( dbo_type ),
-    filter_rule_( filter_rule )
-{
-}
+//BufferFilterRuleEntry::BufferFilterRuleEntry( const std::string &dbo_type, int filter_rule )
+//:   dbo_type_( dbo_type ),
+//    filter_rule_( filter_rule )
+//{
+//}
 
 /**
 Configurable constructor.
@@ -263,13 +263,13 @@ BufferFilter
 /**
 Constructor.
   */
-BufferFilter::BufferFilter()
-:   base_rule_( NULL )
-{
-    // TODO FIXXMEE
-    assert (false);
-    //base_rule_ = new BufferFilterRuleEntry( DBO_UNDEFINED, BLOCK );
-}
+//BufferFilter::BufferFilter()
+//:   base_rule_( NULL )
+//{
+//    // TODO FIXXMEE
+//    assert (false);
+//    //base_rule_ = new BufferFilterRuleEntry( DBO_UNDEFINED, BLOCK );
+//}
 
 /**
 Configurable constructor.
@@ -305,18 +305,18 @@ void BufferFilter::addPropertyToFilter( const std::string &dbo_type, const Prope
     if( entries.find( prop.getId() ) != entries.end() )
         throw std::runtime_error( "BufferFilter: addEntry: Duplicate entry id." );
 
-    if( unusable_ )
-    {
-        BufferFilterEntry* entry = new BufferFilterEntry( dbo_type );
-        entry->setProperty( prop );
-        property_filter_[ dbo_type ][ prop.getId() ] = entry;
-    }
-    else
-    {
+//    if( unusable_ )
+//    {
+//        BufferFilterEntry* entry = new BufferFilterEntry( dbo_type );
+//        entry->setProperty( prop );
+//        property_filter_[ dbo_type ][ prop.getId() ] = entry;
+//    }
+//    else
+//    {
         Configuration& config = addNewSubConfiguration( "BufferFilterEntry" );
         BufferFilterEntry::getConfig( config, dbo_type, prop.getId(), prop.getDataType() );
         generateSubConfigurable( config.getClassId(), config.getInstanceId() );
-    }
+//    }
 }
 
 /**
@@ -332,18 +332,18 @@ void BufferFilter::addPropertyToFilter( const std::string &dbo_type, const std::
     if( entries.find( id ) != entries.end() )
         throw std::runtime_error( "BufferFilter: addEntry: Duplicate entry id." );
 
-    if( unusable_ )
-    {
-        BufferFilterEntry* entry = new BufferFilterEntry( dbo_type );
-        entry->setProperty( id, data_type );
-        property_filter_[ dbo_type ][ id ] = entry;
-    }
-    else
-    {
+//    if( unusable_ )
+//    {
+//        BufferFilterEntry* entry = new BufferFilterEntry( dbo_type );
+//        entry->setProperty( id, data_type );
+//        property_filter_[ dbo_type ][ id ] = entry;
+//    }
+//    else
+//    {
         Configuration& config = addNewSubConfiguration( "BufferFilterEntry", "" );
         BufferFilterEntry::getConfig( config, dbo_type, id, data_type );
         generateSubConfigurable( config.getClassId(), config.getInstanceId() );
-    }
+//    }
 }
 
 /**
@@ -440,16 +440,16 @@ void BufferFilter::setRule( const std::string &dbo_type, BufferFilterRule rule )
         return;
     }
 
-    if( unusable_ )
-    {
-        rules_[ dbo_type ] = new BufferFilterRuleEntry( dbo_type, (int)rule );
-    }
-    else
-    {
+//    if( unusable_ )
+//    {
+//        rules_[ dbo_type ] = new BufferFilterRuleEntry( dbo_type, (int)rule );
+//    }
+//    else
+//    {
         Configuration& config = addNewSubConfiguration( "BufferFilterRuleEntry" );
         BufferFilterRuleEntry::getConfig( config, dbo_type, (int)rule );
         generateSubConfigurable( config.getClassId(), config.getInstanceId() );
-    }
+//    }
 }
 
 /**

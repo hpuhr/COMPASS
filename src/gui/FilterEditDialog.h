@@ -176,7 +176,7 @@ protected:
     /// The Property rule widgets
     PropertyWidgets prop_widgets_;
     /// A temporary filter
-    BufferFilter filter_tmp_;
+    //BufferFilter filter_tmp_;
 };
 
 #endif //FILTEREDITWIDGET_H

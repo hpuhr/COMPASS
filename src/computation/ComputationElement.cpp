@@ -26,14 +26,14 @@ Constructor.
 @param name The computations name.
 @param parent The parent computation element (may be NULL).
   */
-ComputationElement::ComputationElement( const std::string& name, ComputationElement* parent )
-:   Computation( name ),
-    parent_( NULL ),
-    parent_id_( NULL )
-{
-    if( parent )
-        parent->addChild( this );
-}
+//ComputationElement::ComputationElement( const std::string& name, ComputationElement* parent )
+//:   Computation( name ),
+//    parent_( NULL ),
+//    parent_id_( NULL )
+//{
+//    if( parent )
+//        parent->addChild( this );
+//}
 
 /**
 Configurable constructor.
@@ -73,8 +73,8 @@ void ComputationElement::setParent( ComputationElement* parent )
 {
     parent_ = parent;
 
-    if( unusable_ )
-        return;
+//    if( unusable_ )
+//        return;
 
     if( parent_ )
     {
@@ -166,8 +166,8 @@ void ComputationElement::addChild( ComputationElement* child )
     child->setParent( this );
     connect( child );
 
-    if( unusable_ )
-        return;
+//    if( unusable_ )
+//        return;
 
     Configuration& config = addNewSubConfiguration( "ComputationElementIDChild" );
     config.addParameterString( "id", child->name() );
@@ -190,8 +190,8 @@ void ComputationElement::insertChild( ComputationElement* child, int idx )
     child->setParent( this );
     connect( child );
 
-    if( unusable_ )
-        return;
+//    if( unusable_ )
+//        return;
 
     Configuration& config = addNewSubConfiguration( "ComputationElementIDChild", "" );
     ComputationElementID* id = new ComputationElementID( config.getClassId(), config.getInstanceId(), this );
@@ -228,11 +228,11 @@ ComputationElement* ComputationElement::removeChild( int idx )
 
     connect( elem, false );
 
-    if( !unusable_ )
-    {
-        delete child_ids_[ idx ];
-        child_ids_.erase( child_ids_.begin()+idx );
-    }
+//    if( !unusable_ )
+//    {
+//        delete child_ids_[ idx ];
+//        child_ids_.erase( child_ids_.begin()+idx );
+//    }
 
     return elem;
 }
@@ -255,11 +255,11 @@ ComputationElement* ComputationElement::removeChild( const std::string& name )
 
             connect( elem, false );
 
-            if( !unusable_ )
-            {
-                delete child_ids_[ i ];
-                child_ids_.erase( child_ids_.begin()+i );
-            }
+//            if( !unusable_ )
+//            {
+//                delete child_ids_[ i ];
+//                child_ids_.erase( child_ids_.begin()+i );
+//            }
 
             return elem;
         }

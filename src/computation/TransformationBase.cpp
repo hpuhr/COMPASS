@@ -23,13 +23,13 @@
 /**
 Constructor.
   */
-TransformationBase::TransformationBase()
-{
-    //create variables
-    vars_in_     = new TransformationVariables;
-    vars_out_    = new TransformationVariables;
-    vars_hidden_ = new TransformationVariables;
-}
+//TransformationBase::TransformationBase()
+//{
+//    //create variables
+//    vars_in_     = new TransformationVariables;
+//    vars_out_    = new TransformationVariables;
+//    vars_hidden_ = new TransformationVariables;
+//}
 
 /**
 Configurable constructor.
@@ -50,10 +50,10 @@ TransformationBase::TransformationBase( std::string class_id, std::string instan
 Copy constructor.
 @param cpy Instance to copy.
   */
-TransformationBase::TransformationBase( const TransformationBase& cpy )
-{
-    *this = cpy;
-}
+//TransformationBase::TransformationBase( const TransformationBase& cpy )
+//{
+//    *this = cpy;
+//}
 
 /**
 Destructor.

@@ -511,63 +511,66 @@ void FilterEditDialog::addPropertyFromVarSlot()
     DBOVariable* var = dbo_widget_->getSelectedVariable();
 
     //use a temporary filter to read in DBO var
-    filter_tmp_.clear();
-    filter_tmp_.addPropertyToFilter( var );
+    assert (false);
+    //TODO
+
+    //filter_tmp_.clear();
+    //filter_tmp_.addPropertyToFilter( var );
 
     //read properties from filter
-    {
-        const std::map<std::string,DBObject*>& dobs = DBObjectManager::getInstance().getDBObjects();
-        std::string dbo_type;
-        PropertyDataType dtype;
-        std::string name;
-        bool errors = false;
-        std::multimap<std::string,Property> props = filter_tmp_.getProperties();
-        std::multimap<std::string,Property>::const_iterator it, itend = props.end();
-        for( it=props.begin(); it!=itend; ++it )
-        {
-            dbo_type = it->first;
-            dtype = it->second.getDataType();
-            name = it->second.getId();
+//    {
+//        const std::map<std::string,DBObject*>& dobs = DBObjectManager::getInstance().getDBObjects();
+//        std::string dbo_type;
+//        PropertyDataType dtype;
+//        std::string name;
+//        bool errors = false;
+//        std::multimap<std::string,Property> props = filter_tmp_.getProperties();
+//        std::multimap<std::string,Property>::const_iterator it, itend = props.end();
+//        for( it=props.begin(); it!=itend; ++it )
+//        {
+//            dbo_type = it->first;
+//            dtype = it->second.getDataType();
+//            name = it->second.getId();
 
-            //DBO type not found, skip property and show error later
-            if( dobs.find( dbo_type ) == dobs.end() )
-            {
-                errors = true;
-                continue;
-            }
+//            //DBO type not found, skip property and show error later
+//            if( dobs.find( dbo_type ) == dobs.end() )
+//            {
+//                errors = true;
+//                continue;
+//            }
 
-            //widget already present
-            if( prop_widgets_.find( dbo_type ) != prop_widgets_.end() &&
-                prop_widgets_[ dbo_type ].find( name ) != prop_widgets_[ dbo_type ].end() )
-            {
-                PropertyRuleWidget* widget = prop_widgets_[ dbo_type ][ name ];
-                widget->setDataType( dtype );
-                widget->setDBOType( dbo_type );
-                widget->setPropertyName( QString::fromStdString( name ) );
-                continue;
-            }
+//            //widget already present
+//            if( prop_widgets_.find( dbo_type ) != prop_widgets_.end() &&
+//                prop_widgets_[ dbo_type ].find( name ) != prop_widgets_[ dbo_type ].end() )
+//            {
+//                PropertyRuleWidget* widget = prop_widgets_[ dbo_type ][ name ];
+//                widget->setDataType( dtype );
+//                widget->setDBOType( dbo_type );
+//                widget->setPropertyName( QString::fromStdString( name ) );
+//                continue;
+//            }
 
-            //create widget
-            PropertyRuleWidget* widget = new PropertyRuleWidget( this );
-            fillDataTypeCombo( widget->getDataTypeCombo() );
-            widget->setDataType( dtype );
-            widget->setDBOType( dbo_type );
-            widget->setPropertyName( QString::fromStdString( name ) );
+//            //create widget
+//            PropertyRuleWidget* widget = new PropertyRuleWidget( this );
+//            fillDataTypeCombo( widget->getDataTypeCombo() );
+//            widget->setDataType( dtype );
+//            widget->setDBOType( dbo_type );
+//            widget->setPropertyName( QString::fromStdString( name ) );
 
-            //add widget
-            prop_widgets_[ dbo_type ][ name ] = widget;
-            prop_layout_->addWidget( widget );
+//            //add widget
+//            prop_widgets_[ dbo_type ][ name ] = widget;
+//            prop_layout_->addWidget( widget );
 
-            connect( widget, SIGNAL(deleteMe()), this, SLOT(deleteRuleSlot()) );
-        }
+//            connect( widget, SIGNAL(deleteMe()), this, SLOT(deleteRuleSlot()) );
+//        }
 
-        //DBO type related errors
-        if( errors )
-        {
-            QString msg = "Rules with non-present DBO type have been detected and skipped. By pressing ok these rules will be deleted.";
-            QMessageBox::warning( this, "Warning", msg );
-        }
-    }
+//        //DBO type related errors
+//        if( errors )
+//        {
+//            QString msg = "Rules with non-present DBO type have been detected and skipped. By pressing ok these rules will be deleted.";
+//            QMessageBox::warning( this, "Warning", msg );
+//        }
+//    }
 }
 
 /**
