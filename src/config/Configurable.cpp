@@ -57,7 +57,7 @@ Configurable::Configurable(std::string class_id, std::string instance_id, Config
  * Sets the unusable flag and sets parameters to null or dummy values.
  */
 Configurable::Configurable ()
-: unusable_ (true), parent_ (0), configuration_ (ConfigurationManager::getInstance().getDummyConfiguration())
+: unusable_ (true), parent_ (0), configuration_ (ConfigurationManager::getInstance().getDummyConfiguration()) // TODO HACK
 {
 
 }

@@ -35,6 +35,7 @@ using namespace tinyxml2;
  * Loads the main configuration filename from Config and calls parseConfigurationFile.
  */
 ConfigurationManager::ConfigurationManager()
+    : dummy_configuration_(Configuration ("Dummy", "Dummy0"))
 {
     std::string tmp;
     Config::getInstance().getValue("main_config_input", &tmp);
@@ -228,9 +229,9 @@ void ConfigurationManager::parseConfigurationSection (XMLElement *configuration_
 
                 logdbg << "ConfigurationManager: parseConfigurationSection: creating new configuration for class " << class_id <<
                         " instance " << instance_id;
-                root_configurations_ [key] = Configuration (class_id, instance_id);
-                root_configurations_ [key].setConfigurationFilename (filename);
-                root_configurations_ [key].parseXMLElement(configuration_element);
+                root_configurations_.insert (std::pair<std::pair<std::string, std::string>, Configuration> (key, Configuration (class_id, instance_id)));
+                root_configurations_.at(key).setConfigurationFilename (filename);
+                root_configurations_.at(key).parseXMLElement(configuration_element);
             }
             else
                 throw std::runtime_error ("error: ConfigurationManager: parseConfigurationSection: configuration misses attributes");

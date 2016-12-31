@@ -53,15 +53,6 @@ Configuration::Configuration(std::string class_id, std::string instance_id, std:
 }
 
 
-/**
- * Default constructor, only exists for creation in stl containers, should not be used (without overwriting).
- */
-Configuration::Configuration()
-: class_id_(UNDEFINED_NAME), instance_id_(UNDEFINED_NAME), used_(false), template_flag_ (false)
-{
-    logdbg  << "Configuration: constructor: ";
-}
-
 Configuration::Configuration(const Configuration &source)
 {
     operator=(source);
@@ -89,11 +80,7 @@ Configuration& Configuration::operator= (const Configuration &source)
     parameters_string_ = source.parameters_string_;
 
     /// Container for all added sub-configurables
-    std::map<std::pair<std::string, std::string>, Configuration >::const_iterator it2;
-    for (it2 = source.sub_configurations_.begin(); it2 != source.sub_configurations_.end(); it2++)
-    {
-        sub_configurations_ [it2->first] = it2->second;
-    }
+   sub_configurations_ = source.sub_configurations_;
 
     // return the existing object
     return *this;
@@ -545,16 +532,16 @@ void Configuration::parseXMLElement (XMLElement *element)
                 loginf << "Configuration: parseXMLElement: found template class " << class_id << " instance "
                         << instance_id;
                 assert (configuration_templates_.find(template_name) == configuration_templates_.end());
-                configuration_templates_[template_name] = Configuration (class_id, instance_id);
-                configuration_templates_[template_name].parseXMLElement(parameter_element);
-                configuration_templates_[template_name].setTemplate(true, template_name);
+                configuration_templates_.insert(std::pair <std::string, Configuration> (template_name, Configuration (class_id, instance_id)));
+                configuration_templates_.at(template_name).parseXMLElement(parameter_element);
+                configuration_templates_.at(template_name).setTemplate(true, template_name);
             }
             else
             {
                 std::pair <std::string, std::string> key (class_id, instance_id);
                 assert (sub_configurations_.find(key) == sub_configurations_.end());
-                sub_configurations_[key] = Configuration (class_id, instance_id);
-                sub_configurations_[key].parseXMLElement(parameter_element);
+                sub_configurations_.insert(std::pair <std::pair<std::string, std::string>, Configuration> (key, Configuration (class_id, instance_id)));
+                sub_configurations_.at(key).parseXMLElement(parameter_element);
             }
         }
         else
@@ -688,8 +675,8 @@ Configuration &Configuration::addNewSubConfiguration (std::string class_id, std:
 {
     std::pair<std::string, std::string> key (class_id, instance_id);
     assert (sub_configurations_.find (key) == sub_configurations_.end());
-    sub_configurations_[key] = Configuration (class_id, instance_id);
-    return sub_configurations_[key];
+    sub_configurations_.insert(std::pair <std::pair<std::string, std::string>, Configuration> (key, Configuration (class_id, instance_id)));
+    return sub_configurations_.at(key);
 }
 
 Configuration &Configuration::addNewSubConfiguration (std::string class_id)
@@ -716,8 +703,8 @@ Configuration &Configuration::addNewSubConfiguration (Configuration &configurati
 {
     std::pair<std::string, std::string> key (configuration.getClassId(), configuration.getInstanceId());
     assert (sub_configurations_.find (key) == sub_configurations_.end());
-    sub_configurations_[key] = configuration;
-    return sub_configurations_[key];
+    sub_configurations_.insert(std::pair <std::pair<std::string, std::string>, Configuration> (key, configuration));
+    return sub_configurations_.at(key);
 }
 
 Configuration &Configuration::getSubConfiguration (std::string class_id, std::string instance_id)
@@ -732,7 +719,7 @@ Configuration &Configuration::getSubConfiguration (std::string class_id, std::st
     }
 
     assert (sub_configurations_.find (key) != sub_configurations_.end());
-    return sub_configurations_[key];
+    return sub_configurations_.at(key);
 }
 
 void Configuration::removeSubConfiguration (std::string class_id, std::string instance_id)
@@ -763,7 +750,115 @@ bool Configuration::getSubTemplateNameFree (std::string template_name)
 void Configuration::addSubTemplate (Configuration *configuration, std::string template_name)
 {
     assert (getSubTemplateNameFree(template_name));
-    configuration_templates_ [template_name] = *configuration;
-    configuration_templates_ [template_name].setTemplate(true, template_name);
+    configuration_templates_.insert (std::pair<std::string, Configuration> (template_name, *configuration));
+    configuration_templates_.at(template_name).setTemplate(true, template_name);
     delete configuration;
+}
+
+template<> void ConfigurableParameter<bool>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
+{
+    config_value_ = attribute->BoolValue();
+}
+
+template<> void ConfigurableParameter<int>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
+{
+    config_value_ = attribute->IntValue();
+}
+
+template<> void ConfigurableParameter<unsigned int>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
+{
+    config_value_ = attribute->UnsignedValue();
+}
+
+template<> void ConfigurableParameter<float>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
+{
+    config_value_ = attribute->FloatValue();
+}
+
+template<> void ConfigurableParameter<double>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
+{
+    config_value_ = attribute->DoubleValue();
+}
+
+template<> void ConfigurableParameter<std::string>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
+{
+    config_value_ = attribute->Value();
+}
+
+template<> std::string ConfigurableParameter<bool>::getParameterType ()
+{
+    return "ParameterBool";
+}
+
+template<> std::string ConfigurableParameter<int>::getParameterType ()
+{
+    return "ParameterInt";
+}
+
+template<> std::string ConfigurableParameter<unsigned int>::getParameterType ()
+{
+    return "ParameterUnsignedInt";
+}
+
+template<> std::string ConfigurableParameter<float>::getParameterType ()
+{
+    return "ParameterFloat";
+}
+
+template<> std::string ConfigurableParameter<double>::getParameterType ()
+{
+    return "ParameterDouble";
+}
+
+template<> std::string ConfigurableParameter<std::string>::getParameterType ()
+{
+    return "ParameterString";
+}
+
+template<> std::string ConfigurableParameter<bool>::getParameterValue ()
+{
+    if (pointer_)
+        return Utils::String::intToString(*pointer_);
+    else
+        return Utils::String::intToString(config_value_);
+}
+
+template<> std::string ConfigurableParameter<int>::getParameterValue ()
+{
+    if (pointer_)
+        return Utils::String::intToString(*pointer_);
+    else
+        return Utils::String::intToString(config_value_);
+}
+
+template<> std::string ConfigurableParameter<unsigned int>::getParameterValue ()
+{
+    if (pointer_)
+        return Utils::String::uIntToString(*pointer_);
+    else
+        return Utils::String::uIntToString(config_value_);
+}
+
+template<> std::string ConfigurableParameter<float>::getParameterValue ()
+{
+    if (pointer_)
+        return Utils::String::doubleToStringPrecision(*pointer_, 8);
+    else
+        return Utils::String::doubleToStringPrecision(config_value_, 8);
+}
+
+template<> std::string ConfigurableParameter<double>::getParameterValue ()
+{
+    if (pointer_)
+        return Utils::String::doubleToStringPrecision(*pointer_, 12);
+    else
+        return Utils::String::doubleToStringPrecision(config_value_, 12);
+}
+
+template<> std::string ConfigurableParameter<std::string>::getParameterValue ()
+{
+    if (pointer_)
+        return *pointer_;
+    else
+        return config_value_;
 }

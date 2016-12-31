@@ -48,13 +48,7 @@ template <class T> class ConfigurableParameter //: public ConfigurableParameterB
 public:
     /// Constructor, initializes members
     ConfigurableParameter () : pointer_(0)
-{
-        if (typeid(T) != typeid(std::string))
-        {
-            memset (&config_value_, 0, sizeof (T));
-            memset (&default_value_, 0, sizeof (T));
-        }
-};
+    {}
 
     /// Copy constructor, uses assignment operator
     ConfigurableParameter(const ConfigurableParameter &source)
@@ -77,7 +71,7 @@ public:
     }
 
     /// Desctructor
-    virtual ~ConfigurableParameter () {};
+    virtual ~ConfigurableParameter () {}
     /// Parameter identifier
     std::string parameter_id_;
     /// Template pointer to real value
@@ -97,19 +91,7 @@ public:
             logdbg  << "ConfigurableParameter " << configuration_id << ": parseElement: attribute " << attribute->Name() << "  value "<< attribute->Value();
 
             parameter_id_=attribute->Name();
-
-            if (typeid(T) == typeid(bool))
-                config_value_ = attribute->BoolValue();
-            else if (typeid(T) == typeid(int))
-                config_value_ = attribute->IntValue();
-            else if (typeid(T) == typeid(unsigned int))
-                config_value_ = attribute->UnsignedValue();
-            else if (typeid(T) == typeid(float))
-                config_value_ = attribute->FloatValue();
-            else if (typeid(T) == typeid(double))
-                config_value_ = attribute->DoubleValue();
-            else
-                throw std::runtime_error ("ConfigurableParameter: parseElement: unknown class type");
+            setConfigValue (attribute);
 
             attribute=attribute->Next();
             assert (!attribute);
@@ -123,18 +105,7 @@ public:
      */
     std::string getParameterType ()
     {
-        if (typeid(T) == typeid(bool))
-            return "ParameterBool";
-        else if (typeid(T) == typeid(int))
-            return "ParameterInt";
-        else if (typeid(T) == typeid(unsigned int))
-            return "ParameterUnsignedInt";
-        else if (typeid(T) == typeid(float))
-            return "ParameterFloat";
-        else if (typeid(T) == typeid(double))
-            return "ParameterDouble";
-        else
-            throw std::runtime_error ("ConfigurableParameter: getParameterType: unknown class type");
+        throw std::runtime_error ("ConfigurableParameter: getParameterType: unknown class type");
     }
 
     /// Returns parameter identifier
@@ -146,21 +117,7 @@ public:
     /// Returns parameter value as string (using a stringstream)
     std::string getParameterValue ()
     {
-        std::stringstream ss;
-
-        if (pointer_)
-        {
-            if (typeid(T) == typeid(float))
-                return Utils::String::doubleToStringPrecision(*pointer_, 8);
-            else if (typeid(T) == typeid(double))
-                return Utils::String::doubleToStringPrecision(*pointer_, 12);
-
-            ss << *pointer_;
-        }
-        else
-            ss << config_value_;
-
-        return ss.str();
+        throw std::runtime_error ("ConfigurableParameter: getParameterValue: unknown class type");
     }
 
     /// Sets pointer_ to default value if valid, otherwise sets config_value_ to default_value_
@@ -182,115 +139,31 @@ public:
 
         loginf  << ss.str();
     }
+
+protected:
+    void setConfigValue (const tinyxml2::XMLAttribute* attribute);
 };
 
-template <> class ConfigurableParameter <std::string> //: public ConfigurableParameterBase
-{
-public:
-    /// Constructor, initializes members
-    ConfigurableParameter () : pointer_(0)
-{
-        if (typeid(std::string) != typeid(std::string))
-        {
-            memset (&config_value_, 0, sizeof (std::string));
-            memset (&default_value_, 0, sizeof (std::string));
-        }
-};
+template<> void ConfigurableParameter<bool>::setConfigValue (const tinyxml2::XMLAttribute* attribute);
+template<> void ConfigurableParameter<int>::setConfigValue (const tinyxml2::XMLAttribute* attribute);
+template<> void ConfigurableParameter<unsigned int>::setConfigValue (const tinyxml2::XMLAttribute* attribute);
+template<> void ConfigurableParameter<float>::setConfigValue (const tinyxml2::XMLAttribute* attribute);
+template<> void ConfigurableParameter<double>::setConfigValue (const tinyxml2::XMLAttribute* attribute);
+template<> void ConfigurableParameter<std::string>::setConfigValue (const tinyxml2::XMLAttribute* attribute);
 
-    /// Copy constructor, uses assignment operator
-    ConfigurableParameter(const ConfigurableParameter &source)
-    {
-        operator=(source);
-    }
+template<> std::string ConfigurableParameter<bool>::getParameterType ();
+template<> std::string ConfigurableParameter<int>::getParameterType ();
+template<> std::string ConfigurableParameter<unsigned int>::getParameterType ();
+template<> std::string ConfigurableParameter<float>::getParameterType ();
+template<> std::string ConfigurableParameter<double>::getParameterType ();
+template<> std::string ConfigurableParameter<std::string>::getParameterType ();
 
-    /// Assignment operator, make deep copy and discards the pointer.
-    virtual ConfigurableParameter& operator= (const ConfigurableParameter &source)
-    {
-        parameter_id_ = source.parameter_id_;
-        pointer_=0;
-        if (source.pointer_)
-            config_value_ = *source.pointer_;
-        else
-            config_value_ = source.config_value_;
-        default_value_ = source.default_value_;
-
-        return *this;
-    }
-
-    /// Desctructor
-    virtual ~ConfigurableParameter () {};
-    /// Parameter identifier
-    std::string parameter_id_;
-    /// Template pointer to real value
-    std::string *pointer_;
-    /// Template configuration value
-    std::string config_value_;
-    /// Template default value as given by registerParameter
-    std::string default_value_;
-
-    /// Parses an element from the XML configuration and sets parameter_id_ and config_value_ (using a stringstream)
-    void parseElement (const tinyxml2::XMLElement *element)
-    {
-        std::string configuration_id = element->Value();
-        const tinyxml2::XMLAttribute* attribute=element->FirstAttribute();
-        while (attribute)
-        {
-            logdbg  << "ConfigurableParameter " << configuration_id << ": parseElement: attribute " << attribute->Name() << "  value "<< attribute->Value();
-
-            parameter_id_=attribute->Name();
-
-            config_value_ = attribute->Value();
-
-            attribute=attribute->Next();
-            assert (!attribute);
-        }
-    }
-
-    /**
-     * Returns the parameter type as string
-     *
-     * \exception std::runtime_error if unknown class is used
-     */
-    std::string getParameterType ()
-    {
-        return "ParameterString";
-    }
-
-    /// Returns parameter identifier
-    std::string getParameterId ()
-    {
-        return parameter_id_;
-    }
-
-    /// Returns parameter value as string (using a stringstream)
-    std::string getParameterValue ()
-    {
-        if (pointer_)
-            return *pointer_;
-
-        return config_value_;
-    }
-
-    /// Sets pointer_ to default value if valid, otherwise sets config_value_ to default_value_
-    void resetToDefault ()
-    {
-        std::stringstream ss;
-        ss << "ConfigurableParameter: resetToDefault: parameter '" << parameter_id_ << "' default value '" << default_value_ << "'";
-
-        if (pointer_)
-        {
-            ss << " ptr not null value '" << *pointer_ << "'";
-            *pointer_=default_value_;
-        }
-        else
-        {
-            ss << " ptr null";
-            config_value_=default_value_;
-        }
-
-        loginf  << ss.str();
-    }
-};
+template<> std::string ConfigurableParameter<bool>::getParameterValue ();
+template<> std::string ConfigurableParameter<int>::getParameterValue ();
+template<> std::string ConfigurableParameter<unsigned int>::getParameterValue ();
+template<> std::string ConfigurableParameter<float>::getParameterValue ();
+template<> std::string ConfigurableParameter<double>::getParameterValue ();
+template<> std::string ConfigurableParameter<std::string>::getParameterValue ();
 
 /**
  * @brief Configuration storage and retrieval container class
@@ -307,8 +180,7 @@ class Configuration
 public:
     /// @brief Constructor
     Configuration(std::string class_id, std::string instance_id, std::string configuration_filename="");
-    /// @brief Default constructor for stl containers
-    Configuration();
+
     /// @brief Copy constructor
     Configuration(const Configuration &source);
     /// @brief Destructor
@@ -438,9 +310,6 @@ protected:
 
     /// Container with all configuration templates
     std::map<std::string, Configuration> configuration_templates_;
-
-    /// Undefined name for default constructor
-    static const std::string UNDEFINED_NAME;
 };
 
 #endif /* CONFIGURATION_H_ */
