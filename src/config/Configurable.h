@@ -133,9 +133,9 @@ protected:
 
 public:
     /// @brief Returns instance identifier
-    std::string getInstanceId () { return instance_id_; }
+    const std::string &getInstanceId () const { return instance_id_; }
     /// @brief Returns class identifier
-    std::string getClassId () { return class_id_; }
+    const std::string &getClassId () const { return class_id_; }
 };
 
 #endif /* CONFIGURABLE_H_ */

@@ -40,7 +40,7 @@
  */
 Configurable::Configurable(std::string class_id, std::string instance_id, Configurable *parent, std::string configuration_filename)
 : unusable_ (false), class_id_(class_id), instance_id_(instance_id), parent_(parent),
-  configuration_ (parent_ ? parent_->registerSubConfigurable(this) : ConfigurationManager::getInstance().registerRootConfigurable(this))
+  configuration_ (parent_ ? parent_->registerSubConfigurable(this) : ConfigurationManager::getInstance().registerRootConfigurable(*this))
 {
     logdbg  << "Configurable: constructor: class_id " << class_id_ << " instance_id " << instance_id_;
 
@@ -79,7 +79,7 @@ Configurable::~Configurable()
         }
         else
         {
-            ConfigurationManager::getInstance().unregisterRootConfigurable(this);
+            ConfigurationManager::getInstance().unregisterRootConfigurable(*this);
         }
 
         if (children_.size() != 0)

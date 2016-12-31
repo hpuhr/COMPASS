@@ -26,7 +26,6 @@ void test_array_list(unsigned int test_size)
         assert (list.isNone(cnt) == false);
     }
 
-
     list.clear();
     for (unsigned int cnt=0; cnt < list.size(); cnt++)
     {

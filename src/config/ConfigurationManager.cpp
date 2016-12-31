@@ -51,31 +51,36 @@ ConfigurationManager::~ConfigurationManager()
  * Adds Configurable to the root_configurables_ container, return either Configuration from root_configurations_
  * (if exists) or generates a new one.
  */
-Configuration &ConfigurationManager::registerRootConfigurable(Configurable *configurable)
+Configuration &ConfigurationManager::registerRootConfigurable(Configurable &configurable)
 {
-    assert (configurable);
-    logdbg  << "ConfigurationManager: registerRootConfigurable: " << configurable->getInstanceId();
-    std::pair<std::string, std::string> key (configurable->getClassId(), configurable->getInstanceId());
+    //assert (configurable);
+    logdbg  << "ConfigurationManager: registerRootConfigurable: " << configurable.getInstanceId();
+    std::pair<std::string, std::string> key (configurable.getClassId(), configurable.getInstanceId());
     assert (root_configurables_.find (key) == root_configurables_.end());
-    root_configurables_[key]=configurable;
+
+    //root_configurables_.insert(key)=configurable;
+    root_configurables_.insert( std::pair<std::pair<std::string, std::string>, Configurable &> (key, configurable) );
 
     if (root_configurations_.find (key) == root_configurations_.end()) // does not exist
     {
         loginf << "ConfigurationManager: getRootConfiguration: creating new configuration for class "
-                << configurable->getClassId() << " instance " << configurable->getInstanceId();
-        root_configurations_ [key] = Configuration (configurable->getClassId(), configurable->getInstanceId());
+                << configurable.getClassId() << " instance " << configurable.getInstanceId();
+        //root_configurations_.insert(key) = Configuration (configurable.getClassId(), configurable.getInstanceId());
+        root_configurations_.insert( std::pair<std::pair<std::string, std::string>, Configuration>
+                                     (key, Configuration (configurable.getClassId(), configurable.getInstanceId())) );
+
     }
-    return root_configurations_[key];
+    return root_configurations_.at(key);
 }
 
 /**
  * Removes configurable from root_configurables_ container.
  */
-void ConfigurationManager::unregisterRootConfigurable(Configurable *configurable)
+void ConfigurationManager::unregisterRootConfigurable(Configurable &configurable)
 {
-    assert (configurable);
-    logdbg  << "ConfigurationManager: unregisterRootConfigurable: " << configurable->getInstanceId();
-    std::pair<std::string, std::string> key (configurable->getClassId(), configurable->getInstanceId());
+    //assert (configurable);
+    logdbg  << "ConfigurationManager: unregisterRootConfigurable: " << configurable.getInstanceId();
+    std::pair<std::string, std::string> key (configurable.getClassId(), configurable.getInstanceId());
     assert (root_configurables_.find(key) != root_configurables_.end());
     root_configurables_.erase (root_configurables_.find(key));
 }
@@ -249,22 +254,22 @@ void ConfigurationManager::saveConfiguration ()
     std::map <std::string, XMLElement *> output_file_configuration_section_elements;
     std::map <std::string, XMLElement *> output_file_configurable_section_elements;
 
-    std::map <std::pair<std::string, std::string>, Configurable *>::iterator it;
+    std::map <std::pair<std::string, std::string>, Configurable&>::iterator it;
 
     XMLDocument *main_document = new XMLDocument ();
     XMLElement *file_section = main_document->NewElement("FileSection") ;
 
     for (it=root_configurables_.begin(); it != root_configurables_.end(); it++) //iterate over root configurables
     {
-        Configurable *root_configurable = it->second;
+        Configurable &root_configurable = it->second;
 
         XMLDocument *document=0;
 
         std::string root_config_filename;
 
-        if (root_configurable->getConfiguration().hasConfigurationFilename())
+        if (root_configurable.getConfiguration().hasConfigurationFilename())
         {
-            root_config_filename = root_configurable->getConfiguration().getConfigurationFilename();
+            root_config_filename = root_configurable.getConfiguration().getConfigurationFilename();
 
             if (output_file_documents.find (root_config_filename) == output_file_documents.end()) // new file
             {
@@ -299,7 +304,7 @@ void ConfigurationManager::saveConfiguration ()
         else
             document = main_document;
 
-        XMLElement *configuration_element = root_configurable->getConfiguration().generateXMLElement(document);
+        XMLElement *configuration_element = root_configurable.getConfiguration().generateXMLElement(document);
 
         // add configurationpool
         //loginf << "ConfigurationManager: saveConfiguration: for root configurable " << root_configurable->getInstanceId();
