@@ -54,7 +54,7 @@ class DBInterface : public Configurable
 {
 public:
     /// @brief Constructor
-    DBInterface();
+    DBInterface(std::string class_id, std::string instance_id, Configurable *parent);
     /// @brief Destructor
     virtual ~DBInterface();
 

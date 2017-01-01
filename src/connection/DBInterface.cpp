@@ -63,8 +63,8 @@ using namespace Utils;
  * Creates SQLGenerator, several containers based in DBOs (prepared_, reading_done_, exists_, count_), creates
  * write_table_names_,
  */
-DBInterface::DBInterface()
-: Configurable ("DBInterface", "DBInterface0"), connected_(false), database_opened_ (false), info_(0), connection_(0)//, buffer_writer_(0)
+DBInterface::DBInterface(std::string class_id, std::string instance_id, Configurable *parent)
+: Configurable (class_id, instance_id, parent), connected_(false), database_opened_ (false), info_(0), connection_(0)//, buffer_writer_(0)
 {
     boost::mutex::scoped_lock l(mutex_);
     //registerParameter ("database_name", &database_name_, "");

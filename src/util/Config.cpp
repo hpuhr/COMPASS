@@ -20,12 +20,24 @@
 
 #include "Logger.h"
 #include "Config.h"
+#include "String.h"
 
 using namespace std;
+using namespace Utils;
 
-Config::Config ()
-: opened_ (false)
+Config::Config (const std::string &config_filename)
+: opened_ (false), config_filename_ (config_filename)
 {
+    try
+    {
+        loadFile ();
+        assert (opened_);
+    }
+    catch (exception& e)
+    {
+        cout << "Config: constructor: exception " << e.what() << '\n';
+        opened_ = false;
+    }
 }
 
 Config::~Config()
@@ -33,17 +45,10 @@ Config::~Config()
     opened_=false;
 }
 
-void Config::init (std::string config_filename)
-{
-    assert (!opened_);
-    config_filename_=config_filename;
-    loadFile ();
-    opened_=true;
-}
-
 void Config::loadFile()
 {
-    //const char *filename = "../palantir/conf/palantir.conf";
+    assert (!opened_);
+
     ifstream grab(config_filename_.c_str());
 
     //check file exists
@@ -85,104 +90,74 @@ void Config::loadFile()
         config_[param] = value;
         //std::cout << "Config: got id '" << param << "' with value '" << config_[param] << "'" << endl;
     }
+
+    opened_ = true;
 }
 
-void Config::getValue (string id, int* value)
+bool Config::getBool (const std::string &id)
+{
+    if (!opened_)
+        throw std::runtime_error ("Config: getBool: config file was not opened");
+
+    if (!existsId(id))
+        throw std::runtime_error ("Config: getBool: config id '"+id+"' not present in configuration");
+
+    unsigned int tmp = getUnsignedInt(id);
+    return tmp > 0;
+}
+
+int Config::getInt (const std::string &id)
+{
+    if (!opened_)
+        throw std::runtime_error ("Config: getInt: config file was not opened");
+
+    if (!existsId(id))
+        throw std::runtime_error ("Config: getInt: config id '"+id+"' not present in configuration");
+
+    return String::intFromString(config_.at(id));
+}
+
+unsigned int Config::getUnsignedInt (const std::string &id)
+{
+    if (!opened_)
+        throw std::runtime_error ("Config: getUnsignedInt: config file was not opened");
+
+    if (!existsId(id))
+        throw std::runtime_error ("Config: getUnsignedInt: config id '"+id+"' not present in configuration");
+
+    return String::uIntFromString(config_.at(id));
+}
+
+double Config::getDouble (const std::string &id)
+{
+    if (!opened_)
+        throw std::runtime_error ("Config: getDouble: config file was not opened");
+
+    if (!existsId(id))
+        throw std::runtime_error ("Config: getDouble: config id '"+id+"' not present in configuration");
+
+    return String::doubleFromString(config_.at(id));
+}
+
+const std::string &Config::getString (const std::string &id)
 {
     if (!opened_)
         throw std::runtime_error ("Config: getValue: config file was not opened");
 
-    assert (value);
-    assert (id.size() > 0);
+    if (!existsId(id))
+        throw std::runtime_error ("Config: getBool: config id '"+id+"' not present in configuration");
 
     if (config_[id].empty())
     {
         logerr  << "Config: getValue: unknown id " << id;
         throw std::runtime_error("Config: getValue: unknown id string "+id);
     }
-    *value= atoi((config_[id]).c_str());
-    //logdbg  << "Config: getValue: int is now " << *value;
+    return config_.at(id);
 }
 
-void Config::getValue (string id, unsigned int* value)
-{
-    if (!opened_)
-        throw std::runtime_error ("Config: getValue: config file was not opened");
-
-    assert (value);
-    assert (id.size() > 0);
-
-    if (config_[id].empty())
-    {
-        logerr  << "Config: getValue: unknown id " << id;
-        throw std::runtime_error("Config: getValue: unknown id string "+id);
-    }
-    *value= atoi((config_[id]).c_str());
-    //logdbg  << "Config: getValue: int is now " << *value;
-}
-
-void Config::getValue (string id, double* value)
-{
-    if (!opened_)
-        throw std::runtime_error ("Config: getValue: config file was not opened");
-
-    assert (value);
-    assert (id.size() > 0);
-
-    if (config_[id].empty())
-    {
-        logerr  << "Config: getValue: unknown id " << id;
-        throw std::runtime_error("Config: getValue: unknown id string "+id);
-    }
-    *value= atof((config_[id]).c_str());
-    //logdbg  << "Config: getValue: double is now " << *value;
-}
-void Config::getValue (string id, float* value)
-{
-    if (!opened_)
-        throw std::runtime_error ("Config: getValue: config file was not opened");
-
-    assert (value);
-    assert (id.size() > 0);
-
-    double tmp;
-    getValue (id, &tmp);
-    *value=tmp;
-}
-
-void Config::getValue (string id, bool* value)
-{
-    if (!opened_)
-        throw std::runtime_error ("Config: getValue: config file was not opened");
-
-    assert (value);
-    assert (id.size() > 0);
-
-    int tmp;
-    getValue (id, &tmp);
-    *value=tmp>0;
-}
-
-void Config::getValue (string id, string* value)
-{
-    if (!opened_)
-        throw std::runtime_error ("Config: getValue: config file was not opened");
-
-    assert (value);
-    assert (id.size() > 0);
-
-    if (config_[id].empty())
-    {
-        logerr  << "Config: getValue: unknown id " << id;
-        throw std::runtime_error("Config: getValue: unknown id string "+id);
-    }
-    value->assign(config_[id]);
-    //logdbg  << "Config: getValue: string is now " << *value;
-}
-
-bool Config::existsId(std::string id)
+bool Config::existsId(const std::string &id)
 {
     assert (id.size() > 0);
-    return (config_.find(id) != config_.end());
+    return (config_.count(id) > 0);
 }
 

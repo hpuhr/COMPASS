@@ -1,5 +1,5 @@
 <?1.0?>
-<ATSDBClientConfiguration>
+<MainConfiguration>
     <!--------------------------------------------------------------------------------------->
     <!------- FileSection: SubConfigurationFiles are to be placed here                ------->
     <!--------------------------------------------------------------------------------------->
@@ -10,4 +10,4 @@
     <!--------------------------------------------------------------------------------------->
     <ConfigurationSection>
     </ConfigurationSection>
-</ATSDBClientConfiguration>
+</MainConfiguration>

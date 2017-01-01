@@ -27,9 +27,9 @@
 /**
  * @brief Provides access to a simple configuration file
  *
- * Configuration file singleton for reading a file containing string identifiers and values
+ * Simple configuration file for reading a file containing string identifiers and values
  */
-class Config : public Singleton
+class Config
 {
 protected:
     bool opened_;
@@ -38,39 +38,29 @@ protected:
     /// Container with all defined identifier -> value pairings
     std::map<std::string,std::string> config_;
 
-    /// @brief Constructor
-    Config ();
-    /// @brief Returns if a given identifier exists
-    bool existsId (std::string id);
     /// @brief Initialises the config class and reads file given by filename
     void loadFile ();
 
 public:
-    void init (std::string config_filename);
-
-
-    /// @brief  Gets value from map by id string and converts it to int
-    void getValue (std::string id, int* value);
-    /// @brief  Gets value from map by id string and converts it to unsigned int
-    void getValue (std::string id, unsigned int* value);
-    /// @brief  Gets value from map by id string and converts it to double
-    void getValue (std::string id, double* value);
-    /// @brief  Gets value from map by id string and doesn't convert it
-    void getValue (std::string id, std::string* value);
-    /// @brief  Gets value from map by id string and converts it to float
-    void getValue (std::string id, float* value);
-    /// @brief  Gets value from map by id string and converts it to bool
-    void getValue (std::string id, bool* value);
-
+    /// @brief Constructor
+    Config (const std::string &config_filename);
     /// @brief Destructor
     virtual ~Config();
 
-    /// @brief Returns singleton instance. Important: Call init before getting any values
-    static Config& getInstance()
-    {
-        static Config instance;
-        return instance;
-    }
+    /// @brief Returns if a given identifier exists
+    bool existsId (const std::string &id);
+
+    /// @brief  Gets value from map by id string and converts it to bool
+    bool getBool (const std::string &id);
+    /// @brief  Gets value from map by id string and converts it to int
+    int getInt (const std::string &id);
+    /// @brief  Gets value from map by id string and converts it to unsigned int
+    unsigned int getUnsignedInt (const std::string &id);
+    /// @brief  Gets value from map by id string and converts it to double
+    double getDouble (const std::string &id);
+    /// @brief  Gets value from map by id string and doesn't convert it
+    const std::string &getString (const std::string &id);
+
 };
 
 #endif

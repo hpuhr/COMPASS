@@ -35,17 +35,25 @@ using namespace tinyxml2;
  * Loads the main configuration filename from Config and calls parseConfigurationFile.
  */
 ConfigurationManager::ConfigurationManager()
-    : dummy_configuration_(Configuration ("Dummy", "Dummy0"))
+    : initialized_(false), dummy_configuration_(Configuration ("Dummy", "Dummy0"))
 {
-    std::string tmp;
-    Config::getInstance().getValue("main_config_input", &tmp);
-    loginf  << "ConfigurationManager: constructor: parsing configuration files";
-    parseConfigurationFile (tmp);
+}
+
+void ConfigurationManager::init (const std::string &main_config_filename)
+{
+    assert (!initialized_);
+    assert (main_config_filename.size() > 0);
+
+    main_config_filename_ = main_config_filename;
+    loginf  << "ConfigurationManager: init: parsing main configuration file '" << main_config_filename_ << "'";
+    initialized_ = true;
+    parseConfigurationFile (main_config_filename_);
 }
 
 ConfigurationManager::~ConfigurationManager()
 {
     logdbg  << "ConfigurationManager: destructor";
+    initialized_ = false;
 }
 
 /**
@@ -54,7 +62,8 @@ ConfigurationManager::~ConfigurationManager()
  */
 Configuration &ConfigurationManager::registerRootConfigurable(Configurable &configurable)
 {
-    //assert (configurable);
+    assert (initialized_);
+
     logdbg  << "ConfigurationManager: registerRootConfigurable: " << configurable.getInstanceId();
     std::pair<std::string, std::string> key (configurable.getClassId(), configurable.getInstanceId());
     assert (root_configurables_.find (key) == root_configurables_.end());
@@ -79,7 +88,8 @@ Configuration &ConfigurationManager::registerRootConfigurable(Configurable &conf
  */
 void ConfigurationManager::unregisterRootConfigurable(Configurable &configurable)
 {
-    //assert (configurable);
+    assert (initialized_);
+
     logdbg  << "ConfigurationManager: unregisterRootConfigurable: " << configurable.getInstanceId();
     std::pair<std::string, std::string> key (configurable.getClassId(), configurable.getInstanceId());
     assert (root_configurables_.find(key) != root_configurables_.end());
@@ -87,11 +97,13 @@ void ConfigurationManager::unregisterRootConfigurable(Configurable &configurable
 }
 
 /**
- * Assumes a root PalantirConfiguration, with either a ConfigurationSection or a FileSection, which are
+ * Assumes a root MainConfiguration, with either a ConfigurationSection or a FileSection, which are
  * parsed with the appropriate functions.
  */
 void ConfigurationManager::parseConfigurationFile (std::string filename)
 {
+    assert (initialized_);
+
     logdbg  << "ConfigurationManager: parseConfigurationFile: opening '" << filename << "'";
     XMLDocument *config_file_doc = new XMLDocument ();
 
@@ -99,31 +111,31 @@ void ConfigurationManager::parseConfigurationFile (std::string filename)
     {
         logdbg  << "ConfigurationManager: parseConfigurationFile: file '" << filename << "' opened";
 
-        XMLElement *doc_palantir_conf;
-        XMLElement *palantir_conf_child;
+        XMLElement *doc_main_conf;
+        XMLElement *main_conf_child;
 
-        for ( doc_palantir_conf = config_file_doc->FirstChildElement(); doc_palantir_conf != 0;
-                doc_palantir_conf = doc_palantir_conf->NextSiblingElement())
+        for ( doc_main_conf = config_file_doc->FirstChildElement(); doc_main_conf != 0;
+                doc_main_conf = doc_main_conf->NextSiblingElement())
         {
-            assert (strcmp ("PalantirConfiguration", doc_palantir_conf->Value() ) == 0);
-            logdbg  << "ConfigurationManager: parseConfigurationFile: found PalantirConfiguration";
+            assert (strcmp ("MainConfiguration", doc_main_conf->Value() ) == 0);
+            logdbg  << "ConfigurationManager: parseConfigurationFile: found MainConfiguration";
 
-            for (palantir_conf_child = doc_palantir_conf->FirstChildElement(); palantir_conf_child != 0; palantir_conf_child = palantir_conf_child->NextSiblingElement())
+            for (main_conf_child = doc_main_conf->FirstChildElement(); main_conf_child != 0; main_conf_child = main_conf_child->NextSiblingElement())
             {
-                logdbg  << "ConfigurationManager: parseConfigurationFile: found element '" << palantir_conf_child->Value() << "'";
-                if (strcmp ("ConfigurationSection", palantir_conf_child->Value() ) == 0)
+                logdbg  << "ConfigurationManager: parseConfigurationFile: found element '" << main_conf_child->Value() << "'";
+                if (strcmp ("ConfigurationSection", main_conf_child->Value() ) == 0)
                 {
                     logdbg  << "ConfigurationManager: parseConfigurationFile: is ConfigurationSection";
-                    parseConfigurationSection (palantir_conf_child, filename);
+                    parseConfigurationSection (main_conf_child, filename);
                 }
-                else if (strcmp ("FileSection", palantir_conf_child->Value() ) == 0)
+                else if (strcmp ("FileSection", main_conf_child->Value() ) == 0)
                 {
                     logdbg  << "ConfigurationManager: parseConfigurationFile: is FileSection";
-                    parseFileSection (palantir_conf_child);
+                    parseFileSection (main_conf_child);
                 }
                 else
                 {
-                    throw std::runtime_error (std::string("ConfigurationManager: parseConfigurationFile: unknown section '")+palantir_conf_child->Value()+"'");
+                    throw std::runtime_error (std::string("ConfigurationManager: parseConfigurationFile: unknown section '")+main_conf_child->Value()+"'");
                 }
             }
         }
@@ -142,6 +154,7 @@ void ConfigurationManager::parseConfigurationFile (std::string filename)
  */
 void ConfigurationManager::parseFileSection (XMLElement *configuration_section_element)
 {
+    assert (initialized_);
     logdbg  << "ConfigurationManager: parseFileSection";
 
     XMLElement * pool_child;
@@ -191,6 +204,7 @@ void ConfigurationManager::parseFileSection (XMLElement *configuration_section_e
  */
 void ConfigurationManager::parseConfigurationSection (XMLElement *configuration_section_element, std::string filename)
 {
+    assert (initialized_);
     logdbg  << "ConfigurationManager: parseConfigurationSection";
 
     XMLElement * configuration_element;
@@ -247,8 +261,7 @@ void ConfigurationManager::parseConfigurationSection (XMLElement *configuration_
 
 void ConfigurationManager::saveConfiguration ()
 {
-    std::string main_config_filename;
-    Config::getInstance().getValue("main_config_output", &main_config_filename);
+    assert (initialized_);
 
     std::map <std::string, XMLDocument *> output_file_documents;
     std::map <std::string, XMLElement *> output_file_root_elements;
@@ -257,7 +270,10 @@ void ConfigurationManager::saveConfiguration ()
 
     std::map <std::pair<std::string, std::string>, Configurable&>::iterator it;
 
+    logdbg << "ConfigurationManager: saveConfiguration: creating main document";
     XMLDocument *main_document = new XMLDocument ();
+
+    logdbg << "ConfigurationManager: saveConfiguration: creating main document file secion";
     XMLElement *file_section = main_document->NewElement("FileSection") ;
 
     for (it=root_configurables_.begin(); it != root_configurables_.end(); it++) //iterate over root configurables
@@ -272,6 +288,9 @@ void ConfigurationManager::saveConfiguration ()
         {
             root_config_filename = root_configurable.getConfiguration().getConfigurationFilename();
 
+            logdbg << "ConfigurationManager: saveConfiguration: adding root configurabke " << root_configurable.getInstanceId()
+                   << " filename " << root_config_filename;
+
             if (output_file_documents.find (root_config_filename) == output_file_documents.end()) // new file
             {
                 document = new XMLDocument ();
@@ -279,11 +298,11 @@ void ConfigurationManager::saveConfiguration ()
                 XMLDeclaration* decl = document->NewDeclaration( "1.0");
                 document->LinkEndChild( decl );
 
-                XMLElement * root = document->NewElement ("PalantirConfiguration");
+                XMLElement * root = document->NewElement ("MainConfiguration");
                 output_file_root_elements[root_config_filename] = root;
                 document->LinkEndChild( root );
 
-                if (root_config_filename.compare(main_config_filename) == 0) // if main file add filesection
+                if (root_config_filename.compare(main_config_filename_) == 0) // if main file add filesection
                 {
                     root->LinkEndChild(document->NewComment("-----------------------------------------------------------------------------------"));
                     root->LinkEndChild(document->NewComment("----- FileSection: SubConfigurationFiles are to be placed here                -----"));
@@ -308,10 +327,10 @@ void ConfigurationManager::saveConfiguration ()
         XMLElement *configuration_element = root_configurable.getConfiguration().generateXMLElement(document);
 
         // add configurationpool
-        //loginf << "ConfigurationManager: saveConfiguration: for root configurable " << root_configurable->getInstanceId();
+        logdbg << "ConfigurationManager: saveConfiguration: for root configurable " << root_configurable.getInstanceId();
         std::string comment = "----- Root configuration: " + it->first.second + " -----";
-        output_file_configuration_section_elements [root_config_filename]->LinkEndChild(document->NewComment(comment.c_str()));
-        output_file_configuration_section_elements [root_config_filename]->LinkEndChild(configuration_element);
+        output_file_configuration_section_elements.at(root_config_filename)->LinkEndChild(document->NewComment(comment.c_str()));
+        output_file_configuration_section_elements.at(root_config_filename)->LinkEndChild(configuration_element);
 
         logdbg  << "ConfigurationManager: saveConfiguration: configuration " << it->first.second << " appended to file " << root_config_filename;
     }
@@ -332,7 +351,7 @@ void ConfigurationManager::saveConfiguration ()
                 pool_config_filename = root_config_it->second.getConfigurationFilename();
 
             if (pool_config_filename.size() == 0) // if no config file, use main
-                pool_config_filename = main_config_filename;
+                pool_config_filename = main_config_filename_;
 
             XMLDocument *document;
 
@@ -343,11 +362,11 @@ void ConfigurationManager::saveConfiguration ()
                 XMLDeclaration* decl = document->NewDeclaration("1.0");
                 document->LinkEndChild( decl );
 
-                XMLElement * root = document->NewElement("PalantirConfiguration");
+                XMLElement * root = document->NewElement("MainConfiguration");
                 output_file_root_elements[pool_config_filename] = root;
                 document->LinkEndChild( root );
 
-                if (pool_config_filename.compare(main_config_filename) == 0) // if main file add filesection
+                if (pool_config_filename.compare(main_config_filename_) == 0) // if main file add filesection
                 {
                     root->LinkEndChild(document->NewComment("-----------------------------------------------------------------------------------"));
                     root->LinkEndChild(document->NewComment("----- FileSection: SubConfigurationFiles are to be placed here                -----"));
@@ -383,7 +402,7 @@ void ConfigurationManager::saveConfiguration ()
     std::map <std::string, XMLDocument *>::iterator file_it;
     for (file_it=output_file_documents.begin(); file_it != output_file_documents.end(); file_it++)
     {
-        if (file_it->first.compare(main_config_filename) != 0)
+        if (file_it->first.compare(main_config_filename_) != 0)
         {
             XMLElement *sub_file_element = main_document->NewElement( "SubConfigurationFile" );
             sub_file_element->SetAttribute ("path", file_it->first.c_str());

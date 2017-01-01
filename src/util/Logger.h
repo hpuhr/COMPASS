@@ -28,15 +28,15 @@
 #define logerr log4cpp::Category::getRoot().errorStream()
 #define logwrn log4cpp::Category::getRoot().warnStream()
 #define loginf log4cpp::Category::getRoot().infoStream()
-//#define logdbg log4cpp::Category::getRoot().debugStream()
-#define logdbg if(0) log4cpp::Category::getRoot().debugStream()
+#define logdbg log4cpp::Category::getRoot().debugStream()
+//#define logdbg if(0) log4cpp::Category::getRoot().debugStream() // for improved performance
 
 #include "Singleton.h"
 
 #include "log4cpp/Appender.hh"
 #include "log4cpp/Category.hh"
 
-enum TLogLevel {logERROR, logWARNING, logINFO, logDEBUG, logDEBUG1, logDEBUG2, logDEBUG3, logDEBUG4};
+//enum TLogLevel {logERROR, logWARNING, logINFO, logDEBUG, logDEBUG1, logDEBUG2, logDEBUG3, logDEBUG4};
 
 /**
  * @brief Thread-safe logger
@@ -47,12 +47,10 @@ class Logger : public Singleton
 {
 protected:
   static Logger *log_instance_;
-  std::string filename_;
   log4cpp::Appender *console_appender_;
   log4cpp::Appender *file_appender_;
 
   Logger();
-  void init ();
 
 public:
   static Logger& getInstance()
@@ -60,6 +58,9 @@ public:
     static Logger instance;
     return instance;
   }
+
+  void init (const std::string &log_config_filename);
+
   virtual ~Logger();
 };
 

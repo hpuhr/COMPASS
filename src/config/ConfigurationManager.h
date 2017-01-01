@@ -48,6 +48,8 @@ class Configurable;
 class ConfigurationManager : public Singleton
 {
 public:
+    void init (const std::string &main_config_filename);
+
     /// @brief Destructor
     virtual ~ConfigurationManager();
 
@@ -70,6 +72,8 @@ public:
     Configuration &getDummyConfiguration () { return dummy_configuration_; }
 
 protected:
+    bool initialized_;
+    std::string main_config_filename_;
     /// Container with all root configurables (class id, instance id) -> Configurable
     std::map <std::pair<std::string, std::string>, Configurable &> root_configurables_;
     /// Container with all root configurations (class id, instance id) -> Configuration

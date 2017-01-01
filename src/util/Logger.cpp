@@ -38,10 +38,9 @@
 Logger::Logger()
 : console_appender_(0), file_appender_(0)
 {
-  init();
 }
 
-void Logger::init ()
+void Logger::init (const std::string &log_config_filename)
 {
 #ifdef LOGGER_FIXED_LEVEL
   log4cpp::Appender *console_appender_ = new log4cpp::OstreamAppender("console", &std::cout);
@@ -55,8 +54,7 @@ void Logger::init ()
   root.addAppender(console_appender_);
   root.addAppender(file_appender_);
 #else
-  Config::getInstance().getValue("debug_properties_file", &filename_);
-  log4cpp::PropertyConfigurator::configure(filename_);
+  log4cpp::PropertyConfigurator::configure(log_config_filename);
 #endif
 }
 

@@ -34,7 +34,7 @@
 #include "Singleton.h"
 #include "JobOrderer.h"
 #include "DBOVariableSet.h"
-
+#include "Configurable.h"
 
 class Buffer;
 class DataSource;
@@ -91,9 +91,11 @@ class BufferReceiver;
  * \todo Maybe extend some classes to observer pattern
  * \todo Removed writing of new databases. Re-integrated if necessary
  */
-class ATSDB : public Singleton, public JobOrderer
+class ATSDB : public Configurable
 {
 public:
+    ///@brief Constructor.
+    ATSDB(const std::string instance_id);
     ///@brief Destructor.
     virtual ~ATSDB();
 
@@ -102,6 +104,8 @@ public:
     void open (std::string database_name);
     ///@brief Shuts down the DB access.
     void shutdown ();
+
+    virtual void generateSubConfigurable (std::string class_id, std::string instance_id);
 
     ///@brief Adds data to a DBO from a C struct data pointer.
     //void insert (const std::string &dbo_type, void *data);
@@ -227,8 +231,7 @@ protected:
 
     //std::vector <std::string> databases_;
 
-    ///@brief Constructor.
-    ATSDB();
+    virtual void checkSubConfigurables ();
 
     ///@brief Quits all reading processes.
     //void quitReading ();
@@ -247,11 +250,11 @@ protected:
 
 public:
     ///@brief Instance access function for Singleton.
-    static ATSDB& getInstance()
-    {
-        static ATSDB instance;
-        return instance;
-    }
+//    static ATSDB& getInstance()
+//    {
+//        static ATSDB instance;
+//        return instance;
+//    }
     ///@brief Returns flag indicating if DB was opened.
     bool getDBOpened () { return db_opened_; };
 

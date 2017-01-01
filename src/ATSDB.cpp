@@ -27,6 +27,7 @@
 #include <boost/function.hpp>
 
 #include "ATSDB.h"
+#include "Config.h"
 //#include "Buffer.h"
 //#include "BufferReceiver.h"
 //#include "DataSource.h"
@@ -57,17 +58,19 @@ using namespace std;
 /**
  * Locks state_mutex_, sets init state, creates members, starts the thread using go.
  */
-ATSDB::ATSDB()
+ATSDB::ATSDB(const std::string instance_id)
+ : Configurable ("ATSDB", instance_id, 0, "conf/atsdb.xml"), db_interface_(nullptr)
 //: export_active_(false), dbo_reads_active_(0)
 {
     db_opened_=false;
 
-    Logger::getInstance();
     //WorkerThreadManager::getInstance();
 
     logdbg  << "ATSDB: constructor: start";
 
-    db_interface_ = new DBInterface ();
+    createSubConfigurables ();
+
+    //db_interface_ = new DBInterface ();
     //struct_reader_ = new StructureReader (db_interface_);
 
     //reference_point_defined_=false;
@@ -84,7 +87,11 @@ ATSDB::~ATSDB()
 
     //delete struct_reader_;
 
-    delete db_interface_;
+    if (db_interface_ != nullptr)
+    {
+        delete db_interface_;
+        db_interface_ = nullptr;
+    }
 
 //    if (dbo_read_jobs_.size() > 0)
 //        logerr << "ATSDB: destructor: unfinished dbo read jobs " << dbo_read_jobs_.size();
@@ -108,7 +115,28 @@ ATSDB::~ATSDB()
     logdbg  << "ATSDB: destructor: end";
 }
 
+void ATSDB::generateSubConfigurable (std::string class_id, std::string instance_id)
+{
+    logdbg  << "ATSDB: generateSubConfigurable: class_id " << class_id << " instance_id " << instance_id;
+    if (class_id.compare ("DBInterface") == 0)
+    {
+        assert (db_interface_ == nullptr);
+        db_interface_ = new DBInterface (class_id, instance_id, this);
+        assert (db_interface_ != nullptr);
+    }
+    else
+        throw std::runtime_error ("ATSDB: generateSubConfigurable: unknown class_id "+class_id );
+}
 
+void ATSDB::checkSubConfigurables ()
+{
+    if (db_interface_ == nullptr)
+    {
+        addNewSubConfiguration ("DBInterface", "DBInterface0");
+        generateSubConfigurable ("DBInterface", "DBInterface0");
+        assert (db_interface_ != nullptr);
+    }
+}
 
 
 /**
@@ -389,40 +417,40 @@ void ATSDB::open (std::string database_name)
 // * Calls stop, locks state_mutex_. If data was written uning the StructureReader, this process is finished correctly.
 // * State is set to DB_STATE_SHUTDOWN and ouput buffers are cleared.
 // */
-//void ATSDB::shutdown ()
-//{
-//    loginf  << "ATSDB: database shutdown";
+void ATSDB::shutdown ()
+{
+    loginf  << "ATSDB: database shutdown";
 
-////    if (struct_reader_->hasUnwrittenData())
-////    {
-////        loginf << "ATSDB: shutdown: finalizing data insertion";
-////        struct_reader_->finalize();
+//    if (struct_reader_->hasUnwrittenData())
+//    {
+//        loginf << "ATSDB: shutdown: finalizing data insertion";
+//        struct_reader_->finalize();
 
-////        if (!WorkerThreadManager::getInstance().noJobs())
-////            loginf << "ATSDB: shutdown: waiting on data insertion finish";
+//        if (!WorkerThreadManager::getInstance().noJobs())
+//            loginf << "ATSDB: shutdown: waiting on data insertion finish";
 
-////        while (!WorkerThreadManager::getInstance().noJobs())
-////        {
-////            sleep(1);
-////        }
-////        WorkerThreadManager::getInstance().shutdown();
-////    }
-////    else
-////    {
-////        setJobsObsolete();
+//        while (!WorkerThreadManager::getInstance().noJobs())
+//        {
+//            sleep(1);
+//        }
+//        WorkerThreadManager::getInstance().shutdown();
+//    }
+//    else
+//    {
+//        setJobsObsolete();
 
-////        while (active_jobs_.size() != 0)
-////        {
-////            loginf << "ATSDB: shutdown: waiting for " << active_jobs_.size() << " job(s) to finish";
-////            sleep(1);
-////        }
-////    }
+//        while (active_jobs_.size() != 0)
+//        {
+//            loginf << "ATSDB: shutdown: waiting for " << active_jobs_.size() << " job(s) to finish";
+//            sleep(1);
+//        }
+//    }
 
-//    logdbg  << "ATSDB: shutdown: state to 'DB_STATE_SHUTDOWN'";
-//    db_opened_=false;
+    logdbg  << "ATSDB: shutdown: state to 'DB_STATE_SHUTDOWN'";
+    db_opened_=false;
 
-//    logdbg  << "ATSDB: shutdown: end";
-//}
+    logdbg  << "ATSDB: shutdown: end";
+}
 
 ////bool ATSDB::error()
 ////{
