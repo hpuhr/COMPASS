@@ -109,17 +109,17 @@ set ( atsdb_HDRS
         src/config/ConfigurationManager.h
         src/command/DBCommand.h
         src/command/DBCommandList.h
-        src/connection/BufferWriter.h
+#        src/connection/BufferWriter.h
         src/connection/DBConnection.h
         src/connection/DBConnectionInfo.h
 #        src/connection/MySQLConConnection.h
         src/connection/MySQLppConnection.h
 ##        src/connection/SQLiteConnection.h
-        src/datasource/DataSource.h
-        src/filter/DBFilter.h
-        src/filter/SensorFilter.h
-        src/filter/FilterManager.h
-        src/job/DBJob.h
+#        src/datasource/DataSource.h
+#        src/filter/DBFilter.h
+#        src/filter/SensorFilter.h
+#        src/filter/FilterManager.h
+#        src/job/DBJob.h
         src/job/Job.h
         src/job/JobOrderer.h
 #        src/job/DBOActiveDataSourcesDBJob.h
@@ -132,34 +132,34 @@ set ( atsdb_HDRS
 #        src/job/UpdateBufferDBJob.h
 #        src/job/WriteBufferDBJob.h
 #        src/job/PostProcessDBJob.h
-        src/job/TransformationJob.h
+#        src/job/TransformationJob.h
 #        src/mem/ArrayTemplateManager.h
 #        src/mem/ArrayTemplate.h
 #        src/mem/BufferTemplate.h
 #        src/mem/MemoryManager.h
-        src/object/DBObject.h
-        src/object/DBObjectManager.h
-        src/object/DBOVariable.h
-        src/object/DBOVariableSet.h
-        src/object/DBOVariableOrderedSet.h
-        src/polygon/AirspaceSector.h
-        src/polygon/AirspaceSectorParser.h
-        src/polygon/AirspaceSectorManager.h
-        src/polygon/GeographicPoint.h
-        src/polygon/Polygon4DDI.h
-        src/polygon/Vector2.h
+#        src/object/DBObject.h
+#        src/object/DBObjectManager.h
+#        src/object/DBOVariable.h
+#        src/object/DBOVariableSet.h
+#        src/object/DBOVariableOrderedSet.h
+#        src/polygon/AirspaceSector.h
+#        src/polygon/AirspaceSectorParser.h
+#        src/polygon/AirspaceSectorManager.h
+#        src/polygon/GeographicPoint.h
+#        src/polygon/Polygon4DDI.h
+#        src/polygon/Vector2.h
 #        src/polygon/acgxml/ACGXMLParser.h
 #        src/polygon/acgxml/Abd.h
 #        src/polygon/acgxml/Ase.h
-        src/polygon/shapefile/ShapeFileParser.h
-        src/projection/ProjectionManager.h
+#        src/polygon/shapefile/ShapeFileParser.h
+#        src/projection/ProjectionManager.h
         src/property/Property.h
         src/property/PropertyList.h
 #        src/property/PropertyArray.h
 #        src/property/PropertyContainer.h
-        src/result/BufferSet.h
+#        src/result/BufferSet.h
         src/result/DBResult.h
-        src/result/BufferReceiver.h
+#        src/result/BufferReceiver.h
 #        src/struct/StructureDescription.h
 ##        src/struct/StructureDescriptionPlot.h
 ##        src/struct/StructureDescriptionSystemTrack.h
@@ -170,34 +170,34 @@ set ( atsdb_HDRS
 #        src/struct/StructureElement.h
 #        src/struct/StructureReader.h
 #        src/struct/StructureVariable.h
-        src/schema/DBTable.h
-        src/schema/DBTableColumn.h
-        src/schema/DBSchema.h
-        src/schema/DBSchemaManager.h
-        src/schema/MetaDBTable.h
-        src/schema/SQLGenerator.h
-        src/thread/Thread.h
-        src/thread/TimedThread.h
-        src/thread/WorkerThread.h
-        src/thread/WorkerThreadManager.h
-        src/computation/Workflow.h
-        src/computation/Computation.h
-        src/computation/ComputationElement.h
-        src/computation/ComputationPipeline.h
-        src/computation/ComputationPipelineQueue.h
-        src/computation/TransformationBase.h
-        src/computation/Transformation.h
-        src/computation/TransformationVariable.h
-        src/computation/TransformationFactory.h
+#        src/schema/DBTable.h
+#        src/schema/DBTableColumn.h
+#        src/schema/DBSchema.h
+#        src/schema/DBSchemaManager.h
+#        src/schema/MetaDBTable.h
+#        src/schema/SQLGenerator.h
+#        src/thread/Thread.h
+#        src/thread/TimedThread.h
+#        src/thread/WorkerThread.h
+#        src/thread/WorkerThreadManager.h
+#        src/computation/Workflow.h
+#        src/computation/Computation.h
+#        src/computation/ComputationElement.h
+#        src/computation/ComputationPipeline.h
+#        src/computation/ComputationPipelineQueue.h
+#        src/computation/TransformationBase.h
+#        src/computation/Transformation.h
+#        src/computation/TransformationVariable.h
+#        src/computation/TransformationFactory.h
 #        src/transform/CalculateHistogram.h
 #        src/transform/CalculateHistogram2D.h
 #        src/transform/CalculatePosition.h
 #        src/transform/CalculatePosition2D.h
 #        src/transform/CalculateLines.h
 #        src/transform/CalculateStyle.h
-        src/unit/Unit.h
-        src/unit/UnitLength.h
-        src/unit/UnitManager.h
+#        src/unit/Unit.h
+#        src/unit/UnitLength.h
+#        src/unit/UnitManager.h
         src/util/Config.h
         src/util/Global.h
 #        src/util/Data.h
@@ -209,159 +209,159 @@ set ( atsdb_HDRS
         )
 
 set (atsdb_MOC_HEADERS
-        src/filter/DBFilterCondition.h
-        src/filter/DBFilterWidget.h
-        src/filter/FilterEditWidget.h
-        src/filter/FilterGeneratorWidget.h
-        src/filter/SensorFilterWidget.h
-        src/gui/DBSelectionWidget.h
-        src/gui/QCollapsableWidget.h
-        src/gui/WorkerThreadWidget.h
+#        src/filter/DBFilterCondition.h
+#        src/filter/DBFilterWidget.h
+#        src/filter/FilterEditWidget.h
+#        src/filter/FilterGeneratorWidget.h
+#        src/filter/SensorFilterWidget.h
+#        src/gui/DBSelectionWidget.h
+#        src/gui/QCollapsableWidget.h
+#        src/gui/WorkerThreadWidget.h
 #        src/gui/WorkflowEditWidget.h
 #        src/gui/WorkflowEditDialog.h
 #        src/gui/WorkflowSettingsEditDialog.h
 #        src/gui/ComputationEditDialog.h
 #        src/gui/TransformationEditDialog.h
 #        src/gui/TransformationVariableEditDialog.h
-        src/gui/FilterEditDialog.h
-        src/object/DBOTypeComboBox.h
-        src/object/DBObjectWidget.h
-        src/object/DBObjectEditWidget.h
-        src/object/DBOVariableComboBox.h
-        src/object/DBOVariableSetWidget.h
-        src/object/DBOVariableOrderedSetWidget.h
-        src/object/DBOVariableSelectionWidget.h
-        src/object/DBOVariableDataTypeComboBox.h
-        src/object/PropertyDataTypeComboBox.h
-        src/object/MetaDBObjectEditWidget.h
+#        src/gui/FilterEditDialog.h
+#        src/object/DBOTypeComboBox.h
+#        src/object/DBObjectWidget.h
+#        src/object/DBObjectEditWidget.h
+#        src/object/DBOVariableComboBox.h
+#        src/object/DBOVariableSetWidget.h
+#        src/object/DBOVariableOrderedSetWidget.h
+#        src/object/DBOVariableSelectionWidget.h
+#        src/object/DBOVariableDataTypeComboBox.h
+#        src/object/PropertyDataTypeComboBox.h
+#        src/object/MetaDBObjectEditWidget.h
 #        src/object/StringRepresentationComboBox.h
-        src/object/UnitSelectionWidget.h
-        src/polygon/AirspaceSectorManagerWidget.h
-        src/polygon/AirspaceSectorTreeWidget.h
-        src/polygon/AirspaceSectorWidget.h
-        src/projection/ProjectionManagerWidget.h
-        src/schema/DBTableColumnComboBox.h
-        src/schema/DBSchemaWidget.h
-        src/schema/DBSchemaEditWidget.h
-        src/schema/DBTableEditWidget.h
-        src/schema/MetaDBTableEditWidget.h
+#        src/object/UnitSelectionWidget.h
+#        src/polygon/AirspaceSectorManagerWidget.h
+#        src/polygon/AirspaceSectorTreeWidget.h
+#        src/polygon/AirspaceSectorWidget.h
+#        src/projection/ProjectionManagerWidget.h
+#        src/schema/DBTableColumnComboBox.h
+#        src/schema/DBSchemaWidget.h
+#        src/schema/DBSchemaEditWidget.h
+#        src/schema/DBTableEditWidget.h
+#        src/schema/MetaDBTableEditWidget.h
         )
 
 set ( atsdb_SRCS
         src/ATSDB.cpp
         src/buffer/ArrayList.cpp
         src/buffer/Buffer.cpp
-        src/buffer/BufferFilter.cpp
+#        src/buffer/BufferFilter.cpp
         src/config/Configurable.cpp
         src/config/Configuration.cpp
         src/config/ConfigurationManager.cpp
         src/command/DBCommand.cpp
         src/command/DBCommandList.cpp
-        src/connection/BufferWriter.cpp
+#        src/connection/BufferWriter.cpp
         src/connection/DBInterface.cpp
 #        src/connection/MySQLConConnection.cpp
         src/connection/MySQLppConnection.cpp
 #        src/connection/SQLiteConnection.cpp
-        src/datasource/DataSource.cpp
-        src/filter/DBFilter.cpp
-        src/filter/DBFilterCondition.cpp
-        src/filter/DBFilterWidget.cpp
-        src/filter/FilterManager.cpp
-        src/filter/SensorFilter.cpp
-        src/filter/SensorFilterWidget.cpp
-        src/filter/FilterEditWidget.cpp
-        src/filter/FilterGeneratorWidget.cpp
-        src/gui/DBSelectionWidget.cpp
-        src/gui/QCollapsableWidget.cpp
-        src/gui/WorkerThreadWidget.cpp
+#        src/datasource/DataSource.cpp
+#        src/filter/DBFilter.cpp
+#        src/filter/DBFilterCondition.cpp
+#        src/filter/DBFilterWidget.cpp
+#        src/filter/FilterManager.cpp
+#        src/filter/SensorFilter.cpp
+#        src/filter/SensorFilterWidget.cpp
+#        src/filter/FilterEditWidget.cpp
+#        src/filter/FilterGeneratorWidget.cpp
+#        src/gui/DBSelectionWidget.cpp
+#        src/gui/QCollapsableWidget.cpp
+#        src/gui/WorkerThreadWidget.cpp
 #        src/gui/WorkflowEditWidget.cpp
 #        src/gui/WorkflowEditDialog.cpp
 #        src/gui/WorkflowSettingsEditDialog.cpp
 #        src/gui/ComputationEditDialog.cpp
 #        src/gui/TransformationEditDialog.cpp
 #        src/gui/TransformationVariableEditDialog.cpp
-        src/gui/FilterEditDialog.cpp
+#        src/gui/FilterEditDialog.cpp
 #        src/job/DBOActiveDataSourcesDBJob.cpp
 #        src/job/DBOVariableDistinctStatisticsDBJob.cpp
 #        src/job/DBOVariableMinMaxDBJob.cpp
 #        src/job/DBOCountDBJob.cpp
 #        src/job/DBOReadDBJob.cpp
 #        src/job/DBOInfoDBJob.cpp
-        src/job/DBJob.cpp
+#        src/job/DBJob.cpp
         src/job/Job.cpp
         src/job/JobOrderer.cpp
 #        src/job/FinalizeDBOReadJob.cpp
 #        src/job/UpdateBufferDBJob.cpp
 #        src/job/WriteBufferDBJob.cpp
 #        src/job/PostProcessDBJob.cpp
-        src/job/TransformationJob.cpp
+#        src/job/TransformationJob.cpp
 #        src/mem/MemoryManager.cpp
-        src/schema/DBSchemaWidget.cpp
-        src/schema/DBSchemaEditWidget.cpp
-        src/schema/DBTableEditWidget.cpp
-        src/schema/DBTableColumnComboBox.cpp
-        src/schema/MetaDBTableEditWidget.cpp
-        src/object/DBOVariableComboBox.cpp
-        src/object/DBOVariableSetWidget.cpp
-        src/object/DBOVariableOrderedSetWidget.cpp
-        src/object/DBOVariableSelectionWidget.cpp
-        src/object/DBObjectEditWidget.cpp
-        src/object/DBObjectWidget.cpp
-        src/object/MetaDBObjectEditWidget.cpp
-        src/object/UnitSelectionWidget.cpp
-        src/object/DBObject.cpp
-        src/object/DBObjectManager.cpp
-        src/object/DBOVariable.cpp
-        src/object/DBOVariableSet.cpp
-        src/object/DBOVariableOrderedSet.cpp
-        src/polygon/Polygon4DDI.cpp
-        src/polygon/GeographicPoint.cpp
-        src/polygon/AirspaceSector.cpp
-        src/polygon/AirspaceSectorManager.cpp
-        src/polygon/AirspaceSectorManagerWidget.cpp
-        src/polygon/AirspaceSectorTreeWidget.cpp
-        src/polygon/AirspaceSectorWidget.cpp
+#        src/schema/DBSchemaWidget.cpp
+#        src/schema/DBSchemaEditWidget.cpp
+#        src/schema/DBTableEditWidget.cpp
+#        src/schema/DBTableColumnComboBox.cpp
+#        src/schema/MetaDBTableEditWidget.cpp
+#        src/object/DBOVariableComboBox.cpp
+#        src/object/DBOVariableSetWidget.cpp
+#        src/object/DBOVariableOrderedSetWidget.cpp
+#        src/object/DBOVariableSelectionWidget.cpp
+#        src/object/DBObjectEditWidget.cpp
+#        src/object/DBObjectWidget.cpp
+#        src/object/MetaDBObjectEditWidget.cpp
+#        src/object/UnitSelectionWidget.cpp
+#        src/object/DBObject.cpp
+#        src/object/DBObjectManager.cpp
+#        src/object/DBOVariable.cpp
+#        src/object/DBOVariableSet.cpp
+#        src/object/DBOVariableOrderedSet.cpp
+#        src/polygon/Polygon4DDI.cpp
+#        src/polygon/GeographicPoint.cpp
+#        src/polygon/AirspaceSector.cpp
+#        src/polygon/AirspaceSectorManager.cpp
+#        src/polygon/AirspaceSectorManagerWidget.cpp
+#        src/polygon/AirspaceSectorTreeWidget.cpp
+#        src/polygon/AirspaceSectorWidget.cpp
 #        src/polygon/acgxml/ACGXMLParser.cpp
 #        src/polygon/acgxml/Abd.cpp
 #        src/polygon/acgxml/Ase.cpp
-        src/polygon/shapefile/ShapeFileParser.cpp
-        src/projection/ProjectionManager.cpp
-        src/projection/ProjectionManagerWidget.cpp
+#        src/polygon/shapefile/ShapeFileParser.cpp
+#        src/projection/ProjectionManager.cpp
+#        src/projection/ProjectionManagerWidget.cpp
         src/property/Property.cpp
 #        src/property/PropertyContainer.cpp
-        src/result/BufferSet.cpp
+#        src/result/BufferSet.cpp
         src/result/DBResult.cpp
-        src/schema/DBTable.cpp
-        src/schema/DBTableColumn.cpp
-        src/schema/DBSchema.cpp
-        src/schema/DBSchemaManager.cpp
-        src/schema/MetaDBTable.cpp
-        src/schema/SQLGenerator.cpp
+#        src/schema/DBTable.cpp
+#        src/schema/DBTableColumn.cpp
+#        src/schema/DBSchema.cpp
+#        src/schema/DBSchemaManager.cpp
+#        src/schema/MetaDBTable.cpp
+#        src/schema/SQLGenerator.cpp
 #        src/struct/StructureDescription.cpp
 #        src/struct/StructureReader.cpp
 #        src/struct/StructureDescriptionManager.cpp
 #        src/struct/StructureVariable.cpp
-        src/thread/Thread.cpp
-        src/thread/TimedThread.cpp
-        src/thread/WorkerThread.cpp
-        src/thread/WorkerThreadManager.cpp
-        src/computation/Workflow.cpp
-        src/computation/Computation.cpp
-        src/computation/ComputationElement.cpp
-        src/computation/ComputationPipeline.cpp
-        src/computation/ComputationPipelineQueue.cpp
-        src/computation/TransformationBase.cpp
-        src/computation/Transformation.cpp
-        src/computation/TransformationVariable.cpp
-        src/computation/TransformationFactory.cpp
+#        src/thread/Thread.cpp
+#        src/thread/TimedThread.cpp
+#        src/thread/WorkerThread.cpp
+#        src/thread/WorkerThreadManager.cpp
+#        src/computation/Workflow.cpp
+#        src/computation/Computation.cpp
+#        src/computation/ComputationElement.cpp
+#        src/computation/ComputationPipeline.cpp
+#        src/computation/ComputationPipelineQueue.cpp
+#        src/computation/TransformationBase.cpp
+#        src/computation/Transformation.cpp
+#        src/computation/TransformationVariable.cpp
+#        src/computation/TransformationFactory.cpp
 #        src/transform/CalculateHistogram.cpp
 #        src/transform/CalculateHistogram2D.cpp
 #        src/transform/CalculatePosition.cpp
 #        src/transform/CalculatePosition2D.cpp
 #        src/transform/CalculateLines.cpp
 #        src/transform/CalculateStyle.cpp
-        src/unit/Unit.cpp
-        src/unit/UnitManager.cpp
+#        src/unit/Unit.cpp
+#        src/unit/UnitManager.cpp
         src/util/Config.cpp
         src/util/Logger.cpp
 #        src/util/Data.cpp
@@ -370,11 +370,11 @@ set ( atsdb_SRCS
         )
 
 set ( atsdb_UI
-        src/gui/FilterEditDialogBase.ui
-        src/gui/ComputationEditDialogBase.ui
-        src/gui/TransformationEditDialogBase.ui
-        src/gui/TransformationVariableEditDialogBase.ui
-        src/gui/WorkflowSettingsEditDialogBase.ui
+ #       src/gui/FilterEditDialogBase.ui
+ #       src/gui/ComputationEditDialogBase.ui
+ #       src/gui/TransformationEditDialogBase.ui
+ #       src/gui/TransformationVariableEditDialogBase.ui
+ #       src/gui/WorkflowSettingsEditDialogBase.ui
         )
 
 set ( client_SRCS

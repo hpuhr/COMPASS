@@ -40,7 +40,7 @@ class Buffer;
 class DataSource;
 class DBConnectionInfo;
 class DBInterface;
-class StructureReader;
+//class StructureReader;
 class DBOVariable;
 class Job;
 //class DBOReadDBJob;
@@ -105,37 +105,37 @@ public:
 
     ///@brief Adds data to a DBO from a C struct data pointer.
     //void insert (const std::string &dbo_type, void *data);
-    void insert (Buffer *buffer, std::string table_name);
+    //void insert (Buffer *buffer, std::string table_name);
     ///@brief Updates data records for a DBObject, delete buffer after execution
-    void update (Buffer *data);
+    //void update (Buffer *data);
 
     ///@brief Clears previous result and start reading of data for all existing DBOs.
-    void startReading (BufferReceiver *receiver, DBOVariableSet read_list);
-    void startReading (BufferReceiver *receiver, const std::string &dbo_type, DBOVariableSet read_list, std::string custom_filter_clause,
-            DBOVariable *order);
+    //void startReading (BufferReceiver *receiver, DBOVariableSet read_list);
+    //void startReading (BufferReceiver *receiver, const std::string &dbo_type, DBOVariableSet read_list, std::string custom_filter_clause,
+    //        DBOVariable *order);
     ///@brief Returns flag indicating if reading of data is done.
-    bool isReadingDone ();
+    //bool isReadingDone ();
 
     ///@brief Returns container with all defined data sources, DBO type -> data sources
-    std::map <std::string, std::map<int, std::string> > &getAllDataSources () { return data_sources_; }
-    std::map <std::pair<unsigned char, unsigned char>, DataSource* > &getDataSourceInstances (const std::string &dbo_type)
-            { assert (data_sources_instances_.find(dbo_type) != data_sources_instances_.end()); return data_sources_instances_[dbo_type]; }
+//    std::map <std::string, std::map<int, std::string> > &getAllDataSources () { return data_sources_; }
+//    std::map <std::pair<unsigned char, unsigned char>, DataSource* > &getDataSourceInstances (const std::string &dbo_type)
+//            { assert (data_sources_instances_.find(dbo_type) != data_sources_instances_.end()); return data_sources_instances_[dbo_type]; }
 
     ///@brief Returns flag if data sources are defined for DBO type.
-    bool hasDataSources (const std::string &dbo_type);
+    //bool hasDataSources (const std::string &dbo_type);
     ///@brief Returns container with all defined data source for DBO type.
-    const std::map<int, std::string> &getDataSources (const std::string &dbo_type);
+    //const std::map<int, std::string> &getDataSources (const std::string &dbo_type);
     ///@brief Returns data source name for a DBO type and data source number.
-    std::string getNameOfSensor (const std::string &dbo_type, unsigned int num);
+    //std::string getNameOfSensor (const std::string &dbo_type, unsigned int num);
     /// @brief Return if a DBObject has information about its active data sources
-    bool hasActiveDataSourcesInfo (const std::string &dbo_type);
+    //bool hasActiveDataSourcesInfo (const std::string &dbo_type);
     /// @brief Creates information about a DBObject's active data sources
-    void buildActiveDataSourcesInfo (const std::string &dbo_type);
+    //void buildActiveDataSourcesInfo (const std::string &dbo_type);
 
     ///@brief Returns flag indicating if data exists for DBO type.
-    bool contains (const std::string &dbo_type);
+    //bool contains (const std::string &dbo_type);
     ///@brief Returns number of elements existing for DBO type.
-    unsigned int count (const std::string &dbo_type);
+    //unsigned int count (const std::string &dbo_type);
     ///@brief Returns flag indicating if error state was set.
     //bool error();
 
@@ -146,77 +146,77 @@ public:
     //std::string getMaxAsString (DBOVariable *var);
 
     ///@brief Returns buffer with data from a DBO type, from a specific id and variables.
-    void getInfo (JobOrderer *orderer, boost::function<void (Job*)> done_function,
-            boost::function<void (Job*)> obsolete_function, const std::string &dbo_type, unsigned int id, DBOVariableSet read_list);
-    ///@brief Returns buffer with data from a DBO type, from specific ids and other parameters.
-    void getInfo (JobOrderer *orderer, boost::function<void (Job*)> done_function,
-            boost::function<void (Job*)> obsolete_function, const std::string &dbo_type,
-            std::vector<unsigned int> ids, DBOVariableSet read_list, bool use_filters, std::string order_by_variable,
-            bool ascending, unsigned int limit_min=0, unsigned int limit_max=0, bool finalize=true);
+//    void getInfo (JobOrderer *orderer, boost::function<void (Job*)> done_function,
+//            boost::function<void (Job*)> obsolete_function, const std::string &dbo_type, unsigned int id, DBOVariableSet read_list);
+//    ///@brief Returns buffer with data from a DBO type, from specific ids and other parameters.
+//    void getInfo (JobOrderer *orderer, boost::function<void (Job*)> done_function,
+//            boost::function<void (Job*)> obsolete_function, const std::string &dbo_type,
+//            std::vector<unsigned int> ids, DBOVariableSet read_list, bool use_filters, std::string order_by_variable,
+//            bool ascending, unsigned int limit_min=0, unsigned int limit_max=0, bool finalize=true);
 
-    void getCount (JobOrderer *orderer, boost::function<void (Job*)> done_function,
-            boost::function<void (Job*)> obsolete_function, const std::string &dbo_type, unsigned int sensor_number);
+//    void getCount (JobOrderer *orderer, boost::function<void (Job*)> done_function,
+//            boost::function<void (Job*)> obsolete_function, const std::string &dbo_type, unsigned int sensor_number);
 
-    void getDistinctStatistics (JobOrderer *orderer, boost::function<void (Job*)> done_function,
-            boost::function<void (Job*)> obsolete_function, const std::string &dbo_type, DBOVariable *variable,
-            unsigned int sensor_number);
+//    void getDistinctStatistics (JobOrderer *orderer, boost::function<void (Job*)> done_function,
+//            boost::function<void (Job*)> obsolete_function, const std::string &dbo_type, DBOVariable *variable,
+//            unsigned int sensor_number);
 
-    ///@brief Returns a Buffer with all table names in the DB. May throw exception.
-    Buffer *getTableList();
-    ///@brief Returns a Buffer with all column names for a table in the DB. May throw exception.
-    Buffer *getColumnList(std::string table);
+//    ///@brief Returns a Buffer with all table names in the DB. May throw exception.
+//    Buffer *getTableList();
+//    ///@brief Returns a Buffer with all column names for a table in the DB. May throw exception.
+//    Buffer *getColumnList(std::string table);
 
 //    ///@brief Starts the post-processing.
-    void postProcess (JobOrderer *orderer, boost::function<void(Job*)> done, boost::function<void(Job*)> obsolete);
+    //void postProcess (JobOrderer *orderer, boost::function<void(Job*)> done, boost::function<void(Job*)> obsolete);
 
     ///@brief Sets if data gets exported
-    void setExportActive (bool active);
+    //void setExportActive (bool active);
     ///@brief Returns if data gets exported
-    bool getExportActive ();
+    //bool getExportActive ();
 
     /// @brief Callback function for post-processing job done
-    void postProcessingDone( Job *job );
-    void activeDataSourcesDone( Job *job );
-    void minMaxDone( Job *job );
-    /// @brief Callback function for main reading job done
-    void readDBODone( Job *job );
-    /// @brief Callback function for main reading job done
-    void readDBOIntermediate( Job *job, Buffer *buffer );
-    /// @brief Callback function for finalizing of main reading job done
-    void finalizeReadDBODone( Job *job );
+//    void postProcessingDone( Job *job );
+//    void activeDataSourcesDone( Job *job );
+//    void minMaxDone( Job *job );
+//    /// @brief Callback function for main reading job done
+//    void readDBODone( Job *job );
+//    /// @brief Callback function for main reading job done
+//    void readDBOIntermediate( Job *job, Buffer *buffer );
+//    /// @brief Callback function for finalizing of main reading job done
+//    void finalizeReadDBODone( Job *job );
 
-    /// @brief Callback function for update job done
-    void updateDBODone ( Job *job );
-    void updateDBOAborted ( Job *job );
+//    /// @brief Callback function for update job done
+//    void updateDBODone ( Job *job );
+//    void updateDBOAborted ( Job *job );
 
-    void abortFinalizeReadDBODone( Job *job );
-    /// @brief Callback function for aborted jobs
-    void jobAborted( Job *job );
+//    void abortFinalizeReadDBODone( Job *job );
+//    /// @brief Callback function for aborted jobs
+//    void jobAborted( Job *job );
 
-    void deleteAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string filter);
-    void updateAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string new_value, std::string filter);
-    void getMinMaxOfVariable (DBOVariable *variable, std::string filter_condition, std::string &min, std::string &max);
-    //void getDistinctValues (DBOVariable *variable, std::string filter_condition, std::vector<std::string> &values);
+//    void deleteAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string filter);
+//    void updateAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string new_value, std::string filter);
+//    void getMinMaxOfVariable (DBOVariable *variable, std::string filter_condition, std::string &min, std::string &max);
+//    //void getDistinctValues (DBOVariable *variable, std::string filter_condition, std::vector<std::string> &values);
 
-    // Parameters in decimal, return buffer with track_num, min(tod), max(tod)
-    Buffer *getTrackMatches (bool has_mode_a, unsigned int mode_a, bool has_ta, unsigned int ta, bool has_ti, std::string ti,
-            bool has_tod, double tod_min, double tod_max);
+//    // Parameters in decimal, return buffer with track_num, min(tod), max(tod)
+//    Buffer *getTrackMatches (bool has_mode_a, unsigned int mode_a, bool has_ta, unsigned int ta, bool has_ti, std::string ti,
+//            bool has_tod, double tod_min, double tod_max);
 
-    const std::vector<std::string> &getDatabaseNames ();
+//    const std::vector<std::string> &getDatabaseNames ();
 
 protected:
     /// Flag indicating if database was opened.
     bool db_opened_;
     /// Flag indicating if data gets exported
-    bool export_active_;
+    //bool export_active_;
 
     /// DB interface, encapsulating all database functionality.
     DBInterface *db_interface_;
     /// Structure reader, can read data from defined C structs.
     //StructureReader *struct_reader_;
     /// Map containg all existing data sources (DBO type -> data source number, data source name).
-    std::map <std::string, std::map<int, std::string> > data_sources_;
-    std::map <std::string, std::map <std::pair<unsigned char, unsigned char>, DataSource* > > data_sources_instances_;
+//    std::map <std::string, std::map<int, std::string> > data_sources_;
+//    std::map <std::string, std::map <std::pair<unsigned char, unsigned char>, DataSource* > > data_sources_instances_;
 
     /// Container with all current read jobs (one per loaded DBObject)
     //std::vector <DBOReadDBJob*> read_jobs_;
@@ -225,25 +225,25 @@ protected:
 //    boost::mutex finalize_jobs_mutex_;
 //    std::map <FinalizeDBOReadJob*, BufferReceiver*> dbo_finalize_jobs_;
 
-    std::vector <std::string> databases_;
+    //std::vector <std::string> databases_;
 
     ///@brief Constructor.
     ATSDB();
 
     ///@brief Quits all reading processes.
-    void quitReading ();
+    //void quitReading ();
 
-    void buildDatabases ();
+    //void buildDatabases ();
 
     ///@brief Generates minimum and maximum information from previous post-processing.
-    void loadMinMaxValues ();
+    //void loadMinMaxValues ();
     ///@brief Generates data sources information from previous post-processing.
-    void buildDataSources();
+    //void buildDataSources();
     ///@brief Generates active data sources information from previous post-processing.
-    void loadActiveDataSources ();
+    //void loadActiveDataSources ();
 
-    void testUpdate ();
-    void setJobsObsoleteForBufferReceiver (BufferReceiver *receiver);
+//    void testUpdate ();
+//    void setJobsObsoleteForBufferReceiver (BufferReceiver *receiver);
 
 public:
     ///@brief Instance access function for Singleton.
@@ -257,7 +257,7 @@ public:
 
     ///@brief Returns DBConnectionInfo pointer used in init.
     DBConnectionInfo *getDBInfo ();
-    unsigned int getNumJobsForBufferReceiver (BufferReceiver *receiver);
+    //unsigned int getNumJobsForBufferReceiver (BufferReceiver *receiver);
 };
 
 #endif /* ATSDB_H */
