@@ -1,0 +1,14 @@
+<?1.0?>
+<Configuration>
+    <ConfigurationSection>
+        <!--------------------------------------------------------------------------------------->
+        <!------- ConfigurationSection: Configurations are to be placed here              ------->
+        <!--------------------------------------------------------------------------------------->
+        <!------- Root configuration: Client0 ------->
+        <Configuration class_id="ATSDB" instance_id="Client0">
+            <Configuration class_id="DBInterface" instance_id="DBInterface0">
+                <ParameterUnsignedInt read_chunk_size="20000"/>
+            </Configuration>
+        </Configuration>
+    </ConfigurationSection>
+</Configuration>

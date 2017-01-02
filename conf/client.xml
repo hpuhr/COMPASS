@@ -1,13 +1,9 @@
 <?1.0?>
-<MainConfiguration>
-    <!--------------------------------------------------------------------------------------->
-    <!------- FileSection: SubConfigurationFiles are to be placed here                ------->
-    <!--------------------------------------------------------------------------------------->
+<Configuration>
     <FileSection>
+        <!--------------------------------------------------------------------------------------->
+        <!------- FileSection: SubConfigurationFiles are to be placed here                ------->
+        <!--------------------------------------------------------------------------------------->
+        <SubConfigurationFile path="conf/atsdb.xml"/>
     </FileSection>
-    <!--------------------------------------------------------------------------------------->
-    <!------- ConfigurationSection: Configurations are to be placed here              ------->
-    <!--------------------------------------------------------------------------------------->
-    <ConfigurationSection>
-    </ConfigurationSection>
-</MainConfiguration>
+</Configuration>

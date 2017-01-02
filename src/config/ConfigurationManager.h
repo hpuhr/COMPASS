@@ -33,6 +33,32 @@
 
 class Configurable;
 
+class ConfigurationSaveInformation
+{
+public:
+    ConfigurationSaveInformation ();
+    ConfigurationSaveInformation (const std::string &output_filename, bool is_main_configuration);
+
+    virtual ~ConfigurationSaveInformation ();
+
+    void addConfigurationSection (const std::string &instance_id, const Configuration &configuration);
+
+    void addSubConfigurationFile (const std::string &output_filename);
+
+    void save ();
+
+protected:
+    std::string output_filename_;
+    bool is_main_configuration_;
+    tinyxml2::XMLDocument *document_;
+    tinyxml2::XMLElement *root_element_;
+    tinyxml2::XMLElement *file_element_;
+    tinyxml2::XMLElement *configuration_section_element_;
+    tinyxml2::XMLElement *configurable_section_element_;
+
+    void init ();
+};
+
 /**
  * @brief Main class for configuration loading, generating and writing.
  *
@@ -69,7 +95,7 @@ public:
     }
 
     /// @brief Returns a dummy configuration which is discarded
-    Configuration &getDummyConfiguration () { return dummy_configuration_; }
+    //Configuration &getDummyConfiguration () { return dummy_configuration_; }
 
 protected:
     bool initialized_;
@@ -78,7 +104,10 @@ protected:
     std::map <std::pair<std::string, std::string>, Configurable &> root_configurables_;
     /// Container with all root configurations (class id, instance id) -> Configuration
     std::map <std::pair<std::string, std::string>, Configuration> root_configurations_;
-    Configuration dummy_configuration_;
+    //Configuration dummy_configuration_;
+
+    /// Container with all save information, output filename -> save information
+    std::map <std::string, ConfigurationSaveInformation> save_info_;
 
     /// @brief Constructor
     ConfigurationManager();
@@ -89,6 +118,8 @@ protected:
     void parseFileSection (tinyxml2::XMLElement *configuration_section_element);
     /// @brief Parses a configuration section
     void parseConfigurationSection (tinyxml2::XMLElement *configuration_section_element, std::string filename);
+
+    void initSaveInformation (ConfigurationSaveInformation &info, bool is_main_document);
 };
 
 #endif /* CONFIGURATIONMANAGER_H_ */

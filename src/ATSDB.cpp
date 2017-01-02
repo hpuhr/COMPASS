@@ -115,7 +115,7 @@ ATSDB::~ATSDB()
     logdbg  << "ATSDB: destructor: end";
 }
 
-void ATSDB::generateSubConfigurable (std::string class_id, std::string instance_id)
+void ATSDB::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
     logdbg  << "ATSDB: generateSubConfigurable: class_id " << class_id << " instance_id " << instance_id;
     if (class_id.compare ("DBInterface") == 0)

@@ -103,19 +103,19 @@ public:
      *
      * \exception std::runtime_error if unknown class is used
      */
-    std::string getParameterType ()
+    std::string getParameterType () const
     {
         throw std::runtime_error ("ConfigurableParameter: getParameterType: unknown class type");
     }
 
     /// Returns parameter identifier
-    std::string getParameterId ()
+    const std::string &getParameterId () const
     {
         return parameter_id_;
     }
 
     /// Returns parameter value as string (using a stringstream)
-    std::string getParameterValue ()
+    std::string getParameterValue () const
     {
         throw std::runtime_error ("ConfigurableParameter: getParameterValue: unknown class type");
     }
@@ -151,19 +151,19 @@ template<> void ConfigurableParameter<float>::setConfigValue (const tinyxml2::XM
 template<> void ConfigurableParameter<double>::setConfigValue (const tinyxml2::XMLAttribute* attribute);
 template<> void ConfigurableParameter<std::string>::setConfigValue (const tinyxml2::XMLAttribute* attribute);
 
-template<> std::string ConfigurableParameter<bool>::getParameterType ();
-template<> std::string ConfigurableParameter<int>::getParameterType ();
-template<> std::string ConfigurableParameter<unsigned int>::getParameterType ();
-template<> std::string ConfigurableParameter<float>::getParameterType ();
-template<> std::string ConfigurableParameter<double>::getParameterType ();
-template<> std::string ConfigurableParameter<std::string>::getParameterType ();
+template<> std::string ConfigurableParameter<bool>::getParameterType () const;
+template<> std::string ConfigurableParameter<int>::getParameterType () const;
+template<> std::string ConfigurableParameter<unsigned int>::getParameterType () const;
+template<> std::string ConfigurableParameter<float>::getParameterType () const;
+template<> std::string ConfigurableParameter<double>::getParameterType () const;
+template<> std::string ConfigurableParameter<std::string>::getParameterType () const;
 
-template<> std::string ConfigurableParameter<bool>::getParameterValue ();
-template<> std::string ConfigurableParameter<int>::getParameterValue ();
-template<> std::string ConfigurableParameter<unsigned int>::getParameterValue ();
-template<> std::string ConfigurableParameter<float>::getParameterValue ();
-template<> std::string ConfigurableParameter<double>::getParameterValue ();
-template<> std::string ConfigurableParameter<std::string>::getParameterValue ();
+template<> std::string ConfigurableParameter<bool>::getParameterValue () const;
+template<> std::string ConfigurableParameter<int>::getParameterValue () const;
+template<> std::string ConfigurableParameter<unsigned int>::getParameterValue () const;
+template<> std::string ConfigurableParameter<float>::getParameterValue () const;
+template<> std::string ConfigurableParameter<double>::getParameterValue () const;
+template<> std::string ConfigurableParameter<std::string>::getParameterValue () const;
 
 /**
  * @brief Configuration storage and retrieval container class
@@ -231,7 +231,7 @@ public:
     /// @brief Parses an XML configuration element
     void parseXMLElement (tinyxml2::XMLElement *element);
     /// @brief Generates an XML configuration element
-    tinyxml2::XMLElement *generateXMLElement (tinyxml2::XMLDocument *root_document);
+    tinyxml2::XMLElement *generateXMLElement (tinyxml2::XMLDocument *root_document) const;
 
     /// @brief Resets all values to their default values
     void resetToDefault ();
@@ -268,7 +268,7 @@ public:
     /// @brief Sets the template flag and name
     void setTemplate (bool template_flag, const std::string &template_name_);
     /// @brief Returns the template flag
-    bool getTemplateFlag () { return template_flag_; }
+    bool getTemplateFlag () const { return template_flag_; }
     /// @brief Returns the template name
     const std::string &getTemplateName () { return template_name_; }
 
