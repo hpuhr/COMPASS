@@ -24,10 +24,11 @@
 
 #include <algorithm>
 #include "ConfigurationManager.h"
+#include "DBObject.h"
 #include "DBOVariable.h"
 #include "DBOVariableSet.h"
 #include "DBOVariableOrderedSet.h"
-#include "DBObjectManager.h"
+#include "ATSDB.h"
 
 DBOVariableOrderedSet::DBOVariableOrderedSet(std::string class_id, std::string instance_id, Configurable *parent)
  : Configurable (class_id, instance_id, parent), changed_(false)
@@ -52,7 +53,8 @@ void DBOVariableOrderedSet::generateSubConfigurable (std::string class_id, std::
   {
     DBOVariableOrderDefinition *definition = new DBOVariableOrderDefinition (class_id, instance_id, this);
 
-    if (!DBObjectManager::getInstance().existsDBOVariable(definition->getDBOType(), definition->getId()))
+    if (!ATSDB::getInstance().existsDBObject(definition->getDBOType())
+            || !ATSDB::getInstance().getDBObject(definition->getDBOType())->hasVariable(definition->getId()))
     {
       logwrn << "DBOVariableOrderedSet: generateSubConfigurable: outdated type " << definition->getDBOType() << " variable "
           << definition->getId();
@@ -114,29 +116,29 @@ void DBOVariableOrderedSet::add (DBOVariableOrderedSet &set)
   }
 }
 
-void DBOVariableOrderedSet::addOnly (DBOVariableOrderedSet &set, const std::string &dbo_type)
-{
-  logdbg  << "DBOVariableOrderedSet: addOnly: type " << dbo_type;
-  std::vector <DBOVariable*> &setset = set.getSet();
+//void DBOVariableOrderedSet::addOnly (DBOVariableOrderedSet &set, const std::string &dbo_type)
+//{
+//  logdbg  << "DBOVariableOrderedSet: addOnly: type " << dbo_type;
+//  std::vector <DBOVariable*> &setset = set.getSet();
 
-  //loginf  << "DBOVariableOrderedSet: addOnly: getset";
-  std::vector <DBOVariable*>::iterator it;
+//  //loginf  << "DBOVariableOrderedSet: addOnly: getset";
+//  std::vector <DBOVariable*>::iterator it;
 
-  //loginf  << "DBOVariableOrderedSet: addOnly: iterating";
-  for (it=setset.begin(); it != setset.end(); it++)
-  {
-    if (find (set_.begin(), set_.end(), *it) == set_.end())
-    {
-      //loginf  << "DBOVariableOrderedSet: addOnly: new var";
-      if ((*it)->existsIn(dbo_type))
-      {
-        logdbg  << "DBOVariableOrderedSet: addOnly: pushback";
-        add ((*it)->getFor(dbo_type));
-      }
-    }
-  }
-  //loginf  << "DBOVariableOrderedSet: addOnly: done";
-}
+//  //loginf  << "DBOVariableOrderedSet: addOnly: iterating";
+//  for (it=setset.begin(); it != setset.end(); it++)
+//  {
+//    if (find (set_.begin(), set_.end(), *it) == set_.end())
+//    {
+//      //loginf  << "DBOVariableOrderedSet: addOnly: new var";
+//      if ((*it)->existsIn(dbo_type))
+//      {
+//        logdbg  << "DBOVariableOrderedSet: addOnly: pushback";
+//        add ((*it)->getFor(dbo_type));
+//      }
+//    }
+//  }
+//  //loginf  << "DBOVariableOrderedSet: addOnly: done";
+//}
 
 void DBOVariableOrderedSet::removeVariableAt (unsigned int index)
 {
@@ -222,24 +224,24 @@ void DBOVariableOrderedSet::moveVariableDown (unsigned int index)
 }
 
 
-DBOVariableSet *DBOVariableOrderedSet::getFor (const std::string &dbo_type)
-{
-  logdbg  << "DBOVariableOrderedSet: getFor: type " << dbo_type;
+//DBOVariableSet *DBOVariableOrderedSet::getFor (const std::string &dbo_type)
+//{
+//  logdbg  << "DBOVariableOrderedSet: getFor: type " << dbo_type;
 
-  DBOVariableSet *type_set = new DBOVariableSet ();
-  std::vector <DBOVariable*>::iterator it;
+//  DBOVariableSet *type_set = new DBOVariableSet ();
+//  std::vector <DBOVariable*>::iterator it;
 
-  for (it=set_.begin(); it != set_.end(); it++)
-  {
-    if ((*it)->existsIn(dbo_type))
-    {
-      logdbg  << "DBOVariableOrderedSet: getFor: add";
-      type_set->add ((*it)->getFor(dbo_type));
-    }
-  }
+//  for (it=set_.begin(); it != set_.end(); it++)
+//  {
+//    if ((*it)->existsIn(dbo_type))
+//    {
+//      logdbg  << "DBOVariableOrderedSet: getFor: add";
+//      type_set->add ((*it)->getFor(dbo_type));
+//    }
+//  }
 
-  return type_set;
-}
+//  return type_set;
+//}
 
 DBOVariableSet DBOVariableOrderedSet::getUnorderedSet ()
 {
@@ -279,23 +281,23 @@ bool DBOVariableOrderedSet::hasVariable (DBOVariable *variable)
   return find (set_.begin(), set_.end(), variable) != set_.end();
 }
 
-PropertyList DBOVariableOrderedSet::getPropertyList (const std::string &dbo_type)
-{
-  std::vector <DBOVariable*>::iterator it;
-  PropertyList list;
+//PropertyList DBOVariableOrderedSet::getPropertyList (const std::string &dbo_type)
+//{
+//  std::vector <DBOVariable*>::iterator it;
+//  PropertyList list;
 
-  for (it=set_.begin(); it != set_.end(); it++)
-  {
-    if ((*it)->existsIn(dbo_type))
-    {
-      logdbg  << "DBOVariableOrderedSet: getPropertyList: getfor";
-      DBOVariable *var = (*it)->getFor(dbo_type);
-      list.addProperty (var->getId(), var->getDataType());
-    }
-  }
+//  for (it=set_.begin(); it != set_.end(); it++)
+//  {
+//    if ((*it)->existsIn(dbo_type))
+//    {
+//      logdbg  << "DBOVariableOrderedSet: getPropertyList: getfor";
+//      DBOVariable *var = (*it)->getFor(dbo_type);
+//      list.addProperty (var->getId(), var->getDataType());
+//    }
+//  }
 
-  return list;
-}
+//  return list;
+//}
 
 void DBOVariableOrderedSet::updateDBOVariableSet ()
 {
@@ -306,8 +308,16 @@ void DBOVariableOrderedSet::updateDBOVariableSet ()
     const std::string &type = it->second->getDBOType();
     std::string name = it->second->getId();
 
-    assert (DBObjectManager::getInstance().existsDBOVariable (type, name));
-    DBOVariable *variable = DBObjectManager::getInstance().getDBOVariable (type, name);
+    if (!ATSDB::getInstance().existsDBObject(type)
+            || !ATSDB::getInstance().getDBObject(type)->hasVariable(name))
+    {
+      logwrn << "DBOVariableOrderedSet: updateDBOVariableSet: outdated skipping type " << type << " variable "
+          << name;
+      continue;
+    }
+
+    //assert (DBObjectManager::getInstance().existsDBOVariable (type, name));
+    DBOVariable *variable = ATSDB::getInstance().getDBObject(type)->getVariable(name);
     set_.push_back(variable);
   }
   assert (variable_definitions_.size() == set_.size());

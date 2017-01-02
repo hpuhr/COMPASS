@@ -40,6 +40,8 @@ class Buffer;
 class DataSource;
 class DBConnectionInfo;
 class DBInterface;
+class DBObject;
+class DBObjectManager;
 //class StructureReader;
 class DBOVariable;
 class Job;
@@ -91,11 +93,9 @@ class BufferReceiver;
  * \todo Maybe extend some classes to observer pattern
  * \todo Removed writing of new databases. Re-integrated if necessary
  */
-class ATSDB : public Configurable
+class ATSDB : public Configurable, public Singleton
 {
 public:
-    ///@brief Constructor.
-    ATSDB(const std::string instance_id);
     ///@brief Destructor.
     virtual ~ATSDB();
 
@@ -106,6 +106,11 @@ public:
     void shutdown ();
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
+
+    /// @brief Returns if an object of type exists
+    bool existsDBObject (const std::string &dbo_type);
+    /// @brief Returns the object of type, if existing
+    DBObject *getDBObject (const std::string &dbo_type);
 
     ///@brief Adds data to a DBO from a C struct data pointer.
     //void insert (const std::string &dbo_type, void *data);
@@ -216,6 +221,7 @@ protected:
 
     /// DB interface, encapsulating all database functionality.
     DBInterface *db_interface_;
+    DBObjectManager *dbo_manager_;
     /// Structure reader, can read data from defined C structs.
     //StructureReader *struct_reader_;
     /// Map containg all existing data sources (DBO type -> data source number, data source name).
@@ -248,13 +254,16 @@ protected:
 //    void testUpdate ();
 //    void setJobsObsoleteForBufferReceiver (BufferReceiver *receiver);
 
+    ///@brief Constructor.
+    ATSDB();
+
 public:
     ///@brief Instance access function for Singleton.
-//    static ATSDB& getInstance()
-//    {
-//        static ATSDB instance;
-//        return instance;
-//    }
+    static ATSDB& getInstance()
+    {
+        static ATSDB instance;
+        return instance;
+    }
     ///@brief Returns flag indicating if DB was opened.
     bool getDBOpened () { return db_opened_; };
 

@@ -33,8 +33,8 @@
 //#include "DataSource.h"
 //#include "DBOVariable.h"
 #include "DBConnectionInfo.h"
-//#include "DBObject.h"
-//#include "DBObjectManager.h"
+#include "DBObject.h"
+#include "DBObjectManager.h"
 #include "DBInterface.h"
 #include "Global.h"
 #include "Logger.h"
@@ -58,8 +58,8 @@ using namespace std;
 /**
  * Locks state_mutex_, sets init state, creates members, starts the thread using go.
  */
-ATSDB::ATSDB(const std::string instance_id)
- : Configurable ("ATSDB", instance_id, 0, "conf/atsdb.xml"), db_interface_(nullptr)
+ATSDB::ATSDB()
+ : Configurable ("ATSDB", "ATSDB0", 0, "conf/atsdb.xml"), db_interface_(nullptr), dbo_manager_(nullptr)
 //: export_active_(false), dbo_reads_active_(0)
 {
     db_opened_=false;
@@ -93,6 +93,12 @@ ATSDB::~ATSDB()
         db_interface_ = nullptr;
     }
 
+    if (dbo_manager_ != nullptr)
+    {
+        delete dbo_manager_;
+        dbo_manager_ = nullptr;
+    }
+
 //    if (dbo_read_jobs_.size() > 0)
 //        logerr << "ATSDB: destructor: unfinished dbo read jobs " << dbo_read_jobs_.size();
 
@@ -124,6 +130,12 @@ void ATSDB::generateSubConfigurable (const std::string &class_id, const std::str
         db_interface_ = new DBInterface (class_id, instance_id, this);
         assert (db_interface_ != nullptr);
     }
+    else if (class_id.compare ("DBObjectManager") == 0)
+    {
+        assert (dbo_manager_ == nullptr);
+        dbo_manager_ = new DBObjectManager (class_id, instance_id, this);
+        assert (dbo_manager_ != nullptr);
+    }
     else
         throw std::runtime_error ("ATSDB: generateSubConfigurable: unknown class_id "+class_id );
 }
@@ -135,6 +147,12 @@ void ATSDB::checkSubConfigurables ()
         addNewSubConfiguration ("DBInterface", "DBInterface0");
         generateSubConfigurable ("DBInterface", "DBInterface0");
         assert (db_interface_ != nullptr);
+    }
+    if (dbo_manager_ == nullptr)
+    {
+        addNewSubConfiguration ("DBObjectManager", "DBObjectManager0");
+        generateSubConfigurable ("DBObjectManager", "DBObjectManager0");
+        assert (dbo_manager_ != nullptr);
     }
 }
 
@@ -190,6 +208,18 @@ void ATSDB::open (std::string database_name)
     //testUpdate();
 
     logdbg  << "ATSDB: open: end";
+}
+
+/// @brief Returns if an object of type exists
+bool ATSDB::existsDBObject (const std::string &dbo_type)
+{
+    return dbo_manager_->existsDBObject(dbo_type);
+}
+
+/// @brief Returns the object of type, if existing
+DBObject *ATSDB::getDBObject (const std::string &dbo_type)
+{
+    return dbo_manager_->getDBObject(dbo_type);
 }
 
 /**

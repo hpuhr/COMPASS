@@ -39,51 +39,43 @@ class DBOVariableSet;
  *
  * Singleton which creates and holds all DBObjects defined in its configuration.
  */
-class DBObjectManager : public Singleton, public Configurable
+class DBObjectManager : public Configurable
 {
 public:
-  /// @brief Returns if an object of type exists
-  bool existsDBObject (const std::string &dbo_type);
-  /// @brief Returns the object of type, if existing
-  DBObject *getDBObject (const std::string &dbo_type);
+    /// @brief Constructor
+    DBObjectManager(const std::string &class_id, const std::string &instance_id, Configurable *parent);
 
-  /// @brief Returns defined DBOVariable, if existing
-  DBOVariable *getDBOVariable (const std::string &dbo_type, std::string id);
-  /// @brief Returns if defined DBOVariable exists
-  bool existsDBOVariable (const std::string &dbo_type, std::string id);
-  /// @brief Returns container with all DBOVariables
-  std::map <std::string, DBOVariable*> &getDBOVariables (const std::string &dbo_type);
+    /// @brief Returns if an object of type exists
+    bool existsDBObject (const std::string &dbo_type);
+    /// @brief Returns the object of type, if existing
+    DBObject *getDBObject (const std::string &dbo_type);
 
-  virtual void generateSubConfigurable (std::string class_id, std::string instance_id);
+    /// @brief Returns defined DBOVariable, if existing
+    DBOVariable *getDBOVariable (const std::string &dbo_type, std::string id);
+    /// @brief Returns if defined DBOVariable exists
+    bool existsDBOVariable (const std::string &dbo_type, std::string id);
+    /// @brief Returns container with all DBOVariables
+    std::map <std::string, DBOVariable*> &getDBOVariables (const std::string &dbo_type);
 
-  /// @brief Returns container with all DBObjects
-  const std::map <std::string, DBObject*>& getDBObjects () { return objects_; }
-  /// @brief Returns of any DBObjects exist
-  bool hasObjects () { return objects_.size() > 0; }
+    virtual void generateSubConfigurable (std::string class_id, std::string instance_id);
 
-  /// @brief Destructor
-  virtual ~DBObjectManager();
+    /// @brief Returns container with all DBObjects
+    const std::map <std::string, DBObject*>& getDBObjects () { return objects_; }
+    /// @brief Returns of any DBObjects exist
+    bool hasObjects () { return objects_.size() > 0; }
+
+    /// @brief Destructor
+    virtual ~DBObjectManager();
 
 protected:
-  /// Container with all DBOs (DBO type -> DBO pointer)
-  std::map <std::string, DBObject*> objects_;
-  bool registered_parent_variables_;
+    /// Container with all DBOs (DBO type -> DBO pointer)
+    std::map <std::string, DBObject*> objects_;
+    //bool registered_parent_variables_;
 
-  /// @brief Constructor
-  DBObjectManager();
+    virtual void checkSubConfigurables ();
 
-  virtual void checkSubConfigurables ();
-
-  /// @brief Small hack for minimum/maximum update. Refer to DBObject::registerParentVariables() for details.
-  void registerParentVariablesIfRequired ();
-
-public:
-  /// @brief Returns singleton instance
-  static DBObjectManager& getInstance()
-  {
-    static DBObjectManager instance;
-    return instance;
-  }
+    /// @brief Small hack for minimum/maximum update. Refer to DBObject::registerParentVariables() for details.
+    //void registerParentVariablesIfRequired ();
 };
 
 #endif /* DBOBJECTMANAGER_H_ */

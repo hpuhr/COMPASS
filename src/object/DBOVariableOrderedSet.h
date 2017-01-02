@@ -81,7 +81,7 @@ public:
   /// @brief Adds a variable set
   void add (DBOVariableOrderedSet &set);
   /// @brief Adds a variable set for a given DBO type (DBOVariable::getFor)
-  void addOnly (DBOVariableOrderedSet &set, const std::string &dbo_type);
+  //void addOnly (DBOVariableOrderedSet &set, const std::string &dbo_type);
   /// @brief Removes a variable at a given index
   void removeVariableAt (unsigned int index);
 
@@ -96,7 +96,7 @@ public:
   bool hasVariable (const std::string &dbo_type, std::string name);
 
   /// @brief Returns a copied new variable set, with all variables for a given DBO type
-  DBOVariableSet *getFor (const std::string &dbo_type);
+  //DBOVariableSet *getFor (const std::string &dbo_type);
   DBOVariableSet getUnorderedSet ();
 
   /// @brief Returns container with all variables
@@ -105,7 +105,7 @@ public:
   DBOVariable *getVariable (unsigned int index);
 
   /// @brief Returns set as properties for given DBO type
-  PropertyList getPropertyList (const std::string &dbo_type);
+  //PropertyList getPropertyList (const std::string &dbo_type);
 
   /// @brief Prints information for debugging
   void print ();

@@ -125,21 +125,21 @@ public:
   /// @brief Desctructor
   virtual ~DBOVariable();
 
-  /// @brief Return if variable exist in DBO of type
-  bool existsIn (const std::string &dbo_type);
-  /// @brief Returns variable existing in DBO of type
-  DBOVariable *getFor (const std::string &dbo_type);
-  /// @brief Returns first available variable
-  DBOVariable *getFirst ();
-  /// @brief Return variable identifier in DBO of type
-  std::string getNameFor (const std::string &dbo_type);
-  /// @brief Returns flag indicating if variable is meta variable
-  bool isMetaVariable ();
+//  /// @brief Return if variable exist in DBO of type
+//  bool existsIn (const std::string &dbo_type);
+//  /// @brief Returns variable existing in DBO of type
+//  DBOVariable *getFor (const std::string &dbo_type);
+//  /// @brief Returns first available variable
+//  DBOVariable *getFirst ();
+//  /// @brief Return variable identifier in DBO of type
+//  std::string getNameFor (const std::string &dbo_type);
+//  /// @brief Returns flag indicating if variable is meta variable
+//  bool isMetaVariable ();
 
-  /// @brief Returns container with sub variable names, dbo type -> sub variable name
-  const std::map <std::string, std::string> &getSubVariables () { return sub_variables_; }
-  /// @brief Sets sub-variable name for DBO of type
-  void setSubVariable (const std::string &type, std::string name);
+//  /// @brief Returns container with sub variable names, dbo type -> sub variable name
+//  const std::map <std::string, std::string> &getSubVariables () { return sub_variables_; }
+//  /// @brief Sets sub-variable name for DBO of type
+//  void setSubVariable (const std::string &type, std::string name);
 
   /// @brief Comparison operator
   bool operator==(const DBOVariable &var);
@@ -220,32 +220,32 @@ public:
   ///void removeMinMaxObserver (DBOVariableMinMaxObserver *observer);
 
   /// @brief Registers meta-variables as parents of sub-variables
-  void registerAsParent ();
+  //void registerAsParent ();
   /// @brief Unregisters meta-variables as parents of sub-variables
-  void unregisterAsParent ();
+  //void unregisterAsParent ();
   /// @brief Checks if min/max info is present for meta-variables
   //void subVariableHasMinMaxInfo ();
 
 protected:
-  /// Minimum as string
-  std::string min_;
-  /// Maximum as string
-  std::string max_;
+//  /// Minimum as string
+//  std::string min_;
+//  /// Maximum as string
+//  std::string max_;
 
   /// Container with all minimum/maximum information observers
   std::vector <DBOVariableMinMaxObserver*> min_max_observers_;
   /// Meta-variables with container this variable
-  std::vector <DBOVariable*> parent_variables_;
+  //std::vector <DBOVariable*> parent_variables_;
 
   /// Unit dimension such as time
   std::string unit_dimension_;
   /// Unit unit such as seconds
   std::string unit_unit_;
 
-  /// Container of sub-variable definitions, for meta variables
-  std::vector<DBOVariableDefinition *> sub_variable_definitions_;
-  /// Container for sub variables (DBO type -> variable identifier), for meta variables
-  std::map <std::string, std::string> sub_variables_;
+//  /// Container of sub-variable definitions, for meta variables
+//  std::vector<DBOVariableDefinition *> sub_variable_definitions_;
+//  /// Container for sub variables (DBO type -> variable identifier), for meta variables
+//  std::map <std::string, std::string> sub_variables_;
 
   /// Container with schema-variable definitions
   std::vector <DBOSchemaVariableDefinition *> schema_variables_definitions_;
@@ -257,9 +257,9 @@ protected:
 
   virtual void checkSubConfigurables ();
   /// @brief Registers a parent variable
-  void registerParentVariable (DBOVariable *parent);
-  /// @brief Unregisters a parent variable
-  void unregisterParentVariable (DBOVariable *parent);
+//  void registerParentVariable (DBOVariable *parent);
+//  /// @brief Unregisters a parent variable
+//  void unregisterParentVariable (DBOVariable *parent);
   /// @brief Notifies minimum/maximum information observers
   void notifyMinMaxObservers ();
 };

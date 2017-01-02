@@ -34,8 +34,8 @@
 /**
  * Creates sub-configurables.
  */
-DBObjectManager::DBObjectManager()
-: Configurable ("DBObjectManager", "DBObjectManager0", 0, "conf/config_dbo.xml"), registered_parent_variables_ (false)
+DBObjectManager::DBObjectManager(const std::string &class_id, const std::string &instance_id, Configurable *parent)
+: Configurable (class_id, instance_id, parent, "conf/config_dbo.xml") //, registered_parent_variables_ (false)
 {
     logdbg  << "DBObjectManager: constructor: creating subconfigurables";
 
@@ -47,17 +47,17 @@ DBObjectManager::DBObjectManager()
  */
 DBObjectManager::~DBObjectManager()
 {
-    if (registered_parent_variables_)
-    {
-        //loginf << "DBObjectManager: registerParentVariablesIfRequired: registering";
-        std::map <std::string, DBObject*>::iterator it;
+//    if (registered_parent_variables_)
+//    {
+//        //loginf << "DBObjectManager: registerParentVariablesIfRequired: registering";
+//        std::map <std::string, DBObject*>::iterator it;
 
-        for (it = objects_.begin(); it != objects_.end(); it++)
-            if (it->second->isMeta())
-                it->second->unregisterParentVariables();
+//        for (it = objects_.begin(); it != objects_.end(); it++)
+//            if (it->second->isMeta())
+//                it->second->unregisterParentVariables();
 
-        registered_parent_variables_=false;
-    }
+//        registered_parent_variables_=false;
+//    }
 
     std::map <std::string, DBObject*>::iterator it;
 
@@ -93,7 +93,7 @@ void DBObjectManager::checkSubConfigurables ()
 
 bool DBObjectManager::existsDBObject (const std::string &dbo_type)
 {
-    registerParentVariablesIfRequired();
+    //registerParentVariablesIfRequired();
 
     return (objects_.find(dbo_type) != objects_.end());
 }
@@ -102,7 +102,7 @@ DBObject *DBObjectManager::getDBObject (const std::string &dbo_type)
 {
     logdbg  << "DBObjectManager: getDBObject: type " << dbo_type;
 
-    registerParentVariablesIfRequired();
+    //registerParentVariablesIfRequired();
 
     assert (objects_.find(dbo_type) != objects_.end());
     assert (objects_.at(dbo_type));
@@ -119,7 +119,7 @@ DBOVariable *DBObjectManager::getDBOVariable (const std::string &dbo_type, std::
 {
     logdbg  << "DBObjectManager: getDBOVariable: type " << dbo_type << " id " << id;
 
-    registerParentVariablesIfRequired();
+    //registerParentVariablesIfRequired();
 
     assert (existsDBObject(dbo_type));
     assert (id.size() > 0);
@@ -135,7 +135,7 @@ DBOVariable *DBObjectManager::getDBOVariable (const std::string &dbo_type, std::
 
 std::map <std::string, DBOVariable*> &DBObjectManager::getDBOVariables (const std::string &dbo_type)
 {
-    registerParentVariablesIfRequired();
+    //registerParentVariablesIfRequired();
 
     assert (existsDBObject(dbo_type));
     return getDBObject (dbo_type)->getVariables();
@@ -143,24 +143,24 @@ std::map <std::string, DBOVariable*> &DBObjectManager::getDBOVariables (const st
 
 bool DBObjectManager::existsDBOVariable (const std::string &dbo_type, std::string id)
 {
-    registerParentVariablesIfRequired();
+    //registerParentVariablesIfRequired();
 
     if (!existsDBObject(dbo_type))
         return false;
     return getDBObject (dbo_type)->hasVariable(id);
 }
 
-void DBObjectManager::registerParentVariablesIfRequired ()
-{
-    if (!registered_parent_variables_)
-    {
-        //loginf << "DBObjectManager: registerParentVariablesIfRequired: registering";
-        std::map <std::string, DBObject*>::iterator it;
+//void DBObjectManager::registerParentVariablesIfRequired ()
+//{
+//    if (!registered_parent_variables_)
+//    {
+//        //loginf << "DBObjectManager: registerParentVariablesIfRequired: registering";
+//        std::map <std::string, DBObject*>::iterator it;
 
-        for (it = objects_.begin(); it != objects_.end(); it++)
-            if (it->second->isMeta())
-                it->second->registerParentVariables();
+//        for (it = objects_.begin(); it != objects_.end(); it++)
+//            if (it->second->isMeta())
+//                it->second->registerParentVariables();
 
-        registered_parent_variables_=true;
-    }
-}
+//        registered_parent_variables_=true;
+//    }
+//}

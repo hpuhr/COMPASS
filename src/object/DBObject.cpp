@@ -46,7 +46,7 @@ DBObject::DBObject(std::string class_id, std::string instance_id, Configurable *
   registerParameter ("info" , &info_, "");
   registerParameter ("dbo_type" , &dbo_type_, "");
   registerParameter ("is_loadable" , &is_loadable_, false);
-  registerParameter ("is_meta" , &is_meta_, false);
+  //registerParameter ("is_meta" , &is_meta_, false);
 
   createSubConfigurables ();
 
@@ -292,31 +292,31 @@ void DBObject::checkVariables ()
 /**
  * Bit of a hack, explanation at DBOVariable::registerAsParent ().
  */
-void DBObject::registerParentVariables ()
-{
-    logdbg << "DBObject: registerParentVariables";
-    assert (isMeta());
-    std::map<std::string, DBOVariable*>::iterator it;
+//void DBObject::registerParentVariables ()
+//{
+//    logdbg << "DBObject: registerParentVariables";
+//    assert (isMeta());
+//    std::map<std::string, DBOVariable*>::iterator it;
 
-    for (it = variables_.begin(); it != variables_.end(); it++)
-    {
-        assert (it->second->isMetaVariable());
-        it->second->registerAsParent();
-    }
-}
+//    for (it = variables_.begin(); it != variables_.end(); it++)
+//    {
+//        assert (it->second->isMetaVariable());
+//        it->second->registerAsParent();
+//    }
+//}
 
 /**
  * Bit of a hack, explanation at DBOVariable::registerAsParent ().
  */
-void DBObject::unregisterParentVariables ()
-{
-    logdbg << "DBObject: unregisterParentVariables";
-    assert (isMeta());
-    std::map<std::string, DBOVariable*>::iterator it;
+//void DBObject::unregisterParentVariables ()
+//{
+//    logdbg << "DBObject: unregisterParentVariables";
+//    assert (isMeta());
+//    std::map<std::string, DBOVariable*>::iterator it;
 
-    for (it = variables_.begin(); it != variables_.end(); it++)
-    {
-        assert (it->second->isMetaVariable());
-        it->second->unregisterAsParent();
-    }
-}
+//    for (it = variables_.begin(); it != variables_.end(); it++)
+//    {
+//        assert (it->second->isMetaVariable());
+//        it->second->unregisterAsParent();
+//    }
+//}

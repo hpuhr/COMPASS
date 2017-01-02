@@ -181,7 +181,7 @@ public:
 
 
   /// @brief Returns if object is meta
-  bool isMeta () { return is_meta_; }
+  //bool isMeta () { return is_meta_; }
 
   /// @brief Returns if a data source is defined in the current schema
   bool hasCurrentDataSource ();
@@ -208,9 +208,9 @@ public:
   std::set<int> getActiveDataSources () { return active_data_sources_; }
 
   /// @brief In meta object, registers meta variables as parent variables
-  void registerParentVariables ();
+  //void registerParentVariables ();
   /// @brief In meta object, unregisters meta variables as parent variables
-  void unregisterParentVariables ();
+  //void unregisterParentVariables ();
 
 protected:
   /// DBO type
@@ -222,7 +222,7 @@ protected:
   /// DBO is loadable flag
   bool is_loadable_; // loadable on its own
   /// DBO is meta flag
-  bool is_meta_;
+  //bool is_meta_;
 
   /// Container with all DBOSchemaMetaTableDefinitions
   std::vector <DBOSchemaMetaTableDefinition *> meta_table_definitions_;

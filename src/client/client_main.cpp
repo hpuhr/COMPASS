@@ -139,12 +139,12 @@ int main (int argc, char **argv)
 
         ConfigurationManager::getInstance().init (config.getString("main_configuration_file"));
 
-        ATSDB atsdb ("Client0");
+        ATSDB::getInstance();
 
         if (config.getBool("save_config_on_exit"))
             ConfigurationManager::getInstance().saveConfiguration();
 
-        atsdb.shutdown();
+        ATSDB::getInstance().shutdown();
 
         loginf << "ATSDBClient: shutdown";
 

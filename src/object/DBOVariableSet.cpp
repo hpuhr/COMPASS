@@ -76,31 +76,31 @@ bool DBOVariableSet::add (DBOVariableSet &set)
   return added;
 }
 
-bool DBOVariableSet::addOnly (DBOVariableSet &set, const std::string &dbo_type)
-{
-  logdbg  << "DBOVariableSet: addOnly: type " << dbo_type;
-  std::vector <DBOVariable*> &setset = set.getSet();
+//bool DBOVariableSet::addOnly (DBOVariableSet &set, const std::string &dbo_type)
+//{
+//  logdbg  << "DBOVariableSet: addOnly: type " << dbo_type;
+//  std::vector <DBOVariable*> &setset = set.getSet();
 
-  std::vector <DBOVariable*>::iterator it;
-  bool added=false;
+//  std::vector <DBOVariable*>::iterator it;
+//  bool added=false;
 
-  for (it=setset.begin(); it != setset.end(); it++)
-  {
-    if (find (set_.begin(), set_.end(), *it) == set_.end())
-    {
-      //loginf  << "DBOVariableSet: addOnly: new var";
-      if ((*it)->existsIn(dbo_type))
-      {
-        logdbg  << "DBOVariableSet: addOnly: pushback";
-        set_.push_back ((*it)->getFor(dbo_type));
-        changed_=true;
-        added=true;
-      }
-    }
-  }
+//  for (it=setset.begin(); it != setset.end(); it++)
+//  {
+//    if (find (set_.begin(), set_.end(), *it) == set_.end())
+//    {
+//      //loginf  << "DBOVariableSet: addOnly: new var";
+//      if ((*it)->existsIn(dbo_type))
+//      {
+//        logdbg  << "DBOVariableSet: addOnly: pushback";
+//        set_.push_back ((*it)->getFor(dbo_type));
+//        changed_=true;
+//        added=true;
+//      }
+//    }
+//  }
 
-  return added;
-}
+//  return added;
+//}
 
 void DBOVariableSet::removeVariableAt (unsigned int index)
 {
@@ -111,25 +111,25 @@ void DBOVariableSet::removeVariableAt (unsigned int index)
   changed_=true;
 }
 
-DBOVariableSet *DBOVariableSet::getFor (const std::string &dbo_type)
-{
-  logdbg  << "DBOVariableSet: getFor: type " << dbo_type;
+//DBOVariableSet *DBOVariableSet::getFor (const std::string &dbo_type)
+//{
+//  logdbg  << "DBOVariableSet: getFor: type " << dbo_type;
 
-  DBOVariableSet *type_set = new DBOVariableSet ();
-  std::vector <DBOVariable*>::iterator it;
+//  DBOVariableSet *type_set = new DBOVariableSet ();
+//  std::vector <DBOVariable*>::iterator it;
 
-  for (it=set_.begin(); it != set_.end(); it++)
-  {
-    if ((*it)->existsIn(dbo_type))
-    {
-      logdbg  << "DBOVariableSet: getFor: add";
-      assert (!(*it)->getFor(dbo_type)->isMetaVariable());
-      type_set->add ((*it)->getFor(dbo_type));
-    }
-  }
+//  for (it=set_.begin(); it != set_.end(); it++)
+//  {
+//    if ((*it)->existsIn(dbo_type))
+//    {
+//      logdbg  << "DBOVariableSet: getFor: add";
+//      assert (!(*it)->getFor(dbo_type)->isMetaVariable());
+//      type_set->add ((*it)->getFor(dbo_type));
+//    }
+//  }
 
-  return type_set;
-}
+//  return type_set;
+//}
 
 
 DBOVariableSet& DBOVariableSet::operator= (const DBOVariableSet &source)
@@ -207,20 +207,20 @@ bool DBOVariableSet::hasVariable (DBOVariable *variable)
   return find (set_.begin(), set_.end(), variable) != set_.end();
 }
 
-PropertyList DBOVariableSet::getPropertyList (const std::string &dbo_type)
-{
-  std::vector <DBOVariable*>::iterator it;
-  PropertyList list;
+//PropertyList DBOVariableSet::getPropertyList (const std::string &dbo_type)
+//{
+//  std::vector <DBOVariable*>::iterator it;
+//  PropertyList list;
 
-  for (it=set_.begin(); it != set_.end(); it++)
-  {
-    if ((*it)->existsIn(dbo_type))
-    {
-      logdbg  << "DBOVariableSet: getPropertyList: getfor";
-      DBOVariable *var = (*it)->getFor(dbo_type);
-      list.addProperty (var->getId(), var->getDataType());
-    }
-  }
+//  for (it=set_.begin(); it != set_.end(); it++)
+//  {
+//    if ((*it)->existsIn(dbo_type))
+//    {
+//      logdbg  << "DBOVariableSet: getPropertyList: getfor";
+//      DBOVariable *var = (*it)->getFor(dbo_type);
+//      list.addProperty (var->getId(), var->getDataType());
+//    }
+//  }
 
-  return list;
-}
+//  return list;
+//}

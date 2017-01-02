@@ -57,7 +57,7 @@ public:
   /// @brief Adds another set of variables
   bool add (DBOVariableSet &set);
   /// @brief Adds variables for a given type from a given set of variables
-  bool addOnly (DBOVariableSet &set, const std::string &dbo_type);
+  //bool addOnly (DBOVariableSet &set, const std::string &dbo_type);
   /// @brief Removes variable at a given index
   void removeVariableAt (unsigned int index);
   /// @brief Intersects with another set of variables
@@ -68,7 +68,7 @@ public:
   bool hasVariable (DBOVariable *variable);
 
   /// @brief Returns copied set of variables for a given DBO type, has to be deleted by caller
-  DBOVariableSet *getFor (const std::string &dbo_type);
+  //DBOVariableSet *getFor (const std::string &dbo_type);
 
 
   DBOVariableSet& operator= (const DBOVariableSet &source);
@@ -80,7 +80,7 @@ public:
   DBOVariable *getVariable (unsigned int index);
 
   /// @brief Return property list for a given DBO type for variables in the set
-  PropertyList getPropertyList (const std::string &dbo_type);
+  //PropertyList getPropertyList (const std::string &dbo_type);
 
   /// @brief Prints contents, for debugging purposes
   void print ();
