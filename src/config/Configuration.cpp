@@ -42,8 +42,8 @@ using namespace tinyxml2;
  * \param configuration_filename special filename, default ""
  */
 Configuration::Configuration(const std::string &class_id, const std::string &instance_id, const std::string &configuration_filename)
-: class_id_(class_id), instance_id_(instance_id), used_(false), configuration_filename_(configuration_filename),
-  template_flag_ (false)
+    : class_id_(class_id), instance_id_(instance_id), used_(false), configuration_filename_(configuration_filename),
+      template_flag_ (false)
 {
     logdbg  << "Configuration: constructor: class " << class_id_ << " instance " << instance_id_;
     assert (class_id_.size() != 0);
@@ -78,7 +78,7 @@ Configuration& Configuration::operator= (const Configuration &source)
     parameters_string_ = source.parameters_string_;
 
     /// Container for all added sub-configurables
-   sub_configurations_ = source.sub_configurations_;
+    sub_configurations_ = source.sub_configurations_;
 
     // return the existing object
     return *this;
@@ -354,7 +354,7 @@ void Configuration::getParameter (const std::string &parameter_id, bool &value)
     if (parameters_bool_.at(parameter_id).pointer_ == 0)
         throw std::runtime_error ("Configuration: getParameter: bool "+parameter_id+" not in use");
 
-   value = *(parameters_bool_.at(parameter_id).pointer_);
+    value = *(parameters_bool_.at(parameter_id).pointer_);
 }
 
 void Configuration::getParameter (const std::string &parameter_id, int &value)
@@ -367,7 +367,7 @@ void Configuration::getParameter (const std::string &parameter_id, int &value)
     if (parameters_int_.at(parameter_id).pointer_ == 0)
         throw std::runtime_error ("Configuration: getParameter: int "+parameter_id+" not in use");
 
-   value = *(parameters_int_.at(parameter_id).pointer_);
+    value = *(parameters_int_.at(parameter_id).pointer_);
 }
 
 void Configuration::getParameter (const std::string &parameter_id, unsigned int &value)
@@ -380,7 +380,7 @@ void Configuration::getParameter (const std::string &parameter_id, unsigned int 
     if (parameters_uint_.at(parameter_id).pointer_ == 0)
         throw std::runtime_error ("Configuration: getParameter: uint "+parameter_id+" not in use");
 
-   value = *(parameters_uint_.at(parameter_id).pointer_);
+    value = *(parameters_uint_.at(parameter_id).pointer_);
 }
 
 void Configuration::getParameter (const std::string &parameter_id, float &value)
@@ -393,7 +393,7 @@ void Configuration::getParameter (const std::string &parameter_id, float &value)
     if (parameters_float_.at(parameter_id).pointer_ == 0)
         throw std::runtime_error ("Configuration: getParameter: float "+parameter_id+" not in use");
 
-   value = *(parameters_float_.at(parameter_id).pointer_);
+    value = *(parameters_float_.at(parameter_id).pointer_);
 }
 
 void Configuration::getParameter (const std::string &parameter_id, double &value)
@@ -406,7 +406,7 @@ void Configuration::getParameter (const std::string &parameter_id, double &value
     if (parameters_double_.at(parameter_id).pointer_ == 0)
         throw std::runtime_error ("Configuration: getParameter: double "+parameter_id+" not in use");
 
-   value = *(parameters_double_.at(parameter_id).pointer_);
+    value = *(parameters_double_.at(parameter_id).pointer_);
 }
 void Configuration::getParameter (const std::string &parameter_id, std::string &value)
 {
@@ -418,7 +418,7 @@ void Configuration::getParameter (const std::string &parameter_id, std::string &
     if (parameters_string_.at(parameter_id).pointer_ == 0)
         throw std::runtime_error ("Configuration: getParameter: double "+parameter_id+" not in use");
 
-   value = *(parameters_string_.at(parameter_id).pointer_);
+    value = *(parameters_string_.at(parameter_id).pointer_);
 }
 
 
@@ -426,15 +426,31 @@ void Configuration::parseXMLElement (XMLElement *element)
 {
     logdbg  << "Configuration " << instance_id_ << ": parseElement";
 
+    if (strcmp ("SubConfigurationFile", element->Value() ) == 0)
+    {
+        logdbg  << "Configuration " << instance_id_ << ": parseElement: found file element";
+        parseXMLFileElement(element);
+    }
+    else if (strcmp ("Configuration", element->Value() ) == 0)
+    {
+        logdbg  << "Configuration " << instance_id_ << ": parseElement: found configuration element";
+        parseXMLConfigurationElement(element);
+    }
+    else
+        throw std::runtime_error (std::string("Configuration: parseXMLElement: unknown element ")+element->Value());
+}
+
+void Configuration::parseXMLConfigurationElement (tinyxml2::XMLElement *element)
+{
     XMLElement * parameter_element;
 
     for ( parameter_element = element->FirstChildElement(); parameter_element != 0;
-            parameter_element = parameter_element->NextSiblingElement())
+          parameter_element = parameter_element->NextSiblingElement())
     {
-        logdbg  << "Configuration " << instance_id_ << ": parseElement: found element '" << parameter_element->Value() << "'";
+        logdbg  << "Configuration " << instance_id_ << ": parseXMLConfigurationElement: found element '" << parameter_element->Value() << "'";
         if (strcmp ("ParameterBool", parameter_element->Value() ) == 0)
         {
-            logdbg  << "Configuration " << instance_id_ << ": parseXMLElement: is ParameterBool";
+            logdbg  << "Configuration " << instance_id_ << ": parseXMLConfigurationElement: is ParameterBool";
             ConfigurableParameter<bool> parameter;
             parameter.parseElement(parameter_element);
 
@@ -443,7 +459,7 @@ void Configuration::parseXMLElement (XMLElement *element)
         }
         else if (strcmp ("ParameterInt", parameter_element->Value() ) == 0)
         {
-            logdbg  << "Configuration " << instance_id_ << ": parseXMLElement: is ParameterInt";
+            logdbg  << "Configuration " << instance_id_ << ": parseXMLConfigurationElement: is ParameterInt";
             ConfigurableParameter<int> parameter;
             parameter.parseElement(parameter_element);
 
@@ -452,7 +468,7 @@ void Configuration::parseXMLElement (XMLElement *element)
         }
         else if (strcmp ("ParameterUnsignedInt", parameter_element->Value() ) == 0)
         {
-            logdbg  << "Configuration " << instance_id_ << ": parseXMLElement: is ParameterUnsignedInt";
+            logdbg  << "Configuration " << instance_id_ << ": parseXMLConfigurationElement: is ParameterUnsignedInt";
             ConfigurableParameter<unsigned int> parameter;
             parameter.parseElement(parameter_element);
 
@@ -461,7 +477,7 @@ void Configuration::parseXMLElement (XMLElement *element)
         }
         else if (strcmp ("ParameterFloat", parameter_element->Value() ) == 0)
         {
-            logdbg  << "Configuration " << instance_id_ << ": parseXMLElement: is ParameterFloat";
+            logdbg  << "Configuration " << instance_id_ << ": parseXMLConfigurationElement: is ParameterFloat";
             ConfigurableParameter<float> parameter;
             parameter.parseElement(parameter_element);
 
@@ -470,7 +486,7 @@ void Configuration::parseXMLElement (XMLElement *element)
         }
         else if (strcmp ("ParameterDouble", parameter_element->Value() ) == 0)
         {
-            logdbg  << "Configuration " << instance_id_ << ": parseXMLElement: is ParameterDouble";
+            logdbg  << "Configuration " << instance_id_ << ": parseXMLConfigurationElement: is ParameterDouble";
             ConfigurableParameter<double> parameter;
             parameter.parseElement(parameter_element);
 
@@ -479,7 +495,7 @@ void Configuration::parseXMLElement (XMLElement *element)
         }
         else if (strcmp ("ParameterString", parameter_element->Value() ) == 0)
         {
-            logdbg  << "Configuration " << instance_id_ << ": parseXMLElement: is ParameterString";
+            logdbg  << "Configuration " << instance_id_ << ": parseXMLConfigurationElement: is ParameterString";
             ConfigurableParameter<std::string> parameter;
             parameter.parseElement(parameter_element);
 
@@ -488,8 +504,8 @@ void Configuration::parseXMLElement (XMLElement *element)
         }
         else if (strcmp ("Configuration", parameter_element->Value() ) == 0)
         {
-//            loginf << "Configuration: parseXMLElement: parsing configuration " << class_id_ << " instance "
-//                    << instance_id_;
+            //            loginf << "Configuration: parseXMLElement: parsing configuration " << class_id_ << " instance "
+            //                    << instance_id_;
 
             const char *class_id=0;
             const char *instance_id=0;
@@ -510,24 +526,24 @@ void Configuration::parseXMLElement (XMLElement *element)
                     template_name=attribute->Value();
                 }
                 else
-                    throw std::runtime_error ("Configuration: parseXMLElement: unknown attribute");
+                    throw std::runtime_error ("Configuration: parseXMLConfigurationElement: unknown attribute");
 
                 attribute=attribute->Next();
             }
 
-            logdbg  << "Configuration: parseXMLElement: parsing sub-configuration";
+            logdbg  << "Configuration: parseXMLConfigurationElement: parsing sub-configuration";
 
             if (!class_id || !instance_id)
-                throw std::runtime_error ("Configuration: parseElement: wrong attributes of configuration");
+                throw std::runtime_error ("Configuration: parseXMLConfigurationElement: wrong attributes of configuration");
 
-//            loginf << "Configuration: parseXMLElement: parsing configuration " << class_id_ << " instance "
-//                    << instance_id_ << " found sub-configuration class " << class_id << " instance " << instance_id
-//                    << " template " << template_flag << " template name " << template_name;
+            //            loginf << "Configuration: parseXMLElement: parsing configuration " << class_id_ << " instance "
+            //                    << instance_id_ << " found sub-configuration class " << class_id << " instance " << instance_id
+            //                    << " template " << template_flag << " template name " << template_name;
 
             if (template_flag)
             {
-                loginf << "Configuration: parseXMLElement: found template class " << class_id << " instance "
-                        << instance_id;
+                loginf << "Configuration: parseXMLConfigurationElement: found template class " << class_id << " instance "
+                       << instance_id;
                 assert (configuration_templates_.find(template_name) == configuration_templates_.end());
                 configuration_templates_.insert(std::pair <std::string, Configuration> (template_name, Configuration (class_id, instance_id)));
                 configuration_templates_.at(template_name).parseXMLElement(parameter_element);
@@ -541,21 +557,118 @@ void Configuration::parseXMLElement (XMLElement *element)
                 sub_configurations_.at(key).parseXMLElement(parameter_element);
             }
         }
+        else if (strcmp ("SubConfigurationFile", parameter_element->Value() ) == 0)
+        {
+            logdbg  << "Configuration: parseXMLConfigurationElement: is SubConfigurationFile";
+
+            std::string class_id;
+            std::string instance_id;
+            std::string path;
+
+            const XMLAttribute* attribute=parameter_element->FirstAttribute();
+            while (attribute)
+            {
+                logdbg  << "ConfigurationManager: parseXMLConfigurationElement: attribute '" << attribute->Name()
+                        << "'' value '"<< attribute->Value() << "'";
+                if (strcmp ("class_id", attribute->Name()) == 0)
+                    class_id=attribute->Value();
+                else if (strcmp ("instance_id", attribute->Name()) == 0)
+                    instance_id=attribute->Value();
+                else if (strcmp ("path", attribute->Name()) == 0)
+                    path=attribute->Value();
+                else
+                    throw std::runtime_error (std::string ("Configuration: parseXMLConfigurationElement: unknown attribute ")
+                                              +attribute->Name());
+
+                attribute=attribute->Next();
+            }
+
+            if (class_id.size() && instance_id.size() && path.size())
+            {
+
+                logdbg << "Configuration: parseXMLConfigurationElement: creating new configuration for class " << class_id <<
+                          " instance " << instance_id;
+
+                std::pair <std::string, std::string> key (class_id, instance_id);
+                assert (sub_configurations_.find(key) == sub_configurations_.end());
+                sub_configurations_.insert(std::pair <std::pair<std::string, std::string>, Configuration> (key, Configuration (class_id, instance_id)));
+                sub_configurations_.at(key).setConfigurationFilename (path);
+                sub_configurations_.at(key).parseXMLElement(parameter_element);
+            }
+            else
+                throw std::runtime_error ("error: Configuration: parseXMLConfigurationElement: configuration misses attributes");
+
+
+        }
         else
         {
-            throw std::runtime_error (std::string("Configuration: parseXMLElement: unknown section ")+parameter_element->Value());
+            throw std::runtime_error (std::string("Configuration: parseXMLConfigurationElement: unknown section ")+parameter_element->Value());
         }
     }
 
     if (template_flag_)
-        loginf << "Configuration: parseXMLElement: class " << class_id_ << " instance " << instance_id_ <<
-            " is template " << template_name_;
+        loginf << "Configuration: parseXMLConfigurationElement: class " << class_id_ << " instance " << instance_id_ <<
+                  " is template " << template_name_;
+
 }
 
-XMLElement *Configuration::generateXMLElement (tinyxml2::XMLDocument *root_document) const
+void Configuration::parseXMLFileElement (tinyxml2::XMLElement *element)
+{
+    std::string class_id;
+    std::string instance_id;
+    std::string path;
+
+    const XMLAttribute* attribute=element->FirstAttribute();
+    while (attribute)
+    {
+        logdbg  << "Configuration: parseXMLFileElement: attribute '" << attribute->Name()
+                << "'' value '"<< attribute->Value() << "'";
+        if (strcmp ("class_id", attribute->Name()) == 0)
+            class_id=attribute->Value();
+        else if (strcmp ("instance_id", attribute->Name()) == 0)
+            instance_id=attribute->Value();
+        else if (strcmp ("path", attribute->Name()) == 0)
+            path=attribute->Value();
+        else
+            throw std::runtime_error (std::string ("Configuration: parseXMLFileElement: unknown attribute ")
+                                      +attribute->Name());
+
+        attribute=attribute->Next();
+    }
+
+    if (class_id.size() && instance_id.size() && path.size())
+    {
+        XMLDocument *sub_config_file_doc = new XMLDocument ();
+
+        if (sub_config_file_doc->LoadFile(path.c_str()) == 0)
+        {
+            XMLElement *element;
+
+            for ( element = sub_config_file_doc->FirstChildElement(); element != 0;
+                  element = sub_config_file_doc->NextSiblingElement())
+            {
+                parseXMLElement (element);
+            }
+        }
+        else
+        {
+            logerr << "Configuration: parseXMLFileElement: could not load file '" << path << "'";
+            throw std::runtime_error ("Configuration: parseXMLFileElement: load error");
+        }
+    }
+    else
+        throw std::runtime_error ("error: Configuration: parseXMLFileElement: configuration misses attributes");
+
+}
+
+XMLElement *Configuration::generateXMLElement (tinyxml2::XMLDocument *parent_document) const
 {
     logdbg  << "Configuration: generateElement: in class " << instance_id_ ;
-    XMLElement *element = root_document->NewElement("Configuration");
+    assert (parent_document);
+
+    tinyxml2::XMLDocument *document = configuration_filename_.size() > 0 ? new XMLDocument () : parent_document;
+
+    XMLElement *element = document->NewElement("Configuration");
 
     element->SetAttribute("class_id", class_id_.c_str());
     element->SetAttribute("instance_id", instance_id_.c_str());
@@ -563,14 +676,14 @@ XMLElement *Configuration::generateXMLElement (tinyxml2::XMLDocument *root_docum
     if (template_flag_)
     {
         loginf << "Configuration: generateXMLElement: class " << class_id_ << " instance " << instance_id_ <<
-                " is template " << template_name_;
+                  " is template " << template_name_;
         element->SetAttribute("template", template_name_.c_str());
     }
 
     for (auto it = parameters_bool_.begin(); it != parameters_bool_.end(); it++)
     {
         logdbg  << "Configuration: generateElement: bool param " << it->first;
-        XMLElement *parameter = root_document->NewElement(it->second.getParameterType().c_str());
+        XMLElement *parameter = document->NewElement(it->second.getParameterType().c_str());
         parameter->SetAttribute(it->second.getParameterId().c_str(), it->second.getParameterValue().c_str());
         element->LinkEndChild(parameter);
     }
@@ -578,7 +691,7 @@ XMLElement *Configuration::generateXMLElement (tinyxml2::XMLDocument *root_docum
     for (auto it = parameters_int_.begin(); it != parameters_int_.end(); it++)
     {
         logdbg  << "Configuration: generateElement: int param " << it->first;
-        XMLElement *parameter = root_document->NewElement(it->second.getParameterType().c_str());
+        XMLElement *parameter = document->NewElement(it->second.getParameterType().c_str());
         parameter->SetAttribute(it->second.getParameterId().c_str(), it->second.getParameterValue().c_str());
         element->LinkEndChild(parameter);
     }
@@ -586,7 +699,7 @@ XMLElement *Configuration::generateXMLElement (tinyxml2::XMLDocument *root_docum
     for (auto it = parameters_uint_.begin(); it != parameters_uint_.end(); it++)
     {
         logdbg  << "Configuration: generateElement: uint param " << it->first;
-        XMLElement *parameter = root_document->NewElement(it->second.getParameterType().c_str());
+        XMLElement *parameter = document->NewElement(it->second.getParameterType().c_str());
         parameter->SetAttribute(it->second.getParameterId().c_str(), it->second.getParameterValue().c_str());
         element->LinkEndChild(parameter);
     }
@@ -594,7 +707,7 @@ XMLElement *Configuration::generateXMLElement (tinyxml2::XMLDocument *root_docum
     for (auto it = parameters_float_.begin(); it != parameters_float_.end(); it++)
     {
         logdbg  << "Configuration: generateElement: float param " << it->first;
-        XMLElement *parameter = root_document->NewElement(it->second.getParameterType().c_str());
+        XMLElement *parameter = document->NewElement(it->second.getParameterType().c_str());
         parameter->SetAttribute(it->second.getParameterId().c_str(), it->second.getParameterValue().c_str());
         element->LinkEndChild(parameter);
     }
@@ -602,7 +715,7 @@ XMLElement *Configuration::generateXMLElement (tinyxml2::XMLDocument *root_docum
     for (auto it = parameters_double_.begin(); it != parameters_double_.end(); it++)
     {
         logdbg  << "Configuration: generateElement: double param " << it->first;
-        XMLElement *parameter = root_document->NewElement(it->second.getParameterType().c_str());
+        XMLElement *parameter = document->NewElement(it->second.getParameterType().c_str());
         parameter->SetAttribute(it->second.getParameterId().c_str(), it->second.getParameterValue().c_str());
         element->LinkEndChild(parameter);
     }
@@ -610,7 +723,7 @@ XMLElement *Configuration::generateXMLElement (tinyxml2::XMLDocument *root_docum
     for (auto it = parameters_string_.begin(); it != parameters_string_.end(); it++)
     {
         logdbg  << "Configuration: generateElement: string param " << it->first;
-        XMLElement *parameter = root_document->NewElement(it->second.getParameterType().c_str());
+        XMLElement *parameter = document->NewElement(it->second.getParameterType().c_str());
         parameter->SetAttribute(it->second.getParameterId().c_str(), it->second.getParameterValue().c_str());
         element->LinkEndChild(parameter);
     }
@@ -619,24 +732,39 @@ XMLElement *Configuration::generateXMLElement (tinyxml2::XMLDocument *root_docum
     for (tit = configuration_templates_.begin(); tit != configuration_templates_.end(); tit++)
     {
         assert (tit->second.getTemplateFlag());
-        XMLElement *config = tit->second.generateXMLElement(root_document);
+        XMLElement *config = tit->second.generateXMLElement(document);
         element->LinkEndChild(config);
     }
 
     std::map<std::pair<std::string, std::string>, Configuration >::const_iterator cit;
     for (cit = sub_configurations_.begin(); cit != sub_configurations_.end(); cit++)
     {
-        XMLElement *config = cit->second.generateXMLElement(root_document);
+        XMLElement *config = cit->second.generateXMLElement(document);
         element->LinkEndChild(config);
     }
 
-    return element;
+    if (configuration_filename_.size() > 0)
+    {
+        logdbg  << "Configuration: generateElement: saving sub-configuration file '" << configuration_filename_ << "'";
+
+        document->LinkEndChild( element );
+        document->SaveFile(configuration_filename_.c_str());
+
+        XMLElement *sub_file_element = parent_document->NewElement( "SubConfigurationFile" );
+        sub_file_element->SetAttribute("class_id", class_id_.c_str());
+        sub_file_element->SetAttribute("instance_id", instance_id_.c_str());
+        sub_file_element->SetAttribute ("path", configuration_filename_.c_str());
+
+        return sub_file_element;
+    }
+    else
+        return element;
 }
 
 void Configuration::createSubConfigurables (Configurable *configurable)
 {
     logdbg  << "Configuration: createSubConfigurables: config instance " << instance_id_ << " configurable instance " <<
-            configurable->getInstanceId()   ;
+               configurable->getInstanceId()   ;
 
     std::map<std::pair<std::string, std::string>, Configuration >::iterator it;
 
@@ -644,7 +772,7 @@ void Configuration::createSubConfigurables (Configurable *configurable)
     {
         //ConfigurableDefinition &mos_def = sub_configurables_.at(cnt);
         logdbg << "Configuration: createSubConfigurables: generateSubConfigurable: class_id '" << it->first.first << "' instance_id '"
-                << it->first.second <<"'";
+               << it->first.second <<"'";
         configurable->generateSubConfigurable (it->first.first, it->first.second);
     }
 
@@ -711,7 +839,7 @@ Configuration &Configuration::getSubConfiguration (const std::string &class_id, 
     if (sub_configurations_.find (key) == sub_configurations_.end())
     {
         loginf << "Configuration instance " << instance_id_ <<": getSubConfiguration: creating new (empty) configuration for class " << class_id <<
-                " instance " << instance_id;
+                  " instance " << instance_id;
         addNewSubConfiguration(class_id, instance_id);
     }
 
@@ -721,8 +849,8 @@ Configuration &Configuration::getSubConfiguration (const std::string &class_id, 
 
 void Configuration::removeSubConfiguration (const std::string &class_id, const std::string &instance_id)
 {
-//    loginf << "Configuration: removeSubConfiguration: me "  << class_id_ << " " << instance_id_
-//            << " you " << class_id << " " << instance_id;
+    //    loginf << "Configuration: removeSubConfiguration: me "  << class_id_ << " " << instance_id_
+    //            << " you " << class_id << " " << instance_id;
 
     std::pair<std::string, std::string> key (class_id, instance_id);
     assert (sub_configurations_.find (key) != sub_configurations_.end());
@@ -735,7 +863,7 @@ void Configuration::setTemplate (bool template_flag, const std::string &template
     template_name_ = template_name;
 
     loginf << "Configuration: setTemplate: " << class_id_ << " instance " << instance_id_ << " flag " << template_flag
-            << " name " << template_name;
+           << " name " << template_name;
 
 }
 

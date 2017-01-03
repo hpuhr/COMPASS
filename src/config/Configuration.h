@@ -228,10 +228,10 @@ public:
     /// @brief Writes data value if a string parameter to an argument
     void getParameter (const std::string &parameter_id, std::string &value);
 
-    /// @brief Parses an XML configuration element
+    /// @brief Parses an XML element
     void parseXMLElement (tinyxml2::XMLElement *element);
     /// @brief Generates an XML configuration element
-    tinyxml2::XMLElement *generateXMLElement (tinyxml2::XMLDocument *root_document) const;
+    tinyxml2::XMLElement *generateXMLElement (tinyxml2::XMLDocument *parent_document) const;
 
     /// @brief Resets all values to their default values
     void resetToDefault ();
@@ -310,6 +310,11 @@ protected:
 
     /// Container with all configuration templates
     std::map<std::string, Configuration> configuration_templates_;
+
+    /// @brief Parses an XML configuration element
+    void parseXMLConfigurationElement (tinyxml2::XMLElement *element);
+    /// @brief Parses an XML configuration element
+    void parseXMLFileElement (tinyxml2::XMLElement *element);
 };
 
 #endif /* CONFIGURATION_H_ */

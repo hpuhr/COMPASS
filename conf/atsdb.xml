@@ -1,15 +1,6 @@
-<?1.0?>
-<Configuration>
-    <ConfigurationSection>
-        <!--------------------------------------------------------------------------------------->
-        <!------- ConfigurationSection: Configurations are to be placed here              ------->
-        <!--------------------------------------------------------------------------------------->
-        <!------- Root configuration: ATSDB0 ------->
-        <Configuration class_id="ATSDB" instance_id="ATSDB0">
-            <Configuration class_id="DBInterface" instance_id="DBInterface0">
-                <ParameterUnsignedInt read_chunk_size="20000"/>
-            </Configuration>
-            <Configuration class_id="DBObjectManager" instance_id="DBObjectManager0"/>
-        </Configuration>
-    </ConfigurationSection>
+<Configuration class_id="ATSDB" instance_id="ATSDB0">
+    <Configuration class_id="DBInterface" instance_id="DBInterface0">
+        <ParameterUnsignedInt read_chunk_size="20000"/>
+    </Configuration>
+    <SubConfigurationFile class_id="DBObjectManager" instance_id="DBObjectManager0" path="conf/config_dbo.xml"/>
 </Configuration>
