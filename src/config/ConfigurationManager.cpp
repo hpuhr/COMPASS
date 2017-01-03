@@ -85,7 +85,7 @@ Configuration &ConfigurationManager::registerRootConfigurable(Configurable &conf
     {
         loginf << "ConfigurationManager: getRootConfiguration: creating new configuration for class "
                 << configurable.getClassId() << " instance " << configurable.getInstanceId();
-        //root_configurations_.insert(key) = Configuration (configurable.getClassId(), configurable.getInstanceId());
+
         root_configurations_.insert( std::pair<std::pair<std::string, std::string>, Configuration>
                                      (key, Configuration (configurable.getClassId(), configurable.getInstanceId())) );
 
@@ -107,8 +107,7 @@ void ConfigurationManager::unregisterRootConfigurable(Configurable &configurable
 }
 
 /**
- * Assumes a root Configuration, with either a ConfigurationSection or a FileSection, which are
- * parsed with the appropriate functions.
+ * Assumes a root Configuration, which is parsed with the appropriate functions.
  */
 void ConfigurationManager::parseConfigurationFile (std::string filename)
 {
@@ -136,7 +135,7 @@ void ConfigurationManager::parseConfigurationFile (std::string filename)
                 if (strcmp ("SubConfigurationFile", main_conf_child->Value() ) == 0)
                 {
                     logdbg  << "ConfigurationManager: parseConfigurationFile: is SubConfigurationFile";
-                    //parseConfigurationSection (main_conf_child, filename);
+
                     std::string class_id;
                     std::string instance_id;
                     std::string path;
@@ -173,11 +172,6 @@ void ConfigurationManager::parseConfigurationFile (std::string filename)
                     else
                         throw std::runtime_error ("error: ConfigurationManager: parseConfigurationFile: configuration misses attributes");
                 }
-//                else if (strcmp ("FileSection", main_conf_child->Value() ) == 0)
-//                {
-//                    logdbg  << "ConfigurationManager: parseConfigurationFile: is FileSection";
-//                    parseFileSection (main_conf_child);
-//                }
                 else
                 {
                     throw std::runtime_error (std::string("ConfigurationManager: parseConfigurationFile: unknown section '")+main_conf_child->Value()+"'");
@@ -193,116 +187,6 @@ void ConfigurationManager::parseConfigurationFile (std::string filename)
     logdbg  << "ConfigurationManager: parseConfigurationFile: file '" << filename << "' done";
     delete config_file_doc;
 }
-
-/**
- * Assumes a list of SubConfigurationFile nodes, which define paths on which parseConfigurationFile is called.
- */
-//void ConfigurationManager::parseFileSection (XMLElement *configuration_section_element)
-//{
-//    assert (initialized_);
-//    logdbg  << "ConfigurationManager: parseFileSection";
-
-//    XMLElement * pool_child;
-
-//    for ( pool_child = configuration_section_element->FirstChildElement(); pool_child != 0; pool_child = pool_child->NextSiblingElement())
-//    {
-//        logdbg  << "ConfigurationManager: parseFileSection: found element '" << pool_child->Value() << "'";
-
-//        if (strcmp ("SubConfigurationFile", pool_child->Value() ) == 0)
-//        {
-//            logdbg  << "ConfigurationManager: parseFileSection: is SubConfigurationFile";
-
-//            const char *path=0;
-
-//            const XMLAttribute* attribute=pool_child->FirstAttribute();
-//            while (attribute)
-//            {
-//                logdbg  << "ConfigurationManager: parseFileSection: attribute " << attribute->Name() << "  value "<< attribute->Value();
-//                if (strcmp ("path", attribute->Name()) == 0)
-//                    path=attribute->Value();
-//                else
-//                    throw std::runtime_error ("ConfigurationManager: parseFileSection: unknown attribute");
-
-//                attribute=attribute->Next();
-//            }
-
-//            if (path)
-//            {
-//                logdbg  << "ConfigurationManager: parseFileSection: parsing sub configuration file '" << path << "'";
-//                parseConfigurationFile (path);
-//            }
-//            else
-//                throw std::runtime_error ("error: ConfigurationManager: parseFileSection: configuration misses attributes");
-
-//        }
-//        else
-//        {
-//            throw std::runtime_error (std::string("ConfigurationManager: parseFileSection: unknown section '")+pool_child->Value()+"'");
-//        }
-//    }
-//    logdbg  << "ConfigurationManager: parseFileSection: done";
-//}
-
-/**
- * Assumes a Configuration tags, which hold the root configurables & configurations. If a correct class id and
- * instance id is supplied, a new root configuration is generated, which the parses its element using parseXMLElement.
- */
-//void ConfigurationManager::parseConfigurationSection (XMLElement *configuration_section_element, std::string filename)
-//{
-//    assert (initialized_);
-//    logdbg  << "ConfigurationManager: parseConfigurationSection";
-
-//    XMLElement * configuration_element;
-
-//    for ( configuration_element = configuration_section_element->FirstChildElement(); configuration_element != 0;
-//            configuration_element = configuration_element->NextSiblingElement())
-//    {
-//        logdbg  << "ConfigurationManager: parseConfigurationSection: found element '" << configuration_element->Value() << "'";
-//        if (strcmp ("Configuration", configuration_element->Value() ) == 0)
-//        {
-//            logdbg  << "ConfigurationManager: parseConfigurationSection: is Configuration";
-
-//            const char *class_id=0;
-//            const char *instance_id=0;
-
-//            const XMLAttribute* attribute=configuration_element->FirstAttribute();
-//            while (attribute)
-//            {
-//                logdbg  << "ConfigurationManager: parseConfigurationSection: attribute " << attribute->Name()
-//                                << "  value "<< attribute->Value();
-//                if (strcmp ("class_id", attribute->Name()) == 0)
-//                    class_id=attribute->Value();
-//                else if (strcmp ("instance_id", attribute->Name()) == 0)
-//                    instance_id=attribute->Value();
-//                else
-//                    throw std::runtime_error (std::string ("ConfigurationManager: parseConfigurationSection: unknown attribute ")
-//                        +attribute->Name());
-
-//                attribute=attribute->Next();
-//            }
-
-//            if (class_id && instance_id)
-//            {
-//                std::pair<std::string, std::string> key (class_id, instance_id);
-//                assert (root_configurations_.find (key) == root_configurations_.end()); // should not exist
-
-//                logdbg << "ConfigurationManager: parseConfigurationSection: creating new configuration for class " << class_id <<
-//                        " instance " << instance_id;
-//                root_configurations_.insert (std::pair<std::pair<std::string, std::string>, Configuration> (key, Configuration (class_id, instance_id)));
-//                root_configurations_.at(key).setConfigurationFilename (filename);
-//                root_configurations_.at(key).parseXMLElement(configuration_element);
-//            }
-//            else
-//                throw std::runtime_error ("error: ConfigurationManager: parseConfigurationSection: configuration misses attributes");
-
-//        }
-//        else
-//        {
-//            throw std::runtime_error ("ConfigurationManager: parseConfigurationSection: unknown section");
-//        }
-//    }
-//    logdbg  << "ConfigurationManager: parseConfigurationSection: done";
-//}
 
 void ConfigurationManager::saveConfiguration ()
 {

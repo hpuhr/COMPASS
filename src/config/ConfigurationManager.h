@@ -85,11 +85,6 @@ protected:
 
     /// @brief Parses a configuration file
     void parseConfigurationFile (std::string filename);
-    /// @brief Parses a file section
-    //void parseFileSection (tinyxml2::XMLElement *configuration_section_element);
-    /// @brief Parses a configuration section
-    //void parseConfigurationSection (tinyxml2::XMLElement *configuration_section_element, std::string filename);
-
 };
 
 #endif /* CONFIGURATIONMANAGER_H_ */
