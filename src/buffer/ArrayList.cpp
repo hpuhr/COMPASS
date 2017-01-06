@@ -49,32 +49,36 @@ size_t ArrayListBase::maximumSize ()
 
 void ArrayListBase::setAllNone()
 {
-    std::vector < std::shared_ptr< std::array<bool,BUFFER_ARRAY_SIZE> > >::iterator it;
 
-    for (it = none_flags_.begin(); it != none_flags_.end(); it++)
+    for (auto it : none_flags_)
         for (unsigned int cnt=0; cnt < BUFFER_ARRAY_SIZE; cnt++)
-            it->get()->at(cnt)=true;
+            (*it)[cnt] = true;
+
+//    for (auto it : none_flags_)
+//        it->set();
 }
 
 void ArrayListBase::setNone(size_t index)
 {
     assert (index < size_);
-    none_flags_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE) = true;
+    (*none_flags_[index/BUFFER_ARRAY_SIZE])[index%BUFFER_ARRAY_SIZE] = true;
 }
 
 bool ArrayListBase::isNone(size_t index)
 {
     assert (index < size_);
-    return none_flags_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
+    return (*none_flags_[index/BUFFER_ARRAY_SIZE])[index%BUFFER_ARRAY_SIZE];
 
 }
 
 void ArrayListBase::allocatedNewNoneArray ()
 {
     std::shared_ptr< std::array<bool,BUFFER_ARRAY_SIZE> > new_array_ptr = std::make_shared<std::array<bool,BUFFER_ARRAY_SIZE>>();
+    //std::shared_ptr<std::bitset<BUFFER_ARRAY_SIZE>> new_array_ptr = std::make_shared<std::bitset<BUFFER_ARRAY_SIZE>>();
 
-    for (unsigned int cnt=0; cnt < BUFFER_ARRAY_SIZE; cnt++) //initialize to all none
-        new_array_ptr->at(cnt) = true;
+    for (unsigned int cnt=0; cnt < BUFFER_ARRAY_SIZE; cnt++)
+        (*new_array_ptr)[cnt] = true;
+    //new_array_ptr->set();
 
     none_flags_.push_back(new_array_ptr);
 }
@@ -82,5 +86,5 @@ void ArrayListBase::allocatedNewNoneArray ()
 void ArrayListBase::unsetNone (size_t index)
 {
     assert (index < size_);
-    none_flags_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE) = false;
+    (*none_flags_[index/BUFFER_ARRAY_SIZE])[index%BUFFER_ARRAY_SIZE] = false;
 }

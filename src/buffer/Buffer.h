@@ -25,6 +25,7 @@
 #ifndef BUFFER_H_
 #define BUFFER_H_
 
+#include <unordered_map>
 #include <vector>
 #include "PropertyList.h"
 #include "ArrayList.h"

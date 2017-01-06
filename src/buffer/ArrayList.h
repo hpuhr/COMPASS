@@ -26,6 +26,7 @@
 
 #include <memory>
 #include <vector>
+#include <bitset>
 
 #include "Logger.h"
 
@@ -68,6 +69,7 @@ protected:
     size_t max_size_;
 
     std::vector < std::shared_ptr< std::array<bool,BUFFER_ARRAY_SIZE> > > none_flags_;
+    //std::vector <std::shared_ptr<std::bitset<BUFFER_ARRAY_SIZE>>> none_flags_;
 
     /// @brief Allocates a new none array
     void allocatedNewNoneArray ();
