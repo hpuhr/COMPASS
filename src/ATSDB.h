@@ -110,7 +110,7 @@ public:
     /// @brief Returns if an object of type exists
     bool existsDBObject (const std::string &dbo_type);
     /// @brief Returns the object of type, if existing
-    DBObject *getDBObject (const std::string &dbo_type);
+    DBObject &getDBObject (const std::string &dbo_type);
 
     ///@brief Adds data to a DBO from a C struct data pointer.
     //void insert (const std::string &dbo_type, void *data);

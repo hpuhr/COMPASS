@@ -48,19 +48,19 @@ public:
     /// @brief Returns if an object of type exists
     bool existsDBObject (const std::string &dbo_type);
     /// @brief Returns the object of type, if existing
-    DBObject *getDBObject (const std::string &dbo_type);
+    DBObject &getDBObject (const std::string &dbo_type);
 
     /// @brief Returns defined DBOVariable, if existing
-    DBOVariable *getDBOVariable (const std::string &dbo_type, std::string id);
+    //DBOVariable *getDBOVariable (const std::string &dbo_type, std::string id);
     /// @brief Returns if defined DBOVariable exists
-    bool existsDBOVariable (const std::string &dbo_type, std::string id);
+    //bool existsDBOVariable (const std::string &dbo_type, std::string id);
     /// @brief Returns container with all DBOVariables
-    std::map <std::string, DBOVariable*> &getDBOVariables (const std::string &dbo_type);
+    //std::map <std::string, DBOVariable*> &getDBOVariables (const std::string &dbo_type);
 
-    virtual void generateSubConfigurable (std::string class_id, std::string instance_id);
+    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
     /// @brief Returns container with all DBObjects
-    const std::map <std::string, DBObject*>& getDBObjects () { return objects_; }
+    const std::map <std::string, DBObject>& getDBObjects () { return objects_; }
     /// @brief Returns of any DBObjects exist
     bool hasObjects () { return objects_.size() > 0; }
 
@@ -69,7 +69,7 @@ public:
 
 protected:
     /// Container with all DBOs (DBO type -> DBO pointer)
-    std::map <std::string, DBObject*> objects_;
+    std::map <std::string, DBObject> objects_;
     //bool registered_parent_variables_;
 
     virtual void checkSubConfigurables ();

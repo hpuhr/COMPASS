@@ -58,24 +58,24 @@ DBObject::DBObject(std::string class_id, std::string instance_id, Configurable *
  */
 DBObject::~DBObject()
 {
-  std::map <std::string, DBODataSourceDefinition *>::iterator it;
-  for (it = data_source_definitions_.begin(); it != data_source_definitions_.end(); it++)
-    delete it->second;
+//  std::map <std::string, DBODataSourceDefinition *>::iterator it;
+//  for (it = data_source_definitions_.begin(); it != data_source_definitions_.end(); it++)
+//    delete it->second;
   data_source_definitions_.clear();
 
-  std::vector <DBOSchemaMetaTableDefinition *>::iterator it2;
-  for (it2 = meta_table_definitions_.begin(); it2 != meta_table_definitions_.end(); it2++)
-    delete *it2;
+//  std::vector <DBOSchemaMetaTableDefinition *>::iterator it2;
+//  for (it2 = meta_table_definitions_.begin(); it2 != meta_table_definitions_.end(); it2++)
+//    delete *it2;
   meta_table_definitions_.clear();
 
-  std::map<std::string, DBOVariable*>::iterator it3;
-  for (it3 = variables_.begin(); it3 !=  variables_.end(); it3++)
-    delete it3->second;
+//  std::map<std::string, DBOVariable*>::iterator it3;
+//  for (it3 = variables_.begin(); it3 !=  variables_.end(); it3++)
+//    delete it3->second;
   variables_.clear();
 
 }
 
-bool DBObject::hasVariable (std::string id)
+bool DBObject::hasVariable (const std::string &id) const
 {
 //  if (!variables_checked_)
 //    checkVariables ();
@@ -83,13 +83,13 @@ bool DBObject::hasVariable (std::string id)
   return (variables_.find (id) != variables_.end());
 }
 
-DBOVariable *DBObject::getVariable (std::string id)
+DBOVariable &DBObject::getVariable (std::string id)
 {
 //  if (!variables_checked_)
 //    checkVariables ();
 
   assert (hasVariable (id));
-  return variables_[id];
+  return variables_.at(id);
 }
 
 void DBObject::deleteVariable (std::string id)
@@ -98,14 +98,15 @@ void DBObject::deleteVariable (std::string id)
 //    checkVariables ();
 
   assert (hasVariable (id));
-  std::map<std::string, DBOVariable*>::iterator it;
-  it = variables_.find (id);
-  DBOVariable *variable = it->second;
-  variables_.erase(it);
-  delete variable;
+  //std::map<std::string, DBOVariable*>::iterator it;
+  //it = variables_.find (id);
+  //DBOVariable *variable = it->second;
+  variables_.erase(variables_.find (id));
+  assert (!hasVariable (id));
+  //delete variable;
 }
 
-std::map<std::string, DBOVariable*> &DBObject::getVariables ()
+const std::map<std::string, DBOVariable> &DBObject::getVariables () const
 {
 //  if (!variables_checked_)
 //    checkVariables ();
@@ -117,50 +118,50 @@ std::map<std::string, DBOVariable*> &DBObject::getVariables ()
  * Iterates through all variables, and checks if the current meta table has a variable with the same name, if so it adds
  * the variable to the returned list.
  */
-std::vector <DBOVariable*> DBObject::getVariablesForTable (std::string table)
-{
-//  if (!variables_checked_)
-//    checkVariables ();
+//std::vector <DBOVariable*> DBObject::getVariablesForTable (std::string table)
+//{
+////  if (!variables_checked_)
+////    checkVariables ();
 
-  std::vector <DBOVariable*> variables;
+//  std::vector <DBOVariable*> variables;
 
-  std::map<std::string, DBOVariable*>::iterator it;
+//  std::map<std::string, DBOVariable*>::iterator it;
 
-  for (it = variables_.begin(); it != variables_.end(); it++)
-  {
-    if (getCurrentMetaTable()->getTableDBNameForVariable(it->second->getCurrentVariableName()).compare (table) != 0)
-      continue;
-    variables.push_back (it->second);
-  }
+//  for (it = variables_.begin(); it != variables_.end(); it++)
+//  {
+//    if (getCurrentMetaTable()->getTableDBNameForVariable(it->second->getCurrentVariableName()).compare (table) != 0)
+//      continue;
+//    variables.push_back (it->second);
+//  }
 
-  return variables;
-}
+//  return variables;
+//}
 
-std::string DBObject::getMetaTable (std::string schema)
+const std::string &DBObject::getMetaTable (const std::string &schema) const
 {
   assert (meta_tables_.find(schema) != meta_tables_.end());
-  return meta_tables_[schema];
+  return meta_tables_.at(schema);
 }
 
 /**
  * Returns if the current schema name exists in the data source definitions
  */
-bool DBObject::hasCurrentDataSource ()
+bool DBObject::hasCurrentDataSource () const
 {
   return (data_source_definitions_.find(DBSchemaManager::getInstance().getCurrentSchema()->getName()) != data_source_definitions_.end());
 }
 
-DBODataSourceDefinition *DBObject::getCurrentDataSource ()
+const DBODataSourceDefinition &DBObject::getCurrentDataSource () const
 {
   assert (hasCurrentDataSource());
-  return data_source_definitions_[DBSchemaManager::getInstance().getCurrentSchema()->getName()];
+  return data_source_definitions_.at(DBSchemaManager::getInstance().getCurrentSchema()->getName());
 }
 
 /**
  * Returns true if current_meta_table_ is not null, else gets the current schema, checks and get the meta_table_ entry for
  * the current schema, and returns if the meta table for the current schema exists in the current schema.
  */
-bool DBObject::hasCurrentMetaTable ()
+bool DBObject::hasCurrentMetaTable () const
 {
   if (current_meta_table_ != 0)
     return true;
@@ -169,7 +170,7 @@ bool DBObject::hasCurrentMetaTable ()
     DBSchema *schema = DBSchemaManager::getInstance().getCurrentSchema();
     logdbg  << "DBObject "<< getName() << ": hasCurrentMetaTable: got current schema " << schema->getName();
     assert (meta_tables_.find(schema->getName()) != meta_tables_.end());
-    std::string meta_table_name = meta_tables_ [schema->getName()];
+    std::string meta_table_name = meta_tables_ .at(schema->getName());
     return schema->hasMetaTable (meta_table_name);
   }
 
@@ -179,36 +180,36 @@ bool DBObject::hasCurrentMetaTable ()
  * If current_meta_table_ is not set, it is set be getting the current schema, and getting the current meta table from
  * the schema by its identifier. Then current_meta_table_ is returned.
  */
-MetaDBTable *DBObject::getCurrentMetaTable ()
+const MetaDBTable &DBObject::getCurrentMetaTable ()
 {
   if (!current_meta_table_)
   {
     DBSchema *schema = DBSchemaManager::getInstance().getCurrentSchema();
     assert (meta_tables_.find(schema->getName()) != meta_tables_.end());
-    std::string meta_table_name = meta_tables_ [schema->getName()];
+    std::string meta_table_name = meta_tables_ .at(schema->getName());
     assert (schema->hasMetaTable (meta_table_name));
     current_meta_table_ = schema->getMetaTable (meta_table_name);
   }
   assert (current_meta_table_);
-  return current_meta_table_;
+  return *current_meta_table_;
 }
 
 /**
  * Can generate DBOVariables, DBOSchemaMetaTableDefinitions and DBODataSourceDefinitions.
  */
-void DBObject::generateSubConfigurable (std::string class_id, std::string instance_id)
+void DBObject::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
   logdbg  << "DBObject: generateSubConfigurable: generating variable " << instance_id;
   if (class_id.compare ("DBOVariable") == 0)
   {
     DBOVariable *variable = new DBOVariable (class_id, instance_id, this);
     assert (variables_.find (variable->getId()) == variables_.end());
-    variables_[variable->getId()]=variable;
+    variables_.insert (std::pair <std::string, DBOVariable> (variable->getId(), *variable));
   }
   else if (class_id.compare ("DBOSchemaMetaTableDefinition") == 0)
   {
     DBOSchemaMetaTableDefinition *def = new DBOSchemaMetaTableDefinition (class_id, instance_id, this);
-    meta_table_definitions_.push_back (def);
+    meta_table_definitions_.push_back (*def);
 
     logdbg  << "DBObject "<< getName() << ": generateSubConfigurable: schema " << def->getSchema() << " meta " << def->getMetaTable();
 
@@ -219,7 +220,8 @@ void DBObject::generateSubConfigurable (std::string class_id, std::string instan
   {
     DBODataSourceDefinition *def = new DBODataSourceDefinition (class_id, instance_id, this);
     assert (data_source_definitions_.find(def->getSchema()) == data_source_definitions_.end());
-    data_source_definitions_ [def->getSchema()] = def;
+
+    data_source_definitions_.insert (std::pair<std::string, DBODataSourceDefinition> (def->getSchema(), *def));
   }
   else
     throw std::runtime_error ("DBObject: generateSubConfigurable: unknown class_id "+class_id );
@@ -233,17 +235,17 @@ void DBObject::checkSubConfigurables ()
 void DBObject::checkVariables ()
 {
   assert (hasCurrentMetaTable());
-  std::map<std::string, DBOVariable*>::iterator it;
+  //std::map<std::string, DBOVariable*>::iterator it;
 
-  for (it =  variables_.begin(); it !=  variables_.end(); it++)
+  for (auto it : variables_)
   {
-    bool found = current_meta_table_->hasTableColumn(it->first);
+    bool found = current_meta_table_->hasTableColumn(it.first);
 
     if (!found)
     {
-      logwrn  << "DBObject: checkVariables: erasing non-existing variable '"<<it->first<<"'";
-      delete it->second;
-      variables_.erase(it);
+      logwrn  << "DBObject: checkVariables: erasing non-existing variable '"<<it.first<<"'";
+//      delete it->second;
+      variables_.erase(it.first);
     }
   }
   variables_checked_=true;

@@ -41,7 +41,7 @@ class DBTableColumn;
 class DBOVariableDefinition : public Configurable
 {
 public:
-  DBOVariableDefinition(std::string class_id, std::string instance_id, Configurable *parent)
+  DBOVariableDefinition(const std::string &class_id, const std::string &instance_id, Configurable *parent)
   : Configurable (class_id, instance_id, parent)
   {
     registerParameter ("dbo_type_", &dbo_type_, "");
@@ -54,7 +54,7 @@ public:
   const std::string &getDBOType () { return dbo_type_; }
   void setDBOType (const std::string &dbo_type) { dbo_type_=dbo_type; }
 
-  std::string getId () { return id_; }
+  const std::string &getId () { return id_; }
   void setId (std::string id) { id_=id; }
 
 protected:
@@ -70,7 +70,7 @@ protected:
 class DBOSchemaVariableDefinition : public Configurable
 {
 public:
-  DBOSchemaVariableDefinition(std::string class_id, std::string instance_id, Configurable *parent) : Configurable (class_id, instance_id, parent)
+  DBOSchemaVariableDefinition(const std::string &class_id, const std::string &instance_id, Configurable *parent) : Configurable (class_id, instance_id, parent)
   {
     registerParameter ("schema", &schema_, "");
     registerParameter ("meta_table", &meta_table_, "");
@@ -78,13 +78,13 @@ public:
   }
   virtual ~DBOSchemaVariableDefinition() {}
 
-  std::string getSchema () { return schema_; }
+  const std::string &getSchema () { return schema_; }
   void setSchema(std::string schema) { schema_=schema; }
 
-  std::string getMetaTable () { return meta_table_; }
+  const std::string &getMetaTable () { return meta_table_; }
   void setMetaTable(std::string meta_table) { meta_table_=meta_table; }
 
-  std::string getVariable () { return variable_; }
+  const std::string &getVariable () { return variable_; }
   void setVariable(std::string variable) { variable_=variable; }
 
 protected:
@@ -121,7 +121,7 @@ public:
 
 
   /// @brief Constructor
-  DBOVariable(std::string class_id, std::string instance_id, Configurable *parent);
+  DBOVariable(const std::string &class_id, const std::string &instance_id, Configurable *parent);
   /// @brief Desctructor
   virtual ~DBOVariable();
 
@@ -158,17 +158,17 @@ public:
   /// @brief Prints information for debugging
   void print ();
 
-  virtual void generateSubConfigurable (std::string class_id, std::string instance_id);
+  virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
   /// @brief Returns variable identifier
-  std::string getName () { return id_; }
+  const std::string &getName () const { return id_; }
   /// @brief Sets variable identifier
-  void setName (std::string name) { id_=name; };
+  void setName (const std::string &name) { id_=name; }
 
   /// @brief Returns variable description
-  std::string getInfo () { return description_; }
+  const std::string &getInfo () { return description_; }
   /// @brief Sets variable description
-  void setInfo (std::string info) { description_=info; };
+  void setInfo (const std::string &info) { description_=info; }
 
   /// @brief Returns variable data type
   PropertyDataType getDataType () { return data_type_;}
@@ -181,28 +181,28 @@ public:
 //  std::string getDBOTypeString () { return DB_OBJECT_TYPE_STRINGS.at((DB_OBJECT_TYPE)dbo_type_int_);}
 
   /// @brief Returns of schema is present in schema_variables_
-  bool hasSchema (std::string schema);
+  bool hasSchema (const std::string &schema);
   /// @brief Returns meta table identifier for a given schema
-  std::string getMetaTable (std::string schema);
+  const std::string &getMetaTable (const std::string &schema);
   /// @brief Returns variable identifier for a given schema
-  std::string getVariableName (std::string schema);
+  const std::string &getVariableName (const std::string &schema);
 
   bool hasCurrentDBColumn ();
-  DBTableColumn *getCurrentDBColumn ();
+  const DBTableColumn &getCurrentDBColumn ();
 
   /// @brief Returns if current schema is present in schema_variables_
   bool hasCurrentSchema ();
   /// @brief Returns meta table identifier for current schema
-  std::string getCurrentMetaTable ();
+  const std::string &getCurrentMetaTable ();
   /// @brief Returns variable identifier for current schema
-  std::string getCurrentVariableName ();
+  const std::string &getCurrentVariableName ();
 
   /// @brief Returns if unit information is present
   bool hasUnit () { return unit_dimension_.size() != 0;}
   /// @brief Returns unit dimension
-  std::string &getUnitDimension () { return unit_dimension_; }
+  const std::string &getUnitDimension () { return unit_dimension_; }
   /// @brief  Returns unit unit
-  std::string &getUnitUnit () { return unit_unit_; }
+  const std::string &getUnitUnit () { return unit_unit_; }
 
   /// @brief Returns flag if minimum/maximum information is available
   //bool hasMinMaxInfo ();
@@ -248,7 +248,7 @@ protected:
 //  std::map <std::string, std::string> sub_variables_;
 
   /// Container with schema-variable definitions
-  std::vector <DBOSchemaVariableDefinition *> schema_variables_definitions_;
+  std::vector <DBOSchemaVariableDefinition> schema_variables_definitions_;
   /// Container with schema, meta table, variable mappings (schema identifier -> (meta table identifier, variable identifier))
   std::map <std::string, std::pair <std::string, std::string> > schema_variables_;
 

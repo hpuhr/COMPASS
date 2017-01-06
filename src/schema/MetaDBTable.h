@@ -110,7 +110,7 @@ public:
   /// @brief Returns container with all columns
   std::map <std::string, DBTableColumn*>& getColumns ();
   /// @brief Returns column with a given name
-  DBTableColumn *getTableColumn (std::string column);
+  const DBTableColumn &getTableColumn (std::string column);
 
   /// @brief Returns if meta sub-tables are defined
   bool hasSubTables () { return sub_table_definitions_.size() > 0; }

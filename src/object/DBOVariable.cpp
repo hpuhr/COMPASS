@@ -42,7 +42,7 @@
 
 using namespace Utils;
 
-DBOVariable::DBOVariable(std::string class_id, std::string instance_id, Configurable *parent)
+DBOVariable::DBOVariable(const std::string &class_id, const std::string &instance_id, Configurable *parent)
     : Property (), Configurable (class_id, instance_id, parent), registered_as_parent_(false)
 {
     registerParameter ("id", &id_, "");
@@ -65,9 +65,9 @@ DBOVariable::~DBOVariable()
 
     //    sub_variable_definitions_.clear();
 
-    std::vector <DBOSchemaVariableDefinition *>::iterator it;
-    for (it = schema_variables_definitions_.begin(); it != schema_variables_definitions_.end(); it++)
-        delete *it;
+//    std::vector <DBOSchemaVariableDefinition *>::iterator it;
+//    for (it = schema_variables_definitions_.begin(); it != schema_variables_definitions_.end(); it++)
+//        delete *it;
     schema_variables_definitions_.clear();
 }
 
@@ -412,7 +412,7 @@ void DBOVariable::print ()
 //}
 
 
-void DBOVariable::generateSubConfigurable (std::string class_id, std::string instance_id)
+void DBOVariable::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
 //    if (class_id.compare("DBOVariableDefinition") == 0)
 //    {
@@ -429,7 +429,7 @@ void DBOVariable::generateSubConfigurable (std::string class_id, std::string ins
     if (class_id.compare("DBOSchemaVariableDefinition") == 0)
     {
         DBOSchemaVariableDefinition *definition = new DBOSchemaVariableDefinition (class_id, instance_id, this);
-        schema_variables_definitions_.push_back (definition);
+        schema_variables_definitions_.push_back (*definition);
         assert (schema_variables_.find (definition->getSchema()) == schema_variables_.end());
         schema_variables_[definition->getSchema()] = std::pair<std::string, std::string> (definition->getMetaTable(), definition->getVariable());
     }
@@ -442,19 +442,19 @@ void DBOVariable::checkSubConfigurables ()
     // nothing to do here
 }
 
-bool DBOVariable::hasSchema (std::string schema)
+bool DBOVariable::hasSchema (const std::string &schema)
 {
     if (schema_variables_.find (schema) == schema_variables_.end())
         return false;
     else
         return schema_variables_[schema].second.size()>0;
 }
-std::string DBOVariable::getMetaTable (std::string schema)
+const std::string &DBOVariable::getMetaTable (const std::string &schema)
 {
     assert (hasSchema(schema));
     return schema_variables_[schema].first;
 }
-std::string DBOVariable::getVariableName (std::string schema)
+const std::string &DBOVariable::getVariableName (const std::string &schema)
 {
     assert (hasSchema(schema));
     return schema_variables_[schema].second;
@@ -471,7 +471,7 @@ bool DBOVariable::hasCurrentDBColumn ()
     return DBSchemaManager::getInstance().getCurrentSchema ()->getMetaTable(meta_tablename)->hasTableColumn(table_varname);
 }
 
-DBTableColumn *DBOVariable::getCurrentDBColumn ()
+const DBTableColumn &DBOVariable::getCurrentDBColumn ()
 {
     assert (hasCurrentDBColumn());
 
@@ -504,14 +504,14 @@ bool DBOVariable::hasCurrentSchema ()
     }
 
 }
-std::string DBOVariable::getCurrentMetaTable ()
+const std::string &DBOVariable::getCurrentMetaTable ()
 {
     assert (hasCurrentSchema());
     std::string schema = DBSchemaManager::getInstance().getCurrentSchemaName();
     return schema_variables_[schema].first;
 
 }
-std::string DBOVariable::getCurrentVariableName ()
+const std::string &DBOVariable::getCurrentVariableName ()
 {
     assert (hasCurrentSchema());
     std::string schema = DBSchemaManager::getInstance().getCurrentSchemaName();

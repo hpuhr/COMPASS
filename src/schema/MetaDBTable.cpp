@@ -89,11 +89,11 @@ std::string MetaDBTable::getTableDBNameForVariable (std::string variable_name)
 }
 
 
-DBTableColumn *MetaDBTable::getTableColumn (std::string column)
+const DBTableColumn &MetaDBTable::getTableColumn (std::string column)
 {
   setSubTablesIfRequired();
   assert (hasTableColumn (column));
-  return columns_[column];
+  return *columns_[column];
 }
 
 void MetaDBTable::generateSubConfigurable (std::string class_id, std::string instance_id)

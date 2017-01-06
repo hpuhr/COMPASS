@@ -137,60 +137,60 @@ public:
   virtual ~DBObject();
 
   /// @brief Returns flag indication if a DBOVariable identified by id exists
-  bool hasVariable (std::string id);
+  bool hasVariable (const std::string &id) const;
   /// @brief Returns variable identified by id
-  DBOVariable *getVariable (std::string id);
+  DBOVariable &getVariable (std::string id);
   /// @brief Deletes a variable identified by id
   void deleteVariable (std::string id);
 
   /// @brief Returns container with all variables
-  std::map<std::string, DBOVariable*> &getVariables ();
+  const std::map<std::string, DBOVariable> &getVariables () const;
   /// @brief Returns number of existing variables
-  unsigned int getNumVariables () { return variables_.size(); }
+  unsigned int getNumVariables () const { return variables_.size(); }
 
   /// @brief Returns container with all variables in a DBTable identified by table
-  std::vector <DBOVariable*> getVariablesForTable (std::string table);
+  //std::vector <DBOVariable*> getVariablesForTable (std::string table);
   /// @brief Returns name of the object
-  std::string getName () { return name_; }
+  const std::string &getName () const { return name_; }
   /// @brief Sets name of the object
-  void setName (std::string name) { assert (name.size()>0); name_=name; }
+  void setName (const std::string &name) { assert (name.size()>0); name_=name; }
 
   /// @brief Returns description of the object
-  std::string getInfo () { return info_; }
+  const std::string &getInfo () const { return info_; }
   /// @brief Sets description of the object
   void setInfo(std::string info) { info_=info; }
 
   /// @brief Sets if an object can be loaded
   void setLoadable(bool loadable) { is_loadable_=loadable; }
   /// @brief Returns if an object can be loaded
-  bool isLoadable () { return is_loadable_; }
+  bool isLoadable () const { return is_loadable_; }
 
   /// @brief Returns the type of the object
-  const std::string &getType () { return dbo_type_; }
+  const std::string &getType () const { return dbo_type_; }
   /// @brief Sets the type of the object
   void setType (const std::string &dbo_type) { dbo_type_=dbo_type; }
 
   /// @brief Returns container with all meta tables
-  std::map <std::string, std::string> &getMetaTables () { return meta_tables_; }
+  const std::map <std::string, std::string> &getMetaTables () const { return meta_tables_; }
   /// @brief Returns identifier of main meta table under DBSchema defined by schema
-  std::string getMetaTable (std::string schema);
+  const std::string &getMetaTable (const std::string &schema) const;
   /// @brief Returns main meta table for current schema
-  MetaDBTable *getCurrentMetaTable ();
+  const MetaDBTable &getCurrentMetaTable ();
   /// @brief Returns if current schema has main meta table
-  bool hasCurrentMetaTable ();
+  bool hasCurrentMetaTable () const;
 
 
   /// @brief Returns if object is meta
   //bool isMeta () { return is_meta_; }
 
   /// @brief Returns if a data source is defined in the current schema
-  bool hasCurrentDataSource ();
+  bool hasCurrentDataSource () const;
   /// @brief Returns current data source definition
-  DBODataSourceDefinition *getCurrentDataSource ();
+  const DBODataSourceDefinition &getCurrentDataSource () const;
   /// @brief Returns container with all data source definitions
-  std::map <std::string, DBODataSourceDefinition *> &getDataSourceDefinitions () { return data_source_definitions_; }
+  const std::map <std::string, DBODataSourceDefinition> &getDataSourceDefinitions () const { return data_source_definitions_; }
 
-  virtual void generateSubConfigurable (std::string class_id, std::string instance_id);
+  virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
 //  /// @brief Registers an observer to the active data sources information
 //  void addActiveSourcesObserver (ActiveSourcesObserver *observer);
@@ -205,7 +205,7 @@ public:
 //  void setActiveDataSources (std::set<int> active_data_sources);
 
   /// @brief Returns container with the active data sources information
-  std::set<int> getActiveDataSources () { return active_data_sources_; }
+  const std::set<int> getActiveDataSources () const { return active_data_sources_; }
 
   /// @brief In meta object, registers meta variables as parent variables
   //void registerParentVariables ();
@@ -225,14 +225,14 @@ protected:
   //bool is_meta_;
 
   /// Container with all DBOSchemaMetaTableDefinitions
-  std::vector <DBOSchemaMetaTableDefinition *> meta_table_definitions_;
+  std::vector <DBOSchemaMetaTableDefinition> meta_table_definitions_;
   /// Container with the main meta tables for schemas (schema identifier -> meta_table identifier)
   std::map <std::string, std::string> meta_tables_;
 
   /// Container with data source definitions (schema identifier -> data source definition pointer)
-  std::map <std::string, DBODataSourceDefinition *> data_source_definitions_;
+  std::map <std::string, DBODataSourceDefinition> data_source_definitions_;
   /// Container with all variables (variable identifier -> variable pointer)
-  std::map<std::string, DBOVariable*> variables_;
+  std::map<std::string, DBOVariable> variables_;
 
   /// Container with all observers of the active data sources information
   std::vector <ActiveSourcesObserver *> active_sources_observers_;

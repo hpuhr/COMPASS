@@ -217,7 +217,7 @@ bool ATSDB::existsDBObject (const std::string &dbo_type)
 }
 
 /// @brief Returns the object of type, if existing
-DBObject *ATSDB::getDBObject (const std::string &dbo_type)
+DBObject &ATSDB::getDBObject (const std::string &dbo_type)
 {
     return dbo_manager_->getDBObject(dbo_type);
 }

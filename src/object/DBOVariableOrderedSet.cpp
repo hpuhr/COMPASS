@@ -30,46 +30,46 @@
 #include "DBOVariableOrderedSet.h"
 #include "ATSDB.h"
 
-DBOVariableOrderedSet::DBOVariableOrderedSet(std::string class_id, std::string instance_id, Configurable *parent)
- : Configurable (class_id, instance_id, parent), changed_(false)
+DBOVariableOrderedSet::DBOVariableOrderedSet(const std::string &class_id, const std::string &instance_id, Configurable *parent)
+    : Configurable (class_id, instance_id, parent), changed_(false)
 {
-  createSubConfigurables ();
+    createSubConfigurables ();
 }
 
 DBOVariableOrderedSet::~DBOVariableOrderedSet()
 {
-  std::map <unsigned int, DBOVariableOrderDefinition*>::iterator it;
-  for (it = variable_definitions_.begin(); it != variable_definitions_.end(); it++)
-  {
-    delete it->second;
-  }
-  variable_definitions_.clear();
+    //  std::map <unsigned int, DBOVariableOrderDefinition*>::iterator it;
+    for (auto it : variable_definitions_)
+    {
+        delete it.second;
+    }
+    variable_definitions_.clear();
 }
 
-void DBOVariableOrderedSet::generateSubConfigurable (std::string class_id, std::string instance_id)
+void DBOVariableOrderedSet::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
-  logdbg  << "DBOVariableOrderedSet: generateSubConfigurable: class_id " << class_id << " instance_id " << instance_id;
-  if (class_id.compare("DBOVariableOrderDefinition") == 0)
-  {
-    DBOVariableOrderDefinition *definition = new DBOVariableOrderDefinition (class_id, instance_id, this);
-
-    if (!ATSDB::getInstance().existsDBObject(definition->getDBOType())
-            || !ATSDB::getInstance().getDBObject(definition->getDBOType())->hasVariable(definition->getId()))
+    logdbg  << "DBOVariableOrderedSet: generateSubConfigurable: class_id " << class_id << " instance_id " << instance_id;
+    if (class_id.compare("DBOVariableOrderDefinition") == 0)
     {
-      logwrn << "DBOVariableOrderedSet: generateSubConfigurable: outdated type " << definition->getDBOType() << " variable "
-          << definition->getId();
-      delete definition;
-      return;
+        DBOVariableOrderDefinition *definition = new DBOVariableOrderDefinition (class_id, instance_id, this);
+
+        if (!ATSDB::getInstance().existsDBObject(definition->getDBOType())
+                || !ATSDB::getInstance().getDBObject(definition->getDBOType()).hasVariable(definition->getId()))
+        {
+            logwrn << "DBOVariableOrderedSet: generateSubConfigurable: outdated type " << definition->getDBOType() << " variable "
+                   << definition->getId();
+            delete definition;
+            return;
+        }
+
+        unsigned int index_new = definition->getIndex();
+        assert (variable_definitions_.find(index_new) == variable_definitions_.end());
+        variable_definitions_.insert (std::pair <unsigned int, DBOVariableOrderDefinition*> (index_new, definition));
+
+        updateDBOVariableSet();
     }
-
-    unsigned int index_new = definition->getIndex();
-    assert (variable_definitions_.find(index_new) == variable_definitions_.end());
-    variable_definitions_[index_new] = definition;
-
-    updateDBOVariableSet();
-  }
-  else
-    throw std::runtime_error ("DBOVariableOrderedSet: generateSubConfigurable: unknown class_id "+class_id );
+    else
+        throw std::runtime_error ("DBOVariableOrderedSet: generateSubConfigurable: unknown class_id "+class_id );
 }
 
 void DBOVariableOrderedSet::checkSubConfigurables ()
@@ -77,43 +77,43 @@ void DBOVariableOrderedSet::checkSubConfigurables ()
 
 }
 
-void DBOVariableOrderedSet::add (DBOVariable *var)
+void DBOVariableOrderedSet::add (DBOVariable &var)
 {
-  assert (variable_definitions_.size() == set_.size());
-
-  if (find (set_.begin(), set_.end(), var) == set_.end())
-  {
-    std::string var_name = var->getName();
-
-    Configuration &id_configuration = addNewSubConfiguration ("DBOVariableOrderDefinition", "DBOVariableOrderDefinition"+var_name+"0");
-    id_configuration.addParameterString ("dbo_type", var->getDBOType());
-    id_configuration.addParameterString ("id", var_name);
-    id_configuration.addParameterUnsignedInt ("index", (unsigned int)set_.size());
-    generateSubConfigurable("DBOVariableOrderDefinition", "DBOVariableOrderDefinition"+var_name+"0");
-
     assert (variable_definitions_.size() == set_.size());
-    changed_=true;
-  }
-}
 
-void DBOVariableOrderedSet::add (const DBOVariable *var)
-{
-  //lol hack
-  add ((DBOVariable *)var);
-}
-
-void DBOVariableOrderedSet::add (DBOVariableOrderedSet &set)
-{
-  std::vector <DBOVariable*> &setset = set.getSet();
-  std::vector <DBOVariable*>::iterator it;
-
-  for (it=setset.begin(); it != setset.end(); it++)
-  {
-    if (find (set_.begin(), set_.end(), *it) == set_.end())
+    if (!hasVariable(var))
     {
-      add (*it);
+        std::string var_name = var.getName();
+
+        Configuration &id_configuration = addNewSubConfiguration ("DBOVariableOrderDefinition", "DBOVariableOrderDefinition"+var_name+"0");
+        id_configuration.addParameterString ("dbo_type", var.getDBOType());
+        id_configuration.addParameterString ("id", var_name);
+        id_configuration.addParameterUnsignedInt ("index", (unsigned int)set_.size());
+        generateSubConfigurable("DBOVariableOrderDefinition", "DBOVariableOrderDefinition"+var_name+"0");
+
+        assert (variable_definitions_.size() == set_.size());
+        changed_=true;
     }
-  }
+}
+
+//void DBOVariableOrderedSet::add (const DBOVariable *var)
+//{
+//  //lol hack
+//  add ((DBOVariable *)var);
+//}
+
+void DBOVariableOrderedSet::add (const DBOVariableOrderedSet &set)
+{
+    //const std::vector <DBOVariable &> &setset = set.getSet();
+    //std::vector <DBOVariable*>::const_iterator it;
+
+    for (auto it : set.getSet())
+    {
+        if (!hasVariable (it.second))
+        {
+            add (it.second);
+        }
+    }
 }
 
 //void DBOVariableOrderedSet::addOnly (DBOVariableOrderedSet &set, const std::string &dbo_type)
@@ -142,85 +142,88 @@ void DBOVariableOrderedSet::add (DBOVariableOrderedSet &set)
 
 void DBOVariableOrderedSet::removeVariableAt (unsigned int index)
 {
-  assert (index < set_.size());
-  assert (index < variable_definitions_.size());
+    assert (index < set_.size());
+    assert (index < variable_definitions_.size());
 
-  std::map <unsigned int, DBOVariableOrderDefinition*>::iterator it;
-  std::map <unsigned int, DBOVariableOrderDefinition*>::iterator it_tobeerased;
-  it = variable_definitions_.find(index);
-  assert (it != variable_definitions_.end());
-  delete it->second;
+    assert (false);
+    //TODO
 
-  it_tobeerased=it;
+    //  std::map <unsigned int, DBOVariableOrderDefinition*>::iterator it;
+    //  std::map <unsigned int, DBOVariableOrderDefinition*>::iterator it_tobeerased;
+    //  it = variable_definitions_.find(index);
+    //  assert (it != variable_definitions_.end());
+    //  delete it->second;
 
-  for (; it != variable_definitions_.end(); it++)
-  {
-    it->second->setIndex(it->first-1);
-    const_cast<unsigned int&>(it->first) = it->first-1;
-  }
+    //  it_tobeerased=it;
 
-  variable_definitions_.erase(it_tobeerased);
+    //  for (; it != variable_definitions_.end(); it++)
+    //  {
+    //    it->second->setIndex(it->first-1);
+    //    const_cast<unsigned int&>(it->first) = it->first-1;
+    //  }
 
-  set_.erase(set_.begin()+index);
+    //  variable_definitions_.erase(it_tobeerased);
 
-  changed_=true;
+    //  set_.erase(set_.begin()+index);
+
+    changed_=true;
 }
 
 void DBOVariableOrderedSet::moveVariableUp (unsigned int index)
 {
-  logdbg  << "DBOVariableOrderedSet: moveVariableUp: index " << index;
-  assert (index < set_.size());
-  assert (index < variable_definitions_.size());
+    logdbg  << "DBOVariableOrderedSet: moveVariableUp: index " << index;
+    assert (index < set_.size());
+    assert (index < variable_definitions_.size());
 
-  std::map <unsigned int, DBOVariableOrderDefinition*>::iterator it, itnext;
+    std::map <unsigned int, DBOVariableOrderDefinition*>::iterator it, itnext;
 
-  it = variable_definitions_.find(index);
-  assert (it != variable_definitions_.end());
+    it = variable_definitions_.find(index);
+    assert (it != variable_definitions_.end());
 
-  if (index == variable_definitions_.size() - 1)
-  {
-    logerr  << "DBOVariableOrderedSet: moveVariableUp: tried to move up last variable";
-    return;
-  }
+    if (index == variable_definitions_.size() - 1)
+    {
+        logerr  << "DBOVariableOrderedSet: moveVariableUp: tried to move up last variable";
+        return;
+    }
 
-  itnext = variable_definitions_.find(index+1);
-  assert (itnext != variable_definitions_.end());
+    itnext = variable_definitions_.find(index+1);
+    assert (itnext != variable_definitions_.end());
 
-  std::swap (it->second, itnext->second);
-  it->second->setIndex(it->first);
-  itnext->second->setIndex(itnext->first);
+    std::swap (it->second, itnext->second);
+    it->second->setIndex(it->first);
+    itnext->second->setIndex(itnext->first);
 
-  updateDBOVariableSet();
+    updateDBOVariableSet();
 
-  changed_=true;
+    changed_=true;
 }
 void DBOVariableOrderedSet::moveVariableDown (unsigned int index)
 {
-  logdbg  << "DBOVariableOrderedSet: moveVariableDown: index " << index;
-  assert (index < set_.size());
-  assert (index < variable_definitions_.size());
+    logdbg  << "DBOVariableOrderedSet: moveVariableDown: index " << index;
+    assert (index < set_.size());
+    assert (index < variable_definitions_.size());
 
-  std::map <unsigned int, DBOVariableOrderDefinition*>::iterator it, itprev;
+    std::map <unsigned int, DBOVariableOrderDefinition*>::iterator it, itprev;
 
-  it = variable_definitions_.find(index);
-  assert (it != variable_definitions_.end());
+    it = variable_definitions_.find(index);
+    assert (it != variable_definitions_.end());
 
-  if (index == 0)
-  {
-    logwrn  << "DBOVariableOrderedSet: moveVariableDown: tried to move down first variable";
-    return;
-  }
+    if (index == 0)
+    {
+        logwrn  << "DBOVariableOrderedSet: moveVariableDown: tried to move down first variable";
+        return;
+    }
 
-  itprev = variable_definitions_.find(index-1);
-  assert (itprev != variable_definitions_.end());
+    itprev = variable_definitions_.find(index-1);
+    assert (itprev != variable_definitions_.end());
 
-  std::swap (it->second, itprev->second);
-  it->second->setIndex(it->first);
-  itprev->second->setIndex(itprev->first);
+    std::swap (it->second, itprev->second);
+    it->second->setIndex(it->first);
+    itprev->second->setIndex(itprev->first);
 
-  updateDBOVariableSet();
+    updateDBOVariableSet();
 
-  changed_=true;
+    changed_=true;
 }
 
 
@@ -243,42 +246,45 @@ void DBOVariableOrderedSet::moveVariableDown (unsigned int index)
 //  return type_set;
 //}
 
-DBOVariableSet DBOVariableOrderedSet::getUnorderedSet ()
+//DBOVariableSet DBOVariableOrderedSet::getUnorderedSet () const
+//{
+//  logdbg  << "DBOVariableOrderedSet: getSet";
+
+//  DBOVariableSet type_set;
+
+//  for (auto it : set_)
+//  {
+//      logdbg  << "DBOVariableOrderedSet: getFor: add";
+//      type_set.add (it.second);
+//  }
+
+//  return type_set;
+//}
+
+DBOVariable &DBOVariableOrderedSet::getVariable (unsigned int index) const
 {
-  logdbg  << "DBOVariableOrderedSet: getSet";
-
-  DBOVariableSet type_set;
-  std::vector <DBOVariable*>::iterator it;
-
-  for (it=set_.begin(); it != set_.end(); it++)
-  {
-      logdbg  << "DBOVariableOrderedSet: getFor: add";
-      type_set.add ((*it));
-  }
-
-  return type_set;
+    assert (index < set_.size());
+    return set_.at(index);
 }
 
-DBOVariable *DBOVariableOrderedSet::getVariable (unsigned int index)
+void DBOVariableOrderedSet::print () const
 {
-  assert (index < set_.size());
-  return set_.at(index);
+    logdbg  << "DBOVariableOrderedSet: print: size" << set_.size() << " changed " << changed_;
+    //std::vector <DBOVariable*>::iterator it;
+
+    for (auto it : set_)
+    {
+        it.second.print();
+    }
 }
 
-void DBOVariableOrderedSet::print ()
+bool DBOVariableOrderedSet::hasVariable (const DBOVariable &variable) const
 {
-  logdbg  << "DBOVariableOrderedSet: print: size" << set_.size() << " changed " << changed_;
-  std::vector <DBOVariable*>::iterator it;
+    for (auto it : set_)
+        if (it.second == variable)
+            return true;
 
-  for (it=set_.begin(); it != set_.end(); it++)
-  {
-    (*it)->print();
-  }
-}
-
-bool DBOVariableOrderedSet::hasVariable (DBOVariable *variable)
-{
-  return find (set_.begin(), set_.end(), variable) != set_.end();
+    return false;
 }
 
 //PropertyList DBOVariableOrderedSet::getPropertyList (const std::string &dbo_type)
@@ -301,25 +307,25 @@ bool DBOVariableOrderedSet::hasVariable (DBOVariable *variable)
 
 void DBOVariableOrderedSet::updateDBOVariableSet ()
 {
-  set_.clear();
-  std::map <unsigned int, DBOVariableOrderDefinition*>::iterator it;
-  for (it = variable_definitions_.begin(); it != variable_definitions_.end(); it++)
-  {
-    const std::string &type = it->second->getDBOType();
-    std::string name = it->second->getId();
-
-    if (!ATSDB::getInstance().existsDBObject(type)
-            || !ATSDB::getInstance().getDBObject(type)->hasVariable(name))
+    set_.clear();
+    //std::map <unsigned int, DBOVariableOrderDefinition>::iterator it;
+    for (auto it : variable_definitions_)
     {
-      logwrn << "DBOVariableOrderedSet: updateDBOVariableSet: outdated skipping type " << type << " variable "
-          << name;
-      continue;
-    }
+        const std::string &type = it.second->getDBOType();
+        std::string name = it.second->getId();
 
-    //assert (DBObjectManager::getInstance().existsDBOVariable (type, name));
-    DBOVariable *variable = ATSDB::getInstance().getDBObject(type)->getVariable(name);
-    set_.push_back(variable);
-  }
-  assert (variable_definitions_.size() == set_.size());
-  //loginf  << "DBOVariableOrderedSet: updateDBOVariableSet: set has size "  << set_.size();
+        if (!ATSDB::getInstance().existsDBObject(type)
+                || !ATSDB::getInstance().getDBObject(type).hasVariable(name))
+        {
+            logwrn << "DBOVariableOrderedSet: updateDBOVariableSet: outdated skipping type " << type << " variable "
+                   << name;
+            continue;
+        }
+
+        //assert (DBObjectManager::getInstance().existsDBOVariable (type, name));
+        DBOVariable &variable = ATSDB::getInstance().getDBObject(type).getVariable(name);
+        set_.insert (std::pair <unsigned int, DBOVariable &> (it.second->getIndex(), variable));
+    }
+    assert (variable_definitions_.size() == set_.size());
+    //loginf  << "DBOVariableOrderedSet: updateDBOVariableSet: set has size "  << set_.size();
 }
