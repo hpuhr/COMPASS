@@ -27,6 +27,7 @@
 
 #include "Configuration.h"
 #include "ConfigurationManager.h"
+#include "DBObject.h"
 #include "DBOVariable.h"
 //#include "ATSDB.h"
 #include "DBObjectManager.h"
@@ -42,8 +43,8 @@
 
 using namespace Utils;
 
-DBOVariable::DBOVariable(const std::string &class_id, const std::string &instance_id, Configurable *parent)
-    : Property (), Configurable (class_id, instance_id, parent), registered_as_parent_(false)
+DBOVariable::DBOVariable(const std::string &class_id, const std::string &instance_id, DBObject *parent)
+    : Property (), Configurable (class_id, instance_id, parent), dbo_parent_(*parent) //, registered_as_parent_(false)
 {
     registerParameter ("id", &id_, "");
     registerParameter ("description", &description_, "");

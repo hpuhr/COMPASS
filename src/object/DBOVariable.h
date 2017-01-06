@@ -93,6 +93,7 @@ protected:
   std::string variable_;
 };
 
+class DBObect;
 class DBOVariableMinMaxObserver;
 
 /**
@@ -112,16 +113,8 @@ class DBOVariableMinMaxObserver;
 class DBOVariable : public Property, public Configurable
 {
 public:
-  /// DBO type
-  std::string dbo_type_;
-  /// Value representation type, based on enum STRING_REPRESENTATION
-  unsigned int representation_int_;
-  /// Description
-  std::string description_;
-
-
   /// @brief Constructor
-  DBOVariable(const std::string &class_id, const std::string &instance_id, Configurable *parent);
+  DBOVariable(const std::string &class_id, const std::string &instance_id, DBObject *parent);
   /// @brief Desctructor
   virtual ~DBOVariable();
 
@@ -227,6 +220,15 @@ public:
   //void subVariableHasMinMaxInfo ();
 
 protected:
+  /// DBO parent
+  DBObject &dbo_parent_;
+  /// DBO type
+  std::string dbo_type_;
+  /// Value representation type, based on enum STRING_REPRESENTATION
+  unsigned int representation_int_;
+  /// Description
+  std::string description_;
+
 //  /// Minimum as string
 //  std::string min_;
 //  /// Maximum as string
@@ -253,7 +255,7 @@ protected:
   std::map <std::string, std::pair <std::string, std::string> > schema_variables_;
 
   /// Flag indicating if this meta-variable has registered itself to its sub-variables
-  bool registered_as_parent_;
+  //bool registered_as_parent_;
 
   virtual void checkSubConfigurables ();
   /// @brief Registers a parent variable

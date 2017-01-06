@@ -23,6 +23,7 @@
  */
 
 #include <algorithm>
+#include "DBObject.h"
 #include "DBOVariable.h"
 #include "DBOVariableSet.h"
 
