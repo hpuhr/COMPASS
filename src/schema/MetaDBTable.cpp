@@ -24,7 +24,7 @@
 
 #include <algorithm>
 #include "DBSchema.h"
-#include "DBSchemaManager.h"
+#include "ATSDB.h"
 #include "DBTableColumn.h"
 #include "DBTable.h"
 #include "MetaDBTable.h"
@@ -265,7 +265,7 @@ void MetaDBTable::setSubTablesIfRequired ()
 
   std::vector <SubTableDefinition *>::iterator it;
 
-  DBSchema *current_schema = DBSchemaManager::getInstance().getCurrentSchema ();
+  DBSchema *current_schema = ATSDB::getInstance().getCurrentSchema ();
 
   for (it = sub_table_definitions_.begin(); it != sub_table_definitions_.end(); it++)
   {

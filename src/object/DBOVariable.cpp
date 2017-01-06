@@ -31,7 +31,7 @@
 #include "DBOVariable.h"
 //#include "ATSDB.h"
 #include "DBObjectManager.h"
-#include "DBSchemaManager.h"
+#include "ATSDB.h"
 #include "DBSchema.h"
 #include "DBTableColumn.h"
 #include "MetaDBTable.h"
@@ -469,7 +469,7 @@ bool DBOVariable::hasCurrentDBColumn ()
     std::string meta_tablename = getCurrentMetaTable ();
     std::string table_varname = getCurrentVariableName ();
 
-    return DBSchemaManager::getInstance().getCurrentSchema ()->getMetaTable(meta_tablename)->hasTableColumn(table_varname);
+    return ATSDB::getInstance().getCurrentSchema ()->getMetaTable(meta_tablename)->hasTableColumn(table_varname);
 }
 
 const DBTableColumn &DBOVariable::getCurrentDBColumn ()
@@ -479,12 +479,12 @@ const DBTableColumn &DBOVariable::getCurrentDBColumn ()
     std::string meta_tablename = getCurrentMetaTable ();
     std::string table_varname = getCurrentVariableName ();
 
-    return DBSchemaManager::getInstance().getCurrentSchema ()->getMetaTable(meta_tablename)->getTableColumn(table_varname);
+    return ATSDB::getInstance().getCurrentSchema ()->getMetaTable(meta_tablename)->getTableColumn(table_varname);
 }
 
 bool DBOVariable::hasCurrentSchema ()
 {
-    std::string schema = DBSchemaManager::getInstance().getCurrentSchemaName();
+    std::string schema = ATSDB::getInstance().getCurrentSchemaName();
     if (schema_variables_.find (schema) == schema_variables_.end())
     {
         logerr << "DBOVariable: hasCurrentSchema: failed in variable " << id_ << ", unknown schema '" << schema
@@ -508,14 +508,14 @@ bool DBOVariable::hasCurrentSchema ()
 const std::string &DBOVariable::getCurrentMetaTable ()
 {
     assert (hasCurrentSchema());
-    std::string schema = DBSchemaManager::getInstance().getCurrentSchemaName();
+    std::string schema = ATSDB::getInstance().getCurrentSchemaName();
     return schema_variables_[schema].first;
 
 }
 const std::string &DBOVariable::getCurrentVariableName ()
 {
     assert (hasCurrentSchema());
-    std::string schema = DBSchemaManager::getInstance().getCurrentSchemaName();
+    std::string schema = ATSDB::getInstance().getCurrentSchemaName();
     return schema_variables_[schema].second;
 }
 

@@ -35,6 +35,7 @@
 #include "DBConnectionInfo.h"
 #include "DBObject.h"
 #include "DBObjectManager.h"
+#include "DBSchemaManager.h"
 #include "DBInterface.h"
 #include "Global.h"
 #include "Logger.h"
@@ -59,7 +60,7 @@ using namespace std;
  * Locks state_mutex_, sets init state, creates members, starts the thread using go.
  */
 ATSDB::ATSDB()
- : Configurable ("ATSDB", "ATSDB0", 0, "conf/atsdb.xml"), db_interface_(nullptr), dbo_manager_(nullptr)
+ : Configurable ("ATSDB", "ATSDB0", 0, "conf/atsdb.xml"), db_interface_(nullptr), dbo_manager_(nullptr), db_schema_manager_ (nullptr)
 //: export_active_(false), dbo_reads_active_(0)
 {
     db_opened_=false;
@@ -99,6 +100,12 @@ ATSDB::~ATSDB()
         dbo_manager_ = nullptr;
     }
 
+    if (db_schema_manager_ != nullptr)
+    {
+        delete db_schema_manager_;
+        db_schema_manager_ = nullptr;
+    }
+
 //    if (dbo_read_jobs_.size() > 0)
 //        logerr << "ATSDB: destructor: unfinished dbo read jobs " << dbo_read_jobs_.size();
 
@@ -124,17 +131,23 @@ ATSDB::~ATSDB()
 void ATSDB::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
     logdbg  << "ATSDB: generateSubConfigurable: class_id " << class_id << " instance_id " << instance_id;
-    if (class_id.compare ("DBInterface") == 0)
+    if (class_id == "DBInterface")
     {
         assert (db_interface_ == nullptr);
         db_interface_ = new DBInterface (class_id, instance_id, this);
         assert (db_interface_ != nullptr);
     }
-    else if (class_id.compare ("DBObjectManager") == 0)
+    else if (class_id == "DBObjectManager")
     {
         assert (dbo_manager_ == nullptr);
         dbo_manager_ = new DBObjectManager (class_id, instance_id, this);
         assert (dbo_manager_ != nullptr);
+    }
+    else if (class_id == "DBSchemaManager")
+    {
+        assert (db_schema_manager_ == nullptr);
+        db_schema_manager_ = new DBSchemaManager (class_id, instance_id, this);
+        assert (db_schema_manager_ != nullptr);
     }
     else
         throw std::runtime_error ("ATSDB: generateSubConfigurable: unknown class_id "+class_id );
@@ -154,6 +167,13 @@ void ATSDB::checkSubConfigurables ()
         generateSubConfigurable ("DBObjectManager", "DBObjectManager0");
         assert (dbo_manager_ != nullptr);
     }
+    if (db_schema_manager_ == nullptr)
+    {
+        addNewSubConfiguration ("DBSchemaManager", "DBSchemaManager0");
+        generateSubConfigurable ("DBSchemaManager", "DBSchemaManager0");
+        assert (dbo_manager_ != nullptr);
+    }
+
 }
 
 
@@ -213,13 +233,35 @@ void ATSDB::open (std::string database_name)
 /// @brief Returns if an object of type exists
 bool ATSDB::existsDBObject (const std::string &dbo_type)
 {
+    assert (dbo_manager_);
     return dbo_manager_->existsDBObject(dbo_type);
 }
 
 /// @brief Returns the object of type, if existing
 DBObject &ATSDB::getDBObject (const std::string &dbo_type)
 {
+    assert (dbo_manager_);
     return dbo_manager_->getDBObject(dbo_type);
+}
+
+bool ATSDB::hasCurrentSchema ()
+{
+    assert (db_schema_manager_);
+    return db_schema_manager_->hasCurrentSchema();
+}
+
+/// @brief Returns name of the current schema
+std::string ATSDB::getCurrentSchemaName ()
+{
+    assert (db_schema_manager_);
+    return db_schema_manager_->getCurrentSchemaName();
+}
+
+/// @brief Returns the current DBSchema
+DBSchema *ATSDB::getCurrentSchema ()
+{
+    assert (db_schema_manager_);
+    return db_schema_manager_->getCurrentSchema();
 }
 
 /**

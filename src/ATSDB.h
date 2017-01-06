@@ -42,6 +42,8 @@ class DBConnectionInfo;
 class DBInterface;
 class DBObject;
 class DBObjectManager;
+class DBSchema;
+class DBSchemaManager;
 //class StructureReader;
 class DBOVariable;
 class Job;
@@ -111,6 +113,13 @@ public:
     bool existsDBObject (const std::string &dbo_type);
     /// @brief Returns the object of type, if existing
     DBObject &getDBObject (const std::string &dbo_type);
+
+    /// @brief Returns flag indicating if current schema is defined and exists
+    bool hasCurrentSchema ();
+    /// @brief Returns name of the current schema
+    std::string getCurrentSchemaName ();
+    /// @brief Returns the current DBSchema
+    DBSchema *getCurrentSchema ();
 
     ///@brief Adds data to a DBO from a C struct data pointer.
     //void insert (const std::string &dbo_type, void *data);
@@ -222,6 +231,7 @@ protected:
     /// DB interface, encapsulating all database functionality.
     DBInterface *db_interface_;
     DBObjectManager *dbo_manager_;
+    DBSchemaManager *db_schema_manager_;
     /// Structure reader, can read data from defined C structs.
     //StructureReader *struct_reader_;
     /// Map containg all existing data sources (DBO type -> data source number, data source name).

@@ -33,7 +33,7 @@
 #include "PropertyList.h"
 #include "MetaDBTable.h"
 //#include "ActiveSourcesObserver.h"
-//#include "ATSDB.h"
+#include "ATSDB.h"
 
 /**
  * Registers parameters, creates sub configurables
@@ -148,13 +148,13 @@ const std::string &DBObject::getMetaTable (const std::string &schema) const
  */
 bool DBObject::hasCurrentDataSource () const
 {
-  return (data_source_definitions_.find(DBSchemaManager::getInstance().getCurrentSchema()->getName()) != data_source_definitions_.end());
+  return (data_source_definitions_.find(ATSDB::getInstance().getCurrentSchema()->getName()) != data_source_definitions_.end());
 }
 
 const DBODataSourceDefinition &DBObject::getCurrentDataSource () const
 {
   assert (hasCurrentDataSource());
-  return data_source_definitions_.at(DBSchemaManager::getInstance().getCurrentSchema()->getName());
+  return data_source_definitions_.at(ATSDB::getInstance().getCurrentSchema()->getName());
 }
 
 /**
@@ -167,7 +167,7 @@ bool DBObject::hasCurrentMetaTable () const
     return true;
   else
   {
-    DBSchema *schema = DBSchemaManager::getInstance().getCurrentSchema();
+    DBSchema *schema = ATSDB::getInstance().getCurrentSchema();
     logdbg  << "DBObject "<< getName() << ": hasCurrentMetaTable: got current schema " << schema->getName();
     assert (meta_tables_.find(schema->getName()) != meta_tables_.end());
     std::string meta_table_name = meta_tables_ .at(schema->getName());
@@ -184,7 +184,7 @@ const MetaDBTable &DBObject::getCurrentMetaTable ()
 {
   if (!current_meta_table_)
   {
-    DBSchema *schema = DBSchemaManager::getInstance().getCurrentSchema();
+    DBSchema *schema = ATSDB::getInstance().getCurrentSchema();
     assert (meta_tables_.find(schema->getName()) != meta_tables_.end());
     std::string meta_table_name = meta_tables_ .at(schema->getName());
     assert (schema->hasMetaTable (meta_table_name));

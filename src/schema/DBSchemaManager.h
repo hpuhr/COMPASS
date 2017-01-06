@@ -26,7 +26,7 @@
 #define DBSCHEMAMANAGER_H_
 
 #include "Configurable.h"
-#include "Singleton.h"
+
 
 class DBSchema;
 
@@ -37,20 +37,12 @@ class DBSchema;
  *
  * \todo Check why addRDLSchema is the same addEmptySchema.
  */
-class DBSchemaManager : public Configurable, public Singleton
+class DBSchemaManager : public Configurable
 {
-private:
-  /// Name of current DBSchema
-  std::string current_schema_;
-  /// Container with all defined schemas (schema name -> DBSchema)
-  std::map <std::string, DBSchema *> schemas_;
-
-  /// @brief Constructor
-  DBSchemaManager();
-
-  //void loadDBSchema (); // outdated method
-
 public:
+  /// @brief Constructor
+  DBSchemaManager(const std::string &class_id, const std::string &instance_id, Configurable *parent);
+
   /// @brief Destructor
   virtual ~DBSchemaManager();
 
@@ -79,15 +71,16 @@ public:
 
   virtual void generateSubConfigurable (std::string class_id, std::string instance_id);
 
-public:
-  static DBSchemaManager& getInstance()
-  {
-      static DBSchemaManager instance;
-      return instance;
-  }
-
 protected:
+  /// Name of current DBSchema
+  std::string current_schema_;
+  /// Container with all defined schemas (schema name -> DBSchema)
+  std::map <std::string, DBSchema *> schemas_;
+
+  //void loadDBSchema (); // outdated method
   virtual void checkSubConfigurables ();
+
+
 };
 
 #endif /* DBSCHEMAMANAGER_H_ */

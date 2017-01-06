@@ -32,8 +32,8 @@
 /**
  * Registers current_schema as parameter, creates sub-configurables (schemas), checks if current_schema exists (if defined).
  */
-DBSchemaManager::DBSchemaManager()
-: Configurable ("DBSchemaManager", "DBSchemaManager0", 0, "conf/config_db_schema.xml")
+DBSchemaManager::DBSchemaManager(const std::string &class_id, const std::string &instance_id, Configurable *parent)
+: Configurable (class_id, instance_id, parent, "conf/config_db_schema.xml")
 {
     registerParameter ("current_schema", &current_schema_, (std::string)"");
 
@@ -41,7 +41,6 @@ DBSchemaManager::DBSchemaManager()
 
     if (current_schema_.size() != 0)
         assert (schemas_.find(current_schema_) != schemas_.end());
-
 }
 
 /**
