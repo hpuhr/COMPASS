@@ -52,15 +52,16 @@ public:
     /// @brief Desctructor. Calls clear.
     virtual ~PropertyList()
     {
-        logdbg << "PropertyList: desctructor: start";
+        logdbg << "PropertyList: destructor: start";
         clear();
-        logdbg << "PropertyList: desctructor: end";
+        logdbg << "PropertyList: destructor: end";
     };
 
     /// @brief Copy constructor
     PropertyList(const PropertyList& org)
     {
         properties_ = org.properties_;
+        //loginf << "PropertyList: constructor: properties " << properties_.size();
     }
 
     /// @brief Copy operator

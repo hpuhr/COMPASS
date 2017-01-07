@@ -109,7 +109,10 @@ protected:
   virtual void finalizeStatement ()=0;
 
   /// @brief Executes an SQL command which returns data (internal)
-  void execute (std::string command, Buffer *buffer);
+  //void execute (std::string command, Buffer *buffer);
+
+  /// @brief Executes an SQL command which no returns data (internal)
+  //void execute (std::string command);
 };
 
 #endif /* DBCONNECTION_H_ */

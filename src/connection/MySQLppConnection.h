@@ -98,10 +98,16 @@ private:
     void prepareStatement (const char *sql);
     void finalizeStatement ();
 
+    /// @brief Executes an SQL command which returns data (internal)
     void execute (std::string command, Buffer *buffer);
 
+    /// @brief Executes an SQL command which returns no data (internal)
+    void execute (std::string command);
+
+    void readRowIntoBuffer (mysqlpp::Row &row, const PropertyList &list, unsigned int num_properties, Buffer *buffer, unsigned int index);
+
     /// @brief Used for performance tests.
-    // void performanceTest ();
+    void performanceTest ();
 };
 
 #endif /* MySQLppConnection_H_ */

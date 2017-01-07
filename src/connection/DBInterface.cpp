@@ -157,6 +157,7 @@ void DBInterface::initConnection (DBConnectionInfo *info)
     assert (connection_);
     connection_->connect();
 
+
 }
 
 void DBInterface::openDatabase (std::string database_name)

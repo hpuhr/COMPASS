@@ -55,7 +55,7 @@ Buffer::Buffer()
  * \param type DBO type
  */
 Buffer::Buffer(PropertyList properties, std::string dbo_type)
-: properties_(properties), dbo_type_(dbo_type), last_one_(false)
+: dbo_type_(dbo_type), last_one_(false)
 //, first_write_(true),
 //search_active_(false), search_key_pos_(-1), search_key_min_ (-1), search_key_max_ (-1)
 {
@@ -63,6 +63,9 @@ Buffer::Buffer(PropertyList properties, std::string dbo_type)
 
     id_ = ids_;
     ++ids_;
+
+    for (unsigned int cnt=0; cnt < properties.size(); cnt++)
+        addProperty(properties.at(cnt));
 
     //init();
 
@@ -260,7 +263,12 @@ void Buffer::addProperty (std::string id, PropertyDataType type)
     properties_.addProperty(id,type);
 
     logdbg  << "Buffer: addProperty: end";
-};
+}
+
+void Buffer::addProperty (const Property &property)
+{
+    addProperty (property.getId(), property.getDataType());
+}
 
 ArrayListTemplate<bool> &Buffer::getBool (const std::string &id)
 {

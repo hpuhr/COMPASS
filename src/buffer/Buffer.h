@@ -61,6 +61,7 @@ public:
 
     /// @brief Adds an additional property.
     void addProperty (std::string id, PropertyDataType type);
+    void addProperty (const Property &property);
 
     /// @brief Print function for debugging.
 //    void print (unsigned int num_elements);

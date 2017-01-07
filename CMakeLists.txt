@@ -2,7 +2,7 @@ set(ATSDB_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 message("  Path: ${ATSDB_PATH}")
 
 cmake_minimum_required( VERSION 2.6 )
-set ( CMAKE_BUILD_TYPE Debug )
+set ( CMAKE_BUILD_TYPE Release )
 
 project( ATSDB )
 
@@ -28,9 +28,9 @@ find_package ( MySQLpp REQUIRED )
 message("  MySQLpp_INCLUDE_DIR: ${MySQLpp_INCLUDE_DIR}") 
 message("  MySQLpp_LIBRARY: ${MySQLpp_LIBRARY}") 
 
-find_package ( MySQL REQUIRED )
-message("  MYSQL_INCLUDE_DIR: ${MYSQL_INCLUDE_DIR}") 
-message("  MYSQL_LIBRARY: ${MYSQL_LIBRARY}") 
+#find_package ( MySQL REQUIRED )
+#message("  MYSQL_INCLUDE_DIR: ${MYSQL_INCLUDE_DIR}")
+#message("  MYSQL_LIBRARY: ${MYSQL_LIBRARY}")
 
 #find_package ( Sqlite3 REQUIRED )
 #message("  SQLite3_INCLUDE_DIR: ${SQLITE3_INCLUDE_DIR}")
@@ -385,11 +385,11 @@ set ( client_SRCS
 QT4_WRAP_UI( UI_HDRS ${atsdb_UI} )
 qt4_wrap_cpp (atsdb_MOC_OUTFILES ${atsdb_MOC_HEADERS})
 add_library ( atsdb SHARED ${atsdb_SRCS} ${atsdb_HDRS} ${UIS} ${UI_HDRS} ${RSCS} ${TRS} ${atsdb_MOC_OUTFILES} )
-target_link_libraries ( atsdb  ${GDAL_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${TINYXML2_LIBRARY} ${GDAL_LIBRARIES} ${Boost_LIBRARIES} -lmysqlcppconn ${LOG4CPP_LIBRARIES} ${MySQLpp_LIBRARY})
+target_link_libraries ( atsdb  ${GDAL_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${TINYXML2_LIBRARY} ${GDAL_LIBRARIES} ${Boost_LIBRARIES} ${LOG4CPP_LIBRARIES} ${MySQLpp_LIBRARY})
 # ${SQLITE3_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_DATA_TIME_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_IOSTREAMS_LIBRARY}
 
 add_executable ( atsdb_client ${atsdb_HDRS} ${client_SRCS})
-target_link_libraries ( atsdb_client atsdb ${GDAL_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${TINYXML2_LIBRARY} ${GDAL_LIBRARIES} ${Boost_LIBRARIES} -lmysqlcppconn ${LOG4CPP_LIBRARIES} ${MySQLpp_LIBRARY})
+target_link_libraries ( atsdb_client atsdb ${GDAL_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${TINYXML2_LIBRARY} ${GDAL_LIBRARIES} ${Boost_LIBRARIES} ${LOG4CPP_LIBRARIES} ${MySQLpp_LIBRARY})
 
 INSTALL_FILES(/include .h ${atsdb_HDRS})
 INSTALL_FILES(/include .h ${atsdb_MOC_HEADERS})
