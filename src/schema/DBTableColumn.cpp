@@ -25,7 +25,7 @@
 #include "DBTableColumn.h"
 #include "Logger.h"
 
-DBTableColumn::DBTableColumn(std::string class_id, std::string instance_id, Configurable *parent, std::string db_table_name)
+DBTableColumn::DBTableColumn(const std::string &class_id, const std::string &instance_id, Configurable *parent, const std::string &db_table_name)
  : Configurable (class_id, instance_id, parent), db_table_name_ (db_table_name)
 {
   registerParameter ("name", &name_, (std::string) "");

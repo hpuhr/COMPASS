@@ -37,38 +37,38 @@ class DBTableColumn : public Configurable
 {
 public:
   /// @brief Constructor
-  DBTableColumn(std::string class_id, std::string instance_id, Configurable *parent, std::string db_table_name);
+  DBTableColumn(const std::string &class_id, const std::string &instance_id, Configurable *parent, const std::string &db_table_name);
   /// @brief Destructor
   virtual ~DBTableColumn();
 
   /// @brief Sets the column name
-  void setName (std::string name) { name_=name; }
+  void name (const std::string &name) { name_=name; }
   /// @brief Returns the column name
-  std::string getName() { return name_; }
+  const std::string &name() const { return name_; }
 
   /// @brief Sets the data type
-  void setType (std::string type) { type_=type; }
+  void type (const std::string &type) { type_=type; }
   /// @brief Returns the data type
-  std::string getType() { return type_; }
+  const std::string &type() const { return type_; }
 
   /// @brief Sets key flag
-  void setIsKey (bool is_key) { is_key_=is_key;}
+  void isKey (bool is_key) { is_key_=is_key;}
   /// @brief Returns key flag
-  bool isKey () { return is_key_; }
+  bool isKey () const { return is_key_; }
 
   /// @brief Returns if column has an assigned unit
-  bool hasUnit () { return unit_dimension_.size() != 0;}
+  bool unit () const { return unit_dimension_.size() != 0; }
   /// @brief Returns unit dimension
-  std::string &getUnitDimension () { return unit_dimension_; }
+  const std::string &unitDimension () const { return unit_dimension_; }
   /// @brief Returns unit
-  std::string &getUnitUnit () { return unit_unit_; }
+  const std::string &unitUnit () const { return unit_unit_; }
 
   /// @brief Returns database table name which holds this column
-  std::string getDBTableName () { return db_table_name_; }
+  const std::string &dbTableName () const { return db_table_name_; }
 
-  bool hasSpecialNull () { return special_null_.size() > 0; }
-  void setSpecialNull (std::string special_null) { special_null_ = special_null; }
-  std::string getSpecialNull () { return special_null_; }
+  bool hasSpecialNull () const { return special_null_.size() > 0; }
+  void specialNull (std::string special_null) { special_null_ = special_null; }
+  const std::string &specialNull () const { return special_null_; }
 
   void createSubConfigurables () {}
 

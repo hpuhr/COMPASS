@@ -27,7 +27,6 @@
 
 #include "Configurable.h"
 
-
 class DBSchema;
 
 /**
@@ -49,33 +48,33 @@ public:
   /// @brief Returns flag indicating if current schema is defined and exists
   bool hasCurrentSchema ();
   /// @brief Returns name of the current schema
-  std::string getCurrentSchemaName ();
+  const std::string &getCurrentSchemaName ();
   /// @brief Returns the current DBSchema
-  DBSchema *getCurrentSchema ();
+  DBSchema &getCurrentSchema ();
   /// @brief Returns the DBSchema with a given name
-  DBSchema *getSchema (std::string name);
+  DBSchema &getSchema (const std::string &name);
   /// @brief Returns if DBSchema with a given name exists
-  bool hasSchema (std::string name);
+  bool hasSchema (const std::string &name);
 
   /// @brief Returns container with all schemas
-  std::map <std::string, DBSchema *>& getSchemas () { return schemas_; }
+  std::map <std::string, DBSchema>& getSchemas () { return schemas_; }
 
   /// @brief Renames the current schema
-  void renameCurrentSchema (std::string new_name);
+  void renameCurrentSchema (const std::string &new_name);
   /// @brief Sets the current schema
-  void setCurrentSchema (std::string current_schema);
+  void setCurrentSchema (const std::string &current_schema);
   /// @brief Adds an empty schema with a given name
-  void addEmptySchema (std::string name);
+  void addEmptySchema (const std::string &name);
   /// @brief Adds an RDL schema with a given name
   //void addRDLSchema (std::string name);
 
-  virtual void generateSubConfigurable (std::string class_id, std::string instance_id);
+  virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
 protected:
   /// Name of current DBSchema
   std::string current_schema_;
   /// Container with all defined schemas (schema name -> DBSchema)
-  std::map <std::string, DBSchema *> schemas_;
+  std::map <std::string, DBSchema> schemas_;
 
   //void loadDBSchema (); // outdated method
   virtual void checkSubConfigurables ();

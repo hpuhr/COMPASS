@@ -32,9 +32,10 @@
 //#include "ATSDB.h"
 #include "DBObjectManager.h"
 #include "ATSDB.h"
-#include "DBSchema.h"
 #include "DBTableColumn.h"
+#include "DBTable.h"
 #include "MetaDBTable.h"
+#include "DBSchema.h"
 #include "Unit.h"
 #include "UnitManager.h"
 //#include "DBOVariableMinMaxObserver.h"
@@ -469,7 +470,7 @@ bool DBOVariable::hasCurrentDBColumn ()
     std::string meta_tablename = getCurrentMetaTable ();
     std::string table_varname = getCurrentVariableName ();
 
-    return ATSDB::getInstance().getCurrentSchema ()->getMetaTable(meta_tablename)->hasTableColumn(table_varname);
+    return ATSDB::getInstance().getCurrentSchema().metaTable(meta_tablename).hasColumn(table_varname);
 }
 
 const DBTableColumn &DBOVariable::getCurrentDBColumn ()
@@ -479,7 +480,7 @@ const DBTableColumn &DBOVariable::getCurrentDBColumn ()
     std::string meta_tablename = getCurrentMetaTable ();
     std::string table_varname = getCurrentVariableName ();
 
-    return ATSDB::getInstance().getCurrentSchema ()->getMetaTable(meta_tablename)->getTableColumn(table_varname);
+    return ATSDB::getInstance().getCurrentSchema().metaTable(meta_tablename).column(table_varname);
 }
 
 bool DBOVariable::hasCurrentSchema ()

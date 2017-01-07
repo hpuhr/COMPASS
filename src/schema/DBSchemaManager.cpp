@@ -23,8 +23,11 @@
  */
 
 #include "ConfigurationManager.h"
-#include "DBSchemaManager.h"
+#include "DBTableColumn.h"
+#include "DBTable.h"
+#include "MetaDBTable.h"
 #include "DBSchema.h"
+#include "DBSchemaManager.h"
 #include "Logger.h"
 #include "ATSDB.h"
 #include "Buffer.h"
@@ -48,28 +51,27 @@ DBSchemaManager::DBSchemaManager(const std::string &class_id, const std::string 
  */
 DBSchemaManager::~DBSchemaManager()
 {
-    std::map <std::string, DBSchema *>::iterator it;
-    for (it = schemas_.begin(); it != schemas_.end(); it++)
-        delete it->second;
+//    std::map <std::string, DBSchema *>::iterator it;
+//    for (it = schemas_.begin(); it != schemas_.end(); it++)
+//        delete it->second;
     schemas_.clear();
 
 }
 
-void DBSchemaManager::renameCurrentSchema (std::string new_name)
+void DBSchemaManager::renameCurrentSchema (const std::string &new_name)
 {
     assert (hasCurrentSchema());
 
-    std::map <std::string, DBSchema *>::iterator it;
+    std::map <std::string, DBSchema>::iterator it;
     it = schemas_.find (current_schema_);
-    DBSchema *schema = it->second;
-    schemas_.erase (it);
     assert (new_name.size() != 0);
     assert (schemas_.find(new_name) == schemas_.end());
-    schemas_[new_name] = schema;
+    schemas_.insert (std::pair <std::string, DBSchema> (new_name, it->second));
+    schemas_.erase(it);
     current_schema_= new_name;
 }
 
-void DBSchemaManager::setCurrentSchema (std::string current_schema)
+void DBSchemaManager::setCurrentSchema (const std::string &current_schema)
 {
     assert (current_schema.size() != 0);
     assert (schemas_.find(current_schema) != schemas_.end());
@@ -96,7 +98,7 @@ bool DBSchemaManager::hasCurrentSchema ()
         return false;
     }
 }
-std::string DBSchemaManager::getCurrentSchemaName ()
+const std::string &DBSchemaManager::getCurrentSchemaName ()
 {
     assert (hasCurrentSchema());
     return current_schema_;
@@ -108,7 +110,7 @@ std::string DBSchemaManager::getCurrentSchemaName ()
  *
  * \exception std::runtime_error if unknown class_id
  */
-void DBSchemaManager::generateSubConfigurable (std::string class_id, std::string instance_id)
+void DBSchemaManager::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
     logdbg  << "DBSchemaManager: generateSubConfigurable: " << class_id_ << " instance " << instance_id_;
 
@@ -116,9 +118,10 @@ void DBSchemaManager::generateSubConfigurable (std::string class_id, std::string
     {
         logdbg  << "DBSchema: generateSubConfigurable: generating DBTable";
         DBSchema *schema = new DBSchema ("DBSchema", instance_id, this);
-        assert (schema->getName().size() != 0);
-        assert (schemas_.find(schema->getName()) == schemas_.end());
-        schemas_[schema->getName()]=schema;
+        assert (schema->name().size() != 0);
+        assert (schemas_.find(schema->name()) == schemas_.end());
+        schemas_.insert (std::pair <std::string, DBSchema> (schema->name(), *schema));
+        //schemas_.at(schema->getName())=schema;
     }
     else
         throw std::runtime_error ("DBSchema: generateSubConfigurable: unknown class_id "+class_id);
@@ -133,25 +136,25 @@ void DBSchemaManager::checkSubConfigurables ()
     //  }
 }
 
-DBSchema *DBSchemaManager::getCurrentSchema ()
+DBSchema &DBSchemaManager::getCurrentSchema ()
 {
     assert (current_schema_.size() != 0);
     assert (schemas_.find(current_schema_) != schemas_.end());
-    return schemas_[current_schema_];
+    return schemas_.at(current_schema_);
 }
 
-DBSchema *DBSchemaManager::getSchema (std::string name)
+DBSchema &DBSchemaManager::getSchema (const std::string &name)
 {
     assert (schemas_.find(name) != schemas_.end());
-    return schemas_[name];
+    return schemas_.at(name);
 }
 
-bool DBSchemaManager::hasSchema (std::string name)
+bool DBSchemaManager::hasSchema (const std::string &name)
 {
     return schemas_.find(name) != schemas_.end();
 }
 
-void DBSchemaManager::addEmptySchema (std::string name)
+void DBSchemaManager::addEmptySchema (const std::string &name)
 {
     std::string schema_name="DBSchema"+name+"0";
     Configuration &schema_configuration = addNewSubConfiguration ("DBSchema", schema_name);

@@ -40,30 +40,30 @@ class DBSchema : public Configurable
 {
 public:
   /// @brief Constructor
-  DBSchema(std::string class_id, std::string instance_id, Configurable *parent);
+  DBSchema(const std::string &class_id, const std::string &instance_id, Configurable *parent);
   /// @brief Destructor
   virtual ~DBSchema();
 
-  virtual void generateSubConfigurable (std::string class_id, std::string instance_id);
+  virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
   /// @brief Sets the schema name
-  void setName (std::string name) { assert (name.size() != 0); name_=name; }
+  void name (const std::string &name) { assert (name.size() != 0); name_=name; }
   /// @brief Returns the schema name
-  std::string getName () { return name_; }
+  const std::string &name () const { return name_; }
 
   /// @brief Returns the DBTable with the supplied name
-  DBTable *getTable (std::string name);
+  const DBTable &table (const std::string &name) const  {  assert (tables_.find(name) != tables_.end()); return tables_.at(name); }
   /// @brief returns flag if a table with the given name exists
-  bool hasTable (std::string name);
-  std::string getTableName (std::string db_table_name);
+  bool hasTable (const std::string &name) const { return tables_.find(name) != tables_.end(); }
+  const std::string &tableName (const std::string &db_table_name) const;
 
-  MetaDBTable *getMetaTable (std::string name);
-  bool hasMetaTable (std::string name);
+  bool hasMetaTable (const std::string &name) const;
+  const MetaDBTable &metaTable (const std::string &name) const { assert (hasMetaTable(name)); return meta_tables_.at(name);}
 
   /// @brief Returns container with all tables
-  std::map <std::string, DBTable*> &getTables () { return tables_; }
+  const std::map <std::string, DBTable> &tables () const { return tables_; }
   /// @brief Returns container with all meta-tables
-  std::map <std::string, MetaDBTable*> &getMetaTables () { return meta_tables_; }
+  const std::map <std::string, MetaDBTable> &metaTables ()  const{ return meta_tables_; }
 
   /// @brief Updates table container (if name of a table changed)
   void updateTables ();
@@ -71,16 +71,16 @@ public:
   void updateMetaTables ();
 
 protected:
-  virtual void checkSubConfigurables ();
+  virtual void checkSubConfigurables () {};
 
 private:
   /// Name of the schema
   std::string name_;
 
   /// Container with all tables (table name -> DBTable)
-  std::map <std::string, DBTable*> tables_;
+  std::map <std::string, DBTable> tables_;
   /// Container with all meta-tables (meta-table name -> MetaDBTable)
-  std::map <std::string, MetaDBTable*> meta_tables_;
+  std::map <std::string, MetaDBTable> meta_tables_;
 };
 
 #endif /* DBSCHEMA_H_ */

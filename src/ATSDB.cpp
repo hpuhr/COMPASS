@@ -251,14 +251,14 @@ bool ATSDB::hasCurrentSchema ()
 }
 
 /// @brief Returns name of the current schema
-std::string ATSDB::getCurrentSchemaName ()
+const std::string &ATSDB::getCurrentSchemaName ()
 {
     assert (db_schema_manager_);
     return db_schema_manager_->getCurrentSchemaName();
 }
 
 /// @brief Returns the current DBSchema
-DBSchema *ATSDB::getCurrentSchema ()
+DBSchema &ATSDB::getCurrentSchema ()
 {
     assert (db_schema_manager_);
     return db_schema_manager_->getCurrentSchema();

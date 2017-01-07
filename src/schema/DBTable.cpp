@@ -26,63 +26,60 @@
 #include "DBTableColumn.h"
 #include "Logger.h"
 
-DBTable::DBTable(std::string class_id, std::string instance_id, Configurable *parent)
- : Configurable (class_id, instance_id, parent)
+DBTable::DBTable(const std::string &class_id, const std::string &instance_id, Configurable *parent)
+    : Configurable (class_id, instance_id, parent)
 {
-  registerParameter ("db_name", &db_name_, (std::string) "");
-  registerParameter ("name", &name_, (std::string) "");
-  registerParameter ("info", &info_, (std::string) "");
-  registerParameter ("key_name", &key_name_, (std::string) "");
+    registerParameter ("db_name", &db_name_, (std::string) "");
+    registerParameter ("name", &name_, (std::string) "");
+    registerParameter ("info", &info_, (std::string) "");
+    registerParameter ("key_name", &key_name_, (std::string) "");
 
-  createSubConfigurables();
+    createSubConfigurables();
 }
 
 DBTable::~DBTable()
 {
-  std::map <std::string, DBTableColumn *>::iterator it;
-  for (it =  columns_.begin(); it !=  columns_.end(); it++)
-    delete it->second;
-  columns_.clear();
+    //  std::map <std::string, DBTableColumn *>::iterator it;
+    //  for (it =  columns_.begin(); it !=  columns_.end(); it++)
+    //    delete it->second;
+    columns_.clear();
 }
 
-void DBTable::generateSubConfigurable (std::string class_id, std::string instance_id)
+void DBTable::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
-  logdbg  << "DBTable: generateSubConfigurable: " << class_id_ << " instance " << instance_id_;
+    logdbg  << "DBTable: generateSubConfigurable: " << class_id_ << " instance " << instance_id_;
 
-  if (class_id.compare("DBTableColumn") == 0)
-  {
-    DBTableColumn *column = new DBTableColumn ("DBTableColumn", instance_id, this, db_name_);
-    assert (column->getName().size() != 0);
-    assert (columns_.find(column->getName()) == columns_.end());
-    columns_ [column->getName()] = column;
+    if (class_id == "DBTableColumn")
+    {
+        DBTableColumn *column = new DBTableColumn ("DBTableColumn", instance_id, this, db_name_);
+        assert (column->name().size() != 0);
+        assert (columns_.find(column->name()) == columns_.end());
+        columns_.insert (std::pair <std::string, DBTableColumn> (column->name(), *column));
 
-    if (column->isKey())
-      key_name_ = column->getName();
-  }
-  else
-    throw std::runtime_error ("DBTable: generateSubConfigurable: unknown class_id "+class_id);
+        if (column->isKey())
+            key_name_ = column->name();
+    }
+    else
+        throw std::runtime_error ("DBTable: generateSubConfigurable: unknown class_id "+class_id);
 }
 void DBTable::checkSubConfigurables ()
 {
-  // move along, sir.
+    // move along, sir.
 }
 
-bool DBTable::hasTableColumn (std::string name)
+bool DBTable::hasColumn (const std::string &name) const
 {
     return columns_.find(name) != columns_.end();
 }
 
-DBTableColumn *DBTable::getTableColumn (std::string name)
+const DBTableColumn &DBTable::column (const std::string &name) const
 {
-  assert (columns_.find(name) != columns_.end());
-  return columns_[name];
+    assert (columns_.find(name) != columns_.end());
+    return columns_.at(name);
 }
 
-void DBTable::deleteColumn (std::string name)
+void DBTable::deleteColumn (const std::string &name)
 {
-  std::map <std::string, DBTableColumn *>::iterator it;
-  it =  columns_.find(name);
-  assert (it !=  columns_.end());
-  delete it->second;
-  columns_.erase(it);
+    assert (hasColumn(name));
+    columns_.erase(columns_.find(name));
 }

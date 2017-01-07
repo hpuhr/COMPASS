@@ -240,7 +240,7 @@ protected:
   std::set<int> active_data_sources_;
 
   /// Current (in the current schema) main meta table
-  MetaDBTable *current_meta_table_;
+  const MetaDBTable *current_meta_table_; // TODO rework
 
   /// Flag indicating if varaibles where checked. Not really used yet.
   bool variables_checked_;

@@ -117,9 +117,9 @@ public:
     /// @brief Returns flag indicating if current schema is defined and exists
     bool hasCurrentSchema ();
     /// @brief Returns name of the current schema
-    std::string getCurrentSchemaName ();
+    const std::string &getCurrentSchemaName ();
     /// @brief Returns the current DBSchema
-    DBSchema *getCurrentSchema ();
+    DBSchema &getCurrentSchema ();
 
     ///@brief Adds data to a DBO from a C struct data pointer.
     //void insert (const std::string &dbo_type, void *data);

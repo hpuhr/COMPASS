@@ -38,44 +38,44 @@ class DBTable : public Configurable
 {
 public:
   /// @brief Constructor
-  DBTable(std::string class_id, std::string instance_id, Configurable *parent);
+  DBTable(const std::string &class_id, const std::string &instance_id, Configurable *parent);
   /// @brief Destructor
   virtual ~DBTable();
 
-  virtual void generateSubConfigurable (std::string class_id, std::string instance_id);
-
-  /// @brief Returns container with all table columns
-  std::map <std::string, DBTableColumn *>& getColumns () { return columns_; }
+  virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
   /// @brief Sets the identifier name
-  void setName (std::string name) {assert (name.size() != 0); name_ = name;}
+  void name (const std::string &name) {assert (name.size() != 0); name_ = name;}
   /// @brief Returns the identifier name
-  std::string getName () { return name_; }
+  const std::string &name () const { return name_; }
 
   /// @brief Sets the name of the database table
-  void setDBName (std::string db_name) {assert (db_name.size() != 0); db_name_ = db_name;}
+  void dbName (const std::string &db_name) {assert (db_name.size() != 0); db_name_ = db_name;}
   /// @brief Return the name of the database table
-  std::string getDBName () { return db_name_; }
+  const std::string &dbName () const { return db_name_; }
 
   /// @brief Sets the description
-  void setInfo (std::string info) { info_=info; }
+  void info (const std::string &info) { info_=info; }
   /// @brief Returns the description
-  std::string getInfo () { return info_; }
+  const std::string &getInfo () const { return info_; }
 
-  bool hasTableColumn (std::string name);
+  bool hasColumn (const std::string &name) const;
   /// @brief Returns the DBTableColumn identified by the given name
-  DBTableColumn *getTableColumn (std::string name);
+  const DBTableColumn &column (const std::string &name) const;
   /// @brief Returns number of defined database columns
-  unsigned int getNumColumns () { return columns_.size(); }
+  unsigned int numColumns () const { return columns_.size(); }
   /// @brief Deletes a given column
-  void deleteColumn (std::string name);
+  void deleteColumn (const std::string &name);
+
+  /// @brief Returns container with all table columns
+  const std::map <std::string, DBTableColumn>& columns () const { return columns_; }
 
   /// @brief Returns if the name of the key column is defined
-  bool hasKey() { return key_name_.size() > 0; }
+  bool hasKey() const { return key_name_.size() > 0; }
   /// @brief Sets the name of the key column
-  void setKey (std::string key) { key_name_ = key; }
+  void key (const std::string &key) { key_name_ = key; }
   /// @brief Returns name of the key column
-  std::string getKeyName () { return key_name_; }
+  const std::string &key () const { return key_name_; }
 
 private:
   /// Table name identifier
@@ -87,7 +87,7 @@ private:
   /// Name of the key column
   std::string key_name_;
   /// Container with all table columns (column name -> DBTableColumn)
-  std::map <std::string, DBTableColumn *> columns_;
+  std::map <std::string, DBTableColumn> columns_;
 
 protected:
   virtual void checkSubConfigurables ();
