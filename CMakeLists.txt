@@ -114,6 +114,7 @@ set ( atsdb_HDRS
         src/connection/DBConnectionInfo.h
 #        src/connection/MySQLConConnection.h
         src/connection/MySQLppConnection.h
+        src/connection/SQLGenerator.h
 ##        src/connection/SQLiteConnection.h
 #        src/datasource/DataSource.h
 #        src/filter/DBFilter.h
@@ -175,7 +176,6 @@ set ( atsdb_HDRS
         src/schema/DBSchema.h
         src/schema/DBSchemaManager.h
         src/schema/MetaDBTable.h
-        src/schema/SQLGenerator.h
 #        src/thread/Thread.h
 #        src/thread/TimedThread.h
 #        src/thread/WorkerThread.h
@@ -261,6 +261,7 @@ set ( atsdb_SRCS
         src/connection/DBInterface.cpp
 #        src/connection/MySQLConConnection.cpp
         src/connection/MySQLppConnection.cpp
+        src/connection/SQLGenerator.cpp
 #        src/connection/SQLiteConnection.cpp
 #        src/datasource/DataSource.cpp
 #        src/filter/DBFilter.cpp
@@ -336,7 +337,6 @@ set ( atsdb_SRCS
         src/schema/DBSchema.cpp
         src/schema/DBSchemaManager.cpp
         src/schema/MetaDBTable.cpp
-        src/schema/SQLGenerator.cpp
 #        src/struct/StructureDescription.cpp
 #        src/struct/StructureReader.cpp
 #        src/struct/StructureDescriptionManager.cpp
