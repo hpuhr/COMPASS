@@ -142,9 +142,9 @@ void DBInterface::initConnection (DBConnectionInfo *info)
 //        //connection_ = new SQLiteConnection (info);
 //        throw std::runtime_error ("DBInterface: initConnection: SQLite3 connection not supported at the moment");
 //    }
-    if (info->getType() == DB_TYPE_MYSQLpp)
+    if (info->type() == DB_TYPE_MYSQLpp)
     {
-        connection_ = new MySQLppConnection (info);
+        connection_ = new MySQLppConnection (*info);
         //throw std::runtime_error ("DBInterface: initConnection: MySQL++ connection not supported at the moment");
     }
 //    else if (info->getType() == DB_TYPE_MYSQLCon)

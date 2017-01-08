@@ -455,7 +455,7 @@ Buffer *Buffer::getShallowCopy ()
 //    return shallow_copy;
 }
 
-bool Buffer::isFull ()
+bool Buffer::full ()
 {
     return size()%BUFFER_ARRAY_SIZE == 0;
 }

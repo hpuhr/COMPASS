@@ -73,9 +73,9 @@ public:
     //void setWritten () { first_write_=false; };
 
     /// @brief Returns boolean indicating if buffer is the last of one DB operation.
-    bool getLastOne () { return last_one_;};
+    bool lastOne() { return last_one_;}
     /// @brief Sets if buffer is the last one of one DB operation.
-    void setLastOne (bool last_one) { last_one_=last_one; };
+    void lastOne (bool last_one) { last_one_=last_one; }
 
     /// @brief Returns buffer containing the data of this buffer and re-initializes.
     //Buffer *transferData ();
@@ -93,18 +93,17 @@ public:
     //void setPropertyValuesNan (unsigned int property_index);
 
     /// @brief Returns flag indicating if buffer is filled to a multiple of BUFFER_ARRAY_SIZE.
-    bool isFull ();
+    bool full ();
 
     /// @brief Returns the buffers id
-    unsigned int getId() const { return id_; }
-
-    /// Unique buffer id, copied when getting shallow copies
-    unsigned int id_;
+    unsigned int id() const { return id_; }
 
     /// Copies current index from source buffer into this one. PropertyLists must have the same indices
     //void deepCopyRecordFrom (Buffer *src);
 
-private:
+protected:
+    /// Unique buffer id, copied when getting shallow copies
+    unsigned int id_;
     /// List of all properties
     PropertyList properties_;
     /// DBO type

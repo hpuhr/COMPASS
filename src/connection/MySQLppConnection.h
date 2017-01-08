@@ -39,15 +39,15 @@ class Buffer;
 class MySQLppConnection : public DBConnection
 {
 public:
-    MySQLppConnection(DBConnectionInfo *info);
+    MySQLppConnection(const DBConnectionInfo &info);
     virtual ~MySQLppConnection();
 
     virtual void connect ();
-    virtual void openDatabase (std::string database_name);
+    virtual void openDatabase (const std::string &database_name);
 
-    void executeSQL(std::string sql);
+    void executeSQL(const std::string &sql);
 
-    void prepareBindStatement (std::string statement);
+    void prepareBindStatement (const std::string &statement);
     void beginBindTransaction ();
     void stepAndClearBindings ();
     void endBindTransaction ();
@@ -58,19 +58,19 @@ public:
     void bindVariable (unsigned int index, const char *value);
     void bindVariableNull (unsigned int index);
 
-    DBResult *execute (DBCommand *command);
-    DBResult *execute (DBCommandList *command_list);
+    std::shared_ptr <DBResult> execute (const DBCommand &command);
+    std::shared_ptr <DBResult> execute (const DBCommandList &command_list);
 
-    void prepareCommand (DBCommand *command);
-    DBResult *stepPreparedCommand (unsigned int max_results=0);
+    void prepareCommand (const DBCommand &command);
+    std::shared_ptr <DBResult> stepPreparedCommand (unsigned int max_results=0);
     void finalizeCommand ();
     bool getPreparedCommandDone () { return prepared_command_done_; }
 
     /// @brief Added for performance test. Do not use.
-    DBResult *readBulkCommand (DBCommand *command, std::string main_statement, std::string order_statement, unsigned int max_results=0);
+    //DBResult *readBulkCommand (DBCommand *command, std::string main_statement, std::string order_statement, unsigned int max_results=0);
 
-    Buffer *getTableList();
-    Buffer *getColumnList(std::string table);
+    std::shared_ptr <Buffer> getTableList();
+    std::shared_ptr <Buffer> getColumnList(const std::string &table);
 
 private:
     /// Used for all database queries
@@ -88,7 +88,7 @@ private:
     mysqlpp::Transaction *transaction_;
 
     /// Last prepared command
-    DBCommand *prepared_command_;
+    const DBCommand *prepared_command_;
     /// Prepared command finished flag.
     bool prepared_command_done_;
 
@@ -96,12 +96,12 @@ private:
     void finalizeStatement ();
 
     /// @brief Executes an SQL command which returns data (internal)
-    void execute (std::string command, Buffer *buffer);
+    void execute (const std::string &command, Buffer &buffer);
 
     /// @brief Executes an SQL command which returns no data (internal)
-    void execute (std::string command);
+    void execute (const std::string &command);
 
-    void readRowIntoBuffer (mysqlpp::Row &row, const PropertyList &list, unsigned int num_properties, Buffer *buffer, unsigned int index);
+    void readRowIntoBuffer (mysqlpp::Row &row, const PropertyList &list, unsigned int num_properties, Buffer &buffer, unsigned int index);
 
     /// @brief Used for performance tests.
     void performanceTest ();

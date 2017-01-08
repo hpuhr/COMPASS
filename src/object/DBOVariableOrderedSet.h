@@ -70,9 +70,9 @@ public:
   virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
   /// @brief Returns if a change occurred
-  bool getChanged () const { return changed_; };
+  bool getChanged () const { return changed_; }
   /// @brief Sets if a change occurred
-  void setChanged (bool changed) { changed_=changed; };
+  void setChanged (bool changed) { changed_=changed; }
 
   /// @brief Adds a variable to the set at last index
   void add (DBOVariable &var);
@@ -98,7 +98,7 @@ public:
   //DBOVariableSet getUnorderedSet () const;
 
   /// @brief Returns container with all variables
-  const std::map <unsigned int, DBOVariable &> &getSet () const { return set_;};
+  const std::map <unsigned int, DBOVariable &> &getSet () const { return set_;}
   /// @brief Returns a variable at a given index
   DBOVariable &getVariable (unsigned int index) const;
 
@@ -108,7 +108,7 @@ public:
   /// @brief Prints information for debugging
   void print () const;
   /// @brief Returns number of variables in set
-  unsigned int getSize () const { return variable_definitions_.size(); };
+  unsigned int getSize () const { return variable_definitions_.size(); }
 
 protected:
   /// Container with ordered variable definitions (index -> definition pointer)

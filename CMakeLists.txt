@@ -255,8 +255,6 @@ set ( atsdb_SRCS
         src/config/Configurable.cpp
         src/config/Configuration.cpp
         src/config/ConfigurationManager.cpp
-        src/command/DBCommand.cpp
-        src/command/DBCommandList.cpp
 #        src/connection/BufferWriter.cpp
         src/connection/DBInterface.cpp
 #        src/connection/MySQLConConnection.cpp

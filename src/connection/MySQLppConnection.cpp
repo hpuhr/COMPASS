@@ -40,12 +40,11 @@ using namespace Utils;
 using namespace Utils::Data;
 
 
-MySQLppConnection::MySQLppConnection(DBConnectionInfo *info)
+MySQLppConnection::MySQLppConnection(const DBConnectionInfo &info)
     : DBConnection (info), connection_(mysqlpp::Connection (false)), prepared_query_(connection_.query()),
       prepared_parameters_(mysqlpp::SQLQueryParms(&prepared_query_)), query_used_(false), transaction_(0)
 {
-    assert (info_);
-    assert (info_ ->getType() == DB_TYPE_MYSQLpp);
+    assert (info_.getType() == DB_TYPE_MYSQLpp);
 
 
     prepared_command_=0;
@@ -59,12 +58,12 @@ MySQLppConnection::~MySQLppConnection()
 
 void MySQLppConnection::connect()
 {
-    assert (info_->getType() == DB_TYPE_MYSQLpp);
+    assert (info.getType() == DB_TYPE_MYSQLpp);
 
-    MySQLConnectionInfo *info = dynamic_cast<MySQLConnectionInfo*> (info_);
+    const MySQLConnectionInfo &info = dynamic_cast<const MySQLConnectionInfo &> (info_);
     assert (info);
 
-    if (!connection_.connect("", info->getServer().c_str(), info->getUser().c_str(), info->getPassword().c_str(), info->getPort()))
+    if (!connection_.connect("", info.server().c_str(), info.user().c_str(), info.password().c_str(), info.port()))
     {
         logerr  << "MySQLppConnection: init: DB connection failed: " << connection_.error();
         throw std::runtime_error ("MySQLppConnection: init: DB connection failed");
@@ -76,7 +75,7 @@ void MySQLppConnection::connect()
 
 }
 
-void MySQLppConnection::openDatabase (std::string database_name)
+void MySQLppConnection::openDatabase (const std::string &database_name)
 {
     //    if (info_ ->isNew())
     //    {
@@ -91,7 +90,7 @@ void MySQLppConnection::openDatabase (std::string database_name)
     //performanceTest ();
 }
 
-void MySQLppConnection::executeSQL(std::string sql)
+void MySQLppConnection::executeSQL(const std::string &sql)
 {
     logdbg  << "MySQLppConnection: executeSQL: sql statement execute: '" <<sql << "'";
 
@@ -103,7 +102,7 @@ void MySQLppConnection::executeSQL(std::string sql)
     }
 }
 
-void MySQLppConnection::prepareBindStatement (std::string statement)
+void MySQLppConnection::prepareBindStatement (const std::string &statement)
 {
     logdbg  << "MySQLppConnection: prepareBindStatement: statement prepare '" <<statement << "'";
 
@@ -167,41 +166,40 @@ void MySQLppConnection::bindVariableNull (unsigned int index)
 }
 
 
-DBResult *MySQLppConnection::execute (DBCommand *command)
+std::shared_ptr <DBResult> MySQLppConnection::execute (const DBCommand &command)
 {
     logdbg  << "MySQLppConnection: execute";
-    assert (command);
-    DBResult *dbresult = new DBResult ();
 
-    std::string sql = command->getCommandString();
+    std::shared_ptr <DBResult> dbresult = std::make_shared <DBResult> ();
+
+    std::string sql = command.get();
 
     Buffer *buffer=0;
-    if (command->getResultList()->size() > 0) // data should be returned
+    if (command.resultList().size() > 0) // data should be returned
     {
-        buffer = new Buffer (*(command->getResultList()));
+        buffer = new Buffer (command.resultList());
         dbresult->setBuffer(buffer);
     }
 
     logdbg  << "MySQLppConnection: execute: executing";
-    execute (sql, buffer);
+    execute (sql, *buffer);
 
     logdbg  << "MySQLppConnection: execute: end";
 
     return dbresult;
 }
 
-DBResult *MySQLppConnection::execute (DBCommandList *command_list)
+std::shared_ptr <DBResult>MySQLppConnection::execute (const DBCommandList &command_list)
 {
-    assert (command_list);
-    DBResult *dbresult = new DBResult ();
+    std::shared_ptr <DBResult> dbresult = std::make_shared <DBResult> ();
 
-    unsigned int num_commands = command_list->getNumCommands();
+    unsigned int num_commands = command_list.getNumCommands();
 
     Buffer *buffer=0;
 
-    if (command_list->getResultList()->size() > 0) // data should be returned
+    if (command_list.getResultList().size() > 0) // data should be returned
     {
-        buffer = new Buffer (*(command_list->getResultList()));
+        buffer = new Buffer (command_list.getResultList());
         dbresult->setBuffer(buffer);
     }
 
@@ -213,10 +211,10 @@ DBResult *MySQLppConnection::execute (DBCommandList *command_list)
         //        if (cnt != 0)
         //            buffer->incrementIndex();
 
-        std::string sql = command_list->getCommandString(cnt);
+        std::string sql = command_list.getCommandString(cnt);
 
         if (buffer)
-            execute (sql, buffer);
+            execute (sql, *buffer);
         else
             execute (sql);
     }
@@ -225,14 +223,14 @@ DBResult *MySQLppConnection::execute (DBCommandList *command_list)
     return dbresult;
 }
 
-void MySQLppConnection::execute (std::string command, Buffer *buffer)
+void MySQLppConnection::execute (const std::string &command, Buffer &buffer)
 {
     logdbg  << "MySQLppConnection: execute: command '" << command << "'";
 
     assert (buffer);
     unsigned int num_properties=0;
 
-    const PropertyList &list = buffer->properties();
+    const PropertyList &list = buffer.properties();
     num_properties = list.size();
 
     logdbg  << "MySQLppConnection: execute: creating query";
@@ -242,7 +240,7 @@ void MySQLppConnection::execute (std::string command, Buffer *buffer)
 
     logdbg  << "MySQLppConnection: execute: iterating result";
     // Display results
-    unsigned int cnt=buffer->size();
+    unsigned int cnt=buffer.size();
     mysqlpp::StoreQueryResult::const_iterator it;
     for (it = res.begin(); it != res.end(); ++it)
     {
@@ -251,12 +249,11 @@ void MySQLppConnection::execute (std::string command, Buffer *buffer)
         cnt++;
     }
 
-    logdbg  << "MySQLppConnection: execute done with size " << buffer->size();
+    logdbg  << "MySQLppConnection: execute done with size " << buffer.size();
 }
 
-void MySQLppConnection::readRowIntoBuffer (mysqlpp::Row &row, const PropertyList &list, unsigned int num_properties, Buffer *buffer, unsigned int index)
+void MySQLppConnection::readRowIntoBuffer (mysqlpp::Row &row, const PropertyList &list, unsigned int num_properties, Buffer &buffer, unsigned int index)
 {
-    assert (buffer);
     for (unsigned int cnt=0; cnt < num_properties; cnt++)
     {
         if (row[cnt] != mysqlpp::null)
@@ -266,35 +263,35 @@ void MySQLppConnection::readRowIntoBuffer (mysqlpp::Row &row, const PropertyList
             switch (prop.getDataType())
             {
             case PropertyDataType::BOOL:
-                buffer->getBool(prop.getId()).set(index, static_cast<bool> (row[cnt]));
+                buffer.getBool(prop.getId()).set(index, static_cast<bool> (row[cnt]));
                 //loginf  << "sqlex: bool " << prop->id_ << " val " << *ptr;
                 break;
             case PropertyDataType::UCHAR:
-                buffer->getUChar(prop.getId()).set(index, static_cast<unsigned char> (row[cnt]));
+                buffer.getUChar(prop.getId()).set(index, static_cast<unsigned char> (row[cnt]));
                 //loginf  << "sqlex: uchar " << prop->id_ << " val " << *ptr;
                 break;
             case PropertyDataType::CHAR:
-                buffer->getChar(prop.getId()).set(index, static_cast<signed char> (row[cnt]));
+                buffer.getChar(prop.getId()).set(index, static_cast<signed char> (row[cnt]));
                 //loginf  << "sqlex: char " << prop->id_ << " val " << *ptr;
                 break;
             case PropertyDataType::INT:
-                buffer->getInt(prop.getId()).set(index, static_cast<int> (row[cnt]));
+                buffer.getInt(prop.getId()).set(index, static_cast<int> (row[cnt]));
                 //loginf  << "sqlex: int " << prop->id_ << " val " << *ptr;
                 break;
             case PropertyDataType::UINT:
-                buffer->getUInt(prop.getId()).set(index, static_cast<unsigned int> (row[cnt]));
+                buffer.getUInt(prop.getId()).set(index, static_cast<unsigned int> (row[cnt]));
                 //loginf  << "sqlex: uint " << prop->id_ << " val " << *ptr;
                 break;
             case PropertyDataType::STRING:
-                buffer->getString(prop.getId()).set(index, static_cast<const char *> (row[cnt]));
+                buffer.getString(prop.getId()).set(index, static_cast<const char *> (row[cnt]));
                 //loginf  << "sqlex: string " << prop->id_ << " val " << *ptr;
                 break;
             case PropertyDataType::FLOAT:
-                buffer->getFloat(prop.getId()).set(index, static_cast<float> (row[cnt]));
+                buffer.getFloat(prop.getId()).set(index, static_cast<float> (row[cnt]));
                 //loginf  << "sqlex: float " << prop->id_ << " val " << *ptr;
                 break;
             case PropertyDataType::DOUBLE:
-                buffer->getDouble(prop.getId()).set(index, static_cast<double> (row[cnt]));
+                buffer.getDouble(prop.getId()).set(index, static_cast<double> (row[cnt]));
                 //loginf  << "sqlex: double " << prop->id_ << " val " << *ptr;
                 break;
             default:
@@ -306,7 +303,7 @@ void MySQLppConnection::readRowIntoBuffer (mysqlpp::Row &row, const PropertyList
     }
 }
 
-void MySQLppConnection::execute (std::string command)
+void MySQLppConnection::execute (const std::string &command)
 {
     logdbg  << "MySQLppConnection: execute: command '" << command << "'";
 
@@ -347,30 +344,30 @@ void MySQLppConnection::finalizeStatement ()
     logdbg  << "MySQLppConnection: finalizeStatement: done";
 }
 
-void MySQLppConnection::prepareCommand (DBCommand *command)
+void MySQLppConnection::prepareCommand (const DBCommand &command)
 {
     logdbg  << "MySQLppConnection: prepareCommand";
     assert (prepared_command_==0);
-    assert (command);
 
-    prepared_command_=command;
+    prepared_command_=&command;
     prepared_command_done_=false;
 
-    prepareStatement (command->getCommandString().c_str());
+    prepareStatement (command.get().c_str());
     logdbg  << "MySQLppConnection: prepareCommand: done";
 }
-DBResult *MySQLppConnection::stepPreparedCommand (unsigned int max_results)
+
+std::shared_ptr <DBResult> MySQLppConnection::stepPreparedCommand (unsigned int max_results)
 {
     logdbg  << "MySQLppConnection: stepPreparedCommand";
 
     assert (prepared_command_);
 
-    DBResult *dbresult = new DBResult ();
+    std::shared_ptr <DBResult> dbresult = std::make_shared <DBResult> ();
 
-    std::string sql = prepared_command_->getCommandString();
+    std::string sql = prepared_command_->get();
 
-    assert (prepared_command_->getResultList()->size() > 0); // data should be returned
-    Buffer *buffer = new Buffer (*(prepared_command_->getResultList()));
+    assert (prepared_command_->resultList()->size() > 0); // data should be returned
+    Buffer *buffer = new Buffer (prepared_command_->resultList());
     assert (buffer->properties().size() > 0);
     dbresult->setBuffer(buffer);
 
@@ -385,7 +382,7 @@ DBResult *MySQLppConnection::stepPreparedCommand (unsigned int max_results)
 
     while (mysqlpp::Row row = result_step_.fetch_row())
     {
-        readRowIntoBuffer (row, list, num_properties, buffer, cnt);
+        readRowIntoBuffer (row, list, num_properties, *buffer, cnt);
 
         if (max_results != 0 && cnt >= max_results)
         {
@@ -400,7 +397,7 @@ DBResult *MySQLppConnection::stepPreparedCommand (unsigned int max_results)
     {
         logdbg  << "MySQLppConnection: stepPreparedCommand: reading done";
         prepared_command_done_=true;
-        buffer->setLastOne(true);
+        buffer->lastOne(true);
     }
 
     logdbg  << "MySQLppConnection: stepPreparedCommand: done";
@@ -417,29 +414,28 @@ void MySQLppConnection::finalizeCommand ()
     logdbg  << "MySQLppConnection: finalizeCommand: done";
 }
 
-Buffer *MySQLppConnection::getTableList()  // buffer of table name strings
+std::shared_ptr <Buffer> MySQLppConnection::getTableList()  // buffer of table name strings
 {
     DBCommand command;
     //command.setCommandString ("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '"+db_name+"' ORDER BY TABLE_NAME DESC;");
-    command.setCommandString ("SHOW TABLES;");
+    command.set ("SHOW TABLES;");
     PropertyList list;
     list.addProperty ("name", PropertyDataType::STRING);
-    command.setPropertyList (list);
+    command.list (list);
 
-    DBResult *result = execute(&command);
+    std::shared_ptr <DBResult> result = execute(command);
     assert (result->containsData());
-    Buffer *buffer = result->getBuffer();
-    delete result;
+    std::shared_ptr <Buffer> buffer = std::make_shared<Buffer> (*result->getBuffer());
 
     return buffer;
 }
 
-Buffer *MySQLppConnection::getColumnList(std::string table) // buffer of column name string, data type
+std::shared_ptr <Buffer>MySQLppConnection::getColumnList(const std::string &table) // buffer of column name string, data type
 {
     DBCommand command;
     //    command.setCommandString ("SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '"
     //            +database_name+"' AND TABLE_NAME = '"+table+"' ORDER BY COLUMN_NAME DESC;");
-    command.setCommandString ("SHOW COLUMNS FROM "+table);
+    command.set ("SHOW COLUMNS FROM "+table);
 
     //SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'job_awam_0019' AND TABLE_NAME = 'sd_track' ORDER BY COLUMN_NAME DESC;
 
@@ -450,12 +446,11 @@ Buffer *MySQLppConnection::getColumnList(std::string table) // buffer of column 
     list.addProperty ("key_string", PropertyDataType::STRING);
     list.addProperty ("default", PropertyDataType::STRING);
     list.addProperty ("extra", PropertyDataType::STRING);
-    command.setPropertyList (list);
+    command.list (list);
 
-    DBResult *result = execute(&command);
+    std::shared_ptr <DBResult> result = execute(command);
     assert (result->containsData());
-    Buffer *buffer = result->getBuffer();
-    delete result;
+    std::shared_ptr <Buffer> buffer = std::make_shared<Buffer> (*result->getBuffer());
 
     buffer->addProperty ("key", PropertyDataType::BOOL);
     //buffer->setIndex(0);
@@ -482,7 +477,7 @@ void MySQLppConnection::performanceTest ()
     start_time = boost::posix_time::microsec_clock::local_time();
 
     DBCommand command;
-    command.setCommandString("SELECT sd_radar.REC_NUM, sd_radar.POS_SYS_X_NM, sd_radar.POS_SYS_Y_NM, sd_radar.MODEC_CODE_FT, sd_radar.TOD, sd_radar.DETECTION_TYPE, sd_radar.DS_ID FROM sd_radar ORDER BY REC_NUM;");
+    command.set("SELECT sd_radar.REC_NUM, sd_radar.POS_SYS_X_NM, sd_radar.POS_SYS_Y_NM, sd_radar.MODEC_CODE_FT, sd_radar.TOD, sd_radar.DETECTION_TYPE, sd_radar.DS_ID FROM sd_radar ORDER BY REC_NUM;");
     //ORDER BY REC_NUM
 
     PropertyList list;
@@ -495,23 +490,22 @@ void MySQLppConnection::performanceTest ()
     list.addProperty ("POS_SYS_Y_NM", PropertyDataType::DOUBLE);
     //list.addProperty ("DETECTION_TYPE", PropertyDataType::INT);
     //list.addProperty ("DS_ID", PropertyDataType::INT);
-    command.setPropertyList (list);
+    command.list (list);
 
-    prepareCommand (&command);
+    prepareCommand (command);
 
     unsigned int rows=0;
     bool quit = false;
     while (!quit)
     {
-        DBResult *result = stepPreparedCommand(chunk_size);
+        std::shared_ptr <DBResult> result = stepPreparedCommand(chunk_size);
         assert (result->containsData());
         Buffer *buffer = result->getBuffer();
         assert (buffer->size() != 0);
         rows += buffer->size();
-        if (buffer->getLastOne())
+        if (buffer->lastOne())
             quit=true;
 
-        delete result;
         delete buffer;
         loginf << "MySQLppConnection: performanceTest: got " << rows << " rows";
     }

@@ -43,10 +43,10 @@ public:
   virtual ~DBConnectionInfo() {}
 
   /// @brief Returns database system type
-  DB_CONNECTION_TYPE getType () { return type_; }
+  DB_CONNECTION_TYPE type () const { return type_; }
 
   /// @brief Returns string identifying database system and database
-  virtual std::string getIdString ()=0;
+  virtual std::string id () const=0;
 
 protected:
   /// Database system type
@@ -79,22 +79,22 @@ protected:
 class MySQLConnectionInfo : public DBConnectionInfo
 {
 public:
-    MySQLConnectionInfo (DB_CONNECTION_TYPE type, std::string db, std::string server, std::string user, std::string password, unsigned int port)
+    MySQLConnectionInfo (DB_CONNECTION_TYPE type, const std::string &db, const std::string &server, const std::string &user, const std::string &password, unsigned int port)
    : DBConnectionInfo(type), db_(db), server_(server), user_(user), password_(password), port_(port) {}
   virtual ~MySQLConnectionInfo () {}
 
   /// Returns the database name
-  std::string getDB () { return db_; }
+  const std::string &db () const { return db_; }
   /// Returns the database server name or IP address
-  std::string getServer () { return server_; }
+  const std::string &server () const { return server_; }
   /// Returns the username
-  std::string getUser () { return user_; }
+  const std::string user () const { return user_; }
   /// Returns the password
-  std::string getPassword () { return password_; }
+  const std::string password () const { return password_; }
   /// Returns the port number
-  unsigned int getPort () { return port_; }
+  unsigned int port () const { return port_; }
 
-  std::string getIdString () { return "MySQL Server: '"+server_+"' Database: '"+db_+"'";}
+  std::string id () const { return "MySQL Server: '"+server_+"' Database: '"+db_+"'";}
 
 private:
   /// Database name

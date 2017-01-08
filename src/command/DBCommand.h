@@ -37,23 +37,24 @@ class DBCommand
 {
 public:
   /// @brief Constructor
-	DBCommand();
+    DBCommand():expect_data_result_(false) {}
+    DBCommand(const PropertyList &list):expect_data_result_(true), result_list_(list) {}
 	/// @brief Destructor
-	virtual ~DBCommand();
+    virtual ~DBCommand() {}
 
 	/// @brief Sets command string
-	void setCommandString (std::string command);
+    void set (const std::string &command) { command_=command; }
 	/// @brief Sets PropertyList of exptected data.
-	void setPropertyList (PropertyList list);
+    void list (const PropertyList &list) { 	result_list_=list; expect_data_result_=true;}
 
 	/// @brief Returns command string
-	std::string getCommandString ();
+    const std::string &get () const { return command_; }
 	/// @brief Returns flag indicating if returned data is expected.
-	bool getExpectDataResult ();
+    bool expectsResult () const { return expect_data_result_; }
 	/// @brief Returns PropertyList of expected data.
-	PropertyList *getResultList ();
+    const PropertyList &resultList () const { return result_list_; }
 
-private:
+protected:
 	/// SQL Command
 	std::string command_;
 	/// Flag if return of data is expected
@@ -61,5 +62,7 @@ private:
 	/// PropertyList of expected data
 	PropertyList result_list_;
 };
+
+using DBCommandVector = std::vector<DBCommand>;
 
 #endif /* DBCOMMAND_H_ */

@@ -37,29 +37,29 @@ class DBCommandList
 {
 public:
   /// @brief Constructor
-	DBCommandList();
+    DBCommandList() : expect_data_result_(false) {}
 	/// @brief  Desctructor
-	virtual ~DBCommandList();
+    virtual ~DBCommandList() { commands_.clear(); }
 
 	/// @brief Adds a command string
-	void addCommandString (std::string command);
+    void addCommandString (std::string command) { commands_.push_back (command); }
 	/// @brief Adds a vector of command strings
-	void addCommandStrings (std::vector<std::string> commands);
+    void addCommandStrings (std::vector<std::string> commands) { commands_.insert (commands_.end(), commands.begin(), commands.end()); }
 	/// @brief Sets the PropertyList of the expected data
-	void setPropertyList (PropertyList list);
+    void setPropertyList (PropertyList list) {     result_list_=list; expect_data_result_=true; }
 
 	/// @brief Returns command string at index i
-	std::string getCommandString (unsigned int i);
+    const std::string &getCommandString (unsigned int i) const {     assert (i < commands_.size()); return commands_.at(i); }
 	/// @brief Returns number of commands
-	unsigned int getNumCommands ();
+    unsigned int getNumCommands () const { return commands_.size(); }
 	/// @brief Returns command container
-	std::vector <std::string> getCommands ();
+    const std::vector <std::string> &getCommands () const { return commands_; }
 	/// @brief Returns flag indicating if returned data is expected
-	bool getExpectDataResult ();
+    bool getExpectDataResult () const { return expect_data_result_; }
 	/// @brief Returns PropertyList of the expected returned data
-	PropertyList *getResultList ();
+    const PropertyList &getResultList () const { return result_list_; }
 
-private:
+protected:
 	/// Command list container
 	std::vector <std::string> commands_;
 	/// Flag indicating if returned data is expected
@@ -67,5 +67,6 @@ private:
 	/// PropertyList of the expected returned data
 	PropertyList result_list_;
 };
+
 
 #endif /* DBCOMMANDLIST_H_ */

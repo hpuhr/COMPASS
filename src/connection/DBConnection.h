@@ -25,6 +25,8 @@
 #ifndef DBCONNECTION_H_
 #define DBCONNECTION_H_
 
+#include <memory>
+
 class DBCommand;
 class DBCommandList;
 class DBResult;
@@ -45,19 +47,19 @@ public:
    *
    * \param info defines what database system is used
    */
-  DBConnection(DBConnectionInfo *info) : database_opened_(false) {info_=info;}
+  DBConnection(const DBConnectionInfo &info) : info_(info), database_opened_(false) {}
   /// @brief Destructor
-  virtual ~DBConnection() {};
+  virtual ~DBConnection() {}
 
   /// @brief Initializes the connection to the database
   virtual void connect ()=0;
   /// @brief Initializes the connection to the database
-  virtual void openDatabase (std::string database_name){ database_opened_=true; }
+  virtual void openDatabase (const std::string &database_name){ database_opened_=true; }
   /// @brief Executes a simple SQL command, returned data is not retrieved
-  virtual void executeSQL(std::string sql)=0;
+  virtual void executeSQL(const std::string &sql)=0;
 
   /// @brief Create a bound statement, to which variables can be bound
-  virtual void prepareBindStatement (std::string statement)=0;
+  virtual void prepareBindStatement (const std::string &statement)=0;
   /// @brief Prepare a transaction (for fast insertion) for a bound statement
   virtual void beginBindTransaction ()=0;
   /// @brief Execute the transaction and clear bound variables
@@ -77,30 +79,30 @@ public:
   virtual void bindVariableNull (unsigned int index)=0;
 
   /// @brief Executes a database query where data can be returned
-  virtual DBResult *execute (DBCommand *command)=0;
+  virtual std::shared_ptr <DBResult> execute (const DBCommand &command)=0;
   /// @brief Executes a number of database queries where data (of the same structure) can be returned
-  virtual DBResult *execute (DBCommandList *command_list)=0;
+  virtual std::shared_ptr <DBResult> execute (const DBCommandList &command_list)=0;
 
   /// @brief Prepare a database query for incremental data retrieval of the result
-  virtual void prepareCommand (DBCommand *command)=0;
+  virtual void prepareCommand (const DBCommand &command)=0;
   /// @brief Step through a prepared query and return a number of results
-  virtual DBResult *stepPreparedCommand (unsigned int max_results=0)=0;
+  virtual std::shared_ptr <DBResult> stepPreparedCommand (unsigned int max_results=0)=0;
   /// @brief Finalize the prepared query
   virtual void finalizeCommand ()=0;
   /// @brief Returns if all data from the prepared command was read
   virtual bool getPreparedCommandDone ()=0;
 
   /// @brief Return a Buffer with all table names (as strings) in the database
-  virtual Buffer *getTableList()=0;
+  virtual std::shared_ptr <Buffer> getTableList()=0;
   /// @brief Return a Buffer with all columns and data types for a table
-  virtual Buffer *getColumnList(std::string table)=0;
+  virtual std::shared_ptr <Buffer> getColumnList(const std::string &table)=0;
 
   /// @brief Return the DBConnectionInfo defining the database system and parameters
-  DBConnectionInfo *getDBInfo () { return info_; }
+  const DBConnectionInfo &getDBInfo () { return info_; }
 
 protected:
   /// Defines the database system and parameters
-  DBConnectionInfo *info_;
+  const DBConnectionInfo &info_;
   bool database_opened_;
 
   /// @brief Creates a prepared query (internal)
