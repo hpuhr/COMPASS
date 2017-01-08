@@ -219,5 +219,7 @@ void ConfigurationManager::saveConfiguration ()
 
     loginf  << "ConfigurationManager: saveConfiguration: saving configuration file";
     document->SaveFile(main_config_filename_.c_str());
+
+    delete document;
 }
 

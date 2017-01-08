@@ -86,7 +86,7 @@ void MySQLppConnection::openDatabase (const std::string &database_name)
     loginf  << "MySQLppConnection: openDatabase: successfully opened database '" << database_name << "'";
 
     //loginf  << "MySQLppConnection: init: performance test";
-    performanceTest ();
+    //performanceTest ();
 }
 
 void MySQLppConnection::executeSQL(const std::string &sql)
