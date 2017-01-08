@@ -178,7 +178,12 @@ void DBInterface::openDatabase (std::string database_name)
 
 }
 
+void DBInterface::initialize ()
+{
+    assert (connection_);
 
+    std::shared_ptr <Buffer> tables = connection_->getTableList();
+}
 
 /**
  * Calls queryContains for all DBOs in exists_.

@@ -176,13 +176,16 @@ public:
 //            bool has_tod, double tod_min, double tod_max);
 
 //    std::vector <std::string> getDatabases ();
-private:
+
+protected:
     /// Last used database name
     //std::string database_name_;
     /// Connection exists
     bool connected_;
     /// Database opened
     bool database_opened_;
+    /// Interface initialized (after opening database)
+    bool initialized_;
     /// Container with all prepared flags (for incremental reading)
 //    std::map <std::string, bool> prepared_;
 //    /// Container with all reading done flags (for incremental reading)
@@ -209,6 +212,9 @@ private:
     DBConnection *connection_;
     /// Writes buffer to the database
     //BufferWriter *buffer_writer_;
+
+    /// @brief loads database tables and columns
+    void initialize ();
 
     /// @brief Returns if a defined table name exists
 //    bool existsTable (std::string table_name);

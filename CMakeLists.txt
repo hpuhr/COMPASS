@@ -2,7 +2,7 @@ set(ATSDB_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 message("  Path: ${ATSDB_PATH}")
 
 cmake_minimum_required( VERSION 2.6 )
-set ( CMAKE_BUILD_TYPE Release )
+set ( CMAKE_BUILD_TYPE Debug )
 
 project( ATSDB )
 
@@ -112,6 +112,7 @@ set ( atsdb_HDRS
 #        src/connection/BufferWriter.h
         src/connection/DBConnection.h
         src/connection/DBConnectionInfo.h
+        src/connection/DBResult.h
 #        src/connection/MySQLConConnection.h
         src/connection/MySQLppConnection.h
         src/connection/SQLGenerator.h
@@ -159,7 +160,6 @@ set ( atsdb_HDRS
 #        src/property/PropertyArray.h
 #        src/property/PropertyContainer.h
 #        src/result/BufferSet.h
-        src/result/DBResult.h
 #        src/result/BufferReceiver.h
 #        src/struct/StructureDescription.h
 ##        src/struct/StructureDescriptionPlot.h
@@ -324,7 +324,6 @@ set ( atsdb_SRCS
         src/property/Property.cpp
 #        src/property/PropertyContainer.cpp
 #        src/result/BufferSet.cpp
-        src/result/DBResult.cpp
 #        src/schema/DBSchemaWidget.cpp
 #        src/schema/DBSchemaEditWidget.cpp
 #        src/schema/DBTableEditWidget.cpp

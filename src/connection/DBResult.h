@@ -25,6 +25,8 @@
 #ifndef DBRESULT_H_
 #define DBRESULT_H_
 
+#include <memory>
+
 class Buffer;
 
 /**
@@ -36,25 +38,25 @@ class DBResult
 {
 public:
   /// @brief Constructor with parameters
-	DBResult(bool contains_data, Buffer *buffer);
+    DBResult(std::shared_ptr <Buffer> buffer):contains_data_(true), buffer_(buffer) {}
 	/// @brief Default constructor
-	DBResult();
+    DBResult():contains_data_(false) {}
 	/// @brief Destructor
-	virtual ~DBResult();
+    virtual ~DBResult() {}
 
 	/// @brief Sets the result buffer
-	void setBuffer (Buffer *buffer);
+    void buffer (std::shared_ptr <Buffer> buffer) { buffer_=buffer; contains_data_=true; }
 	/// @brief Returns the result buffer
-	Buffer *getBuffer ();
+    std::shared_ptr <Buffer> buffer () const { return buffer_;}
 
 	/// @brief Returns if contains data flag was set
-	bool containsData ();
+    bool containsData () { return contains_data_; }
 
 private:
 	/// @brief Contains result data flag
 	bool contains_data_;
 	/// @brief Result data buffer
-	Buffer *buffer_;
+    std::shared_ptr <Buffer> buffer_;
 };
 
 #endif /* DBRESULT_H_ */
