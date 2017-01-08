@@ -655,6 +655,7 @@ void Configuration::parseXMLFileElement (tinyxml2::XMLElement *element)
             logerr << "Configuration: parseXMLFileElement: could not load file '" << path << "'";
             throw std::runtime_error ("Configuration: parseXMLFileElement: load error");
         }
+        delete sub_config_file_doc;
     }
     else
         throw std::runtime_error ("error: Configuration: parseXMLFileElement: configuration misses attributes");
@@ -749,6 +750,7 @@ XMLElement *Configuration::generateXMLElement (tinyxml2::XMLDocument *parent_doc
 
         document->LinkEndChild( element );
         document->SaveFile(configuration_filename_.c_str());
+        delete document;
 
         XMLElement *sub_file_element = parent_document->NewElement( "SubConfigurationFile" );
         sub_file_element->SetAttribute("class_id", class_id_.c_str());

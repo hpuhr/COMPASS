@@ -96,12 +96,12 @@ private:
     void finalizeStatement ();
 
     /// @brief Executes an SQL command which returns data (internal)
-    void execute (const std::string &command, Buffer &buffer);
+    void execute (const std::string &command, std::shared_ptr <Buffer> buffer);
 
     /// @brief Executes an SQL command which returns no data (internal)
     void execute (const std::string &command);
 
-    void readRowIntoBuffer (mysqlpp::Row &row, const PropertyList &list, unsigned int num_properties, Buffer &buffer, unsigned int index);
+    void readRowIntoBuffer (mysqlpp::Row &row, const PropertyList &list, unsigned int num_properties, std::shared_ptr <Buffer> buffer, unsigned int index);
 
     /// @brief Used for performance tests.
     void performanceTest ();
