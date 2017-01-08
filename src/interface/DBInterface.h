@@ -62,6 +62,8 @@ public:
     void initConnection (DBConnectionInfo *info);
     void openDatabase (std::string database_name);
 
+    void updateTableInfo ();
+
     /// @brief Returns a buffer with all data sources for a DBO type
 //    Buffer *getDataSourceDescription (const std::string &dbo_type);
 //    bool hasActiveDataSourcesInfo (const std::string &dbo_type);
@@ -186,6 +188,7 @@ protected:
     bool database_opened_;
     /// Interface initialized (after opening database)
     bool initialized_;
+
     /// Container with all prepared flags (for incremental reading)
 //    std::map <std::string, bool> prepared_;
 //    /// Container with all reading done flags (for incremental reading)

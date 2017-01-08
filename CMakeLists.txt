@@ -66,29 +66,30 @@ include_directories (
 	${TINYXML2_INCLUDE_DIR}
 	.
 	src
-	src/config
-	src/struct
-        src/interface
+        src/buffer
+        src/computation
+        src/config
 	src/command
 	src/connection
 	src/datasource
-	src/result
+        src/gui
+        src/interface
 	src/mem
 	src/object
 	src/util
 	src/filter
 	src/job
-	src/gui
 	src/polygon
 	src/polygon/acgxml
 	src/polygon/shapefile
         src/projection
 	src/property
-	src/buffer
-	src/variable
-	src/thread
-        src/computation
+        src/result
+        src/schema
+        src/struct
+        src/thread
         src/transform
+        src/variable
 	src/unit
     )
 
@@ -161,6 +162,11 @@ set ( atsdb_HDRS
 #        src/property/PropertyContainer.h
 #        src/result/BufferSet.h
 #        src/result/BufferReceiver.h
+        src/schema/DBTable.h
+        src/schema/DBTableColumn.h
+        src/schema/DBSchema.h
+        src/schema/DBSchemaManager.h
+        src/schema/MetaDBTable.h
 #        src/struct/StructureDescription.h
 ##        src/struct/StructureDescriptionPlot.h
 ##        src/struct/StructureDescriptionSystemTrack.h
@@ -172,11 +178,6 @@ set ( atsdb_HDRS
 #        src/struct/StructureReader.h
 #        src/struct/StructureVariable.h
         src/interface/DBInterface.h
-        src/interface/DBTable.h
-        src/interface/DBTableColumn.h
-        src/interface/DBSchema.h
-        src/interface/DBSchemaManager.h
-        src/interface/MetaDBTable.h
 #        src/thread/Thread.h
 #        src/thread/TimedThread.h
 #        src/thread/WorkerThread.h
@@ -225,11 +226,11 @@ set (atsdb_MOC_HEADERS
 #        src/gui/TransformationEditDialog.h
 #        src/gui/TransformationVariableEditDialog.h
 #        src/gui/FilterEditDialog.h
-#        src/interface/DBTableColumnComboBox.h
-#        src/interface/DBSchemaWidget.h
-#        src/interface/DBSchemaEditWidget.h
-#        src/interface/DBTableEditWidget.h
-#        src/interface/MetaDBTableEditWidget.h
+#        src/schema/DBTableColumnComboBox.h
+#        src/schema/DBSchemaWidget.h
+#        src/schema/DBSchemaEditWidget.h
+#        src/schema/DBTableEditWidget.h
+#        src/schema/MetaDBTableEditWidget.h
 #        src/object/DBOTypeComboBox.h
 #        src/object/DBObjectWidget.h
 #        src/object/DBObjectEditWidget.h
@@ -280,17 +281,7 @@ set ( atsdb_SRCS
 #        src/gui/TransformationEditDialog.cpp
 #        src/gui/TransformationVariableEditDialog.cpp
 #        src/gui/FilterEditDialog.cpp
-#        src/interface/DBSchemaWidget.cpp
-#        src/interface/DBSchemaEditWidget.cpp
-#        src/interface/DBTableEditWidget.cpp
-#        src/interface/DBTableColumnComboBox.cpp
-#        src/interface/MetaDBTableEditWidget.cpp
         src/interface/DBInterface.cpp
-        src/interface/DBTable.cpp
-        src/interface/DBTableColumn.cpp
-        src/interface/DBSchema.cpp
-        src/interface/DBSchemaManager.cpp
-        src/interface/MetaDBTable.cpp
 #        src/job/DBOActiveDataSourcesDBJob.cpp
 #        src/job/DBOVariableDistinctStatisticsDBJob.cpp
 #        src/job/DBOVariableMinMaxDBJob.cpp
@@ -335,6 +326,16 @@ set ( atsdb_SRCS
         src/property/Property.cpp
 #        src/property/PropertyContainer.cpp
 #        src/result/BufferSet.cpp
+#        src/schema/DBSchemaWidget.cpp
+#        src/schema/DBSchemaEditWidget.cpp
+#        src/schema/DBTableEditWidget.cpp
+#        src/schema/DBTableColumnComboBox.cpp
+#        src/schema/MetaDBTableEditWidget.cpp
+        src/schema/DBTable.cpp
+        src/schema/DBTableColumn.cpp
+        src/schema/DBSchema.cpp
+        src/schema/DBSchemaManager.cpp
+        src/schema/MetaDBTable.cpp
 #        src/struct/StructureDescription.cpp
 #        src/struct/StructureReader.cpp
 #        src/struct/StructureDescriptionManager.cpp

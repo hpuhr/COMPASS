@@ -64,7 +64,7 @@ using namespace Utils;
  * write_table_names_,
  */
 DBInterface::DBInterface(std::string class_id, std::string instance_id, Configurable *parent)
-: Configurable (class_id, instance_id, parent), connected_(false), database_opened_ (false), initialized_(false), info_(0), connection_(0)//, buffer_writer_(0)
+: Configurable (class_id, instance_id, parent), connected_(false), database_opened_ (false), info_(0), connection_(0)//, buffer_writer_(0)
 {
     boost::mutex::scoped_lock l(mutex_);
     //registerParameter ("database_name", &database_name_, "");
@@ -165,7 +165,7 @@ void DBInterface::openDatabase (std::string database_name)
 
     assert (connection_);
     connection_->openDatabase(database_name);
-    initialize ();
+    updateTableInfo ();
 
     //    if (info->isNew())
     //    {
@@ -179,22 +179,18 @@ void DBInterface::openDatabase (std::string database_name)
 
 }
 
-void DBInterface::initialize ()
+void DBInterface::updateTableInfo ()
 {
-    assert (connection_);
-    assert (!initialized_);
-
     std::shared_ptr <Buffer> tables = connection_->getTableList();
+    loginf << "DBInterface::initialize: found " << tables->size() << " tables";
     size_t size = tables->size();
-    std::string name;
+    std::string table_name;
 
     for (unsigned int cnt=0; cnt < size; cnt++)
     {
-        name = tables->getString("name").get(cnt);
-        loginf << "DBInterface::initialize: found table '" << name << "'";
+        table_name = tables->getString("name").get(cnt);
+        std::shared_ptr <Buffer> columns = connection_->getColumnList(table_name);
     }
-
-    initialized_ = true;
 }
 
 /**
