@@ -175,7 +175,7 @@ set ( atsdb_HDRS
         src/schema/DBSchema.h
         src/schema/DBSchemaManager.h
         src/schema/MetaDBTable.h
-#        src/schema/SQLGenerator.h
+        src/schema/SQLGenerator.h
 #        src/thread/Thread.h
 #        src/thread/TimedThread.h
 #        src/thread/WorkerThread.h
@@ -336,7 +336,7 @@ set ( atsdb_SRCS
         src/schema/DBSchema.cpp
         src/schema/DBSchemaManager.cpp
         src/schema/MetaDBTable.cpp
-#        src/schema/SQLGenerator.cpp
+        src/schema/SQLGenerator.cpp
 #        src/struct/StructureDescription.cpp
 #        src/struct/StructureReader.cpp
 #        src/struct/StructureDescriptionManager.cpp

@@ -208,20 +208,14 @@ bool DBOVariableSet::hasVariable (DBOVariable *variable)
   return find (set_.begin(), set_.end(), variable) != set_.end();
 }
 
-//PropertyList DBOVariableSet::getPropertyList (const std::string &dbo_type)
-//{
-//  std::vector <DBOVariable*>::iterator it;
-//  PropertyList list;
+PropertyList DBOVariableSet::getPropertyList () const
+{
+  PropertyList list;
 
-//  for (it=set_.begin(); it != set_.end(); it++)
-//  {
-//    if ((*it)->existsIn(dbo_type))
-//    {
-//      logdbg  << "DBOVariableSet: getPropertyList: getfor";
-//      DBOVariable *var = (*it)->getFor(dbo_type);
-//      list.addProperty (var->getId(), var->getDataType());
-//    }
-//  }
+  for (auto it : set_)
+  {
+      list.addProperty (it->getId(), it->getDataType());
+  }
 
-//  return list;
-//}
+  return list;
+}

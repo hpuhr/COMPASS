@@ -64,7 +64,7 @@ public:
     void prepareCommand (DBCommand *command);
     DBResult *stepPreparedCommand (unsigned int max_results=0);
     void finalizeCommand ();
-    bool getPreparedCommandDone () { return prepared_command_done_; };
+    bool getPreparedCommandDone () { return prepared_command_done_; }
 
     /// @brief Added for performance test. Do not use.
     DBResult *readBulkCommand (DBCommand *command, std::string main_statement, std::string order_statement, unsigned int max_results=0);
@@ -91,9 +91,6 @@ private:
     DBCommand *prepared_command_;
     /// Prepared command finished flag.
     bool prepared_command_done_;
-
-    /// Key which was last read, needed by test function readBulkCommand
-    unsigned int last_key_;
 
     void prepareStatement (const char *sql);
     void finalizeStatement ();

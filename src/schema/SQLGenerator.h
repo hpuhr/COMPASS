@@ -44,9 +44,77 @@ class DBTableColumn;
  */
 class SQLGenerator
 {
-private:
+public:
+    /// @brief Constructor
+    SQLGenerator(const DBInterface &db_interface);
+    /// @brief Destructor
+    virtual ~SQLGenerator();
+
+    /// @brief Returns statement to bind variables for buffer contents
+//    std::string createDBInsertStringBind(Buffer *buffer, const std::string &tablename);
+//    /// @brief Returns statement to bind variables for buffer contents
+//    std::string createDBUpdateStringBind(Buffer *buffer, const std::string &tablename);
+//    /// @brief Returns statement to create table for buffer contents
+//    std::string createDBCreateString (Buffer *buffer, const std::string &tablename);
+
+//    /// @brief Returns general select command
+//    DBCommand *getSelectCommand(const std::string &dbo_type, const DBOVariableSet &read_list, const std::string &custom_filter_clause="",
+//            DBOVariable *order=0);
+//    /// @brief Returns command for all data sources select
+
+//    //DBCommand *getDataSourcesSelectCommand (const std::string &dbo_type);
+//    /// @brief Returns command for active data sources select
+//    //DBCommand *getDistinctDataSourcesSelectCommand (const std::string &dbo_type);
+//    DBCommand *getCountStatement (const std::string &dbo_type, unsigned int sensor_number);
+
+//    DBCommand *getDistinctStatistics (const std::string &dbo_type, DBOVariable *variable, unsigned int sensor_number);
+
+//    /// @brief Returns minimum/maximum table name
+//    const std::string &getMinMaxTableName () { return table_name_minxmax_; }
+//    /// @brief Returns properties table name
+//    const std::string &getPropertiesTableName () { return table_name_properties_; }
+
+//    /// @brief Returns statement to check table existence
+//    std::string getContainsStatement (const std::string &table_name);
+//    /// @brief Returns statement to query number of records
+//    std::string getCountStatement (const std::string &dbo_type);
+
+//    /// @brief Returns minimum/maximum table creation statement
+//    std::string getTableMinMaxCreateStatement ();
+//    /// @brief Returns properties table creation statement
+//    std::string getTablePropertiesCreateStatement ();
+
+//    /// @brief Returns property insertion statement
+//    std::string getInsertPropertyStatement (const std::string &id, const std::string &value);
+//    /// @brief Returns property selection statement
+//    std::string getSelectPropertyStatement (const std::string &id);
+
+//    /// @brief Returns minimum/maximum insertion statement
+//    std::string getInsertMinMaxStatement (const std::string &id, const std::string &dbo_type, std::string min, const std::string &max);
+//    /// @brief Returns minimum/maximum selection statement
+//    std::string getSelectMinMaxStatement (const std::string &id, const std::string &dbo_type);
+//    std::string getSelectMinMaxStatement ();
+
+//    /// @brief Returns general info select statement
+//    DBCommand *getSelectInfoCommand(const std::string &dbo_type, std::vector<unsigned int> ids, DBOVariableSet read_list,
+//            bool use_filters, std::string order_by_variable, bool ascending, unsigned int limit_min=0,
+//            unsigned int limit_max=0);
+//    DBCommand *getTableSelectMinMaxNormalStatement (const std::string &table_name);
+//    DBCommand *getColumnSelectMinMaxStatement (DBTableColumn *column, std::string table_name);
+
+//    std::string getDeleteStatement (const DBTableColumn &column, const std::string &value, const std::string &filter);
+//    std::string getUpdateStatement (const DBTableColumn &column, const std::string &value, const std::string &new_value, const std::string &filter);
+
+//    /// @brief Minimum/Maximum select statement for one variable in one table
+//    std::string getMinMaxSelectStatement (const std::string &variable, const std::string& table, const std::string &condition="");
+//    /// @brief Minimum/Maximum select statment for a number of variables in one table
+//    std::string getMinMaxSelectStatements (const std::vector <std::string> &variables, const std::string &table);
+//    std::string getDistinctSelectStatement (const DBTableColumn &column, const std::string &filter_condition="");
+//    std::string getShowDatabasesStatement ();
+
+protected:
     /// Pointer to used DBInterface
-    DBInterface *db_interface_;
+    const DBInterface &db_interface_;
     /// Flag if db_type_ was set
     bool db_type_set_;
     /// Database connection type
@@ -63,76 +131,9 @@ private:
     std::string table_properties_create_statement_;
 
     /// @brief Returns general select statement
-    DBCommand *getSelectCommand (PropertyList variables, MetaDBTable *table,
-            std::vector <std::string> &filtered_variable_names, std::string filter="", std::string order="",
-            std::string limit="", bool distinct=false, bool left_join=false);
-
-public:
-    /// @brief Constructor
-    SQLGenerator(DBInterface *db_interface);
-    /// @brief Destructor
-    virtual ~SQLGenerator();
-
-    /// @brief Returns statement to bind variables for buffer contents
-    std::string createDBInsertStringBind(Buffer *buffer, std::string tablename);
-    /// @brief Returns statement to bind variables for buffer contents
-    std::string createDBUpdateStringBind(Buffer *buffer, std::string tablename);
-    /// @brief Returns statement to create table for buffer contents
-    std::string createDBCreateString (Buffer *buffer, std::string tablename);
-
-    /// @brief Returns general select command
-    DBCommand *getSelectCommand(const std::string &dbo_type, DBOVariableSet read_list, std::string custom_filter_clause="",
-            DBOVariable *order=0);
-    /// @brief Returns command for all data sources select
-    DBCommand *getDataSourcesSelectCommand (const std::string &dbo_type);
-    /// @brief Returns command for active data sources select
-    DBCommand *getDistinctDataSourcesSelectCommand (const std::string &dbo_type);
-    DBCommand *getCountStatement (const std::string &dbo_type, unsigned int sensor_number);
-
-    DBCommand *getDistinctStatistics (const std::string &dbo_type, DBOVariable *variable, unsigned int sensor_number);
-
-    /// @brief Returns minimum/maximum table name
-    std::string getMinMaxTableName () { return table_name_minxmax_; }
-    /// @brief Returns properties table name
-    std::string getPropertiesTableName () { return table_name_properties_; }
-
-    /// @brief Returns statement to check table existence
-    std::string getContainsStatement (std::string table_name);
-    /// @brief Returns statement to query number of records
-    std::string getCountStatement (const std::string &dbo_type);
-
-    /// @brief Returns minimum/maximum table creation statement
-    std::string getTableMinMaxCreateStatement ();
-    /// @brief Returns properties table creation statement
-    std::string getTablePropertiesCreateStatement ();
-
-    /// @brief Returns property insertion statement
-    std::string getInsertPropertyStatement (std::string id, std::string value);
-    /// @brief Returns property selection statement
-    std::string getSelectPropertyStatement (std::string id);
-
-    /// @brief Returns minimum/maximum insertion statement
-    std::string getInsertMinMaxStatement (std::string id, const std::string &dbo_type, std::string min, std::string max);
-    /// @brief Returns minimum/maximum selection statement
-    std::string getSelectMinMaxStatement (std::string id, const std::string &dbo_type);
-    std::string getSelectMinMaxStatement ();
-
-    /// @brief Returns general info select statement
-    DBCommand *getSelectInfoCommand(const std::string &dbo_type, std::vector<unsigned int> ids, DBOVariableSet read_list,
-            bool use_filters, std::string order_by_variable, bool ascending, unsigned int limit_min=0,
-            unsigned int limit_max=0);
-    DBCommand *getTableSelectMinMaxNormalStatement (std::string table_name);
-    DBCommand *getColumnSelectMinMaxStatement (DBTableColumn *column, std::string table_name);
-
-    std::string getDeleteStatement (DBTableColumn *column, std::string value, std::string filter);
-    std::string getUpdateStatement (DBTableColumn *column, std::string value, std::string new_value, std::string filter);
-
-    /// @brief Minimum/Maximum select statement for one variable in one table
-    std::string getMinMaxSelectStatement (std::string variable, std::string table, std::string condition="");
-    /// @brief Minimum/Maximum select statment for a number of variables in one table
-    std::string getMinMaxSelectStatements (std::vector <std::string> variables, std::string table);
-    std::string getDistinctSelectStatement (DBTableColumn *column, std::string filter_condition="");
-    std::string getShowDatabasesStatement ();
+    DBCommand *getSelectCommand (const PropertyList &variables, const MetaDBTable &table,
+            const std::vector <std::string> &filtered_variable_names, const std::string &filter="", const std::string &order="",
+            const std::string &limit="", bool distinct=false, bool left_join=false);
 };
 
 #endif /* SQLGENERATOR_H_ */

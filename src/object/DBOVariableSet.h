@@ -46,9 +46,9 @@ public:
   virtual ~DBOVariableSet();
 
   /// @brief Returns flag indicating if a change occurred
-  bool getChanged () { return changed_; };
+  bool getChanged () { return changed_; }
   /// @brief Sets the change occurred flag
-  void setChanged (bool changed) { changed_=changed; };
+  void setChanged (bool changed) { changed_=changed; }
 
   /// @brief Adds a DBOVariable
   bool add (DBOVariable *var);
@@ -75,18 +75,18 @@ public:
   //DBOVariableSet *clone ();
 
   /// @brief Returns container with all variables
-  std::vector <DBOVariable*> &getSet () { return set_;};
+  std::vector <DBOVariable*> &getSet () { return set_;}
   /// @brief Returns variable at a given index
   DBOVariable *getVariable (unsigned int index);
 
   /// @brief Return property list for a given DBO type for variables in the set
-  //PropertyList getPropertyList (const std::string &dbo_type);
+  PropertyList getPropertyList () const;
 
   /// @brief Prints contents, for debugging purposes
   void print ();
 
   /// @brief Returns number of variables in the set
-  unsigned int getSize () { return set_.size(); };
+  unsigned int getSize () { return set_.size(); }
 
 protected:
   /// Container with all variables in the set

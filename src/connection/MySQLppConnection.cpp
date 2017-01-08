@@ -87,8 +87,8 @@ void MySQLppConnection::openDatabase (std::string database_name)
     connection_.select_db(database_name);
     loginf  << "MySQLppConnection: openDatabase: successfully opened database '" << database_name << "'";
 
-    loginf  << "MySQLppConnection: init: performance test";
-    performanceTest ();
+    //loginf  << "MySQLppConnection: init: performance test";
+    //performanceTest ();
 }
 
 void MySQLppConnection::executeSQL(std::string sql)
@@ -251,10 +251,7 @@ void MySQLppConnection::execute (std::string command, Buffer *buffer)
         cnt++;
     }
 
-    if (buffer)
-        logdbg  << "MySQLppConnection: execute done with size " << buffer->size();
-    else
-        logdbg  << "MySQLppConnection: execute done";
+    logdbg  << "MySQLppConnection: execute done with size " << buffer->size();
 }
 
 void MySQLppConnection::readRowIntoBuffer (mysqlpp::Row &row, const PropertyList &list, unsigned int num_properties, Buffer *buffer, unsigned int index)
@@ -480,23 +477,24 @@ void MySQLppConnection::performanceTest ()
 
     unsigned int chunk_size=100000;
 
-    last_key_=0;
-
     loginf  << "MySQLppConnection: performanceTest: start";
 
     start_time = boost::posix_time::microsec_clock::local_time();
 
     DBCommand command;
-    command.setCommandString("SELECT sd_radar.REC_NUM, sd_radar.POS_SYS_X_NM, sd_radar.POS_SYS_Y_NM, sd_radar.MODEC_CODE_FT, sd_radar.TOD, sd_radar.DETECTION_TYPE, sd_radar.DS_ID FROM sd_radar;");
+    command.setCommandString("SELECT sd_radar.REC_NUM, sd_radar.POS_SYS_X_NM, sd_radar.POS_SYS_Y_NM, sd_radar.MODEC_CODE_FT, sd_radar.TOD, sd_radar.DETECTION_TYPE, sd_radar.DS_ID FROM sd_radar ORDER BY REC_NUM;");
     //ORDER BY REC_NUM
 
     PropertyList list;
     list.addProperty ("REC_NUM", PropertyDataType::INT);
     list.addProperty ("POS_LAT_DEG", PropertyDataType::DOUBLE);
     list.addProperty ("POS_LONG_DEG", PropertyDataType::DOUBLE);
+    list.addProperty ("MODEC_CODE_FT", PropertyDataType::DOUBLE);
     list.addProperty ("TOD", PropertyDataType::DOUBLE);
     list.addProperty ("POS_SYS_X_NM", PropertyDataType::DOUBLE);
     list.addProperty ("POS_SYS_Y_NM", PropertyDataType::DOUBLE);
+    //list.addProperty ("DETECTION_TYPE", PropertyDataType::INT);
+    //list.addProperty ("DS_ID", PropertyDataType::INT);
     command.setPropertyList (list);
 
     prepareCommand (&command);
