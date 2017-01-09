@@ -177,6 +177,7 @@ set ( atsdb_HDRS
 #        src/struct/StructureElement.h
 #        src/struct/StructureReader.h
 #        src/struct/StructureVariable.h
+        src/interface/DBTableInfo.h
         src/interface/DBInterface.h
 #        src/thread/Thread.h
 #        src/thread/TimedThread.h

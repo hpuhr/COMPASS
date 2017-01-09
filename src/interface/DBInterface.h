@@ -39,6 +39,7 @@ class DBOVariable;
 class QProgressDialog;
 class DBResult;
 class DBTableColumn;
+class DBTableInfo;
 
 class SQLGenerator;
 
@@ -216,8 +217,10 @@ protected:
     /// Writes buffer to the database
     //BufferWriter *buffer_writer_;
 
+    std::map <std::string, DBTableInfo> table_info_;
+
     /// @brief loads database tables and columns
-    void initialize ();
+    //void initialize ();
 
     /// @brief Returns if a defined table name exists
 //    bool existsTable (std::string table_name);

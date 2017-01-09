@@ -30,6 +30,7 @@
 #include "DBConnection.h"
 
 class Buffer;
+class DBTableInfo;
 
 /**
  * @brief Interface for a MySQL database connection
@@ -68,13 +69,13 @@ public:
 
     /// @brief Added for performance test. Do not use.
     //DBResult *readBulkCommand (DBCommand *command, std::string main_statement, std::string order_statement, unsigned int max_results=0);
-
-    std::shared_ptr <Buffer> getTableList();
-    std::shared_ptr <Buffer> getColumnList(const std::string &table);
+    std::map <std::string, DBTableInfo> getTableInfo ();
 
 private:
     /// Used for all database queries
     mysqlpp::Connection connection_;
+
+    std::string database_;
     /// Prepared query
     mysqlpp::Query prepared_query_;
     /// Parameters which are bound to the a query
@@ -102,6 +103,9 @@ private:
     void execute (const std::string &command);
 
     void readRowIntoBuffer (mysqlpp::Row &row, const PropertyList &list, unsigned int num_properties, std::shared_ptr <Buffer> buffer, unsigned int index);
+
+    std::vector<std::string> getTableList();
+    DBTableInfo getColumnList(const std::string &table);
 
     /// @brief Used for performance tests.
     void performanceTest ();

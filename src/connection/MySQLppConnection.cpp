@@ -30,6 +30,7 @@
 #include "DBConnectionInfo.h"
 #include "Logger.h"
 #include "MySQLppConnection.h"
+#include "DBTableInfo.h"
 
 #include <QMessageBox>
 
@@ -84,6 +85,8 @@ void MySQLppConnection::openDatabase (const std::string &database_name)
     //    }
     connection_.select_db(database_name);
     loginf  << "MySQLppConnection: openDatabase: successfully opened database '" << database_name << "'";
+
+    database_ = database_name;
 
     //loginf  << "MySQLppConnection: init: performance test";
     //performanceTest ();
@@ -411,8 +414,20 @@ void MySQLppConnection::finalizeCommand ()
     logdbg  << "MySQLppConnection: finalizeCommand: done";
 }
 
-std::shared_ptr <Buffer> MySQLppConnection::getTableList()  // buffer of table name strings
+std::map <std::string, DBTableInfo> MySQLppConnection::getTableInfo ()
 {
+    std::map <std::string, DBTableInfo> info;
+
+    for (auto it : getTableList())
+        info.insert (std::pair<std::string, DBTableInfo> (it, getColumnList(it)));
+
+    return info;
+}
+
+std::vector <std::string> MySQLppConnection::getTableList()  // buffer of table name strings
+{
+    std::vector <std::string> tables;
+
     DBCommand command;
     //command.setCommandString ("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '"+db_name+"' ORDER BY TABLE_NAME DESC;");
     command.set ("SHOW TABLES;");
@@ -424,41 +439,46 @@ std::shared_ptr <Buffer> MySQLppConnection::getTableList()  // buffer of table n
     assert (result->containsData());
     std::shared_ptr <Buffer> buffer = result->buffer();
 
-    return buffer;
+    unsigned int size = buffer->size();
+    for (unsigned int cnt=0; cnt < size; cnt++)
+        tables.push_back(buffer->getString("name").get(cnt));
+
+    return tables;
 }
 
-std::shared_ptr <Buffer>MySQLppConnection::getColumnList(const std::string &table) // buffer of column name string, data type
+DBTableInfo MySQLppConnection::getColumnList(const std::string &table) // buffer of column name string, data type
 {
+    DBTableInfo table_info (table);
+
     DBCommand command;
     //    command.setCommandString ("SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '"
     //            +database_name+"' AND TABLE_NAME = '"+table+"' ORDER BY COLUMN_NAME DESC;");
-    command.set ("SHOW COLUMNS FROM "+table);
+    //command.set ("SHOW COLUMNS FROM "+table);
 
-    //SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'job_awam_0019' AND TABLE_NAME = 'sd_track' ORDER BY COLUMN_NAME DESC;
+    //SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY, IS_NULLABLE, COLUMN_COMMENT FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'job_awam_0019' AND TABLE_NAME = 'sd_track' ORDER BY COLUMN_NAME DESC;
+    command.set ("SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY, IS_NULLABLE, COLUMN_COMMENT FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '"+database_+"' AND TABLE_NAME = '"+table+"'");
 
     PropertyList list;
-    list.addProperty ("name", PropertyDataType::STRING);
-    list.addProperty ("type", PropertyDataType::STRING);
-    list.addProperty ("null", PropertyDataType::BOOL);
-    list.addProperty ("key_string", PropertyDataType::STRING);
-    list.addProperty ("default", PropertyDataType::STRING);
-    list.addProperty ("extra", PropertyDataType::STRING);
+    list.addProperty ("COLUMN_NAME", PropertyDataType::STRING);
+    list.addProperty ("DATA_TYPE", PropertyDataType::STRING);
+    list.addProperty ("COLUMN_KEY", PropertyDataType::STRING);
+    list.addProperty ("IS_NULLABLE", PropertyDataType::BOOL);
+    list.addProperty ("COLUMN_COMMENT", PropertyDataType::STRING);
+    //list.addProperty ("comment", PropertyDataType::STRING);
     command.list (list);
 
     std::shared_ptr <DBResult> result = execute(command);
     assert (result->containsData());
     std::shared_ptr <Buffer> buffer = result->buffer();
 
-    buffer->addProperty ("key", PropertyDataType::BOOL);
-    //buffer->setIndex(0);
-
     for (unsigned int cnt=0; cnt < buffer->size(); cnt++)
     {
-        std::string key_string = buffer->getString("key_string").get(cnt);
-        buffer->getBool("key").set(cnt, key_string.compare("PRI") == 0);
+        table_info.addColumn (buffer->getString("COLUMN_NAME").get(cnt), buffer->getString("DATA_TYPE").get(cnt),
+                              buffer->getString("COLUMN_KEY").get(cnt) == "PRI", buffer->getBool("IS_NULLABLE").get(cnt),
+                              buffer->getString("COLUMN_COMMENT").get(cnt));
     }
 
-    return buffer;
+    return table_info;
 }
 
 void MySQLppConnection::performanceTest ()

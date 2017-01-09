@@ -51,6 +51,7 @@
 //#include "DBTableColumn.h"
 #include "Unit.h"
 #include "UnitManager.h"
+#include "DBTableInfo.h"
 
 #include "Data.h"
 #include "String.h"
@@ -111,6 +112,8 @@ DBInterface::~DBInterface()
         delete connection_;
         connection_=0;
     }
+
+    table_info_.clear();
 
 //    delete sql_generator_;
 //    sql_generator_=0;
@@ -181,16 +184,16 @@ void DBInterface::openDatabase (std::string database_name)
 
 void DBInterface::updateTableInfo ()
 {
-    std::shared_ptr <Buffer> tables = connection_->getTableList();
-    loginf << "DBInterface::initialize: found " << tables->size() << " tables";
-    size_t size = tables->size();
-    std::string table_name;
+    table_info_.clear();
 
-    for (unsigned int cnt=0; cnt < size; cnt++)
-    {
-        table_name = tables->getString("name").get(cnt);
-        std::shared_ptr <Buffer> columns = connection_->getColumnList(table_name);
-    }
+    table_info_ = connection_->getTableInfo();
+
+    loginf << "DBInterface::updateTableInfo: found " << table_info_.size() << " tables";
+
+//    for (auto it : table_info_)
+//    {
+//        loginf << "DBInterface::updateTableInfo: table '" << it.first << "' with " << it.second.size() << " columns";
+//    }
 }
 
 /**
