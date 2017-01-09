@@ -6,6 +6,8 @@
 #include "ArrayList.h"
 
 #include "ATSDB.h"
+#include "Client.h"
+#include "MainWindow.h"
 #include "DBConnectionInfo.h"
 
 #include "boost/date_time/posix_time/posix_time.hpp"
@@ -134,15 +136,23 @@ int main (int argc, char **argv)
 
         ConfigurationManager::getInstance().init (config.getString("main_configuration_file"));
 
-        MySQLConnectionInfo info (DB_TYPE_MYSQLpp, "job_awam_0023", "localhost", "sassc", "sassc", 3306);
+        Client mf(argc, argv);
 
-        ATSDB::getInstance().connect(&info);
-        ATSDB::getInstance().open("job_awam_0023");
+        MainWindow window;
 
-        if (config.getBool("save_config_on_exit"))
-            ConfigurationManager::getInstance().saveConfiguration();
+        window.show();
 
-        ATSDB::getInstance().shutdown();
+        return mf.exec();
+
+//        MySQLConnectionInfo info (DB_TYPE_MYSQLpp, "job_awam_0023", "localhost", "sassc", "sassc", 3306);
+
+//        ATSDB::getInstance().connect(&info);
+//        ATSDB::getInstance().open("job_awam_0023");
+
+//        if (config.getBool("save_config_on_exit"))
+//            ConfigurationManager::getInstance().saveConfiguration();
+
+//        ATSDB::getInstance().shutdown();
 
 //        unsigned int test_size=10000000;
 //        test_array_list(test_size);
@@ -157,11 +167,21 @@ int main (int argc, char **argv)
     {
         logerr  << "Main: Caught Exception '" << ex.what() << "'";
 
+        if (ATSDB::getInstance().getDBOpened ())
+            ATSDB::getInstance().shutdown();
+
+        //WorkerThreadManager::getInstance().shutdown();
+
         return -1;
     }
     catch(...)
     {
         logerr  << "Main: Caught Exception";
+
+        if (ATSDB::getInstance().getDBOpened ())
+            ATSDB::getInstance().shutdown();
+
+        //WorkerThreadManager::getInstance().shutdown();
 
         return -1;
     }

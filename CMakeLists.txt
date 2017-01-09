@@ -67,6 +67,7 @@ include_directories (
 	.
 	src
         src/buffer
+        src/client
         src/computation
         src/config
 	src/command
@@ -105,6 +106,7 @@ set ( atsdb_HDRS
 #        src/buffer/ArrayContainer.h
         src/buffer/Buffer.h
 #        src/buffer/BufferFilter.h
+        src/client/Client.h
         src/config/Configurable.h
         src/config/Configuration.h
         src/config/ConfigurationManager.h
@@ -212,6 +214,8 @@ set ( atsdb_HDRS
         )
 
 set (atsdb_MOC_HEADERS
+        src/client/MainWindow.h
+        src/client/MainWidget.h
 #        src/filter/DBFilterCondition.h
 #        src/filter/DBFilterWidget.h
 #        src/filter/FilterEditWidget.h
@@ -255,6 +259,9 @@ set ( atsdb_SRCS
         src/buffer/ArrayList.cpp
         src/buffer/Buffer.cpp
 #        src/buffer/BufferFilter.cpp
+        src/client/Client.cpp
+        src/client/MainWindow.cpp
+        src/client/MainWidget.cpp
         src/config/Configurable.cpp
         src/config/Configuration.cpp
         src/config/ConfigurationManager.cpp
@@ -378,7 +385,7 @@ set ( atsdb_UI
         )
 
 set ( client_SRCS
-        src/client/client_main.cpp
+        src/client/Main.cpp
     )
 
 	
