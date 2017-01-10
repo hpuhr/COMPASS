@@ -85,7 +85,7 @@ public:
 /**
  * @brief Widget for choosing a database system and parameters
  */
-class DBSelectionWidget : public QFrame, public Configurable
+class DBSelectionWidget : public QFrame
 {
     Q_OBJECT
 
@@ -106,7 +106,7 @@ signals:
 
 public:
     /// @brief Constructor
-    DBSelectionWidget(std::string class_id, std::string instance_id, Configurable *parent);
+    DBSelectionWidget();
     /// @brief Destructor
     virtual ~DBSelectionWidget();
 
@@ -178,9 +178,6 @@ protected:
 
     /// @brief Creates GUI elements
     void createElements ();
-
-protected:
-    virtual void checkSubConfigurables ();
 };
 
 #endif /* DBSELECTIONWIDGET_H_ */

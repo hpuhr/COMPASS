@@ -93,11 +93,8 @@ public:
   /// @brief Returns if all data from the prepared command was read
   virtual bool getPreparedCommandDone ()=0;
 
-  /// @brief Return a Buffer with all table names (as strings) in the database
-  //virtual std::shared_ptr <Buffer> getTableList()=0;
-  /// @brief Return a Buffer with all columns and data types for a table
-  //virtual std::shared_ptr <Buffer> getColumnList(const std::string &table)=0;
   virtual std::map <std::string, DBTableInfo> getTableInfo ()=0;
+  virtual std::vector <std::string> getDatabases()=0;
 
   /// @brief Return the DBConnectionInfo defining the database system and parameters
   const DBConnectionInfo &getDBInfo () { return info_; }

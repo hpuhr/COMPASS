@@ -29,16 +29,12 @@
 #include "Configurable.h"
 //#include "JobOrderer.h"
 
-//class Job;
-class QTextEdit;
 class QPushButton;
 //class DBConnectionInfo;
 //class DBObjectWidget;
-//class DBSelectionWidget;
+class DBSelectionWidget;
 //class DBSchemaWidget;
 class QStackedWidget;
-class QHBoxLayout;
-class QLineEdit;
 
 //namespace ATSDB
 //{
@@ -52,7 +48,7 @@ class QLineEdit;
  *
  * Also handles shutdown behavior using the closeEvent() function.
  */
-class MainWindow : public QMainWindow //, public Configurable
+class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
@@ -74,8 +70,6 @@ public:
     MainWindow();
     /// @brief Destructor
     virtual ~MainWindow();
-
-    //virtual void generateSubConfigurable (std::string class_id, std::string instance_id);
 
 //    /// @brief Sets database type
 //    void setDBType (std::string value);
@@ -100,12 +94,12 @@ protected:
     /// Widget stack for startup to usage switch
     QStackedWidget *widget_stack_;
     /// Database configuration widget
-    //QWidget *db_config_widget_;
+    QWidget *db_config_widget_;
     /// Central widget
     //MainWidget *main_widget_;
 
     /// Contains database type and parameter elements
-    //DBSelectionWidget *selection_widget_;
+    DBSelectionWidget *selection_widget_;
     /// Contains database schema configuration elements
     //DBSchemaWidget *schema_widget_;
     /// Contains DBObject configuration elements
@@ -134,15 +128,9 @@ protected:
 
     /// @brief Called when application closes
     void closeEvent(QCloseEvent *event);
-    /// @brief Called when window is moved, for position persistence
-    virtual void moveEvent (QMoveEvent *event);
-    /// @brief Called when window is resized, for size persistence
-    virtual void resizeEvent (QResizeEvent *event);
 
     /// @brief Unlocks database schema edit elements
     void unlockSchemaGui();
-
-    //virtual void checkSubConfigurables ();
 };
 
 //}

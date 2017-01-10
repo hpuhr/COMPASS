@@ -70,6 +70,7 @@ public:
     /// @brief Added for performance test. Do not use.
     //DBResult *readBulkCommand (DBCommand *command, std::string main_statement, std::string order_statement, unsigned int max_results=0);
     std::map <std::string, DBTableInfo> getTableInfo ();
+    std::vector <std::string> getDatabases();
 
 private:
     /// Used for all database queries

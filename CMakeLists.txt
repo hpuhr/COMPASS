@@ -221,7 +221,7 @@ set (atsdb_MOC_HEADERS
 #        src/filter/FilterEditWidget.h
 #        src/filter/FilterGeneratorWidget.h
 #        src/filter/SensorFilterWidget.h
-#        src/gui/DBSelectionWidget.h
+        src/gui/DBSelectionWidget.h
 #        src/gui/QCollapsableWidget.h
 #        src/gui/WorkerThreadWidget.h
 #        src/gui/WorkflowEditWidget.h
@@ -279,7 +279,7 @@ set ( atsdb_SRCS
 #        src/filter/SensorFilterWidget.cpp
 #        src/filter/FilterEditWidget.cpp
 #        src/filter/FilterGeneratorWidget.cpp
-#        src/gui/DBSelectionWidget.cpp
+        src/gui/DBSelectionWidget.cpp
 #        src/gui/QCollapsableWidget.cpp
 #        src/gui/WorkerThreadWidget.cpp
 #        src/gui/WorkflowEditWidget.cpp

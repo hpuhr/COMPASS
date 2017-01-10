@@ -1514,34 +1514,8 @@ void DBInterface::updateTableInfo ()
 //    return buffer;
 //}
 
-//std::vector <std::string> DBInterface::getDatabases ()
-//{
-//    std::vector <std::string> names;
-
-//    boost::mutex::scoped_lock l(mutex_);
-
-//    DBCommand command;
-//    command.setCommandString(sql_generator_->getShowDatabasesStatement());
-
-//    PropertyList list;
-//    list.addProperty("name", PropertyDataType::STRING);
-//    command.setPropertyList(list);
-
-//    DBResult *result = connection_->execute(&command);
-//    assert (result->containsData());
-
-//    Buffer *buffer = result->getBuffer();
-//    if (!buffer->firstWrite())
-//    {
-//        for (unsigned int cnt=0; cnt < buffer->size(); cnt++)
-//        {
-//            std::string tmp = buffer->getString("name").get(cnt);
-//            names.push_back(tmp);
-//        }
-//    }
-
-//    delete buffer;
-//    delete result;
-
-//    return names;
-//}
+std::vector <std::string> DBInterface::getDatabases ()
+{
+    assert (connection_);
+    return connection_->getDatabases();
+}

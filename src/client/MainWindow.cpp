@@ -37,6 +37,7 @@
 #include <QStackedWidget>
 #include <QLineEdit>
 #include <QGridLayout>
+#include <QSettings>
 
 //#include "Buffer.h"
 #include "MainWindow.h"
@@ -47,7 +48,7 @@
 #include "ConfigurationManager.h"
 //#include "DBObjectWidget.h"
 #include "ATSDB.h"
-//#include "DBSelectionWidget.h"
+#include "DBSelectionWidget.h"
 //#include "DBSchema.h"
 //#include "DBSchemaManager.h"
 //#include "DBSchemaWidget.h"
@@ -64,21 +65,13 @@ using namespace std;
 //{
 
 MainWindow::MainWindow()
-//: Configurable ("MainWindow", "MainWindow0"), main_widget_(0), selection_widget_(0), schema_widget_(0),
-    : start_button_(0), db_opened_(false) //, object_widget_ (0)
+//: main_widget_(0), , schema_widget_(0),
+    : db_config_widget_(0), selection_widget_(0), start_button_(0), db_opened_(false) //, object_widget_ (0)
 {
     logdbg  << "MainWindow: constructor";
 
-//    registerParameter ("pos_x", &pos_x_, 0);
-//    registerParameter ("pos_y", &pos_y_, 0);
-//    registerParameter ("width", &width_, 1000);
-//    registerParameter ("height", &height_, 700);
-//    registerParameter ("min_width", &min_width_, 1000);
-//    registerParameter ("min_height", &min_height_, 700);
-//    registerParameter ("native_menu", &native_menu_, false);
-
-//    setMinimumSize(QSize(min_width_, min_height_));
-//    setGeometry(pos_x_, pos_y_, width_, height_);
+    QSettings settings("ATSDB", "Client");
+    restoreGeometry(settings.value("geometry").toByteArray());
 
     createMenus();
 
@@ -91,17 +84,19 @@ MainWindow::MainWindow()
 
     //object_widget_ = new DBObjectWidget ();
 
-//    assert (selection_widget_);
-//    assert (schema_widget_);
+    selection_widget_ = new DBSelectionWidget ();
+    connect(selection_widget_, SIGNAL(databaseOpened()), this, SLOT(openedDB()));
+    assert (selection_widget_);
+    //assert (schema_widget_);
 
-//    db_config_widget_ = new QWidget ();
-//    assert (db_config_widget_);
-//    createDBConfigWidget ();
+    db_config_widget_ = new QWidget ();
+    assert (db_config_widget_);
+    createDBConfigWidget ();
 
-//    widget_stack_->addWidget (db_config_widget_);
+    widget_stack_->addWidget (db_config_widget_);
     setCentralWidget(widget_stack_);
 
-//    widget_stack_->setCurrentIndex (0);
+    widget_stack_->setCurrentIndex (0);
 
     menuBar()->setNativeMenuBar(native_menu_);
 
@@ -161,6 +156,9 @@ void MainWindow::closeEvent(QCloseEvent *event)
 {
     logdbg  << "MainWindow: closeEvent: start";
 
+    QSettings settings("ATSDB", "Client");
+    settings.setValue("geometry", saveGeometry());
+
     ConfigurationManager::getInstance().saveConfiguration();
 
     if (widget_stack_)
@@ -179,85 +177,52 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
     //WorkerThreadManager::getInstance().shutdown();
 
+    QWidget::closeEvent(event);
     logdbg  << "MainWindow: closeEvent: done";
 }
 
-void MainWindow::moveEvent (QMoveEvent *event)
-{
-    logdbg  << "MainWindow: moveEvent";
-//    pos_x_ = event->pos().x();
-//    pos_y_ = event->pos().y();
-}
-
-void MainWindow::resizeEvent (QResizeEvent *event)
-{
-    logdbg  << "MainWindow: resizeEvent";
-//    width_ = event->size().width();
-//    height_ = event->size().height();
-}
-
-//void MainWindow::generateSubConfigurable (std::string class_id, std::string instance_id)
-//{
-//    if (class_id.compare("DBSelectionWidget") == 0)
-//    {
-//        assert (selection_widget_ == 0);
-//        selection_widget_ = new DBSelectionWidget ("DBSelectionWidget", instance_id, this);
-//        connect (selection_widget_, SIGNAL(databaseOpened()), this, SLOT(openedDB()));
-//    }
-//    else
-//        throw std::runtime_error ("MainWindow: generateSubConfigurable: unknown sub-configurable "+class_id);
-//}
-
-//void MainWindow::checkSubConfigurables ()
-//{
-//    if (selection_widget_ == 0)
-//    {
-//        generateSubConfigurable ("DBSelectionWidget", "DBSelectionWidget0");
-//    }
-//}
-
 void MainWindow::createDBConfigWidget ()
 {
-//    QFont font_bold;
-//    font_bold.setBold(true);
+    QFont font_bold;
+    font_bold.setBold(true);
 
-//    QFont font_big;
-//    font_big.setPointSize(18);
+    QFont font_big;
+    font_big.setPointSize(18);
 
-//    assert (selection_widget_ != 0);
+    assert (selection_widget_ != 0);
 
-//    QHBoxLayout *layout = new QHBoxLayout ();
+    QHBoxLayout *layout = new QHBoxLayout ();
 
-//    layout->addWidget (selection_widget_);
+    layout->addWidget (selection_widget_);
 
-//    QVBoxLayout *db_schema_layout = new QVBoxLayout ();
+    QVBoxLayout *db_schema_layout = new QVBoxLayout ();
 
-//    assert (schema_widget_);
-//    db_schema_layout->addWidget (schema_widget_);
+    //assert (schema_widget_);
+    //db_schema_layout->addWidget (schema_widget_);
 
-//    db_schema_layout->addWidget (object_widget_);
+    //db_schema_layout->addWidget (object_widget_);
 
-//    ProjectionManagerWidget *projmanwi = new ProjectionManagerWidget ();
-//    db_schema_layout->addWidget (projmanwi);
+    //ProjectionManagerWidget *projmanwi = new ProjectionManagerWidget ();
+    //db_schema_layout->addWidget (projmanwi);
 
-//    db_schema_layout->addStretch();
+    db_schema_layout->addStretch();
 
-//    QHBoxLayout *start_layout = new QHBoxLayout ();
+    QHBoxLayout *start_layout = new QHBoxLayout ();
 
-//    start_layout->addStretch();
+    start_layout->addStretch();
 
-//    start_button_ = new QPushButton(tr("Start"));
-//    start_button_->setFont (font_bold);
-//    start_button_->setMinimumWidth(200);
-//    connect(start_button_, SIGNAL( clicked() ), this, SLOT( start() ));
-//    start_button_->setDisabled (true);
-//    start_layout->addWidget(start_button_);
+    start_button_ = new QPushButton(tr("Start"));
+    start_button_->setFont (font_bold);
+    start_button_->setMinimumWidth(200);
+    connect(start_button_, SIGNAL( clicked() ), this, SLOT( start() ));
+    start_button_->setDisabled (true);
+    start_layout->addWidget(start_button_);
 
-//    db_schema_layout->addLayout(start_layout);
+    db_schema_layout->addLayout(start_layout);
 
-//    layout->addLayout (db_schema_layout);
+    layout->addLayout (db_schema_layout);
 
-//    db_config_widget_->setLayout (layout);
+    db_config_widget_->setLayout (layout);
 }
 
 void MainWindow::keyPressEvent ( QKeyEvent * event )

@@ -220,7 +220,7 @@ public:
 //    Buffer *getTrackMatches (bool has_mode_a, unsigned int mode_a, bool has_ta, unsigned int ta, bool has_ti, std::string ti,
 //            bool has_tod, double tod_min, double tod_max);
 
-//    const std::vector<std::string> &getDatabaseNames ();
+    std::vector<std::string> getDatabaseNames ();
 
 protected:
     /// Flag indicating if database was opened.
@@ -275,7 +275,7 @@ public:
         return instance;
     }
     ///@brief Returns flag indicating if DB was opened.
-    bool getDBOpened () { return db_opened_; };
+    bool getDBOpened () { return db_opened_; }
 
     ///@brief Returns DBConnectionInfo pointer used in init.
     DBConnectionInfo *getDBInfo ();

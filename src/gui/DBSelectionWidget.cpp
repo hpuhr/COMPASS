@@ -41,24 +41,24 @@
 using namespace Utils;
 
 
-DBSelectionWidget::DBSelectionWidget(std::string class_id, std::string instance_id, Configurable *parent)
- : Configurable (class_id, instance_id, parent), /*filename_edit_(0), file_radio_(0),*/ mysqlpp_radio_(0), //mysqlcon_radio_(0),
+DBSelectionWidget::DBSelectionWidget()
+ : /*filename_edit_(0), file_radio_(0),*/ mysqlpp_radio_(0), //mysqlcon_radio_(0),
   mysql_db_ip_edit_(0), mysql_db_port_edit_ (0), mysql_db_username_edit_ (0), mysql_db_password_edit_(0),
   connect_button_(0),  mysql_db_name_box_ (0), open_button_(0)
 {
-  registerParameter ("filename", &filename_, (std::string)"");
+//  registerParameter ("filename", &filename_, (std::string)"");
 
-  registerParameter ("mysql_db_name", &mysql_db_name_, (std::string) "test");
-  registerParameter ("mysql_db_ip", &mysql_db_ip_, (std::string) "localhost");
-  registerParameter ("mysql_db_port", &mysql_db_port_, (std::string) "3306");
-  registerParameter ("mysql_db_username", &mysql_db_username_, (std::string) "root");
-  registerParameter ("mysql_db_password", &mysql_db_password_, (std::string) "");
+//  registerParameter ("mysql_db_name", &mysql_db_name_, (std::string) "test");
+//  registerParameter ("mysql_db_ip", &mysql_db_ip_, (std::string) "localhost");
+//  registerParameter ("mysql_db_port", &mysql_db_port_, (std::string) "3306");
+//  registerParameter ("mysql_db_username", &mysql_db_username_, (std::string) "root");
+//  registerParameter ("mysql_db_password", &mysql_db_password_, (std::string) "");
 
-  registerParameter ("db_type_selection", &db_type_selection_, 0);
+//  registerParameter ("db_type_selection", &db_type_selection_, 0);
 
   createElements();
 
-  createSubConfigurables();
+  //createSubConfigurables();
 }
 
 DBSelectionWidget::~DBSelectionWidget()
@@ -66,10 +66,10 @@ DBSelectionWidget::~DBSelectionWidget()
 
 }
 
-void DBSelectionWidget::checkSubConfigurables ()
-{
+//void DBSelectionWidget::checkSubConfigurables ()
+//{
 
-}
+//}
 
 //void DBSelectionWidget::selectFile()
 //{

@@ -1113,7 +1113,8 @@ void ATSDB::shutdown ()
 //    return db_interface_->getTrackMatches(has_mode_a, mode_a, has_ta, ta, has_ti, ti, has_tod, tod_min, tod_max);
 //}
 
-//const std::vector<std::string> &ATSDB::getDatabaseNames ()
-//{
-//    return databases_;
-//}
+std::vector<std::string> ATSDB::getDatabaseNames ()
+{
+    assert (db_interface_);
+    return db_interface_->getDatabases();;
+}

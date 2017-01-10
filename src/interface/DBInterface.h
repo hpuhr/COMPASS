@@ -178,7 +178,7 @@ public:
 //    Buffer *getTrackMatches (bool has_mode_a, unsigned int mode_a, bool has_ta, unsigned int ta, bool has_ti, std::string ti,
 //            bool has_tod, double tod_min, double tod_max);
 
-//    std::vector <std::string> getDatabases ();
+    std::vector <std::string> getDatabases ();
 
 protected:
     /// Last used database name

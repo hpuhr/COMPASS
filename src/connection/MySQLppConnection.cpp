@@ -456,7 +456,7 @@ DBTableInfo MySQLppConnection::getColumnList(const std::string &table) // buffer
     //command.set ("SHOW COLUMNS FROM "+table);
 
     //SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY, IS_NULLABLE, COLUMN_COMMENT FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'job_awam_0019' AND TABLE_NAME = 'sd_track' ORDER BY COLUMN_NAME DESC;
-    command.set ("SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY, IS_NULLABLE, COLUMN_COMMENT FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '"+database_+"' AND TABLE_NAME = '"+table+"'");
+    command.set ("SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY, IS_NULLABLE, COLUMN_COMMENT FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '"+database_+"' AND TABLE_NAME = '"+table+"';");
 
     PropertyList list;
     list.addProperty ("COLUMN_NAME", PropertyDataType::STRING);
@@ -479,6 +479,33 @@ DBTableInfo MySQLppConnection::getColumnList(const std::string &table) // buffer
     }
 
     return table_info;
+}
+
+std::vector<std::string> MySQLppConnection::getDatabases ()
+{
+    std::vector <std::string> names;
+
+    DBCommand command;
+    command.set("SHOW DATABASES;");
+
+    PropertyList list;
+    list.addProperty("name", PropertyDataType::STRING);
+    command.list(list);
+
+    std::shared_ptr <DBResult> result = execute(command);
+    assert (result->containsData());
+
+    std::shared_ptr <Buffer> buffer = result->buffer();
+    if (!buffer->firstWrite())
+    {
+        for (unsigned int cnt=0; cnt < buffer->size(); cnt++)
+        {
+            std::string tmp = buffer->getString("name").get(cnt);
+            names.push_back(tmp);
+        }
+    }
+
+    return names;
 }
 
 void MySQLppConnection::performanceTest ()
