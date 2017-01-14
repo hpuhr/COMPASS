@@ -71,7 +71,7 @@ MainWindow::MainWindow()
     logdbg  << "MainWindow: constructor";
 
     QSettings settings("ATSDB", "Client");
-    restoreGeometry(settings.value("geometry").toByteArray());
+    restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
 
     createMenus();
 
@@ -157,7 +157,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     logdbg  << "MainWindow: closeEvent: start";
 
     QSettings settings("ATSDB", "Client");
-    settings.setValue("geometry", saveGeometry());
+    settings.setValue("MainWindow/geometry", saveGeometry());
 
     ConfigurationManager::getInstance().saveConfiguration();
 
