@@ -35,12 +35,12 @@
 class Buffer;
 class BufferWriter;
 class DBConnection;
-class DBConnectionInfo;
 class DBOVariable;
 class QProgressDialog;
 class DBResult;
 class DBTableColumn;
 class DBTableInfo;
+class DBInterfaceWidget;
 
 class SQLGenerator;
 
@@ -60,8 +60,10 @@ public:
     /// @brief Destructor
     virtual ~DBInterface();
 
+    const std::vector<std::string> &getDatabaseConnectionTypes () { return connection_types_; }
+
     /// @brief Initializes a database connection based on the supplied type
-    void initConnection (DBConnectionInfo *info);
+    void initConnection (const std::string &connection_type);
     void openDatabase (std::string database_name);
 
     void updateTableInfo ();
@@ -181,7 +183,10 @@ public:
 
     std::vector <std::string> getDatabases ();
 
+    DBInterfaceWidget *widget();
+
 protected:
+    std::vector <std::string> connection_types_;
     /// Last used database name
     //std::string database_name_;
     /// Connection exists
@@ -209,14 +214,14 @@ protected:
     /// Size of a read chunk in incremental reading process
     unsigned int read_chunk_size_;
 
-    /// Definition of used database system and parameters
-    DBConnectionInfo *info_;
     /// Generates SQL statements
     //SQLGenerator *sql_generator_;
     /// Connection to database, created based on DBConnectionInfo
     DBConnection *connection_;
     /// Writes buffer to the database
     //BufferWriter *buffer_writer_;
+
+    DBInterfaceWidget *widget_;
 
     std::map <std::string, DBTableInfo> table_info_;
 

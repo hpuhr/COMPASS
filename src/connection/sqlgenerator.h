@@ -25,7 +25,6 @@
 #ifndef SQLGENERATOR_H_
 #define SQLGENERATOR_H_
 
-#include "dbconnectioninfo.h"
 #include "dbovariableset.h"
 
 class Buffer;
@@ -118,7 +117,7 @@ protected:
     /// Flag if db_type_ was set
     bool db_type_set_;
     /// Database connection type
-    DB_CONNECTION_TYPE db_type_;
+    //DB_CONNECTION_TYPE db_type_;
 
     /// Properties table name
     std::string table_name_properties_;

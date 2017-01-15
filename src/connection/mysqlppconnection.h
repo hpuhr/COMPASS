@@ -32,6 +32,40 @@
 
 class Buffer;
 class DBTableInfo;
+class MySQLppConnectionWidget;
+
+class MySQLConnectionInfo
+{
+public:
+    MySQLConnectionInfo (const std::string &db, const std::string &server, const std::string &user, const std::string &password, unsigned int port)
+   : db_(db), server_(server), user_(user), password_(password), port_(port) {}
+  virtual ~MySQLConnectionInfo () {}
+
+  /// Returns the database name
+  const std::string &db () const { return db_; }
+  /// Returns the database server name or IP address
+  const std::string &server () const { return server_; }
+  /// Returns the username
+  const std::string user () const { return user_; }
+  /// Returns the password
+  const std::string password () const { return password_; }
+  /// Returns the port number
+  unsigned int port () const { return port_; }
+
+  std::string id () const { return "MySQL Server: '"+server_+"' Database: '"+db_+"'";}
+
+private:
+  /// Database name
+  std::string db_;
+  /// Database server name or IP address
+  std::string server_;
+  /// Username
+  std::string user_;
+  /// Password
+  std::string password_;
+  /// Port number
+  unsigned int port_;
+};
 
 /**
  * @brief Interface for a MySQL database connection
@@ -41,7 +75,7 @@ class DBTableInfo;
 class MySQLppConnection : public DBConnection
 {
 public:
-    MySQLppConnection(const DBConnectionInfo &info);
+    MySQLppConnection();
     virtual ~MySQLppConnection();
 
     virtual void connect ();
@@ -73,6 +107,8 @@ public:
     std::map <std::string, DBTableInfo> getTableInfo ();
     std::vector <std::string> getDatabases();
 
+    QWidget *getWidget ();
+
 private:
     /// Used for all database queries
     mysqlpp::Connection connection_;
@@ -94,6 +130,8 @@ private:
     const DBCommand *prepared_command_;
     /// Prepared command finished flag.
     bool prepared_command_done_;
+
+    MySQLppConnectionWidget *widget_;
 
     void prepareStatement (const char *sql);
     void finalizeStatement ();

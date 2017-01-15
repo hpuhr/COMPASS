@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * SQLite3Connection.cpp
- *
- *  Created on: Jan 11, 2012
- *      Author: sk
- */
-
 #include "boost/date_time/posix_time/posix_time.hpp"
 //#include <QProgressDialog>
 //#include <QCoreApplication>
@@ -34,12 +27,12 @@
 #include "dbcommand.h"
 #include "dbcommandlist.h"
 #include "dbconnection.h"
+#include "dbinterfacewidget.h"
 #include "dbinterface.h"
 #include "dbobjectmanager.h"
 #include "dbovariable.h"
 #include "dbresult.h"
 //#include "MetaDBTable.h"
-#include "dbconnectioninfo.h"
 #include "mysqlppconnection.h"
 //#include "MySQLConConnection.h"
 //#include "SQLGenerator.h"
@@ -65,9 +58,11 @@ using namespace Utils;
  * write_table_names_,
  */
 DBInterface::DBInterface(std::string class_id, std::string instance_id, Configurable *parent)
-: Configurable (class_id, instance_id, parent), connected_(false), database_opened_ (false), info_(0), connection_(0)//, buffer_writer_(0)
+    : Configurable (class_id, instance_id, parent), connection_types_{"MySQL++ Server"}, connected_(false), database_opened_ (false), connection_(nullptr),
+  widget_(nullptr)//, buffer_writer_(0)
 {
     boost::mutex::scoped_lock l(mutex_);
+
     //registerParameter ("database_name", &database_name_, "");
     registerParameter ("read_chunk_size", &read_chunk_size_, 20000);
 
@@ -107,10 +102,16 @@ DBInterface::~DBInterface()
 
     boost::mutex::scoped_lock l(mutex_);
 
+    if (widget_)
+    {
+        delete widget_;
+        widget_ = nullptr;
+    }
+
     if (connection_)
     {
         delete connection_;
-        connection_=0;
+        connection_ = nullptr;
     }
 
     table_info_.clear();
@@ -131,13 +132,8 @@ DBInterface::~DBInterface()
  * Generates connection based on the DB_CONNECTION_TYPE of info, calls init on it. If a new database will be created, creates
  * the buffer_writer_, else calls updateExists and updateCount.
  */
-void DBInterface::initConnection (DBConnectionInfo *info)
+void DBInterface::initConnection (const std::string &connection_type)
 {
-    assert (info);
-    assert (!info_);
-
-    info_=info;
-
     assert (!connection_);
 
 //    if (info->getType() == DB_TYPE_SQLITE)
@@ -145,9 +141,10 @@ void DBInterface::initConnection (DBConnectionInfo *info)
 //        //connection_ = new SQLiteConnection (info);
 //        throw std::runtime_error ("DBInterface: initConnection: SQLite3 connection not supported at the moment");
 //    }
-    if (info->type() == DB_TYPE_MYSQLpp)
+    if (connection_type == "MySQL++ Server")
     {
-        connection_ = new MySQLppConnection (*info);
+        connection_ = new MySQLppConnection ();
+        assert (connection_);
         //throw std::runtime_error ("DBInterface: initConnection: MySQL++ connection not supported at the moment");
     }
 //    else if (info->getType() == DB_TYPE_MYSQLCon)
@@ -194,6 +191,17 @@ void DBInterface::updateTableInfo ()
 //    {
 //        loginf << "DBInterface::updateTableInfo: table '" << it.first << "' with " << it.second.size() << " columns";
 //    }
+}
+
+DBInterfaceWidget *DBInterface::widget()
+{
+    if (!widget_)
+    {
+        widget_ = new DBInterfaceWidget (*this);
+    }
+
+    assert (widget_);
+    return widget_;
 }
 
 /**

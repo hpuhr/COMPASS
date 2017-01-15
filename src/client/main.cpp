@@ -11,7 +11,6 @@
 #include "atsdb.h"
 #include "client.h"
 #include "mainwindow.h"
-#include "dbconnectioninfo.h"
 
 void test_array_list(unsigned int test_size)
 {

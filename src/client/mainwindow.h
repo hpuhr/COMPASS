@@ -27,11 +27,9 @@
 
 #include <QMainWindow>
 
-#include "configurable.h"
 //#include "JobOrderer.h"
 
 class QPushButton;
-//class DBConnectionInfo;
 //class DBObjectWidget;
 class DBSelectionWidget;
 //class DBSchemaWidget;
@@ -95,18 +93,18 @@ protected:
     /// Widget stack for startup to usage switch
     QStackedWidget *widget_stack_;
     /// Database configuration widget
-    QWidget *db_config_widget_;
+    QWidget *dbinterface_widget_;
     /// Central widget
     //MainWidget *main_widget_;
 
     /// Contains database type and parameter elements
-    DBSelectionWidget *selection_widget_;
+    //DBSelectionWidget *selection_widget_;
     /// Contains database schema configuration elements
     //DBSchemaWidget *schema_widget_;
     /// Contains DBObject configuration elements
     //DBObjectWidget *object_widget_;
 
-    static const unsigned int info_height_=200;
+    //static const unsigned int info_height_=200;
 
     QPushButton *start_button_;
 

@@ -28,7 +28,6 @@
 //#include "BufferReceiver.h"
 //#include "DataSource.h"
 //#include "DBOVariable.h"
-#include "dbconnectioninfo.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "dbschemamanager.h"
@@ -177,6 +176,12 @@ void ATSDB::checkSubConfigurables ()
 }
 
 
+DBInterfaceWidget *ATSDB::dbInterfaceWidget ()
+{
+    assert (db_interface_);
+    return db_interface_->widget();
+}
+
 /**
  * Initializes the DB, post-processes if required, builsd minimum, maximum, data sources and active data sources information. Sets
  * state to DB_STATE_WRITE if a new database was created or DB_STATE_READ_IDLE if an existing one was opened. Sets db_opened_
@@ -184,23 +189,23 @@ void ATSDB::checkSubConfigurables ()
  *
  * \param info DBConnectionInfo pointer defining what database system and parameters to use
  */
-void ATSDB::connect (DBConnectionInfo *info)
-{
-    logdbg  << "ATSDB: connect: start";
+//void ATSDB::connect (DBConnectionInfo *info)
+//{
+//    logdbg  << "ATSDB: connect: start";
 
-    assert (info);
+//    assert (info);
 
-    loginf  << "ATSDB: connect: initialising connection";
-    db_interface_->initConnection(info);
+//    loginf  << "ATSDB: connect: initialising connection";
+//    db_interface_->initConnection(info);
 
-    //buildDatabases ();
-}
+//    //buildDatabases ();
+//}
 
-void ATSDB::open (std::string database_name)
-{
-    db_interface_->openDatabase(database_name);
+//void ATSDB::open (std::string database_name)
+//{
+//    db_interface_->openDatabase(database_name);
 
-    loginf  << "ATSDB: open: data sources";
+//    loginf  << "ATSDB: open: data sources";
     //buildDataSources();
 
 //    logdbg  << "ATSDB: open: checking if new";
@@ -221,14 +226,14 @@ void ATSDB::open (std::string database_name)
 
     // Now we have opened the database
     //loginf  <<  "ATSDB: init: database '" << filename << "' opened";
-    logdbg  << "ATSDB: open: state to 'DB_STATE_READ_IDLE'";
+//    logdbg  << "ATSDB: open: state to 'DB_STATE_READ_IDLE'";
 
-    db_opened_=true;
+//    db_opened_=true;
 
-    //testUpdate();
+//    //testUpdate();
 
-    logdbg  << "ATSDB: open: end";
-}
+//    logdbg  << "ATSDB: open: end";
+//}
 
 /// @brief Returns if an object of type exists
 bool ATSDB::existsDBObject (const std::string &dbo_type)
@@ -1112,9 +1117,3 @@ void ATSDB::shutdown ()
 //    assert (db_interface_);
 //    return db_interface_->getTrackMatches(has_mode_a, mode_a, has_ta, ta, has_ti, ti, has_tod, tod_min, tod_max);
 //}
-
-std::vector<std::string> ATSDB::getDatabaseNames ()
-{
-    assert (db_interface_);
-    return db_interface_->getDatabases();;
-}

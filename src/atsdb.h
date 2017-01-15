@@ -39,8 +39,8 @@
 
 class Buffer;
 class DataSource;
-class DBConnectionInfo;
 class DBInterface;
+class DBInterfaceWidget;
 class DBObject;
 class DBObjectManager;
 class DBSchema;
@@ -102,9 +102,9 @@ public:
     ///@brief Destructor.
     virtual ~ATSDB();
 
-    ///@brief Connnects to a database system using a DBConnectionInfo pointer specifying the DB system and parameters.
-    void connect (DBConnectionInfo *info);
-    void open (std::string database_name);
+    ///@brief Connnects to a database system
+    //void connect ();
+
     ///@brief Shuts down the DB access.
     void shutdown ();
 
@@ -121,6 +121,8 @@ public:
     const std::string &getCurrentSchemaName ();
     /// @brief Returns the current DBSchema
     DBSchema &getCurrentSchema ();
+
+    DBInterfaceWidget *dbInterfaceWidget ();
 
     ///@brief Adds data to a DBO from a C struct data pointer.
     //void insert (const std::string &dbo_type, void *data);
@@ -221,7 +223,6 @@ public:
 //    Buffer *getTrackMatches (bool has_mode_a, unsigned int mode_a, bool has_ta, unsigned int ta, bool has_ti, std::string ti,
 //            bool has_tod, double tod_min, double tod_max);
 
-    std::vector<std::string> getDatabaseNames ();
 
 protected:
     /// Flag indicating if database was opened.
@@ -278,8 +279,6 @@ public:
     ///@brief Returns flag indicating if DB was opened.
     bool getDBOpened () { return db_opened_; }
 
-    ///@brief Returns DBConnectionInfo pointer used in init.
-    DBConnectionInfo *getDBInfo ();
     //unsigned int getNumJobsForBufferReceiver (BufferReceiver *receiver);
 };
 

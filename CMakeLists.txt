@@ -113,7 +113,6 @@ set ( atsdb_HDRS
         src/command/dbcommandlist.h
 #        src/connection/bufferwriter.h
         src/connection/dbconnection.h
-        src/connection/dbconnectioninfo.h
         src/connection/dbresult.h
 #        src/connection/mysqlconconnection.h
         src/connection/mysqlppconnection.h
@@ -215,8 +214,8 @@ set (atsdb_MOC_HEADERS
 #        src/filter/filtereditwidget.h
 #        src/filter/filtergeneratorwidget.h
 #        src/filter/sensorfilterwidget.h
-        src/connection/dbconnectionwidget.h
-        src/connection/dbselectionwidget.h
+        src/connection/mysqlppconnectionwidget.h
+        src/interface/dbinterfacewidget.h
 #        src/gui/qcollapsablewidget.h
 #        src/gui/workerthreadwidget.h
 #        src/gui/workfloweditwidget.h
@@ -263,8 +262,8 @@ set ( atsdb_SRCS
 #        src/connection/bufferwriter.cpp
 #        src/connection/mysqlconconnection.cpp
         src/connection/mysqlppconnection.cpp
+        src/connection/mysqlppconnectionwidget.cpp
         src/connection/sqlgenerator.cpp
-        src/connection/dbselectionwidget.cpp
 #        src/connection/sqliteconnection.cpp
 #        src/datasource/datasource.cpp
 #        src/filter/dbfilter.cpp
@@ -285,6 +284,7 @@ set ( atsdb_SRCS
 #        src/gui/transformationvariableeditdialog.cpp
 #        src/gui/filtereditdialog.cpp
         src/interface/dbinterface.cpp
+        src/interface/dbinterfacewidget.cpp
 #        src/job/dboactivedatasourcesdbjob.cpp
 #        src/job/dbovariabledistinctstatisticsdbjob.cpp
 #        src/job/dbovariableminmaxdbjob.cpp

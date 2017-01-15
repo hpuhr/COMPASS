@@ -33,6 +33,7 @@ class DBResult;
 class DBConnectionInfo;
 class Buffer;
 class DBTableInfo;
+class QWidget;
 
 /**
  * @brief Interface for any database connection
@@ -48,7 +49,7 @@ public:
    *
    * \param info defines what database system is used
    */
-  DBConnection(const DBConnectionInfo &info) : info_(info), database_opened_(false) {}
+  DBConnection() : database_opened_(false) {}
   /// @brief Destructor
   virtual ~DBConnection() {}
 
@@ -97,11 +98,11 @@ public:
   virtual std::vector <std::string> getDatabases()=0;
 
   /// @brief Return the DBConnectionInfo defining the database system and parameters
-  const DBConnectionInfo &getDBInfo () { return info_; }
+
+  virtual QWidget *getWidget ()=0;
 
 protected:
   /// Defines the database system and parameters
-  const DBConnectionInfo &info_;
   bool database_opened_;
 
   /// @brief Creates a prepared query (internal)

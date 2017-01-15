@@ -27,8 +27,6 @@
 
 #include <QWidget>
 
-#include "configurable.h"
-
 //namespace MFImport
 //{
 

@@ -48,7 +48,8 @@
 #include "configurationmanager.h"
 //#include "DBObjectWidget.h"
 #include "atsdb.h"
-#include "dbselectionwidget.h"
+#include "dbinterfacewidget.h"
+//#include "dbselectionwidget.h"
 //#include "DBSchema.h"
 //#include "DBSchemaManager.h"
 //#include "DBSchemaWidget.h"
@@ -66,7 +67,7 @@ using namespace std;
 
 MainWindow::MainWindow()
 //: main_widget_(0), , schema_widget_(0),
-    : db_config_widget_(0), selection_widget_(0), start_button_(0), db_opened_(false) //, object_widget_ (0)
+    : dbinterface_widget_(0), start_button_(0), db_opened_(false) //, object_widget_ (0)
 {
     logdbg  << "MainWindow: constructor";
 
@@ -84,16 +85,18 @@ MainWindow::MainWindow()
 
     //object_widget_ = new DBObjectWidget ();
 
-    selection_widget_ = new DBSelectionWidget ();
-    connect(selection_widget_, SIGNAL(databaseOpened()), this, SLOT(openedDB()));
-    assert (selection_widget_);
-    //assert (schema_widget_);
+//    selection_widget_ = new DBSelectionWidget ();
+//    connect(selection_widget_, SIGNAL(databaseOpened()), this, SLOT(openedDB()));
+//    assert (selection_widget_);
+//    //assert (schema_widget_);
 
-    db_config_widget_ = new QWidget ();
-    assert (db_config_widget_);
-    createDBConfigWidget ();
+//    db_config_widget_ = new QWidget ();
+//    assert (db_config_widget_);
+//    createDBConfigWidget ();
 
-    widget_stack_->addWidget (db_config_widget_);
+    dbinterface_widget_ = ATSDB::getInstance().dbInterfaceWidget();
+
+    widget_stack_->addWidget (dbinterface_widget_);
     setCentralWidget(widget_stack_);
 
     widget_stack_->setCurrentIndex (0);
@@ -181,49 +184,49 @@ void MainWindow::closeEvent(QCloseEvent *event)
     logdbg  << "MainWindow: closeEvent: done";
 }
 
-void MainWindow::createDBConfigWidget ()
-{
-    QFont font_bold;
-    font_bold.setBold(true);
+//void MainWindow::createDBConfigWidget ()
+//{
+//    QFont font_bold;
+//    font_bold.setBold(true);
 
-    QFont font_big;
-    font_big.setPointSize(18);
+//    QFont font_big;
+//    font_big.setPointSize(18);
 
-    assert (selection_widget_ != 0);
+//    assert (selection_widget_ != 0);
 
-    QHBoxLayout *layout = new QHBoxLayout ();
+//    QHBoxLayout *layout = new QHBoxLayout ();
 
-    layout->addWidget (selection_widget_);
+//    layout->addWidget (selection_widget_);
 
-    QVBoxLayout *db_schema_layout = new QVBoxLayout ();
+//    QVBoxLayout *db_schema_layout = new QVBoxLayout ();
 
-    //assert (schema_widget_);
-    //db_schema_layout->addWidget (schema_widget_);
+//    //assert (schema_widget_);
+//    //db_schema_layout->addWidget (schema_widget_);
 
-    //db_schema_layout->addWidget (object_widget_);
+//    //db_schema_layout->addWidget (object_widget_);
 
-    //ProjectionManagerWidget *projmanwi = new ProjectionManagerWidget ();
-    //db_schema_layout->addWidget (projmanwi);
+//    //ProjectionManagerWidget *projmanwi = new ProjectionManagerWidget ();
+//    //db_schema_layout->addWidget (projmanwi);
 
-    db_schema_layout->addStretch();
+//    db_schema_layout->addStretch();
 
-    QHBoxLayout *start_layout = new QHBoxLayout ();
+//    QHBoxLayout *start_layout = new QHBoxLayout ();
 
-    start_layout->addStretch();
+//    start_layout->addStretch();
 
-    start_button_ = new QPushButton(tr("Start"));
-    start_button_->setFont (font_bold);
-    start_button_->setMinimumWidth(200);
-    connect(start_button_, SIGNAL( clicked() ), this, SLOT( start() ));
-    start_button_->setDisabled (true);
-    start_layout->addWidget(start_button_);
+//    start_button_ = new QPushButton(tr("Start"));
+//    start_button_->setFont (font_bold);
+//    start_button_->setMinimumWidth(200);
+//    connect(start_button_, SIGNAL( clicked() ), this, SLOT( start() ));
+//    start_button_->setDisabled (true);
+//    start_layout->addWidget(start_button_);
 
-    db_schema_layout->addLayout(start_layout);
+//    db_schema_layout->addLayout(start_layout);
 
-    layout->addLayout (db_schema_layout);
+//    layout->addLayout (db_schema_layout);
 
-    db_config_widget_->setLayout (layout);
-}
+//    db_config_widget_->setLayout (layout);
+//}
 
 void MainWindow::keyPressEvent ( QKeyEvent * event )
 {

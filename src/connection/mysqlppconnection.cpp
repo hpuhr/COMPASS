@@ -26,8 +26,8 @@
 #include "dbcommand.h"
 #include "dbcommandlist.h"
 #include "dbresult.h"
-#include "dbconnectioninfo.h"
 #include "logger.h"
+#include "mysqlppconnectionwidget.h"
 #include "mysqlppconnection.h"
 #include "dbtableinfo.h"
 #include "data.h"
@@ -40,37 +40,39 @@ using namespace Utils;
 using namespace Utils::Data;
 
 
-MySQLppConnection::MySQLppConnection(const DBConnectionInfo &info)
-    : DBConnection (info), connection_(mysqlpp::Connection (false)), prepared_query_(connection_.query()),
-      prepared_parameters_(mysqlpp::SQLQueryParms(&prepared_query_)), query_used_(false), transaction_(0)
+MySQLppConnection::MySQLppConnection()
+    : connection_(mysqlpp::Connection (false)), prepared_query_(connection_.query()),
+      prepared_parameters_(mysqlpp::SQLQueryParms(&prepared_query_)), query_used_(false), transaction_(nullptr), widget_(nullptr)
 {
-    assert (info_.type() == DB_TYPE_MYSQLpp);
-
-
     prepared_command_=0;
     prepared_command_done_=false;
 }
 
 MySQLppConnection::~MySQLppConnection()
 {
+    if (widget_)
+    {
+        delete widget_;
+        widget_ = nullptr;
+    }
+
     connection_.disconnect();
 }
 
 void MySQLppConnection::connect()
 {
-    assert (info_.type() == DB_TYPE_MYSQLpp);
 
-    const MySQLConnectionInfo &info = dynamic_cast<const MySQLConnectionInfo &> (info_);
+//    const MySQLConnectionInfo &info = dynamic_cast<const MySQLConnectionInfo &> (info_);
 
-    if (!connection_.connect("", info.server().c_str(), info.user().c_str(), info.password().c_str(), info.port()))
-    {
-        logerr  << "MySQLppConnection: init: DB connection failed: " << connection_.error();
-        throw std::runtime_error ("MySQLppConnection: init: DB connection failed");
-    }
+//    if (!connection_.connect("", info.server().c_str(), info.user().c_str(), info.password().c_str(), info.port()))
+//    {
+//        logerr  << "MySQLppConnection: init: DB connection failed: " << connection_.error();
+//        throw std::runtime_error ("MySQLppConnection: init: DB connection failed");
+//    }
 
-    assert (connection_.connected ());
+//    assert (connection_.connected ());
 
-    loginf  << "MySQLppConnection: init: sucessfully connected to server '" << connection_.server_version ();
+//    loginf  << "MySQLppConnection: init: sucessfully connected to server '" << connection_.server_version ();
 
 }
 
@@ -573,6 +575,16 @@ void MySQLppConnection::performanceTest ()
     double load_time = diff.total_milliseconds()/1000.0;
 
     loginf  << "MySQLppConnection: performanceTest: end after load time " << load_time << "s rows " << rows << " " << rows/load_time << " r/s";
+}
+
+QWidget *MySQLppConnection::getWidget ()
+{
+    if (!widget_)
+    {
+        widget_ = new MySQLppConnectionWidget(*this);
+    }
+
+    return widget_;
 }
 
 //DBResult *MySQLppConnection::readBulkCommand (DBCommand *command, std::string main_statement, std::string order_statement, unsigned int max_results)
