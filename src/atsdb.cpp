@@ -498,6 +498,8 @@ void ATSDB::shutdown ()
 {
     loginf  << "ATSDB: database shutdown";
 
+    db_interface_->closeConnection();
+
 //    if (struct_reader_->hasUnwrittenData())
 //    {
 //        loginf << "ATSDB: shutdown: finalizing data insertion";

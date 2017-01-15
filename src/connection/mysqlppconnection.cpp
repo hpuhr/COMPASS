@@ -577,13 +577,14 @@ void MySQLppConnection::performanceTest ()
     loginf  << "MySQLppConnection: performanceTest: end after load time " << load_time << "s rows " << rows << " " << rows/load_time << " r/s";
 }
 
-QWidget *MySQLppConnection::getWidget ()
+QWidget *MySQLppConnection::widget ()
 {
     if (!widget_)
     {
         widget_ = new MySQLppConnectionWidget(*this);
     }
 
+    assert (widget_);
     return widget_;
 }
 

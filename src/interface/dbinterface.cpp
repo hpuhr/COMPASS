@@ -102,19 +102,8 @@ DBInterface::~DBInterface()
 
     boost::mutex::scoped_lock l(mutex_);
 
-    if (widget_)
-    {
-        delete widget_;
-        widget_ = nullptr;
-    }
-
-    if (connection_)
-    {
-        delete connection_;
-        connection_ = nullptr;
-    }
-
-    table_info_.clear();
+    assert (!connection_);
+    assert (!widget_);
 
 //    delete sql_generator_;
 //    sql_generator_=0;
@@ -156,28 +145,45 @@ void DBInterface::initConnection (const std::string &connection_type)
 
     assert (connection_);
     connection_->connect();
-
-
 }
 
-void DBInterface::openDatabase (std::string database_name)
+void DBInterface::closeConnection ()
 {
+    boost::mutex::scoped_lock l(mutex_);
 
-    assert (connection_);
-    connection_->openDatabase(database_name);
-    updateTableInfo ();
+    if (connection_)
+    {
+        delete connection_;
+        connection_ = nullptr;
+    }
 
-    //    if (info->isNew())
-    //    {
-    //        buffer_writer_ = new BufferWriter (connection_, sql_generator_);
-    //    }
-    //    else
-    //    {
-//            updateExists();
-//            updateCount();
-    //    }
+    if (widget_)
+    {
+        delete widget_;
+        widget_ = nullptr;
+    }
 
+    table_info_.clear();
 }
+
+//void DBInterface::openDatabase (std::string database_name)
+//{
+
+//    assert (connection_);
+//    connection_->openDatabase(database_name);
+//    updateTableInfo ();
+
+//    //    if (info->isNew())
+//    //    {
+//    //        buffer_writer_ = new BufferWriter (connection_, sql_generator_);
+//    //    }
+//    //    else
+//    //    {
+////            updateExists();
+////            updateCount();
+//    //    }
+
+//}
 
 void DBInterface::updateTableInfo ()
 {
@@ -202,6 +208,12 @@ DBInterfaceWidget *DBInterface::widget()
 
     assert (widget_);
     return widget_;
+}
+
+QWidget *DBInterface::connectionWidget()
+{
+    assert (connection_);
+    return connection_->widget();
 }
 
 /**

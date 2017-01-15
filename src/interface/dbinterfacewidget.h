@@ -21,12 +21,8 @@
 #include <QFrame>
 #include <QComboBox>
 
-class QTextEdit;
-class QRadioButton;
-class QLineEdit;
-class QPushButton;
-class DBConnectionInfo;
 class DBInterface;
+class QVBoxLayout;
 
 /**
  * @brief Widget for choosing a database system and parameters
@@ -36,13 +32,11 @@ class DBInterfaceWidget : public QFrame
     Q_OBJECT
 
 public slots:
-    /// @brief Starts the open file dialog
-    //void selectFile();
-    /// @brief Sets database system based on radio buttons
-    void selectDBType();
+    void databaseTypeSelectSlot ();
+    void databaseOpenedSlot ();
 
 signals:
-    void databaseOpened ();
+    void databaseOpenedSignal ();
 
 public:
     /// @brief Constructor
@@ -52,22 +46,10 @@ public:
 
 protected:
     DBInterface &interface_;
-    /// SQLite3 selection radio button
-    //QRadioButton *file_radio_;
-    /// MySQL++ selection radio button
-    QRadioButton *mysqlpp_radio_;
-    /// MySQL Connector selection radio button
-    //QRadioButton *mysqlcon_radio_;
-    /// Database type, 0 undefined, 1 sqlite file, 2 mysqlpp, 3 mysqlcon
-    unsigned int db_type_selection_;
 
-    /// Filename edit field
-    //QTextEdit *filename_edit_;
-    /// Filename
-    //std::string filename_;
+    QVBoxLayout *connection_layout_;
 
-    /// @brief Creates GUI elements
-    void createElements ();
+    void initConnection (std::string connection_type);
 };
 
 #endif /* DBINTERFACEWIDGET_H_ */

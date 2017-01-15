@@ -107,7 +107,7 @@ public:
     std::map <std::string, DBTableInfo> getTableInfo ();
     std::vector <std::string> getDatabases();
 
-    QWidget *getWidget ();
+    QWidget *widget ();
 
 private:
     /// Used for all database queries

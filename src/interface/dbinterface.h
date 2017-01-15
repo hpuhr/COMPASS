@@ -43,6 +43,7 @@ class DBTableInfo;
 class DBInterfaceWidget;
 
 class SQLGenerator;
+class QWidget;
 
 /**
  * @brief Encapsulates all dedicated database functionality
@@ -64,6 +65,8 @@ public:
 
     /// @brief Initializes a database connection based on the supplied type
     void initConnection (const std::string &connection_type);
+    void closeConnection ();
+
     void openDatabase (std::string database_name);
 
     void updateTableInfo ();
@@ -184,6 +187,7 @@ public:
     std::vector <std::string> getDatabases ();
 
     DBInterfaceWidget *widget();
+    QWidget *connectionWidget ();
 
 protected:
     std::vector <std::string> connection_types_;

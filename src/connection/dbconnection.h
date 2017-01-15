@@ -99,7 +99,7 @@ public:
 
   /// @brief Return the DBConnectionInfo defining the database system and parameters
 
-  virtual QWidget *getWidget ()=0;
+  virtual QWidget *widget ()=0;
 
 protected:
   /// Defines the database system and parameters

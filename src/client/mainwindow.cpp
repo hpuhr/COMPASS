@@ -164,19 +164,12 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
     ConfigurationManager::getInstance().saveConfiguration();
 
+    ATSDB::getInstance().shutdown();
+    assert (!ATSDB::getInstance().getDBOpened ());
+    db_opened_=false;
+
     if (widget_stack_)
         delete widget_stack_;
-
-    if (db_opened_)
-    {
-        logdbg  << "MainWindow: closeEvent: database shutdown";
-
-        if (ATSDB::getInstance().getDBOpened ())
-            ATSDB::getInstance().shutdown();
-
-        db_opened_=false;
-    }
-    assert (!ATSDB::getInstance().getDBOpened ());
 
     //WorkerThreadManager::getInstance().shutdown();
 
