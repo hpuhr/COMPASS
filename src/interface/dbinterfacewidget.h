@@ -49,7 +49,7 @@ protected:
 
     QVBoxLayout *connection_layout_;
 
-    void initConnection (std::string connection_type);
+    void useConnection (std::string connection_type);
 };
 
 #endif /* DBINTERFACEWIDGET_H_ */

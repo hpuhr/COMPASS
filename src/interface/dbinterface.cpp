@@ -26,14 +26,15 @@
 #include "dbobject.h"
 #include "dbcommand.h"
 #include "dbcommandlist.h"
+#include "mysqlserver.h"
 #include "dbconnection.h"
+#include "mysqlppconnection.h"
 #include "dbinterfacewidget.h"
 #include "dbinterface.h"
 #include "dbobjectmanager.h"
 #include "dbovariable.h"
 #include "dbresult.h"
 //#include "MetaDBTable.h"
-#include "mysqlppconnection.h"
 //#include "MySQLConConnection.h"
 //#include "SQLGenerator.h"
 //#include "SQLiteConnection.h"
@@ -58,8 +59,7 @@ using namespace Utils;
  * write_table_names_,
  */
 DBInterface::DBInterface(std::string class_id, std::string instance_id, Configurable *parent)
-    : Configurable (class_id, instance_id, parent), connection_types_{"MySQL++ Server"}, connected_(false), database_opened_ (false), connection_(nullptr),
-  widget_(nullptr)//, buffer_writer_(0)
+    : Configurable (class_id, instance_id, parent), current_connection_(nullptr), widget_(nullptr)//, buffer_writer_(0)
 {
     boost::mutex::scoped_lock l(mutex_);
 
@@ -91,6 +91,8 @@ DBInterface::DBInterface(std::string class_id, std::string instance_id, Configur
 //    write_table_names_[DBO_ADS_B] = "ADSB";
 //    write_table_names_[DBO_REFERENCE_TRAJECTORIES] = "ReferenceTrajectory";
 //    write_table_names_[DBO_SENSOR_INFORMATION] = "PlotSensor";
+
+    createSubConfigurables();
 }
 
 /**
@@ -102,7 +104,11 @@ DBInterface::~DBInterface()
 
     boost::mutex::scoped_lock l(mutex_);
 
-    assert (!connection_);
+    for (auto it : connections_)
+        delete it.second;
+
+    connections_.clear();
+
     assert (!widget_);
 
 //    delete sql_generator_;
@@ -121,47 +127,31 @@ DBInterface::~DBInterface()
  * Generates connection based on the DB_CONNECTION_TYPE of info, calls init on it. If a new database will be created, creates
  * the buffer_writer_, else calls updateExists and updateCount.
  */
-void DBInterface::initConnection (const std::string &connection_type)
+void DBInterface::useConnection (const std::string &connection_type)
 {
-    assert (!connection_);
+    logdbg << "DBInterface: useConnection: '" << connection_type << "'";
+    if (current_connection_)
+        assert (!current_connection_->ready());
 
-//    if (info->getType() == DB_TYPE_SQLITE)
-//    {
-//        //connection_ = new SQLiteConnection (info);
-//        throw std::runtime_error ("DBInterface: initConnection: SQLite3 connection not supported at the moment");
-//    }
-    if (connection_type == "MySQL++ Server")
-    {
-        connection_ = new MySQLppConnection ();
-        assert (connection_);
-        //throw std::runtime_error ("DBInterface: initConnection: MySQL++ connection not supported at the moment");
-    }
-//    else if (info->getType() == DB_TYPE_MYSQLCon)
-//    {
-//        connection_ = new MySQLConConnection (info);
-//    }
-    else
-        throw std::runtime_error ("DBInterface::initConnection: unknown db type");
+    current_connection_ = connections_.at(connection_type);
 
-    assert (connection_);
-    connection_->connect();
+    assert (current_connection_);
 }
 
 void DBInterface::closeConnection ()
 {
     boost::mutex::scoped_lock l(mutex_);
 
-    if (connection_)
-    {
-        delete connection_;
-        connection_ = nullptr;
-    }
+    logdbg << "DBInterface: closeConnection";
+    current_connection_->disconnect();
 
     if (widget_)
     {
         delete widget_;
         widget_ = nullptr;
     }
+
+    current_connection_ = 0;
 
     table_info_.clear();
 }
@@ -189,7 +179,8 @@ void DBInterface::updateTableInfo ()
 {
     table_info_.clear();
 
-    table_info_ = connection_->getTableInfo();
+    assert (current_connection_);
+    table_info_ = current_connection_->getTableInfo();
 
     loginf << "DBInterface::updateTableInfo: found " << table_info_.size() << " tables";
 
@@ -212,8 +203,36 @@ DBInterfaceWidget *DBInterface::widget()
 
 QWidget *DBInterface::connectionWidget()
 {
-    assert (connection_);
-    return connection_->widget();
+    assert (current_connection_);
+    return current_connection_->widget();
+}
+
+std::vector <std::string> DBInterface::getDatabases ()
+{
+    assert (current_connection_);
+    return current_connection_->getDatabases();
+}
+
+void DBInterface::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
+{
+  logdbg  << "DBInterface: generateSubConfigurable: generating variable " << instance_id;
+  if (class_id == "MySQLppConnection")
+  {
+    MySQLppConnection *connection = new MySQLppConnection (instance_id, this);
+    assert (connections_.count (connection->getInstanceId()) == 0);
+    connections_.insert (std::pair <std::string, DBConnection*> (connection->getInstanceId(), dynamic_cast<DBConnection*>(connection)));
+  }
+  else
+    throw std::runtime_error ("DBInterface: generateSubConfigurable: unknown class_id "+class_id );
+}
+
+void DBInterface::checkSubConfigurables ()
+{
+  if (connections_.count("MySQL++ Connection") == 0)
+  {
+      addNewSubConfiguration ("MySQLppConnection", "MySQL++ Connection");
+      generateSubConfigurable ("MySQLppConnection", "MySQL++ Connection");
+  }
 }
 
 /**
@@ -1534,8 +1553,3 @@ QWidget *DBInterface::connectionWidget()
 //    return buffer;
 //}
 
-std::vector <std::string> DBInterface::getDatabases ()
-{
-    assert (connection_);
-    return connection_->getDatabases();
-}

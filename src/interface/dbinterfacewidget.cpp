@@ -31,6 +31,7 @@
 #include <QPushButton>
 #include <QLineEdit>
 #include <QComboBox>
+#include <QGroupBox>
 
 #include "atsdb.h"
 #include "dbinterfacewidget.h"
@@ -56,21 +57,21 @@ DBInterfaceWidget::DBInterfaceWidget(DBInterface &interface, QWidget* parent, Qt
 
     QVBoxLayout *layout = new QVBoxLayout ();
 
-    QLabel *db_type_label = new QLabel ("Database System");
-    db_type_label->setFont (font_big);
-    layout->addWidget (db_type_label);
+    QGroupBox *groupBox = new QGroupBox(tr("Database System"));
+    QVBoxLayout *grplayout = new QVBoxLayout ();
 
-    std::vector<std::string> types = interface_.getDatabaseConnectionTypes();
-
-    for (auto type : types)
+    const std::map<std::string, DBConnection*> &types = interface_.connections();
+    for (auto it : types)
     {
-        QRadioButton *radio = new QRadioButton(type.c_str(), this);
+        QRadioButton *radio = new QRadioButton(it.first.c_str(), this);
         connect(radio, SIGNAL(pressed()), this, SLOT(databaseTypeSelectSlot()));
         if (types.size() == 1)
             radio->setChecked (true);
         radio->setFont (font_bold);
-        layout->addWidget (radio);
+        grplayout->addWidget (radio);
     }
+    groupBox->setLayout(grplayout);
+    layout->addWidget(groupBox);
 
     connection_layout_ = new QVBoxLayout ();
     layout->addLayout(connection_layout_);
@@ -80,7 +81,7 @@ DBInterfaceWidget::DBInterfaceWidget(DBInterface &interface, QWidget* parent, Qt
     setLayout (layout);
 
     if (types.size() == 1)
-        initConnection (types.at(0));
+        useConnection (types.begin()->first);
 }
 
 DBInterfaceWidget::~DBInterfaceWidget()
@@ -91,12 +92,12 @@ DBInterfaceWidget::~DBInterfaceWidget()
 void DBInterfaceWidget::databaseTypeSelectSlot ()
 {
     QRadioButton *radio = dynamic_cast <QRadioButton *> (QObject::sender());
-    initConnection(radio->text().toStdString());
+    useConnection(radio->text().toStdString());
 }
 
-void DBInterfaceWidget::initConnection (std::string connection_type)
+void DBInterfaceWidget::useConnection (std::string connection_type)
 {
-    interface_.initConnection(connection_type);
+    interface_.useConnection(connection_type);
 
     assert (connection_layout_);
 

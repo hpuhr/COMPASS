@@ -111,11 +111,11 @@ set ( atsdb_HDRS
         src/config/configurationmanager.h
         src/command/dbcommand.h
         src/command/dbcommandlist.h
+        src/connection/mysqlppconnection.h
 #        src/connection/bufferwriter.h
-        src/connection/dbconnection.h
         src/connection/dbresult.h
 #        src/connection/mysqlconconnection.h
-        src/connection/mysqlppconnection.h
+        src/connection/mysqlserver.h
         src/connection/sqlgenerator.h
 ##        src/connection/sqliteconnection.h
 #        src/datasource/datasource.h
@@ -209,12 +209,14 @@ set ( atsdb_HDRS
 set (atsdb_MOC_HEADERS
         src/client/mainwindow.h
         src/client/mainwidget.h
+        src/connection/dbconnection.h
 #        src/filter/dbfiltercondition.h
 #        src/filter/dbfilterwidget.h
 #        src/filter/filtereditwidget.h
 #        src/filter/filtergeneratorwidget.h
 #        src/filter/sensorfilterwidget.h
         src/connection/mysqlppconnectionwidget.h
+        src/connection/mysqlserverwidget.h
         src/interface/dbinterfacewidget.h
 #        src/gui/qcollapsablewidget.h
 #        src/gui/workerthreadwidget.h
@@ -263,6 +265,7 @@ set ( atsdb_SRCS
 #        src/connection/mysqlconconnection.cpp
         src/connection/mysqlppconnection.cpp
         src/connection/mysqlppconnectionwidget.cpp
+        src/connection/mysqlserverwidget.cpp
         src/connection/sqlgenerator.cpp
 #        src/connection/sqliteconnection.cpp
 #        src/datasource/datasource.cpp

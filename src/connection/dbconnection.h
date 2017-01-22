@@ -26,6 +26,9 @@
 #define DBCONNECTION_H_
 
 #include <memory>
+#include "configurable.h"
+
+#include <qobject.h>
 
 class DBCommand;
 class DBCommandList;
@@ -42,21 +45,25 @@ class QWidget;
  * different SQL based database systems and client libraries. The DBInterface only deals with a DBConnection, whatever the
  * underlying system requires.
  */
-class DBConnection
+class DBConnection : public QObject, public Configurable
 {
+Q_OBJECT
+
+signals:
+    void connectedSignal ();
+
 public:
   /** @brief Constructor
    *
    * \param info defines what database system is used
    */
-  DBConnection() : database_opened_(false) {}
+  DBConnection(const std::string &class_id, const std::string &instance_id, Configurable *parent)
+      : Configurable(class_id, instance_id, parent), connection_ready_(false) {}
   /// @brief Destructor
   virtual ~DBConnection() {}
 
   /// @brief Initializes the connection to the database
-  virtual void connect ()=0;
-  /// @brief Initializes the connection to the database
-  virtual void openDatabase (const std::string &database_name){ database_opened_=true; }
+  virtual void disconnect ()=0;
   /// @brief Executes a simple SQL command, returned data is not retrieved
   virtual void executeSQL(const std::string &sql)=0;
 
@@ -101,14 +108,18 @@ public:
 
   virtual QWidget *widget ()=0;
 
+  bool ready () { return connection_ready_; }
+
 protected:
   /// Defines the database system and parameters
-  bool database_opened_;
+  bool connection_ready_;
 
   /// @brief Creates a prepared query (internal)
   virtual void prepareStatement (const char *sql)=0;
   /// @brief Finalizes a prepared query (internal)
   virtual void finalizeStatement ()=0;
+
+  virtual void checkSubConfigurables () {}
 
   /// @brief Executes an SQL command which returns data (internal)
   //void execute (std::string command, Buffer *buffer);

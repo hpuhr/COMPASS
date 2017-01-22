@@ -61,15 +61,22 @@ public:
     /// @brief Destructor
     virtual ~DBInterface();
 
-    const std::vector<std::string> &getDatabaseConnectionTypes () { return connection_types_; }
+    const std::map<std::string, DBConnection*> &connections () { return connections_; }
 
     /// @brief Initializes a database connection based on the supplied type
-    void initConnection (const std::string &connection_type);
+    void useConnection (const std::string &connection_type);
     void closeConnection ();
 
     void openDatabase (std::string database_name);
 
     void updateTableInfo ();
+
+    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
+
+    std::vector <std::string> getDatabases ();
+
+    DBInterfaceWidget *widget();
+    QWidget *connectionWidget ();
 
     /// @brief Returns a buffer with all data sources for a DBO type
 //    Buffer *getDataSourceDescription (const std::string &dbo_type);
@@ -184,19 +191,11 @@ public:
 //    Buffer *getTrackMatches (bool has_mode_a, unsigned int mode_a, bool has_ta, unsigned int ta, bool has_ti, std::string ti,
 //            bool has_tod, double tod_min, double tod_max);
 
-    std::vector <std::string> getDatabases ();
-
-    DBInterfaceWidget *widget();
-    QWidget *connectionWidget ();
-
 protected:
-    std::vector <std::string> connection_types_;
-    /// Last used database name
-    //std::string database_name_;
-    /// Connection exists
-    bool connected_;
-    /// Database opened
-    bool database_opened_;
+    std::map <std::string, DBConnection*> connections_;
+
+    DBConnection *current_connection_;
+
     /// Interface initialized (after opening database)
     bool initialized_;
 
@@ -221,13 +220,15 @@ protected:
     /// Generates SQL statements
     //SQLGenerator *sql_generator_;
     /// Connection to database, created based on DBConnectionInfo
-    DBConnection *connection_;
+
     /// Writes buffer to the database
     //BufferWriter *buffer_writer_;
 
     DBInterfaceWidget *widget_;
 
     std::map <std::string, DBTableInfo> table_info_;
+
+    virtual void checkSubConfigurables ();
 
     /// @brief loads database tables and columns
     //void initialize ();

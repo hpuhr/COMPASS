@@ -269,6 +269,49 @@ DBSchema &ATSDB::getCurrentSchema ()
     return db_schema_manager_->getCurrentSchema();
 }
 
+///**
+// * Calls stop, locks state_mutex_. If data was written uning the StructureReader, this process is finished correctly.
+// * State is set to DB_STATE_SHUTDOWN and ouput buffers are cleared.
+// */
+void ATSDB::shutdown ()
+{
+    loginf  << "ATSDB: database shutdown";
+
+    assert (db_interface_);
+    db_interface_->closeConnection();
+
+//    if (struct_reader_->hasUnwrittenData())
+//    {
+//        loginf << "ATSDB: shutdown: finalizing data insertion";
+//        struct_reader_->finalize();
+
+//        if (!WorkerThreadManager::getInstance().noJobs())
+//            loginf << "ATSDB: shutdown: waiting on data insertion finish";
+
+//        while (!WorkerThreadManager::getInstance().noJobs())
+//        {
+//            sleep(1);
+//        }
+//        WorkerThreadManager::getInstance().shutdown();
+//    }
+//    else
+//    {
+//        setJobsObsolete();
+
+//        while (active_jobs_.size() != 0)
+//        {
+//            loginf << "ATSDB: shutdown: waiting for " << active_jobs_.size() << " job(s) to finish";
+//            sleep(1);
+//        }
+//    }
+
+    logdbg  << "ATSDB: shutdown: state to 'DB_STATE_SHUTDOWN'";
+    db_opened_=false;
+
+    logdbg  << "ATSDB: shutdown: end";
+}
+
+
 /**
  * Returns false if DBO does not exist at all, true for DBO_UNDEFINED, otherwise value returns from DBInterface::exists().
  */
@@ -490,46 +533,6 @@ DBSchema &ATSDB::getCurrentSchema ()
 ////    return var->getMaxString();
 ////}
 
-///**
-// * Calls stop, locks state_mutex_. If data was written uning the StructureReader, this process is finished correctly.
-// * State is set to DB_STATE_SHUTDOWN and ouput buffers are cleared.
-// */
-void ATSDB::shutdown ()
-{
-    loginf  << "ATSDB: database shutdown";
-
-    db_interface_->closeConnection();
-
-//    if (struct_reader_->hasUnwrittenData())
-//    {
-//        loginf << "ATSDB: shutdown: finalizing data insertion";
-//        struct_reader_->finalize();
-
-//        if (!WorkerThreadManager::getInstance().noJobs())
-//            loginf << "ATSDB: shutdown: waiting on data insertion finish";
-
-//        while (!WorkerThreadManager::getInstance().noJobs())
-//        {
-//            sleep(1);
-//        }
-//        WorkerThreadManager::getInstance().shutdown();
-//    }
-//    else
-//    {
-//        setJobsObsolete();
-
-//        while (active_jobs_.size() != 0)
-//        {
-//            loginf << "ATSDB: shutdown: waiting for " << active_jobs_.size() << " job(s) to finish";
-//            sleep(1);
-//        }
-//    }
-
-    logdbg  << "ATSDB: shutdown: state to 'DB_STATE_SHUTDOWN'";
-    db_opened_=false;
-
-    logdbg  << "ATSDB: shutdown: end";
-}
 
 ////bool ATSDB::error()
 ////{

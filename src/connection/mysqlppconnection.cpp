@@ -27,11 +27,13 @@
 #include "dbcommandlist.h"
 #include "dbresult.h"
 #include "logger.h"
+#include "propertylist.h"
 #include "mysqlppconnectionwidget.h"
 #include "mysqlppconnection.h"
 #include "dbtableinfo.h"
 #include "data.h"
 #include "stringconv.h"
+#include "mysqlserver.h"
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include <QMessageBox>
@@ -40,40 +42,27 @@ using namespace Utils;
 using namespace Utils::Data;
 
 
-MySQLppConnection::MySQLppConnection()
-    : connection_(mysqlpp::Connection (false)), prepared_query_(connection_.query()),
-      prepared_parameters_(mysqlpp::SQLQueryParms(&prepared_query_)), query_used_(false), transaction_(nullptr), widget_(nullptr)
+MySQLppConnection::MySQLppConnection(const std::string &instance_id, Configurable *parent)
+    : DBConnection ("MySQLppConnection", instance_id, parent), connected_server_(nullptr), connection_(mysqlpp::Connection (false)), prepared_query_(connection_.query()),
+      prepared_parameters_(mysqlpp::SQLQueryParms(&prepared_query_)), query_used_(false), transaction_(nullptr), prepared_command_(nullptr),
+      prepared_command_done_(false), widget_(nullptr)
 {
-    prepared_command_=0;
-    prepared_command_done_=false;
+    registerParameter("used_server", &used_server_, "");
+
+    createSubConfigurables ();
 }
 
 MySQLppConnection::~MySQLppConnection()
 {
-    if (widget_)
-    {
-        delete widget_;
-        widget_ = nullptr;
-    }
-
-    connection_.disconnect();
 }
 
-void MySQLppConnection::connect()
+void MySQLppConnection::connectServer (const std::string &server)
 {
+    assert (servers_.count(used_server_) == 1);
+    used_server_ = server;
+    connected_server_ = &servers_.at(server);
 
-//    const MySQLConnectionInfo &info = dynamic_cast<const MySQLConnectionInfo &> (info_);
-
-//    if (!connection_.connect("", info.server().c_str(), info.user().c_str(), info.password().c_str(), info.port()))
-//    {
-//        logerr  << "MySQLppConnection: init: DB connection failed: " << connection_.error();
-//        throw std::runtime_error ("MySQLppConnection: init: DB connection failed");
-//    }
-
-//    assert (connection_.connected ());
-
-//    loginf  << "MySQLppConnection: init: sucessfully connected to server '" << connection_.server_version ();
-
+    connection_.connect("", connected_server_->host().c_str(), connected_server_->user().c_str(), connected_server_->password().c_str(), connected_server_->port());
 }
 
 void MySQLppConnection::openDatabase (const std::string &database_name)
@@ -87,10 +76,25 @@ void MySQLppConnection::openDatabase (const std::string &database_name)
     connection_.select_db(database_name);
     loginf  << "MySQLppConnection: openDatabase: successfully opened database '" << database_name << "'";
 
-    database_ = database_name;
+    connection_ready_ = true;
+
+    emit connectedSignal();
 
     //loginf  << "MySQLppConnection: init: performance test";
     //performanceTest ();
+}
+
+void MySQLppConnection::disconnect()
+{
+    connection_.disconnect();
+
+    if (widget_)
+    {
+        delete widget_;
+        widget_ = nullptr;
+    }
+
+    connected_server_ = nullptr;
 }
 
 void MySQLppConnection::executeSQL(const std::string &sql)
@@ -456,8 +460,11 @@ DBTableInfo MySQLppConnection::getColumnList(const std::string &table) // buffer
     //            +database_name+"' AND TABLE_NAME = '"+table+"' ORDER BY COLUMN_NAME DESC;");
     //command.set ("SHOW COLUMNS FROM "+table);
 
+    assert (connected_server_);
+    std::string database = connected_server_->database();
+
     //SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY, IS_NULLABLE, COLUMN_COMMENT FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'job_awam_0019' AND TABLE_NAME = 'sd_track' ORDER BY COLUMN_NAME DESC;
-    command.set ("SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY, IS_NULLABLE, COLUMN_COMMENT FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '"+database_+"' AND TABLE_NAME = '"+table+"';");
+    command.set ("SELECT COLUMN_NAME, DATA_TYPE, COLUMN_KEY, IS_NULLABLE, COLUMN_COMMENT FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '"+database+"' AND TABLE_NAME = '"+table+"';");
 
     PropertyList list;
     list.addProperty ("COLUMN_NAME", PropertyDataType::STRING);
@@ -586,6 +593,30 @@ QWidget *MySQLppConnection::widget ()
 
     assert (widget_);
     return widget_;
+}
+
+void MySQLppConnection::addServer (std::string name)
+{
+    logdbg << "MySQLppConnection: addServer: name '" << name << "'";
+
+    if (servers_.count (name) != 0)
+        throw std::invalid_argument ("MySQLppConnection: addServer: name '"+name+"' already in use");
+
+    addNewSubConfiguration ("MySQLServer", name);
+    generateSubConfigurable ("MySQLServer", name);
+}
+
+void MySQLppConnection::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
+{
+  logdbg  << "MySQLppConnection: generateSubConfigurable: generating " << instance_id;
+  if (class_id == "MySQLServer")
+  {
+    MySQLServer *server = new MySQLServer (instance_id, *this);
+    assert (servers_.count (server->getInstanceId()) == 0);
+    servers_.insert (std::pair <std::string, MySQLServer> (server->getInstanceId(), *server));
+  }
+  else
+    throw std::runtime_error ("MySQLppConnection: generateSubConfigurable: unknown class_id "+class_id );
 }
 
 //DBResult *MySQLppConnection::readBulkCommand (DBCommand *command, std::string main_statement, std::string order_statement, unsigned int max_results)

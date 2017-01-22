@@ -28,44 +28,14 @@
 #include <mysql++/mysql++.h>
 #include <string>
 
+#include "configurable.h"
 #include "dbconnection.h"
 
 class Buffer;
 class DBTableInfo;
 class MySQLppConnectionWidget;
-
-class MySQLConnectionInfo
-{
-public:
-    MySQLConnectionInfo (const std::string &db, const std::string &server, const std::string &user, const std::string &password, unsigned int port)
-   : db_(db), server_(server), user_(user), password_(password), port_(port) {}
-  virtual ~MySQLConnectionInfo () {}
-
-  /// Returns the database name
-  const std::string &db () const { return db_; }
-  /// Returns the database server name or IP address
-  const std::string &server () const { return server_; }
-  /// Returns the username
-  const std::string user () const { return user_; }
-  /// Returns the password
-  const std::string password () const { return password_; }
-  /// Returns the port number
-  unsigned int port () const { return port_; }
-
-  std::string id () const { return "MySQL Server: '"+server_+"' Database: '"+db_+"'";}
-
-private:
-  /// Database name
-  std::string db_;
-  /// Database server name or IP address
-  std::string server_;
-  /// Username
-  std::string user_;
-  /// Password
-  std::string password_;
-  /// Port number
-  unsigned int port_;
-};
+class MySQLServer;
+class PropertyList;
 
 /**
  * @brief Interface for a MySQL database connection
@@ -75,11 +45,15 @@ private:
 class MySQLppConnection : public DBConnection
 {
 public:
-    MySQLppConnection();
+    MySQLppConnection(const std::string &instance_id, Configurable *parent);
     virtual ~MySQLppConnection();
 
-    virtual void connect ();
+    void addServer (std::string name);
+    void connectServer (const std::string &server);
     virtual void openDatabase (const std::string &database_name);
+
+    virtual void disconnect ();
+
 
     void executeSQL(const std::string &sql);
 
@@ -107,13 +81,19 @@ public:
     std::map <std::string, DBTableInfo> getTableInfo ();
     std::vector <std::string> getDatabases();
 
+    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
+
     QWidget *widget ();
 
+    const std::map <std::string, MySQLServer> &servers () const { return servers_; }
+
 private:
+    std::string used_server_;
+    MySQLServer *connected_server_;
+
     /// Used for all database queries
     mysqlpp::Connection connection_;
 
-    std::string database_;
     /// Prepared query
     mysqlpp::Query prepared_query_;
     /// Parameters which are bound to the a query
@@ -132,6 +112,8 @@ private:
     bool prepared_command_done_;
 
     MySQLppConnectionWidget *widget_;
+
+    std::map <std::string, MySQLServer> servers_;
 
     void prepareStatement (const char *sql);
     void finalizeStatement ();
