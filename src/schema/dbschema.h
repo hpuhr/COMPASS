@@ -57,6 +57,7 @@ public:
   /// @brief returns flag if a table with the given name exists
   bool hasTable (const std::string &name) const { return tables_.find(name) != tables_.end(); }
   void addTable (const std::string &name);
+  void deleteTable (const std::string &name);
 
   bool hasMetaTable (const std::string &name) const;
   const MetaDBTable &metaTable (const std::string &name) const { assert (hasMetaTable(name)); return *meta_tables_.at(name);}

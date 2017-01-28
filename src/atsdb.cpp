@@ -98,11 +98,7 @@ ATSDB::~ATSDB()
         dbo_manager_ = nullptr;
     }
 
-    if (db_schema_manager_ != nullptr)
-    {
-        delete db_schema_manager_;
-        db_schema_manager_ = nullptr;
-    }
+    assert (db_schema_manager_ == nullptr);
 
 //    if (dbo_read_jobs_.size() > 0)
 //        logerr << "ATSDB: destructor: unfinished dbo read jobs " << dbo_read_jobs_.size();
@@ -300,7 +296,8 @@ void ATSDB::shutdown ()
     db_interface_->closeConnection();
 
     assert (db_schema_manager_);
-    db_schema_manager_->destroy();
+    delete db_schema_manager_;
+    db_schema_manager_ = nullptr;
 
 //    if (struct_reader_->hasUnwrittenData())
 //    {

@@ -22,11 +22,12 @@
  *      Author: sk
  */
 
+#include "dbtable.h"
 #include "dbtablecolumn.h"
 #include "logger.h"
 
-DBTableColumn::DBTableColumn(const std::string &class_id, const std::string &instance_id, Configurable *parent, const std::string &db_table_name)
- : Configurable (class_id, instance_id, parent), db_table_name_ (db_table_name)
+DBTableColumn::DBTableColumn(const std::string &class_id, const std::string &instance_id, DBTable *table)
+ : Configurable (class_id, instance_id, table), table_(*table)
 {
   registerParameter ("name", &name_, (std::string) "");
   registerParameter ("type", &type_, (std::string) "");

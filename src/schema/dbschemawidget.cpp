@@ -43,6 +43,7 @@
 #include "configurationmanager.h"
 #include "dbtable.h"
 #include "dbtableinfo.h"
+#include "dbtablewidget.h"
 //#include "dbtableEditWidget.h"
 #include "metadbtable.h"
 //#include "MetaDBTableEditWidget.h"
@@ -190,22 +191,22 @@ void DBSchemaWidget::addTable()
 
 void DBSchemaWidget::addAllTables()
 {
-//    assert (new_table_name_edit_);
-//    assert (new_table_dbname_);
+    const std::map <std::string, DBTableInfo> &table_info = ATSDB::getInstance().tableInfo ();
 
-//    std::string table_name = new_table_name_edit_->text().toStdString();
-//    std::string table_db_name = new_table_dbname_->currentText().toStdString();
+    for (auto it : table_info)
+    {
+        if (schema_.tables().count(it.first) == 0)
+            schema_.addTable(it.first);
 
-//    std::string table_instance = "DBTable"+table_name+"0";
+        assert (auto_populate_check_);
+        if (auto_populate_check_->checkState() == Qt::Checked)
+            schema_.populateTable(it.first);
 
-//    Configuration &table_config = schema_.addNewSubConfiguration ("DBTable", table_instance);
-//    table_config.addParameterString ("name", table_name);
-//    table_config.addParameterString ("db_name", table_db_name);
+    }
 
-//    schema_.generateSubConfigurable("DBTable", table_instance);
+   updateTableGrid();
+   //updateMetaTablesGrid();
 
-    updateTableGrid();
-    //updateMetaTablesGrid();
 }
 
 void DBSchemaWidget::addMetaTable()
@@ -245,37 +246,59 @@ void DBSchemaWidget::updateTableGrid()
     name_label->setFont (font_bold);
     table_grid_->addWidget (name_label, 0, 0);
 
-    QLabel *info_label = new QLabel ("Description");
-    info_label->setFont (font_bold);
-    table_grid_->addWidget (info_label, 0, 1);
-
     QLabel *numel_label = new QLabel ("# columns");
     numel_label->setFont (font_bold);
-    table_grid_->addWidget (numel_label, 0, 2);
+    table_grid_->addWidget (numel_label, 0, 1);
 
     QLabel *key_label = new QLabel ("Key");
     key_label->setFont (font_bold);
-    table_grid_->addWidget (key_label, 0, 3);
+    table_grid_->addWidget (key_label, 0, 2);
+
+    QLabel *edit_label = new QLabel ("Edit");
+    edit_label->setFont (font_bold);
+    table_grid_->addWidget (edit_label, 0, 3);
+
+    QLabel *del_label = new QLabel ("Delete");
+    del_label->setFont (font_bold);
+    table_grid_->addWidget (del_label, 0, 4);
 
     unsigned int row=1;
+
+    QPixmap edit_pixmap("./data/icons/edit.png");
+    QIcon edit_icon(edit_pixmap);
+
+    QPixmap del_pixmap("./data/icons/delete.png");
+    QIcon del_icon(del_pixmap);
+
+    edit_table_buttons_.clear();
+    delete_table_buttons_.clear();
 
     for (auto it : schema_.tables())
     {
         QLabel *name = new QLabel (it.first.c_str());
         table_grid_->addWidget (name, row, 0);
 
-        QLabel *info = new QLabel (it.second->info().c_str());
-        table_grid_->addWidget (info, row, 1);
-
         QLabel *numel = new QLabel ((String::intToString(it.second->numColumns())).c_str());
-        table_grid_->addWidget (numel, row, 2);
+        table_grid_->addWidget (numel, row, 1);
 
         QLabel *key = new QLabel (it.second->key().c_str());
-        table_grid_->addWidget (key, row, 3);
+        table_grid_->addWidget (key, row, 2);
 
-        QPushButton *edit = new QPushButton ("Edit");
+        QPushButton *edit = new QPushButton ();
+        edit->setIcon(edit_icon);
+        edit->setIconSize(QSize(30,30));
+        edit->setFlat(true);
         connect(edit, SIGNAL( clicked() ), this, SLOT( editTable() ));
-        table_grid_->addWidget (edit, row, 4);
+        table_grid_->addWidget (edit, row, 3);
+        edit_table_buttons_[edit] = it.second;
+
+        QPushButton *del = new QPushButton ();
+        del->setIcon(del_icon);
+        del->setIconSize(QSize(30,30));
+        del->setFlat(true);
+        connect(del, SIGNAL( clicked() ), this, SLOT( deleteTable() ));
+        table_grid_->addWidget (del, row, 4);
+        delete_table_buttons_[del] = it.second;
 
         //edit_table_buttons_ [edit] = it.second;
 
@@ -353,6 +376,11 @@ void DBSchemaWidget::updateMetaTablesGrid()
 
 void DBSchemaWidget::editTable()
 {
+    logdbg << "DBSchemaWidget: editTable";
+
+    QPushButton *sender = dynamic_cast <QPushButton*> (QObject::sender());
+    assert (edit_table_buttons_.count(sender) == 1);
+    edit_table_buttons_.at(sender)->widget()->show();
 //    assert (edit_table_buttons_.find((QPushButton*)sender()) != edit_table_buttons_.end());
 
 //    DBTable *table = edit_table_buttons_ [(QPushButton*)sender()];
@@ -366,6 +394,19 @@ void DBSchemaWidget::editTable()
 //    }
 //    else
 //        edit_table_widgets_[table]->show();
+}
+
+void DBSchemaWidget::deleteTable()
+{
+    logdbg << "DBSchemaWidget: deleteTable";
+
+    QPushButton *sender = dynamic_cast <QPushButton*> (QObject::sender());
+    assert (delete_table_buttons_.count(sender) == 1);
+    schema_.deleteTable(delete_table_buttons_.at(sender)->name());
+
+    updateTableGrid();
+
+    // update meta tables
 }
 
 void DBSchemaWidget::editMetaTable ()

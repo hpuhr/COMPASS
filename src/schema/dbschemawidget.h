@@ -53,6 +53,7 @@ private slots:
     void addMetaTable();
     /// @brief Edits a DBTable
     void editTable();
+    void deleteTable();
     /// @brief Edits a MetaDBTable
     void editMetaTable ();
     /// @brief Called when a DBTable was changed
@@ -79,13 +80,10 @@ protected:
 
     /// Container for table edit buttons
     std::map <QPushButton *, DBTable *> edit_table_buttons_;
-    /// Container for existing table edit widgets
-    std::map <DBTable *, DBTableEditWidget*> edit_table_widgets_;
+    std::map <QPushButton *, DBTable *> delete_table_buttons_;
 
     /// Container for meta table edit buttons
     std::map <QPushButton *, MetaDBTable *> edit_meta_table_buttons_;
-    /// Container for meta table edit widgets
-    std::map <MetaDBTable *, MetaDBTableEditWidget*> edit_meta_table_widgets_;
 
     /// @brief Creates GUI elements
     void createElements ();

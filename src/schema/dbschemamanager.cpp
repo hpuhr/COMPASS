@@ -44,7 +44,8 @@ DBSchemaManager::DBSchemaManager(const std::string &class_id, const std::string 
     createSubConfigurables ();
 
     if (current_schema_.size() != 0)
-        assert (schemas_.find(current_schema_) != schemas_.end());
+        if (schemas_.count(current_schema_) == 0)
+            current_schema_="";
 }
 
 /**
@@ -52,20 +53,18 @@ DBSchemaManager::DBSchemaManager(const std::string &class_id, const std::string 
  */
 DBSchemaManager::~DBSchemaManager()
 {
-//    std::map <std::string, DBSchema *>::iterator it;
-//    for (it = schemas_.begin(); it != schemas_.end(); it++)
-//        delete it->second;
-}
+    for (auto it : schemas_)
+        delete it.second;
 
-void DBSchemaManager::destroy ()
-{
     schemas_.clear();
+
 
     if (widget_)
     {
         delete widget_;
         widget_ = nullptr;
     }
+
 }
 
 void DBSchemaManager::renameCurrentSchema (const std::string &new_name)
@@ -156,6 +155,16 @@ DBSchema &DBSchemaManager::getSchema (const std::string &name)
 {
     assert (schemas_.find(name) != schemas_.end());
     return *schemas_.at(name);
+}
+
+void DBSchemaManager::deleteCurrentSchema ()
+{
+    assert (current_schema_.size() != 0);
+    assert (hasCurrentSchema());
+    delete schemas_.at(current_schema_);
+    schemas_.erase(current_schema_);
+
+    current_schema_="";
 }
 
 bool DBSchemaManager::hasSchema (const std::string &name)

@@ -88,7 +88,7 @@ void DBSchemaManagerWidget::deleteSchemaSlot ()
 {
     logdbg << "DBSchemaManagerWidget: deleteSchemaSlot";
 
-    //manager_.deleteUsedServer();
+    manager_.deleteCurrentSchema();
 
     updateSchemas ();
 }

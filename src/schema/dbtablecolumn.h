@@ -28,6 +28,8 @@
 #include <string>
 #include "configurable.h"
 
+class DBTable;
+
 /**
  * @brief Database table column definition
  *
@@ -37,7 +39,7 @@ class DBTableColumn : public Configurable
 {
 public:
   /// @brief Constructor
-  DBTableColumn(const std::string &class_id, const std::string &instance_id, Configurable *parent, const std::string &db_table_name);
+  DBTableColumn(const std::string &class_id, const std::string &instance_id, DBTable *table);
   /// @brief Destructor
   virtual ~DBTableColumn();
 
@@ -73,6 +75,7 @@ public:
   void createSubConfigurables () {}
 
 protected:
+  DBTable &table_;
   /// Name of the column
   std::string name_;
   /// Data type

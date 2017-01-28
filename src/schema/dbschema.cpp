@@ -93,10 +93,21 @@ void DBSchema::addTable(const std::string &name)
     assert (hasTable(name));
 }
 
+void DBSchema::deleteTable (const std::string &name)
+{
+    assert (hasTable(name));
+    delete tables_.at(name);
+    tables_.erase (name);
+
+    // update meta tables
+}
+
 void DBSchema::populateTable (const std::string &name)
 {
     assert (hasTable(name));
     tables_.at(name)->populate();
+
+    // update meta tables
 }
 
 bool DBSchema::hasMetaTable (const std::string &name) const

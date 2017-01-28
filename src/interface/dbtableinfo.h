@@ -65,6 +65,7 @@ public:
 
     unsigned int size() { return columns_.size(); }
 
+    const std::map <std::string, DBTableColumnInfo> &columns () const { return columns_; }
 protected:
     std::string name_;
 

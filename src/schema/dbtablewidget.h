@@ -15,19 +15,12 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBTableEditWidget.h
- *
- *  Created on: Aug 21, 2012
- *      Author: sk
- */
-
 #ifndef DBTABLEEDITWIDGET_H_
 #define DBTABLEEDITWIDGET_H_
 
 #include <QWidget>
 
-#include "Configurable.h"
+#include "configurable.h"
 
 class DBTable;
 class DBTableColumn;
@@ -40,19 +33,17 @@ class QPushButton;
 /**
  * @brief Edit widget for a DBTable
  */
-class DBTableEditWidget : public QWidget
+class DBTableWidget : public QWidget
 {
     Q_OBJECT
 
 signals:
-    /// @brief Emitted if the table was changed
-    void changedTable();
 
 public slots:
+    void infoSlot (const QString &value);
+    void keySlot (const QString &value);
     /// @brief Deletes a column
     void deleteColumn ();
-    /// @brief Sets the table parameters
-    void updateParameters ();
     /// @brief Creates all columns that exist in database table
     void createColumnsFromDB ();
     void createNewColumnsFromDB ();
@@ -61,18 +52,14 @@ public slots:
 
 public:
     /// @brief Constructor
-    DBTableEditWidget(DBTable *table, QWidget * parent = 0, Qt::WindowFlags f = 0);
+    DBTableWidget(DBTable &table, QWidget * parent = 0, Qt::WindowFlags f = 0);
     /// @brief Destructor
-    virtual ~DBTableEditWidget();
+    virtual ~DBTableWidget();
 
 protected:
     /// Represented table
-    DBTable *table_;
+    DBTable &table_;
 
-    /// Table name edit field
-    QLineEdit *name_edit_;
-    /// Database table selection field
-    QComboBox *db_name_box_;
     /// Table info edit field
     QLineEdit *info_edit_;
     /// Table key selection field
@@ -86,10 +73,6 @@ protected:
     /// Container with all column special null edit fields
     std::map <QLineEdit *, DBTableColumn* > column_grid_special_nulls_;
 
-    /// @brief Creates GUI elements
-    void createElements ();
-    /// @brief Updates the database table selection
-    void updateTableSelection();
     /// @brief Updates the table key selection field
     void updateKeySelection();
     /// @brief Updates the table columns grid

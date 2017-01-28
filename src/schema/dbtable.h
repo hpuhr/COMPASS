@@ -28,6 +28,8 @@
 #include "configurable.h"
 
 class DBTableColumn;
+class DBTableWidget;
+class DBSchema;
 
 /**
  * @brief Database table definition
@@ -38,7 +40,7 @@ class DBTable : public Configurable
 {
 public:
   /// @brief Constructor
-  DBTable(const std::string &class_id, const std::string &instance_id, Configurable *parent);
+  DBTable(const std::string &class_id, const std::string &instance_id, DBSchema *schema);
   /// @brief Destructor
   virtual ~DBTable();
 
@@ -63,7 +65,7 @@ public:
   void deleteColumn (const std::string &name);
 
   /// @brief Returns container with all table columns
-  const std::map <std::string, DBTableColumn>& columns () const { return columns_; }
+  const std::map <std::string, DBTableColumn*>& columns () const { return columns_; }
 
   /// @brief Returns if the name of the key column is defined
   bool hasKey() const { return key_name_.size() > 0; }
@@ -74,7 +76,13 @@ public:
 
   void populate ();
 
+  DBTableWidget *widget ();
+
 private:
+  DBSchema &schema_;
+
+  DBTableWidget *widget_;
+
   /// Table name identifier
   std::string name_;
   /// Description
@@ -82,7 +90,7 @@ private:
   /// Name of the key column
   std::string key_name_;
   /// Container with all table columns (column name -> DBTableColumn)
-  std::map <std::string, DBTableColumn> columns_;
+  std::map <std::string, DBTableColumn*> columns_;
 
 protected:
   virtual void checkSubConfigurables ();

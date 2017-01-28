@@ -44,11 +44,11 @@ MetaDBTable::MetaDBTable(const std::string &class_id, const std::string &instanc
     table_ = &schema_.table (table_name_);
     assert (table_);
 
-    for (auto it : table_->columns ())
-    {
-        assert (columns_.find(it.first) == columns_.end());
-        columns_.insert (std::pair <std::string, DBTableColumn> (it.first, it.second));
-    }
+//    for (auto it : table_->columns ())
+//    {
+//        assert (columns_.find(it.first) == columns_.end());
+//        columns_.insert (std::pair <std::string, DBTableColumn> (it.first, it.second));
+//    }
 
     createSubConfigurables ();
 

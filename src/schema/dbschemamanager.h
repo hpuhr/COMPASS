@@ -56,6 +56,7 @@ public:
   DBSchema &getSchema (const std::string &name);
   /// @brief Returns if DBSchema with a given name exists
   bool hasSchema (const std::string &name);
+  void deleteCurrentSchema ();
 
   /// @brief Returns container with all schemas
   std::map <std::string, DBSchema*>& getSchemas () { return schemas_; }
@@ -70,8 +71,6 @@ public:
   //void addRDLSchema (std::string name);
 
   virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
-
-  void destroy ();
 
   DBSchemaManagerWidget *widget();
 

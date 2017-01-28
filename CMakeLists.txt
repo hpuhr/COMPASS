@@ -229,7 +229,7 @@ set (atsdb_MOC_HEADERS
 #        src/schema/dbtablecolumncombobox.h
         src/schema/dbschemamanagerwidget.h
         src/schema/dbschemawidget.h
-#        src/schema/dbtableeditwidget.h
+        src/schema/dbtablewidget.h
 #        src/schema/netabdtableeditwidget.h
 #        src/object/dbotypecombobox.h
 #        src/object/dbobjectwidget.h
@@ -330,7 +330,7 @@ set ( atsdb_SRCS
 #        src/property/propertycontainer.cpp
 #        src/result/bufferset.cpp
         src/schema/dbschemawidget.cpp
-#        src/schema/dbtableeditwidget.cpp
+        src/schema/dbtablewidget.cpp
 #        src/schema/dbtablecolumncombobox.cpp
 #        src/schema/metadbtableeditwidget.cpp
         src/schema/dbtable.cpp

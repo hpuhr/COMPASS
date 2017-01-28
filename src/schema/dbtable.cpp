@@ -22,25 +22,34 @@
  *      Author: sk
  */
 
+#include "dbschema.h"
 #include "dbtable.h"
 #include "dbtablecolumn.h"
+#include "dbtableinfo.h"
+#include "dbtablewidget.h"
+#include "atsdb.h"
 #include "logger.h"
 
-DBTable::DBTable(const std::string &class_id, const std::string &instance_id, Configurable *parent)
-    : Configurable (class_id, instance_id, parent)
+DBTable::DBTable(const std::string &class_id, const std::string &instance_id, DBSchema *schema)
+    : Configurable (class_id, instance_id, schema), schema_(*schema), widget_(nullptr)
 {
-    registerParameter ("name", &name_, (std::string) "");
-    registerParameter ("info", &info_, (std::string) "");
-    registerParameter ("key_name", &key_name_, (std::string) "");
+    registerParameter ("name", &name_, "");
+    registerParameter ("info", &info_, "");
+    registerParameter ("key_name", &key_name_, "");
 
     createSubConfigurables();
 }
 
 DBTable::~DBTable()
 {
-    //  std::map <std::string, DBTableColumn *>::iterator it;
-    //  for (it =  columns_.begin(); it !=  columns_.end(); it++)
-    //    delete it->second;
+    if (widget_)
+    {
+        delete widget_;
+        widget_ = nullptr;
+    }
+
+    for (auto it : columns_)
+        delete it.second;
     columns_.clear();
 }
 
@@ -50,10 +59,10 @@ void DBTable::generateSubConfigurable (const std::string &class_id, const std::s
 
     if (class_id == "DBTableColumn")
     {
-        DBTableColumn *column = new DBTableColumn ("DBTableColumn", instance_id, this, name_);
+        DBTableColumn *column = new DBTableColumn ("DBTableColumn", instance_id, this);
         assert (column->name().size() != 0);
         assert (columns_.find(column->name()) == columns_.end());
-        columns_.insert (std::pair <std::string, DBTableColumn> (column->name(), *column));
+        columns_.insert (std::pair <std::string, DBTableColumn*> (column->name(), column));
 
         if (column->isKey())
             key_name_ = column->name();
@@ -74,7 +83,7 @@ bool DBTable::hasColumn (const std::string &name) const
 const DBTableColumn &DBTable::column (const std::string &name) const
 {
     assert (columns_.find(name) != columns_.end());
-    return columns_.at(name);
+    return *columns_.at(name);
 }
 
 void DBTable::deleteColumn (const std::string &name)
@@ -86,4 +95,27 @@ void DBTable::deleteColumn (const std::string &name)
 void DBTable::populate ()
 {
     loginf << "DBTable: populate: table " << name_;
+
+    assert (ATSDB::getInstance().ready());
+    for (auto it : ATSDB::getInstance().tableInfo().at(name_).columns ())
+    {
+        if (columns_.count(it.first) == 0)
+        {
+            Configuration &config = addNewSubConfiguration ("DBTableColumn", it.first);
+            config.addParameterString ("name", it.first);
+            config.addParameterString ("type", it.second.type());
+            config.addParameterBool ("is_key", it.second.key());
+            generateSubConfigurable("DBTableColumn", it.first);
+        }
+    }
+}
+
+DBTableWidget *DBTable::widget ()
+{
+    if (!widget_)
+    {
+        widget_ = new DBTableWidget (*this);
+    }
+
+    return widget_;
 }
