@@ -53,23 +53,25 @@ public:
   const std::string &name () const { return name_; }
 
   /// @brief Returns the DBTable with the supplied name
-  const DBTable &table (const std::string &name) const  {  assert (tables_.find(name) != tables_.end()); return tables_.at(name); }
+  const DBTable &table (const std::string &name) const  {  assert (tables_.find(name) != tables_.end()); return *tables_.at(name); }
   /// @brief returns flag if a table with the given name exists
   bool hasTable (const std::string &name) const { return tables_.find(name) != tables_.end(); }
-  const std::string &tableName (const std::string &db_table_name) const;
+  void addTable (const std::string &name);
 
   bool hasMetaTable (const std::string &name) const;
-  const MetaDBTable &metaTable (const std::string &name) const { assert (hasMetaTable(name)); return meta_tables_.at(name);}
+  const MetaDBTable &metaTable (const std::string &name) const { assert (hasMetaTable(name)); return *meta_tables_.at(name);}
 
   /// @brief Returns container with all tables
-  const std::map <std::string, DBTable> &tables () const { return tables_; }
+  const std::map <std::string, DBTable*> &tables () const { return tables_; }
   /// @brief Returns container with all meta-tables
-  const std::map <std::string, MetaDBTable> &metaTables ()  const{ return meta_tables_; }
+  const std::map <std::string, MetaDBTable*> &metaTables ()  const{ return meta_tables_; }
 
   /// @brief Updates table container (if name of a table changed)
   void updateTables ();
   /// @brief Updates meta-table container (if name of meta-table changed)
   void updateMetaTables ();
+
+  void populateTable (const std::string &name);
 
   DBSchemaWidget *widget ();
 
@@ -81,9 +83,9 @@ private:
   std::string name_;
 
   /// Container with all tables (table name -> DBTable)
-  std::map <std::string, DBTable> tables_;
+  std::map <std::string, DBTable*> tables_;
   /// Container with all meta-tables (meta-table name -> MetaDBTable)
-  std::map <std::string, MetaDBTable> meta_tables_;
+  std::map <std::string, MetaDBTable*> meta_tables_;
 
   DBSchemaWidget *widget_;
 };

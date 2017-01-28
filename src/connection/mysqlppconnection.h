@@ -32,6 +32,7 @@
 #include "dbconnection.h"
 
 class Buffer;
+class DBInterface;
 class DBTableInfo;
 class MySQLppConnectionWidget;
 class MySQLServer;
@@ -45,7 +46,7 @@ class PropertyList;
 class MySQLppConnection : public DBConnection
 {
 public:
-    MySQLppConnection(const std::string &instance_id, Configurable *parent);
+    MySQLppConnection(const std::string &instance_id, DBInterface *interface);
     virtual ~MySQLppConnection();
 
     void addServer (std::string name);
@@ -93,7 +94,8 @@ public:
 
     MySQLServer& connectedServer () { assert (connected_server_); return *connected_server_; }
 
-private:
+protected:
+    DBInterface &interface_;
     std::string used_server_;
     MySQLServer *connected_server_;
 

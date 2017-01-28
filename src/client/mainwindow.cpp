@@ -66,7 +66,7 @@ using namespace std;
 //{
 
 MainWindow::MainWindow()
-    : dbinterface_widget_(nullptr), dbschema_manager_widget_(nullptr), start_button_(nullptr), db_opened_(false) //, object_widget_ (0)
+    : dbinterface_widget_(nullptr), dbschema_manager_widget_(nullptr), start_button_(nullptr) //, object_widget_ (0)
 {
     logdbg  << "MainWindow: constructor";
 
@@ -122,7 +122,6 @@ MainWindow::~MainWindow()
 void MainWindow::databaseOpenedSlot()
 {
     logdbg  << "MainWindow: databaseOpenedSlot";
-    assert (!db_opened_);
 
     assert (start_button_);
     start_button_->setDisabled (false);
@@ -172,8 +171,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     ConfigurationManager::getInstance().saveConfiguration();
 
     ATSDB::getInstance().shutdown();
-    assert (!ATSDB::getInstance().getDBOpened ());
-    db_opened_=false;
+    assert (!ATSDB::getInstance().ready());
 
     if (widget_stack_)
         delete widget_stack_;

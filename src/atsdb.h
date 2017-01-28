@@ -41,6 +41,7 @@ class Buffer;
 class DataSource;
 class DBInterface;
 class DBInterfaceWidget;
+class DBTableInfo;
 class DBObject;
 class DBObjectManager;
 class DBSchema;
@@ -125,6 +126,10 @@ public:
 
     DBInterfaceWidget *dbInterfaceWidget ();
     DBSchemaManagerWidget *dbSchemaManagerWidget ();
+
+    const std::map <std::string, DBTableInfo> &tableInfo ();
+
+    bool ready ();
 
     ///@brief Adds data to a DBO from a C struct data pointer.
     //void insert (const std::string &dbo_type, void *data);
@@ -227,8 +232,6 @@ public:
 
 
 protected:
-    /// Flag indicating if database was opened.
-    bool db_opened_;
     /// Flag indicating if data gets exported
     //bool export_active_;
 
@@ -278,9 +281,6 @@ public:
         static ATSDB instance;
         return instance;
     }
-    ///@brief Returns flag indicating if DB was opened.
-    bool getDBOpened () { return db_opened_; }
-
     //unsigned int getNumJobsForBufferReceiver (BufferReceiver *receiver);
 };
 

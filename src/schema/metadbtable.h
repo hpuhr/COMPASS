@@ -104,8 +104,6 @@ public:
     /// @brief Sets name of the main database table
     void tableName (const std::string &table_name) { assert (table_name.size() != 0); table_name_=table_name; }
 
-    /// @brief Returns the database name of the main table
-    const std::string &tableDBName () const {   assert (table_); return table_->dbName();}
     /// @brief Returns database table name for a variable
     const std::string &tableDBNameForVariable (std::string variable_name) const { return columns_.at(variable_name).dbTableName(); }
 
@@ -125,7 +123,7 @@ public:
     /// @brief Returns string with concatenated, comma separated meta sub-tables
     std::string subTableNames () const;
     /// @brief Returns string with all table names (own and sub metas) as comma separated list
-    std::string allTableNames () const { return tableDBName()+ ", " + subTableNames (); }
+    std::string allTableNames () const { return tableName()+ ", " + subTableNames (); }
     /// @brief Returns container with all table names
     std::vector<std::string> allTableNamesVector () const;
 

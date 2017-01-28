@@ -25,6 +25,7 @@
 #include "buffer.h"
 #include "dbcommand.h"
 #include "dbcommandlist.h"
+#include "dbinterface.h"
 #include "dbresult.h"
 #include "logger.h"
 #include "propertylist.h"
@@ -42,8 +43,9 @@ using namespace Utils;
 using namespace Utils::Data;
 
 
-MySQLppConnection::MySQLppConnection(const std::string &instance_id, Configurable *parent)
-    : DBConnection ("MySQLppConnection", instance_id, parent), connected_server_(nullptr), connection_(mysqlpp::Connection (false)), prepared_query_(connection_.query()),
+MySQLppConnection::MySQLppConnection(const std::string &instance_id, DBInterface *interface)
+    : DBConnection ("MySQLppConnection", instance_id, interface), interface_(*interface), connected_server_(nullptr), connection_(mysqlpp::Connection (false)),
+      prepared_query_(connection_.query()),
       prepared_parameters_(mysqlpp::SQLQueryParms(&prepared_query_)), query_used_(false), transaction_(nullptr), prepared_command_(nullptr),
       prepared_command_done_(false), widget_(nullptr)
 {
@@ -87,6 +89,7 @@ void MySQLppConnection::openDatabase (const std::string &database_name)
     connection_ready_ = true;
 
     emit connectedSignal();
+    interface_.databaseOpened();
 
     //loginf  << "MySQLppConnection: init: performance test";
     //performanceTest ();

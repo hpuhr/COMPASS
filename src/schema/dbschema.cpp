@@ -46,7 +46,12 @@ DBSchema::~DBSchema()
         widget_ = nullptr;
     }
 
+    for (auto it : tables_)
+        delete it.second;
     tables_.clear();
+
+    for (auto it : meta_tables_)
+        delete it.second;
     meta_tables_.clear();
 }
 
@@ -60,7 +65,7 @@ void DBSchema::generateSubConfigurable (const std::string &class_id, const std::
         DBTable *table = new DBTable ("DBTable", instance_id, this);
         assert (table->name().size() != 0);
         assert (tables_.find(table->name()) == tables_.end());
-        tables_.insert (std::pair <std::string, DBTable> (table->name(), *table));
+        tables_.insert (std::pair <std::string, DBTable*> (table->name(), table));
         logdbg  << "DBSchema '" << name_ << "': generateSubConfigurable: generated DBTable " << table->name();
     }
     else if (class_id.compare("MetaDBTable") == 0)
@@ -69,22 +74,29 @@ void DBSchema::generateSubConfigurable (const std::string &class_id, const std::
         MetaDBTable *meta_table = new MetaDBTable ("MetaDBTable", instance_id, this);
         assert (meta_table->name().size() != 0);
         assert (meta_tables_.find(meta_table->name()) == meta_tables_.end());
-        meta_tables_.insert(std::pair<std::string, MetaDBTable>(meta_table->name(), *meta_table));
+        meta_tables_.insert(std::pair<std::string, MetaDBTable*>(meta_table->name(), meta_table));
         logdbg  << "DBSchema '" << name_ << "': generateSubConfigurable: generated MetaDBTable " << meta_table->name();
     }
     else
         throw std::runtime_error ("DBSchema: generateSubConfigurable: unknown class_id "+class_id);
 }
 
-const std::string &DBSchema::tableName (const std::string &db_table_name) const
+void DBSchema::addTable(const std::string &name)
 {
-    for (auto it: tables_)
-    {
-        if (it.second.dbName() == db_table_name)
-            return it.second.name();
-    }
+    assert (!hasTable(name));
+    assert (children_.count("DBTable"+name) == 0);
 
-    throw std::invalid_argument ("DBSchema: tablename '"+db_table_name+"'' not found");
+    Configuration &table_config = addNewSubConfiguration ("DBTable", name);
+    table_config.addParameterString ("name", name);
+
+    generateSubConfigurable("DBTable", name);
+    assert (hasTable(name));
+}
+
+void DBSchema::populateTable (const std::string &name)
+{
+    assert (hasTable(name));
+    tables_.at(name)->populate();
 }
 
 bool DBSchema::hasMetaTable (const std::string &name) const
@@ -95,28 +107,24 @@ bool DBSchema::hasMetaTable (const std::string &name) const
 void DBSchema::updateTables ()
 {
     logdbg  << "DBSchema: updateTables";
-    std::map <std::string, DBTable> old_tables = tables_;
+    std::map <std::string, DBTable*> old_tables = tables_;
     tables_.clear();
 
-    std::map <std::string, DBTable>::iterator it;
-
-    for (it = old_tables.begin(); it != old_tables.end(); it++)
+    for (auto it : old_tables)
     {
-        tables_.insert (std::pair <std::string, DBTable> (it->second.name(), it->second));
+        tables_.insert (std::pair <std::string, DBTable*> (it.second->name(), it.second));
     }
 }
 
 void DBSchema::updateMetaTables ()
 {
     logdbg  << "DBSchema: updateMetaTables";
-    std::map <std::string, MetaDBTable> old_meta_tables = meta_tables_;
+    std::map <std::string, MetaDBTable*> old_meta_tables = meta_tables_;
     meta_tables_.clear();
 
-    std::map <std::string, MetaDBTable>::iterator it;
-
-    for (it = old_meta_tables.begin(); it != old_meta_tables.end(); it++)
+    for (auto it : old_meta_tables)
     {
-        meta_tables_.insert (std::pair <std::string, MetaDBTable> (it->second.name(), it->second));
+        meta_tables_.insert (std::pair <std::string, MetaDBTable*> (it.second->name(), it.second));
     }
 }
 

@@ -29,7 +29,6 @@
 DBTable::DBTable(const std::string &class_id, const std::string &instance_id, Configurable *parent)
     : Configurable (class_id, instance_id, parent)
 {
-    registerParameter ("db_name", &db_name_, (std::string) "");
     registerParameter ("name", &name_, (std::string) "");
     registerParameter ("info", &info_, (std::string) "");
     registerParameter ("key_name", &key_name_, (std::string) "");
@@ -51,7 +50,7 @@ void DBTable::generateSubConfigurable (const std::string &class_id, const std::s
 
     if (class_id == "DBTableColumn")
     {
-        DBTableColumn *column = new DBTableColumn ("DBTableColumn", instance_id, this, db_name_);
+        DBTableColumn *column = new DBTableColumn ("DBTableColumn", instance_id, this, name_);
         assert (column->name().size() != 0);
         assert (columns_.find(column->name()) == columns_.end());
         columns_.insert (std::pair <std::string, DBTableColumn> (column->name(), *column));
@@ -82,4 +81,9 @@ void DBTable::deleteColumn (const std::string &name)
 {
     assert (hasColumn(name));
     columns_.erase(columns_.find(name));
+}
+
+void DBTable::populate ()
+{
+    loginf << "DBTable: populate: table " << name_;
 }

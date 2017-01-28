@@ -34,12 +34,15 @@
 #include <QLayoutItem>
 #include <QComboBox>
 #include <QScrollArea>
+#include <QInputDialog>
+#include <QCheckBox>
 
 #include "dbschemawidget.h"
 #include "dbschemamanager.h"
 #include "configuration.h"
 #include "configurationmanager.h"
 #include "dbtable.h"
+#include "dbtableinfo.h"
 //#include "dbtableEditWidget.h"
 #include "metadbtable.h"
 //#include "MetaDBTableEditWidget.h"
@@ -52,45 +55,15 @@
 using namespace Utils;
 
 DBSchemaWidget::DBSchemaWidget(DBSchema &schema, QWidget * parent, Qt::WindowFlags f)
-: QWidget (parent, f), schema_(schema), name_edit_(nullptr), new_table_name_edit_(nullptr), new_table_dbname_ (nullptr), new_meta_table_name_edit_(nullptr),
-  new_meta_table_table_ (nullptr), table_grid_(nullptr), meta_table_grid_(nullptr)
+: QWidget (parent, f), schema_(schema), auto_populate_check_(nullptr), table_grid_(nullptr), meta_table_grid_(nullptr)
 {
     QFont font_bold;
     font_bold.setBold(true);
-
-    QFont font_big;
-    font_big.setPointSize(18);
 
     QScrollArea *scroll_area = new QScrollArea ();
     scroll_area->setWidgetResizable (true);
 
     QVBoxLayout *main_layout = new QVBoxLayout ();
-
-    // name edit
-
-    QLabel *main_label = new QLabel ("Edit schema");
-    main_label->setFont (font_big);
-    main_layout->addWidget (main_label);
-
-    QFrame *name_frame = new QFrame ();
-    name_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
-
-    QHBoxLayout *name_layout = new QHBoxLayout ();
-    name_frame->setLayout (name_layout);
-
-    QLabel *name_label = new QLabel ("Change Name");
-    name_label->setFont (font_bold);
-    name_layout->addWidget (name_label);
-
-    name_edit_ = new QLineEdit ();
-    name_edit_->setText (schema_.name().c_str());
-    name_layout->addWidget (name_edit_);
-
-    QPushButton *name_button = new QPushButton ("Set");
-    connect(name_button, SIGNAL( clicked() ), this, SLOT( setName() ));
-    name_layout->addWidget (name_button);
-
-    main_layout->addWidget (name_frame);
 
     // tables
 
@@ -101,7 +74,7 @@ DBSchemaWidget::DBSchemaWidget(DBSchema &schema, QWidget * parent, Qt::WindowFla
     tables_frame->setLayout (tables_layout);
 
     QLabel *table_label = new QLabel ("Tables");
-    table_label->setFont (font_big);
+    table_label->setFont (font_bold);
     tables_layout->addWidget (table_label);
 
     table_grid_ = new QGridLayout ();
@@ -110,65 +83,41 @@ DBSchemaWidget::DBSchemaWidget(DBSchema &schema, QWidget * parent, Qt::WindowFla
     main_layout->addWidget (tables_frame);
 
     // new table
+    QHBoxLayout *add_table_layout =  new QHBoxLayout ();
 
-    QHBoxLayout *new_table_layout = new QHBoxLayout ();
+    QPushButton *add_table = new QPushButton ("Add Table");
+    connect(add_table, SIGNAL( clicked() ), this, SLOT( addTable() ));
+    add_table_layout->addWidget (add_table);
 
-    QLabel *new_table_label = new QLabel ("New Table");
-    new_table_label->setFont (font_bold);
-    new_table_layout->addWidget (new_table_label);
+    QPushButton *add_all = new QPushButton ("Add All Tables");
+    connect(add_all, SIGNAL( clicked() ), this, SLOT( addAllTables() ));
+    add_table_layout->addWidget (add_all);
 
-    QLabel *new_dbname_label = new QLabel ("Name in database");
-    new_table_layout->addWidget (new_dbname_label);
+    auto_populate_check_ = new QCheckBox ("Auto Populate");
+    auto_populate_check_->setChecked(true);
+    add_table_layout->addWidget (auto_populate_check_);
 
-    new_table_dbname_ = new QComboBox ();
-    new_table_layout->addWidget (new_table_dbname_);
+    main_layout->addLayout(add_table_layout);
 
-    QLabel *new_tablename_label = new QLabel ("Name");
-    new_table_layout->addWidget (new_tablename_label);
+    // meta tables
 
-    new_table_name_edit_ = new QLineEdit ("Undefined");
-    new_table_layout->addWidget (new_table_name_edit_);
-
-    QPushButton *new_table_add = new QPushButton ("Add");
-    connect(new_table_add, SIGNAL( clicked() ), this, SLOT( addTable() ));
-    new_table_layout->addWidget (new_table_add);
-
-    main_layout->addLayout (new_table_layout);
-
-    // table structures
-
-    QFrame *table_structures_frame = new QFrame ();
-    table_structures_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
+    QFrame *meta_table_frame = new QFrame ();
+    meta_table_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
     QVBoxLayout *table_structures_layout = new QVBoxLayout ();
+    meta_table_frame->setLayout (table_structures_layout);
 
-    table_structures_frame->setLayout (table_structures_layout);
+    // meta tables
 
     QLabel *table_structures_label = new QLabel ("Meta tables");
-    table_structures_label->setFont (font_big);
+    table_structures_label->setFont (font_bold);
     table_structures_layout->addWidget (table_structures_label);
 
     meta_table_grid_ = new QGridLayout ();
     table_structures_layout->addLayout (meta_table_grid_);
 
-    main_layout->addWidget (table_structures_frame);
+    main_layout->addWidget (meta_table_frame);
 
     QHBoxLayout *add_ts_layout =  new QHBoxLayout ();
-
-    QLabel *add_ts_label = new QLabel ("New meta table");
-    add_ts_label->setFont (font_bold);
-    add_ts_layout->addWidget (add_ts_label);
-
-    QLabel *add_ts_table_label = new QLabel ("Table");
-    add_ts_layout->addWidget (add_ts_table_label);
-
-    new_meta_table_table_ = new QComboBox ();
-    add_ts_layout->addWidget (new_meta_table_table_);
-
-    QLabel *add_ts_name_label = new QLabel ("Name");
-    add_ts_layout->addWidget (add_ts_name_label);
-
-    new_meta_table_name_edit_ = new QLineEdit ("Undefined");
-    add_ts_layout->addWidget (new_meta_table_name_edit_);
 
     QPushButton *add_ts_button = new QPushButton ("Add");
     connect(add_ts_button, SIGNAL( clicked() ), this, SLOT( addMetaTable() ));
@@ -189,10 +138,7 @@ DBSchemaWidget::DBSchemaWidget(DBSchema &schema, QWidget * parent, Qt::WindowFla
     setLayout(tmp_lay);
 
     updateTableGrid();
-
-    updateDBTableComboBox ();
-
-    updateTableComboBox ();
+    updateMetaTablesGrid ();
 }
 
 DBSchemaWidget::~DBSchemaWidget()
@@ -215,93 +161,69 @@ DBSchemaWidget::~DBSchemaWidget()
 //    edit_meta_table_widgets_.clear();
 }
 
-void DBSchemaWidget::setName()
-{
-    assert (name_edit_);
-//    DBSchemaManager::getInstance().renameCurrentSchema (name_edit_->text().toStdString());
-//    emit renamed ();
-}
-
 void DBSchemaWidget::addTable()
 {
-    assert (new_table_name_edit_);
-    assert (new_table_dbname_);
+    const std::map <std::string, DBTableInfo> &table_info = ATSDB::getInstance().tableInfo ();
 
-    std::string table_name = new_table_name_edit_->text().toStdString();
-    std::string table_db_name = new_table_dbname_->currentText().toStdString();
+    QStringList items;
+    for (auto it : table_info)
+    {
+        if (schema_.tables().count(it.first) == 0)
+            items.append(it.first.c_str());
+    }
 
-    std::string table_instance = "DBTable"+table_name+"0";
+    bool ok;
+    QString item = QInputDialog::getItem(this, tr("Add Table"), tr("Select:"), items, 0, false, &ok);
+    if (ok && !item.isEmpty())
+    {
+        std::string name = item.toStdString();
+        schema_.addTable(name);
 
-    Configuration &table_config = schema_.addNewSubConfiguration ("DBTable", table_instance);
-    table_config.addParameterString ("name", table_name);
-    table_config.addParameterString ("db_name", table_db_name);
+        assert (auto_populate_check_);
+        if (auto_populate_check_->checkState() == Qt::Checked)
+            schema_.populateTable(name);
 
-    schema_.generateSubConfigurable("DBTable", table_instance);
+        updateTableGrid();
+        //updateMetaTablesGrid();
+    }
+}
+
+void DBSchemaWidget::addAllTables()
+{
+//    assert (new_table_name_edit_);
+//    assert (new_table_dbname_);
+
+//    std::string table_name = new_table_name_edit_->text().toStdString();
+//    std::string table_db_name = new_table_dbname_->currentText().toStdString();
+
+//    std::string table_instance = "DBTable"+table_name+"0";
+
+//    Configuration &table_config = schema_.addNewSubConfiguration ("DBTable", table_instance);
+//    table_config.addParameterString ("name", table_name);
+//    table_config.addParameterString ("db_name", table_db_name);
+
+//    schema_.generateSubConfigurable("DBTable", table_instance);
 
     updateTableGrid();
-    updateTableComboBox();
-    updateMetaTableTables();
+    //updateMetaTablesGrid();
 }
 
 void DBSchemaWidget::addMetaTable()
 {
-    assert (new_meta_table_name_edit_);
-    assert (new_meta_table_table_);
+//    assert (new_meta_table_name_edit_);
+//    assert (new_meta_table_table_);
 
-    std::string ts_name = new_meta_table_name_edit_->text().toStdString();
-    std::string ts_table_name = new_meta_table_table_->currentText().toStdString();
+//    std::string ts_name = new_meta_table_name_edit_->text().toStdString();
+//    std::string ts_table_name = new_meta_table_table_->currentText().toStdString();
 
-    std::string ts_instance = "MetaDBTable"+ts_name+"0";
+//    std::string ts_instance = "MetaDBTable"+ts_name+"0";
 
-    Configuration &ts_config = schema_.addNewSubConfiguration ("MetaDBTable", ts_instance);
-    ts_config.addParameterString ("name", ts_name);
-    ts_config.addParameterString ("table", ts_table_name);
+//    Configuration &ts_config = schema_.addNewSubConfiguration ("MetaDBTable", ts_instance);
+//    ts_config.addParameterString ("name", ts_name);
+//    ts_config.addParameterString ("table", ts_table_name);
 
-    schema_.generateSubConfigurable("MetaDBTable", ts_instance);
+//    schema_.generateSubConfigurable("MetaDBTable", ts_instance);
     updateMetaTablesGrid();
-}
-
-void DBSchemaWidget::updateDBTableComboBox ()
-{
-//    assert (ATSDB::getInstance().getDBOpened ());
-//    Buffer *tables = ATSDB::getInstance().getTableList ();
-
-//    if (tables->firstWrite())
-//    {
-//        delete tables;
-//        return;
-//    }
-
-    // TODO FIX READING
-//    tables->setIndex(0);
-//    std::string table_name;
-
-//    assert (new_table_dbname_);
-//    while (new_table_dbname_->count() > 0)
-//        new_table_dbname_->removeItem (0);
-
-//    for (unsigned int cnt=0; cnt < tables->getSize(); cnt++)
-//    {
-//        if (cnt != 0)
-//            tables->incrementIndex();
-
-//        table_name = *(std::string *) tables->get(0);
-//        new_table_dbname_->addItem (table_name.c_str());
-//    }
-//    delete tables;
-}
-
-void DBSchemaWidget::updateTableComboBox ()
-{
-    assert (new_meta_table_table_);
-    while (new_meta_table_table_->count() > 0)
-        new_meta_table_table_->removeItem (0);
-
-    for (auto it : schema_.tables())
-    {
-        new_meta_table_table_->addItem (it.second.name().c_str());
-    }
-
 }
 
 void DBSchemaWidget::updateTableGrid()
@@ -327,17 +249,13 @@ void DBSchemaWidget::updateTableGrid()
     info_label->setFont (font_bold);
     table_grid_->addWidget (info_label, 0, 1);
 
-    QLabel *db_name_label = new QLabel ("DB table");
-    db_name_label->setFont (font_bold);
-    table_grid_->addWidget (db_name_label, 0, 2);
-
     QLabel *numel_label = new QLabel ("# columns");
     numel_label->setFont (font_bold);
-    table_grid_->addWidget (numel_label, 0, 3);
+    table_grid_->addWidget (numel_label, 0, 2);
 
     QLabel *key_label = new QLabel ("Key");
     key_label->setFont (font_bold);
-    table_grid_->addWidget (key_label, 0, 4);
+    table_grid_->addWidget (key_label, 0, 3);
 
     unsigned int row=1;
 
@@ -346,21 +264,18 @@ void DBSchemaWidget::updateTableGrid()
         QLabel *name = new QLabel (it.first.c_str());
         table_grid_->addWidget (name, row, 0);
 
-        QLabel *info = new QLabel (it.second.info().c_str());
+        QLabel *info = new QLabel (it.second->info().c_str());
         table_grid_->addWidget (info, row, 1);
 
-        QLabel *dbname = new QLabel (it.second.dbName().c_str());
-        table_grid_->addWidget (dbname, row, 2);
+        QLabel *numel = new QLabel ((String::intToString(it.second->numColumns())).c_str());
+        table_grid_->addWidget (numel, row, 2);
 
-        QLabel *numel = new QLabel ((String::intToString(it.second.numColumns())).c_str());
-        table_grid_->addWidget (numel, row, 3);
-
-        QLabel *key = new QLabel (it.second.key().c_str());
-        table_grid_->addWidget (key, row, 4);
+        QLabel *key = new QLabel (it.second->key().c_str());
+        table_grid_->addWidget (key, row, 3);
 
         QPushButton *edit = new QPushButton ("Edit");
         connect(edit, SIGNAL( clicked() ), this, SLOT( editTable() ));
-        table_grid_->addWidget (edit, row, 5);
+        table_grid_->addWidget (edit, row, 4);
 
         //edit_table_buttons_ [edit] = it.second;
 
@@ -408,21 +323,21 @@ void DBSchemaWidget::updateMetaTablesGrid()
 
     for (auto it : schema_.metaTables())
     {
-        QLabel *name = new QLabel (it.second.name().c_str());
+        QLabel *name = new QLabel (it.second->name().c_str());
         meta_table_grid_->addWidget (name, row, 0);
 
-        QLabel *info = new QLabel (it.second.info().c_str());
+        QLabel *info = new QLabel (it.second->info().c_str());
         meta_table_grid_->addWidget (info, row, 1);
 
-        QLabel *db_name = new QLabel (it.second.tableName().c_str());
+        QLabel *db_name = new QLabel (it.second->tableName().c_str());
         meta_table_grid_->addWidget (db_name, row, 2);
 
         QLabel *sub = new QLabel ("None");
-        sub->setText (it.second.subTableNames().c_str());
+        sub->setText (it.second->subTableNames().c_str());
 
         meta_table_grid_->addWidget (sub, row, 3);
 
-        QLabel *numcols = new QLabel (String::intToString(it.second.numColumns()).c_str());
+        QLabel *numcols = new QLabel (String::intToString(it.second->numColumns()).c_str());
         meta_table_grid_->addWidget (numcols, row, 4);
 
         QPushButton *edit = new QPushButton ("Edit");
@@ -435,17 +350,6 @@ void DBSchemaWidget::updateMetaTablesGrid()
     }
 
 }
-
-void DBSchemaWidget::updateMetaTableTables ()
-{
-//    std::map <MetaDBTable *, MetaDBTableEditWidget*>::iterator it;
-
-//    for (it = edit_meta_table_widgets_.begin(); it != edit_meta_table_widgets_.end(); it++)
-//    {
-//        it->second->updateTableSelection();
-//    }
-}
-
 
 void DBSchemaWidget::editTable()
 {
@@ -486,7 +390,6 @@ void DBSchemaWidget::changedTable()
 {
     schema_.updateTables();
     updateTableGrid();
-    updateMetaTableTables();
 }
 
 void DBSchemaWidget::changedMetaTable ()

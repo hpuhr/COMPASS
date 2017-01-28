@@ -824,7 +824,7 @@ DBCommand *SQLGenerator::getSelectCommand (const PropertyList &variables, const 
         //    LEFT JOIN comments
         //    ON comments.news_id = news.id
         //    GROUP BY news.id
-        std::string main_table_name = table.tableDBName();
+        std::string main_table_name = table.tableName();
 
         ss << main_table_name;
 
@@ -859,7 +859,7 @@ DBCommand *SQLGenerator::getSelectCommand (const PropertyList &variables, const 
 
     if (left_join)
     {
-        ss << " GROUP BY " << table.getTable().dbName() << "." << table.getTable().dbName();
+        ss << " GROUP BY " << table.getTable().name() << "." << table.getTable().name();
     }
 
     if (order.size() > 0)

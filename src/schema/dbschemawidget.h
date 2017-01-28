@@ -20,15 +20,12 @@
 #define DBSCHEMAWIDGET_H_
 
 #include <QWidget>
+#include <QDialog>
 #include <map>
 
-class QLineEdit;
-class QGridLayout;
-class Configuration;
-class QComboBox;
+class QCheckBox;
 class QPushButton;
-class QTextEdit;
-class QLineEdit;
+class QGridLayout;
 
 class DBTable;
 class DBTableEditWidget;
@@ -48,10 +45,10 @@ signals:
     void renamed ();
 
 private slots:
-    /// @brief Sets the name
-    void setName ();
     /// @brief Adds a DBTable
     void addTable();
+    /// @brief Adds all possible DBTables
+    void addAllTables();
     /// @brief Adds a MetaDBTable
     void addMetaTable();
     /// @brief Edits a DBTable
@@ -73,18 +70,7 @@ protected:
     /// Schema to be edited
     DBSchema &schema_;
 
-    /// Schema name edit field
-    QLineEdit *name_edit_;
-
-    /// New table name edit field
-    QLineEdit *new_table_name_edit_;
-    /// New table database table name selection field
-    QComboBox *new_table_dbname_;
-
-    /// New meta table name edit field
-    QLineEdit *new_meta_table_name_edit_;
-    /// New meta table database table selection field
-    QComboBox *new_meta_table_table_;
+    QCheckBox *auto_populate_check_;
 
     /// Grid for all tables
     QGridLayout *table_grid_;
@@ -104,16 +90,10 @@ protected:
     /// @brief Creates GUI elements
     void createElements ();
 
-    /// Updates database table selection field
-    void updateDBTableComboBox ();
-    /// Updates DBTable selection field
-    void updateTableComboBox ();
     /// Updates DBTable grid
     void updateTableGrid();
     /// Updates MetaDBTable grid
     void updateMetaTablesGrid();
-    /// Updates MetaDBTable edit widgets
-    void updateMetaTableTables ();
 };
 
 #endif /* DBSCHEMAWIDGET_H_ */

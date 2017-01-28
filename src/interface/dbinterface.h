@@ -67,16 +67,19 @@ public:
     void useConnection (const std::string &connection_type);
     void closeConnection ();
 
-    void openDatabase (std::string database_name);
-
     void updateTableInfo ();
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
+    void databaseOpened ();
     std::vector <std::string> getDatabases ();
 
     DBInterfaceWidget *widget();
     QWidget *connectionWidget ();
+
+    const std::map <std::string, DBTableInfo> &tableInfo () { return table_info_; }
+
+    bool ready ();
 
     /// @brief Returns a buffer with all data sources for a DBO type
 //    Buffer *getDataSourceDescription (const std::string &dbo_type);

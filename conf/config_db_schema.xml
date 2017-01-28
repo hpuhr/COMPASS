@@ -2,5 +2,23 @@
     <ParameterString current_schema="SCDB"/>
     <Configuration class_id="DBSchema" instance_id="DBSchemaSCDB0">
         <ParameterString name="SCDB"/>
+        <Configuration class_id="DBTable" instance_id="DBTablesd_radar0">
+            <ParameterString info=""/>
+            <ParameterString key_name=""/>
+            <ParameterString name="sd_radar"/>
+        </Configuration>
+        <Configuration class_id="DBTable" instance_id="DBTablesd_track0">
+            <ParameterString info=""/>
+            <ParameterString key_name=""/>
+            <ParameterString name="sd_track"/>
+        </Configuration>
+        <Configuration class_id="DBTable" instance_id="ad_jobs">
+            <ParameterString info=""/>
+            <ParameterString key_name=""/>
+            <ParameterString name="ad_jobs"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBSchema" instance_id="DBSchemaTest0">
+        <ParameterString name="Test"/>
     </Configuration>
 </Configuration>

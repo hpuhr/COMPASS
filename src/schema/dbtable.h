@@ -44,15 +44,10 @@ public:
 
   virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
-  /// @brief Sets the identifier name
+  /// @brief Sets the identifier name, is the name in the database
   void name (const std::string &name) {assert (name.size() != 0); name_ = name;}
   /// @brief Returns the identifier name
   const std::string &name () const { return name_; }
-
-  /// @brief Sets the name of the database table
-  void dbName (const std::string &db_name) {assert (db_name.size() != 0); db_name_ = db_name;}
-  /// @brief Return the name of the database table
-  const std::string &dbName () const { return db_name_; }
 
   /// @brief Sets the description
   void info (const std::string &info) { info_=info; }
@@ -77,11 +72,11 @@ public:
   /// @brief Returns name of the key column
   const std::string &key () const { return key_name_; }
 
+  void populate ();
+
 private:
   /// Table name identifier
   std::string name_;
-  /// Database table name
-  std::string db_name_;
   /// Description
   std::string info_;
   /// Name of the key column

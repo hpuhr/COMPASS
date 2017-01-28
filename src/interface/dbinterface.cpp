@@ -207,10 +207,23 @@ QWidget *DBInterface::connectionWidget()
     return current_connection_->widget();
 }
 
+void DBInterface::databaseOpened ()
+{
+    updateTableInfo();
+}
+
 std::vector <std::string> DBInterface::getDatabases ()
 {
     assert (current_connection_);
     return current_connection_->getDatabases();
+}
+
+bool DBInterface::ready ()
+{
+    if (!current_connection_)
+        return false;
+
+    return current_connection_->ready();
 }
 
 void DBInterface::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)

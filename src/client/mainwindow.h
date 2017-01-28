@@ -81,7 +81,6 @@ protected:
 
     QPushButton *start_button_;
 
-    bool db_opened_;
     bool native_menu_;
 
     /// @brief Creates File menu

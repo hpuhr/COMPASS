@@ -30,6 +30,7 @@
 //#include "DBOVariable.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
+#include "dbtableinfo.h"
 #include "dbschemamanager.h"
 #include "dbinterface.h"
 #include "global.h"
@@ -62,8 +63,6 @@ ATSDB::ATSDB()
  : Configurable ("ATSDB", "ATSDB0", 0, "conf/atsdb.xml"), db_interface_(nullptr), dbo_manager_(nullptr), db_schema_manager_ (nullptr)
 //: export_active_(false), dbo_reads_active_(0)
 {
-    db_opened_=false;
-
     //WorkerThreadManager::getInstance();
 
     logdbg  << "ATSDB: constructor: start";
@@ -186,6 +185,20 @@ DBSchemaManagerWidget *ATSDB::dbSchemaManagerWidget ()
     assert (db_schema_manager_);
     return db_schema_manager_->widget();
 
+}
+
+bool ATSDB::ready ()
+{
+    if (!db_interface_)
+        return false;
+
+    return db_interface_->ready();
+}
+
+const std::map <std::string, DBTableInfo> &ATSDB::tableInfo ()
+{
+    assert (ready());
+    return db_interface_->tableInfo();
 }
 
 /**
@@ -313,10 +326,6 @@ void ATSDB::shutdown ()
 //            sleep(1);
 //        }
 //    }
-
-    logdbg  << "ATSDB: shutdown: state to 'DB_STATE_SHUTDOWN'";
-    db_opened_=false;
-
     logdbg  << "ATSDB: shutdown: end";
 }
 
