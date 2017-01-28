@@ -32,7 +32,7 @@
 class QPushButton;
 //class DBObjectWidget;
 class DBSelectionWidget;
-//class DBSchemaWidget;
+class DBSchemaManagerWidget;
 class QStackedWidget;
 
 //namespace ATSDB
@@ -51,15 +51,11 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-//signals:
-//    /// @brief Emitted when database was opened
-//    void openedDatabase();
-
 private slots:
     /// @brief Called when database was opened
-    void openedDB();
+    void databaseOpenedSlot();
     /// @brief If database is open, switch to ManagementWidget
-    void start ();
+    void startSlot ();
 
     /// @brief Handles key press events
     void keyPressEvent ( QKeyEvent * event );
@@ -70,37 +66,14 @@ public:
     /// @brief Destructor
     virtual ~MainWindow();
 
-//    /// @brief Sets database type
-//    void setDBType (std::string value);
-//    /// @brief Sets database server
-//    void setDBServer (std::string value);
-//    /// @brief Sets database name
-//    void setDBName (std::string value);
-//    /// @brief Sets database port number
-//    void setDBPort (std::string value);
-//    /// @brief Sets database username
-//    void setDBUser (std::string value);
-//    /// @brief Sets database password
-//    void setDBPassword (std::string value);
-//    /// @brief Sets database usage without password
-//    void setDBNoPassword ();
-//    /// @brief Sets database schema
-//    void setDBSchema (std::string value);
-//    /// @brief Triggers a autostart without user interaction (from console parameters)
-//    void triggerAutoStart ();
-
 protected:
     /// Widget stack for startup to usage switch
     QStackedWidget *widget_stack_;
     /// Database configuration widget
     QWidget *dbinterface_widget_;
-    /// Central widget
-    //MainWidget *main_widget_;
+    // Contains database schema configuration elements
+    QWidget *dbschema_manager_widget_;
 
-    /// Contains database type and parameter elements
-    //DBSelectionWidget *selection_widget_;
-    /// Contains database schema configuration elements
-    //DBSchemaWidget *schema_widget_;
     /// Contains DBObject configuration elements
     //DBObjectWidget *object_widget_;
 
@@ -109,27 +82,13 @@ protected:
     QPushButton *start_button_;
 
     bool db_opened_;
-
-    unsigned int pos_x_;
-    unsigned int pos_y_;
-    unsigned int width_;
-    unsigned int height_;
-    unsigned int min_width_;
-    unsigned int min_height_;
     bool native_menu_;
 
     /// @brief Creates File menu
     void createMenus();
-    /// @brief Creates database configuration widget
-    void createDBConfigWidget ();
-    /// @brief Opens the database
-    //void openDatabase (DBConnectionInfo *info);
 
     /// @brief Called when application closes
     void closeEvent(QCloseEvent *event);
-
-    /// @brief Unlocks database schema edit elements
-    void unlockSchemaGui();
 };
 
 //}

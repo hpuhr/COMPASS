@@ -16,13 +16,12 @@ public:
         registerParameter ("host", &host_, "");
         registerParameter ("user", &user_, "");
         registerParameter ("password", &password_, "");
-        registerParameter ("port", &port_, 0);
+        registerParameter ("port", &port_, 3306);
         registerParameter ("database", &database_, "");
     }
 
     virtual ~MySQLServer ()
     {
-        assert (false);
         if (widget_)
         {
             delete widget_;

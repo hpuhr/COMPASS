@@ -208,7 +208,6 @@ set ( atsdb_HDRS
 
 set (atsdb_MOC_HEADERS
         src/client/mainwindow.h
-        src/client/mainwidget.h
         src/connection/dbconnection.h
 #        src/filter/dbfiltercondition.h
 #        src/filter/dbfilterwidget.h
@@ -228,8 +227,8 @@ set (atsdb_MOC_HEADERS
 #        src/gui/transformationvariableeditdialog.h
 #        src/gui/filtereditdialog.h
 #        src/schema/dbtablecolumncombobox.h
-#        src/schema/dbschemawidget.h
-#        src/schema/dbschemaeditwidget.h
+        src/schema/dbschemamanagerwidget.h
+        src/schema/dbschemawidget.h
 #        src/schema/dbtableeditwidget.h
 #        src/schema/netabdtableeditwidget.h
 #        src/object/dbotypecombobox.h
@@ -257,7 +256,6 @@ set ( atsdb_SRCS
 #        src/buffer/bufferfilter.cpp
         src/client/client.cpp
         src/client/mainwindow.cpp
-        src/client/mainwidget.cpp
         src/config/configurable.cpp
         src/config/configuration.cpp
         src/config/configurationmanager.cpp
@@ -331,8 +329,7 @@ set ( atsdb_SRCS
         src/property/property.cpp
 #        src/property/propertycontainer.cpp
 #        src/result/bufferset.cpp
-#        src/schema/dbschemawidget.cpp
-#        src/schema/dbschemaeditwidget.cpp
+        src/schema/dbschemawidget.cpp
 #        src/schema/dbtableeditwidget.cpp
 #        src/schema/dbtablecolumncombobox.cpp
 #        src/schema/metadbtableeditwidget.cpp
@@ -340,6 +337,7 @@ set ( atsdb_SRCS
         src/schema/dbtablecolumn.cpp
         src/schema/dbschema.cpp
         src/schema/dbschemamanager.cpp
+        src/schema/dbschemamanagerwidget.cpp
         src/schema/metadbtable.cpp
 #        src/struct/structuredescription.cpp
 #        src/struct/structurereader.cpp

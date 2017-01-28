@@ -57,7 +57,7 @@ public:
   /// @brief Sets the description
   void info (const std::string &info) { info_=info; }
   /// @brief Returns the description
-  const std::string &getInfo () const { return info_; }
+  const std::string &info () const { return info_; }
 
   bool hasColumn (const std::string &name) const;
   /// @brief Returns the DBTableColumn identified by the given name

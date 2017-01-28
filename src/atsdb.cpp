@@ -175,11 +175,17 @@ void ATSDB::checkSubConfigurables ()
 
 }
 
-
 DBInterfaceWidget *ATSDB::dbInterfaceWidget ()
 {
     assert (db_interface_);
     return db_interface_->widget();
+}
+
+DBSchemaManagerWidget *ATSDB::dbSchemaManagerWidget ()
+{
+    assert (db_schema_manager_);
+    return db_schema_manager_->widget();
+
 }
 
 /**
@@ -279,6 +285,9 @@ void ATSDB::shutdown ()
 
     assert (db_interface_);
     db_interface_->closeConnection();
+
+    assert (db_schema_manager_);
+    db_schema_manager_->destroy();
 
 //    if (struct_reader_->hasUnwrittenData())
 //    {

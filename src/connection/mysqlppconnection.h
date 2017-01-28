@@ -49,11 +49,12 @@ public:
     virtual ~MySQLppConnection();
 
     void addServer (std::string name);
-    void connectServer (const std::string &server);
+    void deleteUsedServer ();
+    void setServer (const std::string &server);
+    void connectServer ();
     virtual void openDatabase (const std::string &database_name);
 
     virtual void disconnect ();
-
 
     void executeSQL(const std::string &sql);
 
@@ -85,7 +86,12 @@ public:
 
     QWidget *widget ();
 
-    const std::map <std::string, MySQLServer> &servers () const { return servers_; }
+    const std::map <std::string, MySQLServer*> &servers () const { return servers_; }
+
+    const std::string &usedServerString () { return used_server_; }
+    MySQLServer& usedServer () { assert (servers_.count (used_server_) == 1); return *servers_.at(used_server_); }
+
+    MySQLServer& connectedServer () { assert (connected_server_); return *connected_server_; }
 
 private:
     std::string used_server_;
@@ -113,7 +119,7 @@ private:
 
     MySQLppConnectionWidget *widget_;
 
-    std::map <std::string, MySQLServer> servers_;
+    std::map <std::string, MySQLServer*> servers_;
 
     void prepareStatement (const char *sql);
     void finalizeStatement ();

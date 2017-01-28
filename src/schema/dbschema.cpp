@@ -26,48 +26,54 @@
 #include "dbtable.h"
 #include "metadbtable.h"
 #include "dbschema.h"
+#include "dbschemawidget.h"
 #include "logger.h"
 
 DBSchema::DBSchema(const std::string &class_id, const std::string &instance_id, Configurable *parent)
-: Configurable (class_id, instance_id, parent)
+    : Configurable (class_id, instance_id, parent), widget_(nullptr)
 {
-  registerParameter ("name", &name_, (std::string) "");
-  assert (name_.size() != 0);
+    registerParameter ("name", &name_, (std::string) "");
+    assert (name_.size() != 0);
 
-  createSubConfigurables();
+    createSubConfigurables();
 }
 
 DBSchema::~DBSchema()
 {
-  tables_.clear();
-  meta_tables_.clear();
+    if (widget_)
+    {
+        delete widget_;
+        widget_ = nullptr;
+    }
 
+    tables_.clear();
+    meta_tables_.clear();
 }
 
 void DBSchema::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
-  logdbg  << "DBSchema: generateSubConfigurable: " << class_id_ << " instance " << instance_id_;
+    logdbg  << "DBSchema: generateSubConfigurable: " << class_id_ << " instance " << instance_id_;
 
-  if (class_id.compare("DBTable") == 0)
-  {
-    logdbg  << "DBSchema '" << name_ << "': generateSubConfigurable: generating DBTable " << instance_id;
-    DBTable *table = new DBTable ("DBTable", instance_id, this);
-    assert (table->name().size() != 0);
-    assert (tables_.find(table->name()) == tables_.end());
-    tables_.insert (std::pair <std::string, DBTable> (table->name(), *table));
-    logdbg  << "DBSchema '" << name_ << "': generateSubConfigurable: generated DBTable " << table->name();
-  }
-  else if (class_id.compare("MetaDBTable") == 0)
-  {
-    logdbg  << "DBSchema '" << name_ << "': generateSubConfigurable: generating MetaDBTable " << instance_id;
-    MetaDBTable *meta_table = new MetaDBTable ("MetaDBTable", instance_id, this);
-    assert (meta_table->name().size() != 0);
-    assert (meta_tables_.find(meta_table->name()) == meta_tables_.end());
-    meta_tables_.insert(std::pair<std::string, MetaDBTable>(meta_table->name(), *meta_table));
-    logdbg  << "DBSchema '" << name_ << "': generateSubConfigurable: generated MetaDBTable " << meta_table->name();
-  }
-  else
-    throw std::runtime_error ("DBSchema: generateSubConfigurable: unknown class_id "+class_id);
+    if (class_id.compare("DBTable") == 0)
+    {
+        logdbg  << "DBSchema '" << name_ << "': generateSubConfigurable: generating DBTable " << instance_id;
+        DBTable *table = new DBTable ("DBTable", instance_id, this);
+        assert (table->name().size() != 0);
+        assert (tables_.find(table->name()) == tables_.end());
+        tables_.insert (std::pair <std::string, DBTable> (table->name(), *table));
+        logdbg  << "DBSchema '" << name_ << "': generateSubConfigurable: generated DBTable " << table->name();
+    }
+    else if (class_id.compare("MetaDBTable") == 0)
+    {
+        logdbg  << "DBSchema '" << name_ << "': generateSubConfigurable: generating MetaDBTable " << instance_id;
+        MetaDBTable *meta_table = new MetaDBTable ("MetaDBTable", instance_id, this);
+        assert (meta_table->name().size() != 0);
+        assert (meta_tables_.find(meta_table->name()) == meta_tables_.end());
+        meta_tables_.insert(std::pair<std::string, MetaDBTable>(meta_table->name(), *meta_table));
+        logdbg  << "DBSchema '" << name_ << "': generateSubConfigurable: generated MetaDBTable " << meta_table->name();
+    }
+    else
+        throw std::runtime_error ("DBSchema: generateSubConfigurable: unknown class_id "+class_id);
 }
 
 const std::string &DBSchema::tableName (const std::string &db_table_name) const
@@ -83,34 +89,44 @@ const std::string &DBSchema::tableName (const std::string &db_table_name) const
 
 bool DBSchema::hasMetaTable (const std::string &name) const
 {
-  return meta_tables_.find(name) != meta_tables_.end();
+    return meta_tables_.find(name) != meta_tables_.end();
 }
 
 void DBSchema::updateTables ()
 {
-  logdbg  << "DBSchema: updateTables";
-  std::map <std::string, DBTable> old_tables = tables_;
-  tables_.clear();
+    logdbg  << "DBSchema: updateTables";
+    std::map <std::string, DBTable> old_tables = tables_;
+    tables_.clear();
 
-  std::map <std::string, DBTable>::iterator it;
+    std::map <std::string, DBTable>::iterator it;
 
-  for (it = old_tables.begin(); it != old_tables.end(); it++)
-  {
-    tables_.insert (std::pair <std::string, DBTable> (it->second.name(), it->second));
-  }
+    for (it = old_tables.begin(); it != old_tables.end(); it++)
+    {
+        tables_.insert (std::pair <std::string, DBTable> (it->second.name(), it->second));
+    }
 }
 
 void DBSchema::updateMetaTables ()
 {
-  logdbg  << "DBSchema: updateMetaTables";
-  std::map <std::string, MetaDBTable> old_meta_tables = meta_tables_;
-  meta_tables_.clear();
+    logdbg  << "DBSchema: updateMetaTables";
+    std::map <std::string, MetaDBTable> old_meta_tables = meta_tables_;
+    meta_tables_.clear();
 
-  std::map <std::string, MetaDBTable>::iterator it;
+    std::map <std::string, MetaDBTable>::iterator it;
 
-  for (it = old_meta_tables.begin(); it != old_meta_tables.end(); it++)
-  {
-    meta_tables_.insert (std::pair <std::string, MetaDBTable> (it->second.name(), it->second));
-  }
+    for (it = old_meta_tables.begin(); it != old_meta_tables.end(); it++)
+    {
+        meta_tables_.insert (std::pair <std::string, MetaDBTable> (it->second.name(), it->second));
+    }
+}
+
+DBSchemaWidget *DBSchema::widget ()
+{
+    if (!widget_)
+    {
+        widget_ = new DBSchemaWidget (*this);
+    }
+
+    return widget_;
 }
 

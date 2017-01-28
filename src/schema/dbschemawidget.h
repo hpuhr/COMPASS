@@ -15,75 +15,105 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBSchemaWidget.h
- *
- *  Created on: Aug 19, 2012
- *      Author: sk
- */
 
 #ifndef DBSCHEMAWIDGET_H_
 #define DBSCHEMAWIDGET_H_
 
-#include <QFrame>
-//#include "Configurable.h"
+#include <QWidget>
+#include <map>
 
-class QTextEdit;
 class QLineEdit;
+class QGridLayout;
+class Configuration;
 class QComboBox;
 class QPushButton;
-class DBSchemaEditWidget;
+class QTextEdit;
+class QLineEdit;
+
+class DBTable;
+class DBTableEditWidget;
+class MetaDBTable;
+class MetaDBTableEditWidget;
+class DBSchema;
 
 /**
  * @brief Widget for setting the current and adding a new DBSchema
  */
-class DBSchemaWidget : public QFrame
+class DBSchemaWidget : public QWidget
 {
     Q_OBJECT
 
-protected slots:
-    /// @brief Updates the current schema selection field
-    void updateSchemaCombo();
-    /// @brief Adds a new schema
-    void addEmptySchema ();
-    /// @brief Edits the current schema
-    void editSchema ();
-    /// @brief Selects the current schema
-    void selectSchema (int index);
-    /// @brief Called when the schema was renamed
+signals:
+    /// @brief Is emitted when the schema was renamed
     void renamed ();
+
+private slots:
+    /// @brief Sets the name
+    void setName ();
+    /// @brief Adds a DBTable
+    void addTable();
+    /// @brief Adds a MetaDBTable
+    void addMetaTable();
+    /// @brief Edits a DBTable
+    void editTable();
+    /// @brief Edits a MetaDBTable
+    void editMetaTable ();
+    /// @brief Called when a DBTable was changed
+    void changedTable();
+    /// @brief Called when a MetaDBTable was changed
+    void changedMetaTable ();
 
 public:
     /// @brief Constructor
-    DBSchemaWidget(QWidget *parent = 0, Qt::WindowFlags f = 0);
+    DBSchemaWidget(DBSchema &schema, QWidget * parent = 0, Qt::WindowFlags f = 0);
     /// @brief Destructor
     virtual ~DBSchemaWidget();
 
-    /// @brief Sets the schema
-    void setSchema (std::string schema);
-    /// @brief Returns if a schema was selected
-    bool hasSelectedSchema ();
-    /// @brief Returns selected schema
-    std::string getSelectedSchema ();
-
-    /// @brief Unlocks editing functionality
-    void unlock ();
-
 protected:
-    /// New schema name edit field
-    QLineEdit *new_schema_name_edit_;
-    /// Current schema selection field
-    QComboBox *current_schema_select_;
+    /// Schema to be edited
+    DBSchema &schema_;
 
-    /// Current schema edit button
-    QPushButton *edit_button_;
-    /// Current schema edit widget
-    DBSchemaEditWidget *edit_widget_;
+    /// Schema name edit field
+    QLineEdit *name_edit_;
 
-    QPushButton *add_button_;
+    /// New table name edit field
+    QLineEdit *new_table_name_edit_;
+    /// New table database table name selection field
+    QComboBox *new_table_dbname_;
+
+    /// New meta table name edit field
+    QLineEdit *new_meta_table_name_edit_;
+    /// New meta table database table selection field
+    QComboBox *new_meta_table_table_;
+
+    /// Grid for all tables
+    QGridLayout *table_grid_;
+    /// Grid for all meta tables
+    QGridLayout *meta_table_grid_;
+
+    /// Container for table edit buttons
+    std::map <QPushButton *, DBTable *> edit_table_buttons_;
+    /// Container for existing table edit widgets
+    std::map <DBTable *, DBTableEditWidget*> edit_table_widgets_;
+
+    /// Container for meta table edit buttons
+    std::map <QPushButton *, MetaDBTable *> edit_meta_table_buttons_;
+    /// Container for meta table edit widgets
+    std::map <MetaDBTable *, MetaDBTableEditWidget*> edit_meta_table_widgets_;
 
     /// @brief Creates GUI elements
-    void createElements();
+    void createElements ();
+
+    /// Updates database table selection field
+    void updateDBTableComboBox ();
+    /// Updates DBTable selection field
+    void updateTableComboBox ();
+    /// Updates DBTable grid
+    void updateTableGrid();
+    /// Updates MetaDBTable grid
+    void updateMetaTablesGrid();
+    /// Updates MetaDBTable edit widgets
+    void updateMetaTableTables ();
 };
 
 #endif /* DBSCHEMAWIDGET_H_ */

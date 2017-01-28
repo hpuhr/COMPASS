@@ -8,6 +8,7 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QInputDialog>
+#include <QStackedWidget>
 
 MySQLppConnectionWidget::MySQLppConnectionWidget(MySQLppConnection &connection, QWidget *parent)
     : QWidget(parent), connection_(connection)
@@ -15,41 +16,39 @@ MySQLppConnectionWidget::MySQLppConnectionWidget(MySQLppConnection &connection, 
     QFont font_bold;
     font_bold.setBold(true);
 
-    QFont font_big;
-    font_big.setPointSize(16);
-
     QVBoxLayout *layout = new QVBoxLayout ();
 
     QLabel *servers_label = new QLabel ("Servers");
-    servers_label->setFont(font_big);
+    servers_label->setFont(font_bold);
     layout->addWidget(servers_label);
 
     server_select_ = new QComboBox ();
-    updateServers ();
     connect (server_select_, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(serverSelectedSlot(const QString &)));
     layout->addWidget (server_select_);
     layout->addSpacing(10);
 
     QHBoxLayout *button_layout = new QHBoxLayout ();
 
-    QPushButton *add_button = new QPushButton ("Add");
-    connect (add_button, SIGNAL(clicked()), this, SLOT(addServer()));
-    button_layout->addWidget(add_button);
+    add_button_ = new QPushButton ("Add");
+    connect (add_button_, SIGNAL(clicked()), this, SLOT(addServerSlot()));
+    button_layout->addWidget(add_button_);
 
-    QPushButton *delete_button = new QPushButton ("Delete");
-    connect (delete_button, SIGNAL(clicked()), this, SLOT(deleteServer()));
-    button_layout->addWidget(delete_button);
+    delete_button_ = new QPushButton ("Delete");
+    connect (delete_button_, SIGNAL(clicked()), this, SLOT(deleteServerSlot()));
+    button_layout->addWidget(delete_button_);
     layout->addLayout(button_layout);
 
-    server_widget_layout_ = new QVBoxLayout ();
-    layout->addLayout(server_widget_layout_);
+    server_widgets_ = new QStackedWidget ();
+    layout->addWidget(server_widgets_);
+
+    updateServers ();
 
     setLayout (layout);
 }
 
-void MySQLppConnectionWidget::addServer ()
+void MySQLppConnectionWidget::addServerSlot ()
 {
-    logdbg << "MySQLppConnectionWidget: addServer";
+    logdbg << "MySQLppConnectionWidget: addServerSlot";
 
     bool ok;
     QString text = QInputDialog::getText(this, tr("Server Name"),
@@ -61,43 +60,71 @@ void MySQLppConnectionWidget::addServer ()
         connection_.addServer(text.toStdString());
         updateServers ();
     }
-    logdbg << "MySQLppConnectionWidget: addServer: done";
 }
 
-void MySQLppConnectionWidget::deleteServer ()
+void MySQLppConnectionWidget::deleteServerSlot ()
 {
-    logdbg << "MySQLppConnectionWidget: deleteServer";
+    logdbg << "MySQLppConnectionWidget: deleteServerSlot";
+
+    connection_.deleteUsedServer();
+
+    updateServers ();
 }
 
 void MySQLppConnectionWidget::serverSelectedSlot (const QString &value)
 {
     logdbg << "MySQLppConnectionWidget: serverSelectedSlot: '" << value.toStdString() << "'";
-//    ATSDB::getInstance().connect(getConnectionInfo());
 
-//    assert (mysql_db_name_box_);
-//    mysql_db_name_box_->loadDatabaseNames();
+    assert (server_widgets_);
+    while (server_widgets_->count() > 0)
+        server_widgets_->removeWidget(server_widgets_->widget(0));
 
-//    if (mysql_db_name_box_->hasDatabaseName(mysql_db_name_))
-//        mysql_db_name_box_->setDatabaseName (mysql_db_name_);
-//    else
-//        mysql_db_name_=mysql_db_name_box_->getDatabaseName();
-//    connect(mysql_db_name_box_, SIGNAL( currentIndexChanged (const QString &) ), this, SLOT( updateMySQLDatabaseInfo() ));
+    if (value.size() > 0)
+    {
+        connection_.setServer (value.toStdString());
 
-//    connect_button_->setDisabled(true);
-//    open_button_->setDisabled(false);
+        QWidget *widget = connection_.usedServer().widget();
+        QObject::connect(widget, SIGNAL(serverConnectedSignal()), this, SLOT(serverConnectedSlot()), static_cast<Qt::ConnectionType>(Qt::UniqueConnection));
+        QObject::connect(widget, SIGNAL(databaseOpenedSignal()), this, SLOT(databaseOpenedSlot()), static_cast<Qt::ConnectionType>(Qt::UniqueConnection));
+
+        server_widgets_->addWidget(widget);
+        delete_button_->setDisabled(false);
+    }
+    else
+        delete_button_->setDisabled(true);
+}
+
+void MySQLppConnectionWidget::serverConnectedSlot ()
+{
+    logdbg << "MySQLppConnectionWidget: serverConnectedSlot";
+    server_select_->setDisabled(true);
+    add_button_->setDisabled(true);
+    delete_button_->setDisabled(true);
+}
+
+void MySQLppConnectionWidget::databaseOpenedSlot()
+{
+    logdbg << "MySQLppConnectionWidget: databaseOpenedSlot";
+    emit databaseOpenedSignal ();
 }
 
 void MySQLppConnectionWidget::updateServers()
 {
     logdbg << "MySQLppConnectionWidget: updateServers";
-//    const std::map <std::string, MySQLServer> &servers = connection_.servers();
+    const std::map <std::string, MySQLServer*> &servers = connection_.servers();
+    std::string used_server = connection_.usedServerString();
 
-//    server_select_->
-//    server_select_->clear();
+    server_select_->clear();
 
-//    for (auto it : servers)
-//    {
-//        server_select_->addItem(it.first.c_str());
-//    }
-    logdbg << "MySQLppConnectionWidget: updateServers: done";
+    for (auto it : servers)
+    {
+        server_select_->addItem(it.first.c_str());
+    }
+
+    int index = server_select_->findText(used_server.c_str());
+    if (index != -1) // -1 for not found
+    {
+       server_select_->setCurrentIndex(index);
+
+    }
 }

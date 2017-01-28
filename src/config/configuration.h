@@ -48,7 +48,7 @@ template <class T> class ConfigurableParameter //: public ConfigurableParameterB
 {
 public:
     /// Constructor, initializes members
-    ConfigurableParameter () : pointer_(0)
+    explicit ConfigurableParameter () : pointer_(0)
     {}
 
     /// Copy constructor, uses assignment operator

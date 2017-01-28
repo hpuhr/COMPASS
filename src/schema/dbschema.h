@@ -29,6 +29,7 @@
 
 class DBTable;
 class MetaDBTable;
+class DBSchemaWidget;
 
 /**
  * @brief Encapsulates a database schema
@@ -70,6 +71,8 @@ public:
   /// @brief Updates meta-table container (if name of meta-table changed)
   void updateMetaTables ();
 
+  DBSchemaWidget *widget ();
+
 protected:
   virtual void checkSubConfigurables () {};
 
@@ -81,6 +84,8 @@ private:
   std::map <std::string, DBTable> tables_;
   /// Container with all meta-tables (meta-table name -> MetaDBTable)
   std::map <std::string, MetaDBTable> meta_tables_;
+
+  DBSchemaWidget *widget_;
 };
 
 #endif /* DBSCHEMA_H_ */

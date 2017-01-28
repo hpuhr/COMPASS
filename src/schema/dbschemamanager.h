@@ -28,6 +28,7 @@
 #include "configurable.h"
 
 class DBSchema;
+class DBSchemaManagerWidget;
 
 /**
  * @brief Singleton for managing DBSchema instances
@@ -57,7 +58,7 @@ public:
   bool hasSchema (const std::string &name);
 
   /// @brief Returns container with all schemas
-  std::map <std::string, DBSchema>& getSchemas () { return schemas_; }
+  std::map <std::string, DBSchema*>& getSchemas () { return schemas_; }
 
   /// @brief Renames the current schema
   void renameCurrentSchema (const std::string &new_name);
@@ -70,11 +71,17 @@ public:
 
   virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
+  void destroy ();
+
+  DBSchemaManagerWidget *widget();
+
 protected:
   /// Name of current DBSchema
   std::string current_schema_;
   /// Container with all defined schemas (schema name -> DBSchema)
-  std::map <std::string, DBSchema> schemas_;
+  std::map <std::string, DBSchema*> schemas_;
+
+  DBSchemaManagerWidget *widget_;
 
   //void loadDBSchema (); // outdated method
   virtual void checkSubConfigurables ();

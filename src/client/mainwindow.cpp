@@ -49,7 +49,7 @@
 //#include "DBObjectWidget.h"
 #include "atsdb.h"
 #include "dbinterfacewidget.h"
-//#include "dbselectionwidget.h"
+#include "dbschemamanagerwidget.h"
 //#include "DBSchema.h"
 //#include "DBSchemaManager.h"
 //#include "DBSchemaWidget.h"
@@ -66,8 +66,7 @@ using namespace std;
 //{
 
 MainWindow::MainWindow()
-//: main_widget_(0), , schema_widget_(0),
-    : dbinterface_widget_(0), start_button_(0), db_opened_(false) //, object_widget_ (0)
+    : dbinterface_widget_(nullptr), dbschema_manager_widget_(nullptr), start_button_(nullptr), db_opened_(false) //, object_widget_ (0)
 {
     logdbg  << "MainWindow: constructor";
 
@@ -78,25 +77,33 @@ MainWindow::MainWindow()
 
     widget_stack_ = new QStackedWidget ();
 
-    //schema_widget_ = new DBSchemaWidget ();
-    //connect(this, SIGNAL(openedDatabase()), schema_widget_, SLOT(openedDatabase()));
+    QWidget *main_widget = new QWidget ();
+    QVBoxLayout *main_layout = new QVBoxLayout ();
 
-    //createSubConfigurables();
+    // for se widgets
+    QHBoxLayout *layout = new QHBoxLayout ();
+    dbinterface_widget_ = ATSDB::getInstance().dbInterfaceWidget();
+    QObject::connect(dbinterface_widget_, SIGNAL(databaseOpenedSignal()), this, SLOT(databaseOpenedSlot()));
+    layout->addWidget(dbinterface_widget_);
+
+    dbschema_manager_widget_ = ATSDB::getInstance().dbSchemaManagerWidget();
+    QObject::connect(dbinterface_widget_, SIGNAL(databaseOpenedSignal()), dbschema_manager_widget_, SLOT(databaseOpenedSlot()));
+    layout->addWidget(dbschema_manager_widget_);
+    main_layout->addLayout(layout);
 
     //object_widget_ = new DBObjectWidget ();
 
-//    selection_widget_ = new DBSelectionWidget ();
-//    connect(selection_widget_, SIGNAL(databaseOpened()), this, SLOT(openedDB()));
-//    assert (selection_widget_);
-//    //assert (schema_widget_);
+    QHBoxLayout *start_layout = new QHBoxLayout ();
+    start_layout->addStretch();
 
-//    db_config_widget_ = new QWidget ();
-//    assert (db_config_widget_);
-//    createDBConfigWidget ();
+    start_button_ = new QPushButton ("Start");
+    start_layout->addWidget(start_button_);
 
-    dbinterface_widget_ = ATSDB::getInstance().dbInterfaceWidget();
+    main_layout->addLayout(start_layout);
 
-    widget_stack_->addWidget (dbinterface_widget_);
+    main_widget->setLayout(main_layout);
+
+    widget_stack_->addWidget (main_widget);
     setCentralWidget(widget_stack_);
 
     widget_stack_->setCurrentIndex (0);
@@ -112,11 +119,10 @@ MainWindow::~MainWindow()
     // remember: this not called! insert deletes into closeEvent function
 }
 
-void MainWindow::openedDB()
+void MainWindow::databaseOpenedSlot()
 {
+    logdbg  << "MainWindow: databaseOpenedSlot";
     assert (!db_opened_);
-
-    db_opened_=true;
 
     assert (start_button_);
     start_button_->setDisabled (false);
@@ -126,8 +132,9 @@ void MainWindow::openedDB()
 //    widget_stack_->addWidget (main_widget_);
 }
 
-void MainWindow::start ()
+void MainWindow::startSlot ()
 {
+    logdbg  << "MainWindow: startSlot";
 //    if (db_opened_)
 //    {
 //        if (schema_widget_->hasSelectedSchema ())
@@ -177,133 +184,17 @@ void MainWindow::closeEvent(QCloseEvent *event)
     logdbg  << "MainWindow: closeEvent: done";
 }
 
-//void MainWindow::createDBConfigWidget ()
-//{
-//    QFont font_bold;
-//    font_bold.setBold(true);
-
-//    QFont font_big;
-//    font_big.setPointSize(18);
-
-//    assert (selection_widget_ != 0);
-
-//    QHBoxLayout *layout = new QHBoxLayout ();
-
-//    layout->addWidget (selection_widget_);
-
-//    QVBoxLayout *db_schema_layout = new QVBoxLayout ();
-
-//    //assert (schema_widget_);
-//    //db_schema_layout->addWidget (schema_widget_);
-
-//    //db_schema_layout->addWidget (object_widget_);
-
-//    //ProjectionManagerWidget *projmanwi = new ProjectionManagerWidget ();
-//    //db_schema_layout->addWidget (projmanwi);
-
-//    db_schema_layout->addStretch();
-
-//    QHBoxLayout *start_layout = new QHBoxLayout ();
-
-//    start_layout->addStretch();
-
-//    start_button_ = new QPushButton(tr("Start"));
-//    start_button_->setFont (font_bold);
-//    start_button_->setMinimumWidth(200);
-//    connect(start_button_, SIGNAL( clicked() ), this, SLOT( start() ));
-//    start_button_->setDisabled (true);
-//    start_layout->addWidget(start_button_);
-
-//    db_schema_layout->addLayout(start_layout);
-
-//    layout->addLayout (db_schema_layout);
-
-//    db_config_widget_->setLayout (layout);
-//}
-
 void MainWindow::keyPressEvent ( QKeyEvent * event )
 {
     logdbg  << "MainWindow: keyPressEvent '" << event->text().toStdString() << "'";
 
-    if (event->modifiers()  & Qt::ControlModifier)
-    {
-        if (event->key() == Qt::Key_U)
-        {
-            unlockSchemaGui();
-        }
-    }
-}
-
-void MainWindow::unlockSchemaGui()
-{
-    loginf  << "MainWindow: unlockDBGui";
-
-//    if (schema_widget_)
-//        schema_widget_->unlock();
-
-//    if (object_widget_)
-//        object_widget_->unlock();
-}
-
-//void MainWindow::setDBType (std::string value)
-//{
-//    assert (selection_widget_);
-//    selection_widget_->setDBType(value);
-//}
-//
-//void MainWindow::setDBServer (std::string value)
-//{
-//    assert (selection_widget_);
-//    selection_widget_->setDBServer(value);
-//}
-//void MainWindow::setDBName (std::string value)
-//{
-//    assert (selection_widget_);
-//    selection_widget_->setDBName(value);
-//}
-//void MainWindow::setDBPort (std::string value)
-//{
-//    assert (selection_widget_);
-//    selection_widget_->setDBPort(value);
-//
-//}
-//void MainWindow::setDBUser (std::string value)
-//{
-//    assert (selection_widget_);
-//    selection_widget_->setDBUser(value);
-//
-//}
-//void MainWindow::setDBPassword (std::string value)
-//{
-//    assert (selection_widget_);
-//    selection_widget_->setDBPassword(value);
-//
-//}
-//
-//void MainWindow::setDBNoPassword ()
-//{
-//    assert (selection_widget_);
-//    selection_widget_->setDBNoPassword();
-//}
-//void MainWindow::setDBSchema (std::string value)
-//{
-//    assert (schema_widget_);
-//    schema_widget_->setSchema(value);
-//}
-//
-//
-//void MainWindow::triggerAutoStart ()
-//{
-//    loginf  << "MainWindow: triggerAutoStart";
-//    selection_widget_->connectDB ();
-//    selection_widget_->openDB ();
-//
-//    if (db_opened_)
-//        start ();
-//    else
+//    if (event->modifiers()  & Qt::ControlModifier)
 //    {
-//        logerr  << "MainWindow: triggerAutoStart: db open failed";
+//        if (event->key() == Qt::Key_U)
+//        {
+//            unlockSchemaGui();
+//        }
 //    }
-//}
+}
 
 //}

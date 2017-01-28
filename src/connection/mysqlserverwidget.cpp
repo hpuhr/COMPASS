@@ -14,6 +14,9 @@ MySQLServerWidget::MySQLServerWidget(MySQLppConnection &connection, MySQLServer 
 {
     QVBoxLayout *layout = new QVBoxLayout ();
 
+//    QLabel *main = new QLabel (server.getInstanceId().c_str());
+//    layout->addWidget(main);
+
     layout->addWidget (new QLabel("Server Host"));
 
     host_edit_ = new QLineEdit (server_.host().c_str());
@@ -48,6 +51,7 @@ MySQLServerWidget::MySQLServerWidget(MySQLppConnection &connection, MySQLServer 
 
     db_name_box_ = new QComboBox ();
     connect (db_name_box_, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(updateDatabaseSlot(const QString &)));
+    db_name_box_->setDisabled(true);
     layout->addWidget (db_name_box_);
 
     open_button_ = new QPushButton ("Open");
@@ -66,35 +70,100 @@ MySQLServerWidget::~MySQLServerWidget ()
 
 void MySQLServerWidget::updateHostSlot (const QString &value)
 {
-
+    logdbg << "MySQLServerWidget: updateHostSlot: value '" << value.toStdString() << "'";
+    server_.host(value.toStdString());
 }
 
 void MySQLServerWidget::updateUserSlot (const QString &value)
 {
-
+    logdbg << "MySQLServerWidget: updateUserSlot: value '" << value.toStdString() << "'";
+    server_.user(value.toStdString());
 }
 
-void MySQLServerWidget::updatePasswortSlot (const QString &value)
+void MySQLServerWidget::updatePasswordSlot (const QString &value)
 {
-
+    logdbg << "MySQLServerWidget: updatePasswortSlot: value '" << value.toStdString() << "'";
+    server_.password(value.toStdString());
 }
 
 void MySQLServerWidget::updatePortSlot (const QString &value)
 {
-
+    logdbg << "MySQLServerWidget: updatePortSlot: value '" << value.toStdString() << "'";
+    server_.port(value.toInt());
 }
 
 void MySQLServerWidget::connectSlot ()
 {
+    logdbg << "MySQLServerWidget: connectSlot";
+
+    assert (host_edit_);
+    assert (user_edit_);
+    assert (password_edit_);
+    assert (port_edit_);
+
+    assert (connect_button_);
+    assert (open_button_);
+
+    host_edit_->setDisabled(true);
+    user_edit_->setDisabled(true);
+    password_edit_->setDisabled(true);
+    port_edit_->setDisabled(true);
+    connect_button_->setDisabled(true);
+
+    connection_.connectServer();
+
+    updateDatabases ();
+    db_name_box_->setDisabled(false);
+    open_button_->setDisabled(false);
+
+    emit serverConnectedSignal ();
+}
+
+void MySQLServerWidget::updateDatabases ()
+{
+    std::vector <std::string> databases = connection_.getDatabases();
+    std::string used_database = server_.database();
+
+    logdbg << "MySQLServerWidget: updateDatabases: got used database '" << used_database << "'";
+
+    db_name_box_->clear();
+
+    for (auto it : databases)
+    {
+        db_name_box_->addItem(it.c_str());
+    }
+
+    int index = db_name_box_->findText(used_database.c_str());
+    if (index != -1) // -1 for not found
+    {
+       db_name_box_->setCurrentIndex(index);
+    }
+
+//    index = db_name_box_->currentIndex();
+//    if (index != -1)
+//    {
+//        QString selected = db_name_box_->itemText(index); //get selected
+//        logdbg << "MySQLppConnectionWidget: updateDatabases: got database '" << selected.toStdString() << "'";
+//        updateDatabaseSlot (selected);
+//    }
 
 }
 
 void MySQLServerWidget::updateDatabaseSlot (const QString &value)
 {
-
+    logdbg << "MySQLServerWidget: updateDatabaseSlot: value '" << value.toStdString() << "'";
+    server_.database(value.toStdString());
 }
 
 void MySQLServerWidget::openDatabaseSlot ()
 {
+    logdbg << "MySQLServerWidget: openDatabaseSlot";
+    connection_.openDatabase(server_.database());
 
+    assert (open_button_);
+    assert (db_name_box_);
+    open_button_->setDisabled(true);
+    db_name_box_->setDisabled(true);
+
+    emit databaseOpenedSignal ();
 }

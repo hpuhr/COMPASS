@@ -22,241 +22,475 @@
  *      Author: sk
  */
 
+#include "dbschemawidget.h"
+
+#include <QVBoxLayout>
 #include <QLabel>
-#include <QRadioButton>
-#include <QTextEdit>
-#include <QPushButton>
-#include <QLineEdit>
-#include <QComboBox>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QLineEdit>
+#include <QFrame>
+#include <QPushButton>
+#include <QLayoutItem>
+#include <QComboBox>
+#include <QScrollArea>
 
-#include "DBSchema.h"
-#include "DBSchemaWidget.h"
-#include "DBSchemaEditWidget.h"
-#include "DBSchemaManager.h"
-#include "Logger.h"
+#include "dbschemawidget.h"
+#include "dbschemamanager.h"
+#include "configuration.h"
+#include "configurationmanager.h"
+#include "dbtable.h"
+//#include "dbtableEditWidget.h"
+#include "metadbtable.h"
+//#include "MetaDBTableEditWidget.h"
+#include "dbschema.h"
+#include "atsdb.h"
+#include "buffer.h"
 
-DBSchemaWidget::DBSchemaWidget(QWidget * parent, Qt::WindowFlags f)
-: QFrame (parent, f), current_schema_select_(0), new_schema_name_edit_(0), edit_widget_(0),
-  edit_button_(0), add_button_ (0)
+#include "stringconv.h"
+
+using namespace Utils;
+
+DBSchemaWidget::DBSchemaWidget(DBSchema &schema, QWidget * parent, Qt::WindowFlags f)
+: QWidget (parent, f), schema_(schema), name_edit_(nullptr), new_table_name_edit_(nullptr), new_table_dbname_ (nullptr), new_meta_table_name_edit_(nullptr),
+  new_meta_table_table_ (nullptr), table_grid_(nullptr), meta_table_grid_(nullptr)
 {
-    createElements();
-}
-
-DBSchemaWidget::~DBSchemaWidget()
-{
-    if (edit_widget_)
-    {
-        edit_widget_->close();
-        delete edit_widget_;
-        edit_widget_=0;
-    }
-}
-
-void DBSchemaWidget::updateSchemaCombo()
-{
-    assert (current_schema_select_ != 0);
-
-    while (current_schema_select_->count() != 0)
-        current_schema_select_->removeItem (0);
-
-    std::string current_schema;
-    bool exists_current_schema = DBSchemaManager::getInstance().hasCurrentSchema ();
-    int current_index = -1;
-
-    if (exists_current_schema)
-        current_schema = DBSchemaManager::getInstance().getCurrentSchemaName();
-
-    std::map <std::string, DBSchema *> &schemas =  DBSchemaManager::getInstance().getSchemas();
-    std::map <std::string, DBSchema *>::iterator it;
-
-    int cnt=0;
-    for (it = schemas.begin(); it != schemas.end(); it++)
-    {
-        current_schema_select_->addItem (it->first.c_str());
-
-        if (exists_current_schema)
-        {
-            if (it->first.compare (current_schema) == 0)
-                current_index=cnt;
-        }
-        cnt++;
-    }
-
-    if (exists_current_schema)
-    {
-        assert (current_index != -1);
-        current_schema_select_->setCurrentIndex (current_index);
-    }
-}
-
-void DBSchemaWidget::addEmptySchema ()
-{
-    assert (new_schema_name_edit_);
-    DBSchemaManager::getInstance().addEmptySchema(new_schema_name_edit_->text().toStdString());
-    updateSchemaCombo();
-}
-//void DBSchemaWidget::addRDLSchema ()
-//{
-//    assert (new_schema_name_edit_);
-//    DBSchemaManager::getInstance().addRDLSchema(new_schema_name_edit_->text().toStdString());
-//    updateSchemaCombo();
-//}
-
-void DBSchemaWidget::editSchema ()
-{
-    assert (current_schema_select_);
-
-    if (edit_widget_ == 0)
-    {
-        if (DBSchemaManager::getInstance().hasCurrentSchema())
-        {
-            edit_widget_ = new DBSchemaEditWidget (DBSchemaManager::getInstance().getCurrentSchema());
-            connect(edit_widget_, SIGNAL( renamed() ), this, SLOT( renamed() ));
-        }
-    }
-    else
-        edit_widget_->show();
-
-}
-
-void DBSchemaWidget::selectSchema (int index)
-{
-    assert (current_schema_select_);
-    assert  (index >= 0  && index <= current_schema_select_->count());
-
-    DBSchemaManager::getInstance().setCurrentSchema(current_schema_select_->currentText().toStdString());
-}
-
-void DBSchemaWidget::setSchema (std::string schema)
-{
-    assert (current_schema_select_);
-    if (!DBSchemaManager::getInstance().hasSchema(schema))
-    {
-        logerr  << "DBSchemaWidget: setSchema: schema '" << schema << "' does not exist";
-    }
-    else
-    {
-        DBSchemaManager::getInstance().setCurrentSchema(schema);
-
-        int index = current_schema_select_->findData(schema.c_str());
-        if ( index != -1 )
-        { // -1 for not found
-            current_schema_select_->setCurrentIndex(index);
-        }
-        else
-        {
-            logerr  << "DBSchemaWidget: setSchema: combobox doesn't contain " << schema;
-        }
-    }
-}
-
-bool DBSchemaWidget::hasSelectedSchema ()
-{
-    assert (current_schema_select_);
-    if (current_schema_select_->count() == 0)
-        return false;
-
-    return current_schema_select_->currentText().size() != 0;
-}
-std::string DBSchemaWidget::getSelectedSchema ()
-{
-    assert (hasSelectedSchema());
-
-    return current_schema_select_->currentText().toStdString();
-}
-
-void DBSchemaWidget::unlock ()
-{
-    if (current_schema_select_)
-        current_schema_select_->setDisabled (false);
-
-    if (new_schema_name_edit_)
-        new_schema_name_edit_->setDisabled (false);
-
-    if (edit_button_)
-        edit_button_->setDisabled (false);
-
-    if (add_button_)
-        add_button_->setDisabled (false);
-}
-
-void DBSchemaWidget::renamed ()
-{
-    assert (edit_widget_);
-    updateSchemaCombo ();
-}
-
-void DBSchemaWidget::createElements ()
-{
-    unsigned int frame_width = 2;
-    unsigned int frame_width_small = 1;
     QFont font_bold;
     font_bold.setBold(true);
 
     QFont font_big;
     font_big.setPointSize(18);
 
-    setFrameStyle(QFrame::Panel | QFrame::Raised);
-    setLineWidth(frame_width);
+    QScrollArea *scroll_area = new QScrollArea ();
+    scroll_area->setWidgetResizable (true);
 
-    QVBoxLayout *db_schema_layout = new QVBoxLayout ();
+    QVBoxLayout *main_layout = new QVBoxLayout ();
 
-    QLabel *db_schema_label = new QLabel (tr("Please select a Database schema"));
-    db_schema_label->setFont (font_big);
-    db_schema_layout->addWidget (db_schema_label);
+    // name edit
 
-    QFrame *new_schema_widget = new QFrame ();
-    new_schema_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
-    new_schema_widget->setLineWidth(frame_width_small);
+    QLabel *main_label = new QLabel ("Edit schema");
+    main_label->setFont (font_big);
+    main_layout->addWidget (main_label);
 
-    QVBoxLayout *select_schema_layout = new QVBoxLayout ();
+    QFrame *name_frame = new QFrame ();
+    name_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
 
-    QLabel *existing_schema_label = new QLabel (tr("Schema selection"));
-    existing_schema_label->setFont (font_bold);
-    select_schema_layout->addWidget (existing_schema_label);
+    QHBoxLayout *name_layout = new QHBoxLayout ();
+    name_frame->setLayout (name_layout);
 
-    current_schema_select_ = new QComboBox ();
-    updateSchemaCombo();
-    connect(current_schema_select_, SIGNAL( activated(int) ), this, SLOT( selectSchema(int) ));
-    current_schema_select_->setDisabled(true);
-    select_schema_layout->addWidget(current_schema_select_);
+    QLabel *name_label = new QLabel ("Change Name");
+    name_label->setFont (font_bold);
+    name_layout->addWidget (name_label);
 
-    db_schema_layout->addLayout (select_schema_layout);
+    name_edit_ = new QLineEdit ();
+    name_edit_->setText (schema_.name().c_str());
+    name_layout->addWidget (name_edit_);
 
-    edit_button_ = new QPushButton(tr("Edit schema"));
-    edit_button_->setDisabled (true);
-    connect(edit_button_, SIGNAL( clicked() ), this, SLOT( editSchema() ));
-    db_schema_layout->addWidget (edit_button_);
+    QPushButton *name_button = new QPushButton ("Set");
+    connect(name_button, SIGNAL( clicked() ), this, SLOT( setName() ));
+    name_layout->addWidget (name_button);
 
-    QVBoxLayout *new_schema_layout = new QVBoxLayout ();
+    main_layout->addWidget (name_frame);
 
-    QHBoxLayout *new_schema_name_layout = new QHBoxLayout ();
+    // tables
 
-    QLabel *new_schema_label = new QLabel (tr("Add new schema"));
-    new_schema_label->setFont (font_bold);
-    new_schema_layout->addWidget (new_schema_label);
+    QFrame *tables_frame = new QFrame ();
+    tables_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
+    QVBoxLayout *tables_layout = new QVBoxLayout ();
 
-    QLabel *new_schema_name_label = new QLabel (tr("Name"));
-    new_schema_name_layout->addWidget (new_schema_name_label);
+    tables_frame->setLayout (tables_layout);
 
-    new_schema_name_edit_ = new QLineEdit ();
-    new_schema_name_edit_->setText ("Undefined");
-    new_schema_name_edit_->setDisabled(true);
-    new_schema_name_layout->addWidget (new_schema_name_edit_);
+    QLabel *table_label = new QLabel ("Tables");
+    table_label->setFont (font_big);
+    tables_layout->addWidget (table_label);
 
-    add_button_ = new QPushButton(tr("Add"));
-    connect(add_button_, SIGNAL( clicked() ), this, SLOT( addEmptySchema() ));
-    add_button_->setDisabled (true);
+    table_grid_ = new QGridLayout ();
+    tables_layout->addLayout (table_grid_);
 
-    new_schema_layout->addLayout (new_schema_name_layout);
+    main_layout->addWidget (tables_frame);
 
-    new_schema_name_layout->addWidget (add_button_);
+    // new table
 
-    new_schema_widget->setLayout (new_schema_layout);
+    QHBoxLayout *new_table_layout = new QHBoxLayout ();
 
-    db_schema_layout->addWidget(new_schema_widget);
+    QLabel *new_table_label = new QLabel ("New Table");
+    new_table_label->setFont (font_bold);
+    new_table_layout->addWidget (new_table_label);
 
-    setLayout (db_schema_layout);
+    QLabel *new_dbname_label = new QLabel ("Name in database");
+    new_table_layout->addWidget (new_dbname_label);
+
+    new_table_dbname_ = new QComboBox ();
+    new_table_layout->addWidget (new_table_dbname_);
+
+    QLabel *new_tablename_label = new QLabel ("Name");
+    new_table_layout->addWidget (new_tablename_label);
+
+    new_table_name_edit_ = new QLineEdit ("Undefined");
+    new_table_layout->addWidget (new_table_name_edit_);
+
+    QPushButton *new_table_add = new QPushButton ("Add");
+    connect(new_table_add, SIGNAL( clicked() ), this, SLOT( addTable() ));
+    new_table_layout->addWidget (new_table_add);
+
+    main_layout->addLayout (new_table_layout);
+
+    // table structures
+
+    QFrame *table_structures_frame = new QFrame ();
+    table_structures_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
+    QVBoxLayout *table_structures_layout = new QVBoxLayout ();
+
+    table_structures_frame->setLayout (table_structures_layout);
+
+    QLabel *table_structures_label = new QLabel ("Meta tables");
+    table_structures_label->setFont (font_big);
+    table_structures_layout->addWidget (table_structures_label);
+
+    meta_table_grid_ = new QGridLayout ();
+    table_structures_layout->addLayout (meta_table_grid_);
+
+    main_layout->addWidget (table_structures_frame);
+
+    QHBoxLayout *add_ts_layout =  new QHBoxLayout ();
+
+    QLabel *add_ts_label = new QLabel ("New meta table");
+    add_ts_label->setFont (font_bold);
+    add_ts_layout->addWidget (add_ts_label);
+
+    QLabel *add_ts_table_label = new QLabel ("Table");
+    add_ts_layout->addWidget (add_ts_table_label);
+
+    new_meta_table_table_ = new QComboBox ();
+    add_ts_layout->addWidget (new_meta_table_table_);
+
+    QLabel *add_ts_name_label = new QLabel ("Name");
+    add_ts_layout->addWidget (add_ts_name_label);
+
+    new_meta_table_name_edit_ = new QLineEdit ("Undefined");
+    add_ts_layout->addWidget (new_meta_table_name_edit_);
+
+    QPushButton *add_ts_button = new QPushButton ("Add");
+    connect(add_ts_button, SIGNAL( clicked() ), this, SLOT( addMetaTable() ));
+    add_ts_layout->addWidget (add_ts_button);
+
+    updateMetaTablesGrid();
+
+    main_layout->addLayout (add_ts_layout);
+
+    main_layout->addStretch();
+
+    QWidget *tmp = new QWidget ();
+    tmp->setLayout (main_layout);
+    scroll_area->setWidget(tmp);
+
+    QVBoxLayout *tmp_lay = new QVBoxLayout ();
+    tmp_lay->addWidget (scroll_area);
+    setLayout(tmp_lay);
+
+    updateTableGrid();
+
+    updateDBTableComboBox ();
+
+    updateTableComboBox ();
+}
+
+DBSchemaWidget::~DBSchemaWidget()
+{
+//    std::map <DBTable *, DBTableEditWidget*>::iterator it;
+//    for (it = edit_table_widgets_.begin(); it != edit_table_widgets_.end(); it++)
+//    {
+//        it->second->close();
+//        delete it->second;
+//    }
+//    edit_table_widgets_.clear();
+
+
+//    std::map <MetaDBTable *, MetaDBTableEditWidget*>::iterator it2;
+//    for (it2 = edit_meta_table_widgets_.begin(); it2 != edit_meta_table_widgets_.end(); it2++)
+//    {
+//        it2->second->close();
+//        delete it2->second;
+//    }
+//    edit_meta_table_widgets_.clear();
+}
+
+void DBSchemaWidget::setName()
+{
+    assert (name_edit_);
+//    DBSchemaManager::getInstance().renameCurrentSchema (name_edit_->text().toStdString());
+//    emit renamed ();
+}
+
+void DBSchemaWidget::addTable()
+{
+    assert (new_table_name_edit_);
+    assert (new_table_dbname_);
+
+    std::string table_name = new_table_name_edit_->text().toStdString();
+    std::string table_db_name = new_table_dbname_->currentText().toStdString();
+
+    std::string table_instance = "DBTable"+table_name+"0";
+
+    Configuration &table_config = schema_.addNewSubConfiguration ("DBTable", table_instance);
+    table_config.addParameterString ("name", table_name);
+    table_config.addParameterString ("db_name", table_db_name);
+
+    schema_.generateSubConfigurable("DBTable", table_instance);
+
+    updateTableGrid();
+    updateTableComboBox();
+    updateMetaTableTables();
+}
+
+void DBSchemaWidget::addMetaTable()
+{
+    assert (new_meta_table_name_edit_);
+    assert (new_meta_table_table_);
+
+    std::string ts_name = new_meta_table_name_edit_->text().toStdString();
+    std::string ts_table_name = new_meta_table_table_->currentText().toStdString();
+
+    std::string ts_instance = "MetaDBTable"+ts_name+"0";
+
+    Configuration &ts_config = schema_.addNewSubConfiguration ("MetaDBTable", ts_instance);
+    ts_config.addParameterString ("name", ts_name);
+    ts_config.addParameterString ("table", ts_table_name);
+
+    schema_.generateSubConfigurable("MetaDBTable", ts_instance);
+    updateMetaTablesGrid();
+}
+
+void DBSchemaWidget::updateDBTableComboBox ()
+{
+//    assert (ATSDB::getInstance().getDBOpened ());
+//    Buffer *tables = ATSDB::getInstance().getTableList ();
+
+//    if (tables->firstWrite())
+//    {
+//        delete tables;
+//        return;
+//    }
+
+    // TODO FIX READING
+//    tables->setIndex(0);
+//    std::string table_name;
+
+//    assert (new_table_dbname_);
+//    while (new_table_dbname_->count() > 0)
+//        new_table_dbname_->removeItem (0);
+
+//    for (unsigned int cnt=0; cnt < tables->getSize(); cnt++)
+//    {
+//        if (cnt != 0)
+//            tables->incrementIndex();
+
+//        table_name = *(std::string *) tables->get(0);
+//        new_table_dbname_->addItem (table_name.c_str());
+//    }
+//    delete tables;
+}
+
+void DBSchemaWidget::updateTableComboBox ()
+{
+    assert (new_meta_table_table_);
+    while (new_meta_table_table_->count() > 0)
+        new_meta_table_table_->removeItem (0);
+
+    for (auto it : schema_.tables())
+    {
+        new_meta_table_table_->addItem (it.second.name().c_str());
+    }
+
+}
+
+void DBSchemaWidget::updateTableGrid()
+{
+    logdbg  << "DBSchemaWidget: updateTableGrid";
+    QLayoutItem *child;
+    while ((child = table_grid_->takeAt(0)) != 0)
+    {
+        if (child->widget())
+            delete child->widget();
+        delete child;
+    }
+    edit_table_buttons_.clear();
+
+    QFont font_bold;
+    font_bold.setBold(true);
+
+    QLabel *name_label = new QLabel ("Name");
+    name_label->setFont (font_bold);
+    table_grid_->addWidget (name_label, 0, 0);
+
+    QLabel *info_label = new QLabel ("Description");
+    info_label->setFont (font_bold);
+    table_grid_->addWidget (info_label, 0, 1);
+
+    QLabel *db_name_label = new QLabel ("DB table");
+    db_name_label->setFont (font_bold);
+    table_grid_->addWidget (db_name_label, 0, 2);
+
+    QLabel *numel_label = new QLabel ("# columns");
+    numel_label->setFont (font_bold);
+    table_grid_->addWidget (numel_label, 0, 3);
+
+    QLabel *key_label = new QLabel ("Key");
+    key_label->setFont (font_bold);
+    table_grid_->addWidget (key_label, 0, 4);
+
+    unsigned int row=1;
+
+    for (auto it : schema_.tables())
+    {
+        QLabel *name = new QLabel (it.first.c_str());
+        table_grid_->addWidget (name, row, 0);
+
+        QLabel *info = new QLabel (it.second.info().c_str());
+        table_grid_->addWidget (info, row, 1);
+
+        QLabel *dbname = new QLabel (it.second.dbName().c_str());
+        table_grid_->addWidget (dbname, row, 2);
+
+        QLabel *numel = new QLabel ((String::intToString(it.second.numColumns())).c_str());
+        table_grid_->addWidget (numel, row, 3);
+
+        QLabel *key = new QLabel (it.second.key().c_str());
+        table_grid_->addWidget (key, row, 4);
+
+        QPushButton *edit = new QPushButton ("Edit");
+        connect(edit, SIGNAL( clicked() ), this, SLOT( editTable() ));
+        table_grid_->addWidget (edit, row, 5);
+
+        //edit_table_buttons_ [edit] = it.second;
+
+        row++;
+    }
+
+}
+
+void DBSchemaWidget::updateMetaTablesGrid()
+{
+    logdbg  << "DBSchemaWidget: updateMetaTablesGrid";
+    QLayoutItem *child;
+    while ((child = meta_table_grid_->takeAt(0)) != 0)
+    {
+        if (child->widget())
+            delete child->widget();
+        delete child;
+    }
+    edit_meta_table_buttons_.clear();
+
+    QFont font_bold;
+    font_bold.setBold(true);
+
+    QLabel *name_label = new QLabel ("Name");
+    name_label->setFont (font_bold);
+    meta_table_grid_->addWidget (name_label, 0, 0);
+
+    QLabel *info_label = new QLabel ("Description");
+    info_label->setFont (font_bold);
+    meta_table_grid_->addWidget (info_label, 0, 1);
+
+    QLabel *db_name_label = new QLabel ("Table");
+    db_name_label->setFont (font_bold);
+    meta_table_grid_->addWidget (db_name_label, 0, 2);
+
+    QLabel *subtables_label = new QLabel ("Sub table structures");
+    subtables_label->setFont (font_bold);
+    meta_table_grid_->addWidget (subtables_label, 0, 3);
+
+    QLabel *numcols_label = new QLabel ("#columns");
+    numcols_label->setFont (font_bold);
+    meta_table_grid_->addWidget (numcols_label, 0, 4);
+
+    unsigned int row=1;
+
+    for (auto it : schema_.metaTables())
+    {
+        QLabel *name = new QLabel (it.second.name().c_str());
+        meta_table_grid_->addWidget (name, row, 0);
+
+        QLabel *info = new QLabel (it.second.info().c_str());
+        meta_table_grid_->addWidget (info, row, 1);
+
+        QLabel *db_name = new QLabel (it.second.tableName().c_str());
+        meta_table_grid_->addWidget (db_name, row, 2);
+
+        QLabel *sub = new QLabel ("None");
+        sub->setText (it.second.subTableNames().c_str());
+
+        meta_table_grid_->addWidget (sub, row, 3);
+
+        QLabel *numcols = new QLabel (String::intToString(it.second.numColumns()).c_str());
+        meta_table_grid_->addWidget (numcols, row, 4);
+
+        QPushButton *edit = new QPushButton ("Edit");
+        connect(edit, SIGNAL( clicked() ), this, SLOT( editMetaTable() ));
+        meta_table_grid_->addWidget (edit, row, 5);
+
+        //edit_meta_table_buttons_ [edit] = it->second;
+
+        row++;
+    }
+
+}
+
+void DBSchemaWidget::updateMetaTableTables ()
+{
+//    std::map <MetaDBTable *, MetaDBTableEditWidget*>::iterator it;
+
+//    for (it = edit_meta_table_widgets_.begin(); it != edit_meta_table_widgets_.end(); it++)
+//    {
+//        it->second->updateTableSelection();
+//    }
+}
+
+
+void DBSchemaWidget::editTable()
+{
+//    assert (edit_table_buttons_.find((QPushButton*)sender()) != edit_table_buttons_.end());
+
+//    DBTable *table = edit_table_buttons_ [(QPushButton*)sender()];
+
+//    if (edit_table_widgets_.find (table) == edit_table_widgets_.end())
+//    {
+//        DBTableEditWidget *widget = new DBTableEditWidget (table);
+//        connect(widget, SIGNAL( changedTable() ), this, SLOT( changedTable() ));
+//        edit_table_widgets_[table] = widget;
+//        widget->updateParameters();
+//    }
+//    else
+//        edit_table_widgets_[table]->show();
+}
+
+void DBSchemaWidget::editMetaTable ()
+{
+//    assert (edit_meta_table_buttons_.find((QPushButton*)sender()) != edit_meta_table_buttons_.end());
+
+//    MetaDBTable *table_structure = edit_meta_table_buttons_ [(QPushButton*)sender()];
+
+//    if (edit_meta_table_widgets_.find (table_structure) == edit_meta_table_widgets_.end())
+//    {
+//        MetaDBTableEditWidget *widget = new MetaDBTableEditWidget (table_structure);
+//        connect(widget, SIGNAL( changedMetaTable() ), this, SLOT( changedMetaTable() ));
+//        edit_meta_table_widgets_[table_structure] = widget;
+//        //    widget->updateParameters();
+//        // for id autoset - not required?
+//    }
+//    else
+//        edit_meta_table_widgets_[table_structure]->show();
+}
+
+void DBSchemaWidget::changedTable()
+{
+    schema_.updateTables();
+    updateTableGrid();
+    updateMetaTableTables();
+}
+
+void DBSchemaWidget::changedMetaTable ()
+{
+    schema_.updateMetaTables();
+    updateMetaTablesGrid ();
 }

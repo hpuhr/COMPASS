@@ -49,9 +49,6 @@ DBInterfaceWidget::DBInterfaceWidget(DBInterface &interface, QWidget* parent, Qt
     QFont font_bold;
     font_bold.setBold(true);
 
-    QFont font_big;
-    font_big.setPointSize(18);
-
     setFrameStyle(QFrame::Panel | QFrame::Raised);
     setLineWidth(frame_width);
 
@@ -67,7 +64,6 @@ DBInterfaceWidget::DBInterfaceWidget(DBInterface &interface, QWidget* parent, Qt
         connect(radio, SIGNAL(pressed()), this, SLOT(databaseTypeSelectSlot()));
         if (types.size() == 1)
             radio->setChecked (true);
-        radio->setFont (font_bold);
         grplayout->addWidget (radio);
     }
     groupBox->setLayout(grplayout);
@@ -101,10 +97,13 @@ void DBInterfaceWidget::useConnection (std::string connection_type)
 
     assert (connection_layout_);
 
+    QObject::connect(interface_.connectionWidget(), SIGNAL(databaseOpenedSignal()), this, SLOT(databaseOpenedSlot()), static_cast<Qt::ConnectionType>(Qt::UniqueConnection));
+
     connection_layout_->addWidget(interface_.connectionWidget());
 }
 
 void DBInterfaceWidget::databaseOpenedSlot ()
 {
-
+    logdbg << "DBInterfaceWidget: databaseOpenedSlot";
+    emit databaseOpenedSignal();
 }

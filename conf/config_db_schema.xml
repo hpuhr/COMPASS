@@ -1,3 +1,6 @@
 <Configuration class_id="DBSchemaManager" instance_id="DBSchemaManager0">
-    <ParameterString current_schema=""/>
+    <ParameterString current_schema="SCDB"/>
+    <Configuration class_id="DBSchema" instance_id="DBSchemaSCDB0">
+        <ParameterString name="SCDB"/>
+    </Configuration>
 </Configuration>

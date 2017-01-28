@@ -56,14 +56,22 @@ MySQLppConnection::~MySQLppConnection()
 {
 }
 
-void MySQLppConnection::connectServer (const std::string &server)
+void MySQLppConnection::setServer (const std::string &server)
 {
-    assert (servers_.count(used_server_) == 1);
+    logdbg << "MySQLppConnection: setServer: '" << server << "'";
     used_server_ = server;
-    connected_server_ = &servers_.at(server);
+    assert (servers_.count(used_server_) == 1);
+}
 
+void MySQLppConnection::connectServer ()
+{
+    logdbg << "MySQLppConnection: connectServer";
+
+    assert (servers_.count(used_server_) == 1);
+    connected_server_ = servers_.at(used_server_);
     connection_.connect("", connected_server_->host().c_str(), connected_server_->user().c_str(), connected_server_->password().c_str(), connected_server_->port());
 }
+
 
 void MySQLppConnection::openDatabase (const std::string &database_name)
 {
@@ -87,6 +95,12 @@ void MySQLppConnection::openDatabase (const std::string &database_name)
 void MySQLppConnection::disconnect()
 {
     connection_.disconnect();
+
+    for (auto it : servers_)
+        delete it.second;
+    servers_.clear();
+
+    connected_server_ = nullptr;
 
     if (widget_)
     {
@@ -606,6 +620,21 @@ void MySQLppConnection::addServer (std::string name)
     generateSubConfigurable ("MySQLServer", name);
 }
 
+void MySQLppConnection::deleteUsedServer ()
+{
+    logdbg << "MySQLppConnection: deleteUsedServer: name '" << used_server_ << "'";
+    if (servers_.count (used_server_) != 0)
+    {
+        MySQLServer *server = servers_.at(used_server_);
+        servers_.erase(servers_.find(used_server_));
+        delete server;
+
+        used_server_ = "";
+    }
+    else
+        throw std::invalid_argument ("MySQLppConnection: deleteServer: unknown server '"+used_server_+"'");
+}
+
 void MySQLppConnection::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
   logdbg  << "MySQLppConnection: generateSubConfigurable: generating " << instance_id;
@@ -613,7 +642,7 @@ void MySQLppConnection::generateSubConfigurable (const std::string &class_id, co
   {
     MySQLServer *server = new MySQLServer (instance_id, *this);
     assert (servers_.count (server->getInstanceId()) == 0);
-    servers_.insert (std::pair <std::string, MySQLServer> (server->getInstanceId(), *server));
+    servers_.insert (std::pair <std::string, MySQLServer*> (server->getInstanceId(), server));
   }
   else
     throw std::runtime_error ("MySQLppConnection: generateSubConfigurable: unknown class_id "+class_id );

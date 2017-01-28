@@ -45,6 +45,7 @@ class DBObject;
 class DBObjectManager;
 class DBSchema;
 class DBSchemaManager;
+class DBSchemaManagerWidget;
 //class StructureReader;
 class DBOVariable;
 class Job;
@@ -123,6 +124,7 @@ public:
     DBSchema &getCurrentSchema ();
 
     DBInterfaceWidget *dbInterfaceWidget ();
+    DBSchemaManagerWidget *dbSchemaManagerWidget ();
 
     ///@brief Adds data to a DBO from a C struct data pointer.
     //void insert (const std::string &dbo_type, void *data);
