@@ -25,7 +25,10 @@ UnitSelectionWidget::UnitSelectionWidget(std::string &quantity, std::string &uni
  : QPushButton (),quantity_(quantity), unit_(unit)
 {
   logdbg  << "UnitSelectionWidget: constructor";
-  setText (unit_.c_str());
+
+  if (quantity_.size() > 0)
+    setText (QString::fromStdString(quantity_)+":"+QString::fromStdString(unit_));
+
   createMenu();
 
   connect( &menu_, SIGNAL(triggered(QAction*)), this, SLOT(triggerSlot(QAction*)));
@@ -78,8 +81,8 @@ void UnitSelectionWidget::triggerSlot( QAction* action )
 
   if (action->text().size() != 0)
   {
-    quantity = vmap.begin().key().toStdString();
-    unit = vmap.begin().value().toString().toStdString();
+    quantity = vmap.begin().value().toString().toStdString();
+    unit = vmap.begin().key().toStdString();
   }
 
   loginf  << "UnitSelectionWidget: triggerSlot: got quantity " << quantity << " unit " << unit;
@@ -87,7 +90,10 @@ void UnitSelectionWidget::triggerSlot( QAction* action )
   quantity_ = quantity;
   unit_ = unit;
 
-  setText (QString::fromStdString(unit_));
+  if (quantity_.size() > 0)
+    setText (QString::fromStdString(quantity)+":"+QString::fromStdString(unit_));
+  else
+      setText ("");
 
 //  emit selectionChanged();
 }

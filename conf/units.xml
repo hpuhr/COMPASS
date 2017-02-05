@@ -17,6 +17,28 @@
             <ParameterString definition=""/>
         </Configuration>
     </Configuration>
+    <Configuration class_id="Quantity" instance_id="Position">
+        <Configuration class_id="Unit" instance_id="Kilometer">
+            <ParameterDouble factor="0.001000000000"/>
+            <ParameterString definition=""/>
+        </Configuration>
+        <Configuration class_id="Unit" instance_id="Meter">
+            <ParameterDouble factor="1.000000000000"/>
+            <ParameterString definition=""/>
+        </Configuration>
+        <Configuration class_id="Unit" instance_id="Mile">
+            <ParameterDouble factor="0.000621371192"/>
+            <ParameterString definition=""/>
+        </Configuration>
+        <Configuration class_id="Unit" instance_id="Nautical Mile">
+            <ParameterDouble factor="0.000539956803"/>
+            <ParameterString definition=""/>
+        </Configuration>
+        <Configuration class_id="Unit" instance_id="WGS 84">
+            <ParameterDouble factor="0.000000000000"/>
+            <ParameterString definition=""/>
+        </Configuration>
+    </Configuration>
     <Configuration class_id="Quantity" instance_id="Time">
         <Configuration class_id="Unit" instance_id="Hour">
             <ParameterDouble factor="0.000277777778"/>

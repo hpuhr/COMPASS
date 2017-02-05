@@ -450,10 +450,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="WGS84 coordinate latitude"/>
                 <ParameterString name="POS_LAT_DEG"/>
-                <ParameterString quanitiy=""/>
+                <ParameterString quanitiy="Position"/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
-                <ParameterString unit=""/>
+                <ParameterString unit="WGS 84"/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -461,10 +461,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="WGS84 coordinate longitude"/>
                 <ParameterString name="POS_LONG_DEG"/>
-                <ParameterString quanitiy=""/>
+                <ParameterString quanitiy="Position"/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
-                <ParameterString unit=""/>
+                <ParameterString unit="WGS 84"/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -472,10 +472,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="System coordinate x"/>
                 <ParameterString name="POS_SYS_X_NM"/>
-                <ParameterString quanitiy=""/>
+                <ParameterString quanitiy="Position"/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
-                <ParameterString unit=""/>
+                <ParameterString unit="Nautical Mile"/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -483,10 +483,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="System coordinate y"/>
                 <ParameterString name="POS_SYS_Y_NM"/>
-                <ParameterString quanitiy=""/>
+                <ParameterString quanitiy="Position"/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
-                <ParameterString unit=""/>
+                <ParameterString unit="Nautical Mile"/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -648,10 +648,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Time of Day (1/128 sec from midnight)"/>
                 <ParameterString name="TOD"/>
-                <ParameterString quanitiy="V7Time"/>
+                <ParameterString quanitiy="Time"/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
-                <ParameterString unit="Time"/>
+                <ParameterString unit="V7Time"/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>

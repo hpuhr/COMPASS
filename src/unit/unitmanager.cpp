@@ -69,6 +69,18 @@ void UnitManager::checkSubConfigurables ()
         quantities_.at("Time")->addUnit ("V7Time", 128.0, "");
         quantities_.at("Time")->addUnit ("V6Time", 4096.0, "");
     }
+
+    if (quantities_.count("Position") == 0)
+    {
+        addNewSubConfiguration ("Quantity", "Position");
+        generateSubConfigurable("Quantity", "Position");
+
+        quantities_.at("Position")->addUnit ("Meter", 1.0, "");
+        quantities_.at("Position")->addUnit ("Kilometer", 1.0/1000.0, "");
+        quantities_.at("Position")->addUnit ("Mile", 1.0/1609.344, "");
+        quantities_.at("Position")->addUnit ("Nautical Mile", 1.0/1852.0, "");
+        quantities_.at("Position")->addUnit ("WGS 84", 0, "");
+    }
 }
 
 

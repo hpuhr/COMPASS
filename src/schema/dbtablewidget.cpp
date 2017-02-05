@@ -22,6 +22,7 @@
 #include <QComboBox>
 #include <QPushButton>
 #include <QScrollArea>
+#include <QSettings>
 
 //#include "ConfigurationManager.h"
 #include "configuration.h"
@@ -40,6 +41,9 @@ DBTableWidget::DBTableWidget(DBTable &table, QWidget * parent, Qt::WindowFlags f
 : QWidget (parent, f), table_(table), info_edit_(0), column_grid_(0)
 {
     setMinimumSize(QSize(800, 600));
+
+    QSettings settings("ATSDB", "DBTableWidget");
+    restoreGeometry(settings.value("DBTableWidget/geometry").toByteArray());
 
     unsigned int frame_width = 1;
 
@@ -101,7 +105,7 @@ DBTableWidget::DBTableWidget(DBTable &table, QWidget * parent, Qt::WindowFlags f
 //    button_layout->addWidget (create_new_columns);
 
 //    main_layout->addLayout(button_layout);
-    main_layout->addStretch ();
+//    main_layout->addStretch ();
 
     setLayout (main_layout);
 
@@ -110,6 +114,8 @@ DBTableWidget::DBTableWidget(DBTable &table, QWidget * parent, Qt::WindowFlags f
 
 DBTableWidget::~DBTableWidget()
 {
+    QSettings settings("ATSDB", "DBTableWidget");
+    settings.setValue("DBTableWidget/geometry", saveGeometry());
 }
 
 void DBTableWidget::infoSlot (const QString &value)
