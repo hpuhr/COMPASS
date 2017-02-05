@@ -29,25 +29,25 @@ DBSchemaManagerWidget::DBSchemaManagerWidget(DBSchemaManager &manager, QWidget* 
 
     QVBoxLayout *layout = new QVBoxLayout ();
 
-    QLabel *db_schema_label = new QLabel (tr("Database Schema"));
+    QLabel *db_schema_label = new QLabel (tr("Database Schema Selection"));
     db_schema_label->setFont (font_bold);
     layout->addWidget (db_schema_label);
 
     schema_select_ = new QComboBox ();
     updateSchemas();
     connect (schema_select_, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(schemaSelectedSlot(const QString &)));
-    schema_select_->setDisabled(true);
+    //schema_select_->setDisabled(true);
     layout->addWidget(schema_select_);
 
     QHBoxLayout *button_layout = new QHBoxLayout ();
 
     add_button_ = new QPushButton(tr("Add Schema"));
-    add_button_->setDisabled (true);
+    //add_button_->setDisabled (true);
     connect(add_button_, SIGNAL( clicked() ), this, SLOT( addSchemaSlot() ));
     button_layout->addWidget (add_button_);
 
     delete_button_ = new QPushButton(tr("Delete Schema"));
-    delete_button_->setDisabled (true);
+    //delete_button_->setDisabled (true);
     connect(delete_button_, SIGNAL( clicked() ), this, SLOT( deleteSchemaSlot() ));
     button_layout->addWidget (delete_button_);
 
@@ -62,6 +62,7 @@ DBSchemaManagerWidget::DBSchemaManagerWidget(DBSchemaManager &manager, QWidget* 
 
     setLayout (layout);
 
+    setDisabled(true);
 }
 
 DBSchemaManagerWidget::~DBSchemaManagerWidget()
@@ -141,14 +142,16 @@ void DBSchemaManagerWidget::updateSchemas()
 
 void DBSchemaManagerWidget::databaseOpenedSlot ()
 {
-    assert (schema_select_);
-    schema_select_->setDisabled (false);
+    setDisabled(false);
 
-    assert (add_button_);
-    add_button_->setDisabled (false);
+//    assert (schema_select_);
+//    schema_select_->setDisabled (false);
 
-    assert (delete_button_);
-    delete_button_->setDisabled (false);
+//    assert (add_button_);
+//    add_button_->setDisabled (false);
+
+//    assert (delete_button_);
+//    delete_button_->setDisabled (false);
 }
 
 // and who are you? the proud lord said...

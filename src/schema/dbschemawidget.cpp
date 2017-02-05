@@ -61,62 +61,69 @@ DBSchemaWidget::DBSchemaWidget(DBSchema &schema, QWidget * parent, Qt::WindowFla
     QFont font_bold;
     font_bold.setBold(true);
 
-    QScrollArea *scroll_area = new QScrollArea ();
-    scroll_area->setWidgetResizable (true);
-
     QVBoxLayout *main_layout = new QVBoxLayout ();
 
     // tables
-
-    QFrame *tables_frame = new QFrame ();
-    tables_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
     QVBoxLayout *tables_layout = new QVBoxLayout ();
 
-    tables_frame->setLayout (tables_layout);
+    QLabel *tables_label = new QLabel ("Tables");
+    tables_label->setFont (font_bold);
+    tables_layout->addWidget (tables_label);
 
-    QLabel *table_label = new QLabel ("Tables");
-    table_label->setFont (font_bold);
-    tables_layout->addWidget (table_label);
+
+    QScrollArea *table_scroll_area = new QScrollArea ();
+    table_scroll_area->setWidgetResizable (true);
+
+    QWidget *table_scroll_widget = new QWidget ();
 
     table_grid_ = new QGridLayout ();
-    tables_layout->addLayout (table_grid_);
+    table_scroll_widget->setLayout(table_grid_);
 
-    main_layout->addWidget (tables_frame);
+    table_scroll_area->setWidget(table_scroll_widget);
 
-    // new table
-    QHBoxLayout *add_table_layout =  new QHBoxLayout ();
+    tables_layout->addWidget (table_scroll_area);
+
+    // table buttons
+    QHBoxLayout *table_button_layout =  new QHBoxLayout ();
 
     QPushButton *add_table = new QPushButton ("Add Table");
     connect(add_table, SIGNAL( clicked() ), this, SLOT( addTable() ));
-    add_table_layout->addWidget (add_table);
+    table_button_layout->addWidget (add_table);
 
     QPushButton *add_all = new QPushButton ("Add All Tables");
     connect(add_all, SIGNAL( clicked() ), this, SLOT( addAllTables() ));
-    add_table_layout->addWidget (add_all);
+    table_button_layout->addWidget (add_all);
 
     auto_populate_check_ = new QCheckBox ("Auto Populate");
     auto_populate_check_->setChecked(true);
-    add_table_layout->addWidget (auto_populate_check_);
+    table_button_layout->addWidget (auto_populate_check_);
 
-    main_layout->addLayout(add_table_layout);
+    tables_layout->addLayout(table_button_layout);
 
-    // meta tables
-
-    QFrame *meta_table_frame = new QFrame ();
-    meta_table_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
-    QVBoxLayout *table_structures_layout = new QVBoxLayout ();
-    meta_table_frame->setLayout (table_structures_layout);
+    main_layout->addLayout(tables_layout);
 
     // meta tables
 
-    QLabel *table_structures_label = new QLabel ("Meta tables");
-    table_structures_label->setFont (font_bold);
-    table_structures_layout->addWidget (table_structures_label);
+    QVBoxLayout *meta_tables_layout = new QVBoxLayout ();
+
+    QLabel *meta_tables_label = new QLabel ("Meta Tables");
+    meta_tables_label->setFont (font_bold);
+    meta_tables_layout->addWidget (meta_tables_label);
+
+
+    QScrollArea *meta_table_scroll_area = new QScrollArea ();
+    meta_table_scroll_area->setWidgetResizable (true);
+
+    QWidget *meta_table_scroll_widget = new QWidget ();
 
     meta_table_grid_ = new QGridLayout ();
-    table_structures_layout->addLayout (meta_table_grid_);
+    meta_table_scroll_widget->setLayout(meta_table_grid_);
 
-    main_layout->addWidget (meta_table_frame);
+    meta_table_scroll_area->setWidget(meta_table_scroll_widget);
+
+    meta_tables_layout->addWidget (meta_table_scroll_area);
+
+    // meta table buttons
 
     QHBoxLayout *add_ts_layout =  new QHBoxLayout ();
 
@@ -124,19 +131,11 @@ DBSchemaWidget::DBSchemaWidget(DBSchema &schema, QWidget * parent, Qt::WindowFla
     connect(add_ts_button, SIGNAL( clicked() ), this, SLOT( addMetaTable() ));
     add_ts_layout->addWidget (add_ts_button);
 
-    updateMetaTablesGrid();
+    meta_tables_layout->addLayout (add_ts_layout);
 
-    main_layout->addLayout (add_ts_layout);
+    main_layout->addLayout(meta_tables_layout);
 
-    main_layout->addStretch();
-
-    QWidget *tmp = new QWidget ();
-    tmp->setLayout (main_layout);
-    scroll_area->setWidget(tmp);
-
-    QVBoxLayout *tmp_lay = new QVBoxLayout ();
-    tmp_lay->addWidget (scroll_area);
-    setLayout(tmp_lay);
+    setLayout(main_layout);
 
     updateTableGrid();
     updateMetaTablesGrid ();
@@ -237,7 +236,6 @@ void DBSchemaWidget::updateTableGrid()
             delete child->widget();
         delete child;
     }
-    edit_table_buttons_.clear();
 
     QFont font_bold;
     font_bold.setBold(true);
@@ -299,8 +297,6 @@ void DBSchemaWidget::updateTableGrid()
         connect(del, SIGNAL( clicked() ), this, SLOT( deleteTable() ));
         table_grid_->addWidget (del, row, 4);
         delete_table_buttons_[del] = it.second;
-
-        //edit_table_buttons_ [edit] = it.second;
 
         row++;
     }

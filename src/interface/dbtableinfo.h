@@ -30,7 +30,7 @@
 class DBTableColumnInfo
 {
 public:
-    DBTableColumnInfo (const std::string &name, const std::string &type, bool null_allowed, bool key, const std::string &comment)
+    DBTableColumnInfo (const std::string &name, const std::string &type, bool key, bool null_allowed, const std::string &comment)
         : name_(name), type_(type), null_allowed_(null_allowed), key_(key), comment_(comment)  {}
     virtual ~DBTableColumnInfo() {}
 
@@ -60,8 +60,8 @@ public:
 
     bool hasColumn (const std::string &name) const { return columns_.count(name) > 0; }
     const DBTableColumnInfo &column (const std::string &name) const { return columns_.at(name); }
-    void addColumn (const std::string &name, const std::string &type, bool null_allowed, bool key, const std::string &comment)
-        {  columns_.insert(std::pair<std::string, DBTableColumnInfo> (name,DBTableColumnInfo (name, type, null_allowed, key, comment)));  }
+    void addColumn (const std::string &name, const std::string &type, bool key, bool null_allowed, const std::string &comment)
+        {  columns_.insert(std::pair<std::string, DBTableColumnInfo> (name,DBTableColumnInfo (name, type, key, null_allowed, comment)));  }
 
     unsigned int size() { return columns_.size(); }
 

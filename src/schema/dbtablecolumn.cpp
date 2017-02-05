@@ -29,12 +29,13 @@
 DBTableColumn::DBTableColumn(const std::string &class_id, const std::string &instance_id, DBTable *table)
  : Configurable (class_id, instance_id, table), table_(*table)
 {
-  registerParameter ("name", &name_, (std::string) "");
-  registerParameter ("type", &type_, (std::string) "");
+  registerParameter ("name", &name_, "");
+  registerParameter ("type", &type_, "");
   registerParameter ("is_key", &is_key_, false);
-  registerParameter ("unit_dimension", &unit_dimension_, (std::string) "");
-  registerParameter ("unit_unit", &unit_unit_, (std::string) "");
-  registerParameter ("special_null", &special_null_, (std::string) "");
+  registerParameter ("comment", &comment_, "");
+  registerParameter ("unit_dimension", &unit_dimension_, "");
+  registerParameter ("unit_unit", &unit_unit_, "");
+  registerParameter ("special_null", &special_null_, "");
 
   createSubConfigurables();
 }

@@ -79,11 +79,11 @@ protected:
     QGridLayout *meta_table_grid_;
 
     /// Container for table edit buttons
-    std::map <QPushButton *, DBTable *> edit_table_buttons_;
-    std::map <QPushButton *, DBTable *> delete_table_buttons_;
+    std::map <QPushButton*, DBTable*> edit_table_buttons_;
+    std::map <QPushButton*, DBTable*> delete_table_buttons_;
 
     /// Container for meta table edit buttons
-    std::map <QPushButton *, MetaDBTable *> edit_meta_table_buttons_;
+    std::map <QPushButton*, MetaDBTable*> edit_meta_table_buttons_;
 
     /// @brief Creates GUI elements
     void createElements ();

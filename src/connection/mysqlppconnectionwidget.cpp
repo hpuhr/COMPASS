@@ -18,7 +18,7 @@ MySQLppConnectionWidget::MySQLppConnectionWidget(MySQLppConnection &connection, 
 
     QVBoxLayout *layout = new QVBoxLayout ();
 
-    QLabel *servers_label = new QLabel ("Servers");
+    QLabel *servers_label = new QLabel ("Server Selection");
     servers_label->setFont(font_bold);
     layout->addWidget(servers_label);
 

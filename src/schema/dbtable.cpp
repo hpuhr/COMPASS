@@ -105,6 +105,7 @@ void DBTable::populate ()
             config.addParameterString ("name", it.first);
             config.addParameterString ("type", it.second.type());
             config.addParameterBool ("is_key", it.second.key());
+            config.addParameterString ("comment", it.second.comment());
             generateSubConfigurable("DBTableColumn", it.first);
         }
     }

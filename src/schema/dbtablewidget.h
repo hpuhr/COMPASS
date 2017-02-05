@@ -41,12 +41,9 @@ signals:
 
 public slots:
     void infoSlot (const QString &value);
-    void keySlot (const QString &value);
-    /// @brief Deletes a column
-    void deleteColumn ();
     /// @brief Creates all columns that exist in database table
-    void createColumnsFromDB ();
-    void createNewColumnsFromDB ();
+//    void createColumnsFromDB ();
+//    void createNewColumnsFromDB ();
     /// @brief Sets a special null value
     void setSpecialNull ();
 
@@ -62,19 +59,13 @@ protected:
 
     /// Table info edit field
     QLineEdit *info_edit_;
-    /// Table key selection field
-    QComboBox *key_box_;
 
     /// Grid with all table columns
     QGridLayout *column_grid_;
 
-    /// Container with all column delete buttons
-    std::map <QPushButton *, DBTableColumn *> column_grid_delete_buttons_;
     /// Container with all column special null edit fields
     std::map <QLineEdit *, DBTableColumn* > column_grid_special_nulls_;
 
-    /// @brief Updates the table key selection field
-    void updateKeySelection();
     /// @brief Updates the table columns grid
     void updateColumnGrid ();
 };

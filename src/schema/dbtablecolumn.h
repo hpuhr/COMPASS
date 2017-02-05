@@ -58,6 +58,9 @@ public:
   /// @brief Returns key flag
   bool isKey () const { return is_key_; }
 
+  void comment (const std::string &comment) { comment_ = comment; }
+  const std::string &comment () const { return comment_; }
+
   /// @brief Returns if column has an assigned unit
   bool unit () const { return unit_dimension_.size() != 0; }
   /// @brief Returns unit dimension
@@ -82,6 +85,8 @@ protected:
   std::string type_;
   /// Key flag
   bool is_key_;
+  /// Data type
+  std::string comment_;
   /// Unit dimension
   std::string unit_dimension_;
   /// Unit
