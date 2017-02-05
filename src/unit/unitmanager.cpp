@@ -15,44 +15,62 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * UnitManager.cpp
- *
- *  Created on: Oct 24, 2012
- *      Author: sk
- */
-
-#include "UnitManager.h"
-#include "UnitLength.h"
-#include "UnitTime.h"
-#include "Logger.h"
+#include "unitmanager.h"
+#include "quantity.h"
+#include "logger.h"
 
 UnitManager::UnitManager()
+: Configurable ("UnitManager", "UnitManager0", 0, "conf/units.xml")
 {
-  registerUnit (new UnitLength());
-  registerUnit (new UnitTime());
+    createSubConfigurables ();
 }
 
 UnitManager::~UnitManager()
 {
-  std::map <std::string, Unit*>::iterator it;
-
-  for (it = units_.begin(); it != units_.end(); it++)
-    delete it->second;
-  units_.clear();
+  for (auto it : quantities_)
+    delete it.second;
+  quantities_.clear();
 }
 
-void UnitManager::registerUnit (Unit *unit)
+void UnitManager::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
-  assert (unit);
-  std::string unit_def = unit->getName();
-  assert (units_.find (unit_def) == units_.end());
-  units_[unit_def]=unit;
+    if (class_id == "Quantity")
+    {
+        Quantity *quantity = new Quantity (class_id, instance_id, this);
+        assert (quantities_.find(quantity->getInstanceId()) == quantities_.end());
+        quantities_.insert (std::pair <std::string, Quantity*> (quantity->getInstanceId(), quantity));
+    }
+    else
+        throw std::runtime_error ("UnitManager: generateSubConfigurable: unknown class_id "+class_id );
 }
-Unit *UnitManager::getUnit (std::string name)
+
+void UnitManager::checkSubConfigurables ()
 {
-  assert (units_.find (name) != units_.end());
-  return units_[name];
+    if (quantities_.count("Length") == 0)
+    {
+        addNewSubConfiguration ("Quantity", "Length");
+        generateSubConfigurable("Quantity", "Length");
+
+        quantities_.at("Length")->addUnit ("Meter", 1.0, "");
+        quantities_.at("Length")->addUnit ("Kilometer", 1.0/1000.0, "");
+        quantities_.at("Length")->addUnit ("Mile", 1.0/1609.344, "");
+        quantities_.at("Length")->addUnit ("Nautical Mile", 1.0/1852.0, "");
+    }
+
+    if (quantities_.count("Time") == 0)
+    {
+        addNewSubConfiguration ("Quantity", "Time");
+        generateSubConfigurable("Quantity", "Time");
+
+        quantities_.at("Time")->addUnit ("Second", 1.0, "");
+        quantities_.at("Time")->addUnit ("Minute", 1.0/60.0, "");
+        quantities_.at("Time")->addUnit ("Hour", 1.0/3600.0, "");
+        quantities_.at("Time")->addUnit ("MilliSeconds", 1000.0, "");
+        quantities_.at("Time")->addUnit ("V7Time", 128.0, "");
+        quantities_.at("Time")->addUnit ("V6Time", 4096.0, "");
+    }
 }
+
+
 
 

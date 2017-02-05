@@ -30,7 +30,7 @@
 #include "dbtablecolumn.h"
 //#include "ATSDB.h"
 #include "logger.h"
-//#include "UnitSelectionWidget.h"
+#include "unitselectionwidget.h"
 
 #include "stringconv.h"
 
@@ -163,20 +163,20 @@ void DBTableWidget::updateColumnGrid ()
     for (auto it : table_.columns ())
     {
         QLabel *name = new QLabel (it.second->name().c_str());
-        column_grid_->addWidget (name, row,0);
+        column_grid_->addWidget (name, row, 0);
 
         QLabel *type = new QLabel (it.second->type().c_str());
-        column_grid_->addWidget (type, row,1);
+        column_grid_->addWidget (type, row, 1);
 
         QLabel *key = new QLabel (String::intToString((int)it.second->isKey()).c_str());
-        column_grid_->addWidget (key, row,2);
+        column_grid_->addWidget (key, row, 2);
 
-//        UnitSelectionWidget *unit_widget = new UnitSelectionWidget (it->second->getUnitDimension (), it->second->getUnitUnit());
-//        column_grid_->addWidget (unit_widget, row,4);
+        UnitSelectionWidget *unit_widget = it.second->unitWidget();
+        column_grid_->addWidget (unit_widget, row, 3);
 
         QLineEdit *edit = new QLineEdit (it.second->specialNull().c_str());
         connect (edit, SIGNAL(returnPressed()), this, SLOT (setSpecialNull()));
-        column_grid_->addWidget (edit, row,4);
+        column_grid_->addWidget (edit, row, 4);
         assert (column_grid_special_nulls_.find (edit) == column_grid_special_nulls_.end());
         column_grid_special_nulls_ [edit] = it.second;
 

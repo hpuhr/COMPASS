@@ -15,22 +15,17 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * UnitSelectionWidget.cpp
- *
- *  Created on: Oct 24, 2012
- *      Author: sk
- */
+#include "unitselectionwidget.h"
+#include "unitmanager.h"
+#include "unit.h"
+#include "quantity.h"
+#include "logger.h"
 
-#include "UnitSelectionWidget.h"
-#include "UnitManager.h"
-#include "Logger.h"
-
-UnitSelectionWidget::UnitSelectionWidget(std::string &unit_dimension, std::string &unit_unit)
- : QPushButton (),unit_dimension_(unit_dimension), unit_unit_(unit_unit)
+UnitSelectionWidget::UnitSelectionWidget(std::string &quantity, std::string &unit)
+ : QPushButton (),quantity_(quantity), unit_(unit)
 {
   logdbg  << "UnitSelectionWidget: constructor";
-  setText (unit_unit_.c_str());
+  setText (unit_.c_str());
   createMenu();
 
   connect( &menu_, SIGNAL(triggered(QAction*)), this, SLOT(triggerSlot(QAction*)));
@@ -45,28 +40,24 @@ UnitSelectionWidget::~UnitSelectionWidget()
 void UnitSelectionWidget::createMenu()
 {
   logdbg  << "UnitSelectionWidget: createMenu";
-  std::map <std::string, Unit*> &units = UnitManager::getInstance().getUnits();
-  std::map <std::string, Unit*>::iterator it;
-
-  //menu_.addMenu("");
   menu_.addAction( "" );
-  for (it = units.begin(); it != units.end(); it++)
-  {
-    std::map <std::string, double> &unit_units = it->second->getUnits ();
-    std::map <std::string, double>::iterator unitit;
 
-    if (unit_units.size() > 0)
+  for (auto it : UnitManager::getInstance().quantities())
+  {
+    const std::map <std::string, Unit*> &units = it.second->units();
+
+    if (units.size() > 0)
     {
 //      loginf  << "UnitSelectionWidget: createMenu: unit " << it->first;
-      QMenu* m2 = menu_.addMenu( QString::fromStdString(it->first));
+      QMenu* m2 = menu_.addMenu( QString::fromStdString(it.first));
 
-      for (unitit = unit_units.begin(); unitit != unit_units.end(); unitit++)
+      for (auto it2: units)
       {
 //        loginf  << "UnitSelectionWidget: createMenu: unitunit " << unitit->first;
-        QAction* action = m2->addAction( QString::fromStdString(unitit->first) );
+        QAction* action = m2->addAction( QString::fromStdString(it2.first) );
 
         QVariantMap vmap;
-        vmap.insert( QString::fromStdString(unitit->first), QVariant( QString::fromStdString(it->first) ) );
+        vmap.insert( QString::fromStdString(it2.first), QVariant( QString::fromStdString(it.first) ) );
         action->setData( QVariant( vmap ) );
       }
     }
@@ -83,20 +74,20 @@ void UnitSelectionWidget::showMenuSlot()
 void UnitSelectionWidget::triggerSlot( QAction* action )
 {
   QVariantMap vmap = action->data().toMap();
-  std::string unitunit, unit;
+  std::string quantity, unit;
 
   if (action->text().size() != 0)
   {
-    unitunit = vmap.begin().key().toStdString();
+    quantity = vmap.begin().key().toStdString();
     unit = vmap.begin().value().toString().toStdString();
   }
 
-  loginf  << "UnitSelectionWidget: triggerSlot: got unit " << unit << " unitunit " << unitunit;
+  loginf  << "UnitSelectionWidget: triggerSlot: got quantity " << quantity << " unit " << unit;
 
-  unit_dimension_ = unit;
-  unit_unit_ = unitunit;
+  quantity_ = quantity;
+  unit_ = unit;
 
-  setText (QString::fromStdString(unitunit));
+  setText (QString::fromStdString(unit_));
 
 //  emit selectionChanged();
 }

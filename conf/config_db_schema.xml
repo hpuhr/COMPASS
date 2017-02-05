@@ -10,8 +10,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="AIRSPEED_KT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -19,8 +21,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="AIRSPEED_MACH"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -28,8 +32,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Barometric altitude, Mode C"/>
                 <ParameterString name="ALT_BARO_FT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="mediumint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -37,8 +43,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Geometric altitude, 3D Height"/>
                 <ParameterString name="ALT_GEO_FT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -46,8 +54,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="currently 25 or 100"/>
                 <ParameterString name="ALT_REPORTING_CAPABILITY_FT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -55,8 +65,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="BARO_VERTICAL_RATE_FTM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -64,8 +76,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Calculated Geographical Altitude"/>
                 <ParameterString name="CALC_ALT_GEO_FT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -73,8 +87,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="CALLSIGN"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="varchar"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -82,8 +98,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="ASTERIX CAT"/>
                 <ParameterString name="CAT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -91,8 +109,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Non unique, 24-bit ICAO, surface vehicle or anonymous address.!!! 24 bit? !!!"/>
                 <ParameterString name="DESCRIPTOR_ATP"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -100,8 +120,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="DIFFERENTIAL_CORRECTION"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -109,8 +131,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="DISPLAY_STATE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -118,8 +142,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Day of message in posix time."/>
                 <ParameterString name="DOM_POSIX"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -127,8 +153,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="DO_260A"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -136,8 +164,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Common Source Description ID, derived from SAC/SIC, Station Code etc."/>
                 <ParameterString name="DS_ID"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -145,8 +175,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="EMITTER_CATEGORY"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -154,8 +186,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="unknown, ACAS (not) operational"/>
                 <ParameterString name="FIGURE_OF_MERIT_ACAS"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -163,8 +197,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="unknown, (no) differential correction"/>
                 <ParameterString name="FIGURE_OF_MERIT_DIFFERENTIAL"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -172,8 +208,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="unknown, multiple navigational aids (not) operational"/>
                 <ParameterString name="FIGURE_OF_MERIT_MULTIPLE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -181,8 +219,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="FINAL_SEL_ALTITUDE_APPROACH"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -190,8 +230,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="FINAL_SEL_ALTITUDE_FT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="mediumint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -199,8 +241,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="FINAL_SEL_ALTITUDE_HOLD"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -208,8 +252,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="FINAL_SEL_ALTITUDE_VERTICAL"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -217,8 +263,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="FROM_FFT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -226,8 +274,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Geographical area bit mask"/>
                 <ParameterString name="GEO_AREA_MASK"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="bigint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -235,8 +285,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="GEO_VERTICAL_RATE_FTM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -244,8 +296,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="GROUNDSPEED_KT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -253,8 +307,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="GROUND_BIT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -262,8 +318,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="ARTAS MD5 Hash Code "/>
                 <ParameterString name="HASH_CODE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyblob"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -271,8 +329,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="INTER_SEL_ALTITUDE_FT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="mediumint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -280,8 +340,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="INTER_SEL_ALTITUDE_INFO"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -289,8 +351,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="unknown, aircraft, FCU/MSP selected, FMS selected altitude"/>
                 <ParameterString name="INTER_SEL_ALTITUDE_SOURCE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -298,8 +362,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Communication line ID"/>
                 <ParameterString name="LINE_ID"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -307,8 +373,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="LINK_TECHNOLOGY_CDTI"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -316,8 +384,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="LINK_TECHNOLOGY_MDS"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -325,8 +395,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="LINK_TECHNOLOGY_OTHER"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -334,8 +406,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="LINK_TECHNOLOGY_UAT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -343,8 +417,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="LINK_TECHNOLOGY_VDL"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -352,8 +428,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="MAGNETIC_HEADING_DEG"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -361,8 +439,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="POSITION_ACCURACY"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -370,8 +450,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="WGS84 coordinate latitude"/>
                 <ParameterString name="POS_LAT_DEG"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -379,8 +461,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="WGS84 coordinate longitude"/>
                 <ParameterString name="POS_LONG_DEG"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -388,8 +472,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="System coordinate x"/>
                 <ParameterString name="POS_SYS_X_NM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -397,8 +483,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="System coordinate y"/>
                 <ParameterString name="POS_SYS_Y_NM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -406,8 +494,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Binary represetation"/>
                 <ParameterString name="RAW_MSG"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="blob"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -415,8 +505,10 @@
                 <ParameterBool is_key="1"/>
                 <ParameterString comment="Ascending record number"/>
                 <ParameterString name="REC_NUM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -424,8 +516,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="ms fraction"/>
                 <ParameterString name="REC_TIME_MS"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -433,8 +527,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="POSIX recording time stamped by I/O process"/>
                 <ParameterString name="REC_TIME_POSIX"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -442,8 +538,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="ADS-B only"/>
                 <ParameterString name="REPORT_TYPE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -451,8 +549,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=""/>
                 <ParameterString name="ROLL_ANGLE_DEG"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -460,8 +560,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="ASTERIX SAC"/>
                 <ParameterString name="SAC"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -469,8 +571,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="SELECTED_ALT_CAPABILITY"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -478,8 +582,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="ASTERIX SIC"/>
                 <ParameterString name="SIC"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -487,8 +593,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Simulated Plot/Track?"/>
                 <ParameterString name="SIMULATED_TARGET"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -496,8 +604,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="SPI"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -505,8 +615,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="24 bit target address / aircraft address / Mode-S address"/>
                 <ParameterString name="TARGET_ADDR"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -514,8 +626,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="TARGET_STATUS"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -523,8 +637,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Test Plot/Track?"/>
                 <ParameterString name="TEST_TARGET"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -532,8 +648,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Time of Day (1/128 sec from midnight)"/>
                 <ParameterString name="TOD"/>
+                <ParameterString quanitiy="V7Time"/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit="Time"/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -541,8 +659,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="in 1/256 secs"/>
                 <ParameterString name="TOD_ACCURACY"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -550,8 +670,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="C:Calculated, R:Recording time, N:From data, L:Local time transform"/>
                 <ParameterString name="TOD_CALCULATED"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -559,8 +681,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="TRACK_ANGLE_DEG"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -568,8 +692,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="TRUE_AIRSPEED_KT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -577,8 +703,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="turn rate in Deg/sec"/>
                 <ParameterString name="TURNRATE_DEGPS"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -586,8 +714,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="N/A, left, right, straight"/>
                 <ParameterString name="TURNRATE_INDICATOR"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -595,8 +725,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="VELOCITY_ACCURACY"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -609,8 +741,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Aircraft identification capability"/>
                 <ParameterString name="ACAS_AIRCRAFT_IDENTIFICATION"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -618,8 +752,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Altitude reporting capability, currently 25 or 100"/>
                 <ParameterString name="ACAS_ALT_CAPABILITY_FT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -627,8 +763,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="BDS 1,0: bit 16"/>
                 <ParameterString name="ACAS_BDS_1_A"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -636,8 +774,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="BDS 1,0: bits 37-40"/>
                 <ParameterString name="ACAS_BDS_1_B"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -645,8 +785,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Communications capability of the transponder, see X__SD_ACAS_COMMS"/>
                 <ParameterString name="ACAS_COMM_CAPABILITY"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -654,8 +796,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Flight status, see X__SD_ACAS_FLIGHT_STATUSES"/>
                 <ParameterString name="ACAS_FLIGHT_STATUS"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -663,8 +807,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-S specific service capability?"/>
                 <ParameterString name="ACAS_MODES_SERVICE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -672,8 +818,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="x acceleration in meters per square second"/>
                 <ParameterString name="ACCEL_AX_MS2"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -681,8 +829,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="y acceleration in meters per square second"/>
                 <ParameterString name="ACCEL_AY_MS2"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -690,8 +840,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Height above WGS-84 ellipsoid in feet"/>
                 <ParameterString name="ALT_GEO_FT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="mediumint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -699,8 +851,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Calculated Geographical Altitude in feet"/>
                 <ParameterString name="CALC_ALT_GEO_FT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -708,8 +862,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Aircraft identification"/>
                 <ParameterString name="CALLSIGN"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="varchar"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -717,8 +873,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="normally ASTERIX CAT 20"/>
                 <ParameterString name="CAT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -726,8 +884,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="See table x__SD_DISPLAY_STATES"/>
                 <ParameterString name="DISPLAY_STATE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -735,8 +895,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Day of message in posix time."/>
                 <ParameterString name="DOM_POSIX"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -744,8 +906,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Common Source Description ID, derived from SAC/SIC, Station Code etc."/>
                 <ParameterString name="DS_ID"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -753,8 +917,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Flight level in feet"/>
                 <ParameterString name="FLIGHT_LEVEL_FT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="mediumint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -762,8 +928,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Flight level Garbled? Y, N"/>
                 <ParameterString name="FLIGHT_LEVEL_G"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -771,8 +939,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Flight level Validated? Y, N"/>
                 <ParameterString name="FLIGHT_LEVEL_V"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -780,8 +950,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=""/>
                 <ParameterString name="GEO_ALT_STD_DEV_FT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -789,8 +961,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Standard deviation of geometric altitude in meters"/>
                 <ParameterString name="GEO_ALT_STD_DEV_M"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -798,8 +972,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Geographical area bit mask"/>
                 <ParameterString name="GEO_AREA_MASK"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="bigint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -807,8 +983,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Transponder ground bit set?"/>
                 <ParameterString name="GROUND_BIT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -816,8 +994,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="ARTAS MD5 Hash Code"/>
                 <ParameterString name="HASH_CODE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyblob"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -825,8 +1005,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Height above local coordinate system in feet"/>
                 <ParameterString name="HEIGHT_3D_FT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="mediumint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -834,8 +1016,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Communication line ID"/>
                 <ParameterString name="LINE_ID"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -843,8 +1027,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="MAS unique track number"/>
                 <ParameterString name="MAS_TRACK_NUM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -852,8 +1038,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-1 Code"/>
                 <ParameterString name="MODE1_CODE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -861,8 +1049,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-1 Garbled? Y, N"/>
                 <ParameterString name="MODE1_G"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -870,8 +1060,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-1 Smoothed? Y, N"/>
                 <ParameterString name="MODE1_SMO"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -879,8 +1071,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-1 Validated? Y, N"/>
                 <ParameterString name="MODE1_V"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -888,8 +1082,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-2 Code"/>
                 <ParameterString name="MODE2_CODE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -897,8 +1093,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-2 Garbled? Y, N"/>
                 <ParameterString name="MODE2_G"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -906,8 +1104,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-2 Smoothed? Y, N"/>
                 <ParameterString name="MODE2_SMO"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -915,8 +1115,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-2 Validated? Y, N"/>
                 <ParameterString name="MODE2_V"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -924,8 +1126,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-3/A Code"/>
                 <ParameterString name="MODE3A_CODE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -933,8 +1137,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-3/A Garbled? Y, N"/>
                 <ParameterString name="MODE3A_G"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -942,8 +1148,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-3/A Smoothed? Y, N"/>
                 <ParameterString name="MODE3A_SMO"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -951,8 +1159,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-3/A Validated? Y, N"/>
                 <ParameterString name="MODE3A_V"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -960,8 +1170,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Raw Mode S MB Data (= BDS registers)"/>
                 <ParameterString name="MODES_MB_DATA"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyblob"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -969,8 +1181,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Message Format (usually ASTERIX), see X__SD_MSG_FMTS"/>
                 <ParameterString name="MSG_FMT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -978,8 +1192,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Dilution of precision along the x axis"/>
                 <ParameterString name="POS_DOP_X"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -987,8 +1203,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Square root of dilution of precision in the x-y plane "/>
                 <ParameterString name="POS_DOP_XY"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -996,8 +1214,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="POS_DOP_XY_CORRELATION_COEFF"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1005,8 +1225,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Dilution of precision along the y axis"/>
                 <ParameterString name="POS_DOP_Y"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1014,8 +1236,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="latitude in degrees"/>
                 <ParameterString name="POS_LAT_DEG"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1023,8 +1247,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="C = computed, R = reported"/>
                 <ParameterString name="POS_LAT_DEG_CALC"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1032,8 +1258,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="x coordinate in nautical miles"/>
                 <ParameterString name="POS_LOCAL_X_NM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1041,8 +1269,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="C = computed, R = reported"/>
                 <ParameterString name="POS_LOCAL_X_NM_CALC"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1050,8 +1280,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="y coordinate in nautical miles"/>
                 <ParameterString name="POS_LOCAL_Y_NM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1059,8 +1291,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="C = computed, R = reported"/>
                 <ParameterString name="POS_LOCAL_Y_NM_CALC"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1068,8 +1302,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="longitude in degrees"/>
                 <ParameterString name="POS_LONG_DEG"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1077,8 +1313,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="C = computed, R = reported"/>
                 <ParameterString name="POS_LONG_DEG_CALC"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1086,8 +1324,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Y = smoothed position, N = measured position"/>
                 <ParameterString name="POS_SMOOTHED"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1095,8 +1335,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Correlation coefficient of x and y components"/>
                 <ParameterString name="POS_STD_DEV_CORRELATION_COEFF"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1104,8 +1346,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="POS_STD_DEV_LATLONG_CORR_COEFF"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1113,8 +1357,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="POS_STD_DEV_LATLONG_DEG"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1122,8 +1368,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="POS_STD_DEV_LAT_DEG"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1131,8 +1379,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="POS_STD_DEV_LAT_M"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1140,8 +1390,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="POS_STD_DEV_LONG_DEG"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1149,8 +1401,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="POS_STD_DEV_LONG_M"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1158,8 +1412,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Standard deviation of x component in meters"/>
                 <ParameterString name="POS_STD_DEV_X_M"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1167,8 +1423,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Standard deviation of y component in meters"/>
                 <ParameterString name="POS_STD_DEV_Y_M"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1176,8 +1434,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="System coordinate x in nautical miles"/>
                 <ParameterString name="POS_SYS_X_NM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1185,8 +1445,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="System coordinate y in nautical miles"/>
                 <ParameterString name="POS_SYS_Y_NM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1194,8 +1456,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="binary represetation"/>
                 <ParameterString name="RAW_MSG"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="blob"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1203,8 +1467,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="RDP Chain 1 or 2"/>
                 <ParameterString name="RDP_CHAIN"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1212,8 +1478,10 @@
                 <ParameterBool is_key="1"/>
                 <ParameterString comment="ascending record number"/>
                 <ParameterString name="REC_NUM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1221,8 +1489,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="ms fraction"/>
                 <ParameterString name="REC_TIME_MS"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1230,8 +1500,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="POSIX recording time stamped by I/O process"/>
                 <ParameterString name="REC_TIME_POSIX"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1239,8 +1511,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="MLAT (11)"/>
                 <ParameterString name="REPORT_TYPE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1248,8 +1522,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="ASTERIX SAC"/>
                 <ParameterString name="SAC"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1257,8 +1533,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="ASTERIX SIC"/>
                 <ParameterString name="SIC"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1266,8 +1544,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Simulated track?"/>
                 <ParameterString name="SIMULATED_TARGET"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1275,8 +1555,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Special position identification?"/>
                 <ParameterString name="SPI"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1284,8 +1566,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="24 bit target address / aircraft address / Mode-S address"/>
                 <ParameterString name="TARGET_ADDR"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1293,8 +1577,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Test track?"/>
                 <ParameterString name="TEST_TARGET"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1302,8 +1588,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Time of Day (1/128 sec from midnight)"/>
                 <ParameterString name="TOD"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1311,8 +1599,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="C:Calculated, R:Recording time, N:From data, L:Local time transform"/>
                 <ParameterString name="TOD_CALCULATED"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1320,8 +1610,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="See X__SD_TRACK_CLIMB_DESC_MODES"/>
                 <ParameterString name="TRACK_CLIMB_DESC_MODE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="char"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1329,8 +1621,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Coasted? Y, N"/>
                 <ParameterString name="TRACK_COASTED"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1338,8 +1632,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Y = firm track, N = tentative track"/>
                 <ParameterString name="TRACK_CONFIRMED"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1347,8 +1643,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Y = End of track, N = Track is still alive"/>
                 <ParameterString name="TRACK_END"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1356,8 +1654,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Y = Ghost Target, N = True Target"/>
                 <ParameterString name="TRACK_GHOST_TARGET"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1365,8 +1665,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Y = horizontal Manoeuvre, N = No Manoeuvre"/>
                 <ParameterString name="TRACK_MANOEUVRE_HORI"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1374,8 +1676,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Track number"/>
                 <ParameterString name="TRACK_NUM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1383,8 +1687,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="TRD_DME"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1392,8 +1698,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="TRD_HF"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1401,8 +1709,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="TRD_MS"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1410,8 +1720,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="TRD_SSR"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1419,8 +1731,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="TRD_UAT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1428,8 +1742,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="TRD_VDL4"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1437,8 +1753,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="x velocity in meters per second"/>
                 <ParameterString name="VELOCITY_VX_MS"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1446,8 +1764,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="y velocity in meters per second"/>
                 <ParameterString name="VELOCITY_VY_MS"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1460,8 +1780,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Flag: ACAS Aircraft identification capability? (Y/N) [I048/230 AIC]"/>
                 <ParameterString name="ACAS_AIRCRAFT_IDENTIFICATION"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1469,8 +1791,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Altitude reporting capability, currently 25 or 100, replaces old ACAS_25FT_REPORTING column"/>
                 <ParameterString name="ACAS_ALT_CAPABILITY_FT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1478,8 +1802,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="BDS 1,0 bit 16 [I048/230 B1A]"/>
                 <ParameterString name="ACAS_BDS_1_A"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1487,8 +1813,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="BDS 1,0 bits 37-40 [I048/230 B1B]"/>
                 <ParameterString name="ACAS_BDS_1_B"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1496,8 +1824,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="ACAS Communications capability of the transponder, see X__SD_ACAS_COMMS [I048/230 COM]"/>
                 <ParameterString name="ACAS_COMM_CAPABILITY"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1505,8 +1835,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="ACAS Flight status, see X__SD_ACAS_FLIGHT_STATUS [I048/230 STAT]"/>
                 <ParameterString name="ACAS_FLIGHT_STATUS"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1514,8 +1846,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Flag: ACAS Mode-S specifific service capability? (Y/N) [I048/230 MMSC]"/>
                 <ParameterString name="ACAS_MODES_SERVICE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1523,8 +1857,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Antenna 1 or 2"/>
                 <ParameterString name="ANTENNA"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1532,8 +1868,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Calculated Geographical Altitude"/>
                 <ParameterString name="CALC_ALT_GEO_FT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1541,8 +1879,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="aircraft identification when flight plan is available or the plan is available [I021/170, I048/240]"/>
                 <ParameterString name="CALLSIGN"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="varchar"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1550,8 +1890,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="ASTERIX Category"/>
                 <ParameterString name="CAT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1559,8 +1901,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="0 = default, 5 = code 7500 (unlawful interference), 6 = code 7600 (radio comunnication failure), 7 = code 7700 (emergency) [I001/020 DS1/DS2]"/>
                 <ParameterString name="CIVIL_EMERGENCY"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1568,8 +1912,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Detection type [I030/080 TYPE, I062/340 #6 TYP], see X__SD_DETECTION_TYPES"/>
                 <ParameterString name="DETECTION_TYPE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1577,8 +1923,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="DISPLAY_STATE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1586,8 +1934,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Day of message in posix time."/>
                 <ParameterString name="DOM_POSIX"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1595,8 +1945,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="DATA SOURCE ID, is derived from table DS and its sub tables"/>
                 <ParameterString name="DS_ID"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1604,8 +1956,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Flag: Y = from Fixed Field Transponder, N = from Aircraft [I001/020 RAB, , I021/040 RAB, I048/020 RAB]"/>
                 <ParameterString name="FROM_FFT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1613,8 +1967,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Geographical area bit mask"/>
                 <ParameterString name="GEO_AREA_MASK"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="bigint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1622,8 +1978,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="ARTAS MD5 Hash Code"/>
                 <ParameterString name="HASH_CODE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyblob"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1631,8 +1989,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Height in Ft measured by a 3D radar [048/110]"/>
                 <ParameterString name="HEIGHT_3D_FT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="mediumint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1640,8 +2000,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Non-ASTERIX source id"/>
                 <ParameterString name="IC_CODE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1649,8 +2011,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="COMMUNICATION LINE ID determines the origin of the record, see table COMMS"/>
                 <ParameterString name="LINE_ID"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1658,8 +2022,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="MAS_TRACK_NUM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1667,8 +2033,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Flag: military emergency? (Y/N) [I001/020 MI, I048/020 ME]"/>
                 <ParameterString name="MIL_EMERGENCY"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1676,8 +2044,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Flag: Y = military, N = default [I001/020 MI, I048/020 MI, I062/080 MI]"/>
                 <ParameterString name="MIL_IDENT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1685,8 +2055,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-1 Code in octal representation [I001/055, I048/055]"/>
                 <ParameterString name="MODE1_CODE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1694,8 +2066,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-1 garbled? (Y,N) [I001/055 G, I048/055 G]"/>
                 <ParameterString name="MODE1_G"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1703,8 +2077,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-1 Confidence indicator, 6 bits, each bit indicating low quality if it is 1, NULL is the same 0 (all bits have high quality) [I001/065 QXi, I048/065 QXi]"/>
                 <ParameterString name="MODE1_QX"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1712,8 +2088,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Flag: Y = Mode-1 is smoothed, N = Mode-1 as derived from the reply of the transponder [I001/055 L, I048/055 L]"/>
                 <ParameterString name="MODE1_SMO"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1721,8 +2099,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-1 valid? (Y,N) [I001/055 V, I048/055 V]"/>
                 <ParameterString name="MODE1_V"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1730,8 +2110,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-2 Code in octal representation [I001/050, I048/050]"/>
                 <ParameterString name="MODE2_CODE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1739,8 +2121,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-2 garbled? (Y,N) [I001/050 G, I048/050 G]"/>
                 <ParameterString name="MODE2_G"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1748,8 +2132,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-2 Confidence indicator, 12 bits, each bit indicating low quality if it is 1, NULL is the same 0 (all bits have high quality) [I001/060 QXi, I048/050 QXi]"/>
                 <ParameterString name="MODE2_QX"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1757,8 +2143,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Flag: Y = Mode-2 is smoothed, N = Mode-2 as derived from the reply of the transponder [I001/050 L, I048/050 L]"/>
                 <ParameterString name="MODE2_SMO"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1766,8 +2154,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-2 valid? (Y,N) [I001/050 V, I048/050 V]"/>
                 <ParameterString name="MODE2_V"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1775,8 +2165,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-3/A Code in octal representation [I001/070, I048/070]"/>
                 <ParameterString name="MODE3A_CODE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1784,8 +2176,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-3/A garbled? (Y,N) [I001/070 G, I048/070 G]"/>
                 <ParameterString name="MODE3A_G"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1793,8 +2187,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-3/A Confidence indicator, 12 bits, each bit indicating low quality if it is 1, NULL is the same 0 (all bits have high quality) [I001/080 QXi, I048/080 QXi]"/>
                 <ParameterString name="MODE3A_QX"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1802,8 +2198,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Flag: Y = Mode-3/A is smoothed, i.e. not extracted during last scan, N = Mode-3/A as derived from the reply of the transponder [I001/070 L, I048/070 L]"/>
                 <ParameterString name="MODE3A_SMO"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1811,8 +2209,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-3/A valid? (Y,N) [I001/070 V, I048/070 V]"/>
                 <ParameterString name="MODE3A_V"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1820,8 +2220,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-4 interrorgation type: - = no interrogation, F = Friendly target, U = Unknown Target, N = No Reply [I048/020 FOE/FRI]"/>
                 <ParameterString name="MODE4_FRIENDLY"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1829,8 +2231,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-C Code Flight Level in Ft [I001/090, I048/090]"/>
                 <ParameterString name="MODEC_CODE_FT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="mediumint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1838,8 +2242,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-C Code as received from the transponder [I001/100, I048/100]"/>
                 <ParameterString name="MODEC_CODE_GRAY"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1847,8 +2253,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-C garbled? (Y,N) [I001/090 G, I048/090 G]"/>
                 <ParameterString name="MODEC_G"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1856,8 +2264,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-C garbled? (Y,N) [I001/100 G, I048/100 G]"/>
                 <ParameterString name="MODEC_G_GRAY"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1865,8 +2275,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-C Confidence indicator, 12 bits, each bit indicating low quality if it is 1, NULL is the same 0 (all bits have high quality) [I001/060 QXi, I048/050 QXi]"/>
                 <ParameterString name="MODEC_QX_GRAY"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1874,8 +2286,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-C valid? (Y,N) [I001/090 V, I048/090 V]"/>
                 <ParameterString name="MODEC_V"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1883,8 +2297,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-C valid? (Y,N) [I001/100 V, I048/100 V]"/>
                 <ParameterString name="MODEC_V_GRAY"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1892,8 +2308,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Raw Mode S MB Data (= BDS registers)"/>
                 <ParameterString name="MODES_MB_DATA"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyblob"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1901,8 +2319,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Protocol type as defined in X__SD_MSG_FMTS, contents shall be ASTERIX, Aircat 500, Alenia, FPS117, RAT31SL, RSRP, TRS22, RDIF, MADREC, EUROCONTROL, DDE, CD2, Ericsson"/>
                 <ParameterString name="MSG_FMT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1910,8 +2330,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Amplitude of (M)SSR reply in dBm [048/130 #3 SAM]"/>
                 <ParameterString name="MSSR_AMPLITUDE_DBM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1919,8 +2341,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Number of received replies from (M)SSR [048/130 #2 SRR]"/>
                 <ParameterString name="MSSR_REPLIES_NUM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1928,8 +2352,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Measured position in polar coordinates: Theta in ¿¿ [I001/040, I048/040]"/>
                 <ParameterString name="POS_AZM_DEG"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1937,8 +2363,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="C = computed, R = reported"/>
                 <ParameterString name="POS_AZM_DEG_CALC"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1946,8 +2374,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="WGS84 coordinate latitude"/>
                 <ParameterString name="POS_LAT_DEG"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1955,8 +2385,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Calculated x position in Cartesian coordinates [I001/042, I048/042]"/>
                 <ParameterString name="POS_LOCAL_X_NM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1964,8 +2396,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="C = computed, R = reported"/>
                 <ParameterString name="POS_LOCAL_X_NM_CALC"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1973,8 +2407,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Calculated y position in Cartesian coordinates [I001/042, I048/042]"/>
                 <ParameterString name="POS_LOCAL_Y_NM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1982,8 +2418,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="C = computed, R = reported"/>
                 <ParameterString name="POS_LOCAL_Y_NM_CALC"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -1991,8 +2429,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="WGS84 coordinate longitude"/>
                 <ParameterString name="POS_LONG_DEG"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2000,8 +2440,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Measured position in polar coordinates: Rho in NM [I001/040, I048/040]"/>
                 <ParameterString name="POS_RANGE_NM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2009,8 +2451,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="C = computed, R = reported"/>
                 <ParameterString name="POS_RANGE_NM_CALC"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2018,8 +2462,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="System coordinate x"/>
                 <ParameterString name="POS_SYS_X_NM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2027,8 +2473,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="System coordinate y"/>
                 <ParameterString name="POS_SYS_Y_NM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2036,8 +2484,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Amplitude of primary plot in dBm [048/130 #5 PAM]"/>
                 <ParameterString name="PSR_AMPLITUDE_DBM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2045,8 +2495,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Primary plot runlength in ¿¿ [048/130 #4 PRL]"/>
                 <ParameterString name="PSR_RUNLENGTH_DEG"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2054,8 +2506,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Difference in azimuth between PSR and SSR plot in NM [048/130 #6 RDP]"/>
                 <ParameterString name="PSR_SSR_AZM_DIFF_DEG"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2063,8 +2517,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Difference in range between PSR and SSR plot in NM [048/130 #6 RDP]"/>
                 <ParameterString name="PSR_SSR_RANGE_DIFF_NM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2072,8 +2528,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Binary representation"/>
                 <ParameterString name="RAW_MSG"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="blob"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2081,8 +2539,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Report from which RDP Chain number: 1 or 2 [I001/020 RDP, I048/020 RDP]"/>
                 <ParameterString name="RDP_CHAIN"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2090,8 +2550,10 @@
                 <ParameterBool is_key="1"/>
                 <ParameterString comment="Unique record id starting with 0 on every new recording"/>
                 <ParameterString name="REC_NUM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2099,8 +2561,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="ms fraction of REC_TIME_POSIX"/>
                 <ParameterString name="REC_TIME_MS"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2108,8 +2572,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Recording time with accuracy of 1s; is stamped by the communication process"/>
                 <ParameterString name="REC_TIME_POSIX"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2117,8 +2583,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Report classification [I001/020, I048/020, etc] as enrichment, see X__SD_REPORT_TYPES"/>
                 <ParameterString name="REPORT_TYPE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2126,8 +2594,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="ASTERIX System Area Code [I001/010, I002/010, I002/010, I034/010, I048/010, I062/010, I021/010]"/>
                 <ParameterString name="SAC"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2135,8 +2605,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Scan number"/>
                 <ParameterString name="SCAN_NUM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2144,8 +2616,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="ASTERIX System Identification Code [I001/010, I002/010, I002/010, I034/010, I048/010, I062/010, I021/010]"/>
                 <ParameterString name="SIC"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2153,8 +2627,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Flag: Y = Simulated, N = actual plot/track (I001/020 SIM, I021/040 SIM, I048/020 SIM]"/>
                 <ParameterString name="SIMULATED_TARGET"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2162,8 +2638,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Flag: Special position indication? (Y/N) [I001/020 SPI, I021/040 SPI, , I048/020 SPI]"/>
                 <ParameterString name="SPI"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2171,8 +2649,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="SSR plot runlength in degree [048/130 #1 SRL]"/>
                 <ParameterString name="SSR_RUNLENGTH_DEG"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2180,8 +2660,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="24 bit target addreess / aircraft address / Mode-S address assigned uniquely to each aircraft [I021/080, I048/220]"/>
                 <ParameterString name="TARGET_ADDR"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2189,8 +2671,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Flag: Y = Test target report, N = Real target report (I001/020 TST, I021/040 TST, I048/020 TST]"/>
                 <ParameterString name="TEST_TARGET"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2198,8 +2682,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Measured time / (truncated) Time of Day (= ms since last midnight), [I001/141, I021/030, I048/140]"/>
                 <ParameterString name="TOD"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2207,8 +2693,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="C:Calculated, R:Recording time, N:From data, L:Local time transform"/>
                 <ParameterString name="TOD_CALCULATED"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2216,8 +2704,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Climb/Descend Mode: M = Maintaining, C = Climbing, D = Descending, I = Invalid [I048/170 CDM]"/>
                 <ParameterString name="TRACK_CLIMB_DESC_MODE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2225,8 +2715,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Flag: Track confirmed? [I001/170 CON, I048/170 CNF]"/>
                 <ParameterString name="TRACK_CONFIRMED"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2234,8 +2726,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Flag: Plot to Track association doubtful? [I001/170 DOU, I048/170 DOU]"/>
                 <ParameterString name="TRACK_DOUBTFUL"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2243,8 +2737,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Flag: End of Track? [I001/170 TRE, I048/170 TRE]"/>
                 <ParameterString name="TRACK_END"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2252,8 +2748,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Flag: Y = Ghost Target, N = True Target [I001/170 GHO, I048/170 GHO]"/>
                 <ParameterString name="TRACK_GHOST_TARGET"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2261,8 +2759,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Calculated track velocity expressed in polar coordinates, groundspeed in Kt [I001/200, I021/160, I048/200]"/>
                 <ParameterString name="TRACK_GROUNDSPEED_KT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2270,8 +2770,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Calculated track velocity expressed in polar coordinates, angle in ¿¿ [I001/200, I021/160, I048/200]"/>
                 <ParameterString name="TRACK_HEADING_DEG"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2279,8 +2781,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Flag: Horizontal manoeuvring? [I001/170 MAN, I048/170 MAN]"/>
                 <ParameterString name="TRACK_MANOEUVRE_HORI"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2288,8 +2792,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Track number, can also be plot number for CAT 001"/>
                 <ParameterString name="TRACK_NUM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2297,8 +2803,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="RDP Chain 1 or 2 [I001/170 RDPC]"/>
                 <ParameterString name="TRACK_RDP_CHAIN"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2306,8 +2814,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Standard deviation on the angle within the local grid system [I048/210 Sigma(H)]]"/>
                 <ParameterString name="TRACK_SIGMA_H_DEG"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2315,8 +2825,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Standard deviation on the groundspeed within the local grid system [I048/210 Sigma(V)]]"/>
                 <ParameterString name="TRACK_SIGMA_V_KT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2324,8 +2836,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Standard deviation on the horizontal axis of the local grid system [I048/210 Sigma(X)]]"/>
                 <ParameterString name="TRACK_SIGMA_X_NM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2333,8 +2847,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Standard deviation on the vertical axis of the local grid system [I048/210 Sigma(Y)]]"/>
                 <ParameterString name="TRACK_SIGMA_Y_NM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2342,8 +2858,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Type of plot coordinate transformation mechanism in slant range correction technique? [I048/170 TCC]"/>
                 <ParameterString name="TRACK_SLANT_CORR"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2351,8 +2869,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Flag: Track maintained with track information from neighbouring Node B on the cluster, or network? [I048/170 SUP]"/>
                 <ParameterString name="TRACK_SUP"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2360,8 +2880,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="P (Primary), S(SSR), C(Combined), N(Not primary, SSR/Combined), I(Invalid)"/>
                 <ParameterString name="TRACK_TYPE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2374,8 +2896,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="AIRCRAFT_DERIVED"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2383,8 +2907,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Calculated barometric altitude [I030/130,I062/135 dependend on I062/080 SRC]"/>
                 <ParameterString name="ALT_BARO_FT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="mediumint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2392,8 +2918,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Barometric altitude more reliable? Y, N"/>
                 <ParameterString name="ALT_BARO_MORE_RELIABLE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2401,8 +2929,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Calculated geometric altitude  [I030/130,I062/130 dependend on I062/080 SRC]"/>
                 <ParameterString name="ALT_GEO_FT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2410,8 +2940,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Calculated Geographical Altitude"/>
                 <ParameterString name="CALC_ALT_GEO_FT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2419,8 +2951,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="CALC_VERTICAL_RATE_FTM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2428,8 +2962,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Aircraft identification"/>
                 <ParameterString name="CALLSIGN"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="varchar"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2437,8 +2973,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="ASTERIX Category"/>
                 <ParameterString name="CAT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2446,8 +2984,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Civil emergency"/>
                 <ParameterString name="CIVIL_EMERGENCY"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2455,8 +2995,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="PSR, SSR, CMB, INV, (MISS)?, ..."/>
                 <ParameterString name="DETECTION_TYPE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2464,8 +3006,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="DISPLAY_STATE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2473,8 +3017,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Day of message in posix time."/>
                 <ParameterString name="DOM_POSIX"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2482,8 +3028,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="DATA SOURCE ID, is derived from table DS and its sub tables"/>
                 <ParameterString name="DS_ID"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2491,8 +3039,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="FORMATION_FLIGHT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2500,8 +3050,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Geographical area bit mask"/>
                 <ParameterString name="GEO_AREA_MASK"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="bigint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2509,8 +3061,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="GROUNDSPEED_KT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2518,8 +3072,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="ARTAS MD5 Hash Code"/>
                 <ParameterString name="HASH_CODE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyblob"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2527,8 +3083,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="HEADING_DEG"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2536,8 +3094,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="IC_CODE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2545,8 +3105,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="COMMUNICATION LINE ID determines the origin of the record, see table COMMS"/>
                 <ParameterString name="LINE_ID"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2554,8 +3116,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="MAS_TRACK_NUM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2563,8 +3127,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="MIL_EMERGENCY"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2572,8 +3138,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Code, 4 octels"/>
                 <ParameterString name="MODE3A_CODE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2581,8 +3149,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-3/A Garbled? Y, N"/>
                 <ParameterString name="MODE3A_G"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2590,8 +3160,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-3/A Valid? Y, N"/>
                 <ParameterString name="MODE3A_V"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2599,8 +3171,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=""/>
                 <ParameterString name="MODEC_AGE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2608,8 +3182,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Flight Level / Altitude in Ft"/>
                 <ParameterString name="MODEC_CODE_FT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="mediumint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2617,8 +3193,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-C Garbled? "/>
                 <ParameterString name="MODEC_G"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2626,8 +3204,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=""/>
                 <ParameterString name="MODEC_SOURCE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="char"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2635,8 +3215,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode-C Valid? Y, N"/>
                 <ParameterString name="MODEC_V"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2644,8 +3226,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Raw Mode S MB Data (= BDS registers)"/>
                 <ParameterString name="MODES_MB_DATA"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyblob"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2653,8 +3237,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode of flight - Longitudinal acceleration: 0 = Constant Groundspeed, 1 = Increasing Groundspeed, 2 = Decreasing Groundspeed, 3 = Undetermined, see also X__SD_MOF_LONG [I030/200 LONGI, I062/200 LONG]"/>
                 <ParameterString name="MOF_LONG"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2662,8 +3248,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode of flight - Transversal acceleration: 0 = Constant Course, 1 = Right Turn, 2 = Left Turn, 3 = Undetermined, see also X__SD_MOF_TRANS [I030/200 TRANS, I062/200 TRANS]"/>
                 <ParameterString name="MOF_TRANS"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2671,8 +3259,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Mode of flight - Vertical acceleration: 0 = Level Flight, 1 = Climb, 2 = Descent, 3 = Undetermined, see also X__SD_MOF_VERT [I030/200 LONGI, I062/200 LONG]"/>
                 <ParameterString name="MOF_VERT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2680,8 +3270,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Message format as defined in X__SD_MSG_FMTS, contents shall be ASTERIX, Aircat 500, Alenia, FPS117, RAT31SL, RSRP, TRS22, RDIF, MADREC, EUROCONTROL, DDE, CD2, Ericsson"/>
                 <ParameterString name="MSG_FMT"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2689,8 +3281,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Is the source a multiple-data-source [Y] or single-data-source [N]"/>
                 <ParameterString name="MULTIPLE_SOURCES"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2698,8 +3292,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Calculated WGS84 track latitude position (low or high resolution) [I062/105 or I062/106]"/>
                 <ParameterString name="POS_LAT_DEG"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2707,8 +3303,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="C = computed, R = reported"/>
                 <ParameterString name="POS_LAT_DEG_CALC"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2716,8 +3314,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Calculated Cartesian track X position (low or high resolution) [I030/110, I062/100 or I062/101]"/>
                 <ParameterString name="POS_LOCAL_X_NM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2725,8 +3325,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="C = computed, R = reported"/>
                 <ParameterString name="POS_LOCAL_X_NM_CALC"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2734,8 +3336,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Calculated Cartesian track Y position (low or high resolution) [I030/110, I062/100 or I062/101]"/>
                 <ParameterString name="POS_LOCAL_Y_NM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2743,8 +3347,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="C = computed, R = reported"/>
                 <ParameterString name="POS_LOCAL_Y_NM_CALC"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2752,8 +3358,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Calculated WGS84 track longitude position (low or high resolution) [I062/105 or I062/106]"/>
                 <ParameterString name="POS_LONG_DEG"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2761,8 +3369,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="C = computed, R = reported"/>
                 <ParameterString name="POS_LONG_DEG_CALC"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2770,8 +3380,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="System coordinate x"/>
                 <ParameterString name="POS_SYS_X_NM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2779,8 +3391,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="System coordinate y"/>
                 <ParameterString name="POS_SYS_Y_NM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2788,8 +3402,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Binary represetation"/>
                 <ParameterString name="RAW_MSG"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="blob"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2797,8 +3413,10 @@
                 <ParameterBool is_key="1"/>
                 <ParameterString comment="Unique record id starting with 0 on every new recording"/>
                 <ParameterString name="REC_NUM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2806,8 +3424,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="ms fraction of REC_TIME_POSIX"/>
                 <ParameterString name="REC_TIME_MS"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2815,8 +3435,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Recording time with accuracy of 1s; is stamped by the communication process"/>
                 <ParameterString name="REC_TIME_POSIX"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2824,8 +3446,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Report classification, see X__SD_REPORT_TYPES"/>
                 <ParameterString name="REPORT_TYPE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2833,8 +3457,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="ASTERIX System Area Code [I030/010, I062/010]"/>
                 <ParameterString name="SAC"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2842,8 +3468,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="ASTERIX System Identification Code [I030/010, I062/010]"/>
                 <ParameterString name="SIC"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2851,8 +3479,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Simulated Track? Y, N"/>
                 <ParameterString name="SIMULATED_TARGET"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2860,8 +3490,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="SPI"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2869,8 +3501,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="24 bit target address / aircraft address / Mode-S address"/>
                 <ParameterString name="TARGET_ADDR"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2878,8 +3512,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Time of Message / Time of Day (= ms since last midnight), [I030/020, I062/070]"/>
                 <ParameterString name="TOD"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2887,8 +3523,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="C:Calculated, R:Recording time, N:From data, L:Local time transform"/>
                 <ParameterString name="TOD_CALCULATED"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2896,8 +3534,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="TRACK_AMALGAMATED"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2905,8 +3545,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="TRACK_COASTED"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2914,8 +3556,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Y or N (tentative)"/>
                 <ParameterString name="TRACK_CONFIRMED"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2923,8 +3567,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="TRACK_CREATED"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2932,8 +3578,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Y = End of track, N = Track is still alive"/>
                 <ParameterString name="TRACK_END"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2941,8 +3589,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Track number [I030/050 SYSTEM TRACK NUMBER, I062/040]"/>
                 <ParameterString name="TRACK_NUM"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2950,8 +3600,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="TRACK_PSR_AGE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2959,8 +3611,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="see X__SD_TRACK_SLANT_CORR_TYPES"/>
                 <ParameterString name="TRACK_SLANT_CORR_TYPE"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2968,8 +3622,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
                 <ParameterString name="TRANSPONDER_DELAY_CORR"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2977,8 +3633,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Turn rate in Deg/sec"/>
                 <ParameterString name="TURNRATE_DEGPS"/>
+                <ParameterString quanitiy=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>

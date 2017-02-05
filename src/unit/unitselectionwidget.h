@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * UnitSelectionWidget.h
- *
- *  Created on: Oct 24, 2012
- *      Author: sk
- */
-
 #ifndef UNITSELECTIONWIDGET_H_
 #define UNITSELECTIONWIDGET_H_
 
@@ -43,15 +36,15 @@ protected slots:
 
 public:
     /// @brief Constructor
-    UnitSelectionWidget (std::string &unit_dimension, std::string &unit_unit);
+    UnitSelectionWidget (std::string &quantity, std::string &unit);
     /// @brief Destructor
     virtual ~UnitSelectionWidget();
 
 protected:
     /// Unit dimension reference
-    std::string &unit_dimension_;
+    std::string &quantity_;
     /// Unit unit reference
-    std::string &unit_unit_;
+    std::string &unit_;
 
     /// Context menu
     QMenu menu_;

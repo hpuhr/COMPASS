@@ -42,15 +42,15 @@ DBTable::DBTable(const std::string &class_id, const std::string &instance_id, DB
 
 DBTable::~DBTable()
 {
+    for (auto it : columns_)
+        delete it.second;
+    columns_.clear();
+
     if (widget_)
     {
         delete widget_;
         widget_ = nullptr;
     }
-
-    for (auto it : columns_)
-        delete it.second;
-    columns_.clear();
 }
 
 void DBTable::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)

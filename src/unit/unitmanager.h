@@ -15,50 +15,49 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * UnitManager.h
- *
- *  Created on: Oct 24, 2012
- *      Author: sk
- */
-
 #ifndef UNITMANAGER_H_
 #define UNITMANAGER_H_
 
+#include "configurable.h"
 #include "singleton.h"
-#include "unit.h"
+
+class Quantity;
 
 /**
  * @brief Holds and manages all units
  *
  * All units have to call registerUnit.
  */
-class UnitManager : public Singleton
+class UnitManager : public Configurable, public Singleton
 {
 public:
-  /// @brief Destructor
-  virtual ~UnitManager();
+    /// @brief Destructor
+    virtual ~UnitManager();
 
-  /// @brief Registers a unit
-  void registerUnit (Unit *unit);
-  /// @brief Returns unit with a given name
-  Unit *getUnit (std::string name);
-  /// @brief Return container with all units
-  std::map <std::string, Unit*> &getUnits () { return units_; }
+    bool hasQuanity (const std::string &name) { return quantities_.count(name) > 0; }
 
-private:
-  /// Container with all units (unit name (length, time) -> unit)
-  std::map <std::string, Unit*> units_;
+    /// @brief Returns unit with a given name
+    const Quantity &quanity (const std::string &name) { return *quantities_.at(name); }
+    /// @brief Return container with all units
+    const std::map <std::string, Quantity*> &quantities () { return quantities_; }
 
-  /// @brief Constructor
-  UnitManager();
+    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
+
+protected:
+    /// Container with all units (unit name (length, time) -> unit)
+    std::map <std::string, Quantity*> quantities_;
+
+    virtual void checkSubConfigurables ();
+
+    /// @brief Constructor
+    UnitManager();
 
 public:
-  static UnitManager& getInstance()
-  {
-    static UnitManager instance;
-    return instance;
-  }
+    static UnitManager& getInstance()
+    {
+        static UnitManager instance;
+        return instance;
+    }
 };
 
 #endif /* UNITMANAGER_H_ */

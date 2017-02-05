@@ -194,9 +194,9 @@ set ( atsdb_HDRS
 #        src/transform/calculateposition2d.h
 #        src/transform/calculatelines.h
 #        src/transform/calculatestyle.h
-#        src/unit/unit.h
-#        src/unit/unitlength.h
-#        src/unit/unitmanager.h
+        src/unit/unit.h
+        src/unit/unitmanager.h
+        src/unit/quantity.h
         src/util/config.h
         src/util/global.h
 #        src/util/data.h
@@ -242,7 +242,7 @@ set (atsdb_MOC_HEADERS
 #        src/object/propertydatatypecombobox.h
 #        src/object/metadbobjecteditwidget.h
 #        src/object/stringrepresentationcombobox.h
-#        src/object/unitselectionwidget.h
+        src/unit/unitselectionwidget.h
 #        src/polygon/airspacesectormanagerwidget.h
 #        src/polygon/airspacesectortreewidget.h
 #        src/polygon/airspacesectorwidget.h
@@ -307,7 +307,6 @@ set ( atsdb_SRCS
 #        src/object/dbobjecteditwidget.cpp
 #        src/object/dbobjectwidget.cpp
 #        src/object/metadbobjecteditwidget.cpp
-#        src/object/unitselectionwidget.cpp
         src/object/dbobject.cpp
         src/object/dbobjectmanager.cpp
         src/object/dbovariable.cpp
@@ -362,8 +361,9 @@ set ( atsdb_SRCS
 #        src/transform/calculateposition2d.cpp
 #        src/transform/calculatelines.cpp
 #        src/transform/calculatestyle.cpp
-#        src/unit/unit.cpp
-#        src/unit/unitmanager.cpp
+        src/unit/quantity.cpp
+        src/unit/unitselectionwidget.cpp
+        src/unit/unitmanager.cpp
         src/util/config.cpp
         src/util/logger.cpp
 #        src/util/data.cpp

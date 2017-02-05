@@ -15,15 +15,11 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * Unit.h
- *
- *  Created on: Oct 24, 2012
- *      Author: sk
- */
-
 #ifndef UNIT_H_
 #define UNIT_H_
+
+#include "configurable.h"
+#include "quantity.h"
 
 #include <string>
 #include <map>
@@ -33,30 +29,27 @@
  *
  * Automatically registers to UnitManager, has a name (length, time), allows registering sub units with scaling factors.
  */
-class Unit
+class Unit : public Configurable
 {
 public:
   /// @brief Constructor with a name
-  Unit(std::string name);
+  Unit(const std::string &class_id, const std::string &instance_id, Quantity &parent)
+      : Configurable (class_id, instance_id, &parent) {}
   /// @brief Destructor
-  virtual ~Unit();
+  virtual ~Unit() {}
 
-  /// @brief Registers a derived unit (m, cm, km) with factor compared to base unit
-  void registerUnit (std::string definition, double factor);
-  /// @brief Returns unit name
-  std::string getName () { return name_; }
+  virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id) { assert (false); }
 
-  /// @brief Returns factor from one unit to another
-  double getFactor (std::string unit_source, std::string unit_destination);
-
-  /// @brief Returns container with all units
-  std::map <std::string, double> &getUnits () { return units_; }
+  double factor () const { return factor_; }
 
 private:
-  /// Name
-  std::string name_;
-  /// Container with all units (unit definition -> double scaling factor)
-  std::map <std::string, double> units_;
+  /// Comment definition
+  std::string definition_;
+  /// Scaling factor
+  double factor_;
+
+protected:
+    virtual void checkSubConfigurables () {}
 };
 
 #endif /* UNIT_H_ */

@@ -29,6 +29,7 @@
 #include "configurable.h"
 
 class DBTable;
+class UnitSelectionWidget;
 
 /**
  * @brief Database table column definition
@@ -61,12 +62,10 @@ public:
   void comment (const std::string &comment) { comment_ = comment; }
   const std::string &comment () const { return comment_; }
 
-  /// @brief Returns if column has an assigned unit
-  bool unit () const { return unit_dimension_.size() != 0; }
-  /// @brief Returns unit dimension
-  const std::string &unitDimension () const { return unit_dimension_; }
+  /// @brief Returns quanity contained in the column
+  const std::string &quantity () const { return quanitiy_; }
   /// @brief Returns unit
-  const std::string &unitUnit () const { return unit_unit_; }
+  const std::string &unit () const { return unit_; }
 
   /// @brief Returns database table name which holds this column
   const std::string &dbTableName () const { return db_table_name_; }
@@ -74,6 +73,8 @@ public:
   bool hasSpecialNull () const { return special_null_.size() > 0; }
   void specialNull (std::string special_null) { special_null_ = special_null; }
   const std::string &specialNull () const { return special_null_; }
+
+  UnitSelectionWidget *unitWidget ();
 
   void createSubConfigurables () {}
 
@@ -88,13 +89,15 @@ protected:
   /// Data type
   std::string comment_;
   /// Unit dimension
-  std::string unit_dimension_;
+  std::string quanitiy_;
   /// Unit
-  std::string unit_unit_;
+  std::string unit_;
   /// Database table name which holds this column
   std::string db_table_name_;
   /// Special value signifying null value
   std::string special_null_;
+
+  UnitSelectionWidget *widget_;
 };
 
 #endif /* DBTABLECOLUMN_H_ */

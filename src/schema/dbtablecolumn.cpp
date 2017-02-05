@@ -25,16 +25,17 @@
 #include "dbtable.h"
 #include "dbtablecolumn.h"
 #include "logger.h"
+#include "unitselectionwidget.h"
 
 DBTableColumn::DBTableColumn(const std::string &class_id, const std::string &instance_id, DBTable *table)
- : Configurable (class_id, instance_id, table), table_(*table)
+ : Configurable (class_id, instance_id, table), table_(*table), widget_(nullptr)
 {
   registerParameter ("name", &name_, "");
   registerParameter ("type", &type_, "");
   registerParameter ("is_key", &is_key_, false);
   registerParameter ("comment", &comment_, "");
-  registerParameter ("unit_dimension", &unit_dimension_, "");
-  registerParameter ("unit_unit", &unit_unit_, "");
+  registerParameter ("quanitiy", &quanitiy_, "");
+  registerParameter ("unit", &unit_, "");
   registerParameter ("special_null", &special_null_, "");
 
   createSubConfigurables();
@@ -42,6 +43,22 @@ DBTableColumn::DBTableColumn(const std::string &class_id, const std::string &ins
 
 DBTableColumn::~DBTableColumn()
 {
+    if (widget_)
+    {
+        delete widget_;
+        widget_ = nullptr;
+    }
+
 }
 
 
+UnitSelectionWidget *DBTableColumn::unitWidget ()
+{
+    if (!widget_)
+    {
+        widget_ = new UnitSelectionWidget (quanitiy_, unit_);
+        assert (widget_);
+    }
+
+    return widget_;
+}
