@@ -3641,5 +3641,10 @@
                 <ParameterString unit_unit=""/>
             </Configuration>
         </Configuration>
+        <Configuration class_id="MetaDBTable" instance_id="MetaDBTableRadar">
+            <ParameterString info=""/>
+            <ParameterString main_table_name="sd_radar"/>
+            <ParameterString name="Radar"/>
+        </Configuration>
     </Configuration>
 </Configuration>

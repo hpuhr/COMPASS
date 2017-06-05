@@ -44,9 +44,8 @@
 #include "dbtable.h"
 #include "dbtableinfo.h"
 #include "dbtablewidget.h"
-//#include "dbtableEditWidget.h"
 #include "metadbtable.h"
-//#include "MetaDBTableEditWidget.h"
+#include "metadbtablewidget.h"
 #include "dbschema.h"
 #include "atsdb.h"
 #include "buffer.h"
@@ -87,11 +86,11 @@ DBSchemaWidget::DBSchemaWidget(DBSchema &schema, QWidget * parent, Qt::WindowFla
     QHBoxLayout *table_button_layout =  new QHBoxLayout ();
 
     QPushButton *add_table = new QPushButton ("Add Table");
-    connect(add_table, SIGNAL( clicked() ), this, SLOT( addTable() ));
+    connect(add_table, SIGNAL( clicked() ), this, SLOT( addTableSlot() ));
     table_button_layout->addWidget (add_table);
 
     QPushButton *add_all = new QPushButton ("Add All Tables");
-    connect(add_all, SIGNAL( clicked() ), this, SLOT( addAllTables() ));
+    connect(add_all, SIGNAL( clicked() ), this, SLOT( addAllTablesSlot() ));
     table_button_layout->addWidget (add_all);
 
     auto_populate_check_ = new QCheckBox ("Auto Populate");
@@ -128,7 +127,7 @@ DBSchemaWidget::DBSchemaWidget(DBSchema &schema, QWidget * parent, Qt::WindowFla
     QHBoxLayout *add_ts_layout =  new QHBoxLayout ();
 
     QPushButton *add_ts_button = new QPushButton ("Add");
-    connect(add_ts_button, SIGNAL( clicked() ), this, SLOT( addMetaTable() ));
+    connect(add_ts_button, SIGNAL( clicked() ), this, SLOT( addMetaTableSlot() ));
     add_ts_layout->addWidget (add_ts_button);
 
     meta_tables_layout->addLayout (add_ts_layout);
@@ -138,7 +137,7 @@ DBSchemaWidget::DBSchemaWidget(DBSchema &schema, QWidget * parent, Qt::WindowFla
     setLayout(main_layout);
 
     updateTableGrid();
-    updateMetaTablesGrid ();
+    updateMetaTableGrid ();
 }
 
 DBSchemaWidget::~DBSchemaWidget()
@@ -161,7 +160,7 @@ DBSchemaWidget::~DBSchemaWidget()
 //    edit_meta_table_widgets_.clear();
 }
 
-void DBSchemaWidget::addTable()
+void DBSchemaWidget::addTableSlot()
 {
     const std::map <std::string, DBTableInfo> &table_info = ATSDB::getInstance().tableInfo ();
 
@@ -177,6 +176,12 @@ void DBSchemaWidget::addTable()
     if (ok && !item.isEmpty())
     {
         std::string name = item.toStdString();
+
+        if (schema_.hasTable(name))
+        {
+            logerr << "DBSchemaWidget: addTable: table with same name already exists";
+            return;
+        }
         schema_.addTable(name);
 
         assert (auto_populate_check_);
@@ -188,7 +193,7 @@ void DBSchemaWidget::addTable()
     }
 }
 
-void DBSchemaWidget::addAllTables()
+void DBSchemaWidget::addAllTablesSlot()
 {
     const std::map <std::string, DBTableInfo> &table_info = ATSDB::getInstance().tableInfo ();
 
@@ -208,22 +213,39 @@ void DBSchemaWidget::addAllTables()
 
 }
 
-void DBSchemaWidget::addMetaTable()
+void DBSchemaWidget::addMetaTableSlot()
 {
-//    assert (new_meta_table_name_edit_);
-//    assert (new_meta_table_table_);
+    bool ok;
+    QString text = QInputDialog::getText(this, tr("Meta Table Name"),
+                                         tr("Specify a (unique) meta table name:"), QLineEdit::Normal,
+                                         "", &ok);
+    if (ok && !text.isEmpty())
+    {
+        std::string name = text.toStdString();
 
-//    std::string ts_name = new_meta_table_name_edit_->text().toStdString();
-//    std::string ts_table_name = new_meta_table_table_->currentText().toStdString();
+        if (schema_.hasMetaTable(name))
+        {
+            logerr << "DBSchemaWidget: addMetaTable: table with same name already exists";
+            return;
+        }
 
-//    std::string ts_instance = "MetaDBTable"+ts_name+"0";
+        QStringList items;
+        for (auto it : schema_.tables()) // make list of all tables
+        {
+                items.append(it.first.c_str());
+        }
 
-//    Configuration &ts_config = schema_.addNewSubConfiguration ("MetaDBTable", ts_instance);
-//    ts_config.addParameterString ("name", ts_name);
-//    ts_config.addParameterString ("table", ts_table_name);
+        bool ok;
+        QString item = QInputDialog::getItem(this, tr("Meta Table Main Table"), tr("Select:"), items, 0, false, &ok);
+        if (ok && !item.isEmpty())
+        {
+            std::string main_table_name = item.toStdString();
 
-//    schema_.generateSubConfigurable("MetaDBTable", ts_instance);
-    updateMetaTablesGrid();
+            schema_.addMetaTable(name, main_table_name);
+
+            updateMetaTableGrid();
+        }
+    }
 }
 
 void DBSchemaWidget::updateTableGrid()
@@ -286,7 +308,7 @@ void DBSchemaWidget::updateTableGrid()
         edit->setIcon(edit_icon);
         edit->setIconSize(QSize(30,30));
         edit->setFlat(true);
-        connect(edit, SIGNAL( clicked() ), this, SLOT( editTable() ));
+        connect(edit, SIGNAL( clicked() ), this, SLOT( editTableSlot() ));
         table_grid_->addWidget (edit, row, 3);
         edit_table_buttons_[edit] = it.second;
 
@@ -294,7 +316,7 @@ void DBSchemaWidget::updateTableGrid()
         del->setIcon(del_icon);
         del->setIconSize(QSize(30,30));
         del->setFlat(true);
-        connect(del, SIGNAL( clicked() ), this, SLOT( deleteTable() ));
+        connect(del, SIGNAL( clicked() ), this, SLOT( deleteTableSlot() ));
         table_grid_->addWidget (del, row, 4);
         delete_table_buttons_[del] = it.second;
 
@@ -303,7 +325,7 @@ void DBSchemaWidget::updateTableGrid()
 
 }
 
-void DBSchemaWidget::updateMetaTablesGrid()
+void DBSchemaWidget::updateMetaTableGrid()
 {
     logdbg  << "DBSchemaWidget: updateMetaTablesGrid";
     QLayoutItem *child;
@@ -322,55 +344,74 @@ void DBSchemaWidget::updateMetaTablesGrid()
     name_label->setFont (font_bold);
     meta_table_grid_->addWidget (name_label, 0, 0);
 
-    QLabel *info_label = new QLabel ("Description");
-    info_label->setFont (font_bold);
-    meta_table_grid_->addWidget (info_label, 0, 1);
-
-    QLabel *db_name_label = new QLabel ("Table");
+    QLabel *db_name_label = new QLabel ("Main Table");
     db_name_label->setFont (font_bold);
-    meta_table_grid_->addWidget (db_name_label, 0, 2);
+    meta_table_grid_->addWidget (db_name_label, 0, 1);
 
-    QLabel *subtables_label = new QLabel ("Sub table structures");
+    QLabel *subtables_label = new QLabel ("Sub tables");
     subtables_label->setFont (font_bold);
-    meta_table_grid_->addWidget (subtables_label, 0, 3);
+    meta_table_grid_->addWidget (subtables_label, 0, 2);
 
     QLabel *numcols_label = new QLabel ("#columns");
     numcols_label->setFont (font_bold);
-    meta_table_grid_->addWidget (numcols_label, 0, 4);
+    meta_table_grid_->addWidget (numcols_label, 0, 3);
+
+    QLabel *edit_label = new QLabel ("Edit");
+    edit_label->setFont (font_bold);
+    meta_table_grid_->addWidget (edit_label, 0, 4);
+
+    QLabel *del_label = new QLabel ("Delete");
+    del_label->setFont (font_bold);
+    meta_table_grid_->addWidget (del_label, 0, 5);
 
     unsigned int row=1;
+
+    QPixmap edit_pixmap("./data/icons/edit.png");
+    QIcon edit_icon(edit_pixmap);
+
+    QPixmap del_pixmap("./data/icons/delete.png");
+    QIcon del_icon(del_pixmap);
+
+    edit_meta_table_buttons_.clear();
+    delete_meta_table_buttons_.clear();
 
     for (auto it : schema_.metaTables())
     {
         QLabel *name = new QLabel (it.second->name().c_str());
         meta_table_grid_->addWidget (name, row, 0);
 
-        QLabel *info = new QLabel (it.second->info().c_str());
-        meta_table_grid_->addWidget (info, row, 1);
-
-        QLabel *db_name = new QLabel (it.second->tableName().c_str());
-        meta_table_grid_->addWidget (db_name, row, 2);
+        QLabel *db_name = new QLabel (it.second->mainTableName().c_str());
+        meta_table_grid_->addWidget (db_name, row, 1);
 
         QLabel *sub = new QLabel ("None");
         sub->setText (it.second->subTableNames().c_str());
 
-        meta_table_grid_->addWidget (sub, row, 3);
+        meta_table_grid_->addWidget (sub, row, 2);
 
         QLabel *numcols = new QLabel (String::intToString(it.second->numColumns()).c_str());
-        meta_table_grid_->addWidget (numcols, row, 4);
+        meta_table_grid_->addWidget (numcols, row, 3);
 
-        QPushButton *edit = new QPushButton ("Edit");
-        connect(edit, SIGNAL( clicked() ), this, SLOT( editMetaTable() ));
-        meta_table_grid_->addWidget (edit, row, 5);
+        QPushButton *edit = new QPushButton ();
+        edit->setIcon(edit_icon);
+        edit->setIconSize(QSize(30,30));
+        edit->setFlat(true);
+        connect(edit, SIGNAL( clicked() ), this, SLOT( editMetaTableSlot() ));
+        meta_table_grid_->addWidget (edit, row, 4);
+        edit_meta_table_buttons_[edit] = it.second;
 
-        //edit_meta_table_buttons_ [edit] = it->second;
-
+        QPushButton *del = new QPushButton ();
+        del->setIcon(del_icon);
+        del->setIconSize(QSize(30,30));
+        del->setFlat(true);
+        connect(del, SIGNAL( clicked() ), this, SLOT( deleteMetaTableSlot() ));
+        meta_table_grid_->addWidget (del, row, 5);
+        delete_meta_table_buttons_[del] = it.second;
         row++;
     }
 
 }
 
-void DBSchemaWidget::editTable()
+void DBSchemaWidget::editTableSlot()
 {
     logdbg << "DBSchemaWidget: editTable";
 
@@ -392,7 +433,7 @@ void DBSchemaWidget::editTable()
 //        edit_table_widgets_[table]->show();
 }
 
-void DBSchemaWidget::deleteTable()
+void DBSchemaWidget::deleteTableSlot()
 {
     logdbg << "DBSchemaWidget: deleteTable";
 
@@ -401,12 +442,17 @@ void DBSchemaWidget::deleteTable()
     schema_.deleteTable(delete_table_buttons_.at(sender)->name());
 
     updateTableGrid();
-
-    // update meta tables
+    updateMetaTableGrid();
 }
 
-void DBSchemaWidget::editMetaTable ()
+void DBSchemaWidget::editMetaTableSlot ()
 {
+    logdbg << "DBSchemaWidget: editMetaTableSlot";
+
+    QPushButton *sender = dynamic_cast <QPushButton*> (QObject::sender());
+    assert (edit_meta_table_buttons_.count(sender) == 1);
+    edit_meta_table_buttons_.at(sender)->widget()->show();
+
 //    assert (edit_meta_table_buttons_.find((QPushButton*)sender()) != edit_meta_table_buttons_.end());
 
 //    MetaDBTable *table_structure = edit_meta_table_buttons_ [(QPushButton*)sender()];
@@ -423,14 +469,25 @@ void DBSchemaWidget::editMetaTable ()
 //        edit_meta_table_widgets_[table_structure]->show();
 }
 
-void DBSchemaWidget::changedTable()
+void DBSchemaWidget::deleteMetaTableSlot ()
+{
+    logdbg << "DBSchemaWidget: deleteTable";
+
+    QPushButton *sender = dynamic_cast <QPushButton*> (QObject::sender());
+    assert (delete_meta_table_buttons_.count(sender) == 1);
+    schema_.deleteMetaTable(delete_meta_table_buttons_.at(sender)->getInstanceId());
+
+    updateMetaTableGrid();
+}
+
+void DBSchemaWidget::changedTableSlot()
 {
     schema_.updateTables();
     updateTableGrid();
 }
 
-void DBSchemaWidget::changedMetaTable ()
+void DBSchemaWidget::changedMetaTableSlot ()
 {
     schema_.updateMetaTables();
-    updateMetaTablesGrid ();
+    updateMetaTableGrid ();
 }

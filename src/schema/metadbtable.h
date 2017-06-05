@@ -52,29 +52,31 @@ public:
     SubTableDefinition(const std::string &class_id, const std::string &instance_id, Configurable *parent)
         : Configurable (class_id, instance_id, parent)
     {
-        registerParameter ("local_key", &local_key_, (std::string)"");
-        registerParameter ("sub_table_name", &sub_table_name_,  (std::string)"");
-        registerParameter ("sub_table_key", &sub_table_key_,  (std::string)"");
+        registerParameter ("main_table_key", &main_table_key_, "");
+        registerParameter ("sub_table_name", &sub_table_name_,  "");
+        registerParameter ("sub_table_key", &sub_table_key_, "");
     }
     /// @brief Destructor
     virtual ~SubTableDefinition() {}
 
     /// @brief Returns local key
-    const std::string &getLocalKey () { return local_key_; }
+    const std::string &mainTableKey () { return main_table_key_; }
     /// @brief Returns meta sub-table name
-    const std::string &getSubTableName () { return sub_table_name_; }
+    const std::string &subTableName () { return sub_table_name_; }
     /// @brief Returns meta sub-table key
-    const std::string &getSubTableKey () { return sub_table_key_; }
+    const std::string &subTableKey () { return sub_table_key_; }
 
 protected:
     /// Local key
-    std::string local_key_;
+    std::string main_table_key_;
     /// Meta sub-table name
     std::string sub_table_name_;
     /// Meta sub-table key
     std::string sub_table_key_;
 
 };
+
+class MetaDBTableWidget;
 
 /**
  * @brief Aggregation and abstraction of DBTables
@@ -89,10 +91,9 @@ public:
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
-    /// @brief Returns name
     const std::string &name () const { return name_; }
-    /// @brief Sets name
-    void name (const std::string &name) { assert(name.size() != 0 ); name_=name; }
+    /// @brief Sets description
+    void name (const std::string &name);
 
     /// @brief Returns description
     const std::string &info () const { return info_; }
@@ -100,12 +101,12 @@ public:
     void info (const std::string &info) { info_=info; }
 
     /// @brief Returns name of the main database table
-    const std::string &tableName () const { return table_name_; }
+    const std::string &mainTableName () const { return main_table_name_; }
     /// @brief Sets name of the main database table
-    void tableName (const std::string &table_name) { assert (table_name.size() != 0); table_name_=table_name; }
+    //void mainTableName (const std::string &main_table_name);
 
-    /// @brief Returns database table name for a variable
-    const std::string &tableDBNameForVariable (std::string variable_name) const { return columns_.at(variable_name).dbTableName(); }
+//    /// @brief Returns database table name for a variable
+//    const std::string &tableDBNameForVariable (std::string variable_name) const { return columns_.at(variable_name).dbTableName(); }
 
     /// @brief Returns number of columns
     unsigned int numColumns () const { return columns_.size(); }
@@ -118,14 +119,17 @@ public:
 
     /// @brief Returns if meta sub-tables are defined
     bool hasSubTables () const { return sub_table_definitions_.size() > 0; }
+    bool hasSubTable (const std::string& name) const { return sub_table_definitions_.count(name) > 0; }
     /// @brief Returns container with all meta sub-tables
-    const std::map <SubTableDefinition, const DBTable &> &subTables () const { return sub_tables_; }
+    const std::map <std::string, const DBTable &> &subTables () const { return sub_tables_; }
     /// @brief Returns string with concatenated, comma separated meta sub-tables
     std::string subTableNames () const;
+    void addSubTable (const std::string &local_key, const std::string &sub_table_name, const std::string &sub_table_key);
+    void removeSubTable (const std::string& name);
     /// @brief Returns string with all table names (own and sub metas) as comma separated list
-    std::string allTableNames () const { return tableName()+ ", " + subTableNames (); }
+    //std::string allTableNames () const { return tableName()+ ", " + subTableNames (); }
     /// @brief Returns container with all table names
-    std::vector<std::string> allTableNamesVector () const;
+    //std::vector<std::string> allTableNamesVector () const;
 
     /// @brief Returns SQL where clause with all used meta sub-tables
     //std::string subTablesWhereClause (std::vector <std::string> &used_tables) const;
@@ -133,36 +137,42 @@ public:
     //std::string subTableKeyClause (const std::string &sub_table_name) const;
 
     /// @brief Returns container with all sub meta-table definitions
-    const std::vector <SubTableDefinition>& getSubTableDefinitions () const { return sub_table_definitions_; }
+    const std::map <std::string, SubTableDefinition*>& subTableDefinitions () const { return sub_table_definitions_; }
 
     /// @brief Returns main database table
-    const DBTable &getTable() const { return *table_; }
+    const DBTable &mainTable() const { return *main_table_; }
+    const DBSchema &schema() const { return schema_; }
 
-private:
+    MetaDBTableWidget *widget ();
+
+protected:
     /// Name
     std::string name_;
     /// Description
     std::string info_;
     /// Main table name
-    std::string table_name_;
+    std::string main_table_name_;
 
     /// Parent schema
-    const DBSchema &schema_;
+    DBSchema &schema_;
     /// Main database table
-    const DBTable *table_;
+    const DBTable *main_table_;
+
+    MetaDBTableWidget *widget_;
 
     /// Container with all meta sub-table definitions
-    std::vector <SubTableDefinition> sub_table_definitions_;
+    std::map <std::string, SubTableDefinition*> sub_table_definitions_;
     /// Container with all meta sub-tables
-    std::map <SubTableDefinition, const DBTable&> sub_tables_;
+    std::map <std::string, const DBTable&> sub_tables_;
     /// Container with all table columns
     std::map <std::string, const DBTableColumn&> columns_;
 
     /// @brief Creates sub meta-tables from their definitions (if required)
     //void setSubTablesIfRequired ();
 
-protected:
     virtual void checkSubConfigurables () {}
+
+    void updateColumns ();
 };
 
 #endif /* METADBTABLE_H_ */

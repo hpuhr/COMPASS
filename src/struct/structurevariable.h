@@ -28,7 +28,7 @@
 #include <string>
 #include <stdio.h>
 #include <iostream>
-#include "StructureElement.h"
+#include "structureelement.h"
 
 class StructureDescription;
 
@@ -39,9 +39,9 @@ class StructureVariable : public StructureElement
 {
 public:
   /// @brief Constructor
-  StructureVariable(std::string id, SE_DATA_TYPE type, unsigned int number, std::string description, size_t offset);
+  StructureVariable(std::string id, StructureElementDataType type, unsigned int number, std::string description, size_t offset);
 
-  void addPresentStructureVariable (std:: string id, SE_DATA_TYPE type, int number, std::string description, size_t offset);
+  void addPresentStructureVariable (std:: string id, StructureElementDataType type, int number, std::string description, size_t offset);
 
 public:
   void print (std::string prefix);
@@ -69,7 +69,7 @@ public:
   unsigned int getSize() const;
 
   /// @brief Returns data type
-  SE_DATA_TYPE getType() const
+  StructureElementDataType getType() const
   {
       return type_;
   }
@@ -87,7 +87,7 @@ protected:
   /// Length in bytes
   unsigned int number_;
   /// Data type
-  SE_DATA_TYPE type_;
+  StructureElementDataType type_;
   /// Description
   std::string description_;
   /// Offset from base pointer

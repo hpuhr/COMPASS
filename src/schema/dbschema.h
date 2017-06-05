@@ -61,6 +61,8 @@ public:
 
   bool hasMetaTable (const std::string &name) const;
   const MetaDBTable &metaTable (const std::string &name) const { assert (hasMetaTable(name)); return *meta_tables_.at(name);}
+  void addMetaTable (const std::string &name, const std::string &main_table_name);
+  void deleteMetaTable (const std::string &name);
 
   /// @brief Returns container with all tables
   const std::map <std::string, DBTable*> &tables () const { return tables_; }

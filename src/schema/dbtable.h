@@ -47,7 +47,7 @@ public:
   virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
   /// @brief Sets the identifier name, is the name in the database
-  void name (const std::string &name) {assert (name.size() != 0); name_ = name;}
+  //void name (const std::string &name) {assert (name.size() != 0); name_ = name;}
   /// @brief Returns the identifier name
   const std::string &name () const { return name_; }
 

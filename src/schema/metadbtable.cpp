@@ -30,45 +30,41 @@
 #include "dbschema.h"
 #include "atsdb.h"
 #include "logger.h"
+#include "metadbtablewidget.h"
 
 MetaDBTable::MetaDBTable(const std::string &class_id, const std::string &instance_id, DBSchema *parent)
-    : Configurable (class_id, instance_id, parent), schema_(*parent), table_ (nullptr)
+    : Configurable (class_id, instance_id, parent), schema_(*parent), main_table_ (nullptr), widget_(nullptr)
 {
-    registerParameter ("name", &name_, (std::string)"");
-    registerParameter ("info", &info_, (std::string)"");
-    registerParameter ("table", &table_name_, (std::string)"");
+    registerParameter ("name", &name_, "");
+    registerParameter ("info", &info_, "");
+    registerParameter ("main_table_name", &main_table_name_, "");
 
-    logdbg  << "MetaDBTable: constructor: name " << name_ << " table " << table_name_;
+    logdbg  << "MetaDBTable: constructor: name " << name_ << " main table '" << main_table_name_ << "'";
 
-    assert (schema_.hasTable (table_name_));
-    table_ = &schema_.table (table_name_);
-    assert (table_);
-
-//    for (auto it : table_->columns ())
-//    {
-//        assert (columns_.find(it.first) == columns_.end());
-//        columns_.insert (std::pair <std::string, DBTableColumn> (it.first, it.second));
-//    }
+    assert (schema_.hasTable (main_table_name_));
+    main_table_ = &schema_.table (main_table_name_);
+    assert (main_table_);
 
     createSubConfigurables ();
 
-    assert (false);
-    //TODO check init
+    updateColumns();
 }
 
 MetaDBTable::~MetaDBTable()
 {
-    //  std::map <std::pair<std::string, std::string>, MetaDBTable*>::iterator it;
-    //
-    //  for (it=sub_tables_.begin(); it != sub_tables_.end(); it++)
-    //    delete it->second;
+    for (auto it : sub_table_definitions_)
+        delete it.second;
 
-    //  std::vector <SubTableDefinition *>::iterator it;
-    //  for (it=sub_table_definitions_.begin(); it != sub_table_definitions_.end(); it++)
-    //    delete (*it);
+    sub_table_definitions_.clear();
 
     sub_tables_.clear(); // are only pointers to tables from schema
-    sub_table_definitions_.clear();
+    columns_.clear();
+
+    if (widget_)
+    {
+        delete widget_;
+        widget_ = nullptr;
+    }
 }
 
 void MetaDBTable::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
@@ -80,11 +76,23 @@ void MetaDBTable::generateSubConfigurable (const std::string &class_id, const st
         logdbg  << "MetaDBTable: generateSubConfigurable: generating sub table definition";
 
         SubTableDefinition *def = new SubTableDefinition (class_id, instance_id, this);
-        sub_table_definitions_.push_back (*def);
+        sub_table_definitions_.insert (std::pair <std::string, SubTableDefinition*> (def->subTableName(), def));
     }
     else
         throw std::runtime_error ("MetaDBTable: generateSubConfigurable: unknown class_id "+class_id);
 }
+
+void MetaDBTable::name (const std::string &name)
+{
+    name_=name;
+    schema_.updateMetaTables();
+}
+
+//void MetaDBTable::mainTableName (const std::string &main_table_name)
+//{
+//    assert (main_table_name.size() != 0);
+//    main_table_name_=main_table_name;
+//}
 
 std::string MetaDBTable::subTableNames () const
 {
@@ -104,17 +112,72 @@ std::string MetaDBTable::subTableNames () const
     }
 }
 
-std::vector<std::string> MetaDBTable::allTableNamesVector () const
+void MetaDBTable::addSubTable (const std::string &local_key, const std::string &sub_table_name, const std::string &sub_table_key)
 {
-    std::vector <std::string> table_names;
+    assert (!hasSubTable(sub_table_name));
 
-    table_names.push_back (tableName());
+    std::string instance_id = "SubTableDefinition"+name_+sub_table_name+"0";
 
-    for (auto it : sub_tables_)
-        table_names.push_back(it.second.name());
+    Configuration &configuration = addNewSubConfiguration ("SubTableDefinition", instance_id);
+    configuration.addParameterString ("local_key", local_key);
+    configuration.addParameterString ("sub_table_name", sub_table_name);
+    configuration.addParameterString ("sub_table_key", sub_table_key);
+    generateSubConfigurable ("SubTableDefinition", instance_id);
 
-    return table_names;
+    assert (hasSubTable(sub_table_name));
 }
+
+void MetaDBTable::removeSubTable (const std::string& name)
+{
+    assert (hasSubTable(name));
+    delete sub_table_definitions_.at(name);
+    sub_table_definitions_.erase (name);
+
+    sub_tables_.erase (name);
+
+    updateColumns();
+}
+
+MetaDBTableWidget *MetaDBTable::widget ()
+{
+    if (!widget_)
+    {
+        widget_ = new MetaDBTableWidget (*this);
+    }
+    return widget_;
+}
+
+void MetaDBTable::updateColumns ()
+{
+    columns_.clear();
+
+    for (auto it : main_table_->columns ())
+    {
+        assert (columns_.find(it.first) == columns_.end());
+        columns_.insert (std::pair <std::string, const DBTableColumn&> (it.first, *it.second));
+    }
+
+    for (auto it: sub_tables_)
+    {
+        for (auto it2 : it.second.columns())
+        {
+            if (columns_.find(it.first) == columns_.end())
+                columns_.insert (std::pair <std::string, const DBTableColumn&> (it2.first, *it2.second));
+        }
+    }
+}
+
+//std::vector<std::string> MetaDBTable::allTableNamesVector () const
+//{
+//    std::vector <std::string> table_names;
+
+//    table_names.push_back (tableName());
+
+//    for (auto it : sub_tables_)
+//        table_names.push_back(it.second.name());
+
+//    return table_names;
+//}
 
 //std::string MetaDBTable::subTablesWhereClause(std::vector <std::string> &used_tables) const
 //{

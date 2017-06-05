@@ -27,9 +27,9 @@
 
 #include <vector>
 #include <string>
-#include "StructureElement.h"
-#include "PropertyList.h"
-#include "Configuration.h"
+#include "structureelement.h"
+#include "propertylist.h"
+#include "configuration.h"
 
 class StructureVariable;
 
@@ -48,10 +48,10 @@ public:
   virtual ~StructureDescription();
 
   /// @brief Adds a StructureVariable, which is returned
-  StructureVariable *addStructureVariable (std:: string id, SE_DATA_TYPE type, int number, std::string description, size_t offset);
+  StructureVariable *addStructureVariable (std:: string id, StructureElementDataType type, int number, std::string description, size_t offset);
   /// @brief Adds a StructureDescription, which is returned
   StructureDescription *addStructureDescription (std::string id, std::string description, size_t offset);
-  void addPresentStructureVariable (std:: string id, SE_DATA_TYPE type, int number, std::string description, size_t offset);
+  void addPresentStructureVariable (std:: string id, StructureElementDataType type, int number, std::string description, size_t offset);
 
   /// @brief Returns the number of elements
   unsigned int getSize ();
@@ -76,8 +76,6 @@ protected:
   /// Offset from base pointer in bytes
   size_t offset_;
 
-  /// Data conversion table, from SE_DATA_TYPES to P_DATA_TYPES
-  std::vector <int> data_type_conversion_table_;
   /// Element list
   std::vector <StructureElement*> element_list_;
 };

@@ -25,7 +25,7 @@
 #ifndef STRUCTUREREADER_H_
 #define STRUCTUREREADER_H_
 
-#include "JobOrderer.h"
+#include "joborderer.h"
 
 class Buffer;
 class BufferSet;

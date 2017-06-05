@@ -99,20 +99,48 @@ void DBSchema::deleteTable (const std::string &name)
     delete tables_.at(name);
     tables_.erase (name);
 
-    // update meta tables
+    for (auto it : meta_tables_)
+    {
+        if (it.second->mainTableName() == name)
+        {
+            deleteMetaTable(it.first);
+            continue;
+        }
+
+        if (it.second->hasSubTable(name))
+            it.second->removeSubTable(name);
+    }
 }
 
 void DBSchema::populateTable (const std::string &name)
 {
     assert (hasTable(name));
     tables_.at(name)->populate();
-
-    // update meta tables
 }
 
 bool DBSchema::hasMetaTable (const std::string &name) const
 {
     return meta_tables_.find(name) != meta_tables_.end();
+}
+
+void DBSchema::addMetaTable(const std::string &name, const std::string &main_table_name)
+{
+    assert (!hasMetaTable(name));
+    assert (children_.count("MetaDBTable"+name) == 0);
+
+    Configuration &table_config = addNewSubConfiguration ("MetaDBTable", "MetaDBTable"+name);
+    table_config.addParameterString ("name", name);
+    table_config.addParameterString ("main_table_name", main_table_name);
+
+    generateSubConfigurable("MetaDBTable", "MetaDBTable"+name);
+    assert (hasMetaTable(name));
+}
+
+void DBSchema::deleteMetaTable (const std::string &name)
+{
+    assert (hasMetaTable(name));
+    delete meta_tables_.at(name);
+    meta_tables_.erase (name);
 }
 
 void DBSchema::updateTables ()
@@ -135,7 +163,7 @@ void DBSchema::updateMetaTables ()
 
     for (auto it : old_meta_tables)
     {
-        meta_tables_.insert (std::pair <std::string, MetaDBTable*> (it.second->name(), it.second));
+        meta_tables_.insert (std::pair <std::string, MetaDBTable*> (it.second->getInstanceId(), it.second));
     }
 }
 

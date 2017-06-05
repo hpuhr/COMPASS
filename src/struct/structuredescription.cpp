@@ -25,12 +25,14 @@
 #include <string>
 #include <iostream>
 #include <typeinfo>
-#include "ConfigurationManager.h"
-#include "DBOVariable.h"
-#include "DBObjectManager.h"
-#include "StructureDescription.h"
-#include "StructureVariable.h"
-#include "Logger.h"
+#include "configurationmanager.h"
+#include "dbobject.h"
+#include "dbovariable.h"
+#include "dbobjectmanager.h"
+#include "structuredescription.h"
+#include "structurevariable.h"
+#include "logger.h"
+#include "property.h"
 
 using namespace std;
 
@@ -38,21 +40,6 @@ StructureDescription::StructureDescription(const std::string &dbo_type, string i
 : dbo_type_(dbo_type), id_(id), description_ (description), offset_(offset)
 {
   logdbg  << "StructureDescription: constructor: dbo " << dbo_type << " id " << id;
-  // fill conversion table, from SE_DATA_TYPES (at) to P_DATA_TYPES
-  for (unsigned int cnt=0; cnt < SE_TYPE_SENTINEL; cnt++)
-    data_type_conversion_table_.push_back(0);
-
-  data_type_conversion_table_.at (SE_TYPE_BOOL) = P_TYPE_BOOL;
-  data_type_conversion_table_.at (SE_TYPE_TINYINT) = P_TYPE_CHAR;
-  data_type_conversion_table_.at (SE_TYPE_SMALLINT) = P_TYPE_INT;
-  data_type_conversion_table_.at (SE_TYPE_INT) = P_TYPE_INT;
-  data_type_conversion_table_.at (SE_TYPE_UTINYINT) = P_TYPE_UCHAR;
-  data_type_conversion_table_.at (SE_TYPE_USMALLINT) = P_TYPE_UINT;
-  data_type_conversion_table_.at (SE_TYPE_UINT) = P_TYPE_UINT;
-  data_type_conversion_table_.at (SE_TYPE_VARCHAR) = P_TYPE_STRING;
-  data_type_conversion_table_.at (SE_TYPE_VARCHAR_ARRAY) = P_TYPE_STRING;
-  data_type_conversion_table_.at (SE_TYPE_FLOAT) = P_TYPE_FLOAT;
-  data_type_conversion_table_.at (SE_TYPE_DOUBLE) = P_TYPE_DOUBLE;
 }
 
 StructureDescription::~StructureDescription()
@@ -79,7 +66,7 @@ void StructureDescription::print (std::string prefix)
     element_list_[cnt]->print("  "+prefix+id_+" ");
 }
 
-StructureVariable* StructureDescription::addStructureVariable (string id, SE_DATA_TYPE type, int number, string description, size_t offset)
+StructureVariable* StructureDescription::addStructureVariable (string id, StructureElementDataType type, int number, string description, size_t offset)
 {
   StructureVariable *var = new StructureVariable (id, type, number, description, offset);
   element_list_.push_back (var);
@@ -143,12 +130,10 @@ PropertyList *StructureDescription::convert ()
   {
     StructureVariable *var = getVariableAt(cnt);
     std::string id = var->getId();
-    SE_DATA_TYPE type = var->getType();
 
-    assert (type >= 0 && type < SE_TYPE_SENTINEL);
-    PROPERTY_DATA_TYPE proptype = (PROPERTY_DATA_TYPE) data_type_conversion_table_.at(type);
+    StructureElementDataType type = var->getType();
+    PropertyDataType proptype = data_type_conversion_table_.at(type);
 
-    assert (proptype >= 0 && proptype < P_TYPE_SENTINEL);
 
     result->addProperty(id, proptype);
   }
@@ -217,7 +202,7 @@ PropertyList *StructureDescription::convert ()
 //  return config_definition;
 //}
 
-void StructureDescription::addPresentStructureVariable (std:: string id, SE_DATA_TYPE type, int number, std::string description, size_t offset)
+void StructureDescription::addPresentStructureVariable (std:: string id, StructureElementDataType type, int number, std::string description, size_t offset)
 {
   if(present_variable_ != 0)
   {

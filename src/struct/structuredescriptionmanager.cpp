@@ -22,15 +22,15 @@
  *      Author: sk
  */
 
-#include "StructureDescriptionManager.h"
+#include "structuredescriptionmanager.h"
 //#include "StructureDescriptionPlot.h"
 //#include "StructureDescriptionSystemTrack.h"
 //#include "StructureDescriptionReferenceTrajectory.h"
 //#include "StructureDescriptionADSB.h"
 //#include "StructureDescriptionMLAT.h"
 //#include "StructureDescriptionSensor.h"
-#include "ConfigurationManager.h"
-#include "DBOVariable.h"
+#include "configurationmanager.h"
+#include "dbovariable.h"
 
 StructureDescriptionManager::StructureDescriptionManager()
 {

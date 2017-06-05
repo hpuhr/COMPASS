@@ -25,10 +25,10 @@
 #ifndef STRUCTUREDESCRIPTIONMANAGER_H_
 #define STRUCTUREDESCRIPTIONMANAGER_H_
 
-#include "Singleton.h"
-#include "StructureDescription.h"
-#include "Global.h"
-#include "Configuration.h"
+#include "singleton.h"
+#include "structuredescription.h"
+#include "global.h"
+#include "configuration.h"
 
 /**
  * @brief Global StructureDescription manager

@@ -57,15 +57,8 @@ public:
 
   const std::string &getId() const { return id_; }
 
-  static const std::string &asString (PropertyDataType type)
-  {
-      return data_types_2_strings_.at(type);
-  };
-
-  static PropertyDataType &asDataType (const std::string &type)
-  {
-      return strings_2_data_types_.at(type);
-  };
+  static const std::string &asString (PropertyDataType type)  { return data_types_2_strings_.at(type);  }
+  static PropertyDataType &asDataType (const std::string &type)   { return strings_2_data_types_.at(type); }
 
 
 protected:

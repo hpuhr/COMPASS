@@ -30,7 +30,7 @@ class QGridLayout;
 class DBTable;
 class DBTableEditWidget;
 class MetaDBTable;
-class MetaDBTableEditWidget;
+class MetaDBTableWidget;
 class DBSchema;
 
 /**
@@ -46,20 +46,22 @@ signals:
 
 private slots:
     /// @brief Adds a DBTable
-    void addTable();
+    void addTableSlot();
     /// @brief Adds all possible DBTables
-    void addAllTables();
-    /// @brief Adds a MetaDBTable
-    void addMetaTable();
+    void addAllTablesSlot();
     /// @brief Edits a DBTable
-    void editTable();
-    void deleteTable();
-    /// @brief Edits a MetaDBTable
-    void editMetaTable ();
+    void editTableSlot();
+    void deleteTableSlot();
     /// @brief Called when a DBTable was changed
-    void changedTable();
+    void changedTableSlot();
+
+    /// @brief Adds a MetaDBTable
+    void addMetaTableSlot();
+    /// @brief Edits a MetaDBTable
+    void editMetaTableSlot ();
+    void deleteMetaTableSlot();
     /// @brief Called when a MetaDBTable was changed
-    void changedMetaTable ();
+    void changedMetaTableSlot ();
 
 public:
     /// @brief Constructor
@@ -84,14 +86,14 @@ protected:
 
     /// Container for meta table edit buttons
     std::map <QPushButton*, MetaDBTable*> edit_meta_table_buttons_;
-
+    std::map <QPushButton*, MetaDBTable*> delete_meta_table_buttons_;
     /// @brief Creates GUI elements
     void createElements ();
 
     /// Updates DBTable grid
     void updateTableGrid();
     /// Updates MetaDBTable grid
-    void updateMetaTablesGrid();
+    void updateMetaTableGrid();
 };
 
 #endif /* DBSCHEMAWIDGET_H_ */

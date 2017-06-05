@@ -94,7 +94,7 @@ protected:
   std::string variable_;
 };
 
-class DBObect;
+class DBObject;
 class DBOVariableMinMaxObserver;
 
 /**

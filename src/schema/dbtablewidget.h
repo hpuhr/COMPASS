@@ -45,7 +45,7 @@ public slots:
 //    void createColumnsFromDB ();
 //    void createNewColumnsFromDB ();
     /// @brief Sets a special null value
-    void setSpecialNull ();
+    void setSpecialNull (const QString &text);
 
 public:
     /// @brief Constructor

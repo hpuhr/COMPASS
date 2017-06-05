@@ -181,7 +181,7 @@ void DBTableWidget::updateColumnGrid ()
         column_grid_->addWidget (unit_widget, row, 3);
 
         QLineEdit *edit = new QLineEdit (it.second->specialNull().c_str());
-        connect (edit, SIGNAL(returnPressed()), this, SLOT (setSpecialNull()));
+        connect (edit, SIGNAL(textChanged(const QString &)), this, SLOT (setSpecialNull(const QString &)));
         column_grid_->addWidget (edit, row, 4);
         assert (column_grid_special_nulls_.find (edit) == column_grid_special_nulls_.end());
         column_grid_special_nulls_ [edit] = it.second;
@@ -193,7 +193,7 @@ void DBTableWidget::updateColumnGrid ()
     }
 }
 
-void DBTableWidget::setSpecialNull ()
+void DBTableWidget::setSpecialNull (const QString &text)
 {
     loginf << "DBTableWidget: setSpecialNull";
 
@@ -201,5 +201,5 @@ void DBTableWidget::setSpecialNull ()
 
     assert (column_grid_special_nulls_.find (edit) != column_grid_special_nulls_.end());
 
-    column_grid_special_nulls_[edit]->specialNull(edit->text().toStdString());
+    column_grid_special_nulls_[edit]->specialNull(text.toStdString());
 }

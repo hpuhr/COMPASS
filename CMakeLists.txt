@@ -163,16 +163,16 @@ set ( atsdb_HDRS
         src/schema/dbschema.h
         src/schema/dbschemamanager.h
         src/schema/metadbtable.h
-#        src/struct/structuredescription.h
+        src/struct/structuredescription.h
 ##        src/struct/structuredescriptionplot.h
 ##        src/struct/structuredescriptionsystemtrack.h
 ##        src/struct/structuredescriptionreferencetrajectory.h
 ##        src/struct/structuredescriptionmlat.h
 ##        src/struct/structuredescriptionsensor.h
-#        src/struct/structuredescriptionmanager.h
-#        src/struct/structureelement.h
+        src/struct/structuredescriptionmanager.h
+        src/struct/structureelement.h
 #        src/struct/structurereader.h
-#        src/struct/structurevariable.h
+        src/struct/structurevariable.h
         src/interface/dbtableinfo.h
         src/interface/dbinterface.h
 #        src/thread/thread.h
@@ -230,7 +230,7 @@ set (atsdb_MOC_HEADERS
         src/schema/dbschemamanagerwidget.h
         src/schema/dbschemawidget.h
         src/schema/dbtablewidget.h
-#        src/schema/netabdtableeditwidget.h
+        src/schema/metadbtablewidget.h
 #        src/object/dbotypecombobox.h
 #        src/object/dbobjectwidget.h
 #        src/object/dbobjecteditwidget.h
@@ -331,17 +331,18 @@ set ( atsdb_SRCS
         src/schema/dbschemawidget.cpp
         src/schema/dbtablewidget.cpp
 #        src/schema/dbtablecolumncombobox.cpp
-#        src/schema/metadbtableeditwidget.cpp
         src/schema/dbtable.cpp
         src/schema/dbtablecolumn.cpp
         src/schema/dbschema.cpp
         src/schema/dbschemamanager.cpp
         src/schema/dbschemamanagerwidget.cpp
         src/schema/metadbtable.cpp
-#        src/struct/structuredescription.cpp
+        src/schema/metadbtablewidget.cpp
+        src/struct/structureelement.cpp
+        src/struct/structuredescription.cpp
 #        src/struct/structurereader.cpp
-#        src/struct/structuredescriptionmanager.cpp
-#        src/struct/structurevariable.cpp
+        src/struct/structuredescriptionmanager.cpp
+        src/struct/structurevariable.cpp
 #        src/thread/thread.cpp
 #        src/thread/timedthread.cpp
 #        src/thread/workerthread.cpp

@@ -27,12 +27,6 @@
  *
  */
 
-/// C struct data type, if any new data types are added also add them to the conversion mechanism in StructureConverter.cpp
-enum SE_DATA_TYPE {
-  SE_TYPE_BOOL=0, SE_TYPE_TINYINT, SE_TYPE_SMALLINT, SE_TYPE_INT, SE_TYPE_UTINYINT, SE_TYPE_USMALLINT, SE_TYPE_UINT, SE_TYPE_VARCHAR, SE_TYPE_VARCHAR_ARRAY,
-  SE_TYPE_FLOAT, SE_TYPE_DOUBLE, SE_TYPE_SENTINEL
-};
-
 /// SQL data type
 enum DB_DATA_TYPE { DB_TYPE_BOOL=0, DB_TYPE_INT, DB_TYPE_DOUBLE, DB_TYPE_STRING, DB_TYPE_SENTINEL};
 

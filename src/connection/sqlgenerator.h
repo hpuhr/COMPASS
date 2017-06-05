@@ -130,9 +130,9 @@ protected:
     std::string table_properties_create_statement_;
 
     /// @brief Returns general select statement
-    DBCommand *getSelectCommand (const PropertyList &variables, const MetaDBTable &table,
-            const std::vector <std::string> &filtered_variable_names, const std::string &filter="", const std::string &order="",
-            const std::string &limit="", bool distinct=false, bool left_join=false);
+//    DBCommand *getSelectCommand (const PropertyList &variables, const MetaDBTable &table,
+//            const std::vector <std::string> &filtered_variable_names, const std::string &filter="", const std::string &order="",
+//            const std::string &limit="", bool distinct=false, bool left_join=false);
 };
 
 #endif /* SQLGENERATOR_H_ */

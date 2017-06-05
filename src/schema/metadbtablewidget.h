@@ -38,7 +38,7 @@ class QPushButton;
 /**
  * @brief Edit widget for a MetaDBTable
  */
-class MetaDBTableEditWidget: public QWidget
+class MetaDBTableWidget: public QWidget
 {
     Q_OBJECT
 
@@ -48,53 +48,53 @@ signals:
 
 public slots:
     /// @brief Sets name
-    void editName ();
+    void editNameSlot (const QString &text);
     /// @brief Sets info
-    void editInfo ();
+    void editInfoSlot (const QString &text);
 
     /// @brief Adds new sub meta table
-    void addSubMetaTable ();
+    void addSubTableSlot ();
     /// @brief Edits sub meta table
-    void editSubMetaTable ();
+    //void editSubMetaTable ();
 
     /// @brief Sets main database table
-    void selectTable ();
+    //void selectTable ();
 
     /// @brief Updates main database table selection
-    void updateTableSelection();
-    /// @brief Updates sub meta tables grid
-    void updateSubMetaTablesGrid ();
-    void updateColumnsGrid ();
+    //void updateTableSelection();
+    /// @brief Updates sub tables grid
+    void updateSubTablesGridSlot ();
+    void updateColumnsGridSlot ();
     /// @brief Updates meta table selection for new meta sub table
-    void updateNewMetaTableSelection();
+    void updateNewSubTableSelectionSlot();
     /// @brief Updates local key selection for new meta sub table
-    void updateLocalKeySelection ();
+    void updateLocalKeySelectionSlot ();
     /// @brief Updates sub key selection for new meta sub table
-    void updateSubKeySelection ();
+    void updateSubKeySelectionSlot ();
 
 public:
     /// @brief Constructor
-    MetaDBTableEditWidget(MetaDBTable *table_structure, QWidget * parent = 0, Qt::WindowFlags f = 0);
+    MetaDBTableWidget(MetaDBTable &meta_table, QWidget * parent = 0, Qt::WindowFlags f = 0);
     /// @brief Destructor
-    virtual ~MetaDBTableEditWidget();
+    virtual ~MetaDBTableWidget();
 
 protected:
     /// Represented meta table
-    MetaDBTable *meta_table_;
+    MetaDBTable &meta_table_;
 
     /// Name edit field
     QLineEdit *name_edit_;
     /// Info edit field
     QLineEdit *info_edit_;
     /// Main database table selection field
-    QComboBox *table_box_;
+    //QComboBox *table_box_;
     /// Key selection field
     QComboBox *key_box_;
 
     /// Grid with all sub meta tables
-    QGridLayout *sub_meta_tables_grid_;
+    QGridLayout *sub_tables_grid_;
 
-    QGridLayout *columns_grid_;
+    QGridLayout *column_grid_;
 
     /// New sub meta table local key selection
     QComboBox *new_local_key_;
@@ -104,12 +104,9 @@ protected:
     QComboBox *new_sub_key_;
 
     /// Container with all edit buttons for sub meta tables
-    std::map <QPushButton *, MetaDBTable *> edit_sub_meta_table_buttons_;
+    //std::map <QPushButton *, MetaDBTable *> edit_sub_meta_table_buttons_;
     /// Container with existing sub meta table edit widgets
-    std::map <MetaDBTable *, MetaDBTableEditWidget*> edit_sub_meta_table_widgets_;
-
-    /// @brief Creates GUI elements
-    void createElements ();
+    //std::map <MetaDBTable *, MetaDBTableWidget*> edit_sub_meta_table_widgets_;
 };
 
 #endif /* METADBTABLEEDITWIDGET_H_ */
