@@ -47,9 +47,9 @@ public:
     DBObjectManager(const std::string &class_id, const std::string &instance_id, Configurable *parent);
 
     /// @brief Returns if an object of type exists
-    bool existsDBObject (const std::string &dbo_type);
+    bool exists (const std::string &dbo_type);
     /// @brief Returns the object of type, if existing
-    DBObject &getDBObject (const std::string &dbo_type);
+    DBObject &get (const std::string &dbo_type);
 
     /// @brief Returns defined DBOVariable, if existing
     //DBOVariable *getDBOVariable (const std::string &dbo_type, std::string id);
@@ -61,7 +61,7 @@ public:
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
     /// @brief Returns container with all DBObjects
-    const std::map <std::string, DBObject>& getDBObjects () { return objects_; }
+    std::map <std::string, DBObject>& objects () { return objects_; }
     /// @brief Returns of any DBObjects exist
     bool hasObjects () { return objects_.size() > 0; }
 

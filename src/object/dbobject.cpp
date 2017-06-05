@@ -45,7 +45,7 @@ DBObject::DBObject(std::string class_id, std::string instance_id, Configurable *
 {
   registerParameter ("name" , &name_, "Undefined");
   registerParameter ("info" , &info_, "");
-  registerParameter ("dbo_type" , &dbo_type_, "");
+  //registerParameter ("dbo_type" , &dbo_type_, "");
   registerParameter ("is_loadable" , &is_loadable_, false);
   //registerParameter ("is_meta" , &is_meta_, false);
 

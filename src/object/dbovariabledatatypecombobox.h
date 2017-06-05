@@ -28,9 +28,9 @@
 #include <QComboBox>
 #include <stdexcept>
 
-#include "DBOVariable.h"
-#include "Global.h"
-#include "Logger.h"
+#include "dbovariable.h"
+#include "global.h"
+#include "logger.h"
 
 /**
  *  @brief Property data type selection for a DBOVariable

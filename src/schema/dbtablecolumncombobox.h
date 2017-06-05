@@ -28,7 +28,7 @@
 #include <QComboBox>
 #include <stdexcept>
 
-#include "Global.h"
+#include "global.h"
 
 class DBOVariable;
 

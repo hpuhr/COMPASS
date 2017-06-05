@@ -113,9 +113,9 @@ public:
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
     /// @brief Returns if an object of type exists
-    bool existsDBObject (const std::string &dbo_type);
+    bool existsDBObject (const std::string &dbo_name);
     /// @brief Returns the object of type, if existing
-    DBObject &getDBObject (const std::string &dbo_type);
+    DBObject &getDBObject (const std::string &dbo_name);
 
     /// @brief Returns flag indicating if current schema is defined and exists
     bool hasCurrentSchema ();

@@ -251,17 +251,17 @@ const std::map <std::string, DBTableInfo> &ATSDB::tableInfo ()
 //}
 
 /// @brief Returns if an object of type exists
-bool ATSDB::existsDBObject (const std::string &dbo_type)
+bool ATSDB::existsDBObject (const std::string &dbo_name)
 {
     assert (dbo_manager_);
-    return dbo_manager_->existsDBObject(dbo_type);
+    return dbo_manager_->exists (dbo_name);
 }
 
 /// @brief Returns the object of type, if existing
-DBObject &ATSDB::getDBObject (const std::string &dbo_type)
+DBObject &ATSDB::getDBObject (const std::string &dbo_name)
 {
     assert (dbo_manager_);
-    return dbo_manager_->getDBObject(dbo_type);
+    return dbo_manager_->get(dbo_name);
 }
 
 bool ATSDB::hasCurrentSchema ()

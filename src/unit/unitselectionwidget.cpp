@@ -21,7 +21,7 @@
 #include "quantity.h"
 #include "logger.h"
 
-UnitSelectionWidget::UnitSelectionWidget(std::string &quantity, std::string &unit)
+UnitSelectionWidget::UnitSelectionWidget(const std::string &quantity, const std::string &unit)
  : QPushButton (),quantity_(quantity), unit_(unit)
 {
   logdbg  << "UnitSelectionWidget: constructor";

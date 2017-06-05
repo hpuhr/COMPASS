@@ -231,14 +231,13 @@ set (atsdb_MOC_HEADERS
         src/schema/dbschemawidget.h
         src/schema/dbtablewidget.h
         src/schema/metadbtablewidget.h
-#        src/object/dbotypecombobox.h
-#        src/object/dbobjectwidget.h
-#        src/object/dbobjecteditwidget.h
+        src/object/dbobjectmanagerwidget.h
+        src/object/dbobjectwidget.h
 #        src/object/dbovariablecombobox.h
 #        src/object/dbovariablesetwidget.h
 #        src/object/dbovariableorderedsetwidget.h
 #        src/object/dbovariableselectionwidget.h
-#        src/object/dbovariabledatatypecombobox.h
+        src/object/dbovariabledatatypecombobox.h
 #        src/object/propertydatatypecombobox.h
 #        src/object/metadbobjecteditwidget.h
 #        src/object/stringrepresentationcombobox.h
@@ -304,8 +303,8 @@ set ( atsdb_SRCS
 #        src/object/dbovariablesetwidget.cpp
 #        src/object/dbovariableorderedsetwidget.cpp
 #        src/object/dbovariableselectionwidget.cpp
-#        src/object/dbobjecteditwidget.cpp
-#        src/object/dbobjectwidget.cpp
+        src/object/dbobjectwidget.cpp
+        src/object/dbobjectmanagerwidget.cpp
 #        src/object/metadbobjecteditwidget.cpp
         src/object/dbobject.cpp
         src/object/dbobjectmanager.cpp

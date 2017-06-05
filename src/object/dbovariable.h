@@ -194,9 +194,9 @@ public:
   /// @brief Returns if unit information is present
   bool hasUnit () { return unit_dimension_.size() != 0;}
   /// @brief Returns unit dimension
-  const std::string &getUnitDimension () { return unit_dimension_; }
+  const std::string &getUnitDimension () const { return unit_dimension_; }
   /// @brief  Returns unit unit
-  const std::string &getUnitUnit () { return unit_unit_; }
+  const std::string &getUnitUnit () const { return unit_unit_; }
 
   /// @brief Returns flag if minimum/maximum information is available
   //bool hasMinMaxInfo ();

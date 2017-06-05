@@ -167,9 +167,9 @@ public:
   bool isLoadable () const { return is_loadable_; }
 
   /// @brief Returns the type of the object
-  const std::string &getType () const { return dbo_type_; }
+  //const std::string &getType () const { return dbo_type_; }
   /// @brief Sets the type of the object
-  void setType (const std::string &dbo_type) { dbo_type_=dbo_type; }
+  //void setType (const std::string &dbo_type) { dbo_type_=dbo_type; }
 
   /// @brief Returns container with all meta tables
   const std::map <std::string, std::string> &getMetaTables () const { return meta_tables_; }
@@ -215,7 +215,7 @@ public:
 
 protected:
   /// DBO type
-  std::string dbo_type_;
+  //std::string dbo_type_;
   /// DBO name
   std::string name_;
   /// DBO description

@@ -36,15 +36,15 @@ protected slots:
 
 public:
     /// @brief Constructor
-    UnitSelectionWidget (std::string &quantity, std::string &unit);
+    UnitSelectionWidget (const std::string &quantity, const std::string &unit);
     /// @brief Destructor
     virtual ~UnitSelectionWidget();
 
 protected:
     /// Unit dimension reference
-    std::string &quantity_;
+    std::string quantity_;
     /// Unit unit reference
-    std::string &unit_;
+    std::string unit_;
 
     /// Context menu
     QMenu menu_;
