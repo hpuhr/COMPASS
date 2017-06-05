@@ -77,9 +77,9 @@ void DBObjectManager::generateSubConfigurable (const std::string &class_id, cons
     if (class_id.compare ("DBObject") == 0)
     {
         DBObject *object = new DBObject (class_id, instance_id, this);
-        loginf  << "DBObjectManager: generateSubConfigurable: adding object type " << object->getName();
-        assert (objects_.find(object->getName()) == objects_.end());
-        objects_.insert(std::pair <std::string, DBObject> (object->getName(), *object));
+        loginf  << "DBObjectManager: generateSubConfigurable: adding object type " << object->name();
+        assert (objects_.find(object->name()) == objects_.end());
+        objects_.insert(std::pair <std::string, DBObject> (object->name(), *object));
     }
     else
         throw std::runtime_error ("DBObjectManager: generateSubConfigurable: unknown class_id "+class_id );
@@ -90,22 +90,22 @@ void DBObjectManager::checkSubConfigurables ()
     // nothing to do, must be defined in configuration
 }
 
-bool DBObjectManager::exists (const std::string &name)
+bool DBObjectManager::exists (const std::string &dbo_name)
 {
     //registerParentVariablesIfRequired();
 
-    return (objects_.find(name) != objects_.end());
+    return (objects_.find(dbo_name) != objects_.end());
 }
 
-DBObject &DBObjectManager::get (const std::string &name)
+DBObject &DBObjectManager::get (const std::string &dbo_name)
 {
-    logdbg  << "DBObjectManager: getDBObject: name " << name;
+    logdbg  << "DBObjectManager: get: name " << dbo_name;
 
     //registerParentVariablesIfRequired();
 
-    assert (objects_.find(name) != objects_.end());
+    assert (objects_.find(dbo_name) != objects_.end());
 
-    return objects_.at(name);
+    return objects_.at(dbo_name);
 }
 
 /**

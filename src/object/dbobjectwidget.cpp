@@ -77,14 +77,14 @@ DBObjectWidget::DBObjectWidget(DBObject *object, DBSchemaManager &schema_manager
   QLabel *name_label = new QLabel ("Table name");
   properties_layout->addWidget (name_label, 0, 0);
 
-  name_edit_ = new QLineEdit (object_->getName().c_str());
+  name_edit_ = new QLineEdit (object_->name().c_str());
   connect(name_edit_, SIGNAL( returnPressed() ), this, SLOT( editName() ));
   properties_layout->addWidget (name_edit_, 0, 1);
 
   QLabel *info_label = new QLabel ("Description");
   properties_layout->addWidget (info_label, 1, 0);
 
-  info_edit_ = new QLineEdit (object_->getInfo().c_str());
+  info_edit_ = new QLineEdit (object_->info().c_str());
   connect(info_edit_, SIGNAL( returnPressed() ), this, SLOT( editInfo() ));
   properties_layout->addWidget (info_edit_, 1, 1);
 
@@ -92,7 +92,7 @@ DBObjectWidget::DBObjectWidget(DBObject *object, DBSchemaManager &schema_manager
   properties_layout->addWidget (loadable_label, 2, 0);
 
   loadable_check_ = new QCheckBox ();
-  loadable_check_->setChecked (object_->isLoadable());
+  loadable_check_->setChecked (object_->loadable());
   connect(loadable_check_, SIGNAL( clicked() ), this, SLOT( changedLoadable() ));
   properties_layout->addWidget (loadable_check_, 2, 1);
 
@@ -358,7 +358,7 @@ void DBObjectWidget::editName ()
 
   std::string text = name_edit_->text().toStdString();
   assert (text.size()>0);
-  object_->setName (text);
+  object_->name (text);
   emit changedDBO();
 }
 void DBObjectWidget::editInfo ()
@@ -369,7 +369,7 @@ void DBObjectWidget::editInfo ()
 
   std::string text = info_edit_->text().toStdString();
   assert (text.size()>0);
-  object_->setInfo (text);
+  object_->info (text);
   emit changedDBO();
 }
 
@@ -403,7 +403,7 @@ void DBObjectWidget::changedLoadable ()
   logdbg  << "DBObjectWidget: changedLoadable";
   assert (object_);
   assert (loadable_check_);
-  object_->setLoadable(loadable_check_->isChecked());
+  object_->loadable(loadable_check_->isChecked());
 }
 
 void DBObjectWidget::updateDSSchemaSelection()
@@ -417,7 +417,7 @@ void DBObjectWidget::updateDSSchemaSelection()
 void DBObjectWidget::updateDSLocalKeySelection()
 {
   logdbg  << "DBObjectWidget: updateDSLocalKeySelection";
-  auto variables = object_->getVariables ();
+  auto variables = object_->variables ();
 
   std::string selection;
 
@@ -547,7 +547,7 @@ void DBObjectWidget::updateDataSourcesGrid ()
   ds_grid_->addWidget (ds_name_label, 0, 4);
 
 
-  auto dsdefs = object_->getDataSourceDefinitions ();
+  auto dsdefs = object_->dataSourceDefinitions ();
 
   unsigned int row=1;
   for (auto it = dsdefs.begin(); it != dsdefs.end(); it++)
@@ -587,7 +587,7 @@ void DBObjectWidget::addDataSource ()
   std::string foreign_key = ds_foreign_key_box_->currentText().toStdString();
   std::string foreign_name = ds_foreign_name_box_->currentText().toStdString();
 
-  std::string instance = "DBODataSourceDefinition"+object_->getName()+schema+"0";
+  std::string instance = "DBODataSourceDefinition"+object_->name()+schema+"0";
 
   Configuration &config = object_->addNewSubConfiguration ("DBODataSourceDefinition", instance);
   config.addParameterString ("schema", schema);
@@ -641,7 +641,7 @@ void DBObjectWidget::updateMetaTablesGrid()
   meta_label->setFont (font_bold);
   meta_table_grid_->addWidget (meta_label, 0, 1);
 
-  auto metas = object_->getMetaTables ();
+  auto metas = object_->metaTables ();
 
   unsigned int row=1;
   for (auto it = metas.begin(); it != metas.end(); it++)
@@ -663,7 +663,7 @@ void DBObjectWidget::addVariable()
 
   std::string name = new_var_name_edit_->text().toStdString();
 
-  std::string instance = "DBOVariable"+object_->getName()+name+"0";
+  std::string instance = "DBOVariable"+object_->name()+name+"0";
 
   Configuration &config = object_->addNewSubConfiguration ("DBOVariable", instance);
   config.addParameterString ("id", name);
@@ -682,7 +682,7 @@ void DBObjectWidget::addAllVariables ()
     return;
 
   std::string schema_name = all_schemas_box_->currentText().toStdString();
-  std::string meta_name = object_->getMetaTable (schema_name);
+  std::string meta_name = object_->metaTable (schema_name);
 
   const MetaDBTable &meta = schema_manager_.getCurrentSchema().metaTable(meta_name);
   auto columns = meta.columns();
@@ -691,7 +691,7 @@ void DBObjectWidget::addAllVariables ()
   {
     std::string column_name = it->second.name();
 
-    std::string instance = "DBOVariable"+object_->getName()+column_name+"0";
+    std::string instance = "DBOVariable"+object_->name()+column_name+"0";
 
     Configuration &config = object_->addNewSubConfiguration ("DBOVariable", instance);
 
@@ -701,7 +701,7 @@ void DBObjectWidget::addAllVariables ()
 //    config.addParameterUnsignedInt ("data_type", getDataTypeFromDB(it->second->getType()));
 //    config.addParameterUnsignedInt ("dbo_type", object_->getType());
 
-    std::string var_instance = "DBOSchemaVariableDefinition"+object_->getName()+column_name+"0";
+    std::string var_instance = "DBOSchemaVariableDefinition"+object_->name()+column_name+"0";
 
     Configuration &var_configuration = config.addNewSubConfiguration ("DBOSchemaVariableDefinition", var_instance);
     var_configuration.addParameterString ("schema", schema_name);
@@ -724,7 +724,7 @@ void DBObjectWidget::addNewVariables ()
     return;
 
   std::string schema_name = all_schemas_box_->currentText().toStdString();
-  std::string meta_name = object_->getMetaTable (schema_name);
+  std::string meta_name = object_->metaTable (schema_name);
 
   const MetaDBTable &meta = schema_manager_.getCurrentSchema().metaTable(meta_name);
   auto columns = meta.columns ();
@@ -736,7 +736,7 @@ void DBObjectWidget::addNewVariables ()
     if (object_->hasVariable(column_name))
       continue;
 
-    std::string instance = "DBOVariable"+object_->getName()+column_name+"0";
+    std::string instance = "DBOVariable"+object_->name()+column_name+"0";
 
     Configuration &config = object_->addNewSubConfiguration ("DBOVariable", instance);
     config.addParameterString ("id", column_name);
@@ -745,7 +745,7 @@ void DBObjectWidget::addNewVariables ()
 //    config.addParameterUnsignedInt ("data_type", getDataTypeFromDB(it->second->getType()));
 //    config.addParameterUnsignedInt ("dbo_type", object_->getType());
 
-    std::string var_instance = "DBOSchemaVariableDefinition"+object_->getName()+column_name+"0";
+    std::string var_instance = "DBOSchemaVariableDefinition"+object_->name()+column_name+"0";
 
     Configuration &var_configuration = config.addNewSubConfiguration ("DBOSchemaVariableDefinition", var_instance);
     var_configuration.addParameterString ("schema", schema_name);
@@ -827,7 +827,7 @@ void DBObjectWidget::updateDBOVarsGrid ()
 
   logdbg  << "DBObjectWidget: updateDBOVarsGrid: getting schemas";
 
-  auto metas = object_->getMetaTables ();
+  auto metas = object_->metaTables ();
   auto schemas  = schema_manager_.getSchemas();
 
   logdbg  << "DBObjectWidget: updateDBOVarsGrid: creating schemas grid";
@@ -843,7 +843,7 @@ void DBObjectWidget::updateDBOVarsGrid ()
     col++;
   }
 
-  auto variables = object_->getVariables();
+  auto variables = object_->variables();
 
   QPixmap* pixmapmanage = new QPixmap("./Data/icons/close_icon.png");
 

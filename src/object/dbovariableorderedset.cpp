@@ -324,7 +324,7 @@ void DBOVariableOrderedSet::updateDBOVariableSet ()
         }
 
         //assert (DBObjectManager::getInstance().existsDBOVariable (type, name));
-        DBOVariable &variable = ATSDB::getInstance().getDBObject(type).getVariable(name);
+        DBOVariable &variable = ATSDB::getInstance().getDBObject(type).variable(name);
         set_.insert (std::pair <unsigned int, DBOVariable &> (it.second->getIndex(), variable));
     }
     assert (variable_definitions_.size() == set_.size());

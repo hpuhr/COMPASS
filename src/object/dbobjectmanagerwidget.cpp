@@ -257,10 +257,10 @@ void DBObjectManagerWidget::updateDBOs ()
 
     for (auto it = objects.begin(); it != objects.end(); it++)
     {
-        QLabel *name = new QLabel (it->second.getName().c_str());
+        QLabel *name = new QLabel (it->second.name().c_str());
         grid_->addWidget (name, row, 0);
 
-        QLabel *info = new QLabel (it->second.getInfo().c_str());
+        QLabel *info = new QLabel (it->second.info().c_str());
         grid_->addWidget (info, row, 1);
 
         QPushButton *edit = new QPushButton ("Edit");

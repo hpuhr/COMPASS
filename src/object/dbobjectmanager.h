@@ -47,9 +47,9 @@ public:
     DBObjectManager(const std::string &class_id, const std::string &instance_id, Configurable *parent);
 
     /// @brief Returns if an object of type exists
-    bool exists (const std::string &dbo_type);
+    bool exists (const std::string &dbo_name);
     /// @brief Returns the object of type, if existing
-    DBObject &get (const std::string &dbo_type);
+    DBObject &get (const std::string &dbo_name);
 
     /// @brief Returns defined DBOVariable, if existing
     //DBOVariable *getDBOVariable (const std::string &dbo_type, std::string id);
@@ -69,7 +69,7 @@ public:
     virtual ~DBObjectManager();
 
 protected:
-    /// Container with all DBOs (DBO type -> DBO pointer)
+    /// Container with all DBOs (DBO name -> DBO pointer)
     std::map <std::string, DBObject> objects_;
     //bool registered_parent_variables_;
 

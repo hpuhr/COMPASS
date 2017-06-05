@@ -84,13 +84,13 @@ bool DBObject::hasVariable (const std::string &id) const
   return (variables_.find (id) != variables_.end());
 }
 
-DBOVariable &DBObject::getVariable (std::string id)
+DBOVariable &DBObject::variable (std::string variable_id)
 {
 //  if (!variables_checked_)
 //    checkVariables ();
 
-  assert (hasVariable (id));
-  return variables_.at(id);
+  assert (hasVariable (variable_id));
+  return variables_.at(variable_id);
 }
 
 void DBObject::deleteVariable (std::string id)
@@ -107,7 +107,7 @@ void DBObject::deleteVariable (std::string id)
   //delete variable;
 }
 
-const std::map<std::string, DBOVariable> &DBObject::getVariables () const
+const std::map<std::string, DBOVariable> &DBObject::variables () const
 {
 //  if (!variables_checked_)
 //    checkVariables ();
@@ -138,7 +138,7 @@ const std::map<std::string, DBOVariable> &DBObject::getVariables () const
 //  return variables;
 //}
 
-const std::string &DBObject::getMetaTable (const std::string &schema) const
+const std::string &DBObject::metaTable (const std::string &schema) const
 {
   assert (meta_tables_.find(schema) != meta_tables_.end());
   return meta_tables_.at(schema);
@@ -152,7 +152,7 @@ bool DBObject::hasCurrentDataSource () const
   return (data_source_definitions_.find(ATSDB::getInstance().getCurrentSchema().name()) != data_source_definitions_.end());
 }
 
-const DBODataSourceDefinition &DBObject::getCurrentDataSource () const
+const DBODataSourceDefinition &DBObject::currentDataSource () const
 {
   assert (hasCurrentDataSource());
   return data_source_definitions_.at(ATSDB::getInstance().getCurrentSchema().name());
@@ -169,7 +169,7 @@ bool DBObject::hasCurrentMetaTable () const
   else
   {
     DBSchema &schema = ATSDB::getInstance().getCurrentSchema();
-    logdbg  << "DBObject "<< getName() << ": hasCurrentMetaTable: got current schema " << schema.name();
+    logdbg  << "DBObject "<< name() << ": hasCurrentMetaTable: got current schema " << schema.name();
     assert (meta_tables_.find(schema.name()) != meta_tables_.end());
     std::string meta_table_name = meta_tables_ .at(schema.name());
     return schema.hasMetaTable (meta_table_name);
@@ -181,7 +181,7 @@ bool DBObject::hasCurrentMetaTable () const
  * If current_meta_table_ is not set, it is set be getting the current schema, and getting the current meta table from
  * the schema by its identifier. Then current_meta_table_ is returned.
  */
-const MetaDBTable &DBObject::getCurrentMetaTable ()
+const MetaDBTable &DBObject::currentMetaTable ()
 {
   if (!current_meta_table_)
   {
@@ -212,7 +212,7 @@ void DBObject::generateSubConfigurable (const std::string &class_id, const std::
     DBOSchemaMetaTableDefinition *def = new DBOSchemaMetaTableDefinition (class_id, instance_id, this);
     meta_table_definitions_.push_back (*def);
 
-    logdbg  << "DBObject "<< getName() << ": generateSubConfigurable: schema " << def->getSchema() << " meta " << def->getMetaTable();
+    logdbg  << "DBObject "<< name() << ": generateSubConfigurable: schema " << def->getSchema() << " meta " << def->getMetaTable();
 
     assert (meta_tables_.find (def->getSchema()) == meta_tables_.end());
     meta_tables_[def->getSchema()] = def->getMetaTable();
