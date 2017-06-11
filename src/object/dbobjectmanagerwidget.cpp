@@ -22,6 +22,7 @@
 #include <QComboBox>
 #include <QPushButton>
 #include <QScrollArea>
+#include <QInputDialog>
 
 #include "configuration.h"
 #include "configurationmanager.h"
@@ -29,15 +30,16 @@
 #include "dbobject.h"
 #include "dbobjectmanagerwidget.h"
 #include "dbobjectmanager.h"
-//#include "DBObjectManagerWidget.h"
 #include "dbschema.h"
 #include "dbschemamanager.h"
 #include "metadbtable.h"
+#include "stringconv.h"
 //#include "MetaDBObjectEditWidget.h"
 
+using Utils::String;
+
 DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager &object_manager, DBSchemaManager &schema_manager)
-    : object_manager_(object_manager), schema_manager_(schema_manager), grid_ (0), unlocked_(false),
-      new_edit_(0), new_meta_table_(0), new_button_(0)
+    : object_manager_(object_manager), schema_manager_(schema_manager), grid_ (0), unlocked_(false), new_button_(0)
 
 {
     unsigned int frame_width = 2;
@@ -71,31 +73,10 @@ DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager &object_manager, DB
     main_layout->addWidget (scroll);
 
     // new object
-
-    QHBoxLayout *new_layout = new QHBoxLayout ();
-
-    QLabel *new_label = new QLabel ("New object");
-    new_label->setFont (font_bold);
-    new_layout->addWidget (new_label);
-
-    new_edit_ = new QLineEdit ("Undefined");
-    new_edit_->setDisabled (true);
-    new_layout->addWidget (new_edit_);
-
-    QLabel *new_meta_label = new QLabel ("Meta table");
-    new_layout->addWidget (new_meta_label);
-
-    new_meta_table_ = new QComboBox ();
-    updateMetaTables();
-    new_meta_table_->setDisabled (true);
-    new_layout->addWidget (new_meta_table_);
-
     new_button_ = new QPushButton("Add");
     connect(new_button_, SIGNAL( clicked() ), this, SLOT( addDBO() ));
     new_button_->setDisabled (true);
-    new_layout->addWidget (new_button_);
-
-    main_layout->addLayout (new_layout);
+    main_layout->addWidget (new_button_);
 
     // meta object
     //    QHBoxLayout *new_meta_layout = new QHBoxLayout ();
@@ -137,41 +118,68 @@ DBObjectManagerWidget::~DBObjectManagerWidget()
     //  edit_metadbo_widgets_.clear();
 }
 
-void DBObjectManagerWidget::unlock ()
+void DBObjectManagerWidget::databaseOpenedSlot ()
 {
     unlocked_=true;
 
-    std::map <QPushButton *, DBObject *>::iterator it;
+    std::map <QPushButton*, DBObject *>::iterator it;
     for ( it=edit_dbo_buttons_.begin(); it !=  edit_dbo_buttons_.end(); it++)
         it->first->setDisabled (false);
 
-    if (new_edit_)
-        new_edit_->setDisabled (false);
-
     if (new_button_)
         new_button_->setDisabled (false);
-
-    if (new_meta_table_)
-        new_meta_table_->setDisabled(false);
 }
+
+
 
 void DBObjectManagerWidget::addDBO ()
 {
-    assert (new_edit_);
-    assert (new_meta_table_);
+    if (!schema_manager_.hasCurrentSchema())
+    {
+        logerr << "DBObjectManagerWidget: addDBO: no schema was selected";
+        return;
+    }
 
-    std::string name = new_edit_->text().toStdString();
-    std::string meta_table_name = new_meta_table_->currentText().toStdString();
+    bool ok;
+    QString text = QInputDialog::getText(this, tr("Database Object Name"),
+                                         tr("Specify a (unique) DBObject name:"), QLineEdit::Normal,
+                                         "", &ok);
+    if (ok && !text.isEmpty())
+    {
+        std::string name = text.toStdString();
 
-    std::string instance = "DBObject"+name+"0";
+        if (object_manager_.exists(name))
+        {
+            logerr << "DBObjectManagerWidget: addDBO: DBObject same name already exists";
+            return;
+        }
 
-    Configuration &config = object_manager_.addNewSubConfiguration ("DBObject", instance);
-    config.addParameterString ("name", name);
-    config.addParameterString ("meta_table", meta_table_name);
 
-    object_manager_.generateSubConfigurable("DBObject", instance);
+        auto metas = schema_manager_.getCurrentSchema().metaTables();
+        QStringList items;
 
-    updateDBOs();
+        for (auto it = metas.begin(); it != metas.end(); it++)
+        {
+            items.append(it->second->name().c_str());
+        }
+
+        bool ok;
+        QString item = QInputDialog::getItem(this, tr("Main Meta Table For DBObject"), tr("Select:"), items, 0, false, &ok);
+        if (ok && !item.isEmpty())
+        {
+            std::string meta_table_name = item.toStdString();
+
+            std::string instance = "DBObject"+name+"0";
+
+            Configuration &config = object_manager_.addNewSubConfiguration ("DBObject", instance);
+            config.addParameterString ("name", name);
+            config.addParameterString ("meta_table", meta_table_name);
+
+            object_manager_.generateSubConfigurable("DBObject", instance);
+
+            updateDBOs();
+        }
+    }
 }
 
 //void DBObjectManagerWidget::addMetaDBO ()
@@ -227,6 +235,11 @@ void DBObjectManagerWidget::editDBO ()
     //  }
 }
 
+void DBObjectManagerWidget::deleteDBO ()
+{
+    assert (delete_dbo_buttons_.find((QPushButton*)sender()) != delete_dbo_buttons_.end());
+}
+
 
 void DBObjectManagerWidget::updateDBOs ()
 {
@@ -237,7 +250,15 @@ void DBObjectManagerWidget::updateDBOs ()
             delete child->widget();
         delete child;
     }
+
+    QPixmap edit_pixmap("./data/icons/edit.png");
+    QIcon edit_icon(edit_pixmap);
+
+    QPixmap del_pixmap("./data/icons/delete.png");
+    QIcon del_icon(del_pixmap);
+
     edit_dbo_buttons_.clear();
+    delete_dbo_buttons_.clear();
 
     QFont font_bold;
     font_bold.setBold(true);
@@ -246,9 +267,21 @@ void DBObjectManagerWidget::updateDBOs ()
     name_label->setFont (font_bold);
     grid_->addWidget (name_label, 0, 0);
 
-    QLabel *info_label = new QLabel ("Description");
-    info_label->setFont (font_bold);
-    grid_->addWidget (info_label, 0, 1);
+    QLabel *numel_label = new QLabel ("# columns");
+    numel_label->setFont (font_bold);
+    grid_->addWidget (numel_label, 0, 1);
+
+    QLabel *meta_label = new QLabel ("Meta Table");
+    meta_label->setFont (font_bold);
+    grid_->addWidget (meta_label, 0, 2);
+
+    QLabel *edit_label = new QLabel ("Edit");
+    edit_label->setFont (font_bold);
+    grid_->addWidget (edit_label, 0, 3);
+
+    QLabel *del_label = new QLabel ("Delete");
+    del_label->setFont (font_bold);
+    grid_->addWidget (del_label, 0, 4);
 
     unsigned int row=1;
 
@@ -259,48 +292,33 @@ void DBObjectManagerWidget::updateDBOs ()
         QLabel *name = new QLabel (it->second->name().c_str());
         grid_->addWidget (name, row, 0);
 
-        QLabel *info = new QLabel (it->second->info().c_str());
-        grid_->addWidget (info, row, 1);
+        QLabel *numel = new QLabel ((String::intToString(it->second->numVariables())).c_str());
+        grid_->addWidget (numel, row, 1);
 
-        QPushButton *edit = new QPushButton ("Edit");
+        bool active = it->second->hasCurrentMetaTable();
+        QLabel *meta = new QLabel ("None");
+        if (active)
+            meta->setText(it->second->currentMetaTable().name().c_str());
+        grid_->addWidget (meta, row, 2);
+
+        QPushButton *edit = new QPushButton ();
+        edit->setIcon(edit_icon);
+        edit->setIconSize(QSize(30,30));
+        edit->setFlat(true);
+        edit->setDisabled(!active);
         connect(edit, SIGNAL( clicked() ), this, SLOT( editDBO() ));
-        grid_->addWidget (edit, row, 2);
-        edit->setDisabled (!unlocked_);
-        edit_dbo_buttons_ [edit] = it->second;
+        grid_->addWidget (edit, row, 3);
+        edit_dbo_buttons_[edit] = it->second;
+
+        QPushButton *del = new QPushButton ();
+        del->setIcon(del_icon);
+        del->setIconSize(QSize(30,30));
+        del->setFlat(true);
+        del->setDisabled(!active);
+        connect(del, SIGNAL( clicked() ), this, SLOT( deleteDBO() ));
+        grid_->addWidget (del, row, 4);
+        delete_dbo_buttons_[del] = it->second;
 
         row++;
-    }
-}
-
-void DBObjectManagerWidget::updateMetaTables ()
-{
-    assert (new_meta_table_);
-
-    if (!schema_manager_.hasCurrentSchema())
-        return;
-
-    std::string selection;
-    if (new_meta_table_->count() > 0)
-        selection = new_meta_table_->currentText().toStdString();
-    while (new_meta_table_->count() > 0)
-        new_meta_table_->removeItem (0);
-
-    auto metas = schema_manager_.getCurrentSchema().metaTables();
-
-    int index_cnt=-1;
-    unsigned int cnt=0;
-    for (auto it = metas.begin(); it != metas.end(); it++)
-    {
-        if (selection.size()>0 && selection.compare(it->second->name()) == 0)
-            index_cnt=cnt;
-
-        new_meta_table_->addItem (it->second->name().c_str());
-
-        cnt++;
-    }
-
-    if (index_cnt != -1)
-    {
-        new_meta_table_->setCurrentIndex (index_cnt);
     }
 }

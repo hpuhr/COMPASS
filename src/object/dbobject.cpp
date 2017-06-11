@@ -170,6 +170,9 @@ bool DBObject::hasCurrentMetaTable () const
   {
     DBSchema &schema = ATSDB::getInstance().getCurrentSchema();
     logdbg  << "DBObject "<< name() << ": hasCurrentMetaTable: got current schema " << schema.name();
+    logdbg  << "DBObject "<< name() << ": hasCurrentMetaTable: meta tables:";
+    for (auto it = meta_tables_.begin(); it != meta_tables_.end(); it++)
+        logdbg << it->first << ": " << it->second;
     assert (meta_tables_.find(schema.name()) != meta_tables_.end());
     std::string meta_table_name = meta_tables_ .at(schema.name());
     return schema.hasMetaTable (meta_table_name);

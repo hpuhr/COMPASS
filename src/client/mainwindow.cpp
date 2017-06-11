@@ -87,6 +87,7 @@ MainWindow::MainWindow()
     widget_layout->addWidget(dbschema_manager_widget_);
 
     object_manager_widget_ = ATSDB::getInstance().dbObjectManagerWidget();
+    QObject::connect(dbinterface_widget_, SIGNAL(databaseOpenedSignal()), object_manager_widget_, SLOT(databaseOpenedSlot()));
     widget_layout->addWidget(object_manager_widget_);
 
     main_layout->addLayout(widget_layout);

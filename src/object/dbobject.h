@@ -182,7 +182,6 @@ public:
     /// @brief Returns if current schema has main meta table
     bool hasCurrentMetaTable () const;
 
-
     /// @brief Returns if object is meta
     //bool isMeta () { return is_meta_; }
 

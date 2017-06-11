@@ -24,7 +24,6 @@
 class DBObject;
 class DBObjectManager;
 class DBSchemaManager;
-//class DBObjectWidget;
 //class MetaDBObjectEditWidget;
 class QGridLayout;
 class QScrollArea;
@@ -44,21 +43,20 @@ public slots:
     void addDBO ();
     /// @brief Is called when a DBObject was changed
     void changedDBO ();
-    /// @brief Starts editing if a DBObject
+    /// @brief Edits a DBObject
     void editDBO ();
+    /// @brief Deletes a DBObject
+    void deleteDBO ();
     /// @brief Updates the DBObject list
     void updateDBOs ();
-    /// @brief Updates the meta tables selection widget
-    void updateMetaTables ();
+    /// @brief Unlocks editing functionality
+    void databaseOpenedSlot ();
 
 public:
     /// @brief Constructor
     DBObjectManagerWidget(DBObjectManager &object_manager, DBSchemaManager &schema_manager);
     /// @brief Destructor
     virtual ~DBObjectManagerWidget();
-
-    /// @brief Unlocks editing functionality
-    void unlock ();
 
 private:
     DBObjectManager &object_manager_;
@@ -68,10 +66,6 @@ private:
     /// Editing functionality unlocked flag
     bool unlocked_;
 
-    /// New DBO name edit field
-    QLineEdit *new_edit_;
-    /// New meta DBO meta table selection
-    QComboBox *new_meta_table_;
     /// New DBO add button
     QPushButton *new_button_;
 
@@ -82,6 +76,9 @@ private:
 
     /// Container with DBO edit buttons
     std::map <QPushButton *, DBObject *> edit_dbo_buttons_;
+    /// Container with DBO edit buttons
+    std::map <QPushButton *, DBObject *> delete_dbo_buttons_;
+
     /// Container with already existing edit DBO widgets
     //std::map <DBObject *, DBObjectEditWidget*> edit_dbo_widgets_;
     /// Container with already existing edit meta DBO widgets
