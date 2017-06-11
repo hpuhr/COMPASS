@@ -32,8 +32,10 @@
 #include "global.h"
 
 class DBObject;
+class DBObjectManagerWidget;
 class DBOVariable;
 class DBOVariableSet;
+class DBSchemaManager;
 
 /**
  * @brief For management of all DBObjects
@@ -61,17 +63,21 @@ public:
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
     /// @brief Returns container with all DBObjects
-    std::map <std::string, DBObject>& objects () { return objects_; }
+    std::map <std::string, DBObject*>& objects () { return objects_; }
     /// @brief Returns of any DBObjects exist
     bool hasObjects () { return objects_.size() > 0; }
 
     /// @brief Destructor
     virtual ~DBObjectManager();
 
+    DBObjectManagerWidget *widget(DBSchemaManager &schema_manager);
+
 protected:
     /// Container with all DBOs (DBO name -> DBO pointer)
-    std::map <std::string, DBObject> objects_;
+    std::map <std::string, DBObject*> objects_;
     //bool registered_parent_variables_;
+
+    DBObjectManagerWidget *widget_;
 
     virtual void checkSubConfigurables ();
 

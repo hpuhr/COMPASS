@@ -91,6 +91,8 @@ void DBSchema::addTable(const std::string &name)
 
     generateSubConfigurable("DBTable", name);
     assert (hasTable(name));
+
+    emit changedSignal();
 }
 
 void DBSchema::deleteTable (const std::string &name)
@@ -110,12 +112,16 @@ void DBSchema::deleteTable (const std::string &name)
         if (it.second->hasSubTable(name))
             it.second->removeSubTable(name);
     }
+
+    emit changedSignal();
 }
 
 void DBSchema::populateTable (const std::string &name)
 {
     assert (hasTable(name));
     tables_.at(name)->populate();
+
+    emit changedSignal();
 }
 
 bool DBSchema::hasMetaTable (const std::string &name) const
@@ -134,6 +140,8 @@ void DBSchema::addMetaTable(const std::string &name, const std::string &main_tab
 
     generateSubConfigurable("MetaDBTable", "MetaDBTable"+name);
     assert (hasMetaTable(name));
+
+    emit changedSignal();
 }
 
 void DBSchema::deleteMetaTable (const std::string &name)
@@ -141,6 +149,8 @@ void DBSchema::deleteMetaTable (const std::string &name)
     assert (hasMetaTable(name));
     delete meta_tables_.at(name);
     meta_tables_.erase (name);
+
+    emit changedSignal();
 }
 
 void DBSchema::updateTables ()

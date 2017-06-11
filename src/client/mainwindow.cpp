@@ -46,18 +46,13 @@
 #include "config.h"
 #include "workerthreadmanager.h"
 #include "configurationmanager.h"
-//#include "DBObjectWidget.h"
+#include "dbobjectmanagerwidget.h"
 #include "atsdb.h"
 #include "dbinterfacewidget.h"
 #include "dbschemamanagerwidget.h"
-//#include "DBSchema.h"
-//#include "DBSchemaManager.h"
-//#include "DBSchemaWidget.h"
-//#include "DBConnectionInfo.h"
 #include "stringconv.h"
 //#include "ProjectionManager.h"
 //#include "ProjectionManagerWidget.h"
-//#include "MainWidget.h"
 
 using namespace Utils;
 using namespace std;
@@ -66,7 +61,7 @@ using namespace std;
 //{
 
 MainWindow::MainWindow()
-    : dbinterface_widget_(nullptr), dbschema_manager_widget_(nullptr), start_button_(nullptr) //, object_widget_ (0)
+    : dbinterface_widget_(nullptr), dbschema_manager_widget_(nullptr),  object_manager_widget_ (nullptr), start_button_(nullptr)
 {
     logdbg  << "MainWindow: constructor";
 
@@ -81,17 +76,20 @@ MainWindow::MainWindow()
     QVBoxLayout *main_layout = new QVBoxLayout ();
 
     // for se widgets
-    QHBoxLayout *layout = new QHBoxLayout ();
+    QHBoxLayout *widget_layout = new QHBoxLayout();
     dbinterface_widget_ = ATSDB::getInstance().dbInterfaceWidget();
     QObject::connect(dbinterface_widget_, SIGNAL(databaseOpenedSignal()), this, SLOT(databaseOpenedSlot()));
-    layout->addWidget(dbinterface_widget_);
+    widget_layout->addWidget(dbinterface_widget_);
+
 
     dbschema_manager_widget_ = ATSDB::getInstance().dbSchemaManagerWidget();
     QObject::connect(dbinterface_widget_, SIGNAL(databaseOpenedSignal()), dbschema_manager_widget_, SLOT(databaseOpenedSlot()));
-    layout->addWidget(dbschema_manager_widget_);
-    main_layout->addLayout(layout);
+    widget_layout->addWidget(dbschema_manager_widget_);
 
-    //object_widget_ = new DBObjectWidget ();
+    object_manager_widget_ = ATSDB::getInstance().dbObjectManagerWidget();
+    widget_layout->addWidget(object_manager_widget_);
+
+    main_layout->addLayout(widget_layout);
 
     QHBoxLayout *start_layout = new QHBoxLayout ();
     start_layout->addStretch();

@@ -84,6 +84,8 @@ void DBSchemaManager::setCurrentSchema (const std::string &current_schema)
     assert (current_schema.size() != 0);
     assert (schemas_.find(current_schema) != schemas_.end());
     current_schema_=current_schema;
+
+    emit schemaChangedSignal();
 }
 
 bool DBSchemaManager::hasCurrentSchema ()

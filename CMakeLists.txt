@@ -136,7 +136,6 @@ set ( atsdb_HDRS
 #        src/job/writebufferdbjob.h
 #        src/job/postprocessdbjob.h
 #        src/job/transformationjob.h
-        src/object/dbobject.h
         src/object/dbobjectmanager.h
         src/object/dbovariable.h
         src/object/dbovariableset.h
@@ -160,8 +159,6 @@ set ( atsdb_HDRS
 #        src/result/bufferreceiver.h
         src/schema/dbtable.h
         src/schema/dbtablecolumn.h
-        src/schema/dbschema.h
-        src/schema/dbschemamanager.h
         src/schema/metadbtable.h
         src/struct/structuredescription.h
 ##        src/struct/structuredescriptionplot.h
@@ -227,12 +224,15 @@ set (atsdb_MOC_HEADERS
 #        src/gui/transformationvariableeditdialog.h
 #        src/gui/filtereditdialog.h
 #        src/schema/dbtablecolumncombobox.h
-        src/schema/dbschemamanagerwidget.h
+        src/schema/dbschema.h
         src/schema/dbschemawidget.h
+        src/schema/dbschemamanager.h
+        src/schema/dbschemamanagerwidget.h
         src/schema/dbtablewidget.h
         src/schema/metadbtablewidget.h
-        src/object/dbobjectmanagerwidget.h
+        src/object/dbobject.h
         src/object/dbobjectwidget.h
+        src/object/dbobjectmanagerwidget.h
 #        src/object/dbovariablecombobox.h
 #        src/object/dbovariablesetwidget.h
 #        src/object/dbovariableorderedsetwidget.h

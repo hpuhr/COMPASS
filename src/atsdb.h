@@ -44,6 +44,7 @@ class DBInterfaceWidget;
 class DBTableInfo;
 class DBObject;
 class DBObjectManager;
+class DBObjectManagerWidget;
 class DBSchema;
 class DBSchemaManager;
 class DBSchemaManagerWidget;
@@ -126,6 +127,7 @@ public:
 
     DBInterfaceWidget *dbInterfaceWidget ();
     DBSchemaManagerWidget *dbSchemaManagerWidget ();
+    DBObjectManagerWidget *dbObjectManagerWidget ();
 
     const std::map <std::string, DBTableInfo> &tableInfo ();
 

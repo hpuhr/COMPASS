@@ -28,13 +28,14 @@
 #include "dbovariableset.h"
 #include "dbobjectmanager.h"
 #include "logger.h"
+#include "dbobjectmanagerwidget.h"
 //#include "structureDescriptionManager.h"
 
 /**
  * Creates sub-configurables.
  */
 DBObjectManager::DBObjectManager(const std::string &class_id, const std::string &instance_id, Configurable *parent)
-: Configurable (class_id, instance_id, parent, "conf/config_dbo.xml") //, registered_parent_variables_ (false)
+: Configurable (class_id, instance_id, parent, "conf/config_dbo.xml"), widget_(nullptr) //, registered_parent_variables_ (false)
 {
     logdbg  << "DBObjectManager: constructor: creating subconfigurables";
 
@@ -79,7 +80,7 @@ void DBObjectManager::generateSubConfigurable (const std::string &class_id, cons
         DBObject *object = new DBObject (class_id, instance_id, this);
         loginf  << "DBObjectManager: generateSubConfigurable: adding object type " << object->name();
         assert (objects_.find(object->name()) == objects_.end());
-        objects_.insert(std::pair <std::string, DBObject> (object->name(), *object));
+        objects_.insert(std::pair <std::string, DBObject*> (object->name(), object));
     }
     else
         throw std::runtime_error ("DBObjectManager: generateSubConfigurable: unknown class_id "+class_id );
@@ -105,7 +106,7 @@ DBObject &DBObjectManager::get (const std::string &dbo_name)
 
     assert (objects_.find(dbo_name) != objects_.end());
 
-    return objects_.at(dbo_name);
+    return *objects_.at(dbo_name);
 }
 
 /**
@@ -162,3 +163,15 @@ DBObject &DBObjectManager::get (const std::string &dbo_name)
 //        registered_parent_variables_=true;
 //    }
 //}
+
+DBObjectManagerWidget *DBObjectManager::widget(DBSchemaManager &schema_manager)
+{
+    if (!widget_)
+    {
+        widget_ = new DBObjectManagerWidget (*this, schema_manager);
+    }
+
+    assert (widget_);
+    return widget_;
+}
+

@@ -183,6 +183,13 @@ DBSchemaManagerWidget *ATSDB::dbSchemaManagerWidget ()
 
 }
 
+DBObjectManagerWidget *ATSDB::dbObjectManagerWidget ()
+{
+    assert (dbo_manager_);
+    assert (db_schema_manager_);
+    return dbo_manager_->widget(*db_schema_manager_);
+}
+
 bool ATSDB::ready ()
 {
     if (!db_interface_)

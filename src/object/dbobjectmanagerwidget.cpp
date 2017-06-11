@@ -49,13 +49,10 @@ DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager &object_manager, DB
     QFont font_bold;
     font_bold.setBold(true);
 
-    QFont font_big;
-    font_big.setPointSize(18);
-
     QVBoxLayout *main_layout = new QVBoxLayout ();
 
     QLabel *main_label = new QLabel ("Database objects");
-    main_label->setFont (font_big);
+    main_label->setFont (font_bold);
     main_layout->addWidget (main_label);
 
     QFrame *dob_frame = new QFrame ();
@@ -117,6 +114,8 @@ DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager &object_manager, DB
     //    new_meta_layout->addWidget (new_meta_button_);
 
     //    main_layout->addLayout (new_meta_layout);
+
+    main_layout->addStretch();
 
     setLayout (main_layout);
 }
@@ -257,17 +256,17 @@ void DBObjectManagerWidget::updateDBOs ()
 
     for (auto it = objects.begin(); it != objects.end(); it++)
     {
-        QLabel *name = new QLabel (it->second.name().c_str());
+        QLabel *name = new QLabel (it->second->name().c_str());
         grid_->addWidget (name, row, 0);
 
-        QLabel *info = new QLabel (it->second.info().c_str());
+        QLabel *info = new QLabel (it->second->info().c_str());
         grid_->addWidget (info, row, 1);
 
         QPushButton *edit = new QPushButton ("Edit");
         connect(edit, SIGNAL( clicked() ), this, SLOT( editDBO() ));
         grid_->addWidget (edit, row, 2);
         edit->setDisabled (!unlocked_);
-        edit_dbo_buttons_ [edit] = &it->second;
+        edit_dbo_buttons_ [edit] = it->second;
 
         row++;
     }

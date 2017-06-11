@@ -30,9 +30,9 @@
 //#include "JobOrderer.h"
 
 class QPushButton;
-//class DBObjectWidget;
 class DBSelectionWidget;
 class DBSchemaManagerWidget;
+class DBObjectManagerWidget;
 class QStackedWidget;
 
 //namespace ATSDB
@@ -75,7 +75,7 @@ protected:
     QWidget *dbschema_manager_widget_;
 
     /// Contains DBObject configuration elements
-    //DBObjectWidget *object_widget_;
+    DBObjectManagerWidget *object_manager_widget_;
 
     //static const unsigned int info_height_=200;
 

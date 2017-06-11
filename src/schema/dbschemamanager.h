@@ -26,6 +26,7 @@
 #define DBSCHEMAMANAGER_H_
 
 #include "configurable.h"
+#include <qobject.h>
 
 class DBSchema;
 class DBSchemaManagerWidget;
@@ -37,53 +38,58 @@ class DBSchemaManagerWidget;
  *
  * \todo Check why addRDLSchema is the same addEmptySchema.
  */
-class DBSchemaManager : public Configurable
+class DBSchemaManager : public QObject, public Configurable
 {
+    Q_OBJECT
+
+signals:
+    void schemaChangedSignal ();
+
 public:
-  /// @brief Constructor
-  DBSchemaManager(const std::string &class_id, const std::string &instance_id, Configurable *parent);
+    /// @brief Constructor
+    DBSchemaManager(const std::string &class_id, const std::string &instance_id, Configurable *parent);
 
-  /// @brief Destructor
-  virtual ~DBSchemaManager();
+    /// @brief Destructor
+    virtual ~DBSchemaManager();
 
-  /// @brief Returns flag indicating if current schema is defined and exists
-  bool hasCurrentSchema ();
-  /// @brief Returns name of the current schema
-  const std::string &getCurrentSchemaName ();
-  /// @brief Returns the current DBSchema
-  DBSchema &getCurrentSchema ();
-  /// @brief Returns the DBSchema with a given name
-  DBSchema &getSchema (const std::string &name);
-  /// @brief Returns if DBSchema with a given name exists
-  bool hasSchema (const std::string &name);
-  void deleteCurrentSchema ();
+    /// @brief Returns flag indicating if current schema is defined and exists
+    bool hasCurrentSchema ();
+    /// @brief Returns name of the current schema
+    const std::string &getCurrentSchemaName ();
+    /// @brief Returns the current DBSchema
+    DBSchema &getCurrentSchema ();
+    /// @brief Returns the DBSchema with a given name
+    DBSchema &getSchema (const std::string &name);
+    /// @brief Returns if DBSchema with a given name exists
+    bool hasSchema (const std::string &name);
+    void deleteCurrentSchema ();
 
-  /// @brief Returns container with all schemas
-  std::map <std::string, DBSchema*>& getSchemas () { return schemas_; }
+    /// @brief Returns container with all schemas
+    std::map <std::string, DBSchema*>& getSchemas () { return schemas_; }
 
-  /// @brief Renames the current schema
-  void renameCurrentSchema (const std::string &new_name);
-  /// @brief Sets the current schema
-  void setCurrentSchema (const std::string &current_schema);
-  /// @brief Adds an empty schema with a given name
-  void addEmptySchema (const std::string &name);
-  /// @brief Adds an RDL schema with a given name
-  //void addRDLSchema (std::string name);
+    /// @brief Renames the current schema
+    void renameCurrentSchema (const std::string &new_name);
+    /// @brief Sets the current schema
+    void setCurrentSchema (const std::string &current_schema);
+    /// @brief Adds an empty schema with a given name
+    void addEmptySchema (const std::string &name);
+    /// @brief Adds an RDL schema with a given name
+    //void addRDLSchema (std::string name);
 
-  virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
+    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
-  DBSchemaManagerWidget *widget();
+    DBSchemaManagerWidget *widget();
 
 protected:
-  /// Name of current DBSchema
-  std::string current_schema_;
-  /// Container with all defined schemas (schema name -> DBSchema)
-  std::map <std::string, DBSchema*> schemas_;
+    /// Name of current DBSchema
+    std::string current_schema_;
+    /// Container with all defined schemas (schema name -> DBSchema)
+    std::map <std::string, DBSchema*> schemas_;
 
-  DBSchemaManagerWidget *widget_;
+    DBSchemaManagerWidget *widget_;
 
-  //void loadDBSchema (); // outdated method
-  virtual void checkSubConfigurables ();
+    //void loadDBSchema (); // outdated method
+    virtual void checkSubConfigurables ();
 
 
 };
