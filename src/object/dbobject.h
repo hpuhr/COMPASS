@@ -47,17 +47,17 @@ class DBOSchemaMetaTableDefinition : public Configurable
 {
 public:
     /// @brief Constructor, registers parameters
-    DBOSchemaMetaTableDefinition(std::string class_id, std::string instance_id, Configurable *parent)
+    DBOSchemaMetaTableDefinition(const std::string &class_id, const std::string &instance_id, Configurable *parent)
         : Configurable (class_id, instance_id, parent)
     {
-        registerParameter ("schema", &schema_, (std::string)"");
-        registerParameter ("meta_table", &meta_table_,  (std::string)"");
+        registerParameter ("schema", &schema_, "");
+        registerParameter ("meta_table", &meta_table_, "");
     }
     /// @brief Destructor
     virtual ~DBOSchemaMetaTableDefinition() {}
 
-    std::string getSchema () { return schema_; }
-    std::string getMetaTable () { return meta_table_; }
+    const std::string &schema () { return schema_; }
+    const std::string &metaTable () { return meta_table_; }
 
 protected:
     /// DBSchema identifier
@@ -73,22 +73,22 @@ class DBODataSourceDefinition : public Configurable
 {
 public:
     /// @brief Constructor, registers parameters
-    DBODataSourceDefinition(std::string class_id, std::string instance_id, Configurable *parent)
+    DBODataSourceDefinition(const std::string &class_id, const std::string &instance_id, Configurable *parent)
         : Configurable (class_id, instance_id, parent)
     {
-        registerParameter ("schema", &schema_, (std::string)"");
-        registerParameter ("local_key", &local_key_, (std::string)"");
-        registerParameter ("meta_table", &meta_table_,  (std::string)"");
-        registerParameter ("foreign_key", &foreign_key_, (std::string)"");
-        registerParameter ("name_column", &name_column_, (std::string)"");
+        registerParameter ("schema", &schema_, "");
+        registerParameter ("local_key", &local_key_, "");
+        registerParameter ("meta_table", &meta_table_,  "");
+        registerParameter ("foreign_key", &foreign_key_, "");
+        registerParameter ("name_column", &name_column_, "");
     }
     virtual ~DBODataSourceDefinition() {}
 
-    std::string getSchema () { return schema_; }
-    std::string getLocalKey () { return local_key_; }
-    std::string getMetaTableName () { return meta_table_; }
-    std::string getForeignKey () { return foreign_key_; }
-    std::string getNameColumn () { return name_column_; }
+    std::string schema () { return schema_; }
+    std::string localKey () { return local_key_; }
+    std::string metaTableName () { return meta_table_; }
+    std::string foreignKey () { return foreign_key_; }
+    std::string nameColumn () { return name_column_; }
 
 protected:
     /// DBSchema identifier
@@ -102,6 +102,8 @@ protected:
     /// Identifier for sensor name column in meta table with data sources
     std::string name_column_;
 };
+
+class DBObjectWidget;
 
 /**
  * @brief Abstract data description of an object stored in a database
@@ -147,7 +149,7 @@ public:
     void deleteVariable (std::string id);
 
     /// @brief Returns container with all variables
-    const std::map<std::string, DBOVariable> &variables () const;
+    const std::map<std::string, DBOVariable*> &variables () const;
     /// @brief Returns number of existing variables
     unsigned int numVariables () const { return variables_.size(); }
 
@@ -190,7 +192,7 @@ public:
     /// @brief Returns current data source definition
     const DBODataSourceDefinition &currentDataSource () const;
     /// @brief Returns container with all data source definitions
-    const std::map <std::string, DBODataSourceDefinition> &dataSourceDefinitions () const { return data_source_definitions_; }
+    const std::map <std::string, DBODataSourceDefinition *> &dataSourceDefinitions () const { return data_source_definitions_; }
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
@@ -214,6 +216,8 @@ public:
     /// @brief In meta object, unregisters meta variables as parent variables
     //void unregisterParentVariables ();
 
+    DBObjectWidget *widget ();
+
 protected:
     /// DBO type
     //std::string dbo_type_;
@@ -227,14 +231,14 @@ protected:
     //bool is_meta_;
 
     /// Container with all DBOSchemaMetaTableDefinitions
-    std::vector <DBOSchemaMetaTableDefinition> meta_table_definitions_;
+    std::vector <DBOSchemaMetaTableDefinition*> meta_table_definitions_;
     /// Container with the main meta tables for schemas (schema identifier -> meta_table identifier)
     std::map <std::string, std::string> meta_tables_;
 
     /// Container with data source definitions (schema identifier -> data source definition pointer)
-    std::map <std::string, DBODataSourceDefinition> data_source_definitions_;
+    std::map <std::string, DBODataSourceDefinition*> data_source_definitions_;
     /// Container with all variables (variable identifier -> variable pointer)
-    std::map<std::string, DBOVariable> variables_;
+    std::map<std::string, DBOVariable*> variables_;
 
     /// Container with all observers of the active data sources information
     std::vector <ActiveSourcesObserver *> active_sources_observers_;
@@ -248,6 +252,8 @@ protected:
     bool variables_checked_;
     /// Flag indicating if the active data sources information is present
     bool has_active_data_sources_info_;
+
+    DBObjectWidget *widget_;
 
     virtual void checkSubConfigurables ();
     /// @brief Checks if variables really exist. Not used yet.

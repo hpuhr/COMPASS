@@ -86,19 +86,9 @@ ATSDB::~ATSDB()
 
     //delete struct_reader_;
 
-    if (db_interface_ != nullptr)
-    {
-        delete db_interface_;
-        db_interface_ = nullptr;
-    }
-
-    if (dbo_manager_ != nullptr)
-    {
-        delete dbo_manager_;
-        dbo_manager_ = nullptr;
-    }
-
-    assert (db_schema_manager_ == nullptr);
+    assert (dbo_manager_ == 0);
+    assert (db_schema_manager_ == 0);
+    assert (db_interface_ == 0);
 
 //    if (dbo_read_jobs_.size() > 0)
 //        logerr << "ATSDB: destructor: unfinished dbo read jobs " << dbo_read_jobs_.size();
@@ -170,24 +160,22 @@ void ATSDB::checkSubConfigurables ()
 
 }
 
-DBInterfaceWidget *ATSDB::dbInterfaceWidget ()
+DBInterface &ATSDB::dbInterface ()
 {
     assert (db_interface_);
-    return db_interface_->widget();
+    return *db_interface_;
 }
 
-DBSchemaManagerWidget *ATSDB::dbSchemaManagerWidget ()
+DBSchemaManager &ATSDB::schemaManager ()
 {
     assert (db_schema_manager_);
-    return db_schema_manager_->widget();
-
+    return *db_schema_manager_;
 }
 
-DBObjectManagerWidget *ATSDB::dbObjectManagerWidget ()
+DBObjectManager &ATSDB::dbObjectManager ()
 {
     assert (dbo_manager_);
-    assert (db_schema_manager_);
-    return dbo_manager_->widget(*db_schema_manager_);
+    return *dbo_manager_;
 }
 
 bool ATSDB::ready ()
@@ -302,9 +290,17 @@ void ATSDB::shutdown ()
     assert (db_interface_);
     db_interface_->closeConnection();
 
+    assert (dbo_manager_);
+    delete dbo_manager_;
+    dbo_manager_ = nullptr;
+
     assert (db_schema_manager_);
     delete db_schema_manager_;
     db_schema_manager_ = nullptr;
+
+    assert (db_interface_);
+    delete db_interface_;
+    db_interface_ = nullptr;
 
 //    if (struct_reader_->hasUnwrittenData())
 //    {

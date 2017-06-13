@@ -431,10 +431,10 @@ void DBObjectWidget::updateDSLocalKeySelection()
   unsigned int cnt=0;
   for (auto it = variables.begin(); it != variables.end(); it++)
   {
-    if (selection.size()>0 && selection.compare(it->second.getName()) == 0)
+    if (selection.size()>0 && selection.compare(it->second->getName()) == 0)
       index_cnt=cnt;
 
-    ds_local_key_box_->addItem (it->second.getName().c_str());
+    ds_local_key_box_->addItem (it->second->getName().c_str());
 
     cnt++;
   }
@@ -552,19 +552,19 @@ void DBObjectWidget::updateDataSourcesGrid ()
   unsigned int row=1;
   for (auto it = dsdefs.begin(); it != dsdefs.end(); it++)
   {
-    QLabel *schema = new QLabel (it->second.getSchema().c_str());
+    QLabel *schema = new QLabel (it->second->schema().c_str());
     ds_grid_->addWidget (schema, row, 0);
 
-    QLabel *localkey= new QLabel (it->second.getLocalKey().c_str());
+    QLabel *localkey= new QLabel (it->second->localKey().c_str());
     ds_grid_->addWidget (localkey, row, 1);
 
-    QLabel *meta= new QLabel (it->second.getMetaTableName().c_str());
+    QLabel *meta= new QLabel (it->second->metaTableName().c_str());
     ds_grid_->addWidget (meta, row, 2);
 
-    QLabel *foreignkey= new QLabel (it->second.getForeignKey().c_str());
+    QLabel *foreignkey= new QLabel (it->second->foreignKey().c_str());
     ds_grid_->addWidget (foreignkey, row, 3);
 
-    QLabel *namecol= new QLabel (it->second.getNameColumn().c_str());
+    QLabel *namecol= new QLabel (it->second->nameColumn().c_str());
     ds_grid_->addWidget (namecol, row, 4);
 
     row++;
@@ -859,27 +859,27 @@ void DBObjectWidget::updateDBOVarsGrid ()
     del->setFlat(true);
     connect(del, SIGNAL( clicked() ), this, SLOT( deleteDBOVar() ));
     assert (dbo_vars_grid_delete_buttons_.find(del) == dbo_vars_grid_delete_buttons_.end());
-    dbo_vars_grid_delete_buttons_ [del] = &it->second;
+    dbo_vars_grid_delete_buttons_ [del] = it->second;
     dbovars_grid_->addWidget (del, row, 0);
 
     //logdbg  << "DBObjectWidget: updateDBOVarsGrid: creating variable row for " << it->first << " name";
-    QLineEdit *name = new QLineEdit (it->second.getName().c_str());
+    QLineEdit *name = new QLineEdit (it->second->getName().c_str());
     connect(name, SIGNAL( returnPressed() ), this, SLOT( editDBOVarName() ));
     assert (dbo_vars_grid_name_edits_.find(name) == dbo_vars_grid_name_edits_.end());
-    dbo_vars_grid_name_edits_[name] = &it->second;
+    dbo_vars_grid_name_edits_[name] = it->second;
     dbovars_grid_->addWidget (name, row, 1);
 
     //logdbg  << "DBObjectWidget: updateDBOVarsGrid: creating variable row for " << it->first << " info";
-    QLineEdit *info = new QLineEdit (it->second.getInfo().c_str());
+    QLineEdit *info = new QLineEdit (it->second->getInfo().c_str());
     connect(info, SIGNAL( returnPressed() ), this, SLOT( editDBOVarInfo() ));
     assert (dbo_vars_grid_info_edits_.find(info) == dbo_vars_grid_info_edits_.end());
-    dbo_vars_grid_info_edits_[info] = &it->second;
+    dbo_vars_grid_info_edits_[info] = it->second;
     dbovars_grid_->addWidget (info, row, 2);
 
     //logdbg  << "DBObjectWidget: updateDBOVarsGrid: creating variable row for " << it->first << " property";
-    DBOVariableDataTypeComboBox *type = new DBOVariableDataTypeComboBox (&it->second);
+    DBOVariableDataTypeComboBox *type = new DBOVariableDataTypeComboBox (it->second);
     assert (dbo_vars_grid_data_type_boxes_.find(type) == dbo_vars_grid_data_type_boxes_.end());
-    dbo_vars_grid_data_type_boxes_[type] = &it->second;
+    dbo_vars_grid_data_type_boxes_[type] = it->second;
     dbovars_grid_->addWidget (type, row, 3);
 
     //logdbg  << "DBObjectWidget: updateDBOVarsGrid: creating variable row for " << it->first << " stringrep";
@@ -891,7 +891,7 @@ void DBObjectWidget::updateDBOVarsGrid ()
 //    dbovars_grid_->addWidget (repr, row, 4);
 
     //logdbg  << "DBObjectWidget: updateDBOVarsGrid: creating variable row for " << it->first << " unit";
-    UnitSelectionWidget *unit_sel = new UnitSelectionWidget (it->second.getUnitDimension(), it->second.getUnitUnit());
+    UnitSelectionWidget *unit_sel = new UnitSelectionWidget (it->second->getUnitDimension(), it->second->getUnitUnit());
     dbovars_grid_->addWidget (unit_sel, row, 5);
 
     //logdbg  << "DBObjectWidget: updateDBOVarsGrid: variable row for schemas";
@@ -901,7 +901,7 @@ void DBObjectWidget::updateDBOVarsGrid ()
       if (metas.find (sit->second->name()) == metas.end())
         continue;
 
-      DBTableColumnComboBox *box = new DBTableColumnComboBox (sit->second->name(), metas[sit->second->name()], &it->second);
+      DBTableColumnComboBox *box = new DBTableColumnComboBox (sit->second->name(), metas[sit->second->name()], it->second);
       dbovars_grid_->addWidget (box, row, col);
       col++;
     }

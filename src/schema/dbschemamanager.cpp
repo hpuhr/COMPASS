@@ -55,9 +55,7 @@ DBSchemaManager::~DBSchemaManager()
 {
     for (auto it : schemas_)
         delete it.second;
-
     schemas_.clear();
-
 
     if (widget_)
     {

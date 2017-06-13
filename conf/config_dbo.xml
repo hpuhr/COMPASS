@@ -1,2 +1,11 @@
 <Configuration class_id="DBObjectManager" instance_id="DBObjectManager0">
+    <Configuration class_id="DBObject" instance_id="DBObjectRadar0">
+        <ParameterBool is_loadable="0"/>
+        <ParameterString info=""/>
+        <ParameterString name="Radar"/>
+        <Configuration class_id="DBOSchemaMetaTableDefinition" instance_id="DBOSchemaMetaTableDefinition0">
+            <ParameterString meta_table="Radar"/>
+            <ParameterString schema="SCDB"/>
+        </Configuration>
+    </Configuration>
 </Configuration>

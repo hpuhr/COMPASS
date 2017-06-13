@@ -28,6 +28,7 @@
 #include "dbschema.h"
 #include "dbschemamanager.h"
 #include "dbobject.h"
+#include "dbobjectwidget.h"
 #include "dbobjectmanager.h"
 #include "dbovariable.h"
 //#include "StructureDescriptionManager.h"
@@ -40,18 +41,17 @@
  * Registers parameters, creates sub configurables
  */
 DBObject::DBObject(std::string class_id, std::string instance_id, Configurable *parent)
- : Configurable (class_id, instance_id, parent), current_meta_table_(0), variables_checked_(false),
-   has_active_data_sources_info_(false)
+    : Configurable (class_id, instance_id, parent), current_meta_table_(0), variables_checked_(false),
+      has_active_data_sources_info_(false), widget_(nullptr)
 {
-  registerParameter ("name" , &name_, "Undefined");
-  registerParameter ("info" , &info_, "");
-  //registerParameter ("dbo_type" , &dbo_type_, "");
-  registerParameter ("is_loadable" , &is_loadable_, false);
-  //registerParameter ("is_meta" , &is_meta_, false);
+    registerParameter ("name" , &name_, "Undefined");
+    registerParameter ("info" , &info_, "");
+    registerParameter ("is_loadable" , &is_loadable_, false);
+    //registerParameter ("is_meta" , &is_meta_, false);
 
-  createSubConfigurables ();
+    createSubConfigurables ();
 
-  logdbg  << "DBObject: constructor: created with instance_id " << instance_id_ << " name " << name_;
+    logdbg  << "DBObject: constructor: created with instance_id " << instance_id_ << " name " << name_;
 }
 
 /**
@@ -59,60 +59,62 @@ DBObject::DBObject(std::string class_id, std::string instance_id, Configurable *
  */
 DBObject::~DBObject()
 {
-//  std::map <std::string, DBODataSourceDefinition *>::iterator it;
-//  for (it = data_source_definitions_.begin(); it != data_source_definitions_.end(); it++)
-//    delete it->second;
-  data_source_definitions_.clear();
+    for (auto it = data_source_definitions_.begin(); it != data_source_definitions_.end(); it++)
+        delete it->second;
+    data_source_definitions_.clear();
 
-//  std::vector <DBOSchemaMetaTableDefinition *>::iterator it2;
-//  for (it2 = meta_table_definitions_.begin(); it2 != meta_table_definitions_.end(); it2++)
-//    delete *it2;
-  meta_table_definitions_.clear();
+    for (auto it = meta_table_definitions_.begin(); it != meta_table_definitions_.end(); it++)
+        delete *it;
+    meta_table_definitions_.clear();
 
-//  std::map<std::string, DBOVariable*>::iterator it3;
-//  for (it3 = variables_.begin(); it3 !=  variables_.end(); it3++)
-//    delete it3->second;
-  variables_.clear();
+    for (auto it = variables_.begin(); it !=  variables_.end(); it++)
+        delete it->second;
+    variables_.clear();
 
+    if (widget_)
+    {
+        delete widget_;
+        widget_=nullptr;
+    }
 }
 
 bool DBObject::hasVariable (const std::string &id) const
 {
-//  if (!variables_checked_)
-//    checkVariables ();
+    //  if (!variables_checked_)
+    //    checkVariables ();
 
-  return (variables_.find (id) != variables_.end());
+    return (variables_.find (id) != variables_.end());
 }
 
 DBOVariable &DBObject::variable (std::string variable_id)
 {
-//  if (!variables_checked_)
-//    checkVariables ();
+    //  if (!variables_checked_)
+    //    checkVariables ();
 
-  assert (hasVariable (variable_id));
-  return variables_.at(variable_id);
+    assert (hasVariable (variable_id));
+    return *variables_.at(variable_id);
 }
 
 void DBObject::deleteVariable (std::string id)
 {
-//  if (!variables_checked_)
-//    checkVariables ();
+    //  if (!variables_checked_)
+    //    checkVariables ();
 
-  assert (hasVariable (id));
-  //std::map<std::string, DBOVariable*>::iterator it;
-  //it = variables_.find (id);
-  //DBOVariable *variable = it->second;
-  variables_.erase(variables_.find (id));
-  assert (!hasVariable (id));
-  //delete variable;
+    assert (hasVariable (id));
+    //std::map<std::string, DBOVariable*>::iterator it;
+    //it = variables_.find (id);
+    //DBOVariable *variable = it->second;
+    variables_.erase(variables_.find (id));
+    assert (!hasVariable (id));
+    //delete variable;
 }
 
-const std::map<std::string, DBOVariable> &DBObject::variables () const
+const std::map<std::string, DBOVariable*> &DBObject::variables () const
 {
-//  if (!variables_checked_)
-//    checkVariables ();
+    //  if (!variables_checked_)
+    //    checkVariables ();
 
-  return variables_;
+    return variables_;
 }
 
 /**
@@ -140,8 +142,8 @@ const std::map<std::string, DBOVariable> &DBObject::variables () const
 
 const std::string &DBObject::metaTable (const std::string &schema) const
 {
-  assert (meta_tables_.find(schema) != meta_tables_.end());
-  return meta_tables_.at(schema);
+    assert (meta_tables_.find(schema) != meta_tables_.end());
+    return meta_tables_.at(schema);
 }
 
 /**
@@ -149,13 +151,13 @@ const std::string &DBObject::metaTable (const std::string &schema) const
  */
 bool DBObject::hasCurrentDataSource () const
 {
-  return (data_source_definitions_.find(ATSDB::getInstance().getCurrentSchema().name()) != data_source_definitions_.end());
+    return (data_source_definitions_.find(ATSDB::getInstance().getCurrentSchema().name()) != data_source_definitions_.end());
 }
 
 const DBODataSourceDefinition &DBObject::currentDataSource () const
 {
-  assert (hasCurrentDataSource());
-  return data_source_definitions_.at(ATSDB::getInstance().getCurrentSchema().name());
+    assert (hasCurrentDataSource());
+    return *data_source_definitions_.at(ATSDB::getInstance().getCurrentSchema().name());
 }
 
 /**
@@ -164,20 +166,19 @@ const DBODataSourceDefinition &DBObject::currentDataSource () const
  */
 bool DBObject::hasCurrentMetaTable () const
 {
-  if (current_meta_table_ != 0)
-    return true;
-  else
-  {
-    DBSchema &schema = ATSDB::getInstance().getCurrentSchema();
-    logdbg  << "DBObject "<< name() << ": hasCurrentMetaTable: got current schema " << schema.name();
-    logdbg  << "DBObject "<< name() << ": hasCurrentMetaTable: meta tables:";
-    for (auto it = meta_tables_.begin(); it != meta_tables_.end(); it++)
-        logdbg << it->first << ": " << it->second;
-    assert (meta_tables_.find(schema.name()) != meta_tables_.end());
-    std::string meta_table_name = meta_tables_ .at(schema.name());
-    return schema.hasMetaTable (meta_table_name);
-  }
-
+    if (current_meta_table_ != 0)
+        return true;
+    else
+    {
+        DBSchema &schema = ATSDB::getInstance().getCurrentSchema();
+        logdbg  << "DBObject "<< name() << ": hasCurrentMetaTable: got current schema " << schema.name();
+        logdbg  << "DBObject "<< name() << ": hasCurrentMetaTable: meta tables:";
+        for (auto it = meta_tables_.begin(); it != meta_tables_.end(); it++)
+            logdbg << it->first << ": " << it->second;
+        assert (meta_tables_.find(schema.name()) != meta_tables_.end());
+        std::string meta_table_name = meta_tables_ .at(schema.name());
+        return schema.hasMetaTable (meta_table_name);
+    }
 }
 
 /**
@@ -186,16 +187,16 @@ bool DBObject::hasCurrentMetaTable () const
  */
 const MetaDBTable &DBObject::currentMetaTable ()
 {
-  if (!current_meta_table_)
-  {
-    DBSchema &schema = ATSDB::getInstance().getCurrentSchema();
-    assert (meta_tables_.find(schema.name()) != meta_tables_.end());
-    std::string meta_table_name = meta_tables_ .at(schema.name());
-    assert (schema.hasMetaTable (meta_table_name));
-    current_meta_table_ = &schema.metaTable (meta_table_name);
-  }
-  assert (current_meta_table_);
-  return *current_meta_table_;
+    if (!current_meta_table_)
+    {
+        DBSchema &schema = ATSDB::getInstance().getCurrentSchema();
+        assert (meta_tables_.find(schema.name()) != meta_tables_.end());
+        std::string meta_table_name = meta_tables_ .at(schema.name());
+        assert (schema.hasMetaTable (meta_table_name));
+        current_meta_table_ = &schema.metaTable (meta_table_name);
+    }
+    assert (current_meta_table_);
+    return *current_meta_table_;
 }
 
 /**
@@ -203,56 +204,56 @@ const MetaDBTable &DBObject::currentMetaTable ()
  */
 void DBObject::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
-  logdbg  << "DBObject: generateSubConfigurable: generating variable " << instance_id;
-  if (class_id.compare ("DBOVariable") == 0)
-  {
-    DBOVariable *variable = new DBOVariable (class_id, instance_id, this);
-    assert (variables_.find (variable->getId()) == variables_.end());
-    variables_.insert (std::pair <std::string, DBOVariable> (variable->getId(), *variable));
-  }
-  else if (class_id.compare ("DBOSchemaMetaTableDefinition") == 0)
-  {
-    DBOSchemaMetaTableDefinition *def = new DBOSchemaMetaTableDefinition (class_id, instance_id, this);
-    meta_table_definitions_.push_back (*def);
+    logdbg  << "DBObject: generateSubConfigurable: generating variable " << instance_id;
+    if (class_id.compare ("DBOVariable") == 0)
+    {
+        DBOVariable *variable = new DBOVariable (class_id, instance_id, this);
+        assert (variables_.find (variable->getId()) == variables_.end());
+        variables_.insert (std::pair <std::string, DBOVariable*> (variable->getId(), variable));
+    }
+    else if (class_id.compare ("DBOSchemaMetaTableDefinition") == 0)
+    {
+        DBOSchemaMetaTableDefinition *def = new DBOSchemaMetaTableDefinition (class_id, instance_id, this);
+        meta_table_definitions_.push_back (def);
 
-    logdbg  << "DBObject "<< name() << ": generateSubConfigurable: schema " << def->getSchema() << " meta " << def->getMetaTable();
+        logdbg  << "DBObject "<< name() << ": generateSubConfigurable: schema " << def->schema() << " meta " << def->metaTable();
 
-    assert (meta_tables_.find (def->getSchema()) == meta_tables_.end());
-    meta_tables_[def->getSchema()] = def->getMetaTable();
-  }
-  else if (class_id.compare ("DBODataSourceDefinition") == 0)
-  {
-    DBODataSourceDefinition *def = new DBODataSourceDefinition (class_id, instance_id, this);
-    assert (data_source_definitions_.find(def->getSchema()) == data_source_definitions_.end());
+        assert (meta_tables_.find (def->schema()) == meta_tables_.end());
+        meta_tables_[def->schema()] = def->metaTable();
+    }
+    else if (class_id.compare ("DBODataSourceDefinition") == 0)
+    {
+        DBODataSourceDefinition *def = new DBODataSourceDefinition (class_id, instance_id, this);
+        assert (data_source_definitions_.find(def->schema()) == data_source_definitions_.end());
 
-    data_source_definitions_.insert (std::pair<std::string, DBODataSourceDefinition> (def->getSchema(), *def));
-  }
-  else
-    throw std::runtime_error ("DBObject: generateSubConfigurable: unknown class_id "+class_id );
+        data_source_definitions_.insert (std::pair<std::string, DBODataSourceDefinition*> (def->schema(), def));
+    }
+    else
+        throw std::runtime_error ("DBObject: generateSubConfigurable: unknown class_id "+class_id );
 }
 
 void DBObject::checkSubConfigurables ()
 {
-  //nothing to see here
+    //nothing to see here
 }
 
 void DBObject::checkVariables ()
 {
-  assert (hasCurrentMetaTable());
-  //std::map<std::string, DBOVariable*>::iterator it;
+    assert (hasCurrentMetaTable());
+    //std::map<std::string, DBOVariable*>::iterator it;
 
-  for (auto it : variables_)
-  {
-    bool found = current_meta_table_->hasColumn(it.first);
-
-    if (!found)
+    for (auto it : variables_)
     {
-      logwrn  << "DBObject: checkVariables: erasing non-existing variable '"<<it.first<<"'";
-//      delete it->second;
-      variables_.erase(it.first);
+        bool found = current_meta_table_->hasColumn(it.first);
+
+        if (!found)
+        {
+            logwrn  << "DBObject: checkVariables: erasing non-existing variable '"<<it.first<<"'";
+            //      delete it->second;
+            variables_.erase(it.first);
+        }
     }
-  }
-  variables_checked_=true;
+    variables_checked_=true;
 }
 
 //void DBObject::addActiveSourcesObserver (ActiveSourcesObserver *observer)
@@ -326,3 +327,14 @@ void DBObject::checkVariables ()
 //        it->second->unregisterAsParent();
 //    }
 //}
+
+DBObjectWidget *DBObject::widget ()
+{
+    if (!widget_)
+    {
+        widget_ = new DBObjectWidget (this, ATSDB::getInstance().schemaManager());
+    }
+
+    assert (widget_);
+    return widget_;
+}

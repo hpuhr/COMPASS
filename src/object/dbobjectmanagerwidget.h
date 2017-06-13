@@ -22,6 +22,7 @@
 #include <map>
 
 class DBObject;
+class DBObjectWidget;
 class DBObjectManager;
 class DBSchemaManager;
 //class MetaDBObjectEditWidget;
@@ -54,7 +55,7 @@ public slots:
 
 public:
     /// @brief Constructor
-    DBObjectManagerWidget(DBObjectManager &object_manager, DBSchemaManager &schema_manager);
+    DBObjectManagerWidget(DBObjectManager &object_manager);
     /// @brief Destructor
     virtual ~DBObjectManagerWidget();
 
@@ -80,7 +81,7 @@ private:
     std::map <QPushButton *, DBObject *> delete_dbo_buttons_;
 
     /// Container with already existing edit DBO widgets
-    //std::map <DBObject *, DBObjectEditWidget*> edit_dbo_widgets_;
+    std::map <DBObject*, DBObjectWidget*> edit_dbo_widgets_;
     /// Container with already existing edit meta DBO widgets
     //std::map <DBObject *, MetaDBObjectEditWidget*> edit_metadbo_widgets_;
 };

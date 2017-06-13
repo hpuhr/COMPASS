@@ -40,7 +40,6 @@ DBObjectManager::DBObjectManager(const std::string &class_id, const std::string 
     logdbg  << "DBObjectManager: constructor: creating subconfigurables";
 
     createSubConfigurables ();
-
 }
 /**
  * Deletes all DBOs.
@@ -58,15 +57,14 @@ DBObjectManager::~DBObjectManager()
 
 //        registered_parent_variables_=false;
 //    }
-
-//    std::map <std::string, DBObject*>::iterator it;
-
-//    for (it = objects_.begin(); it != objects_.end(); it++)
-//    {
-//        delete it->second;
-//        it->second=0;
-//    }
+    for (auto it = objects_.begin(); it != objects_.end(); it++)
+    {
+        delete it->second;
+    }
     objects_.clear();
+
+    delete widget_;
+    widget_ = nullptr;
 }
 
 /**
@@ -164,11 +162,11 @@ DBObject &DBObjectManager::get (const std::string &dbo_name)
 //    }
 //}
 
-DBObjectManagerWidget *DBObjectManager::widget(DBSchemaManager &schema_manager)
+DBObjectManagerWidget *DBObjectManager::widget()
 {
     if (!widget_)
     {
-        widget_ = new DBObjectManagerWidget (*this, schema_manager);
+        widget_ = new DBObjectManagerWidget (*this);
     }
 
     assert (widget_);

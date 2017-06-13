@@ -28,18 +28,20 @@
 #include "configurationmanager.h"
 #include "dbovariable.h"
 #include "dbobject.h"
+#include "dbobjectwidget.h"
 #include "dbobjectmanagerwidget.h"
 #include "dbobjectmanager.h"
 #include "dbschema.h"
 #include "dbschemamanager.h"
 #include "metadbtable.h"
 #include "stringconv.h"
+#include "atsdb.h"
 //#include "MetaDBObjectEditWidget.h"
 
 using Utils::String;
 
-DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager &object_manager, DBSchemaManager &schema_manager)
-    : object_manager_(object_manager), schema_manager_(schema_manager), grid_ (0), unlocked_(false), new_button_(0)
+DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager &object_manager)
+    : object_manager_(object_manager), schema_manager_(ATSDB::getInstance().schemaManager()), grid_ (0), unlocked_(false), new_button_(0)
 
 {
     unsigned int frame_width = 2;
@@ -173,7 +175,10 @@ void DBObjectManagerWidget::addDBO ()
 
             Configuration &config = object_manager_.addNewSubConfiguration ("DBObject", instance);
             config.addParameterString ("name", name);
-            config.addParameterString ("meta_table", meta_table_name);
+            //config.addParameterString ("meta_table", meta_table_name);
+            Configuration &metatable_config = config.addNewSubConfiguration("DBOSchemaMetaTableDefinition");
+            metatable_config.addParameterString ("schema", schema_manager_.getCurrentSchemaName());
+            metatable_config.addParameterString ("meta_table", meta_table_name);
 
             object_manager_.generateSubConfigurable("DBObject", instance);
 
@@ -208,7 +213,7 @@ void DBObjectManagerWidget::editDBO ()
 {
     assert (edit_dbo_buttons_.find((QPushButton*)sender()) != edit_dbo_buttons_.end());
 
-    //  DBObject *object = edit_dbo_buttons_ [(QPushButton*)sender()];
+    DBObject *object = edit_dbo_buttons_ [(QPushButton*)sender()];
 
     //  if (object->isMeta())
     //  {
@@ -224,14 +229,16 @@ void DBObjectManagerWidget::editDBO ()
     //  }
     //  else
     //  {
-    //    if (edit_dbo_widgets_.find (object) == edit_dbo_widgets_.end())
-    //    {
-    //      DBObjectEditWidget *widget = new DBObjectEditWidget (object);
-    //      connect(widget, SIGNAL( changedDBO() ), this, SLOT( changedDBO() ));
-    //      edit_dbo_widgets_[object] = widget;
-    //    }
-    //    else
-    //      edit_dbo_widgets_[object]->show();
+
+    if (edit_dbo_widgets_.find (object) == edit_dbo_widgets_.end())
+    {
+        DBObjectWidget *widget = object->widget();
+        connect(widget, SIGNAL( changedDBO() ), this, SLOT( changedDBO() ));
+        edit_dbo_widgets_[object] = widget;
+    }
+    else
+        edit_dbo_widgets_[object]->show();
+
     //  }
 }
 
@@ -305,7 +312,7 @@ void DBObjectManagerWidget::updateDBOs ()
         edit->setIcon(edit_icon);
         edit->setIconSize(QSize(30,30));
         edit->setFlat(true);
-        edit->setDisabled(!active);
+        edit->setDisabled(!active || !unlocked_);
         connect(edit, SIGNAL( clicked() ), this, SLOT( editDBO() ));
         grid_->addWidget (edit, row, 3);
         edit_dbo_buttons_[edit] = it->second;
@@ -314,7 +321,7 @@ void DBObjectManagerWidget::updateDBOs ()
         del->setIcon(del_icon);
         del->setIconSize(QSize(30,30));
         del->setFlat(true);
-        del->setDisabled(!active);
+        del->setDisabled(!active || !unlocked_);
         connect(del, SIGNAL( clicked() ), this, SLOT( deleteDBO() ));
         grid_->addWidget (del, row, 4);
         delete_dbo_buttons_[del] = it->second;

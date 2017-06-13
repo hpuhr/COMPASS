@@ -40,14 +40,11 @@
 class Buffer;
 class DataSource;
 class DBInterface;
-class DBInterfaceWidget;
 class DBTableInfo;
 class DBObject;
 class DBObjectManager;
-class DBObjectManagerWidget;
 class DBSchema;
 class DBSchemaManager;
-class DBSchemaManagerWidget;
 //class StructureReader;
 class DBOVariable;
 class Job;
@@ -125,9 +122,10 @@ public:
     /// @brief Returns the current DBSchema
     DBSchema &getCurrentSchema ();
 
-    DBInterfaceWidget *dbInterfaceWidget ();
-    DBSchemaManagerWidget *dbSchemaManagerWidget ();
-    DBObjectManagerWidget *dbObjectManagerWidget ();
+    DBInterface &dbInterface ();
+    DBSchemaManager &schemaManager ();
+    DBObjectManager &dbObjectManager ();
+
 
     const std::map <std::string, DBTableInfo> &tableInfo ();
 

@@ -184,6 +184,7 @@ DBSchemaWidget *DBSchema::widget ()
         widget_ = new DBSchemaWidget (*this);
     }
 
+    assert (widget_);
     return widget_;
 }
 

@@ -52,11 +52,11 @@ public:
   }
   virtual ~DBOVariableDefinition() {}
 
-  const std::string &getDBOType () { return dbo_type_; }
-  void setDBOType (const std::string &dbo_type) { dbo_type_=dbo_type; }
+  const std::string &dboType () { return dbo_type_; }
+  void dboType (const std::string &dbo_type) { dbo_type_=dbo_type; }
 
-  const std::string &getId () { return id_; }
-  void setId (std::string id) { id_=id; }
+  const std::string &id () { return id_; }
+  void id (const std::string &id) { id_=id; }
 
 protected:
   std::string dbo_type_;

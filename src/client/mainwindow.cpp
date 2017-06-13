@@ -46,9 +46,12 @@
 #include "config.h"
 #include "workerthreadmanager.h"
 #include "configurationmanager.h"
+#include "dbobjectmanager.h"
 #include "dbobjectmanagerwidget.h"
 #include "atsdb.h"
+#include "dbinterface.h"
 #include "dbinterfacewidget.h"
+#include "dbschemamanager.h"
 #include "dbschemamanagerwidget.h"
 #include "stringconv.h"
 //#include "ProjectionManager.h"
@@ -77,16 +80,16 @@ MainWindow::MainWindow()
 
     // for se widgets
     QHBoxLayout *widget_layout = new QHBoxLayout();
-    dbinterface_widget_ = ATSDB::getInstance().dbInterfaceWidget();
+    dbinterface_widget_ = ATSDB::getInstance().dbInterface().widget();
     QObject::connect(dbinterface_widget_, SIGNAL(databaseOpenedSignal()), this, SLOT(databaseOpenedSlot()));
     widget_layout->addWidget(dbinterface_widget_);
 
 
-    dbschema_manager_widget_ = ATSDB::getInstance().dbSchemaManagerWidget();
+    dbschema_manager_widget_ = ATSDB::getInstance().schemaManager().widget();
     QObject::connect(dbinterface_widget_, SIGNAL(databaseOpenedSignal()), dbschema_manager_widget_, SLOT(databaseOpenedSlot()));
     widget_layout->addWidget(dbschema_manager_widget_);
 
-    object_manager_widget_ = ATSDB::getInstance().dbObjectManagerWidget();
+    object_manager_widget_ = ATSDB::getInstance().dbObjectManager().widget();
     QObject::connect(dbinterface_widget_, SIGNAL(databaseOpenedSignal()), object_manager_widget_, SLOT(databaseOpenedSlot()));
     widget_layout->addWidget(object_manager_widget_);
 

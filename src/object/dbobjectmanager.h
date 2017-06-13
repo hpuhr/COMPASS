@@ -70,7 +70,7 @@ public:
     /// @brief Destructor
     virtual ~DBObjectManager();
 
-    DBObjectManagerWidget *widget(DBSchemaManager &schema_manager);
+    DBObjectManagerWidget *widget();
 
 protected:
     /// Container with all DBOs (DBO name -> DBO pointer)
