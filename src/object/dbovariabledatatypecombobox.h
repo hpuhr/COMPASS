@@ -47,7 +47,7 @@ public slots:
     /// @brief Sets the data type
     void changed ()
     {
-        variable_->setDataType(getType());
+        variable_->dataType(getType());
     }
 
 public:
@@ -55,16 +55,17 @@ public:
     DBOVariableDataTypeComboBox(DBOVariable *variable, QWidget * parent = 0)
     : QComboBox(parent), variable_(variable)
     {
-        assert (false);
-        //TODO FIXXME
-
-//        for (unsigned int cnt = 0; cnt < P_TYPE_SENTINEL; cnt++)
-//        {
-//            addItem (PROPERTY_DATA_TYPE_STRINGS.at((PROPERTY_DATA_TYPE) cnt).c_str());
-//        }
-//        setCurrentIndex (variable_->getDataType());
-//        connect(this, SIGNAL( activated(const QString &) ), this, SIGNAL( changedType() ));
-//        connect(this, SIGNAL( activated(const QString &) ), this, SLOT( changed() ));
+        const std::map<PropertyDataType,std::string> &datatypes2str = Property::dataTypes2Strings();
+        for (auto it = datatypes2str.begin(); it != datatypes2str.end(); it++)
+        {
+            addItem (it->second.c_str());
+        }
+        logdbg << "UGA '" << variable_->dataTypeString() << "'";
+        int index = findText(QString(variable_->dataTypeString().c_str()));
+        assert (index >= 0);
+        setCurrentIndex (index);
+        connect(this, SIGNAL( activated(const QString &) ), this, SIGNAL( changedType() ));
+        connect(this, SIGNAL( activated(const QString &) ), this, SLOT( changed() ));
 
     }
     /// @brief Destructor
@@ -72,11 +73,8 @@ public:
     /// @brief Returns the currently selected data type
     PropertyDataType getType ()
     {
-        assert (false);
-        //TODO FIXXME
-
-        return PropertyDataType::BOOL;
-//        return currentText().toStdString();
+        return Property::asDataType(currentText().toStdString());
+//        return ;
 //        for (unsigned int cnt = 0; cnt < P_TYPE_SENTINEL; cnt++)
 //        {
 //            if (text.compare (PROPERTY_DATA_TYPE_STRINGS.at((PROPERTY_DATA_TYPE) cnt)) == 0)
@@ -87,9 +85,10 @@ public:
     /// @brief Sets the currently selected data type
     void setType (PropertyDataType type)
     {
-        assert (false);
-        //TODO FIXXME
-        //setCurrentIndex (type);
+        logdbg << "UGA2 '" << Property::asString(type) << "'";
+        int index = findText(QString(Property::asString(type).c_str()));
+        assert (index >= 0);
+        setCurrentIndex (index);
     }
 
 protected:

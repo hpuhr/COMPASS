@@ -215,7 +215,7 @@ PropertyList DBOVariableSet::getPropertyList () const
 
   for (auto it : set_)
   {
-      list.addProperty (it->getId(), it->getDataType());
+      list.addProperty (it->name(), it->dataType());
   }
 
   return list;

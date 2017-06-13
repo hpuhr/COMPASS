@@ -78,6 +78,44 @@ DBObject::~DBObject()
     }
 }
 
+/**
+ * Can generate DBOVariables, DBOSchemaMetaTableDefinitions and DBODataSourceDefinitions.
+ */
+void DBObject::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
+{
+    logdbg  << "DBObject: generateSubConfigurable: generating variable " << instance_id;
+    if (class_id.compare ("DBOVariable") == 0)
+    {
+        DBOVariable *variable = new DBOVariable (class_id, instance_id, this);
+        assert (variables_.find (variable->name()) == variables_.end());
+        variables_.insert (std::pair <std::string, DBOVariable*> (variable->name(), variable));
+    }
+    else if (class_id.compare ("DBOSchemaMetaTableDefinition") == 0)
+    {
+        DBOSchemaMetaTableDefinition *def = new DBOSchemaMetaTableDefinition (class_id, instance_id, this);
+        meta_table_definitions_.push_back (def);
+
+        logdbg  << "DBObject "<< name() << ": generateSubConfigurable: schema " << def->schema() << " meta " << def->metaTable();
+
+        assert (meta_tables_.find (def->schema()) == meta_tables_.end());
+        meta_tables_[def->schema()] = def->metaTable();
+    }
+    else if (class_id.compare ("DBODataSourceDefinition") == 0)
+    {
+        DBODataSourceDefinition *def = new DBODataSourceDefinition (class_id, instance_id, this);
+        assert (data_source_definitions_.find(def->schema()) == data_source_definitions_.end());
+
+        data_source_definitions_.insert (std::pair<std::string, DBODataSourceDefinition*> (def->schema(), def));
+    }
+    else
+        throw std::runtime_error ("DBObject: generateSubConfigurable: unknown class_id "+class_id );
+}
+
+void DBObject::checkSubConfigurables ()
+{
+    //nothing to see here
+}
+
 bool DBObject::hasVariable (const std::string &id) const
 {
     //  if (!variables_checked_)
@@ -199,43 +237,6 @@ const MetaDBTable &DBObject::currentMetaTable ()
     return *current_meta_table_;
 }
 
-/**
- * Can generate DBOVariables, DBOSchemaMetaTableDefinitions and DBODataSourceDefinitions.
- */
-void DBObject::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
-{
-    logdbg  << "DBObject: generateSubConfigurable: generating variable " << instance_id;
-    if (class_id.compare ("DBOVariable") == 0)
-    {
-        DBOVariable *variable = new DBOVariable (class_id, instance_id, this);
-        assert (variables_.find (variable->getId()) == variables_.end());
-        variables_.insert (std::pair <std::string, DBOVariable*> (variable->getId(), variable));
-    }
-    else if (class_id.compare ("DBOSchemaMetaTableDefinition") == 0)
-    {
-        DBOSchemaMetaTableDefinition *def = new DBOSchemaMetaTableDefinition (class_id, instance_id, this);
-        meta_table_definitions_.push_back (def);
-
-        logdbg  << "DBObject "<< name() << ": generateSubConfigurable: schema " << def->schema() << " meta " << def->metaTable();
-
-        assert (meta_tables_.find (def->schema()) == meta_tables_.end());
-        meta_tables_[def->schema()] = def->metaTable();
-    }
-    else if (class_id.compare ("DBODataSourceDefinition") == 0)
-    {
-        DBODataSourceDefinition *def = new DBODataSourceDefinition (class_id, instance_id, this);
-        assert (data_source_definitions_.find(def->schema()) == data_source_definitions_.end());
-
-        data_source_definitions_.insert (std::pair<std::string, DBODataSourceDefinition*> (def->schema(), def));
-    }
-    else
-        throw std::runtime_error ("DBObject: generateSubConfigurable: unknown class_id "+class_id );
-}
-
-void DBObject::checkSubConfigurables ()
-{
-    //nothing to see here
-}
 
 void DBObject::checkVariables ()
 {

@@ -42,31 +42,31 @@ class Property
 {
 protected:
   /// @brief Default constructor. Use only if members are overwritten.
-  Property() {};
+  Property() {}
 public:
     /// @brief Constructor
   Property(std::string id, PropertyDataType type);
   /// @brief Destructor
-  virtual ~Property() {};
+  virtual ~Property() {}
 
-  PropertyDataType getDataType() const { return data_type_; }
+  PropertyDataType dataType() const { return data_type_; }
+  const std::string &dataTypeString() const { return data_type_str_; }
+  void dataType(PropertyDataType type) { data_type_ = type; data_type_str_ = asString(data_type_); }
 
-  const std::string &asDataTypeString() const { return data_type_str_; }
+  const std::string &name() const { return name_; }
 
-  void setDataType(PropertyDataType type) { data_type_ = type; data_type_str_ = asString(data_type_); }
+  static const std::string &asString (PropertyDataType type);
+  static PropertyDataType &asDataType (const std::string &type);
 
-  const std::string &getId() const { return id_; }
-
-  static const std::string &asString (PropertyDataType type)  { return data_types_2_strings_.at(type);  }
-  static PropertyDataType &asDataType (const std::string &type)   { return strings_2_data_types_.at(type); }
-
+  static const std::map<PropertyDataType,std::string> &dataTypes2Strings() {return data_types_2_strings_; }
+  static const std::map<std::string, PropertyDataType> &strings2DataTypes() { return strings_2_data_types_; }
 
 protected:
   /// Data type
   PropertyDataType data_type_;
   std::string data_type_str_;
   /// String identifier
-  std::string id_;
+  std::string name_;
 
   /// Mappings from PropertyDataType to strings, and back.
   static std::map<PropertyDataType,std::string> data_types_2_strings_;

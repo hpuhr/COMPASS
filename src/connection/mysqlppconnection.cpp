@@ -279,38 +279,38 @@ void MySQLppConnection::readRowIntoBuffer (mysqlpp::Row &row, const PropertyList
         {
             const Property &prop=list.at(cnt);
 
-            switch (prop.getDataType())
+            switch (prop.dataType())
             {
             case PropertyDataType::BOOL:
-                buffer->getBool(prop.getId()).set(index, static_cast<bool> (row[cnt]));
+                buffer->getBool(prop.name()).set(index, static_cast<bool> (row[cnt]));
                 //loginf  << "sqlex: bool " << prop->id_ << " val " << *ptr;
                 break;
             case PropertyDataType::UCHAR:
-                buffer->getUChar(prop.getId()).set(index, static_cast<unsigned char> (row[cnt]));
+                buffer->getUChar(prop.name()).set(index, static_cast<unsigned char> (row[cnt]));
                 //loginf  << "sqlex: uchar " << prop->id_ << " val " << *ptr;
                 break;
             case PropertyDataType::CHAR:
-                buffer->getChar(prop.getId()).set(index, static_cast<signed char> (row[cnt]));
+                buffer->getChar(prop.name()).set(index, static_cast<signed char> (row[cnt]));
                 //loginf  << "sqlex: char " << prop->id_ << " val " << *ptr;
                 break;
             case PropertyDataType::INT:
-                buffer->getInt(prop.getId()).set(index, static_cast<int> (row[cnt]));
+                buffer->getInt(prop.name()).set(index, static_cast<int> (row[cnt]));
                 //loginf  << "sqlex: int " << prop->id_ << " val " << *ptr;
                 break;
             case PropertyDataType::UINT:
-                buffer->getUInt(prop.getId()).set(index, static_cast<unsigned int> (row[cnt]));
+                buffer->getUInt(prop.name()).set(index, static_cast<unsigned int> (row[cnt]));
                 //loginf  << "sqlex: uint " << prop->id_ << " val " << *ptr;
                 break;
             case PropertyDataType::STRING:
-                buffer->getString(prop.getId()).set(index, static_cast<const char *> (row[cnt]));
+                buffer->getString(prop.name()).set(index, static_cast<const char *> (row[cnt]));
                 //loginf  << "sqlex: string " << prop->id_ << " val " << *ptr;
                 break;
             case PropertyDataType::FLOAT:
-                buffer->getFloat(prop.getId()).set(index, static_cast<float> (row[cnt]));
+                buffer->getFloat(prop.name()).set(index, static_cast<float> (row[cnt]));
                 //loginf  << "sqlex: float " << prop->id_ << " val " << *ptr;
                 break;
             case PropertyDataType::DOUBLE:
-                buffer->getDouble(prop.getId()).set(index, static_cast<double> (row[cnt]));
+                buffer->getDouble(prop.name()).set(index, static_cast<double> (row[cnt]));
                 //loginf  << "sqlex: double " << prop->id_ << " val " << *ptr;
                 break;
             default:

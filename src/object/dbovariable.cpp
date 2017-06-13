@@ -46,10 +46,9 @@ using namespace Utils;
 DBOVariable::DBOVariable(const std::string &class_id, const std::string &instance_id, DBObject *parent)
     : Property (), Configurable (class_id, instance_id, parent), dbo_parent_(*parent) //, registered_as_parent_(false)
 {
-    registerParameter ("id", &id_, "");
+    registerParameter ("name", &name_, "");
     registerParameter ("description", &description_, "");
     registerParameter ("data_type_str", &data_type_str_, "");
-    registerParameter ("dbo_type", &dbo_type_, "");
     registerParameter ("representation", &representation_int_, R_STANDARD);
     registerParameter ("unit_dimension", &unit_dimension_, "");
     registerParameter ("unit_unit", &unit_unit_, "");
@@ -69,7 +68,33 @@ DBOVariable::~DBOVariable()
 //    std::vector <DBOSchemaVariableDefinition *>::iterator it;
 //    for (it = schema_variables_definitions_.begin(); it != schema_variables_definitions_.end(); it++)
 //        delete *it;
-    schema_variables_definitions_.clear();
+    for (auto it = schema_variables_.begin(); it != schema_variables_.end(); it++)
+        delete it->second;
+    schema_variables_.clear();
+}
+
+void DBOVariable::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
+{
+//    if (class_id.compare("DBOVariableDefinition") == 0)
+//    {
+//        DBOVariableDefinition *definition = new DBOVariableDefinition (class_id, instance_id, this);
+//        sub_variable_definitions_.push_back (definition);
+
+//        const std::string &dbo_type = definition->getDBOType();
+//        std::string name = definition->getId();
+
+//        assert (sub_variables_.find(dbo_type) == sub_variables_.end());
+//        sub_variables_[dbo_type] = name;
+//    }
+//    else
+    if (class_id.compare("DBOSchemaVariableDefinition") == 0)
+    {
+        DBOSchemaVariableDefinition *definition = new DBOSchemaVariableDefinition (class_id, instance_id, this);
+        assert (schema_variables_.find (definition->getSchema()) == schema_variables_.end());
+        schema_variables_[definition->getSchema()] = definition;
+    }
+    else
+        throw std::runtime_error ("DBOVariable: generateSubConfigurable: unknown class_id "+class_id);
 }
 
 //bool DBOVariable::existsIn (const std::string &dbo_type)
@@ -177,11 +202,11 @@ DBOVariable::~DBOVariable()
 
 bool DBOVariable::operator==(const DBOVariable &var)
 {
-    if (dbo_type_ != var.dbo_type_)
+    if (getDBOName() != var.getDBOName())
         return false;
     if (data_type_ != var.data_type_)
         return false;
-    if (id_.compare (var.id_) != 0)
+    if (name_.compare (var.name_) != 0)
         return false;
 
     return true;
@@ -189,7 +214,7 @@ bool DBOVariable::operator==(const DBOVariable &var)
 
 void DBOVariable::print ()
 {
-    loginf  << "DBOVariable: print: dbo type " << dbo_type_ << " id " << id_ << " data type " << data_type_str_;
+    loginf  << "DBOVariable: print: dbo " << parent_->getInstanceId() << " id " << name_ << " data type " << data_type_str_;
 
 //    if (sub_variable_definitions_.size() > 0)
 //    {
@@ -413,52 +438,30 @@ void DBOVariable::print ()
 //}
 
 
-void DBOVariable::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
-{
-//    if (class_id.compare("DBOVariableDefinition") == 0)
-//    {
-//        DBOVariableDefinition *definition = new DBOVariableDefinition (class_id, instance_id, this);
-//        sub_variable_definitions_.push_back (definition);
-
-//        const std::string &dbo_type = definition->getDBOType();
-//        std::string name = definition->getId();
-
-//        assert (sub_variables_.find(dbo_type) == sub_variables_.end());
-//        sub_variables_[dbo_type] = name;
-//    }
-//    else
-    if (class_id.compare("DBOSchemaVariableDefinition") == 0)
-    {
-        DBOSchemaVariableDefinition *definition = new DBOSchemaVariableDefinition (class_id, instance_id, this);
-        schema_variables_definitions_.push_back (*definition);
-        assert (schema_variables_.find (definition->getSchema()) == schema_variables_.end());
-        schema_variables_[definition->getSchema()] = std::pair<std::string, std::string> (definition->getMetaTable(), definition->getVariable());
-    }
-    else
-        throw std::runtime_error ("DBOVariable: generateSubConfigurable: unknown class_id "+class_id);
-}
-
 void DBOVariable::checkSubConfigurables ()
 {
     // nothing to do here
 }
 
+const std::string &DBOVariable::getDBOName () const
+{
+    return dbo_parent_.name();
+}
+
+
 bool DBOVariable::hasSchema (const std::string &schema)
 {
-    if (schema_variables_.find (schema) == schema_variables_.end())
-        return false;
-    else
-        return schema_variables_[schema].second.size()>0;
+    return schema_variables_.find (schema) != schema_variables_.end();
 }
 const std::string &DBOVariable::getMetaTable (const std::string &schema)
 {
     assert (hasSchema(schema));
-    return schema_variables_[schema].first;
+    return schema_variables_.at(schema)->getMetaTable();
 }
 const std::string &DBOVariable::getVariableName (const std::string &schema)
 {
     assert (hasSchema(schema));
-    return schema_variables_[schema].second;
+    return schema_variables_.at(schema)->getVariable();
 }
 
 bool DBOVariable::hasCurrentDBColumn ()
@@ -484,39 +487,21 @@ const DBTableColumn &DBOVariable::getCurrentDBColumn ()
 
 bool DBOVariable::hasCurrentSchema ()
 {
-    std::string schema = ATSDB::instance().getCurrentSchemaName();
-    if (schema_variables_.find (schema) == schema_variables_.end())
-    {
-        logerr << "DBOVariable: hasCurrentSchema: failed in variable " << id_ << ", unknown schema '" << schema
-               << "' # schema variables " << schema_variables_.size();
-        return false;
-    }
-    else
-    {
-        if (schema_variables_[schema].second.size()>0)
-            return true;
-        else
-        {
-            logerr << "DBOVariable: hasCurrentSchema: failed in variable " << id_ << ", schema '" << schema
-                   << "' # schema variables " << schema_variables_.size()
-                   << " schema variable 0 length";
-            return false;
-        }
-    }
-
+    return hasSchema(ATSDB::instance().getCurrentSchemaName());
 }
+
 const std::string &DBOVariable::getCurrentMetaTable ()
 {
     assert (hasCurrentSchema());
     std::string schema = ATSDB::instance().getCurrentSchemaName();
-    return schema_variables_[schema].first;
+    return schema_variables_.at(schema)->getMetaTable();
 
 }
 const std::string &DBOVariable::getCurrentVariableName ()
 {
     assert (hasCurrentSchema());
     std::string schema = ATSDB::instance().getCurrentSchemaName();
-    return schema_variables_[schema].second;
+    return schema_variables_.at(schema)->getVariable();
 }
 
 //bool DBOVariable::hasMinMaxInfo ()

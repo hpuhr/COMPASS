@@ -45,21 +45,21 @@ public:
   DBOVariableDefinition(const std::string &class_id, const std::string &instance_id, Configurable *parent)
   : Configurable (class_id, instance_id, parent)
   {
-    registerParameter ("dbo_type_", &dbo_type_, "");
+    registerParameter ("dbo_name", &dbo_name_, "");
     registerParameter ("id", &id_, "");
 
     assert (id_.size() > 0);
   }
   virtual ~DBOVariableDefinition() {}
 
-  const std::string &dboType () { return dbo_type_; }
-  void dboType (const std::string &dbo_type) { dbo_type_=dbo_type; }
+  const std::string &dboName () { return dbo_name_; }
+  void dboName (const std::string &dbo_name) { dbo_name_=dbo_name; }
 
   const std::string &id () { return id_; }
   void id (const std::string &id) { id_=id; }
 
 protected:
-  std::string dbo_type_;
+  std::string dbo_name_;
   std::string id_;
 };
 
@@ -155,9 +155,11 @@ public:
   virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
   /// @brief Returns variable identifier
-  const std::string &getName () const { return id_; }
+  const std::string &getName () const { return name_; }
   /// @brief Sets variable identifier
-  void setName (const std::string &name) { id_=name; }
+  void setName (const std::string &name) { name_=name; }
+
+  const std::string &getDBOName () const;
 
   /// @brief Returns variable description
   const std::string &getInfo () { return description_; }
@@ -165,12 +167,12 @@ public:
   void setInfo (const std::string &info) { description_=info; }
 
   /// @brief Returns variable data type
-  PropertyDataType getDataType () { return data_type_;}
+  PropertyDataType dataType () { return data_type_;}
   /// @brief Sets variable data type
-  void setDataType (PropertyDataType type) { data_type_=type; }
+  void dataType (PropertyDataType type) { data_type_=type; }
 
   /// @brief Returns DBO type
-  const std::string &getDBOType () const { return dbo_type_; }
+  //const std::string &getDBOType () const { return dbo_type_; }
 //  /// @brief Returns DBO type string identifier
 //  std::string getDBOTypeString () { return DB_OBJECT_TYPE_STRINGS.at((DB_OBJECT_TYPE)dbo_type_int_);}
 
@@ -224,7 +226,7 @@ protected:
   /// DBO parent
   DBObject &dbo_parent_;
   /// DBO type
-  std::string dbo_type_;
+  //std::string dbo_type_;
   /// Value representation type, based on enum STRING_REPRESENTATION
   unsigned int representation_int_;
   /// Description
@@ -250,10 +252,10 @@ protected:
 //  /// Container for sub variables (DBO type -> variable identifier), for meta variables
 //  std::map <std::string, std::string> sub_variables_;
 
-  /// Container with schema-variable definitions
-  std::vector <DBOSchemaVariableDefinition> schema_variables_definitions_;
+  /// Container with schema identified->schema-variable definitions
+  std::map <std::string, DBOSchemaVariableDefinition*> schema_variables_;
   /// Container with schema, meta table, variable mappings (schema identifier -> (meta table identifier, variable identifier))
-  std::map <std::string, std::pair <std::string, std::string> > schema_variables_;
+  //std::map <std::string, std::pair <std::string, std::string> > schema_variables_;
 
   /// Flag indicating if this meta-variable has registered itself to its sub-variables
   //bool registered_as_parent_;

@@ -695,11 +695,9 @@ void DBObjectWidget::addAllVariables ()
 
     Configuration &config = object_->addNewSubConfiguration ("DBOVariable", instance);
 
-    assert (false);
-    // TODO
-//    config.addParameterString ("id", column_name);
-//    config.addParameterUnsignedInt ("data_type", getDataTypeFromDB(it->second->getType()));
-//    config.addParameterUnsignedInt ("dbo_type", object_->getType());
+    config.addParameterString ("name", column_name);
+    config.addParameterString ("data_type_str", it->second.type());
+    config.addParameterString ("dbo_name", object_->name());
 
     std::string var_instance = "DBOSchemaVariableDefinition"+object_->name()+column_name+"0";
 

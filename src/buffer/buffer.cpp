@@ -265,7 +265,7 @@ void Buffer::addProperty (std::string id, PropertyDataType type)
 
 void Buffer::addProperty (const Property &property)
 {
-    addProperty (property.getId(), property.getDataType());
+    addProperty (property.name(), property.dataType());
 }
 
 ArrayListTemplate<bool> &Buffer::getBool (const std::string &id)

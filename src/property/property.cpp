@@ -55,10 +55,23 @@ std::map<std::string, PropertyDataType> Property::strings_2_data_types_ = boost:
         ("STRING", PropertyDataType::STRING);
 
 Property::Property(std::string id, PropertyDataType type)
-    : data_type_(type), id_(id)
+    : data_type_(type), name_(id)
 {
     //size_ = MemoryManager::getInstance().getBaseSizesInBytes(data_type_int_);
 }
+
+const std::string &Property::asString (PropertyDataType type)
+{
+    assert (data_types_2_strings_.count(type) > 0);
+    return data_types_2_strings_.at(type);
+}
+
+PropertyDataType &Property::asDataType (const std::string &type)
+{
+    assert (strings_2_data_types_.count(type) > 0);
+    return strings_2_data_types_.at(type);
+}
+
 
 //PROPERTY_DATA_TYPE Property::getDataType() const
 //{

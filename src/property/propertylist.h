@@ -97,9 +97,9 @@ public:
     {
         logdbg << "PropertyList: addProperty: start";
 
-        if(hasProperty(property.getId()))
+        if(hasProperty(property.name()))
         {
-            logwrn << "PropertyList: addProperty: property " << property.getId() << " already added";
+            logwrn << "PropertyList: addProperty: property " << property.name() << " already added";
             return;
         }
 
@@ -133,7 +133,7 @@ public:
 
         for (it=properties_.begin(); it != properties_.end(); it++)
         {
-            if (it->getId().compare (id) == 0)
+            if (it->name().compare (id) == 0)
             {
                 properties_.erase (it);
                 logdbg << "PropertyList: removeProperty: end";
@@ -141,7 +141,7 @@ public:
             }
         }
         throw std::runtime_error("PropteryList: removeProperty: property "+id+" could not be removed");
-    };
+    }
 
     /**
      * @brief Returns a property by id
@@ -158,13 +158,13 @@ public:
 
         for (it=properties_.begin(); it != properties_.end(); it++)
         {
-            if (it->getId().compare (id) == 0)
+            if (it->name().compare (id) == 0)
             {
                 return *it;
             }
         }
         throw std::runtime_error("PropteryList: get: property "+id+" not found");
-    };
+    }
 
     /**
      * @brief Returns index of a property
@@ -182,14 +182,14 @@ public:
         unsigned int cnt=0;
         for (it=properties_.begin(); it != properties_.end(); it++)
         {
-            if (it->getId().compare (id) == 0)
+            if (it->name().compare (id) == 0)
             {
                 return cnt;
             }
             cnt++;
         }
         throw std::runtime_error("PropteryList: getPropertyIndex: property "+id+" not found");
-    };
+    }
 
     /// @brief Returns flag indicating if property is in list
     bool hasProperty (std::string id) const
@@ -199,12 +199,12 @@ public:
         std::vector <Property>::const_iterator it;
         for (it=properties_.begin(); it != properties_.end(); it++)
         {
-            if (it->getId().compare (id) == 0)
+            if (it->name().compare (id) == 0)
                 return true;
         }
 
         return false;
-    };
+    }
 
     /// @brief Returns flag indicating if property with given indexis in list
     bool hasProperty (unsigned int index) const
