@@ -54,8 +54,8 @@ void DBOVariableOrderedSet::generateSubConfigurable (const std::string &class_id
     {
         DBOVariableOrderDefinition *definition = new DBOVariableOrderDefinition (class_id, instance_id, this);
 
-        if (!ATSDB::getInstance().existsDBObject(definition->dboType())
-                || !ATSDB::getInstance().getDBObject(definition->dboType()).hasVariable(definition->id()))
+        if (!ATSDB::instance().existsDBObject(definition->dboType())
+                || !ATSDB::instance().getDBObject(definition->dboType()).hasVariable(definition->id()))
         {
             logwrn << "DBOVariableOrderedSet: generateSubConfigurable: outdated type " << definition->dboType() << " variable "
                    << definition->id();
@@ -315,8 +315,8 @@ void DBOVariableOrderedSet::updateDBOVariableSet ()
         const std::string &type = it.second->dboType();
         std::string name = it.second->id();
 
-        if (!ATSDB::getInstance().existsDBObject(type)
-                || !ATSDB::getInstance().getDBObject(type).hasVariable(name))
+        if (!ATSDB::instance().existsDBObject(type)
+                || !ATSDB::instance().getDBObject(type).hasVariable(name))
         {
             logwrn << "DBOVariableOrderedSet: updateDBOVariableSet: outdated skipping type " << type << " variable "
                    << name;
@@ -324,7 +324,7 @@ void DBOVariableOrderedSet::updateDBOVariableSet ()
         }
 
         //assert (DBObjectManager::getInstance().existsDBOVariable (type, name));
-        DBOVariable &variable = ATSDB::getInstance().getDBObject(type).variable(name);
+        DBOVariable &variable = ATSDB::instance().getDBObject(type).variable(name);
         set_.insert (std::pair <unsigned int, DBOVariable &> (it.second->getIndex(), variable));
     }
     assert (variable_definitions_.size() == set_.size());

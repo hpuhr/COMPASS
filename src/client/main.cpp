@@ -167,7 +167,7 @@ int main (int argc, char **argv)
     {
         logerr  << "Main: Caught Exception '" << ex.what() << "'";
 
-        ATSDB::getInstance().shutdown();
+        ATSDB::instance().shutdown();
 
         //WorkerThreadManager::getInstance().shutdown();
 
@@ -177,7 +177,7 @@ int main (int argc, char **argv)
     {
         logerr  << "Main: Caught Exception";
 
-        ATSDB::getInstance().shutdown();
+        ATSDB::instance().shutdown();
 
         //WorkerThreadManager::getInstance().shutdown();
 

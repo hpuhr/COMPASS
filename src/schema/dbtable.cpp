@@ -96,8 +96,8 @@ void DBTable::populate ()
 {
     loginf << "DBTable: populate: table " << name_;
 
-    assert (ATSDB::getInstance().ready());
-    for (auto it : ATSDB::getInstance().tableInfo().at(name_).columns ())
+    assert (ATSDB::instance().ready());
+    for (auto it : ATSDB::instance().tableInfo().at(name_).columns ())
     {
         if (columns_.count(it.first) == 0)
         {

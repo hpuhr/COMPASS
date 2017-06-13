@@ -151,13 +151,13 @@ const std::string &DBObject::metaTable (const std::string &schema) const
  */
 bool DBObject::hasCurrentDataSource () const
 {
-    return (data_source_definitions_.find(ATSDB::getInstance().getCurrentSchema().name()) != data_source_definitions_.end());
+    return (data_source_definitions_.find(ATSDB::instance().getCurrentSchema().name()) != data_source_definitions_.end());
 }
 
 const DBODataSourceDefinition &DBObject::currentDataSource () const
 {
     assert (hasCurrentDataSource());
-    return *data_source_definitions_.at(ATSDB::getInstance().getCurrentSchema().name());
+    return *data_source_definitions_.at(ATSDB::instance().getCurrentSchema().name());
 }
 
 /**
@@ -170,7 +170,7 @@ bool DBObject::hasCurrentMetaTable () const
         return true;
     else
     {
-        DBSchema &schema = ATSDB::getInstance().getCurrentSchema();
+        DBSchema &schema = ATSDB::instance().getCurrentSchema();
         logdbg  << "DBObject "<< name() << ": hasCurrentMetaTable: got current schema " << schema.name();
         logdbg  << "DBObject "<< name() << ": hasCurrentMetaTable: meta tables:";
         for (auto it = meta_tables_.begin(); it != meta_tables_.end(); it++)
@@ -189,7 +189,7 @@ const MetaDBTable &DBObject::currentMetaTable ()
 {
     if (!current_meta_table_)
     {
-        DBSchema &schema = ATSDB::getInstance().getCurrentSchema();
+        DBSchema &schema = ATSDB::instance().getCurrentSchema();
         assert (meta_tables_.find(schema.name()) != meta_tables_.end());
         std::string meta_table_name = meta_tables_ .at(schema.name());
         assert (schema.hasMetaTable (meta_table_name));
@@ -332,7 +332,7 @@ DBObjectWidget *DBObject::widget ()
 {
     if (!widget_)
     {
-        widget_ = new DBObjectWidget (this, ATSDB::getInstance().schemaManager());
+        widget_ = new DBObjectWidget (this, ATSDB::instance().schemaManager());
     }
 
     assert (widget_);

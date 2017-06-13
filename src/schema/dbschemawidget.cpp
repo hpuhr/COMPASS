@@ -162,7 +162,7 @@ DBSchemaWidget::~DBSchemaWidget()
 
 void DBSchemaWidget::addTableSlot()
 {
-    const std::map <std::string, DBTableInfo> &table_info = ATSDB::getInstance().tableInfo ();
+    const std::map <std::string, DBTableInfo> &table_info = ATSDB::instance().tableInfo ();
 
     QStringList items;
     for (auto it : table_info)
@@ -195,7 +195,7 @@ void DBSchemaWidget::addTableSlot()
 
 void DBSchemaWidget::addAllTablesSlot()
 {
-    const std::map <std::string, DBTableInfo> &table_info = ATSDB::getInstance().tableInfo ();
+    const std::map <std::string, DBTableInfo> &table_info = ATSDB::instance().tableInfo ();
 
     for (auto it : table_info)
     {

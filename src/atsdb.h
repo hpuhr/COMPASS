@@ -276,7 +276,7 @@ protected:
 
 public:
     ///@brief Instance access function for Singleton.
-    static ATSDB& getInstance()
+    static ATSDB& instance()
     {
         static ATSDB instance;
         return instance;

@@ -80,16 +80,16 @@ MainWindow::MainWindow()
 
     // for se widgets
     QHBoxLayout *widget_layout = new QHBoxLayout();
-    dbinterface_widget_ = ATSDB::getInstance().dbInterface().widget();
+    dbinterface_widget_ = ATSDB::instance().dbInterface().widget();
     QObject::connect(dbinterface_widget_, SIGNAL(databaseOpenedSignal()), this, SLOT(databaseOpenedSlot()));
     widget_layout->addWidget(dbinterface_widget_);
 
 
-    dbschema_manager_widget_ = ATSDB::getInstance().schemaManager().widget();
+    dbschema_manager_widget_ = ATSDB::instance().schemaManager().widget();
     QObject::connect(dbinterface_widget_, SIGNAL(databaseOpenedSignal()), dbschema_manager_widget_, SLOT(databaseOpenedSlot()));
     widget_layout->addWidget(dbschema_manager_widget_);
 
-    object_manager_widget_ = ATSDB::getInstance().dbObjectManager().widget();
+    object_manager_widget_ = ATSDB::instance().dbObjectManager().widget();
     QObject::connect(dbinterface_widget_, SIGNAL(databaseOpenedSignal()), object_manager_widget_, SLOT(databaseOpenedSlot()));
     widget_layout->addWidget(object_manager_widget_);
 
@@ -172,8 +172,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
     ConfigurationManager::getInstance().saveConfiguration();
 
-    ATSDB::getInstance().shutdown();
-    assert (!ATSDB::getInstance().ready());
+    ATSDB::instance().shutdown();
+    assert (!ATSDB::instance().ready());
 
     if (widget_stack_)
         delete widget_stack_;

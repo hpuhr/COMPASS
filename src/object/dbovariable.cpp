@@ -469,7 +469,7 @@ bool DBOVariable::hasCurrentDBColumn ()
     std::string meta_tablename = getCurrentMetaTable ();
     std::string table_varname = getCurrentVariableName ();
 
-    return ATSDB::getInstance().getCurrentSchema().metaTable(meta_tablename).hasColumn(table_varname);
+    return ATSDB::instance().getCurrentSchema().metaTable(meta_tablename).hasColumn(table_varname);
 }
 
 const DBTableColumn &DBOVariable::getCurrentDBColumn ()
@@ -479,12 +479,12 @@ const DBTableColumn &DBOVariable::getCurrentDBColumn ()
     std::string meta_tablename = getCurrentMetaTable ();
     std::string table_varname = getCurrentVariableName ();
 
-    return ATSDB::getInstance().getCurrentSchema().metaTable(meta_tablename).column(table_varname);
+    return ATSDB::instance().getCurrentSchema().metaTable(meta_tablename).column(table_varname);
 }
 
 bool DBOVariable::hasCurrentSchema ()
 {
-    std::string schema = ATSDB::getInstance().getCurrentSchemaName();
+    std::string schema = ATSDB::instance().getCurrentSchemaName();
     if (schema_variables_.find (schema) == schema_variables_.end())
     {
         logerr << "DBOVariable: hasCurrentSchema: failed in variable " << id_ << ", unknown schema '" << schema
@@ -508,14 +508,14 @@ bool DBOVariable::hasCurrentSchema ()
 const std::string &DBOVariable::getCurrentMetaTable ()
 {
     assert (hasCurrentSchema());
-    std::string schema = ATSDB::getInstance().getCurrentSchemaName();
+    std::string schema = ATSDB::instance().getCurrentSchemaName();
     return schema_variables_[schema].first;
 
 }
 const std::string &DBOVariable::getCurrentVariableName ()
 {
     assert (hasCurrentSchema());
-    std::string schema = ATSDB::getInstance().getCurrentSchemaName();
+    std::string schema = ATSDB::instance().getCurrentSchemaName();
     return schema_variables_[schema].second;
 }
 
