@@ -22,10 +22,32 @@
  *      Author: sk
  */
 
+#include <boost/assign/list_of.hpp>
+
 #include "dbtable.h"
 #include "dbtablecolumn.h"
 #include "logger.h"
 #include "unitselectionwidget.h"
+
+// TODO watch out for unsigned
+std::map<std::string, PropertyDataType> DBTableColumn::db_types_2_data_types_ = boost::assign::map_list_of
+        ("bool", PropertyDataType::BOOL)
+        ("tinyint", PropertyDataType::CHAR)
+        //("UCHAR", PropertyDataType::UCHAR)
+        ("smallint", PropertyDataType::INT)
+        ("mediumint", PropertyDataType::INT)
+        ("int", PropertyDataType::INT)
+        //("UINT", PropertyDataType::UCHAR)
+        ("bigint", PropertyDataType::LONGINT)
+        //("ULONGINT", PropertyDataType::ULONGINT)
+        ("float", PropertyDataType::FLOAT)
+        ("double", PropertyDataType::DOUBLE)
+        ("enum", PropertyDataType::STRING)
+        ("tinyblob", PropertyDataType::STRING)
+        ("blob", PropertyDataType::STRING)
+        ("mediumblob", PropertyDataType::STRING)
+        ("longblob", PropertyDataType::STRING)
+        ("varchar", PropertyDataType::STRING);
 
 DBTableColumn::DBTableColumn(const std::string &class_id, const std::string &instance_id, DBTable *table)
  : Configurable (class_id, instance_id, table), table_(*table), widget_(nullptr)
@@ -49,6 +71,15 @@ DBTableColumn::~DBTableColumn()
         widget_ = nullptr;
     }
 
+}
+
+PropertyDataType DBTableColumn::propertyType () const
+{
+//        BOOL, CHAR, UCHAR, INT, UINT, LONGINT, ULONGINT, FLOAT, DOUBLE, STRING
+    if (db_types_2_data_types_.count(type_) == 0)
+        throw std::range_error ("PropertyDataType DBTableColumn:propertyType: unknown data type "+type_);
+    else
+        return db_types_2_data_types_.at(type_);
 }
 
 

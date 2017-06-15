@@ -223,7 +223,7 @@ set (atsdb_MOC_HEADERS
 #        src/gui/transformationeditdialog.h
 #        src/gui/transformationvariableeditdialog.h
 #        src/gui/filtereditdialog.h
-#        src/schema/dbtablecolumncombobox.h
+        src/schema/dbtablecolumncombobox.h
         src/schema/dbschema.h
         src/schema/dbschemawidget.h
         src/schema/dbschemamanager.h
@@ -233,6 +233,7 @@ set (atsdb_MOC_HEADERS
         src/object/dbobject.h
         src/object/dbobjectwidget.h
         src/object/dbobjectmanagerwidget.h
+        src/object/dbovariabledatatypecombobox.h
 #        src/object/dbovariablecombobox.h
 #        src/object/dbovariablesetwidget.h
 #        src/object/dbovariableorderedsetwidget.h
@@ -329,7 +330,7 @@ set ( atsdb_SRCS
 #        src/result/bufferset.cpp
         src/schema/dbschemawidget.cpp
         src/schema/dbtablewidget.cpp
-#        src/schema/dbtablecolumncombobox.cpp
+        src/schema/dbtablecolumncombobox.cpp
         src/schema/dbtable.cpp
         src/schema/dbtablecolumn.cpp
         src/schema/dbschema.cpp

@@ -28,13 +28,16 @@
 #include <QWidget>
 #include <map>
 
-class DBObject;
-class DBOVariable;
 class QLineEdit;
 class QComboBox;
 class QCheckBox;
 class QGridLayout;
 class QPushButton;
+class QTextEdit;
+
+
+class DBObject;
+class DBOVariable;
 class DBTableColumnComboBox;
 class DBOVariableDataTypeComboBox;
 class StringRepresentationComboBox;
@@ -153,7 +156,7 @@ private:
     /// @brief Container with DBOVariable name edit fields
     std::map <QLineEdit *, DBOVariable *> dbo_vars_grid_name_edits_;
     /// @brief Container with DBOVariable info edit fields
-    std::map <QLineEdit *, DBOVariable *> dbo_vars_grid_info_edits_;
+    std::map <QTextEdit *, DBOVariable *> dbo_vars_grid_info_edits_;
     /// @brief Container with DBOVariable property data type selection fields
     std::map <DBOVariableDataTypeComboBox *, DBOVariable *> dbo_vars_grid_data_type_boxes_;
     /// @brief Container with DBOVariable string representation selection fields

@@ -22,34 +22,33 @@
  *      Author: sk
  */
 
-#include "DBTableColumn.h"
-#include "DBTableColumnComboBox.h"
-#include "DBSchema.h"
-#include "DBSchemaManager.h"
-#include "DBOVariable.h"
-#include "MetaDBTable.h"
+#include "dbtablecolumn.h"
+#include "dbtablecolumncombobox.h"
+#include "dbschema.h"
+#include "dbschemamanager.h"
+#include "dbovariable.h"
+#include "metadbtable.h"
 
 DBTableColumnComboBox::DBTableColumnComboBox(std::string schema, std::string meta_table, DBOVariable *variable, QWidget * parent)
  : schema_ (schema), meta_table_ (meta_table), variable_(variable)
 {
   std::string variable_name;
   if (variable_->hasSchema (schema))
-    variable_name = variable_->getVariableName (schema);
+    variable_name = variable_->variableName (schema);
 
-  MetaDBTable *meta = DBSchemaManager::getInstance().getSchema(schema_)->getMetaTable(meta_table_);
-  std::map <std::string, DBTableColumn*> &cols =  meta->getColumns ();
-  std::map <std::string, DBTableColumn*>::iterator it;
+  const MetaDBTable &meta = variable_->currentMetaTable();
+  auto cols =  meta.columns ();
 
   addItem ("");
 
   int index=-1;
   unsigned int cnt=1;
-  for (it = cols.begin(); it != cols.end(); it++)
+  for (auto it = cols.begin(); it != cols.end(); it++)
   {
-    if (variable_name.compare(it->second->getName()) == 0)
+    if (variable_name.compare(it->second.name()) == 0)
       index=cnt;
 
-    addItem (it->second->getName().c_str());
+    addItem (it->second.name().c_str());
     cnt++;
   }
 

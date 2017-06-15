@@ -27,6 +27,7 @@
 
 #include <string>
 #include "configurable.h"
+#include "property.h"
 
 class DBTable;
 class UnitSelectionWidget;
@@ -53,6 +54,7 @@ public:
   void type (const std::string &type) { type_=type; }
   /// @brief Returns the data type
   const std::string &type() const { return type_; }
+  PropertyDataType propertyType () const;
 
   /// @brief Sets key flag
   void isKey (bool is_key) { is_key_=is_key;}
@@ -98,6 +100,9 @@ protected:
   std::string special_null_;
 
   UnitSelectionWidget *widget_;
+
+  static std::map<std::string, PropertyDataType> db_types_2_data_types_;
+
 };
 
 #endif /* DBTABLECOLUMN_H_ */

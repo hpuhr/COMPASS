@@ -7,5 +7,1419 @@
             <ParameterString meta_table="Radar"/>
             <ParameterString schema="SCDB"/>
         </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarACAS_AIRCRAFT_IDENTIFICATION0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Flag: ACAS Aircraft identification capability? (Y/N) [I048/230 AIC]"/>
+            <ParameterString name="ACAS_AIRCRAFT_IDENTIFICATION"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarACAS_AIRCRAFT_IDENTIFICATION0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="ACAS_AIRCRAFT_IDENTIFICATION"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarACAS_ALT_CAPABILITY_FT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Altitude reporting capability, currently 25 or 100, replaces old ACAS_25FT_REPORTING column"/>
+            <ParameterString name="ACAS_ALT_CAPABILITY_FT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarACAS_ALT_CAPABILITY_FT0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="ACAS_ALT_CAPABILITY_FT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarACAS_BDS_1_A0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="BDS 1,0 bit 16 [I048/230 B1A]"/>
+            <ParameterString name="ACAS_BDS_1_A"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarACAS_BDS_1_A0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="ACAS_BDS_1_A"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarACAS_BDS_1_B0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="BDS 1,0 bits 37-40 [I048/230 B1B]"/>
+            <ParameterString name="ACAS_BDS_1_B"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarACAS_BDS_1_B0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="ACAS_BDS_1_B"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarACAS_COMM_CAPABILITY0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="ACAS Communications capability of the transponder, see X__SD_ACAS_COMMS [I048/230 COM]"/>
+            <ParameterString name="ACAS_COMM_CAPABILITY"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarACAS_COMM_CAPABILITY0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="ACAS_COMM_CAPABILITY"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarACAS_FLIGHT_STATUS0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="ACAS Flight status, see X__SD_ACAS_FLIGHT_STATUS [I048/230 STAT]"/>
+            <ParameterString name="ACAS_FLIGHT_STATUS"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarACAS_FLIGHT_STATUS0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="ACAS_FLIGHT_STATUS"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarACAS_MODES_SERVICE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Flag: ACAS Mode-S specifific service capability? (Y/N) [I048/230 MMSC]"/>
+            <ParameterString name="ACAS_MODES_SERVICE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarACAS_MODES_SERVICE0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="ACAS_MODES_SERVICE"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarANTENNA0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Antenna 1 or 2"/>
+            <ParameterString name="ANTENNA"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarANTENNA0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="ANTENNA"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarCALC_ALT_GEO_FT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Calculated Geographical Altitude"/>
+            <ParameterString name="CALC_ALT_GEO_FT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarCALC_ALT_GEO_FT0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="CALC_ALT_GEO_FT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarCALLSIGN0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="aircraft identification when flight plan is available or the plan is available [I021/170, I048/240]"/>
+            <ParameterString name="CALLSIGN"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarCALLSIGN0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="CALLSIGN"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarCAT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="ASTERIX Category"/>
+            <ParameterString name="CAT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarCAT0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="CAT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarCIVIL_EMERGENCY0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="0 = default, 5 = code 7500 (unlawful interference), 6 = code 7600 (radio comunnication failure), 7 = code 7700 (emergency) [I001/020 DS1/DS2]"/>
+            <ParameterString name="CIVIL_EMERGENCY"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarCIVIL_EMERGENCY0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="CIVIL_EMERGENCY"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarDETECTION_TYPE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Detection type [I030/080 TYPE, I062/340 #6 TYP], see X__SD_DETECTION_TYPES"/>
+            <ParameterString name="DETECTION_TYPE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarDETECTION_TYPE0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="DETECTION_TYPE"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarDISPLAY_STATE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description=" "/>
+            <ParameterString name="DISPLAY_STATE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarDISPLAY_STATE0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="DISPLAY_STATE"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarDOM_POSIX0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Day of message in posix time."/>
+            <ParameterString name="DOM_POSIX"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarDOM_POSIX0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="DOM_POSIX"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarDS_ID0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="DATA SOURCE ID, is derived from table DS and its sub tables"/>
+            <ParameterString name="DS_ID"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarDS_ID0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="DS_ID"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarFROM_FFT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Flag: Y = from Fixed Field Transponder, N = from Aircraft [I001/020 RAB, , I021/040 RAB, I048/020 RAB]"/>
+            <ParameterString name="FROM_FFT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarFROM_FFT0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="FROM_FFT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarGEO_AREA_MASK0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="LONGINT"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Geographical area bit mask"/>
+            <ParameterString name="GEO_AREA_MASK"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarGEO_AREA_MASK0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="GEO_AREA_MASK"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarHASH_CODE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="ARTAS MD5 Hash Code"/>
+            <ParameterString name="HASH_CODE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarHASH_CODE0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="HASH_CODE"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarHEIGHT_3D_FT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Height in Ft measured by a 3D radar [048/110]"/>
+            <ParameterString name="HEIGHT_3D_FT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarHEIGHT_3D_FT0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="HEIGHT_3D_FT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarIC_CODE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Non-ASTERIX source id"/>
+            <ParameterString name="IC_CODE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarIC_CODE0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="IC_CODE"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarLINE_ID0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="COMMUNICATION LINE ID determines the origin of the record, see table COMMS"/>
+            <ParameterString name="LINE_ID"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarLINE_ID0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="LINE_ID"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMAS_TRACK_NUM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description=" "/>
+            <ParameterString name="MAS_TRACK_NUM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMAS_TRACK_NUM0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MAS_TRACK_NUM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMIL_EMERGENCY0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Flag: military emergency? (Y/N) [I001/020 MI, I048/020 ME]"/>
+            <ParameterString name="MIL_EMERGENCY"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMIL_EMERGENCY0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MIL_EMERGENCY"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMIL_IDENT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Flag: Y = military, N = default [I001/020 MI, I048/020 MI, I062/080 MI]"/>
+            <ParameterString name="MIL_IDENT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMIL_IDENT0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MIL_IDENT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMODE1_CODE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Mode-1 Code in octal representation [I001/055, I048/055]"/>
+            <ParameterString name="MODE1_CODE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMODE1_CODE0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODE1_CODE"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMODE1_G0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Mode-1 garbled? (Y,N) [I001/055 G, I048/055 G]"/>
+            <ParameterString name="MODE1_G"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMODE1_G0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODE1_G"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMODE1_QX0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Mode-1 Confidence indicator, 6 bits, each bit indicating low quality if it is 1, NULL is the same 0 (all bits have high quality) [I001/065 QXi, I048/065 QXi]"/>
+            <ParameterString name="MODE1_QX"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMODE1_QX0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODE1_QX"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMODE1_SMO0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Flag: Y = Mode-1 is smoothed, N = Mode-1 as derived from the reply of the transponder [I001/055 L, I048/055 L]"/>
+            <ParameterString name="MODE1_SMO"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMODE1_SMO0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODE1_SMO"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMODE1_V0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Mode-1 valid? (Y,N) [I001/055 V, I048/055 V]"/>
+            <ParameterString name="MODE1_V"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMODE1_V0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODE1_V"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMODE2_CODE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Mode-2 Code in octal representation [I001/050, I048/050]"/>
+            <ParameterString name="MODE2_CODE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMODE2_CODE0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODE2_CODE"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMODE2_G0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Mode-2 garbled? (Y,N) [I001/050 G, I048/050 G]"/>
+            <ParameterString name="MODE2_G"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMODE2_G0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODE2_G"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMODE2_QX0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Mode-2 Confidence indicator, 12 bits, each bit indicating low quality if it is 1, NULL is the same 0 (all bits have high quality) [I001/060 QXi, I048/050 QXi]"/>
+            <ParameterString name="MODE2_QX"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMODE2_QX0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODE2_QX"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMODE2_SMO0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Flag: Y = Mode-2 is smoothed, N = Mode-2 as derived from the reply of the transponder [I001/050 L, I048/050 L]"/>
+            <ParameterString name="MODE2_SMO"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMODE2_SMO0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODE2_SMO"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMODE2_V0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Mode-2 valid? (Y,N) [I001/050 V, I048/050 V]"/>
+            <ParameterString name="MODE2_V"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMODE2_V0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODE2_V"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMODE3A_CODE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Mode-3/A Code in octal representation [I001/070, I048/070]"/>
+            <ParameterString name="MODE3A_CODE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMODE3A_CODE0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODE3A_CODE"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMODE3A_G0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Mode-3/A garbled? (Y,N) [I001/070 G, I048/070 G]"/>
+            <ParameterString name="MODE3A_G"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMODE3A_G0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODE3A_G"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMODE3A_QX0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Mode-3/A Confidence indicator, 12 bits, each bit indicating low quality if it is 1, NULL is the same 0 (all bits have high quality) [I001/080 QXi, I048/080 QXi]"/>
+            <ParameterString name="MODE3A_QX"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMODE3A_QX0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODE3A_QX"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMODE3A_SMO0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Flag: Y = Mode-3/A is smoothed, i.e. not extracted during last scan, N = Mode-3/A as derived from the reply of the transponder [I001/070 L, I048/070 L]"/>
+            <ParameterString name="MODE3A_SMO"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMODE3A_SMO0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODE3A_SMO"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMODE3A_V0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Mode-3/A valid? (Y,N) [I001/070 V, I048/070 V]"/>
+            <ParameterString name="MODE3A_V"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMODE3A_V0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODE3A_V"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMODE4_FRIENDLY0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Mode-4 interrorgation type: - = no interrogation, F = Friendly target, U = Unknown Target, N = No Reply [I048/020 FOE/FRI]"/>
+            <ParameterString name="MODE4_FRIENDLY"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMODE4_FRIENDLY0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODE4_FRIENDLY"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMODEC_CODE_FT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Mode-C Code Flight Level in Ft [I001/090, I048/090]"/>
+            <ParameterString name="MODEC_CODE_FT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMODEC_CODE_FT0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODEC_CODE_FT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMODEC_CODE_GRAY0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Mode-C Code as received from the transponder [I001/100, I048/100]"/>
+            <ParameterString name="MODEC_CODE_GRAY"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMODEC_CODE_GRAY0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODEC_CODE_GRAY"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMODEC_G0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Mode-C garbled? (Y,N) [I001/090 G, I048/090 G]"/>
+            <ParameterString name="MODEC_G"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMODEC_G0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODEC_G"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMODEC_G_GRAY0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Mode-C garbled? (Y,N) [I001/100 G, I048/100 G]"/>
+            <ParameterString name="MODEC_G_GRAY"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMODEC_G_GRAY0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODEC_G_GRAY"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMODEC_QX_GRAY0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Mode-C Confidence indicator, 12 bits, each bit indicating low quality if it is 1, NULL is the same 0 (all bits have high quality) [I001/060 QXi, I048/050 QXi]"/>
+            <ParameterString name="MODEC_QX_GRAY"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMODEC_QX_GRAY0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODEC_QX_GRAY"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMODEC_V0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Mode-C valid? (Y,N) [I001/090 V, I048/090 V]"/>
+            <ParameterString name="MODEC_V"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMODEC_V0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODEC_V"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMODEC_V_GRAY0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Mode-C valid? (Y,N) [I001/100 V, I048/100 V]"/>
+            <ParameterString name="MODEC_V_GRAY"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMODEC_V_GRAY0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODEC_V_GRAY"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMODES_MB_DATA0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Raw Mode S MB Data (= BDS registers)"/>
+            <ParameterString name="MODES_MB_DATA"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMODES_MB_DATA0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODES_MB_DATA"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMSG_FMT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Protocol type as defined in X__SD_MSG_FMTS, contents shall be ASTERIX, Aircat 500, Alenia, FPS117, RAT31SL, RSRP, TRS22, RDIF, MADREC, EUROCONTROL, DDE, CD2, Ericsson"/>
+            <ParameterString name="MSG_FMT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMSG_FMT0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MSG_FMT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMSSR_AMPLITUDE_DBM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Amplitude of (M)SSR reply in dBm [048/130 #3 SAM]"/>
+            <ParameterString name="MSSR_AMPLITUDE_DBM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMSSR_AMPLITUDE_DBM0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MSSR_AMPLITUDE_DBM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarMSSR_REPLIES_NUM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Number of received replies from (M)SSR [048/130 #2 SRR]"/>
+            <ParameterString name="MSSR_REPLIES_NUM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMSSR_REPLIES_NUM0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MSSR_REPLIES_NUM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarPOS_AZM_DEG0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Measured position in polar coordinates: Theta in ¿¿ [I001/040, I048/040]"/>
+            <ParameterString name="POS_AZM_DEG"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarPOS_AZM_DEG0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_AZM_DEG"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarPOS_AZM_DEG_CALC0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="C = computed, R = reported"/>
+            <ParameterString name="POS_AZM_DEG_CALC"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarPOS_AZM_DEG_CALC0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_AZM_DEG_CALC"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarPOS_LAT_DEG0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="WGS84 coordinate latitude"/>
+            <ParameterString name="POS_LAT_DEG"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarPOS_LAT_DEG0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_LAT_DEG"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarPOS_LOCAL_X_NM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Calculated x position in Cartesian coordinates [I001/042, I048/042]"/>
+            <ParameterString name="POS_LOCAL_X_NM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarPOS_LOCAL_X_NM0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_LOCAL_X_NM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarPOS_LOCAL_X_NM_CALC0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="C = computed, R = reported"/>
+            <ParameterString name="POS_LOCAL_X_NM_CALC"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarPOS_LOCAL_X_NM_CALC0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_LOCAL_X_NM_CALC"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarPOS_LOCAL_Y_NM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Calculated y position in Cartesian coordinates [I001/042, I048/042]"/>
+            <ParameterString name="POS_LOCAL_Y_NM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarPOS_LOCAL_Y_NM0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_LOCAL_Y_NM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarPOS_LOCAL_Y_NM_CALC0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="C = computed, R = reported"/>
+            <ParameterString name="POS_LOCAL_Y_NM_CALC"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarPOS_LOCAL_Y_NM_CALC0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_LOCAL_Y_NM_CALC"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarPOS_LONG_DEG0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="WGS84 coordinate longitude"/>
+            <ParameterString name="POS_LONG_DEG"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarPOS_LONG_DEG0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_LONG_DEG"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarPOS_RANGE_NM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Measured position in polar coordinates: Rho in NM [I001/040, I048/040]"/>
+            <ParameterString name="POS_RANGE_NM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarPOS_RANGE_NM0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_RANGE_NM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarPOS_RANGE_NM_CALC0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="C = computed, R = reported"/>
+            <ParameterString name="POS_RANGE_NM_CALC"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarPOS_RANGE_NM_CALC0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_RANGE_NM_CALC"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarPOS_SYS_X_NM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="System coordinate x"/>
+            <ParameterString name="POS_SYS_X_NM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarPOS_SYS_X_NM0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_SYS_X_NM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarPOS_SYS_Y_NM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="System coordinate y"/>
+            <ParameterString name="POS_SYS_Y_NM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarPOS_SYS_Y_NM0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_SYS_Y_NM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarPSR_AMPLITUDE_DBM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Amplitude of primary plot in dBm [048/130 #5 PAM]"/>
+            <ParameterString name="PSR_AMPLITUDE_DBM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarPSR_AMPLITUDE_DBM0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="PSR_AMPLITUDE_DBM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarPSR_RUNLENGTH_DEG0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Primary plot runlength in ¿¿ [048/130 #4 PRL]"/>
+            <ParameterString name="PSR_RUNLENGTH_DEG"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarPSR_RUNLENGTH_DEG0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="PSR_RUNLENGTH_DEG"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarPSR_SSR_AZM_DIFF_DEG0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Difference in azimuth between PSR and SSR plot in NM [048/130 #6 RDP]"/>
+            <ParameterString name="PSR_SSR_AZM_DIFF_DEG"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarPSR_SSR_AZM_DIFF_DEG0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="PSR_SSR_AZM_DIFF_DEG"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarPSR_SSR_RANGE_DIFF_NM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Difference in range between PSR and SSR plot in NM [048/130 #6 RDP]"/>
+            <ParameterString name="PSR_SSR_RANGE_DIFF_NM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarPSR_SSR_RANGE_DIFF_NM0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="PSR_SSR_RANGE_DIFF_NM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarRAW_MSG0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Binary representation"/>
+            <ParameterString name="RAW_MSG"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarRAW_MSG0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="RAW_MSG"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarRDP_CHAIN0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Report from which RDP Chain number: 1 or 2 [I001/020 RDP, I048/020 RDP]"/>
+            <ParameterString name="RDP_CHAIN"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarRDP_CHAIN0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="RDP_CHAIN"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarREC_NUM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Unique record id starting with 0 on every new recording"/>
+            <ParameterString name="REC_NUM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarREC_NUM0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="REC_NUM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarREC_TIME_MS0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="ms fraction of REC_TIME_POSIX"/>
+            <ParameterString name="REC_TIME_MS"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarREC_TIME_MS0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="REC_TIME_MS"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarREC_TIME_POSIX0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Recording time with accuracy of 1s; is stamped by the communication process"/>
+            <ParameterString name="REC_TIME_POSIX"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarREC_TIME_POSIX0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="REC_TIME_POSIX"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarREPORT_TYPE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Report classification [I001/020, I048/020, etc] as enrichment, see X__SD_REPORT_TYPES"/>
+            <ParameterString name="REPORT_TYPE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarREPORT_TYPE0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="REPORT_TYPE"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarSAC0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="ASTERIX System Area Code [I001/010, I002/010, I002/010, I034/010, I048/010, I062/010, I021/010]"/>
+            <ParameterString name="SAC"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarSAC0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="SAC"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarSCAN_NUM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Scan number"/>
+            <ParameterString name="SCAN_NUM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarSCAN_NUM0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="SCAN_NUM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarSIC0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="ASTERIX System Identification Code [I001/010, I002/010, I002/010, I034/010, I048/010, I062/010, I021/010]"/>
+            <ParameterString name="SIC"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarSIC0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="SIC"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarSIMULATED_TARGET0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Flag: Y = Simulated, N = actual plot/track (I001/020 SIM, I021/040 SIM, I048/020 SIM]"/>
+            <ParameterString name="SIMULATED_TARGET"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarSIMULATED_TARGET0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="SIMULATED_TARGET"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarSPI0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Flag: Special position indication? (Y/N) [I001/020 SPI, I021/040 SPI, , I048/020 SPI]"/>
+            <ParameterString name="SPI"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarSPI0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="SPI"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarSSR_RUNLENGTH_DEG0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="SSR plot runlength in degree [048/130 #1 SRL]"/>
+            <ParameterString name="SSR_RUNLENGTH_DEG"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarSSR_RUNLENGTH_DEG0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="SSR_RUNLENGTH_DEG"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarTARGET_ADDR0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="24 bit target addreess / aircraft address / Mode-S address assigned uniquely to each aircraft [I021/080, I048/220]"/>
+            <ParameterString name="TARGET_ADDR"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarTARGET_ADDR0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TARGET_ADDR"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarTEST_TARGET0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Flag: Y = Test target report, N = Real target report (I001/020 TST, I021/040 TST, I048/020 TST]"/>
+            <ParameterString name="TEST_TARGET"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarTEST_TARGET0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TEST_TARGET"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarTOD0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Measured time / (truncated) Time of Day (= ms since last midnight), [I001/141, I021/030, I048/140]"/>
+            <ParameterString name="TOD"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarTOD0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TOD"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarTOD_CALCULATED0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="C:Calculated, R:Recording time, N:From data, L:Local time transform"/>
+            <ParameterString name="TOD_CALCULATED"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarTOD_CALCULATED0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TOD_CALCULATED"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarTRACK_CLIMB_DESC_MODE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Climb/Descend Mode: M = Maintaining, C = Climbing, D = Descending, I = Invalid [I048/170 CDM]"/>
+            <ParameterString name="TRACK_CLIMB_DESC_MODE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarTRACK_CLIMB_DESC_MODE0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRACK_CLIMB_DESC_MODE"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarTRACK_CONFIRMED0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Flag: Track confirmed? [I001/170 CON, I048/170 CNF]"/>
+            <ParameterString name="TRACK_CONFIRMED"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarTRACK_CONFIRMED0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRACK_CONFIRMED"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarTRACK_DOUBTFUL0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Flag: Plot to Track association doubtful? [I001/170 DOU, I048/170 DOU]"/>
+            <ParameterString name="TRACK_DOUBTFUL"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarTRACK_DOUBTFUL0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRACK_DOUBTFUL"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarTRACK_END0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Flag: End of Track? [I001/170 TRE, I048/170 TRE]"/>
+            <ParameterString name="TRACK_END"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarTRACK_END0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRACK_END"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarTRACK_GHOST_TARGET0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Flag: Y = Ghost Target, N = True Target [I001/170 GHO, I048/170 GHO]"/>
+            <ParameterString name="TRACK_GHOST_TARGET"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarTRACK_GHOST_TARGET0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRACK_GHOST_TARGET"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarTRACK_GROUNDSPEED_KT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Calculated track velocity expressed in polar coordinates, groundspeed in Kt [I001/200, I021/160, I048/200]"/>
+            <ParameterString name="TRACK_GROUNDSPEED_KT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarTRACK_GROUNDSPEED_KT0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRACK_GROUNDSPEED_KT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarTRACK_HEADING_DEG0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Calculated track velocity expressed in polar coordinates, angle in ¿¿ [I001/200, I021/160, I048/200]"/>
+            <ParameterString name="TRACK_HEADING_DEG"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarTRACK_HEADING_DEG0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRACK_HEADING_DEG"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarTRACK_MANOEUVRE_HORI0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Flag: Horizontal manoeuvring? [I001/170 MAN, I048/170 MAN]"/>
+            <ParameterString name="TRACK_MANOEUVRE_HORI"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarTRACK_MANOEUVRE_HORI0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRACK_MANOEUVRE_HORI"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarTRACK_NUM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Track number, can also be plot number for CAT 001"/>
+            <ParameterString name="TRACK_NUM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarTRACK_NUM0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRACK_NUM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarTRACK_RDP_CHAIN0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="RDP Chain 1 or 2 [I001/170 RDPC]"/>
+            <ParameterString name="TRACK_RDP_CHAIN"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarTRACK_RDP_CHAIN0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRACK_RDP_CHAIN"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarTRACK_SIGMA_H_DEG0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Standard deviation on the angle within the local grid system [I048/210 Sigma(H)]]"/>
+            <ParameterString name="TRACK_SIGMA_H_DEG"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarTRACK_SIGMA_H_DEG0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRACK_SIGMA_H_DEG"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarTRACK_SIGMA_V_KT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Standard deviation on the groundspeed within the local grid system [I048/210 Sigma(V)]]"/>
+            <ParameterString name="TRACK_SIGMA_V_KT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarTRACK_SIGMA_V_KT0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRACK_SIGMA_V_KT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarTRACK_SIGMA_X_NM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Standard deviation on the horizontal axis of the local grid system [I048/210 Sigma(X)]]"/>
+            <ParameterString name="TRACK_SIGMA_X_NM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarTRACK_SIGMA_X_NM0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRACK_SIGMA_X_NM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarTRACK_SIGMA_Y_NM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Standard deviation on the vertical axis of the local grid system [I048/210 Sigma(Y)]]"/>
+            <ParameterString name="TRACK_SIGMA_Y_NM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarTRACK_SIGMA_Y_NM0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRACK_SIGMA_Y_NM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarTRACK_SLANT_CORR0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Type of plot coordinate transformation mechanism in slant range correction technique? [I048/170 TCC]"/>
+            <ParameterString name="TRACK_SLANT_CORR"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarTRACK_SLANT_CORR0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRACK_SLANT_CORR"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarTRACK_SUP0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="Flag: Track maintained with track information from neighbouring Node B on the cluster, or network? [I048/170 SUP]"/>
+            <ParameterString name="TRACK_SUP"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarTRACK_SUP0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRACK_SUP"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarTRACK_TYPE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Radar"/>
+            <ParameterString description="P (Primary), S(SSR), C(Combined), N(Not primary, SSR/Combined), I(Invalid)"/>
+            <ParameterString name="TRACK_TYPE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarTRACK_TYPE0">
+                <ParameterString meta_table="Radar"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRACK_TYPE"/>
+            </Configuration>
+        </Configuration>
     </Configuration>
 </Configuration>

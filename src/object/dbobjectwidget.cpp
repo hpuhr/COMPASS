@@ -23,6 +23,7 @@
 #include <QPushButton>
 #include <QScrollArea>
 #include <QCheckBox>
+#include <QTextEdit>
 
 #include "configuration.h"
 #include "configurationmanager.h"
@@ -376,26 +377,26 @@ void DBObjectWidget::editInfo ()
 void DBObjectWidget::deleteDBOVar()
 {
   logdbg  << "DBObjectWidget: deleteDBOVar";
-  QPushButton *button = (QPushButton*)sender();
+  QPushButton *button = static_cast<QPushButton*>(sender());
   assert (dbo_vars_grid_delete_buttons_.find(button) != dbo_vars_grid_delete_buttons_.end());
-  object_->deleteVariable (dbo_vars_grid_delete_buttons_[button]->getName());
+  object_->deleteVariable (dbo_vars_grid_delete_buttons_[button]->name());
   updateDBOVarsGrid();
 }
 
 void DBObjectWidget::editDBOVarName()
 {
   logdbg  << "DBObjectWidget: editDBOVarName";
-  QLineEdit *edit = (QLineEdit*)sender();
+  QLineEdit *edit = static_cast<QLineEdit*>(sender());
   assert (dbo_vars_grid_name_edits_.find(edit) != dbo_vars_grid_name_edits_.end());
-  dbo_vars_grid_name_edits_[edit]->setName(edit->text().toStdString());
+  dbo_vars_grid_name_edits_[edit]->name(edit->text().toStdString());
 }
 
 void DBObjectWidget::editDBOVarInfo()
 {
   logdbg  << "DBObjectWidget: editDBOVarInfo";
-  QLineEdit *edit = (QLineEdit*)sender();
+  QTextEdit *edit = static_cast<QTextEdit*>(sender());
   assert (dbo_vars_grid_info_edits_.find(edit) != dbo_vars_grid_info_edits_.end());
-  dbo_vars_grid_info_edits_[edit]->setInfo(edit->text().toStdString());
+  dbo_vars_grid_info_edits_[edit]->description(edit->toPlainText().toStdString());
 }
 
 void DBObjectWidget::changedLoadable ()
@@ -431,10 +432,10 @@ void DBObjectWidget::updateDSLocalKeySelection()
   unsigned int cnt=0;
   for (auto it = variables.begin(); it != variables.end(); it++)
   {
-    if (selection.size()>0 && selection.compare(it->second->getName()) == 0)
+    if (selection.size()>0 && selection.compare(it->second->name()) == 0)
       index_cnt=cnt;
 
-    ds_local_key_box_->addItem (it->second->getName().c_str());
+    ds_local_key_box_->addItem (it->second->name().c_str());
 
     cnt++;
   }
@@ -696,8 +697,9 @@ void DBObjectWidget::addAllVariables ()
     Configuration &config = object_->addNewSubConfiguration ("DBOVariable", instance);
 
     config.addParameterString ("name", column_name);
-    config.addParameterString ("data_type_str", it->second.type());
+    config.addParameterString ("data_type_str", Property::asString(it->second.propertyType()));
     config.addParameterString ("dbo_name", object_->name());
+    config.addParameterString ("description", it->second.comment());
 
     std::string var_instance = "DBOSchemaVariableDefinition"+object_->name()+column_name+"0";
 
@@ -861,18 +863,19 @@ void DBObjectWidget::updateDBOVarsGrid ()
     dbovars_grid_->addWidget (del, row, 0);
 
     //logdbg  << "DBObjectWidget: updateDBOVarsGrid: creating variable row for " << it->first << " name";
-    QLineEdit *name = new QLineEdit (it->second->getName().c_str());
+    QLineEdit *name = new QLineEdit (it->second->name().c_str());
     connect(name, SIGNAL( returnPressed() ), this, SLOT( editDBOVarName() ));
     assert (dbo_vars_grid_name_edits_.find(name) == dbo_vars_grid_name_edits_.end());
     dbo_vars_grid_name_edits_[name] = it->second;
     dbovars_grid_->addWidget (name, row, 1);
 
     //logdbg  << "DBObjectWidget: updateDBOVarsGrid: creating variable row for " << it->first << " info";
-    QLineEdit *info = new QLineEdit (it->second->getInfo().c_str());
-    connect(info, SIGNAL( returnPressed() ), this, SLOT( editDBOVarInfo() ));
-    assert (dbo_vars_grid_info_edits_.find(info) == dbo_vars_grid_info_edits_.end());
-    dbo_vars_grid_info_edits_[info] = it->second;
-    dbovars_grid_->addWidget (info, row, 2);
+    QTextEdit *description = new QTextEdit (it->second->description().c_str());
+    description->adjustSize();
+    connect(description, SIGNAL( returnPressed() ), this, SLOT( editDBOVarInfo() ));
+    assert (dbo_vars_grid_info_edits_.find(description) == dbo_vars_grid_info_edits_.end());
+    dbo_vars_grid_info_edits_[description] = it->second;
+    dbovars_grid_->addWidget (description, row, 2);
 
     //logdbg  << "DBObjectWidget: updateDBOVarsGrid: creating variable row for " << it->first << " property";
     DBOVariableDataTypeComboBox *type = new DBOVariableDataTypeComboBox (it->second);
@@ -881,7 +884,6 @@ void DBObjectWidget::updateDBOVarsGrid ()
     dbovars_grid_->addWidget (type, row, 3);
 
     //logdbg  << "DBObjectWidget: updateDBOVarsGrid: creating variable row for " << it->first << " stringrep";
-    assert (false);
     // TODO
 //    StringRepresentationComboBox *repr = new StringRepresentationComboBox (it->second);
 //    assert (dbo_vars_grid_representation_boxes_.find(repr) == dbo_vars_grid_representation_boxes_.end());
@@ -889,7 +891,7 @@ void DBObjectWidget::updateDBOVarsGrid ()
 //    dbovars_grid_->addWidget (repr, row, 4);
 
     //logdbg  << "DBObjectWidget: updateDBOVarsGrid: creating variable row for " << it->first << " unit";
-    UnitSelectionWidget *unit_sel = new UnitSelectionWidget (it->second->getUnitDimension(), it->second->getUnitUnit());
+    UnitSelectionWidget *unit_sel = new UnitSelectionWidget (it->second->unitDimension(), it->second->unitUnit());
     dbovars_grid_->addWidget (unit_sel, row, 5);
 
     //logdbg  << "DBObjectWidget: updateDBOVarsGrid: variable row for schemas";

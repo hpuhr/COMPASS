@@ -37,6 +37,7 @@
 #include "dbschema.h"
 #include "unit.h"
 #include "unitmanager.h"
+#include "dbschemamanager.h"
 //#include "DBOVariableMinMaxObserver.h"
 
 #include "stringconv.h"
@@ -202,7 +203,7 @@ void DBOVariable::generateSubConfigurable (const std::string &class_id, const st
 
 bool DBOVariable::operator==(const DBOVariable &var)
 {
-    if (getDBOName() != var.getDBOName())
+    if (dboName() != var.dboName())
         return false;
     if (data_type_ != var.data_type_)
         return false;
@@ -335,7 +336,7 @@ void DBOVariable::print ()
 
 //        if (hasUnit () || table_column->hasUnit())
 //        {
-//            //loginf  << "UGA var type " << variable->getDBOType() << " dim '" << variable->getUnitDimension() << "'";
+//            //loginf  << "var type " << variable->getDBOType() << " dim '" << variable->getUnitDimension() << "'";
 //            if (variable->hasUnit () != table_column->hasUnit())
 //            {
 //                logerr << "DBOVariable: getValueFromRepresentation: unit transformation inconsistent: var " << variable->getName ()
@@ -443,7 +444,7 @@ void DBOVariable::checkSubConfigurables ()
     // nothing to do here
 }
 
-const std::string &DBOVariable::getDBOName () const
+const std::string &DBOVariable::dboName () const
 {
     return dbo_parent_.name();
 }
@@ -453,12 +454,12 @@ bool DBOVariable::hasSchema (const std::string &schema)
 {
     return schema_variables_.find (schema) != schema_variables_.end();
 }
-const std::string &DBOVariable::getMetaTable (const std::string &schema)
+const std::string &DBOVariable::metaTable (const std::string &schema)
 {
     assert (hasSchema(schema));
     return schema_variables_.at(schema)->getMetaTable();
 }
-const std::string &DBOVariable::getVariableName (const std::string &schema)
+const std::string &DBOVariable::variableName (const std::string &schema)
 {
     assert (hasSchema(schema));
     return schema_variables_.at(schema)->getVariable();
@@ -469,18 +470,18 @@ bool DBOVariable::hasCurrentDBColumn ()
 //    if (isMetaVariable())
 //        return false;
 
-    std::string meta_tablename = getCurrentMetaTable ();
-    std::string table_varname = getCurrentVariableName ();
+    std::string meta_tablename = currentMetaTableString ();
+    std::string table_varname = currentVariableName ();
 
     return ATSDB::instance().getCurrentSchema().metaTable(meta_tablename).hasColumn(table_varname);
 }
 
-const DBTableColumn &DBOVariable::getCurrentDBColumn ()
+const DBTableColumn &DBOVariable::currentDBColumn ()
 {
     assert (hasCurrentDBColumn());
 
-    std::string meta_tablename = getCurrentMetaTable ();
-    std::string table_varname = getCurrentVariableName ();
+    std::string meta_tablename = currentMetaTableString ();
+    std::string table_varname = currentVariableName ();
 
     return ATSDB::instance().getCurrentSchema().metaTable(meta_tablename).column(table_varname);
 }
@@ -490,14 +491,24 @@ bool DBOVariable::hasCurrentSchema ()
     return hasSchema(ATSDB::instance().getCurrentSchemaName());
 }
 
-const std::string &DBOVariable::getCurrentMetaTable ()
+const std::string &DBOVariable::currentMetaTableString ()
 {
     assert (hasCurrentSchema());
     std::string schema = ATSDB::instance().getCurrentSchemaName();
     return schema_variables_.at(schema)->getMetaTable();
 
 }
-const std::string &DBOVariable::getCurrentVariableName ()
+
+const MetaDBTable &DBOVariable::currentMetaTable ()
+{
+    assert (hasCurrentSchema());
+    std::string schema = ATSDB::instance().getCurrentSchemaName();
+    std::string meta_table = schema_variables_.at(schema)->getMetaTable();
+    assert (ATSDB::instance().schemaManager().getCurrentSchema().hasMetaTable(meta_table));
+    return ATSDB::instance().schemaManager().getCurrentSchema().metaTable(meta_table);
+}
+
+const std::string &DBOVariable::currentVariableName ()
 {
     assert (hasCurrentSchema());
     std::string schema = ATSDB::instance().getCurrentSchemaName();

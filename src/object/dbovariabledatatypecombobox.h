@@ -60,7 +60,7 @@ public:
         {
             addItem (it->second.c_str());
         }
-        logdbg << "UGA '" << variable_->dataTypeString() << "'";
+
         int index = findText(QString(variable_->dataTypeString().c_str()));
         assert (index >= 0);
         setCurrentIndex (index);

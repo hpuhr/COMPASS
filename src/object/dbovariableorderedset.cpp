@@ -84,10 +84,10 @@ void DBOVariableOrderedSet::add (DBOVariable &var)
 
     if (!hasVariable(var))
     {
-        std::string var_name = var.getName();
+        std::string var_name = var.name();
 
         Configuration &id_configuration = addNewSubConfiguration ("DBOVariableOrderDefinition", "DBOVariableOrderDefinition"+var_name+"0");
-        id_configuration.addParameterString ("dbo_name", var.getDBOName());
+        id_configuration.addParameterString ("dbo_name", var.dboName());
         id_configuration.addParameterString ("id", var_name);
         id_configuration.addParameterUnsignedInt ("index", (unsigned int)set_.size());
         generateSubConfigurable("DBOVariableOrderDefinition", "DBOVariableOrderDefinition"+var_name+"0");

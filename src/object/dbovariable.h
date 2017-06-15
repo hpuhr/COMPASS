@@ -95,6 +95,7 @@ protected:
 };
 
 class DBObject;
+class MetaDBTable;
 class DBOVariableMinMaxObserver;
 
 /**
@@ -155,16 +156,16 @@ public:
   virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
   /// @brief Returns variable identifier
-  const std::string &getName () const { return name_; }
+  const std::string &name () const { return name_; }
   /// @brief Sets variable identifier
-  void setName (const std::string &name) { name_=name; }
+  void name (const std::string &name) { name_=name; }
 
-  const std::string &getDBOName () const;
+  const std::string &dboName () const;
 
   /// @brief Returns variable description
-  const std::string &getInfo () { return description_; }
+  const std::string &description () { return description_; }
   /// @brief Sets variable description
-  void setInfo (const std::string &info) { description_=info; }
+  void description (const std::string &description) { description_=description; }
 
   /// @brief Returns variable data type
   PropertyDataType dataType () { return data_type_;}
@@ -179,26 +180,28 @@ public:
   /// @brief Returns of schema is present in schema_variables_
   bool hasSchema (const std::string &schema);
   /// @brief Returns meta table identifier for a given schema
-  const std::string &getMetaTable (const std::string &schema);
+  const std::string &metaTable (const std::string &schema);
   /// @brief Returns variable identifier for a given schema
-  const std::string &getVariableName (const std::string &schema);
+  const std::string &variableName (const std::string &schema);
 
   bool hasCurrentDBColumn ();
-  const DBTableColumn &getCurrentDBColumn ();
+  const DBTableColumn &currentDBColumn ();
 
   /// @brief Returns if current schema is present in schema_variables_
   bool hasCurrentSchema ();
   /// @brief Returns meta table identifier for current schema
-  const std::string &getCurrentMetaTable ();
+  const std::string &currentMetaTableString ();
+  /// @brief Returns meta table for current schema
+  const MetaDBTable &currentMetaTable ();
   /// @brief Returns variable identifier for current schema
-  const std::string &getCurrentVariableName ();
+  const std::string &currentVariableName ();
 
   /// @brief Returns if unit information is present
   bool hasUnit () { return unit_dimension_.size() != 0;}
   /// @brief Returns unit dimension
-  const std::string &getUnitDimension () const { return unit_dimension_; }
+  const std::string &unitDimension () const { return unit_dimension_; }
   /// @brief  Returns unit unit
-  const std::string &getUnitUnit () const { return unit_unit_; }
+  const std::string &unitUnit () const { return unit_unit_; }
 
   /// @brief Returns flag if minimum/maximum information is available
   //bool hasMinMaxInfo ();
