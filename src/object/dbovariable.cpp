@@ -38,6 +38,7 @@
 #include "unit.h"
 #include "unitmanager.h"
 #include "dbschemamanager.h"
+#include "dbovariablewidget.h"
 //#include "DBOVariableMinMaxObserver.h"
 
 #include "stringconv.h"
@@ -45,7 +46,7 @@
 using namespace Utils;
 
 DBOVariable::DBOVariable(const std::string &class_id, const std::string &instance_id, DBObject *parent)
-    : Property (), Configurable (class_id, instance_id, parent), dbo_parent_(*parent) //, registered_as_parent_(false)
+    : Property (), Configurable (class_id, instance_id, parent), dbo_parent_(*parent), widget_(nullptr) //, registered_as_parent_(false)
 {
     registerParameter ("name", &name_, "");
     registerParameter ("description", &description_, "");
@@ -72,6 +73,12 @@ DBOVariable::~DBOVariable()
     for (auto it = schema_variables_.begin(); it != schema_variables_.end(); it++)
         delete it->second;
     schema_variables_.clear();
+
+    if (widget_)
+    {
+        delete widget_;
+        widget_ = nullptr;
+    }
 }
 
 void DBOVariable::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
@@ -776,3 +783,14 @@ const std::string &DBOVariable::currentVariableName ()
 //    else
 //        logdbg << "DBOVariable: subVariableHasMinMaxInfo: " << id_ << " has incomplete info";
 //}
+
+DBOVariableWidget *DBOVariable::widget ()
+{
+    if (!widget_)
+    {
+        widget_ = new DBOVariableWidget (*this);
+    }
+
+    assert (widget_);
+    return widget_;
+}

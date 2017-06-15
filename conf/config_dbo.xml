@@ -1,4 +1,2256 @@
 <Configuration class_id="DBObjectManager" instance_id="DBObjectManager0">
+    <Configuration class_id="DBObject" instance_id="DBObjectADSB0">
+        <ParameterBool is_loadable="0"/>
+        <ParameterString info=""/>
+        <ParameterString name="ADSB"/>
+        <Configuration class_id="DBOSchemaMetaTableDefinition" instance_id="DBOSchemaMetaTableDefinition0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBAIRSPEED_KT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="AIRSPEED_KT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBAIRSPEED_KT0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="AIRSPEED_KT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBAIRSPEED_MACH0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="AIRSPEED_MACH"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBAIRSPEED_MACH0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="AIRSPEED_MACH"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBALT_BARO_FT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="Barometric altitude, Mode C"/>
+            <ParameterString name="ALT_BARO_FT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBALT_BARO_FT0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="ALT_BARO_FT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBALT_GEO_FT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="Geometric altitude, 3D Height"/>
+            <ParameterString name="ALT_GEO_FT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBALT_GEO_FT0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="ALT_GEO_FT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBALT_REPORTING_CAPABILITY_FT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="currently 25 or 100"/>
+            <ParameterString name="ALT_REPORTING_CAPABILITY_FT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBALT_REPORTING_CAPABILITY_FT0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="ALT_REPORTING_CAPABILITY_FT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBBARO_VERTICAL_RATE_FTM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="BARO_VERTICAL_RATE_FTM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBBARO_VERTICAL_RATE_FTM0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="BARO_VERTICAL_RATE_FTM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBCALC_ALT_GEO_FT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="Calculated Geographical Altitude"/>
+            <ParameterString name="CALC_ALT_GEO_FT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBCALC_ALT_GEO_FT0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="CALC_ALT_GEO_FT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBCALLSIGN0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="CALLSIGN"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBCALLSIGN0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="CALLSIGN"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBCAT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="ASTERIX CAT"/>
+            <ParameterString name="CAT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBCAT0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="CAT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBDESCRIPTOR_ATP0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="Non unique, 24-bit ICAO, surface vehicle or anonymous address.!!! 24 bit? !!!"/>
+            <ParameterString name="DESCRIPTOR_ATP"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBDESCRIPTOR_ATP0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="DESCRIPTOR_ATP"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBDIFFERENTIAL_CORRECTION0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="DIFFERENTIAL_CORRECTION"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBDIFFERENTIAL_CORRECTION0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="DIFFERENTIAL_CORRECTION"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBDISPLAY_STATE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="DISPLAY_STATE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBDISPLAY_STATE0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="DISPLAY_STATE"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBDOM_POSIX0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="Day of message in posix time."/>
+            <ParameterString name="DOM_POSIX"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBDOM_POSIX0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="DOM_POSIX"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBDO_260A0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="DO_260A"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBDO_260A0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="DO_260A"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBDS_ID0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="Common Source Description ID, derived from SAC/SIC, Station Code etc."/>
+            <ParameterString name="DS_ID"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBDS_ID0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="DS_ID"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBEMITTER_CATEGORY0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="EMITTER_CATEGORY"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBEMITTER_CATEGORY0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="EMITTER_CATEGORY"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBFIGURE_OF_MERIT_ACAS0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="unknown, ACAS (not) operational"/>
+            <ParameterString name="FIGURE_OF_MERIT_ACAS"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBFIGURE_OF_MERIT_ACAS0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="FIGURE_OF_MERIT_ACAS"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBFIGURE_OF_MERIT_DIFFERENTIAL0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="unknown, (no) differential correction"/>
+            <ParameterString name="FIGURE_OF_MERIT_DIFFERENTIAL"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBFIGURE_OF_MERIT_DIFFERENTIAL0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="FIGURE_OF_MERIT_DIFFERENTIAL"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBFIGURE_OF_MERIT_MULTIPLE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="unknown, multiple navigational aids (not) operational"/>
+            <ParameterString name="FIGURE_OF_MERIT_MULTIPLE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBFIGURE_OF_MERIT_MULTIPLE0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="FIGURE_OF_MERIT_MULTIPLE"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBFINAL_SEL_ALTITUDE_APPROACH0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="FINAL_SEL_ALTITUDE_APPROACH"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBFINAL_SEL_ALTITUDE_APPROACH0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="FINAL_SEL_ALTITUDE_APPROACH"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBFINAL_SEL_ALTITUDE_FT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="FINAL_SEL_ALTITUDE_FT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBFINAL_SEL_ALTITUDE_FT0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="FINAL_SEL_ALTITUDE_FT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBFINAL_SEL_ALTITUDE_HOLD0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="FINAL_SEL_ALTITUDE_HOLD"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBFINAL_SEL_ALTITUDE_HOLD0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="FINAL_SEL_ALTITUDE_HOLD"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBFINAL_SEL_ALTITUDE_VERTICAL0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="FINAL_SEL_ALTITUDE_VERTICAL"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBFINAL_SEL_ALTITUDE_VERTICAL0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="FINAL_SEL_ALTITUDE_VERTICAL"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBFROM_FFT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="FROM_FFT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBFROM_FFT0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="FROM_FFT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBGEO_AREA_MASK0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="LONGINT"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="Geographical area bit mask"/>
+            <ParameterString name="GEO_AREA_MASK"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBGEO_AREA_MASK0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="GEO_AREA_MASK"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBGEO_VERTICAL_RATE_FTM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="GEO_VERTICAL_RATE_FTM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBGEO_VERTICAL_RATE_FTM0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="GEO_VERTICAL_RATE_FTM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBGROUNDSPEED_KT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="GROUNDSPEED_KT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBGROUNDSPEED_KT0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="GROUNDSPEED_KT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBGROUND_BIT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="GROUND_BIT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBGROUND_BIT0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="GROUND_BIT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBHASH_CODE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="ARTAS MD5 Hash Code "/>
+            <ParameterString name="HASH_CODE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBHASH_CODE0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="HASH_CODE"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBINTER_SEL_ALTITUDE_FT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="INTER_SEL_ALTITUDE_FT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBINTER_SEL_ALTITUDE_FT0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="INTER_SEL_ALTITUDE_FT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBINTER_SEL_ALTITUDE_INFO0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="INTER_SEL_ALTITUDE_INFO"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBINTER_SEL_ALTITUDE_INFO0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="INTER_SEL_ALTITUDE_INFO"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBINTER_SEL_ALTITUDE_SOURCE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="unknown, aircraft, FCU/MSP selected, FMS selected altitude"/>
+            <ParameterString name="INTER_SEL_ALTITUDE_SOURCE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBINTER_SEL_ALTITUDE_SOURCE0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="INTER_SEL_ALTITUDE_SOURCE"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBLINE_ID0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="Communication line ID"/>
+            <ParameterString name="LINE_ID"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBLINE_ID0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="LINE_ID"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBLINK_TECHNOLOGY_CDTI0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="LINK_TECHNOLOGY_CDTI"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBLINK_TECHNOLOGY_CDTI0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="LINK_TECHNOLOGY_CDTI"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBLINK_TECHNOLOGY_MDS0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="LINK_TECHNOLOGY_MDS"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBLINK_TECHNOLOGY_MDS0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="LINK_TECHNOLOGY_MDS"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBLINK_TECHNOLOGY_OTHER0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="LINK_TECHNOLOGY_OTHER"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBLINK_TECHNOLOGY_OTHER0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="LINK_TECHNOLOGY_OTHER"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBLINK_TECHNOLOGY_UAT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="LINK_TECHNOLOGY_UAT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBLINK_TECHNOLOGY_UAT0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="LINK_TECHNOLOGY_UAT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBLINK_TECHNOLOGY_VDL0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="LINK_TECHNOLOGY_VDL"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBLINK_TECHNOLOGY_VDL0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="LINK_TECHNOLOGY_VDL"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBMAGNETIC_HEADING_DEG0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="MAGNETIC_HEADING_DEG"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBMAGNETIC_HEADING_DEG0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MAGNETIC_HEADING_DEG"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBPOSITION_ACCURACY0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="POSITION_ACCURACY"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBPOSITION_ACCURACY0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POSITION_ACCURACY"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBPOS_LAT_DEG0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="WGS84 coordinate latitude"/>
+            <ParameterString name="POS_LAT_DEG"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBPOS_LAT_DEG0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_LAT_DEG"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBPOS_LONG_DEG0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="WGS84 coordinate longitude"/>
+            <ParameterString name="POS_LONG_DEG"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBPOS_LONG_DEG0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_LONG_DEG"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBPOS_SYS_X_NM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="System coordinate x"/>
+            <ParameterString name="POS_SYS_X_NM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBPOS_SYS_X_NM0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_SYS_X_NM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBPOS_SYS_Y_NM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="System coordinate y"/>
+            <ParameterString name="POS_SYS_Y_NM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBPOS_SYS_Y_NM0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_SYS_Y_NM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBRAW_MSG0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="Binary represetation"/>
+            <ParameterString name="RAW_MSG"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBRAW_MSG0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="RAW_MSG"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBREC_NUM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="Ascending record number"/>
+            <ParameterString name="REC_NUM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBREC_NUM0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="REC_NUM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBREC_TIME_MS0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="ms fraction"/>
+            <ParameterString name="REC_TIME_MS"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBREC_TIME_MS0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="REC_TIME_MS"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBREC_TIME_POSIX0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="POSIX recording time stamped by I/O process"/>
+            <ParameterString name="REC_TIME_POSIX"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBREC_TIME_POSIX0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="REC_TIME_POSIX"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBREPORT_TYPE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="ADS-B only"/>
+            <ParameterString name="REPORT_TYPE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBREPORT_TYPE0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="REPORT_TYPE"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBROLL_ANGLE_DEG0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=""/>
+            <ParameterString name="ROLL_ANGLE_DEG"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBROLL_ANGLE_DEG0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="ROLL_ANGLE_DEG"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBSAC0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="ASTERIX SAC"/>
+            <ParameterString name="SAC"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBSAC0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="SAC"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBSELECTED_ALT_CAPABILITY0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="SELECTED_ALT_CAPABILITY"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBSELECTED_ALT_CAPABILITY0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="SELECTED_ALT_CAPABILITY"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBSIC0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="ASTERIX SIC"/>
+            <ParameterString name="SIC"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBSIC0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="SIC"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBSIMULATED_TARGET0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="Simulated Plot/Track?"/>
+            <ParameterString name="SIMULATED_TARGET"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBSIMULATED_TARGET0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="SIMULATED_TARGET"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBSPI0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="SPI"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBSPI0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="SPI"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBTARGET_ADDR0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="24 bit target address / aircraft address / Mode-S address"/>
+            <ParameterString name="TARGET_ADDR"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBTARGET_ADDR0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TARGET_ADDR"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBTARGET_STATUS0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="TARGET_STATUS"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBTARGET_STATUS0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TARGET_STATUS"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBTEST_TARGET0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="Test Plot/Track?"/>
+            <ParameterString name="TEST_TARGET"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBTEST_TARGET0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TEST_TARGET"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBTOD0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="Time of Day (1/128 sec from midnight)"/>
+            <ParameterString name="TOD"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBTOD0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TOD"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBTOD_ACCURACY0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="in 1/256 secs"/>
+            <ParameterString name="TOD_ACCURACY"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBTOD_ACCURACY0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TOD_ACCURACY"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBTOD_CALCULATED0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="C:Calculated, R:Recording time, N:From data, L:Local time transform"/>
+            <ParameterString name="TOD_CALCULATED"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBTOD_CALCULATED0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TOD_CALCULATED"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBTRACK_ANGLE_DEG0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="TRACK_ANGLE_DEG"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBTRACK_ANGLE_DEG0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRACK_ANGLE_DEG"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBTRUE_AIRSPEED_KT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="TRUE_AIRSPEED_KT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBTRUE_AIRSPEED_KT0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRUE_AIRSPEED_KT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBTURNRATE_DEGPS0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="turn rate in Deg/sec"/>
+            <ParameterString name="TURNRATE_DEGPS"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBTURNRATE_DEGPS0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TURNRATE_DEGPS"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBTURNRATE_INDICATOR0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description="N/A, left, right, straight"/>
+            <ParameterString name="TURNRATE_INDICATOR"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBTURNRATE_INDICATOR0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TURNRATE_INDICATOR"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBVELOCITY_ACCURACY0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString description=" "/>
+            <ParameterString name="VELOCITY_ACCURACY"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBVELOCITY_ACCURACY0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="VELOCITY_ACCURACY"/>
+            </Configuration>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBObject" instance_id="DBObjectMLAT0">
+        <ParameterBool is_loadable="0"/>
+        <ParameterString info=""/>
+        <ParameterString name="MLAT"/>
+        <Configuration class_id="DBOSchemaMetaTableDefinition" instance_id="DBOSchemaMetaTableDefinition0">
+            <ParameterString meta_table="MLAT"/>
+            <ParameterString schema="SCDB"/>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATACAS_AIRCRAFT_IDENTIFICATION0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Aircraft identification capability"/>
+            <ParameterString name="ACAS_AIRCRAFT_IDENTIFICATION"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATACAS_AIRCRAFT_IDENTIFICATION0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="ACAS_AIRCRAFT_IDENTIFICATION"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATACAS_ALT_CAPABILITY_FT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Altitude reporting capability, currently 25 or 100"/>
+            <ParameterString name="ACAS_ALT_CAPABILITY_FT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATACAS_ALT_CAPABILITY_FT0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="ACAS_ALT_CAPABILITY_FT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATACAS_BDS_1_A0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="BDS 1,0: bit 16"/>
+            <ParameterString name="ACAS_BDS_1_A"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATACAS_BDS_1_A0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="ACAS_BDS_1_A"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATACAS_BDS_1_B0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="BDS 1,0: bits 37-40"/>
+            <ParameterString name="ACAS_BDS_1_B"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATACAS_BDS_1_B0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="ACAS_BDS_1_B"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATACAS_COMM_CAPABILITY0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Communications capability of the transponder, see X__SD_ACAS_COMMS"/>
+            <ParameterString name="ACAS_COMM_CAPABILITY"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATACAS_COMM_CAPABILITY0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="ACAS_COMM_CAPABILITY"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATACAS_FLIGHT_STATUS0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Flight status, see X__SD_ACAS_FLIGHT_STATUSES"/>
+            <ParameterString name="ACAS_FLIGHT_STATUS"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATACAS_FLIGHT_STATUS0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="ACAS_FLIGHT_STATUS"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATACAS_MODES_SERVICE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Mode-S specific service capability?"/>
+            <ParameterString name="ACAS_MODES_SERVICE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATACAS_MODES_SERVICE0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="ACAS_MODES_SERVICE"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATACCEL_AX_MS20">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="x acceleration in meters per square second"/>
+            <ParameterString name="ACCEL_AX_MS2"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATACCEL_AX_MS20">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="ACCEL_AX_MS2"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATACCEL_AY_MS20">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="y acceleration in meters per square second"/>
+            <ParameterString name="ACCEL_AY_MS2"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATACCEL_AY_MS20">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="ACCEL_AY_MS2"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATALT_GEO_FT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Height above WGS-84 ellipsoid in feet"/>
+            <ParameterString name="ALT_GEO_FT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATALT_GEO_FT0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="ALT_GEO_FT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATCALC_ALT_GEO_FT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Calculated Geographical Altitude in feet"/>
+            <ParameterString name="CALC_ALT_GEO_FT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATCALC_ALT_GEO_FT0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="CALC_ALT_GEO_FT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATCALLSIGN0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Aircraft identification"/>
+            <ParameterString name="CALLSIGN"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATCALLSIGN0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="CALLSIGN"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATCAT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="normally ASTERIX CAT 20"/>
+            <ParameterString name="CAT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATCAT0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="CAT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATDISPLAY_STATE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="See table x__SD_DISPLAY_STATES"/>
+            <ParameterString name="DISPLAY_STATE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATDISPLAY_STATE0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="DISPLAY_STATE"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATDOM_POSIX0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Day of message in posix time."/>
+            <ParameterString name="DOM_POSIX"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATDOM_POSIX0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="DOM_POSIX"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATDS_ID0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Common Source Description ID, derived from SAC/SIC, Station Code etc."/>
+            <ParameterString name="DS_ID"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATDS_ID0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="DS_ID"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATFLIGHT_LEVEL_FT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Flight level in feet"/>
+            <ParameterString name="FLIGHT_LEVEL_FT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATFLIGHT_LEVEL_FT0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="FLIGHT_LEVEL_FT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATFLIGHT_LEVEL_G0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Flight level Garbled? Y, N"/>
+            <ParameterString name="FLIGHT_LEVEL_G"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATFLIGHT_LEVEL_G0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="FLIGHT_LEVEL_G"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATFLIGHT_LEVEL_V0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Flight level Validated? Y, N"/>
+            <ParameterString name="FLIGHT_LEVEL_V"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATFLIGHT_LEVEL_V0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="FLIGHT_LEVEL_V"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATGEO_ALT_STD_DEV_FT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description=""/>
+            <ParameterString name="GEO_ALT_STD_DEV_FT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATGEO_ALT_STD_DEV_FT0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="GEO_ALT_STD_DEV_FT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATGEO_ALT_STD_DEV_M0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Standard deviation of geometric altitude in meters"/>
+            <ParameterString name="GEO_ALT_STD_DEV_M"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATGEO_ALT_STD_DEV_M0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="GEO_ALT_STD_DEV_M"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATGEO_AREA_MASK0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="LONGINT"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Geographical area bit mask"/>
+            <ParameterString name="GEO_AREA_MASK"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATGEO_AREA_MASK0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="GEO_AREA_MASK"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATGROUND_BIT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Transponder ground bit set?"/>
+            <ParameterString name="GROUND_BIT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATGROUND_BIT0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="GROUND_BIT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATHASH_CODE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="ARTAS MD5 Hash Code"/>
+            <ParameterString name="HASH_CODE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATHASH_CODE0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="HASH_CODE"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATHEIGHT_3D_FT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Height above local coordinate system in feet"/>
+            <ParameterString name="HEIGHT_3D_FT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATHEIGHT_3D_FT0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="HEIGHT_3D_FT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATLINE_ID0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Communication line ID"/>
+            <ParameterString name="LINE_ID"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATLINE_ID0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="LINE_ID"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATMAS_TRACK_NUM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="MAS unique track number"/>
+            <ParameterString name="MAS_TRACK_NUM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATMAS_TRACK_NUM0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MAS_TRACK_NUM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATMODE1_CODE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Mode-1 Code"/>
+            <ParameterString name="MODE1_CODE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATMODE1_CODE0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODE1_CODE"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATMODE1_G0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Mode-1 Garbled? Y, N"/>
+            <ParameterString name="MODE1_G"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATMODE1_G0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODE1_G"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATMODE1_SMO0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Mode-1 Smoothed? Y, N"/>
+            <ParameterString name="MODE1_SMO"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATMODE1_SMO0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODE1_SMO"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATMODE1_V0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Mode-1 Validated? Y, N"/>
+            <ParameterString name="MODE1_V"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATMODE1_V0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODE1_V"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATMODE2_CODE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Mode-2 Code"/>
+            <ParameterString name="MODE2_CODE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATMODE2_CODE0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODE2_CODE"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATMODE2_G0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Mode-2 Garbled? Y, N"/>
+            <ParameterString name="MODE2_G"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATMODE2_G0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODE2_G"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATMODE2_SMO0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Mode-2 Smoothed? Y, N"/>
+            <ParameterString name="MODE2_SMO"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATMODE2_SMO0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODE2_SMO"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATMODE2_V0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Mode-2 Validated? Y, N"/>
+            <ParameterString name="MODE2_V"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATMODE2_V0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODE2_V"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATMODE3A_CODE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Mode-3/A Code"/>
+            <ParameterString name="MODE3A_CODE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATMODE3A_CODE0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODE3A_CODE"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATMODE3A_G0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Mode-3/A Garbled? Y, N"/>
+            <ParameterString name="MODE3A_G"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATMODE3A_G0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODE3A_G"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATMODE3A_SMO0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Mode-3/A Smoothed? Y, N"/>
+            <ParameterString name="MODE3A_SMO"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATMODE3A_SMO0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODE3A_SMO"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATMODE3A_V0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Mode-3/A Validated? Y, N"/>
+            <ParameterString name="MODE3A_V"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATMODE3A_V0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODE3A_V"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATMODES_MB_DATA0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Raw Mode S MB Data (= BDS registers)"/>
+            <ParameterString name="MODES_MB_DATA"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATMODES_MB_DATA0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MODES_MB_DATA"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATMSG_FMT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Message Format (usually ASTERIX), see X__SD_MSG_FMTS"/>
+            <ParameterString name="MSG_FMT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATMSG_FMT0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MSG_FMT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATPOS_DOP_X0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Dilution of precision along the x axis"/>
+            <ParameterString name="POS_DOP_X"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATPOS_DOP_X0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_DOP_X"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATPOS_DOP_XY0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Square root of dilution of precision in the x-y plane "/>
+            <ParameterString name="POS_DOP_XY"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATPOS_DOP_XY0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_DOP_XY"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATPOS_DOP_XY_CORRELATION_COEFF0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description=" "/>
+            <ParameterString name="POS_DOP_XY_CORRELATION_COEFF"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATPOS_DOP_XY_CORRELATION_COEFF0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_DOP_XY_CORRELATION_COEFF"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATPOS_DOP_Y0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Dilution of precision along the y axis"/>
+            <ParameterString name="POS_DOP_Y"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATPOS_DOP_Y0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_DOP_Y"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATPOS_LAT_DEG0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="latitude in degrees"/>
+            <ParameterString name="POS_LAT_DEG"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATPOS_LAT_DEG0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_LAT_DEG"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATPOS_LAT_DEG_CALC0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="C = computed, R = reported"/>
+            <ParameterString name="POS_LAT_DEG_CALC"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATPOS_LAT_DEG_CALC0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_LAT_DEG_CALC"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATPOS_LOCAL_X_NM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="x coordinate in nautical miles"/>
+            <ParameterString name="POS_LOCAL_X_NM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATPOS_LOCAL_X_NM0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_LOCAL_X_NM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATPOS_LOCAL_X_NM_CALC0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="C = computed, R = reported"/>
+            <ParameterString name="POS_LOCAL_X_NM_CALC"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATPOS_LOCAL_X_NM_CALC0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_LOCAL_X_NM_CALC"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATPOS_LOCAL_Y_NM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="y coordinate in nautical miles"/>
+            <ParameterString name="POS_LOCAL_Y_NM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATPOS_LOCAL_Y_NM0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_LOCAL_Y_NM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATPOS_LOCAL_Y_NM_CALC0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="C = computed, R = reported"/>
+            <ParameterString name="POS_LOCAL_Y_NM_CALC"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATPOS_LOCAL_Y_NM_CALC0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_LOCAL_Y_NM_CALC"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATPOS_LONG_DEG0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="longitude in degrees"/>
+            <ParameterString name="POS_LONG_DEG"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATPOS_LONG_DEG0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_LONG_DEG"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATPOS_LONG_DEG_CALC0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="C = computed, R = reported"/>
+            <ParameterString name="POS_LONG_DEG_CALC"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATPOS_LONG_DEG_CALC0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_LONG_DEG_CALC"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATPOS_SMOOTHED0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Y = smoothed position, N = measured position"/>
+            <ParameterString name="POS_SMOOTHED"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATPOS_SMOOTHED0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_SMOOTHED"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATPOS_STD_DEV_CORRELATION_COEFF0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Correlation coefficient of x and y components"/>
+            <ParameterString name="POS_STD_DEV_CORRELATION_COEFF"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATPOS_STD_DEV_CORRELATION_COEFF0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_STD_DEV_CORRELATION_COEFF"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATPOS_STD_DEV_LATLONG_CORR_COEFF0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description=" "/>
+            <ParameterString name="POS_STD_DEV_LATLONG_CORR_COEFF"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATPOS_STD_DEV_LATLONG_CORR_COEFF0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_STD_DEV_LATLONG_CORR_COEFF"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATPOS_STD_DEV_LATLONG_DEG0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description=" "/>
+            <ParameterString name="POS_STD_DEV_LATLONG_DEG"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATPOS_STD_DEV_LATLONG_DEG0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_STD_DEV_LATLONG_DEG"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATPOS_STD_DEV_LAT_DEG0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description=" "/>
+            <ParameterString name="POS_STD_DEV_LAT_DEG"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATPOS_STD_DEV_LAT_DEG0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_STD_DEV_LAT_DEG"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATPOS_STD_DEV_LAT_M0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description=" "/>
+            <ParameterString name="POS_STD_DEV_LAT_M"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATPOS_STD_DEV_LAT_M0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_STD_DEV_LAT_M"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATPOS_STD_DEV_LONG_DEG0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description=" "/>
+            <ParameterString name="POS_STD_DEV_LONG_DEG"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATPOS_STD_DEV_LONG_DEG0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_STD_DEV_LONG_DEG"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATPOS_STD_DEV_LONG_M0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description=" "/>
+            <ParameterString name="POS_STD_DEV_LONG_M"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATPOS_STD_DEV_LONG_M0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_STD_DEV_LONG_M"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATPOS_STD_DEV_X_M0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Standard deviation of x component in meters"/>
+            <ParameterString name="POS_STD_DEV_X_M"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATPOS_STD_DEV_X_M0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_STD_DEV_X_M"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATPOS_STD_DEV_Y_M0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Standard deviation of y component in meters"/>
+            <ParameterString name="POS_STD_DEV_Y_M"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATPOS_STD_DEV_Y_M0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_STD_DEV_Y_M"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATPOS_SYS_X_NM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="System coordinate x in nautical miles"/>
+            <ParameterString name="POS_SYS_X_NM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATPOS_SYS_X_NM0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_SYS_X_NM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATPOS_SYS_Y_NM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="System coordinate y in nautical miles"/>
+            <ParameterString name="POS_SYS_Y_NM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATPOS_SYS_Y_NM0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_SYS_Y_NM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATRAW_MSG0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="binary represetation"/>
+            <ParameterString name="RAW_MSG"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATRAW_MSG0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="RAW_MSG"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATRDP_CHAIN0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="RDP Chain 1 or 2"/>
+            <ParameterString name="RDP_CHAIN"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATRDP_CHAIN0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="RDP_CHAIN"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATREC_NUM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="ascending record number"/>
+            <ParameterString name="REC_NUM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATREC_NUM0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="REC_NUM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATREC_TIME_MS0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="ms fraction"/>
+            <ParameterString name="REC_TIME_MS"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATREC_TIME_MS0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="REC_TIME_MS"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATREC_TIME_POSIX0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="POSIX recording time stamped by I/O process"/>
+            <ParameterString name="REC_TIME_POSIX"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATREC_TIME_POSIX0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="REC_TIME_POSIX"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATREPORT_TYPE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="MLAT (11)"/>
+            <ParameterString name="REPORT_TYPE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATREPORT_TYPE0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="REPORT_TYPE"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATSAC0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="ASTERIX SAC"/>
+            <ParameterString name="SAC"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATSAC0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="SAC"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATSIC0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="ASTERIX SIC"/>
+            <ParameterString name="SIC"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATSIC0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="SIC"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATSIMULATED_TARGET0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Simulated track?"/>
+            <ParameterString name="SIMULATED_TARGET"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATSIMULATED_TARGET0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="SIMULATED_TARGET"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATSPI0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Special position identification?"/>
+            <ParameterString name="SPI"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATSPI0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="SPI"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATTARGET_ADDR0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="24 bit target address / aircraft address / Mode-S address"/>
+            <ParameterString name="TARGET_ADDR"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATTARGET_ADDR0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TARGET_ADDR"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATTEST_TARGET0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Test track?"/>
+            <ParameterString name="TEST_TARGET"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATTEST_TARGET0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TEST_TARGET"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATTOD0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Time of Day (1/128 sec from midnight)"/>
+            <ParameterString name="TOD"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATTOD0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TOD"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATTOD_CALCULATED0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="C:Calculated, R:Recording time, N:From data, L:Local time transform"/>
+            <ParameterString name="TOD_CALCULATED"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATTOD_CALCULATED0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TOD_CALCULATED"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATTRACK_CLIMB_DESC_MODE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str=""/>
+            <ParameterString description=""/>
+            <ParameterString name="TRACK_CLIMB_DESC_MODE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATTRACK_COASTED0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Coasted? Y, N"/>
+            <ParameterString name="TRACK_COASTED"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATTRACK_COASTED0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRACK_COASTED"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATTRACK_CONFIRMED0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Y = firm track, N = tentative track"/>
+            <ParameterString name="TRACK_CONFIRMED"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATTRACK_CONFIRMED0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRACK_CONFIRMED"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATTRACK_END0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Y = End of track, N = Track is still alive"/>
+            <ParameterString name="TRACK_END"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATTRACK_END0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRACK_END"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATTRACK_GHOST_TARGET0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Y = Ghost Target, N = True Target"/>
+            <ParameterString name="TRACK_GHOST_TARGET"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATTRACK_GHOST_TARGET0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRACK_GHOST_TARGET"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATTRACK_MANOEUVRE_HORI0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Y = horizontal Manoeuvre, N = No Manoeuvre"/>
+            <ParameterString name="TRACK_MANOEUVRE_HORI"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATTRACK_MANOEUVRE_HORI0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRACK_MANOEUVRE_HORI"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATTRACK_NUM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="Track number"/>
+            <ParameterString name="TRACK_NUM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATTRACK_NUM0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRACK_NUM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATTRD_DME0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description=" "/>
+            <ParameterString name="TRD_DME"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATTRD_DME0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRD_DME"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATTRD_HF0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description=" "/>
+            <ParameterString name="TRD_HF"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATTRD_HF0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRD_HF"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATTRD_MS0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description=" "/>
+            <ParameterString name="TRD_MS"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATTRD_MS0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRD_MS"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATTRD_SSR0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description=" "/>
+            <ParameterString name="TRD_SSR"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATTRD_SSR0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRD_SSR"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATTRD_UAT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description=" "/>
+            <ParameterString name="TRD_UAT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATTRD_UAT0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRD_UAT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATTRD_VDL40">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description=" "/>
+            <ParameterString name="TRD_VDL4"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATTRD_VDL40">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRD_VDL4"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATVELOCITY_VX_MS0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="x velocity in meters per second"/>
+            <ParameterString name="VELOCITY_VX_MS"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATVELOCITY_VX_MS0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="VELOCITY_VX_MS"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATVELOCITY_VY_MS0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString description="y velocity in meters per second"/>
+            <ParameterString name="VELOCITY_VY_MS"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATVELOCITY_VY_MS0">
+                <ParameterString meta_table="MLAT"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="VELOCITY_VY_MS"/>
+            </Configuration>
+        </Configuration>
+    </Configuration>
     <Configuration class_id="DBObject" instance_id="DBObjectRadar0">
         <ParameterBool is_loadable="0"/>
         <ParameterString info=""/>
@@ -1419,6 +3671,939 @@
                 <ParameterString meta_table="Radar"/>
                 <ParameterString schema="SCDB"/>
                 <ParameterString variable="TRACK_TYPE"/>
+            </Configuration>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBObject" instance_id="DBObjectTracker0">
+        <ParameterBool is_loadable="0"/>
+        <ParameterString info=""/>
+        <ParameterString name="Tracker"/>
+        <Configuration class_id="DBOSchemaMetaTableDefinition" instance_id="DBOSchemaMetaTableDefinition0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerAIRSPEED_KT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="AIRSPEED_KT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerAIRSPEED_KT0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="AIRSPEED_KT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerAIRSPEED_MACH0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="AIRSPEED_MACH"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerAIRSPEED_MACH0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="AIRSPEED_MACH"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerALT_BARO_FT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="Barometric altitude, Mode C"/>
+            <ParameterString name="ALT_BARO_FT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerALT_BARO_FT0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="ALT_BARO_FT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerALT_GEO_FT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="Geometric altitude, 3D Height"/>
+            <ParameterString name="ALT_GEO_FT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerALT_GEO_FT0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="ALT_GEO_FT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerALT_REPORTING_CAPABILITY_FT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="currently 25 or 100"/>
+            <ParameterString name="ALT_REPORTING_CAPABILITY_FT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerALT_REPORTING_CAPABILITY_FT0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="ALT_REPORTING_CAPABILITY_FT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerBARO_VERTICAL_RATE_FTM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="BARO_VERTICAL_RATE_FTM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerBARO_VERTICAL_RATE_FTM0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="BARO_VERTICAL_RATE_FTM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerCALC_ALT_GEO_FT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="Calculated Geographical Altitude"/>
+            <ParameterString name="CALC_ALT_GEO_FT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerCALC_ALT_GEO_FT0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="CALC_ALT_GEO_FT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerCALLSIGN0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="CALLSIGN"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerCALLSIGN0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="CALLSIGN"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerCAT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="ASTERIX CAT"/>
+            <ParameterString name="CAT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerCAT0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="CAT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerDESCRIPTOR_ATP0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="Non unique, 24-bit ICAO, surface vehicle or anonymous address.!!! 24 bit? !!!"/>
+            <ParameterString name="DESCRIPTOR_ATP"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerDESCRIPTOR_ATP0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="DESCRIPTOR_ATP"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerDIFFERENTIAL_CORRECTION0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="DIFFERENTIAL_CORRECTION"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerDIFFERENTIAL_CORRECTION0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="DIFFERENTIAL_CORRECTION"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerDISPLAY_STATE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="DISPLAY_STATE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerDISPLAY_STATE0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="DISPLAY_STATE"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerDOM_POSIX0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="Day of message in posix time."/>
+            <ParameterString name="DOM_POSIX"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerDOM_POSIX0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="DOM_POSIX"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerDO_260A0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="DO_260A"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerDO_260A0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="DO_260A"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerDS_ID0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="Common Source Description ID, derived from SAC/SIC, Station Code etc."/>
+            <ParameterString name="DS_ID"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerDS_ID0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="DS_ID"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerEMITTER_CATEGORY0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="EMITTER_CATEGORY"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerEMITTER_CATEGORY0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="EMITTER_CATEGORY"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerFIGURE_OF_MERIT_ACAS0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="unknown, ACAS (not) operational"/>
+            <ParameterString name="FIGURE_OF_MERIT_ACAS"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerFIGURE_OF_MERIT_ACAS0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="FIGURE_OF_MERIT_ACAS"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerFIGURE_OF_MERIT_DIFFERENTIAL0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="unknown, (no) differential correction"/>
+            <ParameterString name="FIGURE_OF_MERIT_DIFFERENTIAL"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerFIGURE_OF_MERIT_DIFFERENTIAL0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="FIGURE_OF_MERIT_DIFFERENTIAL"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerFIGURE_OF_MERIT_MULTIPLE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="unknown, multiple navigational aids (not) operational"/>
+            <ParameterString name="FIGURE_OF_MERIT_MULTIPLE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerFIGURE_OF_MERIT_MULTIPLE0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="FIGURE_OF_MERIT_MULTIPLE"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerFINAL_SEL_ALTITUDE_APPROACH0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="FINAL_SEL_ALTITUDE_APPROACH"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerFINAL_SEL_ALTITUDE_APPROACH0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="FINAL_SEL_ALTITUDE_APPROACH"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerFINAL_SEL_ALTITUDE_FT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="FINAL_SEL_ALTITUDE_FT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerFINAL_SEL_ALTITUDE_FT0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="FINAL_SEL_ALTITUDE_FT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerFINAL_SEL_ALTITUDE_HOLD0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="FINAL_SEL_ALTITUDE_HOLD"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerFINAL_SEL_ALTITUDE_HOLD0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="FINAL_SEL_ALTITUDE_HOLD"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerFINAL_SEL_ALTITUDE_VERTICAL0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="FINAL_SEL_ALTITUDE_VERTICAL"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerFINAL_SEL_ALTITUDE_VERTICAL0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="FINAL_SEL_ALTITUDE_VERTICAL"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerFROM_FFT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="FROM_FFT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerFROM_FFT0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="FROM_FFT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerGEO_AREA_MASK0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="LONGINT"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="Geographical area bit mask"/>
+            <ParameterString name="GEO_AREA_MASK"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerGEO_AREA_MASK0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="GEO_AREA_MASK"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerGEO_VERTICAL_RATE_FTM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="GEO_VERTICAL_RATE_FTM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerGEO_VERTICAL_RATE_FTM0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="GEO_VERTICAL_RATE_FTM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerGROUNDSPEED_KT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="GROUNDSPEED_KT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerGROUNDSPEED_KT0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="GROUNDSPEED_KT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerGROUND_BIT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="GROUND_BIT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerGROUND_BIT0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="GROUND_BIT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerHASH_CODE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="ARTAS MD5 Hash Code "/>
+            <ParameterString name="HASH_CODE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerHASH_CODE0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="HASH_CODE"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerINTER_SEL_ALTITUDE_FT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="INTER_SEL_ALTITUDE_FT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerINTER_SEL_ALTITUDE_FT0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="INTER_SEL_ALTITUDE_FT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerINTER_SEL_ALTITUDE_INFO0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="INTER_SEL_ALTITUDE_INFO"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerINTER_SEL_ALTITUDE_INFO0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="INTER_SEL_ALTITUDE_INFO"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerINTER_SEL_ALTITUDE_SOURCE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="unknown, aircraft, FCU/MSP selected, FMS selected altitude"/>
+            <ParameterString name="INTER_SEL_ALTITUDE_SOURCE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerINTER_SEL_ALTITUDE_SOURCE0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="INTER_SEL_ALTITUDE_SOURCE"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerLINE_ID0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="Communication line ID"/>
+            <ParameterString name="LINE_ID"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerLINE_ID0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="LINE_ID"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerLINK_TECHNOLOGY_CDTI0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="LINK_TECHNOLOGY_CDTI"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerLINK_TECHNOLOGY_CDTI0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="LINK_TECHNOLOGY_CDTI"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerLINK_TECHNOLOGY_MDS0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="LINK_TECHNOLOGY_MDS"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerLINK_TECHNOLOGY_MDS0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="LINK_TECHNOLOGY_MDS"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerLINK_TECHNOLOGY_OTHER0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="LINK_TECHNOLOGY_OTHER"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerLINK_TECHNOLOGY_OTHER0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="LINK_TECHNOLOGY_OTHER"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerLINK_TECHNOLOGY_UAT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="LINK_TECHNOLOGY_UAT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerLINK_TECHNOLOGY_UAT0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="LINK_TECHNOLOGY_UAT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerLINK_TECHNOLOGY_VDL0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="LINK_TECHNOLOGY_VDL"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerLINK_TECHNOLOGY_VDL0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="LINK_TECHNOLOGY_VDL"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerMAGNETIC_HEADING_DEG0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="MAGNETIC_HEADING_DEG"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerMAGNETIC_HEADING_DEG0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="MAGNETIC_HEADING_DEG"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerPOSITION_ACCURACY0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="POSITION_ACCURACY"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerPOSITION_ACCURACY0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POSITION_ACCURACY"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerPOS_LAT_DEG0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="WGS84 coordinate latitude"/>
+            <ParameterString name="POS_LAT_DEG"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerPOS_LAT_DEG0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_LAT_DEG"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerPOS_LONG_DEG0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="WGS84 coordinate longitude"/>
+            <ParameterString name="POS_LONG_DEG"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerPOS_LONG_DEG0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_LONG_DEG"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerPOS_SYS_X_NM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="System coordinate x"/>
+            <ParameterString name="POS_SYS_X_NM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerPOS_SYS_X_NM0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_SYS_X_NM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerPOS_SYS_Y_NM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="System coordinate y"/>
+            <ParameterString name="POS_SYS_Y_NM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerPOS_SYS_Y_NM0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="POS_SYS_Y_NM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerRAW_MSG0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="Binary represetation"/>
+            <ParameterString name="RAW_MSG"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerRAW_MSG0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="RAW_MSG"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerREC_NUM0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="Ascending record number"/>
+            <ParameterString name="REC_NUM"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerREC_NUM0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="REC_NUM"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerREC_TIME_MS0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="ms fraction"/>
+            <ParameterString name="REC_TIME_MS"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerREC_TIME_MS0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="REC_TIME_MS"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerREC_TIME_POSIX0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="POSIX recording time stamped by I/O process"/>
+            <ParameterString name="REC_TIME_POSIX"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerREC_TIME_POSIX0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="REC_TIME_POSIX"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerREPORT_TYPE0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="ADS-B only"/>
+            <ParameterString name="REPORT_TYPE"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerREPORT_TYPE0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="REPORT_TYPE"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerROLL_ANGLE_DEG0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=""/>
+            <ParameterString name="ROLL_ANGLE_DEG"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerROLL_ANGLE_DEG0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="ROLL_ANGLE_DEG"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerSAC0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="ASTERIX SAC"/>
+            <ParameterString name="SAC"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerSAC0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="SAC"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerSELECTED_ALT_CAPABILITY0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="SELECTED_ALT_CAPABILITY"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerSELECTED_ALT_CAPABILITY0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="SELECTED_ALT_CAPABILITY"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerSIC0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="ASTERIX SIC"/>
+            <ParameterString name="SIC"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerSIC0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="SIC"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerSIMULATED_TARGET0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="Simulated Plot/Track?"/>
+            <ParameterString name="SIMULATED_TARGET"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerSIMULATED_TARGET0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="SIMULATED_TARGET"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerSPI0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="SPI"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerSPI0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="SPI"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerTARGET_ADDR0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="24 bit target address / aircraft address / Mode-S address"/>
+            <ParameterString name="TARGET_ADDR"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerTARGET_ADDR0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TARGET_ADDR"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerTARGET_STATUS0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="TARGET_STATUS"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerTARGET_STATUS0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TARGET_STATUS"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerTEST_TARGET0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="Test Plot/Track?"/>
+            <ParameterString name="TEST_TARGET"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerTEST_TARGET0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TEST_TARGET"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerTOD0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="INT"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="Time of Day (1/128 sec from midnight)"/>
+            <ParameterString name="TOD"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerTOD0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TOD"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerTOD_ACCURACY0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="in 1/256 secs"/>
+            <ParameterString name="TOD_ACCURACY"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerTOD_ACCURACY0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TOD_ACCURACY"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerTOD_CALCULATED0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="STRING"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="C:Calculated, R:Recording time, N:From data, L:Local time transform"/>
+            <ParameterString name="TOD_CALCULATED"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerTOD_CALCULATED0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TOD_CALCULATED"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerTRACK_ANGLE_DEG0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="TRACK_ANGLE_DEG"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerTRACK_ANGLE_DEG0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRACK_ANGLE_DEG"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerTRUE_AIRSPEED_KT0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="TRUE_AIRSPEED_KT"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerTRUE_AIRSPEED_KT0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TRUE_AIRSPEED_KT"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerTURNRATE_DEGPS0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="DOUBLE"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="turn rate in Deg/sec"/>
+            <ParameterString name="TURNRATE_DEGPS"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerTURNRATE_DEGPS0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TURNRATE_DEGPS"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerTURNRATE_INDICATOR0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description="N/A, left, right, straight"/>
+            <ParameterString name="TURNRATE_INDICATOR"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerTURNRATE_INDICATOR0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="TURNRATE_INDICATOR"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerVELOCITY_ACCURACY0">
+            <ParameterUnsignedInt representation="0"/>
+            <ParameterString data_type_str="CHAR"/>
+            <ParameterString dbo_name="Tracker"/>
+            <ParameterString description=" "/>
+            <ParameterString name="VELOCITY_ACCURACY"/>
+            <ParameterString unit_dimension=""/>
+            <ParameterString unit_unit=""/>
+            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerVELOCITY_ACCURACY0">
+                <ParameterString meta_table="ADSB"/>
+                <ParameterString schema="SCDB"/>
+                <ParameterString variable="VELOCITY_ACCURACY"/>
             </Configuration>
         </Configuration>
     </Configuration>

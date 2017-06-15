@@ -55,10 +55,6 @@ signals:
     void changedDBO();
 
 public slots:
-    /// @brief Adds a DBOVariable
-    void addVariable();
-    /// @brief Adds all DBOVariables
-    void addAllVariables ();
     /// @brief Adds all new DBOVariables
     void addNewVariables ();
     /// @brief Adds a MetaDBTable
@@ -90,12 +86,10 @@ public slots:
     /// @brief Changes DBO info
     void editInfo ();
 
+    /// @brief Edits a DBOVariable
+    void editDBOVar();
     /// @brief Deletes a DBOVariable
     void deleteDBOVar();
-    /// @brief Edits a DBOVariable name
-    void editDBOVarName();
-    /// @brief Edits a DBOVariable info
-    void editDBOVarInfo();
 
     /// @brief Updates the DBOVariables grid
     void updateDBOVarsGrid ();
@@ -151,16 +145,10 @@ private:
     /// @brief Grid with all DBOVariables
     QGridLayout *dbovars_grid_;
 
+    /// @brief Container with DBOVariable edit buttons
+    std::map <QPushButton *, DBOVariable *> dbo_vars_grid_edit_buttons_;
     /// @brief Container with DBOVariable delete buttons
     std::map <QPushButton *, DBOVariable *> dbo_vars_grid_delete_buttons_;
-    /// @brief Container with DBOVariable name edit fields
-    std::map <QLineEdit *, DBOVariable *> dbo_vars_grid_name_edits_;
-    /// @brief Container with DBOVariable info edit fields
-    std::map <QTextEdit *, DBOVariable *> dbo_vars_grid_info_edits_;
-    /// @brief Container with DBOVariable property data type selection fields
-    std::map <DBOVariableDataTypeComboBox *, DBOVariable *> dbo_vars_grid_data_type_boxes_;
-    /// @brief Container with DBOVariable string representation selection fields
-    std::map <StringRepresentationComboBox *, DBOVariable *> dbo_vars_grid_representation_boxes_;
 
     /// @brief New DBOVariable name edit field
     QLineEdit *new_var_name_edit_;

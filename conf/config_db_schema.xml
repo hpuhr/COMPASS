@@ -3641,10 +3641,25 @@
                 <ParameterString unit_unit=""/>
             </Configuration>
         </Configuration>
+        <Configuration class_id="MetaDBTable" instance_id="MetaDBTableADSB">
+            <ParameterString info=""/>
+            <ParameterString main_table_name="sd_ads"/>
+            <ParameterString name="ADSB"/>
+        </Configuration>
+        <Configuration class_id="MetaDBTable" instance_id="MetaDBTableMLAT">
+            <ParameterString info=""/>
+            <ParameterString main_table_name="sd_mlat"/>
+            <ParameterString name="MLAT"/>
+        </Configuration>
         <Configuration class_id="MetaDBTable" instance_id="MetaDBTableRadar">
             <ParameterString info=""/>
             <ParameterString main_table_name="sd_radar"/>
             <ParameterString name="Radar"/>
+        </Configuration>
+        <Configuration class_id="MetaDBTable" instance_id="MetaDBTableTracker">
+            <ParameterString info=""/>
+            <ParameterString main_table_name="sd_track"/>
+            <ParameterString name="Tracker"/>
         </Configuration>
     </Configuration>
 </Configuration>

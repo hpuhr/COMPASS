@@ -41,15 +41,15 @@ class DBObjectManagerWidget : public QFrame
 
 public slots:
     /// @brief Adds a DBObject
-    void addDBO ();
+    void addDBOSlot ();
     /// @brief Is called when a DBObject was changed
-    void changedDBO ();
+    void changedDBOSlot ();
     /// @brief Edits a DBObject
-    void editDBO ();
+    void editDBOSlot ();
     /// @brief Deletes a DBObject
-    void deleteDBO ();
+    void deleteDBOSlot ();
     /// @brief Updates the DBObject list
-    void updateDBOs ();
+    void updateDBOsSlot ();
     /// @brief Unlocks editing functionality
     void databaseOpenedSlot ();
 

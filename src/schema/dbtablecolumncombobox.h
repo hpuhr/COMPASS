@@ -41,7 +41,7 @@ class DBTableColumnComboBox : public QComboBox
 
 public:
     /// @brief Constructor
-    DBTableColumnComboBox(std::string schema, std::string meta_table, DBOVariable *variable, QWidget * parent = 0);
+    DBTableColumnComboBox(std::string schema, std::string meta_table, DBOVariable &variable, QWidget * parent = 0);
     /// @brief Destructor
     virtual ~DBTableColumnComboBox();
 
@@ -51,7 +51,7 @@ private:
     /// Meta table name
     std::string meta_table_;
     /// Variable
-    DBOVariable *variable_;
+    DBOVariable &variable_;
 };
 
 

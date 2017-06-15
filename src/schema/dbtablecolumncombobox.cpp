@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBTableColumnComboBox.cpp
- *
- *  Created on: Aug 29, 2012
- *      Author: sk
- */
-
 #include "dbtablecolumn.h"
 #include "dbtablecolumncombobox.h"
 #include "dbschema.h"
@@ -29,33 +22,33 @@
 #include "dbovariable.h"
 #include "metadbtable.h"
 
-DBTableColumnComboBox::DBTableColumnComboBox(std::string schema, std::string meta_table, DBOVariable *variable, QWidget * parent)
- : schema_ (schema), meta_table_ (meta_table), variable_(variable)
+DBTableColumnComboBox::DBTableColumnComboBox(std::string schema, std::string meta_table, DBOVariable &variable, QWidget * parent)
+    : schema_ (schema), meta_table_ (meta_table), variable_(variable)
 {
-  std::string variable_name;
-  if (variable_->hasSchema (schema))
-    variable_name = variable_->variableName (schema);
+    std::string variable_name;
+    if (variable_.hasSchema (schema))
+        variable_name = variable_.variableName (schema);
 
-  const MetaDBTable &meta = variable_->currentMetaTable();
-  auto cols =  meta.columns ();
+    const MetaDBTable &meta = variable_.currentMetaTable();
+    auto cols =  meta.columns ();
 
-  addItem ("");
+    addItem ("");
 
-  int index=-1;
-  unsigned int cnt=1;
-  for (auto it = cols.begin(); it != cols.end(); it++)
-  {
-    if (variable_name.compare(it->second.name()) == 0)
-      index=cnt;
+    int index=-1;
+    unsigned int cnt=1;
+    for (auto it = cols.begin(); it != cols.end(); it++)
+    {
+        if (variable_name.compare(it->second.name()) == 0)
+            index=cnt;
 
-    addItem (it->second.name().c_str());
-    cnt++;
-  }
+        addItem (it->second.name().c_str());
+        cnt++;
+    }
 
-  if (index != -1)
-  {
-    setCurrentIndex (index);
-  }
+    if (index != -1)
+    {
+        setCurrentIndex (index);
+    }
 }
 
 DBTableColumnComboBox::~DBTableColumnComboBox()

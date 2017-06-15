@@ -44,6 +44,7 @@ std::map<std::string, PropertyDataType> DBTableColumn::db_types_2_data_types_ = 
         ("double", PropertyDataType::DOUBLE)
         ("enum", PropertyDataType::STRING)
         ("tinyblob", PropertyDataType::STRING)
+        ("char", PropertyDataType::STRING)
         ("blob", PropertyDataType::STRING)
         ("mediumblob", PropertyDataType::STRING)
         ("longblob", PropertyDataType::STRING)

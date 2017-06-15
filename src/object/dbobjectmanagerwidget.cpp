@@ -64,7 +64,7 @@ DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager &object_manager)
     dob_frame->setLineWidth(frame_width_small);
 
     grid_ = new QGridLayout ();
-    updateDBOs ();
+    updateDBOsSlot ();
 
     dob_frame->setLayout (grid_);
 
@@ -76,7 +76,7 @@ DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager &object_manager)
 
     // new object
     new_button_ = new QPushButton("Add");
-    connect(new_button_, SIGNAL( clicked() ), this, SLOT( addDBO() ));
+    connect(new_button_, SIGNAL( clicked() ), this, SLOT( addDBOSlot() ));
     new_button_->setDisabled (true);
     main_layout->addWidget (new_button_);
 
@@ -134,7 +134,7 @@ void DBObjectManagerWidget::databaseOpenedSlot ()
 
 
 
-void DBObjectManagerWidget::addDBO ()
+void DBObjectManagerWidget::addDBOSlot ()
 {
     if (!schema_manager_.hasCurrentSchema())
     {
@@ -182,7 +182,7 @@ void DBObjectManagerWidget::addDBO ()
 
             object_manager_.generateSubConfigurable("DBObject", instance);
 
-            updateDBOs();
+            updateDBOsSlot();
         }
     }
 }
@@ -204,12 +204,12 @@ void DBObjectManagerWidget::addDBO ()
 //  updateDBOs();
 //}
 
-void DBObjectManagerWidget::changedDBO ()
+void DBObjectManagerWidget::changedDBOSlot ()
 {
-    updateDBOs ();
+    updateDBOsSlot ();
 }
 
-void DBObjectManagerWidget::editDBO ()
+void DBObjectManagerWidget::editDBOSlot ()
 {
     assert (edit_dbo_buttons_.find((QPushButton*)sender()) != edit_dbo_buttons_.end());
 
@@ -233,7 +233,7 @@ void DBObjectManagerWidget::editDBO ()
     if (edit_dbo_widgets_.find (object) == edit_dbo_widgets_.end())
     {
         DBObjectWidget *widget = object->widget();
-        connect(widget, SIGNAL( changedDBO() ), this, SLOT( changedDBO() ));
+        connect(widget, SIGNAL( changedDBOSlot() ), this, SLOT( changedDBOSlot() ));
         edit_dbo_widgets_[object] = widget;
     }
     else
@@ -242,13 +242,14 @@ void DBObjectManagerWidget::editDBO ()
     //  }
 }
 
-void DBObjectManagerWidget::deleteDBO ()
+void DBObjectManagerWidget::deleteDBOSlot ()
 {
     assert (delete_dbo_buttons_.find((QPushButton*)sender()) != delete_dbo_buttons_.end());
+    updateDBOsSlot();
 }
 
 
-void DBObjectManagerWidget::updateDBOs ()
+void DBObjectManagerWidget::updateDBOsSlot ()
 {
     QLayoutItem *child;
     while ((child = grid_->takeAt(0)) != 0)
@@ -313,7 +314,7 @@ void DBObjectManagerWidget::updateDBOs ()
         edit->setIconSize(QSize(30,30));
         edit->setFlat(true);
         edit->setDisabled(!active || !unlocked_);
-        connect(edit, SIGNAL( clicked() ), this, SLOT( editDBO() ));
+        connect(edit, SIGNAL( clicked() ), this, SLOT( editDBOSlot() ));
         grid_->addWidget (edit, row, 3);
         edit_dbo_buttons_[edit] = it->second;
 
@@ -322,7 +323,7 @@ void DBObjectManagerWidget::updateDBOs ()
         del->setIconSize(QSize(30,30));
         del->setFlat(true);
         del->setDisabled(!active || !unlocked_);
-        connect(del, SIGNAL( clicked() ), this, SLOT( deleteDBO() ));
+        connect(del, SIGNAL( clicked() ), this, SLOT( deleteDBOSlot() ));
         grid_->addWidget (del, row, 4);
         delete_dbo_buttons_[del] = it->second;
 

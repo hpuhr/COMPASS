@@ -96,7 +96,8 @@ protected:
 
 class DBObject;
 class MetaDBTable;
-class DBOVariableMinMaxObserver;
+//class DBOVariableMinMaxObserver;
+class DBOVariableWidget;
 
 /**
  * @brief Variable of a DBObject
@@ -203,6 +204,8 @@ public:
   /// @brief  Returns unit unit
   const std::string &unitUnit () const { return unit_unit_; }
 
+  DBObject &dbObject () { return dbo_parent_; }
+
   /// @brief Returns flag if minimum/maximum information is available
   //bool hasMinMaxInfo ();
   /// @brief Triggers generation of the minimum/maximum information
@@ -225,6 +228,8 @@ public:
   /// @brief Checks if min/max info is present for meta-variables
   //void subVariableHasMinMaxInfo ();
 
+  DBOVariableWidget *widget ();
+
 protected:
   /// DBO parent
   DBObject &dbo_parent_;
@@ -241,7 +246,7 @@ protected:
 //  std::string max_;
 
   /// Container with all minimum/maximum information observers
-  std::vector <DBOVariableMinMaxObserver*> min_max_observers_;
+  //std::vector <DBOVariableMinMaxObserver*> min_max_observers_;
   /// Meta-variables with container this variable
   //std::vector <DBOVariable*> parent_variables_;
 
@@ -262,6 +267,8 @@ protected:
 
   /// Flag indicating if this meta-variable has registered itself to its sub-variables
   //bool registered_as_parent_;
+
+  DBOVariableWidget *widget_;
 
   virtual void checkSubConfigurables ();
   /// @brief Registers a parent variable

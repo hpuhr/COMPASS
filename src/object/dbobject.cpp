@@ -141,10 +141,10 @@ void DBObject::deleteVariable (std::string id)
     assert (hasVariable (id));
     //std::map<std::string, DBOVariable*>::iterator it;
     //it = variables_.find (id);
-    //DBOVariable *variable = it->second;
+    DBOVariable *variable = variables_[id];
     variables_.erase(variables_.find (id));
     assert (!hasVariable (id));
-    //delete variable;
+    delete variable;
 }
 
 const std::map<std::string, DBOVariable*> &DBObject::variables () const

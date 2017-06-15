@@ -47,12 +47,12 @@ public slots:
     /// @brief Sets the data type
     void changed ()
     {
-        variable_->dataType(getType());
+        variable_.dataType(getType());
     }
 
 public:
     /// @brief Constructor
-    DBOVariableDataTypeComboBox(DBOVariable *variable, QWidget * parent = 0)
+    DBOVariableDataTypeComboBox(DBOVariable &variable, QWidget * parent = 0)
     : QComboBox(parent), variable_(variable)
     {
         const std::map<PropertyDataType,std::string> &datatypes2str = Property::dataTypes2Strings();
@@ -61,7 +61,7 @@ public:
             addItem (it->second.c_str());
         }
 
-        int index = findText(QString(variable_->dataTypeString().c_str()));
+        int index = findText(QString(variable_.dataTypeString().c_str()));
         assert (index >= 0);
         setCurrentIndex (index);
         connect(this, SIGNAL( activated(const QString &) ), this, SIGNAL( changedType() ));
@@ -70,22 +70,16 @@ public:
     }
     /// @brief Destructor
     virtual ~DBOVariableDataTypeComboBox() {}
+
     /// @brief Returns the currently selected data type
     PropertyDataType getType ()
     {
         return Property::asDataType(currentText().toStdString());
-//        return ;
-//        for (unsigned int cnt = 0; cnt < P_TYPE_SENTINEL; cnt++)
-//        {
-//            if (text.compare (PROPERTY_DATA_TYPE_STRINGS.at((PROPERTY_DATA_TYPE) cnt)) == 0)
-//                return (PROPERTY_DATA_TYPE) cnt;
-//        }
-//        throw std::runtime_error ("DBOVariableDataTypeComboBox: getType: unknown type");
     }
+
     /// @brief Sets the currently selected data type
     void setType (PropertyDataType type)
     {
-        logdbg << "UGA2 '" << Property::asString(type) << "'";
         int index = findText(QString(Property::asString(type).c_str()));
         assert (index >= 0);
         setCurrentIndex (index);
@@ -93,7 +87,7 @@ public:
 
 protected:
     /// Used variable
-    DBOVariable *variable_;
+    DBOVariable &variable_;
 };
 
 #endif /* DBOVARIABLEDATATYPECOMBOBOX_H_ */

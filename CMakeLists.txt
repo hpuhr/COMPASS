@@ -232,6 +232,7 @@ set (atsdb_MOC_HEADERS
         src/schema/metadbtablewidget.h
         src/object/dbobject.h
         src/object/dbobjectwidget.h
+        src/object/dbovariablewidget.h
         src/object/dbobjectmanagerwidget.h
         src/object/dbovariabledatatypecombobox.h
 #        src/object/dbovariablecombobox.h
@@ -310,6 +311,7 @@ set ( atsdb_SRCS
         src/object/dbobject.cpp
         src/object/dbobjectmanager.cpp
         src/object/dbovariable.cpp
+        src/object/dbovariablewidget.cpp
         src/object/dbovariableset.cpp
         src/object/dbovariableorderedset.cpp
 #        src/polygon/polygon4ddi.cpp
