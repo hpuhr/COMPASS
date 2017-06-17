@@ -102,8 +102,7 @@ public:
     ///@brief Destructor.
     virtual ~ATSDB();
 
-    ///@brief Connnects to a database system
-    //void connect ();
+    void initialize ();
 
     ///@brief Shuts down the DB access.
     void shutdown ();
@@ -232,6 +231,8 @@ public:
 
 
 protected:
+    bool initialized_;
+
     /// Flag indicating if data gets exported
     //bool export_active_;
 

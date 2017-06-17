@@ -50,8 +50,6 @@ using namespace std;
 SQLGenerator::SQLGenerator(const DBInterface &db_interface)
     : db_interface_(db_interface)
 {
-
-
     db_type_set_=false;
 
     table_name_properties_ = "aatc_properties";
@@ -73,39 +71,38 @@ SQLGenerator::~SQLGenerator()
 {
 }
 
-//DBCommand *SQLGenerator::getSelectCommand(const std::string &dbo_type, const DBOVariableSet &read_list, const std::string &custom_filter_clause,
-//        DBOVariable *order)
-//{
-//    assert (ATSDB::getInstance().existsDBObject(dbo_type));
-//    //DBOVariableSet &read_list = ATSDB::getInstance().getDBObject(type)->getReadList();
-//    const MetaDBTable &table = ATSDB::getInstance().getDBObject(dbo_type).getCurrentMetaTable ();
+std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand(const DBObject &object, const DBOVariableSet &read_list, const std::string &custom_filter_clause,
+        DBOVariable *order)
+{
+    //DBOVariableSet &read_list = ATSDB::getInstance().getDBObject(type)->getReadList();
+    const MetaDBTable &table = object.currentMetaTable ();
 
-//// AVIBIT HACK
-////    if (order == 0)
-////    {
-////        order = ATSDB::getInstance().getDBOVariable (DBO_UNDEFINED, "id");
-////        assert (order->existsIn (type));
-//    //std::string idname = order->getFor (type)->getCurrentVariableName();
-////    }
-
-
-//    std::vector <std::string> filtered_variable_names; // what
+// AVIBIT HACK
+//    if (order == 0)
+//    {
+//        order = ATSDB::getInstance().getDBOVariable (DBO_UNDEFINED, "id");
+//        assert (order->existsIn (type));
+    //std::string idname = order->getFor (type)->getCurrentVariableName();
+//    }
 
 
+    std::vector <std::string> filtered_variable_names; // what
+
+    // TODO
 //    if (custom_filter_clause.size() == 0)
 //    {
 //        loginf << "SQLGenerator: getSelectCommand: getting filter clause from FilterManager";
 //        custom_filter_clause = FilterManager::getInstance().getSQLCondition(dbo_type, filtered_variable_names);
 //    }
 
-//    //return getSelectCommand (read_list.getPropertyList(type), table, filtered_variable_names, custom_filter_clause,idname);
-//    return getSelectCommand (read_list.getPropertyList(), table, filtered_variable_names, custom_filter_clause, "",
-//            "", false, true);
-//    //(PropertyList variables, MetaDBTable *table,
-//    //    std::vector <std::string> &filtered_variable_names, std::string filter, std::string order, std::string limit,
-//    //    bool distinct, bool left_join)
+    //return getSelectCommand (read_list.getPropertyList(type), table, filtered_variable_names, custom_filter_clause,idname);
+    return getSelectCommand (read_list.getPropertyList(), table, filtered_variable_names, custom_filter_clause, "",
+            "", false, true);
+    //(PropertyList variables, MetaDBTable *table,
+    //    std::vector <std::string> &filtered_variable_names, std::string filter, std::string order, std::string limit,
+    //    bool distinct, bool left_join)
 
-//}
+}
 
 //DBCommand *SQLGenerator::getDataSourcesSelectCommand (const std::string &dbo_type)
 //{
@@ -722,7 +719,202 @@ SQLGenerator::~SQLGenerator()
 //    return ss.str();
 //}
 
+std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const PropertyList &variables, const MetaDBTable &meta_table,
+                                           const std::vector <std::string> &filtered_variable_names, const std::string &filter, const std::string &order,
+                                           const std::string &limit, bool distinct, bool left_join)
+{
+    logdbg  << "SQLGenerator: getSelectCommand: meta table " << meta_table.name() << " var list size " << variables.size();
+    assert (variables.size() != 0);
 
+    std::shared_ptr<DBCommand> command = std::make_shared<DBCommand>(DBCommand());
+
+    std::stringstream ss;
+
+    ss << "SELECT ";
+
+    if (distinct)
+        ss << "DISTINCT ";
+
+    std::vector <std::string> used_tables;
+
+    for (unsigned int cnt = 0; cnt < variables.size(); cnt++)
+        // look what tables are needed for loaded variables and add variables to sql query
+    {
+        const Property &property = variables.at(cnt);
+
+        if (cnt != 0)
+            ss << ", ";
+
+        std::string table_db_name = meta_table.tableFor(property.name()).name();
+
+        if (find (used_tables.begin(), used_tables.end(), table_db_name) == used_tables.end())
+            used_tables.push_back (table_db_name);
+
+        ss << table_db_name << "." << property.name();
+    }
+
+    // TODO rework to variable
+    if (order.size() > 0)
+    {
+        std::vector<std::string> elems;
+        elems = String::split(order, ' ', elems);
+        assert (elems.size() != 0);
+
+        if (meta_table.hasColumn(elems.at(0)))
+        {
+            std::string table_db_name = meta_table.tableFor(elems.at(0)).name();
+            if (find (used_tables.begin(), used_tables.end(), table_db_name) == used_tables.end())
+                used_tables.push_back (table_db_name);
+        }
+        else
+            logwrn << "SQLGenerator: getSelectCommand: unknown order element '" << elems.at(0) << "'";
+    }
+
+    ss << " FROM "; // << table->getAllTableNames();
+
+    bool where_added = false;
+    std::string subtableclause; // for !left_join
+
+    // find all tables needed for variables to be filtered on
+    for (auto it = filtered_variable_names.begin(); it != filtered_variable_names.end(); it++)
+        // look what tables are needed for filtered variables
+    {
+        if (meta_table.hasColumn(*it))
+        {
+            std::string table_db_name = meta_table.tableFor(*it).name();
+
+            if (find (used_tables.begin(), used_tables.end(), table_db_name) == used_tables.end())
+                used_tables.push_back (table_db_name);
+        }
+        logwrn << "SQLGenerator: getSelectCommand: unknown filter element '" << *it << "'";
+    }
+
+    std::string main_table_name = meta_table.mainTableName();
+
+    if (!left_join)
+    {
+        //select cmp_aa.AZIMUTH_ERROR_DEG FROM sd_radar, cmp_aa WHERE  sd_radar.REC_NUM = cmp_aa.REC_NUM
+        assert (used_tables.size() > 0);
+
+        for (auto it = used_tables.begin(); it != used_tables.end(); it++)
+        {
+            if (it != used_tables.begin())
+                ss << ", ";
+            ss << *it;
+        }
+
+        subtableclause = subTablesWhereClause(meta_table, used_tables);
+
+        if (subtableclause.size() != 0)
+        {
+            logdbg  << "SQLGenerator: getSelectCommand: subtableclause '" << subtableclause << "'";
+
+            if (!where_added)
+            {
+                ss << " WHERE ";
+                where_added=true;
+            }
+
+            ss << subtableclause;
+        }
+    }
+    else
+    {
+        //    SELECT news.id, users.username, news.title, news.date, news.body, COUNT(comments.id)
+        //    FROM news
+        //    LEFT JOIN users
+        //    ON news.user_id = users.id
+        //    LEFT JOIN comments
+        //    ON comments.news_id = news.id
+        //    GROUP BY news.id
+        ss << main_table_name;
+
+        assert (used_tables.size() > 0);
+        std::vector <std::string>::iterator it;
+        for (it = used_tables.begin(); it != used_tables.end(); it++)
+        {
+            if (it->compare(main_table_name) != 0) // not main table
+            {
+                ss << " LEFT JOIN " << *it;
+                ss << " ON " << subTableKeyClause (meta_table, *it);
+            }
+        }
+
+    }
+
+    // add filter statement
+    if (filter.size() > 0)
+    {
+        if (!where_added)
+        {
+            ss << " WHERE ";
+            where_added=true;
+        }
+
+        if (!left_join && subtableclause.size() != 0)
+            ss << " AND ";
+
+        ss << filter;
+    }
+
+    if (left_join)
+    {
+        ss << " GROUP BY " << main_table_name << "." << meta_table.mainTable().getKeyId();
+    }
+
+    if (order.size() > 0)
+        ss << " ORDER BY " << order;
+
+    if (limit.size() > 0)
+        ss << " " << limit;
+
+    ss << ";";
+
+
+    command->set(ss.str());
+    command->list(variables);
+
+    logdbg  << "SQLGenerator: getSelectCommand: command sql '" << ss.str() << "'";
+
+    return command;
+}
+
+std::string SQLGenerator::subTablesWhereClause(const MetaDBTable &meta_table, const std::vector <std::string> &used_tables)
+{
+    std::stringstream ss;
+
+    bool first=true;
+
+    for (auto it : meta_table.subTableDefinitions())
+    {
+        if (find (used_tables.begin(), used_tables.end(), it.second->subTableName()) == used_tables.end())
+            continue;
+
+        if (!first)
+            ss << " AND ";
+
+
+        ss << meta_table.mainTableName() << "." << it.second->mainTableKey() << "=" << it.second->subTableName() << "." << it.second->subTableKey();
+        first=false;
+    }
+
+    return ss.str();
+}
+
+std::string SQLGenerator::subTableKeyClause (const MetaDBTable &meta_table, const std::string &sub_table_name)
+{
+    if (meta_table.subTableDefinitions().count(sub_table_name) == 0)
+        throw std::range_error ("SQLGenerator: getSubTableKeyClause: sub_table_name "+sub_table_name+" not found");
+
+
+    auto subtable = meta_table.subTableDefinitions().at(sub_table_name);
+
+    // found subtable
+    std::stringstream ss;
+
+    ss << meta_table.mainTableName() << "." << subtable->mainTableKey() << "=" << subtable->subTableName() << "." << subtable->subTableKey();
+    return ss.str();
+}
 
 //std::string SQLGenerator::getDeleteStatement (DBTableColumn *column, std::string value, std::string filter)
 //{

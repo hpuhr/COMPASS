@@ -73,7 +73,7 @@ public:
     std::shared_ptr <DBResult> execute (const DBCommand &command);
     std::shared_ptr <DBResult> execute (const DBCommandList &command_list);
 
-    void prepareCommand (const DBCommand &command);
+    void prepareCommand (const std::shared_ptr<DBCommand> command);
     std::shared_ptr <DBResult> stepPreparedCommand (unsigned int max_results=0);
     void finalizeCommand ();
     bool getPreparedCommandDone () { return prepared_command_done_; }
@@ -115,7 +115,7 @@ protected:
     mysqlpp::Transaction *transaction_;
 
     /// Last prepared command
-    const DBCommand *prepared_command_;
+    std::shared_ptr<DBCommand> prepared_command_;
     /// Prepared command finished flag.
     bool prepared_command_done_;
 

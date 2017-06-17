@@ -70,11 +70,13 @@ public:
   const std::string &unit () const { return unit_; }
 
   /// @brief Returns database table name which holds this column
-  const std::string &dbTableName () const { return db_table_name_; }
+  //const std::string &dbTableName () const { return db_table_name_; }
 
   bool hasSpecialNull () const { return special_null_.size() > 0; }
   void specialNull (std::string special_null) { special_null_ = special_null; }
   const std::string &specialNull () const { return special_null_; }
+
+  const DBTable &table() const { return table_; }
 
   UnitSelectionWidget *unitWidget ();
 
@@ -95,7 +97,7 @@ protected:
   /// Unit
   std::string unit_;
   /// Database table name which holds this column
-  std::string db_table_name_;
+  //std::string db_table_name_;
   /// Special value signifying null value
   std::string special_null_;
 

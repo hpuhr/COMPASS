@@ -364,15 +364,15 @@ void MySQLppConnection::finalizeStatement ()
     logdbg  << "MySQLppConnection: finalizeStatement: done";
 }
 
-void MySQLppConnection::prepareCommand (const DBCommand &command)
+void MySQLppConnection::prepareCommand (std::shared_ptr<DBCommand> command)
 {
     logdbg  << "MySQLppConnection: prepareCommand";
     assert (prepared_command_==0);
 
-    prepared_command_=&command;
+    prepared_command_=command;
     prepared_command_done_=false;
 
-    prepareStatement (command.get().c_str());
+    prepareStatement (command->get().c_str());
     logdbg  << "MySQLppConnection: prepareCommand: done";
 }
 
@@ -545,8 +545,8 @@ void MySQLppConnection::performanceTest ()
 
     start_time = boost::posix_time::microsec_clock::local_time();
 
-    DBCommand command;
-    command.set("SELECT sd_radar.REC_NUM, sd_radar.POS_SYS_X_NM, sd_radar.POS_SYS_Y_NM, sd_radar.MODEC_CODE_FT, sd_radar.TOD, sd_radar.DETECTION_TYPE, sd_radar.DS_ID FROM sd_radar ORDER BY REC_NUM;");
+    std::shared_ptr<DBCommand> command = std::make_shared<DBCommand> (DBCommand());
+    command->set("SELECT sd_radar.REC_NUM, sd_radar.POS_SYS_X_NM, sd_radar.POS_SYS_Y_NM, sd_radar.MODEC_CODE_FT, sd_radar.TOD, sd_radar.DETECTION_TYPE, sd_radar.DS_ID FROM sd_radar ORDER BY REC_NUM;");
     //ORDER BY REC_NUM
 
     PropertyList list;
@@ -559,7 +559,7 @@ void MySQLppConnection::performanceTest ()
     list.addProperty ("POS_SYS_Y_NM", PropertyDataType::DOUBLE);
     //list.addProperty ("DETECTION_TYPE", PropertyDataType::INT);
     //list.addProperty ("DS_ID", PropertyDataType::INT);
-    command.list (list);
+    command->list (list);
 
     prepareCommand (command);
 

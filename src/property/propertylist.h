@@ -90,7 +90,7 @@ public:
 
         properties_.push_back (Property (id, type));
         logdbg << "PropertyList: addProperty: end";
-    };
+    }
 
     /// @brief Adds a property
     void addProperty (Property &property)
@@ -105,7 +105,7 @@ public:
 
         properties_.push_back (property);
         logdbg << "PropertyList: addProperty: end";
-    };
+    }
 
     /// @brief Return container with all properties
 //    const std::vector <Property> &getProperties ()

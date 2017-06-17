@@ -26,11 +26,13 @@
 #define DBOBJECTMANAGER_H_
 
 #include <vector>
+#include <qobject.h>
 
 #include "singleton.h"
 #include "configurable.h"
 #include "global.h"
 
+class ATSDB;
 class DBObject;
 class DBObjectManagerWidget;
 class DBOVariable;
@@ -42,11 +44,19 @@ class DBSchemaManager;
  *
  * Singleton which creates and holds all DBObjects defined in its configuration.
  */
-class DBObjectManager : public Configurable
+class DBObjectManager : public QObject, public Configurable
 {
+    Q_OBJECT
+public slots:
+    void updateSchemaInformationSlot ();
+
+signals:
+    void dbObjectsChangedSignal ();
+    void schemaChangedSignal ();
+
 public:
     /// @brief Constructor
-    DBObjectManager(const std::string &class_id, const std::string &instance_id, Configurable *parent);
+    DBObjectManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb);
 
     /// @brief Returns if an object of type exists
     bool exists (const std::string &dbo_name);

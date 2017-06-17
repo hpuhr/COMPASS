@@ -27,16 +27,20 @@
 
 #include <boost/thread/mutex.hpp>
 #include <set>
+#include <qobject.h>
 
 #include "configurable.h"
 #include "propertylist.h"
 #include "dbovariableset.h"
+#include "sqlgenerator.h"
 
+class ATSDB;
 class Buffer;
 class BufferWriter;
 class DBConnection;
 class DBOVariable;
 class QProgressDialog;
+class DBObject;
 class DBResult;
 class DBTableColumn;
 class DBTableInfo;
@@ -53,11 +57,15 @@ class QWidget;
  *
  * \todo Context reference point gets lost
  */
-class DBInterface : public Configurable
+class DBInterface : public QObject, public Configurable
 {
+    Q_OBJECT
+public slots:
+    void updateDBObjectInformationSlot ();
+
 public:
     /// @brief Constructor
-    DBInterface(std::string class_id, std::string instance_id, Configurable *parent);
+    DBInterface(std::string class_id, std::string instance_id, ATSDB *atsdb);
     /// @brief Destructor
     virtual ~DBInterface();
 
@@ -93,8 +101,8 @@ public:
 //    void updateBuffer (Buffer *data);
 
 //    /// @brief Prepares incremental read of DBO type
-//    void prepareRead (const std::string &dbo_type, DBOVariableSet read_list, std::string custom_filter_clause="",
-//            DBOVariable *order=0);
+    void prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause="",
+            DBOVariable *order=0);
 //    /// @brief Returns data chunk of DBO type
 //    Buffer *readDataChunk (const std::string &dbo_type, bool activate_key_search);
 //    /// @brief Cleans up incremental read of DBO type
@@ -197,19 +205,11 @@ public:
 protected:
     std::map <std::string, DBConnection*> connections_;
 
+    /// Connection to database, created based on DBConnectionInfo
     DBConnection *current_connection_;
 
     /// Interface initialized (after opening database)
     bool initialized_;
-
-    /// Container with all prepared flags (for incremental reading)
-//    std::map <std::string, bool> prepared_;
-//    /// Container with all reading done flags (for incremental reading)
-//    std::map <std::string, bool> reading_done_;
-//    /// Container with all exists flags, indicating if DBO has data in the database
-//    std::map <std::string, bool> exists_;
-//    /// Container with all DBO element counts
-//    std::map <std::string, unsigned int> count_;
 
     /// Protects the database
     boost::mutex mutex_;
@@ -221,13 +221,21 @@ protected:
     unsigned int read_chunk_size_;
 
     /// Generates SQL statements
-    //SQLGenerator *sql_generator_;
-    /// Connection to database, created based on DBConnectionInfo
+    SQLGenerator sql_generator_;
 
     /// Writes buffer to the database
     //BufferWriter *buffer_writer_;
 
     DBInterfaceWidget *widget_;
+
+    /// Container with all prepared flags (for incremental reading)
+    std::map <std::string, bool> prepared_;
+    /// Container with all reading done flags (for incremental reading)
+    std::map <std::string, bool> reading_done_;
+    /// Container with all exists flags, indicating if DBO has data in the database
+    std::map <std::string, bool> exists_;
+    /// Container with all DBO element counts
+    std::map <std::string, unsigned int> count_;
 
     std::map <std::string, DBTableInfo> table_info_;
 

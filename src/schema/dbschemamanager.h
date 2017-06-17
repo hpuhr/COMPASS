@@ -28,6 +28,7 @@
 #include "configurable.h"
 #include <qobject.h>
 
+class ATSDB;
 class DBSchema;
 class DBSchemaManagerWidget;
 
@@ -41,13 +42,12 @@ class DBSchemaManagerWidget;
 class DBSchemaManager : public QObject, public Configurable
 {
     Q_OBJECT
-
 signals:
     void schemaChangedSignal ();
 
 public:
     /// @brief Constructor
-    DBSchemaManager(const std::string &class_id, const std::string &instance_id, Configurable *parent);
+    DBSchemaManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb);
 
     /// @brief Destructor
     virtual ~DBSchemaManager();

@@ -20,6 +20,7 @@
 //#include <QCoreApplication>
 //#include <QApplication>
 
+#include "atsdb.h"
 #include "buffer.h"
 //#include "BufferWriter.h"
 #include "config.h"
@@ -32,11 +33,11 @@
 #include "dbinterfacewidget.h"
 #include "dbinterface.h"
 #include "dbobjectmanager.h"
+#include "dbobject.h"
 #include "dbovariable.h"
 #include "dbresult.h"
 //#include "MetaDBTable.h"
 //#include "MySQLConConnection.h"
-//#include "SQLGenerator.h"
 //#include "SQLiteConnection.h"
 //#include "StructureDescriptionManager.h"
 //#include "DBSchemaManager.h"
@@ -59,31 +60,15 @@ using namespace Utils;
  * Creates SQLGenerator, several containers based in DBOs (prepared_, reading_done_, exists_, count_), creates
  * write_table_names_,
  */
-DBInterface::DBInterface(std::string class_id, std::string instance_id, Configurable *parent)
-    : Configurable (class_id, instance_id, parent), current_connection_(nullptr), widget_(nullptr)//, buffer_writer_(0)
+DBInterface::DBInterface(std::string class_id, std::string instance_id, ATSDB *atsdb)
+    : Configurable (class_id, instance_id, atsdb), current_connection_(nullptr), sql_generator_(*this), widget_(nullptr)//, buffer_writer_(0)
 {
     boost::mutex::scoped_lock l(mutex_);
 
     //registerParameter ("database_name", &database_name_, "");
     registerParameter ("read_chunk_size", &read_chunk_size_, 20000);
 
-//    sql_generator_ = new SQLGenerator (this);
-
-//    const std::map <std::string, DBObject*> &objects = DBObjectManager::getInstance().getDBObjects ();
-//    std::map <std::string, DBObject*>::const_iterator it;
-
-//    for (it = objects.begin(); it != objects.end(); it++)
-//    {
-//        if (it->second->isMeta() || !it->second->isLoadable())
-//            continue;
-
-//        std::string type = it->first;
-
-//        prepared_[type] = false;
-//        reading_done_[type] = true;
-//        exists_[type]=false;
-//        count_[type]=0;
-//    }
+    //sql_generator_ = new SQLGenerator (*this);
 
     //TODO writing process should be different.
 //    write_table_names_[DBO_PLOTS] = "Plot";
@@ -113,7 +98,7 @@ DBInterface::~DBInterface()
     assert (!widget_);
 
 //    delete sql_generator_;
-//    sql_generator_=0;
+//    sql_generator_=nullptr;
 
 //    if (buffer_writer_)
 //    {
@@ -947,20 +932,19 @@ void DBInterface::checkSubConfigurables ()
 //    buffer_writer_->update (data, table->getDBName());
 //}
 
-//void DBInterface::prepareRead (const std::string &type, DBOVariableSet read_list, std::string custom_filter_clause,
-//        DBOVariable *order)
-//{
-//    boost::mutex::scoped_lock l(mutex_);
+void DBInterface::prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
+        DBOVariable *order)
+{
+    boost::mutex::scoped_lock l(mutex_);
+    assert (current_connection_);
 
-//    assert (DBObjectManager::getInstance().existsDBObject (type));
+    std::shared_ptr<DBCommand> read = sql_generator_.getSelectCommand (dbobject, read_list, custom_filter_clause, order);
+    loginf  << "DBInterface: prepareRead: dbo " << dbobject.name() << " sql '" << read->get() << "'";
+    current_connection_->prepareCommand(read);
 
-//    DBCommand *read = sql_generator_->getSelectCommand (type, read_list, custom_filter_clause, order);
-//    loginf  << "DBInterface: prepareRead: type " << type << " sql '" << read->getCommandString() << "'";
-//    connection_->prepareCommand(read);
-
-//    prepared_.at(type)=true;
-//    reading_done_.at(type)=false;
-//}
+    prepared_.at(dbobject.name())=true;
+    reading_done_.at(dbobject.name())=false;
+}
 
 //void DBInterface::createPropertiesTable ()
 //{
@@ -1567,3 +1551,25 @@ void DBInterface::checkSubConfigurables ()
 //    return buffer;
 //}
 
+void DBInterface::updateDBObjectInformationSlot ()
+{
+    prepared_.clear();
+    reading_done_.clear();
+    exists_.clear();
+    count_.clear();
+
+    auto objects = ATSDB::instance().dbObjectManager().objects();
+
+    for (auto it = objects.begin(); it != objects.end(); it++)
+    {
+        if (!it->second->loadable())
+            continue;
+
+        std::string type = it->first;
+
+        prepared_[type] = false;
+        reading_done_[type] = true;
+        exists_[type]=false;
+        count_[type]=0;
+    }
+}

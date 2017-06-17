@@ -116,6 +116,7 @@ public:
     const std::map <std::string, const DBTableColumn&>& columns () const { return columns_; }
     /// @brief Returns column with a given name
     const DBTableColumn &column (const std::string &column) const { return columns_.at(column); }
+    const DBTable &tableFor (const std::string &column) const;
 
     /// @brief Returns if meta sub-tables are defined
     bool hasSubTables () const { return sub_table_definitions_.size() > 0; }
@@ -130,11 +131,6 @@ public:
     //std::string allTableNames () const { return tableName()+ ", " + subTableNames (); }
     /// @brief Returns container with all table names
     //std::vector<std::string> allTableNamesVector () const;
-
-    /// @brief Returns SQL where clause with all used meta sub-tables
-    //std::string subTablesWhereClause (std::vector <std::string> &used_tables) const;
-    /// @brief Returns SQL key clause for a give meta sub-table
-    //std::string subTableKeyClause (const std::string &sub_table_name) const;
 
     /// @brief Returns container with all sub meta-table definitions
     const std::map <std::string, SubTableDefinition*>& subTableDefinitions () const { return sub_table_definitions_; }

@@ -111,17 +111,19 @@ set ( atsdb_HDRS
         src/config/configurationmanager.h
         src/command/dbcommand.h
         src/command/dbcommandlist.h
+        src/connection/dbconnection.h
         src/connection/mysqlppconnection.h
 #        src/connection/bufferwriter.h
         src/connection/dbresult.h
 #        src/connection/mysqlconconnection.h
         src/connection/mysqlserver.h
-        src/connection/sqlgenerator.h
 ##        src/connection/sqliteconnection.h
 #        src/datasource/datasource.h
 #        src/filter/dbfilter.h
 #        src/filter/sensorfilter.h
 #        src/filter/filtermanager.h
+        src/interface/dbtableinfo.h
+        src/interface/sqlgenerator.h
 #        src/job/dbjob.h
         src/job/job.h
         src/job/joborderer.h
@@ -136,7 +138,6 @@ set ( atsdb_HDRS
 #        src/job/writebufferdbjob.h
 #        src/job/postprocessdbjob.h
 #        src/job/transformationjob.h
-        src/object/dbobjectmanager.h
         src/object/dbovariable.h
         src/object/dbovariableset.h
         src/object/dbovariableorderedset.h
@@ -213,6 +214,7 @@ set (atsdb_MOC_HEADERS
 #        src/filter/sensorfilterwidget.h
         src/connection/mysqlppconnectionwidget.h
         src/connection/mysqlserverwidget.h
+        src/interface/dbinterface.h
         src/interface/dbinterfacewidget.h
 #        src/gui/qcollapsablewidget.h
 #        src/gui/workerthreadwidget.h
@@ -233,6 +235,7 @@ set (atsdb_MOC_HEADERS
         src/object/dbobject.h
         src/object/dbobjectwidget.h
         src/object/dbovariablewidget.h
+        src/object/dbobjectmanager.h
         src/object/dbobjectmanagerwidget.h
         src/object/dbovariabledatatypecombobox.h
 #        src/object/dbovariablecombobox.h
@@ -265,7 +268,6 @@ set ( atsdb_SRCS
         src/connection/mysqlppconnection.cpp
         src/connection/mysqlppconnectionwidget.cpp
         src/connection/mysqlserverwidget.cpp
-        src/connection/sqlgenerator.cpp
 #        src/connection/sqliteconnection.cpp
 #        src/datasource/datasource.cpp
 #        src/filter/dbfilter.cpp
@@ -287,6 +289,7 @@ set ( atsdb_SRCS
 #        src/gui/filtereditdialog.cpp
         src/interface/dbinterface.cpp
         src/interface/dbinterfacewidget.cpp
+        src/interface/sqlgenerator.cpp
 #        src/job/dboactivedatasourcesdbjob.cpp
 #        src/job/dbovariabledistinctstatisticsdbjob.cpp
 #        src/job/dbovariableminmaxdbjob.cpp

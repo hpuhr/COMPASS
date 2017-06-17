@@ -93,7 +93,7 @@ public:
   virtual std::shared_ptr <DBResult> execute (const DBCommandList &command_list)=0;
 
   /// @brief Prepare a database query for incremental data retrieval of the result
-  virtual void prepareCommand (const DBCommand &command)=0;
+  virtual void prepareCommand (std::shared_ptr<DBCommand> command)=0;
   /// @brief Step through a prepared query and return a number of results
   virtual std::shared_ptr <DBResult> stepPreparedCommand (unsigned int max_results=0)=0;
   /// @brief Finalize the prepared query

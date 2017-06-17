@@ -77,6 +77,10 @@ void MetaDBTable::generateSubConfigurable (const std::string &class_id, const st
 
         SubTableDefinition *def = new SubTableDefinition (class_id, instance_id, this);
         sub_table_definitions_.insert (std::pair <std::string, SubTableDefinition*> (def->subTableName(), def));
+
+        assert (schema_.hasTable(def->subTableName()));
+        assert (sub_tables_.count(def->subTableName()) == 0);
+        sub_tables_.insert( std::make_pair(def->subTableName(), schema_.table(def->subTableName())) );
     }
     else
         throw std::runtime_error ("MetaDBTable: generateSubConfigurable: unknown class_id "+class_id);
@@ -93,6 +97,12 @@ void MetaDBTable::name (const std::string &name)
 //    assert (main_table_name.size() != 0);
 //    main_table_name_=main_table_name;
 //}
+
+const DBTable &MetaDBTable::tableFor (const std::string &column) const
+{
+    assert (hasColumn(column));
+    return  columns_.at(column).table();
+}
 
 std::string MetaDBTable::subTableNames () const
 {
@@ -177,49 +187,6 @@ void MetaDBTable::updateColumns ()
 //        table_names.push_back(it.second.name());
 
 //    return table_names;
-//}
-
-//std::string MetaDBTable::subTablesWhereClause(std::vector <std::string> &used_tables) const
-//{
-//    std::stringstream ss;
-
-//    bool first=true;
-
-//    for (auto it : sub_tables_)
-//    {
-//        if (find (used_tables.begin(), used_tables.end(), it->second->getTableDBName()) == used_tables.end())
-//            continue;
-
-//        if (!first)
-//            ss << " AND ";
-
-//        ss << getTableDBName() << "." << it.first.localKey() << "=" << it->second->getTableDBName() << "." << it->first->getSubTableKey();
-//        first=false;
-//    }
-
-//    return ss.str();
-//}
-
-//std::string MetaDBTable::sSubTableKeyClause (std::string sub_table_name)
-//{
-//    setSubTablesIfRequired();
-
-//    std::stringstream ss;
-
-//    std::map <SubTableDefinition*, MetaDBTable*>::iterator it;
-
-//    for (it=sub_tables_.begin(); it != sub_tables_.end(); it++)
-//    {
-//        if (it->second->getTableDBName().compare (sub_table_name) != 0)
-//            continue;
-
-//        // found subtable
-
-//        ss << getTableDBName() << "." << it->first->getLocalKey() << "=" << it->second->getTableDBName() << "." << it->first->getSubTableKey();
-//        return ss.str();
-//    }
-
-//    throw std::runtime_error ("MetaDBTable: getSubTableKeyClause: sub_table_name "+sub_table_name+" not found");
 //}
 
 //void MetaDBTable::setSubTablesIfRequired ()

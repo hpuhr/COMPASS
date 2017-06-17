@@ -22,6 +22,7 @@
  *      Author: sk
  */
 
+#include "atsdb.h"
 #include "configurationmanager.h"
 #include "dbobject.h"
 #include "dbovariable.h"
@@ -34,8 +35,8 @@
 /**
  * Creates sub-configurables.
  */
-DBObjectManager::DBObjectManager(const std::string &class_id, const std::string &instance_id, Configurable *parent)
-: Configurable (class_id, instance_id, parent, "conf/config_dbo.xml"), widget_(nullptr) //, registered_parent_variables_ (false)
+DBObjectManager::DBObjectManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb)
+: Configurable (class_id, instance_id, atsdb, "conf/config_dbo.xml"), widget_(nullptr) //, registered_parent_variables_ (false)
 {
     logdbg  << "DBObjectManager: constructor: creating subconfigurables";
 
@@ -79,6 +80,7 @@ void DBObjectManager::generateSubConfigurable (const std::string &class_id, cons
         loginf  << "DBObjectManager: generateSubConfigurable: adding object type " << object->name();
         assert (objects_.find(object->name()) == objects_.end());
         objects_.insert(std::pair <std::string, DBObject*> (object->name(), object));
+        connect (this, SIGNAL(schemaChangedSignal()), object, SLOT(schemaChangedSlot()));
     }
     else
         throw std::runtime_error ("DBObjectManager: generateSubConfigurable: unknown class_id "+class_id );
@@ -171,5 +173,10 @@ DBObjectManagerWidget *DBObjectManager::widget()
 
     assert (widget_);
     return widget_;
+}
+
+void DBObjectManager::updateSchemaInformationSlot ()
+{
+    emit schemaChangedSignal();
 }
 

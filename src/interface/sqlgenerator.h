@@ -25,6 +25,8 @@
 #ifndef SQLGENERATOR_H_
 #define SQLGENERATOR_H_
 
+#include <memory>
+
 #include "dbovariableset.h"
 
 class Buffer;
@@ -33,6 +35,7 @@ class DBCommandList;
 class DBInterface;
 class MetaDBTable;
 class DBTableColumn;
+class DBObject;
 
 /**
  * @brief Creates SQL statements
@@ -57,8 +60,8 @@ public:
 //    std::string createDBCreateString (Buffer *buffer, const std::string &tablename);
 
 //    /// @brief Returns general select command
-//    DBCommand *getSelectCommand(const std::string &dbo_type, const DBOVariableSet &read_list, const std::string &custom_filter_clause="",
-//            DBOVariable *order=0);
+    std::shared_ptr <DBCommand> getSelectCommand(const DBObject &object, const DBOVariableSet &read_list, const std::string &custom_filter_clause="",
+            DBOVariable *order=0);
 //    /// @brief Returns command for all data sources select
 
 //    //DBCommand *getDataSourcesSelectCommand (const std::string &dbo_type);
@@ -130,9 +133,14 @@ protected:
     std::string table_properties_create_statement_;
 
     /// @brief Returns general select statement
-//    DBCommand *getSelectCommand (const PropertyList &variables, const MetaDBTable &table,
-//            const std::vector <std::string> &filtered_variable_names, const std::string &filter="", const std::string &order="",
-//            const std::string &limit="", bool distinct=false, bool left_join=false);
+    std::shared_ptr<DBCommand> getSelectCommand (const PropertyList &variables, const MetaDBTable &meta_table,
+            const std::vector <std::string> &filtered_variable_names, const std::string &filter="", const std::string &order="",
+            const std::string &limit="", bool distinct=false, bool left_join=false);
+
+    /// @brief Returns SQL where clause with all used meta sub-tables
+    std::string subTablesWhereClause (const MetaDBTable &meta_table, const std::vector <std::string> &used_tables);
+    /// @brief Returns SQL key clause for a give meta sub-table
+    std::string subTableKeyClause (const MetaDBTable &meta_table, const std::string &sub_table_name);
 };
 
 #endif /* SQLGENERATOR_H_ */

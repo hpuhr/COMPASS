@@ -135,6 +135,7 @@ int main (int argc, char **argv)
         loginf << "ATSDBClient: startup version " << config.getString("version") << " using file '" << config.getString("main_configuration_file") << "'";
 
         ConfigurationManager::getInstance().init (config.getString("main_configuration_file"));
+        ATSDB::instance().initialize();
 
         Client mf(argc, argv);
 

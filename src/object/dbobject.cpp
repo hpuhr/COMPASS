@@ -41,7 +41,7 @@
  * Registers parameters, creates sub configurables
  */
 DBObject::DBObject(std::string class_id, std::string instance_id, Configurable *parent)
-    : Configurable (class_id, instance_id, parent), current_meta_table_(0), variables_checked_(false),
+    : Configurable (class_id, instance_id, parent), current_meta_table_(nullptr), variables_checked_(false),
       has_active_data_sources_info_(false), widget_(nullptr)
 {
     registerParameter ("name" , &name_, "Undefined");
@@ -59,6 +59,8 @@ DBObject::DBObject(std::string class_id, std::string instance_id, Configurable *
  */
 DBObject::~DBObject()
 {
+    current_meta_table_ = nullptr;
+
     for (auto it = data_source_definitions_.begin(); it != data_source_definitions_.end(); it++)
         delete it->second;
     data_source_definitions_.clear();
@@ -204,35 +206,15 @@ const DBODataSourceDefinition &DBObject::currentDataSource () const
  */
 bool DBObject::hasCurrentMetaTable () const
 {
-    if (current_meta_table_ != 0)
-        return true;
-    else
-    {
-        DBSchema &schema = ATSDB::instance().getCurrentSchema();
-        logdbg  << "DBObject "<< name() << ": hasCurrentMetaTable: got current schema " << schema.name();
-        logdbg  << "DBObject "<< name() << ": hasCurrentMetaTable: meta tables:";
-        for (auto it = meta_tables_.begin(); it != meta_tables_.end(); it++)
-            logdbg << it->first << ": " << it->second;
-        assert (meta_tables_.find(schema.name()) != meta_tables_.end());
-        std::string meta_table_name = meta_tables_ .at(schema.name());
-        return schema.hasMetaTable (meta_table_name);
-    }
+    return current_meta_table_ != nullptr;
 }
 
 /**
  * If current_meta_table_ is not set, it is set be getting the current schema, and getting the current meta table from
  * the schema by its identifier. Then current_meta_table_ is returned.
  */
-const MetaDBTable &DBObject::currentMetaTable ()
+const MetaDBTable &DBObject::currentMetaTable () const
 {
-    if (!current_meta_table_)
-    {
-        DBSchema &schema = ATSDB::instance().getCurrentSchema();
-        assert (meta_tables_.find(schema.name()) != meta_tables_.end());
-        std::string meta_table_name = meta_tables_ .at(schema.name());
-        assert (schema.hasMetaTable (meta_table_name));
-        current_meta_table_ = &schema.metaTable (meta_table_name);
-    }
     assert (current_meta_table_);
     return *current_meta_table_;
 }
@@ -338,4 +320,18 @@ DBObjectWidget *DBObject::widget ()
 
     assert (widget_);
     return widget_;
+}
+
+void DBObject::schemaChangedSlot ()
+{
+    if (ATSDB::instance().schemaManager().hasCurrentSchema())
+    {
+        DBSchema &schema = ATSDB::instance().schemaManager().getCurrentSchema();
+        assert (meta_tables_.find(schema.name()) != meta_tables_.end());
+        std::string meta_table_name = meta_tables_ .at(schema.name());
+        assert (schema.hasMetaTable (meta_table_name));
+        current_meta_table_ = &schema.metaTable (meta_table_name);
+    }
+    else
+        current_meta_table_ = nullptr;
 }

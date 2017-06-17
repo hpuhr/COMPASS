@@ -53,6 +53,7 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread.hpp>
 #include <boost/function.hpp>
+#include <qobject.h>
 
 using namespace std;
 
@@ -60,7 +61,7 @@ using namespace std;
  * Locks state_mutex_, sets init state, creates members, starts the thread using go.
  */
 ATSDB::ATSDB()
- : Configurable ("ATSDB", "ATSDB0", 0, "conf/atsdb.xml"), db_interface_(nullptr), dbo_manager_(nullptr), db_schema_manager_ (nullptr)
+ : Configurable ("ATSDB", "ATSDB0", 0, "conf/atsdb.xml"), initialized_(false), db_interface_(nullptr), dbo_manager_(nullptr), db_schema_manager_ (nullptr)
 //: export_active_(false), dbo_reads_active_(0)
 {
     //WorkerThreadManager::getInstance();
@@ -68,6 +69,13 @@ ATSDB::ATSDB()
     logdbg  << "ATSDB: constructor: start";
 
     createSubConfigurables ();
+
+    assert (db_interface_);
+    assert (db_schema_manager_);
+    assert (dbo_manager_);
+
+    QObject::connect(dbo_manager_, SIGNAL(dbObjectsChangedSignal()), db_interface_, SLOT(updateDBObjectInformationSlot()));
+    QObject::connect (db_schema_manager_, SIGNAL(schemaChangedSignal()), dbo_manager_, SLOT(updateSchemaInformationSlot()));
 
     //db_interface_ = new DBInterface ();
     //struct_reader_ = new StructureReader (db_interface_);
@@ -77,12 +85,24 @@ ATSDB::ATSDB()
     logdbg  << "ATSDB: constructor: end";
 }
 
+void ATSDB::initialize()
+{
+    assert (!initialized_);
+    initialized_=true;
+
+    dbo_manager_->updateSchemaInformationSlot();
+    db_interface_->updateDBObjectInformationSlot();
+
+}
+
 /**
  * Deletes members.
  */
 ATSDB::~ATSDB()
 {
     logdbg  << "ATSDB: destructor: start";
+
+    assert (!initialized_);
 
     //delete struct_reader_;
 
@@ -163,24 +183,27 @@ void ATSDB::checkSubConfigurables ()
 DBInterface &ATSDB::dbInterface ()
 {
     assert (db_interface_);
+    assert (initialized_);
     return *db_interface_;
 }
 
 DBSchemaManager &ATSDB::schemaManager ()
 {
     assert (db_schema_manager_);
+    assert (initialized_);
     return *db_schema_manager_;
 }
 
 DBObjectManager &ATSDB::dbObjectManager ()
 {
     assert (dbo_manager_);
+    assert (initialized_);
     return *dbo_manager_;
 }
 
 bool ATSDB::ready ()
 {
-    if (!db_interface_)
+    if (!db_interface_ || !initialized_)
         return false;
 
     return db_interface_->ready();
@@ -249,6 +272,7 @@ const std::map <std::string, DBTableInfo> &ATSDB::tableInfo ()
 bool ATSDB::existsDBObject (const std::string &dbo_name)
 {
     assert (dbo_manager_);
+    assert (initialized_);
     return dbo_manager_->exists (dbo_name);
 }
 
@@ -256,6 +280,7 @@ bool ATSDB::existsDBObject (const std::string &dbo_name)
 DBObject &ATSDB::getDBObject (const std::string &dbo_name)
 {
     assert (dbo_manager_);
+    assert (initialized_);
     return dbo_manager_->get(dbo_name);
 }
 
@@ -269,6 +294,7 @@ bool ATSDB::hasCurrentSchema ()
 const std::string &ATSDB::getCurrentSchemaName ()
 {
     assert (db_schema_manager_);
+    assert (initialized_);
     return db_schema_manager_->getCurrentSchemaName();
 }
 
@@ -276,6 +302,7 @@ const std::string &ATSDB::getCurrentSchemaName ()
 DBSchema &ATSDB::getCurrentSchema ()
 {
     assert (db_schema_manager_);
+    assert (initialized_);
     return db_schema_manager_->getCurrentSchema();
 }
 
@@ -286,6 +313,8 @@ DBSchema &ATSDB::getCurrentSchema ()
 void ATSDB::shutdown ()
 {
     loginf  << "ATSDB: database shutdown";
+
+    assert (initialized_);
 
     assert (db_interface_);
     db_interface_->closeConnection();
@@ -301,6 +330,8 @@ void ATSDB::shutdown ()
     assert (db_interface_);
     delete db_interface_;
     db_interface_ = nullptr;
+
+    initialized_=false;
 
 //    if (struct_reader_->hasUnwrittenData())
 //    {

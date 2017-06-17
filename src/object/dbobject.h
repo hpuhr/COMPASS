@@ -135,6 +135,9 @@ class DBObjectWidget;
 class DBObject : public QObject, public Configurable
 {
     Q_OBJECT
+public slots:
+    void schemaChangedSlot ();
+
 public:
     /// @brief Constructor
     DBObject(std::string class_id, std::string instance_id, Configurable *parent);
@@ -179,8 +182,9 @@ public:
     const std::map <std::string, std::string> &metaTables () const { return meta_tables_; }
     /// @brief Returns identifier of main meta table under DBSchema defined by schema
     const std::string &metaTable (const std::string &schema) const;
+
     /// @brief Returns main meta table for current schema
-    const MetaDBTable &currentMetaTable ();
+    const MetaDBTable &currentMetaTable () const;
     /// @brief Returns if current schema has main meta table
     bool hasCurrentMetaTable () const;
 

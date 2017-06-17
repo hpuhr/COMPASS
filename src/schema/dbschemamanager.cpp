@@ -22,6 +22,7 @@
  *      Author: sk
  */
 
+#include "atsdb.h"
 #include "configurationmanager.h"
 #include "dbtablecolumn.h"
 #include "dbtable.h"
@@ -30,14 +31,13 @@
 #include "dbschemamanagerwidget.h"
 #include "dbschemamanager.h"
 #include "logger.h"
-#include "atsdb.h"
 #include "buffer.h"
 
 /**
  * Registers current_schema as parameter, creates sub-configurables (schemas), checks if current_schema exists (if defined).
  */
-DBSchemaManager::DBSchemaManager(const std::string &class_id, const std::string &instance_id, Configurable *parent)
-: Configurable (class_id, instance_id, parent, "conf/config_db_schema.xml"), widget_(nullptr)
+DBSchemaManager::DBSchemaManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb)
+: Configurable (class_id, instance_id, atsdb, "conf/config_db_schema.xml"), widget_(nullptr)
 {
     registerParameter ("current_schema", &current_schema_, (std::string)"");
 
@@ -46,6 +46,7 @@ DBSchemaManager::DBSchemaManager(const std::string &class_id, const std::string 
     if (current_schema_.size() != 0)
         if (schemas_.count(current_schema_) == 0)
             current_schema_="";
+
 }
 
 /**
@@ -75,6 +76,8 @@ void DBSchemaManager::renameCurrentSchema (const std::string &new_name)
     schemas_.insert (std::pair <std::string, DBSchema*> (new_name, it->second));
     schemas_.erase(it);
     current_schema_= new_name;
+
+    emit schemaChangedSignal();
 }
 
 void DBSchemaManager::setCurrentSchema (const std::string &current_schema)
@@ -146,8 +149,7 @@ void DBSchemaManager::checkSubConfigurables ()
 
 DBSchema &DBSchemaManager::getCurrentSchema ()
 {
-    assert (current_schema_.size() != 0);
-    assert (schemas_.find(current_schema_) != schemas_.end());
+    assert (hasCurrentSchema());
     return *schemas_.at(current_schema_);
 }
 
@@ -165,6 +167,7 @@ void DBSchemaManager::deleteCurrentSchema ()
     schemas_.erase(current_schema_);
 
     current_schema_="";
+    emit schemaChangedSignal();
 }
 
 bool DBSchemaManager::hasSchema (const std::string &name)
