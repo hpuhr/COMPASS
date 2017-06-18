@@ -202,6 +202,8 @@ public:
 //    Buffer *getTrackMatches (bool has_mode_a, unsigned int mode_a, bool has_ta, unsigned int ta, bool has_ti, std::string ti,
 //            bool has_tod, double tod_min, double tod_max);
 
+    void testReading ();
+
 protected:
     std::map <std::string, DBConnection*> connections_;
 

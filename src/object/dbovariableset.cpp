@@ -215,6 +215,7 @@ PropertyList DBOVariableSet::getPropertyList () const
 
   for (auto it : set_)
   {
+      loginf << "UGA name '" << it->name() << "'";
       list.addProperty (it->name(), it->dataType());
   }
 

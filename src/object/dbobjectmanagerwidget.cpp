@@ -124,9 +124,11 @@ void DBObjectManagerWidget::databaseOpenedSlot ()
 {
     unlocked_=true;
 
-    std::map <QPushButton*, DBObject *>::iterator it;
-    for ( it=edit_dbo_buttons_.begin(); it !=  edit_dbo_buttons_.end(); it++)
-        it->first->setDisabled (false);
+    for (auto it : edit_dbo_buttons_)
+        it.first->setDisabled (false);
+
+    for (auto it : delete_dbo_buttons_)
+        it.first->setDisabled (false);
 
     if (new_button_)
         new_button_->setDisabled (false);
@@ -245,6 +247,10 @@ void DBObjectManagerWidget::editDBOSlot ()
 void DBObjectManagerWidget::deleteDBOSlot ()
 {
     assert (delete_dbo_buttons_.find((QPushButton*)sender()) != delete_dbo_buttons_.end());
+
+    DBObject *object = delete_dbo_buttons_ [(QPushButton*)sender()];
+    object_manager_.del (object->name());
+
     updateDBOsSlot();
 }
 

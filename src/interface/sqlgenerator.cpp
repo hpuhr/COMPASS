@@ -735,6 +735,8 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const PropertyList &v
 
     std::vector <std::string> used_tables;
 
+    logdbg << "SQLGenerator: getSelectCommand: collecting required variables";
+
     for (unsigned int cnt = 0; cnt < variables.size(); cnt++)
         // look what tables are needed for loaded variables and add variables to sql query
     {
@@ -751,6 +753,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const PropertyList &v
         ss << table_db_name << "." << property.name();
     }
 
+    logdbg << "SQLGenerator: getSelectCommand: ordering";
     // TODO rework to variable
     if (order.size() > 0)
     {
@@ -773,6 +776,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const PropertyList &v
     bool where_added = false;
     std::string subtableclause; // for !left_join
 
+    logdbg << "SQLGenerator: getSelectCommand: collecting sub table clauses";
     // find all tables needed for variables to be filtered on
     for (auto it = filtered_variable_names.begin(); it != filtered_variable_names.end(); it++)
         // look what tables are needed for filtered variables
@@ -791,6 +795,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const PropertyList &v
 
     if (!left_join)
     {
+        logdbg << "SQLGenerator: getSelectCommand: normal query";
         //select cmp_aa.AZIMUTH_ERROR_DEG FROM sd_radar, cmp_aa WHERE  sd_radar.REC_NUM = cmp_aa.REC_NUM
         assert (used_tables.size() > 0);
 
@@ -818,6 +823,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const PropertyList &v
     }
     else
     {
+        logdbg << "SQLGenerator: getSelectCommand: left join query";
         //    SELECT news.id, users.username, news.title, news.date, news.body, COUNT(comments.id)
         //    FROM news
         //    LEFT JOIN users
@@ -840,6 +846,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const PropertyList &v
 
     }
 
+    logdbg << "SQLGenerator: getSelectCommand: filterting statement";
     // add filter statement
     if (filter.size() > 0)
     {
@@ -857,14 +864,21 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const PropertyList &v
 
     if (left_join)
     {
+        logdbg << "SQLGenerator: getSelectCommand: grouping by";
         ss << " GROUP BY " << main_table_name << "." << meta_table.mainTable().getKeyId();
     }
 
     if (order.size() > 0)
+    {
+        logdbg << "SQLGenerator: getSelectCommand: ordering by";
         ss << " ORDER BY " << order;
+    }
 
     if (limit.size() > 0)
+    {
         ss << " " << limit;
+        logdbg << "SQLGenerator: getSelectCommand: limiting";
+    }
 
     ss << ";";
 

@@ -99,6 +99,8 @@ MainWindow::MainWindow()
     start_layout->addStretch();
 
     start_button_ = new QPushButton ("Start");
+    start_button_->setDisabled(true);
+    QObject::connect(start_button_, SIGNAL(clicked()), this, SLOT(startSlot()));
     start_layout->addWidget(start_button_);
 
     main_layout->addLayout(start_layout);
@@ -136,6 +138,8 @@ void MainWindow::databaseOpenedSlot()
 void MainWindow::startSlot ()
 {
     logdbg  << "MainWindow: startSlot";
+
+    ATSDB::instance().interface().testReading();
 //    if (db_opened_)
 //    {
 //        if (schema_widget_->hasSelectedSchema ())

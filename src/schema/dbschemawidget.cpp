@@ -481,7 +481,7 @@ void DBSchemaWidget::deleteMetaTableSlot ()
 
     QPushButton *sender = dynamic_cast <QPushButton*> (QObject::sender());
     assert (delete_meta_table_buttons_.count(sender) == 1);
-    schema_.deleteMetaTable(delete_meta_table_buttons_.at(sender)->getInstanceId());
+    schema_.deleteMetaTable(delete_meta_table_buttons_.at(sender)->name());
 
     updateMetaTableGrid();
 }

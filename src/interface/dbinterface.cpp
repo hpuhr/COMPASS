@@ -1481,3 +1481,37 @@ void DBInterface::updateDBObjectInformationSlot ()
         count_[type]=0;
     }
 }
+
+void DBInterface::testReading ()
+{
+    loginf << "DBInterface: testReading";
+
+    DBObject &object = ATSDB::instance().objectManager().get("Radar");
+    DBOVariableSet read_list;
+
+    loginf << "DBInterface: testReading: adding all variables";
+    for (auto variable_it : object.variables())
+        read_list.add(variable_it.second);
+
+    loginf << "DBInterface: testReading: preparing reading";
+    prepareRead (object, read_list); //, std::string custom_filter_clause="", DBOVariable *order=0);
+
+    loginf << "DBInterface: testReading: starting reading";
+    std::vector<std::shared_ptr <Buffer>> buffer_vector;
+
+    while (!getReadingDone(object))
+    {
+        std::shared_ptr <Buffer> buffer = readDataChunk (object, false);
+        buffer_vector.push_back(buffer);
+        loginf << "DBInterface: testReading: got buffer size " << buffer->size();
+    }
+
+    loginf << "DBInterface: testReading: reading done";
+    finalizeReadStatement (object);
+
+
+    loginf << "DBInterface: testReading: clearing buffers";
+    buffer_vector.clear();
+
+    loginf << "DBInterface: testReading: done";
+}

@@ -109,6 +109,16 @@ DBObject &DBObjectManager::get (const std::string &dbo_name)
     return *objects_.at(dbo_name);
 }
 
+void DBObjectManager::del (const std::string &dbo_name)
+{
+    logdbg  << "DBObjectManager: del: name " << dbo_name;
+    assert (exists(dbo_name));
+    delete objects_.at(dbo_name);
+    objects_.erase(dbo_name);
+
+    emit dbObjectsChangedSignal();
+}
+
 /**
  * Checks if variable exists, returns it if found.
  *

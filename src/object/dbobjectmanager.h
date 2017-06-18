@@ -62,6 +62,7 @@ public:
     bool exists (const std::string &dbo_name);
     /// @brief Returns the object of type, if existing
     DBObject &get (const std::string &dbo_name);
+    void del (const std::string &dbo_name);
 
     /// @brief Returns defined DBOVariable, if existing
     //DBOVariable *getDBOVariable (const std::string &dbo_type, std::string id);

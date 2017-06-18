@@ -1784,8 +1784,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="ACAS_ALT_CAPABILITY_FT">
                 <ParameterBool is_key="0"/>
@@ -1795,8 +1793,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="ACAS_BDS_1_A">
                 <ParameterBool is_key="0"/>
@@ -1806,8 +1802,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="ACAS_BDS_1_B">
                 <ParameterBool is_key="0"/>
@@ -1817,8 +1811,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="ACAS_COMM_CAPABILITY">
                 <ParameterBool is_key="0"/>
@@ -1828,8 +1820,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="ACAS_FLIGHT_STATUS">
                 <ParameterBool is_key="0"/>
@@ -1839,8 +1829,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="ACAS_MODES_SERVICE">
                 <ParameterBool is_key="0"/>
@@ -1850,8 +1838,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="ANTENNA">
                 <ParameterBool is_key="0"/>
@@ -1861,8 +1847,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="CALC_ALT_GEO_FT">
                 <ParameterBool is_key="0"/>
@@ -1872,8 +1856,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="CALLSIGN">
                 <ParameterBool is_key="0"/>
@@ -1883,8 +1865,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="varchar"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="CAT">
                 <ParameterBool is_key="0"/>
@@ -1894,8 +1874,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="CIVIL_EMERGENCY">
                 <ParameterBool is_key="0"/>
@@ -1905,8 +1883,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="DETECTION_TYPE">
                 <ParameterBool is_key="0"/>
@@ -1916,8 +1892,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="DISPLAY_STATE">
                 <ParameterBool is_key="0"/>
@@ -1927,8 +1901,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="DOM_POSIX">
                 <ParameterBool is_key="0"/>
@@ -1938,8 +1910,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="DS_ID">
                 <ParameterBool is_key="0"/>
@@ -1949,8 +1919,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="FROM_FFT">
                 <ParameterBool is_key="0"/>
@@ -1960,8 +1928,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="GEO_AREA_MASK">
                 <ParameterBool is_key="0"/>
@@ -1971,8 +1937,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="bigint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="HASH_CODE">
                 <ParameterBool is_key="0"/>
@@ -1982,8 +1946,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyblob"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="HEIGHT_3D_FT">
                 <ParameterBool is_key="0"/>
@@ -1993,8 +1955,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="mediumint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="IC_CODE">
                 <ParameterBool is_key="0"/>
@@ -2004,8 +1964,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="LINE_ID">
                 <ParameterBool is_key="0"/>
@@ -2015,8 +1973,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MAS_TRACK_NUM">
                 <ParameterBool is_key="0"/>
@@ -2026,8 +1982,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MIL_EMERGENCY">
                 <ParameterBool is_key="0"/>
@@ -2037,8 +1991,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MIL_IDENT">
                 <ParameterBool is_key="0"/>
@@ -2048,8 +2000,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MODE1_CODE">
                 <ParameterBool is_key="0"/>
@@ -2059,8 +2009,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MODE1_G">
                 <ParameterBool is_key="0"/>
@@ -2070,8 +2018,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MODE1_QX">
                 <ParameterBool is_key="0"/>
@@ -2081,8 +2027,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MODE1_SMO">
                 <ParameterBool is_key="0"/>
@@ -2092,8 +2036,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MODE1_V">
                 <ParameterBool is_key="0"/>
@@ -2103,8 +2045,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MODE2_CODE">
                 <ParameterBool is_key="0"/>
@@ -2114,8 +2054,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MODE2_G">
                 <ParameterBool is_key="0"/>
@@ -2125,8 +2063,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MODE2_QX">
                 <ParameterBool is_key="0"/>
@@ -2136,8 +2072,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MODE2_SMO">
                 <ParameterBool is_key="0"/>
@@ -2147,8 +2081,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MODE2_V">
                 <ParameterBool is_key="0"/>
@@ -2158,8 +2090,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MODE3A_CODE">
                 <ParameterBool is_key="0"/>
@@ -2169,8 +2099,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MODE3A_G">
                 <ParameterBool is_key="0"/>
@@ -2180,8 +2108,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MODE3A_QX">
                 <ParameterBool is_key="0"/>
@@ -2191,8 +2117,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MODE3A_SMO">
                 <ParameterBool is_key="0"/>
@@ -2202,8 +2126,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MODE3A_V">
                 <ParameterBool is_key="0"/>
@@ -2213,8 +2135,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MODE4_FRIENDLY">
                 <ParameterBool is_key="0"/>
@@ -2224,8 +2144,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MODEC_CODE_FT">
                 <ParameterBool is_key="0"/>
@@ -2235,8 +2153,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="mediumint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MODEC_CODE_GRAY">
                 <ParameterBool is_key="0"/>
@@ -2246,8 +2162,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MODEC_G">
                 <ParameterBool is_key="0"/>
@@ -2257,8 +2171,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MODEC_G_GRAY">
                 <ParameterBool is_key="0"/>
@@ -2268,8 +2180,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MODEC_QX_GRAY">
                 <ParameterBool is_key="0"/>
@@ -2279,8 +2189,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MODEC_V">
                 <ParameterBool is_key="0"/>
@@ -2290,8 +2198,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MODEC_V_GRAY">
                 <ParameterBool is_key="0"/>
@@ -2301,8 +2207,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MODES_MB_DATA">
                 <ParameterBool is_key="0"/>
@@ -2312,8 +2216,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyblob"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MSG_FMT">
                 <ParameterBool is_key="0"/>
@@ -2323,8 +2225,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MSSR_AMPLITUDE_DBM">
                 <ParameterBool is_key="0"/>
@@ -2334,8 +2234,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MSSR_REPLIES_NUM">
                 <ParameterBool is_key="0"/>
@@ -2345,8 +2243,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_AZM_DEG">
                 <ParameterBool is_key="0"/>
@@ -2356,8 +2252,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_AZM_DEG_CALC">
                 <ParameterBool is_key="0"/>
@@ -2367,8 +2261,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_LAT_DEG">
                 <ParameterBool is_key="0"/>
@@ -2378,8 +2270,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_LOCAL_X_NM">
                 <ParameterBool is_key="0"/>
@@ -2389,8 +2279,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_LOCAL_X_NM_CALC">
                 <ParameterBool is_key="0"/>
@@ -2400,8 +2288,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_LOCAL_Y_NM">
                 <ParameterBool is_key="0"/>
@@ -2411,8 +2297,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_LOCAL_Y_NM_CALC">
                 <ParameterBool is_key="0"/>
@@ -2422,8 +2306,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_LONG_DEG">
                 <ParameterBool is_key="0"/>
@@ -2433,8 +2315,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_RANGE_NM">
                 <ParameterBool is_key="0"/>
@@ -2444,8 +2324,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_RANGE_NM_CALC">
                 <ParameterBool is_key="0"/>
@@ -2455,8 +2333,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_SYS_X_NM">
                 <ParameterBool is_key="0"/>
@@ -2466,8 +2342,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_SYS_Y_NM">
                 <ParameterBool is_key="0"/>
@@ -2477,8 +2351,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="PSR_AMPLITUDE_DBM">
                 <ParameterBool is_key="0"/>
@@ -2488,8 +2360,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="PSR_RUNLENGTH_DEG">
                 <ParameterBool is_key="0"/>
@@ -2499,8 +2369,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="PSR_SSR_AZM_DIFF_DEG">
                 <ParameterBool is_key="0"/>
@@ -2510,8 +2378,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="PSR_SSR_RANGE_DIFF_NM">
                 <ParameterBool is_key="0"/>
@@ -2521,8 +2387,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="RAW_MSG">
                 <ParameterBool is_key="0"/>
@@ -2532,8 +2396,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="blob"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="RDP_CHAIN">
                 <ParameterBool is_key="0"/>
@@ -2543,8 +2405,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="REC_NUM">
                 <ParameterBool is_key="1"/>
@@ -2554,8 +2414,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="REC_TIME_MS">
                 <ParameterBool is_key="0"/>
@@ -2565,8 +2423,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="REC_TIME_POSIX">
                 <ParameterBool is_key="0"/>
@@ -2576,8 +2432,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="REPORT_TYPE">
                 <ParameterBool is_key="0"/>
@@ -2587,8 +2441,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="SAC">
                 <ParameterBool is_key="0"/>
@@ -2598,8 +2450,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="SCAN_NUM">
                 <ParameterBool is_key="0"/>
@@ -2609,8 +2459,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="SIC">
                 <ParameterBool is_key="0"/>
@@ -2620,8 +2468,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="SIMULATED_TARGET">
                 <ParameterBool is_key="0"/>
@@ -2631,8 +2477,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="SPI">
                 <ParameterBool is_key="0"/>
@@ -2642,8 +2486,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="SSR_RUNLENGTH_DEG">
                 <ParameterBool is_key="0"/>
@@ -2653,8 +2495,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="TARGET_ADDR">
                 <ParameterBool is_key="0"/>
@@ -2664,8 +2504,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="TEST_TARGET">
                 <ParameterBool is_key="0"/>
@@ -2675,8 +2513,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="TOD">
                 <ParameterBool is_key="0"/>
@@ -2686,8 +2522,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="TOD_CALCULATED">
                 <ParameterBool is_key="0"/>
@@ -2697,8 +2531,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="TRACK_CLIMB_DESC_MODE">
                 <ParameterBool is_key="0"/>
@@ -2708,8 +2540,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="TRACK_CONFIRMED">
                 <ParameterBool is_key="0"/>
@@ -2719,8 +2549,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="TRACK_DOUBTFUL">
                 <ParameterBool is_key="0"/>
@@ -2730,8 +2558,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="TRACK_END">
                 <ParameterBool is_key="0"/>
@@ -2741,8 +2567,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="TRACK_GHOST_TARGET">
                 <ParameterBool is_key="0"/>
@@ -2752,8 +2576,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="TRACK_GROUNDSPEED_KT">
                 <ParameterBool is_key="0"/>
@@ -2763,8 +2585,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="TRACK_HEADING_DEG">
                 <ParameterBool is_key="0"/>
@@ -2774,8 +2594,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="TRACK_MANOEUVRE_HORI">
                 <ParameterBool is_key="0"/>
@@ -2785,8 +2603,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="TRACK_NUM">
                 <ParameterBool is_key="0"/>
@@ -2796,8 +2612,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="smallint"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="TRACK_RDP_CHAIN">
                 <ParameterBool is_key="0"/>
@@ -2807,8 +2621,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="TRACK_SIGMA_H_DEG">
                 <ParameterBool is_key="0"/>
@@ -2818,8 +2630,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="TRACK_SIGMA_V_KT">
                 <ParameterBool is_key="0"/>
@@ -2829,8 +2639,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="TRACK_SIGMA_X_NM">
                 <ParameterBool is_key="0"/>
@@ -2840,8 +2648,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="TRACK_SIGMA_Y_NM">
                 <ParameterBool is_key="0"/>
@@ -2851,8 +2657,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="TRACK_SLANT_CORR">
                 <ParameterBool is_key="0"/>
@@ -2862,8 +2666,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="TRACK_SUP">
                 <ParameterBool is_key="0"/>
@@ -2873,8 +2675,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="TRACK_TYPE">
                 <ParameterBool is_key="0"/>
@@ -2884,8 +2684,6 @@
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
-                <ParameterString unit_dimension=""/>
-                <ParameterString unit_unit=""/>
             </Configuration>
         </Configuration>
         <Configuration class_id="DBTable" instance_id="sd_track">
