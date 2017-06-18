@@ -36,7 +36,7 @@
 #include "dbobject.h"
 #include "dbovariable.h"
 #include "dbresult.h"
-//#include "MetaDBTable.h"
+#include "metadbtable.h"
 //#include "MySQLConConnection.h"
 //#include "SQLiteConnection.h"
 //#include "StructureDescriptionManager.h"
@@ -124,6 +124,13 @@ void DBInterface::useConnection (const std::string &connection_type)
     assert (current_connection_);
 }
 
+void DBInterface::databaseOpened ()
+{
+    updateTableInfo();
+    updateExists();
+    updateCount();
+}
+
 void DBInterface::closeConnection ()
 {
     boost::mutex::scoped_lock l(mutex_);
@@ -141,25 +148,6 @@ void DBInterface::closeConnection ()
 
     table_info_.clear();
 }
-
-//void DBInterface::openDatabase (std::string database_name)
-//{
-
-//    assert (connection_);
-//    connection_->openDatabase(database_name);
-//    updateTableInfo ();
-
-//    //    if (info->isNew())
-//    //    {
-//    //        buffer_writer_ = new BufferWriter (connection_, sql_generator_);
-//    //    }
-//    //    else
-//    //    {
-////            updateExists();
-////            updateCount();
-//    //    }
-
-//}
 
 void DBInterface::updateTableInfo ()
 {
@@ -191,11 +179,6 @@ QWidget *DBInterface::connectionWidget()
 {
     assert (current_connection_);
     return current_connection_->widget();
-}
-
-void DBInterface::databaseOpened ()
-{
-    updateTableInfo();
 }
 
 std::vector <std::string> DBInterface::getDatabases ()
@@ -237,104 +220,35 @@ void DBInterface::checkSubConfigurables ()
 /**
  * Calls queryContains for all DBOs in exists_.
  */
-//void DBInterface::updateExists ()
-//{
-//    logdbg  << "DBInterface: updateExists: size " << exists_.size();
+void DBInterface::updateExists ()
+{
+    logdbg  << "DBInterface: updateExists: size " << exists_.size();
 
-//    std::map <std::string, bool>::iterator it;
+    for (auto it : ATSDB::instance().dbObjectManager().objects())
+    {
+        std::string table_name = it.second->currentMetaTable().mainTableName();
+        exists_[it.first] = table_info_.count(table_name) > 0;
+        logdbg  << "DBInterface: updateExists: type " << it.first << " exists " <<  exists_[it.first];
+    }
+}
 
-//    for (it = exists_.begin(); it != exists_.end(); it++)
-//    {
-//        it->second = queryContains (it->first);
-//        logdbg  << "DBInterface: updateExists: type " << it->first << " exists " <<  it->second;
-//    }
+/**
+ * Calls queryCount for all DBOs in count_, if they are in exists_.
+ */
+void DBInterface::updateCount ()
+{
+    logdbg  << "DBInterface: updateCount: size " << count_.size();
 
-//}
 
-///**
-// * Calls queryCount for all DBOs in count_, if they are in exists_.
-// */
-//void DBInterface::updateCount ()
-//{
-//    logdbg  << "DBInterface: updateCount: size " << count_.size();
-
-//    std::map <std::string, unsigned int>::iterator it;
-
-//    for (it = count_.begin(); it != count_.end(); it++)
-//    {
-//        if (exists_[it->first])
-//        {
-//            it->second = queryCount (it->first);
-//            logdbg  << "DBInterface: updateCount: type " << it->first << " exists, count " << it->second ;
-//        }
-//    }
-//}
-
-///**
-// * Gets SQL command if the table exists and checks if the resulting count is larger as 0.
-// */
-//bool DBInterface::existsTable (std::string table_name)
-//{
-//    logdbg  << "DBInterface: existsTable: start sql " << sql_generator_->getContainsStatement(table_name);
-
-//    boost::mutex::scoped_lock l(mutex_);
-
-//    DBCommand command;
-//    command.setCommandString(sql_generator_->getContainsStatement(table_name));
-
-////    PropertyList list;
-////    list.addProperty("exists", P_TYPE_INT);
-////    command.setPropertyList(list);
-////
-////    DBResult *result = connection_->execute(&command);
-////
-////    assert (result->containsData());
-////    int tmp = *((int*) result->getBuffer()->get(0,0));
-////
-////    delete result;
-////
-////    loginf  << "DBInterface: existsTable: '" <<  tmp << "'";
-////    return tmp > 0;
-
-//    PropertyList list;
-//    list.addProperty("table", PropertyDataType::STRING);
-//    command.setPropertyList(list);
-
-//    DBResult *result = connection_->execute(&command);
-
-//    assert (false);
-//    // TODO FIXME
-
-//    return false;
-////    assert (result->containsData());
-////    std::string tmp = *((std::string*) result->getBuffer()->get(0,0));
-
-////    delete result;
-
-////    logdbg  << "DBInterface: existsTable: '" <<  tmp << "'";
-////    return tmp == table_name;
-
-//}
-
-///**
-// * Checks if DBO has a main database table, and returns existsTable, else false.
-// */
-//bool DBInterface::queryContains (const std::string &type)
-//{
-//    logdbg  << "DBInterface: queryContains: start";
-
-//    assert (DBObjectManager::getInstance().existsDBObject(type));
-
-//    if (!DBObjectManager::getInstance().getDBObject(type)->hasCurrentMetaTable())
-//    {
-//        logdbg  << "DBInterface: queryContains: object type " << type << " has no current meta table";
-//        return false;
-//    }
-
-//    std::string table_name = DBObjectManager::getInstance().getDBObject(type)->getCurrentMetaTable()->getTableDBName();
-
-//    return existsTable (table_name);
-//}
+    for (auto it : ATSDB::instance().dbObjectManager().objects())
+    {
+        if (exists_[it.first])
+        {
+            count_[it.first] = queryCount (*it.second);
+            logdbg  << "DBInterface: updateCount: name " << it.second->name() << " exists, count " << count_[it.first];
+        }
+    }
+}
 
 ///**
 // * Returns existsTable for table name.
@@ -352,40 +266,35 @@ void DBInterface::checkSubConfigurables ()
 //    return existsTable (sql_generator_->getPropertiesTableName());
 //}
 
-///**
-// * Gets SQL command for element count and returns the result.
-// */
-//unsigned int DBInterface::queryCount (const std::string &type)
-//{
-//    logdbg  << "DBInterface: queryCount: start";
+/**
+ * Gets SQL command for element count and returns the result.
+ */
+unsigned int DBInterface::queryCount (const DBObject &dbobject)
+{
+    logdbg  << "DBInterface: queryCount: start";
 
-//    boost::mutex::scoped_lock l(mutex_);
+    boost::mutex::scoped_lock l(mutex_);
+    assert (current_connection_);
 
-//    std::string sql = sql_generator_->getCountStatement(type);
+    std::string sql = sql_generator_.getCountStatement(dbobject);
 
-//    logdbg  << "DBInterface: queryCount: sql '" << sql << "'";
+    logdbg  << "DBInterface: queryCount: sql '" << sql << "'";
 
-//    DBCommand command;
-//    command.setCommandString(sql);
+    DBCommand command;
+    command.set(sql);
 
-//    PropertyList list;
-//    list.addProperty("count", PropertyDataType::INT);
-//    command.setPropertyList(list);
+    PropertyList list;
+    list.addProperty("count", PropertyDataType::INT);
+    command.list(list);
 
-//    DBResult *result = connection_->execute(&command);
+    std::shared_ptr <DBResult> result = current_connection_->execute(command);
 
-//    // TODO FIXME
-//    assert (false);
-//    return 0;
+    assert (result->containsData());
+    int tmp = result->buffer()->getInt("count").get(0);
 
-////    assert (result->containsData());
-////    int tmp = *((int*) result->getBuffer()->get(0,0));
-
-////    delete result;
-
-////    logdbg  << "DBInterface: queryCount: " << type << ": "<< tmp <<" end";
-////    return (unsigned int) tmp;
-//}
+    logdbg  << "DBInterface: queryCount: " << dbobject.name() << ": "<< tmp <<" end";
+    return static_cast<unsigned int> (tmp);
+}
 
 ///**
 // * Gets SQL command for data sources list and packs the resulting buffer into a set, which is returned.
@@ -757,47 +666,42 @@ void DBInterface::checkSubConfigurables ()
 //}
 
 
-//bool DBInterface::isPrepared (const std::string &type)
-//{
-//    logdbg  << "DBInterface: isPrepared: type " << type;
-//    assert (DBObjectManager::getInstance().existsDBObject (type));
-//    return prepared_.at(type);
-//}
+bool DBInterface::isPrepared (const DBObject &dbobject)
+{
+    logdbg  << "DBInterface: isPrepared: name " << dbobject.name();
+    return prepared_.at(dbobject.name());
+}
 
-//bool DBInterface::getReadingDone (const std::string &type)
-//{
-//    assert (DBObjectManager::getInstance().existsDBObject (type));
-//    return reading_done_.at(type);
-//}
+bool DBInterface::getReadingDone (const DBObject &dbobject)
+{
+    logdbg  << "DBInterface: getReadingDone: name " << dbobject.name();
 
-//bool DBInterface::isReadingDone ()
-//{
-//    bool reading_done = false;
-//    std::map <std::string, bool>::iterator it;
-//    for (it = reading_done_.begin(); it != reading_done_.end(); it++)
-//        reading_done |= it->second;
+    return reading_done_.at(dbobject.name());
+}
 
-//    return reading_done;
-//}
+bool DBInterface::isReadingDone ()
+{
+    for (auto it : reading_done_)
+        if (it.second)
+            return false;
+
+    return true;
+}
 
 
-//bool DBInterface::exists (const std::string &type)
-//{
-//    logdbg  << "DBInterface: exists: type " << type;
-//    assert (DBObjectManager::getInstance().existsDBObject (type));
+bool DBInterface::exists (const DBObject &dbobject)
+{
+    logdbg  << "DBInterface: exists: name " << dbobject.name();
 
-////    if (type == DBO_UNDEFINED)
-////        return true;
+    return exists_.at(dbobject.name());
+}
 
-//    logdbg  << "DBInterface: exists: type " << type << " exists " << exists_.at(type);
-//    return exists_.at(type);
-//}
+unsigned int DBInterface::count (const DBObject &dbobject)
+{
+    logdbg  << "DBInterface: count: name " << dbobject.name();
 
-//unsigned int DBInterface::count (const std::string &type)
-//{
-//    assert (DBObjectManager::getInstance().existsDBObject (type));
-//    return count_.at(type);
-//}
+    return count_.at(dbobject.name());
+}
 
 //DBResult *DBInterface::count (const std::string &type, unsigned int sensor_number)
 //{
@@ -817,27 +721,25 @@ void DBInterface::checkSubConfigurables ()
 //    return result;
 //}
 
-//void DBInterface::finalizeReadStatement (const std::string &type)
-//{
-//    boost::mutex::scoped_lock l(mutex_);
+void DBInterface::finalizeReadStatement (const DBObject &dbobject)
+{
+    boost::mutex::scoped_lock l(mutex_);
+    assert (current_connection_);
 
-//    assert (DBObjectManager::getInstance().existsDBObject (type));
-//    logdbg  << "DBInterface: finishReadSystemTracks: start ";
-//    prepared_.at(type)=false;
-//    connection_->finalizeCommand();
-//}
+    logdbg  << "DBInterface: finishReadSystemTracks: start ";
+    prepared_.at(dbobject.name())=false;
+    current_connection_->finalizeCommand();
+}
 
-//void DBInterface::clearResult ()
-//{
-//    boost::mutex::scoped_lock l(mutex_);
+void DBInterface::clearResult ()
+{
+    boost::mutex::scoped_lock l(mutex_);
 
-//    std::map <std::string, bool>::iterator it;
-
-//    for (it = reading_done_.begin(); it != reading_done_.end(); it++)
-//    {
-//        it->second=true;
-//    }
-//}
+    for (auto it = reading_done_.begin(); it != reading_done_.end(); it++)
+    {
+        it->second=true;
+    }
+}
 
 //bool DBInterface::hasActiveDataSourcesInfo (const std::string &type)
 //{

@@ -105,21 +105,21 @@ public:
             DBOVariable *order=0);
 //    /// @brief Returns data chunk of DBO type
 //    Buffer *readDataChunk (const std::string &dbo_type, bool activate_key_search);
-//    /// @brief Cleans up incremental read of DBO type
-//    void finalizeReadStatement (const std::string &dbo_type);
-//    /// @brief Sets reading_done_ flags
-//    void clearResult ();
+    /// @brief Cleans up incremental read of DBO type
+    void finalizeReadStatement (const DBObject &dbobject);
+    /// @brief Sets reading_done_ flags
+    void clearResult ();
 
-//    /// @brief Returns if incremental read for DBO type was prepared
-//    bool isPrepared (const std::string &dbo_type);
-//    /// @brief Returns if incremental read for DBO type was finished
-//    bool getReadingDone (const std::string &dbo_type);
-//    /// @brief Returns if all incremental reads were finished
-//    bool isReadingDone ();
-//    /// @brief Returns if DBO exists and has data in the database
-//    bool exists (const std::string &dbo_type);
-//    /// @brief Returns number of elements for DBO type
-//    unsigned int count (const std::string &dbo_type);
+    /// @brief Returns if incremental read for DBO type was prepared
+    bool isPrepared (const DBObject &dbobject);
+    /// @brief Returns if incremental read for DBO type was finished
+    bool getReadingDone (const DBObject &dbobject);
+    /// @brief Returns if all incremental reads were finished
+    bool isReadingDone ();
+    /// @brief Returns if DBO exists and has data in the database
+    bool exists (const DBObject &dbobject);
+    /// @brief Returns number of elements for DBO type
+    unsigned int count (const DBObject &dbobject);
 //    DBResult *count (const std::string &dbo_type, unsigned int sensor_number);
 
 //    /// @brief Creates the properties table
@@ -175,10 +175,10 @@ public:
 //    /// @brief Deletes table content for given table name
 //    void clearTableContent (std::string table_name);
 
-//    /// @brief Updates the exists_ container
-//    void updateExists ();
-//    /// @brief Update the count_ container
-//    void updateCount ();
+    /// @brief Updates the exists_ container
+    void updateExists ();
+    /// @brief Update the count_ container
+    void updateCount ();
 
 //    /// @brief Returns the SQLGenerator
 //    SQLGenerator *getSQLGenerator () { assert (sql_generator_); return sql_generator_; }
@@ -244,13 +244,8 @@ protected:
     /// @brief loads database tables and columns
     //void initialize ();
 
-    /// @brief Returns if a defined table name exists
-//    bool existsTable (std::string table_name);
-
-//    /// @brief Queries if DBO has data in database
-//    bool queryContains (const std::string &dbo_type);
-//    /// @brief Returns element count for DBO
-//    unsigned int queryCount (const std::string &dbo_type);
+    /// @brief Returns element count for DBO
+    unsigned int queryCount (const DBObject &dbobject);
 
 //    /// @brief Returns buffer with min/max data from another Buffer with the string contents. Delete returned buffer yourself.
 //    Buffer *createFromMinMaxStringBuffer (Buffer *string_buffer, PropertyDataType data_type);

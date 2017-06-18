@@ -19,6 +19,7 @@
 #define DBGLOBAL_H_
 
 #include <map>
+#include <qsize.h>
 
 /**
  * Property data type
@@ -76,5 +77,7 @@ enum DOQueryFlag {
   QUERY_LINES       = 1<<3,
   QUERY_RECTS       = 1<<4
 };
+
+static QSize UI_ICON_SIZE (20,20);
 
 #endif

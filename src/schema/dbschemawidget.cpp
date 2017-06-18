@@ -276,10 +276,12 @@ void DBSchemaWidget::updateTableGrid()
 
     QLabel *edit_label = new QLabel ("Edit");
     edit_label->setFont (font_bold);
+    edit_label->setAlignment(Qt::AlignCenter);
     table_grid_->addWidget (edit_label, 0, 3);
 
     QLabel *del_label = new QLabel ("Delete");
     del_label->setFont (font_bold);
+    del_label->setAlignment(Qt::AlignCenter);
     table_grid_->addWidget (del_label, 0, 4);
 
     unsigned int row=1;
@@ -306,7 +308,7 @@ void DBSchemaWidget::updateTableGrid()
 
         QPushButton *edit = new QPushButton ();
         edit->setIcon(edit_icon);
-        edit->setIconSize(QSize(30,30));
+        edit->setIconSize(UI_ICON_SIZE);
         edit->setFlat(true);
         connect(edit, SIGNAL( clicked() ), this, SLOT( editTableSlot() ));
         table_grid_->addWidget (edit, row, 3);
@@ -314,7 +316,7 @@ void DBSchemaWidget::updateTableGrid()
 
         QPushButton *del = new QPushButton ();
         del->setIcon(del_icon);
-        del->setIconSize(QSize(30,30));
+        del->setIconSize(UI_ICON_SIZE);
         del->setFlat(true);
         connect(del, SIGNAL( clicked() ), this, SLOT( deleteTableSlot() ));
         table_grid_->addWidget (del, row, 4);
@@ -358,10 +360,12 @@ void DBSchemaWidget::updateMetaTableGrid()
 
     QLabel *edit_label = new QLabel ("Edit");
     edit_label->setFont (font_bold);
+    edit_label->setAlignment(Qt::AlignCenter);
     meta_table_grid_->addWidget (edit_label, 0, 4);
 
     QLabel *del_label = new QLabel ("Delete");
     del_label->setFont (font_bold);
+    del_label->setAlignment(Qt::AlignCenter);
     meta_table_grid_->addWidget (del_label, 0, 5);
 
     unsigned int row=1;
@@ -393,7 +397,7 @@ void DBSchemaWidget::updateMetaTableGrid()
 
         QPushButton *edit = new QPushButton ();
         edit->setIcon(edit_icon);
-        edit->setIconSize(QSize(30,30));
+        edit->setIconSize(UI_ICON_SIZE);
         edit->setFlat(true);
         connect(edit, SIGNAL( clicked() ), this, SLOT( editMetaTableSlot() ));
         meta_table_grid_->addWidget (edit, row, 4);
@@ -401,7 +405,7 @@ void DBSchemaWidget::updateMetaTableGrid()
 
         QPushButton *del = new QPushButton ();
         del->setIcon(del_icon);
-        del->setIconSize(QSize(30,30));
+        del->setIconSize(UI_ICON_SIZE);
         del->setFlat(true);
         connect(del, SIGNAL( clicked() ), this, SLOT( deleteMetaTableSlot() ));
         meta_table_grid_->addWidget (del, row, 5);

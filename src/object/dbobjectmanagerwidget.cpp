@@ -285,10 +285,12 @@ void DBObjectManagerWidget::updateDBOsSlot ()
 
     QLabel *edit_label = new QLabel ("Edit");
     edit_label->setFont (font_bold);
+    edit_label->setAlignment(Qt::AlignCenter);
     grid_->addWidget (edit_label, 0, 3);
 
     QLabel *del_label = new QLabel ("Delete");
     del_label->setFont (font_bold);
+    del_label->setAlignment(Qt::AlignCenter);
     grid_->addWidget (del_label, 0, 4);
 
     unsigned int row=1;
@@ -311,7 +313,7 @@ void DBObjectManagerWidget::updateDBOsSlot ()
 
         QPushButton *edit = new QPushButton ();
         edit->setIcon(edit_icon);
-        edit->setIconSize(QSize(30,30));
+        edit->setIconSize(UI_ICON_SIZE);
         edit->setFlat(true);
         edit->setDisabled(!active || !unlocked_);
         connect(edit, SIGNAL( clicked() ), this, SLOT( editDBOSlot() ));
@@ -320,7 +322,7 @@ void DBObjectManagerWidget::updateDBOsSlot ()
 
         QPushButton *del = new QPushButton ();
         del->setIcon(del_icon);
-        del->setIconSize(QSize(30,30));
+        del->setIconSize(UI_ICON_SIZE);
         del->setFlat(true);
         del->setDisabled(!active || !unlocked_);
         connect(del, SIGNAL( clicked() ), this, SLOT( deleteDBOSlot() ));

@@ -67,7 +67,6 @@ public:
 //    //DBCommand *getDataSourcesSelectCommand (const std::string &dbo_type);
 //    /// @brief Returns command for active data sources select
 //    //DBCommand *getDistinctDataSourcesSelectCommand (const std::string &dbo_type);
-//    DBCommand *getCountStatement (const std::string &dbo_type, unsigned int sensor_number);
 
 //    DBCommand *getDistinctStatistics (const std::string &dbo_type, DBOVariable *variable, unsigned int sensor_number);
 
@@ -78,8 +77,9 @@ public:
 
 //    /// @brief Returns statement to check table existence
 //    std::string getContainsStatement (const std::string &table_name);
-//    /// @brief Returns statement to query number of records
-//    std::string getCountStatement (const std::string &dbo_type);
+    /// @brief Returns statement to query number of records
+    std::string getCountStatement (const DBObject &object);
+    //DBCommand *getCountStatement (const DBObject &object, unsigned int sensor_number);
 
 //    /// @brief Returns minimum/maximum table creation statement
 //    std::string getTableMinMaxCreateStatement ();

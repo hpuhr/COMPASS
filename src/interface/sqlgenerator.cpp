@@ -305,14 +305,12 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand(const DBObject &object
 
 //}
 
-//std::string SQLGenerator::getCountStatement (const std::string &dbo_type)
-//{
-//    assert (ATSDB::getInstance().existsDBObject(dbo_type));
+std::string SQLGenerator::getCountStatement (const DBObject &object)
+{
+    std::string table_name = object.currentMetaTable().mainTableName();
 
-//    std::string table_name = ATSDB::getInstance().getDBObject(dbo_type)->getCurrentMetaTable()->getTableDBName();
-
-//    return "SELECT COUNT(*) FROM " + table_name;
-//}
+    return "SELECT COUNT(*) FROM " + table_name;
+}
 
 //DBCommand *SQLGenerator::getTableSelectMinMaxNormalStatement (std::string table_name)
 //{
