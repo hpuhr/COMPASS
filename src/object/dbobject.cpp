@@ -191,13 +191,16 @@ const std::string &DBObject::metaTable (const std::string &schema) const
  */
 bool DBObject::hasCurrentDataSource () const
 {
-    return (data_source_definitions_.find(ATSDB::instance().getCurrentSchema().name()) != data_source_definitions_.end());
+    if (!ATSDB::instance().schemaManager().hasCurrentSchema())
+        return false;
+
+    return (data_source_definitions_.find(ATSDB::instance().schemaManager().getCurrentSchema().name()) != data_source_definitions_.end());
 }
 
 const DBODataSourceDefinition &DBObject::currentDataSource () const
 {
     assert (hasCurrentDataSource());
-    return *data_source_definitions_.at(ATSDB::instance().getCurrentSchema().name());
+    return *data_source_definitions_.at(ATSDB::instance().schemaManager().getCurrentSchema().name());
 }
 
 /**

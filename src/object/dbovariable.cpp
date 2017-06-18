@@ -480,7 +480,7 @@ bool DBOVariable::hasCurrentDBColumn ()
     std::string meta_tablename = currentMetaTableString ();
     std::string table_varname = currentVariableName ();
 
-    return ATSDB::instance().getCurrentSchema().metaTable(meta_tablename).hasColumn(table_varname);
+    return ATSDB::instance().schemaManager().getCurrentSchema().metaTable(meta_tablename).hasColumn(table_varname);
 }
 
 const DBTableColumn &DBOVariable::currentDBColumn ()
@@ -490,18 +490,18 @@ const DBTableColumn &DBOVariable::currentDBColumn ()
     std::string meta_tablename = currentMetaTableString ();
     std::string table_varname = currentVariableName ();
 
-    return ATSDB::instance().getCurrentSchema().metaTable(meta_tablename).column(table_varname);
+    return ATSDB::instance().schemaManager().getCurrentSchema().metaTable(meta_tablename).column(table_varname);
 }
 
 bool DBOVariable::hasCurrentSchema ()
 {
-    return hasSchema(ATSDB::instance().getCurrentSchemaName());
+    return hasSchema(ATSDB::instance().schemaManager().getCurrentSchemaName());
 }
 
 const std::string &DBOVariable::currentMetaTableString ()
 {
     assert (hasCurrentSchema());
-    std::string schema = ATSDB::instance().getCurrentSchemaName();
+    std::string schema = ATSDB::instance().schemaManager().getCurrentSchemaName();
     return schema_variables_.at(schema)->getMetaTable();
 
 }
@@ -509,7 +509,7 @@ const std::string &DBOVariable::currentMetaTableString ()
 const MetaDBTable &DBOVariable::currentMetaTable ()
 {
     assert (hasCurrentSchema());
-    std::string schema = ATSDB::instance().getCurrentSchemaName();
+    std::string schema = ATSDB::instance().schemaManager().getCurrentSchemaName();
     std::string meta_table = schema_variables_.at(schema)->getMetaTable();
     assert (ATSDB::instance().schemaManager().getCurrentSchema().hasMetaTable(meta_table));
     return ATSDB::instance().schemaManager().getCurrentSchema().metaTable(meta_table);
@@ -518,7 +518,7 @@ const MetaDBTable &DBOVariable::currentMetaTable ()
 const std::string &DBOVariable::currentVariableName ()
 {
     assert (hasCurrentSchema());
-    std::string schema = ATSDB::instance().getCurrentSchemaName();
+    std::string schema = ATSDB::instance().schemaManager().getCurrentSchemaName();
     return schema_variables_.at(schema)->getVariable();
 }
 

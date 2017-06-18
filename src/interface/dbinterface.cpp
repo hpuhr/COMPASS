@@ -224,7 +224,7 @@ void DBInterface::updateExists ()
 {
     logdbg  << "DBInterface: updateExists: size " << exists_.size();
 
-    for (auto it : ATSDB::instance().dbObjectManager().objects())
+    for (auto it : ATSDB::instance().objectManager().objects())
     {
         std::string table_name = it.second->currentMetaTable().mainTableName();
         exists_[it.first] = table_info_.count(table_name) > 0;
@@ -240,7 +240,7 @@ void DBInterface::updateCount ()
     logdbg  << "DBInterface: updateCount: size " << count_.size();
 
 
-    for (auto it : ATSDB::instance().dbObjectManager().objects())
+    for (auto it : ATSDB::instance().objectManager().objects())
     {
         if (exists_[it.first])
         {
@@ -1466,7 +1466,7 @@ void DBInterface::updateDBObjectInformationSlot ()
     exists_.clear();
     count_.clear();
 
-    auto objects = ATSDB::instance().dbObjectManager().objects();
+    auto objects = ATSDB::instance().objectManager().objects();
 
     for (auto it = objects.begin(); it != objects.end(); it++)
     {

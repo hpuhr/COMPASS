@@ -180,7 +180,7 @@ void ATSDB::checkSubConfigurables ()
 
 }
 
-DBInterface &ATSDB::dbInterface ()
+DBInterface &ATSDB::interface ()
 {
     assert (db_interface_);
     assert (initialized_);
@@ -194,7 +194,7 @@ DBSchemaManager &ATSDB::schemaManager ()
     return *db_schema_manager_;
 }
 
-DBObjectManager &ATSDB::dbObjectManager ()
+DBObjectManager &ATSDB::objectManager ()
 {
     assert (dbo_manager_);
     assert (initialized_);
@@ -207,12 +207,6 @@ bool ATSDB::ready ()
         return false;
 
     return db_interface_->ready();
-}
-
-const std::map <std::string, DBTableInfo> &ATSDB::tableInfo ()
-{
-    assert (ready());
-    return db_interface_->tableInfo();
 }
 
 /**
@@ -267,44 +261,6 @@ const std::map <std::string, DBTableInfo> &ATSDB::tableInfo ()
 
 //    logdbg  << "ATSDB: open: end";
 //}
-
-/// @brief Returns if an object of type exists
-bool ATSDB::existsDBObject (const std::string &dbo_name)
-{
-    assert (dbo_manager_);
-    assert (initialized_);
-    return dbo_manager_->exists (dbo_name);
-}
-
-/// @brief Returns the object of type, if existing
-DBObject &ATSDB::getDBObject (const std::string &dbo_name)
-{
-    assert (dbo_manager_);
-    assert (initialized_);
-    return dbo_manager_->get(dbo_name);
-}
-
-bool ATSDB::hasCurrentSchema ()
-{
-    assert (db_schema_manager_);
-    return db_schema_manager_->hasCurrentSchema();
-}
-
-/// @brief Returns name of the current schema
-const std::string &ATSDB::getCurrentSchemaName ()
-{
-    assert (db_schema_manager_);
-    assert (initialized_);
-    return db_schema_manager_->getCurrentSchemaName();
-}
-
-/// @brief Returns the current DBSchema
-DBSchema &ATSDB::getCurrentSchema ()
-{
-    assert (db_schema_manager_);
-    assert (initialized_);
-    return db_schema_manager_->getCurrentSchema();
-}
 
 ///**
 // * Calls stop, locks state_mutex_. If data was written uning the StructureReader, this process is finished correctly.

@@ -55,7 +55,7 @@ DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager &object_manager)
 
     QVBoxLayout *main_layout = new QVBoxLayout ();
 
-    QLabel *main_label = new QLabel ("Database objects");
+    QLabel *main_label = new QLabel ("Database Objects");
     main_label->setFont (font_bold);
     main_layout->addWidget (main_label);
 
@@ -314,7 +314,6 @@ void DBObjectManagerWidget::updateDBOsSlot ()
         QPushButton *edit = new QPushButton ();
         edit->setIcon(edit_icon);
         edit->setIconSize(UI_ICON_SIZE);
-        edit->setFlat(true);
         edit->setDisabled(!active || !unlocked_);
         connect(edit, SIGNAL( clicked() ), this, SLOT( editDBOSlot() ));
         grid_->addWidget (edit, row, 3);
@@ -323,7 +322,6 @@ void DBObjectManagerWidget::updateDBOsSlot ()
         QPushButton *del = new QPushButton ();
         del->setIcon(del_icon);
         del->setIconSize(UI_ICON_SIZE);
-        del->setFlat(true);
         del->setDisabled(!active || !unlocked_);
         connect(del, SIGNAL( clicked() ), this, SLOT( deleteDBOSlot() ));
         grid_->addWidget (del, row, 4);

@@ -47,6 +47,7 @@
 #include "metadbtable.h"
 #include "metadbtablewidget.h"
 #include "dbschema.h"
+#include "dbinterface.h"
 #include "atsdb.h"
 #include "buffer.h"
 
@@ -163,7 +164,7 @@ DBSchemaWidget::~DBSchemaWidget()
 
 void DBSchemaWidget::addTableSlot()
 {
-    const std::map <std::string, DBTableInfo> &table_info = ATSDB::instance().tableInfo ();
+    const std::map <std::string, DBTableInfo> &table_info = ATSDB::instance().interface().tableInfo ();
 
     QStringList items;
     for (auto it : table_info)
@@ -196,7 +197,7 @@ void DBSchemaWidget::addTableSlot()
 
 void DBSchemaWidget::addAllTablesSlot()
 {
-    const std::map <std::string, DBTableInfo> &table_info = ATSDB::instance().tableInfo ();
+    const std::map <std::string, DBTableInfo> &table_info = ATSDB::instance().interface().tableInfo ();
 
     for (auto it : table_info)
     {

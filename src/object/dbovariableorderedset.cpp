@@ -29,6 +29,7 @@
 #include "dbovariable.h"
 #include "dbovariableset.h"
 #include "dbovariableorderedset.h"
+#include "dbobjectmanager.h"
 #include "atsdb.h"
 
 DBOVariableOrderedSet::DBOVariableOrderedSet(const std::string &class_id, const std::string &instance_id, Configurable *parent)
@@ -54,8 +55,8 @@ void DBOVariableOrderedSet::generateSubConfigurable (const std::string &class_id
     {
         DBOVariableOrderDefinition *definition = new DBOVariableOrderDefinition (class_id, instance_id, this);
 
-        if (!ATSDB::instance().existsDBObject(definition->dboName())
-                || !ATSDB::instance().getDBObject(definition->dboName()).hasVariable(definition->id()))
+        if (!ATSDB::instance().objectManager().exists(definition->dboName())
+                || !ATSDB::instance().objectManager().get(definition->dboName()).hasVariable(definition->id()))
         {
             logwrn << "DBOVariableOrderedSet: generateSubConfigurable: outdated name " << definition->dboName() << " variable "
                    << definition->id();
@@ -315,8 +316,8 @@ void DBOVariableOrderedSet::updateDBOVariableSet ()
         const std::string &dbo_name = it.second->dboName();
         std::string name = it.second->id();
 
-        if (!ATSDB::instance().existsDBObject(dbo_name)
-                || !ATSDB::instance().getDBObject(dbo_name).hasVariable(name))
+        if (!ATSDB::instance().objectManager().exists(dbo_name)
+                || !ATSDB::instance().objectManager().get(dbo_name).hasVariable(name))
         {
             logwrn << "DBOVariableOrderedSet: updateDBOVariableSet: outdated skipping name " << dbo_name << " variable "
                    << name;
@@ -324,7 +325,7 @@ void DBOVariableOrderedSet::updateDBOVariableSet ()
         }
 
         //assert (DBObjectManager::getInstance().existsDBOVariable (type, name));
-        DBOVariable &variable = ATSDB::instance().getDBObject(dbo_name).variable(name);
+        DBOVariable &variable = ATSDB::instance().objectManager().get(dbo_name).variable(name);
         set_.insert (std::pair <unsigned int, DBOVariable &> (it.second->getIndex(), variable));
     }
     assert (variable_definitions_.size() == set_.size());

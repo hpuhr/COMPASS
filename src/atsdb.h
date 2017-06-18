@@ -109,24 +109,9 @@ public:
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
-    /// @brief Returns if an object of type exists
-    bool existsDBObject (const std::string &dbo_name);
-    /// @brief Returns the object of type, if existing
-    DBObject &getDBObject (const std::string &dbo_name);
-
-    /// @brief Returns flag indicating if current schema is defined and exists
-    bool hasCurrentSchema ();
-    /// @brief Returns name of the current schema
-    const std::string &getCurrentSchemaName ();
-    /// @brief Returns the current DBSchema
-    DBSchema &getCurrentSchema ();
-
-    DBInterface &dbInterface ();
+    DBInterface &interface ();
     DBSchemaManager &schemaManager ();
-    DBObjectManager &dbObjectManager ();
-
-
-    const std::map <std::string, DBTableInfo> &tableInfo ();
+    DBObjectManager &objectManager ();
 
     bool ready ();
 

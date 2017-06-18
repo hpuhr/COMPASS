@@ -28,6 +28,7 @@
 #include "dbtableinfo.h"
 #include "dbtablewidget.h"
 #include "atsdb.h"
+#include "dbinterface.h"
 #include "logger.h"
 
 DBTable::DBTable(const std::string &class_id, const std::string &instance_id, DBSchema *schema)
@@ -97,7 +98,7 @@ void DBTable::populate ()
     loginf << "DBTable: populate: table " << name_;
 
     assert (ATSDB::instance().ready());
-    for (auto it : ATSDB::instance().tableInfo().at(name_).columns ())
+    for (auto it : ATSDB::instance().interface().tableInfo().at(name_).columns ())
     {
         if (columns_.count(it.first) == 0)
         {

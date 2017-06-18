@@ -80,7 +80,7 @@ MainWindow::MainWindow()
 
     // for se widgets
     QHBoxLayout *widget_layout = new QHBoxLayout();
-    dbinterface_widget_ = ATSDB::instance().dbInterface().widget();
+    dbinterface_widget_ = ATSDB::instance().interface().widget();
     QObject::connect(dbinterface_widget_, SIGNAL(databaseOpenedSignal()), this, SLOT(databaseOpenedSlot()));
     widget_layout->addWidget(dbinterface_widget_);
 
@@ -89,7 +89,7 @@ MainWindow::MainWindow()
     QObject::connect(dbinterface_widget_, SIGNAL(databaseOpenedSignal()), dbschema_manager_widget_, SLOT(databaseOpenedSlot()));
     widget_layout->addWidget(dbschema_manager_widget_);
 
-    object_manager_widget_ = ATSDB::instance().dbObjectManager().widget();
+    object_manager_widget_ = ATSDB::instance().objectManager().widget();
     QObject::connect(dbinterface_widget_, SIGNAL(databaseOpenedSignal()), object_manager_widget_, SLOT(databaseOpenedSlot()));
     widget_layout->addWidget(object_manager_widget_);
 
