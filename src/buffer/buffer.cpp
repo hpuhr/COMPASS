@@ -52,8 +52,8 @@ Buffer::Buffer()
  * \param member_list PropertyList defining all properties
  * \param type DBO type
  */
-Buffer::Buffer(PropertyList properties, std::string dbo_type)
-: dbo_type_(dbo_type), last_one_(false)
+Buffer::Buffer(PropertyList properties, const std::string &dbo_name)
+: dbo_name_(dbo_name), last_one_(false)
 //, first_write_(true),
 //search_active_(false), search_key_pos_(-1), search_key_min_ (-1), search_key_max_ (-1)
 {
@@ -90,7 +90,6 @@ Buffer::~Buffer()
     arrays_double_.clear();
     arrays_string_.clear();
 
-    dbo_type_="";
 //    last_one_=false;
 
     logdbg  << "Buffer: destructor: end";

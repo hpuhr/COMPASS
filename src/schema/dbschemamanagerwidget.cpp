@@ -52,6 +52,7 @@ DBSchemaManagerWidget::DBSchemaManagerWidget(DBSchemaManager &manager, QWidget* 
     button_layout->addWidget (delete_button_);
 
     layout->addLayout(button_layout);
+    layout->addStretch();
 
     schema_widgets_ = new QStackedWidget ();
     layout->addWidget(schema_widgets_);

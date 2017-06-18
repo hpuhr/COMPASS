@@ -27,6 +27,7 @@
 
 #include <boost/thread/mutex.hpp>
 #include <set>
+#include <memory>
 #include <qobject.h>
 
 #include "configurable.h"
@@ -73,13 +74,13 @@ public:
 
     /// @brief Initializes a database connection based on the supplied type
     void useConnection (const std::string &connection_type);
+    void databaseOpened ();
     void closeConnection ();
 
     void updateTableInfo ();
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
-    void databaseOpened ();
     std::vector <std::string> getDatabases ();
 
     DBInterfaceWidget *widget();
@@ -101,10 +102,9 @@ public:
 //    void updateBuffer (Buffer *data);
 
 //    /// @brief Prepares incremental read of DBO type
-    void prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause="",
-            DBOVariable *order=0);
-//    /// @brief Returns data chunk of DBO type
-//    Buffer *readDataChunk (const std::string &dbo_type, bool activate_key_search);
+    void prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause="", DBOVariable *order=0);
+    /// @brief Returns data chunk of DBO type
+    std::shared_ptr <Buffer> readDataChunk (const DBObject &dbobject, bool activate_key_search);
     /// @brief Cleans up incremental read of DBO type
     void finalizeReadStatement (const DBObject &dbobject);
     /// @brief Sets reading_done_ flags

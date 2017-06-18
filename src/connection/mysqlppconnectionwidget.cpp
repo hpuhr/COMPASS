@@ -37,6 +37,7 @@ MySQLppConnectionWidget::MySQLppConnectionWidget(MySQLppConnection &connection, 
     connect (delete_button_, SIGNAL(clicked()), this, SLOT(deleteServerSlot()));
     button_layout->addWidget(delete_button_);
     layout->addLayout(button_layout);
+    layout->addStretch();
 
     server_widgets_ = new QStackedWidget ();
     layout->addWidget(server_widgets_);

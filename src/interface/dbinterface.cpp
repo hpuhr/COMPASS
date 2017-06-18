@@ -615,57 +615,6 @@ unsigned int DBInterface::queryCount (const DBObject &dbobject)
 //    return min_max_values;
 //}
 
-///**
-// * Retrieves result from connection stepPreparedCommand, calls activateKeySearch on buffer and returns it.
-// */
-//Buffer *DBInterface::readDataChunk (const std::string &type, bool activate_key_search)
-//{
-//    boost::mutex::scoped_lock l(mutex_);
-
-//    assert (DBObjectManager::getInstance().existsDBObject (type));
-
-//    DBResult *result = connection_->stepPreparedCommand(read_chunk_size_);
-//    if (!result)
-//    {
-//        logerr  << "DBInterface: readDataChunk: connection returned error";
-//        reading_done_.at(type) = true;
-//        throw std::runtime_error ("DBInterface: readDataChunk: connection returned error");
-//    }
-//    assert (result->containsData());
-//    Buffer *buffer = result->getBuffer();
-//    buffer->setDBOType(type);
-//    delete result;
-
-//    assert (buffer);
-//    if (buffer->firstWrite())
-//    {
-//        reading_done_.at(type) = true;
-//        return buffer; // HACK UGGGA WAS 0
-//    }
-
-//    bool last_one = connection_->getPreparedCommandDone();
-//    reading_done_.at(type) =last_one;
-
-//    assert (false);
-//    // TODO FIXME
-
-////    buffer->setLastOne (last_one);
-////    //buffer->setDBOType(type);
-
-////    if (activate_key_search)
-////    {
-////        assert (DBObjectManager::getInstance().existsDBOVariable (DBO_UNDEFINED, "id"));
-////        assert (DBObjectManager::getInstance().getDBOVariable (DBO_UNDEFINED, "id")->existsIn (type));
-////        std::string id_name = DBObjectManager::getInstance().getDBOVariable (DBO_UNDEFINED, "id")->getFor(type)->getName();
-////        assert (buffer->getPropertyList()->hasProperty(id_name));
-////        logdbg << "DBInterface: readDataChunk: key search id " << id_name << " index " << buffer->getPropertyList()->getPropertyIndex(id_name)
-////                                                    << " buffer first " << buffer->getFirstWrite() << " size " << buffer->getSize();
-////        buffer->activateKeySearch(buffer->getPropertyList()->getPropertyIndex(id_name));
-////    }
-//    return buffer;
-//}
-
-
 bool DBInterface::isPrepared (const DBObject &dbobject)
 {
     logdbg  << "DBInterface: isPrepared: name " << dbobject.name();
@@ -720,26 +669,6 @@ unsigned int DBInterface::count (const DBObject &dbobject)
 
 //    return result;
 //}
-
-void DBInterface::finalizeReadStatement (const DBObject &dbobject)
-{
-    boost::mutex::scoped_lock l(mutex_);
-    assert (current_connection_);
-
-    logdbg  << "DBInterface: finishReadSystemTracks: start ";
-    prepared_.at(dbobject.name())=false;
-    current_connection_->finalizeCommand();
-}
-
-void DBInterface::clearResult ()
-{
-    boost::mutex::scoped_lock l(mutex_);
-
-    for (auto it = reading_done_.begin(); it != reading_done_.end(); it++)
-    {
-        it->second=true;
-    }
-}
 
 //bool DBInterface::hasActiveDataSourcesInfo (const std::string &type)
 //{
@@ -846,6 +775,83 @@ void DBInterface::prepareRead (const DBObject &dbobject, DBOVariableSet read_lis
 
     prepared_.at(dbobject.name())=true;
     reading_done_.at(dbobject.name())=false;
+}
+
+/**
+ * Retrieves result from connection stepPreparedCommand, calls activateKeySearch on buffer and returns it.
+ */
+std::shared_ptr <Buffer> DBInterface::readDataChunk (const DBObject &dbobject, bool activate_key_search)
+{
+    boost::mutex::scoped_lock l(mutex_);
+
+    assert (current_connection_);
+
+    std::shared_ptr <DBResult> result = current_connection_->stepPreparedCommand(read_chunk_size_);
+
+    if (!result)
+    {
+        logerr  << "DBInterface: readDataChunk: connection returned error";
+        reading_done_.at(dbobject.name()) = true;
+        throw std::runtime_error ("DBInterface: readDataChunk: connection returned error");
+    }
+
+    if (!result->containsData())
+    {
+        logerr  << "DBInterface: readDataChunk: buffer does not contain data";
+        reading_done_.at(dbobject.name()) = true;
+        throw std::runtime_error ("DBInterface: readDataChunk: buffer does not contain data");
+    }
+
+    std::shared_ptr <Buffer> buffer = result->buffer();
+
+    buffer->dboName(dbobject.name());
+
+    assert (buffer);
+    if (buffer->firstWrite())
+    {
+        reading_done_.at(dbobject.name()) = true;
+        return buffer; // HACK UGGGA WAS 0
+    }
+
+    bool last_one = current_connection_->getPreparedCommandDone();
+    buffer->lastOne (last_one);
+    reading_done_.at(dbobject.name())=last_one;
+
+    assert (!activate_key_search); // TODO FIXXXXME
+
+//    if (activate_key_search)
+//    {
+//        assert (DBObjectManager::getInstance().existsDBOVariable (DBO_UNDEFINED, "id"));
+//        assert (DBObjectManager::getInstance().getDBOVariable (DBO_UNDEFINED, "id")->existsIn (type));
+//        std::string id_name = DBObjectManager::getInstance().getDBOVariable (DBO_UNDEFINED, "id")->getFor(type)->getName();
+//        assert (buffer->getPropertyList()->hasProperty(id_name));
+//        logdbg << "DBInterface: readDataChunk: key search id " << id_name << " index " << buffer->getPropertyList()->getPropertyIndex(id_name)
+//                                                    << " buffer first " << buffer->getFirstWrite() << " size " << buffer->getSize();
+//        buffer->activateKeySearch(buffer->getPropertyList()->getPropertyIndex(id_name));
+//    }
+
+    return buffer;
+}
+
+
+void DBInterface::finalizeReadStatement (const DBObject &dbobject)
+{
+    boost::mutex::scoped_lock l(mutex_);
+    assert (current_connection_);
+
+    logdbg  << "DBInterface: finishReadSystemTracks: start ";
+    prepared_.at(dbobject.name())=false;
+    current_connection_->finalizeCommand();
+}
+
+void DBInterface::clearResult ()
+{
+    boost::mutex::scoped_lock l(mutex_);
+
+    for (auto it = reading_done_.begin(); it != reading_done_.end(); it++)
+    {
+        it->second=true;
+    }
 }
 
 //void DBInterface::createPropertiesTable ()

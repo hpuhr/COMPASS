@@ -50,7 +50,7 @@ public:
     /// @brief Default constructor.
     Buffer ();
     /// @brief Constructor.
-    Buffer(PropertyList properties, std::string db_type="");
+    Buffer(PropertyList properties, const std::string &dbo_name="");
     /// @brief Desctructor.
     virtual ~Buffer();
 
@@ -101,13 +101,49 @@ public:
     /// Copies current index from source buffer into this one. PropertyLists must have the same indices
     //void deepCopyRecordFrom (Buffer *src);
 
+    ArrayListTemplate<bool> &getBool (const std::string &id);
+    ArrayListTemplate<char> &getChar (const std::string id);
+    ArrayListTemplate<unsigned char> &getUChar (const std::string &id);
+    ArrayListTemplate<int> &getInt (const std::string &id);
+    ArrayListTemplate<unsigned int> &getUInt (const std::string &id);
+    ArrayListTemplate<long int> &getLongInt (const std::string &id);
+    ArrayListTemplate<unsigned long int> &getULongInt (const std::string &id);
+    ArrayListTemplate<float> &getFloat (const std::string &id);
+    ArrayListTemplate<double> &getDouble (const std::string &id);
+    ArrayListTemplate<std::string> &getString (const std::string &id);
+
+    /// @brief  Returns maximal used index size
+    const size_t size ();
+
+
+    /// @brief Returns current maximal size for current allocation
+//    const size_t maxSize ()
+//    {
+//        if (containers_.size() == 0)
+//            return 0;
+
+//        return containers_.front()->maxSize();
+//    };
+
+    /// @brief Returns PropertyList
+    const PropertyList &properties ()
+    {
+        return properties_;
+    }
+
+    /// @brief Returns DBO type
+    const std::string &dboName () { return dbo_name_; }
+
+    /// @brief Sets DBO type
+    void dboName (const std::string &dbo_name) { dbo_name_=dbo_name;}
+
 protected:
     /// Unique buffer id, copied when getting shallow copies
     unsigned int id_;
     /// List of all properties
     PropertyList properties_;
     /// DBO type
-    std::string dbo_type_;
+    std::string dbo_name_;
 
     /// Maximal index for currently allocated size
     //unsigned int num_properties_index_;
@@ -146,43 +182,6 @@ protected:
     //void init();
     /// @brief Allocates memory up to index
     //void allocateUpTo (unsigned int index);
-
-public:
-    ArrayListTemplate<bool> &getBool (const std::string &id);
-    ArrayListTemplate<char> &getChar (const std::string id);
-    ArrayListTemplate<unsigned char> &getUChar (const std::string &id);
-    ArrayListTemplate<int> &getInt (const std::string &id);
-    ArrayListTemplate<unsigned int> &getUInt (const std::string &id);
-    ArrayListTemplate<long int> &getLongInt (const std::string &id);
-    ArrayListTemplate<unsigned long int> &getULongInt (const std::string &id);
-    ArrayListTemplate<float> &getFloat (const std::string &id);
-    ArrayListTemplate<double> &getDouble (const std::string &id);
-    ArrayListTemplate<std::string> &getString (const std::string &id);
-
-    /// @brief  Returns maximal used index size
-    const size_t size ();
-
-
-    /// @brief Returns current maximal size for current allocation
-//    const size_t maxSize ()
-//    {
-//        if (containers_.size() == 0)
-//            return 0;
-
-//        return containers_.front()->maxSize();
-//    };
-
-    /// @brief Returns PropertyList
-    const PropertyList &properties ()
-    {
-        return properties_;
-    }
-
-    /// @brief Returns DBO type
-    const std::string dboType () { return dbo_type_; };
-
-    /// @brief Sets DBO type
-    void setDBOType (const std::string &dbo_type) { dbo_type_=dbo_type;};
 };
 
 #endif /* BUFFER_H_ */
