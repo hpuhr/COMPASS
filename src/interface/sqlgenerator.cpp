@@ -305,11 +305,9 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand(const DBObject &object
 
 //}
 
-std::string SQLGenerator::getCountStatement (const DBObject &object)
+std::string SQLGenerator::getCountStatement (const std::string &table)
 {
-    std::string table_name = object.currentMetaTable().mainTableName();
-
-    return "SELECT COUNT(*) FROM " + table_name;
+    return "SELECT COUNT(*) FROM " + table;
 }
 
 //DBCommand *SQLGenerator::getTableSelectMinMaxNormalStatement (std::string table_name)

@@ -81,6 +81,8 @@ void DBObjectManager::generateSubConfigurable (const std::string &class_id, cons
         assert (objects_.find(object->name()) == objects_.end());
         objects_.insert(std::pair <std::string, DBObject*> (object->name(), object));
         connect (this, SIGNAL(schemaChangedSignal()), object, SLOT(schemaChangedSlot()));
+        connect (this, SIGNAL(databaseOpenedSignal()), object, SLOT(databaseOpenedSlot()));
+        // TODO what if generation after db opening?
     }
     else
         throw std::runtime_error ("DBObjectManager: generateSubConfigurable: unknown class_id "+class_id );
@@ -98,7 +100,7 @@ bool DBObjectManager::exists (const std::string &dbo_name)
     return (objects_.find(dbo_name) != objects_.end());
 }
 
-DBObject &DBObjectManager::get (const std::string &dbo_name)
+DBObject &DBObjectManager::object (const std::string &dbo_name)
 {
     logdbg  << "DBObjectManager: get: name " << dbo_name;
 
@@ -109,7 +111,7 @@ DBObject &DBObjectManager::get (const std::string &dbo_name)
     return *objects_.at(dbo_name);
 }
 
-void DBObjectManager::del (const std::string &dbo_name)
+void DBObjectManager::remove (const std::string &dbo_name)
 {
     logdbg  << "DBObjectManager: del: name " << dbo_name;
     assert (exists(dbo_name));
@@ -190,3 +192,7 @@ void DBObjectManager::updateSchemaInformationSlot ()
     emit schemaChangedSignal();
 }
 
+void DBObjectManager::databaseOpenedSlot ()
+{
+    emit databaseOpenedSignal();
+}

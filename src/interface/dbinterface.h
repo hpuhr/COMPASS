@@ -61,8 +61,11 @@ class QWidget;
 class DBInterface : public QObject, public Configurable
 {
     Q_OBJECT
+signals:
+    void databaseOpenedSignal ();
+
 public slots:
-    void updateDBObjectInformationSlot ();
+    //void updateDBObjectInformationSlot ();
 
 public:
     /// @brief Constructor
@@ -108,18 +111,10 @@ public:
     /// @brief Cleans up incremental read of DBO type
     void finalizeReadStatement (const DBObject &dbobject);
     /// @brief Sets reading_done_ flags
-    void clearResult ();
+    //void clearResult ();
 
-    /// @brief Returns if incremental read for DBO type was prepared
-    bool isPrepared (const DBObject &dbobject);
-    /// @brief Returns if incremental read for DBO type was finished
-    bool getReadingDone (const DBObject &dbobject);
-    /// @brief Returns if all incremental reads were finished
-    bool isReadingDone ();
-    /// @brief Returns if DBO exists and has data in the database
-    bool exists (const DBObject &dbobject);
-    /// @brief Returns number of elements for DBO type
-    unsigned int count (const DBObject &dbobject);
+    /// @brief Returns number of rows for a database table
+    size_t count (const std::string &table);
 //    DBResult *count (const std::string &dbo_type, unsigned int sensor_number);
 
 //    /// @brief Creates the properties table
@@ -164,11 +159,6 @@ public:
 //    /// @brief Deletes table content for given table name
 //    void clearTableContent (std::string table_name);
 
-    /// @brief Updates the exists_ container
-    void updateExists ();
-    /// @brief Update the count_ container
-    void updateCount ();
-
 //    /// @brief Returns minimum/maximum information for all columns in a table
 //    DBResult *queryMinMaxNormalForTable (std::string table);
 //    /// @brief Returns minimum/maximum information for a given column in a table
@@ -187,8 +177,6 @@ public:
 
 //    Buffer *getTrackMatches (bool has_mode_a, unsigned int mode_a, bool has_ta, unsigned int ta, bool has_ti, std::string ti,
 //            bool has_tod, double tod_min, double tod_max);
-
-    void testReading ();
 
 protected:
     std::map <std::string, DBConnection*> connections_;
@@ -216,22 +204,9 @@ protected:
 
     DBInterfaceWidget *widget_;
 
-    /// Container with all prepared flags (for incremental reading)
-    std::map <std::string, bool> prepared_;
-    /// Container with all reading done flags (for incremental reading)
-    std::map <std::string, bool> reading_done_;
-    boost::mutex reading_done_mutex_;
-    /// Container with all exists flags, indicating if DBO has data in the database
-    std::map <std::string, bool> exists_;
-    /// Container with all DBO element counts
-    std::map <std::string, unsigned int> count_;
-
     std::map <std::string, DBTableInfo> table_info_;
 
     virtual void checkSubConfigurables ();
-
-    /// @brief Returns element count for DBO
-    unsigned int queryCount (const DBObject &dbobject);
 
 //    /// @brief Returns buffer with min/max data from another Buffer with the string contents. Delete returned buffer yourself.
 //    Buffer *createFromMinMaxStringBuffer (Buffer *string_buffer, PropertyDataType data_type);

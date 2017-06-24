@@ -74,11 +74,8 @@ ATSDB::ATSDB()
     assert (db_schema_manager_);
     assert (dbo_manager_);
 
-    QObject::connect(dbo_manager_, SIGNAL(dbObjectsChangedSignal()), db_interface_, SLOT(updateDBObjectInformationSlot()));
     QObject::connect (db_schema_manager_, SIGNAL(schemaChangedSignal()), dbo_manager_, SLOT(updateSchemaInformationSlot()));
-
-    //db_interface_ = new DBInterface ();
-    //struct_reader_ = new StructureReader (db_interface_);
+    QObject::connect(db_interface_, SIGNAL(databaseOpenedSignal()), dbo_manager_, SLOT(databaseOpenedSlot()));
 
     //reference_point_defined_=false;
 
@@ -91,7 +88,6 @@ void ATSDB::initialize()
     initialized_=true;
 
     dbo_manager_->updateSchemaInformationSlot();
-    db_interface_->updateDBObjectInformationSlot();
 }
 
 /**
@@ -316,30 +312,6 @@ void ATSDB::shutdown ()
 //    }
     logdbg  << "ATSDB: shutdown: end";
 }
-
-
-/**
- * Returns false if DBO does not exist at all, true for DBO_UNDEFINED, otherwise value returns from DBInterface::exists().
- */
-//bool ATSDB::contains (const std::string &type)
-//{
-//    logdbg << "ATSDB: contains: type " << type << " dbo " << DBObjectManager::getInstance().existsDBObject (type);
-
-//    if (!DBObjectManager::getInstance().existsDBObject (type))
-//        return false;
-
-//    logdbg  << "ATSDB: contains: type " << type << " db " << db_interface_->exists(type);
-//    return db_interface_->exists(type);
-//}
-
-///**
-// * Returns value from DBInterface::count().
-// */
-//unsigned int ATSDB::count (const std::string &type)
-//{
-//    assert (DBObjectManager::getInstance().existsDBObject (type));
-//    return db_interface_->count(type);
-//}
 
 //bool ATSDB::hasDataSources (const std::string &type)
 //{
@@ -815,21 +787,6 @@ void ATSDB::shutdown ()
 //        //        logdbg << "ATSDB: buildActiveDataSources: dbo " << ito->second->getName() << " has " << active_data_sources_ [ito->first] .size()
 //        //                            << " active sensors";
 //    }
-//}
-
-//DBConnectionInfo *ATSDB::getDBInfo ()
-//{
-//    assert (db_interface_);
-//    return db_interface_->getDBInfo();
-//}
-
-//Buffer *ATSDB::getTableList()
-//{
-//    return db_interface_->getTableList();
-//}
-//Buffer *ATSDB::getColumnList(std::string table)
-//{
-//    return db_interface_->getColumnList(table);
 //}
 
 //void ATSDB::setExportActive (bool active)

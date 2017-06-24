@@ -46,7 +46,7 @@
 using namespace Utils;
 
 DBObjectWidget::DBObjectWidget(DBObject *object, DBSchemaManager &schema_manager, QWidget * parent, Qt::WindowFlags f)
- : QWidget (parent, f), object_(object), schema_manager_(schema_manager), name_edit_(0), info_edit_(0), loadable_check_(0),
+ : QWidget (parent, f), object_(object), schema_manager_(schema_manager), name_edit_(0), info_edit_(0),
    ds_schema_box_(0), ds_local_key_box_ (0), ds_meta_name_box_ (0), ds_foreign_key_box_(0), meta_table_grid_(0),
    new_meta_schema_box_ (0), new_meta_box_ (0), dbovars_grid_(0), new_var_name_edit_(0), all_schemas_box_(0)
 {
@@ -89,14 +89,6 @@ DBObjectWidget::DBObjectWidget(DBObject *object, DBSchemaManager &schema_manager
   info_edit_ = new QLineEdit (object_->info().c_str());
   connect(info_edit_, SIGNAL( returnPressed() ), this, SLOT( editInfo() ));
   properties_layout->addWidget (info_edit_, 1, 1);
-
-  QLabel *loadable_label = new QLabel ("Is loadable");
-  properties_layout->addWidget (loadable_label, 2, 0);
-
-  loadable_check_ = new QCheckBox ();
-  loadable_check_->setChecked (object_->loadable());
-  connect(loadable_check_, SIGNAL( clicked() ), this, SLOT( changedLoadable() ));
-  properties_layout->addWidget (loadable_check_, 2, 1);
 
   properties_main_layout->addLayout (properties_layout);
   properties_main_layout->addStretch();
@@ -366,14 +358,6 @@ void DBObjectWidget::deleteDBOVar()
   assert (dbo_vars_grid_delete_buttons_.find(button) != dbo_vars_grid_delete_buttons_.end());
   object_->deleteVariable (dbo_vars_grid_delete_buttons_.at(button)->name());
   updateDBOVarsGrid();
-}
-
-void DBObjectWidget::changedLoadable ()
-{
-  logdbg  << "DBObjectWidget: changedLoadable";
-  assert (object_);
-  assert (loadable_check_);
-  object_->loadable(loadable_check_->isChecked());
 }
 
 void DBObjectWidget::updateDSSchemaSelection()

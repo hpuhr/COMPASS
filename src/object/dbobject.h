@@ -148,6 +148,8 @@ public slots:
     void readJobObsoleteSlot ();
     void readJobDoneSlot();
 
+    void databaseOpenedSlot ();
+
 public:
     /// @brief Constructor
     DBObject(std::string class_id, std::string instance_id, Configurable *parent);
@@ -178,16 +180,18 @@ public:
     /// @brief Sets description of the object
     void info(std::string info) { info_=info; }
 
-    /// @brief Sets if an object can be loaded
-    void loadable(bool loadable) { is_loadable_=loadable; }
     /// @brief Returns if an object can be loaded
     bool loadable () const { return is_loadable_; }
     void load ();
 
-    /// @brief Returns the type of the object
-    //const std::string &getType () const { return dbo_type_; }
-    /// @brief Sets the type of the object
-    //void setType (const std::string &dbo_type) { dbo_type_=dbo_type; }
+    /// @brief Returns if incremental read for DBO type was prepared
+    bool isLoading ();
+    /// @brief Returns if incremental read for DBO type was finished
+    bool wasLoadingPerformed ();
+    /// @brief Returns if DBO exists and has data in the database
+    bool hasData ();
+    /// @brief Returns number of elements for DBO type
+    size_t count ();
 
     /// @brief Returns container with all meta tables
     const std::map <std::string, std::string> &metaTables () const { return meta_tables_; }
@@ -234,17 +238,17 @@ public:
     DBObjectWidget *widget ();
 
 protected:
-    /// DBO type
-    //std::string dbo_type_;
     /// DBO name
     std::string name_;
     /// DBO description
     std::string info_;
     /// DBO is loadable flag
     bool is_loadable_; // loadable on its own
+    size_t count_;
     /// DBO is meta flag
     //bool is_meta_;
     std::shared_ptr <DBOReadDBJob> read_job_;
+    std::vector <std::shared_ptr<Buffer>> read_job_data_;
 
     /// Container with all DBOSchemaMetaTableDefinitions
     std::vector <DBOSchemaMetaTableDefinition*> meta_table_definitions_;

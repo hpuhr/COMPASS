@@ -65,7 +65,7 @@ void DBOReadDBJob::execute ()
     else
         db_interface_.prepareRead (dbobject_, read_list_, custom_filter_clause_, order_);
 
-    while (!db_interface_.getReadingDone(dbobject_) && !obsolete_)
+    while (done_ && !obsolete_)
     {
         // AVIBIT HACK
         //Buffer *buffer = db_interface_->readDataChunk(type_, order_->getName() == "id");

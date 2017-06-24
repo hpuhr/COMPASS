@@ -37,18 +37,19 @@
 //#include "ActiveSourcesObserver.h"
 #include "dboreaddbjob.h"
 #include "atsdb.h"
+#include "dbinterface.h"
 #include "workerthreadmanager.h"
+#include "dbtableinfo.h"
 
 /**
  * Registers parameters, creates sub configurables
  */
 DBObject::DBObject(std::string class_id, std::string instance_id, Configurable *parent)
-    : Configurable (class_id, instance_id, parent), current_meta_table_(nullptr), variables_checked_(false),
+    : Configurable (class_id, instance_id, parent), is_loadable_(false), count_(0), current_meta_table_(nullptr), variables_checked_(false),
       has_active_data_sources_info_(false), widget_(nullptr)
 {
     registerParameter ("name" , &name_, "Undefined");
     registerParameter ("info" , &info_, "");
-    registerParameter ("is_loadable" , &is_loadable_, false);
     //registerParameter ("is_meta" , &is_meta_, false);
 
     createSubConfigurables ();
@@ -345,6 +346,7 @@ void DBObject::load ()
     assert (is_loadable_);
 
     assert (!read_job_);
+    read_job_data_.clear();
 
     DBOVariableSet read_list;
 
@@ -371,17 +373,57 @@ void DBObject::readJobIntermediateSlot (std::shared_ptr<Buffer> buffer)
     DBOReadDBJob *sender = dynamic_cast <DBOReadDBJob*> (QObject::sender());
     assert (sender);
     assert (sender == read_job_.get());
+    read_job_data_.push_back(buffer);
 }
 
 void DBObject::readJobObsoleteSlot ()
 {
     loginf << "DBObject: " << name_ << " readJobObsoleteSlot";
-
+    read_job_ = nullptr;
+    read_job_data_.clear();
 }
 
 void DBObject::readJobDoneSlot()
 {
     loginf << "DBObject: " << name_ << " readJobDoneSlot";
-
     read_job_ = nullptr;
+}
+
+void DBObject::databaseOpenedSlot ()
+{
+    loginf << "DBObject: " << name_ << " databaseOpenedSlot";
+
+    assert (current_meta_table_);
+    std::string table_name = current_meta_table_->mainTableName();
+
+    is_loadable_ = ATSDB::instance().interface().tableInfo().count(table_name) > 0;
+
+    if (is_loadable_)
+        count_ = ATSDB::instance().interface().count (table_name);
+
+    loginf << "DBObject: " << name_ << " databaseOpenedSlot: loadable " << is_loadable_ << " count " << count_;
+}
+
+bool DBObject::isLoading ()
+{
+    return read_job_ == nullptr;
+}
+
+bool DBObject::wasLoadingPerformed ()
+{
+    if (isLoading())
+        return false;
+    else
+        return read_job_data_.size() > 0;
+
+}
+
+bool DBObject::hasData ()
+{
+    return count_ > 0;
+}
+
+size_t DBObject::count ()
+{
+    return count_;
 }

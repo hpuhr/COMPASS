@@ -49,9 +49,11 @@ class DBObjectManager : public QObject, public Configurable
     Q_OBJECT
 public slots:
     void updateSchemaInformationSlot ();
+    void databaseOpenedSlot ();
 
 signals:
     void dbObjectsChangedSignal ();
+    void databaseOpenedSignal ();
     void schemaChangedSignal ();
 
 public:
@@ -61,8 +63,8 @@ public:
     /// @brief Returns if an object of type exists
     bool exists (const std::string &dbo_name);
     /// @brief Returns the object of type, if existing
-    DBObject &get (const std::string &dbo_name);
-    void del (const std::string &dbo_name);
+    DBObject &object (const std::string &dbo_name);
+    void remove (const std::string &dbo_name);
 
     /// @brief Returns defined DBOVariable, if existing
     //DBOVariable *getDBOVariable (const std::string &dbo_type, std::string id);

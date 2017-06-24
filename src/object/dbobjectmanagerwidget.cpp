@@ -249,7 +249,7 @@ void DBObjectManagerWidget::deleteDBOSlot ()
     assert (delete_dbo_buttons_.find((QPushButton*)sender()) != delete_dbo_buttons_.end());
 
     DBObject *object = delete_dbo_buttons_ [(QPushButton*)sender()];
-    object_manager_.del (object->name());
+    object_manager_.remove (object->name());
 
     updateDBOsSlot();
 }

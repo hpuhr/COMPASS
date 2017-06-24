@@ -59,8 +59,6 @@ public slots:
     void addNewVariables ();
     /// @brief Adds a MetaDBTable
     void addMetaTable();
-    /// @brief Changes loadable flag
-    void changedLoadable ();
 
     /// @brief Updates data source schema selection
     void updateDSSchemaSelection();
@@ -117,8 +115,6 @@ private:
     QLineEdit *name_edit_;
     /// @brief DBO info
     QLineEdit *info_edit_;
-    /// @brief DBO loadable
-    QCheckBox *loadable_check_;
 
     /// @brief Grid with all data sources
     QGridLayout *ds_grid_;

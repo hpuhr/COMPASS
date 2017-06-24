@@ -68,8 +68,6 @@ DBInterface::DBInterface(std::string class_id, std::string instance_id, ATSDB *a
     //registerParameter ("database_name", &database_name_, "");
     registerParameter ("read_chunk_size", &read_chunk_size_, 20000);
 
-    //sql_generator_ = new SQLGenerator (*this);
-
     //TODO writing process should be different.
 //    write_table_names_[DBO_PLOTS] = "Plot";
 //    write_table_names_[DBO_SYSTEM_TRACKS] = "SystemTrack";
@@ -96,9 +94,6 @@ DBInterface::~DBInterface()
     connections_.clear();
 
     assert (!widget_);
-
-//    delete sql_generator_;
-//    sql_generator_=nullptr;
 
 //    if (buffer_writer_)
 //    {
@@ -127,8 +122,8 @@ void DBInterface::useConnection (const std::string &connection_type)
 void DBInterface::databaseOpened ()
 {
     updateTableInfo();
-    updateExists();
-    updateCount();
+
+    emit databaseOpenedSignal();
 }
 
 void DBInterface::closeConnection ()
@@ -217,39 +212,6 @@ void DBInterface::checkSubConfigurables ()
   }
 }
 
-/**
- * Calls queryContains for all DBOs in exists_.
- */
-void DBInterface::updateExists ()
-{
-    logdbg  << "DBInterface: updateExists: size " << exists_.size();
-
-    for (auto it : ATSDB::instance().objectManager().objects())
-    {
-        std::string table_name = it.second->currentMetaTable().mainTableName();
-        exists_[it.first] = table_info_.count(table_name) > 0;
-        logdbg  << "DBInterface: updateExists: type " << it.first << " exists " <<  exists_[it.first];
-    }
-}
-
-/**
- * Calls queryCount for all DBOs in count_, if they are in exists_.
- */
-void DBInterface::updateCount ()
-{
-    logdbg  << "DBInterface: updateCount: size " << count_.size();
-
-
-    for (auto it : ATSDB::instance().objectManager().objects())
-    {
-        if (exists_[it.first])
-        {
-            count_[it.first] = queryCount (*it.second);
-            logdbg  << "DBInterface: updateCount: name " << it.second->name() << " exists, count " << count_[it.first];
-        }
-    }
-}
-
 ///**
 // * Returns existsTable for table name.
 // */
@@ -265,36 +227,6 @@ void DBInterface::updateCount ()
 //{
 //    return existsTable (sql_generator_->getPropertiesTableName());
 //}
-
-/**
- * Gets SQL command for element count and returns the result.
- */
-unsigned int DBInterface::queryCount (const DBObject &dbobject)
-{
-    logdbg  << "DBInterface: queryCount: start";
-
-    boost::mutex::scoped_lock l(connection_mutex_);
-    assert (current_connection_);
-
-    std::string sql = sql_generator_.getCountStatement(dbobject);
-
-    logdbg  << "DBInterface: queryCount: sql '" << sql << "'";
-
-    DBCommand command;
-    command.set(sql);
-
-    PropertyList list;
-    list.addProperty("count", PropertyDataType::INT);
-    command.list(list);
-
-    std::shared_ptr <DBResult> result = current_connection_->execute(command);
-
-    assert (result->containsData());
-    int tmp = result->buffer()->getInt("count").get(0);
-
-    logdbg  << "DBInterface: queryCount: " << dbobject.name() << ": "<< tmp <<" end";
-    return static_cast<unsigned int> (tmp);
-}
 
 ///**
 // * Gets SQL command for data sources list and packs the resulting buffer into a set, which is returned.
@@ -615,44 +547,32 @@ unsigned int DBInterface::queryCount (const DBObject &dbobject)
 //    return min_max_values;
 //}
 
-bool DBInterface::isPrepared (const DBObject &dbobject)
+size_t DBInterface::count (const std::string &table)
 {
-    logdbg  << "DBInterface: isPrepared: name " << dbobject.name();
-    return prepared_.at(dbobject.name());
-}
+    logdbg  << "DBInterface: count: table " << table;
+    assert (table_info_.count(table) > 0);
 
-bool DBInterface::getReadingDone (const DBObject &dbobject)
-{
-    logdbg  << "DBInterface: getReadingDone: name " << dbobject.name();
+    boost::mutex::scoped_lock l(connection_mutex_);
+    assert (current_connection_);
 
-    boost::mutex::scoped_lock l(reading_done_mutex_);
-    return reading_done_.at(dbobject.name());
-}
+    std::string sql = sql_generator_.getCountStatement(table);
 
-bool DBInterface::isReadingDone ()
-{
-    boost::mutex::scoped_lock l(reading_done_mutex_);
+    logdbg  << "DBInterface: count: sql '" << sql << "'";
 
-    for (auto it : reading_done_)
-        if (it.second)
-            return false;
+    DBCommand command;
+    command.set(sql);
 
-    return true;
-}
+    PropertyList list;
+    list.addProperty("count", PropertyDataType::INT);
+    command.list(list);
 
+    std::shared_ptr <DBResult> result = current_connection_->execute(command);
 
-bool DBInterface::exists (const DBObject &dbobject)
-{
-    logdbg  << "DBInterface: exists: name " << dbobject.name();
+    assert (result->containsData());
+    int tmp = result->buffer()->getInt("count").get(0);
 
-    return exists_.at(dbobject.name());
-}
-
-unsigned int DBInterface::count (const DBObject &dbobject)
-{
-    logdbg  << "DBInterface: count: name " << dbobject.name();
-
-    return count_.at(dbobject.name());
+    logdbg  << "DBInterface: count: " << table << ": "<< tmp <<" end";
+    return static_cast<size_t> (tmp);
 }
 
 //DBResult *DBInterface::count (const std::string &type, unsigned int sensor_number)
@@ -775,10 +695,6 @@ void DBInterface::prepareRead (const DBObject &dbobject, DBOVariableSet read_lis
     std::shared_ptr<DBCommand> read = sql_generator_.getSelectCommand (dbobject, read_list, custom_filter_clause, order);
     loginf  << "DBInterface: prepareRead: dbo " << dbobject.name() << " sql '" << read->get() << "'";
     current_connection_->prepareCommand(read);
-
-    prepared_.at(dbobject.name())=true;
-    boost::mutex::scoped_lock l2(reading_done_mutex_);
-    reading_done_.at(dbobject.name())=false;
 }
 
 /**
@@ -795,16 +711,14 @@ std::shared_ptr <Buffer> DBInterface::readDataChunk (const DBObject &dbobject, b
     if (!result)
     {
         logerr  << "DBInterface: readDataChunk: connection returned error";
-        boost::mutex::scoped_lock l(reading_done_mutex_);
-        reading_done_.at(dbobject.name()) = true;
+        //TODO inform object
         throw std::runtime_error ("DBInterface: readDataChunk: connection returned error");
     }
 
     if (!result->containsData())
     {
         logerr  << "DBInterface: readDataChunk: buffer does not contain data";
-        boost::mutex::scoped_lock l(reading_done_mutex_);
-        reading_done_.at(dbobject.name()) = true;
+        //TODO inform object
         throw std::runtime_error ("DBInterface: readDataChunk: buffer does not contain data");
     }
 
@@ -815,15 +729,11 @@ std::shared_ptr <Buffer> DBInterface::readDataChunk (const DBObject &dbobject, b
     assert (buffer);
     if (buffer->firstWrite())
     {
-        boost::mutex::scoped_lock l(reading_done_mutex_);
-        reading_done_.at(dbobject.name()) = true;
         return buffer; // HACK UGGGA WAS 0
     }
 
     bool last_one = current_connection_->getPreparedCommandDone();
     buffer->lastOne (last_one);
-    boost::mutex::scoped_lock l2(reading_done_mutex_);
-    reading_done_.at(dbobject.name())=last_one;
 
     assert (!activate_key_search); // TODO FIXXXXME
 
@@ -848,18 +758,8 @@ void DBInterface::finalizeReadStatement (const DBObject &dbobject)
     assert (current_connection_);
 
     logdbg  << "DBInterface: finishReadSystemTracks: start ";
-    prepared_.at(dbobject.name())=false;
+    //prepared_.at(dbobject.name())=false;
     current_connection_->finalizeCommand();
-}
-
-void DBInterface::clearResult ()
-{
-    boost::mutex::scoped_lock l(reading_done_mutex_);
-
-    for (auto it = reading_done_.begin(); it != reading_done_.end(); it++)
-    {
-        it->second=true;
-    }
 }
 
 //void DBInterface::createPropertiesTable ()
@@ -1398,75 +1298,75 @@ void DBInterface::clearResult ()
 //    return buffer;
 //}
 
-void DBInterface::updateDBObjectInformationSlot ()
-{
-    logdbg << "DBInterface: updateDBObjectInformationSlot";
-    boost::mutex::scoped_lock l(reading_done_mutex_);
-    prepared_.clear();
-    reading_done_.clear();
-    exists_.clear();
-    count_.clear();
+//void DBInterface::updateDBObjectInformationSlot ()
+//{
+//    logdbg << "DBInterface: updateDBObjectInformationSlot";
+//    boost::mutex::scoped_lock l(reading_done_mutex_);
+//    prepared_.clear();
+//    reading_done_.clear();
+//    exists_.clear();
+//    count_.clear();
 
-    auto objects = ATSDB::instance().objectManager().objects();
+//    auto objects = ATSDB::instance().objectManager().objects();
 
-    for (auto it = objects.begin(); it != objects.end(); it++)
-    {
-        if (!it->second->loadable())
-            continue;
+//    for (auto it = objects.begin(); it != objects.end(); it++)
+//    {
+//        if (!it->second->loadable())
+//            continue;
 
-        std::string type = it->first;
+//        std::string type = it->first;
 
-        prepared_[type] = false;
-        reading_done_[type] = true;
-        exists_[type]=false;
-        count_[type]=0;
-    }
-}
+//        prepared_[type] = false;
+//        reading_done_[type] = true;
+//        exists_[type]=false;
+//        count_[type]=0;
+//    }
+//}
 
-void DBInterface::testReading ()
-{
-    loginf << "DBInterface: testReading";
+//void DBInterface::testReading ()
+//{
+//    loginf << "DBInterface: testReading";
 
-    boost::posix_time::ptime start_time;
-    boost::posix_time::ptime stop_time;
+//    boost::posix_time::ptime start_time;
+//    boost::posix_time::ptime stop_time;
 
-    DBObject &object = ATSDB::instance().objectManager().get("MLAT");
-    DBOVariableSet read_list;
+//    DBObject &object = ATSDB::instance().objectManager().object("MLAT");
+//    DBOVariableSet read_list;
 
-    loginf << "DBInterface: testReading: adding all variables";
-    for (auto variable_it : object.variables())
-        read_list.add(variable_it.second);
+//    loginf << "DBInterface: testReading: adding all variables";
+//    for (auto variable_it : object.variables())
+//        read_list.add(variable_it.second);
 
-    loginf << "DBInterface: testReading: preparing reading";
-    prepareRead (object, read_list); //, std::string custom_filter_clause="", DBOVariable *order=0);
+//    loginf << "DBInterface: testReading: preparing reading";
+//    prepareRead (object, read_list); //, std::string custom_filter_clause="", DBOVariable *order=0);
 
-    start_time = boost::posix_time::microsec_clock::local_time();
+//    start_time = boost::posix_time::microsec_clock::local_time();
 
-    loginf << "DBInterface: testReading: starting reading";
-    std::vector<std::shared_ptr <Buffer>> buffer_vector;
+//    loginf << "DBInterface: testReading: starting reading";
+//    std::vector<std::shared_ptr <Buffer>> buffer_vector;
 
-    unsigned int num_rows=0;
+//    unsigned int num_rows=0;
 
-    while (!getReadingDone(object))
-    {
-        std::shared_ptr <Buffer> buffer = readDataChunk (object, false);
-        buffer_vector.push_back(buffer);
+//    while (!getReadingDone(object))
+//    {
+//        std::shared_ptr <Buffer> buffer = readDataChunk (object, false);
+//        buffer_vector.push_back(buffer);
 
-        stop_time = boost::posix_time::microsec_clock::local_time();
-        boost::posix_time::time_duration diff = stop_time - start_time;
+//        stop_time = boost::posix_time::microsec_clock::local_time();
+//        boost::posix_time::time_duration diff = stop_time - start_time;
 
-        num_rows += buffer->size();
-        if (diff.total_seconds() > 0)
-            loginf << "DBInterface: testReading: got buffer size " << buffer->size() << " all " << num_rows << " elapsed " << diff << " #el/sec " << num_rows/diff.total_seconds();
-    }
+//        num_rows += buffer->size();
+//        if (diff.total_seconds() > 0)
+//            loginf << "DBInterface: testReading: got buffer size " << buffer->size() << " all " << num_rows << " elapsed " << diff << " #el/sec " << num_rows/diff.total_seconds();
+//    }
 
-    boost::posix_time::time_duration diff = stop_time - start_time;
-    loginf << "DBInterface: testReading: reading done: all " << num_rows << " elapsed " << diff << " #el/sec " << num_rows/diff.total_seconds();
-    finalizeReadStatement (object);
+//    boost::posix_time::time_duration diff = stop_time - start_time;
+//    loginf << "DBInterface: testReading: reading done: all " << num_rows << " elapsed " << diff << " #el/sec " << num_rows/diff.total_seconds();
+//    finalizeReadStatement (object);
 
 
-    loginf << "DBInterface: testReading: clearing buffers";
-    buffer_vector.clear();
+//    loginf << "DBInterface: testReading: clearing buffers";
+//    buffer_vector.clear();
 
-    loginf << "DBInterface: testReading: done";
-}
+//    loginf << "DBInterface: testReading: done";
+//}

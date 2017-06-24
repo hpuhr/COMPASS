@@ -144,10 +144,6 @@ public:
     /// @brief Creates information about a DBObject's active data sources
     //void buildActiveDataSourcesInfo (const std::string &dbo_type);
 
-    ///@brief Returns flag indicating if data exists for DBO type.
-    //bool contains (const std::string &dbo_type);
-    ///@brief Returns number of elements existing for DBO type.
-    //unsigned int count (const std::string &dbo_type);
     ///@brief Returns flag indicating if error state was set.
     //bool error();
 
@@ -172,11 +168,6 @@ public:
 //    void getDistinctStatistics (JobOrderer *orderer, boost::function<void (Job*)> done_function,
 //            boost::function<void (Job*)> obsolete_function, const std::string &dbo_type, DBOVariable *variable,
 //            unsigned int sensor_number);
-
-//    ///@brief Returns a Buffer with all table names in the DB. May throw exception.
-//    Buffer *getTableList();
-//    ///@brief Returns a Buffer with all column names for a table in the DB. May throw exception.
-//    Buffer *getColumnList(std::string table);
 
 //    ///@brief Starts the post-processing.
     //void postProcess (JobOrderer *orderer, boost::function<void(Job*)> done, boost::function<void(Job*)> obsolete);
