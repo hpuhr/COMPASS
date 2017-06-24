@@ -36,14 +36,14 @@ WorkerThread::~WorkerThread()
 {
 }
 
-void WorkerThread::do_work()
+void WorkerThread::run()
 {
   logdbg  << "WorkerThread " << id_ << ": do_work: start";
 
   while (!stop_requested_)
   {
     //logdbg  << "WorkerThread " << id_ << ": do_work: iterating";
-    boost::this_thread::sleep(boost::posix_time::milliseconds(pause_time_));
+    msleep(pause_time_);
     sleep_time_ += pause_time_;
 
     boost::mutex::scoped_lock statelock(state_mutex_);
@@ -84,7 +84,7 @@ void WorkerThread::do_work()
     {
       statelock.unlock();
       //logdbg  << "WorkerThread: do_work: state  " << state_ << " idle waiting";
-      boost::this_thread::sleep(boost::posix_time::milliseconds(idle_sleep_time_));
+      msleep(idle_sleep_time_);
       sleep_time_ += idle_sleep_time_;
     }
 

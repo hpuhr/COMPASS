@@ -40,11 +40,11 @@ TimedThread::~TimedThread()
 /**
 Reimplemented main thread working function.
   */
-void TimedThread::do_work()
+void TimedThread::run()
 {
     while( !stop_requested_ )
     {
-        boost::this_thread::sleep( boost::posix_time::milliseconds( interval_ ) );
+        msleep(10);
 
         boost::mutex::scoped_lock statelock( state_mutex_ );
         state_= THREAD_STATE_WORKING;

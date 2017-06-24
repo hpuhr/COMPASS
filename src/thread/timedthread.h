@@ -37,7 +37,7 @@ public:
 
 protected:
   /// @brief Reimplemented main thread working function
-  void do_work();
+  void run();
   /// @brief Function to be called at each interval
   virtual void workFun() = 0;
 

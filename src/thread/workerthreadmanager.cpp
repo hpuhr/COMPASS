@@ -55,7 +55,7 @@ WorkerThreadManager::WorkerThreadManager()
         WorkerThread *worker = new WorkerThread (name);
         assert (worker);
         workers_.push_back(worker);
-        worker->go();
+        worker->start();
     }
 
 //    timer_ = new QTimer(this);
@@ -75,6 +75,11 @@ WorkerThreadManager::~WorkerThreadManager()
     boost::mutex::scoped_lock l(mutex_);
     for (unsigned int cnt=0; cnt < num_workers_; cnt++)
     {
+        while (workers_.at(cnt)->isRunning())
+        {
+            logdbg  << "WorkerThreadManager: destructor: waiting for thread to exist";
+            msleep(100);
+        }
         delete workers_.at(cnt);
     }
     workers_.clear();
@@ -137,30 +142,36 @@ void WorkerThreadManager::flushFinishedJobs ()
         logdbg << "WorkerThreadManager: flushFinishedJobs: flushed job";
         if( current->obsolete() )
         {
+            logdbg << "WorkerThreadManager: flushFinishedJobs: flushing obsolete job";
             current->emitObsolete();
                     //current->obsolete_signal_(current);
             //delete current;
             continue;
         }
 
+        logdbg << "WorkerThreadManager: flushFinishedJobs: flushing done job";
         current->emitDone();
     }
 
     while (db_todos_signal_.size() > 0)
     {
         std::shared_ptr<DBJob> current = db_todos_signal_.front();
+
         if( !current->obsolete() && !current->done() )
             break;
 
         db_todos_signal_.pop_front();
         logdbg << "WorkerThreadManager: flushFinishedJobs: flushed db job";
+
         if( current->obsolete() )
         {
+            logdbg << "WorkerThreadManager: flushFinishedJobs: flushing obsolete db job";
             current->emitObsolete();
-            //delete current;
+
             continue;
         }
 
+        logdbg << "WorkerThreadManager: flushFinishedJobs: flushing done db job";
         current->emitDone();
     }
 }

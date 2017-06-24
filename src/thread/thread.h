@@ -25,7 +25,12 @@
 #ifndef THREAD_H_
 #define THREAD_H_
 
-#include <boost/thread.hpp>
+//#include <boost/thread.hpp>
+#ifndef Q_MOC_RUN
+#include <boost/thread/mutex.hpp>
+#endif
+
+#include <qthread.h>
 
 /// Thread state variable
 enum THREAD_STATE {THREAD_STATE_INIT, THREAD_STATE_IDLE, THREAD_STATE_WORKING, THREAD_STATE_SHUTDOWN, THREAD_STATE_ERROR};
@@ -35,7 +40,7 @@ enum THREAD_STATE {THREAD_STATE_INIT, THREAD_STATE_IDLE, THREAD_STATE_WORKING, T
  *
  * Created with a string id, can be started (go) and stopped (shutdown). Has state and access functions.
  */
-class Thread
+class Thread : public QThread
 {
 public:
   /// @brief Constructor
@@ -44,7 +49,7 @@ public:
   virtual ~Thread();
 
   /// @brief Starts the thread
-  void go();
+  //void go();
   /// @brief Stops the thread
   void shutdown ();
 
@@ -64,7 +69,7 @@ protected:
   /// Flag indicating if thread should be stopped
   volatile bool stop_requested_;
   /// Boost thread
-  boost::shared_ptr<boost::thread> thread_;
+  //boost::shared_ptr<boost::thread> thread_;
   /// Mutex protecting the state variable
   boost::mutex state_mutex_;
   /// State variable
@@ -75,7 +80,7 @@ protected:
   /// @brief Stops the thread
   void stop();
   /// @brief Main thread working function
-  virtual void do_work()=0;
+  virtual void run()=0;
 };
 
 #endif /* THREAD_H_ */

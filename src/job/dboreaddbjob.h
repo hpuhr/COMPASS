@@ -41,10 +41,10 @@ class DBOReadDBJob : public DBJob
 {
     Q_OBJECT
 signals:
-    void intermediateSignal (std::shared_ptr <Job> job, std::shared_ptr<Buffer> buffer);
+    void intermediateSignal (std::shared_ptr<Buffer> buffer);
 
 public:
-    DBOReadDBJob(DBInterface &db_interface, const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
+    DBOReadDBJob(DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
                  DBOVariable *order, bool activate_key_search);
     virtual ~DBOReadDBJob();
 
@@ -53,7 +53,7 @@ public:
     DBOVariableSet getReadList () { return read_list_; }
 
 protected:
-    const DBObject &dbobject_;
+    DBObject &dbobject_;
     DBOVariableSet read_list_;
     std::string custom_filter_clause_;
     DBOVariable *order_;

@@ -200,7 +200,7 @@ protected:
     bool initialized_;
 
     /// Protects the database
-    boost::mutex mutex_;
+    boost::mutex connection_mutex_;
 
     /// Container with all table names, based on DBO type
     // TODO solve this
@@ -220,6 +220,7 @@ protected:
     std::map <std::string, bool> prepared_;
     /// Container with all reading done flags (for incremental reading)
     std::map <std::string, bool> reading_done_;
+    boost::mutex reading_done_mutex_;
     /// Container with all exists flags, indicating if DBO has data in the database
     std::map <std::string, bool> exists_;
     /// Container with all DBO element counts

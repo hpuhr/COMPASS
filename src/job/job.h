@@ -41,8 +41,8 @@ class Job : public QObject
 {
     Q_OBJECT
 signals:
-    void doneSignal (std::shared_ptr <Job> job);
-    void obsoleteSignal(std::shared_ptr <Job> job);
+    void doneSignal ();
+    void obsoleteSignal();
 
 public:
     /// @brief Constructor
@@ -55,12 +55,12 @@ public:
 
     // @brief Returns done flag
     bool done () { return done_; }
-    void emitDone () { emit obsoleteSignal(std::shared_ptr<Job>(this)); }
+    void emitDone () { emit doneSignal(); }
     // @brief Sets obsolete flag
     void setObsolete () { obsolete_=true; }
     // @brief Returns obsolete flag
     bool obsolete () { return obsolete_; }
-    void emitObsolete () { emit doneSignal(std::shared_ptr<Job>(this)); }
+    void emitObsolete () { emit doneSignal(); }
 
 protected:
     /// Done flag

@@ -350,40 +350,39 @@ void DBObject::load ()
     DBOVariableSet read_list;
 
     loginf << "DBInterface: testReading: adding all variables";
-    for (auto variable_it : variables_)
-        read_list.add(variable_it.second);
+    read_list.add(variables_.at("REC_NUM"));
+    read_list.add(variables_.at("TOD"));
 
     std::string custom_filter_clause;
 
     DBOReadDBJob *read_job = new DBOReadDBJob (ATSDB::instance().interface(), *this, read_list, custom_filter_clause, nullptr, false);
 
     read_job_ = std::shared_ptr<DBOReadDBJob> (read_job);
-    connect (read_job, SIGNAL(intermediateSignal(std::shared_ptr<Job>,std::shared_ptr<Buffer>)), this, SLOT(readJobIntermediateSlot(std::shared_ptr<Job>,std::shared_ptr<Buffer>)),
-             Qt::QueuedConnection);
-    connect (read_job, SIGNAL(obsoleteSignal(std::shared_ptr<Job>)), this, SLOT(readJobObsoleteSlot(std::shared_ptr<Job>)), Qt::QueuedConnection);
-    connect (read_job, SIGNAL(doneSignal(std::shared_ptr<Job>)), this, SLOT(readJobDoneSlot(std::shared_ptr<Job>)), Qt::QueuedConnection);
+    connect (read_job, SIGNAL(intermediateSignal(std::shared_ptr<Buffer>)), this, SLOT(readJobIntermediateSlot(std::shared_ptr<Buffer>)), Qt::QueuedConnection);
+    connect (read_job, SIGNAL(obsoleteSignal()), this, SLOT(readJobObsoleteSlot()), Qt::QueuedConnection);
+    connect (read_job, SIGNAL(doneSignal()), this, SLOT(readJobDoneSlot()), Qt::QueuedConnection);
 
     WorkerThreadManager::getInstance().addDBJob(read_job_);
 }
 
-void DBObject::readJobIntermediateSlot (std::shared_ptr <Job> job, std::shared_ptr<Buffer> buffer)
+void DBObject::readJobIntermediateSlot (std::shared_ptr<Buffer> buffer)
 {
     loginf << "DBObject: " << name_ << " readJobIntermediateSlot";
 
-    assert (job == read_job_);
+    DBOReadDBJob *sender = dynamic_cast <DBOReadDBJob*> (QObject::sender());
+    assert (sender);
+    assert (sender == read_job_.get());
 }
 
-void DBObject::readJobObsoleteSlot (std::shared_ptr <Job> job)
+void DBObject::readJobObsoleteSlot ()
 {
     loginf << "DBObject: " << name_ << " readJobObsoleteSlot";
 
-    assert (job == read_job_);
 }
 
-void DBObject::readJobDoneSlot(std::shared_ptr <Job> job)
+void DBObject::readJobDoneSlot()
 {
     loginf << "DBObject: " << name_ << " readJobDoneSlot";
 
-    assert (job == read_job_);
     read_job_ = nullptr;
 }

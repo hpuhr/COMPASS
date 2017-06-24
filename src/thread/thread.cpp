@@ -30,9 +30,6 @@ Thread::Thread(std::string id, bool start)
 {
   assert (id_.size() > 0);
 
-  if( start )
-    go();
-
   boost::mutex::scoped_lock l(state_mutex_);
   state_ = THREAD_STATE_IDLE;
 }
@@ -41,25 +38,11 @@ Thread::~Thread()
 {
 }
 
-void Thread::go()
-{
-  //loginf << "Thread: go"; // breaks for some reason
-
-  if (thread_)
-    throw std::runtime_error("Thread: go: thread already exists");
-
-  thread_ = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&Thread::do_work, this)));
-
-  //logdbg << "Thread: go: end";
-}
 
 void Thread::stop()
 {
   logdbg << "Thread: stop: " << id_;
-  assert(thread_);
   stop_requested_ = true;
-  logdbg << "Thread: stop: joining";
-  thread_->join();
   logdbg << "Thread: stop: end";
 }
 

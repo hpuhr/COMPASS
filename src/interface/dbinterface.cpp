@@ -63,7 +63,7 @@ using namespace Utils;
 DBInterface::DBInterface(std::string class_id, std::string instance_id, ATSDB *atsdb)
     : Configurable (class_id, instance_id, atsdb), current_connection_(nullptr), sql_generator_(*this), widget_(nullptr)//, buffer_writer_(0)
 {
-    boost::mutex::scoped_lock l(mutex_);
+    boost::mutex::scoped_lock l(connection_mutex_);
 
     //registerParameter ("database_name", &database_name_, "");
     registerParameter ("read_chunk_size", &read_chunk_size_, 20000);
@@ -88,7 +88,7 @@ DBInterface::~DBInterface()
 {
     logdbg  << "DBInterface: desctructor: start";
 
-    boost::mutex::scoped_lock l(mutex_);
+    boost::mutex::scoped_lock l(connection_mutex_);
 
     for (auto it : connections_)
         delete it.second;
@@ -133,7 +133,7 @@ void DBInterface::databaseOpened ()
 
 void DBInterface::closeConnection ()
 {
-    boost::mutex::scoped_lock l(mutex_);
+    boost::mutex::scoped_lock l(connection_mutex_);
 
     logdbg << "DBInterface: closeConnection";
     current_connection_->disconnect();
@@ -273,7 +273,7 @@ unsigned int DBInterface::queryCount (const DBObject &dbobject)
 {
     logdbg  << "DBInterface: queryCount: start";
 
-    boost::mutex::scoped_lock l(mutex_);
+    boost::mutex::scoped_lock l(connection_mutex_);
     assert (current_connection_);
 
     std::string sql = sql_generator_.getCountStatement(dbobject);
@@ -625,11 +625,14 @@ bool DBInterface::getReadingDone (const DBObject &dbobject)
 {
     logdbg  << "DBInterface: getReadingDone: name " << dbobject.name();
 
+    boost::mutex::scoped_lock l(reading_done_mutex_);
     return reading_done_.at(dbobject.name());
 }
 
 bool DBInterface::isReadingDone ()
 {
+    boost::mutex::scoped_lock l(reading_done_mutex_);
+
     for (auto it : reading_done_)
         if (it.second)
             return false;
@@ -766,7 +769,7 @@ unsigned int DBInterface::count (const DBObject &dbobject)
 void DBInterface::prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
         DBOVariable *order)
 {
-    boost::mutex::scoped_lock l(mutex_);
+    boost::mutex::scoped_lock l(connection_mutex_);
     assert (current_connection_);
 
     std::shared_ptr<DBCommand> read = sql_generator_.getSelectCommand (dbobject, read_list, custom_filter_clause, order);
@@ -774,6 +777,7 @@ void DBInterface::prepareRead (const DBObject &dbobject, DBOVariableSet read_lis
     current_connection_->prepareCommand(read);
 
     prepared_.at(dbobject.name())=true;
+    boost::mutex::scoped_lock l2(reading_done_mutex_);
     reading_done_.at(dbobject.name())=false;
 }
 
@@ -782,7 +786,7 @@ void DBInterface::prepareRead (const DBObject &dbobject, DBOVariableSet read_lis
  */
 std::shared_ptr <Buffer> DBInterface::readDataChunk (const DBObject &dbobject, bool activate_key_search)
 {
-    boost::mutex::scoped_lock l(mutex_);
+    boost::mutex::scoped_lock l(connection_mutex_);
 
     assert (current_connection_);
 
@@ -791,6 +795,7 @@ std::shared_ptr <Buffer> DBInterface::readDataChunk (const DBObject &dbobject, b
     if (!result)
     {
         logerr  << "DBInterface: readDataChunk: connection returned error";
+        boost::mutex::scoped_lock l(reading_done_mutex_);
         reading_done_.at(dbobject.name()) = true;
         throw std::runtime_error ("DBInterface: readDataChunk: connection returned error");
     }
@@ -798,6 +803,7 @@ std::shared_ptr <Buffer> DBInterface::readDataChunk (const DBObject &dbobject, b
     if (!result->containsData())
     {
         logerr  << "DBInterface: readDataChunk: buffer does not contain data";
+        boost::mutex::scoped_lock l(reading_done_mutex_);
         reading_done_.at(dbobject.name()) = true;
         throw std::runtime_error ("DBInterface: readDataChunk: buffer does not contain data");
     }
@@ -809,12 +815,14 @@ std::shared_ptr <Buffer> DBInterface::readDataChunk (const DBObject &dbobject, b
     assert (buffer);
     if (buffer->firstWrite())
     {
+        boost::mutex::scoped_lock l(reading_done_mutex_);
         reading_done_.at(dbobject.name()) = true;
         return buffer; // HACK UGGGA WAS 0
     }
 
     bool last_one = current_connection_->getPreparedCommandDone();
     buffer->lastOne (last_one);
+    boost::mutex::scoped_lock l2(reading_done_mutex_);
     reading_done_.at(dbobject.name())=last_one;
 
     assert (!activate_key_search); // TODO FIXXXXME
@@ -836,7 +844,7 @@ std::shared_ptr <Buffer> DBInterface::readDataChunk (const DBObject &dbobject, b
 
 void DBInterface::finalizeReadStatement (const DBObject &dbobject)
 {
-    boost::mutex::scoped_lock l(mutex_);
+    boost::mutex::scoped_lock l(connection_mutex_);
     assert (current_connection_);
 
     logdbg  << "DBInterface: finishReadSystemTracks: start ";
@@ -846,7 +854,7 @@ void DBInterface::finalizeReadStatement (const DBObject &dbobject)
 
 void DBInterface::clearResult ()
 {
-    boost::mutex::scoped_lock l(mutex_);
+    boost::mutex::scoped_lock l(reading_done_mutex_);
 
     for (auto it = reading_done_.begin(); it != reading_done_.end(); it++)
     {
@@ -1393,6 +1401,7 @@ void DBInterface::clearResult ()
 void DBInterface::updateDBObjectInformationSlot ()
 {
     logdbg << "DBInterface: updateDBObjectInformationSlot";
+    boost::mutex::scoped_lock l(reading_done_mutex_);
     prepared_.clear();
     reading_done_.clear();
     exists_.clear();

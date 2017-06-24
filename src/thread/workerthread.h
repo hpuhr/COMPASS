@@ -67,7 +67,7 @@ protected:
   double work_time_;
 
   /// @brief Main thread working function
-  virtual void do_work();
+  virtual void run();
 };
 
 #endif /* WORKERTHREAD_H_ */

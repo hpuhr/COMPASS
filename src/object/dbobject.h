@@ -108,6 +108,7 @@ protected:
 class DBObjectWidget;
 class Buffer;
 class Job;
+class DBJob;
 class DBOReadDBJob;
 
 /**
@@ -143,9 +144,9 @@ class DBObject : public QObject, public Configurable
 public slots:
     void schemaChangedSlot ();
 
-    void readJobIntermediateSlot (std::shared_ptr <Job> job, std::shared_ptr<Buffer> buffer);
-    void readJobObsoleteSlot (std::shared_ptr <Job> job);
-    void readJobDoneSlot(std::shared_ptr <Job> job);
+    void readJobIntermediateSlot (std::shared_ptr<Buffer> buffer);
+    void readJobObsoleteSlot ();
+    void readJobDoneSlot();
 
 public:
     /// @brief Constructor

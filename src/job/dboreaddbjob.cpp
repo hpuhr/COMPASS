@@ -39,7 +39,7 @@
 //#include "MetaDBTable.h"
 #include "logger.h"
 
-DBOReadDBJob::DBOReadDBJob(DBInterface &db_interface, const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
+DBOReadDBJob::DBOReadDBJob(DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
                            DBOVariable *order, bool activate_key_search)
 : DBJob (db_interface), dbobject_(dbobject), read_list_(read_list), custom_filter_clause_ (custom_filter_clause), order_(order), activate_key_search_(activate_key_search)
 {
@@ -82,7 +82,8 @@ void DBOReadDBJob::execute ()
         }
         else
         {
-            emit intermediateSignal(std::shared_ptr<Job> (this), std::shared_ptr<Buffer> (buffer));
+            loginf << "DBOReadDBJob: execute: intermediate signal";
+            emit intermediateSignal(buffer);
         }
         boost::this_thread::sleep( boost::posix_time::milliseconds(10) );
     }
