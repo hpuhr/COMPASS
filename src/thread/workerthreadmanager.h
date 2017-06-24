@@ -28,9 +28,7 @@
 #ifndef Q_MOC_RUN
 #include <boost/thread/mutex.hpp>
 #endif
-//#include <boost/asio.hpp>
-//#include <boost/date_time/posix_time/posix_time.hpp>
-//#include <boost/thread.hpp>
+
 #include <list>
 #include <memory>
 #include <qobject.h>
@@ -42,7 +40,6 @@
 class WorkerThread;
 class DBJob;
 class Job;
-class QTimer;
 //class WorkerThreadWidget;
 
 /**
@@ -57,8 +54,6 @@ class QTimer;
 class WorkerThreadManager: public QThread, public Singleton, public Configurable
 {
     Q_OBJECT
-//private slots:
-//    void timerEventSlot();
 
 public:
     /// @brief Constructor
@@ -72,15 +67,14 @@ public:
 
     bool noJobs ();
 
-    static WorkerThreadManager& getInstance()
+    static WorkerThreadManager& instance()
     {
         static WorkerThreadManager instance;
         return instance;
     }
 
-    WorkerThread *getWorker (unsigned int index);
-    unsigned int getJobNumber ();
-    unsigned int getNumWorkers ();
+    const std::vector <WorkerThread*> workers () { return workers_; }
+    unsigned int numJobs ();
 
 protected:
     /// Flag indicating if thread should stop.
@@ -98,17 +92,6 @@ protected:
 
     std::vector <WorkerThread *> workers_;
     unsigned int cnt_;
-
-//    QTimer *timer_;
-    //    boost::asio::io_service io_;
-//    boost::asio::deadline_timer timer_;
-
-//    ///@brief Starts the thread.
-//    void go();
-//    ///@brief Stops the thread.
-//    void stop();
-//    ///@brief Thread main function doing all the work.
-//    void do_work();
 
     void flushFinishedJobs ();
 

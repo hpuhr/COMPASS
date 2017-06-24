@@ -66,7 +66,7 @@ ATSDB::ATSDB()
 {
     logdbg  << "ATSDB: constructor: start";
 
-    WorkerThreadManager::getInstance().start();
+    WorkerThreadManager::instance().start();
 
     createSubConfigurables ();
 
@@ -288,7 +288,7 @@ void ATSDB::shutdown ()
 
     initialized_=false;
 
-    WorkerThreadManager::getInstance().shutdown();
+    WorkerThreadManager::instance().shutdown();
 
 //    if (struct_reader_->hasUnwrittenData())
 //    {

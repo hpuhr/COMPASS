@@ -228,7 +228,6 @@ const MetaDBTable &DBObject::currentMetaTable () const
 void DBObject::checkVariables ()
 {
     assert (hasCurrentMetaTable());
-    //std::map<std::string, DBOVariable*>::iterator it;
 
     for (auto it : variables_)
     {
@@ -362,7 +361,7 @@ void DBObject::load ()
     connect (read_job, SIGNAL(obsoleteSignal()), this, SLOT(readJobObsoleteSlot()), Qt::QueuedConnection);
     connect (read_job, SIGNAL(doneSignal()), this, SLOT(readJobDoneSlot()), Qt::QueuedConnection);
 
-    WorkerThreadManager::getInstance().addDBJob(read_job_);
+    WorkerThreadManager::instance().addDBJob(read_job_);
 }
 
 void DBObject::readJobIntermediateSlot (std::shared_ptr<Buffer> buffer)

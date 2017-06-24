@@ -30,16 +30,12 @@
 //#include "dbjob.h"
 #include "job.h"
 #include "logger.h"
-//#include <boost/asio.hpp>
-//#include <boost/bind.hpp>
-//#include <boost/date_time/posix_time/posix_time.hpp>
 #include "stringconv.h"
 
 using namespace Utils;
 
 WorkerThreadManager::WorkerThreadManager()
-    : Configurable ("WorkerThreadManager", "WorkerThreadManager0", 0, "conf/threads.xml")//, timer_ (nullptr)
-      //timer_ (io_, boost::posix_time::milliseconds(100))
+    : Configurable ("WorkerThreadManager", "WorkerThreadManager0", 0, "conf/threads.xml")
 {
     logdbg  << "WorkerThreadManager: constructor";
     boost::mutex::scoped_lock l(mutex_);
@@ -58,14 +54,6 @@ WorkerThreadManager::WorkerThreadManager()
         worker->start();
     }
 
-//    timer_ = new QTimer(this);
-//    connect(timer_, SIGNAL(timeout()), this, SLOT(timerEventSlot()));
-//    timer_->start(update_time_);
-
-//    timer_.async_wait(boost::bind(&WorkerThreadManager::timerEvent, this));
-
-    //go();
-
     logdbg  << "WorkerThreadManager: constructor: end";
 }
 
@@ -83,10 +71,6 @@ WorkerThreadManager::~WorkerThreadManager()
         delete workers_.at(cnt);
     }
     workers_.clear();
-
-//    timer_->stop();
-//    delete timer_;
-//    timer_=nullptr;
 }
 
 void WorkerThreadManager::shutdown ()
@@ -144,8 +128,6 @@ void WorkerThreadManager::flushFinishedJobs ()
         {
             logdbg << "WorkerThreadManager: flushFinishedJobs: flushing obsolete job";
             current->emitObsolete();
-                    //current->obsolete_signal_(current);
-            //delete current;
             continue;
         }
 
@@ -202,60 +184,10 @@ void WorkerThreadManager::run()
 
         msleep(update_time_);
     }
-//    if (thread_)
-//        throw std::runtime_error("WorkerThreadManager: go: thread already exists");
-//    thread_ = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&WorkerThreadManager::do_work, this)));
-//    logdbg  << "WorkerThreadManager: go: end";
 }
 
-//void WorkerThreadManager::stop()
-//{
-//    logdbg  << "WorkerThreadManager: stop: start";
-//    assert(thread_);
-//    stop_requested_ = true;
-//    logdbg  << "WorkerThreadManager: stop: stop";
-//    timer_->stop();
-
-//    logdbg  << "WorkerThreadManager: stop: joining";
-//    thread_->join();
-
-//    logdbg  << "WorkerThreadManager: stop: end";
-//}
-
-///**
-// * Main function executed in thread. Uses while loop (terminating if stop_requested_ is set),
-// * checking the state_ and performing tasks according to a state machine.
-// */
-//void WorkerThreadManager::do_work()
-//{
-//    logdbg  << "WorkerThreadManager: do_work: start";
-//    io_.run();
-//    logdbg  << "WorkerThreadManager: do_work: end";
-//}
-
-//void WorkerThreadManager::timerEvent (QTimerEvent *e)
-//void WorkerThreadManager::timerEventSlot()
-//{
-//    logdbg << "WorkerThreadManager: timerEvent: got " << todos_signal_.size()+ db_todos_signal_.size() << " jobs";
-//    if (todos_signal_.size() > 0 || db_todos_signal_.size() > 0)
-//        flushFinishedJobs();
-
-////    timer_.expires_at(timer_.expires_at() + boost::posix_time::milliseconds(500));
-////    timer_.async_wait(boost::bind(&WorkerThreadManager::timerEvent, this));
-//}
-
-WorkerThread *WorkerThreadManager::getWorker (unsigned int index)
-{
-    assert (index < num_workers_);
-    return workers_.at(index);
-}
-unsigned int WorkerThreadManager::getJobNumber ()
+unsigned int WorkerThreadManager::numJobs ()
 {
     return todos_signal_.size();
-}
-
-unsigned int WorkerThreadManager::getNumWorkers ()
-{
-    return num_workers_;
 }
 

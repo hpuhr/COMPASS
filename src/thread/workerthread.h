@@ -60,7 +60,7 @@ protected:
   /// Sleep time for every do_work iteration
   const static unsigned int pause_time_=10;
   /// Sleep time when nothing is to do
-  const static unsigned int idle_sleep_time_=100;
+  const static unsigned int idle_sleep_time_=50;
   /// Sleeping time in percent
   double sleep_time_;
   /// Working time in percent

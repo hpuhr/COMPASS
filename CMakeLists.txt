@@ -160,7 +160,6 @@ set ( atsdb_HDRS
         src/interface/dbtableinfo.h
         src/interface/dbinterface.h
         src/thread/thread.h
-        src/thread/timedthread.h
         src/thread/workerthread.h
 #        src/computation/workflow.h
 #        src/computation/computation.h
@@ -347,7 +346,6 @@ set ( atsdb_SRCS
         src/struct/structuredescriptionmanager.cpp
         src/struct/structurevariable.cpp
         src/thread/thread.cpp
-        src/thread/timedthread.cpp
         src/thread/workerthread.cpp
         src/thread/workerthreadmanager.cpp
 #        src/computation/workflow.cpp
