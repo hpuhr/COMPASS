@@ -219,7 +219,7 @@ set (atsdb_MOC_HEADERS
         #        src/job/dbovariableminmaxdbjob.h
         #        src/job/finalizedboreadjob.h
         #        src/job/dbocountdbjob.h
-        #        src/job/dboreaddbjob.h
+        src/job/dboreaddbjob.h
         #        src/job/dboinfodbjob.h
         #        src/job/updatebufferdbjob.h
         #        src/job/writebufferdbjob.h
@@ -294,7 +294,7 @@ set ( atsdb_SRCS
 #        src/job/dbovariabledistinctstatisticsdbjob.cpp
 #        src/job/dbovariableminmaxdbjob.cpp
 #        src/job/dbocountdbjob.cpp
-#        src/job/dboreaddbjob.cpp
+        src/job/dboreaddbjob.cpp
 #        src/job/dboinfodbjob.cpp
         src/job/joborderer.cpp
 #        src/job/finalizedboreadjob.cpp

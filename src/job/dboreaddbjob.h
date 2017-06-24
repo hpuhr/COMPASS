@@ -25,11 +25,11 @@
 #ifndef DBOREADDBJOB_H_
 #define DBOREADDBJOB_H_
 
-#include "DBJob.h"
-#include "Global.h"
-#include "DBOVariableSet.h"
+#include "job.h"
+#include "dbovariableset.h"
 
 class Buffer;
+class DBObject;
 
 /**
  * @brief DBO reading job
@@ -39,14 +39,13 @@ class Buffer;
  */
 class DBOReadDBJob : public DBJob
 {
-public:
-    /// Emitted signal if Job was performed
-    boost::signals2::signal<void (Job*, Buffer*)> intermediate_signal_;
+    Q_OBJECT
+signals:
+    void intermediateSignal (std::shared_ptr <Job> job, std::shared_ptr<Buffer> buffer);
 
-    DBOReadDBJob(JobOrderer *orderer, boost::function<void (Job*, Buffer*)> intermediate_function,
-            boost::function<void (Job*)> done_function, boost::function<void (Job*)> obsolete_function,
-            DBInterface *db_interface, DB_OBJECT_TYPE type, DBOVariableSet read_list,
-            std::string custom_filter_clause="", DBOVariable *order=0);
+public:
+    DBOReadDBJob(DBInterface &db_interface, const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
+                 DBOVariable *order, bool activate_key_search);
     virtual ~DBOReadDBJob();
 
     virtual void execute ();
@@ -54,11 +53,11 @@ public:
     DBOVariableSet getReadList () { return read_list_; }
 
 protected:
-    /// DBO type
-    DB_OBJECT_TYPE type_;
+    const DBObject &dbobject_;
     DBOVariableSet read_list_;
     std::string custom_filter_clause_;
     DBOVariable *order_;
+    bool activate_key_search_;
 };
 
 #endif /* DBOREADDBJOB_H_ */

@@ -39,7 +39,7 @@ class Thread
 {
 public:
   /// @brief Constructor
-  Thread(std::string id, bool start=true);
+  Thread(std::string id, bool start);
   /// @brief Destructor
   virtual ~Thread();
 

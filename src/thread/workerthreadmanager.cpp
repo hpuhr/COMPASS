@@ -45,7 +45,7 @@ WorkerThreadManager::WorkerThreadManager()
     boost::mutex::scoped_lock l(mutex_);
 
     registerParameter ("num_workers", &num_workers_, 3);
-    registerParameter ("update_time", &update_time_, 100);
+    registerParameter ("update_time", &update_time_, 10);
 
     cnt_=0;
 
@@ -55,6 +55,7 @@ WorkerThreadManager::WorkerThreadManager()
         WorkerThread *worker = new WorkerThread (name);
         assert (worker);
         workers_.push_back(worker);
+        worker->go();
     }
 
 //    timer_ = new QTimer(this);
@@ -160,7 +161,7 @@ void WorkerThreadManager::flushFinishedJobs ()
             continue;
         }
 
-        current->emitObsolete();
+        current->emitDone();
     }
 }
 
@@ -178,7 +179,7 @@ bool WorkerThreadManager::noJobs ()
  */
 void WorkerThreadManager::run()
 {
-    logdbg  << "WorkerThreadManager: go: start";
+    logdbg  << "WorkerThreadManager: run: start";
 
     while (1)
     {

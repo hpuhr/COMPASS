@@ -28,7 +28,7 @@
 #include "logger.h"
 
 WorkerThread::WorkerThread(std::string id)
-: Thread (id), sleep_time_ (0), work_time_ (0)
+: Thread (id, false), sleep_time_ (0), work_time_ (0)
 {
 }
 

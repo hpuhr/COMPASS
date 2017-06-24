@@ -24,38 +24,31 @@
 
 #include <boost/thread/thread.hpp>
 
-#include "DBOReadDBJob.h"
-#include "DBObjectManager.h"
-#include "DBObject.h"
-#include "DBOVariable.h"
-#include "PropertyList.h"
-#include "DBTableColumn.h"
-#include "DBSchemaManager.h"
-#include "DBOVariableSet.h"
-#include "DBInterface.h"
-#include "UnitManager.h"
-#include "Unit.h"
-#include "Buffer.h"
-#include "DBSchema.h"
-#include "MetaDBTable.h"
-#include "Logger.h"
+#include "dboreaddbjob.h"
+#include "dbobject.h"
+#include "dbovariable.h"
+#include "propertylist.h"
+//#include "DBTableColumn.h"
+//#include "DBSchemaManager.h"
+//#include "DBOVariableSet.h"
+#include "dbinterface.h"
+//#include "UnitManager.h"
+//#include "Unit.h"
+#include "buffer.h"
+//#include "DBSchema.h"
+//#include "MetaDBTable.h"
+#include "logger.h"
 
-DBOReadDBJob::DBOReadDBJob(JobOrderer *orderer, boost::function<void (Job*, Buffer*)> intermediate_function,
-        boost::function<void (Job*)> done_function, boost::function<void (Job*)> obsolete_function, DBInterface *db_interface,
-        DB_OBJECT_TYPE type, DBOVariableSet read_list, std::string custom_filter_clause, DBOVariable *order)
-: DBJob (orderer, done_function, obsolete_function, db_interface), type_(type), read_list_(read_list),
-  custom_filter_clause_ (custom_filter_clause), order_(order)
+DBOReadDBJob::DBOReadDBJob(DBInterface &db_interface, const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
+                           DBOVariable *order, bool activate_key_search)
+: DBJob (db_interface), dbobject_(dbobject), read_list_(read_list), custom_filter_clause_ (custom_filter_clause), order_(order), activate_key_search_(activate_key_search)
 {
-    assert (type_ != DBO_UNDEFINED);
-
     // AVIBIT HACK
 //    if (order == 0)
 //    {
 //        order_ = DBObjectManager::getInstance().getDBOVariable (DBO_UNDEFINED, "id");
 //        assert (order_->existsIn (type));
 //    }
-
-    intermediate_signal_.connect( intermediate_function );
 }
 
 DBOReadDBJob::~DBOReadDBJob()
@@ -67,42 +60,34 @@ void DBOReadDBJob::execute ()
 {
     logdbg << "DBOReadDBJob: execute: start";
 
-    assert (type_ > DBO_UNDEFINED && type_ < DBO_SENSOR_INFORMATION);
-
     if (custom_filter_clause_.size() == 0 && order_ )
-    	db_interface_->prepareRead (type_, read_list_);
+        db_interface_.prepareRead (dbobject_, read_list_);
     else
-    	db_interface_->prepareRead (type_, read_list_, custom_filter_clause_, order_);
+        db_interface_.prepareRead (dbobject_, read_list_, custom_filter_clause_, order_);
 
-    while (!db_interface_->getReadingDone(type_) && !obsolete_)
+    while (!db_interface_.getReadingDone(dbobject_) && !obsolete_)
     {
-        boost::this_thread::sleep( boost::posix_time::milliseconds(10) );
-
         // AVIBIT HACK
         //Buffer *buffer = db_interface_->readDataChunk(type_, order_->getName() == "id");
-        Buffer *buffer = db_interface_->readDataChunk(type_, true);
+        std::shared_ptr<Buffer> buffer = db_interface_.readDataChunk(dbobject_, activate_key_search_);
 
-        assert (buffer->getDBOType() != DBO_UNDEFINED && buffer->getDBOType() == type_);
+        assert (buffer->dboName() == dbobject_.name());
 
         if (!buffer)
         {
             logwrn << "DBOReadDBJob: execute: got null buffer";
-            db_interface_->finalizeReadStatement(type_);
+            db_interface_.finalizeReadStatement(dbobject_);
             done_=true;
             return;
         }
-
-        if (obsolete_)
-        {
-            delete buffer;
-        }
         else
         {
-            intermediate_signal_(this, buffer);
+            emit intermediateSignal(std::shared_ptr<Job> (this), std::shared_ptr<Buffer> (buffer));
         }
+        boost::this_thread::sleep( boost::posix_time::milliseconds(10) );
     }
 
-    db_interface_->finalizeReadStatement(type_);
+    db_interface_.finalizeReadStatement(dbobject_);
     done_=true;
 
     logdbg << "DBOReadDBJob: execute: done";

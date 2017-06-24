@@ -26,11 +26,13 @@
 #define DBOBJECT_H_
 
 #include <string>
+#include <qobject.h>
+#include <memory>
 
 #include "global.h"
 #include "dbovariableset.h"
 #include "configurable.h"
-#include <qobject.h>
+
 
 class DBOVariable;
 class PropertyList;
@@ -104,6 +106,9 @@ protected:
 };
 
 class DBObjectWidget;
+class Buffer;
+class Job;
+class DBOReadDBJob;
 
 /**
  * @brief Abstract data description of an object stored in a database
@@ -137,6 +142,10 @@ class DBObject : public QObject, public Configurable
     Q_OBJECT
 public slots:
     void schemaChangedSlot ();
+
+    void readJobIntermediateSlot (std::shared_ptr <Job> job, std::shared_ptr<Buffer> buffer);
+    void readJobObsoleteSlot (std::shared_ptr <Job> job);
+    void readJobDoneSlot(std::shared_ptr <Job> job);
 
 public:
     /// @brief Constructor
@@ -172,6 +181,7 @@ public:
     void loadable(bool loadable) { is_loadable_=loadable; }
     /// @brief Returns if an object can be loaded
     bool loadable () const { return is_loadable_; }
+    void load ();
 
     /// @brief Returns the type of the object
     //const std::string &getType () const { return dbo_type_; }
@@ -233,6 +243,7 @@ protected:
     bool is_loadable_; // loadable on its own
     /// DBO is meta flag
     //bool is_meta_;
+    std::shared_ptr <DBOReadDBJob> read_job_;
 
     /// Container with all DBOSchemaMetaTableDefinitions
     std::vector <DBOSchemaMetaTableDefinition*> meta_table_definitions_;

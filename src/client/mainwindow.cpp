@@ -46,6 +46,7 @@
 #include "config.h"
 #include "workerthreadmanager.h"
 #include "configurationmanager.h"
+#include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "dbobjectmanagerwidget.h"
 #include "atsdb.h"
@@ -139,7 +140,7 @@ void MainWindow::startSlot ()
 {
     logdbg  << "MainWindow: startSlot";
 
-    ATSDB::instance().interface().testReading();
+    ATSDB::instance().objectManager().get("MLAT").load();
 //    if (db_opened_)
 //    {
 //        if (schema_widget_->hasSelectedSchema ())

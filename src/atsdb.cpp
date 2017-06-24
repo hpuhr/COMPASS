@@ -66,7 +66,7 @@ ATSDB::ATSDB()
 {
     logdbg  << "ATSDB: constructor: start";
 
-    WorkerThreadManager::getInstance();
+    WorkerThreadManager::getInstance().start();
 
     createSubConfigurables ();
 
