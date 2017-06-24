@@ -25,11 +25,16 @@
 #ifndef WORKERTHREADMANAGER_H_
 #define WORKERTHREADMANAGER_H_
 
+#ifndef Q_MOC_RUN
+#include <boost/thread/mutex.hpp>
+#endif
+//#include <boost/asio.hpp>
+//#include <boost/date_time/posix_time/posix_time.hpp>
+//#include <boost/thread.hpp>
 #include <list>
-#include <boost/thread.hpp>
-#include <boost/asio.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/thread.hpp>
+#include <memory>
+#include <qobject.h>
+#include <qthread.h>
 
 #include "singleton.h"
 #include "configurable.h"
@@ -37,7 +42,8 @@
 class WorkerThread;
 class DBJob;
 class Job;
-class WorkerThreadWidget;
+class QTimer;
+//class WorkerThreadWidget;
 
 /**
  * @brief Manages execution of TransformationJobs
@@ -48,60 +54,66 @@ class WorkerThreadWidget;
  * done, but can be blocked by unfinished jobs which were added earlier.
  *
  */
-class WorkerThreadManager: public Singleton, public Configurable
+class WorkerThreadManager: public QThread, public Singleton, public Configurable
 {
+    Q_OBJECT
+//private slots:
+//    void timerEventSlot();
+
 public:
-  /// @brief Constructor
-  WorkerThreadManager();
-  virtual ~WorkerThreadManager();
+    /// @brief Constructor
+    WorkerThreadManager();
+    virtual ~WorkerThreadManager();
 
-  void addJob (Job *job);
-  void addDBJob (DBJob *job);
+    void addJob (std::shared_ptr<Job> job);
+    void addDBJob (std::shared_ptr<DBJob> job);
 
-  void shutdown ();
+    void shutdown ();
 
-  bool noJobs ();
+    bool noJobs ();
 
-  static WorkerThreadManager& getInstance()
-  {
-      static WorkerThreadManager instance;
-      return instance;
-  }
+    static WorkerThreadManager& getInstance()
+    {
+        static WorkerThreadManager instance;
+        return instance;
+    }
 
-  WorkerThread *getWorker (unsigned int index);
-  unsigned int getJobNumber ();
-  unsigned int getNumWorkers ();
+    WorkerThread *getWorker (unsigned int index);
+    unsigned int getJobNumber ();
+    unsigned int getNumWorkers ();
 
 protected:
-  /// Flag indicating if thread should stop.
-  volatile bool stop_requested_;
-  /// Boost thread
-  boost::shared_ptr<boost::thread> thread_;
+    /// Flag indicating if thread should stop.
+    volatile bool stop_requested_;
+    /// Boost thread
+    //boost::shared_ptr<boost::thread> thread_;
 
-  boost::mutex mutex_;
-  unsigned int num_workers_;
+    boost::mutex mutex_;
+    unsigned int num_workers_;
 
-  unsigned int update_time_;
+    unsigned int update_time_;
 
-  std::list <Job *> todos_signal_;
-  std::list <DBJob *> db_todos_signal_;
+    std::list <std::shared_ptr<Job>> todos_signal_;
+    std::list <std::shared_ptr<DBJob>> db_todos_signal_;
 
-  std::vector <WorkerThread *> workers_;
-  unsigned int cnt_;
+    std::vector <WorkerThread *> workers_;
+    unsigned int cnt_;
 
-  boost::asio::io_service io_;
-  boost::asio::deadline_timer timer_;
+//    QTimer *timer_;
+    //    boost::asio::io_service io_;
+//    boost::asio::deadline_timer timer_;
 
-  ///@brief Starts the thread.
-  void go();
-  ///@brief Stops the thread.
-  void stop();
-  ///@brief Thread main function doing all the work.
-  void do_work();
+//    ///@brief Starts the thread.
+//    void go();
+//    ///@brief Stops the thread.
+//    void stop();
+//    ///@brief Thread main function doing all the work.
+//    void do_work();
 
-  void timerEvent();
+    void flushFinishedJobs ();
 
-  void flushFinishedJobs ();
+private:
+    void run ();
 
 };
 

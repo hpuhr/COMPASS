@@ -862,23 +862,24 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const PropertyList &v
         ss << filter;
     }
 
-    if (left_join)
-    {
-        logdbg << "SQLGenerator: getSelectCommand: grouping by";
-        ss << " GROUP BY " << main_table_name << "." << meta_table.mainTable().getKeyId();
-    }
+    //TODO FIXME
+//    if (left_join)
+//    {
+//        logdbg << "SQLGenerator: getSelectCommand: grouping by";
+//        ss << " GROUP BY " << main_table_name << "." << meta_table.mainTable().getKeyId();
+//    }
 
-    if (order.size() > 0)
-    {
-        logdbg << "SQLGenerator: getSelectCommand: ordering by";
-        ss << " ORDER BY " << order;
-    }
+//    if (order.size() > 0)
+//    {
+//        logdbg << "SQLGenerator: getSelectCommand: ordering by";
+//        ss << " ORDER BY " << order;
+//    }
 
-    if (limit.size() > 0)
-    {
-        ss << " " << limit;
-        logdbg << "SQLGenerator: getSelectCommand: limiting";
-    }
+//    if (limit.size() > 0)
+//    {
+//        ss << " " << limit;
+//        logdbg << "SQLGenerator: getSelectCommand: limiting";
+//    }
 
     ss << ";";
 

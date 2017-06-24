@@ -22,8 +22,8 @@
  *      Author: sk
  */
 
-#include "Thread.h"
-#include "Logger.h"
+#include "thread.h"
+#include "logger.h"
 
 Thread::Thread(std::string id, bool start)
 : stop_requested_(false), state_ (THREAD_STATE_INIT), id_(id)

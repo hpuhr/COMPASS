@@ -124,20 +124,6 @@ set ( atsdb_HDRS
 #        src/filter/filtermanager.h
         src/interface/dbtableinfo.h
         src/interface/sqlgenerator.h
-#        src/job/dbjob.h
-        src/job/job.h
-        src/job/joborderer.h
-#        src/job/dboactivedatasourcesdbjob.h
-#        src/job/dbovariabledistinctstatisticsdbjob.h
-#        src/job/dbovariableminmaxdbjob.h
-#        src/job/finalizedboreadjob.h
-#        src/job/dbocountdbjob.h
-#        src/job/dboreaddbjob.h
-#        src/job/dboinfodbjob.h
-#        src/job/updatebufferdbjob.h
-#        src/job/writebufferdbjob.h
-#        src/job/postprocessdbjob.h
-#        src/job/transformationjob.h
         src/object/dbovariable.h
         src/object/dbovariableset.h
         src/object/dbovariableorderedset.h
@@ -173,10 +159,9 @@ set ( atsdb_HDRS
         src/struct/structurevariable.h
         src/interface/dbtableinfo.h
         src/interface/dbinterface.h
-#        src/thread/thread.h
-#        src/thread/timedthread.h
-#        src/thread/workerthread.h
-#        src/thread/workerthreadmanager.h
+        src/thread/thread.h
+        src/thread/timedthread.h
+        src/thread/workerthread.h
 #        src/computation/workflow.h
 #        src/computation/computation.h
 #        src/computation/computationelement.h
@@ -225,13 +210,21 @@ set (atsdb_MOC_HEADERS
 #        src/gui/transformationeditdialog.h
 #        src/gui/transformationvariableeditdialog.h
 #        src/gui/filtereditdialog.h
-        src/schema/dbtablecolumncombobox.h
-        src/schema/dbschema.h
-        src/schema/dbschemawidget.h
-        src/schema/dbschemamanager.h
-        src/schema/dbschemamanagerwidget.h
-        src/schema/dbtablewidget.h
-        src/schema/metadbtablewidget.h
+        src/job/job.h
+        src/job/joborderer.h
+        src/thread/workerthreadmanager.h
+        #src/job/dbjob.h
+        #        src/job/dboactivedatasourcesdbjob.h
+        #        src/job/dbovariabledistinctstatisticsdbjob.h
+        #        src/job/dbovariableminmaxdbjob.h
+        #        src/job/finalizedboreadjob.h
+        #        src/job/dbocountdbjob.h
+        #        src/job/dboreaddbjob.h
+        #        src/job/dboinfodbjob.h
+        #        src/job/updatebufferdbjob.h
+        #        src/job/writebufferdbjob.h
+        #        src/job/postprocessdbjob.h
+        #        src/job/transformationjob.h
         src/object/dbobject.h
         src/object/dbobjectwidget.h
         src/object/dbovariablewidget.h
@@ -246,11 +239,18 @@ set (atsdb_MOC_HEADERS
 #        src/object/propertydatatypecombobox.h
 #        src/object/metadbobjecteditwidget.h
 #        src/object/stringrepresentationcombobox.h
-        src/unit/unitselectionwidget.h
 #        src/polygon/airspacesectormanagerwidget.h
 #        src/polygon/airspacesectortreewidget.h
 #        src/polygon/airspacesectorwidget.h
 #        src/projection/projectionmanagerwidget.h
+        src/schema/dbtablecolumncombobox.h
+        src/schema/dbschema.h
+        src/schema/dbschemawidget.h
+        src/schema/dbschemamanager.h
+        src/schema/dbschemamanagerwidget.h
+        src/schema/dbtablewidget.h
+        src/schema/metadbtablewidget.h
+        src/unit/unitselectionwidget.h
         )
 
 set ( atsdb_SRCS
@@ -296,8 +296,6 @@ set ( atsdb_SRCS
 #        src/job/dbocountdbjob.cpp
 #        src/job/dboreaddbjob.cpp
 #        src/job/dboinfodbjob.cpp
-#        src/job/dbjob.cpp
-        src/job/job.cpp
         src/job/joborderer.cpp
 #        src/job/finalizedboreadjob.cpp
 #        src/job/updatebufferdbjob.cpp
@@ -348,10 +346,10 @@ set ( atsdb_SRCS
 #        src/struct/structurereader.cpp
         src/struct/structuredescriptionmanager.cpp
         src/struct/structurevariable.cpp
-#        src/thread/thread.cpp
-#        src/thread/timedthread.cpp
-#        src/thread/workerthread.cpp
-#        src/thread/workerthreadmanager.cpp
+        src/thread/thread.cpp
+        src/thread/timedthread.cpp
+        src/thread/workerthread.cpp
+        src/thread/workerthreadmanager.cpp
 #        src/computation/workflow.cpp
 #        src/computation/computation.cpp
 #        src/computation/computationelement.cpp

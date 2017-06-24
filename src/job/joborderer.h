@@ -27,6 +27,8 @@
 
 #include <vector>
 #include <boost/thread/mutex.hpp>
+#include <QObject>
+#include <memory>
 
 class Buffer;
 class Job;
@@ -37,24 +39,30 @@ class Job;
  * Has simple functions that monitors active jobs, and a function that sets all active Jobs as obsolete.
  * Is thread-safe.
  */
-class JobOrderer
+class JobOrderer : public QObject
 {
+    Q_OBJECT
+public slots:
+    virtual void jobDone (std::shared_ptr <Job> job)=0;
+    virtual void jobObsolete (std::shared_ptr <Job> job)=0;
+
+    /// @brief Adds a Job to the active list
+    void addJob (std::shared_ptr <Job> job);
+    /// @brief Removes a Job from the active list
+    void removeJob (std::shared_ptr <Job> job);
+    /// @brief Sets all Jobs on the active list as obsolete
+    void setJobsObsolete ();
+
+
 public:
     /// @brief Constructor
     JobOrderer();
     /// @brief Destructor
     virtual ~JobOrderer();
 
-    /// @brief Adds a Job to the active list
-    void addJob (Job *job);
-    /// @brief Removes a Job from the active list
-    void removeJob (Job *job);
-    /// @brief Sets all Jobs on the active list as obsolete
-    void setJobsObsolete ();
-
 protected:
     /// Container with all active jobs
-    std::vector <Job *> active_jobs_;
+    std::vector <std::shared_ptr <Job>> active_jobs_;
     /// Protects the active jobs container
     boost::mutex mutex_;
 };

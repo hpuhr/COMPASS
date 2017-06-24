@@ -167,6 +167,7 @@ int main (int argc, char **argv)
     catch (std::exception &ex)
     {
         logerr  << "Main: Caught Exception '" << ex.what() << "'";
+        logerr.flush();
 
         ATSDB::instance().shutdown();
 
@@ -177,6 +178,7 @@ int main (int argc, char **argv)
     catch(...)
     {
         logerr  << "Main: Caught Exception";
+        logerr.flush();
 
         ATSDB::instance().shutdown();
 

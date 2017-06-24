@@ -41,7 +41,7 @@
 //#include "PostProcessDBJob.h"
 //#include "WriteBufferDBJob.h"
 //#include "DBOReadDBJob.h"
-//#include "WorkerThreadManager.h"
+#include "workerthreadmanager.h"
 //#include "DBOInfoDBJob.h"
 //#include "FinalizeDBOReadJob.h"
 //#include "DBOActiveDataSourcesDBJob.h"
@@ -64,9 +64,9 @@ ATSDB::ATSDB()
  : Configurable ("ATSDB", "ATSDB0", 0, "conf/atsdb.xml"), initialized_(false), db_interface_(nullptr), dbo_manager_(nullptr), db_schema_manager_ (nullptr)
 //: export_active_(false), dbo_reads_active_(0)
 {
-    //WorkerThreadManager::getInstance();
-
     logdbg  << "ATSDB: constructor: start";
+
+    WorkerThreadManager::getInstance();
 
     createSubConfigurables ();
 
@@ -92,7 +92,6 @@ void ATSDB::initialize()
 
     dbo_manager_->updateSchemaInformationSlot();
     db_interface_->updateDBObjectInformationSlot();
-
 }
 
 /**
@@ -288,6 +287,8 @@ void ATSDB::shutdown ()
     db_interface_ = nullptr;
 
     initialized_=false;
+
+    WorkerThreadManager::getInstance().shutdown();
 
 //    if (struct_reader_->hasUnwrittenData())
 //    {

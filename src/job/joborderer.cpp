@@ -41,13 +41,17 @@ JobOrderer::~JobOrderer()
   }
 }
 
-void JobOrderer::addJob (Job *job)
+void JobOrderer::addJob (std::shared_ptr <Job> job)
 {
   boost::mutex::scoped_lock l(mutex_);
   assert (std::find (active_jobs_.begin(), active_jobs_.end(), job) == active_jobs_.end());
+
+  connect (job.get(), SIGNAL(doneSignal(std::shared_ptr<Job>)), this, SLOT(jobDone(std::shared_ptr<Job>)));
+  connect (job.get(), SIGNAL(obsoleteSignal(std::shared_ptr<Job>)), this, SLOT(jobObsolete(std::shared_ptr<Job>)));
+
   active_jobs_.push_back(job);
 }
-void JobOrderer::removeJob (Job *job)
+void JobOrderer::removeJob (std::shared_ptr <Job> job)
 {
   boost::mutex::scoped_lock l(mutex_);
   assert (std::find (active_jobs_.begin(), active_jobs_.end(), job) != active_jobs_.end());
@@ -58,10 +62,9 @@ void JobOrderer::removeJob (Job *job)
 void JobOrderer::setJobsObsolete ()
 {
   boost::mutex::scoped_lock l(mutex_);
-  std::vector <Job *>::iterator it;
 
-  for (it = active_jobs_.begin(); it != active_jobs_.end(); it++)
-  {
-    (*it)->setObsolete();
-  }
+//  for (auto it : active_jobs_)
+//  {
+//    it->setObsolete();
+//  }
 }

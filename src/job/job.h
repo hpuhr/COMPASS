@@ -25,10 +25,8 @@
 #ifndef JOB_H_
 #define JOB_H_
 
-#include <boost/signals2.hpp>
-#include <boost/function.hpp>
-
-class JobOrderer;
+#include <QObject>
+#include <memory>
 
 /**
  * @brief Encapsulates a work-package
@@ -39,37 +37,62 @@ class JobOrderer;
  *
  * Important: The Job and the contained data must be deleted in the callback functions.
  */
-class Job
+class Job : public QObject
 {
-public:
-  /// Emitted signal if Job was performed
-  boost::signals2::signal<void (Job*)> done_signal_;
-  /// Emitted signal if Job is obsolete
-  boost::signals2::signal<void (Job*)> obsolete_signal_;
+    Q_OBJECT
+signals:
+    void doneSignal (std::shared_ptr <Job> job);
+    void obsoleteSignal(std::shared_ptr <Job> job);
 
 public:
-  /// @brief Constructor
-  Job(JobOrderer *orderer, boost::function<void (Job*)> done_function, boost::function<void (Job*)> obsolete_function);
-  /// @brief Destructor
-  virtual ~Job();
+    /// @brief Constructor
+    Job() : done_ (false), obsolete_(false) {}
+    /// @brief Destructor
+    virtual ~Job() {}
 
-  // @brief Main operation function
-  virtual void execute ()=0;
+    // @brief Main operation function
+    virtual void execute ()=0;
 
-  // @brief Returns done flag
-  bool isDone () { return done_; };
-  // @brief Sets obsolete flag
-  void setObsolete () { obsolete_=true; };
-  // @brief Returns obsolete flag
-  bool getObsolete () { return obsolete_; };
+    // @brief Returns done flag
+    bool done () { return done_; }
+    void emitDone () { emit obsoleteSignal(std::shared_ptr<Job>(this)); }
+    // @brief Sets obsolete flag
+    void setObsolete () { obsolete_=true; }
+    // @brief Returns obsolete flag
+    bool obsolete () { return obsolete_; }
+    void emitObsolete () { emit doneSignal(std::shared_ptr<Job>(this)); }
 
 protected:
-  /// Pointer to creator
-  JobOrderer *orderer_;
-  /// Done flag
-  bool done_;
-  /// Obsolete flag
-  bool obsolete_;
+    /// Done flag
+    bool done_;
+    /// Obsolete flag
+    bool obsolete_;
+
+    virtual void setDone () { done_=true; }
+};
+
+class DBInterface;
+
+/**
+ * @brief Job specialization for database operations
+ *
+ * Was created to ensure that database jobs are performed in the correct order in one thread (performance gain
+ * of multiple threads dubious).
+ *
+ * Requires a DBInterface instance, calls the done_function when completed or obsolete_function when aborted.
+ */
+class DBJob : public Job
+{
+    Q_OBJECT
+public:
+    /// @brief Constructor
+    DBJob(DBInterface &db_interface) : Job(), db_interface_(db_interface) {}
+    /// @brief Destructor
+    virtual ~DBJob() {}
+
+protected:
+    /// Database interface
+    DBInterface &db_interface_;
 };
 
 #endif /* JOB_H_ */

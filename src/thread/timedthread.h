@@ -19,7 +19,7 @@
 #ifndef TIMEDTHREAD_H
 #define TIMEDTHREAD_H
 
-#include "Thread.h"
+#include "thread.h"
 
 
 /**

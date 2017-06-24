@@ -272,7 +272,7 @@ void MySQLppConnection::execute (const std::string &command, std::shared_ptr <Bu
 
 void MySQLppConnection::readRowIntoBuffer (mysqlpp::Row &row, const PropertyList &list, unsigned int num_properties, std::shared_ptr <Buffer> buffer, unsigned int index)
 {
-    logdbg << "MySQLppConnection::readRowIntoBuffer: start buffer size " << buffer->size() << " index " << index;
+    //logdbg << "MySQLppConnection::readRowIntoBuffer: start buffer size " << buffer->size() << " index " << index;
     for (unsigned int cnt=0; cnt < num_properties; cnt++)
     {
         if (row[cnt] != mysqlpp::null)
@@ -320,7 +320,7 @@ void MySQLppConnection::readRowIntoBuffer (mysqlpp::Row &row, const PropertyList
             }
         }
     }
-    logdbg << "MySQLppConnection::readRowIntoBuffer: end buffer size " << buffer->size() << " index " << index;
+    //logdbg << "MySQLppConnection::readRowIntoBuffer: end buffer size " << buffer->size() << " index " << index;
 }
 
 void MySQLppConnection::execute (const std::string &command)
@@ -354,7 +354,7 @@ void MySQLppConnection::prepareStatement (const char *sql)
     }
 
     query_used_=true;
-    logdbg  << "MySQLppConnection: prepareStatement: sql '" << sql << "' done.";
+    logdbg  << "MySQLppConnection: prepareStatement: done.";
 }
 void MySQLppConnection::finalizeStatement ()
 {

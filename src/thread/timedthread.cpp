@@ -16,7 +16,7 @@
  */
 
 
-#include "TimedThread.h"
+#include "timedthread.h"
 
 
 /**

@@ -1,6 +1,6 @@
 <Configuration class_id="DBObjectManager" instance_id="DBObjectManager0">
     <Configuration class_id="DBObject" instance_id="DBObjectADSB0">
-        <ParameterBool is_loadable="0"/>
+        <ParameterBool is_loadable="1"/>
         <ParameterString info=""/>
         <ParameterString name="ADSB"/>
         <Configuration class_id="DBOSchemaMetaTableDefinition" instance_id="DBOSchemaMetaTableDefinition0">
@@ -933,7 +933,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="DBObject" instance_id="DBObjectMLAT0">
-        <ParameterBool is_loadable="0"/>
+        <ParameterBool is_loadable="1"/>
         <ParameterString info=""/>
         <ParameterString name="MLAT"/>
         <Configuration class_id="DBOSchemaMetaTableDefinition" instance_id="DBOSchemaMetaTableDefinition0">
@@ -2258,7 +2258,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="DBObject" instance_id="DBObjectRadar0">
-        <ParameterBool is_loadable="0"/>
+        <ParameterBool is_loadable="1"/>
         <ParameterString info=""/>
         <ParameterString name="Radar"/>
         <Configuration class_id="DBOSchemaMetaTableDefinition" instance_id="DBOSchemaMetaTableDefinition0">
@@ -3681,7 +3681,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="DBObject" instance_id="DBObjectTracker0">
-        <ParameterBool is_loadable="0"/>
+        <ParameterBool is_loadable="1"/>
         <ParameterString info=""/>
         <ParameterString name="Tracker"/>
         <Configuration class_id="DBOSchemaMetaTableDefinition" instance_id="DBOSchemaMetaTableDefinition0">

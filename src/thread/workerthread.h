@@ -25,7 +25,7 @@
 #ifndef WORKERTHREAD_H_
 #define WORKERTHREAD_H_
 
-#include "Thread.h"
+#include "thread.h"
 
 class Job;
 
@@ -41,7 +41,7 @@ public:
   virtual ~WorkerThread();
 
   /// @brief Adds a TransformationJob
-  void addJob (Job *job);
+  void addJob (std::shared_ptr<Job> job);
 
   /// @brief Returns working time, sleep time in percent
   std::pair <double, double> getUsage ();
@@ -55,7 +55,7 @@ protected:
   boost::mutex todos_mutex_;
 
   /// Container with all unfinished Jobs
-  std::list <Job *> todos_;
+  std::list <std::shared_ptr<Job>> todos_;
 
   /// Sleep time for every do_work iteration
   const static unsigned int pause_time_=10;

@@ -944,76 +944,7 @@ void DBInterface::clearResult ()
 //    return point;
 //}
 
-//Buffer *DBInterface::getTableList()
-//{
-//    boost::mutex::scoped_lock l(mutex_);
-//    return connection_->getTableList ();
-//}
 
-//Buffer *DBInterface::getColumnList(std::string table)
-//{
-//    boost::mutex::scoped_lock l(mutex_);
-//    return connection_->getColumnList(table);
-//}
-
-//void DBInterface::printDBSchema ()
-//{
-//    loginf  << "DBInterface: printDBSchema";
-
-//    Buffer *tables = getTableList ();
-
-//    if (tables->firstWrite())
-//    {
-//        loginf  << "DBInterface: printDBSchema: no data returned";
-//        delete tables;
-//        return;
-//    }
-
-//    assert (false);
-//    // TODO FIXME
-
-////    tables->setIndex(0);
-////    std::string table_name;
-
-////    for (unsigned int cnt=0; cnt < tables->getSize(); cnt++)
-////    {
-////        if (cnt != 0)
-////            tables->incrementIndex();
-
-////        table_name = *(std::string *) tables->get(0);
-
-////        loginf  << "DBInterface: printDBSchema: found table '" << table_name << "'";
-
-////        Buffer *columns = getColumnList(table_name);
-
-////        PropertyList *list = columns->getPropertyList();
-////        unsigned int name_index = list->getPropertyIndex ("name");
-////        unsigned int type_index = list->getPropertyIndex ("type");
-////        unsigned int key_index = list->getPropertyIndex ("key");
-
-////        std::string column_name;
-////        std::string type;
-////        bool key;
-
-////        columns->setIndex(0);
-
-////        for (unsigned int cnt2=0; cnt2 < columns->getSize(); cnt2++)
-////        {
-////            if (cnt2 != 0)
-////                columns->incrementIndex();
-
-////            column_name = *(std::string *) columns->get(name_index);
-////            type = *(std::string *) columns->get(type_index);
-////            key = *(bool *) columns->get(key_index);
-
-////            loginf  << "DBInterface: printDBSchema: in table '" << table_name << "' is column '" << column_name << "' type '" << type << "' key " << key;
-////        }
-
-////        delete columns;
-////    }
-
-//    delete tables;
-//}
 
 //void DBInterface::clearTableContent (std::string table_name)
 //{
@@ -1461,6 +1392,7 @@ void DBInterface::clearResult ()
 
 void DBInterface::updateDBObjectInformationSlot ()
 {
+    logdbg << "DBInterface: updateDBObjectInformationSlot";
     prepared_.clear();
     reading_done_.clear();
     exists_.clear();
@@ -1486,7 +1418,10 @@ void DBInterface::testReading ()
 {
     loginf << "DBInterface: testReading";
 
-    DBObject &object = ATSDB::instance().objectManager().get("Radar");
+    boost::posix_time::ptime start_time;
+    boost::posix_time::ptime stop_time;
+
+    DBObject &object = ATSDB::instance().objectManager().get("MLAT");
     DBOVariableSet read_list;
 
     loginf << "DBInterface: testReading: adding all variables";
@@ -1496,17 +1431,28 @@ void DBInterface::testReading ()
     loginf << "DBInterface: testReading: preparing reading";
     prepareRead (object, read_list); //, std::string custom_filter_clause="", DBOVariable *order=0);
 
+    start_time = boost::posix_time::microsec_clock::local_time();
+
     loginf << "DBInterface: testReading: starting reading";
     std::vector<std::shared_ptr <Buffer>> buffer_vector;
+
+    unsigned int num_rows=0;
 
     while (!getReadingDone(object))
     {
         std::shared_ptr <Buffer> buffer = readDataChunk (object, false);
         buffer_vector.push_back(buffer);
-        loginf << "DBInterface: testReading: got buffer size " << buffer->size();
+
+        stop_time = boost::posix_time::microsec_clock::local_time();
+        boost::posix_time::time_duration diff = stop_time - start_time;
+
+        num_rows += buffer->size();
+        if (diff.total_seconds() > 0)
+            loginf << "DBInterface: testReading: got buffer size " << buffer->size() << " all " << num_rows << " elapsed " << diff << " #el/sec " << num_rows/diff.total_seconds();
     }
 
-    loginf << "DBInterface: testReading: reading done";
+    boost::posix_time::time_duration diff = stop_time - start_time;
+    loginf << "DBInterface: testReading: reading done: all " << num_rows << " elapsed " << diff << " #el/sec " << num_rows/diff.total_seconds();
     finalizeReadStatement (object);
 
 

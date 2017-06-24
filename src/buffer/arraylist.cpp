@@ -38,7 +38,6 @@ ArrayListBase::~ArrayListBase ()
 
 size_t ArrayListBase::size ()
 {
-    logdbg << "ArrayListBase: size: size " << size_;
     return size_;
 }
 

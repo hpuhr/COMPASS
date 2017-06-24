@@ -156,17 +156,6 @@ public:
 //    /// @brief Returns the context reference point
 //    std::pair<float, float> getContextReferencePoint ();
 
-//    /// @brief Returns the used DBConnectionInfo
-//    DBConnectionInfo *getDBInfo () { assert (info_); return info_;}
-
-//    /// @brief Returns a buffer containing all existing table names
-//    Buffer *getTableList();
-//    /// @brief Returns a buffer containing all column names for a given table name
-//    Buffer *getColumnList(std::string table);
-
-//    /// @brief Prints database schema information (for debugging purposes)
-//    void printDBSchema ();
-
 //    /// @brief Returns if minimum/maximum table exists
 //    bool existsMinMaxTable ();
 //    /// @brief Returns if properties table exists
@@ -179,9 +168,6 @@ public:
     void updateExists ();
     /// @brief Update the count_ container
     void updateCount ();
-
-//    /// @brief Returns the SQLGenerator
-//    SQLGenerator *getSQLGenerator () { assert (sql_generator_); return sql_generator_; }
 
 //    /// @brief Returns minimum/maximum information for all columns in a table
 //    DBResult *queryMinMaxNormalForTable (std::string table);
@@ -242,9 +228,6 @@ protected:
     std::map <std::string, DBTableInfo> table_info_;
 
     virtual void checkSubConfigurables ();
-
-    /// @brief loads database tables and columns
-    //void initialize ();
 
     /// @brief Returns element count for DBO
     unsigned int queryCount (const DBObject &dbobject);

@@ -22,10 +22,10 @@
  *      Author: sk
  */
 
-#include "Job.h"
-#include "WorkerThread.h"
-#include "WorkerThreadManager.h"
-#include "Logger.h"
+#include "job.h"
+#include "workerthread.h"
+#include "workerthreadmanager.h"
+#include "logger.h"
 
 WorkerThread::WorkerThread(std::string id)
 : Thread (id), sleep_time_ (0), work_time_ (0)
@@ -59,11 +59,11 @@ void WorkerThread::do_work()
         logdbg  << "WorkerThread " << id_ << ": do_work: getting job";
         boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
-        Job *job = todos_.back();
+        std::shared_ptr<Job> job = todos_.back();
         todos_.pop_back();
         todoslock.unlock();
 
-        if (!job->getObsolete())
+        if (!job->obsolete())
         {
           logdbg  << "WorkerThread " << id_ << ": do_work: executing job";
           job->execute();
@@ -94,7 +94,7 @@ void WorkerThread::do_work()
   //logdbg  << "WorkerThread: do_work: end";
 }
 
-void WorkerThread::addJob (Job *job)
+void WorkerThread::addJob (std::shared_ptr<Job> job)
 {
   boost::mutex::scoped_lock l(todos_mutex_);
 

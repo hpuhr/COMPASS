@@ -1,5 +1,6 @@
 <?1.0?>
 <Configuration>
     <SubConfigurationFile class_id="ATSDB" instance_id="ATSDB0" path="conf/atsdb.xml"/>
+    <SubConfigurationFile class_id="WorkerThreadManager" instance_id="WorkerThreadManager0" path="conf/threads.xml"/>
     <SubConfigurationFile class_id="UnitManager" instance_id="UnitManager0" path="conf/units.xml"/>
 </Configuration>

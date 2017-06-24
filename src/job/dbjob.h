@@ -25,7 +25,7 @@
 #ifndef DBJOB_H_
 #define DBJOB_H_
 
-#include "Job.h"
+#include "job.h"
 
 class DBInterface;
 

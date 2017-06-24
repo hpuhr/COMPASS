@@ -106,7 +106,7 @@ public:
                 it->get()->at(cnt)=T();
 
         setAllNone();
-    };
+    }
 
     /// @brief Returns const reference to a specific value
     const T &get (size_t index)
@@ -118,7 +118,7 @@ public:
             throw std::out_of_range ("ArrayListTemplate: get of None value");
 
         return data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
-    };
+    }
 
     /// @brief Returns string representation of a specific value
     const std::string &getAsString (size_t index)
@@ -130,7 +130,7 @@ public:
             throw std::out_of_range ("ArrayListTemplate: get of None value");
 
         return std::string (data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE));
-    };
+    }
 
     /// @brief Sets specific value
     void set (size_t index, T value)
@@ -139,35 +139,35 @@ public:
 
         if (index >= max_size_)
         {
-            logdbg << "ArrayListTemplate:set: adding new arrays for index " << index << " current max size " << max_size_;
+            //logdbg << "ArrayListTemplate:set: adding new arrays for index " << index << " current max size " << max_size_;
             while (index >= max_size_)
                 allocateNewArray ();
         }
 
-        logdbg << "ArrayListTemplate: set: setting index " << index << " to value " << value << " using array " << index/BUFFER_ARRAY_SIZE << " array_index " << index%BUFFER_ARRAY_SIZE;
+        //logdbg << "ArrayListTemplate: set: setting index " << index << " to value " << value << " using array " << index/BUFFER_ARRAY_SIZE << " array_index " << index%BUFFER_ARRAY_SIZE;
 
         data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE) = value;
 
         if (index >= size_)
             size_= index+1;
 
-        logdbg << "ArrayListTemplate: set: size " << size_ << " max_size " << max_size_;
+        //logdbg << "ArrayListTemplate: set: size " << size_ << " max_size " << max_size_;
 
         unsetNone(index);
-    };
+    }
 
     /// @brief Sets specific element to None value
     virtual void setNone(size_t index)
     {
         if (index >= max_size_)
         {
-            logdbg << "ArrayListTemplate:setNone: adding new arrays for index " << index << " current max size " << max_size_;
+            //logdbg << "ArrayListTemplate:setNone: adding new arrays for index " << index << " current max size " << max_size_;
             while (index >= max_size_)
                 allocateNewArray ();
         }
 
         ArrayListBase::setNone(index);
-    };
+    }
 
 protected:
     /// Data containers
@@ -184,8 +184,8 @@ protected:
 
         assert (data_.size() == none_flags_.size());
 
-        logdbg << "ArrayListTemplate: allocateNewArray: added new array current max size " << max_size_;
-    };
+        //logdbg << "ArrayListTemplate: allocateNewArray: added new array current max size " << max_size_;
+    }
 };
 
 #endif /* ARRAYLIST_H_ */
