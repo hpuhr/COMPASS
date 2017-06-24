@@ -32,5 +32,10 @@ Please refer to the 2 different readme files:
 Author
 ------
 Helmut Puhr
-helmut.puhr@tugraz.at
+helmut.puhr(at)gmx.at
+
+Notes
+-----
+Please note that this library is under major refactoring and will change quite substantially over the next months.
+
 
