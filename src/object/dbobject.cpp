@@ -38,7 +38,7 @@
 #include "dboreaddbjob.h"
 #include "atsdb.h"
 #include "dbinterface.h"
-#include "workerthreadmanager.h"
+#include "jobmanager.h"
 #include "dbtableinfo.h"
 
 /**
@@ -363,7 +363,7 @@ void DBObject::load ()
     connect (read_job, SIGNAL(obsoleteSignal()), this, SLOT(readJobObsoleteSlot()));
     connect (read_job, SIGNAL(doneSignal()), this, SLOT(readJobDoneSlot()));
 
-    WorkerThreadManager::instance().addJob(read_job_);
+    JobManager::instance().addJob(read_job_);
 }
 
 void DBObject::readJobIntermediateSlot (std::shared_ptr<Buffer> buffer)

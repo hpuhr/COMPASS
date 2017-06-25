@@ -44,7 +44,6 @@
 #include "global.h"
 #include "logger.h"
 #include "config.h"
-#include "workerthreadmanager.h"
 #include "configurationmanager.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"

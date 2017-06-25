@@ -41,7 +41,7 @@
 //#include "PostProcessDBJob.h"
 //#include "WriteBufferDBJob.h"
 //#include "DBOReadDBJob.h"
-#include "workerthreadmanager.h"
+#include "jobmanager.h"
 //#include "DBOInfoDBJob.h"
 //#include "FinalizeDBOReadJob.h"
 //#include "DBOActiveDataSourcesDBJob.h"
@@ -66,7 +66,7 @@ ATSDB::ATSDB()
 {
     logdbg  << "ATSDB: constructor: start";
 
-    WorkerThreadManager::instance().start();
+    JobManager::instance().start();
 
     createSubConfigurables ();
 
@@ -284,7 +284,7 @@ void ATSDB::shutdown ()
 
     initialized_=false;
 
-    WorkerThreadManager::instance().shutdown();
+    JobManager::instance().shutdown();
 
 //    if (struct_reader_->hasUnwrittenData())
 //    {

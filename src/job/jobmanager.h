@@ -22,8 +22,8 @@
  *      Author: sk
  */
 
-#ifndef WORKERTHREADMANAGER_H_
-#define WORKERTHREADMANAGER_H_
+#ifndef JOBMANAGER_H_
+#define JOBMANAGER_H_
 
 #ifndef Q_MOC_RUN
 #include <boost/thread/mutex.hpp>
@@ -51,36 +51,32 @@ class Job;
  * done, but can be blocked by unfinished jobs which were added earlier.
  *
  */
-class WorkerThreadManager: public QThread, public Singleton, public Configurable
+class JobManager: public QThread, public Singleton, public Configurable
 {
     Q_OBJECT
 
 public:
     /// @brief Constructor
-    WorkerThreadManager();
-    virtual ~WorkerThreadManager();
+    JobManager();
+    virtual ~JobManager();
 
     void addJob (std::shared_ptr<Job> job);
-    //void addDBJob (std::shared_ptr<DBJob> job);
+    void cancelJob (std::shared_ptr<Job> job);
+
+    bool noJobs ();
+    unsigned int numJobs ();
 
     void shutdown ();
 
-    bool noJobs ();
-
-    static WorkerThreadManager& instance()
+    static JobManager& instance()
     {
-        static WorkerThreadManager instance;
+        static JobManager instance;
         return instance;
     }
-
-    //const std::vector <WorkerThread*> workers () { return workers_; }
-    unsigned int numJobs ();
 
 protected:
     /// Flag indicating if thread should stop.
     volatile bool stop_requested_;
-    /// Boost thread
-    //boost::shared_ptr<boost::thread> thread_;
 
     boost::mutex mutex_;
     unsigned int num_workers_;
@@ -88,10 +84,6 @@ protected:
     unsigned int update_time_;
 
     std::list <std::shared_ptr<Job>> todos_signal_;
-    //std::list <std::shared_ptr<DBJob>> db_todos_signal_;
-
-    //std::vector <WorkerThread *> workers_;
-    //unsigned int cnt_;
 
     void flushFinishedJobs ();
 
@@ -100,4 +92,4 @@ private:
 
 };
 
-#endif /* WorkerThreadManager_H_ */
+#endif /* JOBMANAGER_H_ */
