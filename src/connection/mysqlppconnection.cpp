@@ -411,7 +411,7 @@ std::shared_ptr <DBResult> MySQLppConnection::stepPreparedCommand (unsigned int 
         ++cnt;
     }
 
-    //loginf  << "MySQLppConnection: stepPreparedCommand: buffer size " << buffer->size() << " max results " << max_results;
+    loginf  << "MySQLppConnection: stepPreparedCommand: buffer size " << buffer->size() << " max results " << max_results;
 
     assert (buffer->size() != 0 && buffer->size() <= max_results+1); // because of max_results--
 

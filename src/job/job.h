@@ -26,7 +26,10 @@
 #define JOB_H_
 
 #include <QObject>
+#include <QRunnable>
 #include <memory>
+
+class DBInterface;
 
 /**
  * @brief Encapsulates a work-package
@@ -37,7 +40,7 @@
  *
  * Important: The Job and the contained data must be deleted in the callback functions.
  */
-class Job : public QObject
+class Job : public QObject, public QRunnable
 {
     Q_OBJECT
 signals:
@@ -46,12 +49,12 @@ signals:
 
 public:
     /// @brief Constructor
-    Job() : done_ (false), obsolete_(false) {}
+    Job(DBInterface &db_interface) : done_ (false), obsolete_(false), db_interface_(db_interface) { setAutoDelete(false); }
     /// @brief Destructor
     virtual ~Job() {}
 
     // @brief Main operation function
-    virtual void execute ()=0;
+    virtual void run() = 0;
 
     // @brief Returns done flag
     bool done () { return done_; }
@@ -67,11 +70,13 @@ protected:
     bool done_;
     /// Obsolete flag
     bool obsolete_;
+    /// Database interface
+    DBInterface &db_interface_;
 
     virtual void setDone () { done_=true; }
 };
 
-class DBInterface;
+//class DBInterface;
 
 /**
  * @brief Job specialization for database operations
@@ -81,18 +86,18 @@ class DBInterface;
  *
  * Requires a DBInterface instance, calls the done_function when completed or obsolete_function when aborted.
  */
-class DBJob : public Job
-{
-    Q_OBJECT
-public:
-    /// @brief Constructor
-    DBJob(DBInterface &db_interface) : Job(), db_interface_(db_interface) {}
-    /// @brief Destructor
-    virtual ~DBJob() {}
+//class DBJob : public Job
+//{
+//    Q_OBJECT
+//public:
+//    /// @brief Constructor
+//    DBJob(DBInterface &db_interface) : Job(), db_interface_(db_interface) {}
+//    /// @brief Destructor
+//    virtual ~DBJob() {}
 
-protected:
-    /// Database interface
-    DBInterface &db_interface_;
-};
+//protected:
+//    /// Database interface
+//    DBInterface &db_interface_;
+//};
 
 #endif /* JOB_H_ */

@@ -359,11 +359,11 @@ void DBObject::load ()
     DBOReadDBJob *read_job = new DBOReadDBJob (ATSDB::instance().interface(), *this, read_list, custom_filter_clause, nullptr, false);
 
     read_job_ = std::shared_ptr<DBOReadDBJob> (read_job);
-    connect (read_job, SIGNAL(intermediateSignal(std::shared_ptr<Buffer>)), this, SLOT(readJobIntermediateSlot(std::shared_ptr<Buffer>)), Qt::QueuedConnection);
-    connect (read_job, SIGNAL(obsoleteSignal()), this, SLOT(readJobObsoleteSlot()), Qt::QueuedConnection);
-    connect (read_job, SIGNAL(doneSignal()), this, SLOT(readJobDoneSlot()), Qt::QueuedConnection);
+    connect (read_job, SIGNAL(intermediateSignal(std::shared_ptr<Buffer>)), this, SLOT(readJobIntermediateSlot(std::shared_ptr<Buffer>)));
+    connect (read_job, SIGNAL(obsoleteSignal()), this, SLOT(readJobObsoleteSlot()));
+    connect (read_job, SIGNAL(doneSignal()), this, SLOT(readJobDoneSlot()));
 
-    WorkerThreadManager::instance().addDBJob(read_job_);
+    WorkerThreadManager::instance().addJob(read_job_);
 }
 
 void DBObject::readJobIntermediateSlot (std::shared_ptr<Buffer> buffer)

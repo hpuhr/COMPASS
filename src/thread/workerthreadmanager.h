@@ -61,7 +61,7 @@ public:
     virtual ~WorkerThreadManager();
 
     void addJob (std::shared_ptr<Job> job);
-    void addDBJob (std::shared_ptr<DBJob> job);
+    //void addDBJob (std::shared_ptr<DBJob> job);
 
     void shutdown ();
 
@@ -73,7 +73,7 @@ public:
         return instance;
     }
 
-    const std::vector <WorkerThread*> workers () { return workers_; }
+    //const std::vector <WorkerThread*> workers () { return workers_; }
     unsigned int numJobs ();
 
 protected:
@@ -88,10 +88,10 @@ protected:
     unsigned int update_time_;
 
     std::list <std::shared_ptr<Job>> todos_signal_;
-    std::list <std::shared_ptr<DBJob>> db_todos_signal_;
+    //std::list <std::shared_ptr<DBJob>> db_todos_signal_;
 
-    std::vector <WorkerThread *> workers_;
-    unsigned int cnt_;
+    //std::vector <WorkerThread *> workers_;
+    //unsigned int cnt_;
 
     void flushFinishedJobs ();
 

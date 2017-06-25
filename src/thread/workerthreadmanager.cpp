@@ -23,9 +23,10 @@
  */
 
 #include <qtimer.h>
+#include <QThreadPool>
 
 #include "workerthreadmanager.h"
-#include "workerthread.h"
+//#include "workerthread.h"
 //#include "workerthreadWwdget.h"
 //#include "dbjob.h"
 #include "job.h"
@@ -43,16 +44,16 @@ WorkerThreadManager::WorkerThreadManager()
     registerParameter ("num_workers", &num_workers_, 3);
     registerParameter ("update_time", &update_time_, 10);
 
-    cnt_=0;
+//    cnt_=0;
 
-    for (unsigned int cnt=0; cnt < num_workers_; cnt++)
-    {
-        std::string name = "Worker"+String::intToString(cnt);
-        WorkerThread *worker = new WorkerThread (name);
-        assert (worker);
-        workers_.push_back(worker);
-        worker->start();
-    }
+//    for (unsigned int cnt=0; cnt < num_workers_; cnt++)
+//    {
+//        std::string name = "Worker"+String::intToString(cnt);
+//        WorkerThread *worker = new WorkerThread (name);
+//        assert (worker);
+//        workers_.push_back(worker);
+//        worker->start();
+//    }
 
     logdbg  << "WorkerThreadManager: constructor: end";
 }
@@ -60,17 +61,17 @@ WorkerThreadManager::WorkerThreadManager()
 WorkerThreadManager::~WorkerThreadManager()
 {
     logdbg  << "WorkerThreadManager: destructor";
-    boost::mutex::scoped_lock l(mutex_);
-    for (unsigned int cnt=0; cnt < num_workers_; cnt++)
-    {
-        while (workers_.at(cnt)->isRunning())
-        {
-            logdbg  << "WorkerThreadManager: destructor: waiting for thread to exist";
-            msleep(100);
-        }
-        delete workers_.at(cnt);
-    }
-    workers_.clear();
+//    boost::mutex::scoped_lock l(mutex_);
+//    for (unsigned int cnt=0; cnt < num_workers_; cnt++)
+//    {
+//        while (workers_.at(cnt)->isRunning())
+//        {
+//            logdbg  << "WorkerThreadManager: destructor: waiting for thread to exist";
+//            msleep(100);
+//        }
+//        delete workers_.at(cnt);
+//    }
+//    workers_.clear();
 }
 
 void WorkerThreadManager::shutdown ()
@@ -82,11 +83,11 @@ void WorkerThreadManager::shutdown ()
 
     //stop();
 
-    for (unsigned int cnt=0; cnt < num_workers_; cnt++)
-    {
-        WorkerThread *worker = workers_.at(cnt);
-        worker->shutdown();
-    }
+//    for (unsigned int cnt=0; cnt < num_workers_; cnt++)
+//    {
+//        WorkerThread *worker = workers_.at(cnt);
+//        worker->shutdown();
+//    }
     logdbg  << "WorkerThreadManager: shutdown: done";
 }
 
@@ -94,23 +95,25 @@ void WorkerThreadManager::addJob (std::shared_ptr<Job> job)
 {
     boost::mutex::scoped_lock l(mutex_);
 
-    unsigned int index = 1 + cnt_ % (num_workers_-1);
+    //unsigned int index = 1 + cnt_ % (num_workers_-1);
 
-    logdbg  << "WorkerThreadManager: addJob: to " << index;
-    workers_.at(index)->addJob(job);
+    QThreadPool::globalInstance()->start(job.get());
+
+    //logdbg  << "WorkerThreadManager: addJob: to " << index;
+    //workers_.at(index)->addJob(job);
     todos_signal_.push_back(job);
 
-    cnt_++;
+    //cnt_++;
 }
 
-void WorkerThreadManager::addDBJob (std::shared_ptr<DBJob> job)
-{
-    boost::mutex::scoped_lock l(mutex_);
+//void WorkerThreadManager::addDBJob (std::shared_ptr<DBJob> job)
+//{
+//    boost::mutex::scoped_lock l(mutex_);
 
-    logdbg  << "WorkerThreadManager: addDBJob: to 0";
-    workers_.at(0)->addJob(job);
-    db_todos_signal_.push_back(job);
-}
+//    logdbg  << "WorkerThreadManager: addDBJob: to 0";
+//    workers_.at(0)->addJob(job);
+//    db_todos_signal_.push_back(job);
+//}
 
 void WorkerThreadManager::flushFinishedJobs ()
 {
@@ -124,45 +127,45 @@ void WorkerThreadManager::flushFinishedJobs ()
 
         todos_signal_.pop_front();
         logdbg << "WorkerThreadManager: flushFinishedJobs: flushed job";
-        if( current->obsolete() )
+        if(current->obsolete())
         {
             logdbg << "WorkerThreadManager: flushFinishedJobs: flushing obsolete job";
             current->emitObsolete();
             continue;
         }
 
-        logdbg << "WorkerThreadManager: flushFinishedJobs: flushing done job";
+        loginf << "WorkerThreadManager: flushFinishedJobs: flushing done job";
         current->emitDone();
     }
 
-    while (db_todos_signal_.size() > 0)
-    {
-        std::shared_ptr<DBJob> current = db_todos_signal_.front();
+//    while (db_todos_signal_.size() > 0)
+//    {
+//        std::shared_ptr<DBJob> current = db_todos_signal_.front();
 
-        if( !current->obsolete() && !current->done() )
-            break;
+//        if( !current->obsolete() && !current->done() )
+//            break;
 
-        db_todos_signal_.pop_front();
-        logdbg << "WorkerThreadManager: flushFinishedJobs: flushed db job";
+//        db_todos_signal_.pop_front();
+//        logdbg << "WorkerThreadManager: flushFinishedJobs: flushed db job";
 
-        if( current->obsolete() )
-        {
-            logdbg << "WorkerThreadManager: flushFinishedJobs: flushing obsolete db job";
-            current->emitObsolete();
+//        if( current->obsolete() )
+//        {
+//            logdbg << "WorkerThreadManager: flushFinishedJobs: flushing obsolete db job";
+//            current->emitObsolete();
 
-            continue;
-        }
+//            continue;
+//        }
 
-        logdbg << "WorkerThreadManager: flushFinishedJobs: flushing done db job";
-        current->emitDone();
-    }
+//        logdbg << "WorkerThreadManager: flushFinishedJobs: flushing done db job";
+//        current->emitDone();
+//    }
 }
 
 bool WorkerThreadManager::noJobs ()
 {
     boost::mutex::scoped_lock l(mutex_);
     //logdbg << "WorkerThreadManager: noJobs: todos " << todos_signal_.size() << " db tods " << db_todos_signal_.size();
-    return todos_signal_.size() == 0 && db_todos_signal_.size() == 0;
+    return todos_signal_.size() == 0; //&& db_todos_signal_.size() == 0
 }
 
 /**
@@ -176,7 +179,7 @@ void WorkerThreadManager::run()
 
     while (1)
     {
-        if (todos_signal_.size() > 0 || db_todos_signal_.size() > 0)
+        if (todos_signal_.size() > 0) //|| db_todos_signal_.size() > 0
             flushFinishedJobs ();
 
         if (stop_requested_)
@@ -188,6 +191,7 @@ void WorkerThreadManager::run()
 
 unsigned int WorkerThreadManager::numJobs ()
 {
+    boost::mutex::scoped_lock l(mutex_);
     return todos_signal_.size();
 }
 

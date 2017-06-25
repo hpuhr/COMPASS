@@ -37,7 +37,7 @@ class DBObject;
  * Incrementally reads data record from DBO tables and writes the results into a DBDataSet.
  *
  */
-class DBOReadDBJob : public DBJob
+class DBOReadDBJob : public Job
 {
     Q_OBJECT
 signals:
@@ -48,7 +48,7 @@ public:
                  DBOVariable *order, bool activate_key_search);
     virtual ~DBOReadDBJob();
 
-    virtual void execute ();
+    virtual void run ();
 
     DBOVariableSet getReadList () { return read_list_; }
 
@@ -58,6 +58,8 @@ protected:
     std::string custom_filter_clause_;
     DBOVariable *order_;
     bool activate_key_search_;
+
+    std::vector <std::shared_ptr<Buffer>> buffers_;
 };
 
 #endif /* DBOREADDBJOB_H_ */

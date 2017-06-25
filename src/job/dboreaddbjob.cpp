@@ -24,6 +24,8 @@
 
 #include <boost/thread/thread.hpp>
 
+#include <QThread>
+
 #include "dboreaddbjob.h"
 #include "dbobject.h"
 #include "dbovariable.h"
@@ -41,7 +43,7 @@
 
 DBOReadDBJob::DBOReadDBJob(DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
                            DBOVariable *order, bool activate_key_search)
-: DBJob (db_interface), dbobject_(dbobject), read_list_(read_list), custom_filter_clause_ (custom_filter_clause), order_(order), activate_key_search_(activate_key_search)
+: Job (db_interface), dbobject_(dbobject), read_list_(read_list), custom_filter_clause_ (custom_filter_clause), order_(order), activate_key_search_(activate_key_search)
 {
     // AVIBIT HACK
 //    if (order == 0)
@@ -56,7 +58,7 @@ DBOReadDBJob::~DBOReadDBJob()
 
 }
 
-void DBOReadDBJob::execute ()
+void DBOReadDBJob::run ()
 {
     logdbg << "DBOReadDBJob: execute: start";
 
@@ -65,7 +67,7 @@ void DBOReadDBJob::execute ()
     else
         db_interface_.prepareRead (dbobject_, read_list_, custom_filter_clause_, order_);
 
-    while (done_ && !obsolete_)
+    while (!done_ && !obsolete_)
     {
         // AVIBIT HACK
         //Buffer *buffer = db_interface_->readDataChunk(type_, order_->getName() == "id");
@@ -82,10 +84,15 @@ void DBOReadDBJob::execute ()
         }
         else
         {
-            loginf << "DBOReadDBJob: execute: intermediate signal";
+            buffers_.push_back(buffer);
+            loginf << "DBOReadDBJob: execute: intermediate signal, #buffers " << buffers_.size() << " last one " << buffer->lastOne();
             emit intermediateSignal(buffer);
         }
-        boost::this_thread::sleep( boost::posix_time::milliseconds(10) );
+
+        if (buffer->lastOne())
+            break;
+        //QThread::currentThread()->msleep(50);
+        //msleep (10);
     }
 
     db_interface_.finalizeReadStatement(dbobject_);

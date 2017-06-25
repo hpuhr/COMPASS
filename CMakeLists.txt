@@ -1,7 +1,8 @@
 set(ATSDB_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 message("  Path: ${ATSDB_PATH}")
 
-cmake_minimum_required( VERSION 2.6 )
+#cmake_minimum_required( VERSION 2.6 )
+cmake_minimum_required(VERSION 2.8.11)
 set ( CMAKE_BUILD_TYPE Debug )
 
 project( ATSDB )
@@ -13,9 +14,18 @@ message("  Install Path: ${CMAKE_INSTALL_PREFIX}")
 message("  Platform: Linux")
 add_definitions ( -Wall -std=c++11 )
 
-find_package ( Qt4 REQUIRED )
-message("  QT_QTCORE_LIBRARY: ${QT_QTCORE_LIBRARY}") 
-include ( ${QT_USE_FILE} )
+find_package(Qt5Widgets)
+find_package(Qt5Core)
+
+#find_package(Qt5 REQUIRED COMPONENTS Widgets Core)
+#message("  QT_QTCORE_LIBRARY: ${QT_QTCORE_LIBRARY}")
+#include ( ${QT_USE_FILE} )
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+# Instruct CMake to run moc automatically when needed.
+set(CMAKE_AUTOMOC ON)
+
+add_definitions(${Qt5Widgets_DEFINITIONS})
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 
 find_package ( Boost REQUIRED COMPONENTS regex system thread)
 message("  Boost_INCLUDE_DIR: ${Boost_INCLUDE_DIR}")
@@ -55,8 +65,9 @@ message("  GDAL_LIBRARIES: ${GDAL_LIBRARIES}")
 include_directories (
 	${CMAKE_SOURCE_DIR}
 	${CMAKE_CURRENT_BINARY_DIR}
-	${QT_QTCORE_INCLUDE_DIR}
-	${QT_QTGUI_INCLUDE_DIR}
+        ${Qt5Widgets_INCLUDE_DIRS}
+        #${QT_QTCORE_INCLUDE_DIR}
+        #${QT_QTGUI_INCLUDE_DIR}
 	${Boost_INCLUDE_DIRS}
 	#${SQLITE3_INCLUDE_DIR}
 	${MySQLpp_INCLUDE_DIR}
@@ -101,7 +112,68 @@ link_directories(
 set ( LIBRARY_OUTPUT_PATH dist/lib )
 
 set ( atsdb_HDRS
-        src/atsdb.h
+    src/client/mainwindow.h
+    src/connection/dbconnection.h
+#        src/filter/dbfiltercondition.h
+#        src/filter/dbfilterwidget.h
+#        src/filter/filtereditwidget.h
+#        src/filter/filtergeneratorwidget.h
+#        src/filter/sensorfilterwidget.h
+    src/connection/mysqlppconnectionwidget.h
+    src/connection/mysqlserverwidget.h
+    src/interface/dbinterface.h
+    src/interface/dbinterfacewidget.h
+#        src/gui/qcollapsablewidget.h
+#        src/gui/workerthreadwidget.h
+#        src/gui/workfloweditwidget.h
+#        src/gui/workfloweditdialog.h
+#        src/gui/workflowsettingseditdialog.h
+#        src/gui/computationeditdialog.h
+#        src/gui/transformationeditdialog.h
+#        src/gui/transformationvariableeditdialog.h
+#        src/gui/filtereditdialog.h
+    src/job/job.h
+    src/job/joborderer.h
+    src/thread/workerthreadmanager.h
+    #src/job/dbjob.h
+    #        src/job/dboactivedatasourcesdbjob.h
+    #        src/job/dbovariabledistinctstatisticsdbjob.h
+    #        src/job/dbovariableminmaxdbjob.h
+    #        src/job/finalizedboreadjob.h
+    #        src/job/dbocountdbjob.h
+    src/job/dboreaddbjob.h
+    #        src/job/dboinfodbjob.h
+    #        src/job/updatebufferdbjob.h
+    #        src/job/writebufferdbjob.h
+    #        src/job/postprocessdbjob.h
+    #        src/job/transformationjob.h
+    src/object/dbobject.h
+    src/object/dbobjectwidget.h
+    src/object/dbovariablewidget.h
+    src/object/dbobjectmanager.h
+    src/object/dbobjectmanagerwidget.h
+    src/object/dbovariabledatatypecombobox.h
+#        src/object/dbovariablecombobox.h
+#        src/object/dbovariablesetwidget.h
+#        src/object/dbovariableorderedsetwidget.h
+#        src/object/dbovariableselectionwidget.h
+    src/object/dbovariabledatatypecombobox.h
+#        src/object/propertydatatypecombobox.h
+#        src/object/metadbobjecteditwidget.h
+#        src/object/stringrepresentationcombobox.h
+#        src/polygon/airspacesectormanagerwidget.h
+#        src/polygon/airspacesectortreewidget.h
+#        src/polygon/airspacesectorwidget.h
+#        src/projection/projectionmanagerwidget.h
+    src/schema/dbtablecolumncombobox.h
+    src/schema/dbschema.h
+    src/schema/dbschemawidget.h
+    src/schema/dbschemamanager.h
+    src/schema/dbschemamanagerwidget.h
+    src/schema/dbtablewidget.h
+    src/schema/metadbtablewidget.h
+    src/unit/unitselectionwidget.h
+    src/atsdb.h
         src/buffer/arraylist.h
         src/buffer/buffer.h
 #        src/buffer/bufferfilter.h
@@ -159,8 +231,8 @@ set ( atsdb_HDRS
         src/struct/structurevariable.h
         src/interface/dbtableinfo.h
         src/interface/dbinterface.h
-        src/thread/thread.h
-        src/thread/workerthread.h
+        #src/thread/thread.h
+        #src/thread/workerthread.h
 #        src/computation/workflow.h
 #        src/computation/computation.h
 #        src/computation/computationelement.h
@@ -188,69 +260,6 @@ set ( atsdb_HDRS
         src/util/logger.h
         )
 
-set (atsdb_MOC_HEADERS
-        src/client/mainwindow.h
-        src/connection/dbconnection.h
-#        src/filter/dbfiltercondition.h
-#        src/filter/dbfilterwidget.h
-#        src/filter/filtereditwidget.h
-#        src/filter/filtergeneratorwidget.h
-#        src/filter/sensorfilterwidget.h
-        src/connection/mysqlppconnectionwidget.h
-        src/connection/mysqlserverwidget.h
-        src/interface/dbinterface.h
-        src/interface/dbinterfacewidget.h
-#        src/gui/qcollapsablewidget.h
-#        src/gui/workerthreadwidget.h
-#        src/gui/workfloweditwidget.h
-#        src/gui/workfloweditdialog.h
-#        src/gui/workflowsettingseditdialog.h
-#        src/gui/computationeditdialog.h
-#        src/gui/transformationeditdialog.h
-#        src/gui/transformationvariableeditdialog.h
-#        src/gui/filtereditdialog.h
-        src/job/job.h
-        src/job/joborderer.h
-        src/thread/workerthreadmanager.h
-        #src/job/dbjob.h
-        #        src/job/dboactivedatasourcesdbjob.h
-        #        src/job/dbovariabledistinctstatisticsdbjob.h
-        #        src/job/dbovariableminmaxdbjob.h
-        #        src/job/finalizedboreadjob.h
-        #        src/job/dbocountdbjob.h
-        src/job/dboreaddbjob.h
-        #        src/job/dboinfodbjob.h
-        #        src/job/updatebufferdbjob.h
-        #        src/job/writebufferdbjob.h
-        #        src/job/postprocessdbjob.h
-        #        src/job/transformationjob.h
-        src/object/dbobject.h
-        src/object/dbobjectwidget.h
-        src/object/dbovariablewidget.h
-        src/object/dbobjectmanager.h
-        src/object/dbobjectmanagerwidget.h
-        src/object/dbovariabledatatypecombobox.h
-#        src/object/dbovariablecombobox.h
-#        src/object/dbovariablesetwidget.h
-#        src/object/dbovariableorderedsetwidget.h
-#        src/object/dbovariableselectionwidget.h
-        src/object/dbovariabledatatypecombobox.h
-#        src/object/propertydatatypecombobox.h
-#        src/object/metadbobjecteditwidget.h
-#        src/object/stringrepresentationcombobox.h
-#        src/polygon/airspacesectormanagerwidget.h
-#        src/polygon/airspacesectortreewidget.h
-#        src/polygon/airspacesectorwidget.h
-#        src/projection/projectionmanagerwidget.h
-        src/schema/dbtablecolumncombobox.h
-        src/schema/dbschema.h
-        src/schema/dbschemawidget.h
-        src/schema/dbschemamanager.h
-        src/schema/dbschemamanagerwidget.h
-        src/schema/dbtablewidget.h
-        src/schema/metadbtablewidget.h
-        src/unit/unitselectionwidget.h
-        )
 
 set ( atsdb_SRCS
         src/atsdb.cpp
@@ -345,8 +354,8 @@ set ( atsdb_SRCS
 #        src/struct/structurereader.cpp
         src/struct/structuredescriptionmanager.cpp
         src/struct/structurevariable.cpp
-        src/thread/thread.cpp
-        src/thread/workerthread.cpp
+        #src/thread/thread.cpp
+        #src/thread/workerthread.cpp
         src/thread/workerthreadmanager.cpp
 #        src/computation/workflow.cpp
 #        src/computation/computation.cpp
@@ -386,18 +395,18 @@ set ( client_SRCS
     )
 
 	
-QT4_WRAP_UI( UI_HDRS ${atsdb_UI} )
-qt4_wrap_cpp (atsdb_MOC_OUTFILES ${atsdb_MOC_HEADERS})
-add_library ( atsdb SHARED ${atsdb_SRCS} ${atsdb_HDRS} ${UIS} ${UI_HDRS} ${RSCS} ${TRS} ${atsdb_MOC_OUTFILES} )
-target_link_libraries ( atsdb  ${GDAL_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${TINYXML2_LIBRARY} ${GDAL_LIBRARIES} ${Boost_LIBRARIES} ${LOG4CPP_LIBRARIES} ${MySQLpp_LIBRARY})
+#QT5_WRAP_UI( UI_HDRS ${atsdb_UI} )
+#qt5_wrap_cpp (atsdb_MOC_OUTFILES ${atsdb_MOC_HEADERS})
+add_library ( atsdb SHARED ${atsdb_SRCS} ${atsdb_HDRS} ) #${UIS} ${UI_HDRS} ${RSCS} ${TRS} ${atsdb_MOC_OUTFILES}
+target_link_libraries ( atsdb  ${GDAL_LIBRARIES} Qt5::Widgets Qt5::Core ${TINYXML2_LIBRARY} ${GDAL_LIBRARIES} ${Boost_LIBRARIES} ${LOG4CPP_LIBRARIES} ${MySQLpp_LIBRARY}) #${QT_QTCORE_LIBRARY} ${QT_WIDGETS_LIBRARY}
 # ${SQLITE3_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_DATA_TIME_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_IOSTREAMS_LIBRARY}
 
 add_executable ( atsdb_client ${atsdb_HDRS} ${client_SRCS})
-target_link_libraries ( atsdb_client atsdb ${GDAL_LIBRARIES} ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} ${TINYXML2_LIBRARY} ${GDAL_LIBRARIES} ${Boost_LIBRARIES} ${LOG4CPP_LIBRARIES} ${MySQLpp_LIBRARY})
+target_link_libraries ( atsdb_client atsdb ${GDAL_LIBRARIES} Qt5::Widgets Qt5::Core ${TINYXML2_LIBRARY} ${GDAL_LIBRARIES} ${Boost_LIBRARIES} ${LOG4CPP_LIBRARIES} ${MySQLpp_LIBRARY}) #${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY}
 
-INSTALL_FILES(/include .h ${atsdb_HDRS})
-INSTALL_FILES(/include .h ${atsdb_MOC_HEADERS})
-INSTALL_FILES(/include .h ${UI_HDRS})
+#INSTALL_FILES(/include .h ${atsdb_HDRS})
+#INSTALL_FILES(/include .h ${atsdb_MOC_HEADERS})
+#INSTALL_FILES(/include .h ${UI_HDRS})
  #INSTALL_FILES(/include .h ${atsdb_HDRS})
 #INSTALL_FILES(/include .h ${atsdb_MOC_HEADERS})
 #INSTALL_FILES(/include .h ${UI_HDRS})  
