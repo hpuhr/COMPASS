@@ -169,6 +169,16 @@ public:
         ArrayListBase::setNone(index);
     }
 
+    void addData (ArrayListTemplate<T> &other)
+    {
+        loginf << "Buffer: addData: data size " << data_.size() << " none flags size " << none_flags_.size() << " size " << size_ << " max " << max_size_;
+        data_.insert(data_.end(), other.data_.begin(), other.data_.end());
+        none_flags_.insert(none_flags_.end(), other.none_flags_.begin(), other.none_flags_.end());
+        size_ = max_size_ + other.size_;
+        max_size_ += other.max_size_;
+        loginf << "Buffer: addData: end data size " << data_.size() << " none flags size " << none_flags_.size() << " size " << size_ << " max " << max_size_;
+    }
+
 protected:
     /// Data containers
     std::vector < std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > > data_;

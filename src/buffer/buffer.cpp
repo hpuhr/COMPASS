@@ -359,29 +359,50 @@ void Buffer::seizeBuffer (Buffer &org_buffer)
     //logdbg  << "Buffer: seizeBuffer: containers";
     //std::vector <PropertyContainer *> org_containers = org_buffer->containers_;
 
+    assert (arrays_bool_.size() == org_buffer.arrays_bool_.size());
+    assert (arrays_char_.size() == org_buffer.arrays_char_.size());
+    assert (arrays_uchar_.size() == org_buffer.arrays_uchar_.size());
+    assert (arrays_int_.size() == org_buffer.arrays_int_.size());
+    assert (arrays_uint_.size() == org_buffer.arrays_uint_.size());
+    assert (arrays_long_int_.size() == org_buffer.arrays_long_int_.size());
+    assert (arrays_ulong_int_.size() == org_buffer.arrays_ulong_int_.size());
+    assert (arrays_float_.size() == org_buffer.arrays_float_.size());
+    assert (arrays_double_.size() == org_buffer.arrays_double_.size());
+    assert (arrays_string_.size() == org_buffer.arrays_string_.size());
+
     arrays_.insert (arrays_.end(), org_buffer.arrays_.begin(), org_buffer.arrays_.end());
     org_buffer.arrays_.clear();
 
     logdbg  << "Buffer: seizeBuffer: inserting ";
-    arrays_bool_.insert(make_move_iterator(begin(org_buffer.arrays_bool_)), make_move_iterator(end(org_buffer.arrays_bool_)));
+    for (auto it : arrays_bool_)
+        it.second.addData(org_buffer.arrays_bool_.at(it.first));
     org_buffer.arrays_bool_.clear();
-    arrays_char_.insert(make_move_iterator(begin(org_buffer.arrays_char_)), make_move_iterator(end(org_buffer.arrays_char_)));
+    for (auto it : arrays_char_)
+        it.second.addData(org_buffer.arrays_char_.at(it.first));
     org_buffer.arrays_char_.clear();
-    arrays_uchar_.insert(make_move_iterator(begin(org_buffer.arrays_uchar_)), make_move_iterator(end(org_buffer.arrays_uchar_)));
+    for (auto it : arrays_uchar_)
+        it.second.addData(org_buffer.arrays_uchar_.at(it.first));
     org_buffer.arrays_uchar_.clear();
-    arrays_int_.insert(make_move_iterator(begin(org_buffer.arrays_int_)), make_move_iterator(end(org_buffer.arrays_int_)));
+    for (auto it : arrays_int_)
+        it.second.addData(org_buffer.arrays_int_.at(it.first));
     org_buffer.arrays_int_.clear();
-    arrays_uint_.insert(make_move_iterator(begin(org_buffer.arrays_uint_)), make_move_iterator(end(org_buffer.arrays_uint_)));
+    for (auto it : arrays_uint_)
+        it.second.addData(org_buffer.arrays_uint_.at(it.first));
     org_buffer.arrays_uint_.clear();
-    arrays_long_int_.insert(make_move_iterator(begin(org_buffer.arrays_long_int_)), make_move_iterator(end(org_buffer.arrays_long_int_)));
+    for (auto it : arrays_long_int_)
+        it.second.addData(org_buffer.arrays_long_int_.at(it.first));
     org_buffer.arrays_long_int_.clear();
-    arrays_ulong_int_.insert(make_move_iterator(begin(org_buffer.arrays_ulong_int_)), make_move_iterator(end(org_buffer.arrays_ulong_int_)));
+    for (auto it : arrays_ulong_int_)
+        it.second.addData(org_buffer.arrays_ulong_int_.at(it.first));
     org_buffer.arrays_ulong_int_.clear();
-    arrays_float_.insert(make_move_iterator(begin(org_buffer.arrays_float_)), make_move_iterator(end(org_buffer.arrays_float_)));
+    for (auto it : arrays_float_)
+        it.second.addData(org_buffer.arrays_float_.at(it.first));
     org_buffer.arrays_float_.clear();
-    arrays_double_.insert(make_move_iterator(begin(org_buffer.arrays_double_)), make_move_iterator(end(org_buffer.arrays_double_)));
+    for (auto it : arrays_double_)
+        it.second.addData(org_buffer.arrays_double_.at(it.first));
     org_buffer.arrays_double_.clear();
-    arrays_string_.insert(make_move_iterator(begin(org_buffer.arrays_string_)), make_move_iterator(end(org_buffer.arrays_string_)));
+    for (auto it : arrays_string_)
+        it.second.addData(org_buffer.arrays_string_.at(it.first));
     org_buffer.arrays_string_.clear();
 
     //containers_.insert (containers_.end(), org_containers.begin(), org_containers.end());

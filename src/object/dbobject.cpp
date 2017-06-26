@@ -55,6 +55,8 @@ DBObject::DBObject(std::string class_id, std::string instance_id, Configurable *
 
     createSubConfigurables ();
 
+    qRegisterMetaType<std::shared_ptr<Buffer>>("std::shared_ptr<Buffer>");
+
     logdbg  << "DBObject: constructor: created with instance_id " << instance_id_ << " name " << name_;
 }
 
@@ -350,8 +352,9 @@ void DBObject::load ()
     {
         JobManager::instance().cancelJob(read_job_);
         read_job_ = nullptr;
-        read_job_data_.clear();
     }
+
+    read_job_data_.clear();
 
     if (data_)
         data_ = nullptr;
@@ -379,15 +382,22 @@ void DBObject::readJobIntermediateSlot (std::shared_ptr<Buffer> buffer)
     loginf << "DBObject: " << name_ << " readJobIntermediateSlot";
 
     DBOReadDBJob *sender = dynamic_cast <DBOReadDBJob*> (QObject::sender());
-    assert (sender);
+
+    if (!sender)
+    {
+        logwrn << "DBObject: readJobIntermediateSlot: null sender, event on the loose";
+        return;
+    }
     assert (sender == read_job_.get());
 
     read_job_data_.push_back(buffer);
 
-    if (!data_)
-        data_ = buffer;
-    else
-        data_->seizeBuffer (*buffer.get());
+//    if (!data_)
+//        data_ = buffer;
+//    else
+//        data_->seizeBuffer (*buffer.get());
+
+    loginf << "DBObject: " << name_ << " readJobIntermediateSlot: got " << read_job_data_.size() << " buffers ";// << " with size " << data_->size();
 }
 
 void DBObject::readJobObsoleteSlot ()
