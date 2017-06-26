@@ -31,6 +31,7 @@
 #include "dbobjectwidget.h"
 #include "dbobjectmanager.h"
 #include "dbovariable.h"
+#include "buffer.h"
 //#include "StructureDescriptionManager.h"
 #include "propertylist.h"
 #include "metadbtable.h"
@@ -352,6 +353,9 @@ void DBObject::load ()
         read_job_data_.clear();
     }
 
+    if (data_)
+        data_ = nullptr;
+
     DBOVariableSet read_list;
 
     loginf << "DBInterface: testReading: adding all variables";
@@ -377,7 +381,13 @@ void DBObject::readJobIntermediateSlot (std::shared_ptr<Buffer> buffer)
     DBOReadDBJob *sender = dynamic_cast <DBOReadDBJob*> (QObject::sender());
     assert (sender);
     assert (sender == read_job_.get());
+
     read_job_data_.push_back(buffer);
+
+    if (!data_)
+        data_ = buffer;
+    else
+        data_->seizeBuffer (*buffer.get());
 }
 
 void DBObject::readJobObsoleteSlot ()

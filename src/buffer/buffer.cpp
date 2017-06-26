@@ -349,23 +349,44 @@ ArrayListTemplate<std::string> &Buffer::getString (const std::string &id)
 
 void Buffer::seizeBuffer (Buffer &org_buffer)
 {
-    // TODO
-    assert (false);
-//    logdbg  << "Buffer: seizeBuffer: start";
+    logdbg  << "Buffer: seizeBuffer: start";
 
 //    logdbg  << "Buffer: seizeBuffer: this: cont " << containers_.size() << " max_index " << max_index_ << " max_used_index " << max_used_index_ << " first " << first_write_;
 //    logdbg  << "Buffer: seizeBuffer: org: cont " << org_buffer->containers_.size() << " max_index " << org_buffer->max_index_ << " max_used_index " << org_buffer->max_used_index_ << " first " << org_buffer->first_write_;
 
-//    assert (org_buffer);
-//    assert (isFull() || first_write_);
+    assert (full() || firstWrite()); //|| first_write_
 
-//    logdbg  << "Buffer: seizeBuffer: containers";
-//    std::vector <PropertyContainer *> org_containers = org_buffer->containers_;
+    //logdbg  << "Buffer: seizeBuffer: containers";
+    //std::vector <PropertyContainer *> org_containers = org_buffer->containers_;
 
-//    logdbg  << "Buffer: seizeBuffer: inserting ";
-//    containers_.insert (containers_.end(), org_containers.begin(), org_containers.end());
-//    org_buffer->containers_.clear();
-//    //all your containers belong to us
+    arrays_.insert (arrays_.end(), org_buffer.arrays_.begin(), org_buffer.arrays_.end());
+    org_buffer.arrays_.clear();
+
+    logdbg  << "Buffer: seizeBuffer: inserting ";
+    arrays_bool_.insert(make_move_iterator(begin(org_buffer.arrays_bool_)), make_move_iterator(end(org_buffer.arrays_bool_)));
+    org_buffer.arrays_bool_.clear();
+    arrays_char_.insert(make_move_iterator(begin(org_buffer.arrays_char_)), make_move_iterator(end(org_buffer.arrays_char_)));
+    org_buffer.arrays_char_.clear();
+    arrays_uchar_.insert(make_move_iterator(begin(org_buffer.arrays_uchar_)), make_move_iterator(end(org_buffer.arrays_uchar_)));
+    org_buffer.arrays_uchar_.clear();
+    arrays_int_.insert(make_move_iterator(begin(org_buffer.arrays_int_)), make_move_iterator(end(org_buffer.arrays_int_)));
+    org_buffer.arrays_int_.clear();
+    arrays_uint_.insert(make_move_iterator(begin(org_buffer.arrays_uint_)), make_move_iterator(end(org_buffer.arrays_uint_)));
+    org_buffer.arrays_uint_.clear();
+    arrays_long_int_.insert(make_move_iterator(begin(org_buffer.arrays_long_int_)), make_move_iterator(end(org_buffer.arrays_long_int_)));
+    org_buffer.arrays_long_int_.clear();
+    arrays_ulong_int_.insert(make_move_iterator(begin(org_buffer.arrays_ulong_int_)), make_move_iterator(end(org_buffer.arrays_ulong_int_)));
+    org_buffer.arrays_ulong_int_.clear();
+    arrays_float_.insert(make_move_iterator(begin(org_buffer.arrays_float_)), make_move_iterator(end(org_buffer.arrays_float_)));
+    org_buffer.arrays_float_.clear();
+    arrays_double_.insert(make_move_iterator(begin(org_buffer.arrays_double_)), make_move_iterator(end(org_buffer.arrays_double_)));
+    org_buffer.arrays_double_.clear();
+    arrays_string_.insert(make_move_iterator(begin(org_buffer.arrays_string_)), make_move_iterator(end(org_buffer.arrays_string_)));
+    org_buffer.arrays_string_.clear();
+
+    //containers_.insert (containers_.end(), org_containers.begin(), org_containers.end());
+    //org_buffer->containers_.clear();
+    //all your containers belong to us
 
 //    logdbg  << "Buffer: seizeBuffer: setting indexes";
 
@@ -394,7 +415,7 @@ void Buffer::seizeBuffer (Buffer &org_buffer)
 //        updateContainerKeyInfo ();
 //    }
 
-//    logdbg  << "Buffer: seizeBuffer: end";
+    logdbg  << "Buffer: seizeBuffer: end";
 }
 
 //Buffer *Buffer::transferData ()

@@ -250,6 +250,8 @@ protected:
     std::shared_ptr <DBOReadDBJob> read_job_;
     std::vector <std::shared_ptr<Buffer>> read_job_data_;
 
+    std::shared_ptr<Buffer> data_;
+
     /// Container with all DBOSchemaMetaTableDefinitions
     std::vector <DBOSchemaMetaTableDefinition*> meta_table_definitions_;
     /// Container with the main meta tables for schemas (schema identifier -> meta_table identifier)

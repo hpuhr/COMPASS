@@ -81,7 +81,7 @@ protected:
 
     QPushButton *start_button_;
 
-    bool native_menu_;
+    //bool native_menu_;
 
     /// @brief Creates File menu
     void createMenus();

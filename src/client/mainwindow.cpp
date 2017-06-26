@@ -114,7 +114,7 @@ MainWindow::MainWindow()
 
     widget_stack_->setCurrentIndex (0);
 
-    menuBar()->setNativeMenuBar(native_menu_);
+    //menuBar()->setNativeMenuBar(native_menu_);
 
 }
 

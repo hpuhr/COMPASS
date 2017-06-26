@@ -410,16 +410,18 @@ std::shared_ptr <DBResult> MySQLppConnection::stepPreparedCommand (unsigned int 
 
         ++cnt;
     }
-
     loginf  << "MySQLppConnection: stepPreparedCommand: buffer size " << buffer->size() << " max results " << max_results;
 
-    assert (buffer->size() != 0 && buffer->size() <= max_results+1); // because of max_results--
+    assert (buffer->size() <= max_results+1); // because of max_results--
 
-    if (done)
+    if (buffer->size() == 0 || done)
     {
         logdbg  << "MySQLppConnection: stepPreparedCommand: reading done";
         prepared_command_done_=true;
-        buffer->lastOne(true);
+        if (done)
+            buffer->lastOne(true);
+        else
+            buffer=nullptr;
     }
 
     logdbg  << "MySQLppConnection: stepPreparedCommand: done";

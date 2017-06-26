@@ -873,11 +873,11 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const PropertyList &v
 //        ss << " ORDER BY " << order;
 //    }
 
-//    if (limit.size() > 0)
-//    {
-//        ss << " " << limit;
-//        logdbg << "SQLGenerator: getSelectCommand: limiting";
-//    }
+    if (limit.size() > 0)
+    {
+        ss << " LIMIT " << limit;
+        logdbg << "SQLGenerator: getSelectCommand: limiting";
+    }
 
     ss << ";";
 
