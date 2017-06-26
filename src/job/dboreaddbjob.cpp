@@ -67,11 +67,13 @@ void DBOReadDBJob::run ()
     else
         db_interface_.prepareRead (dbobject_, read_list_, custom_filter_clause_, order_);
 
+    unsigned int cnt=0;
     while (!done_ && !obsolete_)
     {
         // AVIBIT HACK
         //Buffer *buffer = db_interface_->readDataChunk(type_, order_->getName() == "id");
         std::shared_ptr<Buffer> buffer = db_interface_.readDataChunk(dbobject_, activate_key_search_);
+        cnt++;
 
         assert (buffer->dboName() == dbobject_.name());
 
@@ -84,17 +86,15 @@ void DBOReadDBJob::run ()
         }
         else
         {
-            buffers_.push_back(buffer);
-            loginf << "DBOReadDBJob: execute: intermediate signal, #buffers " << buffers_.size() << " last one " << buffer->lastOne();
+            loginf << "DBOReadDBJob: execute: intermediate signal, #buffers " << cnt << " last one " << buffer->lastOne();
             emit intermediateSignal(buffer);
         }
 
         if (buffer->lastOne())
             break;
-        //QThread::currentThread()->msleep(50);
-        //msleep (10);
     }
 
+    loginf << "DBOReadDBJob: execute: finalizing statement";
     db_interface_.finalizeReadStatement(dbobject_);
     done_=true;
 

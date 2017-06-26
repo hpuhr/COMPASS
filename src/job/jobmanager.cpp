@@ -54,6 +54,23 @@ void JobManager::shutdown ()
     logdbg  << "JobManager: shutdown";
     boost::mutex::scoped_lock l(mutex_);
 
+    for (auto job : todos_signal_)
+        job->setObsolete ();
+
+    while (todos_signal_.size() > 0) // wait for finish
+    {
+        auto job = std::begin(todos_signal_);
+
+        while (job != std::end(todos_signal_))
+        {
+            if ((*job)->done ())
+                job = todos_signal_.erase(job);
+            else
+                ++job;
+        }
+        msleep(1);
+    }
+
     stop_requested_ = true;
 
     logdbg  << "JobManager: shutdown: done";
@@ -72,7 +89,10 @@ void JobManager::cancelJob (std::shared_ptr<Job> job)
 {
     boost::mutex::scoped_lock l(mutex_);
 
-    QThreadPool::globalInstance()->cancel(job.get());
+    job->setObsolete();
+
+    while (!job->done()) // wait for finish
+        msleep(1);
 
     todos_signal_.erase(find(todos_signal_.begin(), todos_signal_.end(), job));
 }

@@ -345,8 +345,12 @@ void DBObject::load ()
 {
     assert (is_loadable_);
 
-    assert (!read_job_);
-    read_job_data_.clear();
+    if (read_job_)
+    {
+        JobManager::instance().cancelJob(read_job_);
+        read_job_ = nullptr;
+        read_job_data_.clear();
+    }
 
     DBOVariableSet read_list;
 

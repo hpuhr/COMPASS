@@ -1,7 +1,6 @@
 set(ATSDB_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 message("  Path: ${ATSDB_PATH}")
 
-#cmake_minimum_required( VERSION 2.6 )
 cmake_minimum_required(VERSION 2.8.11)
 set ( CMAKE_BUILD_TYPE Debug )
 
@@ -17,9 +16,6 @@ add_definitions ( -Wall -std=c++11 )
 find_package(Qt5Widgets)
 find_package(Qt5Core)
 
-#find_package(Qt5 REQUIRED COMPONENTS Widgets Core)
-#message("  QT_QTCORE_LIBRARY: ${QT_QTCORE_LIBRARY}")
-#include ( ${QT_USE_FILE} )
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Instruct CMake to run moc automatically when needed.
 set(CMAKE_AUTOMOC ON)
@@ -66,8 +62,6 @@ include_directories (
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
     ${Qt5Widgets_INCLUDE_DIRS}
-    #${QT_QTCORE_INCLUDE_DIR}
-    #${QT_QTGUI_INCLUDE_DIR}
     ${Boost_INCLUDE_DIRS}
     #${SQLITE3_INCLUDE_DIR}
     ${MySQLpp_INCLUDE_DIR}
@@ -391,21 +385,14 @@ set ( client_SRCS
     )
 
 
-#QT5_WRAP_UI( UI_HDRS ${atsdb_UI} )
-#qt5_wrap_cpp (atsdb_MOC_OUTFILES ${atsdb_MOC_HEADERS})
-add_library ( atsdb SHARED ${atsdb_SRCS} ${atsdb_HDRS} ) #${UIS} ${UI_HDRS} ${RSCS} ${TRS} ${atsdb_MOC_OUTFILES}
-target_link_libraries ( atsdb  ${GDAL_LIBRARIES} Qt5::Widgets Qt5::Core ${TINYXML2_LIBRARY} ${GDAL_LIBRARIES} ${Boost_LIBRARIES} ${LOG4CPP_LIBRARIES} ${MySQLpp_LIBRARY}) #${QT_QTCORE_LIBRARY} ${QT_WIDGETS_LIBRARY}
+add_library ( atsdb SHARED ${atsdb_SRCS} ${atsdb_HDRS} ) 
+target_link_libraries ( atsdb  ${GDAL_LIBRARIES} Qt5::Widgets Qt5::Core ${TINYXML2_LIBRARY} ${GDAL_LIBRARIES} ${Boost_LIBRARIES} ${LOG4CPP_LIBRARIES} ${MySQLpp_LIBRARY}) 
 # ${SQLITE3_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_DATA_TIME_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_IOSTREAMS_LIBRARY}
 
 add_executable ( atsdb_client ${atsdb_HDRS} ${client_SRCS})
-target_link_libraries ( atsdb_client atsdb ${GDAL_LIBRARIES} Qt5::Widgets Qt5::Core ${TINYXML2_LIBRARY} ${GDAL_LIBRARIES} ${Boost_LIBRARIES} ${LOG4CPP_LIBRARIES} ${MySQLpp_LIBRARY}) #${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY}
+target_link_libraries ( atsdb_client atsdb ${GDAL_LIBRARIES} Qt5::Widgets Qt5::Core ${TINYXML2_LIBRARY} ${GDAL_LIBRARIES} ${Boost_LIBRARIES} ${LOG4CPP_LIBRARIES} ${MySQLpp_LIBRARY})
 
-#INSTALL_FILES(/include .h ${atsdb_HDRS})
-#INSTALL_FILES(/include .h ${atsdb_MOC_HEADERS})
-#INSTALL_FILES(/include .h ${UI_HDRS})
-#INSTALL_FILES(/include .h ${atsdb_HDRS})
-#INSTALL_FILES(/include .h ${atsdb_MOC_HEADERS})
-#INSTALL_FILES(/include .h ${UI_HDRS})  
+INSTALL_FILES(/include .h ${atsdb_HDRS})
 
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)

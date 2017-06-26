@@ -38,6 +38,7 @@
 #include <QLineEdit>
 #include <QGridLayout>
 #include <QSettings>
+#include <QThread>
 
 //#include "Buffer.h"
 #include "mainwindow.h"
@@ -54,6 +55,7 @@
 #include "dbschemamanager.h"
 #include "dbschemamanagerwidget.h"
 #include "stringconv.h"
+#include "jobmanager.h"
 //#include "ProjectionManager.h"
 //#include "ProjectionManagerWidget.h"
 
@@ -176,13 +178,13 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
     ConfigurationManager::getInstance().saveConfiguration();
 
+    JobManager::instance().shutdown();
+
     ATSDB::instance().shutdown();
     assert (!ATSDB::instance().ready());
 
     if (widget_stack_)
         delete widget_stack_;
-
-    //WorkerThreadManager::getInstance().shutdown();
 
     QWidget::closeEvent(event);
     logdbg  << "MainWindow: closeEvent: done";

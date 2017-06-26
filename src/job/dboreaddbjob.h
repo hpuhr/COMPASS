@@ -58,8 +58,6 @@ protected:
     std::string custom_filter_clause_;
     DBOVariable *order_;
     bool activate_key_search_;
-
-    std::vector <std::shared_ptr<Buffer>> buffers_;
 };
 
 #endif /* DBOREADDBJOB_H_ */
