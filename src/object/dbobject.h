@@ -28,6 +28,8 @@
 #include <string>
 #include <qobject.h>
 #include <memory>
+#include "boost/date_time/posix_time/posix_time.hpp"
+
 
 #include "global.h"
 #include "dbovariableset.h"
@@ -276,6 +278,9 @@ protected:
     bool has_active_data_sources_info_;
 
     DBObjectWidget *widget_;
+
+    boost::posix_time::ptime start_time_;
+    boost::posix_time::ptime stop_time_;
 
     virtual void checkSubConfigurables ();
     /// @brief Checks if variables really exist. Not used yet.

@@ -94,7 +94,7 @@ public:
         : ArrayListBase () {}
 
     /// @brief Destructor
-    virtual ~ArrayListTemplate () {};
+    virtual ~ArrayListTemplate () {}
 
     /// @brief Sets all elements to false
     virtual void clear()
@@ -171,12 +171,18 @@ public:
 
     void addData (ArrayListTemplate<T> &other)
     {
-        loginf << "Buffer: addData: data size " << data_.size() << " none flags size " << none_flags_.size() << " size " << size_ << " max " << max_size_;
+        logdbg << "ArrayListTemplate: addData: data size " << data_.size() << " none flags size " << none_flags_.size() << " size " << size_ << " max " << max_size_;
         data_.insert(data_.end(), other.data_.begin(), other.data_.end());
         none_flags_.insert(none_flags_.end(), other.none_flags_.begin(), other.none_flags_.end());
         size_ = max_size_ + other.size_;
         max_size_ += other.max_size_;
-        loginf << "Buffer: addData: end data size " << data_.size() << " none flags size " << none_flags_.size() << " size " << size_ << " max " << max_size_;
+
+        other.data_.clear();
+        other.none_flags_.clear();
+        other.size_=0;
+        other.max_size_=0;
+
+        logdbg << "ArrayListTemplate: addData: end data size " << data_.size() << " none flags size " << none_flags_.size() << " size " << size_ << " max " << max_size_;
     }
 
 protected:

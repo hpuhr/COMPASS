@@ -141,7 +141,7 @@ void MainWindow::startSlot ()
 {
     logdbg  << "MainWindow: startSlot";
 
-    ATSDB::instance().objectManager().object("MLAT").load();
+    ATSDB::instance().objectManager().object("Radar").load();
 //    if (db_opened_)
 //    {
 //        if (schema_widget_->hasSelectedSchema ())

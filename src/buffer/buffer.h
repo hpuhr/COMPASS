@@ -149,18 +149,18 @@ protected:
     //unsigned int num_properties_index_;
 
     /// Vector with all ArrayList
-    std::vector <ArrayListBase *> arrays_;
+    //std::vector <std::shared_ptr<ArrayListBase>> arrays_;
     /// Map with all ArrayListTemplates, one for each Property type, identified by
-    std::map <std::string, ArrayListTemplate<bool> > arrays_bool_;
-    std::map <std::string, ArrayListTemplate<char> > arrays_char_;
-    std::map <std::string, ArrayListTemplate<unsigned char> > arrays_uchar_;
-    std::map <std::string, ArrayListTemplate<int> > arrays_int_;
-    std::map <std::string, ArrayListTemplate<unsigned int> > arrays_uint_;
-    std::map <std::string, ArrayListTemplate<long int> > arrays_long_int_;
-    std::map <std::string, ArrayListTemplate<unsigned long int> > arrays_ulong_int_;
-    std::map <std::string, ArrayListTemplate<float> > arrays_float_;
-    std::map <std::string, ArrayListTemplate<double> > arrays_double_;
-    std::map <std::string, ArrayListTemplate<std::string> > arrays_string_;
+    std::map <std::string, std::shared_ptr<ArrayListTemplate<bool>>> arrays_bool_;
+    std::map <std::string, std::shared_ptr<ArrayListTemplate<char>>> arrays_char_;
+    std::map <std::string, std::shared_ptr<ArrayListTemplate<unsigned char>>> arrays_uchar_;
+    std::map <std::string, std::shared_ptr<ArrayListTemplate<int>>> arrays_int_;
+    std::map <std::string, std::shared_ptr<ArrayListTemplate<unsigned int>>> arrays_uint_;
+    std::map <std::string, std::shared_ptr<ArrayListTemplate<long int>>> arrays_long_int_;
+    std::map <std::string, std::shared_ptr<ArrayListTemplate<unsigned long int>>> arrays_ulong_int_;
+    std::map <std::string, std::shared_ptr<ArrayListTemplate<float>>> arrays_float_;
+    std::map <std::string, std::shared_ptr<ArrayListTemplate<double>>> arrays_double_;
+    std::map <std::string, std::shared_ptr<ArrayListTemplate<std::string>>> arrays_string_;
     /// Flag indicating if data any was written
     //bool first_write_;
 

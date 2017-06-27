@@ -364,6 +364,13 @@ void DBObject::load ()
     loginf << "DBInterface: testReading: adding all variables";
     read_list.add(variables_.at("REC_NUM"));
     read_list.add(variables_.at("TOD"));
+    read_list.add(variables_.at("CALLSIGN"));
+    read_list.add(variables_.at("DS_ID"));
+    read_list.add(variables_.at("MODE3A_CODE"));
+    read_list.add(variables_.at("MODEC_CODE_FT"));
+    read_list.add(variables_.at("POS_LAT_DEG"));
+    read_list.add(variables_.at("POS_LONG_DEG"));
+    read_list.add(variables_.at("TARGET_ADDR"));
 
     std::string custom_filter_clause;
 
@@ -374,12 +381,15 @@ void DBObject::load ()
     connect (read_job, SIGNAL(obsoleteSignal()), this, SLOT(readJobObsoleteSlot()));
     connect (read_job, SIGNAL(doneSignal()), this, SLOT(readJobDoneSlot()));
 
+    start_time_ = boost::posix_time::microsec_clock::local_time();
+
     JobManager::instance().addJob(read_job_);
 }
 
 void DBObject::readJobIntermediateSlot (std::shared_ptr<Buffer> buffer)
 {
-    loginf << "DBObject: " << name_ << " readJobIntermediateSlot";
+    assert (buffer);
+    logdbg << "DBObject: " << name_ << " readJobIntermediateSlot: buffer size " << buffer->size();
 
     DBOReadDBJob *sender = dynamic_cast <DBOReadDBJob*> (QObject::sender());
 
@@ -392,12 +402,12 @@ void DBObject::readJobIntermediateSlot (std::shared_ptr<Buffer> buffer)
 
     read_job_data_.push_back(buffer);
 
-//    if (!data_)
-//        data_ = buffer;
-//    else
-//        data_->seizeBuffer (*buffer.get());
+    if (!data_)
+        data_ = buffer;
+    else
+        data_->seizeBuffer (*buffer.get());
 
-    loginf << "DBObject: " << name_ << " readJobIntermediateSlot: got " << read_job_data_.size() << " buffers ";// << " with size " << data_->size();
+    loginf << "DBObject: " << name_ << " readJobIntermediateSlot: got " << read_job_data_.size() << " buffers " << " with size " << data_->size();
 }
 
 void DBObject::readJobObsoleteSlot ()
@@ -411,6 +421,12 @@ void DBObject::readJobDoneSlot()
 {
     loginf << "DBObject: " << name_ << " readJobDoneSlot";
     read_job_ = nullptr;
+
+    stop_time_ = boost::posix_time::microsec_clock::local_time();
+    boost::posix_time::time_duration diff = stop_time_ - start_time_;
+
+    loginf  << "DBObject: readJobDoneSlot: done after " << diff << ", " << data_->size()/diff.total_seconds()
+            << " el/s";
 }
 
 void DBObject::databaseOpenedSlot ()

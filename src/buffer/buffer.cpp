@@ -78,7 +78,6 @@ Buffer::~Buffer()
     logdbg  << "Buffer: destructor: start";
 
     properties_.clear();
-    arrays_.clear();
     arrays_bool_.clear();
     arrays_char_.clear();
     arrays_uchar_.clear();
@@ -204,53 +203,43 @@ void Buffer::addProperty (std::string id, PropertyDataType type)
     {
     case PropertyDataType::BOOL:
         assert (arrays_bool_.count(id) == 0);
-        arrays_bool_ [id] = ArrayListTemplate<bool> ();
-        arrays_.push_back(dynamic_cast<ArrayListBase *> (&arrays_bool_ [id]));
+        arrays_bool_ [id] = std::shared_ptr<ArrayListTemplate<bool>> (new ArrayListTemplate<bool>);
         break;
     case PropertyDataType::CHAR:
         assert (arrays_char_.count(id) == 0);
-        arrays_char_ [id] = ArrayListTemplate<char> ();
-        arrays_.push_back(dynamic_cast<ArrayListBase *> (&arrays_char_ [id]));
+        arrays_char_ [id] = std::shared_ptr<ArrayListTemplate<char>> (new ArrayListTemplate<char>);
         break;
     case PropertyDataType::UCHAR:
         assert (arrays_uchar_.count(id) == 0);
-        arrays_uchar_ [id] = ArrayListTemplate<unsigned char> ();
-        arrays_.push_back(dynamic_cast<ArrayListBase *> (&arrays_uchar_ [id]));
+        arrays_uchar_ [id] = std::shared_ptr<ArrayListTemplate<unsigned char>> (new ArrayListTemplate<unsigned char>);
         break;
     case PropertyDataType::INT:
         assert (arrays_int_.count(id) == 0);
-        arrays_int_ [id] = ArrayListTemplate<int> ();
-        arrays_.push_back(dynamic_cast<ArrayListBase *> (&arrays_int_ [id]));
+        arrays_int_ [id] = std::shared_ptr<ArrayListTemplate<int>> (new ArrayListTemplate<int>);
         break;
     case PropertyDataType::UINT:
         assert (arrays_uint_.count(id) == 0);
-        arrays_uint_ [id] = ArrayListTemplate<unsigned int> ();
-        arrays_.push_back(dynamic_cast<ArrayListBase *> (&arrays_uint_ [id]));
+        arrays_uint_ [id] = std::shared_ptr<ArrayListTemplate<unsigned int>> (new ArrayListTemplate<unsigned int>);
         break;
     case PropertyDataType::LONGINT:
         assert (arrays_long_int_.count(id) == 0);
-        arrays_long_int_ [id] = ArrayListTemplate<long int> ();
-        arrays_.push_back(dynamic_cast<ArrayListBase *> (&arrays_long_int_ [id]));
+        arrays_long_int_ [id] = std::shared_ptr<ArrayListTemplate<long>> (new ArrayListTemplate<long>);
         break;
     case PropertyDataType::ULONGINT:
         assert (arrays_ulong_int_.count(id) == 0);
-        arrays_ulong_int_ [id] = ArrayListTemplate<unsigned long int> ();
-        arrays_.push_back(dynamic_cast<ArrayListBase *> (&arrays_ulong_int_ [id]));
+        arrays_ulong_int_ [id] = std::shared_ptr<ArrayListTemplate<unsigned long>> (new ArrayListTemplate<unsigned long>);
         break;
     case PropertyDataType::FLOAT:
         assert (arrays_float_.count(id) == 0);
-        arrays_float_ [id] = ArrayListTemplate<float> ();
-        arrays_.push_back(dynamic_cast<ArrayListBase *> (&arrays_float_ [id]));
+        arrays_float_ [id] = std::shared_ptr<ArrayListTemplate<float>> (new ArrayListTemplate<float>);
         break;
     case PropertyDataType::DOUBLE:
         assert (arrays_double_.count(id) == 0);
-        arrays_double_ [id] = ArrayListTemplate<double> ();
-        arrays_.push_back(dynamic_cast<ArrayListBase *> (&arrays_double_ [id]));
+        arrays_double_ [id] = std::shared_ptr<ArrayListTemplate<double>> (new ArrayListTemplate<double>);
         break;
     case PropertyDataType::STRING:
         assert (arrays_string_.count(id) == 0);
-        arrays_string_ [id] = ArrayListTemplate<std::string> ();
-        arrays_.push_back(dynamic_cast<ArrayListBase *> (&arrays_string_ [id]));
+        arrays_string_ [id] = std::shared_ptr<ArrayListTemplate<std::string>> (new ArrayListTemplate<std::string>);
         break;
     default:
         logerr  <<  "Buffer: addProperty: unknown property type " << Property::asString(type);
@@ -272,7 +261,7 @@ ArrayListTemplate<bool> &Buffer::getBool (const std::string &id)
     if (arrays_bool_.count(id) == 0)
         throw std::runtime_error ("Buffer: getBool: unknown id "+id);
 
-    return arrays_bool_[id];
+    return *arrays_bool_[id];
 }
 
 ArrayListTemplate<char> &Buffer::getChar (const std::string id)
@@ -280,7 +269,7 @@ ArrayListTemplate<char> &Buffer::getChar (const std::string id)
     if (arrays_char_.count(id) == 0)
         throw std::runtime_error ("Buffer: getChar: unknown id "+id);
 
-    return arrays_char_[id];
+    return *arrays_char_[id];
 }
 
 ArrayListTemplate<unsigned char> &Buffer::getUChar (const std::string &id)
@@ -288,7 +277,7 @@ ArrayListTemplate<unsigned char> &Buffer::getUChar (const std::string &id)
     if (arrays_uchar_.count(id) == 0)
         throw std::runtime_error ("Buffer: getUChar: unknown id "+id);
 
-    return arrays_uchar_[id];
+    return *arrays_uchar_[id];
 }
 
 ArrayListTemplate<int> &Buffer::getInt (const std::string &id)
@@ -296,7 +285,7 @@ ArrayListTemplate<int> &Buffer::getInt (const std::string &id)
     if (arrays_int_.count(id) == 0)
         throw std::runtime_error ("Buffer: getInt: unknown id "+id);
 
-    return arrays_int_[id];
+    return *arrays_int_[id];
 }
 
 ArrayListTemplate<unsigned int> &Buffer::getUInt (const std::string &id)
@@ -304,7 +293,7 @@ ArrayListTemplate<unsigned int> &Buffer::getUInt (const std::string &id)
     if (arrays_uint_.count(id) == 0)
         throw std::runtime_error ("Buffer: getUInt: unknown id "+id);
 
-    return arrays_uint_[id];
+    return *arrays_uint_[id];
 }
 
 ArrayListTemplate<long int> &Buffer::getLongInt (const std::string &id)
@@ -312,7 +301,7 @@ ArrayListTemplate<long int> &Buffer::getLongInt (const std::string &id)
     if (arrays_long_int_.count(id) == 0)
         throw std::runtime_error ("Buffer: getLongInt: unknown id "+id);
 
-    return arrays_long_int_[id];
+    return *arrays_long_int_[id];
 }
 
 ArrayListTemplate<unsigned long int> &Buffer::getULongInt (const std::string &id)
@@ -320,7 +309,7 @@ ArrayListTemplate<unsigned long int> &Buffer::getULongInt (const std::string &id
     if (arrays_ulong_int_.count(id) == 0)
         throw std::runtime_error ("Buffer: getULongInt: unknown id "+id);
 
-    return arrays_ulong_int_[id];
+    return *arrays_ulong_int_[id];
 }
 
 ArrayListTemplate<float> &Buffer::getFloat (const std::string &id)
@@ -328,7 +317,7 @@ ArrayListTemplate<float> &Buffer::getFloat (const std::string &id)
     if (arrays_float_.count(id) == 0)
         throw std::runtime_error ("Buffer: getFloat: unknown id "+id);
 
-    return arrays_float_[id];
+    return *arrays_float_[id];
 }
 
 ArrayListTemplate<double> &Buffer::getDouble (const std::string &id)
@@ -336,7 +325,7 @@ ArrayListTemplate<double> &Buffer::getDouble (const std::string &id)
     if (arrays_double_.count(id) == 0)
         throw std::runtime_error ("Buffer: getDouble: unknown id "+id);
 
-    return arrays_double_[id];
+    return *arrays_double_[id];
 }
 
 ArrayListTemplate<std::string> &Buffer::getString (const std::string &id)
@@ -344,15 +333,14 @@ ArrayListTemplate<std::string> &Buffer::getString (const std::string &id)
     if (arrays_string_.count(id) == 0)
         throw std::runtime_error ("Buffer: getString: unknown id "+id);
 
-    return arrays_string_[id];
+    return *arrays_string_[id];
 }
 
 void Buffer::seizeBuffer (Buffer &org_buffer)
 {
     logdbg  << "Buffer: seizeBuffer: start";
 
-//    logdbg  << "Buffer: seizeBuffer: this: cont " << containers_.size() << " max_index " << max_index_ << " max_used_index " << max_used_index_ << " first " << first_write_;
-//    logdbg  << "Buffer: seizeBuffer: org: cont " << org_buffer->containers_.size() << " max_index " << org_buffer->max_index_ << " max_used_index " << org_buffer->max_used_index_ << " first " << org_buffer->first_write_;
+    logdbg  << "Buffer: seizeBuffer: full " << full() << " size " << size() << " first write " << firstWrite();
 
     assert (full() || firstWrite()); //|| first_write_
 
@@ -370,40 +358,41 @@ void Buffer::seizeBuffer (Buffer &org_buffer)
     assert (arrays_double_.size() == org_buffer.arrays_double_.size());
     assert (arrays_string_.size() == org_buffer.arrays_string_.size());
 
-    arrays_.insert (arrays_.end(), org_buffer.arrays_.begin(), org_buffer.arrays_.end());
-    org_buffer.arrays_.clear();
-
     logdbg  << "Buffer: seizeBuffer: inserting ";
+    org_buffer.properties_.clear();
+
     for (auto it : arrays_bool_)
-        it.second.addData(org_buffer.arrays_bool_.at(it.first));
+        it.second->addData(*org_buffer.arrays_bool_.at(it.first));
     org_buffer.arrays_bool_.clear();
     for (auto it : arrays_char_)
-        it.second.addData(org_buffer.arrays_char_.at(it.first));
+        it.second->addData(*org_buffer.arrays_char_.at(it.first));
     org_buffer.arrays_char_.clear();
     for (auto it : arrays_uchar_)
-        it.second.addData(org_buffer.arrays_uchar_.at(it.first));
+        it.second->addData(*org_buffer.arrays_uchar_.at(it.first));
     org_buffer.arrays_uchar_.clear();
     for (auto it : arrays_int_)
-        it.second.addData(org_buffer.arrays_int_.at(it.first));
+        it.second->addData(*org_buffer.arrays_int_.at(it.first));
     org_buffer.arrays_int_.clear();
     for (auto it : arrays_uint_)
-        it.second.addData(org_buffer.arrays_uint_.at(it.first));
+        it.second->addData(*org_buffer.arrays_uint_.at(it.first));
     org_buffer.arrays_uint_.clear();
     for (auto it : arrays_long_int_)
-        it.second.addData(org_buffer.arrays_long_int_.at(it.first));
+        it.second->addData(*org_buffer.arrays_long_int_.at(it.first));
     org_buffer.arrays_long_int_.clear();
     for (auto it : arrays_ulong_int_)
-        it.second.addData(org_buffer.arrays_ulong_int_.at(it.first));
+        it.second->addData(*org_buffer.arrays_ulong_int_.at(it.first));
     org_buffer.arrays_ulong_int_.clear();
     for (auto it : arrays_float_)
-        it.second.addData(org_buffer.arrays_float_.at(it.first));
+        it.second->addData(*org_buffer.arrays_float_.at(it.first));
     org_buffer.arrays_float_.clear();
     for (auto it : arrays_double_)
-        it.second.addData(org_buffer.arrays_double_.at(it.first));
+        it.second->addData(*org_buffer.arrays_double_.at(it.first));
     org_buffer.arrays_double_.clear();
     for (auto it : arrays_string_)
-        it.second.addData(org_buffer.arrays_string_.at(it.first));
+        it.second->addData(*org_buffer.arrays_string_.at(it.first));
     org_buffer.arrays_string_.clear();
+
+    logdbg  << "Buffer: seizeBuffer: size " << size();
 
     //containers_.insert (containers_.end(), org_containers.begin(), org_containers.end());
     //org_buffer->containers_.clear();
@@ -651,13 +640,38 @@ const size_t Buffer::size ()
 {
     size_t size = 0;
 
-    std::vector <ArrayListBase *>::const_iterator it;
+    for (auto it : arrays_bool_)
+        if (it.second->size() > size)
+            size = it.second->size();
+    for (auto it : arrays_char_)
+        if (it.second->size() > size)
+            size = it.second->size();
+    for (auto it : arrays_uchar_)
+        if (it.second->size() > size)
+            size = it.second->size();
+    for (auto it : arrays_int_)
+        if (it.second->size() > size)
+            size = it.second->size();
+    for (auto it : arrays_uint_)
+        if (it.second->size() > size)
+            size = it.second->size();
+    for (auto it : arrays_long_int_)
+        if (it.second->size() > size)
+            size = it.second->size();
+    for (auto it : arrays_ulong_int_)
+        if (it.second->size() > size)
+            size = it.second->size();
+    for (auto it : arrays_float_)
+        if (it.second->size() > size)
+            size = it.second->size();
+    for (auto it : arrays_double_)
+        if (it.second->size() > size)
+            size = it.second->size();
+    for (auto it : arrays_string_)
+        if (it.second->size() > size)
+            size = it.second->size();
 
-    for (it = arrays_.begin(); it != arrays_.end(); it++)
-    {
-        if (size < (*it)->size())
-            size = (*it)->size();
-    }
+    //loginf << "Buffer: size: " << size;
     return size;
 }
 
@@ -665,11 +679,36 @@ bool Buffer::firstWrite ()
 {
     std::vector <ArrayListBase *>::const_iterator it;
 
-    for (it = arrays_.begin(); it != arrays_.end(); it++)
-    {
-        if ((*it)->size() > 0)
+    for (auto it : arrays_bool_)
+        if (it.second->size() > 0)
             return false;
-    }
+    for (auto it : arrays_char_)
+        if (it.second->size() > 0)
+            return false;
+    for (auto it : arrays_uchar_)
+        if (it.second->size() > 0)
+            return false;
+    for (auto it : arrays_int_)
+        if (it.second->size() > 0)
+            return false;
+    for (auto it : arrays_uint_)
+        if (it.second->size() > 0)
+            return false;
+    for (auto it : arrays_long_int_)
+        if (it.second->size() > 0)
+            return false;
+    for (auto it : arrays_ulong_int_)
+        if (it.second->size() > 0)
+            return false;
+    for (auto it : arrays_float_)
+        if (it.second->size() > 0)
+            return false;
+    for (auto it : arrays_double_)
+        if (it.second->size() > 0)
+            return false;
+    for (auto it : arrays_string_)
+        if (it.second->size() > 0)
+            return false;
 
     return true;
 }
