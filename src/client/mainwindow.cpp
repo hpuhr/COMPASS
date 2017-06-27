@@ -54,6 +54,7 @@
 #include "dbinterfacewidget.h"
 #include "dbschemamanager.h"
 #include "dbschemamanagerwidget.h"
+#include "managementwidget.h"
 #include "stringconv.h"
 #include "jobmanager.h"
 //#include "ProjectionManager.h"
@@ -110,6 +111,14 @@ MainWindow::MainWindow()
     main_widget->setLayout(main_layout);
 
     widget_stack_->addWidget (main_widget);
+
+    // management widget
+
+    ManagementWidget *management_widget = new ManagementWidget ();
+    widget_stack_->addWidget (management_widget);
+
+    // set stack
+
     setCentralWidget(widget_stack_);
 
     widget_stack_->setCurrentIndex (0);
@@ -141,7 +150,10 @@ void MainWindow::startSlot ()
 {
     logdbg  << "MainWindow: startSlot";
 
-    ATSDB::instance().objectManager().object("Radar").load();
+    // TODO lock stuff
+    widget_stack_->setCurrentIndex (1);
+
+    //ATSDB::instance().objectManager().object("Radar").load();
 //    if (db_opened_)
 //    {
 //        if (schema_widget_->hasSelectedSchema ())

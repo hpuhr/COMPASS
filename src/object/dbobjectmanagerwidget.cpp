@@ -36,6 +36,7 @@
 #include "metadbtable.h"
 #include "stringconv.h"
 #include "atsdb.h"
+#include "global.h"
 //#include "MetaDBObjectEditWidget.h"
 
 using Utils::String;
@@ -44,8 +45,7 @@ DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager &object_manager)
     : object_manager_(object_manager), schema_manager_(ATSDB::instance().schemaManager()), grid_ (0), unlocked_(false), new_button_(0)
 
 {
-    unsigned int frame_width = 2;
-    unsigned int frame_width_small = 1;
+    unsigned int frame_width = FRAME_SIZE;
 
     setFrameStyle(QFrame::Panel | QFrame::Raised);
     setLineWidth(frame_width);
@@ -61,7 +61,7 @@ DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager &object_manager)
 
     QFrame *dob_frame = new QFrame ();
     dob_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
-    dob_frame->setLineWidth(frame_width_small);
+    dob_frame->setLineWidth(FRAME_SIZE);
 
     grid_ = new QGridLayout ();
     updateDBOsSlot ();

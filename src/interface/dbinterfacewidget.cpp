@@ -38,6 +38,7 @@
 #include "dbinterface.h"
 #include "logger.h"
 #include "stringconv.h"
+#include "global.h"
 
 using namespace Utils;
 
@@ -45,7 +46,7 @@ using namespace Utils;
 DBInterfaceWidget::DBInterfaceWidget(DBInterface &interface, QWidget* parent, Qt::WindowFlags f)
     : interface_(interface), connection_layout_ (nullptr)
 {
-    unsigned int frame_width = 2;
+    unsigned int frame_width = FRAME_SIZE;
     QFont font_bold;
     font_bold.setBold(true);
 

@@ -46,6 +46,7 @@ class DBResult;
 class DBTableColumn;
 class DBTableInfo;
 class DBInterfaceWidget;
+class DBInterfaceInfoWidget;
 
 class SQLGenerator;
 class QWidget;
@@ -87,11 +88,15 @@ public:
     std::vector <std::string> getDatabases ();
 
     DBInterfaceWidget *widget();
+    DBInterfaceInfoWidget *infoWidget();
+
     QWidget *connectionWidget ();
 
     const std::map <std::string, DBTableInfo> &tableInfo () { return table_info_; }
 
     bool ready ();
+
+    DBConnection &connection ();
 
     /// @brief Returns a buffer with all data sources for a DBO type
 //    Buffer *getDataSourceDescription (const std::string &dbo_type);
@@ -203,6 +208,7 @@ protected:
     //BufferWriter *buffer_writer_;
 
     DBInterfaceWidget *widget_;
+    DBInterfaceInfoWidget *info_widget_;
 
     std::map <std::string, DBTableInfo> table_info_;
 

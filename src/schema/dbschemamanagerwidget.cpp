@@ -7,6 +7,7 @@
 #include "dbschemawidget.h"
 #include "dbschemamanager.h"
 #include "logger.h"
+#include "global.h"
 
 #include <QLabel>
 #include <QPushButton>
@@ -20,7 +21,7 @@ DBSchemaManagerWidget::DBSchemaManagerWidget(DBSchemaManager &manager, QWidget* 
  : QFrame(parent), manager_(manager), schema_select_(nullptr), add_button_(nullptr), delete_button_(nullptr),
    schema_widgets_(nullptr)
 {
-    unsigned int frame_width = 2;
+    unsigned int frame_width = FRAME_SIZE;
     QFont font_bold;
     font_bold.setBold(true);
 

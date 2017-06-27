@@ -2,7 +2,7 @@ set(ATSDB_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 message("  Path: ${ATSDB_PATH}")
 
 cmake_minimum_required(VERSION 2.8.11)
-set ( CMAKE_BUILD_TYPE Release )
+set ( CMAKE_BUILD_TYPE Debug )
 
 project( ATSDB )
 
@@ -95,6 +95,7 @@ include_directories (
     src/struct
     src/transform
     src/variable
+    src/view
     src/unit
     )
 
@@ -111,6 +112,7 @@ set ( atsdb_HDRS
     #        src/buffer/bufferfilter.h
     src/client/client.h
     src/client/mainwindow.h
+    src/client/managementwidget.h
     src/config/configurable.h
     src/config/configuration.h
     src/config/configurationmanager.h
@@ -119,6 +121,7 @@ set ( atsdb_HDRS
     src/connection/dbconnection.h
     src/connection/mysqlppconnection.h
     src/connection/mysqlppconnectionwidget.h
+    src/connection/mysqlppconnectioninfowidget.h
     src/connection/dbresult.h
     src/connection/mysqlserver.h
     src/connection/mysqlserverwidget.h
@@ -135,9 +138,10 @@ set ( atsdb_HDRS
     #        src/filter/filtereditwidget.h
     #        src/filter/filtergeneratorwidget.h
     #        src/filter/sensorfilterwidget.h
+    src/interface/dbtableinfo.h
     src/interface/dbinterface.h
     src/interface/dbinterfacewidget.h
-    src/interface/dbtableinfo.h
+    src/interface/dbinterfaceinfowidget.h
     src/interface/sqlgenerator.h
     #        src/gui/qcollapsablewidget.h
     #        src/gui/workerthreadwidget.h
@@ -221,8 +225,6 @@ set ( atsdb_HDRS
     src/schema/dbtablewidget.h
     src/schema/metadbtablewidget.h
     src/unit/unitselectionwidget.h
-    src/interface/dbtableinfo.h
-    src/interface/dbinterface.h
     #        src/computation/workflow.h
     #        src/computation/computation.h
     #        src/computation/computationelement.h
@@ -238,6 +240,16 @@ set ( atsdb_HDRS
     #        src/transform/calculateposition2d.h
     #        src/transform/calculatelines.h
     #        src/transform/calculatestyle.h
+    src/view/viewmanager.h
+    #    src/view/viewbase/ViewSettings.h
+    #    src/view/viewbase/ViewWidget.h
+    #    src/view/viewbase/EventProcessor.h
+    #    src/view/viewbase/ViewModel.h
+    #    src/view/viewbase/DBViewModel.h
+    #    src/view/viewbase/View.h
+    #    src/view/viewbase/DBView.h
+    #    src/view/viewbase/DBViewWidget.h
+    #    src/view/viewbase/ViewSelection.h
     src/unit/unit.h
     src/unit/unitmanager.h
     src/unit/quantity.h
@@ -258,6 +270,7 @@ set ( atsdb_SRCS
     #        src/buffer/bufferfilter.cpp
     src/client/client.cpp
     src/client/mainwindow.cpp
+    src/client/managementwidget.cpp
     src/config/configurable.cpp
     src/config/configuration.cpp
     src/config/configurationmanager.cpp
@@ -265,6 +278,7 @@ set ( atsdb_SRCS
     #        src/connection/mysqlconconnection.cpp
     src/connection/mysqlppconnection.cpp
     src/connection/mysqlppconnectionwidget.cpp
+    src/connection/mysqlppconnectioninfowidget.cpp
     src/connection/mysqlserverwidget.cpp
     #        src/connection/sqliteconnection.cpp
     #        src/datasource/datasource.cpp
@@ -287,6 +301,7 @@ set ( atsdb_SRCS
     #        src/gui/filtereditdialog.cpp
     src/interface/dbinterface.cpp
     src/interface/dbinterfacewidget.cpp
+    src/interface/dbinterfaceinfowidget.cpp
     src/interface/sqlgenerator.cpp
     #        src/job/dboactivedatasourcesdbjob.cpp
     #        src/job/dbovariabledistinctstatisticsdbjob.cpp
@@ -370,6 +385,16 @@ set ( atsdb_SRCS
     #        src/util/data.cpp
     src/util/number.cpp
     src/util/stringconv.cpp
+    src/view/viewmanager.cpp
+    #    src/view/viewbase/ViewSettings.cpp
+    #    src/view/viewbase/ViewModel.cpp
+    #    src/view/viewbase/DBViewModel.cpp
+    #    src/view/viewbase/View.cpp
+    #    src/view/viewbase/DBView.cpp
+    #    src/view/viewbase/EventProcessor.cpp
+    #    src/view/viewbase/ViewWidget.cpp
+    #    src/view/viewbase/DBViewWidget.cpp
+    #    src/view/viewbase/ViewSelection.cpp
     )
 
 set ( atsdb_UI

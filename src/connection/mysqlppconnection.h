@@ -35,6 +35,7 @@ class Buffer;
 class DBInterface;
 class DBTableInfo;
 class MySQLppConnectionWidget;
+class MySQLppConnectionInfoWidget;
 class MySQLServer;
 class PropertyList;
 
@@ -86,6 +87,9 @@ public:
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
     QWidget *widget ();
+    QWidget *infoWidget ();
+    std::string status ();
+
 
     const std::map <std::string, MySQLServer*> &servers () const { return servers_; }
 
@@ -120,6 +124,7 @@ protected:
     bool prepared_command_done_;
 
     MySQLppConnectionWidget *widget_;
+    MySQLppConnectionInfoWidget *info_widget_;
 
     std::map <std::string, MySQLServer*> servers_;
 

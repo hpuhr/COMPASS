@@ -31,6 +31,7 @@
 #include "dbconnection.h"
 #include "mysqlppconnection.h"
 #include "dbinterfacewidget.h"
+#include "dbinterfaceinfowidget.h"
 #include "dbinterface.h"
 #include "dbobjectmanager.h"
 #include "dbobject.h"
@@ -61,7 +62,7 @@ using namespace Utils;
  * write_table_names_,
  */
 DBInterface::DBInterface(std::string class_id, std::string instance_id, ATSDB *atsdb)
-    : Configurable (class_id, instance_id, atsdb), current_connection_(nullptr), sql_generator_(*this), widget_(nullptr)//, buffer_writer_(0)
+    : Configurable (class_id, instance_id, atsdb), current_connection_(nullptr), sql_generator_(*this), widget_(nullptr), info_widget_(nullptr)//, buffer_writer_(0)
 {
     boost::mutex::scoped_lock l(connection_mutex_);
 
@@ -139,6 +140,12 @@ void DBInterface::closeConnection ()
         widget_ = nullptr;
     }
 
+    if (info_widget_)
+    {
+        delete info_widget_;
+        info_widget_ = nullptr;
+    }
+
     current_connection_ = 0;
 
     table_info_.clear();
@@ -170,6 +177,17 @@ DBInterfaceWidget *DBInterface::widget()
     return widget_;
 }
 
+DBInterfaceInfoWidget *DBInterface::infoWidget()
+{
+    if (!info_widget_)
+    {
+        info_widget_ = new DBInterfaceInfoWidget (*this);
+    }
+
+    assert (info_widget_);
+    return info_widget_;
+}
+
 QWidget *DBInterface::connectionWidget()
 {
     assert (current_connection_);
@@ -188,6 +206,12 @@ bool DBInterface::ready ()
         return false;
 
     return current_connection_->ready();
+}
+
+DBConnection &DBInterface::connection ()
+{
+    assert (ready());
+    return *current_connection_;
 }
 
 void DBInterface::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)

@@ -29,7 +29,6 @@
 #include <vector>
 #include <map>
 
-#include "global.h"
 #include "configuration.h"
 
 /**

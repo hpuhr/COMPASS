@@ -29,6 +29,7 @@
 #include "dbresult.h"
 #include "logger.h"
 #include "propertylist.h"
+#include "mysqlppconnectioninfowidget.h"
 #include "mysqlppconnectionwidget.h"
 #include "mysqlppconnection.h"
 #include "dbtableinfo.h"
@@ -47,7 +48,7 @@ MySQLppConnection::MySQLppConnection(const std::string &instance_id, DBInterface
     : DBConnection ("MySQLppConnection", instance_id, interface), interface_(*interface), connected_server_(nullptr), connection_(mysqlpp::Connection (false)),
       prepared_query_(connection_.query()),
       prepared_parameters_(mysqlpp::SQLQueryParms(&prepared_query_)), query_used_(false), transaction_(nullptr), prepared_command_(nullptr),
-      prepared_command_done_(false), widget_(nullptr)
+      prepared_command_done_(true), widget_(nullptr), info_widget_(nullptr)
 {
     registerParameter("used_server", &used_server_, "");
 
@@ -91,6 +92,9 @@ void MySQLppConnection::openDatabase (const std::string &database_name)
     emit connectedSignal();
     interface_.databaseOpened();
 
+    if (info_widget_)
+        info_widget_->updateSlot();
+
     //loginf  << "MySQLppConnection: init: performance test";
     //performanceTest ();
 }
@@ -109,6 +113,12 @@ void MySQLppConnection::disconnect()
     {
         delete widget_;
         widget_ = nullptr;
+    }
+
+    if (info_widget_)
+    {
+        delete info_widget_;
+        info_widget_ = nullptr;
     }
 
     connected_server_ = nullptr;
@@ -135,6 +145,9 @@ void MySQLppConnection::prepareBindStatement (const std::string &statement)
     prepared_query_ << statement;
     prepared_query_.parse();
     query_used_=true;
+
+    if (info_widget_)
+        info_widget_->updateSlot();
 }
 
 void MySQLppConnection::beginBindTransaction ()
@@ -165,6 +178,9 @@ void MySQLppConnection::endBindTransaction ()
 void MySQLppConnection::finalizeBindStatement ()
 {
     query_used_=false;
+
+    if (info_widget_)
+        info_widget_->updateSlot();
 }
 
 void MySQLppConnection::bindVariable (unsigned int index, int value)
@@ -354,6 +370,10 @@ void MySQLppConnection::prepareStatement (const char *sql)
     }
 
     query_used_=true;
+
+    if (info_widget_)
+        info_widget_->updateSlot();
+
     logdbg  << "MySQLppConnection: prepareStatement: done.";
 }
 void MySQLppConnection::finalizeStatement ()
@@ -361,16 +381,24 @@ void MySQLppConnection::finalizeStatement ()
     logdbg  << "MySQLppConnection: finalizeStatement";
     prepared_query_.reset();
     query_used_=false;
+
+    if (info_widget_)
+        info_widget_->updateSlot();
+
     logdbg  << "MySQLppConnection: finalizeStatement: done";
 }
 
 void MySQLppConnection::prepareCommand (std::shared_ptr<DBCommand> command)
 {
     logdbg  << "MySQLppConnection: prepareCommand";
-    assert (prepared_command_==0);
+    assert (!prepared_command_);
+    assert (prepared_command_done_);
 
     prepared_command_=command;
     prepared_command_done_=false;
+
+    if (info_widget_)
+        info_widget_->updateSlot();
 
     prepareStatement (command->get().c_str());
     logdbg  << "MySQLppConnection: prepareCommand: done";
@@ -381,6 +409,7 @@ std::shared_ptr <DBResult> MySQLppConnection::stepPreparedCommand (unsigned int 
     logdbg  << "MySQLppConnection: stepPreparedCommand";
 
     assert (prepared_command_);
+    assert (!prepared_command_done_);
 
     std::string sql = prepared_command_->get();
     assert (prepared_command_->resultList().size() > 0); // data should be returned
@@ -410,7 +439,7 @@ std::shared_ptr <DBResult> MySQLppConnection::stepPreparedCommand (unsigned int 
 
         ++cnt;
     }
-    loginf  << "MySQLppConnection: stepPreparedCommand: buffer size " << buffer->size() << " max results " << max_results;
+    logdbg  << "MySQLppConnection: stepPreparedCommand: buffer size " << buffer->size() << " max results " << max_results;
 
     assert (buffer->size() <= max_results+1); // because of max_results--
 
@@ -430,11 +459,16 @@ std::shared_ptr <DBResult> MySQLppConnection::stepPreparedCommand (unsigned int 
 void MySQLppConnection::finalizeCommand ()
 {
     logdbg  << "MySQLppConnection: finalizeCommand";
-    assert (prepared_command_ != 0);
+    assert (prepared_command_);
+    assert (prepared_command_done_);
 
-    prepared_command_=0; // should be deleted by caller
+    prepared_command_=nullptr; // should be deleted by caller
     prepared_command_done_=true;
     finalizeStatement();
+
+    if (info_widget_)
+        info_widget_->updateSlot();
+
     logdbg  << "MySQLppConnection: finalizeCommand: done";
 }
 
@@ -612,6 +646,30 @@ QWidget *MySQLppConnection::widget ()
 
     assert (widget_);
     return widget_;
+}
+
+QWidget *MySQLppConnection::infoWidget ()
+{
+    if (!info_widget_)
+    {
+        info_widget_ = new MySQLppConnectionInfoWidget(*this);
+    }
+
+    assert (info_widget_);
+    return info_widget_;
+}
+
+std::string MySQLppConnection::status ()
+{
+    if (connection_ready_)
+    {
+        if (query_used_ || !prepared_command_done_)
+            return "Working";
+        else
+            return "Idle";
+    }
+    else
+        return "Not connected";
 }
 
 void MySQLppConnection::addServer (std::string name)
