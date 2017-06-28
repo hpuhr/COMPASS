@@ -49,6 +49,7 @@
 //#include "DBOCountDBJob.h"
 //#include "DBOVariableDistinctStatisticsDBJob.h"
 //#include "UpdateBufferDBJob.h"
+#include "viewmanager.h"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread.hpp>
@@ -61,7 +62,8 @@ using namespace std;
  * Locks state_mutex_, sets init state, creates members, starts the thread using go.
  */
 ATSDB::ATSDB()
- : Configurable ("ATSDB", "ATSDB0", 0, "conf/atsdb.xml"), initialized_(false), db_interface_(nullptr), dbo_manager_(nullptr), db_schema_manager_ (nullptr)
+ : Configurable ("ATSDB", "ATSDB0", 0, "conf/atsdb.xml"), initialized_(false), db_interface_(nullptr), dbo_manager_(nullptr), db_schema_manager_ (nullptr),
+   view_manager_(nullptr)
 //: export_active_(false), dbo_reads_active_(0)
 {
     logdbg  << "ATSDB: constructor: start";
@@ -73,6 +75,7 @@ ATSDB::ATSDB()
     assert (db_interface_);
     assert (db_schema_manager_);
     assert (dbo_manager_);
+    assert (view_manager_);
 
     QObject::connect (db_schema_manager_, SIGNAL(schemaChangedSignal()), dbo_manager_, SLOT(updateSchemaInformationSlot()));
     QObject::connect(db_interface_, SIGNAL(databaseOpenedSignal()), dbo_manager_, SLOT(databaseOpenedSlot()));
@@ -101,9 +104,10 @@ ATSDB::~ATSDB()
 
     //delete struct_reader_;
 
-    assert (dbo_manager_ == 0);
-    assert (db_schema_manager_ == 0);
-    assert (db_interface_ == 0);
+    assert (!dbo_manager_);
+    assert (!db_schema_manager_);
+    assert (!db_interface_);
+    assert (!view_manager_);
 
 //    if (dbo_read_jobs_.size() > 0)
 //        logerr << "ATSDB: destructor: unfinished dbo read jobs " << dbo_read_jobs_.size();
@@ -148,6 +152,12 @@ void ATSDB::generateSubConfigurable (const std::string &class_id, const std::str
         db_schema_manager_ = new DBSchemaManager (class_id, instance_id, this);
         assert (db_schema_manager_ != nullptr);
     }
+    else if (class_id == "ViewManager")
+    {
+        assert (view_manager_ == nullptr);
+        view_manager_ = new ViewManager (class_id, instance_id, this);
+        assert (view_manager_ != nullptr);
+    }
     else
         throw std::runtime_error ("ATSDB: generateSubConfigurable: unknown class_id "+class_id );
 }
@@ -172,7 +182,12 @@ void ATSDB::checkSubConfigurables ()
         generateSubConfigurable ("DBSchemaManager", "DBSchemaManager0");
         assert (dbo_manager_ != nullptr);
     }
-
+    if (view_manager_ == nullptr)
+    {
+        addNewSubConfiguration ("ViewManager", "ViewManager0");
+        generateSubConfigurable ("ViewManager", "ViewManager0");
+        assert (view_manager_ != nullptr);
+    }
 }
 
 DBInterface &ATSDB::interface ()
@@ -194,6 +209,13 @@ DBObjectManager &ATSDB::objectManager ()
     assert (dbo_manager_);
     assert (initialized_);
     return *dbo_manager_;
+}
+
+ViewManager &ATSDB::viewManager ()
+{
+    assert (view_manager_);
+    assert (initialized_);
+    return *view_manager_;
 }
 
 bool ATSDB::ready ()
@@ -281,6 +303,11 @@ void ATSDB::shutdown ()
     assert (db_interface_);
     delete db_interface_;
     db_interface_ = nullptr;
+
+    assert (view_manager_);
+    view_manager_->close();
+    delete view_manager_;
+    view_manager_ = nullptr;
 
     initialized_=false;
 

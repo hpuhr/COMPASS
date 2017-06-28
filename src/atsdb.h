@@ -45,6 +45,7 @@ class DBObject;
 class DBObjectManager;
 class DBSchema;
 class DBSchemaManager;
+class ViewManager;
 //class StructureReader;
 class DBOVariable;
 class Job;
@@ -112,6 +113,7 @@ public:
     DBInterface &interface ();
     DBSchemaManager &schemaManager ();
     DBObjectManager &objectManager ();
+    ViewManager &viewManager ();
 
     bool ready ();
 
@@ -216,6 +218,7 @@ protected:
     DBInterface *db_interface_;
     DBObjectManager *dbo_manager_;
     DBSchemaManager *db_schema_manager_;
+    ViewManager *view_manager_;
     /// Structure reader, can read data from defined C structs.
     //StructureReader *struct_reader_;
     /// Map containg all existing data sources (DBO type -> data source number, data source name).

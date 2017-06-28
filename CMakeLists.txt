@@ -46,17 +46,17 @@ find_package ( LOG4CPP REQUIRED )
 message("  LOG4CPP_INCLUDE_DIR: ${LOG4CPP_INCLUDE_DIR}")
 message("  LOG4CPP_LIBRARY: ${LOG4CPP_LIBRARIES}") 
 
-find_package ( GDAL REQUIRED )
-message("  GDAL_INCLUDE_DIRS: ${GDAL_INCLUDE_DIRS}")
-message("  GDAL_LIBRARIES: ${GDAL_LIBRARIES}")
+#find_package ( GDAL REQUIRED )
+#message("  GDAL_INCLUDE_DIRS: ${GDAL_INCLUDE_DIRS}")
+#message("  GDAL_LIBRARIES: ${GDAL_LIBRARIES}")
 
 find_package ( TinyXML2 REQUIRED )
 message("  TINYXML2_INCLUDE_DIR: ${TINYXML2_INCLUDE_DIR}")
 message("  TINYXML2_LIBRARY: ${TINYXML2_LIBRARY}") 
 
-find_package ( GDAL REQUIRED )
-message("  GDAL_INCLUDE_DIRS: ${GDAL_INCLUDE_DIRS}")
-message("  GDAL_LIBRARIES: ${GDAL_LIBRARIES}")
+#find_package ( GDAL REQUIRED )
+#message("  GDAL_INCLUDE_DIRS: ${GDAL_INCLUDE_DIRS}")
+#message("  GDAL_LIBRARIES: ${GDAL_LIBRARIES}")
 
 include_directories (
     ${CMAKE_SOURCE_DIR}
@@ -64,10 +64,10 @@ include_directories (
     ${Qt5Widgets_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
     #${SQLITE3_INCLUDE_DIR}
-    ${MySQLpp_INCLUDE_DIR}
     ${MYSQL_INCLUDE_DIR}
+    ${MySQLpp_INCLUDE_DIR}
     ${LOG4CPP_INCLUDE_DIR}
-    ${GDAL_INCLUDE_DIRS}
+    #${GDAL_INCLUDE_DIRS}
     ${TINYXML2_INCLUDE_DIR}
     .
     src
@@ -96,6 +96,7 @@ include_directories (
     src/transform
     src/variable
     src/view
+    #src/view/viewbase
     src/unit
     )
 
@@ -243,15 +244,19 @@ set ( atsdb_HDRS
     #        src/transform/calculatelines.h
     #        src/transform/calculatestyle.h
     src/view/viewmanager.h
-    #    src/view/viewbase/ViewSettings.h
-    #    src/view/viewbase/ViewWidget.h
-    #    src/view/viewbase/EventProcessor.h
-    #    src/view/viewbase/ViewModel.h
-    #    src/view/viewbase/DBViewModel.h
-    #    src/view/viewbase/View.h
-    #    src/view/viewbase/DBView.h
-    #    src/view/viewbase/DBViewWidget.h
-    #    src/view/viewbase/ViewSelection.h
+    src/view/viewmanagerwidget.h
+    src/view/viewcontainerwidget.h
+    src/view/viewcontainertabwidget.h
+    src/view/viewcontainerconfigwidget.h
+#    src/view/viewbase/eventprocessor.h
+#    src/view/viewbase/view.h
+#    src/view/viewbase/viewwidget.h
+#    src/view/viewbase/viewsettings.h
+#    src/view/viewbase/viewmodel.h
+#    src/view/viewbase/viewselection.h
+#    src/view/viewbase/dbviewmodel.h
+#    src/view/viewbase/dbview.h
+#    src/view/viewbase/dbviewwidget.h
     src/unit/unit.h
     src/unit/unitmanager.h
     src/unit/quantity.h
@@ -390,24 +395,26 @@ set ( atsdb_SRCS
     src/util/number.cpp
     src/util/stringconv.cpp
     src/view/viewmanager.cpp
-    #    src/view/viewbase/ViewSettings.cpp
-    #    src/view/viewbase/ViewModel.cpp
-    #    src/view/viewbase/DBViewModel.cpp
-    #    src/view/viewbase/View.cpp
-    #    src/view/viewbase/DBView.cpp
-    #    src/view/viewbase/EventProcessor.cpp
-    #    src/view/viewbase/ViewWidget.cpp
-    #    src/view/viewbase/DBViewWidget.cpp
-    #    src/view/viewbase/ViewSelection.cpp
+    src/view/viewmanagerwidget.cpp
+    src/view/viewcontainerwidget.cpp
+#    src/view/viewbase/eventprocessor.cpp
+#    src/view/viewbase/view.cpp
+#    src/view/viewbase/viewwidget.cpp
+#    src/view/viewbase/viewmodel.cpp
+#    src/view/viewbase/viewsettings.cpp
+#    src/view/viewbase/viewselection.cpp
+#    src/view/viewbase/dbviewmodel.cpp
+#    src/view/viewbase/dbview.cpp
+#    src/view/viewbase/dbviewwidget.cpp
     )
 
-set ( atsdb_UI
+#set ( atsdb_UI
     #       src/gui/filtereditdialogbase.ui
     #       src/gui/computationeditdialogbase.ui
     #       src/gui/transformationeditdialogbase.ui
     #       src/gui/transformationvariableeditdialogbase.ui
     #       src/gui/workflowsettingseditdialogbase.ui
-    )
+#    )
 
 set ( client_SRCS
     src/client/main.cpp
@@ -415,11 +422,12 @@ set ( client_SRCS
 
 
 add_library ( atsdb SHARED ${atsdb_SRCS} ${atsdb_HDRS} ) 
-target_link_libraries ( atsdb  ${GDAL_LIBRARIES} Qt5::Widgets Qt5::Core ${TINYXML2_LIBRARY} ${GDAL_LIBRARIES} ${Boost_LIBRARIES} ${LOG4CPP_LIBRARIES} ${MySQLpp_LIBRARY}) 
-# ${SQLITE3_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_DATA_TIME_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_IOSTREAMS_LIBRARY}
+target_link_libraries ( atsdb  ${GDAL_LIBRARIES} Qt5::Widgets Qt5::Core ${TINYXML2_LIBRARY} ${Boost_LIBRARIES} ${LOG4CPP_LIBRARIES} ${MySQLpp_LIBRARY})
+# ${SQLITE3_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_DATA_TIME_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_IOSTREAMS_LIBRARY} ${GDAL_LIBRARIES}
 
 add_executable ( atsdb_client ${atsdb_HDRS} ${client_SRCS})
-target_link_libraries ( atsdb_client atsdb ${GDAL_LIBRARIES} Qt5::Widgets Qt5::Core ${TINYXML2_LIBRARY} ${GDAL_LIBRARIES} ${Boost_LIBRARIES} ${LOG4CPP_LIBRARIES} ${MySQLpp_LIBRARY})
+target_link_libraries ( atsdb_client atsdb ${GDAL_LIBRARIES} Qt5::Widgets Qt5::Core ${TINYXML2_LIBRARY} ${Boost_LIBRARIES} ${LOG4CPP_LIBRARIES} ${MySQLpp_LIBRARY})
+# ${GDAL_LIBRARIES}
 
 INSTALL_FILES(/include .h ${atsdb_HDRS})
 
