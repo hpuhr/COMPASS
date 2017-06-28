@@ -460,7 +460,7 @@ void MySQLppConnection::finalizeCommand ()
 {
     logdbg  << "MySQLppConnection: finalizeCommand";
     assert (prepared_command_);
-    assert (prepared_command_done_);
+    //assert (prepared_command_done_); true if ok, false if quit job
 
     prepared_command_=nullptr; // should be deleted by caller
     prepared_command_done_=true;

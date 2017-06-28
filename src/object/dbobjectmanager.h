@@ -35,6 +35,7 @@
 class ATSDB;
 class DBObject;
 class DBObjectManagerWidget;
+class DBObjectManagerInfoWidget;
 class DBOVariable;
 class DBOVariableSet;
 class DBSchemaManager;
@@ -84,6 +85,7 @@ public:
     virtual ~DBObjectManager();
 
     DBObjectManagerWidget *widget();
+    DBObjectManagerInfoWidget *infoWidget();
 
 protected:
     /// Container with all DBOs (DBO name -> DBO pointer)
@@ -91,6 +93,7 @@ protected:
     //bool registered_parent_variables_;
 
     DBObjectManagerWidget *widget_;
+    DBObjectManagerInfoWidget *info_widget_;
 
     virtual void checkSubConfigurables ();
 

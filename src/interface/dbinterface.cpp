@@ -130,6 +130,7 @@ void DBInterface::databaseOpened ()
 void DBInterface::closeConnection ()
 {
     boost::mutex::scoped_lock l(connection_mutex_);
+    //connection_mutex_.unlock();
 
     logdbg << "DBInterface: closeConnection";
     current_connection_->disconnect();
@@ -713,7 +714,8 @@ size_t DBInterface::count (const std::string &table)
 void DBInterface::prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
         DBOVariable *order)
 {
-    boost::mutex::scoped_lock l(connection_mutex_);
+    //boost::mutex::scoped_lock l(connection_mutex_);
+    connection_mutex_.lock();
     assert (current_connection_);
 
     std::shared_ptr<DBCommand> read = sql_generator_.getSelectCommand (dbobject, read_list, custom_filter_clause, order);
@@ -726,8 +728,7 @@ void DBInterface::prepareRead (const DBObject &dbobject, DBOVariableSet read_lis
  */
 std::shared_ptr <Buffer> DBInterface::readDataChunk (const DBObject &dbobject, bool activate_key_search)
 {
-    boost::mutex::scoped_lock l(connection_mutex_);
-
+    //boost::mutex::scoped_lock l(connection_mutex_);
     assert (current_connection_);
 
     std::shared_ptr <DBResult> result = current_connection_->stepPreparedCommand(read_chunk_size_);
@@ -778,7 +779,7 @@ std::shared_ptr <Buffer> DBInterface::readDataChunk (const DBObject &dbobject, b
 
 void DBInterface::finalizeReadStatement (const DBObject &dbobject)
 {
-    boost::mutex::scoped_lock l(connection_mutex_);
+    connection_mutex_.unlock();
     assert (current_connection_);
 
     logdbg  << "DBInterface: finishReadSystemTracks: start ";

@@ -86,7 +86,7 @@ void DBOReadDBJob::run ()
         }
         else
         {
-            loginf << "DBOReadDBJob: execute: intermediate signal, #buffers " << cnt << " last one " << buffer->lastOne();
+            logdbg << "DBOReadDBJob: execute: intermediate signal, #buffers " << cnt << " last one " << buffer->lastOne();
             emit intermediateSignal(buffer);
         }
 
@@ -94,7 +94,7 @@ void DBOReadDBJob::run ()
             break;
     }
 
-    loginf << "DBOReadDBJob: execute: finalizing statement";
+    logdbg << "DBOReadDBJob: execute: finalizing statement";
     db_interface_.finalizeReadStatement(dbobject_);
     done_=true;
 

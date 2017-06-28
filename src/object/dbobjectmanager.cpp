@@ -30,13 +30,14 @@
 #include "dbobjectmanager.h"
 #include "logger.h"
 #include "dbobjectmanagerwidget.h"
+#include "dbobjectmanagerinfowidget.h"
 //#include "structureDescriptionManager.h"
 
 /**
  * Creates sub-configurables.
  */
 DBObjectManager::DBObjectManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb)
-: Configurable (class_id, instance_id, atsdb, "conf/config_dbo.xml"), widget_(nullptr) //, registered_parent_variables_ (false)
+: Configurable (class_id, instance_id, atsdb, "conf/config_dbo.xml"), widget_(nullptr), info_widget_(nullptr) //, registered_parent_variables_ (false)
 {
     logdbg  << "DBObjectManager: constructor: creating subconfigurables";
 
@@ -64,8 +65,16 @@ DBObjectManager::~DBObjectManager()
     }
     objects_.clear();
 
-    delete widget_;
-    widget_ = nullptr;
+    if (widget_)
+    {
+        delete widget_;
+        widget_ = nullptr;
+    }
+    if (info_widget_)
+    {
+        delete info_widget_;
+        info_widget_ = nullptr;
+    }
 }
 
 /**
@@ -185,6 +194,17 @@ DBObjectManagerWidget *DBObjectManager::widget()
 
     assert (widget_);
     return widget_;
+}
+
+DBObjectManagerInfoWidget *DBObjectManager::infoWidget()
+{
+    if (!info_widget_)
+    {
+        info_widget_ = new DBObjectManagerInfoWidget (*this);
+    }
+
+    assert (info_widget_);
+    return info_widget_;
 }
 
 void DBObjectManager::updateSchemaInformationSlot ()

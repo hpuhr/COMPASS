@@ -43,7 +43,6 @@ using Utils::String;
 
 DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager &object_manager)
     : object_manager_(object_manager), schema_manager_(ATSDB::instance().schemaManager()), grid_ (0), unlocked_(false), new_button_(0)
-
 {
     unsigned int frame_width = FRAME_SIZE;
 

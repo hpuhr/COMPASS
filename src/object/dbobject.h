@@ -108,6 +108,7 @@ protected:
 };
 
 class DBObjectWidget;
+class DBObjectInfoWidget;
 class Buffer;
 class Job;
 class DBJob;
@@ -194,6 +195,7 @@ public:
     bool hasData ();
     /// @brief Returns number of elements for DBO type
     size_t count ();
+    size_t loadedCount ();
 
     /// @brief Returns container with all meta tables
     const std::map <std::string, std::string> &metaTables () const { return meta_tables_; }
@@ -237,7 +239,10 @@ public:
     /// @brief In meta object, unregisters meta variables as parent variables
     //void unregisterParentVariables ();
 
+    std::string status ();
+
     DBObjectWidget *widget ();
+    DBObjectInfoWidget *infoWidget ();
 
 protected:
     /// DBO name
@@ -278,6 +283,7 @@ protected:
     bool has_active_data_sources_info_;
 
     DBObjectWidget *widget_;
+    DBObjectInfoWidget *info_widget_;
 
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;

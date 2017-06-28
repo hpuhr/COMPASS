@@ -15,6 +15,7 @@
 #include "dbinterface.h"
 #include "dbinterfaceinfowidget.h"
 #include "dbobjectmanager.h"
+#include "dbobjectmanagerinfowidget.h"
 #include "dbobject.h"
 //#include "FilterConfigWidget.h"
 //#include "DBInfoWidget.h"
@@ -41,6 +42,12 @@ ManagementWidget::ManagementWidget() : QWidget ()
     vlayout2->addWidget (interface_widget);
     vlayout2->addStretch ();
 
+    DBObjectManagerInfoWidget *objman_widget = ATSDB::instance().objectManager().infoWidget();
+    objman_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
+    objman_widget->setLineWidth(frame_width);
+    vlayout2->addWidget (objman_widget);
+    vlayout2->addStretch ();
+
     QPushButton *button = new QPushButton ("Click Me");
     connect (button, SIGNAL(clicked(bool)), this, SLOT(startSlot()));
     vlayout2->addWidget(button);
@@ -51,6 +58,8 @@ ManagementWidget::ManagementWidget() : QWidget ()
     //  vlayout2->addWidget (result_);
 
     hlayout->addLayout (vlayout2);
+    hlayout->addStretch ();
+    hlayout->addStretch ();
 
     //  filter_config_gui_ = new FilterConfigWidget ();
     //  filter_config_gui_->setFrameStyle(QFrame::Panel | QFrame::Raised);

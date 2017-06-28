@@ -29,6 +29,7 @@
 #include "dbschemamanager.h"
 #include "dbobject.h"
 #include "dbobjectwidget.h"
+#include "dbobjectinfowidget.h"
 #include "dbobjectmanager.h"
 #include "dbovariable.h"
 #include "buffer.h"
@@ -47,7 +48,7 @@
  */
 DBObject::DBObject(std::string class_id, std::string instance_id, Configurable *parent)
     : Configurable (class_id, instance_id, parent), is_loadable_(false), count_(0), current_meta_table_(nullptr), variables_checked_(false),
-      has_active_data_sources_info_(false), widget_(nullptr)
+      has_active_data_sources_info_(false), widget_(nullptr), info_widget_(nullptr)
 {
     registerParameter ("name" , &name_, "Undefined");
     registerParameter ("info" , &info_, "");
@@ -83,6 +84,12 @@ DBObject::~DBObject()
     {
         delete widget_;
         widget_=nullptr;
+    }
+
+    if (info_widget_)
+    {
+        delete info_widget_;
+        info_widget_=nullptr;
     }
 }
 
@@ -319,6 +326,18 @@ void DBObject::checkVariables ()
 //    }
 //}
 
+std::string DBObject::status ()
+{
+    if (read_job_)
+        if (loadedCount())
+            return "Loading";
+        else
+            return "Queued";
+    else
+        return "Idle";
+
+}
+
 DBObjectWidget *DBObject::widget ()
 {
     if (!widget_)
@@ -328,6 +347,17 @@ DBObjectWidget *DBObject::widget ()
 
     assert (widget_);
     return widget_;
+}
+
+DBObjectInfoWidget *DBObject::infoWidget ()
+{
+    if (!info_widget_)
+    {
+        info_widget_ = new DBObjectInfoWidget (*this);
+    }
+
+    assert (info_widget_);
+    return info_widget_;
 }
 
 void DBObject::schemaChangedSlot ()
@@ -367,7 +397,7 @@ void DBObject::load ()
     read_list.add(variables_.at("CALLSIGN"));
     read_list.add(variables_.at("DS_ID"));
     read_list.add(variables_.at("MODE3A_CODE"));
-    read_list.add(variables_.at("MODEC_CODE_FT"));
+//    read_list.add(variables_.at("MODEC_CODE_FT"));
     read_list.add(variables_.at("POS_LAT_DEG"));
     read_list.add(variables_.at("POS_LONG_DEG"));
     read_list.add(variables_.at("TARGET_ADDR"));
@@ -384,6 +414,9 @@ void DBObject::load ()
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
     JobManager::instance().addJob(read_job_);
+
+    if (info_widget_)
+        info_widget_->updateSlot();
 }
 
 void DBObject::readJobIntermediateSlot (std::shared_ptr<Buffer> buffer)
@@ -407,7 +440,10 @@ void DBObject::readJobIntermediateSlot (std::shared_ptr<Buffer> buffer)
     else
         data_->seizeBuffer (*buffer.get());
 
-    loginf << "DBObject: " << name_ << " readJobIntermediateSlot: got " << read_job_data_.size() << " buffers " << " with size " << data_->size();
+    logdbg << "DBObject: " << name_ << " readJobIntermediateSlot: got " << read_job_data_.size() << " buffers " << " with size " << data_->size();
+
+    if (info_widget_)
+        info_widget_->updateSlot();
 }
 
 void DBObject::readJobObsoleteSlot ()
@@ -415,6 +451,9 @@ void DBObject::readJobObsoleteSlot ()
     loginf << "DBObject: " << name_ << " readJobObsoleteSlot";
     read_job_ = nullptr;
     read_job_data_.clear();
+
+    if (info_widget_)
+        info_widget_->updateSlot();
 }
 
 void DBObject::readJobDoneSlot()
@@ -427,11 +466,14 @@ void DBObject::readJobDoneSlot()
 
     loginf  << "DBObject: readJobDoneSlot: done after " << diff << ", " << data_->size()/diff.total_seconds()
             << " el/s";
+
+    if (info_widget_)
+        info_widget_->updateSlot();
 }
 
 void DBObject::databaseOpenedSlot ()
 {
-    loginf << "DBObject: " << name_ << " databaseOpenedSlot";
+    logdbg << "DBObject: " << name_ << " databaseOpenedSlot";
 
     assert (current_meta_table_);
     std::string table_name = current_meta_table_->mainTableName();
@@ -441,7 +483,10 @@ void DBObject::databaseOpenedSlot ()
     if (is_loadable_)
         count_ = ATSDB::instance().interface().count (table_name);
 
-    loginf << "DBObject: " << name_ << " databaseOpenedSlot: loadable " << is_loadable_ << " count " << count_;
+    if (info_widget_)
+        info_widget_->updateSlot();
+
+    logdbg << "DBObject: " << name_ << " databaseOpenedSlot: loadable " << is_loadable_ << " count " << count_;
 }
 
 bool DBObject::isLoading ()
@@ -466,4 +511,12 @@ bool DBObject::hasData ()
 size_t DBObject::count ()
 {
     return count_;
+}
+
+size_t DBObject::loadedCount ()
+{
+    if (data_)
+        return data_->size();
+    else
+        return 0;
 }
