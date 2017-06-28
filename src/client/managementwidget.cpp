@@ -46,11 +46,6 @@ ManagementWidget::ManagementWidget() : QWidget ()
     objman_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
     objman_widget->setLineWidth(frame_width);
     vlayout2->addWidget (objman_widget);
-    vlayout2->addStretch ();
-
-    QPushButton *button = new QPushButton ("Click Me");
-    connect (button, SIGNAL(clicked(bool)), this, SLOT(startSlot()));
-    vlayout2->addWidget(button);
 
     //  result_ = new ResultSetWidget ();
     //  result_->setFrameStyle(QFrame::Panel | QFrame::Raised);
@@ -110,9 +105,3 @@ void ManagementWidget::resizeEvent (QResizeEvent *event)
     //  views_->setMaximumWidth (min_width);
 }
 
-void ManagementWidget::startSlot ()
-{
-    logdbg  << "ManagementWidget: startSlot";
-
-    ATSDB::instance().objectManager().object("Radar").load();
-}

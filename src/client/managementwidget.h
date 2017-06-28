@@ -21,7 +21,6 @@ class ManagementWidget : public QWidget
   Q_OBJECT
 
 public slots:
-    void startSlot ();
 
 public:
   ManagementWidget();

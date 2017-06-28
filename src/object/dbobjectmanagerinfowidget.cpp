@@ -50,6 +50,10 @@ DBObjectManagerInfoWidget::DBObjectManagerInfoWidget(DBObjectManager &object_man
 
     main_layout->addLayout(info_layout_);
 
+    load_all_button_ = new QPushButton ("Load");
+    connect (load_all_button_, SIGNAL(clicked()), this, SLOT(loadAllSlot()));
+    main_layout->addWidget(load_all_button_);
+
     setLayout (main_layout);
 }
 
@@ -59,7 +63,9 @@ DBObjectManagerInfoWidget::~DBObjectManagerInfoWidget()
 
 void DBObjectManagerInfoWidget::loadAllSlot ()
 {
-
+    for (auto object : object_manager_.objects())
+        if (object.second->loadingWanted())
+            object.second->load();
 }
 
 void DBObjectManagerInfoWidget::updateSlot ()

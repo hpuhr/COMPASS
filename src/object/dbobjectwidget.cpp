@@ -753,7 +753,6 @@ void DBObjectWidget::updateDBOVarsGrid ()
     dbo_vars_grid_edit_buttons_ [edit] = it->second;
     dbovars_grid_->addWidget (edit, row, 3);
 
-
     QPushButton *del = new QPushButton ();
     del->setIcon(del_icon);
     del->setFixedSize ( UI_ICON_SIZE );

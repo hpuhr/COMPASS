@@ -33,17 +33,16 @@
 
 
 DBObjectInfoWidget::DBObjectInfoWidget(DBObject &object, QWidget *parent, Qt::WindowFlags f)
-    : QWidget (parent, f), object_(object), main_layout_(nullptr), main_label_(nullptr), status_label_(nullptr), total_count_label_(nullptr), loaded_count_label_(nullptr),
-      load_check_(nullptr), load_button_(nullptr), loading_wanted_(true)
+    : QWidget (parent, f), object_(object), main_layout_(nullptr), main_check_(nullptr), status_label_(nullptr), total_count_label_(nullptr), loaded_count_label_(nullptr)
 {
     QFont font_bold;
     font_bold.setBold(true);
 
     main_layout_ = new QVBoxLayout ();
 
-    main_label_ = new QLabel (object.name().c_str());
-    main_label_->setFont (font_bold);
-    main_layout_->addWidget (main_label_);
+    main_check_ = new QCheckBox (object.name().c_str());
+    main_check_->setFont (font_bold);
+    main_layout_->addWidget (main_check_);
 
     updateSlot();
 
@@ -57,78 +56,58 @@ DBObjectInfoWidget::~DBObjectInfoWidget()
 
 void DBObjectInfoWidget::loadChangedSlot()
 {
-    assert (load_check_);
-    assert (load_button_);
+    assert (main_check_);
 
-    loading_wanted_ = load_check_->checkState() == Qt::Checked;
-    load_button_->setEnabled(loading_wanted_);
-}
-
-void DBObjectInfoWidget::loadSlot()
-{
-    object_.load();
+    object_.loadingWanted(main_check_->checkState() == Qt::Checked);
 }
 
 void DBObjectInfoWidget::updateSlot()
 {
-    assert (main_label_);
+    assert (main_check_);
     if (!object_.hasData())
     {
-        main_label_->setEnabled(false);
+        main_check_->setEnabled(false);
+        object_.loadingWanted(false);
         return;
     }
 
-    main_label_->setEnabled(true);
-
-    if (!load_check_)
+    if (!total_count_label_)
     {
         assert (main_layout_);
-        assert (!load_button_);
+        assert (!loaded_count_label_);
 
         QGridLayout *grid = new QGridLayout ();
 
         grid->addWidget(new QLabel ("Total"), 0, 0);
 
         total_count_label_ = new QLabel ("?");
+        total_count_label_->setAlignment(Qt::AlignRight);
         grid->addWidget(total_count_label_, 0, 1);
 
 
         grid->addWidget(new QLabel ("Loaded"), 1, 0);
 
         loaded_count_label_ = new QLabel ("?");
+        loaded_count_label_->setAlignment(Qt::AlignRight);
         grid->addWidget(loaded_count_label_, 1, 1);
 
         grid->addWidget(new QLabel ("Status"), 2, 0);
 
         status_label_ = new QLabel (object_.status().c_str());
+        status_label_->setAlignment(Qt::AlignRight);
         grid->addWidget(status_label_, 2, 1);
-
-        load_check_ = new QCheckBox ("Load");
-        load_check_->setChecked(loading_wanted_);
-        connect(load_check_, SIGNAL(toggled(bool)), this, SLOT(loadChangedSlot()));
-        grid->addWidget(load_check_, 3, 0);
-
-        QPixmap load_pixmap("./data/icons/load.png");
-        QIcon load_icon(load_pixmap);
-
-        load_button_ = new QPushButton ();
-        load_button_->setIcon(load_icon);
-        load_button_->setFixedSize ( UI_ICON_SIZE );
-        //load_button_->setFlat(true);
-        connect(load_button_, SIGNAL( clicked() ), this, SLOT(loadSlot()));
-        grid->addWidget (load_button_, 3, 1);
-
         main_layout_->addLayout (grid);
+
+        object_.loadingWanted(true);
     }
 
+    assert (main_check_);
     assert (total_count_label_);
     assert (loaded_count_label_);
-    assert (load_check_);
-    assert (load_button_);
 
+    main_check_->setEnabled(object_.hasData());
+    main_check_->setChecked(object_.loadingWanted());
     total_count_label_->setText(QString::number(object_.count()));
     loaded_count_label_->setText(QString::number(object_.loadedCount()));
     status_label_->setText(object_.status().c_str());
-    load_check_->setEnabled(object_.hasData());
-    load_button_->setEnabled(object_.hasData());
 }

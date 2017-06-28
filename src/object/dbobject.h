@@ -185,6 +185,10 @@ public:
 
     /// @brief Returns if an object can be loaded
     bool loadable () const { return is_loadable_; }
+
+    void loadingWanted (bool wanted) { loading_wanted_=wanted; }
+    bool loadingWanted () { return loading_wanted_; }
+
     void load ();
 
     /// @brief Returns if incremental read for DBO type was prepared
@@ -251,6 +255,7 @@ protected:
     std::string info_;
     /// DBO is loadable flag
     bool is_loadable_; // loadable on its own
+    bool loading_wanted_;
     size_t count_;
     /// DBO is meta flag
     //bool is_meta_;

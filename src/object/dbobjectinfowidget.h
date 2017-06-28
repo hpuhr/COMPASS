@@ -44,7 +44,6 @@ class DBObjectInfoWidget : public QWidget
 
 public slots:
     void loadChangedSlot();
-    void loadSlot();
     void updateSlot();
 
 public:
@@ -58,15 +57,11 @@ private:
     DBObject &object_;
 
     QVBoxLayout *main_layout_;
-    QLabel *main_label_;
+    QCheckBox *main_check_;
 
     QLabel *status_label_;
     QLabel *total_count_label_;
     QLabel *loaded_count_label_;
-    QCheckBox *load_check_;
-    QPushButton *load_button_;
-
-    bool loading_wanted_;
 };
 
 #endif /* DBOBJECTINFOWIDGET_H_ */

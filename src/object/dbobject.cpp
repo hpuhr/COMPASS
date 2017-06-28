@@ -47,7 +47,7 @@
  * Registers parameters, creates sub configurables
  */
 DBObject::DBObject(std::string class_id, std::string instance_id, Configurable *parent)
-    : Configurable (class_id, instance_id, parent), is_loadable_(false), count_(0), current_meta_table_(nullptr), variables_checked_(false),
+    : Configurable (class_id, instance_id, parent), is_loadable_(false), loading_wanted_(true), count_(0), current_meta_table_(nullptr), variables_checked_(false),
       has_active_data_sources_info_(false), widget_(nullptr), info_widget_(nullptr)
 {
     registerParameter ("name" , &name_, "Undefined");
