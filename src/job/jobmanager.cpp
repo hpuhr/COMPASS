@@ -26,6 +26,7 @@
 #include <QThreadPool>
 
 #include "jobmanager.h"
+#include "jobmanagerwidget.h"
 #include "job.h"
 #include "logger.h"
 #include "stringconv.h"
@@ -33,7 +34,7 @@
 using namespace Utils;
 
 JobManager::JobManager()
-    : Configurable ("JobManager", "JobManager0", 0, "conf/threads.xml")
+    : Configurable ("JobManager", "JobManager0", 0, "conf/threads.xml"), widget_(nullptr)
 {
     logdbg  << "JobManager: constructor";
     boost::mutex::scoped_lock l(mutex_);
@@ -56,6 +57,12 @@ void JobManager::shutdown ()
 
     for (auto job : todos_signal_)
         job->setObsolete ();
+
+    if (widget_)
+    {
+        delete widget_;
+        widget_ = nullptr;
+    }
 
     while (todos_signal_.size() > 0) // wait for finish
     {
@@ -83,6 +90,9 @@ void JobManager::addJob (std::shared_ptr<Job> job)
     QThreadPool::globalInstance()->start(job.get());
 
     todos_signal_.push_back(job);
+
+    if (widget_)
+        widget_->updateSlot();
 }
 
 void JobManager::cancelJob (std::shared_ptr<Job> job)
@@ -95,6 +105,9 @@ void JobManager::cancelJob (std::shared_ptr<Job> job)
         msleep(1);
 
     todos_signal_.erase(find(todos_signal_.begin(), todos_signal_.end(), job));
+
+    if (widget_)
+        widget_->updateSlot();
 }
 
 void JobManager::flushFinishedJobs ()
@@ -118,6 +131,9 @@ void JobManager::flushFinishedJobs ()
 
         loginf << "JobManager: flushFinishedJobs: flushing done job";
         current->emitDone();
+
+        if (widget_)
+            widget_->updateSlot();
     }
 }
 
@@ -149,9 +165,24 @@ void JobManager::run()
     }
 }
 
+JobManagerWidget *JobManager::widget()
+{
+    if (!widget_)
+    {
+        widget_ = new JobManagerWidget (*this);
+    }
+
+    assert (widget_);
+    return widget_;
+}
+
 unsigned int JobManager::numJobs ()
 {
-    boost::mutex::scoped_lock l(mutex_);
+    //boost::mutex::scoped_lock l(mutex_);
     return todos_signal_.size();
 }
 
+int JobManager::numThreads ()
+{
+    return QThreadPool::globalInstance()->activeThreadCount();
+}

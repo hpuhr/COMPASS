@@ -40,7 +40,7 @@
 class WorkerThread;
 class DBJob;
 class Job;
-//class WorkerThreadWidget;
+class JobManagerWidget;
 
 /**
  * @brief Manages execution of TransformationJobs
@@ -65,6 +65,7 @@ public:
 
     bool noJobs ();
     unsigned int numJobs ();
+    int numThreads ();
 
     void shutdown ();
 
@@ -73,6 +74,8 @@ public:
         static JobManager instance;
         return instance;
     }
+
+    JobManagerWidget *widget();
 
 protected:
     /// Flag indicating if thread should stop.
@@ -84,6 +87,8 @@ protected:
     unsigned int update_time_;
 
     std::list <std::shared_ptr<Job>> todos_signal_;
+
+    JobManagerWidget *widget_;
 
     void flushFinishedJobs ();
 

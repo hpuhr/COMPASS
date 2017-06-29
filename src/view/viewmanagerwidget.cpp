@@ -25,30 +25,15 @@ ViewManagerWidget::ViewManagerWidget(ViewManager &view_manager)
   logdbg  << "ViewsWidget: constructor: start";
   cont_layout_=0;
 
-  createWidgets();
-
-  //view_manager_.setViewsWidget(this);
-  logdbg  << "ViewsWidget: constructor: end";
-}
-
-ViewManagerWidget::~ViewManagerWidget()
-{
-}
-
-void ViewManagerWidget::createWidgets ()
-{
   QFont font_bold;
   font_bold.setBold(true);
 
-  QFont font_big;
-  font_big.setPointSize(18);
-
   layout_ = new QVBoxLayout();
-  layout_->setSpacing( 0 );
-  layout_->setMargin( 0 );
+//  layout_->setSpacing( 0 );
+//  layout_->setMargin( 0 );
 
   QLabel *head = new QLabel (tr("Views"));
-  head->setFont (font_big);
+  head->setFont (font_bold);
   layout_->addWidget(head);
 
   QPushButton *add = new QPushButton(tr("Add View"));
@@ -56,12 +41,19 @@ void ViewManagerWidget::createWidgets ()
   layout_->addWidget(add);
 
   cont_layout_ = new QVBoxLayout ();
-  cont_layout_->setSpacing( 0 );
-  cont_layout_->setMargin( 0 );
+//  cont_layout_->setSpacing( 0 );
+//  cont_layout_->setMargin( 0 );
   layout_->addLayout (cont_layout_);
 
   layout_->addStretch ();
   setLayout (layout_);
+
+  //view_manager_.setViewsWidget(this);
+  logdbg  << "ViewsWidget: constructor: end";
+}
+
+ViewManagerWidget::~ViewManagerWidget()
+{
 }
 
 void ViewManagerWidget::addViewSlot()

@@ -21,7 +21,10 @@
 //#include "DBInfoWidget.h"
 //#include "ResultSetWidget.h"
 //#include "WorkerThreadWidget.h"
-//#include "ViewsWidget.h"
+#include "viewmanager.h"
+#include "viewmanagerwidget.h"
+#include "jobmanager.h"
+#include "jobmanagerwidget.h"
 #include "logger.h"
 #include "global.h"
 
@@ -34,27 +37,26 @@ ManagementWidget::ManagementWidget() : QWidget ()
 
     vlayout->addLayout (hlayout);
 
-    QVBoxLayout *vlayout2 = new QVBoxLayout ();
+    QVBoxLayout *left_layout = new QVBoxLayout ();
 
     DBInterfaceInfoWidget *interface_widget = ATSDB::instance().interface().infoWidget();
     interface_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
     interface_widget->setLineWidth(frame_width);
-    vlayout2->addWidget (interface_widget);
-    vlayout2->addStretch ();
+    left_layout->addWidget (interface_widget);
+    left_layout->addStretch ();
 
     DBObjectManagerInfoWidget *objman_widget = ATSDB::instance().objectManager().infoWidget();
     objman_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
     objman_widget->setLineWidth(frame_width);
-    vlayout2->addWidget (objman_widget);
+    left_layout->addWidget (objman_widget);
 
     //  result_ = new ResultSetWidget ();
     //  result_->setFrameStyle(QFrame::Panel | QFrame::Raised);
     //  result_->setLineWidth(frame_width);
     //  vlayout2->addWidget (result_);
 
-    hlayout->addLayout (vlayout2);
-    hlayout->addStretch ();
-    hlayout->addStretch ();
+    hlayout->addLayout (left_layout);
+    hlayout->addSpacing(400);
 
     //  filter_config_gui_ = new FilterConfigWidget ();
     //  filter_config_gui_->setFrameStyle(QFrame::Panel | QFrame::Raised);
@@ -66,11 +68,21 @@ ManagementWidget::ManagementWidget() : QWidget ()
     //  worker_widget_->setLineWidth(frame_width);
     //  hlayout->addWidget (worker_widget_);
 
-    //  views_ = new ViewsWidget ();
-    //  views_->setFrameStyle(QFrame::Panel | QFrame::Raised);
-    //  views_->setLineWidth(frame_width);
-    //  hlayout->addWidget (views_);
-    //  views_->update();
+    QVBoxLayout *right_layout = new QVBoxLayout ();
+
+    ViewManagerWidget *viewman_widget = ATSDB::instance().viewManager().widget();
+    viewman_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
+    viewman_widget->setLineWidth(frame_width);
+    right_layout->addWidget (viewman_widget);
+
+    right_layout->addStretch();
+
+    JobManagerWidget *jobman_widget = JobManager::instance().widget();
+    jobman_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
+    jobman_widget->setLineWidth(frame_width);
+    right_layout->addWidget (jobman_widget);
+
+    hlayout->addLayout (right_layout);
 
     setLayout(vlayout);
 }

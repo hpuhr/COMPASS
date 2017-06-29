@@ -117,6 +117,12 @@ void ViewManager::checkSubConfigurables ()
 
 ViewManagerWidget *ViewManager::widget()
 {
+    if (!widget_)
+    {
+        widget_ = new ViewManagerWidget(*this);
+    }
+
+    assert (widget_);
     return widget_;
 }
 

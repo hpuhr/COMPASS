@@ -41,6 +41,7 @@ DBObjectInfoWidget::DBObjectInfoWidget(DBObject &object, QWidget *parent, Qt::Wi
     main_layout_ = new QVBoxLayout ();
 
     main_check_ = new QCheckBox (object.name().c_str());
+    connect (main_check_, SIGNAL(toggled(bool)), this, SLOT(loadChangedSlot()));
     main_check_->setFont (font_bold);
     main_layout_->addWidget (main_check_);
 
@@ -59,6 +60,7 @@ void DBObjectInfoWidget::loadChangedSlot()
     assert (main_check_);
 
     object_.loadingWanted(main_check_->checkState() == Qt::Checked);
+    loginf << "DBObjectInfoWidget: loadChangedSlot: wanted " << object_.loadingWanted();
 }
 
 void DBObjectInfoWidget::updateSlot()

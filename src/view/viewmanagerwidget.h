@@ -46,8 +46,6 @@ private:
 
   std::vector<ViewContainerConfigWidget*> cont_widgets_;
   std::map <QAction*, std::pair<std::string, int> > add_template_actions_;
-
-  void createWidgets ();
 };
 
 #endif /* VIEWSWIDGET_H_ */
