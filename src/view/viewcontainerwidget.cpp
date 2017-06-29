@@ -25,7 +25,7 @@
 //#include "ScatterPlotView.h"
 //#include "MosaicView.h"
 //#include "ListBoxView.h"
-//#include "view.h"
+#include "view.h"
 //#include "DBViewModel.h"
 #include "stringconv.h"
 
@@ -34,8 +34,8 @@ using namespace Utils;
 unsigned int ViewContainerWidget::view_count_=0;
 
 
-ViewContainerWidget::ViewContainerWidget(std::string class_id, std::string instance_id, Configurable *parent)
-:   QWidget( 0 ), Configurable( class_id, instance_id, parent ), tab_widget_( NULL ),
+ViewContainerWidget::ViewContainerWidget(const std::string &class_id, const std::string &instance_id, ViewManager *parent)
+:   QWidget( 0 ), Configurable( class_id, instance_id, parent ), view_manager_(*parent), tab_widget_( NULL ),
     last_active_manage_button_ (0)
 {
   logdbg  << "ViewContainerWidget: constructor: instance " << instance_id_;
@@ -70,7 +70,8 @@ ViewContainerWidget::ViewContainerWidget(std::string class_id, std::string insta
   }
   else
   {
-    target_ = ViewManager::getInstance().getCentralWidget();
+    // TODO
+    //target_ = view_manager_.getCentralWidget();
   }
 
   logdbg  << "ViewContainerWidget: constructor: creating gui elements";
@@ -84,11 +85,12 @@ ViewContainerWidget::~ViewContainerWidget()
 {
     logdbg  << "ViewContainerWidget: destructor";
 
-    while( !views_.empty() )
-    {
-        View* view = views_.back();
-        delete view;
-    }
+    //TODO
+//    while( !views_.empty() )
+//    {
+//        View* view = views_.back();
+//        delete view;
+//    }
 }
 
 void ViewContainerWidget::createGUIElements ()
@@ -122,45 +124,45 @@ void ViewContainerWidget::createGUIElements ()
   connect(delete_action, SIGNAL(triggered()), this, SLOT(deleteView()));
 }
 
-void ViewContainerWidget::addGeographicView()
-{
-  generateSubConfigurable ("GeographicView", "GeographicView"+intToString(view_count_));
-}
+//void ViewContainerWidget::addGeographicView()
+//{
+//  generateSubConfigurable ("GeographicView", "GeographicView"+intToString(view_count_));
+//}
 
-void ViewContainerWidget::addHistogramView()
-{
-  generateSubConfigurable ("HistogramView", "HistogramView"+intToString(view_count_));
-}
+//void ViewContainerWidget::addHistogramView()
+//{
+//  generateSubConfigurable ("HistogramView", "HistogramView"+intToString(view_count_));
+//}
 
-void ViewContainerWidget::addListBoxView()
-{
-  generateSubConfigurable ("ListBoxView", "ListBoxView"+intToString(view_count_));
-}
+//void ViewContainerWidget::addListBoxView()
+//{
+//  generateSubConfigurable ("ListBoxView", "ListBoxView"+intToString(view_count_));
+//}
 
-void ViewContainerWidget::addMosaicView()
-{
-  generateSubConfigurable ("MosaicView", "MosaicView"+intToString(view_count_));
-}
+//void ViewContainerWidget::addMosaicView()
+//{
+//  generateSubConfigurable ("MosaicView", "MosaicView"+intToString(view_count_));
+//}
 
-void ViewContainerWidget::addScatterPlotView()
-{
-  generateSubConfigurable ("ScatterPlotView", "ScatterPlotView"+intToString(view_count_));
-}
+//void ViewContainerWidget::addScatterPlotView()
+//{
+//  generateSubConfigurable ("ScatterPlotView", "ScatterPlotView"+intToString(view_count_));
+//}
 
-void ViewContainerWidget::addTemplateView (std::string template_name)
-{
-    std::string view_name = template_name+intToString(ViewContainerWidget::getViewCount());
-    std::map<std::string, Configuration> &templates = ViewManager::getInstance().getConfiguration()
-            .getConfigurationTemplates ();
-    assert (templates.find (template_name) != templates.end());
-    Configuration view_config = templates [template_name];
-    view_config.setInstanceId(view_name);
-    view_config.setTemplate(false, "");
+//void ViewContainerWidget::addTemplateView (std::string template_name)
+//{
+//    std::string view_name = template_name+intToString(ViewContainerWidget::getViewCount());
+//    std::map<std::string, Configuration> &templates = ViewManager::getInstance().getConfiguration()
+//            .getConfigurationTemplates ();
+//    assert (templates.find (template_name) != templates.end());
+//    Configuration view_config = templates [template_name];
+//    view_config.setInstanceId(view_name);
+//    view_config.setTemplate(false, "");
 
-    configuration_.addNewSubConfiguration(view_config);
+//    configuration_.addNewSubConfiguration(view_config);
 
-    generateSubConfigurable (view_config.getClassId(), view_config.getInstanceId());
-}
+//    generateSubConfigurable (view_config.getClassId(), view_config.getInstanceId());
+//}
 
 ViewContainerTabWidget *ViewContainerWidget::getTabWidget ()
 {
@@ -171,7 +173,7 @@ ViewContainerTabWidget *ViewContainerWidget::getTabWidget ()
 void ViewContainerWidget::closeEvent ( QCloseEvent * event )
 {
   loginf  << "ViewContainerWidget: closeEvent: instance " << instance_id_;
-  ViewManager::getInstance().removeContainer( instance_id_ );
+  view_manager_.removeContainer( instance_id_ );
   QWidget::closeEvent(event);
 }
 
@@ -234,57 +236,57 @@ const std::vector<View*>& ViewContainerWidget::getViews() const
 
 void ViewContainerWidget::generateSubConfigurable (std::string class_id, std::string instance_id)
 {
-  if (class_id.compare ("GeographicView") == 0)
-  {
-    GeographicView* view = new GeographicView ( class_id, instance_id, this );
-    unsigned int number = getAppendedInt (instance_id);
-    if (number >= view_count_)
-      view_count_ = number+1;
+//  if (class_id.compare ("GeographicView") == 0)
+//  {
+//    GeographicView* view = new GeographicView ( class_id, instance_id, this );
+//    unsigned int number = getAppendedInt (instance_id);
+//    if (number >= view_count_)
+//      view_count_ = number+1;
 
-    assert( view );
-    view->init();
-  }
-  else if (class_id.compare ("HistogramView") == 0)
-  {
-    HistogramView* view = new HistogramView ( class_id, instance_id, this );
-    unsigned int number = getAppendedInt (instance_id);
-    if (number >= view_count_)
-      view_count_ = number+1;
+//    assert( view );
+//    view->init();
+//  }
+//  else if (class_id.compare ("HistogramView") == 0)
+//  {
+//    HistogramView* view = new HistogramView ( class_id, instance_id, this );
+//    unsigned int number = getAppendedInt (instance_id);
+//    if (number >= view_count_)
+//      view_count_ = number+1;
 
-    assert( view );
-    view->init();
-  }
-  else if (class_id.compare ("ListBoxView") == 0)
-  {
-    ListBoxView* view = new ListBoxView ( class_id, instance_id, this );
-    unsigned int number = getAppendedInt (instance_id);
-    if (number >= view_count_)
-      view_count_ = number+1;
+//    assert( view );
+//    view->init();
+//  }
+//  else if (class_id.compare ("ListBoxView") == 0)
+//  {
+//    ListBoxView* view = new ListBoxView ( class_id, instance_id, this );
+//    unsigned int number = getAppendedInt (instance_id);
+//    if (number >= view_count_)
+//      view_count_ = number+1;
 
-    assert( view );
-    view->init();
-  }
-  else if (class_id.compare ("ScatterPlotView") == 0)
-  {
-    ScatterPlotView* view = new ScatterPlotView ( class_id, instance_id, this );
-    unsigned int number = getAppendedInt (instance_id);
-    if (number >= view_count_)
-      view_count_ = number+1;
+//    assert( view );
+//    view->init();
+//  }
+//  else if (class_id.compare ("ScatterPlotView") == 0)
+//  {
+//    ScatterPlotView* view = new ScatterPlotView ( class_id, instance_id, this );
+//    unsigned int number = getAppendedInt (instance_id);
+//    if (number >= view_count_)
+//      view_count_ = number+1;
 
-    assert( view );
-    view->init();
-  }
-  else if (class_id.compare ("MosaicView") == 0)
-  {
-    MosaicView* view = new MosaicView ( class_id, instance_id, this );
-    unsigned int number = getAppendedInt (instance_id);
-    if (number >= view_count_)
-      view_count_ = number+1;
+//    assert( view );
+//    view->init();
+//  }
+//  else if (class_id.compare ("MosaicView") == 0)
+//  {
+//    MosaicView* view = new MosaicView ( class_id, instance_id, this );
+//    unsigned int number = getAppendedInt (instance_id);
+//    if (number >= view_count_)
+//      view_count_ = number+1;
 
-    assert( view );
-    view->init();
-  }
-  else
+//    assert( view );
+//    view->init();
+//  }
+//  else
     throw std::runtime_error ("ViewContainerWidget: generateSubConfigurable: unknown class_id "+class_id );
 }
 
@@ -309,7 +311,7 @@ void ViewContainerWidget::resizeEvent (QResizeEvent *event)
 
 std::string ViewContainerWidget::getName ()
 {
-  return "Window"+intToString(getAppendedInt (instance_id_));
+  return "Window"+String::intToString(String::getAppendedInt (instance_id_));
 }
 
 void ViewContainerWidget::showMenuSlot ()
@@ -318,35 +320,37 @@ void ViewContainerWidget::showMenuSlot ()
     menu_.exec( QCursor::pos() );
 }
 
-void ViewContainerWidget::saveViewTemplate ()
-{
-    assert (last_active_manage_button_);
+//void ViewContainerWidget::saveViewTemplate ()
+//{
+//    assert (last_active_manage_button_);
 
-    assert (view_manage_buttons_.find (last_active_manage_button_) != view_manage_buttons_.end());
-    View *view = view_manage_buttons_ [last_active_manage_button_];
+//    assert (view_manage_buttons_.find (last_active_manage_button_) != view_manage_buttons_.end());
+//    View *view = view_manage_buttons_ [last_active_manage_button_];
 
-    bool ok;
-    QString text = QInputDialog::getText(this, tr("Save View Template"),
-                                         tr("Template Name"), QLineEdit::Normal,
-                                         view->getInstanceId().c_str(), &ok);
-    if (ok && !text.isEmpty())
-    {
-        loginf << "ViewContainerWidget: saveViewTemplate: for view " << view->getInstanceId() <<
-                " as template " << text.toStdString();
-        ViewManager::getInstance().saveViewAsTemplate (view, text.toStdString());
-    }
+//    bool ok;
+//    QString text = QInputDialog::getText(this, tr("Save View Template"),
+//                                         tr("Template Name"), QLineEdit::Normal,
+//                                         view->getInstanceId().c_str(), &ok);
+//    if (ok && !text.isEmpty())
+//    {
+//        loginf << "ViewContainerWidget: saveViewTemplate: for view " << view->getInstanceId() <<
+//                " as template " << text.toStdString();
+//        //TODO
+//        //ViewManager::getInstance().saveViewAsTemplate (view, text.toStdString());
+//    }
 
-    last_active_manage_button_=0;
-}
+//    last_active_manage_button_=0;
+//}
 void ViewContainerWidget::deleteView ()
 {
     assert (last_active_manage_button_);
 
-    assert (view_manage_buttons_.find (last_active_manage_button_) != view_manage_buttons_.end());
-    View *view = view_manage_buttons_ [last_active_manage_button_];
+    // TODO
+//    assert (view_manage_buttons_.find (last_active_manage_button_) != view_manage_buttons_.end());
+//    View *view = view_manage_buttons_ [last_active_manage_button_];
 
-    loginf << "ViewContainerWidget: saveViewTemplate: for view " << view->getInstanceId();
-    ViewManager::getInstance().viewShutdown (view);
+//    loginf << "ViewContainerWidget: saveViewTemplate: for view " << view->getInstanceId();
+//    ViewManager::getInstance().viewShutdown (view);
 
     last_active_manage_button_=0;
 }

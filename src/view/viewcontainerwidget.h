@@ -16,6 +16,7 @@
 
 class ManagementWidget;
 class View;
+class ViewManager;
 class ViewContainerTabWidget;
 class QHBoxLayout;
 class QPushButton;
@@ -30,19 +31,19 @@ class ViewContainerWidget : public QWidget, public Configurable
   Q_OBJECT
 public slots:
   void showMenuSlot ();
-  void saveViewTemplate ();
+  //void saveViewTemplate ();
   void deleteView ();
 
 public:
-  ViewContainerWidget(std::string class_id, std::string instance_id, Configurable *parent);
+  ViewContainerWidget(const std::string &class_id, const std::string &instance_id, ViewManager *parent);
   virtual ~ViewContainerWidget();
 
-  void addGeographicView();
-  void addHistogramView();
-  void addListBoxView();
-  void addMosaicView();
-  void addScatterPlotView();
-  void addTemplateView (std::string template_name);
+//  void addGeographicView();
+//  void addHistogramView();
+//  void addListBoxView();
+//  void addMosaicView();
+//  void addScatterPlotView();
+//  void addTemplateView (std::string template_name);
 
   ViewContainerTabWidget *getTabWidget ();
 
@@ -53,15 +54,10 @@ public:
   virtual void generateSubConfigurable (std::string class_id, std::string instance_id);
 
   std::string getName ();
+  static unsigned int getViewCount () { return view_count_; }
 
 protected:
-  void closeEvent ( QCloseEvent * event );
-  virtual void moveEvent (QMoveEvent *event);
-  virtual void resizeEvent (QResizeEvent *event);
-
-  virtual void checkSubConfigurables ();
-
-  void createGUIElements ();
+  ViewManager &view_manager_;
 
   bool seperate_window_;
 
@@ -86,8 +82,15 @@ protected:
   unsigned int min_height_;
 
  static unsigned int view_count_;
-public:
- static unsigned int getViewCount () { return view_count_; }
+
+ void closeEvent ( QCloseEvent * event );
+ virtual void moveEvent (QMoveEvent *event);
+ virtual void resizeEvent (QResizeEvent *event);
+
+ virtual void checkSubConfigurables ();
+
+ void createGUIElements ();
+
 };
 
 #endif /* VIEWCONTAINERWIDGET_H_ */

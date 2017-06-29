@@ -19,8 +19,8 @@
 //#include "DBResultSetManager.h"
 //#include "ConfigurationManager.h"
 //#include "BufferSet.h"
-//#include "ViewContainerWidget.h"
-//#include "View.h"
+#include "viewcontainerwidget.h"
+#include "view.h"
 //#include "DBView.h"
 #include "stringconv.h"
 
@@ -223,39 +223,39 @@ ViewManagerWidget *ViewManager::widget()
 //        views_widget_->update();
 //}
 
-//void ViewManager::registerView (View *view)
-//{
-//    logdbg  << "ViewManager: registerView";
-//    assert (view);
-//    assert (!isRegistered(view));
-//    views_[view->getInstanceId()]=view;
-//    //updateReadSet();
-//}
+void ViewManager::registerView (View *view)
+{
+    logdbg  << "ViewManager: registerView";
+    assert (view);
+    assert (!isRegistered(view));
+    views_[view->getInstanceId()]=view;
+    //updateReadSet();
+}
 
-//void ViewManager::unregisterView (View *view)
-//{
-//    logdbg  << "ViewManager: unregisterView " << view->getName().c_str();
-//    assert (view);
-//    assert (isRegistered(view));
+void ViewManager::unregisterView (View *view)
+{
+    logdbg  << "ViewManager: unregisterView " << view->getName().c_str();
+    assert (view);
+    assert (isRegistered(view));
 
-//    std::map<std::string, View*>::iterator it;
+    std::map<std::string, View*>::iterator it;
 
-//    it=views_.find(view->getInstanceId());
-//    views_.erase(it);
-//    //updateReadSet();
-//}
+    it=views_.find(view->getInstanceId());
+    views_.erase(it);
+    //updateReadSet();
+}
 
-//bool ViewManager::isRegistered (View *view)
-//{
-//    logdbg  << "ViewManager: isRegistered";
-//    assert (view);
+bool ViewManager::isRegistered (View *view)
+{
+    logdbg  << "ViewManager: isRegistered";
+    assert (view);
 
-//    std::map<std::string, View*>::iterator it;
+    std::map<std::string, View*>::iterator it;
 
-//    it=views_.find(view->getInstanceId());
+    it=views_.find(view->getInstanceId());
 
-//    return !(it == views_.end());
-//}
+    return !(it == views_.end());
+}
 
 //void ViewManager::distributeData (Buffer *buffer)
 //{
@@ -305,50 +305,50 @@ ViewManagerWidget *ViewManager::widget()
 //    views_widget_=views_widget;
 //}
 
-//void ViewManager::deleteContainer (std::string instance_id)
-//{
-//    std::map <std::string, ViewContainerWidget *>::iterator it;
+void ViewManager::deleteContainer (std::string instance_id)
+{
+    std::map <std::string, ViewContainerWidget *>::iterator it;
 
-//    logdbg  << "ViewManager: removeContainer: instance " << instance_id;
+    logdbg  << "ViewManager: removeContainer: instance " << instance_id;
 
-//    it=containers_.find(instance_id);
+    it=containers_.find(instance_id);
 
-//    if (it != containers_.end())
-//    {
-//        it->second->close();
-//        it->second->deleteLater();
+    if (it != containers_.end())
+    {
+        it->second->close();
+        it->second->deleteLater();
 
-//        containers_.erase(it);
+        containers_.erase(it);
 
-//        if (views_widget_)
-//            views_widget_->update();
+        if (widget_)
+            widget_->update();
 
-//        return;
-//    }
+        return;
+    }
 
-//    throw std::runtime_error ("ViewManager: removeContainer:  key not found");
-//}
+    throw std::runtime_error ("ViewManager: removeContainer:  key not found");
+}
 
-//void ViewManager::removeContainer (std::string instance_id)
-//{
-//    std::map <std::string, ViewContainerWidget *>::iterator it;
+void ViewManager::removeContainer (std::string instance_id)
+{
+    std::map <std::string, ViewContainerWidget *>::iterator it;
 
-//    logdbg  << "ViewManager: removeContainer: instance " << instance_id;
+    logdbg  << "ViewManager: removeContainer: instance " << instance_id;
 
-//    it=containers_.find(instance_id);
+    it=containers_.find(instance_id);
 
-//    if (it != containers_.end())
-//    {
-//        containers_.erase(it);
+    if (it != containers_.end())
+    {
+        containers_.erase(it);
 
-//        if (views_widget_)
-//            views_widget_->update();
+        if (widget_)
+            widget_->update();
 
-//        return;
-//    }
+        return;
+    }
 
-//    throw std::runtime_error ("ViewManager: removeContainer:  key not found");
-//}
+    throw std::runtime_error ("ViewManager: removeContainer:  key not found");
+}
 
 //void ViewManager::updateReadSet ()
 //{
@@ -383,15 +383,17 @@ ViewManagerWidget *ViewManager::widget()
 //    }
 //}
 
-//void ViewManager::viewShutdown( View* view, const std::string& err )
-//{
-//    delete view;
+void ViewManager::viewShutdown( View* view, const std::string& err )
+{
+    delete view;
+
+    //TODO
 //    if( views_widget_ )
 //        views_widget_->update();
 
-//    if (err.size())
-//        QMessageBox::critical( NULL, "View Shutdown", QString::fromStdString( err ) );
-//}
+    if (err.size())
+        QMessageBox::critical( NULL, "View Shutdown", QString::fromStdString( err ) );
+}
 
 //void ViewManager::saveViewAsTemplate (View *view, std::string template_name)
 //{

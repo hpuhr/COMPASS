@@ -30,9 +30,9 @@ public:
     //  void init (QWidget *central_widget);
     void close ();
 
-//    void registerView (View *view);
-//    void unregisterView (View *view);
-//    bool isRegistered (View *view);
+    void registerView (View *view);
+    void unregisterView (View *view);
+    bool isRegistered (View *view);
 
     //  void distributeData (Buffer *buffer);
     //  void clearData ();
@@ -44,14 +44,14 @@ public:
     //  void addContainerWithScatterPlotView ();
     //  void addContainerWithTemplateView (std::string template_name);
 
-    //  void deleteContainer (std::string instance_id);
-    //  void removeContainer (std::string instance_id);
+      void deleteContainer (std::string instance_id);
+      void removeContainer (std::string instance_id);
 
     //void updateReadSet ();
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
-    //  void viewShutdown( View* view, const std::string& err = "" );
+    void viewShutdown( View* view, const std::string& err = "" );
     //  void saveViewAsTemplate (View *view, std::string template_name);
 
     //  void setViewsWidget (ViewsWidget *views_widget);

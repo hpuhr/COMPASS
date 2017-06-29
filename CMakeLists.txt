@@ -96,7 +96,7 @@ include_directories (
     src/transform
     src/variable
     src/view
-    #src/view/viewbase
+    src/view/viewbase
     src/unit
     )
 
@@ -248,12 +248,12 @@ set ( atsdb_HDRS
     src/view/viewcontainerwidget.h
     src/view/viewcontainertabwidget.h
     src/view/viewcontainerconfigwidget.h
-#    src/view/viewbase/eventprocessor.h
-#    src/view/viewbase/view.h
-#    src/view/viewbase/viewwidget.h
-#    src/view/viewbase/viewsettings.h
-#    src/view/viewbase/viewmodel.h
-#    src/view/viewbase/viewselection.h
+    src/view/viewbase/eventprocessor.h
+    src/view/viewbase/view.h
+    src/view/viewbase/viewwidget.h
+    src/view/viewbase/viewsettings.h
+    src/view/viewbase/viewmodel.h
+    src/view/viewbase/viewselection.h
 #    src/view/viewbase/dbviewmodel.h
 #    src/view/viewbase/dbview.h
 #    src/view/viewbase/dbviewwidget.h
@@ -397,12 +397,13 @@ set ( atsdb_SRCS
     src/view/viewmanager.cpp
     src/view/viewmanagerwidget.cpp
     src/view/viewcontainerwidget.cpp
-#    src/view/viewbase/eventprocessor.cpp
-#    src/view/viewbase/view.cpp
-#    src/view/viewbase/viewwidget.cpp
-#    src/view/viewbase/viewmodel.cpp
-#    src/view/viewbase/viewsettings.cpp
-#    src/view/viewbase/viewselection.cpp
+    src/view/viewbase/eventprocessor.cpp
+    src/view/viewbase/view.cpp
+    src/view/viewbase/viewwidget.cpp
+    src/view/viewcontainerconfigwidget.cpp
+    src/view/viewbase/viewmodel.cpp
+    src/view/viewbase/viewsettings.cpp
+    src/view/viewbase/viewselection.cpp
 #    src/view/viewbase/dbviewmodel.cpp
 #    src/view/viewbase/dbview.cpp
 #    src/view/viewbase/dbviewwidget.cpp
@@ -419,7 +420,6 @@ set ( atsdb_SRCS
 set ( client_SRCS
     src/client/main.cpp
     )
-
 
 add_library ( atsdb SHARED ${atsdb_SRCS} ${atsdb_HDRS} ) 
 target_link_libraries ( atsdb  ${GDAL_LIBRARIES} Qt5::Widgets Qt5::Core ${TINYXML2_LIBRARY} ${Boost_LIBRARIES} ${LOG4CPP_LIBRARIES} ${MySQLpp_LIBRARY})
