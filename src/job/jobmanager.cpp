@@ -85,11 +85,13 @@ void JobManager::shutdown ()
 
 void JobManager::addJob (std::shared_ptr<Job> job)
 {
-    boost::mutex::scoped_lock l(mutex_);
+    mutex_.lock();
 
     QThreadPool::globalInstance()->start(job.get());
 
     todos_signal_.push_back(job);
+
+    mutex_.unlock();
 
     if (widget_)
         widget_->updateSlot();
@@ -97,7 +99,7 @@ void JobManager::addJob (std::shared_ptr<Job> job)
 
 void JobManager::cancelJob (std::shared_ptr<Job> job)
 {
-    boost::mutex::scoped_lock l(mutex_);
+    mutex_.lock();
 
     job->setObsolete();
 
@@ -106,13 +108,17 @@ void JobManager::cancelJob (std::shared_ptr<Job> job)
 
     todos_signal_.erase(find(todos_signal_.begin(), todos_signal_.end(), job));
 
+    mutex_.unlock();
+
     if (widget_)
         widget_->updateSlot();
 }
 
 void JobManager::flushFinishedJobs ()
 {
-    boost::mutex::scoped_lock l(mutex_);
+    mutex_.lock();
+
+    bool changed=false;
     while (todos_signal_.size() > 0)
     {
         std::shared_ptr<Job> current = todos_signal_.front();
@@ -121,6 +127,7 @@ void JobManager::flushFinishedJobs ()
             break;
 
         todos_signal_.pop_front();
+        changed = true;
         logdbg << "JobManager: flushFinishedJobs: flushed job";
         if(current->obsolete())
         {
@@ -132,9 +139,13 @@ void JobManager::flushFinishedJobs ()
         loginf << "JobManager: flushFinishedJobs: flushing done job";
         current->emitDone();
 
-        if (widget_)
-            widget_->updateSlot();
     }
+
+    mutex_.unlock();
+
+    if (changed && widget_)
+        widget_->updateSlot();
+
 }
 
 bool JobManager::noJobs ()
@@ -178,7 +189,7 @@ JobManagerWidget *JobManager::widget()
 
 unsigned int JobManager::numJobs ()
 {
-    //boost::mutex::scoped_lock l(mutex_);
+    boost::mutex::scoped_lock l(mutex_);
     return todos_signal_.size();
 }
 

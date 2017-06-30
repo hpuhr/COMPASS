@@ -100,6 +100,8 @@ DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager &object_manager)
     main_layout->addStretch();
 
     setLayout (main_layout);
+
+    setDisabled(true);
 }
 
 DBObjectManagerWidget::~DBObjectManagerWidget()
@@ -122,6 +124,8 @@ DBObjectManagerWidget::~DBObjectManagerWidget()
 void DBObjectManagerWidget::databaseOpenedSlot ()
 {
     unlocked_=true;
+
+    setDisabled(false);
 
     for (auto it : edit_dbo_buttons_)
         it.first->setDisabled (false);

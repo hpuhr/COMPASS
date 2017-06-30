@@ -33,7 +33,7 @@ class QPushButton;
 class DBSelectionWidget;
 class DBSchemaManagerWidget;
 class DBObjectManagerWidget;
-class QStackedWidget;
+class QTabWidget;
 
 //namespace ATSDB
 //{
@@ -68,7 +68,7 @@ public:
 
 protected:
     /// Widget stack for startup to usage switch
-    QStackedWidget *widget_stack_;
+    QTabWidget *tab_widget_;
     /// Database configuration widget
     QWidget *dbinterface_widget_;
     // Contains database schema configuration elements

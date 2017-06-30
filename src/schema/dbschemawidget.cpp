@@ -101,7 +101,7 @@ DBSchemaWidget::DBSchemaWidget(DBSchema &schema, QWidget * parent, Qt::WindowFla
     tables_layout->addLayout(table_button_layout);
 
     main_layout->addLayout(tables_layout);
-    main_layout->addStretch();
+    main_layout->addSpacing(50);
 
     // meta tables
 
@@ -352,23 +352,23 @@ void DBSchemaWidget::updateMetaTableGrid()
     db_name_label->setFont (font_bold);
     meta_table_grid_->addWidget (db_name_label, 0, 1);
 
-    QLabel *subtables_label = new QLabel ("Sub tables");
-    subtables_label->setFont (font_bold);
-    meta_table_grid_->addWidget (subtables_label, 0, 2);
+//    QLabel *subtables_label = new QLabel ("Sub tables");
+//    subtables_label->setFont (font_bold);
+//    meta_table_grid_->addWidget (subtables_label, 0, 2);
 
     QLabel *numcols_label = new QLabel ("#columns");
     numcols_label->setFont (font_bold);
-    meta_table_grid_->addWidget (numcols_label, 0, 3);
+    meta_table_grid_->addWidget (numcols_label, 0, 2);
 
     QLabel *edit_label = new QLabel ("Edit");
     edit_label->setFont (font_bold);
     edit_label->setAlignment(Qt::AlignCenter);
-    meta_table_grid_->addWidget (edit_label, 0, 4);
+    meta_table_grid_->addWidget (edit_label, 0, 3);
 
     QLabel *del_label = new QLabel ("Delete");
     del_label->setFont (font_bold);
     del_label->setAlignment(Qt::AlignCenter);
-    meta_table_grid_->addWidget (del_label, 0, 5);
+    meta_table_grid_->addWidget (del_label, 0, 4);
 
     unsigned int row=1;
 
@@ -389,20 +389,19 @@ void DBSchemaWidget::updateMetaTableGrid()
         QLabel *db_name = new QLabel (it.second->mainTableName().c_str());
         meta_table_grid_->addWidget (db_name, row, 1);
 
-        QLabel *sub = new QLabel ("None");
-        sub->setText (it.second->subTableNames().c_str());
-
-        meta_table_grid_->addWidget (sub, row, 2);
+//        QLabel *sub = new QLabel ("None");
+//        sub->setText (it.second->subTableNames().c_str());
+//        meta_table_grid_->addWidget (sub, row, 2);
 
         QLabel *numcols = new QLabel (String::intToString(it.second->numColumns()).c_str());
-        meta_table_grid_->addWidget (numcols, row, 3);
+        meta_table_grid_->addWidget (numcols, row, 2);
 
         QPushButton *edit = new QPushButton ();
         edit->setIcon(edit_icon);
         edit->setIconSize(UI_ICON_SIZE);
         //edit->setFlat(true);
         connect(edit, SIGNAL( clicked() ), this, SLOT( editMetaTableSlot() ));
-        meta_table_grid_->addWidget (edit, row, 4);
+        meta_table_grid_->addWidget (edit, row, 3);
         edit_meta_table_buttons_[edit] = it.second;
 
         QPushButton *del = new QPushButton ();
@@ -410,7 +409,7 @@ void DBSchemaWidget::updateMetaTableGrid()
         del->setIconSize(UI_ICON_SIZE);
         //del->setFlat(true);
         connect(del, SIGNAL( clicked() ), this, SLOT( deleteMetaTableSlot() ));
-        meta_table_grid_->addWidget (del, row, 5);
+        meta_table_grid_->addWidget (del, row, 4);
         delete_meta_table_buttons_[del] = it.second;
         row++;
     }

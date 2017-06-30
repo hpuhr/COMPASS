@@ -39,6 +39,7 @@
 #include <QGridLayout>
 #include <QSettings>
 #include <QThread>
+#include <QTabWidget>
 
 //#include "Buffer.h"
 #include "mainwindow.h"
@@ -67,7 +68,7 @@ using namespace std;
 //{
 
 MainWindow::MainWindow()
-    : dbinterface_widget_(nullptr), dbschema_manager_widget_(nullptr),  object_manager_widget_ (nullptr), start_button_(nullptr)
+    : tab_widget_(nullptr), dbinterface_widget_(nullptr), dbschema_manager_widget_(nullptr),  object_manager_widget_ (nullptr), start_button_(nullptr)
 {
     logdbg  << "MainWindow: constructor";
 
@@ -76,7 +77,7 @@ MainWindow::MainWindow()
 
     createMenus();
 
-    widget_stack_ = new QStackedWidget ();
+    tab_widget_ = new QTabWidget ();
 
     QWidget *main_widget = new QWidget ();
     QVBoxLayout *main_layout = new QVBoxLayout ();
@@ -110,18 +111,21 @@ MainWindow::MainWindow()
 
     main_widget->setLayout(main_layout);
 
-    widget_stack_->addWidget (main_widget);
+    main_widget->setAutoFillBackground(true);
+    tab_widget_->addTab(main_widget, "DB Config");
 
     // management widget
 
     ManagementWidget *management_widget = new ManagementWidget ();
-    widget_stack_->addWidget (management_widget);
+    management_widget->setAutoFillBackground(true);
+    tab_widget_->addTab (management_widget, "Management");
 
     // set stack
 
-    setCentralWidget(widget_stack_);
+    setCentralWidget(tab_widget_);
 
-    widget_stack_->setCurrentIndex (0);
+    //widget_stack_->setCurrentIndex (0);
+    tab_widget_->setCurrentIndex(0);
 
     //menuBar()->setNativeMenuBar(native_menu_);
 
@@ -151,7 +155,8 @@ void MainWindow::startSlot ()
     logdbg  << "MainWindow: startSlot";
 
     // TODO lock stuff
-    widget_stack_->setCurrentIndex (1);
+    //widget_stack_->setCurrentIndex (1);
+    tab_widget_->setCurrentIndex(1);
 
     //ATSDB::instance().objectManager().object("Radar").load();
 //    if (db_opened_)
@@ -195,8 +200,11 @@ void MainWindow::closeEvent(QCloseEvent *event)
     ATSDB::instance().shutdown();
     assert (!ATSDB::instance().ready());
 
-    if (widget_stack_)
-        delete widget_stack_;
+    if (tab_widget_)
+    {
+        delete tab_widget_;
+        tab_widget_=nullptr;
+    }
 
     QWidget::closeEvent(event);
     logdbg  << "MainWindow: closeEvent: done";

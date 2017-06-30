@@ -43,12 +43,10 @@ DBSchemaManagerWidget::DBSchemaManagerWidget(DBSchemaManager &manager, QWidget* 
     QHBoxLayout *button_layout = new QHBoxLayout ();
 
     add_button_ = new QPushButton(tr("Add Schema"));
-    //add_button_->setDisabled (true);
     connect(add_button_, SIGNAL( clicked() ), this, SLOT( addSchemaSlot() ));
     button_layout->addWidget (add_button_);
 
     delete_button_ = new QPushButton(tr("Delete Schema"));
-    //delete_button_->setDisabled (true);
     connect(delete_button_, SIGNAL( clicked() ), this, SLOT( deleteSchemaSlot() ));
     button_layout->addWidget (delete_button_);
 
@@ -59,8 +57,6 @@ DBSchemaManagerWidget::DBSchemaManagerWidget(DBSchemaManager &manager, QWidget* 
     layout->addWidget(schema_widgets_);
 
     updateSchemas();
-
-    layout->addStretch();
 
     setLayout (layout);
 
