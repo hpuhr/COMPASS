@@ -19,6 +19,7 @@ class ViewContainerWidget;
 class ViewManagerWidget;
 class View;
 class QWidget;
+class QTabWidget;
 
 class ViewManager : public QObject, public Configurable
 {
@@ -27,7 +28,7 @@ public:
     ViewManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb);
     virtual ~ViewManager();
 
-    //  void init (QWidget *central_widget);
+    void init (QTabWidget *tab_widget);
     void close ();
 
     void registerView (View *view);
@@ -68,7 +69,7 @@ protected:
 
     ViewManagerWidget *widget_;
     bool initialized_;
-    //  QWidget *central_widget_;
+    QTabWidget *tab_widget_;
 
     std::map <std::string, ViewContainerWidget *> containers_;
     std::map<std::string, View*> views_;

@@ -58,6 +58,7 @@
 #include "managementwidget.h"
 #include "stringconv.h"
 #include "jobmanager.h"
+#include "viewmanager.h"
 //#include "ProjectionManager.h"
 //#include "ProjectionManagerWidget.h"
 
@@ -68,7 +69,7 @@ using namespace std;
 //{
 
 MainWindow::MainWindow()
-    : tab_widget_(nullptr), dbinterface_widget_(nullptr), dbschema_manager_widget_(nullptr),  object_manager_widget_ (nullptr), start_button_(nullptr)
+    : tab_widget_(nullptr), dbinterface_widget_(nullptr), dbschema_manager_widget_(nullptr),  object_manager_widget_ (nullptr), management_widget_(nullptr), start_button_(nullptr)
 {
     logdbg  << "MainWindow: constructor";
 
@@ -115,12 +116,8 @@ MainWindow::MainWindow()
     tab_widget_->addTab(main_widget, "DB Config");
 
     // management widget
-
-    ManagementWidget *management_widget = new ManagementWidget ();
-    management_widget->setAutoFillBackground(true);
-    tab_widget_->addTab (management_widget, "Management");
-
-    // set stack
+    management_widget_ = new ManagementWidget ();
+    management_widget_->setAutoFillBackground(true);
 
     setCentralWidget(tab_widget_);
 
@@ -153,6 +150,11 @@ void MainWindow::databaseOpenedSlot()
 void MainWindow::startSlot ()
 {
     logdbg  << "MainWindow: startSlot";
+
+    assert (management_widget_);
+    tab_widget_->addTab (management_widget_, "Management");
+
+    ATSDB::instance().viewManager().init(tab_widget_);
 
     // TODO lock stuff
     //widget_stack_->setCurrentIndex (1);

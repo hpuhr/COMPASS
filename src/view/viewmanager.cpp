@@ -41,18 +41,18 @@ ViewManager::ViewManager(const std::string &class_id, const std::string &instanc
 
 }
 
-//void ViewManager::init (QWidget *central_widget)
-//{
-//  logdbg  << "ViewManager: init";
-//  assert (!central_widget_);
-//  assert (!initialized_);
-//  central_widget_=central_widget;
-//  views_widget_=0;
+void ViewManager::init (QTabWidget *tab_widget)
+{
+  logdbg  << "ViewManager: init";
+  assert (tab_widget);
+  assert (!tab_widget_);
+  assert (!initialized_);
+  tab_widget_=tab_widget;
 
-//  initialized_=true;
+  initialized_=true;
 
-//  createSubConfigurables ();
-//}
+  createSubConfigurables ();
+}
 
 void ViewManager::close ()
 {

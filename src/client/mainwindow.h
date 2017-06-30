@@ -33,6 +33,7 @@ class QPushButton;
 class DBSelectionWidget;
 class DBSchemaManagerWidget;
 class DBObjectManagerWidget;
+class ManagementWidget;
 class QTabWidget;
 
 //namespace ATSDB
@@ -76,6 +77,8 @@ protected:
 
     /// Contains DBObject configuration elements
     DBObjectManagerWidget *object_manager_widget_;
+
+    ManagementWidget *management_widget_;
 
     //static const unsigned int info_height_=200;
 
