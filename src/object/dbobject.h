@@ -193,7 +193,7 @@ public:
     void loadingWanted (bool wanted) { loading_wanted_=wanted; }
     bool loadingWanted () { return loading_wanted_; }
 
-    void load ();
+    void load (const std::string &limit_str="");
 
     /// @brief Returns if incremental read for DBO type was prepared
     bool isLoading ();

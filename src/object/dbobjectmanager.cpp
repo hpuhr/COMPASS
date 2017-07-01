@@ -32,6 +32,9 @@
 #include "dbobjectmanagerwidget.h"
 #include "dbobjectmanagerinfowidget.h"
 //#include "structureDescriptionManager.h"
+#include "stringconv.h"
+
+using Utils::String;
 
 /**
  * Creates sub-configurables.
@@ -40,6 +43,10 @@ DBObjectManager::DBObjectManager(const std::string &class_id, const std::string 
 : Configurable (class_id, instance_id, atsdb, "conf/config_dbo.xml"), widget_(nullptr), info_widget_(nullptr) //, registered_parent_variables_ (false)
 {
     logdbg  << "DBObjectManager: constructor: creating subconfigurables";
+
+    registerParameter("use_limit", &use_limit_, false);
+    registerParameter("limit_min", &limit_min_, 0);
+    registerParameter("limit_max", &limit_max_, 1000);
 
     createSubConfigurables ();
 }
@@ -207,6 +214,38 @@ DBObjectManagerInfoWidget *DBObjectManager::infoWidget()
     return info_widget_;
 }
 
+bool DBObjectManager::useLimit() const
+{
+    return use_limit_;
+}
+
+void DBObjectManager::useLimit(bool use_limit)
+{
+    use_limit_ = use_limit;
+}
+
+unsigned int DBObjectManager::limitMin() const
+{
+    return limit_min_;
+}
+
+void DBObjectManager::limitMin(unsigned int limit_min)
+{
+    limit_min_ = limit_min;
+    loginf << "DBObjectManager: limitMin: " << limit_min_;
+}
+
+unsigned int DBObjectManager::limitMax() const
+{
+    return limit_max_;
+}
+
+void DBObjectManager::limitMax(unsigned int limit_max)
+{
+    limit_max_ = limit_max;
+    loginf << "DBObjectManager: limitMax: " << limit_max_;
+}
+
 void DBObjectManager::loadSlot ()
 {
     loginf << "DBObjectManager: loadSlot";
@@ -215,7 +254,14 @@ void DBObjectManager::loadSlot ()
         loginf << "DBObjectManagerInfoWidget: loadSlot: object " << object.first << " wanted loading " << object.second->loadingWanted();
         if (object.second->loadingWanted())
         {
-            object.second->load();
+            if (use_limit_)
+            {
+                std::string limit_str = String::intToString(limit_min_)+","+String::intToString(limit_max_);
+                loginf << "DBObjectManager: loadSlot: use limit str " << limit_str;
+                object.second->load(limit_str);
+            }
+            else
+                object.second->load();
         }
     }
     emit loadingStartedSignal();

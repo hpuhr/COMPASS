@@ -35,10 +35,6 @@ public slots:
     void toggleUseOrder ();
     /// @brief Called when order ascending checkbox is un/checked
     void toggleOrderAscending ();
-    /// @brief Called when limit minimum is changed
-    void limitMinChanged();
-    /// @brief Called when limit maximum is changed
-    void limitMaxChanged();
     /// @brief Called when use selection checkbox is un/checked
     void toggleUseSelection();
     /// @brief Called when database view checkbox is un/checked
@@ -57,14 +53,6 @@ protected:
     //DBOVariableOrderedSetWidget *variable_set_widget_;
     /// Order-by variable selection widget
     //DBOVariableSelectionWidget *order_variable_widget_;
-
-    /// Limit minimum edit field
-    QLineEdit *limit_min_edit_;
-    /// Limit maximum edit field
-    QLineEdit *limit_max_edit_;
-
-    /// @brief Creates GUI elements
-    void createElements ();
 };
 
 #endif /* LISTBOXVIEWCONFIGWIDGET_H_ */

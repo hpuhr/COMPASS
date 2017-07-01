@@ -26,6 +26,8 @@ class DBObjectWidget;
 class DBObjectManager;
 class QVBoxLayout;
 class QPushButton;
+class QCheckBox;
+class QLineEdit;
 
 /**
  * @brief Shows all DBObjects, allows editing and adding new ones
@@ -35,6 +37,14 @@ class DBObjectManagerInfoWidget : public QFrame
     Q_OBJECT
 
 public slots:
+    void toggleUseLimit ();
+    /// @brief Called when limit minimum is changed
+    void limitMinChanged();
+    /// @brief Called when limit maximum is changed
+    void limitMaxChanged();
+
+
+
     void loadAllSlot ();
     void updateSlot ();
 
@@ -47,6 +57,13 @@ public:
 private:
     DBObjectManager &object_manager_;
     QVBoxLayout *info_layout_;
+
+    QCheckBox *limit_check_;
+    /// Limit minimum edit field
+    QLineEdit *limit_min_edit_;
+    /// Limit maximum edit field
+    QLineEdit *limit_max_edit_;
+
     QPushButton *load_all_button_;
 
 };

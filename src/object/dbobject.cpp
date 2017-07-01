@@ -374,7 +374,7 @@ void DBObject::schemaChangedSlot ()
         current_meta_table_ = nullptr;
 }
 
-void DBObject::load ()
+void DBObject::load (const std::string &limit_str)
 {
     assert (is_loadable_);
 
@@ -404,7 +404,10 @@ void DBObject::load ()
 
     std::string custom_filter_clause;
 
-    DBOReadDBJob *read_job = new DBOReadDBJob (ATSDB::instance().interface(), *this, read_list, custom_filter_clause, nullptr, false);
+//    DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
+//    DBOVariable *order, const std::string &limit_str, bool activate_key_search
+
+    DBOReadDBJob *read_job = new DBOReadDBJob (ATSDB::instance().interface(), *this, read_list, custom_filter_clause, nullptr, limit_str, false);
 
     read_job_ = std::shared_ptr<DBOReadDBJob> (read_job);
     connect (read_job, SIGNAL(intermediateSignal(std::shared_ptr<Buffer>)), this, SLOT(readJobIntermediateSlot(std::shared_ptr<Buffer>)));
@@ -468,8 +471,9 @@ void DBObject::readJobDoneSlot()
     stop_time_ = boost::posix_time::microsec_clock::local_time();
     boost::posix_time::time_duration diff = stop_time_ - start_time_;
 
-    loginf  << "DBObject: readJobDoneSlot: done after " << diff << ", " << data_->size()/diff.total_seconds()
-            << " el/s";
+    if (diff.total_seconds() > 0)
+        loginf  << "DBObject: readJobDoneSlot: done after " << diff << ", " << data_->size()/diff.total_seconds()
+                << " el/s";
 
     if (info_widget_)
         info_widget_->updateSlot();

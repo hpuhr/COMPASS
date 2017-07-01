@@ -72,7 +72,7 @@ SQLGenerator::~SQLGenerator()
 }
 
 std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand(const DBObject &object, const DBOVariableSet &read_list, const std::string &custom_filter_clause,
-        DBOVariable *order)
+        DBOVariable *order,  const std::string &limit_str)
 {
     //DBOVariableSet &read_list = ATSDB::getInstance().getDBObject(type)->getReadList();
     const MetaDBTable &table = object.currentMetaTable ();
@@ -95,9 +95,11 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand(const DBObject &object
 //        custom_filter_clause = FilterManager::getInstance().getSQLCondition(dbo_type, filtered_variable_names);
 //    }
 
-    //return getSelectCommand (read_list.getPropertyList(type), table, filtered_variable_names, custom_filter_clause,idname);
+//    const PropertyList &variables, const MetaDBTable &meta_table,
+//                                               const std::vector <std::string> &filtered_variable_names, const std::string &filter, const std::string &order,
+//                                               const std::string &limit, bool distinct, bool left_join
     return getSelectCommand (read_list.getPropertyList(), table, filtered_variable_names, custom_filter_clause, "",
-            "", false, true);
+            limit_str, false, true);
     //(PropertyList variables, MetaDBTable *table,
     //    std::vector <std::string> &filtered_variable_names, std::string filter, std::string order, std::string limit,
     //    bool distinct, bool left_join)

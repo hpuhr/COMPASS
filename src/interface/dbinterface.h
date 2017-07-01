@@ -110,7 +110,8 @@ public:
 //    void updateBuffer (Buffer *data);
 
 //    /// @brief Prepares incremental read of DBO type
-    void prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause="", DBOVariable *order=0);
+    void prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause="", DBOVariable *order=nullptr,
+                      const std::string &limit="");
     /// @brief Returns data chunk of DBO type
     std::shared_ptr <Buffer> readDataChunk (const DBObject &dbobject, bool activate_key_search);
     /// @brief Cleans up incremental read of DBO type

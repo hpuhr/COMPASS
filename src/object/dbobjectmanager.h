@@ -90,7 +90,20 @@ public:
     DBObjectManagerWidget *widget();
     DBObjectManagerInfoWidget *infoWidget();
 
+    bool useLimit() const;
+    void useLimit(bool useLimit);
+
+    unsigned int limitMin() const;
+    void limitMin(unsigned int limitMin);
+
+    unsigned int limitMax() const;
+    void limitMax(unsigned int limitMax);
+
 protected:
+    bool use_limit_;
+    unsigned int limit_min_;
+    unsigned int limit_max_;
+
     /// Container with all DBOs (DBO name -> DBO pointer)
     std::map <std::string, DBObject*> objects_;
     //bool registered_parent_variables_;

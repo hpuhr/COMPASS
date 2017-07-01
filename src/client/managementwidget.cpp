@@ -54,8 +54,8 @@ ManagementWidget::ManagementWidget() : QWidget ()
     //  result_->setLineWidth(frame_width);
     //  vlayout2->addWidget (result_);
 
-    hlayout->addLayout (left_layout);
-    hlayout->addSpacing(600);
+    hlayout->addLayout (left_layout, 1);
+    //hlayout->addSpacing(600);
 
     //  filter_config_gui_ = new FilterConfigWidget ();
     //  filter_config_gui_->setFrameStyle(QFrame::Panel | QFrame::Raised);
@@ -79,7 +79,7 @@ ManagementWidget::ManagementWidget() : QWidget ()
     jobman_widget->setLineWidth(frame_width);
     right_layout->addWidget (jobman_widget);
 
-    hlayout->addLayout (right_layout);
+    hlayout->addLayout (right_layout, 1);
 
     setLayout(vlayout);
 }

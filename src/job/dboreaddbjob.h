@@ -45,7 +45,7 @@ signals:
 
 public:
     DBOReadDBJob(DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
-                 DBOVariable *order, bool activate_key_search);
+                 DBOVariable *order, const std::string &limit_str, bool activate_key_search);
     virtual ~DBOReadDBJob();
 
     virtual void run ();
@@ -57,6 +57,7 @@ protected:
     DBOVariableSet read_list_;
     std::string custom_filter_clause_;
     DBOVariable *order_;
+    std::string limit_str_;
     bool activate_key_search_;
 };
 

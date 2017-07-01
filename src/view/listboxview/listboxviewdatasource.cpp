@@ -200,7 +200,7 @@ void ListBoxViewDataSource::loadingStartedSlot ()
 
 void ListBoxViewDataSource::newDataSlot (DBObject &object)
 {
-    loginf << "ListBoxViewDataSource: newDataSlot: object " << object.name();
+    logdbg << "ListBoxViewDataSource: newDataSlot: object " << object.name();
 //    assert (job);
 
 //    DBOInfoDBJob *infojob = (DBOInfoDBJob*) job;

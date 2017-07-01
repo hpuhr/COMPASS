@@ -42,8 +42,9 @@
 #include "logger.h"
 
 DBOReadDBJob::DBOReadDBJob(DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
-                           DBOVariable *order, bool activate_key_search)
-: Job (db_interface), dbobject_(dbobject), read_list_(read_list), custom_filter_clause_ (custom_filter_clause), order_(order), activate_key_search_(activate_key_search)
+                           DBOVariable *order, const std::string &limit_str, bool activate_key_search)
+: Job (db_interface), dbobject_(dbobject), read_list_(read_list), custom_filter_clause_ (custom_filter_clause), order_(order),
+  limit_str_(limit_str), activate_key_search_(activate_key_search)
 {
     // AVIBIT HACK
 //    if (order == 0)
@@ -65,7 +66,7 @@ void DBOReadDBJob::run ()
     if (custom_filter_clause_.size() == 0 && order_ )
         db_interface_.prepareRead (dbobject_, read_list_);
     else
-        db_interface_.prepareRead (dbobject_, read_list_, custom_filter_clause_, order_);
+        db_interface_.prepareRead (dbobject_, read_list_, custom_filter_clause_, order_, limit_str_);
 
     unsigned int cnt=0;
     while (!done_ && !obsolete_)

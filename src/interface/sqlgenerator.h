@@ -61,7 +61,7 @@ public:
 
 //    /// @brief Returns general select command
     std::shared_ptr <DBCommand> getSelectCommand(const DBObject &object, const DBOVariableSet &read_list, const std::string &custom_filter_clause="",
-            DBOVariable *order=0);
+            DBOVariable *order=0, const std::string &limit_str="");
 //    /// @brief Returns command for all data sources select
 
 //    //DBCommand *getDataSourcesSelectCommand (const std::string &dbo_type);
