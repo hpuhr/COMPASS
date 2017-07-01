@@ -12,140 +12,148 @@
 #include <QAction>
 #include <QVariant>
 
-
 #include "viewmanagerwidget.h"
 #include "viewmanager.h"
 #include "logger.h"
-//#include "DBResultSetManager.h"
+#include "jobmanager.h"
 #include "viewcontainerconfigwidget.h"
 
 ViewManagerWidget::ViewManagerWidget(ViewManager &view_manager)
-    : view_manager_(view_manager)
+    : view_manager_(view_manager), layout_(nullptr), cont_layout_(nullptr), add_button_(nullptr)
 {
-  logdbg  << "ViewsWidget: constructor: start";
-  cont_layout_=0;
+    logdbg  << "ViewsWidget: constructor: start";
 
-  QFont font_bold;
-  font_bold.setBold(true);
+    QFont font_bold;
+    font_bold.setBold(true);
 
-  layout_ = new QVBoxLayout();
-//  layout_->setSpacing( 0 );
-//  layout_->setMargin( 0 );
+    layout_ = new QVBoxLayout();
 
-  QLabel *head = new QLabel (tr("Views"));
-  head->setFont (font_bold);
-  layout_->addWidget(head);
+    QLabel *head = new QLabel (tr("Views"));
+    head->setFont (font_bold);
+    layout_->addWidget(head);
 
-  QPushButton *add = new QPushButton(tr("Add View"));
-  connect(add, SIGNAL( clicked() ), this, SLOT( addViewSlot() ));
-  layout_->addWidget(add);
+    add_button_ = new QPushButton(tr("Add View"));
+    connect(add_button_, SIGNAL( clicked() ), this, SLOT( addViewSlot() ));
+    layout_->addWidget(add_button_);
 
-  cont_layout_ = new QVBoxLayout ();
-//  cont_layout_->setSpacing( 0 );
-//  cont_layout_->setMargin( 0 );
-  layout_->addLayout (cont_layout_);
+    cont_layout_ = new QVBoxLayout ();
+    //  cont_layout_->setSpacing( 0 );
+    //  cont_layout_->setMargin( 0 );
+    layout_->addLayout (cont_layout_);
 
-  layout_->addStretch ();
-  setLayout (layout_);
+    layout_->addStretch ();
+    setLayout (layout_);
 
-  //view_manager_.setViewsWidget(this);
-  logdbg  << "ViewsWidget: constructor: end";
+    connect (&JobManager::instance(), SIGNAL(databaseBusy()), this, SLOT(databaseBusy()));
+    connect (&JobManager::instance(), SIGNAL(databaseIdle()), this, SLOT(databaseIdle()));
+
+    //view_manager_.setViewsWidget(this);
+    logdbg  << "ViewsWidget: constructor: end";
 }
 
 ViewManagerWidget::~ViewManagerWidget()
 {
 }
 
+void ViewManagerWidget::databaseBusy ()
+{
+    assert (add_button_);
+    add_button_->setDisabled(true);
+}
+
+void ViewManagerWidget::databaseIdle ()
+{
+    assert (add_button_);
+    add_button_->setDisabled(false);
+}
+
+
 void ViewManagerWidget::addViewSlot()
 {
-  //TODO
-//  if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
-//    return;
+    add_template_actions_.clear();
 
-//  add_template_actions_.clear();
+    QMenu menu;
+    QMenu* submenu;
+    QString name;
+    unsigned int i, n = cont_widgets_.size();
 
-//  QMenu menu;
-//  QMenu* submenu;
-//  QString name;
-//  unsigned int i, n = cont_widgets_.size();
+    //  //scatter plot view
+    //  submenu = menu.addMenu( "Geographic View" );
+    //  submenu->addAction( "New Window", this, SLOT(addGeographicViewNewWindowSlot()) );
+    //  for( i=0; i<n; ++i )
+    //  {
+    //    name = cont_widgets_[ i ]->name();
+    //    QAction* action = submenu->addAction( name, this, SLOT(addGeographicViewSlot()) );
+    //    action->setData( QVariant( i ) );
+    //  }
 
-//  //scatter plot view
-//  submenu = menu.addMenu( "Geographic View" );
-//  submenu->addAction( "New Window", this, SLOT(addGeographicViewNewWindowSlot()) );
-//  for( i=0; i<n; ++i )
-//  {
-//    name = cont_widgets_[ i ]->name();
-//    QAction* action = submenu->addAction( name, this, SLOT(addGeographicViewSlot()) );
-//    action->setData( QVariant( i ) );
-//  }
+    //  //scatter plot 2d view
+    //  submenu = menu.addMenu( "ScatterPlot View" );
+    //  submenu->addAction( "New Window", this, SLOT(addScatterPlotViewNewWindowSlot()) );
+    //  for( i=0; i<n; ++i )
+    //  {
+    //    name = cont_widgets_[ i ]->name();
+    //    QAction* action = submenu->addAction( name, this, SLOT(addScatterPlotViewSlot()) );
+    //    action->setData( QVariant( i ) );
+    //  }
 
-//  //scatter plot 2d view
-//  submenu = menu.addMenu( "ScatterPlot View" );
-//  submenu->addAction( "New Window", this, SLOT(addScatterPlotViewNewWindowSlot()) );
-//  for( i=0; i<n; ++i )
-//  {
-//    name = cont_widgets_[ i ]->name();
-//    QAction* action = submenu->addAction( name, this, SLOT(addScatterPlotViewSlot()) );
-//    action->setData( QVariant( i ) );
-//  }
+    //  //histogram view
+    //  submenu = menu.addMenu( "Histogram View" );
+    //  submenu->addAction( "New Window", this, SLOT(addHistogramViewNewWindowSlot()) );
+    //  for( i=0; i<n; ++i )
+    //  {
+    //    name = cont_widgets_[ i ]->name();
+    //    QAction* action = submenu->addAction( name, this, SLOT(addHistogramViewSlot()) );
+    //    action->setData( QVariant( i ) );
+    //  }
 
-//  //histogram view
-//  submenu = menu.addMenu( "Histogram View" );
-//  submenu->addAction( "New Window", this, SLOT(addHistogramViewNewWindowSlot()) );
-//  for( i=0; i<n; ++i )
-//  {
-//    name = cont_widgets_[ i ]->name();
-//    QAction* action = submenu->addAction( name, this, SLOT(addHistogramViewSlot()) );
-//    action->setData( QVariant( i ) );
-//  }
+    //  // listbox view
+    //  submenu = menu.addMenu( "ListBox View" );
+    //  submenu->addAction( "New Window", this, SLOT(addListBoxViewNewWindowSlot()) );
+    //  for( i=0; i<n; ++i )
+    //  {
+    //    name = cont_widgets_[ i ]->name();
+    //    QAction* action = submenu->addAction( name, this, SLOT(addListBoxViewSlot()) );
+    //    action->setData( QVariant( i ) );
+    //  }
 
-//  // listbox view
-//  submenu = menu.addMenu( "ListBox View" );
-//  submenu->addAction( "New Window", this, SLOT(addListBoxViewNewWindowSlot()) );
-//  for( i=0; i<n; ++i )
-//  {
-//    name = cont_widgets_[ i ]->name();
-//    QAction* action = submenu->addAction( name, this, SLOT(addListBoxViewSlot()) );
-//    action->setData( QVariant( i ) );
-//  }
+    //  //mosaic view
+    //  /*submenu = menu.addMenu( "Mosaic View" );
+    //  submenu->addAction( "New Window", this, SLOT(addMosaicViewNewWindowSlot()) );
+    //  for( i=0; i<n; ++i )
+    //  {
+    //    name = cont_widgets_[ i ]->name();
+    //    QAction* action = submenu->addAction( name, this, SLOT(addMosaicViewSlot()) );
+    //    action->setData( QVariant( i ) );
+    //  }*/
 
-//  //mosaic view
-//  /*submenu = menu.addMenu( "Mosaic View" );
-//  submenu->addAction( "New Window", this, SLOT(addMosaicViewNewWindowSlot()) );
-//  for( i=0; i<n; ++i )
-//  {
-//    name = cont_widgets_[ i ]->name();
-//    QAction* action = submenu->addAction( name, this, SLOT(addMosaicViewSlot()) );
-//    action->setData( QVariant( i ) );
-//  }*/
+    //  std::map<std::string, Configuration> &templates = ViewManager::getInstance().getConfiguration()
+    //          .getConfigurationTemplates ();
 
-//  std::map<std::string, Configuration> &templates = ViewManager::getInstance().getConfiguration()
-//          .getConfigurationTemplates ();
+    //  if (templates.size() > 0)
+    //  {
+    //      QMenu *templatesubmenu = menu.addMenu ("Templates");
 
-//  if (templates.size() > 0)
-//  {
-//      QMenu *templatesubmenu = menu.addMenu ("Templates");
+    //      std::map<std::string, Configuration>::const_iterator it;
+    //      for (it = templates.begin(); it != templates.end(); it++)
+    //      {
+    //          submenu = templatesubmenu->addMenu( it->first.c_str());
 
-//      std::map<std::string, Configuration>::const_iterator it;
-//      for (it = templates.begin(); it != templates.end(); it++)
-//      {
-//          submenu = templatesubmenu->addMenu( it->first.c_str());
+    //          QAction* newaction = submenu->addAction( "New Window", this, SLOT(addTemplateNewWindowSlot()) );
+    //          newaction->setData( QVariant( tr(it->first.c_str()) ) );
 
-//          QAction* newaction = submenu->addAction( "New Window", this, SLOT(addTemplateNewWindowSlot()) );
-//          newaction->setData( QVariant( tr(it->first.c_str()) ) );
+    //          for( i=0; i<n; ++i )
+    //          {
+    //            name = cont_widgets_[ i ]->name();
+    //            QAction* action = submenu->addAction( name, this, SLOT(addTemplateSlot()) );
 
-//          for( i=0; i<n; ++i )
-//          {
-//            name = cont_widgets_[ i ]->name();
-//            QAction* action = submenu->addAction( name, this, SLOT(addTemplateSlot()) );
+    //            assert (add_template_actions_.find (action) == add_template_actions_.end());
+    //            add_template_actions_ [action] = std::pair <std::string, int> (it->first.c_str(), i);
+    //          }
+    //      }
+    //  }
 
-//            assert (add_template_actions_.find (action) == add_template_actions_.end());
-//            add_template_actions_ [action] = std::pair <std::string, int> (it->first.c_str(), i);
-//          }
-//      }
-//  }
-
-//  menu.exec( QCursor::pos() );
+    menu.exec(QCursor::pos());
 }
 
 //void ViewsWidget::addGeographicViewNewWindowSlot()
@@ -267,24 +275,24 @@ void ViewManagerWidget::addViewSlot()
 
 void ViewManagerWidget::update ()
 {
-  logdbg  << "ViewsWidget: update";
+    logdbg  << "ViewsWidget: update";
 
-  // TODO
-//  for (unsigned int cnt=0; cnt < cont_widgets_.size(); cnt++)
-//    delete cont_widgets_.at(cnt);
-//  cont_widgets_.clear();
+    // TODO
+    //  for (unsigned int cnt=0; cnt < cont_widgets_.size(); cnt++)
+    //    delete cont_widgets_.at(cnt);
+    //  cont_widgets_.clear();
 
-//  std::map <std::string, ViewContainer*> containers = view_manager_.getContainers ();
+    //  std::map <std::string, ViewContainer*> containers = view_manager_.getContainers ();
 
-//  //loginf  << "ViewsWidget: update size containers " << containers.size();
+    //  //loginf  << "ViewsWidget: update size containers " << containers.size();
 
-//  std::map<std::string, ViewContainerWidget*>::iterator it;
-//  for (it = containers.begin(); it != containers.end(); it++)
-//  {
-//    ViewContainerConfigWidget* config_widget = new ViewContainerConfigWidget( it->second );
-//    cont_widgets_.push_back( config_widget );
-//    cont_layout_->addWidget( config_widget );
-//  }
+    //  std::map<std::string, ViewContainerWidget*>::iterator it;
+    //  for (it = containers.begin(); it != containers.end(); it++)
+    //  {
+    //    ViewContainerConfigWidget* config_widget = new ViewContainerConfigWidget( it->second );
+    //    cont_widgets_.push_back( config_widget );
+    //    cont_layout_->addWidget( config_widget );
+    //  }
 }
 
 //void ViewManagerWidget::addTemplateSlot ()

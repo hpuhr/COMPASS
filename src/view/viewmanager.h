@@ -44,25 +44,22 @@ public:
     //  void addContainerWithMosaicView ();
     //  void addContainerWithScatterPlotView ();
     //  void addContainerWithTemplateView (std::string template_name);
+    //  void saveViewAsTemplate (View *view, std::string template_name);
+    //void updateReadSet ();
 
     void deleteContainer (std::string instance_id);
     void removeContainer (std::string instance_id);
 
-    //void updateReadSet ();
-
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
     void viewShutdown( View* view, const std::string& err = "" );
-    //  void saveViewAsTemplate (View *view, std::string template_name);
 
-    //  void setViewsWidget (ViewsWidget *views_widget);
 
     std::map <std::string, ViewContainer*> getContainers () {return containers_;}
     std::map <std::string, View *> getViews () {return views_;}
     DBOVariableSet &getReadSet () { return read_set_; }
 
     ViewManagerWidget *widget();
-    //  QWidget *getCentralWidget () { assert(central_widget_); return central_widget_; }
 
 protected:
     ATSDB &atsdb_;
@@ -73,7 +70,6 @@ protected:
 
     std::map <std::string, ViewContainer*> containers_;
     std::map<std::string, View*> views_;
-    //  ViewsWidget *views_widget_;
 
     DBOVariableSet read_set_;
 

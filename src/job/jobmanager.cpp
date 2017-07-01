@@ -126,6 +126,8 @@ void JobManager::addDBJob (std::shared_ptr<Job> job)
 
     if (widget_)
         widget_->updateSlot();
+
+    emit databaseBusy();
 }
 
 
@@ -200,6 +202,9 @@ void JobManager::flushFinishedJobs ()
         current->emitDone();
 
     }
+
+    if (db_jobs_.size() == 0)
+        emit databaseIdle();
 
     mutex_.unlock();
 

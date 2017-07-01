@@ -54,6 +54,9 @@ class JobManagerWidget;
 class JobManager: public QThread, public Singleton, public Configurable
 {
     Q_OBJECT
+signals:
+    void databaseBusy ();
+    void databaseIdle ();
 
 public:
     /// @brief Constructor

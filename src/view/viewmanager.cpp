@@ -85,7 +85,19 @@ ViewManager::~ViewManager()
 void ViewManager::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
     logdbg  << "ViewManager: generateSubConfigurable: class_id " << class_id << " instance_id " << instance_id;
-    if (class_id.compare ("ViewContainerWidget") == 0)
+
+    assert (initialized_);
+
+    if (class_id.compare ("ViewContainer") == 0)
+    {
+        ViewContainer *container = new ViewContainer (class_id, instance_id, this, tab_widget_);
+        containers_.insert (std::pair <std::string, ViewContainer*> (instance_id, container));
+
+        unsigned int number = String::getAppendedInt (instance_id);
+        if (number >= container_count_)
+            container_count_ = number;
+    }
+    else if (class_id.compare ("ViewContainerWidget") == 0)
     {
         assert (false);
         //    ViewContainerWidget *container = new ViewContainerWidget (class_id, instance_id, this);
@@ -101,12 +113,11 @@ void ViewManager::generateSubConfigurable (const std::string &class_id, const st
 
 void ViewManager::checkSubConfigurables ()
 {
-//    if (containers_.size() == 0)
-//    {
-//        Configuration &main_view_container_config = addNewSubConfiguration ("ViewContainerWidget", "ViewContainerWidget0");
-//        main_view_container_config.addParameterBool ("seperate_window", false);
-//        generateSubConfigurable ("ViewContainerWidget", "ViewContainerWidget0");
-//    }
+    if (containers_.size() == 0)
+    {
+        addNewSubConfiguration ("ViewContainer", "ViewContainer0");
+        generateSubConfigurable ("ViewContainer", "ViewContainer0");
+    }
 
 //    if (views_widget_)
 //        views_widget_->update();

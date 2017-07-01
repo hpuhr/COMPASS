@@ -32,8 +32,8 @@ ViewContainer::ViewContainer(const std::string &class_id, const std::string &ins
     logdbg  << "ViewContainer: constructor: creating gui elements";
     assert (tab_widget_);
 
-    QAction *template_action = menu_.addAction(tr("Save As Template"));
-    connect(template_action, SIGNAL(triggered()), this, SLOT(saveViewTemplate()));
+//    QAction *template_action = menu_.addAction(tr("Save As Template"));
+//    connect(template_action, SIGNAL(triggered()), this, SLOT(saveViewTemplate()));
 
     QAction *delete_action = menu_.addAction(tr("Close"));
     connect(delete_action, SIGNAL(triggered()), this, SLOT(deleteView()));
