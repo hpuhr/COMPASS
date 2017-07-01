@@ -444,6 +444,8 @@ void DBObject::readJobIntermediateSlot (std::shared_ptr<Buffer> buffer)
 
     if (info_widget_)
         info_widget_->updateSlot();
+
+    emit newDataSignal(*this);
 }
 
 void DBObject::readJobObsoleteSlot ()
@@ -454,6 +456,8 @@ void DBObject::readJobObsoleteSlot ()
 
     if (info_widget_)
         info_widget_->updateSlot();
+
+    emit loadingDoneSignal(*this);
 }
 
 void DBObject::readJobDoneSlot()
@@ -469,6 +473,8 @@ void DBObject::readJobDoneSlot()
 
     if (info_widget_)
         info_widget_->updateSlot();
+
+    emit loadingDoneSignal(*this);
 }
 
 void DBObject::databaseOpenedSlot ()

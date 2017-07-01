@@ -144,6 +144,10 @@ class DBOReadDBJob;
 class DBObject : public QObject, public Configurable
 {
     Q_OBJECT
+signals:
+    void newDataSignal (DBObject &object);
+    void loadingDoneSignal (DBObject &object);
+
 public slots:
     void schemaChangedSlot ();
 
@@ -247,6 +251,8 @@ public:
 
     DBObjectWidget *widget ();
     DBObjectInfoWidget *infoWidget ();
+
+    std::shared_ptr<Buffer> data () { return data_; }
 
 protected:
     /// DBO name

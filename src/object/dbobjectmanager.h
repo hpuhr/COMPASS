@@ -49,6 +49,7 @@ class DBObjectManager : public QObject, public Configurable
 {
     Q_OBJECT
 public slots:
+    void loadSlot ();
     void updateSchemaInformationSlot ();
     void databaseOpenedSlot ();
 
@@ -56,6 +57,8 @@ signals:
     void dbObjectsChangedSignal ();
     void databaseOpenedSignal ();
     void schemaChangedSignal ();
+
+    void loadingStartedSignal ();
 
 public:
     /// @brief Constructor

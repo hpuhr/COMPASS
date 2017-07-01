@@ -65,14 +65,7 @@ DBObjectManagerInfoWidget::~DBObjectManagerInfoWidget()
 
 void DBObjectManagerInfoWidget::loadAllSlot ()
 {
-    for (auto object : object_manager_.objects())
-    {
-        loginf << "DBObjectManagerInfoWidget: loadAllSlot: object " << object.first << " wanted loading " << object.second->loadingWanted();
-        if (object.second->loadingWanted())
-        {
-            object.second->load();
-        }
-    }
+    object_manager_.loadSlot();
 }
 
 void DBObjectManagerInfoWidget::updateSlot ()

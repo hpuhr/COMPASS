@@ -9,12 +9,13 @@
 #define LISTBOXVIEWDATASOURCE_H_
 
 #include <QObject>
+
 #include "dbovariable.h"
 #include "dbovariableorderedset.h"
 #include "configurable.h"
 #include "buffer.h"
 #include "viewselection.h"
-#include "joborderer.h"
+
 
 class Job;
 
@@ -25,12 +26,13 @@ class Job;
  * emits signal updateData() when resulting buffer is delivered by callback. Stores Buffers
  * and handles cleanup.
  */
-class ListBoxViewDataSource : public JobOrderer, public Configurable
+class ListBoxViewDataSource : public QObject, public Configurable
 {
     Q_OBJECT
 public slots:
-    virtual void jobDone (std::shared_ptr <Job> job);
-    virtual void jobObsolete (std::shared_ptr <Job> job);
+    void loadingStartedSlot ();
+    void newDataSlot (DBObject &object);
+    void loadingDoneSlot (DBObject &object);
 
 signals:
     /// @brief Emitted when resulting buffer was delivered

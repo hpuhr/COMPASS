@@ -207,6 +207,20 @@ DBObjectManagerInfoWidget *DBObjectManager::infoWidget()
     return info_widget_;
 }
 
+void DBObjectManager::loadSlot ()
+{
+    loginf << "DBObjectManager: loadSlot";
+    for (auto object : objects())
+    {
+        loginf << "DBObjectManagerInfoWidget: loadSlot: object " << object.first << " wanted loading " << object.second->loadingWanted();
+        if (object.second->loadingWanted())
+        {
+            object.second->load();
+        }
+    }
+    emit loadingStartedSignal();
+}
+
 void DBObjectManager::updateSchemaInformationSlot ()
 {
     emit schemaChangedSignal();

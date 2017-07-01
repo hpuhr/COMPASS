@@ -18,7 +18,7 @@
 #include <QMessageBox>
 
 ListBoxViewDataSource::ListBoxViewDataSource(const std::string &class_id, const std::string &instance_id, Configurable *parent)
-: JobOrderer(), Configurable (class_id, instance_id, parent), set_(0), selection_entries_ (ViewSelection::getInstance().getEntries())
+: QObject(), Configurable (class_id, instance_id, parent), set_(0), selection_entries_ (ViewSelection::getInstance().getEntries())
 {
     registerParameter ("use_filters", &use_filters_, false);
     registerParameter ("limit_min", &limit_min_, 0);
@@ -30,15 +30,15 @@ ListBoxViewDataSource::ListBoxViewDataSource(const std::string &class_id, const 
     registerParameter ("order_ascending", &order_ascending_, true);
     registerParameter ("database_view", &database_view_, false);
 
-// TODO
-//    std::map <DB_OBJECT_TYPE, DBObject*> &dbos = DBObjectManager::getInstance().getDBObjects();
-//    std::map <DB_OBJECT_TYPE, DBObject*>::iterator it;
+    connect (&ATSDB::instance().objectManager(), SIGNAL(loadingStartedSignal()), this, SLOT(loadingStartedSlot()));
 
-//    for (it = dbos.begin(); it != dbos.end(); it++)
-//    {
+    for (auto object : ATSDB::instance().objectManager().objects())
+    {
+        connect (object.second, SIGNAL (newDataSignal(DBObject &)), this, SLOT(newDataSlot(DBObject&)));
+        connect (object.second, SIGNAL (loadingDoneSignal(DBObject &)), this, SLOT(loadingDoneSlot(DBObject&)));
 //        if (ATSDB::getInstance().contains(it->first) && it->second->isLoadable())
 //            data_[it->first] = 0;
-//    }
+    }
 
     use_filters_=false;
 
@@ -193,10 +193,14 @@ void ListBoxViewDataSource::updateData ()
     logdbg  << "ListBoxViewDataSource: updateData: end";
 }
 
-
-void ListBoxViewDataSource::jobDone (std::shared_ptr <Job> job)
+void ListBoxViewDataSource::loadingStartedSlot ()
 {
-    loginf << "ListBoxViewDataSource: jobDone";
+    loginf << "ListBoxViewDataSource: loadingStartedSlot";
+}
+
+void ListBoxViewDataSource::newDataSlot (DBObject &object)
+{
+    loginf << "ListBoxViewDataSource: newDataSlot: object " << object.name();
 //    assert (job);
 
 //    DBOInfoDBJob *infojob = (DBOInfoDBJob*) job;
@@ -210,9 +214,10 @@ void ListBoxViewDataSource::jobDone (std::shared_ptr <Job> job)
 
 //    emit updateData ((unsigned int) type, buffer);
 }
-void ListBoxViewDataSource::jobObsolete(std::shared_ptr <Job> job)
+
+void ListBoxViewDataSource::loadingDoneSlot(DBObject &object)
 {
-    loginf << "ListBoxViewDataSource: jobObsolete";
+    loginf << "ListBoxViewDataSource: loadingDoneSlot: object " << object.name();
     //delete job;
 }
 
