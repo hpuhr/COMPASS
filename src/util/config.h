@@ -57,7 +57,6 @@ public:
     double getDouble (const std::string &id);
     /// @brief  Gets value from map by id string and doesn't convert it
     const std::string &getString (const std::string &id);
-
 };
 
 #endif

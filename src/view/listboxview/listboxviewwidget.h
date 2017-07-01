@@ -49,8 +49,6 @@ protected:
     ListBoxViewDataWidget *data_widget_;
     /// Config widget with configuration elements
     ListBoxViewConfigWidget* config_widget_;
-    /// Tab widget for enclosed BufferTableWidgets
-    QTabWidget* tab_widget_;
 };
 
 #endif /* LISTBOXVIEWWIDGET_H_ */

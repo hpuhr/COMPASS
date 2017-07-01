@@ -26,8 +26,6 @@ signals:
     void viewDeleted();
 
 private:
-    void createWidget();
-
     View* view_;
 
     QLabel* load_;

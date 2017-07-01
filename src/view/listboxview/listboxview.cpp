@@ -45,8 +45,7 @@ bool ListBoxView::init()
   //connect( &ViewSelection::getInstance(), SIGNAL(selectionChanged()), this, SLOT(selectionChanged()) );
   //connect( &ViewSelection::getInstance(), SIGNAL(selectionToBeCleared()), this, SLOT(selectionToBeCleared()) );
 
-  connect( data_source_, SIGNAL(updateData (unsigned int, Buffer*)),
-      widget_->getDataWidget (), SLOT(updateData (unsigned int, Buffer*)) );
+  connect( data_source_, SIGNAL(updateData (unsigned int, Buffer*)), widget_->getDataWidget (), SLOT(updateData (unsigned int, Buffer*)) );
 
   return true;
 }

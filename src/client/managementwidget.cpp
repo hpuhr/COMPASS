@@ -55,7 +55,7 @@ ManagementWidget::ManagementWidget() : QWidget ()
     //  vlayout2->addWidget (result_);
 
     hlayout->addLayout (left_layout);
-    hlayout->addSpacing(400);
+    hlayout->addSpacing(600);
 
     //  filter_config_gui_ = new FilterConfigWidget ();
     //  filter_config_gui_->setFrameStyle(QFrame::Panel | QFrame::Raised);

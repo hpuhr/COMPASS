@@ -2,6 +2,7 @@
 #include "view.h"
 #include "viewcontainerwidget.h"
 //#include "DBResultSetManager.h"
+#include "global.h"
 
 #include <QLabel>
 #include <QVBoxLayout>
@@ -18,22 +19,24 @@ ViewContainerConfigWidget
 ViewContainerConfigWidget::ViewContainerConfigWidget( ViewContainer *view_container, QWidget* parent )
 :   QWidget( parent ), view_container_( view_container )
 {
+    setAutoFillBackground(true);
+
     QFont font_bold;
     font_bold.setBold( true );
 
     QVBoxLayout* layout = new QVBoxLayout();
-    layout->setMargin( 3 );
-    setLayout( layout );
+    //layout->setMargin( 3 );
+    setLayout (layout);
 
     QFrame* frame = new QFrame( this );
     frame->setFrameStyle( QFrame::Panel | QFrame::Raised );
-    frame->setLineWidth( 2 );
+    frame->setLineWidth( FRAME_SIZE );
     layout->addWidget( frame );
 
     QVBoxLayout* blayout = new QVBoxLayout();
     frame->setLayout( blayout );
-    blayout->setMargin( 3 );
-    blayout->setSpacing( 3 );
+//    blayout->setMargin( 3 );
+//    blayout->setSpacing( 3 );
 
     QHBoxLayout* namelayout = new QHBoxLayout();
     namelayout->setMargin( 0 );
@@ -158,25 +161,7 @@ ViewControlWidget
 /*
  */
 ViewControlWidget::ViewControlWidget( View* view, QWidget* parent )
-:   QWidget( parent ),
-    view_( view )
-{
-    createWidget();
-
-    connect( view, SIGNAL(loadingStarted()), this, SLOT(loadingStartedSlot()) );
-    connect( view, SIGNAL(loadingFinished()), this, SLOT(loadingFinishedSlot()) );
-    connect( view, SIGNAL(loadingTime(double)), this, SLOT(loadingTimeSlot(double)) );
-}
-
-/*
- */
-ViewControlWidget::~ViewControlWidget()
-{
-}
-
-/*
- */
-void ViewControlWidget::createWidget()
+:   QWidget( parent ), view_( view )
 {
     QFont font_underline;
     font_underline.setItalic( true );
@@ -213,8 +198,17 @@ void ViewControlWidget::createWidget()
     //namelayout->addStretch( 1 );
 
     load_ = new QLabel();
-    load_->setText( "Loading Done ("+time_+")" );
+    load_->setText( "Idle" );
     flayout->addWidget( load_ );
+    connect( view, SIGNAL(loadingStarted()), this, SLOT(loadingStartedSlot()) );
+    connect( view, SIGNAL(loadingFinished()), this, SLOT(loadingFinishedSlot()) );
+    connect( view, SIGNAL(loadingTime(double)), this, SLOT(loadingTimeSlot(double)) );
+}
+
+/*
+ */
+ViewControlWidget::~ViewControlWidget()
+{
 }
 
 /*
