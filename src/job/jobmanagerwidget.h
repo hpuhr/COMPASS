@@ -47,6 +47,7 @@ private:
     JobManager &job_manager_;
 
     QLabel *num_jobs_label_;
+    QLabel *num_dbjobs_label_;
     QLabel *num_threads_label_;
 
     QVBoxLayout *info_layout_;

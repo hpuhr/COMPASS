@@ -61,10 +61,12 @@ public:
     virtual ~JobManager();
 
     void addJob (std::shared_ptr<Job> job);
+    void addDBJob (std::shared_ptr<Job> job);
     void cancelJob (std::shared_ptr<Job> job);
 
     bool noJobs ();
     unsigned int numJobs ();
+    unsigned int numDBJobs ();
     int numThreads ();
 
     void shutdown ();
@@ -86,7 +88,8 @@ protected:
 
     unsigned int update_time_;
 
-    std::list <std::shared_ptr<Job>> todos_signal_;
+    std::list <std::shared_ptr<Job>> jobs_;
+    std::list <std::shared_ptr<Job>> db_jobs_;
 
     JobManagerWidget *widget_;
 

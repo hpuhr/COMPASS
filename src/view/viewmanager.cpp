@@ -19,7 +19,7 @@
 //#include "DBResultSetManager.h"
 //#include "ConfigurationManager.h"
 //#include "BufferSet.h"
-#include "viewcontainerwidget.h"
+#include "viewcontainer.h"
 #include "view.h"
 //#include "DBView.h"
 #include "stringconv.h"
@@ -58,14 +58,11 @@ void ViewManager::close ()
 {
   logdbg  << "ViewManager: close";
 
-  std::map <std::string, ViewContainerWidget *>::iterator it;
-
-  for (it = containers_.begin(); it != containers_.end(); it++)
+  for (auto it = containers_.begin(); it != containers_.end(); it++)
   {
     //it->second->deleteLater ();
     delete it->second;
   }
-
   containers_.clear();
 
   if (widget_)
@@ -313,15 +310,13 @@ bool ViewManager::isRegistered (View *view)
 
 void ViewManager::deleteContainer (std::string instance_id)
 {
-    std::map <std::string, ViewContainerWidget *>::iterator it;
-
     logdbg  << "ViewManager: removeContainer: instance " << instance_id;
 
-    it=containers_.find(instance_id);
+    std::map <std::string, ViewContainer*>::iterator it=containers_.find(instance_id);
 
     if (it != containers_.end())
     {
-        it->second->close();
+        //it->second->close(); // TODO for widgets
         it->second->deleteLater();
 
         containers_.erase(it);
@@ -337,7 +332,7 @@ void ViewManager::deleteContainer (std::string instance_id)
 
 void ViewManager::removeContainer (std::string instance_id)
 {
-    std::map <std::string, ViewContainerWidget *>::iterator it;
+    std::map <std::string, ViewContainer*>::iterator it;
 
     logdbg  << "ViewManager: removeContainer: instance " << instance_id;
 

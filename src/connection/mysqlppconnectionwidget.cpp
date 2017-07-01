@@ -25,7 +25,7 @@ MySQLppConnectionWidget::MySQLppConnectionWidget(MySQLppConnection &connection, 
     server_select_ = new QComboBox ();
     connect (server_select_, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(serverSelectedSlot(const QString &)));
     layout->addWidget (server_select_);
-    layout->addSpacing(10);
+    layout->addStretch();
 
     QHBoxLayout *button_layout = new QHBoxLayout ();
 
@@ -41,6 +41,7 @@ MySQLppConnectionWidget::MySQLppConnectionWidget(MySQLppConnection &connection, 
 
     server_widgets_ = new QStackedWidget ();
     layout->addWidget(server_widgets_);
+    layout->addStretch();
 
     updateServers ();
 

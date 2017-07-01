@@ -413,7 +413,7 @@ void DBObject::load ()
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
-    JobManager::instance().addJob(read_job_);
+    JobManager::instance().addDBJob(read_job_);
 
     if (info_widget_)
         info_widget_->updateSlot();

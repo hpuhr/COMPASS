@@ -54,6 +54,8 @@ DBObjectManagerInfoWidget::DBObjectManagerInfoWidget(DBObjectManager &object_man
     connect (load_all_button_, SIGNAL(clicked()), this, SLOT(loadAllSlot()));
     main_layout->addWidget(load_all_button_);
 
+
+    main_layout->addStretch();
     setLayout (main_layout);
 }
 

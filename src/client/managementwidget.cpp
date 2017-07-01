@@ -43,7 +43,6 @@ ManagementWidget::ManagementWidget() : QWidget ()
     interface_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
     interface_widget->setLineWidth(frame_width);
     left_layout->addWidget (interface_widget);
-    left_layout->addStretch ();
 
     DBObjectManagerInfoWidget *objman_widget = ATSDB::instance().objectManager().infoWidget();
     objman_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
@@ -74,8 +73,6 @@ ManagementWidget::ManagementWidget() : QWidget ()
     viewman_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
     viewman_widget->setLineWidth(frame_width);
     right_layout->addWidget (viewman_widget);
-
-    right_layout->addStretch();
 
     JobManagerWidget *jobman_widget = JobManager::instance().widget();
     jobman_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);

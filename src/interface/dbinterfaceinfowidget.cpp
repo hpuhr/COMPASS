@@ -62,4 +62,5 @@ void DBInterfaceInfoWidget::databaseOpenedSlot ()
 {
     assert (layout_);
     layout_->addWidget(interface_.connection().infoWidget());
+    layout_->addStretch();
 }

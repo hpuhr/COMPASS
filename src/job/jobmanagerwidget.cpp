@@ -44,17 +44,22 @@ JobManagerWidget::JobManagerWidget(JobManager &job_manager)
 
     QGridLayout *grid = new QGridLayout ();
 
-    grid->addWidget(new QLabel("Jobs"), 0, 0);
+    grid->addWidget(new QLabel("DB Jobs"), 0, 0);
+    num_dbjobs_label_ = new QLabel ("?");
+    num_dbjobs_label_->setAlignment(Qt::AlignRight);
+    grid->addWidget(num_dbjobs_label_, 0, 1);
+
+    grid->addWidget(new QLabel("Jobs"), 1, 0);
 
     num_jobs_label_ = new QLabel ("?");
     num_jobs_label_->setAlignment(Qt::AlignRight);
-    grid->addWidget(num_jobs_label_, 0, 1);
+    grid->addWidget(num_jobs_label_, 1, 1);
 
-    grid->addWidget(new QLabel("Threads"), 1, 0);
+    grid->addWidget(new QLabel("Threads"), 2, 0);
 
     num_threads_label_ = new QLabel ("?");
     num_threads_label_->setAlignment(Qt::AlignRight);
-    grid->addWidget(num_threads_label_, 1, 1);
+    grid->addWidget(num_threads_label_, 2, 1);
 
     main_layout->addLayout(grid);
 
@@ -63,6 +68,7 @@ JobManagerWidget::JobManagerWidget(JobManager &job_manager)
     updateSlot();
 
     main_layout->addLayout(info_layout_);
+    main_layout->addStretch();
 
     setLayout (main_layout);
 }
@@ -74,9 +80,11 @@ JobManagerWidget::~JobManagerWidget()
 
 void JobManagerWidget::updateSlot ()
 {
+    assert (num_dbjobs_label_);
     assert (num_jobs_label_);
     assert (num_threads_label_);
 
+    num_dbjobs_label_->setText(QString::number(job_manager_.numDBJobs()));
     num_jobs_label_->setText(QString::number(job_manager_.numJobs()));
     num_threads_label_->setText(QString::number(job_manager_.numThreads()));
 

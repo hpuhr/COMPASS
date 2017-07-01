@@ -246,8 +246,8 @@ set ( atsdb_HDRS
     #        src/transform/calculatestyle.h
     src/view/viewmanager.h
     src/view/viewmanagerwidget.h
-    src/view/viewcontainerwidget.h
-    src/view/viewcontainertabwidget.h
+    src/view/viewcontainer.h
+    #src/view/viewcontainerwidget.h
     src/view/viewcontainerconfigwidget.h
     src/view/viewbase/eventprocessor.h
     src/view/viewbase/view.h
@@ -398,7 +398,8 @@ set ( atsdb_SRCS
     src/util/stringconv.cpp
     src/view/viewmanager.cpp
     src/view/viewmanagerwidget.cpp
-    src/view/viewcontainerwidget.cpp
+    src/view/viewcontainer.cpp
+    #src/view/viewcontainerwidget.cpp
     src/view/viewbase/eventprocessor.cpp
     src/view/viewbase/view.cpp
     src/view/viewbase/viewwidget.cpp

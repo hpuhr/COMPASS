@@ -269,21 +269,22 @@ void ViewManagerWidget::update ()
 {
   logdbg  << "ViewsWidget: update";
 
-  for (unsigned int cnt=0; cnt < cont_widgets_.size(); cnt++)
-    delete cont_widgets_.at(cnt);
-  cont_widgets_.clear();
+  // TODO
+//  for (unsigned int cnt=0; cnt < cont_widgets_.size(); cnt++)
+//    delete cont_widgets_.at(cnt);
+//  cont_widgets_.clear();
 
-  std::map <std::string, ViewContainerWidget *> containers = view_manager_.getContainers ();
+//  std::map <std::string, ViewContainer*> containers = view_manager_.getContainers ();
 
-  //loginf  << "ViewsWidget: update size containers " << containers.size();
+//  //loginf  << "ViewsWidget: update size containers " << containers.size();
 
-  std::map<std::string, ViewContainerWidget*>::iterator it;
-  for (it = containers.begin(); it != containers.end(); it++)
-  {
-    ViewContainerConfigWidget* config_widget = new ViewContainerConfigWidget( it->second );
-    cont_widgets_.push_back( config_widget );
-    cont_layout_->addWidget( config_widget );
-  }
+//  std::map<std::string, ViewContainerWidget*>::iterator it;
+//  for (it = containers.begin(); it != containers.end(); it++)
+//  {
+//    ViewContainerConfigWidget* config_widget = new ViewContainerConfigWidget( it->second );
+//    cont_widgets_.push_back( config_widget );
+//    cont_layout_->addWidget( config_widget );
+//  }
 }
 
 //void ViewManagerWidget::addTemplateSlot ()

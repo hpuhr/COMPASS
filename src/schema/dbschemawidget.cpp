@@ -101,7 +101,7 @@ DBSchemaWidget::DBSchemaWidget(DBSchema &schema, QWidget * parent, Qt::WindowFla
     tables_layout->addLayout(table_button_layout);
 
     main_layout->addLayout(tables_layout);
-    main_layout->addSpacing(50);
+    main_layout->addStretch();
 
     // meta tables
 
@@ -135,6 +135,7 @@ DBSchemaWidget::DBSchemaWidget(DBSchema &schema, QWidget * parent, Qt::WindowFla
     meta_tables_layout->addLayout (add_ts_layout);
 
     main_layout->addLayout(meta_tables_layout);
+    main_layout->addStretch();
 
     setLayout(main_layout);
 

@@ -89,7 +89,6 @@ MainWindow::MainWindow()
     QObject::connect(dbinterface_widget_, SIGNAL(databaseOpenedSignal()), this, SLOT(databaseOpenedSlot()));
     widget_layout->addWidget(dbinterface_widget_);
 
-
     dbschema_manager_widget_ = ATSDB::instance().schemaManager().widget();
     QObject::connect(dbinterface_widget_, SIGNAL(databaseOpenedSignal()), dbschema_manager_widget_, SLOT(databaseOpenedSlot()));
     widget_layout->addWidget(dbschema_manager_widget_);
@@ -121,11 +120,7 @@ MainWindow::MainWindow()
 
     setCentralWidget(tab_widget_);
 
-    //widget_stack_->setCurrentIndex (0);
     tab_widget_->setCurrentIndex(0);
-
-    //menuBar()->setNativeMenuBar(native_menu_);
-
 }
 
 MainWindow::~MainWindow()
@@ -155,23 +150,11 @@ void MainWindow::startSlot ()
     tab_widget_->addTab (management_widget_, "Management");
 
     ATSDB::instance().viewManager().init(tab_widget_);
+    start_button_->setDisabled (true);
 
     // TODO lock stuff
-    //widget_stack_->setCurrentIndex (1);
     tab_widget_->setCurrentIndex(1);
 
-    //ATSDB::instance().objectManager().object("Radar").load();
-//    if (db_opened_)
-//    {
-//        if (schema_widget_->hasSelectedSchema ())
-//        {
-//            assert (DBSchemaManager::getInstance().hasCurrentSchema());
-
-//            widget_stack_->setCurrentIndex (1);
-//            repaint();
-//            start_button_->setDisabled (true);
-//        }
-//    }
 }
 
 void MainWindow::createMenus()

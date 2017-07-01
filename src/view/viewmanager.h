@@ -15,7 +15,7 @@
 
 class ATSDB;
 class Buffer;
-class ViewContainerWidget;
+class ViewContainer;
 class ViewManagerWidget;
 class View;
 class QWidget;
@@ -45,8 +45,8 @@ public:
     //  void addContainerWithScatterPlotView ();
     //  void addContainerWithTemplateView (std::string template_name);
 
-      void deleteContainer (std::string instance_id);
-      void removeContainer (std::string instance_id);
+    void deleteContainer (std::string instance_id);
+    void removeContainer (std::string instance_id);
 
     //void updateReadSet ();
 
@@ -57,7 +57,7 @@ public:
 
     //  void setViewsWidget (ViewsWidget *views_widget);
 
-    std::map <std::string, ViewContainerWidget *> getContainers () {return containers_;}
+    std::map <std::string, ViewContainer*> getContainers () {return containers_;}
     std::map <std::string, View *> getViews () {return views_;}
     DBOVariableSet &getReadSet () { return read_set_; }
 
@@ -71,7 +71,7 @@ protected:
     bool initialized_;
     QTabWidget *tab_widget_;
 
-    std::map <std::string, ViewContainerWidget *> containers_;
+    std::map <std::string, ViewContainer*> containers_;
     std::map<std::string, View*> views_;
     //  ViewsWidget *views_widget_;
 

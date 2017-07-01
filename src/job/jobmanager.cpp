@@ -55,7 +55,10 @@ void JobManager::shutdown ()
     logdbg  << "JobManager: shutdown";
     boost::mutex::scoped_lock l(mutex_);
 
-    for (auto job : todos_signal_)
+    for (auto job : db_jobs_)
+        job->setObsolete ();
+
+    for (auto job : jobs_)
         job->setObsolete ();
 
     if (widget_)
@@ -64,18 +67,32 @@ void JobManager::shutdown ()
         widget_ = nullptr;
     }
 
-    while (todos_signal_.size() > 0) // wait for finish
+    while (db_jobs_.size() > 0) // wait for finish
     {
-        auto job = std::begin(todos_signal_);
+        auto job = std::begin(db_jobs_);
 
-        while (job != std::end(todos_signal_))
+        while (job != std::end(db_jobs_))
         {
             if ((*job)->done ())
-                job = todos_signal_.erase(job);
+                job = db_jobs_.erase(job);
             else
                 ++job;
         }
-        msleep(1);
+        msleep(update_time_);
+    }
+
+    while (jobs_.size() > 0) // wait for finish
+    {
+        auto job = std::begin(jobs_);
+
+        while (job != std::end(jobs_))
+        {
+            if ((*job)->done ())
+                job = jobs_.erase(job);
+            else
+                ++job;
+        }
+        msleep(update_time_);
     }
 
     stop_requested_ = true;
@@ -89,13 +106,28 @@ void JobManager::addJob (std::shared_ptr<Job> job)
 
     QThreadPool::globalInstance()->start(job.get());
 
-    todos_signal_.push_back(job);
+    jobs_.push_back(job);
 
     mutex_.unlock();
 
     if (widget_)
         widget_->updateSlot();
 }
+
+void JobManager::addDBJob (std::shared_ptr<Job> job)
+{
+    mutex_.lock();
+
+    QThreadPool::globalInstance()->start(job.get());
+
+    db_jobs_.push_back(job);
+
+    mutex_.unlock();
+
+    if (widget_)
+        widget_->updateSlot();
+}
+
 
 void JobManager::cancelJob (std::shared_ptr<Job> job)
 {
@@ -106,7 +138,10 @@ void JobManager::cancelJob (std::shared_ptr<Job> job)
     while (!job->done()) // wait for finish
         msleep(1);
 
-    todos_signal_.erase(find(todos_signal_.begin(), todos_signal_.end(), job));
+    if (find(jobs_.begin(), jobs_.end(), job) != jobs_.end())
+        jobs_.erase(find(jobs_.begin(), jobs_.end(), job));
+    else
+        db_jobs_.erase(find(jobs_.begin(), jobs_.end(), job));
 
     mutex_.unlock();
 
@@ -119,14 +154,39 @@ void JobManager::flushFinishedJobs ()
     mutex_.lock();
 
     bool changed=false;
-    while (todos_signal_.size() > 0)
+
+    while (jobs_.size() > 0)
     {
-        std::shared_ptr<Job> current = todos_signal_.front();
+        std::shared_ptr<Job> current = jobs_.front();
+        assert (current);
 
         if( !current->obsolete() && !current->done() )
             break;
 
-        todos_signal_.pop_front();
+        jobs_.pop_front();
+        changed = true;
+        logdbg << "JobManager: flushFinishedJobs: flushed job";
+        if(current->obsolete())
+        {
+            logdbg << "JobManager: flushFinishedJobs: flushing obsolete job";
+            current->emitObsolete();
+            continue;
+        }
+
+        loginf << "JobManager: flushFinishedJobs: flushing done job";
+        current->emitDone();
+
+    }
+
+    while (db_jobs_.size() > 0)
+    {
+        std::shared_ptr<Job> current = db_jobs_.front();
+        assert (current);
+
+        if( !current->obsolete() && !current->done() )
+            break;
+
+        db_jobs_.pop_front();
         changed = true;
         logdbg << "JobManager: flushFinishedJobs: flushed job";
         if(current->obsolete())
@@ -152,7 +212,7 @@ bool JobManager::noJobs ()
 {
     boost::mutex::scoped_lock l(mutex_);
     //logdbg << "JobManager: noJobs: todos " << todos_signal_.size();
-    return todos_signal_.size() == 0;
+    return jobs_.size() == 0 && db_jobs_.size() == 0;
 }
 
 /**
@@ -166,7 +226,7 @@ void JobManager::run()
 
     while (1)
     {
-        if (todos_signal_.size() > 0)
+        if (jobs_.size() > 0 || db_jobs_.size() > 0)
             flushFinishedJobs ();
 
         if (stop_requested_)
@@ -190,7 +250,13 @@ JobManagerWidget *JobManager::widget()
 unsigned int JobManager::numJobs ()
 {
     boost::mutex::scoped_lock l(mutex_);
-    return todos_signal_.size();
+    return jobs_.size();
+}
+
+unsigned int JobManager::numDBJobs ()
+{
+    boost::mutex::scoped_lock l(mutex_);
+    return db_jobs_.size();
 }
 
 int JobManager::numThreads ()

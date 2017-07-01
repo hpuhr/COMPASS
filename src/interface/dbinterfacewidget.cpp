@@ -70,10 +70,10 @@ DBInterfaceWidget::DBInterfaceWidget(DBInterface &interface, QWidget* parent, Qt
     groupBox->setLayout(grplayout);
     layout->addWidget(groupBox);
 
+   layout->addStretch();
+
     connection_layout_ = new QVBoxLayout ();
     layout->addLayout(connection_layout_);
-
-    layout->addStretch();
 
     setLayout (layout);
 
