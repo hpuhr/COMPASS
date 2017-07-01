@@ -44,8 +44,7 @@ ViewContainerConfigWidget::ViewContainerConfigWidget( ViewContainer *view_contai
     head->setFont( font_bold );
     namelayout->addWidget( head );
 
-    //if( view_container_->getKey() > 0 )
-    if (view_container_->getName().compare("Window0") != 0)
+    if (view_container_->getName().compare("MainWindow") != 0)
     {
         QToolButton *vdel = new QToolButton();
         vdel->setIcon( QIcon( "./data/icons/delete.png" ) );
@@ -208,7 +207,7 @@ void ViewControlWidget::createWidget()
     namelayout->addWidget( label );
 
     QToolButton *vdel = new QToolButton();
-    vdel->setIcon( QIcon( "./Data/icons/close_icon_grey.png" ) );
+    vdel->setIcon( QIcon( "./data/icons/delete.png" ) );
     connect( vdel, SIGNAL(clicked()), this, SLOT(removeViewSlot()));
     namelayout->addWidget( vdel );
     //namelayout->addStretch( 1 );

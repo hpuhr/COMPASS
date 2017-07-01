@@ -12,14 +12,16 @@
 #include "viewcontainerconfigwidget.h"
 #include "config.h"
 #include "logger.h"
-//#include "GeographicView.h"
+
 #include "managementwidget.h"
+#include "view.h"
 #include "viewmanager.h"
+#include "listboxview.h"
+//#include "GeographicView.h"
 //#include "HistogramView.h"
 //#include "ScatterPlotView.h"
 //#include "MosaicView.h"
-//#include "ListBoxView.h"
-#include "view.h"
+
 //#include "DBViewModel.h"
 #include "stringconv.h"
 
@@ -34,8 +36,8 @@ ViewContainer::ViewContainer(const std::string &class_id, const std::string &ins
     logdbg  << "ViewContainer: constructor: creating gui elements";
     assert (tab_widget_);
 
-//    QAction *template_action = menu_.addAction(tr("Save As Template"));
-//    connect(template_action, SIGNAL(triggered()), this, SLOT(saveViewTemplate()));
+    //    QAction *template_action = menu_.addAction(tr("Save As Template"));
+    //    connect(template_action, SIGNAL(triggered()), this, SLOT(saveViewTemplate()));
 
     QAction *delete_action = menu_.addAction(tr("Close"));
     connect(delete_action, SIGNAL(triggered()), this, SLOT(deleteView()));
@@ -50,6 +52,10 @@ ViewContainer::~ViewContainer()
         delete config_widget_;
         config_widget_ = nullptr;
     }
+
+    for (auto view : views_)
+        delete view;
+    views_.clear();
 }
 
 //void ViewContainer::addGeographicView()
@@ -64,7 +70,7 @@ ViewContainer::~ViewContainer()
 
 void ViewContainer::addListBoxView()
 {
-  generateSubConfigurable ("ListBoxView", "ListBoxView"+String::intToString(view_count_));
+    generateSubConfigurable ("ListBoxView", "ListBoxView"+String::intToString(view_count_));
 }
 
 //void ViewContainer::addMosaicView()
@@ -94,116 +100,117 @@ void ViewContainer::addListBoxView()
 
 void ViewContainer::addView (View *view)
 {
-  assert (view);
-  QWidget* w = view->getCentralWidget();
-  assert ( w );
+    assert (view);
+    QWidget* w = view->getCentralWidget();
+    assert ( w );
 
-  views_.push_back( view );
-  int index = tab_widget_->addTab( w, QString::fromStdString( view->getName() ) );
+    views_.push_back( view );
+    int index = tab_widget_->addTab( w, QString::fromStdString( view->getName() ) );
 
-  QPushButton *manage_button = new QPushButton();
-  manage_button->setIcon( QIcon( "./Data/icons/gear.png" ) );
-  manage_button->setFixedSize ( 20, 20 );
-  manage_button->setFlat(true);
-  manage_button->setToolTip(tr("Manage view"));
-  connect (manage_button, SIGNAL(clicked()), this, SLOT(showMenuSlot()));
-  tab_widget_->tabBar()->setTabButton(index, QTabBar::RightSide, manage_button);
+    QPushButton *manage_button = new QPushButton();
+    manage_button->setIcon( QIcon( "./Data/icons/gear.png" ) );
+    manage_button->setFixedSize ( 20, 20 );
+    manage_button->setFlat(true);
+    manage_button->setToolTip(tr("Manage view"));
+    connect (manage_button, SIGNAL(clicked()), this, SLOT(showMenuSlot()));
+    tab_widget_->tabBar()->setTabButton(index, QTabBar::RightSide, manage_button);
 
-  assert (view_manage_buttons_.find (manage_button) == view_manage_buttons_.end());
-  view_manage_buttons_ [manage_button] = view;
+    assert (view_manage_buttons_.find (manage_button) == view_manage_buttons_.end());
+    view_manage_buttons_ [manage_button] = view;
 }
 
 
 void ViewContainer::removeView (View *view)
 {
-  assert (view);
-  QWidget* w = view->getCentralWidget();
-  assert ( w );
+    assert (view);
+    QWidget* w = view->getCentralWidget();
+    assert ( w );
 
-  int id = tab_widget_->indexOf( view->getCentralWidget() );
-  std::vector<View*>::iterator it = std::find( views_.begin(), views_.end(), view );
+    int id = tab_widget_->indexOf( view->getCentralWidget() );
+    std::vector<View*>::iterator it = std::find( views_.begin(), views_.end(), view );
 
-  if( id != -1)
-    tab_widget_->removeTab( id );
+    if( id != -1)
+        tab_widget_->removeTab( id );
 
-  if ( it != views_.end() )
-    views_.erase( it );
+    if ( it != views_.end() )
+        views_.erase( it );
 
-  bool found=false;
-  std::map <QPushButton*, View*>::iterator it2;
-  for (it2 = view_manage_buttons_.begin(); it2 != view_manage_buttons_.end(); it2++)
-  {
-      if (it2->second == view)
-      {
-          found=true;
-          view_manage_buttons_.erase(it2);
-          break;
-      }
-  }
-  assert (found);
+    bool found=false;
+    std::map <QPushButton*, View*>::iterator it2;
+    for (it2 = view_manage_buttons_.begin(); it2 != view_manage_buttons_.end(); it2++)
+    {
+        if (it2->second == view)
+        {
+            found=true;
+            view_manage_buttons_.erase(it2);
+            break;
+        }
+    }
+    assert (found);
 
-  return;
+    return;
 }
 
 const std::vector<View*>& ViewContainer::getViews() const
 {
-  return views_;
+    return views_;
 }
 
-void ViewContainer::generateSubConfigurable (std::string class_id, std::string instance_id)
+void ViewContainer::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
-//  if (class_id.compare ("GeographicView") == 0)
-//  {
-//    GeographicView* view = new GeographicView ( class_id, instance_id, this );
-//    unsigned int number = getAppendedInt (instance_id);
-//    if (number >= view_count_)
-//      view_count_ = number+1;
+    if (class_id.compare ("ListBoxView") == 0)
+    {
+        ListBoxView* view = new ListBoxView ( class_id, instance_id, this, view_manager_);
+        unsigned int number = String::getAppendedInt (instance_id);
 
-//    assert( view );
-//    view->init();
-//  }
-//  else if (class_id.compare ("HistogramView") == 0)
-//  {
-//    HistogramView* view = new HistogramView ( class_id, instance_id, this );
-//    unsigned int number = getAppendedInt (instance_id);
-//    if (number >= view_count_)
-//      view_count_ = number+1;
+        if (number >= view_count_)
+            view_count_ = number+1;
 
-//    assert( view );
-//    view->init();
-//  }
-//  else if (class_id.compare ("ListBoxView") == 0)
-//  {
-//    ListBoxView* view = new ListBoxView ( class_id, instance_id, this );
-//    unsigned int number = getAppendedInt (instance_id);
-//    if (number >= view_count_)
-//      view_count_ = number+1;
+        assert( view );
+        view->init();
+    }
+    //  else if (class_id.compare ("GeographicView") == 0)
+    //  {
+    //    GeographicView* view = new GeographicView ( class_id, instance_id, this );
+    //    unsigned int number = getAppendedInt (instance_id);
+    //    if (number >= view_count_)
+    //      view_count_ = number+1;
 
-//    assert( view );
-//    view->init();
-//  }
-//  else if (class_id.compare ("ScatterPlotView") == 0)
-//  {
-//    ScatterPlotView* view = new ScatterPlotView ( class_id, instance_id, this );
-//    unsigned int number = getAppendedInt (instance_id);
-//    if (number >= view_count_)
-//      view_count_ = number+1;
+    //    assert( view );
+    //    view->init();
+    //  }
+    //  else if (class_id.compare ("HistogramView") == 0)
+    //  {
+    //    HistogramView* view = new HistogramView ( class_id, instance_id, this );
+    //    unsigned int number = getAppendedInt (instance_id);
+    //    if (number >= view_count_)
+    //      view_count_ = number+1;
 
-//    assert( view );
-//    view->init();
-//  }
-//  else if (class_id.compare ("MosaicView") == 0)
-//  {
-//    MosaicView* view = new MosaicView ( class_id, instance_id, this );
-//    unsigned int number = getAppendedInt (instance_id);
-//    if (number >= view_count_)
-//      view_count_ = number+1;
+    //    assert( view );
+    //    view->init();
+    //  }
+    //  else if (class_id.compare ("ScatterPlotView") == 0)
+    //  {
+    //    ScatterPlotView* view = new ScatterPlotView ( class_id, instance_id, this );
+    //    unsigned int number = getAppendedInt (instance_id);
+    //    if (number >= view_count_)
+    //      view_count_ = number+1;
 
-//    assert( view );
-//    view->init();
-//  }
-//  else
-    throw std::runtime_error ("ViewContainer: generateSubConfigurable: unknown class_id "+class_id );
+    //    assert( view );
+    //    view->init();
+    //  }
+    //  else if (class_id.compare ("MosaicView") == 0)
+    //  {
+    //    MosaicView* view = new MosaicView ( class_id, instance_id, this );
+    //    unsigned int number = getAppendedInt (instance_id);
+    //    if (number >= view_count_)
+    //      view_count_ = number+1;
+
+    //    assert( view );
+    //    view->init();
+    //  }
+    else
+        throw std::runtime_error ("ViewContainer: generateSubConfigurable: unknown class_id "+class_id );
 }
 
 void ViewContainer::checkSubConfigurables ()
@@ -213,7 +220,7 @@ void ViewContainer::checkSubConfigurables ()
 
 std::string ViewContainer::getName ()
 {
-  return "MainWindow";
+    return "MainWindow";
 }
 
 ViewContainerConfigWidget *ViewContainer::configWidget ()
@@ -259,11 +266,11 @@ void ViewContainer::deleteView ()
     assert (last_active_manage_button_);
 
     // TODO
-//    assert (view_manage_buttons_.find (last_active_manage_button_) != view_manage_buttons_.end());
-//    View *view = view_manage_buttons_ [last_active_manage_button_];
+    //    assert (view_manage_buttons_.find (last_active_manage_button_) != view_manage_buttons_.end());
+    //    View *view = view_manage_buttons_ [last_active_manage_button_];
 
-//    loginf << "ViewContainerWidget: saveViewTemplate: for view " << view->getInstanceId();
-//    ViewManager::getInstance().viewShutdown (view);
+    //    loginf << "ViewContainerWidget: saveViewTemplate: for view " << view->getInstanceId();
+    //    ViewManager::getInstance().viewShutdown (view);
 
     last_active_manage_button_=0;
 }

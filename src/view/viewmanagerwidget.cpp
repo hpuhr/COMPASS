@@ -38,8 +38,8 @@ ViewManagerWidget::ViewManagerWidget(ViewManager &view_manager)
     layout_->addWidget(add_button_);
 
     cont_layout_ = new QVBoxLayout ();
-    //  cont_layout_->setSpacing( 0 );
-    //  cont_layout_->setMargin( 0 );
+    cont_layout_->setSpacing (0);
+    cont_layout_->setMargin (0);
     layout_->addLayout (cont_layout_);
 
     layout_->addStretch ();

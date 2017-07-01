@@ -32,7 +32,7 @@ public:
     void removeView (View *view);
     const std::vector<View*>& getViews() const;
 
-    virtual void generateSubConfigurable (std::string class_id, std::string instance_id);
+    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
     virtual std::string getName ();
     static unsigned int getViewCount () { return view_count_; }

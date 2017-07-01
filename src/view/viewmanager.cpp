@@ -60,7 +60,6 @@ void ViewManager::close ()
 
   for (auto it = containers_.begin(); it != containers_.end(); it++)
   {
-    //it->second->deleteLater ();
     delete it->second;
   }
   containers_.clear();
