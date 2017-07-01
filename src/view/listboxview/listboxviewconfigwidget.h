@@ -1,0 +1,70 @@
+/*
+ * ListBoxViewConfigWidget.h
+ *
+ *  Created on: Nov 11, 2012
+ *      Author: sk
+ */
+
+#ifndef LISTBOXVIEWCONFIGWIDGET_H_
+#define LISTBOXVIEWCONFIGWIDGET_H_
+
+#include <QWidget>
+#include "DBOVariable.h"
+
+class DBOVariableOrderedSetWidget;
+class DBOVariableSelectionWidget;
+class ListBoxView;
+class QLineEdit;
+
+/**
+ * @brief Widget with configuration elements for a ListBoxView
+ *
+ */
+class ListBoxViewConfigWidget : public QWidget
+{
+    Q_OBJECT
+
+public slots:
+    /// @brief Called when the variable read list was changed
+    void variableSetChanged ();
+    /// @brief Called when the order-by variable was changed
+    void orderVariableChanged ();
+    /// @brief Called when use filter checkbox is un/checked
+    void toggleUseFilters();
+    /// @brief Called when the use order checkbox is un/checked
+    void toggleUseOrder ();
+    /// @brief Called when order ascending checkbox is un/checked
+    void toggleOrderAscending ();
+    /// @brief Called when limit minimum is changed
+    void limitMinChanged();
+    /// @brief Called when limit maximum is changed
+    void limitMaxChanged();
+    /// @brief Called when use selection checkbox is un/checked
+    void toggleUseSelection();
+    /// @brief Called when database view checkbox is un/checked
+    void toggleDatabaseView ();
+
+public:
+    /// @brief Constructor
+    ListBoxViewConfigWidget( ListBoxView* view, QWidget* parent=NULL );
+    /// @brief Destructor
+    virtual ~ListBoxViewConfigWidget();
+
+protected:
+    /// Base view
+    ListBoxView* view_;
+    /// Variable read list widget
+    DBOVariableOrderedSetWidget *variable_set_widget_;
+    /// Order-by variable selection widget
+    DBOVariableSelectionWidget *order_variable_widget_;
+
+    /// Limit minimum edit field
+    QLineEdit *limit_min_edit_;
+    /// Limit maximum edit field
+    QLineEdit *limit_max_edit_;
+
+    /// @brief Creates GUI elements
+    void createElements ();
+};
+
+#endif /* LISTBOXVIEWCONFIGWIDGET_H_ */

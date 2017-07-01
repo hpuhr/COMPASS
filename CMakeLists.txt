@@ -97,6 +97,7 @@ include_directories (
     src/variable
     src/view
     src/view/viewbase
+    src/view/listboxview
     src/unit
     )
 
@@ -258,6 +259,12 @@ set ( atsdb_HDRS
 #    src/view/viewbase/dbviewmodel.h
 #    src/view/viewbase/dbview.h
 #    src/view/viewbase/dbviewwidget.h
+    src/view/listboxview/buffertablewidget.h
+    src/view/listboxview/listboxviewdatasource.h
+    src/view/listboxview/listboxview.h
+    src/view/listboxview/listboxviewconfigwidget.h
+    src/view/listboxview/listboxviewdatawidget.h
+    src/view/listboxview/listboxviewwidget.h
     src/unit/unit.h
     src/unit/unitmanager.h
     src/unit/quantity.h
@@ -407,6 +414,11 @@ set ( atsdb_SRCS
     src/view/viewbase/viewmodel.cpp
     src/view/viewbase/viewsettings.cpp
     src/view/viewbase/viewselection.cpp
+    src/view/listboxview/buffertablewidget.cpp
+    src/view/listboxview/listboxview.cpp
+    src/view/listboxview/listboxviewconfigwidget.cpp
+    src/view/listboxview/listboxviewdatawidget.cpp
+    src/view/listboxview/listboxviewwidget.cpp
 #    src/view/viewbase/dbviewmodel.cpp
 #    src/view/viewbase/dbview.cpp
 #    src/view/viewbase/dbviewwidget.cpp
