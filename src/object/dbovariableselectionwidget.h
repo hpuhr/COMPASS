@@ -19,7 +19,7 @@
 #ifndef DBOVARIABLESELECTIONWIDGET_H
 #define DBOVARIABLESELECTIONWIDGET_H
 
-#include "DBOVariable.h"
+#include "dbovariable.h"
 
 #include <QGroupBox>
 #include <QMenu>

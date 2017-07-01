@@ -9,10 +9,10 @@
 #define LISTBOXVIEWCONFIGWIDGET_H_
 
 #include <QWidget>
-#include "DBOVariable.h"
+#include "dbovariable.h"
 
-class DBOVariableOrderedSetWidget;
-class DBOVariableSelectionWidget;
+//class DBOVariableOrderedSetWidget;
+//class DBOVariableSelectionWidget;
 class ListBoxView;
 class QLineEdit;
 
@@ -46,7 +46,7 @@ public slots:
 
 public:
     /// @brief Constructor
-    ListBoxViewConfigWidget( ListBoxView* view, QWidget* parent=NULL );
+    ListBoxViewConfigWidget (ListBoxView* view, QWidget* parent=nullptr);
     /// @brief Destructor
     virtual ~ListBoxViewConfigWidget();
 
@@ -54,9 +54,9 @@ protected:
     /// Base view
     ListBoxView* view_;
     /// Variable read list widget
-    DBOVariableOrderedSetWidget *variable_set_widget_;
+    //DBOVariableOrderedSetWidget *variable_set_widget_;
     /// Order-by variable selection widget
-    DBOVariableSelectionWidget *order_variable_widget_;
+    //DBOVariableSelectionWidget *order_variable_widget_;
 
     /// Limit minimum edit field
     QLineEdit *limit_min_edit_;

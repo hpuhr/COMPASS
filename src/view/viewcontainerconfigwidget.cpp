@@ -15,11 +15,47 @@ ViewContainerConfigWidget
 
 /*
  */
-ViewContainerConfigWidget::ViewContainerConfigWidget( ViewContainerWidget* view_container, QWidget* parent )
-:   QWidget( parent ),
-    view_container_( view_container )
+ViewContainerConfigWidget::ViewContainerConfigWidget( ViewContainer *view_container, QWidget* parent )
+:   QWidget( parent ), view_container_( view_container )
 {
-    createWidget();
+    QFont font_bold;
+    font_bold.setBold( true );
+
+    QVBoxLayout* layout = new QVBoxLayout();
+    layout->setMargin( 3 );
+    setLayout( layout );
+
+    QFrame* frame = new QFrame( this );
+    frame->setFrameStyle( QFrame::Panel | QFrame::Raised );
+    frame->setLineWidth( 2 );
+    layout->addWidget( frame );
+
+    QVBoxLayout* blayout = new QVBoxLayout();
+    frame->setLayout( blayout );
+    blayout->setMargin( 3 );
+    blayout->setSpacing( 3 );
+
+    QHBoxLayout* namelayout = new QHBoxLayout();
+    namelayout->setMargin( 0 );
+    blayout->addLayout( namelayout );
+
+    name_ = QString(view_container_->getName().c_str());//"Window " + QString::number( view_container_->getKey() );
+    QLabel *head = new QLabel( name_ );
+    head->setFont( font_bold );
+    namelayout->addWidget( head );
+
+    //if( view_container_->getKey() > 0 )
+    if (view_container_->getName().compare("Window0") != 0)
+    {
+        QToolButton *vdel = new QToolButton();
+        vdel->setIcon( QIcon( "./data/icons/delete.png" ) );
+        namelayout->addWidget( vdel );
+        connect( vdel, SIGNAL(clicked()), this, SLOT(closeSlot()) );
+    }
+
+    layout_ = new QVBoxLayout();
+    blayout->addLayout( layout_ );
+
     updateSlot();
 }
 
@@ -62,15 +98,11 @@ ViewContainerConfigWidget::~ViewContainerConfigWidget()
 //    updateSlot();
 //}
 
-//void ViewContainerConfigWidget::addListBoxView()
-//{
-//    //TODO
-//    if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
-//        return;
-
-//    view_container_->addListBoxView();
-//    updateSlot();
-//}
+void ViewContainerConfigWidget::addListBoxView()
+{
+    view_container_->addListBoxView();
+    updateSlot();
+}
 
 //void ViewContainerConfigWidget::addMosaicView()
 //{
@@ -92,51 +124,9 @@ ViewContainerConfigWidget::~ViewContainerConfigWidget()
 
 //}
 
-void ViewContainerConfigWidget::createWidget()
-{
-    QFont font_bold;
-    font_bold.setBold( true );
-
-    QVBoxLayout* layout = new QVBoxLayout();
-    layout->setMargin( 3 );
-    setLayout( layout );
-
-    QFrame* frame = new QFrame( this );
-    frame->setFrameStyle( QFrame::Panel | QFrame::Raised );
-    frame->setLineWidth( 2 );
-    layout->addWidget( frame );
-
-    QVBoxLayout* blayout = new QVBoxLayout();
-    frame->setLayout( blayout );
-    blayout->setMargin( 3 );
-    blayout->setSpacing( 3 );
-
-    QHBoxLayout* namelayout = new QHBoxLayout();
-    namelayout->setMargin( 0 );
-    blayout->addLayout( namelayout );
-
-    name_ = QString(view_container_->getName().c_str());//"Window " + QString::number( view_container_->getKey() );
-    QLabel *head = new QLabel( name_ );
-    head->setFont( font_bold );
-    namelayout->addWidget( head );
-
-    //if( view_container_->getKey() > 0 )
-    if (view_container_->getName().compare("Window0") != 0)
-    {
-        QToolButton *vdel = new QToolButton();
-        vdel->setIcon( QIcon( "./Data/icons/close_icon.png" ) );
-        namelayout->addWidget( vdel );
-        connect( vdel, SIGNAL(clicked()), this, SLOT(closeSlot()) );
-    }
-
-    layout_ = new QVBoxLayout();
-    blayout->addLayout( layout_ );
-}
-
-
 void ViewContainerConfigWidget::closeSlot()
 {
-    view_container_->close();
+    //view_container_->close();
     //TODO why r u not delete view_container?
 }
 

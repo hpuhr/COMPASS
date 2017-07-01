@@ -5,15 +5,15 @@
  *      Author: sk
  */
 
-#include "ListBoxView.h"
-#include "ListBoxViewWidget.h"
-#include "ListBoxViewDataSource.h"
-#include "ListBoxViewDataWidget.h"
-#include "Logger.h"
-#include "ViewSelection.h"
+#include "listboxview.h"
+#include "listboxviewwidget.h"
+#include "listboxviewdatasource.h"
+#include "listboxviewdatawidget.h"
+#include "logger.h"
+#include "viewselection.h"
 
-ListBoxView::ListBoxView(const std::string& class_id, const std::string& instance_id, ViewContainerWidget* w )
-: View (class_id, instance_id, w), widget_(0), data_source_ (0)
+ListBoxView::ListBoxView(const std::string& class_id, const std::string& instance_id, ViewContainer *w, ViewManager &view_manager)
+: View (class_id, instance_id, w, view_manager), widget_(0), data_source_ (0)
 {
 }
 
@@ -51,7 +51,7 @@ bool ListBoxView::init()
   return true;
 }
 
-void ListBoxView::generateSubConfigurable (std::string class_id, std::string instance_id)
+void ListBoxView::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
   logdbg  << "ListBoxView: generateSubConfigurable: class_id " << class_id << " instance_id " << instance_id;
   if ( class_id == "ListBoxViewDataSource" )

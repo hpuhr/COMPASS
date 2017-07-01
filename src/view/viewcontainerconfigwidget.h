@@ -4,7 +4,7 @@
 
 #include <QWidget>
 
-class ViewContainerWidget;
+class ViewContainer;
 class View;
 class QLabel;
 class QVBoxLayout;
@@ -13,7 +13,7 @@ class ViewControlWidget : public QWidget
 {
     Q_OBJECT
 public:
-    ViewControlWidget( View* view, QWidget* parent=NULL );
+    ViewControlWidget(View* view, QWidget *parent=nullptr);
     ~ViewControlWidget();
 
 private slots:
@@ -38,7 +38,7 @@ class ViewContainerConfigWidget : public QWidget
 {
     Q_OBJECT
 public:
-    ViewContainerConfigWidget( ViewContainerWidget* view_container, QWidget* parent=NULL );
+    ViewContainerConfigWidget (ViewContainer* view_container, QWidget *parent=nullptr);
     virtual ~ViewContainerConfigWidget();
 
     const QString& name() { return name_; }
@@ -55,9 +55,7 @@ private slots:
     void closeSlot();
 
 private:
-    void createWidget();
-
-    ViewContainerWidget* view_container_;
+    ViewContainer* view_container_;
     std::vector<ViewControlWidget*> view_widgets_;
     QVBoxLayout* layout_;
 

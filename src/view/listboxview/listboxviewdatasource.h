@@ -9,12 +9,12 @@
 #define LISTBOXVIEWDATASOURCE_H_
 
 #include <QObject>
-#include "DBOVariable.h"
-#include "DBOVariableOrderedSet.h"
-#include "Configurable.h"
-#include "Buffer.h"
-#include "ViewSelection.h"
-#include "JobOrderer.h"
+#include "dbovariable.h"
+#include "dbovariableorderedset.h"
+#include "configurable.h"
+#include "buffer.h"
+#include "viewselection.h"
+#include "joborderer.h"
 
 class Job;
 
@@ -25,25 +25,29 @@ class Job;
  * emits signal updateData() when resulting buffer is delivered by callback. Stores Buffers
  * and handles cleanup.
  */
-class ListBoxViewDataSource : public QObject, public Configurable, public JobOrderer
+class ListBoxViewDataSource : public JobOrderer, public Configurable
 {
     Q_OBJECT
+public slots:
+    virtual void jobDone (std::shared_ptr <Job> job);
+    virtual void jobObsolete (std::shared_ptr <Job> job);
+
 signals:
     /// @brief Emitted when resulting buffer was delivered
     void updateData (unsigned int dbo_type, Buffer *buffer);
 
 public:
     /// @brief Constructor
-    ListBoxViewDataSource(std::string class_id, std::string instance_id, Configurable *parent);
+    ListBoxViewDataSource(const std::string &class_id, const std::string &instance_id, Configurable *parent);
     /// @brief Destructor
     virtual ~ListBoxViewDataSource();
 
-    virtual void generateSubConfigurable (std::string class_id, std::string instance_id);
+    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
     /// @brief Returns variable read list
     DBOVariableOrderedSet *getSet () { return set_; }
     /// @brief Returns stored result Buffers
-    std::map <DB_OBJECT_TYPE, Buffer*> &getData () { return data_; }
+    //std::map <DB_OBJECT_TYPE, Buffer*> &getData () { return data_; }
 
     /// @brief Sets use filter flag
     void setUseFilters (bool use_filters) { use_filters_=use_filters; }
@@ -76,9 +80,9 @@ public:
     std::string getOrderVariableName () { return order_variable_name_; }
 
     /// @brief Sets order variable DBObject type
-    void setOrderVariableType (DB_OBJECT_TYPE type) { order_variable_type_int_=type; }
+    //void setOrderVariableType (DB_OBJECT_TYPE type) { order_variable_type_int_=type; }
     /// @brief Returns order variable DBObject type
-    DB_OBJECT_TYPE getOrderVariableType () { return (DB_OBJECT_TYPE) order_variable_type_int_; }
+    //DB_OBJECT_TYPE getOrderVariableType () { return (DB_OBJECT_TYPE) order_variable_type_int_; }
 
     /// @brief Sets order ascending flag
     void setOrderAscending (bool asc) { order_ascending_=asc; }
@@ -121,7 +125,7 @@ protected:
     bool database_view_;
 
     /// Container with result data buffers
-    std::map <DB_OBJECT_TYPE, Buffer*> data_;
+    //std::map <DB_OBJECT_TYPE, Buffer*> data_;
     /// Selected DBObject records
     ViewSelectionEntries &selection_entries_;
 

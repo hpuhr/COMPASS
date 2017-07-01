@@ -8,8 +8,8 @@
 #ifndef LISTBOXVIEWWIDGET_H_
 #define LISTBOXVIEWWIDGET_H_
 
-#include "ViewWidget.h"
-#include "EventProcessor.h"
+#include "viewwidget.h"
+#include "eventprocessor.h"
 
 class ListBoxView;
 class QTabWidget;
@@ -26,8 +26,7 @@ class ListBoxViewWidget : public ViewWidget
 {
 public:
     /// @brief Constructor
-    ListBoxViewWidget( const std::string& class_id, const std::string& instance_id,
-            Configurable* config_parent, ListBoxView* view, QWidget* parent=NULL );
+    ListBoxViewWidget( const std::string& class_id, const std::string& instance_id, Configurable* config_parent, ListBoxView* view, QWidget* parent=NULL );
     /// @brief Destructor
     virtual ~ListBoxViewWidget();
 

@@ -14,6 +14,7 @@ class QPushButton;
 class QTabWidget;
 
 class ViewManager;
+class ViewContainerConfigWidget;
 
 class ViewContainer : public QObject, public Configurable
 {
@@ -38,10 +39,12 @@ public:
 
     //  void addGeographicView();
     //  void addHistogramView();
-    //  void addListBoxView();
+    void addListBoxView();
     //  void addMosaicView();
     //  void addScatterPlotView();
     //  void addTemplateView (std::string template_name);
+
+    ViewContainerConfigWidget *configWidget ();
 
 protected:
     ViewManager &view_manager_;
@@ -52,6 +55,8 @@ protected:
 
     QMenu menu_;
     QPushButton *last_active_manage_button_;
+
+    ViewContainerConfigWidget *config_widget_;
 
     std::map <QPushButton*, View*> view_manage_buttons_;
 

@@ -9,8 +9,9 @@
 #define BUFFERTABLEWIDGET_H_
 
 #include <QWidget>
-#include "Global.h"
-#include "PropertyList.h"
+
+#include "global.h"
+#include "propertylist.h"
 
 
 class QTableWidget;
@@ -39,7 +40,7 @@ public slots:
 
 public:
     /// @brief Constructor
-    BufferTableWidget(QWidget * parent = 0, Qt::WindowFlags f = 0 );
+    BufferTableWidget(QWidget * parent = 0, Qt::WindowFlags f = 0);
     /// @brief Destructor
     virtual ~BufferTableWidget();
 
@@ -54,15 +55,13 @@ protected:
     /// Table header list
     QStringList header_list_;
     /// DBObject type
-    DB_OBJECT_TYPE type_;
+    //DB_OBJECT_TYPE type_;
 
     /// Container with selection checkboxes
-    std::map <QTableWidgetItem *, unsigned int> selection_checkboxes_;
+    std::map <QTableWidgetItem*, unsigned int> selection_checkboxes_;
 
-    /// @brief Creates GUI elements
-    void createGUIElements ();
     /// @brief Is called when keys are pressed
-    virtual void keyPressEvent ( QKeyEvent * event );
+    virtual void keyPressEvent (QKeyEvent * event);
 };
 
 #endif /* BUFFERTABLEWIDGET_H_ */

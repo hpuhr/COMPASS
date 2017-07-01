@@ -8,8 +8,8 @@
 #ifndef LISTBOXVIEW_H_
 #define LISTBOXVIEW_H_
 
-#include "View.h"
-#include "ViewSelection.h"
+#include "view.h"
+#include "viewselection.h"
 
 class ListBoxViewWidget;
 class ListBoxViewDataSource;
@@ -39,15 +39,15 @@ public slots:
 
 signals:
     /// @brief Is emitted when selection was changed locally
-    void setSelection( const ViewSelectionEntries& entries );
+    void setSelection (const ViewSelectionEntries& entries);
     /// @brief Is emitted when somthing was added to the selection
-    void addSelection( const ViewSelectionEntries& entries );
+    void addSelection (const ViewSelectionEntries& entries);
     /// @brief Is emitted when selection should be cleared
     void clearSelection();
 
 public:
     /// @brief Constructor
-    ListBoxView(const std::string& class_id, const std::string& instance_id, ViewContainerWidget* w );
+    ListBoxView(const std::string& class_id, const std::string& instance_id, ViewContainer *w, ViewManager &view_manager);
     /// @brief Destructor
     virtual ~ListBoxView();
 
@@ -55,7 +55,7 @@ public:
     void clearData();
     bool init();
 
-    virtual void generateSubConfigurable (std::string class_id, std::string instance_id);
+    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
     /// @brief Returns the used data source
     ListBoxViewDataSource *getDataSource () { assert (data_source_); return data_source_; }

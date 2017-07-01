@@ -26,7 +26,7 @@ private slots:
     void addViewSlot();
     //  void addGeographicViewSlot();
     //  void addHistogramViewSlot();
-    //  void addListBoxViewSlot();
+    void addListBoxViewSlot();
     //  void addMosaicViewSlot();
     //  void addScatterPlotViewSlot();
     //  void addGeographicViewNewWindowSlot();

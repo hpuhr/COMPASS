@@ -182,8 +182,8 @@ set ( atsdb_HDRS
     src/object/dbovariabledatatypecombobox.h
     #        src/object/dbovariablecombobox.h
     #        src/object/dbovariablesetwidget.h
-    #        src/object/dbovariableorderedsetwidget.h
-    #        src/object/dbovariableselectionwidget.h
+    #src/object/dbovariableorderedsetwidget.h
+    #src/object/dbovariableselectionwidget.h
     src/object/dbovariabledatatypecombobox.h
     #        src/object/propertydatatypecombobox.h
     #        src/object/metadbobjecteditwidget.h
@@ -334,8 +334,8 @@ set ( atsdb_SRCS
     #        src/job/transformationjob.cpp
     #        src/object/dbovariablecombobox.cpp
     #        src/object/dbovariablesetwidget.cpp
-    #        src/object/dbovariableorderedsetwidget.cpp
-    #        src/object/dbovariableselectionwidget.cpp
+    #src/object/dbovariableorderedsetwidget.cpp
+    #src/object/dbovariableselectionwidget.cpp
     #        src/object/metadbobjecteditwidget.cpp
     src/object/dbobject.cpp
     src/object/dbobjectwidget.cpp
@@ -416,6 +416,7 @@ set ( atsdb_SRCS
     src/view/viewbase/viewselection.cpp
     src/view/listboxview/buffertablewidget.cpp
     src/view/listboxview/listboxview.cpp
+    src/view/listboxview/listboxviewdatasource.cpp
     src/view/listboxview/listboxviewconfigwidget.cpp
     src/view/listboxview/listboxviewdatawidget.cpp
     src/view/listboxview/listboxviewwidget.cpp

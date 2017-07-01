@@ -9,7 +9,7 @@
 #include <QInputDialog>
 
 #include "viewcontainer.h"
-//#include "viewcontainertabwidget.h"
+#include "viewcontainerconfigwidget.h"
 #include "config.h"
 #include "logger.h"
 //#include "GeographicView.h"
@@ -25,9 +25,11 @@
 
 unsigned int ViewContainer::view_count_=0;
 
+using Utils::String;
+
 ViewContainer::ViewContainer(const std::string &class_id, const std::string &instance_id, ViewManager *parent, QTabWidget *tab_widget)
-    : QObject(), Configurable( class_id, instance_id, parent ), view_manager_(*parent), tab_widget_(tab_widget),
-    last_active_manage_button_ (nullptr)
+    : QObject(), Configurable( class_id, instance_id, parent ), view_manager_(*parent), tab_widget_(tab_widget), last_active_manage_button_ (nullptr),
+      config_widget_(nullptr)
 {
     logdbg  << "ViewContainer: constructor: creating gui elements";
     assert (tab_widget_);
@@ -43,7 +45,11 @@ ViewContainer::ViewContainer(const std::string &class_id, const std::string &ins
 
 ViewContainer::~ViewContainer()
 {
-
+    if (config_widget_)
+    {
+        delete config_widget_;
+        config_widget_ = nullptr;
+    }
 }
 
 //void ViewContainer::addGeographicView()
@@ -56,10 +62,10 @@ ViewContainer::~ViewContainer()
 //  generateSubConfigurable ("HistogramView", "HistogramView"+intToString(view_count_));
 //}
 
-//void ViewContainer::addListBoxView()
-//{
-//  generateSubConfigurable ("ListBoxView", "ListBoxView"+intToString(view_count_));
-//}
+void ViewContainer::addListBoxView()
+{
+  generateSubConfigurable ("ListBoxView", "ListBoxView"+String::intToString(view_count_));
+}
 
 //void ViewContainer::addMosaicView()
 //{
@@ -208,6 +214,17 @@ void ViewContainer::checkSubConfigurables ()
 std::string ViewContainer::getName ()
 {
   return "MainWindow";
+}
+
+ViewContainerConfigWidget *ViewContainer::configWidget ()
+{
+    if (!config_widget_)
+    {
+        config_widget_ = new ViewContainerConfigWidget (this);
+    }
+
+    assert (config_widget_);
+    return config_widget_;
 }
 
 void ViewContainer::showMenuSlot ()

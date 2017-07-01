@@ -11,19 +11,19 @@
 #include <QLineEdit>
 #include <QLabel>
 
-#include "DBObjectManager.h"
-#include "DBOVariableOrderedSetWidget.h"
-#include "DBOVariableSelectionWidget.h"
-#include "ListBoxView.h"
-#include "ListBoxViewConfigWidget.h"
-#include "ListBoxViewDataSource.h"
-#include "Logger.h"
-#include "String.h"
+#include "dbobjectmanager.h"
+//#include "dbovariableorderedsetwidget.h"
+//#include "dbovariableselectionwidget.h"
+#include "listboxview.h"
+#include "listboxviewconfigwidget.h"
+#include "listboxviewdatasource.h"
+#include "logger.h"
+#include "stringconv.h"
 
-using namespace Utils::String;
+using namespace Utils;
 
 ListBoxViewConfigWidget::ListBoxViewConfigWidget( ListBoxView* view, QWidget* parent )
-:   QWidget( parent ), view_( view ), variable_set_widget_ (0), order_variable_widget_(0), limit_min_edit_ (0), limit_max_edit_(0)
+:   QWidget( parent ), view_( view ), limit_min_edit_ (0), limit_max_edit_(0) //variable_set_widget_ (0), order_variable_widget_(0),
 {
   createElements ();
 }
@@ -38,9 +38,10 @@ void ListBoxViewConfigWidget::createElements ()
 
   assert (view_);
 
-  variable_set_widget_ = new DBOVariableOrderedSetWidget (view_->getDataSource()->getSet());
-  connect( variable_set_widget_, SIGNAL(setChanged()), this, SLOT(variableSetChanged()) );
-  vlayout->addWidget (variable_set_widget_);
+    // TODO
+//  variable_set_widget_ = new DBOVariableOrderedSetWidget (view_->getDataSource()->getSet());
+//  connect( variable_set_widget_, SIGNAL(setChanged()), this, SLOT(variableSetChanged()) );
+//  vlayout->addWidget (variable_set_widget_);
 
   QCheckBox *use_filters = new QCheckBox("Use filters");
   use_filters->setChecked(view_->getDataSource()->getUseFilters());
@@ -64,15 +65,16 @@ void ListBoxViewConfigWidget::createElements ()
   connect(order_ascending, SIGNAL( clicked() ), this, SLOT( toggleOrderAscending() ));
   order_layout->addWidget(order_ascending);
 
-  order_variable_widget_ = new DBOVariableSelectionWidget ();
-  if (DBObjectManager::getInstance().existsDBOVariable(view_->getDataSource()->getOrderVariableType(),
-      view_->getDataSource()->getOrderVariableName()))
-  {
-    order_variable_widget_->setSelectedVariable(DBObjectManager::getInstance().getDBOVariable(view_->getDataSource()->getOrderVariableType(),
-        view_->getDataSource()->getOrderVariableName()));
-  }
-  connect (order_variable_widget_, SIGNAL (selectionChanged()), this, SLOT(orderVariableChanged()));
-  order_layout->addWidget (order_variable_widget_);
+  //TODO
+//  order_variable_widget_ = new DBOVariableSelectionWidget ();
+//  if (DBObjectManager::getInstance().existsDBOVariable(view_->getDataSource()->getOrderVariableType(),
+//      view_->getDataSource()->getOrderVariableName()))
+//  {
+//    order_variable_widget_->setSelectedVariable(DBObjectManager::getInstance().getDBOVariable(view_->getDataSource()->getOrderVariableType(),
+//        view_->getDataSource()->getOrderVariableName()));
+//  }
+//  connect (order_variable_widget_, SIGNAL (selectionChanged()), this, SLOT(orderVariableChanged()));
+//  order_layout->addWidget (order_variable_widget_);
 
   order_frame->setLayout (order_layout);
   vlayout->addWidget (order_frame);
@@ -90,12 +92,12 @@ void ListBoxViewConfigWidget::createElements ()
   QHBoxLayout *limit_edits_layout = new QHBoxLayout ();
 
   limit_min_edit_ = new QLineEdit ();
-  limit_min_edit_->setText (intToString(view_->getDataSource()->getLimitMin()).c_str());
+  limit_min_edit_->setText (String::intToString(view_->getDataSource()->getLimitMin()).c_str());
   connect( limit_min_edit_, SIGNAL(returnPressed()), this, SLOT(limitMinChanged()) );
   limit_edits_layout->addWidget(limit_min_edit_);
 
   limit_max_edit_ = new QLineEdit ();
-  limit_max_edit_->setText (intToString(view_->getDataSource()->getLimitMax()).c_str());
+  limit_max_edit_->setText (String::intToString(view_->getDataSource()->getLimitMax()).c_str());
   connect( limit_max_edit_, SIGNAL(returnPressed()), this, SLOT(limitMaxChanged()) );
   limit_edits_layout->addWidget(limit_max_edit_);
 
@@ -153,22 +155,23 @@ void ListBoxViewConfigWidget::toggleOrderAscending ()
 
 void ListBoxViewConfigWidget::orderVariableChanged ()
 {
-  assert (order_variable_widget_);
-  DBOVariable *var = order_variable_widget_->getSelectedVariable();
-  view_->getDataSource()->setOrderVariableName (var->getName());
-  view_->getDataSource()->setOrderVariableType (var->getDBOType());
+      //TODO
+//  assert (order_variable_widget_);
+//  DBOVariable *var = order_variable_widget_->getSelectedVariable();
+//  view_->getDataSource()->setOrderVariableName (var->getName());
+//  view_->getDataSource()->setOrderVariableType (var->getDBOType());
 }
 
 void ListBoxViewConfigWidget::limitMinChanged()
 {
   assert (limit_min_edit_);
-  unsigned int min = intFromString (limit_min_edit_->text().toStdString());
+  unsigned int min = String::intFromString (limit_min_edit_->text().toStdString());
   view_->getDataSource()->setLimitMin (min);
 }
 void ListBoxViewConfigWidget::limitMaxChanged()
 {
   assert (limit_max_edit_);
-  unsigned int max = intFromString (limit_max_edit_->text().toStdString());
+  unsigned int max = String::intFromString (limit_max_edit_->text().toStdString());
   view_->getDataSource()->setLimitMax (max);
 
 }

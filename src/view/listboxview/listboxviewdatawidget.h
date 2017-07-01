@@ -9,7 +9,7 @@
 #define LISTBOXVIEWDATAWIDGET_H_
 
 #include <QWidget>
-#include "Global.h"
+#include "global.h"
 
 class ListBoxViewDataSource;
 class QTabWidget;
@@ -29,7 +29,7 @@ public slots:
 
 public:
     /// @brief Constructor
-    ListBoxViewDataWidget(ListBoxViewDataSource *data_source, QWidget * parent = 0, Qt::WindowFlags f = 0);
+    ListBoxViewDataWidget(ListBoxViewDataSource *data_source, QWidget* parent=nullptr, Qt::WindowFlags f=0);
     /// @brief Destructor
     virtual ~ListBoxViewDataWidget();
 
@@ -42,7 +42,7 @@ protected:
     /// Main tab widget
     QTabWidget *tab_widget_;
     /// Container with all table widgets
-    std::map <DB_OBJECT_TYPE, BufferTableWidget*> buffer_tables_;
+    //std::map <DB_OBJECT_TYPE, BufferTableWidget*> buffer_tables_;
 };
 
 #endif /* LISTBOXVIEWDATAWIDGET_H_ */

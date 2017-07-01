@@ -109,6 +109,9 @@ void ViewManager::generateSubConfigurable (const std::string &class_id, const st
     }
     else
         throw std::runtime_error ("ViewManager: generateSubConfigurable: unknown class_id "+class_id );
+
+    if (widget_)
+        widget_->update();
 }
 
 void ViewManager::checkSubConfigurables ()

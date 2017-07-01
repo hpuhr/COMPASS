@@ -1,5 +1,5 @@
 /*
- * ViewsWidget.cpp
+ * ViewManagerWidget.cpp
  *
  *  Created on: Apr 12, 2012
  *      Author: sk
@@ -16,12 +16,13 @@
 #include "viewmanager.h"
 #include "logger.h"
 #include "jobmanager.h"
+#include "viewcontainer.h"
 #include "viewcontainerconfigwidget.h"
 
 ViewManagerWidget::ViewManagerWidget(ViewManager &view_manager)
     : view_manager_(view_manager), layout_(nullptr), cont_layout_(nullptr), add_button_(nullptr)
 {
-    logdbg  << "ViewsWidget: constructor: start";
+    logdbg  << "ViewManagerWidget: constructor: start";
 
     QFont font_bold;
     font_bold.setBold(true);
@@ -47,8 +48,10 @@ ViewManagerWidget::ViewManagerWidget(ViewManager &view_manager)
     connect (&JobManager::instance(), SIGNAL(databaseBusy()), this, SLOT(databaseBusy()));
     connect (&JobManager::instance(), SIGNAL(databaseIdle()), this, SLOT(databaseIdle()));
 
-    //view_manager_.setViewsWidget(this);
-    logdbg  << "ViewsWidget: constructor: end";
+    //view_manager_.setViewManagerWidget(this);
+    update ();
+
+    logdbg  << "ViewManagerWidget: constructor: end";
 }
 
 ViewManagerWidget::~ViewManagerWidget()
@@ -107,15 +110,15 @@ void ViewManagerWidget::addViewSlot()
     //    action->setData( QVariant( i ) );
     //  }
 
-    //  // listbox view
-    //  submenu = menu.addMenu( "ListBox View" );
+    // listbox view
+    submenu = menu.addMenu( "ListBox View" );
     //  submenu->addAction( "New Window", this, SLOT(addListBoxViewNewWindowSlot()) );
-    //  for( i=0; i<n; ++i )
-    //  {
-    //    name = cont_widgets_[ i ]->name();
-    //    QAction* action = submenu->addAction( name, this, SLOT(addListBoxViewSlot()) );
-    //    action->setData( QVariant( i ) );
-    //  }
+    for( i=0; i<n; ++i )
+    {
+        name = cont_widgets_[ i ]->name();
+        QAction* action = submenu->addAction( name, this, SLOT(addListBoxViewSlot()) );
+        action->setData( QVariant( i ) );
+    }
 
     //  //mosaic view
     //  /*submenu = menu.addMenu( "Mosaic View" );
@@ -156,7 +159,7 @@ void ViewManagerWidget::addViewSlot()
     menu.exec(QCursor::pos());
 }
 
-//void ViewsWidget::addGeographicViewNewWindowSlot()
+//void ViewManagerWidget::addGeographicViewNewWindowSlot()
 //{
 //  //TODO
 //  if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
@@ -165,7 +168,7 @@ void ViewManagerWidget::addViewSlot()
 //  ViewManager::getInstance().addContainerWithGeographicView();
 //}
 
-//void ViewsWidget::addHistogramViewNewWindowSlot()
+//void ViewManagerWidget::addHistogramViewNewWindowSlot()
 //{
 //  //TODO
 //  if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
@@ -174,7 +177,7 @@ void ViewManagerWidget::addViewSlot()
 //  ViewManager::getInstance().addContainerWithHistogramView();
 //}
 
-//void ViewsWidget::addListBoxViewNewWindowSlot()
+//void ViewManagerWidget::addListBoxViewNewWindowSlot()
 //{
 //  //TODO
 //  if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
@@ -184,7 +187,7 @@ void ViewManagerWidget::addViewSlot()
 //}
 
 
-//void ViewsWidget::addMosaicViewNewWindowSlot()
+//void ViewManagerWidget::addMosaicViewNewWindowSlot()
 //{
 //  //TODO
 //  if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
@@ -193,7 +196,7 @@ void ViewManagerWidget::addViewSlot()
 //  ViewManager::getInstance().addContainerWithMosaicView();
 //}
 
-//void ViewsWidget::addScatterPlotViewNewWindowSlot()
+//void ViewManagerWidget::addScatterPlotViewNewWindowSlot()
 //{
 //  //TODO
 //  if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
@@ -202,7 +205,7 @@ void ViewManagerWidget::addViewSlot()
 //  ViewManager::getInstance().addContainerWithScatterPlotView();
 //}
 
-//void ViewsWidget::addGeographicViewSlot()
+//void ViewManagerWidget::addGeographicViewSlot()
 //{
 //  //TODO
 //  if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
@@ -212,11 +215,11 @@ void ViewManagerWidget::addViewSlot()
 //  unsigned int containter_id = action->data().toUInt();
 
 //  if( containter_id < 0 || containter_id >= cont_widgets_.size() )
-//    throw( std::runtime_error( "ViewsWidget :addGeographicViewSlot: container out of bounds" ) );
+//    throw( std::runtime_error( "ViewManagerWidget :addGeographicViewSlot: container out of bounds" ) );
 //  cont_widgets_[ containter_id ]->addGeographicView();
 //}
 
-//void ViewsWidget::addHistogramViewSlot()
+//void ViewManagerWidget::addHistogramViewSlot()
 //{
 //  //TODO
 //  if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
@@ -226,11 +229,21 @@ void ViewManagerWidget::addViewSlot()
 //  unsigned int containter_id = action->data().toUInt();
 
 //  if( containter_id < 0 || containter_id >= cont_widgets_.size() )
-//    throw( std::runtime_error( "ViewsWidget: addHistogramViewSlot: container out of bounds" ) );
+//    throw( std::runtime_error( "ViewManagerWidget: addHistogramViewSlot: container out of bounds" ) );
 //  cont_widgets_[ containter_id ]->addHistogramView();
 //}
 
-//void ViewsWidget::addListBoxViewSlot()
+void ViewManagerWidget::addListBoxViewSlot()
+{
+  QAction* action = (QAction*)(QObject::sender());
+  unsigned int containter_id = action->data().toUInt();
+
+  if( containter_id < 0 || containter_id >= cont_widgets_.size() )
+    throw( std::runtime_error( "ViewManagerWidget: addListBoxViewSlot: container out of bounds" ) );
+  cont_widgets_[ containter_id ]->addListBoxView();
+}
+
+//void ViewManagerWidget::addMosaicViewSlot()
 //{
 //  //TODO
 //  if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
@@ -240,25 +253,11 @@ void ViewManagerWidget::addViewSlot()
 //  unsigned int containter_id = action->data().toUInt();
 
 //  if( containter_id < 0 || containter_id >= cont_widgets_.size() )
-//    throw( std::runtime_error( "ViewsWidget: addListBoxViewSlot: container out of bounds" ) );
-//  cont_widgets_[ containter_id ]->addListBoxView();
-//}
-
-//void ViewsWidget::addMosaicViewSlot()
-//{
-//  //TODO
-//  if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
-//    return;
-
-//  QAction* action = (QAction*)(QObject::sender());
-//  unsigned int containter_id = action->data().toUInt();
-
-//  if( containter_id < 0 || containter_id >= cont_widgets_.size() )
-//    throw( std::runtime_error( "ViewsWidget: addMosaicViewSlot: container out of bounds" ) );
+//    throw( std::runtime_error( "ViewManagerWidget: addMosaicViewSlot: container out of bounds" ) );
 //  cont_widgets_[ containter_id ]->addMosaicView();
 //}
 
-//void ViewsWidget::addScatterPlotViewSlot()
+//void ViewManagerWidget::addScatterPlotViewSlot()
 //{
 //  //TODO
 //  if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
@@ -268,31 +267,33 @@ void ViewManagerWidget::addViewSlot()
 //  unsigned int containter_id = action->data().toUInt();
 
 //  if( containter_id < 0 || containter_id >= cont_widgets_.size() )
-//    throw( std::runtime_error( "ViewsWidget: addScatterPlotViewSlot: container out of bounds" ) );
+//    throw( std::runtime_error( "ViewManagerWidget: addScatterPlotViewSlot: container out of bounds" ) );
 
 //  cont_widgets_[ containter_id ]->addScatterPlotView();
 //}
 
 void ViewManagerWidget::update ()
 {
-    logdbg  << "ViewsWidget: update";
+    logdbg  << "ViewManagerWidget: update";
 
-    // TODO
-    //  for (unsigned int cnt=0; cnt < cont_widgets_.size(); cnt++)
-    //    delete cont_widgets_.at(cnt);
-    //  cont_widgets_.clear();
+    cont_widgets_.clear();
 
-    //  std::map <std::string, ViewContainer*> containers = view_manager_.getContainers ();
+    QLayoutItem *child;
+    while ((child = cont_layout_->takeAt(0)) != 0)
+    {
+        cont_layout_->removeItem(child);
+    }
 
-    //  //loginf  << "ViewsWidget: update size containers " << containers.size();
+    std::map <std::string, ViewContainer*> containers = view_manager_.getContainers ();
 
-    //  std::map<std::string, ViewContainerWidget*>::iterator it;
-    //  for (it = containers.begin(); it != containers.end(); it++)
-    //  {
-    //    ViewContainerConfigWidget* config_widget = new ViewContainerConfigWidget( it->second );
-    //    cont_widgets_.push_back( config_widget );
-    //    cont_layout_->addWidget( config_widget );
-    //  }
+    //loginf  << "ViewManagerWidget: update size containers " << containers.size();
+
+    std::map<std::string, ViewContainer*>::iterator it;
+    for (it = containers.begin(); it != containers.end(); it++)
+    {
+        cont_widgets_.push_back (it->second->configWidget());
+        cont_layout_->addWidget (it->second->configWidget());
+    }
 }
 
 //void ViewManagerWidget::addTemplateSlot ()
@@ -302,11 +303,11 @@ void ViewManagerWidget::update ()
 //    assert (add_template_actions_.find (action) != add_template_actions_.end());
 //    std::pair <std::string, int> data = add_template_actions_ [action];
 
-//    loginf << "ViewsWidget: addTemplateSlot: " << data.first << " in window " << data.second;
+//    loginf << "ViewManagerWidget: addTemplateSlot: " << data.first << " in window " << data.second;
 //    int containter_id = data.second;
 
 //    if( containter_id < 0 || containter_id >= cont_widgets_.size() )
-//      throw( std::runtime_error( "ViewsWidget: addTemplateSlot: container out of bounds" ) );
+//      throw( std::runtime_error( "ViewManagerWidget: addTemplateSlot: container out of bounds" ) );
 
 //    cont_widgets_[ containter_id ]->addTemplateView (data.first);
 
@@ -316,7 +317,7 @@ void ViewManagerWidget::update ()
 //{
 //    QAction *action = (QAction*) sender();
 //    QVariant variant = action->data();
-//    loginf << "ViewsWidget: addTemplateNewWindowSlot: " << variant.toString().toStdString();
+//    loginf << "ViewManagerWidget: addTemplateNewWindowSlot: " << variant.toString().toStdString();
 //    ViewManager::getInstance().addContainerWithTemplateView(variant.toString().toStdString());
 //}
 
