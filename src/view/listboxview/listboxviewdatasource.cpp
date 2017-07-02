@@ -21,8 +21,8 @@ ListBoxViewDataSource::ListBoxViewDataSource(const std::string &class_id, const 
 : QObject(), Configurable (class_id, instance_id, parent), set_(0), selection_entries_ (ViewSelection::getInstance().getEntries())
 {
     registerParameter ("use_filters", &use_filters_, false);
-    registerParameter ("limit_min", &limit_min_, 0);
-    registerParameter ("limit_max", &limit_max_, 100);
+//    registerParameter ("limit_min", &limit_min_, 0);
+//    registerParameter ("limit_max", &limit_max_, 100);
     registerParameter ("use_selection", &use_selection_, true);
     registerParameter ("use_order", &use_order_, false);
     registerParameter ("order_variable_type_int", &order_variable_type_int_, 0);
@@ -36,8 +36,6 @@ ListBoxViewDataSource::ListBoxViewDataSource(const std::string &class_id, const 
     {
         connect (object.second, SIGNAL (newDataSignal(DBObject &)), this, SLOT(newDataSlot(DBObject&)));
         connect (object.second, SIGNAL (loadingDoneSignal(DBObject &)), this, SLOT(loadingDoneSlot(DBObject&)));
-//        if (ATSDB::getInstance().contains(it->first) && it->second->isLoadable())
-//            data_[it->first] = 0;
     }
 
     use_filters_=false;
@@ -114,11 +112,11 @@ void ListBoxViewDataSource::checkSubConfigurables ()
     }
 }
 
-void ListBoxViewDataSource::updateData ()
-{
-    logdbg  << "ListBoxViewDataSource: updateData: start";
+//void ListBoxViewDataSource::updateData ()
+//{
+//    logdbg  << "ListBoxViewDataSource: updateData: start";
 
-    //TODO
+//    //TODO
 //    std::map <DB_OBJECT_TYPE, Buffer*>::iterator it;
 
 //    for (it = data_.begin(); it != data_.end(); it++)
@@ -190,8 +188,8 @@ void ListBoxViewDataSource::updateData ()
 //                    order_by_variable, order_ascending_, limit_min_, limit_max_, !database_view_);
 //        }
 //    }
-    logdbg  << "ListBoxViewDataSource: updateData: end";
-}
+//    logdbg  << "ListBoxViewDataSource: updateData: end";
+//}
 
 void ListBoxViewDataSource::loadingStartedSlot ()
 {
@@ -201,23 +199,15 @@ void ListBoxViewDataSource::loadingStartedSlot ()
 void ListBoxViewDataSource::newDataSlot (DBObject &object)
 {
     logdbg << "ListBoxViewDataSource: newDataSlot: object " << object.name();
-//    assert (job);
 
-//    DBOInfoDBJob *infojob = (DBOInfoDBJob*) job;
+    std::shared_ptr <Buffer> buffer = object.data();
+    assert (buffer);
 
-//    DB_OBJECT_TYPE type = infojob->getType();
-//    Buffer *buffer = infojob->getResultBuffer();
-
-//    delete job;
-
-//    assert (buffer);
-
-//    emit updateData ((unsigned int) type, buffer);
+    emit updateData (object, buffer);
 }
 
 void ListBoxViewDataSource::loadingDoneSlot(DBObject &object)
 {
     loginf << "ListBoxViewDataSource: loadingDoneSlot: object " << object.name();
-    //delete job;
 }
 

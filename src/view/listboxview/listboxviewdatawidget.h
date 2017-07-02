@@ -9,12 +9,16 @@
 #define LISTBOXVIEWDATAWIDGET_H_
 
 #include <QWidget>
+
+#include <memory>
+
 #include "global.h"
 
 class ListBoxViewDataSource;
 class QTabWidget;
 class BufferTableWidget;
 class Buffer;
+class DBObject;
 
 /**
  * @brief Widget with tab containing BufferTableWidgets in ListBoxView
@@ -25,7 +29,7 @@ class ListBoxViewDataWidget : public QWidget
     Q_OBJECT
 public slots:
     /// @brief Called when new result Buffer was delivered
-    void updateData (unsigned int dbo_type, Buffer *buffer);
+    void updateData (DBObject &object, std::shared_ptr<Buffer> buffer);
 
 public:
     /// @brief Constructor
@@ -42,7 +46,7 @@ protected:
     /// Main tab widget
     QTabWidget *tab_widget_;
     /// Container with all table widgets
-    //std::map <DB_OBJECT_TYPE, BufferTableWidget*> buffer_tables_;
+    std::map <std::string, BufferTableWidget*> buffer_tables_;
 };
 
 #endif /* LISTBOXVIEWDATAWIDGET_H_ */

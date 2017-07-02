@@ -10,6 +10,8 @@
 
 #include <QWidget>
 
+#include <memory>
+
 #include "global.h"
 #include "propertylist.h"
 
@@ -19,6 +21,7 @@ class QTableWidgetItem;
 class QStringList;
 class Buffer;
 class DBOVariableSet;
+class DBObject;
 
 /**
  * @brief Widget with table representation of a Buffer's data contents
@@ -45,7 +48,7 @@ public:
     virtual ~BufferTableWidget();
 
     /// @brief Shows Buffer content in table
-    void show (Buffer *buffer, DBOVariableSet *variables, bool database_view);
+    void show (DBObject &object, std::shared_ptr<Buffer> buffer); //, DBOVariableSet *variables, bool database_view
 
 protected:
     /// Table with items

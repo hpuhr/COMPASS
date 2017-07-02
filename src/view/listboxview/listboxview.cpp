@@ -45,7 +45,7 @@ bool ListBoxView::init()
   //connect( &ViewSelection::getInstance(), SIGNAL(selectionChanged()), this, SLOT(selectionChanged()) );
   //connect( &ViewSelection::getInstance(), SIGNAL(selectionToBeCleared()), this, SLOT(selectionToBeCleared()) );
 
-  connect( data_source_, SIGNAL(updateData (unsigned int, Buffer*)), widget_->getDataWidget (), SLOT(updateData (unsigned int, Buffer*)) );
+  connect( data_source_, SIGNAL(updateData (DBObject&, std::shared_ptr<Buffer>)), widget_->getDataWidget (), SLOT(updateData (DBObject&, std::shared_ptr<Buffer>)) );
 
   return true;
 }
@@ -80,24 +80,24 @@ void ListBoxView::checkSubConfigurables ()
   }
 }
 
-void ListBoxView::updateData ()
-{
-  logdbg  << "ListBoxView: updateData";
-  assert (data_source_);
-  assert (widget_);
+//void ListBoxView::updateData ()
+//{
+//  logdbg  << "ListBoxView: updateData";
+//  assert (data_source_);
+//  assert (widget_);
 
-  //boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
-  loginf  << "ListBoxView: " << getName().c_str() << ": loading ";
+//  //boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+//  loginf  << "ListBoxView: " << getName().c_str() << ": loading ";
 
-  data_source_->updateData();
-  widget_->getDataWidget()->clearTables();
-  //boost::posix_time::ptime stop_time = boost::posix_time::microsec_clock::local_time();
+//  data_source_->updateData();
+//  widget_->getDataWidget()->clearTables();
+//  //boost::posix_time::ptime stop_time = boost::posix_time::microsec_clock::local_time();
 
-//  boost::posix_time::time_duration diff = stop_time - start_time;
-//  double load_time= diff.total_milliseconds()/1000.0;
-//
-//  loginf  << "ListBoxView: " << getName().c_str() << ": loading done after " << load_time << " seconds";
-}
+////  boost::posix_time::time_duration diff = stop_time - start_time;
+////  double load_time= diff.total_milliseconds()/1000.0;
+////
+////  loginf  << "ListBoxView: " << getName().c_str() << ": loading done after " << load_time << " seconds";
+//}
 
 void ListBoxView::selectionChanged()
 {

@@ -30,7 +30,7 @@ class ListBoxView : public View
     Q_OBJECT
 public slots:
     /// @brief Is executed when update button is clicked
-    void updateData ();
+    //void updateData ();
 
     /// @brief Is executed when selection is changed. Does nothing.
     void selectionChanged();

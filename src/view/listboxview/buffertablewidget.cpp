@@ -5,6 +5,8 @@
  *      Author: sk
  */
 
+//#include <iostream>
+
 #include <QTableWidget>
 #include <QVBoxLayout>
 #include <QClipboard>
@@ -16,6 +18,7 @@
 #include "buffer.h"
 #include "dbovariable.h"
 #include "dbovariableset.h"
+#include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "logger.h"
 #include "buffertablewidget.h"
@@ -27,6 +30,8 @@
 BufferTableWidget::BufferTableWidget(QWidget * parent, Qt::WindowFlags f)
 : QWidget (parent, f), table_ (0), variables_(0)
 {
+    setAutoFillBackground(true);
+
     QVBoxLayout *layout = new QVBoxLayout ();
     table_ = new QTableWidget ();
     table_->setAlternatingRowColors(true);
@@ -203,58 +208,49 @@ void BufferTableWidget::keyPressEvent ( QKeyEvent * event )
     }
 }
 
-void BufferTableWidget::show (Buffer *buffer, DBOVariableSet *variables, bool database_view)
+void BufferTableWidget::show (DBObject &object, std::shared_ptr<Buffer> buffer) //, DBOVariableSet *variables, bool database_view
 {
-    loginf  << " BufferTableWidget: show: start";
+    assert (buffer);
+
+    loginf  << "BufferTableWidget: show: object " << object.name() << " buffer size " << buffer->size() << " properties " << buffer->properties().size();
     assert (table_);
+
     table_->clear();
 
-    //TODO
-//    selection_checkboxes_.clear();
+    selection_checkboxes_.clear();
 
-//    if (buffer == 0)
-//    {
-//        logwrn << "BufferTableWidget: show: no buffer";
-//        return;
-//    }
-//    if (variables == 0)
-//    {
-//        logwrn << "BufferTableWidget: show: empty variables";
-//        return;
-//    }
-//    if (buffer->getFirstWrite())
-//    {
-//        logwrn << "BufferTableWidget: show: empty buffer";
-//        return;
-//    }
+    if (buffer->firstWrite())
+    {
+        logwrn << "BufferTableWidget: show: empty buffer";
+        return;
+    }
 
-//    QFont font_italic;
-//    font_italic.setItalic(true);
+    QFont font_italic;
+    font_italic.setItalic(true);
 
-//    variables_ = variables;
+    //variables_ = variables;
 
-//    //assert (variables_->getSize() == buffer->getPropertyList()->getNumProperties());
+    //assert (variables_->getSize() == buffer->getPropertyList()->getNumProperties());
 
-//    table_->setRowCount(buffer->getSize());
-//    table_->setColumnCount(variables_->getSize()+1);
+    const PropertyList &properties = buffer->properties();
 
-//    header_list_.clear();
-//    std::vector <unsigned int> test_keys;
+    table_->setRowCount(buffer->size());
+    table_->setColumnCount(properties.size()+1);
 
-//    header_list_.append (tr("Selected"));
-//    for (unsigned int cnt=0; cnt < variables_->getSize(); cnt++)
-//    {
-//        header_list_.append(variables_->getVariable(cnt)->getName().c_str());
-//    }
-//    table_->setHorizontalHeaderLabels (header_list_);
+    header_list_.clear();
+    //std::vector <unsigned int> test_keys;
 
-//    std::vector<void*>* output_adresses;
+    header_list_.append (tr("Selected"));
+    for (unsigned int cnt=0; cnt < properties.size(); cnt++)
+    {
+        header_list_.append(properties.at(cnt).name().c_str());
+    }
+    table_->setHorizontalHeaderLabels (header_list_);
 
-//    std::map <unsigned int, QTableWidgetItem*> selected_items;
+    //std::map <unsigned int, QTableWidgetItem*> selected_items;
 //    std::string id_name;
 //    unsigned int id_index;
 
-//    type_ = buffer->getDBOType();
 //    logdbg  << "BufferTableWidget: show: buffer type " << type_;
 //    assert (DBObjectManager::getInstance().existsDBOVariable (DBO_UNDEFINED, "id"));
 //    id_name = DBObjectManager::getInstance().getDBOVariable (DBO_UNDEFINED, "id")->getFor (type_)->id_;
@@ -262,20 +258,92 @@ void BufferTableWidget::show (Buffer *buffer, DBOVariableSet *variables, bool da
 
 //    PropertyList *proplist = buffer->getPropertyList();
 
-//    bool null=false;
-//    buffer->setIndex(0);
-//    for (unsigned int row=0; row < buffer->getSize(); row++)
-//    {
+    PropertyDataType data_type;
+    bool null=false;
+    std::string value_str;
+
+    //buffer->setIndex(0);
+
+    unsigned int buffer_size = buffer->size();
+    unsigned int properties_size = properties.size();
+
+    for (unsigned int row=0; row < buffer_size; row++)
+    {
 //        if (row != 0)
 //            buffer->incrementIndex();
 
 //        output_adresses = buffer->getAdresses();
 
-//        QTableWidgetItem *newItem;
+        QTableWidgetItem *newItem;
 
-//        for (unsigned int col=0; col < variables_->getSize(); col++)
-//        {
-//            std::string value_representation;
+        for (unsigned int col=0; col < properties_size; col++)
+        {
+            data_type = properties.at(col).dataType();
+            value_str = "NULL";
+
+            if (data_type == PropertyDataType::BOOL)
+            {
+                null = buffer->getBool(properties.at(col).name()).isNone(row);
+                if (!null)
+                    value_str = buffer->getBool(properties.at(col).name()).getAsString(row);
+            }
+            else if (data_type == PropertyDataType::CHAR)
+            {
+                null = buffer->getChar(properties.at(col).name()).isNone(row);
+                if (!null)
+                    value_str = buffer->getChar(properties.at(col).name()).getAsString(row);
+            }
+            else if (data_type == PropertyDataType::UCHAR)
+            {
+                null = buffer->getUChar(properties.at(col).name()).isNone(row);
+                if (!null)
+                    value_str = buffer->getUChar(properties.at(col).name()).getAsString(row);
+            }
+            else if (data_type == PropertyDataType::INT)
+            {
+                null = buffer->getInt(properties.at(col).name()).isNone(row);
+                if (!null)
+                    value_str = buffer->getInt(properties.at(col).name()).getAsString(row);
+            }
+            else if (data_type == PropertyDataType::UINT)
+            {
+                null = buffer->getUInt(properties.at(col).name()).isNone(row);
+                if (!null)
+                    value_str = buffer->getUInt(properties.at(col).name()).getAsString(row);
+            }
+            else if (data_type == PropertyDataType::LONGINT)
+            {
+                null = buffer->getLongInt(properties.at(col).name()).isNone(row);
+                if (!null)
+                    value_str = buffer->getLongInt(properties.at(col).name()).getAsString(row);
+            }
+            else if (data_type == PropertyDataType::ULONGINT)
+            {
+                null = buffer->getULongInt(properties.at(col).name()).isNone(row);
+                if (!null)
+                    value_str = buffer->getULongInt(properties.at(col).name()).getAsString(row);
+            }
+            else if (data_type == PropertyDataType::FLOAT)
+            {
+                null = buffer->getFloat(properties.at(col).name()).isNone(row);
+                if (!null)
+                    value_str = buffer->getFloat(properties.at(col).name()).getAsString(row);
+            }
+            else if (data_type == PropertyDataType::DOUBLE)
+            {
+                null = buffer->getDouble(properties.at(col).name()).isNone(row);
+                if (!null)
+                    value_str = buffer->getDouble(properties.at(col).name()).getAsString(row);
+            }
+            else if (data_type == PropertyDataType::STRING)
+            {
+                null = buffer->getString(properties.at(col).name()).isNone(row);
+                if (!null)
+                    value_str = buffer->getString(properties.at(col).name()).getAsString(row);
+            }
+            else
+                throw std::domain_error ("BufferTableWidget: show: unknown property data type");
+
 
 //            std::string col_name = variables->getVariable(col)->id_;
 //            assert (proplist->hasProperty(col_name));
@@ -292,26 +360,26 @@ void BufferTableWidget::show (Buffer *buffer, DBOVariableSet *variables, bool da
 //                    value_representation= variables_->getVariable(col)->getRepresentationFromValue( value );
 //            }
 
-//            newItem = new QTableWidgetItem(value_representation.c_str());
-//            if (null)
-//                newItem->setBackgroundColor(Qt::lightGray);
-//            newItem->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-//            table_->setItem(row, col+1, newItem);
-//        }
+            newItem = new QTableWidgetItem(value_str.c_str());
+            if (null)
+                newItem->setBackgroundColor(Qt::lightGray);
+            newItem->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+            table_->setItem(row, col+1, newItem);
+        }
 
-//        unsigned int id = *((unsigned int*) output_adresses->at( id_index ));
+        //unsigned int id = *((unsigned int*) output_adresses->at( id_index ));
 
-//        newItem = new QTableWidgetItem();
-//        newItem->setFlags(Qt::ItemIsUserCheckable|Qt::ItemIsEnabled);
-//        newItem->setCheckState ( Qt::Unchecked );
-//        table_->setItem(row, 0, newItem);
-//        selection_checkboxes_ [newItem] = id;
+        newItem = new QTableWidgetItem();
+        newItem->setFlags(Qt::ItemIsUserCheckable|Qt::ItemIsEnabled);
+        newItem->setCheckState (Qt::Unchecked );
+        table_->setItem (row, 0, newItem);
+        //selection_checkboxes_ [newItem] = id;
 
-//        test_keys.push_back (id);
-//        assert (selected_items.find(id) == selected_items.end());
-//        selected_items [id] = newItem;
+        //test_keys.push_back (id);
+        //assert (selected_items.find(id) == selected_items.end());
+        //selected_items [id] = newItem;
 
-//    }
+    }
 
 //    ViewSelectionEntries &selection_entries = ViewSelection::getInstance().getEntries();
 //    ViewSelectionEntries::iterator it;
@@ -336,7 +404,7 @@ void BufferTableWidget::show (Buffer *buffer, DBOVariableSet *variables, bool da
 //        }
 //    }
 
-//    table_->resizeColumnsToContents();
+    table_->resizeColumnsToContents();
 
     logdbg  << " BufferTableWidget: show: end";
 }

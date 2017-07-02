@@ -231,8 +231,15 @@ void JobManager::run()
 
     while (1)
     {
+        mutex_.lock();
+
         if (jobs_.size() > 0 || db_jobs_.size() > 0)
+        {
+            mutex_.unlock();
             flushFinishedJobs ();
+        }
+        else
+            mutex_.unlock();
 
         if (stop_requested_)
             break;

@@ -59,15 +59,20 @@ void ArrayListBase::setAllNone()
 
 void ArrayListBase::setNone(size_t index)
 {
+    if (index >= size_)
+        logerr << "ArrayListBase: setNone: index " << index << " too large for size " << size_;
     assert (index < size_);
+
     (*none_flags_[index/BUFFER_ARRAY_SIZE])[index%BUFFER_ARRAY_SIZE] = true;
 }
 
 bool ArrayListBase::isNone(size_t index)
 {
+    if (index >= size_)
+        return true;
+
     assert (index < size_);
     return (*none_flags_[index/BUFFER_ARRAY_SIZE])[index%BUFFER_ARRAY_SIZE];
-
 }
 
 void ArrayListBase::allocatedNewNoneArray ()
@@ -84,6 +89,8 @@ void ArrayListBase::allocatedNewNoneArray ()
 
 void ArrayListBase::unsetNone (size_t index)
 {
-    assert (index < size_);
-    (*none_flags_[index/BUFFER_ARRAY_SIZE])[index%BUFFER_ARRAY_SIZE] = false;
+    if (index >= size_)
+        logerr << "ArrayListBase: unsetNone: index " << index << " too large for size " << size_;
+
+    assert (index < size_);    (*none_flags_[index/BUFFER_ARRAY_SIZE])[index%BUFFER_ARRAY_SIZE] = false;
 }

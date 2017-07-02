@@ -83,11 +83,6 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget( ListBoxView* view, QWidget* pa
 
     vlayout->addStretch();
 
-    QPushButton *update = new QPushButton ("Update");
-    connect( update, SIGNAL(clicked()), view_, SLOT(updateData()) );
-    vlayout->addWidget (update);
-
-
     setLayout( vlayout );
 }
 

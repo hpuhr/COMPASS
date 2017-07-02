@@ -27,6 +27,7 @@
 #include <memory>
 #include <vector>
 #include <bitset>
+#include <sstream>
 
 #include "logger.h"
 
@@ -121,7 +122,7 @@ public:
     }
 
     /// @brief Returns string representation of a specific value
-    const std::string &getAsString (size_t index)
+    const std::string getAsString (size_t index)
     {
         if (index > size_)
             throw std::out_of_range ("ArrayListTemplate: get out of index");
@@ -129,7 +130,10 @@ public:
         if (isNone(index))
             throw std::out_of_range ("ArrayListTemplate: get of None value");
 
-        return std::string (data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE));
+        std::stringstream ss;
+        ss << data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
+
+        return ss.str();
     }
 
     /// @brief Sets specific value

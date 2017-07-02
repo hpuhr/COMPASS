@@ -36,7 +36,7 @@ public slots:
 
 signals:
     /// @brief Emitted when resulting buffer was delivered
-    void updateData (unsigned int dbo_type, Buffer *buffer);
+    void updateData (DBObject &object, std::shared_ptr<Buffer> buffer);
 
 public:
     /// @brief Constructor
@@ -56,15 +56,15 @@ public:
     /// @brief Returns use filter flag
     bool getUseFilters () { return use_filters_; }
 
-    /// @brief sets limit minimum
-    void setLimitMin (unsigned int min) { limit_min_ = min; }
-    /// @brief Returns limit minimum
-    unsigned int getLimitMin () { return limit_min_; }
+//    /// @brief sets limit minimum
+//    void setLimitMin (unsigned int min) { limit_min_ = min; }
+//    /// @brief Returns limit minimum
+//    unsigned int getLimitMin () { return limit_min_; }
 
-    /// @brief Sets limit maximum
-    void setLimitMax (unsigned int max) { limit_max_ = max; }
-    /// @brief Return limit maximum
-    unsigned int getLimitMax () { return limit_max_; }
+//    /// @brief Sets limit maximum
+//    void setLimitMax (unsigned int max) { limit_max_ = max; }
+//    /// @brief Return limit maximum
+//    unsigned int getLimitMax () { return limit_max_; }
 
     /// @brief Sets use selection flag
     void setUseSelection (bool use_selection) { use_selection_=use_selection; }
@@ -92,12 +92,12 @@ public:
     bool getOrderAscending () { return order_ascending_; }
 
     /// @brief Creates asynchronous read jobs for all DBObjects
-    void updateData ();
+    //void updateData ();
 
     /// @brief Callback function for correctly finished read jobs
-    void readInfoDone (Job *job);
+    //void readInfoDone (Job *job);
     /// @brief Callback function for interrupted read jobs
-    void readInfoObsolete (Job *job);
+    //void readInfoObsolete (Job *job);
 
     /// @brief Returns database view flag
     bool getDatabaseView () { return database_view_; }
@@ -110,9 +110,9 @@ protected:
     /// Use filters flag
     bool use_filters_;
     /// Limit minimum
-    unsigned int limit_min_;
+    //unsigned int limit_min_;
     /// Limit maximum
-    unsigned int limit_max_;
+    //unsigned int limit_max_;
     /// Use selection flag
     bool use_selection_;
     /// Use order flag
