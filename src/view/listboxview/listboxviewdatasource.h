@@ -35,6 +35,7 @@ public slots:
     void loadingDoneSlot (DBObject &object);
 
 signals:
+    void loadingStartedSignal ();
     /// @brief Emitted when resulting buffer was delivered
     void updateData (DBObject &object, std::shared_ptr<Buffer> buffer);
 

@@ -16,8 +16,9 @@
 #include "propertylist.h"
 
 
-class QTableWidget;
-class QTableWidgetItem;
+class QTableView;
+//class QTableWidgetItem;
+class BufferTableModel;
 class QStringList;
 class Buffer;
 class DBOVariableSet;
@@ -39,29 +40,32 @@ class BufferTableWidget : public QWidget
     Q_OBJECT
 public slots:
     /// @brief Is called when table item is clicked, un/checks selection checkboxes
-    void itemChanged (QTableWidgetItem *item);
+    //void itemChanged (QTableWidgetItem *item);
 
 public:
     /// @brief Constructor
-    BufferTableWidget(QWidget * parent = 0, Qt::WindowFlags f = 0);
+    BufferTableWidget(DBObject &object, QWidget * parent = 0, Qt::WindowFlags f = 0);
     /// @brief Destructor
     virtual ~BufferTableWidget();
 
+
+    void clear ();
     /// @brief Shows Buffer content in table
-    void show (DBObject &object, std::shared_ptr<Buffer> buffer); //, DBOVariableSet *variables, bool database_view
+    void show (std::shared_ptr<Buffer> buffer); //, DBOVariableSet *variables, bool database_view
 
 protected:
+    DBObject &object_;
     /// Table with items
-    QTableWidget *table_;
+    QTableView *table_;
+    BufferTableModel *model_;
+
     /// Variable read lost
     DBOVariableSet *variables_;
     /// Table header list
     QStringList header_list_;
-    /// DBObject type
-    //DB_OBJECT_TYPE type_;
 
     /// Container with selection checkboxes
-    std::map <QTableWidgetItem*, unsigned int> selection_checkboxes_;
+    //std::map <QTableWidgetItem*, unsigned int> selection_checkboxes_;
 
     /// @brief Is called when keys are pressed
     virtual void keyPressEvent (QKeyEvent * event);

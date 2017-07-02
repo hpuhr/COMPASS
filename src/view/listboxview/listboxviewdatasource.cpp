@@ -194,6 +194,7 @@ void ListBoxViewDataSource::checkSubConfigurables ()
 void ListBoxViewDataSource::loadingStartedSlot ()
 {
     loginf << "ListBoxViewDataSource: loadingStartedSlot";
+    emit loadingStartedSignal ();
 }
 
 void ListBoxViewDataSource::newDataSlot (DBObject &object)

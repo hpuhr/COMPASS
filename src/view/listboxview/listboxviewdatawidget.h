@@ -28,6 +28,7 @@ class ListBoxViewDataWidget : public QWidget
 {
     Q_OBJECT
 public slots:
+    void loadingStartedSlot();
     /// @brief Called when new result Buffer was delivered
     void updateData (DBObject &object, std::shared_ptr<Buffer> buffer);
 

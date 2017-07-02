@@ -31,7 +31,7 @@ ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxViewDataSource *data_source,
     {
         if (object.second->hasData())
         {
-            BufferTableWidget *buffer_table = new BufferTableWidget ();
+            BufferTableWidget *buffer_table = new BufferTableWidget (*object.second);
             tab_widget_->addTab (buffer_table , object.first.c_str());
             buffer_tables_[object.first] = buffer_table;
         }
@@ -60,11 +60,17 @@ void ListBoxViewDataWidget::clearTables ()
     logdbg  << "ListBoxViewDataWidget: updateTables: end";
 }
 
+void ListBoxViewDataWidget::loadingStartedSlot()
+{
+    for (auto buffer_table : buffer_tables_)
+        buffer_table.second->clear();
+}
+
 void ListBoxViewDataWidget::updateData (DBObject &object, std::shared_ptr<Buffer> buffer)
 {
     logdbg  << "ListBoxViewDataWidget: updateTables: start";
     assert (buffer_tables_.count (object.name()) > 0);
-    buffer_tables_.at(object.name())->show(object, buffer); //, data_source_->getSet()->getFor(type), data_source_->getDatabaseView()
+    buffer_tables_.at(object.name())->show(buffer); //, data_source_->getSet()->getFor(type), data_source_->getDatabaseView()
 
     logdbg  << "ListBoxViewDataWidget: updateTables: end";
 }

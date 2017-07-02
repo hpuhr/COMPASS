@@ -1,18 +1,1 @@
-<Configuration class_id="ATSDB" instance_id="ATSDB0">
-    <Configuration class_id="DBInterface" instance_id="DBInterface0">
-        <ParameterUnsignedInt read_chunk_size="20000"/>
-        <Configuration class_id="MySQLppConnection" instance_id="MySQL++ Connection">
-            <ParameterString used_server="Localhost"/>
-            <Configuration class_id="MySQLServer" instance_id="Localhost">
-                <ParameterUnsignedInt port="3306"/>
-                <ParameterString database="job_awam_0023"/>
-                <ParameterString host="localhost"/>
-                <ParameterString password="sassc"/>
-                <ParameterString user="sassc"/>
-            </Configuration>
-        </Configuration>
-    </Configuration>
-    <SubConfigurationFile class_id="DBObjectManager" instance_id="DBObjectManager0" path="conf/config_dbo.xml"/>
-    <SubConfigurationFile class_id="DBSchemaManager" instance_id="DBSchemaManager0" path="conf/config_db_schema.xml"/>
-    <SubConfigurationFile class_id="ViewManager" instance_id="ViewManager0" path="conf/config_views.xml"/>
-</Configuration>
+<Configuration class_id="ATSDB" instance_id="ATSDB0"/>

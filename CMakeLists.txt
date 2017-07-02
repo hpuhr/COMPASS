@@ -259,6 +259,7 @@ set ( atsdb_HDRS
 #    src/view/viewbase/dbviewmodel.h
 #    src/view/viewbase/dbview.h
 #    src/view/viewbase/dbviewwidget.h
+    src/view/listboxview/buffertablemodel.h
     src/view/listboxview/buffertablewidget.h
     src/view/listboxview/listboxviewdatasource.h
     src/view/listboxview/listboxview.h
@@ -414,6 +415,7 @@ set ( atsdb_SRCS
     src/view/viewbase/viewmodel.cpp
     src/view/viewbase/viewsettings.cpp
     src/view/viewbase/viewselection.cpp
+    src/view/listboxview/buffertablemodel.cpp
     src/view/listboxview/buffertablewidget.cpp
     src/view/listboxview/listboxview.cpp
     src/view/listboxview/listboxviewdatasource.cpp
