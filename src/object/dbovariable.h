@@ -121,22 +121,6 @@ public:
   /// @brief Desctructor
   virtual ~DBOVariable();
 
-//  /// @brief Return if variable exist in DBO of type
-//  bool existsIn (const std::string &dbo_type);
-//  /// @brief Returns variable existing in DBO of type
-//  DBOVariable *getFor (const std::string &dbo_type);
-//  /// @brief Returns first available variable
-//  DBOVariable *getFirst ();
-//  /// @brief Return variable identifier in DBO of type
-//  std::string getNameFor (const std::string &dbo_type);
-//  /// @brief Returns flag indicating if variable is meta variable
-//  bool isMetaVariable ();
-
-//  /// @brief Returns container with sub variable names, dbo type -> sub variable name
-//  const std::map <std::string, std::string> &getSubVariables () { return sub_variables_; }
-//  /// @brief Sets sub-variable name for DBO of type
-//  void setSubVariable (const std::string &type, std::string name);
-
   /// @brief Comparison operator
   bool operator==(const DBOVariable &var);
 
@@ -172,11 +156,6 @@ public:
   PropertyDataType dataType () { return data_type_;}
   /// @brief Sets variable data type
   void dataType (PropertyDataType type) { data_type_=type; }
-
-  /// @brief Returns DBO type
-  //const std::string &getDBOType () const { return dbo_type_; }
-//  /// @brief Returns DBO type string identifier
-//  std::string getDBOTypeString () { return DB_OBJECT_TYPE_STRINGS.at((DB_OBJECT_TYPE)dbo_type_int_);}
 
   /// @brief Returns of schema is present in schema_variables_
   bool hasSchema (const std::string &schema);
@@ -233,8 +212,6 @@ public:
 protected:
   /// DBO parent
   DBObject &dbo_parent_;
-  /// DBO type
-  //std::string dbo_type_;
   /// Value representation type, based on enum STRING_REPRESENTATION
   unsigned int representation_int_;
   /// Description
@@ -255,26 +232,12 @@ protected:
   /// Unit unit such as seconds
   std::string unit_unit_;
 
-//  /// Container of sub-variable definitions, for meta variables
-//  std::vector<DBOVariableDefinition *> sub_variable_definitions_;
-//  /// Container for sub variables (DBO type -> variable identifier), for meta variables
-//  std::map <std::string, std::string> sub_variables_;
-
   /// Container with schema identified->schema-variable definitions
   std::map <std::string, DBOSchemaVariableDefinition*> schema_variables_;
-  /// Container with schema, meta table, variable mappings (schema identifier -> (meta table identifier, variable identifier))
-  //std::map <std::string, std::pair <std::string, std::string> > schema_variables_;
-
-  /// Flag indicating if this meta-variable has registered itself to its sub-variables
-  //bool registered_as_parent_;
 
   DBOVariableWidget *widget_;
 
   virtual void checkSubConfigurables ();
-  /// @brief Registers a parent variable
-//  void registerParentVariable (DBOVariable *parent);
-//  /// @brief Unregisters a parent variable
-//  void unregisterParentVariable (DBOVariable *parent);
   /// @brief Notifies minimum/maximum information observers
   void notifyMinMaxObservers ();
 };

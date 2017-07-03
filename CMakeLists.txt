@@ -172,6 +172,7 @@ set ( atsdb_HDRS
     src/object/dbovariable.h
     src/object/dbovariableset.h
     src/object/dbovariableorderedset.h
+    src/object/metadbovariable.h
     src/object/dbobject.h
     src/object/dbobjectwidget.h
     src/object/dbobjectinfowidget.h
@@ -348,6 +349,7 @@ set ( atsdb_SRCS
     src/object/dbovariablewidget.cpp
     src/object/dbovariableset.cpp
     src/object/dbovariableorderedset.cpp
+    src/object/metadbovariable.cpp
     #        src/polygon/polygon4ddi.cpp
     #        src/polygon/geographicpoint.cpp
     #        src/polygon/airspacesector.cpp
