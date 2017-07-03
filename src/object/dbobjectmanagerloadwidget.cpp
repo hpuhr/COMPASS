@@ -25,7 +25,7 @@
 #include "dbovariable.h"
 #include "dbobject.h"
 #include "dbobjectinfowidget.h"
-#include "dbobjectmanagerinfowidget.h"
+#include "dbobjectmanagerloadwidget.h"
 #include "dbobjectmanager.h"
 #include "atsdb.h"
 #include "global.h"
@@ -33,7 +33,7 @@
 
 using Utils::String;
 
-DBObjectManagerInfoWidget::DBObjectManagerInfoWidget(DBObjectManager &object_manager)
+DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager &object_manager)
     : object_manager_(object_manager), info_layout_(nullptr), limit_check_(nullptr), limit_min_edit_ (nullptr), limit_max_edit_(nullptr), load_all_button_(nullptr)
 {
     unsigned int frame_width = FRAME_SIZE;
@@ -93,11 +93,11 @@ DBObjectManagerInfoWidget::DBObjectManagerInfoWidget(DBObjectManager &object_man
     setLayout (main_layout);
 }
 
-DBObjectManagerInfoWidget::~DBObjectManagerInfoWidget()
+DBObjectManagerLoadWidget::~DBObjectManagerLoadWidget()
 {
 }
 
-void DBObjectManagerInfoWidget::toggleUseLimit()
+void DBObjectManagerLoadWidget::toggleUseLimit()
 {
     assert (limit_check_);
     assert (limit_min_edit_);
@@ -112,7 +112,7 @@ void DBObjectManagerInfoWidget::toggleUseLimit()
 }
 
 
-void DBObjectManagerInfoWidget::limitMinChanged()
+void DBObjectManagerLoadWidget::limitMinChanged()
 {
   assert (limit_min_edit_);
 
@@ -122,7 +122,7 @@ void DBObjectManagerInfoWidget::limitMinChanged()
   unsigned int min = String::intFromString (limit_min_edit_->text().toStdString());
   object_manager_.limitMin(min);
 }
-void DBObjectManagerInfoWidget::limitMaxChanged()
+void DBObjectManagerLoadWidget::limitMaxChanged()
 {
   assert (limit_max_edit_);
 
@@ -133,12 +133,12 @@ void DBObjectManagerInfoWidget::limitMaxChanged()
   object_manager_.limitMax(max);
 }
 
-void DBObjectManagerInfoWidget::loadAllSlot ()
+void DBObjectManagerLoadWidget::loadAllSlot ()
 {
     object_manager_.loadSlot();
 }
 
-void DBObjectManagerInfoWidget::updateSlot ()
+void DBObjectManagerLoadWidget::updateSlot ()
 {
     QLayoutItem* item;
     while ((item = info_layout_->takeAt(0)) != nullptr)

@@ -31,7 +31,7 @@
 class QLabel;
 class QCheckBox;
 class QPushButton;
-class QVBoxLayout;
+class QGridLayout;
 
 class DBObject;
 
@@ -56,11 +56,10 @@ private:
     /// @brief DBObject to be managed
     DBObject &object_;
 
-    QVBoxLayout *main_layout_;
+    QGridLayout *main_layout_;
     QCheckBox *main_check_;
 
     QLabel *status_label_;
-    QLabel *total_count_label_;
     QLabel *loaded_count_label_;
 };
 

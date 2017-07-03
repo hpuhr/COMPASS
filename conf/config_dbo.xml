@@ -1,5 +1,5 @@
 <Configuration class_id="DBObjectManager" instance_id="DBObjectManager0">
-    <ParameterBool use_limit="1"/>
+    <ParameterBool use_limit="0"/>
     <ParameterUnsignedInt limit_max="100000"/>
     <ParameterUnsignedInt limit_min="0"/>
     <Configuration class_id="DBObject" instance_id="DBObjectADSB0">

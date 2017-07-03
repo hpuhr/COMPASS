@@ -15,7 +15,7 @@
 #include "dbinterface.h"
 #include "dbinterfaceinfowidget.h"
 #include "dbobjectmanager.h"
-#include "dbobjectmanagerinfowidget.h"
+#include "dbobjectmanagerloadwidget.h"
 #include "dbobject.h"
 //#include "FilterConfigWidget.h"
 //#include "DBInfoWidget.h"
@@ -44,7 +44,7 @@ ManagementWidget::ManagementWidget() : QWidget ()
     interface_widget->setLineWidth(frame_width);
     left_layout->addWidget (interface_widget);
 
-    DBObjectManagerInfoWidget *objman_widget = ATSDB::instance().objectManager().infoWidget();
+    DBObjectManagerLoadWidget *objman_widget = ATSDB::instance().objectManager().loadWidget();
     objman_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
     objman_widget->setLineWidth(frame_width);
     left_layout->addWidget (objman_widget);

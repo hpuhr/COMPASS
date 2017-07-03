@@ -33,12 +33,12 @@
 
 
 DBObjectInfoWidget::DBObjectInfoWidget(DBObject &object, QWidget *parent, Qt::WindowFlags f)
-    : QWidget (parent, f), object_(object), main_layout_(nullptr), main_check_(nullptr), status_label_(nullptr), total_count_label_(nullptr), loaded_count_label_(nullptr)
+    : QWidget (parent, f), object_(object), main_layout_(nullptr), main_check_(nullptr), status_label_(nullptr), loaded_count_label_(nullptr)
 {
     QFont font_bold;
     font_bold.setBold(true);
 
-    main_layout_ = new QVBoxLayout ();
+    main_layout_ = new QGridLayout ();
 
     main_check_ = new QCheckBox (object.name().c_str());
     connect (main_check_, SIGNAL(toggled(bool)), this, SLOT(loadChangedSlot()));
@@ -73,43 +73,29 @@ void DBObjectInfoWidget::updateSlot()
         return;
     }
 
-    if (!total_count_label_)
+    if (!status_label_)
     {
         assert (main_layout_);
         assert (!loaded_count_label_);
 
-        QGridLayout *grid = new QGridLayout ();
+        status_label_ = new QLabel (object_.status().c_str());
+        status_label_->setAlignment(Qt::AlignRight);
+        main_layout_->addWidget(status_label_, 0, 1);
 
-        grid->addWidget(new QLabel ("Total"), 0, 0);
-
-        total_count_label_ = new QLabel ("?");
-        total_count_label_->setAlignment(Qt::AlignRight);
-        grid->addWidget(total_count_label_, 0, 1);
-
-
-        grid->addWidget(new QLabel ("Loaded"), 1, 0);
+        main_layout_->addWidget(new QLabel ("Loaded"), 1, 0);
 
         loaded_count_label_ = new QLabel ("?");
         loaded_count_label_->setAlignment(Qt::AlignRight);
-        grid->addWidget(loaded_count_label_, 1, 1);
-
-        grid->addWidget(new QLabel ("Status"), 2, 0);
-
-        status_label_ = new QLabel (object_.status().c_str());
-        status_label_->setAlignment(Qt::AlignRight);
-        grid->addWidget(status_label_, 2, 1);
-        main_layout_->addLayout (grid);
+        main_layout_->addWidget(loaded_count_label_, 1, 1);
 
         object_.loadingWanted(true);
     }
 
     assert (main_check_);
-    assert (total_count_label_);
     assert (loaded_count_label_);
 
     main_check_->setEnabled(object_.hasData());
     main_check_->setChecked(object_.loadingWanted());
-    total_count_label_->setText(QString::number(object_.count()));
-    loaded_count_label_->setText(QString::number(object_.loadedCount()));
     status_label_->setText(object_.status().c_str());
+    loaded_count_label_->setText(QString::number(object_.loadedCount())+" / "+QString::number(object_.count()));
 }

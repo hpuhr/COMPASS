@@ -32,7 +32,7 @@ class QLineEdit;
 /**
  * @brief Shows all DBObjects, allows editing and adding new ones
  */
-class DBObjectManagerInfoWidget : public QFrame
+class DBObjectManagerLoadWidget : public QFrame
 {
     Q_OBJECT
 
@@ -50,9 +50,9 @@ public slots:
 
 public:
     /// @brief Constructor
-    DBObjectManagerInfoWidget(DBObjectManager &object_manager);
+    DBObjectManagerLoadWidget(DBObjectManager &object_manager);
     /// @brief Destructor
-    virtual ~DBObjectManagerInfoWidget();
+    virtual ~DBObjectManagerLoadWidget();
 
 private:
     DBObjectManager &object_manager_;

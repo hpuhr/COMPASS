@@ -30,7 +30,7 @@
 #include "dbobjectmanager.h"
 #include "logger.h"
 #include "dbobjectmanagerwidget.h"
-#include "dbobjectmanagerinfowidget.h"
+#include "dbobjectmanagerloadwidget.h"
 //#include "structureDescriptionManager.h"
 #include "stringconv.h"
 
@@ -40,7 +40,7 @@ using Utils::String;
  * Creates sub-configurables.
  */
 DBObjectManager::DBObjectManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb)
-: Configurable (class_id, instance_id, atsdb, "conf/config_dbo.xml"), widget_(nullptr), info_widget_(nullptr) //, registered_parent_variables_ (false)
+: Configurable (class_id, instance_id, atsdb, "conf/config_dbo.xml"), widget_(nullptr), load_widget_(nullptr) //, registered_parent_variables_ (false)
 {
     logdbg  << "DBObjectManager: constructor: creating subconfigurables";
 
@@ -77,10 +77,10 @@ DBObjectManager::~DBObjectManager()
         delete widget_;
         widget_ = nullptr;
     }
-    if (info_widget_)
+    if (load_widget_)
     {
-        delete info_widget_;
-        info_widget_ = nullptr;
+        delete load_widget_;
+        load_widget_ = nullptr;
     }
 }
 
@@ -203,15 +203,15 @@ DBObjectManagerWidget *DBObjectManager::widget()
     return widget_;
 }
 
-DBObjectManagerInfoWidget *DBObjectManager::infoWidget()
+DBObjectManagerLoadWidget *DBObjectManager::loadWidget()
 {
-    if (!info_widget_)
+    if (!load_widget_)
     {
-        info_widget_ = new DBObjectManagerInfoWidget (*this);
+        load_widget_ = new DBObjectManagerLoadWidget (*this);
     }
 
-    assert (info_widget_);
-    return info_widget_;
+    assert (load_widget_);
+    return load_widget_;
 }
 
 bool DBObjectManager::useLimit() const

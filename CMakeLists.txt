@@ -178,7 +178,7 @@ set ( atsdb_HDRS
     src/object/dbovariablewidget.h
     src/object/dbobjectmanager.h
     src/object/dbobjectmanagerwidget.h
-    src/object/dbobjectmanagerinfowidget.h
+    src/object/dbobjectmanagerloadwidget.h
     src/object/dbovariabledatatypecombobox.h
     #        src/object/dbovariablecombobox.h
     #        src/object/dbovariablesetwidget.h
@@ -343,7 +343,7 @@ set ( atsdb_SRCS
     src/object/dbobjectinfowidget.cpp
     src/object/dbobjectmanager.cpp
     src/object/dbobjectmanagerwidget.cpp
-    src/object/dbobjectmanagerinfowidget.cpp
+    src/object/dbobjectmanagerloadwidget.cpp
     src/object/dbovariable.cpp
     src/object/dbovariablewidget.cpp
     src/object/dbovariableset.cpp

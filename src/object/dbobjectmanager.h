@@ -35,7 +35,7 @@
 class ATSDB;
 class DBObject;
 class DBObjectManagerWidget;
-class DBObjectManagerInfoWidget;
+class DBObjectManagerLoadWidget;
 class DBOVariable;
 class DBOVariableSet;
 class DBSchemaManager;
@@ -88,7 +88,7 @@ public:
     virtual ~DBObjectManager();
 
     DBObjectManagerWidget *widget();
-    DBObjectManagerInfoWidget *infoWidget();
+    DBObjectManagerLoadWidget *loadWidget();
 
     bool useLimit() const;
     void useLimit(bool useLimit);
@@ -109,7 +109,7 @@ protected:
     //bool registered_parent_variables_;
 
     DBObjectManagerWidget *widget_;
-    DBObjectManagerInfoWidget *info_widget_;
+    DBObjectManagerLoadWidget *load_widget_;
 
     virtual void checkSubConfigurables ();
 
