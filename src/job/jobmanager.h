@@ -87,16 +87,16 @@ protected:
     volatile bool stop_requested_;
 
     boost::mutex mutex_;
-    unsigned int num_workers_;
+    //unsigned int num_workers_;
 
     unsigned int update_time_;
 
     std::list <std::shared_ptr<Job>> jobs_;
-    std::list <std::shared_ptr<Job>> db_jobs_;
+
+    std::shared_ptr<Job> active_db_job_;
+    std::list <std::shared_ptr<Job>> queued_db_jobs_;
 
     JobManagerWidget *widget_;
-
-    void flushFinishedJobs ();
 
 private:
     void run ();
