@@ -60,7 +60,7 @@ DBOVariable::DBOVariable(const std::string &class_id, const std::string &instanc
     assert (name_.size() > 0);
     assert (data_type_str_.size() > 0);
 
-    boost::algorithm::to_lower(name_);
+    //boost::algorithm::to_lower(name_);
 
     data_type_ = Property::asDataType(data_type_str_);
 

@@ -134,7 +134,6 @@ set ( atsdb_HDRS
     #        src/filter/dbfilter.h
     #        src/filter/sensorfilter.h
     #        src/filter/filtermanager.h
-
     #        src/filter/dbfiltercondition.h
     #        src/filter/dbfilterwidget.h
     #        src/filter/filtereditwidget.h
