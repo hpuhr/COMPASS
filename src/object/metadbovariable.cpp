@@ -1,14 +1,23 @@
 #include "metadbovariable.h"
+#include "dbovariable.h"
+#include "dbobject.h"
 
 MetaDBOVariable::MetaDBOVariable(const std::string &class_id, const std::string &instance_id, DBObjectManager *object_manager)
     :Configurable (class_id, instance_id, object_manager), object_manager_(*object_manager)
 {
+    registerParameter("name", &name_, "");
 
+    assert (name_.size() > 0);
+
+    createSubConfigurables();
 }
 
 MetaDBOVariable::~MetaDBOVariable ()
 {
-
+    for (auto it : definitions_)
+        delete it.second;
+    definitions_.clear();
+    variables_.clear();
 }
 
 void MetaDBOVariable::checkSubConfigurables ()
@@ -18,118 +27,72 @@ void MetaDBOVariable::checkSubConfigurables ()
 
 void MetaDBOVariable::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
-//    if (class_id.compare("DBOVariableDefinition") == 0)
-//    {
-//        DBOVariableDefinition *definition = new DBOVariableDefinition (class_id, instance_id, this);
-//        sub_variable_definitions_.push_back (definition);
+    if (class_id.compare("DBOVariableDefinition") == 0)
+    {
+        DBOVariableDefinition *definition = new DBOVariableDefinition (class_id, instance_id, this);
 
-//        const std::string &dbo_type = definition->getDBOType();
-//        std::string name = definition->getId();
+        const std::string &dbo_name = definition->dboName();
+        std::string dbovar_name = definition->variableName();
 
-//        assert (sub_variables_.find(dbo_type) == sub_variables_.end());
-//        sub_variables_[dbo_type] = name;
-//    }
-//    else
+        assert (object_manager_.exists(dbo_name));
+        assert (object_manager_.object(dbo_name).hasVariable(dbovar_name));
+        assert (variables_.find(dbo_name) == variables_.end());
+
+        definitions_[dbo_name] = definition;
+        variables_.insert(std::pair<std::string, DBOVariable&> (dbo_name, object_manager_.object(dbo_name).variable(dbovar_name)));
+    }
+    else
         throw std::runtime_error ("DBOVariable: generateSubConfigurable: unknown class_id "+class_id);
 }
 
-//bool DBOVariable::existsIn (const std::string &dbo_type)
-//{
-//    bool ret = (dbo_type_ == dbo_type);
+bool MetaDBOVariable::existsIn (const std::string &dbo_name)
+{
+    return variables_.count(dbo_name) > 0;
+}
 
-//    if (!ret && sub_variables_.find(dbo_type) != sub_variables_.end() && sub_variables_[dbo_type].size() != 0)
-//    {
-//        DBOVariable *variable = DBObjectManager::getInstance().getDBOVariable (dbo_type, sub_variables_[dbo_type]);
-//        ret |= variable->existsIn(dbo_type);
-//    }
+DBOVariable &MetaDBOVariable::getFor (const std::string &dbo_name)
+{
+    assert (existsIn(dbo_name));
+    return variables_.at(dbo_name);
+}
 
-//    return ret;
-//}
+std::string MetaDBOVariable::getNameFor (const std::string &dbo_name)
+{
+    assert (existsIn (dbo_type));
+    return variables_.at(dbo_name).name();
+}
 
-//DBOVariable *DBOVariable::getFor (const std::string &dbo_type)
-//{
-//    //assert (dbo_type != DBO_UNDEFINED);
+void MetaDBOVariable::removeVariable (const std::string &dbo_name)
+{
+    assert (existsIn (dbo_type));
+    delete definitions_.at(dbo_name);
+    definitions_.erase(dbo_name);
+    variables_.erase(dbo_name);
+}
 
-//    if (!isMetaVariable())
-//    {
-//        assert (existsIn (dbo_type));
-//        return this;
-//    }
-//    else
-//    {
-//        if (dbo_type == dbo_type_)
-//            return this;
+void MetaDBOVariable::addVariable (const std::string &dbo_name, const std::string &dbovariable_name)
+{
+    logdbg  << "MetaDBOVariable: addVariable: dbo " << dbo_name << " varname " << dbovariable_name;
 
-//        if (sub_variables_.find(dbo_type) != sub_variables_.end())
-//        {
-//            DBOVariable *var = DBObjectManager::getInstance().getDBOVariable (dbo_type, sub_variables_[dbo_type]);
-//            assert (!var->isMetaVariable());
-//            return var;
-//        }
+    assert (!existsIn(dbo_name));
 
-//        throw std::runtime_error ("DBOVariable: getFor: id '"+id_+"' type "+dbo_type_+": impossible for type "+dbo_type);
-//    }
-//}
+    std::string instance_id = "DBOVariableDefinition"+dbo_name+dbovariable_name+"0";
 
-//DBOVariable *DBOVariable::getFirst ()
-//{
-//    if (!isMetaVariable())
-//    {
-//        return this;
-//    }
-//    else
-//    {
-//        if (sub_variables_.size() == 0)
-//            throw std::runtime_error ("DBOVariable: getFirst: no sub variables");
+    Configuration &config = addNewSubConfiguration ("DBOVariableDefinition", instance_id);
+    config.addParameterString ("dbo_name", dbo_name);
+    config.addParameterString ("dbo_variable_name", dbovariable_name);
+    generateSubConfigurable ("DBOVariableDefinition", instance_id);
+}
 
-//        return DBObjectManager::getInstance().getDBOVariable (sub_variables_.begin()->first, sub_variables_.begin()->second);
-//    }
-//}
+std::string MetaDBOVariable::name() const
+{
+    return name_;
+}
 
-
-//std::string DBOVariable::getNameFor (const std::string &dbo_type)
-//{
-//    assert (existsIn (dbo_type));
-//    return sub_variables_[dbo_type];
-//}
-
-//void DBOVariable::setSubVariable (const std::string &dbo_type, std::string name)
-//{
-//    logdbg  << "DBOVariable: changed: type " << dbo_type << " varname " << name;
-
-//    bool set=false;
-//    if (sub_variables_.find(dbo_type) != sub_variables_.end())
-//    {
-//        logdbg  << "DBOVariable: changed: sub variable should exist";
-//        std::vector<DBOVariableDefinition *>::iterator it;
-//        for (it = sub_variable_definitions_.begin(); it != sub_variable_definitions_.end(); it++)
-//        {
-//            if ((*it)->getDBOType() == dbo_type)
-//            {
-//                (*it)->setId (name);
-//                set=true;
-//                break;
-//            }
-//            else
-//            {
-//                logwrn  << "DBOVariable: changed: not exists at id " << (*it)->getId() <<  " type " << (*it)->getDBOType();
-//            }
-//        }
-//        if (!set)
-//            throw std::runtime_error ("DBOVariable: setSubVariable: not found though exists, type "+dbo_type+" name "+name);
-//    }
-//    else
-//    {
-//        std::string instance_id = "DBOVariableDefinition"+dbo_type+id_+name+"0";
-
-//        logdbg  << "DBOVariable: setSubVariable: generating subvar type " << dbo_type << " name " << name << " instance " << instance_id;
-
-//        Configuration &config = addNewSubConfiguration ("DBOVariableDefinition", instance_id);
-//        config.addParameterString ("dbo_type", dbo_type);
-//        config.addParameterString ("id", name);
-//        generateSubConfigurable ("DBOVariableDefinition", instance_id);
-//    }
-//}
+void MetaDBOVariable::name(const std::string &name)
+{
+    name_ = name;
+}
 
 /**
  * Bit of a hack, only to be called on meta variables. Basically, only for normal (= non-meta) variables the

@@ -26,6 +26,7 @@
 #include "configurationmanager.h"
 #include "dbobject.h"
 #include "dbovariable.h"
+#include "metadbovariable.h"
 #include "dbovariableset.h"
 #include "dbobjectmanager.h"
 #include "logger.h"
@@ -66,17 +67,20 @@ DBObjectManager::~DBObjectManager()
 
 //        registered_parent_variables_=false;
 //    }
-    for (auto it = objects_.begin(); it != objects_.end(); it++)
-    {
-        delete it->second;
-    }
+    for (auto it : objects_)
+        delete it.second;
     objects_.clear();
+
+    for (auto it : meta_variables_)
+        delete it.second;
+    meta_variables_.clear();
 
     if (widget_)
     {
         delete widget_;
         widget_ = nullptr;
     }
+
     if (load_widget_)
     {
         delete load_widget_;
@@ -100,6 +104,13 @@ void DBObjectManager::generateSubConfigurable (const std::string &class_id, cons
         connect (this, SIGNAL(databaseOpenedSignal()), object, SLOT(databaseOpenedSlot()));
         // TODO what if generation after db opening?
     }
+    else if (class_id.compare ("MetaDBOVariable") == 0)
+    {
+        MetaDBOVariable *meta_var = new MetaDBOVariable (class_id, instance_id, this);
+        loginf  << "DBObjectManager: generateSubConfigurable: adding meta var type " << meta_var->name();
+        assert (meta_variables_.find(meta_var->name()) == meta_variables_.end());
+        meta_variables_.insert(std::pair <std::string, MetaDBOVariable*> (meta_var->name(), meta_var));
+    }
     else
         throw std::runtime_error ("DBObjectManager: generateSubConfigurable: unknown class_id "+class_id );
 }
@@ -109,7 +120,7 @@ void DBObjectManager::checkSubConfigurables ()
     // nothing to do, must be defined in configuration
 }
 
-bool DBObjectManager::exists (const std::string &dbo_name)
+bool DBObjectManager::existsObject (const std::string &dbo_name)
 {
     //registerParentVariablesIfRequired();
 
@@ -118,7 +129,7 @@ bool DBObjectManager::exists (const std::string &dbo_name)
 
 DBObject &DBObjectManager::object (const std::string &dbo_name)
 {
-    logdbg  << "DBObjectManager: get: name " << dbo_name;
+    logdbg  << "DBObjectManager: object: name " << dbo_name;
 
     //registerParentVariablesIfRequired();
 
@@ -127,15 +138,38 @@ DBObject &DBObjectManager::object (const std::string &dbo_name)
     return *objects_.at(dbo_name);
 }
 
-void DBObjectManager::remove (const std::string &dbo_name)
+void DBObjectManager::deleteObject (const std::string &dbo_name)
 {
-    logdbg  << "DBObjectManager: del: name " << dbo_name;
-    assert (exists(dbo_name));
+    logdbg  << "DBObjectManager: deleteObject: name " << dbo_name;
+    assert (existsObject(dbo_name));
     delete objects_.at(dbo_name);
     objects_.erase(dbo_name);
 
     emit dbObjectsChangedSignal();
 }
+
+bool DBObjectManager::existsMetaVariable (const std::string &var_name)
+{
+    return (meta_variables_.find(var_name) != meta_variables_.end());
+}
+
+MetaDBOVariable &DBObjectManager::metaVariable (const std::string &var_name)
+{
+    logdbg  << "DBObjectManager: metaVariable: name " << var_name;
+
+    assert (meta_variables_.find(var_name) != meta_variables_.end());
+
+    return *meta_variables_.at(var_name);
+}
+
+void DBObjectManager::deleteMetaVariable (const std::string &var_name)
+{
+    logdbg  << "DBObjectManager: deleteMetaVariable: name " << var_name;
+    assert (existsMetaVariable(var_name));
+    delete meta_variables_.at(var_name);
+    meta_variables_.erase(var_name);
+}
+
 
 /**
  * Checks if variable exists, returns it if found.

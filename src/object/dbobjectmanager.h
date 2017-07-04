@@ -37,6 +37,7 @@ class DBObject;
 class DBObjectManagerWidget;
 class DBObjectManagerLoadWidget;
 class DBOVariable;
+class MetaDBOVariable;
 class DBOVariableSet;
 class DBSchemaManager;
 
@@ -65,24 +66,21 @@ public:
     DBObjectManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb);
 
     /// @brief Returns if an object of type exists
-    bool exists (const std::string &dbo_name);
+    bool existsObject (const std::string &dbo_name);
     /// @brief Returns the object of type, if existing
     DBObject &object (const std::string &dbo_name);
-    void remove (const std::string &dbo_name);
-
-    /// @brief Returns defined DBOVariable, if existing
-    //DBOVariable *getDBOVariable (const std::string &dbo_type, std::string id);
-    /// @brief Returns if defined DBOVariable exists
-    //bool existsDBOVariable (const std::string &dbo_type, std::string id);
-    /// @brief Returns container with all DBOVariables
-    //std::map <std::string, DBOVariable*> &getDBOVariables (const std::string &dbo_type);
-
-    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
-
+    void deleteObject (const std::string &dbo_name);
     /// @brief Returns container with all DBObjects
     std::map <std::string, DBObject*>& objects () { return objects_; }
-    /// @brief Returns of any DBObjects exist
-    bool hasObjects () { return objects_.size() > 0; }
+
+    bool existsMetaVariable (const std::string &var_name);
+    /// @brief Returns the a meta variable, if existing
+    MetaDBOVariable &metaVariable (const std::string &var_name);
+    void deleteMetaVariable (const std::string &var_name);
+    /// @brief Returns container with all MetaVariables
+    std::map <std::string, MetaDBOVariable*>& metaVariables () { return meta_variables_; }
+
+    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
     /// @brief Destructor
     virtual ~DBObjectManager();
@@ -106,6 +104,7 @@ protected:
 
     /// Container with all DBOs (DBO name -> DBO pointer)
     std::map <std::string, DBObject*> objects_;
+    std::map <std::string, MetaDBOVariable*> meta_variables_;
     //bool registered_parent_variables_;
 
     DBObjectManagerWidget *widget_;

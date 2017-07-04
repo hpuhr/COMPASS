@@ -41,6 +41,8 @@
 #include "dbovariablewidget.h"
 //#include "DBOVariableMinMaxObserver.h"
 
+#include <boost/algorithm/string.hpp>
+
 #include "stringconv.h"
 
 using namespace Utils;
@@ -58,6 +60,8 @@ DBOVariable::DBOVariable(const std::string &class_id, const std::string &instanc
     assert (name_.size() > 0);
     assert (data_type_str_.size() > 0);
 
+    boost::algorithm::to_lower(name_);
+
     data_type_ = Property::asDataType(data_type_str_);
 
     //loginf  << "DBOVariable: constructor: name " << id_ << " unitdim '" << unit_dimension_ << "' unitunit '" << unit_unit_ << "'";
@@ -67,8 +71,8 @@ DBOVariable::DBOVariable(const std::string &class_id, const std::string &instanc
 
 DBOVariable::~DBOVariable()
 {
-    for (auto it = schema_variables_.begin(); it != schema_variables_.end(); it++)
-        delete it->second;
+    for (auto it : schema_variables_)
+        delete it.second;
     schema_variables_.clear();
 
     if (widget_)

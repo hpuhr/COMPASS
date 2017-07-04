@@ -13,25 +13,32 @@ public:
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
-    //  /// @brief Return if variable exist in DBO of type
-    //  bool existsIn (const std::string &dbo_type);
-    //  /// @brief Returns variable existing in DBO of type
-    //  DBOVariable *getFor (const std::string &dbo_type);
-    //  /// @brief Returns first available variable
-    //  DBOVariable *getFirst ();
-    //  /// @brief Return variable identifier in DBO of type
-    //  std::string getNameFor (const std::string &dbo_type);
+    bool hasVariables () { return variables_.size() > 0; }
+    PropertyDataType dataType () { assert (hasVariables()); return variables_.begin()->second.dataType(); }
+    const std::string &dataTypeString() { assert (hasVariables()); return variables_.begin()->second.dataTypeString(); }
 
-    //  /// @brief Sets sub-variable name for DBO of type
-    //  void setSubVariable (const std::string &type, std::string name);
+    /// @brief Return if variable exist in DBO of type
+    bool existsIn (const std::string &dbo_name);
+    /// @brief Returns variable existing in DBO of type
+    DBOVariable &getFor (const std::string &dbo_name);
+    /// @brief Return variable identifier in DBO of type
+    std::string getNameFor (const std::string &dbo_name);
 
+    void removeVariable (const std::string &dbo_name);
+    /// @brief Sets sub-variable name for DBO of type
+    void addVariable (const std::string &dbo_name, const std::string &dbovariable_name);
+
+    const std::map <std::string, DBOVariable&> &variables () { return variables_; }
+
+    std::string name() const;
+    void name(const std::string &name);
 
 protected:
+    std::string name_;
+
     DBObjectManager &object_manager_;
     std::map <std::string, DBOVariableDefinition*> definitions_;
-
-    /// Flag indicating if this meta-variable has registered itself to its sub-variables
-    //bool registered_as_parent_;
+    std::map <std::string, DBOVariable&> variables_;
 
     virtual void checkSubConfigurables ();
 

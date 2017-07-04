@@ -55,11 +55,11 @@ void DBOVariableOrderedSet::generateSubConfigurable (const std::string &class_id
     {
         DBOVariableOrderDefinition *definition = new DBOVariableOrderDefinition (class_id, instance_id, this);
 
-        if (!ATSDB::instance().objectManager().exists(definition->dboName())
-                || !ATSDB::instance().objectManager().object(definition->dboName()).hasVariable(definition->id()))
+        if (!ATSDB::instance().objectManager().existsObject(definition->dboName())
+                || !ATSDB::instance().objectManager().object(definition->dboName()).hasVariable(definition->variableName()))
         {
             logwrn << "DBOVariableOrderedSet: generateSubConfigurable: outdated name " << definition->dboName() << " variable "
-                   << definition->id();
+                   << definition->variableName();
             delete definition;
             return;
         }
@@ -314,9 +314,9 @@ void DBOVariableOrderedSet::updateDBOVariableSet ()
     for (auto it : variable_definitions_)
     {
         const std::string &dbo_name = it.second->dboName();
-        std::string name = it.second->id();
+        std::string name = it.second->variableName();
 
-        if (!ATSDB::instance().objectManager().exists(dbo_name)
+        if (!ATSDB::instance().objectManager().existsObject(dbo_name)
                 || !ATSDB::instance().objectManager().object(dbo_name).hasVariable(name))
         {
             logwrn << "DBOVariableOrderedSet: updateDBOVariableSet: outdated skipping name " << dbo_name << " variable "

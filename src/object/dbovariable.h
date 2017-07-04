@@ -46,21 +46,21 @@ public:
   : Configurable (class_id, instance_id, parent)
   {
     registerParameter ("dbo_name", &dbo_name_, "");
-    registerParameter ("id", &id_, "");
+    registerParameter ("dbo_variable_name", &dbo_variable_name_, "");
 
-    assert (id_.size() > 0);
+    assert (dbo_variable_name_.size() > 0);
   }
   virtual ~DBOVariableDefinition() {}
 
   const std::string &dboName () { return dbo_name_; }
   void dboName (const std::string &dbo_name) { dbo_name_=dbo_name; }
 
-  const std::string &id () { return id_; }
-  void id (const std::string &id) { id_=id; }
+  const std::string &variableName () { return dbo_variable_name_; }
+  void variableName (const std::string &dbo_variable_name) { dbo_variable_name_=dbo_variable_name; }
 
 protected:
   std::string dbo_name_;
-  std::string id_;
+  std::string dbo_variable_name_;
 };
 
 /**
