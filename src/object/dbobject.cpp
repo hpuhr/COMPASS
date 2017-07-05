@@ -414,8 +414,6 @@ void DBObject::load (const std::string &limit_str)
     connect (read_job, SIGNAL(obsoleteSignal()), this, SLOT(readJobObsoleteSlot()));
     connect (read_job, SIGNAL(doneSignal()), this, SLOT(readJobDoneSlot()));
 
-    start_time_ = boost::posix_time::microsec_clock::local_time();
-
     JobManager::instance().addDBJob(read_job_);
 
     if (info_widget_)
@@ -467,13 +465,6 @@ void DBObject::readJobDoneSlot()
 {
     loginf << "DBObject: " << name_ << " readJobDoneSlot";
     read_job_ = nullptr;
-
-    stop_time_ = boost::posix_time::microsec_clock::local_time();
-    boost::posix_time::time_duration diff = stop_time_ - start_time_;
-
-    if (diff.total_seconds() > 0)
-        loginf  << "DBObject: readJobDoneSlot: done after " << diff << ", " << data_->size()/diff.total_seconds()
-                << " el/s";
 
     if (info_widget_)
         info_widget_->updateSlot();

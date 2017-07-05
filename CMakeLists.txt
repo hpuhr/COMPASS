@@ -2,7 +2,7 @@ set(ATSDB_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 message("  Path: ${ATSDB_PATH}")
 
 cmake_minimum_required(VERSION 2.8.11)
-set ( CMAKE_BUILD_TYPE Debug )
+set ( CMAKE_BUILD_TYPE Release )
 
 project( ATSDB )
 
@@ -53,10 +53,6 @@ message("  LOG4CPP_LIBRARY: ${LOG4CPP_LIBRARIES}")
 find_package ( TinyXML2 REQUIRED )
 message("  TINYXML2_INCLUDE_DIR: ${TINYXML2_INCLUDE_DIR}")
 message("  TINYXML2_LIBRARY: ${TINYXML2_LIBRARY}") 
-
-#find_package ( GDAL REQUIRED )
-#message("  GDAL_INCLUDE_DIRS: ${GDAL_INCLUDE_DIRS}")
-#message("  GDAL_LIBRARIES: ${GDAL_LIBRARIES}")
 
 include_directories (
     ${CMAKE_SOURCE_DIR}

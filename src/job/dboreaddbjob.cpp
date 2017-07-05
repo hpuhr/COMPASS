@@ -63,12 +63,15 @@ void DBOReadDBJob::run ()
 {
     logdbg << "DBOReadDBJob: execute: start";
 
+    start_time_ = boost::posix_time::microsec_clock::local_time();
+
     if (custom_filter_clause_.size() == 0 && order_ )
         db_interface_.prepareRead (dbobject_, read_list_);
     else
         db_interface_.prepareRead (dbobject_, read_list_, custom_filter_clause_, order_, limit_str_);
 
     unsigned int cnt=0;
+    unsigned int row_count=0;
     while (!done_ && !obsolete_)
     {
         // AVIBIT HACK
@@ -88,6 +91,7 @@ void DBOReadDBJob::run ()
         else
         {
             logdbg << "DBOReadDBJob: execute: intermediate signal, #buffers " << cnt << " last one " << buffer->lastOne();
+            row_count += buffer->size();
             emit intermediateSignal(buffer);
         }
 
@@ -97,6 +101,15 @@ void DBOReadDBJob::run ()
 
     logdbg << "DBOReadDBJob: execute: finalizing statement";
     db_interface_.finalizeReadStatement(dbobject_);
+
+    stop_time_ = boost::posix_time::microsec_clock::local_time();
+    boost::posix_time::time_duration diff = stop_time_ - start_time_;
+
+    if (diff.total_seconds() > 0)
+        loginf  << "DBOReadDBJob: run: done after " << diff << ", " << row_count/diff.total_seconds()
+                << " el/s";
+
+
     done_=true;
 
     logdbg << "DBOReadDBJob: execute: done";

@@ -25,6 +25,8 @@
 #ifndef DBOREADDBJOB_H_
 #define DBOREADDBJOB_H_
 
+#include "boost/date_time/posix_time/posix_time.hpp"
+
 #include "job.h"
 #include "dbovariableset.h"
 
@@ -59,6 +61,9 @@ protected:
     DBOVariable *order_;
     std::string limit_str_;
     bool activate_key_search_;
+
+    boost::posix_time::ptime start_time_;
+    boost::posix_time::ptime stop_time_;
 };
 
 #endif /* DBOREADDBJOB_H_ */
