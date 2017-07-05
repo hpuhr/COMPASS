@@ -97,7 +97,7 @@ void DBObjectManager::generateSubConfigurable (const std::string &class_id, cons
     if (class_id.compare ("DBObject") == 0)
     {
         DBObject *object = new DBObject (class_id, instance_id, this);
-        loginf  << "DBObjectManager: generateSubConfigurable: adding object type " << object->name();
+        logdbg  << "DBObjectManager: generateSubConfigurable: adding object type " << object->name();
         assert (objects_.find(object->name()) == objects_.end());
         objects_.insert(std::pair <std::string, DBObject*> (object->name(), object));
         connect (this, SIGNAL(schemaChangedSignal()), object, SLOT(schemaChangedSlot()));
@@ -107,7 +107,7 @@ void DBObjectManager::generateSubConfigurable (const std::string &class_id, cons
     else if (class_id.compare ("MetaDBOVariable") == 0)
     {
         MetaDBOVariable *meta_var = new MetaDBOVariable (class_id, instance_id, this);
-        loginf  << "DBObjectManager: generateSubConfigurable: adding meta var type " << meta_var->name();
+        logdbg  << "DBObjectManager: generateSubConfigurable: adding meta var type " << meta_var->name();
         assert (meta_variables_.find(meta_var->name()) == meta_variables_.end());
         meta_variables_.insert(std::pair <std::string, MetaDBOVariable*> (meta_var->name(), meta_var));
     }

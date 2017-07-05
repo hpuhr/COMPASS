@@ -134,7 +134,6 @@ MetaDBTableWidget::MetaDBTableWidget(MetaDBTable &meta_table, QWidget * parent, 
     updateSubKeySelectionSlot();
     new_grid->addWidget (new_sub_key_,1,2);
 
-
     QPushButton *new_struct_add = new QPushButton ("Add");
     connect(new_struct_add, SIGNAL( clicked() ), this, SLOT( addSubTableSlot() ));
     new_grid->addWidget (new_struct_add, 1, 3);

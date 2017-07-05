@@ -28,6 +28,7 @@
 #include "configurationmanager.h"
 #include "dbovariable.h"
 #include "metadbovariable.h"
+#include "metadbovariablewidget.h"
 #include "dbobject.h"
 #include "dbobjectwidget.h"
 #include "dbobjectmanagerwidget.h"
@@ -256,16 +257,6 @@ void DBObjectManagerWidget::updateDBOsSlot ()
     meta_label->setFont (font_bold);
     dbobjects_grid_->addWidget (meta_label, 0, 2);
 
-//    QLabel *edit_label = new QLabel ("Edit");
-//    edit_label->setFont (font_bold);
-//    edit_label->setAlignment(Qt::AlignCenter);
-//    dbobjects_grid_->addWidget (edit_label, 0, 3);
-
-//    QLabel *del_label = new QLabel ("Delete");
-//    del_label->setFont (font_bold);
-//    del_label->setAlignment(Qt::AlignCenter);
-//    dbobjects_grid_->addWidget (del_label, 0, 4);
-
     unsigned int row=1;
 
     auto objects = object_manager_.objects();
@@ -307,6 +298,38 @@ void DBObjectManagerWidget::updateDBOsSlot ()
         row++;
     }
 }
+
+void DBObjectManagerWidget::addMetaVariableSlot ()
+{
+
+}
+
+void DBObjectManagerWidget::editMetaVariableSlot ()
+{
+    assert (edit_meta_buttons_.find((QPushButton*)sender()) != edit_meta_buttons_.end());
+
+    MetaDBOVariable *meta_var = edit_meta_buttons_ [(QPushButton*)sender()];
+
+    if (edit_meta_widgets_.find (meta_var) == edit_meta_widgets_.end())
+    {
+        MetaDBOVariableWidget *widget = meta_var->widget();
+        connect(widget, SIGNAL( metaVariableChangedSignal()), this, SLOT( updateMetaVariablesSlot()));
+        edit_meta_widgets_[meta_var] = widget;
+    }
+    else
+        edit_meta_widgets_[meta_var]->show();
+}
+
+void DBObjectManagerWidget::deleteMetaVariableSlot ()
+{
+    assert (delete_meta_buttons_.find((QPushButton*)sender()) != delete_meta_buttons_.end());
+
+    MetaDBOVariable *meta_var = delete_meta_buttons_ [(QPushButton*)sender()];
+    object_manager_.deleteMetaVariable (meta_var->name());
+
+    updateMetaVariablesSlot();
+}
+
 
 void DBObjectManagerWidget::addAllMetaVariablesSlot ()
 {
@@ -400,16 +423,6 @@ void DBObjectManagerWidget::updateMetaVariablesSlot ()
     type_label->setFont (font_bold);
     meta_variables_grid_->addWidget (type_label, 0, 1);
 
-//    QLabel *edit_label = new QLabel ("Edit");
-//    edit_label->setFont (font_bold);
-//    edit_label->setAlignment(Qt::AlignCenter);
-//    meta_variables_grid_->addWidget (edit_label, 0, 2);
-
-//    QLabel *del_label = new QLabel ("Delete");
-//    del_label->setFont (font_bold);
-//    del_label->setAlignment(Qt::AlignCenter);
-//    meta_variables_grid_->addWidget (del_label, 0, 3);
-
     unsigned int row=1;
 
     auto meta_variables = object_manager_.metaVariables();
@@ -430,7 +443,7 @@ void DBObjectManagerWidget::updateMetaVariablesSlot ()
         edit->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
         edit->setFlat(UI_ICON_BUTTON_FLAT);
         //edit->setDisabled(!active || !unlocked_);
-        //connect(edit, SIGNAL( clicked() ), this, SLOT( editDBOSlot() ));
+        connect(edit, SIGNAL(clicked()), this, SLOT(editMetaVariableSlot()));
         meta_variables_grid_->addWidget (edit, row, 2);
         edit_meta_buttons_[edit] = it->second;
 
@@ -440,7 +453,7 @@ void DBObjectManagerWidget::updateMetaVariablesSlot ()
         del->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
         del->setFlat(UI_ICON_BUTTON_FLAT);
         //del->setDisabled(!unlocked_);
-        //connect(del, SIGNAL( clicked() ), this, SLOT( deleteDBOSlot() ));
+        connect(del, SIGNAL(clicked()), this, SLOT(deleteMetaVariableSlot()));
         meta_variables_grid_->addWidget (del, row, 3);
         delete_meta_buttons_[del] = it->second;
 

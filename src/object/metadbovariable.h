@@ -5,6 +5,8 @@
 #include "dbobjectmanager.h"
 #include "dbovariable.h"
 
+class MetaDBOVariableWidget;
+
 class MetaDBOVariable: public Configurable
 {
 public:
@@ -33,10 +35,19 @@ public:
     std::string name() const;
     void name(const std::string &name);
 
+    std::string description() const;
+    void description(const std::string &description);
+
+    MetaDBOVariableWidget *widget ();
+
 protected:
     std::string name_;
+    std::string description_;
 
     DBObjectManager &object_manager_;
+
+    MetaDBOVariableWidget *widget_;
+
     std::map <std::string, DBOVariableDefinition*> definitions_;
     std::map <std::string, DBOVariable&> variables_;
 

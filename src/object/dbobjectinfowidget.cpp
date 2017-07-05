@@ -60,7 +60,7 @@ void DBObjectInfoWidget::loadChangedSlot()
     assert (main_check_);
 
     object_.loadingWanted(main_check_->checkState() == Qt::Checked);
-    loginf << "DBObjectInfoWidget: loadChangedSlot: wanted " << object_.loadingWanted();
+    logdbg << "DBObjectInfoWidget: loadChangedSlot: wanted " << object_.loadingWanted();
 }
 
 void DBObjectInfoWidget::updateSlot()

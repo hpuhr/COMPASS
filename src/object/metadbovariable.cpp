@@ -1,11 +1,13 @@
 #include "metadbovariable.h"
+#include "metadbovariablewidget.h"
 #include "dbovariable.h"
 #include "dbobject.h"
 
 MetaDBOVariable::MetaDBOVariable(const std::string &class_id, const std::string &instance_id, DBObjectManager *object_manager)
-    :Configurable (class_id, instance_id, object_manager), object_manager_(*object_manager)
+    :Configurable (class_id, instance_id, object_manager), object_manager_(*object_manager), widget_(nullptr)
 {
     registerParameter("name", &name_, "");
+    registerParameter("description", &description_, "");
 
     assert (name_.size() > 0);
 
@@ -14,6 +16,12 @@ MetaDBOVariable::MetaDBOVariable(const std::string &class_id, const std::string 
 
 MetaDBOVariable::~MetaDBOVariable ()
 {
+    if (widget_)
+    {
+        delete widget_;
+        widget_=nullptr;
+    }
+
     for (auto it : definitions_)
         delete it.second;
     definitions_.clear();
@@ -84,6 +92,16 @@ void MetaDBOVariable::addVariable (const std::string &dbo_name, const std::strin
     generateSubConfigurable ("DBOVariableDefinition", instance_id);
 }
 
+MetaDBOVariableWidget *MetaDBOVariable::widget ()
+{
+    if (!widget_)
+    {
+        widget_ = new MetaDBOVariableWidget (*this);
+    }
+    assert (widget_);
+    return widget_;
+}
+
 std::string MetaDBOVariable::name() const
 {
     return name_;
@@ -92,6 +110,16 @@ std::string MetaDBOVariable::name() const
 void MetaDBOVariable::name(const std::string &name)
 {
     name_ = name;
+}
+
+std::string MetaDBOVariable::description() const
+{
+    return description_;
+}
+
+void MetaDBOVariable::description(const std::string &description)
+{
+    description_ = description;
 }
 
 /**

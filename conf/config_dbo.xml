@@ -1,6 +1,6 @@
 <Configuration class_id="DBObjectManager" instance_id="DBObjectManager0">
-    <ParameterBool use_limit="0"/>
-    <ParameterUnsignedInt limit_max="100000"/>
+    <ParameterBool use_limit="1"/>
+    <ParameterUnsignedInt limit_max="1000000"/>
     <ParameterUnsignedInt limit_min="0"/>
     <Configuration class_id="DBObject" instance_id="DBObjectADSB0">
         <ParameterBool is_loadable="1"/>
@@ -4645,6 +4645,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableACAS_AIRCRAFT_IDENTIFICATION0">
+        <ParameterString description=""/>
         <ParameterString name="ACAS_AIRCRAFT_IDENTIFICATION"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATACAS_AIRCRAFT_IDENTIFICATION0">
             <ParameterString dbo_name="MLAT"/>
@@ -4656,6 +4657,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableACAS_ALT_CAPABILITY_FT0">
+        <ParameterString description=""/>
         <ParameterString name="ACAS_ALT_CAPABILITY_FT"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATACAS_ALT_CAPABILITY_FT0">
             <ParameterString dbo_name="MLAT"/>
@@ -4667,6 +4669,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableACAS_BDS_1_A0">
+        <ParameterString description=""/>
         <ParameterString name="ACAS_BDS_1_A"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATACAS_BDS_1_A0">
             <ParameterString dbo_name="MLAT"/>
@@ -4678,6 +4681,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableACAS_BDS_1_B0">
+        <ParameterString description=""/>
         <ParameterString name="ACAS_BDS_1_B"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATACAS_BDS_1_B0">
             <ParameterString dbo_name="MLAT"/>
@@ -4689,6 +4693,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableACAS_COMM_CAPABILITY0">
+        <ParameterString description=""/>
         <ParameterString name="ACAS_COMM_CAPABILITY"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATACAS_COMM_CAPABILITY0">
             <ParameterString dbo_name="MLAT"/>
@@ -4700,6 +4705,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableACAS_FLIGHT_STATUS0">
+        <ParameterString description=""/>
         <ParameterString name="ACAS_FLIGHT_STATUS"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATACAS_FLIGHT_STATUS0">
             <ParameterString dbo_name="MLAT"/>
@@ -4711,6 +4717,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableACAS_MODES_SERVICE0">
+        <ParameterString description=""/>
         <ParameterString name="ACAS_MODES_SERVICE"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATACAS_MODES_SERVICE0">
             <ParameterString dbo_name="MLAT"/>
@@ -4722,6 +4729,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableALT_BARO_FT0">
+        <ParameterString description=""/>
         <ParameterString name="ALT_BARO_FT"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBALT_BARO_FT0">
             <ParameterString dbo_name="ADSB"/>
@@ -4733,6 +4741,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableALT_GEO_FT0">
+        <ParameterString description=""/>
         <ParameterString name="ALT_GEO_FT"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBALT_GEO_FT0">
             <ParameterString dbo_name="ADSB"/>
@@ -4744,6 +4753,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableCALC_ALT_GEO_FT0">
+        <ParameterString description=""/>
         <ParameterString name="CALC_ALT_GEO_FT"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBCALC_ALT_GEO_FT0">
             <ParameterString dbo_name="ADSB"/>
@@ -4763,6 +4773,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableCALLSIGN0">
+        <ParameterString description=""/>
         <ParameterString name="CALLSIGN"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBCALLSIGN0">
             <ParameterString dbo_name="ADSB"/>
@@ -4782,6 +4793,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableCAT0">
+        <ParameterString description=""/>
         <ParameterString name="CAT"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBCAT0">
             <ParameterString dbo_name="ADSB"/>
@@ -4801,6 +4813,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableCIVIL_EMERGENCY0">
+        <ParameterString description=""/>
         <ParameterString name="CIVIL_EMERGENCY"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadarCIVIL_EMERGENCY0">
             <ParameterString dbo_name="Radar"/>
@@ -4812,6 +4825,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableDETECTION_TYPE0">
+        <ParameterString description=""/>
         <ParameterString name="DETECTION_TYPE"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadarDETECTION_TYPE0">
             <ParameterString dbo_name="Radar"/>
@@ -4823,6 +4837,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableDISPLAY_STATE0">
+        <ParameterString description=""/>
         <ParameterString name="DISPLAY_STATE"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBDISPLAY_STATE0">
             <ParameterString dbo_name="ADSB"/>
@@ -4842,6 +4857,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableDOM_POSIX0">
+        <ParameterString description=""/>
         <ParameterString name="DOM_POSIX"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBDOM_POSIX0">
             <ParameterString dbo_name="ADSB"/>
@@ -4861,6 +4877,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableDS_ID0">
+        <ParameterString description=""/>
         <ParameterString name="DS_ID"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBDS_ID0">
             <ParameterString dbo_name="ADSB"/>
@@ -4880,6 +4897,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableFROM_FFT0">
+        <ParameterString description=""/>
         <ParameterString name="FROM_FFT"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBFROM_FFT0">
             <ParameterString dbo_name="ADSB"/>
@@ -4891,6 +4909,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableGEO_AREA_MASK0">
+        <ParameterString description=""/>
         <ParameterString name="GEO_AREA_MASK"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBGEO_AREA_MASK0">
             <ParameterString dbo_name="ADSB"/>
@@ -4910,6 +4929,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableGROUNDSPEED_KT0">
+        <ParameterString description=""/>
         <ParameterString name="GROUNDSPEED_KT"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBGROUNDSPEED_KT0">
             <ParameterString dbo_name="ADSB"/>
@@ -4921,6 +4941,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableGROUND_BIT0">
+        <ParameterString description=""/>
         <ParameterString name="GROUND_BIT"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBGROUND_BIT0">
             <ParameterString dbo_name="ADSB"/>
@@ -4932,6 +4953,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableHASH_CODE0">
+        <ParameterString description=""/>
         <ParameterString name="HASH_CODE"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBHASH_CODE0">
             <ParameterString dbo_name="ADSB"/>
@@ -4951,6 +4973,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableHEIGHT_3D_FT0">
+        <ParameterString description=""/>
         <ParameterString name="HEIGHT_3D_FT"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATHEIGHT_3D_FT0">
             <ParameterString dbo_name="MLAT"/>
@@ -4962,6 +4985,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableIC_CODE0">
+        <ParameterString description=""/>
         <ParameterString name="IC_CODE"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadarIC_CODE0">
             <ParameterString dbo_name="Radar"/>
@@ -4973,6 +4997,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableLINE_ID0">
+        <ParameterString description=""/>
         <ParameterString name="LINE_ID"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBLINE_ID0">
             <ParameterString dbo_name="ADSB"/>
@@ -4992,6 +5017,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableMAS_TRACK_NUM0">
+        <ParameterString description=""/>
         <ParameterString name="MAS_TRACK_NUM"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATMAS_TRACK_NUM0">
             <ParameterString dbo_name="MLAT"/>
@@ -5007,6 +5033,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableMIL_EMERGENCY0">
+        <ParameterString description=""/>
         <ParameterString name="MIL_EMERGENCY"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadarMIL_EMERGENCY0">
             <ParameterString dbo_name="Radar"/>
@@ -5017,95 +5044,8 @@
             <ParameterString dbo_variable_name="MIL_EMERGENCY"/>
         </Configuration>
     </Configuration>
-    <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableMODE1_CODE0">
-        <ParameterString name="MODE1_CODE"/>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATMODE1_CODE0">
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString dbo_variable_name="MODE1_CODE"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadarMODE1_CODE0">
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString dbo_variable_name="MODE1_CODE"/>
-        </Configuration>
-    </Configuration>
-    <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableMODE1_G0">
-        <ParameterString name="MODE1_G"/>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATMODE1_G0">
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString dbo_variable_name="MODE1_G"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadarMODE1_G0">
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString dbo_variable_name="MODE1_G"/>
-        </Configuration>
-    </Configuration>
-    <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableMODE1_SMO0">
-        <ParameterString name="MODE1_SMO"/>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATMODE1_SMO0">
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString dbo_variable_name="MODE1_SMO"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadarMODE1_SMO0">
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString dbo_variable_name="MODE1_SMO"/>
-        </Configuration>
-    </Configuration>
-    <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableMODE1_V0">
-        <ParameterString name="MODE1_V"/>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATMODE1_V0">
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString dbo_variable_name="MODE1_V"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadarMODE1_V0">
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString dbo_variable_name="MODE1_V"/>
-        </Configuration>
-    </Configuration>
-    <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableMODE2_CODE0">
-        <ParameterString name="MODE2_CODE"/>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATMODE2_CODE0">
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString dbo_variable_name="MODE2_CODE"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadarMODE2_CODE0">
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString dbo_variable_name="MODE2_CODE"/>
-        </Configuration>
-    </Configuration>
-    <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableMODE2_G0">
-        <ParameterString name="MODE2_G"/>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATMODE2_G0">
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString dbo_variable_name="MODE2_G"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadarMODE2_G0">
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString dbo_variable_name="MODE2_G"/>
-        </Configuration>
-    </Configuration>
-    <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableMODE2_SMO0">
-        <ParameterString name="MODE2_SMO"/>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATMODE2_SMO0">
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString dbo_variable_name="MODE2_SMO"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadarMODE2_SMO0">
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString dbo_variable_name="MODE2_SMO"/>
-        </Configuration>
-    </Configuration>
-    <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableMODE2_V0">
-        <ParameterString name="MODE2_V"/>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATMODE2_V0">
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString dbo_variable_name="MODE2_V"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadarMODE2_V0">
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString dbo_variable_name="MODE2_V"/>
-        </Configuration>
-    </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableMODE3A_CODE0">
+        <ParameterString description=""/>
         <ParameterString name="MODE3A_CODE"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATMODE3A_CODE0">
             <ParameterString dbo_name="MLAT"/>
@@ -5121,6 +5061,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableMODE3A_G0">
+        <ParameterString description=""/>
         <ParameterString name="MODE3A_G"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATMODE3A_G0">
             <ParameterString dbo_name="MLAT"/>
@@ -5136,6 +5077,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableMODE3A_SMO0">
+        <ParameterString description=""/>
         <ParameterString name="MODE3A_SMO"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATMODE3A_SMO0">
             <ParameterString dbo_name="MLAT"/>
@@ -5147,6 +5089,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableMODE3A_V0">
+        <ParameterString description=""/>
         <ParameterString name="MODE3A_V"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATMODE3A_V0">
             <ParameterString dbo_name="MLAT"/>
@@ -5162,6 +5105,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableMODEC_CODE_FT0">
+        <ParameterString description=""/>
         <ParameterString name="MODEC_CODE_FT"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadarMODEC_CODE_FT0">
             <ParameterString dbo_name="Radar"/>
@@ -5173,6 +5117,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableMODEC_G0">
+        <ParameterString description=""/>
         <ParameterString name="MODEC_G"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadarMODEC_G0">
             <ParameterString dbo_name="Radar"/>
@@ -5184,6 +5129,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableMODEC_V0">
+        <ParameterString description=""/>
         <ParameterString name="MODEC_V"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadarMODEC_V0">
             <ParameterString dbo_name="Radar"/>
@@ -5195,6 +5141,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableMODES_MB_DATA0">
+        <ParameterString description=""/>
         <ParameterString name="MODES_MB_DATA"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATMODES_MB_DATA0">
             <ParameterString dbo_name="MLAT"/>
@@ -5210,6 +5157,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableMSG_FMT0">
+        <ParameterString description=""/>
         <ParameterString name="MSG_FMT"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATMSG_FMT0">
             <ParameterString dbo_name="MLAT"/>
@@ -5225,6 +5173,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariablePOS_LAT_DEG0">
+        <ParameterString description=""/>
         <ParameterString name="POS_LAT_DEG"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBPOS_LAT_DEG0">
             <ParameterString dbo_name="ADSB"/>
@@ -5244,6 +5193,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariablePOS_LAT_DEG_CALC0">
+        <ParameterString description=""/>
         <ParameterString name="POS_LAT_DEG_CALC"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATPOS_LAT_DEG_CALC0">
             <ParameterString dbo_name="MLAT"/>
@@ -5255,6 +5205,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariablePOS_LOCAL_X_NM0">
+        <ParameterString description=""/>
         <ParameterString name="POS_LOCAL_X_NM"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATPOS_LOCAL_X_NM0">
             <ParameterString dbo_name="MLAT"/>
@@ -5270,6 +5221,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariablePOS_LOCAL_X_NM_CALC0">
+        <ParameterString description=""/>
         <ParameterString name="POS_LOCAL_X_NM_CALC"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATPOS_LOCAL_X_NM_CALC0">
             <ParameterString dbo_name="MLAT"/>
@@ -5285,6 +5237,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariablePOS_LOCAL_Y_NM0">
+        <ParameterString description=""/>
         <ParameterString name="POS_LOCAL_Y_NM"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATPOS_LOCAL_Y_NM0">
             <ParameterString dbo_name="MLAT"/>
@@ -5300,6 +5253,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariablePOS_LOCAL_Y_NM_CALC0">
+        <ParameterString description=""/>
         <ParameterString name="POS_LOCAL_Y_NM_CALC"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATPOS_LOCAL_Y_NM_CALC0">
             <ParameterString dbo_name="MLAT"/>
@@ -5315,6 +5269,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariablePOS_LONG_DEG0">
+        <ParameterString description=""/>
         <ParameterString name="POS_LONG_DEG"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBPOS_LONG_DEG0">
             <ParameterString dbo_name="ADSB"/>
@@ -5334,6 +5289,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariablePOS_LONG_DEG_CALC0">
+        <ParameterString description=""/>
         <ParameterString name="POS_LONG_DEG_CALC"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATPOS_LONG_DEG_CALC0">
             <ParameterString dbo_name="MLAT"/>
@@ -5345,6 +5301,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariablePOS_SYS_X_NM0">
+        <ParameterString description=""/>
         <ParameterString name="POS_SYS_X_NM"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBPOS_SYS_X_NM0">
             <ParameterString dbo_name="ADSB"/>
@@ -5364,6 +5321,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariablePOS_SYS_Y_NM0">
+        <ParameterString description=""/>
         <ParameterString name="POS_SYS_Y_NM"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBPOS_SYS_Y_NM0">
             <ParameterString dbo_name="ADSB"/>
@@ -5383,6 +5341,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableRAW_MSG0">
+        <ParameterString description=""/>
         <ParameterString name="RAW_MSG"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBRAW_MSG0">
             <ParameterString dbo_name="ADSB"/>
@@ -5402,6 +5361,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableRDP_CHAIN0">
+        <ParameterString description=""/>
         <ParameterString name="RDP_CHAIN"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATRDP_CHAIN0">
             <ParameterString dbo_name="MLAT"/>
@@ -5413,6 +5373,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableREC_NUM0">
+        <ParameterString description=""/>
         <ParameterString name="REC_NUM"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBREC_NUM0">
             <ParameterString dbo_name="ADSB"/>
@@ -5432,6 +5393,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableREC_TIME_MS0">
+        <ParameterString description=""/>
         <ParameterString name="REC_TIME_MS"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBREC_TIME_MS0">
             <ParameterString dbo_name="ADSB"/>
@@ -5451,6 +5413,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableREC_TIME_POSIX0">
+        <ParameterString description=""/>
         <ParameterString name="REC_TIME_POSIX"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBREC_TIME_POSIX0">
             <ParameterString dbo_name="ADSB"/>
@@ -5470,6 +5433,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableREPORT_TYPE0">
+        <ParameterString description=""/>
         <ParameterString name="REPORT_TYPE"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBREPORT_TYPE0">
             <ParameterString dbo_name="ADSB"/>
@@ -5489,6 +5453,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableSAC0">
+        <ParameterString description=""/>
         <ParameterString name="SAC"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBSAC0">
             <ParameterString dbo_name="ADSB"/>
@@ -5508,6 +5473,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableSIC0">
+        <ParameterString description=""/>
         <ParameterString name="SIC"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBSIC0">
             <ParameterString dbo_name="ADSB"/>
@@ -5527,6 +5493,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableSIMULATED_TARGET0">
+        <ParameterString description=""/>
         <ParameterString name="SIMULATED_TARGET"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBSIMULATED_TARGET0">
             <ParameterString dbo_name="ADSB"/>
@@ -5546,6 +5513,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableSPI0">
+        <ParameterString description=""/>
         <ParameterString name="SPI"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBSPI0">
             <ParameterString dbo_name="ADSB"/>
@@ -5565,6 +5533,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableTARGET_ADDR0">
+        <ParameterString description=""/>
         <ParameterString name="TARGET_ADDR"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBTARGET_ADDR0">
             <ParameterString dbo_name="ADSB"/>
@@ -5584,6 +5553,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableTEST_TARGET0">
+        <ParameterString description=""/>
         <ParameterString name="TEST_TARGET"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBTEST_TARGET0">
             <ParameterString dbo_name="ADSB"/>
@@ -5599,6 +5569,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableTOD0">
+        <ParameterString description=""/>
         <ParameterString name="TOD"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBTOD0">
             <ParameterString dbo_name="ADSB"/>
@@ -5618,6 +5589,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableTOD_CALCULATED0">
+        <ParameterString description=""/>
         <ParameterString name="TOD_CALCULATED"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBTOD_CALCULATED0">
             <ParameterString dbo_name="ADSB"/>
@@ -5637,6 +5609,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableTRACK_CLIMB_DESC_MODE0">
+        <ParameterString description=""/>
         <ParameterString name="TRACK_CLIMB_DESC_MODE"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATTRACK_CLIMB_DESC_MODE0">
             <ParameterString dbo_name="MLAT"/>
@@ -5648,6 +5621,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableTRACK_COASTED0">
+        <ParameterString description=""/>
         <ParameterString name="TRACK_COASTED"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATTRACK_COASTED0">
             <ParameterString dbo_name="MLAT"/>
@@ -5659,6 +5633,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableTRACK_CONFIRMED0">
+        <ParameterString description=""/>
         <ParameterString name="TRACK_CONFIRMED"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATTRACK_CONFIRMED0">
             <ParameterString dbo_name="MLAT"/>
@@ -5674,6 +5649,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableTRACK_END0">
+        <ParameterString description=""/>
         <ParameterString name="TRACK_END"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATTRACK_END0">
             <ParameterString dbo_name="MLAT"/>
@@ -5689,6 +5665,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableTRACK_GHOST_TARGET0">
+        <ParameterString description=""/>
         <ParameterString name="TRACK_GHOST_TARGET"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATTRACK_GHOST_TARGET0">
             <ParameterString dbo_name="MLAT"/>
@@ -5700,6 +5677,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableTRACK_MANOEUVRE_HORI0">
+        <ParameterString description=""/>
         <ParameterString name="TRACK_MANOEUVRE_HORI"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATTRACK_MANOEUVRE_HORI0">
             <ParameterString dbo_name="MLAT"/>
@@ -5711,6 +5689,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableTRACK_NUM0">
+        <ParameterString description=""/>
         <ParameterString name="TRACK_NUM"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATTRACK_NUM0">
             <ParameterString dbo_name="MLAT"/>
@@ -5726,6 +5705,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableTURNRATE_DEGPS0">
+        <ParameterString description=""/>
         <ParameterString name="TURNRATE_DEGPS"/>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBTURNRATE_DEGPS0">
             <ParameterString dbo_name="ADSB"/>
