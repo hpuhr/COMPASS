@@ -277,15 +277,15 @@ void DBSchemaWidget::updateTableGrid()
     key_label->setFont (font_bold);
     table_grid_->addWidget (key_label, 0, 2);
 
-    QLabel *edit_label = new QLabel ("Edit");
-    edit_label->setFont (font_bold);
-    edit_label->setAlignment(Qt::AlignCenter);
-    table_grid_->addWidget (edit_label, 0, 3);
+//    QLabel *edit_label = new QLabel ("Edit");
+//    edit_label->setFont (font_bold);
+//    edit_label->setAlignment(Qt::AlignCenter);
+//    table_grid_->addWidget (edit_label, 0, 3);
 
-    QLabel *del_label = new QLabel ("Delete");
-    del_label->setFont (font_bold);
-    del_label->setAlignment(Qt::AlignCenter);
-    table_grid_->addWidget (del_label, 0, 4);
+//    QLabel *del_label = new QLabel ("Delete");
+//    del_label->setFont (font_bold);
+//    del_label->setAlignment(Qt::AlignCenter);
+//    table_grid_->addWidget (del_label, 0, 4);
 
     unsigned int row=1;
 
@@ -312,7 +312,8 @@ void DBSchemaWidget::updateTableGrid()
         QPushButton *edit = new QPushButton ();
         edit->setIcon(edit_icon);
         edit->setIconSize(UI_ICON_SIZE);
-        //edit->setFlat(true);
+        edit->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
+        edit->setFlat(UI_ICON_BUTTON_FLAT);
         connect(edit, SIGNAL( clicked() ), this, SLOT( editTableSlot() ));
         table_grid_->addWidget (edit, row, 3);
         edit_table_buttons_[edit] = it.second;
@@ -320,7 +321,8 @@ void DBSchemaWidget::updateTableGrid()
         QPushButton *del = new QPushButton ();
         del->setIcon(del_icon);
         del->setIconSize(UI_ICON_SIZE);
-        //del->setFlat(true);
+        del->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
+        del->setFlat(UI_ICON_BUTTON_FLAT);
         connect(del, SIGNAL( clicked() ), this, SLOT( deleteTableSlot() ));
         table_grid_->addWidget (del, row, 4);
         delete_table_buttons_[del] = it.second;
@@ -361,15 +363,15 @@ void DBSchemaWidget::updateMetaTableGrid()
     numcols_label->setFont (font_bold);
     meta_table_grid_->addWidget (numcols_label, 0, 2);
 
-    QLabel *edit_label = new QLabel ("Edit");
-    edit_label->setFont (font_bold);
-    edit_label->setAlignment(Qt::AlignCenter);
-    meta_table_grid_->addWidget (edit_label, 0, 3);
+//    QLabel *edit_label = new QLabel ("Edit");
+//    edit_label->setFont (font_bold);
+//    edit_label->setAlignment(Qt::AlignCenter);
+//    meta_table_grid_->addWidget (edit_label, 0, 3);
 
-    QLabel *del_label = new QLabel ("Delete");
-    del_label->setFont (font_bold);
-    del_label->setAlignment(Qt::AlignCenter);
-    meta_table_grid_->addWidget (del_label, 0, 4);
+//    QLabel *del_label = new QLabel ("Delete");
+//    del_label->setFont (font_bold);
+//    del_label->setAlignment(Qt::AlignCenter);
+//    meta_table_grid_->addWidget (del_label, 0, 4);
 
     unsigned int row=1;
 
@@ -400,7 +402,8 @@ void DBSchemaWidget::updateMetaTableGrid()
         QPushButton *edit = new QPushButton ();
         edit->setIcon(edit_icon);
         edit->setIconSize(UI_ICON_SIZE);
-        //edit->setFlat(true);
+        edit->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
+        edit->setFlat(UI_ICON_BUTTON_FLAT);
         connect(edit, SIGNAL( clicked() ), this, SLOT( editMetaTableSlot() ));
         meta_table_grid_->addWidget (edit, row, 3);
         edit_meta_table_buttons_[edit] = it.second;
@@ -408,7 +411,8 @@ void DBSchemaWidget::updateMetaTableGrid()
         QPushButton *del = new QPushButton ();
         del->setIcon(del_icon);
         del->setIconSize(UI_ICON_SIZE);
-        //del->setFlat(true);
+        del->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
+        del->setFlat(UI_ICON_BUTTON_FLAT);
         connect(del, SIGNAL( clicked() ), this, SLOT( deleteMetaTableSlot() ));
         meta_table_grid_->addWidget (del, row, 4);
         delete_meta_table_buttons_[del] = it.second;

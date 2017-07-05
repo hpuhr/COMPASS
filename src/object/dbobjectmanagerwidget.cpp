@@ -256,15 +256,15 @@ void DBObjectManagerWidget::updateDBOsSlot ()
     meta_label->setFont (font_bold);
     dbobjects_grid_->addWidget (meta_label, 0, 2);
 
-    QLabel *edit_label = new QLabel ("Edit");
-    edit_label->setFont (font_bold);
-    edit_label->setAlignment(Qt::AlignCenter);
-    dbobjects_grid_->addWidget (edit_label, 0, 3);
+//    QLabel *edit_label = new QLabel ("Edit");
+//    edit_label->setFont (font_bold);
+//    edit_label->setAlignment(Qt::AlignCenter);
+//    dbobjects_grid_->addWidget (edit_label, 0, 3);
 
-    QLabel *del_label = new QLabel ("Delete");
-    del_label->setFont (font_bold);
-    del_label->setAlignment(Qt::AlignCenter);
-    dbobjects_grid_->addWidget (del_label, 0, 4);
+//    QLabel *del_label = new QLabel ("Delete");
+//    del_label->setFont (font_bold);
+//    del_label->setAlignment(Qt::AlignCenter);
+//    dbobjects_grid_->addWidget (del_label, 0, 4);
 
     unsigned int row=1;
 
@@ -287,6 +287,8 @@ void DBObjectManagerWidget::updateDBOsSlot ()
         QPushButton *edit = new QPushButton ();
         edit->setIcon(edit_icon);
         edit->setIconSize(UI_ICON_SIZE);
+        edit->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
+        edit->setFlat(UI_ICON_BUTTON_FLAT);
         edit->setDisabled(!active || !unlocked_);
         connect(edit, SIGNAL( clicked() ), this, SLOT( editDBOSlot() ));
         dbobjects_grid_->addWidget (edit, row, 3);
@@ -295,6 +297,8 @@ void DBObjectManagerWidget::updateDBOsSlot ()
         QPushButton *del = new QPushButton ();
         del->setIcon(del_icon);
         del->setIconSize(UI_ICON_SIZE);
+        del->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
+        del->setFlat(UI_ICON_BUTTON_FLAT);
         del->setDisabled(!unlocked_);
         connect(del, SIGNAL( clicked() ), this, SLOT( deleteDBOSlot() ));
         dbobjects_grid_->addWidget (del, row, 4);
@@ -396,15 +400,15 @@ void DBObjectManagerWidget::updateMetaVariablesSlot ()
     type_label->setFont (font_bold);
     meta_variables_grid_->addWidget (type_label, 0, 1);
 
-    QLabel *edit_label = new QLabel ("Edit");
-    edit_label->setFont (font_bold);
-    edit_label->setAlignment(Qt::AlignCenter);
-    meta_variables_grid_->addWidget (edit_label, 0, 2);
+//    QLabel *edit_label = new QLabel ("Edit");
+//    edit_label->setFont (font_bold);
+//    edit_label->setAlignment(Qt::AlignCenter);
+//    meta_variables_grid_->addWidget (edit_label, 0, 2);
 
-    QLabel *del_label = new QLabel ("Delete");
-    del_label->setFont (font_bold);
-    del_label->setAlignment(Qt::AlignCenter);
-    meta_variables_grid_->addWidget (del_label, 0, 3);
+//    QLabel *del_label = new QLabel ("Delete");
+//    del_label->setFont (font_bold);
+//    del_label->setAlignment(Qt::AlignCenter);
+//    meta_variables_grid_->addWidget (del_label, 0, 3);
 
     unsigned int row=1;
 
@@ -423,6 +427,8 @@ void DBObjectManagerWidget::updateMetaVariablesSlot ()
         QPushButton *edit = new QPushButton ();
         edit->setIcon(edit_icon);
         edit->setIconSize(UI_ICON_SIZE);
+        edit->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
+        edit->setFlat(UI_ICON_BUTTON_FLAT);
         //edit->setDisabled(!active || !unlocked_);
         //connect(edit, SIGNAL( clicked() ), this, SLOT( editDBOSlot() ));
         meta_variables_grid_->addWidget (edit, row, 2);
@@ -431,6 +437,8 @@ void DBObjectManagerWidget::updateMetaVariablesSlot ()
         QPushButton *del = new QPushButton ();
         del->setIcon(del_icon);
         del->setIconSize(UI_ICON_SIZE);
+        del->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
+        del->setFlat(UI_ICON_BUTTON_FLAT);
         //del->setDisabled(!unlocked_);
         //connect(del, SIGNAL( clicked() ), this, SLOT( deleteDBOSlot() ));
         meta_variables_grid_->addWidget (del, row, 3);

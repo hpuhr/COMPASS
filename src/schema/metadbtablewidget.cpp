@@ -158,7 +158,7 @@ MetaDBTableWidget::MetaDBTableWidget(MetaDBTable &meta_table, QWidget * parent, 
 
     main_layout->addWidget (columns_scroll);
 
-    main_layout->addStretch ();
+    //main_layout->addStretch ();
 
     setLayout (main_layout);
 

@@ -747,7 +747,7 @@ void DBObjectWidget::updateDBOVarsGrid ()
     QPushButton *edit = new QPushButton ();
     edit->setIcon(edit_icon);
     edit->setFixedSize ( UI_ICON_SIZE );
-    //edit->setFlat(true);
+    edit->setFlat(UI_ICON_BUTTON_FLAT);
     connect(edit, SIGNAL( clicked() ), this, SLOT( editDBOVar() ));
     assert (dbo_vars_grid_edit_buttons_.find(edit) == dbo_vars_grid_edit_buttons_.end());
     dbo_vars_grid_edit_buttons_ [edit] = it->second;
@@ -756,7 +756,7 @@ void DBObjectWidget::updateDBOVarsGrid ()
     QPushButton *del = new QPushButton ();
     del->setIcon(del_icon);
     del->setFixedSize ( UI_ICON_SIZE );
-    //del->setFlat(true);
+    del->setFlat(UI_ICON_BUTTON_FLAT);
     connect(del, SIGNAL( clicked() ), this, SLOT( deleteDBOVar() ));
     assert (dbo_vars_grid_delete_buttons_.find(del) == dbo_vars_grid_delete_buttons_.end());
     dbo_vars_grid_delete_buttons_ [del] = it->second;

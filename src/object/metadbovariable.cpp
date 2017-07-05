@@ -34,7 +34,7 @@ void MetaDBOVariable::generateSubConfigurable (const std::string &class_id, cons
         const std::string &dbo_name = definition->dboName();
         std::string dbovar_name = definition->variableName();
 
-        assert (object_manager_.exists(dbo_name));
+        assert (object_manager_.existsObject(dbo_name));
         assert (object_manager_.object(dbo_name).hasVariable(dbovar_name));
         assert (variables_.find(dbo_name) == variables_.end());
 
@@ -58,13 +58,13 @@ DBOVariable &MetaDBOVariable::getFor (const std::string &dbo_name)
 
 std::string MetaDBOVariable::getNameFor (const std::string &dbo_name)
 {
-    assert (existsIn (dbo_type));
+    assert (existsIn (dbo_name));
     return variables_.at(dbo_name).name();
 }
 
 void MetaDBOVariable::removeVariable (const std::string &dbo_name)
 {
-    assert (existsIn (dbo_type));
+    assert (existsIn (dbo_name));
     delete definitions_.at(dbo_name);
     definitions_.erase(dbo_name);
     variables_.erase(dbo_name);

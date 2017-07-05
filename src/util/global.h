@@ -79,6 +79,9 @@ enum DOQueryFlag {
 };
 
 static QSize UI_ICON_SIZE (20,20);
+static const unsigned int UI_ICON_BUTTON_MAX_WIDTH=40;
+static const bool UI_ICON_BUTTON_FLAT=true;
 static const unsigned int FRAME_SIZE=1;
+
 
 #endif
