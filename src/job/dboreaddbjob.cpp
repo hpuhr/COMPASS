@@ -106,8 +106,7 @@ void DBOReadDBJob::run ()
     boost::posix_time::time_duration diff = stop_time_ - start_time_;
 
     if (diff.total_seconds() > 0)
-        loginf  << "DBOReadDBJob: run: done after " << diff << ", " << row_count/diff.total_seconds()
-                << " el/s";
+        loginf  << "DBOReadDBJob: run: done after " << diff << ", " << 1000.0*row_count/diff.total_milliseconds() << " el/s";
 
 
     done_=true;

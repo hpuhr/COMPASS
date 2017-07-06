@@ -2,7 +2,7 @@ set(ATSDB_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 message("  Path: ${ATSDB_PATH}")
 
 cmake_minimum_required(VERSION 2.8.11)
-set ( CMAKE_BUILD_TYPE Release )
+set ( CMAKE_BUILD_TYPE Debug )
 
 project( ATSDB )
 
@@ -180,7 +180,7 @@ set ( atsdb_HDRS
     #        src/object/dbovariablecombobox.h
     #        src/object/dbovariablesetwidget.h
     #src/object/dbovariableorderedsetwidget.h
-    #src/object/dbovariableselectionwidget.h
+    src/object/dbovariableselectionwidget.h
     src/object/dbovariabledatatypecombobox.h
     #        src/object/propertydatatypecombobox.h
     #        src/object/metadbobjecteditwidget.h
@@ -330,11 +330,6 @@ set ( atsdb_SRCS
     #        src/job/writebufferdbjob.cpp
     #        src/job/postprocessdbjob.cpp
     #        src/job/transformationjob.cpp
-    #        src/object/dbovariablecombobox.cpp
-    #        src/object/dbovariablesetwidget.cpp
-    #src/object/dbovariableorderedsetwidget.cpp
-    #src/object/dbovariableselectionwidget.cpp
-    #        src/object/metadbobjecteditwidget.cpp
     src/object/dbobject.cpp
     src/object/dbobjectwidget.cpp
     src/object/dbobjectinfowidget.cpp
@@ -347,6 +342,11 @@ set ( atsdb_SRCS
     src/object/dbovariableorderedset.cpp
     src/object/metadbovariable.cpp
     src/object/metadbovariablewidget.cpp
+    src/object/dbovariableselectionwidget.cpp
+    #        src/object/dbovariablecombobox.cpp
+    #        src/object/dbovariablesetwidget.cpp
+    #src/object/dbovariableorderedsetwidget.cpp
+    #        src/object/metadbobjecteditwidget.cpp
     #        src/polygon/polygon4ddi.cpp
     #        src/polygon/geographicpoint.cpp
     #        src/polygon/airspacesector.cpp

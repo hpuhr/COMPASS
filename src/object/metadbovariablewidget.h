@@ -28,10 +28,9 @@ class QPushButton;
 class QTextEdit;
 
 class MetaDBOVariable;
-class DBTableColumnComboBox;
-class DBOVariableDataTypeComboBox;
-class StringRepresentationComboBox;
-class UnitSelectionWidget;
+class QGridLayout;
+class DBOVariableSelectionWidget;
+
 
 /**
  * @brief Edit widget for a DBObject
@@ -49,6 +48,8 @@ public slots:
     /// @brief Changes DBO info
     void editDescriptionSlot ();
 
+    void updateSlot ();
+
 public:
     /// @brief Constructor
     MetaDBOVariableWidget(MetaDBOVariable &variable, QWidget * parent = 0, Qt::WindowFlags f = 0);
@@ -63,8 +64,10 @@ private:
     QLineEdit *name_edit_;
     /// @brief DBOVariable info
     QLineEdit *description_edit_;
-    //DBOVariableDataTypeComboBox *type_combo_;
-    //UnitSelectionWidget *unit_sel_;
+
+    QGridLayout *grid_layout_;
+
+    //std::map <>
 };
 
 #endif /* METADBOVARIABLEWIDGET_H_ */

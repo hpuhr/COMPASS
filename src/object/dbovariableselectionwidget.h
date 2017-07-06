@@ -25,13 +25,13 @@
 #include <QMenu>
 
 class QPushButton;
-class QLineEdit;
+class QLabel;
 
 
-typedef struct {
-    std::string id;
-    unsigned int dbo_type;
-} SelectionId;
+//typedef struct {
+//    std::string id;
+//    unsigned int dbo_type;
+//} SelectionId;
 
 /**
  * @brief Widget for selection of a DBOVariable
@@ -44,14 +44,14 @@ class DBOVariableSelectionWidget : public QGroupBox
     Q_OBJECT
 public:
     /// @brief Constructor without variable
-    DBOVariableSelectionWidget( bool h_box=false, QWidget* parent=NULL );
+    DBOVariableSelectionWidget (bool show_title=true, bool h_box=false, QWidget* parent=nullptr );
     /// @brief Constructor with given variable
-    DBOVariableSelectionWidget( DBOVariable *init, bool h_box=false, QWidget* parent=NULL );
+    DBOVariableSelectionWidget (DBOVariable *init, bool show_title=true, bool h_box=false, QWidget* parent=nullptr );
     /// @brief Destructor
     ~DBOVariableSelectionWidget();
 
     /// @brief Returns if a variable is selected
-    bool hasVariable() const { return sel_var_ != NULL; }
+    bool hasVariable() const { return sel_var_ != nullptr; }
     /// @brief Return selected variable
     DBOVariable* getSelectedVariable() const;
     /// @brief Sets the selected variable
@@ -76,9 +76,9 @@ private:
     /// Select variable button
     QPushButton* sel_button_;
     /// Variable type information
-    QLineEdit* sel_edit_type_;
+    QLabel* sel_edit_type_;
     /// Variable name information
-    QLineEdit* sel_edit_id_;
+    QLabel* sel_edit_id_;
     /// Context menu for variable selection
     QMenu menu_;
     /// Selected variable

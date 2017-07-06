@@ -20,25 +20,15 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QComboBox>
-#include <QPushButton>
-#include <QScrollArea>
-#include <QCheckBox>
 #include <QTextEdit>
 
 #include "configuration.h"
-#include "configurationmanager.h"
 #include "dbobject.h"
+#include "dbobjectmanager.h"
 #include "metadbovariablewidget.h"
 #include "metadbovariable.h"
-#include "dbtablecolumn.h"
-#include "dbschema.h"
-#include "dbschemamanager.h"
-#include "metadbtable.h"
+#include "dbovariableselectionwidget.h"
 #include "logger.h"
-#include "dbovariabledatatypecombobox.h"
-//#include "StringRepresentationComboBox.h"
-#include "dbtablecolumncombobox.h"
-#include "unitselectionwidget.h"
 #include "atsdb.h"
 
 #include "stringconv.h"
@@ -46,7 +36,7 @@
 using namespace Utils;
 
 MetaDBOVariableWidget::MetaDBOVariableWidget(MetaDBOVariable &variable, QWidget *parent, Qt::WindowFlags f)
-    : QWidget (parent, f), variable_(variable), name_edit_(nullptr), description_edit_(nullptr) //, type_combo_(nullptr),unit_sel_ (nullptr)
+    : QWidget (parent, f), variable_(variable), name_edit_(nullptr), description_edit_(nullptr), grid_layout_ (nullptr)
 {
     setMinimumSize(QSize(800, 600));
 
@@ -82,49 +72,16 @@ MetaDBOVariableWidget::MetaDBOVariableWidget(MetaDBOVariable &variable, QWidget 
     properties_layout->addWidget (description_edit_, row, 1);
     row++;
 
-//    QLabel *type_label = new QLabel ("Data Type");
-//    properties_layout->addWidget(type_label, row, 0);
-
-//    type_combo_ = new DBOVariableDataTypeComboBox (variable_);
-//    properties_layout->addWidget (type_combo_, row, 1);
-//    row++;
-
-    //logdbg  << "DBObjectWidget: updateDBOVarsGrid: creating variable row for " << it->first << " stringrep";
-    // TODO
-    //    StringRepresentationComboBox *repr = new StringRepresentationComboBox (it->second);
-    //    assert (dbo_vars_grid_representation_boxes_.find(repr) == dbo_vars_grid_representation_boxes_.end());
-    //    dbo_vars_grid_representation_boxes_[repr] = it->second;
-    //    dbovars_grid_->addWidget (repr, row, 4);
-
-
-//    QLabel *unit_label = new QLabel ("Unit");
-//    properties_layout->addWidget(unit_label, row, 0);
-
-//    unit_sel_ = new UnitSelectionWidget (variable_.unitDimension(), variable_.unitUnit());
-//    properties_layout->addWidget (unit_sel_, row, 1);
-//    row++;
-
-//    auto metas = variable_.dbObject().metaTables ();
-//    auto schemas  = ATSDB::instance().schemaManager().getSchemas();
-
-//    for (auto sit = schemas.begin(); sit != schemas.end(); sit++)
-//    {
-//        if (metas.find (sit->second->name()) == metas.end())
-//            continue;
-
-//        std::string schema_string = "Schema: "+sit->second->name();
-//        QLabel *label = new QLabel (schema_string.c_str());
-//        properties_layout->addWidget(label, row, 0);
-
-//        DBTableColumnComboBox *box = new DBTableColumnComboBox (sit->second->name(), metas[sit->second->name()], variable_);
-//        properties_layout->addWidget (box, row, 1);
-//        row++;
-//    }
-
     main_layout->addLayout (properties_layout);
+
+    grid_layout_ = new QGridLayout ();
+    main_layout->addLayout (grid_layout_);
+
     main_layout->addStretch();
 
     setLayout (main_layout);
+
+    updateSlot ();
 
     show();
 }
@@ -155,4 +112,26 @@ void MetaDBOVariableWidget::editDescriptionSlot()
     emit metaVariableChangedSignal();
 }
 
+void MetaDBOVariableWidget::updateSlot ()
+{
+    assert (grid_layout_);
 
+    QLayoutItem *child;
+    while ((child = grid_layout_->takeAt(0)) != 0)
+    {
+        if (child->widget())
+            delete child->widget();
+        delete child;
+    }
+
+    unsigned int row = 0;
+    for (auto object_it : ATSDB::instance().objectManager().objects())
+    {
+        grid_layout_->addWidget(new QLabel (object_it.first.c_str()), row, 0);
+
+        DBOVariableSelectionWidget *var_sel = new DBOVariableSelectionWidget (true);
+
+        grid_layout_->addWidget(var_sel, row, 1);
+        row++;
+    }
+}
