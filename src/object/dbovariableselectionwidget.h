@@ -45,17 +45,27 @@ class DBOVariableSelectionWidget : public QGroupBox
 public:
     /// @brief Constructor without variable
     DBOVariableSelectionWidget (bool show_title=true, bool h_box=false, QWidget* parent=nullptr );
-    /// @brief Constructor with given variable
-    DBOVariableSelectionWidget (DBOVariable *init, bool show_title=true, bool h_box=false, QWidget* parent=nullptr );
     /// @brief Destructor
     ~DBOVariableSelectionWidget();
 
     /// @brief Returns if a variable is selected
-    bool hasVariable() const { return sel_var_ != nullptr; }
+    bool hasVariable() const { return variable_selected_; }
     /// @brief Return selected variable
-    DBOVariable* getSelectedVariable() const;
+    DBOVariable& selectedVariable() const;
     /// @brief Sets the selected variable
-    void setSelectedVariable (DBOVariable *var);
+    void selectedVariable (DBOVariable &variable);
+
+    bool showMetaVariables() const;
+    void showMetaVariables(bool show_meta_variables);
+
+    bool showMetaVariablesOnly() const;
+    void showMetaVariablesOnly(bool show_meta_variables_only);
+
+    bool showDBOOnly() const;
+    void showDBOOnly(bool show_dbo_only);
+
+    std::string onlyDBOName() const;
+    void onlyDBOName(const std::string &only_dbo_name);
 
 protected slots:
     /// @brief Slot for menu triggered action
@@ -68,23 +78,25 @@ signals:
     void selectionChanged();
 
 private:
-    /// @brief Creates GUI elements
-    void createControls();
-    /// @brief Updates selection menu entries
-    void updateEntries();
-
-    /// Select variable button
-    QPushButton* sel_button_;
     /// Variable type information
-    QLabel* sel_edit_type_;
+    QLabel* object_label_;
     /// Variable name information
-    QLabel* sel_edit_id_;
+    QLabel* variable_label_;
     /// Context menu for variable selection
     QMenu menu_;
-    /// Selected variable
-    DBOVariable *sel_var_;
-    /// Layout horizontal flag
-    bool h_box_;
+
+    bool variable_selected_;
+    bool meta_variable_selected_;
+
+    bool show_meta_variables_;
+    bool show_meta_variables_only_;
+
+    bool show_dbo_only_;
+    std::string only_dbo_name_;
+
+    /// @brief Updates selection menu entries
+    void updateMenuEntries();
+
 };
 
 #endif //DBOVARIABLESELECTIONWIDGET_H

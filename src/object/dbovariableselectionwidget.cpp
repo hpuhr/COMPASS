@@ -31,25 +31,53 @@
 /*
  */
 DBOVariableSelectionWidget::DBOVariableSelectionWidget (bool show_title, bool h_box, QWidget* parent )
-    :   QGroupBox (show_title ? "Select DBO Variable": "", parent), sel_var_(0), h_box_(h_box)
+    :   QGroupBox (show_title ? "Select DBO Variable": "", parent), variable_selected_(false), meta_variable_selected_(false),
+      show_meta_variables_(false), show_meta_variables_only_(false), show_dbo_only_(false)
 {
-    createControls();
+    //setStyleSheet("border: 1px solid gray; border-radius: 0px; padding:0");
+    setFlat(true);
+
+    QBoxLayout *layout;
+
+    QPixmap* pixmap = new QPixmap("./data/icons/expand.png");
+
+    object_label_ = new QLabel (this);
+    variable_label_ = new QLabel (this);
+    variable_label_->setAlignment (Qt::AlignRight);
+
+    QPushButton *sel_button = new QPushButton(this);
+    sel_button->setIcon(QIcon(*pixmap));
+    sel_button->setFixedSize (UI_ICON_SIZE);
+    sel_button->setFlat(UI_ICON_BUTTON_FLAT);
+
+    if (h_box)
+    {
+        layout = new QHBoxLayout;
+        layout->addWidget( object_label_);
+        layout->addWidget( variable_label_);
+
+        layout->addWidget(sel_button);
+    }
+    else
+    {
+        layout = new QVBoxLayout;
+
+        QHBoxLayout *select_layout = new QHBoxLayout ();
+        select_layout->addWidget( object_label_);
+        select_layout->addWidget(sel_button);
+        layout->addLayout (select_layout);
+
+        layout->addWidget( variable_label_);
+
+    }
+    setLayout( layout );
+
+    connect( &menu_, SIGNAL(triggered(QAction*)), this, SLOT(triggerSlot(QAction*)));
+    connect( sel_button, SIGNAL(clicked()), this, SLOT(showMenuSlot()) );
+
+    updateMenuEntries();
 }
 
-/*
- */
-DBOVariableSelectionWidget::DBOVariableSelectionWidget (DBOVariable *init, bool show_title, bool h_box, QWidget* parent )
-    :   QGroupBox (show_title ? "Select DBO Variable": ""), sel_var_( init ), h_box_(h_box)
-{
-    assert (sel_var_);
-
-    createControls();
-
-    QString str = QString::fromStdString(sel_var_->dbObject().name());
-
-    sel_edit_type_->setText (str);
-    sel_edit_id_->setText (QString::fromStdString( sel_var_->name()));
-}
 
 /*
  */
@@ -59,57 +87,33 @@ DBOVariableSelectionWidget::~DBOVariableSelectionWidget()
 
 /*
  */
-void DBOVariableSelectionWidget::createControls()
-{
-    QBoxLayout *layout;
-
-    QPixmap* pixmapmanage = new QPixmap("./data/icons/expand.png");
-    sel_button_ = new QPushButton(this);
-    sel_button_->setIcon(QIcon(*pixmapmanage));
-    sel_button_->setFixedSize ( 25, 25 );
-
-    if (h_box_)
-    {
-        layout = new QHBoxLayout;
-        //QHBoxLayout *select_layout = new QHBoxLayout ();
-        sel_edit_type_ = new QLabel (this);
-        layout->addWidget( sel_edit_type_);
-
-        //layout->addLayout (select_layout);
-
-        sel_edit_id_ = new QLabel (this);
-        layout->addWidget( sel_edit_id_);
-
-        layout->addWidget(sel_button_);
-    }
-    else
-    {
-        layout = new QVBoxLayout;
-        QHBoxLayout *select_layout = new QHBoxLayout ();
-        sel_edit_type_ = new QLabel (this);
-        select_layout->addWidget( sel_edit_type_);
-        select_layout->addWidget(sel_button_);
-        layout->addLayout (select_layout);
-
-        sel_edit_id_ = new QLabel (this);
-        layout->addWidget( sel_edit_id_);
-
-    }
-    setLayout( layout );
-
-    connect( &menu_, SIGNAL(triggered(QAction*)), this, SLOT(triggerSlot(QAction*)));
-    connect( sel_button_, SIGNAL(clicked()), this, SLOT(showMenuSlot()) );
-
-    updateEntries();
-}
-
-/*
- */
-void DBOVariableSelectionWidget::updateEntries()
+void DBOVariableSelectionWidget::updateMenuEntries()
 {
     menu_.clear();
 
-    for(auto object_it : ATSDB::instance().objectManager().objects())
+    QAction* action = menu_.addAction("");
+    QVariantMap vmap;
+    vmap.insert (QString (""), QVariant (QString ("")));
+    action->setData (QVariant(vmap));
+
+    if (show_meta_variables_)
+    {
+        QMenu* meta_menu = menu_.addMenu(QString::fromStdString (META_OBJECT_NAME));
+        for (auto meta_it : ATSDB::instance().objectManager().metaVariables())
+        {
+            QAction* action = meta_menu->addAction(QString::fromStdString (meta_it.first));
+
+            QVariantMap vmap;
+            vmap.insert (QString::fromStdString (meta_it.first), QVariant (QString::fromStdString (META_OBJECT_NAME)));
+            action->setData (QVariant(vmap));
+
+        }
+    }
+
+    if (show_meta_variables_only_)
+        return;
+
+    for (auto object_it : ATSDB::instance().objectManager().objects())
     {
         auto variables = object_it.second->variables();
 
@@ -120,8 +124,8 @@ void DBOVariableSelectionWidget::updateEntries()
             QAction* action = m2->addAction(QString::fromStdString (variable_it.first));
 
             QVariantMap vmap;
-            vmap.insert( QString::fromStdString (variable_it.first), QVariant (QString::fromStdString (object_it.first)));
-            action->setData( QVariant( vmap ) );
+            vmap.insert (QString::fromStdString (variable_it.first), QVariant (QString::fromStdString (object_it.first)));
+            action->setData (QVariant (vmap));
         }
     }
 }
@@ -137,30 +141,109 @@ void DBOVariableSelectionWidget::showMenuSlot()
  */
 void DBOVariableSelectionWidget::triggerSlot( QAction* action )
 {
-      QVariantMap vmap = action->data().toMap();
-      std::string var_name = vmap.begin().key().toStdString();
-      std::string obj_name = vmap.begin().value().toString().toStdString();
+    assert (object_label_);
+    assert (variable_label_);
+    
+    QVariantMap vmap = action->data().toMap();
+    std::string var_name = vmap.begin().key().toStdString();
+    std::string obj_name = vmap.begin().value().toString().toStdString();
 
-      sel_var_ = &ATSDB::instance().objectManager().object(obj_name).variable(var_name);
+    if (var_name.size() == 0 && obj_name.size() == 0)
+    {
+        meta_variable_selected_=false;
+        variable_selected_=false;
+    }
+    else
+    {
+        if (obj_name == META_OBJECT_NAME)
+        {
+            meta_variable_selected_ = true;
+            variable_selected_=false;
+        }
+        else
+        {
+            assert (ATSDB::instance().objectManager().object(obj_name).hasVariable(var_name));
 
-      sel_edit_type_->setText (obj_name.c_str());
-      sel_edit_id_->setText( action->text() );
+            meta_variable_selected_ = false;
+            variable_selected_=true;
+        }
+    }
 
-      emit selectionChanged();
+    object_label_->setText (obj_name.c_str());
+    variable_label_->setText (var_name.c_str());
+
+    emit selectionChanged();
 }
 
-void DBOVariableSelectionWidget::setSelectedVariable (DBOVariable *var)
+void DBOVariableSelectionWidget::selectedVariable (DBOVariable &variable)
 {
-    sel_edit_type_->setText (QString::fromStdString(var->dbObject().name()));
-    sel_edit_id_->setText (var->name().c_str());
+    assert (object_label_);
+    assert (variable_label_);
 
-    sel_var_=var;
+    object_label_->setText (QString::fromStdString(variable.dbObject().name()));
+    variable_label_->setText (variable.name().c_str());
+
+    variable_selected_=true;
+    meta_variable_selected_=false;
 }
 
 /*
  */
-DBOVariable* DBOVariableSelectionWidget::getSelectedVariable() const
+DBOVariable &DBOVariableSelectionWidget::selectedVariable() const
 {
-    assert (sel_var_);
-    return sel_var_;
+    assert (object_label_);
+    assert (variable_label_);
+    assert (variable_selected_);
+
+    std::string obj_name = object_label_->text().toStdString();
+    std::string var_name = variable_label_->text().toStdString();
+
+    assert (ATSDB::instance().objectManager().object(obj_name).hasVariable(var_name));
+
+    return ATSDB::instance().objectManager().object(obj_name).variable(var_name);
+}
+
+std::string DBOVariableSelectionWidget::onlyDBOName() const
+{
+    return only_dbo_name_;
+}
+
+void DBOVariableSelectionWidget::onlyDBOName(const std::string &only_dbo_name)
+{
+    only_dbo_name_ = only_dbo_name;
+}
+
+bool DBOVariableSelectionWidget::showDBOOnly() const
+{
+    return show_dbo_only_;
+}
+
+void DBOVariableSelectionWidget::showDBOOnly(bool show_dbo_only)
+{
+    show_dbo_only_ = show_dbo_only;
+}
+
+bool DBOVariableSelectionWidget::showMetaVariablesOnly() const
+{
+    return show_meta_variables_only_;
+}
+
+void DBOVariableSelectionWidget::showMetaVariablesOnly(bool show_meta_variables_only)
+{
+    show_meta_variables_only_ = show_meta_variables_only;
+
+    if (show_meta_variables_only_)
+        show_meta_variables_ = true;
+
+    updateMenuEntries ();
+}
+
+bool DBOVariableSelectionWidget::showMetaVariables() const
+{
+    return show_meta_variables_;
+}
+
+void DBOVariableSelectionWidget::showMetaVariables(bool show_meta_variables)
+{
+    show_meta_variables_ = show_meta_variables;
 }
