@@ -92,14 +92,6 @@ public:
     /// @brief Returns order ascending flag
     bool getOrderAscending () { return order_ascending_; }
 
-    /// @brief Creates asynchronous read jobs for all DBObjects
-    //void updateData ();
-
-    /// @brief Callback function for correctly finished read jobs
-    //void readInfoDone (Job *job);
-    /// @brief Callback function for interrupted read jobs
-    //void readInfoObsolete (Job *job);
-
     /// @brief Returns database view flag
     bool getDatabaseView () { return database_view_; }
     /// @brief Sets database view flags
@@ -127,8 +119,6 @@ protected:
     /// Use database view
     bool database_view_;
 
-    /// Container with result data buffers
-    //std::map <DB_OBJECT_TYPE, Buffer*> data_;
     /// Selected DBObject records
     ViewSelectionEntries &selection_entries_;
 

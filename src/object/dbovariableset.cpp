@@ -37,22 +37,22 @@ DBOVariableSet::~DBOVariableSet()
 {
 }
 
-bool DBOVariableSet::add (DBOVariable *var)
+bool DBOVariableSet::add (DBOVariable &var)
 {
-  if (find (set_.begin(), set_.end(), var) == set_.end())
+  if (find (set_.begin(), set_.end(), &var) == set_.end())
   {
-    set_.push_back (var);
+    set_.push_back (&var);
     changed_=true;
     return true;
   }
   return false;
 }
 
-bool DBOVariableSet::add (const DBOVariable *var)
+bool DBOVariableSet::add (const DBOVariable &var)
 {
-  if (find (set_.begin(), set_.end(), var) == set_.end())
+  if (find (set_.begin(), set_.end(), &var) == set_.end())
   {
-    set_.push_back ((DBOVariable *)var);
+    set_.push_back ( (DBOVariable *) (&var)); // TODO this is ugly
     changed_=true;
     return true;
   }
@@ -148,16 +148,16 @@ DBOVariableSet& DBOVariableSet::operator= (const DBOVariableSet &source)
     // do the copy
     for (it=source.set_.begin(); it != source.set_.end(); it++)
     {
-        add ((*it));
+        add (*(*it));
     }
 
     return *this;
 }
 
-DBOVariable *DBOVariableSet::getVariable (unsigned int index)
+DBOVariable &DBOVariableSet::getVariable (unsigned int index)
 {
   assert (index < set_.size());
-  return set_.at(index);
+  return *set_.at(index);
 }
 
 bool DBOVariableSet::intersect (DBOVariableSet &set)
@@ -204,9 +204,9 @@ void DBOVariableSet::clear ()
   changed_=true;
 }
 
-bool DBOVariableSet::hasVariable (DBOVariable *variable)
+bool DBOVariableSet::hasVariable (DBOVariable &variable)
 {
-  return find (set_.begin(), set_.end(), variable) != set_.end();
+  return find (set_.begin(), set_.end(), &variable) != set_.end();
 }
 
 PropertyList DBOVariableSet::getPropertyList () const

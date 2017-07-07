@@ -99,7 +99,7 @@ public:
     bool hasVariable (const std::string &dbo_type, const std::string &name) const;
 
     /// @brief Returns a copied new variable set, with all variables for a given DBO type
-    //DBOVariableSet *getFor (const std::string &dbo_type);
+    DBOVariableSet getFor (const std::string &dbo_name);
     //DBOVariableSet getUnorderedSet () const;
 
     /// @brief Returns a variable at a given index

@@ -111,6 +111,7 @@ class Buffer;
 class Job;
 class DBJob;
 class DBOReadDBJob;
+class DBOVariableSet;
 
 /**
  * @brief Abstract data description of an object stored in a database
@@ -191,7 +192,7 @@ public:
     void loadingWanted (bool wanted) { loading_wanted_=wanted; }
     bool loadingWanted () { return loading_wanted_; }
 
-    void load (const std::string &limit_str="");
+    void load (DBOVariableSet &read_set, const std::string &limit_str="");
 
     /// @brief Returns if incremental read for DBO type was prepared
     bool isLoading ();

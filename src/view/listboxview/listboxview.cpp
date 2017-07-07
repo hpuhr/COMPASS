@@ -81,6 +81,12 @@ void ListBoxView::checkSubConfigurables ()
   }
 }
 
+DBOVariableSet ListBoxView::getSet (const std::string &dbo_name)
+{
+    assert (data_source_);
+    return data_source_->getSet()->getFor(dbo_name);
+}
+
 //void ListBoxView::updateData ()
 //{
 //  logdbg  << "ListBoxView: updateData";

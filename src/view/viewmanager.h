@@ -57,7 +57,7 @@ public:
 
     std::map <std::string, ViewContainer*> getContainers () {return containers_;}
     std::map <std::string, View *> getViews () {return views_;}
-    DBOVariableSet &getReadSet () { return read_set_; }
+    DBOVariableSet getReadSet (const std::string &dbo_name);
 
     ViewManagerWidget *widget();
 
@@ -70,8 +70,6 @@ protected:
 
     std::map <std::string, ViewContainer*> containers_;
     std::map<std::string, View*> views_;
-
-    DBOVariableSet read_set_;
 
     unsigned int container_count_;
 

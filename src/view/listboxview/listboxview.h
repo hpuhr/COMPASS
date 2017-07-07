@@ -60,6 +60,8 @@ public:
     /// @brief Returns the used data source
     ListBoxViewDataSource *getDataSource () { assert (data_source_); return data_source_; }
 
+    virtual DBOVariableSet getSet (const std::string &dbo_name);
+
 protected:
     /// For data display
     ListBoxViewWidget* widget_;

@@ -51,9 +51,8 @@ public:
   void setChanged (bool changed) { changed_=changed; }
 
   /// @brief Adds a DBOVariable
-  bool add (DBOVariable *var);
-  /// @brief Adds a DBOVariable
-  bool add (const DBOVariable *var);
+  bool add (DBOVariable &var);
+  bool add (const DBOVariable &var);
   /// @brief Adds another set of variables
   bool add (DBOVariableSet &set);
   /// @brief Adds variables for a given type from a given set of variables
@@ -65,7 +64,7 @@ public:
   /// @brief Removes all variables
   void clear ();
   /// @brief Returns if given variable is in the set
-  bool hasVariable (DBOVariable *variable);
+  bool hasVariable (DBOVariable &variable);
 
   /// @brief Returns copied set of variables for a given DBO type, has to be deleted by caller
   //DBOVariableSet *getFor (const std::string &dbo_type);
@@ -77,7 +76,7 @@ public:
   /// @brief Returns container with all variables
   std::vector <DBOVariable*> &getSet () { return set_;}
   /// @brief Returns variable at a given index
-  DBOVariable *getVariable (unsigned int index);
+  DBOVariable &getVariable (unsigned int index);
 
   /// @brief Return property list for a given DBO type for variables in the set
   PropertyList getPropertyList () const;

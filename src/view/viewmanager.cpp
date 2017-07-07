@@ -125,6 +125,19 @@ void ViewManager::checkSubConfigurables ()
 //        views_widget_->update();
 }
 
+DBOVariableSet ViewManager::getReadSet (const std::string &dbo_name)
+{
+    DBOVariableSet read_set;
+    DBOVariableSet read_set_tmp;
+
+    for (auto view_it : views_)
+    {
+        read_set_tmp = view_it.second->getSet (dbo_name);
+        read_set.add (read_set_tmp);
+    }
+    return read_set;
+}
+
 ViewManagerWidget *ViewManager::widget()
 {
     if (!widget_)
