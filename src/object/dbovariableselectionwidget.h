@@ -19,13 +19,14 @@
 #ifndef DBOVARIABLESELECTIONWIDGET_H
 #define DBOVARIABLESELECTIONWIDGET_H
 
-#include "dbovariable.h"
 
 #include <QGroupBox>
 #include <QMenu>
 
 class QPushButton;
 class QLabel;
+class DBOVariable;
+class MetaDBOVariable;
 
 
 //typedef struct {
@@ -42,6 +43,18 @@ class QLabel;
 class DBOVariableSelectionWidget : public QGroupBox
 {
     Q_OBJECT
+
+protected slots:
+    /// @brief Slot for menu triggered action
+    void triggerSlot( QAction* action );
+    /// @brief Slot for show menu
+    void showMenuSlot();
+
+signals:
+    /// @brief Signal if variable was changed
+    void selectionChanged();
+
+
 public:
     /// @brief Constructor without variable
     DBOVariableSelectionWidget (bool show_title=true, bool h_box=false, QWidget* parent=nullptr );
@@ -55,27 +68,24 @@ public:
     /// @brief Sets the selected variable
     void selectedVariable (DBOVariable &variable);
 
+    /// @brief Returns if a variable is selected
+    bool hasMetaVariable() const { return meta_variable_selected_; }
+    /// @brief Return selected variable
+    MetaDBOVariable& selectedMetaVariable() const;
+    /// @brief Sets the selected variable
+    void selectedMetaVariable (MetaDBOVariable &variable);
+
     bool showMetaVariables() const;
     void showMetaVariables(bool show_meta_variables);
 
     bool showMetaVariablesOnly() const;
     void showMetaVariablesOnly(bool show_meta_variables_only);
 
+    void showDBOOnly(const std::string &only_dbo_name);
+    void disableShowDBOOnly();
+
     bool showDBOOnly() const;
-    void showDBOOnly(bool show_dbo_only);
-
     std::string onlyDBOName() const;
-    void onlyDBOName(const std::string &only_dbo_name);
-
-protected slots:
-    /// @brief Slot for menu triggered action
-    void triggerSlot( QAction* action );
-    /// @brief Slot for show menu
-    void showMenuSlot();
-
-signals:
-    /// @brief Signal if variable was changed
-    void selectionChanged();
 
 private:
     /// Variable type information

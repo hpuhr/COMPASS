@@ -11,7 +11,7 @@
 #include <QWidget>
 #include "dbovariable.h"
 
-//class DBOVariableOrderedSetWidget;
+class DBOVariableOrderedSetWidget;
 //class DBOVariableSelectionWidget;
 class ListBoxView;
 class QLineEdit;
@@ -25,8 +25,6 @@ class ListBoxViewConfigWidget : public QWidget
     Q_OBJECT
 
 public slots:
-    /// @brief Called when the variable read list was changed
-    void variableSetChanged ();
     /// @brief Called when the order-by variable was changed
     void orderVariableChanged ();
     /// @brief Called when use filter checkbox is un/checked
@@ -50,7 +48,7 @@ protected:
     /// Base view
     ListBoxView* view_;
     /// Variable read list widget
-    //DBOVariableOrderedSetWidget *variable_set_widget_;
+    DBOVariableOrderedSetWidget *variable_set_widget_;
     /// Order-by variable selection widget
     //DBOVariableSelectionWidget *order_variable_widget_;
 };

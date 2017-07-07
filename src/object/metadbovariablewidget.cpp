@@ -99,6 +99,7 @@ void MetaDBOVariableWidget::editNameSlot ()
     std::string text = name_edit_->text().toStdString();
     assert (text.size()>0);
     variable_.name (text);
+
     emit metaVariableChangedSignal();
 }
 void MetaDBOVariableWidget::editDescriptionSlot()
@@ -109,7 +110,28 @@ void MetaDBOVariableWidget::editDescriptionSlot()
     std::string text = description_edit_->text().toStdString();
     assert (text.size()>0);
     variable_.description (text);
+
     emit metaVariableChangedSignal();
+}
+
+void MetaDBOVariableWidget::subVariableChangedSlot ()
+{
+    DBOVariableSelectionWidget *var_sel = dynamic_cast <DBOVariableSelectionWidget*> (QObject::sender());
+    assert (var_sel);
+    assert (!var_sel->hasMetaVariable());
+    assert (selection_widgets_.count(var_sel) > 0);
+
+    std::string obj_name = selection_widgets_.at(var_sel);
+
+    if (variable_.existsIn(obj_name))
+        variable_.removeVariable(obj_name);
+
+    if (var_sel->hasVariable())
+    {
+        assert (!variable_.existsIn(obj_name));
+        DBOVariable &variable = var_sel->selectedVariable();
+        variable_.addVariable(obj_name, variable.name());
+    }
 }
 
 void MetaDBOVariableWidget::updateSlot ()
@@ -124,13 +146,21 @@ void MetaDBOVariableWidget::updateSlot ()
         delete child;
     }
 
+    selection_widgets_.clear();
+
     unsigned int row = 0;
     for (auto object_it : ATSDB::instance().objectManager().objects())
     {
         grid_layout_->addWidget(new QLabel (object_it.first.c_str()), row, 0);
 
         DBOVariableSelectionWidget *var_sel = new DBOVariableSelectionWidget (false, true);
-        //var_sel->showMetaVariablesOnly(true);
+        var_sel->showDBOOnly(object_it.first);
+
+        if (variable_.existsIn(object_it.first))
+            var_sel->selectedVariable (variable_.getFor(object_it.first));
+
+        connect (var_sel, SIGNAL(selectionChanged()), this, SLOT(subVariableChangedSlot()));
+        selection_widgets_[var_sel] = object_it.first;
 
         grid_layout_->addWidget(var_sel, row, 1);
         row++;

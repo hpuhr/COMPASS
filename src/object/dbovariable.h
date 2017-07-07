@@ -183,7 +183,7 @@ public:
   /// @brief  Returns unit unit
   const std::string &unitUnit () const { return unit_unit_; }
 
-  DBObject &dbObject () { return dbo_parent_; }
+  DBObject &dbObject () const { return dbo_parent_; }
 
   /// @brief Returns flag if minimum/maximum information is available
   //bool hasMinMaxInfo ();

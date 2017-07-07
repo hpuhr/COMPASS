@@ -167,6 +167,7 @@ set ( atsdb_HDRS
     src/object/dbovariable.h
     src/object/dbovariableset.h
     src/object/dbovariableorderedset.h
+    src/object/dbovariableorderedsetwidget.h
     src/object/metadbovariable.h
     src/object/metadbovariablewidget.h
     src/object/dbobject.h
@@ -177,14 +178,12 @@ set ( atsdb_HDRS
     src/object/dbobjectmanagerwidget.h
     src/object/dbobjectmanagerloadwidget.h
     src/object/dbovariabledatatypecombobox.h
-    #        src/object/dbovariablecombobox.h
-    #        src/object/dbovariablesetwidget.h
-    #src/object/dbovariableorderedsetwidget.h
     src/object/dbovariableselectionwidget.h
     src/object/dbovariabledatatypecombobox.h
+    #        src/object/dbovariablecombobox.h
+    #        src/object/dbovariablesetwidget.h
     #        src/object/propertydatatypecombobox.h
-    #        src/object/metadbobjecteditwidget.h
-    #        src/object/stringrepresentationcombobox.h
+        #        src/object/stringrepresentationcombobox.h
     #        src/polygon/airspacesectormanagerwidget.h
     #        src/polygon/airspacesectortreewidget.h
     #        src/polygon/airspacesectorwidget.h
@@ -340,13 +339,12 @@ set ( atsdb_SRCS
     src/object/dbovariablewidget.cpp
     src/object/dbovariableset.cpp
     src/object/dbovariableorderedset.cpp
+    src/object/dbovariableorderedsetwidget.cpp
     src/object/metadbovariable.cpp
     src/object/metadbovariablewidget.cpp
     src/object/dbovariableselectionwidget.cpp
     #        src/object/dbovariablecombobox.cpp
     #        src/object/dbovariablesetwidget.cpp
-    #src/object/dbovariableorderedsetwidget.cpp
-    #        src/object/metadbobjecteditwidget.cpp
     #        src/polygon/polygon4ddi.cpp
     #        src/polygon/geographicpoint.cpp
     #        src/polygon/airspacesector.cpp

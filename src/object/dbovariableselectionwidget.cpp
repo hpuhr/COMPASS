@@ -18,14 +18,16 @@
 
 #include "dbovariableselectionwidget.h"
 #include "dbobjectmanager.h"
+#include "atsdb.h"
+#include "dbobject.h"
+#include "dbovariable.h"
+#include "metadbovariable.h"
 
 #include "global.h"
 
 #include <QPushButton>
 #include <QLabel>
 #include <QGridLayout>
-#include "atsdb.h"
-#include "dbobject.h"
 
 
 /*
@@ -96,36 +98,53 @@ void DBOVariableSelectionWidget::updateMenuEntries()
     vmap.insert (QString (""), QVariant (QString ("")));
     action->setData (QVariant(vmap));
 
-    if (show_meta_variables_)
+    if (show_dbo_only_)
     {
-        QMenu* meta_menu = menu_.addMenu(QString::fromStdString (META_OBJECT_NAME));
-        for (auto meta_it : ATSDB::instance().objectManager().metaVariables())
+        assert (ATSDB::instance().objectManager().existsObject(only_dbo_name_));
+
+        for (auto variable_it : ATSDB::instance().objectManager().object(only_dbo_name_).variables())
         {
-            QAction* action = meta_menu->addAction(QString::fromStdString (meta_it.first));
+            QAction* action = menu_.addAction(QString::fromStdString (variable_it.first));
 
             QVariantMap vmap;
-            vmap.insert (QString::fromStdString (meta_it.first), QVariant (QString::fromStdString (META_OBJECT_NAME)));
-            action->setData (QVariant(vmap));
-
+            vmap.insert (QString::fromStdString (variable_it.first), QVariant (QString::fromStdString (only_dbo_name_)));
+            action->setData (QVariant (vmap));
         }
     }
-
-    if (show_meta_variables_only_)
-        return;
-
-    for (auto object_it : ATSDB::instance().objectManager().objects())
+    else
     {
-        auto variables = object_it.second->variables();
-
-        QMenu* m2 = menu_.addMenu(QString::fromStdString(object_it.first));
-
-        for (auto variable_it : variables)
+        if (show_meta_variables_)
         {
-            QAction* action = m2->addAction(QString::fromStdString (variable_it.first));
+            QMenu* meta_menu = menu_.addMenu(QString::fromStdString (META_OBJECT_NAME));
+            for (auto meta_it : ATSDB::instance().objectManager().metaVariables())
+            {
+                QAction* action = meta_menu->addAction(QString::fromStdString (meta_it.first));
 
-            QVariantMap vmap;
-            vmap.insert (QString::fromStdString (variable_it.first), QVariant (QString::fromStdString (object_it.first)));
-            action->setData (QVariant (vmap));
+                QVariantMap vmap;
+                vmap.insert (QString::fromStdString (meta_it.first), QVariant (QString::fromStdString (META_OBJECT_NAME)));
+                action->setData (QVariant(vmap));
+
+            }
+        }
+
+        if (show_meta_variables_only_)
+            return;
+
+        for (auto object_it : ATSDB::instance().objectManager().objects())
+        {
+
+            auto variables = object_it.second->variables();
+
+            QMenu* m2 = menu_.addMenu(QString::fromStdString(object_it.first));
+
+            for (auto variable_it : variables)
+            {
+                QAction* action = m2->addAction(QString::fromStdString (variable_it.first));
+
+                QVariantMap vmap;
+                vmap.insert (QString::fromStdString (variable_it.first), QVariant (QString::fromStdString (object_it.first)));
+                action->setData (QVariant (vmap));
+            }
         }
     }
 }
@@ -203,24 +222,61 @@ DBOVariable &DBOVariableSelectionWidget::selectedVariable() const
     return ATSDB::instance().objectManager().object(obj_name).variable(var_name);
 }
 
+void DBOVariableSelectionWidget::selectedMetaVariable (MetaDBOVariable &variable)
+{
+    assert (object_label_);
+    assert (variable_label_);
+
+    object_label_->setText (QString::fromStdString(META_OBJECT_NAME));
+    variable_label_->setText (variable.name().c_str());
+
+    variable_selected_=false;
+    meta_variable_selected_=true;
+}
+
+/*
+ */
+MetaDBOVariable &DBOVariableSelectionWidget::selectedMetaVariable() const
+{
+    assert (object_label_);
+    assert (variable_label_);
+    assert (variable_selected_);
+
+    std::string obj_name = object_label_->text().toStdString();
+    std::string var_name = variable_label_->text().toStdString();
+
+    assert (obj_name == META_OBJECT_NAME);
+    assert (ATSDB::instance().objectManager().existsMetaVariable(var_name));
+
+    return ATSDB::instance().objectManager().metaVariable(var_name);
+}
+
+void DBOVariableSelectionWidget::showDBOOnly(const std::string &only_dbo_name)
+{
+    show_dbo_only_ = true;
+    only_dbo_name_ = only_dbo_name;
+
+    updateMenuEntries ();
+}
+
+
+void DBOVariableSelectionWidget::disableShowDBOOnly()
+{
+    show_dbo_only_ = false;
+    only_dbo_name_ = "";
+
+    updateMenuEntries ();
+}
+
 std::string DBOVariableSelectionWidget::onlyDBOName() const
 {
     return only_dbo_name_;
 }
 
-void DBOVariableSelectionWidget::onlyDBOName(const std::string &only_dbo_name)
-{
-    only_dbo_name_ = only_dbo_name;
-}
 
 bool DBOVariableSelectionWidget::showDBOOnly() const
 {
     return show_dbo_only_;
-}
-
-void DBOVariableSelectionWidget::showDBOOnly(bool show_dbo_only)
-{
-    show_dbo_only_ = show_dbo_only;
 }
 
 bool DBOVariableSelectionWidget::showMetaVariablesOnly() const

@@ -72,6 +72,7 @@ std::string MetaDBOVariable::getNameFor (const std::string &dbo_name)
 
 void MetaDBOVariable::removeVariable (const std::string &dbo_name)
 {
+    loginf  << "MetaDBOVariable " << name_ << ": removeVariable: dbo " << dbo_name;
     assert (existsIn (dbo_name));
     delete definitions_.at(dbo_name);
     definitions_.erase(dbo_name);
@@ -80,7 +81,7 @@ void MetaDBOVariable::removeVariable (const std::string &dbo_name)
 
 void MetaDBOVariable::addVariable (const std::string &dbo_name, const std::string &dbovariable_name)
 {
-    logdbg  << "MetaDBOVariable: addVariable: dbo " << dbo_name << " varname " << dbovariable_name;
+    loginf  << "MetaDBOVariable " << name_ << ": addVariable: dbo " << dbo_name << " varname " << dbovariable_name;
 
     assert (!existsIn(dbo_name));
 

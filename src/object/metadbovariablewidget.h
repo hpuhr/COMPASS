@@ -47,6 +47,7 @@ public slots:
     void editNameSlot ();
     /// @brief Changes DBO info
     void editDescriptionSlot ();
+    void subVariableChangedSlot ();
 
     void updateSlot ();
 
@@ -67,7 +68,7 @@ private:
 
     QGridLayout *grid_layout_;
 
-    //std::map <>
+    std::map <DBOVariableSelectionWidget*, std::string> selection_widgets_;
 };
 
 #endif /* METADBOVARIABLEWIDGET_H_ */

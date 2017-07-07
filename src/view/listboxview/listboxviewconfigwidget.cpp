@@ -12,7 +12,7 @@
 #include <QLabel>
 
 #include "dbobjectmanager.h"
-//#include "dbovariableorderedsetwidget.h"
+#include "dbovariableorderedsetwidget.h"
 //#include "dbovariableselectionwidget.h"
 #include "listboxview.h"
 #include "listboxviewconfigwidget.h"
@@ -23,16 +23,14 @@
 using namespace Utils;
 
 ListBoxViewConfigWidget::ListBoxViewConfigWidget( ListBoxView* view, QWidget* parent )
-:   QWidget( parent ), view_( view ) //variable_set_widget_ (0), order_variable_widget_(0),
+:   QWidget( parent ), view_( view ), variable_set_widget_ (nullptr) //, order_variable_widget_(0),
 {
     QVBoxLayout *vlayout = new QVBoxLayout;
 
     assert (view_);
 
-      // TODO
-  //  variable_set_widget_ = new DBOVariableOrderedSetWidget (view_->getDataSource()->getSet());
-  //  connect( variable_set_widget_, SIGNAL(setChanged()), this, SLOT(variableSetChanged()) );
-  //  vlayout->addWidget (variable_set_widget_);
+    variable_set_widget_ = view_->getDataSource()->getSet()->widget();
+    vlayout->addWidget (variable_set_widget_);
 
     QCheckBox *use_filters = new QCheckBox("Use filters");
     use_filters->setChecked(view_->getDataSource()->getUseFilters());
@@ -88,13 +86,6 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget( ListBoxView* view, QWidget* pa
 
 ListBoxViewConfigWidget::~ListBoxViewConfigWidget()
 {
-}
-
-void ListBoxViewConfigWidget::variableSetChanged ()
-{
-  logdbg  << "ListBoxViewConfigWidget: variableSetChanged";
-//  assert (view_);
-//  view_->getDataSource()->setSet (variable_set_widget_->getSet());
 }
 
 void ListBoxViewConfigWidget::toggleUseFilters()

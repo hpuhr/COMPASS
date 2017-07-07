@@ -11,7 +11,48 @@
                 <ParameterUnsignedInt limit_min="0"/>
                 <ParameterUnsignedInt order_variable_type_int="0"/>
                 <ParameterString order_variable_name="frame_time"/>
-                <Configuration class_id="DBOVariableOrderedSet" instance_id="DBOVariableOrderedSet0"/>
+                <Configuration class_id="DBOVariableOrderedSet" instance_id="DBOVariableOrderedSet0">
+                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionCALLSIGN0">
+                        <ParameterUnsignedInt index="5"/>
+                        <ParameterString dbo_name="Meta"/>
+                        <ParameterString dbo_variable_name="CALLSIGN"/>
+                    </Configuration>
+                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionMODE3A_CODE0">
+                        <ParameterUnsignedInt index="2"/>
+                        <ParameterString dbo_name="Meta"/>
+                        <ParameterString dbo_variable_name="MODE3A_CODE"/>
+                    </Configuration>
+                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionMODEC_CODE_FT0">
+                        <ParameterUnsignedInt index="3"/>
+                        <ParameterString dbo_name="Meta"/>
+                        <ParameterString dbo_variable_name="MODEC_CODE_FT"/>
+                    </Configuration>
+                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionPOS_LAT_DEG_CALC0">
+                        <ParameterUnsignedInt index="6"/>
+                        <ParameterString dbo_name="Meta"/>
+                        <ParameterString dbo_variable_name="POS_LAT_DEG_CALC"/>
+                    </Configuration>
+                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionPOS_LONG_DEG_CALC0">
+                        <ParameterUnsignedInt index="7"/>
+                        <ParameterString dbo_name="Meta"/>
+                        <ParameterString dbo_variable_name="POS_LONG_DEG_CALC"/>
+                    </Configuration>
+                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionREC_NUM0">
+                        <ParameterUnsignedInt index="0"/>
+                        <ParameterString dbo_name="Meta"/>
+                        <ParameterString dbo_variable_name="REC_NUM"/>
+                    </Configuration>
+                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionTARGET_ADDR0">
+                        <ParameterUnsignedInt index="4"/>
+                        <ParameterString dbo_name="Meta"/>
+                        <ParameterString dbo_variable_name="TARGET_ADDR"/>
+                    </Configuration>
+                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionTOD0">
+                        <ParameterUnsignedInt index="1"/>
+                        <ParameterString dbo_name="Meta"/>
+                        <ParameterString dbo_variable_name="TOD"/>
+                    </Configuration>
+                </Configuration>
             </Configuration>
             <Configuration class_id="ListBoxViewWidget" instance_id="ListBoxViewWidget0"/>
         </Configuration>
