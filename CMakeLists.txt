@@ -130,6 +130,7 @@ set ( atsdb_HDRS
     src/filter/dbfilter.h
     #        src/filter/sensorfilter.h
     src/filter/filtermanager.h
+    src/filter/filtermanagerwidget.h
     src/filter/dbfiltercondition.h
     src/filter/dbfilterwidget.h
     src/filter/filtereditwidget.h
@@ -300,6 +301,7 @@ set ( atsdb_SRCS
     src/filter/dbfiltercondition.cpp
     src/filter/dbfilterwidget.cpp
     src/filter/filtermanager.cpp
+    src/filter/filtermanagerwidget.cpp
     #        src/filter/sensorfilter.cpp
     #        src/filter/sensorfilterwidget.cpp
     src/filter/filtereditwidget.cpp

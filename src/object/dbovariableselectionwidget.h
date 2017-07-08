@@ -87,6 +87,9 @@ public:
     bool showDBOOnly() const;
     std::string onlyDBOName() const;
 
+    bool showEmptyVariable() const;
+    void showEmptyVariable(bool show_empty_variable);
+
 private:
     /// Variable type information
     QLabel* object_label_;
@@ -97,6 +100,8 @@ private:
 
     bool variable_selected_;
     bool meta_variable_selected_;
+
+    bool show_empty_variable_;
 
     bool show_meta_variables_;
     bool show_meta_variables_only_;

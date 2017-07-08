@@ -83,9 +83,6 @@ public:
     /// @brief Returns if only sub-filters and no own conditions exist
     bool onlyHasSubFilter () { return conditions_.size()>0; }
 
-    /// @brief Returns the filter widget
-    DBFilterWidget *getWidget ();
-
     /// @brief Returns if the filter uses the AND operation. Not used yet.
     bool getAnd () { return op_and_; }
     /// @brief Sets the filter AND operation flag. Not used yet.
@@ -110,7 +107,9 @@ public:
     //void destroy ();
 
     /// @brief Returns if widget has already been deleted
-    void widgetIsDeleted ();
+    //void widgetIsDeleted ();
+
+    DBFilterWidget *widget ();
 
 protected:
     //FilterManager &filter_manager_;

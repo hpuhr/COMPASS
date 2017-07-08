@@ -32,17 +32,16 @@
 #include "logger.h"
 #include "dbinterface.h"
 #include "dbconnection.h"
+#include "filtermanagerwidget.h"
 //#include "SensorFilter.h"
 
 
 FilterManager::FilterManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb)
-: Configurable (class_id, instance_id, atsdb, "conf/config_filter.xml")
+: Configurable (class_id, instance_id, atsdb, "conf/config_filter.xml"), widget_(nullptr)
 {
     logdbg  << "FilterManager: constructor";
 
     registerParameter ("db_id", &db_id_, "");
-
-    createSubConfigurables ();
 }
 
 FilterManager::~FilterManager()
@@ -50,6 +49,12 @@ FilterManager::~FilterManager()
     for (unsigned int cnt=0; cnt < filters_.size(); cnt++)
         delete filters_.at(cnt);
     filters_.clear();
+
+    if (widget_)
+    {
+        delete widget_;
+        widget_ = nullptr;
+    }
 }
 
 void FilterManager::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
@@ -178,7 +183,7 @@ void FilterManager::reset ()
     }
 }
 
-void FilterManager::deleteFilter (DBFilter *filter)
+void FilterManager::deleteFilterSlot (DBFilter *filter)
 {
     std::vector <DBFilter*>::iterator it;
 
@@ -191,10 +196,25 @@ void FilterManager::deleteFilter (DBFilter *filter)
         delete filter;
     }
 
+    emit changedFiltersSignal();
+}
+
+FilterManagerWidget *FilterManager::widget ()
+{
+    if (!widget_)
+    {
+        widget_ = new FilterManagerWidget (*this);
+        connect (this, SIGNAL(changedFiltersSignal()), widget_, SLOT(updateFiltersSlot()));
+    }
+
+    assert (widget_);
+    return widget_;
 }
 
 void FilterManager::databaseOpenedSlot ()
 {
+    createSubConfigurables ();
+
     std::string tmpstr = ATSDB::instance().interface().connection().identifier();
     replace(tmpstr.begin(), tmpstr.end(), ' ', '_');
 
@@ -205,4 +225,8 @@ void FilterManager::databaseOpenedSlot ()
         db_id_ = tmpstr;
     }
 
+    emit changedFiltersSignal();
+
+    if (widget_)
+        widget_->databaseOpenedSlot();
 }

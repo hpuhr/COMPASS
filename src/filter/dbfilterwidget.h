@@ -60,7 +60,7 @@ private slots:
   /// @brief Reset function
   void reset ();
   /// @brief Deletes the filter
-  //void deleteFilter ();
+  void deleteFilter ();
   /// @brief Value changed in edit field
   void filterEditSlot ();
 
@@ -73,6 +73,7 @@ signals:
   void possibleFilterChange();
   /// @brief Emitted when the file should be edited
   void filterEdit (DBFilter *filter);
+  void deleteFilterSignal (DBFilter *filter);
 
 public:
   /// @brief Constructor
@@ -110,8 +111,6 @@ protected:
   /// Filter management menu
   QMenu menu_;
 
-  /// Creates widget GUI elements
-  virtual void createGUIElements ();
   /// Creates the menu_
   void createMenu ();
 };

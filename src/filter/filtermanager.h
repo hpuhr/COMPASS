@@ -35,6 +35,7 @@
 
 class DBFilter;
 class ATSDB;
+class FilterManagerWidget;
 
 /**
  * @brief Manages all filters and generates SQL conditions
@@ -49,10 +50,11 @@ class FilterManager : public QObject, public Configurable
 {
     Q_OBJECT
 signals:
-    void changedSignal ();
+    void changedFiltersSignal ();
 
 public slots:
     void databaseOpenedSlot ();
+    void deleteFilterSlot (DBFilter *filter);
 
 public:
     /// @brief Constructor
@@ -67,18 +69,20 @@ public:
     unsigned int getNumFilters ();
     /// @brief Returns filter at a given index
     DBFilter *getFilter (unsigned int index);
+    std::vector <DBFilter*> &filters () { return filters_; }
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
     /// @brief Resets all filters
     void reset ();
 
-    /// @brief Deletes a given filter
-    void deleteFilter (DBFilter *filter);
+    FilterManagerWidget *widget ();
 
 protected:
     /// Database definition, resets if changed
     std::string db_id_;
+
+    FilterManagerWidget *widget_;
 
     /// Container with all DBFilters
     std::vector <DBFilter*> filters_;

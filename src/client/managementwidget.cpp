@@ -17,10 +17,8 @@
 #include "dbobjectmanager.h"
 #include "dbobjectmanagerloadwidget.h"
 #include "dbobject.h"
-//#include "FilterConfigWidget.h"
-//#include "DBInfoWidget.h"
-//#include "ResultSetWidget.h"
-//#include "WorkerThreadWidget.h"
+#include "filtermanager.h"
+#include "filtermanagerwidget.h"
 #include "viewmanager.h"
 #include "viewmanagerwidget.h"
 #include "jobmanager.h"
@@ -49,23 +47,12 @@ ManagementWidget::ManagementWidget() : QWidget ()
     objman_widget->setLineWidth(frame_width);
     left_layout->addWidget (objman_widget);
 
-    //  result_ = new ResultSetWidget ();
-    //  result_->setFrameStyle(QFrame::Panel | QFrame::Raised);
-    //  result_->setLineWidth(frame_width);
-    //  vlayout2->addWidget (result_);
-
     hlayout->addLayout (left_layout, 1);
-    //hlayout->addSpacing(600);
 
-    //  filter_config_gui_ = new FilterConfigWidget ();
-    //  filter_config_gui_->setFrameStyle(QFrame::Panel | QFrame::Raised);
-    //  filter_config_gui_->setLineWidth(frame_width);
-    //  hlayout->addWidget (filter_config_gui_);
-
-    //  worker_widget_ = new WorkerThreadWidget ();
-    //  worker_widget_->setFrameStyle(QFrame::Panel | QFrame::Raised);
-    //  worker_widget_->setLineWidth(frame_width);
-    //  hlayout->addWidget (worker_widget_);
+    FilterManagerWidget *filman_widget = ATSDB::instance().filterManager().widget();
+    filman_widget->setFrameStyle(QFrame::Panel | QFrame::Raised);
+    filman_widget->setLineWidth(frame_width);
+    hlayout->addWidget (filman_widget, 1);
 
     QVBoxLayout *right_layout = new QVBoxLayout ();
 

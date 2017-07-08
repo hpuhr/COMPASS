@@ -34,6 +34,7 @@
 #include "filtergeneratorwidget.h"
 #include "atsdb.h"
 #include "dbovariable.h"
+#include "metadbovariable.h"
 #include "dbovariableselectionwidget.h"
 #include "configurationmanager.h"
 #include "filtermanager.h"
@@ -80,6 +81,8 @@ void FilterGeneratorWidget::createGUIElements ()
 
   QVBoxLayout *var_layout = new QVBoxLayout ();
   condition_variable_widget_ = new DBOVariableSelectionWidget ();
+  condition_variable_widget_->showMetaVariables(true);
+  condition_variable_widget_->showEmptyVariable(false);
   var_layout->addWidget (condition_variable_widget_);
   var_layout->addStretch();
   condition_layout->addLayout (var_layout, 0, 0);
@@ -118,11 +121,11 @@ void FilterGeneratorWidget::createGUIElements ()
   value_layout->addWidget(condition_value_);
 
   QPushButton *load_min = new QPushButton(tr("Load min"));
-  connect(load_min, SIGNAL( clicked() ), this, SLOT( loadMin() ));
+  //connect(load_min, SIGNAL( clicked() ), this, SLOT( loadMin() ));
   value_layout->addWidget(load_min);
 
   QPushButton *load_max = new QPushButton(tr("Load max"));
-  connect(load_max, SIGNAL( clicked() ), this, SLOT( loadMax() ));
+  //connect(load_max, SIGNAL( clicked() ), this, SLOT( loadMax() ));
   value_layout->addWidget(load_max);
 
   value_layout->addStretch();
@@ -135,9 +138,9 @@ void FilterGeneratorWidget::createGUIElements ()
   reset_layout->addWidget(label_reset);
 
   condition_reset_combo_=new QComboBox();
+  condition_reset_combo_->addItem("value");
   condition_reset_combo_->addItem("MIN");
   condition_reset_combo_->addItem("MAX");
-  condition_reset_combo_->addItem("value");
   reset_layout->addWidget(condition_reset_combo_);
   reset_layout->addStretch();
 
@@ -199,17 +202,29 @@ void FilterGeneratorWidget::addCondition ()
   assert (condition_variable_widget_);
   assert (condition_combo_);
 
-  const DBOVariable &var = condition_variable_widget_->selectedVariable();
-
   ConditionTemplate data_condition;
-  data_condition.variable_name_=var.name();
-  data_condition.variable_dbo_type_=var.dboName();
+
+  if (condition_variable_widget_->hasVariable())
+  {
+    const DBOVariable &var = condition_variable_widget_->selectedVariable();
+    data_condition.variable_name_=var.name();
+    data_condition.variable_dbo_type_=var.dboName();
+  }
+  else
+  {
+      assert (condition_variable_widget_->hasMetaVariable());
+      MetaDBOVariable &var = condition_variable_widget_->selectedMetaVariable();
+      data_condition.variable_name_=var.name();
+      data_condition.variable_dbo_type_=META_OBJECT_NAME;
+  }
+
   data_condition.absolute_value_=condition_absolute_->checkState() == Qt::Checked;
   data_condition.operator_=condition_combo_->currentText().toStdString();
   data_condition.value_=condition_value_->text().toStdString();
   data_condition.reset_value_=condition_reset_combo_->currentText().toStdString();
 
   data_conditions_.push_back (data_condition);
+
   updateWidgetList();
 }
 

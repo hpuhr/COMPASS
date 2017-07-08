@@ -56,12 +56,19 @@ DBFilterCondition::DBFilterCondition(const std::string &class_id, const std::str
     registerParameter ("variable_dbo_name", &variable_dbo_name_, "");
     registerParameter ("variable_name", &variable_name_, "");
 
-    // TODO add meta variable stuff
+    if (variable_dbo_name_ == META_OBJECT_NAME)
+    {
+        if (!ATSDB::instance().objectManager().existsMetaVariable(variable_name_))
+            throw std::runtime_error ("DBFilterCondition: constructor: meta dbo variable '"+variable_name_+"' does not exist");
+        meta_variable_ = &ATSDB::instance().objectManager().metaVariable(variable_name_);
+    }
+    else
+    {
+        if (!ATSDB::instance().objectManager().existsObject(variable_dbo_name_) || !ATSDB::instance().objectManager().object(variable_dbo_name_).hasVariable(variable_name_))
+            throw std::runtime_error ("DBFilterCondition: constructor: dbo variable '"+variable_name_+"' does not exist");
 
-    if (!ATSDB::instance().objectManager().existsObject(variable_dbo_name_) || !ATSDB::instance().objectManager().object(variable_dbo_name_).hasVariable(variable_name_))
-        throw std::runtime_error ("DBFilterCondition: constructor: dbo variable '"+variable_name_+"' does not exist");
-
-    variable_ = &ATSDB::instance().objectManager().object(variable_dbo_name_).variable(variable_name_);
+        variable_ = &ATSDB::instance().objectManager().object(variable_dbo_name_).variable(variable_name_);
+    }
 
     // TODO ADD THIS LATER
     //variable_->addMinMaxObserver(this);

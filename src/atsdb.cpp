@@ -326,7 +326,11 @@ void ATSDB::shutdown ()
     delete db_interface_;
     db_interface_ = nullptr;
 
-    assert (view_manager_);
+    assert (filter_manager_);
+    delete filter_manager_;
+    filter_manager_ = nullptr;
+
+        assert (view_manager_);
     view_manager_->close();
     delete view_manager_;
     view_manager_ = nullptr;

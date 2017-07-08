@@ -33,16 +33,17 @@ ViewManagerWidget::ViewManagerWidget(ViewManager &view_manager)
     head->setFont (font_bold);
     layout_->addWidget(head);
 
-    add_button_ = new QPushButton(tr("Add View"));
-    connect(add_button_, SIGNAL( clicked() ), this, SLOT( addViewSlot() ));
-    layout_->addWidget(add_button_);
-
     cont_layout_ = new QVBoxLayout ();
     cont_layout_->setSpacing (0);
     cont_layout_->setMargin (0);
     layout_->addLayout (cont_layout_);
 
     layout_->addStretch ();
+
+    add_button_ = new QPushButton(tr("Add View"));
+    connect(add_button_, SIGNAL( clicked() ), this, SLOT( addViewSlot() ));
+    layout_->addWidget(add_button_);
+
     setLayout (layout_);
 
     connect (&JobManager::instance(), SIGNAL(databaseBusy()), this, SLOT(databaseBusy()));

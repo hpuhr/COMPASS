@@ -239,7 +239,7 @@ void FilterEditWidget::deleteCondition ()
     assert (conditions_delete_buttons_.find (button) != conditions_delete_buttons_.end());
     assert (filter_);
     filter_->deleteCondition(conditions_delete_buttons_[button]);
-    filter_->getWidget()->updateChildWidget();
+    filter_->widget()->updateChildWidget();
 
     updateConditionsGrid();
 }

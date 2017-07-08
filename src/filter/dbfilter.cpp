@@ -74,10 +74,10 @@ DBFilter::~DBFilter()
     conditions_.clear();
 }
 
-void DBFilter::widgetIsDeleted ()
-{
-    widget_=0;
-}
+//void DBFilter::widgetIsDeleted ()
+//{
+//    widget_=0;
+//}
 
 /**
  * Sets changed in FilterManager if required, overwrites active_ and distributes the change to the sub-filters.
@@ -220,12 +220,6 @@ std::string DBFilter::getConditionString (const std::string &dbo_type, bool &fir
     return ss.str();
 }
 
-DBFilterWidget *DBFilter::getWidget ()
-{
-    assert (widget_);
-    return widget_;
-}
-
 void DBFilter::setAnd (bool op_and)
 {
     if (op_and_ != op_and)
@@ -308,7 +302,7 @@ void DBFilter::checkSubConfigurables ()
     //TODO
     for (unsigned int cnt=0; cnt < sub_filters_.size(); cnt++)
     {
-        DBFilterWidget *filter = sub_filters_.at(cnt)->getWidget();
+        DBFilterWidget *filter = sub_filters_.at(cnt)->widget();
         QObject::connect((QWidget*)filter, SIGNAL( possibleFilterChange() ), (QWidget*)widget_, SLOT( possibleSubFilterChange() ));
         widget_->addChildWidget (filter);
     }
@@ -337,6 +331,12 @@ void DBFilter::deleteCondition (DBFilterCondition *condition)
     assert (it != conditions_.end());
     conditions_.erase (it);
     delete condition;
+}
+
+DBFilterWidget *DBFilter::widget ()
+{
+    assert (widget_);
+    return widget_;
 }
 
 //void DBFilter::destroy ()

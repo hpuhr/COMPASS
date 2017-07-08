@@ -32,6 +32,9 @@
 #include "dbfilter.h"
 #include "logger.h"
 #include "dbfiltercondition.h"
+#include "global.h"
+#include "atsdb.h"
+#include "filtermanager.h"
 
 /**
  * Initializes members, registers Parameter, creates GUI elements and the menu, calls update
@@ -45,26 +48,55 @@ DBFilterWidget::DBFilterWidget(const std::string &class_id, const std::string &i
     registerParameter ("visible", &visible_, false);
 
 
-    /*
-  and_checkbox_ = new QCheckBox();
-  connect( and_checkbox_, SIGNAL( clicked() ), this, SLOT( toggleAnd() ) );
+    QVBoxLayout *main_layout = new QVBoxLayout ();
+    main_layout->setContentsMargins (1, 1, 1, 1);
+    main_layout->setSpacing (1);
 
-  and_checkbox_->setStyleSheet (" QCheckBox::indicator {  width: 12px; height: 12px; }  "
-      "QCheckBox::indicator:checked   {     image: url(./Data/icons/or.png);   }"
-      "QCheckBox::indicator:unchecked   {     image: url(./Data/icons/and.png); }");
+    setFrameStyle(QFrame::Panel | QFrame::Raised);
 
-  config_layout->addWidget (and_checkbox_);
+    QHBoxLayout *config_layout = new QHBoxLayout ();
+    config_layout->setContentsMargins (1, 1, 1, 1);
+    config_layout->setSpacing (1);
 
-  invert_checkbox_ = new QCheckBox();
-  connect( invert_checkbox_, SIGNAL( clicked() ), this, SLOT( invert() ) );
+    active_checkbox_ = new QCheckBox();
+    connect( active_checkbox_, SIGNAL( clicked() ), this, SLOT( toggleActive() ) );
+    config_layout->addWidget (active_checkbox_);
 
-  invert_checkbox_->setStyleSheet (" QCheckBox::indicator {  width: 12px; height: 12px; }  "
-      "QCheckBox::indicator:checked   {     image: url(./Data/icons/invert.png);   }"
-      "QCheckBox::indicator:unchecked   {     image: url(./Data/icons/invert.png); }");
+    visible_checkbox_ = new QCheckBox(tr(filter_.getName().c_str()));
+    connect( visible_checkbox_, SIGNAL( clicked() ), this, SLOT( toggleVisible() ) );
 
-  config_layout->addWidget (invert_checkbox_);
-     */
-    createGUIElements ();
+    visible_checkbox_->setStyleSheet (" QCheckBox::indicator {  width: 12px; height: 12px; }  "
+            "QCheckBox::indicator:checked   {     image: url(./data/icons/collapse.png);   }"
+            "QCheckBox::indicator:unchecked   {     image: url(./data/icons/expand.png); }");
+
+    config_layout->addWidget (visible_checkbox_);
+    config_layout->addStretch();
+
+    QPixmap* pixmapmanage = new QPixmap("./data/icons/edit.png");
+    manage_button_ = new QPushButton ();
+    manage_button_->setIcon(QIcon(*pixmapmanage));
+    manage_button_->setFixedSize (UI_ICON_SIZE);
+    manage_button_->setFlat(UI_ICON_BUTTON_FLAT);
+    manage_button_->setToolTip(tr("Manage filter"));
+    connect(manage_button_, SIGNAL( clicked() ), this, SLOT( showMenuSlot() ));
+    config_layout->addWidget (manage_button_);
+    main_layout->addLayout (config_layout);
+
+    child_ = new QWidget ();
+    child_->setVisible (visible_);
+
+    child_layout_ = new QVBoxLayout ();
+    child_layout_->setContentsMargins (5, 1, 1, 1);
+    child_layout_->setSpacing (1);
+
+    updateChildWidget();
+
+    child_->setLayout (child_layout_);
+
+    main_layout->addWidget (child_);
+    setLayout (main_layout);
+
+    connect (this, SIGNAL(deleteFilterSignal(DBFilter*)), &ATSDB::instance().filterManager(), SLOT(deleteFilterSlot(DBFilter*)), Qt::QueuedConnection);
     createMenu ();
 
     update();
@@ -75,69 +107,7 @@ DBFilterWidget::DBFilterWidget(const std::string &class_id, const std::string &i
  */
 DBFilterWidget::~DBFilterWidget()
 {
-    filter_.widgetIsDeleted();
-}
 
-/**
- * Creates GUI elements, calls updateChildWidget, adds child widget to the main layout.
- */
-void DBFilterWidget::createGUIElements ()
-{
-    logdbg  << "DBFilterWidget: createGUIElements";
-
-    QVBoxLayout *main_layout = new QVBoxLayout ();
-    main_layout->setContentsMargins (0, 0, 0, 0);
-    main_layout->setSpacing (0);
-
-    setFrameStyle(QFrame::Panel | QFrame::Raised);
-
-    QHBoxLayout *config_layout = new QHBoxLayout ();
-    config_layout->setContentsMargins (0, 0, 0, 0);
-    config_layout->setSpacing (0);
-
-    active_checkbox_ = new QCheckBox();
-    connect( active_checkbox_, SIGNAL( clicked() ), this, SLOT( toggleActive() ) );
-    config_layout->addWidget (active_checkbox_);
-
-    visible_checkbox_ = new QCheckBox(tr(filter_.getName().c_str()));
-    connect( visible_checkbox_, SIGNAL( clicked() ), this, SLOT( toggleVisible() ) );
-
-    visible_checkbox_->setStyleSheet (" QCheckBox::indicator {  width: 12px; height: 12px; }  "
-            "QCheckBox::indicator:checked   {     image: url(./Data/icons/collapse.png);   }"
-            "QCheckBox::indicator:unchecked   {     image: url(./Data/icons/expand.png); }");
-
-    config_layout->addWidget (visible_checkbox_);
-    config_layout->addStretch();
-
-
-    //  if (filter_.isGeneric())
-    //  {
-    QPixmap* pixmapmanage = new QPixmap("./Data/icons/gear.png");
-    manage_button_ = new QPushButton ();
-    manage_button_->setIcon(QIcon(*pixmapmanage));
-    manage_button_->setFixedSize ( 20, 20 );
-    manage_button_->setFlat(true);
-    manage_button_->setToolTip(tr("Manage filter"));
-    connect(manage_button_, SIGNAL( clicked() ), this, SLOT( showMenuSlot() ));
-    config_layout->addWidget (manage_button_);
-    //}
-    main_layout->addLayout (config_layout);
-
-    child_ = new QWidget ();
-    child_->setVisible (visible_);
-
-    child_layout_ = new QVBoxLayout ();
-    child_layout_->setContentsMargins (5, 0, 0, 0);
-    child_layout_->setSpacing (0);
-
-    updateChildWidget();
-
-    child_->setLayout (child_layout_);
-
-    main_layout->addWidget (child_);
-    setLayout (main_layout);
-
-    logdbg  << "DBFilterWidget: createGUIElements: done";
 }
 
 /**
@@ -275,10 +245,10 @@ void DBFilterWidget::showMenuSlot()
     menu_.exec( QCursor::pos() );
 }
 
-//void DBFilterWidget::deleteFilter()
-//{
-//    filter_.destroy();
-//}
+void DBFilterWidget::deleteFilter()
+{
+    emit deleteFilterSignal (&filter_);
+}
 
 void DBFilterWidget::filterEditSlot ()
 {

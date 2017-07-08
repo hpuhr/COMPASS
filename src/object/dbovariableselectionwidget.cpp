@@ -34,7 +34,7 @@
  */
 DBOVariableSelectionWidget::DBOVariableSelectionWidget (bool show_title, bool h_box, QWidget* parent )
     :   QGroupBox (show_title ? "Select DBO Variable": "", parent), variable_selected_(false), meta_variable_selected_(false),
-      show_meta_variables_(false), show_meta_variables_only_(false), show_dbo_only_(false)
+      show_empty_variable_(true), show_meta_variables_(false), show_meta_variables_only_(false), show_dbo_only_(false)
 {
     //setStyleSheet("border: 1px solid gray; border-radius: 0px; padding:0");
     setFlat(true);
@@ -93,10 +93,13 @@ void DBOVariableSelectionWidget::updateMenuEntries()
 {
     menu_.clear();
 
-    QAction* action = menu_.addAction("");
-    QVariantMap vmap;
-    vmap.insert (QString (""), QVariant (QString ("")));
-    action->setData (QVariant(vmap));
+    if (show_empty_variable_)
+    {
+        QAction* action = menu_.addAction("");
+        QVariantMap vmap;
+        vmap.insert (QString (""), QVariant (QString ("")));
+        action->setData (QVariant(vmap));
+    }
 
     if (show_dbo_only_)
     {
@@ -240,7 +243,7 @@ MetaDBOVariable &DBOVariableSelectionWidget::selectedMetaVariable() const
 {
     assert (object_label_);
     assert (variable_label_);
-    assert (variable_selected_);
+    assert (meta_variable_selected_);
 
     std::string obj_name = object_label_->text().toStdString();
     std::string var_name = variable_label_->text().toStdString();
@@ -273,6 +276,18 @@ std::string DBOVariableSelectionWidget::onlyDBOName() const
     return only_dbo_name_;
 }
 
+bool DBOVariableSelectionWidget::showEmptyVariable() const
+{
+    return show_empty_variable_;
+}
+
+void DBOVariableSelectionWidget::showEmptyVariable(bool show_empty_variable)
+{
+    show_empty_variable_ = show_empty_variable;
+
+    updateMenuEntries();
+}
+
 
 bool DBOVariableSelectionWidget::showDBOOnly() const
 {
@@ -302,4 +317,5 @@ bool DBOVariableSelectionWidget::showMetaVariables() const
 void DBOVariableSelectionWidget::showMetaVariables(bool show_meta_variables)
 {
     show_meta_variables_ = show_meta_variables;
+    updateMenuEntries();
 }
