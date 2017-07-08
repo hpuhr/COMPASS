@@ -89,7 +89,7 @@ public:
     QWidget *widget ();
     QWidget *infoWidget ();
     std::string status ();
-
+    std::string identifier ();
 
     const std::map <std::string, MySQLServer*> &servers () const { return servers_; }
 
@@ -101,6 +101,8 @@ public:
 protected:
     DBInterface &interface_;
     std::string used_server_;
+    std::string used_database_;
+
     MySQLServer *connected_server_;
 
     /// Used for all database queries

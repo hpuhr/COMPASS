@@ -125,22 +125,24 @@ set ( atsdb_HDRS
     src/connection/mysqlserverwidget.h
     #        src/connection/bufferwriter.h
     #        src/connection/mysqlconconnection.h
-    ##        src/connection/sqliteconnection.h
+    #        src/connection/sqliteconnection.h
     #        src/datasource/datasource.h
-    #        src/filter/dbfilter.h
+    src/filter/dbfilter.h
     #        src/filter/sensorfilter.h
-    #        src/filter/filtermanager.h
-    #        src/filter/dbfiltercondition.h
-    #        src/filter/dbfilterwidget.h
-    #        src/filter/filtereditwidget.h
-    #        src/filter/filtergeneratorwidget.h
+    src/filter/filtermanager.h
+    src/filter/dbfiltercondition.h
+    src/filter/dbfilterwidget.h
+    src/filter/filtereditwidget.h
+    src/filter/filtergeneratorwidget.h
+    src/filter/filterconditionoperatorcombobox.h
+    src/filter/filterconditionresetvaluecombobox.h
     #        src/filter/sensorfilterwidget.h
     src/interface/dbtableinfo.h
     src/interface/dbinterface.h
     src/interface/dbinterfacewidget.h
     src/interface/dbinterfaceinfowidget.h
     src/interface/sqlgenerator.h
-    #        src/gui/qcollapsablewidget.h
+    # src/gui/qcollapsablewidget.h
     #        src/gui/workerthreadwidget.h
     #        src/gui/workfloweditwidget.h
     #        src/gui/workfloweditdialog.h
@@ -294,15 +296,15 @@ set ( atsdb_SRCS
     src/connection/mysqlserverwidget.cpp
     #        src/connection/sqliteconnection.cpp
     #        src/datasource/datasource.cpp
-    #        src/filter/dbfilter.cpp
-    #        src/filter/dbfiltercondition.cpp
-    #        src/filter/dbfilterwidget.cpp
-    #        src/filter/filtermanager.cpp
+    src/filter/dbfilter.cpp
+    src/filter/dbfiltercondition.cpp
+    src/filter/dbfilterwidget.cpp
+    src/filter/filtermanager.cpp
     #        src/filter/sensorfilter.cpp
     #        src/filter/sensorfilterwidget.cpp
-    #        src/filter/filtereditwidget.cpp
-    #        src/filter/filtergeneratorwidget.cpp
-    #        src/gui/qcollapsablewidget.cpp
+    src/filter/filtereditwidget.cpp
+    src/filter/filtergeneratorwidget.cpp
+    #src/gui/qcollapsablewidget.cpp
     #        src/gui/workerthreadwidget.cpp
     #        src/gui/workfloweditwidget.cpp
     #        src/gui/workfloweditdialog.cpp

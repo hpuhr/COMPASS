@@ -28,13 +28,13 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <QObject>
 
 #include "singleton.h"
-//#include "global.h"
 #include "configurable.h"
 
 class DBFilter;
-
+class ATSDB;
 
 /**
  * @brief Manages all filters and generates SQL conditions
@@ -45,33 +45,30 @@ class DBFilter;
  *
  * \todo Generalize SQL condition w.r.t. RDL schema
  */
-class FilterManager : public Singleton, public Configurable
+class FilterManager : public QObject, public Configurable
 {
+    Q_OBJECT
+signals:
+    void changedSignal ();
+
+public slots:
+    void databaseOpenedSlot ();
+
 public:
+    /// @brief Constructor
+    FilterManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb);
     /// @brief Destructor
     virtual ~FilterManager();
 
-    /// @brief Returns flag if an active filter was changed
-    bool getChanged ();
-    /// @brief Sets the changed flag
-    void setChanged ();
-    /// @brief Clears the changed flag
-    void clearChanged ();
-
-    /// @brief Returns of data of a DBO should be loaded
-    bool getLoad (const std::string &dbo_type);
-    /// @brief Sets if data of a DBO should be loaded
-    void setLoad (const std::string &dbo_type, bool show);
-
     /// @brief Returns the SQL condition for a DBO and sets all used variable names
-    std::string getSQLCondition (const std::string &dbo_type, std::vector<std::string> &variable_names);
+    std::string getSQLCondition (const std::string &dbo_name, std::vector<std::string> &variable_names);
 
     /// @brief Returns number of existing filters
     unsigned int getNumFilters ();
     /// @brief Returns filter at a given index
     DBFilter *getFilter (unsigned int index);
 
-    virtual void generateSubConfigurable (std::string class_id, std::string instance_id);
+    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
     /// @brief Resets all filters
     void reset ();
@@ -80,28 +77,16 @@ public:
     void deleteFilter (DBFilter *filter);
 
 protected:
-    /// Container with all load flags, dbo type -> loading
-    std::map<std::string, bool*> load_;
-    /// Changed flag
-    bool changed_;
     /// Database definition, resets if changed
     std::string db_id_;
+
     /// Container with all DBFilters
     std::vector <DBFilter*> filters_;
 
-    /// @brief Constructor
-    FilterManager();
     /// @brief Returns the SQL condition for a DBO and sets all used variable names
     std::string getActiveFilterSQLCondition (const std::string &dbo_type, std::vector<std::string> &variable_names);
 
     virtual void checkSubConfigurables ();
-
-public:
-    static FilterManager& getInstance()
-    {
-        static FilterManager instance;
-        return instance;
-    }
 };
 
 #endif /* FILTERMANAGER_H_ */

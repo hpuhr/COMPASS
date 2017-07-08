@@ -28,17 +28,17 @@
 #include <QVBoxLayout>
 #include <QPushButton>
 
-#include "DBFilterWidget.h"
-#include "DBFilter.h"
-#include "Logger.h"
-#include "DBFilterCondition.h"
+#include "dbfilterwidget.h"
+#include "dbfilter.h"
+#include "logger.h"
+#include "dbfiltercondition.h"
 
 /**
  * Initializes members, registers Parameter, creates GUI elements and the menu, calls update
  */
-DBFilterWidget::DBFilterWidget(DBFilter &filter, std::string class_id, std::string instance_id) : QFrame (),
-Configurable (class_id, instance_id, &filter),filter_(filter),  visible_checkbox_(0),
-active_checkbox_(0), manage_button_ (0), child_layout_ (0)
+DBFilterWidget::DBFilterWidget(const std::string &class_id, const std::string &instance_id, DBFilter &filter)
+    : QFrame (), Configurable (class_id, instance_id, &filter),filter_(filter), visible_checkbox_(0),
+      active_checkbox_(0), manage_button_ (0), child_layout_ (0)
 {
     logdbg  << "DBFilterWidget: constructor";
 
@@ -84,7 +84,6 @@ DBFilterWidget::~DBFilterWidget()
 void DBFilterWidget::createGUIElements ()
 {
     logdbg  << "DBFilterWidget: createGUIElements";
-
 
     QVBoxLayout *main_layout = new QVBoxLayout ();
     main_layout->setContentsMargins (0, 0, 0, 0);
@@ -276,10 +275,10 @@ void DBFilterWidget::showMenuSlot()
     menu_.exec( QCursor::pos() );
 }
 
-void DBFilterWidget::deleteFilter()
-{
-    filter_.destroy();
-}
+//void DBFilterWidget::deleteFilter()
+//{
+//    filter_.destroy();
+//}
 
 void DBFilterWidget::filterEditSlot ()
 {

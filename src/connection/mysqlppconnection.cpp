@@ -88,6 +88,7 @@ void MySQLppConnection::openDatabase (const std::string &database_name)
     loginf  << "MySQLppConnection: openDatabase: successfully opened database '" << database_name << "'";
 
     connection_ready_ = true;
+    used_database_ = database_name;
 
     emit connectedSignal();
     interface_.databaseOpened();
@@ -670,6 +671,13 @@ std::string MySQLppConnection::status ()
     }
     else
         return "Not connected";
+}
+
+std::string MySQLppConnection::identifier ()
+{
+    assert (connection_ready_);
+
+    return "MySQL: "+used_server_+": "+used_database_;
 }
 
 void MySQLppConnection::addServer (std::string name)

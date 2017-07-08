@@ -25,17 +25,18 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 #include <QVBoxLayout>
-#include "DBFilter.h"
-#include "DBFilterWidget.h"
-#include "DBFilterCondition.h"
-#include "Logger.h"
-#include "FilterManager.h"
+
+#include "dbfilter.h"
+#include "dbfilterwidget.h"
+#include "dbfiltercondition.h"
+#include "logger.h"
+#include "filtermanager.h"
 
 /**
  * Initializes members, registers parameters and creates sub-configurables if class id is DBFilter.
  */
-DBFilter::DBFilter(std::string class_id, std::string instance_id, Configurable *parent, bool is_generic)
-: Configurable (class_id, instance_id, parent), widget_ (0), is_generic_(is_generic)
+DBFilter::DBFilter(const std::string &class_id, const std::string &instance_id, Configurable *parent, bool is_generic)
+: Configurable (class_id, instance_id, parent), widget_ (nullptr), is_generic_(is_generic) // filter_manager_(*filter_manager),
 {
     registerParameter ("active", &active_, false);
     registerParameter ("op_and_", &op_and_, true);
@@ -53,6 +54,13 @@ DBFilter::DBFilter(std::string class_id, std::string instance_id, Configurable *
 DBFilter::~DBFilter()
 {
     logdbg  << "DBFilter: destructor: instance_id " << instance_id_;
+
+    if (widget_)
+    {
+        delete widget_;
+        widget_=nullptr;
+    }
+
     for (unsigned int cnt=0; cnt < sub_filters_.size(); cnt++)
     {
         delete sub_filters_.at(cnt);
@@ -64,12 +72,6 @@ DBFilter::~DBFilter()
         delete conditions_.at(cnt);
     }
     conditions_.clear();
-
-    if (widget_)
-    {
-        delete widget_;
-        widget_=0;
-    }
 }
 
 void DBFilter::widgetIsDeleted ()
@@ -83,8 +85,8 @@ void DBFilter::widgetIsDeleted ()
  */
 void DBFilter::setActive (bool active)
 {
-    if (active_ && !active)
-        FilterManager::getInstance().setChanged();
+//    if (active_ && !active)
+//        FilterManager::getInstance().setChanged();
 
     active_=active;
 
@@ -152,7 +154,7 @@ void DBFilter::setVisible (bool visible)
     visible_=visible;
 }
 
-void DBFilter::setName (std::string name)
+void DBFilter::setName (const std::string &name)
 {
     name_=name;
     if (widget_)
@@ -261,33 +263,32 @@ void DBFilter::invert ()
  *
  * \exception std::runtime_error if unknown class_id
  */
-void DBFilter::generateSubConfigurable (std::string class_id, std::string instance_id)
+void DBFilter::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
     logdbg  << "DBFilter: generateSubConfigurable: " << class_id_ << " instance " << instance_id_;
 
-    if (class_id.compare("DBFilterWidget") == 0)
+    if (class_id == "DBFilterWidget")
     {
         logdbg  << "DBFilter: generateSubConfigurable: generating widget";
         assert (!widget_);
-        widget_ = new DBFilterWidget (*this, class_id, instance_id);
+        widget_ = new DBFilterWidget (class_id, instance_id, *this);
+    }
+    else if (class_id == "DBFilterCondition")
+    {
+        logdbg  << "DBFilter: generateSubConfigurable: generating condition";
+        DBFilterCondition *condition = new DBFilterCondition (class_id, instance_id, this);
+        conditions_.push_back (condition);
+
+        if (widget_) // bit of a hack. think about order of generation.
+            widget_->updateChildWidget();
+    }
+    else if (class_id == "DBFilter")
+    {
+        DBFilter *filter = new DBFilter (class_id, instance_id, this);
+        addSubFilter (filter);
     }
     else
-        if (class_id.compare("DBFilterCondition") == 0)
-        {
-            logdbg  << "DBFilter: generateSubConfigurable: generating condition";
-            DBFilterCondition *condition = new DBFilterCondition (instance_id, this);
-            conditions_.push_back (condition);
-
-            if (widget_) // bit of a hack. think about order of generation.
-                widget_->updateChildWidget();
-        }
-        else if (class_id.compare("DBFilter") == 0)
-        {
-            DBFilter *filter = new DBFilter (class_id, instance_id, this);
-            addSubFilter (filter);
-        }
-        else
-            throw std::runtime_error ("DBFilter: generateSubConfigurable: unknown class_id "+class_id);
+        throw std::runtime_error ("DBFilter: generateSubConfigurable: unknown class_id "+class_id);
 }
 
 /**
@@ -300,7 +301,7 @@ void DBFilter::checkSubConfigurables ()
     if (!widget_)
     {
         logdbg  << "DBFilter: checkSubConfigurables: generating generic filter widget";
-        widget_ = new DBFilterWidget (*this, "DBFilterWidget",instance_id_+"Widget0");
+        widget_ = new DBFilterWidget ("DBFilterWidget", instance_id_+"Widget0", *this);
     }
     assert (widget_);
 
@@ -338,10 +339,10 @@ void DBFilter::deleteCondition (DBFilterCondition *condition)
     delete condition;
 }
 
-void DBFilter::destroy ()
-{
-    FilterManager::getInstance().deleteFilter (this);
-}
+//void DBFilter::destroy ()
+//{
+//    FilterManager::getInstance().deleteFilter (this);
+//}
 
 //void DBFilter::parseFilterDefinition (std::string def)
 //{

@@ -30,12 +30,14 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QCheckBox>
-#include "FilterGeneratorWidget.h"
-#include "ATSDB.h"
-#include "DBOVariableSelectionWidget.h"
-#include "ConfigurationManager.h"
-#include "FilterManager.h"
-#include "String.h"
+
+#include "filtergeneratorwidget.h"
+#include "atsdb.h"
+#include "dbovariable.h"
+#include "dbovariableselectionwidget.h"
+#include "configurationmanager.h"
+#include "filtermanager.h"
+#include "stringconv.h"
 
 using namespace Utils;
 
@@ -171,37 +173,37 @@ void FilterGeneratorWidget::createGUIElements ()
   setLayout (layout);
 }
 
-void FilterGeneratorWidget::loadMin ()
-{
-  assert (condition_variable_widget_);
-  DBOVariable *var = condition_variable_widget_->getSelectedVariable();
+//void FilterGeneratorWidget::loadMin ()
+//{
+//  assert (condition_variable_widget_);
+//  DBOVariable *var = condition_variable_widget_->selectedVariable();
 
-  // TOFO FIX REPRESENTATION
-  assert (false);
-//  std::string min = var->getRepresentationFromValue(ATSDB::getInstance().getMinAsString (var));
-//  condition_value_->setText (tr(min.c_str()));
-}
-void FilterGeneratorWidget::loadMax ()
-{
-  assert (condition_variable_widget_);
-  DBOVariable *var = condition_variable_widget_->getSelectedVariable();
+//  // TOFO FIX REPRESENTATION
+//  assert (false);
+////  std::string min = var->getRepresentationFromValue(ATSDB::getInstance().getMinAsString (var));
+////  condition_value_->setText (tr(min.c_str()));
+//}
+//void FilterGeneratorWidget::loadMax ()
+//{
+//  assert (condition_variable_widget_);
+//  DBOVariable *var = condition_variable_widget_->getSelectedVariable();
 
-  // TOFO FIX REPRESENTATION
-  assert (false);
-//  std::string max = var->getRepresentationFromValue(ATSDB::getInstance().getMaxAsString (var));
-//  condition_value_->setText (tr(max.c_str()));
-}
+//  // TOFO FIX REPRESENTATION
+//  assert (false);
+////  std::string max = var->getRepresentationFromValue(ATSDB::getInstance().getMaxAsString (var));
+////  condition_value_->setText (tr(max.c_str()));
+//}
 
 void FilterGeneratorWidget::addCondition ()
 {
   assert (condition_variable_widget_);
   assert (condition_combo_);
 
-  const DBOVariable *var = condition_variable_widget_->getSelectedVariable();
+  const DBOVariable &var = condition_variable_widget_->selectedVariable();
 
   ConditionTemplate data_condition;
-  data_condition.variable_name_=var->getId();
-  data_condition.variable_dbo_type_=var->getDBOType();
+  data_condition.variable_name_=var.name();
+  data_condition.variable_dbo_type_=var.dboName();
   data_condition.absolute_value_=condition_absolute_->checkState() == Qt::Checked;
   data_condition.operator_=condition_combo_->currentText().toStdString();
   data_condition.value_=condition_value_->text().toStdString();
@@ -236,7 +238,7 @@ void FilterGeneratorWidget::accept ()
 {
   std::string filter_name=filter_name_->text().toStdString();
 
-  Configuration &configuration = FilterManager::getInstance().addNewSubConfiguration ("DBFilter", filter_name);
+  Configuration &configuration = ATSDB::instance().filterManager().addNewSubConfiguration ("DBFilter", filter_name);
 
   for (unsigned int cnt=0; cnt < data_conditions_.size(); cnt++)
   {
@@ -246,7 +248,7 @@ void FilterGeneratorWidget::accept ()
     Configuration &condition_configuration = configuration.addNewSubConfiguration ("DBFilterCondition", condition_name);
     condition_configuration.addParameterString ("operator", data_condition.operator_);
     condition_configuration.addParameterString ("variable_name", data_condition.variable_name_);
-    condition_configuration.addParameterString ("variable_dbo_type", data_condition.variable_dbo_type_);
+    condition_configuration.addParameterString ("variable_dbo_name", data_condition.variable_dbo_type_);
     condition_configuration.addParameterBool ("absolute_value", data_condition.absolute_value_);
     condition_configuration.addParameterString ("value", data_condition.value_);
     std::string reset_value;
@@ -259,7 +261,7 @@ void FilterGeneratorWidget::accept ()
     //configuration.addSubConfigurable ("DBFilterCondition", condition_name, condition_config_name);
   }
 
-  FilterManager::getInstance().generateSubConfigurable ("DBFilter", filter_name);
+  ATSDB::instance().filterManager().generateSubConfigurable ("DBFilter", filter_name);
 
   emit filterWidgetAction (true);
 }

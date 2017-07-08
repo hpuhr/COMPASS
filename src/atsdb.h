@@ -45,6 +45,7 @@ class DBObject;
 class DBObjectManager;
 class DBSchema;
 class DBSchemaManager;
+class FilterManager;
 class ViewManager;
 //class StructureReader;
 class DBOVariable;
@@ -113,6 +114,7 @@ public:
     DBInterface &interface ();
     DBSchemaManager &schemaManager ();
     DBObjectManager &objectManager ();
+    FilterManager &filterManager ();
     ViewManager &viewManager ();
 
     bool ready ();
@@ -218,6 +220,7 @@ protected:
     DBInterface *db_interface_;
     DBObjectManager *dbo_manager_;
     DBSchemaManager *db_schema_manager_;
+    FilterManager *filter_manager_;
     ViewManager *view_manager_;
     /// Structure reader, can read data from defined C structs.
     //StructureReader *struct_reader_;

@@ -27,7 +27,8 @@
 
 #include <QFrame>
 #include <QMenu>
-#include "Configurable.h"
+
+#include "configurable.h"
 
 class QWidget;
 class QCheckBox;
@@ -59,7 +60,7 @@ private slots:
   /// @brief Reset function
   void reset ();
   /// @brief Deletes the filter
-  void deleteFilter ();
+  //void deleteFilter ();
   /// @brief Value changed in edit field
   void filterEditSlot ();
 
@@ -75,7 +76,7 @@ signals:
 
 public:
   /// @brief Constructor
-  DBFilterWidget(DBFilter &filter, std::string class_id, std::string instance_id);
+  DBFilterWidget(const std::string &class_id, const std::string &instance_id, DBFilter &filter);
   /// @brief Destructor
   virtual ~DBFilterWidget();
 

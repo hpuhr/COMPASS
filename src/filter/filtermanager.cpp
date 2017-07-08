@@ -22,51 +22,27 @@
  *      Author: sk
  */
 
-#include "ConfigurationManager.h"
-#include "DBConnectionInfo.h"
-#include "DBFilter.h"
-#include "DBObject.h"
-#include "DBObjectManager.h"
-#include "DBOVariable.h"
-#include "ATSDB.h"
-#include "FilterManager.h"
-#include "Logger.h"
-#include "SensorFilter.h"
+#include "configurationmanager.h"
+#include "dbfilter.h"
+#include "dbobject.h"
+#include "dbobjectmanager.h"
+#include "dbovariable.h"
+#include "atsdb.h"
+#include "filtermanager.h"
+#include "logger.h"
+#include "dbinterface.h"
+#include "dbconnection.h"
+//#include "SensorFilter.h"
 
 
-FilterManager::FilterManager()
-: Configurable ("FilterManager", "FilterManager0", 0, "conf/config_filter.xml")
+FilterManager::FilterManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb)
+: Configurable (class_id, instance_id, atsdb, "conf/config_filter.xml")
 {
     logdbg  << "FilterManager: constructor";
-    changed_=false;
 
     registerParameter ("db_id", &db_id_, "");
 
-
-    const std::map <std::string, DBObject*> &objects = DBObjectManager::getInstance().getDBObjects ();
-    std::map <std::string, DBObject*>::const_iterator it;
-
-    for (it = objects.begin(); it != objects.end(); it++)
-    {
-        std::string dbo_type = it->first;
-
-        load_[dbo_type]= new bool (true);
-        registerParameter ("Load"+ DBObjectManager::getInstance().getDBObject(it->first)->getInstanceId(), load_[dbo_type], true);
-    }
-
     createSubConfigurables ();
-
-    std::string tmpstr = ATSDB::getInstance().getDBInfo()->getIdString();
-    replace(tmpstr.begin(), tmpstr.end(), ' ', '_');
-
-    if (db_id_.compare (tmpstr) != 0)
-    {
-        loginf  << "FilterManager: constructor: different db id, resetting filters";
-        reset();
-        db_id_ = ATSDB::getInstance().getDBInfo()->getIdString();
-        replace(db_id_.begin(), db_id_.end(), ' ', '_');
-    }
-
 }
 
 FilterManager::~FilterManager()
@@ -74,30 +50,21 @@ FilterManager::~FilterManager()
     for (unsigned int cnt=0; cnt < filters_.size(); cnt++)
         delete filters_.at(cnt);
     filters_.clear();
-
-    std::map <std::string, bool*>::iterator it;
-    for (it=load_.begin(); it != load_.end(); it++)
-        delete it->second;
-    load_.clear();
-
 }
 
-void FilterManager::generateSubConfigurable (std::string class_id, std::string instance_id)
+void FilterManager::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
-    if (class_id.compare ("DBFilter") == 0)
+    if (class_id == "DBFilter")
     {
         DBFilter *filter = new DBFilter (class_id, instance_id, this);
         filters_.push_back (filter);
     }
-    else if (class_id.compare ("PlotSensorNumberFilter") == 0)
-    {
-        logerr  << "FilterManager: generateSubConfigurable: PlotSensorNumberFilter returned from the grave ";
-    }
-    else if (class_id.compare ("SensorFilter") == 0)
-    {
-        SensorFilter *filter = new SensorFilter (class_id, instance_id, this);
-        filters_.push_back (filter);
-    }
+    // TODO
+//    else if (class_id.compare ("SensorFilter") == 0)
+//    {
+//        SensorFilter *filter = new SensorFilter (class_id, instance_id, this);
+//        filters_.push_back (filter);
+//    }
     else
         throw std::runtime_error ("FilterManager: generateSubConfigurable: unknown class_id "+class_id );
 }
@@ -106,24 +73,21 @@ void FilterManager::checkSubConfigurables ()
 
     if (filters_.size() == 0)
     {
-        loginf << "FilterManager: checkSubConfigurables: generating sensor filters";
-        // sensor filters
-        const std::map <std::string, DBObject*> &objects =  DBObjectManager::getInstance().getDBObjects ();
-        std::map <std::string, DBObject*>::const_iterator it;
+//        loginf << "FilterManager: checkSubConfigurables: generating sensor filters";
+//        // sensor filters
+//        const std::map <std::string, DBObject*> &objects =  DBObjectManager::getInstance().getDBObjects ();
+//        std::map <std::string, DBObject*>::const_iterator it;
 
-        for (it = objects.begin(); it != objects.end(); it++)
-        {
-            if (!it->second->hasCurrentDataSource())
-                continue;
+//        for (it = objects.begin(); it != objects.end(); it++)
+//        {
+//            if (!it->second->hasCurrentDataSource())
+//                continue;
 
-            std::string instance_id = "Sensors"+it->second->getName();
-            Configuration &sensorfilter_configuration = addNewSubConfiguration ("SensorFilter", instance_id);
-            sensorfilter_configuration.addParameterString ("dbo_type", it->first);
-            generateSubConfigurable ("SensorFilter", instance_id);
-        }
-
-        // FIX META VARIABLES
-        assert (false);
+//            std::string instance_id = "Sensors"+it->second->getName();
+//            Configuration &sensorfilter_configuration = addNewSubConfiguration ("SensorFilter", instance_id);
+//            sensorfilter_configuration.addParameterString ("dbo_type", it->first);
+//            generateSubConfigurable ("SensorFilter", instance_id);
+//        }
 
 //        loginf << "FilterManager: checkSubConfigurables: generating frame time filter";
 //        // frame time filter
@@ -168,52 +132,12 @@ void FilterManager::checkSubConfigurables ()
     }
 }
 
-bool FilterManager::getChanged ()
+std::string FilterManager::getSQLCondition (const std::string &dbo_name, std::vector<std::string> &variable_names)
 {
-    for (unsigned int cnt=0; cnt < filters_.size(); cnt++)
-    {
-        if (filters_.at(cnt)->getActive())
-            changed_ |= filters_.at(cnt)->getChanged();
-    }
-    return changed_;
-}
+    assert (ATSDB::instance().objectManager().object(dbo_name).loadable());
 
-void FilterManager::setChanged ()
-{
-    changed_=true;
-}
-
-void FilterManager::clearChanged ()
-{
-    for (unsigned int cnt=0; cnt < filters_.size(); cnt++)
-    {
-        if (filters_.at(cnt)->getActive())
-            filters_.at(cnt)->setChanged(false);
-    }
-    changed_=false;
-}
-
-void FilterManager::setLoad (const std::string &dbo_type, bool show)
-{
-    assert (DBObjectManager::getInstance().existsDBObject (dbo_type));
-    *load_.at(dbo_type)=show;
-    changed_=true;
-}
-
-bool FilterManager::getLoad (const std::string &dbo_type)
-{
-    assert (DBObjectManager::getInstance().existsDBObject (dbo_type));
-    return *load_.at(dbo_type);
-}
-
-std::string FilterManager::getSQLCondition (const std::string &dbo_type, std::vector<std::string> &variable_names)
-{
-    assert (DBObjectManager::getInstance().getDBObject(dbo_type)->isLoadable());
-    //assert (type == DBO_PLOTS || type == DBO_SYSTEM_TRACKS || DBO_ADS_B || type == DBO_MLAT);
-
-    std::string sql = getActiveFilterSQLCondition (dbo_type, variable_names);
-    logdbg  << "FilterManager: getSQLCondition: type " << DBObjectManager::getInstance().getDBObject(dbo_type)->getName ()
-            << " '" << sql << "'";
+    std::string sql = getActiveFilterSQLCondition (dbo_name, variable_names);
+    logdbg  << "FilterManager: getSQLCondition: name " << dbo_name << " '" << sql << "'";
     return sql;
 }
 
@@ -238,6 +162,7 @@ unsigned int FilterManager::getNumFilters ()
 {
     return filters_.size();
 }
+
 DBFilter *FilterManager::getFilter (unsigned int index)
 {
     assert (index < filters_.size());
@@ -268,3 +193,16 @@ void FilterManager::deleteFilter (DBFilter *filter)
 
 }
 
+void FilterManager::databaseOpenedSlot ()
+{
+    std::string tmpstr = ATSDB::instance().interface().connection().identifier();
+    replace(tmpstr.begin(), tmpstr.end(), ' ', '_');
+
+    if (db_id_.compare (tmpstr) != 0)
+    {
+        loginf  << "FilterManager: constructor: different db id, resetting filters";
+        reset();
+        db_id_ = tmpstr;
+    }
+
+}

@@ -27,7 +27,8 @@
 
 #include <QDialog>
 #include <vector>
-#include "Configuration.h"
+
+#include "configuration.h"
 
 class DBOVariableSelectionWidget;
 class QLineEdit;
@@ -52,8 +53,8 @@ signals:
 void filterWidgetAction (bool generated);
 
 public slots:
-  void loadMin ();
-  void loadMax ();
+//  void loadMin ();
+//  void loadMax ();
   void addCondition ();
   void accept ();
   void cancel ();

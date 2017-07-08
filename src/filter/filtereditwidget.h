@@ -27,7 +27,8 @@
 
 #include <QWidget>
 #include <vector>
-#include "Configuration.h"
+
+#include "configuration.h"
 
 class DBOVariableSelectionWidget;
 class FilterConditionOperatorComboBox;
@@ -44,8 +45,8 @@ class FilterEditWidget : public QWidget
 {
   Q_OBJECT
 public slots:
-  void loadMin ();
-  void loadMax ();
+//  void loadMin ();
+//  void loadMax ();
   void addCondition ();
   void deleteCondition ();
   void changedName ();
@@ -55,7 +56,7 @@ public slots:
   void changedResetValue ();
 
 public:
-  FilterEditWidget(DBFilter *filter, QWidget *parent=0);
+  FilterEditWidget(DBFilter *filter, QWidget *parent=nullptr);
   virtual ~FilterEditWidget();
 
 protected:
@@ -74,7 +75,6 @@ protected:
   std::map <FilterConditionOperatorComboBox*, DBFilterCondition *> conditions_operator_combos_;
   std::map <FilterConditionResetValueComboBox*, DBFilterCondition *> conditions_reset_value_combos_;
 
-  void createGUIElements ();
   void updateConditionsGrid();
 };
 

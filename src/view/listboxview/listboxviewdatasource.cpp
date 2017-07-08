@@ -13,7 +13,7 @@
 #include "listboxviewdatasource.h"
 #include "logger.h"
 #include "job.h"
-//#include "DBOInfoDBJob.h"
+
 
 #include <QMessageBox>
 
@@ -21,8 +21,6 @@ ListBoxViewDataSource::ListBoxViewDataSource(const std::string &class_id, const 
 : QObject(), Configurable (class_id, instance_id, parent), set_(nullptr), selection_entries_ (ViewSelection::getInstance().getEntries())
 {
     registerParameter ("use_filters", &use_filters_, false);
-//    registerParameter ("limit_min", &limit_min_, 0);
-//    registerParameter ("limit_max", &limit_max_, 100);
     registerParameter ("use_selection", &use_selection_, true);
     registerParameter ("use_order", &use_order_, false);
     registerParameter ("order_variable_type_int", &order_variable_type_int_, 0);
@@ -74,7 +72,7 @@ void ListBoxViewDataSource::checkSubConfigurables ()
 
 void ListBoxViewDataSource::loadingStartedSlot ()
 {
-    loginf << "ListBoxViewDataSource: loadingStartedSlot";
+    logdbg << "ListBoxViewDataSource: loadingStartedSlot";
     emit loadingStartedSignal ();
 }
 
@@ -90,6 +88,6 @@ void ListBoxViewDataSource::newDataSlot (DBObject &object)
 
 void ListBoxViewDataSource::loadingDoneSlot(DBObject &object)
 {
-    loginf << "ListBoxViewDataSource: loadingDoneSlot: object " << object.name();
+    logdbg << "ListBoxViewDataSource: loadingDoneSlot: object " << object.name();
 }
 

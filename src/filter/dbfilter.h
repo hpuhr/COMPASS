@@ -27,10 +27,11 @@
 
 #include <string>
 #include <vector>
-#include "Configurable.h"
+#include "configurable.h"
 
 class DBFilterWidget;
 class DBFilterCondition;
+class FilterManager;
 
 /**
  * @brief Dynamic database filter
@@ -45,7 +46,7 @@ class DBFilter : public Configurable
 {
 public:
     /// @brief Constructor
-    DBFilter(std::string class_id, std::string instance_id, Configurable *parent, bool is_generic=true);
+    DBFilter(const std::string &class_id, const std::string &instance_id, Configurable *parent, bool is_generic=true);
     /// @brief Destructor
     virtual ~DBFilter();
 
@@ -72,7 +73,7 @@ public:
     /// @brief Returns the filter name
     std::string getName () { return name_; }
     /// @brief Sets the filter name
-    void setName (std::string name);
+    void setName (const std::string &name);
 
     /// @brief Returns the generic flag
     bool isGeneric () { return is_generic_; }
@@ -80,13 +81,13 @@ public:
     /// @brief Returns the condition string for a DBObject
     virtual std::string getConditionString (const std::string &dbo_type, bool &first, std::vector<std::string> &variable_names);
     /// @brief Returns if only sub-filters and no own conditions exist
-    bool onlyHasSubFilter () { return conditions_.size()>0; };
+    bool onlyHasSubFilter () { return conditions_.size()>0; }
 
     /// @brief Returns the filter widget
     DBFilterWidget *getWidget ();
 
     /// @brief Returns if the filter uses the AND operation. Not used yet.
-    bool getAnd () { return op_and_; };
+    bool getAnd () { return op_and_; }
     /// @brief Sets the filter AND operation flag. Not used yet.
     void setAnd (bool op_and);
 
@@ -96,22 +97,23 @@ public:
     /// @brief Resets the filter (sub-filters and conditions) to their inital values.
     virtual void reset ();
 
-    virtual void generateSubConfigurable (std::string class_id, std::string instance_id);
+    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
     /// @brief Returns the conditions container
-    std::vector <DBFilterCondition *>& getConditions() { return conditions_; };
+    std::vector <DBFilterCondition *>& getConditions() { return conditions_; }
     /// @brief Returns the number of conditions
     unsigned int getNumConditions () { return conditions_.size(); }
     /// @brief Removes a specific condition
     void deleteCondition (DBFilterCondition *condition);
 
     /// @brief Removes the filter from the FilterManager
-    void destroy ();
+    //void destroy ();
 
     /// @brief Returns if widget has already been deleted
     void widgetIsDeleted ();
 
 protected:
+    //FilterManager &filter_manager_;
     /// Active flag, if false, no conditions are used.
     bool active_;
     /// AND operation flag. Not used.

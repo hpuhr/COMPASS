@@ -35,7 +35,7 @@
 #include "dbinterface.h"
 #include "global.h"
 #include "logger.h"
-//#include "FilterManager.h"
+#include "filtermanager.h"
 //#include "StructureReader.h"
 //#include "Job.h"
 //#include "PostProcessDBJob.h"
@@ -63,7 +63,7 @@ using namespace std;
  */
 ATSDB::ATSDB()
  : Configurable ("ATSDB", "ATSDB0", 0, "conf/atsdb.xml"), initialized_(false), db_interface_(nullptr), dbo_manager_(nullptr), db_schema_manager_ (nullptr),
-   view_manager_(nullptr)
+   filter_manager_(nullptr), view_manager_(nullptr)
 //: export_active_(false), dbo_reads_active_(0)
 {
     logdbg  << "ATSDB: constructor: start";
@@ -75,10 +75,12 @@ ATSDB::ATSDB()
     assert (db_interface_);
     assert (db_schema_manager_);
     assert (dbo_manager_);
+    assert (filter_manager_);
     assert (view_manager_);
 
     QObject::connect (db_schema_manager_, SIGNAL(schemaChangedSignal()), dbo_manager_, SLOT(updateSchemaInformationSlot()));
     QObject::connect(db_interface_, SIGNAL(databaseOpenedSignal()), dbo_manager_, SLOT(databaseOpenedSlot()));
+    QObject::connect(db_interface_, SIGNAL(databaseOpenedSignal()), filter_manager_, SLOT(databaseOpenedSlot()));
 
     //reference_point_defined_=false;
 
@@ -107,6 +109,7 @@ ATSDB::~ATSDB()
     assert (!dbo_manager_);
     assert (!db_schema_manager_);
     assert (!db_interface_);
+    assert (!filter_manager_);
     assert (!view_manager_);
 
 //    if (dbo_read_jobs_.size() > 0)
@@ -152,6 +155,12 @@ void ATSDB::generateSubConfigurable (const std::string &class_id, const std::str
         db_schema_manager_ = new DBSchemaManager (class_id, instance_id, this);
         assert (db_schema_manager_ != nullptr);
     }
+    else if (class_id == "FilterManager")
+    {
+        assert (filter_manager_ == nullptr);
+        filter_manager_ = new FilterManager (class_id, instance_id, this);
+        assert (filter_manager_ != nullptr);
+    }
     else if (class_id == "ViewManager")
     {
         assert (view_manager_ == nullptr);
@@ -182,6 +191,12 @@ void ATSDB::checkSubConfigurables ()
         generateSubConfigurable ("DBSchemaManager", "DBSchemaManager0");
         assert (dbo_manager_ != nullptr);
     }
+    if (filter_manager_ == nullptr)
+    {
+        addNewSubConfiguration ("FilterManager", "FilterManager0");
+        generateSubConfigurable ("FilterManager", "FilterManager0");
+        assert (filter_manager_ != nullptr);
+    }
     if (view_manager_ == nullptr)
     {
         addNewSubConfiguration ("ViewManager", "ViewManager0");
@@ -209,6 +224,13 @@ DBObjectManager &ATSDB::objectManager ()
     assert (dbo_manager_);
     assert (initialized_);
     return *dbo_manager_;
+}
+
+FilterManager &ATSDB::filterManager ()
+{
+    assert (filter_manager_);
+    assert (initialized_);
+    return *filter_manager_;
 }
 
 ViewManager &ATSDB::viewManager ()

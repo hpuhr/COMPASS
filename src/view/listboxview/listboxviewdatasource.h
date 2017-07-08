@@ -57,16 +57,6 @@ public:
     /// @brief Returns use filter flag
     bool getUseFilters () { return use_filters_; }
 
-//    /// @brief sets limit minimum
-//    void setLimitMin (unsigned int min) { limit_min_ = min; }
-//    /// @brief Returns limit minimum
-//    unsigned int getLimitMin () { return limit_min_; }
-
-//    /// @brief Sets limit maximum
-//    void setLimitMax (unsigned int max) { limit_max_ = max; }
-//    /// @brief Return limit maximum
-//    unsigned int getLimitMax () { return limit_max_; }
-
     /// @brief Sets use selection flag
     void setUseSelection (bool use_selection) { use_selection_=use_selection; }
     /// @brief Returns use selection flag
@@ -102,10 +92,6 @@ protected:
     DBOVariableOrderedSet *set_;
     /// Use filters flag
     bool use_filters_;
-    /// Limit minimum
-    //unsigned int limit_min_;
-    /// Limit maximum
-    //unsigned int limit_max_;
     /// Use selection flag
     bool use_selection_;
     /// Use order flag

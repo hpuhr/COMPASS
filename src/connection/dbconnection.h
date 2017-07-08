@@ -110,6 +110,7 @@ public:
   virtual QWidget *infoWidget ()=0;
 
   virtual std::string status ()=0;
+  virtual std::string identifier ()=0;
 
   bool ready () { return connection_ready_; }
 

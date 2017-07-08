@@ -26,13 +26,15 @@
 #define DBFILTERCONDITION_H_
 
 #include <QObject>
-#include "Configurable.h"
-#include "DBOVariable.h"
-#include "DBOVariableMinMaxObserver.h"
+
+#include "configurable.h"
+//#include "DBOVariableMinMaxObserver.h"
 
 class QWidget;
 class QLineEdit;
 class QLabel;
+class DBOVariable;
+class MetaDBOVariable;
 
 class DBFilter;
 
@@ -45,7 +47,7 @@ class DBFilter;
  * A condition consists of a DBOVariable, and operator and a value e.g. 'TOD <= 0.1'. A number of operators are supported, the value
  * also has a specific reset value (e.g. original value, minimum of variable, maximum of variable.
  */
-class DBFilterCondition : public QObject, public Configurable, public DBOVariableMinMaxObserver
+class DBFilterCondition : public QObject, public Configurable //, public DBOVariableMinMaxObserver
 {
     Q_OBJECT
 
@@ -59,7 +61,7 @@ signals:
 
 public:
     /// @brief Constructor
-    DBFilterCondition(std::string instance_id, DBFilter *filter_parent);
+    DBFilterCondition(const std::string &class_id, const std::string &instance_id, DBFilter *filter_parent);
     /// @brief Desctructor
     virtual ~DBFilterCondition();
 
@@ -71,15 +73,15 @@ public:
     std::string getConditionString (const std::string &dbo_type, bool &first, std::vector<std::string> &variable_names);
 
     /// @brief Returns the widget
-    QWidget *getWidget () { assert(widget_); return widget_;};
+    QWidget *getWidget () { assert(widget_); return widget_;}
 
     /// @brief Updates the GUI elements
     void update ();
 
     /// @brief Returns changed flag
-    bool getChanged () { return changed_; };
+    bool getChanged () { return changed_; }
     /// @brief Sets changed flag
-    void setChanged (bool changed) { changed_=changed; };
+    void setChanged (bool changed) { changed_=changed; }
 
     /// @brief Returns DBOVariable which is used in the condition
     DBOVariable *getVariable () { return variable_; }
@@ -109,7 +111,7 @@ public:
     /// @brief Resets condition by setting value_ to reset_value_
     void reset ();
 
-    virtual void notifyMinMax (DBOVariable *variable);
+    //virtual void notifyMinMax (DBOVariable *variable);
 
 private:
     /// @brief Parent filter
@@ -125,11 +127,14 @@ private:
     /// @brief Reset value
     std::string reset_value_;
     /// @brief DBO type of variable
-    std::string variable_dbo_type_;
+    std::string variable_dbo_name_;
     /// @brief DBO variable identifier
     std::string variable_name_;
+
     /// @brief Pointer to DBO variable
     DBOVariable *variable_;
+    MetaDBOVariable *meta_variable_;
+
     /// @brief Changed flag
     bool changed_;
 
