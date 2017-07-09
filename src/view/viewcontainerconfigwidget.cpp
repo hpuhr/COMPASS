@@ -106,6 +106,13 @@ void ViewContainerConfigWidget::addListBoxView()
     updateSlot();
 }
 
+void ViewContainerConfigWidget::addOSGView()
+{
+    view_container_->addOSGView();
+    updateSlot();
+}
+
+
 //void ViewContainerConfigWidget::addMosaicView()
 //{
 //    //TODO

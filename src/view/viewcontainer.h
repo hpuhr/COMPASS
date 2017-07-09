@@ -40,6 +40,7 @@ public:
     //  void addGeographicView();
     //  void addHistogramView();
     void addListBoxView();
+    void addOSGView();
     //  void addMosaicView();
     //  void addScatterPlotView();
     //  void addTemplateView (std::string template_name);

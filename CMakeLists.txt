@@ -15,6 +15,7 @@ add_definitions ( -Wall -std=c++11 )
 
 find_package(Qt5Widgets)
 find_package(Qt5Core)
+find_package(Qt5OpenGL)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Instruct CMake to run moc automatically when needed.
@@ -54,10 +55,18 @@ find_package ( TinyXML2 REQUIRED )
 message("  TINYXML2_INCLUDE_DIR: ${TINYXML2_INCLUDE_DIR}")
 message("  TINYXML2_LIBRARY: ${TINYXML2_LIBRARY}") 
 
+#find_package(OpenSceneGraph 2.0.0 REQUIRED osgDB osgUtil osgViewer osgQt)
+    # libOpenThreads & libosg automatically searched
+#message("  OSG_INCLUDE_DIR: ${OPENSCENEGRAPH_INCLUDE_DIRS}")
+
+#find_package(OSGEarth REQUIRED)
+#message("  OSGEARTH_INCLUDE_DIR: ${OSGEARTH_INCLUDE_DIRS}")
+
 include_directories (
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
     ${Qt5Widgets_INCLUDE_DIRS}
+    ${Qt5OpenGL_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
     #${SQLITE3_INCLUDE_DIR}
     ${MYSQL_INCLUDE_DIR}
@@ -65,6 +74,8 @@ include_directories (
     ${LOG4CPP_INCLUDE_DIR}
     #${GDAL_INCLUDE_DIRS}
     ${TINYXML2_INCLUDE_DIR}
+#    ${OPENSCENEGRAPH_INCLUDE_DIRS}
+#    ${OSGEARTH_INCLUDE_DIRS}
     .
     src
     src/buffer
@@ -94,6 +105,7 @@ include_directories (
     src/view
     src/view/viewbase
     src/view/listboxview
+    src/view/osgview
     src/unit
     )
 
@@ -265,6 +277,11 @@ set ( atsdb_HDRS
     src/view/listboxview/listboxviewconfigwidget.h
     src/view/listboxview/listboxviewdatawidget.h
     src/view/listboxview/listboxviewwidget.h
+#    src/view/osgview/osgviewdatasource.h
+#    src/view/osgview/osgview.h
+#    src/view/osgview/osgviewconfigwidget.h
+#    src/view/osgview/osgviewdatawidget.h
+#    src/view/osgview/osgviewwidget.h
     src/unit/unit.h
     src/unit/unitmanager.h
     src/unit/quantity.h
@@ -423,6 +440,11 @@ set ( atsdb_SRCS
     src/view/listboxview/listboxviewconfigwidget.cpp
     src/view/listboxview/listboxviewdatawidget.cpp
     src/view/listboxview/listboxviewwidget.cpp
+#    src/view/osgview/osgviewdatasource.cpp
+#    src/view/osgview/osgview.cpp
+#    src/view/osgview/osgviewconfigwidget.cpp
+#    src/view/osgview/osgviewdatawidget.cpp
+#    src/view/osgview/osgviewwidget.cpp
 #    src/view/viewbase/dbviewmodel.cpp
 #    src/view/viewbase/dbview.cpp
 #    src/view/viewbase/dbviewwidget.cpp
@@ -441,12 +463,12 @@ set ( client_SRCS
     )
 
 add_library ( atsdb SHARED ${atsdb_SRCS} ${atsdb_HDRS} ) 
-target_link_libraries ( atsdb  ${GDAL_LIBRARIES} Qt5::Widgets Qt5::Core ${TINYXML2_LIBRARY} ${Boost_LIBRARIES} ${LOG4CPP_LIBRARIES} ${MySQLpp_LIBRARY})
-# ${SQLITE3_LIBRARIES} ${Boost_SYSTEM_LIBRARY} ${Boost_DATA_TIME_LIBRARY} ${Boost_REGEX_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_IOSTREAMS_LIBRARY} ${GDAL_LIBRARIES}
+target_link_libraries ( atsdb  Qt5::Widgets Qt5::Core Qt5::OpenGL ${TINYXML2_LIBRARY} ${Boost_LIBRARIES} ${LOG4CPP_LIBRARIES} ${MySQLpp_LIBRARY} )
+# ${SQLITE3_LIBRARIES} ${GDAL_LIBRARIES} ${OSGEARTH_LIBRARY} ${OPENSCENEGRAPH_LIBRARIES}
 
 add_executable ( atsdb_client ${atsdb_HDRS} ${client_SRCS})
-target_link_libraries ( atsdb_client atsdb ${GDAL_LIBRARIES} Qt5::Widgets Qt5::Core ${TINYXML2_LIBRARY} ${Boost_LIBRARIES} ${LOG4CPP_LIBRARIES} ${MySQLpp_LIBRARY})
-# ${GDAL_LIBRARIES}
+target_link_libraries ( atsdb_client atsdb Qt5::Widgets Qt5::Core Qt5::OpenGL ${TINYXML2_LIBRARY} ${Boost_LIBRARIES} ${LOG4CPP_LIBRARIES} ${MySQLpp_LIBRARY})
+# ${GDAL_LIBRARIES} ${OSGEARTH_LIBRARY} ${OPENSCENEGRAPH_LIBRARIES}
 
 INSTALL_FILES(/include .h ${atsdb_HDRS})
 

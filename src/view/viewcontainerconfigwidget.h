@@ -41,12 +41,13 @@ public:
 
     const QString& name() { return name_; }
 
-    void addGeographicView();
-    void addScatterPlotView();
-    void addHistogramView();
+//    void addGeographicView();
+//    void addScatterPlotView();
+//    void addHistogramView();
     void addListBoxView();
-    void addMosaicView();
-    void addTemplateView (std::string template_name);
+    void addOSGView();
+//    void addMosaicView();
+//    void addTemplateView (std::string template_name);
 
 private slots:
     void updateSlot();
