@@ -124,7 +124,7 @@ int main (int argc, char **argv)
 {
     try
     {
-        Config config ("conf/client.conf");
+        SimpleConfig config ("conf/client.conf");
         assert (config.existsId("version"));
         assert (config.existsId("main_configuration_file"));
         assert (config.existsId("log_properties_file"));

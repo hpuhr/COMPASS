@@ -26,7 +26,7 @@
 using namespace std;
 using namespace Utils;
 
-Config::Config (const std::string &config_filename)
+SimpleConfig::SimpleConfig (const std::string &config_filename)
 : opened_ (false), config_filename_ (config_filename)
 {
     try
@@ -41,12 +41,12 @@ Config::Config (const std::string &config_filename)
     }
 }
 
-Config::~Config()
+SimpleConfig::~SimpleConfig()
 {
     opened_=false;
 }
 
-void Config::loadFile()
+void SimpleConfig::loadFile()
 {
     assert (!opened_);
 
@@ -95,7 +95,7 @@ void Config::loadFile()
     opened_ = true;
 }
 
-bool Config::getBool (const std::string &id)
+bool SimpleConfig::getBool (const std::string &id)
 {
     if (!opened_)
         throw std::runtime_error ("Config: getBool: config file was not opened");
@@ -107,7 +107,7 @@ bool Config::getBool (const std::string &id)
     return tmp > 0;
 }
 
-int Config::getInt (const std::string &id)
+int SimpleConfig::getInt (const std::string &id)
 {
     if (!opened_)
         throw std::runtime_error ("Config: getInt: config file was not opened");
@@ -118,7 +118,7 @@ int Config::getInt (const std::string &id)
     return String::intFromString(config_.at(id));
 }
 
-unsigned int Config::getUnsignedInt (const std::string &id)
+unsigned int SimpleConfig::getUnsignedInt (const std::string &id)
 {
     if (!opened_)
         throw std::runtime_error ("Config: getUnsignedInt: config file was not opened");
@@ -129,7 +129,7 @@ unsigned int Config::getUnsignedInt (const std::string &id)
     return String::uIntFromString(config_.at(id));
 }
 
-double Config::getDouble (const std::string &id)
+double SimpleConfig::getDouble (const std::string &id)
 {
     if (!opened_)
         throw std::runtime_error ("Config: getDouble: config file was not opened");
@@ -140,7 +140,7 @@ double Config::getDouble (const std::string &id)
     return String::doubleFromString(config_.at(id));
 }
 
-const std::string &Config::getString (const std::string &id)
+const std::string &SimpleConfig::getString (const std::string &id)
 {
     if (!opened_)
         throw std::runtime_error ("Config: getValue: config file was not opened");
@@ -156,7 +156,7 @@ const std::string &Config::getString (const std::string &id)
     return config_.at(id);
 }
 
-bool Config::existsId(const std::string &id)
+bool SimpleConfig::existsId(const std::string &id)
 {
     assert (id.size() > 0);
     return (config_.count(id) > 0);

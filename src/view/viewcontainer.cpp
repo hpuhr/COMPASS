@@ -8,6 +8,11 @@
 #include <QTabWidget>
 #include <QInputDialog>
 
+// TODO HACK
+#include <QApplication>
+#include <QMainWindow>
+
+
 #include "viewcontainer.h"
 #include "viewcontainerconfigwidget.h"
 #include "config.h"
@@ -17,7 +22,8 @@
 #include "view.h"
 #include "viewmanager.h"
 #include "listboxview.h"
-//#include "osgview.h"
+//#include "test.h"
+#include "osgview.h"
 //#include "GeographicView.h"
 //#include "HistogramView.h"
 //#include "ScatterPlotView.h"
@@ -76,7 +82,20 @@ void ViewContainer::addListBoxView()
 
 void ViewContainer::addOSGView()
 {
-    //generateSubConfigurable ("OSGView", "OSGView"+String::intToString(view_count_));
+//    QMainWindow *window;
+//    QWidgetList widgets = qApp->topLevelWidgets();
+//    for (QWidgetList::iterator i = widgets.begin(); i != widgets.end(); ++i)
+//        if ((*i)->objectName() == "MainWindow")
+//            window = (QMainWindow*) (*i);
+
+//    QtOSGWidget *widget = new QtOSGWidget(1, 1, window);
+//    widget->show();
+
+
+//    ViewerWidget *widget = new ViewerWidget ();
+//    widget->show();
+
+    generateSubConfigurable ("OSGView", "OSGView"+String::intToString(view_count_));
 }
 
 //void ViewContainer::addMosaicView()
@@ -177,14 +196,14 @@ void ViewContainer::generateSubConfigurable (const std::string &class_id, const 
     }
     else if (class_id.compare ("OSGView") == 0)
     {
-//        OSGView* view = new OSGView ( class_id, instance_id, this, view_manager_);
-//        unsigned int number = String::getAppendedInt (instance_id);
+        OSGView* view = new OSGView ( class_id, instance_id, this, view_manager_);
+        unsigned int number = String::getAppendedInt (instance_id);
 
-//        if (number >= view_count_)
-//            view_count_ = number+1;
+        if (number >= view_count_)
+            view_count_ = number+1;
 
-//        assert( view );
-//        view->init();
+        assert( view );
+        view->init();
     }
     //  else if (class_id.compare ("GeographicView") == 0)
     //  {

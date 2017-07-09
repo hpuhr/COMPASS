@@ -8,12 +8,7 @@
 #include <QTabWidget>
 #include <QHBoxLayout>
 
-#include <osgViewer/CompositeViewer>
-#include <osgViewer/ViewerEventHandlers>
-#include <osgGA/TrackballManipulator>
-#include <osgDB/ReadFile>
-#include <osgQt/GraphicsWindowQt>
-#include <QGLWidget>
+
 
 #include "buffertablewidget.h"
 #include "dbobject.h"
@@ -24,119 +19,146 @@
 #include "logger.h"
 #include "atsdb.h"
 
-OSGViewDataWidget::OSGViewDataWidget(OSGViewDataSource *data_source, osgViewer::ViewerBase::ThreadingModel threadingModel,
-                                     QWidget * parent, Qt::WindowFlags f)
-    : QWidget (parent, f), data_source_ (data_source)
+OSGViewDataWidget::OSGViewDataWidget(OSGViewDataSource *data_source, qreal scaleX, qreal scaleY, QWidget* parent)
+    : QOpenGLWidget(parent), data_source_ (data_source), _mGraphicsWindow (new osgViewer::GraphicsWindowEmbedded( this->x(), this->y(), this->width(), this->height())),
+      _mViewer(new osgViewer::Viewer), m_scaleX(scaleX), m_scaleY(scaleY)
 {
-    assert (data_source_);
+    //        osg::Cylinder* cylinder    = new osg::Cylinder( osg::Vec3( 0.f, 0.f, 0.f ), 0.25f, 0.5f );
+    //        osg::ShapeDrawable* sd = new osg::ShapeDrawable( cylinder );
+    //        sd->setColor( osg::Vec4( 0.8f, 0.5f, 0.2f, 1.f ) );
 
-    QHBoxLayout *layout = new QHBoxLayout ();
+    //osg::Geode* geode = new osg::Geode;
+    //osg::Node* globe = osgDB::readNodeFile("data/maps/openstreetmap_flat.earth");
+    //geode->addDrawable(globe);
 
-    setThreadingModel(threadingModel);
+    osg::Node* loadedModel = osgDB::readNodeFile("/home/sk/workspace_cdt/atsdb/data/maps/openstreetmap_flat.earth");
 
-    // disable the default setting of viewer.done() by pressing Escape.
-    setKeyEventSetsDone(0);
+    // Find the MapNode
+    osgEarth::MapNode* mapNode = MapNode::get( loadedModel );
 
-    QWidget* widget1 = addViewWidget( createGraphicsWindow(0,0,100,100), osgDB::readNodeFile("cow.osgt") );
-//    QWidget* widget2 = addViewWidget( createGraphicsWindow(0,0,100,100), osgDB::readNodeFile("glider.osgt") );
-//    QWidget* widget3 = addViewWidget( createGraphicsWindow(0,0,100,100), osgDB::readNodeFile("axes.osgt") );
-//    QWidget* widget4 = addViewWidget( createGraphicsWindow(0,0,100,100), osgDB::readNodeFile("fountain.osgt") );
-//    QWidget* popupWidget = addViewWidget( createGraphicsWindow(900,100,320,240,"Popup window",true), osgDB::readNodeFile("dumptruck.osgt") );
-//    popupWidget->show();
+    //      Map* map = new Map();
 
-//    QGridLayout* grid = new QGridLayout;
-//    grid->addWidget( widget1, 0, 0 );
-//    grid->addWidget( widget2, 0, 1 );
-//    grid->addWidget( widget3, 1, 0 );
-//    grid->addWidget( widget4, 1, 1 );
-//    setLayout( grid );
+    //      // Add an imagery layer (blue marble from a TMS source)
+    //      {
+    //          TMSOptions tms;
+    //          tms.url() = "http://labs.metacarta.com/wms-c/Basic.py/1.0.0/satellite/";
+    //          ImageLayer* layer = new ImageLayer( "NASA", tms );
+    //          map->addImageLayer( layer );
+    //      }
+    //      MapNode* mapNode = new MapNode( map );
 
-    layout->addWidget(widget1);
+    osg::Camera* camera = new osg::Camera;
+    camera->setViewport( 0, 0, this->width(), this->height() );
+    camera->setClearColor( osg::Vec4( 0.9f, 0.9f, 1.f, 1.f ) );
+    float aspectRatio = static_cast<float>( this->width()) / static_cast<float>( this->height() );
+    camera->setProjectionMatrixAsPerspective( 30.f, aspectRatio, 1.f, 1000.f );
+    camera->setGraphicsContext( _mGraphicsWindow );
 
-    connect( &timer_, SIGNAL(timeout()), this, SLOT(update()) );
-    timer_.start( 10 );
-
-    setLayout (layout);
+    _mViewer->setCamera(camera);
+    _mViewer->setSceneData(mapNode);
+    osgGA::TrackballManipulator* manipulator = new osgGA::TrackballManipulator;
+    manipulator->setAllowThrow( false );
+    this->setMouseTracking(true);
+    _mViewer->setCameraManipulator(manipulator);
+    _mViewer->setThreadingModel(osgViewer::Viewer::SingleThreaded);
+    _mViewer->realize();
 }
 
 OSGViewDataWidget::~OSGViewDataWidget()
 {
-    // TODO
-    //buffer_tables_.clear();
+
 }
 
-//void OSGViewDataWidget::clearTables ()
-//{
-//    logdbg  << "OSGViewDataWidget: updateTables: start";
-//    // TODO
-//    //  std::map <DB_OBJECT_TYPE, BufferTableWidget*>::iterator it;
+void OSGViewDataWidget::setScale(qreal X, qreal Y)
+{
+    m_scaleX = X;
+    m_scaleY = Y;
+    this->resizeGL(this->width(), this->height());
+}
 
-//    //  for (it = buffer_tables_.begin(); it != buffer_tables_.end(); it++)
-//    //  {
-//    //    it->second->show (0, 0, false);
-//    //  }
+void OSGViewDataWidget::paintGL()
+{
+  _mViewer->frame();
+}
 
-//    logdbg  << "OSGViewDataWidget: updateTables: end";
-//}
+void OSGViewDataWidget::resizeGL( int width, int height )
+{
+    this->getEventQueue()->windowResize(this->x()*m_scaleX, this->y() * m_scaleY, width*m_scaleX, height*m_scaleY);
+    _mGraphicsWindow->resized(this->x()*m_scaleX, this->y() * m_scaleY, width*m_scaleX, height*m_scaleY);
+    osg::Camera* camera = _mViewer->getCamera();
+    camera->setViewport(0, 0, this->width()*m_scaleX, this->height()* m_scaleY);
+}
+
+void OSGViewDataWidget::mouseMoveEvent(QMouseEvent* event)
+{
+    this->getEventQueue()->mouseMotion(event->x()*m_scaleX, event->y()*m_scaleY);
+}
+
+void OSGViewDataWidget::mousePressEvent(QMouseEvent* event)
+{
+    unsigned int button = 0;
+    switch (event->button()){
+    case Qt::LeftButton:
+        button = 1;
+        break;
+    case Qt::MiddleButton:
+        button = 2;
+        break;
+    case Qt::RightButton:
+        button = 3;
+        break;
+    default:
+        break;
+    }
+    this->getEventQueue()->mouseButtonPress(event->x()*m_scaleX, event->y()*m_scaleY, button);
+}
+
+void OSGViewDataWidget::mouseReleaseEvent(QMouseEvent* event)
+{
+    unsigned int button = 0;
+    switch (event->button()){
+    case Qt::LeftButton:
+        button = 1;
+        break;
+    case Qt::MiddleButton:
+        button = 2;
+        break;
+    case Qt::RightButton:
+        button = 3;
+        break;
+    default:
+        break;
+    }
+    this->getEventQueue()->mouseButtonRelease(event->x()*m_scaleX, event->y()*m_scaleY, button);
+}
+
+void OSGViewDataWidget::wheelEvent(QWheelEvent* event)
+{
+    int delta = event->delta();
+    osgGA::GUIEventAdapter::ScrollingMotion motion = delta > 0 ?
+                osgGA::GUIEventAdapter::SCROLL_UP : osgGA::GUIEventAdapter::SCROLL_DOWN;
+    this->getEventQueue()->mouseScroll(motion);
+}
+
+bool OSGViewDataWidget::event(QEvent* event)
+{
+    bool handled = QOpenGLWidget::event(event);
+    this->update();
+    return handled;
+}
+
+osgGA::EventQueue* OSGViewDataWidget::getEventQueue() const
+{
+  osgGA::EventQueue* eventQueue = _mGraphicsWindow->getEventQueue();
+  return eventQueue;
+}
 
 void OSGViewDataWidget::loadingStartedSlot()
 {
-//    for (auto buffer_table : buffer_tables_)
-//        buffer_table.second->clear();
+    loginf << "OSGViewDataWidget: loadingStartedSlot";
 }
 
 void OSGViewDataWidget::updateData (DBObject &object, std::shared_ptr<Buffer> buffer)
 {
-    logdbg  << "OSGViewDataWidget: updateTables: start";
-    //assert (buffer_tables_.count (object.name()) > 0);
-    //buffer_tables_.at(object.name())->show(buffer); //, data_source_->getSet()->getFor(type), data_source_->getDatabaseView()
-
-    logdbg  << "OSGViewDataWidget: updateTables: end";
+loginf << "OSGViewDataWidget: updateData";
 }
-
-
-QWidget* OSGViewDataWidget::addViewWidget( osgQt::GraphicsWindowQt* gw, osg::Node* scene )
-{
-    osgViewer::View* view = new osgViewer::View;
-    addView( view );
-
-    osg::Camera* camera = view->getCamera();
-    camera->setGraphicsContext( gw );
-
-    const osg::GraphicsContext::Traits* traits = gw->getTraits();
-
-    camera->setClearColor( osg::Vec4(0.2, 0.2, 0.6, 1.0) );
-    camera->setViewport( new osg::Viewport(0, 0, traits->width, traits->height) );
-    camera->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(traits->width)/static_cast<double>(traits->height), 1.0f, 10000.0f );
-
-    view->setSceneData( scene );
-    view->addEventHandler( new osgViewer::StatsHandler );
-    view->setCameraManipulator( new osgGA::TrackballManipulator );
-
-    return gw->getGLWidget();
-}
-
-osgQt::GraphicsWindowQt* OSGViewDataWidget::createGraphicsWindow (int x, int y, int w, int h, const std::string& name, bool windowDecoration)
-{
-    osg::DisplaySettings* ds = osg::DisplaySettings::instance().get();
-    osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
-    traits->windowName = name;
-    traits->windowDecoration = windowDecoration;
-    traits->x = x;
-    traits->y = y;
-    traits->width = w;
-    traits->height = h;
-    traits->doubleBuffer = true;
-    traits->alpha = ds->getMinimumNumAlphaBits();
-    traits->stencil = ds->getMinimumNumStencilBits();
-    traits->sampleBuffers = ds->getMultiSamples();
-    traits->samples = ds->getNumMultiSamples();
-
-    return new osgQt::GraphicsWindowQt(traits.get());
-}
-
-void OSGViewDataWidget::paintEvent( QPaintEvent* event )
-{
-    frame();
-}
-

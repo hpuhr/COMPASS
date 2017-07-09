@@ -26,7 +26,8 @@
  *
  * Simple configuration file for reading a file containing string identifiers and values
  */
-class Config
+
+class SimpleConfig
 {
 protected:
     bool opened_;
@@ -40,9 +41,9 @@ protected:
 
 public:
     /// @brief Constructor
-    Config (const std::string &config_filename);
+    SimpleConfig (const std::string &config_filename);
     /// @brief Destructor
-    virtual ~Config();
+    virtual ~SimpleConfig();
 
     /// @brief Returns if a given identifier exists
     bool existsId (const std::string &id);

@@ -24,7 +24,7 @@ OSGViewWidget::OSGViewWidget( const std::string& class_id, const std::string& in
 
     QHBoxLayout *hlayout = new QHBoxLayout;
 
-    data_widget_ = new OSGViewDataWidget (view->getDataSource());
+    data_widget_ = new OSGViewDataWidget (view->getDataSource(), 1, 1);
     data_widget_->setAutoFillBackground(true);
     QSizePolicy sp_left(QSizePolicy::Preferred, QSizePolicy::Preferred);
     sp_left.setHorizontalStretch(3);

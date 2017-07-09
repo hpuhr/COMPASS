@@ -120,15 +120,15 @@ void ViewManagerWidget::addViewSlot()
         QAction* action = submenu->addAction( name, this, SLOT(addListBoxViewSlot()) );
         action->setData( QVariant( i ) );
     }
-    // listbox view
-    //    submenu = menu.addMenu( "OSG View" );
-    //    //  submenu->addAction( "New Window", this, SLOT(addListBoxViewNewWindowSlot()) );
-    //    for( i=0; i<n; ++i )
-    //    {
-    //        name = cont_widgets_[ i ]->name();
-    //        QAction* action = submenu->addAction( name, this, SLOT(addOSGViewSlot()) );
-    //        action->setData( QVariant( i ) );
-    //    }
+    // osg view
+    submenu = menu.addMenu( "OSG View" );
+    //  submenu->addAction( "New Window", this, SLOT(addListBoxViewNewWindowSlot()) );
+    for( i=0; i<n; ++i )
+    {
+        name = cont_widgets_[ i ]->name();
+        QAction* action = submenu->addAction( name, this, SLOT(addOSGViewSlot()) );
+        action->setData( QVariant( i ) );
+    }
 
 
     //  //mosaic view
