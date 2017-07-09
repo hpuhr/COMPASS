@@ -2,7 +2,7 @@ set(ATSDB_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 message("  Path: ${ATSDB_PATH}")
 
 cmake_minimum_required(VERSION 2.8.11)
-set ( CMAKE_BUILD_TYPE Debug )
+set ( CMAKE_BUILD_TYPE Release )
 
 project( ATSDB )
 
@@ -278,7 +278,6 @@ set ( atsdb_HDRS
     src/view/listboxview/listboxviewconfigwidget.h
     src/view/listboxview/listboxviewdatawidget.h
     src/view/listboxview/listboxviewwidget.h
-    src/view/osgview/test.h
     src/view/osgview/osgviewdatasource.h
     src/view/osgview/osgview.h
     src/view/osgview/osgviewconfigwidget.h
@@ -475,7 +474,7 @@ target_link_libraries ( atsdb
     ${MySQLpp_LIBRARY}
     ${OPENSCENEGRAPH_LIBRARIES}
     ${OSGEARTH_LIBRARY}
-    ${OSGEARTHQT_LIBRARY})
+    ${OSGEARTHUTIL_LIBRARY})
 # ${SQLITE3_LIBRARIES} ${GDAL_LIBRARIES} ${OSGEARTH_LIBRARY} ${OPENSCENEGRAPH_LIBRARIES}
 
 add_executable ( atsdb_client ${atsdb_HDRS} ${client_SRCS})
@@ -490,7 +489,7 @@ target_link_libraries ( atsdb_client
     ${MySQLpp_LIBRARY}
     ${OPENSCENEGRAPH_LIBRARIES}
     ${OSGEARTH_LIBRARY}
-    ${OSGEARTHQT_LIBRARY})
+    ${OSGEARTHUTIL_LIBRARY})
 # ${GDAL_LIBRARIES} ${OSGEARTH_LIBRARY}
 
 INSTALL_FILES(/include .h ${atsdb_HDRS})
