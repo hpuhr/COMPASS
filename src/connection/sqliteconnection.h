@@ -32,6 +32,9 @@
 
 class Buffer;
 class DBInterface;
+class SQLiteConnectionWidget;
+class SQLiteConnectionInfoWidget;
+class PropertyList;
 
 /**
  * @brief Interface for a SQLite3 database connection
@@ -69,6 +72,7 @@ public:
     bool getPreparedCommandDone () { return prepared_command_done_; }
 
     std::map <std::string, DBTableInfo> getTableInfo ();
+    virtual std::vector <std::string> getDatabases();
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
@@ -88,6 +92,9 @@ protected:
 
     std::shared_ptr<DBCommand> prepared_command_;
     bool prepared_command_done_;
+
+    SQLiteConnectionWidget *widget_;
+    SQLiteConnectionInfoWidget *info_widget_;
 
     void execute (const std::string &command);
     void execute (const std::string &command, std::shared_ptr <Buffer> buffer);

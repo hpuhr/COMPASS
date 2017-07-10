@@ -11,6 +11,7 @@
                 <ParameterString user="sassc"/>
             </Configuration>
         </Configuration>
+        <Configuration class_id="SQLiteConnection" instance_id="SQLite Connection"/>
     </Configuration>
     <SubConfigurationFile class_id="DBObjectManager" instance_id="DBObjectManager0" path="conf/config_dbo.xml"/>
     <SubConfigurationFile class_id="DBSchemaManager" instance_id="DBSchemaManager0" path="conf/config_db_schema.xml"/>

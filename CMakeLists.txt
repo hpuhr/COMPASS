@@ -136,9 +136,11 @@ set ( atsdb_HDRS
     src/connection/dbresult.h
     src/connection/mysqlserver.h
     src/connection/mysqlserverwidget.h
+    src/connection/sqliteconnection.h
+    src/connection/sqliteconnectionwidget.cpp
+    src/connection/sqliteconnectioninfowidget.cpp
     #        src/connection/bufferwriter.h
     #        src/connection/mysqlconconnection.h
-    src/connection/sqliteconnection.h
     #        src/datasource/datasource.h
     src/filter/dbfilter.h
     #        src/filter/sensorfilter.h
@@ -312,6 +314,8 @@ set ( atsdb_SRCS
     src/connection/mysqlppconnectioninfowidget.cpp
     src/connection/mysqlserverwidget.cpp
     src/connection/sqliteconnection.cpp
+    src/connection/sqliteconnectionwidget.cpp
+    src/connection/sqliteconnectioninfowidget.cpp
     #        src/datasource/datasource.cpp
     src/filter/dbfilter.cpp
     src/filter/dbfiltercondition.cpp

@@ -30,11 +30,14 @@
 #include "dbresult.h"
 #include "logger.h"
 #include "sqliteconnection.h"
+#include "sqliteconnectionwidget.h"
+#include "sqliteconnectioninfowidget.h"
 #include "dbinterface.h"
 #include "dbtableinfo.h"
 
 SQLiteConnection::SQLiteConnection(const std::string &class_id, const std::string &instance_id, DBInterface *interface)
-: DBConnection (class_id, instance_id, interface), interface_(*interface), db_handle_(nullptr), prepared_command_(nullptr), prepared_command_done_(false)
+: DBConnection (class_id, instance_id, interface), interface_(*interface), db_handle_(nullptr), prepared_command_(nullptr), prepared_command_done_(false),
+  widget_(nullptr), info_widget_(nullptr)
 {
 }
 
@@ -64,6 +67,18 @@ void SQLiteConnection::openFile (const std::string &file_name)
 
 void SQLiteConnection::disconnect()
 {
+    if (widget_)
+    {
+        delete widget_;
+        widget_ = nullptr;
+    }
+
+    if (info_widget_)
+    {
+        delete info_widget_;
+        info_widget_ = nullptr;
+    }
+
     if (db_handle_)
     {
         sqlite3_close(db_handle_);
@@ -425,6 +440,11 @@ std::map <std::string, DBTableInfo> SQLiteConnection::getTableInfo ()
     return info;
 }
 
+std::vector <std::string> SQLiteConnection::getDatabases()
+{
+    return std::vector <std::string>(); //no databases
+}
+
 std::vector <std::string> SQLiteConnection::getTableList()  // buffer of table name strings
 {
     std::vector <std::string> tables;
@@ -483,20 +503,42 @@ void SQLiteConnection::generateSubConfigurable (const std::string &class_id, con
 
 QWidget *SQLiteConnection::widget ()
 {
+    if (!widget_)
+    {
+        widget_ = new SQLiteConnectionWidget(*this);
+    }
 
+    assert (widget_);
+    return widget_;
 }
 
 QWidget *SQLiteConnection::infoWidget ()
 {
+    if (!info_widget_)
+    {
+        info_widget_ = new SQLiteConnectionInfoWidget(*this);
+    }
 
+    assert (info_widget_);
+    return info_widget_;
 }
 
 std::string SQLiteConnection::status ()
 {
-
+    if (connection_ready_)
+    {
+        if (!prepared_command_done_)
+            return "Working";
+        else
+            return "Idle";
+    }
+    else
+        return "Not connected";
 }
 
 std::string SQLiteConnection::identifier ()
 {
+    assert (connection_ready_);
 
+    return "SQLite: "+file_name_;
 }

@@ -30,6 +30,7 @@
 #include "mysqlserver.h"
 #include "dbconnection.h"
 #include "mysqlppconnection.h"
+#include "sqliteconnection.h"
 #include "dbinterfacewidget.h"
 #include "dbinterfaceinfowidget.h"
 #include "dbinterface.h"
@@ -224,6 +225,12 @@ void DBInterface::generateSubConfigurable (const std::string &class_id, const st
     assert (connections_.count (connection->getInstanceId()) == 0);
     connections_.insert (std::pair <std::string, DBConnection*> (connection->getInstanceId(), dynamic_cast<DBConnection*>(connection)));
   }
+  else if (class_id == "SQLiteConnection")
+  {
+    SQLiteConnection *connection = new SQLiteConnection (class_id, instance_id, this);
+    assert (connections_.count (connection->getInstanceId()) == 0);
+    connections_.insert (std::pair <std::string, DBConnection*> (connection->getInstanceId(), dynamic_cast<DBConnection*>(connection)));
+  }
   else
     throw std::runtime_error ("DBInterface: generateSubConfigurable: unknown class_id "+class_id );
 }
@@ -234,6 +241,12 @@ void DBInterface::checkSubConfigurables ()
   {
       addNewSubConfiguration ("MySQLppConnection", "MySQL++ Connection");
       generateSubConfigurable ("MySQLppConnection", "MySQL++ Connection");
+  }
+
+  if (connections_.count("SQLite Connection") == 0)
+  {
+      addNewSubConfiguration ("SQLiteConnection", "SQLite Connection");
+      generateSubConfigurable ("SQLiteConnection", "SQLite Connection");
   }
 }
 
