@@ -24,46 +24,31 @@
 
 #include <cstring>
 
-#include "Buffer.h"
-#include "DBCommand.h"
-#include "DBCommandList.h"
-#include "DBResult.h"
-#include "DBConnectionInfo.h"
-#include "Logger.h"
-#include "SQLiteConnection.h"
+#include "buffer.h"
+#include "dbcommand.h"
+#include "dbcommandlist.h"
+#include "dbresult.h"
+#include "logger.h"
+#include "sqliteconnection.h"
+#include "dbinterface.h"
+#include "dbtableinfo.h"
 
-#include "Data.h"
-
-using namespace Utils::Data;
-
-
-SQLiteConnection::SQLiteConnection(DBConnectionInfo *info)
-: DBConnection (info)
+SQLiteConnection::SQLiteConnection(const std::string &class_id, const std::string &instance_id, DBInterface *interface)
+: DBConnection (class_id, instance_id, interface), interface_(*interface), db_handle_(nullptr), prepared_command_(nullptr), prepared_command_done_(false)
 {
-    assert (info_);
-    assert (info_ ->getType() == DB_TYPE_SQLITE);
-
-    db_handle_ = 0;
-    prepared_command_=0;
-    prepared_command_done_=false;
 }
 
 SQLiteConnection::~SQLiteConnection()
 {
-    if (db_handle_)
-    {
-        sqlite3_close(db_handle_);
-        db_handle_=0;
-    }
+    assert (!db_handle_);
 }
 
-void SQLiteConnection::connect()
+void SQLiteConnection::openFile (const std::string &file_name)
 {
-    assert (info_->getType() == DB_TYPE_SQLITE);
+    file_name_=file_name;
+    assert (file_name.size() > 0);
 
-    SQLite3ConnectionInfo *info = (SQLite3ConnectionInfo*) info_;
-
-    int result = sqlite3_open_v2(info->getFilename().c_str(), &db_handle_, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
+    int result = sqlite3_open_v2(file_name.c_str(), &db_handle_, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
 
     if (result != SQLITE_OK)
     {
@@ -73,18 +58,20 @@ void SQLiteConnection::connect()
         sqlite3_close(db_handle_);
         throw std::runtime_error ("SQLiteConnection: createRDBFile: error");
     }
-
     char * sErrMsg = 0;
     sqlite3_exec(db_handle_, "PRAGMA synchronous = OFF", NULL, NULL, &sErrMsg);
 }
 
-void SQLiteConnection::openDatabase (std::string database_name)
+void SQLiteConnection::disconnect()
 {
-    // has nothing to do
-    DBConnection::openDatabase(database_name);
+    if (db_handle_)
+    {
+        sqlite3_close(db_handle_);
+        db_handle_=nullptr;
+    }
 }
 
-void SQLiteConnection::executeSQL(std::string sql)
+void SQLiteConnection::executeSQL(const std::string &sql)
 {
     logdbg  << "DBInterface: executeSQL: sql statement execute: '" <<sql << "'";
 
@@ -101,7 +88,7 @@ void SQLiteConnection::executeSQL(std::string sql)
     }
 }
 
-void SQLiteConnection::prepareBindStatement (std::string statement)
+void SQLiteConnection::prepareBindStatement (const std::string &statement)
 {
     const char * tail = 0;
     int ret=sqlite3_prepare_v2(db_handle_, statement.c_str(), statement.size(), &statement_, &tail);
@@ -140,7 +127,6 @@ void SQLiteConnection::stepAndClearBindings ()
 
     sqlite3_clear_bindings(statement_);
     sqlite3_reset(statement_);
-
 }
 
 void SQLiteConnection::endBindTransaction ()
@@ -163,10 +149,10 @@ void SQLiteConnection::bindVariable (unsigned int index, double value)
     logdbg  << "SQLiteConnection: bindVariable: index " << index << " value '" << value << "'";
     sqlite3_bind_double(statement_, index, value);
 }
-void SQLiteConnection::bindVariable (unsigned int index, const char *value)
+void SQLiteConnection::bindVariable (unsigned int index, const std::string &value)
 {
     logdbg  << "SQLiteConnection: bindVariable: index " << index << " value '" << value << "'";
-    sqlite3_bind_text(statement_, index, value, -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(statement_, index, value.c_str(), -1, SQLITE_TRANSIENT);
 }
 
 void SQLiteConnection::bindVariableNull (unsigned int index)
@@ -175,160 +161,93 @@ void SQLiteConnection::bindVariableNull (unsigned int index)
 }
 
 // TODO: beware of se deleted propertylist, new buffer should use deep copied list
-DBResult *SQLiteConnection::execute (DBCommand *command)
+std::shared_ptr <DBResult> SQLiteConnection::execute (const DBCommand &command)
 {
-    assert (command);
-    DBResult *dbresult = new DBResult ();
+    std::shared_ptr <DBResult> dbresult (new DBResult ());
+    std::string sql = command.get();
 
-    std::string sql = command->getCommandString();
-
-    Buffer *buffer=0;
-    if (command->getResultList()->getNumProperties() > 0) // data should be returned
+    if (command.resultList().size() > 0) // data should be returned
     {
-        buffer = new Buffer (*(command->getResultList()));
-        dbresult->setBuffer(buffer);
-    }
-
-    execute (sql, buffer);
-
-    logdbg  << "SQLiteConnection: execute: end";
-
-    return dbresult;
-}
-
-DBResult *SQLiteConnection::execute (DBCommandList *command_list)
-{
-    assert (command_list);
-    DBResult *dbresult = new DBResult ();
-
-    unsigned int num_commands = command_list->getNumCommands();
-
-    Buffer *buffer=0;
-
-    if (command_list->getResultList()->getNumProperties() > 0) // data should be returned
-    {
-        buffer = new Buffer (*(command_list->getResultList()));
-        dbresult->setBuffer(buffer);
-    }
-
-    for (unsigned int cnt=0; cnt < num_commands; cnt++)
-    {
-        if (cnt != 0)
-            buffer->incrementIndex();
-
-        std::string sql = command_list->getCommandString(cnt);
-
+        std::shared_ptr <Buffer> buffer (new Buffer (command.resultList()));
+        dbresult->buffer(buffer);
+        logdbg  << "MySQLppConnection: execute: executing";
         execute (sql, buffer);
     }
+    else
+    {
+        logdbg  << "MySQLppConnection: execute: executing";
+        execute (sql);
+    }
+
     logdbg  << "SQLiteConnection: execute: end";
 
     return dbresult;
 }
 
-void SQLiteConnection::execute (std::string command, Buffer *buffer)
+std::shared_ptr <DBResult> SQLiteConnection::execute (const DBCommandList &command_list)
+{
+    std::shared_ptr <DBResult> dbresult (new DBResult ());
+
+    unsigned int num_commands = command_list.getNumCommands();
+
+    if (command_list.getResultList().size() > 0) // data should be returned
+    {
+        std::shared_ptr <Buffer> buffer (new Buffer (command_list.getResultList()));
+        dbresult->buffer(buffer);
+
+        for (unsigned int cnt=0; cnt < num_commands; cnt++)
+            execute (command_list.getCommandString(cnt), buffer);
+    }
+    else
+    {
+        for (unsigned int cnt=0; cnt < num_commands; cnt++)
+            execute (command_list.getCommandString(cnt));
+
+    }
+    logdbg  << "SQLiteConnection: execute: end";
+
+    return dbresult;
+}
+
+void SQLiteConnection::execute (const std::string &command)
 {
     logdbg  << "SQLiteConnection: execute";
 
-    unsigned int num_properties=0;
-    PropertyList *list=0;
-    Property *prop=0;
-    std::vector <Property*> *properties = 0;
-    std::vector<void*>* adresses;
+    int result;
 
-    if (buffer)
+    prepareStatement(command.c_str());
+    result = sqlite3_step(statement_);
+
+    if (result != SQLITE_DONE)
     {
-        list = buffer->getPropertyList();
-        num_properties = list->getNumProperties();
-        properties = list->getProperties();
-        //buffer->setIndex(0); // HARDCORE
+        logerr <<  "SQLiteConnection: execute: problem while stepping the result: " <<  result << " " <<  sqlite3_errmsg(db_handle_);
+        throw std::runtime_error ("SQLiteConnection: execute: problem while stepping the result");
     }
 
-    int row_counter;
+    finalizeStatement();
+}
+
+void SQLiteConnection::execute (const std::string &command, std::shared_ptr <Buffer> buffer)
+{
+    logdbg  << "SQLiteConnection: execute";
+
+    assert (buffer);
+    unsigned int num_properties=0;
+
+    const PropertyList &list = buffer->properties();
+    num_properties = list.size();
+
+    unsigned int cnt=buffer->size();
+
     int result;
 
     prepareStatement(command.c_str());
 
     // Now step throught the result lines
-    for (result = sqlite3_step(statement_), row_counter = 0; result == SQLITE_ROW; result = sqlite3_step(statement_), ++row_counter)
+    for (result = sqlite3_step(statement_); result == SQLITE_ROW; result = sqlite3_step(statement_))
     {
-        if (buffer && row_counter != 0)
-        {
-            buffer->incrementIndex();
-        }
-        if (buffer && row_counter == 0)
-                buffer->unsetFirstWrite();
-
-        for (unsigned int cnt=0; cnt < num_properties; cnt++)
-        {
-            assert (buffer);
-            prop=properties->at(cnt);
-
-            if (buffer)
-            {
-                adresses = buffer->getAdresses();
-
-                if (sqlite3_column_type(statement_, cnt) == SQLITE_NULL)
-                    setNan(prop->data_type_int_, adresses->at(cnt));
-                else
-                {
-                    switch (prop->data_type_int_)
-                    {
-                    case P_TYPE_BOOL:
-                    {
-                        *(bool*) adresses->at(cnt) = sqlite3_column_int(statement_, cnt) > 0;
-                        //loginf  << "sqlex: bool " << prop->id_ << " val " << *ptr;
-                    }
-                    break;
-                    case P_TYPE_UCHAR:
-                    {
-                        *(unsigned char*) adresses->at(cnt) = (unsigned char) sqlite3_column_int(statement_, cnt);
-                        //loginf  << "sqlex: uchar " << prop->id_ << " val " << *ptr;
-                    }
-                    break;
-                    case P_TYPE_CHAR:
-                    {
-                        *(char*) adresses->at(cnt) = (char) sqlite3_column_int(statement_, cnt);
-                        //loginf  << "sqlex: char " << prop->id_ << " val " << *ptr;
-                    }
-                    break;
-                    case P_TYPE_INT:
-                    {
-                        *(int*) adresses->at(cnt) = sqlite3_column_int(statement_, cnt);
-                        //loginf  << "sqlex: int " << prop->id_ << " val " << *ptr;
-                    }
-                    break;
-                    case P_TYPE_UINT:
-                    {
-                        *(unsigned int*) adresses->at(cnt) = (unsigned int) sqlite3_column_int(statement_, cnt);
-                        //loginf  << "sqlex: uint " << prop->id_ << " val " << *ptr;
-                    }
-                    break;
-                    case P_TYPE_STRING:
-                    {
-                        *(std::string*) adresses->at(cnt) = (const char *)sqlite3_column_text(statement_, cnt);
-                        //loginf  << "sqlex: string " << prop->id_ << " val " << *ptr;
-                    }
-                    break;
-                    case P_TYPE_FLOAT:
-                    {
-                        *(float*) adresses->at(cnt) = (float) sqlite3_column_double (statement_, cnt);
-                        //loginf  << "sqlex: float " << prop->id_ << " val " << *ptr;
-                    }
-                    break;
-                    case P_TYPE_DOUBLE:
-                    {
-                        *(double*) adresses->at(cnt) = sqlite3_column_double (statement_, cnt);
-                        //loginf  << "sqlex: double " << prop->id_ << " val " << *ptr;
-                    }
-                    break;
-                    default:
-                        logerr  <<  "SQLiteConnection: execute: unknown property type";
-                        throw std::runtime_error ("SQLiteConnection: execute: unknown property type");
-                        break;
-                    }
-                }
-            }
-        }
+        readRowIntoBuffer (list, num_properties, buffer, cnt);
+        cnt++;
     }
 
     if (result != SQLITE_DONE)
@@ -340,7 +259,58 @@ void SQLiteConnection::execute (std::string command, Buffer *buffer)
     finalizeStatement();
 }
 
-void SQLiteConnection::prepareStatement (const char *sql)
+void SQLiteConnection::readRowIntoBuffer (const PropertyList &list, unsigned int num_properties, std::shared_ptr <Buffer> buffer, unsigned int index)
+{
+    for (unsigned int cnt=0; cnt < num_properties; cnt++)
+    {
+        if (sqlite3_column_type(statement_, cnt) != SQLITE_NULL)
+        {
+            const Property &prop=list.at(cnt);
+
+            switch (prop.dataType())
+            {
+            case PropertyDataType::BOOL:
+                buffer->getBool(prop.name()).set(index, static_cast<bool> (sqlite3_column_int(statement_, cnt)));
+                //loginf  << "sqlex: bool " << prop->id_ << " val " << *ptr;
+                break;
+            case PropertyDataType::UCHAR:
+                buffer->getUChar(prop.name()).set(index, static_cast<unsigned char> (sqlite3_column_int(statement_, cnt)));
+                //loginf  << "sqlex: uchar " << prop->id_ << " val " << *ptr;
+                break;
+            case PropertyDataType::CHAR:
+                buffer->getChar(prop.name()).set(index, static_cast<signed char> (sqlite3_column_int(statement_, cnt)));
+                //loginf  << "sqlex: char " << prop->id_ << " val " << *ptr;
+                break;
+            case PropertyDataType::INT:
+                buffer->getInt(prop.name()).set(index, static_cast<int> (sqlite3_column_int(statement_, cnt)));
+                //loginf  << "sqlex: int " << prop->id_ << " val " << *ptr;
+                break;
+            case PropertyDataType::UINT:
+                buffer->getUInt(prop.name()).set(index, static_cast<unsigned int> (sqlite3_column_int(statement_, cnt)));
+                //loginf  << "sqlex: uint " << prop->id_ << " val " << *ptr;
+                break;
+            case PropertyDataType::STRING:
+                buffer->getString(prop.name()).set(index, std::string (reinterpret_cast<const char*> (sqlite3_column_text(statement_, cnt))));
+                //loginf  << "sqlex: string " << prop->id_ << " val " << *ptr;
+                break;
+            case PropertyDataType::FLOAT:
+                buffer->getFloat(prop.name()).set(index, static_cast<float> (sqlite3_column_double (statement_, cnt)));
+                //loginf  << "sqlex: float " << prop->id_ << " val " << *ptr;
+                break;
+            case PropertyDataType::DOUBLE:
+                buffer->getDouble(prop.name()).set(index, static_cast<double> (sqlite3_column_double (statement_, cnt)));
+                //loginf  << "sqlex: double " << prop->id_ << " val " << *ptr;
+                break;
+            default:
+                logerr  <<  "MySQLppConnection: readRowIntoBuffer: unknown property type";
+                throw std::runtime_error ("MySQLppConnection: readRowIntoBuffer: unknown property type");
+                break;
+            }
+        }
+    }
+}
+
+void SQLiteConnection::prepareStatement (const std::string &sql)
 {
     logdbg  << "SQLiteConnection: prepareStatement: sql '" << sql << "'";
     int result;
@@ -348,7 +318,7 @@ void SQLiteConnection::prepareStatement (const char *sql)
 
     // Prepare the select statement
     remaining_sql = NULL;
-    result = sqlite3_prepare_v2(db_handle_, sql, strlen(sql), &statement_, &remaining_sql);
+    result = sqlite3_prepare_v2(db_handle_, sql.c_str(), sql.size(), &statement_, &remaining_sql);
     if (result != SQLITE_OK)
     {
         logerr <<  "SQLiteConnection: execute: error " <<  result << " " <<  sqlite3_errmsg(db_handle_);
@@ -367,7 +337,7 @@ void SQLiteConnection::finalizeStatement ()
     sqlite3_finalize(statement_);
 }
 
-void SQLiteConnection::prepareCommand (DBCommand *command)
+void SQLiteConnection::prepareCommand (const std::shared_ptr<DBCommand> command)
 {
     assert (prepared_command_==0);
     assert (command);
@@ -375,119 +345,42 @@ void SQLiteConnection::prepareCommand (DBCommand *command)
     prepared_command_=command;
     prepared_command_done_=false;
 
-    prepareStatement (command->getCommandString().c_str());
+    prepareStatement (command->get().c_str());
 }
-DBResult *SQLiteConnection::stepPreparedCommand (unsigned int max_results)
+std::shared_ptr <DBResult> SQLiteConnection::stepPreparedCommand (unsigned int max_results)
 {
     assert (prepared_command_);
+    assert (!prepared_command_done_);
 
-    DBResult *dbresult = new DBResult ();
+    std::string sql = prepared_command_->get();
+    assert (prepared_command_->resultList().size() > 0); // data should be returned
 
-    std::string sql = prepared_command_->getCommandString();
+    std::shared_ptr <Buffer> buffer (new Buffer (prepared_command_->resultList()));
+    assert (buffer->size() == 0);
+    std::shared_ptr <DBResult> dbresult (new DBResult(buffer));
 
-    Buffer *buffer=0;
-    if (prepared_command_->getResultList()->getNumProperties() > 0) // data should be returned
-    {
-        buffer = new Buffer (*(prepared_command_->getResultList()));
-        dbresult->setBuffer(buffer);
-    }
+    unsigned int num_properties = buffer->properties().size();
+    const PropertyList &list = buffer->properties();
 
-    unsigned int num_properties=0;
-    PropertyList *list=0;
-    Property *prop=0;
-    std::vector <Property*> *properties = 0;
-    unsigned int result_cnt=0;
-    std::vector<void*>* adresses;
-
-    if (buffer)
-    {
-        list = buffer->getPropertyList();
-        num_properties = list->getNumProperties();
-        properties = list->getProperties();
-        buffer->setIndex(0);
-    }
-
-    unsigned int row_counter;
+    unsigned int cnt = 0;
     int result;
+    bool done=true;
 
     max_results--;
 
     // Now step throught the result lines
-    for (result = sqlite3_step(statement_), row_counter = 0; result == SQLITE_ROW; result = sqlite3_step(statement_), ++row_counter)
+    for (result = sqlite3_step(statement_); result == SQLITE_ROW; result = sqlite3_step(statement_))
     {
-        if (buffer && row_counter != 0)
+        readRowIntoBuffer (list, num_properties, buffer, cnt);
+        assert (buffer->size() == cnt+1);
+
+        if (max_results != 0 && cnt >= max_results)
         {
-            buffer->incrementIndex();
-        }
-
-        for (unsigned int cnt=0; cnt < num_properties; cnt++)
-        {
-            assert (buffer);
-            prop=properties->at(cnt);
-
-            if (buffer)
-                adresses = buffer->getAdresses();
-
-            if (sqlite3_column_type(statement_, cnt) == SQLITE_NULL)
-                setNan(prop->data_type_int_, adresses->at(cnt));
-            else
-            {
-                switch (prop->data_type_int_)
-                {
-                case P_TYPE_BOOL:
-                {
-                    *(bool*) adresses->at(cnt) = sqlite3_column_int(statement_, cnt) > 0;
-                }
-                break;
-                case P_TYPE_UCHAR:
-                {
-                    *(unsigned char*) adresses->at(cnt) = (unsigned char) sqlite3_column_int(statement_, cnt);
-                }
-                break;
-                case P_TYPE_CHAR:
-                {
-                    *(char*) adresses->at(cnt) = (char) sqlite3_column_int(statement_, cnt);
-                }
-                break;
-                case P_TYPE_INT:
-                {
-                    *(int*) adresses->at(cnt) = sqlite3_column_int(statement_, cnt);
-                }
-                break;
-                case P_TYPE_UINT:
-                {
-                    *(unsigned int*) adresses->at(cnt) = (unsigned int) sqlite3_column_int(statement_, cnt);
-                }
-                break;
-                case P_TYPE_STRING:
-                {
-                    *(std::string*) adresses->at(cnt)  = (const char *)sqlite3_column_text(statement_, cnt);
-                }
-                break;
-                case P_TYPE_FLOAT:
-                {
-                    *(float*) adresses->at(cnt) = (float) sqlite3_column_double (statement_, cnt);
-                }
-                break;
-                case P_TYPE_DOUBLE:
-                {
-                    *(double*) adresses->at(cnt) = sqlite3_column_double (statement_, cnt);
-                }
-                break;
-                default:
-                    logerr  <<  "SQLiteConnection: execute: unknown property type";
-                    throw std::runtime_error ("SQLiteConnection: execute: unknown property type");
-                    break;
-                }
-            }
-        }
-        if (max_results != 0 && row_counter >= max_results)
+            done=false;
             break;
-        //    if (buffer)
-        //    {
-        //      buffer->incrementIndex();
-        //    }
-        result_cnt++;
+        }
+
+        ++cnt;
     }
 
     if (result != SQLITE_ROW && result != SQLITE_DONE)
@@ -496,57 +389,114 @@ DBResult *SQLiteConnection::stepPreparedCommand (unsigned int max_results)
         throw std::runtime_error ("SQLiteConnection: stepPreparedCommand: problem while stepping the result");
     }
 
-    if (result == SQLITE_DONE)
+    assert (buffer->size() <= max_results+1); // because of max_results--
+
+    if (result == SQLITE_DONE || buffer->size() == 0 || done)
     {
         logdbg  << "SQLiteConnection: stepPreparedCommand: reading done";
         prepared_command_done_=true;
+
+        if (done)
+            buffer->lastOne(true);
+        else
+            buffer=nullptr;
+
     }
+
 
     return dbresult;
 }
 void SQLiteConnection::finalizeCommand ()
 {
-    assert (prepared_command_ != 0);
+    assert (prepared_command_ != nullptr);
     sqlite3_finalize(statement_);
-    prepared_command_=0; // should be deleted by caller
+    prepared_command_=nullptr; // should be deleted by caller
     prepared_command_done_=true;
 }
 
-Buffer *SQLiteConnection::getTableList()  // buffer of table name strings
+
+std::map <std::string, DBTableInfo> SQLiteConnection::getTableInfo ()
 {
-//    MySQLConnectionInfo *info = (MySQLConnectionInfo*) info_;
-//    std::string db_name = info->getDB();
+    std::map <std::string, DBTableInfo> info;
 
-    DBCommand command;
-    command.setCommandString ("SELECT name FROM sqlite_master WHERE name != 'sqlite_sequence' ORDER BY name DESC;");
-    PropertyList list;
-    list.addProperty ("name", P_TYPE_STRING);
-    command.setPropertyList (list);
+    for (auto it : getTableList())
+        info.insert (std::pair<std::string, DBTableInfo> (it, getColumnList(it)));
 
-    DBResult *result = execute(&command);
-    assert (result->containsData());
-    Buffer *buffer = result->getBuffer();
-    delete result;
-
-    return buffer;
+    return info;
 }
-Buffer *SQLiteConnection::getColumnList(std::string table) // buffer of column name string, data type
+
+std::vector <std::string> SQLiteConnection::getTableList()  // buffer of table name strings
 {
+    std::vector <std::string> tables;
+
     DBCommand command;
-    command.setCommandString ("PRAGMA table_info("+table+")");
+    command.set ("SELECT name FROM sqlite_master WHERE name != 'sqlite_sequence' ORDER BY name DESC;");
     PropertyList list;
-    list.addProperty ("cid", P_TYPE_INT);
-    list.addProperty ("name", P_TYPE_STRING);
-    list.addProperty ("type", P_TYPE_STRING);
-    list.addProperty ("notnull", P_TYPE_BOOL);
-    list.addProperty ("dfltvalue", P_TYPE_INT);
-    list.addProperty ("key", P_TYPE_BOOL);
-    command.setPropertyList (list);
+    list.addProperty ("name", PropertyDataType::STRING);
+    command.list (list);
 
-    DBResult *result = execute(&command);
+    std::shared_ptr <DBResult> result = execute(command);
     assert (result->containsData());
-    Buffer *buffer = result->getBuffer();
-    delete result;
+    std::shared_ptr <Buffer> buffer = result->buffer();
 
-    return buffer;
+    unsigned int size = buffer->size();
+    for (unsigned int cnt=0; cnt < size; cnt++)
+        tables.push_back(buffer->getString("name").get(cnt));
+
+    return tables;
+}
+
+DBTableInfo SQLiteConnection::getColumnList(const std::string &table) // buffer of column name string, data type
+{
+    DBTableInfo table_info (table);
+
+    DBCommand command;
+    command.set ("PRAGMA table_info("+table+")");
+
+    PropertyList list;
+    //list.addProperty ("cid", P_TYPE_INT);
+    list.addProperty ("name", PropertyDataType::STRING);
+    list.addProperty ("type", PropertyDataType::STRING);
+    list.addProperty ("key", PropertyDataType::BOOL);
+    list.addProperty ("notnull", PropertyDataType::BOOL);
+    //list.addProperty ("dfltvalue", P_TYPE_INT);
+
+    command.list (list);
+
+    std::shared_ptr <DBResult> result = execute(command);
+    assert (result->containsData());
+    std::shared_ptr <Buffer> buffer = result->buffer();
+
+    for (unsigned int cnt=0; cnt < buffer->size(); cnt++)
+    {
+        table_info.addColumn (buffer->getString("name").get(cnt), buffer->getString("type").get(cnt),
+                              buffer->getBool("key").get(cnt), !buffer->getBool("notnull").get(cnt), "");
+    }
+
+    return table_info;
+}
+
+void SQLiteConnection::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
+{
+    throw std::runtime_error ("SQLiteConnection: generateSubConfigurable: unknown class_id "+class_id );
+}
+
+QWidget *SQLiteConnection::widget ()
+{
+
+}
+
+QWidget *SQLiteConnection::infoWidget ()
+{
+
+}
+
+std::string SQLiteConnection::status ()
+{
+
+}
+
+std::string SQLiteConnection::identifier ()
+{
+
 }

@@ -39,9 +39,9 @@ find_package ( MySQL REQUIRED )
 message("  MYSQL_INCLUDE_DIR: ${MYSQL_INCLUDE_DIR}")
 #message("  MYSQL_LIBRARY: ${MYSQL_LIBRARY}")
 
-#find_package ( Sqlite3 REQUIRED )
-#message("  SQLite3_INCLUDE_DIR: ${SQLITE3_INCLUDE_DIR}")
-#message("  SQLite3_LIBRARY_DIR: ${SQLITE3_LIBRARIES}") 
+find_package ( Sqlite3 REQUIRED )
+message("  SQLite3_INCLUDE_DIR: ${SQLITE3_INCLUDE_DIR}")
+message("  SQLite3_LIBRARY_DIR: ${SQLITE3_LIBRARIES}")
 
 find_package ( LOG4CPP REQUIRED )
 message("  LOG4CPP_INCLUDE_DIR: ${LOG4CPP_INCLUDE_DIR}")
@@ -68,7 +68,7 @@ include_directories (
     ${Qt5Widgets_INCLUDE_DIRS}
     ${Qt5OpenGL_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
-    #${SQLITE3_INCLUDE_DIR}
+    ${SQLITE3_INCLUDE_DIR}
     ${MYSQL_INCLUDE_DIR}
     ${MySQLpp_INCLUDE_DIR}
     ${LOG4CPP_INCLUDE_DIR}
@@ -138,7 +138,7 @@ set ( atsdb_HDRS
     src/connection/mysqlserverwidget.h
     #        src/connection/bufferwriter.h
     #        src/connection/mysqlconconnection.h
-    #        src/connection/sqliteconnection.h
+    src/connection/sqliteconnection.h
     #        src/datasource/datasource.h
     src/filter/dbfilter.h
     #        src/filter/sensorfilter.h
@@ -199,7 +199,7 @@ set ( atsdb_HDRS
     #        src/object/dbovariablecombobox.h
     #        src/object/dbovariablesetwidget.h
     #        src/object/propertydatatypecombobox.h
-        #        src/object/stringrepresentationcombobox.h
+    #        src/object/stringrepresentationcombobox.h
     #        src/polygon/airspacesectormanagerwidget.h
     #        src/polygon/airspacesectortreewidget.h
     #        src/polygon/airspacesectorwidget.h
@@ -217,8 +217,6 @@ set ( atsdb_HDRS
     #        src/projection/projectionmanagerwidget.h
     src/property/property.h
     src/property/propertylist.h
-    #        src/property/propertyarray.h
-    #        src/property/propertycontainer.h
     #        src/result/bufferset.h
     #        src/result/bufferreceiver.h
     src/struct/structuredescription.h
@@ -313,7 +311,7 @@ set ( atsdb_SRCS
     src/connection/mysqlppconnectionwidget.cpp
     src/connection/mysqlppconnectioninfowidget.cpp
     src/connection/mysqlserverwidget.cpp
-    #        src/connection/sqliteconnection.cpp
+    src/connection/sqliteconnection.cpp
     #        src/datasource/datasource.cpp
     src/filter/dbfilter.cpp
     src/filter/dbfiltercondition.cpp
@@ -381,7 +379,6 @@ set ( atsdb_SRCS
     #        src/projection/projectionmanager.cpp
     #        src/projection/projectionmanagerwidget.cpp
     src/property/property.cpp
-    #        src/property/propertycontainer.cpp
     #        src/result/bufferset.cpp
     src/schema/dbschemawidget.cpp
     src/schema/dbtablewidget.cpp

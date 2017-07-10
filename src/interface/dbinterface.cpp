@@ -220,7 +220,7 @@ void DBInterface::generateSubConfigurable (const std::string &class_id, const st
   logdbg  << "DBInterface: generateSubConfigurable: generating variable " << instance_id;
   if (class_id == "MySQLppConnection")
   {
-    MySQLppConnection *connection = new MySQLppConnection (instance_id, this);
+    MySQLppConnection *connection = new MySQLppConnection (class_id, instance_id, this);
     assert (connections_.count (connection->getInstanceId()) == 0);
     connections_.insert (std::pair <std::string, DBConnection*> (connection->getInstanceId(), dynamic_cast<DBConnection*>(connection)));
   }

@@ -44,8 +44,8 @@ using namespace Utils;
 using namespace Utils::Data;
 
 
-MySQLppConnection::MySQLppConnection(const std::string &instance_id, DBInterface *interface)
-    : DBConnection ("MySQLppConnection", instance_id, interface), interface_(*interface), connected_server_(nullptr), connection_(mysqlpp::Connection (false)),
+MySQLppConnection::MySQLppConnection(const std::string &class_id, const std::string &instance_id, DBInterface *interface)
+    : DBConnection (class_id, instance_id, interface), interface_(*interface), connected_server_(nullptr), connection_(mysqlpp::Connection (false)),
       prepared_query_(connection_.query()),
       prepared_parameters_(mysqlpp::SQLQueryParms(&prepared_query_)), query_used_(false), transaction_(nullptr), prepared_command_(nullptr),
       prepared_command_done_(true), widget_(nullptr), info_widget_(nullptr)
@@ -194,10 +194,10 @@ void MySQLppConnection::bindVariable (unsigned int index, double value)
     logdbg  << "MySQLppConnection: bindVariable: index " << index << " value '" << value << "'";
     prepared_parameters_[index] = value;
 }
-void MySQLppConnection::bindVariable (unsigned int index, const char *value)
+void MySQLppConnection::bindVariable (unsigned int index, const std::string &value)
 {
     logdbg  << "MySQLppConnection: bindVariable: index " << index << " value '" << value << "'";
-    prepared_parameters_[index] = value;
+    prepared_parameters_[index] = value.c_str();
 }
 
 void MySQLppConnection::bindVariableNull (unsigned int index)
@@ -354,7 +354,7 @@ void MySQLppConnection::execute (const std::string &command)
 }
 
 
-void MySQLppConnection::prepareStatement (const char *sql)
+void MySQLppConnection::prepareStatement (const std::string &sql)
 {
     logdbg  << "MySQLppConnection: prepareStatement: sql '" << sql << "'";
 

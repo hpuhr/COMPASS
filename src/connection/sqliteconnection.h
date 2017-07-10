@@ -27,9 +27,11 @@
 
 #include <sqlite3.h>
 #include <string>
-#include "DBConnection.h"
+
+#include "dbconnection.h"
 
 class Buffer;
+class DBInterface;
 
 /**
  * @brief Interface for a SQLite3 database connection
@@ -38,15 +40,16 @@ class Buffer;
 class SQLiteConnection : public DBConnection
 {
 public:
-    SQLiteConnection(DBConnectionInfo *info);
+    SQLiteConnection(const std::string &class_id, const std::string &instance_id, DBInterface *interface);
     virtual ~SQLiteConnection();
 
-    virtual void connect ();
-    virtual void openDatabase (std::string database_name);
+    void openFile (const std::string &file_name);
 
-    void executeSQL(std::string sql);
+    virtual void disconnect ();
 
-    void prepareBindStatement (std::string statement);
+    void executeSQL(const std::string &sql);
+
+    void prepareBindStatement (const std::string &statement);
     void beginBindTransaction ();
     void stepAndClearBindings ();
     void endBindTransaction ();
@@ -54,34 +57,47 @@ public:
 
     void bindVariable (unsigned int index, int value);
     void bindVariable (unsigned int index, double value);
-    void bindVariable (unsigned int index, const char *value);
+    void bindVariable (unsigned int index, const std::string &value);
     void bindVariableNull (unsigned int index);
 
-    DBResult *execute (DBCommand *command);
-    DBResult *execute (DBCommandList *command_list);
+    std::shared_ptr <DBResult> execute (const DBCommand &command);
+    std::shared_ptr <DBResult> execute (const DBCommandList &command_list);
 
-    void prepareCommand (DBCommand *command);
-    DBResult *stepPreparedCommand (unsigned int max_results=0);
+    void prepareCommand (const std::shared_ptr<DBCommand> command);
+    std::shared_ptr <DBResult> stepPreparedCommand (unsigned int max_results=0);
     void finalizeCommand ();
-    bool getPreparedCommandDone () { return prepared_command_done_; };
+    bool getPreparedCommandDone () { return prepared_command_done_; }
 
-    Buffer *getTableList();
-    Buffer *getColumnList(std::string table);
+    std::map <std::string, DBTableInfo> getTableInfo ();
+
+    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
+
+    QWidget *widget ();
+    QWidget *infoWidget ();
+    std::string status ();
+    std::string identifier ();
 
 protected:
+    DBInterface &interface_;
+    std::string file_name_;
+
     /// Database handle to execute queries
     sqlite3* db_handle_;
     /// Statement for binding variables to.
     sqlite3_stmt *statement_;
 
-    DBCommand *prepared_command_;
+    std::shared_ptr<DBCommand> prepared_command_;
     bool prepared_command_done_;
 
-    void execute (std::string command, Buffer *buffer);
+    void execute (const std::string &command);
+    void execute (const std::string &command, std::shared_ptr <Buffer> buffer);
+    void readRowIntoBuffer (const PropertyList &list, unsigned int num_properties, std::shared_ptr <Buffer> buffer, unsigned int index);
 
-    void prepareStatement (const char *sql);
+    void prepareStatement (const std::string &sql);
     void finalizeStatement ();
 
+    std::vector<std::string> getTableList();
+    DBTableInfo getColumnList(const std::string &table);
 };
 
 #endif /* DBINTERFACE_H_ */

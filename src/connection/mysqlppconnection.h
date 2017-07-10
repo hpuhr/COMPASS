@@ -47,14 +47,14 @@ class PropertyList;
 class MySQLppConnection : public DBConnection
 {
 public:
-    MySQLppConnection(const std::string &instance_id, DBInterface *interface);
+    MySQLppConnection(const std::string &class_id, const std::string &instance_id, DBInterface *interface);
     virtual ~MySQLppConnection();
 
     void addServer (std::string name);
     void deleteUsedServer ();
     void setServer (const std::string &server);
     void connectServer ();
-    virtual void openDatabase (const std::string &database_name);
+    void openDatabase (const std::string &database_name);
 
     virtual void disconnect ();
 
@@ -68,7 +68,7 @@ public:
 
     void bindVariable (unsigned int index, int value);
     void bindVariable (unsigned int index, double value);
-    void bindVariable (unsigned int index, const char *value);
+    void bindVariable (unsigned int index, const std::string &value);
     void bindVariableNull (unsigned int index);
 
     std::shared_ptr <DBResult> execute (const DBCommand &command);
@@ -130,7 +130,7 @@ protected:
 
     std::map <std::string, MySQLServer*> servers_;
 
-    void prepareStatement (const char *sql);
+    void prepareStatement (const std::string &sql);
     void finalizeStatement ();
 
     /// @brief Executes an SQL command which returns data (internal)

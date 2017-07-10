@@ -83,7 +83,7 @@ public:
   /// @brief Bind a double variable at index to a value
   virtual void bindVariable (unsigned int index, double value)=0;
   /// @brief Bind a string variable at index to a value
-  virtual void bindVariable (unsigned int index, const char *value)=0;
+  virtual void bindVariable (unsigned int index, const std::string &value)=0;
   /// @brief Bind a variable to the NULL value
   virtual void bindVariableNull (unsigned int index)=0;
 
@@ -119,7 +119,7 @@ protected:
   bool connection_ready_;
 
   /// @brief Creates a prepared query (internal)
-  virtual void prepareStatement (const char *sql)=0;
+  virtual void prepareStatement (const std::string &sql)=0;
   /// @brief Finalizes a prepared query (internal)
   virtual void finalizeStatement ()=0;
 
