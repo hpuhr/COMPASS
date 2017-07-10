@@ -136,6 +136,7 @@ set ( atsdb_HDRS
     src/connection/dbresult.h
     src/connection/mysqlserver.h
     src/connection/mysqlserverwidget.h
+    src/connection/sqlitefile.h
     src/connection/sqliteconnection.h
     src/connection/sqliteconnectionwidget.cpp
     src/connection/sqliteconnectioninfowidget.cpp

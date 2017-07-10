@@ -29,29 +29,41 @@
 #include "dbcommandlist.h"
 #include "dbresult.h"
 #include "logger.h"
+#include "sqlitefile.h"
 #include "sqliteconnection.h"
 #include "sqliteconnectionwidget.h"
 #include "sqliteconnectioninfowidget.h"
 #include "dbinterface.h"
 #include "dbtableinfo.h"
+#include "stringconv.h"
 
 SQLiteConnection::SQLiteConnection(const std::string &class_id, const std::string &instance_id, DBInterface *interface)
 : DBConnection (class_id, instance_id, interface), interface_(*interface), db_handle_(nullptr), prepared_command_(nullptr), prepared_command_done_(false),
   widget_(nullptr), info_widget_(nullptr)
 {
+    registerParameter("last_filename", &last_filename_, "");
+
+    createSubConfigurables();
 }
 
 SQLiteConnection::~SQLiteConnection()
 {
     assert (!db_handle_);
+
+    for (auto it : file_list_)
+        delete it.second;
+
+    file_list_.clear();
 }
 
 void SQLiteConnection::openFile (const std::string &file_name)
 {
-    file_name_=file_name;
-    assert (file_name.size() > 0);
+    loginf << "SQLiteConnection: openFile";
 
-    int result = sqlite3_open_v2(file_name.c_str(), &db_handle_, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
+    last_filename_=file_name;
+    assert (last_filename_.size() > 0);
+
+    int result = sqlite3_open_v2(last_filename_.c_str(), &db_handle_, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
 
     if (result != SQLITE_OK)
     {
@@ -63,6 +75,8 @@ void SQLiteConnection::openFile (const std::string &file_name)
     }
     char * sErrMsg = 0;
     sqlite3_exec(db_handle_, "PRAGMA synchronous = OFF", NULL, NULL, &sErrMsg);
+
+    emit connectedSignal();
 }
 
 void SQLiteConnection::disconnect()
@@ -432,10 +446,15 @@ void SQLiteConnection::finalizeCommand ()
 
 std::map <std::string, DBTableInfo> SQLiteConnection::getTableInfo ()
 {
+    loginf << "SQLiteConnection: getTableInfo";
+
     std::map <std::string, DBTableInfo> info;
 
     for (auto it : getTableList())
+    {
+        loginf << "SQLiteConnection: getTableInfo: table " << it;
         info.insert (std::pair<std::string, DBTableInfo> (it, getColumnList(it)));
+    }
 
     return info;
 }
@@ -498,6 +517,13 @@ DBTableInfo SQLiteConnection::getColumnList(const std::string &table) // buffer 
 
 void SQLiteConnection::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
+    if (class_id == "SQLiteFile")
+    {
+      SQLiteFile *file = new SQLiteFile (class_id, instance_id, this);
+      assert (file_list_.count (file->name()) == 0);
+      file_list_.insert (std::pair <std::string, SQLiteFile*> (file->name(), file));
+    }
+    else
     throw std::runtime_error ("SQLiteConnection: generateSubConfigurable: unknown class_id "+class_id );
 }
 
@@ -540,5 +566,33 @@ std::string SQLiteConnection::identifier ()
 {
     assert (connection_ready_);
 
-    return "SQLite: "+file_name_;
+    return "SQLite: "+last_filename_;
+}
+
+void SQLiteConnection::addFile (const std::string &filename)
+{
+    if (file_list_.count (filename) != 0)
+        throw std::invalid_argument ("SQLiteConnection: addFile: name '"+filename+"' already in use");
+
+    std::string instancename = filename;
+    instancename.erase (std::remove(instancename.begin(), instancename.end(), '/'), instancename.end());
+
+    Configuration &config = addNewSubConfiguration ("SQLiteFile", "SQLiteFile"+instancename);
+    config.addParameterString("name", filename);
+    generateSubConfigurable ("SQLiteFile", "SQLiteFile"+instancename);
+
+    if (widget_)
+        widget_->updateFileListSlot();
+}
+
+void SQLiteConnection::removeFile (const std::string &filename)
+{
+    if (file_list_.count (filename) != 1)
+        throw std::invalid_argument ("SQLiteConnection: addFile: name '"+filename+"' not in use");
+
+    delete file_list_.at(filename);
+    file_list_.erase(filename);
+
+    if (widget_)
+        widget_->updateFileListSlot();
 }

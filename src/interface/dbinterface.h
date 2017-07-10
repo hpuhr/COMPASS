@@ -76,6 +76,7 @@ public:
 
     const std::map<std::string, DBConnection*> &connections () { return connections_; }
 
+    const std::string &usedConnection () { return used_connection_; }
     /// @brief Initializes a database connection based on the supplied type
     void useConnection (const std::string &connection_type);
     void databaseOpened ();
@@ -187,6 +188,7 @@ public:
 protected:
     std::map <std::string, DBConnection*> connections_;
 
+    std::string used_connection_;
     /// Connection to database, created based on DBConnectionInfo
     DBConnection *current_connection_;
 

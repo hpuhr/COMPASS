@@ -32,10 +32,12 @@
 #include <QLineEdit>
 #include <QComboBox>
 #include <QGroupBox>
+#include <QStackedWidget>
 
 #include "atsdb.h"
 #include "dbinterfacewidget.h"
 #include "dbinterface.h"
+#include "dbconnection.h"
 #include "logger.h"
 #include "stringconv.h"
 #include "global.h"
@@ -44,7 +46,7 @@ using namespace Utils;
 
 
 DBInterfaceWidget::DBInterfaceWidget(DBInterface &interface, QWidget* parent, Qt::WindowFlags f)
-    : interface_(interface), connection_layout_ (nullptr)
+    : interface_(interface), connection_stack_ (nullptr)
 {
     unsigned int frame_width = FRAME_SIZE;
     QFont font_bold;
@@ -58,32 +60,38 @@ DBInterfaceWidget::DBInterfaceWidget(DBInterface &interface, QWidget* parent, Qt
     QGroupBox *groupBox = new QGroupBox(tr("Database System"));
     QVBoxLayout *grplayout = new QVBoxLayout ();
 
+    connection_stack_ = new QStackedWidget ();
+
     const std::map<std::string, DBConnection*> &types = interface_.connections();
     for (auto it : types)
     {
         QRadioButton *radio = new QRadioButton(it.first.c_str(), this);
         connect(radio, SIGNAL(pressed()), this, SLOT(databaseTypeSelectSlot()));
-        if (types.size() == 1)
+        if (interface_.usedConnection() == it.first)
             radio->setChecked (true);
         grplayout->addWidget (radio);
+
+        connection_stack_->addWidget(it.second->widget());
+        QObject::connect(it.second->widget(), SIGNAL(databaseOpenedSignal()), this, SLOT(databaseOpenedSlot()), static_cast<Qt::ConnectionType>(Qt::UniqueConnection));
     }
     groupBox->setLayout(grplayout);
     layout->addWidget(groupBox);
 
-   layout->addStretch();
+    layout->addStretch();
 
-    connection_layout_ = new QVBoxLayout ();
-    layout->addLayout(connection_layout_);
+    layout->addWidget(connection_stack_);
 
     setLayout (layout);
 
-    if (types.size() == 1)
-        useConnection (types.begin()->first);
+    if (interface_.usedConnection().size() > 0)
+    {
+        useConnection (interface_.usedConnection());
+    }
 }
 
 DBInterfaceWidget::~DBInterfaceWidget()
 {
-    connection_layout_ = nullptr;
+    connection_stack_ = nullptr;
 }
 
 void DBInterfaceWidget::databaseTypeSelectSlot ()
@@ -96,11 +104,9 @@ void DBInterfaceWidget::useConnection (std::string connection_type)
 {
     interface_.useConnection(connection_type);
 
-    assert (connection_layout_);
+    assert (connection_stack_);
 
-    QObject::connect(interface_.connectionWidget(), SIGNAL(databaseOpenedSignal()), this, SLOT(databaseOpenedSlot()), static_cast<Qt::ConnectionType>(Qt::UniqueConnection));
-
-    connection_layout_->addWidget(interface_.connectionWidget());
+    connection_stack_->setCurrentWidget(interface_.connectionWidget());
 }
 
 void DBInterfaceWidget::databaseOpenedSlot ()

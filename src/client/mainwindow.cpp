@@ -87,15 +87,15 @@ MainWindow::MainWindow()
     QHBoxLayout *widget_layout = new QHBoxLayout();
     dbinterface_widget_ = ATSDB::instance().interface().widget();
     QObject::connect(dbinterface_widget_, SIGNAL(databaseOpenedSignal()), this, SLOT(databaseOpenedSlot()));
-    widget_layout->addWidget(dbinterface_widget_);
+    widget_layout->addWidget(dbinterface_widget_, 1);
 
     dbschema_manager_widget_ = ATSDB::instance().schemaManager().widget();
     QObject::connect(dbinterface_widget_, SIGNAL(databaseOpenedSignal()), dbschema_manager_widget_, SLOT(databaseOpenedSlot()));
-    widget_layout->addWidget(dbschema_manager_widget_);
+    widget_layout->addWidget(dbschema_manager_widget_, 1);
 
     object_manager_widget_ = ATSDB::instance().objectManager().widget();
     QObject::connect(dbinterface_widget_, SIGNAL(databaseOpenedSignal()), object_manager_widget_, SLOT(databaseOpenedSlot()));
-    widget_layout->addWidget(object_manager_widget_);
+    widget_layout->addWidget(object_manager_widget_, 1);
 
     main_layout->addLayout(widget_layout);
 
@@ -107,7 +107,7 @@ MainWindow::MainWindow()
     QObject::connect(start_button_, SIGNAL(clicked()), this, SLOT(startSlot()));
     start_layout->addWidget(start_button_);
 
-    main_layout->addLayout(start_layout);
+    main_layout->addLayout(start_layout, 1);
 
     main_widget->setLayout(main_layout);
 

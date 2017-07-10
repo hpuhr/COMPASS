@@ -57,6 +57,7 @@ MySQLppConnection::MySQLppConnection(const std::string &class_id, const std::str
 
 MySQLppConnection::~MySQLppConnection()
 {
+
 }
 
 void MySQLppConnection::setServer (const std::string &server)

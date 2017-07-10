@@ -69,6 +69,7 @@ DBInterface::DBInterface(std::string class_id, std::string instance_id, ATSDB *a
 
     //registerParameter ("database_name", &database_name_, "");
     registerParameter ("read_chunk_size", &read_chunk_size_, 20000);
+    registerParameter ("used_connection", &used_connection_, "");
 
     //TODO writing process should be different.
 //    write_table_names_[DBO_PLOTS] = "Plot";
@@ -117,6 +118,7 @@ void DBInterface::useConnection (const std::string &connection_type)
         assert (!current_connection_->ready());
 
     current_connection_ = connections_.at(connection_type);
+    used_connection_ = connection_type;
 
     assert (current_connection_);
 }
@@ -134,7 +136,8 @@ void DBInterface::closeConnection ()
     //connection_mutex_.unlock();
 
     logdbg << "DBInterface: closeConnection";
-    current_connection_->disconnect();
+    for (auto it : connections_)
+        it.second->disconnect ();
 
     if (widget_)
     {
@@ -148,7 +151,7 @@ void DBInterface::closeConnection ()
         info_widget_ = nullptr;
     }
 
-    current_connection_ = 0;
+
 
     table_info_.clear();
 }

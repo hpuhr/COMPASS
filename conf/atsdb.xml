@@ -1,6 +1,7 @@
 <Configuration class_id="ATSDB" instance_id="ATSDB0">
     <Configuration class_id="DBInterface" instance_id="DBInterface0">
         <ParameterUnsignedInt read_chunk_size="20000"/>
+        <ParameterString used_connection="SQLite Connection"/>
         <Configuration class_id="MySQLppConnection" instance_id="MySQL++ Connection">
             <ParameterString used_server="Localhost"/>
             <Configuration class_id="MySQLServer" instance_id="Localhost">
@@ -11,7 +12,15 @@
                 <ParameterString user="sassc"/>
             </Configuration>
         </Configuration>
-        <Configuration class_id="SQLiteConnection" instance_id="SQLite Connection"/>
+        <Configuration class_id="SQLiteConnection" instance_id="SQLite Connection">
+            <ParameterString last_filename="/home/sk/avibit/data/rev228849_20151120_185314_SAT_FINAL/20151109_sat/20151109_sat.adb"/>
+            <Configuration class_id="SQLiteFile" instance_id="SQLiteFilehomeskavibitdatarev228849_20151120_185314_SAT_FINAL20151109_sat20151109_sat.adb">
+                <ParameterString name="/home/sk/avibit/data/rev228849_20151120_185314_SAT_FINAL/20151109_sat/20151109_sat.adb"/>
+            </Configuration>
+            <Configuration class_id="SQLiteFile" instance_id="SQLiteFilehomeskavibitdatarev228849_20151120_185314_SAT_FINAL20151110_sat20151110_sat.adb">
+                <ParameterString name="/home/sk/avibit/data/rev228849_20151120_185314_SAT_FINAL/20151110_sat/20151110_sat.adb"/>
+            </Configuration>
+        </Configuration>
     </Configuration>
     <SubConfigurationFile class_id="DBObjectManager" instance_id="DBObjectManager0" path="conf/config_dbo.xml"/>
     <SubConfigurationFile class_id="DBSchemaManager" instance_id="DBSchemaManager0" path="conf/config_db_schema.xml"/>
