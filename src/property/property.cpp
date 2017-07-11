@@ -26,7 +26,7 @@
 #include <boost/assign/list_of.hpp>
 
 #include "property.h"
-
+#include "logger.h"
 
 
 
@@ -68,6 +68,7 @@ const std::string &Property::asString (PropertyDataType type)
 
 PropertyDataType &Property::asDataType (const std::string &type)
 {
+    logdbg << "Property: asDataType: " << type;
     assert (strings_2_data_types_.count(type) > 0);
     return strings_2_data_types_.at(type);
 }

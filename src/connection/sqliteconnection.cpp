@@ -24,6 +24,7 @@
 
 #include <cstring>
 
+#include "property.h"
 #include "buffer.h"
 #include "dbcommand.h"
 #include "dbcommandlist.h"
@@ -75,6 +76,8 @@ void SQLiteConnection::openFile (const std::string &file_name)
     }
     char * sErrMsg = 0;
     sqlite3_exec(db_handle_, "PRAGMA synchronous = OFF", NULL, NULL, &sErrMsg);
+
+    interface_.databaseOpened();
 
     emit connectedSignal();
 }
@@ -492,13 +495,15 @@ DBTableInfo SQLiteConnection::getColumnList(const std::string &table) // buffer 
     DBCommand command;
     command.set ("PRAGMA table_info("+table+")");
 
+    //int cid, string name, string type,int notnull, string dflt_value, int pk
+
     PropertyList list;
-    //list.addProperty ("cid", P_TYPE_INT);
+    list.addProperty ("cid", PropertyDataType::INT);
     list.addProperty ("name", PropertyDataType::STRING);
     list.addProperty ("type", PropertyDataType::STRING);
-    list.addProperty ("key", PropertyDataType::BOOL);
-    list.addProperty ("notnull", PropertyDataType::BOOL);
-    //list.addProperty ("dfltvalue", P_TYPE_INT);
+    list.addProperty ("notnull", PropertyDataType::INT);
+    list.addProperty ("dfltvalue", PropertyDataType::STRING);
+    list.addProperty ("pk", PropertyDataType::INT);
 
     command.list (list);
 
@@ -508,8 +513,23 @@ DBTableInfo SQLiteConnection::getColumnList(const std::string &table) // buffer 
 
     for (unsigned int cnt=0; cnt < buffer->size(); cnt++)
     {
-        table_info.addColumn (buffer->getString("name").get(cnt), buffer->getString("type").get(cnt),
-                              buffer->getBool("key").get(cnt), !buffer->getBool("notnull").get(cnt), "");
+        loginf << "UGA " << table << ": "  << buffer->getString("name").get(cnt);
+
+        std::string data_type = buffer->getString("type").get(cnt);
+
+        if (data_type == "BOOLEAN")
+            data_type = "BOOL";
+        else if (data_type == "TEXT")
+            data_type = "STRING";
+        else if (data_type == "REAL")
+            data_type = "DOUBLE";
+        else if (data_type == "INTEGER")
+            data_type = "INT";
+
+        PropertyDataType type = Property::asDataType (data_type);
+
+        table_info.addColumn (buffer->getString("name").get(cnt), data_type,
+                              buffer->getInt("pk").get(cnt) > 0, !buffer->getInt("notnull").get(cnt), "");
     }
 
     return table_info;

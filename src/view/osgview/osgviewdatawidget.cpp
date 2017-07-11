@@ -159,7 +159,7 @@ void OSGViewDataWidget::setup ()
     //osg::Group* rootNode = new osg::Group();
     //Registry::shaderGenerator().run(rootNode);
 
-    osg::Node* loadedModel = osgDB::readNodeFile("data/maps/openstreetmap_flat.earth");
+    osg::Node* loadedModel = osgDB::readNodeFile("data/maps/openstreetmap.earth");
     //osg::Node* loadedModel = osgDB::readNodeFile("data/maps/openstreetmap.earth");
     //osg::Node* loadedModel = osgDB::readNodeFile("data/maps/lod_blending.earth");
     // Find the MapNode

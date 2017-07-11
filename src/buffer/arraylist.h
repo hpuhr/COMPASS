@@ -30,6 +30,7 @@
 #include <sstream>
 
 #include "logger.h"
+#include "stringconv.h"
 
 static const unsigned int BUFFER_ARRAY_SIZE=10000;
 
@@ -113,10 +114,10 @@ public:
     const T &get (size_t index)
     {
         if (index > size_)
-            throw std::out_of_range ("ArrayListTemplate: get out of index");
+            throw std::out_of_range ("ArrayListTemplate: get out of index "+Utils::String::intToString(index));
 
         if (isNone(index))
-            throw std::out_of_range ("ArrayListTemplate: get of None value");
+            throw std::out_of_range ("ArrayListTemplate: get of None value "+Utils::String::intToString(index));
 
         return data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
     }
@@ -125,10 +126,10 @@ public:
     const std::string getAsString (size_t index)
     {
         if (index > size_)
-            throw std::out_of_range ("ArrayListTemplate: get out of index");
+            throw std::out_of_range ("ArrayListTemplate: get out of index "+Utils::String::intToString(index));
 
         if (isNone(index))
-            throw std::out_of_range ("ArrayListTemplate: get of None value");
+            throw std::out_of_range ("ArrayListTemplate: get of None value "+Utils::String::intToString(index));
 
         std::stringstream ss;
         ss << data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);

@@ -1,3 +1,3 @@
 <Configuration class_id="FilterManager" instance_id="FilterManager0">
-    <ParameterString db_id="MySQL:_Localhost:_job_awam_0023"/>
+    <ParameterString db_id="SQLite:_/home/sk/avibit/data/rev228849_20151120_185314_SAT_FINAL/20151109_sat/20151109_sat.adb"/>
 </Configuration>

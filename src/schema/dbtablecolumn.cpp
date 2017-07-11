@@ -78,7 +78,7 @@ PropertyDataType DBTableColumn::propertyType () const
 {
 //        BOOL, CHAR, UCHAR, INT, UINT, LONGINT, ULONGINT, FLOAT, DOUBLE, STRING
     if (db_types_2_data_types_.count(type_) == 0)
-        throw std::range_error ("PropertyDataType DBTableColumn:propertyType: unknown data type "+type_);
+        return Property::asDataType(type_);
     else
         return db_types_2_data_types_.at(type_);
 }
