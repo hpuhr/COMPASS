@@ -57,7 +57,7 @@ signals:
 
 public:
     /// @brief Constructor without variable
-    DBOVariableSelectionWidget (bool show_title=true, bool h_box=false, QWidget* parent=nullptr );
+    DBOVariableSelectionWidget (bool show_title=true, bool h_box=true, QWidget* parent=nullptr );
     /// @brief Destructor
     ~DBOVariableSelectionWidget();
 

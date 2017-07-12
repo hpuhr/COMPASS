@@ -47,6 +47,12 @@ DBObjectManager::DBObjectManager(const std::string &class_id, const std::string 
     logdbg  << "DBObjectManager: constructor: creating subconfigurables";
 
     registerParameter("use_filters", &use_filters_, false);
+
+    registerParameter("use_order", &use_order_, false);
+    registerParameter("use_order_ascending", &use_order_ascending_, false);
+    registerParameter("order_variable_dbo_name", &order_variable_dbo_name_, "");
+    registerParameter("order_variable__name", &order_variable_name_, "");
+
     registerParameter("use_limit", &use_limit_, false);
     registerParameter("limit_min", &limit_min_, 0);
     registerParameter("limit_max", &limit_max_, 1000);
@@ -291,6 +297,46 @@ void DBObjectManager::useFilters(bool use_filters)
 {
     use_filters_ = use_filters;
     loginf << "DBObjectManager: useFilters: " << use_filters_;
+}
+
+bool DBObjectManager::useOrder() const
+{
+    return use_order_;
+}
+
+void DBObjectManager::useOrder(bool use_order)
+{
+    use_order_ = use_order;
+}
+
+bool DBObjectManager::useOrderAscending() const
+{
+    return use_order_ascending_;
+}
+
+void DBObjectManager::useOrderAscending(bool use_order_ascending)
+{
+    use_order_ascending_ = use_order_ascending;
+}
+
+std::string DBObjectManager::orderVariableDBOName() const
+{
+    return order_variable_dbo_name_;
+}
+
+void DBObjectManager::orderVariableDBOName(const std::string &order_variable_dbo_name)
+{
+    order_variable_dbo_name_ = order_variable_dbo_name;
+}
+
+std::string DBObjectManager::orderVariableName() const
+{
+    return order_variable_name_;
+}
+
+void DBObjectManager::orderVariableName(const std::string &order_variable__name)
+{
+    order_variable_name_ = order_variable__name;
 }
 
 void DBObjectManager::loadSlot ()

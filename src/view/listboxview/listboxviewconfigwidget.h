@@ -25,18 +25,10 @@ class ListBoxViewConfigWidget : public QWidget
     Q_OBJECT
 
 public slots:
-    /// @brief Called when the order-by variable was changed
-    void orderVariableChanged ();
-    /// @brief Called when use filter checkbox is un/checked
-    void toggleUseFilters();
-    /// @brief Called when the use order checkbox is un/checked
-    void toggleUseOrder ();
-    /// @brief Called when order ascending checkbox is un/checked
-    void toggleOrderAscending ();
     /// @brief Called when use selection checkbox is un/checked
-    void toggleUseSelection();
+    //void toggleUseSelection();
     /// @brief Called when database view checkbox is un/checked
-    void toggleDatabaseView ();
+    //void toggleDatabaseView ();
 
 public:
     /// @brief Constructor
@@ -49,8 +41,6 @@ protected:
     ListBoxView* view_;
     /// Variable read list widget
     DBOVariableOrderedSetWidget *variable_set_widget_;
-    /// Order-by variable selection widget
-    //DBOVariableSelectionWidget *order_variable_widget_;
 };
 
 #endif /* LISTBOXVIEWCONFIGWIDGET_H_ */

@@ -100,8 +100,25 @@ public:
     bool useFilters() const;
     void useFilters(bool useFilters);
 
+    bool useOrder() const;
+    void useOrder(bool useOrder);
+
+    bool useOrderAscending() const;
+    void useOrderAscending(bool useOrderAscending);
+
+    std::string orderVariableDBOName() const;
+    void orderVariableDBOName(const std::string &orderVariableDBOName);
+
+    std::string orderVariableName() const;
+    void orderVariableName(const std::string &orderVariableName);
+
 protected:
     bool use_filters_;
+
+    bool use_order_;
+    bool use_order_ascending_;
+    std::string order_variable_dbo_name_;
+    std::string order_variable_name_;
 
     bool use_limit_;
     unsigned int limit_min_;

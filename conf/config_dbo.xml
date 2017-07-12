@@ -1,8 +1,12 @@
 <Configuration class_id="DBObjectManager" instance_id="DBObjectManager0">
     <ParameterBool use_filters="1"/>
-    <ParameterBool use_limit="1"/>
+    <ParameterBool use_limit="0"/>
+    <ParameterBool use_order="0"/>
+    <ParameterBool use_order_ascending="0"/>
     <ParameterUnsignedInt limit_max="1000000"/>
     <ParameterUnsignedInt limit_min="0"/>
+    <ParameterString order_variable__name=""/>
+    <ParameterString order_variable_dbo_name=""/>
     <Configuration class_id="DBObject" instance_id="DBObjectADSB0">
         <ParameterBool is_loadable="1"/>
         <ParameterString info=""/>

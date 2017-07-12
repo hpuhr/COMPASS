@@ -27,6 +27,7 @@
 #include "dbobjectinfowidget.h"
 #include "dbobjectmanagerloadwidget.h"
 #include "dbobjectmanager.h"
+#include "dbovariableselectionwidget.h"
 #include "atsdb.h"
 #include "global.h"
 #include "stringconv.h"
@@ -34,8 +35,8 @@
 using Utils::String;
 
 DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager &object_manager)
-    : object_manager_(object_manager), info_layout_(nullptr), filters_check_(nullptr), limit_check_(nullptr), limit_min_edit_ (nullptr),
-      limit_max_edit_(nullptr), load_all_button_(nullptr)
+    : object_manager_(object_manager), info_layout_(nullptr), filters_check_(nullptr), order_check_(nullptr),order_ascending_check_(nullptr),
+      order_variable_widget_(nullptr), limit_check_(nullptr), limit_min_edit_ (nullptr), limit_max_edit_(nullptr), load_all_button_(nullptr)
 {
     unsigned int frame_width = FRAME_SIZE;
 
@@ -52,10 +53,10 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager &object_man
     main_layout->addWidget (main_label);
 
     info_layout_ = new QVBoxLayout ();
-
     updateSlot();
-
     main_layout->addLayout(info_layout_);
+
+    main_layout->addStretch();
 
     // use filters stuff
     bool use_filters = object_manager_.useFilters();
@@ -64,6 +65,34 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager &object_man
     connect (filters_check_, SIGNAL(toggled(bool)), this, SLOT(toggleUseFilters()));
     main_layout->addWidget(filters_check_);
 
+    // there is to be order!
+    order_check_ = new QCheckBox("Use Order");
+    //order_check_->setChecked(view_->getDataSource()->getUseOrder());
+    connect(order_check_, SIGNAL( clicked() ), this, SLOT( toggleUseOrder() ));
+    main_layout->addWidget(order_check_);
+
+//    QFrame *order_frame = new QFrame ();
+//    order_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
+//    QVBoxLayout *order_layout = new QVBoxLayout ();
+
+    order_ascending_check_= new QCheckBox("Order Ascending");
+    //order_ascending_check_->setChecked(view_->getDataSource()->getOrderAscending());
+    connect(order_ascending_check_, SIGNAL( clicked() ), this, SLOT( toggleOrderAscending() ));
+    main_layout->addWidget(order_ascending_check_);
+
+    main_layout->addWidget (new QLabel ("Order Variable:"));
+    order_variable_widget_ = new DBOVariableSelectionWidget (false, true, this);
+//    if (DBObjectManager::getInstance().existsDBOVariable(view_->getDataSource()->getOrderVariableType(),
+//        view_->getDataSource()->getOrderVariableName()))
+//    {
+//      order_variable_widget_->setSelectedVariable(DBObjectManager::getInstance().getDBOVariable(view_->getDataSource()->getOrderVariableType(),
+//          view_->getDataSource()->getOrderVariableName()));
+//    }
+    connect (order_variable_widget_, SIGNAL (selectionChanged()), this, SLOT(orderVariableChanged()));
+    main_layout->addWidget (order_variable_widget_);
+
+//    order_frame->setLayout (order_layout);
+//    main_layout->addWidget (order_frame);
 
     // limit stuff
     bool use_limit = object_manager_.useLimit();
@@ -97,8 +126,6 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager &object_man
     connect (load_all_button_, SIGNAL(clicked()), this, SLOT(loadAllSlot()));
     main_layout->addWidget(load_all_button_);
 
-
-    main_layout->addStretch();
     setLayout (main_layout);
 }
 
@@ -108,12 +135,36 @@ DBObjectManagerLoadWidget::~DBObjectManagerLoadWidget()
 
 void DBObjectManagerLoadWidget::toggleUseFilters()
 {
-    assert (filters_check_);
+//    assert (filters_check_);
 
-    bool checked = filters_check_->checkState() == Qt::Checked;
-    logdbg  << "DBObjectManagerInfoWidget: toggleUseFilters: setting use limit to " << checked;
-    object_manager_.useFilters(checked);
+//    bool checked = filters_check_->checkState() == Qt::Checked;
+//    logdbg  << "DBObjectManagerInfoWidget: toggleUseFilters: setting use limit to " << checked;
+//    object_manager_.useFilters(checked);
 }
+
+void DBObjectManagerLoadWidget::toggleUseOrder ()
+{
+//  QCheckBox *send = ((QCheckBox*)sender());
+//  bool checked = send->checkState() == Qt::Checked;
+//  view_->getDataSource()->setUseOrder (checked);
+}
+
+void DBObjectManagerLoadWidget::toggleOrderAscending ()
+{
+//  QCheckBox *send = ((QCheckBox*)sender());
+//  bool checked = send->checkState() == Qt::Checked;
+//  view_->getDataSource()->setOrderAscending (checked);
+}
+
+void DBObjectManagerLoadWidget::orderVariableChanged ()
+{
+      //TODO
+//  assert (order_variable_widget_);
+//  DBOVariable *var = order_variable_widget_->getSelectedVariable();
+//  view_->getDataSource()->setOrderVariableName (var->getName());
+//  view_->getDataSource()->setOrderVariableType (var->getDBOType());
+}
+
 
 void DBObjectManagerLoadWidget::toggleUseLimit()
 {

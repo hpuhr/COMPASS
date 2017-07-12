@@ -28,6 +28,7 @@ class QVBoxLayout;
 class QPushButton;
 class QCheckBox;
 class QLineEdit;
+class DBOVariableSelectionWidget;
 
 /**
  * @brief Shows all DBObjects, allows editing and adding new ones
@@ -37,14 +38,19 @@ class DBObjectManagerLoadWidget : public QFrame
     Q_OBJECT
 
 public slots:
+    /// @brief Called when the order-by variable was changed
+    void orderVariableChanged ();
+    /// @brief Called when the use order checkbox is un/checked
+    void toggleUseOrder ();
+    /// @brief Called when order ascending checkbox is un/checked
+    void toggleOrderAscending ();
+
     void toggleUseFilters ();
     void toggleUseLimit ();
     /// @brief Called when limit minimum is changed
     void limitMinChanged();
     /// @brief Called when limit maximum is changed
     void limitMaxChanged();
-
-
 
     void loadAllSlot ();
     void updateSlot ();
@@ -60,6 +66,10 @@ private:
     QVBoxLayout *info_layout_;
 
     QCheckBox *filters_check_;
+    QCheckBox *order_check_;
+    QCheckBox *order_ascending_check_;
+    /// Order-by variable selection widget
+    DBOVariableSelectionWidget *order_variable_widget_;
     QCheckBox *limit_check_;
     /// Limit minimum edit field
     QLineEdit *limit_min_edit_;
