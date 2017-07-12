@@ -103,12 +103,6 @@ public:
     /// @brief Removes a specific condition
     void deleteCondition (DBFilterCondition *condition);
 
-    /// @brief Removes the filter from the FilterManager
-    //void destroy ();
-
-    /// @brief Returns if widget has already been deleted
-    //void widgetIsDeleted ();
-
     DBFilterWidget *widget ();
 
 protected:

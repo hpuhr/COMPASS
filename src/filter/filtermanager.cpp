@@ -94,46 +94,6 @@ void FilterManager::checkSubConfigurables ()
 //            generateSubConfigurable ("SensorFilter", instance_id);
 //        }
 
-//        loginf << "FilterManager: checkSubConfigurables: generating frame time filter";
-//        // frame time filter
-//        if (DBObjectManager::getInstance().existsDBOVariable (DBO_UNDEFINED, "frame_time"))
-//        {
-//            DBOVariable *frame_time = DBObjectManager::getInstance().getDBOVariable (DBO_UNDEFINED, "frame_time");
-
-//            Configuration &frametime_configuration = addNewSubConfiguration ("DBFilter", "FrameTime0");
-//            Configuration &frametime_condition_configuration = frametime_configuration.addNewSubConfiguration ("DBFilterCondition", "FrameTime0Condition1");
-//            frametime_condition_configuration.addParameterString ("operator", ">=");
-//            frametime_condition_configuration.addParameterString ("variable_name", "frame_time");
-//            frametime_condition_configuration.addParameterUnsignedInt ("variable_type", 0);
-//            frametime_condition_configuration.addParameterString ("value", frame_time->getRepresentationFromValue(ATSDB::getInstance().getMinAsString (frame_time)));
-//            frametime_condition_configuration.addParameterString ("reset_value", "MIN");
-
-//            Configuration &frametime_condition_configuration2 = frametime_configuration.addNewSubConfiguration ("DBFilterCondition", "FrameTime0Condition2");
-//            frametime_condition_configuration2.addParameterString ("operator", "<=");
-//            frametime_condition_configuration2.addParameterString ("variable_name", "frame_time");
-//            frametime_condition_configuration2.addParameterUnsignedInt ("variable_type", 0);
-//            frametime_condition_configuration2.addParameterString ("value", frame_time->getRepresentationFromValue(ATSDB::getInstance().getMaxAsString (frame_time)));
-//            frametime_condition_configuration2.addParameterString ("reset_value", "MAX");
-
-//            generateSubConfigurable ("DBFilter", "FrameTime0");
-//        }
-
-//        loginf << "FilterManager: checkSubConfigurables: generating mode 3a filter";
-
-//        // mode 3a code filter
-//        if (DBObjectManager::getInstance().existsDBOVariable (DBO_UNDEFINED, "mode_3a_code"))
-//        {
-//            DBOVariable *mode_3a_code = DBObjectManager::getInstance().getDBOVariable (DBO_UNDEFINED, "mode_3a_code");
-
-//            Configuration &modea_configuration = addNewSubConfiguration ("DBFilter", "ModeA0");
-//            Configuration &modea_condition_configuration = modea_configuration.addNewSubConfiguration ("DBFilterCondition", "ModeA0Condition0");
-//            modea_condition_configuration.addParameterString ("operator", "|=");
-//            modea_condition_configuration.addParameterString ("variable_name", "mode_3a_code");
-//            modea_condition_configuration.addParameterUnsignedInt ("variable_type", 0);
-//            modea_condition_configuration.addParameterString ("value", mode_3a_code->getRepresentationFromValue(ATSDB::getInstance().getMaxAsString (mode_3a_code)));
-//            modea_condition_configuration.addParameterString ("reset_value", "MAX");
-//            generateSubConfigurable ("DBFilter", "ModeA0");
-//        }
     }
 }
 
@@ -141,13 +101,6 @@ std::string FilterManager::getSQLCondition (const std::string &dbo_name, std::ve
 {
     assert (ATSDB::instance().objectManager().object(dbo_name).loadable());
 
-    std::string sql = getActiveFilterSQLCondition (dbo_name, variable_names);
-    loginf  << "FilterManager: getSQLCondition: name " << dbo_name << " '" << sql << "'";
-    return sql;
-}
-
-std::string FilterManager::getActiveFilterSQLCondition (const std::string &dbo_type, std::vector<std::string> &variable_names)
-{
     std::stringstream ss;
 
     bool first=true;
@@ -156,13 +109,14 @@ std::string FilterManager::getActiveFilterSQLCondition (const std::string &dbo_t
     {
         if (filters_.at(cnt)->getActive())
         {
-            ss << filters_.at(cnt)->getConditionString (dbo_type, first, variable_names);
+            ss << filters_.at(cnt)->getConditionString (dbo_name, first, variable_names);
         }
     }
 
-    loginf << "FilterManager: getActiveFilterSQLCondition: object " <<  dbo_type << " filter '" << ss.str() << "'";
+    loginf  << "FilterManager: getSQLCondition: name " << dbo_name << " '" << ss.str() << "'";
     return ss.str();
 }
+
 
 unsigned int FilterManager::getNumFilters ()
 {

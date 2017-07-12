@@ -87,9 +87,6 @@ protected:
     /// Container with all DBFilters
     std::vector <DBFilter*> filters_;
 
-    /// @brief Returns the SQL condition for a DBO and sets all used variable names
-    std::string getActiveFilterSQLCondition (const std::string &dbo_type, std::vector<std::string> &variable_names);
-
     virtual void checkSubConfigurables ();
 };
 

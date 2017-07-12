@@ -119,7 +119,7 @@ bool DBFilterCondition::filters (const std::string &dbo_name)
 
 std::string DBFilterCondition::getConditionString (const std::string &dbo_name, bool &first, std::vector<std::string> &variable_names)
 {
-    loginf << "DBFilterCondition: getConditionString: object " << dbo_name << " first " << first;
+    logdbg << "DBFilterCondition: getConditionString: object " << dbo_name << " first " << first;
     std::stringstream ss;
 
     std::string variable_prefix;
@@ -165,7 +165,7 @@ std::string DBFilterCondition::getConditionString (const std::string &dbo_name, 
 
 
     if (ss.str().size() > 0)
-        loginf  << "DBFilterCondition " << instance_id_<<": getConditionString: '" << ss.str()<<"'";
+        logdbg  << "DBFilterCondition " << instance_id_<<": getConditionString: '" << ss.str()<<"'";
 
     return ss.str();
 
