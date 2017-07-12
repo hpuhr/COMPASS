@@ -1,3 +1,31 @@
 <Configuration class_id="FilterManager" instance_id="FilterManager0">
-    <ParameterString db_id="SQLite:_/home/sk/avibit/data/rev228849_20151120_185314_SAT_FINAL/20151109_sat/20151109_sat.adb"/>
+    <ParameterString db_id="MySQL:_Localhost:_job_awam_0023"/>
+    <Configuration class_id="DBFilter" instance_id="TOD">
+        <ParameterBool active="1"/>
+        <ParameterBool changed="1"/>
+        <ParameterBool op_and_="1"/>
+        <ParameterBool visible="0"/>
+        <ParameterString name="TOD"/>
+        <Configuration class_id="DBFilterCondition" instance_id="TODCondition0">
+            <ParameterBool absolute_value="0"/>
+            <ParameterBool op_and="1"/>
+            <ParameterString operator="&gt;="/>
+            <ParameterString reset_value="0"/>
+            <ParameterString value="11*460800"/>
+            <ParameterString variable_dbo_name="Meta"/>
+            <ParameterString variable_name="TOD"/>
+        </Configuration>
+        <Configuration class_id="DBFilterCondition" instance_id="TODCondition1">
+            <ParameterBool absolute_value="0"/>
+            <ParameterBool op_and="1"/>
+            <ParameterString operator="&lt;="/>
+            <ParameterString reset_value="5*3600"/>
+            <ParameterString value="12*460800"/>
+            <ParameterString variable_dbo_name="Meta"/>
+            <ParameterString variable_name="TOD"/>
+        </Configuration>
+        <Configuration class_id="DBFilterWidget" instance_id="TODWidget0">
+            <ParameterBool visible="1"/>
+        </Configuration>
+    </Configuration>
 </Configuration>

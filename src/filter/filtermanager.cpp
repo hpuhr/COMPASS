@@ -142,7 +142,7 @@ std::string FilterManager::getSQLCondition (const std::string &dbo_name, std::ve
     assert (ATSDB::instance().objectManager().object(dbo_name).loadable());
 
     std::string sql = getActiveFilterSQLCondition (dbo_name, variable_names);
-    logdbg  << "FilterManager: getSQLCondition: name " << dbo_name << " '" << sql << "'";
+    loginf  << "FilterManager: getSQLCondition: name " << dbo_name << " '" << sql << "'";
     return sql;
 }
 
@@ -160,6 +160,7 @@ std::string FilterManager::getActiveFilterSQLCondition (const std::string &dbo_t
         }
     }
 
+    loginf << "FilterManager: getActiveFilterSQLCondition: object " <<  dbo_type << " filter '" << ss.str() << "'";
     return ss.str();
 }
 

@@ -42,16 +42,10 @@
 #include "logger.h"
 
 DBOReadDBJob::DBOReadDBJob(DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
-                           DBOVariable *order, const std::string &limit_str, bool activate_key_search)
-: Job (db_interface), dbobject_(dbobject), read_list_(read_list), custom_filter_clause_ (custom_filter_clause), order_(order),
-  limit_str_(limit_str), activate_key_search_(activate_key_search)
+                           const std::vector<std::string> &filtered_variables, DBOVariable *order, const std::string &limit_str, bool activate_key_search)
+: Job (db_interface), dbobject_(dbobject), read_list_(read_list), custom_filter_clause_ (custom_filter_clause), filtered_variables_(filtered_variables),
+  order_(order), limit_str_(limit_str), activate_key_search_(activate_key_search)
 {
-    // AVIBIT HACK
-//    if (order == 0)
-//    {
-//        order_ = DBObjectManager::getInstance().getDBOVariable (DBO_UNDEFINED, "id");
-//        assert (order_->existsIn (type));
-//    }
 }
 
 DBOReadDBJob::~DBOReadDBJob()
@@ -65,17 +59,12 @@ void DBOReadDBJob::run ()
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
-    if (custom_filter_clause_.size() == 0 && order_ )
-        db_interface_.prepareRead (dbobject_, read_list_);
-    else
-        db_interface_.prepareRead (dbobject_, read_list_, custom_filter_clause_, order_, limit_str_);
+    db_interface_.prepareRead (dbobject_, read_list_, custom_filter_clause_, filtered_variables_, order_, limit_str_);
 
     unsigned int cnt=0;
     unsigned int row_count=0;
     while (!done_ && !obsolete_)
     {
-        // AVIBIT HACK
-        //Buffer *buffer = db_interface_->readDataChunk(type_, order_->getName() == "id");
         std::shared_ptr<Buffer> buffer = db_interface_.readDataChunk(dbobject_, activate_key_search_);
         cnt++;
 

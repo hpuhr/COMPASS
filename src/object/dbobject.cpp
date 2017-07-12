@@ -33,6 +33,7 @@
 #include "dbobjectmanager.h"
 #include "dbovariable.h"
 #include "buffer.h"
+#include "filtermanager.h"
 //#include "StructureDescriptionManager.h"
 #include "propertylist.h"
 #include "metadbtable.h"
@@ -374,7 +375,7 @@ void DBObject::schemaChangedSlot ()
         current_meta_table_ = nullptr;
 }
 
-void DBObject::load (DBOVariableSet &read_set, const std::string &limit_str)
+void DBObject::load (DBOVariableSet &read_set, bool use_filters, const std::string &limit_str)
 {
     assert (is_loadable_);
 
@@ -389,25 +390,18 @@ void DBObject::load (DBOVariableSet &read_set, const std::string &limit_str)
     if (data_)
         data_ = nullptr;
 
-    //DBOVariableSet read_list;
-
-//    loginf << "DBInterface: testReading: adding all variables";
-//    read_list.add(*variables_.at("REC_NUM"));
-//    read_list.add(*variables_.at("TOD"));
-//    read_list.add(*variables_.at("CALLSIGN"));
-//    read_list.add(*variables_.at("DS_ID"));
-//    read_list.add(*variables_.at("MODE3A_CODE"));
-////    read_list.add(*variables_.at("MODEC_CODE_FT"));
-//    read_list.add(*variables_.at("POS_LAT_DEG"));
-//    read_list.add(*variables_.at("POS_LONG_DEG"));
-//    read_list.add(*variables_.at("TARGET_ADDR"));
-
     std::string custom_filter_clause;
+    std::vector<std::string> filter_variable_names;
+
+    if (use_filters)
+    {
+        custom_filter_clause = ATSDB::instance().filterManager().getSQLCondition (name_, filter_variable_names);
+    }
 
 //    DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
 //    DBOVariable *order, const std::string &limit_str, bool activate_key_search
 
-    DBOReadDBJob *read_job = new DBOReadDBJob (ATSDB::instance().interface(), *this, read_set, custom_filter_clause, nullptr, limit_str, false);
+    DBOReadDBJob *read_job = new DBOReadDBJob (ATSDB::instance().interface(), *this, read_set, custom_filter_clause, filter_variable_names, nullptr, limit_str, false);
 
     read_job_ = std::shared_ptr<DBOReadDBJob> (read_job);
     connect (read_job, SIGNAL(intermediateSignal(std::shared_ptr<Buffer>)), this, SLOT(readJobIntermediateSlot(std::shared_ptr<Buffer>)));

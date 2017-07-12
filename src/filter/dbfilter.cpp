@@ -199,23 +199,16 @@ std::string DBFilter::getConditionString (const std::string &dbo_type, bool &fir
         {
             std::string text = conditions_.at(cnt)->getConditionString(dbo_type, first, variable_names);
             ss << text;
-
-            if (text.size() > 0)
-                first=false;
         }
-
 
         for (unsigned int cnt=0; cnt < sub_filters_.size(); cnt ++)
         {
             std::string text = sub_filters_.at(cnt)->getConditionString(dbo_type, first, variable_names);
             ss << text;
-
-            if (text.size() > 0)
-                first=false;
         }
     }
 
-    logdbg  << "DBFilter " << instance_id_ << ": getConditionString: here '" <<ss.str() << "'";
+    loginf  << "DBFilter " << instance_id_ << ": getConditionString: here '" <<ss.str() << "' first " << first;
 
     return ss.str();
 }

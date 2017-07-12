@@ -37,6 +37,7 @@
 #include "dbschemamanager.h"
 #include "metadbtable.h"
 #include "dbschema.h"
+#include "dbtable.h"
 #include "atsdb.h"
 #include "dbfilter.h"
 
@@ -106,14 +107,19 @@ void DBFilterCondition::invert ()
 /**
  * Returns if variable_ exists in DBObject of type
  */
-bool DBFilterCondition::filters (const std::string &dbo_type)
+bool DBFilterCondition::filters (const std::string &dbo_name)
 {
-    return variable_dbo_name_ == dbo_type;
-    //TODO add meta stuff
+    if (meta_variable_)
+    {
+        return meta_variable_->existsIn(dbo_name);
+    }
+    else
+        return variable_dbo_name_ == dbo_name;
 }
 
-std::string DBFilterCondition::getConditionString (const std::string &dbo_type, bool &first, std::vector<std::string> &variable_names)
+std::string DBFilterCondition::getConditionString (const std::string &dbo_name, bool &first, std::vector<std::string> &variable_names)
 {
+    loginf << "DBFilterCondition: getConditionString: object " << dbo_name << " first " << first;
     std::stringstream ss;
 
     std::string variable_prefix;
@@ -125,55 +131,93 @@ std::string DBFilterCondition::getConditionString (const std::string &dbo_type, 
         variable_suffix=variable_suffix+")";
     }
 
-    assert (variable_);
+    assert (variable_ || meta_variable_);
 
-    DBSchemaManager &schema_manager = ATSDB::instance().schemaManager();
+    //DBSchemaManager &schema_manager = ATSDB::instance().schemaManager();
 
-    if (operator_.compare("|=") == 0)
+    DBOVariable *variable=nullptr;
+
+    if (meta_variable_)
     {
-        std::vector<std::string> chunks = String::split(value_, ',');
+        assert (meta_variable_->existsIn(dbo_name));
+        variable = &meta_variable_->getFor(dbo_name);
+    }
+    else
+        variable = variable_;
 
-        if (chunks.size() > 0)
-        {
-            //loginf  << "only subs";
+    const DBTableColumn &column = variable->currentDBColumn();
+    const MetaDBTable &meta_table = variable->currentMetaTable();
+    std::string table_db_name = meta_table.tableFor(column.name()).name();
 
-            // TODO why
-//            MetaDBTable &meta_table_name = variable_->currentMetaTable();
-//            std::string table_db_name = meta_table_name.t(variable_->getId());
-            //ss << table_db_name << "." << variable_->id_;
+    if (!first)
+    {
+        if (op_and_)
+            ss << " AND ";
+        else
+            ss << " OR ";
+    }
+    first=false;
 
-            if (variable_->dboName() == dbo_type)
-            {
-                if (!first)
-                {
-                    if (op_and_)
-                        ss << " AND ";
-                    else
-                        ss << " OR ";
+    ss << table_db_name << "." << column.name() << " " << operator_ << " " << value_;
 
-                    first=false;
-                }
+    if (find (variable_names.begin(), variable_names.end(), variable->name()) == variable_names.end())
+        variable_names.push_back(variable->name());
 
-                ss  << "(";
 
-                for (unsigned int cnt2 = 0; cnt2 < chunks.size(); cnt2++)
-                {
-                    if (cnt2 != 0)
-                        ss << " OR ";
+    if (ss.str().size() > 0)
+        loginf  << "DBFilterCondition " << instance_id_<<": getConditionString: '" << ss.str()<<"'";
 
-                    assert (false);
-                    // FIX representation
-                    //                        ss << variable_prefix << table_db_name << "." << variable_->getId()  << variable_suffix << " = "
-                    //                                << variable_->getValueFromRepresentation(chunks.at(cnt2), true);
-                }
-                ss  << ")";
+    return ss.str();
 
-                if (chunks.size() > 0) // variable added
-                {
-                    if (find (variable_names.begin(), variable_names.end(), variable_->name()) == variable_names.end())
-                        variable_names.push_back(variable_->name());
-                }
-            }
+        //TODO FIX REPRESENATION
+        //                ss << variable_prefix << table_db_name << "." << variable_->id_  << variable_suffix  << " " << operator_ << " "
+        //                        << variable_->getValueFromRepresentation(value_, true);
+
+//    if (operator_.compare("|=") == 0)
+//    {
+//        std::vector<std::string> chunks = String::split(value_, ',');
+
+//        if (chunks.size() > 0)
+//        {
+//            //loginf  << "only subs";
+
+//            // TODO why
+////            MetaDBTable &meta_table_name = variable_->currentMetaTable();
+////            std::string table_db_name = meta_table_name.t(variable_->getId());
+//            //ss << table_db_name << "." << variable_->id_;
+
+//            if (variable_->dboName() == dbo_type)
+//            {
+//                if (!first)
+//                {
+//                    if (op_and_)
+//                        ss << " AND ";
+//                    else
+//                        ss << " OR ";
+
+//                    first=false;
+//                }
+
+//                ss  << "(";
+
+//                for (unsigned int cnt2 = 0; cnt2 < chunks.size(); cnt2++)
+//                {
+//                    if (cnt2 != 0)
+//                        ss << " OR ";
+
+//                    assert (false);
+//                    // FIX representation
+//                    //                        ss << variable_prefix << table_db_name << "." << variable_->getId()  << variable_suffix << " = "
+//                    //                                << variable_->getValueFromRepresentation(chunks.at(cnt2), true);
+//                }
+//                ss  << ")";
+
+//                if (chunks.size() > 0) // variable added
+//                {
+//                    if (find (variable_names.begin(), variable_names.end(), variable_->name()) == variable_names.end())
+//                        variable_names.push_back(variable_->name());
+//                }
+//            }
             //            else // is meta
 //            {
 //                const std::map <std::string, std::string> &subvars = variable_->getSubVariables ();
@@ -225,37 +269,37 @@ std::string DBFilterCondition::getConditionString (const std::string &dbo_type, 
 //                    }
 //                }
 //            }
-        }
-    }
-    else
-    {
-        //TODO why?
-//            std::string meta_table_name = variable_->getCurrentMetaTable();
-//            assert (DBSchemaManager::getInstance().getCurrentSchema()->hasMetaTable(meta_table_name));
-//            MetaDBTable *table =DBSchemaManager::getInstance().getCurrentSchema()->getMetaTable(meta_table_name);
-//            std::string table_db_name = table->getTableDBNameForVariable(variable_->getId());
-            //ss << table_db_name << "." << variable_->id_;
+//        }
+//    }
+//    else
+//    {
+//        //TODO why?
+////            std::string meta_table_name = variable_->getCurrentMetaTable();
+////            assert (DBSchemaManager::getInstance().getCurrentSchema()->hasMetaTable(meta_table_name));
+////            MetaDBTable *table =DBSchemaManager::getInstance().getCurrentSchema()->getMetaTable(meta_table_name);
+////            std::string table_db_name = table->getTableDBNameForVariable(variable_->getId());
+//            //ss << table_db_name << "." << variable_->id_;
 
-            if (variable_->dboName() == dbo_type)
-            {
-                if (!first)
-                {
-                    if (op_and_)
-                        ss << " AND ";
-                    else
-                        ss << " OR ";
+//            if (variable_->dboName() == dbo_type)
+//            {
+//                if (!first)
+//                {
+//                    if (op_and_)
+//                        ss << " AND ";
+//                    else
+//                        ss << " OR ";
 
-                    first=false;
-                }
+//                    first=false;
+//                }
 
-                //TODO FIX REPRESENATION
-                assert (false);
-//                ss << variable_prefix << table_db_name << "." << variable_->id_  << variable_suffix  << " " << operator_ << " "
-//                        << variable_->getValueFromRepresentation(value_, true);
+//                //TODO FIX REPRESENATION
+//                assert (false);
+////                ss << variable_prefix << table_db_name << "." << variable_->id_  << variable_suffix  << " " << operator_ << " "
+////                        << variable_->getValueFromRepresentation(value_, true);
 
-                if (find (variable_names.begin(), variable_names.end(), variable_->name()) == variable_names.end())
-                    variable_names.push_back(variable_->name());
-            }
+//                if (find (variable_names.begin(), variable_names.end(), variable_->name()) == variable_names.end())
+//                    variable_names.push_back(variable_->name());
+//            }
 
 //        else // is meta
 //        {
@@ -294,12 +338,8 @@ std::string DBFilterCondition::getConditionString (const std::string &dbo_type, 
 //                }
 //            }
 //        }
-    }
+//    }
 
-    if (ss.str().size() > 0)
-    loginf  << "DBFilterCondition " << instance_id_<<": getConditionString: '" << ss.str()<<"'";
-
-    return ss.str();
 }
 
 /**

@@ -59,9 +59,14 @@ public:
 //    /// @brief Returns statement to create table for buffer contents
 //    std::string createDBCreateString (Buffer *buffer, const std::string &tablename);
 
+    /// @brief Returns general select statement
+    std::shared_ptr<DBCommand> getSelectCommand (const DBObject &object, const PropertyList &variables,
+            const std::string &filter, const std::vector <std::string> &filtered_variable_names, DBOVariable *order=nullptr,
+            const std::string &limit="", bool distinct=false, bool left_join=false);
+
 //    /// @brief Returns general select command
-    std::shared_ptr <DBCommand> getSelectCommand(const DBObject &object, const DBOVariableSet &read_list, const std::string &custom_filter_clause="",
-            DBOVariable *order=0, const std::string &limit_str="");
+//    std::shared_ptr <DBCommand> getSelectCommand(const DBObject &object, const DBOVariableSet &read_list, const std::string &custom_filter_clause,
+//                                                 std::vector<std::string> &filtered_variable_names, DBOVariable *order=0, const std::string &limit_str="");
 //    /// @brief Returns command for all data sources select
 
 //    //DBCommand *getDataSourcesSelectCommand (const std::string &dbo_type);
@@ -131,11 +136,6 @@ protected:
     std::string table_minmax_create_statement_;
     /// Properties table create SQL statement
     std::string table_properties_create_statement_;
-
-    /// @brief Returns general select statement
-    std::shared_ptr<DBCommand> getSelectCommand (const PropertyList &variables, const MetaDBTable &meta_table,
-            const std::vector <std::string> &filtered_variable_names, const std::string &filter="", const std::string &order="",
-            const std::string &limit="", bool distinct=false, bool left_join=false);
 
     /// @brief Returns SQL where clause with all used meta sub-tables
     std::string subTablesWhereClause (const MetaDBTable &meta_table, const std::vector <std::string> &used_tables);

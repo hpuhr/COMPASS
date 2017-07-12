@@ -97,7 +97,12 @@ public:
     unsigned int limitMax() const;
     void limitMax(unsigned int limitMax);
 
+    bool useFilters() const;
+    void useFilters(bool useFilters);
+
 protected:
+    bool use_filters_;
+
     bool use_limit_;
     unsigned int limit_min_;
     unsigned int limit_max_;

@@ -66,7 +66,7 @@ void SQLiteConnectionWidget::deleteFileSlot ()
     QString filename = file_list_->currentItem()->text();
     if (filename.size() > 0)
     {
-        assert (connection_->hasFile(filename.toStdString()));
+        assert (connection_.hasFile(filename.toStdString()));
         connection_.removeFile (filename.toStdString());
     }
 }
@@ -76,7 +76,7 @@ void SQLiteConnectionWidget::openFileSlot ()
     QString filename = file_list_->currentItem()->text();
     if (filename.size() > 0)
     {
-        assert (connection_->hasFile(filename.toStdString()));
+        assert (connection_.hasFile(filename.toStdString()));
         connection_.openFile(filename.toStdString());
 
         emit databaseOpenedSignal();

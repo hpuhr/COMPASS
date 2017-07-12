@@ -37,6 +37,7 @@ class DBObjectManagerLoadWidget : public QFrame
     Q_OBJECT
 
 public slots:
+    void toggleUseFilters ();
     void toggleUseLimit ();
     /// @brief Called when limit minimum is changed
     void limitMinChanged();
@@ -58,6 +59,7 @@ private:
     DBObjectManager &object_manager_;
     QVBoxLayout *info_layout_;
 
+    QCheckBox *filters_check_;
     QCheckBox *limit_check_;
     /// Limit minimum edit field
     QLineEdit *limit_min_edit_;

@@ -46,6 +46,7 @@ DBObjectManager::DBObjectManager(const std::string &class_id, const std::string 
 {
     logdbg  << "DBObjectManager: constructor: creating subconfigurables";
 
+    registerParameter("use_filters", &use_filters_, false);
     registerParameter("use_limit", &use_limit_, false);
     registerParameter("limit_min", &limit_min_, 0);
     registerParameter("limit_max", &limit_max_, 1000);
@@ -281,6 +282,17 @@ void DBObjectManager::limitMax(unsigned int limit_max)
     loginf << "DBObjectManager: limitMax: " << limit_max_;
 }
 
+bool DBObjectManager::useFilters() const
+{
+    return use_filters_;
+}
+
+void DBObjectManager::useFilters(bool use_filters)
+{
+    use_filters_ = use_filters;
+    loginf << "DBObjectManager: useFilters: " << use_filters_;
+}
+
 void DBObjectManager::loadSlot ()
 {
     loginf << "DBObjectManager: loadSlot";
@@ -295,10 +307,10 @@ void DBObjectManager::loadSlot ()
             {
                 std::string limit_str = String::intToString(limit_min_)+","+String::intToString(limit_max_);
                 loginf << "DBObjectManager: loadSlot: use limit str " << limit_str;
-                object.second->load(read_set, limit_str);
+                object.second->load(read_set, use_filters_, limit_str);
             }
             else
-                object.second->load(read_set);
+                object.second->load(read_set, use_filters_);
         }
     }
     emit loadingStartedSignal();

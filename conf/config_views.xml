@@ -10,20 +10,30 @@
                 <ParameterUnsignedInt order_variable_type_int="0"/>
                 <ParameterString order_variable_name="frame_time"/>
                 <Configuration class_id="DBOVariableOrderedSet" instance_id="DBOVariableOrderedSet0">
-                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitiongroundspeed_x0">
-                        <ParameterUnsignedInt index="0"/>
-                        <ParameterString dbo_name="ADSB"/>
-                        <ParameterString dbo_variable_name="groundspeed_x"/>
+                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionCALLSIGN0">
+                        <ParameterUnsignedInt index="3"/>
+                        <ParameterString dbo_name="Meta"/>
+                        <ParameterString dbo_variable_name="CALLSIGN"/>
                     </Configuration>
-                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionmode_a_code_changed0">
-                        <ParameterUnsignedInt index="1"/>
-                        <ParameterString dbo_name="ADSB"/>
-                        <ParameterString dbo_variable_name="mode_a_code_changed"/>
-                    </Configuration>
-                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitiontime_recording_daq_pos0">
+                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionMODE3A_CODE0">
                         <ParameterUnsignedInt index="2"/>
-                        <ParameterString dbo_name="ADSB"/>
-                        <ParameterString dbo_variable_name="time_recording_daq_pos"/>
+                        <ParameterString dbo_name="Meta"/>
+                        <ParameterString dbo_variable_name="MODE3A_CODE"/>
+                    </Configuration>
+                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionREC_NUM0">
+                        <ParameterUnsignedInt index="0"/>
+                        <ParameterString dbo_name="Meta"/>
+                        <ParameterString dbo_variable_name="REC_NUM"/>
+                    </Configuration>
+                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionTARGET_ADDR0">
+                        <ParameterUnsignedInt index="4"/>
+                        <ParameterString dbo_name="Meta"/>
+                        <ParameterString dbo_variable_name="TARGET_ADDR"/>
+                    </Configuration>
+                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionTOD0">
+                        <ParameterUnsignedInt index="1"/>
+                        <ParameterString dbo_name="Meta"/>
+                        <ParameterString dbo_variable_name="TOD"/>
                     </Configuration>
                 </Configuration>
             </Configuration>

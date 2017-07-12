@@ -34,7 +34,8 @@
 using Utils::String;
 
 DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager &object_manager)
-    : object_manager_(object_manager), info_layout_(nullptr), limit_check_(nullptr), limit_min_edit_ (nullptr), limit_max_edit_(nullptr), load_all_button_(nullptr)
+    : object_manager_(object_manager), info_layout_(nullptr), filters_check_(nullptr), limit_check_(nullptr), limit_min_edit_ (nullptr),
+      limit_max_edit_(nullptr), load_all_button_(nullptr)
 {
     unsigned int frame_width = FRAME_SIZE;
 
@@ -55,6 +56,14 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager &object_man
     updateSlot();
 
     main_layout->addLayout(info_layout_);
+
+    // use filters stuff
+    bool use_filters = object_manager_.useFilters();
+    filters_check_ = new QCheckBox ("Use Filters");
+    filters_check_->setChecked(use_filters);
+    connect (filters_check_, SIGNAL(toggled(bool)), this, SLOT(toggleUseFilters()));
+    main_layout->addWidget(filters_check_);
+
 
     // limit stuff
     bool use_limit = object_manager_.useLimit();
@@ -95,6 +104,15 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager &object_man
 
 DBObjectManagerLoadWidget::~DBObjectManagerLoadWidget()
 {
+}
+
+void DBObjectManagerLoadWidget::toggleUseFilters()
+{
+    assert (filters_check_);
+
+    bool checked = filters_check_->checkState() == Qt::Checked;
+    logdbg  << "DBObjectManagerInfoWidget: toggleUseFilters: setting use limit to " << checked;
+    object_manager_.useFilters(checked);
 }
 
 void DBObjectManagerLoadWidget::toggleUseLimit()
