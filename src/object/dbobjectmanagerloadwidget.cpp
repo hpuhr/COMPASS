@@ -56,43 +56,52 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager &object_man
     updateSlot();
     main_layout->addLayout(info_layout_);
 
-    main_layout->addStretch();
+    QFrame *line = new QFrame(this);
+    line->setFrameShape(QFrame::HLine); // Horizontal line
+    line->setFrameShadow(QFrame::Sunken);
+    line->setLineWidth(1);
+    main_layout->addWidget(line);
 
     // use filters stuff
-    bool use_filters = object_manager_.useFilters();
     filters_check_ = new QCheckBox ("Use Filters");
-    filters_check_->setChecked(use_filters);
+    filters_check_->setChecked(object_manager_.useFilters());
     connect (filters_check_, SIGNAL(toggled(bool)), this, SLOT(toggleUseFilters()));
     main_layout->addWidget(filters_check_);
 
+    QFrame *line2 = new QFrame(this);
+    line2->setFrameShape(QFrame::HLine); // Horizontal line
+    line2->setFrameShadow(QFrame::Sunken);
+    line2->setLineWidth(1);
+    main_layout->addWidget(line2);
+
     // there is to be order!
     order_check_ = new QCheckBox("Use Order");
-    //order_check_->setChecked(view_->getDataSource()->getUseOrder());
+    order_check_->setChecked(object_manager.useOrder());
     connect(order_check_, SIGNAL( clicked() ), this, SLOT( toggleUseOrder() ));
     main_layout->addWidget(order_check_);
 
-//    QFrame *order_frame = new QFrame ();
-//    order_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
-//    QVBoxLayout *order_layout = new QVBoxLayout ();
-
     order_ascending_check_= new QCheckBox("Order Ascending");
-    //order_ascending_check_->setChecked(view_->getDataSource()->getOrderAscending());
+    order_ascending_check_->setChecked(object_manager.useOrderAscending());
     connect(order_ascending_check_, SIGNAL( clicked() ), this, SLOT( toggleOrderAscending() ));
     main_layout->addWidget(order_ascending_check_);
 
     main_layout->addWidget (new QLabel ("Order Variable:"));
     order_variable_widget_ = new DBOVariableSelectionWidget (false, true, this);
-//    if (DBObjectManager::getInstance().existsDBOVariable(view_->getDataSource()->getOrderVariableType(),
-//        view_->getDataSource()->getOrderVariableName()))
-//    {
-//      order_variable_widget_->setSelectedVariable(DBObjectManager::getInstance().getDBOVariable(view_->getDataSource()->getOrderVariableType(),
-//          view_->getDataSource()->getOrderVariableName()));
-//    }
+    order_variable_widget_->showMetaVariables(true);
+
+    if (object_manager.hasOrderVariable())
+        order_variable_widget_->selectedVariable(object_manager.orderVariable());
+    if (object_manager.hasOrderMetaVariable())
+        order_variable_widget_->selectedMetaVariable(object_manager.orderMetaVariable());
+
     connect (order_variable_widget_, SIGNAL (selectionChanged()), this, SLOT(orderVariableChanged()));
     main_layout->addWidget (order_variable_widget_);
 
-//    order_frame->setLayout (order_layout);
-//    main_layout->addWidget (order_frame);
+    QFrame *line3 = new QFrame(this);
+    line3->setFrameShape(QFrame::HLine); // Horizontal line
+    line3->setFrameShadow(QFrame::Sunken);
+    line3->setLineWidth(1);
+    main_layout->addWidget(line3);
 
     // limit stuff
     bool use_limit = object_manager_.useLimit();
@@ -121,6 +130,12 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager &object_man
 
     main_layout->addLayout(limit_layout);
 
+    QFrame *line4 = new QFrame(this);
+    line4->setFrameShape(QFrame::HLine); // Horizontal line
+    line4->setFrameShadow(QFrame::Sunken);
+    line4->setLineWidth(1);
+    main_layout->addWidget(line4);
+
     // load
     load_all_button_ = new QPushButton ("Load");
     connect (load_all_button_, SIGNAL(clicked()), this, SLOT(loadAllSlot()));
@@ -135,34 +150,37 @@ DBObjectManagerLoadWidget::~DBObjectManagerLoadWidget()
 
 void DBObjectManagerLoadWidget::toggleUseFilters()
 {
-//    assert (filters_check_);
+    assert (filters_check_);
 
-//    bool checked = filters_check_->checkState() == Qt::Checked;
-//    logdbg  << "DBObjectManagerInfoWidget: toggleUseFilters: setting use limit to " << checked;
-//    object_manager_.useFilters(checked);
+    bool checked = filters_check_->checkState() == Qt::Checked;
+    logdbg  << "DBObjectManagerInfoWidget: toggleUseFilters: setting use limit to " << checked;
+    object_manager_.useFilters(checked);
 }
 
 void DBObjectManagerLoadWidget::toggleUseOrder ()
 {
-//  QCheckBox *send = ((QCheckBox*)sender());
-//  bool checked = send->checkState() == Qt::Checked;
-//  view_->getDataSource()->setUseOrder (checked);
+    assert (order_check_);
+    bool checked = order_check_->checkState() == Qt::Checked;
+    object_manager_.useOrder(checked);
 }
 
 void DBObjectManagerLoadWidget::toggleOrderAscending ()
 {
-//  QCheckBox *send = ((QCheckBox*)sender());
-//  bool checked = send->checkState() == Qt::Checked;
-//  view_->getDataSource()->setOrderAscending (checked);
+    assert (order_ascending_check_);
+    bool checked = order_ascending_check_->checkState() == Qt::Checked;
+    object_manager_.useOrderAscending(checked);
 }
 
 void DBObjectManagerLoadWidget::orderVariableChanged ()
 {
-      //TODO
-//  assert (order_variable_widget_);
-//  DBOVariable *var = order_variable_widget_->getSelectedVariable();
-//  view_->getDataSource()->setOrderVariableName (var->getName());
-//  view_->getDataSource()->setOrderVariableType (var->getDBOType());
+    assert (order_variable_widget_);
+
+    if (order_variable_widget_->hasVariable())
+        object_manager_.orderVariable(order_variable_widget_->selectedVariable());
+    else if (order_variable_widget_->hasMetaVariable())
+        object_manager_.orderMetaVariable(order_variable_widget_->selectedMetaVariable());
+    else
+        object_manager_.clearOrderVariable();
 }
 
 
@@ -183,23 +201,23 @@ void DBObjectManagerLoadWidget::toggleUseLimit()
 
 void DBObjectManagerLoadWidget::limitMinChanged()
 {
-  assert (limit_min_edit_);
+    assert (limit_min_edit_);
 
-  if (limit_min_edit_->text().size() == 0)
-      return;
+    if (limit_min_edit_->text().size() == 0)
+        return;
 
-  unsigned int min = String::intFromString (limit_min_edit_->text().toStdString());
-  object_manager_.limitMin(min);
+    unsigned int min = String::intFromString (limit_min_edit_->text().toStdString());
+    object_manager_.limitMin(min);
 }
 void DBObjectManagerLoadWidget::limitMaxChanged()
 {
-  assert (limit_max_edit_);
+    assert (limit_max_edit_);
 
-  if (limit_max_edit_->text().size() == 0)
-      return;
+    if (limit_max_edit_->text().size() == 0)
+        return;
 
-  unsigned int max = String::intFromString (limit_max_edit_->text().toStdString());
-  object_manager_.limitMax(max);
+    unsigned int max = String::intFromString (limit_max_edit_->text().toStdString());
+    object_manager_.limitMax(max);
 }
 
 void DBObjectManagerLoadWidget::loadAllSlot ()

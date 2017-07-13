@@ -728,7 +728,7 @@ size_t DBInterface::count (const std::string &table)
 //}
 
 void DBInterface::prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause, const std::vector <std::string> filtered_variables,
-        DBOVariable *order, const std::string &limit)
+        bool use_order, DBOVariable *order_variable, bool use_order_ascending, const std::string &limit)
 {
     //boost::mutex::scoped_lock l(connection_mutex_);
     connection_mutex_.lock();
@@ -738,7 +738,8 @@ void DBInterface::prepareRead (const DBObject &dbobject, DBOVariableSet read_lis
 //                                               const std::string &filter, const std::vector <std::string> &filtered_variable_names,  DBOVariable *order,
 //                                               const std::string &limit, bool distinct, bool left_join)
 
-    std::shared_ptr<DBCommand> read = sql_generator_.getSelectCommand (dbobject, read_list.getPropertyList(), custom_filter_clause, filtered_variables, order, limit);
+    std::shared_ptr<DBCommand> read = sql_generator_.getSelectCommand (dbobject, read_list.getPropertyList(), custom_filter_clause, filtered_variables, use_order, order_variable,
+                                                                       use_order_ascending, limit);
     loginf  << "DBInterface: prepareRead: dbo " << dbobject.name() << " sql '" << read->get() << "'";
     current_connection_->prepareCommand(read);
 }

@@ -698,9 +698,9 @@ std::string SQLGenerator::getCountStatement (const std::string &table)
 //    return ss.str();
 //}
 
-std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const DBObject &object, const PropertyList &variables,
-                                           const std::string &filter, const std::vector <std::string> &filtered_variable_names, DBOVariable *order,
-                                           const std::string &limit, bool distinct, bool left_join)
+std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const DBObject &object, const PropertyList &variables, const std::string &filter,
+                                                           const std::vector <std::string> &filtered_variable_names, bool use_order, DBOVariable *order_variable, bool use_order_ascending,
+                                                           const std::string &limit, bool distinct, bool left_join)
 {
     const MetaDBTable &meta_table = object.currentMetaTable();
 
@@ -736,24 +736,15 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const DBObject &objec
         ss << table_db_name << "." << property.name();
     }
 
-    logdbg << "SQLGenerator: getSelectCommand: ordering";
-    // TODO rework to variable
-    assert (!order);
-//    if (order.size() > 0)
-//    {
-//        std::vector<std::string> elems;
-//        elems = String::split(order, ' ', elems);
-//        assert (elems.size() != 0);
-
-//        if (meta_table.hasColumn(elems.at(0)))
-//        {
-//            std::string table_db_name = meta_table.tableFor(elems.at(0)).name();
-//            if (find (used_tables.begin(), used_tables.end(), table_db_name) == used_tables.end())
-//                used_tables.push_back (table_db_name);
-//        }
-//        else
-//            logwrn << "SQLGenerator: getSelectCommand: unknown order element '" << elems.at(0) << "'";
-//    }
+    logdbg << "SQLGenerator: getSelectCommand: ordering table";
+    if (use_order)
+    {
+        assert (order_variable);
+        assert (meta_table.hasColumn(order_variable->currentDBColumn().name()));
+        std::string table_db_name = meta_table.tableFor(order_variable->currentDBColumn().name()).name();
+        if (find (used_tables.begin(), used_tables.end(), table_db_name) == used_tables.end())
+            used_tables.push_back (table_db_name);
+    }
 
     ss << " FROM "; // << table->getAllTableNames();
 
@@ -854,11 +845,20 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const DBObject &objec
 //        ss << " GROUP BY " << main_table_name << "." << meta_table.mainTable().getKeyId();
 //    }
 
-//    if (order.size() > 0)
-//    {
-//        logdbg << "SQLGenerator: getSelectCommand: ordering by";
-//        ss << " ORDER BY " << order;
-//    }
+    if (use_order)
+    {
+        assert (order_variable);
+        assert (meta_table.hasColumn(order_variable->currentDBColumn().name()));
+        std::string table_db_name = meta_table.tableFor(order_variable->currentDBColumn().name()).name();
+
+        ss << " ORDER BY " << table_db_name << "." << order_variable->currentDBColumn().name();
+
+        if (use_order_ascending)
+            ss << " ASC";
+        else
+            ss << " DESC";
+    }
+
 
     if (limit.size() > 0)
     {

@@ -319,24 +319,50 @@ void DBObjectManager::useOrderAscending(bool use_order_ascending)
     use_order_ascending_ = use_order_ascending;
 }
 
-std::string DBObjectManager::orderVariableDBOName() const
+bool DBObjectManager::hasOrderVariable ()
 {
-    return order_variable_dbo_name_;
+    if (existsObject(order_variable_dbo_name_))
+        if (object(order_variable_dbo_name_).hasVariable(order_variable_name_))
+                return true;
+    return false;
 }
 
-void DBObjectManager::orderVariableDBOName(const std::string &order_variable_dbo_name)
+DBOVariable &DBObjectManager::orderVariable ()
 {
-    order_variable_dbo_name_ = order_variable_dbo_name;
+    assert (hasOrderVariable());
+    return object(order_variable_dbo_name_).variable(order_variable_name_);
 }
 
-std::string DBObjectManager::orderVariableName() const
+void DBObjectManager::orderVariable(DBOVariable &variable)
 {
-    return order_variable_name_;
+    order_variable_dbo_name_=variable.dboName();
+    order_variable_name_=variable.name();
 }
 
-void DBObjectManager::orderVariableName(const std::string &order_variable__name)
+bool DBObjectManager::hasOrderMetaVariable ()
 {
-    order_variable_name_ = order_variable__name;
+    if (order_variable_dbo_name_ == META_OBJECT_NAME)
+        return existsMetaVariable(order_variable_name_);
+
+    return false;
+}
+
+MetaDBOVariable &DBObjectManager::orderMetaVariable ()
+{
+    assert (hasOrderMetaVariable());
+    return metaVariable(order_variable_name_);
+}
+
+void DBObjectManager::orderMetaVariable(MetaDBOVariable &variable)
+{
+    order_variable_dbo_name_=META_OBJECT_NAME;
+    order_variable_name_=variable.name();
+}
+
+void DBObjectManager::clearOrderVariable ()
+{
+    order_variable_dbo_name_="";
+    order_variable_name_="";
 }
 
 void DBObjectManager::loadSlot ()
@@ -349,14 +375,21 @@ void DBObjectManager::loadSlot ()
         {
             DBOVariableSet read_set = ATSDB::instance().viewManager().getReadSet(object.first);
 
+            std::string limit_str = "";
             if (use_limit_)
             {
-                std::string limit_str = String::intToString(limit_min_)+","+String::intToString(limit_max_);
+                limit_str = String::intToString(limit_min_)+","+String::intToString(limit_max_);
                 loginf << "DBObjectManager: loadSlot: use limit str " << limit_str;
-                object.second->load(read_set, use_filters_, limit_str);
             }
-            else
-                object.second->load(read_set, use_filters_);
+
+            DBOVariable *variable=nullptr;
+            if (hasOrderVariable())
+                variable = &orderVariable();
+            if (hasOrderMetaVariable())
+                variable = &orderMetaVariable().getFor(object.first);
+
+            // load (DBOVariableSet &read_set, bool use_filters, bool use_order, DBOVariable *order_variable, bool use_order_ascending, const std::string &limit_str="")
+            object.second->load(read_set, use_filters_, use_order_, variable, use_order_ascending_, limit_str);
         }
     }
     emit loadingStartedSignal();

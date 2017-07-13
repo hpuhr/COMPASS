@@ -61,7 +61,7 @@ public:
 
     /// @brief Returns general select statement
     std::shared_ptr<DBCommand> getSelectCommand (const DBObject &object, const PropertyList &variables,
-            const std::string &filter, const std::vector <std::string> &filtered_variable_names, DBOVariable *order=nullptr,
+            const std::string &filter, const std::vector <std::string> &filtered_variable_names, bool use_order=false, DBOVariable *order_variable=nullptr, bool use_order_ascending=false,
             const std::string &limit="", bool distinct=false, bool left_join=false);
 
 //    /// @brief Returns general select command

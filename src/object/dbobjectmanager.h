@@ -106,11 +106,13 @@ public:
     bool useOrderAscending() const;
     void useOrderAscending(bool useOrderAscending);
 
-    std::string orderVariableDBOName() const;
-    void orderVariableDBOName(const std::string &orderVariableDBOName);
-
-    std::string orderVariableName() const;
-    void orderVariableName(const std::string &orderVariableName);
+    bool hasOrderVariable ();
+    DBOVariable &orderVariable ();
+    void orderVariable(DBOVariable &variable);
+    bool hasOrderMetaVariable ();
+    MetaDBOVariable &orderMetaVariable ();
+    void orderMetaVariable(MetaDBOVariable &variable);
+    void clearOrderVariable ();
 
 protected:
     bool use_filters_;

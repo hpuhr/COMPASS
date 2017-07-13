@@ -41,10 +41,10 @@
 //#include "MetaDBTable.h"
 #include "logger.h"
 
-DBOReadDBJob::DBOReadDBJob(DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
-                           const std::vector<std::string> &filtered_variables, DBOVariable *order, const std::string &limit_str, bool activate_key_search)
+DBOReadDBJob::DBOReadDBJob(DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause, const std::vector<std::string> &filtered_variables,
+                           bool use_order, DBOVariable *order_variable, bool use_order_ascending, const std::string &limit_str, bool activate_key_search)
 : Job (db_interface), dbobject_(dbobject), read_list_(read_list), custom_filter_clause_ (custom_filter_clause), filtered_variables_(filtered_variables),
-  order_(order), limit_str_(limit_str), activate_key_search_(activate_key_search)
+  use_order_(use_order), order_variable_(order_variable), use_order_ascending_(use_order_ascending), limit_str_(limit_str), activate_key_search_(activate_key_search)
 {
 }
 
@@ -59,7 +59,7 @@ void DBOReadDBJob::run ()
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
-    db_interface_.prepareRead (dbobject_, read_list_, custom_filter_clause_, filtered_variables_, order_, limit_str_);
+    db_interface_.prepareRead (dbobject_, read_list_, custom_filter_clause_, filtered_variables_, use_order_, order_variable_, use_order_ascending_, limit_str_);
 
     unsigned int cnt=0;
     unsigned int row_count=0;

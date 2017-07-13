@@ -192,7 +192,7 @@ public:
     void loadingWanted (bool wanted) { loading_wanted_=wanted; }
     bool loadingWanted () { return loading_wanted_; }
 
-    void load (DBOVariableSet &read_set, bool use_filters, const std::string &limit_str="");
+    void load (DBOVariableSet &read_set, bool use_filters, bool use_order, DBOVariable *order_variable, bool use_order_ascending, const std::string &limit_str="");
 
     /// @brief Returns if incremental read for DBO type was prepared
     bool isLoading ();

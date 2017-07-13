@@ -375,7 +375,7 @@ void DBObject::schemaChangedSlot ()
         current_meta_table_ = nullptr;
 }
 
-void DBObject::load (DBOVariableSet &read_set, bool use_filters, const std::string &limit_str)
+void DBObject::load (DBOVariableSet &read_set, bool use_filters, bool use_order, DBOVariable *order_variable, bool use_order_ascending, const std::string &limit_str)
 {
     assert (is_loadable_);
 
@@ -401,7 +401,8 @@ void DBObject::load (DBOVariableSet &read_set, bool use_filters, const std::stri
 //    DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
 //    DBOVariable *order, const std::string &limit_str, bool activate_key_search
 
-    DBOReadDBJob *read_job = new DBOReadDBJob (ATSDB::instance().interface(), *this, read_set, custom_filter_clause, filter_variable_names, nullptr, limit_str, false);
+    DBOReadDBJob *read_job = new DBOReadDBJob (ATSDB::instance().interface(), *this, read_set, custom_filter_clause, filter_variable_names, use_order, order_variable,
+                                               use_order_ascending, limit_str, false);
 
     read_job_ = std::shared_ptr<DBOReadDBJob> (read_job);
     connect (read_job, SIGNAL(intermediateSignal(std::shared_ptr<Buffer>)), this, SLOT(readJobIntermediateSlot(std::shared_ptr<Buffer>)));
