@@ -53,7 +53,7 @@ protected:
     UnitManager();
 
 public:
-    static UnitManager& getInstance()
+    static UnitManager& instance()
     {
         static UnitManager instance;
         return instance;

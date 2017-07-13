@@ -153,7 +153,7 @@ void DBObjectManagerLoadWidget::toggleUseFilters()
     assert (filters_check_);
 
     bool checked = filters_check_->checkState() == Qt::Checked;
-    logdbg  << "DBObjectManagerInfoWidget: toggleUseFilters: setting use limit to " << checked;
+    logdbg  << "DBObjectManagerLoadWidget: toggleUseFilters: setting use limit to " << checked;
     object_manager_.useFilters(checked);
 }
 
@@ -191,7 +191,7 @@ void DBObjectManagerLoadWidget::toggleUseLimit()
     assert (limit_max_edit_);
 
     bool checked = limit_check_->checkState() == Qt::Checked;
-    logdbg  << "DBObjectManagerInfoWidget: toggleUseLimit: setting use limit to " << checked;
+    logdbg  << "DBObjectManagerLoadWidget: toggleUseLimit: setting use limit to " << checked;
     object_manager_.useLimit(checked);
 
     limit_min_edit_->setEnabled(checked);

@@ -203,7 +203,7 @@ void DBObjectManagerWidget::editDBOSlot ()
     if (edit_dbo_widgets_.find (object) == edit_dbo_widgets_.end())
     {
         DBObjectWidget *widget = object->widget();
-        connect(widget, SIGNAL( changedDBOSlot() ), this, SLOT( changedDBOSlot() ));
+        connect(widget, SIGNAL (changedDBOSignal()), this, SLOT(changedDBOSlot()));
         edit_dbo_widgets_[object] = widget;
     }
     else

@@ -48,6 +48,7 @@ public slots:
     void editNameSlot ();
     /// @brief Changes DBO info
     void editDescriptionSlot ();
+    void editDataTypeSlot();
 
 public:
     /// @brief Constructor

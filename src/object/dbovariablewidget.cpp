@@ -87,6 +87,7 @@ DBOVariableWidget::DBOVariableWidget(DBOVariable &variable, QWidget *parent, Qt:
     properties_layout->addWidget(type_label, row, 0);
 
     type_combo_ = new DBOVariableDataTypeComboBox (variable_);
+    connect (type_combo_, SIGNAL(changedType()), this, SLOT(editDataTypeSlot()));
     properties_layout->addWidget (type_combo_, row, 1);
     row++;
 
@@ -156,4 +157,11 @@ void DBOVariableWidget::editDescriptionSlot()
     emit dboVariableChangedSignal();
 }
 
+void DBOVariableWidget::editDataTypeSlot()
+{
+    logdbg  << "DBOVariableWidget: editDataTypeSlot";
+    assert (type_combo_);
+    variable_.dataType(type_combo_->getType());
+    emit dboVariableChangedSignal();
 
+}

@@ -45,7 +45,7 @@ void UnitSelectionWidget::createMenu()
   logdbg  << "UnitSelectionWidget: createMenu";
   menu_.addAction( "" );
 
-  for (auto it : UnitManager::getInstance().quantities())
+  for (auto it : UnitManager::instance().quantities())
   {
     const std::map <std::string, Unit*> &units = it.second->units();
 

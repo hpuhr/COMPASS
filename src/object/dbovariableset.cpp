@@ -136,14 +136,14 @@ void DBOVariableSet::removeVariableAt (unsigned int index)
 
 DBOVariableSet& DBOVariableSet::operator= (const DBOVariableSet &source)
 {
-    loginf  << "DBOVariableSet: copy constructor";
+    logdbg  << "DBOVariableSet: copy constructor";
 
     if (this == &source) // self assignment
         return *this;
 
     std::vector <DBOVariable*>::const_iterator it;
 
-    loginf  << "DBOVariableSet: copy constructor: copying " << source.set_.size() << " elements";
+    logdbg  << "DBOVariableSet: copy constructor: copying " << source.set_.size() << " elements";
 
     // do the copy
     for (it=source.set_.begin(); it != source.set_.end(); it++)

@@ -370,7 +370,7 @@ void DBObjectManager::loadSlot ()
     loginf << "DBObjectManager: loadSlot";
     for (auto object : objects())
     {
-        loginf << "DBObjectManagerInfoWidget: loadSlot: object " << object.first << " wanted loading " << object.second->loadingWanted();
+        logdbg << "DBObjectManager: loadSlot: object " << object.first << " wanted loading " << object.second->loadingWanted();
         if (object.second->loadingWanted())
         {
             DBOVariableSet read_set = ATSDB::instance().viewManager().getReadSet(object.first);
@@ -379,7 +379,7 @@ void DBObjectManager::loadSlot ()
             if (use_limit_)
             {
                 limit_str = String::intToString(limit_min_)+","+String::intToString(limit_max_);
-                loginf << "DBObjectManager: loadSlot: use limit str " << limit_str;
+                logdbg << "DBObjectManager: loadSlot: use limit str " << limit_str;
             }
 
             DBOVariable *variable=nullptr;

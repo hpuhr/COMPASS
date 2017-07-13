@@ -153,9 +153,9 @@ public:
   void description (const std::string &description) { description_=description; }
 
   /// @brief Returns variable data type
-  PropertyDataType dataType () { return data_type_;}
+  //PropertyDataType dataType () { return data_type_;}
   /// @brief Sets variable data type
-  void dataType (PropertyDataType type) { data_type_=type; }
+  //void dataType (PropertyDataType type) { data_type_=type; }
 
   /// @brief Returns of schema is present in schema_variables_
   bool hasSchema (const std::string &schema);

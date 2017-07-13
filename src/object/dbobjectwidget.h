@@ -52,7 +52,7 @@ class DBObjectWidget : public QWidget
 
 signals:
     /// @brief Emitted if DBObject was changed
-    void changedDBO();
+    void changedDBOSignal();
 
 public slots:
     /// @brief Adds all new DBOVariables

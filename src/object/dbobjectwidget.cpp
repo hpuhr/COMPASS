@@ -329,7 +329,7 @@ void DBObjectWidget::editName ()
   std::string text = name_edit_->text().toStdString();
   assert (text.size()>0);
   object_->name (text);
-  emit changedDBO();
+  emit changedDBOSignal();
 }
 void DBObjectWidget::editInfo ()
 {
@@ -340,7 +340,7 @@ void DBObjectWidget::editInfo ()
   std::string text = info_edit_->text().toStdString();
   assert (text.size()>0);
   object_->info (text);
-  emit changedDBO();
+  emit changedDBOSignal();
 }
 
 void DBObjectWidget::editDBOVar()

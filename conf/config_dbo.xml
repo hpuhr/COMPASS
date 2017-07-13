@@ -5,7 +5,7 @@
     <ParameterBool use_order_ascending="1"/>
     <ParameterUnsignedInt limit_max="1000000"/>
     <ParameterUnsignedInt limit_min="0"/>
-    <ParameterString order_variable__name="TOD"/>
+    <ParameterString order_variable__name="CALLSIGN"/>
     <ParameterString order_variable_dbo_name="Meta"/>
     <Configuration class_id="DBObject" instance_id="DBObjectADSB0">
         <ParameterBool is_loadable="1"/>
@@ -829,7 +829,7 @@
         </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBTOD0">
             <ParameterUnsignedInt representation="0"/>
-            <ParameterString data_type_str="INT"/>
+            <ParameterString data_type_str="FLOAT"/>
             <ParameterString dbo_name="ADSB"/>
             <ParameterString description="Time of Day (1/128 sec from midnight)"/>
             <ParameterString name="TOD"/>
@@ -2028,7 +2028,7 @@
         </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATTOD0">
             <ParameterUnsignedInt representation="0"/>
-            <ParameterString data_type_str="INT"/>
+            <ParameterString data_type_str="FLOAT"/>
             <ParameterString dbo_name="MLAT"/>
             <ParameterString description="Time of Day (1/128 sec from midnight)"/>
             <ParameterString name="TOD"/>
@@ -3423,7 +3423,7 @@
         </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarTOD0">
             <ParameterUnsignedInt representation="0"/>
-            <ParameterString data_type_str="INT"/>
+            <ParameterString data_type_str="FLOAT"/>
             <ParameterString dbo_name="Radar"/>
             <ParameterString description="Measured time / (truncated) Time of Day (= ms since last midnight), [I001/141, I021/030, I048/140]"/>
             <ParameterString name="TOD"/>
@@ -4482,7 +4482,7 @@
         </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerTOD0">
             <ParameterUnsignedInt representation="0"/>
-            <ParameterString data_type_str="INT"/>
+            <ParameterString data_type_str="FLOAT"/>
             <ParameterString dbo_name="Tracker"/>
             <ParameterString description="Time of Message / Time of Day (= ms since last midnight), [I030/020, I062/070]"/>
             <ParameterString name="TOD"/>
