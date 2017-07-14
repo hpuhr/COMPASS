@@ -133,17 +133,17 @@ void ViewContainer::addView (View *view)
     int index = tab_widget_->addTab( w, QString::fromStdString( view->getName() ) );
 
     QPushButton *manage_button = new QPushButton();
-    manage_button->setIcon( QIcon( "./Data/icons/gear.png" ) );
-    manage_button->setFixedSize ( 20, 20 );
-    manage_button->setFlat(true);
+    manage_button->setIcon( QIcon( "./data/icons/edit.png" ) );
+    manage_button->setFixedSize (UI_ICON_SIZE);
+    manage_button->setFlat(UI_ICON_BUTTON_FLAT);
     manage_button->setToolTip(tr("Manage view"));
     connect (manage_button, SIGNAL(clicked()), this, SLOT(showMenuSlot()));
     tab_widget_->tabBar()->setTabButton(index, QTabBar::RightSide, manage_button);
 
     assert (view_manage_buttons_.find (manage_button) == view_manage_buttons_.end());
     view_manage_buttons_ [manage_button] = view;
+    loginf << "ViewContainer: addView: view " << view->getName() << " added";
 }
-
 
 void ViewContainer::removeView (View *view)
 {
@@ -174,6 +174,19 @@ void ViewContainer::removeView (View *view)
     assert (found);
 
     return;
+}
+
+void ViewContainer::deleteView ()
+{
+    assert (last_active_manage_button_);
+
+    assert (view_manage_buttons_.find (last_active_manage_button_) != view_manage_buttons_.end());
+    View *view = view_manage_buttons_ [last_active_manage_button_];
+
+    loginf << "ViewContainerWidget: deleteView: for view " << view->getInstanceId();
+    delete view;
+
+    last_active_manage_button_=nullptr;
 }
 
 const std::vector<View*>& ViewContainer::getViews() const
@@ -297,16 +310,4 @@ void ViewContainer::showMenuSlot ()
 
 //    last_active_manage_button_=0;
 //}
-void ViewContainer::deleteView ()
-{
-    assert (last_active_manage_button_);
 
-    // TODO
-    //    assert (view_manage_buttons_.find (last_active_manage_button_) != view_manage_buttons_.end());
-    //    View *view = view_manage_buttons_ [last_active_manage_button_];
-
-    //    loginf << "ViewContainerWidget: saveViewTemplate: for view " << view->getInstanceId();
-    //    ViewManager::getInstance().viewShutdown (view);
-
-    last_active_manage_button_=0;
-}

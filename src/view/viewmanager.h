@@ -54,7 +54,6 @@ public:
 
     void viewShutdown( View* view, const std::string& err = "" );
 
-
     std::map <std::string, ViewContainer*> getContainers () {return containers_;}
     std::map <std::string, View *> getViews () {return views_;}
     DBOVariableSet getReadSet (const std::string &dbo_name);
