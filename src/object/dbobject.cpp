@@ -438,6 +438,11 @@ void DBObject::readJobIntermediateSlot (std::shared_ptr<Buffer> buffer)
         assert (properties.hasProperty(column.name()));
         const Property &property = properties.get(column.name());
         assert (property.dataType() == var_it->dataType());
+        if (column.unit() != var_it->unitUnit())
+            loginf << "UGA " << var_it->name() << " unit " << column.unit() << " " << var_it->unitUnit();
+        if (column.quantity() != var_it->unitDimension())
+            loginf << "UGA2 " << var_it->name() << " unit " << column.quantity() << " " << var_it->unitDimension();
+
     }
 
     read_job_data_.push_back(buffer);

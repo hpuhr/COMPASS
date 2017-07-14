@@ -69,9 +69,6 @@ public:
   /// @brief Returns unit
   const std::string &unit () const { return unit_; }
 
-  /// @brief Returns database table name which holds this column
-  //const std::string &dbTableName () const { return db_table_name_; }
-
   bool hasSpecialNull () const { return special_null_.size() > 0; }
   void specialNull (std::string special_null) { special_null_ = special_null; }
   const std::string &specialNull () const { return special_null_; }
@@ -96,8 +93,6 @@ protected:
   std::string quanitiy_;
   /// Unit
   std::string unit_;
-  /// Database table name which holds this column
-  //std::string db_table_name_;
   /// Special value signifying null value
   std::string special_null_;
 

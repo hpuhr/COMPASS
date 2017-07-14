@@ -2033,7 +2033,7 @@
             <ParameterString description="Time of Day (sec from midnight)"/>
             <ParameterString name="TOD"/>
             <ParameterString unit_dimension="Time"/>
-            <ParameterString unit_unit="V7Time"/>
+            <ParameterString unit_unit="Second"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATTOD0">
                 <ParameterString meta_table="MLAT"/>
                 <ParameterString schema="SCDB"/>

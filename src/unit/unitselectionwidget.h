@@ -36,7 +36,7 @@ protected slots:
     void showMenuSlot();
 
 public:
-    /// @brief Constructor
+    /// @brief Constructor TODO HACK references directly used
     UnitSelectionWidget (std::string &quantity, std::string &unit);
     /// @brief Destructor
     virtual ~UnitSelectionWidget();
