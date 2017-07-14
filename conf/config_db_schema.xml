@@ -1588,10 +1588,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Time of Day (1/128 sec from midnight)"/>
                 <ParameterString name="TOD"/>
-                <ParameterString quanitiy=""/>
+                <ParameterString quanitiy="Time"/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
-                <ParameterString unit=""/>
+                <ParameterString unit="V7Time"/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>
@@ -2518,10 +2518,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Measured time / (truncated) Time of Day (= ms since last midnight), [I001/141, I021/030, I048/140]"/>
                 <ParameterString name="TOD"/>
-                <ParameterString quanitiy=""/>
+                <ParameterString quanitiy="Time"/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
-                <ParameterString unit=""/>
+                <ParameterString unit="V7Time"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="TOD_CALCULATED">
                 <ParameterBool is_key="0"/>
@@ -3310,10 +3310,10 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Time of Message / Time of Day (= ms since last midnight), [I030/020, I062/070]"/>
                 <ParameterString name="TOD"/>
-                <ParameterString quanitiy=""/>
+                <ParameterString quanitiy="Time"/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
-                <ParameterString unit=""/>
+                <ParameterString unit="V7Time"/>
                 <ParameterString unit_dimension=""/>
                 <ParameterString unit_unit=""/>
             </Configuration>

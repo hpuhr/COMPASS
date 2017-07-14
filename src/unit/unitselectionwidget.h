@@ -28,6 +28,7 @@ class UnitSelectionWidget : public QPushButton
 {
     Q_OBJECT
 
+
 protected slots:
     /// @brief Called when menu action is executed
     void triggerSlot( QAction* action );
@@ -36,20 +37,20 @@ protected slots:
 
 public:
     /// @brief Constructor
-    UnitSelectionWidget (const std::string &quantity, const std::string &unit);
+    UnitSelectionWidget (std::string &quantity, std::string &unit);
     /// @brief Destructor
     virtual ~UnitSelectionWidget();
 
 protected:
     /// Unit dimension reference
-    std::string quantity_;
+    std::string &quantity_;
     /// Unit unit reference
-    std::string unit_;
+    std::string &unit_;
 
     /// Context menu
     QMenu menu_;
 
-void createMenu();
+    void createMenu();
 };
 
 #endif /* UNITSELECTIONWIDGET_H_ */

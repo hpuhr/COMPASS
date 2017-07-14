@@ -831,10 +831,10 @@
             <ParameterUnsignedInt representation="0"/>
             <ParameterString data_type_str="FLOAT"/>
             <ParameterString dbo_name="ADSB"/>
-            <ParameterString description="Time of Day (1/128 sec from midnight)"/>
+            <ParameterString description="Time of Day (sec from midnight)"/>
             <ParameterString name="TOD"/>
-            <ParameterString unit_dimension=""/>
-            <ParameterString unit_unit=""/>
+            <ParameterString unit_dimension="Time"/>
+            <ParameterString unit_unit="Second"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBTOD0">
                 <ParameterString meta_table="ADSB"/>
                 <ParameterString schema="SCDB"/>
@@ -2030,10 +2030,10 @@
             <ParameterUnsignedInt representation="0"/>
             <ParameterString data_type_str="FLOAT"/>
             <ParameterString dbo_name="MLAT"/>
-            <ParameterString description="Time of Day (1/128 sec from midnight)"/>
+            <ParameterString description="Time of Day (sec from midnight)"/>
             <ParameterString name="TOD"/>
-            <ParameterString unit_dimension=""/>
-            <ParameterString unit_unit=""/>
+            <ParameterString unit_dimension="Time"/>
+            <ParameterString unit_unit="V7Time"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATTOD0">
                 <ParameterString meta_table="MLAT"/>
                 <ParameterString schema="SCDB"/>
@@ -3425,10 +3425,10 @@
             <ParameterUnsignedInt representation="0"/>
             <ParameterString data_type_str="FLOAT"/>
             <ParameterString dbo_name="Radar"/>
-            <ParameterString description="Measured time / (truncated) Time of Day (= ms since last midnight), [I001/141, I021/030, I048/140]"/>
+            <ParameterString description="Measured time / (truncated) Time of Day (s since last midnight)"/>
             <ParameterString name="TOD"/>
-            <ParameterString unit_dimension=""/>
-            <ParameterString unit_unit=""/>
+            <ParameterString unit_dimension="Time"/>
+            <ParameterString unit_unit="Second"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarTOD0">
                 <ParameterString meta_table="Radar"/>
                 <ParameterString schema="SCDB"/>
@@ -4484,10 +4484,10 @@
             <ParameterUnsignedInt representation="0"/>
             <ParameterString data_type_str="FLOAT"/>
             <ParameterString dbo_name="Tracker"/>
-            <ParameterString description="Time of Message / Time of Day (= ms since last midnight), [I030/020, I062/070]"/>
+            <ParameterString description="Time of Message / Time of Day s since last midnight)"/>
             <ParameterString name="TOD"/>
-            <ParameterString unit_dimension=""/>
-            <ParameterString unit_unit=""/>
+            <ParameterString unit_dimension="Time"/>
+            <ParameterString unit_unit="Second"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerTOD0">
                 <ParameterString meta_table="Tracker"/>
                 <ParameterString schema="SCDB"/>

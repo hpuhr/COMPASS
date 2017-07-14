@@ -179,9 +179,9 @@ public:
   /// @brief Returns if unit information is present
   bool hasUnit () { return unit_dimension_.size() != 0;}
   /// @brief Returns unit dimension
-  const std::string &unitDimension () const { return unit_dimension_; }
+  std::string &unitDimension () { return unit_dimension_; }
   /// @brief  Returns unit unit
-  const std::string &unitUnit () const { return unit_unit_; }
+  std::string &unitUnit () { return unit_unit_; }
 
   DBObject &dbObject () const { return dbo_parent_; }
 
