@@ -5,7 +5,7 @@
     <ParameterBool use_order_ascending="1"/>
     <ParameterUnsignedInt limit_max="1000000"/>
     <ParameterUnsignedInt limit_min="0"/>
-    <ParameterString order_variable__name="CALLSIGN"/>
+    <ParameterString order_variable__name="TOD"/>
     <ParameterString order_variable_dbo_name="Meta"/>
     <Configuration class_id="DBObject" instance_id="DBObjectADSB0">
         <ParameterBool is_loadable="1"/>

@@ -20,7 +20,7 @@
 #define DBOVARIABLESELECTIONWIDGET_H
 
 
-#include <QGroupBox>
+#include <QFrame>
 #include <QMenu>
 
 class QPushButton;
@@ -40,7 +40,7 @@ class MetaDBOVariable;
  * Selection is made using a context menu (which is triggered by a button), definition of the variable is shown in two
  * QLineEdit fields. Provides getter and setter methods for access.
  */
-class DBOVariableSelectionWidget : public QGroupBox
+class DBOVariableSelectionWidget : public QFrame
 {
     Q_OBJECT
 
@@ -57,7 +57,7 @@ signals:
 
 public:
     /// @brief Constructor without variable
-    DBOVariableSelectionWidget (bool show_title=true, bool h_box=true, QWidget* parent=nullptr );
+    DBOVariableSelectionWidget (bool h_box=true, QWidget* parent=nullptr );
     /// @brief Destructor
     ~DBOVariableSelectionWidget();
 

@@ -153,7 +153,7 @@ void MetaDBOVariableWidget::updateSlot ()
     {
         grid_layout_->addWidget(new QLabel (object_it.first.c_str()), row, 0);
 
-        DBOVariableSelectionWidget *var_sel = new DBOVariableSelectionWidget (false, true);
+        DBOVariableSelectionWidget *var_sel = new DBOVariableSelectionWidget (true);
         var_sel->showDBOOnly(object_it.first);
 
         if (variable_.existsIn(object_it.first))

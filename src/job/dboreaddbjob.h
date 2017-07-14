@@ -53,7 +53,7 @@ public:
 
     virtual void run ();
 
-    DBOVariableSet getReadList () { return read_list_; }
+    DBOVariableSet &readList () { return read_list_; }
 
 protected:
     DBObject &dbobject_;

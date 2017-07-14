@@ -32,12 +32,15 @@
 
 /*
  */
-DBOVariableSelectionWidget::DBOVariableSelectionWidget (bool show_title, bool h_box, QWidget* parent )
-    :   QGroupBox (show_title ? "Select DBO Variable": "", parent), variable_selected_(false), meta_variable_selected_(false),
+DBOVariableSelectionWidget::DBOVariableSelectionWidget (bool h_box, QWidget* parent)
+    :   QFrame (parent), variable_selected_(false), meta_variable_selected_(false),
       show_empty_variable_(true), show_meta_variables_(false), show_meta_variables_only_(false), show_dbo_only_(false)
 {
     //setStyleSheet("border: 1px solid gray; border-radius: 0px; padding:0");
-    setFlat(true);
+    //setFlat(true);
+
+    setFrameStyle(QFrame::Panel | QFrame::Sunken);
+    setLineWidth(1);
 
     QBoxLayout *layout;
 
@@ -55,6 +58,9 @@ DBOVariableSelectionWidget::DBOVariableSelectionWidget (bool show_title, bool h_
     if (h_box)
     {
         layout = new QHBoxLayout;
+        layout->setContentsMargins (1, 1, 1, 1);
+        layout->setSpacing (1);
+
         layout->addWidget( object_label_);
         layout->addWidget( variable_label_);
 
@@ -63,8 +69,13 @@ DBOVariableSelectionWidget::DBOVariableSelectionWidget (bool show_title, bool h_
     else
     {
         layout = new QVBoxLayout;
+        layout->setContentsMargins (1, 1, 1, 1);
+        layout->setSpacing (1);
 
         QHBoxLayout *select_layout = new QHBoxLayout ();
+        select_layout->setContentsMargins (1, 1, 1, 1);
+        select_layout->setSpacing (1);
+
         select_layout->addWidget( object_label_);
         select_layout->addWidget(sel_button);
         layout->addLayout (select_layout);

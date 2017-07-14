@@ -429,6 +429,17 @@ void DBObject::readJobIntermediateSlot (std::shared_ptr<Buffer> buffer)
     }
     assert (sender == read_job_.get());
 
+    std::vector <DBOVariable*> &variables = sender->readList().getSet ();
+    const PropertyList &properties = buffer->properties();
+
+    for (auto var_it : variables)
+    {
+        const DBTableColumn &column = var_it->currentDBColumn ();
+        assert (properties.hasProperty(column.name()));
+        const Property &property = properties.get(column.name());
+        assert (property.dataType() == var_it->dataType());
+    }
+
     read_job_data_.push_back(buffer);
 
     if (!data_)

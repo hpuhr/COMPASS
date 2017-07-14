@@ -86,7 +86,7 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager &object_man
     main_layout->addWidget(order_ascending_check_);
 
     main_layout->addWidget (new QLabel ("Order Variable:"));
-    order_variable_widget_ = new DBOVariableSelectionWidget (false, true, this);
+    order_variable_widget_ = new DBOVariableSelectionWidget (true, this);
     order_variable_widget_->showMetaVariables(true);
 
     if (object_manager.hasOrderVariable())
@@ -111,7 +111,6 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager &object_man
     main_layout->addWidget(limit_check_);
 
     QGridLayout *limit_layout = new QGridLayout ();
-
     limit_layout->addWidget(new QLabel ("Limit Min"), 0, 0);
 
     limit_min_edit_ = new QLineEdit ();
@@ -129,12 +128,13 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager &object_man
     limit_layout->addWidget(limit_max_edit_, 1, 1);
 
     main_layout->addLayout(limit_layout);
+    main_layout->addStretch();
 
-    QFrame *line4 = new QFrame(this);
-    line4->setFrameShape(QFrame::HLine); // Horizontal line
-    line4->setFrameShadow(QFrame::Sunken);
-    line4->setLineWidth(1);
-    main_layout->addWidget(line4);
+//    QFrame *line4 = new QFrame(this);
+//    line4->setFrameShape(QFrame::HLine); // Horizontal line
+//    line4->setFrameShadow(QFrame::Sunken);
+//    line4->setLineWidth(1);
+//    main_layout->addWidget(line4);
 
     // load
     load_all_button_ = new QPushButton ("Load");

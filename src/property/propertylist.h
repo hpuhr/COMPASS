@@ -48,14 +48,14 @@ public:
     PropertyList()
     {
         logdbg << "PropertyList: constructor";
-    };
+    }
     /// @brief Desctructor. Calls clear.
     virtual ~PropertyList()
     {
         logdbg << "PropertyList: destructor: start";
         clear();
         logdbg << "PropertyList: destructor: end";
-    };
+    }
 
     /// @brief Copy constructor
     PropertyList(const PropertyList& org)
@@ -123,7 +123,7 @@ public:
      *
      * \exception std::runtime_error if identifier not found
      */
-    void removeProperty (std::string id)
+    void removeProperty (const std::string &id)
     {
         logdbg << "PropertyList: removeProperty: start";
         if (!hasProperty(id))
@@ -148,7 +148,7 @@ public:
      *
      * \exception std::runtime_error if identifier not found
      */
-    const Property &get (std::string id) const
+    const Property &get (const std::string &id) const
     {
         logdbg << "PropertyList: get: start";
         if (!hasProperty(id))
@@ -192,7 +192,7 @@ public:
     }
 
     /// @brief Returns flag indicating if property is in list
-    bool hasProperty (std::string id) const
+    bool hasProperty (const std::string &id) const
     {
         logdbg << "PropertyList: hasProperty: start";
 
