@@ -176,7 +176,7 @@ set ( atsdb_HDRS
     #        src/job/dboactivedatasourcesdbjob.h
     #        src/job/dbovariabledistinctstatisticsdbjob.h
     #        src/job/dbovariableminmaxdbjob.h
-    #        src/job/finalizedboreadjob.h
+    src/job/finalizedboreadjob.h
     #        src/job/dbocountdbjob.h
     #        src/job/dboinfodbjob.h
     #        src/job/updatebufferdbjob.h
@@ -349,7 +349,7 @@ set ( atsdb_SRCS
     src/job/joborderer.cpp
     src/job/jobmanager.cpp
     src/job/jobmanagerwidget.cpp
-    #        src/job/finalizedboreadjob.cpp
+    src/job/finalizedboreadjob.cpp
     #        src/job/updatebufferdbjob.cpp
     #        src/job/writebufferdbjob.cpp
     #        src/job/postprocessdbjob.cpp

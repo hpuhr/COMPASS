@@ -111,6 +111,7 @@ class Buffer;
 class Job;
 class DBJob;
 class DBOReadDBJob;
+class FinalizeDBOReadJob;
 class DBOVariableSet;
 
 /**
@@ -153,6 +154,7 @@ public slots:
     void readJobIntermediateSlot (std::shared_ptr<Buffer> buffer);
     void readJobObsoleteSlot ();
     void readJobDoneSlot();
+    void finalizeReadJobDoneSlot();
 
     void databaseOpenedSlot ();
 
@@ -197,7 +199,7 @@ public:
     /// @brief Returns if incremental read for DBO type was prepared
     bool isLoading ();
     /// @brief Returns if incremental read for DBO type was finished
-    bool wasLoadingPerformed ();
+    //bool wasLoadingPerformed ();
     /// @brief Returns if DBO exists and has data in the database
     bool hasData ();
     /// @brief Returns number of elements for DBO type
@@ -265,7 +267,8 @@ protected:
     /// DBO is meta flag
     //bool is_meta_;
     std::shared_ptr <DBOReadDBJob> read_job_;
-    std::vector <std::shared_ptr<Buffer>> read_job_data_;
+    //std::vector <std::shared_ptr<Buffer>> read_job_data_;
+    std::shared_ptr <FinalizeDBOReadJob> finalize_job_;
 
     std::shared_ptr<Buffer> data_;
 

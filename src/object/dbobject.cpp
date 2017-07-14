@@ -39,6 +39,7 @@
 #include "metadbtable.h"
 //#include "ActiveSourcesObserver.h"
 #include "dboreaddbjob.h"
+#include "finalizedboreadjob.h"
 #include "atsdb.h"
 #include "dbinterface.h"
 #include "jobmanager.h"
@@ -385,7 +386,7 @@ void DBObject::load (DBOVariableSet &read_set, bool use_filters, bool use_order,
         read_job_ = nullptr;
     }
 
-    read_job_data_.clear();
+    //read_job_data_.clear();
 
     if (data_)
         data_ = nullptr;
@@ -438,33 +439,27 @@ void DBObject::readJobIntermediateSlot (std::shared_ptr<Buffer> buffer)
         assert (properties.hasProperty(column.name()));
         const Property &property = properties.get(column.name());
         assert (property.dataType() == var_it->dataType());
-        if (column.unit() != var_it->unitUnit())
-            loginf << "UGA " << var_it->name() << " unit " << column.unit() << " " << var_it->unitUnit();
-        if (column.quantity() != var_it->unitDimension())
-            loginf << "UGA2 " << var_it->name() << " unit " << column.quantity() << " " << var_it->unitDimension();
-
     }
 
-    read_job_data_.push_back(buffer);
+    logdbg << "DBObject: " << name_ << " readJobIntermediateSlot: got buffer with size " << buffer->size();
 
-    if (!data_)
-        data_ = buffer;
-    else
-        data_->seizeBuffer (*buffer.get());
+    FinalizeDBOReadJob *job = new FinalizeDBOReadJob (*this, sender->readList(), buffer);
 
-    logdbg << "DBObject: " << name_ << " readJobIntermediateSlot: got " << read_job_data_.size() << " buffers " << " with size " << data_->size();
+    std::shared_ptr<FinalizeDBOReadJob> job_ptr = std::shared_ptr<FinalizeDBOReadJob> (job);
+    connect (job, SIGNAL(doneSignal()), this, SLOT(finalizeReadJobDoneSlot()));
+
+    JobManager::instance().addJob(job_ptr);
 
     if (info_widget_)
         info_widget_->updateSlot();
 
-    emit newDataSignal(*this);
 }
 
 void DBObject::readJobObsoleteSlot ()
 {
     loginf << "DBObject: " << name_ << " readJobObsoleteSlot";
     read_job_ = nullptr;
-    read_job_data_.clear();
+    //read_job_data_.clear();
 
     if (info_widget_)
         info_widget_->updateSlot();
@@ -482,6 +477,36 @@ void DBObject::readJobDoneSlot()
 
     emit loadingDoneSignal(*this);
 }
+
+void DBObject::finalizeReadJobDoneSlot()
+{
+    loginf << "DBObject: " << name_ << " finalizeReadJobDoneSlot";
+
+    FinalizeDBOReadJob *sender = dynamic_cast <FinalizeDBOReadJob*> (QObject::sender());
+
+    if (!sender)
+    {
+        logwrn << "DBObject: finalizeReadJobDoneSlot: null sender, event on the loose";
+        return;
+    }
+
+    std::shared_ptr<Buffer> buffer = sender->buffer();
+
+    //read_job_data_.push_back(buffer);
+
+    if (!data_)
+        data_ = buffer;
+    else
+        data_->seizeBuffer (*buffer.get());
+
+    logdbg << "DBObject: " << name_ << " finalizeReadJobDoneSlot: got buffer with size " << data_->size();
+
+    if (info_widget_)
+        info_widget_->updateSlot();
+
+    emit newDataSignal(*this);
+}
+
 
 void DBObject::databaseOpenedSlot ()
 {
@@ -506,14 +531,14 @@ bool DBObject::isLoading ()
     return read_job_ == nullptr;
 }
 
-bool DBObject::wasLoadingPerformed ()
-{
-    if (isLoading())
-        return false;
-    else
-        return read_job_data_.size() > 0;
+//bool DBObject::wasLoadingPerformed ()
+//{
+//    if (isLoading())
+//        return false;
+//    else
+//        return read_job_data_.size() > 0;
 
-}
+//}
 
 bool DBObject::hasData ()
 {

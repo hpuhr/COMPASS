@@ -22,28 +22,17 @@
  *      Author: sk
  */
 
-#include <boost/thread/thread.hpp>
-
-#include <QThread>
-
 #include "dboreaddbjob.h"
 #include "dbobject.h"
 #include "dbovariable.h"
 #include "propertylist.h"
-//#include "DBTableColumn.h"
-//#include "DBSchemaManager.h"
-//#include "DBOVariableSet.h"
 #include "dbinterface.h"
-//#include "UnitManager.h"
-//#include "Unit.h"
 #include "buffer.h"
-//#include "DBSchema.h"
-//#include "MetaDBTable.h"
 #include "logger.h"
 
 DBOReadDBJob::DBOReadDBJob(DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause, const std::vector<std::string> &filtered_variables,
                            bool use_order, DBOVariable *order_variable, bool use_order_ascending, const std::string &limit_str, bool activate_key_search)
-: Job (db_interface), dbobject_(dbobject), read_list_(read_list), custom_filter_clause_ (custom_filter_clause), filtered_variables_(filtered_variables),
+: Job (), db_interface_(db_interface), dbobject_(dbobject), read_list_(read_list), custom_filter_clause_ (custom_filter_clause), filtered_variables_(filtered_variables),
   use_order_(use_order), order_variable_(order_variable), use_order_ascending_(use_order_ascending), limit_str_(limit_str), activate_key_search_(activate_key_search)
 {
 }

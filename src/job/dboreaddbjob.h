@@ -32,6 +32,7 @@
 
 class Buffer;
 class DBObject;
+class DBInterface;
 
 /**
  * @brief DBO reading job
@@ -56,6 +57,7 @@ public:
     DBOVariableSet &readList () { return read_list_; }
 
 protected:
+    DBInterface &db_interface_;
     DBObject &dbobject_;
     DBOVariableSet read_list_;
     std::string custom_filter_clause_;

@@ -25,10 +25,11 @@
 #ifndef FINALIZEDBOREADJOB_H_
 #define FINALIZEDBOREADJOB_H_
 
-#include "Job.h"
-#include "Global.h"
-#include "DBOVariableSet.h"
+#include "job.h"
+#include "global.h"
+#include "dbovariableset.h"
 
+class DBObject;
 class Buffer;
 
 /**
@@ -39,18 +40,17 @@ class Buffer;
 class FinalizeDBOReadJob : public Job
 {
 public:
-    FinalizeDBOReadJob(JobOrderer *orderer, boost::function<void (Job*)> done_function,
-            boost::function<void (Job*)> obsolete_function, Buffer *buffer, DBOVariableSet read_list);
+    FinalizeDBOReadJob (DBObject &dbobject, DBOVariableSet &read_list, std::shared_ptr<Buffer> buffer);
     virtual ~FinalizeDBOReadJob();
 
-    virtual void execute ();
+    virtual void run ();
 
-    Buffer *getBuffer () { assert (buffer_); return buffer_; }
+    std::shared_ptr<Buffer> buffer () { assert (buffer_); return buffer_; }
 
 protected:
-    DB_OBJECT_TYPE type_;
-    Buffer *buffer_;
+    DBObject &dbobject_;
     DBOVariableSet read_list_;
+    std::shared_ptr<Buffer> buffer_;
 };
 
 #endif /* FINALIZEDBOREADJOB_H_ */

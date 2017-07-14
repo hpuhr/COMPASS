@@ -29,8 +29,6 @@
 #include <QRunnable>
 #include <memory>
 
-class DBInterface;
-
 /**
  * @brief Encapsulates a work-package
  *
@@ -49,7 +47,7 @@ signals:
 
 public:
     /// @brief Constructor
-    Job(DBInterface &db_interface) : done_ (false), obsolete_(false), db_interface_(db_interface) { setAutoDelete(false); }
+    Job() : done_ (false), obsolete_(false) { setAutoDelete(false); }
     /// @brief Destructor
     virtual ~Job() {}
 
@@ -70,34 +68,8 @@ protected:
     bool done_;
     /// Obsolete flag
     bool obsolete_;
-    /// Database interface
-    DBInterface &db_interface_;
 
     virtual void setDone () { done_=true; }
 };
-
-//class DBInterface;
-
-/**
- * @brief Job specialization for database operations
- *
- * Was created to ensure that database jobs are performed in the correct order in one thread (performance gain
- * of multiple threads dubious).
- *
- * Requires a DBInterface instance, calls the done_function when completed or obsolete_function when aborted.
- */
-//class DBJob : public Job
-//{
-//    Q_OBJECT
-//public:
-//    /// @brief Constructor
-//    DBJob(DBInterface &db_interface) : Job(), db_interface_(db_interface) {}
-//    /// @brief Destructor
-//    virtual ~DBJob() {}
-
-//protected:
-//    /// Database interface
-//    DBInterface &db_interface_;
-//};
 
 #endif /* JOB_H_ */
