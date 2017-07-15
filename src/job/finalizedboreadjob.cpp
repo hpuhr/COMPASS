@@ -58,13 +58,12 @@ void FinalizeDBOReadJob::run ()
         assert (properties.hasProperty(column.name()));
         const Property &property = properties.get(column.name());
         assert (property.dataType() == var_it->dataType());
-        if (column.unit() != var_it->unitUnit())
-            loginf << "FinalizeDBOReadJob UGA " << var_it->name() << " unit " << column.unit() << " " << var_it->unitUnit();
-        if (column.quantity() != var_it->unitDimension())
-            loginf << "FinalizeDBOReadJob UGA2 " << var_it->name() << " unit " << column.quantity() << " " << var_it->unitDimension();
+        if (column.dimension() != var_it->dimension())
+            loginf << "FinalizeDBOReadJob UGA " << var_it->name() << " dimension " << column.dimension() << " " << var_it->dimension();
+        if (column.unit() != var_it->unit())
+            loginf << "FinalizeDBOReadJob UGA2 " << var_it->name() << " unit " << column.unit() << " " << var_it->unit();
     }
 
-    QThread::currentThread()->msleep(50);
 
 //    assert (type != DBO_UNDEFINED);
 

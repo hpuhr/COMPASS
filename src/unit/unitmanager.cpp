@@ -16,7 +16,7 @@
  */
 
 #include "unitmanager.h"
-#include "quantity.h"
+#include "dimension.h"
 #include "logger.h"
 
 UnitManager::UnitManager()
@@ -27,18 +27,18 @@ UnitManager::UnitManager()
 
 UnitManager::~UnitManager()
 {
-  for (auto it : quantities_)
+  for (auto it : dimensions_)
     delete it.second;
-  quantities_.clear();
+  dimensions_.clear();
 }
 
 void UnitManager::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
-    if (class_id == "Quantity")
+    if (class_id == "Dimension")
     {
-        Quantity *quantity = new Quantity (class_id, instance_id, this);
-        assert (quantities_.find(quantity->getInstanceId()) == quantities_.end());
-        quantities_.insert (std::pair <std::string, Quantity*> (quantity->getInstanceId(), quantity));
+        Dimension *quantity = new Dimension (class_id, instance_id, this);
+        assert (dimensions_.find(quantity->getInstanceId()) == dimensions_.end());
+        dimensions_.insert (std::pair <std::string, Dimension*> (quantity->getInstanceId(), quantity));
     }
     else
         throw std::runtime_error ("UnitManager: generateSubConfigurable: unknown class_id "+class_id );
@@ -46,40 +46,40 @@ void UnitManager::generateSubConfigurable (const std::string &class_id, const st
 
 void UnitManager::checkSubConfigurables ()
 {
-    if (quantities_.count("Length") == 0)
+    if (dimensions_.count("Length") == 0)
     {
-        addNewSubConfiguration ("Quantity", "Length");
-        generateSubConfigurable("Quantity", "Length");
+        addNewSubConfiguration ("Dimension", "Length");
+        generateSubConfigurable("Dimension", "Length");
 
-        quantities_.at("Length")->addUnit ("Meter", 1.0, "");
-        quantities_.at("Length")->addUnit ("Kilometer", 1.0/1000.0, "");
-        quantities_.at("Length")->addUnit ("Mile", 1.0/1609.344, "");
-        quantities_.at("Length")->addUnit ("Nautical Mile", 1.0/1852.0, "");
+        dimensions_.at("Length")->addUnit ("Meter", 1.0, "");
+        dimensions_.at("Length")->addUnit ("Kilometer", 1.0/1000.0, "");
+        dimensions_.at("Length")->addUnit ("Mile", 1.0/1609.344, "");
+        dimensions_.at("Length")->addUnit ("Nautical Mile", 1.0/1852.0, "");
     }
 
-    if (quantities_.count("Time") == 0)
+    if (dimensions_.count("Time") == 0)
     {
-        addNewSubConfiguration ("Quantity", "Time");
-        generateSubConfigurable("Quantity", "Time");
+        addNewSubConfiguration ("Dimension", "Time");
+        generateSubConfigurable("Dimension", "Time");
 
-        quantities_.at("Time")->addUnit ("Second", 1.0, "");
-        quantities_.at("Time")->addUnit ("Minute", 1.0/60.0, "");
-        quantities_.at("Time")->addUnit ("Hour", 1.0/3600.0, "");
-        quantities_.at("Time")->addUnit ("MilliSeconds", 1000.0, "");
-        quantities_.at("Time")->addUnit ("V7Time", 128.0, "");
-        quantities_.at("Time")->addUnit ("V6Time", 4096.0, "");
+        dimensions_.at("Time")->addUnit ("Second", 1.0, "");
+        dimensions_.at("Time")->addUnit ("Minute", 1.0/60.0, "");
+        dimensions_.at("Time")->addUnit ("Hour", 1.0/3600.0, "");
+        dimensions_.at("Time")->addUnit ("MilliSeconds", 1000.0, "");
+        dimensions_.at("Time")->addUnit ("V7Time", 128.0, "");
+        dimensions_.at("Time")->addUnit ("V6Time", 4096.0, "");
     }
 
-    if (quantities_.count("Position") == 0)
+    if (dimensions_.count("Position") == 0)
     {
-        addNewSubConfiguration ("Quantity", "Position");
-        generateSubConfigurable("Quantity", "Position");
+        addNewSubConfiguration ("Dimension", "Position");
+        generateSubConfigurable("Dimension", "Position");
 
-        quantities_.at("Position")->addUnit ("Meter", 1.0, "");
-        quantities_.at("Position")->addUnit ("Kilometer", 1.0/1000.0, "");
-        quantities_.at("Position")->addUnit ("Mile", 1.0/1609.344, "");
-        quantities_.at("Position")->addUnit ("Nautical Mile", 1.0/1852.0, "");
-        quantities_.at("Position")->addUnit ("WGS 84", 0, "");
+        dimensions_.at("Position")->addUnit ("Meter", 1.0, "");
+        dimensions_.at("Position")->addUnit ("Kilometer", 1.0/1000.0, "");
+        dimensions_.at("Position")->addUnit ("Mile", 1.0/1609.344, "");
+        dimensions_.at("Position")->addUnit ("Nautical Mile", 1.0/1852.0, "");
+        dimensions_.at("Position")->addUnit ("WGS 84", 0, "");
     }
 }
 

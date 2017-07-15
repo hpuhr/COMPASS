@@ -54,8 +54,8 @@ DBOVariable::DBOVariable(const std::string &class_id, const std::string &instanc
     registerParameter ("description", &description_, "");
     registerParameter ("data_type_str", &data_type_str_, "");
     registerParameter ("representation", &representation_int_, R_STANDARD);
-    registerParameter ("unit_dimension", &unit_dimension_, "");
-    registerParameter ("unit_unit", &unit_unit_, "");
+    registerParameter ("dimension", &dimension_, "");
+    registerParameter ("unit", &unit_, "");
 
     assert (name_.size() > 0);
     assert (data_type_str_.size() > 0);

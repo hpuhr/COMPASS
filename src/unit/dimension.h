@@ -5,12 +5,12 @@
 
 class Unit;
 
-class Quantity : public Configurable
+class Dimension : public Configurable
 {
 public:
-    Quantity(const std::string &class_id, const std::string &instance_id, Configurable *parent);
+    Dimension(const std::string &class_id, const std::string &instance_id, Configurable *parent);
     /// @brief Destructor
-    virtual ~Quantity();
+    virtual ~Dimension();
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 

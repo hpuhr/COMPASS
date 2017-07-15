@@ -18,22 +18,21 @@
 #include "unitselectionwidget.h"
 #include "unitmanager.h"
 #include "unit.h"
-#include "quantity.h"
+#include "dimension.h"
 #include "logger.h"
 
-UnitSelectionWidget::UnitSelectionWidget(std::string &quantity, std::string &unit)
- : QPushButton (),quantity_(quantity), unit_(unit)
+UnitSelectionWidget::UnitSelectionWidget(std::string &dimension, std::string &unit)
+ : QPushButton (), dimension_(dimension), unit_(unit)
 {
   logdbg  << "UnitSelectionWidget: constructor";
 
-  if (quantity_.size() > 0)
-    setText (QString::fromStdString(quantity_)+":"+QString::fromStdString(unit_));
+  if (dimension_.size() > 0)
+    setText (QString::fromStdString(dimension_)+":"+QString::fromStdString(unit_));
 
   createMenu();
 
   connect( &menu_, SIGNAL(triggered(QAction*)), this, SLOT(triggerSlot(QAction*)));
   connect( this, SIGNAL(clicked()), this, SLOT(showMenuSlot()) );
-
 }
 
 UnitSelectionWidget::~UnitSelectionWidget()
@@ -45,7 +44,7 @@ void UnitSelectionWidget::createMenu()
   logdbg  << "UnitSelectionWidget: createMenu";
   menu_.addAction( "" );
 
-  for (auto it : UnitManager::instance().quantities())
+  for (auto it : UnitManager::instance().dimensions())
   {
     const std::map <std::string, Unit*> &units = it.second->units();
 
@@ -77,21 +76,21 @@ void UnitSelectionWidget::showMenuSlot()
 void UnitSelectionWidget::triggerSlot( QAction* action )
 {
   QVariantMap vmap = action->data().toMap();
-  std::string quantity, unit;
+  std::string dimension, unit;
 
   if (action->text().size() != 0)
   {
-    quantity = vmap.begin().value().toString().toStdString();
+    dimension = vmap.begin().value().toString().toStdString();
     unit = vmap.begin().key().toStdString();
   }
 
-  loginf  << "UnitSelectionWidget: triggerSlot: got quantity " << quantity << " unit " << unit;
+  loginf  << "UnitSelectionWidget: triggerSlot: got dimension " << dimension << " unit " << unit;
 
-  quantity_ = quantity;
+  dimension_ = dimension;
   unit_ = unit;
 
-  if (quantity_.size() > 0)
-    setText (QString::fromStdString(quantity)+":"+QString::fromStdString(unit_));
+  if (dimension_.size() > 0)
+    setText (QString::fromStdString(dimension_)+":"+QString::fromStdString(unit_));
   else
       setText ("");
 

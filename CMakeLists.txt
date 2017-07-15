@@ -286,7 +286,7 @@ set ( atsdb_HDRS
     src/view/osgview/osgviewwidget.h
     src/unit/unit.h
     src/unit/unitmanager.h
-    src/unit/quantity.h
+    src/unit/dimension.h
     src/util/config.h
     src/util/global.h
     #        src/util/data.h
@@ -417,7 +417,7 @@ set ( atsdb_SRCS
     #        src/transform/calculateposition2d.cpp
     #        src/transform/calculatelines.cpp
     #        src/transform/calculatestyle.cpp
-    src/unit/quantity.cpp
+    src/unit/dimension.cpp
     src/unit/unitselectionwidget.cpp
     src/unit/unitmanager.cpp
     src/util/config.cpp

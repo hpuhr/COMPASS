@@ -21,7 +21,7 @@
 #include "configurable.h"
 #include "singleton.h"
 
-class Quantity;
+class Dimension;
 
 /**
  * @brief Holds and manages all units
@@ -34,18 +34,18 @@ public:
     /// @brief Destructor
     virtual ~UnitManager();
 
-    bool hasQuanity (const std::string &name) { return quantities_.count(name) > 0; }
+    bool hasDimension (const std::string &name) { return dimensions_.count(name) > 0; }
 
     /// @brief Returns unit with a given name
-    const Quantity &quanity (const std::string &name) { return *quantities_.at(name); }
+    const Dimension &dimension (const std::string &name) { return *dimensions_.at(name); }
     /// @brief Return container with all units
-    const std::map <std::string, Quantity*> &quantities () { return quantities_; }
+    const std::map <std::string, Dimension*> &dimensions () { return dimensions_; }
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
 protected:
     /// Container with all units (unit name (length, time) -> unit)
-    std::map <std::string, Quantity*> quantities_;
+    std::map <std::string, Dimension*> dimensions_;
 
     virtual void checkSubConfigurables ();
 

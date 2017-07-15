@@ -37,13 +37,14 @@ protected slots:
 
 public:
     /// @brief Constructor TODO HACK references directly used
-    UnitSelectionWidget (std::string &quantity, std::string &unit);
+    UnitSelectionWidget (std::string &dimension, std::string &unit);
     /// @brief Destructor
     virtual ~UnitSelectionWidget();
 
 protected:
     /// Unit dimension reference
-    std::string &quantity_;
+    std::string &dimension_;
+
     /// Unit unit reference
     std::string &unit_;
 

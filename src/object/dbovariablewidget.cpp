@@ -102,7 +102,7 @@ DBOVariableWidget::DBOVariableWidget(DBOVariable &variable, QWidget *parent, Qt:
     QLabel *unit_label = new QLabel ("Unit");
     properties_layout->addWidget(unit_label, row, 0);
 
-    unit_sel_ = new UnitSelectionWidget (variable_.unitDimension(), variable_.unitUnit());
+    unit_sel_ = new UnitSelectionWidget (variable_.dimension(), variable_.unit());
     properties_layout->addWidget (unit_sel_, row, 1);
     row++;
 

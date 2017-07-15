@@ -57,7 +57,7 @@ DBTableColumn::DBTableColumn(const std::string &class_id, const std::string &ins
   registerParameter ("type", &type_, "");
   registerParameter ("is_key", &is_key_, false);
   registerParameter ("comment", &comment_, "");
-  registerParameter ("quanitiy", &quanitiy_, "");
+  registerParameter ("dimension", &dimension_, "");
   registerParameter ("unit", &unit_, "");
   registerParameter ("special_null", &special_null_, "");
 
@@ -88,7 +88,7 @@ UnitSelectionWidget *DBTableColumn::unitWidget ()
 {
     if (!widget_)
     {
-        widget_ = new UnitSelectionWidget (quanitiy_, unit_);
+        widget_ = new UnitSelectionWidget (dimension_, unit_);
         assert (widget_);
     }
 

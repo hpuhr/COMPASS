@@ -46,7 +46,7 @@
 //#include "DBSchema.h"
 //#include "DBTable.h"
 //#include "DBTableColumn.h"
-#include "quantity.h"
+#include "dimension.h"
 #include "unit.h"
 #include "unitmanager.h"
 #include "dbtableinfo.h"

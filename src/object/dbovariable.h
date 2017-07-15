@@ -177,11 +177,11 @@ public:
   const std::string &currentVariableName ();
 
   /// @brief Returns if unit information is present
-  bool hasUnit () { return unit_dimension_.size() != 0;}
+  bool hasUnit () { return dimension_.size() != 0;}
   /// @brief Returns unit dimension
-  std::string &unitDimension () { return unit_dimension_; }
+  std::string &dimension () { return dimension_; }
   /// @brief  Returns unit unit
-  std::string &unitUnit () { return unit_unit_; }
+  std::string &unit () { return unit_; }
 
   DBObject &dbObject () const { return dbo_parent_; }
 
@@ -228,9 +228,9 @@ protected:
   //std::vector <DBOVariable*> parent_variables_;
 
   /// Unit dimension such as time
-  std::string unit_dimension_;
+  std::string dimension_;
   /// Unit unit such as seconds
-  std::string unit_unit_;
+  std::string unit_;
 
   /// Container with schema identified->schema-variable definitions
   std::map <std::string, DBOSchemaVariableDefinition*> schema_variables_;

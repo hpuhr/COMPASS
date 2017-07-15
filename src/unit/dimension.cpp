@@ -1,21 +1,21 @@
 #include "unit.h"
-#include "quantity.h"
+#include "dimension.h"
 
 
-Quantity::Quantity(const std::string &class_id, const std::string &instance_id, Configurable *parent)
+Dimension::Dimension(const std::string &class_id, const std::string &instance_id, Configurable *parent)
     : Configurable (class_id, instance_id, parent)
 {
     createSubConfigurables();
 }
 
-Quantity::~Quantity()
+Dimension::~Dimension()
 {
     for (auto it : units_)
         delete it.second;
     units_.clear();
 }
 
-void Quantity::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
+void Dimension::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
     if (class_id == "Unit")
     {
@@ -28,7 +28,7 @@ void Quantity::generateSubConfigurable (const std::string &class_id, const std::
         throw std::runtime_error ("UnitManager: generateSubConfigurable: unknown class_id "+class_id );
 }
 
-void Quantity::addUnit (const std::string &name, double factor, const std::string &definition)
+void Dimension::addUnit (const std::string &name, double factor, const std::string &definition)
 {
     Configuration &config = addNewSubConfiguration ("Unit", name);
     config.addParameterDouble ("factor", factor);
@@ -36,7 +36,7 @@ void Quantity::addUnit (const std::string &name, double factor, const std::strin
     generateSubConfigurable("Unit", name);
 }
 
-double Quantity::getFactor (const std::string &unit_source, const std::string &unit_destination)
+double Dimension::getFactor (const std::string &unit_source, const std::string &unit_destination)
 {
   assert (units_.find(unit_source) != units_.end());
   assert (units_.find(unit_destination) != units_.end());

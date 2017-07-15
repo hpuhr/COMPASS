@@ -19,7 +19,7 @@
 #define UNIT_H_
 
 #include "configurable.h"
-#include "quantity.h"
+#include "dimension.h"
 
 #include <string>
 #include <map>
@@ -33,7 +33,7 @@ class Unit : public Configurable
 {
 public:
   /// @brief Constructor with a name
-  Unit(const std::string &class_id, const std::string &instance_id, Quantity &parent)
+  Unit(const std::string &class_id, const std::string &instance_id, Dimension &parent)
       : Configurable (class_id, instance_id, &parent) {}
   /// @brief Destructor
   virtual ~Unit() {}

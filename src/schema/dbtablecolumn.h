@@ -64,8 +64,8 @@ public:
   void comment (const std::string &comment) { comment_ = comment; }
   const std::string &comment () const { return comment_; }
 
-  /// @brief Returns quanity contained in the column
-  const std::string &quantity () const { return quanitiy_; }
+  /// @brief Returns dimension contained in the column
+  const std::string &dimension () const { return dimension_; }
   /// @brief Returns unit
   const std::string &unit () const { return unit_; }
 
@@ -90,7 +90,7 @@ protected:
   /// Data type
   std::string comment_;
   /// Unit dimension
-  std::string quanitiy_;
+  std::string dimension_;
   /// Unit
   std::string unit_;
   /// Special value signifying null value

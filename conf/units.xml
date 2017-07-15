@@ -1,5 +1,5 @@
 <Configuration class_id="UnitManager" instance_id="UnitManager0">
-    <Configuration class_id="Quantity" instance_id="Length">
+    <Configuration class_id="Dimension" instance_id="Length">
         <Configuration class_id="Unit" instance_id="Kilometer">
             <ParameterDouble factor="0.001000000000"/>
             <ParameterString definition=""/>
@@ -17,7 +17,7 @@
             <ParameterString definition=""/>
         </Configuration>
     </Configuration>
-    <Configuration class_id="Quantity" instance_id="Position">
+    <Configuration class_id="Dimension" instance_id="Position">
         <Configuration class_id="Unit" instance_id="Kilometer">
             <ParameterDouble factor="0.001000000000"/>
             <ParameterString definition=""/>
@@ -39,7 +39,7 @@
             <ParameterString definition=""/>
         </Configuration>
     </Configuration>
-    <Configuration class_id="Quantity" instance_id="Time">
+    <Configuration class_id="Dimension" instance_id="Time">
         <Configuration class_id="Unit" instance_id="Hour">
             <ParameterDouble factor="0.000277777778"/>
             <ParameterString definition=""/>

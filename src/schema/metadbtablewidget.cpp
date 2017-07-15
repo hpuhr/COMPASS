@@ -480,7 +480,7 @@ void MetaDBTableWidget::updateColumnsGridSlot ()
         QLabel *key = new QLabel (QString::number(it.second.isKey()));
         column_grid_->addWidget (key, row, 2);
 
-        QLabel *unit = new QLabel ((it.second.quantity()+":"+it.second.unit()).c_str());
+        QLabel *unit = new QLabel ((it.second.unit()+":"+it.second.dimension()).c_str());
         column_grid_->addWidget (unit, row, 3);
 
         QLabel *edit = new QLabel (it.second.specialNull().c_str());
