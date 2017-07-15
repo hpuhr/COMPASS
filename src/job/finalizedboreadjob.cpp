@@ -47,7 +47,7 @@ FinalizeDBOReadJob::~FinalizeDBOReadJob()
 
 void FinalizeDBOReadJob::run ()
 {
-    loginf << "FinalizeDBOReadJob: run";
+    logdbg << "FinalizeDBOReadJob: run";
 
     std::vector <DBOVariable*> &variables = read_list_.getSet ();
     const PropertyList &properties = buffer_->properties();
@@ -59,95 +59,83 @@ void FinalizeDBOReadJob::run ()
         const Property &property = properties.get(column.name());
         assert (property.dataType() == var_it->dataType());
         if (column.dimension() != var_it->dimension())
-            loginf << "FinalizeDBOReadJob UGA " << var_it->name() << " dimension " << column.dimension() << " " << var_it->dimension();
-        if (column.unit() != var_it->unit())
-            loginf << "FinalizeDBOReadJob UGA2 " << var_it->name() << " unit " << column.unit() << " " << var_it->unit();
+            logwrn << "FinalizeDBOReadJob: run: variable " << var_it->name() << " has differing dimensions " << column.dimension() << " " << var_it->dimension();
+        else if (column.unit() != var_it->unit())
+        {
+            logdbg << "FinalizeDBOReadJob: run: variable " << var_it->name() << " of same dimension has different units " << column.unit() << " " << var_it->unit();
+
+            const Dimension &dimension = UnitManager::instance().dimension (var_it->dimension());
+            double factor = dimension.getFactor (column.unit(), var_it->unit());
+            logdbg  << "FinalizeDBOReadJob: run: correct unit transformation with factor " << factor;
+
+            switch (property.dataType())
+            {
+            case PropertyDataType::BOOL:
+            {
+                ArrayListTemplate<bool> &array_list = buffer_->getBool (property.name());
+                logwrn << "FinalizeDBOReadJob: run: double multiplication of boolean variable " << var_it->name();
+                array_list *= factor;
+                break;
+            }
+            case PropertyDataType::CHAR:
+            {
+                ArrayListTemplate<char> &array_list = buffer_->getChar (property.name());
+                logwrn << "FinalizeDBOReadJob: run: double multiplication of char variable " << var_it->name();
+                array_list *= factor;
+                break;
+            }
+            case PropertyDataType::UCHAR:
+            {
+                ArrayListTemplate<unsigned char> &array_list = buffer_->getUChar (property.name());
+                logwrn << "FinalizeDBOReadJob: run: double multiplication of unsigned char variable " << var_it->name();
+                array_list *= factor;
+                break;
+            }
+            case PropertyDataType::INT:
+            {
+                ArrayListTemplate<int> &array_list = buffer_->getInt (property.name());
+                array_list *= factor;
+                break;
+            }
+            case PropertyDataType::UINT:
+            {
+                ArrayListTemplate<unsigned int> &array_list = buffer_->getUInt (property.name());
+                array_list *= factor;
+                break;
+            }
+            case PropertyDataType::LONGINT:
+            {
+                ArrayListTemplate<long> &array_list = buffer_->getLongInt(property.name());
+                array_list *= factor;
+                break;
+            }
+            case PropertyDataType::ULONGINT:
+            {
+                ArrayListTemplate<unsigned long> &array_list = buffer_->getULongInt(property.name());
+                array_list *= factor;
+                break;
+            }
+            case PropertyDataType::FLOAT:
+            {
+                ArrayListTemplate<float> &array_list = buffer_->getFloat (property.name());
+                array_list *= factor;
+                break;
+            }
+            case PropertyDataType::DOUBLE:
+            {
+                ArrayListTemplate<double> &array_list = buffer_->getDouble (property.name());
+                array_list *= factor;
+                break;
+            }
+            case PropertyDataType::STRING:
+                logerr << "FinalizeDBOReadJob: run: unit transformation for string variable " << var_it->name() << " impossible";
+                break;
+            default:
+                logerr  <<  "FinalizeDBOReadJob: run: unknown property type " << Property::asString(property.dataType());
+                throw std::runtime_error ("Buffer: addProperty: unknown property type "+Property::asString(property.dataType()));
+            }
+        }
     }
-
-
-//    assert (type != DBO_UNDEFINED);
-
-//    DBOVariableSet *type_set = read_list.getFor (type);
-//    std::vector <DBOVariable*> &variables =type_set->getSet();
-//    std::vector <DBOVariable*>::iterator it;
-
-//    PropertyList *buffer_list = buffer->getPropertyList ();
-
-//    logdbg << "Util: finalizeDBData: vars " << buffer_list->getNumProperties();
-
-//    for (it = variables.begin(); it != variables.end(); it++)
-//    {
-//        DBOVariable *variable = *it;
-
-//        assert (!variable->isMetaVariable());
-
-//        std::string meta_tablename = variable->getCurrentMetaTable ();
-//        std::string table_varname = variable->getCurrentVariableName ();
-
-//        DBTableColumn *table_column = DBSchemaManager::getInstance().getCurrentSchema ()->getMetaTable(meta_tablename)->getTableColumn(table_varname);
-
-//        logdbg  << "Util: finalizeDBData: type " << type << " variable " << table_column->getName();
-//        if (!buffer_list->hasProperty(table_column->getName()))
-//        {
-//            logwrn  << "Util: finalizeDBData: variable information not synchronized";
-//            continue;
-//        }
-
-//        unsigned col = buffer_list->getPropertyIndex(table_column->getName());
-//        PROPERTY_DATA_TYPE data_type = (PROPERTY_DATA_TYPE) buffer->getPropertyList()->getProperty(col)->data_type_int_;
-
-//        if (table_column->hasSpecialNull())
-//        {
-//            logdbg << "Util: finalizeDBData: setting special null '" << table_column->getSpecialNull()
-//                   << "' col " << col;
-//            setSpecialNullsNan (buffer, col, data_type, table_column->getSpecialNull());
-//        }
-
-//        if (variable->hasUnit () || table_column->hasUnit())
-//        {
-//            logdbg  << "Util: finalizeDBData: unit var type " << variable->getDBOType() << " dim '" << variable->getUnitDimension() << "'";
-//            if (variable->hasUnit () != table_column->hasUnit())
-//            {
-//                logerr << "Util: finalizeDBData: unit transformation inconsistent: var " << variable->getName () << " has unit " << variable->hasUnit ()
-//                       << " table column " << table_column->getName() << " has unit " << table_column->hasUnit();
-//                continue;
-//            }
-
-//            if (variable->getUnitDimension().compare(table_column->getUnitDimension()) != 0)
-//            {
-//                logerr << "Util: finalizeDBData: unit transformation inconsistent: var " << variable->getName () << " has dimension " << variable->getUnitDimension ()
-//                       << " table column " << table_column->getName() << " has dimension " << table_column->getUnitDimension();
-//                continue;
-//            }
-
-//            Unit *unit = UnitManager::getInstance().getUnit (variable->getUnitDimension());
-//            double factor = unit->getFactor (table_column->getUnitUnit(), variable->getUnitUnit());
-//            logdbg  << "Util: finalizeDBData: correct unit transformation with factor " << factor;
-
-//            buffer->setIndex( 0 );
-
-//            std::vector<void*>* output_adresses;
-//            unsigned int cnt;
-//            unsigned n = buffer->getSize();
-
-//            for( cnt=0; cnt<n; ++cnt )
-//            {
-//                if( cnt != 0 )
-//                {
-//                    assert (buffer);
-//                    buffer->incrementIndex();
-//                }
-
-//                output_adresses = buffer->getAdresses();
-
-//                if (isNan(data_type, output_adresses->at( col )))
-//                    continue;
-
-//                multiplyData(output_adresses->at( col ), data_type, factor);
-//            }
-//        }
-//    }
-//    delete type_set;
 
     done_=true;
 }

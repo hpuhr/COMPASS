@@ -190,6 +190,24 @@ public:
         logdbg << "ArrayListTemplate: addData: end data size " << data_.size() << " none flags size " << none_flags_.size() << " size " << size_ << " max " << max_size_;
     }
 
+    ArrayListTemplate<T>& operator*=(double factor)
+    {
+        typename std::vector < std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > >::iterator it;
+
+        unsigned list_cnt=0;
+        for (it = data_.begin(); it != data_.end(); it++)
+        {
+            for (unsigned int cnt=0; cnt < BUFFER_ARRAY_SIZE; cnt++)
+            {
+                if (!(*none_flags_[list_cnt])[cnt]) // not for none
+                    it->get()->at(cnt) *= factor;
+            }
+            list_cnt++;
+        }
+
+        return *this;
+    }
+
 protected:
     /// Data containers
     std::vector < std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > > data_;
@@ -208,5 +226,22 @@ protected:
         //logdbg << "ArrayListTemplate: allocateNewArray: added new array current max size " << max_size_;
     }
 };
+
+//template <std::string> std::string X<c1>::getName() {
+//   return c1::getName();
+//}
+
+//template<>
+//struct ArrayListTemplate<std::string>
+//{
+//    ArrayListTemplate<std::string>& operator*=(double factor)
+//    {
+//        throw std::runtime_error ("ArrayListTemplate: multiplication operator impossible for strings");
+//    }
+
+//};
+
+
+//template<typename T> ArrayListTemplate<T> operator* (T k, const Matrix<T> &m) { return m * k; }
 
 #endif /* ARRAYLIST_H_ */

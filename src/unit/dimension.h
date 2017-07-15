@@ -16,7 +16,7 @@ public:
 
     void addUnit (const std::string &name, double factor, const std::string &definition);
     /// @brief Returns factor from one unit to another
-    double getFactor (const std::string &unit_source, const std::string &unit_destination);
+    double getFactor (const std::string &unit_source, const std::string &unit_destination) const;
 
     const std::map <std::string, Unit*> &units () const { return units_; }
 

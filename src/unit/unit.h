@@ -20,6 +20,7 @@
 
 #include "configurable.h"
 #include "dimension.h"
+#include "logger.h"
 
 #include <string>
 #include <map>
@@ -34,7 +35,13 @@ class Unit : public Configurable
 public:
   /// @brief Constructor with a name
   Unit(const std::string &class_id, const std::string &instance_id, Dimension &parent)
-      : Configurable (class_id, instance_id, &parent) {}
+      : Configurable (class_id, instance_id, &parent)
+  {
+      registerParameter("definition", &definition_, "");
+      registerParameter("factor", &factor_, 1.0);
+
+      logdbg << "Unit: constructor: dimension " << parent.getInstanceId() << " unit " << instance_id << " factor " << factor_;
+  }
   /// @brief Destructor
   virtual ~Unit() {}
 

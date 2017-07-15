@@ -48,7 +48,6 @@ size_t ArrayListBase::maximumSize ()
 
 void ArrayListBase::setAllNone()
 {
-
     for (auto it : none_flags_)
         for (unsigned int cnt=0; cnt < BUFFER_ARRAY_SIZE; cnt++)
             (*it)[cnt] = true;
@@ -94,3 +93,11 @@ void ArrayListBase::unsetNone (size_t index)
 
     assert (index < size_);    (*none_flags_[index/BUFFER_ARRAY_SIZE])[index%BUFFER_ARRAY_SIZE] = false;
 }
+
+//template <class T>
+//ArrayListTemplate<T>& ArrayListTemplate<T>::operator*=(double factor)
+//{
+//    //DO STUFF
+//    return *this;
+//}
+

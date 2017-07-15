@@ -36,12 +36,14 @@ void Dimension::addUnit (const std::string &name, double factor, const std::stri
     generateSubConfigurable("Unit", name);
 }
 
-double Dimension::getFactor (const std::string &unit_source, const std::string &unit_destination)
+double Dimension::getFactor (const std::string &unit_source, const std::string &unit_destination) const
 {
   assert (units_.find(unit_source) != units_.end());
   assert (units_.find(unit_destination) != units_.end());
   double factor = 1.0;
+  logdbg << "Dimension: getFactor: src factor " << units_.at(unit_source)->factor();
   factor /= units_.at(unit_source)->factor();
+  logdbg << "Dimension: getFactor: dest factor " << units_.at(unit_destination)->factor();
   factor *= units_.at(unit_destination)->factor();
   return factor;
 }
