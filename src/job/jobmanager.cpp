@@ -93,8 +93,7 @@ void JobManager::addJob (std::shared_ptr<Job> job)
 
     mutex_.unlock();
 
-    if (widget_)
-        widget_->updateSlot();
+    updateWidget();
 }
 
 void JobManager::addDBJob (std::shared_ptr<Job> job)
@@ -105,8 +104,7 @@ void JobManager::addDBJob (std::shared_ptr<Job> job)
 
     mutex_.unlock();
 
-    if (widget_)
-        widget_->updateSlot();
+    updateWidget();
 
     emit databaseBusy();
 }
@@ -135,8 +133,7 @@ void JobManager::cancelJob (std::shared_ptr<Job> job)
 
     mutex_.unlock();
 
-    if (widget_)
-        widget_->updateSlot();
+    updateWidget();
 }
 
 bool JobManager::noJobs ()
@@ -159,6 +156,7 @@ void JobManager::run()
         mutex_.lock();
 
         bool changed=false;
+        bool last_one=false;
 
         if (jobs_.size() > 0 || active_db_job_ || queued_db_jobs_.size() > 0)
         {
@@ -183,6 +181,7 @@ void JobManager::run()
                 logdbg << "JobManager: flushFinishedJobs: flushing done job";
                 current->emitDone();
 
+                last_one = jobs_.size() == 0;
             }
 
             if (active_db_job_)
@@ -200,6 +199,7 @@ void JobManager::run()
                     active_db_job_->emitDone();
                     active_db_job_ = nullptr;
                     changed = true;
+                    last_one = true;
                 }
             }
 
@@ -226,8 +226,8 @@ void JobManager::run()
 
         mutex_.unlock();
 
-        if (changed && widget_)
-            widget_->updateSlot();
+        if (changed)
+            updateWidget(last_one);
 
         if (stop_requested_)
             break;
@@ -241,6 +241,7 @@ JobManagerWidget *JobManager::widget()
     if (!widget_)
     {
         widget_ = new JobManagerWidget (*this);
+        last_update_time_ = boost::posix_time::microsec_clock::local_time();
     }
 
     assert (widget_);
@@ -263,4 +264,19 @@ unsigned int JobManager::numDBJobs ()
 int JobManager::numThreads ()
 {
     return QThreadPool::globalInstance()->activeThreadCount();
+}
+
+void JobManager::updateWidget (bool really)
+{
+    if (widget_)
+    {
+        boost::posix_time::ptime current_time = boost::posix_time::microsec_clock::local_time();
+        boost::posix_time::time_duration diff = current_time - last_update_time_;
+
+        if (diff.total_milliseconds() > 500 || really)
+        {
+            widget_->updateSlot();
+            last_update_time_=current_time;
+        }
+    }
 }

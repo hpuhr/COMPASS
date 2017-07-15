@@ -27,6 +27,7 @@
 
 #ifndef Q_MOC_RUN
 #include <boost/thread/mutex.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #endif
 
 #include <list>
@@ -98,6 +99,9 @@ protected:
 
     JobManagerWidget *widget_;
 
+    boost::posix_time::ptime last_update_time_;
+
+    void updateWidget (bool really=false);
 private:
     void run ();
 

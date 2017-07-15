@@ -136,6 +136,7 @@ void FinalizeDBOReadJob::run ()
             }
         }
     }
+    //QThread::currentThread()->msleep(500);
 
     done_=true;
 }

@@ -80,6 +80,8 @@ JobManagerWidget::~JobManagerWidget()
 
 void JobManagerWidget::updateSlot ()
 {
+    logdbg << "JobManagerWidget: updateSlot";
+
     assert (num_dbjobs_label_);
     assert (num_jobs_label_);
     assert (num_threads_label_);
