@@ -49,7 +49,7 @@
  * Registers parameters, creates sub configurables
  */
 DBObject::DBObject(std::string class_id, std::string instance_id, Configurable *parent)
-    : Configurable (class_id, instance_id, parent), is_loadable_(false), loading_wanted_(true), count_(0), current_meta_table_(nullptr), variables_checked_(false),
+    : Configurable (class_id, instance_id, parent), is_loadable_(false), loading_wanted_(true), count_(0), data_(nullptr), current_meta_table_(nullptr), variables_checked_(false),
       has_active_data_sources_info_(false), widget_(nullptr), info_widget_(nullptr)
 {
     registerParameter ("name" , &name_, "Undefined");
@@ -335,6 +335,8 @@ std::string DBObject::status ()
             return "Loading";
         else
             return "Queued";
+    else if (finalize_jobs_.size() > 0)
+        return "Post-processing";
     else
         return "Idle";
 
@@ -385,8 +387,11 @@ void DBObject::load (DBOVariableSet &read_set, bool use_filters, bool use_order,
         JobManager::instance().cancelJob(read_job_);
         read_job_ = nullptr;
     }
+    read_job_data_.clear();
 
-    //read_job_data_.clear();
+    for (auto job_it : finalize_jobs_)
+        JobManager::instance().cancelJob(job_it);
+    finalize_jobs_.clear();
 
     if (data_)
         data_ = nullptr;
@@ -406,9 +411,9 @@ void DBObject::load (DBOVariableSet &read_set, bool use_filters, bool use_order,
                                                use_order_ascending, limit_str, false);
 
     read_job_ = std::shared_ptr<DBOReadDBJob> (read_job);
-    connect (read_job, SIGNAL(intermediateSignal(std::shared_ptr<Buffer>)), this, SLOT(readJobIntermediateSlot(std::shared_ptr<Buffer>)));
-    connect (read_job, SIGNAL(obsoleteSignal()), this, SLOT(readJobObsoleteSlot()));
-    connect (read_job, SIGNAL(doneSignal()), this, SLOT(readJobDoneSlot()));
+    connect (read_job, SIGNAL(intermediateSignal(std::shared_ptr<Buffer>)), this, SLOT(readJobIntermediateSlot(std::shared_ptr<Buffer>)), Qt::QueuedConnection);
+    connect (read_job, SIGNAL(obsoleteSignal()), this, SLOT(readJobObsoleteSlot()), Qt::QueuedConnection);
+    connect (read_job, SIGNAL(doneSignal()), this, SLOT(readJobDoneSlot()), Qt::QueuedConnection);
 
     JobManager::instance().addDBJob(read_job_);
 
@@ -443,10 +448,13 @@ void DBObject::readJobIntermediateSlot (std::shared_ptr<Buffer> buffer)
 
     logdbg << "DBObject: " << name_ << " readJobIntermediateSlot: got buffer with size " << buffer->size();
 
+    read_job_data_.push_back(buffer);
+
     FinalizeDBOReadJob *job = new FinalizeDBOReadJob (*this, sender->readList(), buffer);
 
     std::shared_ptr<FinalizeDBOReadJob> job_ptr = std::shared_ptr<FinalizeDBOReadJob> (job);
-    connect (job, SIGNAL(doneSignal()), this, SLOT(finalizeReadJobDoneSlot()));
+    connect (job, SIGNAL(doneSignal()), this, SLOT(finalizeReadJobDoneSlot()), Qt::QueuedConnection);
+    finalize_jobs_.push_back(job_ptr);
 
     JobManager::instance().addJob(job_ptr);
 
@@ -459,7 +467,7 @@ void DBObject::readJobObsoleteSlot ()
 {
     loginf << "DBObject: " << name_ << " readJobObsoleteSlot";
     read_job_ = nullptr;
-    //read_job_data_.clear();
+    read_job_data_.clear();
 
     if (info_widget_)
         info_widget_->updateSlot();
@@ -480,7 +488,7 @@ void DBObject::readJobDoneSlot()
 
 void DBObject::finalizeReadJobDoneSlot()
 {
-    loginf << "DBObject: " << name_ << " finalizeReadJobDoneSlot";
+    logdbg << "DBObject: " << name_ << " finalizeReadJobDoneSlot";
 
     FinalizeDBOReadJob *sender = dynamic_cast <FinalizeDBOReadJob*> (QObject::sender());
 
@@ -492,7 +500,17 @@ void DBObject::finalizeReadJobDoneSlot()
 
     std::shared_ptr<Buffer> buffer = sender->buffer();
 
-    //read_job_data_.push_back(buffer);
+    bool found=false;
+    for (auto final_it : finalize_jobs_)
+    {
+        if (final_it.get() == sender)
+        {
+            finalize_jobs_.erase(std::find(finalize_jobs_.begin(), finalize_jobs_.end(), final_it));
+            found=true;
+            break;
+        }
+    }
+    assert (found);
 
     if (!data_)
         data_ = buffer;
@@ -528,7 +546,7 @@ void DBObject::databaseOpenedSlot ()
 
 bool DBObject::isLoading ()
 {
-    return read_job_ == nullptr;
+    return read_job_ == nullptr || finalize_jobs_.size() > 0;
 }
 
 //bool DBObject::wasLoadingPerformed ()

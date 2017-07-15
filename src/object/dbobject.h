@@ -267,8 +267,8 @@ protected:
     /// DBO is meta flag
     //bool is_meta_;
     std::shared_ptr <DBOReadDBJob> read_job_;
-    //std::vector <std::shared_ptr<Buffer>> read_job_data_;
-    std::shared_ptr <FinalizeDBOReadJob> finalize_job_;
+    std::vector <std::shared_ptr<Buffer>> read_job_data_;
+    std::vector <std::shared_ptr <FinalizeDBOReadJob>> finalize_jobs_;
 
     std::shared_ptr<Buffer> data_;
 

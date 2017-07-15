@@ -123,11 +123,15 @@ void JobManager::cancelJob (std::shared_ptr<Job> job)
 
     if (find(jobs_.begin(), jobs_.end(), job) != jobs_.end())
         jobs_.erase(find(jobs_.begin(), jobs_.end(), job));
-
-    if (active_db_job_ == job)
-        active_db_job_ = nullptr;
     else
-        queued_db_jobs_.erase(find(jobs_.begin(), jobs_.end(), job));
+    {
+        if (active_db_job_ == job)
+            active_db_job_ = nullptr;
+        else if (find(queued_db_jobs_.begin(), queued_db_jobs_.end(), job) != queued_db_jobs_.end())
+            queued_db_jobs_.erase(find(queued_db_jobs_.begin(), queued_db_jobs_.end(), job));
+        else
+            logwrn << "JobManager: cancelJob: unknown job was to be cancelled";
+    }
 
     mutex_.unlock();
 
@@ -176,7 +180,7 @@ void JobManager::run()
                     continue;
                 }
 
-                loginf << "JobManager: flushFinishedJobs: flushing done job";
+                logdbg << "JobManager: flushFinishedJobs: flushing done job";
                 current->emitDone();
 
             }

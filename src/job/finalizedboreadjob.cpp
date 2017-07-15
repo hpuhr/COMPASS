@@ -22,6 +22,8 @@
  *      Author: sk
  */
 
+#include <QThread>
+
 #include "finalizedboreadjob.h"
 #include "dbobject.h"
 #include "dbovariable.h"
@@ -45,7 +47,7 @@ FinalizeDBOReadJob::~FinalizeDBOReadJob()
 
 void FinalizeDBOReadJob::run ()
 {
-    logdbg << "FinalizeDBOReadJob: run";
+    loginf << "FinalizeDBOReadJob: run";
 
     std::vector <DBOVariable*> &variables = read_list_.getSet ();
     const PropertyList &properties = buffer_->properties();
@@ -61,6 +63,8 @@ void FinalizeDBOReadJob::run ()
         if (column.quantity() != var_it->unitDimension())
             loginf << "FinalizeDBOReadJob UGA2 " << var_it->name() << " unit " << column.quantity() << " " << var_it->unitDimension();
     }
+
+    QThread::currentThread()->msleep(50);
 
 //    assert (type != DBO_UNDEFINED);
 
