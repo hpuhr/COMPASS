@@ -367,7 +367,7 @@ void ATSDB::shutdown ()
 //            sleep(1);
 //        }
 //    }
-    loginf  << "ATSDB: shutdown: end";
+    logdbg  << "ATSDB: shutdown: end";
 }
 
 //bool ATSDB::hasDataSources (const std::string &type)

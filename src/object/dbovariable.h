@@ -31,6 +31,7 @@
 #include "global.h"
 #include "property.h"
 #include "configurable.h"
+#include "stringrepresentation.h"
 
 class DBTableColumn;
 
@@ -204,7 +205,9 @@ protected:
   /// DBO parent
   DBObject &dbo_parent_;
   /// Value representation type, based on enum STRING_REPRESENTATION
-  unsigned int representation_int_;
+  std::string representation_str_;
+  StringRepresentation representation_;
+
   /// Description
   std::string description_;
 

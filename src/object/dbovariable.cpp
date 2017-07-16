@@ -44,6 +44,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include "stringconv.h"
+#include "stringrepresentation.h"
 
 using namespace Utils;
 
@@ -53,16 +54,21 @@ DBOVariable::DBOVariable(const std::string &class_id, const std::string &instanc
     registerParameter ("name", &name_, "");
     registerParameter ("description", &description_, "");
     registerParameter ("data_type_str", &data_type_str_, "");
-    registerParameter ("representation", &representation_int_, R_STANDARD);
+    registerParameter ("representation_str", &representation_str_, "");
     registerParameter ("dimension", &dimension_, "");
     registerParameter ("unit", &unit_, "");
 
     assert (name_.size() > 0);
     assert (data_type_str_.size() > 0);
-
-    //boost::algorithm::to_lower(name_);
-
     data_type_ = Property::asDataType(data_type_str_);
+
+    if (representation_str_.size() == 0)
+    {
+        representation_str_ = representation_2_string.at(StringRepresentation::STANDARD);
+    }
+
+    assert (string_2_representation.count(representation_str_) == 1);
+    representation_ = string_2_representation.at(representation_str_);
 
     //loginf  << "DBOVariable: constructor: name " << id_ << " unitdim '" << unit_dimension_ << "' unitunit '" << unit_unit_ << "'";
 

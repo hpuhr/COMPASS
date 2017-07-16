@@ -28,8 +28,6 @@
 #include "property.h"
 #include "logger.h"
 
-
-
 std::map<PropertyDataType,std::string> Property::data_types_2_strings_ = boost::assign::map_list_of
         (PropertyDataType::BOOL,       "BOOL")
         (PropertyDataType::CHAR,       "CHAR")
