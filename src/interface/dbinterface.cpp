@@ -135,7 +135,7 @@ void DBInterface::closeConnection ()
     boost::mutex::scoped_lock l(connection_mutex_);
     //connection_mutex_.unlock();
 
-    logdbg << "DBInterface: closeConnection";
+    logdbg  << "DBInterface: closeConnection";
     for (auto it : connections_)
         it.second->disconnect ();
 
@@ -151,9 +151,8 @@ void DBInterface::closeConnection ()
         info_widget_ = nullptr;
     }
 
-
-
     table_info_.clear();
+    logdbg  << "DBInterface: closeConnection: done";
 }
 
 void DBInterface::updateTableInfo ()

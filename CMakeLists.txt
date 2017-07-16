@@ -4,6 +4,7 @@ message("  Path: ${ATSDB_PATH}")
 cmake_minimum_required(VERSION 2.8.11)
 set ( CMAKE_BUILD_TYPE Debug )
 
+
 project( ATSDB )
 
 message("  System: ${CMAKE_SYSTEM}")

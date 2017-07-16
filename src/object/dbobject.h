@@ -176,8 +176,6 @@ public:
     /// @brief Returns number of existing variables
     unsigned int numVariables () const { return variables_.size(); }
 
-    /// @brief Returns container with all variables in a DBTable identified by table
-    //std::vector <DBOVariable*> getVariablesForTable (std::string table);
     /// @brief Returns name of the object
     const std::string &name () const { return name_; }
     /// @brief Sets name of the object
@@ -198,8 +196,6 @@ public:
 
     /// @brief Returns if incremental read for DBO type was prepared
     bool isLoading ();
-    /// @brief Returns if incremental read for DBO type was finished
-    //bool wasLoadingPerformed ();
     /// @brief Returns if DBO exists and has data in the database
     bool hasData ();
     /// @brief Returns number of elements for DBO type
@@ -215,9 +211,6 @@ public:
     const MetaDBTable &currentMetaTable () const;
     /// @brief Returns if current schema has main meta table
     bool hasCurrentMetaTable () const;
-
-    /// @brief Returns if object is meta
-    //bool isMeta () { return is_meta_; }
 
     /// @brief Returns if a data source is defined in the current schema
     bool hasCurrentDataSource () const;
@@ -242,11 +235,6 @@ public:
 
     /// @brief Returns container with the active data sources information
     const std::set<int> getActiveDataSources () const { return active_data_sources_; }
-
-    /// @brief In meta object, registers meta variables as parent variables
-    //void registerParentVariables ();
-    /// @brief In meta object, unregisters meta variables as parent variables
-    //void unregisterParentVariables ();
 
     std::string status ();
 

@@ -47,13 +47,14 @@ signals:
 
 public:
     /// @brief Constructor
-    Job() : done_ (false), obsolete_(false) { setAutoDelete(false); }
+    Job() : started_(false), done_ (false), obsolete_(false) { setAutoDelete(false); }
     /// @brief Destructor
     virtual ~Job() {}
 
     // @brief Main operation function
     virtual void run() = 0;
 
+    bool started () { return started_; }
     // @brief Returns done flag
     bool done () { return done_; }
     void emitDone () { emit doneSignal(); }
@@ -64,6 +65,8 @@ public:
     void emitObsolete () { emit doneSignal(); }
 
 protected:
+    ///
+    bool started_;
     /// Done flag
     bool done_;
     /// Obsolete flag

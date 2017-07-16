@@ -152,11 +152,6 @@ public:
   /// @brief Sets variable description
   void description (const std::string &description) { description_=description; }
 
-  /// @brief Returns variable data type
-  //PropertyDataType dataType () { return data_type_;}
-  /// @brief Sets variable data type
-  //void dataType (PropertyDataType type) { data_type_=type; }
-
   /// @brief Returns of schema is present in schema_variables_
   bool hasSchema (const std::string &schema);
   /// @brief Returns meta table identifier for a given schema
@@ -200,10 +195,6 @@ public:
   ///// @brief Removes an observer of the minimum/maximum information
   ///void removeMinMaxObserver (DBOVariableMinMaxObserver *observer);
 
-  /// @brief Registers meta-variables as parents of sub-variables
-  //void registerAsParent ();
-  /// @brief Unregisters meta-variables as parents of sub-variables
-  //void unregisterAsParent ();
   /// @brief Checks if min/max info is present for meta-variables
   //void subVariableHasMinMaxInfo ();
 
@@ -224,8 +215,6 @@ protected:
 
   /// Container with all minimum/maximum information observers
   //std::vector <DBOVariableMinMaxObserver*> min_max_observers_;
-  /// Meta-variables with container this variable
-  //std::vector <DBOVariable*> parent_variables_;
 
   /// Unit dimension such as time
   std::string dimension_;
@@ -239,7 +228,7 @@ protected:
 
   virtual void checkSubConfigurables ();
   /// @brief Notifies minimum/maximum information observers
-  void notifyMinMaxObservers ();
+  //void notifyMinMaxObservers ();
 };
 
 #endif /* DBOVARIABLE_H_ */

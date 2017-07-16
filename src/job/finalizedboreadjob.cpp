@@ -48,6 +48,7 @@ FinalizeDBOReadJob::~FinalizeDBOReadJob()
 void FinalizeDBOReadJob::run ()
 {
     logdbg << "FinalizeDBOReadJob: run";
+    started_ = true;
 
     std::vector <DBOVariable*> &variables = read_list_.getSet ();
     const PropertyList &properties = buffer_->properties();

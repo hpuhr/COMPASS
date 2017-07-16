@@ -135,29 +135,19 @@ void DBObject::checkSubConfigurables ()
 
 bool DBObject::hasVariable (const std::string &id) const
 {
-    //  if (!variables_checked_)
-    //    checkVariables ();
-
     return (variables_.find (id) != variables_.end());
 }
 
 DBOVariable &DBObject::variable (std::string variable_id)
 {
-    //  if (!variables_checked_)
-    //    checkVariables ();
-
     assert (hasVariable (variable_id));
     return *variables_.at(variable_id);
 }
 
 void DBObject::deleteVariable (std::string id)
 {
-    //  if (!variables_checked_)
-    //    checkVariables ();
-
     assert (hasVariable (id));
-    //std::map<std::string, DBOVariable*>::iterator it;
-    //it = variables_.find (id);
+
     DBOVariable *variable = variables_[id];
     variables_.erase(variables_.find (id));
     assert (!hasVariable (id));
@@ -166,34 +156,8 @@ void DBObject::deleteVariable (std::string id)
 
 const std::map<std::string, DBOVariable*> &DBObject::variables () const
 {
-    //  if (!variables_checked_)
-    //    checkVariables ();
-
     return variables_;
 }
-
-/**
- * Iterates through all variables, and checks if the current meta table has a variable with the same name, if so it adds
- * the variable to the returned list.
- */
-//std::vector <DBOVariable*> DBObject::getVariablesForTable (std::string table)
-//{
-////  if (!variables_checked_)
-////    checkVariables ();
-
-//  std::vector <DBOVariable*> variables;
-
-//  std::map<std::string, DBOVariable*>::iterator it;
-
-//  for (it = variables_.begin(); it != variables_.end(); it++)
-//  {
-//    if (getCurrentMetaTable()->getTableDBNameForVariable(it->second->getCurrentVariableName()).compare (table) != 0)
-//      continue;
-//    variables.push_back (it->second);
-//  }
-
-//  return variables;
-//}
 
 const std::string &DBObject::metaTable (const std::string &schema) const
 {
@@ -296,45 +260,18 @@ void DBObject::checkVariables ()
 //    notifyActiveDataSourcesObservers();
 //}
 
-/**
- * Bit of a hack, explanation at DBOVariable::registerAsParent ().
- */
-//void DBObject::registerParentVariables ()
-//{
-//    logdbg << "DBObject: registerParentVariables";
-//    assert (isMeta());
-//    std::map<std::string, DBOVariable*>::iterator it;
-
-//    for (it = variables_.begin(); it != variables_.end(); it++)
-//    {
-//        assert (it->second->isMetaVariable());
-//        it->second->registerAsParent();
-//    }
-//}
-
-/**
- * Bit of a hack, explanation at DBOVariable::registerAsParent ().
- */
-//void DBObject::unregisterParentVariables ()
-//{
-//    logdbg << "DBObject: unregisterParentVariables";
-//    assert (isMeta());
-//    std::map<std::string, DBOVariable*>::iterator it;
-
-//    for (it = variables_.begin(); it != variables_.end(); it++)
-//    {
-//        assert (it->second->isMetaVariable());
-//        it->second->unregisterAsParent();
-//    }
-//}
-
 std::string DBObject::status ()
 {
     if (read_job_)
         if (loadedCount())
             return "Loading";
         else
-            return "Queued";
+        {
+            if (read_job_->started())
+                return "Started";
+            else
+                return "Queued";
+        }
     else if (finalize_jobs_.size() > 0)
         return "Post-processing";
     else
@@ -415,10 +352,10 @@ void DBObject::load (DBOVariableSet &read_set, bool use_filters, bool use_order,
     connect (read_job, SIGNAL(obsoleteSignal()), this, SLOT(readJobObsoleteSlot()), Qt::QueuedConnection);
     connect (read_job, SIGNAL(doneSignal()), this, SLOT(readJobDoneSlot()), Qt::QueuedConnection);
 
-    JobManager::instance().addDBJob(read_job_);
-
     if (info_widget_)
         info_widget_->updateSlot();
+
+    JobManager::instance().addDBJob(read_job_);
 }
 
 void DBObject::readJobIntermediateSlot (std::shared_ptr<Buffer> buffer)
@@ -548,15 +485,6 @@ bool DBObject::isLoading ()
 {
     return read_job_ == nullptr || finalize_jobs_.size() > 0;
 }
-
-//bool DBObject::wasLoadingPerformed ()
-//{
-//    if (isLoading())
-//        return false;
-//    else
-//        return read_job_data_.size() > 0;
-
-//}
 
 bool DBObject::hasData ()
 {

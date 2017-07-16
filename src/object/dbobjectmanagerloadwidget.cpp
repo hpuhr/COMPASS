@@ -130,12 +130,6 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager &object_man
     main_layout->addLayout(limit_layout);
     main_layout->addStretch();
 
-//    QFrame *line4 = new QFrame(this);
-//    line4->setFrameShape(QFrame::HLine); // Horizontal line
-//    line4->setFrameShadow(QFrame::Sunken);
-//    line4->setLineWidth(1);
-//    main_layout->addWidget(line4);
-
     // load
     load_all_button_ = new QPushButton ("Load");
     connect (load_all_button_, SIGNAL(clicked()), this, SLOT(loadAllSlot()));
@@ -222,6 +216,7 @@ void DBObjectManagerLoadWidget::limitMaxChanged()
 
 void DBObjectManagerLoadWidget::loadAllSlot ()
 {
+    loginf << "DBObjectManagerLoadWidget: loadAllSlot";
     object_manager_.loadSlot();
 }
 

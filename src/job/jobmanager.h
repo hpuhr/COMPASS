@@ -86,6 +86,7 @@ public:
 protected:
     /// Flag indicating if thread should stop.
     volatile bool stop_requested_;
+    volatile bool stopped_;
 
     boost::mutex mutex_;
     //unsigned int num_workers_;

@@ -311,6 +311,8 @@ void ATSDB::shutdown ()
 
     assert (initialized_);
 
+    JobManager::instance().shutdown();
+
     assert (db_interface_);
     db_interface_->closeConnection();
 
@@ -337,8 +339,6 @@ void ATSDB::shutdown ()
 
     initialized_=false;
 
-    JobManager::instance().shutdown();
-
 //    if (struct_reader_->hasUnwrittenData())
 //    {
 //        loginf << "ATSDB: shutdown: finalizing data insertion";
@@ -363,7 +363,7 @@ void ATSDB::shutdown ()
 //            sleep(1);
 //        }
 //    }
-    logdbg  << "ATSDB: shutdown: end";
+    loginf  << "ATSDB: shutdown: end";
 }
 
 //bool ATSDB::hasDataSources (const std::string &type)

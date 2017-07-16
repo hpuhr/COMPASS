@@ -45,6 +45,7 @@ DBOReadDBJob::~DBOReadDBJob()
 void DBOReadDBJob::run ()
 {
     logdbg << "DBOReadDBJob: execute: start";
+    started_ = true;
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 

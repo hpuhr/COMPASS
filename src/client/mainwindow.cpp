@@ -180,8 +180,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
     ConfigurationManager::getInstance().saveConfiguration();
 
-    JobManager::instance().shutdown();
-
     ATSDB::instance().shutdown();
     assert (!ATSDB::instance().ready());
 

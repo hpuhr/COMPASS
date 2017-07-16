@@ -34,7 +34,7 @@
 using namespace Utils;
 
 JobManager::JobManager()
-    : Configurable ("JobManager", "JobManager0", 0, "conf/threads.xml"), widget_(nullptr)
+    : Configurable ("JobManager", "JobManager0", 0, "conf/threads.xml"), stop_requested_(false), stopped_(false), widget_(nullptr)
 {
     logdbg  << "JobManager: constructor";
     boost::mutex::scoped_lock l(mutex_);
@@ -47,40 +47,6 @@ JobManager::JobManager()
 JobManager::~JobManager()
 {
     logdbg  << "JobManager: destructor";
-}
-
-void JobManager::shutdown ()
-{
-    logdbg  << "JobManager: shutdown";
-    mutex_.lock();
-
-    if (active_db_job_)
-        active_db_job_->setObsolete();
-
-    for (auto job : queued_db_jobs_)
-        job->setObsolete ();
-
-    for (auto job : jobs_)
-        job->setObsolete ();
-
-    if (widget_)
-    {
-        delete widget_;
-        widget_ = nullptr;
-    }
-
-    while (jobs_.size() > 0 || active_db_job_ || queued_db_jobs_.size() > 0 )
-    {
-        mutex_.unlock();
-        msleep(update_time_);
-        mutex_.lock();
-    }
-
-    stop_requested_ = true;
-
-    mutex_.unlock();
-
-    logdbg  << "JobManager: shutdown: done";
 }
 
 void JobManager::addJob (std::shared_ptr<Job> job)
@@ -170,15 +136,15 @@ void JobManager::run()
 
                 jobs_.pop_front();
                 changed = true;
-                logdbg << "JobManager: flushFinishedJobs: flushed job";
+                logdbg << "JobManager: run: flushed job";
                 if(current->obsolete())
                 {
-                    logdbg << "JobManager: flushFinishedJobs: flushing obsolete job";
+                    logdbg << "JobManager: run: flushing obsolete job";
                     current->emitObsolete();
                     continue;
                 }
 
-                logdbg << "JobManager: flushFinishedJobs: flushing done job";
+                logdbg << "JobManager: run: flushing done job";
                 current->emitDone();
 
                 last_one = jobs_.size() == 0;
@@ -188,14 +154,14 @@ void JobManager::run()
             {
                 if(active_db_job_->obsolete())
                 {
-                    logdbg << "JobManager: flushFinishedJobs: flushing obsolete job";
+                    logdbg << "JobManager: run: flushing obsolete job";
                     active_db_job_->emitObsolete();
                     active_db_job_ = nullptr;
                     changed = true;
                 }
                 else if (active_db_job_->done())
                 {
-                    logdbg << "JobManager: flushFinishedJobs: flushing obsolete job";
+                    logdbg << "JobManager: run: flushing obsolete job";
                     active_db_job_->emitDone();
                     active_db_job_ = nullptr;
                     changed = true;
@@ -226,14 +192,58 @@ void JobManager::run()
 
         mutex_.unlock();
 
+        if (stop_requested_)
+        {
+            logdbg << "JobManager: run: stop requested";
+            break;
+        }
+
         if (changed)
             updateWidget(last_one);
 
-        if (stop_requested_)
-            break;
-
         msleep(update_time_);
     }
+    stopped_=true;
+}
+
+void JobManager::shutdown ()
+{
+    loginf  << "JobManager: shutdown";
+    mutex_.lock();
+
+    if (active_db_job_)
+        active_db_job_->setObsolete();
+
+    for (auto job : queued_db_jobs_)
+        job->setObsolete ();
+
+    for (auto job : jobs_)
+        job->setObsolete ();
+
+    if (widget_)
+    {
+        delete widget_;
+        widget_ = nullptr;
+    }
+
+//    while (jobs_.size() > 0 || active_db_job_ || queued_db_jobs_.size() > 0 )
+//    {
+//        mutex_.unlock();
+//        msleep(update_time_);
+//        mutex_.lock();
+//    }
+
+    mutex_.unlock();
+    logdbg  << "JobManager: shutdown: setting stop requested";
+    stop_requested_ = true;
+
+    while (!stopped_)
+    {
+        logdbg  << "JobManager: shutdown: waiting";
+        QThread::currentThread()->msleep(update_time_);
+    }
+
+    logdbg  << "JobManager: shutdown: done";
 }
 
 JobManagerWidget *JobManager::widget()
