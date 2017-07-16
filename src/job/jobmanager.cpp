@@ -204,12 +204,19 @@ void JobManager::run()
         msleep(update_time_);
     }
     stopped_=true;
+    logdbg  << "JobManager: run: stopped";
 }
 
 void JobManager::shutdown ()
 {
     loginf  << "JobManager: shutdown";
     mutex_.lock();
+
+    if (widget_)
+    {
+        delete widget_;
+        widget_ = nullptr;
+    }
 
     if (active_db_job_)
         active_db_job_->setObsolete();
@@ -219,12 +226,6 @@ void JobManager::shutdown ()
 
     for (auto job : jobs_)
         job->setObsolete ();
-
-    if (widget_)
-    {
-        delete widget_;
-        widget_ = nullptr;
-    }
 
 //    while (jobs_.size() > 0 || active_db_job_ || queued_db_jobs_.size() > 0 )
 //    {

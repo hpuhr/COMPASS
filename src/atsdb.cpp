@@ -309,7 +309,11 @@ void ATSDB::shutdown ()
 {
     loginf  << "ATSDB: database shutdown";
 
-    assert (initialized_);
+    if (!initialized_)
+    {
+        logerr  << "ATSDB: already shut down";
+        return;
+    }
 
     JobManager::instance().shutdown();
 
@@ -332,7 +336,7 @@ void ATSDB::shutdown ()
     delete filter_manager_;
     filter_manager_ = nullptr;
 
-        assert (view_manager_);
+    assert (view_manager_);
     view_manager_->close();
     delete view_manager_;
     view_manager_ = nullptr;

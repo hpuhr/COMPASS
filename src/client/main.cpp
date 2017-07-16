@@ -159,17 +159,14 @@ int main (int argc, char **argv)
 //        test_array_list(test_size);
 //        test_buffer(test_size);
 //        test_buffer_smart(test_size);
-
-        loginf << "ATSDBClient: shutdown";
-
-        return 0;
     }
     catch (std::exception &ex)
     {
         logerr  << "Main: Caught Exception '" << ex.what() << "'";
         logerr.flush();
 
-        ATSDB::instance().shutdown();
+        if (ATSDB::instance().ready())
+            ATSDB::instance().shutdown();
 
         //WorkerThreadManager::getInstance().shutdown();
 
@@ -180,7 +177,8 @@ int main (int argc, char **argv)
         logerr  << "Main: Caught Exception";
         logerr.flush();
 
-        ATSDB::instance().shutdown();
+        if (ATSDB::instance().ready())
+            ATSDB::instance().shutdown();
 
         //WorkerThreadManager::getInstance().shutdown();
 

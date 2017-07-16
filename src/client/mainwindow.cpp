@@ -173,7 +173,7 @@ void MainWindow::createMenus()
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    logdbg  << "MainWindow: closeEvent: start";
+    loginf  << "MainWindow: closeEvent: start";
 
     QSettings settings("ATSDB", "Client");
     settings.setValue("MainWindow/geometry", saveGeometry());
@@ -189,8 +189,10 @@ void MainWindow::closeEvent(QCloseEvent *event)
         tab_widget_=nullptr;
     }
 
-    QWidget::closeEvent(event);
-    logdbg  << "MainWindow: closeEvent: done";
+    event->accept();
+
+    //QWidget::closeEvent(event);
+    loginf  << "MainWindow: closeEvent: done";
 }
 
 void MainWindow::keyPressEvent ( QKeyEvent * event )
