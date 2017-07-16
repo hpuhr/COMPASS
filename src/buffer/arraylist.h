@@ -28,9 +28,11 @@
 #include <vector>
 #include <bitset>
 #include <sstream>
+#include <iomanip>
 
 #include "logger.h"
 #include "stringconv.h"
+#include "stringrepresentation.h"
 
 static const unsigned int BUFFER_ARRAY_SIZE=10000;
 
@@ -62,6 +64,10 @@ public:
     /// @brief Sets all elements to initial value and None information to true
     virtual void clear()=0;
 
+    bool hasSpecialRepresentation () { return representation_ != StringRepresentation::STANDARD; }
+    StringRepresentation representation() const;
+    void representation(const StringRepresentation &representation);
+
 protected:
     /// Identifier of contained data
     std::string id_;
@@ -69,6 +75,8 @@ protected:
     size_t size_;
     /// Size of data arrays
     size_t max_size_;
+
+    StringRepresentation representation_;
 
     std::vector < std::shared_ptr< std::array<bool,BUFFER_ARRAY_SIZE> > > none_flags_;
     //std::vector <std::shared_ptr<std::bitset<BUFFER_ARRAY_SIZE>>> none_flags_;
@@ -122,17 +130,71 @@ public:
         return data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
     }
 
-    /// @brief Returns string representation of a specific value
+    /// @brief Returns string of a specific value
     const std::string getAsString (size_t index)
     {
         if (index > size_)
-            throw std::out_of_range ("ArrayListTemplate: get out of index "+Utils::String::intToString(index));
+            throw std::out_of_range ("ArrayListTemplate: getAsString out of index "+Utils::String::intToString(index));
 
         if (isNone(index))
-            throw std::out_of_range ("ArrayListTemplate: get of None value "+Utils::String::intToString(index));
+            throw std::out_of_range ("ArrayListTemplate: getAsString of None value "+Utils::String::intToString(index));
 
         std::stringstream ss;
         ss << data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
+
+        return ss.str();
+    }
+
+    /// @brief Returns representation string of a specific value
+    const std::string getAsRepresentationString (size_t index)
+    {
+        if (index > size_)
+            throw std::out_of_range ("ArrayListTemplate: getAsRepresentationString out of index "+Utils::String::intToString(index));
+
+        if (isNone(index))
+            throw std::out_of_range ("ArrayListTemplate: getAsRepresentationString of None value "+Utils::String::intToString(index));
+
+        std::stringstream ss;
+
+        try
+        {
+            if (representation_ == StringRepresentation::STANDARD)
+            {
+                ss << data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
+            }
+            else if (representation_ == StringRepresentation::SECONDS_TO_TIME)
+            {
+                double value = data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
+                ss << Utils::String::timeStringFromDouble (value);
+            }
+            else if (representation_ == StringRepresentation::DEC_TO_OCTAL)
+            {
+                unsigned int value = data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
+                ss << std::oct << std::setfill ('0') << std::setw (4) << value;
+            }
+            else if (representation_ == StringRepresentation::DEC_TO_HEX)
+            {
+                unsigned int value = data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
+                ss << std::uppercase << std::hex << value;
+            }
+            else if (representation_ == StringRepresentation::FEET_TO_FLIGHTLEVEL)
+            {
+                double value = data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
+                ss << value/100.0;
+            }
+            else
+            {
+                throw std::runtime_error ("ArrayListTemplate: getAsRepresentationString: unknown representation");
+            }
+        }
+        catch(std::exception& e)
+        {
+            logerr  << "ArrayListTemplate: getAsRepresentationString: exception thrown: " << e.what();
+        }
+        catch(...)
+        {
+            logerr  << "ArrayListTemplate: getAsRepresentationString: exception thrown";;
+        }
 
         return ss.str();
     }

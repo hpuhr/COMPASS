@@ -10,7 +10,7 @@ enum class StringRepresentation { STANDARD, SECONDS_TO_TIME, DEC_TO_OCTAL, DEC_T
 /// Mappings for STRING_REPRESENTATION to strings, defined in util.cpp
 //extern std::map<StringRepresentation,std::string> STRING_REPRESENTATION_STRINGS;
 
-extern std::map<StringRepresentation,std::string> representation_2_string;
+extern std::map<StringRepresentation, std::string> representation_2_string;
 extern std::map<std::string, StringRepresentation> string_2_representation;
 
 #endif // STRINGREPRESENTATION_H

@@ -23,7 +23,6 @@
  */
 
 #include <algorithm>
-#include <iomanip>
 
 #include "configuration.h"
 #include "configurationmanager.h"
@@ -116,50 +115,6 @@ void DBOVariable::print ()
 {
     loginf  << "DBOVariable: print: dbo " << parent_->getInstanceId() << " id " << name_ << " data type " << data_type_str_;
 }
-
-//std::string DBOVariable::getValueFrom (void *ptr)
-//{
-//    std::stringstream ss;
-
-//    if (data_type_int_ == P_TYPE_BOOL)
-//    {
-//        ss << *(bool *) ptr;
-//    }
-//    else if (data_type_int_ == P_TYPE_CHAR)
-//    {
-//        ss << (int)*(char *) ptr;
-//    }
-//    else if (data_type_int_ == P_TYPE_INT)
-//    {
-//        ss << *(int *) ptr;
-//    }
-//    else if (data_type_int_ == P_TYPE_UCHAR)
-//    {
-//        ss << (int) *(unsigned char *) ptr;
-//    }
-//    else if (data_type_int_ == P_TYPE_UINT)
-//    {
-//        ss << *(unsigned int *) ptr;
-//    }
-//    else if (data_type_int_ == P_TYPE_STRING)
-//    {
-//        ss << *(std::string *) ptr;
-//    }
-//    else if (data_type_int_ == P_TYPE_POINTER)
-//    {
-//        ss << std::hex << *(void**) ptr;
-//    }
-//    else if (data_type_int_ == P_TYPE_FLOAT)
-//    {
-//        ss << *(float *) ptr;
-//    }
-//    else if (data_type_int_ == P_TYPE_DOUBLE)
-//    {
-//        ss << *(double *) ptr;
-//    }
-
-//    return ss.str();
-//}
 
 
 //std::string DBOVariable::getValueFromRepresentation (std::string representation_string, bool transform, bool* ok)
@@ -627,4 +582,17 @@ DBOVariableWidget *DBOVariable::widget ()
 
     assert (widget_);
     return widget_;
+}
+
+StringRepresentation DBOVariable::representation() const
+{
+    return representation_;
+}
+
+void DBOVariable::representation(const StringRepresentation &representation)
+{
+    assert (representation_2_string.count(representation) == 1);
+
+    representation_ = representation;
+    representation_str_ = representation_2_string.at(representation_);
 }

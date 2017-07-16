@@ -26,7 +26,7 @@
 #include "arraylist.h"
 
 ArrayListBase::ArrayListBase ()
-    : size_(0), max_size_(0)
+    : size_(0), max_size_(0), representation_(StringRepresentation::STANDARD)
 {
 
 }
@@ -72,6 +72,16 @@ bool ArrayListBase::isNone(size_t index)
 
     assert (index < size_);
     return (*none_flags_[index/BUFFER_ARRAY_SIZE])[index%BUFFER_ARRAY_SIZE];
+}
+
+StringRepresentation ArrayListBase::representation() const
+{
+    return representation_;
+}
+
+void ArrayListBase::representation(const StringRepresentation &representation)
+{
+    representation_ = representation;
 }
 
 void ArrayListBase::allocatedNewNoneArray ()

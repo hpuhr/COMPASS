@@ -201,6 +201,9 @@ public:
 
   DBOVariableWidget *widget ();
 
+  StringRepresentation representation() const;
+  void representation(const StringRepresentation &representation);
+
 protected:
   /// DBO parent
   DBObject &dbo_parent_;

@@ -59,9 +59,74 @@ void FinalizeDBOReadJob::run ()
         assert (properties.hasProperty(column.name()));
         const Property &property = properties.get(column.name());
         assert (property.dataType() == var_it->dataType());
+
+        if (var_it->representation() != StringRepresentation::STANDARD) // do representation stuff
+        {
+            StringRepresentation rep = var_it->representation();
+            assert (representation_2_string.count(rep) == 1);
+            loginf << "FinalizeDBOReadJob: run: variable " << var_it->name() << ": setting string representation " << representation_2_string.at(rep);
+
+            switch (property.dataType())
+            {
+            case PropertyDataType::BOOL:
+            {
+                buffer_->getBool (property.name()).representation(rep);
+                break;
+            }
+            case PropertyDataType::CHAR:
+            {
+                buffer_->getChar (property.name()).representation(rep);
+                break;
+            }
+            case PropertyDataType::UCHAR:
+            {
+                buffer_->getUChar (property.name()).representation(rep);
+                break;
+            }
+            case PropertyDataType::INT:
+            {
+                buffer_->getInt (property.name()).representation(rep);
+                break;
+            }
+            case PropertyDataType::UINT:
+            {
+                buffer_->getUInt (property.name()).representation(rep);
+                break;
+            }
+            case PropertyDataType::LONGINT:
+            {
+                buffer_->getLongInt (property.name()).representation(rep);
+                break;
+            }
+            case PropertyDataType::ULONGINT:
+            {
+                buffer_->getULongInt (property.name()).representation(rep);
+                break;
+            }
+            case PropertyDataType::FLOAT:
+            {
+                buffer_->getFloat (property.name()).representation(rep);
+
+                break;
+            }
+            case PropertyDataType::DOUBLE:
+            {
+                buffer_->getDouble (property.name()).representation(rep);
+                break;
+            }
+            case PropertyDataType::STRING:
+                logerr << "FinalizeDBOReadJob: run: string representation for string variable " << var_it->name() << " impossible";
+                break;
+            default:
+                logerr  <<  "FinalizeDBOReadJob: run: unknown property type " << Property::asString(property.dataType());
+                throw std::runtime_error ("FinalizeDBOReadJob: run: unknown property type "+Property::asString(property.dataType()));
+            }
+
+        }
+
         if (column.dimension() != var_it->dimension())
             logwrn << "FinalizeDBOReadJob: run: variable " << var_it->name() << " has differing dimensions " << column.dimension() << " " << var_it->dimension();
-        else if (column.unit() != var_it->unit())
+        else if (column.unit() != var_it->unit()) // do unit conversion stuff
         {
             logdbg << "FinalizeDBOReadJob: run: variable " << var_it->name() << " of same dimension has different units " << column.unit() << " " << var_it->unit();
 
@@ -133,7 +198,7 @@ void FinalizeDBOReadJob::run ()
                 break;
             default:
                 logerr  <<  "FinalizeDBOReadJob: run: unknown property type " << Property::asString(property.dataType());
-                throw std::runtime_error ("Buffer: addProperty: unknown property type "+Property::asString(property.dataType()));
+                throw std::runtime_error ("FinalizeDBOReadJob: run: unknown property type "+Property::asString(property.dataType()));
             }
         }
     }
