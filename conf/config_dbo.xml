@@ -1,9 +1,9 @@
 <Configuration class_id="DBObjectManager" instance_id="DBObjectManager0">
     <ParameterBool use_filters="0"/>
-    <ParameterBool use_limit="0"/>
-    <ParameterBool use_order="1"/>
+    <ParameterBool use_limit="1"/>
+    <ParameterBool use_order="0"/>
     <ParameterBool use_order_ascending="1"/>
-    <ParameterUnsignedInt limit_max="1000000"/>
+    <ParameterUnsignedInt limit_max="100000"/>
     <ParameterUnsignedInt limit_min="0"/>
     <ParameterString order_variable__name="TOD"/>
     <ParameterString order_variable_dbo_name="Meta"/>
@@ -791,7 +791,7 @@
             <ParameterString description="24 bit target address / aircraft address / Mode-S address"/>
             <ParameterString dimension=""/>
             <ParameterString name="TARGET_ADDR"/>
-            <ParameterString representation_str="STANDARD"/>
+            <ParameterString representation_str="DEC_TO_HEX"/>
             <ParameterString unit=""/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBTARGET_ADDR0">
                 <ParameterString meta_table="ADSB"/>
@@ -833,7 +833,7 @@
             <ParameterString description="Time of Day (sec from midnight)"/>
             <ParameterString dimension="Time"/>
             <ParameterString name="TOD"/>
-            <ParameterString representation_str="STANDARD"/>
+            <ParameterString representation_str="SECONDS_TO_TIME"/>
             <ParameterString unit="Second"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBTOD0">
                 <ParameterString meta_table="ADSB"/>
@@ -1444,7 +1444,7 @@
             <ParameterString description="Mode-3/A Code"/>
             <ParameterString dimension=""/>
             <ParameterString name="MODE3A_CODE"/>
-            <ParameterString representation_str="STANDARD"/>
+            <ParameterString representation_str="DEC_TO_OCTAL"/>
             <ParameterString unit=""/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATMODE3A_CODE0">
                 <ParameterString meta_table="MLAT"/>
@@ -2004,7 +2004,7 @@
             <ParameterString description="24 bit target address / aircraft address / Mode-S address"/>
             <ParameterString dimension=""/>
             <ParameterString name="TARGET_ADDR"/>
-            <ParameterString representation_str="STANDARD"/>
+            <ParameterString representation_str="DEC_TO_HEX"/>
             <ParameterString unit=""/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATTARGET_ADDR0">
                 <ParameterString meta_table="MLAT"/>
@@ -2032,7 +2032,7 @@
             <ParameterString description="Time of Day (sec from midnight)"/>
             <ParameterString dimension="Time"/>
             <ParameterString name="TOD"/>
-            <ParameterString representation_str="STANDARD"/>
+            <ParameterString representation_str="SECONDS_TO_TIME"/>
             <ParameterString unit="Second"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATTOD0">
                 <ParameterString meta_table="MLAT"/>
@@ -2769,7 +2769,7 @@
             <ParameterString description="Mode-3/A Code in octal representation [I001/070, I048/070]"/>
             <ParameterString dimension=""/>
             <ParameterString name="MODE3A_CODE"/>
-            <ParameterString representation_str="STANDARD"/>
+            <ParameterString representation_str="DEC_TO_OCTAL"/>
             <ParameterString unit=""/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarMODE3A_CODE0">
                 <ParameterString meta_table="Radar"/>
@@ -3399,7 +3399,7 @@
             <ParameterString description="24 bit target addreess / aircraft address / Mode-S address assigned uniquely to each aircraft [I021/080, I048/220]"/>
             <ParameterString dimension=""/>
             <ParameterString name="TARGET_ADDR"/>
-            <ParameterString representation_str="STANDARD"/>
+            <ParameterString representation_str="DEC_TO_HEX"/>
             <ParameterString unit=""/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarTARGET_ADDR0">
                 <ParameterString meta_table="Radar"/>
@@ -3427,7 +3427,7 @@
             <ParameterString description="Measured time / (truncated) Time of Day (s since last midnight)"/>
             <ParameterString dimension="Time"/>
             <ParameterString name="TOD"/>
-            <ParameterString representation_str="STANDARD"/>
+            <ParameterString representation_str="SECONDS_TO_TIME"/>
             <ParameterString unit="Second"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarTOD0">
                 <ParameterString meta_table="Radar"/>
@@ -4010,7 +4010,7 @@
             <ParameterString description="Code, 4 octels"/>
             <ParameterString dimension=""/>
             <ParameterString name="MODE3A_CODE"/>
-            <ParameterString representation_str="STANDARD"/>
+            <ParameterString representation_str="DEC_TO_OCTAL"/>
             <ParameterString unit=""/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerMODE3A_CODE0">
                 <ParameterString meta_table="Tracker"/>
@@ -4472,7 +4472,7 @@
             <ParameterString description="24 bit target address / aircraft address / Mode-S address"/>
             <ParameterString dimension=""/>
             <ParameterString name="TARGET_ADDR"/>
-            <ParameterString representation_str="STANDARD"/>
+            <ParameterString representation_str="DEC_TO_HEX"/>
             <ParameterString unit=""/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerTARGET_ADDR0">
                 <ParameterString meta_table="Tracker"/>
@@ -4486,7 +4486,7 @@
             <ParameterString description="Time of Message / Time of Day s since last midnight)"/>
             <ParameterString dimension="Time"/>
             <ParameterString name="TOD"/>
-            <ParameterString representation_str="STANDARD"/>
+            <ParameterString representation_str="SECONDS_TO_TIME"/>
             <ParameterString unit="Second"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerTOD0">
                 <ParameterString meta_table="Tracker"/>

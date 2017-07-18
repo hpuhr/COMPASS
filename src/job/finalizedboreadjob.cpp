@@ -64,7 +64,7 @@ void FinalizeDBOReadJob::run ()
         {
             StringRepresentation rep = var_it->representation();
             assert (representation_2_string.count(rep) == 1);
-            loginf << "FinalizeDBOReadJob: run: variable " << var_it->name() << ": setting string representation " << representation_2_string.at(rep);
+            logdbg << "FinalizeDBOReadJob: run: variable " << var_it->name() << ": setting string representation " << representation_2_string.at(rep);
 
             switch (property.dataType())
             {

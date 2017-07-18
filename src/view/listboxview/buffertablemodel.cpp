@@ -66,55 +66,55 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
         {
             null = buffer_->getBool(properties.at(col).name()).isNone(row);
             if (!null)
-                value_str = buffer_->getBool(properties.at(col).name()).getAsString(row);
+                value_str = buffer_->getBool(properties.at(col).name()).getAsRepresentationString(row);
         }
         else if (data_type == PropertyDataType::CHAR)
         {
             null = buffer_->getChar(properties.at(col).name()).isNone(row);
             if (!null)
-                value_str = buffer_->getChar(properties.at(col).name()).getAsString(row);
+                value_str = buffer_->getChar(properties.at(col).name()).getAsRepresentationString(row);
         }
         else if (data_type == PropertyDataType::UCHAR)
         {
             null = buffer_->getUChar(properties.at(col).name()).isNone(row);
             if (!null)
-                value_str = buffer_->getUChar(properties.at(col).name()).getAsString(row);
+                value_str = buffer_->getUChar(properties.at(col).name()).getAsRepresentationString(row);
         }
         else if (data_type == PropertyDataType::INT)
         {
             null = buffer_->getInt(properties.at(col).name()).isNone(row);
             if (!null)
-                value_str = buffer_->getInt(properties.at(col).name()).getAsString(row);
+                value_str = buffer_->getInt(properties.at(col).name()).getAsRepresentationString(row);
         }
         else if (data_type == PropertyDataType::UINT)
         {
             null = buffer_->getUInt(properties.at(col).name()).isNone(row);
             if (!null)
-                value_str = buffer_->getUInt(properties.at(col).name()).getAsString(row);
+                value_str = buffer_->getUInt(properties.at(col).name()).getAsRepresentationString(row);
         }
         else if (data_type == PropertyDataType::LONGINT)
         {
             null = buffer_->getLongInt(properties.at(col).name()).isNone(row);
             if (!null)
-                value_str = buffer_->getLongInt(properties.at(col).name()).getAsString(row);
+                value_str = buffer_->getLongInt(properties.at(col).name()).getAsRepresentationString(row);
         }
         else if (data_type == PropertyDataType::ULONGINT)
         {
             null = buffer_->getULongInt(properties.at(col).name()).isNone(row);
             if (!null)
-                value_str = buffer_->getULongInt(properties.at(col).name()).getAsString(row);
+                value_str = buffer_->getULongInt(properties.at(col).name()).getAsRepresentationString(row);
         }
         else if (data_type == PropertyDataType::FLOAT)
         {
             null = buffer_->getFloat(properties.at(col).name()).isNone(row);
             if (!null)
-                value_str = buffer_->getFloat(properties.at(col).name()).getAsString(row);
+                value_str = buffer_->getFloat(properties.at(col).name()).getAsRepresentationString(row);
         }
         else if (data_type == PropertyDataType::DOUBLE)
         {
             null = buffer_->getDouble(properties.at(col).name()).isNone(row);
             if (!null)
-                value_str = buffer_->getDouble(properties.at(col).name()).getAsString(row);
+                value_str = buffer_->getDouble(properties.at(col).name()).getAsRepresentationString(row);
         }
         else if (data_type == PropertyDataType::STRING)
         {

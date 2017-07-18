@@ -81,6 +81,7 @@ StringRepresentation ArrayListBase::representation() const
 
 void ArrayListBase::representation(const StringRepresentation &representation)
 {
+    logdbg << "ArrayList: representation: name " << id_ << " set to representation " << representation_2_string.at(representation);
     representation_ = representation;
 }
 

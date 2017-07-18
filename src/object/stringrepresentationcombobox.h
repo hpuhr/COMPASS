@@ -28,8 +28,9 @@
 #include <QComboBox>
 #include <stdexcept>
 
-#include "Global.h"
-#include "DBOVariable.h"
+#include "global.h"
+#include "dbovariable.h"
+#include "stringrepresentation.h"
 
 /**
  * @brief String representation selection for a DBOVariable
@@ -46,46 +47,43 @@ public slots:
     /// @brief Sets the representation
     void changed ()
     {
-        variable_->setStringRepresentation(getRepresentation());
+        variable_.representation(representation());
     }
 
 
 public:
     /// @brief Constructor
-    StringRepresentationComboBox(DBOVariable *variable, QWidget * parent = 0)
+    StringRepresentationComboBox(DBOVariable &variable, QWidget * parent = 0)
     : QComboBox(parent), variable_(variable)
     {
-        for (unsigned int cnt = 0; cnt <= R_HEX; cnt++)
-        {
-            addItem (STRING_REPRESENTATION_STRINGS.at((STRING_REPRESENTATION) cnt).c_str());
-        }
-        setCurrentIndex (variable_->getRepresentation());
+        for (auto it : string_2_representation)
+            addItem (it.first.c_str());
+
+        setCurrentText (representation_2_string.at(variable_.representation()).c_str());
         connect(this, SIGNAL( activated(const QString &) ), this, SIGNAL( changedRepresentation() ));
         connect(this, SIGNAL( activated(const QString &) ), this, SLOT( changed() ));
     }
 
     /// @brief Destructor
     virtual ~StringRepresentationComboBox() {}
+
     /// @brief Returns the currently selected representation
-    STRING_REPRESENTATION getRepresentation ()
+    StringRepresentation representation ()
     {
         std::string text = currentText().toStdString();
-        for (unsigned int cnt = 0; cnt <= R_HEX; cnt++)
-        {
-            if (text.compare (STRING_REPRESENTATION_STRINGS.at((STRING_REPRESENTATION) cnt)) == 0)
-                return (STRING_REPRESENTATION) cnt;
-        }
-        throw std::runtime_error ("StringRepresentationComboBox: getType: unknown type");
+        assert (string_2_representation.count(text) == 1);
+        return string_2_representation.at(text);
     }
+
     /// @brief Sets the currently selected representation
-    void setRepresentation (STRING_REPRESENTATION type)
+    void representation (StringRepresentation type)
     {
-        setCurrentIndex (type);
+        setCurrentText (representation_2_string.at(type).c_str());
     }
 
 protected:
     /// Used variable
-    DBOVariable *variable_;
+    DBOVariable &variable_;
 };
 
 

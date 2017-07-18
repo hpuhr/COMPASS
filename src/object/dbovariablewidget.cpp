@@ -36,7 +36,7 @@
 #include "metadbtable.h"
 #include "logger.h"
 #include "dbovariabledatatypecombobox.h"
-//#include "StringRepresentationComboBox.h"
+#include "stringrepresentationcombobox.h"
 #include "dbtablecolumncombobox.h"
 #include "unitselectionwidget.h"
 #include "atsdb.h"
@@ -91,13 +91,11 @@ DBOVariableWidget::DBOVariableWidget(DBOVariable &variable, QWidget *parent, Qt:
     properties_layout->addWidget (type_combo_, row, 1);
     row++;
 
-    //logdbg  << "DBObjectWidget: updateDBOVarsGrid: creating variable row for " << it->first << " stringrep";
-    // TODO
-    //    StringRepresentationComboBox *repr = new StringRepresentationComboBox (it->second);
-    //    assert (dbo_vars_grid_representation_boxes_.find(repr) == dbo_vars_grid_representation_boxes_.end());
-    //    dbo_vars_grid_representation_boxes_[repr] = it->second;
-    //    dbovars_grid_->addWidget (repr, row, 4);
+    properties_layout->addWidget(new QLabel ("Representation"), row, 0);
 
+    StringRepresentationComboBox *repr = new StringRepresentationComboBox (variable_);
+    properties_layout->addWidget (repr, row, 1);
+    row++;
 
     QLabel *unit_label = new QLabel ("Unit");
     properties_layout->addWidget(unit_label, row, 0);

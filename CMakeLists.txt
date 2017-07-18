@@ -203,7 +203,7 @@ set ( atsdb_HDRS
     #        src/object/dbovariablecombobox.h
     #        src/object/dbovariablesetwidget.h
     #        src/object/propertydatatypecombobox.h
-    #        src/object/stringrepresentationcombobox.h
+    src/object/stringrepresentationcombobox.h
     #        src/polygon/airspacesectormanagerwidget.h
     #        src/polygon/airspacesectortreewidget.h
     #        src/polygon/airspacesectorwidget.h
