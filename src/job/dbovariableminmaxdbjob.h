@@ -25,31 +25,31 @@
 #ifndef DBOVARIABLEMINMAXDBJOB_H_
 #define DBOVARIABLEMINMAXDBJOB_H_
 
-#include "DBJob.h"
+#include "job.h"
 
 class DBOVariable;
+class DBInterface;
 
 /**
  * \brief Creates the minimum/maximum information for a specific DBOVariable
  *
  * DBJob, Uses DBInterface.
  */
-class DBOVariableMinMaxDBJob : public DBJob
+class DBOVariableMinMaxDBJob : public Job
 {
 public:
-    DBOVariableMinMaxDBJob(JobOrderer *orderer, boost::function<void (Job*)> done_function,
-            boost::function<void (Job*)> obsolete_function, DBInterface *db_interface,
-            DBOVariable *variable);
+    DBOVariableMinMaxDBJob(DBInterface &db_interface, DBOVariable &variable);
     virtual ~DBOVariableMinMaxDBJob();
 
-    virtual void execute ();
+    virtual void run ();
 
-    DBOVariable *getDBOVariable () { return variable_; }
-    std::string getMin () { return min_; }
-    std::string getMax () { return max_; }
+    DBOVariable &dboVariable () { return variable_; }
+    std::string min () { return min_; }
+    std::string max () { return max_; }
 
 protected:
-    DBOVariable *variable_;
+    DBInterface &db_interface_;
+    DBOVariable &variable_;
     std::string min_;
     std::string max_;
 };

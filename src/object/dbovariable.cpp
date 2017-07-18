@@ -38,7 +38,6 @@
 #include "unitmanager.h"
 #include "dbschemamanager.h"
 #include "dbovariablewidget.h"
-//#include "DBOVariableMinMaxObserver.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -116,51 +115,6 @@ void DBOVariable::print ()
     loginf  << "DBOVariable: print: dbo " << parent_->getInstanceId() << " id " << name_ << " data type " << data_type_str_;
 }
 
-
-//std::string DBOVariable::getValueFromRepresentation (std::string representation_string, bool transform, bool* ok)
-//{
-
-//    std::stringstream ss;
-//    bool ssok = true;
-
-//    if (representation_int_ == R_STANDARD)
-//    {
-//        ss << representation_string;
-//    }
-//    else if (representation_int_ == R_TIME_SECONDS)
-//    {
-//        ss << timeFromString (representation_string, &ssok);
-//    }
-//    else if (representation_int_ == R_OCTAL)
-//    {
-//        ss << intFromOctalString (representation_string, &ssok);
-//    }
-//    else if (representation_int_ ==R_FLIGHT_LEVEL)
-//    {
-//        std::stringstream ss2;
-//        ss2 << representation_string;
-//        double value;
-//        ssok = ( ss2 >> value );
-//        if( !ssok )
-//            logerr << "DBOVariable: getValueFromRepresentation: Could not convert to flight level";
-//        ss << value*100.0;
-//    }
-//    else if (representation_int_ == R_SENSOR_NAME)
-//    {
-//        throw std::runtime_error ("DBOVariable: getRepresentationFromValue: unknown for sensor name");
-//    }
-//    else if (representation_int_ == R_HEX)
-//    {
-//        ss << intFromHexString (representation_string, &ssok);
-//    }
-//    else
-//    {
-//        throw std::runtime_error ("DBOVariable: getRepresentationFromValue: unknown representation");
-//    }
-
-//    if( ok )
-//        *ok = ssok;
-
 //    if (transform)
 //    {
 //        logdbg  << "DBOVariable: getValueFromRepresentation: var " << id_ << " representation " << representation_string;
@@ -212,73 +166,6 @@ void DBOVariable::print ()
 //    }
 //    else
 //        return ss.str();
-//}
-//std::string DBOVariable::getRepresentationFromValue (std::string value_string)
-//{
-//    std::stringstream ss;
-
-//    if (representation_int_ == R_STANDARD)
-//    {
-//        ss << value_string;
-//    }
-//    else if (representation_int_ == R_TIME_SECONDS)
-//    {
-//        std::stringstream ss2;
-//        ss2 << value_string;
-//        double value;
-//        ss2 >> value;
-//        ss << timeStringFromDouble (value);
-//    }
-//    else if (representation_int_ == R_OCTAL)
-//    {
-//        std::stringstream ss2;
-//        ss2 << value_string;
-//        unsigned int value;
-//        ss2 >> value;
-//        ss << std::oct << std::setfill ('0') << std::setw (4) << value;
-//    }
-//    else if (representation_int_ ==R_FLIGHT_LEVEL)
-//    {
-//        std::stringstream ss2;
-//        ss2 << value_string;
-//        int value;
-//        ss2 >> value;
-//        ss << ((double)value)/100.0;
-//    }
-//    else if (representation_int_ == R_HEX)
-//    {
-//        std::stringstream ss2;
-//        ss2 << value_string;
-//        unsigned int value;
-//        ss2 >> value;
-//        ss << std::uppercase << std::hex << value;
-//    }
-//    else if (representation_int_ == R_SENSOR_NAME)
-//    {
-//        std::stringstream ss2;
-//        ss2 << value_string;
-//        unsigned int value;
-//        ss2 >> value;
-//        ss << "TODO"; // TODO HACK
-//    }
-//    else
-//    {
-//        throw std::runtime_error ("DBOVariable: getRepresentationFromValue: unknown representation");
-//    }
-
-//    return ss.str();
-//}
-
-//void DBOVariable::setStringRepresentation (STRING_REPRESENTATION representation)
-//{
-//    logdbg  << " DBOVariable: setStringRepresentation " << representation;
-//    representation_int_=representation;
-
-//    for (unsigned int cnt=0; cnt < sub_variable_definitions_.size(); cnt++)
-//    {
-//        DBOVariable *variable = DBObjectManager::getInstance().getDBOVariable (sub_variable_definitions_.at(cnt)->getDBOType(), sub_variable_definitions_.at(cnt)->getId());
-//        variable->setStringRepresentation (representation);
-//    }
 //}
 
 void DBOVariable::checkSubConfigurables ()
@@ -354,67 +241,37 @@ const std::string &DBOVariable::currentVariableName ()
     return schema_variables_.at(schema)->getVariable();
 }
 
-//bool DBOVariable::hasMinMaxInfo ()
-//{
-//    if (isMetaVariable())
-//    {
-//        std::map <DB_OBJECT_TYPE, std::string>::iterator it;
-//        bool info_present=true;
-//        for (it = sub_variables_.begin(); it != sub_variables_.end(); it++)
-//            info_present &= DBObjectManager::getInstance().getDBOVariable(it->first, it->second)->hasMinMaxInfo();
-//        return info_present;
-//    }
-//    else
-//        return !(min_.size() == 0 && max_.size() == 0);
-//}
+bool DBOVariable::hasMinMaxInfo ()
+{
+    return !(min_.size() == 0 && max_.size() == 0);
+}
 
-//void DBOVariable::buildMinMaxInfo ()
-//{
-//    assert (!hasMinMaxInfo());
+void DBOVariable::buildMinMaxInfo ()
+{
+    assert (!hasMinMaxInfo());
 
-//    if (!isMetaVariable())
-//        ATSDB::getInstance().buildMinMaxInfo(this);
-//    else
-//    {
-//        std::map <DB_OBJECT_TYPE, std::string>::iterator it;
+    //TODO
+    assert (false);
+    //ATSDB::getInstance().buildMinMaxInfo(this);
+}
 
-//        for (it = sub_variables_.begin(); it != sub_variables_.end(); it++)
-//        {
-//            assert (DBObjectManager::getInstance().existsDBOVariable(it->first, it->second));
-//            DBOVariable *var = DBObjectManager::getInstance().getDBOVariable(it->first, it->second);
+void DBOVariable::setMinMax (std::string min, std::string max)
+{
+    min_=min;
+    max_=max;
 
-//            if (!var->hasMinMaxInfo())
-//                ATSDB::getInstance().buildMinMaxInfo(var);
-//        }
-//    }
-//}
+    logdbg << "DBOVariable: setMinMax: min " << min_ << " max " << max_;
 
-//void DBOVariable::setMinMax (std::string min, std::string max)
-//{
-//    if (isMetaVariable())
-//        throw std::runtime_error ("DBOVariable: setMinString: "+id_+" not possible when meta");
+    emit minMaxInfoAvailableSignal();
+}
 
-//    min_=min;
-//    max_=max;
+std::string DBOVariable::getMinString ()
+{
+    std::string min;
 
-//    logdbg << "DBOVariable: setMinMax: min " << min_ << " max " << max_;
-
-//    assert (hasMinMaxInfo());
-//    notifyMinMaxObservers ();
-
-//    if (parent_variables_.size() > 0)
-//    {
-//        logdbg << "DBOVariable: setMinMax: " << id_ << " updating parents";
-//        std::vector <DBOVariable*>::iterator it;
-//        for (it = parent_variables_.begin(); it != parent_variables_.end(); it++)
-//            (*it)->subVariableHasMinMaxInfo();
-//    }
-//}
-
-//std::string DBOVariable::getMinString ()
-//{
-//    std::string min;
-//    if (isMetaVariable())
+    assert (false);
+    //TODO
+    //    if (isMetaVariable())
 //    {
 //        std::map <DB_OBJECT_TYPE, std::string>::iterator it;
 //        for (it = sub_variables_.begin(); it != sub_variables_.end(); it++)
@@ -463,13 +320,15 @@ const std::string &DBOVariable::currentVariableName ()
 //    }
 
 //    logdbg << "DBOVariable: getMinString: type " << dbo_type_int_ << " name " << id_ << " returning " << min;
-//    return min;
-//}
+    return min;
+}
 
-//std::string DBOVariable::getMaxString ()
-//{
-//    std::string max;
-//    if (isMetaVariable())
+std::string DBOVariable::getMaxString ()
+{
+    std::string max;
+    // TODO
+    assert (false);
+    //    if (isMetaVariable())
 //    {
 //        std::map <DB_OBJECT_TYPE, std::string>::iterator it;
 //        for (it = sub_variables_.begin(); it != sub_variables_.end(); it++)
@@ -518,60 +377,8 @@ const std::string &DBOVariable::currentVariableName ()
 //    }
 
 //    logdbg << "DBOVariable: getMaxString: type " << dbo_type_int_ << " name " << id_ << " returning " << max;
-//    return max;
-//}
-
-//void DBOVariable::addMinMaxObserver (DBOVariableMinMaxObserver *observer)
-//{
-//    assert (find (min_max_observers_.begin(), min_max_observers_.end(), observer) ==
-//            min_max_observers_.end());
-//    min_max_observers_.push_back (observer);
-//}
-//void DBOVariable::removeMinMaxObserver (DBOVariableMinMaxObserver *observer)
-//{
-//    assert (find (min_max_observers_.begin(), min_max_observers_.end(), observer) !=
-//            min_max_observers_.end());
-//    min_max_observers_.erase (find (min_max_observers_.begin(), min_max_observers_.end(), observer));
-//}
-
-//void DBOVariable::notifyMinMaxObservers ()
-//{
-//    std::vector <DBOVariableMinMaxObserver *>::iterator it;
-//    for (it=min_max_observers_.begin(); it != min_max_observers_.end(); it++)
-//        (*it)->notifyMinMax (this);
-//}
-
-//void DBOVariable::registerParentVariable (DBOVariable *parent)
-//{
-//    assert (find (parent_variables_.begin(), parent_variables_.end(), parent) == parent_variables_.end());
-//    parent_variables_.push_back(parent);
-//}
-//void DBOVariable::unregisterParentVariable (DBOVariable *parent)
-//{
-//    assert (find (parent_variables_.begin(), parent_variables_.end(), parent) != parent_variables_.end());
-//    parent_variables_.erase(find (parent_variables_.begin(), parent_variables_.end(), parent));
-//}
-
-//void DBOVariable::subVariableHasMinMaxInfo ()
-//{
-//    assert (isMetaVariable());
-
-//    std::map <std::string, std::string>::iterator it;
-//    bool min_max_valid = true;
-//    for (it = sub_variables_.begin(); it != sub_variables_.end(); it++)
-//    {
-//        DBOVariable *var = DBObjectManager::getInstance().getDBOVariable(it->first, it->second);
-//        min_max_valid &= var->hasMinMaxInfo();
-//    }
-
-//    if (min_max_valid)
-//    {
-//        logdbg << "DBOVariable: subVariableHasMinMaxInfo: " << id_ << " has now valid info";
-//        notifyMinMaxObservers();
-//    }
-//    else
-//        logdbg << "DBOVariable: subVariableHasMinMaxInfo: " << id_ << " has incomplete info";
-//}
+    return max;
+}
 
 DBOVariableWidget *DBOVariable::widget ()
 {

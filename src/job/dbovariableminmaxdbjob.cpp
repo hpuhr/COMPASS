@@ -23,27 +23,26 @@
  */
 
 #include "boost/date_time/posix_time/posix_time.hpp"
-#include "DBResult.h"
-#include "DBInterface.h"
-#include "DBOVariableMinMaxDBJob.h"
-#include "DBOVariable.h"
-#include "DBSchemaManager.h"
-#include "DBTableColumn.h"
-#include "Buffer.h"
-#include "DBSchema.h"
-#include "DBObject.h"
-#include "DBObjectManager.h"
-#include "MetaDBTable.h"
-#include "DBTable.h"
-#include "DBCommand.h"
-#include "String.h"
+
+#include "dbresult.h"
+#include "dbinterface.h"
+#include "dbovariableminmaxdbjob.h"
+#include "dbovariable.h"
+//#include "DBSchemaManager.h"
+#include "dbtablecolumn.h"
+#include "buffer.h"
+//#include "DBSchema.h"
+#include "dbobject.h"
+//#include "DBObjectManager.h"
+//#include "MetaDBTable.h"
+//#include "DBTable.h"
+#include "dbcommand.h"
+#include "stringconv.h"
 
 using namespace Utils::String;
 
-DBOVariableMinMaxDBJob::DBOVariableMinMaxDBJob(JobOrderer *orderer, boost::function<void (Job*)> done_function,
-        boost::function<void (Job*)> obsolete_function, DBInterface *db_interface,
-        DBOVariable *variable)
-: DBJob(orderer, done_function, obsolete_function, db_interface), variable_(variable)
+DBOVariableMinMaxDBJob::DBOVariableMinMaxDBJob(DBInterface &db_interface, DBOVariable &variable)
+: Job(), db_interface_(db_interface), variable_(variable)
 {
 
 }
