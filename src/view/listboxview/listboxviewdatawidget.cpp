@@ -74,3 +74,12 @@ void ListBoxViewDataWidget::updateData (DBObject &object, std::shared_ptr<Buffer
 
     logdbg  << "ListBoxViewDataWidget: updateTables: end";
 }
+
+void ListBoxViewDataWidget::exportDataSlot()
+{
+    logdbg << "ListBoxViewDataWidget: exportDataSlot";
+    assert (tab_widget_);
+    BufferTableWidget *buffer_widget = reinterpret_cast<BufferTableWidget *> (tab_widget_->currentWidget());
+    assert (buffer_widget);
+    buffer_widget->exportSlot();
+}

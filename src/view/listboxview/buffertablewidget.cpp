@@ -12,6 +12,7 @@
 #include <QClipboard>
 #include <QKeyEvent>
 #include <QApplication>
+#include <QFileDialog>
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
@@ -260,3 +261,16 @@ void BufferTableWidget::show (std::shared_ptr<Buffer> buffer) //, DBOVariableSet
     logdbg  << " BufferTableWidget: show: end";
 }
 
+void BufferTableWidget::exportSlot()
+{
+    loginf << "BufferTableWidget: exportSlot: object " << object_.name();
+
+    QString file_name = QFileDialog::getSaveFileName(this,
+            ("Save "+object_.name()+" as CSV").c_str(), "",
+            tr("Comma-separated values (*.csv);;All Files (*)"));
+
+    if (file_name.size())
+    {
+
+    }
+}

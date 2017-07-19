@@ -20,13 +20,9 @@
 ListBoxViewDataSource::ListBoxViewDataSource(const std::string &class_id, const std::string &instance_id, Configurable *parent)
 : QObject(), Configurable (class_id, instance_id, parent), set_(nullptr), selection_entries_ (ViewSelection::getInstance().getEntries())
 {
-    registerParameter ("use_filters", &use_filters_, false);
-    registerParameter ("use_selection", &use_selection_, true);
-    registerParameter ("use_order", &use_order_, false);
-    registerParameter ("order_variable_type_int", &order_variable_type_int_, 0);
-    registerParameter ("order_variable_name", &order_variable_name_, "frame_time");
-    registerParameter ("order_ascending", &order_ascending_, true);
-    registerParameter ("database_view", &database_view_, false);
+    //registerParameter ("use_selection", &use_selection_, true);
+    registerParameter ("use_presentation", &use_presentation_, true);
+    registerParameter ("overwrite_csv", &overwrite_csv_, true);
 
     connect (&ATSDB::instance().objectManager(), SIGNAL(loadingStartedSignal()), this, SLOT(loadingStartedSlot()));
 
@@ -36,7 +32,7 @@ ListBoxViewDataSource::ListBoxViewDataSource(const std::string &class_id, const 
         connect (object.second, SIGNAL (loadingDoneSignal(DBObject &)), this, SLOT(loadingDoneSlot(DBObject&)));
     }
 
-    use_filters_=false;
+    //use_filters_=false;
 
     createSubConfigurables ();
 }
@@ -62,11 +58,31 @@ void ListBoxViewDataSource::generateSubConfigurable (const std::string &class_id
         throw std::runtime_error ("ListBoxViewDataSource: generateSubConfigurable: unknown class_id "+class_id );
 }
 
+bool ListBoxViewDataSource::usePresentation() const
+{
+    return use_presentation_;
+}
+
+void ListBoxViewDataSource::usePresentation(bool use_presentation)
+{
+    use_presentation_ = use_presentation;
+}
+
+bool ListBoxViewDataSource::overwriteCSV() const
+{
+    return overwrite_csv_;
+}
+
+void ListBoxViewDataSource::overwriteCSV(bool overwrite_csv)
+{
+    overwrite_csv_ = overwrite_csv;
+}
+
 void ListBoxViewDataSource::checkSubConfigurables ()
 {
     if (set_ == nullptr)
         generateSubConfigurable ("DBOVariableOrderedSet", "DBOVariableOrderedSet0");
-
+    
     assert (set_);
 }
 

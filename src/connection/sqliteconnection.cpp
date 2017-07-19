@@ -526,8 +526,6 @@ DBTableInfo SQLiteConnection::getColumnList(const std::string &table) // buffer 
         else if (data_type == "INTEGER")
             data_type = "INT";
 
-        PropertyDataType type = Property::asDataType (data_type);
-
         table_info.addColumn (buffer->getString("name").get(cnt), data_type,
                               buffer->getInt("pk").get(cnt) > 0, !buffer->getInt("notnull").get(cnt), "");
     }

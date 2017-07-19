@@ -22,7 +22,7 @@
 using namespace Utils;
 
 ListBoxViewConfigWidget::ListBoxViewConfigWidget( ListBoxView* view, QWidget* parent )
-:   QWidget( parent ), view_( view ), variable_set_widget_ (nullptr)
+    :   QWidget( parent ), view_( view ), variable_set_widget_ (nullptr), presentation_check_ (nullptr), overwrite_check_(nullptr)
 {
     QVBoxLayout *vlayout = new QVBoxLayout;
 
@@ -31,10 +31,10 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget( ListBoxView* view, QWidget* pa
     variable_set_widget_ = view_->getDataSource()->getSet()->widget();
     vlayout->addWidget (variable_set_widget_);
 
-//    QCheckBox *use_selection = new QCheckBox("Use Selection");
-//    use_selection->setChecked(view_->getDataSource()->getUseSelection());
-//    connect(use_selection, SIGNAL( clicked() ), this, SLOT( toggleUseSelection() ));
-//    vlayout->addWidget(use_selection);
+    presentation_check_ = new QCheckBox("Use Presentation");
+    presentation_check_->setChecked(view_->getDataSource()->usePresentation());
+    //connect(use_selection, SIGNAL( clicked() ), this, SLOT( toggleUseSelection() ));
+    vlayout->addWidget(presentation_check_);
 
 
 //    QCheckBox *db_view = new QCheckBox("Database view");
@@ -43,6 +43,10 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget( ListBoxView* view, QWidget* pa
 //    vlayout->addWidget(db_view);
 
     vlayout->addStretch();
+
+    QPushButton *export_button = new QPushButton ("Export");
+    connect(export_button, SIGNAL(clicked(bool)), this, SLOT(exportSlot()));
+    vlayout->addWidget(export_button);
 
     setLayout( vlayout );
 }
@@ -67,3 +71,9 @@ ListBoxViewConfigWidget::~ListBoxViewConfigWidget()
 //    view_->getDataSource()->setDatabaseView (checked);
 
 //}
+
+void ListBoxViewConfigWidget::exportSlot()
+{
+    logdbg << "ListBoxViewConfigWidget: exportSlot";
+    emit exportSignal();
+}

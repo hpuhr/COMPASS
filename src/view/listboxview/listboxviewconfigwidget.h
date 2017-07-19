@@ -12,7 +12,7 @@
 #include "dbovariable.h"
 
 class DBOVariableOrderedSetWidget;
-//class DBOVariableSelectionWidget;
+class QCheckBox;
 class ListBoxView;
 class QLineEdit;
 
@@ -29,6 +29,10 @@ public slots:
     //void toggleUseSelection();
     /// @brief Called when database view checkbox is un/checked
     //void toggleDatabaseView ();
+    void exportSlot();
+
+signals:
+     void exportSignal ();
 
 public:
     /// @brief Constructor
@@ -41,6 +45,9 @@ protected:
     ListBoxView* view_;
     /// Variable read list widget
     DBOVariableOrderedSetWidget *variable_set_widget_;
+
+    QCheckBox *presentation_check_;
+    QCheckBox *overwrite_check_;
 };
 
 #endif /* LISTBOXVIEWCONFIGWIDGET_H_ */

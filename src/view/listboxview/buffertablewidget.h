@@ -41,6 +41,7 @@ class BufferTableWidget : public QWidget
 public slots:
     /// @brief Is called when table item is clicked, un/checks selection checkboxes
     //void itemChanged (QTableWidgetItem *item);
+    void exportSlot();
 
 public:
     /// @brief Constructor

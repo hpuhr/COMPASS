@@ -9,6 +9,7 @@
 #include "listboxviewwidget.h"
 #include "listboxviewdatasource.h"
 #include "listboxviewdatawidget.h"
+#include "listboxviewconfigwidget.h"
 #include "logger.h"
 #include "viewselection.h"
 
@@ -48,6 +49,7 @@ bool ListBoxView::init()
   connect( data_source_, SIGNAL(loadingStartedSignal ()), widget_->getDataWidget (), SLOT(loadingStartedSlot()));
   connect( data_source_, SIGNAL(updateData (DBObject&, std::shared_ptr<Buffer>)), widget_->getDataWidget (), SLOT(updateData (DBObject&, std::shared_ptr<Buffer>)) );
 
+  connect (widget_->configWidget(), SIGNAL(exportSignal()), widget_->getDataWidget(), SLOT(exportDataSlot()));
   return true;
 }
 

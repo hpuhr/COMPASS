@@ -32,6 +32,7 @@ public slots:
     /// @brief Called when new result Buffer was delivered
     void updateData (DBObject &object, std::shared_ptr<Buffer> buffer);
 
+    void exportDataSlot();
 public:
     /// @brief Constructor
     ListBoxViewDataWidget(ListBoxViewDataSource *data_source, QWidget* parent=nullptr, Qt::WindowFlags f=0);
