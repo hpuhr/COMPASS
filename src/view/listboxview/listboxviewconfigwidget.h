@@ -25,8 +25,8 @@ class ListBoxViewConfigWidget : public QWidget
     Q_OBJECT
 
 public slots:
-    /// @brief Called when use selection checkbox is un/checked
-    //void toggleUseSelection();
+    void toggleUsePresentation();
+    void toggleUseOverwrite();
     /// @brief Called when database view checkbox is un/checked
     //void toggleDatabaseView ();
     void exportSlot();

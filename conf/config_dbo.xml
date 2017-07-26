@@ -1,6 +1,6 @@
 <Configuration class_id="DBObjectManager" instance_id="DBObjectManager0">
     <ParameterBool use_filters="0"/>
-    <ParameterBool use_limit="1"/>
+    <ParameterBool use_limit="0"/>
     <ParameterBool use_order="0"/>
     <ParameterBool use_order_ascending="1"/>
     <ParameterUnsignedInt limit_max="100000"/>

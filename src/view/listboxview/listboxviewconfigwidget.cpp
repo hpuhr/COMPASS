@@ -33,16 +33,15 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget( ListBoxView* view, QWidget* pa
 
     presentation_check_ = new QCheckBox("Use Presentation");
     presentation_check_->setChecked(view_->getDataSource()->usePresentation());
-    //connect(use_selection, SIGNAL( clicked() ), this, SLOT( toggleUseSelection() ));
+    connect(presentation_check_, SIGNAL( clicked() ), this, SLOT( toggleUsePresentation() ));
     vlayout->addWidget(presentation_check_);
 
-
-//    QCheckBox *db_view = new QCheckBox("Database view");
-//    db_view->setChecked(view_->getDataSource()->getDatabaseView());
-//    connect(db_view, SIGNAL( clicked() ), this, SLOT( toggleDatabaseView() ));
-//    vlayout->addWidget(db_view);
-
     vlayout->addStretch();
+
+    overwrite_check_ = new QCheckBox("Overwrite Exported File");
+    overwrite_check_->setChecked(view_->getDataSource()->overwriteCSV());
+    connect(overwrite_check_, SIGNAL( clicked() ), this, SLOT( toggleUseOverwrite() ));
+    vlayout->addWidget(overwrite_check_);
 
     QPushButton *export_button = new QPushButton ("Export");
     connect(export_button, SIGNAL(clicked(bool)), this, SLOT(exportSlot()));
@@ -55,22 +54,22 @@ ListBoxViewConfigWidget::~ListBoxViewConfigWidget()
 {
 }
 
-//void ListBoxViewConfigWidget::toggleUseSelection()
-//{
-//  QCheckBox *send = ((QCheckBox*)sender());
-//  bool checked = send->checkState() == Qt::Checked;
-//  logdbg  << "ListBoxViewConfigWidget: toggleUseSelection: setting use filters to " << checked;
-//  view_->getDataSource()->setUseSelection (checked);
-//}
+void ListBoxViewConfigWidget::toggleUsePresentation()
+{
+  assert (presentation_check_);
+  bool checked = presentation_check_->checkState() == Qt::Checked;
+  logdbg  << "ListBoxViewConfigWidget: toggleUsePresentation: setting use presentation to " << checked;
+  view_->getDataSource()->usePresentation(checked);
+}
 
-//void ListBoxViewConfigWidget::toggleDatabaseView ()
-//{
-//    QCheckBox *send = ((QCheckBox*)sender());
-//    bool checked = send->checkState() == Qt::Checked;
-//    logdbg  << "ListBoxViewConfigWidget: toggleDatabaseView: setting database view to " << checked;
-//    view_->getDataSource()->setDatabaseView (checked);
+void ListBoxViewConfigWidget::toggleUseOverwrite()
+{
+    assert (overwrite_check_);
+    bool checked = overwrite_check_->checkState() == Qt::Checked;
+    logdbg  << "ListBoxViewConfigWidget: toggleUseOverwrite: setting overwrite to " << checked;
+    view_->getDataSource()->overwriteCSV (checked);
 
-//}
+}
 
 void ListBoxViewConfigWidget::exportSlot()
 {
