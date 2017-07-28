@@ -32,7 +32,7 @@ public slots:
     void exportSlot();
 
 signals:
-     void exportSignal ();
+     void exportSignal (bool overwrite);
 
 public:
     /// @brief Constructor

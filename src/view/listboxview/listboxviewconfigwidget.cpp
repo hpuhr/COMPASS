@@ -74,5 +74,6 @@ void ListBoxViewConfigWidget::toggleUseOverwrite()
 void ListBoxViewConfigWidget::exportSlot()
 {
     logdbg << "ListBoxViewConfigWidget: exportSlot";
-    emit exportSignal();
+    assert (overwrite_check_);
+    emit exportSignal(overwrite_check_->checkState() == Qt::Checked);
 }

@@ -261,7 +261,7 @@ void BufferTableWidget::show (std::shared_ptr<Buffer> buffer) //, DBOVariableSet
     logdbg  << " BufferTableWidget: show: end";
 }
 
-void BufferTableWidget::exportSlot()
+void BufferTableWidget::exportSlot(bool overwrite)
 {
     loginf << "BufferTableWidget: exportSlot: object " << object_.name();
 
@@ -271,6 +271,8 @@ void BufferTableWidget::exportSlot()
 
     if (file_name.size())
     {
-
+        loginf << "BufferTableWidget: exportSlot: export filename " << file_name.toStdString();
+        assert (model_);
+        model_->saveAsCSV(file_name.toStdString(), overwrite);
     }
 }

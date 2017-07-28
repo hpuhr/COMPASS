@@ -173,7 +173,8 @@ void BufferTableModel::setData (std::shared_ptr <Buffer> buffer)
     endResetModel();
 }
 
-void BufferTableModel::saveAsCSV (const std::string &file_name, bool overwrite, bool presentation)
+void BufferTableModel::saveAsCSV (const std::string &file_name, bool overwrite)
 {
-    loginf << "BufferTableModel: saveAsCSV: into filename " << file_name << " overwrite " << overwrite << " presentation " << presentation;
+    loginf << "BufferTableModel: saveAsCSV: into filename " << file_name << " overwrite " << overwrite;
+
 }

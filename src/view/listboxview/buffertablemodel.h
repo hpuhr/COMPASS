@@ -23,7 +23,7 @@ public:
     void clearData ();
     void setData (std::shared_ptr <Buffer> buffer);
 
-    void saveAsCSV (const std::string &file_name, bool overwrite, bool presentation);
+    void saveAsCSV (const std::string &file_name, bool overwrite);
 
 protected:
     DBObject &object_;
