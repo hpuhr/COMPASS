@@ -2,6 +2,8 @@
 
 #include "buffer.h"
 #include "dbobject.h"
+#include "buffercsvexportjob.h"
+#include "jobmanager.h"
 
 BufferTableModel::BufferTableModel(QObject *parent, DBObject &object)
     :QAbstractTableModel(parent), object_(object)
@@ -177,4 +179,24 @@ void BufferTableModel::saveAsCSV (const std::string &file_name, bool overwrite)
 {
     loginf << "BufferTableModel: saveAsCSV: into filename " << file_name << " overwrite " << overwrite;
 
+    assert (buffer_);
+    BufferCSVExportJob *export_job = new BufferCSVExportJob (buffer_, file_name, overwrite);
+
+    export_job_ = std::shared_ptr<BufferCSVExportJob> (export_job);
+    connect (export_job, SIGNAL(obsoleteSignal()), this, SLOT(exportJobObsoleteSlot()), Qt::QueuedConnection);
+    connect (export_job, SIGNAL(doneSignal()), this, SLOT(exportJobDoneSlot()), Qt::QueuedConnection);
+
+    JobManager::instance().addJob(export_job_);
 }
+
+void BufferTableModel::exportJobObsoleteSlot ()
+{
+    loginf << "BufferTableModel: exportJobObsoleteSlot";
+}
+
+void BufferTableModel::exportJobDoneSlot()
+{
+    loginf << "BufferTableModel: exportJobDoneSlot";
+}
+
+

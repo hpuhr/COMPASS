@@ -89,9 +89,6 @@ public:
     /// @brief Sets index that where key matches, returns true if found, else false.
     //bool setIndexForKey (unsigned int key);
 
-    /// @brief Sets all values of a property to NaN.
-    //void setPropertyValuesNan (unsigned int property_index);
-
     /// @brief Returns flag indicating if buffer is filled to a multiple of BUFFER_ARRAY_SIZE.
     bool full ();
 
@@ -115,16 +112,6 @@ public:
     /// @brief  Returns maximal used index size
     const size_t size ();
 
-
-    /// @brief Returns current maximal size for current allocation
-//    const size_t maxSize ()
-//    {
-//        if (containers_.size() == 0)
-//            return 0;
-
-//        return containers_.front()->maxSize();
-//    };
-
     /// @brief Returns PropertyList
     const PropertyList &properties ()
     {
@@ -144,9 +131,6 @@ protected:
     PropertyList properties_;
     /// DBO type
     std::string dbo_name_;
-
-    /// Maximal index for currently allocated size
-    //unsigned int num_properties_index_;
 
     /// Vector with all ArrayList
     //std::vector <std::shared_ptr<ArrayListBase>> arrays_;
@@ -177,11 +161,6 @@ protected:
 //    int search_key_max_;
 
     static unsigned int ids_;
-
-    /// @brief Initialization
-    //void init();
-    /// @brief Allocates memory up to index
-    //void allocateUpTo (unsigned int index);
 };
 
 #endif /* BUFFER_H_ */

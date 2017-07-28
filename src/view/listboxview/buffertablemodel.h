@@ -7,10 +7,16 @@
 
 class Buffer;
 class DBObject;
+class BufferCSVExportJob;
 
 class BufferTableModel : public QAbstractTableModel
 {
     Q_OBJECT
+
+public slots:
+    void exportJobObsoleteSlot ();
+    void exportJobDoneSlot();
+
 public:
     BufferTableModel(QObject *parent, DBObject &object);
     virtual ~BufferTableModel();
@@ -28,6 +34,8 @@ public:
 protected:
     DBObject &object_;
     std::shared_ptr <Buffer> buffer_;
+
+    std::shared_ptr <BufferCSVExportJob> export_job_;
 };
 
 #endif // BUFFERTABLEMODEL_H
