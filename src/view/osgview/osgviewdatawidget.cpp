@@ -176,18 +176,14 @@ void OSGViewDataWidget::loadingStartedSlot()
 {
     loginf << "OSGViewDataWidget: loadingStartedSlot";
     dbo_sizes_.clear();
-}
 
-void OSGViewDataWidget::updateData (DBObject &object, std::shared_ptr<Buffer> buffer)
-{
-    loginf << "OSGViewDataWidget: updateData: dbo " << object.name() << " size " << buffer->size();
+    Vec3d eye(47.5, 14.0, 10.0 );
+    Vec3d center(47.5, 14.0, 0.0 );
+    Vec3d up( 0.0, 1.0, 0.0 );
+    assert (manipulator_);
+    manipulator_->setHomePosition(eye, center, up);
+    viewer_->setCameraManipulator(manipulator_);
 
-    assert (root_node_);
-    osg::ref_ptr<osg::Geode> geode = createSpriteGeometry(object, buffer);
-    Registry::shaderGenerator().run(geode);
-
-    root_node_->addChild(geode);
-    update();
 }
 
 void OSGViewDataWidget::setup ()
@@ -215,34 +211,19 @@ void OSGViewDataWidget::setup ()
 
 
     //osg::Node* loadedModel = osgDB::readNodeFile("data/maps/openstreetmap_flat.earth");
-    //osg::Node* loadedModel = osgDB::readNodeFile("data/maps/openstreetmap.earth");
+    osg::Node* loadedModel = osgDB::readNodeFile("data/maps/openstreetmap.earth");
     //osg::Node* loadedModel = osgDB::readNodeFile("data/maps/lod_blending.earth");
     // Find the MapNode
-    //assert (!map_node_);
-    //map_node_ = MapNode::get( loadedModel );
-    //root_node_->addChild(map_node_);
-
-    //root_node_->addChild(map_node_);
-
-//    osg::Node* geode = Annotation::AnnotationUtils::createSphere( 250.0, osg::Vec4(0,0,0,0) );
-//    Registry::shaderGenerator().run(geode);
-
-//    GeoTransform* xform = new GeoTransform();
-//    xform->setTerrain( map_node_->getTerrain() );
-
-//    const SpatialReference* srs =map_node_->getTerrain()->getSRS();
-
-//    GeoPoint point(srs, 0.0, 0.0,5000);
-//    xform->setPosition(point);
-//    xform->addChild(geode);
-//    root_node_->addChild(xform);
+    assert (!map_node_);
+    map_node_ = MapNode::get( loadedModel );
+    root_node_->addChild(map_node_);
 
     osg::Camera* camera = new osg::Camera;
 
     LogarithmicDepthBuffer logdepth;
     logdepth.install(camera);
 
-    camera->setViewport( 47.5, 14, this->width(), this->height() );
+    camera->setViewport( 0.0, 0.0, this->width(), this->height() );
     camera->setClearColor( osg::Vec4( 0.f, 0.f, 0.f, 0.f ) );
     float aspectRatio = static_cast<float>( this->width()) / static_cast<float>( this->height() );
     //camera->setProjectionMatrixAsPerspective( 30.f, aspectRatio, 0.001f, 1000.f );
@@ -250,24 +231,40 @@ void OSGViewDataWidget::setup ()
 
     camera->setGraphicsContext( graphics_window_ );
 
-    Vec3d eye(14.0, 47.5, 10.0 );
-    Vec3d center(14.0, 47.5, 0.0 );
-    Vec3d up( 0.0, 1.0, 0.0 );
-
     //camera->setViewMatrixAsLookAt( eye, center, up );
 
     viewer_->setCamera(camera);
 
     viewer_->setSceneData(root_node_);
-    osgGA::TrackballManipulator* manipulator = new osgGA::TrackballManipulator;
-    manipulator->setHomePosition(eye, center, up);
-    manipulator->setAllowThrow( false );
+    manipulator_ = new osgGA::TrackballManipulator;
+    manipulator_->setAllowThrow( false );
     this->setMouseTracking(true);
-    viewer_->setCameraManipulator(manipulator);
+    viewer_->setCameraManipulator(manipulator_);
     viewer_->setThreadingModel(osgViewer::Viewer::SingleThreaded);
     viewer_->realize();
 
     setFocusPolicy(Qt::StrongFocus);
+}
+
+void OSGViewDataWidget::updateData (DBObject &object, std::shared_ptr<Buffer> buffer)
+{
+    loginf << "OSGViewDataWidget: updateData: dbo " << object.name() << " size " << buffer->size();
+
+    assert (root_node_);
+    osg::ref_ptr<osg::Geode> geode = createSpriteGeometry(object, buffer);
+    //Registry::shaderGenerator().run(geode);
+
+//    GeoTransform* xform = new GeoTransform();
+
+//    const SpatialReference* srs = map_node_->getTerrain()->getSRS();
+//    xform->setTerrain( map_node_->getTerrain() );
+//    GeoPoint point(srs, -0.0, 0.0);
+//    xform->setPosition(point);
+//    xform->addChild(geode);
+
+
+    root_node_->addChild(geode);
+    update();
 }
 
 osg::ref_ptr<osg::Geode> OSGViewDataWidget::createSpriteGeometry(DBObject &object, std::shared_ptr<Buffer> buffer)
@@ -315,6 +312,12 @@ osg::ref_ptr<osg::Geode> OSGViewDataWidget::createSpriteGeometry(DBObject &objec
     ArrayListTemplate<double> &latitudes = buffer->getDouble ("POS_LAT_DEG");
     ArrayListTemplate<double> &longitudes = buffer->getDouble ("POS_LONG_DEG");
 
+    const SpatialReference* wgs84 = SpatialReference::get("wgs84");
+    const SpatialReference* srs = map_node_->getTerrain()->getSRS();
+
+    GeoPoint wgsPoint;
+    GeoPoint srsPoint;
+
     for (size_t i = 0; i < size_to_read; ++i)
     {
         if (!latitudes.isNone(i) && !longitudes.isNone(i))
@@ -323,11 +326,16 @@ osg::ref_ptr<osg::Geode> OSGViewDataWidget::createSpriteGeometry(DBObject &objec
 //            xform_->setPosition(point);
 //            assert (point.isValid());
 
+            wgsPoint.set(wgs84, latitudes.get(previous_size+i), longitudes.get(previous_size+i), 1.0, osgEarth::ALTMODE_RELATIVE);
+            srsPoint = wgsPoint.transform( srs );
 
-            (*instanceCoords)[i].y() = latitudes.get(previous_size+i);
-            (*instanceCoords)[i].x() = longitudes.get(previous_size+i);
+
+            (*instanceCoords)[i].x() = srsPoint.x();
+            (*instanceCoords)[i].y() = srsPoint.y();
         }
     }
+    loginf << "last point x " << srsPoint.x() << " y " << srsPoint.y();
+
     dbo_sizes_[object.name()] = buffer_size;
 
     osg::ref_ptr<osg::Geometry> geom = new osg::Geometry;
@@ -366,12 +374,6 @@ osg::ref_ptr<osg::Geode> OSGViewDataWidget::createSpriteGeometry(DBObject &objec
       }
     geode->addDrawable(geom);
     //geode->setName(getGeometryName(modelGeometry).toStdString());
-
-//    GeoTransform* xform = new GeoTransform();
-//    xform->setTerrain( map_node_->getTerrain() );
-//    xform->setPosition( GeoPoint(srs, 0.0, 0.0, 0.0, ALTMODE_ABSOLUTE) );
-//    xform->addChild( geode );
-//    return xform;
 
     return geode;
 }
