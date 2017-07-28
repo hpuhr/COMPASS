@@ -22,6 +22,16 @@
                         <ParameterString dbo_name="Meta"/>
                         <ParameterString dbo_variable_name="MODE3A_CODE"/>
                     </Configuration>
+                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionPOS_LAT_DEG0">
+                        <ParameterUnsignedInt index="5"/>
+                        <ParameterString dbo_name="Meta"/>
+                        <ParameterString dbo_variable_name="POS_LAT_DEG"/>
+                    </Configuration>
+                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionPOS_LONG_DEG0">
+                        <ParameterUnsignedInt index="6"/>
+                        <ParameterString dbo_name="Meta"/>
+                        <ParameterString dbo_variable_name="POS_LONG_DEG"/>
+                    </Configuration>
                     <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionREC_NUM0">
                         <ParameterUnsignedInt index="0"/>
                         <ParameterString dbo_name="Meta"/>

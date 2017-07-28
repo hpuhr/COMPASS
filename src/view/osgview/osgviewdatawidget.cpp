@@ -15,7 +15,24 @@
 #include <osg/Material>
 #include <osgGA/EventQueue>
 #include <osgGA/TrackballManipulator>
-//#include <osgEarthQt/ViewerWidget>
+#include <osg/Geometry>
+#include <osg/Texture2D>
+#include <osg/AlphaFunc>
+#include <osg/BlendFunc>
+#include <osg/Array>
+#include <osg/Geode>
+#include <osg/Group>
+#include <osg/Image>
+#include <osg/Notify>
+#include <osg/BlendFunc>
+#include <osg/BlendEquation>
+#include <osg/PointSprite>
+#include <osg/Point>
+#include <osg/LineWidth>
+#include <osgDB/ReadFile>
+#include <osg/ShapeDrawable>
+#include <osgEarthAnnotation/AnnotationUtils>
+#include <osg/Material>
 
 #include <osgEarth/GeoTransform>
 #include <osgEarth/Map>
@@ -24,14 +41,6 @@
 #include <osgEarthDrivers/tms/TMSOptions>
 #include <osgEarthDrivers/gdal/GDALOptions>
 #include <osgEarthUtil/LogarithmicDepthBuffer>
-
-#include <osg/Geometry>
-#include <osg/Texture2D>
-#include <osg/Billboard>
-#include <osg/AlphaFunc>
-#include <osg/BlendFunc>
-//#include <osgDB/Registry>
-//#include <osgDB/ReadFile>
 #include <osg/PositionAttitudeTransform>
 
 #include "buffertablewidget.h"
@@ -50,14 +59,15 @@ using namespace osgEarth::Drivers;
 
 OSGViewDataWidget::OSGViewDataWidget(OSGViewDataSource *data_source, qreal scaleX, qreal scaleY, QWidget* parent)
     : QOpenGLWidget(parent), data_source_ (data_source), graphics_window_ (new osgViewer::GraphicsWindowEmbedded( this->x(), this->y(), this->width(), this->height())),
-      viewer_(new osgViewer::Viewer), scale_x_(scaleX), scale_y_(scaleY)
+      viewer_(new osgViewer::Viewer), root_node_(nullptr), scale_x_(scaleX), scale_y_(scaleY)
 {
     setup();
 }
 
 OSGViewDataWidget::~OSGViewDataWidget()
 {
-
+    assert (root_node_);
+    root_node_->releaseGLObjects();
 }
 
 void OSGViewDataWidget::setScale(qreal X, qreal Y)
@@ -69,7 +79,7 @@ void OSGViewDataWidget::setScale(qreal X, qreal Y)
 
 void OSGViewDataWidget::paintGL()
 {
-  viewer_->frame();
+    viewer_->frame();
 }
 
 void OSGViewDataWidget::resizeGL( int width, int height )
@@ -82,7 +92,7 @@ void OSGViewDataWidget::resizeGL( int width, int height )
 
 void OSGViewDataWidget::mouseMoveEvent(QMouseEvent* event)
 {
-    this->getEventQueue()->mouseMotion(event->x()*scale_x_, event->y()*scale_y_);
+    this->getEventQueue()->mouseMotion(static_cast<float>(event->x())*scale_x_, static_cast<float>(event->y())*scale_y_);
 }
 
 void OSGViewDataWidget::mousePressEvent(QMouseEvent* event)
@@ -125,191 +135,245 @@ void OSGViewDataWidget::mouseReleaseEvent(QMouseEvent* event)
 
 void OSGViewDataWidget::wheelEvent(QWheelEvent* event)
 {
+    event->accept();
     int delta = event->delta();
     osgGA::GUIEventAdapter::ScrollingMotion motion = delta > 0 ?
                 osgGA::GUIEventAdapter::SCROLL_UP : osgGA::GUIEventAdapter::SCROLL_DOWN;
     this->getEventQueue()->mouseScroll(motion);
+
 }
 
 bool OSGViewDataWidget::event(QEvent* event)
 {
     bool handled = QOpenGLWidget::event(event);
-    this->update();
+
+    switch (event->type())
+    {
+    case QEvent::KeyPress:
+    case QEvent::KeyRelease:
+    case QEvent::MouseButtonDblClick:
+    case QEvent::MouseButtonPress:
+    case QEvent::MouseButtonRelease:
+    case QEvent::MouseMove:
+    case QEvent::Wheel:
+        update();
+        break;
+
+    default:
+        break;
+    }
+
     return handled;
 }
 
 osgGA::EventQueue* OSGViewDataWidget::getEventQueue() const
 {
-  osgGA::EventQueue* eventQueue = graphics_window_->getEventQueue();
-  return eventQueue;
+    osgGA::EventQueue* eventQueue = graphics_window_->getEventQueue();
+    return eventQueue;
 }
 
 void OSGViewDataWidget::loadingStartedSlot()
 {
     loginf << "OSGViewDataWidget: loadingStartedSlot";
+    dbo_sizes_.clear();
 }
 
 void OSGViewDataWidget::updateData (DBObject &object, std::shared_ptr<Buffer> buffer)
 {
-    loginf << "OSGViewDataWidget: updateData";
+    loginf << "OSGViewDataWidget: updateData: dbo " << object.name() << " size " << buffer->size();
+
+    assert (root_node_);
+    osg::ref_ptr<osg::Geode> geode = createSpriteGeometry(object, buffer);
+    Registry::shaderGenerator().run(geode);
+
+    root_node_->addChild(geode);
+    update();
 }
 
 void OSGViewDataWidget::setup ()
 {
-    //osg::Group* rootNode = new osg::Group();
-    //Registry::shaderGenerator().run(rootNode);
+    assert (!root_node_);
+    root_node_ = new osg::Group();
 
-    osg::Node* loadedModel = osgDB::readNodeFile("data/maps/openstreetmap.earth");
+    osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
+    // set up alpha blending
+    stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
+
+    osg::ref_ptr<osg::BlendFunc> blendFunction = new osg::BlendFunc;
+    blendFunction->setFunction(osg::BlendFunc::SRC_ALPHA,
+                               osg::BlendFunc::ONE_MINUS_SRC_ALPHA);
+    stateset->setAttributeAndModes(blendFunction, osg::StateAttribute::ON);
+
+    osg::ref_ptr<osg::BlendEquation> blendEquation = new osg::BlendEquation;
+
+    blendEquation->setEquation(osg::BlendEquation::FUNC_ADD);
+    stateset->setAttribute(blendEquation);
+
+    stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+    stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+    root_node_->setStateSet(stateset);
+
+
+    //osg::Node* loadedModel = osgDB::readNodeFile("data/maps/openstreetmap_flat.earth");
     //osg::Node* loadedModel = osgDB::readNodeFile("data/maps/openstreetmap.earth");
     //osg::Node* loadedModel = osgDB::readNodeFile("data/maps/lod_blending.earth");
     // Find the MapNode
-    osgEarth::MapNode* mapNode = MapNode::get( loadedModel );
-    //rootNode->addChild(mapNode);
+    //assert (!map_node_);
+    //map_node_ = MapNode::get( loadedModel );
+    //root_node_->addChild(map_node_);
 
-    GeoTransform* xform = new GeoTransform();
-    xform->setTerrain( mapNode->getTerrain() );
+    //root_node_->addChild(map_node_);
 
-    const SpatialReference* srs =mapNode->getTerrain()->getSRS();
+//    osg::Node* geode = Annotation::AnnotationUtils::createSphere( 250.0, osg::Vec4(0,0,0,0) );
+//    Registry::shaderGenerator().run(geode);
 
-    GeoPoint point(srs, -121.0, 34.0);
-    xform->setPosition(point);
+//    GeoTransform* xform = new GeoTransform();
+//    xform->setTerrain( map_node_->getTerrain() );
 
-//    Map* map = new Map();
+//    const SpatialReference* srs =map_node_->getTerrain()->getSRS();
 
-//    TMSOptions driverOpt;
-//    driverOpt.url() = "http://tile.openstreetmap.org/";
-//    driverOpt.tmsType() = "google";
-
-//    ImageLayerOptions layerOpt( "OSM", driverOpt );
-//    //layerOpt.profile() = ProfileOptions( "global-mercator" );
-
-//    ImageLayer* osmLayer = new ImageLayer( layerOpt );
-//    osmLayer->setOpacity( 0.5 );
-
-//    map->addImageLayer( osmLayer );
-
-//    MapNode* mapNode = new MapNode( map );
+//    GeoPoint point(srs, 0.0, 0.0,5000);
+//    xform->setPosition(point);
+//    xform->addChild(geode);
+//    root_node_->addChild(xform);
 
     osg::Camera* camera = new osg::Camera;
 
     LogarithmicDepthBuffer logdepth;
     logdepth.install(camera);
 
-//    Vec3d eye( 1000.0, 1000.0, 0.0 );
-//    Vec3d center( 0.0, 0.0, 0.0 );
-//    Vec3d up( 0.0, 0.0, 1.0 );
-
-//    camera->setViewMatrixAsLookAt( eye, center, up );
-
-    osg::Billboard *billy = createBillboards ();
-    Registry::shaderGenerator().run(billy);
-
-    mapNode->addChild(billy);
-
-
-    camera->setViewport( 0, 0, this->width(), this->height() );
+    camera->setViewport( 47.5, 14, this->width(), this->height() );
     camera->setClearColor( osg::Vec4( 0.f, 0.f, 0.f, 0.f ) );
     float aspectRatio = static_cast<float>( this->width()) / static_cast<float>( this->height() );
-    camera->setProjectionMatrixAsPerspective( 30.f, aspectRatio, 0.001f, 1000.f );
+    //camera->setProjectionMatrixAsPerspective( 30.f, aspectRatio, 0.001f, 1000.f );
+    camera->setProjectionMatrixAsPerspective(60.f, aspectRatio, 1.f, 1000.f);
+
     camera->setGraphicsContext( graphics_window_ );
 
-    // setup
+    Vec3d eye(14.0, 47.5, 10.0 );
+    Vec3d center(14.0, 47.5, 0.0 );
+    Vec3d up( 0.0, 1.0, 0.0 );
+
+    //camera->setViewMatrixAsLookAt( eye, center, up );
+
     viewer_->setCamera(camera);
 
-    viewer_->setSceneData(mapNode);
+    viewer_->setSceneData(root_node_);
     osgGA::TrackballManipulator* manipulator = new osgGA::TrackballManipulator;
+    manipulator->setHomePosition(eye, center, up);
     manipulator->setAllowThrow( false );
     this->setMouseTracking(true);
     viewer_->setCameraManipulator(manipulator);
     viewer_->setThreadingModel(osgViewer::Viewer::SingleThreaded);
     viewer_->realize();
+
+    setFocusPolicy(Qt::StrongFocus);
 }
 
-osg::Billboard* OSGViewDataWidget::createBillboards ()
+osg::ref_ptr<osg::Geode> OSGViewDataWidget::createSpriteGeometry(DBObject &object, std::shared_ptr<Buffer> buffer)
 {
-    osg::Billboard* shrubBillBoard = new osg::Billboard();
+    //  auto* sprite = dynamic_cast<const Sprite*>(modelGeometry.getPrimitive());
+    //  if (!sprite)
+    //  {
+    //    std::cout << "Error: primitive with type sprite was not a sprite"
+    //              << std::endl;
+    //    return nullptr;
+    //  }
+    // per-instance data
 
-    shrubBillBoard->setMode(osg::Billboard::POINT_ROT_EYE);
-    shrubBillBoard->setAxis(osg::Vec3(0.0f,0.0f,1.0f));
-    shrubBillBoard->setNormal(osg::Vec3(0.0f,-1.0f,0.0f));
+//    osg::Geode* geode = new osg::Geode();
+//    geode->setComputeBoundingSphereCallback( new MyComputeBoundCallback(RADIUS) );
+//    geode->addDrawable( new osg::ShapeDrawable( new osg::Sphere(osg::Vec3f(0,0,0), RADIUS) ) );
+//    osg::Vec3f center = geode->getBound().center();
+//    GeoTransform* xform = new GeoTransform();
+//    xform->setPosition( GeoPoint(srs, 0.0, 0.0, 0.0, ALTMODE_ABSOLUTE) );
+//    xform->addChild( geode );
+//return xform;
 
-    osg::Texture2D *ocotilloTexture = new osg::Texture2D;
-    ocotilloTexture->setImage(osgDB::readImageFile("data/icons/delete.png"));
+    //const SpatialReference* srs = map_node_->getTerrain()->getSRS();
 
-    osg::AlphaFunc* alphaFunc = new osg::AlphaFunc;
-    alphaFunc->setFunction(osg::AlphaFunc::GEQUAL,0.05f);
+    //GeoPoint point;
 
-    osg::StateSet* billBoardStateSet = new osg::StateSet;
+    osg::ref_ptr<osg::Geode> geode = new osg::Geode;
 
-    billBoardStateSet->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
-    billBoardStateSet->setTextureAttributeAndModes
-          (0, ocotilloTexture, osg::StateAttribute::ON );
-    billBoardStateSet->setAttributeAndModes
-          (new osg::BlendFunc, osg::StateAttribute::ON );
-    osg::AlphaFunc* alphaFunction = new osg::AlphaFunc;
-    alphaFunction->setFunction(osg::AlphaFunc::GEQUAL,0.05f);
-    billBoardStateSet->setAttributeAndModes( alphaFunc, osg::StateAttribute::ON );
+    size_t previous_size = 0;
+    if (dbo_sizes_.count(object.name()) > 0)
+        previous_size = dbo_sizes_.at(object.name());
 
-    osg::Drawable* shrub1Drawable = createShrub( 1.0f, billBoardStateSet);
-    osg::Drawable* shrub2Drawable = createShrub( 2.0f, billBoardStateSet);
-    osg::Drawable* shrub3Drawable = createShrub( 1.2f, billBoardStateSet);
+    size_t buffer_size = buffer->size();
+    if (buffer_size <= previous_size)
+    {
+        logerr << "UGA bufer size fixme";
+        return geode;
+    }
+    size_t size_to_read = buffer_size-previous_size;
 
-    // Add these drawables to our billboard at various positions
-    shrubBillBoard->addDrawable( shrub1Drawable , osg::Vec3(120,30,80) );
-    shrubBillBoard->addDrawable( shrub2Drawable , osg::Vec3(100,180,80));
-    shrubBillBoard->addDrawable( shrub3Drawable , osg::Vec3(60,100,80) );
+    Sprite sprite (QColor("#FF0000"),Sprite::Style::CIRCLE, 2.0);
 
-    return shrubBillBoard;
+    osg::ref_ptr<osg::Vec2Array> instanceCoords = new osg::Vec2Array(size_to_read);
+
+    ArrayListTemplate<double> &latitudes = buffer->getDouble ("POS_LAT_DEG");
+    ArrayListTemplate<double> &longitudes = buffer->getDouble ("POS_LONG_DEG");
+
+    for (size_t i = 0; i < size_to_read; ++i)
+    {
+        if (!latitudes.isNone(i) && !longitudes.isNone(i))
+        {
+//            point.set(srs, latitudes.get(previous_size+i), longitudes.get(previous_size+i), 2000.0, osgEarth::ALTMODE_ABSOLUTE);
+//            xform_->setPosition(point);
+//            assert (point.isValid());
+
+
+            (*instanceCoords)[i].y() = latitudes.get(previous_size+i);
+            (*instanceCoords)[i].x() = longitudes.get(previous_size+i);
+        }
+    }
+    dbo_sizes_[object.name()] = buffer_size;
+
+    osg::ref_ptr<osg::Geometry> geom = new osg::Geometry;
+    osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(1);
+    (*colors)[0].r() = 1.0f;
+    (*colors)[0].g() = 1.0f;
+    (*colors)[0].b() = 1.0f;
+    (*colors)[0].a() = 1.0f;
+    geom->setColorArray(colors, osg::Array::Binding::BIND_OVERALL);
+    geom->setVertexArray(instanceCoords);
+    geom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::POINTS, 0, size_to_read));
+
+
+      {
+        osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
+
+        // Use point sprites
+        osg::ref_ptr<osg::PointSprite> pointSprite = new osg::PointSprite;
+        stateset->setTextureAttributeAndModes(0, pointSprite, osg::StateAttribute::ON);
+
+        // set GL_POINT_SIZE
+        osg::ref_ptr<osg::Point> point = new osg::Point;
+        point->setSize(sprite.getSize());
+        stateset->setAttribute(point);
+
+        // set texture for points
+        auto* tex = textureFactory.getTextureForStyle(sprite.getStyle());
+        if (!tex)
+        {
+          std::cout << "Error: got null texture" << std::endl;
+          return nullptr;
+        }
+        stateset->setTextureAttributeAndModes(0, tex, osg::StateAttribute::ON);
+
+        geom->setStateSet(stateset);
+      }
+    geode->addDrawable(geom);
+    //geode->setName(getGeometryName(modelGeometry).toStdString());
+
+//    GeoTransform* xform = new GeoTransform();
+//    xform->setTerrain( map_node_->getTerrain() );
+//    xform->setPosition( GeoPoint(srs, 0.0, 0.0, 0.0, ALTMODE_ABSOLUTE) );
+//    xform->addChild( geode );
+//    return xform;
+
+    return geode;
 }
 
-osg::Drawable* OSGViewDataWidget::createShrub(const float &scale, osg::StateSet* bbState)
-{
-   float width = 1.5f;
-   float height = 3.0f;
 
-   width *= scale;
-   height *= scale;
-
-   osg::Geometry* shrubQuad = new osg::Geometry;
-
-   osg::Vec3Array* shrubVerts = new osg::Vec3Array(4);
-   (*shrubVerts)[0] = osg::Vec3(-width/2.0f, 0, 0);
-   (*shrubVerts)[1] = osg::Vec3( width/2.0f, 0, 0);
-   (*shrubVerts)[2] = osg::Vec3( width/2.0f, 0, height);
-   (*shrubVerts)[3] = osg::Vec3(-width/2.0f, 0, height);
-
-   shrubQuad->setVertexArray(shrubVerts);
-
-   osg::Vec2Array* shrubTexCoords = new osg::Vec2Array(4);
-   (*shrubTexCoords)[0].set(0.0f,0.0f);
-   (*shrubTexCoords)[1].set(1.0f,0.0f);
-   (*shrubTexCoords)[2].set(1.0f,1.0f);
-   (*shrubTexCoords)[3].set(0.0f,1.0f);
-   shrubQuad->setTexCoordArray(0,shrubTexCoords);
-
-   shrubQuad->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS,0,4));
-
-   // Need to assign a color to the underlying geometry, otherwise we'll get
-   // whatever color is current applied to our geometry.
-   // Create a color array, add a single color to use for all the vertices
-
-   osg::Vec4Array* colorArray = new osg::Vec4Array;
-   colorArray->push_back(osg::Vec4(1.0f, 1.0f, 1.0f, 1.0f) ); // white, fully opaque
-
-   // An index array for assigning vertices to colors (based on index in the array)
-   osg::TemplateIndexArray
-      <unsigned int, osg::Array::UIntArrayType,4,1> *colorIndexArray;
-   colorIndexArray =
-      new osg::TemplateIndexArray<unsigned int, osg::Array::UIntArrayType,4,1>;
-   colorIndexArray->push_back(0);
-
-   // Use the index array to associate the first entry in our index array with all
-   // of the vertices.
-   shrubQuad->setColorArray( colorArray);
-   //shrubQuad->setColorIndices(colorIndexArray);
-   shrubQuad->setColorBinding(osg::Geometry::BIND_OVERALL);
-
-   shrubQuad->setStateSet(bbState);
-
-   return shrubQuad;
-}

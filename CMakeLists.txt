@@ -285,6 +285,8 @@ set ( atsdb_HDRS
     src/view/osgview/osgviewconfigwidget.h
     src/view/osgview/osgviewdatawidget.h
     src/view/osgview/osgviewwidget.h
+    src/view/osgview/primitive.h
+    src/view/osgview/texturefactory.h
     src/unit/unit.h
     src/unit/unitmanager.h
     src/unit/dimension.h
@@ -451,6 +453,8 @@ set ( atsdb_SRCS
     src/view/osgview/osgviewconfigwidget.cpp
     src/view/osgview/osgviewdatawidget.cpp
     src/view/osgview/osgviewwidget.cpp
+    src/view/osgview/primitive.cpp
+    src/view/osgview/texturefactory.cpp
 #    src/view/viewbase/dbviewmodel.cpp
 #    src/view/viewbase/dbview.cpp
 #    src/view/viewbase/dbviewwidget.cpp
