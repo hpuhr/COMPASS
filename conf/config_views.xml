@@ -56,8 +56,8 @@
         <ParameterUnsignedInt height="1197"/>
         <ParameterUnsignedInt min_height="700"/>
         <ParameterUnsignedInt min_width="1000"/>
-        <ParameterUnsignedInt pos_x="948"/>
-        <ParameterUnsignedInt pos_y="140"/>
+        <ParameterUnsignedInt pos_x="944"/>
+        <ParameterUnsignedInt pos_y="149"/>
         <ParameterUnsignedInt width="1518"/>
         <Configuration class_id="ViewContainer" instance_id="ViewWindow1ViewContainer0">
             <Configuration class_id="OSGView" instance_id="OSGView1">

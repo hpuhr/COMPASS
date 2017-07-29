@@ -177,12 +177,12 @@ void OSGViewDataWidget::loadingStartedSlot()
     loginf << "OSGViewDataWidget: loadingStartedSlot";
     dbo_sizes_.clear();
 
-    Vec3d eye(47.5, 14.0, 10.0 );
-    Vec3d center(47.5, 14.0, 0.0 );
-    Vec3d up( 0.0, 1.0, 0.0 );
-    assert (manipulator_);
-    manipulator_->setHomePosition(eye, center, up);
-    viewer_->setCameraManipulator(manipulator_);
+//    Vec3d eye(47.5, 14.0, 10.0 );
+//    Vec3d center(47.5, 14.0, 0.0 );
+//    Vec3d up( 0.0, 1.0, 0.0 );
+//    assert (manipulator_);
+//    manipulator_->setHomePosition(eye, center, up);
+//    viewer_->setCameraManipulator(manipulator_);
 
 }
 
@@ -191,31 +191,39 @@ void OSGViewDataWidget::setup ()
     assert (!root_node_);
     root_node_ = new osg::Group();
 
-    osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
-    // set up alpha blending
-    stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
+//    osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
+//    // set up alpha blending
+//    stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
 
-    osg::ref_ptr<osg::BlendFunc> blendFunction = new osg::BlendFunc;
-    blendFunction->setFunction(osg::BlendFunc::SRC_ALPHA,
-                               osg::BlendFunc::ONE_MINUS_SRC_ALPHA);
-    stateset->setAttributeAndModes(blendFunction, osg::StateAttribute::ON);
+//    osg::ref_ptr<osg::BlendFunc> blendFunction = new osg::BlendFunc;
+//    blendFunction->setFunction(osg::BlendFunc::SRC_ALPHA,
+//                               osg::BlendFunc::ONE_MINUS_SRC_ALPHA);
+//    stateset->setAttributeAndModes(blendFunction, osg::StateAttribute::ON);
 
-    osg::ref_ptr<osg::BlendEquation> blendEquation = new osg::BlendEquation;
+//    osg::ref_ptr<osg::BlendEquation> blendEquation = new osg::BlendEquation;
 
-    blendEquation->setEquation(osg::BlendEquation::FUNC_ADD);
-    stateset->setAttribute(blendEquation);
+//    blendEquation->setEquation(osg::BlendEquation::FUNC_ADD);
+//    stateset->setAttribute(blendEquation);
 
-    stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
-    stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-    root_node_->setStateSet(stateset);
+//    stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+//    stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+//    root_node_->setStateSet(stateset);
 
 
     //osg::Node* loadedModel = osgDB::readNodeFile("data/maps/openstreetmap_flat.earth");
     osg::Node* loadedModel = osgDB::readNodeFile("data/maps/openstreetmap.earth");
+
+//    osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
+//    osg::AlphaFunc* alphaFunc = new osg::AlphaFunc;
+//    alphaFunc->setFunction(osg::AlphaFunc::GEQUAL,0.05f);
+//    stateset->setAttributeAndModes (alphaFunc, osg::StateAttribute::ON );
+//    loadedModel->setStateSet(stateset);
+
     //osg::Node* loadedModel = osgDB::readNodeFile("data/maps/lod_blending.earth");
     // Find the MapNode
     assert (!map_node_);
     map_node_ = MapNode::get( loadedModel );
+    map_node_->getMap()->getImageLayerAt(0)->setOpacity(0.9);
     root_node_->addChild(map_node_);
 
     osg::Camera* camera = new osg::Camera;
@@ -223,11 +231,11 @@ void OSGViewDataWidget::setup ()
     LogarithmicDepthBuffer logdepth;
     logdepth.install(camera);
 
-    camera->setViewport( 0.0, 0.0, this->width(), this->height() );
+    //camera->setViewport( 0.0, 0.0, this->width(), this->height() );
     camera->setClearColor( osg::Vec4( 0.f, 0.f, 0.f, 0.f ) );
     float aspectRatio = static_cast<float>( this->width()) / static_cast<float>( this->height() );
     //camera->setProjectionMatrixAsPerspective( 30.f, aspectRatio, 0.001f, 1000.f );
-    camera->setProjectionMatrixAsPerspective(60.f, aspectRatio, 1.f, 1000.f);
+    camera->setProjectionMatrixAsPerspective(60.f, aspectRatio, 0.001f, 1000.f);
 
     camera->setGraphicsContext( graphics_window_ );
 
@@ -261,6 +269,7 @@ void OSGViewDataWidget::updateData (DBObject &object, std::shared_ptr<Buffer> bu
 //    GeoPoint point(srs, -0.0, 0.0);
 //    xform->setPosition(point);
 //    xform->addChild(geode);
+//    root_node_->addChild(xform);
 
 
     root_node_->addChild(geode);
@@ -305,18 +314,24 @@ osg::ref_ptr<osg::Geode> OSGViewDataWidget::createSpriteGeometry(DBObject &objec
     }
     size_t size_to_read = buffer_size-previous_size;
 
-    Sprite sprite (QColor("#FF0000"),Sprite::Style::CIRCLE, 2.0);
+    Sprite sprite (QColor("#FFFFFF"),Sprite::Style::CIRCLE, 2.0);
 
-    osg::ref_ptr<osg::Vec2Array> instanceCoords = new osg::Vec2Array(size_to_read);
+    osg::ref_ptr<osg::Vec3Array> instanceCoords = new osg::Vec3Array(size_to_read);
 
     ArrayListTemplate<double> &latitudes = buffer->getDouble ("POS_LAT_DEG");
     ArrayListTemplate<double> &longitudes = buffer->getDouble ("POS_LONG_DEG");
 
-    const SpatialReference* wgs84 = SpatialReference::get("wgs84");
-    const SpatialReference* srs = map_node_->getTerrain()->getSRS();
+    //const SpatialReference* wgs84 = SpatialReference::get("wgs84");
+    //const SpatialReference* srs = map_node_->getTerrain()->getSRS();
 
-    GeoPoint wgsPoint;
-    GeoPoint srsPoint;
+    //GeoPoint wgsPoint (srs, 0.0, 0.0, 0.0);
+    //GeoPoint srsPoint;
+    //osg::Vec3d world_point;
+
+
+    double x,y,z;
+    osg::EllipsoidModel elipsModelObj;
+
 
     for (size_t i = 0; i < size_to_read; ++i)
     {
@@ -326,23 +341,34 @@ osg::ref_ptr<osg::Geode> OSGViewDataWidget::createSpriteGeometry(DBObject &objec
 //            xform_->setPosition(point);
 //            assert (point.isValid());
 
-            wgsPoint.set(wgs84, latitudes.get(previous_size+i), longitudes.get(previous_size+i), 1.0, osgEarth::ALTMODE_RELATIVE);
-            srsPoint = wgsPoint.transform( srs );
+            //world_point.set(latitudes.get(previous_size+i), longitudes.get(previous_size+i), 1.0);
 
+            //wgsPoint.fromWorld(wgs84, world_point);
+            //.set(srs, , osgEarth::ALTMODE_ABSOLUTE);
+            //wgsPoint.toWorld(world_point);
+            //srsPoint = wgsPoint.transform( srs );
 
-            (*instanceCoords)[i].x() = srsPoint.x();
-            (*instanceCoords)[i].y() = srsPoint.y();
+            elipsModelObj.convertLatLongHeightToXYZ(latitudes.get(previous_size+i),longitudes.get(previous_size+i),1000.0,x,y,z);
+
+            (*instanceCoords)[i].x() = x;
+            (*instanceCoords)[i].y() = y;
+            (*instanceCoords)[i].z() = z;
+
+//            (*instanceCoords)[i].x() = latitudes.get(previous_size+i);
+//            (*instanceCoords)[i].y() = longitudes.get(previous_size+i);
+//            (*instanceCoords)[i].z() = 0;
+
         }
     }
-    loginf << "last point x " << srsPoint.x() << " y " << srsPoint.y();
+    loginf << "last point x " << x << " y " << y << " z " << z;
 
     dbo_sizes_[object.name()] = buffer_size;
 
     osg::ref_ptr<osg::Geometry> geom = new osg::Geometry;
     osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(1);
     (*colors)[0].r() = 1.0f;
-    (*colors)[0].g() = 1.0f;
-    (*colors)[0].b() = 1.0f;
+    (*colors)[0].g() = 0.0f;
+    (*colors)[0].b() = 0.0f;
     (*colors)[0].a() = 1.0f;
     geom->setColorArray(colors, osg::Array::Binding::BIND_OVERALL);
     geom->setVertexArray(instanceCoords);
@@ -351,10 +377,26 @@ osg::ref_ptr<osg::Geode> OSGViewDataWidget::createSpriteGeometry(DBObject &objec
 
       {
         osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
+        stateset->setMode(GL_DEPTH_TEST,osg::StateAttribute::ON);
+        //stateset->setRenderBinDetails( 2, "RenderBin");
 
         // Use point sprites
         osg::ref_ptr<osg::PointSprite> pointSprite = new osg::PointSprite;
         stateset->setTextureAttributeAndModes(0, pointSprite, osg::StateAttribute::ON);
+
+        osg::AlphaFunc* alphaFunc = new osg::AlphaFunc;
+        alphaFunc->setFunction(osg::AlphaFunc::ALWAYS,0.05f);
+
+//            osg::StateSet* billBoardStateSet = new osg::StateSet;
+
+//            billBoardStateSet->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
+//            billBoardStateSet->setTextureAttributeAndModes
+//                  (0, ocotilloTexture, osg::StateAttribute::ON );
+//            billBoardStateSet->setAttributeAndModes
+//                  (new osg::BlendFunc, osg::StateAttribute::ON );
+//            osg::AlphaFunc* alphaFunction = new osg::AlphaFunc;
+//            alphaFunction->setFunction(osg::AlphaFunc::GEQUAL,0.05f);
+//            billBoardStateSet->setAttributeAndModes( alphaFunc, osg::StateAttribute::ON );
 
         // set GL_POINT_SIZE
         osg::ref_ptr<osg::Point> point = new osg::Point;
@@ -368,6 +410,7 @@ osg::ref_ptr<osg::Geode> OSGViewDataWidget::createSpriteGeometry(DBObject &objec
           std::cout << "Error: got null texture" << std::endl;
           return nullptr;
         }
+        stateset->setAttributeAndModes( alphaFunc, osg::StateAttribute::ON );
         stateset->setTextureAttributeAndModes(0, tex, osg::StateAttribute::ON);
 
         geom->setStateSet(stateset);
