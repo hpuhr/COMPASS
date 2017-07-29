@@ -30,31 +30,38 @@
 
 class FilterConditionOperatorComboBox : public QComboBox
 {
-protected:
-  static QList<QString> stringsList_;
 public:
-  FilterConditionOperatorComboBox ()
-  {
-    if (stringsList_.size() == 0)
+    FilterConditionOperatorComboBox (bool numeric_only=false, bool string_only=false)
     {
-      stringsList_.append("=");
-      stringsList_.append("!=");
-      stringsList_.append(">");
-      stringsList_.append(">=");
-      stringsList_.append("<");
-      stringsList_.append("<=");
-      stringsList_.append("|=");
-      stringsList_.append("IS");
-      stringsList_.append("IS NOT");
-    }
+        QList<QString> stringlist;
 
-    /* Populate the comboBox */
-    addItems(stringsList_);
-  }
-  virtual ~FilterConditionOperatorComboBox () {}
+        if (stringlist.size() == 0)
+        {
+            stringlist.append("=");
+            stringlist.append("!=");
+
+            if (!string_only)
+            {
+                stringlist.append(">");
+                stringlist.append(">=");
+                stringlist.append("<");
+                stringlist.append("<=");
+                stringlist.append("IN");
+            }
+            if (!numeric_only)
+            {
+                stringlist.append("LIKE");
+            }
+            stringlist.append("IS");
+            stringlist.append("IS NOT");
+        }
+
+        /* Populate the comboBox */
+        addItems(stringlist);
+    }
+    virtual ~FilterConditionOperatorComboBox () {}
+
 
 };
-
-QList<QString> FilterConditionOperatorComboBox::stringsList_;
 
 #endif /* FILTERCONDITIONOPERATORCOMBOBOX_H_ */

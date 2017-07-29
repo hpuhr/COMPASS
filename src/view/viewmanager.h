@@ -16,6 +16,7 @@
 class ATSDB;
 class Buffer;
 class ViewContainer;
+class ViewContainerWidget;
 class ViewManagerWidget;
 class View;
 class QWidget;
@@ -35,20 +36,12 @@ public:
     void unregisterView (View *view);
     bool isRegistered (View *view);
 
-    //  void distributeData (Buffer *buffer);
-    //  void clearData ();
+    ViewContainerWidget* addNewContainerWidget ();
 
-    //  void addContainerWithGeographicView ();
-    //  void addContainerWithHistogramView ();
-    //  void addContainerWithListBoxView ();
-    //  void addContainerWithMosaicView ();
-    //  void addContainerWithScatterPlotView ();
-    //  void addContainerWithTemplateView (std::string template_name);
-    //  void saveViewAsTemplate (View *view, std::string template_name);
-    //void updateReadSet ();
-
-    void deleteContainer (std::string instance_id);
+    //void deleteContainer (std::string instance_id);
     void removeContainer (std::string instance_id);
+    void deleteContainerWidget (std::string instance_id);
+    void removeContainerWidget (std::string instance_id);
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
@@ -68,6 +61,7 @@ protected:
     QTabWidget *tab_widget_;
 
     std::map <std::string, ViewContainer*> containers_;
+    std::map <std::string, ViewContainerWidget*> container_widgets_;
     std::map<std::string, View*> views_;
 
     unsigned int container_count_;

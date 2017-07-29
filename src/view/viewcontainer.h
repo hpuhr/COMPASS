@@ -25,7 +25,7 @@ class ViewContainer : public QObject, public Configurable
     void deleteView ();
 
 public:
-    ViewContainer(const std::string &class_id, const std::string &instance_id, ViewManager *parent, QTabWidget *tab_widget);
+    ViewContainer(const std::string &class_id, const std::string &instance_id, Configurable *parent, ViewManager *view_manager, QTabWidget *tab_widget);
     virtual ~ViewContainer();
 
     void addView (View *view);

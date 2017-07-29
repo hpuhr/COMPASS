@@ -17,6 +17,7 @@
 #include "logger.h"
 #include "jobmanager.h"
 #include "viewcontainer.h"
+#include "viewcontainerwidget.h"
 #include "viewcontainerconfigwidget.h"
 
 ViewManagerWidget::ViewManagerWidget(ViewManager &view_manager)
@@ -113,7 +114,7 @@ void ViewManagerWidget::addViewSlot()
 
     // listbox view
     submenu = menu.addMenu( "ListBox View" );
-    //  submenu->addAction( "New Window", this, SLOT(addListBoxViewNewWindowSlot()) );
+    submenu->addAction( "New Window", this, SLOT(addListBoxViewNewWindowSlot()) );
     for( i=0; i<n; ++i )
     {
         name = cont_widgets_[ i ]->name();
@@ -122,7 +123,7 @@ void ViewManagerWidget::addViewSlot()
     }
     // osg view
     submenu = menu.addMenu( "OSG View" );
-    //  submenu->addAction( "New Window", this, SLOT(addListBoxViewNewWindowSlot()) );
+    submenu->addAction( "New Window", this, SLOT(addOSGViewNewWindowSlot()) );
     for( i=0; i<n; ++i )
     {
         name = cont_widgets_[ i ]->name();
@@ -188,14 +189,23 @@ void ViewManagerWidget::addViewSlot()
 //  ViewManager::getInstance().addContainerWithHistogramView();
 //}
 
-//void ViewManagerWidget::addListBoxViewNewWindowSlot()
-//{
-//  //TODO
-//  if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
-//    return;
+void ViewManagerWidget::addListBoxViewNewWindowSlot()
+{
+  ViewContainerWidget* container_widget = view_manager_.addNewContainerWidget ();
+  container_widget->viewContainer().addListBoxView();
 
-//  ViewManager::getInstance().addContainerWithListBoxView();
-//}
+  update();
+}
+
+
+void ViewManagerWidget::addOSGViewNewWindowSlot()
+{
+  ViewContainerWidget* container_widget = view_manager_.addNewContainerWidget ();
+  container_widget->viewContainer().addOSGView();
+
+  update();
+}
+
 
 
 //void ViewManagerWidget::addMosaicViewNewWindowSlot()

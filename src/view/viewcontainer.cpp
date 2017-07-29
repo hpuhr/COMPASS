@@ -1,18 +1,5 @@
 #include "viewcontainer.h"
 
-#include <QHBoxLayout>
-#include <QMoveEvent>
-#include <QPushButton>
-#include <QMenu>
-#include <QTabBar>
-#include <QTabWidget>
-#include <QInputDialog>
-
-// TODO HACK
-#include <QApplication>
-#include <QMainWindow>
-
-
 #include "viewcontainer.h"
 #include "viewcontainerconfigwidget.h"
 #include "config.h"
@@ -22,22 +9,27 @@
 #include "view.h"
 #include "viewmanager.h"
 #include "listboxview.h"
-//#include "test.h"
 #include "osgview.h"
 //#include "GeographicView.h"
 //#include "HistogramView.h"
 //#include "ScatterPlotView.h"
 //#include "MosaicView.h"
 
-//#include "DBViewModel.h"
 #include "stringconv.h"
+
+#include <QHBoxLayout>
+#include <QPushButton>
+#include <QMenu>
+#include <QTabBar>
+#include <QTabWidget>
+#include <QInputDialog>
 
 unsigned int ViewContainer::view_count_=0;
 
 using Utils::String;
 
-ViewContainer::ViewContainer(const std::string &class_id, const std::string &instance_id, ViewManager *parent, QTabWidget *tab_widget)
-    : QObject(), Configurable( class_id, instance_id, parent ), view_manager_(*parent), tab_widget_(tab_widget), last_active_manage_button_ (nullptr),
+ViewContainer::ViewContainer(const std::string &class_id, const std::string &instance_id, Configurable *parent, ViewManager *view_manager, QTabWidget *tab_widget)
+    : QObject(), Configurable( class_id, instance_id, parent ), view_manager_(*view_manager), tab_widget_(tab_widget), last_active_manage_button_ (nullptr),
       config_widget_(nullptr)
 {
     logdbg  << "ViewContainer: constructor: creating gui elements";
@@ -54,6 +46,8 @@ ViewContainer::ViewContainer(const std::string &class_id, const std::string &ins
 
 ViewContainer::~ViewContainer()
 {
+    view_manager_.removeContainer(instance_id_);
+
     if (config_widget_)
     {
         delete config_widget_;
@@ -61,7 +55,9 @@ ViewContainer::~ViewContainer()
     }
 
     for (auto view : views_)
+    {
         delete view;
+    }
     views_.clear();
 }
 
@@ -82,19 +78,6 @@ void ViewContainer::addListBoxView()
 
 void ViewContainer::addOSGView()
 {
-//    QMainWindow *window;
-//    QWidgetList widgets = qApp->topLevelWidgets();
-//    for (QWidgetList::iterator i = widgets.begin(); i != widgets.end(); ++i)
-//        if ((*i)->objectName() == "MainWindow")
-//            window = (QMainWindow*) (*i);
-
-//    QtOSGWidget *widget = new QtOSGWidget(1, 1, window);
-//    widget->show();
-
-
-//    ViewerWidget *widget = new ViewerWidget ();
-//    widget->show();
-
     generateSubConfigurable ("OSGView", "OSGView"+String::intToString(view_count_));
 }
 

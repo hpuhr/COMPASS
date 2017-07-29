@@ -1,10 +1,3 @@
-/*
- * ViewManager.cpp
- *
- *  Created on: Mar 26, 2012
- *      Author: sk
- */
-
 #include <QWidget>
 #include <QMessageBox>
 
@@ -15,13 +8,9 @@
 #include "viewmanager.h"
 #include "viewmanagerwidget.h"
 #include "logger.h"
-//#include "DBObjectManager.h"
-//#include "DBResultSetManager.h"
-//#include "ConfigurationManager.h"
-//#include "BufferSet.h"
 #include "viewcontainer.h"
+#include "viewcontainerwidget.h"
 #include "view.h"
-//#include "DBView.h"
 #include "stringconv.h"
 
 using namespace Utils;
@@ -30,53 +19,57 @@ ViewManager::ViewManager(const std::string &class_id, const std::string &instanc
     : Configurable (class_id, instance_id, atsdb, "conf/config_views.xml"), atsdb_(*atsdb), widget_(nullptr), initialized_(false), container_count_(0)
 {
     logdbg  << "ViewManager: constructor";
-
-    //  central_widget_=0;
-
-    //  if (DBObjectManager::getInstance().hasObjects() && DBObjectManager::getInstance().existsDBOVariable (DBO_UNDEFINED, "id"))
-    //  {
-    //      logdbg  << "DBResultSetManager: constructor: adding id";
-    //      read_set_.add (DBObjectManager::getInstance().getDBOVariable (DBO_UNDEFINED, "id"));
-    //  }
-
 }
 
 void ViewManager::init (QTabWidget *tab_widget)
 {
-  logdbg  << "ViewManager: init";
-  assert (tab_widget);
-  assert (!tab_widget_);
-  assert (!initialized_);
-  tab_widget_=tab_widget;
+    logdbg  << "ViewManager: init";
+    assert (tab_widget);
+    assert (!tab_widget_);
+    assert (!initialized_);
+    tab_widget_=tab_widget;
 
-  initialized_=true;
+    initialized_=true;
 
-  createSubConfigurables ();
+    createSubConfigurables ();
 }
 
 void ViewManager::close ()
 {
-  logdbg  << "ViewManager: close";
+    logdbg  << "ViewManager: close";
+    initialized_=false;
 
-  for (auto it = containers_.begin(); it != containers_.end(); it++)
-  {
-    delete it->second;
-  }
-  containers_.clear();
+    logdbg  << "ViewManager: close: deleting container widgets";
+    while (container_widgets_.size())
+    {
+        auto first_it = container_widgets_.begin();
+        logdbg  << "ViewManager: close: deleting container widget " << first_it->first;
+        delete first_it->second;
+        container_widgets_.erase(first_it);
+    }
 
-  if (widget_)
-  {
-      delete widget_;
-      widget_ = nullptr;
-  }
+    logdbg  << "ViewManager: close: deleting containers size " << containers_.size();
+    while (containers_.size())
+    {
+        auto first_it = containers_.begin();
+        logdbg  << "ViewManager: close: deleting container " << first_it->first;
+        delete first_it->second;
+    }
 
-  initialized_=false;
+    if (widget_)
+    {
+        delete widget_;
+        widget_ = nullptr;
+    }
+
 }
 
 ViewManager::~ViewManager()
 {
     logdbg  << "ViewManager: destructor";
 
+    assert (!container_widgets_.size());
+    assert (!containers_.size());
     assert (!widget_);
     assert (!initialized_);
 }
@@ -89,7 +82,8 @@ void ViewManager::generateSubConfigurable (const std::string &class_id, const st
 
     if (class_id.compare ("ViewContainer") == 0)
     {
-        ViewContainer *container = new ViewContainer (class_id, instance_id, this, tab_widget_);
+        ViewContainer *container = new ViewContainer (class_id, instance_id, this, this, tab_widget_);
+        assert (containers_.count(instance_id) == 0);
         containers_.insert (std::pair <std::string, ViewContainer*> (instance_id, container));
 
         unsigned int number = String::getAppendedInt (instance_id);
@@ -98,13 +92,15 @@ void ViewManager::generateSubConfigurable (const std::string &class_id, const st
     }
     else if (class_id.compare ("ViewContainerWidget") == 0)
     {
-        assert (false);
-        //    ViewContainerWidget *container = new ViewContainerWidget (class_id, instance_id, this);
-        //    containers_.insert (std::pair <std::string, ViewContainerWidget *> (instance_id, container));
+        ViewContainerWidget *container_widget = new ViewContainerWidget (class_id, instance_id, this);
+        assert (containers_.count(container_widget->viewContainer().getInstanceId()) == 0);
+        containers_.insert (std::pair <std::string, ViewContainer*> (container_widget->viewContainer().getInstanceId(), &container_widget->viewContainer()));
+        assert (container_widgets_.count(instance_id) == 0);
+        container_widgets_.insert (std::pair <std::string, ViewContainerWidget*> (instance_id, container_widget));
 
-        //    unsigned int number = getAppendedInt (instance_id);
-        //    if (number >= container_count_)
-        //      container_count_ = number;
+        unsigned int number = String::getAppendedInt (instance_id);
+        if (number >= container_count_)
+            container_count_ = number;
     }
     else
         throw std::runtime_error ("ViewManager: generateSubConfigurable: unknown class_id "+class_id );
@@ -120,9 +116,6 @@ void ViewManager::checkSubConfigurables ()
         addNewSubConfiguration ("ViewContainer", "ViewContainer0");
         generateSubConfigurable ("ViewContainer", "ViewContainer0");
     }
-
-//    if (views_widget_)
-//        views_widget_->update();
 }
 
 DBOVariableSet ViewManager::getReadSet (const std::string &dbo_name)
@@ -149,108 +142,20 @@ ViewManagerWidget *ViewManager::widget()
     return widget_;
 }
 
-//void ViewManager::addContainerWithGeographicView ()
-//{
-//    logdbg  << "ViewManager: addContainerWithGeographicView";
 
-//    container_count_++;
-//    std::string container_name = "ViewContainerWidget"+intToString(container_count_);
-//    std::string view_name = "GeographicView"+intToString(ViewContainerWidget::getViewCount());
+ViewContainerWidget* ViewManager::addNewContainerWidget ()
+{
+    logdbg  << "ViewManager: addNewContainerWidget";
 
-//    Configuration &container_config = addNewSubConfiguration ("ViewContainerWidget", container_name);
-//    container_config.addNewSubConfiguration ("GeographicView", view_name);
-//    generateSubConfigurable ("ViewContainerWidget", container_name);
+    container_count_++;
+    std::string container_widget_name = "ViewWindow"+String::intToString(container_count_);
 
-//    if (views_widget_)
-//        views_widget_->update();
-//}
+    addNewSubConfiguration ("ViewContainerWidget", container_widget_name);
+    generateSubConfigurable ("ViewContainerWidget", container_widget_name);
 
-//void ViewManager::addContainerWithHistogramView ()
-//{
-//    logdbg  << "ViewManager: addContainerWithHistogramView";
-
-//    container_count_++;
-//    std::string container_name = "ViewContainerWidget"+intToString(container_count_);
-//    std::string view_name = "HistogramView"+intToString(ViewContainerWidget::getViewCount());
-
-//    Configuration &container_config = addNewSubConfiguration ("ViewContainerWidget", container_name);
-//    container_config.addNewSubConfiguration ("HistogramView", view_name);
-//    generateSubConfigurable ("ViewContainerWidget", container_name);
-
-//    if (views_widget_)
-//        views_widget_->update();
-//}
-
-//void ViewManager::addContainerWithListBoxView ()
-//{
-//    logdbg  << "ViewManager: addContainerWithHistogramView";
-
-//    container_count_++;
-//    std::string container_name = "ViewContainerWidget"+intToString(container_count_);
-//    std::string view_name = "ListBoxView"+intToString(ViewContainerWidget::getViewCount());
-
-//    Configuration &container_config = addNewSubConfiguration ("ViewContainerWidget", container_name);
-//    container_config.addNewSubConfiguration ("ListBoxView", view_name);
-//    generateSubConfigurable ("ViewContainerWidget", container_name);
-
-//    if (views_widget_)
-//        views_widget_->update();
-//}
-
-//void ViewManager::addContainerWithMosaicView ()
-//{
-//    logdbg  << "ViewManager: addContainerWithMosaicView";
-
-//    container_count_++;
-//    std::string container_name = "ViewContainerWidget"+intToString(container_count_);
-//    std::string view_name = "MosaicView"+intToString(ViewContainerWidget::getViewCount());
-
-//    Configuration &container_config = addNewSubConfiguration ("ViewContainerWidget", container_name);
-//    container_config.addNewSubConfiguration ("MosaicView", view_name);
-//    generateSubConfigurable ("ViewContainerWidget", container_name);
-
-//    if (views_widget_)
-//        views_widget_->update();
-//}
-
-//void ViewManager::addContainerWithScatterPlotView ()
-//{
-//    logdbg  << "ViewManager: addContainerWithScatterPlotView";
-
-//    container_count_++;
-//    std::string container_name = "ViewContainerWidget"+intToString(container_count_);
-//    std::string view_name = "ScatterPlotView"+intToString(ViewContainerWidget::getViewCount());
-
-//    Configuration &container_config = addNewSubConfiguration ("ViewContainerWidget", container_name);
-//    container_config.addNewSubConfiguration ("ScatterPlotView", view_name);
-//    generateSubConfigurable ("ViewContainerWidget", container_name);
-
-//    if (views_widget_)
-//        views_widget_->update();
-//}
-
-//void ViewManager::addContainerWithTemplateView (std::string template_name)
-//{
-//    logdbg  << "ViewManager: addContainerWithTemplateView";
-
-//    container_count_++;
-//    std::string container_name = "ViewContainerWidget"+intToString(container_count_);
-//    std::string view_name = template_name+intToString(ViewContainerWidget::getViewCount());
-
-//    Configuration &container_config = addNewSubConfiguration ("ViewContainerWidget", container_name);
-
-//    std::map<std::string, Configuration> &templates = configuration_.getConfigurationTemplates ();
-//    assert (templates.find (template_name) != templates.end());
-//    Configuration view_config = templates [template_name];
-//    view_config.setInstanceId(view_name);
-//    view_config.setTemplate(false, "");
-
-//    container_config.addNewSubConfiguration (view_config);
-//    generateSubConfigurable ("ViewContainerWidget", container_name);
-
-//    if (views_widget_)
-//        views_widget_->update();
-//}
+    assert (container_widgets_.count(container_widget_name) == 1);
+    return container_widgets_.at(container_widget_name);
+}
 
 void ViewManager::registerView (View *view)
 {
@@ -258,7 +163,6 @@ void ViewManager::registerView (View *view)
     assert (view);
     assert (!isRegistered(view));
     views_[view->getInstanceId()]=view;
-    //updateReadSet();
 }
 
 void ViewManager::unregisterView (View *view)
@@ -271,7 +175,6 @@ void ViewManager::unregisterView (View *view)
 
     it=views_.find(view->getInstanceId());
     views_.erase(it);
-    //updateReadSet();
 }
 
 bool ViewManager::isRegistered (View *view)
@@ -286,75 +189,27 @@ bool ViewManager::isRegistered (View *view)
     return !(it == views_.end());
 }
 
-//void ViewManager::distributeData (Buffer *buffer)
+//void ViewManager::deleteContainer (std::string instance_id)
 //{
-//    logdbg  << "ViewManager: distributeData";
-//    assert (buffer);
+//    logdbg  << "ViewManager: removeContainer: instance " << instance_id;
 
-//    std::map<std::string, View*>::iterator it;
+//    std::map <std::string, ViewContainer*>::iterator it=containers_.find(instance_id);
 
-//    for (it = views_.begin(); it != views_.end(); it++)
+//    if (it != containers_.end())
 //    {
-//        BufferSet *copy = new BufferSet();
-//        assert (copy);
+//        //it->second->close(); // TODO for widgets
+//        it->second->deleteLater();
 
-//        if( it->second->viewType() != "DBView" )
-//            continue;
+//        containers_.erase(it);
 
-//        DBView* dbview = (DBView*)it->second;
+//        if (widget_)
+//            widget_->update();
 
-//        copy->addBuffer(buffer->getShallowCopy());
-
-//        if( !dbview->addData(copy) )
-//        {
-//            copy->clearAndDelete();
-//            delete copy;
-//        }
+//        return;
 //    }
 
+//    throw std::runtime_error ("ViewManager: removeContainer:  key not found");
 //}
-
-//void ViewManager::clearData ()
-//{
-//    logdbg  << "ViewManager: clearData";
-
-//    std::map<std::string, View*>::iterator it;
-
-//    for (it = views_.begin(); it != views_.end(); it++)
-//    {
-//        logdbg  << "ViewManager: clearData: calling on view " << it->first;
-//        it->second->clearData();
-//    }
-//}
-
-//void ViewManager::setViewsWidget (ViewsWidget *views_widget)
-//{
-//    assert (!views_widget_);
-//    assert (views_widget);
-//    views_widget_=views_widget;
-//}
-
-void ViewManager::deleteContainer (std::string instance_id)
-{
-    logdbg  << "ViewManager: removeContainer: instance " << instance_id;
-
-    std::map <std::string, ViewContainer*>::iterator it=containers_.find(instance_id);
-
-    if (it != containers_.end())
-    {
-        //it->second->close(); // TODO for widgets
-        it->second->deleteLater();
-
-        containers_.erase(it);
-
-        if (widget_)
-            widget_->update();
-
-        return;
-    }
-
-    throw std::runtime_error ("ViewManager: removeContainer:  key not found");
-}
 
 void ViewManager::removeContainer (std::string instance_id)
 {
@@ -368,13 +223,57 @@ void ViewManager::removeContainer (std::string instance_id)
     {
         containers_.erase(it);
 
-        if (widget_)
+        if (initialized_ && widget_) // not during destructor
             widget_->update();
 
         return;
     }
 
     throw std::runtime_error ("ViewManager: removeContainer:  key not found");
+}
+
+void ViewManager::removeContainerWidget (std::string instance_id)
+{
+    std::map <std::string, ViewContainerWidget*>::iterator it;
+
+    logdbg  << "ViewManager: removeContainerWidget: instance " << instance_id;
+
+    it=container_widgets_.find(instance_id);
+
+    if (it != container_widgets_.end())
+    {
+        container_widgets_.erase(it);
+
+        if (initialized_ && widget_) // not during destructor
+            widget_->update();
+
+        return;
+    }
+
+    throw std::runtime_error ("ViewManager: removeContainer:  key not found");
+}
+
+void ViewManager::deleteContainerWidget (std::string instance_id)
+{
+    std::map <std::string, ViewContainerWidget*>::iterator it;
+
+    logdbg  << "ViewManager: deleteContainerWidget: instance " << instance_id;
+
+    it=container_widgets_.find(instance_id);
+
+    if (it != container_widgets_.end())
+    {
+        it->second->deleteLater();
+
+        container_widgets_.erase(it);
+
+        if (initialized_ && widget_) // not during destructor
+            widget_->update();
+
+        return;
+    }
+
+    throw std::runtime_error ("ViewManager: deleteContainerWidget:  key not found");
 }
 
 //void ViewManager::updateReadSet ()
@@ -415,8 +314,8 @@ void ViewManager::viewShutdown( View* view, const std::string& err )
     delete view;
 
     //TODO
-//    if( views_widget_ )
-//        views_widget_->update();
+    //    if( views_widget_ )
+    //        views_widget_->update();
 
     if (err.size())
         QMessageBox::critical( NULL, "View Shutdown", QString::fromStdString( err ) );

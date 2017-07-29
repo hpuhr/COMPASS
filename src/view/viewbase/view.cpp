@@ -10,6 +10,7 @@
 #include "viewmodel.h"
 #include "viewwidget.h"
 #include "viewmanager.h"
+#include "viewcontainer.h"
 
 unsigned int View::cnt_=0;
 

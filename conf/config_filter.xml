@@ -25,7 +25,7 @@
             <ParameterString variable_name="TOD"/>
         </Configuration>
         <Configuration class_id="DBFilterWidget" instance_id="TODWidget0">
-            <ParameterBool visible="0"/>
+            <ParameterBool visible="1"/>
         </Configuration>
     </Configuration>
     <Configuration class_id="DBFilter" instance_id="TestFilter">

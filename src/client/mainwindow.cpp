@@ -73,6 +73,10 @@ MainWindow::MainWindow()
 {
     logdbg  << "MainWindow: constructor";
 
+    QPixmap atsdb_pixmap("./data/icons/atsdb.png");
+    QIcon atsdb_icon(atsdb_pixmap);
+    setWindowIcon(atsdb_icon); // for the glory of the empire
+
     QSettings settings("ATSDB", "Client");
     restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
 

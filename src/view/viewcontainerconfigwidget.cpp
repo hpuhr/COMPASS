@@ -1,7 +1,7 @@
 #include "viewcontainerconfigwidget.h"
 #include "view.h"
 #include "viewcontainerwidget.h"
-//#include "DBResultSetManager.h"
+#include "viewcontainer.h"
 #include "global.h"
 
 #include <QLabel>
@@ -10,12 +10,6 @@
 #include <QMessageBox>
 
 
-/****************************************************************************
-ViewContainerConfigWidget
-*****************************************************************************/
-
-/*
- */
 ViewContainerConfigWidget::ViewContainerConfigWidget( ViewContainer *view_container, QWidget* parent )
 :   QWidget( parent ), view_container_( view_container )
 {
