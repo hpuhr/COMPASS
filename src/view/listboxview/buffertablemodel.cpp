@@ -191,12 +191,16 @@ void BufferTableModel::saveAsCSV (const std::string &file_name, bool overwrite)
 
 void BufferTableModel::exportJobObsoleteSlot ()
 {
-    loginf << "BufferTableModel: exportJobObsoleteSlot";
+    logdbg << "BufferTableModel: exportJobObsoleteSlot";
+
+    emit exportDoneSignal (true);
 }
 
 void BufferTableModel::exportJobDoneSlot()
 {
-    loginf << "BufferTableModel: exportJobDoneSlot";
+    logdbg << "BufferTableModel: exportJobDoneSlot";
+
+    emit exportDoneSignal (false);
 }
 
 

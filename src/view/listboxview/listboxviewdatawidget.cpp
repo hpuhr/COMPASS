@@ -34,6 +34,7 @@ ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxViewDataSource *data_source,
             BufferTableWidget *buffer_table = new BufferTableWidget (*object.second);
             tab_widget_->addTab (buffer_table , object.first.c_str());
             buffer_tables_[object.first] = buffer_table;
+            connect (buffer_table, SIGNAL(exportDoneSignal(bool)), this, SLOT(exportDoneSlot(bool)));
         }
     }
 
@@ -82,4 +83,9 @@ void ListBoxViewDataWidget::exportDataSlot(bool overwrite)
     BufferTableWidget *buffer_widget = reinterpret_cast<BufferTableWidget *> (tab_widget_->currentWidget());
     assert (buffer_widget);
     buffer_widget->exportSlot(overwrite);
+}
+
+void ListBoxViewDataWidget::exportDoneSlot (bool cancelled)
+{
+    emit exportDoneSignal(cancelled);
 }

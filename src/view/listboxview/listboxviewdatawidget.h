@@ -27,12 +27,18 @@ class DBObject;
 class ListBoxViewDataWidget : public QWidget
 {
     Q_OBJECT
+
+signals:
+    void exportDoneSignal (bool cancelled);
+
 public slots:
     void loadingStartedSlot();
     /// @brief Called when new result Buffer was delivered
     void updateData (DBObject &object, std::shared_ptr<Buffer> buffer);
 
     void exportDataSlot(bool overwrite);
+    void exportDoneSlot (bool cancelled);
+
 public:
     /// @brief Constructor
     ListBoxViewDataWidget(ListBoxViewDataSource *data_source, QWidget* parent=nullptr, Qt::WindowFlags f=0);

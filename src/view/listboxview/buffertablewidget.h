@@ -38,10 +38,15 @@ class DBObject;
 class BufferTableWidget : public QWidget
 {
     Q_OBJECT
+
+signals:
+    void exportDoneSignal (bool cancelled);
+
 public slots:
     /// @brief Is called when table item is clicked, un/checks selection checkboxes
     //void itemChanged (QTableWidgetItem *item);
     void exportSlot(bool overwrite);
+    void exportDoneSlot (bool cancelled);
 
 public:
     /// @brief Constructor

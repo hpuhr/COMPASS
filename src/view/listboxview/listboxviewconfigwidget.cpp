@@ -10,6 +10,7 @@
 #include <QCheckBox>
 #include <QLineEdit>
 #include <QLabel>
+#include <QMessageBox>
 
 #include "dbobjectmanager.h"
 #include "dbovariableorderedsetwidget.h"
@@ -22,7 +23,7 @@
 using namespace Utils;
 
 ListBoxViewConfigWidget::ListBoxViewConfigWidget( ListBoxView* view, QWidget* parent )
-    :   QWidget( parent ), view_( view ), variable_set_widget_ (nullptr), presentation_check_ (nullptr), overwrite_check_(nullptr)
+    :   QWidget( parent ), view_( view )
 {
     QVBoxLayout *vlayout = new QVBoxLayout;
 
@@ -43,9 +44,9 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget( ListBoxView* view, QWidget* pa
     connect(overwrite_check_, SIGNAL( clicked() ), this, SLOT( toggleUseOverwrite() ));
     vlayout->addWidget(overwrite_check_);
 
-    QPushButton *export_button = new QPushButton ("Export");
-    connect(export_button, SIGNAL(clicked(bool)), this, SLOT(exportSlot()));
-    vlayout->addWidget(export_button);
+    export_button_ = new QPushButton ("Export");
+    connect(export_button_, SIGNAL(clicked(bool)), this, SLOT(exportSlot()));
+    vlayout->addWidget(export_button_);
 
     setLayout( vlayout );
 }
@@ -75,5 +76,22 @@ void ListBoxViewConfigWidget::exportSlot()
 {
     logdbg << "ListBoxViewConfigWidget: exportSlot";
     assert (overwrite_check_);
+    assert (export_button_);
+
+    export_button_->setDisabled(true);
     emit exportSignal(overwrite_check_->checkState() == Qt::Checked);
+}
+
+void ListBoxViewConfigWidget::exportDoneSlot(bool cancelled)
+{
+    assert (export_button_);
+
+    export_button_->setDisabled(false);
+
+    if (!cancelled)
+    {
+        QMessageBox msgBox;
+        msgBox.setText("Export complete.");
+        msgBox.exec();
+    }
 }

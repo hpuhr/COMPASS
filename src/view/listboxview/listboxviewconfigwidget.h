@@ -15,6 +15,7 @@ class DBOVariableOrderedSetWidget;
 class QCheckBox;
 class ListBoxView;
 class QLineEdit;
+class QPushButton;
 
 /**
  * @brief Widget with configuration elements for a ListBoxView
@@ -30,6 +31,7 @@ public slots:
     /// @brief Called when database view checkbox is un/checked
     //void toggleDatabaseView ();
     void exportSlot();
+    void exportDoneSlot(bool cancelled);
 
 signals:
      void exportSignal (bool overwrite);
@@ -44,10 +46,12 @@ protected:
     /// Base view
     ListBoxView* view_;
     /// Variable read list widget
-    DBOVariableOrderedSetWidget *variable_set_widget_;
+    DBOVariableOrderedSetWidget *variable_set_widget_{nullptr};
 
-    QCheckBox *presentation_check_;
-    QCheckBox *overwrite_check_;
+    QCheckBox *presentation_check_ {nullptr};
+    QCheckBox *overwrite_check_ {nullptr};
+
+    QPushButton *export_button_ {nullptr};
 };
 
 #endif /* LISTBOXVIEWCONFIGWIDGET_H_ */

@@ -43,6 +43,7 @@ BufferTableWidget::BufferTableWidget(DBObject &object, QWidget * parent, Qt::Win
     table_->setModel(model_);
 
     //connect( table_, SIGNAL( itemClicked( QTableWidgetItem * )), this, SLOT( itemChanged ( QTableWidgetItem * )));
+    connect (model_, SIGNAL(exportDoneSignal(bool)), this, SLOT(exportDoneSlot(bool)));
 
     layout->addWidget (table_);
     table_->show();
@@ -265,9 +266,16 @@ void BufferTableWidget::exportSlot(bool overwrite)
 {
     loginf << "BufferTableWidget: exportSlot: object " << object_.name();
 
-    QString file_name = QFileDialog::getSaveFileName(this,
-            ("Save "+object_.name()+" as CSV").c_str(), "",
-            tr("Comma-separated values (*.csv);;All Files (*)"));
+    QString file_name;
+    if (overwrite)
+    {
+        file_name = QFileDialog::getSaveFileName(this, ("Save "+object_.name()+" as CSV").c_str(), "", tr("Comma-separated values (*.csv);;All Files (*)"));
+    }
+    else
+    {
+        file_name = QFileDialog::getSaveFileName(this, ("Save "+object_.name()+" as CSV").c_str(), "", tr("Comma-separated values (*.csv);;All Files (*)"), nullptr,
+                                                 QFileDialog::DontConfirmOverwrite);
+    }
 
     if (file_name.size())
     {
@@ -275,4 +283,13 @@ void BufferTableWidget::exportSlot(bool overwrite)
         assert (model_);
         model_->saveAsCSV(file_name.toStdString(), overwrite);
     }
+    else
+    {
+        emit exportDoneSignal (true);
+    }
+}
+
+void BufferTableWidget::exportDoneSlot (bool cancelled)
+{
+    emit exportDoneSignal (cancelled);
 }

@@ -13,6 +13,9 @@ class BufferTableModel : public QAbstractTableModel
 {
     Q_OBJECT
 
+signals:
+    void exportDoneSignal (bool cancelled);
+
 public slots:
     void exportJobObsoleteSlot ();
     void exportJobDoneSlot();

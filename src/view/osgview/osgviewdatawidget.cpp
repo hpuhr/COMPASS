@@ -40,6 +40,7 @@
 #include <osgEarth/Registry>
 #include <osgEarthDrivers/tms/TMSOptions>
 #include <osgEarthDrivers/gdal/GDALOptions>
+#include <osgEarthDrivers/cache_filesystem/FileSystemCache>
 #include <osgEarthUtil/LogarithmicDepthBuffer>
 #include <osg/PositionAttitudeTransform>
 
@@ -183,9 +184,20 @@ void OSGViewDataWidget::setup ()
     assert (!root_node_);
     root_node_ = new osg::Group();
 
+//    osgEarth::Drivers::FileSystemCacheOptions cacheOptions;
+//    cacheOptions.path("/home/sk/workspace_cdt/atsb/osgearth_cache/";
+
+//    MapOptions mapOptions;
+//    mapOptions.cache() = cacheOptions;
+
+
+//    osgEarth::FileSystemCache *cache = new osgEarth::FileSystemCache ();
+//    osgEarth::Registry::instance()->setCache(cache);
+//    osgEarth::Registry::instance()->setDefaultCachePolicy(osgEarth::CachePolicy::USAGE_READ_WRITE);
+
     //osg::Node* loadedModel = osgDB::readNodeFile("data/maps/openstreetmap_flat.earth");
-    osg::Node* loadedModel = osgDB::readNodeFile("data/maps/openstreetmap.earth");
-    //osg::Node* loadedModel = osgDB::readNodeFile("data/maps/lod_blending.earth");
+    //osg::Node* loadedModel = osgDB::readNodeFile("data/maps/openstreetmap.earth");
+    osg::Node* loadedModel = osgDB::readNodeFile("data/maps/lod_blending.earth");
 
     // Find the MapNode
     assert (!map_node_);
