@@ -34,11 +34,15 @@ public:
 
     void saveAsCSV (const std::string &file_name, bool overwrite);
 
+    void usePresentation (bool use_presentation);
+
 protected:
     DBObject &object_;
     std::shared_ptr <Buffer> buffer_;
 
     std::shared_ptr <BufferCSVExportJob> export_job_;
+
+    bool use_presentation_;
 };
 
 #endif // BUFFERTABLEMODEL_H

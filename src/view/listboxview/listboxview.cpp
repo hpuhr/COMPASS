@@ -16,6 +16,8 @@
 ListBoxView::ListBoxView(const std::string& class_id, const std::string& instance_id, ViewContainer *w, ViewManager &view_manager)
 : View (class_id, instance_id, w, view_manager), widget_(0), data_source_ (0)
 {
+    registerParameter ("use_presentation", &use_presentation_, true);
+    registerParameter ("overwrite_csv", &overwrite_csv_, true);
 }
 
 ListBoxView::~ListBoxView()
@@ -48,6 +50,10 @@ bool ListBoxView::init()
 
   connect (widget_->configWidget(), SIGNAL(exportSignal(bool)), widget_->getDataWidget(), SLOT(exportDataSlot(bool)));
   connect (widget_->getDataWidget(), SIGNAL(exportDoneSignal(bool)), widget_->configWidget(), SLOT(exportDoneSlot(bool)));
+
+  connect (this, SIGNAL(usePresentationSignal(bool)), widget_->getDataWidget(), SLOT(usePresentationSlot(bool)));
+
+  widget_->getDataWidget()->usePresentationSlot(use_presentation_);
 
   return true;
 }
@@ -99,4 +105,25 @@ void ListBoxView::selectionToBeCleared()
 
 }
 
+bool ListBoxView::usePresentation() const
+{
+    return use_presentation_;
+}
+
+void ListBoxView::usePresentation(bool use_presentation)
+{
+    use_presentation_ = use_presentation;
+
+    emit usePresentationSignal(use_presentation_);
+}
+
+bool ListBoxView::overwriteCSV() const
+{
+    return overwrite_csv_;
+}
+
+void ListBoxView::overwriteCSV(bool overwrite_csv)
+{
+    overwrite_csv_ = overwrite_csv;
+}
 

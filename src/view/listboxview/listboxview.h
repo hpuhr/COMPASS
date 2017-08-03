@@ -42,6 +42,8 @@ signals:
     /// @brief Is emitted when selection should be cleared
     void clearSelection();
 
+    void usePresentationSignal (bool use_presentation);
+
 public:
     /// @brief Constructor
     ListBoxView(const std::string& class_id, const std::string& instance_id, ViewContainer *w, ViewManager &view_manager);
@@ -59,11 +61,22 @@ public:
 
     virtual DBOVariableSet getSet (const std::string &dbo_name);
 
+    bool usePresentation() const;
+    void usePresentation(bool use_presentation);
+
+    bool overwriteCSV() const;
+    void overwriteCSV(bool overwrite_csv);
+
 protected:
     /// For data display
     ListBoxViewWidget* widget_;
     /// For data loading
     ListBoxViewDataSource *data_source_;
+
+    /// Use presentation
+    bool use_presentation_;
+    /// Overwrite during export, if not, it appends
+    bool overwrite_csv_;
 
     virtual void checkSubConfigurables ();
 };

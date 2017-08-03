@@ -48,6 +48,8 @@ public slots:
     void exportSlot(bool overwrite);
     void exportDoneSlot (bool cancelled);
 
+    void usePresentationSlot (bool use_presentation);
+
 public:
     /// @brief Constructor
     BufferTableWidget(DBObject &object, QWidget * parent = 0, Qt::WindowFlags f = 0);
@@ -58,6 +60,7 @@ public:
     void clear ();
     /// @brief Shows Buffer content in table
     void show (std::shared_ptr<Buffer> buffer); //, DBOVariableSet *variables, bool database_view
+
 
 protected:
     DBObject &object_;

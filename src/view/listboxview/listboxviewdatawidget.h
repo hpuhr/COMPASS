@@ -30,6 +30,7 @@ class ListBoxViewDataWidget : public QWidget
 
 signals:
     void exportDoneSignal (bool cancelled);
+    void usePresentationSignal (bool use_presentation);
 
 public slots:
     void loadingStartedSlot();
@@ -38,6 +39,8 @@ public slots:
 
     void exportDataSlot(bool overwrite);
     void exportDoneSlot (bool cancelled);
+
+    void usePresentationSlot (bool use_presentation);
 
 public:
     /// @brief Constructor

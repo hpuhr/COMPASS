@@ -68,61 +68,106 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
         {
             null = buffer_->getBool(properties.at(col).name()).isNone(row);
             if (!null)
-                value_str = buffer_->getBool(properties.at(col).name()).getAsRepresentationString(row);
+            {
+                if (use_presentation_)
+                    value_str = buffer_->getBool(properties.at(col).name()).getAsRepresentationString(row);
+                else
+                    value_str = buffer_->getBool(properties.at(col).name()).getAsString(row);
+            }
         }
         else if (data_type == PropertyDataType::CHAR)
         {
             null = buffer_->getChar(properties.at(col).name()).isNone(row);
             if (!null)
-                value_str = buffer_->getChar(properties.at(col).name()).getAsRepresentationString(row);
+            {
+                if (use_presentation_)
+                    value_str = buffer_->getChar(properties.at(col).name()).getAsRepresentationString(row);
+            }
         }
         else if (data_type == PropertyDataType::UCHAR)
         {
             null = buffer_->getUChar(properties.at(col).name()).isNone(row);
             if (!null)
-                value_str = buffer_->getUChar(properties.at(col).name()).getAsRepresentationString(row);
+            {
+                if (use_presentation_)
+                    value_str = buffer_->getUChar(properties.at(col).name()).getAsRepresentationString(row);
+                else
+                    value_str = buffer_->getUChar(properties.at(col).name()).getAsString(row);
+            }
         }
         else if (data_type == PropertyDataType::INT)
         {
             null = buffer_->getInt(properties.at(col).name()).isNone(row);
             if (!null)
-                value_str = buffer_->getInt(properties.at(col).name()).getAsRepresentationString(row);
+            {
+                if (use_presentation_)
+                    value_str = buffer_->getInt(properties.at(col).name()).getAsRepresentationString(row);
+                else
+                    value_str = buffer_->getInt(properties.at(col).name()).getAsString(row);
+            }
         }
         else if (data_type == PropertyDataType::UINT)
         {
             null = buffer_->getUInt(properties.at(col).name()).isNone(row);
             if (!null)
-                value_str = buffer_->getUInt(properties.at(col).name()).getAsRepresentationString(row);
+            {
+                if (use_presentation_)
+                    value_str = buffer_->getUInt(properties.at(col).name()).getAsRepresentationString(row);
+                else
+                    value_str = buffer_->getUInt(properties.at(col).name()).getAsString(row);
+            }
         }
         else if (data_type == PropertyDataType::LONGINT)
         {
             null = buffer_->getLongInt(properties.at(col).name()).isNone(row);
             if (!null)
-                value_str = buffer_->getLongInt(properties.at(col).name()).getAsRepresentationString(row);
+            {
+                if (use_presentation_)
+                    value_str = buffer_->getLongInt(properties.at(col).name()).getAsRepresentationString(row);
+                else
+                    value_str = buffer_->getLongInt(properties.at(col).name()).getAsString(row);
+            }
         }
         else if (data_type == PropertyDataType::ULONGINT)
         {
             null = buffer_->getULongInt(properties.at(col).name()).isNone(row);
             if (!null)
-                value_str = buffer_->getULongInt(properties.at(col).name()).getAsRepresentationString(row);
+            {
+                if (use_presentation_)
+                    value_str = buffer_->getULongInt(properties.at(col).name()).getAsRepresentationString(row);
+                else
+                    value_str = buffer_->getULongInt(properties.at(col).name()).getAsString(row);
+            }
         }
         else if (data_type == PropertyDataType::FLOAT)
         {
             null = buffer_->getFloat(properties.at(col).name()).isNone(row);
             if (!null)
-                value_str = buffer_->getFloat(properties.at(col).name()).getAsRepresentationString(row);
+            {
+                if (use_presentation_)
+                    value_str = buffer_->getFloat(properties.at(col).name()).getAsRepresentationString(row);
+                else
+                    value_str = buffer_->getFloat(properties.at(col).name()).getAsString(row);
+            }
         }
         else if (data_type == PropertyDataType::DOUBLE)
         {
             null = buffer_->getDouble(properties.at(col).name()).isNone(row);
             if (!null)
-                value_str = buffer_->getDouble(properties.at(col).name()).getAsRepresentationString(row);
+            {
+                if (use_presentation_)
+                    value_str = buffer_->getDouble(properties.at(col).name()).getAsRepresentationString(row);
+                else
+                    value_str = buffer_->getDouble(properties.at(col).name()).getAsString(row);
+            }
         }
         else if (data_type == PropertyDataType::STRING)
         {
             null = buffer_->getString(properties.at(col).name()).isNone(row);
             if (!null)
+            {
                 value_str = buffer_->getString(properties.at(col).name()).getAsString(row);
+            }
         }
         else
             throw std::domain_error ("BufferTableWidget: show: unknown property data type");
@@ -180,7 +225,7 @@ void BufferTableModel::saveAsCSV (const std::string &file_name, bool overwrite)
     loginf << "BufferTableModel: saveAsCSV: into filename " << file_name << " overwrite " << overwrite;
 
     assert (buffer_);
-    BufferCSVExportJob *export_job = new BufferCSVExportJob (buffer_, file_name, overwrite);
+    BufferCSVExportJob *export_job = new BufferCSVExportJob (buffer_, file_name, overwrite, use_presentation_);
 
     export_job_ = std::shared_ptr<BufferCSVExportJob> (export_job);
     connect (export_job, SIGNAL(obsoleteSignal()), this, SLOT(exportJobObsoleteSlot()), Qt::QueuedConnection);
@@ -203,4 +248,10 @@ void BufferTableModel::exportJobDoneSlot()
     emit exportDoneSignal (false);
 }
 
+void BufferTableModel::usePresentation (bool use_presentation)
+{
+    beginResetModel();
+    use_presentation_=use_presentation;
+    endResetModel();
+}
 

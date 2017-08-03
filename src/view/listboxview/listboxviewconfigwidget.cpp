@@ -33,14 +33,14 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget( ListBoxView* view, QWidget* pa
     vlayout->addWidget (variable_set_widget_);
 
     presentation_check_ = new QCheckBox("Use Presentation");
-    presentation_check_->setChecked(view_->getDataSource()->usePresentation());
+    presentation_check_->setChecked(view_->usePresentation());
     connect(presentation_check_, SIGNAL( clicked() ), this, SLOT( toggleUsePresentation() ));
     vlayout->addWidget(presentation_check_);
 
     vlayout->addStretch();
 
     overwrite_check_ = new QCheckBox("Overwrite Exported File");
-    overwrite_check_->setChecked(view_->getDataSource()->overwriteCSV());
+    overwrite_check_->setChecked(view_->overwriteCSV());
     connect(overwrite_check_, SIGNAL( clicked() ), this, SLOT( toggleUseOverwrite() ));
     vlayout->addWidget(overwrite_check_);
 
@@ -60,7 +60,7 @@ void ListBoxViewConfigWidget::toggleUsePresentation()
   assert (presentation_check_);
   bool checked = presentation_check_->checkState() == Qt::Checked;
   logdbg  << "ListBoxViewConfigWidget: toggleUsePresentation: setting use presentation to " << checked;
-  view_->getDataSource()->usePresentation(checked);
+  view_->usePresentation(checked);
 }
 
 void ListBoxViewConfigWidget::toggleUseOverwrite()
@@ -68,7 +68,7 @@ void ListBoxViewConfigWidget::toggleUseOverwrite()
     assert (overwrite_check_);
     bool checked = overwrite_check_->checkState() == Qt::Checked;
     logdbg  << "ListBoxViewConfigWidget: toggleUseOverwrite: setting overwrite to " << checked;
-    view_->getDataSource()->overwriteCSV (checked);
+    view_->overwriteCSV (checked);
 
 }
 

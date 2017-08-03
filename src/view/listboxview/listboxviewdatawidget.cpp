@@ -35,6 +35,7 @@ ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxViewDataSource *data_source,
             tab_widget_->addTab (buffer_table , object.first.c_str());
             buffer_tables_[object.first] = buffer_table;
             connect (buffer_table, SIGNAL(exportDoneSignal(bool)), this, SLOT(exportDoneSlot(bool)));
+            connect (this, SIGNAL(usePresentationSignal(bool)), buffer_table, SLOT(usePresentationSlot(bool)));
         }
     }
 
@@ -88,4 +89,9 @@ void ListBoxViewDataWidget::exportDataSlot(bool overwrite)
 void ListBoxViewDataWidget::exportDoneSlot (bool cancelled)
 {
     emit exportDoneSignal(cancelled);
+}
+
+void ListBoxViewDataWidget::usePresentationSlot (bool use_presentation)
+{
+    emit usePresentationSignal(use_presentation);
 }

@@ -293,3 +293,11 @@ void BufferTableWidget::exportDoneSlot (bool cancelled)
 {
     emit exportDoneSignal (cancelled);
 }
+
+void BufferTableWidget::usePresentationSlot (bool use_presentation)
+{
+    assert (model_);
+    model_->usePresentation(use_presentation);
+    assert (table_);
+    table_->resizeColumnsToContents();
+}

@@ -57,19 +57,9 @@ public:
     /// @brief Returns use selection flag
     //bool getUseSelection () { return use_selection_; }
 
-    bool usePresentation() const;
-    void usePresentation(bool use_presentation);
-
-    bool overwriteCSV() const;
-    void overwriteCSV(bool overwrite_csv);
-
 protected:
     /// Variable read list
     DBOVariableOrderedSet *set_;
-    /// Use presentation
-    bool use_presentation_;
-    /// Overwrite during export, if not, it appends
-    bool overwrite_csv_;
 
     /// Selected DBObject records
     ViewSelectionEntries &selection_entries_;

@@ -21,8 +21,6 @@ ListBoxViewDataSource::ListBoxViewDataSource(const std::string &class_id, const 
 : QObject(), Configurable (class_id, instance_id, parent), set_(nullptr), selection_entries_ (ViewSelection::getInstance().getEntries())
 {
     //registerParameter ("use_selection", &use_selection_, true);
-    registerParameter ("use_presentation", &use_presentation_, true);
-    registerParameter ("overwrite_csv", &overwrite_csv_, true);
 
     connect (&ATSDB::instance().objectManager(), SIGNAL(loadingStartedSignal()), this, SLOT(loadingStartedSlot()));
 
@@ -56,26 +54,6 @@ void ListBoxViewDataSource::generateSubConfigurable (const std::string &class_id
     }
     else
         throw std::runtime_error ("ListBoxViewDataSource: generateSubConfigurable: unknown class_id "+class_id );
-}
-
-bool ListBoxViewDataSource::usePresentation() const
-{
-    return use_presentation_;
-}
-
-void ListBoxViewDataSource::usePresentation(bool use_presentation)
-{
-    use_presentation_ = use_presentation;
-}
-
-bool ListBoxViewDataSource::overwriteCSV() const
-{
-    return overwrite_csv_;
-}
-
-void ListBoxViewDataSource::overwriteCSV(bool overwrite_csv)
-{
-    overwrite_csv_ = overwrite_csv;
 }
 
 void ListBoxViewDataSource::checkSubConfigurables ()
