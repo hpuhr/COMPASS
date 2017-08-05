@@ -139,10 +139,7 @@ public:
         if (isNone(index))
             throw std::out_of_range ("ArrayListTemplate: getAsString of None value "+Utils::String::intToString(index));
 
-        std::stringstream ss;
-        ss << data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
-
-        return ss.str();
+        return std::to_string( data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE));
     }
 
     /// @brief Returns representation string of a specific value
@@ -154,33 +151,32 @@ public:
         if (isNone(index))
             throw std::out_of_range ("ArrayListTemplate: getAsRepresentationString of None value "+Utils::String::intToString(index));
 
-        std::stringstream ss;
+        if (representation_ == StringRepresentation::STANDARD)
+            return getAsString(index);
+
+        std::ostringstream out;
 
         try
         {
-            if (representation_ == StringRepresentation::STANDARD)
-            {
-                ss << data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
-            }
-            else if (representation_ == StringRepresentation::SECONDS_TO_TIME)
+            if (representation_ == StringRepresentation::SECONDS_TO_TIME)
             {
                 double value = data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
-                ss << Utils::String::timeStringFromDouble (value);
+                return Utils::String::timeStringFromDouble (value);
             }
             else if (representation_ == StringRepresentation::DEC_TO_OCTAL)
             {
                 unsigned int value = data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
-                ss << std::oct << std::setfill ('0') << std::setw (4) << value;
+                out << std::oct << std::setfill ('0') << std::setw (4) << value;
             }
             else if (representation_ == StringRepresentation::DEC_TO_HEX)
             {
                 unsigned int value = data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
-                ss << std::uppercase << std::hex << value;
+                out << std::uppercase << std::hex << value;
             }
             else if (representation_ == StringRepresentation::FEET_TO_FLIGHTLEVEL)
             {
                 double value = data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
-                ss << value/100.0;
+                out << value/100.0;
             }
             else
             {
@@ -196,7 +192,7 @@ public:
             logerr  << "ArrayListTemplate: getAsRepresentationString: exception thrown";;
         }
 
-        return ss.str();
+        return out.str();
     }
 
     /// @brief Sets specific value
@@ -289,21 +285,18 @@ protected:
     }
 };
 
-//template <std::string> std::string X<c1>::getName() {
-//   return c1::getName();
-//}
 
-//template<>
-//struct ArrayListTemplate<std::string>
-//{
-//    ArrayListTemplate<std::string>& operator*=(double factor)
-//    {
-//        throw std::runtime_error ("ArrayListTemplate: multiplication operator impossible for strings");
-//    }
+template <>
+const std::string ArrayListTemplate<std::string>::getAsString (size_t index);
 
-//};
+template <>
+const std::string ArrayListTemplate<float>::getAsString (size_t index);
+
+template <>
+const std::string ArrayListTemplate<double>::getAsString (size_t index);
 
 
-//template<typename T> ArrayListTemplate<T> operator* (T k, const Matrix<T> &m) { return m * k; }
+
+
 
 #endif /* ARRAYLIST_H_ */

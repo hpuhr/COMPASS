@@ -22,6 +22,10 @@
  */
 
 #include <cassert>
+#include <limits>
+
+typedef std::numeric_limits<double> double_limit;
+typedef std::numeric_limits<float> float_limit;
 
 #include "arraylist.h"
 
@@ -111,4 +115,44 @@ void ArrayListBase::unsetNone (size_t index)
 //    //DO STUFF
 //    return *this;
 //}
+
+template <>
+const std::string ArrayListTemplate<std::string>::getAsString (size_t index)
+{
+    if (index > size_)
+        throw std::out_of_range ("ArrayListTemplate: getAsString out of index "+Utils::String::intToString(index));
+
+    if (isNone(index))
+        throw std::out_of_range ("ArrayListTemplate: getAsString of None value "+Utils::String::intToString(index));
+
+    return data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
+}
+
+template <>
+const std::string ArrayListTemplate<float>::getAsString (size_t index)
+{
+    if (index > size_)
+        throw std::out_of_range ("ArrayListTemplate: getAsString out of index "+Utils::String::intToString(index));
+
+    if (isNone(index))
+        throw std::out_of_range ("ArrayListTemplate: getAsString of None value "+Utils::String::intToString(index));
+
+    std::ostringstream out;
+    out << std::setprecision (float_limit::max_digits10) << data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
+    return out.str();
+}
+
+template <>
+const std::string ArrayListTemplate<double>::getAsString (size_t index)
+{
+    if (index > size_)
+        throw std::out_of_range ("ArrayListTemplate: getAsString out of index "+Utils::String::intToString(index));
+
+    if (isNone(index))
+        throw std::out_of_range ("ArrayListTemplate: getAsString of None value "+Utils::String::intToString(index));
+
+    std::ostringstream out;
+    out << std::setprecision (double_limit::max_digits10) << data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
+    return out.str();
+}
 
