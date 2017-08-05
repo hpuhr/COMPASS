@@ -122,10 +122,10 @@ public:
     const T &get (size_t index)
     {
         if (index > size_)
-            throw std::out_of_range ("ArrayListTemplate: get out of index "+Utils::String::intToString(index));
+            throw std::out_of_range ("ArrayListTemplate: get out of index "+std::to_string(index));
 
         if (isNone(index))
-            throw std::out_of_range ("ArrayListTemplate: get of None value "+Utils::String::intToString(index));
+            throw std::out_of_range ("ArrayListTemplate: get of None value "+std::to_string(index));
 
         return data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
     }
@@ -134,10 +134,10 @@ public:
     const std::string getAsString (size_t index)
     {
         if (index > size_)
-            throw std::out_of_range ("ArrayListTemplate: getAsString out of index "+Utils::String::intToString(index));
+            throw std::out_of_range ("ArrayListTemplate: getAsString out of index "+std::to_string(index));
 
         if (isNone(index))
-            throw std::out_of_range ("ArrayListTemplate: getAsString of None value "+Utils::String::intToString(index));
+            throw std::out_of_range ("ArrayListTemplate: getAsString of None value "+std::to_string(index));
 
         return std::to_string( data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE));
     }
@@ -146,10 +146,10 @@ public:
     const std::string getAsRepresentationString (size_t index)
     {
         if (index > size_)
-            throw std::out_of_range ("ArrayListTemplate: getAsRepresentationString out of index "+Utils::String::intToString(index));
+            throw std::out_of_range ("ArrayListTemplate: getAsRepresentationString out of index "+std::to_string(index));
 
         if (isNone(index))
-            throw std::out_of_range ("ArrayListTemplate: getAsRepresentationString of None value "+Utils::String::intToString(index));
+            throw std::out_of_range ("ArrayListTemplate: getAsRepresentationString of None value "+std::to_string(index));
 
         if (representation_ == StringRepresentation::STANDARD)
             return getAsString(index);

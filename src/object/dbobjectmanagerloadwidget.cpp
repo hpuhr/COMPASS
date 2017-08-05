@@ -32,7 +32,7 @@
 #include "global.h"
 #include "stringconv.h"
 
-using Utils::String;
+using namespace Utils::String;
 
 DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager &object_manager)
     : object_manager_(object_manager), info_layout_(nullptr), filters_check_(nullptr), order_check_(nullptr),order_ascending_check_(nullptr),
@@ -114,7 +114,7 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager &object_man
     limit_layout->addWidget(new QLabel ("Limit Min"), 0, 0);
 
     limit_min_edit_ = new QLineEdit ();
-    limit_min_edit_->setText (String::intToString(object_manager_.limitMin()).c_str());
+    limit_min_edit_->setText (std::to_string(object_manager_.limitMin()).c_str());
     limit_min_edit_->setEnabled(use_limit);
     connect( limit_min_edit_, SIGNAL(textChanged(QString)), this, SLOT(limitMinChanged()) );
     limit_layout->addWidget(limit_min_edit_, 0, 1);
@@ -122,7 +122,7 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager &object_man
     limit_layout->addWidget(new QLabel ("Limit Max"), 1, 0);
 
     limit_max_edit_ = new QLineEdit ();
-    limit_max_edit_->setText (String::intToString(object_manager_.limitMax()).c_str());
+    limit_max_edit_->setText (std::to_string(object_manager_.limitMax()).c_str());
     limit_max_edit_->setEnabled(use_limit);
     connect( limit_max_edit_, SIGNAL(textChanged(QString)), this, SLOT(limitMaxChanged()) );
     limit_layout->addWidget(limit_max_edit_, 1, 1);
@@ -200,7 +200,7 @@ void DBObjectManagerLoadWidget::limitMinChanged()
     if (limit_min_edit_->text().size() == 0)
         return;
 
-    unsigned int min = String::intFromString (limit_min_edit_->text().toStdString());
+    unsigned int min = std::stoul (limit_min_edit_->text().toStdString());
     object_manager_.limitMin(min);
 }
 void DBObjectManagerLoadWidget::limitMaxChanged()
@@ -210,7 +210,7 @@ void DBObjectManagerLoadWidget::limitMaxChanged()
     if (limit_max_edit_->text().size() == 0)
         return;
 
-    unsigned int max = String::intFromString (limit_max_edit_->text().toStdString());
+    unsigned int max = std::stoul (limit_max_edit_->text().toStdString());
     object_manager_.limitMax(max);
 }
 

@@ -823,7 +823,7 @@ Configuration &Configuration::addNewSubConfiguration (const std::string &class_i
     }
     instance_number++;
 
-    return addNewSubConfiguration (class_id, class_id+String::intToString (instance_number));
+    return addNewSubConfiguration (class_id, class_id+std::to_string (instance_number));
 }
 
 Configuration &Configuration::addNewSubConfiguration (Configuration &configuration)
@@ -945,25 +945,25 @@ template<> std::string ConfigurableParameter<std::string>::getParameterType () c
 template<> std::string ConfigurableParameter<bool>::getParameterValue () const
 {
     if (pointer_)
-        return Utils::String::intToString(*pointer_);
+        return std::to_string(*pointer_);
     else
-        return Utils::String::intToString(config_value_);
+        return std::to_string(config_value_);
 }
 
 template<> std::string ConfigurableParameter<int>::getParameterValue () const
 {
     if (pointer_)
-        return Utils::String::intToString(*pointer_);
+        return std::to_string(*pointer_);
     else
-        return Utils::String::intToString(config_value_);
+        return std::to_string(config_value_);
 }
 
 template<> std::string ConfigurableParameter<unsigned int>::getParameterValue () const
 {
     if (pointer_)
-        return Utils::String::uIntToString(*pointer_);
+        return std::to_string(*pointer_);
     else
-        return Utils::String::uIntToString(config_value_);
+        return std::to_string(config_value_);
 }
 
 template<> std::string ConfigurableParameter<float>::getParameterValue () const

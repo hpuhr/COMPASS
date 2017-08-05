@@ -430,7 +430,7 @@ set ( atsdb_SRCS
     src/util/logger.cpp
     #        src/util/data.cpp
     src/util/number.cpp
-    src/util/stringconv.cpp
+    #src/util/stringconv.cpp
     src/util/stringrepresentation.cpp
     src/view/viewmanager.cpp
     src/view/viewmanagerwidget.cpp

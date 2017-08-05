@@ -36,7 +36,7 @@
 #include "stringconv.h"
 #include "viewmanager.h"
 
-using Utils::String;
+using namespace Utils::String;
 
 /**
  * Creates sub-configurables.
@@ -378,7 +378,7 @@ void DBObjectManager::loadSlot ()
             std::string limit_str = "";
             if (use_limit_)
             {
-                limit_str = String::intToString(limit_min_)+","+String::intToString(limit_max_);
+                limit_str = std::to_string(limit_min_)+","+std::to_string(limit_max_);
                 logdbg << "DBObjectManager: loadSlot: use limit str " << limit_str;
             }
 

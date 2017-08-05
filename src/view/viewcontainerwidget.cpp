@@ -24,7 +24,7 @@ ViewContainerWidget::ViewContainerWidget(const std::string &class_id, const std:
   registerParameter ("min_width", &min_width_, 1000);
   registerParameter ("min_height", &min_height_, 700);
 
-  name_ = "Window"+String::intToString(String::getAppendedInt (instance_id_));
+  name_ = "Window"+std::to_string(String::getAppendedInt (instance_id_));
 
   QHBoxLayout *layout = new QHBoxLayout ();
   layout->setSpacing(0);

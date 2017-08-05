@@ -174,7 +174,7 @@ void DBTableWidget::updateColumnGrid ()
         QLabel *type = new QLabel (it.second->type().c_str());
         column_grid_->addWidget (type, row, 1);
 
-        QLabel *key = new QLabel (String::intToString((int)it.second->isKey()).c_str());
+        QLabel *key = new QLabel (std::to_string((int)it.second->isKey()).c_str());
         column_grid_->addWidget (key, row, 2);
 
         UnitSelectionWidget *unit_widget = it.second->unitWidget();

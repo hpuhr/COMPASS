@@ -41,7 +41,7 @@
 #include "global.h"
 //#include "MetaDBObjectEditWidget.h"
 
-using Utils::String;
+using namespace Utils::String;
 
 DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager &object_manager)
     : object_manager_(object_manager), schema_manager_(ATSDB::instance().schemaManager()), dbobjects_grid_ (nullptr), meta_variables_grid_(nullptr), unlocked_(false)
@@ -266,7 +266,7 @@ void DBObjectManagerWidget::updateDBOsSlot ()
         QLabel *name = new QLabel (it->second->name().c_str());
         dbobjects_grid_->addWidget (name, row, 0);
 
-        QLabel *numel = new QLabel ((String::intToString(it->second->numVariables())).c_str());
+        QLabel *numel = new QLabel ((std::to_string(it->second->numVariables())).c_str());
         dbobjects_grid_->addWidget (numel, row, 1);
 
         bool active = it->second->hasCurrentMetaTable();

@@ -258,7 +258,7 @@ void FilterGeneratorWidget::accept ()
   for (unsigned int cnt=0; cnt < data_conditions_.size(); cnt++)
   {
     ConditionTemplate &data_condition = data_conditions_.at(cnt);
-    std::string condition_name = filter_name+"Condition"+String::intToString(cnt);
+    std::string condition_name = filter_name+"Condition"+std::to_string(cnt);
 
     Configuration &condition_configuration = configuration.addNewSubConfiguration ("DBFilterCondition", condition_name);
     condition_configuration.addParameterString ("operator", data_condition.operator_);

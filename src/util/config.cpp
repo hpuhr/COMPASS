@@ -115,7 +115,7 @@ int SimpleConfig::getInt (const std::string &id)
     if (!existsId(id))
         throw std::runtime_error ("Config: getInt: config id '"+id+"' not present in configuration");
 
-    return String::intFromString(config_.at(id));
+    return std::stoi(config_.at(id));
 }
 
 unsigned int SimpleConfig::getUnsignedInt (const std::string &id)
@@ -126,7 +126,7 @@ unsigned int SimpleConfig::getUnsignedInt (const std::string &id)
     if (!existsId(id))
         throw std::runtime_error ("Config: getUnsignedInt: config id '"+id+"' not present in configuration");
 
-    return String::uIntFromString(config_.at(id));
+    return std::stoul(config_.at(id));
 }
 
 double SimpleConfig::getDouble (const std::string &id)
@@ -137,7 +137,7 @@ double SimpleConfig::getDouble (const std::string &id)
     if (!existsId(id))
         throw std::runtime_error ("Config: getDouble: config id '"+id+"' not present in configuration");
 
-    return String::doubleFromString(config_.at(id));
+    return std::stod(config_.at(id));
 }
 
 const std::string &SimpleConfig::getString (const std::string &id)

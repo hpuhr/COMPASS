@@ -303,7 +303,7 @@ void DBSchemaWidget::updateTableGrid()
         QLabel *name = new QLabel (it.first.c_str());
         table_grid_->addWidget (name, row, 0);
 
-        QLabel *numel = new QLabel ((String::intToString(it.second->numColumns())).c_str());
+        QLabel *numel = new QLabel ((std::to_string(it.second->numColumns())).c_str());
         table_grid_->addWidget (numel, row, 1);
 
         QLabel *key = new QLabel (it.second->key().c_str());
@@ -396,7 +396,7 @@ void DBSchemaWidget::updateMetaTableGrid()
 //        sub->setText (it.second->subTableNames().c_str());
 //        meta_table_grid_->addWidget (sub, row, 2);
 
-        QLabel *numcols = new QLabel (String::intToString(it.second->numColumns()).c_str());
+        QLabel *numcols = new QLabel (std::to_string(it.second->numColumns()).c_str());
         meta_table_grid_->addWidget (numcols, row, 2);
 
         QPushButton *edit = new QPushButton ();

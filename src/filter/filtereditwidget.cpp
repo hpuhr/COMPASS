@@ -213,7 +213,7 @@ void FilterEditWidget::addCondition ()
     std::string reset_value_str = condition_reset_combo_->currentText().toStdString();
 
     std::string condition_name = filter_name+condition_variable_widget_->selectedVariable().name()+
-            "Condition"+String::intToString(filter_->getNumConditions()); // TODO not the best way
+            "Condition"+std::to_string(filter_->getNumConditions()); // TODO not the best way
 
     Configuration &condition_configuration = filter_->addNewSubConfiguration ("DBFilterCondition", condition_name);
     condition_configuration.addParameterString ("operator", operator_str);

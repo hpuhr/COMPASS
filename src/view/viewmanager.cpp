@@ -148,7 +148,7 @@ ViewContainerWidget* ViewManager::addNewContainerWidget ()
     logdbg  << "ViewManager: addNewContainerWidget";
 
     container_count_++;
-    std::string container_widget_name = "ViewWindow"+String::intToString(container_count_);
+    std::string container_widget_name = "ViewWindow"+std::to_string(container_count_);
 
     addNewSubConfiguration ("ViewContainerWidget", container_widget_name);
     generateSubConfigurable ("ViewContainerWidget", container_widget_name);

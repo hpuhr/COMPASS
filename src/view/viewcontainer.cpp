@@ -26,7 +26,7 @@
 
 unsigned int ViewContainer::view_count_=0;
 
-using Utils::String;
+using namespace Utils::String;
 
 ViewContainer::ViewContainer(const std::string &class_id, const std::string &instance_id, Configurable *parent, ViewManager *view_manager, QTabWidget *tab_widget)
     : QObject(), Configurable( class_id, instance_id, parent ), view_manager_(*view_manager), tab_widget_(tab_widget), last_active_manage_button_ (nullptr),
@@ -73,12 +73,12 @@ ViewContainer::~ViewContainer()
 
 void ViewContainer::addListBoxView()
 {
-    generateSubConfigurable ("ListBoxView", "ListBoxView"+String::intToString(view_count_));
+    generateSubConfigurable ("ListBoxView", "ListBoxView"+std::to_string(view_count_));
 }
 
 void ViewContainer::addOSGView()
 {
-    generateSubConfigurable ("OSGView", "OSGView"+String::intToString(view_count_));
+    generateSubConfigurable ("OSGView", "OSGView"+std::to_string(view_count_));
 }
 
 //void ViewContainer::addMosaicView()
@@ -182,7 +182,7 @@ void ViewContainer::generateSubConfigurable (const std::string &class_id, const 
     if (class_id.compare ("ListBoxView") == 0)
     {
         ListBoxView* view = new ListBoxView ( class_id, instance_id, this, view_manager_);
-        unsigned int number = String::getAppendedInt (instance_id);
+        unsigned int number = getAppendedInt (instance_id);
 
         if (number >= view_count_)
             view_count_ = number+1;
@@ -193,7 +193,7 @@ void ViewContainer::generateSubConfigurable (const std::string &class_id, const 
     else if (class_id.compare ("OSGView") == 0)
     {
         OSGView* view = new OSGView ( class_id, instance_id, this, view_manager_);
-        unsigned int number = String::getAppendedInt (instance_id);
+        unsigned int number = getAppendedInt (instance_id);
 
         if (number >= view_count_)
             view_count_ = number+1;
