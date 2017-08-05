@@ -18,7 +18,6 @@
 #ifndef DBGLOBAL_H_
 #define DBGLOBAL_H_
 
-#include <map>
 #include <qsize.h>
 
 static QSize UI_ICON_SIZE (20,20);

@@ -16,6 +16,7 @@
 //#include "MosaicView.h"
 
 #include "stringconv.h"
+#include "global.h"
 
 #include <QHBoxLayout>
 #include <QPushButton>

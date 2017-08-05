@@ -50,6 +50,7 @@
 #include "dbinterface.h"
 #include "atsdb.h"
 #include "buffer.h"
+#include "global.h"
 
 #include "stringconv.h"
 

@@ -26,16 +26,9 @@
 #define STRINGMANIPULATION_H_
 
 #include <vector>
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/assign/list_of.hpp>
-#include <boost/format.hpp>
 #include <iomanip>
+
 #include <boost/regex.hpp>
-
-#include "global.h"
-#include "property.h"
-
 
 namespace Utils
 {
@@ -119,7 +112,7 @@ inline double timeFromString (std::string seconds)
     double time;
 
     if (chunks.size() != 3)
-        throw std::runtime_error( "Util: timeFromString: wrong number of chunks" );
+        throw std::invalid_argument( "Util: timeFromString: wrong number of chunks" );
 
     time =  std::stod(chunks[0]) * 3600.0;
     time += std::stod(chunks[1]) * 60.0;
