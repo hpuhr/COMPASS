@@ -92,7 +92,7 @@ DBFilterCondition::DBFilterCondition(const std::string &class_id, const std::str
     layout->addWidget(label_);
 
     edit_ = new QLineEdit(tr(value_.c_str()));
-    connect(edit_, SIGNAL( returnPressed() ), this, SLOT( valueChanged() ));
+    connect(edit_, SIGNAL(textChanged(QString)), this, SLOT( valueChanged() ));
     layout->addWidget(edit_);
 
     widget_->setLayout (layout);
@@ -162,87 +162,7 @@ std::string DBFilterCondition::getConditionString (const std::string &dbo_name, 
     }
     first=false;
 
-    std::vector<std::string> value_strings;
-    std::vector<std::string> transformed_value_strings;
-
-    if (operator_ == "IN")
-    {
-        value_strings = String::split(value_, ',');
-    }
-    else
-    {
-        value_strings.push_back(value_);
-    }
-
-    logdbg << "DBFilterCondition: getConditionString: in value strings '" << boost::algorithm::join(value_strings, ",") << "'";
-
-    for (auto value_it : value_strings)
-    {
-        std::string value_str = value_it;
-
-        if (variable->representation() != String::Representation::STANDARD)
-            value_str = String::getValueStringFromRepresentation(value_str, variable->representation()); // fix representation
-
-        logdbg << "DBFilterCondition: getConditionString: value string " << value_str;
-
-        if (column.unit() != variable->unit()) // do unit conversion stuff
-        {
-            logdbg << "DBFilterCondition: getConditionString: variable " << variable->name() << " of same dimension has different units " << column.unit() << " " << variable->unit();
-
-            const Dimension &dimension = UnitManager::instance().dimension (variable->dimension());
-            double factor = dimension.getFactor (column.unit(), variable->unit());
-            logdbg  << "DBFilterCondition: getConditionString: correct unit transformation with factor " << factor;
-
-            switch (variable->dataType())
-            {
-            case PropertyDataType::BOOL:
-            case PropertyDataType::UCHAR:
-            case PropertyDataType::UINT:
-            case PropertyDataType::ULONGINT:
-            {
-                unsigned long value = std::stoul(value_str);
-                value /= factor;
-                value_str = std::to_string(value);
-                break;
-            }
-            case PropertyDataType::CHAR:
-            case PropertyDataType::INT:
-            case PropertyDataType::LONGINT:
-            {
-                long value = std::stol(value_str);
-                value /= factor;
-                value_str = std::to_string(value);
-                break;
-            }
-            case PropertyDataType::FLOAT:
-            case PropertyDataType::DOUBLE:
-            {
-                double value = std::stod(value_str);
-                value /= factor;
-                value_str = Utils::String::getValueString(value);
-                break;
-            }
-            case PropertyDataType::STRING:
-                logerr << "DBFilterCondition:getConditionString: unit transformation for string variable " << variable->name() << " impossible";
-                break;
-            default:
-                logerr  <<  "DBFilterCondition:getConditionString: unknown property type " << Property::asString(variable->dataType());
-                throw std::runtime_error ("DBFilterCondition:getConditionString: unknown property type "+Property::asString(variable->dataType()));
-            }
-        }
-        logdbg << "DBFilterCondition: getConditionString: transformed value string " << value_str;
-        transformed_value_strings.push_back(value_str);
-    }
-
-    assert (transformed_value_strings.size());
-
-    if (operator_ != "IN")
-    {
-        assert (transformed_value_strings.size() == 1);
-        ss << table_db_name << "." << column.name() << " " << operator_ << " " << transformed_value_strings.at(0);
-    }
-    else
-        ss << table_db_name << "." << column.name() << " " << operator_ << " (" << boost::algorithm::join(transformed_value_strings, ",") << ")";
+    ss << variable_prefix << table_db_name << "." << column.name() << variable_suffix << " " << operator_ << getTransformedValue (value_, variable);
 
     if (find (variable_names.begin(), variable_names.end(), variable->name()) == variable_names.end())
         variable_names.push_back(variable->name());
@@ -261,15 +181,55 @@ void DBFilterCondition::valueChanged ()
 {
     logdbg  << "DBFilterCondition: valueChanged";
     assert  (edit_);
+    assert (variable_ || meta_variable_);
 
-    if (value_.compare(edit_->text().toStdString()) != 0)
+    std::string new_value = edit_->text().toStdString();
+
+    std::vector <DBOVariable*> variables;
+
+    if (meta_variable_)
     {
-        value_ = edit_->text().toStdString();
+        for (auto var_it : meta_variable_->variables())
+            variables.push_back(&var_it.second);
+    }
+    else
+        variables.push_back(variable_);
+
+    invalid_ = true;
+
+    try
+    {
+        for (auto var_it : variables)
+        {
+            std::string transformed_value = getTransformedValue (new_value, var_it);
+            logdbg  << "DBFilterCondition: valueChanged: transformed value " << transformed_value;
+        }
+        invalid_ = false;
+    }
+    catch(std::exception& e)
+    {
+        logdbg  << "DBFilterCondition: valueChanged: exception thrown: " << e.what();
+    }
+    catch(...)
+    {
+        logdbg  << "DBFilterCondition: valueChanged: exception thrown";
+    }
+
+    if (!invalid_ && value_ != new_value)
+    {
+        value_ = new_value;
 
         changed_=true;
 
         emit possibleFilterChange();
     }
+
+    loginf  << "DBFilterCondition: valueChanged: value_ '" << value_ << "' invalid " << invalid_;
+
+    if (invalid_)
+        edit_->setStyleSheet("QLineEdit { background: rgb(255, 100, 100); selection-background-color: rgb(255, 200, 200); }");
+    else
+        edit_->setStyleSheet("QLineEdit { background: rgb(255, 255, 255); selection-background-color: rgb(200, 200, 200); }");
 }
 
 /**
@@ -327,6 +287,99 @@ void DBFilterCondition::reset ()
     value_=value;
 
     update();
+}
+
+bool DBFilterCondition::invalid() const
+{
+    return invalid_;
+}
+
+std::string DBFilterCondition::getTransformedValue (const std::string& untransformed_value, DBOVariable *variable)
+{
+    assert (variable);
+    const DBTableColumn &column = variable->currentDBColumn();
+
+    std::vector<std::string> value_strings;
+    std::vector<std::string> transformed_value_strings;
+
+    if (operator_ == "IN")
+    {
+        value_strings = String::split(untransformed_value, ',');
+    }
+    else
+    {
+        value_strings.push_back(untransformed_value);
+    }
+
+    logdbg << "DBFilterCondition: getTransformedValue: in value strings '" << boost::algorithm::join(value_strings, ",") << "'";
+
+    for (auto value_it : value_strings)
+    {
+        std::string value_str = value_it;
+
+        if (variable->representation() != String::Representation::STANDARD)
+            value_str = String::getValueStringFromRepresentation(value_str, variable->representation()); // fix representation
+
+        logdbg << "DBFilterCondition: getTransformedValue: value string " << value_str;
+
+        if (column.unit() != variable->unit()) // do unit conversion stuff
+        {
+            logdbg << "DBFilterCondition: getTransformedValue: variable " << variable->name() << " of same dimension has different units " << column.unit() << " " << variable->unit();
+
+            const Dimension &dimension = UnitManager::instance().dimension (variable->dimension());
+            double factor = dimension.getFactor (column.unit(), variable->unit());
+            logdbg  << "DBFilterCondition: getTransformedValue: correct unit transformation with factor " << factor;
+
+            switch (variable->dataType())
+            {
+            case PropertyDataType::BOOL:
+            case PropertyDataType::UCHAR:
+            case PropertyDataType::UINT:
+            case PropertyDataType::ULONGINT:
+            {
+                unsigned long value = std::stoul(value_str);
+                value /= factor;
+                value_str = std::to_string(value);
+                break;
+            }
+            case PropertyDataType::CHAR:
+            case PropertyDataType::INT:
+            case PropertyDataType::LONGINT:
+            {
+                long value = std::stol(value_str);
+                value /= factor;
+                value_str = std::to_string(value);
+                break;
+            }
+            case PropertyDataType::FLOAT:
+            case PropertyDataType::DOUBLE:
+            {
+                double value = std::stod(value_str);
+                value /= factor;
+                value_str = Utils::String::getValueString(value);
+                break;
+            }
+            case PropertyDataType::STRING:
+                logerr << "DBFilterCondition: getTransformedValue: unit transformation for string variable " << variable->name() << " impossible";
+                break;
+            default:
+                logerr  <<  "DBFilterCondition: getTransformedValue: unknown property type " << Property::asString(variable->dataType());
+                throw std::runtime_error ("DBFilterCondition: getTransformedValue: unknown property type "+Property::asString(variable->dataType()));
+            }
+        }
+        logdbg << "DBFilterCondition: getTransformedValue: transformed value string " << value_str;
+        transformed_value_strings.push_back(value_str);
+    }
+
+    assert (transformed_value_strings.size());
+
+    if (operator_ != "IN")
+    {
+        assert (transformed_value_strings.size() == 1);
+        return transformed_value_strings.at(0);
+    }
+    else
+        return "(" + boost::algorithm::join(transformed_value_strings, ",") + ")";
 }
 
 //void DBFilterCondition::notifyMinMax (DBOVariable *variable)

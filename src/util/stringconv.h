@@ -301,39 +301,26 @@ template <typename T> std::string getAsSpecialRepresentationString (T value, Rep
 
 inline std::string getValueStringFromRepresentation (const std::string &representation_str, Representation representation)
 {
-    try
+    if (representation == Utils::String::Representation::SECONDS_TO_TIME)
     {
-        if (representation == Utils::String::Representation::SECONDS_TO_TIME)
-        {
-            return getValueString(timeFromString (representation_str));
-        }
-        else if (representation == Utils::String::Representation::DEC_TO_OCTAL)
-        {
-            return getValueString(intFromOctalString(representation_str));
-        }
-        else if (representation == Utils::String::Representation::DEC_TO_HEX)
-        {
-            return getValueString(intFromHexString(representation_str));
-        }
-        else if (representation == Utils::String::Representation::FEET_TO_FLIGHTLEVEL)
-        {
-            return getValueString(std::stod(representation_str)*100.0);
-        }
-        else
-        {
-            throw std::runtime_error ("Utils: String: getAsSpecialRepresentationString: unknown representation");
-        }
+        return getValueString(timeFromString (representation_str));
     }
-    catch(std::exception& e)
+    else if (representation == Utils::String::Representation::DEC_TO_OCTAL)
     {
-        logerr  << "Utils: String: getAsSpecialRepresentationString: exception thrown: " << e.what();
+        return getValueString(intFromOctalString(representation_str));
     }
-    catch(...)
+    else if (representation == Utils::String::Representation::DEC_TO_HEX)
     {
-        logerr  << "Utils: String: getAsSpecialRepresentationString: exception thrown";;
+        return getValueString(intFromHexString(representation_str));
     }
-
-    return "";
+    else if (representation == Utils::String::Representation::FEET_TO_FLIGHTLEVEL)
+    {
+        return getValueString(std::stod(representation_str)*100.0);
+    }
+    else
+    {
+        throw std::runtime_error ("Utils: String: getAsSpecialRepresentationString: unknown representation");
+    }
 }
 }
 

@@ -113,6 +113,8 @@ public:
 
     //virtual void notifyMinMax (DBOVariable *variable);
 
+    bool invalid() const;
+
 private:
     /// @brief Parent filter
     DBFilter *filter_parent_;
@@ -137,6 +139,7 @@ private:
 
     /// @brief Changed flag
     bool changed_;
+    bool invalid_;
 
     /// @brief Widget with condition elements
     QWidget *widget_;
@@ -144,6 +147,8 @@ private:
     QLineEdit *edit_;
     /// @brief Variable name and operator label
     QLabel *label_;
+
+    std::string getTransformedValue (const std::string& untransformed_value, DBOVariable *variable);
 };
 
 #endif /* DBFILTERCONDITION_H_ */

@@ -192,6 +192,12 @@ std::string DBFilter::getConditionString (const std::string &dbo_type, bool &fir
     {
         for (unsigned int cnt=0; cnt < conditions_.size(); cnt++)
         {
+            if (conditions_.at(cnt)->invalid())
+            {
+                logwrn  << "DBFilter " << instance_id_ << ": getConditionString: invalid condition, returning empty condition";
+                return "";
+            }
+
             std::string text = conditions_.at(cnt)->getConditionString(dbo_type, first, variable_names);
             ss << text;
         }
