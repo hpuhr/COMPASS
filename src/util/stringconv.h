@@ -27,6 +27,7 @@
 
 #include <vector>
 #include <iomanip>
+#include <map>
 
 #include <boost/regex.hpp>
 
@@ -221,7 +222,18 @@ inline double doubleFromLongitudeString(std::string &longitude_str)
 
     return x;
 }
+
+enum class Representation { STANDARD, SECONDS_TO_TIME, DEC_TO_OCTAL, DEC_TO_HEX, FEET_TO_FLIGHTLEVEL};
+
+extern std::map<Representation, std::string> representation_2_string;
+extern std::map<std::string, Representation> string_2_representation;
+
+Representation stringToRepresentation (const std::string &representation_str);
+std::string representationToString (Representation representation);
+
 }
+
+
 
 //template <typename T> std::string formatBinaryString (T val)
 //{

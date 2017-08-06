@@ -30,7 +30,7 @@ typedef std::numeric_limits<float> float_limit;
 #include "arraylist.h"
 
 ArrayListBase::ArrayListBase ()
-    : size_(0), max_size_(0), representation_(StringRepresentation::STANDARD)
+    : size_(0), max_size_(0), representation_(Utils::String::Representation::STANDARD)
 {
 
 }
@@ -78,14 +78,14 @@ bool ArrayListBase::isNone(size_t index)
     return (*none_flags_[index/BUFFER_ARRAY_SIZE])[index%BUFFER_ARRAY_SIZE];
 }
 
-StringRepresentation ArrayListBase::representation() const
+Utils::String::Representation ArrayListBase::representation() const
 {
     return representation_;
 }
 
-void ArrayListBase::representation(const StringRepresentation &representation)
+void ArrayListBase::representation(const Utils::String::Representation &representation)
 {
-    logdbg << "ArrayList: representation: name " << id_ << " set to representation " << representation_2_string.at(representation);
+    logdbg << "ArrayList: representation: name " << id_ << " set to representation " << Utils::String::representationToString(representation);
     representation_ = representation;
 }
 

@@ -60,11 +60,10 @@ void FinalizeDBOReadJob::run ()
         const Property &property = properties.get(column.name());
         assert (property.dataType() == var_it->dataType());
 
-        if (var_it->representation() != StringRepresentation::STANDARD) // do representation stuff
+        if (var_it->representation() != Utils::String::Representation::STANDARD) // do representation stuff
         {
-            StringRepresentation rep = var_it->representation();
-            assert (representation_2_string.count(rep) == 1);
-            logdbg << "FinalizeDBOReadJob: run: variable " << var_it->name() << ": setting string representation " << representation_2_string.at(rep);
+            Utils::String::Representation rep = var_it->representation();
+            logdbg << "FinalizeDBOReadJob: run: variable " << var_it->name() << ": setting string representation " << Utils::String::representationToString(rep);
 
             switch (property.dataType())
             {

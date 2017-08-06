@@ -42,7 +42,6 @@
 #include <boost/algorithm/string.hpp>
 
 #include "stringconv.h"
-#include "stringrepresentation.h"
 
 using namespace Utils;
 
@@ -62,11 +61,10 @@ DBOVariable::DBOVariable(const std::string &class_id, const std::string &instanc
 
     if (representation_str_.size() == 0)
     {
-        representation_str_ = representation_2_string.at(StringRepresentation::STANDARD);
+        representation_str_ = String::representationToString(String::Representation::STANDARD);
     }
 
-    assert (string_2_representation.count(representation_str_) == 1);
-    representation_ = string_2_representation.at(representation_str_);
+    representation_ = String::stringToRepresentation(representation_str_);
 
     //loginf  << "DBOVariable: constructor: name " << id_ << " unitdim '" << unit_dimension_ << "' unitunit '" << unit_unit_ << "'";
 
@@ -391,15 +389,13 @@ DBOVariableWidget *DBOVariable::widget ()
     return widget_;
 }
 
-StringRepresentation DBOVariable::representation() const
+String::Representation DBOVariable::representation() const
 {
     return representation_;
 }
 
-void DBOVariable::representation(const StringRepresentation &representation)
+void DBOVariable::representation(const String::Representation &representation)
 {
-    assert (representation_2_string.count(representation) == 1);
-
+    representation_str_ = String::representationToString(representation_);
     representation_ = representation;
-    representation_str_ = representation_2_string.at(representation_);
 }

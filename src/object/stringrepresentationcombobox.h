@@ -30,7 +30,6 @@
 
 #include "global.h"
 #include "dbovariable.h"
-#include "stringrepresentation.h"
 
 /**
  * @brief String representation selection for a DBOVariable
@@ -56,10 +55,10 @@ public:
     StringRepresentationComboBox(DBOVariable &variable, QWidget * parent = 0)
     : QComboBox(parent), variable_(variable)
     {
-        for (auto it : string_2_representation)
+        for (auto it : Utils::String::string_2_representation)
             addItem (it.first.c_str());
 
-        setCurrentText (representation_2_string.at(variable_.representation()).c_str());
+        setCurrentText (Utils::String::representationToString(variable_.representation()).c_str());
         connect(this, SIGNAL( activated(const QString &) ), this, SIGNAL( changedRepresentation() ));
         connect(this, SIGNAL( activated(const QString &) ), this, SLOT( changed() ));
     }
@@ -68,17 +67,16 @@ public:
     virtual ~StringRepresentationComboBox() {}
 
     /// @brief Returns the currently selected representation
-    StringRepresentation representation ()
+    Utils::String::Representation representation ()
     {
         std::string text = currentText().toStdString();
-        assert (string_2_representation.count(text) == 1);
-        return string_2_representation.at(text);
+        return Utils::String::stringToRepresentation(text);
     }
 
     /// @brief Sets the currently selected representation
-    void representation (StringRepresentation type)
+    void representation (Utils::String::Representation type)
     {
-        setCurrentText (representation_2_string.at(type).c_str());
+        setCurrentText (Utils::String::representationToString(type).c_str());
     }
 
 protected:

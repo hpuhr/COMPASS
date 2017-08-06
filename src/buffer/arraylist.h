@@ -32,7 +32,6 @@
 
 #include "logger.h"
 #include "stringconv.h"
-#include "stringrepresentation.h"
 
 static const unsigned int BUFFER_ARRAY_SIZE=10000;
 
@@ -64,9 +63,9 @@ public:
     /// @brief Sets all elements to initial value and None information to true
     virtual void clear()=0;
 
-    bool hasSpecialRepresentation () { return representation_ != StringRepresentation::STANDARD; }
-    StringRepresentation representation() const;
-    void representation(const StringRepresentation &representation);
+    bool hasSpecialRepresentation () { return representation_ != Utils::String::Representation::STANDARD; }
+    Utils::String::Representation representation() const;
+    void representation(const Utils::String::Representation &representation);
 
 protected:
     /// Identifier of contained data
@@ -76,7 +75,7 @@ protected:
     /// Size of data arrays
     size_t max_size_;
 
-    StringRepresentation representation_;
+    Utils::String::Representation representation_;
 
     std::vector < std::shared_ptr< std::array<bool,BUFFER_ARRAY_SIZE> > > none_flags_;
     //std::vector <std::shared_ptr<std::bitset<BUFFER_ARRAY_SIZE>>> none_flags_;
@@ -151,29 +150,29 @@ public:
         if (isNone(index))
             throw std::out_of_range ("ArrayListTemplate: getAsRepresentationString of None value "+std::to_string(index));
 
-        if (representation_ == StringRepresentation::STANDARD)
+        if (representation_ == Utils::String::Representation::STANDARD)
             return getAsString(index);
 
         std::ostringstream out;
 
         try
         {
-            if (representation_ == StringRepresentation::SECONDS_TO_TIME)
+            if (representation_ == Utils::String::Representation::SECONDS_TO_TIME)
             {
                 double value = data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
                 return Utils::String::timeStringFromDouble (value);
             }
-            else if (representation_ == StringRepresentation::DEC_TO_OCTAL)
+            else if (representation_ == Utils::String::Representation::DEC_TO_OCTAL)
             {
                 unsigned int value = data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
                 out << std::oct << std::setfill ('0') << std::setw (4) << value;
             }
-            else if (representation_ == StringRepresentation::DEC_TO_HEX)
+            else if (representation_ == Utils::String::Representation::DEC_TO_HEX)
             {
                 unsigned int value = data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
                 out << std::uppercase << std::hex << value;
             }
-            else if (representation_ == StringRepresentation::FEET_TO_FLIGHTLEVEL)
+            else if (representation_ == Utils::String::Representation::FEET_TO_FLIGHTLEVEL)
             {
                 double value = data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
                 out << value/100.0;

@@ -296,7 +296,7 @@ set ( atsdb_HDRS
     #        src/util/data.h
     src/util/number.h
     src/util/stringconv.h
-    src/util/stringrepresentation.h
+    #src/util/stringrepresentation.h
     src/util/singleton.h
     src/util/logger.h
     )
@@ -430,8 +430,8 @@ set ( atsdb_SRCS
     src/util/logger.cpp
     #        src/util/data.cpp
     src/util/number.cpp
-    #src/util/stringconv.cpp
-    src/util/stringrepresentation.cpp
+    src/util/stringconv.cpp
+    #src/util/stringrepresentation.cpp
     src/view/viewmanager.cpp
     src/view/viewmanagerwidget.cpp
     src/view/viewcontainer.cpp

@@ -32,7 +32,7 @@
 #include "global.h"
 #include "property.h"
 #include "configurable.h"
-#include "stringrepresentation.h"
+#include "stringconv.h"
 
 class DBTableColumn;
 
@@ -186,15 +186,15 @@ public:
 
     DBOVariableWidget *widget ();
 
-    StringRepresentation representation() const;
-    void representation(const StringRepresentation &representation);
+    Utils::String::Representation representation() const;
+    void representation(const Utils::String::Representation &representation);
 
 protected:
     /// DBO parent
     DBObject &dbo_parent_;
     /// Value representation type, based on enum STRING_REPRESENTATION
     std::string representation_str_;
-    StringRepresentation representation_;
+    Utils::String::Representation representation_;
 
     /// Description
     std::string description_;
