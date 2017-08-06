@@ -203,43 +203,43 @@ void Buffer::addProperty (std::string id, PropertyDataType type)
     {
     case PropertyDataType::BOOL:
         assert (arrays_bool_.count(id) == 0);
-        arrays_bool_ [id] = std::shared_ptr<ArrayListTemplate<bool>> (new ArrayListTemplate<bool>);
+        arrays_bool_ [id] = std::shared_ptr<ArrayListTemplate<bool>> (new ArrayListTemplate<bool>());
         break;
     case PropertyDataType::CHAR:
         assert (arrays_char_.count(id) == 0);
-        arrays_char_ [id] = std::shared_ptr<ArrayListTemplate<char>> (new ArrayListTemplate<char>);
+        arrays_char_ [id] = std::shared_ptr<ArrayListTemplate<char>> (new ArrayListTemplate<char>());
         break;
     case PropertyDataType::UCHAR:
         assert (arrays_uchar_.count(id) == 0);
-        arrays_uchar_ [id] = std::shared_ptr<ArrayListTemplate<unsigned char>> (new ArrayListTemplate<unsigned char>);
+        arrays_uchar_ [id] = std::shared_ptr<ArrayListTemplate<unsigned char>> (new ArrayListTemplate<unsigned char>());
         break;
     case PropertyDataType::INT:
         assert (arrays_int_.count(id) == 0);
-        arrays_int_ [id] = std::shared_ptr<ArrayListTemplate<int>> (new ArrayListTemplate<int>);
+        arrays_int_ [id] = std::shared_ptr<ArrayListTemplate<int>> (new ArrayListTemplate<int>());
         break;
     case PropertyDataType::UINT:
         assert (arrays_uint_.count(id) == 0);
-        arrays_uint_ [id] = std::shared_ptr<ArrayListTemplate<unsigned int>> (new ArrayListTemplate<unsigned int>);
+        arrays_uint_ [id] = std::shared_ptr<ArrayListTemplate<unsigned int>> (new ArrayListTemplate<unsigned int>());
         break;
     case PropertyDataType::LONGINT:
         assert (arrays_long_int_.count(id) == 0);
-        arrays_long_int_ [id] = std::shared_ptr<ArrayListTemplate<long>> (new ArrayListTemplate<long>);
+        arrays_long_int_ [id] = std::shared_ptr<ArrayListTemplate<long>> (new ArrayListTemplate<long>());
         break;
     case PropertyDataType::ULONGINT:
         assert (arrays_ulong_int_.count(id) == 0);
-        arrays_ulong_int_ [id] = std::shared_ptr<ArrayListTemplate<unsigned long>> (new ArrayListTemplate<unsigned long>);
+        arrays_ulong_int_ [id] = std::shared_ptr<ArrayListTemplate<unsigned long>> (new ArrayListTemplate<unsigned long>());
         break;
     case PropertyDataType::FLOAT:
         assert (arrays_float_.count(id) == 0);
-        arrays_float_ [id] = std::shared_ptr<ArrayListTemplate<float>> (new ArrayListTemplate<float>);
+        arrays_float_ [id] = std::shared_ptr<ArrayListTemplate<float>> (new ArrayListTemplate<float>());
         break;
     case PropertyDataType::DOUBLE:
         assert (arrays_double_.count(id) == 0);
-        arrays_double_ [id] = std::shared_ptr<ArrayListTemplate<double>> (new ArrayListTemplate<double>);
+        arrays_double_ [id] = std::shared_ptr<ArrayListTemplate<double>> (new ArrayListTemplate<double>());
         break;
     case PropertyDataType::STRING:
         assert (arrays_string_.count(id) == 0);
-        arrays_string_ [id] = std::shared_ptr<ArrayListTemplate<std::string>> (new ArrayListTemplate<std::string>);
+        arrays_string_ [id] = std::shared_ptr<ArrayListTemplate<std::string>> (new ArrayListTemplate<std::string>());
         break;
     default:
         logerr  <<  "Buffer: addProperty: unknown property type " << Property::asString(type);

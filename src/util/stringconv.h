@@ -25,6 +25,8 @@
 #ifndef STRINGMANIPULATION_H_
 #define STRINGMANIPULATION_H_
 
+#include "logger.h"
+
 #include <vector>
 #include <iomanip>
 #include <map>
@@ -106,9 +108,9 @@ inline std::string timeStringFromDouble (double seconds)
     return out.str();
 }
 
-inline double timeFromString (std::string seconds)
+inline double timeFromString (std::string time_str)
 {
-    std::vector<std::string> chunks = split(seconds, ':');
+    std::vector<std::string> chunks = split(time_str, ':');
 
     double time;
 
@@ -231,6 +233,108 @@ extern std::map<std::string, Representation> string_2_representation;
 Representation stringToRepresentation (const std::string &representation_str);
 std::string representationToString (Representation representation);
 
+inline std::string getValueString (const std::string &value)
+{
+    return value;
+}
+
+typedef std::numeric_limits<double> double_limit;
+typedef std::numeric_limits<float> float_limit;
+
+inline std::string getValueString (const float &value)
+{
+    std::ostringstream out;
+    out << std::setprecision (float_limit::max_digits10) << value;
+    return out.str();
+
+}
+
+inline std::string getValueString (const double &value)
+{
+    std::ostringstream out;
+    out << std::setprecision (double_limit::max_digits10) << value;
+    return out.str();
+}
+
+template <typename T> std::string getValueString (T value)
+{
+    return std::to_string(value);
+}
+
+template <typename T> std::string getAsSpecialRepresentationString (T value, Representation representation)
+{
+    std::ostringstream out;
+    try
+    {
+        if (representation == Utils::String::Representation::SECONDS_TO_TIME)
+        {
+            return Utils::String::timeStringFromDouble (value);
+        }
+        else if (representation == Utils::String::Representation::DEC_TO_OCTAL)
+        {
+            out << std::oct << std::setfill ('0') << std::setw (4) << value;
+        }
+        else if (representation == Utils::String::Representation::DEC_TO_HEX)
+        {
+            out << std::uppercase << std::hex << value;
+        }
+        else if (representation == Utils::String::Representation::FEET_TO_FLIGHTLEVEL)
+        {
+            out << value/100.0;
+        }
+        else
+        {
+            throw std::runtime_error ("Utils: String: getAsSpecialRepresentationString: unknown representation");
+        }
+    }
+    catch(std::exception& e)
+    {
+        logerr  << "Utils: String: getAsSpecialRepresentationString: exception thrown: " << e.what();
+    }
+    catch(...)
+    {
+        logerr  << "Utils: String: getAsSpecialRepresentationString: exception thrown";;
+    }
+
+    return out.str();
+}
+
+inline std::string getValueStringFromRepresentation (const std::string &representation_str, Representation representation)
+{
+    try
+    {
+        if (representation == Utils::String::Representation::SECONDS_TO_TIME)
+        {
+            return getValueString(timeFromString (representation_str));
+        }
+        else if (representation == Utils::String::Representation::DEC_TO_OCTAL)
+        {
+            return getValueString(intFromOctalString(representation_str));
+        }
+        else if (representation == Utils::String::Representation::DEC_TO_HEX)
+        {
+            return getValueString(intFromHexString(representation_str));
+        }
+        else if (representation == Utils::String::Representation::FEET_TO_FLIGHTLEVEL)
+        {
+            return getValueString(std::stod(representation_str)*100.0);
+        }
+        else
+        {
+            throw std::runtime_error ("Utils: String: getAsSpecialRepresentationString: unknown representation");
+        }
+    }
+    catch(std::exception& e)
+    {
+        logerr  << "Utils: String: getAsSpecialRepresentationString: exception thrown: " << e.what();
+    }
+    catch(...)
+    {
+        logerr  << "Utils: String: getAsSpecialRepresentationString: exception thrown";;
+    }
+
+    return "";
+}
 }
 
 

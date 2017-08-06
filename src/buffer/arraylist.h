@@ -31,6 +31,7 @@
 #include <iomanip>
 
 #include "logger.h"
+#include "property.h"
 #include "stringconv.h"
 
 static const unsigned int BUFFER_ARRAY_SIZE=10000;
@@ -138,7 +139,7 @@ public:
         if (isNone(index))
             throw std::out_of_range ("ArrayListTemplate: getAsString of None value "+std::to_string(index));
 
-        return std::to_string( data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE));
+        return Utils::String::getValueString (data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE));
     }
 
     /// @brief Returns representation string of a specific value
@@ -151,47 +152,9 @@ public:
             throw std::out_of_range ("ArrayListTemplate: getAsRepresentationString of None value "+std::to_string(index));
 
         if (representation_ == Utils::String::Representation::STANDARD)
-            return getAsString(index);
+            return Utils::String::getValueString (data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE));
 
-        std::ostringstream out;
-
-        try
-        {
-            if (representation_ == Utils::String::Representation::SECONDS_TO_TIME)
-            {
-                double value = data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
-                return Utils::String::timeStringFromDouble (value);
-            }
-            else if (representation_ == Utils::String::Representation::DEC_TO_OCTAL)
-            {
-                unsigned int value = data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
-                out << std::oct << std::setfill ('0') << std::setw (4) << value;
-            }
-            else if (representation_ == Utils::String::Representation::DEC_TO_HEX)
-            {
-                unsigned int value = data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
-                out << std::uppercase << std::hex << value;
-            }
-            else if (representation_ == Utils::String::Representation::FEET_TO_FLIGHTLEVEL)
-            {
-                double value = data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
-                out << value/100.0;
-            }
-            else
-            {
-                throw std::runtime_error ("ArrayListTemplate: getAsRepresentationString: unknown representation");
-            }
-        }
-        catch(std::exception& e)
-        {
-            logerr  << "ArrayListTemplate: getAsRepresentationString: exception thrown: " << e.what();
-        }
-        catch(...)
-        {
-            logerr  << "ArrayListTemplate: getAsRepresentationString: exception thrown";;
-        }
-
-        return out.str();
+        return Utils::String::getAsSpecialRepresentationString (data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE), representation_);
     }
 
     /// @brief Sets specific value
@@ -285,14 +248,14 @@ protected:
 };
 
 
-template <>
-const std::string ArrayListTemplate<std::string>::getAsString (size_t index);
+//template <>
+//const std::string ArrayListTemplate<std::string>::getAsString (size_t index);
 
-template <>
-const std::string ArrayListTemplate<float>::getAsString (size_t index);
+//template <>
+//const std::string ArrayListTemplate<float>::getAsString (size_t index);
 
-template <>
-const std::string ArrayListTemplate<double>::getAsString (size_t index);
+//template <>
+//const std::string ArrayListTemplate<double>::getAsString (size_t index);
 
 
 

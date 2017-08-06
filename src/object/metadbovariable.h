@@ -4,6 +4,7 @@
 #include "configurable.h"
 #include "dbobjectmanager.h"
 #include "dbovariable.h"
+#include "stringconv.h"
 
 class MetaDBOVariableWidget;
 
@@ -16,8 +17,9 @@ public:
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
     bool hasVariables () { return variables_.size() > 0; }
-    PropertyDataType dataType () { assert (hasVariables()); return variables_.begin()->second.dataType(); }
-    const std::string &dataTypeString() { assert (hasVariables()); return variables_.begin()->second.dataTypeString(); }
+    PropertyDataType dataType ();
+    const std::string &dataTypeString();
+    Utils::String::Representation representation ();
 
     /// @brief Return if variable exist in DBO of type
     bool existsIn (const std::string &dbo_name);

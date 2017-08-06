@@ -2,7 +2,7 @@
     <Configuration class_id="ViewContainer" instance_id="ViewContainer0">
         <Configuration class_id="ListBoxView" instance_id="ListBoxView0">
             <ParameterBool overwrite_csv="1"/>
-            <ParameterBool use_presentation="1"/>
+            <ParameterBool use_presentation="0"/>
             <Configuration class_id="ListBoxViewDataSource" instance_id="ListBoxViewDataSource0">
                 <ParameterBool database_view="0"/>
                 <ParameterBool order_ascending="1"/>

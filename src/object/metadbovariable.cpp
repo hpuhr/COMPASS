@@ -123,45 +123,39 @@ void MetaDBOVariable::description(const std::string &description)
     description_ = description;
 }
 
-/**
- * Bit of a hack, only to be called on meta variables. Basically, only for normal (= non-meta) variables the
- * minimum/maximum information can be generated. If such information should be generated for a meta-variable,
- * jobs are generated for all sub-variables. When the information is set for the sub-variables, the meta-variable
- * needs an update to inform its observers. Therefore, the meta-variable registers itself as parent to all its
- * sub-variables, and is updated when all sub-variables have the minimum/maximum information. Look into setMinMax()
- * and subVariableHasMinMaxInfo() for the details.
- */
-//void DBOVariable::registerAsParent ()
-//{
-//    logdbg << "DBOVariable: registerAsParent: " << id_;
-//    assert (isMetaVariable());
-//    assert (!registered_as_parent_);
-//    std::map <std::string, std::string>::iterator it;
-//    for (it = sub_variables_.begin(); it != sub_variables_.end(); it++)
-//    {
-//        assert (DBObjectManager::getInstance().existsDBOVariable(it->first, it->second));
-//        DBOVariable *var = DBObjectManager::getInstance().getDBOVariable(it->first, it->second);
-//        var->registerParentVariable(this);
+PropertyDataType MetaDBOVariable::dataType ()
+{
+    assert (hasVariables());
 
-//        if (data_type_ != var->data_type_)
-//            logwrn << "DBOVariable: registerAsParent: meta variable " << id_ << " has different data type " <<
-//                      data_type_str_ << " than sub variable " << var->id_ << " data type "
-//                   << var->data_type_str_;
-//    }
-//    registered_as_parent_=true;
-//}
+    PropertyDataType data_type = variables_.begin()->second.dataType();
 
-//void DBOVariable::unregisterAsParent ()
-//{
-//    logdbg << "DBOVariable: unregisterAsParent: " << id_;
-//    assert (isMetaVariable());
-//    assert (registered_as_parent_);
-//    std::map <std::string, std::string>::iterator it;
-//    for (it = sub_variables_.begin(); it != sub_variables_.end(); it++)
-//    {
-//        assert (DBObjectManager::getInstance().existsDBOVariable(it->first, it->second));
-//        DBOVariable *var = DBObjectManager::getInstance().getDBOVariable(it->first, it->second);
-//        var->unregisterParentVariable(this);
-//    }
-//    registered_as_parent_=false;
-//}
+    for (auto variable_it : variables_)
+    {
+        if (variable_it.second.dataType() != data_type)
+            logerr << "MetaDBOVariable: dataType: meta var " << name_ << " has different data types in sub variables";
+    }
+
+    return data_type;
+}
+
+const std::string &MetaDBOVariable::dataTypeString()
+{
+    assert (hasVariables());
+    return Property::asString(dataType());
+}
+
+Utils::String::Representation MetaDBOVariable::representation ()
+{
+    assert (hasVariables());
+
+    Utils::String::Representation representation = variables_.begin()->second.representation();
+
+    for (auto variable_it : variables_)
+    {
+        if (variable_it.second.representation() != representation)
+            logerr << "MetaDBOVariable: dataType: meta var " << name_ << " has different representations in sub variables";
+    }
+
+    return representation;
+}
+

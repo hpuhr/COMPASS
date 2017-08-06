@@ -27,3 +27,5 @@ std::string Utils::String::representationToString (Utils::String::Representation
     assert (Utils::String::representation_2_string.count(representation) == 1);
     return Utils::String::representation_2_string.at(representation);
 }
+
+

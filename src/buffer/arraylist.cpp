@@ -116,43 +116,43 @@ void ArrayListBase::unsetNone (size_t index)
 //    return *this;
 //}
 
-template <>
-const std::string ArrayListTemplate<std::string>::getAsString (size_t index)
-{
-    if (index > size_)
-        throw std::out_of_range ("ArrayListTemplate: getAsString out of index "+std::to_string(index));
+//template <>
+//const std::string ArrayListTemplate<std::string>::getAsString (size_t index)
+//{
+//    if (index > size_)
+//        throw std::out_of_range ("ArrayListTemplate: getAsString out of index "+std::to_string(index));
 
-    if (isNone(index))
-        throw std::out_of_range ("ArrayListTemplate: getAsString of None value "+std::to_string(index));
+//    if (isNone(index))
+//        throw std::out_of_range ("ArrayListTemplate: getAsString of None value "+std::to_string(index));
 
-    return data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
-}
+//    return data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
+//}
 
-template <>
-const std::string ArrayListTemplate<float>::getAsString (size_t index)
-{
-    if (index > size_)
-        throw std::out_of_range ("ArrayListTemplate: getAsString out of index "+std::to_string(index));
+//template <>
+//const std::string ArrayListTemplate<float>::getAsString (size_t index)
+//{
+//    if (index > size_)
+//        throw std::out_of_range ("ArrayListTemplate: getAsString out of index "+std::to_string(index));
 
-    if (isNone(index))
-        throw std::out_of_range ("ArrayListTemplate: getAsString of None value "+std::to_string(index));
+//    if (isNone(index))
+//        throw std::out_of_range ("ArrayListTemplate: getAsString of None value "+std::to_string(index));
 
-    std::ostringstream out;
-    out << std::setprecision (float_limit::max_digits10) << data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
-    return out.str();
-}
+//    std::ostringstream out;
+//    out << std::setprecision (float_limit::max_digits10) << data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
+//    return out.str();
+//}
 
-template <>
-const std::string ArrayListTemplate<double>::getAsString (size_t index)
-{
-    if (index > size_)
-        throw std::out_of_range ("ArrayListTemplate: getAsString out of index "+std::to_string(index));
+//template <>
+//const std::string ArrayListTemplate<double>::getAsString (size_t index)
+//{
+//    if (index > size_)
+//        throw std::out_of_range ("ArrayListTemplate: getAsString out of index "+std::to_string(index));
 
-    if (isNone(index))
-        throw std::out_of_range ("ArrayListTemplate: getAsString of None value "+std::to_string(index));
+//    if (isNone(index))
+//        throw std::out_of_range ("ArrayListTemplate: getAsString of None value "+std::to_string(index));
 
-    std::ostringstream out;
-    out << std::setprecision (double_limit::max_digits10) << data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
-    return out.str();
-}
+//    std::ostringstream out;
+//    out << std::setprecision (double_limit::max_digits10) << data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
+//    return out.str();
+//}
 
