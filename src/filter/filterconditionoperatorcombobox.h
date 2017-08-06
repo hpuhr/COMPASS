@@ -46,12 +46,15 @@ public:
                 stringlist.append(">=");
                 stringlist.append("<");
                 stringlist.append("<=");
-                stringlist.append("IN");
             }
+
+            stringlist.append("IN");
+
             if (!numeric_only)
             {
                 stringlist.append("LIKE");
             }
+
             stringlist.append("IS");
             stringlist.append("IS NOT");
         }

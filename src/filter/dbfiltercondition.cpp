@@ -24,10 +24,13 @@
 
 #include <sstream>
 #include <cassert>
+
 #include <QHBoxLayout>
 #include <QWidget>
 #include <QLineEdit>
 #include <QLabel>
+
+#include <boost/algorithm/string/join.hpp>
 
 #include "dbfiltercondition.h"
 #include "dbobjectmanager.h"
@@ -38,8 +41,11 @@
 #include "metadbtable.h"
 #include "dbschema.h"
 #include "dbtable.h"
+#include "dbtablecolumn.h"
 #include "atsdb.h"
 #include "dbfilter.h"
+#include "unitmanager.h"
+#include "unit.h"
 
 #include "stringconv.h"
 
@@ -158,7 +164,87 @@ std::string DBFilterCondition::getConditionString (const std::string &dbo_name, 
     }
     first=false;
 
-    ss << table_db_name << "." << column.name() << " " << operator_ << " " << value_;
+    std::vector<std::string> value_strings;
+    std::vector<std::string> transformed_value_strings;
+
+    if (operator_ == "IN")
+    {
+        value_strings = String::split(value_, ',');
+    }
+    else
+    {
+        value_strings.push_back(value_);
+    }
+
+    loginf << "DBFilterCondition: getConditionString: in value strings '" << boost::algorithm::join(value_strings, ",") << "'";
+
+    for (auto value_it : value_strings)
+    {
+        std::string value_str = value_it;
+
+        if (variable->representation() != String::Representation::STANDARD)
+            value_str = String::getValueStringFromRepresentation(value_str, variable->representation()); // fix representation
+
+        loginf << "DBFilterCondition: getConditionString: value string " << value_str;
+
+        if (column.unit() != variable->unit()) // do unit conversion stuff
+        {
+            logdbg << "DBFilterCondition: getConditionString: variable " << variable->name() << " of same dimension has different units " << column.unit() << " " << variable->unit();
+
+            const Dimension &dimension = UnitManager::instance().dimension (variable->dimension());
+            double factor = dimension.getFactor (column.unit(), variable->unit());
+            logdbg  << "DBFilterCondition: getConditionString: correct unit transformation with factor " << factor;
+
+            switch (variable->dataType())
+            {
+            case PropertyDataType::BOOL:
+            case PropertyDataType::UCHAR:
+            case PropertyDataType::UINT:
+            case PropertyDataType::ULONGINT:
+            {
+                unsigned long value = std::stoul(value_str);
+                value /= factor;
+                value_str = std::to_string(value);
+                break;
+            }
+            case PropertyDataType::CHAR:
+            case PropertyDataType::INT:
+            case PropertyDataType::LONGINT:
+            {
+                long value = std::stol(value_str);
+                value /= factor;
+                value_str = std::to_string(value);
+                break;
+            }
+            case PropertyDataType::FLOAT:
+            case PropertyDataType::DOUBLE:
+            {
+                double value = std::stod(value_str);
+                value /= factor;
+                value_str = Utils::String::getValueString(value);
+                break;
+            }
+            case PropertyDataType::STRING:
+                logerr << "DBFilterCondition:getConditionString: unit transformation for string variable " << variable->name() << " impossible";
+                break;
+            default:
+                logerr  <<  "DBFilterCondition:getConditionString: unknown property type " << Property::asString(variable->dataType());
+                throw std::runtime_error ("DBFilterCondition:getConditionString: unknown property type "+Property::asString(variable->dataType()));
+            }
+        }
+        loginf << "DBFilterCondition: getConditionString: transformed value string " << value_str;
+        transformed_value_strings.push_back(value_str);
+    }
+
+    assert (transformed_value_strings.size());
+
+    if (operator_ != "IN")
+    {
+        assert (transformed_value_strings.size() == 1);
+        ss << table_db_name << "." << column.name() << " " << operator_ << " " << transformed_value_strings.at(0);
+    }
+    else
+        ss << table_db_name << "." << column.name() << " " << operator_ << " (" << boost::algorithm::join(transformed_value_strings, ",") << ")";
 
     if (find (variable_names.begin(), variable_names.end(), variable->name()) == variable_names.end())
         variable_names.push_back(variable->name());

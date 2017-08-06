@@ -32,6 +32,7 @@
 #include <QCheckBox>
 
 #include "filtergeneratorwidget.h"
+#include "filterconditionoperatorcombobox.h"
 #include "atsdb.h"
 #include "dbovariable.h"
 #include "metadbovariable.h"
@@ -99,14 +100,7 @@ void FilterGeneratorWidget::createGUIElements ()
   label->setFont (font_bold);
   operator_layout->addWidget(label);
 
-  condition_combo_=new QComboBox();
-  condition_combo_->addItem("=");
-  condition_combo_->addItem("!=");
-  condition_combo_->addItem(">");
-  condition_combo_->addItem(">=");
-  condition_combo_->addItem("<");
-  condition_combo_->addItem("<=");
-  condition_combo_->addItem("|=");
+  condition_combo_=new FilterConditionOperatorComboBox();
   operator_layout->addWidget(condition_combo_);
   operator_layout->addStretch();
 

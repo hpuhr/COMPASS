@@ -1,5 +1,24 @@
 <Configuration class_id="FilterManager" instance_id="FilterManager0">
     <ParameterString db_id="MySQL:_Localhost:_job_awam_0023"/>
+    <Configuration class_id="DBFilter" instance_id="ModeACode">
+        <ParameterBool active="0"/>
+        <ParameterBool changed="0"/>
+        <ParameterBool op_and_="1"/>
+        <ParameterBool visible="0"/>
+        <ParameterString name="ModeACode"/>
+        <Configuration class_id="DBFilterCondition" instance_id="ModeACodeCondition0">
+            <ParameterBool absolute_value="0"/>
+            <ParameterBool op_and="1"/>
+            <ParameterString operator="IN"/>
+            <ParameterString reset_value="7000"/>
+            <ParameterString value="7000"/>
+            <ParameterString variable_dbo_name="Meta"/>
+            <ParameterString variable_name="MODE3A_CODE"/>
+        </Configuration>
+        <Configuration class_id="DBFilterWidget" instance_id="ModeACodeWidget0">
+            <ParameterBool visible="1"/>
+        </Configuration>
+    </Configuration>
     <Configuration class_id="DBFilter" instance_id="TOD">
         <ParameterBool active="0"/>
         <ParameterBool changed="1"/>
@@ -25,25 +44,6 @@
             <ParameterString variable_name="TOD"/>
         </Configuration>
         <Configuration class_id="DBFilterWidget" instance_id="TODWidget0">
-            <ParameterBool visible="1"/>
-        </Configuration>
-    </Configuration>
-    <Configuration class_id="DBFilter" instance_id="TestFilter">
-        <ParameterBool active="0"/>
-        <ParameterBool changed="0"/>
-        <ParameterBool op_and_="1"/>
-        <ParameterBool visible="0"/>
-        <ParameterString name="TestFilter"/>
-        <Configuration class_id="DBFilterCondition" instance_id="TestFilterCondition0">
-            <ParameterBool absolute_value="0"/>
-            <ParameterBool op_and="1"/>
-            <ParameterString operator="="/>
-            <ParameterString reset_value="test"/>
-            <ParameterString value="test1"/>
-            <ParameterString variable_dbo_name="Meta"/>
-            <ParameterString variable_name="CALLSIGN"/>
-        </Configuration>
-        <Configuration class_id="DBFilterWidget" instance_id="TestFilterWidget0">
             <ParameterBool visible="1"/>
         </Configuration>
     </Configuration>
