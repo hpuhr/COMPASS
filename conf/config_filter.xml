@@ -13,7 +13,7 @@
             <ParameterString reset_value="7000"/>
             <ParameterString value="7000,1112"/>
             <ParameterString variable_dbo_name="Meta"/>
-            <ParameterString variable_name="MODE3A_CODE"/>
+            <ParameterString variable_name="mode3a_code"/>
         </Configuration>
         <Configuration class_id="DBFilterWidget" instance_id="ModeACodeWidget0">
             <ParameterBool visible="1"/>
@@ -32,7 +32,7 @@
             <ParameterString reset_value="0"/>
             <ParameterString value="09:00:00.00"/>
             <ParameterString variable_dbo_name="Meta"/>
-            <ParameterString variable_name="TOD"/>
+            <ParameterString variable_name="tod"/>
         </Configuration>
         <Configuration class_id="DBFilterCondition" instance_id="TODCondition1">
             <ParameterBool absolute_value="0"/>
@@ -41,7 +41,7 @@
             <ParameterString reset_value="5*3600"/>
             <ParameterString value="09:30:00.00"/>
             <ParameterString variable_dbo_name="Meta"/>
-            <ParameterString variable_name="TOD"/>
+            <ParameterString variable_name="tod"/>
         </Configuration>
         <Configuration class_id="DBFilterWidget" instance_id="TODWidget0">
             <ParameterBool visible="1"/>

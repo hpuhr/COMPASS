@@ -1,3 +1,6 @@
+
+//#include <boost/algorithm/string.hpp>
+
 #include "metadbovariable.h"
 #include "metadbovariablewidget.h"
 #include "dbovariable.h"
@@ -8,6 +11,9 @@ MetaDBOVariable::MetaDBOVariable(const std::string &class_id, const std::string 
 {
     registerParameter("name", &name_, "");
     registerParameter("description", &description_, "");
+
+    // DBOVAR LOWERCASE HACK
+    //boost::algorithm::to_lower(name_);
 
     assert (name_.size() > 0);
 
@@ -41,6 +47,9 @@ void MetaDBOVariable::generateSubConfigurable (const std::string &class_id, cons
 
         const std::string &dbo_name = definition->dboName();
         std::string dbovar_name = definition->variableName();
+
+        // DBOVAR LOWERCASE HACK
+        //boost::algorithm::to_lower(dbovar_name);
 
         assert (object_manager_.existsObject(dbo_name));
         assert (object_manager_.object(dbo_name).hasVariable(dbovar_name));

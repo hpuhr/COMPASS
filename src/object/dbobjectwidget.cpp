@@ -25,6 +25,8 @@
 #include <QCheckBox>
 #include <QTextEdit>
 
+#include <boost/algorithm/string.hpp>
+
 #include "configuration.h"
 #include "configurationmanager.h"
 #include "dbobject.h"
@@ -628,6 +630,7 @@ void DBObjectWidget::addNewVariables ()
   for (auto it = columns.begin(); it != columns.end(); it++)
   {
     std::string column_name = it->second.name();
+    boost::algorithm::to_lower(column_name);
 
     if (object_->hasVariable(column_name))
       continue;

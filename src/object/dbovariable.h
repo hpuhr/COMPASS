@@ -34,6 +34,8 @@
 #include "configurable.h"
 #include "stringconv.h"
 
+//#include <boost/algorithm/string.hpp>
+
 class DBTableColumn;
 
 /**
@@ -49,6 +51,9 @@ public:
     {
         registerParameter ("dbo_name", &dbo_name_, "");
         registerParameter ("dbo_variable_name", &dbo_variable_name_, "");
+
+        // DBOVAR LOWERCASE HACK
+        //boost::algorithm::to_lower(dbo_variable_name_);
 
         assert (dbo_variable_name_.size() > 0);
     }

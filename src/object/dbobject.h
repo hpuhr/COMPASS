@@ -167,7 +167,7 @@ public:
     /// @brief Returns flag indication if a DBOVariable identified by id exists
     bool hasVariable (const std::string &id) const;
     /// @brief Returns variable identified by id
-    DBOVariable &variable (std::string variable_id);
+    DBOVariable &variable (std::string variable_id) const;
     /// @brief Deletes a variable identified by id
     void deleteVariable (std::string id);
 

@@ -39,7 +39,7 @@
 #include "dbschemamanager.h"
 #include "dbovariablewidget.h"
 
-#include <boost/algorithm/string.hpp>
+//#include <boost/algorithm/string.hpp>
 
 #include "stringconv.h"
 
@@ -54,6 +54,9 @@ DBOVariable::DBOVariable(const std::string &class_id, const std::string &instanc
     registerParameter ("representation_str", &representation_str_, "");
     registerParameter ("dimension", &dimension_, "");
     registerParameter ("unit", &unit_, "");
+
+    // DBOVAR LOWERCASE HACK
+    //boost::algorithm::to_lower(name_);
 
     assert (name_.size() > 0);
     assert (data_type_str_.size() > 0);

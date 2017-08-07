@@ -138,7 +138,7 @@ bool DBObject::hasVariable (const std::string &id) const
     return (variables_.find (id) != variables_.end());
 }
 
-DBOVariable &DBObject::variable (std::string variable_id)
+DBOVariable &DBObject::variable (std::string variable_id) const
 {
     assert (hasVariable (variable_id));
     return *variables_.at(variable_id);

@@ -31,6 +31,7 @@
 #include <QLabel>
 
 #include <boost/algorithm/string/join.hpp>
+//#include <boost/algorithm/string.hpp>
 
 #include "dbfiltercondition.h"
 #include "dbobjectmanager.h"
@@ -62,6 +63,9 @@ DBFilterCondition::DBFilterCondition(const std::string &class_id, const std::str
     registerParameter ("absolute_value", &absolute_value_, false);
     registerParameter ("variable_dbo_name", &variable_dbo_name_, "");
     registerParameter ("variable_name", &variable_name_, "");
+
+    // DBOVAR LOWERCASE HACK
+    //boost::algorithm::to_lower(variable_name_);
 
     if (variable_dbo_name_ == META_OBJECT_NAME)
     {

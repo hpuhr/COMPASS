@@ -756,9 +756,10 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const DBObject &objec
     for (auto it = filtered_variable_names.begin(); it != filtered_variable_names.end(); it++)
         // look what tables are needed for filtered variables
     {
-        if (meta_table.hasColumn(*it))
+        assert (object.hasVariable(*it));
+        if (meta_table.hasColumn(object.variable(*it).currentDBColumn().name()))
         {
-            std::string table_db_name = meta_table.tableFor(*it).name();
+            std::string table_db_name = meta_table.tableFor(object.variable(*it).currentDBColumn().name()).name();
 
             if (find (used_tables.begin(), used_tables.end(), table_db_name) == used_tables.end())
                 used_tables.push_back (table_db_name);
