@@ -209,7 +209,7 @@ bool DBOVariableSet::hasVariable (DBOVariable &variable)
   return find (set_.begin(), set_.end(), &variable) != set_.end();
 }
 
-PropertyList DBOVariableSet::getPropertyList () const // HACK
+PropertyList DBOVariableSet::getCurrentVariablePropertyList () const
 {
   PropertyList list;
 

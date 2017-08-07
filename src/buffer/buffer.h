@@ -109,6 +109,17 @@ public:
     ArrayListTemplate<double> &getDouble (const std::string &id);
     ArrayListTemplate<std::string> &getString (const std::string &id);
 
+    void renameBool (const std::string &id, const std::string &id_new);
+    void renameChar (const std::string &id, const std::string &id_new);
+    void renameUChar (const std::string &id, const std::string &id_new);
+    void renameInt (const std::string &id, const std::string &id_new);
+    void renameUInt (const std::string &id, const std::string &id_new);
+    void renameLongInt (const std::string &id, const std::string &id_new);
+    void renameULongInt (const std::string &id, const std::string &id_new);
+    void renameFloat (const std::string &id, const std::string &id_new);
+    void renameDouble (const std::string &id, const std::string &id_new);
+    void renameString (const std::string &id, const std::string &id_new);
+
     /// @brief  Returns maximal used index size
     const size_t size ();
 

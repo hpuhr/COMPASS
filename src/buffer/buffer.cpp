@@ -336,6 +336,156 @@ ArrayListTemplate<std::string> &Buffer::getString (const std::string &id)
     return *arrays_string_[id];
 }
 
+void Buffer::renameBool (const std::string &id, const std::string &id_new)
+{
+    assert (arrays_bool_.count(id) == 1);
+    assert (arrays_bool_.count(id_new) == 0);
+
+    assert (properties_.hasProperty(id));
+    Property old_property = properties_.get(id);
+    properties_.removeProperty(id);
+    properties_.addProperty(id_new, old_property.dataType());
+
+    std::shared_ptr<ArrayListTemplate<bool>> array_list = arrays_bool_.at(id);
+    arrays_bool_.erase(id);
+    arrays_bool_[id_new]=array_list;
+}
+
+void Buffer::renameChar (const std::string &id, const std::string &id_new)
+{
+    assert (arrays_char_.count(id) == 1);
+    assert (arrays_char_.count(id_new) == 0);
+
+    assert (properties_.hasProperty(id));
+    Property old_property = properties_.get(id);
+    properties_.removeProperty(id);
+    properties_.addProperty(id_new, old_property.dataType());
+
+    std::shared_ptr<ArrayListTemplate<char>> array_list = arrays_char_.at(id);
+    arrays_char_.erase(id);
+    arrays_char_[id_new]=array_list;
+}
+
+void Buffer::renameUChar (const std::string &id, const std::string &id_new)
+{
+    assert (arrays_uchar_.count(id) == 1);
+    assert (arrays_uchar_.count(id_new) == 0);
+
+    assert (properties_.hasProperty(id));
+    Property old_property = properties_.get(id);
+    properties_.removeProperty(id);
+    properties_.addProperty(id_new, old_property.dataType());
+
+    std::shared_ptr<ArrayListTemplate<unsigned char>> array_list = arrays_uchar_.at(id);
+    arrays_uchar_.erase(id);
+    arrays_uchar_[id_new]=array_list;
+}
+
+void Buffer::renameInt (const std::string &id, const std::string &id_new)
+{
+    assert (arrays_int_.count(id) == 1);
+    assert (arrays_int_.count(id_new) == 0);
+
+    assert (properties_.hasProperty(id));
+    Property old_property = properties_.get(id);
+    properties_.removeProperty(id);
+    properties_.addProperty(id_new, old_property.dataType());
+
+    std::shared_ptr<ArrayListTemplate<int>> array_list = arrays_int_.at(id);
+    arrays_int_.erase(id);
+    arrays_int_[id_new]=array_list;
+}
+
+void Buffer::renameUInt (const std::string &id, const std::string &id_new)
+{
+    assert (arrays_uint_.count(id) == 1);
+    assert (arrays_uint_.count(id_new) == 0);
+
+    assert (properties_.hasProperty(id));
+    Property old_property = properties_.get(id);
+    properties_.removeProperty(id);
+    properties_.addProperty(id_new, old_property.dataType());
+
+    std::shared_ptr<ArrayListTemplate<unsigned int>> array_list = arrays_uint_.at(id);
+    arrays_uint_.erase(id);
+    arrays_uint_[id_new]=array_list;
+}
+
+void Buffer::renameLongInt (const std::string &id, const std::string &id_new)
+{
+    assert (arrays_long_int_.count(id) == 1);
+    assert (arrays_long_int_.count(id_new) == 0);
+
+    assert (properties_.hasProperty(id));
+    Property old_property = properties_.get(id);
+    properties_.removeProperty(id);
+    properties_.addProperty(id_new, old_property.dataType());
+
+    std::shared_ptr<ArrayListTemplate<long int>> array_list = arrays_long_int_.at(id);
+    arrays_long_int_.erase(id);
+    arrays_long_int_[id_new]=array_list;
+}
+
+void Buffer::renameULongInt (const std::string &id, const std::string &id_new)
+{
+    assert (arrays_ulong_int_.count(id) == 1);
+    assert (arrays_ulong_int_.count(id_new) == 0);
+
+    assert (properties_.hasProperty(id));
+    Property old_property = properties_.get(id);
+    properties_.removeProperty(id);
+    properties_.addProperty(id_new, old_property.dataType());
+
+    std::shared_ptr<ArrayListTemplate<unsigned long>> array_list = arrays_ulong_int_.at(id);
+    arrays_ulong_int_.erase(id);
+    arrays_ulong_int_[id_new]=array_list;
+}
+
+void Buffer::renameFloat (const std::string &id, const std::string &id_new)
+{
+    assert (arrays_float_.count(id) == 1);
+    assert (arrays_float_.count(id_new) == 0);
+
+    assert (properties_.hasProperty(id));
+    Property old_property = properties_.get(id);
+    properties_.removeProperty(id);
+    properties_.addProperty(id_new, old_property.dataType());
+
+    std::shared_ptr<ArrayListTemplate<float>> array_list = arrays_float_.at(id);
+    arrays_float_.erase(id);
+    arrays_float_[id_new]=array_list;
+}
+
+void Buffer::renameDouble (const std::string &id, const std::string &id_new)
+{
+    assert (arrays_double_.count(id) == 1);
+    assert (arrays_double_.count(id_new) == 0);
+
+    assert (properties_.hasProperty(id));
+    Property old_property = properties_.get(id);
+    properties_.removeProperty(id);
+    properties_.addProperty(id_new, old_property.dataType());
+
+    std::shared_ptr<ArrayListTemplate<double>> array_list = arrays_double_.at(id);
+    arrays_double_.erase(id);
+    arrays_double_[id_new]=array_list;
+}
+
+void Buffer::renameString (const std::string &id, const std::string &id_new)
+{
+    assert (arrays_string_.count(id) == 1);
+    assert (arrays_string_.count(id_new) == 0);
+
+    assert (properties_.hasProperty(id));
+    Property old_property = properties_.get(id);
+    properties_.removeProperty(id);
+    properties_.addProperty(id_new, old_property.dataType());
+
+    std::shared_ptr<ArrayListTemplate<std::string>> array_list = arrays_string_.at(id);
+    arrays_string_.erase(id);
+    arrays_string_[id_new]=array_list;
+}
+
 void Buffer::seizeBuffer (Buffer &org_buffer)
 {
     logdbg  << "Buffer: seizeBuffer: start";

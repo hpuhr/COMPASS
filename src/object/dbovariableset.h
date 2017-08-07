@@ -79,7 +79,7 @@ public:
   DBOVariable &getVariable (unsigned int index);
 
   /// @brief Return property list for a given DBO type for variables in the set
-  PropertyList getPropertyList () const;
+  PropertyList getCurrentVariablePropertyList () const;
 
   /// @brief Prints contents, for debugging purposes
   void print ();
