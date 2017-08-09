@@ -2,6 +2,182 @@
     <ParameterString current_schema="SCDB"/>
     <Configuration class_id="DBSchema" instance_id="DBSchemaSCDB0">
         <ParameterString name="SCDB"/>
+        <Configuration class_id="DBTable" instance_id="le_ds">
+            <ParameterString info=""/>
+            <ParameterString key_name="DS_ID"/>
+            <ParameterString name="le_ds"/>
+            <Configuration class_id="DBTableColumn" instance_id="APP_ID">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="APP_ID"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="COMM">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="COMM"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="varchar"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="DECOM_DATE">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="DECOM_DATE"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="datetime"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="DS_ID">
+                <ParameterBool is_key="1"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="DS_ID"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="DS_NAME">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="DS_NAME"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="varchar"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="DS_SHORT_NAME">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="DS_SHORT_NAME"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="varchar"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="DS_TYPE">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="DS_TYPE"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="IC_CODE">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="IC_CODE"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="int"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="LOCALTIME_OFFSET_MIN">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="LOCALTIME_OFFSET_MIN"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="MAX_EVENTS">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="MAX_EVENTS"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="mediumint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="MAX_MSG_PER_PERIOD">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="MAX_MSG_PER_PERIOD"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="mediumint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="MEASURED_TIME_EXPECTED">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="MEASURED_TIME_EXPECTED"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="enum"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="MIN_MSG_PER_PERIOD">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="MIN_MSG_PER_PERIOD"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="mediumint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="MSG_FMT">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="MSG_FMT"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="OPERATIONAL_DATE">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="OPERATIONAL_DATE"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="datetime"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="SAC">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="SAC"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="SIC">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="SIC"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="TIMESTAMP_TOLERANCE_MS">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="TIMESTAMP_TOLERANCE_MS"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="UAP_NR">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="UAP_NR"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+        </Configuration>
         <Configuration class_id="DBTable" instance_id="sd_ads">
             <ParameterString info=""/>
             <ParameterString key_name="REC_NUM"/>
@@ -2987,6 +3163,11 @@
             <ParameterString info=""/>
             <ParameterString main_table_name="sd_ads"/>
             <ParameterString name="ADSB"/>
+        </Configuration>
+        <Configuration class_id="MetaDBTable" instance_id="MetaDBTableDatasources">
+            <ParameterString info=""/>
+            <ParameterString main_table_name="le_ds"/>
+            <ParameterString name="Datasources"/>
         </Configuration>
         <Configuration class_id="MetaDBTable" instance_id="MetaDBTableMLAT">
             <ParameterString info=""/>

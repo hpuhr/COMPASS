@@ -11,6 +11,13 @@
         <ParameterBool is_loadable="1"/>
         <ParameterString info=""/>
         <ParameterString name="ADSB"/>
+        <Configuration class_id="DBODataSourceDefinition" instance_id="DBODataSourceDefinitionADSBSCDB0">
+            <ParameterString foreign_key="DS_ID"/>
+            <ParameterString local_key="ds_id"/>
+            <ParameterString meta_table="Datasources"/>
+            <ParameterString name_column="DS_ID"/>
+            <ParameterString schema="SCDB"/>
+        </Configuration>
         <Configuration class_id="DBOSchemaMetaTableDefinition" instance_id="DBOSchemaMetaTableDefinition0">
             <ParameterString meta_table="ADSB"/>
             <ParameterString schema="SCDB"/>
@@ -944,6 +951,13 @@
         <ParameterBool is_loadable="1"/>
         <ParameterString info=""/>
         <ParameterString name="MLAT"/>
+        <Configuration class_id="DBODataSourceDefinition" instance_id="DBODataSourceDefinitionMLATSCDB0">
+            <ParameterString foreign_key="DS_ID"/>
+            <ParameterString local_key="ds_id"/>
+            <ParameterString meta_table="Datasources"/>
+            <ParameterString name_column="DS_SHORT_NAME"/>
+            <ParameterString schema="SCDB"/>
+        </Configuration>
         <Configuration class_id="DBOSchemaMetaTableDefinition" instance_id="DBOSchemaMetaTableDefinition0">
             <ParameterString meta_table="MLAT"/>
             <ParameterString schema="SCDB"/>
@@ -2269,6 +2283,13 @@
         <ParameterBool is_loadable="1"/>
         <ParameterString info=""/>
         <ParameterString name="Radar"/>
+        <Configuration class_id="DBODataSourceDefinition" instance_id="DBODataSourceDefinitionRadarSCDB0">
+            <ParameterString foreign_key="DS_ID"/>
+            <ParameterString local_key="ds_id"/>
+            <ParameterString meta_table="Datasources"/>
+            <ParameterString name_column="DS_SHORT_NAME"/>
+            <ParameterString schema="SCDB"/>
+        </Configuration>
         <Configuration class_id="DBOSchemaMetaTableDefinition" instance_id="DBOSchemaMetaTableDefinition0">
             <ParameterString meta_table="Radar"/>
             <ParameterString schema="SCDB"/>
@@ -3692,6 +3713,13 @@
         <ParameterBool is_loadable="1"/>
         <ParameterString info=""/>
         <ParameterString name="Tracker"/>
+        <Configuration class_id="DBODataSourceDefinition" instance_id="DBODataSourceDefinitionTrackerSCDB0">
+            <ParameterString foreign_key="DS_ID"/>
+            <ParameterString local_key="ds_id"/>
+            <ParameterString meta_table="Datasources"/>
+            <ParameterString name_column="DS_SHORT_NAME"/>
+            <ParameterString schema="SCDB"/>
+        </Configuration>
         <Configuration class_id="DBOSchemaMetaTableDefinition" instance_id="DBOSchemaMetaTableDefinition0">
             <ParameterString meta_table="Tracker"/>
             <ParameterString schema="SCDB"/>
