@@ -80,7 +80,7 @@ void MetaDBTable::generateSubConfigurable (const std::string &class_id, const st
 
         assert (schema_.hasTable(def->subTableName()));
         assert (sub_tables_.count(def->subTableName()) == 0);
-        sub_tables_.insert( std::make_pair(def->subTableName(), schema_.table(def->subTableName())) );
+        sub_tables_.insert( std::pair<std::string, const DBTable&> (def->subTableName(), schema_.table(def->subTableName())) );
     }
     else
         throw std::runtime_error ("MetaDBTable: generateSubConfigurable: unknown class_id "+class_id);
@@ -124,12 +124,13 @@ std::string MetaDBTable::subTableNames () const
 
 void MetaDBTable::addSubTable (const std::string &local_key, const std::string &sub_table_name, const std::string &sub_table_key)
 {
+    loginf << "MetaDBTable: addSubTable: local key " << local_key << " sub table name " << sub_table_name << " key " << sub_table_key;
     assert (!hasSubTable(sub_table_name));
 
     std::string instance_id = "SubTableDefinition"+name_+sub_table_name+"0";
 
     Configuration &configuration = addNewSubConfiguration ("SubTableDefinition", instance_id);
-    configuration.addParameterString ("local_key", local_key);
+    configuration.addParameterString ("main_table_key", local_key);
     configuration.addParameterString ("sub_table_name", sub_table_name);
     configuration.addParameterString ("sub_table_key", sub_table_key);
     generateSubConfigurable ("SubTableDefinition", instance_id);
@@ -171,8 +172,9 @@ void MetaDBTable::updateColumns ()
     {
         for (auto it2 : it.second.columns())
         {
-            if (columns_.find(it.first) == columns_.end())
-                columns_.insert (std::pair <std::string, const DBTableColumn&> (it2.first, *it2.second));
+            //if (columns_.find(it.first) == columns_.end())
+            assert (columns_.find(it.first+"."+it2.first) == columns_.end());
+            columns_.insert (std::pair <std::string, const DBTableColumn&> (it.first+"."+it2.first, *it2.second));
         }
     }
 }

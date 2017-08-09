@@ -84,7 +84,7 @@ public:
     DBSchemaWidget *widget ();
 
 protected:
-    virtual void checkSubConfigurables () {};
+    virtual void checkSubConfigurables () {}
 
 private:
     /// Name of the schema

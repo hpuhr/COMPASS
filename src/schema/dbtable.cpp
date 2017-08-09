@@ -43,6 +43,8 @@ DBTable::DBTable(const std::string &class_id, const std::string &instance_id, DB
 
 DBTable::~DBTable()
 {
+    logdbg << "DBTable: ~DBTable: name " << name_;
+
     for (auto it : columns_)
         delete it.second;
     columns_.clear();

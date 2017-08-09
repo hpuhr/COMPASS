@@ -270,13 +270,13 @@ void DBSchemaWidget::updateTableGrid()
     name_label->setFont (font_bold);
     table_grid_->addWidget (name_label, 0, 0);
 
-    QLabel *numel_label = new QLabel ("# columns");
-    numel_label->setFont (font_bold);
-    table_grid_->addWidget (numel_label, 0, 1);
+//    QLabel *numel_label = new QLabel ("# columns");
+//    numel_label->setFont (font_bold);
+//    table_grid_->addWidget (numel_label, 0, 1);
 
     QLabel *key_label = new QLabel ("Key");
     key_label->setFont (font_bold);
-    table_grid_->addWidget (key_label, 0, 2);
+    table_grid_->addWidget (key_label, 0, 1);
 
 //    QLabel *edit_label = new QLabel ("Edit");
 //    edit_label->setFont (font_bold);
@@ -304,11 +304,11 @@ void DBSchemaWidget::updateTableGrid()
         QLabel *name = new QLabel (it.first.c_str());
         table_grid_->addWidget (name, row, 0);
 
-        QLabel *numel = new QLabel ((std::to_string(it.second->numColumns())).c_str());
-        table_grid_->addWidget (numel, row, 1);
+//        QLabel *numel = new QLabel ((std::to_string(it.second->numColumns())).c_str());
+//        table_grid_->addWidget (numel, row, 1);
 
         QLabel *key = new QLabel (it.second->key().c_str());
-        table_grid_->addWidget (key, row, 2);
+        table_grid_->addWidget (key, row, 1);
 
         QPushButton *edit = new QPushButton ();
         edit->setIcon(edit_icon);
@@ -316,7 +316,7 @@ void DBSchemaWidget::updateTableGrid()
         edit->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
         edit->setFlat(UI_ICON_BUTTON_FLAT);
         connect(edit, SIGNAL( clicked() ), this, SLOT( editTableSlot() ));
-        table_grid_->addWidget (edit, row, 3);
+        table_grid_->addWidget (edit, row, 2);
         edit_table_buttons_[edit] = it.second;
 
         QPushButton *del = new QPushButton ();
@@ -325,7 +325,7 @@ void DBSchemaWidget::updateTableGrid()
         del->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
         del->setFlat(UI_ICON_BUTTON_FLAT);
         connect(del, SIGNAL( clicked() ), this, SLOT( deleteTableSlot() ));
-        table_grid_->addWidget (del, row, 4);
+        table_grid_->addWidget (del, row, 3);
         delete_table_buttons_[del] = it.second;
 
         row++;
@@ -360,9 +360,9 @@ void DBSchemaWidget::updateMetaTableGrid()
 //    subtables_label->setFont (font_bold);
 //    meta_table_grid_->addWidget (subtables_label, 0, 2);
 
-    QLabel *numcols_label = new QLabel ("#columns");
-    numcols_label->setFont (font_bold);
-    meta_table_grid_->addWidget (numcols_label, 0, 2);
+//    QLabel *numcols_label = new QLabel ("#columns");
+//    numcols_label->setFont (font_bold);
+//    meta_table_grid_->addWidget (numcols_label, 0, 2);
 
 //    QLabel *edit_label = new QLabel ("Edit");
 //    edit_label->setFont (font_bold);
@@ -397,8 +397,8 @@ void DBSchemaWidget::updateMetaTableGrid()
 //        sub->setText (it.second->subTableNames().c_str());
 //        meta_table_grid_->addWidget (sub, row, 2);
 
-        QLabel *numcols = new QLabel (std::to_string(it.second->numColumns()).c_str());
-        meta_table_grid_->addWidget (numcols, row, 2);
+//        QLabel *numcols = new QLabel (std::to_string(it.second->numColumns()).c_str());
+//        meta_table_grid_->addWidget (numcols, row, 2);
 
         QPushButton *edit = new QPushButton ();
         edit->setIcon(edit_icon);
@@ -406,7 +406,7 @@ void DBSchemaWidget::updateMetaTableGrid()
         edit->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
         edit->setFlat(UI_ICON_BUTTON_FLAT);
         connect(edit, SIGNAL( clicked() ), this, SLOT( editMetaTableSlot() ));
-        meta_table_grid_->addWidget (edit, row, 3);
+        meta_table_grid_->addWidget (edit, row, 2);
         edit_meta_table_buttons_[edit] = it.second;
 
         QPushButton *del = new QPushButton ();
@@ -415,7 +415,7 @@ void DBSchemaWidget::updateMetaTableGrid()
         del->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
         del->setFlat(UI_ICON_BUTTON_FLAT);
         connect(del, SIGNAL( clicked() ), this, SLOT( deleteMetaTableSlot() ));
-        meta_table_grid_->addWidget (del, row, 4);
+        meta_table_grid_->addWidget (del, row, 3);
         delete_meta_table_buttons_[del] = it.second;
         row++;
     }

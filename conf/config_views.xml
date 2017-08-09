@@ -54,6 +54,11 @@
                         <ParameterString dbo_name="Meta"/>
                         <ParameterString dbo_variable_name="track_num"/>
                     </Configuration>
+                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionhorizontal_error_m0">
+                        <ParameterUnsignedInt index="8"/>
+                        <ParameterString dbo_name="Meta"/>
+                        <ParameterString dbo_variable_name="horizontal_error_m"/>
+                    </Configuration>
                 </Configuration>
             </Configuration>
             <Configuration class_id="ListBoxViewWidget" instance_id="ListBoxViewWidget0"/>

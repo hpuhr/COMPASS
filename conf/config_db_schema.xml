@@ -2,6 +2,146 @@
     <ParameterString current_schema="SCDB"/>
     <Configuration class_id="DBSchema" instance_id="DBSchemaSCDB0">
         <ParameterString name="SCDB"/>
+        <Configuration class_id="DBTable" instance_id="cmp_aa">
+            <ParameterString info=""/>
+            <ParameterString key_name="REC_NUM"/>
+            <ParameterString name="cmp_aa"/>
+            <Configuration class_id="DBTableColumn" instance_id="ACROSS_TRACK_ERROR_M">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Transversal error related to the RRT course."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ACROSS_TRACK_ERROR_M"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ACTION_ID">
+                <ParameterBool is_key="1"/>
+                <ParameterString comment="Action identifier."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ACTION_ID"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ALONG_TRACK_ERROR_M">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Longitudinal error related to the RRT course."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ALONG_TRACK_ERROR_M"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="AZIMUTH_ERROR_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Azimuth error."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="AZIMUTH_ERROR_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="GROUNDCOURSE_ERROR_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Course error related to the local tracker."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="GROUNDCOURSE_ERROR_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="GROUNDSPEED_ERROR_KT">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Ground speed error related to the local tracker."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="GROUNDSPEED_ERROR_KT"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="HORIZONTAL_ERROR_M">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Position error (positions projected to the Earth&apos;s surface)."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="HORIZONTAL_ERROR_M"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="IS_CONSEC_LARGE_ERROR">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="&apos;Y&apos; if the plot is part of a consecutive secuence of large erros., &apos;N&apos; otherwise"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="IS_CONSEC_LARGE_ERROR"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="char"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="IS_JUMP">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="&apos;Y&apos; if the plot is a jump, &apos;N&apos; otherwise"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="IS_JUMP"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="char"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="LATENCY_S">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Along residual error divided by the instantaneous groundspeed."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="LATENCY_S"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="RANGE_ERROR_M">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Range error."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="RANGE_ERROR_M"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="REC_NUM">
+                <ParameterBool is_key="1"/>
+                <ParameterString comment="Record unique identifier the measurements belong to."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="REC_NUM"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="int"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="VERTICALSPEED_ERROR_FTM">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Vertical speed error related to the RRT course."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="VERTICALSPEED_ERROR_FTM"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="X_ERROR_M">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Position error measured on X axis."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="X_ERROR_M"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="Y_ERROR_M">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Position error measured on Y axis."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="Y_ERROR_M"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+        </Configuration>
         <Configuration class_id="DBTable" instance_id="le_ds">
             <ParameterString info=""/>
             <ParameterString key_name="DS_ID"/>
@@ -3163,6 +3303,11 @@
             <ParameterString info=""/>
             <ParameterString main_table_name="sd_ads"/>
             <ParameterString name="ADSB"/>
+            <Configuration class_id="SubTableDefinition" instance_id="SubTableDefinitionADSBcmp_aa0">
+                <ParameterString main_table_key="REC_NUM"/>
+                <ParameterString sub_table_key="REC_NUM"/>
+                <ParameterString sub_table_name="cmp_aa"/>
+            </Configuration>
         </Configuration>
         <Configuration class_id="MetaDBTable" instance_id="MetaDBTableDatasources">
             <ParameterString info=""/>
@@ -3173,16 +3318,31 @@
             <ParameterString info=""/>
             <ParameterString main_table_name="sd_mlat"/>
             <ParameterString name="MLAT"/>
+            <Configuration class_id="SubTableDefinition" instance_id="SubTableDefinitionMLATcmp_aa0">
+                <ParameterString main_table_key="REC_NUM"/>
+                <ParameterString sub_table_key="REC_NUM"/>
+                <ParameterString sub_table_name="cmp_aa"/>
+            </Configuration>
         </Configuration>
         <Configuration class_id="MetaDBTable" instance_id="MetaDBTableRadar">
             <ParameterString info=""/>
             <ParameterString main_table_name="sd_radar"/>
             <ParameterString name="Radar"/>
+            <Configuration class_id="SubTableDefinition" instance_id="SubTableDefinitionRadarcmp_aa0">
+                <ParameterString main_table_key="REC_NUM"/>
+                <ParameterString sub_table_key="REC_NUM"/>
+                <ParameterString sub_table_name="cmp_aa"/>
+            </Configuration>
         </Configuration>
         <Configuration class_id="MetaDBTable" instance_id="MetaDBTableTracker">
             <ParameterString info=""/>
             <ParameterString main_table_name="sd_track"/>
             <ParameterString name="Tracker"/>
+            <Configuration class_id="SubTableDefinition" instance_id="SubTableDefinitionTrackercmp_aa0">
+                <ParameterString main_table_key="REC_NUM"/>
+                <ParameterString sub_table_key="REC_NUM"/>
+                <ParameterString sub_table_name="cmp_aa"/>
+            </Configuration>
         </Configuration>
     </Configuration>
 </Configuration>

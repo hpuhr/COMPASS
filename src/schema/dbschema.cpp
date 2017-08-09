@@ -61,7 +61,7 @@ void DBSchema::generateSubConfigurable (const std::string &class_id, const std::
 
     if (class_id.compare("DBTable") == 0)
     {
-        logdbg  << "DBSchema '" << name_ << "': generateSubConfigurable: generating DBTable " << instance_id;
+        loginf  << "DBSchema '" << name_ << "': generateSubConfigurable: generating DBTable " << instance_id;
         DBTable *table = new DBTable ("DBTable", instance_id, this);
         assert (table->name().size() != 0);
         assert (tables_.find(table->name()) == tables_.end());
