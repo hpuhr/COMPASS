@@ -137,12 +137,6 @@ public:
 //    std::map <std::pair<unsigned char, unsigned char>, DataSource* > &getDataSourceInstances (const std::string &dbo_type)
 //            { assert (data_sources_instances_.find(dbo_type) != data_sources_instances_.end()); return data_sources_instances_[dbo_type]; }
 
-    ///@brief Returns flag if data sources are defined for DBO type.
-    //bool hasDataSources (const std::string &dbo_type);
-    ///@brief Returns container with all defined data source for DBO type.
-    //const std::map<int, std::string> &getDataSources (const std::string &dbo_type);
-    ///@brief Returns data source name for a DBO type and data source number.
-    //std::string getNameOfSensor (const std::string &dbo_type, unsigned int num);
     /// @brief Return if a DBObject has information about its active data sources
     //bool hasActiveDataSourcesInfo (const std::string &dbo_type);
     /// @brief Creates information about a DBObject's active data sources
@@ -246,8 +240,6 @@ protected:
 
     ///@brief Generates minimum and maximum information from previous post-processing.
     //void loadMinMaxValues ();
-    ///@brief Generates data sources information from previous post-processing.
-    //void buildDataSources();
     ///@brief Generates active data sources information from previous post-processing.
     //void loadActiveDataSources ();
 

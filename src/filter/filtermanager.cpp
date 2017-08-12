@@ -97,7 +97,7 @@ void FilterManager::checkSubConfigurables ()
     }
 }
 
-std::string FilterManager::getSQLCondition (const std::string &dbo_name, std::vector<std::string> &variable_names)
+std::string FilterManager::getSQLCondition (const std::string &dbo_name, std::vector <DBOVariable*>& filtered_variables)
 {
     assert (ATSDB::instance().objectManager().object(dbo_name).loadable());
 
@@ -109,7 +109,7 @@ std::string FilterManager::getSQLCondition (const std::string &dbo_name, std::ve
     {
         if (filters_.at(cnt)->getActive())
         {
-            ss << filters_.at(cnt)->getConditionString (dbo_name, first, variable_names);
+            ss << filters_.at(cnt)->getConditionString (dbo_name, first, filtered_variables);
         }
     }
 

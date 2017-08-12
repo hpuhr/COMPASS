@@ -307,24 +307,69 @@ void DBInterface::checkSubConfigurables ()
 ///**
 // * Gets SQL command, executes it and returns resulting buffer.
 // */
-//Buffer *DBInterface::getDataSourceDescription (const std::string &type)
-//{
-//    logdbg  << "DBInterface: getDataSourceDescription: start";
+std::map <int, std::string> DBInterface::getDataSources (const DBObject &object)
+{
+    logdbg  << "DBInterface: getDataSourceDescription: start";
 
-//    boost::mutex::scoped_lock l(mutex_);
+    boost::mutex::scoped_lock l(connection_mutex_);
 
-//    DBCommand *command = sql_generator_->getDataSourcesSelectCommand(type);
+    std::shared_ptr<DBCommand> command = sql_generator_.getDataSourcesSelectCommand(object);
 
-//    logdbg << "DBInterface: getDataSourceDescription: sql '" << command->getCommandString() << "'";
+    logdbg << "DBInterface: getDataSourceDescription: sql '" << command->get() << "'";
 
-//    DBResult *result = connection_->execute(command);
-//    assert (result->containsData());
-//    Buffer *buffer = result->getBuffer();
-//    delete result;
-//    delete command;
+    std::shared_ptr <DBResult> result = current_connection_->execute(*command);
+    assert (result->containsData());
+    std::shared_ptr <Buffer> buffer = result->buffer();
 
-//    return buffer;
-//}
+    const DBODataSourceDefinition &ds = object.currentDataSource ();
+    std::string key_column = ds.localKey();
+    std::string name_column = ds.nameColumn();
+
+    assert (buffer->properties().hasProperty(key_column));
+    assert (buffer->properties().get(key_column).dataType() == PropertyDataType::INT);
+    assert (buffer->properties().hasProperty(name_column));
+    assert (buffer->properties().get(name_column).dataType() == PropertyDataType::STRING);
+
+    std::map <int, std::string> sources;
+
+    for (unsigned cnt = 0; cnt < buffer->size(); cnt++)
+    {
+        int key = buffer->getInt(key_column).get(cnt);
+        std::string name = buffer->getString(name_column).get(cnt);
+        assert (sources.count(key) == 0);
+        sources[key] = name;
+    }
+
+    return sources;
+}
+
+size_t DBInterface::count (const std::string &table)
+{
+    logdbg  << "DBInterface: count: table " << table;
+    assert (table_info_.count(table) > 0);
+
+    boost::mutex::scoped_lock l(connection_mutex_);
+    assert (current_connection_);
+
+    std::string sql = sql_generator_.getCountStatement(table);
+
+    logdbg  << "DBInterface: count: sql '" << sql << "'";
+
+    DBCommand command;
+    command.set(sql);
+
+    PropertyList list;
+    list.addProperty("count", PropertyDataType::INT);
+    command.list(list);
+
+    std::shared_ptr <DBResult> result = current_connection_->execute(command);
+
+    assert (result->containsData());
+    int tmp = result->buffer()->getInt("count").get(0);
+
+    logdbg  << "DBInterface: count: " << table << ": "<< tmp <<" end";
+    return static_cast<size_t> (tmp);
+}
 
 //void DBInterface::insertProperty (std::string id, std::string value)
 //{
@@ -587,34 +632,6 @@ void DBInterface::checkSubConfigurables ()
 //    return min_max_values;
 //}
 
-size_t DBInterface::count (const std::string &table)
-{
-    logdbg  << "DBInterface: count: table " << table;
-    assert (table_info_.count(table) > 0);
-
-    boost::mutex::scoped_lock l(connection_mutex_);
-    assert (current_connection_);
-
-    std::string sql = sql_generator_.getCountStatement(table);
-
-    logdbg  << "DBInterface: count: sql '" << sql << "'";
-
-    DBCommand command;
-    command.set(sql);
-
-    PropertyList list;
-    list.addProperty("count", PropertyDataType::INT);
-    command.list(list);
-
-    std::shared_ptr <DBResult> result = current_connection_->execute(command);
-
-    assert (result->containsData());
-    int tmp = result->buffer()->getInt("count").get(0);
-
-    logdbg  << "DBInterface: count: " << table << ": "<< tmp <<" end";
-    return static_cast<size_t> (tmp);
-}
-
 //DBResult *DBInterface::count (const std::string &type, unsigned int sensor_number)
 //{
 //    boost::mutex::scoped_lock l(mutex_);
@@ -726,7 +743,7 @@ size_t DBInterface::count (const std::string &table)
 //    buffer_writer_->update (data, table->getDBName());
 //}
 
-void DBInterface::prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause, const std::vector <std::string> filtered_variables,
+void DBInterface::prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause, std::vector <DBOVariable *> filtered_variables,
         bool use_order, DBOVariable *order_variable, bool use_order_ascending, const std::string &limit)
 {
     connection_mutex_.lock();
@@ -736,7 +753,7 @@ void DBInterface::prepareRead (const DBObject &dbobject, DBOVariableSet read_lis
 //                                               const std::string &filter, const std::vector <std::string> &filtered_variable_names,  DBOVariable *order,
 //                                               const std::string &limit, bool left_join)
 
-    std::shared_ptr<DBCommand> read = sql_generator_.getSelectCommand (dbobject, read_list, custom_filter_clause, filtered_variables, use_order, order_variable,
+    std::shared_ptr<DBCommand> read = sql_generator_.getSelectCommand (dbobject.currentMetaTable(), read_list, custom_filter_clause, filtered_variables, use_order, order_variable,
                                                                        use_order_ascending, limit, true);
     loginf  << "DBInterface: prepareRead: dbo " << dbobject.name() << " sql '" << read->get() << "'";
     current_connection_->prepareCommand(read);

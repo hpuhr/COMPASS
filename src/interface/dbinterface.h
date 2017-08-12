@@ -99,8 +99,8 @@ public:
 
     DBConnection &connection ();
 
-    /// @brief Returns a buffer with all data sources for a DBO type
-//    Buffer *getDataSourceDescription (const std::string &dbo_type);
+    /// @brief Returns a container with all data sources for a DBO
+    std::map <int, std::string> getDataSources (const DBObject &object);
 //    bool hasActiveDataSourcesInfo (const std::string &dbo_type);
 //    /// @brief Returns a set with all active data source ids for a DBO type
 //    std::set<int> getActiveSensorNumbers (const std::string &dbo_type);
@@ -111,7 +111,7 @@ public:
 //    void updateBuffer (Buffer *data);
 
 //    /// @brief Prepares incremental read of DBO type
-    void prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause, const std::vector <std::string> filtered_variables,
+    void prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause, std::vector <DBOVariable *> filtered_variables,
                       bool use_order=false, DBOVariable *order_variable=nullptr, bool use_order_ascending=false, const std::string &limit="");
     /// @brief Returns data chunk of DBO type
     std::shared_ptr <Buffer> readDataChunk (const DBObject &dbobject, bool activate_key_search);

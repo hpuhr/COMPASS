@@ -60,16 +60,14 @@ public:
 //    std::string createDBCreateString (Buffer *buffer, const std::string &tablename);
 
     /// @brief Returns general select statement
-    std::shared_ptr<DBCommand> getSelectCommand (const DBObject &object, DBOVariableSet read_list,
-            const std::string &filter, const std::vector <std::string> &filtered_variable_names, bool use_order=false, DBOVariable *order_variable=nullptr, bool use_order_ascending=false,
+    std::shared_ptr<DBCommand> getSelectCommand (const MetaDBTable &meta_table, DBOVariableSet read_list,
+            const std::string &filter, std::vector <DBOVariable *> filtered_variables, bool use_order=false, DBOVariable *order_variable=nullptr, bool use_order_ascending=false,
             const std::string &limit="", bool left_join=false);
 
-//    /// @brief Returns general select command
-//    std::shared_ptr <DBCommand> getSelectCommand(const DBObject &object, const DBOVariableSet &read_list, const std::string &custom_filter_clause,
-//                                                 std::vector<std::string> &filtered_variable_names, DBOVariable *order=0, const std::string &limit_str="");
-//    /// @brief Returns command for all data sources select
+    std::shared_ptr<DBCommand> getSelectCommand (const MetaDBTable &meta_table, std::vector <const DBTableColumn*> columns);
+    ///@brief Returns command for all data sources select for dbo
+    std::shared_ptr<DBCommand> getDataSourcesSelectCommand (const DBObject &object);
 
-//    //DBCommand *getDataSourcesSelectCommand (const std::string &dbo_type);
 //    /// @brief Returns command for active data sources select
 //    //DBCommand *getDistinctDataSourcesSelectCommand (const std::string &dbo_type);
 

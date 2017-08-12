@@ -70,7 +70,7 @@ public:
     /// @brief Returns if condition is active for the DBO type
     bool filters (const std::string &dbo_name);
     /// @brief Returns condition string for a DBO type
-    std::string getConditionString (const std::string &dbo_name, bool &first, std::vector<std::string> &variable_names);
+    std::string getConditionString (const std::string &dbo_name, bool &first, std::vector <DBOVariable*>& filtered_variables);
 
     /// @brief Returns the widget
     QWidget *getWidget () { assert(widget_); return widget_;}

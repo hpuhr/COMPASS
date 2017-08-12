@@ -334,17 +334,17 @@ void DBObject::load (DBOVariableSet &read_set, bool use_filters, bool use_order,
         data_ = nullptr;
 
     std::string custom_filter_clause;
-    std::vector<std::string> filter_variable_names;
+    std::vector <DBOVariable *> filtered_variables;
 
     if (use_filters)
     {
-        custom_filter_clause = ATSDB::instance().filterManager().getSQLCondition (name_, filter_variable_names);
+        custom_filter_clause = ATSDB::instance().filterManager().getSQLCondition (name_, filtered_variables);
     }
 
 //    DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
 //    DBOVariable *order, const std::string &limit_str, bool activate_key_search
 
-    DBOReadDBJob *read_job = new DBOReadDBJob (ATSDB::instance().interface(), *this, read_set, custom_filter_clause, filter_variable_names, use_order, order_variable,
+    DBOReadDBJob *read_job = new DBOReadDBJob (ATSDB::instance().interface(), *this, read_set, custom_filter_clause, filtered_variables, use_order, order_variable,
                                                use_order_ascending, limit_str, false);
 
     read_job_ = std::shared_ptr<DBOReadDBJob> (read_job);
@@ -475,10 +475,31 @@ void DBObject::databaseOpenedSlot ()
     if (is_loadable_)
         count_ = ATSDB::instance().interface().count (table_name);
 
+    buildDataSources();
+
     if (info_widget_)
         info_widget_->updateSlot();
 
     logdbg << "DBObject: " << name_ << " databaseOpenedSlot: loadable " << is_loadable_ << " count " << count_;
+}
+
+void DBObject::buildDataSources()
+{
+    logdbg << "DBObject: buildDataSources: start";
+    data_sources_.clear();
+
+    logdbg  << "DBObject: buildDataSources: building dbo " << name_;
+    if (!is_loadable_ || !hasCurrentDataSource ())
+    {
+        logdbg << "DBObject: buildDataSources: not processed is loadable " << is_loadable_ << " has data source " << hasCurrentDataSource ();
+        return;
+    }
+
+    logdbg  << "DBObject: buildDataSources: building data sources for " << name_;
+
+    data_sources_ = ATSDB::instance().interface().getDataSources(*this);
+
+    logdbg << "DBObject: buildDataSources: end";
 }
 
 bool DBObject::isLoading ()

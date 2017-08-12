@@ -86,11 +86,11 @@ public:
     }
     virtual ~DBODataSourceDefinition() {}
 
-    std::string schema () { return schema_; }
-    std::string localKey () { return local_key_; }
-    std::string metaTableName () { return meta_table_; }
-    std::string foreignKey () { return foreign_key_; }
-    std::string nameColumn () { return name_column_; }
+    const std::string& schema () const { return schema_; }
+    const std::string& localKey () const { return local_key_; }
+    const std::string& metaTableName () const { return meta_table_; }
+    const std::string& foreignKey () const { return foreign_key_; }
+    const std::string& nameColumn () const { return name_column_; }
 
 protected:
     /// DBSchema identifier
@@ -226,6 +226,14 @@ public:
     //  /// @brief Removes an observer to the active data sources information
     //  void removeActiveSourcesObserver (ActiveSourcesObserver *observer);
 
+
+    ///@brief Returns flag if data sources are defined for DBO type.
+    bool hasDataSources ();
+    ///@brief Returns container with all defined data source for DBO type.
+    const std::map<int, std::string> &dataSources ();
+    ///@brief Returns data source name for a DBO type and data source number.
+    std::string getNameOfSensor (unsigned int num);
+
     //  /// @brief Return if active data sources info is available
     //  bool hasActiveDataSourcesInfo ();
     //  /// @brief Triggers build process of the active data sources ino
@@ -270,6 +278,7 @@ protected:
     /// Container with all variables (variable identifier -> variable pointer)
     std::map<std::string, DBOVariable*> variables_;
 
+    std::map<int, std::string> data_sources_;
     /// Container with all observers of the active data sources information
     std::vector <ActiveSourcesObserver *> active_sources_observers_;
     /// Container with all active data sources
@@ -289,6 +298,9 @@ protected:
     virtual void checkSubConfigurables ();
     /// @brief Checks if variables really exist. Not used yet.
     void checkVariables ();
+
+    ///@brief Generates data sources information from previous post-processing.
+    void buildDataSources();
 
     /// Notifies all observers of the active data sources information
     void notifyActiveDataSourcesObservers ();

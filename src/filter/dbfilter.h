@@ -32,6 +32,7 @@
 class DBFilterWidget;
 class DBFilterCondition;
 class FilterManager;
+class DBOVariable;
 
 /**
  * @brief Dynamic database filter
@@ -79,7 +80,7 @@ public:
     bool isGeneric () { return is_generic_; }
 
     /// @brief Returns the condition string for a DBObject
-    virtual std::string getConditionString (const std::string &dbo_type, bool &first, std::vector<std::string> &variable_names);
+    virtual std::string getConditionString (const std::string &dbo_type, bool &first, std::vector <DBOVariable*>& filtered_variables);
     /// @brief Returns if only sub-filters and no own conditions exist
     bool onlyHasSubFilter () { return conditions_.size()>0; }
 

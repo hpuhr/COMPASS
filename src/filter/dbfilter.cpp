@@ -184,7 +184,7 @@ bool DBFilter::filters (const std::string &dbo_type)
 /**
  * If active, returns concatenated condition strings from all sub-conditions and sub-filters, else returns empty string.
  */
-std::string DBFilter::getConditionString (const std::string &dbo_type, bool &first, std::vector<std::string> &variable_names)
+std::string DBFilter::getConditionString (const std::string &dbo_type, bool &first, std::vector <DBOVariable*>& filtered_variables)
 {
     std::stringstream ss;
 
@@ -198,13 +198,13 @@ std::string DBFilter::getConditionString (const std::string &dbo_type, bool &fir
                 return "";
             }
 
-            std::string text = conditions_.at(cnt)->getConditionString(dbo_type, first, variable_names);
+            std::string text = conditions_.at(cnt)->getConditionString(dbo_type, first, filtered_variables);
             ss << text;
         }
 
         for (unsigned int cnt=0; cnt < sub_filters_.size(); cnt ++)
         {
-            std::string text = sub_filters_.at(cnt)->getConditionString(dbo_type, first, variable_names);
+            std::string text = sub_filters_.at(cnt)->getConditionString(dbo_type, first, filtered_variables);
             ss << text;
         }
     }

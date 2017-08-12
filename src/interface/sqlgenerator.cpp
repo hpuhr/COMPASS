@@ -41,6 +41,7 @@
 #include "dbtablecolumn.h"
 #include "dbtable.h"
 #include "metadbtable.h"
+#include "dbschemamanager.h"
 #include "dbschema.h"
 #include "stringconv.h"
 
@@ -87,39 +88,41 @@ SQLGenerator::~SQLGenerator()
 
 //}
 
-//DBCommand *SQLGenerator::getDataSourcesSelectCommand (const std::string &dbo_type)
-//{
-//    assert (ATSDB::getInstance().existsDBObject(dbo_type));
-//    assert (ATSDB::getInstance().getDBObject(dbo_type)->hasCurrentDataSource ());
+std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand (const DBObject &object)
+{
+    assert (object.hasCurrentDataSource ());
 
+    const DBODataSourceDefinition &ds = object.currentDataSource ();
+    const DBSchema &schema = ATSDB::instance().schemaManager().getCurrentSchema();
+    assert (schema.hasMetaTable(ds.metaTableName()));
 
+    const MetaDBTable& meta =  schema.metaTable(ds.metaTableName());
+    assert (meta.hasColumn(ds.foreignKey()));
+    const DBTableColumn& foreign_key_col = meta.column(ds.foreignKey());
+    assert (meta.hasColumn(ds.nameColumn()));
+    const DBTableColumn& name_col = meta.column(ds.nameColumn());
 
-//    DBODataSourceDefinition *ds = ATSDB::getInstance().getDBObject(dbo_type)->getCurrentDataSource ();
-//    assert (DBSchemaManager::getInstance().getCurrentSchema()->hasMetaTable(ds->getMetaTableName()));
+    std::vector <const DBTableColumn*> columns;
+    columns.push_back(&foreign_key_col);
+    columns.push_back(&name_col);
 
-//    MetaDBTable *meta =  DBSchemaManager::getInstance().getCurrentSchema()->getMetaTable(ds->getMetaTableName());
-//    assert (meta->hasTableColumn(ds->getForeignKey()));
-//    assert (meta->hasTableColumn(ds->getNameColumn()));
+    //PropertyList list;
+    //list.addProperty (ds.foreignKey(), PropertyDataType::INT);
+    //list.addProperty (ds.nameColumn(), PropertyDataType::STRING); //DS_NAME SAC SIC
+    //list.addProperty ("DS_NAME", PropertyDataType::STRING);
+    //list.addProperty ("SAC", PropertyDataType::UCHAR);
+    //list.addProperty ("SIC", PropertyDataType::UCHAR);
+    //list.addProperty ("POS_LAT_DEG", PropertyDataType::DOUBLE);
+    //list.addProperty ("POS_LONG_DEG", PropertyDataType::DOUBLE);
 
-//    PropertyList list;
-//    list.addProperty (ds->getForeignKey(), PropertyDataType::INT);
-//    list.addProperty (ds->getNameColumn(), PropertyDataType::STRING); //DS_NAME SAC SIC
-//    list.addProperty ("DS_NAME", PropertyDataType::STRING);
-//    list.addProperty ("SAC", PropertyDataType::UCHAR);
-//    list.addProperty ("SIC", PropertyDataType::UCHAR);
-//    list.addProperty ("POS_LAT_DEG", PropertyDataType::DOUBLE);
-//    list.addProperty ("POS_LONG_DEG", PropertyDataType::DOUBLE);
+    // TODO height hack to be resolved
+//    if (type == DBO_PLOTS)
+//        list.addProperty ("GROUND_ALTITUDE_AMSL_M", PropertyDataType::DOUBLE);
+//    else if (type == DBO_SYSTEM_TRACKS || type == DBO_MLAT)
+//        list.addProperty ("WGS_ELEV_CARTESIAN_M", PropertyDataType::DOUBLE);
 
-//    assert (false);
-//    // TODO height hack to be resolved
-////    if (type == DBO_PLOTS)
-////        list.addProperty ("GROUND_ALTITUDE_AMSL_M", PropertyDataType::DOUBLE);
-////    else if (type == DBO_SYSTEM_TRACKS || type == DBO_MLAT)
-////        list.addProperty ("WGS_ELEV_CARTESIAN_M", PropertyDataType::DOUBLE);
-
-//    std::vector <std::string> filtered_variable_names; // what
-//    return getSelectCommand (list, meta, filtered_variable_names);
-//}
+    return getSelectCommand (meta, columns);
+}
 
 //DBCommand *SQLGenerator::getDistinctDataSourcesSelectCommand (const std::string &dbo_type)
 //{
@@ -698,12 +701,10 @@ std::string SQLGenerator::getCountStatement (const std::string &table)
 //    return ss.str();
 //}
 
-std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const DBObject &object, DBOVariableSet read_list, const std::string &filter,
-                                                           const std::vector <std::string> &filtered_variable_names, bool use_order, DBOVariable *order_variable, bool use_order_ascending,
+std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const MetaDBTable &meta_table, DBOVariableSet read_list, const std::string &filter,
+                                                           std::vector <DBOVariable*> filtered_variables, bool use_order, DBOVariable *order_variable, bool use_order_ascending,
                                                            const std::string &limit, bool left_join)
 {
-    const MetaDBTable &meta_table = object.currentMetaTable();
-
     logdbg  << "SQLGenerator: getSelectCommand: meta table " << meta_table.name() << " read list size " << read_list.getSize();
     assert (read_list.getSize() != 0);
 
@@ -761,19 +762,18 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const DBObject &objec
 
     logdbg << "SQLGenerator: getSelectCommand: collecting sub table clauses";
     // find all tables needed for variables to be filtered on
-    for (auto it = filtered_variable_names.begin(); it != filtered_variable_names.end(); it++)
+    for (auto var_it : filtered_variables)
         // look what tables are needed for filtered variables
     {
-        assert (object.hasVariable(*it));
-        if (meta_table.hasColumn(object.variable(*it).currentDBColumn().name()))
+        if (meta_table.hasColumn(var_it->currentDBColumn().name()))
         {
-            std::string table_db_name = meta_table.tableFor(object.variable(*it).currentDBColumn().name()).name();
+            std::string table_db_name = meta_table.tableFor(var_it->currentDBColumn().name()).name();
 
             if (find (used_tables.begin(), used_tables.end(), table_db_name) == used_tables.end())
                 used_tables.push_back (table_db_name);
         }
         else
-            logwrn << "SQLGenerator: getSelectCommand: unknown filter element '" << *it << "'";
+            logwrn << "SQLGenerator: getSelectCommand: meta table does not contain variable '" << var_it->name() << "'";
     }
 
     std::string main_table_name = meta_table.mainTableName();
@@ -877,6 +877,77 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const DBObject &objec
 
     ss << ";";
 
+
+    command->set(ss.str());
+    command->list(property_list);
+
+    logdbg  << "SQLGenerator: getSelectCommand: command sql '" << ss.str() << "'";
+
+    return command;
+}
+
+std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const MetaDBTable &meta_table, std::vector <const DBTableColumn*> columns)
+{
+    logdbg  << "SQLGenerator: getSelectCommand: meta table " << meta_table.name() << " db columns size " << columns.size();
+    assert (columns.size() != 0);
+
+    std::shared_ptr<DBCommand> command = std::make_shared<DBCommand>(DBCommand());
+
+    std::stringstream ss;
+
+    ss << "SELECT ";
+
+    std::vector <std::string> used_tables;
+
+    logdbg << "SQLGenerator: getSelectCommand: collecting required variables";
+
+    PropertyList property_list;
+
+    bool first = true;
+    for (auto col_it : columns)
+        // look what tables are needed for loaded variables and add variables to sql query
+    {
+        if (!first)
+            ss << ", ";
+
+        std::string table_db_name = col_it->table().name();
+
+        if (find (used_tables.begin(), used_tables.end(), table_db_name) == used_tables.end())
+            used_tables.push_back (table_db_name);
+
+        ss << table_db_name << "." << col_it->name();
+
+        property_list.addProperty(col_it->name(), col_it->propertyType());
+
+        first=false;
+    }
+
+    ss << " FROM ";
+
+    std::string main_table_name = meta_table.mainTableName();
+
+    logdbg << "SQLGenerator: getSelectCommand: left join query";
+    //    SELECT news.id, users.username, news.title, news.date, news.body, COUNT(comments.id)
+    //    FROM news
+    //    LEFT JOIN users
+    //    ON news.user_id = users.id
+    //    LEFT JOIN comments
+    //    ON comments.news_id = news.id
+    //    GROUP BY news.id
+    ss << main_table_name;
+
+    assert (used_tables.size() > 0);
+    std::vector <std::string>::iterator it;
+    for (it = used_tables.begin(); it != used_tables.end(); it++)
+    {
+        if (it->compare(main_table_name) != 0) // not main table
+        {
+            ss << " LEFT JOIN " << *it;
+            ss << " ON " << subTableKeyClause (meta_table, *it);
+        }
+    }
+
+    ss << ";";
 
     command->set(ss.str());
     command->list(property_list);

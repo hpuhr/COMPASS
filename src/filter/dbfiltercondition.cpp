@@ -127,7 +127,7 @@ bool DBFilterCondition::filters (const std::string &dbo_name)
         return variable_dbo_name_ == dbo_name;
 }
 
-std::string DBFilterCondition::getConditionString (const std::string &dbo_name, bool &first, std::vector<std::string> &variable_names)
+std::string DBFilterCondition::getConditionString (const std::string &dbo_name, bool &first, std::vector <DBOVariable*>& filtered_variables)
 {
     logdbg << "DBFilterCondition: getConditionString: object " << dbo_name << " first " << first;
     std::stringstream ss;
@@ -168,8 +168,8 @@ std::string DBFilterCondition::getConditionString (const std::string &dbo_name, 
 
     ss << variable_prefix << table_db_name << "." << column.name() << variable_suffix << " " << operator_ << getTransformedValue (value_, variable);
 
-    if (find (variable_names.begin(), variable_names.end(), variable->name()) == variable_names.end())
-        variable_names.push_back(variable->name());
+    if (find (filtered_variables.begin(), filtered_variables.end(), variable) == filtered_variables.end())
+        filtered_variables.push_back(variable);
 
 
     if (ss.str().size() > 0)
