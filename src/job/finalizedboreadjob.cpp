@@ -47,7 +47,7 @@ FinalizeDBOReadJob::~FinalizeDBOReadJob()
 
 void FinalizeDBOReadJob::run ()
 {
-    logdbg << "FinalizeDBOReadJob: run";
+    logdbg << "FinalizeDBOReadJob: run: read_list size " << read_list_.getSize();
     started_ = true;
 
     std::vector <DBOVariable*> &variables = read_list_.getSet ();
@@ -55,6 +55,7 @@ void FinalizeDBOReadJob::run ()
 
     for (auto var_it : variables)
     {
+        logdbg << "FinalizeDBOReadJob: run: variable " << var_it->name() << " has representation " << Utils::String::representationToString(var_it->representation());
         const DBTableColumn &column = var_it->currentDBColumn ();
         assert (properties.hasProperty(column.name()));
         const Property &property = properties.get(column.name());

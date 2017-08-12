@@ -30,6 +30,7 @@
 
 #include "global.h"
 #include "dbovariable.h"
+#include "logger.h"
 
 /**
  * @brief String representation selection for a DBOVariable
@@ -44,8 +45,9 @@ signals:
 
 public slots:
     /// @brief Sets the representation
-    void changed ()
+    void changedSlot ()
     {
+        loginf << "StringRepresentationComboBox: changed " << currentText().toStdString();
         variable_.representation(representation());
     }
 
@@ -59,8 +61,8 @@ public:
             addItem (it.first.c_str());
 
         setCurrentText (Utils::String::representationToString(variable_.representation()).c_str());
-        connect(this, SIGNAL( activated(const QString &) ), this, SIGNAL( changedRepresentation() ));
-        connect(this, SIGNAL( activated(const QString &) ), this, SLOT( changed() ));
+        //connect(this, SIGNAL( activated(const QString &) ), this, SIGNAL( changedRepresentation() ));
+        connect(this, SIGNAL(currentTextChanged(const QString &)), this, SLOT(changedSlot()));
     }
 
     /// @brief Destructor

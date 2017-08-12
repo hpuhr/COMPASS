@@ -209,14 +209,4 @@ bool DBOVariableSet::hasVariable (DBOVariable &variable)
   return find (set_.begin(), set_.end(), &variable) != set_.end();
 }
 
-PropertyList DBOVariableSet::getCurrentVariablePropertyList () const
-{
-  PropertyList list;
 
-  for (auto it : set_)
-  {
-      list.addProperty (it->currentVariableName (), it->dataType());
-  }
-
-  return list;
-}

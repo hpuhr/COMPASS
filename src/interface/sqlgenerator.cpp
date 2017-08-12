@@ -698,14 +698,14 @@ std::string SQLGenerator::getCountStatement (const std::string &table)
 //    return ss.str();
 //}
 
-std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const DBObject &object, const PropertyList &variables, const std::string &filter,
+std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const DBObject &object, DBOVariableSet read_list, const std::string &filter,
                                                            const std::vector <std::string> &filtered_variable_names, bool use_order, DBOVariable *order_variable, bool use_order_ascending,
-                                                           const std::string &limit, bool distinct, bool left_join)
+                                                           const std::string &limit, bool left_join)
 {
     const MetaDBTable &meta_table = object.currentMetaTable();
 
-    logdbg  << "SQLGenerator: getSelectCommand: meta table " << meta_table.name() << " var list size " << variables.size();
-    assert (variables.size() != 0);
+    logdbg  << "SQLGenerator: getSelectCommand: meta table " << meta_table.name() << " read list size " << read_list.getSize();
+    assert (read_list.getSize() != 0);
 
     std::shared_ptr<DBCommand> command = std::make_shared<DBCommand>(DBCommand());
 
@@ -713,27 +713,35 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const DBObject &objec
 
     ss << "SELECT ";
 
-    if (distinct)
-        ss << "DISTINCT ";
+//    if (distinct)
+//        ss << "DISTINCT ";
 
     std::vector <std::string> used_tables;
 
     logdbg << "SQLGenerator: getSelectCommand: collecting required variables";
 
-    for (unsigned int cnt = 0; cnt < variables.size(); cnt++)
+    PropertyList property_list;
+
+    bool first = true;
+    for (auto var_it : read_list.getSet ())
         // look what tables are needed for loaded variables and add variables to sql query
     {
-        const Property &property = variables.at(cnt);
+        DBOVariable *variable = var_it;
 
-        if (cnt != 0)
+        if (!first)
             ss << ", ";
 
-        std::string table_db_name = meta_table.tableFor(property.name()).name();
+        const DBTableColumn &column = variable->currentDBColumn();
+        std::string table_db_name = column.table().name();
 
         if (find (used_tables.begin(), used_tables.end(), table_db_name) == used_tables.end())
             used_tables.push_back (table_db_name);
 
-        ss << table_db_name << "." << property.name();
+        ss << table_db_name << "." << column.name();
+
+        property_list.addProperty(column.name(), variable->dataType());
+
+        first=false;
     }
 
     logdbg << "SQLGenerator: getSelectCommand: ordering table";
@@ -871,7 +879,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const DBObject &objec
 
 
     command->set(ss.str());
-    command->list(variables);
+    command->list(property_list);
 
     logdbg  << "SQLGenerator: getSelectCommand: command sql '" << ss.str() << "'";
 

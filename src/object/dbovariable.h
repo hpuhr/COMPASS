@@ -82,7 +82,7 @@ public:
     {
         registerParameter ("schema", &schema_, "");
         registerParameter ("meta_table", &meta_table_, "");
-        registerParameter ("variable", &variable_, "");
+        registerParameter ("variable_identifier", &variable_identifier, "");
     }
     virtual ~DBOSchemaVariableDefinition() {}
 
@@ -92,13 +92,13 @@ public:
     const std::string &getMetaTable () { return meta_table_; }
     void setMetaTable(std::string meta_table) { meta_table_=meta_table; }
 
-    const std::string &getVariable () { return variable_; }
-    void setVariable(std::string variable) { variable_=variable; }
+    const std::string &getVariableIdentifier () { return variable_identifier; }
+    void setVariableIdentifier(std::string variable) { variable_identifier=variable; }
 
 protected:
     std::string schema_;
     std::string meta_table_;
-    std::string variable_;
+    std::string variable_identifier;
 };
 
 class DBObject;
@@ -168,7 +168,7 @@ public:
     /// @brief Returns meta table for current schema
     const MetaDBTable &currentMetaTable ();
     /// @brief Returns variable identifier for current schema
-    const std::string &currentVariableName ();
+    const std::string &currentVariableIdentifier ();
 
     /// @brief Returns if unit information is present
     bool hasUnit () { return dimension_.size() != 0;}

@@ -729,16 +729,15 @@ size_t DBInterface::count (const std::string &table)
 void DBInterface::prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause, const std::vector <std::string> filtered_variables,
         bool use_order, DBOVariable *order_variable, bool use_order_ascending, const std::string &limit)
 {
-    //boost::mutex::scoped_lock l(connection_mutex_);
     connection_mutex_.lock();
     assert (current_connection_);
 
 //    getSelectCommand (const DBObject &object, const PropertyList &variables
 //                                               const std::string &filter, const std::vector <std::string> &filtered_variable_names,  DBOVariable *order,
-//                                               const std::string &limit, bool distinct, bool left_join)
+//                                               const std::string &limit, bool left_join)
 
-    std::shared_ptr<DBCommand> read = sql_generator_.getSelectCommand (dbobject, read_list.getCurrentVariablePropertyList(), custom_filter_clause, filtered_variables, use_order, order_variable,
-                                                                       use_order_ascending, limit);
+    std::shared_ptr<DBCommand> read = sql_generator_.getSelectCommand (dbobject, read_list, custom_filter_clause, filtered_variables, use_order, order_variable,
+                                                                       use_order_ascending, limit, true);
     loginf  << "DBInterface: prepareRead: dbo " << dbobject.name() << " sql '" << read->get() << "'";
     current_connection_->prepareCommand(read);
 }
@@ -748,7 +747,7 @@ void DBInterface::prepareRead (const DBObject &dbobject, DBOVariableSet read_lis
  */
 std::shared_ptr <Buffer> DBInterface::readDataChunk (const DBObject &dbobject, bool activate_key_search)
 {
-    //boost::mutex::scoped_lock l(connection_mutex_);
+    // locked by prepareRead
     assert (current_connection_);
 
     std::shared_ptr <DBResult> result = current_connection_->stepPreparedCommand(read_chunk_size_);

@@ -60,9 +60,9 @@ public:
 //    std::string createDBCreateString (Buffer *buffer, const std::string &tablename);
 
     /// @brief Returns general select statement
-    std::shared_ptr<DBCommand> getSelectCommand (const DBObject &object, const PropertyList &variables,
+    std::shared_ptr<DBCommand> getSelectCommand (const DBObject &object, DBOVariableSet read_list,
             const std::string &filter, const std::vector <std::string> &filtered_variable_names, bool use_order=false, DBOVariable *order_variable=nullptr, bool use_order_ascending=false,
-            const std::string &limit="", bool distinct=false, bool left_join=false);
+            const std::string &limit="", bool left_join=false);
 
 //    /// @brief Returns general select command
 //    std::shared_ptr <DBCommand> getSelectCommand(const DBObject &object, const DBOVariableSet &read_list, const std::string &custom_filter_clause,

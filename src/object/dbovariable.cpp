@@ -55,9 +55,6 @@ DBOVariable::DBOVariable(const std::string &class_id, const std::string &instanc
     registerParameter ("dimension", &dimension_, "");
     registerParameter ("unit", &unit_, "");
 
-    // DBOVAR LOWERCASE HACK
-    //boost::algorithm::to_lower(name_);
-
     assert (name_.size() > 0);
     assert (data_type_str_.size() > 0);
     data_type_ = Property::asDataType(data_type_str_);
@@ -192,15 +189,17 @@ const std::string &DBOVariable::metaTable (const std::string &schema)
 const std::string &DBOVariable::variableName (const std::string &schema)
 {
     assert (hasSchema(schema));
-    return schema_variables_.at(schema)->getVariable();
+    return schema_variables_.at(schema)->getVariableIdentifier();
 }
 
 bool DBOVariable::hasCurrentDBColumn ()
 {
     std::string meta_tablename = currentMetaTableString ();
-    std::string table_varname = currentVariableName ();
+    std::string meta_table_varid = currentVariableIdentifier ();
 
-    return ATSDB::instance().schemaManager().getCurrentSchema().metaTable(meta_tablename).hasColumn(table_varname);
+    logdbg << "DBOVariable: hasCurrentDBColumn: meta " << meta_tablename << " variable id " << meta_table_varid;
+
+    return ATSDB::instance().schemaManager().getCurrentSchema().metaTable(meta_tablename).hasColumn(meta_table_varid);
 }
 
 const DBTableColumn &DBOVariable::currentDBColumn ()
@@ -208,9 +207,11 @@ const DBTableColumn &DBOVariable::currentDBColumn ()
     assert (hasCurrentDBColumn());
 
     std::string meta_tablename = currentMetaTableString ();
-    std::string table_varname = currentVariableName ();
+    std::string meta_table_varid = currentVariableIdentifier ();
 
-    return ATSDB::instance().schemaManager().getCurrentSchema().metaTable(meta_tablename).column(table_varname);
+    logdbg << "DBOVariable: currentDBColumn: meta " << meta_tablename << " variable id " << meta_table_varid;
+
+    return ATSDB::instance().schemaManager().getCurrentSchema().metaTable(meta_tablename).column(meta_table_varid);
 }
 
 bool DBOVariable::hasCurrentSchema ()
@@ -235,11 +236,11 @@ const MetaDBTable &DBOVariable::currentMetaTable ()
     return ATSDB::instance().schemaManager().getCurrentSchema().metaTable(meta_table);
 }
 
-const std::string &DBOVariable::currentVariableName ()
+const std::string &DBOVariable::currentVariableIdentifier ()
 {
     assert (hasCurrentSchema());
     std::string schema = ATSDB::instance().schemaManager().getCurrentSchemaName();
-    return schema_variables_.at(schema)->getVariable();
+    return schema_variables_.at(schema)->getVariableIdentifier();
 }
 
 bool DBOVariable::hasMinMaxInfo ()
@@ -399,6 +400,6 @@ String::Representation DBOVariable::representation() const
 
 void DBOVariable::representation(const String::Representation &representation)
 {
-    representation_str_ = String::representationToString(representation_);
+    representation_str_ = String::representationToString(representation);
     representation_ = representation;
 }

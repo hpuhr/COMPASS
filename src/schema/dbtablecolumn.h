@@ -46,9 +46,11 @@ public:
   virtual ~DBTableColumn();
 
   /// @brief Sets the column name
-  void name (const std::string &name) { name_=name; }
+  void name (const std::string &name);
   /// @brief Returns the column name
   const std::string &name() const { return name_; }
+
+  const std::string &identifier () const { return identifier_; }
 
   /// @brief Sets the data type
   void type (const std::string &type) { type_=type; }
@@ -83,6 +85,7 @@ protected:
   DBTable &table_;
   /// Name of the column
   std::string name_;
+  std::string identifier_;
   /// Data type
   std::string type_;
   /// Key flag

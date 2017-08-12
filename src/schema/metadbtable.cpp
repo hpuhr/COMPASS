@@ -165,7 +165,7 @@ void MetaDBTable::updateColumns ()
     for (auto it : main_table_->columns ())
     {
         assert (columns_.find(it.first) == columns_.end());
-        columns_.insert (std::pair <std::string, const DBTableColumn&> (it.first, *it.second));
+        columns_.insert (std::pair <std::string, const DBTableColumn&> (it.second->identifier(), *it.second));
     }
 
     for (auto it: sub_tables_)
@@ -173,8 +173,8 @@ void MetaDBTable::updateColumns ()
         for (auto it2 : it.second.columns())
         {
             //if (columns_.find(it.first) == columns_.end())
-            assert (columns_.find(it.first+"."+it2.first) == columns_.end());
-            columns_.insert (std::pair <std::string, const DBTableColumn&> (it.first+"."+it2.first, *it2.second));
+            assert (columns_.find(it2.second->identifier()) == columns_.end());
+            columns_.insert (std::pair <std::string, const DBTableColumn&> (it2.second->identifier(), *it2.second));
         }
     }
 }

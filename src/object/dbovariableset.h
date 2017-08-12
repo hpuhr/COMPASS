@@ -66,10 +66,6 @@ public:
   /// @brief Returns if given variable is in the set
   bool hasVariable (DBOVariable &variable);
 
-  /// @brief Returns copied set of variables for a given DBO type, has to be deleted by caller
-  //DBOVariableSet *getFor (const std::string &dbo_type);
-
-
   DBOVariableSet& operator= (const DBOVariableSet &source);
   //DBOVariableSet *clone ();
 
@@ -77,9 +73,6 @@ public:
   std::vector <DBOVariable*> &getSet () { return set_;}
   /// @brief Returns variable at a given index
   DBOVariable &getVariable (unsigned int index);
-
-  /// @brief Return property list for a given DBO type for variables in the set
-  PropertyList getCurrentVariablePropertyList () const;
 
   /// @brief Prints contents, for debugging purposes
   void print ();

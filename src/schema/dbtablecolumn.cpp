@@ -61,6 +61,8 @@ DBTableColumn::DBTableColumn(const std::string &class_id, const std::string &ins
   registerParameter ("unit", &unit_, "");
   registerParameter ("special_null", &special_null_, "");
 
+  identifier_ = table_.name()+"."+name_;
+
   createSubConfigurables();
 }
 
@@ -72,6 +74,12 @@ DBTableColumn::~DBTableColumn()
         widget_ = nullptr;
     }
 
+}
+
+void DBTableColumn::name (const std::string &name)
+{
+    name_=name;
+    table_.name()+"."+name_;
 }
 
 PropertyDataType DBTableColumn::propertyType () const

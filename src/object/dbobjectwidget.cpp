@@ -631,15 +631,24 @@ void DBObjectWidget::addNewVariables ()
   {
     std::string column_name = it->second.name();
     boost::algorithm::to_lower(column_name);
+    std::string column_identifier = it->second.identifier();
+    boost::algorithm::to_lower(column_identifier);
 
-    if (object_->hasVariable(column_name))
+    if (object_->hasVariable(column_name) || object_->hasVariable(column_identifier))
       continue;
 
-    std::string instance = "DBOVariable"+object_->name()+column_name+"0";
+    std::string column_name_to_use;
+
+    if (!object_->hasVariable(column_name))
+        column_name_to_use=column_name;
+    else
+        column_name_to_use=column_identifier;
+
+    std::string instance = "DBOVariable"+object_->name()+column_name_to_use+"0";
 
     Configuration &config = object_->addNewSubConfiguration ("DBOVariable", instance);
 
-    config.addParameterString ("name", column_name);
+    config.addParameterString ("name", column_name_to_use);
     config.addParameterString ("data_type_str", Property::asString(it->second.propertyType()));
     config.addParameterString ("dbo_name", object_->name());
     config.addParameterString ("description", it->second.comment());
@@ -649,8 +658,7 @@ void DBObjectWidget::addNewVariables ()
     Configuration &var_configuration = config.addNewSubConfiguration ("DBOSchemaVariableDefinition", var_instance);
     var_configuration.addParameterString ("schema", schema_name);
     var_configuration.addParameterString ("meta_table", meta.name());
-    var_configuration.addParameterString ("variable", it->second.name());
-//    config.addSubConfigurable ("DBOSchemaVariableDefinition", var_instance, var_config_name);
+    var_configuration.addParameterString ("variable_identifier", it->second.identifier());
 
     object_->generateSubConfigurable("DBOVariable", instance);
   }
@@ -742,6 +750,7 @@ void DBObjectWidget::updateDBOVarsGrid ()
 
     //logdbg  << "DBObjectWidget: updateDBOVarsGrid: creating variable row for " << it->first << " info";
     QLabel *description = new QLabel (it->second->description().c_str());
+    description->setMaximumWidth(300);
     dbovars_grid_->addWidget (description, row, 1);
 
     QLabel *datatype = new QLabel (it->second->dataTypeString().c_str());
