@@ -97,6 +97,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand (const DBOb
     assert (schema.hasMetaTable(ds.metaTableName()));
 
     const MetaDBTable& meta =  schema.metaTable(ds.metaTableName());
+    loginf << "SQLGenerator: getDataSourcesSelectCommand: object " << object.name() << " meta table " << meta.name() << " key col " << ds.foreignKey() << " name col " << ds.nameColumn();
     assert (meta.hasColumn(ds.foreignKey()));
     const DBTableColumn& foreign_key_col = meta.column(ds.foreignKey());
     assert (meta.hasColumn(ds.nameColumn()));

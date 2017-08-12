@@ -142,6 +142,1628 @@
                 <ParameterString unit=""/>
             </Configuration>
         </Configuration>
+        <Configuration class_id="DBTable" instance_id="ds_ads">
+            <ParameterString info=""/>
+            <ParameterString key_name="DS_ID"/>
+            <ParameterString name="ds_ads"/>
+            <Configuration class_id="DBTableColumn" instance_id="COVERAGE_MAP_FILE">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="EMS coverage map."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="COVERAGE_MAP_FILE"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="longblob"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="COVERAGE_MAP_PATH">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Path of latest imported EMS cluster.dat."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="COVERAGE_MAP_PATH"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="varchar"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="DS_ID">
+                <ParameterBool is_key="1"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="DS_ID"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="POS_LAT_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="POS_LAT_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="POS_LONG_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="POS_LONG_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="REFERENCE_PERIOD">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="REFERENCE_PERIOD"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="TIME_BIAS_SEC">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="TIME_BIAS_SEC"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="TIME_SD_SEC">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="TIME_SD_SEC"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="UPDATE_CYCLE_MS">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="UPDATE_CYCLE_MS"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBTable" instance_id="ds_mlat">
+            <ParameterString info=""/>
+            <ParameterString key_name="DS_ID"/>
+            <ParameterString name="ds_mlat"/>
+            <Configuration class_id="DBTableColumn" instance_id="ACC_ALT">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ACC_ALT"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ACC_LAT_LONG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ACC_LAT_LONG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ACTIVE_ERROR_MAP_ID">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="MLAT error 3D map ID in the LE_MLAT_ERROR_MAPS."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ACTIVE_ERROR_MAP_ID"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="mediumint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ALT_BIAS_FT">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Altitude coordinate bias assigned to the sensor."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ALT_BIAS_FT"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ALT_BIAS_M">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ALT_BIAS_M"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ALT_SD_FT">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ALT_SD_FT"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ALT_SD_M">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ALT_SD_M"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="COORD_SYS">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="WGS or cartesian"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="COORD_SYS"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="enum"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="COVERAGE_MAP_FILE">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="EMS coverage map."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="COVERAGE_MAP_FILE"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="longblob"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="COVERAGE_MAP_PATH">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Path of imported EMS coverage map."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="COVERAGE_MAP_PATH"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="varchar"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="DS_ID">
+                <ParameterBool is_key="1"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="DS_ID"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ERRORMAP_NUM_CELLS_LAT">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Geographical characteristics: Number of cells latitude"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ERRORMAP_NUM_CELLS_LAT"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ERRORMAP_NUM_CELLS_LONG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Geographical characteristics: Number of cells longitude"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ERRORMAP_NUM_CELLS_LONG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ERRORMAP_NUM_CELLS_VERT">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Geographical characteristics: Number of cells vertical"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ERRORMAP_NUM_CELLS_VERT"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ERRORMAP_ORIGIN_LAT_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Geographical characteristics: Origin latitude"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ERRORMAP_ORIGIN_LAT_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ERRORMAP_ORIGIN_LONG_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Geographical characteristics: Origin longitude"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ERRORMAP_ORIGIN_LONG_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ERRORMAP_ORIGIN_VERT_FT">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Geographical characteristics: Origin vertical"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ERRORMAP_ORIGIN_VERT_FT"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ERRORMAP_STEP_LAT_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Geographical characteristics: Step latitude"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ERRORMAP_STEP_LAT_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ERRORMAP_STEP_LONG_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Geographical characteristics: Step longitude"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ERRORMAP_STEP_LONG_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ERRORMAP_STEP_VERT_FT">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Geographical characteristics: Step vertical"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ERRORMAP_STEP_VERT_FT"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ERRORMAP_USAGE">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="error map usage in OTR"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ERRORMAP_USAGE"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ERROR_MAP_FILE">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="MLAT error 3D map imported as LONGBLOB."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ERROR_MAP_FILE"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="longblob"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ERROR_MAP_PATH">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Path of latest imported MLAT error 3D map."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ERROR_MAP_PATH"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="varchar"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="LAT_BIAS_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="LAT_BIAS_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="LAT_BIAS_M">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Latitude coordinate bias assigned to the sensor."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="LAT_BIAS_M"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="LONG_BIAS_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="LONG_BIAS_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="LONG_BIAS_M">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Longitude coordinate bias assigned to the sensor."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="LONG_BIAS_M"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ML_TYPE">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ML_TYPE"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="varchar"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="POS_BIAS_BEHAV">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Position Bias OTR behaviour. Possible values: 0 - Calculated using an initial value stored in Database , 1 - Calculated using an initial neutral value, 2 - Not Calculated. Fixed value"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="POS_BIAS_BEHAV"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="POS_LATLONG_SD_CORREL">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Correlation coeficient between LONG_SD_M and LAT_SD_M values."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="POS_LATLONG_SD_CORREL"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="POS_LAT_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Latitude coordinate of the sensor&apos;s cartesian centre."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="POS_LAT_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="POS_LAT_SD_M">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Noise assigned to latitude coordinate for the sensor."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="POS_LAT_SD_M"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="POS_LONG_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Longitude coordinate of the sensor&apos;s cartesian centre."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="POS_LONG_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="POS_LONG_SD_M">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Noise assigned to longitude coordinate for the sensor."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="POS_LONG_SD_M"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="POS_SD_M">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="POS_SD_M"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="REFERENCE_PERIOD">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="REFERENCE_PERIOD"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="TIME_BIAS_BEHAV">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Time Bias OTR behaviour. Possible values: 0 - Calculated using an initial value stored in Database , 1 - Calculated using an initial neutral value, 2 - Not Calculated. Fixed value"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="TIME_BIAS_BEHAV"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="TIME_BIAS_S">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Time bias assigned to the sensor."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="TIME_BIAS_S"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="TIME_BIAS_SEC">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="TIME_BIAS_SEC"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="TIME_SD_S">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Time noise assigned to the sensor."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="TIME_SD_S"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="TIME_SD_SEC">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="TIME_SD_SEC"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="UPDATE_CYCLE_MS">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="UPDATE_CYCLE_MS"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="USE_IN_BIAS_EST">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="use this Data source in OTR bias estimation stage"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="USE_IN_BIAS_EST"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="USE_IN_RECONS_STAGE">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="use this Data source in OTR reconstruction stage"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="USE_IN_RECONS_STAGE"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="USE_NOISE">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="use noise from error map instead of reported sigma"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="USE_NOISE"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="WGS_ELEV_CARTESIAN_M">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Altitude from the ellipsoid (WGS&apos;84) of the sensor&apos;s cartesian centre."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="WGS_ELEV_CARTESIAN_M"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBTable" instance_id="ds_radar">
+            <ParameterString info=""/>
+            <ParameterString key_name="DS_ID"/>
+            <ParameterString name="ds_radar"/>
+            <Configuration class_id="DBTableColumn" instance_id="ACTIVE_BIASES_ID">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ACTIVE_BIASES_ID"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="mediumint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ACTIVE_EMS_SOLUTION_ENTRY">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Active state of the cluster."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ACTIVE_EMS_SOLUTION_ENTRY"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ACTIVE_SDS_ID">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ACTIVE_SDS_ID"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="AZIMUTH_BIAS_MODES_BEHAV">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="mode S azimuth accentricity angle bias behaviour. Possible values: 0 - Calculated using an initial value stored in Database , 1 - Calculated using an initial neutral value, 2 - Not Calculated. Fixed value"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="AZIMUTH_BIAS_MODES_BEHAV"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="AZIMUTH_BIAS_PSR_BEHAV">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="primary azimuth bias behaviour. Possible values: 0 - Calculated using an initial value stored in Database , 1 - Calculated using an initial neutral value, 2 - Not Calculated. Fixed value"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="AZIMUTH_BIAS_PSR_BEHAV"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="AZIMUTH_BIAS_SSR_BEHAV">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="secondary azimuth bias behaviour. Possible values: 0 - Calculated using an initial value stored in Database , 1 - Calculated using an initial neutral value, 2 - Not Calculated. Fixed value"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="AZIMUTH_BIAS_SSR_BEHAV"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="AZIMUTH_NOISE_MODES_BEHAV">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="mode S azimuth noise behaviour. Possible values: 0 - Not calculated, 1 - Calculated"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="AZIMUTH_NOISE_MODES_BEHAV"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="AZIMUTH_NOISE_PSR_BEHAV">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="primary azimuth  noise behaviour. Possible values: 0 - Not calculated, 1 - Calculated"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="AZIMUTH_NOISE_PSR_BEHAV"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="AZIMUTH_NOISE_SSR_BEHAV">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="secondary azimuth  noise behaviour. Possible values: 0 - Not calculated, 1 - Calculated"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="AZIMUTH_NOISE_SSR_BEHAV"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="AZM_OFFSET_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="AZM_OFFSET_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="AZM_POLAR_PREC_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="AZM_POLAR_PREC_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="AZ_BIAS_ECCENT_MODES_BEHAV">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="modes azimuth eccentricity value bias behaviour. Possible values: 0 - Calculated using an initial value stored in Database , 1 - Calculated using an initial neutral value, 2 - Not Calculated. Fixed value"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="AZ_BIAS_ECCENT_MODES_BEHAV"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="AZ_BIAS_ECCENT_PSR_BEHAV">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="primary azimuth eccentricity value bias behaviour. Possible values: 0 - Calculated using an initial value stored in Database , 1 - Calculated using an initial neutral value, 2 - Not Calculated. Fixed value"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="AZ_BIAS_ECCENT_PSR_BEHAV"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="AZ_BIAS_ECCENT_SSR_BEHAV">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="secondary azimuth eccentricity value bias behaviour. Possible values: 0 - Calculated using an initial value stored in Database , 1 - Calculated using an initial neutral value, 2 - Not Calculated. Fixed value"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="AZ_BIAS_ECCENT_SSR_BEHAV"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="CALC_TOD_TOLERANCE_MS">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="CALC_TOD_TOLERANCE_MS"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="CONTROL_CENTRE_ID">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="CONTROL_CENTRE_ID"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="varchar"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="COORD_SYS">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Polar with slant range, polar with corrected range or cartesian"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="COORD_SYS"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="enum"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="COUNTRY_ID">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="COUNTRY_ID"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="varchar"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="CO_MOUNTED">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="CO_MOUNTED"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="enum"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="DS_ID">
+                <ParameterBool is_key="1"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="DS_ID"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="EMM_EXPECTED">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="EMM_EXPECTED"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="char"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="EMM_RETRIES">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="EMM_RETRIES"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="EMM_TOLERANCE_MS">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="EMM_TOLERANCE_MS"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="EMS_APPLICABLE_FOR_PRI_SSR">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="EMS_APPLICABLE_FOR_PRI_SSR"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="char"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="EMS_COVERAGE_MAPS_FILE">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="EMS system maps + cluster.dat imported as LONGBLOB."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="EMS_COVERAGE_MAPS_FILE"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="longblob"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="EMS_COVERAGE_MAPS_PATH">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Path of latest imported EMS map."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="EMS_COVERAGE_MAPS_PATH"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="varchar"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="EMS_NODE_ID">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="EMS node identifier in the cluster."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="EMS_NODE_ID"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="EST_REV_PERIOD_TOLERANCE_MS">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="EST_REV_PERIOD_TOLERANCE_MS"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="EST_REV_PERIOD_TOLERANCE_VAR">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="EST_REV_PERIOD_TOLERANCE_VAR"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="GROUND_ALTITUDE_AMSL_M">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="GROUND_ALTITUDE_AMSL_M"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="IS3M">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Whether the modeS radar acts as a 3M radar."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="IS3M"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="char"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="MAX_UNAMBIGUOUS_RANGE_NM">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Maximum unambiguous range of the radar.Measured in NM"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="MAX_UNAMBIGUOUS_RANGE_NM"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="MODES_AZIMUTH_BIAS_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Known value of azimuth bias parameter for Mode-S."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="MODES_AZIMUTH_BIAS_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="MODES_AZIMUTH_ERROR_SD_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Known value of azimuth error (noise) parameter for Mode-S."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="MODES_AZIMUTH_ERROR_SD_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="MODES_AZM_ECC_ANGLE_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Known value of azimuth eccentricity angle parameter for Mode-S."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="MODES_AZM_ECC_ANGLE_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="MODES_AZM_ECC_VALUE_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Known value of azimuth eccentricity parameter for Mode-S."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="MODES_AZM_ECC_VALUE_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="MODES_COS_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="MODES_COS_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="MODES_ELECTRICAL_HEIGHT_M">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="MODES_ELECTRICAL_HEIGHT_M"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="MODES_LOCKOUT_RANGE_NM">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="MODES_LOCKOUT_RANGE_NM"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="MODES_MAX_IR_NM">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="MODES_MAX_IR_NM"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="MODES_MIN_IR_NM">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="MODES_MIN_IR_NM"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="MODES_RANGE_BIAS_M">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Known value of range bias parameter for Mode-S."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="MODES_RANGE_BIAS_M"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="MODES_RANGE_ERROR_SD_M">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Known value of range error (noise) parameter for Mode-S."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="MODES_RANGE_ERROR_SD_M"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="MODES_RANGE_GAIN">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Known value of range gain parameter for Mode-S (non-dimensional)."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="MODES_RANGE_GAIN"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="MODES_TIME_BIAS_SEC">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Known value of time bias parameter for Mode-S Antenna."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="MODES_TIME_BIAS_SEC"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="NUM_SECTORS">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="NUM_SECTORS"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="POS_LAT_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="POS_LAT_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="POS_LONG_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="POS_LONG_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="PRI_3D_HEIGHT_BIAS_FT">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="PRI_3D_HEIGHT_BIAS_FT"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="PRI_3D_HEIGHT_ERROR_SD_FT">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="PRI_3D_HEIGHT_ERROR_SD_FT"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="PRI_AZIMUTH_BIAS_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="PRI_AZIMUTH_BIAS_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="PRI_AZIMUTH_ERROR_SD_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="PRI_AZIMUTH_ERROR_SD_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="PRI_AZM_ECC_ANGLE_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="PRI_AZM_ECC_ANGLE_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="PRI_AZM_ECC_VALUE_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="PRI_AZM_ECC_VALUE_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="PRI_COS_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="PRI_COS_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="PRI_ELECTRICAL_HEIGHT_M">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="PRI_ELECTRICAL_HEIGHT_M"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="PRI_MAX_IR_NM">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="PRI_MAX_IR_NM"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="PRI_MIN_ELEV_ANGLE_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="PRI_MIN_ELEV_ANGLE_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="PRI_MIN_IR_NM">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="PRI_MIN_IR_NM"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="PRI_RANGE_BIAS_M">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="PRI_RANGE_BIAS_M"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="PRI_RANGE_ERROR_SD_M">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="PRI_RANGE_ERROR_SD_M"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="PRI_RANGE_GAIN">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="PRI_RANGE_GAIN"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="PRI_SCREENING_FILE">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="PRI screening imported as LONGBLOB."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="PRI_SCREENING_FILE"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="longblob"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="PRI_SCREENING_PATH">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Path of latest imported PRI screening."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="PRI_SCREENING_PATH"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="varchar"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="PRI_TIME_BIAS_SEC">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Known value of time bias parameter for Primary Antenna."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="PRI_TIME_BIAS_SEC"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="RADAR_TYPE_ID">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="RADAR_TYPE_ID"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="varchar"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="RANGE_BIAS_MODES_BEHAV">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="mode S range bias behaviour. Possible values: 0 - Calculated using an initial value stored in Database , 1 - Calculated using an initial neutral value, 2 - Not Calculated. Fixed value"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="RANGE_BIAS_MODES_BEHAV"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="RANGE_BIAS_PSR_BEHAV">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="primary range bias behaviour. Possible values: 0 - Calculated using an initial value stored in Database , 1 - Calculated using an initial neutral value, 2 - Not Calculated. Fixed value"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="RANGE_BIAS_PSR_BEHAV"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="RANGE_BIAS_SSR_BEHAV">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="secondary range bias behaviour. Possible values: 0 - Calculated using an initial value stored in Database , 1 - Calculated using an initial neutral value, 2 - Not Calculated. Fixed value"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="RANGE_BIAS_SSR_BEHAV"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="RANGE_GAIN">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="RANGE_GAIN"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="RANGE_GAIN_BIAS_MODES_BEHAV">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="mode S range gain bias behaviour. Possible values: 0 - Calculated using an initial value stored in Database , 1 - Calculated using an initial neutral value, 2 - Not Calculated. Fixed value"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="RANGE_GAIN_BIAS_MODES_BEHAV"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="RANGE_GAIN_BIAS_PSR_BEHAV">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="primary range gain bias behaviour. Possible values: 0 - Calculated using an initial value stored in Database , 1 - Calculated using an initial neutral value, 2 - Not Calculated. Fixed value"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="RANGE_GAIN_BIAS_PSR_BEHAV"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="RANGE_GAIN_BIAS_SSR_BEHAV">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="secondary range gain bias behaviour. Possible values: 0 - Calculated using an initial value stored in Database , 1 - Calculated using an initial neutral value, 2 - Not Calculated. Fixed value"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="RANGE_GAIN_BIAS_SSR_BEHAV"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="RANGE_NOISE_MODES_BEHAV">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="mode S range noise behaviour. Possible values: 0 - Not calculated, 1 - Calculated"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="RANGE_NOISE_MODES_BEHAV"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="RANGE_NOISE_PSR_BEHAV">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="primary range noise behaviour. Possible values: 0 - Not calculated, 1 - Calculated"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="RANGE_NOISE_PSR_BEHAV"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="RANGE_NOISE_SSR_BEHAV">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="secondary range noise behaviour. Possible values: 0 - Not calculated, 1 - Calculated"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="RANGE_NOISE_SSR_BEHAV"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="RANGE_OFFSET_NM">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="RANGE_OFFSET_NM"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="RANGE_POLAR_PREC_NM">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="RANGE_POLAR_PREC_NM"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="REVOLUTION_TIME_MS">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="REVOLUTION_TIME_MS"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="REVOLUTION_TIME_TOLERANCE_MS">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="REVOLUTION_TIME_TOLERANCE_MS"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="SMM_EXPECTED">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="SMM_EXPECTED"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="char"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="SMM_TOLERANCE_MS">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="SMM_TOLERANCE_MS"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="SOURCE_COORD_SYS">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="SOURCE_COORD_SYS"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="enum"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="SSR_AZIMUTH_BIAS_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="SSR_AZIMUTH_BIAS_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="SSR_AZIMUTH_ERROR_SD_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="SSR_AZIMUTH_ERROR_SD_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="SSR_AZM_ECC_ANGLE_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="SSR_AZM_ECC_ANGLE_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="SSR_AZM_ECC_VALUE_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="SSR_AZM_ECC_VALUE_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="SSR_COS_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="SSR_COS_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="SSR_ELECTRICAL_HEIGHT_M">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="SSR_ELECTRICAL_HEIGHT_M"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="SSR_MAX_IR_NM">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="SSR_MAX_IR_NM"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="SSR_MIN_ELEV_ANGLE_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="SSR_MIN_ELEV_ANGLE_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="SSR_MIN_IR_NM">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="SSR_MIN_IR_NM"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="SSR_RANGE_BIAS_M">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="SSR_RANGE_BIAS_M"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="SSR_RANGE_ERROR_SD_M">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="SSR_RANGE_ERROR_SD_M"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="SSR_RANGE_GAIN">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="SSR_RANGE_GAIN"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="SSR_SCREENING_FILE">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="SSR screening imported as LONGBLOB."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="SSR_SCREENING_FILE"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="longblob"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="SSR_SCREENING_PATH">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Path of latest imported SSR screening."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="SSR_SCREENING_PATH"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="varchar"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="SSR_TIME_BIAS_SEC">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Known value of time bias parameter for Secondary Antenna."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="SSR_TIME_BIAS_SEC"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="TIME_BIAS_MODES_BEHAV">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Mode S time value bias behaviour. Possible values: 0 - Calculated using an initial value stored in Database , 1 - Calculated using an initial neutral value, 2 - Not Calculated. Fixed value"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="TIME_BIAS_MODES_BEHAV"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="TIME_BIAS_PSR_BEHAV">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Primary time value bias behaviour. Possible values: 0 - Calculated using an initial value stored in Database , 1 - Calculated using an initial neutral value, 2 - Not Calculated. Fixed value"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="TIME_BIAS_PSR_BEHAV"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="TIME_BIAS_SEC">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Field obsolete since TRES version 1.3 build 4467."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="TIME_BIAS_SEC"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="TIME_BIAS_SSR_BEHAV">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Secondary time value bias behaviour. Possible values: 0 - Calculated using an initial value stored in Database , 1 - Calculated using an initial neutral value, 2 - Not Calculated. Fixed value"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="TIME_BIAS_SSR_BEHAV"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="TIME_ERROR_SD_SEC">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="TIME_ERROR_SD_SEC"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="TOWER_HEIGHT_M">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="TOWER_HEIGHT_M"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="USAGE_AREA_ID">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="USAGE_AREA_ID"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="char"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="USAGE_GEN_ID">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="USAGE_GEN_ID"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="char"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="USAGE_IS_FOR_EVALUATION">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="USAGE_IS_FOR_EVALUATION"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="char"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="USAGE_IS_MILITARY">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="USAGE_IS_MILITARY"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="enum"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="USAGE_SIM_ID">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="USAGE_SIM_ID"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="char"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="USAGE_TYPE_ID">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="USAGE_TYPE_ID"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="char"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="USE_IN_BIAS_EST">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="use this Data source in OTR bias estimation stage"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="USE_IN_BIAS_EST"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="USE_IN_RECONS_STAGE">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="use this Data source in OTR reconstruction stage"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="USE_IN_RECONS_STAGE"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="WGS_ELEV_CARTESIAN_M">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="WGS_ELEV_CARTESIAN_M"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="X_CART_PREC_NM">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="X_CART_PREC_NM"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="Y_CART_PREC_NM">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="Y_CART_PREC_NM"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="DBTable" instance_id="ds_tracker">
+            <ParameterString info=""/>
+            <ParameterString key_name="DS_ID"/>
+            <ParameterString name="ds_tracker"/>
+            <Configuration class_id="DBTableColumn" instance_id="COORD_SYS">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="WGS or cartesian"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="COORD_SYS"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="enum"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="DS_ID">
+                <ParameterBool is_key="1"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="DS_ID"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="FDDI_ID">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Tracker 4ddi id"/>
+                <ParameterString dimension=""/>
+                <ParameterString name="FDDI_ID"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="int"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="POS_LAT_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="POS_LAT_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="POS_LONG_DEG">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="POS_LONG_DEG"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="REFERENCE_PERIOD">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="REFERENCE_PERIOD"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="UPDATE_CYCLE_MS">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString dimension=""/>
+                <ParameterString name="UPDATE_CYCLE_MS"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="WGS_ELEV_CARTESIAN_M">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Elevation (m) of stereographic/Cartesian plan above WGS84."/>
+                <ParameterString dimension=""/>
+                <ParameterString name="WGS_ELEV_CARTESIAN_M"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+        </Configuration>
         <Configuration class_id="DBTable" instance_id="le_ds">
             <ParameterString info=""/>
             <ParameterString key_name="DS_ID"/>
@@ -3309,10 +4931,15 @@
                 <ParameterString sub_table_name="cmp_aa"/>
             </Configuration>
         </Configuration>
-        <Configuration class_id="MetaDBTable" instance_id="MetaDBTableDatasources">
+        <Configuration class_id="MetaDBTable" instance_id="MetaDBTableADSBDataSources">
             <ParameterString info=""/>
-            <ParameterString main_table_name="le_ds"/>
-            <ParameterString name="Datasources"/>
+            <ParameterString main_table_name="ds_ads"/>
+            <ParameterString name="ADSBDataSources"/>
+            <Configuration class_id="SubTableDefinition" instance_id="SubTableDefinitionADSBDataSourcesle_ds0">
+                <ParameterString main_table_key="DS_ID"/>
+                <ParameterString sub_table_key="DS_ID"/>
+                <ParameterString sub_table_name="le_ds"/>
+            </Configuration>
         </Configuration>
         <Configuration class_id="MetaDBTable" instance_id="MetaDBTableMLAT">
             <ParameterString info=""/>
@@ -3322,6 +4949,16 @@
                 <ParameterString main_table_key="REC_NUM"/>
                 <ParameterString sub_table_key="REC_NUM"/>
                 <ParameterString sub_table_name="cmp_aa"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="MetaDBTable" instance_id="MetaDBTableMLATDataSources">
+            <ParameterString info=""/>
+            <ParameterString main_table_name="ds_mlat"/>
+            <ParameterString name="MLATDataSources"/>
+            <Configuration class_id="SubTableDefinition" instance_id="SubTableDefinitionMLATDataSourcesle_ds0">
+                <ParameterString main_table_key="DS_ID"/>
+                <ParameterString sub_table_key="DS_ID"/>
+                <ParameterString sub_table_name="le_ds"/>
             </Configuration>
         </Configuration>
         <Configuration class_id="MetaDBTable" instance_id="MetaDBTableRadar">
@@ -3334,6 +4971,16 @@
                 <ParameterString sub_table_name="cmp_aa"/>
             </Configuration>
         </Configuration>
+        <Configuration class_id="MetaDBTable" instance_id="MetaDBTableRadarDataSources">
+            <ParameterString info=""/>
+            <ParameterString main_table_name="ds_radar"/>
+            <ParameterString name="RadarDataSources"/>
+            <Configuration class_id="SubTableDefinition" instance_id="SubTableDefinitionRadarDataSourcesle_ds0">
+                <ParameterString main_table_key="DS_ID"/>
+                <ParameterString sub_table_key="DS_ID"/>
+                <ParameterString sub_table_name="le_ds"/>
+            </Configuration>
+        </Configuration>
         <Configuration class_id="MetaDBTable" instance_id="MetaDBTableTracker">
             <ParameterString info=""/>
             <ParameterString main_table_name="sd_track"/>
@@ -3342,6 +4989,16 @@
                 <ParameterString main_table_key="REC_NUM"/>
                 <ParameterString sub_table_key="REC_NUM"/>
                 <ParameterString sub_table_name="cmp_aa"/>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="MetaDBTable" instance_id="MetaDBTableTrackerDataSources">
+            <ParameterString info=""/>
+            <ParameterString main_table_name="ds_tracker"/>
+            <ParameterString name="TrackerDataSources"/>
+            <Configuration class_id="SubTableDefinition" instance_id="SubTableDefinitionTrackerDataSourcesle_ds0">
+                <ParameterString main_table_key="DS_ID"/>
+                <ParameterString sub_table_key="DS_ID"/>
+                <ParameterString sub_table_name="le_ds"/>
             </Configuration>
         </Configuration>
     </Configuration>

@@ -840,7 +840,7 @@ void DBObjectWidget::updateVariableSelectionBox (QComboBox *box, std::string sch
     if (selection.size()>0 && selection.compare(it->second.name()) == 0)
       index_cnt=cnt;
 
-    box->addItem (it->second.name().c_str());
+    box->addItem (it->first.c_str());
 
     cnt++;
   }

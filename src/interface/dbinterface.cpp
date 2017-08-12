@@ -39,6 +39,8 @@
 #include "dbovariable.h"
 #include "dbresult.h"
 #include "metadbtable.h"
+#include "dbschemamanager.h"
+#include "dbschema.h"
 //#include "MySQLConConnection.h"
 //#include "SQLiteConnection.h"
 //#include "StructureDescriptionManager.h"
@@ -309,7 +311,7 @@ void DBInterface::checkSubConfigurables ()
 // */
 std::map <int, std::string> DBInterface::getDataSources (const DBObject &object)
 {
-    logdbg  << "DBInterface: getDataSourceDescription: start";
+    loginf  << "DBInterface: getDataSourceDescription: start";
 
     boost::mutex::scoped_lock l(connection_mutex_);
 
@@ -322,21 +324,28 @@ std::map <int, std::string> DBInterface::getDataSources (const DBObject &object)
     std::shared_ptr <Buffer> buffer = result->buffer();
 
     const DBODataSourceDefinition &ds = object.currentDataSource ();
-    std::string key_column = ds.localKey();
-    std::string name_column = ds.nameColumn();
+    const DBSchema &schema = ATSDB::instance().schemaManager().getCurrentSchema();
+    assert (schema.hasMetaTable(ds.metaTableName()));
 
-    assert (buffer->properties().hasProperty(key_column));
-    assert (buffer->properties().get(key_column).dataType() == PropertyDataType::INT);
-    assert (buffer->properties().hasProperty(name_column));
-    assert (buffer->properties().get(name_column).dataType() == PropertyDataType::STRING);
+    const MetaDBTable& meta =  schema.metaTable(ds.metaTableName());
+
+    const DBTableColumn& foreign_key_col = meta.column(ds.foreignKey());
+    const DBTableColumn& name_col = meta.column(ds.nameColumn());
+
+
+    assert (buffer->properties().hasProperty(foreign_key_col.name()));
+    assert (buffer->properties().get(foreign_key_col.name()).dataType() == PropertyDataType::INT);
+    assert (buffer->properties().hasProperty(name_col.name()));
+    assert (buffer->properties().get(name_col.name()).dataType() == PropertyDataType::STRING);
 
     std::map <int, std::string> sources;
 
     for (unsigned cnt = 0; cnt < buffer->size(); cnt++)
     {
-        int key = buffer->getInt(key_column).get(cnt);
-        std::string name = buffer->getString(name_column).get(cnt);
+        int key = buffer->getInt(foreign_key_col.name()).get(cnt);
+        std::string name = buffer->getString(name_col.name()).get(cnt);
         assert (sources.count(key) == 0);
+        loginf << "DBInterface: getDataSources: object " << object.name() << " key " << key << " name " << name;
         sources[key] = name;
     }
 
