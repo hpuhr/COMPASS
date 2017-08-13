@@ -33,7 +33,7 @@
 #include "dbinterface.h"
 #include "dbconnection.h"
 #include "filtermanagerwidget.h"
-//#include "SensorFilter.h"
+#include "sensorfilter.h"
 
 
 FilterManager::FilterManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb)
@@ -64,36 +64,41 @@ void FilterManager::generateSubConfigurable (const std::string &class_id, const 
         DBFilter *filter = new DBFilter (class_id, instance_id, this);
         filters_.push_back (filter);
     }
-    // TODO
-//    else if (class_id.compare ("SensorFilter") == 0)
-//    {
-//        SensorFilter *filter = new SensorFilter (class_id, instance_id, this);
-//        filters_.push_back (filter);
-//    }
+    else if (class_id.compare ("SensorFilter") == 0)
+    {
+        SensorFilter *filter = new SensorFilter (class_id, instance_id, this);
+        filters_.push_back (filter);
+    }
     else
         throw std::runtime_error ("FilterManager: generateSubConfigurable: unknown class_id "+class_id );
 }
 void FilterManager::checkSubConfigurables ()
 {
-
-    if (filters_.size() == 0)
+    // watch those sensors
+    for (auto dbo_it : ATSDB::instance().objectManager().objects())
     {
-//        loginf << "FilterManager: checkSubConfigurables: generating sensor filters";
-//        // sensor filters
-//        const std::map <std::string, DBObject*> &objects =  DBObjectManager::getInstance().getDBObjects ();
-//        std::map <std::string, DBObject*>::const_iterator it;
+        if (!dbo_it.second->hasCurrentDataSource())
+            continue;
 
-//        for (it = objects.begin(); it != objects.end(); it++)
-//        {
-//            if (!it->second->hasCurrentDataSource())
-//                continue;
+        bool exists = false;
+        for (auto fil_it : filters_)
+        {
+            SensorFilter *sensor_filter = reinterpret_cast<SensorFilter *> (fil_it);
+            if (sensor_filter && sensor_filter->dbObjectName() == dbo_it.first)
+            {
+                exists = true;
+                break;
+            }
+        }
+        if (exists)
+            continue;
 
-//            std::string instance_id = "Sensors"+it->second->getName();
-//            Configuration &sensorfilter_configuration = addNewSubConfiguration ("SensorFilter", instance_id);
-//            sensorfilter_configuration.addParameterString ("dbo_type", it->first);
-//            generateSubConfigurable ("SensorFilter", instance_id);
-//        }
+        loginf << "FilterManager: checkSubConfigurables: generating sensor filter for " << dbo_it.first;
 
+        std::string instance_id = dbo_it.second->name()+"Sensors";
+        Configuration &sensorfilter_configuration = addNewSubConfiguration ("SensorFilter", instance_id);
+        sensorfilter_configuration.addParameterString ("dbo_name", dbo_it.first);
+        generateSubConfigurable ("SensorFilter", instance_id);
     }
 }
 

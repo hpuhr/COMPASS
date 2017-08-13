@@ -26,26 +26,20 @@
 #include <QGridLayout>
 #include <QCheckBox>
 
-#include "SensorFilterWidget.h"
-#include "FilterManager.h"
-#include "ATSDB.h"
-#include "DBObjectManager.h"
-#include "DBObject.h"
+#include "sensorfilterwidget.h"
+#include "filtermanager.h"
+#include "atsdb.h"
+#include "dbobjectmanager.h"
+#include "dbobject.h"
 
 /**
  * Initializes members, creates GUI elements.
  */
 SensorFilterWidget::SensorFilterWidget(SensorFilter &filter, std::string class_id, std::string instance_id)
-: DBFilterWidget (filter, "SensorFilterWidget", instance_id), filter_ (filter), data_sources_(filter_.getDataSources())
+    : DBFilterWidget (class_id, instance_id, filter), filter_ (filter), data_sources_(filter_.dataSources())
 {
-    dbo_type_ = filter_.getDBOType();
-
-    if (!ATSDB::getInstance().contains(dbo_type_))
-        throw std::runtime_error ("SensorFilterWidget: constructor: type "+dbo_type_+" not contained");
-
     createGUIElements();
 
-    assert (false);
     // TODO fix sources observer
     //createMenu (DBObjectManager::getInstance().getDBObject(dbo_type_)->hasActiveDataSourcesInfo());
 
@@ -90,7 +84,7 @@ void SensorFilterWidget::createGUIElements ()
         data_sources_checkboxes_ [radar_checkbox] = it->first;
 
         logdbg << "SensorFilterWidget: createGUIElements: got sensor " << it->first << " name " <<  it->second.getName()
-                        << " active " << radar_checkbox->isChecked();
+               << " active " << radar_checkbox->isChecked();
 
         row = 1 + cnt / 2;
         col = cnt % 2;
@@ -168,7 +162,7 @@ void SensorFilterWidget::updateCheckboxesDisabled ()
         SensorFilterDataSource &src = data_sources_[checkit->second];
         checkit->first->setEnabled(src.isActiveInData());
         logdbg << "SensorFilterWidget: updateCheckboxesDisabled: src " << src.getName() << " active "
-                << src.isActiveInData();
+               << src.isActiveInData();
     }
 
 }
@@ -193,13 +187,10 @@ void SensorFilterWidget::toggleDataSource ()
 void SensorFilterWidget::setSourcesInactive ()
 {
     logdbg << "SensorFilterWidget: setSourcesInactive";
-    DBObject *object = DBObjectManager::getInstance().getDBObject (dbo_type_);
 
-    assert (false);
     // TODO fix sources observer
-
-//    assert (!object->hasActiveDataSourcesInfo());
-//    object->buildActiveDataSourcesInfo();
+    //    assert (!object->hasActiveDataSourcesInfo());
+    //    object->buildActiveDataSourcesInfo();
     createMenu(true);
 }
 

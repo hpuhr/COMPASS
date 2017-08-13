@@ -80,7 +80,7 @@ public:
     bool isGeneric () { return is_generic_; }
 
     /// @brief Returns the condition string for a DBObject
-    virtual std::string getConditionString (const std::string &dbo_type, bool &first, std::vector <DBOVariable*>& filtered_variables);
+    virtual std::string getConditionString (const std::string &dbo_name, bool &first, std::vector <DBOVariable*>& filtered_variables);
     /// @brief Returns if only sub-filters and no own conditions exist
     bool onlyHasSubFilter () { return conditions_.size()>0; }
 

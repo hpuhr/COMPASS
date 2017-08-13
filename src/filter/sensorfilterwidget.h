@@ -27,8 +27,8 @@
 
 #include <QMenu>
 
-#include "DBFilterWidget.h"
-#include "SensorFilter.h"
+#include "dbfilterwidget.h"
+#include "sensorfilter.h"
 
 
 

@@ -145,7 +145,7 @@ set ( atsdb_HDRS
     #        src/connection/mysqlconconnection.h
     #        src/datasource/datasource.h
     src/filter/dbfilter.h
-    #        src/filter/sensorfilter.h
+    src/filter/sensorfilter.h
     src/filter/filtermanager.h
     src/filter/filtermanagerwidget.h
     src/filter/dbfiltercondition.h
@@ -154,7 +154,7 @@ set ( atsdb_HDRS
     src/filter/filtergeneratorwidget.h
     src/filter/filterconditionoperatorcombobox.h
     src/filter/filterconditionresetvaluecombobox.h
-    #        src/filter/sensorfilterwidget.h
+    src/filter/sensorfilterwidget.h
     src/interface/dbtableinfo.h
     src/interface/dbinterface.h
     src/interface/dbinterfacewidget.h
@@ -296,7 +296,6 @@ set ( atsdb_HDRS
     #        src/util/data.h
     src/util/number.h
     src/util/stringconv.h
-    #src/util/stringrepresentation.h
     src/util/singleton.h
     src/util/logger.h
     )
@@ -328,8 +327,8 @@ set ( atsdb_SRCS
     src/filter/dbfilterwidget.cpp
     src/filter/filtermanager.cpp
     src/filter/filtermanagerwidget.cpp
-    #        src/filter/sensorfilter.cpp
-    #        src/filter/sensorfilterwidget.cpp
+    src/filter/sensorfilter.cpp
+    src/filter/sensorfilterwidget.cpp
     src/filter/filtereditwidget.cpp
     src/filter/filtergeneratorwidget.cpp
     #src/gui/qcollapsablewidget.cpp
