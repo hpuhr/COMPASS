@@ -47,9 +47,11 @@ class DBTableColumn;
 class DBTableInfo;
 class DBInterfaceWidget;
 class DBInterfaceInfoWidget;
+class Job;
 
 class SQLGenerator;
 class QWidget;
+class QProgressDialog;
 
 /**
  * @brief Encapsulates all dedicated database functionality
@@ -64,8 +66,10 @@ class DBInterface : public QObject, public Configurable
     Q_OBJECT
 signals:
     void databaseOpenedSignal ();
+    void postProcessingDoneSignal ();
 
 public slots:
+    void postProcessingJobDoneSlot();
     //void updateDBObjectInformationSlot ();
 
 public:
@@ -145,7 +149,7 @@ public:
 
     /// @brief Returns if database was post processed
     bool isPostProcessed ();
-    void setPostProcessed (bool value);
+    void postProcess ();
 
     //    /// @brief Returns variable values for a number of DBO type elements
     //    Buffer *getInfo (const std::string &dbo_type, std::vector<unsigned int> ids, DBOVariableSet read_list, bool use_filters,
@@ -172,8 +176,8 @@ public:
 
     //    DBResult *getDistinctStatistics (const std::string &dbo_type, DBOVariable *variable, unsigned int sensor_number);
 
-    //    /// @brief Executes query and returns numbers for all active sensors
-    //    std::set<int> queryActiveSensorNumbers (const std::string &dbo_type);
+    /// @brief Executes query and returns numbers for all active sensors
+    std::set<int> getActiveSensorNumbers (const DBObject &object);
 
     //    void deleteAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string filter);
     //    void updateAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string new_value, std::string filter);
@@ -214,8 +218,13 @@ protected:
 
     std::map <std::string, DBTableInfo> table_info_;
 
+    std::vector <std::shared_ptr<Job>> postprocess_jobs_;
+    QProgressDialog* postprocess_dialog_ {nullptr};
+    unsigned int postprocess_job_num_{0};
+
     virtual void checkSubConfigurables ();
 
+    void setPostProcessed (bool value);
     //    /// @brief Returns buffer with min/max data from another Buffer with the string contents. Delete returned buffer yourself.
     //    Buffer *createFromMinMaxStringBuffer (Buffer *string_buffer, PropertyDataType data_type);
 };

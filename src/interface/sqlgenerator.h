@@ -64,12 +64,12 @@ public:
             const std::string &filter, std::vector <DBOVariable *> filtered_variables, bool use_order=false, DBOVariable *order_variable=nullptr, bool use_order_ascending=false,
             const std::string &limit="", bool left_join=false);
 
-    std::shared_ptr<DBCommand> getSelectCommand (const MetaDBTable &meta_table, std::vector <const DBTableColumn*> columns);
+    std::shared_ptr<DBCommand> getSelectCommand (const MetaDBTable &meta_table, std::vector <const DBTableColumn*> columns, bool distinct=false);
     ///@brief Returns command for all data sources select for dbo
     std::shared_ptr<DBCommand> getDataSourcesSelectCommand (const DBObject &object);
 
-//    /// @brief Returns command for active data sources select
-//    //DBCommand *getDistinctDataSourcesSelectCommand (const std::string &dbo_type);
+    /// @brief Returns command for active data sources select
+    std::shared_ptr<DBCommand> getDistinctDataSourcesSelectCommand (const DBObject &object);
 
 //    DBCommand *getDistinctStatistics (const std::string &dbo_type, DBOVariable *variable, unsigned int sensor_number);
 

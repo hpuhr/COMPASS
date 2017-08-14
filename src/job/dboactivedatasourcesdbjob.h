@@ -25,8 +25,10 @@
 #ifndef DBOACTIVEDATASOURCESDBJOB_H_
 #define DBOACTIVEDATASOURCESDBJOB_H_
 
-#include "DBJob.h"
-#include "Global.h"
+#include "job.h"
+
+class DBInterface;
+class DBObject;
 
 /**
  * @brief Generates the active data sources information for a DBObject
@@ -34,22 +36,19 @@
  * For a given DBObject type, uses the DBInterface to generate the active data sources. The compacted information is
  * added as property string.
  */
-class DBOActiveDataSourcesDBJob : public DBJob
+class DBOActiveDataSourcesDBJob : public Job
 {
 public:
-    DBOActiveDataSourcesDBJob(JobOrderer *orderer, boost::function<void (Job*)> done_function,
-            boost::function<void (Job*)> obsolete_function, DBInterface *db_interface,
-            DB_OBJECT_TYPE type);
+    DBOActiveDataSourcesDBJob(DBInterface& db_interface, DBObject &object);
     virtual ~DBOActiveDataSourcesDBJob();
 
-    virtual void execute ();
+    virtual void run ();
 
-    DB_OBJECT_TYPE getDBOType () { return type_; }
+    DBObject& dbObject () { return object_; }
 
 protected:
-    DB_OBJECT_TYPE type_;
-  /// @brief Creates properties table and values
-  void createActiveDataSources ();
+    DBInterface& db_interface_;
+    DBObject &object_;
 };
 
 #endif /* DBOACTIVEDATASOURCESDBJOB_H_ */

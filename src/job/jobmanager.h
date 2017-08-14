@@ -39,7 +39,7 @@
 #include "configurable.h"
 
 class WorkerThread;
-class DBJob;
+//class DBJob;
 class Job;
 class JobManagerWidget;
 

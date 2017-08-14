@@ -52,6 +52,9 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+public slots:
+    void postProcessingDoneSlot ();
+
 private slots:
     /// @brief Called when database was opened
     void databaseOpenedSlot();
@@ -80,14 +83,12 @@ protected:
 
     ManagementWidget *management_widget_;
 
-    //static const unsigned int info_height_=200;
-
     QPushButton *start_button_;
-
-    //bool native_menu_;
 
     /// @brief Creates File menu
     void createMenus();
+
+    void initAfterStart ();
 
     /// @brief Called when application closes
     void closeEvent(QCloseEvent *event);

@@ -16,9 +16,9 @@
  */
 
 #include "boost/date_time/posix_time/posix_time.hpp"
-//#include <QProgressDialog>
-//#include <QCoreApplication>
-//#include <QApplication>
+#include <QMessageBox>
+#include <QThread>
+#include <QProgressDialog>
 
 #include "atsdb.h"
 #include "buffer.h"
@@ -41,13 +41,9 @@
 #include "metadbtable.h"
 #include "dbschemamanager.h"
 #include "dbschema.h"
-//#include "MySQLConConnection.h"
-//#include "SQLiteConnection.h"
 //#include "StructureDescriptionManager.h"
-//#include "DBSchemaManager.h"
-//#include "DBSchema.h"
-//#include "DBTable.h"
-//#include "DBTableColumn.h"
+#include "jobmanager.h"
+#include "dboactivedatasourcesdbjob.h"
 #include "dimension.h"
 #include "unit.h"
 #include "unitmanager.h"
@@ -131,13 +127,6 @@ void DBInterface::databaseOpened ()
         createPropertiesTable();
 
     loginf << "DBInterface: databaseOpened: post-processed " << isPostProcessed ();
-
-    if (!isPostProcessed ())
-    {
-        loginf << "DBInterface: databaseOpened: post-processing started";
-        // DO SE POST
-        setPostProcessed(true);
-    }
 
     emit databaseOpenedSignal();
 }
@@ -278,38 +267,36 @@ bool DBInterface::existsPropertiesTable ()
 ///**
 // * Gets SQL command for data sources list and packs the resulting buffer into a set, which is returned.
 // */
-//std::set<int> DBInterface::queryActiveSensorNumbers(const std::string &type)
-//{
-//    logdbg  << "DBInterface: queryActiveSensorNumbers: start";
+std::set<int> DBInterface::getActiveSensorNumbers(const DBObject &object)
+{
+    logdbg  << "DBInterface: queryActiveSensorNumbers: start";
 
-//    boost::mutex::scoped_lock l(mutex_);
+    boost::mutex::scoped_lock l(connection_mutex_);
 
-//    assert (DBObjectManager::getInstance().existsDBObject(type));
-//    assert (DBObjectManager::getInstance().getDBObject(type)->hasCurrentDataSource());
+    assert (object.hasCurrentDataSource());
 
-//    std::set<int> data;
+    std::string local_key_dbovar = object.currentDataSource().localKey();
+    assert (object.hasVariable(local_key_dbovar));
+    const DBTableColumn& local_key_col = object.variable(local_key_dbovar).currentDBColumn();
 
-//    DBCommand *command = sql_generator_->getDistinctDataSourcesSelectCommand(type);
+    std::set<int> data;
 
-//    DBResult *result = connection_->execute(command);
+    std::shared_ptr<DBCommand> command = sql_generator_.getDistinctDataSourcesSelectCommand(object);
 
-//    assert (result->containsData());
+    std::shared_ptr<DBResult> result = current_connection_->execute(*command);
 
-//    // TODO FIXME
-//    assert (false);
+    assert (result->containsData());
 
-////    Buffer *buffer = result->getBuffer();
-////    for (unsigned int cnt=0; cnt < buffer->getSize(); cnt++)
-////    {
-////        int tmp = *((int*) result->getBuffer()->get(cnt,0));
-////        data.insert (tmp);
-////    }
+    std::shared_ptr<Buffer> buffer = result->buffer();
+    for (unsigned int cnt=0; cnt < buffer->size(); cnt++)
+    {
+        int tmp = buffer->getInt(local_key_col.name()).get(cnt);
+        data.insert (tmp);
+    }
 
-////    delete result;
-
-//    logdbg << "DBInterface: queryActiveSensorNumbers: done";
-//    return data;
-//}
+    logdbg << "DBInterface: queryActiveSensorNumbers: done";
+    return data;
+}
 
 ///**
 // * Gets SQL command, executes it and returns resulting buffer.
@@ -649,6 +636,69 @@ void DBInterface::setPostProcessed (bool value)
 {
     setProperty("postProcessed", value ? "Yes" : "Nope");
 }
+
+void DBInterface::postProcess ()
+{
+    loginf << "DBInterface: postProcess: creating active data sources jobs";
+
+    for (auto obj_it : ATSDB::instance().objectManager().objects())
+    {
+        if (!obj_it.second->hasData())
+            continue;
+
+        DBOActiveDataSourcesDBJob *job = new DBOActiveDataSourcesDBJob (ATSDB::instance().interface(), *obj_it.second);
+
+        std::shared_ptr<Job> shared_job = std::shared_ptr<Job> (job);
+        connect (job, SIGNAL(doneSignal()), this, SLOT(postProcessingJobDoneSlot()), Qt::QueuedConnection);
+        JobManager::instance().addDBJob(shared_job);
+        postprocess_jobs_.push_back(shared_job);
+    }
+
+    assert (!postprocess_dialog_);
+    postprocess_dialog_ = new QProgressDialog (tr("Post-Processing"), tr(""), 0, static_cast<int>(postprocess_jobs_.size()));
+    postprocess_dialog_->setCancelButton(0);
+    postprocess_dialog_->setWindowModality(Qt::ApplicationModal);
+    postprocess_dialog_->show();
+
+    postprocess_job_num_ = postprocess_jobs_.size();
+}
+
+void DBInterface::postProcessingJobDoneSlot()
+{
+    loginf << "DBInterface: postProcessingJobDoneSlot: " << postprocess_jobs_.size() << " active jobs" ;
+
+    Job* job_sender = static_cast <Job*> (QObject::sender());
+    assert (job_sender);
+    assert (postprocess_jobs_.size() > 0);
+    assert (postprocess_dialog_);
+
+    bool found;
+    for (auto job_it = postprocess_jobs_.begin(); job_it != postprocess_jobs_.end(); job_it++)
+    {
+        Job *current = job_it->get();
+        if (current == job_sender)
+        {
+            postprocess_jobs_.erase(job_it);
+            found = true;
+            break;
+        }
+    }
+    assert (found);
+
+    if (postprocess_jobs_.size() == 0)
+    {
+        loginf << "DBInterface: postProcessingJobDoneSlot: done";
+        setPostProcessed(true);
+
+        delete postprocess_dialog_;
+        postprocess_dialog_=nullptr;
+
+        emit postProcessingDoneSignal();
+    }
+    else
+        postprocess_dialog_->setValue(postprocess_job_num_-postprocess_jobs_.size());
+}
+
 
 //DBResult *DBInterface::count (const std::string &type, unsigned int sensor_number)
 //{

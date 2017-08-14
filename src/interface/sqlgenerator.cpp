@@ -125,25 +125,25 @@ std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand (const DBOb
     return getSelectCommand (meta, columns);
 }
 
-//DBCommand *SQLGenerator::getDistinctDataSourcesSelectCommand (const std::string &dbo_type)
-//{
-//    // "SELECT DISTINCT sensor_number__value FROM " << table_names_.at(DBO_PLOTS) << " WHERE mapped_position__present = '1' AND sensor_number__present = '1' ORDER BY sensor_number__value;";
-//    //return distinct_radar_numbers_statement_;
+std::shared_ptr<DBCommand> SQLGenerator::getDistinctDataSourcesSelectCommand (const DBObject &object)
+{
+    // "SELECT DISTINCT sensor_number__value FROM " << table_names_.at(DBO_PLOTS) << " WHERE mapped_position__present = '1' AND sensor_number__present = '1' ORDER BY sensor_number__value;";
+    //return distinct_radar_numbers_statement_;
 
-//    assert (ATSDB::getInstance().existsDBObject(dbo_type));
-//    assert (ATSDB::getInstance().getDBObject(dbo_type)->hasCurrentDataSource());
+    assert (object.hasCurrentDataSource());
 
-//    DBODataSourceDefinition *ds = ATSDB::getInstance().getDBObject(dbo_type)->getCurrentDataSource ();
-//    std::string sensor_id = ds->getLocalKey();
+    std::string local_key_dbovar = object.currentDataSource().localKey();
+    assert (object.hasVariable(local_key_dbovar));
+    const DBTableColumn& local_key_col = object.variable(local_key_dbovar).currentDBColumn();
 
-//    MetaDBTable *table = ATSDB::getInstance().getDBObject(dbo_type)->getCurrentMetaTable ();
+    std::vector <const DBTableColumn*> columns;
+    columns.push_back(&local_key_col);
 
-//    PropertyList list;
-//    list.addProperty (sensor_id, PropertyDataType::INT);
+    PropertyList list;
+    list.addProperty (local_key_col.name(), PropertyDataType::INT);
 
-//    std::vector <std::string> filtered_variable_names; // what
-//    return getSelectCommand (list, table, filtered_variable_names, "", sensor_id, "", true);
-//}
+    return getSelectCommand (object.currentMetaTable(), columns, true);
+}
 
 //DBCommand *SQLGenerator::getCountStatement (const std::string &dbo_type, unsigned int sensor_number)
 //{
@@ -890,7 +890,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const MetaDBTable &me
     return command;
 }
 
-std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const MetaDBTable &meta_table, std::vector <const DBTableColumn*> columns)
+std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const MetaDBTable &meta_table, std::vector <const DBTableColumn*> columns, bool distinct)
 {
     logdbg  << "SQLGenerator: getSelectCommand: meta table " << meta_table.name() << " db columns size " << columns.size();
     assert (columns.size() != 0);
@@ -900,6 +900,9 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const MetaDBTable &me
     std::stringstream ss;
 
     ss << "SELECT ";
+
+    if (distinct)
+        ss << "DISTINCT ";
 
     std::vector <std::string> used_tables;
 

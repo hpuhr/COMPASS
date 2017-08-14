@@ -37,7 +37,7 @@
 class DBOVariable;
 class PropertyList;
 class MetaDBTable;
-class ActiveSourcesObserver;
+//class ActiveSourcesObserver;
 
 /**
  * @brief Definition of a meta table in a schema in a DBObject
@@ -109,7 +109,6 @@ class DBObjectWidget;
 class DBObjectInfoWidget;
 class Buffer;
 class Job;
-class DBJob;
 class DBOReadDBJob;
 class FinalizeDBOReadJob;
 class DBOVariableSet;
@@ -280,7 +279,7 @@ protected:
 
     std::map<int, std::string> data_sources_;
     /// Container with all observers of the active data sources information
-    std::vector <ActiveSourcesObserver *> active_sources_observers_;
+    //std::vector <ActiveSourcesObserver *> active_sources_observers_;
     /// Container with all active data sources
     std::set<int> active_data_sources_;
 

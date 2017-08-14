@@ -141,20 +141,40 @@ void MainWindow::databaseOpenedSlot()
     assert (start_button_);
     start_button_->setDisabled (false);
 
-//    main_widget_ = new MFImport::MainWidget ();
-//    assert (main_widget_);
-//    widget_stack_->addWidget (main_widget_);
+    //    main_widget_ = new MFImport::MainWidget ();
+    //    assert (main_widget_);
+    //    widget_stack_->addWidget (main_widget_);
 }
 
 void MainWindow::startSlot ()
 {
     logdbg  << "MainWindow: startSlot";
 
+    start_button_->setDisabled (true);
+
+    if (!ATSDB::instance().interface().isPostProcessed ())
+    {
+        loginf << "MainWindow: startSlot: post-processing started";
+        // DO SE POST
+        connect (&ATSDB::instance().interface(), SIGNAL(postProcessingDoneSignal()), this, SLOT(postProcessingDoneSlot()));
+        ATSDB::instance().interface().postProcess();
+    }
+    else
+        initAfterStart ();
+}
+
+void MainWindow::postProcessingDoneSlot ()
+{
+    loginf << "MainWindow: postProcessingDoneSlot: done";
+    initAfterStart ();
+}
+
+void MainWindow::initAfterStart ()
+{
     assert (management_widget_);
     tab_widget_->addTab (management_widget_, "Management");
 
     ATSDB::instance().viewManager().init(tab_widget_);
-    start_button_->setDisabled (true);
 
     // TODO lock stuff
     tab_widget_->setCurrentIndex(1);
@@ -203,13 +223,13 @@ void MainWindow::keyPressEvent ( QKeyEvent * event )
 {
     logdbg  << "MainWindow: keyPressEvent '" << event->text().toStdString() << "'";
 
-//    if (event->modifiers()  & Qt::ControlModifier)
-//    {
-//        if (event->key() == Qt::Key_U)
-//        {
-//            unlockSchemaGui();
-//        }
-//    }
+    //    if (event->modifiers()  & Qt::ControlModifier)
+    //    {
+    //        if (event->key() == Qt::Key_U)
+    //        {
+    //            unlockSchemaGui();
+    //        }
+    //    }
 }
 
 //}

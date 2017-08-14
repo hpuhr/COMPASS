@@ -161,15 +161,14 @@ set ( atsdb_HDRS
     src/job/jobmanagerwidget.h
     src/job/dboreaddbjob.h
     src/job/buffercsvexportjob.h
-    #        src/job/dboactivedatasourcesdbjob.h
+    src/job/dboactivedatasourcesdbjob.h
     #        src/job/dbovariabledistinctstatisticsdbjob.h
-    # src/job/dbovariableminmaxdbjob.h
     src/job/finalizedboreadjob.h
     #        src/job/dbocountdbjob.h
     #        src/job/dboinfodbjob.h
     #        src/job/updatebufferdbjob.h
     #        src/job/writebufferdbjob.h
-    #        src/job/postprocessdbjob.h
+    #src/job/postprocessdbjob.h
     #        src/job/transformationjob.h
     src/object/dbovariable.h
     src/object/dbovariableset.h
@@ -303,9 +302,8 @@ set ( atsdb_SRCS
     src/interface/dbinterfacewidget.cpp
     src/interface/dbinterfaceinfowidget.cpp
     src/interface/sqlgenerator.cpp
-    #        src/job/dboactivedatasourcesdbjob.cpp
+    src/job/dboactivedatasourcesdbjob.cpp
     #        src/job/dbovariabledistinctstatisticsdbjob.cpp
-    # src/job/dbovariableminmaxdbjob.cpp
     #        src/job/dbocountdbjob.cpp
     src/job/dboreaddbjob.cpp
     #        src/job/dboinfodbjob.cpp
@@ -316,7 +314,7 @@ set ( atsdb_SRCS
     src/job/buffercsvexportjob.cpp
     #        src/job/updatebufferdbjob.cpp
     #        src/job/writebufferdbjob.cpp
-    #        src/job/postprocessdbjob.cpp
+    #src/job/postprocessdbjob.cpp
     #        src/job/transformationjob.cpp
     src/object/dbobject.cpp
     src/object/dbobjectwidget.cpp
