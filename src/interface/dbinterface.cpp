@@ -53,10 +53,8 @@
 #include "unitmanager.h"
 #include "dbtableinfo.h"
 
-#include "data.h"
 #include "string.h"
 
-using namespace Utils::Data;
 using namespace Utils;
 
 

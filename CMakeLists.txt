@@ -82,14 +82,11 @@ include_directories (
     src
     src/buffer
     src/client
-    src/computation
     src/config
     src/command
     src/connection
     src/datasource
-    src/gui
     src/interface
-    src/mem
     src/object
     src/util
     src/filter
@@ -99,10 +96,8 @@ include_directories (
     src/polygon/shapefile
     src/projection
     src/property
-    src/result
     src/schema
     src/struct
-    src/transform
     src/variable
     src/view
     src/view/viewbase
@@ -160,15 +155,6 @@ set ( atsdb_HDRS
     src/interface/dbinterfacewidget.h
     src/interface/dbinterfaceinfowidget.h
     src/interface/sqlgenerator.h
-    # src/gui/qcollapsablewidget.h
-    #        src/gui/workerthreadwidget.h
-    #        src/gui/workfloweditwidget.h
-    #        src/gui/workfloweditdialog.h
-    #        src/gui/workflowsettingseditdialog.h
-    #        src/gui/computationeditdialog.h
-    #        src/gui/transformationeditdialog.h
-    #        src/gui/transformationvariableeditdialog.h
-    #        src/gui/filtereditdialog.h
     src/job/job.h
     src/job/joborderer.h
     src/job/jobmanager.h
@@ -222,8 +208,6 @@ set ( atsdb_HDRS
     #        src/projection/projectionmanagerwidget.h
     src/property/property.h
     src/property/propertylist.h
-    #        src/result/bufferset.h
-    #        src/result/bufferreceiver.h
     src/struct/structuredescription.h
     ##        src/struct/structuredescriptionplot.h
     ##        src/struct/structuredescriptionsystemtrack.h
@@ -245,21 +229,6 @@ set ( atsdb_HDRS
     src/schema/dbtablewidget.h
     src/schema/metadbtablewidget.h
     src/unit/unitselectionwidget.h
-    #        src/computation/workflow.h
-    #        src/computation/computation.h
-    #        src/computation/computationelement.h
-    #        src/computation/computationpipeline.h
-    #        src/computation/computationpipelinequeue.h
-    #        src/computation/transformationbase.h
-    #        src/computation/transformation.h
-    #        src/computation/transformationvariable.h
-    #        src/computation/transformationfactory.h
-    #        src/transform/calculatehistogram.h
-    #        src/transform/calculatehistogram2d.h
-    #        src/transform/calculateposition.h
-    #        src/transform/calculateposition2d.h
-    #        src/transform/calculatelines.h
-    #        src/transform/calculatestyle.h
     src/view/viewmanager.h
     src/view/viewmanagerwidget.h
     src/view/viewcontainer.h
@@ -293,7 +262,6 @@ set ( atsdb_HDRS
     src/unit/dimension.h
     src/util/config.h
     src/util/global.h
-    #        src/util/data.h
     src/util/number.h
     src/util/stringconv.h
     src/util/singleton.h
@@ -331,15 +299,6 @@ set ( atsdb_SRCS
     src/filter/sensorfilterwidget.cpp
     src/filter/filtereditwidget.cpp
     src/filter/filtergeneratorwidget.cpp
-    #src/gui/qcollapsablewidget.cpp
-    #        src/gui/workerthreadwidget.cpp
-    #        src/gui/workfloweditwidget.cpp
-    #        src/gui/workfloweditdialog.cpp
-    #        src/gui/workflowsettingseditdialog.cpp
-    #        src/gui/computationeditdialog.cpp
-    #        src/gui/transformationeditdialog.cpp
-    #        src/gui/transformationvariableeditdialog.cpp
-    #        src/gui/filtereditdialog.cpp
     src/interface/dbinterface.cpp
     src/interface/dbinterfacewidget.cpp
     src/interface/dbinterfaceinfowidget.cpp
@@ -389,7 +348,6 @@ set ( atsdb_SRCS
     #        src/projection/projectionmanager.cpp
     #        src/projection/projectionmanagerwidget.cpp
     src/property/property.cpp
-    #        src/result/bufferset.cpp
     src/schema/dbschemawidget.cpp
     src/schema/dbtablewidget.cpp
     src/schema/dbtablecolumncombobox.cpp
@@ -405,32 +363,13 @@ set ( atsdb_SRCS
     #        src/struct/structurereader.cpp
     src/struct/structuredescriptionmanager.cpp
     src/struct/structurevariable.cpp
-    #src/thread/thread.cpp
-    #src/thread/workerthread.cpp
-    #        src/computation/workflow.cpp
-    #        src/computation/computation.cpp
-    #        src/computation/computationelement.cpp
-    #        src/computation/computationpipeline.cpp
-    #        src/computation/computationpipelinequeue.cpp
-    #        src/computation/transformationbase.cpp
-    #        src/computation/transformation.cpp
-    #        src/computation/transformationvariable.cpp
-    #        src/computation/transformationfactory.cpp
-    #        src/transform/calculatehistogram.cpp
-    #        src/transform/calculatehistogram2d.cpp
-    #        src/transform/calculateposition.cpp
-    #        src/transform/calculateposition2d.cpp
-    #        src/transform/calculatelines.cpp
-    #        src/transform/calculatestyle.cpp
     src/unit/dimension.cpp
     src/unit/unitselectionwidget.cpp
     src/unit/unitmanager.cpp
     src/util/config.cpp
     src/util/logger.cpp
-    #        src/util/data.cpp
     src/util/number.cpp
     src/util/stringconv.cpp
-    #src/util/stringrepresentation.cpp
     src/view/viewmanager.cpp
     src/view/viewmanagerwidget.cpp
     src/view/viewcontainer.cpp
@@ -460,14 +399,6 @@ set ( atsdb_SRCS
 #    src/view/viewbase/dbview.cpp
 #    src/view/viewbase/dbviewwidget.cpp
     )
-
-#set ( atsdb_UI
-    #       src/gui/filtereditdialogbase.ui
-    #       src/gui/computationeditdialogbase.ui
-    #       src/gui/transformationeditdialogbase.ui
-    #       src/gui/transformationvariableeditdialogbase.ui
-    #       src/gui/workflowsettingseditdialogbase.ui
-#    )
 
 set ( client_SRCS
     src/client/main.cpp

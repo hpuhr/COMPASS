@@ -33,7 +33,6 @@
 #include "mysqlppconnectionwidget.h"
 #include "mysqlppconnection.h"
 #include "dbtableinfo.h"
-#include "data.h"
 #include "stringconv.h"
 #include "mysqlserver.h"
 
@@ -41,8 +40,6 @@
 #include <QMessageBox>
 
 using namespace Utils;
-using namespace Utils::Data;
-
 
 MySQLppConnection::MySQLppConnection(const std::string &class_id, const std::string &instance_id, DBInterface *interface)
     : DBConnection (class_id, instance_id, interface), interface_(*interface), connected_server_(nullptr), connection_(mysqlpp::Connection (false)),

@@ -26,7 +26,6 @@
 
 #include "buffer.h"
 #include "logger.h"
-#include "data.h"
 #include "string.h"
 
 unsigned int Buffer::ids_ = 0;

@@ -125,18 +125,6 @@ public:
     ///@brief Updates data records for a DBObject, delete buffer after execution
     //void update (Buffer *data);
 
-    ///@brief Clears previous result and start reading of data for all existing DBOs.
-    //void startReading (BufferReceiver *receiver, DBOVariableSet read_list);
-    //void startReading (BufferReceiver *receiver, const std::string &dbo_type, DBOVariableSet read_list, std::string custom_filter_clause,
-    //        DBOVariable *order);
-    ///@brief Returns flag indicating if reading of data is done.
-    //bool isReadingDone ();
-
-    ///@brief Returns container with all defined data sources, DBO type -> data sources
-//    std::map <std::string, std::map<int, std::string> > &getAllDataSources () { return data_sources_; }
-//    std::map <std::pair<unsigned char, unsigned char>, DataSource* > &getDataSourceInstances (const std::string &dbo_type)
-//            { assert (data_sources_instances_.find(dbo_type) != data_sources_instances_.end()); return data_sources_instances_[dbo_type]; }
-
     /// @brief Return if a DBObject has information about its active data sources
     //bool hasActiveDataSourcesInfo (const std::string &dbo_type);
     /// @brief Creates information about a DBObject's active data sources
@@ -160,9 +148,6 @@ public:
 //            std::vector<unsigned int> ids, DBOVariableSet read_list, bool use_filters, std::string order_by_variable,
 //            bool ascending, unsigned int limit_min=0, unsigned int limit_max=0, bool finalize=true);
 
-//    void getCount (JobOrderer *orderer, boost::function<void (Job*)> done_function,
-//            boost::function<void (Job*)> obsolete_function, const std::string &dbo_type, unsigned int sensor_number);
-
 //    void getDistinctStatistics (JobOrderer *orderer, boost::function<void (Job*)> done_function,
 //            boost::function<void (Job*)> obsolete_function, const std::string &dbo_type, DBOVariable *variable,
 //            unsigned int sensor_number);
@@ -170,29 +155,10 @@ public:
 //    ///@brief Starts the post-processing.
     //void postProcess (JobOrderer *orderer, boost::function<void(Job*)> done, boost::function<void(Job*)> obsolete);
 
-    ///@brief Sets if data gets exported
-    //void setExportActive (bool active);
-    ///@brief Returns if data gets exported
-    //bool getExportActive ();
-
     /// @brief Callback function for post-processing job done
 //    void postProcessingDone( Job *job );
 //    void activeDataSourcesDone( Job *job );
 //    void minMaxDone( Job *job );
-//    /// @brief Callback function for main reading job done
-//    void readDBODone( Job *job );
-//    /// @brief Callback function for main reading job done
-//    void readDBOIntermediate( Job *job, Buffer *buffer );
-//    /// @brief Callback function for finalizing of main reading job done
-//    void finalizeReadDBODone( Job *job );
-
-//    /// @brief Callback function for update job done
-//    void updateDBODone ( Job *job );
-//    void updateDBOAborted ( Job *job );
-
-//    void abortFinalizeReadDBODone( Job *job );
-//    /// @brief Callback function for aborted jobs
-//    void jobAborted( Job *job );
 
 //    void deleteAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string filter);
 //    void updateAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string new_value, std::string filter);
@@ -207,9 +173,6 @@ public:
 protected:
     bool initialized_;
 
-    /// Flag indicating if data gets exported
-    //bool export_active_;
-
     /// DB interface, encapsulating all database functionality.
     DBInterface *db_interface_;
     DBObjectManager *dbo_manager_;
@@ -219,24 +182,8 @@ protected:
     /// Structure reader, can read data from defined C structs.
     //StructureReader *struct_reader_;
     /// Map containg all existing data sources (DBO type -> data source number, data source name).
-//    std::map <std::string, std::map<int, std::string> > data_sources_;
-//    std::map <std::string, std::map <std::pair<unsigned char, unsigned char>, DataSource* > > data_sources_instances_;
-
-    /// Container with all current read jobs (one per loaded DBObject)
-    //std::vector <DBOReadDBJob*> read_jobs_;
-//    boost::mutex read_jobs_mutex_;
-//    std::map <DBOReadDBJob*, BufferReceiver*> dbo_read_jobs_;
-//    boost::mutex finalize_jobs_mutex_;
-//    std::map <FinalizeDBOReadJob*, BufferReceiver*> dbo_finalize_jobs_;
-
-    //std::vector <std::string> databases_;
 
     virtual void checkSubConfigurables ();
-
-    ///@brief Quits all reading processes.
-    //void quitReading ();
-
-    //void buildDatabases ();
 
     ///@brief Generates minimum and maximum information from previous post-processing.
     //void loadMinMaxValues ();
@@ -244,7 +191,6 @@ protected:
     //void loadActiveDataSources ();
 
 //    void testUpdate ();
-//    void setJobsObsoleteForBufferReceiver (BufferReceiver *receiver);
 
     ///@brief Constructor.
     ATSDB();
@@ -256,7 +202,6 @@ public:
         static ATSDB instance;
         return instance;
     }
-    //unsigned int getNumJobsForBufferReceiver (BufferReceiver *receiver);
 };
 
 #endif /* ATSDB_H */

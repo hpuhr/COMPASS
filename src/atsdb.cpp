@@ -24,10 +24,7 @@
 
 #include "atsdb.h"
 #include "config.h"
-//#include "Buffer.h"
-//#include "BufferReceiver.h"
 //#include "DataSource.h"
-//#include "DBOVariable.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "dbtableinfo.h"
@@ -37,16 +34,11 @@
 #include "logger.h"
 #include "filtermanager.h"
 //#include "StructureReader.h"
-//#include "Job.h"
-//#include "PostProcessDBJob.h"
 //#include "WriteBufferDBJob.h"
-//#include "DBOReadDBJob.h"
 #include "jobmanager.h"
 //#include "DBOInfoDBJob.h"
-//#include "FinalizeDBOReadJob.h"
 //#include "DBOActiveDataSourcesDBJob.h"
 //#include "DBOVariableMinMaxDBJob.h"
-//#include "DBOCountDBJob.h"
 //#include "DBOVariableDistinctStatisticsDBJob.h"
 //#include "UpdateBufferDBJob.h"
 #include "viewmanager.h"
@@ -64,7 +56,6 @@ using namespace std;
 ATSDB::ATSDB()
  : Configurable ("ATSDB", "ATSDB0", 0, "conf/atsdb.xml"), initialized_(false), db_interface_(nullptr), dbo_manager_(nullptr), db_schema_manager_ (nullptr),
    filter_manager_(nullptr), view_manager_(nullptr)
-//: export_active_(false), dbo_reads_active_(0)
 {
     logdbg  << "ATSDB: constructor: start";
 
@@ -111,12 +102,6 @@ ATSDB::~ATSDB()
     assert (!db_interface_);
     assert (!filter_manager_);
     assert (!view_manager_);
-
-//    if (dbo_read_jobs_.size() > 0)
-//        logerr << "ATSDB: destructor: unfinished dbo read jobs " << dbo_read_jobs_.size();
-
-//    if (dbo_finalize_jobs_.size() > 0)
-//        logerr << "ATSDB: destructor: unfinished dbo finalize jobs " << dbo_finalize_jobs_.size();
 
 //    std::map <std::string, std::map <std::pair<unsigned char, unsigned char>, DataSource* > >::iterator it;
 //    for (it = data_sources_instances_.begin(); it != data_sources_instances_.end(); it++)
@@ -248,24 +233,6 @@ bool ATSDB::ready ()
     return db_interface_->ready();
 }
 
-/**
- * Initializes the DB, post-processes if required, builsd minimum, maximum, data sources and active data sources information. Sets
- * state to DB_STATE_WRITE if a new database was created or DB_STATE_READ_IDLE if an existing one was opened. Sets db_opened_
- * on success.
- *
- * \param info DBConnectionInfo pointer defining what database system and parameters to use
- */
-//void ATSDB::connect (DBConnectionInfo *info)
-//{
-//    logdbg  << "ATSDB: connect: start";
-
-//    assert (info);
-
-//    loginf  << "ATSDB: connect: initialising connection";
-//    db_interface_->initConnection(info);
-
-//    //buildDatabases ();
-//}
 
 //void ATSDB::open (std::string database_name)
 //{
@@ -370,36 +337,6 @@ void ATSDB::shutdown ()
     logdbg  << "ATSDB: shutdown: end";
 }
 
-//bool ATSDB::hasDataSources (const std::string &type)
-//{
-//    return data_sources_.find (type) != data_sources_.end();
-//}
-
-//const std::map<int, std::string> &ATSDB::getDataSources (const std::string &type)
-//{
-//    assert (hasDataSources(type));
-//    return data_sources_[type];
-//}
-
-///**
-// * If not found, returns string "Unknown".
-// */
-//std::string ATSDB::getNameOfSensor (const std::string &type, unsigned int num)
-//{
-//    if (data_sources_.find (type) != data_sources_.end())
-//    {
-//        std::map<int, std::string> &sources = data_sources_[type];
-
-//        if (sources.find (num) != sources.end())
-//        {
-//            logdbg  << "ATSDB: getNameOfSensor: type " << type << " num " << num << " name " << sources [num];
-//            return sources [num];
-//        }
-//    }
-
-//    return std::string("Unknown");
-//}
-
 //bool ATSDB::hasActiveDataSourcesInfo (const std::string &type)
 //{
 //    //    loginf << "ATSDB: hasActiveDataSourcesInfo: " << type << " info " << active_data_sources_info_exists_ [type];
@@ -418,121 +355,6 @@ void ATSDB::shutdown ()
 ////            boost::bind( &ATSDB::jobAborted, this, _1) , db_interface_, type);
 //}
 
-///**
-// * Uses state_mutex_ lock, calls quitReading if previous reading process is active. Clears result and read DBO todos, adds loadable
-// * DBOs to todos. Assumes state DB_STATE_READ_IDLE, sets state to DB_STATE_READ_WORKING.
-// *
-// * \exception std::runtime_error if called in wrong state
-// */
-//void ATSDB::startReading (BufferReceiver *receiver, DBOVariableSet read_list)
-//{
-//    loginf  << "ATSDB: startReading: start";
-
-//    assert (receiver);
-
-//    setJobsObsoleteForBufferReceiver (receiver);
-
-//    while (1)
-//    {
-//        unsigned int num_jobs = getNumJobsForBufferReceiver(receiver);
-
-//        if (num_jobs == 0)
-//            break;
-
-//        loginf << "ATSDB: startReading: waiting for " << num_jobs << " job(s) to finish";
-//        //sleep(1); // sync issues when not
-//        sleep(1);
-//    }
-
-//    db_interface_->clearResult();
-
-//    const std::map <std::string, DBObject*> &objects = DBObjectManager::getInstance().getDBObjects ();
-//    std::map <std::string, DBObject*>::const_iterator it;
-
-//    for (it = objects.begin(); it != objects.end(); it++)
-//    {
-//        if (it->second->isLoadable() && db_interface_->exists(it->first) && FilterManager::getInstance().getLoad(it->first))
-//        {
-//            loginf << "ATSDB: startReading: creating read job for type " << it->second->getName();
-//            // TODO
-//            assert (false);
-////            DBOReadDBJob *read_dbo = new DBOReadDBJob (this, boost::bind( &ATSDB::readDBOIntermediate, this, _1, _2),
-////                    boost::bind( &ATSDB::readDBODone, this, _1),
-////                    boost::bind( &ATSDB::jobAborted, this, _1) , db_interface_, it->first, read_list);
-////            boost::mutex::scoped_lock l(read_jobs_mutex_);
-////            dbo_read_jobs_ [read_dbo] = receiver;
-//        }
-//    }
-
-//    logdbg  << "ATSDB: startReading: done";
-//}
-
-//void ATSDB::startReading (BufferReceiver *receiver, const std::string &type, DBOVariableSet read_list, std::string custom_filter_clause,
-//        DBOVariable *order)
-//{
-//    logdbg  << "ATSDB: startReading: start";
-
-//    setJobsObsoleteForBufferReceiver (receiver);
-
-//    while (1)
-//    {
-//        unsigned int num_jobs = getNumJobsForBufferReceiver(receiver);
-
-//        if (num_jobs == 0)
-//            break;
-
-//        loginf << "ATSDB: startReading: waiting for " << num_jobs << " job(s) to finish";
-//        //sleep(1); // sync issues when not
-//        sleep(1);
-//    }
-
-//    db_interface_->clearResult();
-
-//    assert (DBObjectManager::getInstance().existsDBObject(type));
-//    DBObject *object = DBObjectManager::getInstance().getDBObject(type);
-
-
-//    if (object->isLoadable() && db_interface_->exists(type))
-//    {
-//        loginf << "ATSDB: startReading: creating read job for type " << object->getName();
-//        //TODO
-//        assert (false);
-////        DBOReadDBJob *read_dbo = new DBOReadDBJob (this, boost::bind( &ATSDB::readDBOIntermediate, this, _1, _2),
-////                boost::bind( &ATSDB::readDBODone, this, _1),
-////                boost::bind( &ATSDB::jobAborted, this, _1) , db_interface_, type, read_list,
-////                custom_filter_clause, order);
-////        boost::mutex::scoped_lock l(read_jobs_mutex_);
-////        dbo_read_jobs_ [read_dbo] = receiver;
-//    }
-
-//    logdbg  << "ATSDB: startReading: done";
-//}
-
-///**
-// * Should only be called if state_mutex_ lock is active. Clears output buffers and finishes all prepared statements.
-// *
-// * \exception std::runtime_error if called in wrong state
-// */
-//void ATSDB::quitReading ()
-//{
-//    logdbg  << "ATSDB: quitReading: start";
-
-//    //clearOutputBuffers ();
-
-//    const std::map <std::string, DBObject*> &dobs = DBObjectManager::getInstance().getDBObjects ();
-//    std::map <std::string, DBObject*>::const_iterator it;
-
-//    for (it = dobs.begin(); it != dobs.end(); it++)
-//    {
-//        if (!it->second->isMeta())
-//        {
-//            if (db_interface_->isPrepared(it->first))
-//                db_interface_->finalizeReadStatement(it->first);
-//        }
-//    }
-
-//    logdbg  << "ATSDB: quitReading: end";
-//}
 
 ////void ATSDB::buildMinMaxInfo (DBOVariable *var)
 ////{
@@ -567,14 +389,6 @@ void ATSDB::shutdown ()
 ////    assert (var->hasMinMaxInfo());
 ////    return var->getMaxString();
 ////}
-
-
-////bool ATSDB::error()
-////{
-////    //return (state_ == DB_STATE_ERROR);
-////    return false; //TODO
-////}
-
 
 ////void ATSDB::insert (const std::string &type, void *data)
 ////{
@@ -669,16 +483,6 @@ void ATSDB::shutdown ()
 ////            type, ids, read_list, use_filters, order_by_variable, ascending, limit_min, limit_max, finalize);
 //}
 
-//void ATSDB::getCount (JobOrderer *orderer, boost::function<void (Job*)> done_function,
-//        boost::function<void (Job*)> obsolete_function, const std::string &type, unsigned int sensor_number)
-//{
-//    //TODO
-//    assert (false);
-
-////    DBOCountDBJob *countjob = new DBOCountDBJob (orderer, done_function, obsolete_function, db_interface_,
-////            type, sensor_number);
-//}
-
 //void ATSDB::getDistinctStatistics (JobOrderer *orderer, boost::function<void (Job*)> done_function,
 //        boost::function<void (Job*)> obsolete_function, const std::string &type,
 //        DBOVariable *variable, unsigned int sensor_number)
@@ -688,12 +492,6 @@ void ATSDB::shutdown ()
 
 ////    DBOVariableDistinctStatisticsDBJob *distinct_job = new DBOVariableDistinctStatisticsDBJob (orderer, done_function,
 ////            obsolete_function, db_interface_, type, variable, sensor_number);
-//}
-
-//void ATSDB::buildDatabases ()
-//{
-//    assert (db_interface_);
-//    databases_ = db_interface_->getDatabases();
 //}
 
 //void ATSDB::loadMinMaxValues ()
@@ -744,26 +542,6 @@ void ATSDB::shutdown ()
 //    }
 //}
 
-//void ATSDB::setExportActive (bool active)
-//{
-//    export_active_=active;
-//}
-
-
-//bool ATSDB::getExportActive ()
-//{
-//    return export_active_;
-//}
-
-//void ATSDB::postProcessingDone( Job *job )
-//{
-//    logdbg << "ATSDB: postProcessingDone";
-
-//    //delete job; // is deleted in caller
-
-//    loadMinMaxValues ();
-//}
-
 //void ATSDB::activeDataSourcesDone( Job *job )
 //{
 //    assert (false);
@@ -791,94 +569,6 @@ void ATSDB::shutdown ()
 ////    delete minmaxjob;
 //}
 
-//void ATSDB::readDBODone( Job *job )
-//{
-//    assert (false);
-//    // TODO
-
-//    logdbg << "ATSDB: readDBODone";
-
-////    DBOReadDBJob *read_job = (DBOReadDBJob*) job;
-
-////    boost::mutex::scoped_lock l(read_jobs_mutex_);
-////    std::map <DBOReadDBJob*, BufferReceiver*>::iterator it;
-////    it = dbo_read_jobs_.find(read_job);
-////    assert (it != dbo_read_jobs_.end());
-
-////    logdbg << "ATSDB: readDBODone: deleting job " << read_job;
-
-////    BufferReceiver *receiver = it->second;
-////    dbo_read_jobs_.erase(it);
-////    l.unlock();
-
-////    unsigned int num_jobs = getNumJobsForBufferReceiver(receiver);
-////    logdbg << "ATSDB: readDBODone: num_jobs " << num_jobs;
-////    if (num_jobs == 0)
-////    {
-////        receiver->loadingDone();
-////    }
-
-////    delete read_job;
-//    logdbg << "ATSDB: readDBODone: done";
-//}
-
-//void ATSDB::readDBOIntermediate( Job *job, Buffer *buffer )
-//{
-//    assert (false);
-//    // TODO
-
-////    logdbg << "ATSDB: readDBOIntermidiate";
-
-////    assert (buffer);
-////    assert (buffer->dboType() != DBO_UNDEFINED);
-
-////    DBOReadDBJob *read_job = (DBOReadDBJob*) job;
-////    DBOVariableSet read_list = read_job->getReadList();
-
-////    boost::mutex::scoped_lock l(read_jobs_mutex_);
-////    std::map <DBOReadDBJob*, BufferReceiver*>::iterator it;
-////    it = dbo_read_jobs_.find(read_job);
-////    assert (it != dbo_read_jobs_.end());
-
-////    BufferReceiver *receiver = it->second;
-//////    loginf << "ATSDB: readDBOIntermediate: removing read job " << read_job;
-//////    dbo_read_jobs_.erase(read_job);
-////    l.unlock();
-
-////    FinalizeDBOReadJob *finalize_read_dbo = new FinalizeDBOReadJob (this, boost::bind( &ATSDB::finalizeReadDBODone, this, _1),
-////            boost::bind( &ATSDB::abortFinalizeReadDBODone, this, _1) , buffer, read_list);
-
-////    boost::mutex::scoped_lock l2(finalize_jobs_mutex_);
-////    dbo_finalize_jobs_ [finalize_read_dbo] = receiver;
-
-//    logdbg << "ATSDB: readDBOIntermidiate: done";
-//}
-
-//void ATSDB::finalizeReadDBODone( Job *job )
-//{
-//    assert (false);
-//    // TODO
-
-////    logdbg << "ATSDB: finalizeReadDBODone";
-
-////    FinalizeDBOReadJob *final_job = (FinalizeDBOReadJob*) job;
-////    Buffer *buffer = final_job->getBuffer();
-
-////    boost::mutex::scoped_lock l(finalize_jobs_mutex_);
-////    std::map <FinalizeDBOReadJob*, BufferReceiver*>::iterator it;
-////    it = dbo_finalize_jobs_.find(final_job);
-////    assert (it != dbo_finalize_jobs_.end());
-
-////    BufferReceiver *receiver = it->second;
-////    dbo_finalize_jobs_.erase (it);
-////    l.unlock();
-
-////    assert (receiver);
-////    receiver->receive(buffer);
-
-////    delete final_job;
-////    logdbg << "ATSDB: finalizeReadDBODone: done";
-//}
 
 //void ATSDB::updateDBODone( Job *job )
 //{
@@ -905,100 +595,6 @@ void ATSDB::shutdown ()
 ////    logdbg << "ATSDB: updateDBOAborted: done";
 ////    delete updatejob->getBuffer();
 ////    delete updatejob;
-//}
-
-//void ATSDB::abortFinalizeReadDBODone( Job *job )
-//{
-//    assert (false);
-//    // TODO
-
-////    logdbg << "ATSDB: abortFinalizeReadDBODone";
-
-////    FinalizeDBOReadJob *final_job = (FinalizeDBOReadJob*) job;
-////    delete final_job->getBuffer();
-////    delete job;
-
-////    logdbg << "ATSDB: abortFinalizeReadDBODone: done";
-//}
-
-//void ATSDB::jobAborted( Job *job )
-//{
-//    assert (false);
-//    // TODO
-
-//    logdbg << "ATSDB: jobAborted";
-
-////    DBOReadDBJob *read_job = (DBOReadDBJob*) job;
-
-////    boost::mutex::scoped_lock l(read_jobs_mutex_);
-////    std::map <DBOReadDBJob*, BufferReceiver*>::iterator it;
-////    it = dbo_read_jobs_.find(read_job);
-////    assert (it != dbo_read_jobs_.end());
-
-////    logdbg << "ATSDB: jobAborted: deleting job " << read_job;
-
-////    dbo_read_jobs_.erase(read_job);
-
-////    delete read_job;
-
-////    logdbg << "ATSDB: jobAborted: done";
-//}
-
-//void ATSDB::setJobsObsoleteForBufferReceiver (BufferReceiver *receiver)
-//{
-//    logdbg << "ATSDB: setJobsObsoleteForBufferReceiver";
-
-//    assert (false);
-//    // TODO
-
-////    boost::mutex::scoped_lock l(read_jobs_mutex_);
-////    std::map <DBOReadDBJob*, BufferReceiver*>::iterator it;
-////    for (it = dbo_read_jobs_.begin(); it != dbo_read_jobs_.end(); it++)
-////    {
-////        if (it->second == receiver)
-////            it->first->setObsolete();
-////    }
-////    l.unlock();
-
-////    boost::mutex::scoped_lock l2(finalize_jobs_mutex_);
-////    std::map <FinalizeDBOReadJob*, BufferReceiver*>::iterator it2;
-////    for (it2 = dbo_finalize_jobs_.begin(); it2 != dbo_finalize_jobs_.end(); it2++)
-////    {
-////        if (it2->second == receiver)
-////            it2->first->setObsolete();
-////    }
-////    logdbg << "ATSDB: setJobsObsoleteForBufferReceiver: done";
-//}
-
-//unsigned int ATSDB::getNumJobsForBufferReceiver (BufferReceiver *receiver)
-//{
-//    logdbg << "ATSDB: getNumJobsForBufferReceiver";
-//    unsigned int cnt=0;
-
-//    assert (false);
-//    // TODO
-
-////    boost::mutex::scoped_lock l(read_jobs_mutex_);
-
-////    std::map <DBOReadDBJob*, BufferReceiver*>::iterator it;
-////    for (it = dbo_read_jobs_.begin(); it != dbo_read_jobs_.end(); it++)
-////    {
-////        if (it->second == receiver)
-////            cnt++;
-////    }
-////    l.unlock();
-
-////    boost::mutex::scoped_lock l2(finalize_jobs_mutex_);
-
-////    std::map <FinalizeDBOReadJob*, BufferReceiver*>::iterator it2;
-////    for (it2 = dbo_finalize_jobs_.begin(); it2 != dbo_finalize_jobs_.end(); it2++)
-////    {
-////        if (it2->second == receiver)
-////            cnt++;
-////    }
-
-////    logdbg << "ATSDB: getNumJobsForBufferReceiver: done";
-//    return cnt;
 //}
 
 //void ATSDB::deleteAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string filter)
