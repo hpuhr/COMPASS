@@ -127,13 +127,24 @@ void DBInterface::databaseOpened ()
 {
     updateTableInfo();
 
+    if (!existsPropertiesTable())
+        createPropertiesTable();
+
+    loginf << "DBInterface: databaseOpened: post-processed " << isPostProcessed ();
+
+    if (!isPostProcessed ())
+    {
+        loginf << "DBInterface: databaseOpened: post-processing started";
+        // DO SE POST
+        setPostProcessed(true);
+    }
+
     emit databaseOpenedSignal();
 }
 
 void DBInterface::closeConnection ()
 {
     boost::mutex::scoped_lock l(connection_mutex_);
-    //connection_mutex_.unlock();
 
     logdbg  << "DBInterface: closeConnection";
     for (auto it : connections_)
@@ -157,17 +168,13 @@ void DBInterface::closeConnection ()
 
 void DBInterface::updateTableInfo ()
 {
+    boost::mutex::scoped_lock l(connection_mutex_);
     table_info_.clear();
 
     assert (current_connection_);
     table_info_ = current_connection_->getTableInfo();
 
     loginf << "DBInterface::updateTableInfo: found " << table_info_.size() << " tables";
-
-//    for (auto it : table_info_)
-//    {
-//        loginf << "DBInterface::updateTableInfo: table '" << it.first << "' with " << it.second.size() << " columns";
-//    }
 }
 
 DBInterfaceWidget *DBInterface::widget()
@@ -260,13 +267,13 @@ void DBInterface::checkSubConfigurables ()
 //    return existsTable (sql_generator_->getMinMaxTableName());
 //}
 
-///**
-// * Returns existsTable for table name.
-// */
-//bool DBInterface::existsPropertiesTable ()
-//{
-//    return existsTable (sql_generator_->getPropertiesTableName());
-//}
+/**
+ * Returns existsTable for table name.
+ */
+bool DBInterface::existsPropertiesTable ()
+{
+    return table_info_.count (sql_generator_.getPropertiesTableName()) == 1;
+}
 
 ///**
 // * Gets SQL command for data sources list and packs the resulting buffer into a set, which is returned.
@@ -378,79 +385,71 @@ size_t DBInterface::count (const std::string &table)
     return static_cast<size_t> (tmp);
 }
 
-//void DBInterface::insertProperty (std::string id, std::string value)
-//{
-//    boost::mutex::scoped_lock l(mutex_);
+void DBInterface::setProperty (const std::string& id, const std::string& value)
+{
+    boost::mutex::scoped_lock l(connection_mutex_);
+    assert (current_connection_);
 
-//    std::string str = sql_generator_->getInsertPropertyStatement(id, value);
-//    connection_->executeSQL (str);
-//}
+    std::string str = sql_generator_.getInsertPropertyStatement(id, value);
+    current_connection_->executeSQL (str);
+}
 
-//std::string DBInterface::getProperty (std::string id)
-//{
-//    logdbg  << "DBInterface: getProperty: start";
+std::string DBInterface::getProperty (const std::string& id)
+{
+    logdbg  << "DBInterface: getProperty: start";
 
-//    boost::mutex::scoped_lock l(mutex_);
+    boost::mutex::scoped_lock l(connection_mutex_);
 
-//    DBCommand command;
-//    command.setCommandString(sql_generator_->getSelectPropertyStatement(id));
+    DBCommand command;
+    command.set(sql_generator_.getSelectPropertyStatement(id));
 
-//    PropertyList list;
-//    list.addProperty("property", PropertyDataType::STRING);
-//    command.setPropertyList(list);
+    PropertyList list;
+    list.addProperty("property", PropertyDataType::STRING);
+    command.list(list);
 
-//    DBResult *result = connection_->execute(&command);
+    std::shared_ptr <DBResult> result = current_connection_->execute(command);
 
-//    assert (result->containsData());
+    assert (result->containsData());
 
-//    std::string text;
-//    Buffer *buffer = result->getBuffer();
+    std::string text;
+    std::shared_ptr <Buffer> buffer = result->buffer();
 
-//    // TODO FIXXME
-//    assert (false);
+    assert (buffer);
 
-////    assert (buffer);
-////    if (buffer->getFirstWrite())
-////        throw std::runtime_error ("DBInterface: getProperty: id "+id+" does not exist");
+    if (buffer->firstWrite())
+        throw std::invalid_argument ("DBInterface: getProperty: id "+id+" does not exist");
 
-////    text = *((std::string*) buffer->get(0,0));
+    assert (buffer->size() == 1);
 
-////    delete result;
+    text = buffer->getString("property").get(0);
 
-//    logdbg  << "DBInterface: getProperty: end id " << id << " value " << text;
-//    return text;
-//}
+    logdbg  << "DBInterface: getProperty: end id " << id << " value " << text;
+    return text;
+}
 
-//bool DBInterface::hasProperty (std::string id)
-//{
-//    logdbg  << "DBInterface: hasProperty: start";
+bool DBInterface::hasProperty (const std::string& id)
+{
+    logdbg  << "DBInterface: hasProperty: start";
 
-//    boost::mutex::scoped_lock l(mutex_);
+    boost::mutex::scoped_lock l(connection_mutex_);
 
-//    DBCommand command;
-//    command.setCommandString(sql_generator_->getSelectPropertyStatement(id));
+    DBCommand command;
+    command.set(sql_generator_.getSelectPropertyStatement(id));
 
-//    PropertyList list;
-//    list.addProperty("property", PropertyDataType::STRING);
-//    command.setPropertyList(list);
+    PropertyList list;
+    list.addProperty("property", PropertyDataType::STRING);
+    command.list(list);
 
-//    DBResult *result = connection_->execute(&command);
+    std::shared_ptr <DBResult> result = current_connection_->execute(command);
 
-//    assert (result->containsData());
+    assert (result->containsData());
 
-//    std::string text;
-//    Buffer *buffer = result->getBuffer();
+    std::shared_ptr <Buffer> buffer = result->buffer();
 
-//    assert (buffer);
-//    bool found = !buffer->firstWrite();
+    assert (buffer);
 
-//    delete buffer;
-
-//    delete result;
-
-//    logdbg  << "DBInterface: hasProperty: end id " << id << " found " << found;
-//    return found;
-//}
+    return buffer->size() == 1;
+}
 
 //void DBInterface::insertMinMax (std::string id, const std::string &type, std::string min, std::string max)
 //{
@@ -638,6 +637,18 @@ size_t DBInterface::count (const std::string &table)
 
 //    return min_max_values;
 //}
+
+bool DBInterface::isPostProcessed ()
+{
+    return hasProperty("postProcessed") && getProperty("postProcessed") == "Yes";
+
+    //return existsMinMaxTable ();// && existsPropertiesTable();
+}
+
+void DBInterface::setPostProcessed (bool value)
+{
+    setProperty("postProcessed", value ? "Yes" : "Nope");
+}
 
 //DBResult *DBInterface::count (const std::string &type, unsigned int sensor_number)
 //{
@@ -830,22 +841,20 @@ void DBInterface::finalizeReadStatement (const DBObject &dbobject)
     current_connection_->finalizeCommand();
 }
 
-//void DBInterface::createPropertiesTable ()
-//{
-//    assert (!existsPropertiesTable());
-//    boost::mutex::scoped_lock l(mutex_);
-//    connection_->executeSQL(sql_generator_->getTablePropertiesCreateStatement());
-//}
+void DBInterface::createPropertiesTable ()
+{
+    assert (!existsPropertiesTable());
+    connection_mutex_.lock();
+    current_connection_->executeSQL(sql_generator_.getTablePropertiesCreateStatement());
+    connection_mutex_.unlock();
+
+    updateTableInfo ();
+}
 //void DBInterface::createMinMaxTable ()
 //{
 //    assert (!existsMinMaxTable());
 //    boost::mutex::scoped_lock l(mutex_);
 //    connection_->executeSQL(sql_generator_->getTableMinMaxCreateStatement());
-//}
-
-//bool DBInterface::isPostProcessed ()
-//{
-//    return existsMinMaxTable ();// && existsPropertiesTable();
 //}
 
 ///**

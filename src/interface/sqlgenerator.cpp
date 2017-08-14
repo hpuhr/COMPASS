@@ -53,8 +53,8 @@ SQLGenerator::SQLGenerator(const DBInterface &db_interface)
 {
     db_type_set_=false;
 
-    table_name_properties_ = "aatc_properties";
-    table_name_minxmax_ = "aatc_minmax";
+    table_name_properties_ = "atsdb_properties";
+    table_name_minxmax_ = "atsdb_minmax";
 
     std::stringstream ss;
 
@@ -388,20 +388,22 @@ std::string SQLGenerator::getCountStatement (const std::string &table)
 
 //}
 
-//std::string SQLGenerator::getInsertPropertyStatement (std::string id, std::string value)
-//{
-//    stringstream ss;
-//    //ss << "INSERT INTO " << table_name_properties_ << " VALUES ('" << id <<"', '" << value <<"');";
-//    // REPLACE into table (id, name, age) values(1, "A", 19)
-//    ss << "REPLACE INTO " << table_name_properties_ << " VALUES ('" << id <<"', '" << value <<"');";
-//    return ss.str();
-//}
-//std::string SQLGenerator::getSelectPropertyStatement (std::string id)
-//{
-//    stringstream ss;
-//    ss << "SELECT value FROM " << table_name_properties_ << " WHERE id = '" << id << "'";
-//    return ss.str();
-//}
+std::string SQLGenerator::getInsertPropertyStatement (const std::string &id, const std::string &value)
+{
+    stringstream ss;
+    assert (id.size() < 255);
+    assert (value.size() < 1701);
+
+    // REPLACE into table (id, name, age) values(1, "A", 19)
+    ss << "REPLACE INTO " << table_name_properties_ << " VALUES ('" << id <<"', '" << value <<"');";
+    return ss.str();
+}
+std::string SQLGenerator::getSelectPropertyStatement (const std::string &id)
+{
+    stringstream ss;
+    ss << "SELECT value FROM " << table_name_properties_ << " WHERE id = '" << id << "'";
+    return ss.str();
+}
 
 //std::string SQLGenerator::getInsertMinMaxStatement (std::string id, const std::string &dbo_type, std::string min, std::string max)
 //{
@@ -428,10 +430,11 @@ std::string SQLGenerator::getCountStatement (const std::string &table)
 //{
 //    return table_minmax_create_statement_;
 //}
-//std::string SQLGenerator::getTablePropertiesCreateStatement ()
-//{
-//    return table_properties_create_statement_;
-//}
+
+std::string SQLGenerator::getTablePropertiesCreateStatement ()
+{
+    return table_properties_create_statement_;
+}
 
 //std::string SQLGenerator::createDBInsertStringBind(Buffer *buffer, std::string tablename)
 //{

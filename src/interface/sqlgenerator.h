@@ -75,8 +75,8 @@ public:
 
 //    /// @brief Returns minimum/maximum table name
 //    const std::string &getMinMaxTableName () { return table_name_minxmax_; }
-//    /// @brief Returns properties table name
-//    const std::string &getPropertiesTableName () { return table_name_properties_; }
+    /// @brief Returns properties table name
+    const std::string &getPropertiesTableName () { return table_name_properties_; }
 
 //    /// @brief Returns statement to check table existence
 //    std::string getContainsStatement (const std::string &table_name);
@@ -86,13 +86,13 @@ public:
 
 //    /// @brief Returns minimum/maximum table creation statement
 //    std::string getTableMinMaxCreateStatement ();
-//    /// @brief Returns properties table creation statement
-//    std::string getTablePropertiesCreateStatement ();
+    /// @brief Returns properties table creation statement
+    std::string getTablePropertiesCreateStatement ();
 
-//    /// @brief Returns property insertion statement
-//    std::string getInsertPropertyStatement (const std::string &id, const std::string &value);
-//    /// @brief Returns property selection statement
-//    std::string getSelectPropertyStatement (const std::string &id);
+    /// @brief Returns property insertion statement
+    std::string getInsertPropertyStatement (const std::string &id, const std::string &value);
+    /// @brief Returns property selection statement
+    std::string getSelectPropertyStatement (const std::string &id);
 
 //    /// @brief Returns minimum/maximum insertion statement
 //    std::string getInsertMinMaxStatement (const std::string &id, const std::string &dbo_type, std::string min, const std::string &max);

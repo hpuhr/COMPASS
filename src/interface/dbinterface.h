@@ -101,16 +101,16 @@ public:
 
     /// @brief Returns a container with all data sources for a DBO
     std::map <int, std::string> getDataSources (const DBObject &object);
-//    bool hasActiveDataSourcesInfo (const std::string &dbo_type);
-//    /// @brief Returns a set with all active data source ids for a DBO type
-//    std::set<int> getActiveSensorNumbers (const std::string &dbo_type);
+    //    bool hasActiveDataSourcesInfo (const std::string &dbo_type);
+    //    /// @brief Returns a set with all active data source ids for a DBO type
+    //    std::set<int> getActiveSensorNumbers (const std::string &dbo_type);
 
-//    /// @brief Writes a buffer to the database, into a table defined by write_table_names_ and DBO type
-//    void writeBuffer (Buffer *data);
-//    void writeBuffer (Buffer *data, std::string table_name);
-//    void updateBuffer (Buffer *data);
+    //    /// @brief Writes a buffer to the database, into a table defined by write_table_names_ and DBO type
+    //    void writeBuffer (Buffer *data);
+    //    void writeBuffer (Buffer *data, std::string table_name);
+    //    void updateBuffer (Buffer *data);
 
-//    /// @brief Prepares incremental read of DBO type
+    //    /// @brief Prepares incremental read of DBO type
     void prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause, std::vector <DBOVariable *> filtered_variables,
                       bool use_order=false, DBOVariable *order_variable=nullptr, bool use_order_ascending=false, const std::string &limit="");
     /// @brief Returns data chunk of DBO type
@@ -122,68 +122,67 @@ public:
 
     /// @brief Returns number of rows for a database table
     size_t count (const std::string &table);
-//    DBResult *count (const std::string &dbo_type, unsigned int sensor_number);
+    //    DBResult *count (const std::string &dbo_type, unsigned int sensor_number);
 
-//    /// @brief Creates the properties table
-//    void createPropertiesTable ();
-//    /// @brief Inserts a property
-//    void insertProperty (std::string id, std::string value);
-//    /// @brief Returns a property
-//    std::string getProperty (std::string id);
-//    bool hasProperty (std::string id);
+    /// @brief Returns if properties table exists
+    bool existsPropertiesTable ();
+    /// @brief Creates the properties table
+    void createPropertiesTable ();
+    /// @brief Inserts a property
+    void setProperty (const std::string& id, const std::string& value);
+    /// @brief Returns a property
+    std::string getProperty (const std::string& id);
+    bool hasProperty (const std::string& id);
 
-//    /// @brief Returns the minimum/maximum table
-//    void createMinMaxTable ();
-//    /// @brief Returns buffer with the minimum/maximum of a DBO variable
-//    Buffer *getMinMaxString (DBOVariable *var);
-//    /// (dbo type, id) -> (min, max)
-//    std::map <std::pair<std::string, std::string>, std::pair<std::string, std::string> > getMinMaxInfo ();
-//    /// @brief Inserts a minimum/maximum value pair
-//    void insertMinMax (std::string id, const std::string &dbo_type, std::string min, std::string max);
+    //    /// @brief Returns the minimum/maximum table
+    //    void createMinMaxTable ();
+    //    /// @brief Returns buffer with the minimum/maximum of a DBO variable
+    //    Buffer *getMinMaxString (DBOVariable *var);
+    //    /// (dbo type, id) -> (min, max)
+    //    std::map <std::pair<std::string, std::string>, std::pair<std::string, std::string> > getMinMaxInfo ();
+    //    /// @brief Inserts a minimum/maximum value pair
+    //    void insertMinMax (std::string id, const std::string &dbo_type, std::string min, std::string max);
 
-//    /// @brief Returns if database was post processed
-//    bool isPostProcessed ();
-//    /// @brief Post-processes the database
-//    //void postProcess ();
+    /// @brief Returns if database was post processed
+    bool isPostProcessed ();
+    void setPostProcessed (bool value);
 
-//    /// @brief Returns variable values for a number of DBO type elements
-//    Buffer *getInfo (const std::string &dbo_type, std::vector<unsigned int> ids, DBOVariableSet read_list, bool use_filters,
-//            std::string order_by_variable, bool ascending, unsigned int limit_min=0, unsigned int limit_max=0,
-//            bool finalize=0);
+    //    /// @brief Returns variable values for a number of DBO type elements
+    //    Buffer *getInfo (const std::string &dbo_type, std::vector<unsigned int> ids, DBOVariableSet read_list, bool use_filters,
+    //            std::string order_by_variable, bool ascending, unsigned int limit_min=0, unsigned int limit_max=0,
+    //            bool finalize=0);
 
-//    /// @brief Sets the context reference point as property
-//    void setContextReferencePoint (bool defined, float latitude, float longitude);
-//    /// @brief Returns if context reference point is defined
-//    bool getContextReferencePointDefined ();
-//    /// @brief Returns the context reference point
-//    std::pair<float, float> getContextReferencePoint ();
+    //    /// @brief Sets the context reference point as property
+    //    void setContextReferencePoint (bool defined, float latitude, float longitude);
+    //    /// @brief Returns if context reference point is defined
+    //    bool getContextReferencePointDefined ();
+    //    /// @brief Returns the context reference point
+    //    std::pair<float, float> getContextReferencePoint ();
 
-//    /// @brief Returns if minimum/maximum table exists
-//    bool existsMinMaxTable ();
-//    /// @brief Returns if properties table exists
-//    bool existsPropertiesTable ();
+    //    /// @brief Returns if minimum/maximum table exists
+    //    bool existsMinMaxTable ();
 
-//    /// @brief Deletes table content for given table name
-//    void clearTableContent (std::string table_name);
+    //    /// @brief Deletes table content for given table name
+    //    void clearTableContent (std::string table_name);
 
-//    /// @brief Returns minimum/maximum information for all columns in a table
-//    DBResult *queryMinMaxNormalForTable (std::string table);
-//    /// @brief Returns minimum/maximum information for a given column in a table
-//    DBResult *queryMinMaxForColumn (DBTableColumn *column, std::string table);
+    //    /// @brief Returns minimum/maximum information for all columns in a table
+    //    DBResult *queryMinMaxNormalForTable (std::string table);
+    //    /// @brief Returns minimum/maximum information for a given column in a table
+    //    DBResult *queryMinMaxForColumn (DBTableColumn *column, std::string table);
 
-//    DBResult *getDistinctStatistics (const std::string &dbo_type, DBOVariable *variable, unsigned int sensor_number);
+    //    DBResult *getDistinctStatistics (const std::string &dbo_type, DBOVariable *variable, unsigned int sensor_number);
 
-//    /// @brief Executes query and returns numbers for all active sensors
-//    std::set<int> queryActiveSensorNumbers (const std::string &dbo_type);
+    //    /// @brief Executes query and returns numbers for all active sensors
+    //    std::set<int> queryActiveSensorNumbers (const std::string &dbo_type);
 
-//    void deleteAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string filter);
-//    void updateAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string new_value, std::string filter);
+    //    void deleteAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string filter);
+    //    void updateAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string new_value, std::string filter);
 
-//    void getMinMaxOfVariable (DBOVariable *variable, std::string filter_condition, std::string &min, std::string &max);
-////    void getDistinctValues (DBOVariable *variable, std::string filter_condition, std::vector<std::string> &values);
+    //    void getMinMaxOfVariable (DBOVariable *variable, std::string filter_condition, std::string &min, std::string &max);
+    ////    void getDistinctValues (DBOVariable *variable, std::string filter_condition, std::vector<std::string> &values);
 
-//    Buffer *getTrackMatches (bool has_mode_a, unsigned int mode_a, bool has_ta, unsigned int ta, bool has_ti, std::string ti,
-//            bool has_tod, double tod_min, double tod_max);
+    //    Buffer *getTrackMatches (bool has_mode_a, unsigned int mode_a, bool has_ta, unsigned int ta, bool has_ti, std::string ti,
+    //            bool has_tod, double tod_min, double tod_max);
 
 protected:
     std::map <std::string, DBConnection*> connections_;
@@ -217,8 +216,8 @@ protected:
 
     virtual void checkSubConfigurables ();
 
-//    /// @brief Returns buffer with min/max data from another Buffer with the string contents. Delete returned buffer yourself.
-//    Buffer *createFromMinMaxStringBuffer (Buffer *string_buffer, PropertyDataType data_type);
+    //    /// @brief Returns buffer with min/max data from another Buffer with the string contents. Delete returned buffer yourself.
+    //    Buffer *createFromMinMaxStringBuffer (Buffer *string_buffer, PropertyDataType data_type);
 };
 
 #endif /* SQLITE3CONNECTION_H_ */
