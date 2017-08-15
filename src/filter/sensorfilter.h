@@ -26,7 +26,6 @@
 #define SENSORFILTER_H_
 
 #include "dbfilter.h"
-//#include "ActiveSourcesObserver.h"
 
 /**
  * @brief Definition for a data source in a SensorFilter
@@ -103,7 +102,7 @@ class DBObject;
  * should always exist. Should not have sub-filters or conditions.
  *
  */
-class SensorFilter : public DBFilter //, public ActiveSourcesObserver
+class SensorFilter : public DBFilter
 {
 public:
   /// @brief Constructor
@@ -118,8 +117,6 @@ public:
   virtual void reset ();
 
   const std::string &dbObjectName () { return dbo_name_; }
-
-  //virtual void notifyActiveSources ();
 
   std::map<int, SensorFilterDataSource> &dataSources () { return data_sources_; }
 

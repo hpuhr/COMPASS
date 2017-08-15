@@ -35,6 +35,8 @@
 #include "dbovariableset.h"
 #include "sqlgenerator.h"
 
+static const std::string ACTIVE_DATA_SOURCES_PROPERTY_PREFIX="activeDataSources_";
+
 class ATSDB;
 class Buffer;
 class BufferWriter;
@@ -105,9 +107,9 @@ public:
 
     /// @brief Returns a container with all data sources for a DBO
     std::map <int, std::string> getDataSources (const DBObject &object);
-    //    bool hasActiveDataSourcesInfo (const std::string &dbo_type);
-    //    /// @brief Returns a set with all active data source ids for a DBO type
-    //    std::set<int> getActiveSensorNumbers (const std::string &dbo_type);
+    bool hasActiveDataSources (const DBObject &object);
+    /// @brief Returns a set with all active data source ids for a DBO type
+    std::set<int> getActiveDataSources (const DBObject &object);
 
     //    /// @brief Writes a buffer to the database, into a table defined by write_table_names_ and DBO type
     //    void writeBuffer (Buffer *data);
@@ -177,7 +179,7 @@ public:
     //    DBResult *getDistinctStatistics (const std::string &dbo_type, DBOVariable *variable, unsigned int sensor_number);
 
     /// @brief Executes query and returns numbers for all active sensors
-    std::set<int> getActiveSensorNumbers (const DBObject &object);
+    std::set<int> queryActiveSensorNumbers (const DBObject &object);
 
     //    void deleteAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string filter);
     //    void updateAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string new_value, std::string filter);

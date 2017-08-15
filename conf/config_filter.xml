@@ -20,7 +20,7 @@
         <ParameterBool LoadSensorNumber20="0"/>
         <ParameterBool LoadSensorNumber21="0"/>
         <ParameterBool LoadSensorNumber22="0"/>
-        <ParameterBool LoadSensorNumber23="1"/>
+        <ParameterBool LoadSensorNumber23="0"/>
         <ParameterBool LoadSensorNumber24="0"/>
         <ParameterBool LoadSensorNumber25="0"/>
         <ParameterBool LoadSensorNumber28="0"/>
@@ -31,7 +31,7 @@
         <ParameterString dbo_name="MLAT"/>
         <ParameterString name="MLATSensors"/>
         <Configuration class_id="SensorFilterWidget" instance_id="MLATSensorsWidget0">
-            <ParameterBool visible="0"/>
+            <ParameterBool visible="1"/>
         </Configuration>
     </Configuration>
     <Configuration class_id="SensorFilter" instance_id="RadarSensors">
@@ -48,7 +48,7 @@
         <ParameterBool LoadSensorNumber5="0"/>
         <ParameterBool LoadSensorNumber6="0"/>
         <ParameterBool LoadSensorNumber7="0"/>
-        <ParameterBool LoadSensorNumber8="1"/>
+        <ParameterBool LoadSensorNumber8="0"/>
         <ParameterBool LoadSensorNumber9="0"/>
         <ParameterBool active="0"/>
         <ParameterBool changed="1"/>
@@ -57,7 +57,7 @@
         <ParameterString dbo_name="Radar"/>
         <ParameterString name="RadarSensors"/>
         <Configuration class_id="SensorFilterWidget" instance_id="RadarSensorsWidget0">
-            <ParameterBool visible="0"/>
+            <ParameterBool visible="1"/>
         </Configuration>
     </Configuration>
     <Configuration class_id="SensorFilter" instance_id="TrackerSensors">
@@ -69,7 +69,7 @@
         <ParameterString dbo_name="Tracker"/>
         <ParameterString name="TrackerSensors"/>
         <Configuration class_id="SensorFilterWidget" instance_id="TrackerSensorsWidget0">
-            <ParameterBool visible="0"/>
+            <ParameterBool visible="1"/>
         </Configuration>
     </Configuration>
 </Configuration>

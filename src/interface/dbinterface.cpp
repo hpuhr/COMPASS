@@ -267,7 +267,7 @@ bool DBInterface::existsPropertiesTable ()
 ///**
 // * Gets SQL command for data sources list and packs the resulting buffer into a set, which is returned.
 // */
-std::set<int> DBInterface::getActiveSensorNumbers(const DBObject &object)
+std::set<int> DBInterface::queryActiveSensorNumbers(const DBObject &object)
 {
     logdbg  << "DBInterface: queryActiveSensorNumbers: start";
 
@@ -718,41 +718,38 @@ void DBInterface::postProcessingJobDoneSlot()
 //    return result;
 //}
 
-//bool DBInterface::hasActiveDataSourcesInfo (const std::string &type)
-//{
-//    if (!existsPropertiesTable())
-//        return false;
+bool DBInterface::hasActiveDataSources (const DBObject &object)
+{
+    if (!existsPropertiesTable())
+        return false;
 
-//    return hasProperty("activeSensorNumbers"+DBObjectManager::getInstance().getDBObject(type)->getName());
-//}
+    return hasProperty(ACTIVE_DATA_SOURCES_PROPERTY_PREFIX+object.name());
+}
 
-///**
-// * Gets active sensor numbers as property, splits it and packs it into a set.
-// */
-//std::set<int> DBInterface::getActiveSensorNumbers (const std::string &type)
-//{
-//    logdbg  << "DBInterface: getActiveRadarNumbers: start";
+/**
+ * Gets active sensor numbers as property, splits it and packs it into a set.
+ */
+std::set<int> DBInterface::getActiveDataSources (const DBObject &object)
+{
+    logdbg  << "DBInterface: getActiveDataSources: start";
 
-//    assert (DBObjectManager::getInstance().existsDBObject(type));
+    std::string tmp = getProperty(ACTIVE_DATA_SOURCES_PROPERTY_PREFIX+object.name());
 
-//    std::string tmp = getProperty("activeSensorNumbers"+DBObjectManager::getInstance().getDBObject(type)->getName());
+    std::set<int> ret;
 
-//    std::set<int> ret;
+    std::vector<std::string> tmp2 = String::split(tmp, ',');
 
-//    std::vector<std::string> tmp2 = String::split(tmp, ',');
+    logdbg  << "DBInterface: getActiveDataSources: got "<< tmp2.size() << " parts from '" << tmp << "'" ;
 
-//    logdbg  << "DBInterface: getActiveRadarNumbers: got "<< tmp2.size() << " parts from '" << tmp << "'" ;
+    for (unsigned int cnt=0; cnt < tmp2.size(); cnt++)
+    {
+        ret.insert (std::stoi(tmp2.at(cnt)));
+        logdbg  << "DBInterface: getActiveDataSources: got active radar "<< cnt << " '" << std::stoi(tmp2.at(cnt)) << "'" ;
+    }
 
-//    for (unsigned int cnt=0; cnt < tmp2.size(); cnt++)
-//    {
-//        ret.insert (String::intFromString(tmp2.at(cnt)));
-//        logdbg  << "DBInterface: getActiveRadarNumbers: got active radar "<< cnt << " '" << String::intFromString(tmp2.at(cnt)) << "'" ;
-//    }
-
-
-//    logdbg  << "DBInterface: getActiveRadarNumbers: end";
-//    return ret;
-//}
+    logdbg  << "DBInterface: getActiveDataSources: end";
+    return ret;
+}
 
 //void DBInterface::writeBuffer (Buffer *data)
 //{

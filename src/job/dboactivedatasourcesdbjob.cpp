@@ -57,7 +57,7 @@ void DBOActiveDataSourcesDBJob::run ()
 
     loginf  << "DBOActiveDataSourcesDBJob: run: creating active sensors for dbo " << object_.name();
 
-    std::set<int> active = db_interface_.getActiveSensorNumbers(object_);
+    std::set<int> active = db_interface_.queryActiveSensorNumbers(object_);
     std::stringstream ss;
 
     std::set<int>::iterator it2;
@@ -71,9 +71,9 @@ void DBOActiveDataSourcesDBJob::run ()
             ss << "," << *it2;
         ++cnt;
     }
-    db_interface_.setProperty("activeSensorNumbers"+object_.name(), ss.str());
+    db_interface_.setProperty(ACTIVE_DATA_SOURCES_PROPERTY_PREFIX+object_.name(), ss.str());
     loginf  << "DBOActiveDataSourcesDBJob: run: dbo " << object_.name() << " active sensors '" << ss.str() << "'";
-    assert (db_interface_.hasProperty("activeSensorNumbers"+object_.name()));
+    assert (db_interface_.hasProperty(ACTIVE_DATA_SOURCES_PROPERTY_PREFIX+object_.name()));
 
     loading_stop_time_ = boost::posix_time::microsec_clock::local_time();
 

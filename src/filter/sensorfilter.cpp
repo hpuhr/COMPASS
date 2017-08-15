@@ -42,24 +42,27 @@ SensorFilter::SensorFilter(const std::string &class_id, const std::string &insta
     db_object_ = &ATSDB::instance().objectManager().object(dbo_name_);
     assert (db_object_->hasCurrentDataSource());
 
-    // TODO FIX OBSERVER
-//    object->addActiveSourcesObserver(this);
-
     sensor_column_name_ = db_object_->currentDataSource().localKey();
 
     updateDataSources ();
 
-//    if (object->hasActiveDataSourcesInfo())
-//        updateDataSourcesActive();
+    if (db_object_->hasActiveDataSourcesInfo())
+        updateDataSourcesActive();
 
     createSubConfigurables();
+
+    assert (widget_);
+    if (db_object_->count() == 0)
+    {
+        active_=false;
+        widget_->setInvisible();
+        widget_->update();
+        widget_->setDisabled(true);
+    }
 }
 
 SensorFilter::~SensorFilter()
 {
-    // TODO FIX OBSERVER
-//    DBObject *object = DBObjectManager::getInstance().getDBObject ((DB_OBJECT_TYPE) dbo_type_int_);
-//    object->removeActiveSourcesObserver(this);
 }
 
 std::string SensorFilter::getConditionString (const std::string &dbo_name, bool &first, std::vector <DBOVariable*>& filtered_variables)
@@ -144,35 +147,33 @@ void SensorFilter::updateDataSources ()
 
 void SensorFilter::updateDataSourcesActive ()
 {
-    logdbg << "SensorFilter: updateDataSourcesActive";
+    loginf << "SensorFilter: updateDataSourcesActive";
 
-    // TODO FIX OBSERVER
+    if (!db_object_->hasActiveDataSourcesInfo())
+    {
+        logerr  << "SensorFilter: updateDataSourcesActive: type " << db_object_->name() << " has no active data sources info";
+        return;
+    }
 
-//    if (!object->hasActiveDataSourcesInfo())
-//    {
-//        logerr  << "SensorFilter: updateDataSourcesActive: type " << dbo_type_int_ << " has no active data sources info";
-//        return;
-//    }
+    std::map<int, SensorFilterDataSource>::iterator srcit;
+    for (srcit =  data_sources_.begin(); srcit !=  data_sources_.end(); srcit++)
+        srcit->second.setActiveInData(false);
 
-//    std::map<int, SensorFilterDataSource>::iterator srcit;
-//    for (srcit =  data_sources_.begin(); srcit !=  data_sources_.end(); srcit++)
-//        srcit->second.setActiveInData(false);
+    std::set<int> active_sources = db_object_->getActiveDataSources();
+    std::set<int>::iterator it;
 
-//    std::set<int> active_radars = object->getActiveDataSources();
-//    std::set<int>::iterator it;
+    for (it = active_sources.begin(); it != active_sources.end(); it++)
+    {
+        assert (data_sources_.find(*it) != data_sources_.end());
+        SensorFilterDataSource &src = data_sources_[*it];
+        src.setActiveInData(true);
+    }
 
-//    for (it = active_radars.begin(); it != active_radars.end(); it++)
-//    {
-//        assert (data_sources_.find(*it) != data_sources_.end());
-//        SensorFilterDataSource &src = data_sources_[*it];
-//        src.setActiveInData(true);
-//    }
-
-//    for (srcit =  data_sources_.begin(); srcit !=  data_sources_.end(); srcit++)
-//    {
-//        if (!srcit->second.isActiveInData())
-//            srcit->second.setActiveInFilter(false);
-//    }
+    for (srcit =  data_sources_.begin(); srcit !=  data_sources_.end(); srcit++)
+    {
+        if (!srcit->second.isActiveInData())
+            srcit->second.setActiveInFilter(false);
+    }
 }
 
 

@@ -34,6 +34,7 @@
 #include <QLabel>
 #include <QTextEdit>
 #include <QPushButton>
+#include <QCheckBox>
 #include <QStackedWidget>
 #include <QLineEdit>
 #include <QGridLayout>
@@ -106,6 +107,10 @@ MainWindow::MainWindow()
     QHBoxLayout *start_layout = new QHBoxLayout ();
     start_layout->addStretch();
 
+    postprocess_check_ = new QCheckBox ("Force Post-processing");
+    postprocess_check_->setChecked(false);
+    start_layout->addWidget(postprocess_check_);
+
     start_button_ = new QPushButton ("Start");
     start_button_->setDisabled(true);
     QObject::connect(start_button_, SIGNAL(clicked()), this, SLOT(startSlot()));
@@ -150,12 +155,16 @@ void MainWindow::startSlot ()
 {
     logdbg  << "MainWindow: startSlot";
 
+    assert (start_button_);
+    assert (postprocess_check_);
+
     start_button_->setDisabled (true);
 
-    if (!ATSDB::instance().interface().isPostProcessed ())
+    bool force_post = postprocess_check_->checkState() == Qt::Checked;
+
+    if (force_post || !ATSDB::instance().interface().isPostProcessed ())
     {
         loginf << "MainWindow: startSlot: post-processing started";
-        // DO SE POST
         connect (&ATSDB::instance().interface(), SIGNAL(postProcessingDoneSignal()), this, SLOT(postProcessingDoneSlot()));
         ATSDB::instance().interface().postProcess();
     }
@@ -178,7 +187,6 @@ void MainWindow::initAfterStart ()
 
     // TODO lock stuff
     tab_widget_->setCurrentIndex(1);
-
 }
 
 void MainWindow::createMenus()

@@ -89,6 +89,8 @@ public:
   /// @brief Updates the management elements
   virtual void update (void);
 
+  void setInvisible () { visible_=false; child_->setVisible(visible_); }
+
 protected:
   /// DBFilter that is represented by this widget
   DBFilter &filter_;

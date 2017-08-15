@@ -35,6 +35,7 @@ class DBSchemaManagerWidget;
 class DBObjectManagerWidget;
 class ManagementWidget;
 class QTabWidget;
+class QCheckBox;
 
 //namespace ATSDB
 //{
@@ -83,7 +84,8 @@ protected:
 
     ManagementWidget *management_widget_;
 
-    QPushButton *start_button_;
+    QCheckBox *postprocess_check_{nullptr};
+    QPushButton *start_button_{nullptr};
 
     /// @brief Creates File menu
     void createMenus();

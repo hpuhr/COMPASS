@@ -220,12 +220,6 @@ public:
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
-    //  /// @brief Registers an observer to the active data sources information
-    //  void addActiveSourcesObserver (ActiveSourcesObserver *observer);
-    //  /// @brief Removes an observer to the active data sources information
-    //  void removeActiveSourcesObserver (ActiveSourcesObserver *observer);
-
-
     ///@brief Returns flag if data sources are defined for DBO type.
     bool hasDataSources () { return data_sources_.size() > 0; }
     ///@brief Returns container with all defined data source for DBO type.
@@ -233,15 +227,11 @@ public:
     ///@brief Returns data source name for a DBO type and data source number.
     std::string getNameOfSensor (unsigned int num);
 
-    //  /// @brief Return if active data sources info is available
-    //  bool hasActiveDataSourcesInfo ();
-    //  /// @brief Triggers build process of the active data sources ino
-    //  void buildActiveDataSourcesInfo ();
-    //  /// @brief Sets the container with the active data sources information
-    //  void setActiveDataSources (std::set<int> active_data_sources);
+    /// @brief Return if active data sources info is available
+    bool hasActiveDataSourcesInfo ();
 
     /// @brief Returns container with the active data sources information
-    const std::set<int> getActiveDataSources () const { return active_data_sources_; }
+    const std::set<int> getActiveDataSources () const;
 
     std::string status ();
 
@@ -259,8 +249,7 @@ protected:
     bool is_loadable_; // loadable on its own
     bool loading_wanted_;
     size_t count_;
-    /// DBO is meta flag
-    //bool is_meta_;
+
     std::shared_ptr <DBOReadDBJob> read_job_;
     std::vector <std::shared_ptr<Buffer>> read_job_data_;
     std::vector <std::shared_ptr <FinalizeDBOReadJob>> finalize_jobs_;
@@ -278,18 +267,12 @@ protected:
     std::map<std::string, DBOVariable*> variables_;
 
     std::map<int, std::string> data_sources_;
-    /// Container with all observers of the active data sources information
-    //std::vector <ActiveSourcesObserver *> active_sources_observers_;
-    /// Container with all active data sources
-    std::set<int> active_data_sources_;
 
     /// Current (in the current schema) main meta table
     const MetaDBTable *current_meta_table_; // TODO rework
 
     /// Flag indicating if varaibles where checked. Not really used yet.
     bool variables_checked_;
-    /// Flag indicating if the active data sources information is present
-    bool has_active_data_sources_info_;
 
     DBObjectWidget *widget_;
     DBObjectInfoWidget *info_widget_;
@@ -300,9 +283,6 @@ protected:
 
     ///@brief Generates data sources information from previous post-processing.
     void buildDataSources();
-
-    /// Notifies all observers of the active data sources information
-    void notifyActiveDataSourcesObservers ();
 };
 
 #endif /* DBOBJECT_H_ */

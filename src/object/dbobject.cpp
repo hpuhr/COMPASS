@@ -37,7 +37,6 @@
 //#include "StructureDescriptionManager.h"
 #include "propertylist.h"
 #include "metadbtable.h"
-//#include "ActiveSourcesObserver.h"
 #include "dboreaddbjob.h"
 #include "finalizedboreadjob.h"
 #include "atsdb.h"
@@ -50,11 +49,10 @@
  */
 DBObject::DBObject(std::string class_id, std::string instance_id, Configurable *parent)
     : Configurable (class_id, instance_id, parent), is_loadable_(false), loading_wanted_(true), count_(0), data_(nullptr), current_meta_table_(nullptr), variables_checked_(false),
-      has_active_data_sources_info_(false), widget_(nullptr), info_widget_(nullptr)
+      widget_(nullptr), info_widget_(nullptr)
 {
     registerParameter ("name" , &name_, "Undefined");
     registerParameter ("info" , &info_, "");
-    //registerParameter ("is_meta" , &is_meta_, false);
 
     createSubConfigurables ();
 
@@ -220,45 +218,15 @@ void DBObject::checkVariables ()
     variables_checked_=true;
 }
 
-//void DBObject::addActiveSourcesObserver (ActiveSourcesObserver *observer)
-//{
-//    assert (find (active_sources_observers_.begin(), active_sources_observers_.end(), observer) ==
-//            active_sources_observers_.end());
-//    active_sources_observers_.push_back (observer);
-//}
+bool DBObject::hasActiveDataSourcesInfo ()
+{
+    return ATSDB::instance().interface().hasActiveDataSources(*this);
+}
 
-//void DBObject::removeActiveSourcesObserver (ActiveSourcesObserver *observer)
-//{
-//    assert (find (active_sources_observers_.begin(), active_sources_observers_.end(), observer) !=
-//            active_sources_observers_.end());
-//    active_sources_observers_.erase (find (active_sources_observers_.begin(), active_sources_observers_.end(), observer));
-//}
-
-//void DBObject::notifyActiveDataSourcesObservers ()
-//{
-//    std::vector <ActiveSourcesObserver *>::iterator it;
-//    for (it=active_sources_observers_.begin(); it != active_sources_observers_.end(); it++)
-//        (*it)->notifyActiveSources ();
-//}
-
-//bool DBObject::hasActiveDataSourcesInfo ()
-//{
-//    return ATSDB::getInstance().hasActiveDataSourcesInfo(dbo_type_);
-//}
-
-//void DBObject::buildActiveDataSourcesInfo ()
-//{
-//    assert (hasCurrentDataSource());
-//    assert (!hasActiveDataSourcesInfo());
-//    ATSDB::getInstance().buildActiveDataSourcesInfo(dbo_type_);
-//}
-
-//void DBObject::setActiveDataSources (std::set<int> active_data_sources)
-//{
-//    assert (hasCurrentDataSource());
-//    active_data_sources_= active_data_sources;
-//    notifyActiveDataSourcesObservers();
-//}
+const std::set<int> DBObject::getActiveDataSources () const
+{
+    return ATSDB::instance().interface().getActiveDataSources(*this);
+}
 
 std::string DBObject::status ()
 {
