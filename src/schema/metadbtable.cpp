@@ -179,18 +179,6 @@ void MetaDBTable::updateColumns ()
     }
 }
 
-//std::vector<std::string> MetaDBTable::allTableNamesVector () const
-//{
-//    std::vector <std::string> table_names;
-
-//    table_names.push_back (tableName());
-
-//    for (auto it : sub_tables_)
-//        table_names.push_back(it.second.name());
-
-//    return table_names;
-//}
-
 //void MetaDBTable::setSubTablesIfRequired ()
 //{
 //    if (sub_table_definitions_.size() == 0)

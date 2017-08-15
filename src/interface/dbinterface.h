@@ -36,12 +36,15 @@
 #include "sqlgenerator.h"
 
 static const std::string ACTIVE_DATA_SOURCES_PROPERTY_PREFIX="activeDataSources_";
+static const std::string TABLE_NAME_PROPERTIES = "atsdb_properties";
+static const std::string TABLE_NAME_MINMAX = "atsdb_minmax";
 
 class ATSDB;
 class Buffer;
 class BufferWriter;
 class DBConnection;
 class DBOVariable;
+class DBTable;
 class QProgressDialog;
 class DBObject;
 class DBResult;
@@ -140,14 +143,16 @@ public:
     std::string getProperty (const std::string& id);
     bool hasProperty (const std::string& id);
 
-    //    /// @brief Returns the minimum/maximum table
-    //    void createMinMaxTable ();
-    //    /// @brief Returns buffer with the minimum/maximum of a DBO variable
-    //    Buffer *getMinMaxString (DBOVariable *var);
-    //    /// (dbo type, id) -> (min, max)
-    //    std::map <std::pair<std::string, std::string>, std::pair<std::string, std::string> > getMinMaxInfo ();
-    //    /// @brief Inserts a minimum/maximum value pair
-    //    void insertMinMax (std::string id, const std::string &dbo_type, std::string min, std::string max);
+    /// @brief Returns if minimum/maximum table exists
+    bool existsMinMaxTable ();
+    /// @brief Returns the minimum/maximum table
+    void createMinMaxTable ();
+    /// @brief Returns buffer with the minimum/maximum of a DBO variable
+    std::pair<std::string, std::string> getMinMaxString (const DBOVariable& var);
+    /// (dbo type, id) -> (min, max)
+    std::map <std::pair<std::string, std::string>, std::pair<std::string, std::string> > getMinMaxInfo ();
+    /// @brief Inserts a minimum/maximum value pair
+    void insertMinMax (const std::string& id, const std::string& object_name, const std::string& min, const std::string& max);
 
     /// @brief Returns if database was post processed
     bool isPostProcessed ();
@@ -165,14 +170,11 @@ public:
     //    /// @brief Returns the context reference point
     //    std::pair<float, float> getContextReferencePoint ();
 
-    //    /// @brief Returns if minimum/maximum table exists
-    //    bool existsMinMaxTable ();
+    /// @brief Deletes table content for given table name
+    void clearTableContent (const std::string& table_name);
 
-    //    /// @brief Deletes table content for given table name
-    //    void clearTableContent (std::string table_name);
-
-    //    /// @brief Returns minimum/maximum information for all columns in a table
-    //    DBResult *queryMinMaxNormalForTable (std::string table);
+    /// @brief Returns minimum/maximum information for all columns in a table
+    std::shared_ptr<DBResult> queryMinMaxNormalForTable (const DBTable& table);
     //    /// @brief Returns minimum/maximum information for a given column in a table
     //    DBResult *queryMinMaxForColumn (DBTableColumn *column, std::string table);
 

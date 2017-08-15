@@ -39,20 +39,20 @@ SensorFilter::SensorFilter(const std::string &class_id, const std::string &insta
     registerParameter ("dbo_name", &dbo_name_, "");
 
     assert (ATSDB::instance().objectManager().existsObject(dbo_name_));
-    db_object_ = &ATSDB::instance().objectManager().object(dbo_name_);
-    assert (db_object_->hasCurrentDataSource());
+    object_ = &ATSDB::instance().objectManager().object(dbo_name_);
+    assert (object_->hasCurrentDataSource());
 
-    sensor_column_name_ = db_object_->currentDataSource().localKey();
+    sensor_column_name_ = object_->currentDataSource().localKey();
 
     updateDataSources ();
 
-    if (db_object_->hasActiveDataSourcesInfo())
+    if (object_->hasActiveDataSourcesInfo())
         updateDataSourcesActive();
 
     createSubConfigurables();
 
     assert (widget_);
-    if (db_object_->count() == 0)
+    if (object_->count() == 0)
     {
         active_=false;
         widget_->setInvisible();
@@ -75,8 +75,8 @@ std::string SensorFilter::getConditionString (const std::string &dbo_name, bool 
     {
         if (dbo_name == dbo_name_)
         {
-            assert (db_object_->hasVariable(sensor_column_name_));
-            filtered_variables.push_back(&db_object_->variable(sensor_column_name_));
+            assert (object_->hasVariable(sensor_column_name_));
+            filtered_variables.push_back(&object_->variable(sensor_column_name_));
 
             bool got_one=false;
             bool got_all=true;
@@ -125,13 +125,13 @@ std::string SensorFilter::getConditionString (const std::string &dbo_name, bool 
 
 void SensorFilter::updateDataSources ()
 {
-    if (!db_object_->hasDataSources ())
+    if (!object_->hasDataSources ())
     {
         logerr  << "SensorFilter: updateDataSources: type " << dbo_name_ << " has no data sources";
         return;
     }
 
-    for (auto src_it : db_object_->dataSources())
+    for (auto src_it : object_->dataSources())
     {
         if (data_sources_.find(src_it.first) == data_sources_.end())
         {
@@ -149,9 +149,9 @@ void SensorFilter::updateDataSourcesActive ()
 {
     loginf << "SensorFilter: updateDataSourcesActive";
 
-    if (!db_object_->hasActiveDataSourcesInfo())
+    if (!object_->hasActiveDataSourcesInfo())
     {
-        logerr  << "SensorFilter: updateDataSourcesActive: type " << db_object_->name() << " has no active data sources info";
+        logerr  << "SensorFilter: updateDataSourcesActive: type " << object_->name() << " has no active data sources info";
         return;
     }
 
@@ -159,7 +159,7 @@ void SensorFilter::updateDataSourcesActive ()
     for (srcit =  data_sources_.begin(); srcit !=  data_sources_.end(); srcit++)
         srcit->second.setActiveInData(false);
 
-    std::set<int> active_sources = db_object_->getActiveDataSources();
+    std::set<int> active_sources = object_->getActiveDataSources();
     std::set<int>::iterator it;
 
     for (it = active_sources.begin(); it != active_sources.end(); it++)

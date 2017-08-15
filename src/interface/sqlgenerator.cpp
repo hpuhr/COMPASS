@@ -53,17 +53,14 @@ SQLGenerator::SQLGenerator(const DBInterface &db_interface)
 {
     db_type_set_=false;
 
-    table_name_properties_ = "atsdb_properties";
-    table_name_minxmax_ = "atsdb_minmax";
-
     std::stringstream ss;
 
-    ss << "CREATE TABLE " << table_name_minxmax_ << " (id VARCHAR(255), dbo_type INT, min VARCHAR(255), max VARCHAR(255),"
-            "PRIMARY KEY (id, dbo_type));";
+    ss << "CREATE TABLE " << TABLE_NAME_MINMAX << " (variable_name VARCHAR(255), object_name VARCHAR(255), min VARCHAR(255), max VARCHAR(255),"
+            "PRIMARY KEY (variable_name, object_name));";
     table_minmax_create_statement_ = ss.str();
     ss.str(std::string());
 
-    ss << "CREATE TABLE " << table_name_properties_ << "(id VARCHAR(255), value VARCHAR(1701), PRIMARY KEY (id));";
+    ss << "CREATE TABLE " << TABLE_NAME_PROPERTIES << "(id VARCHAR(255), value VARCHAR(1701), PRIMARY KEY (id));";
     table_properties_create_statement_ = ss.str();
     ss.str(std::string());
 }
@@ -297,60 +294,48 @@ std::string SQLGenerator::getCountStatement (const std::string &table)
     return "SELECT COUNT(*) FROM " + table;
 }
 
-//DBCommand *SQLGenerator::getTableSelectMinMaxNormalStatement (std::string table_name)
-//{
-//    logdbg  << "SQLGenerator: getTableSelectMinMaxNormalStatement: start for table " << table_name;
+std::shared_ptr <DBCommand> SQLGenerator::getTableSelectMinMaxNormalStatement (const DBTable& table)
+{
+    logdbg  << "SQLGenerator: getTableSelectMinMaxNormalStatement: start for table " << table.name();
 
-//    assert (DBSchemaManager::getInstance().getCurrentSchema()->hasTable(table_name));
-//    std::map <std::string, DBTableColumn *> &columns =  DBSchemaManager::getInstance().getCurrentSchema()->getTable(table_name)->getColumns ();
-//    std::map <std::string, DBTableColumn *>::iterator it;
+    stringstream ss;
 
-//    stringstream ss;
+    std::shared_ptr<DBCommand> command (new DBCommand ());
+    assert (command);
 
-//    DBCommand *command = new DBCommand ();
-//    assert (command);
+    PropertyList command_list;
 
-//    PropertyList command_list;
+    ss << "SELECT ";
 
-//    ss << "SELECT ";
+    bool first=true;
 
-//    DBTableColumn *column;
-//    bool first=true;
-
-//    for (it = columns.begin(); it != columns.end(); it++)
-//    {
-//        column = it->second;
+    for (auto col_it : table.columns())
+    {
 //        if (column->hasSpecialNull())
 //            continue;
 
-//        logdbg  << "SQLGenerator: getMainTableSelectMinMaxStatement: variable " << column->getName();
+        logdbg  << "SQLGenerator: getMainTableSelectMinMaxStatement: current name " << col_it.first;
 
-//        std::string current_name = column->getName ();
+        if (!first)
+            ss << ",";
 
-//        logdbg  << "SQLGenerator: getMainTableSelectMinMaxStatement: current name " << current_name;
+        ss << "MIN("<< col_it.first <<"),MAX("<< col_it.first <<")";
 
-//        if (!first)
-//            ss << ",";
+        command_list.addProperty(col_it.first+"MIN", PropertyDataType::STRING);
+        command_list.addProperty(col_it.first+"MAX", PropertyDataType::STRING);
 
-//        ss << "MIN("<< current_name <<"),MAX("<< current_name <<")";
+        first = false;
+    }
 
-//        command_list.addProperty(current_name+"MIN", PropertyDataType::STRING);
-//        command_list.addProperty(current_name+"MAX", PropertyDataType::STRING);
+    ss << " FROM " << table.name();
 
-//        first = false;
-//    }
+    command->set (ss.str());
+    command->list(command_list);
 
-//    ss << " FROM " << DBSchemaManager::getInstance().getCurrentSchema()->getTable(table_name)->getDBName();
+    logdbg  << "SQLGenerator: getMainTableSelectMinMaxStatement: sql '" << ss.str() << "'";
 
-//    command->setCommandString (ss.str());
-//    command->setPropertyList(command_list);
-
-//    //delete list;
-
-//    logdbg  << "SQLGenerator: getMainTableSelectMinMaxStatement: sql '" << ss.str() << "'";
-
-//    return command;
-//}
+    return command;
+}
 
 //DBCommand *SQLGenerator::getColumnSelectMinMaxStatement (DBTableColumn *column, std::string table_name)
 //{
@@ -395,41 +380,41 @@ std::string SQLGenerator::getInsertPropertyStatement (const std::string &id, con
     assert (value.size() < 1701);
 
     // REPLACE into table (id, name, age) values(1, "A", 19)
-    ss << "REPLACE INTO " << table_name_properties_ << " VALUES ('" << id <<"', '" << value <<"');";
+    ss << "REPLACE INTO " << TABLE_NAME_PROPERTIES << " VALUES ('" << id <<"', '" << value <<"');";
     return ss.str();
 }
 std::string SQLGenerator::getSelectPropertyStatement (const std::string &id)
 {
     stringstream ss;
-    ss << "SELECT value FROM " << table_name_properties_ << " WHERE id = '" << id << "'";
+    ss << "SELECT value FROM " << TABLE_NAME_PROPERTIES << " WHERE id = '" << id << "'";
     return ss.str();
 }
 
-//std::string SQLGenerator::getInsertMinMaxStatement (std::string id, const std::string &dbo_type, std::string min, std::string max)
-//{
-//    stringstream ss;
-//    //ss << "INSERT INTO " << table_name_minxmax_<< " VALUES ('" << id <<"', '" << type <<"', '" << min<< "', '"<< max <<"');";
-//    ss << "REPLACE INTO " << table_name_minxmax_ << " VALUES ('" << id <<"', '" << dbo_type <<"', '" << min<< "', '"<< max <<"');";
-//    return ss.str();
-//}
-//std::string SQLGenerator::getSelectMinMaxStatement (std::string id, const std::string &dbo_type)
-//{
-//    stringstream ss;
-//    ss << "SELECT min,max FROM " << table_name_minxmax_<< " WHERE id = '" << id << "' AND dbo_type = '" << dbo_type << "'";
-//    return ss.str();
-//}
+std::string SQLGenerator::getInsertMinMaxStatement (const std::string& id, const std::string& dbo_name, const std::string& min, const std::string& max)
+{
+    stringstream ss;
+    //ss << "INSERT INTO " << table_name_minxmax_<< " VALUES ('" << id <<"', '" << type <<"', '" << min<< "', '"<< max <<"');";
+    ss << "REPLACE INTO " << TABLE_NAME_MINMAX << " VALUES ('" << id <<"', '" << dbo_name <<"', '" << min<< "', '"<< max <<"');";
+    return ss.str();
+}
+std::string SQLGenerator::getSelectMinMaxStatement (const std::string& id, const std::string& dbo_name)
+{
+    stringstream ss;
+    ss << "SELECT min,max FROM " << TABLE_NAME_MINMAX<< " WHERE id = '" << id << "' AND dbo_type = '" << dbo_name << "'";
+    return ss.str();
+}
 
-//std::string SQLGenerator::getSelectMinMaxStatement ()
-//{
-//    stringstream ss;
-//    ss << "SELECT id,dbo_type,min,max FROM " << table_name_minxmax_;
-//    return ss.str();
-//}
+std::string SQLGenerator::getSelectMinMaxStatement ()
+{
+    stringstream ss;
+    ss << "SELECT variable_name,object_name,min,max FROM " << TABLE_NAME_MINMAX;
+    return ss.str();
+}
 
-//std::string SQLGenerator::getTableMinMaxCreateStatement ()
-//{
-//    return table_minmax_create_statement_;
-//}
+std::string SQLGenerator::getTableMinMaxCreateStatement ()
+{
+    return table_minmax_create_statement_;
+}
 
 std::string SQLGenerator::getTablePropertiesCreateStatement ()
 {

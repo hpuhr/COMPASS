@@ -36,6 +36,7 @@ class DBInterface;
 class MetaDBTable;
 class DBTableColumn;
 class DBObject;
+class DBTable;
 
 /**
  * @brief Creates SQL statements
@@ -73,19 +74,14 @@ public:
 
 //    DBCommand *getDistinctStatistics (const std::string &dbo_type, DBOVariable *variable, unsigned int sensor_number);
 
-//    /// @brief Returns minimum/maximum table name
-//    const std::string &getMinMaxTableName () { return table_name_minxmax_; }
-    /// @brief Returns properties table name
-    const std::string &getPropertiesTableName () { return table_name_properties_; }
-
 //    /// @brief Returns statement to check table existence
 //    std::string getContainsStatement (const std::string &table_name);
     /// @brief Returns statement to query number of records
     std::string getCountStatement (const std::string &table);
     //DBCommand *getCountStatement (const DBObject &object, unsigned int sensor_number);
 
-//    /// @brief Returns minimum/maximum table creation statement
-//    std::string getTableMinMaxCreateStatement ();
+    /// @brief Returns minimum/maximum table creation statement
+    std::string getTableMinMaxCreateStatement ();
     /// @brief Returns properties table creation statement
     std::string getTablePropertiesCreateStatement ();
 
@@ -94,17 +90,17 @@ public:
     /// @brief Returns property selection statement
     std::string getSelectPropertyStatement (const std::string &id);
 
-//    /// @brief Returns minimum/maximum insertion statement
-//    std::string getInsertMinMaxStatement (const std::string &id, const std::string &dbo_type, std::string min, const std::string &max);
-//    /// @brief Returns minimum/maximum selection statement
-//    std::string getSelectMinMaxStatement (const std::string &id, const std::string &dbo_type);
-//    std::string getSelectMinMaxStatement ();
+    /// @brief Returns minimum/maximum insertion statement
+    std::string getInsertMinMaxStatement (const std::string& id, const std::string& dbo_name, const std::string& min, const std::string &max);
+    /// @brief Returns minimum/maximum selection statement
+    std::string getSelectMinMaxStatement (const std::string& id, const std::string& dbo_name);
+    std::string getSelectMinMaxStatement ();
 
 //    /// @brief Returns general info select statement
 //    DBCommand *getSelectInfoCommand(const std::string &dbo_type, std::vector<unsigned int> ids, DBOVariableSet read_list,
 //            bool use_filters, std::string order_by_variable, bool ascending, unsigned int limit_min=0,
 //            unsigned int limit_max=0);
-//    DBCommand *getTableSelectMinMaxNormalStatement (const std::string &table_name);
+    std::shared_ptr<DBCommand> getTableSelectMinMaxNormalStatement (const DBTable& table);
 //    DBCommand *getColumnSelectMinMaxStatement (DBTableColumn *column, std::string table_name);
 
 //    std::string getDeleteStatement (const DBTableColumn &column, const std::string &value, const std::string &filter);
@@ -124,11 +120,6 @@ protected:
     bool db_type_set_;
     /// Database connection type
     //DB_CONNECTION_TYPE db_type_;
-
-    /// Properties table name
-    std::string table_name_properties_;
-    /// Minimum/maximum table name
-    std::string table_name_minxmax_;
 
     /// Minimum/maximum table create SQL statement
     std::string table_minmax_create_statement_;

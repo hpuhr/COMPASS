@@ -44,6 +44,7 @@
 //#include "StructureDescriptionManager.h"
 #include "jobmanager.h"
 #include "dboactivedatasourcesdbjob.h"
+#include "postprocessdbjob.h"
 #include "dimension.h"
 #include "unit.h"
 #include "unitmanager.h"
@@ -68,12 +69,12 @@ DBInterface::DBInterface(std::string class_id, std::string instance_id, ATSDB *a
     registerParameter ("used_connection", &used_connection_, "");
 
     //TODO writing process should be different.
-//    write_table_names_[DBO_PLOTS] = "Plot";
-//    write_table_names_[DBO_SYSTEM_TRACKS] = "SystemTrack";
-//    write_table_names_[DBO_MLAT] = "MLAT";
-//    write_table_names_[DBO_ADS_B] = "ADSB";
-//    write_table_names_[DBO_REFERENCE_TRAJECTORIES] = "ReferenceTrajectory";
-//    write_table_names_[DBO_SENSOR_INFORMATION] = "PlotSensor";
+    //    write_table_names_[DBO_PLOTS] = "Plot";
+    //    write_table_names_[DBO_SYSTEM_TRACKS] = "SystemTrack";
+    //    write_table_names_[DBO_MLAT] = "MLAT";
+    //    write_table_names_[DBO_ADS_B] = "ADSB";
+    //    write_table_names_[DBO_REFERENCE_TRAJECTORIES] = "ReferenceTrajectory";
+    //    write_table_names_[DBO_SENSOR_INFORMATION] = "PlotSensor";
 
     createSubConfigurables();
 }
@@ -94,11 +95,11 @@ DBInterface::~DBInterface()
 
     assert (!widget_);
 
-//    if (buffer_writer_)
-//    {
-//        delete buffer_writer_;
-//        buffer_writer_=0;
-//    }
+    //    if (buffer_writer_)
+    //    {
+    //        delete buffer_writer_;
+    //        buffer_writer_=0;
+    //    }
 
     logdbg  << "DBInterface: desctructor: end";
 }
@@ -216,52 +217,52 @@ DBConnection &DBInterface::connection ()
 
 void DBInterface::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
-  logdbg  << "DBInterface: generateSubConfigurable: generating variable " << instance_id;
-  if (class_id == "MySQLppConnection")
-  {
-    MySQLppConnection *connection = new MySQLppConnection (class_id, instance_id, this);
-    assert (connections_.count (connection->getInstanceId()) == 0);
-    connections_.insert (std::pair <std::string, DBConnection*> (connection->getInstanceId(), dynamic_cast<DBConnection*>(connection)));
-  }
-  else if (class_id == "SQLiteConnection")
-  {
-    SQLiteConnection *connection = new SQLiteConnection (class_id, instance_id, this);
-    assert (connections_.count (connection->getInstanceId()) == 0);
-    connections_.insert (std::pair <std::string, DBConnection*> (connection->getInstanceId(), dynamic_cast<DBConnection*>(connection)));
-  }
-  else
-    throw std::runtime_error ("DBInterface: generateSubConfigurable: unknown class_id "+class_id );
+    logdbg  << "DBInterface: generateSubConfigurable: generating variable " << instance_id;
+    if (class_id == "MySQLppConnection")
+    {
+        MySQLppConnection *connection = new MySQLppConnection (class_id, instance_id, this);
+        assert (connections_.count (connection->getInstanceId()) == 0);
+        connections_.insert (std::pair <std::string, DBConnection*> (connection->getInstanceId(), dynamic_cast<DBConnection*>(connection)));
+    }
+    else if (class_id == "SQLiteConnection")
+    {
+        SQLiteConnection *connection = new SQLiteConnection (class_id, instance_id, this);
+        assert (connections_.count (connection->getInstanceId()) == 0);
+        connections_.insert (std::pair <std::string, DBConnection*> (connection->getInstanceId(), dynamic_cast<DBConnection*>(connection)));
+    }
+    else
+        throw std::runtime_error ("DBInterface: generateSubConfigurable: unknown class_id "+class_id );
 }
 
 void DBInterface::checkSubConfigurables ()
 {
-  if (connections_.count("MySQL++ Connection") == 0)
-  {
-      addNewSubConfiguration ("MySQLppConnection", "MySQL++ Connection");
-      generateSubConfigurable ("MySQLppConnection", "MySQL++ Connection");
-  }
+    if (connections_.count("MySQL++ Connection") == 0)
+    {
+        addNewSubConfiguration ("MySQLppConnection", "MySQL++ Connection");
+        generateSubConfigurable ("MySQLppConnection", "MySQL++ Connection");
+    }
 
-  if (connections_.count("SQLite Connection") == 0)
-  {
-      addNewSubConfiguration ("SQLiteConnection", "SQLite Connection");
-      generateSubConfigurable ("SQLiteConnection", "SQLite Connection");
-  }
+    if (connections_.count("SQLite Connection") == 0)
+    {
+        addNewSubConfiguration ("SQLiteConnection", "SQLite Connection");
+        generateSubConfigurable ("SQLiteConnection", "SQLite Connection");
+    }
 }
 
-///**
-// * Returns existsTable for table name.
-// */
-//bool DBInterface::existsMinMaxTable ()
-//{
-//    return existsTable (sql_generator_->getMinMaxTableName());
-//}
+/**
+ * Returns existsTable for table name.
+ */
+bool DBInterface::existsMinMaxTable ()
+{
+    return table_info_.count (TABLE_NAME_MINMAX) == 1;
+}
 
 /**
  * Returns existsTable for table name.
  */
 bool DBInterface::existsPropertiesTable ()
 {
-    return table_info_.count (sql_generator_.getPropertiesTableName()) == 1;
+    return table_info_.count (TABLE_NAME_PROPERTIES) == 1;
 }
 
 ///**
@@ -438,131 +439,136 @@ bool DBInterface::hasProperty (const std::string& id)
     return buffer->size() == 1;
 }
 
-//void DBInterface::insertMinMax (std::string id, const std::string &type, std::string min, std::string max)
-//{
-//    boost::mutex::scoped_lock l(mutex_);
+void DBInterface::insertMinMax (const std::string& id, const std::string& object_name, const std::string& min, const std::string& max)
+{
+    boost::mutex::scoped_lock l(connection_mutex_);
 
-//    std::string str = sql_generator_->getInsertMinMaxStatement(id, type, min, max);
-//    connection_->executeSQL (str);
-//}
+    std::string str = sql_generator_.getInsertMinMaxStatement(id, object_name, min, max);
+    current_connection_->executeSQL (str);
+}
 
-///**
-// * If variable is a not meta variable, min/max values just for the variable. If it is, gets min/max values for all subvariables
-// * and calculates the min/max for all subvariables. If the variable needs a unit transformation, it is performed (locally
-// * in this thread).
-// */
-//Buffer *DBInterface::getMinMaxString (DBOVariable *var)
-//{
-//    boost::mutex::scoped_lock l(mutex_);
-//    assert (var);
+/**
+ * If variable is a not meta variable, min/max values just for the variable. If it is, gets min/max values for all subvariables
+ * and calculates the min/max for all subvariables. If the variable needs a unit transformation, it is performed (locally
+ * in this thread).
+ */
+std::pair<std::string, std::string> DBInterface::getMinMaxString (const DBOVariable& var)
+{
+    boost::mutex::scoped_lock l(connection_mutex_);
 
-//    Buffer *string_buffer;
-//    PropertyList list;
-//    list.addProperty("min", PropertyDataType::STRING);
-//    list.addProperty("max", PropertyDataType::STRING);
+    PropertyList list;
+    list.addProperty("min", PropertyDataType::STRING);
+    list.addProperty("max", PropertyDataType::STRING);
 
-//    // get min max as strings
+    // get min max as strings
 
-//    if (!var->isMetaVariable())
-//    {
-//        logdbg  << "DBInterface: getMinMax: is not meta";
-//        DBCommand command;
-//        command.setCommandString(sql_generator_->getSelectMinMaxStatement(var->getId(), var->getDBOType()));
+    //    if (!var->isMetaVariable())
+    //    {
+    logdbg  << "DBInterface: getMinMax: is not meta";
+    DBCommand command;
+    command.set(sql_generator_.getSelectMinMaxStatement(var.name(), var.dboName()));
 
-//        command.setPropertyList(list);
+    command.list(list);
 
-//        DBResult *result = connection_->execute(&command);
+    std::shared_ptr<DBResult> result = current_connection_->execute(command);
 
-//        assert (result->containsData());
-//        string_buffer = result->getBuffer();
-//        assert (string_buffer);
-//        if (string_buffer->size() != 1)
-//        {
-//            logwrn  << "DBInterface: getMinMaxString: string buffer for variaible " << var->getId() << " empty";
-//        }
-//        delete result;
-//    }
-//    else
-//    {
-//        logdbg  << "DBInterface: getMinMax: is meta";
-//        DBCommandList command_list;
+    assert (result);
+    assert (result->containsData());
+    std::shared_ptr<Buffer> buffer = result->buffer();
 
-//        const std::map <std::string, std::string> &subvars = var->getSubVariables ();
-//        std::map <std::string, std::string>::const_iterator it;
+    assert (buffer);
+    if (buffer->size() != 1)
+    {
+        logwrn  << "DBInterface: getMinMaxString: string buffer for variaible " << var.name() << " empty";
+        return std::pair <std::string, std::string> ("NULL", "NULL");
+    }
 
-//        for (it =subvars.begin(); it != subvars.end(); it++)
-//        {
-//            if (exists_[it->first])
-//                command_list.addCommandString(sql_generator_->getSelectMinMaxStatement(it->second, it->first));
-//        }
+    std::string min = buffer->getString("min").get(0);
+    std::string max = buffer->getString("max").get(0);
 
-//        command_list.setPropertyList(list);
+    loginf << "DBInterface: getMinMaxString: var " << var.name() << " min " << min << " max " << max;
 
-//        DBResult *result = connection_->execute(&command_list);
+    // TODO factor in units && representation?
+    return std::pair <std::string, std::string> (min, max);
 
-//        assert (result->containsData());
-//        string_buffer = result->getBuffer();
-//        assert (string_buffer);
-//        delete result;
-//    }
+    //    else
+    //    {
+    //        logdbg  << "DBInterface: getMinMax: is meta";
+    //        DBCommandList command_list;
 
-//    // got final (possibly multiple) min max in a buffer
+    //        const std::map <std::string, std::string> &subvars = var->getSubVariables ();
+    //        std::map <std::string, std::string>::const_iterator it;
 
-//    assert (false);
-//    // TODO FIXMME
+    //        for (it =subvars.begin(); it != subvars.end(); it++)
+    //        {
+    //            if (exists_[it->first])
+    //                command_list.addCommandString(sql_generator_->getSelectMinMaxStatement(it->second, it->first));
+    //        }
 
-////    for (unsigned int cnt=0; cnt < string_buffer->size(); cnt++)
-////    {
-////        logdbg << "DBInterface: getMinMax: var " << var->getName() << " cnt " << cnt
-////                << " string min " << *((std::string*)string_buffer->get(cnt,0))
-////                << " max " << *((std::string*)string_buffer->get(cnt,1));
-////    }
+    //        command_list.setPropertyList(list);
 
-////    Buffer *data_buffer = createFromMinMaxStringBuffer (string_buffer, var->getDBOType());
+    //        DBResult *result = connection_->execute(&command_list);
 
-////    // only 1 minmax line
-////    assert (data_buffer->size() == 1);
+    //        assert (result->containsData());
+    //        string_buffer = result->getBuffer();
+    //        assert (string_buffer);
+    //        delete result;
+    //    }
 
-////    // check unit transformation
+    // got final (possibly multiple) min max in a buffer
 
-////    DBOVariable *tmpvar = var->getFirst();
+    //    for (unsigned int cnt=0; cnt < string_buffer->size(); cnt++)
+    //    {
+    //        logdbg << "DBInterface: getMinMax: var " << var->getName() << " cnt " << cnt
+    //                << " string min " << *((std::string*)string_buffer->get(cnt,0))
+    //                << " max " << *((std::string*)string_buffer->get(cnt,1));
+    //    }
 
-////    std::string meta_tablename = tmpvar->getCurrentMetaTable ();
-////    std::string table_varname = tmpvar->getCurrentVariableName ();
+    //    Buffer *data_buffer = createFromMinMaxStringBuffer (string_buffer, var->getDBOType());
 
-////    DBTableColumn *table_column = DBSchemaManager::getInstance().getCurrentSchema ()->getMetaTable(meta_tablename)->getTableColumn(table_varname);
+    //    // only 1 minmax line
+    //    assert (data_buffer->size() == 1);
 
-////    if (tmpvar->hasUnit () || table_column->hasUnit())
-////    {
-////        if (tmpvar->hasUnit () != table_column->hasUnit())
-////        {
-////            logerr << "DBInterface: getMinMax: unit transformation inconsistent: var " << tmpvar->getName () << " has unit " << tmpvar->hasUnit ()
-////                                                      << " table column " << table_column->getName() << " has unit " << table_column->hasUnit();
-////            throw std::runtime_error ("DBInterface: getMinMax: unit transformation error 1");
-////        }
+    //    // check unit transformation
 
-////        if (tmpvar->getUnitDimension().compare(table_column->getUnitDimension()) != 0)
-////        {
-////            logerr << "DBInterface: getMinMax: unit transformation inconsistent: var " << tmpvar->getName () << " has dimension " << tmpvar->getUnitDimension ()
-////                                                      << " table column " << table_column->getName() << " has dimension " << table_column->getUnitDimension();
-////            throw std::runtime_error ("DBInterface: getMinMax: unit transformation error 2");
-////        }
+    //    DBOVariable *tmpvar = var->getFirst();
 
-////        Unit *unit = UnitManager::getInstance().getUnit (tmpvar->getUnitDimension());
-////        double factor = unit->getFactor (table_column->getUnitUnit(), tmpvar->getUnitUnit());
-////        logdbg  << "DBInterface: getMinMax: adapting " << tmpvar->getName () << " unit transformation with factor " << factor;
+    //    std::string meta_tablename = tmpvar->getCurrentMetaTable ();
+    //    std::string table_varname = tmpvar->getCurrentVariableName ();
 
-////        multiplyData (data_buffer->get(0,0), (PROPERTY_DATA_TYPE) tmpvar->data_type_int_, factor);
-////        multiplyData (data_buffer->get(0,1), (PROPERTY_DATA_TYPE) tmpvar->data_type_int_, factor);
-////    }
-////    // write values back to string buffer
-////    *((std::string *)(string_buffer->get(0,0))) = tmpvar->getValueFrom (data_buffer->get(0,0));
-////    *((std::string *)(string_buffer->get(0,1))) = tmpvar->getValueFrom (data_buffer->get(0,1));
+    //    DBTableColumn *table_column = DBSchemaManager::getInstance().getCurrentSchema ()->getMetaTable(meta_tablename)->getTableColumn(table_varname);
 
-////    delete data_buffer;
+    //    if (tmpvar->hasUnit () || table_column->hasUnit())
+    //    {
+    //        if (tmpvar->hasUnit () != table_column->hasUnit())
+    //        {
+    //            logerr << "DBInterface: getMinMax: unit transformation inconsistent: var " << tmpvar->getName () << " has unit " << tmpvar->hasUnit ()
+    //                                                      << " table column " << table_column->getName() << " has unit " << table_column->hasUnit();
+    //            throw std::runtime_error ("DBInterface: getMinMax: unit transformation error 1");
+    //        }
 
-//    return string_buffer;
-//}
+    //        if (tmpvar->getUnitDimension().compare(table_column->getUnitDimension()) != 0)
+    //        {
+    //            logerr << "DBInterface: getMinMax: unit transformation inconsistent: var " << tmpvar->getName () << " has dimension " << tmpvar->getUnitDimension ()
+    //                                                      << " table column " << table_column->getName() << " has dimension " << table_column->getUnitDimension();
+    //            throw std::runtime_error ("DBInterface: getMinMax: unit transformation error 2");
+    //        }
+
+    //        Unit *unit = UnitManager::getInstance().getUnit (tmpvar->getUnitDimension());
+    //        double factor = unit->getFactor (table_column->getUnitUnit(), tmpvar->getUnitUnit());
+    //        logdbg  << "DBInterface: getMinMax: adapting " << tmpvar->getName () << " unit transformation with factor " << factor;
+
+    //        multiplyData (data_buffer->get(0,0), (PROPERTY_DATA_TYPE) tmpvar->data_type_int_, factor);
+    //        multiplyData (data_buffer->get(0,1), (PROPERTY_DATA_TYPE) tmpvar->data_type_int_, factor);
+    //    }
+    //    // write values back to string buffer
+    //    *((std::string *)(string_buffer->get(0,0))) = tmpvar->getValueFrom (data_buffer->get(0,0));
+    //    *((std::string *)(string_buffer->get(0,1))) = tmpvar->getValueFrom (data_buffer->get(0,1));
+
+    //    delete data_buffer;
+
+    //    return string_buffer;
+}
 
 //std::map <std::pair<std::string, std::string>, std::pair<std::string, std::string> > DBInterface::getMinMaxInfo ()
 //{
@@ -639,19 +645,33 @@ void DBInterface::setPostProcessed (bool value)
 
 void DBInterface::postProcess ()
 {
-    loginf << "DBInterface: postProcess: creating active data sources jobs";
+    loginf << "DBInterface: postProcess: creating jobs";
+
+    if (!existsMinMaxTable())
+        createMinMaxTable();
+    else
+        clearTableContent (TABLE_NAME_MINMAX);
 
     for (auto obj_it : ATSDB::instance().objectManager().objects())
     {
         if (!obj_it.second->hasData())
             continue;
 
-        DBOActiveDataSourcesDBJob *job = new DBOActiveDataSourcesDBJob (ATSDB::instance().interface(), *obj_it.second);
+        {
+            DBOActiveDataSourcesDBJob* job = new DBOActiveDataSourcesDBJob (ATSDB::instance().interface(), *obj_it.second);
 
-        std::shared_ptr<Job> shared_job = std::shared_ptr<Job> (job);
-        connect (job, SIGNAL(doneSignal()), this, SLOT(postProcessingJobDoneSlot()), Qt::QueuedConnection);
-        JobManager::instance().addDBJob(shared_job);
-        postprocess_jobs_.push_back(shared_job);
+            std::shared_ptr<Job> shared_job = std::shared_ptr<Job> (job);
+            connect (job, SIGNAL(doneSignal()), this, SLOT(postProcessingJobDoneSlot()), Qt::QueuedConnection);
+            JobManager::instance().addDBJob(shared_job);
+            postprocess_jobs_.push_back(shared_job);
+        }
+        {
+            PostProcessDBJob* job = new PostProcessDBJob (ATSDB::instance().interface(), *obj_it.second);
+            std::shared_ptr<Job> shared_job = std::shared_ptr<Job> (job);
+            connect (job, SIGNAL(doneSignal()), this, SLOT(postProcessingJobDoneSlot()), Qt::QueuedConnection);
+            JobManager::instance().addDBJob(shared_job);
+            postprocess_jobs_.push_back(shared_job);
+        }
     }
 
     assert (!postprocess_dialog_);
@@ -809,14 +829,14 @@ std::set<int> DBInterface::getActiveDataSources (const DBObject &object)
 //}
 
 void DBInterface::prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause, std::vector <DBOVariable *> filtered_variables,
-        bool use_order, DBOVariable *order_variable, bool use_order_ascending, const std::string &limit)
+                               bool use_order, DBOVariable *order_variable, bool use_order_ascending, const std::string &limit)
 {
     connection_mutex_.lock();
     assert (current_connection_);
 
-//    getSelectCommand (const DBObject &object, const PropertyList &variables
-//                                               const std::string &filter, const std::vector <std::string> &filtered_variable_names,  DBOVariable *order,
-//                                               const std::string &limit, bool left_join)
+    //    getSelectCommand (const DBObject &object, const PropertyList &variables
+    //                                               const std::string &filter, const std::vector <std::string> &filtered_variable_names,  DBOVariable *order,
+    //                                               const std::string &limit, bool left_join)
 
     std::shared_ptr<DBCommand> read = sql_generator_.getSelectCommand (dbobject.currentMetaTable(), read_list, custom_filter_clause, filtered_variables, use_order, order_variable,
                                                                        use_order_ascending, limit, true);
@@ -863,16 +883,16 @@ std::shared_ptr <Buffer> DBInterface::readDataChunk (const DBObject &dbobject, b
 
     assert (!activate_key_search); // TODO FIXXXXME
 
-//    if (activate_key_search)
-//    {
-//        assert (DBObjectManager::getInstance().existsDBOVariable (DBO_UNDEFINED, "id"));
-//        assert (DBObjectManager::getInstance().getDBOVariable (DBO_UNDEFINED, "id")->existsIn (type));
-//        std::string id_name = DBObjectManager::getInstance().getDBOVariable (DBO_UNDEFINED, "id")->getFor(type)->getName();
-//        assert (buffer->getPropertyList()->hasProperty(id_name));
-//        logdbg << "DBInterface: readDataChunk: key search id " << id_name << " index " << buffer->getPropertyList()->getPropertyIndex(id_name)
-//                                                    << " buffer first " << buffer->getFirstWrite() << " size " << buffer->getSize();
-//        buffer->activateKeySearch(buffer->getPropertyList()->getPropertyIndex(id_name));
-//    }
+    //    if (activate_key_search)
+    //    {
+    //        assert (DBObjectManager::getInstance().existsDBOVariable (DBO_UNDEFINED, "id"));
+    //        assert (DBObjectManager::getInstance().getDBOVariable (DBO_UNDEFINED, "id")->existsIn (type));
+    //        std::string id_name = DBObjectManager::getInstance().getDBOVariable (DBO_UNDEFINED, "id")->getFor(type)->getName();
+    //        assert (buffer->getPropertyList()->hasProperty(id_name));
+    //        logdbg << "DBInterface: readDataChunk: key search id " << id_name << " index " << buffer->getPropertyList()->getPropertyIndex(id_name)
+    //                                                    << " buffer first " << buffer->getFirstWrite() << " size " << buffer->getSize();
+    //        buffer->activateKeySearch(buffer->getPropertyList()->getPropertyIndex(id_name));
+    //    }
 
     return buffer;
 }
@@ -897,12 +917,15 @@ void DBInterface::createPropertiesTable ()
 
     updateTableInfo ();
 }
-//void DBInterface::createMinMaxTable ()
-//{
-//    assert (!existsMinMaxTable());
-//    boost::mutex::scoped_lock l(mutex_);
-//    connection_->executeSQL(sql_generator_->getTableMinMaxCreateStatement());
-//}
+void DBInterface::createMinMaxTable ()
+{
+    assert (!existsMinMaxTable());
+    connection_mutex_.lock();
+    current_connection_->executeSQL(sql_generator_.getTableMinMaxCreateStatement());
+    connection_mutex_.unlock();
+
+    updateTableInfo ();
+}
 
 ///**
 // * Gets SQL command from SQLGenerator, executes it, transforms units on results if required, returns buffer.
@@ -978,23 +1001,23 @@ void DBInterface::createPropertiesTable ()
 
 
 
-//void DBInterface::clearTableContent (std::string table_name)
-//{
-//    boost::mutex::scoped_lock l(mutex_);
-//    //DELETE FROM tablename;
-//    connection_->executeSQL("DELETE FROM "+table_name+";");
-//}
+void DBInterface::clearTableContent (const std::string& table_name)
+{
+    boost::mutex::scoped_lock l(connection_mutex_);
+    //DELETE FROM tablename;
+    current_connection_->executeSQL("DELETE FROM "+table_name+";");
+}
 
-//DBResult *DBInterface::queryMinMaxNormalForTable (std::string table)
-//{
-//    boost::mutex::scoped_lock l(mutex_);
-//    logdbg  << "DBInterface: queryMinMaxForTable: getting command";
-//    DBCommand *command = sql_generator_->getTableSelectMinMaxNormalStatement (table);
+std::shared_ptr<DBResult> DBInterface::queryMinMaxNormalForTable (const DBTable& table)
+{
+    boost::mutex::scoped_lock l(connection_mutex_);
+    logdbg  << "DBInterface: queryMinMaxForTable: getting command";
+    std::shared_ptr <DBCommand> command = sql_generator_.getTableSelectMinMaxNormalStatement (table);
 
-//    //loginf  << "DBInterface: queryMinMaxForTable: executing command '" << command->getCommandString() << "'";
-//    DBResult *result = connection_->execute(command);
-//    return result;
-//}
+    //loginf  << "DBInterface: queryMinMaxForTable: executing command '" << command->getCommandString() << "'";
+    std::shared_ptr<DBResult> result = current_connection_->execute(*command);
+    return result;
+}
 
 //DBResult *DBInterface::queryMinMaxForColumn (DBTableColumn *column, std::string table)
 //{

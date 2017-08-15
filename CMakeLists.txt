@@ -168,7 +168,7 @@ set ( atsdb_HDRS
     #        src/job/dboinfodbjob.h
     #        src/job/updatebufferdbjob.h
     #        src/job/writebufferdbjob.h
-    #src/job/postprocessdbjob.h
+    src/job/postprocessdbjob.h
     #        src/job/transformationjob.h
     src/object/dbovariable.h
     src/object/dbovariableset.h
@@ -314,7 +314,7 @@ set ( atsdb_SRCS
     src/job/buffercsvexportjob.cpp
     #        src/job/updatebufferdbjob.cpp
     #        src/job/writebufferdbjob.cpp
-    #src/job/postprocessdbjob.cpp
+    src/job/postprocessdbjob.cpp
     #        src/job/transformationjob.cpp
     src/object/dbobject.cpp
     src/object/dbobjectwidget.cpp

@@ -127,10 +127,6 @@ public:
     std::string subTableNames () const;
     void addSubTable (const std::string &local_key, const std::string &sub_table_name, const std::string &sub_table_key);
     void removeSubTable (const std::string& name);
-    /// @brief Returns string with all table names (own and sub metas) as comma separated list
-    //std::string allTableNames () const { return tableName()+ ", " + subTableNames (); }
-    /// @brief Returns container with all table names
-    //std::vector<std::string> allTableNamesVector () const;
 
     /// @brief Returns container with all sub meta-table definitions
     const std::map <std::string, SubTableDefinition*>& subTableDefinitions () const { return sub_table_definitions_; }

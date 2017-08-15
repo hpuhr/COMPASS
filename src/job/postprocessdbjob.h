@@ -25,7 +25,11 @@
 #ifndef POSTPROCESSDBJOB_H_
 #define POSTPROCESSDBJOB_H_
 
-#include "DBJob.h"
+#include "job.h"
+
+class DBObject;
+class DBInterface;
+class DBTable;
 
 /**
  * @brief Post-processing Job
@@ -33,23 +37,22 @@
  * Updates meta-information about database content: A list of active data sources and minimum/maximum values of all
  * variables.
  *
- * Note: Not in use, since information is now generated on demand.
  */
-class PostProcessDBJob : public DBJob
+class PostProcessDBJob : public Job
 {
 public:
-  PostProcessDBJob(JobOrderer *orderer, boost::function<void (Job*)> done_function,
-      boost::function<void (Job*)> obsolete_function, DBInterface *db_interface);
-  virtual ~PostProcessDBJob();
+    PostProcessDBJob(DBInterface& db_interface, const DBObject& object);
+    virtual ~PostProcessDBJob();
 
-  virtual void execute ();
+    virtual void run ();
 
 protected:
-  /// @brief Creates properties table and values
-  //void createProperties ();
-  /// @brief Creates minimum/maximum table and values
-  void createMinMaxValuesSpecial ();
-  void createMinMaxValuesNormal ();
+    DBInterface& db_interface_;
+    const DBObject& object_;
+    /// @brief Creates minimum/maximum table and values
+    //void createMinMaxValuesSpecial ();
+    void createMinMaxValuesNormal ();
+    void processTable (const DBTable& table);
 };
 
 #endif /* POSTPROCESSDBJOB_H_ */
