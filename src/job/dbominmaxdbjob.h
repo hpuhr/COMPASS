@@ -15,15 +15,8 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * PostProcessDBJob.h
- *
- *  Created on: Feb 5, 2013
- *      Author: sk
- */
-
-#ifndef POSTPROCESSDBJOB_H_
-#define POSTPROCESSDBJOB_H_
+#ifndef DBOMINMAXDBJOB_H_
+#define DBOMINMAXDBJOB_H_
 
 #include "job.h"
 
@@ -38,11 +31,11 @@ class DBTable;
  * variables.
  *
  */
-class PostProcessDBJob : public Job
+class DBOMinMaxDBJob : public Job
 {
 public:
-    PostProcessDBJob(DBInterface& db_interface, const DBObject& object);
-    virtual ~PostProcessDBJob();
+    DBOMinMaxDBJob(DBInterface& db_interface, const DBObject& object);
+    virtual ~DBOMinMaxDBJob();
 
     virtual void run ();
 
@@ -55,4 +48,4 @@ protected:
     void processTable (const DBTable& table);
 };
 
-#endif /* POSTPROCESSDBJOB_H_ */
+#endif /* DBOMINMAXDBJOB_H_ */

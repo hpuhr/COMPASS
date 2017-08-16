@@ -44,7 +44,7 @@
 //#include "StructureDescriptionManager.h"
 #include "jobmanager.h"
 #include "dboactivedatasourcesdbjob.h"
-#include "postprocessdbjob.h"
+#include "dbominmaxdbjob.h"
 #include "dimension.h"
 #include "unit.h"
 #include "unitmanager.h"
@@ -666,7 +666,7 @@ void DBInterface::postProcess ()
             postprocess_jobs_.push_back(shared_job);
         }
         {
-            PostProcessDBJob* job = new PostProcessDBJob (ATSDB::instance().interface(), *obj_it.second);
+            DBOMinMaxDBJob* job = new DBOMinMaxDBJob (ATSDB::instance().interface(), *obj_it.second);
             std::shared_ptr<Job> shared_job = std::shared_ptr<Job> (job);
             connect (job, SIGNAL(doneSignal()), this, SLOT(postProcessingJobDoneSlot()), Qt::QueuedConnection);
             JobManager::instance().addDBJob(shared_job);

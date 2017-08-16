@@ -22,7 +22,7 @@
  *      Author: sk
  */
 
-#include "postprocessdbjob.h"
+#include "dbominmaxdbjob.h"
 #include "dbinterface.h"
 #include "sqlgenerator.h"
 #include "dbresult.h"
@@ -39,16 +39,16 @@
 
 using namespace Utils;
 
-PostProcessDBJob::PostProcessDBJob(DBInterface& db_interface, const DBObject& object)
+DBOMinMaxDBJob::DBOMinMaxDBJob(DBInterface& db_interface, const DBObject& object)
 : Job(), db_interface_(db_interface), object_(object)
 {
 }
 
-PostProcessDBJob::~PostProcessDBJob()
+DBOMinMaxDBJob::~DBOMinMaxDBJob()
 {
 }
 
-void PostProcessDBJob::run ()
+void DBOMinMaxDBJob::run ()
 {
     loginf  << "PostProcessDBJob: run: start";
 
@@ -150,7 +150,7 @@ void PostProcessDBJob::run ()
 //    }
 //}
 
-void PostProcessDBJob::createMinMaxValuesNormal ()
+void DBOMinMaxDBJob::createMinMaxValuesNormal ()
 {
     assert (db_interface_.existsMinMaxTable());
 
@@ -162,7 +162,7 @@ void PostProcessDBJob::createMinMaxValuesNormal ()
     }
 }
 
-void PostProcessDBJob::processTable (const DBTable& table)
+void DBOMinMaxDBJob::processTable (const DBTable& table)
 {
     loginf  << "DBInterface: processTable: getting minimum and maximum of all variables of table " << table.name();
 
