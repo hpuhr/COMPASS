@@ -4,6 +4,7 @@
 #include "dbobject.h"
 #include "buffercsvexportjob.h"
 #include "jobmanager.h"
+#include "global.h"
 
 BufferTableModel::BufferTableModel(QObject *parent, DBObject &object)
     :QAbstractTableModel(parent), object_(object)
@@ -62,7 +63,7 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
         assert (col < properties.size());
 
         PropertyDataType data_type = properties.at(col).dataType();
-        value_str = "NULL";
+        value_str = NULL_STRING;
 
         if (data_type == PropertyDataType::BOOL)
         {

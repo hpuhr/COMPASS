@@ -168,3 +168,44 @@ Utils::String::Representation MetaDBOVariable::representation ()
     return representation;
 }
 
+std::string MetaDBOVariable::getMinString ()
+{
+    std::string value_string;
+
+    for (auto variable_it : variables_)
+    {
+        if (value_string.size() == 0)
+            value_string = variable_it.second.getMinString();
+        else
+            value_string = Utils::String::getSmallerValueString (value_string, variable_it.second.getMinString(), dataType());
+    }
+    assert (value_string.size());
+    return value_string;
+}
+
+std::string MetaDBOVariable::getMaxString ()
+{
+    std::string value_string;
+
+    for (auto variable_it : variables_)
+    {
+        if (value_string.size() == 0)
+            value_string = variable_it.second.getMaxString();
+        else
+            value_string = Utils::String::getLargerValueString (value_string, variable_it.second.getMaxString(), dataType());
+    }
+    assert (value_string.size());
+    return value_string;
+}
+
+std::string MetaDBOVariable::getMinStringRepresentation ()
+{
+    return Utils::String::getRepresentationStringFromValue(getMinString(), dataType(), variables_.begin()->second.representation());
+}
+
+std::string MetaDBOVariable::getMaxStringRepresentation ()
+{
+    return Utils::String::getRepresentationStringFromValue(getMaxString(), dataType(), variables_.begin()->second.representation());
+
+}
+

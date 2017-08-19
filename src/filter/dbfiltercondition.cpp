@@ -164,7 +164,7 @@ std::string DBFilterCondition::getConditionString (const std::string &dbo_name, 
     }
     first=false;
 
-    ss << variable_prefix << table_db_name << "." << column.name() << variable_suffix << " " << operator_ << getTransformedValue (value_, variable);
+    ss << variable_prefix << table_db_name << "." << column.name() << variable_suffix << " " << operator_  << " " << getTransformedValue (value_, variable);
 
     if (find (filtered_variables.begin(), filtered_variables.end(), variable) == filtered_variables.end())
         filtered_variables.push_back(variable);
@@ -220,7 +220,7 @@ void DBFilterCondition::setVariable (DBOVariable *variable)
 
 void DBFilterCondition::update ()
 {
-    assert (variable_);
+    assert (variable_ || meta_variable_);
 
     label_->setText(tr((variable_name_+" "+operator_).c_str()));
     edit_->setText (tr(value_.c_str()));
@@ -235,13 +235,31 @@ void DBFilterCondition::reset ()
 
         if (reset_value_.compare ("MIN") == 0)
         {
-            value = variable_->getMinStringRepresentation();
-            logdbg << "DBFilterCondition: reset: value " << variable_->getMinString() << " repr " << value;
+            if (variable_)
+            {
+                value = variable_->getMinStringRepresentation();
+                logdbg << "DBFilterCondition: reset: value " << value << " repr " << value;
+            }
+            else
+            {
+                assert (meta_variable_);
+                value = meta_variable_->getMinStringRepresentation();
+                logdbg << "DBFilterCondition: reset: value " << value << " repr " << value;
+            }
         }
         else if (reset_value_.compare ("MAX") == 0)
         {
-            value = variable_->getMaxStringRepresentation();
-            logdbg << "DBFilterCondition: reset: value " << variable_->getMaxString() << " repr " << value;
+            if (variable_)
+            {
+                value = variable_->getMaxStringRepresentation();
+                logdbg << "DBFilterCondition: reset: value " << value << " repr " << value;
+            }
+            else
+            {
+                assert (meta_variable_);
+                value = meta_variable_->getMaxStringRepresentation();
+                logdbg << "DBFilterCondition: reset: value " << value << " repr " << value;
+            }
         }
     }
     else
@@ -331,7 +349,7 @@ std::string DBFilterCondition::getTransformedValue (const std::string& untransfo
             double factor = dimension.getFactor (column.unit(), variable->unit());
             logdbg  << "DBFilterCondition: getTransformedValue: correct unit transformation with factor " << factor;
 
-            value_str = String::multiplyString(value_str, 1.0/factor, variable_->dataType());
+            value_str = String::multiplyString(value_str, 1.0/factor, variable->dataType());
         }
         logdbg << "DBFilterCondition: getTransformedValue: transformed value string " << value_str;
         transformed_value_strings.push_back(value_str);

@@ -27,6 +27,7 @@
 
 #include "logger.h"
 #include "property.h"
+#include "global.h"
 
 #include <vector>
 #include <iomanip>
@@ -305,6 +306,9 @@ inline std::string getRepresentationStringFromValue (const std::string& value_st
     logdbg << "String: getRepresentationStringFromValue: value " << value_str << " data_type " << Property::asString(data_type)
            << " representation " << Utils::String::representationToString(representation);
 
+    if (value_str == NULL_STRING)
+        return value_str;
+
     if (representation == Utils::String::Representation::STANDARD)
         return value_str;
 
@@ -365,6 +369,9 @@ inline std::string getRepresentationStringFromValue (const std::string& value_st
 
 inline std::string getValueStringFromRepresentation (const std::string& representation_str, Representation representation)
 {
+    if (representation_str == NULL_STRING)
+        return representation_str;
+
     if (representation == Utils::String::Representation::SECONDS_TO_TIME)
     {
         return getValueString(timeFromString (representation_str));
@@ -388,6 +395,8 @@ inline std::string getValueStringFromRepresentation (const std::string& represen
 }
 
 std::string multiplyString (const std::string& value_str, double factor, PropertyDataType data_type);
+const std::string& getLargerValueString (const std::string& value_a_str, const std::string& value_b_str, PropertyDataType data_type);
+const std::string& getSmallerValueString (const std::string& value_a_str, const std::string& value_b_str, PropertyDataType data_type);
 }
 
 

@@ -25,6 +25,7 @@ static const unsigned int UI_ICON_BUTTON_MAX_WIDTH=40;
 static const bool UI_ICON_BUTTON_FLAT=true;
 static const unsigned int FRAME_SIZE=1;
 static const std::string META_OBJECT_NAME="Meta";
+static const std::string NULL_STRING="NULL";
 
 /// If an old ogre library (1.6.x) is used.
 //#define USE_OLD_OGRE 0

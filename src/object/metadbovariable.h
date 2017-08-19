@@ -40,6 +40,11 @@ public:
     std::string description() const;
     void description(const std::string &description);
 
+    std::string getMinString ();
+    std::string getMaxString ();
+    std::string getMinStringRepresentation ();
+    std::string getMaxStringRepresentation ();
+
     MetaDBOVariableWidget *widget ();
 
 protected:

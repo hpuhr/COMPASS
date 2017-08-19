@@ -33,6 +33,9 @@ std::string Utils::String::multiplyString (const std::string& value_str, double 
 {
     logdbg << "String: multiplyString: value " << value_str << " factor " << factor << " data_type " << Property::asString(data_type);
 
+    if (value_str == NULL_STRING)
+        return value_str;
+
     std::string return_string;
 
     switch (data_type)
@@ -111,3 +114,129 @@ std::string Utils::String::multiplyString (const std::string& value_str, double 
 
     return return_string;
 }
+
+const std::string& Utils::String::getLargerValueString (const std::string& value_a_str, const std::string& value_b_str, PropertyDataType data_type)
+{
+    logdbg << "String: getLargerValueString: value a " << value_a_str << " b " << value_b_str << " data_type " << Property::asString(data_type);
+
+    if (value_a_str == NULL_STRING || value_b_str == NULL_STRING)
+    {
+        if (value_a_str != NULL_STRING)
+            return value_a_str;
+        if (value_b_str != NULL_STRING)
+            return value_b_str;
+        return NULL_STRING;
+    }
+
+    switch (data_type)
+    {
+    case PropertyDataType::BOOL:
+    case PropertyDataType::UCHAR:
+    case PropertyDataType::UINT:
+    case PropertyDataType::ULONGINT:
+    {
+        if (std::stoul(value_a_str) > std::stoul(value_b_str))
+            return value_a_str;
+        else
+            return value_b_str;
+    }
+    case PropertyDataType::CHAR:
+    case PropertyDataType::INT:
+    {
+        if (std::stoi(value_a_str) > std::stoi(value_b_str))
+            return value_a_str;
+        else
+            return value_b_str;
+    }
+    case PropertyDataType::LONGINT:
+    {
+        if (std::stol(value_a_str) > std::stol(value_b_str))
+            return value_a_str;
+        else
+            return value_b_str;
+    }
+    case PropertyDataType::FLOAT:
+    {
+        if (std::stof(value_a_str) > std::stof(value_b_str))
+            return value_a_str;
+        else
+            return value_b_str;
+    }
+    case PropertyDataType::DOUBLE:
+    {
+        if (std::stod(value_a_str) > std::stod(value_b_str))
+            return value_a_str;
+        else
+            return value_b_str;
+    }
+    case PropertyDataType::STRING:
+        throw std::invalid_argument ("String: getLargerValueString: operation on string variable impossible");
+    default:
+        logerr  <<  "String: getLargerValueString:: unknown property type " << Property::asString(data_type);
+        throw std::runtime_error ("String: getLargerValueString:: unknown property type " + Property::asString(data_type));
+    }
+}
+
+const std::string& Utils::String::getSmallerValueString (const std::string& value_a_str, const std::string& value_b_str, PropertyDataType data_type)
+{
+    logdbg << "String: getSmallerValueString: value a " << value_a_str << " b " << value_b_str << " data_type " << Property::asString(data_type);
+
+    if (value_a_str == NULL_STRING || value_b_str == NULL_STRING)
+    {
+        if (value_a_str != NULL_STRING)
+            return value_a_str;
+        if (value_b_str != NULL_STRING)
+            return value_b_str;
+        return NULL_STRING;
+    }
+
+
+    switch (data_type)
+    {
+    case PropertyDataType::BOOL:
+    case PropertyDataType::UCHAR:
+    case PropertyDataType::UINT:
+    case PropertyDataType::ULONGINT:
+    {
+        if (std::stoul(value_a_str) < std::stoul(value_b_str))
+            return value_a_str;
+        else
+            return value_b_str;
+    }
+    case PropertyDataType::CHAR:
+    case PropertyDataType::INT:
+    {
+        if (std::stoi(value_a_str) < std::stoi(value_b_str))
+            return value_a_str;
+        else
+            return value_b_str;
+    }
+    case PropertyDataType::LONGINT:
+    {
+        if (std::stol(value_a_str) < std::stol(value_b_str))
+            return value_a_str;
+        else
+            return value_b_str;
+    }
+    case PropertyDataType::FLOAT:
+    {
+        if (std::stof(value_a_str) < std::stof(value_b_str))
+            return value_a_str;
+        else
+            return value_b_str;
+    }
+    case PropertyDataType::DOUBLE:
+    {
+        if (std::stod(value_a_str) < std::stod(value_b_str))
+            return value_a_str;
+        else
+            return value_b_str;
+    }
+    case PropertyDataType::STRING:
+        throw std::invalid_argument ("String: getSmallerValueString: operation on string variable impossible");
+    default:
+        logerr  <<  "String: getSmallerValueString:: unknown property type " << Property::asString(data_type);
+        throw std::runtime_error ("String: getSmallerValueString:: unknown property type " + Property::asString(data_type));
+    }
+}
+

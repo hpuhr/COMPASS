@@ -1,30 +1,30 @@
 <Configuration class_id="FilterManager" instance_id="FilterManager0">
     <ParameterString db_id="MySQL:_Localhost:_job_awam_0023"/>
-    <Configuration class_id="DBFilter" instance_id="Radar Time of Day">
-        <ParameterBool active="1"/>
+    <Configuration class_id="DBFilter" instance_id="Time of Day">
+        <ParameterBool active="0"/>
         <ParameterBool changed="1"/>
         <ParameterBool op_and_="1"/>
         <ParameterBool visible="0"/>
-        <ParameterString name="Radar Time of Day"/>
-        <Configuration class_id="DBFilterCondition" instance_id="Radar Time of DayCondition0">
+        <ParameterString name="Time of Day"/>
+        <Configuration class_id="DBFilterCondition" instance_id="Time of DayCondition0">
             <ParameterBool absolute_value="0"/>
             <ParameterBool op_and="1"/>
             <ParameterString operator="&gt;="/>
             <ParameterString reset_value="MIN"/>
             <ParameterString value="08:59:58.000"/>
-            <ParameterString variable_dbo_name="Radar"/>
+            <ParameterString variable_dbo_name="Meta"/>
             <ParameterString variable_name="tod"/>
         </Configuration>
-        <Configuration class_id="DBFilterCondition" instance_id="Radar Time of DayCondition1">
+        <Configuration class_id="DBFilterCondition" instance_id="Time of DayCondition1">
             <ParameterBool absolute_value="0"/>
             <ParameterBool op_and="1"/>
             <ParameterString operator="&lt;="/>
             <ParameterString reset_value="MAX"/>
             <ParameterString value="13:59:59.000"/>
-            <ParameterString variable_dbo_name="Radar"/>
+            <ParameterString variable_dbo_name="Meta"/>
             <ParameterString variable_name="tod"/>
         </Configuration>
-        <Configuration class_id="DBFilterWidget" instance_id="Radar Time of DayWidget0">
+        <Configuration class_id="DBFilterWidget" instance_id="Time of DayWidget0">
             <ParameterBool visible="1"/>
         </Configuration>
     </Configuration>

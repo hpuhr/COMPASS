@@ -454,6 +454,9 @@ void DBInterface::insertMinMax (const std::string& id, const std::string& object
  */
 std::pair<std::string, std::string> DBInterface::getMinMaxString (const DBOVariable& var)
 {
+    if (!var.dbObject().count()) // object doesn't exist in this database
+        return std::pair<std::string, std::string> (NULL_STRING, NULL_STRING);
+
     boost::mutex::scoped_lock l(connection_mutex_);
 
     PropertyList list;

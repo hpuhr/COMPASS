@@ -36,6 +36,7 @@
 #include "dbtable.h"
 #include "dbcommand.h"
 #include "string.h"
+#include "global.h"
 
 using namespace Utils;
 
@@ -201,13 +202,13 @@ void DBOMinMaxDBJob::processTable (const DBTable& table)
         assert (buffer->properties().hasProperty(col_it.first+"MAX"));
 
         if (buffer->getString(col_it.first+"MIN").isNone(0))
-            min = "NULL";
+            min = NULL_STRING;
         else
             min = buffer->getString(col_it.first+"MIN").get(0);
         minmax.push_back (min);
 
         if (buffer->getString(col_it.first+"MAX").isNone(0))
-            max = "NULL";
+            max = NULL_STRING;
         else
             max = buffer->getString(col_it.first+"MAX").get(0);
         minmax.push_back (max);
@@ -218,7 +219,7 @@ void DBOMinMaxDBJob::processTable (const DBTable& table)
         //                    continue;
         //                }
 
-        if (minmax.at(0) == "NULL" || minmax.at(1) == "NULL")
+        if (minmax.at(0) == NULL_STRING || minmax.at(1) == NULL_STRING)
         {
             loginf << "DBInterface: createMinMaxValues: id " << col_it.first << " object " << object_.name() << " has NULL values";
             continue;
