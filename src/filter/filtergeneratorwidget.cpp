@@ -115,11 +115,11 @@ void FilterGeneratorWidget::createGUIElements ()
   value_layout->addWidget(condition_value_);
 
   QPushButton *load_min = new QPushButton(tr("Load min"));
-  //connect(load_min, SIGNAL( clicked() ), this, SLOT( loadMin() ));
+  connect(load_min, SIGNAL( clicked() ), this, SLOT( loadMin() ));
   value_layout->addWidget(load_min);
 
   QPushButton *load_max = new QPushButton(tr("Load max"));
-  //connect(load_max, SIGNAL( clicked() ), this, SLOT( loadMax() ));
+  connect(load_max, SIGNAL( clicked() ), this, SLOT( loadMax() ));
   value_layout->addWidget(load_max);
 
   value_layout->addStretch();
@@ -170,26 +170,22 @@ void FilterGeneratorWidget::createGUIElements ()
   setLayout (layout);
 }
 
-//void FilterGeneratorWidget::loadMin ()
-//{
-//  assert (condition_variable_widget_);
-//  DBOVariable *var = condition_variable_widget_->selectedVariable();
+void FilterGeneratorWidget::loadMin ()
+{
+  assert (condition_variable_widget_);
+  DBOVariable &var = condition_variable_widget_->selectedVariable(); //TODO
 
-//  // TOFO FIX REPRESENTATION
-//  assert (false);
-////  std::string min = var->getRepresentationFromValue(ATSDB::getInstance().getMinAsString (var));
-////  condition_value_->setText (tr(min.c_str()));
-//}
-//void FilterGeneratorWidget::loadMax ()
-//{
-//  assert (condition_variable_widget_);
-//  DBOVariable *var = condition_variable_widget_->getSelectedVariable();
+  std::string min = var.getMinStringRepresentation();
+  condition_value_->setText (tr(min.c_str()));
+}
+void FilterGeneratorWidget::loadMax ()
+{
+  assert (condition_variable_widget_);
+  DBOVariable &var = condition_variable_widget_->selectedVariable();  //TODO
 
-//  // TOFO FIX REPRESENTATION
-//  assert (false);
-////  std::string max = var->getRepresentationFromValue(ATSDB::getInstance().getMaxAsString (var));
-////  condition_value_->setText (tr(max.c_str()));
-//}
+  std::string max = var.getMaxStringRepresentation();
+  condition_value_->setText (tr(max.c_str()));
+}
 
 void FilterGeneratorWidget::addCondition ()
 {

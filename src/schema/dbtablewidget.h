@@ -45,7 +45,7 @@ public slots:
 //    void createColumnsFromDB ();
 //    void createNewColumnsFromDB ();
     /// @brief Sets a special null value
-    void setSpecialNull (const QString &text);
+//    void setSpecialNull (const QString &text);
 
 public:
     /// @brief Constructor
@@ -64,7 +64,7 @@ protected:
     QGridLayout *column_grid_;
 
     /// Container with all column special null edit fields
-    std::map <QLineEdit *, DBTableColumn* > column_grid_special_nulls_;
+    //std::map <QLineEdit *, DBTableColumn* > column_grid_special_nulls_;
 
     /// @brief Updates the table columns grid
     void updateColumnGrid ();

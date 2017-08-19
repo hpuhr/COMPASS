@@ -466,9 +466,10 @@ std::pair<std::string, std::string> DBInterface::getMinMaxString (const DBOVaria
     //    {
     logdbg  << "DBInterface: getMinMax: is not meta";
     DBCommand command;
-    command.set(sql_generator_.getSelectMinMaxStatement(var.name(), var.dboName()));
-
+    command.set(sql_generator_.getSelectMinMaxStatement(var.currentDBColumn().name(), var.dboName()));
     command.list(list);
+
+    loginf << "DBInterface: getMinMaxString: sql '" << command.get() << "'";
 
     std::shared_ptr<DBResult> result = current_connection_->execute(command);
 
@@ -479,17 +480,29 @@ std::pair<std::string, std::string> DBInterface::getMinMaxString (const DBOVaria
     assert (buffer);
     if (buffer->size() != 1)
     {
-        logwrn  << "DBInterface: getMinMaxString: string buffer for variaible " << var.name() << " empty";
-        return std::pair <std::string, std::string> ("NULL", "NULL");
+        throw std::invalid_argument ("DBInterface: getMinMaxString: string buffer for variable " + var.name() + " empty");
     }
 
     std::string min = buffer->getString("min").get(0);
     std::string max = buffer->getString("max").get(0);
 
+    const DBTableColumn &column = var.currentDBColumn ();
+    if (column.unit() != var.unitConst()) // do unit conversion stuff
+    {
+        const Dimension &dimension = UnitManager::instance().dimension (var.dimensionConst());
+        double factor = dimension.getFactor (column.unit(), var.unitConst());
+
+        min = String::multiplyString(min, factor, var.dataType());
+        max = String::multiplyString(max, factor, var.dataType());
+    }
+
     loginf << "DBInterface: getMinMaxString: var " << var.name() << " min " << min << " max " << max;
+    return std::pair <std::string, std::string> (min, max);
+
+
 
     // TODO factor in units && representation?
-    return std::pair <std::string, std::string> (min, max);
+
 
     //    else
     //    {

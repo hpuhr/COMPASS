@@ -122,9 +122,6 @@ class DBOVariableWidget;
 class DBOVariable : public QObject, public Property, public Configurable
 {
     Q_OBJECT
-signals:
-    void minMaxInfoAvailableSignal();
-
 public:
     /// @brief Constructor
     DBOVariable(const std::string &class_id, const std::string &instance_id, DBObject *parent);
@@ -152,42 +149,39 @@ public:
     void description (const std::string &description) { description_=description; }
 
     /// @brief Returns of schema is present in schema_variables_
-    bool hasSchema (const std::string &schema);
+    bool hasSchema (const std::string &schema) const;
     /// @brief Returns meta table identifier for a given schema
-    const std::string &metaTable (const std::string &schema);
+    const std::string &metaTable (const std::string &schema) const;
     /// @brief Returns variable identifier for a given schema
-    const std::string &variableName (const std::string &schema);
+    const std::string &variableName (const std::string &schema) const;
 
-    bool hasCurrentDBColumn ();
-    const DBTableColumn &currentDBColumn ();
+    bool hasCurrentDBColumn () const;
+    const DBTableColumn &currentDBColumn () const;
 
     /// @brief Returns if current schema is present in schema_variables_
-    bool hasCurrentSchema ();
+    bool hasCurrentSchema () const;
     /// @brief Returns meta table identifier for current schema
-    const std::string &currentMetaTableString ();
+    const std::string &currentMetaTableString () const;
     /// @brief Returns meta table for current schema
-    const MetaDBTable &currentMetaTable ();
+    const MetaDBTable &currentMetaTable () const;
     /// @brief Returns variable identifier for current schema
-    const std::string &currentVariableIdentifier ();
+    const std::string &currentVariableIdentifier () const;
 
-    /// @brief Returns if unit information is present
-    bool hasUnit () { return dimension_.size() != 0;}
+    /// @brief Returns if dimension information is present
+    bool hasDimension () { return dimension_.size() > 0;}
     /// @brief Returns unit dimension
-    std::string &dimension () { return dimension_; }
+    const std::string &dimensionConst () const{ return dimension_; } //TODO should be const
+    std::string &dimension () { return dimension_; } //TODO should be const
     /// @brief  Returns unit unit
+    const std::string &unitConst () const { return unit_; }
     std::string &unit () { return unit_; }
 
     DBObject &dbObject () const { return dbo_parent_; }
 
-    /// @brief Returns flag if minimum/maximum information is available
-    bool hasMinMaxInfo ();
-    /// @brief Triggers generation of the minimum/maximum information
-    void buildMinMaxInfo ();
-    /// @brief Callback used to the the minimum/maximum information
-    void setMinMax (std::string min, std::string max);
-
     std::string getMinString ();
     std::string getMaxString ();
+    std::string getMinStringRepresentation ();
+    std::string getMaxStringRepresentation ();
 
     DBOVariableWidget *widget ();
 
@@ -204,6 +198,7 @@ protected:
     /// Description
     std::string description_;
 
+    bool min_max_set_{false};
     /// Minimum as string
     std::string min_;
     /// Maximum as string
@@ -220,6 +215,7 @@ protected:
     DBOVariableWidget *widget_;
 
     virtual void checkSubConfigurables ();
+    void setMinMax ();
 };
 
 #endif /* DBOVARIABLE_H_ */

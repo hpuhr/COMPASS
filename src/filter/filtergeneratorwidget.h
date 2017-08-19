@@ -53,8 +53,8 @@ signals:
 void filterWidgetAction (bool generated);
 
 public slots:
-//  void loadMin ();
-//  void loadMax ();
+  void loadMin ();
+  void loadMax ();
   void addCondition ();
   void accept ();
   void cancel ();

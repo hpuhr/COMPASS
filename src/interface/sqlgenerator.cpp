@@ -390,17 +390,17 @@ std::string SQLGenerator::getSelectPropertyStatement (const std::string &id)
     return ss.str();
 }
 
-std::string SQLGenerator::getInsertMinMaxStatement (const std::string& id, const std::string& dbo_name, const std::string& min, const std::string& max)
+std::string SQLGenerator::getInsertMinMaxStatement (const std::string& variable_name, const std::string& object_name, const std::string& min, const std::string& max)
 {
     stringstream ss;
     //ss << "INSERT INTO " << table_name_minxmax_<< " VALUES ('" << id <<"', '" << type <<"', '" << min<< "', '"<< max <<"');";
-    ss << "REPLACE INTO " << TABLE_NAME_MINMAX << " VALUES ('" << id <<"', '" << dbo_name <<"', '" << min<< "', '"<< max <<"');";
+    ss << "REPLACE INTO " << TABLE_NAME_MINMAX << " VALUES ('" << variable_name <<"', '" << object_name <<"', '" << min<< "', '"<< max <<"');";
     return ss.str();
 }
-std::string SQLGenerator::getSelectMinMaxStatement (const std::string& id, const std::string& dbo_name)
+std::string SQLGenerator::getSelectMinMaxStatement (const std::string& variable_name, const std::string& object_name)
 {
     stringstream ss;
-    ss << "SELECT min,max FROM " << TABLE_NAME_MINMAX<< " WHERE id = '" << id << "' AND dbo_type = '" << dbo_name << "'";
+    ss << "SELECT min,max FROM " << TABLE_NAME_MINMAX<< " WHERE variable_name = '" << variable_name << "' AND object_name = '" << object_name << "'";
     return ss.str();
 }
 
@@ -738,8 +738,8 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const MetaDBTable &me
     if (use_order)
     {
         assert (order_variable);
-        assert (meta_table.hasColumn(order_variable->currentDBColumn().name()));
-        std::string table_db_name = meta_table.tableFor(order_variable->currentDBColumn().name()).name();
+        assert (meta_table.hasColumn(order_variable->currentDBColumn().identifier()));
+        std::string table_db_name = meta_table.tableFor(order_variable->currentDBColumn().identifier()).name();
         if (find (used_tables.begin(), used_tables.end(), table_db_name) == used_tables.end())
             used_tables.push_back (table_db_name);
     }
@@ -754,9 +754,9 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const MetaDBTable &me
     for (auto var_it : filtered_variables)
         // look what tables are needed for filtered variables
     {
-        if (meta_table.hasColumn(var_it->currentDBColumn().name()))
+        if (meta_table.hasColumn(var_it->currentDBColumn().identifier()))
         {
-            std::string table_db_name = meta_table.tableFor(var_it->currentDBColumn().name()).name();
+            std::string table_db_name = meta_table.tableFor(var_it->currentDBColumn().identifier()).name();
 
             if (find (used_tables.begin(), used_tables.end(), table_db_name) == used_tables.end())
                 used_tables.push_back (table_db_name);
@@ -846,8 +846,8 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const MetaDBTable &me
     if (use_order)
     {
         assert (order_variable);
-        assert (meta_table.hasColumn(order_variable->currentDBColumn().name()));
-        std::string table_db_name = meta_table.tableFor(order_variable->currentDBColumn().name()).name();
+        assert (meta_table.hasColumn(order_variable->currentDBColumn().identifier()));
+        std::string table_db_name = meta_table.tableFor(order_variable->currentDBColumn().identifier()).name();
 
         ss << " ORDER BY " << table_db_name << "." << order_variable->currentDBColumn().name();
 

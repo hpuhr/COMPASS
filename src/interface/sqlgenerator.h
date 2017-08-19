@@ -91,9 +91,9 @@ public:
     std::string getSelectPropertyStatement (const std::string &id);
 
     /// @brief Returns minimum/maximum insertion statement
-    std::string getInsertMinMaxStatement (const std::string& id, const std::string& dbo_name, const std::string& min, const std::string &max);
+    std::string getInsertMinMaxStatement (const std::string& variable_name, const std::string& object_name, const std::string& min, const std::string &max);
     /// @brief Returns minimum/maximum selection statement
-    std::string getSelectMinMaxStatement (const std::string& id, const std::string& dbo_name);
+    std::string getSelectMinMaxStatement (const std::string& variable_name, const std::string& object_name);
     std::string getSelectMinMaxStatement ();
 
 //    /// @brief Returns general info select statement

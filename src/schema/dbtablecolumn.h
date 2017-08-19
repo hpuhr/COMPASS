@@ -66,14 +66,15 @@ public:
   void comment (const std::string &comment) { comment_ = comment; }
   const std::string &comment () const { return comment_; }
 
+  bool hasDimension () const { return dimension_.size() > 0; }
   /// @brief Returns dimension contained in the column
   const std::string &dimension () const { return dimension_; }
   /// @brief Returns unit
   const std::string &unit () const { return unit_; }
 
-  bool hasSpecialNull () const { return special_null_.size() > 0; }
-  void specialNull (std::string special_null) { special_null_ = special_null; }
-  const std::string &specialNull () const { return special_null_; }
+//  bool hasSpecialNull () const { return special_null_.size() > 0; }
+//  void specialNull (std::string special_null) { special_null_ = special_null; }
+//  const std::string &specialNull () const { return special_null_; }
 
   const DBTable &table() const { return table_; }
 

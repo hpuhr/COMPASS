@@ -26,6 +26,7 @@
 #define STRINGMANIPULATION_H_
 
 #include "logger.h"
+#include "property.h"
 
 #include <vector>
 #include <iomanip>
@@ -299,7 +300,70 @@ template <typename T> std::string getAsSpecialRepresentationString (T value, Rep
     return out.str();
 }
 
-inline std::string getValueStringFromRepresentation (const std::string &representation_str, Representation representation)
+inline std::string getRepresentationStringFromValue (const std::string& value_str, PropertyDataType data_type, Representation representation)
+{
+    logdbg << "String: getRepresentationStringFromValue: value " << value_str << " data_type " << Property::asString(data_type)
+           << " representation " << Utils::String::representationToString(representation);
+
+    if (representation == Utils::String::Representation::STANDARD)
+        return value_str;
+
+    switch (data_type)
+    {
+    case PropertyDataType::BOOL:
+    {
+        bool value = std::stoul(value_str);
+        return Utils::String::getAsSpecialRepresentationString (value, representation);
+    }
+    case PropertyDataType::CHAR:
+    {
+        char value = std::stoi(value_str);
+        return Utils::String::getAsSpecialRepresentationString (value, representation);
+    }
+    case PropertyDataType::UCHAR:
+    {
+        unsigned char value = std::stoul(value_str);
+        return Utils::String::getAsSpecialRepresentationString (value, representation);
+    }
+    case PropertyDataType::INT:
+    {
+        int value = std::stoi(value_str);
+        return Utils::String::getAsSpecialRepresentationString (value, representation);
+    }
+    case PropertyDataType::UINT:
+    {
+        unsigned int value = std::stoul(value_str);
+        return Utils::String::getAsSpecialRepresentationString (value, representation);
+    }
+    case PropertyDataType::LONGINT:
+    {
+        long value = std::stol(value_str);
+        return Utils::String::getAsSpecialRepresentationString (value, representation);
+    }
+    case PropertyDataType::ULONGINT:
+    {
+        unsigned long value = std::stoul(value_str);
+        return Utils::String::getAsSpecialRepresentationString (value, representation);
+    }
+    case PropertyDataType::FLOAT:
+    {
+        float value = std::stof(value_str);
+        return Utils::String::getAsSpecialRepresentationString (value, representation);
+    }
+    case PropertyDataType::DOUBLE:
+    {
+        double value = std::stod(value_str);
+        return Utils::String::getAsSpecialRepresentationString (value, representation);
+    }
+    case PropertyDataType::STRING:
+        throw std::invalid_argument ("String: getRepresentationStringFromValue: representation of string variable impossible");
+    default:
+        logerr  <<  "String: getRepresentationStringFromValue:: unknown property type " << Property::asString(data_type);
+        throw std::runtime_error ("String: getRepresentationStringFromValue:: unknown property type " + Property::asString(data_type));
+    }
+}
+
+inline std::string getValueStringFromRepresentation (const std::string& representation_str, Representation representation)
 {
     if (representation == Utils::String::Representation::SECONDS_TO_TIME)
     {
@@ -322,8 +386,9 @@ inline std::string getValueStringFromRepresentation (const std::string &represen
         throw std::runtime_error ("Utils: String: getAsSpecialRepresentationString: unknown representation");
     }
 }
-}
 
+std::string multiplyString (const std::string& value_str, double factor, PropertyDataType data_type);
+}
 
 
 //template <typename T> std::string formatBinaryString (T val)

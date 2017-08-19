@@ -38,8 +38,7 @@
 #include "unitmanager.h"
 #include "dbschemamanager.h"
 #include "dbovariablewidget.h"
-
-//#include <boost/algorithm/string.hpp>
+#include "dbinterface.h"
 
 #include "stringconv.h"
 
@@ -177,22 +176,24 @@ const std::string &DBOVariable::dboName () const
 }
 
 
-bool DBOVariable::hasSchema (const std::string &schema)
+bool DBOVariable::hasSchema (const std::string &schema) const
 {
     return schema_variables_.find (schema) != schema_variables_.end();
 }
-const std::string &DBOVariable::metaTable (const std::string &schema)
+
+const std::string &DBOVariable::metaTable (const std::string &schema) const
 {
     assert (hasSchema(schema));
     return schema_variables_.at(schema)->getMetaTable();
 }
-const std::string &DBOVariable::variableName (const std::string &schema)
+
+const std::string &DBOVariable::variableName (const std::string &schema) const
 {
     assert (hasSchema(schema));
     return schema_variables_.at(schema)->getVariableIdentifier();
 }
 
-bool DBOVariable::hasCurrentDBColumn ()
+bool DBOVariable::hasCurrentDBColumn () const
 {
     std::string meta_tablename = currentMetaTableString ();
     std::string meta_table_varid = currentVariableIdentifier ();
@@ -202,7 +203,7 @@ bool DBOVariable::hasCurrentDBColumn ()
     return ATSDB::instance().schemaManager().getCurrentSchema().metaTable(meta_tablename).hasColumn(meta_table_varid);
 }
 
-const DBTableColumn &DBOVariable::currentDBColumn ()
+const DBTableColumn &DBOVariable::currentDBColumn () const
 {
     assert (hasCurrentDBColumn());
 
@@ -214,12 +215,12 @@ const DBTableColumn &DBOVariable::currentDBColumn ()
     return ATSDB::instance().schemaManager().getCurrentSchema().metaTable(meta_tablename).column(meta_table_varid);
 }
 
-bool DBOVariable::hasCurrentSchema ()
+bool DBOVariable::hasCurrentSchema () const
 {
     return hasSchema(ATSDB::instance().schemaManager().getCurrentSchemaName());
 }
 
-const std::string &DBOVariable::currentMetaTableString ()
+const std::string &DBOVariable::currentMetaTableString () const
 {
     assert (hasCurrentSchema());
     std::string schema = ATSDB::instance().schemaManager().getCurrentSchemaName();
@@ -227,7 +228,7 @@ const std::string &DBOVariable::currentMetaTableString ()
 
 }
 
-const MetaDBTable &DBOVariable::currentMetaTable ()
+const MetaDBTable &DBOVariable::currentMetaTable () const
 {
     assert (hasCurrentSchema());
     std::string schema = ATSDB::instance().schemaManager().getCurrentSchemaName();
@@ -236,43 +237,29 @@ const MetaDBTable &DBOVariable::currentMetaTable ()
     return ATSDB::instance().schemaManager().getCurrentSchema().metaTable(meta_table);
 }
 
-const std::string &DBOVariable::currentVariableIdentifier ()
+const std::string &DBOVariable::currentVariableIdentifier () const
 {
     assert (hasCurrentSchema());
     std::string schema = ATSDB::instance().schemaManager().getCurrentSchemaName();
     return schema_variables_.at(schema)->getVariableIdentifier();
 }
 
-bool DBOVariable::hasMinMaxInfo ()
+void DBOVariable::setMinMax ()
 {
-    return !(min_.size() == 0 && max_.size() == 0);
-}
+    assert (!min_max_set_);
 
-void DBOVariable::buildMinMaxInfo ()
-{
-    assert (!hasMinMaxInfo());
+    std::pair<std::string, std::string> min_max = ATSDB::instance().interface().getMinMaxString(*this);
 
-    //TODO
-    assert (false);
-    //ATSDB::getInstance().buildMinMaxInfo(this);
-}
+    min_=min_max.first;
+    max_=min_max.second;
 
-void DBOVariable::setMinMax (std::string min, std::string max)
-{
-    min_=min;
-    max_=max;
+    min_max_set_=true;
 
     logdbg << "DBOVariable: setMinMax: min " << min_ << " max " << max_;
-
-    emit minMaxInfoAvailableSignal();
 }
 
 std::string DBOVariable::getMinString ()
 {
-    std::string min;
-
-    assert (false);
-    //TODO
     //    if (isMetaVariable())
 //    {
 //        std::map <DB_OBJECT_TYPE, std::string>::iterator it;
@@ -288,48 +275,38 @@ std::string DBOVariable::getMinString ()
 //            }
 //        }
 //    }
-//    else
-//        min = min_;
 
-//    DBOVariable *tmpvar = getFirst();
+    if (!min_max_set_)
+        setMinMax();
 
-//    std::string meta_tablename = tmpvar->getCurrentMetaTable ();
-//    std::string table_varname = tmpvar->getCurrentVariableName ();
+    assert (min_max_set_);
 
-//    DBTableColumn *table_column = DBSchemaManager::getInstance().getCurrentSchema ()->getMetaTable(meta_tablename)->getTableColumn(table_varname);
+    std::string min = min_;
 
-//    if (!isMetaVariable() && (tmpvar->hasUnit () || table_column->hasUnit()))
-//    {
-//        if (tmpvar->hasUnit () != table_column->hasUnit())
-//        {
-//            logerr << "DBOVariable: getMinString: unit transformation inconsistent: var " << tmpvar->getName () << " has unit " << tmpvar->hasUnit ()
-//                                                                      << " table column " << table_column->getName() << " has unit " << table_column->hasUnit();
-//            throw std::runtime_error ("DBOVariable: getMinString: unit transformation error 1");
-//        }
+    const DBTableColumn& table_column = currentDBColumn();
 
-//        if (tmpvar->getUnitDimension().compare(table_column->getUnitDimension()) != 0)
-//        {
-//            logerr << "DBOVariable: getMinString: unit transformation inconsistent: var " << tmpvar->getName () << " has dimension " << tmpvar->getUnitDimension ()
-//                                                                      << " table column " << table_column->getName() << " has dimension " << table_column->getUnitDimension();
-//            throw std::runtime_error ("DBOVariable: getMinString: unit transformation error 2");
-//        }
+    if (hasDimension() || table_column.hasDimension())
+    {
+        if (dimension() != table_column.dimension())
+        {
+            logerr << "DBOVariable: getMinString: unit transformation inconsistent: var " << name() << " has dimension " << dimension()
+                                                                      << " table column " << table_column.name() << " has dimension " << table_column.dimension();
+            throw std::runtime_error ("DBOVariable: getMinString: unit transformation error");
+        }
 
-//        Unit *unit = UnitManager::getInstance().getUnit (tmpvar->getUnitDimension());
-//        double factor = unit->getFactor (table_column->getUnitUnit(), tmpvar->getUnitUnit());
-//        logdbg  << "DBOVariable: getMinString: adapting " << tmpvar->getName () << " unit transformation with factor " << factor;
+        const Dimension &dimension = UnitManager::instance().dimension (dimension_);
+        double factor = dimension.getFactor (table_column.unit(), unit());
+        logdbg  << "DBOVariable: getMinString: adapting " << name() << " with unit transformation factor " << factor;
 
-//        multiplyString (min, (PROPERTY_DATA_TYPE) tmpvar->data_type_int_, factor);
-//    }
+        String::multiplyString (min, factor, dataType());
+    }
 
-//    logdbg << "DBOVariable: getMinString: type " << dbo_type_int_ << " name " << id_ << " returning " << min;
+    logdbg << "DBOVariable: getMinString: object " << dboName() << " name " << name() << " returning " << min;
     return min;
 }
 
 std::string DBOVariable::getMaxString ()
 {
-    std::string max;
-    // TODO
-    assert (false);
     //    if (isMetaVariable())
 //    {
 //        std::map <DB_OBJECT_TYPE, std::string>::iterator it;
@@ -345,42 +322,53 @@ std::string DBOVariable::getMaxString ()
 //            }
 //        }
 //    }
-//    else
-//        max = max_;
 
-//    DBOVariable *tmpvar = getFirst();
 
-//    std::string meta_tablename = tmpvar->getCurrentMetaTable ();
-//    std::string table_varname = tmpvar->getCurrentVariableName ();
+    if (!min_max_set_)
+        setMinMax();
 
-//    DBTableColumn *table_column = DBSchemaManager::getInstance().getCurrentSchema ()->getMetaTable(meta_tablename)->getTableColumn(table_varname);
+    assert (min_max_set_);
 
-//    if (!isMetaVariable() && (tmpvar->hasUnit () || table_column->hasUnit()))
-//    {
-//        if (tmpvar->hasUnit () != table_column->hasUnit())
-//        {
-//            logerr << "DBOVariable: getMinString: unit transformation inconsistent: var " << tmpvar->getName () << " has unit " << tmpvar->hasUnit ()
-//                                                                      << " table column " << table_column->getName() << " has unit " << table_column->hasUnit();
-//            throw std::runtime_error ("DBOVariable: getMinString: unit transformation error 1");
-//        }
+    std::string max = max_;
 
-//        if (tmpvar->getUnitDimension().compare(table_column->getUnitDimension()) != 0)
-//        {
-//            logerr << "DBOVariable: getMinString: unit transformation inconsistent: var " << tmpvar->getName () << " has dimension " << tmpvar->getUnitDimension ()
-//                                                                      << " table column " << table_column->getName() << " has dimension " << table_column->getUnitDimension();
-//            throw std::runtime_error ("DBOVariable: getMinString: unit transformation error 2");
-//        }
+    const DBTableColumn& table_column = currentDBColumn();
 
-//        Unit *unit = UnitManager::getInstance().getUnit (tmpvar->getUnitDimension());
-//        double factor = unit->getFactor (table_column->getUnitUnit(), tmpvar->getUnitUnit());
-//        logdbg  << "DBOVariable: getMinString: adapting " << tmpvar->getName () << " unit transformation with factor " << factor;
+    if (hasDimension() || table_column.hasDimension())
+    {
+        if (dimension() != table_column.dimension())
+        {
+            logerr << "DBOVariable: getMaxString: unit transformation inconsistent: var " << name() << " has dimension " << dimension()
+                                                                      << " table column " << table_column.name() << " has dimension " << table_column.dimension();
+            throw std::runtime_error ("DBOVariable: getMaxString: unit transformation error");
+        }
 
-//        multiplyString (max, (PROPERTY_DATA_TYPE) tmpvar->data_type_int_, factor);
-//    }
+        const Dimension &dimension = UnitManager::instance().dimension (dimension_);
+        double factor = dimension.getFactor (table_column.unit(), unit());
+        logdbg  << "DBOVariable: getMaxString: adapting " << name() << " with unit transformation factor " << factor;
 
-//    logdbg << "DBOVariable: getMaxString: type " << dbo_type_int_ << " name " << id_ << " returning " << max;
+        String::multiplyString (max, factor, dataType());
+    }
+
+    logdbg << "DBOVariable: getMaxString: object " << dboName() << " name " << name() << " returning " << max;
     return max;
 }
+
+std::string DBOVariable::getMinStringRepresentation ()
+{
+    if (representation_ == String::Representation::STANDARD)
+        return getMinString();
+    else
+        return String::getRepresentationStringFromValue(getMinString(), data_type_, representation_);
+}
+
+std::string DBOVariable::getMaxStringRepresentation ()
+{
+    if (representation_ == String::Representation::STANDARD)
+        return getMaxString();
+    else
+        return String::getRepresentationStringFromValue(getMaxString(), data_type_, representation_);
+}
+
 
 DBOVariableWidget *DBOVariable::widget ()
 {

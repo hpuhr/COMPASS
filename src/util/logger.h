@@ -36,8 +36,6 @@
 //#define logdbg log4cpp::Category::getRoot().debugStream()
 #define logdbg if(0) log4cpp::Category::getRoot().debugStream() // for improved performance
 
-//enum TLogLevel {logERROR, logWARNING, logINFO, logDEBUG, logDEBUG1, logDEBUG2, logDEBUG3, logDEBUG4};
-
 /**
  * @brief Thread-safe logger
  *

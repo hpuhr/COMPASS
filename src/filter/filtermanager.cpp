@@ -112,7 +112,7 @@ std::string FilterManager::getSQLCondition (const std::string &dbo_name, std::ve
 
     for (unsigned int cnt=0; cnt < filters_.size(); cnt++)
     {
-        if (filters_.at(cnt)->getActive())
+        if (filters_.at(cnt)->getActive() && filters_.at(cnt)->filters (dbo_name))
         {
             ss << filters_.at(cnt)->getConditionString (dbo_name, first, filtered_variables);
         }

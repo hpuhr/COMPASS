@@ -28,7 +28,6 @@
 #include <QObject>
 
 #include "configurable.h"
-//#include "DBOVariableMinMaxObserver.h"
 
 class QWidget;
 class QLineEdit;
@@ -47,7 +46,7 @@ class DBFilter;
  * A condition consists of a DBOVariable, and operator and a value e.g. 'TOD <= 0.1'. A number of operators are supported, the value
  * also has a specific reset value (e.g. original value, minimum of variable, maximum of variable.
  */
-class DBFilterCondition : public QObject, public Configurable //, public DBOVariableMinMaxObserver
+class DBFilterCondition : public QObject, public Configurable
 {
     Q_OBJECT
 
@@ -111,8 +110,6 @@ public:
     /// @brief Resets condition by setting value_ to reset_value_
     void reset ();
 
-    //virtual void notifyMinMax (DBOVariable *variable);
-
     bool invalid() const;
 
 private:
@@ -149,6 +146,7 @@ private:
     QLabel *label_;
 
     std::string getTransformedValue (const std::string& untransformed_value, DBOVariable *variable);
+    bool checkValueInvalid (const std::string& new_value);
 };
 
 #endif /* DBFILTERCONDITION_H_ */

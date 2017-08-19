@@ -459,13 +459,13 @@ void MetaDBTableWidget::updateColumnsGridSlot ()
     unit_label->setFont(font_bold);
     column_grid_->addWidget (unit_label, 0,3);
 
-    QLabel *null_label = new QLabel ("Special null");
-    null_label->setFont(font_bold);
-    column_grid_->addWidget (null_label, 0,4);
+//    QLabel *null_label = new QLabel ("Special null"); //TODO
+//    null_label->setFont(font_bold);
+//    column_grid_->addWidget (null_label, 0,4);
 
     QLabel *comment_label = new QLabel ("Comment");
     comment_label->setFont(font_bold);
-    column_grid_->addWidget (comment_label, 0,5);
+    column_grid_->addWidget (comment_label, 0,4);
 
 
     unsigned int row=1;
@@ -483,11 +483,11 @@ void MetaDBTableWidget::updateColumnsGridSlot ()
         QLabel *unit = new QLabel ((it.second.unit()+":"+it.second.dimension()).c_str());
         column_grid_->addWidget (unit, row, 3);
 
-        QLabel *edit = new QLabel (it.second.specialNull().c_str());
-        column_grid_->addWidget (edit, row, 4);
+//        QLabel *edit = new QLabel (it.second.specialNull().c_str());
+//        column_grid_->addWidget (edit, row, 4);
 
         QLabel *comment = new QLabel (it.second.comment().c_str());
-        column_grid_->addWidget (comment, row, 5);
+        column_grid_->addWidget (comment, row, 4);
 
         row++;
     }

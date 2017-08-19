@@ -178,6 +178,8 @@ bool DBFilter::filters (const std::string &dbo_type)
         ret  |= sub_filters_.at(cnt)->filters(dbo_type);
     }
 
+    logdbg << "DBFilter: filters: object " << dbo_type << " " << ret;
+
     return ret;
 }
 
@@ -194,8 +196,8 @@ std::string DBFilter::getConditionString (const std::string &dbo_name, bool &fir
         {
             if (conditions_.at(cnt)->invalid())
             {
-                logwrn  << "DBFilter " << instance_id_ << ": getConditionString: invalid condition, returning empty condition";
-                return "";
+                logwrn  << "DBFilter " << instance_id_ << ": getConditionString: invalid condition, will be skipped";
+                continue;
             }
 
             std::string text = conditions_.at(cnt)->getConditionString(dbo_name, first, filtered_variables);
@@ -209,7 +211,7 @@ std::string DBFilter::getConditionString (const std::string &dbo_name, bool &fir
         }
     }
 
-    logdbg  << "DBFilter " << instance_id_ << ": getConditionString: here '" <<ss.str() << "' first " << first;
+    loginf  << "DBFilter " << instance_id_ << ": getConditionString: object " << dbo_name << " here '" << ss.str() << "' first " << first;
 
     return ss.str();
 }

@@ -81,11 +81,11 @@ DBFilterCondition::DBFilterCondition(const std::string &class_id, const std::str
         variable_ = &ATSDB::instance().objectManager().object(variable_dbo_name_).variable(variable_name_);
     }
 
-    // TODO ADD THIS LATER
-    //variable_->addMinMaxObserver(this);
-
     registerParameter ("reset_value", &reset_value_, std::string("value"));
     registerParameter ("value", &value_, "");
+
+    invalid_ = checkValueInvalid (value_);
+    loginf << "DBFilterCondition: DBFilterCondition: " << instance_id << " value " << value_ << " invalid " << invalid_;
 
     widget_ = new QWidget ();
     QHBoxLayout *layout = new QHBoxLayout ();
@@ -104,8 +104,6 @@ DBFilterCondition::DBFilterCondition(const std::string &class_id, const std::str
 
 DBFilterCondition::~DBFilterCondition()
 {
-    //TODO ADD THIS LATER
-    //variable_->removeMinMaxObserver(this);
 }
 
 void DBFilterCondition::invert ()
@@ -155,7 +153,7 @@ std::string DBFilterCondition::getConditionString (const std::string &dbo_name, 
 
     const DBTableColumn &column = variable->currentDBColumn();
     const MetaDBTable &meta_table = variable->currentMetaTable();
-    std::string table_db_name = meta_table.tableFor(column.name()).name();
+    std::string table_db_name = meta_table.tableFor(column.identifier()).name();
 
     if (!first)
     {
@@ -185,44 +183,14 @@ void DBFilterCondition::valueChanged ()
 {
     logdbg  << "DBFilterCondition: valueChanged";
     assert  (edit_);
-    assert (variable_ || meta_variable_);
 
     std::string new_value = edit_->text().toStdString();
 
-    std::vector <DBOVariable*> variables;
-
-    if (meta_variable_)
-    {
-        for (auto var_it : meta_variable_->variables())
-            variables.push_back(&var_it.second);
-    }
-    else
-        variables.push_back(variable_);
-
-    invalid_ = true;
-
-    try
-    {
-        for (auto var_it : variables)
-        {
-            std::string transformed_value = getTransformedValue (new_value, var_it);
-            logdbg  << "DBFilterCondition: valueChanged: transformed value " << transformed_value;
-        }
-        invalid_ = false;
-    }
-    catch(std::exception& e)
-    {
-        logdbg  << "DBFilterCondition: valueChanged: exception thrown: " << e.what();
-    }
-    catch(...)
-    {
-        logdbg  << "DBFilterCondition: valueChanged: exception thrown";
-    }
+    invalid_ = checkValueInvalid (new_value);
 
     if (!invalid_ && value_ != new_value)
     {
         value_ = new_value;
-
         changed_=true;
 
         emit possibleFilterChange();
@@ -264,31 +232,25 @@ void DBFilterCondition::reset ()
 
     if (reset_value_.compare ("MIN") == 0 || reset_value_.compare ("MAX") == 0)
     {
-        // FIX MINMAX
-        assert (false);
-//        if (!variable_->hasMinMaxInfo())
-//        {
-//            value = "LOADING";
-//            variable_->buildMinMaxInfo();
-//        }
-//        else
-//        {
-//            if (reset_value_.compare ("MIN") == 0)
-//            {
-//                value = variable_->getRepresentationFromValue(variable_->getMinString());
-//                loginf << "DBFilterCondition: reset: value " << variable_->getMinString() << " repr " << value;
-//            }
-//            else if (reset_value_.compare ("MAX") == 0)
-//            {
-//                value = variable_->getRepresentationFromValue(variable_->getMaxString());
-//                loginf << "DBFilterCondition: reset: value " << variable_->getMaxString() << " repr " << value;
-//            }
-//        }
+
+        if (reset_value_.compare ("MIN") == 0)
+        {
+            value = variable_->getMinStringRepresentation();
+            logdbg << "DBFilterCondition: reset: value " << variable_->getMinString() << " repr " << value;
+        }
+        else if (reset_value_.compare ("MAX") == 0)
+        {
+            value = variable_->getMaxStringRepresentation();
+            logdbg << "DBFilterCondition: reset: value " << variable_->getMaxString() << " repr " << value;
+        }
     }
     else
         value=reset_value_;
 
     value_=value;
+    invalid_ = checkValueInvalid(value_);
+
+    loginf  << "DBFilterCondition: reset: value '" << value_ << " invalid " << invalid_;
 
     update();
 }
@@ -296,6 +258,41 @@ void DBFilterCondition::reset ()
 bool DBFilterCondition::invalid() const
 {
     return invalid_;
+}
+
+bool DBFilterCondition::checkValueInvalid (const std::string& new_value)
+{
+    assert (variable_ || meta_variable_);
+    std::vector <DBOVariable*> variables;
+
+    if (meta_variable_)
+    {
+        for (auto var_it : meta_variable_->variables())
+            variables.push_back(&var_it.second);
+    }
+    else
+        variables.push_back(variable_);
+
+    bool invalid = true;
+
+    try
+    {
+        for (auto var_it : variables)
+        {
+            std::string transformed_value = getTransformedValue (new_value, var_it);
+            logdbg  << "DBFilterCondition: valueChanged: transformed value " << transformed_value;
+        }
+        invalid = false;
+    }
+    catch(std::exception& e)
+    {
+        logdbg  << "DBFilterCondition: checkValueInvalid: exception thrown: " << e.what();
+    }
+    catch(...)
+    {
+        logdbg  << "DBFilterCondition: checkValueInvalid: exception thrown";
+    }
+    return invalid;
 }
 
 std::string DBFilterCondition::getTransformedValue (const std::string& untransformed_value, DBOVariable *variable)
@@ -334,42 +331,7 @@ std::string DBFilterCondition::getTransformedValue (const std::string& untransfo
             double factor = dimension.getFactor (column.unit(), variable->unit());
             logdbg  << "DBFilterCondition: getTransformedValue: correct unit transformation with factor " << factor;
 
-            switch (variable->dataType())
-            {
-            case PropertyDataType::BOOL:
-            case PropertyDataType::UCHAR:
-            case PropertyDataType::UINT:
-            case PropertyDataType::ULONGINT:
-            {
-                unsigned long value = std::stoul(value_str);
-                value /= factor;
-                value_str = std::to_string(value);
-                break;
-            }
-            case PropertyDataType::CHAR:
-            case PropertyDataType::INT:
-            case PropertyDataType::LONGINT:
-            {
-                long value = std::stol(value_str);
-                value /= factor;
-                value_str = std::to_string(value);
-                break;
-            }
-            case PropertyDataType::FLOAT:
-            case PropertyDataType::DOUBLE:
-            {
-                double value = std::stod(value_str);
-                value /= factor;
-                value_str = Utils::String::getValueString(value);
-                break;
-            }
-            case PropertyDataType::STRING:
-                logerr << "DBFilterCondition: getTransformedValue: unit transformation for string variable " << variable->name() << " impossible";
-                break;
-            default:
-                logerr  <<  "DBFilterCondition: getTransformedValue: unknown property type " << Property::asString(variable->dataType());
-                throw std::runtime_error ("DBFilterCondition: getTransformedValue: unknown property type "+Property::asString(variable->dataType()));
-            }
+            value_str = String::multiplyString(value_str, 1.0/factor, variable_->dataType());
         }
         logdbg << "DBFilterCondition: getTransformedValue: transformed value string " << value_str;
         transformed_value_strings.push_back(value_str);
@@ -386,21 +348,3 @@ std::string DBFilterCondition::getTransformedValue (const std::string& untransfo
         return "(" + boost::algorithm::join(transformed_value_strings, ",") + ")";
 }
 
-//void DBFilterCondition::notifyMinMax (DBOVariable *variable)
-//{
-//    loginf << "DBFilterCondition: notifyMinMax";
-
-//    std::string value;
-
-//    //TODO FIX MINMAX
-//    assert (false);
-
-//    assert (variable_->hasMinMaxInfo());
-//    if (reset_value_.compare ("MIN") == 0)
-//        value = variable_->getRepresentationFromValue(variable_->getMinString());
-//    else if (reset_value_.compare ("MAX") == 0)
-//        value = variable_->getRepresentationFromValue(variable_->getMaxString());
-
-//    value_=value;
-//    update();
-//}

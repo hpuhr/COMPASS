@@ -135,7 +135,7 @@ void DBTableWidget::updateColumnGrid ()
         delete child;
     }
 
-    column_grid_special_nulls_.clear();
+    //column_grid_special_nulls_.clear();
 
     QFont font_bold;
     font_bold.setBold(true);
@@ -156,13 +156,13 @@ void DBTableWidget::updateColumnGrid ()
     unit_label->setFont(font_bold);
     column_grid_->addWidget (unit_label, 0,3);
 
-    QLabel *null_label = new QLabel ("Special null");
-    null_label->setFont(font_bold);
-    column_grid_->addWidget (null_label, 0,4);
+//    QLabel *null_label = new QLabel ("Special null"); //TODO
+//    null_label->setFont(font_bold);
+//    column_grid_->addWidget (null_label, 0,4);
 
     QLabel *comment_label = new QLabel ("Comment");
     comment_label->setFont(font_bold);
-    column_grid_->addWidget (comment_label, 0,5);
+    column_grid_->addWidget (comment_label, 0,4);
 
 
     unsigned int row=1;
@@ -180,26 +180,26 @@ void DBTableWidget::updateColumnGrid ()
         UnitSelectionWidget *unit_widget = it.second->unitWidget();
         column_grid_->addWidget (unit_widget, row, 3);
 
-        QLineEdit *edit = new QLineEdit (it.second->specialNull().c_str());
-        connect (edit, SIGNAL(textChanged(const QString &)), this, SLOT (setSpecialNull(const QString &)));
-        column_grid_->addWidget (edit, row, 4);
-        assert (column_grid_special_nulls_.find (edit) == column_grid_special_nulls_.end());
-        column_grid_special_nulls_ [edit] = it.second;
+//        QLineEdit *edit = new QLineEdit (it.second->specialNull().c_str());
+//        connect (edit, SIGNAL(textChanged(const QString &)), this, SLOT (setSpecialNull(const QString &)));
+//        column_grid_->addWidget (edit, row, 4);
+//        assert (column_grid_special_nulls_.find (edit) == column_grid_special_nulls_.end());
+//        column_grid_special_nulls_ [edit] = it.second;
 
         QLabel *comment = new QLabel (it.second->comment().c_str());
-        column_grid_->addWidget (comment, row, 5);
+        column_grid_->addWidget (comment, row, 4);
 
         row++;
     }
 }
 
-void DBTableWidget::setSpecialNull (const QString &text)
-{
-    loginf << "DBTableWidget: setSpecialNull";
+//void DBTableWidget::setSpecialNull (const QString &text)
+//{
+//    loginf << "DBTableWidget: setSpecialNull";
 
-    QLineEdit *edit = (QLineEdit*) sender();
+//    QLineEdit *edit = (QLineEdit*) sender();
 
-    assert (column_grid_special_nulls_.find (edit) != column_grid_special_nulls_.end());
+//    assert (column_grid_special_nulls_.find (edit) != column_grid_special_nulls_.end());
 
-    column_grid_special_nulls_[edit]->specialNull(text.toStdString());
-}
+//    column_grid_special_nulls_[edit]->specialNull(text.toStdString());
+//}
