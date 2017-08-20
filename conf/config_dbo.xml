@@ -1,7 +1,7 @@
 <Configuration class_id="DBObjectManager" instance_id="DBObjectManager0">
     <ParameterBool use_filters="1"/>
-    <ParameterBool use_limit="1"/>
-    <ParameterBool use_order="1"/>
+    <ParameterBool use_limit="0"/>
+    <ParameterBool use_order="0"/>
     <ParameterBool use_order_ascending="1"/>
     <ParameterUnsignedInt limit_max="1000000"/>
     <ParameterUnsignedInt limit_min="0"/>
@@ -6216,6 +6216,14 @@
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariablemodec_code_ft0">
         <ParameterString description=""/>
         <ParameterString name="modec_code_ft"/>
+        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBalt_baro_ft0">
+            <ParameterString dbo_name="ADSB"/>
+            <ParameterString dbo_variable_name="alt_baro_ft"/>
+        </Configuration>
+        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATflight_level_ft0">
+            <ParameterString dbo_name="MLAT"/>
+            <ParameterString dbo_variable_name="flight_level_ft"/>
+        </Configuration>
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadarmodec_code_ft0">
             <ParameterString dbo_name="Radar"/>
             <ParameterString dbo_variable_name="modec_code_ft"/>

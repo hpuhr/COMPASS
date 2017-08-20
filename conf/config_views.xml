@@ -55,9 +55,14 @@
                         <ParameterString dbo_variable_name="track_num"/>
                     </Configuration>
                     <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionhorizontal_error_m0">
-                        <ParameterUnsignedInt index="8"/>
+                        <ParameterUnsignedInt index="9"/>
                         <ParameterString dbo_name="Meta"/>
                         <ParameterString dbo_variable_name="horizontal_error_m"/>
+                    </Configuration>
+                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionmodec_code_ft0">
+                        <ParameterUnsignedInt index="8"/>
+                        <ParameterString dbo_name="Meta"/>
+                        <ParameterString dbo_variable_name="modec_code_ft"/>
                     </Configuration>
                 </Configuration>
             </Configuration>

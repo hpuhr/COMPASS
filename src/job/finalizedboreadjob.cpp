@@ -203,63 +203,66 @@ void FinalizeDBOReadJob::run ()
         }
 
         // rename to reflect dbo variable
-        switch (property.dataType())
+        if (property.name() != var_it->name())
         {
-        case PropertyDataType::BOOL:
-        {
-            buffer_->renameBool (property.name(), var_it->name());
-            break;
+            //loginf << "FinalizeDBOReadJob: run: renaming property " << property.name() << " to dbo variable name " << var_it->name();
+            switch (property.dataType())
+            {
+            case PropertyDataType::BOOL:
+            {
+                buffer_->renameBool (property.name(), var_it->name());
+                break;
+            }
+            case PropertyDataType::CHAR:
+            {
+                buffer_->renameChar (property.name(), var_it->name());
+                break;
+            }
+            case PropertyDataType::UCHAR:
+            {
+                buffer_->renameUChar (property.name(), var_it->name());
+                break;
+            }
+            case PropertyDataType::INT:
+            {
+                buffer_->renameInt (property.name(), var_it->name());
+                break;
+            }
+            case PropertyDataType::UINT:
+            {
+                buffer_->renameUInt (property.name(), var_it->name());
+                break;
+            }
+            case PropertyDataType::LONGINT:
+            {
+                buffer_->renameLongInt (property.name(), var_it->name());
+                break;
+            }
+            case PropertyDataType::ULONGINT:
+            {
+                buffer_->renameULongInt (property.name(), var_it->name());
+                break;
+            }
+            case PropertyDataType::FLOAT:
+            {
+                buffer_->renameFloat (property.name(), var_it->name());
+                break;
+            }
+            case PropertyDataType::DOUBLE:
+            {
+                buffer_->renameDouble (property.name(), var_it->name());
+                break;
+            }
+            case PropertyDataType::STRING:
+            {
+                buffer_->renameString (property.name(), var_it->name());
+                break;
+            }
+            default:
+                logerr  <<  "FinalizeDBOReadJob: run: unknown property type " << Property::asString(property.dataType());
+                throw std::runtime_error ("FinalizeDBOReadJob: run: unknown property type "+Property::asString(property.dataType()));
+            }
         }
-        case PropertyDataType::CHAR:
-        {
-            buffer_->renameChar (property.name(), var_it->name());
-            break;
-        }
-        case PropertyDataType::UCHAR:
-        {
-            buffer_->renameUChar (property.name(), var_it->name());
-            break;
-        }
-        case PropertyDataType::INT:
-        {
-            buffer_->renameInt (property.name(), var_it->name());
-            break;
-        }
-        case PropertyDataType::UINT:
-        {
-            buffer_->renameUInt (property.name(), var_it->name());
-            break;
-        }
-        case PropertyDataType::LONGINT:
-        {
-            buffer_->renameLongInt (property.name(), var_it->name());
-            break;
-        }
-        case PropertyDataType::ULONGINT:
-        {
-            buffer_->renameULongInt (property.name(), var_it->name());
-            break;
-        }
-        case PropertyDataType::FLOAT:
-        {
-            buffer_->renameFloat (property.name(), var_it->name());
-            break;
-        }
-        case PropertyDataType::DOUBLE:
-        {
-            buffer_->renameDouble (property.name(), var_it->name());
-            break;
-        }
-        case PropertyDataType::STRING:
-        {
-            buffer_->renameString (property.name(), var_it->name());
-            break;
-        }
-        default:
-            logerr  <<  "FinalizeDBOReadJob: run: unknown property type " << Property::asString(property.dataType());
-            throw std::runtime_error ("FinalizeDBOReadJob: run: unknown property type "+Property::asString(property.dataType()));
-        }
-
     }
 
     logdbg << "FinalizeDBOReadJob: run: done";

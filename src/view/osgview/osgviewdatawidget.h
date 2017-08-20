@@ -13,6 +13,7 @@
 #include <QOpenGLWidget>
 #include <QMouseEvent>
 #include <QWheelEvent>
+#include <QColor>
 
 #include <memory>
 #include <iostream>
@@ -77,9 +78,11 @@ private:
   qreal scale_x_, scale_y_;
 
   std::map <std::string, size_t> dbo_sizes_;
+  std::map <std::string, std::vector <osg::ref_ptr<osg::Geode>>> dbo_nodes_;
 
   void setup ();
   TextureFactory textureFactory;
+  std::map <std::string, QColor> object_colors_;
 
   osgGA::EventQueue* getEventQueue() const;
 
