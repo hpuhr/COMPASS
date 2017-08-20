@@ -2,7 +2,9 @@
 #define RADARPLOTPOSITIONCALCULATOR_H_
 
 #include <QObject>
+#include <memory>
 
+class Buffer;
 class RadarPlotPositionCalculatorTaskWidget;
 
 class RadarPlotPositionCalculatorTask : public QObject

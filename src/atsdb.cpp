@@ -36,6 +36,7 @@
 //#include "StructureReader.h"
 //#include "WriteBufferDBJob.h"
 #include "jobmanager.h"
+#include "taskmanager.h"
 //#include "DBOInfoDBJob.h"
 //#include "DBOVariableDistinctStatisticsDBJob.h"
 //#include "UpdateBufferDBJob.h"
@@ -58,6 +59,7 @@ ATSDB::ATSDB()
     logdbg  << "ATSDB: constructor: start";
 
     JobManager::instance().start();
+    TaskManager::instance();
 
     createSubConfigurables ();
 
@@ -247,6 +249,7 @@ void ATSDB::shutdown ()
     }
 
     JobManager::instance().shutdown();
+    TaskManager::instance().shutdown();
 
     assert (db_interface_);
     db_interface_->closeConnection();

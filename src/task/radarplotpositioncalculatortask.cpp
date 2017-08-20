@@ -21,6 +21,7 @@ using namespace Utils;
 
 RadarPlotPositionCalculatorTask::RadarPlotPositionCalculatorTask()
 {
+    qRegisterMetaType<std::shared_ptr<Buffer>>("std::shared_ptr<Buffer>");
 }
 
 RadarPlotPositionCalculatorTask::~RadarPlotPositionCalculatorTask()

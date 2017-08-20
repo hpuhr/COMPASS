@@ -60,8 +60,6 @@ signals:
     void databaseIdle ();
 
 public:
-    /// @brief Constructor
-    JobManager();
     virtual ~JobManager();
 
     void addJob (std::shared_ptr<Job> job);
@@ -101,6 +99,9 @@ protected:
     JobManagerWidget *widget_;
 
     boost::posix_time::ptime last_update_time_;
+
+    /// @brief Constructor
+    JobManager();
 
     void updateWidget (bool really=false);
 private:

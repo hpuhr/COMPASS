@@ -219,6 +219,7 @@ set ( atsdb_HDRS
     src/schema/dbschemamanagerwidget.h
     src/schema/dbtablewidget.h
     src/schema/metadbtablewidget.h
+    src/task/taskmanager.h
     src/task/radarplotpositioncalculatortask.h
     src/task/radarplotpositioncalculatortaskwidget.h
     src/unit/unitselectionwidget.h
@@ -334,6 +335,7 @@ set ( atsdb_SRCS
     #        src/projection/projectionmanager.cpp
     #        src/projection/projectionmanagerwidget.cpp
     src/property/property.cpp
+    src/task/taskmanager.cpp
     src/task/radarplotpositioncalculatortask.cpp
     src/task/radarplotpositioncalculatortaskwidget.cpp
     src/schema/dbschemawidget.cpp
