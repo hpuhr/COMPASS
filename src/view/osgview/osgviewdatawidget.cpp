@@ -42,6 +42,7 @@
 #include <osgEarthDrivers/gdal/GDALOptions>
 #include <osgEarthDrivers/cache_filesystem/FileSystemCache>
 #include <osgEarthUtil/LogarithmicDepthBuffer>
+#include <osgEarthUtil/EarthManipulator>
 #include <osg/PositionAttitudeTransform>
 
 #include "buffertablewidget.h"
@@ -219,11 +220,13 @@ void OSGViewDataWidget::setup ()
     viewer_->setCamera(camera);
 
     viewer_->setSceneData(root_node_);
-    manipulator_ = new osgGA::TrackballManipulator;
-    manipulator_->setAllowThrow( false );
-    manipulator_->setWheelZoomFactor(-0.005);
+//    osgGA::TrackballManipulator* manipulator = new osgGA::TrackballManipulator;
+//    manipulator->setAllowThrow( false );
+//    manipulator_>setWheelZoomFactor(-0.005);
+
+    osgEarth::Util::EarthManipulator* manipulator = new osgEarth::Util::EarthManipulator();
     this->setMouseTracking(true);
-    viewer_->setCameraManipulator(manipulator_);
+    viewer_->setCameraManipulator(manipulator);
     viewer_->setThreadingModel(osgViewer::Viewer::SingleThreaded);
     viewer_->realize();
 
@@ -358,7 +361,7 @@ osg::ref_ptr<osg::Geode> OSGViewDataWidget::createSpriteGeometry(DBObject &objec
             //            z = wgsPoint.z();
 
             if (!mode_c_height.isNone(i))
-                mode_c = 50.0*0.3048 * static_cast<float> (mode_c_height.get(i));
+                mode_c = 5.0*0.3048 * static_cast<float> (mode_c_height.get(i));
 
             elipsModelObj.convertLatLongHeightToXYZ(osg::DegreesToRadians(latitudes.get(previous_size+i)),osg::DegreesToRadians(longitudes.get(previous_size+i)),mode_c,x,y,z);
 

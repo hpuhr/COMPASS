@@ -62,6 +62,9 @@
 #include "viewmanager.h"
 //#include "ProjectionManager.h"
 //#include "ProjectionManagerWidget.h"
+#include "taskmanager.h"
+#include "radarplotpositioncalculatortask.h"
+#include "radarplotpositioncalculatortaskwidget.h"
 
 using namespace Utils;
 using namespace std;
@@ -172,6 +175,13 @@ void MainWindow::startSlot ()
         initAfterStart ();
 }
 
+void MainWindow::addRadarPlotPositionCalculatorTaskSlot ()
+{
+    loginf  << "MainWindow: addRadarPlotPositionCalculatorTaskSlot";
+
+    TaskManager::instance().getRadarPlotPositionCalculatorTask()->widget()->show();
+}
+
 void MainWindow::postProcessingDoneSlot ()
 {
     loginf << "MainWindow: postProcessingDoneSlot: done";
@@ -187,6 +197,9 @@ void MainWindow::initAfterStart ()
 
     // TODO lock stuff
     tab_widget_->setCurrentIndex(1);
+
+    assert (task_menu_);
+    task_menu_->setDisabled(false);
 }
 
 void MainWindow::createMenus()
@@ -201,6 +214,13 @@ void MainWindow::createMenus()
     QMenu *file_menu = menuBar()->addMenu(tr("&File"));
     file_menu->addAction(exit_action);
 
+
+    QAction *radar_plot_position_calculator_task_action = new QAction(tr("Perform Radar Plot Position Calculation"), this);
+    connect(radar_plot_position_calculator_task_action, SIGNAL(triggered()), this, SLOT(addRadarPlotPositionCalculatorTaskSlot()));
+
+    task_menu_ = menuBar()->addMenu(tr("&Task"));
+    task_menu_->addAction(radar_plot_position_calculator_task_action);
+    task_menu_->setDisabled(true);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)

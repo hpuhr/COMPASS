@@ -70,7 +70,6 @@ private:
 
   osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> graphics_window_;
   osg::ref_ptr<osgViewer::Viewer> viewer_;
-  osgGA::TrackballManipulator* manipulator_{nullptr};
 
   osg::Group* root_node_;
   osgEarth::MapNode* map_node_{nullptr};

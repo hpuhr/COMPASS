@@ -6,6 +6,8 @@
 class Buffer;
 class QLabel;
 class RadarPlotPositionCalculatorTask;
+class DBObjectComboBox;
+class DBOVariableSelectionWidet;
 
 class RadarPlotPositionCalculatorTaskWidget : public QWidget
 {
@@ -23,6 +25,9 @@ public:
 protected:
     RadarPlotPositionCalculatorTask& task_;
 
+    DBObjectComboBox* object_box;
+
+    QLabel *count_label_ {nullptr};
     QLabel *load_status_label_ {nullptr};
     QLabel *calculated_status_label_ {nullptr};
     QLabel *written_status_label_  {nullptr};

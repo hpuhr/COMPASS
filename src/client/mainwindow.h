@@ -36,12 +36,9 @@ class DBObjectManagerWidget;
 class ManagementWidget;
 class QTabWidget;
 class QCheckBox;
+class QMenu;
 
-//namespace ATSDB
-//{
-    //class MainWidget;
-
-    /**
+/**
  * @brief Main window which embeds all other components
  *
  * When started, allows management of database connection and schema. When database is opened,
@@ -61,6 +58,7 @@ private slots:
     void databaseOpenedSlot();
     /// @brief If database is open, switch to ManagementWidget
     void startSlot ();
+    void addRadarPlotPositionCalculatorTaskSlot ();
 
     /// @brief Handles key press events
     void keyPressEvent ( QKeyEvent * event );
@@ -78,6 +76,7 @@ protected:
     QWidget *dbinterface_widget_;
     // Contains database schema configuration elements
     QWidget *dbschema_manager_widget_;
+    QMenu *task_menu_ {nullptr};
 
     /// Contains DBObject configuration elements
     DBObjectManagerWidget *object_manager_widget_;
