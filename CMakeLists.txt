@@ -91,12 +91,11 @@ include_directories (
     src/filter
     src/job
     src/polygon
-    src/polygon/acgxml
-    src/polygon/shapefile
     src/projection
     src/property
     src/schema
     src/struct
+    src/task
     src/variable
     src/view
     src/view/viewbase
@@ -221,6 +220,8 @@ set ( atsdb_HDRS
     src/schema/dbschemamanagerwidget.h
     src/schema/dbtablewidget.h
     src/schema/metadbtablewidget.h
+    src/task/radarplotpositioncalculatortask.h
+    src/task/radarplotpositioncalculatortaskwidget.h
     src/unit/unitselectionwidget.h
     src/view/viewmanager.h
     src/view/viewmanagerwidget.h
@@ -335,6 +336,8 @@ set ( atsdb_SRCS
     #        src/projection/projectionmanager.cpp
     #        src/projection/projectionmanagerwidget.cpp
     src/property/property.cpp
+    src/task/radarplotpositioncalculatortask.cpp
+    src/task/radarplotpositioncalculatortaskwidget.cpp
     src/schema/dbschemawidget.cpp
     src/schema/dbtablewidget.cpp
     src/schema/dbtablecolumncombobox.cpp
