@@ -153,7 +153,6 @@ set ( atsdb_HDRS
     src/interface/dbinterfaceinfowidget.h
     src/interface/sqlgenerator.h
     src/job/job.h
-    src/job/joborderer.h
     src/job/jobmanager.h
     src/job/jobmanagerwidget.h
     src/job/dboreaddbjob.h
@@ -307,7 +306,6 @@ set ( atsdb_SRCS
     #        src/job/updatebufferdbjob.cpp
     #        src/job/writebufferdbjob.cpp
     #        src/job/transformationjob.cpp
-    src/job/joborderer.cpp
     src/job/jobmanager.cpp
     src/job/jobmanagerwidget.cpp
     src/object/dbobject.cpp

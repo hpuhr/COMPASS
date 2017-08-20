@@ -27,7 +27,6 @@
 
 #include "propertylist.h"
 #include "singleton.h"
-#include "joborderer.h"
 #include "dbovariableset.h"
 #include "configurable.h"
 
@@ -50,8 +49,6 @@ class ViewManager;
 //class StructureReader;
 class DBOVariable;
 class Job;
-//class DBOReadDBJob;
-//class FinalizeDBOReadJob;
 class BufferReceiver;
 
 /**
@@ -125,19 +122,8 @@ public:
     ///@brief Updates data records for a DBObject, delete buffer after execution
     //void update (Buffer *data);
 
-    /// @brief Return if a DBObject has information about its active data sources
-    //bool hasActiveDataSourcesInfo (const std::string &dbo_type);
-    /// @brief Creates information about a DBObject's active data sources
-    //void buildActiveDataSourcesInfo (const std::string &dbo_type);
-
     ///@brief Returns flag indicating if error state was set.
     //bool error();
-
-    //void buildMinMaxInfo (DBOVariable *var);
-    ///@brief Returns string minimum for DBO variable.
-    //std::string getMinAsString (DBOVariable *var);
-    ///@brief Returns string maximum for DBO variable.
-    //std::string getMaxAsString (DBOVariable *var);
 
     ///@brief Returns buffer with data from a DBO type, from a specific id and variables.
 //    void getInfo (JobOrderer *orderer, boost::function<void (Job*)> done_function,
@@ -151,14 +137,6 @@ public:
 //    void getDistinctStatistics (JobOrderer *orderer, boost::function<void (Job*)> done_function,
 //            boost::function<void (Job*)> obsolete_function, const std::string &dbo_type, DBOVariable *variable,
 //            unsigned int sensor_number);
-
-//    ///@brief Starts the post-processing.
-    //void postProcess (JobOrderer *orderer, boost::function<void(Job*)> done, boost::function<void(Job*)> obsolete);
-
-    /// @brief Callback function for post-processing job done
-//    void postProcessingDone( Job *job );
-//    void activeDataSourcesDone( Job *job );
-//    void minMaxDone( Job *job );
 
 //    void deleteAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string filter);
 //    void updateAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string new_value, std::string filter);
@@ -181,16 +159,8 @@ protected:
     ViewManager *view_manager_;
     /// Structure reader, can read data from defined C structs.
     //StructureReader *struct_reader_;
-    /// Map containg all existing data sources (DBO type -> data source number, data source name).
 
     virtual void checkSubConfigurables ();
-
-    ///@brief Generates minimum and maximum information from previous post-processing.
-    //void loadMinMaxValues ();
-    ///@brief Generates active data sources information from previous post-processing.
-    //void loadActiveDataSources ();
-
-//    void testUpdate ();
 
     ///@brief Constructor.
     ATSDB();

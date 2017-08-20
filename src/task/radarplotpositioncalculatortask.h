@@ -3,6 +3,8 @@
 
 #include <QObject>
 
+class RadarPlotPositionCalculatorTaskWidget;
+
 class RadarPlotPositionCalculatorTask : public QObject
 {
     Q_OBJECT
@@ -21,10 +23,14 @@ public:
     bool isCalculating ();
     unsigned int getNumLoaded () { return num_loaded_; }
 
+    RadarPlotPositionCalculatorTaskWidget* widget();
+
 protected:
     bool calculating_ {false};
 
     unsigned int num_loaded_ {0};
+
+    RadarPlotPositionCalculatorTaskWidget* widget_ {nullptr};
 };
 
 #endif /* RADARPLOTPOSITIONCALCULATOR_H_ */

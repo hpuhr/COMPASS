@@ -11,8 +11,8 @@
 using namespace Utils::String;
 
 
-RadarPlotPositionCalculatorTaskWidget::RadarPlotPositionCalculatorTaskWidget(RadarPlotPositionCalculator& calculator, QWidget * parent, Qt::WindowFlags f)
-: QWidget (parent, f), calculator_(calculator)
+RadarPlotPositionCalculatorTaskWidget::RadarPlotPositionCalculatorTaskWidget(RadarPlotPositionCalculatorTask& task, QWidget * parent, Qt::WindowFlags f)
+: QWidget (parent, f), task_(task)
 {
     setMinimumSize(QSize(800, 600));
 

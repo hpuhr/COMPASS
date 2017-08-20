@@ -12,6 +12,7 @@
 #include "dbobjectmanager.h"
 #include "dbovariableset.h"
 #include "radarplotpositioncalculatortask.h"
+#include "radarplotpositioncalculatortaskwidget.h"
 #include "logger.h"
 #include "propertylist.h"
 //#include "ProjectionManager.h"
@@ -24,6 +25,23 @@ RadarPlotPositionCalculatorTask::RadarPlotPositionCalculatorTask()
 
 RadarPlotPositionCalculatorTask::~RadarPlotPositionCalculatorTask()
 {
+    if (widget_)
+    {
+        delete widget_;
+        widget_ = nullptr;
+    }
+
+}
+
+RadarPlotPositionCalculatorTaskWidget* RadarPlotPositionCalculatorTask::widget()
+{
+    if (!widget_)
+    {
+        widget_ = new RadarPlotPositionCalculatorTaskWidget (*this);
+    }
+
+    assert (widget_);
+    return widget_;
 }
 
 void RadarPlotPositionCalculatorTask::calculate (void)

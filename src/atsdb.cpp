@@ -37,8 +37,6 @@
 //#include "WriteBufferDBJob.h"
 #include "jobmanager.h"
 //#include "DBOInfoDBJob.h"
-//#include "DBOActiveDataSourcesDBJob.h"
-//#include "DBOVariableMinMaxDBJob.h"
 //#include "DBOVariableDistinctStatisticsDBJob.h"
 //#include "UpdateBufferDBJob.h"
 #include "viewmanager.h"
@@ -234,40 +232,6 @@ bool ATSDB::ready ()
 }
 
 
-//void ATSDB::open (std::string database_name)
-//{
-//    db_interface_->openDatabase(database_name);
-
-//    loginf  << "ATSDB: open: data sources";
-    //buildDataSources();
-
-//    logdbg  << "ATSDB: open: checking if new";
-
-//    if (!info->isNew())
-//    {
-//        if (db_interface_->existsPropertiesTable())
-//        {
-//            loadActiveDataSources ();
-//            loginf  << "ATSDB: open: building active data sources";
-//        }
-//        if (db_interface_->existsMinMaxTable())
-//        {
-//            loginf  << "ATSDB: open: building minmax values";
-//            loadMinMaxValues();
-//        }
-//    }
-
-    // Now we have opened the database
-    //loginf  <<  "ATSDB: init: database '" << filename << "' opened";
-//    logdbg  << "ATSDB: open: state to 'DB_STATE_READ_IDLE'";
-
-//    db_opened_=true;
-
-//    //testUpdate();
-
-//    logdbg  << "ATSDB: open: end";
-//}
-
 ///**
 // * Calls stop, locks state_mutex_. If data was written uning the StructureReader, this process is finished correctly.
 // * State is set to DB_STATE_SHUTDOWN and ouput buffers are cleared.
@@ -337,59 +301,6 @@ void ATSDB::shutdown ()
     logdbg  << "ATSDB: shutdown: end";
 }
 
-//bool ATSDB::hasActiveDataSourcesInfo (const std::string &type)
-//{
-//    //    loginf << "ATSDB: hasActiveDataSourcesInfo: " << type << " info " << active_data_sources_info_exists_ [type];
-
-//    return db_interface_->hasActiveDataSourcesInfo(type);//active_data_sources_info_exists_ [type];
-//}
-
-//void ATSDB::buildActiveDataSourcesInfo (const std::string &type)
-//{
-//    assert (!hasActiveDataSourcesInfo(type));
-
-//    assert (false);
-//    //TODO
-////    DBOActiveDataSourcesDBJob *ds_job = new DBOActiveDataSourcesDBJob (this,
-////            boost::bind( &ATSDB::activeDataSourcesDone, this, _1),
-////            boost::bind( &ATSDB::jobAborted, this, _1) , db_interface_, type);
-//}
-
-
-////void ATSDB::buildMinMaxInfo (DBOVariable *var)
-////{
-////    assert (var);
-////    loginf << "ATSDB: buildMinMaxInfo: var " << var->getName () << " type " << var->getDBOType();
-
-////    if (var->isMetaVariable())
-////    {
-////        logerr << "ATSDB: buildMinMaxInfo: var " << var->getName () << " is meta";
-////        return;
-////    }
-
-////    if (var->hasMinMaxInfo())
-////        logwrn << "ATSDB: buildMinMaxInfo: var " << var->getName() << " already has defined minmax info";
-
-////    DBOVariableMinMaxDBJob *ds_job = new DBOVariableMinMaxDBJob (this,
-////            boost::bind( &ATSDB::minMaxDone, this, _1),
-////            boost::bind( &ATSDB::jobAborted, this, _1) , db_interface_, var);
-////}
-
-////std::string ATSDB::getMinAsString (DBOVariable *var)
-////{
-////    logdbg  << "ATSDB: getMinAsString: start var "  << var->id_ << " type " << var->dbo_type_int_;
-
-////    assert (var->hasMinMaxInfo());
-////    return var->getMinString();
-////}
-////std::string ATSDB::getMaxAsString (DBOVariable *var)
-////{
-////    logdbg  << "ATSDB: getMaxAsString: start";
-
-////    assert (var->hasMinMaxInfo());
-////    return var->getMaxString();
-////}
-
 ////void ATSDB::insert (const std::string &type, void *data)
 ////{
 ////    logdbg  << "ATSDB: insert: got type " << type;
@@ -441,22 +352,6 @@ void ATSDB::shutdown ()
 //    logdbg << "ATSDB: update: done";
 //}
 
-//void ATSDB::postProcess (JobOrderer *orderer, boost::function<void(Job*)> done, boost::function<void(Job*)> obsolete)
-//{
-//    logdbg  << "ATSDB: postProcess: start";
-
-//    //don't you have a job to do ... a thought repeating in that barbaric brain of yours ... edgar friendly
-
-//    //TODO
-//    assert (false);
-
-////    PostProcessDBJob *ppjob = new PostProcessDBJob (this, done, obsolete, db_interface_);
-////    ppjob->done_signal_.connect( boost::bind( &ATSDB::postProcessingDone, this, _1 ) );
-////    ppjob->obsolete_signal_.connect( boost::bind( &ATSDB::jobAborted, this, _1 ) );
-
-//    logdbg  << "ATSDB: postProcess: end";
-//}
-
 //void ATSDB::getInfo (JobOrderer *orderer, boost::function<void (Job*)> done_function,
 //        boost::function<void (Job*)> obsolete_function, const std::string &type, unsigned int id, DBOVariableSet read_list)
 //{
@@ -493,82 +388,6 @@ void ATSDB::shutdown ()
 ////    DBOVariableDistinctStatisticsDBJob *distinct_job = new DBOVariableDistinctStatisticsDBJob (orderer, done_function,
 ////            obsolete_function, db_interface_, type, variable, sensor_number);
 //}
-
-//void ATSDB::loadMinMaxValues ()
-//{
-//    logdbg  << "ATSDB: buildMinMaxValues: start";
-
-//    //TODO
-//    assert (false);
-
-////    std::map <std::pair<std::string, std::string>, std::pair<std::string, std::string> > min_max_values =
-////            db_interface_->getMinMaxInfo ();
-
-////    std::map <std::pair<std::string, std::string>, std::pair<std::string, std::string> >::iterator it;
-
-////    for (it = min_max_values.begin(); it != min_max_values.end(); it++)
-////    {
-////        if (!DBObjectManager::getInstance().existsDBOVariable (it->first.first, it->first.second))
-////            logerr << "ATSDB: loadMinMaxValues: variable does not exist, type " << it->first.first << " name '"
-////            << it->first.second <<"'";
-////        else
-////            DBObjectManager::getInstance().getDBOVariable (it->first.first, it->first.second)->setMinMax(it->second.first, it->second.second);
-////    }
-
-//    logdbg  << "ATSDB: buildMinMaxValues: done";
-//}
-
-
-//void ATSDB::loadActiveDataSources ()
-//{
-//    const std::map <std::string, DBObject*> &objects = DBObjectManager::getInstance().getDBObjects();
-//    std::map <std::string, DBObject*>::const_iterator ito;
-
-//    for (ito = objects.begin(); ito != objects.end(); ito++)
-//    {
-//        if (!db_interface_->exists(ito->first) || !ito->second->hasCurrentDataSource ()
-//                || !db_interface_->hasActiveDataSourcesInfo(ito->first))
-//        {
-//            logdbg  << "ATSDB: loadActiveDataSources: cannot load data sources for type " << ito->first;
-//            continue;
-//        }
-
-//        assert (false);
-//        // TODO
-
-//        //ito->second->setActiveDataSources(db_interface_->getActiveSensorNumbers (ito->first));
-//        //        logdbg << "ATSDB: buildActiveDataSources: dbo " << ito->second->getName() << " has " << active_data_sources_ [ito->first] .size()
-//        //                            << " active sensors";
-//    }
-//}
-
-//void ATSDB::activeDataSourcesDone( Job *job )
-//{
-//    assert (false);
-//    // TODO
-////    logdbg << "ATSDB: activeDataSourcesDone";
-////    DBOActiveDataSourcesDBJob *ads_job = (DBOActiveDataSourcesDBJob*) job;
-////    DB_OBJECT_TYPE type = ads_job->getDBOType();
-////    assert (DBObjectManager::getInstance().existsDBObject(type));
-////    DBObject *object = DBObjectManager::getInstance().getDBObject(type);
-////    assert (object->hasCurrentDataSource());
-////    assert (db_interface_->hasActiveDataSourcesInfo(type));
-////    object->setActiveDataSources(db_interface_->getActiveSensorNumbers(type));
-
-//    delete job;
-//}
-
-//void ATSDB::minMaxDone( Job *job )
-//{
-//    assert (false);
-//    // TODO
-////    logdbg << "ATSDB: minMaxDone";
-////    DBOVariableMinMaxDBJob *minmaxjob = (DBOVariableMinMaxDBJob*) job;
-////    minmaxjob->getDBOVariable()->setMinMax(minmaxjob->getMin(), minmaxjob->getMax());
-////    logdbg << "ATSDB: minMaxDone: var " << minmaxjob->getDBOVariable()->id_;
-////    delete minmaxjob;
-//}
-
 
 //void ATSDB::updateDBODone( Job *job )
 //{
@@ -617,12 +436,6 @@ void ATSDB::shutdown ()
 
 
 //    db_interface_->updateAllRowsWithVariableValue(variable, value, new_value, filter);
-//}
-
-//void ATSDB::getMinMaxOfVariable (DBOVariable *variable, std::string filter_condition, std::string &min, std::string &max)
-//{
-//    assert (db_interface_);
-//    db_interface_->getMinMaxOfVariable(variable, filter_condition, min, max);
 //}
 
 ////void ATSDB::getDistinctValues (DBOVariable *variable, std::string filter_condition, std::vector<std::string> &values)

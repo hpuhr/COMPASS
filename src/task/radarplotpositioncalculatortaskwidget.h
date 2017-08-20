@@ -5,7 +5,7 @@
 
 class Buffer;
 class QLabel;
-class RadarPlotPositionCalculator;
+class RadarPlotPositionCalculatorTask;
 
 class RadarPlotPositionCalculatorTaskWidget : public QWidget
 {
@@ -15,13 +15,13 @@ public slots:
     void calculateSlot ();
 
 public:
-    RadarPlotPositionCalculatorTaskWidget(RadarPlotPositionCalculator& calculator, QWidget * parent = 0, Qt::WindowFlags f = 0);
+    RadarPlotPositionCalculatorTaskWidget(RadarPlotPositionCalculatorTask& task, QWidget * parent = 0, Qt::WindowFlags f = 0);
     virtual ~RadarPlotPositionCalculatorTaskWidget();
 
     void update ();
 
 protected:
-    RadarPlotPositionCalculator& calculator_;
+    RadarPlotPositionCalculatorTask& task_;
 
     QLabel *load_status_label_ {nullptr};
     QLabel *calculated_status_label_ {nullptr};
