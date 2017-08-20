@@ -2,8 +2,7 @@ set(ATSDB_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 message("  Path: ${ATSDB_PATH}")
 
 cmake_minimum_required(VERSION 2.8.11)
-set ( CMAKE_BUILD_TYPE Release )
-
+set ( CMAKE_BUILD_TYPE Debug )
 
 project( ATSDB )
 
@@ -137,7 +136,6 @@ set ( atsdb_HDRS
     src/connection/sqliteconnectionwidget.cpp
     src/connection/sqliteconnectioninfowidget.cpp
     #        src/connection/bufferwriter.h
-    #        src/connection/mysqlconconnection.h
     #        src/datasource/datasource.h
     src/filter/dbfilter.h
     src/filter/sensorfilter.h
@@ -199,10 +197,6 @@ set ( atsdb_HDRS
     #        src/polygon/geographicpoint.h
     #        src/polygon/polygon4ddi.h
     #        src/polygon/vector2.h
-    #        src/polygon/acgxml/acgxmlparser.h
-    #        src/polygon/acgxml/abd.h
-    #        src/polygon/acgxml/ase.h
-    #        src/polygon/shapefile/shapefileparser.h
     #        src/projection/projectionmanager.h
     #        src/projection/projectionmanagerwidget.h
     src/property/property.h
@@ -280,7 +274,6 @@ set ( atsdb_SRCS
     src/config/configuration.cpp
     src/config/configurationmanager.cpp
     #        src/connection/bufferwriter.cpp
-    #        src/connection/mysqlconconnection.cpp
     src/connection/mysqlppconnection.cpp
     src/connection/mysqlppconnectionwidget.cpp
     src/connection/mysqlppconnectioninfowidget.cpp
@@ -339,10 +332,6 @@ set ( atsdb_SRCS
     #        src/polygon/airspacesectormanagerwidget.cpp
     #        src/polygon/airspacesectortreewidget.cpp
     #        src/polygon/airspacesectorwidget.cpp
-    #        src/polygon/acgxml/acgxmlparser.cpp
-    #        src/polygon/acgxml/abd.cpp
-    #        src/polygon/acgxml/ase.cpp
-    #        src/polygon/shapefile/shapefileparser.cpp
     #        src/projection/projectionmanager.cpp
     #        src/projection/projectionmanagerwidget.cpp
     src/property/property.cpp
