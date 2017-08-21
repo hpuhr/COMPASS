@@ -45,6 +45,7 @@ class DBObjectManager;
 class DBSchema;
 class DBSchemaManager;
 class FilterManager;
+class TaskManager;
 class ViewManager;
 //class StructureReader;
 class DBOVariable;
@@ -108,11 +109,12 @@ public:
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
-    DBInterface &interface ();
-    DBSchemaManager &schemaManager ();
-    DBObjectManager &objectManager ();
-    FilterManager &filterManager ();
-    ViewManager &viewManager ();
+    DBInterface& interface ();
+    DBSchemaManager& schemaManager ();
+    DBObjectManager& objectManager ();
+    FilterManager& filterManager ();
+    TaskManager& taskManager ();
+    ViewManager& viewManager ();
 
     bool ready ();
 
@@ -152,11 +154,12 @@ protected:
     bool initialized_;
 
     /// DB interface, encapsulating all database functionality.
-    DBInterface *db_interface_;
-    DBObjectManager *dbo_manager_;
-    DBSchemaManager *db_schema_manager_;
-    FilterManager *filter_manager_;
-    ViewManager *view_manager_;
+    DBInterface* db_interface_;
+    DBObjectManager* dbo_manager_;
+    DBSchemaManager* db_schema_manager_;
+    FilterManager* filter_manager_;
+    TaskManager* task_manager_;
+    ViewManager* view_manager_;
     /// Structure reader, can read data from defined C structs.
     //StructureReader *struct_reader_;
 

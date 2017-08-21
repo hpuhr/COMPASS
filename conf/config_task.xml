@@ -1,0 +1,3 @@
+<Configuration class_id="TaskManager" instance_id="TaskManager0">
+    <Configuration class_id="RadarPlotPositionCalculatorTask" instance_id="RadarPlotPositionCalculatorTask0"/>
+</Configuration>

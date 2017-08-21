@@ -1,5 +1,7 @@
 #include "radarplotpositioncalculatortaskwidget.h"
 #include "radarplotpositioncalculatortask.h"
+#include "dbobjectcombobox.h"
+#include "dbovariableselectionwidget.h"
 #include "logger.h"
 #include "atsdb.h"
 #include "stringconv.h"
@@ -30,26 +32,72 @@ RadarPlotPositionCalculatorTaskWidget::RadarPlotPositionCalculatorTaskWidget(Rad
     main_layout->addWidget (main_label);
 
     QGridLayout *grid = new QGridLayout ();
+    unsigned int row_cnt=0;
 
-    grid->addWidget (new QLabel ("Number of Plots"), 0, 0);
+    grid->addWidget (new QLabel ("DBObject"), row_cnt, 0);
+
+    object_box_ = new DBObjectComboBox (false);
+    connect (object_box_, SIGNAL(changedObject()), this, SLOT(dbObjectChangedSlot()));
+    grid->addWidget (object_box_, row_cnt, 1);
+
+    row_cnt++;
+    grid->addWidget (new QLabel ("Key Variable"), row_cnt, 0);
+    key_box_ = new DBOVariableSelectionWidget ();
+    grid->addWidget (key_box_, row_cnt, 1);
+
+    row_cnt++;
+    grid->addWidget (new QLabel ("Data Source Variable"), row_cnt, 0);
+    datasource_box_ = new DBOVariableSelectionWidget ();
+    grid->addWidget (datasource_box_, row_cnt, 1);
+
+    row_cnt++;
+    grid->addWidget (new QLabel ("Range Variable"), row_cnt, 0);
+    range_box_ = new DBOVariableSelectionWidget ();
+    grid->addWidget (range_box_, row_cnt, 1);
+
+    row_cnt++;
+    grid->addWidget (new QLabel ("Azimuth Variable"), row_cnt, 0);
+    azimuth_box_ = new DBOVariableSelectionWidget ();
+    grid->addWidget (azimuth_box_, row_cnt, 1);
+
+    row_cnt++;
+    grid->addWidget (new QLabel ("Altitude Variable"), row_cnt, 0);
+    altitude_box_ = new DBOVariableSelectionWidget ();
+    grid->addWidget (altitude_box_, row_cnt, 1);
+
+    row_cnt++;
+    grid->addWidget (new QLabel ("Latitude Variable"), row_cnt, 0);
+    latitude_box_ = new DBOVariableSelectionWidget ();
+    grid->addWidget (latitude_box_, row_cnt, 1);
+
+    row_cnt++;
+    grid->addWidget (new QLabel ("Longitude"), row_cnt, 0);
+    longitude_box_ = new DBOVariableSelectionWidget ();
+    grid->addWidget (longitude_box_, row_cnt, 1);
+
+    row_cnt++;
+    grid->addWidget (new QLabel ("Number of Plots"), row_cnt, 0);
 
     count_label_ = new QLabel ("Unknown");
-    grid->addWidget (count_label_, 0, 1);
+    grid->addWidget (count_label_, row_cnt, 1);
 
-    grid->addWidget (new QLabel ("Number of Loaded Plots"), 1, 0);
+    row_cnt++;
+    grid->addWidget (new QLabel ("Number of Loaded Plots"), row_cnt, 0);
 
     load_status_label_ = new QLabel ("0");
-    grid->addWidget (load_status_label_, 1, 1);
+    grid->addWidget (load_status_label_, row_cnt, 1);
 
-    grid->addWidget (new QLabel ("Number of Calculated Positions"), 2, 0);
+    row_cnt++;
+    grid->addWidget (new QLabel ("Number of Calculated Positions"), row_cnt, 0);
 
     calculated_status_label_ = new QLabel ("0");
-    grid->addWidget (calculated_status_label_, 2, 1);
+    grid->addWidget (calculated_status_label_, row_cnt, 1);
 
-    grid->addWidget (new QLabel ("Number of Updated Plots"), 3, 0);
+    row_cnt++;
+    grid->addWidget (new QLabel ("Number of Updated Plots"), row_cnt, 0);
 
     written_status_label_ = new QLabel ("0");
-    grid->addWidget (written_status_label_, 3, 1);
+    grid->addWidget (written_status_label_, row_cnt, 1);
 
     main_layout->addLayout(grid);
 
@@ -71,6 +119,24 @@ RadarPlotPositionCalculatorTaskWidget::~RadarPlotPositionCalculatorTaskWidget()
 void RadarPlotPositionCalculatorTaskWidget::update ()
 {
 
+}
+
+void RadarPlotPositionCalculatorTaskWidget::dbObjectChangedSlot()
+{
+    assert (object_box_);
+
+    std::string object_name = object_box_->getObjectName();
+
+    loginf << "RadarPlotPositionCalculatorTaskWidget: dbObjectChangedSlot: " << object_name;
+
+    key_box_->showDBOOnly(object_name);
+    datasource_box_->showDBOOnly(object_name);
+    range_box_->showDBOOnly(object_name);
+    azimuth_box_->showDBOOnly(object_name);
+    altitude_box_->showDBOOnly(object_name);
+
+    latitude_box_->showDBOOnly(object_name);
+    longitude_box_->showDBOOnly(object_name);
 }
 
 void RadarPlotPositionCalculatorTaskWidget::calculateSlot ()

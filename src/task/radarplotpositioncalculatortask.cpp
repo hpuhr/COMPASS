@@ -15,11 +15,13 @@
 #include "radarplotpositioncalculatortaskwidget.h"
 #include "logger.h"
 #include "propertylist.h"
+#include "taskmanager.h"
 //#include "ProjectionManager.h"
 
 using namespace Utils;
 
-RadarPlotPositionCalculatorTask::RadarPlotPositionCalculatorTask()
+RadarPlotPositionCalculatorTask::RadarPlotPositionCalculatorTask(const std::string &class_id, const std::string &instance_id, TaskManager* task_manager)
+    : Configurable (class_id, instance_id, task_manager)
 {
     qRegisterMetaType<std::shared_ptr<Buffer>>("std::shared_ptr<Buffer>");
 }

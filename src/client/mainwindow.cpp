@@ -179,7 +179,7 @@ void MainWindow::addRadarPlotPositionCalculatorTaskSlot ()
 {
     loginf  << "MainWindow: addRadarPlotPositionCalculatorTaskSlot";
 
-    TaskManager::instance().getRadarPlotPositionCalculatorTask()->widget()->show();
+    ATSDB::instance().taskManager().getRadarPlotPositionCalculatorTask()->widget()->show();
 }
 
 void MainWindow::postProcessingDoneSlot ()

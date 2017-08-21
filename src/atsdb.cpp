@@ -59,7 +59,6 @@ ATSDB::ATSDB()
     logdbg  << "ATSDB: constructor: start";
 
     JobManager::instance().start();
-    TaskManager::instance();
 
     createSubConfigurables ();
 
@@ -67,6 +66,7 @@ ATSDB::ATSDB()
     assert (db_schema_manager_);
     assert (dbo_manager_);
     assert (filter_manager_);
+    assert (task_manager_);
     assert (view_manager_);
 
     QObject::connect (db_schema_manager_, SIGNAL(schemaChangedSignal()), dbo_manager_, SLOT(updateSchemaInformationSlot()));
@@ -101,6 +101,7 @@ ATSDB::~ATSDB()
     assert (!db_schema_manager_);
     assert (!db_interface_);
     assert (!filter_manager_);
+    assert (!task_manager_);
     assert (!view_manager_);
 
 //    std::map <std::string, std::map <std::pair<unsigned char, unsigned char>, DataSource* > >::iterator it;
@@ -146,6 +147,12 @@ void ATSDB::generateSubConfigurable (const std::string &class_id, const std::str
         filter_manager_ = new FilterManager (class_id, instance_id, this);
         assert (filter_manager_ != nullptr);
     }
+    else if (class_id == "TaskManager")
+    {
+        assert (task_manager_ == nullptr);
+        task_manager_ = new TaskManager (class_id, instance_id, this);
+        assert (task_manager_ != nullptr);
+    }
     else if (class_id == "ViewManager")
     {
         assert (view_manager_ == nullptr);
@@ -181,6 +188,12 @@ void ATSDB::checkSubConfigurables ()
         addNewSubConfiguration ("FilterManager", "FilterManager0");
         generateSubConfigurable ("FilterManager", "FilterManager0");
         assert (filter_manager_ != nullptr);
+    }
+    if (task_manager_ == nullptr)
+    {
+        addNewSubConfiguration ("TaskManager", "TaskManager0");
+        generateSubConfigurable ("TaskManager", "TaskManager0");
+        assert (task_manager_ != nullptr);
     }
     if (view_manager_ == nullptr)
     {
@@ -218,6 +231,13 @@ FilterManager &ATSDB::filterManager ()
     return *filter_manager_;
 }
 
+TaskManager& ATSDB::taskManager ()
+{
+    assert (task_manager_);
+    assert (initialized_);
+    return *task_manager_;
+}
+
 ViewManager &ATSDB::viewManager ()
 {
     assert (view_manager_);
@@ -232,7 +252,6 @@ bool ATSDB::ready ()
 
     return db_interface_->ready();
 }
-
 
 ///**
 // * Calls stop, locks state_mutex_. If data was written uning the StructureReader, this process is finished correctly.
@@ -249,7 +268,6 @@ void ATSDB::shutdown ()
     }
 
     JobManager::instance().shutdown();
-    TaskManager::instance().shutdown();
 
     assert (db_interface_);
     db_interface_->closeConnection();
@@ -269,6 +287,11 @@ void ATSDB::shutdown ()
     assert (filter_manager_);
     delete filter_manager_;
     filter_manager_ = nullptr;
+
+    assert (task_manager_);
+    task_manager_->shutdown();
+    delete task_manager_;
+    task_manager_ = nullptr;
 
     assert (view_manager_);
     view_manager_->close();

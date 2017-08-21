@@ -1,13 +1,16 @@
 #ifndef RADARPLOTPOSITIONCALCULATOR_H_
 #define RADARPLOTPOSITIONCALCULATOR_H_
 
+#include "configurable.h"
+
 #include <QObject>
 #include <memory>
 
 class Buffer;
 class RadarPlotPositionCalculatorTaskWidget;
+class TaskManager;
 
-class RadarPlotPositionCalculatorTask : public QObject
+class RadarPlotPositionCalculatorTask : public QObject, public Configurable
 {
     Q_OBJECT
 
@@ -17,7 +20,7 @@ public slots:
     void readJobDoneSlot();
 
 public:
-    RadarPlotPositionCalculatorTask();
+    RadarPlotPositionCalculatorTask(const std::string &class_id, const std::string &instance_id, TaskManager* task_manager);
     virtual ~RadarPlotPositionCalculatorTask();
 
     void calculate ();

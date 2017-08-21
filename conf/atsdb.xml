@@ -25,5 +25,6 @@
     <SubConfigurationFile class_id="DBObjectManager" instance_id="DBObjectManager0" path="conf/config_dbo.xml"/>
     <SubConfigurationFile class_id="DBSchemaManager" instance_id="DBSchemaManager0" path="conf/config_db_schema.xml"/>
     <SubConfigurationFile class_id="FilterManager" instance_id="FilterManager0" path="conf/config_filter.xml"/>
+    <SubConfigurationFile class_id="TaskManager" instance_id="TaskManager0" path="conf/config_task.xml"/>
     <SubConfigurationFile class_id="ViewManager" instance_id="ViewManager0" path="conf/config_views.xml"/>
 </Configuration>
