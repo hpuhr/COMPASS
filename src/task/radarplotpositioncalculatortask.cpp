@@ -24,6 +24,15 @@ RadarPlotPositionCalculatorTask::RadarPlotPositionCalculatorTask(const std::stri
     : Configurable (class_id, instance_id, task_manager)
 {
     qRegisterMetaType<std::shared_ptr<Buffer>>("std::shared_ptr<Buffer>");
+
+    registerParameter("db_object_str", &db_object_str_, "");
+    registerParameter("key_var_str", &key_var_str_, "");
+    registerParameter("datasource_var_str", &datasource_var_str_, "");
+    registerParameter("range_var_str", &range_var_str_, "");
+    registerParameter("azimuth_var_str", &azimuth_var_str_, "");
+    registerParameter("altitude_var_str", &altitude_var_str_, "");
+    registerParameter("latitude_var_str", &latitude_var_str_, "");
+    registerParameter("longitude_var_str", &longitude_var_str_, "");
 }
 
 RadarPlotPositionCalculatorTask::~RadarPlotPositionCalculatorTask()
@@ -47,7 +56,125 @@ RadarPlotPositionCalculatorTaskWidget* RadarPlotPositionCalculatorTask::widget()
     return widget_;
 }
 
-void RadarPlotPositionCalculatorTask::calculate (void)
+std::string RadarPlotPositionCalculatorTask::dbObjectStr() const
+{
+    return db_object_str_;
+}
+
+void RadarPlotPositionCalculatorTask::dbObjectStr(const std::string &db_object_str)
+{
+    db_object_str_ = db_object_str;
+
+    assert (ATSDB::instance().objectManager().existsObject(db_object_str_));
+    db_object_ = &ATSDB::instance().objectManager().object(db_object_str_);
+}
+
+std::string RadarPlotPositionCalculatorTask::keyVarStr() const
+{
+    return key_var_str_;
+}
+
+void RadarPlotPositionCalculatorTask::keyVarStr(const std::string &key_var_str)
+{
+    key_var_str_ = key_var_str;
+    if (db_object_)
+    {
+        assert (db_object_->hasVariable(key_var_str_));
+        key_var_ = &db_object_->variable(key_var_str_);
+    }
+}
+
+std::string RadarPlotPositionCalculatorTask::datasourceVarStr() const
+{
+    return datasource_var_str_;
+}
+
+void RadarPlotPositionCalculatorTask::datasourceVarStr(const std::string &datasource_var_str)
+{
+    datasource_var_str_ = datasource_var_str;
+    if (db_object_)
+    {
+        assert (db_object_->hasVariable(datasource_var_str_));
+        datasource_var_ = &db_object_->variable(datasource_var_str_);
+    }
+}
+
+std::string RadarPlotPositionCalculatorTask::rangeVarStr() const
+{
+    return range_var_str_;
+}
+
+void RadarPlotPositionCalculatorTask::rangeVarStr(const std::string &range_var_str)
+{
+    range_var_str_ = range_var_str;
+    if (db_object_)
+    {
+        assert (db_object_->hasVariable(range_var_str_));
+        range_var_ = &db_object_->variable(range_var_str_);
+    }
+}
+
+std::string RadarPlotPositionCalculatorTask::azimuthVarStr() const
+{
+    return azimuth_var_str_;
+}
+
+void RadarPlotPositionCalculatorTask::azimuthVarStr(const std::string &azimuth_var_str)
+{
+    azimuth_var_str_ = azimuth_var_str;
+    if (db_object_)
+    {
+        assert (db_object_->hasVariable(azimuth_var_str_));
+        azimuth_var_ = &db_object_->variable(azimuth_var_str_);
+    }
+}
+
+std::string RadarPlotPositionCalculatorTask::altitudeVarStr() const
+{
+    return altitude_var_str_;
+}
+
+void RadarPlotPositionCalculatorTask::altitudeVarStr(const std::string &altitude_var_str)
+{
+    altitude_var_str_ = altitude_var_str;
+    if (db_object_)
+    {
+        assert (db_object_->hasVariable(altitude_var_str_));
+        altitude_var_ = &db_object_->variable(altitude_var_str_);
+    }
+}
+
+std::string RadarPlotPositionCalculatorTask::latitudeVarStr() const
+{
+    return latitude_var_str_;
+}
+
+void RadarPlotPositionCalculatorTask::latitudeVarStr(const std::string &latitude_var_str)
+{
+    latitude_var_str_ = latitude_var_str;
+    if (db_object_)
+    {
+        assert (db_object_->hasVariable(latitude_var_str_));
+        latitude_var_ = &db_object_->variable(latitude_var_str_);
+    }
+}
+
+std::string RadarPlotPositionCalculatorTask::longitudeVarStr() const
+{
+    return longitude_var_str_;
+}
+
+void RadarPlotPositionCalculatorTask::longitudeVarStr(const std::string &longitude_var_str)
+{
+    longitude_var_str_ = longitude_var_str;
+    if (db_object_)
+    {
+        assert (db_object_->hasVariable(longitude_var_str_));
+        longitude_var_ = &db_object_->variable(longitude_var_str_);
+    }
+}
+
+void RadarPlotPositionCalculatorTask::calculate ()
 {
     loginf << "RadarPlotPositionCalculatorTask: calculate: start";
 
@@ -55,7 +182,7 @@ void RadarPlotPositionCalculatorTask::calculate (void)
 
     num_loaded_=0;
 
-//    assert (DBObjectManager::getInstance().existsDBObject(DBO_PLOTS));
+    //    assert (DBObjectManager::getInstance().existsDBObject(DBO_PLOTS));
 //    DBObject *plot_obj = DBObjectManager::getInstance().getDBObject (DBO_PLOTS);
 
 //    assert (plot_obj->hasVariable("REC_NUM"));

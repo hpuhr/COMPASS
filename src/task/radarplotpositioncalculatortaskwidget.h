@@ -15,6 +15,7 @@ class RadarPlotPositionCalculatorTaskWidget : public QWidget
 
 public slots:
     void dbObjectChangedSlot();
+    void anyVariableChangedSlot();
     void calculateSlot ();
 
 public:
@@ -40,6 +41,8 @@ protected:
     QLabel *load_status_label_ {nullptr};
     QLabel *calculated_status_label_ {nullptr};
     QLabel *written_status_label_  {nullptr};
+
+    void setDBOBject (const std::string& object_name);
 };
 
 #endif /* RADARPLOTPOSITIONCALCULATORTASKWIDGET_H_ */

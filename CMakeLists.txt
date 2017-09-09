@@ -2,7 +2,7 @@ set(ATSDB_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 message("  Path: ${ATSDB_PATH}")
 
 cmake_minimum_required(VERSION 2.8.11)
-set ( CMAKE_BUILD_TYPE Release )
+set ( CMAKE_BUILD_TYPE Debug )
 
 project( ATSDB )
 
@@ -166,12 +166,6 @@ set ( atsdb_HDRS
     #        src/job/updatebufferdbjob.h
     #        src/job/writebufferdbjob.h
     #        src/job/transformationjob.h
-    src/object/dbovariable.h
-    src/object/dbovariableset.h
-    src/object/dbovariableorderedset.h
-    src/object/dbovariableorderedsetwidget.h
-    src/object/metadbovariable.h
-    src/object/metadbovariablewidget.h
     src/object/dbobject.h
     src/object/dbobjectwidget.h
     src/object/dbobjectinfowidget.h
@@ -183,6 +177,14 @@ set ( atsdb_HDRS
     src/object/dbovariabledatatypecombobox.h
     src/object/dbovariableselectionwidget.h
     src/object/dbovariabledatatypecombobox.h
+    src/object/dbodatasource.h
+    src/object/dbodatasourcewidget.h
+    src/object/dbovariable.h
+    src/object/dbovariableset.h
+    src/object/dbovariableorderedset.h
+    src/object/dbovariableorderedsetwidget.h
+    src/object/metadbovariable.h
+    src/object/metadbovariablewidget.h
     #        src/object/dbovariablecombobox.h
     #        src/object/dbovariablesetwidget.h
     #        src/object/propertydatatypecombobox.h
@@ -316,6 +318,8 @@ set ( atsdb_SRCS
     src/object/dbobjectmanager.cpp
     src/object/dbobjectmanagerwidget.cpp
     src/object/dbobjectmanagerloadwidget.cpp
+    src/object/dbodatasource.cpp
+    src/object/dbodatasourcewidget.cpp
     src/object/dbovariable.cpp
     src/object/dbovariablewidget.cpp
     src/object/dbovariableset.cpp

@@ -31,8 +31,8 @@
 
 #include "global.h"
 #include "dbovariableset.h"
+#include "dbodatasource.h"
 #include "configurable.h"
-
 
 class DBOVariable;
 class PropertyList;
@@ -66,43 +66,6 @@ protected:
     std::string schema_;
     /// MetaDBTable identifier
     std::string meta_table_;
-};
-
-/**
- * @brief Definition of a data source for a DBObject
- */
-class DBODataSourceDefinition : public Configurable
-{
-public:
-    /// @brief Constructor, registers parameters
-    DBODataSourceDefinition(const std::string &class_id, const std::string &instance_id, Configurable *parent)
-        : Configurable (class_id, instance_id, parent)
-    {
-        registerParameter ("schema", &schema_, "");
-        registerParameter ("local_key", &local_key_, "");
-        registerParameter ("meta_table", &meta_table_,  "");
-        registerParameter ("foreign_key", &foreign_key_, "");
-        registerParameter ("name_column", &name_column_, "");
-    }
-    virtual ~DBODataSourceDefinition() {}
-
-    const std::string& schema () const { return schema_; }
-    const std::string& localKey () const { return local_key_; }
-    const std::string& metaTableName () const { return meta_table_; }
-    const std::string& foreignKey () const { return foreign_key_; }
-    const std::string& nameColumn () const { return name_column_; }
-
-protected:
-    /// DBSchema identifier
-    std::string schema_;
-    /// Identifier for key in main table
-    std::string local_key_;
-    /// Identifier for meta table with data sources
-    std::string meta_table_;
-    /// Identifier for key in meta table with data sources
-    std::string foreign_key_;
-    /// Identifier for sensor name column in meta table with data sources
-    std::string name_column_;
 };
 
 class DBObjectWidget;
