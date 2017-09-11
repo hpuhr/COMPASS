@@ -37,6 +37,7 @@ class QTextEdit;
 
 
 class DBObject;
+class DBODataSourceDefinition;
 class DBOVariable;
 class DBTableColumnComboBox;
 class DBOVariableDataTypeComboBox;
@@ -62,14 +63,6 @@ public slots:
 
     /// @brief Updates data source schema selection
     void updateDSSchemaSelection();
-    /// @brief Updates data source local key selection
-    void updateDSLocalKeySelection();
-    /// @brief Updates data source meta table name selection
-    void updateDSMetaTableNameSelection ();
-    /// @brief Updates data source foreign key selection
-    void updateDSForeignKeySelection ();
-    /// @brief Updates data source name column selection
-    void updateDSNameColumnSelection ();
     /// @brief Updates data sources grid
     void updateDataSourcesGrid ();
     /// @brief Adds a data source
@@ -78,6 +71,10 @@ public slots:
     void changedDSSchema();
     /// @brief Updates data sources meta table dependents
     void changedDSMetaTable();
+    /// @brief Edits a DBOVariable
+    void editDataSource();
+    /// @brief Deletes a DBOVariable
+    void deleteDataSource();
 
     /// @brief Changes DBO name
     void editName ();
@@ -108,56 +105,51 @@ public:
 
 private:
     /// @brief DBObject to be managed
-    DBObject *object_;
+    DBObject* object_;
     DBSchemaManager &schema_manager_;
 
     /// @brief DBO name
-    QLineEdit *name_edit_;
+    QLineEdit* name_edit_;
     /// @brief DBO info
-    QLineEdit *info_edit_;
+    QLineEdit* info_edit_;
 
     /// @brief Grid with all data sources
-    QGridLayout *ds_grid_;
+    QGridLayout* ds_grid_;
+    /// @brief Container with data sources edit buttons
+    std::map <QPushButton*, DBODataSourceDefinition*> ds_grid_edit_buttons_;
+    /// @brief Container with data sources delete buttons
+    std::map <QPushButton*, DBODataSourceDefinition*> ds_grid_delete_buttons_;
+
 
     /// @brief Add new data source schema selection
-    QComboBox *ds_schema_box_;
-    /// @brief Add new data source local key selection
-    QComboBox *ds_local_key_box_;
-    /// @brief Add new data source meta table selection
-    QComboBox *ds_meta_name_box_;
-    /// @brief Add new data source foreign key selection
-    QComboBox *ds_foreign_key_box_;
-    /// @brief Add new data source foreign name selection
-    QComboBox *ds_foreign_name_box_;
+    QComboBox* ds_schema_box_;
 
     /// @brief grid with all meta tables per schema
-    QGridLayout *meta_table_grid_;
+    QGridLayout* meta_table_grid_;
 
     /// @brief Add meta table for schema schema selection
-    QComboBox *new_meta_schema_box_;
+    QComboBox* new_meta_schema_box_;
     /// @brief Add meta table for schema meta table selection
-    QComboBox *new_meta_box_;
+    QComboBox* new_meta_box_;
 
     /// @brief Grid with all DBOVariables
-    QGridLayout *dbovars_grid_;
+    QGridLayout* dbovars_grid_;
 
     /// @brief Container with DBOVariable edit buttons
-    std::map <QPushButton *, DBOVariable *> dbo_vars_grid_edit_buttons_;
+    std::map <QPushButton*, DBOVariable*> dbo_vars_grid_edit_buttons_;
     /// @brief Container with DBOVariable delete buttons
-    std::map <QPushButton *, DBOVariable *> dbo_vars_grid_delete_buttons_;
+    std::map <QPushButton*, DBOVariable*> dbo_vars_grid_delete_buttons_;
 
     /// @brief New DBOVariable name edit field
-    QLineEdit *new_var_name_edit_;
+    QLineEdit* new_var_name_edit_;
 
     /// @brief Add all variables schema box
-    QComboBox *all_schemas_box_;
+    QComboBox* all_schemas_box_;
     /// @brief Add all variables button
-    QPushButton *add_all_button_;
+    QPushButton* add_all_button_;
 
     /// @brief Updates a schema selection box
-    void updateSchemaSelectionBox (QComboBox *box);
-    /// @brief Updates a variable selection box
-    void updateVariableSelectionBox (QComboBox *box, std::string schema_name, std::string meta_table_name);
+    void updateSchemaSelectionBox (QComboBox* box);
 };
 
 #endif /* DBOBJECTEDITWIDGET_H_ */

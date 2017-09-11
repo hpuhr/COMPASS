@@ -49,8 +49,7 @@ using namespace Utils;
 
 DBObjectWidget::DBObjectWidget(DBObject *object, DBSchemaManager &schema_manager, QWidget * parent, Qt::WindowFlags f)
  : QWidget (parent, f), object_(object), schema_manager_(schema_manager), name_edit_(0), info_edit_(0),
-   ds_schema_box_(0), ds_local_key_box_ (0), ds_meta_name_box_ (0), ds_foreign_key_box_(0), meta_table_grid_(0),
-   new_meta_schema_box_ (0), new_meta_box_ (0), dbovars_grid_(0), new_var_name_edit_(0), all_schemas_box_(0)
+   ds_schema_box_(0), meta_table_grid_(0), new_meta_schema_box_ (0), new_meta_box_ (0), dbovars_grid_(0), new_var_name_edit_(0), all_schemas_box_(0)
 {
   assert (object_);
 
@@ -183,36 +182,6 @@ DBObjectWidget::DBObjectWidget(DBObject *object, DBSchemaManager &schema_manager
   updateDSSchemaSelection();
   connect(ds_schema_box_, SIGNAL( activated(int) ), this, SLOT( changedDSSchema() ));
   new_ds_layout->addWidget (ds_schema_box_);
-
-  QLabel *ds_local_label = new QLabel ("Local key");
-  new_ds_layout->addWidget (ds_local_label);
-
-  ds_local_key_box_ = new QComboBox ();
-  updateDSLocalKeySelection();
-  new_ds_layout->addWidget (ds_local_key_box_);
-
-  QLabel *ds_meta_label = new QLabel ("Meta table");
-  new_ds_layout->addWidget (ds_meta_label);
-
-  ds_meta_name_box_ = new QComboBox ();
-  updateDSMetaTableNameSelection();
-  connect(ds_meta_name_box_, SIGNAL( activated(int) ), this, SLOT( changedDSMetaTable() ));
-  new_ds_layout->addWidget (ds_meta_name_box_);
-
-  QLabel *ds_foreign_label = new QLabel ("Foreign key");
-  new_ds_layout->addWidget (ds_foreign_label);
-
-  ds_foreign_key_box_ = new QComboBox ();
-  updateDSForeignKeySelection();
-  new_ds_layout->addWidget (ds_foreign_key_box_);
-
-  QLabel *ds_name_label = new QLabel ("Name");
-  new_ds_layout->addWidget (ds_name_label);
-
-  ds_foreign_name_box_ = new QComboBox ();
-  updateDSNameColumnSelection ();
-  new_ds_layout->addWidget (ds_foreign_name_box_);
-
 
   QPushButton *new_ds_add = new QPushButton ("Add");
   connect(new_ds_add, SIGNAL( clicked() ), this, SLOT( addDataSource() ));
@@ -370,100 +339,6 @@ void DBObjectWidget::updateDSSchemaSelection()
 }
 
 
-void DBObjectWidget::updateDSLocalKeySelection()
-{
-  logdbg  << "DBObjectWidget: updateDSLocalKeySelection";
-  auto variables = object_->variables ();
-
-  std::string selection;
-
-  if (ds_local_key_box_->count() > 0)
-    selection = ds_local_key_box_->currentText().toStdString();
-
-  while (ds_local_key_box_->count() > 0)
-  	ds_local_key_box_->removeItem (0);
-
-  int index_cnt=-1;
-  unsigned int cnt=0;
-  for (auto it = variables.begin(); it != variables.end(); it++)
-  {
-    if (selection.size()>0 && selection.compare(it->second->name()) == 0)
-      index_cnt=cnt;
-
-    ds_local_key_box_->addItem (it->second->name().c_str());
-
-    cnt++;
-  }
-
-  if (index_cnt != -1)
-  {
-  	ds_local_key_box_->setCurrentIndex (index_cnt);
-  }
-}
-void DBObjectWidget::updateDSMetaTableNameSelection ()
-{
-  logdbg  << "DBObjectWidget: updateDSMetaTableNameSelection";
-  assert (ds_meta_name_box_);
-  assert (ds_schema_box_);
-
-  std::string selection;
-
-  if (ds_meta_name_box_->count() > 0)
-    selection = ds_meta_name_box_->currentText().toStdString();
-
-  while (ds_meta_name_box_->count() > 0)
-    ds_meta_name_box_->removeItem (0);
-
-  std::string schema_name = ds_schema_box_->currentText().toStdString();
-
-  DBSchema &schema = schema_manager_.getSchema(schema_name);
-
-  auto metatables = schema.metaTables();
-
-  int index_cnt=-1;
-  unsigned int cnt=0;
-  for (auto it = metatables.begin(); it != metatables.end(); it++)
-  {
-    if (selection.size()>0 && selection.compare(it->second->name()) == 0)
-      index_cnt=cnt;
-
-    ds_meta_name_box_->addItem (it->second->name().c_str());
-
-    cnt++;
-  }
-
-  if (index_cnt != -1)
-  {
-    ds_meta_name_box_->setCurrentIndex (index_cnt);
-  }
-
-}
-void DBObjectWidget::updateDSForeignKeySelection ()
-{
-  logdbg  << "DBObjectWidget: updateDSForeignKeySelection";
-  assert (ds_foreign_key_box_);
-  assert (ds_meta_name_box_);
-  assert (ds_schema_box_);
-
-  std::string meta_table_name = ds_meta_name_box_->currentText().toStdString();
-  std::string schema_name = ds_schema_box_->currentText().toStdString();
-
-  updateVariableSelectionBox (ds_foreign_key_box_, schema_name, meta_table_name);
-}
-
-void DBObjectWidget::updateDSNameColumnSelection ()
-{
-  logdbg  << "DBObjectWidget: updateDSNameColumnSelection";
-  assert (ds_foreign_name_box_);
-  assert (ds_meta_name_box_);
-  assert (ds_schema_box_);
-
-  std::string meta_table_name = ds_meta_name_box_->currentText().toStdString();
-  std::string schema_name = ds_schema_box_->currentText().toStdString();
-
-  updateVariableSelectionBox (ds_foreign_name_box_, schema_name, meta_table_name);
-
-}
 
 void DBObjectWidget::updateDataSourcesGrid ()
 {
@@ -478,6 +353,9 @@ void DBObjectWidget::updateDataSourcesGrid ()
         delete child->widget();
     delete child;
   }
+  ds_grid_edit_buttons_.clear();
+  ds_grid_delete_buttons_.clear();
+
 
   QFont font_bold;
   font_bold.setBold(true);
@@ -486,22 +364,19 @@ void DBObjectWidget::updateDataSourcesGrid ()
   schema_label->setFont (font_bold);
   ds_grid_->addWidget (schema_label, 0, 0);
 
-  QLabel *local_label = new QLabel ("Local key");
-  local_label->setFont (font_bold);
-  ds_grid_->addWidget (local_label, 0, 1);
+  QLabel *edit_label = new QLabel ("Edit");
+  edit_label->setFont (font_bold);
+  ds_grid_->addWidget (edit_label, 0, 1);
 
-  QLabel *meta_label = new QLabel ("Meta table");
-  meta_label->setFont (font_bold);
-  ds_grid_->addWidget (meta_label, 0, 2);
+  QLabel *del_label = new QLabel ("Delete");
+  del_label->setFont (font_bold);
+  ds_grid_->addWidget (del_label, 0, 2);
 
-  QLabel *foreign_label = new QLabel ("Foreign key");
-  foreign_label->setFont (font_bold);
-  ds_grid_->addWidget (foreign_label, 0, 3);
+  QPixmap edit_pixmap("./data/icons/edit.png");
+  QIcon edit_icon(edit_pixmap);
 
-  QLabel *ds_name_label = new QLabel ("Name column");
-  ds_name_label->setFont (font_bold);
-  ds_grid_->addWidget (ds_name_label, 0, 4);
-
+  QPixmap del_pixmap("./data/icons/delete.png");
+  QIcon del_icon(del_pixmap);
 
   auto dsdefs = object_->dataSourceDefinitions ();
 
@@ -511,17 +386,23 @@ void DBObjectWidget::updateDataSourcesGrid ()
     QLabel *schema = new QLabel (it->second->schema().c_str());
     ds_grid_->addWidget (schema, row, 0);
 
-    QLabel *localkey= new QLabel (it->second->localKey().c_str());
-    ds_grid_->addWidget (localkey, row, 1);
+    QPushButton *edit = new QPushButton ();
+    edit->setIcon(edit_icon);
+    edit->setFixedSize ( UI_ICON_SIZE );
+    edit->setFlat(UI_ICON_BUTTON_FLAT);
+    connect(edit, SIGNAL(clicked()), this, SLOT(editDataSource()));
+    assert (ds_grid_edit_buttons_.find(edit) == ds_grid_edit_buttons_.end());
+    ds_grid_edit_buttons_ [edit] = it->second;
+    ds_grid_->addWidget (edit, row, 1);
 
-    QLabel *meta= new QLabel (it->second->metaTableName().c_str());
-    ds_grid_->addWidget (meta, row, 2);
-
-    QLabel *foreignkey= new QLabel (it->second->foreignKey().c_str());
-    ds_grid_->addWidget (foreignkey, row, 3);
-
-    QLabel *namecol= new QLabel (it->second->nameColumn().c_str());
-    ds_grid_->addWidget (namecol, row, 4);
+    QPushButton *del = new QPushButton ();
+    del->setIcon(del_icon);
+    del->setFixedSize ( UI_ICON_SIZE );
+    del->setFlat(UI_ICON_BUTTON_FLAT);
+    connect(del, SIGNAL(clicked()), this, SLOT(deleteDataSource()));
+    assert (ds_grid_delete_buttons_.find(del) == ds_grid_delete_buttons_.end());
+    ds_grid_delete_buttons_ [del] = it->second;
+    ds_grid_->addWidget (del, row, 2);
 
     row++;
   }
@@ -569,6 +450,25 @@ void DBObjectWidget::changedDSMetaTable()
   logdbg  << "DBObjectWidget: changedMetaTable";
   updateDSForeignKeySelection ();
   updateDSNameColumnSelection ();
+}
+
+void DBObjectWidget::editDataSource()
+{
+  logdbg  << "DBObjectWidget: editDataSource";
+  QPushButton *button = static_cast<QPushButton*>(sender());
+  assert (ds_grid_edit_buttons_.find(button) != ds_grid_edit_buttons_.end());
+  //TODO
+  //ds_grid_edit_buttons_.at(button)->widget()->show();
+}
+
+void DBObjectWidget::deleteDataSource()
+{
+  logdbg  << "DBObjectWidget: deleteDBOVar";
+  QPushButton *button = static_cast<QPushButton*>(sender());
+  assert (ds_grid_delete_buttons_.find(button) != ds_grid_delete_buttons_.end());
+  //TODO
+  //object_->deleteVariable (ds_grid_delete_buttons_.at(button)->name());
+  updateDataSourcesGrid();
 }
 
 
@@ -812,41 +712,3 @@ void DBObjectWidget::updateSchemaSelectionBox (QComboBox *box)
   }
 }
 
-void DBObjectWidget::updateVariableSelectionBox (QComboBox *box, std::string schema_name, std::string meta_table_name)
-{
-  logdbg  << "DBObjectWidget: updateVariableSelectionBox";
-  assert (box);
-
-  std::string selection;
-
-  if (box->count() > 0)
-    selection = box->currentText().toStdString();
-
-  while (box->count() > 0)
-    box->removeItem (0);
-
-  DBSchema &schema = schema_manager_.getSchema(schema_name);
-
-  assert (schema.hasMetaTable (meta_table_name));
-
-  const MetaDBTable &meta_table = schema.metaTable (meta_table_name);
-
-  auto table_columns =  meta_table.columns();
-
-  int index_cnt=-1;
-  unsigned int cnt=0;
-  for (auto it = table_columns.begin(); it != table_columns.end(); it++)
-  {
-    if (selection.size()>0 && selection.compare(it->second.name()) == 0)
-      index_cnt=cnt;
-
-    box->addItem (it->first.c_str());
-
-    cnt++;
-  }
-
-  if (index_cnt != -1)
-  {
-    box->setCurrentIndex (index_cnt);
-  }
-}

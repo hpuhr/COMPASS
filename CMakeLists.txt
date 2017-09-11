@@ -178,7 +178,7 @@ set ( atsdb_HDRS
     src/object/dbovariableselectionwidget.h
     src/object/dbovariabledatatypecombobox.h
     src/object/dbodatasource.h
-    src/object/dbodatasourcewidget.h
+    src/object/dbodatasourcedefinitionwidget.h
     src/object/dbovariable.h
     src/object/dbovariableset.h
     src/object/dbovariableorderedset.h
@@ -319,15 +319,15 @@ set ( atsdb_SRCS
     src/object/dbobjectmanagerwidget.cpp
     src/object/dbobjectmanagerloadwidget.cpp
     src/object/dbodatasource.cpp
-    src/object/dbodatasourcewidget.cpp
+    src/object/dbodatasourcedefinitionwidget.cpp
     src/object/dbovariable.cpp
     src/object/dbovariablewidget.cpp
     src/object/dbovariableset.cpp
     src/object/dbovariableorderedset.cpp
     src/object/dbovariableorderedsetwidget.cpp
+    src/object/dbovariableselectionwidget.cpp
     src/object/metadbovariable.cpp
     src/object/metadbovariablewidget.cpp
-    src/object/dbovariableselectionwidget.cpp
     #        src/object/dbovariablecombobox.cpp
     #        src/object/dbovariablesetwidget.cpp
     #        src/polygon/polygon4ddi.cpp
