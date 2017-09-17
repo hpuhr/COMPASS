@@ -84,7 +84,6 @@ include_directories (
     src/config
     src/command
     src/connection
-    src/datasource
     src/interface
     src/object
     src/util
@@ -135,7 +134,6 @@ set ( atsdb_HDRS
     src/connection/sqliteconnectionwidget.cpp
     src/connection/sqliteconnectioninfowidget.cpp
     #        src/connection/bufferwriter.h
-    #        src/datasource/datasource.h
     src/filter/dbfilter.h
     src/filter/sensorfilter.h
     src/filter/filtermanager.h
@@ -285,7 +283,6 @@ set ( atsdb_SRCS
     src/connection/sqliteconnection.cpp
     src/connection/sqliteconnectionwidget.cpp
     src/connection/sqliteconnectioninfowidget.cpp
-    #        src/datasource/datasource.cpp
     src/filter/dbfilter.cpp
     src/filter/dbfiltercondition.cpp
     src/filter/dbfilterwidget.cpp

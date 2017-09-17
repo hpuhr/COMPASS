@@ -67,6 +67,60 @@ class DBODataSource
 {
 public:
     DBODataSource();
+    virtual ~DBODataSource();
+
+    void id(unsigned int id);
+    unsigned int id() const;
+
+    void name(const std::string &name);
+    const std::string &name() const;
+
+    void shortName(const std::string &short_name);
+    const std::string &shortName() const;
+
+    void sac(unsigned char sac);
+    unsigned char sac() const;
+
+    void sic(unsigned char sic);
+    unsigned char sic() const;
+
+    void altitude(double altitude);
+    double altitude() const;
+
+    void latitude(double latitiude);
+    double latitude() const;
+
+    void longitude(double longitude_);
+    double longitude() const;
+
+    //void finalize ();
+
+    // azimuth degrees, range & altitude in meters
+    //void calculateSystemCoordinates (double azimuth, double slant_range, double altitude, bool has_altitude, double &sys_x, double &sys_y);
+
+protected:
+    unsigned int id_;
+
+    std::string name_;
+    std::string short_name_;
+
+    unsigned char sac_;
+    unsigned char sic_;
+
+    double latitude_; //degrees
+    double longitude_; // degrees
+    double altitude_;  // meter above msl
+
+    //bool finalized_;
+
+
+//    double system_x_;
+//    double system_y_;
+
+//    double local_trans_x_;
+//    double local_trans_y_;
+
+//    double deg2rad_;
 };
 
 #endif // DBODATASOURCE_H
