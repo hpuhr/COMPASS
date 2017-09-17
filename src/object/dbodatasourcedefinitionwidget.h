@@ -17,6 +17,8 @@ public slots:
     void changedLocalKeySlot();
     void changedMetaTableSlot();
     void changedNameColumnSlot ();
+    void changedLatitudeColumnSlot ();
+    void changedLongitudeColumnSlot ();
 
     /// @brief Updates data source local key selection
     void updateLocalKeySlot();
@@ -26,6 +28,8 @@ public slots:
     void updateForeignKeySlot ();
     /// @brief Updates data source name column selection
     void updateNameColumnSlot ();
+    void updateLatitudeColumnSlot ();
+    void updateLongitudeColumnSlot ();
 
 //signals:
 //    void definitionChangedSignal();
@@ -45,10 +49,12 @@ private:
     /// @brief Add new data source foreign key selection
     QComboBox* foreign_key_box_{nullptr};
     /// @brief Add new data source foreign name selection
-    QComboBox* foreign_name_box_{nullptr};
+    QComboBox* name_box_{nullptr};
+    QComboBox* latitude_box_{nullptr};
+    QComboBox* longitude_box_{nullptr};
 
     /// @brief Updates a variable selection box
-    void updateVariableSelectionBox (QComboBox* box, const std::string& schema_name, const std::string& meta_table_name, const std::string& value);
+    void updateVariableSelectionBox (QComboBox* box, const std::string& schema_name, const std::string& meta_table_name, const std::string& value, bool empty_allowed=false);
 
 };
 

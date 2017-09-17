@@ -36,6 +36,14 @@ public:
 
     DBODataSourceDefinitionWidget* widget ();
 
+    bool hasLatitudeColumn () const { return latitude_column_.size() > 0; }
+    std::string latitudeColumn() const;
+    void latitudeColumn(const std::string &latitude_column);
+
+    bool hasLongitudeColumn () const { return longitude_column_.size() > 0; }
+    std::string longitudeColumn() const;
+    void longitudeColumn(const std::string &longitude_column);
+
 protected:
     DBObject* object_{nullptr};
 
@@ -49,6 +57,8 @@ protected:
     std::string foreign_key_;
     /// Identifier for sensor name column in meta table with data sources
     std::string name_column_;
+    std::string latitude_column_;
+    std::string longitude_column_;
 
     DBODataSourceDefinitionWidget* widget_{nullptr};
 };

@@ -70,10 +70,26 @@ DBODataSourceDefinitionWidget::DBODataSourceDefinitionWidget(DBObject& object, D
     row++;
     grid->addWidget (new QLabel ("Name column"), row, 0);
 
-    foreign_name_box_ = new QComboBox ();
+    name_box_ = new QComboBox ();
     updateNameColumnSlot ();
-    connect(foreign_name_box_, SIGNAL( activated(int) ), this, SLOT(changedNameColumnSlot()));
-    grid->addWidget (foreign_name_box_, row, 1);
+    connect(name_box_, SIGNAL( activated(int) ), this, SLOT(changedNameColumnSlot()));
+    grid->addWidget (name_box_, row, 1);
+
+    row++;
+    grid->addWidget (new QLabel ("Latitude column"), row, 0);
+
+    latitude_box_ = new QComboBox ();
+    updateLatitudeColumnSlot();
+    connect(latitude_box_, SIGNAL( activated(int) ), this, SLOT(changedLatitudeColumnSlot()));
+    grid->addWidget (latitude_box_, row, 1);
+
+    row++;
+    grid->addWidget (new QLabel ("Longitude column"), row, 0);
+
+    longitude_box_ = new QComboBox ();
+    updateLongitudeColumnSlot();
+    connect(longitude_box_, SIGNAL( activated(int) ), this, SLOT(changedLongitudeColumnSlot()));
+    grid->addWidget (longitude_box_, row, 1);
 
     main_layout->addLayout(grid);
 
@@ -116,11 +132,26 @@ void DBODataSourceDefinitionWidget::changedForeignKeySlot ()
 void DBODataSourceDefinitionWidget::changedNameColumnSlot ()
 {
     logdbg  << "DBODataSourceDefinitionWidget: changedNameColumnSlot";
-    assert (foreign_name_box_);
-    std::string value = foreign_name_box_->currentText().toStdString();
+    assert (name_box_);
+    std::string value = name_box_->currentText().toStdString();
     definition_.nameColumn(value);
 }
 
+void DBODataSourceDefinitionWidget::changedLatitudeColumnSlot ()
+{
+    logdbg  << "DBODataSourceDefinitionWidget: changedLatitudeColumnSlot";
+    assert (latitude_box_);
+    std::string value = latitude_box_->currentText().toStdString();
+    definition_.latitudeColumn(value);
+}
+
+void DBODataSourceDefinitionWidget::changedLongitudeColumnSlot ()
+{
+    logdbg  << "DBODataSourceDefinitionWidget: changedLongitudeColumnSlot";
+    assert (longitude_box_);
+    std::string value = longitude_box_->currentText().toStdString();
+    definition_.longitudeColumn(value);
+}
 
 void DBODataSourceDefinitionWidget::updateLocalKeySlot()
 {
@@ -208,17 +239,43 @@ void DBODataSourceDefinitionWidget::updateForeignKeySlot ()
 void DBODataSourceDefinitionWidget::updateNameColumnSlot ()
 {
     logdbg  << "DBODataSourceDefinitionWidget: updateNameColumnSlot";
-    assert (foreign_name_box_);
+    assert (name_box_);
     assert (meta_name_box_);
 
     std::string meta_table_name = meta_name_box_->currentText().toStdString();
     std::string schema_name = definition_.schema();
 
-    updateVariableSelectionBox (foreign_name_box_, schema_name, meta_table_name, definition_.nameColumn());
+    updateVariableSelectionBox (name_box_, schema_name, meta_table_name, definition_.nameColumn());
 
 }
 
-void DBODataSourceDefinitionWidget::updateVariableSelectionBox (QComboBox* box, const std::string& schema_name, const std::string& meta_table_name, const std::string& value)
+void DBODataSourceDefinitionWidget::updateLatitudeColumnSlot ()
+{
+    logdbg  << "DBODataSourceDefinitionWidget: updateLatitudeColumnSlot";
+    assert (latitude_box_);
+    assert (meta_name_box_);
+
+    std::string meta_table_name = meta_name_box_->currentText().toStdString();
+    std::string schema_name = definition_.schema();
+
+    updateVariableSelectionBox (latitude_box_, schema_name, meta_table_name, definition_.latitudeColumn(), true);
+}
+
+
+void DBODataSourceDefinitionWidget::updateLongitudeColumnSlot ()
+{
+    logdbg  << "DBODataSourceDefinitionWidget: updateLongitudeColumnSlot";
+    assert (longitude_box_);
+    assert (meta_name_box_);
+
+    std::string meta_table_name = meta_name_box_->currentText().toStdString();
+    std::string schema_name = definition_.schema();
+
+    updateVariableSelectionBox (longitude_box_, schema_name, meta_table_name, definition_.longitudeColumn(), true);
+}
+
+void DBODataSourceDefinitionWidget::updateVariableSelectionBox (QComboBox* box, const std::string& schema_name, const std::string& meta_table_name, const std::string& value,
+                                                                bool empty_allowed)
 {
     logdbg  << "DBODataSourceDefinitionWidget: updateVariableSelectionBox: value " << value;
     assert (box);
@@ -243,6 +300,14 @@ void DBODataSourceDefinitionWidget::updateVariableSelectionBox (QComboBox* box, 
 
     int index_cnt=-1;
     unsigned int cnt=0;
+
+    if (empty_allowed)
+    {
+        box->addItem ("");
+        if (selection == "")
+            index_cnt = 0;
+    }
+
     for (auto it = table_columns.begin(); it != table_columns.end(); it++)
     {
         if (selection.size()>0 && selection == it->first)

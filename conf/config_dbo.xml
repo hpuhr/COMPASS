@@ -12,7 +12,9 @@
         <ParameterString name="ADSB"/>
         <Configuration class_id="DBODataSourceDefinition" instance_id="DBODataSourceDefinitionADSBSCDB0">
             <ParameterString foreign_key="le_ds.DS_ID"/>
+            <ParameterString latitude_column=""/>
             <ParameterString local_key="ds_id"/>
+            <ParameterString longitude_column=""/>
             <ParameterString meta_table="ADSBDataSources"/>
             <ParameterString name_column="le_ds.DS_NAME"/>
             <ParameterString schema="SCDB"/>
@@ -1147,7 +1149,9 @@
         <ParameterString name="MLAT"/>
         <Configuration class_id="DBODataSourceDefinition" instance_id="DBODataSourceDefinitionMLATSCDB0">
             <ParameterString foreign_key="le_ds.DS_ID"/>
+            <ParameterString latitude_column=""/>
             <ParameterString local_key="ds_id"/>
+            <ParameterString longitude_column=""/>
             <ParameterString meta_table="MLATDataSources"/>
             <ParameterString name_column="le_ds.DS_NAME"/>
             <ParameterString schema="SCDB"/>
@@ -2674,7 +2678,9 @@
         <ParameterString name="Radar"/>
         <Configuration class_id="DBODataSourceDefinition" instance_id="DBODataSourceDefinitionRadarSCDB0">
             <ParameterString foreign_key="le_ds.DS_ID"/>
+            <ParameterString latitude_column=""/>
             <ParameterString local_key="ds_id"/>
+            <ParameterString longitude_column=""/>
             <ParameterString meta_table="RadarDataSources"/>
             <ParameterString name_column="le_ds.DS_NAME"/>
             <ParameterString schema="SCDB"/>
@@ -4299,7 +4305,9 @@
         <ParameterString name="Tracker"/>
         <Configuration class_id="DBODataSourceDefinition" instance_id="DBODataSourceDefinitionTrackerSCDB0">
             <ParameterString foreign_key="le_ds.DS_ID"/>
+            <ParameterString latitude_column=""/>
             <ParameterString local_key="ds_id"/>
+            <ParameterString longitude_column=""/>
             <ParameterString meta_table="TrackerDataSources"/>
             <ParameterString name_column="le_ds.DS_NAME"/>
             <ParameterString schema="SCDB"/>

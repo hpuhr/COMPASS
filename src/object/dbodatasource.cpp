@@ -10,6 +10,8 @@ DBODataSourceDefinition::DBODataSourceDefinition(const std::string &class_id, co
     registerParameter ("meta_table", &meta_table_,  "");
     registerParameter ("foreign_key", &foreign_key_, "");
     registerParameter ("name_column", &name_column_, "");
+    registerParameter ("latitude_column", &latitude_column_, "");
+    registerParameter ("longitude_column", &longitude_column_, "");
 }
 
 DBODataSourceDefinition::~DBODataSourceDefinition()
@@ -30,6 +32,26 @@ DBODataSourceDefinitionWidget* DBODataSourceDefinition::widget ()
 
     assert (widget_);
     return widget_;
+}
+
+std::string DBODataSourceDefinition::latitudeColumn() const
+{
+    return latitude_column_;
+}
+
+std::string DBODataSourceDefinition::longitudeColumn() const
+{
+    return longitude_column_;
+}
+
+void DBODataSourceDefinition::longitudeColumn(const std::string &longitude_column)
+{
+    longitude_column_ = longitude_column;
+}
+
+void DBODataSourceDefinition::latitudeColumn(const std::string &latitude_column)
+{
+    latitude_column_ = latitude_column;
 }
 
 void DBODataSourceDefinition::localKey(const std::string &local_key)
