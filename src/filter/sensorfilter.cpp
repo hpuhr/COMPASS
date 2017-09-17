@@ -38,9 +38,12 @@ SensorFilter::SensorFilter(const std::string &class_id, const std::string &insta
 {
     registerParameter ("dbo_name", &dbo_name_, "");
 
-    assert (ATSDB::instance().objectManager().existsObject(dbo_name_));
+    if (!ATSDB::instance().objectManager().existsObject(dbo_name_))
+        throw std::invalid_argument ("SensorFilter: SensorFilter: instance "+instance_id+" has non-existing object "+dbo_name_);
+
     object_ = &ATSDB::instance().objectManager().object(dbo_name_);
-    assert (object_->hasCurrentDataSource());
+    if (!object_->hasCurrentDataSource())
+        throw std::invalid_argument ("SensorFilter: SensorFilter: instance "+instance_id+" object "+dbo_name_+" has no data sources");
 
     sensor_column_name_ = object_->currentDataSource().localKey();
 

@@ -66,8 +66,16 @@ void FilterManager::generateSubConfigurable (const std::string &class_id, const 
     }
     else if (class_id.compare ("SensorFilter") == 0)
     {
-        SensorFilter *filter = new SensorFilter (class_id, instance_id, this);
-        filters_.push_back (filter);
+        try
+        {
+            SensorFilter *filter = new SensorFilter (class_id, instance_id, this);
+            filters_.push_back (filter);
+        }
+        catch (const std::exception& e)
+        {
+            loginf << "FilterManager: generateSubConfigurable: sensor filter for instance " << instance_id << " outdated, deleting";
+            configuration_.removeSubConfiguration(class_id, instance_id);
+        }
     }
     else
         throw std::runtime_error ("FilterManager: generateSubConfigurable: unknown class_id "+class_id );

@@ -179,6 +179,7 @@ public:
     /// @brief Returns current data source definition
     const DBODataSourceDefinition &currentDataSource () const;
     bool hasDataSource (const std::string& schema) { return data_source_definitions_.count(schema); }
+    void deleteDataSource (const std::string& schema);
     /// @brief Returns container with all data source definitions
     const std::map <std::string, DBODataSourceDefinition *> &dataSourceDefinitions () const { return data_source_definitions_; }
 

@@ -67,10 +67,6 @@ public slots:
     void updateDataSourcesGrid ();
     /// @brief Adds a data source
     void addDataSource ();
-    /// @brief Changes data source schema
-    //void changedDSSchema();
-    /// @brief Updates data sources meta table dependents
-    //void changedDSMetaTable();
     /// @brief Edits a DBOVariable
     void editDataSource();
     /// @brief Deletes a DBOVariable
@@ -119,7 +115,6 @@ private:
     std::map <QPushButton*, DBODataSourceDefinition*> ds_grid_edit_buttons_;
     /// @brief Container with data sources delete buttons
     std::map <QPushButton*, DBODataSourceDefinition*> ds_grid_delete_buttons_;
-
 
     /// @brief Add new data source schema selection
     QComboBox* ds_schema_box_;

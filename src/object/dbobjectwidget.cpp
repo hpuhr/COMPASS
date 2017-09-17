@@ -43,6 +43,7 @@
 //#include "StringRepresentationComboBox.h"
 #include "dbtablecolumncombobox.h"
 #include "unitselectionwidget.h"
+#include "dbodatasourcedefinitionwidget.h"
 
 #include "stringconv.h"
 
@@ -69,7 +70,6 @@ DBObjectWidget::DBObjectWidget(DBObject *object, DBSchemaManager &schema_manager
     QLabel *main_label = new QLabel ("Edit DB object");
     main_label->setFont (font_big);
     main_layout->addWidget (main_label);
-
 
     // object parameters
     QVBoxLayout *properties_main_layout = new QVBoxLayout ();
@@ -446,28 +446,12 @@ void DBObjectWidget::addDataSource ()
     updateDataSourcesGrid();
 }
 
-//void DBObjectWidget::changedDSSchema()
-//{
-//  logdbg  << "DBObjectWidget: changedDSSchema";
-//  updateDSLocalKeySelection();
-//  updateDSMetaTableNameSelection ();
-//  updateDSForeignKeySelection ();
-//  updateDSNameColumnSelection ();
-//}
-//void DBObjectWidget::changedDSMetaTable()
-//{
-//  logdbg  << "DBObjectWidget: changedMetaTable";
-//  updateDSForeignKeySelection ();
-//  updateDSNameColumnSelection ();
-//}
-
 void DBObjectWidget::editDataSource()
 {
     logdbg  << "DBObjectWidget: editDataSource";
     QPushButton *button = static_cast<QPushButton*>(sender());
     assert (ds_grid_edit_buttons_.find(button) != ds_grid_edit_buttons_.end());
-    //TODO
-    //ds_grid_edit_buttons_.at(button)->widget()->show();
+    ds_grid_edit_buttons_.at(button)->widget()->show();
 }
 
 void DBObjectWidget::deleteDataSource()

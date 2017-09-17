@@ -174,10 +174,17 @@ bool DBObject::hasCurrentDataSource () const
     return (data_source_definitions_.find(ATSDB::instance().schemaManager().getCurrentSchema().name()) != data_source_definitions_.end());
 }
 
-const DBODataSourceDefinition &DBObject::currentDataSource () const
+const DBODataSourceDefinition& DBObject::currentDataSource () const
 {
     assert (hasCurrentDataSource());
     return *data_source_definitions_.at(ATSDB::instance().schemaManager().getCurrentSchema().name());
+}
+
+void DBObject::deleteDataSource (const std::string& schema)
+{
+    assert (data_source_definitions_.count(schema) == 1);
+    delete data_source_definitions_.at(schema);
+    data_source_definitions_.erase(schema);
 }
 
 /**
@@ -465,7 +472,16 @@ void DBObject::buildDataSources()
 
     logdbg  << "DBObject: buildDataSources: building data sources for " << name_;
 
-    data_sources_ = ATSDB::instance().interface().getDataSources(*this);
+    try
+    {
+        data_sources_ = ATSDB::instance().interface().getDataSources(*this);
+    }
+    catch (std::exception& e)
+    {
+        logerr << "DBObject: buildDataSources: failed, deleting entry";
+        deleteDataSource (ATSDB::instance().schemaManager().getCurrentSchema().name());
+        assert (!hasCurrentDataSource());
+    }
 
     logdbg << "DBObject: buildDataSources: end";
 }

@@ -91,13 +91,20 @@ std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand (const DBOb
 
     const DBODataSourceDefinition &ds = object.currentDataSource ();
     const DBSchema &schema = ATSDB::instance().schemaManager().getCurrentSchema();
-    assert (schema.hasMetaTable(ds.metaTableName()));
+
+    if (!schema.hasMetaTable(ds.metaTableName()))
+        throw std::invalid_argument ("SQLGenerator: getDataSourcesSelectCommand: schema does has no meta table "+ds.metaTableName());
 
     const MetaDBTable& meta =  schema.metaTable(ds.metaTableName());
     loginf << "SQLGenerator: getDataSourcesSelectCommand: object " << object.name() << " meta table " << meta.name() << " key col " << ds.foreignKey() << " name col " << ds.nameColumn();
-    assert (meta.hasColumn(ds.foreignKey()));
+    if (!meta.hasColumn(ds.foreignKey()))
+        throw std::runtime_error ("SQLGenerator: getDataSourcesSelectCommand: meta table has no column "+ds.foreignKey());
+
     const DBTableColumn& foreign_key_col = meta.column(ds.foreignKey());
-    assert (meta.hasColumn(ds.nameColumn()));
+
+    if (!meta.hasColumn(ds.nameColumn()))
+        throw std::runtime_error ("SQLGenerator: getDataSourcesSelectCommand: meta table has no column "+ds.foreignKey());
+
     const DBTableColumn& name_col = meta.column(ds.nameColumn());
 
     std::vector <const DBTableColumn*> columns;

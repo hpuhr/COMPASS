@@ -241,7 +241,7 @@ public:
     void createSubConfigurables (Configurable *configurable);
 
     /// @brief Returns flag indicating if configuration has been used by a configurable
-    bool getUsed () {return used_; };
+    bool getUsed () {return used_; }
 
     /// @brief Sets special filename for XML configuration
     void setConfigurationFilename (const std::string &configuration_filename);

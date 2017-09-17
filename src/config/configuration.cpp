@@ -416,7 +416,7 @@ void Configuration::getParameter (const std::string &parameter_id, std::string &
     assert (parameters_string_.at(parameter_id).getParameterType().compare ("ParameterString") == 0);
 
     if (parameters_string_.at(parameter_id).pointer_ == 0)
-        throw std::runtime_error ("Configuration: getParameter: double "+parameter_id+" not in use");
+        throw std::runtime_error ("Configuration: getParameter: string "+parameter_id+" not in use");
 
     value = *(parameters_string_.at(parameter_id).pointer_);
 }
