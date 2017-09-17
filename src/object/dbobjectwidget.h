@@ -68,9 +68,9 @@ public slots:
     /// @brief Adds a data source
     void addDataSource ();
     /// @brief Changes data source schema
-    void changedDSSchema();
+    //void changedDSSchema();
     /// @brief Updates data sources meta table dependents
-    void changedDSMetaTable();
+    //void changedDSMetaTable();
     /// @brief Edits a DBOVariable
     void editDataSource();
     /// @brief Deletes a DBOVariable
@@ -99,7 +99,7 @@ public slots:
 
 public:
     /// @brief Constructor
-    DBObjectWidget(DBObject *object, DBSchemaManager &schema_manager, QWidget * parent = 0, Qt::WindowFlags f = 0);
+    DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager, QWidget* parent = 0, Qt::WindowFlags f = 0);
     /// @brief Destructor
     virtual ~DBObjectWidget();
 
