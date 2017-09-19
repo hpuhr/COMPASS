@@ -44,6 +44,21 @@ public:
     std::string longitudeColumn() const;
     void longitudeColumn(const std::string &longitude_column);
 
+    bool hasShortNameColumn () const { return short_name_column_.size() > 0; }
+    std::string shortNameColumn() const;
+    void shortNameColumn(const std::string &short_name_column);
+
+    bool hasSacColumn () const { return sac_column_.size() > 0; }
+    std::string sacColumn() const;
+    void sacColumn(const std::string &sac_column);
+
+    bool hasSicColumn () const { return sic_column_.size() > 0; }
+    std::string sicColumn() const;
+    void sicColumn(const std::string &sic_column);
+
+    std::string altitudeColumn() const;
+    void altitudeColumn(const std::string &altitude_column);
+
 protected:
     DBObject* object_{nullptr};
 
@@ -56,9 +71,13 @@ protected:
     /// Identifier for key in meta table with data sources
     std::string foreign_key_;
     /// Identifier for sensor name column in meta table with data sources
+    std::string short_name_column_;
     std::string name_column_;
+    std::string sac_column_;
+    std::string sic_column_;
     std::string latitude_column_;
     std::string longitude_column_;
+    std::string altitude_column_;
 
     DBODataSourceDefinitionWidget* widget_{nullptr};
 };

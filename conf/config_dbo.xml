@@ -11,13 +11,17 @@
         <ParameterString info=""/>
         <ParameterString name="ADSB"/>
         <Configuration class_id="DBODataSourceDefinition" instance_id="DBODataSourceDefinitionADSBSCDB0">
+            <ParameterString altitude_column=""/>
             <ParameterString foreign_key="le_ds.DS_ID"/>
             <ParameterString latitude_column=""/>
             <ParameterString local_key="ds_id"/>
             <ParameterString longitude_column=""/>
             <ParameterString meta_table="ADSBDataSources"/>
             <ParameterString name_column="le_ds.DS_NAME"/>
+            <ParameterString sac_column="le_ds.SAC"/>
             <ParameterString schema="SCDB"/>
+            <ParameterString short_name_column="le_ds.DS_SHORT_NAME"/>
+            <ParameterString sic_column="le_ds.SIC"/>
         </Configuration>
         <Configuration class_id="DBOSchemaMetaTableDefinition" instance_id="DBOSchemaMetaTableDefinition0">
             <ParameterString meta_table="ADSB"/>
@@ -1148,13 +1152,17 @@
         <ParameterString info=""/>
         <ParameterString name="MLAT"/>
         <Configuration class_id="DBODataSourceDefinition" instance_id="DBODataSourceDefinitionMLATSCDB0">
+            <ParameterString altitude_column=""/>
             <ParameterString foreign_key="le_ds.DS_ID"/>
             <ParameterString latitude_column=""/>
             <ParameterString local_key="ds_id"/>
             <ParameterString longitude_column=""/>
             <ParameterString meta_table="MLATDataSources"/>
             <ParameterString name_column="le_ds.DS_NAME"/>
+            <ParameterString sac_column="le_ds.SAC"/>
             <ParameterString schema="SCDB"/>
+            <ParameterString short_name_column="le_ds.DS_SHORT_NAME"/>
+            <ParameterString sic_column="le_ds.SIC"/>
         </Configuration>
         <Configuration class_id="DBOSchemaMetaTableDefinition" instance_id="DBOSchemaMetaTableDefinition0">
             <ParameterString meta_table="MLAT"/>
@@ -2677,13 +2685,17 @@
         <ParameterString info=""/>
         <ParameterString name="Radar"/>
         <Configuration class_id="DBODataSourceDefinition" instance_id="DBODataSourceDefinitionRadarSCDB0">
+            <ParameterString altitude_column="ds_radar.WGS_ELEV_CARTESIAN_M"/>
             <ParameterString foreign_key="le_ds.DS_ID"/>
-            <ParameterString latitude_column=""/>
+            <ParameterString latitude_column="ds_radar.POS_LAT_DEG"/>
             <ParameterString local_key="ds_id"/>
-            <ParameterString longitude_column=""/>
+            <ParameterString longitude_column="ds_radar.POS_LONG_DEG"/>
             <ParameterString meta_table="RadarDataSources"/>
             <ParameterString name_column="le_ds.DS_NAME"/>
+            <ParameterString sac_column="le_ds.SAC"/>
             <ParameterString schema="SCDB"/>
+            <ParameterString short_name_column="le_ds.DS_SHORT_NAME"/>
+            <ParameterString sic_column="le_ds.SIC"/>
         </Configuration>
         <Configuration class_id="DBOSchemaMetaTableDefinition" instance_id="DBOSchemaMetaTableDefinition0">
             <ParameterString meta_table="Radar"/>
@@ -4304,13 +4316,17 @@
         <ParameterString info=""/>
         <ParameterString name="Tracker"/>
         <Configuration class_id="DBODataSourceDefinition" instance_id="DBODataSourceDefinitionTrackerSCDB0">
+            <ParameterString altitude_column=""/>
             <ParameterString foreign_key="le_ds.DS_ID"/>
             <ParameterString latitude_column=""/>
             <ParameterString local_key="ds_id"/>
             <ParameterString longitude_column=""/>
             <ParameterString meta_table="TrackerDataSources"/>
             <ParameterString name_column="le_ds.DS_NAME"/>
+            <ParameterString sac_column="le_ds.SAC"/>
             <ParameterString schema="SCDB"/>
+            <ParameterString short_name_column="le_ds.DS_SHORT_NAME"/>
+            <ParameterString sic_column="le_ds.SIC"/>
         </Configuration>
         <Configuration class_id="DBOSchemaMetaTableDefinition" instance_id="DBOSchemaMetaTableDefinition0">
             <ParameterString meta_table="Tracker"/>

@@ -9,9 +9,13 @@ DBODataSourceDefinition::DBODataSourceDefinition(const std::string &class_id, co
     registerParameter ("local_key", &local_key_, "");
     registerParameter ("meta_table", &meta_table_,  "");
     registerParameter ("foreign_key", &foreign_key_, "");
+    registerParameter ("short_name_column", &short_name_column_, "");
     registerParameter ("name_column", &name_column_, "");
+    registerParameter ("sac_column", &sac_column_, "");
+    registerParameter ("sic_column", &sic_column_, "");
     registerParameter ("latitude_column", &latitude_column_, "");
     registerParameter ("longitude_column", &longitude_column_, "");
+    registerParameter ("altitude_column", &altitude_column_, "");
 }
 
 DBODataSourceDefinition::~DBODataSourceDefinition()
@@ -46,12 +50,64 @@ std::string DBODataSourceDefinition::longitudeColumn() const
 
 void DBODataSourceDefinition::longitudeColumn(const std::string &longitude_column)
 {
+    loginf << "DBODataSourceDefinition: localKey: value " << longitude_column;
     longitude_column_ = longitude_column;
+    emit definitionChangedSignal();
+}
+
+std::string DBODataSourceDefinition::shortNameColumn() const
+{
+    return short_name_column_;
+}
+
+void DBODataSourceDefinition::shortNameColumn(const std::string &short_name_column)
+{
+    loginf << "DBODataSourceDefinition: shortNameColumn: value " << short_name_column;
+    short_name_column_ = short_name_column;
+    emit definitionChangedSignal();
+}
+
+std::string DBODataSourceDefinition::sacColumn() const
+{
+    return sac_column_;
+}
+
+void DBODataSourceDefinition::sacColumn(const std::string &sac_column)
+{
+    loginf << "DBODataSourceDefinition: sacColumn: value " << sac_column;
+    sac_column_ = sac_column;
+    emit definitionChangedSignal();
+}
+
+std::string DBODataSourceDefinition::sicColumn() const
+{
+    return sic_column_;
+}
+
+void DBODataSourceDefinition::sicColumn(const std::string &sic_column)
+{
+    loginf << "DBODataSourceDefinition: sicColumn: value " << sic_column;
+    sic_column_ = sic_column;
+    emit definitionChangedSignal();
+}
+
+std::string DBODataSourceDefinition::altitudeColumn() const
+{
+    return altitude_column_;
+}
+
+void DBODataSourceDefinition::altitudeColumn(const std::string &altitude_column)
+{
+    loginf << "DBODataSourceDefinition: altitudeColumn: value " << altitude_column;
+    altitude_column_ = altitude_column;
+    emit definitionChangedSignal();
 }
 
 void DBODataSourceDefinition::latitudeColumn(const std::string &latitude_column)
 {
+    loginf << "DBODataSourceDefinition: latitudeColumn: value " << latitude_column;
     latitude_column_ = latitude_column;
+    emit definitionChangedSignal();
 }
 
 void DBODataSourceDefinition::localKey(const std::string &local_key)
