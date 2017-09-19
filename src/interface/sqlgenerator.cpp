@@ -87,9 +87,9 @@ SQLGenerator::~SQLGenerator()
 
 std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand (const DBObject &object)
 {
-    assert (object.hasCurrentDataSource ());
+    assert (object.hasCurrentDataSourceDefinition ());
 
-    const DBODataSourceDefinition &ds = object.currentDataSource ();
+    const DBODataSourceDefinition &ds = object.currentDataSourceDefinition ();
     const DBSchema &schema = ATSDB::instance().schemaManager().getCurrentSchema();
 
     if (!schema.hasMetaTable(ds.metaTableName()))
@@ -134,9 +134,9 @@ std::shared_ptr<DBCommand> SQLGenerator::getDistinctDataSourcesSelectCommand (co
     // "SELECT DISTINCT sensor_number__value FROM " << table_names_.at(DBO_PLOTS) << " WHERE mapped_position__present = '1' AND sensor_number__present = '1' ORDER BY sensor_number__value;";
     //return distinct_radar_numbers_statement_;
 
-    assert (object.hasCurrentDataSource());
+    assert (object.hasCurrentDataSourceDefinition());
 
-    std::string local_key_dbovar = object.currentDataSource().localKey();
+    std::string local_key_dbovar = object.currentDataSourceDefinition().localKey();
     assert (object.hasVariable(local_key_dbovar));
     const DBTableColumn& local_key_col = object.variable(local_key_dbovar).currentDBColumn();
 

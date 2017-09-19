@@ -85,13 +85,11 @@ protected:
 class DBODataSource
 {
 public:
-    DBODataSource();
+    DBODataSource(unsigned int id, const std::string& name);
     virtual ~DBODataSource();
 
-    void id(unsigned int id);
     unsigned int id() const;
 
-    void name(const std::string &name);
     const std::string &name() const;
 
     void shortName(const std::string &short_name);

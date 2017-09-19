@@ -42,10 +42,10 @@ SensorFilter::SensorFilter(const std::string &class_id, const std::string &insta
         throw std::invalid_argument ("SensorFilter: SensorFilter: instance "+instance_id+" has non-existing object "+dbo_name_);
 
     object_ = &ATSDB::instance().objectManager().object(dbo_name_);
-    if (!object_->hasCurrentDataSource())
+    if (!object_->hasCurrentDataSourceDefinition())
         throw std::invalid_argument ("SensorFilter: SensorFilter: instance "+instance_id+" object "+dbo_name_+" has no data sources");
 
-    sensor_column_name_ = object_->currentDataSource().localKey();
+    sensor_column_name_ = object_->currentDataSourceDefinition().localKey();
 
     updateDataSources ();
 
@@ -139,7 +139,7 @@ void SensorFilter::updateDataSources ()
         if (data_sources_.find(src_it.first) == data_sources_.end())
         {
             data_sources_[src_it.first].setNumber(src_it.first);
-            data_sources_[src_it.first].setName(src_it.second);
+            data_sources_[src_it.first].setName(src_it.second.name());
             data_sources_[src_it.first].setActiveInFilter(true);
             data_sources_[src_it.first].setActiveInData(true);
 

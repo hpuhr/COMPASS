@@ -119,6 +119,7 @@ public slots:
     void finalizeReadJobDoneSlot();
 
     void databaseOpenedSlot ();
+    void dataSourceDefinitionChanged ();
 
 public:
     /// @brief Constructor
@@ -175,20 +176,20 @@ public:
     bool hasCurrentMetaTable () const;
 
     /// @brief Returns if a data source is defined in the current schema
-    bool hasCurrentDataSource () const;
+    bool hasCurrentDataSourceDefinition () const;
     /// @brief Returns current data source definition
-    const DBODataSourceDefinition &currentDataSource () const;
-    bool hasDataSource (const std::string& schema) { return data_source_definitions_.count(schema); }
-    void deleteDataSource (const std::string& schema);
+    const DBODataSourceDefinition &currentDataSourceDefinition () const;
+    bool hasDataSourceDefinition (const std::string& schema) { return data_source_definitions_.count(schema); }
+    void deleteDataSourceDefinition (const std::string& schema);
     /// @brief Returns container with all data source definitions
-    const std::map <std::string, DBODataSourceDefinition *> &dataSourceDefinitions () const { return data_source_definitions_; }
+    const std::map <std::string, DBODataSourceDefinition*> &dataSourceDefinitions () const { return data_source_definitions_; }
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
     ///@brief Returns flag if data sources are defined for DBO type.
     bool hasDataSources () { return data_sources_.size() > 0; }
     ///@brief Returns container with all defined data source for DBO type.
-    const std::map<int, std::string> &dataSources () { return data_sources_; }
+    const std::map<int, DBODataSource> &dataSources () { return data_sources_; }
     ///@brief Returns data source name for a DBO type and data source number.
     std::string getNameOfSensor (unsigned int num);
 
@@ -228,10 +229,10 @@ protected:
 
     /// Container with data source definitions (schema identifier -> data source definition pointer)
     std::map <std::string, DBODataSourceDefinition*> data_source_definitions_;
+    std::map<int, DBODataSource> data_sources_;
     /// Container with all variables (variable identifier -> variable pointer)
     std::map<std::string, DBOVariable*> variables_;
 
-    std::map<int, std::string> data_sources_;
 
     /// Current (in the current schema) main meta table
     const MetaDBTable *current_meta_table_; // TODO rework

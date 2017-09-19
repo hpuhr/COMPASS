@@ -425,7 +425,7 @@ void DBObjectWidget::addDataSource ()
     //  std::string foreign_key = ds_foreign_key_box_->currentText().toStdString();
     //  std::string foreign_name = ds_foreign_name_box_->currentText().toStdString();
 
-    if (object_->hasDataSource(schema))
+    if (object_->hasDataSourceDefinition(schema))
     {
         QMessageBox msgBox;
         msgBox.setText("Data source for this schema is already defined.");

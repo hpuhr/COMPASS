@@ -85,7 +85,7 @@ void FilterManager::checkSubConfigurables ()
     // watch those sensors
     for (auto dbo_it : ATSDB::instance().objectManager().objects())
     {
-        if (!dbo_it.second->hasCurrentDataSource())
+        if (!dbo_it.second->hasCurrentDataSourceDefinition())
             continue;
 
         bool exists = false;

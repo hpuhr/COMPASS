@@ -25,6 +25,7 @@
 //#include "BufferWriter.h"
 #include "config.h"
 #include "dbobject.h"
+#include "dbodatasource.h"
 #include "dbcommand.h"
 #include "dbcommandlist.h"
 #include "mysqlserver.h"
@@ -274,9 +275,9 @@ std::set<int> DBInterface::queryActiveSensorNumbers(const DBObject &object)
 
     boost::mutex::scoped_lock l(connection_mutex_);
 
-    assert (object.hasCurrentDataSource());
+    assert (object.hasCurrentDataSourceDefinition());
 
-    std::string local_key_dbovar = object.currentDataSource().localKey();
+    std::string local_key_dbovar = object.currentDataSourceDefinition().localKey();
     assert (object.hasVariable(local_key_dbovar));
     const DBTableColumn& local_key_col = object.variable(local_key_dbovar).currentDBColumn();
 
@@ -302,7 +303,7 @@ std::set<int> DBInterface::queryActiveSensorNumbers(const DBObject &object)
 ///**
 // * Gets SQL command, executes it and returns resulting buffer.
 // */
-std::map <int, std::string> DBInterface::getDataSources (const DBObject &object)
+std::map <int, DBODataSource> DBInterface::getDataSources (const DBObject &object)
 {
     loginf  << "DBInterface: getDataSourceDescription: start";
 
@@ -316,7 +317,7 @@ std::map <int, std::string> DBInterface::getDataSources (const DBObject &object)
     assert (result->containsData());
     std::shared_ptr <Buffer> buffer = result->buffer();
 
-    const DBODataSourceDefinition &ds = object.currentDataSource ();
+    const DBODataSourceDefinition &ds = object.currentDataSourceDefinition ();
     const DBSchema &schema = ATSDB::instance().schemaManager().getCurrentSchema();
     assert (schema.hasMetaTable(ds.metaTableName()));
 
@@ -331,7 +332,7 @@ std::map <int, std::string> DBInterface::getDataSources (const DBObject &object)
     assert (buffer->properties().hasProperty(name_col.name()));
     assert (buffer->properties().get(name_col.name()).dataType() == PropertyDataType::STRING);
 
-    std::map <int, std::string> sources;
+    std::map <int, DBODataSource> sources;
 
     for (unsigned cnt = 0; cnt < buffer->size(); cnt++)
     {
@@ -339,7 +340,8 @@ std::map <int, std::string> DBInterface::getDataSources (const DBObject &object)
         std::string name = buffer->getString(name_col.name()).get(cnt);
         assert (sources.count(key) == 0);
         loginf << "DBInterface: getDataSources: object " << object.name() << " key " << key << " name " << name;
-        sources[key] = name;
+//        sources[key] = name;
+        sources.insert(std::pair<int, DBODataSource>(key, DBODataSource(key, name)));
     }
 
     return sources;

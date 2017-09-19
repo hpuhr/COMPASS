@@ -138,8 +138,8 @@ void DBODataSourceDefinition::nameColumn(const std::string &name_column)
     emit definitionChangedSignal();
 }
 
-DBODataSource::DBODataSource()
-: id_(0), sac_(255), sic_(255), latitude_(360.0), longitude_(360), altitude_(1701)
+DBODataSource::DBODataSource(unsigned int id, const std::string& name)
+: id_(id), name_(name), sac_(255), sic_(255), latitude_(360.0), longitude_(360), altitude_(1701)
 //finalized_(false),  system_x_(0), system_y_(0)//, local_trans_x_(0), local_trans_y_(0)
 {
     //deg2rad_ = 2*M_PI/360.0;
@@ -251,11 +251,6 @@ void DBODataSource::altitude(double altitude)
     this->altitude_ = altitude;
 }
 
-void DBODataSource::id(unsigned int id)
-{
-    this->id_ = id;
-}
-
 void DBODataSource::latitude(double latitiude)
 {
     this->latitude_ = latitiude;
@@ -264,11 +259,6 @@ void DBODataSource::latitude(double latitiude)
 void DBODataSource::longitude(double longitude)
 {
     this->longitude_ = longitude;
-}
-
-void DBODataSource::name(const std::string &name)
-{
-    this->name_ = name;
 }
 
 void DBODataSource::sac(unsigned char sac)

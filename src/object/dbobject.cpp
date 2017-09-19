@@ -68,16 +68,18 @@ DBObject::~DBObject()
 {
     current_meta_table_ = nullptr;
 
-    for (auto it = data_source_definitions_.begin(); it != data_source_definitions_.end(); it++)
-        delete it->second;
+    data_sources_.clear();
+
+    for (auto it : data_source_definitions_)
+        delete it.second;
     data_source_definitions_.clear();
 
-    for (auto it = meta_table_definitions_.begin(); it != meta_table_definitions_.end(); it++)
-        delete *it;
+    for (auto it : meta_table_definitions_)
+        delete it;
     meta_table_definitions_.clear();
 
-    for (auto it = variables_.begin(); it !=  variables_.end(); it++)
-        delete it->second;
+    for (auto it : variables_)
+        delete it.second;
     variables_.clear();
 
     if (widget_)
@@ -119,6 +121,7 @@ void DBObject::generateSubConfigurable (const std::string &class_id, const std::
     {
         DBODataSourceDefinition *def = new DBODataSourceDefinition (class_id, instance_id, this);
         assert (data_source_definitions_.find(def->schema()) == data_source_definitions_.end());
+        connect (def, SIGNAL(definitionChangedSignal()), this, SLOT(dataSourceDefinitionChanged()));
 
         data_source_definitions_.insert (std::pair<std::string, DBODataSourceDefinition*> (def->schema(), def));
     }
@@ -166,7 +169,7 @@ const std::string &DBObject::metaTable (const std::string &schema) const
 /**
  * Returns if the current schema name exists in the data source definitions
  */
-bool DBObject::hasCurrentDataSource () const
+bool DBObject::hasCurrentDataSourceDefinition () const
 {
     if (!ATSDB::instance().schemaManager().hasCurrentSchema())
         return false;
@@ -174,18 +177,52 @@ bool DBObject::hasCurrentDataSource () const
     return (data_source_definitions_.find(ATSDB::instance().schemaManager().getCurrentSchema().name()) != data_source_definitions_.end());
 }
 
-const DBODataSourceDefinition& DBObject::currentDataSource () const
+const DBODataSourceDefinition& DBObject::currentDataSourceDefinition () const
 {
-    assert (hasCurrentDataSource());
+    assert (hasCurrentDataSourceDefinition());
     return *data_source_definitions_.at(ATSDB::instance().schemaManager().getCurrentSchema().name());
 }
 
-void DBObject::deleteDataSource (const std::string& schema)
+void DBObject::deleteDataSourceDefinition (const std::string& schema)
 {
     assert (data_source_definitions_.count(schema) == 1);
     delete data_source_definitions_.at(schema);
     data_source_definitions_.erase(schema);
 }
+
+void DBObject::dataSourceDefinitionChanged ()
+{
+    logdbg << "DBObject: " << name_ << " dataSourceDefinitionChanged";
+}
+
+void DBObject::buildDataSources()
+{
+    logdbg << "DBObject: buildDataSources: start";
+    data_sources_.clear();
+
+    logdbg  << "DBObject: buildDataSources: building dbo " << name_;
+    if (!is_loadable_ || !hasCurrentDataSourceDefinition ())
+    {
+        logdbg << "DBObject: buildDataSources: not processed is loadable " << is_loadable_ << " has data source " << hasCurrentDataSourceDefinition ();
+        return;
+    }
+
+    logdbg  << "DBObject: buildDataSources: building data sources for " << name_;
+
+    try
+    {
+        data_sources_ = ATSDB::instance().interface().getDataSources(*this);
+    }
+    catch (std::exception& e)
+    {
+        logerr << "DBObject: buildDataSources: failed, deleting entry";
+        deleteDataSourceDefinition (ATSDB::instance().schemaManager().getCurrentSchema().name());
+        assert (!hasCurrentDataSourceDefinition());
+    }
+
+    logdbg << "DBObject: buildDataSources: end";
+}
+
 
 /**
  * Returns true if current_meta_table_ is not null, else gets the current schema, checks and get the meta_table_ entry for
@@ -456,34 +493,6 @@ void DBObject::databaseOpenedSlot ()
         info_widget_->updateSlot();
 
     logdbg << "DBObject: " << name_ << " databaseOpenedSlot: loadable " << is_loadable_ << " count " << count_;
-}
-
-void DBObject::buildDataSources()
-{
-    logdbg << "DBObject: buildDataSources: start";
-    data_sources_.clear();
-
-    logdbg  << "DBObject: buildDataSources: building dbo " << name_;
-    if (!is_loadable_ || !hasCurrentDataSource ())
-    {
-        logdbg << "DBObject: buildDataSources: not processed is loadable " << is_loadable_ << " has data source " << hasCurrentDataSource ();
-        return;
-    }
-
-    logdbg  << "DBObject: buildDataSources: building data sources for " << name_;
-
-    try
-    {
-        data_sources_ = ATSDB::instance().interface().getDataSources(*this);
-    }
-    catch (std::exception& e)
-    {
-        logerr << "DBObject: buildDataSources: failed, deleting entry";
-        deleteDataSource (ATSDB::instance().schemaManager().getCurrentSchema().name());
-        assert (!hasCurrentDataSource());
-    }
-
-    logdbg << "DBObject: buildDataSources: end";
 }
 
 bool DBObject::isLoading ()
