@@ -290,13 +290,11 @@ void FilterEditWidget::updateConditionsGrid()
     //std::map <std::string, DBSchema *> &schemas  = DBSchemaManager::getInstance().getSchemas ();
     std::vector <DBFilterCondition *>::iterator it;
 
-    QPixmap* pixmapmanage = new QPixmap("./Data/icons/close_icon.png");
-
     unsigned int row=1;
     for (it = conditions.begin(); it != conditions.end(); it++)
     {
         QPushButton *del = new QPushButton ();
-        del->setIcon(QIcon(*pixmapmanage));
+        del->setIcon(QIcon(QPixmap("./Data/icons/close_icon.png")));
         del->setFixedSize ( 20, 20 );
         del->setFlat(true);
         connect(del, SIGNAL( clicked() ), this, SLOT( deleteCondition() ));

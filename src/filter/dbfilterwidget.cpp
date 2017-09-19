@@ -147,9 +147,8 @@ void DBFilterWidget::updateChildWidget ()
     {
         if (child->widget())
             child_layout_->removeWidget(child->widget());;
-        delete child;
         child_layout_->removeItem(child);
-        //    delete child;
+        delete child;
     }
 
     std::vector <DBFilterCondition *> &conditions = filter_.getConditions();

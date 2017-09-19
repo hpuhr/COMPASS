@@ -710,7 +710,7 @@ void DBInterface::postProcessingJobDoneSlot()
     assert (postprocess_jobs_.size() > 0);
     assert (postprocess_dialog_);
 
-    bool found;
+    bool found=false;
     for (auto job_it = postprocess_jobs_.begin(); job_it != postprocess_jobs_.end(); job_it++)
     {
         Job *current = job_it->get();

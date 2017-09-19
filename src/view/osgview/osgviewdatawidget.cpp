@@ -392,6 +392,14 @@ osg::ref_ptr<osg::Geode> OSGViewDataWidget::createSpriteGeometry(DBObject &objec
 
 
     {
+        // set texture for points
+        auto* tex = textureFactory.getTextureForStyle(sprite.getStyle());
+        if (!tex)
+        {
+            std::cout << "Error: got null texture" << std::endl;
+            return nullptr;
+        }
+
         osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
         stateset->setMode(GL_DEPTH_TEST,osg::StateAttribute::ON);
 
@@ -407,13 +415,6 @@ osg::ref_ptr<osg::Geode> OSGViewDataWidget::createSpriteGeometry(DBObject &objec
         point->setSize(sprite.getSize());
         stateset->setAttribute(point);
 
-        // set texture for points
-        auto* tex = textureFactory.getTextureForStyle(sprite.getStyle());
-        if (!tex)
-        {
-            std::cout << "Error: got null texture" << std::endl;
-            return nullptr;
-        }
         stateset->setAttributeAndModes( alphaFunc, osg::StateAttribute::ON );
         stateset->setTextureAttributeAndModes(0, tex, osg::StateAttribute::ON);
 
