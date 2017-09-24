@@ -139,7 +139,7 @@ void DBODataSourceDefinition::nameColumn(const std::string &name_column)
 }
 
 DBODataSource::DBODataSource(unsigned int id, const std::string& name)
-: id_(id), name_(name), sac_(255), sic_(255), latitude_(360.0), longitude_(360), altitude_(1701)
+: id_(id), name_(name)
 //finalized_(false),  system_x_(0), system_y_(0)//, local_trans_x_(0), local_trans_y_(0)
 {
     //deg2rad_ = 2*M_PI/360.0;
@@ -224,6 +224,36 @@ double DBODataSource::latitude() const
 double DBODataSource::longitude() const
 {
     return longitude_;
+}
+
+bool DBODataSource::hasShortName() const
+{
+    return has_short_name_;
+}
+
+bool DBODataSource::hasSac() const
+{
+    return has_sac_;
+}
+
+bool DBODataSource::hasSic() const
+{
+    return has_sic_;
+}
+
+bool DBODataSource::hasLatitude() const
+{
+    return has_latitude_;
+}
+
+bool DBODataSource::hasLongitude() const
+{
+    return has_longitude_;
+}
+
+bool DBODataSource::hasAltitude() const
+{
+    return has_altitude_;
 }
 
 const std::string &DBODataSource::name() const

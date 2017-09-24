@@ -215,7 +215,7 @@ void DBObject::buildDataSources()
     }
     catch (std::exception& e)
     {
-        logerr << "DBObject: buildDataSources: failed, deleting entry";
+        logerr << "DBObject: buildDataSources: failed with '" << e.what() << "', deleting entry";
         deleteDataSourceDefinition (ATSDB::instance().schemaManager().getCurrentSchema().name());
         assert (!hasCurrentDataSourceDefinition());
     }

@@ -111,6 +111,54 @@ std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand (const DBOb
     columns.push_back(&foreign_key_col);
     columns.push_back(&name_col);
 
+    if (ds.hasShortNameColumn())
+    {
+        if (!meta.hasColumn(ds.shortNameColumn()))
+            throw std::runtime_error ("SQLGenerator: getDataSourcesSelectCommand: meta table has no short name column "+ds.shortNameColumn());
+        else
+            columns.push_back(&meta.column(ds.shortNameColumn()));
+    }
+
+    if (ds.hasSacColumn())
+    {
+        if (!meta.hasColumn(ds.sacColumn()))
+            throw std::runtime_error ("SQLGenerator: getDataSourcesSelectCommand: meta table has no sac column "+ds.sacColumn());
+        else
+            columns.push_back(&meta.column(ds.sacColumn()));
+    }
+
+    if (ds.hasSicColumn())
+    {
+        if (!meta.hasColumn(ds.sicColumn()))
+            throw std::runtime_error ("SQLGenerator: getDataSourcesSelectCommand: meta table has no sic column "+ds.sicColumn());
+        else
+            columns.push_back(&meta.column(ds.sicColumn()));
+    }
+
+    if (ds.hasLatitudeColumn())
+    {
+        if (!meta.hasColumn(ds.latitudeColumn()))
+            throw std::runtime_error ("SQLGenerator: getDataSourcesSelectCommand: meta table has no latitude column "+ds.latitudeColumn());
+        else
+            columns.push_back(&meta.column(ds.latitudeColumn()));
+    }
+
+    if (ds.hasLongitudeColumn())
+    {
+        if (!meta.hasColumn(ds.longitudeColumn()))
+            throw std::runtime_error ("SQLGenerator: getDataSourcesSelectCommand: meta table has no longitude column "+ds.longitudeColumn());
+        else
+            columns.push_back(&meta.column(ds.longitudeColumn()));
+    }
+
+    if (ds.hasAltitudeColumn())
+    {
+        if (!meta.hasColumn(ds.altitudeColumn()))
+            throw std::runtime_error ("SQLGenerator: getDataSourcesSelectCommand: meta table has no altitude column "+ds.altitudeColumn());
+        else
+            columns.push_back(&meta.column(ds.altitudeColumn()));
+    }
+
     //PropertyList list;
     //list.addProperty (ds.foreignKey(), PropertyDataType::INT);
     //list.addProperty (ds.nameColumn(), PropertyDataType::STRING); //DS_NAME SAC SIC

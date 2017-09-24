@@ -73,7 +73,7 @@ void FilterManager::generateSubConfigurable (const std::string &class_id, const 
         }
         catch (const std::exception& e)
         {
-            loginf << "FilterManager: generateSubConfigurable: sensor filter for instance " << instance_id << " outdated, deleting";
+            loginf << "FilterManager: generateSubConfigurable: sensor filter exception '" << e.what() << "', deleting";
             configuration_.removeSubConfiguration(class_id, instance_id);
         }
     }

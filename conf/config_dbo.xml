@@ -2685,7 +2685,7 @@
         <ParameterString info=""/>
         <ParameterString name="Radar"/>
         <Configuration class_id="DBODataSourceDefinition" instance_id="DBODataSourceDefinitionRadarSCDB0">
-            <ParameterString altitude_column="ds_radar.WGS_ELEV_CARTESIAN_M"/>
+            <ParameterString altitude_column="ds_radar.GROUND_ALTITUDE_AMSL_M"/>
             <ParameterString foreign_key="le_ds.DS_ID"/>
             <ParameterString latitude_column="ds_radar.POS_LAT_DEG"/>
             <ParameterString local_key="ds_id"/>

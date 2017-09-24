@@ -305,7 +305,7 @@ std::set<int> DBInterface::queryActiveSensorNumbers(const DBObject &object)
 // */
 std::map <int, DBODataSource> DBInterface::getDataSources (const DBObject &object)
 {
-    loginf  << "DBInterface: getDataSourceDescription: start";
+    logdbg  << "DBInterface: getDataSourceDescription: start";
 
     boost::mutex::scoped_lock l(connection_mutex_);
 
@@ -326,11 +326,59 @@ std::map <int, DBODataSource> DBInterface::getDataSources (const DBObject &objec
     const DBTableColumn& foreign_key_col = meta.column(ds.foreignKey());
     const DBTableColumn& name_col = meta.column(ds.nameColumn());
 
-
     assert (buffer->properties().hasProperty(foreign_key_col.name()));
     assert (buffer->properties().get(foreign_key_col.name()).dataType() == PropertyDataType::INT);
     assert (buffer->properties().hasProperty(name_col.name()));
     assert (buffer->properties().get(name_col.name()).dataType() == PropertyDataType::STRING);
+
+    bool has_short_name = ds.hasShortNameColumn();
+    std::string short_name_col_name;
+    if (has_short_name)
+    {
+        short_name_col_name = meta.column(ds.shortNameColumn()).name();
+        assert (buffer->properties().hasProperty(short_name_col_name) && buffer->properties().get(short_name_col_name).dataType() == PropertyDataType::STRING);
+    }
+
+    bool has_sac = ds.hasSacColumn();
+    std::string sac_col_name;
+    if (has_sac)
+    {
+        sac_col_name = meta.column(ds.sacColumn()).name();
+        assert (buffer->properties().hasProperty(sac_col_name) && buffer->properties().get(sac_col_name).dataType() == PropertyDataType::CHAR);
+    }
+
+    bool has_sic = ds.hasSicColumn();
+    std::string sic_col_name;
+    if (has_sic)
+    {
+        sic_col_name = meta.column(ds.sicColumn()).name();
+        assert (buffer->properties().hasProperty(sic_col_name) && buffer->properties().get(sic_col_name).dataType() == PropertyDataType::CHAR);
+    }
+
+    bool has_latitude = ds.hasLatitudeColumn();
+    std::string latitude_col_name;
+    if (has_latitude)
+    {
+        latitude_col_name = meta.column(ds.latitudeColumn()).name();
+        assert (buffer->properties().hasProperty(latitude_col_name) && buffer->properties().get(latitude_col_name).dataType() == PropertyDataType::DOUBLE);
+    }
+
+    bool has_longitude = ds.hasLongitudeColumn();
+    std::string longitude_col_name;
+    if (has_longitude)
+    {
+        longitude_col_name = meta.column(ds.longitudeColumn()).name();
+        assert (buffer->properties().hasProperty(longitude_col_name) && buffer->properties().get(longitude_col_name).dataType() == PropertyDataType::DOUBLE);
+    }
+
+    bool has_altitude = ds.hasAltitudeColumn();
+    std::string altitude_col_name;
+    if (has_altitude)
+    {
+        altitude_col_name = meta.column(ds.altitudeColumn()).name();
+        assert (buffer->properties().hasProperty(altitude_col_name) || buffer->properties().get(altitude_col_name).dataType() == PropertyDataType::DOUBLE);
+    }
+
 
     std::map <int, DBODataSource> sources;
 
@@ -340,8 +388,25 @@ std::map <int, DBODataSource> DBInterface::getDataSources (const DBObject &objec
         std::string name = buffer->getString(name_col.name()).get(cnt);
         assert (sources.count(key) == 0);
         loginf << "DBInterface: getDataSources: object " << object.name() << " key " << key << " name " << name;
-//        sources[key] = name;
         sources.insert(std::pair<int, DBODataSource>(key, DBODataSource(key, name)));
+
+        if (has_short_name && !buffer->getString(short_name_col_name).isNone(cnt))
+            sources.at(key).shortName(buffer->getString(short_name_col_name).get(cnt));
+
+        if (has_sac && !buffer->getChar(sac_col_name).isNone(cnt))
+            sources.at(key).sac(buffer->getChar(sac_col_name).get(cnt));
+
+        if (has_sic && !buffer->getChar(sic_col_name).isNone(cnt))
+            sources.at(key).sic(buffer->getChar(sic_col_name).get(cnt));
+
+        if (has_latitude && !buffer->getDouble(latitude_col_name).isNone(cnt))
+            sources.at(key).latitude(buffer->getDouble(latitude_col_name).get(cnt));
+
+        if (has_longitude && !buffer->getDouble(longitude_col_name).isNone(cnt))
+            sources.at(key).longitude(buffer->getDouble(longitude_col_name).get(cnt));
+
+        if (has_altitude && !buffer->getDouble(altitude_col_name).isNone(cnt))
+            sources.at(key).altitude(buffer->getDouble(altitude_col_name).get(cnt));
     }
 
     return sources;

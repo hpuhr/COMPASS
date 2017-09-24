@@ -851,8 +851,7 @@ Configuration &Configuration::getSubConfiguration (const std::string &class_id, 
 
 void Configuration::removeSubConfiguration (const std::string &class_id, const std::string &instance_id)
 {
-    //    loginf << "Configuration: removeSubConfiguration: me "  << class_id_ << " " << instance_id_
-    //            << " you " << class_id << " " << instance_id;
+    logdbg << "Configuration: removeSubConfiguration: me "  << class_id_ << " " << instance_id_ << " you " << class_id << " " << instance_id;
 
     std::pair<std::string, std::string> key (class_id, instance_id);
     assert (sub_configurations_.find (key) != sub_configurations_.end());

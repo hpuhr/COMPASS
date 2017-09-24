@@ -56,6 +56,7 @@ public:
     std::string sicColumn() const;
     void sicColumn(const std::string &sic_column);
 
+    bool hasAltitudeColumn () const { return altitude_column_.size() > 0; }
     std::string altitudeColumn() const;
     void altitudeColumn(const std::string &altitude_column);
 
@@ -92,23 +93,30 @@ public:
 
     const std::string &name() const;
 
+    bool hasShortName() const;
     void shortName(const std::string &short_name);
     const std::string &shortName() const;
 
+    bool hasSac() const;
     void sac(unsigned char sac);
     unsigned char sac() const;
 
+    bool hasSic() const;
     void sic(unsigned char sic);
     unsigned char sic() const;
 
-    void altitude(double altitude);
-    double altitude() const;
 
+    bool hasLatitude() const;
     void latitude(double latitiude);
     double latitude() const;
 
+    bool hasLongitude() const;
     void longitude(double longitude_);
     double longitude() const;
+
+    bool hasAltitude() const;
+    void altitude(double altitude);
+    double altitude() const;
 
     //void finalize ();
 
@@ -116,17 +124,27 @@ public:
     //void calculateSystemCoordinates (double azimuth, double slant_range, double altitude, bool has_altitude, double &sys_x, double &sys_y);
 
 protected:
-    unsigned int id_;
+    unsigned int id_{0};
 
     std::string name_;
+
+    bool has_short_name_{false};
     std::string short_name_;
 
+    bool has_sac_;
     unsigned char sac_;
-    unsigned char sic_;
 
-    double latitude_; //degrees
-    double longitude_; // degrees
-    double altitude_;  // meter above msl
+    bool has_sic_{false};
+    unsigned char sic_{0};
+
+    bool has_latitude_{false};
+    double latitude_{0}; //degrees
+
+    bool has_longitude_{false};
+    double longitude_{0}; // degrees
+
+    bool has_altitude_{false};
+    double altitude_{0};  // meter above msl
 
     //bool finalized_;
 
