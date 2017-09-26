@@ -2,6 +2,7 @@
 #define RADARPLOTPOSITIONCALCULATOR_H_
 
 #include "configurable.h"
+#include "dbodatasource.h"
 
 #include <QObject>
 #include <memory>
@@ -17,9 +18,11 @@ class RadarPlotPositionCalculatorTask : public QObject, public Configurable
     Q_OBJECT
 
 public slots:
-    void readJobIntermediateSlot (std::shared_ptr<Buffer> buffer);
-    void readJobObsoleteSlot ();
-    void readJobDoneSlot();
+    //    void readJobIntermediateSlot (std::shared_ptr<Buffer> buffer);
+    //    void readJobObsoleteSlot ();
+    //    void readJobDoneSlot();
+    void newDataSlot (DBObject &object);
+    void loadingDoneSlot (DBObject &object);
 
 public:
     RadarPlotPositionCalculatorTask(const std::string &class_id, const std::string &instance_id, TaskManager* task_manager);
@@ -81,11 +84,15 @@ protected:
     std::string longitude_var_str_;
     DBOVariable* longitude_var_{nullptr};
 
+    std::map<int, DBODataSource> data_sources_;
+
     bool calculating_ {false};
 
     unsigned int num_loaded_ {0};
 
     RadarPlotPositionCalculatorTaskWidget* widget_ {nullptr};
+
+    void checkAndSetVariable (std::string &name_str, DBOVariable** var);
 };
 
 #endif /* RADARPLOTPOSITIONCALCULATOR_H_ */

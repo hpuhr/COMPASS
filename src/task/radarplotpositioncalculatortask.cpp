@@ -174,6 +174,27 @@ void RadarPlotPositionCalculatorTask::longitudeVarStr(const std::string &longitu
     }
 }
 
+void RadarPlotPositionCalculatorTask::checkAndSetVariable (std::string &name_str, DBOVariable** var)
+{
+    if (db_object_)
+    {
+        if (!db_object_->hasVariable(name_str))
+        {
+            loginf << "RadarPlotPositionCalculatorTask::checkAndSetVariable: var " << name_str << " does not exist";
+            name_str = "";
+            var = nullptr;
+        }
+        else
+        {
+            *var = &db_object_->variable(name_str);
+            loginf << "RadarPlotPositionCalculatorTask::checkAndSetVariable: var " << name_str << " set";
+            assert (var);
+        }
+    }
+    else
+        loginf << "RadarPlotPositionCalculatorTask::checkAndSetVariable: dbobject null";
+}
+
 void RadarPlotPositionCalculatorTask::calculate ()
 {
     loginf << "RadarPlotPositionCalculatorTask: calculate: start";
@@ -182,8 +203,39 @@ void RadarPlotPositionCalculatorTask::calculate ()
 
     num_loaded_=0;
 
-    //    assert (DBObjectManager::getInstance().existsDBObject(DBO_PLOTS));
-//    DBObject *plot_obj = DBObjectManager::getInstance().getDBObject (DBO_PLOTS);
+    if (db_object_str_.size())
+    {
+        if (!ATSDB::instance().objectManager().existsObject(db_object_str_))
+            db_object_str_="";
+        else
+            db_object_ = &ATSDB::instance().objectManager().object(db_object_str_);
+    }
+    assert (db_object_);
+
+    if (key_var_str_.size())
+        checkAndSetVariable (key_var_str_, &key_var_);
+    if (datasource_var_str_.size())
+        checkAndSetVariable (datasource_var_str_, &datasource_var_);
+    if (range_var_str_.size())
+        checkAndSetVariable (range_var_str_, &range_var_);
+    if (azimuth_var_str_.size())
+        checkAndSetVariable (azimuth_var_str_, &azimuth_var_);
+    if (altitude_var_str_.size())
+        checkAndSetVariable (altitude_var_str_, &altitude_var_);
+    if (latitude_var_str_.size())
+        checkAndSetVariable (latitude_var_str_, &latitude_var_);
+    if (longitude_var_str_.size())
+        checkAndSetVariable (longitude_var_str_, &longitude_var_);
+
+    assert (db_object_);
+
+    assert (key_var_);
+    assert (datasource_var_);
+    assert (range_var_);
+    assert (azimuth_var_);
+    assert (altitude_var_);
+    assert (latitude_var_);
+    assert (longitude_var_);
 
 //    assert (plot_obj->hasVariable("REC_NUM"));
 //    assert (plot_obj->hasVariable("SAC"));
@@ -203,8 +255,17 @@ void RadarPlotPositionCalculatorTask::calculate ()
     //SELECT * FROM sd_radar WHERE pos_range_nm IS NOT NULL AND pos_lat_deg IS NOT NULL;
     //ds 11  sac 50 sic 7 range 6.3508481015218  azm  313.267583462432 alt 29995   lat   47.9696340057652 long    12.9230976753774
 
-//    std::map <std::pair<unsigned char, unsigned char>, DataSource* > &data_sources =
-//            ATSDB::getInstance().getDataSourceInstances (DBO_PLOTS);
+    data_sources_ = db_object_->dataSources();
+
+    DBOVariableSet read_set;
+    read_set.add(*key_var_);
+    read_set.add(*datasource_var_);
+    read_set.add(*range_var_);
+    read_set.add(*azimuth_var_);
+    read_set.add(*altitude_var_);
+    read_set.add(*latitude_var_);
+    read_set.add(*longitude_var_);
+
 //
 //    std::pair<unsigned char, unsigned char> sac_sic_key;
 //
@@ -227,35 +288,49 @@ void RadarPlotPositionCalculatorTask::calculate ()
 
 //    return;
 
+    connect (db_object_, SIGNAL(newDataSignal(DBObject&)), this, SLOT(newDataSlot(DBObject&)));
+    connect (db_object_, SIGNAL(loadingDoneSignal(DBObject&)), this, SLOT(loadingDoneSlot(DBObject&)));
+//    connect (db_object_, SIGNAL(readJobDoneSlot), this, SLOT(readJobObsoleteSlot()));
+    db_object_->load (read_set, false, false, nullptr, false);
+
     //ATSDB::getInstance().startReading (this, DBO_PLOTS, read_list, "DETECTION_TYPE!=0", 0);
-
-    //connect (this, SIGNAL(processSignal(Buffer*)), this, SLOT(processSlot(Buffer*)));
 }
 
-void RadarPlotPositionCalculatorTask::readJobIntermediateSlot (std::shared_ptr<Buffer> buffer)
+void RadarPlotPositionCalculatorTask::newDataSlot (DBObject &object)
 {
-    assert (buffer);
-
-    //    if (num_loaded_ == 0)
-    //        emit processSignal (buffer);
-
-
-    num_loaded_ += buffer->size();
-
-    loginf << "RadarPlotPositionCalculatorTask: receive: received buffer, num_loaded " << num_loaded_;
-
-    //emit processSignal (buffer);
+    loginf << "RadarPlotPositionCalculatorTask: newDataSlot";
 }
 
-void RadarPlotPositionCalculatorTask::readJobObsoleteSlot ()
+void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject &object)
 {
-    assert (false);
+    loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot";
 }
 
-void RadarPlotPositionCalculatorTask::readJobDoneSlot()
-{
-    calculating_=false;
-}
+
+//void RadarPlotPositionCalculatorTask::readJobIntermediateSlot (std::shared_ptr<Buffer> buffer)
+//{
+//    assert (buffer);
+
+//    //    if (num_loaded_ == 0)
+//    //        emit processSignal (buffer);
+
+
+//    num_loaded_ += buffer->size();
+
+//    loginf << "RadarPlotPositionCalculatorTask: receive: received buffer, num_loaded " << num_loaded_;
+
+//    //emit processSignal (buffer);
+//}
+
+//void RadarPlotPositionCalculatorTask::readJobObsoleteSlot ()
+//{
+//    assert (false);
+//}
+
+//void RadarPlotPositionCalculatorTask::readJobDoneSlot()
+//{
+//    calculating_=false;
+//}
 
 
 bool RadarPlotPositionCalculatorTask::isCalculating ()
