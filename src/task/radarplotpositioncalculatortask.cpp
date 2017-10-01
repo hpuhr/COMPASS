@@ -7,16 +7,18 @@
 
 #include "buffer.h"
 #include "atsdb.h"
-//#include "DataSource.h"
+#include "dbodatasource.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
+#include "dbovariable.h"
 #include "dbovariableset.h"
+#include "dbtablecolumn.h"
 #include "radarplotpositioncalculatortask.h"
 #include "radarplotpositioncalculatortaskwidget.h"
 #include "logger.h"
 #include "propertylist.h"
 #include "taskmanager.h"
-//#include "ProjectionManager.h"
+#include "projectionmanager.h"
 
 using namespace Utils;
 
@@ -251,7 +253,7 @@ void RadarPlotPositionCalculatorTask::calculate ()
     //connect (db_object_, SIGNAL(newDataSignal(DBObject&)), this, SLOT(newDataSlot(DBObject&)));
     connect (db_object_, SIGNAL(loadingDoneSignal(DBObject&)), this, SLOT(loadingDoneSlot(DBObject&)));
 
-    db_object_->load (read_set, false, false, nullptr, false);
+    db_object_->load (read_set, false, false, nullptr, false); //"0,100000"
 
     //ATSDB::getInstance().startReading (this, DBO_PLOTS, read_list, "DETECTION_TYPE!=0", 0);
 }
@@ -287,104 +289,112 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject &object)
 
     //    return;
 
-    //    ProjectionManager &proj_man = ProjectionManager::getInstance();
+    ProjectionManager &proj_man = ProjectionManager::instance();
 
-    //    PropertyList update_buffer_list;
-    //    update_buffer_list.addProperty("POS_LAT_DEG", P_TYPE_DOUBLE);
-    //    update_buffer_list.addProperty("POS_LONG_DEG", P_TYPE_DOUBLE);
-    //    update_buffer_list.addProperty("REC_NUM", P_TYPE_UINT);
+    std::shared_ptr<Buffer> read_buffer = object.data();
+    unsigned int read_size = read_buffer->size();
+    assert (read_size);
 
-    //    Buffer *update_buffer = new Buffer (update_buffer_list, DBO_PLOTS);
+    PropertyList update_buffer_list;
+    update_buffer_list.addProperty(latitude_var_str_, PropertyDataType::DOUBLE);
+    update_buffer_list.addProperty(longitude_var_str_, PropertyDataType::DOUBLE);
+    update_buffer_list.addProperty(key_var_str_, PropertyDataType::INT);
 
-    //    buffer->setIndex(0);
-    //    update_buffer->setIndex(0);
+    std::shared_ptr<Buffer> update_buffer = std::shared_ptr<Buffer> (new Buffer (update_buffer_list,db_object_->name()));
 
-    //    unsigned int size = buffer->getSize();
-
-    //    std::vector<void *>* adresses;
-    //    std::vector<void *>* update_adresses;
-
-    //    unsigned int rec_num;
-    //    unsigned char sac, sic;
-    //    double pos_azm_deg;
-    //    double pos_range_nm;
-    //    double pos_range_m;
-    //    double altitude_ft;
-    //    double altitude_m;
-    //    bool has_altitude;
-    //    //double altitude_angle;
+    int rec_num;
+    int sensor_id;
+    //unsigned char sac, sic;
+    //bool has_position;
+    double pos_azm_deg;
+    double pos_range_nm;
+    double pos_range_m;
+    double altitude_ft;
+    double altitude_m;
+    bool has_altitude;
+    //double altitude_angle;
 
     //    std::map <std::pair<unsigned char, unsigned char>, DataSource* > &data_sources = ATSDB::getInstance().getDataSourceInstances (DBO_PLOTS);
+    assert (data_sources_.size());
 
     //    std::pair<unsigned char, unsigned char> sac_sic_key;
-    //    double sys_x, sys_y;
-    //    double lat, lon;
+    double sys_x, sys_y;
+    double lat, lon;
+    unsigned int update_cnt=0;
 
-    //    loginf << "RadarPlotPositionCalculatorTask: receive: writing update_buffer";
-    //    for (unsigned int cnt=0; cnt < size; cnt++)
-    //    {
-    //        if (cnt != 0)
-    //        {
-    //            buffer->incrementIndex();
-    //        }
+    loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: writing update_buffer";
+    for (unsigned int cnt=0; cnt < read_size; cnt++)
+    {
+        if (read_buffer->getInt(key_var_str_).isNone(cnt))
+        {
+            logerr << "RadarPlotPositionCalculatorTask: loadingDoneSlot: key null";
+            continue;
+        }
+        rec_num = read_buffer->getInt(key_var_str_).get(cnt);
 
-    //        adresses = buffer->getAdresses();
+        if (read_buffer->getInt(datasource_var_str_).isNone(cnt))
+        {
+            logerr << "RadarPlotPositionCalculatorTask: loadingDoneSlot: data source null";
+            continue;
+        }
+        sensor_id = read_buffer->getInt(datasource_var_str_).get(cnt);
 
-    //        rec_num= *((unsigned int*)adresses->at(0));
-    //        sac = *((unsigned char*)adresses->at(1));
-    //        sic = *((unsigned char*)adresses->at(2));
-    //        pos_azm_deg =  *((double*)adresses->at(3));
-    //        pos_range_nm = *((double*)adresses->at(4));
-    //        altitude_ft= *((int*)adresses->at(5));
-    //        has_altitude = isNan(P_TYPE_INT, adresses->at(5));
+        //sac = *((unsigned char*)adresses->at(1));
+        //sic = *((unsigned char*)adresses->at(2));
 
-    //        if (isNan(P_TYPE_DOUBLE, adresses->at(3)) || isNan(P_TYPE_DOUBLE, adresses->at(4)))
-    //        {
-    //            logerr << "RadarPlotPositionCalculatorTask: processSlot: position null";
-    //            continue;
-    //        }
+        if (read_buffer->getDouble(azimuth_var_str_).isNone(cnt) || read_buffer->getDouble(range_var_str_).isNone(cnt))
+        {
+            logdbg << "RadarPlotPositionCalculatorTask: loadingDoneSlot: position null";
+            continue;
+        }
 
-    //        if (isNan(P_TYPE_INT, adresses->at(5)))
-    //            altitude_ft=10000.0;
+        pos_azm_deg =  read_buffer->getDouble(azimuth_var_str_).get(cnt);
+        pos_range_nm =  read_buffer->getDouble(range_var_str_).get(cnt);
+
+        has_altitude = !read_buffer->getInt(altitude_var_str_).isNone(cnt);
+        if (has_altitude)
+            altitude_ft = read_buffer->getInt(altitude_var_str_).get(cnt);
+        else
+            altitude_ft = 10000.0; // HACK
+
 
     //        sac_sic_key.first = sac;
     //        sac_sic_key.second= sic;
 
-    //        assert (data_sources.find(sac_sic_key) != data_sources.end());
 
-    //        pos_range_m = 1852.0 * pos_range_nm;
+        if (data_sources_.find(sensor_id) == data_sources_.end())
+        {
+            logerr << "RadarPlotPositionCalculatorTask: loadingDoneSlot: sensor id " << sensor_id << " unkown";
+            continue;
+        }
 
-    //        //loginf << " DB alt ft " << altitude_ft;
+        pos_range_m = 1852.0 * pos_range_nm;
 
-    //        altitude_m = 0.3048 * altitude_ft;
+        //loginf << " DB alt ft " << altitude_ft;
+
+        altitude_m = 0.3048 * altitude_ft;
 
     //        //loginf << " DBO alt m " << altitude_m;
-    //        //altitude_m -= data_sources [sac_sic_key]->getAltitude ();
+        altitude_m -= data_sources_.at(sensor_id).altitude();
 
-    //        //altitude_angle = acos (altitude_m/pos_range_m);
+            //altitude_angle = acos (altitude_m/pos_range_m);
 
-    //        data_sources [sac_sic_key]->calculateSystemCoordinates(pos_azm_deg, pos_range_m, altitude_m, has_altitude, sys_x, sys_y);
-    //        proj_man.cart2geo(sys_x, sys_y, lat, lon, false);
+        data_sources_.at(sensor_id).calculateSystemCoordinates(pos_azm_deg, pos_range_m, altitude_m, has_altitude, sys_x, sys_y);
+        proj_man.cart2geo(sys_x, sys_y, lat, lon, false);
 
-    //        if (cnt != 0)
-    //        {
-    //            update_buffer->incrementIndex();
-    //        }
-    //        update_adresses = update_buffer->getAdresses();
+        update_buffer->getDouble(latitude_var_str_).set(update_cnt, lat);
+        update_buffer->getDouble(longitude_var_str_).set(update_cnt, lon);
+        update_buffer->getInt(key_var_str_).set(update_cnt, rec_num);
+        update_cnt++;
 
-    //        *((double*)update_adresses->at(0)) = lat;
-    //        *((double*)update_adresses->at(1)) = lon;
-    //        *((unsigned int*)update_adresses->at(2)) = rec_num;
-    //        //loginf << "uga lat " << *((double*)update_adresses->at(1)) << " long " << *((double*)update_adresses->at(2));
-    //    }
+        //loginf << "uga cnt " << update_cnt << " rec_num " << rec_num << " lat " << lat << " long " << lon;
+    }
 
-    //    loginf << "RadarPlotPositionCalculatorTask: receive: sending update_buffer";
-    //    ATSDB::getInstance().update(update_buffer);
+    loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: update_buffer size " << update_buffer->size();
+    //ATSDB::getInstance().update(update_buffer);
 
-    //    loginf << "RadarPlotPositionCalculatorTask: processSlot: end";
+    loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: end";
 }
-
-
 
 bool RadarPlotPositionCalculatorTask::isCalculating ()
 {

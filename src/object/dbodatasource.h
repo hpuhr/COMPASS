@@ -118,10 +118,10 @@ public:
     void altitude(double altitude);
     double altitude() const;
 
-    //void finalize ();
+    void finalize ();
 
     // azimuth degrees, range & altitude in meters
-    //void calculateSystemCoordinates (double azimuth, double slant_range, double altitude, bool has_altitude, double &sys_x, double &sys_y);
+    void calculateSystemCoordinates (double azimuth, double slant_range, double altitude, bool has_altitude, double &sys_x, double &sys_y);
 
 protected:
     unsigned int id_{0};
@@ -146,16 +146,13 @@ protected:
     bool has_altitude_{false};
     double altitude_{0};  // meter above msl
 
-    //bool finalized_;
+    bool finalized_ {false};
 
+    double system_x_;
+    double system_y_;
 
-//    double system_x_;
-//    double system_y_;
-
-//    double local_trans_x_;
-//    double local_trans_y_;
-
-//    double deg2rad_;
+    double local_trans_x_;
+    double local_trans_y_;
 };
 
 #endif // DBODATASOURCE_H

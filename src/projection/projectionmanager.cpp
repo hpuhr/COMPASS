@@ -28,11 +28,11 @@
 
 #include "cpl_conv.h"
 
-//#include "config.h"
 #include "projectionmanager.h"
+#include "projectionmanagerwidget.h"
 
 ProjectionManager::ProjectionManager()
-: Configurable ("ProjectionManager", "ProjectionManager0", 0), geo2cart_(0), cart2geo_(0)
+: Configurable ("ProjectionManager", "ProjectionManager0", 0, "conf/projection.xml")
 {
     loginf  << "ProjectionManager: constructor";
 
@@ -87,6 +87,23 @@ ProjectionManager::~ProjectionManager()
     assert (cart2geo_);
     delete cart2geo_;
     cart2geo_=0;
+
+    if (widget_)
+    {
+        delete widget_;
+        widget_ = nullptr;
+    }
+}
+
+void ProjectionManager::shutdown ()
+{
+    loginf  << "ProjectionManager: shutdown";
+
+    if (widget_)
+    {
+        delete widget_;
+        widget_ = nullptr;
+    }
 }
 
 double  ProjectionManager::getWorldSize (double size)
@@ -186,4 +203,14 @@ std::string ProjectionManager::getCartesianPROJ4Info ()
     //loginf << "ProjectionManager: getCartesianPROJ4Info: '" << info << "'";
 
     return info;
+}
+
+ProjectionManagerWidget *ProjectionManager::widget ()
+{
+    if (!widget_)
+    {
+        widget_ = new ProjectionManagerWidget ();
+    }
+    assert (widget_);
+    return widget_;
 }

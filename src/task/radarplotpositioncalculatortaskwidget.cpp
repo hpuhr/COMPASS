@@ -6,6 +6,8 @@
 #include "logger.h"
 #include "atsdb.h"
 #include "stringconv.h"
+#include "projectionmanager.h"
+#include "projectionmanagerwidget.h"
 
 #include <QVBoxLayout>
 #include <QGridLayout>
@@ -31,6 +33,8 @@ RadarPlotPositionCalculatorTaskWidget::RadarPlotPositionCalculatorTaskWidget(Rad
     QLabel *main_label = new QLabel ("Calculate radar plot positions");
     main_label->setFont (font_big);
     main_layout->addWidget (main_label);
+
+    main_layout->addWidget(ProjectionManager::instance().widget());
 
     QGridLayout *grid = new QGridLayout ();
     unsigned int row_cnt=0;

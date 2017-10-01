@@ -1,6 +1,7 @@
 #include "dbodatasource.h"
 #include "dbobject.h"
 #include "dbodatasourcedefinitionwidget.h"
+#include "projectionmanager.h"
 
 DBODataSourceDefinition::DBODataSourceDefinition(const std::string &class_id, const std::string &instance_id, DBObject* object)
     : Configurable (class_id, instance_id, object), object_(object)
@@ -140,9 +141,7 @@ void DBODataSourceDefinition::nameColumn(const std::string &name_column)
 
 DBODataSource::DBODataSource(unsigned int id, const std::string& name)
 : id_(id), name_(name)
-//finalized_(false),  system_x_(0), system_y_(0)//, local_trans_x_(0), local_trans_y_(0)
 {
-    //deg2rad_ = 2*M_PI/360.0;
 }
 
 DBODataSource::~DBODataSource()
@@ -150,61 +149,61 @@ DBODataSource::~DBODataSource()
 
 }
 
-//void DBODataSource::finalize ()
-//{
-//    assert (!finalized_);
+void DBODataSource::finalize ()
+{
+    assert (!finalized_);
 
-//    ProjectionManager::getInstance().geo2Cart(latitude_, longitude_, system_x_, system_y_, false);
+    ProjectionManager::instance().geo2Cart(latitude_, longitude_, system_x_, system_y_, false);
 
-//    logdbg << "DBODataSource: finalize: " << short_name_ << " lat " << latitude_ << " lon " << longitude_ << " x " << system_x_ << " y " << system_y_;
-////    double center_system_x = ProjectionManager::getInstance().getCenterSystemX();
-////    double center_system_y = ProjectionManager::getInstance().getCenterSystemY();
+    logdbg << "DBODataSource: finalize: " << short_name_ << " lat " << latitude_ << " lon " << longitude_ << " x " << system_x_ << " y " << system_y_;
+    double center_system_x = ProjectionManager::instance().getCenterSystemX();
+    double center_system_y = ProjectionManager::instance().getCenterSystemY();
 
-////    local_trans_x_ = center_system_x-system_x_;
-////    local_trans_y_ = center_system_y-system_y_;
+    local_trans_x_ = center_system_x-system_x_;
+    local_trans_y_ = center_system_y-system_y_;
 
-//    finalized_=true;
-//}
+    finalized_=true;
+}
 
 // azimuth degrees, range & altitude in meters
-//void DBODataSource::calculateSystemCoordinates (double azimuth, double slant_range, double altitude, bool has_altitude, double &sys_x, double &sys_y)
-//{
-//    if (!finalized_)
-//        finalize ();
+void DBODataSource::calculateSystemCoordinates (double azimuth, double slant_range, double altitude, bool has_altitude, double &sys_x, double &sys_y)
+{
+    if (!finalized_)
+        finalize ();
 
-//    assert (finalized_);
+    assert (finalized_);
 
-//    double range;
+    double range;
 
-////    if (slant_range <= altitude)
-////    {
-////        logerr << "DataSource: calculateSystemCoordinates: a " << azimuth << " sr " << slant_range << " alt " << altitude
-////                << ", assuming range = slant range";
-////        range = slant_range; // TODO pure act of desperation
-////    }
-////    else
-////        range = sqrt (slant_range*slant_range-altitude*altitude); // TODO: flatland
-
-//    if (has_altitude && slant_range > altitude)
-//        range = sqrt (slant_range*slant_range-altitude*altitude);
-//    else
-//        range = slant_range; // TODO pure act of desperation
-
-//    azimuth *= deg2rad_;
-
-//    sys_x = range * sin (azimuth);
-//    sys_y = range * cos (azimuth);
-
-//    sys_x += system_x_;
-//    sys_y += system_y_;
-
-//    if (sys_x != sys_x || sys_y != sys_y)
+//    if (slant_range <= altitude)
 //    {
-//        logerr << "DBODataSource: calculateSystemCoordinates: a " << azimuth << " sr " << slant_range << " alt " << altitude
-//                << " range " << range << " sys_x " << sys_x << " sys_y " << sys_y;
-//        assert (false);
+//        logerr << "DataSource: calculateSystemCoordinates: a " << azimuth << " sr " << slant_range << " alt " << altitude
+//                << ", assuming range = slant range";
+//        range = slant_range; // TODO pure act of desperation
 //    }
-//}
+//    else
+//        range = sqrt (slant_range*slant_range-altitude*altitude); // TODO: flatland
+
+    if (has_altitude && slant_range > altitude)
+        range = sqrt (slant_range*slant_range-altitude*altitude);
+    else
+        range = slant_range; // TODO pure act of desperation
+
+    azimuth *= DEG2RAD;
+
+    sys_x = range * sin (azimuth);
+    sys_y = range * cos (azimuth);
+
+    sys_x += system_x_;
+    sys_y += system_y_;
+
+    if (sys_x != sys_x || sys_y != sys_y)
+    {
+        logerr << "DBODataSource: calculateSystemCoordinates: a " << azimuth << " sr " << slant_range << " alt " << altitude
+                << " range " << range << " sys_x " << sys_x << " sys_y " << sys_y;
+        throw std::runtime_error ("DBODataSource: calculateSystemCoordinates: failed transformation");
+    }
+}
 
 double DBODataSource::altitude() const
 {

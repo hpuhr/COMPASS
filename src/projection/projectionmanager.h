@@ -30,7 +30,7 @@
 #include "configurable.h"
 #include "singleton.h"
 
-//#include "Global.h"
+class ProjectionManagerWidget;
 
 /**
  * @brief Singleton for coordinate projection handling
@@ -67,8 +67,10 @@ protected:
     OGRSpatialReference geo_;
     OGRSpatialReference cart_;
 
-    OGRCoordinateTransformation *geo2cart_;
-    OGRCoordinateTransformation *cart2geo_;
+    OGRCoordinateTransformation *geo2cart_{nullptr};
+    OGRCoordinateTransformation *cart2geo_{nullptr};
+
+    ProjectionManagerWidget *widget_{nullptr};
 
     /// @brief Constructor
     ProjectionManager();
@@ -105,6 +107,10 @@ public:
     std::string getCartesianPROJ4Info ();
 
     unsigned int getEPSG () { return epsg_value_; }
+
+    ProjectionManagerWidget *widget ();
+
+    void shutdown ();
 
     /// @brief Returns static instance
     static ProjectionManager& instance()

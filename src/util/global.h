@@ -19,6 +19,7 @@
 #define DBGLOBAL_H_
 
 #include <qsize.h>
+#include <math.h>
 
 static QSize UI_ICON_SIZE (20,20);
 static const unsigned int UI_ICON_BUTTON_MAX_WIDTH=40;
@@ -26,6 +27,9 @@ static const bool UI_ICON_BUTTON_FLAT=true;
 static const unsigned int FRAME_SIZE=1;
 static const std::string META_OBJECT_NAME="Meta";
 static const std::string NULL_STRING="NULL";
+
+static const double DEG2RAD = 2*M_PI/360.0;
+static const double RAD2DEG = 1.0/DEG2RAD;
 
 /// If an old ogre library (1.6.x) is used.
 //#define USE_OLD_OGRE 0

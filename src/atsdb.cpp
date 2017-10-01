@@ -41,6 +41,7 @@
 //#include "DBOVariableDistinctStatisticsDBJob.h"
 //#include "UpdateBufferDBJob.h"
 #include "viewmanager.h"
+#include "projectionmanager.h"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/thread.hpp>
@@ -268,6 +269,7 @@ void ATSDB::shutdown ()
     }
 
     JobManager::instance().shutdown();
+    ProjectionManager::instance().shutdown();
 
     assert (db_interface_);
     db_interface_->closeConnection();
