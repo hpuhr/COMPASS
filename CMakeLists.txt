@@ -47,9 +47,9 @@ find_package ( LOG4CPP REQUIRED )
 message("  LOG4CPP_INCLUDE_DIR: ${LOG4CPP_INCLUDE_DIR}")
 message("  LOG4CPP_LIBRARY: ${LOG4CPP_LIBRARIES}") 
 
-#find_package ( GDAL REQUIRED )
-#message("  GDAL_INCLUDE_DIRS: ${GDAL_INCLUDE_DIRS}")
-#message("  GDAL_LIBRARIES: ${GDAL_LIBRARIES}")
+find_package ( GDAL REQUIRED )
+message("  GDAL_INCLUDE_DIRS: ${GDAL_INCLUDE_DIRS}")
+message("  GDAL_LIBRARIES: ${GDAL_LIBRARIES}")
 
 find_package ( TinyXML2 REQUIRED )
 message("  TINYXML2_INCLUDE_DIR: ${TINYXML2_INCLUDE_DIR}")
@@ -72,7 +72,7 @@ include_directories (
     ${MYSQL_INCLUDE_DIR}
     ${MySQLpp_INCLUDE_DIR}
     ${LOG4CPP_INCLUDE_DIR}
-    #${GDAL_INCLUDE_DIRS}
+    ${GDAL_INCLUDE_DIRS}
     ${TINYXML2_INCLUDE_DIR}
     ${OPENSCENEGRAPH_INCLUDE_DIRS}
     ${OSGEARTH_INCLUDE_DIRS}
@@ -196,8 +196,8 @@ set ( atsdb_HDRS
     #        src/polygon/geographicpoint.h
     #        src/polygon/polygon4ddi.h
     #        src/polygon/vector2.h
-    #        src/projection/projectionmanager.h
-    #        src/projection/projectionmanagerwidget.h
+    src/projection/projectionmanager.h
+    src/projection/projectionmanagerwidget.h
     src/property/property.h
     src/property/propertylist.h
     src/struct/structuredescription.h
@@ -334,8 +334,8 @@ set ( atsdb_SRCS
     #        src/polygon/airspacesectormanagerwidget.cpp
     #        src/polygon/airspacesectortreewidget.cpp
     #        src/polygon/airspacesectorwidget.cpp
-    #        src/projection/projectionmanager.cpp
-    #        src/projection/projectionmanagerwidget.cpp
+    src/projection/projectionmanager.cpp
+    src/projection/projectionmanagerwidget.cpp
     src/property/property.cpp
     src/task/taskmanager.cpp
     src/task/radarplotpositioncalculatortask.cpp
@@ -407,8 +407,10 @@ target_link_libraries ( atsdb
     ${MySQLpp_LIBRARY}
     ${OPENSCENEGRAPH_LIBRARIES}
     ${OSGEARTH_LIBRARY}
-    ${OSGEARTHUTIL_LIBRARY})
-# ${SQLITE3_LIBRARIES} ${GDAL_LIBRARIES} ${OSGEARTH_LIBRARY} ${OPENSCENEGRAPH_LIBRARIES}
+    ${OSGEARTHUTIL_LIBRARY}
+    ${GDAL_LIBRARIES}
+    ${SQLITE3_LIBRARIES})
+#   ${OSGEARTH_LIBRARY} ${OPENSCENEGRAPH_LIBRARIES}
 
 add_executable ( atsdb_client ${atsdb_HDRS} ${client_SRCS})
 target_link_libraries ( atsdb_client
@@ -422,7 +424,9 @@ target_link_libraries ( atsdb_client
     ${MySQLpp_LIBRARY}
     ${OPENSCENEGRAPH_LIBRARIES}
     ${OSGEARTH_LIBRARY}
-    ${OSGEARTHUTIL_LIBRARY})
+    ${OSGEARTHUTIL_LIBRARY}
+    ${GDAL_LIBRARIES}
+    ${SQLITE3_LIBRARIES})
 # ${GDAL_LIBRARIES} ${OSGEARTH_LIBRARY}
 
 INSTALL_FILES(/include .h ${atsdb_HDRS})

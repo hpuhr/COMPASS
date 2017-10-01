@@ -12,9 +12,9 @@
 #include <QLineEdit>
 #include <QMessageBox>
 
-#include "String.h"
-#include "ProjectionManager.h"
-#include "ProjectionManagerWidget.h"
+#include "stringconv.h"
+#include "projectionmanager.h"
+#include "projectionmanagerwidget.h"
 
 ProjectionManagerWidget::ProjectionManagerWidget(QWidget *parent, Qt::WindowFlags f)
  : QWidget (parent, f), world_proj_info_label_ (0), epsg_edit_ (0), cart_proj_info_label_(0)
@@ -45,7 +45,7 @@ void ProjectionManagerWidget::createGUIElements ()
     QLabel *world_label = new QLabel ("World Coordinates (WGS84) Info");
     grid->addWidget (world_label, 0, 0);
 
-    world_proj_info_label_ = new QLabel (ProjectionManager::getInstance().getWorldPROJ4Info().c_str());
+    world_proj_info_label_ = new QLabel (ProjectionManager::instance().getWorldPROJ4Info().c_str());
     world_proj_info_label_->setWordWrap(true);
     grid->addWidget (world_proj_info_label_, 0, 1);
 
@@ -53,7 +53,7 @@ void ProjectionManagerWidget::createGUIElements ()
     grid->addWidget (cart_label, 1, 0);
 
     epsg_edit_ = new QLineEdit ();
-    epsg_edit_->setText(Utils::String::intToString(ProjectionManager::getInstance().getEPSG()).c_str());
+    epsg_edit_->setText(std::to_string(ProjectionManager::instance().getEPSG()).c_str());
     connect (epsg_edit_, SIGNAL(returnPressed()), this, SLOT(changeEPSG()));
     epsg_edit_->setToolTip("Please refer to the EPSG number appropriate to your country \n under http://spatialreference.org/ref/epsg/");
     grid->addWidget (epsg_edit_, 1, 1);
@@ -61,7 +61,7 @@ void ProjectionManagerWidget::createGUIElements ()
     QLabel *cart_info_label = new QLabel ("Cartesian Coordinates Info");
     grid->addWidget (cart_info_label, 2, 0);
 
-    cart_proj_info_label_ = new QLabel (ProjectionManager::getInstance().getCartesianPROJ4Info().c_str());
+    cart_proj_info_label_ = new QLabel (ProjectionManager::instance().getCartesianPROJ4Info().c_str());
     cart_proj_info_label_->setWordWrap(true);
     grid->addWidget (cart_proj_info_label_, 2, 1);
 
@@ -79,15 +79,15 @@ void ProjectionManagerWidget::changeEPSG ()
 
     try
     {
-        unsigned int value = Utils::String::intFromString(value_str);
-        ProjectionManager::getInstance().setNewCartesianEPSG(value);
-        cart_proj_info_label_->setText(ProjectionManager::getInstance().getCartesianPROJ4Info().c_str());
+        unsigned int value = std::stoul(value_str);
+        ProjectionManager::instance().setNewCartesianEPSG(value);
+        cart_proj_info_label_->setText(ProjectionManager::instance().getCartesianPROJ4Info().c_str());
     }
     catch (...)
     {
         std::string msg = "Forbidden value '"+value_str+"\n Please refer to http://spatialreference.org/ref/epsg/ for possible numbers";
         QMessageBox::warning ( this, "Change Cartesian Coordinate", msg.c_str());
-        epsg_edit_->setText(Utils::String::intToString(ProjectionManager::getInstance().getEPSG()).c_str());
+        epsg_edit_->setText(std::to_string(ProjectionManager::instance().getEPSG()).c_str());
         return;
     }
 

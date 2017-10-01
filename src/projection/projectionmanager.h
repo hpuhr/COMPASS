@@ -27,10 +27,10 @@
 
 #include <ogr_spatialref.h>
 
-#include "Configurable.h"
-#include "Singleton.h"
+#include "configurable.h"
+#include "singleton.h"
 
-#include "Global.h"
+//#include "Global.h"
 
 /**
  * @brief Singleton for coordinate projection handling
@@ -107,7 +107,7 @@ public:
     unsigned int getEPSG () { return epsg_value_; }
 
     /// @brief Returns static instance
-    static ProjectionManager& getInstance()
+    static ProjectionManager& instance()
     {
         static ProjectionManager instance;
         return instance;

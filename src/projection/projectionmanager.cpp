@@ -28,8 +28,8 @@
 
 #include "cpl_conv.h"
 
-#include "Config.h"
-#include "ProjectionManager.h"
+//#include "config.h"
+#include "projectionmanager.h"
 
 ProjectionManager::ProjectionManager()
 : Configurable ("ProjectionManager", "ProjectionManager0", 0), geo2cart_(0), cart2geo_(0)
@@ -156,8 +156,8 @@ void ProjectionManager::createProjection ()
 {
     OGRErr error = cart_.importFromEPSG(epsg_value_);
     if (error != OGRERR_NONE)
-        throw std::runtime_error ("ProjectionManager: createProjection: cartesian EPSG value "+Utils::String::intToString(epsg_value_)+" caused ORG error "
-        +Utils::String::intToString((int)error));
+        throw std::runtime_error ("ProjectionManager: createProjection: cartesian EPSG value "+std::to_string(epsg_value_)+" caused ORG error "
+        +std::to_string((int)error));
 
     if (geo2cart_)
     {

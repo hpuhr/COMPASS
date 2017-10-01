@@ -18,10 +18,7 @@ class RadarPlotPositionCalculatorTask : public QObject, public Configurable
     Q_OBJECT
 
 public slots:
-    //    void readJobIntermediateSlot (std::shared_ptr<Buffer> buffer);
-    //    void readJobObsoleteSlot ();
-    //    void readJobDoneSlot();
-    void newDataSlot (DBObject &object);
+    //void newDataSlot (DBObject &object);
     void loadingDoneSlot (DBObject &object);
 
 public:
