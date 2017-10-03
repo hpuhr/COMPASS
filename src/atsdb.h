@@ -121,8 +121,6 @@ public:
     ///@brief Adds data to a DBO from a C struct data pointer.
     //void insert (const std::string &dbo_type, void *data);
     //void insert (Buffer *buffer, std::string table_name);
-    ///@brief Updates data records for a DBObject, delete buffer after execution
-    //void update (Buffer *data);
 
     ///@brief Returns flag indicating if error state was set.
     //bool error();

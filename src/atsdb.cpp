@@ -24,7 +24,6 @@
 
 #include "atsdb.h"
 #include "config.h"
-//#include "DataSource.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "dbtableinfo.h"
@@ -39,7 +38,6 @@
 #include "taskmanager.h"
 //#include "DBOInfoDBJob.h"
 //#include "DBOVariableDistinctStatisticsDBJob.h"
-//#include "UpdateBufferDBJob.h"
 #include "viewmanager.h"
 #include "projectionmanager.h"
 
@@ -349,35 +347,6 @@ void ATSDB::shutdown ()
 
 //    assert (db_interface_);
 //    db_interface_->writeBuffer(buffer, table_name);
-//}
-
-///**
-// * Within the given buffer, one column has to contain the id of the DBObject, the others are the values to be set. Such values
-// * have to be within the main DBTable, others are not implemented at the moment.
-// */
-//void ATSDB::update (Buffer *data)
-//{
-//    logdbg << "ATSDB: update";
-
-//    assert (data);
-
-//    const std::string &dbotype = data->dboType();
-
-//    //TODO
-//    assert (false);
-
-////    assert (DBObjectManager::getInstance().existsDBOVariable(DBO_UNDEFINED, "id"));
-////    DBOVariable *idvar = DBObjectManager::getInstance().getDBOVariable(DBO_UNDEFINED, "id");
-////    assert (idvar->existsIn(dbotype));
-////    std::string dboidvar_name = idvar->getFor(dbotype)->getCurrentVariableName();
-
-////    PropertyList *list = data->properties();
-////    assert (list->hasProperty(dboidvar_name));
-
-////    UpdateBufferDBJob *job = new UpdateBufferDBJob (this, boost::bind( &ATSDB::updateDBODone, this, _1 ),
-////            boost::bind( &ATSDB::updateDBOAborted, this, _1 ), db_interface_, data);
-
-//    logdbg << "ATSDB: update: done";
 //}
 
 //void ATSDB::getInfo (JobOrderer *orderer, boost::function<void (Job*)> done_function,

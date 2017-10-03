@@ -567,7 +567,7 @@ QWidget *SQLiteConnection::infoWidget ()
     return info_widget_;
 }
 
-std::string SQLiteConnection::status ()
+std::string SQLiteConnection::status () const
 {
     if (connection_ready_)
     {
@@ -580,7 +580,7 @@ std::string SQLiteConnection::status ()
         return "Not connected";
 }
 
-std::string SQLiteConnection::identifier ()
+std::string SQLiteConnection::identifier () const
 {
     assert (connection_ready_);
 

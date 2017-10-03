@@ -30,6 +30,7 @@
 #include "dbcommandlist.h"
 #include "dbcommand.h"
 #include "dbinterface.h"
+#include "dbconnection.h"
 #include "dbobject.h"
 #include "atsdb.h"
 #include "dbovariable.h"
@@ -48,10 +49,10 @@
 using namespace Utils;
 using namespace std;
 
-SQLGenerator::SQLGenerator(const DBInterface &db_interface)
+SQLGenerator::SQLGenerator(DBInterface &db_interface)
     : db_interface_(db_interface)
 {
-    db_type_set_=false;
+    //db_type_set_=false;
 
     std::stringstream ss;
 
@@ -545,29 +546,24 @@ std::string SQLGenerator::getTablePropertiesCreateStatement ()
 //    return ss.str();
 //}
 
-//std::string SQLGenerator::createDBUpdateStringBind(Buffer *buffer, std::string tablename)
-//{
-//    assert (buffer);
-//    assert (tablename.size() > 0);
+std::string SQLGenerator::createDBUpdateStringBind(std::shared_ptr<Buffer> buffer, DBObject &object, DBOVariable &key_var, std::string tablename)
+{
+    assert (buffer);
+    assert (tablename.size() > 0);
 
-//    const PropertyList &list = buffer->properties();
+    const std::vector <Property> &properties = buffer->properties().properties();
 
-//    // UPDATE table_name SET col1=val1,col2=value2 WHERE somecol=someval;
+    // UPDATE table_name SET col1=val1,col2=value2 WHERE somecol=someval;
 
-//    unsigned int size = list.size();
-//    logdbg  << "SQLGenerator: createDBUpdateStringBind: creating db string";
-//    std::stringstream ss;//create a stringstream
+    unsigned int size = properties.size();
+    logdbg  << "SQLGenerator: createDBUpdateStringBind: creating db string";
+    std::stringstream ss;//create a stringstream
 
-//    const std::string &dbo_type = buffer->getDBOType();
+    std::string key_var_name = key_var.currentDBColumn().name();
 
-//    assert (ATSDB::getInstance().existsDBOVariable(DBO_UNDEFINED, "id"));
-//    DBOVariable *idvar = ATSDB::getInstance().getDBOVariable(DBO_UNDEFINED, "id");
-//    assert (idvar->existsIn(dbotype));
-//    std::string dboidvar_name = idvar->getFor(dbotype)->getCurrentVariableName();
+    loginf << "SQLGenerator: createDBUpdateStringBind: idvar name " << key_var_name;
 
-//    loginf << "SQLGenerator: createDBUpdateStringBind: idvar name " << dboidvar_name;
-
-//    ss << "UPDATE " << tablename << " SET ";
+    ss << "UPDATE " << tablename << " SET ";
 
 //    if (!db_type_set_)
 //    {
@@ -575,55 +571,52 @@ std::string SQLGenerator::getTablePropertiesCreateStatement ()
 //        db_type_set_=true;
 //    }
 
-//    std::vector <Property*> *properties =list->getProperties ();
-//    if (dboidvar_name != properties->at(size-1)->id_)
-//        throw std::runtime_error ("SQLGenerator: createDBUpdateStringBind: id var not at last position");
 
-//    if (db_type_ == DB_TYPE_SQLITE || db_type_ == DB_TYPE_MYSQLpp || db_type_ == DB_TYPE_MYSQLCon)
-//    {
-//        for (unsigned int cnt=0; cnt < size; cnt++)
-//        {
-//            if (dboidvar_name == properties->at(cnt)->id_)
-//            {
-//                if (cnt == size-1)
-//                    continue;
-//                else
-//                    throw std::runtime_error ("SQLGenerator: createDBUpdateStringBind: id var at other than last position "+
-//                            intToString (cnt));
-//            }
-//            ss << properties->at(cnt)->id_ << "=";
 
-//            if (db_type_ == DB_TYPE_SQLITE)
-//                ss << "@VAR"+intToString(cnt+1);
-//            else if (db_type_ == DB_TYPE_MYSQLpp)
-//                ss << "%"+intToString(cnt+1);
-//            else if (db_type_ == DB_TYPE_MYSQLCon)
-//                ss << "?";
+    if (key_var_name != properties.at(size-1).name())
+        throw std::runtime_error ("SQLGenerator: createDBUpdateStringBind: id var not at last position");
 
-//            if (cnt != size-2)
-//            {
-//                ss << ", ";
-//            }
-//        }
-//    }
-//    else
-//        throw std::runtime_error ("SQLGenerator: createDBUpdateStringBind: not yet implemented db type "+intToString (db_type_));
+    std::string connection_type = db_interface_.connection().type();
 
-//    ss << " WHERE " << dboidvar_name << "=";
+    if (connection_type != SQLITE_IDENTIFIER && connection_type != MYSQL_IDENTIFIER)
+        throw std::runtime_error ("SQLGenerator: createDBUpdateStringBind: not yet implemented db type "+connection_type);
 
-//    if (db_type_ == DB_TYPE_SQLITE)
-//        ss << "@VAR" << intToString (size);
-//    else if (db_type_ == DB_TYPE_MYSQLpp)
-//        ss << "%" << intToString (size);
-//    else if (db_type_ == DB_TYPE_MYSQLCon)
-//        ss << "?";
+    for (unsigned int cnt=0; cnt < size; cnt++)
+    {
+        if (key_var_name == properties.at(cnt).name())
+        {
+            if (cnt == size-1)
+                continue;
+            else
+                throw std::runtime_error ("SQLGenerator: createDBUpdateStringBind: id var at other than last position "+
+                                          std::to_string(cnt));
+        }
+        ss << properties.at(cnt).name() << "=";
 
-//    ss << ";";
+        if (connection_type == SQLITE_IDENTIFIER)
+            ss << "@VAR"+std::to_string(cnt+1);
+        else if (connection_type == MYSQL_IDENTIFIER)
+            ss << "%"+std::to_string(cnt+1);
 
-//    loginf << "SQLGenerator: createDBUpdateStringBind: var update string '" << ss.str() << "'";
+        if (cnt != size-2)
+        {
+            ss << ", ";
+        }
+    }
 
-//    return ss.str();
-//}
+    ss << " WHERE " << key_var_name << "=";
+
+    if (connection_type == SQLITE_IDENTIFIER)
+        ss << "@VAR" << std::to_string (size);
+    else if (connection_type == MYSQL_IDENTIFIER)
+        ss << "%" << std::to_string (size);
+
+    ss << ";";
+
+    loginf << "SQLGenerator: createDBUpdateStringBind: var update string '" << ss.str() << "'";
+
+    return ss.str();
+}
 
 //std::string SQLGenerator::createDBCreateString (Buffer *buffer, std::string tablename)
 //{

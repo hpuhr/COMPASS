@@ -26,29 +26,34 @@
 #define UpdateBufferDBJob_H_
 
 #include <list>
-#include "DBJob.h"
+#include "job.h"
 
 class Buffer;
+class DBObject;
+class DBInterface;
+class DBOVariable;
 
 /**
  * @brief Buffer write job
  *
  * Writes buffer's data contents to a database table.
  */
-class UpdateBufferDBJob : public DBJob
+class UpdateBufferDBJob : public Job
 {
 public:
-  UpdateBufferDBJob(JobOrderer *orderer, boost::function<void (Job*)> done_function,
-      boost::function<void (Job*)> obsolete_function, DBInterface *db_interface, Buffer *buffer);
+    UpdateBufferDBJob(DBInterface &db_interface, DBObject &dbobject, DBOVariable &key_var, std::shared_ptr<Buffer> buffer);
 
-  virtual ~UpdateBufferDBJob();
+    virtual ~UpdateBufferDBJob();
 
-  virtual void execute ();
+    virtual void run ();
 
-  Buffer *getBuffer () { return buffer_; }
+    std::shared_ptr<Buffer> buffer () { assert (buffer_); return buffer_; }
 
 protected:
-  Buffer *buffer_;
+    DBInterface &db_interface_;
+    DBObject &dbobject_;
+    DBOVariable &key_var_;
+    std::shared_ptr<Buffer> buffer_;
 };
 
 #endif /* UpdateBufferDBJob_H_ */

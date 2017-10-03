@@ -19,6 +19,8 @@
 #include "propertylist.h"
 #include "taskmanager.h"
 #include "projectionmanager.h"
+#include "updatebufferdbjob.h"
+#include "jobmanager.h"
 
 using namespace Utils;
 
@@ -295,10 +297,14 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject &object)
     unsigned int read_size = read_buffer->size();
     assert (read_size);
 
+    std::string latitude_var_dbname = latitude_var_->currentDBColumn().name();
+    std::string longitude_var_dbname = longitude_var_->currentDBColumn().name();
+    std::string keyvar_var_dbname = key_var_->currentDBColumn().name();
+
     PropertyList update_buffer_list;
-    update_buffer_list.addProperty(latitude_var_str_, PropertyDataType::DOUBLE);
-    update_buffer_list.addProperty(longitude_var_str_, PropertyDataType::DOUBLE);
-    update_buffer_list.addProperty(key_var_str_, PropertyDataType::INT);
+    update_buffer_list.addProperty(latitude_var_dbname, PropertyDataType::DOUBLE);
+    update_buffer_list.addProperty(longitude_var_dbname, PropertyDataType::DOUBLE);
+    update_buffer_list.addProperty(keyvar_var_dbname, PropertyDataType::INT);
 
     std::shared_ptr<Buffer> update_buffer = std::shared_ptr<Buffer> (new Buffer (update_buffer_list,db_object_->name()));
 
@@ -382,18 +388,30 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject &object)
         data_sources_.at(sensor_id).calculateSystemCoordinates(pos_azm_deg, pos_range_m, altitude_m, has_altitude, sys_x, sys_y);
         proj_man.cart2geo(sys_x, sys_y, lat, lon, false);
 
-        update_buffer->getDouble(latitude_var_str_).set(update_cnt, lat);
-        update_buffer->getDouble(longitude_var_str_).set(update_cnt, lon);
-        update_buffer->getInt(key_var_str_).set(update_cnt, rec_num);
+        update_buffer->getDouble(latitude_var_dbname).set(update_cnt, lat);
+        update_buffer->getDouble(longitude_var_dbname).set(update_cnt, lon);
+        update_buffer->getInt(keyvar_var_dbname).set(update_cnt, rec_num);
         update_cnt++;
 
         //loginf << "uga cnt " << update_cnt << " rec_num " << rec_num << " lat " << lat << " long " << lon;
     }
 
     loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: update_buffer size " << update_buffer->size();
-    //ATSDB::getInstance().update(update_buffer);
+
+    UpdateBufferDBJob *job = new UpdateBufferDBJob(ATSDB::instance().interface(), object, *key_var_, update_buffer);
+    job_ptr_ = std::shared_ptr<UpdateBufferDBJob> (job);
+    connect (job, SIGNAL(doneSignal()), this, SLOT(updateDoneSlot()), Qt::QueuedConnection);
+
+    JobManager::instance().addDBJob(job_ptr_);
 
     loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: end";
+}
+
+void RadarPlotPositionCalculatorTask::updateDoneSlot ()
+{
+    loginf << "RadarPlotPositionCalculatorTask: updateDoneSlot";
+
+    job_ptr_ = nullptr;
 }
 
 bool RadarPlotPositionCalculatorTask::isCalculating ()

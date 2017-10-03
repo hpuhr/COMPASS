@@ -12,6 +12,7 @@ class DBObject;
 class DBOVariable;
 class RadarPlotPositionCalculatorTaskWidget;
 class TaskManager;
+class UpdateBufferDBJob;
 
 class RadarPlotPositionCalculatorTask : public QObject, public Configurable
 {
@@ -20,6 +21,7 @@ class RadarPlotPositionCalculatorTask : public QObject, public Configurable
 public slots:
     //void newDataSlot (DBObject &object);
     void loadingDoneSlot (DBObject &object);
+    void updateDoneSlot ();
 
 public:
     RadarPlotPositionCalculatorTask(const std::string &class_id, const std::string &instance_id, TaskManager* task_manager);
@@ -82,6 +84,8 @@ protected:
     DBOVariable* longitude_var_{nullptr};
 
     std::map<int, DBODataSource> data_sources_;
+
+    std::shared_ptr<UpdateBufferDBJob> job_ptr_;
 
     bool calculating_ {false};
 

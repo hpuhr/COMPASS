@@ -121,6 +121,9 @@ public:
     /// @brief Returns const reference to a specific value
     const T &get (size_t index)
     {
+        assert (index <= size_);
+        assert (!isNone(index));
+
         if (index > size_)
             throw std::out_of_range ("ArrayListTemplate: get out of index "+std::to_string(index));
 

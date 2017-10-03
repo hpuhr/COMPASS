@@ -135,6 +135,8 @@ public:
     /// @brief Sets DBO type
     void dboName (const std::string &dbo_name) { dbo_name_=dbo_name;}
 
+    bool isNone (const Property& property, unsigned int row_cnt);
+
 protected:
     /// Unique buffer id, copied when getting shallow copies
     unsigned int id_;

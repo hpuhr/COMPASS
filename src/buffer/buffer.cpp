@@ -861,3 +861,44 @@ bool Buffer::firstWrite ()
 
     return true;
 }
+
+bool Buffer::isNone (const Property& property, unsigned int row_cnt)
+{
+    switch (property.dataType())
+    {
+    case PropertyDataType::BOOL:
+        assert (arrays_bool_.count(property.name()));
+        return arrays_bool_.at(property.name())->isNone(row_cnt);
+    case PropertyDataType::CHAR:
+        assert (arrays_char_.count(property.name()));
+        return arrays_char_.at(property.name())->isNone(row_cnt);
+    case PropertyDataType::UCHAR:
+        assert (arrays_uchar_.count(property.name()));
+        return arrays_uchar_.at(property.name())->isNone(row_cnt);
+    case PropertyDataType::INT:
+        assert (arrays_int_.count(property.name()));
+        return arrays_int_.at(property.name())->isNone(row_cnt);
+    case PropertyDataType::UINT:
+        assert (arrays_uint_.count(property.name()));
+        return arrays_uint_.at(property.name())->isNone(row_cnt);
+    case PropertyDataType::LONGINT:
+        assert (arrays_long_int_.count(property.name()));
+        return arrays_long_int_.at(property.name())->isNone(row_cnt);
+    case PropertyDataType::ULONGINT:
+        assert (arrays_ulong_int_.count(property.name()));
+        return arrays_ulong_int_.at(property.name())->isNone(row_cnt);
+    case PropertyDataType::FLOAT:
+        assert (arrays_float_.count(property.name()));
+        return arrays_float_.at(property.name())->isNone(row_cnt);
+    case PropertyDataType::DOUBLE:
+        assert (arrays_double_.count(property.name()));
+        return arrays_double_.at(property.name())->isNone(row_cnt);
+    case PropertyDataType::STRING:
+        assert (arrays_string_.count(property.name()));
+        return arrays_string_.at(property.name())->isNone(row_cnt);
+    default:
+        logerr  <<  "Buffer: isNone: unknown property type " << Property::asString(property.dataType());
+        throw std::runtime_error ("Buffer: isNone: unknown property type "+Property::asString(property.dataType()));
+    }
+
+}

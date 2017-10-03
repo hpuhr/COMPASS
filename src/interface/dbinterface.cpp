@@ -22,7 +22,7 @@
 
 #include "atsdb.h"
 #include "buffer.h"
-//#include "BufferWriter.h"
+#include "bufferwriter.h"
 #include "config.h"
 #include "dbobject.h"
 #include "dbodatasource.h"
@@ -50,6 +50,7 @@
 #include "unit.h"
 #include "unitmanager.h"
 #include "dbtableinfo.h"
+#include "dbtable.h"
 
 #include "string.h"
 
@@ -61,7 +62,7 @@ using namespace Utils;
  * write_table_names_,
  */
 DBInterface::DBInterface(std::string class_id, std::string instance_id, ATSDB *atsdb)
-    : Configurable (class_id, instance_id, atsdb), current_connection_(nullptr), sql_generator_(*this), widget_(nullptr), info_widget_(nullptr)//, buffer_writer_(0)
+    : Configurable (class_id, instance_id, atsdb), current_connection_(nullptr), sql_generator_(*this), widget_(nullptr), info_widget_(nullptr)
 {
     boost::mutex::scoped_lock l(connection_mutex_);
 
@@ -96,11 +97,11 @@ DBInterface::~DBInterface()
 
     assert (!widget_);
 
-    //    if (buffer_writer_)
-    //    {
-    //        delete buffer_writer_;
-    //        buffer_writer_=0;
-    //    }
+    if (buffer_writer_)
+    {
+        delete buffer_writer_;
+        buffer_writer_=0;
+    }
 
     logdbg  << "DBInterface: desctructor: end";
 }
@@ -887,29 +888,30 @@ std::set<int> DBInterface::getActiveDataSources (const DBObject &object)
 //    buffer_writer_->write (data, table_name);
 //}
 
-//void DBInterface::updateBuffer (Buffer *data)
-//{
-//    boost::mutex::scoped_lock l(mutex_);
+void DBInterface::updateBuffer (DBObject &object, DBOVariable &key_var, std::shared_ptr<Buffer> buffer)
+{
+    boost::mutex::scoped_lock l(connection_mutex_);
 
-//    if (!buffer_writer_)
-//        buffer_writer_ = new BufferWriter (connection_, sql_generator_);
+    assert (current_connection_);
+    assert (buffer);
 
-//    assert (buffer_writer_);
-//    assert (data);
+    if (!buffer_writer_)
+        buffer_writer_ = new BufferWriter (current_connection_, &sql_generator_);
 
-//    std::string type = data->dboType();
-//    DBTable *table = DBObjectManager::getInstance ().getDBObject(type)->getCurrentMetaTable()->getTable();
+    assert (buffer_writer_);
 
-//    const PropertyList &properties = data->properties();
+    const DBTable &table = object.currentMetaTable().mainTable();
 
-//    for (unsigned int cnt=0; cnt < properties.size(); cnt++)
-//    {
-//        if (!table->hasTableColumn(properties.at(cnt).getId()))
-//            throw std::runtime_error ("DBInterface: updateBuffer: column '"+properties.at(cnt).getId()+"' does not exist in table "+table->getDBName());
-//    }
+    const PropertyList &properties = buffer->properties();
 
-//    buffer_writer_->update (data, table->getDBName());
-//}
+    for (unsigned int cnt=0; cnt < properties.size(); cnt++)
+    {
+        if (!table.hasColumn(properties.at(cnt).name()))
+            throw std::runtime_error ("DBInterface: updateBuffer: column '"+properties.at(cnt).name()+"' does not exist in table "+table.name());
+    }
+
+    buffer_writer_->update (buffer, object, key_var, table.name());
+}
 
 void DBInterface::prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause, std::vector <DBOVariable *> filtered_variables,
                                bool use_order, DBOVariable *order_variable, bool use_order_ascending, const std::string &limit)

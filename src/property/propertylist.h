@@ -108,10 +108,11 @@ public:
     }
 
     /// @brief Return container with all properties
-//    const std::vector <Property> &getProperties ()
-//    {
-//        return properties_;
-//    };
+    const std::vector <Property> &properties () const
+    {
+        return properties_;
+    }
+
     const Property &at (unsigned int index) const
     {
         assert (index < properties_.size());
@@ -177,12 +178,10 @@ public:
         if (!hasProperty(id))
             throw std::runtime_error ("PropteryList: getPropertyIndex: property "+id+" does not exists");
 
-        std::vector <Property>::const_iterator it;
-
         unsigned int cnt=0;
-        for (it=properties_.begin(); it != properties_.end(); it++)
+        for (auto it : properties_)
         {
-            if (it->name().compare (id) == 0)
+            if (it.name().compare (id) == 0)
             {
                 return cnt;
             }
@@ -196,10 +195,9 @@ public:
     {
         logdbg << "PropertyList: hasProperty: start";
 
-        std::vector <Property>::const_iterator it;
-        for (it=properties_.begin(); it != properties_.end(); it++)
+        for (auto it : properties_)
         {
-            if (it->name().compare (id) == 0)
+            if (it.name().compare (id) == 0)
                 return true;
         }
 

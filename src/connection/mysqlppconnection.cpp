@@ -658,7 +658,7 @@ QWidget *MySQLppConnection::infoWidget ()
     return info_widget_;
 }
 
-std::string MySQLppConnection::status ()
+std::string MySQLppConnection::status () const
 {
     if (connection_ready_)
     {
@@ -671,7 +671,7 @@ std::string MySQLppConnection::status ()
         return "Not connected";
 }
 
-std::string MySQLppConnection::identifier ()
+std::string MySQLppConnection::identifier () const
 {
     assert (connection_ready_);
 

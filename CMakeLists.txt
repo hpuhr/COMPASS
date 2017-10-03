@@ -133,7 +133,7 @@ set ( atsdb_HDRS
     src/connection/sqliteconnection.h
     src/connection/sqliteconnectionwidget.cpp
     src/connection/sqliteconnectioninfowidget.cpp
-    #        src/connection/bufferwriter.h
+    src/connection/bufferwriter.h
     src/filter/dbfilter.h
     src/filter/sensorfilter.h
     src/filter/filtermanager.h
@@ -161,7 +161,7 @@ set ( atsdb_HDRS
     #        src/job/dbovariabledistinctstatisticsdbjob.h
     #        src/job/dbocountdbjob.h
     #        src/job/dboinfodbjob.h
-    #        src/job/updatebufferdbjob.h
+    src/job/updatebufferdbjob.h
     #        src/job/writebufferdbjob.h
     #        src/job/transformationjob.h
     src/object/dbobject.h
@@ -275,7 +275,7 @@ set ( atsdb_SRCS
     src/config/configurable.cpp
     src/config/configuration.cpp
     src/config/configurationmanager.cpp
-    #        src/connection/bufferwriter.cpp
+    src/connection/bufferwriter.cpp
     src/connection/mysqlppconnection.cpp
     src/connection/mysqlppconnectionwidget.cpp
     src/connection/mysqlppconnectioninfowidget.cpp
@@ -304,7 +304,7 @@ set ( atsdb_SRCS
     #        src/job/dbovariabledistinctstatisticsdbjob.cpp
     #        src/job/dbocountdbjob.cpp
     #        src/job/dboinfodbjob.cpp
-    #        src/job/updatebufferdbjob.cpp
+    src/job/updatebufferdbjob.cpp
     #        src/job/writebufferdbjob.cpp
     #        src/job/transformationjob.cpp
     src/job/jobmanager.cpp

@@ -15,24 +15,18 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * UpdateBufferDBJob.cpp
- *
- *  Created on: Feb 5, 2013
- *      Author: sk
- */
+#include "buffer.h"
+#include "updatebufferdbjob.h"
+#include "dbinterface.h"
+#include "dbobject.h"
+#include "dbovariable.h"
 
-#include "Buffer.h"
-#include "UpdateBufferDBJob.h"
-#include "DBInterface.h"
-
-#include "String.h"
+#include "stringconv.h"
 
 using namespace Utils::String;
 
-UpdateBufferDBJob::UpdateBufferDBJob(JobOrderer *orderer, boost::function<void (Job*)> done_function,
-        boost::function<void (Job*)> obsolete_function, DBInterface *db_interface, Buffer *buffer)
-: DBJob(orderer, done_function, obsolete_function, db_interface), buffer_(buffer)
+UpdateBufferDBJob::UpdateBufferDBJob(DBInterface &db_interface, DBObject &dbobject, DBOVariable &key_var, std::shared_ptr<Buffer> buffer)
+: Job(), db_interface_(db_interface), dbobject_(dbobject), key_var_(key_var), buffer_(buffer)
 {
     assert (buffer_);
 }
@@ -42,17 +36,17 @@ UpdateBufferDBJob::~UpdateBufferDBJob()
 
 }
 
-void UpdateBufferDBJob::execute ()
+void UpdateBufferDBJob::run ()
 {
-    loginf  << "UpdateBufferDBJob: execute: start";
+    loginf  << "UpdateBufferDBJob: run: start";
 
     boost::posix_time::ptime loading_start_time_;
     boost::posix_time::ptime loading_stop_time_;
 
     loading_start_time_ = boost::posix_time::microsec_clock::local_time();
 
-    loginf  << "UpdateBufferDBJob: execute: writing type " << buffer_->getDBOType() << " size " << buffer_->getSize();
-    db_interface_->updateBuffer (buffer_);
+    loginf  << "UpdateBufferDBJob: run: writing object " << dbobject_.name() << " key " << key_var_.name() << " size " << buffer_->size();
+    db_interface_.updateBuffer (dbobject_, key_var_, buffer_);
 
     loading_stop_time_ = boost::posix_time::microsec_clock::local_time();
 
@@ -60,6 +54,6 @@ void UpdateBufferDBJob::execute ()
     boost::posix_time::time_duration diff = loading_stop_time_ - loading_start_time_;
     load_time= diff.total_milliseconds()/1000.0;
 
-    loginf  << "UpdateBufferDBJob: execute: buffer write done (" << doubleToString (load_time) << " s).";
+    loginf  << "UpdateBufferDBJob: run: buffer write done (" << doubleToStringPrecision(load_time, 2) << " s).";
     done_=true;
 }

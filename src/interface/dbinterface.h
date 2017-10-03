@@ -54,6 +54,7 @@ class DBTableInfo;
 class DBInterfaceWidget;
 class DBInterfaceInfoWidget;
 class Job;
+class BufferWriter;
 
 class SQLGenerator;
 class QWidget;
@@ -118,7 +119,7 @@ public:
     //    /// @brief Writes a buffer to the database, into a table defined by write_table_names_ and DBO type
     //    void writeBuffer (Buffer *data);
     //    void writeBuffer (Buffer *data, std::string table_name);
-    //    void updateBuffer (Buffer *data);
+    void updateBuffer (DBObject &object, DBOVariable &key_var, std::shared_ptr<Buffer> buffer);
 
     //    /// @brief Prepares incremental read of DBO type
     void prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause, std::vector <DBOVariable *> filtered_variables,
@@ -216,7 +217,7 @@ protected:
     SQLGenerator sql_generator_;
 
     /// Writes buffer to the database
-    //BufferWriter *buffer_writer_;
+    BufferWriter *buffer_writer_{nullptr};
 
     DBInterfaceWidget *widget_;
     DBInterfaceInfoWidget *info_widget_;

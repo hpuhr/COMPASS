@@ -285,7 +285,7 @@ osg::ref_ptr<osg::Geode> OSGViewDataWidget::createSpriteGeometry(DBObject &objec
         previous_size = dbo_sizes_.at(object.name());
 
     size_t buffer_size = buffer->size();
-    if (object.name() == "Radar" || buffer_size <= previous_size) //TODO FIXME PLZ
+    if (buffer_size <= previous_size) //TODO FIXME PLZ
     {
         logerr << "UGA bufer size fixme";
         return geode;
@@ -334,11 +334,12 @@ osg::ref_ptr<osg::Geode> OSGViewDataWidget::createSpriteGeometry(DBObject &objec
     double x,y,z;
     osg::EllipsoidModel elipsModelObj;
     float mode_c;
-
+    size_t current_size;
 
     for (size_t i = 0; i < size_to_read; ++i)
     {
-        if (previous_size+i > buffer_size)
+        current_size = previous_size+i;
+        if (current_size > buffer_size)
         {
             logwrn << "UGA read size";
             break;
@@ -346,7 +347,7 @@ osg::ref_ptr<osg::Geode> OSGViewDataWidget::createSpriteGeometry(DBObject &objec
 
         mode_c = 1000.0;
 
-        if (!latitudes.isNone(i) && !longitudes.isNone(i))
+        if (!latitudes.isNone(current_size) && !longitudes.isNone(current_size))
         {
             //            point.set(srs, latitudes.get(previous_size+i), longitudes.get(previous_size+i), 2000.0, osgEarth::ALTMODE_ABSOLUTE);
             //            xform_->setPosition(point);
@@ -360,10 +361,10 @@ osg::ref_ptr<osg::Geode> OSGViewDataWidget::createSpriteGeometry(DBObject &objec
             //            y = wgsPoint.y();
             //            z = wgsPoint.z();
 
-            if (!mode_c_height.isNone(i))
-                mode_c = 5.0*0.3048 * static_cast<float> (mode_c_height.get(i));
+            if (!mode_c_height.isNone(current_size))
+                mode_c = 5.0*0.3048 * static_cast<float> (mode_c_height.get(current_size));
 
-            elipsModelObj.convertLatLongHeightToXYZ(osg::DegreesToRadians(latitudes.get(previous_size+i)),osg::DegreesToRadians(longitudes.get(previous_size+i)),mode_c,x,y,z);
+            elipsModelObj.convertLatLongHeightToXYZ(osg::DegreesToRadians(latitudes.get(current_size)),osg::DegreesToRadians(longitudes.get(current_size)),mode_c,x,y,z);
 
             (*instanceCoords)[i].x() = x;
             (*instanceCoords)[i].y() = y;

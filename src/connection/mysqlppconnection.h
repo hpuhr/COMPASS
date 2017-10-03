@@ -30,6 +30,7 @@
 
 #include "configurable.h"
 #include "dbconnection.h"
+#include "global.h"
 
 class Buffer;
 class DBInterface;
@@ -88,8 +89,9 @@ public:
 
     QWidget *widget ();
     QWidget *infoWidget ();
-    std::string status ();
-    std::string identifier ();
+    std::string status () const;
+    std::string identifier () const;
+    std::string type () const override { return MYSQL_IDENTIFIER; }
 
     const std::map <std::string, MySQLServer*> &servers () const { return servers_; }
 

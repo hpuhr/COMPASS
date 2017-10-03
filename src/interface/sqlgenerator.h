@@ -49,14 +49,14 @@ class SQLGenerator
 {
 public:
     /// @brief Constructor
-    SQLGenerator(const DBInterface &db_interface);
+    SQLGenerator(DBInterface &db_interface);
     /// @brief Destructor
     virtual ~SQLGenerator();
 
     /// @brief Returns statement to bind variables for buffer contents
 //    std::string createDBInsertStringBind(Buffer *buffer, const std::string &tablename);
-//    /// @brief Returns statement to bind variables for buffer contents
-//    std::string createDBUpdateStringBind(Buffer *buffer, const std::string &tablename);
+    /// @brief Returns statement to bind variables for buffer contents
+    std::string createDBUpdateStringBind(std::shared_ptr<Buffer> buffer, DBObject &object, DBOVariable &key_var, std::string tablename);
 //    /// @brief Returns statement to create table for buffer contents
 //    std::string createDBCreateString (Buffer *buffer, const std::string &tablename);
 
@@ -115,9 +115,9 @@ public:
 
 protected:
     /// Pointer to used DBInterface
-    const DBInterface &db_interface_;
+    DBInterface &db_interface_;
     /// Flag if db_type_ was set
-    bool db_type_set_;
+    //bool db_type_set_;
     /// Database connection type
     //DB_CONNECTION_TYPE db_type_;
 

@@ -26,7 +26,10 @@
 #define BUFFERWRITER_H_
 
 #include <map>
+#include <memory>
 
+class DBObject;
+class DBOVariable;
 class Buffer;
 class DBConnection;
 class SQLGenerator;
@@ -49,8 +52,8 @@ public:
     virtual ~BufferWriter();
 
     /// @brief Write a buffer containing data into a table
-    void write (Buffer *data, std::string tablename);
-    void update (Buffer *data, std::string tablename);
+    //void write (Buffer *data, std::string tablename);
+    void update (std::shared_ptr<Buffer> buffer, DBObject &object, DBOVariable &key_var, std::string tablename);
 
 private:
     /// Database connection to write the data to
@@ -64,13 +67,13 @@ private:
     std::map <std::string, std::string> created_binds_;
 
     /// @brief Creates a database table with a Buffers definition and a specified name
-    void createTableForBuffer (Buffer *data, std::string tablename);
-    /// @brief Returns flag indicating if a table was already created
-    bool existsTableForBuffer (std::string tablename);
+//    void createTableForBuffer (Buffer *data, std::string tablename);
+//    /// @brief Returns flag indicating if a table was already created
+//    bool existsTableForBuffer (std::string tablename);
 
-    /// @brief Writes the data at the current index of a Buffer into the database
-    void insertBindStatementForCurrentIndex (Buffer *buffer);
-    void insertBindStatementUpdateForCurrentIndex (Buffer *buffer);
+//    /// @brief Writes the data at the current index of a Buffer into the database
+//    void insertBindStatementForCurrentIndex (Buffer *buffer);
+    void insertBindStatementUpdateForCurrentIndex (std::shared_ptr<Buffer> buffer, unsigned int row);
 };
 
 #endif /* BUFFERWRITER_H_ */

@@ -29,6 +29,7 @@
 #include <string>
 
 #include "dbconnection.h"
+#include "global.h"
 
 class Buffer;
 class DBInterface;
@@ -79,8 +80,9 @@ public:
 
     QWidget *widget ();
     QWidget *infoWidget ();
-    std::string status ();
-    std::string identifier ();
+    std::string status () const;
+    std::string identifier () const;
+    std::string type () const override { return SQLITE_IDENTIFIER; }
 
     const std::map <std::string, SQLiteFile*> &fileList () { return file_list_; }
     bool hasFile (const std::string &filename) { return file_list_.count (filename) > 0; }

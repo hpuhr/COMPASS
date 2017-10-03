@@ -109,8 +109,9 @@ public:
   virtual QWidget *widget ()=0;
   virtual QWidget *infoWidget ()=0;
 
-  virtual std::string status ()=0;
-  virtual std::string identifier ()=0;
+  virtual std::string status () const=0;
+  virtual std::string identifier () const=0;
+  virtual std::string type () const=0;
 
   bool ready () { return connection_ready_; }
 
