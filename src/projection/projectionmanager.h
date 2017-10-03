@@ -40,27 +40,27 @@ class ProjectionManagerWidget;
 class ProjectionManager : public Singleton, public Configurable
 {
 protected:
-    /// Height offset
-    float minimal_height_;
-    /// System center latitude
-    double center_latitude_;
-    /// System center longitude
-    double center_longitude_;
+//    /// Height offset
+//    float minimal_height_;
+//    /// System center latitude
+//    double center_latitude_;
+//    /// System center longitude
+//    double center_longitude_;
 
-    double center_system_x_; //without transform
-    double center_system_y_; //without transform
+//    double center_system_x_; //without transform
+//    double center_system_y_; //without transform
 
-    /// World scale plane width
-    double projection_plane_width_;
-    /// World scale constant
-    double world_scale_;
-    /// World height scale factor
-    double height_scale_;
-    /// World center point in x
+//    /// World scale plane width
+//    double projection_plane_width_;
+//    /// World scale constant
+//    double world_scale_;
+//    /// World height scale factor
+//    double height_scale_;
+//    /// World center point in x
 
-    double mult_factor_;
-    double trans_x_factor_;
-    double trans_y_factor_;
+//    double mult_factor_;
+//    double trans_x_factor_;
+//    double trans_y_factor_;
 
     unsigned int epsg_value_;
 
@@ -87,18 +87,18 @@ public:
     float transformHeight (float value);
 
     /// @brief Projects geo-coordinate in WGS-84 to cartesian coordinate, transform flag to ogre coordinates, else meters
-    void geo2Cart (double latitude, double longitude, double &x_pos, double &y_pos, bool transform=true);
+    void geo2Cart (double latitude, double longitude, double &x_pos, double &y_pos); //, bool transform=true
     /// @brief Projects cartesian coordinate to geo-coordinate in WGS-84
-    void cart2geo (double x_pos, double y_pos, double &latitude, double &longitude, bool transform=true);
+    void cart2geo (double x_pos, double y_pos, double &latitude, double &longitude); //, bool transform=true
 
-    double getCenterLatitude () { return center_latitude_; }
-    double getCenterLongitude () { return center_longitude_; }
+//    double getCenterLatitude () { return center_latitude_; }
+//    double getCenterLongitude () { return center_longitude_; }
 
-    double getCenterSystemX () { return center_system_x_; } // without transform
-    double getCenterSystemY () { return center_system_y_; } // without transform
+//    double getCenterSystemX () { return center_system_x_; } // without transform
+//    double getCenterSystemY () { return center_system_y_; } // without transform
 
-    void setCenterLatitude (double value) { center_latitude_ = value; }
-    void setCenterLongitude (double value) { center_longitude_ = value; }
+//    void setCenterLatitude (double value) { center_latitude_ = value; }
+//    void setCenterLongitude (double value) { center_longitude_ = value; }
 
     //std::string getWorldWKTInfo ();
     std::string getWorldPROJ4Info ();

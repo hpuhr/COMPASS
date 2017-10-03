@@ -210,7 +210,7 @@ void OSGViewDataWidget::setup ()
     LogarithmicDepthBuffer logdepth;
     logdepth.install(camera);
 
-    //camera->setViewport( 0.0, 0.0, this->width(), this->height() );
+    camera->setViewport( 0.0, 0.0, this->width(), this->height() );
     camera->setClearColor( osg::Vec4( 0.f, 0.f, 0.f, 0.f ) );
     float aspectRatio = static_cast<float>( this->width()) / static_cast<float>( this->height() );
     camera->setProjectionMatrixAsPerspective(60.f, aspectRatio, 0.0001f, 1000.f);
@@ -254,21 +254,10 @@ void OSGViewDataWidget::loadingStartedSlot()
 
 void OSGViewDataWidget::updateData (DBObject &object, std::shared_ptr<Buffer> buffer)
 {
-    loginf << "OSGViewDataWidget: updateData: dbo " << object.name() << " size " << buffer->size();
+    logdbg << "OSGViewDataWidget: updateData: dbo " << object.name() << " size " << buffer->size();
 
     assert (root_node_);
     osg::ref_ptr<osg::Geode> geode = createSpriteGeometry(object, buffer);
-    //Registry::shaderGenerator().run(geode);
-
-    //    GeoTransform* xform = new GeoTransform();
-
-    //    const SpatialReference* srs = map_node_->getTerrain()->getSRS();
-    //    xform->setTerrain( map_node_->getTerrain() );
-    //    GeoPoint point(srs, -0.0, 0.0);
-    //    xform->setPosition(point);
-    //    xform->addChild(geode);
-    //    root_node_->addChild(xform);
-
 
     root_node_->addChild(geode);
     dbo_nodes_[object.name()].push_back(geode);
@@ -285,11 +274,8 @@ osg::ref_ptr<osg::Geode> OSGViewDataWidget::createSpriteGeometry(DBObject &objec
         previous_size = dbo_sizes_.at(object.name());
 
     size_t buffer_size = buffer->size();
-    if (buffer_size <= previous_size) //TODO FIXME PLZ
-    {
-        logerr << "UGA bufer size fixme";
-        return geode;
-    }
+    assert (buffer_size > previous_size);
+
     size_t size_to_read = buffer_size-previous_size;
 
     QColor color = object_colors_[object.name()];
@@ -323,18 +309,16 @@ osg::ref_ptr<osg::Geode> OSGViewDataWidget::createSpriteGeometry(DBObject &objec
     ArrayListTemplate<double> &longitudes = buffer->getDouble (longitude_var.name());
     ArrayListTemplate<int> &mode_c_height = buffer->getInt (altitude_var.name());
 
-    //    const SpatialReference* wgs84 = SpatialReference::get("wgs84");
-    //    const SpatialReference* srs = map_node_->getTerrain()->getSRS();
+    const SpatialReference* wgs84 = SpatialReference::get("wgs84");
+    const SpatialReference* srs = map_node_->getTerrain()->getSRS();
 
-    //    GeoPoint wgsPoint (srs, 0.0, 0.0, 0.0);
-    //    GeoPoint srsPoint;
-    //    osg::Vec3d world_point;
+    GeoPoint wgsPoint;
+    GeoPoint srsPoint;
+    osg::Vec3d world_point;
 
-
-    double x,y,z;
-    osg::EllipsoidModel elipsModelObj;
-    float mode_c;
+    double latitude, longitude,mode_c;
     size_t current_size;
+    bool ret;
 
     for (size_t i = 0; i < size_to_read; ++i)
     {
@@ -349,35 +333,22 @@ osg::ref_ptr<osg::Geode> OSGViewDataWidget::createSpriteGeometry(DBObject &objec
 
         if (!latitudes.isNone(current_size) && !longitudes.isNone(current_size))
         {
-            //            point.set(srs, latitudes.get(previous_size+i), longitudes.get(previous_size+i), 2000.0, osgEarth::ALTMODE_ABSOLUTE);
-            //            xform_->setPosition(point);
-            //            assert (point.isValid());
-
-            //            world_point.set(latitudes.get(previous_size+i), longitudes.get(previous_size+i), 1.0);
-
-            //            wgsPoint.fromWorld(wgs84, world_point);
-
-            //            x = wgsPoint.x();
-            //            y = wgsPoint.y();
-            //            z = wgsPoint.z();
+            latitude = latitudes.get(current_size);
+            longitude = longitudes.get(current_size);
 
             if (!mode_c_height.isNone(current_size))
                 mode_c = 5.0*0.3048 * static_cast<float> (mode_c_height.get(current_size));
 
-            elipsModelObj.convertLatLongHeightToXYZ(osg::DegreesToRadians(latitudes.get(current_size)),osg::DegreesToRadians(longitudes.get(current_size)),mode_c,x,y,z);
+            wgsPoint.set(wgs84, longitude, latitude, mode_c, osgEarth::ALTMODE_ABSOLUTE);
+            srsPoint = wgsPoint.transform(srs);
+            assert (srsPoint.isValid());
 
-            (*instanceCoords)[i].x() = x;
-            (*instanceCoords)[i].y() = y;
-            (*instanceCoords)[i].z() = z;
+            ret = srsPoint.toWorld(world_point);
+            assert (ret);
 
-
-            //            (*instanceCoords)[i].x() = latitudes.get(previous_size+i);
-            //            (*instanceCoords)[i].y() = longitudes.get(previous_size+i);
-            //            (*instanceCoords)[i].z() = 0;
-
+            (*instanceCoords)[i] = world_point;
         }
     }
-    loginf << "last point x " << x << " y " << y << " z " << z;
 
     dbo_sizes_[object.name()] = buffer_size;
 

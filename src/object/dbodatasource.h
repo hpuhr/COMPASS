@@ -151,8 +151,8 @@ protected:
     double system_x_;
     double system_y_;
 
-    double local_trans_x_;
-    double local_trans_y_;
+//    double local_trans_x_;
+//    double local_trans_y_;
 };
 
 #endif // DBODATASOURCE_H

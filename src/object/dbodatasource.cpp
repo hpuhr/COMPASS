@@ -153,14 +153,14 @@ void DBODataSource::finalize ()
 {
     assert (!finalized_);
 
-    ProjectionManager::instance().geo2Cart(latitude_, longitude_, system_x_, system_y_, false);
+    ProjectionManager::instance().geo2Cart(latitude_, longitude_, system_x_, system_y_);
 
     logdbg << "DBODataSource: finalize: " << short_name_ << " lat " << latitude_ << " lon " << longitude_ << " x " << system_x_ << " y " << system_y_;
-    double center_system_x = ProjectionManager::instance().getCenterSystemX();
-    double center_system_y = ProjectionManager::instance().getCenterSystemY();
+//    double center_system_x = ProjectionManager::instance().getCenterSystemX();
+//    double center_system_y = ProjectionManager::instance().getCenterSystemY();
 
-    local_trans_x_ = center_system_x-system_x_;
-    local_trans_y_ = center_system_y-system_y_;
+//    local_trans_x_ = center_system_x-system_x_;
+//    local_trans_y_ = center_system_y-system_y_;
 
     finalized_=true;
 }

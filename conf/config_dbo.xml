@@ -1,5 +1,5 @@
 <Configuration class_id="DBObjectManager" instance_id="DBObjectManager0">
-    <ParameterBool use_filters="1"/>
+    <ParameterBool use_filters="0"/>
     <ParameterBool use_limit="0"/>
     <ParameterBool use_order="0"/>
     <ParameterBool use_order_ascending="1"/>
