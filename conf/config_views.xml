@@ -69,4 +69,27 @@
             <Configuration class_id="ListBoxViewWidget" instance_id="ListBoxViewWidget0"/>
         </Configuration>
     </Configuration>
+    <Configuration class_id="ViewContainerWidget" instance_id="ViewWindow1">
+        <ParameterUnsignedInt height="1088"/>
+        <ParameterUnsignedInt min_height="700"/>
+        <ParameterUnsignedInt min_width="1000"/>
+        <ParameterUnsignedInt pos_x="949"/>
+        <ParameterUnsignedInt pos_y="111"/>
+        <ParameterUnsignedInt width="1549"/>
+        <Configuration class_id="ViewContainer" instance_id="ViewWindow1ViewContainer0">
+            <Configuration class_id="OSGView" instance_id="OSGView1">
+                <Configuration class_id="OSGViewDataSource" instance_id="OSGViewDataSource0">
+                    <ParameterBool database_view="0"/>
+                    <ParameterBool order_ascending="1"/>
+                    <ParameterBool use_filters="0"/>
+                    <ParameterBool use_order="0"/>
+                    <ParameterBool use_selection="1"/>
+                    <ParameterUnsignedInt order_variable_type_int="0"/>
+                    <ParameterString order_variable_name="frame_time"/>
+                    <Configuration class_id="DBOVariableOrderedSet" instance_id="DBOVariableOrderedSet0"/>
+                </Configuration>
+                <Configuration class_id="OSGViewWidget" instance_id="OSGViewWidget0"/>
+            </Configuration>
+        </Configuration>
+    </Configuration>
 </Configuration>

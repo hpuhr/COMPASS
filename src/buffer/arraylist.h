@@ -68,6 +68,8 @@ public:
     Utils::String::Representation representation() const;
     void representation(const Utils::String::Representation &representation);
 
+    virtual const std::string getAsString (size_t index)=0;
+
 protected:
     /// Identifier of contained data
     std::string id_;
@@ -134,7 +136,7 @@ public:
     }
 
     /// @brief Returns string of a specific value
-    const std::string getAsString (size_t index)
+    const std::string getAsString (size_t index) override
     {
         if (index > size_)
             throw std::out_of_range ("ArrayListTemplate: getAsString out of index "+std::to_string(index));

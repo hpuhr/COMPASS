@@ -39,6 +39,22 @@ namespace osgGA
 class TrackballManipulator;
 }
 
+class LinePoint
+{
+public:
+    osg::Vec3d point_;
+    double tod_;
+};
+
+class LineContainer
+{
+public:
+    std::string identifier_;
+    osg::ref_ptr<osg::Geode> geode_;
+    std::vector <LinePoint> points_;
+    unsigned int previous_size_{0};
+};
+
 class OSGViewDataWidget : public QOpenGLWidget
 {
     Q_OBJECT
@@ -77,7 +93,10 @@ private:
   qreal scale_x_, scale_y_;
 
   std::map <std::string, size_t> dbo_sizes_;
-  std::map <std::string, std::vector <osg::ref_ptr<osg::Geode>>> dbo_nodes_;
+  std::map <std::string, std::vector <osg::ref_ptr<osg::Geode>>> dbo_sprite_nodes_;
+  std::map <std::string, std::vector <osg::ref_ptr<osg::Geode>>> dbo_line_nodes_;
+
+  std::map <std::string, std::map <std::string, LineContainer>> dbo_line_containers_;
 
   void setup ();
   TextureFactory textureFactory;
@@ -85,7 +104,8 @@ private:
 
   osgGA::EventQueue* getEventQueue() const;
 
-  osg::ref_ptr<osg::Geode> createSpriteGeometry(DBObject &object, std::shared_ptr<Buffer> buffer);
+  void createSpriteGeometry(DBObject &object, std::shared_ptr<Buffer> buffer);
+  void createLineGeometry(DBObject &object, std::shared_ptr<Buffer> buffer);
 };
 
 

@@ -1,4 +1,6 @@
 
+#include <QSurfaceFormat>
+
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 #include "config.h"
@@ -138,6 +140,10 @@ int main (int argc, char **argv)
         ATSDB::instance().initialize();
 
         Client mf(argc, argv);
+
+        QSurfaceFormat fmt;
+        fmt.setSamples(4);
+        QSurfaceFormat::setDefaultFormat(fmt);
 
         MainWindow window;
 
