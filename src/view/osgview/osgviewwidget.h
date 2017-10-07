@@ -26,7 +26,7 @@ class OSGViewWidget : public ViewWidget
 {
 public:
     /// @brief Constructor
-    OSGViewWidget( const std::string& class_id, const std::string& instance_id, Configurable* config_parent, OSGView* view, QWidget* parent=NULL );
+    OSGViewWidget( const std::string& class_id, const std::string& instance_id, Configurable* config_parent, OSGView* view, QWidget* parent=nullptr );
     /// @brief Destructor
     virtual ~OSGViewWidget();
 

@@ -49,61 +49,10 @@ public:
 
     /// @brief Returns variable read list
     DBOVariableOrderedSet *getSet () { return set_; }
-    /// @brief Returns stored result Buffers
-    //std::map <DB_OBJECT_TYPE, Buffer*> &getData () { return data_; }
-
-    /// @brief Sets use filter flag
-    void setUseFilters (bool use_filters) { use_filters_=use_filters; }
-    /// @brief Returns use filter flag
-    bool getUseFilters () { return use_filters_; }
-
-    /// @brief Sets use selection flag
-    void setUseSelection (bool use_selection) { use_selection_=use_selection; }
-    /// @brief Returns use selection flag
-    bool getUseSelection () { return use_selection_; }
-
-    /// @brief Sets use order flags
-    void setUseOrder (bool use_order) { use_order_=use_order; }
-    /// @brief Return use order flag
-    bool getUseOrder () { return use_order_; }
-
-    /// @brief Sets order variable name
-    void setOrderVariableName (std::string name) { order_variable_name_=name; }
-    /// @brief Returns order variable name
-    std::string getOrderVariableName () { return order_variable_name_; }
-
-    /// @brief Sets order variable DBObject type
-    //void setOrderVariableType (DB_OBJECT_TYPE type) { order_variable_type_int_=type; }
-    /// @brief Returns order variable DBObject type
-    //DB_OBJECT_TYPE getOrderVariableType () { return (DB_OBJECT_TYPE) order_variable_type_int_; }
-
-    /// @brief Sets order ascending flag
-    void setOrderAscending (bool asc) { order_ascending_=asc; }
-    /// @brief Returns order ascending flag
-    bool getOrderAscending () { return order_ascending_; }
-
-    /// @brief Returns database view flag
-    bool getDatabaseView () { return database_view_; }
-    /// @brief Sets database view flags
-    void setDatabaseView (bool database_view) { database_view_=database_view; }
 
 protected:
     /// Variable read list
     DBOVariableOrderedSet *set_;
-    /// Use filters flag
-    bool use_filters_;
-    /// Use selection flag
-    bool use_selection_;
-    /// Use order flag
-    bool use_order_;
-    /// Order variable DBObject type
-    unsigned int order_variable_type_int_;
-    /// Order variable name
-    std::string order_variable_name_;
-    /// Order ascending flag
-    bool order_ascending_;
-    /// Use database view
-    bool database_view_;
 
     /// Selected DBObject records
     ViewSelectionEntries &selection_entries_;

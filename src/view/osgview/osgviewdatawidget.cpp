@@ -50,6 +50,7 @@
 #include "dbovariable.h"
 #include "metadbovariable.h"
 #include "dbobjectmanager.h"
+#include "osgview.h"
 #include "osgviewdatawidget.h"
 #include "osgviewdatasource.h"
 #include "buffer.h"
@@ -61,8 +62,8 @@ using namespace osgEarth;
 using namespace osgEarth::Util;
 using namespace osgEarth::Drivers;
 
-OSGViewDataWidget::OSGViewDataWidget(OSGViewDataSource *data_source, qreal scaleX, qreal scaleY, QWidget* parent)
-    : QOpenGLWidget(parent), data_source_ (data_source), graphics_window_ (new osgViewer::GraphicsWindowEmbedded( this->x(), this->y(), this->width(), this->height())),
+OSGViewDataWidget::OSGViewDataWidget(OSGView* osg_view, OSGViewDataSource *data_source, qreal scaleX, qreal scaleY, QWidget* parent)
+    : QOpenGLWidget(parent), osg_view_(osg_view), data_source_ (data_source), graphics_window_ (new osgViewer::GraphicsWindowEmbedded( this->x(), this->y(), this->width(), this->height())),
       viewer_(new osgViewer::Viewer), root_node_(nullptr), scale_x_(scaleX), scale_y_(scaleY)
 {
     object_colors_["Radar"] = QColor("#50FF50");
@@ -75,6 +76,8 @@ OSGViewDataWidget::OSGViewDataWidget(OSGViewDataSource *data_source, qreal scale
 
 OSGViewDataWidget::~OSGViewDataWidget()
 {
+    deleteGeometry ();
+
     assert (root_node_);
     root_node_->releaseGLObjects();
 }
@@ -148,7 +151,7 @@ void OSGViewDataWidget::wheelEvent(QWheelEvent* event)
     int delta = event->delta();
     osgGA::GUIEventAdapter::ScrollingMotion motion = delta > 0 ?
                 osgGA::GUIEventAdapter::SCROLL_UP : osgGA::GUIEventAdapter::SCROLL_DOWN;
-    this->getEventQueue()->mouseScroll(motion, 10);
+    this->getEventQueue()->mouseScroll(motion, 5);
 }
 
 bool OSGViewDataWidget::event(QEvent* event)
@@ -196,14 +199,14 @@ void OSGViewDataWidget::setup ()
     //    osgEarth::Registry::instance()->setCache(cache);
     //    osgEarth::Registry::instance()->setDefaultCachePolicy(osgEarth::CachePolicy::USAGE_READ_WRITE);
 
+    loadMapFile (osg_view_->mapName());
+
     //osg::Node* loadedModel = osgDB::readNodeFile("data/maps/openstreetmap_flat.earth");
     //osg::Node* loadedModel = osgDB::readNodeFile("data/maps/openstreetmap.earth");
-    osg::Node* loadedModel = osgDB::readNodeFile("data/maps/lod_blending.earth");
+
 
     // Find the MapNode
-    assert (!map_node_);
-    map_node_ = MapNode::get( loadedModel );
-    root_node_->addChild(map_node_);
+
 
     osg::Camera* camera = new osg::Camera;
 
@@ -236,35 +239,14 @@ void OSGViewDataWidget::setup ()
 void OSGViewDataWidget::loadingStartedSlot()
 {
     loginf << "OSGViewDataWidget: loadingStartedSlot";
-    dbo_sizes_.clear();
-    dbo_line_nodes_.clear();
-
-    assert (root_node_);
-
-    for (auto object_it : dbo_sprite_nodes_)
-    {
-        for (auto node_it : object_it.second)
-        {
-            root_node_->removeChild(node_it);
-        }
-        object_it.second.clear();
-    }
-
-    for (auto object_it : dbo_line_nodes_)
-    {
-        for (auto node_it : object_it.second)
-        {
-            root_node_->removeChild(node_it);
-        }
-        object_it.second.clear();
-    }
+    deleteGeometry();
 
     update();
 }
 
 void OSGViewDataWidget::updateData (DBObject &object, std::shared_ptr<Buffer> buffer)
 {
-    logdbg << "OSGViewDataWidget: updateData: dbo " << object.name() << " size " << buffer->size();
+    logdbg << "OSGViewDataWidget: updateData: dbo " << object.name() << " size " << buffer->size() << " previous " << dbo_sizes_[object.name()];
 
     assert (root_node_);
 
@@ -274,6 +256,22 @@ void OSGViewDataWidget::updateData (DBObject &object, std::shared_ptr<Buffer> bu
     dbo_sizes_[object.name()] = buffer->size();
 
     update();
+}
+
+void OSGViewDataWidget::loadMapFile (const std::string earth_file)
+{
+    if (map_node_)
+    {
+        root_node_->removeChild(map_node_);
+        map_node_ = nullptr;
+    }
+
+    osg::Node* loadedModel = osgDB::readNodeFile("data/maps/"+earth_file);
+
+    assert (!map_node_);
+    map_node_ = MapNode::get( loadedModel );
+    mapOpacityChangedSlot (osg_view_->mapOpacity());
+    root_node_->addChild(map_node_);
 }
 
 void OSGViewDataWidget::createSpriteGeometry(DBObject &object, std::shared_ptr<Buffer> buffer)
@@ -335,24 +333,43 @@ void OSGViewDataWidget::createSpriteGeometry(DBObject &object, std::shared_ptr<B
     size_t current_size;
     bool ret;
 
+    const Terrain* terrain = map_node_->getTerrain();
+    assert (terrain);
+
+    bool use_height = osg_view_->useHeight();
+    bool use_height_scale = osg_view_->useHeightScale();
+    float height_scale_factor = osg_view_->heightScaleFactor();
+    bool clamp_height = osg_view_->clampHeight();
+    double terrain_height;
+
     for (size_t i = 0; i < size_to_read; ++i)
     {
         current_size = previous_size+i;
-        if (current_size > buffer_size)
-        {
-            logwrn << "UGA read size";
-            break;
-        }
+        assert (current_size <= buffer_size);
 
-        mode_c = 1000.0;
+        mode_c = 0.0;
 
         if (!latitudes.isNone(current_size) && !longitudes.isNone(current_size))
         {
             latitude = latitudes.get(current_size);
             longitude = longitudes.get(current_size);
 
-            if (!mode_c_height.isNone(current_size))
-                mode_c = 5.0*0.3048 * static_cast<float> (mode_c_height.get(current_size));
+            if (use_height && !mode_c_height.isNone(current_size))
+            {
+                mode_c = 0.3048 * static_cast<float> (mode_c_height.get(current_size));
+
+                if (use_height_scale)
+                    mode_c *= height_scale_factor;
+            }
+
+            if (clamp_height)
+            {
+                ret = terrain->getHeight (srs,latitude, longitude, &terrain_height);
+                assert (ret);
+                terrain_height += 200;
+                if (terrain_height > mode_c)
+                    mode_c = terrain_height;
+            }
 
             wgsPoint.set(wgs84, longitude, latitude, mode_c, osgEarth::ALTMODE_ABSOLUTE);
             srsPoint = wgsPoint.transform(srs);
@@ -365,12 +382,14 @@ void OSGViewDataWidget::createSpriteGeometry(DBObject &object, std::shared_ptr<B
         }
     }
 
+    float opacity = 1.0-osg_view_->dataOpacity();
+
     osg::ref_ptr<osg::Geometry> geom = new osg::Geometry;
     osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(1);
     (*colors)[0].r() = sprite.getColor().redF();
     (*colors)[0].g() = sprite.getColor().greenF();
     (*colors)[0].b() = sprite.getColor().blueF();
-    (*colors)[0].a() = 0.9f;
+    (*colors)[0].a() = opacity;
     geom->setColorArray(colors, osg::Array::Binding::BIND_OVERALL);
     geom->setVertexArray(instanceCoords);
     geom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::POINTS, 0, size_to_read));
@@ -448,6 +467,8 @@ void OSGViewDataWidget::createLineGeometry(DBObject &object, std::shared_ptr<Buf
 
     size_t size_to_read = buffer_size-previous_size;
 
+    logdbg << "OSGViewDataWidget: createLineGeometry: obj " << object.name() << " buf " << buffer_size << " prev " << previous_size << " to read " << size_to_read;
+
     const DBOVariable &track_num_var = object_manager.metaVariable("track_num").getFor(object.name());
     const DBOVariable &latitude_var = object_manager.metaVariable("pos_lat_deg").getFor(object.name());
     const DBOVariable &longitude_var = object_manager.metaVariable("pos_long_deg").getFor(object.name());
@@ -467,9 +488,9 @@ void OSGViewDataWidget::createLineGeometry(DBObject &object, std::shared_ptr<Buf
     GeoPoint srsPoint;
     osg::Vec3d world_point;
 
-    std::map <std::string, LineContainer>& line_container_groups = dbo_line_containers_[object.name()];
+    std::map <std::string, LineContainer*>& line_container_groups = dbo_line_containers_[object.name()];
+    logdbg << "OSGViewDataWidget: createLineGeometry: obj " << object.name() << " with " << line_container_groups.size() << " groups";
 
-    bool has_track_num;
     int track_num;
     double latitude, longitude,mode_c;
     float tod;
@@ -479,29 +500,48 @@ void OSGViewDataWidget::createLineGeometry(DBObject &object, std::shared_ptr<Buf
     size_t current_size;
     bool ret;
 
+    const Terrain* terrain = map_node_->getTerrain();
+    assert (terrain);
+
+    bool use_height = osg_view_->useHeight();
+    bool use_height_scale = osg_view_->useHeightScale();
+    float height_scale_factor = osg_view_->heightScaleFactor();
+    bool clamp_height = osg_view_->clampHeight();
+    double terrain_height;
+
+    logdbg << "OSGViewDataWidget: createLineGeometry: obj " << object.name() << " creating points";
+
     for (size_t i = 0; i < size_to_read; ++i)
     {
         current_size = previous_size+i;
         assert (current_size < buffer_size);
 
-        mode_c = 1000.0;
+        mode_c = 0.0;
 
-        if (!latitudes.isNone(current_size) && !longitudes.isNone(current_size))
+        if (!latitudes.isNone(current_size) && !longitudes.isNone(current_size) && !track_nums.isNone(current_size))
         {
-            has_track_num = !track_nums.isNone(current_size);
-
-            if (has_track_num)
-                track_num = track_nums.get(current_size);
-            else
-                continue;
-
+            track_num = track_nums.get(current_size);
             latitude = latitudes.get(current_size);
             longitude = longitudes.get(current_size);
             assert (!tods.isNone(current_size));
             tod = tods.get(current_size);
 
-            if (!mode_c_height.isNone(current_size))
-                mode_c = 5.0*0.3048 * static_cast<float> (mode_c_height.get(current_size));
+            if (use_height && !mode_c_height.isNone(current_size))
+            {
+                mode_c = 0.3048 * static_cast<float> (mode_c_height.get(current_size));
+
+                if (use_height_scale)
+                    mode_c *= height_scale_factor;
+            }
+
+            if (clamp_height)
+            {
+                ret = terrain->getHeight (srs,latitude, longitude, &terrain_height);
+                terrain_height += 200;
+                assert (ret);
+                if (terrain_height > mode_c)
+                    mode_c = terrain_height;
+            }
 
             wgsPoint.set(wgs84, longitude, latitude, mode_c, osgEarth::ALTMODE_ABSOLUTE);
             srsPoint = wgsPoint.transform(srs);
@@ -512,68 +552,77 @@ void OSGViewDataWidget::createLineGeometry(DBObject &object, std::shared_ptr<Buf
 
             group_id = std::to_string(track_num);
 
-            LineContainer &line_container = line_container_groups[group_id];
+            logdbg << "OSGViewDataWidget: createLineGeometry: obj " << object.name() << " group " << group_id << " lat " << latitude << " lon " << longitude << " modec " << mode_c;
 
-            if (!line_container.geode_)
+            if (line_container_groups.count(group_id) == 0)
             {
-                line_container.identifier_ = group_id;
-                line_container.geode_ = new osg::Geode;
+                logdbg << "OSGViewDataWidget: createLineGeometry: obj " << object.name() << " creating new container for " << group_id;
+                line_container_groups.insert(std::pair<std::string,LineContainer*> (group_id, new LineContainer(group_id)) );
+                line_container_groups.at(group_id)->geode_ = new osg::Geode;
 
-                root_node_->addChild(line_container.geode_);
-                dbo_line_nodes_[object.name()].push_back(line_container.geode_);
+                root_node_->addChild(line_container_groups.at(group_id)->geode_);
+                dbo_line_nodes_[object.name()].push_back(line_container_groups.at(group_id)->geode_);
             }
 
-//            std::string identifier_;
-//            osg::ref_ptr<osg::Geode> geode_;
-//            std::vector <LinePoint> points_;
-//            unsigned int previous_size_{0};
+            LineContainer* line_container = line_container_groups.at(group_id);
 
-//            line point
-//            osg::Vec3d point_;
-//            double tod_;
+            //loginf << "OSGViewDataWidget: createLineGeometry: obj " << object.name() << " group " << group_id << " prev " << line_container->previous_size_ << " points "
+            //       << line_container->points_.size();
 
             line_point.point_ = world_point;
             line_point.tod_ = tod;
 
-            line_container.points_.push_back(line_point);
+            line_container->points_.push_back(line_point);
         }
     }
 
+    logdbg << "OSGViewDataWidget: createLineGeometry: obj " << object.name() << " creating lines, line containers " << line_container_groups.size();
+
+    float opacity = 1.0-osg_view_->dataOpacity();
+
     for (auto line_group_it : line_container_groups)
     {
-        LineContainer &line_container = line_group_it.second;
+        LineContainer* line_container = line_group_it.second;
 
-        if (line_container.points_.size() != line_container.previous_size_) // draw me like 'em french girls
+        if (line_container->points_.size() != line_container->previous_size_) // draw me like 'em french girls
         {
-            unsigned int num_lines;
+            size_t begin_index;
+            size_t num_lines;
+            size_t max_index;
 
-            assert (line_container.points_.size() > line_container.previous_size_);
+            assert (line_container->points_.size() > line_container->previous_size_);
 
-            if (line_container.previous_size_ == 0)
-                num_lines = line_container.points_.size();
+            logdbg << "OSGViewDataWidget: createLineGeometry: obj " << object.name() << " line container " << line_container->identifier_ << " prev " << line_container->previous_size_
+                   << " points " << line_container->points_.size();
+
+            if (line_container->previous_size_ == 0)
+            {
+                begin_index = 0;
+                num_lines = line_container->points_.size();
+                max_index = line_container->points_.size();
+            }
             else
-                num_lines = line_container.points_.size() - line_container.previous_size_ + 1; // line to last one
+            {
+                begin_index = line_container->previous_size_-1;
+                num_lines = line_container->points_.size() - line_container->previous_size_ + 1; // line to last one
+                max_index = line_container->points_.size();
+            }
+
+            logdbg << "OSGViewDataWidget: createLineGeometry: obj " << object.name() << " line container " << line_container->identifier_ << " with num_lines " << num_lines;
 
             // per-instance data
             osg::ref_ptr<osg::Vec3Array> instanceCoords = new osg::Vec3Array(num_lines);
 
-//            size_t begin, end;
-
-//            if (line_group.previous_size_ == 0)
-//            {
-//                begin = 0;
-//                end = num_lines-1;
-//            }
-//            else // line to last one
-//            {
-//                begin = line_group.previous_size_;
-//                end = num_lines-1;
-//                (*instanceCoords)[0] =
-//            }
-
-            for (size_t i = line_container.previous_size_; i < num_lines; ++i)
+            unsigned int line_cnt=0;
+            for (size_t i = begin_index; i < max_index; ++i)
             {
-                (*instanceCoords)[i] = line_container.points_.at(i).point_;
+                (*instanceCoords)[line_cnt] = line_container->points_.at(i).point_;
+
+//                if (line_container->identifier_ == "67")
+//                    loginf << "UGA line " << line_cnt << " i " << i << " point " << (*instanceCoords)[line_cnt].x() << "," << (*instanceCoords)[line_cnt].y()
+//                           << "," << (*instanceCoords)[line_cnt].z();
+
+                line_cnt++;
             }
 
             QColor color = object_colors_[object.name()];
@@ -584,7 +633,7 @@ void OSGViewDataWidget::createLineGeometry(DBObject &object, std::shared_ptr<Buf
             (*colors)[0].r() = color.redF();
             (*colors)[0].g() = color.greenF();
             (*colors)[0].b() = color.blueF();
-            (*colors)[0].a() = 0.9f;
+            (*colors)[0].a() = opacity;
             geom->setColorArray(colors, osg::Array::Binding::BIND_OVERALL);
             geom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINE_STRIP, 0, num_lines));
 
@@ -594,40 +643,113 @@ void OSGViewDataWidget::createLineGeometry(DBObject &object, std::shared_ptr<Buf
                 stateset->setAttribute(new osg::LineWidth(1));
                 geom->setStateSet(stateset);
             }
-            line_container.geode_->addDrawable(geom);
+            line_container->geode_->addDrawable(geom);
             //geode->setName(getGeometryName(modelGeometry).toStdString());
-            line_container.previous_size_=line_container.points_.size();
+
+            line_container->previous_size_=line_container->points_.size();
+            logdbg << "OSGViewDataWidget: createLineGeometry: obj " << object.name() << " line container " << line_container->identifier_ << " end, set prev to " << line_container->previous_size_;
         }
+        else
+            logdbg << "OSGViewDataWidget: createLineGeometry: obj " << object.name() << " line container " << line_container->identifier_ << " requires no update";
     }
 
-    // per-instance data
-//    osg::ref_ptr<osg::Vec2Array> instanceCoords =
-//            new osg::Vec2Array(modelGeometry.getPositions().size());
-//    for (size_t i = 0; i < modelGeometry.getPositions().size(); ++i)
-//    {
-//        (*instanceCoords)[i].x() = modelGeometry.getPositions()[i].x();
-//        (*instanceCoords)[i].y() = modelGeometry.getPositions()[i].y();
-//    }
-
-//    QColor color = object_colors_[object.name()];
-
-//    osg::ref_ptr<osg::Geometry> geom = new osg::Geometry;
-//    geom->setVertexArray(instanceCoords);
-//    osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(1);
-//    (*colors)[0].r() = color.redF();
-//    (*colors)[0].g() = color.greenF();
-//    (*colors)[0].b() = color.blueF();
-//    (*colors)[0].a() = 0.9f;
-//    geom->setColorArray(colors, osg::Array::Binding::BIND_OVERALL);
-//    geom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINE_STRIP, 0, modelGeometry.getPositions().size()));
-
-//    {
-//        osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
-//        stateset->setAttribute(new osg::LineWidth(2));
-//        geom->setStateSet(stateset);
-//    }
-//    geode->addDrawable(geom);
-//    //geode->setName(getGeometryName(modelGeometry).toStdString());
-
     return;
+}
+
+void OSGViewDataWidget::mapNameChangedSlot (const std::string& map_name)
+{
+    loadMapFile(map_name);
+
+    redrawGeometry ();
+}
+
+void OSGViewDataWidget::mapOpacityChangedSlot (float opacity)
+{
+    assert (map_node_);
+    map_node_->getMap()->getImageLayerAt(0)->setOpacity(1.0-opacity);
+    update();
+}
+
+void OSGViewDataWidget::dataOpacityChangedSlot (float opacity)
+{
+    loginf << "OSGViewDataWidget: dataOpacityChangedSlot: " << opacity;
+
+    redrawGeometry ();
+    update();
+}
+
+void OSGViewDataWidget::useHeightChangedSlot (bool use)
+{
+    loginf << "OSGViewDataWidget: useHeightChangedSlot: " << use;
+
+    redrawGeometry ();
+    update();
+}
+
+void OSGViewDataWidget::useHeightScaleChangedSlot (bool use)
+{
+    loginf << "OSGViewDataWidget: useHeightScaleChangedSlot: " << use;
+
+    redrawGeometry ();
+    update();
+}
+
+void OSGViewDataWidget::heightScaleFactorChangedSlot (float factor)
+{
+    loginf << "OSGViewDataWidget: heightScaleFactorChangedSlot: " << factor;
+
+    redrawGeometry ();
+    update();
+}
+
+void OSGViewDataWidget::clampHeightChangedSlot (bool use)
+{
+    loginf << "OSGViewDataWidget: clampHeightChangedSlot: " << use;
+
+    redrawGeometry ();
+    update();
+}
+
+void OSGViewDataWidget::deleteGeometry ()
+{
+    dbo_sizes_.clear();
+
+    for (auto it : dbo_line_containers_)
+        for (auto it2 : it.second)
+            delete it2.second;
+
+    dbo_line_containers_.clear();
+
+    assert (root_node_);
+
+    for (auto object_it : dbo_sprite_nodes_)
+    {
+        for (auto node_it : object_it.second)
+        {
+            root_node_->removeChild(node_it);
+        }
+        object_it.second.clear();
+    }
+
+    for (auto object_it : dbo_line_nodes_)
+    {
+        for (auto node_it : object_it.second)
+        {
+            //node_it->removeDrawables (0, node_it->getNumDrawables());
+            root_node_->removeChild(node_it);
+        }
+        object_it.second.clear();
+    }
+    dbo_line_nodes_.clear();
+}
+
+void OSGViewDataWidget::redrawGeometry ()
+{
+    deleteGeometry ();
+
+    for (auto object_it : ATSDB::instance().objectManager().objects())
+    {
+        if (object_it.second->data())
+            updateData (*object_it.second, object_it.second->data());
+    }
 }

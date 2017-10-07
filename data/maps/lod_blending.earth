@@ -5,15 +5,16 @@ LOD Blending creates smoother transitions between levels of detail.
 <map name="readymap.org" type="geocentric" version="2">
     
     <options>
+
         <!-- elevation_tile_size must be an odd number for morphing. -->
 	<elevation_interpolation>triangulate</elevation_interpolation>
         
         <!-- extend the min_lod so we can see MORE morphing. -->
-        <terrain first_lod="1" min_lod="19"/>
+        <terrain color="#000000FF" first_lod="1" min_lod="19"/>
 
 	<cache_policy max_age="1209600"/>
         <cache type="filesystem">
-            <path>osgearth_cache</path>
+            <path>osgearth_cache/readymap</path>
         </cache>
 
     </options>

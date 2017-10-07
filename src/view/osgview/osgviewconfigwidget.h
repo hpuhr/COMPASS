@@ -11,10 +11,11 @@
 #include <QWidget>
 #include "dbovariable.h"
 
-class DBOVariableOrderedSetWidget;
-//class DBOVariableSelectionWidget;
 class OSGView;
 class QLineEdit;
+class QSlider;
+class QRadioButton;
+class QCheckBox;
 
 /**
  * @brief Widget with configuration elements for a OSGView
@@ -25,18 +26,14 @@ class OSGViewConfigWidget : public QWidget
     Q_OBJECT
 
 public slots:
-    /// @brief Called when the order-by variable was changed
-    void orderVariableChanged ();
-    /// @brief Called when use filter checkbox is un/checked
-    void toggleUseFilters();
-    /// @brief Called when the use order checkbox is un/checked
-    void toggleUseOrder ();
-    /// @brief Called when order ascending checkbox is un/checked
-    void toggleOrderAscending ();
-    /// @brief Called when use selection checkbox is un/checked
-    void toggleUseSelection();
-    /// @brief Called when database view checkbox is un/checked
-    void toggleDatabaseView ();
+    void mapSelectedSlot (bool selected);
+    void mapOpacityChangedSlot ();
+    void dataOpacityChangedSlot ();
+
+    void useHeightSlot (bool checked);
+    void useHeightScaleSlot (bool checked);
+    void heightScaleFactorChangedSlot ();
+    void heightClampChangedSlot(bool checked);
 
 public:
     /// @brief Constructor
@@ -47,10 +44,16 @@ public:
 protected:
     /// Base view
     OSGView* view_;
-    /// Variable read list widget
-    DBOVariableOrderedSetWidget *variable_set_widget_;
-    /// Order-by variable selection widget
-    //DBOVariableSelectionWidget *order_variable_widget_;
+
+    QSlider* map_opacity_slider_ {nullptr};
+    QSlider* data_opacity_slider_ {nullptr};
+
+    QCheckBox* use_height_check_ {nullptr};
+    QCheckBox* height_scale_check_ {nullptr};
+    QSlider* height_scale_slider_ {nullptr};
+    QCheckBox* height_clamp_check_ {nullptr};
+
+    std::map <QRadioButton*, std::string> map_names_;
 };
 
 #endif /* OSGVIEWCONFIGWIDGET_H_ */

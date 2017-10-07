@@ -1,7 +1,7 @@
 <Configuration class_id="FilterManager" instance_id="FilterManager0">
     <ParameterString db_id="MySQL:_Localhost:_job_awam_0023"/>
     <Configuration class_id="DBFilter" instance_id="Barometric Altitude">
-        <ParameterBool active="1"/>
+        <ParameterBool active="0"/>
         <ParameterBool changed="1"/>
         <ParameterBool op_and_="1"/>
         <ParameterBool visible="0"/>
@@ -25,6 +25,34 @@
             <ParameterString variable_name="modec_code_ft"/>
         </Configuration>
         <Configuration class_id="DBFilterWidget" instance_id="Barometric AltitudeWidget0">
+            <ParameterBool visible="1"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBFilter" instance_id="Filter0">
+        <ParameterBool active="1"/>
+        <ParameterBool changed="1"/>
+        <ParameterBool op_and_="1"/>
+        <ParameterBool visible="0"/>
+        <ParameterString name="Filter0"/>
+        <Configuration class_id="DBFilterCondition" instance_id="Filter0Condition0">
+            <ParameterBool absolute_value="0"/>
+            <ParameterBool op_and="1"/>
+            <ParameterString operator="&gt;="/>
+            <ParameterString reset_value="MIN"/>
+            <ParameterString value="50"/>
+            <ParameterString variable_dbo_name="Meta"/>
+            <ParameterString variable_name="track_num"/>
+        </Configuration>
+        <Configuration class_id="DBFilterCondition" instance_id="Filter0Condition1">
+            <ParameterBool absolute_value="0"/>
+            <ParameterBool op_and="1"/>
+            <ParameterString operator="&lt;="/>
+            <ParameterString reset_value="MAX"/>
+            <ParameterString value="75"/>
+            <ParameterString variable_dbo_name="Meta"/>
+            <ParameterString variable_name="track_num"/>
+        </Configuration>
+        <Configuration class_id="DBFilterWidget" instance_id="Filter0Widget0">
             <ParameterBool visible="1"/>
         </Configuration>
     </Configuration>

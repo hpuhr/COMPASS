@@ -10,10 +10,11 @@
 #include <QCheckBox>
 #include <QLineEdit>
 #include <QLabel>
+#include <QSlider>
+#include <QGroupBox>
+#include <QRadioButton>
 
 #include "dbobjectmanager.h"
-#include "dbovariableorderedsetwidget.h"
-//#include "dbovariableselectionwidget.h"
 #include "osgview.h"
 #include "osgviewconfigwidget.h"
 #include "osgviewdatasource.h"
@@ -22,116 +23,151 @@
 
 using namespace Utils;
 
+static const float OPACITY_SLIDE_VALUES = 20;
+
 OSGViewConfigWidget::OSGViewConfigWidget( OSGView* view, QWidget* parent )
-:   QWidget( parent ), view_( view ), variable_set_widget_ (nullptr) //, order_variable_widget_(0),
+    :   QWidget( parent ), view_( view )
 {
+    assert (view_);
     QVBoxLayout *vlayout = new QVBoxLayout;
 
-    assert (view_);
+    QGroupBox *map_box = new QGroupBox(tr("Map Layer"));
 
-    variable_set_widget_ = view_->getDataSource()->getSet()->widget();
-    vlayout->addWidget (variable_set_widget_);
+    std::string map_name = view_->mapName();
 
-    QCheckBox *use_filters = new QCheckBox("Use filters");
-    use_filters->setChecked(view_->getDataSource()->getUseFilters());
-    connect(use_filters, SIGNAL( clicked() ), this, SLOT( toggleUseFilters() ));
-    vlayout->addWidget(use_filters);
+    //QRadioButton *radio1 = new QRadioButton(tr("None"));
+    QRadioButton *radio1 = new QRadioButton(tr("Globe Satellite (ReadyMap)"));
+    map_names_[radio1] = "lod_blending.earth";
 
-    QCheckBox *use_order = new QCheckBox("Use order");
-    use_order->setChecked(view_->getDataSource()->getUseOrder());
-    connect(use_order, SIGNAL( clicked() ), this, SLOT( toggleUseOrder() ));
-    vlayout->addWidget(use_order);
+    QRadioButton *radio2 = new QRadioButton(tr("Globe Map (OSM)"));
+    map_names_[radio2] = "openstreetmap.earth";
 
-    QFrame *order_frame = new QFrame ();
-    order_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
-    QVBoxLayout *order_layout = new QVBoxLayout ();
+    QRadioButton *radio3 = new QRadioButton(tr("Flat Map (OSM)"));
+    map_names_[radio3] = "openstreetmap_flat.earth";
 
-  //  QLabel *order_label = new QLabel ("Order");
-  //  order_layout->addWidget(order_label);
+    for (auto it : map_names_)
+    {
+        if (map_name == it.second)
+            it.first->setChecked (true);
+    }
 
-    QCheckBox *order_ascending = new QCheckBox("Ascending");
-    order_ascending->setChecked(view_->getDataSource()->getOrderAscending());
-    connect(order_ascending, SIGNAL( clicked() ), this, SLOT( toggleOrderAscending() ));
-    order_layout->addWidget(order_ascending);
-
-    //TODO
-  //  order_variable_widget_ = new DBOVariableSelectionWidget ();
-  //  if (DBObjectManager::getInstance().existsDBOVariable(view_->getDataSource()->getOrderVariableType(),
-  //      view_->getDataSource()->getOrderVariableName()))
-  //  {
-  //    order_variable_widget_->setSelectedVariable(DBObjectManager::getInstance().getDBOVariable(view_->getDataSource()->getOrderVariableType(),
-  //        view_->getDataSource()->getOrderVariableName()));
-  //  }
-  //  connect (order_variable_widget_, SIGNAL (selectionChanged()), this, SLOT(orderVariableChanged()));
-  //  order_layout->addWidget (order_variable_widget_);
-
-    order_frame->setLayout (order_layout);
-    vlayout->addWidget (order_frame);
-
-    QCheckBox *use_selection = new QCheckBox("Use Selection");
-    use_selection->setChecked(view_->getDataSource()->getUseSelection());
-    connect(use_selection, SIGNAL( clicked() ), this, SLOT( toggleUseSelection() ));
-    vlayout->addWidget(use_selection);
+    connect (radio1, SIGNAL(toggled(bool)), this, SLOT(mapSelectedSlot(bool)));
+    connect (radio3, SIGNAL(toggled(bool)), this, SLOT(mapSelectedSlot(bool)));
+    connect (radio2, SIGNAL(toggled(bool)), this, SLOT(mapSelectedSlot(bool)));
 
 
-    QCheckBox *db_view = new QCheckBox("Database view");
-    db_view->setChecked(view_->getDataSource()->getDatabaseView());
-    connect(db_view, SIGNAL( clicked() ), this, SLOT( toggleDatabaseView() ));
-    vlayout->addWidget(db_view);
+    QVBoxLayout *vbox = new QVBoxLayout;
+    vbox->addWidget(radio1);
+    vbox->addWidget(radio2);
+    vbox->addWidget(radio3);
+    //vbox->addWidget(radio4);
+    //vbox->addStretch(1);
+    map_box->setLayout(vbox);
+    vlayout->addWidget(map_box);
+
+    vlayout->addWidget(new QLabel ("Map Opacity"));
+
+    int opacity = OPACITY_SLIDE_VALUES*view_->mapOpacity()/OPACITY_SLIDE_VALUES;
+
+    map_opacity_slider_ = new QSlider (Qt::Horizontal);
+    map_opacity_slider_->setMinimum(0);
+    map_opacity_slider_->setSingleStep(2);
+    map_opacity_slider_->setMaximum(OPACITY_SLIDE_VALUES);
+    map_opacity_slider_->setValue(opacity);
+    connect (map_opacity_slider_, SIGNAL(valueChanged(int)), SLOT(mapOpacityChangedSlot()));
+    vlayout->addWidget(map_opacity_slider_);
+
+    vlayout->addWidget(new QLabel ("Data Opacity"));
+
+    opacity = OPACITY_SLIDE_VALUES*view_->dataOpacity();
+    data_opacity_slider_ = new QSlider (Qt::Horizontal);
+    data_opacity_slider_->setMinimum(0);
+    data_opacity_slider_->setSingleStep(2);
+    data_opacity_slider_->setMaximum(OPACITY_SLIDE_VALUES);
+    data_opacity_slider_->setValue(opacity);
+    connect (data_opacity_slider_, SIGNAL(valueChanged(int)), SLOT(dataOpacityChangedSlot()));
+    vlayout->addWidget(data_opacity_slider_);
+
+    use_height_check_ = new QCheckBox ("Use Height");
+    use_height_check_->setChecked(view->useHeight());
+    connect (use_height_check_, SIGNAL(toggled(bool)), this, SLOT(useHeightSlot(bool)));
+    vlayout->addWidget(use_height_check_);
+
+    height_scale_check_ = new QCheckBox ("Scale Height");
+    height_scale_check_->setChecked(view->useHeightScale());
+    connect (height_scale_check_, SIGNAL(toggled(bool)), this, SLOT(useHeightScaleSlot(bool)));
+    vlayout->addWidget(height_scale_check_);
+
+    vlayout->addWidget(new QLabel ("Height Scale Factor"));
+
+    float height_factor = view_->heightScaleFactor()/10.0;
+    height_scale_slider_ = new QSlider (Qt::Horizontal);
+    height_scale_slider_->setMinimum(1);
+    height_scale_slider_->setSingleStep(1);
+    height_scale_slider_->setMaximum(10);
+    height_scale_slider_->setValue(height_factor);
+    connect (height_scale_slider_, SIGNAL(valueChanged(int)), SLOT(heightScaleFactorChangedSlot()));
+    vlayout->addWidget(height_scale_slider_);
+
+    height_clamp_check_ = new QCheckBox ("Clamp Height on Ground");
+    height_clamp_check_->setChecked(view->clampHeight());
+    connect (height_clamp_check_, SIGNAL(toggled(bool)), this, SLOT(heightClampChangedSlot(bool)));
+    vlayout->addWidget(height_clamp_check_);
 
     vlayout->addStretch();
-
-    setLayout( vlayout );
+    setLayout (vlayout);
 }
 
 OSGViewConfigWidget::~OSGViewConfigWidget()
 {
 }
 
-void OSGViewConfigWidget::toggleUseFilters()
+void OSGViewConfigWidget::mapSelectedSlot (bool selected)
 {
-  QCheckBox *send = ((QCheckBox*)sender());
-  bool checked = send->checkState() == Qt::Checked;
-  logdbg  << "OSGViewConfigWidget: toggleUseFilters: setting use filters to " << checked;
-  view_->getDataSource()->setUseFilters (checked);
+    if (selected)
+    {
+        QRadioButton* radio = dynamic_cast<QRadioButton*> (QObject::sender());
+        assert (radio);
+        assert (map_names_.count(radio) == 1);
+        view_->mapName(map_names_.at(radio));
+    }
 }
 
-void OSGViewConfigWidget::toggleUseOrder ()
+void OSGViewConfigWidget::mapOpacityChangedSlot ()
 {
-  QCheckBox *send = ((QCheckBox*)sender());
-  bool checked = send->checkState() == Qt::Checked;
-  view_->getDataSource()->setUseOrder (checked);
+    assert (map_opacity_slider_);
+    int opacity = map_opacity_slider_->value();
+    assert (opacity >= 0 && opacity <= OPACITY_SLIDE_VALUES);
+    view_->mapOpacity(static_cast<float> (opacity/OPACITY_SLIDE_VALUES));
 }
 
-void OSGViewConfigWidget::toggleOrderAscending ()
+void OSGViewConfigWidget::dataOpacityChangedSlot ()
 {
-  QCheckBox *send = ((QCheckBox*)sender());
-  bool checked = send->checkState() == Qt::Checked;
-  view_->getDataSource()->setOrderAscending (checked);
+    assert (data_opacity_slider_);
+    int opacity = data_opacity_slider_->value();
+    assert (opacity >= 0 && opacity <= OPACITY_SLIDE_VALUES);
+    view_->dataOpacity(static_cast<float> (opacity/OPACITY_SLIDE_VALUES));
 }
 
-void OSGViewConfigWidget::orderVariableChanged ()
+void OSGViewConfigWidget::useHeightSlot (bool checked)
 {
-      //TODO
-//  assert (order_variable_widget_);
-//  DBOVariable *var = order_variable_widget_->getSelectedVariable();
-//  view_->getDataSource()->setOrderVariableName (var->getName());
-//  view_->getDataSource()->setOrderVariableType (var->getDBOType());
+    view_->useHeight(checked);
 }
 
-void OSGViewConfigWidget::toggleUseSelection()
+void OSGViewConfigWidget::useHeightScaleSlot (bool checked)
 {
-  QCheckBox *send = ((QCheckBox*)sender());
-  bool checked = send->checkState() == Qt::Checked;
-  logdbg  << "OSGViewConfigWidget: toggleUseSelection: setting use filters to " << checked;
-  view_->getDataSource()->setUseSelection (checked);
+    view_->useHeightScale(checked);
 }
 
-void OSGViewConfigWidget::toggleDatabaseView ()
+void OSGViewConfigWidget::heightScaleFactorChangedSlot ()
 {
-    QCheckBox *send = ((QCheckBox*)sender());
-    bool checked = send->checkState() == Qt::Checked;
-    logdbg  << "OSGViewConfigWidget: toggleDatabaseView: setting database view to " << checked;
-    view_->getDataSource()->setDatabaseView (checked);
+    assert (height_scale_slider_);
+    int factor = height_scale_slider_->value()*10;
+    assert (factor >= 0 && factor <= HEIGHT_SCALE_SLIDE_VALUES);
+    view_->heightScaleFactor(static_cast<float> (factor));
+}
 
+void OSGViewConfigWidget::heightClampChangedSlot(bool checked)
+{
+    view_->clampHeight(checked);
 }

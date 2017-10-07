@@ -23,7 +23,9 @@
 
 #include "texturefactory.h"
 #include "global.h"
+#include "logger.h"
 
+class OSGView;
 class OSGViewDataSource;
 class Buffer;
 class DBObject;
@@ -49,6 +51,7 @@ public:
 class LineContainer
 {
 public:
+    LineContainer (const std::string& identifier):identifier_(identifier) { logdbg << "LineContainer: ctor: " << identifier_; }
     std::string identifier_;
     osg::ref_ptr<osg::Geode> geode_;
     std::vector <LinePoint> points_;
@@ -63,8 +66,17 @@ public slots:
     /// @brief Called when new result Buffer was delivered
     void updateData (DBObject &object, std::shared_ptr<Buffer> buffer);
 
+    void mapNameChangedSlot (const std::string& map_name);
+    void mapOpacityChangedSlot (float opacity);
+    void dataOpacityChangedSlot (float opacity);
+
+    void useHeightChangedSlot (bool use);
+    void useHeightScaleChangedSlot (bool use);
+    void heightScaleFactorChangedSlot (float factor);
+    void clampHeightChangedSlot (bool use);
+
 public:
-  OSGViewDataWidget(OSGViewDataSource *data_source, qreal scaleX, qreal scaleY, QWidget* parent = 0);
+  OSGViewDataWidget(OSGView* osg_view, OSGViewDataSource* data_source, qreal scaleX, qreal scaleY, QWidget* parent = 0);
 
   virtual ~OSGViewDataWidget();
 
@@ -81,6 +93,7 @@ protected:
   virtual bool event(QEvent* event);
 
 private:
+  OSGView* osg_view_;
   /// Data source
   OSGViewDataSource *data_source_;
 
@@ -96,7 +109,7 @@ private:
   std::map <std::string, std::vector <osg::ref_ptr<osg::Geode>>> dbo_sprite_nodes_;
   std::map <std::string, std::vector <osg::ref_ptr<osg::Geode>>> dbo_line_nodes_;
 
-  std::map <std::string, std::map <std::string, LineContainer>> dbo_line_containers_;
+  std::map <std::string, std::map <std::string, LineContainer*>> dbo_line_containers_;
 
   void setup ();
   TextureFactory textureFactory;
@@ -104,8 +117,13 @@ private:
 
   osgGA::EventQueue* getEventQueue() const;
 
+  void loadMapFile (const std::string earth_file);
   void createSpriteGeometry(DBObject &object, std::shared_ptr<Buffer> buffer);
   void createLineGeometry(DBObject &object, std::shared_ptr<Buffer> buffer);
+
+  void deleteGeometry ();
+  void redrawGeometry ();
+
 };
 
 

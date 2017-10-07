@@ -45,6 +45,14 @@ signals:
     /// @brief Is emitted when selection should be cleared
     void clearSelection();
 
+    void mapNameChangedSignal (const std::string name);
+    void mapOpacityChangedSignal (float opacity);
+    void dataOpacityChangedSignal (float opacity);
+    void useHeightChangedSignal (bool use);
+    void useHeightScaleChangedSignal (bool use);
+    void heightScaleFactorChangedSignal (float factor);
+    void clampHeightChangedSignal (bool use);
+
 public:
     /// @brief Constructor
     OSGView(const std::string& class_id, const std::string& instance_id, ViewContainer *w, ViewManager &view_manager);
@@ -62,11 +70,41 @@ public:
 
     virtual DBOVariableSet getSet (const std::string &dbo_name);
 
+    float mapOpacity() const;
+    void mapOpacity(float opacity);
+
+    float dataOpacity() const;
+    void dataOpacity(float opacity);
+
+    std::string mapName() const;
+    void mapName(const std::string &map_name);
+
+    float heightScaleFactor() const;
+    void heightScaleFactor(float height_scale_factor);
+
+    bool useHeight() const;
+    void useHeight(bool use_height);
+
+    bool clampHeight() const;
+    void clampHeight(bool clamp_height_on_ground);
+
+    bool useHeightScale() const;
+    void useHeightScale(bool use_height_scale);
+
 protected:
     /// For data display
     OSGViewWidget* widget_;
     /// For data loading
     OSGViewDataSource *data_source_;
+
+    std::string map_name_;
+    float map_opacity_;
+    float data_opacity_;
+
+    bool use_height_;
+    bool use_height_scale_;
+    float height_scale_factor_;
+    bool clamp_height_;
 
     virtual void checkSubConfigurables ();
 };

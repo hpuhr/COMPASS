@@ -20,14 +20,6 @@
 OSGViewDataSource::OSGViewDataSource(const std::string &class_id, const std::string &instance_id, Configurable *parent)
 : QObject(), Configurable (class_id, instance_id, parent), set_(nullptr), selection_entries_ (ViewSelection::getInstance().getEntries())
 {
-    registerParameter ("use_filters", &use_filters_, false);
-    registerParameter ("use_selection", &use_selection_, true);
-    registerParameter ("use_order", &use_order_, false);
-    registerParameter ("order_variable_type_int", &order_variable_type_int_, 0);
-    registerParameter ("order_variable_name", &order_variable_name_, "frame_time");
-    registerParameter ("order_ascending", &order_ascending_, true);
-    registerParameter ("database_view", &database_view_, false);
-
     connect (&ATSDB::instance().objectManager(), SIGNAL(loadingStartedSignal()), this, SLOT(loadingStartedSlot()));
 
     for (auto object : ATSDB::instance().objectManager().objects())
@@ -35,8 +27,6 @@ OSGViewDataSource::OSGViewDataSource(const std::string &class_id, const std::str
         connect (object.second, SIGNAL (newDataSignal(DBObject &)), this, SLOT(newDataSlot(DBObject&)));
         connect (object.second, SIGNAL (loadingDoneSignal(DBObject &)), this, SLOT(loadingDoneSlot(DBObject&)));
     }
-
-    use_filters_=false;
 
     createSubConfigurables ();
 }
@@ -78,10 +68,10 @@ void OSGViewDataSource::loadingStartedSlot ()
 
 void OSGViewDataSource::newDataSlot (DBObject &object)
 {
-    logdbg << "OSGViewDataSource: newDataSlot: object " << object.name();
-
     std::shared_ptr <Buffer> buffer = object.data();
     assert (buffer);
+
+    logdbg << "OSGViewDataSource: newDataSlot: object " << object.name() << " buffer size " << buffer->size();
 
     emit updateData (object, buffer);
 }
