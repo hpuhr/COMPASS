@@ -82,7 +82,7 @@
                 <ParameterBool use_height="1"/>
                 <ParameterBool use_height_scale="1"/>
                 <ParameterFloat data_opacity="1.00000000"/>
-                <ParameterFloat height_scale_factor="30.00000000"/>
+                <ParameterFloat height_scale_factor="80.00000000"/>
                 <ParameterFloat map_opacity="0.40000001"/>
                 <ParameterString map_name="openstreetmap.earth"/>
                 <Configuration class_id="OSGViewDataSource" instance_id="OSGViewDataSource0">

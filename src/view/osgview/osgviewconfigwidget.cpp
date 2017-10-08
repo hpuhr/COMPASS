@@ -163,7 +163,7 @@ void OSGViewConfigWidget::heightScaleFactorChangedSlot ()
 {
     assert (height_scale_slider_);
     int factor = height_scale_slider_->value()*10;
-    assert (factor >= 0 && factor <= HEIGHT_SCALE_SLIDE_VALUES);
+    assert (factor >= 0 && factor <= 100.0);
     view_->heightScaleFactor(static_cast<float> (factor));
 }
 

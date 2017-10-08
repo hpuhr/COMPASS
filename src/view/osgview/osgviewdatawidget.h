@@ -118,6 +118,7 @@ private:
   osgGA::EventQueue* getEventQueue() const;
 
   void loadMapFile (const std::string earth_file);
+  void createGeometry(DBObject &object, std::shared_ptr<Buffer> buffer);
   void createSpriteGeometry(DBObject &object, std::shared_ptr<Buffer> buffer);
   void createLineGeometry(DBObject &object, std::shared_ptr<Buffer> buffer);
 

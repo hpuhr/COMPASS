@@ -45,6 +45,8 @@
 #include <osgEarthUtil/EarthManipulator>
 #include <osg/PositionAttitudeTransform>
 
+#include <limits>
+
 #include "buffertablewidget.h"
 #include "dbobject.h"
 #include "dbovariable.h"
@@ -61,6 +63,8 @@ using namespace osg;
 using namespace osgEarth;
 using namespace osgEarth::Util;
 using namespace osgEarth::Drivers;
+
+static const std::string UNASSOCIATED_GROUP_ID = "Unassociated";
 
 OSGViewDataWidget::OSGViewDataWidget(OSGView* osg_view, OSGViewDataSource *data_source, qreal scaleX, qreal scaleY, QWidget* parent)
     : QOpenGLWidget(parent), osg_view_(osg_view), data_source_ (data_source), graphics_window_ (new osgViewer::GraphicsWindowEmbedded( this->x(), this->y(), this->width(), this->height())),
@@ -250,6 +254,8 @@ void OSGViewDataWidget::updateData (DBObject &object, std::shared_ptr<Buffer> bu
 
     assert (root_node_);
 
+//    createGeometry(object, buffer);
+
     createSpriteGeometry(object, buffer);
     createLineGeometry(object, buffer);
 
@@ -273,6 +279,284 @@ void OSGViewDataWidget::loadMapFile (const std::string earth_file)
     mapOpacityChangedSlot (osg_view_->mapOpacity());
     root_node_->addChild(map_node_);
 }
+
+void OSGViewDataWidget::createGeometry(DBObject &object, std::shared_ptr<Buffer> buffer)
+{
+    assert (buffer);
+
+    DBObjectManager &object_manager = ATSDB::instance().objectManager();
+
+    if (!object_manager.existsMetaVariable("track_num") || !object_manager.existsMetaVariable("pos_lat_deg") ||
+            !object_manager.existsMetaVariable("pos_long_deg") || !object_manager.existsMetaVariable("modec_code_ft") || !object_manager.existsMetaVariable("tod"))
+    {
+        logwrn << "OSGViewDataWidget::createLineGeometry: required variables missing, quitting";
+        return;
+    }
+
+    if (!object_manager.metaVariable("track_num").existsIn(object.name()) || !object_manager.metaVariable("pos_lat_deg").existsIn(object.name()) ||
+            !object_manager.metaVariable("pos_long_deg").existsIn(object.name()) || !object_manager.metaVariable("modec_code_ft").existsIn(object.name()) ||
+            !object_manager.metaVariable("tod").existsIn(object.name()))
+    {
+        logwrn << "OSGViewDataWidget::createLineGeometry: required variables exist but not for object, quitting";
+        return;
+    }
+
+    size_t previous_size = 0;
+    if (dbo_sizes_.count(object.name()) > 0)
+        previous_size = dbo_sizes_.at(object.name());
+
+    size_t buffer_size = buffer->size();
+    if (buffer_size <= previous_size)
+    {
+        logerr << "OSGViewDataWidget: createLineGeometry: obj " << object.name() << " buf " << buffer_size << " prev " << previous_size;
+        return;
+    }
+
+    size_t size_to_read = buffer_size-previous_size;
+
+    logdbg << "OSGViewDataWidget: createLineGeometry: obj " << object.name() << " buf " << buffer_size << " prev " << previous_size << " to read " << size_to_read;
+
+    const DBOVariable &track_num_var = object_manager.metaVariable("track_num").getFor(object.name());
+    const DBOVariable &latitude_var = object_manager.metaVariable("pos_lat_deg").getFor(object.name());
+    const DBOVariable &longitude_var = object_manager.metaVariable("pos_long_deg").getFor(object.name());
+    const DBOVariable &altitude_var = object_manager.metaVariable("modec_code_ft").getFor(object.name());
+    const DBOVariable &tod_var = object_manager.metaVariable("tod").getFor(object.name());
+
+    ArrayListTemplate<int> &track_nums = buffer->getInt (track_num_var.name());
+    ArrayListTemplate<double> &latitudes = buffer->getDouble (latitude_var.name());
+    ArrayListTemplate<double> &longitudes = buffer->getDouble (longitude_var.name());
+    ArrayListTemplate<int> &mode_c_height = buffer->getInt (altitude_var.name());
+    ArrayListTemplate<float> &tods = buffer->getFloat (tod_var.name());
+
+    const SpatialReference* wgs84 = SpatialReference::get("wgs84");
+    const SpatialReference* srs = map_node_->getTerrain()->getSRS();
+
+    GeoPoint wgsPoint;
+    GeoPoint srsPoint;
+    osg::Vec3d world_point;
+
+    std::map <std::string, LineContainer*>& line_container_groups = dbo_line_containers_[object.name()];
+    logdbg << "OSGViewDataWidget: createLineGeometry: obj " << object.name() << " with " << line_container_groups.size() << " groups";
+
+    int track_num;
+    double latitude, longitude,mode_c;
+    float tod;
+    std::string group_id;
+    LinePoint line_point;
+
+    size_t current_size;
+    bool ret;
+
+    const Terrain* terrain = map_node_->getTerrain();
+    assert (terrain);
+
+    bool use_height = osg_view_->useHeight();
+    bool use_height_scale = osg_view_->useHeightScale();
+    float height_scale_factor = osg_view_->heightScaleFactor();
+    bool clamp_height = osg_view_->clampHeight();
+    double terrain_height;
+
+    logdbg << "OSGViewDataWidget: createLineGeometry: obj " << object.name() << " creating points";
+
+    for (size_t i = 0; i < size_to_read; ++i)
+    {
+        current_size = previous_size+i;
+        assert (current_size < buffer_size);
+
+        mode_c = 0.0;
+
+        if (!latitudes.isNone(current_size) && !longitudes.isNone(current_size))
+        {
+            latitude = latitudes.get(current_size);
+            longitude = longitudes.get(current_size);
+            if (tods.isNone(current_size))
+                tod = std::numeric_limits<float>::infinity();
+            else
+                tod = tods.get(current_size);
+
+            if (use_height && !mode_c_height.isNone(current_size))
+            {
+                mode_c = 0.3048 * static_cast<float> (mode_c_height.get(current_size));
+
+                if (use_height_scale)
+                    mode_c *= height_scale_factor;
+            }
+
+            if (clamp_height)
+            {
+                ret = terrain->getHeight (srs,latitude, longitude, &terrain_height);
+                terrain_height += 200;
+                assert (ret);
+                if (terrain_height > mode_c)
+                    mode_c = terrain_height;
+            }
+
+            wgsPoint.set(wgs84, longitude, latitude, mode_c, osgEarth::ALTMODE_ABSOLUTE);
+            srsPoint = wgsPoint.transform(srs);
+            assert (srsPoint.isValid());
+
+            ret = srsPoint.toWorld(world_point);
+            assert (ret);
+
+            if (!track_nums.isNone(current_size))
+            {
+                track_num = track_nums.get(current_size);
+                group_id = std::to_string(track_num);
+            }
+            else
+                group_id = UNASSOCIATED_GROUP_ID;
+
+            logdbg << "OSGViewDataWidget: createLineGeometry: obj " << object.name() << " group " << group_id << " lat " << latitude << " lon " << longitude << " modec " << mode_c;
+
+            if (line_container_groups.count(group_id) == 0)
+            {
+                logdbg << "OSGViewDataWidget: createLineGeometry: obj " << object.name() << " creating new container for " << group_id;
+                line_container_groups.insert(std::pair<std::string,LineContainer*> (group_id, new LineContainer(group_id)) );
+                line_container_groups.at(group_id)->geode_ = new osg::Geode;
+
+                root_node_->addChild(line_container_groups.at(group_id)->geode_);
+                dbo_line_nodes_[object.name()].push_back(line_container_groups.at(group_id)->geode_);
+            }
+
+            LineContainer* line_container = line_container_groups.at(group_id);
+
+            //loginf << "OSGViewDataWidget: createLineGeometry: obj " << object.name() << " group " << group_id << " prev " << line_container->previous_size_ << " points "
+            //       << line_container->points_.size();
+
+            line_point.point_ = world_point;
+            line_point.tod_ = tod;
+
+            line_container->points_.push_back(line_point);
+        }
+    }
+
+    logdbg << "OSGViewDataWidget: createLineGeometry: obj " << object.name() << " creating lines, line containers " << line_container_groups.size();
+
+    float opacity = 1.0-osg_view_->dataOpacity();
+    QColor color = object_colors_[object.name()];
+    Sprite sprite (color,Sprite::Style::CIRCLE, 2.0);
+
+    for (auto line_group_it : line_container_groups)
+    {
+        LineContainer* line_container = line_group_it.second;
+
+        if (line_container->points_.size() != line_container->previous_size_) // draw me like 'em french girls
+        {
+            size_t begin_index;
+            size_t num_lines;
+            size_t point_size;
+            size_t num_points;
+
+            assert (line_container->points_.size() > line_container->previous_size_);
+
+            logdbg << "OSGViewDataWidget: createLineGeometry: obj " << object.name() << " line container " << line_container->identifier_ << " prev " << line_container->previous_size_
+                   << " points " << line_container->points_.size();
+
+            if (line_container->previous_size_ == 0)
+            {
+                begin_index = 0;
+                num_lines = line_container->points_.size();
+            }
+            else
+            {
+                begin_index = line_container->previous_size_-1;
+                num_lines = line_container->points_.size() - line_container->previous_size_ + 1; // line to last one
+            }
+            point_size = line_container->points_.size();
+            num_points = line_container->points_.size() - line_container->previous_size_;
+
+            logdbg << "OSGViewDataWidget: createLineGeometry: obj " << object.name() << " line container " << line_container->identifier_ << " with num_lines " << num_lines;
+
+            // per-instance data
+//            { // thats the point
+//                osg::ref_ptr<osg::Vec3Array> spriteCoords = new osg::Vec3Array(num_points);
+//                unsigned int point_cnt=0;
+//                for (size_t i = line_container->previous_size_; i < point_size; ++i)
+//                {
+//                    (*spriteCoords)[point_cnt] = line_container->points_.at(i).point_;
+//                    point_cnt++;
+//                }
+
+//                osg::ref_ptr<osg::Geometry> geom = new osg::Geometry;
+//                osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(1);
+//                (*colors)[0].r() = sprite.getColor().redF();
+//                (*colors)[0].g() = sprite.getColor().greenF();
+//                (*colors)[0].b() = sprite.getColor().blueF();
+//                (*colors)[0].a() = opacity;
+//                geom->setColorArray(colors, osg::Array::Binding::BIND_OVERALL);
+//                geom->setVertexArray(spriteCoords);
+//                geom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::POINTS, 0, num_points));
+
+//                // set texture for points
+//                auto* tex = textureFactory.getTextureForStyle(sprite.getStyle());
+//                if (!tex)
+//                {
+//                    std::cout << "Error: got null texture" << std::endl;
+//                    return;
+//                }
+
+//                osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
+//                stateset->setMode(GL_DEPTH_TEST,osg::StateAttribute::ON);
+
+//                // Use point sprites
+//                osg::ref_ptr<osg::PointSprite> pointSprite = new osg::PointSprite;
+//                stateset->setTextureAttributeAndModes(0, pointSprite, osg::StateAttribute::ON);
+
+//                osg::AlphaFunc* alphaFunc = new osg::AlphaFunc;
+//                alphaFunc->setFunction(osg::AlphaFunc::ALWAYS,0.05f);
+
+//                // set GL_POINT_SIZE
+//                osg::ref_ptr<osg::Point> point = new osg::Point;
+//                point->setSize(3); //sprite.getSize()
+//                stateset->setAttribute(point);
+
+//                stateset->setAttributeAndModes( alphaFunc, osg::StateAttribute::ON );
+//                stateset->setTextureAttributeAndModes(0, tex, osg::StateAttribute::ON);
+
+//                geom->setStateSet(stateset);
+//                line_container->geode_->addDrawable(geom);
+//            }
+//            if (line_group_it.first != UNASSOCIATED_GROUP_ID) // the line must be drawn here
+//            {
+//                osg::ref_ptr<osg::Vec3Array> lineCoords = new osg::Vec3Array(num_lines);
+//                unsigned int line_cnt=0;
+//                for (size_t i = begin_index; i < point_size; ++i)
+//                {
+//                    (*lineCoords)[line_cnt] = line_container->points_.at(i).point_;
+
+//                    line_cnt++;
+//                }
+
+//                osg::ref_ptr<osg::Geometry> geom = new osg::Geometry;
+//                geom->setVertexArray(lineCoords);
+//                osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(1);
+//                (*colors)[0].r() = color.redF();
+//                (*colors)[0].g() = color.greenF();
+//                (*colors)[0].b() = color.blueF();
+//                (*colors)[0].a() = opacity;
+//                geom->setColorArray(colors, osg::Array::Binding::BIND_OVERALL);
+//                geom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::LINE_STRIP, 0, num_lines));
+
+//                {
+//                    osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
+//                    stateset->setMode(GL_DEPTH_TEST,osg::StateAttribute::ON);
+//                    stateset->setAttribute(new osg::LineWidth(1));
+//                    geom->setStateSet(stateset);
+//                }
+//                line_container->geode_->addDrawable(geom);
+//                //geode->setName(getGeometryName(modelGeometry).toStdString());
+
+//                logdbg << "OSGViewDataWidget: createLineGeometry: obj " << object.name() << " line container " << line_container->identifier_ << " end, set prev to " << line_container->previous_size_;
+//            }
+            line_container->previous_size_=line_container->points_.size();
+        }
+        else
+            logdbg << "OSGViewDataWidget: createLineGeometry: obj " << object.name() << " line container " << line_container->identifier_ << " requires no update";
+    }
+
+    return;
+}
+
 
 void OSGViewDataWidget::createSpriteGeometry(DBObject &object, std::shared_ptr<Buffer> buffer)
 {
@@ -618,9 +902,9 @@ void OSGViewDataWidget::createLineGeometry(DBObject &object, std::shared_ptr<Buf
             {
                 (*instanceCoords)[line_cnt] = line_container->points_.at(i).point_;
 
-//                if (line_container->identifier_ == "67")
-//                    loginf << "UGA line " << line_cnt << " i " << i << " point " << (*instanceCoords)[line_cnt].x() << "," << (*instanceCoords)[line_cnt].y()
-//                           << "," << (*instanceCoords)[line_cnt].z();
+                //                if (line_container->identifier_ == "67")
+                //                    loginf << "UGA line " << line_cnt << " i " << i << " point " << (*instanceCoords)[line_cnt].x() << "," << (*instanceCoords)[line_cnt].y()
+                //                           << "," << (*instanceCoords)[line_cnt].z();
 
                 line_cnt++;
             }
