@@ -204,14 +204,14 @@ void DBFilterWidget::update (void)
     visible_checkbox_->setText (filter_.getName().c_str());
 
     if (filter_.getActive())
-        active_checkbox_->setChecked(Qt::Checked);
+        active_checkbox_->setChecked(true);
     else
-        active_checkbox_->setChecked(Qt::Unchecked);
+        active_checkbox_->setChecked(false);
 
     if (visible_)
-        visible_checkbox_->setChecked(Qt::Checked);
+        visible_checkbox_->setChecked(true);
     else
-        visible_checkbox_->setChecked(Qt::Unchecked);
+        visible_checkbox_->setChecked(false);
 
     //  if (!filter_.getAnd())
     //    and_checkbox_->setChecked(Qt::Checked);

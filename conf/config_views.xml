@@ -69,27 +69,4 @@
             <Configuration class_id="ListBoxViewWidget" instance_id="ListBoxViewWidget0"/>
         </Configuration>
     </Configuration>
-    <Configuration class_id="ViewContainerWidget" instance_id="ViewWindow1">
-        <ParameterUnsignedInt height="1279"/>
-        <ParameterUnsignedInt min_height="700"/>
-        <ParameterUnsignedInt min_width="1000"/>
-        <ParameterUnsignedInt pos_x="536"/>
-        <ParameterUnsignedInt pos_y="130"/>
-        <ParameterUnsignedInt width="1629"/>
-        <Configuration class_id="ViewContainer" instance_id="ViewWindow1ViewContainer0">
-            <Configuration class_id="OSGView" instance_id="OSGView1">
-                <ParameterBool clamp_height="0"/>
-                <ParameterBool use_height="1"/>
-                <ParameterBool use_height_scale="1"/>
-                <ParameterFloat data_opacity="1.00000000"/>
-                <ParameterFloat height_scale_factor="80.00000000"/>
-                <ParameterFloat map_opacity="0.40000001"/>
-                <ParameterString map_name="openstreetmap.earth"/>
-                <Configuration class_id="OSGViewDataSource" instance_id="OSGViewDataSource0">
-                    <Configuration class_id="DBOVariableOrderedSet" instance_id="DBOVariableOrderedSet0"/>
-                </Configuration>
-                <Configuration class_id="OSGViewWidget" instance_id="OSGViewWidget0"/>
-            </Configuration>
-        </Configuration>
-    </Configuration>
 </Configuration>

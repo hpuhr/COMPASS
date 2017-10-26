@@ -104,7 +104,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="DBFilter" instance_id="TrackNumIsNull">
-        <ParameterBool active="1"/>
+        <ParameterBool active="0"/>
         <ParameterBool changed="1"/>
         <ParameterBool op_and_="1"/>
         <ParameterBool visible="0"/>
@@ -180,25 +180,25 @@
         <ParameterBool LoadSensorNumber10="0"/>
         <ParameterBool LoadSensorNumber11="0"/>
         <ParameterBool LoadSensorNumber12="0"/>
-        <ParameterBool LoadSensorNumber13="0"/>
+        <ParameterBool LoadSensorNumber13="1"/>
         <ParameterBool LoadSensorNumber14="0"/>
         <ParameterBool LoadSensorNumber15="0"/>
         <ParameterBool LoadSensorNumber16="0"/>
-        <ParameterBool LoadSensorNumber3="0"/>
+        <ParameterBool LoadSensorNumber3="1"/>
         <ParameterBool LoadSensorNumber4="0"/>
         <ParameterBool LoadSensorNumber5="0"/>
         <ParameterBool LoadSensorNumber6="0"/>
         <ParameterBool LoadSensorNumber7="0"/>
         <ParameterBool LoadSensorNumber8="0"/>
         <ParameterBool LoadSensorNumber9="0"/>
-        <ParameterBool active="0"/>
+        <ParameterBool active="1"/>
         <ParameterBool changed="1"/>
         <ParameterBool op_and_="1"/>
         <ParameterBool visible="0"/>
         <ParameterString dbo_name="Radar"/>
         <ParameterString name="RadarSensors"/>
         <Configuration class_id="SensorFilterWidget" instance_id="RadarSensorsWidget0">
-            <ParameterBool visible="0"/>
+            <ParameterBool visible="1"/>
         </Configuration>
     </Configuration>
     <Configuration class_id="SensorFilter" instance_id="TrackerSensors">

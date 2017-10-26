@@ -121,16 +121,6 @@ void ViewManagerWidget::addViewSlot()
         QAction* action = submenu->addAction( name, this, SLOT(addListBoxViewSlot()) );
         action->setData( QVariant( i ) );
     }
-    // osg view
-    submenu = menu.addMenu( "OSG View" );
-    submenu->addAction( "New Window", this, SLOT(addOSGViewNewWindowSlot()) );
-    for( i=0; i<n; ++i )
-    {
-        name = cont_widgets_[ i ]->name();
-        QAction* action = submenu->addAction( name, this, SLOT(addOSGViewSlot()) );
-        action->setData( QVariant( i ) );
-    }
-
 
     //  //mosaic view
     //  /*submenu = menu.addMenu( "Mosaic View" );
@@ -198,16 +188,6 @@ void ViewManagerWidget::addListBoxViewNewWindowSlot()
 }
 
 
-void ViewManagerWidget::addOSGViewNewWindowSlot()
-{
-  ViewContainerWidget* container_widget = view_manager_.addNewContainerWidget ();
-  container_widget->viewContainer().addOSGView();
-
-  update();
-}
-
-
-
 //void ViewManagerWidget::addMosaicViewNewWindowSlot()
 //{
 //  //TODO
@@ -264,18 +244,6 @@ void ViewManagerWidget::addListBoxViewSlot()
     if( containter_id < 0 || containter_id >= cont_widgets_.size() )
         throw( std::runtime_error( "ViewManagerWidget: addListBoxViewSlot: container out of bounds" ) );
     cont_widgets_[ containter_id ]->addListBoxView();
-}
-
-void ViewManagerWidget::addOSGViewSlot()
-{
-    loginf << "ViewManagerWidget: addOSGViewSlot";
-
-    QAction* action = (QAction*)(QObject::sender());
-    unsigned int containter_id = action->data().toUInt();
-
-    if( containter_id < 0 || containter_id >= cont_widgets_.size() )
-        throw( std::runtime_error( "ViewManagerWidget: addListBoxViewSlot: container out of bounds" ) );
-    cont_widgets_[ containter_id ]->addOSGView();
 }
 
 //void ViewManagerWidget::addMosaicViewSlot()

@@ -45,7 +45,6 @@ public:
 //    void addScatterPlotView();
 //    void addHistogramView();
     void addListBoxView();
-    void addOSGView();
 //    void addMosaicView();
 //    void addTemplateView (std::string template_name);
 

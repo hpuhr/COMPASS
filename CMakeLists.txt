@@ -2,7 +2,7 @@ set(ATSDB_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 message("  Path: ${ATSDB_PATH}")
 
 cmake_minimum_required(VERSION 2.8.11)
-set ( CMAKE_BUILD_TYPE Release )
+set ( CMAKE_BUILD_TYPE Debug )
 
 project( ATSDB )
 
@@ -55,13 +55,6 @@ find_package ( TinyXML2 REQUIRED )
 message("  TINYXML2_INCLUDE_DIR: ${TINYXML2_INCLUDE_DIR}")
 message("  TINYXML2_LIBRARY: ${TINYXML2_LIBRARY}") 
 
-find_package(OpenSceneGraph 2.0.0 REQUIRED osgDB osgGA osgQt osgUtil osgViewer)
-    # libOpenThreads & libosg automatically searched
-message("  OSG_INCLUDE_DIR: ${OPENSCENEGRAPH_INCLUDE_DIRS}")
-
-find_package(OSGEarth REQUIRED)
-message("  OSGEARTH_INCLUDE_DIR: ${OSGEARTH_INCLUDE_DIRS}")
-
 include_directories (
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
@@ -75,8 +68,6 @@ include_directories (
     ${GDAL_INCLUDE_DIRS}
     ${TINYXML2_INCLUDE_DIR}
     ${OPENSCENEGRAPH_INCLUDE_DIRS}
-    ${OSGEARTH_INCLUDE_DIRS}
-    ${OSGEARTHQT_INCLUDE_DIRS}
     .
     src
     src/buffer
@@ -99,7 +90,6 @@ include_directories (
     src/view
     src/view/viewbase
     src/view/listboxview
-    src/view/osgview
     src/unit
     )
 
@@ -245,13 +235,6 @@ set ( atsdb_HDRS
     src/view/listboxview/listboxviewconfigwidget.h
     src/view/listboxview/listboxviewdatawidget.h
     src/view/listboxview/listboxviewwidget.h
-    src/view/osgview/osgviewdatasource.h
-    src/view/osgview/osgview.h
-    src/view/osgview/osgviewconfigwidget.h
-    src/view/osgview/osgviewdatawidget.h
-    src/view/osgview/osgviewwidget.h
-    src/view/osgview/primitive.h
-    src/view/osgview/texturefactory.h
     src/unit/unit.h
     src/unit/unitmanager.h
     src/unit/dimension.h
@@ -380,13 +363,6 @@ set ( atsdb_SRCS
     src/view/listboxview/listboxviewconfigwidget.cpp
     src/view/listboxview/listboxviewdatawidget.cpp
     src/view/listboxview/listboxviewwidget.cpp
-    src/view/osgview/osgviewdatasource.cpp
-    src/view/osgview/osgview.cpp
-    src/view/osgview/osgviewconfigwidget.cpp
-    src/view/osgview/osgviewdatawidget.cpp
-    src/view/osgview/osgviewwidget.cpp
-    src/view/osgview/primitive.cpp
-    src/view/osgview/texturefactory.cpp
 #    src/view/viewbase/dbviewmodel.cpp
 #    src/view/viewbase/dbview.cpp
 #    src/view/viewbase/dbviewwidget.cpp
@@ -405,9 +381,6 @@ target_link_libraries ( atsdb
     ${Boost_LIBRARIES}
     ${LOG4CPP_LIBRARIES}
     ${MySQLpp_LIBRARY}
-    ${OPENSCENEGRAPH_LIBRARIES}
-    ${OSGEARTH_LIBRARY}
-    ${OSGEARTHUTIL_LIBRARY}
     ${GDAL_LIBRARIES}
     ${SQLITE3_LIBRARIES})
 #   ${OSGEARTH_LIBRARY} ${OPENSCENEGRAPH_LIBRARIES}
@@ -422,12 +395,8 @@ target_link_libraries ( atsdb_client
     ${Boost_LIBRARIES}
     ${LOG4CPP_LIBRARIES}
     ${MySQLpp_LIBRARY}
-    ${OPENSCENEGRAPH_LIBRARIES}
-    ${OSGEARTH_LIBRARY}
-    ${OSGEARTHUTIL_LIBRARY}
     ${GDAL_LIBRARIES}
     ${SQLITE3_LIBRARIES})
-# ${GDAL_LIBRARIES} ${OSGEARTH_LIBRARY}
 
 INSTALL_FILES(/include .h ${atsdb_HDRS})
 
