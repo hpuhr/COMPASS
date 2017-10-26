@@ -49,6 +49,7 @@
 #include "dbinterfacewidget.h"
 #include "dbschemamanager.h"
 #include "dbschemamanagerwidget.h"
+#include "filtermanager.h"
 #include "managementwidget.h"
 #include "stringconv.h"
 #include "jobmanager.h"
@@ -126,6 +127,8 @@ MainWindow::MainWindow()
     setCentralWidget(tab_widget_);
 
     tab_widget_->setCurrentIndex(0);
+
+    QObject::connect (this, SIGNAL(startedSignal()), &ATSDB::instance().filterManager(), SLOT(startedSlot()));
 }
 
 MainWindow::~MainWindow()
@@ -183,6 +186,9 @@ void MainWindow::postProcessingDoneSlot ()
 
 void MainWindow::initAfterStart ()
 {
+    loginf << "MainWindow: initAfterStart";
+    emit startedSignal ();
+
     assert (management_widget_);
     tab_widget_->addTab (management_widget_, "Management");
 

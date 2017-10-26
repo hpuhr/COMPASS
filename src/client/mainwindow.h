@@ -43,6 +43,9 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+signals:
+    void startedSignal ();
+
 public slots:
     void postProcessingDoneSlot ();
 

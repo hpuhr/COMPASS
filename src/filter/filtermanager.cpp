@@ -172,8 +172,9 @@ FilterManagerWidget *FilterManager::widget ()
     return widget_;
 }
 
-void FilterManager::databaseOpenedSlot ()
+void FilterManager::startedSlot ()
 {
+    loginf  << "FilterManager: startedSlot";
     createSubConfigurables ();
 
     std::string tmpstr = ATSDB::instance().interface().connection().identifier();
@@ -181,7 +182,7 @@ void FilterManager::databaseOpenedSlot ()
 
     if (db_id_.compare (tmpstr) != 0)
     {
-        loginf  << "FilterManager: constructor: different db id, resetting filters";
+        loginf  << "FilterManager: startedSlot: different db id, resetting filters";
         reset();
         db_id_ = tmpstr;
     }
