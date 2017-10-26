@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * PropertyDataTypeComboBox.h
- *
- *  Created on: Aug 29, 2012
- *      Author: sk
- */
-
 #ifndef PROPERTYDATATYPECOMBOBOX_H_
 #define PROPERTYDATATYPECOMBOBOX_H_
 

@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * FinalizeDBOReadJob.cpp
- *
- *  Created on: Feb 25, 2013
- *      Author: sk
- */
-
 #include <QThread>
 
 #include "finalizedboreadjob.h"

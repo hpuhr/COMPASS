@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * StructureReader.cpp
- *
- *  Created on: Jan 24, 2012
- *      Author: sk
- */
-
 #include "buffer.h"
 #include "config.h"
 #include "dbinterface.h"

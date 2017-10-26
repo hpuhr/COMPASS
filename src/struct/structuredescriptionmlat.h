@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * StructureDescriptionMLAT.h
- *
- *  Created on: Jul 26, 2012
- *      Author: sk
- */
-
 #ifndef STRUCTUREDESCRIPTIONMLAT_H_
 #define STRUCTUREDESCRIPTIONMLAT_H_
 

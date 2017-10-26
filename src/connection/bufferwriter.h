@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * BufferWriter.h
- *
- *  Created on: Jan 26, 2012
- *      Author: sk
- */
-
 #ifndef BUFFERWRITER_H_
 #define BUFFERWRITER_H_
 

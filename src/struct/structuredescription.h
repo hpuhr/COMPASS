@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * StructureDescriptopn.h
- *
- *  Created on: Jul 18, 2011
- *      Author: sk
- */
-
 #ifndef STRUCTUREDESCRIPTOPN_H_
 #define STRUCTUREDESCRIPTOPN_H_
 

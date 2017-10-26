@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBOActiveDataSourcesDBJob.cpp
- *
- *  Created on: Mar 3, 2013
- *      Author: sk
- */
-
 #include "dboactivedatasourcesdbjob.h"
 #include "dbinterface.h"
 #include "dbobject.h"

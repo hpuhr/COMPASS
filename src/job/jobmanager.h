@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * WorkerThreadManager.h
- *
- *  Created on: Mar 26, 2012
- *      Author: sk
- */
-
 #ifndef JOBMANAGER_H_
 #define JOBMANAGER_H_
 

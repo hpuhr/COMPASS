@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBInterface.cpp
- *
- *  Created on: Feb 1, 2012
- *      Author: sk
- */
-
 #include <cstring>
 
 #include "property.h"

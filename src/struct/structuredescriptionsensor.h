@@ -15,12 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-///*
-// * StructureDescriptionSensor.h
-// *
-// *  Created on: Jul 26, 2012
-// *      Author: sk
-// */
 //
 //#ifndef STRUCTUREDESCRIPTIONSENSOR_H_
 //#define STRUCTUREDESCRIPTIONSENSOR_H_

@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBOReadDBJob.cpp
- *
- *  Created on: Feb 6, 2013
- *      Author: sk
- */
-
 #include "dboreaddbjob.h"
 #include "dbobject.h"
 #include "dbovariable.h"

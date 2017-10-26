@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBTableColumnComboBox.h
- *
- *  Created on: Aug 29, 2012
- *      Author: sk
- */
-
 #ifndef DBTABLECOLUMNCOMBOBOX_H_
 #define DBTABLECOLUMNCOMBOBOX_H_
 

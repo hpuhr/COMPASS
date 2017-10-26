@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * ProjectionManager.h
- *
- *  Created on: Mar 12, 2013
- *      Author: sk
- */
-
 #ifndef PROJECTIONMANAGER_H_
 #define PROJECTIONMANAGER_H_
 

@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBFilter.cpp
- *
- *  Created on: Oct 25, 2011
- *      Author: sk
- */
-
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 #include <QVBoxLayout>

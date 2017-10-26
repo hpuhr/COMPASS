@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * FilterManager.cpp
- *
- *  Created on: Jan 15, 2012
- *      Author: sk
- */
-
 #include "configurationmanager.h"
 #include "dbfilter.h"
 #include "dbobject.h"

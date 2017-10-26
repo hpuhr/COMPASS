@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * Number.cpp
- *
- *  Created on: Mar 3, 2014
- *      Author: sk
- */
-
 #include "number.h"
 
 #include <stdlib.h>

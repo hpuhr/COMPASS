@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * MetaDBTableEditWidget.h
- *
- *  Created on: Aug 26, 2012
- *      Author: sk
- */
-
 #ifndef METADBTABLEEDITWIDGET_H_
 #define METADBTABLEEDITWIDGET_H_
 

@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * FinalizeDBOReadJob.h
- *
- *  Created on: Feb 25, 2013
- *      Author: sk
- */
-
 #ifndef FINALIZEDBOREADJOB_H_
 #define FINALIZEDBOREADJOB_H_
 

@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBOVariableDataTypeComboBox.h
- *
- *  Created on: Aug 29, 2012
- *      Author: sk
- */
-
 #ifndef DBOVARIABLEDATATYPECOMBOBOX_H_
 #define DBOVARIABLEDATATYPECOMBOBOX_H_
 

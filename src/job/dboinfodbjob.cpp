@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBOInfoDBJob.cpp
- *
- *  Created on: Feb 6, 2013
- *      Author: sk
- */
-
 #include "DBOInfoDBJob.h"
 #include "DBJob.h"
 #include "Buffer.h"

@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBOVariableSet.cpp
- *
- *  Created on: May 22, 2012
- *      Author: sk
- */
-
 #include <algorithm>
 
 #include "dbobject.h"

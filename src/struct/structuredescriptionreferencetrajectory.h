@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * StructureDescriptionReferenceTrajectory.h
- *
- *  Created on: Jul 26, 2012
- *      Author: sk
- */
-
 #ifndef STRUCTUREDESCRIPTIONREFERENCETRAJECTORY_H_
 #define STRUCTUREDESCRIPTIONREFERENCETRAJECTORY_H_
 

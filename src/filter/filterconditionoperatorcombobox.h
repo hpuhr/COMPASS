@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * FilterConditionOperatorComboBox.h
- *
- *  Created on: Nov 28, 2012
- *      Author: sk
- */
-
 #ifndef FILTERCONDITIONOPERATORCOMBOBOX_H_
 #define FILTERCONDITIONOPERATORCOMBOBOX_H_
 

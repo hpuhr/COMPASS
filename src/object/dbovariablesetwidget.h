@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBOVariableSetWidget.h
- *
- *  Created on: Nov 11, 2012
- *      Author: sk
- */
-
 #ifndef DBOVARIABLESETWIDGET_H_
 #define DBOVARIABLESETWIDGET_H_
 

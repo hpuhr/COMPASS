@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * StructureReader.h
- *
- *  Created on: Jan 24, 2012
- *      Author: sk
- */
-
 #ifndef STRUCTUREREADER_H_
 #define STRUCTUREREADER_H_
 

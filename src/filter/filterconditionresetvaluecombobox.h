@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * FilterConditionResetValueComboBox.h
- *
- *  Created on: Nov 29, 2012
- *      Author: sk
- */
-
 #ifndef FILTERCONDITIONRESETVALUECOMBOBOX_H_
 #define FILTERCONDITIONRESETVALUECOMBOBOX_H_
 

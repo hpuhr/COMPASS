@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBOReadDBJob.h
- *
- *  Created on: Feb 6, 2013
- *      Author: sk
- */
-
 #ifndef DBOREADDBJOB_H_
 #define DBOREADDBJOB_H_
 

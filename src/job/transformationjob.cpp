@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * TransformationJob.cpp
- *
- *  Created on: Apr 24, 2012
- *      Author: sk
- */
-
 #include "TransformationJob.h"
 #include "Transformation.h"
 #include "Logger.h"

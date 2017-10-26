@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * Configurable.h
- *
- *  Created on: May 15, 2012
- *      Author: sk
- */
-
 #ifndef CONFIGURABLE_H_
 #define CONFIGURABLE_H_
 

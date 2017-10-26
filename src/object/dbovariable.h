@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBOVariable.h
- *
- *  Created on: Apr 25, 2012
- *      Author: sk
- */
-
 #ifndef DBOVARIABLE_H_
 #define DBOVARIABLE_H_
 

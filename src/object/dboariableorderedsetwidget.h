@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBOVariableOrderedSetWidget.h
- *
- *  Created on: Nov 11, 2012
- *      Author: sk
- */
-
 #ifndef DBOVARIABLEORDEREDSETWIDGET_H_
 #define DBOVARIABLEORDEREDSETWIDGET_H_
 

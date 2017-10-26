@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * StructureElement.h
- *
- *  Created on: Jul 18, 2011
- *      Author: sk
- */
-
 #ifndef STRUCTUREELEMENT_H_
 #define STRUCTUREELEMENT_H_
 

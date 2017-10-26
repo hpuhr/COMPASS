@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * SensorFilterWidget.h
- *
- *  Created on: Nov 4, 2012
- *      Author: sk
- */
-
 #ifndef SENSORFILTERWIDGET_H_
 #define SENSORFILTERWIDGET_H_
 
@@ -29,8 +22,6 @@
 
 #include "dbfilterwidget.h"
 #include "sensorfilter.h"
-
-
 
 class QGridLayout;
 

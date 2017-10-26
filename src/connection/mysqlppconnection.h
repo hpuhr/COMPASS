@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * MySQLppConnection.h
- *
- *  Created on: Jul 19, 2012
- *      Author: sk
- */
-
 #ifndef MySQLppConnection_H_
 #define MySQLppConnection_H_
 

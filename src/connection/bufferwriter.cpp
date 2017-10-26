@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * BufferWriter.cpp
- *
- *  Created on: Jan 26, 2012
- *      Author: sk
- */
-
 #include <iomanip>
 #include <algorithm>
 #include "buffer.h"

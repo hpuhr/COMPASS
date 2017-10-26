@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBObjectManager.cpp
- *
- *  Created on: Apr 6, 2012
- *      Author: sk
- */
-
 #include "atsdb.h"
 #include "configurationmanager.h"
 #include "dbobject.h"

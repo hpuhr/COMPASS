@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBObjectManager.h
- *
- *  Created on: Apr 6, 2012
- *      Author: sk
- */
-
 #ifndef DBOBJECTMANAGER_H_
 #define DBOBJECTMANAGER_H_
 

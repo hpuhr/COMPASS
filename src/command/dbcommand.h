@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBCommand.h
- *
- *  Created on: Feb 1, 2012
- *      Author: sk
- */
-
 #ifndef DBCOMMAND_H_
 #define DBCOMMAND_H_
 

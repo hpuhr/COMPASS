@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * StringRepresentationComboBox.h
- *
- *  Created on: Aug 29, 2012
- *      Author: sk
- */
-
 #ifndef STRINGREPRESENTATIONCOMBOBOX_H_
 #define STRINGREPRESENTATIONCOMBOBOX_H_
 

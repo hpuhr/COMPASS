@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBSelectionWidget.cpp
- *
- *  Created on: Aug 19, 2012
- *      Author: sk
- */
-
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>

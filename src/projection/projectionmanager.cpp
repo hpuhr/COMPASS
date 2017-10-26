@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * ProjectionManager.cpp
- *
- *  Created on: Mar 12, 2013
- *      Author: sk
- */
-
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <cmath>

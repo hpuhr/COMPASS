@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * StructureDescriptionManager.cpp
- *
- *  Created on: Jul 26, 2012
- *      Author: sk
- */
-
 #include "structuredescriptionmanager.h"
 //#include "StructureDescriptionPlot.h"
 //#include "StructureDescriptionSystemTrack.h"

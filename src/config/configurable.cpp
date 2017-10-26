@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * Configurable.cpp
- *
- *  Created on: May 15, 2012
- *      Author: sk
- */
-
 #include "configurable.h"
 #include "configuration.h"
 #include "logger.h"

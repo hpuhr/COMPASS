@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBInterface.h
- *
- *  Created on: Feb 1, 2012
- *      Author: sk
- */
-
 #ifndef DBINTERFACE_H_
 #define DBINTERFACE_H_
 

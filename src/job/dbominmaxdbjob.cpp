@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * PostProcessDBJob.cpp
- *
- *  Created on: Feb 5, 2013
- *      Author: sk
- */
-
 #include "dbominmaxdbjob.h"
 #include "dbinterface.h"
 #include "sqlgenerator.h"

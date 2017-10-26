@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBTable.cpp
- *
- *  Created on: Aug 13, 2012
- *      Author: sk
- */
-
 #include "dbschema.h"
 #include "dbtable.h"
 #include "dbtablecolumn.h"

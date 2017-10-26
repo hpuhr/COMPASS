@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * SQLGenerator.h
- *
- *  Created on: Jan 11, 2012
- *      Author: sk
- */
-
 #ifndef SQLGENERATOR_H_
 #define SQLGENERATOR_H_
 

@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * FilterEditWidget.h
- *
- *  Created on: May 30, 2012
- *      Author: sk
- */
-
 #ifndef FilterEditWidget_H_
 #define FilterEditWidget_H_
 

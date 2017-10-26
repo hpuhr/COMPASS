@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * StringManipulation.h
- *
- *  Created on: Mar 3, 2014
- *      Author: sk
- */
-
 #ifndef STRINGMANIPULATION_H_
 #define STRINGMANIPULATION_H_
 

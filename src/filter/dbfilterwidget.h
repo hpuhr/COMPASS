@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBFilterWidget.h
- *
- *  Created on: May 4, 2012
- *      Author: sk
- */
-
 #ifndef DBFILTERWIDGET_H_
 #define DBFILTERWIDGET_H_
 

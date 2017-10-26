@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBSchemaManager.cpp
- *
- *  Created on: Aug 13, 2012
- *      Author: sk
- */
-
 #include "atsdb.h"
 #include "configurationmanager.h"
 #include "dbtablecolumn.h"

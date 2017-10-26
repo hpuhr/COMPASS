@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * WriteBufferDBJob.h
- *
- *  Created on: Feb 5, 2013
- *      Author: sk
- */
-
 #ifndef WRITEBUFFERDBJOB_H_
 #define WRITEBUFFERDBJOB_H_
 

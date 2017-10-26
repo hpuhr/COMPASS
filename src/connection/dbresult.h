@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBResult.h
- *
- *  Created on: Feb 1, 2012
- *      Author: sk
- */
-
 #ifndef DBRESULT_H_
 #define DBRESULT_H_
 

@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * UpdateBufferDBJob.h
- *
- *  Created on: Feb 5, 2013
- *      Author: sk
- */
-
 #ifndef UpdateBufferDBJob_H_
 #define UpdateBufferDBJob_H_
 

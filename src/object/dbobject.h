@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBObject.h
- *
- *  Created on: Apr 6, 2012
- *      Author: sk
- */
-
 #ifndef DBOBJECT_H_
 #define DBOBJECT_H_
 

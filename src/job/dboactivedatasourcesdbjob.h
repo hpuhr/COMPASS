@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBOActiveDataSourcesDBJob.h
- *
- *  Created on: Mar 3, 2013
- *      Author: sk
- */
-
 #ifndef DBOACTIVEDATASOURCESDBJOB_H_
 #define DBOACTIVEDATASOURCESDBJOB_H_
 

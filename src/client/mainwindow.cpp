@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * MainWindow.cpp
- *
- *  Created on: Aug 2, 2011
- *      Author: sk
- */
-
 #include <boost/bind.hpp>
 
 #include <QMenuBar>

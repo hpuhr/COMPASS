@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * StructureVariable.cpp
- *
- *  Created on: Nov 19, 2012
- *      Author: sk
- */
-
 #include "structurevariable.h"
 #include "structuredescription.h"
 #include "logger.h"

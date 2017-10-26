@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * Job.h
- *
- *  Created on: Feb 4, 2013
- *      Author: sk
- */
-
 #ifndef JOB_H_
 #define JOB_H_
 

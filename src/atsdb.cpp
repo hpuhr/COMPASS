@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * ATSDB.cpp
- *
- *  Created on: Jul 12, 2011
- *      Author: sk
- */
-
 #include "atsdb.h"
 #include "config.h"
 #include "dbobject.h"

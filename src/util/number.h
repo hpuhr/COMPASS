@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * Number.h
- *
- *  Created on: Mar 3, 2014
- *      Author: sk
- */
-
 #ifndef NUMBER_H_
 #define NUMBER_H_
 

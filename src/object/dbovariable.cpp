@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBOVariable.cpp
- *
- *  Created on: Apr 25, 2012
- *      Author: sk
- */
-
 #include <algorithm>
 
 #include "configuration.h"

@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * StructureDescriptionADSB.h
- *
- *  Created on: Jul 26, 2012
- *      Author: sk
- */
-
 #ifndef STRUCTUREDESCRIPTIONADSB_H_
 #define STRUCTUREDESCRIPTIONADSB_H_
 

@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBCondition.cpp
- *
- *  Created on: Nov 6, 2011
- *      Author: sk
- */
-
 #include <sstream>
 #include <cassert>
 

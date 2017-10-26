@@ -15,12 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * ArrayList.h
- *
- *      Author: sk
- */
-
 #ifndef ARRAYLIST_H_
 #define ARRAYLIST_H_
 

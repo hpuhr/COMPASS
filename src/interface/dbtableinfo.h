@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBTableInfo.h
- *
- *  Created on: Jan 8, 2016
- *      Author: sk
- */
-
 #ifndef DBTABLEINFO_H_
 #define DBTABLEINFO_H_
 

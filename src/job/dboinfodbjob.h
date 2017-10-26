@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBOInfoDBJob.h
- *
- *  Created on: Feb 6, 2013
- *      Author: sk
- */
-
 #ifndef DBOINFODBJOB_H_
 #define DBOINFODBJOB_H_
 

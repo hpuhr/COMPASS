@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * StructureVariable.h
- *
- *  Created on: Jul 18, 2011
- *      Author: sk
- */
-
 #ifndef STRUCTUREVARIABLE_H_
 #define STRUCTUREVARIABLE_H_
 

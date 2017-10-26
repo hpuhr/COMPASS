@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * PropertyList.h
- *
- *  Created on: Dec 7, 2011
- *      Author: sk
- */
-
 #ifndef PROPERTYLIST_H_
 #define PROPERTYLIST_H_
 

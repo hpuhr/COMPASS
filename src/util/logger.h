@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * Logger.h
- *
- *  Created on: Apr 8, 2009
- *      Author: sk
- */
-
 #ifndef LOGGER_H_
 #define LOGGER_H_
 

@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * SensorFilter.cpp
- *
- *  Created on: Nov 4, 2012
- *      Author: sk
- */
-
 #include "atsdb.h"
 #include "sensorfilter.h"
 #include "sensorfilterwidget.h"

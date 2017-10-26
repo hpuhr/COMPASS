@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBFilterWidget.cpp
- *
- *  Created on: May 4, 2012
- *      Author: sk
- */
-
 #include <QAction>
 #include <QWidget>
 #include <QCheckBox>

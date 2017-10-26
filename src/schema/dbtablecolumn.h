@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBTableColumn.h
- *
- *  Created on: Aug 13, 2012
- *      Author: sk
- */
-
 #ifndef DBTABLECOLUMN_H_
 #define DBTABLECOLUMN_H_
 

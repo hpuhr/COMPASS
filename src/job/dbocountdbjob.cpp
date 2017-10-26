@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBOCountDBJob.cpp
- *
- *  Created on: Jun 6, 2013
- *      Author: sk
- */
-
 #include "Buffer.h"
 #include "DBOCountDBJob.h"
 #include "DBInterface.h"

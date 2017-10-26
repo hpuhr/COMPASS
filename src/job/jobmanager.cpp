@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * JobManager.cpp
- *
- *  Created on: Mar 26, 2012
- *      Author: sk
- */
-
 #include <qtimer.h>
 #include <QThreadPool>
 

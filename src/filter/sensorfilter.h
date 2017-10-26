@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * SensorFilter.h
- *
- *  Created on: Nov 4, 2012
- *      Author: sk
- */
-
 #ifndef SENSORFILTER_H_
 #define SENSORFILTER_H_
 

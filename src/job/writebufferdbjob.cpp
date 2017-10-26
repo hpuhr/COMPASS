@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * WriteBufferDBJob.cpp
- *
- *  Created on: Feb 5, 2013
- *      Author: sk
- */
-
 #include "Buffer.h"
 #include "WriteBufferDBJob.h"
 #include "DBInterface.h"

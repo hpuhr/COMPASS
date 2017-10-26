@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * FilterManager.h
- *
- *  Created on: Jan 15, 2012
- *      Author: sk
- */
-
 #ifndef FILTERMANAGER_H_
 #define FILTERMANAGER_H_
 

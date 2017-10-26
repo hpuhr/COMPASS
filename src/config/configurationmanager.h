@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * ConfigurationManager.h
- *
- *  Created on: May 15, 2012
- *      Author: sk
- */
-
 #ifndef CONFIGURATIONMANAGER_H_
 #define CONFIGURATIONMANAGER_H_
 

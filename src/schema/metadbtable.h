@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * MetaDBTable.h
- *
- *  Created on: Jul 28, 2012
- *      Author: sk
- */
-
 #ifndef METADBTABLE_H_
 #define METADBTABLE_H_
 

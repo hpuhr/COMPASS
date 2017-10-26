@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBOVariableDistinctStatisticsDBJob.h
- *
- *  Created on: Jun 7, 2013
- *      Author: sk
- */
-
 #ifndef DBOVARIABLEDISTINCTSTATISTICSDBJOB_H_
 #define DBOVARIABLEDISTINCTSTATISTICSDBJOB_H_
 

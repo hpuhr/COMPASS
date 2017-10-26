@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBInterface.cpp
- *
- *  Created on: Jul 19, 2012
- *      Author: sk
- */
-
 #include "buffer.h"
 #include "dbcommand.h"
 #include "dbcommandlist.h"

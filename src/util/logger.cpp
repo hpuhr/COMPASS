@@ -15,14 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * Logger.cpp
- *
- *  Created on: Apr 8, 2009
- *      Author: sk
- */
-
-
 #include "log4cpp/FileAppender.hh"
 #include "log4cpp/OstreamAppender.hh"
 #include "log4cpp/Layout.hh"

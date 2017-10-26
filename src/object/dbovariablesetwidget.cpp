@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBOVariableSetWidget.cpp
- *
- *  Created on: Nov 11, 2012
- *      Author: sk
- */
-
 #include "DBObjectManager.h"
 #include "ATSDB.h"
 #include "DBObject.h"

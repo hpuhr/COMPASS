@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * SensorFilterWidget.cpp
- *
- *  Created on: Nov 4, 2012
- *      Author: sk
- */
-
 #include <QPushButton>
 #include <QGridLayout>
 #include <QCheckBox>

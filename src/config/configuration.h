@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * Configuration.h
- *
- *  Created on: May 15, 2012
- *      Author: sk
- */
-
 #ifndef CONFIGURATION_H_
 #define CONFIGURATION_H_
 

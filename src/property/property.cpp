@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * Property.cpp
- *
- *  Created on: Nov 19, 2012
- *      Author: sk
- */
-
 #include <limits>
 #include <boost/assign/list_of.hpp>
 

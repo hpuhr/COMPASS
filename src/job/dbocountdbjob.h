@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBOCountDBJob.h
- *
- *  Created on: Jun 6, 2013
- *      Author: sk
- */
-
 #ifndef DBOCOUNTDBJOB_H_
 #define DBOCOUNTDBJOB_H_
 

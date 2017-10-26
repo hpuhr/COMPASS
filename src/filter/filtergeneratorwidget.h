@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * FilterGeneratorWidget.h
- *
- *  Created on: May 30, 2012
- *      Author: sk
- */
-
 #ifndef FilterGeneratorWidget_H_
 #define FilterGeneratorWidget_H_
 

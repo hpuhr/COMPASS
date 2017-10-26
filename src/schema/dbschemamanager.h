@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBSchemaManager.h
- *
- *  Created on: Aug 13, 2012
- *      Author: sk
- */
-
 #ifndef DBSCHEMAMANAGER_H_
 #define DBSCHEMAMANAGER_H_
 

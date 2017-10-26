@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * Client.h
- *
- *  Created on: Jul 30, 2009
- *      Author: sk
- */
-
 #ifndef CLIENT_H_
 #define CLIENT_H_
 

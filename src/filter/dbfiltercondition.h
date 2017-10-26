@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBCondition.h
- *
- *  Created on: Nov 6, 2011
- *      Author: sk
- */
-
 #ifndef DBFILTERCONDITION_H_
 #define DBFILTERCONDITION_H_
 

@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * Buffer.h
- *
- *  Created on: Dec 8, 2011
- *      Author: sk
- */
-
 #ifndef BUFFER_H_
 #define BUFFER_H_
 

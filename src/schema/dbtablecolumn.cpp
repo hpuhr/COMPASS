@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBTableColumn.cpp
- *
- *  Created on: Aug 13, 2012
- *      Author: sk
- */
-
 #include <boost/assign/list_of.hpp>
 
 #include "dbtable.h"

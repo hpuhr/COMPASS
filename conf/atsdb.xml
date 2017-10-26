@@ -6,7 +6,7 @@
             <ParameterString used_server="Localhost"/>
             <Configuration class_id="MySQLServer" instance_id="Localhost">
                 <ParameterUnsignedInt port="3306"/>
-                <ParameterString database="job_awam_0023"/>
+                <ParameterString database="example"/>
                 <ParameterString host="localhost"/>
                 <ParameterString password="sassc"/>
                 <ParameterString user="sassc"/>

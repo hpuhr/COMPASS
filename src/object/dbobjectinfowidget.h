@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBObjectEditWidget.h
- *
- *  Created on: Aug 27, 2012
- *      Author: sk
- */
-
 #ifndef DBOBJECTINFOWIDGET_H_
 #define DBOBJECTINFOWIDGET_H_
 

@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBOVariableOrderedSet.h
- *
- *  Created on: May 22, 2012
- *      Author: sk
- */
-
 #ifndef DBOVARIABLEORDEREDSET_H_
 #define DBOVARIABLEORDEREDSET_H_
 

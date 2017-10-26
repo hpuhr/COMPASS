@@ -15,12 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * ArrayList.cpp
- *
- *      Author: sk
- */
-
 #include <cassert>
 #include <limits>
 

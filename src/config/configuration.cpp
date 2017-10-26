@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * Configuration.cpp
- *
- *  Created on: May 15, 2012
- *      Author: sk
- */
-
 #include <typeinfo>
 
 #include "configuration.h"

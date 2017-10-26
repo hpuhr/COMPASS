@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * TransformationJob.h
- *
- *  Created on: Apr 24, 2012
- *      Author: sk
- */
-
 #ifndef TRANSFORMATIONJOB_H_
 #define TRANSFORMATIONJOB_H_
 

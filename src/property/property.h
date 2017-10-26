@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * Property.h
- *
- *  Created on: Dec 7, 2011
- *      Author: sk
- */
-
 #ifndef PROPERTY_H_
 #define PROPERTY_H_
 

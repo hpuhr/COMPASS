@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * StructureDescriptopn.cpp
- *
- *  Created on: Jul 18, 2011
- *      Author: sk
- */
-
 #include <string>
 #include <iostream>
 #include <typeinfo>

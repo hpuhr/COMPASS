@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * StructureDescriptionSystemTrack.h
- *
- *  Created on: Jul 26, 2012
- *      Author: sk
- */
-
 #ifndef STRUCTUREDESCRIPTIONSYSTEMTRACK_H_
 #define STRUCTUREDESCRIPTIONSYSTEMTRACK_H_
 

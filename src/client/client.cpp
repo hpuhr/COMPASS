@@ -15,12 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * Client.cpp
- *
- *  Created on: Jul 30, 2009
- *      Author: sk
- */
 #include <QApplication>
 #include <QMessageBox>
 

@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * MainWindow.h
- *
- *  Created on: Aug 2, 2011
- *      Author: sk
- */
-
 #ifndef MAINWINDOW_H_
 #define MAINWINDOW_H_
 

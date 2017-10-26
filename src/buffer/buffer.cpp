@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * Buffer.cpp
- *
- *  Created on: Dec 8, 2011
- *      Author: sk
- */
-
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 #include "buffer.h"

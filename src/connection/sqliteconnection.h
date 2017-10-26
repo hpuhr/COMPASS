@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * SQLiteConnection.h
- *
- *  Created on: Jan 11, 2012
- *      Author: sk
- */
-
 #ifndef SQLITECONNECTION_H_
 #define SQLITECONNECTION_H_
 

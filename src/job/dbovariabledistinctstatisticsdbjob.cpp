@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * DBOVariableDistinctStatisticsDBJob.cpp
- *
- *  Created on: Jun 7, 2013
- *      Author: sk
- */
-
 #include "DBOVariableDistinctStatisticsDBJob.h"
 #include "DBInterface.h"
 #include "Buffer.h"

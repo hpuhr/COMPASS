@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * ATSDB.h
- *
- *  Created on: Jul 12, 2011
- *      Author: sk
- */
-
 #ifndef ATSDB_H_
 #define ATSDB_H_
 

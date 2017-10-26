@@ -15,13 +15,6 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * SQLGenerator.cpp
- *
- *  Created on: Jan 11, 2012
- *      Author: sk
- */
-
 #include <algorithm>
 #include <string>
 #include <iomanip>
