@@ -23,6 +23,7 @@
 
 
 \usepackage{memsty}
+\usepackage{float}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{titlepages}  % code of the example titlepages
 \usepackage{memlays}     % extra layout diagrams
@@ -295,45 +296,123 @@ will  be  needed  during  the  open  process)  is  equivalent  to  the  job  nam
 
 Please \textbf{note} that the SASS-C MySQL database name is not case sensitive ('job\_v7\_mainsacso\_0005' is the same as 'JOB\_V7\_MAINSACSO\_0005').
 
+\chapter{Installation}
+\label{sec:installation}
+
+TODO
+
 \chapter{Usage}
 \label{sec:usage}
 
 \section{Startup and opening a database}
 \label{sec:startup}
 
-When  ATSDB  is  started  a  dialog  for  opening  a  database  is  shown.  On the left-hand side, a database can be selected.  Choices are either a file container with a SQLite3 database or a MySQL database.  On the right-hand side a database schema can be selected and edited (only recommended for experienced users).
+When  ATSDB  is  started  a  dialog  for  opening  a  database  is  shown. 
 
-(image here)
+\begin{figure}[H]
+  \hspace*{-3cm}
+    \includegraphics[width=18cm]{../screenshots/db_config_connect.png}
+  \caption{Connecting to a database.}
+  \label{fig:db_open}
+\end{figure}
+
+On the left-hand side, a database system can be selected.  Choices are either MySQL database or a file container with a SQLite3 database. \\
+On the lower left, depending on the database system, either a MySQL server connection can be configured, or a list of SQLite3 files is shown.\\
+
+On the right-hand side a database schema can be selected and edited (editing is only recommended for experienced users).
 
 \subsection{Database Selection}
-\subsubsection{File container}
-For opening a file container, clicking the 'Select' button opens a file selection dialog, in which any SQLite3 file can be selection as data source.
-
 \subsubsection{MySQL database}
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=10cm]{../screenshots/mysql_server_selection.png}
+  \caption{Connecting to a MySQL server.}
+  \label{fig:mysql_connect}
+\end{figure}
+
+Several MySQL servers can be defined, each on as a specific set of parameters. To add a new server, press the 'Add' button and enter a unique server name. To select the currently used server, use the dropdown menu. To delete the currently used server, press the 'Delete' button.
+
 For connecting to MySQL database, several parameters have to be entered:
 
-(table with parameters)
+\begin{table}[h]
+  \center
+  \begin{tabular}{ | l | l | l |}
+    \hline
+    \textbf{Parameter} & \textbf{Description} & \textbf{Example Values} \\ \hline
+    Server Host & Network identifier of server & 'localhost', '10.0.0.123' \\ \hline
+    Username & MySQL user name & 'sassc', 'root' \\ \hline
+    Password & MySQL user password & 'sassc', '' \\ \hline
+    Port Number & MySQL server port & '3306', '' \\
+    \hline
+  \end{tabular}
+  \caption{MySQL server parameters}
+\end{table}
+
+To connect to a defined MySQL server, press the 'Connect' button.\\
 
 If  a  wrong  database  name  or  IP  address  is  used,  error  messages  can  be  either  'MySQLConnection: executeSQL: error when executing' or 'MySQLConnection:  init:  DB connection failed'.  If such an error occurs, correcting the database name and IP address values should solve the problem.
 
-To open a database click the 'Open' button (lower left corner).  After that, the 'Database information' field shows a list of all tables. If the database is opened for the first time, a post-processing step is performed.
+After successful connection, all existing databases in the server are shown in the 'Database name' drop-down menu. The last used one is selected automatically.
 
-\subsubsection{Database Schema Selection}
-For a common user, selection of a pre-configured database schema is recommened. To select a different database schema, please use the 'Schema selection' drop-down menu.
+\begin{figure}[H]
+  \center
+    \includegraphics[width=10cm]{../screenshots/mysql_database_selection.png}
+  \caption{Selecting a MySQL database.}
+  \label{fig:mysql_db_select}
+\end{figure}
 
-For experienced users, on the right-hand side of Figure X, a database schema can be selected and edited.
 
-\subsection{Postprocessing}
+To open a database click the 'Open' button (lower left corner).
+
+\subsubsection{SQlite3 File container}
+For opening a file container, clicking the 'Select' button opens a file selection dialog, in which any SQLite3 file can be selection as data source.
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=10cm]{../screenshots/sqlite3_open.png}
+  \caption{Opening a SQLite3 file container.}
+  \label{fig:sqlite3_open}
+\end{figure}
+
+\subsection{Database Schema Selection}
+For a common user, selection of a pre-configured database schema is recommened. To select a different database schema, please use the 'Schema selection' drop-down menu.\\
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=10cm]{../screenshots/database_schema_selection.png}
+  \caption{Selecting a database schema.}
+  \label{fig:db_schema_select}
+\end{figure}
+
+For experienced users, on the right-hand side a database schema can be selected and edited, which is currently not recommended (since it is not user friendly and might crash if used in the ``wrong'' manner).
+
+\begin{figure}[H]
+  \hspace*{-1cm}
+    \includegraphics[width=16cm]{../screenshots/database_schema_configuration.png}
+  \caption{Configuring a database schema.}
+  \label{fig:db_schema_configuration}
+\end{figure}
+
+\subsection{Starting}
+
+After the previous steps have been completed, the 'Start' button can be pressed to continue. \\
+
+When a database is opened the first time, a post-processing performed, which can be forced using the 'Force post-processing' checkbox.
+
+\subsubsection{Postprocessing}
 When a database is generated by a previous process,  some information that eases usage of the display software does not exist. 
 
 The following information is generated and stored in the database:
 
 \begin{itemize}  
 \item Create list of all active data sources for all DBOs
-\item Create list with all Minima/Maxima for all variables of all DBOs
+\item Create list with all minima/maxima for all variables of all DBOs
 \end{itemize}
 
-Please note that this step has to be performed only once for each database, and may take up to a few minutes for large datasets.
+Please \textbf{note} that this step has to be performed only once for each database, and may take up to a few minutes for large datasets. \\
+
+Please also \textbf{note} that during this step, no DBO data itself is changed, but only additional information is generated and stored in separate database tables.
 
 \section{Management}
 \label{sec:management}
