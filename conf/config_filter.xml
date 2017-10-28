@@ -97,7 +97,7 @@
         <ParameterBool LoadSensorNumber22="1"/>
         <ParameterBool LoadSensorNumber23="1"/>
         <ParameterBool LoadSensorNumber24="1"/>
-        <ParameterBool LoadSensorNumber25="1"/>
+        <ParameterBool LoadSensorNumber25="0"/>
         <ParameterBool LoadSensorNumber28="1"/>
         <ParameterBool active="0"/>
         <ParameterBool changed="1"/>
@@ -106,7 +106,7 @@
         <ParameterString dbo_name="MLAT"/>
         <ParameterString name="MLATSensors"/>
         <Configuration class_id="SensorFilterWidget" instance_id="MLATSensorsWidget0">
-            <ParameterBool visible="0"/>
+            <ParameterBool visible="1"/>
         </Configuration>
     </Configuration>
     <Configuration class_id="SensorFilter" instance_id="RadarSensors">
@@ -115,8 +115,8 @@
         <ParameterBool LoadSensorNumber11="1"/>
         <ParameterBool LoadSensorNumber12="1"/>
         <ParameterBool LoadSensorNumber13="1"/>
-        <ParameterBool LoadSensorNumber14="1"/>
-        <ParameterBool LoadSensorNumber15="1"/>
+        <ParameterBool LoadSensorNumber14="0"/>
+        <ParameterBool LoadSensorNumber15="0"/>
         <ParameterBool LoadSensorNumber16="1"/>
         <ParameterBool LoadSensorNumber3="1"/>
         <ParameterBool LoadSensorNumber4="1"/>

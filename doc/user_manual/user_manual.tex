@@ -250,36 +250,36 @@ Each View defines which parts of the database are required to fulfill its purpos
 
 In this section, a few key concepts are introduced to allow a somewhat deeper understanding of ATSDB, to allow the reader to understand some main design choices made by the author. This should also give indications about the strengths and draw-backs of the chosen approach.
 
-\subsection{Database Systems}
+\section*{Database Systems}
 A database allows for storage, retrieval and filtering of the data of interest. While SQL has some definitive drawbacks, it was chosen since support of the SASS-C database SCDB was wanted.\\
 Currently  two  database  systems  are  supported:  MySQL  and  SQLite3.   MySQL  relies  on  an  independent background process, which holds several databases and can also be accessed over a network connection.\\
 SQLite3 encapsulates one database in a single file container, which is read from a storage medium (e.g. hard drive).
 
-\subsection{Configuration}
+\section*{Configuration}
 At startup, several configuration files are loaded, and at shutdown the current configuration state of ATSDB is saved.  But configuration is not just a matter of components having the same parameters, but also what components exist. To give an example: Each existing View is saved, and when the program is started again, the previously active Views are created.  The same holds for the filters, or the database interface/schema. \\
 This way, a user can have a specific program configuration for a specific usage situation, which can be instantly reused for a different dataset, using have a completely configurable database schema or filter configuration. \\
 This allows for a high degree of flexibility, but somewhat complicates software development.
 
-\subsection{Flexible Database Interface}
+\section*{Flexible Database Interface}
 Using such a configuration, a flexible database interface method was implemented to allow general displaying of data in different database systems and schemas.  How this was done would require a detailed discussion, which will be skipped for the moment.\\
 To summarize, several database schemas are stored in configuration files, each of which is a structured collection of database tables and their logical dependencies. Such information is used in one set of Database Objects (DBOs). In each database system, any database schema may exist.
 
-\subsection{Database Objects}
+\section*{Database Objects}
 A Database Object (DBO) is defined by a name and has a collection of variables. For example, radar plots and system tracks are database objects, and each has variables holding time, position, Mode 3/A codes and Mode C heights and so on. From a database, if such a DBO is present, it can be loaded and displayed.\\
 
 To allow displaying data from different DBOs in the same system, so-called meta-variables were  introduced, which hold variables that are present in some or all DBOs (with a possibly different name or unit).  For example, there meta-variable 'position\_x', which is a collection of sub-variables for each existing DBO and the respective x coordinate position variable.
 
-\subsection{Data Loading}
+\section*{Data Loading}
 In ATSDB, a unified data loading process was chosen, meaning that only one dataset is loaded, which can be inspected using Views. When started, data is incrementally read from the database, stored in the resulting dataset, and distributed to the active Views. Each time such a loading process is triggered, all Views clear their dataset and gradually update. \\
 This makes working with the data somewhat easier to understand, since only one dataset exists, while on the other hand it (generally) does not allow several independent datasets to be loaded.
 
-\section{Generating a Database}
+\section*{Generating a Database}
 \label{sec:generation}
 
 A database has to be generated before it can be opened with ATSDB.  This section describes how such
 a process can be performed, however it is by no means a complete guide.
 
-\subsection{SASS-C Verif}
+\section*{SASS-C Verif}
 A sophisticated treatment of how to generate a database using the highly sophisticated SASS-C Verif frame work  is  out  of  the  scope  of  this  document.   However,  a  short  summary  of  the  necessary  steps  will  be presented here.\\
 
 \begin{itemize}  
@@ -304,16 +304,16 @@ TODO
 \chapter{Usage}
 \label{sec:usage}
 
-\section{Startup and opening a database}
+\section{Opening a database}
 \label{sec:startup}
 
-When  ATSDB  is  started  a  dialog  for  opening  a  database  is  shown. 
+While ATSDB is more a database framework, it comes with a dedicated client. When this ATSDB client is started a dialog  for opening a database is shown. 
 
 \begin{figure}[H]
   \hspace*{-3cm}
     \includegraphics[width=18cm]{../screenshots/db_config_connect.png}
-  \caption{Connecting to a database.}
-  \label{fig:db_open}
+  \caption{Connecting to a database}
+  \label{fig:db_connect}
 \end{figure}
 
 On the left-hand side, a database system can be selected.  Choices are either MySQL database or a file container with a SQLite3 database. \\
@@ -327,7 +327,7 @@ On the right-hand side a database schema can be selected and edited (editing is 
 \begin{figure}[H]
   \center
     \includegraphics[width=10cm]{../screenshots/mysql_server_selection.png}
-  \caption{Connecting to a MySQL server.}
+  \caption{Connecting to a MySQL server}
   \label{fig:mysql_connect}
 \end{figure}
 
@@ -371,7 +371,7 @@ For opening a file container, clicking the 'Select' button opens a file selectio
 \begin{figure}[H]
   \center
     \includegraphics[width=10cm]{../screenshots/sqlite3_open.png}
-  \caption{Opening a SQLite3 file container.}
+  \caption{Opening a SQLite3 file container}
   \label{fig:sqlite3_open}
 \end{figure}
 
@@ -381,7 +381,7 @@ For a common user, selection of a pre-configured database schema is recommened. 
 \begin{figure}[H]
   \center
     \includegraphics[width=10cm]{../screenshots/database_schema_selection.png}
-  \caption{Selecting a database schema.}
+  \caption{Selecting a database schema}
   \label{fig:db_schema_select}
 \end{figure}
 
@@ -390,7 +390,7 @@ For experienced users, on the right-hand side a database schema can be selected 
 \begin{figure}[H]
   \hspace*{-1cm}
     \includegraphics[width=16cm]{../screenshots/database_schema_configuration.png}
-  \caption{Configuring a database schema.}
+  \caption{Configuring a database schema}
   \label{fig:db_schema_configuration}
 \end{figure}
 
@@ -398,10 +398,20 @@ For experienced users, on the right-hand side a database schema can be selected 
 
 After the previous steps have been completed, the 'Start' button can be pressed to continue. \\
 
-When a database is opened the first time, a post-processing performed, which can be forced using the 'Force post-processing' checkbox.
+When a database is opened the first time, a post-processing has to be performed.
 
 \subsubsection{Postprocessing}
-When a database is generated by a previous process,  some information that eases usage of the display software does not exist. 
+When a database is generated by a previous process,  some information that eases usage of the software does not exist. This information is generated once during a post-processing step, which is automatically performed. If wanted, it can always performed using the 'Force post-processing' checkbox.
+
+Please \textbf{note} that during post-processing the application will not react to user input. \\
+
+
+\begin{figure}[H]
+  \hspace*{-2cm}
+    \includegraphics[width=18cm]{../screenshots/db_postprocessing.png}
+  \caption{Post-processing a database}
+  \label{fig:db_postprocessing}
+\end{figure}
 
 The following information is generated and stored in the database:
 
@@ -417,80 +427,128 @@ Please also \textbf{note} that during this step, no DBO data itself is changed, 
 \section{Management}
 \label{sec:management}
 
-When started, a main window is shown.
-(image here)
+After pressing the 'Start' button, a management window is shown.
 
-Located in the main window, a management tab exists.  It shows general information, the current state
-of  all  active  major  components  of  Palantir  and  management  elements  for  the  creation  and  removal  of
-components. It is divided into 4 columns, which are (from left to right):
+\begin{figure}[H]
+  \hspace*{-2cm}
+    \includegraphics[width=18cm]{../screenshots/management.png}
+  \caption{Main management window}
+  \label{fig:db_postprocessing}
+\end{figure}
 
-\begin{itemize}  
-\item Database: General information
-\begin{itemize}  
-\item Data source: Identification and content sizes
-\item ResultSet: Current size of the loaded data, Update functions
+In the uppermost part, the current tab can be selected. The following tabs exist:
+
+\begin{table}[h]
+  \center
+  \begin{tabular}{ | l | l |}
+    \hline
+    \textbf{Tab} & \textbf{Description} \\ \hline
+    DB Config & Database configuration, used during startup \\ \hline
+    Management & All elements to manage loading and inspection of data \\ \hline
+    ... & Additional tabs with Views \\
+    \hline
+  \end{tabular}
+  \caption{Main window tab list}
+\end{table}
+
+Located in the main window, a management tab exists.  It shows general database information, a list of database object with loading function, a filter system and so on.
+
+\subsection{Database Information}
+
+In this widget, general information about the database is given. 
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=10cm]{../screenshots/management_database.png}
+  \caption{Management: Database Information}
+  \label{fig:management_database}
+\end{figure}
+
+This also includes the working status, which can be:
+
+\begin{itemize}
+ \item Idle: Nothing to do at the moment
+ \item Working: Database read/write in progress
 \end{itemize}
-\item Filters: Filter configuration and management
-\item Transformation: Information about additional threads
-\item Views: View information and management
+
+\subsection{Database Objects}
+
+In this widget, information about the DBO's, the loaded dataset, and the loading parameters are given.
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=10cm]{../screenshots/management_dbos.png}
+  \caption{Management: Database Objects}
+  \label{fig:management_objects}
+\end{figure}
+
+Each existing DBO is listed, and active ones have the following items:
+
+\begin{itemize}
+ \item Name checkbox: Defines wheter data from this DBO should be loaded
+ \item Loading status information
+  \begin{itemize}
+  \item Idle: Nothing to do at the moment
+  \item Loading: DBO read/write in progress
+  \end{itemize}
+ \item Loaded data size: Number of loaded items / Number of existing items
 \end{itemize}
 
-A loading process is triggered if the 'Update' button in the 'ResultSet' column is pressed, or if a change
-in the Filter or View configuration occurs and 'Auto Update' is active.
-A user can change the Filter configuration and manage the Views until satisfactory data selection and rep-
-resentation is found. For detailed information please refer to 'Using Filters' in Section 0.14 or 'Managing
-Views' in Section 0.16.
+If a DBO exists, but has no data in the database, it is shown as inactive (greyed out, like ADSB in the screenshot).\\
 
-\subsection{ResultSet Information}
-In this element, information about the current ResultSet is shown.  At startup,zero sizes indicate that no
-data has been loaded.  If a loading process is triggered, the status information changes from 'Data Set is
-empty' to 'Loading in Progress' and the elapsed time in seconds and current size of the ResultSet of each
-DBO are shown.
-When this process is finished, the label switches to 'Loading Done', displaying the overall time it took
-to transfer the search results into the ResultSet
+Additionally, parameters which configure the loading process exist:
 
-(image here)
+\begin{itemize}
+ \item ``Use Filters'' checkbox: Whether filtering should be performed
+ \item ``Use order'' checkbox: Whether the dataset should be ordered by a DBO variable
+ \item ``Use Ascending`` checkbox: If ordered, defines if it should be ascending or descending
+ \item ''Order Variable`` selection: If ordered, what variable should be used
+ \item ''Use Limit`` checkbox: If the data size should be limited
+ \item ''Limit Min``: If limited, the data set will start at the n-th index given here. If 0, it will be loaded from the beginning, if e.g. 100, the first 100 entries will be skipped and the 101st entry will be the first in the dataset.
+\item ''Limit Max'': If limited, the number given here will be the number of loaded entries.
+\end{itemize}
 
-\section{Filter Usage}
-\label{sec:filter_usage}
+Using the ``Load'' button , a loading process using the current configuration is started.
 
-(image here)
+\subsection{Filters}
 
-In this GUI component, several elements exist that define and control the loading process from the database.
-The first element is made out of various checkboxes, one for each DBO in the database. If unchecked, these
-objects are be loaded from the database. Below, a list of all available filters is shown.
+\begin{figure}[H]
+  \center
+    \includegraphics[width=10cm]{../screenshots/management_filters.png}
+  \caption{Management: Filters}
+  \label{fig:management_filters}
+\end{figure}
 
 Each filter consists of a checkbox, defining if a filter is active (contributes to the search query), a triangle-
-button to show/hide the filter configuration elements, and a unique name. Editable filters also have a manage
-button, which activates a context menu with possible actions for the filter.
+button (to show/hide the filter configuration elements), a unique name, and a manage button (activates a context menu). 
+
 At the bottom an 'Add filter' button exists, which can be used to add new filters.
 
-Please note that the filter configuration will be saved at program shutdown, which is also true for new
+Please \textbf{note} that the filter configuration will be saved at program shutdown, which is also true for new
 filters.   At  startup,  all  filters  from  the  configuration  are  generated  and  restored  to  their  previous  state.
 
 However, when the database was changed (usage of different data source), all filters are reset to an initial
 state (since their previous configuration may be senseless).
 
-Please also note that active filters, at the moment, are always combined with a logical AND. Therefore,
+Please also \textbf{note} that active filters, at the moment, are always combined with a logical AND. Therefore,
 when  two  filters  are  active,  only  the  intersection  of  data  which  both  filters  allow  is  loaded.   A  logical combination of filters using an OR operation is planned, but was not implemented yet.
 
-\subsection{Sensor Filters}
+\subsubsection{Sensor Filters}
 For each DBO with a sensor list, a sensor filter is generated which can not be edited or deleted.  For each
 sensor a checkbox exists, which is only active if the sensor was active in the database.  If checked, the
-data generated by the sensor is loaded, and vice versa.  Also, two buttons ('All', 'None') exists, which
-check/uncheck all sensor checkboxes.
+data generated by the sensor is loaded, and vice versa.
 
-\subsection{Custom filters}
-A  custom  filter  does  not  differ  in  general  usage,  but  the  inner  workings  are  different.   Also,  it  can  begenerated using the 'Add filter' button. It can also be reset (to the original values) edited and deleted using
+\subsubsection{Custom filters}
+A  custom  filter  does  not  differ  in  general  usage,  but  the  inner  workings  are  different.   Also,  it  can  be generated using the 'Add filter' button. It can also be reset (to the original values) edited and deleted using
 the manage button.
-A custom filter consists of one or more filter conditions.  Such a condition involves a DBO variable,
+A custom filter consists of one or more filter conditions.  Such a condition involves a DBO (or meta) variable,
 an operator, and a value.  When active, the filter restricts all loaded DBO data to be valid regarding all
 conditions.
-As an example, the FrameTime filter limits the loaded data to a specific time window, to load only time
-slices of the dataset.  The Mode A filter restricts to a list of (comma-separated) mode 3/A codes, to single
+As an example, the ``Time of Day'' filter limits the loaded data to a specific time window, to load only time
+slices of the dataset.  The ``Mode 3A Codes`` filter restricts to a list of (comma-separated) mode 3/A codes, to single
 out specific flights.
 
-\section{Adding a new filter}
+\subsubsection{Adding a new filter}
 When clicking the 'Add filter' button, a dialog is opened.
 
 (image here)
@@ -536,7 +594,7 @@ for persistence.
 
 (image here)
 
-\section{Editing a filter}
+\subsubsection{Editing a filter}
 \label{sec:filter_editing}
 
 (image here)
@@ -551,8 +609,15 @@ shown at the bottom in rows.  Each condition can be deleted using the delete but
 All changes are immediately propagated to the filter in the Management tab.  When done, the window
 can be closed using the 'Close' button on the lower right.
 
-\section{View Management}
-\label{sec:view_management}
+
+\subsection{Views}
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=10cm]{../screenshots/management_views.png}
+  \caption{Management: Views}
+  \label{fig:management_views}
+\end{figure}
 
 This element allows generation and management of all active Views and windows. Each View is contained
 in a tab within a parent window.  At startup, only the main window exists ('Window0'), which also holds
@@ -627,6 +692,15 @@ matches will not be shown.
 The 'Limit row number' parameter defines how many rows (at maximum) will be shown.
 
 (image here)
+
+\subsection{Jobs}
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=10cm]{../screenshots/management_jobs.png}
+  \caption{Management: Jobs}
+  \label{fig:management_jobs}
+\end{figure}
 
 \section{Glossary}
 Buffer
