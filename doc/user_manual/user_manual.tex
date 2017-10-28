@@ -1,0 +1,637 @@
+%#% extstart input preamble.tex
+%
+% memman.tex  Memoir class user manual (Part II only)  last updated 2009/09/07
+%             Author: Peter Wilson
+%             Copyright 2001, 2002, 2003, 2004, 2008, 2009 Peter R. wilson
+%
+%   This work has the LPPL maintenance status "maintained".
+%   Maintainer: Lars Madsen (daleif at math dot au dot dk)
+%
+%\listfiles
+\documentclass[10pt,letterpaper,extrafontsizes]{memoir}
+\listfiles
+\usepackage{comment}
+
+
+% For (non-printing) notes  \PWnote{date}{text}
+\newcommand{\PWnote}[2]{} 
+\PWnote{2009/04/29}{Added fonttable to the used packages}
+\PWnote{2009/08/19}{Made Part I a separate doc (memdesign.tex).}
+
+% same
+\newcommand{\LMnote}[2]{} 
+
+
+\usepackage{memsty}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{titlepages}  % code of the example titlepages
+\usepackage{memlays}     % extra layout diagrams
+\usepackage{dpfloat}     % floats on facing pages
+\usepackage{fonttable}[2009/04/01]   % font tables
+%%%%\usepackage{xr-hyper} \externaldocument{memdesign} Doesn't work, 
+%%%%                      Idea won't work in general for memman/memdesign
+%%%%                      as at display time, who knows where everything
+%%%%                      will be located on the individual's computer.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%% Change section heading styles
+%%%\memmansecheads
+
+%%%% Use the built-in division styling
+\headstyles{memman}
+
+%%% ToC down to subsections
+\settocdepth{subsection}
+%%% Numbering down to subsections as well
+\setsecnumdepth{subsection}
+
+%%%%%%%%%%%%%%%%%%%%%%% glossary
+\makeglossary
+\changeglossactual{?}
+\changeglossnum{\@currentlabel} 
+\changeglossnum{\thepage}
+\changeglossnumformat{|hyperpage} %|
+\renewcommand*{\glossaryname}{Command summary}
+\renewcommand{\glossitem}[4]{%
+  \sbox\@tempboxa{#1 \space #2 #3 \makebox[2em]{#4}}%
+\par\hangindent 2em
+  \ifdim\wd\@tempboxa<0.8\linewidth
+    #1 \space #2 #3 \dotfill \makebox[2em][r]{#4}\relax
+  \else
+    #1 \dotfill \makebox[2em][r]{#4}\\
+    #2 #3
+  \fi}
+\renewcommand*{\glossarymark}{\markboth{\glossaryname}{\glossaryname}}
+
+%%%% extra index for first lines
+\makeindex[lines]
+
+
+% this 'if' is used to determine whether we are compiling the memoir
+% master in the subversion repository, or the public memman.tex
+\newif\ifMASTER
+\MASTERfalse
+%\MASTERtrue
+
+\ifMASTER
+
+% add patch to fink, such that \AtEndFile still work
+\makeatletter
+\AtEndFile{fink.sty}{
+  \typeout{patching fink} 
+  \renewcommand{\InputIfFileExists}[2]{%
+    \IfFileExists{##1}%
+    {##2\@addtofilelist{##1}%
+      \m@matbeginf{##1}%
+      \fink@prepare{##1}%
+      %\@@input \@filef@und
+      \expandafter\fink@input%
+      \expandafter\fink@restore\expandafter{\finkpath}%
+     \m@matendf{##1}%
+     \killm@matf{##1}}%
+ }
+}
+\makeatother
+% private package, not in circulation
+% enables us to gather svn information on a single file basis
+%\usepackage[filehooks]{svn-multi-private}
+% use the current version
+%\usepackage[filehooks]{svn-multi}
+
+
+% \svnidlong
+% {}
+% {$LastChangedDate: 2015-03-05 18:49:59 +0100 (Thu, 05 Mar 2015) $}
+% {$LastChangedRevision: 516 $}
+% {$LastChangedBy: daleif $}
+
+
+
+%\makeatletter
+%\newcommand\addRevisionData{%
+%  \begin{picture}(0,0)%
+%    \put(0,-20){%
+%      \tiny%
+%      \expandafter\@ifmtarg\expandafter{\svnfiledate}{}{%
+%        \textit{\textcolor{darkgray}{Chapter last updated \svnfileyear/\svnfilemonth/\svnfileday
+%         \enspace (revision \svnfilerev)}}
+%     }%
+%    }%
+%  \end{picture}%
+%}
+%\makeatother
+
+% we add this to the first page of each chapter
+
+\makepagestyle{chapter}
+\makeoddfoot{chapter}{\addRevisionData}{\thepage}{}
+\makeevenfoot{chapter}{\addRevisionData}{\thepage}{}
+
+\else
+% disable svn info collecting
+\newcommand\svnidlong[4]{}
+\fi
+
+
+
+%% end preamble
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%#% extend
+
+%\usepackage[draft]{fixme}
+%\fxsetup{
+%  layout=marginnote
+%}
+ 
+
+\begin{document}
+
+
+%\tightlists
+\firmlists
+\midsloppy
+\raggedbottom
+\chapterstyle{demo3}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\input{memnoidxnum}
+
+\frontmatter
+\pagestyle{empty}
+
+
+% title page
+\vspace*{\fill}
+\begin{center}
+\HUGE\textsf{ATSDB}\par
+\end{center}
+
+\begin{center}
+\Huge\textsf{User Guide}\par
+\end{center}
+\begin{center}
+\normalsize\textsf{Maintained by Helmut Puhr}\par
+\medskip
+\normalsize\textsf{Version 0.0.8 \textit{Astmathic Ant}}\par
+\end{center}
+\vspace*{\fill}
+\begin{center}
+\includegraphics[width=\droptitle]{../logo/atsdb.png}
+\setlength{\droptitle}{0pt}%
+\end{center}
+\clearpage
+
+\cleardoublepage
+
+% ToC, etc
+%%%\pagenumbering{roman}
+\pagestyle{headings}
+%%%%\pagestyle{Ruled}
+
+\setupshorttoc
+\tableofcontents
+\clearpage
+\setupparasubsecs
+\setupmaintoc
+\tableofcontents
+\setlength{\unitlength}{1pt}
+\clearpage
+\listoffigures
+\clearpage
+\listoftables
+
+%#% extend
+
+\chapter{Introduction}
+
+This document has its focus on interaction and working procedures required to make use of the existing
+functionality. In this introduction, feature highlights are listed, followed by a brief summary of important aspects of  ATSDB. In the later section \nameref{sec:usage}, a functional, task-oriented overview is given. At the end of the document, a glossary is given.
+
+\section{Feature highlights}
+
+The \textbf{A}ir \textbf{T}raffic \textbf{S}urveillance \textbf{D}ata\textbf{B}ase aims at providing a generalized framework for ATM surveillance data inspection. While its current functionality is somewhat limited, the following features exist:\\\\
+
+\begin{itemize}  
+\item High performance processing
+\item Low memory footprint
+\item Utilization of application during loading procedure
+\item Views for data inspection
+\item Parallel synchronized usage of Views
+\item Simple custom filter generation
+\item Operates directly on a database
+\item Support of multiple database systems
+\item Highly flexible database readout
+\item Supported Database Objects
+\begin{itemize}  
+\item Radar plots
+\item System Tracks and Reference Trajectories
+\item MLAT \& WAM target reports
+\item ADS-B target reports
+\end{itemize}
+\item XML-based configuration files
+\item Multiple coexisting configurations, usage chosen during runtime
+\item Based on Open Source libraries
+\item Runs on generic hardware
+\end{itemize}
+
+\section{General Aspects}
+ATSDB is a highly specialized surveillance data processing framework, with a strong focus on high-performance and  a  low  memory  footprint,  to  process  massive  quantities  of  data.   Surveillance  data  is fetched from a database (limited by a filter system), then processed and displayed using so-called Views (visualization of aspects of the result set).\\\\
+
+As storage medium, a database is used.  Different database systems are supported, and a flexible read-out system allows for easy adaptation to different database schemas.  Data in such a database has to be generated in a previous, separate process.  One method would be using EUROCONTROLS SASS-C  Verif V7/8 framework.\\
+
+When such a previously generated database is opened for the first time, some post-processing is performed, to ease usage and to increase startup speed.  When data is loaded using a database query, a filter configuration may restrict the data leading to a result set.  Such a result set can be analyzed using Views, e.g. the Listbox view.\\
+
+Each View defines which parts of the database are required to fulfill its purpose, and only such parts are loaded.  During a loading process from the database, subsets of the query result are immediately added to the current result set and all views are updated.
+
+\chapter{Key Concepts}
+\label{cha:key_concepts}
+
+In this section, a few key concepts are introduced to allow a somewhat deeper understanding of ATSDB, to allow the reader to understand some main design choices made by the author. This should also give indications about the strengths and draw-backs of the chosen approach.
+
+\subsection{Database Systems}
+A database allows for storage, retrieval and filtering of the data of interest. While SQL has some definitive drawbacks, it was chosen since support of the SASS-C database SCDB was wanted.\\
+Currently  two  database  systems  are  supported:  MySQL  and  SQLite3.   MySQL  relies  on  an  independent background process, which holds several databases and can also be accessed over a network connection.\\
+SQLite3 encapsulates one database in a single file container, which is read from a storage medium (e.g. hard drive).
+
+\subsection{Configuration}
+At startup, several configuration files are loaded, and at shutdown the current configuration state of ATSDB is saved.  But configuration is not just a matter of components having the same parameters, but also what components exist. To give an example: Each existing View is saved, and when the program is started again, the previously active Views are created.  The same holds for the filters, or the database interface/schema. \\
+This way, a user can have a specific program configuration for a specific usage situation, which can be instantly reused for a different dataset, using have a completely configurable database schema or filter configuration. \\
+This allows for a high degree of flexibility, but somewhat complicates software development.
+
+\subsection{Flexible Database Interface}
+Using such a configuration, a flexible database interface method was implemented to allow general displaying of data in different database systems and schemas.  How this was done would require a detailed discussion, which will be skipped for the moment.\\
+To summarize, several database schemas are stored in configuration files, each of which is a structured collection of database tables and their logical dependencies. Such information is used in one set of Database Objects (DBOs). In each database system, any database schema may exist.
+
+\subsection{Database Objects}
+A Database Object (DBO) is defined by a name and has a collection of variables. For example, radar plots and system tracks are database objects, and each has variables holding time, position, Mode 3/A codes and Mode C heights and so on. From a database, if such a DBO is present, it can be loaded and displayed.\\
+
+To allow displaying data from different DBOs in the same system, so-called meta-variables were  introduced, which hold variables that are present in some or all DBOs (with a possibly different name or unit).  For example, there meta-variable 'position\_x', which is a collection of sub-variables for each existing DBO and the respective x coordinate position variable.
+
+\subsection{Data Loading}
+In ATSDB, a unified data loading process was chosen, meaning that only one dataset is loaded, which can be inspected using Views. When started, data is incrementally read from the database, stored in the resulting dataset, and distributed to the active Views. Each time such a loading process is triggered, all Views clear their dataset and gradually update. \\
+This makes working with the data somewhat easier to understand, since only one dataset exists, while on the other hand it (generally) does not allow several independent datasets to be loaded.
+
+\section{Generating a Database}
+\label{sec:generation}
+
+A database has to be generated before it can be opened with ATSDB.  This section describes how such
+a process can be performed, however it is by no means a complete guide.
+
+\subsection{SASS-C Verif}
+A sophisticated treatment of how to generate a database using the highly sophisticated SASS-C Verif frame work  is  out  of  the  scope  of  this  document.   However,  a  short  summary  of  the  necessary  steps  will  be presented here.\\
+
+\begin{itemize}  
+\item Import a previous evaluation job
+\item Set data recording path, e.g. 'somelocation/\%iffile.if'
+\item Run IRIS command
+\item Run OTR command
+\item Run CMP command with all but RA
+\item Run CMP command with just RA
+\end{itemize}
+
+After  these  steps,  a  database  was  generated  and  filled  with  data.   The  name  of  the  database  (which
+will  be  needed  during  the  open  process)  is  equivalent  to  the  job  name,  e.g.   'job\_v7\_mainsacso\_0005', 'HelloWorld' etc. \\
+
+Please \textbf{note} that the SASS-C MySQL database name is not case sensitive ('job\_v7\_mainsacso\_0005' is the same as 'JOB\_V7\_MAINSACSO\_0005').
+
+\chapter{Usage}
+\label{sec:usage}
+
+\section{Startup and opening a database}
+\label{sec:startup}
+
+When  ATSDB  is  started  a  dialog  for  opening  a  database  is  shown.  On the left-hand side, a database can be selected.  Choices are either a file container with a SQLite3 database or a MySQL database.  On the right-hand side a database schema can be selected and edited (only recommended for experienced users).
+
+(image here)
+
+\subsection{Database Selection}
+\subsubsection{File container}
+For opening a file container, clicking the 'Select' button opens a file selection dialog, in which any SQLite3 file can be selection as data source.
+
+\subsubsection{MySQL database}
+For connecting to MySQL database, several parameters have to be entered:
+
+(table with parameters)
+
+If  a  wrong  database  name  or  IP  address  is  used,  error  messages  can  be  either  'MySQLConnection: executeSQL: error when executing' or 'MySQLConnection:  init:  DB connection failed'.  If such an error occurs, correcting the database name and IP address values should solve the problem.
+
+To open a database click the 'Open' button (lower left corner).  After that, the 'Database information' field shows a list of all tables. If the database is opened for the first time, a post-processing step is performed.
+
+\subsubsection{Database Schema Selection}
+For a common user, selection of a pre-configured database schema is recommened. To select a different database schema, please use the 'Schema selection' drop-down menu.
+
+For experienced users, on the right-hand side of Figure X, a database schema can be selected and edited.
+
+\subsection{Postprocessing}
+When a database is generated by a previous process,  some information that eases usage of the display software does not exist. 
+
+The following information is generated and stored in the database:
+
+\begin{itemize}  
+\item Create list of all active data sources for all DBOs
+\item Create list with all Minima/Maxima for all variables of all DBOs
+\end{itemize}
+
+Please note that this step has to be performed only once for each database, and may take up to a few minutes for large datasets.
+
+\section{Management}
+\label{sec:management}
+
+When started, a main window is shown.
+(image here)
+
+Located in the main window, a management tab exists.  It shows general information, the current state
+of  all  active  major  components  of  Palantir  and  management  elements  for  the  creation  and  removal  of
+components. It is divided into 4 columns, which are (from left to right):
+
+\begin{itemize}  
+\item Database: General information
+\begin{itemize}  
+\item Data source: Identification and content sizes
+\item ResultSet: Current size of the loaded data, Update functions
+\end{itemize}
+\item Filters: Filter configuration and management
+\item Transformation: Information about additional threads
+\item Views: View information and management
+\end{itemize}
+
+A loading process is triggered if the 'Update' button in the 'ResultSet' column is pressed, or if a change
+in the Filter or View configuration occurs and 'Auto Update' is active.
+A user can change the Filter configuration and manage the Views until satisfactory data selection and rep-
+resentation is found. For detailed information please refer to 'Using Filters' in Section 0.14 or 'Managing
+Views' in Section 0.16.
+
+\subsection{ResultSet Information}
+In this element, information about the current ResultSet is shown.  At startup,zero sizes indicate that no
+data has been loaded.  If a loading process is triggered, the status information changes from 'Data Set is
+empty' to 'Loading in Progress' and the elapsed time in seconds and current size of the ResultSet of each
+DBO are shown.
+When this process is finished, the label switches to 'Loading Done', displaying the overall time it took
+to transfer the search results into the ResultSet
+
+(image here)
+
+\section{Filter Usage}
+\label{sec:filter_usage}
+
+(image here)
+
+In this GUI component, several elements exist that define and control the loading process from the database.
+The first element is made out of various checkboxes, one for each DBO in the database. If unchecked, these
+objects are be loaded from the database. Below, a list of all available filters is shown.
+
+Each filter consists of a checkbox, defining if a filter is active (contributes to the search query), a triangle-
+button to show/hide the filter configuration elements, and a unique name. Editable filters also have a manage
+button, which activates a context menu with possible actions for the filter.
+At the bottom an 'Add filter' button exists, which can be used to add new filters.
+
+Please note that the filter configuration will be saved at program shutdown, which is also true for new
+filters.   At  startup,  all  filters  from  the  configuration  are  generated  and  restored  to  their  previous  state.
+
+However, when the database was changed (usage of different data source), all filters are reset to an initial
+state (since their previous configuration may be senseless).
+
+Please also note that active filters, at the moment, are always combined with a logical AND. Therefore,
+when  two  filters  are  active,  only  the  intersection  of  data  which  both  filters  allow  is  loaded.   A  logical combination of filters using an OR operation is planned, but was not implemented yet.
+
+\subsection{Sensor Filters}
+For each DBO with a sensor list, a sensor filter is generated which can not be edited or deleted.  For each
+sensor a checkbox exists, which is only active if the sensor was active in the database.  If checked, the
+data generated by the sensor is loaded, and vice versa.  Also, two buttons ('All', 'None') exists, which
+check/uncheck all sensor checkboxes.
+
+\subsection{Custom filters}
+A  custom  filter  does  not  differ  in  general  usage,  but  the  inner  workings  are  different.   Also,  it  can  begenerated using the 'Add filter' button. It can also be reset (to the original values) edited and deleted using
+the manage button.
+A custom filter consists of one or more filter conditions.  Such a condition involves a DBO variable,
+an operator, and a value.  When active, the filter restricts all loaded DBO data to be valid regarding all
+conditions.
+As an example, the FrameTime filter limits the loaded data to a specific time window, to load only time
+slices of the dataset.  The Mode A filter restricts to a list of (comma-separated) mode 3/A codes, to single
+out specific flights.
+
+\section{Adding a new filter}
+When clicking the 'Add filter' button, a dialog is opened.
+
+(image here)
+
+First, one has to give the filter a new (unique) name. Then, conditions have to be defined and added. A
+condition consists of a DBO variable, an operator, a value, and a reset value.
+
+(image here)
+
+When the triangular button is clicked, a sub-menu is opened, where one can choose a DBO variable. The
+selected variable restricts data of all DBOs if it is of type 'Meta', or just data from one DBO if it is not.
+
+(image here)
+
+Additionally, the mathematical operator 'ABS' can be selected. If so, not the value of the variable but the
+absolute value of the variable is used: 'ABS(var)>value' is equivalent to 'var>value OR var<-value'.
+
+An operator can be chosen with the drop-down menu.  The supplied operators are equivalent to mathematical operators, except for operator 'One of' ('|='), which allows a comma-separated list as value.  A condition with the 'One of' operator is true if the DBO variable value matches any of the supplied possible
+values.
+
+(table with operators)
+
+In the 'Value' field, one can set a value manually or load the minimum or maximum values of the selected
+DBO variable from the database using the 'Load min'/'Load max' buttons .
+
+(image here)
+
+A reset value also has to be supplied.  Whenever a database different from the previous one is opened,
+all filters are reset, since previous values may have become invalid.
+
+(table with reset values)
+
+After a condition is defined, it has to be added using the 'Add condition' button. Existing conditions are
+shown in the 'Current conditions' list. Please note that added conditions can not be removed in this dialog,
+but have to be removed as described in the 'Edit filter' section 0.16
+
+(image here)
+
+Now the described process can be repeated until a usable filter emerges, which is added using the 'Add'
+button. The process of adding a new filter can be canceled by using the 'Cancel' button, which discards all
+settings. When added, a new filter shows up immediately in the filter list and is saved to the configuration
+for persistence.
+
+(image here)
+
+\section{Editing a filter}
+\label{sec:filter_editing}
+
+(image here)
+
+A filter can be reset (load reset values), edited or deleted.  When clicking on the manage button, a context menu appears. Please select the appropriate action, for editing select 'Edit'.
+
+(image here)
+
+When the 'Filter name' field is edited, its name is changed.  A new condition can be added using the
+'Define condition' elements, in the same manner as in the 'New filter' process. All existing conditions are
+shown at the bottom in rows.  Each condition can be deleted using the delete button, or changed using the elements in the appropriate row.
+All changes are immediately propagated to the filter in the Management tab.  When done, the window
+can be closed using the 'Close' button on the lower right.
+
+\section{View Management}
+\label{sec:view_management}
+
+This element allows generation and management of all active Views and windows. Each View is contained
+in a tab within a parent window.  At startup, only the main window exists ('Window0'), which also holds
+the management tab. If the main window is closed, Palantir shuts down.
+New Views can be added using the 'Add View' button, which opens a pull-down-menu. Each View can
+either be added to the main window ('Window0') or into a new window.
+
+When added, a new tab exists in the containing window, and controlling elements are added for any new
+windows or views.
+
+(table with views)
+
+New Views can be added either to currently existing windows as new tabs, or to a newly opened window.
+All windows except the main window can be closed, which deletes all contained Views.  Also, each View
+can be closed separately, which frees up all its allocated resources.
+Each View adds its required variables to the loading list for the database, and triggers a reloading pro-
+cess if new variables have been added and if the 'Auto update' checkbox is checked.  During a loading
+process, the loading time (in seconds) of a View is shown in the management tab, indicating its state and
+performance.
+
+(image here)
+
+A window can be closed either by the red close button in the GUI, or the close button in the window
+decoration.  Either way, all contained Views are discarded with the window.  To delete a single View, one
+can use the gray close button in the GUI.
+Please note that the application closes when the main window (with the Management tab) is closed.
+
+\section{Using ListBox View}
+A ListBoxView displays the DBO records as text in tables, to allow full data inspection.  Please
+note that updates have to be started manually in this View. When started, it presents itself in the following manner.
+
+(image here)
+
+On the left side, a number of tabs exist for each DBO, each of which contains a table. On the right side,
+a configuration area exists.
+A number of variables is displayed for each DBO, as shown in the 'Configuration→Variables' component. One can change the order, remove and add variables. The global filter configuration can be used (or not), also the table can be ordered by a DBO variable.  The number of table rows can be limited, and a global selection can be used.
+A Listbox has a unique update mechanism, which triggers a separate database query, and is started by
+using the 'Update' button.
+
+(image here)
+
+Once updated, the tables are filled with text representing the values of the DBO variables.  If a value is
+undefined its cell is marked in gray.
+In the first column of each table, a checkbox exists. If checked, the record is added to the global selection,
+if unchecked, it is removed.
+Please note that column names can differ in each table, since Meta-DBO variables can have different
+names in each DBO. Also, since some variable might only exist in some DBOs, the number of columns
+may differ.
+
+\subsection{Configuration}
+\subsubsection{Using Variable List}
+All DBO Variables which are loaded from the database are shown in the 'Variables' list. This list is ordered,
+and like all configuration elements persistent. Ordering can be changed by selecting (clicking on) a variable
+and using the Up/Down triangle buttons.
+When pressing the 'Remove' button, a selected variable is removed.  Pressing the 'Add' button allows
+appending a variable to the list using a context-menu.
+
+\subsubsection{Use filters}
+When this checkbox is checked, the global filter configuration (from the Management tab) is used to restrict
+the loaded data.
+
+\subsubsection{Use order}
+When this checkbox is checked, the resulting data is ordered by a given DBO Variable.  The checkbox
+'Ascending' defines if ordering is ascending or descending (not checked).   The 'Select DBO Variable'
+component defines which variable is used for ordering.  If the selected variable does not exist in a DBO,
+the according table is not ordered.
+
+\subsubsection{Using Limits}
+The number of results which can displayed in the table is limited. The 'Limit starting position' defines the
+first result to be shown. If e.g. its value is 0, the data will be shown from the beginning; if 100, the first 100
+matches will not be shown.
+The 'Limit row number' parameter defines how many rows (at maximum) will be shown.
+
+(image here)
+
+\section{Glossary}
+Buffer
+Dynamic data container, e.g. for DBO data items.
+Configurable
+Component which is configurable using an sophisticated XML-based configuration.
+CPU
+Central Processing Unit; main computational unit of any workstation.
+DBO
+DataBaseObject; an object with a set of variables to be stored in and read from the database, e.g. Plots, System Tracks.
+DBO data item
+One item of a specific DBO, e.g. Radar plot message, System Track status update.
+DBO meta variable
+Variable that binds together a number of DBO variables. 
+DBO variable
+Variable that exists in all DBO data items.
+DBStorage
+GPU
+Graphics Processing Unit; main computational unit of a graphics card.
+GUI
+Graphical User Interface
+ListBoxView
+View that displays any DBO data in a table structure.
+Pipeline
+Architectural equivalent of an assemly line, a number of seperate components execute a number of disjoint jobs in parallel.
+ResultSet
+Collection of DBO data items.
+SASS-C
+Surveillance Analysis Support System for ATC-Centre; A software toolbox developed by EUROCONTROL to provide standardised methods and tools for assessing the performance of Surveillance
+infrastructures.
+View
+Visualization of aspects of the result set.
+WorkerThread
+Additional thread that executes TransformationJobs.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%\endinput
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%% end mbooka
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% back end
+\backmatter
+
+\PWnote{2009/07/08}{Changed \cs{toclevel@section} so that Notes 
+                    divisions appear in the bookmarks}
+\makeatletter\renewcommand*{\toclevel@chapter}{-1}\makeatother 
+\makeatletter\renewcommand*{\toclevel@section}{0}\makeatother
+\clearpage
+\printpagenotes
+\clearpage
+\pagestyle{plainmarkruled}
+%%\chapterstyle{section}
+
+\renewcommand*{\begintheglossaryhook}{\small}
+%%%\glossaryintoc
+\printglossary
+
+
+\clearpage
+\twocolindex
+\pagestyle{index}
+%\renewcommand{\chaptermark}[1]{}
+\renewcommand{\preindexhook}{%
+The first page number is usually, but not always, the primary reference to
+the indexed topic.\vskip\onelineskip}
+\indexintoc
+
+%%%\raggedright  does nasty things to index entries
+\printindex
+
+\onecolindex
+\renewcommand*{\preindexhook}{}
+\renewcommand*{\indexname}{Index of first lines}
+%%%\indexintoc
+\printindex[lines]
+
+\cleardoublepage
+\pagestyle{empty}
+\null\vfil
+
+\end{document}
+
+\endinput
+
