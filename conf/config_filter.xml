@@ -47,6 +47,25 @@
             <ParameterBool visible="0"/>
         </Configuration>
     </Configuration>
+    <Configuration class_id="DBFilter" instance_id="TargetAddress">
+        <ParameterBool active="0"/>
+        <ParameterBool changed="0"/>
+        <ParameterBool op_and_="1"/>
+        <ParameterBool visible="0"/>
+        <ParameterString name="TargetAddress"/>
+        <Configuration class_id="DBFilterCondition" instance_id="TargetAddressCondition0">
+            <ParameterBool absolute_value="0"/>
+            <ParameterBool op_and="1"/>
+            <ParameterString operator="IN"/>
+            <ParameterString reset_value="FEFE10"/>
+            <ParameterString value="FEFE10"/>
+            <ParameterString variable_dbo_name="Meta"/>
+            <ParameterString variable_name="target_addr"/>
+        </Configuration>
+        <Configuration class_id="DBFilterWidget" instance_id="TargetAddressWidget0">
+            <ParameterBool visible="1"/>
+        </Configuration>
+    </Configuration>
     <Configuration class_id="DBFilter" instance_id="Time of Day">
         <ParameterBool active="0"/>
         <ParameterBool changed="1"/>
@@ -106,7 +125,7 @@
         <ParameterString dbo_name="MLAT"/>
         <ParameterString name="MLATSensors"/>
         <Configuration class_id="SensorFilterWidget" instance_id="MLATSensorsWidget0">
-            <ParameterBool visible="1"/>
+            <ParameterBool visible="0"/>
         </Configuration>
     </Configuration>
     <Configuration class_id="SensorFilter" instance_id="RadarSensors">
