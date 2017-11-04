@@ -1,8 +1,9 @@
 Description
 -----------
-Based on a dynamic database schema, recorded air traffic surveillance data can be inserted, retieved and inspected.
+Based on a dynamic database schema, recorded air traffic surveillance data can be inserted, retrieved and inspected.
 
 Please refer to the user manual for a more detailed description.
+https://github.com/hpuhr/ATSDB/blob/master/doc/user_manual/user_manual_v0.0.9.pdf
 
 Contents
 --------
