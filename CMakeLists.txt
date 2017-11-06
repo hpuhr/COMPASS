@@ -55,6 +55,10 @@ find_package ( TinyXML2 REQUIRED )
 message("  TINYXML2_INCLUDE_DIR: ${TINYXML2_INCLUDE_DIR}")
 message("  TINYXML2_LIBRARY: ${TINYXML2_LIBRARY}") 
 
+#add_subdirectory(experimental_src)
+add_definitions ( -DEXPERMENTAL_SRC=1 )
+include(experimental_src/CMakeLists.txt)
+
 include_directories (
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
@@ -91,6 +95,7 @@ include_directories (
     src/view/viewbase
     src/view/listboxview
     src/unit
+    ${EXPERIMENTAL_INCLUDE_DIRS}
     )
 
 link_directories(
@@ -244,6 +249,7 @@ set ( atsdb_HDRS
     src/util/stringconv.h
     src/util/singleton.h
     src/util/logger.h
+    ${EXPERIMENTAL_HEADERS}
     )
 
 
@@ -366,13 +372,14 @@ set ( atsdb_SRCS
 #    src/view/viewbase/dbviewmodel.cpp
 #    src/view/viewbase/dbview.cpp
 #    src/view/viewbase/dbviewwidget.cpp
+    ${EXPERIMENTAL_SOURCES}
     )
 
 set ( client_SRCS
     src/client/main.cpp
     )
 
-add_library ( atsdb SHARED ${atsdb_SRCS} ${atsdb_HDRS} ) 
+add_library ( atsdb SHARED ${atsdb_SRCS} ${atsdb_HDRS} )
 target_link_libraries ( atsdb
     Qt5::Widgets
     Qt5::Core
@@ -382,7 +389,8 @@ target_link_libraries ( atsdb
     ${LOG4CPP_LIBRARIES}
     ${MySQLpp_LIBRARY}
     ${GDAL_LIBRARIES}
-    ${SQLITE3_LIBRARIES})
+    ${SQLITE3_LIBRARIES}
+    ${EXPERIMENTAL_LIBRARIES})
 #   ${OSGEARTH_LIBRARY} ${OPENSCENEGRAPH_LIBRARIES}
 
 add_executable ( atsdb_client ${atsdb_HDRS} ${client_SRCS})
@@ -396,7 +404,8 @@ target_link_libraries ( atsdb_client
     ${LOG4CPP_LIBRARIES}
     ${MySQLpp_LIBRARY}
     ${GDAL_LIBRARIES}
-    ${SQLITE3_LIBRARIES})
+    ${SQLITE3_LIBRARIES}
+    ${EXPERIMENTAL_LIBRARIES})
 
 INSTALL_FILES(/include .h ${atsdb_HDRS})
 
@@ -421,7 +430,7 @@ set(CPACK_PACKAGE_VERSION_PATCH "1")
 set(CPACK_SOURCE_GENERATOR "TGZ")
 set(CPACK_SOURCE_PACKAGE_FILE_NAME
     "${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-src")
-set(CPACK_SOURCE_IGNORE_FILES 
+set(CPACK_SOURCE_IGNORE_FILES
     "/CMakeFiles/"
     "/_CPack_Packages/"
     "/dist/"

@@ -31,6 +31,10 @@
 //#include "ScatterPlotView.h"
 //#include "MosaicView.h"
 
+#ifdef VARNAME
+#include "osgview.h"
+#endif
+
 #include "stringconv.h"
 #include "global.h"
 
