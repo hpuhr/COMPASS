@@ -1,10 +1,13 @@
 set(ATSDB_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 message("  Path: ${ATSDB_PATH}")
 
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.1)
 set ( CMAKE_BUILD_TYPE Debug )
 
 project( ATSDB )
+SET(CPACK_PACKAGE_VERSION_MAJOR "0")
+SET(CPACK_PACKAGE_VERSION_MINOR "0")
+SET(CPACK_PACKAGE_VERSION_PATCH "9")
 
 message("  System: ${CMAKE_SYSTEM}")
 SET(CMAKE_INSTALL_PREFIX ${ATSDB_PATH}/dist)
@@ -37,7 +40,7 @@ message("  MySQLpp_LIBRARY: ${MySQLpp_LIBRARY}")
 
 find_package ( MySQL REQUIRED )
 message("  MYSQL_INCLUDE_DIR: ${MYSQL_INCLUDE_DIR}")
-#message("  MYSQL_LIBRARY: ${MYSQL_LIBRARY}")
+message("  MYSQL_LIBRARY: ${MYSQL_LIBRARY}")
 
 find_package ( Sqlite3 REQUIRED )
 message("  SQLite3_INCLUDE_DIR: ${SQLITE3_INCLUDE_DIR}")
@@ -55,7 +58,8 @@ find_package ( TinyXML2 REQUIRED )
 message("  TINYXML2_INCLUDE_DIR: ${TINYXML2_INCLUDE_DIR}")
 message("  TINYXML2_LIBRARY: ${TINYXML2_LIBRARY}") 
 
-#add_subdirectory(experimental_src)
+add_library(atsdb "")
+
 add_definitions ( -DEXPERMENTAL_SRC=1 )
 include(experimental_src/CMakeLists.txt)
 
@@ -95,93 +99,91 @@ include_directories (
     src/view/viewbase
     src/view/listboxview
     src/unit
-    ${EXPERIMENTAL_INCLUDE_DIRS}
     )
 
 link_directories(
     ${Boost_LIBRARY_DIR}
     )
 
-set ( LIBRARY_OUTPUT_PATH dist/lib )
-
-set ( atsdb_HDRS
-    src/atsdb.h
-    src/buffer/arraylist.h
-    src/buffer/buffer.h
+target_sources(atsdb
+    PUBLIC
+    "${CMAKE_CURRENT_LIST_DIR}/src/atsdb.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/buffer/arraylist.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/buffer/buffer.h"
     #        src/buffer/bufferfilter.h
-    src/client/client.h
-    src/client/mainwindow.h
-    src/client/managementwidget.h
-    src/config/configurable.h
-    src/config/configuration.h
-    src/config/configurationmanager.h
-    src/command/dbcommand.h
-    src/command/dbcommandlist.h
-    src/connection/dbconnection.h
-    src/connection/mysqlppconnection.h
-    src/connection/mysqlppconnectionwidget.h
-    src/connection/mysqlppconnectioninfowidget.h
-    src/connection/dbresult.h
-    src/connection/mysqlserver.h
-    src/connection/mysqlserverwidget.h
-    src/connection/sqlitefile.h
-    src/connection/sqliteconnection.h
-    src/connection/sqliteconnectionwidget.cpp
-    src/connection/sqliteconnectioninfowidget.cpp
-    src/connection/bufferwriter.h
-    src/filter/dbfilter.h
-    src/filter/sensorfilter.h
-    src/filter/filtermanager.h
-    src/filter/filtermanagerwidget.h
-    src/filter/dbfiltercondition.h
-    src/filter/dbfilterwidget.h
-    src/filter/filtereditwidget.h
-    src/filter/filtergeneratorwidget.h
-    src/filter/filterconditionoperatorcombobox.h
-    src/filter/filterconditionresetvaluecombobox.h
-    src/filter/sensorfilterwidget.h
-    src/interface/dbtableinfo.h
-    src/interface/dbinterface.h
-    src/interface/dbinterfacewidget.h
-    src/interface/dbinterfaceinfowidget.h
-    src/interface/sqlgenerator.h
-    src/job/job.h
-    src/job/jobmanager.h
-    src/job/jobmanagerwidget.h
-    src/job/dboreaddbjob.h
-    src/job/buffercsvexportjob.h
-    src/job/dboactivedatasourcesdbjob.h
-    src/job/dbominmaxdbjob.h
-    src/job/finalizedboreadjob.h
+    "${CMAKE_CURRENT_LIST_DIR}/src/client/client.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/client/mainwindow.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/client/managementwidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/config/configurable.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/config/configuration.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/config/configurationmanager.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/command/dbcommand.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/command/dbcommandlist.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/connection/dbconnection.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/connection/mysqlppconnection.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/connection/mysqlppconnectionwidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/connection/mysqlppconnectioninfowidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/connection/dbresult.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/connection/mysqlserver.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/connection/mysqlserverwidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/connection/sqlitefile.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/connection/sqliteconnection.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/connection/sqliteconnectionwidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/connection/sqliteconnectioninfowidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/connection/bufferwriter.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/filter/dbfilter.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/filter/sensorfilter.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/filter/filtermanager.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/filter/filtermanagerwidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/filter/dbfiltercondition.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/filter/dbfilterwidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/filter/filtereditwidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/filter/filtergeneratorwidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/filter/filterconditionoperatorcombobox.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/filter/filterconditionresetvaluecombobox.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/filter/sensorfilterwidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/interface/dbtableinfo.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/interface/dbinterface.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/interface/dbinterfacewidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/interface/dbinterfaceinfowidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/interface/sqlgenerator.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/job/job.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/job/jobmanager.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/job/jobmanagerwidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/job/dboreaddbjob.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/job/buffercsvexportjob.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/job/dboactivedatasourcesdbjob.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/job/dbominmaxdbjob.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/job/finalizedboreadjob.h"
     #        src/job/dbovariabledistinctstatisticsdbjob.h
     #        src/job/dbocountdbjob.h
     #        src/job/dboinfodbjob.h
-    src/job/updatebufferdbjob.h
+    "${CMAKE_CURRENT_LIST_DIR}/src/job/updatebufferdbjob.h"
     #        src/job/writebufferdbjob.h
     #        src/job/transformationjob.h
-    src/object/dbobject.h
-    src/object/dbobjectwidget.h
-    src/object/dbobjectinfowidget.h
-    src/object/dbobjectcombobox.h
-    src/object/dbovariablewidget.h
-    src/object/dbobjectmanager.h
-    src/object/dbobjectmanagerwidget.h
-    src/object/dbobjectmanagerloadwidget.h
-    src/object/dbovariabledatatypecombobox.h
-    src/object/dbovariableselectionwidget.h
-    src/object/dbovariabledatatypecombobox.h
-    src/object/dbodatasource.h
-    src/object/dbodatasourcedefinitionwidget.h
-    src/object/dbovariable.h
-    src/object/dbovariableset.h
-    src/object/dbovariableorderedset.h
-    src/object/dbovariableorderedsetwidget.h
-    src/object/metadbovariable.h
-    src/object/metadbovariablewidget.h
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbobject.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbobjectwidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbobjectinfowidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbobjectcombobox.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbovariablewidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbobjectmanager.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbobjectmanagerwidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbobjectmanagerloadwidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbovariabledatatypecombobox.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbovariableselectionwidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbovariabledatatypecombobox.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbodatasource.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbodatasourcedefinitionwidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbovariable.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbovariableset.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbovariableorderedset.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbovariableorderedsetwidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/metadbovariable.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/metadbovariablewidget.h"
     #        src/object/dbovariablecombobox.h
     #        src/object/dbovariablesetwidget.h
     #        src/object/propertydatatypecombobox.h
-    src/object/stringrepresentationcombobox.h
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/stringrepresentationcombobox.h"
     #        src/polygon/airspacesectormanagerwidget.h
     #        src/polygon/airspacesectortreewidget.h
     #        src/polygon/airspacesectorwidget.h
@@ -191,129 +193,129 @@ set ( atsdb_HDRS
     #        src/polygon/geographicpoint.h
     #        src/polygon/polygon4ddi.h
     #        src/polygon/vector2.h
-    src/projection/projectionmanager.h
-    src/projection/projectionmanagerwidget.h
-    src/property/property.h
-    src/property/propertylist.h
-    src/struct/structuredescription.h
+    "${CMAKE_CURRENT_LIST_DIR}/src/projection/projectionmanager.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/projection/projectionmanagerwidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/property/property.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/property/propertylist.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/struct/structuredescription.h"
     ##        src/struct/structuredescriptionplot.h
     ##        src/struct/structuredescriptionsystemtrack.h
     ##        src/struct/structuredescriptionreferencetrajectory.h
     ##        src/struct/structuredescriptionmlat.h
     ##        src/struct/structuredescriptionsensor.h
-    src/struct/structuredescriptionmanager.h
-    src/struct/structureelement.h
+    "${CMAKE_CURRENT_LIST_DIR}/src/struct/structuredescriptionmanager.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/struct/structureelement.h"
     #        src/struct/structurereader.h
-    src/struct/structurevariable.h
-    src/schema/dbtable.h
-    src/schema/dbtablecolumn.h
-    src/schema/metadbtable.h
-    src/schema/dbtablecolumncombobox.h
-    src/schema/dbschema.h
-    src/schema/dbschemawidget.h
-    src/schema/dbschemamanager.h
-    src/schema/dbschemamanagerwidget.h
-    src/schema/dbtablewidget.h
-    src/schema/metadbtablewidget.h
-    src/task/taskmanager.h
-    src/task/radarplotpositioncalculatortask.h
-    src/task/radarplotpositioncalculatortaskwidget.h
-    src/unit/unitselectionwidget.h
-    src/view/viewmanager.h
-    src/view/viewmanagerwidget.h
-    src/view/viewcontainer.h
-    src/view/viewcontainerwidget.h
-    src/view/viewcontainerconfigwidget.h
-    src/view/viewbase/eventprocessor.h
-    src/view/viewbase/view.h
-    src/view/viewbase/viewwidget.h
-    src/view/viewbase/viewsettings.h
-    src/view/viewbase/viewmodel.h
-    src/view/viewbase/viewselection.h
+    "${CMAKE_CURRENT_LIST_DIR}/src/struct/structurevariable.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/schema/dbtable.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/schema/dbtablecolumn.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/schema/metadbtable.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/schema/dbtablecolumncombobox.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/schema/dbschema.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/schema/dbschemawidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/schema/dbschemamanager.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/schema/dbschemamanagerwidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/schema/dbtablewidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/schema/metadbtablewidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/task/taskmanager.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/task/radarplotpositioncalculatortask.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/task/radarplotpositioncalculatortaskwidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/unit/unitselectionwidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/viewmanager.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/viewmanagerwidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/viewcontainer.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/viewcontainerwidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/viewcontainerconfigwidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/viewbase/eventprocessor.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/viewbase/view.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/viewbase/viewwidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/viewbase/viewsettings.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/viewbase/viewmodel.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/viewbase/viewselection.h"
 #    src/view/viewbase/dbviewmodel.h
 #    src/view/viewbase/dbview.h
 #    src/view/viewbase/dbviewwidget.h
-    src/view/listboxview/buffertablemodel.h
-    src/view/listboxview/buffertablewidget.h
-    src/view/listboxview/listboxviewdatasource.h
-    src/view/listboxview/listboxview.h
-    src/view/listboxview/listboxviewconfigwidget.h
-    src/view/listboxview/listboxviewdatawidget.h
-    src/view/listboxview/listboxviewwidget.h
-    src/unit/unit.h
-    src/unit/unitmanager.h
-    src/unit/dimension.h
-    src/util/config.h
-    src/util/global.h
-    src/util/number.h
-    src/util/stringconv.h
-    src/util/singleton.h
-    src/util/logger.h
-    ${EXPERIMENTAL_HEADERS}
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/listboxview/buffertablemodel.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/listboxview/buffertablewidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/listboxview/listboxviewdatasource.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/listboxview/listboxview.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/listboxview/listboxviewconfigwidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/listboxview/listboxviewdatawidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/listboxview/listboxviewwidget.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/unit/unit.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/unit/unitmanager.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/unit/dimension.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/util/config.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/util/global.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/util/number.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/util/stringconv.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/util/singleton.h"
+    "${CMAKE_CURRENT_LIST_DIR}/src/util/logger.h"
     )
 
 
-set ( atsdb_SRCS
-    src/atsdb.cpp
-    src/buffer/arraylist.cpp
-    src/buffer/buffer.cpp
+target_sources(atsdb
+    PRIVATE
+    "${CMAKE_CURRENT_LIST_DIR}/src/atsdb.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/buffer/arraylist.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/buffer/buffer.cpp"
     #        src/buffer/bufferfilter.cpp
-    src/client/client.cpp
-    src/client/mainwindow.cpp
-    src/client/managementwidget.cpp
-    src/config/configurable.cpp
-    src/config/configuration.cpp
-    src/config/configurationmanager.cpp
-    src/connection/bufferwriter.cpp
-    src/connection/mysqlppconnection.cpp
-    src/connection/mysqlppconnectionwidget.cpp
-    src/connection/mysqlppconnectioninfowidget.cpp
-    src/connection/mysqlserverwidget.cpp
-    src/connection/sqliteconnection.cpp
-    src/connection/sqliteconnectionwidget.cpp
-    src/connection/sqliteconnectioninfowidget.cpp
-    src/filter/dbfilter.cpp
-    src/filter/dbfiltercondition.cpp
-    src/filter/dbfilterwidget.cpp
-    src/filter/filtermanager.cpp
-    src/filter/filtermanagerwidget.cpp
-    src/filter/sensorfilter.cpp
-    src/filter/sensorfilterwidget.cpp
-    src/filter/filtereditwidget.cpp
-    src/filter/filtergeneratorwidget.cpp
-    src/interface/dbinterface.cpp
-    src/interface/dbinterfacewidget.cpp
-    src/interface/dbinterfaceinfowidget.cpp
-    src/interface/sqlgenerator.cpp
-    src/job/dboactivedatasourcesdbjob.cpp
-    src/job/dbominmaxdbjob.cpp
-    src/job/dboreaddbjob.cpp
-    src/job/finalizedboreadjob.cpp
-    src/job/buffercsvexportjob.cpp
+    "${CMAKE_CURRENT_LIST_DIR}/src/client/client.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/client/mainwindow.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/client/managementwidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/config/configurable.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/config/configuration.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/config/configurationmanager.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/connection/bufferwriter.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/connection/mysqlppconnection.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/connection/mysqlppconnectionwidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/connection/mysqlppconnectioninfowidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/connection/mysqlserverwidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/connection/sqliteconnection.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/connection/sqliteconnectionwidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/connection/sqliteconnectioninfowidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/filter/dbfilter.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/filter/dbfiltercondition.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/filter/dbfilterwidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/filter/filtermanager.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/filter/filtermanagerwidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/filter/sensorfilter.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/filter/sensorfilterwidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/filter/filtereditwidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/filter/filtergeneratorwidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/interface/dbinterface.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/interface/dbinterfacewidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/interface/dbinterfaceinfowidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/interface/sqlgenerator.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/job/dboactivedatasourcesdbjob.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/job/dbominmaxdbjob.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/job/dboreaddbjob.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/job/finalizedboreadjob.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/job/buffercsvexportjob.cpp"
     #        src/job/dbovariabledistinctstatisticsdbjob.cpp
     #        src/job/dbocountdbjob.cpp
     #        src/job/dboinfodbjob.cpp
-    src/job/updatebufferdbjob.cpp
+    "${CMAKE_CURRENT_LIST_DIR}/src/job/updatebufferdbjob.cpp"
     #        src/job/writebufferdbjob.cpp
     #        src/job/transformationjob.cpp
-    src/job/jobmanager.cpp
-    src/job/jobmanagerwidget.cpp
-    src/object/dbobject.cpp
-    src/object/dbobjectwidget.cpp
-    src/object/dbobjectinfowidget.cpp
-    src/object/dbobjectmanager.cpp
-    src/object/dbobjectmanagerwidget.cpp
-    src/object/dbobjectmanagerloadwidget.cpp
-    src/object/dbodatasource.cpp
-    src/object/dbodatasourcedefinitionwidget.cpp
-    src/object/dbovariable.cpp
-    src/object/dbovariablewidget.cpp
-    src/object/dbovariableset.cpp
-    src/object/dbovariableorderedset.cpp
-    src/object/dbovariableorderedsetwidget.cpp
-    src/object/dbovariableselectionwidget.cpp
-    src/object/metadbovariable.cpp
-    src/object/metadbovariablewidget.cpp
+    "${CMAKE_CURRENT_LIST_DIR}/src/job/jobmanager.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/job/jobmanagerwidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbobject.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbobjectwidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbobjectinfowidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbobjectmanager.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbobjectmanagerwidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbobjectmanagerloadwidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbodatasource.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbodatasourcedefinitionwidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbovariable.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbovariablewidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbovariableset.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbovariableorderedset.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbovariableorderedsetwidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/dbovariableselectionwidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/metadbovariable.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/object/metadbovariablewidget.cpp"
     #        src/object/dbovariablecombobox.cpp
     #        src/object/dbovariablesetwidget.cpp
     #        src/polygon/polygon4ddi.cpp
@@ -323,63 +325,57 @@ set ( atsdb_SRCS
     #        src/polygon/airspacesectormanagerwidget.cpp
     #        src/polygon/airspacesectortreewidget.cpp
     #        src/polygon/airspacesectorwidget.cpp
-    src/projection/projectionmanager.cpp
-    src/projection/projectionmanagerwidget.cpp
-    src/property/property.cpp
-    src/task/taskmanager.cpp
-    src/task/radarplotpositioncalculatortask.cpp
-    src/task/radarplotpositioncalculatortaskwidget.cpp
-    src/schema/dbschemawidget.cpp
-    src/schema/dbtablewidget.cpp
-    src/schema/dbtablecolumncombobox.cpp
-    src/schema/dbtable.cpp
-    src/schema/dbtablecolumn.cpp
-    src/schema/dbschema.cpp
-    src/schema/dbschemamanager.cpp
-    src/schema/dbschemamanagerwidget.cpp
-    src/schema/metadbtable.cpp
-    src/schema/metadbtablewidget.cpp
-    src/struct/structureelement.cpp
-    src/struct/structuredescription.cpp
+    "${CMAKE_CURRENT_LIST_DIR}/src/projection/projectionmanager.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/projection/projectionmanagerwidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/property/property.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/task/taskmanager.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/task/radarplotpositioncalculatortask.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/task/radarplotpositioncalculatortaskwidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/schema/dbschemawidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/schema/dbtablewidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/schema/dbtablecolumncombobox.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/schema/dbtable.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/schema/dbtablecolumn.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/schema/dbschema.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/schema/dbschemamanager.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/schema/dbschemamanagerwidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/schema/metadbtable.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/schema/metadbtablewidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/struct/structureelement.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/struct/structuredescription.cpp"
     #        src/struct/structurereader.cpp
-    src/struct/structuredescriptionmanager.cpp
-    src/struct/structurevariable.cpp
-    src/unit/dimension.cpp
-    src/unit/unitselectionwidget.cpp
-    src/unit/unitmanager.cpp
-    src/util/config.cpp
-    src/util/logger.cpp
-    src/util/number.cpp
-    src/util/stringconv.cpp
-    src/view/viewmanager.cpp
-    src/view/viewmanagerwidget.cpp
-    src/view/viewcontainer.cpp
-    src/view/viewcontainerwidget.cpp
-    src/view/viewbase/eventprocessor.cpp
-    src/view/viewbase/view.cpp
-    src/view/viewbase/viewwidget.cpp
-    src/view/viewcontainerconfigwidget.cpp
-    src/view/viewbase/viewmodel.cpp
-    src/view/viewbase/viewsettings.cpp
-    src/view/viewbase/viewselection.cpp
-    src/view/listboxview/buffertablemodel.cpp
-    src/view/listboxview/buffertablewidget.cpp
-    src/view/listboxview/listboxview.cpp
-    src/view/listboxview/listboxviewdatasource.cpp
-    src/view/listboxview/listboxviewconfigwidget.cpp
-    src/view/listboxview/listboxviewdatawidget.cpp
-    src/view/listboxview/listboxviewwidget.cpp
+    "${CMAKE_CURRENT_LIST_DIR}/src/struct/structuredescriptionmanager.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/struct/structurevariable.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/unit/dimension.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/unit/unitselectionwidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/unit/unitmanager.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/util/config.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/util/logger.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/util/number.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/util/stringconv.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/viewmanager.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/viewmanagerwidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/viewcontainer.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/viewcontainerwidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/viewbase/eventprocessor.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/viewbase/view.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/viewbase/viewwidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/viewcontainerconfigwidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/viewbase/viewmodel.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/viewbase/viewsettings.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/viewbase/viewselection.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/listboxview/buffertablemodel.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/listboxview/buffertablewidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/listboxview/listboxview.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/listboxview/listboxviewdatasource.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/listboxview/listboxviewconfigwidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/listboxview/listboxviewdatawidget.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/src/view/listboxview/listboxviewwidget.cpp"
 #    src/view/viewbase/dbviewmodel.cpp
 #    src/view/viewbase/dbview.cpp
 #    src/view/viewbase/dbviewwidget.cpp
-    ${EXPERIMENTAL_SOURCES}
     )
 
-set ( client_SRCS
-    src/client/main.cpp
-    )
-
-add_library ( atsdb SHARED ${atsdb_SRCS} ${atsdb_HDRS} )
 target_link_libraries ( atsdb
     Qt5::Widgets
     Qt5::Core
@@ -388,26 +384,20 @@ target_link_libraries ( atsdb
     ${Boost_LIBRARIES}
     ${LOG4CPP_LIBRARIES}
     ${MySQLpp_LIBRARY}
+    ${MYSQL_LIBRARY}
     ${GDAL_LIBRARIES}
-    ${SQLITE3_LIBRARIES}
-    ${EXPERIMENTAL_LIBRARIES})
-#   ${OSGEARTH_LIBRARY} ${OPENSCENEGRAPH_LIBRARIES}
+    ${SQLITE3_LIBRARIES})
 
-add_executable ( atsdb_client ${atsdb_HDRS} ${client_SRCS})
+set ( client_SRCS
+    src/client/main.cpp
+    )
+
+add_executable ( atsdb_client ${client_SRCS})
 target_link_libraries ( atsdb_client
-    atsdb
-    Qt5::Widgets
-    Qt5::Core
-    Qt5::OpenGL
-    ${TINYXML2_LIBRARY}
-    ${Boost_LIBRARIES}
-    ${LOG4CPP_LIBRARIES}
-    ${MySQLpp_LIBRARY}
-    ${GDAL_LIBRARIES}
-    ${SQLITE3_LIBRARIES}
-    ${EXPERIMENTAL_LIBRARIES})
+    atsdb)
 
-INSTALL_FILES(/include .h ${atsdb_HDRS})
+set ( LIBRARY_OUTPUT_PATH dist/lib )
+#INSTALL_FILES(/include .h ${atsdb_HDRS})
 
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
