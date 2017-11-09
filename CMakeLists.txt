@@ -10,8 +10,11 @@ SET(CPACK_PACKAGE_VERSION_MINOR "0")
 SET(CPACK_PACKAGE_VERSION_PATCH "9")
 
 message("  System: ${CMAKE_SYSTEM}")
-SET(CMAKE_INSTALL_PREFIX ${ATSDB_PATH}/dist)
-message("  Install Path: ${CMAKE_INSTALL_PREFIX}")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+#SET(CMAKE_INSTALL_PREFIX ${ATSDB_PATH}/dist)
+#message("  Install Path: ${CMAKE_INSTALL_PREFIX}")
 
 message("  Platform: Linux")
 add_definitions ( -Wall -std=c++11 )
@@ -96,8 +99,11 @@ target_link_libraries ( atsdb
     ${GDAL_LIBRARIES}
     ${SQLITE3_LIBRARIES})
 
-set ( LIBRARY_OUTPUT_PATH dist/lib )
+#set ( LIBRARY_OUTPUT_PATH dist/lib )
 #INSTALL_FILES(/include .h ${atsdb_HDRS})
+
+install (TARGETS atsdb DESTINATION lib)
+install (TARGETS atsdb_client DESTINATION bin)
 
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
