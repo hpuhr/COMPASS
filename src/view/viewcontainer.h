@@ -56,7 +56,7 @@ public:
 
     //  void addGeographicView();
     //  void addHistogramView();
-    void addListBoxView();
+    void addView(const std::string& class_name);
     //  void addMosaicView();
     //  void addScatterPlotView();
     //  void addTemplateView (std::string template_name);

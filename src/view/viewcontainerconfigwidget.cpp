@@ -79,55 +79,11 @@ ViewContainerConfigWidget::~ViewContainerConfigWidget()
 {
 }
 
-
-//void ViewContainerConfigWidget::addGeographicView()
-//{
-//    //TODO
-//    if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
-//        return;
-
-//    view_container_->addGeographicView();
-//    updateSlot();
-//}
-
-
-//void ViewContainerConfigWidget::addScatterPlotView()
-//{
-//    //TODO
-//    if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
-//        return;
-
-//    view_container_->addScatterPlotView();
-//    updateSlot();
-//}
-
-//
-//
-//void ViewContainerConfigWidget::addHistogramView()
-//{
-//    //TODO
-//    if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
-//        return;
-
-//    view_container_->addHistogramView();
-//    updateSlot();
-//}
-
-void ViewContainerConfigWidget::addListBoxView()
+void ViewContainerConfigWidget::addView(const std::string& class_name)
 {
-    view_container_->addListBoxView();
+    view_container_->addView(class_name);
     updateSlot();
 }
-
-//void ViewContainerConfigWidget::addMosaicView()
-//{
-//    //TODO
-//    if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
-//        return;
-
-//    view_container_->addMosaicView();
-//    updateSlot();
-//}
 
 //void ViewContainerConfigWidget::addTemplateView (std::string template_name)
 //{

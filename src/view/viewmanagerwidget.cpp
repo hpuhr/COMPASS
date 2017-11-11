@@ -53,7 +53,7 @@ ViewManagerWidget::ViewManagerWidget(ViewManager &view_manager)
     layout_->addStretch ();
 
     add_button_ = new QPushButton(tr("Add View"));
-    connect(add_button_, SIGNAL( clicked() ), this, SLOT( addViewSlot() ));
+    connect(add_button_, SIGNAL( clicked() ), this, SLOT( addViewMenuSlot() ));
     layout_->addWidget(add_button_);
 
     setLayout (layout_);
@@ -84,7 +84,7 @@ void ViewManagerWidget::databaseIdle ()
 }
 
 
-void ViewManagerWidget::addViewSlot()
+void ViewManagerWidget::addViewMenuSlot()
 {
     add_template_actions_.clear();
 
@@ -124,13 +124,19 @@ void ViewManagerWidget::addViewSlot()
     //  }
 
     // listbox view
-    submenu = menu.addMenu( "ListBox View" );
-    submenu->addAction( "New Window", this, SLOT(addListBoxViewNewWindowSlot()) );
+    submenu = menu.addMenu ("ListBox View");
+
+    QAction *new_window_action = submenu->addAction("New Window", this, SLOT(addViewNewWindowSlot()) );
+    new_window_action->setData("ListBoxView");
+
     for( i=0; i<n; ++i )
     {
         name = cont_widgets_[ i ]->name();
-        QAction* action = submenu->addAction( name, this, SLOT(addListBoxViewSlot()) );
-        action->setData( QVariant( i ) );
+        QAction* action = submenu->addAction( name, this, SLOT(addViewSlot()) );
+        QStringList list;
+        list.append("ListBoxView");
+        list.append(QString::number(i));
+        action->setData(list);
     }
 
     //  //mosaic view
@@ -172,119 +178,35 @@ void ViewManagerWidget::addViewSlot()
     menu.exec(QCursor::pos());
 }
 
-//void ViewManagerWidget::addGeographicViewNewWindowSlot()
-//{
-//  //TODO
-//  if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
-//    return;
-
-//  ViewManager::getInstance().addContainerWithGeographicView();
-//}
-
-//void ViewManagerWidget::addHistogramViewNewWindowSlot()
-//{
-//  //TODO
-//  if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
-//    return;
-
-//  ViewManager::getInstance().addContainerWithHistogramView();
-//}
-
-void ViewManagerWidget::addListBoxViewNewWindowSlot()
+void ViewManagerWidget::addViewNewWindowSlot()
 {
-  ViewContainerWidget* container_widget = view_manager_.addNewContainerWidget ();
-  container_widget->viewContainer().addListBoxView();
+    QAction *action = dynamic_cast<QAction*> (QObject::sender());
+    assert (action);
+    QString class_name = action->data().toString();
+    ViewContainerWidget* container_widget = view_manager_.addNewContainerWidget ();
+    container_widget->viewContainer().addView(class_name.toStdString());
 
-  update();
+    update();
 }
 
-
-//void ViewManagerWidget::addMosaicViewNewWindowSlot()
-//{
-//  //TODO
-//  if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
-//    return;
-
-//  ViewManager::getInstance().addContainerWithMosaicView();
-//}
-
-//void ViewManagerWidget::addScatterPlotViewNewWindowSlot()
-//{
-//  //TODO
-//  if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
-//    return;
-
-//  ViewManager::getInstance().addContainerWithScatterPlotView();
-//}
-
-//void ViewManagerWidget::addGeographicViewSlot()
-//{
-//  //TODO
-//  if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
-//    return;
-
-//  QAction* action = (QAction*)(QObject::sender());
-//  unsigned int containter_id = action->data().toUInt();
-
-//  if( containter_id < 0 || containter_id >= cont_widgets_.size() )
-//    throw( std::runtime_error( "ViewManagerWidget :addGeographicViewSlot: container out of bounds" ) );
-//  cont_widgets_[ containter_id ]->addGeographicView();
-//}
-
-//void ViewManagerWidget::addHistogramViewSlot()
-//{
-//  //TODO
-//  if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
-//    return;
-
-//  QAction* action = (QAction*)(QObject::sender());
-//  unsigned int containter_id = action->data().toUInt();
-
-//  if( containter_id < 0 || containter_id >= cont_widgets_.size() )
-//    throw( std::runtime_error( "ViewManagerWidget: addHistogramViewSlot: container out of bounds" ) );
-//  cont_widgets_[ containter_id ]->addHistogramView();
-//}
-
-void ViewManagerWidget::addListBoxViewSlot()
+void ViewManagerWidget::addViewSlot()
 {
-    loginf << "ViewManagerWidget: addListBoxViewSlot";
+    QAction *action = dynamic_cast<QAction*> (QObject::sender());
+    assert (action);
+    QStringList list = action->data().toStringList();
+    assert (list.size() == 2);
+    QString class_name = list.at(0);
+    QString number_str = list.at(1);
+    bool ok;
+    unsigned int containter_id = number_str.toUInt(&ok);
+    assert (ok);
 
-    QAction* action = (QAction*)(QObject::sender());
-    unsigned int containter_id = action->data().toUInt();
+    loginf << "ViewManagerWidget: addViewSlot: class " << class_name.toStdString();
 
     if( containter_id < 0 || containter_id >= cont_widgets_.size() )
-        throw( std::runtime_error( "ViewManagerWidget: addListBoxViewSlot: container out of bounds" ) );
-    cont_widgets_[ containter_id ]->addListBoxView();
+        throw( std::runtime_error( "ViewManagerWidget: addViewSlot: container out of bounds" ) );
+    cont_widgets_[ containter_id ]->addView(class_name.toStdString());
 }
-
-//void ViewManagerWidget::addMosaicViewSlot()
-//{
-//  //TODO
-//  if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
-//    return;
-
-//  QAction* action = (QAction*)(QObject::sender());
-//  unsigned int containter_id = action->data().toUInt();
-
-//  if( containter_id < 0 || containter_id >= cont_widgets_.size() )
-//    throw( std::runtime_error( "ViewManagerWidget: addMosaicViewSlot: container out of bounds" ) );
-//  cont_widgets_[ containter_id ]->addMosaicView();
-//}
-
-//void ViewManagerWidget::addScatterPlotViewSlot()
-//{
-//  //TODO
-//  if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
-//    return;
-
-//  QAction* action = (QAction*)(QObject::sender());
-//  unsigned int containter_id = action->data().toUInt();
-
-//  if( containter_id < 0 || containter_id >= cont_widgets_.size() )
-//    throw( std::runtime_error( "ViewManagerWidget: addScatterPlotViewSlot: container out of bounds" ) );
-
-//  cont_widgets_[ containter_id ]->addScatterPlotView();
-//}
 
 void ViewManagerWidget::update ()
 {

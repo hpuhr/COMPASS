@@ -83,30 +83,10 @@ ViewContainer::~ViewContainer()
     views_.clear();
 }
 
-//void ViewContainer::addGeographicView()
-//{
-//  generateSubConfigurable ("GeographicView", "GeographicView"+intToString(view_count_));
-//}
-
-//void ViewContainer::addHistogramView()
-//{
-//  generateSubConfigurable ("HistogramView", "HistogramView"+intToString(view_count_));
-//}
-
-void ViewContainer::addListBoxView()
+void ViewContainer::addView(const std::string& class_name)
 {
-    generateSubConfigurable ("ListBoxView", "ListBoxView"+std::to_string(view_count_));
+    generateSubConfigurable (class_name, class_name+std::to_string(view_count_));
 }
-
-//void ViewContainer::addMosaicView()
-//{
-//  generateSubConfigurable ("MosaicView", "MosaicView"+intToString(view_count_));
-//}
-
-//void ViewContainer::addScatterPlotView()
-//{
-//  generateSubConfigurable ("ScatterPlotView", "ScatterPlotView"+intToString(view_count_));
-//}
 
 //void ViewContainer::addTemplateView (std::string template_name)
 //{

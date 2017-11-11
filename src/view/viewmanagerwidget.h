@@ -25,6 +25,7 @@ class ViewManager;
 class ViewContainerConfigWidget;
 class QVBoxLayout;
 class QPushButton;
+class QAction;
 
 class ViewManagerWidget : public QFrame
 {
@@ -33,17 +34,9 @@ private slots:
     void databaseBusy ();
     void databaseIdle ();
 
+    void addViewMenuSlot();
     void addViewSlot();
-    //  void addGeographicViewSlot();
-    //  void addHistogramViewSlot();
-    void addListBoxViewSlot();
-    //  void addMosaicViewSlot();
-    //  void addScatterPlotViewSlot();
-    //  void addGeographicViewNewWindowSlot();
-    //  void addHistogramViewNewWindowSlot();
-    void addListBoxViewNewWindowSlot();
-    //  void addMosaicViewNewWindowSlot();
-    //  void addScatterPlotViewNewWindowSlot();
+    void addViewNewWindowSlot();
     //  void addTemplateSlot ();
     //  void addTemplateNewWindowSlot ();
 
