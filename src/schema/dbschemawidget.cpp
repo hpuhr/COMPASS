@@ -44,7 +44,7 @@
 #include "atsdb.h"
 #include "buffer.h"
 #include "global.h"
-
+#include "files.h"
 #include "stringconv.h"
 
 using namespace Utils;
@@ -283,10 +283,10 @@ void DBSchemaWidget::updateTableGrid()
 
     unsigned int row=1;
 
-    QPixmap edit_pixmap("./data/icons/edit.png");
+    QPixmap edit_pixmap(Files::getIconFilepath("edit.png").c_str());
     QIcon edit_icon(edit_pixmap);
 
-    QPixmap del_pixmap("./data/icons/delete.png");
+    QPixmap del_pixmap(Files::getIconFilepath("delete.png").c_str());
     QIcon del_icon(del_pixmap);
 
     edit_table_buttons_.clear();
@@ -369,10 +369,10 @@ void DBSchemaWidget::updateMetaTableGrid()
 
     unsigned int row=1;
 
-    QPixmap edit_pixmap("./data/icons/edit.png");
+    QPixmap edit_pixmap(Files::getIconFilepath("edit.png").c_str());
     QIcon edit_icon(edit_pixmap);
 
-    QPixmap del_pixmap("./data/icons/delete.png");
+    QPixmap del_pixmap(Files::getIconFilepath("delete.png").c_str());
     QIcon del_icon(del_pixmap);
 
     edit_meta_table_buttons_.clear();

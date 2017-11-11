@@ -69,5 +69,12 @@ bool copyRecursively(const std::string& source_folder, const std::string& dest_f
     return true;
 }
 
+std::string getIconFilepath (const std::string& filename)
+{
+    std::string filepath = HOME_DATA_DIRECTORY+"icons/"+filename;
+    verifyFileExists (filepath);
+    return filepath;
+}
+
 }
 }

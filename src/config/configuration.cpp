@@ -634,6 +634,7 @@ void Configuration::parseXMLFileElement (tinyxml2::XMLElement *element)
         XMLDocument *sub_config_file_doc = new XMLDocument ();
 
         std::string file_path = CURRENT_CONF_DIRECTORY+path;
+        loginf << "Configuration: parseXMLFileElement: loading file '" << file_path << "'";
         Files::verifyFileExists(file_path);
 
         if (sub_config_file_doc->LoadFile(file_path.c_str()) == 0)
@@ -742,11 +743,10 @@ XMLElement *Configuration::generateXMLElement (tinyxml2::XMLDocument *parent_doc
 
     if (configuration_filename_.size() > 0)
     {
-        logdbg  << "Configuration: generateElement: saving sub-configuration file '" << configuration_filename_ << "'";
-
         document->LinkEndChild( element );
 
         std::string file_path = CURRENT_CONF_DIRECTORY+configuration_filename_;
+        loginf  << "Configuration: generateElement: saving sub-configuration file '" << file_path << "'";
         Files::verifyFileExists(file_path);
 
         document->SaveFile(file_path.c_str());

@@ -37,6 +37,7 @@
 
 #include "stringconv.h"
 #include "global.h"
+#include "files.h"
 
 #include <QHBoxLayout>
 #include <QPushButton>
@@ -47,7 +48,7 @@
 
 unsigned int ViewContainer::view_count_=0;
 
-using namespace Utils::String;
+using namespace Utils;
 
 ViewContainer::ViewContainer(const std::string &class_id, const std::string &instance_id, Configurable *parent, ViewManager *view_manager, QTabWidget *tab_widget)
     : QObject(), Configurable( class_id, instance_id, parent ), view_manager_(*view_manager), tab_widget_(tab_widget), last_active_manage_button_ (nullptr),
@@ -132,7 +133,7 @@ void ViewContainer::addView (View *view)
     int index = tab_widget_->addTab( w, QString::fromStdString( view->getName() ) );
 
     QPushButton *manage_button = new QPushButton();
-    manage_button->setIcon( QIcon( "./data/icons/edit.png" ) );
+    manage_button->setIcon (QIcon(Files::getIconFilepath("edit.png").c_str()));
     manage_button->setFixedSize (UI_ICON_SIZE);
     manage_button->setFlat(UI_ICON_BUTTON_FLAT);
     manage_button->setToolTip(tr("Manage view"));
@@ -198,7 +199,7 @@ void ViewContainer::generateSubConfigurable (const std::string &class_id, const 
     if (class_id.compare ("ListBoxView") == 0)
     {
         ListBoxView* view = new ListBoxView ( class_id, instance_id, this, view_manager_);
-        unsigned int number = getAppendedInt (instance_id);
+        unsigned int number = String::getAppendedInt (instance_id);
 
         if (number >= view_count_)
             view_count_ = number+1;

@@ -44,7 +44,7 @@
 #include "dbtablecolumncombobox.h"
 #include "unitselectionwidget.h"
 #include "dbodatasourcedefinitionwidget.h"
-
+#include "files.h"
 #include "stringconv.h"
 
 using namespace Utils;
@@ -373,10 +373,10 @@ void DBObjectWidget::updateDataSourcesGrid ()
     del_label->setFont (font_bold);
     ds_grid_->addWidget (del_label, 0, 2);
 
-    QPixmap edit_pixmap("./data/icons/edit.png");
+    QPixmap edit_pixmap(Files::getIconFilepath("edit.png").c_str());
     QIcon edit_icon(edit_pixmap);
 
-    QPixmap del_pixmap("./data/icons/delete.png");
+    QPixmap del_pixmap(Files::getIconFilepath("delete.png").c_str());
     QIcon del_icon(del_pixmap);
 
     auto dsdefs = object_->dataSourceDefinitions ();
@@ -626,10 +626,10 @@ void DBObjectWidget::updateDBOVarsGrid ()
 
     auto variables = object_->variables();
 
-    QPixmap edit_pixmap("./data/icons/edit.png");
+    QPixmap edit_pixmap(Files::getIconFilepath("edit.png").c_str());
     QIcon edit_icon(edit_pixmap);
 
-    QPixmap del_pixmap("./data/icons/delete.png");
+    QPixmap del_pixmap(Files::getIconFilepath("delete.png").c_str());
     QIcon del_icon(del_pixmap);
 
     logdbg  << "DBObjectWidget: updateDBOVarsGrid: creating variable rows";

@@ -29,6 +29,8 @@ void verifyFileExists(const std::string& path);
 bool directoryExists(const std::string& path);
 bool copyRecursively(const std::string& source_folder, const std::string& dest_folder);
 
+std::string getIconFilepath (const std::string& filename);
+
 }
 }
 

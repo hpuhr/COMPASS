@@ -28,6 +28,9 @@
 #include "global.h"
 #include "atsdb.h"
 #include "filtermanager.h"
+#include "files.h"
+
+using namespace Utils;
 
 /**
  * Initializes members, registers Parameter, creates GUI elements and the menu, calls update
@@ -58,14 +61,15 @@ DBFilterWidget::DBFilterWidget(const std::string &class_id, const std::string &i
     visible_checkbox_ = new QCheckBox(tr(filter_.getName().c_str()));
     connect( visible_checkbox_, SIGNAL( clicked() ), this, SLOT( toggleVisible() ) );
 
-    visible_checkbox_->setStyleSheet (" QCheckBox::indicator {  width: 12px; height: 12px; }  "
-            "QCheckBox::indicator:checked   {     image: url(./data/icons/collapse.png);   }"
-            "QCheckBox::indicator:unchecked   {     image: url(./data/icons/expand.png); }");
+    std::string style_str = " QCheckBox::indicator {  width: 12px; height: 12px; }  "
+                            "QCheckBox::indicator:checked   {     image: url("+Files::getIconFilepath("collapse.png")+");   }"
+                            "QCheckBox::indicator:unchecked   {     image: url("+Files::getIconFilepath("expand.png")+"); }";
+    visible_checkbox_->setStyleSheet (style_str.c_str());
 
     config_layout->addWidget (visible_checkbox_);
     config_layout->addStretch();
 
-    QPixmap* pixmapmanage = new QPixmap("./data/icons/edit.png");
+    QPixmap* pixmapmanage = new QPixmap(Files::getIconFilepath("edit.png").c_str());
     manage_button_ = new QPushButton ();
     manage_button_->setIcon(QIcon(*pixmapmanage));
     manage_button_->setFixedSize (UI_ICON_SIZE);

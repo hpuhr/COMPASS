@@ -39,9 +39,10 @@
 #include "stringconv.h"
 #include "atsdb.h"
 #include "global.h"
+#include "files.h"
 //#include "MetaDBObjectEditWidget.h"
 
-using namespace Utils::String;
+using namespace Utils;
 
 DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager &object_manager)
     : object_manager_(object_manager), schema_manager_(ATSDB::instance().schemaManager()), dbobjects_grid_ (nullptr), meta_variables_grid_(nullptr), unlocked_(false)
@@ -233,10 +234,10 @@ void DBObjectManagerWidget::updateDBOsSlot ()
         delete child;
     }
 
-    QPixmap edit_pixmap("./data/icons/edit.png");
+    QPixmap edit_pixmap(Files::getIconFilepath("edit.png").c_str());
     QIcon edit_icon(edit_pixmap);
 
-    QPixmap del_pixmap("./data/icons/delete.png");
+    QPixmap del_pixmap(Files::getIconFilepath("delete.png").c_str());
     QIcon del_icon(del_pixmap);
 
     edit_dbo_buttons_.clear();
@@ -403,10 +404,10 @@ void DBObjectManagerWidget::updateMetaVariablesSlot ()
         delete child;
     }
 
-    QPixmap edit_pixmap("./data/icons/edit.png");
+    QPixmap edit_pixmap(Files::getIconFilepath("edit.png").c_str());
     QIcon edit_icon(edit_pixmap);
 
-    QPixmap del_pixmap("./data/icons/delete.png");
+    QPixmap del_pixmap(Files::getIconFilepath("delete.png").c_str());
     QIcon del_icon(del_pixmap);
 
     edit_meta_buttons_.clear();

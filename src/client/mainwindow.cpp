@@ -59,6 +59,7 @@
 #include "taskmanager.h"
 #include "radarplotpositioncalculatortask.h"
 #include "radarplotpositioncalculatortaskwidget.h"
+#include "files.h"
 
 using namespace Utils;
 using namespace std;
@@ -71,7 +72,7 @@ MainWindow::MainWindow()
 {
     logdbg  << "MainWindow: constructor";
 
-    QPixmap atsdb_pixmap("./data/icons/atsdb.png");
+    QPixmap atsdb_pixmap(Files::getIconFilepath("atsdb.png").c_str());
     QIcon atsdb_icon(atsdb_pixmap);
     setWindowIcon(atsdb_icon); // for the glory of the empire
 

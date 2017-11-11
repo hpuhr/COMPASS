@@ -20,12 +20,14 @@
 #include "viewcontainerwidget.h"
 #include "viewcontainer.h"
 #include "global.h"
+#include "files.h"
 
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QToolButton>
 #include <QMessageBox>
 
+using namespace Utils;
 
 ViewContainerConfigWidget::ViewContainerConfigWidget( ViewContainer *view_container, QWidget* parent )
 :   QWidget( parent ), view_container_( view_container )
@@ -61,7 +63,7 @@ ViewContainerConfigWidget::ViewContainerConfigWidget( ViewContainer *view_contai
     if (view_container_->getName().compare("MainWindow") != 0)
     {
         QToolButton *vdel = new QToolButton();
-        vdel->setIcon( QIcon( "./data/icons/delete.png" ) );
+        vdel->setIcon( QIcon(Files::getIconFilepath("delete.png").c_str()));
         namelayout->addWidget( vdel );
         connect( vdel, SIGNAL(clicked()), this, SLOT(closeSlot()) );
     }
@@ -203,7 +205,7 @@ ViewControlWidget::ViewControlWidget( View* view, QWidget* parent )
     namelayout->addWidget( label );
 
     QToolButton *vdel = new QToolButton();
-    vdel->setIcon( QIcon( "./data/icons/delete.png" ) );
+    vdel->setIcon( QIcon(Files::getIconFilepath("delete.png").c_str()));
     connect( vdel, SIGNAL(clicked()), this, SLOT(removeViewSlot()));
     namelayout->addWidget( vdel );
     //namelayout->addStretch( 1 );
@@ -211,9 +213,9 @@ ViewControlWidget::ViewControlWidget( View* view, QWidget* parent )
     load_ = new QLabel();
     load_->setText( "Idle" );
     flayout->addWidget( load_ );
-    connect( view, SIGNAL(loadingStarted()), this, SLOT(loadingStartedSlot()) );
-    connect( view, SIGNAL(loadingFinished()), this, SLOT(loadingFinishedSlot()) );
-    connect( view, SIGNAL(loadingTime(double)), this, SLOT(loadingTimeSlot(double)) );
+    connect (view, SIGNAL(loadingStarted()), this, SLOT(loadingStartedSlot()));
+    connect (view, SIGNAL(loadingFinished()), this, SLOT(loadingFinishedSlot()));
+    connect (view, SIGNAL(loadingTime(double)), this, SLOT(loadingTimeSlot(double)));
 }
 
 /*
