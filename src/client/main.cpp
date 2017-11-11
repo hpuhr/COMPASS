@@ -72,8 +72,9 @@ int main (int argc, char **argv)
         std::string config_version = config.getString("version");
         loginf << "ATSDBClient: configuration version " << config_version;
 
-        if (USE_EXPERIMENTAL_SOURCE)
-            loginf << "ATSDBClient: includes experimental features";
+#if USE_EXPERIMENTAL_SOURCE == true
+        loginf << "ATSDBClient: includes experimental features";
+#endif
 
         if (config.existsId("enable_multisampling") && config.getBool("enable_multisampling")
                 && config.existsId("multisampling"))

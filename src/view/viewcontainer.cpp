@@ -26,18 +26,14 @@
 #include "view.h"
 #include "viewmanager.h"
 #include "listboxview.h"
-//#include "GeographicView.h"
-//#include "HistogramView.h"
-//#include "ScatterPlotView.h"
-//#include "MosaicView.h"
-
-#ifdef VARNAME
-#include "osgview.h"
-#endif
 
 #include "stringconv.h"
 #include "global.h"
 #include "files.h"
+
+#if USE_EXPERIMENTAL_SOURCE == true
+#include "osgview.h"
+#endif
 
 #include <QHBoxLayout>
 #include <QPushButton>
@@ -187,16 +183,18 @@ void ViewContainer::generateSubConfigurable (const std::string &class_id, const 
         assert( view );
         view->init();
     }
-    //  else if (class_id.compare ("GeographicView") == 0)
-    //  {
-    //    GeographicView* view = new GeographicView ( class_id, instance_id, this );
-    //    unsigned int number = getAppendedInt (instance_id);
-    //    if (number >= view_count_)
-    //      view_count_ = number+1;
+#if USE_EXPERIMENTAL_SOURCE == true
+    else if (class_id.compare ("OSGView") == 0)
+    {
+        OSGView* view = new OSGView (class_id, instance_id, this, view_manager_);
+        unsigned int number = String::getAppendedInt (instance_id);
+        if (number >= view_count_)
+            view_count_ = number+1;
 
-    //    assert( view );
-    //    view->init();
-    //  }
+        assert( view );
+        view->init();
+    }
+#endif
     //  else if (class_id.compare ("HistogramView") == 0)
     //  {
     //    HistogramView* view = new HistogramView ( class_id, instance_id, this );

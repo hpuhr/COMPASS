@@ -54,12 +54,7 @@ public:
     virtual std::string getName ();
     static unsigned int getViewCount () { return view_count_; }
 
-    //  void addGeographicView();
-    //  void addHistogramView();
     void addView(const std::string& class_name);
-    //  void addMosaicView();
-    //  void addScatterPlotView();
-    //  void addTemplateView (std::string template_name);
 
     ViewContainerConfigWidget *configWidget ();
 

@@ -61,14 +61,28 @@ message("  TINYXML2_LIBRARY: ${TINYXML2_LIBRARY}")
 
 add_library(atsdb "")
 
+message("Install path: ${CMAKE_INSTALL_PREFIX}")
+
+include(src/CMakeLists.txt)
+
 set (EXPERIMENTAL_SRC true)
 message("Experimental source: ${EXPERIMENTAL_SRC}")
 
-message("Install path: ${CMAKE_INSTALL_PREFIX}")
-configure_file(src/util/global.h.in include/global.h)
+IF (EXPERIMENTAL_SRC)
+    IF(IS_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/experimental_src2")
+        MESSAGE(STATUS "Experimental source found")
+    ELSE()
+        MESSAGE(STATUS "Experimental source not found found, deactivating")
+        set (EXPERIMENTAL_SRC false)
+    ENDIF()
+ENDIF()
 
-include(src/CMakeLists.txt)
-include(experimental_src/CMakeLists.txt)
+IF (EXPERIMENTAL_SRC)
+    MESSAGE(STATUS "Including experimental source")
+    include(experimental_src/CMakeLists.txt)
+ENDIF()
+
+configure_file(src/util/global.h.in include/global.h)
 
 include_directories (
     ${CMAKE_SOURCE_DIR}

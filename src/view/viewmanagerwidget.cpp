@@ -30,6 +30,7 @@
 #include "viewcontainer.h"
 #include "viewcontainerwidget.h"
 #include "viewcontainerconfigwidget.h"
+#include "global.h"
 
 ViewManagerWidget::ViewManagerWidget(ViewManager &view_manager)
     : view_manager_(view_manager), layout_(nullptr), cont_layout_(nullptr), add_button_(nullptr)
@@ -61,7 +62,12 @@ ViewManagerWidget::ViewManagerWidget(ViewManager &view_manager)
     connect (&JobManager::instance(), SIGNAL(databaseBusy()), this, SLOT(databaseBusy()));
     connect (&JobManager::instance(), SIGNAL(databaseIdle()), this, SLOT(databaseIdle()));
 
-    //view_manager_.setViewManagerWidget(this);
+    view_class_list_.append("ListBoxView");
+
+#if USE_EXPERIMENTAL_SOURCE == true
+    view_class_list_.append("OSGView");
+#endif
+
     update ();
 
     logdbg  << "ViewManagerWidget: constructor: end";
@@ -93,61 +99,23 @@ void ViewManagerWidget::addViewMenuSlot()
     QString name;
     unsigned int i, n = cont_widgets_.size();
 
-    //  //scatter plot view
-    //  submenu = menu.addMenu( "Geographic View" );
-    //  submenu->addAction( "New Window", this, SLOT(addGeographicViewNewWindowSlot()) );
-    //  for( i=0; i<n; ++i )
-    //  {
-    //    name = cont_widgets_[ i ]->name();
-    //    QAction* action = submenu->addAction( name, this, SLOT(addGeographicViewSlot()) );
-    //    action->setData( QVariant( i ) );
-    //  }
-
-    //  //scatter plot 2d view
-    //  submenu = menu.addMenu( "ScatterPlot View" );
-    //  submenu->addAction( "New Window", this, SLOT(addScatterPlotViewNewWindowSlot()) );
-    //  for( i=0; i<n; ++i )
-    //  {
-    //    name = cont_widgets_[ i ]->name();
-    //    QAction* action = submenu->addAction( name, this, SLOT(addScatterPlotViewSlot()) );
-    //    action->setData( QVariant( i ) );
-    //  }
-
-    //  //histogram view
-    //  submenu = menu.addMenu( "Histogram View" );
-    //  submenu->addAction( "New Window", this, SLOT(addHistogramViewNewWindowSlot()) );
-    //  for( i=0; i<n; ++i )
-    //  {
-    //    name = cont_widgets_[ i ]->name();
-    //    QAction* action = submenu->addAction( name, this, SLOT(addHistogramViewSlot()) );
-    //    action->setData( QVariant( i ) );
-    //  }
-
-    // listbox view
-    submenu = menu.addMenu ("ListBox View");
-
-    QAction *new_window_action = submenu->addAction("New Window", this, SLOT(addViewNewWindowSlot()) );
-    new_window_action->setData("ListBoxView");
-
-    for( i=0; i<n; ++i )
+    for (QString view_class : view_class_list_)
     {
-        name = cont_widgets_[ i ]->name();
-        QAction* action = submenu->addAction( name, this, SLOT(addViewSlot()) );
-        QStringList list;
-        list.append("ListBoxView");
-        list.append(QString::number(i));
-        action->setData(list);
-    }
+        submenu = menu.addMenu (view_class);
 
-    //  //mosaic view
-    //  /*submenu = menu.addMenu( "Mosaic View" );
-    //  submenu->addAction( "New Window", this, SLOT(addMosaicViewNewWindowSlot()) );
-    //  for( i=0; i<n; ++i )
-    //  {
-    //    name = cont_widgets_[ i ]->name();
-    //    QAction* action = submenu->addAction( name, this, SLOT(addMosaicViewSlot()) );
-    //    action->setData( QVariant( i ) );
-    //  }*/
+        QAction *new_window_action = submenu->addAction("New Window", this, SLOT(addViewNewWindowSlot()) );
+        new_window_action->setData(view_class);
+
+        for( i=0; i<n; ++i )
+        {
+            name = cont_widgets_[ i ]->name();
+            QAction* action = submenu->addAction( name, this, SLOT(addViewSlot()) );
+            QStringList list;
+            list.append(view_class);
+            list.append(QString::number(i));
+            action->setData(list);
+        }
+    }
 
     //  std::map<std::string, Configuration> &templates = ViewManager::getInstance().getConfiguration()
     //          .getConfigurationTemplates ();

@@ -19,6 +19,7 @@
 #define VIEWSWIDGET_H_
 
 #include <QFrame>
+#include <QStringList>
 #include <map>
 
 class ViewManager;
@@ -53,6 +54,7 @@ private:
 
     QPushButton *add_button_;
 
+    QStringList view_class_list_;
     std::vector<ViewContainerConfigWidget*> cont_widgets_;
     std::map <QAction*, std::pair<std::string, int> > add_template_actions_;
 };

@@ -37,6 +37,6 @@ static const double DEG2RAD = 2*M_PI/360.0;
 static const double RAD2DEG = 1.0/DEG2RAD;
 
 //std::string my_var = "@MY_VAR@";
-static const bool USE_EXPERIMENTAL_SOURCE = @EXPERIMENTAL_SRC@;
+#define USE_EXPERIMENTAL_SOURCE @EXPERIMENTAL_SRC@
 static const std::string CMAKE_INSTALL_PREFIX = "@CMAKE_INSTALL_PREFIX@";
 #endif
