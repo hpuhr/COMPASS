@@ -18,8 +18,10 @@
 #ifndef DBGLOBAL_H_
 #define DBGLOBAL_H_
 
-#include <qsize.h>
+#include <QSize>
 #include <math.h>
+
+static const std::string VERSION = "@CPACK_PACKAGE_VERSION_MAJOR@.@CPACK_PACKAGE_VERSION_MINOR@.@CPACK_PACKAGE_VERSION_PATCH@";
 
 static QSize UI_ICON_SIZE (20,20);
 static const unsigned int UI_ICON_BUTTON_MAX_WIDTH=40;
@@ -34,41 +36,7 @@ static const std::string MYSQL_IDENTIFIER="mysql";
 static const double DEG2RAD = 2*M_PI/360.0;
 static const double RAD2DEG = 1.0/DEG2RAD;
 
-/// If an old ogre library (1.6.x) is used.
-//#define USE_OLD_OGRE 0
-/// If set, disables ogre logging.
-//#define DISABLE_OGRE_LOG 1
-
-/// Definition of different presentation modes
-//enum PRESENTATION_MODE
-//{
-//  PRESENTATION_MODE_POINT_DETECTION,
-//  PRESENTATION_MODE_POINT_RADAR,
-//  PRESENTATION_MODE_SYMBOL_DETECTION,
-//  PRESENTATION_MODE_SYMBOL_RADAR
-//};
-
-/// Definition of different view modes
-//enum VIEW_MODE
-//{
-//  VIEW_MODE_2D, VIEW_MODE_3D
-//};
-
-/// Definition if different display object types
-//enum DOType {
-//  DO_UNKNOWN,
-//  DO_POINTS,
-//  DO_TILEDPOINTS,
-//  DO_LINES
-//};
-
-/// Definition of different display object query flags
-//enum DOQueryFlag {
-//  QUERY_NONE        = 0,
-//  QUERY_POINTS      = 1<<1,
-//  QUERY_TILEDPOINTS = 1<<2,
-//  QUERY_LINES       = 1<<3,
-//  QUERY_RECTS       = 1<<4
-//};
-
+//std::string my_var = "@MY_VAR@";
+static const bool USE_EXPERIMENTAL_SOURCE = @EXPERIMENTAL_SRC@;
+static const std::string CMAKE_INSTALL_PREFIX = "@CMAKE_INSTALL_PREFIX@";
 #endif

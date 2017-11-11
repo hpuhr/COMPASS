@@ -20,7 +20,7 @@
 #include "logger.h"
 
 UnitManager::UnitManager()
-: Configurable ("UnitManager", "UnitManager0", 0, "conf/units.xml")
+: Configurable ("UnitManager", "UnitManager0", 0, "units.xml")
 {
     createSubConfigurables ();
 }

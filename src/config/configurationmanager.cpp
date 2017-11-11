@@ -21,8 +21,12 @@
 #include "configurable.h"
 #include "logger.h"
 #include "config.h"
+#include "global.h"
+#include "files.h"
 
 using namespace tinyxml2;
+
+using namespace Utils;
 
 /**
  * Loads the main configuration filename from Config and calls parseConfigurationFile.
@@ -40,17 +44,11 @@ void ConfigurationManager::init (const std::string &main_config_filename)
     main_config_filename_ = main_config_filename;
     initialized_ = true;
 
-    std::ifstream grab(main_config_filename.c_str());
+    std::string path_filename = CURRENT_CONF_DIRECTORY+main_config_filename;
+    Files::verifyFileExists(path_filename);
 
-    //check file exists
-    if (grab)
-    {
-        loginf  << "ConfigurationManager: init: parsing main configuration file '" << main_config_filename_ << "'";
-        parseConfigurationFile (main_config_filename_);
-    }
-    else
-        logwrn << "ConfigurationManager::init: main configuration file does not exist";
-
+    loginf << "ConfigurationManager: init: opening main configuration file '" << path_filename << "'";
+    parseConfigurationFile (path_filename);
 }
 
 ConfigurationManager::~ConfigurationManager()
@@ -109,10 +107,11 @@ void ConfigurationManager::parseConfigurationFile (std::string filename)
     logdbg  << "ConfigurationManager: parseConfigurationFile: opening '" << filename << "'";
     XMLDocument *config_file_doc = new XMLDocument ();
 
+    Files::verifyFileExists(filename);
+    logdbg  << "ConfigurationManager: parseConfigurationFile: opening file '" << filename << "'";
+
     if (config_file_doc->LoadFile(filename.c_str()) == 0)
     {
-        logdbg  << "ConfigurationManager: parseConfigurationFile: file '" << filename << "' opened";
-
         XMLElement *doc_main_conf;
         XMLElement *main_conf_child;
 
@@ -122,7 +121,8 @@ void ConfigurationManager::parseConfigurationFile (std::string filename)
             assert (strcmp ("Configuration", doc_main_conf->Value() ) == 0);
             logdbg  << "ConfigurationManager: parseConfigurationFile: found Configuration";
 
-            for (main_conf_child = doc_main_conf->FirstChildElement(); main_conf_child != 0; main_conf_child = main_conf_child->NextSiblingElement())
+            for (main_conf_child = doc_main_conf->FirstChildElement(); main_conf_child != 0;
+                 main_conf_child = main_conf_child->NextSiblingElement())
             {
                 logdbg  << "ConfigurationManager: parseConfigurationFile: found element '" << main_conf_child->Value() << "'";
                 if (strcmp ("SubConfigurationFile", main_conf_child->Value() ) == 0)
@@ -174,7 +174,7 @@ void ConfigurationManager::parseConfigurationFile (std::string filename)
     }
     else
     {
-        logerr << "ConfigurationManager: parseConfigurationFile: could not load file '" << filename << "'";
+        logerr << "ConfigurationManager: parseConfigurationFile: could not load file '" << filename<< "'";
         throw std::runtime_error ("ConfigurationManager: parseConfigurationFile: load error");
     }
     logdbg  << "ConfigurationManager: parseConfigurationFile: file '" << filename << "' done";
@@ -210,8 +210,9 @@ void ConfigurationManager::saveConfiguration ()
         }
     }
 
-    loginf  << "ConfigurationManager: saveConfiguration: saving configuration file";
-    document->SaveFile(main_config_filename_.c_str());
+    std::string main_config_path = CURRENT_CONF_DIRECTORY+main_config_filename_;
+    loginf  << "ConfigurationManager: saveConfiguration: saving main configuration file '" << main_config_path << "'";
+    document->SaveFile(main_config_path.c_str());
 
     delete document;
 }

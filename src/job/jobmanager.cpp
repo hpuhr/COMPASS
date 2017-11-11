@@ -27,7 +27,7 @@
 using namespace Utils;
 
 JobManager::JobManager()
-    : Configurable ("JobManager", "JobManager0", 0, "conf/threads.xml"), stop_requested_(false), stopped_(false), widget_(nullptr)
+    : Configurable ("JobManager", "JobManager0", 0, "threads.xml"), stop_requested_(false), stopped_(false), widget_(nullptr)
 {
     logdbg  << "JobManager: constructor";
     boost::mutex::scoped_lock l(mutex_);

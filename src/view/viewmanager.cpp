@@ -33,7 +33,7 @@
 using namespace Utils;
 
 ViewManager::ViewManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb)
-    : Configurable (class_id, instance_id, atsdb, "conf/config_views.xml"), atsdb_(*atsdb), widget_(nullptr), initialized_(false), container_count_(0)
+    : Configurable (class_id, instance_id, atsdb, "views.xml"), atsdb_(*atsdb), widget_(nullptr), initialized_(false), container_count_(0)
 {
     logdbg  << "ViewManager: constructor";
 }

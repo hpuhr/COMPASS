@@ -30,7 +30,7 @@
 
 
 FilterManager::FilterManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb)
-: Configurable (class_id, instance_id, atsdb, "conf/config_filter.xml"), widget_(nullptr)
+: Configurable (class_id, instance_id, atsdb, "filter.xml"), widget_(nullptr)
 {
     logdbg  << "FilterManager: constructor";
 

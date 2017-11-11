@@ -30,7 +30,7 @@
  * Registers current_schema as parameter, creates sub-configurables (schemas), checks if current_schema exists (if defined).
  */
 DBSchemaManager::DBSchemaManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb)
-: Configurable (class_id, instance_id, atsdb, "conf/config_db_schema.xml"), widget_(nullptr)
+: Configurable (class_id, instance_id, atsdb, "db_schema.xml"), widget_(nullptr)
 {
     registerParameter ("current_schema", &current_schema_, (std::string)"");
 

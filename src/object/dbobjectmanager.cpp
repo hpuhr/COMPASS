@@ -35,7 +35,7 @@ using namespace Utils::String;
  * Creates sub-configurables.
  */
 DBObjectManager::DBObjectManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb)
-: Configurable (class_id, instance_id, atsdb, "conf/config_dbo.xml"), widget_(nullptr), load_widget_(nullptr) //, registered_parent_variables_ (false)
+: Configurable (class_id, instance_id, atsdb, "db_object.xml"), widget_(nullptr), load_widget_(nullptr) //, registered_parent_variables_ (false)
 {
     logdbg  << "DBObjectManager: constructor: creating subconfigurables";
 
