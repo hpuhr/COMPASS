@@ -69,7 +69,7 @@ set (EXPERIMENTAL_SRC true)
 message("Experimental source: ${EXPERIMENTAL_SRC}")
 
 IF (EXPERIMENTAL_SRC)
-    IF(IS_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/experimental_src2")
+    IF(IS_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/experimental_src")
         MESSAGE(STATUS "Experimental source found")
     ELSE()
         MESSAGE(STATUS "Experimental source not found found, deactivating")
