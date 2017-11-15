@@ -59,7 +59,6 @@ int main (int argc, char **argv)
 
         CURRENT_CONF_DIRECTORY = HOME_CONF_DIRECTORY+config.getString("configuration_path")+"/";
 
-        assert (false);
         std::cout << "ATSDBClient: current configuration path is '" << CURRENT_CONF_DIRECTORY+"'" << std::endl;
 
         std::string log_config_path = HOME_CONF_DIRECTORY+config.getString("log_properties_file");
