@@ -227,6 +227,85 @@ public:
         return *this;
     }
 
+    std::set<T> distinctValues (size_t index=0)
+    {
+        std::set<T> values;
+
+        typename std::vector < std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > >::iterator it;
+        T value;
+
+        size_t first_list_cnt=0;
+        unsigned list_cnt=0;
+
+        size_t first_list_row=0;
+        size_t list_row_cnt;
+
+        if (index)
+        {
+            first_list_cnt = index/BUFFER_ARRAY_SIZE;
+            first_list_row = index%BUFFER_ARRAY_SIZE;
+        }
+
+        for (; list_cnt < data_.size(); list_cnt++)
+        {
+            std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > array_list = data_.at(list_cnt);
+
+            if (index && list_cnt == first_list_cnt) // there is a start index
+                list_row_cnt=first_list_row;
+            else
+                list_row_cnt=0;
+
+            for (; list_row_cnt < BUFFER_ARRAY_SIZE; list_row_cnt++)
+            {
+                if (!(*none_flags_[list_cnt])[list_row_cnt]) // not for none
+                {
+                    value = array_list->at(list_row_cnt);
+                    if (values.count(value) == 0)
+                        values.insert(value);
+                }
+            }
+        }
+        return values;
+    }
+
+    std::map<T, std::vector<size_t>> distinctValuesWithIndexes (size_t index=0)
+    {
+        std::map<T, std::vector<size_t>> values;
+
+        typename std::vector < std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > >::iterator it;
+
+        size_t first_list_cnt=0;
+        unsigned list_cnt=0;
+
+        size_t first_list_row=0;
+        size_t list_row_cnt;
+
+        if (index)
+        {
+            first_list_cnt = index/BUFFER_ARRAY_SIZE;
+            first_list_row = index%BUFFER_ARRAY_SIZE;
+        }
+
+        for (list_cnt = first_list_cnt; list_cnt < data_.size(); list_cnt++)
+        {
+            std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > array_list = data_.at(list_cnt);
+
+            if (index && list_cnt == first_list_cnt) // there is a start index
+                list_row_cnt=first_list_row;
+            else
+                list_row_cnt=0;
+
+            for (; list_row_cnt < BUFFER_ARRAY_SIZE; list_row_cnt++)
+            {
+                if (!(*none_flags_[list_cnt])[list_row_cnt]) // not for none
+                {
+                    values[array_list->at(list_row_cnt)].push_back(list_cnt*BUFFER_ARRAY_SIZE+list_row_cnt);
+                }
+            }
+        }
+        return values;
+    }
+
 protected:
     /// Data containers
     std::vector < std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > > data_;
@@ -256,7 +335,8 @@ protected:
 //template <>
 //const std::string ArrayListTemplate<double>::getAsString (size_t index);
 
-
+template <>
+ArrayListTemplate<bool>& ArrayListTemplate<bool>::operator*=(double factor);
 
 
 

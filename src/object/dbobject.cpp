@@ -255,6 +255,14 @@ void DBObject::checkVariables ()
     variables_checked_=true;
 }
 
+std::string DBObject::getNameOfSensor (int num)
+{
+    assert (hasActiveDataSourcesInfo());
+    assert (data_sources_.count(num) > 0);
+
+    return data_sources_.at(num).name();
+}
+
 bool DBObject::hasActiveDataSourcesInfo ()
 {
     return ATSDB::instance().interface().hasActiveDataSources(*this);

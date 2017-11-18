@@ -150,3 +150,22 @@ void ArrayListBase::unsetNone (size_t index)
 //    return out.str();
 //}
 
+template <>
+ArrayListTemplate<bool>& ArrayListTemplate<bool>::operator*=(double factor)
+{
+    typename std::vector < std::shared_ptr< std::array<bool,BUFFER_ARRAY_SIZE> > >::iterator it;
+
+    unsigned list_cnt=0;
+    for (it = data_.begin(); it != data_.end(); it++)
+    {
+        for (unsigned int cnt=0; cnt < BUFFER_ARRAY_SIZE; cnt++)
+        {
+            if (!(*none_flags_[list_cnt])[cnt]) // not for none
+                it->get()->at(cnt) = it->get()->at(cnt) && factor;
+        }
+        list_cnt++;
+    }
+
+    return *this;
+}
+

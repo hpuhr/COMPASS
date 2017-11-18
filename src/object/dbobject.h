@@ -184,7 +184,7 @@ public:
     ///@brief Returns container with all defined data source for DBO type.
     const std::map<int, DBODataSource> &dataSources () { return data_sources_; }
     ///@brief Returns data source name for a DBO type and data source number.
-    std::string getNameOfSensor (unsigned int num);
+    std::string getNameOfSensor (int num);
 
     /// @brief Return if active data sources info is available
     bool hasActiveDataSourcesInfo ();
