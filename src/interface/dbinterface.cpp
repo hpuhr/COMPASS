@@ -67,7 +67,7 @@ DBInterface::DBInterface(std::string class_id, std::string instance_id, ATSDB *a
     boost::mutex::scoped_lock l(connection_mutex_);
 
     //registerParameter ("database_name", &database_name_, "");
-    registerParameter ("read_chunk_size", &read_chunk_size_, 100000);
+    registerParameter ("read_chunk_size", &read_chunk_size_, 50000);
     registerParameter ("used_connection", &used_connection_, "");
 
     //TODO writing process should be different.
