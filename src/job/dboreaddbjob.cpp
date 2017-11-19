@@ -25,7 +25,7 @@
 
 DBOReadDBJob::DBOReadDBJob(DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause, std::vector <DBOVariable *> filtered_variables,
                            bool use_order, DBOVariable *order_variable, bool use_order_ascending, const std::string &limit_str, bool activate_key_search)
-: Job (), db_interface_(db_interface), dbobject_(dbobject), read_list_(read_list), custom_filter_clause_ (custom_filter_clause), filtered_variables_(filtered_variables),
+: Job("DBOReadDBJob"), db_interface_(db_interface), dbobject_(dbobject), read_list_(read_list), custom_filter_clause_ (custom_filter_clause), filtered_variables_(filtered_variables),
   use_order_(use_order), order_variable_(order_variable), use_order_ascending_(use_order_ascending), limit_str_(limit_str), activate_key_search_(activate_key_search)
 {
 }

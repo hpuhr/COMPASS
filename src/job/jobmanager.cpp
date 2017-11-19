@@ -46,11 +46,11 @@ void JobManager::addJob (std::shared_ptr<Job> job)
 {
     mutex_.lock();
 
-    QThreadPool::globalInstance()->start(job.get());
-
+    logdbg << "JobManager: addJob: " << job->name() << " num " << jobs_.size()+1;
     jobs_.push_back(job);
-
     mutex_.unlock();
+
+    QThreadPool::globalInstance()->start(job.get());
 
     updateWidget();
 }
@@ -129,7 +129,7 @@ void JobManager::run()
 
                 jobs_.pop_front();
                 changed = true;
-                logdbg << "JobManager: run: flushed job";
+                logdbg << "JobManager: run: flushed job "+current->name();
                 if(current->obsolete())
                 {
                     logdbg << "JobManager: run: flushing obsolete job";
@@ -139,6 +139,7 @@ void JobManager::run()
 
                 logdbg << "JobManager: run: flushing done job";
                 current->emitDone();
+                logdbg << "JobManager: run: done job emitted "+current->name();
 
                 last_one = jobs_.size() == 0;
             }
@@ -173,10 +174,12 @@ void JobManager::run()
                 if (current->obsolete())
                     continue;
 
+                logdbg << "JobManager: run: starting dbjob " << current->name();
                 active_db_job_ = current;
 
                 QThreadPool::globalInstance()->start(active_db_job_.get());
                 changed = true;
+                break;
             }
 
             if (changed && !active_db_job_ && queued_db_jobs_.size() == 0)

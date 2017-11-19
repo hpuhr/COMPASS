@@ -34,7 +34,7 @@
 using namespace Utils;
 
 DBOMinMaxDBJob::DBOMinMaxDBJob(DBInterface& db_interface, const DBObject& object)
-: Job(), db_interface_(db_interface), object_(object)
+: Job("DBOMinMaxDBJob"), db_interface_(db_interface), object_(object)
 {
 }
 

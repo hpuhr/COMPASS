@@ -23,7 +23,7 @@
 using namespace Utils;
 
 DBOActiveDataSourcesDBJob::DBOActiveDataSourcesDBJob(DBInterface& db_interface, DBObject &object)
-: Job(), db_interface_(db_interface), object_(object)
+: Job("DBOActiveDataSourcesDBJob"), db_interface_(db_interface), object_(object)
 {
 }
 

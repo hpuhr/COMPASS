@@ -60,7 +60,7 @@ std::string Utils::String::multiplyString (const std::string& value_str, double 
     case PropertyDataType::BOOL:
     {
         bool value = std::stoul(value_str);
-        value *= factor;
+        value = value && factor;
         return_string = std::to_string(value);
         break;
     }

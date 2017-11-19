@@ -22,7 +22,8 @@
 
 
 BufferCSVExportJob::BufferCSVExportJob(std::shared_ptr<Buffer> buffer, const std::string& file_name, bool overwrite, bool use_presentation)
-    : buffer_(buffer), file_name_(file_name), overwrite_(overwrite), use_presentation_(use_presentation)
+    : Job("BufferCSVExportJob"), buffer_(buffer), file_name_(file_name), overwrite_(overwrite),
+      use_presentation_(use_presentation)
 {
     assert (file_name_.size());
 }

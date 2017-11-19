@@ -257,7 +257,6 @@ void DBObject::checkVariables ()
 
 std::string DBObject::getNameOfSensor (int num)
 {
-    assert (hasActiveDataSourcesInfo());
     assert (data_sources_.count(num) > 0);
 
     return data_sources_.at(num).name();

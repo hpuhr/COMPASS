@@ -272,10 +272,11 @@ public:
     {
         std::map<T, std::vector<size_t>> values;
 
-        typename std::vector < std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > >::iterator it;
+        //typename std::vector < std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > >::iterator it;
 
-        size_t first_list_cnt=0;
+        size_t first_list_cnt=-1;
         unsigned list_cnt=0;
+        unsigned list_size=data_.size();
 
         size_t first_list_row=0;
         size_t list_row_cnt;
@@ -283,10 +284,11 @@ public:
         if (index)
         {
             first_list_cnt = index/BUFFER_ARRAY_SIZE;
+            list_cnt = index/BUFFER_ARRAY_SIZE;
             first_list_row = index%BUFFER_ARRAY_SIZE;
         }
 
-        for (list_cnt = first_list_cnt; list_cnt < data_.size(); list_cnt++)
+        for (; list_cnt < list_size; list_cnt++)
         {
             std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > array_list = data_.at(list_cnt);
 

@@ -28,7 +28,7 @@
 #include "buffer.h"
 
 FinalizeDBOReadJob::FinalizeDBOReadJob(DBObject &dbobject, DBOVariableSet &read_list, std::shared_ptr<Buffer> buffer)
-    : Job (), dbobject_(dbobject), read_list_(read_list), buffer_ (buffer)
+    : Job("FinalizeDBOReadJob"), dbobject_(dbobject), read_list_(read_list), buffer_ (buffer)
 {
     assert (buffer_);
 }

@@ -40,7 +40,8 @@ signals:
 
 public:
     /// @brief Constructor
-    Job() : started_(false), done_ (false), obsolete_(false) { setAutoDelete(false); }
+    Job(const std::string& name) : name_(name), started_(false), done_ (false), obsolete_(false)
+    { setAutoDelete(false); }
     /// @brief Destructor
     virtual ~Job() {}
 
@@ -57,7 +58,10 @@ public:
     bool obsolete () { return obsolete_; }
     void emitObsolete () { emit doneSignal(); }
 
+    const std::string &name() { return name_; }
+
 protected:
+    std::string name_;
     ///
     bool started_;
     /// Done flag
