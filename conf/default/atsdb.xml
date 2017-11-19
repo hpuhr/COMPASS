@@ -1,6 +1,6 @@
 <Configuration class_id="ATSDB" instance_id="ATSDB0">
     <Configuration class_id="DBInterface" instance_id="DBInterface0">
-        <ParameterUnsignedInt read_chunk_size="20000"/>
+        <ParameterUnsignedInt read_chunk_size="100000"/>
         <ParameterString used_connection="MySQL++ Connection"/>
         <Configuration class_id="MySQLppConnection" instance_id="MySQL++ Connection">
             <ParameterString used_server="Localhost"/>

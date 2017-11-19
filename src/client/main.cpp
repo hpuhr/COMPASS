@@ -50,7 +50,7 @@ int main (int argc, char **argv)
 
         std::cout << "ATSDBClient: opening simple config file at '" << HOME_CONF_DIRECTORY+"main.conf'" << std::endl;
 
-        SimpleConfig config ("client.conf");
+        SimpleConfig config ("main.conf");
         assert (config.existsId("version"));
         assert (config.existsId("configuration_path"));
         assert (config.existsId("save_config_on_exit"));
