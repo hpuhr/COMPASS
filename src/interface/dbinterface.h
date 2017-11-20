@@ -138,6 +138,7 @@ public:
     std::string getProperty (const std::string& id);
     bool hasProperty (const std::string& id);
 
+    bool existsTable (const std::string& table_name);
     /// @brief Returns if minimum/maximum table exists
     bool existsMinMaxTable ();
     /// @brief Returns the minimum/maximum table

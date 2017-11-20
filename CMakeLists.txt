@@ -124,6 +124,7 @@ install(DIRECTORY "data" DESTINATION atsdb)
 
 install (TARGETS atsdb DESTINATION lib
     PUBLIC_HEADER DESTINATION include/atsdb)
+
 install (TARGETS atsdb_client DESTINATION bin)
 
 # build a CPack driven installer package

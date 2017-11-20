@@ -152,7 +152,11 @@ void DBOMinMaxDBJob::createMinMaxValuesNormal ()
 
     for (auto table_it : object_.currentMetaTable().subTables())
     {
-        processTable (table_it.second);
+
+        if (db_interface_.existsTable(table_it.first))
+            processTable (table_it.second);
+        else
+            logwrn << "DBOMinMaxDBJob: createMinMaxValuesNormal: table '" << table_it.first << " not in database";
     }
 }
 
@@ -177,6 +181,13 @@ void DBOMinMaxDBJob::processTable (const DBTable& table)
     logdbg  << "DBInterface: createMinMaxValues: setting variables";
 
     assert (buffer);
+
+    if (buffer->size() == 0)
+    {
+        logwrn << "DBOMinMaxDBJob: processTable: table '" << table.name() << "' has no data";
+        return;
+    }
+
     assert (buffer->size() == 1);
 
     std::string min;

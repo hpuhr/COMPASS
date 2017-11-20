@@ -251,6 +251,11 @@ void DBInterface::checkSubConfigurables ()
     }
 }
 
+bool DBInterface::existsTable (const std::string& table_name)
+{
+    return table_info_.count (table_name) == 1;
+}
+
 /**
  * Returns existsTable for table name.
  */
