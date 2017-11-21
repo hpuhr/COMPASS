@@ -268,31 +268,36 @@ public:
         return values;
     }
 
-    std::map<T, std::vector<size_t>> distinctValuesWithIndexes (size_t index=0)
+    std::map<T, std::vector<size_t>> distinctValuesWithIndexes (size_t from_index, size_t to_index)
     {
         std::map<T, std::vector<size_t>> values;
+
+        assert (to_index);
+        assert (from_index < to_index);
 
         //typename std::vector < std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > >::iterator it;
 
         size_t first_list_cnt=-1;
         unsigned list_cnt=0;
-        unsigned list_size=data_.size();
+        unsigned list_size=0;
 
         size_t first_list_row=0;
         size_t list_row_cnt;
 
-        if (index)
-        {
-            first_list_cnt = index/BUFFER_ARRAY_SIZE;
-            list_cnt = index/BUFFER_ARRAY_SIZE;
-            first_list_row = index%BUFFER_ARRAY_SIZE;
-        }
+        first_list_cnt = from_index/BUFFER_ARRAY_SIZE;
+        list_cnt = first_list_cnt;
+        list_size = to_index/BUFFER_ARRAY_SIZE;
+        first_list_row = from_index%BUFFER_ARRAY_SIZE;
+
+        logdbg << "ArrayList: distinctValuesWithIndexes: from_index " << from_index << " to_index " << to_index
+               << " first_list_cnt " << first_list_cnt << " list_cnt " << list_cnt << " list size " << list_size
+               << " first_list_row " << first_list_row;
 
         for (; list_cnt < list_size; list_cnt++)
         {
             std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > array_list = data_.at(list_cnt);
 
-            if (index && list_cnt == first_list_cnt) // there is a start index
+            if (list_cnt == first_list_cnt) // there is a start index
                 list_row_cnt=first_list_row;
             else
                 list_row_cnt=0;
@@ -305,6 +310,8 @@ public:
                 }
             }
         }
+
+        logdbg << "ArrayList: distinctValuesWithIndexes: done with " << values.size();
         return values;
     }
 
