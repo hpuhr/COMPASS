@@ -89,17 +89,22 @@ inline std::vector<std::string> split(const std::string &s, char delim)
     return split(s, delim, elems);
 }
 
-inline std::string timeStringFromDouble (double seconds)
+inline std::string timeStringFromDouble (double seconds, bool milliseconds=true)
 {
     int hours, minutes;
     std::ostringstream out;
 
-    hours = (int) (seconds / 3600.0);
-    minutes = (int) ((double)((int)seconds%3600)/60.0);
+    hours = static_cast<int> (seconds / 3600.0);
+    minutes = static_cast<int> (static_cast<double>(static_cast<int> (seconds)%3600)/60.0);
     seconds = seconds-hours*3600.0-minutes*60.0;
 
-    out << std::fixed << std::setw(2) << std::setfill('0') << hours << ":" << std::setw(2) << std::setfill('0') << minutes << ":" << std::setw(6)
-        << std::setfill('0') << std::setprecision(3) << seconds;
+    out << std::fixed << std::setw(2) << std::setfill('0') << hours << ":" << std::setw(2) << std::setfill('0') << minutes << ":";
+
+    if (milliseconds)
+        out << std::setw(6) << std::setfill('0') << std::setprecision(3) << seconds;
+    else
+        out << std::setw(2) << std::setfill('0') << std::setprecision(0) << static_cast<int> (seconds);
+
     return out.str();
 }
 
