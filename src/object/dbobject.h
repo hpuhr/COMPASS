@@ -209,7 +209,7 @@ protected:
     bool loading_wanted_;
     size_t count_;
 
-    std::shared_ptr <DBOReadDBJob> read_job_;
+    std::shared_ptr <DBOReadDBJob> read_job_ {nullptr};
     std::vector <std::shared_ptr<Buffer>> read_job_data_;
     std::vector <std::shared_ptr <FinalizeDBOReadJob>> finalize_jobs_;
 

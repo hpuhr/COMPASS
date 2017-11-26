@@ -46,6 +46,7 @@ public slots:
     void loadSlot ();
     void updateSchemaInformationSlot ();
     void databaseOpenedSlot ();
+    void loadingDoneSlot (DBObject& object);
 
 signals:
     void dbObjectsChangedSignal ();
@@ -53,6 +54,7 @@ signals:
     void schemaChangedSignal ();
 
     void loadingStartedSignal ();
+    void allLoadingDoneSignal ();
 
 public:
     /// @brief Constructor

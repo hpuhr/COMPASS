@@ -41,7 +41,8 @@
  * Registers parameters, creates sub configurables
  */
 DBObject::DBObject(std::string class_id, std::string instance_id, Configurable *parent)
-    : Configurable (class_id, instance_id, parent), is_loadable_(false), loading_wanted_(true), count_(0), data_(nullptr), current_meta_table_(nullptr), variables_checked_(false),
+    : Configurable (class_id, instance_id, parent), is_loadable_(false), loading_wanted_(true), count_(0), data_(nullptr),
+      current_meta_table_(nullptr), variables_checked_(false),
       widget_(nullptr), info_widget_(nullptr)
 {
     registerParameter ("name" , &name_, "Undefined");
@@ -275,6 +276,7 @@ const std::set<int> DBObject::getActiveDataSources () const
 std::string DBObject::status ()
 {
     if (read_job_)
+    {
         if (loadedCount())
             return "Loading";
         else
@@ -284,6 +286,7 @@ std::string DBObject::status ()
             else
                 return "Queued";
         }
+    }
     else if (finalize_jobs_.size() > 0)
         return "Post-processing";
     else
@@ -414,7 +417,7 @@ void DBObject::readJobIntermediateSlot (std::shared_ptr<Buffer> buffer)
 
 void DBObject::readJobObsoleteSlot ()
 {
-    loginf << "DBObject: " << name_ << " readJobObsoleteSlot";
+    logdbg << "DBObject: " << name_ << " readJobObsoleteSlot";
     read_job_ = nullptr;
     read_job_data_.clear();
 
@@ -432,7 +435,11 @@ void DBObject::readJobDoneSlot()
     if (info_widget_)
         info_widget_->updateSlot();
 
-    emit loadingDoneSignal(*this);
+    if (!isLoading())
+    {
+        loginf << "DBObject: " << name_ << " readJobDoneSlot: no jobs left, done";
+        emit loadingDoneSignal(*this);
+    }
 }
 
 void DBObject::finalizeReadJobDoneSlot()
@@ -472,6 +479,12 @@ void DBObject::finalizeReadJobDoneSlot()
         info_widget_->updateSlot();
 
     emit newDataSignal(*this);
+
+    if (!isLoading())
+    {
+        loginf << "DBObject: " << name_ << " finalizeReadJobDoneSlot: no jobs left, done";
+        emit loadingDoneSignal(*this);
+    }
 }
 
 
@@ -497,7 +510,7 @@ void DBObject::databaseOpenedSlot ()
 
 bool DBObject::isLoading ()
 {
-    return read_job_ == nullptr || finalize_jobs_.size() > 0;
+    return read_job_ || finalize_jobs_.size();
 }
 
 bool DBObject::hasData ()
