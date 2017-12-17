@@ -1,5 +1,7 @@
 #include "files.h"
 
+#include <cassert>
+
 #include <QFileInfo>
 #include <QString>
 #include <QDir>
@@ -67,6 +69,14 @@ bool copyRecursively(const std::string& source_folder, const std::string& dest_f
     }
 
     return true;
+}
+
+QStringList getFilesInDirectory (const std::string& path)
+{
+    assert (directoryExists(path));
+    QDir directory(path.c_str());
+    QStringList list = directory.entryList(QStringList({"*"}),QDir::Files); // << "*.jpg" << "*.JPG"
+    return list;
 }
 
 std::string getIconFilepath (const std::string& filename)

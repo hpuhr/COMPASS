@@ -28,6 +28,7 @@ bool fileExists(const std::string& path);
 void verifyFileExists(const std::string& path);
 bool directoryExists(const std::string& path);
 bool copyRecursively(const std::string& source_folder, const std::string& dest_folder);
+QStringList getFilesInDirectory (const std::string& path);
 
 std::string getIconFilepath (const std::string& filename);
 
