@@ -111,11 +111,13 @@ std::string FilterManager::getSQLCondition (const std::string &dbo_name, std::ve
 
     bool first=true;
 
-    for (unsigned int cnt=0; cnt < filters_.size(); cnt++)
+    for (auto* filter : filters_)
     {
-        if (filters_.at(cnt)->getActive() && filters_.at(cnt)->filters (dbo_name))
+        loginf << "FilterManager: getSQLCondition: filter " << filter->getInstanceId() << " active " << filter->getActive()
+               << " filters " << dbo_name << " " << filter->filters (dbo_name);
+        if (filter->getActive() && filter->filters (dbo_name))
         {
-            ss << filters_.at(cnt)->getConditionString (dbo_name, first, filtered_variables);
+            ss << filter->getConditionString (dbo_name, first, filtered_variables);
         }
     }
 

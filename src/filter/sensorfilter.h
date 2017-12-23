@@ -107,6 +107,7 @@ public:
 
   virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
+  virtual bool filters (const std::string &dbo_type);
   virtual void reset ();
 
   const std::string &dbObjectName () { return dbo_name_; }

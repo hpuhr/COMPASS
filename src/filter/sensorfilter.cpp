@@ -61,6 +61,11 @@ SensorFilter::~SensorFilter()
 {
 }
 
+bool SensorFilter::filters (const std::string &dbo_type)
+{
+    return dbo_name_ == dbo_type;
+}
+
 std::string SensorFilter::getConditionString (const std::string &dbo_name, bool &first, std::vector <DBOVariable*>& filtered_variables)
 {
     logdbg  << "SensorFilter: getConditionString ";
