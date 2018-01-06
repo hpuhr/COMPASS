@@ -22,6 +22,8 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/dbovariableset.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbovariableorderedset.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbovariableorderedsetwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/dbolabeldefinition.h"
+        "${CMAKE_CURRENT_LIST_DIR}/dbolabeldefinitionwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/metadbovariable.h"
         "${CMAKE_CURRENT_LIST_DIR}/metadbovariablewidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/stringrepresentationcombobox.h"
@@ -43,6 +45,8 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/dbovariableorderedset.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbovariableorderedsetwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbovariableselectionwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/dbolabeldefinition.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/dbolabeldefinitionwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/metadbovariable.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/metadbovariablewidget.cpp"
     #        src/object/dbovariablecombobox.cpp

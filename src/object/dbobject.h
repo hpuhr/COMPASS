@@ -68,6 +68,8 @@ class Job;
 class DBOReadDBJob;
 class FinalizeDBOReadJob;
 class DBOVariableSet;
+class DBOLabelDefinition;
+class DBOLabelDefinitionWidget;
 
 /**
  * @brief Abstract data description of an object stored in a database
@@ -194,8 +196,9 @@ public:
 
     std::string status ();
 
-    DBObjectWidget *widget ();
-    DBObjectInfoWidget *infoWidget ();
+    DBObjectWidget* widget ();
+    DBObjectInfoWidget* infoWidget ();
+    DBOLabelDefinitionWidget* labelDefinitionWidget();
 
     std::shared_ptr<Buffer> data () { return data_; }
 
@@ -208,6 +211,8 @@ protected:
     bool is_loadable_; // loadable on its own
     bool loading_wanted_;
     size_t count_;
+
+    DBOLabelDefinition* label_definition_{nullptr};
 
     std::shared_ptr <DBOReadDBJob> read_job_ {nullptr};
     std::vector <std::shared_ptr<Buffer>> read_job_data_;

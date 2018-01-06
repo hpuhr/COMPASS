@@ -36,6 +36,8 @@
 #include "dbinterface.h"
 #include "jobmanager.h"
 #include "dbtableinfo.h"
+#include "dbolabeldefinition.h"
+#include "dbolabeldefinitionwidget.h"
 
 /**
  * Registers parameters, creates sub configurables
@@ -63,6 +65,12 @@ DBObject::~DBObject()
     current_meta_table_ = nullptr;
 
     data_sources_.clear();
+
+    if (label_definition_)
+    {
+        delete label_definition_;
+        label_definition_=nullptr;
+    }
 
     for (auto it : data_source_definitions_)
         delete it.second;
@@ -119,6 +127,13 @@ void DBObject::generateSubConfigurable (const std::string &class_id, const std::
 
         data_source_definitions_.insert (std::pair<std::string, DBODataSourceDefinition*> (def->schema(), def));
     }
+    else if (class_id.compare ("DBOLabelDefinition") == 0)
+    {
+        DBOLabelDefinition *def = new DBOLabelDefinition (class_id, instance_id, this);
+        assert (!label_definition_);
+        //connect (def, SIGNAL(definitionChangedSignal()), this, SLOT(dataSourceDefinitionChanged()));
+        label_definition_ = def;
+    }
     else
         throw std::runtime_error ("DBObject: generateSubConfigurable: unknown class_id "+class_id );
 }
@@ -126,6 +141,12 @@ void DBObject::generateSubConfigurable (const std::string &class_id, const std::
 void DBObject::checkSubConfigurables ()
 {
     //nothing to see here
+
+    if (!label_definition_)
+    {
+        generateSubConfigurable ("DBOLabelDefinition", "DBOLabelDefinition0");
+        assert (label_definition_);
+    }
 }
 
 bool DBObject::hasVariable (const std::string &id) const
@@ -314,6 +335,12 @@ DBObjectInfoWidget *DBObject::infoWidget ()
 
     assert (info_widget_);
     return info_widget_;
+}
+
+DBOLabelDefinitionWidget* DBObject::labelDefinitionWidget()
+{
+    assert (label_definition_);
+    return label_definition_->widget();
 }
 
 void DBObject::schemaChangedSlot ()

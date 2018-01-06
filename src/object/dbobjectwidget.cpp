@@ -34,6 +34,7 @@
 #include "dbobjectwidget.h"
 #include "dbovariable.h"
 #include "dbovariablewidget.h"
+#include "dbolabeldefinitionwidget.h"
 #include "dbtablecolumn.h"
 #include "dbschema.h"
 #include "dbschemamanager.h"
@@ -94,6 +95,10 @@ DBObjectWidget::DBObjectWidget(DBObject *object, DBSchemaManager &schema_manager
     properties_main_layout->addStretch();
 
     main_layout->addLayout (properties_main_layout);
+
+    QPushButton* show_labels = new QPushButton ("Edit Label Definition");
+    connect(show_labels, SIGNAL( clicked() ), this, SLOT( showLabelDefinitionWidgetSlot() ));
+    main_layout->addWidget(show_labels);
 
     QHBoxLayout *upper_layout = new QHBoxLayout ();
 
@@ -504,6 +509,12 @@ void DBObjectWidget::updateMetaTablesGrid()
     }
 }
 
+
+void DBObjectWidget::showLabelDefinitionWidgetSlot()
+{
+    assert (object_);
+    object_->labelDefinitionWidget()->show();
+}
 
 void DBObjectWidget::addNewVariables ()
 {

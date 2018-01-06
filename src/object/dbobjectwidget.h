@@ -86,6 +86,8 @@ public slots:
     /// @brief Updates meta tables grid
     void updateMetaTablesGrid();
 
+    void showLabelDefinitionWidgetSlot();
+
 public:
     /// @brief Constructor
     DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager, QWidget* parent = 0, Qt::WindowFlags f = 0);
