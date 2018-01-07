@@ -38,6 +38,7 @@
 #include "dbtableinfo.h"
 #include "dbolabeldefinition.h"
 #include "dbolabeldefinitionwidget.h"
+#include "data.h"
 
 /**
  * Registers parameters, creates sub configurables
@@ -357,7 +358,8 @@ void DBObject::schemaChangedSlot ()
         current_meta_table_ = nullptr;
 }
 
-void DBObject::load (DBOVariableSet &read_set, bool use_filters, bool use_order, DBOVariable *order_variable, bool use_order_ascending, const std::string &limit_str)
+void DBObject::load (DBOVariableSet &read_set, bool use_filters, bool use_order, DBOVariable *order_variable,
+                     bool use_order_ascending, const std::string &limit_str)
 {
     assert (is_loadable_);
 
@@ -386,18 +388,61 @@ void DBObject::load (DBOVariableSet &read_set, bool use_filters, bool use_order,
 //    DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
 //    DBOVariable *order, const std::string &limit_str, bool activate_key_search
 
-    DBOReadDBJob *read_job = new DBOReadDBJob (ATSDB::instance().interface(), *this, read_set, custom_filter_clause, filtered_variables, use_order, order_variable,
-                                               use_order_ascending, limit_str, false);
+    read_job_ = std::shared_ptr<DBOReadDBJob> (new DBOReadDBJob (ATSDB::instance().interface(), *this, read_set, custom_filter_clause,
+                                                                 filtered_variables, use_order, order_variable,
+                                                                 use_order_ascending, limit_str, false));
 
-    read_job_ = std::shared_ptr<DBOReadDBJob> (read_job);
-    connect (read_job, SIGNAL(intermediateSignal(std::shared_ptr<Buffer>)), this, SLOT(readJobIntermediateSlot(std::shared_ptr<Buffer>)), Qt::QueuedConnection);
-    connect (read_job, SIGNAL(obsoleteSignal()), this, SLOT(readJobObsoleteSlot()), Qt::QueuedConnection);
-    connect (read_job, SIGNAL(doneSignal()), this, SLOT(readJobDoneSlot()), Qt::QueuedConnection);
+    connect (read_job_.get(), SIGNAL(intermediateSignal(std::shared_ptr<Buffer>)), this, SLOT(readJobIntermediateSlot(std::shared_ptr<Buffer>)), Qt::QueuedConnection);
+    connect (read_job_.get(), SIGNAL(obsoleteSignal()), this, SLOT(readJobObsoleteSlot()), Qt::QueuedConnection);
+    connect (read_job_.get(), SIGNAL(doneSignal()), this, SLOT(readJobDoneSlot()), Qt::QueuedConnection);
 
     if (info_widget_)
         info_widget_->updateSlot();
 
     JobManager::instance().addDBJob(read_job_);
+}
+
+std::map<int, std::string> DBObject::loadLabelData (std::vector<int> rec_nums)
+{
+    std::string custom_filter_clause;
+    bool first=true;
+
+    custom_filter_clause = "rec_num in (";
+    for (auto& rec_num : rec_nums)
+    {
+        if (first)
+            first=false;
+        else
+            custom_filter_clause += ",";
+
+        custom_filter_clause += std::to_string(rec_num);
+    }
+    custom_filter_clause += ");";
+
+    DBOVariableSet read_list = label_definition_->readList();
+    assert(read_list.hasVariable(variable("rec_num")));
+
+    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+
+    DBInterface& db_interface = ATSDB::instance().interface ();
+
+    db_interface.prepareRead (*this, read_list, custom_filter_clause, {}, false, nullptr, false, "");
+    std::shared_ptr<Buffer> buffer = db_interface.readDataChunk(*this, false);
+    db_interface.finalizeReadStatement(*this);
+
+    assert (buffer->size() == rec_nums.size());
+
+   Utils::Data::finalizeBuffer(read_list, buffer);
+
+   std::map<int, std::string> labels = label_definition_->generateLabels (rec_nums, buffer);
+
+
+   boost::posix_time::ptime stop_time = boost::posix_time::microsec_clock::local_time();
+   boost::posix_time::time_duration diff = stop_time - start_time;
+
+   loginf  << "DBObject: loadLabelData: done after " << diff.total_milliseconds() << " ms";
+
+   return labels;
 }
 
 void DBObject::readJobIntermediateSlot (std::shared_ptr<Buffer> buffer)

@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <list>
+#include <memory>
 
 #include "configurable.h"
 #include "dbovariableset.h"
@@ -47,6 +48,7 @@ protected:
 };
 
 class DBOLabelDefinitionWidget;
+class Buffer;
 
 class DBOLabelDefinition : public QObject, public Configurable
 {
@@ -59,7 +61,7 @@ public:
     DBOLabelDefinition(const std::string& class_id, const std::string& instance_id, DBObject* parent);
     virtual ~DBOLabelDefinition();
 
-    DBOVariableSet &readList () { return read_list_; }
+    DBOVariableSet &readList ();
     const std::map<std::string, DBOLabelEntry*>& entries () { return entries_; }
     DBOLabelEntry& entry (const std::string& variable_name);
 
@@ -71,6 +73,8 @@ public:
     virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
 
     DBOLabelDefinitionWidget* widget ();
+
+    std::map<int, std::string> generateLabels (std::vector<int> rec_nums, std::shared_ptr<Buffer> buffer);
 
 protected:
     DBObject* db_object_{nullptr};
