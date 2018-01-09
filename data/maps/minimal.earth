@@ -1,0 +1,39 @@
+<!--
+osgEarth Sample
+-->
+
+<map name="Wordwide Line Vectors" type="geocentric">
+  
+    <options>
+        <lighting>false</lighting>
+         <terrain color="#101010ff"/>
+    </options>
+
+    <image name="world" driver="gdal">
+    </image>
+    
+    <model name="world_boundaries" driver="feature_geom">
+            
+        <features name="world" driver="ogr">
+            <url>shapefiles/TM_WORLD_BORDERS-0.3.shp</url>
+            <build_spatial_index>true</build_spatial_index>
+            <convert type="line"/>
+        </features>
+        
+        <layout tile_size="500000">
+            <level max_range="1e10"/>
+        </layout>
+                
+        <styles>
+            <style type="text/css">
+                world {
+                   stroke:                       #ffff00;
+                   stroke-width:                 2px;
+                   render-depth-offset-min-bias: 1000;
+                }            
+            </style>
+        </styles>
+        
+    </model>
+  
+</map>
