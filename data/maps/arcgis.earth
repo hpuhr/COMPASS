@@ -25,26 +25,6 @@ You must have the mapnik vector tiles driver built by including the protobuf lib
         <nodata_image>http://server.arcgisonline.com/ArcGIS/rest/services/ESRI_Imagery_World_2D/MapServer/tile/100/0/0.jpeg</nodata_image>
     </image>
 
-    <image name="osm_roads" driver="agglite" min_level="14">
-      
-       <max_data_level>14</max_data_level>
-       
-       <profile>spherical-mercator</profile>
-
-        <styles>
-            <style type="text/css">
-                roads {
-                  stroke: #656363;
-                  stroke-width: 15m;
-                  stroke-linecap: square;
-                }           
-            </style>
-        </styles>
-        
-        <cache_policy usage="none"/>
-    </image>
-
-
     <elevation name="readymap_elevation" driver="tms">
         <url>http://readymap.org/readymap/tiles/1.0.0/116/</url>
     </elevation>
