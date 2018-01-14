@@ -2951,11 +2951,11 @@
             <Configuration class_id="DBTableColumn" instance_id="POS_LAT_DEG">
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="latitude in degrees"/>
-                <ParameterString dimension=""/>
+                <ParameterString dimension="Position"/>
                 <ParameterString name="POS_LAT_DEG"/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
-                <ParameterString unit=""/>
+                <ParameterString unit="WGS 84"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_LAT_DEG_CALC">
                 <ParameterBool is_key="0"/>
@@ -3005,11 +3005,11 @@
             <Configuration class_id="DBTableColumn" instance_id="POS_LONG_DEG">
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="longitude in degrees"/>
-                <ParameterString dimension=""/>
+                <ParameterString dimension="Position"/>
                 <ParameterString name="POS_LONG_DEG"/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
-                <ParameterString unit=""/>
+                <ParameterString unit="WGS 84"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_LONG_DEG_CALC">
                 <ParameterBool is_key="0"/>
@@ -3883,11 +3883,11 @@
             <Configuration class_id="DBTableColumn" instance_id="POS_LAT_DEG">
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="WGS84 coordinate latitude"/>
-                <ParameterString dimension=""/>
+                <ParameterString dimension="Position"/>
                 <ParameterString name="POS_LAT_DEG"/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
-                <ParameterString unit=""/>
+                <ParameterString unit="WGS 84"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_LOCAL_X_NM">
                 <ParameterBool is_key="0"/>
@@ -3928,11 +3928,11 @@
             <Configuration class_id="DBTableColumn" instance_id="POS_LONG_DEG">
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="WGS84 coordinate longitude"/>
-                <ParameterString dimension=""/>
+                <ParameterString dimension="Position"/>
                 <ParameterString name="POS_LONG_DEG"/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
-                <ParameterString unit=""/>
+                <ParameterString unit="WGS 84"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_RANGE_NM">
                 <ParameterBool is_key="0"/>
@@ -4635,11 +4635,11 @@
             <Configuration class_id="DBTableColumn" instance_id="POS_LAT_DEG">
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Calculated WGS84 track latitude position (low or high resolution) [I062/105 or I062/106]"/>
-                <ParameterString dimension=""/>
+                <ParameterString dimension="Position"/>
                 <ParameterString name="POS_LAT_DEG"/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
-                <ParameterString unit=""/>
+                <ParameterString unit="WGS 84"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_LAT_DEG_CALC">
                 <ParameterBool is_key="0"/>
@@ -4689,11 +4689,11 @@
             <Configuration class_id="DBTableColumn" instance_id="POS_LONG_DEG">
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Calculated WGS84 track longitude position (low or high resolution) [I062/105 or I062/106]"/>
-                <ParameterString dimension=""/>
+                <ParameterString dimension="Position"/>
                 <ParameterString name="POS_LONG_DEG"/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
-                <ParameterString unit=""/>
+                <ParameterString unit="WGS 84"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_LONG_DEG_CALC">
                 <ParameterBool is_key="0"/>
