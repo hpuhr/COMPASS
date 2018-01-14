@@ -33,9 +33,9 @@ public:
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
-    bool hasVariables () { return variables_.size() > 0; }
-    PropertyDataType dataType ();
-    const std::string &dataTypeString();
+    bool hasVariables () const { return variables_.size() > 0; }
+    PropertyDataType dataType () const;
+    const std::string &dataTypeString() const;
     Utils::String::Representation representation ();
 
     /// @brief Return if variable exist in DBO of type
@@ -57,10 +57,10 @@ public:
     std::string description() const;
     void description(const std::string &description);
 
-    std::string getMinString ();
-    std::string getMaxString ();
-    std::string getMinStringRepresentation ();
-    std::string getMaxStringRepresentation ();
+    std::string getMinString () const;
+    std::string getMaxString () const;
+    std::string getMinStringRepresentation () const;
+    std::string getMaxStringRepresentation () const;
 
     MetaDBOVariableWidget *widget ();
 
@@ -76,13 +76,6 @@ protected:
     std::map <std::string, DBOVariable&> variables_;
 
     virtual void checkSubConfigurables ();
-
-    /// @brief Registers a parent variable
-  //  void registerParentVariable (DBOVariable *parent);
-  //  /// @brief Unregisters a parent variable
-  //  void unregisterParentVariable (DBOVariable *parent);
-
-
 };
 
 #endif // METADBOVARIABLE_H

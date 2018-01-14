@@ -148,7 +148,7 @@ void MetaDBOVariable::description(const std::string &description)
     description_ = description;
 }
 
-PropertyDataType MetaDBOVariable::dataType ()
+PropertyDataType MetaDBOVariable::dataType () const
 {
     assert (hasVariables());
 
@@ -163,7 +163,7 @@ PropertyDataType MetaDBOVariable::dataType ()
     return data_type;
 }
 
-const std::string &MetaDBOVariable::dataTypeString()
+const std::string &MetaDBOVariable::dataTypeString() const
 {
     assert (hasVariables());
     return Property::asString(dataType());
@@ -184,7 +184,7 @@ Utils::String::Representation MetaDBOVariable::representation ()
     return representation;
 }
 
-std::string MetaDBOVariable::getMinString ()
+std::string MetaDBOVariable::getMinString () const
 {
     std::string value_string;
 
@@ -199,7 +199,7 @@ std::string MetaDBOVariable::getMinString ()
     return value_string;
 }
 
-std::string MetaDBOVariable::getMaxString ()
+std::string MetaDBOVariable::getMaxString () const
 {
     std::string value_string;
 
@@ -214,12 +214,12 @@ std::string MetaDBOVariable::getMaxString ()
     return value_string;
 }
 
-std::string MetaDBOVariable::getMinStringRepresentation ()
+std::string MetaDBOVariable::getMinStringRepresentation () const
 {
     return Utils::String::getRepresentationStringFromValue(getMinString(), dataType(), variables_.begin()->second.representation());
 }
 
-std::string MetaDBOVariable::getMaxStringRepresentation ()
+std::string MetaDBOVariable::getMaxStringRepresentation () const
 {
     return Utils::String::getRepresentationStringFromValue(getMaxString(), dataType(), variables_.begin()->second.representation());
 
