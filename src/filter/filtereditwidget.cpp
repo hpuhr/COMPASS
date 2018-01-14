@@ -287,7 +287,7 @@ void FilterEditWidget::updateConditionsGrid()
     for (it = conditions.begin(); it != conditions.end(); it++)
     {
         QPushButton *del = new QPushButton ();
-        del->setIcon(QIcon(QPixmap(Files::getIconFilepath("delete.png").c_str())));
+        del->setIcon(QIcon(Files::getIconFilepath("delete.png").c_str()));
         del->setFixedSize ( 20, 20 );
         del->setFlat(true);
         connect(del, SIGNAL( clicked() ), this, SLOT( deleteCondition() ));

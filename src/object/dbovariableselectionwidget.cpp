@@ -40,14 +40,12 @@ DBOVariableSelectionWidget::DBOVariableSelectionWidget (bool h_box, QWidget* par
 
     QBoxLayout *layout;
 
-    QPixmap* pixmap = new QPixmap(Files::getIconFilepath("expand.png").c_str());
-
     object_label_ = new QLabel (this);
     variable_label_ = new QLabel (this);
     variable_label_->setAlignment (Qt::AlignRight);
 
     QPushButton *sel_button = new QPushButton(this);
-    sel_button->setIcon(QIcon(*pixmap));
+    sel_button->setIcon(QIcon(Files::getIconFilepath("expand.png").c_str()));
     sel_button->setFixedSize (UI_ICON_SIZE);
     sel_button->setFlat(UI_ICON_BUTTON_FLAT);
 

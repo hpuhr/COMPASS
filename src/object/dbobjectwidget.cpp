@@ -378,11 +378,8 @@ void DBObjectWidget::updateDataSourcesGrid ()
     del_label->setFont (font_bold);
     ds_grid_->addWidget (del_label, 0, 2);
 
-    QPixmap edit_pixmap(Files::getIconFilepath("edit.png").c_str());
-    QIcon edit_icon(edit_pixmap);
-
-    QPixmap del_pixmap(Files::getIconFilepath("delete.png").c_str());
-    QIcon del_icon(del_pixmap);
+    QIcon edit_icon(Files::getIconFilepath("edit.png").c_str());
+    QIcon del_icon(Files::getIconFilepath("delete.png").c_str());
 
     auto dsdefs = object_->dataSourceDefinitions ();
 
@@ -637,11 +634,8 @@ void DBObjectWidget::updateDBOVarsGrid ()
 
     auto variables = object_->variables();
 
-    QPixmap edit_pixmap(Files::getIconFilepath("edit.png").c_str());
-    QIcon edit_icon(edit_pixmap);
-
-    QPixmap del_pixmap(Files::getIconFilepath("delete.png").c_str());
-    QIcon del_icon(del_pixmap);
+    QIcon edit_icon(Files::getIconFilepath("edit.png").c_str());
+    QIcon del_icon(Files::getIconFilepath("delete.png").c_str());
 
     logdbg  << "DBObjectWidget: updateDBOVarsGrid: creating variable rows";
 

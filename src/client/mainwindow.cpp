@@ -72,8 +72,7 @@ MainWindow::MainWindow()
 {
     logdbg  << "MainWindow: constructor";
 
-    QPixmap atsdb_pixmap(Files::getIconFilepath("atsdb.png").c_str());
-    QIcon atsdb_icon(atsdb_pixmap);
+    QIcon atsdb_icon(Files::getIconFilepath("atsdb.png").c_str());
     setWindowIcon(atsdb_icon); // for the glory of the empire
 
     QSettings settings("ATSDB", "Client");

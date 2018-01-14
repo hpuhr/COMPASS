@@ -66,15 +66,15 @@ public:
 protected:
     ATSDB &atsdb_;
 
-    ViewManagerWidget *widget_;
-    bool initialized_;
-    QTabWidget *tab_widget_;
+    ViewManagerWidget* widget_{nullptr};
+    bool initialized_{false};
+    QTabWidget* tab_widget_{nullptr};
 
     std::map <std::string, ViewContainer*> containers_;
     std::map <std::string, ViewContainerWidget*> container_widgets_;
     std::map<std::string, View*> views_;
 
-    unsigned int container_count_;
+    unsigned int container_count_{0};
 
     virtual void checkSubConfigurables ();
 };
