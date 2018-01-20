@@ -110,7 +110,7 @@ public:
   virtual bool filters (const std::string &dbo_type);
   virtual void reset ();
 
-  const std::string &dbObjectName () { return dbo_name_; }
+  const std::string& dbObjectName () { return dbo_name_; }
 
   std::map<int, SensorFilterDataSource> &dataSources () { return data_sources_; }
 

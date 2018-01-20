@@ -84,13 +84,14 @@ void FilterManager::checkSubConfigurables ()
         bool exists = false;
         for (auto fil_it : filters_)
         {
-            SensorFilter *sensor_filter = reinterpret_cast<SensorFilter *> (fil_it);
+            SensorFilter *sensor_filter = dynamic_cast<SensorFilter*> (fil_it);
             if (sensor_filter && sensor_filter->dbObjectName() == dbo_it.first)
             {
                 exists = true;
                 break;
             }
         }
+
         if (exists)
             continue;
 

@@ -65,7 +65,7 @@ public:
     void setVisible (bool visible);
 
     /// @brief Returns the filter name
-    std::string getName () { return name_; }
+    const std::string& getName () { return name_; }
     /// @brief Sets the filter name
     void setName (const std::string &name);
 
