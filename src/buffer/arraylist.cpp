@@ -47,11 +47,7 @@ size_t ArrayListBase::maximumSize ()
 void ArrayListBase::setAllNone()
 {
     for (auto it : none_flags_)
-        for (unsigned int cnt=0; cnt < BUFFER_ARRAY_SIZE; cnt++)
-            (*it)[cnt] = true;
-
-//    for (auto it : none_flags_)
-//        it->set();
+        it->fill(true);
 }
 
 void ArrayListBase::setNone(size_t index)
@@ -86,11 +82,8 @@ void ArrayListBase::representation(const Utils::String::Representation &represen
 void ArrayListBase::allocatedNewNoneArray ()
 {
     std::shared_ptr< std::array<bool,BUFFER_ARRAY_SIZE> > new_array_ptr = std::make_shared<std::array<bool,BUFFER_ARRAY_SIZE>>();
-    //std::shared_ptr<std::bitset<BUFFER_ARRAY_SIZE>> new_array_ptr = std::make_shared<std::bitset<BUFFER_ARRAY_SIZE>>();
 
-    for (unsigned int cnt=0; cnt < BUFFER_ARRAY_SIZE; cnt++)
-        (*new_array_ptr)[cnt] = true;
-    //new_array_ptr->set();
+    new_array_ptr->fill(true);
 
     none_flags_.push_back(new_array_ptr);
 }
@@ -100,7 +93,8 @@ void ArrayListBase::unsetNone (size_t index)
     if (index >= size_)
         logerr << "ArrayListBase: unsetNone: index " << index << " too large for size " << size_;
 
-    assert (index < size_);    (*none_flags_[index/BUFFER_ARRAY_SIZE])[index%BUFFER_ARRAY_SIZE] = false;
+    assert (index < size_);
+    (*none_flags_[index/BUFFER_ARRAY_SIZE])[index%BUFFER_ARRAY_SIZE] = false;
 }
 
 //template <class T>
@@ -153,17 +147,16 @@ void ArrayListBase::unsetNone (size_t index)
 template <>
 ArrayListTemplate<bool>& ArrayListTemplate<bool>::operator*=(double factor)
 {
-    typename std::vector < std::shared_ptr< std::array<bool,BUFFER_ARRAY_SIZE> > >::iterator it;
+    size_t list_size = data_.size();
+    bool tmp_factor = static_cast<bool> (factor);
 
-    unsigned list_cnt=0;
-    for (it = data_.begin(); it != data_.end(); it++)
+    for (size_t list_cnt=0; list_cnt < list_size; list_cnt++)
     {
-        for (unsigned int cnt=0; cnt < BUFFER_ARRAY_SIZE; cnt++)
+        for (size_t cnt=0; cnt < BUFFER_ARRAY_SIZE; cnt++)
         {
             if (!(*none_flags_[list_cnt])[cnt]) // not for none
-                it->get()->at(cnt) = it->get()->at(cnt) && factor;
+                data_.at(list_cnt)->at(cnt) = data_.at(list_cnt)->at(cnt) && tmp_factor;
         }
-        list_cnt++;
     }
 
     return *this;

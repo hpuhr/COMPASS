@@ -59,11 +59,20 @@ void MySQLppConnection::setServer (const std::string &server)
 
 void MySQLppConnection::connectServer ()
 {
-    logdbg << "MySQLppConnection: connectServer";
-
     assert (servers_.count(used_server_) == 1);
     connected_server_ = servers_.at(used_server_);
-    connection_.connect("", connected_server_->host().c_str(), connected_server_->user().c_str(), connected_server_->password().c_str(), connected_server_->port());
+
+    loginf << "MySQLppConnection: connectServer: host " << connected_server_->host() << " port " << connected_server_->port()
+           << " user " << connected_server_->user() << " pw " << connected_server_->password();
+
+    //bool connect(const char* db = 0, const char* server = 0, const char* user = 0, const char* password = 0, unsigned int port = 0);
+    bool ret = connection_.connect("", connected_server_->host().c_str(), connected_server_->user().c_str(),
+                                   connected_server_->password().c_str(), connected_server_->port());
+
+    if (!ret)
+    {
+        logerr << "MySQLppConnection: connectServer: connect failed, error " << connection_.errnum() << ": " << connection_.error();
+    }
 }
 
 

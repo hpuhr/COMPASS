@@ -103,13 +103,10 @@ public:
     virtual ~ArrayListTemplate () {}
 
     /// @brief Sets all elements to false
-    virtual void clear()
+    virtual void clear() override
     {
-        typename std::vector < std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > >::iterator it;
-
-        for (it = data_.begin(); it != data_.end(); it++)
-            for (unsigned int cnt=0; cnt < BUFFER_ARRAY_SIZE; cnt++)
-                it->get()->at(cnt)=T();
+        for (auto& data_it : data_)
+            data_it->fill(T());
 
         setAllNone();
     }
@@ -181,7 +178,7 @@ public:
     }
 
     /// @brief Sets specific element to None value
-    virtual void setNone(size_t index)
+    virtual void setNone(size_t index) override
     {
         if (index >= max_size_)
         {
@@ -198,6 +195,7 @@ public:
         logdbg << "ArrayListTemplate: addData: data size " << data_.size() << " none flags size " << none_flags_.size() << " size " << size_ << " max " << max_size_;
         data_.insert(data_.end(), other.data_.begin(), other.data_.end());
         none_flags_.insert(none_flags_.end(), other.none_flags_.begin(), other.none_flags_.end());
+        assert (data_.size() == none_flags_.size());
         size_ = max_size_ + other.size_;
         max_size_ += other.max_size_;
 
@@ -211,18 +209,9 @@ public:
 
     ArrayListTemplate<T>& operator*=(double factor)
     {
-        typename std::vector < std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > >::iterator it;
-
-        unsigned list_cnt=0;
-        for (it = data_.begin(); it != data_.end(); it++)
-        {
+        for (auto &data_it : data_)
             for (unsigned int cnt=0; cnt < BUFFER_ARRAY_SIZE; cnt++)
-            {
-                if (!(*none_flags_[list_cnt])[cnt]) // not for none
-                    it->get()->at(cnt) *= factor;
-            }
-            list_cnt++;
-        }
+                data_it->at(cnt) *= factor;
 
         return *this;
     }
@@ -231,7 +220,6 @@ public:
     {
         std::set<T> values;
 
-        typename std::vector < std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > >::iterator it;
         T value;
 
         size_t first_list_cnt=0;
@@ -257,7 +245,7 @@ public:
 
             for (; list_row_cnt < BUFFER_ARRAY_SIZE; list_row_cnt++)
             {
-                if (!(*none_flags_[list_cnt])[list_row_cnt]) // not for none
+                if (!none_flags_.at(list_cnt)->at(list_row_cnt)) // not for none
                 {
                     value = array_list->at(list_row_cnt);
                     if (values.count(value) == 0)
@@ -275,19 +263,11 @@ public:
         assert (to_index);
         assert (from_index < to_index);
 
-        //typename std::vector < std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > >::iterator it;
-
-        size_t first_list_cnt=-1;
-        unsigned list_cnt=0;
-        unsigned list_size=0;
-
-        size_t first_list_row=0;
-        size_t list_row_cnt;
-
-        first_list_cnt = from_index/BUFFER_ARRAY_SIZE;
-        list_cnt = first_list_cnt;
-        list_size = to_index/BUFFER_ARRAY_SIZE;
-        first_list_row = from_index%BUFFER_ARRAY_SIZE;
+        size_t first_list_cnt = from_index/BUFFER_ARRAY_SIZE;
+        unsigned list_cnt = first_list_cnt;
+        unsigned list_size = to_index/BUFFER_ARRAY_SIZE;
+        size_t first_list_row = from_index%BUFFER_ARRAY_SIZE;
+        size_t list_row_cnt = 0;
 
         logdbg << "ArrayList: distinctValuesWithIndexes: from_index " << from_index << " to_index " << to_index
                << " first_list_cnt " << first_list_cnt << " list_cnt " << list_cnt << " list size " << list_size
@@ -304,7 +284,7 @@ public:
 
             for (; list_row_cnt < BUFFER_ARRAY_SIZE; list_row_cnt++)
             {
-                if (!(*none_flags_[list_cnt])[list_row_cnt]) // not for none
+                if (!none_flags_.at(list_cnt)->at(list_row_cnt)) // not for none
                 {
                     values[array_list->at(list_row_cnt)].push_back(list_cnt*BUFFER_ARRAY_SIZE+list_row_cnt);
                 }
