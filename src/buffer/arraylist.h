@@ -23,6 +23,7 @@
 #include <bitset>
 #include <sstream>
 #include <iomanip>
+#include <array>
 
 #include "logger.h"
 #include "property.h"

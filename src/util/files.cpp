@@ -1,6 +1,7 @@
 #include "files.h"
 
 #include <cassert>
+#include <stdexcept>
 
 #include <QFileInfo>
 #include <QString>

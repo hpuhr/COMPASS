@@ -18,6 +18,7 @@
 #include "viewselection.h"
 
 #include <algorithm>
+#include <stdexcept>
 
 //Ogre::ColourValue ViewSelection::selection_col_ = Ogre::ColourValue( 1.0, 1.0, 0.0, 1.0 );
 float ViewSelection::selection_alpha_ = 0.0;
