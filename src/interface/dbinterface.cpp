@@ -16,6 +16,8 @@
  */
 
 #include "boost/date_time/posix_time/posix_time.hpp"
+
+#include <QMutexLocker>
 #include <QMessageBox>
 #include <QThread>
 #include <QProgressDialog>
@@ -64,7 +66,7 @@ using namespace Utils;
 DBInterface::DBInterface(std::string class_id, std::string instance_id, ATSDB *atsdb)
     : Configurable (class_id, instance_id, atsdb), current_connection_(nullptr), sql_generator_(*this), widget_(nullptr), info_widget_(nullptr)
 {
-    boost::mutex::scoped_lock l(connection_mutex_);
+    QMutexLocker locker(&connection_mutex_);
 
     //registerParameter ("database_name", &database_name_, "");
     registerParameter ("read_chunk_size", &read_chunk_size_, 50000);
@@ -88,7 +90,7 @@ DBInterface::~DBInterface()
 {
     logdbg  << "DBInterface: desctructor: start";
 
-    boost::mutex::scoped_lock l(connection_mutex_);
+    QMutexLocker locker(&connection_mutex_);
 
     for (auto it : connections_)
         delete it.second;
@@ -136,7 +138,7 @@ void DBInterface::databaseOpened ()
 
 void DBInterface::closeConnection ()
 {
-    boost::mutex::scoped_lock l(connection_mutex_);
+    QMutexLocker locker(&connection_mutex_);
 
     logdbg  << "DBInterface: closeConnection";
     for (auto it : connections_)
@@ -160,7 +162,7 @@ void DBInterface::closeConnection ()
 
 void DBInterface::updateTableInfo ()
 {
-    boost::mutex::scoped_lock l(connection_mutex_);
+    QMutexLocker locker(&connection_mutex_);
     table_info_.clear();
 
     assert (current_connection_);
@@ -279,7 +281,7 @@ std::set<int> DBInterface::queryActiveSensorNumbers(const DBObject &object)
 {
     logdbg  << "DBInterface: queryActiveSensorNumbers: start";
 
-    boost::mutex::scoped_lock l(connection_mutex_);
+    QMutexLocker locker(&connection_mutex_);
 
     assert (object.hasCurrentDataSourceDefinition());
 
@@ -313,7 +315,7 @@ std::map <int, DBODataSource> DBInterface::getDataSources (const DBObject &objec
 {
     logdbg  << "DBInterface: getDataSourceDescription: start";
 
-    boost::mutex::scoped_lock l(connection_mutex_);
+    QMutexLocker locker(&connection_mutex_);
 
     std::shared_ptr<DBCommand> command = sql_generator_.getDataSourcesSelectCommand(object);
 
@@ -423,7 +425,7 @@ size_t DBInterface::count (const std::string &table)
     logdbg  << "DBInterface: count: table " << table;
     assert (table_info_.count(table) > 0);
 
-    boost::mutex::scoped_lock l(connection_mutex_);
+    QMutexLocker locker(&connection_mutex_);
     assert (current_connection_);
 
     std::string sql = sql_generator_.getCountStatement(table);
@@ -448,7 +450,7 @@ size_t DBInterface::count (const std::string &table)
 
 void DBInterface::setProperty (const std::string& id, const std::string& value)
 {
-    boost::mutex::scoped_lock l(connection_mutex_);
+    QMutexLocker locker(&connection_mutex_);
     assert (current_connection_);
 
     std::string str = sql_generator_.getInsertPropertyStatement(id, value);
@@ -459,7 +461,7 @@ std::string DBInterface::getProperty (const std::string& id)
 {
     logdbg  << "DBInterface: getProperty: start";
 
-    boost::mutex::scoped_lock l(connection_mutex_);
+    QMutexLocker locker(&connection_mutex_);
 
     DBCommand command;
     command.set(sql_generator_.getSelectPropertyStatement(id));
@@ -492,7 +494,7 @@ bool DBInterface::hasProperty (const std::string& id)
 {
     logdbg  << "DBInterface: hasProperty: start";
 
-    boost::mutex::scoped_lock l(connection_mutex_);
+    QMutexLocker locker(&connection_mutex_);
 
     DBCommand command;
     command.set(sql_generator_.getSelectPropertyStatement(id));
@@ -514,7 +516,7 @@ bool DBInterface::hasProperty (const std::string& id)
 
 void DBInterface::insertMinMax (const std::string& id, const std::string& object_name, const std::string& min, const std::string& max)
 {
-    boost::mutex::scoped_lock l(connection_mutex_);
+    QMutexLocker locker(&connection_mutex_);
 
     std::string str = sql_generator_.getInsertMinMaxStatement(id, object_name, min, max);
     current_connection_->executeSQL (str);
@@ -530,7 +532,7 @@ std::pair<std::string, std::string> DBInterface::getMinMaxString (const DBOVaria
     if (!var.dbObject().count()) // object doesn't exist in this database
         return std::pair<std::string, std::string> (NULL_STRING, NULL_STRING);
 
-    boost::mutex::scoped_lock l(connection_mutex_);
+    QMutexLocker locker(&connection_mutex_);
 
     PropertyList list;
     list.addProperty("min", PropertyDataType::STRING);
@@ -661,7 +663,7 @@ std::pair<std::string, std::string> DBInterface::getMinMaxString (const DBOVaria
 
 //std::map <std::pair<std::string, std::string>, std::pair<std::string, std::string> > DBInterface::getMinMaxInfo ()
 //{
-//    boost::mutex::scoped_lock l(mutex_);
+//    std::scoped_lock l(mutex_);
 
 //    std::map <std::pair<std::string, std::string>, std::pair<std::string, std::string> > min_max_values;
 
@@ -811,7 +813,7 @@ void DBInterface::postProcessingJobDoneSlot()
 
 //DBResult *DBInterface::count (const std::string &type, unsigned int sensor_number)
 //{
-//    boost::mutex::scoped_lock l(mutex_);
+//    std::scoped_lock l(mutex_);
 
 //    loginf << "DBInterface: count: for type " << type << " number " << sensor_number;
 
@@ -865,7 +867,7 @@ std::set<int> DBInterface::getActiveDataSources (const DBObject &object)
 //    if (!buffer_writer_)
 //        buffer_writer_ = new BufferWriter (connection_, sql_generator_);
 
-//    boost::mutex::scoped_lock l(mutex_);
+//    std::scoped_lock l(mutex_);
 
 //    assert (buffer_writer_);
 //    assert (data);
@@ -885,7 +887,7 @@ std::set<int> DBInterface::getActiveDataSources (const DBObject &object)
 //    if (!buffer_writer_)
 //        buffer_writer_ = new BufferWriter (connection_, sql_generator_);
 
-//    boost::mutex::scoped_lock l(mutex_);
+//    std::scoped_lock l(mutex_);
 
 //    assert (buffer_writer_);
 //    assert (data);
@@ -895,7 +897,7 @@ std::set<int> DBInterface::getActiveDataSources (const DBObject &object)
 
 void DBInterface::updateBuffer (DBObject &object, DBOVariable &key_var, std::shared_ptr<Buffer> buffer)
 {
-    boost::mutex::scoped_lock l(connection_mutex_);
+    QMutexLocker locker(&connection_mutex_);
 
     assert (current_connection_);
     assert (buffer);
@@ -1035,7 +1037,7 @@ void DBInterface::createMinMaxTable ()
 //{
 //    logdbg  << "DBInterface: getInfo: start";
 
-//    boost::mutex::scoped_lock l(mutex_);
+//    std::scoped_lock l(mutex_);
 
 //    DBCommand *command = sql_generator_->getSelectInfoCommand(type, ids, read_list, use_filters, order_by_variable, ascending, limit_min, limit_max);
 
@@ -1093,14 +1095,14 @@ void DBInterface::createMinMaxTable ()
 
 void DBInterface::clearTableContent (const std::string& table_name)
 {
-    boost::mutex::scoped_lock l(connection_mutex_);
+    QMutexLocker locker(&connection_mutex_);
     //DELETE FROM tablename;
     current_connection_->executeSQL("DELETE FROM "+table_name+";");
 }
 
 std::shared_ptr<DBResult> DBInterface::queryMinMaxNormalForTable (const DBTable& table)
 {
-    boost::mutex::scoped_lock l(connection_mutex_);
+    QMutexLocker locker(&connection_mutex_);
     logdbg  << "DBInterface: queryMinMaxForTable: getting command";
     std::shared_ptr <DBCommand> command = sql_generator_.getTableSelectMinMaxNormalStatement (table);
 
@@ -1114,7 +1116,7 @@ std::shared_ptr<DBResult> DBInterface::queryMinMaxNormalForTable (const DBTable&
 //    assert (column);
 //    assert (table.size() > 0);
 
-//    boost::mutex::scoped_lock l(mutex_);
+//    std::scoped_lock l(mutex_);
 //    logdbg  << "DBInterface: queryMinMaxForColumn: getting command";
 //    DBCommand *command = sql_generator_->getColumnSelectMinMaxStatement(column, table);
 
@@ -1125,7 +1127,7 @@ std::shared_ptr<DBResult> DBInterface::queryMinMaxNormalForTable (const DBTable&
 
 //DBResult *DBInterface::getDistinctStatistics (const std::string &type, DBOVariable *variable, unsigned int sensor_number)
 //{
-//    boost::mutex::scoped_lock l(mutex_);
+//    std::scoped_lock l(mutex_);
 
 //    assert (DBObjectManager::getInstance().existsDBObject(type));
 //    assert (variable->existsIn(type));
@@ -1405,7 +1407,7 @@ std::shared_ptr<DBResult> DBInterface::queryMinMaxNormalForTable (const DBTable&
 //    assert (!variable->isMetaVariable());
 //    assert (variable->hasCurrentDBColumn());
 
-//    boost::mutex::scoped_lock l(mutex_);
+//    std::scoped_lock l(mutex_);
 //    connection_->executeSQL(sql_generator_->getDeleteStatement(variable->getCurrentDBColumn(), value, filter));
 //}
 
@@ -1538,7 +1540,7 @@ std::shared_ptr<DBResult> DBInterface::queryMinMaxNormalForTable (const DBTable&
 //void DBInterface::updateDBObjectInformationSlot ()
 //{
 //    logdbg << "DBInterface: updateDBObjectInformationSlot";
-//    boost::mutex::scoped_lock l(reading_done_mutex_);
+//    std::scoped_lock l(reading_done_mutex_);
 //    prepared_.clear();
 //    reading_done_.clear();
 //    exists_.clear();

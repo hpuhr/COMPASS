@@ -18,7 +18,7 @@
 #ifndef DBINTERFACE_H_
 #define DBINTERFACE_H_
 
-#include <boost/thread/mutex.hpp>
+#include <QMutex>
 #include <set>
 #include <memory>
 #include <qobject.h>
@@ -199,7 +199,7 @@ protected:
     bool initialized_;
 
     /// Protects the database
-    boost::mutex connection_mutex_;
+    QMutex connection_mutex_;
 
     /// Container with all table names, based on DBO type
     // TODO solve this

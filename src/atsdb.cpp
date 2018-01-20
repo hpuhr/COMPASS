@@ -42,7 +42,7 @@
 using namespace std;
 
 /**
- * Locks state_mutex_, sets init state, creates members, starts the thread using go.
+ * Sets init state, creates members, starts the thread using go.
  */
 ATSDB::ATSDB()
  : Configurable ("ATSDB", "ATSDB0", 0, "atsdb.xml"), initialized_(false), db_interface_(nullptr), dbo_manager_(nullptr), db_schema_manager_ (nullptr),
@@ -246,7 +246,7 @@ bool ATSDB::ready ()
 }
 
 ///**
-// * Calls stop, locks state_mutex_. If data was written uning the StructureReader, this process is finished correctly.
+// * Calls stop. If data was written uning the StructureReader, this process is finished correctly.
 // * State is set to DB_STATE_SHUTDOWN and ouput buffers are cleared.
 // */
 void ATSDB::shutdown ()

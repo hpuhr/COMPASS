@@ -15,6 +15,8 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "boost/date_time/posix_time/posix_time.hpp"
+
 #include "dboactivedatasourcesdbjob.h"
 #include "dbinterface.h"
 #include "dbobject.h"

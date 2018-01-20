@@ -15,6 +15,8 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "boost/date_time/posix_time/posix_time.hpp"
+
 #include "buffer.h"
 #include "updatebufferdbjob.h"
 #include "dbinterface.h"
