@@ -91,7 +91,7 @@ void ListBoxViewDataWidget::exportDataSlot(bool overwrite)
 {
     logdbg << "ListBoxViewDataWidget: exportDataSlot";
     assert (tab_widget_);
-    BufferTableWidget *buffer_widget = reinterpret_cast<BufferTableWidget *> (tab_widget_->currentWidget());
+    BufferTableWidget *buffer_widget = dynamic_cast<BufferTableWidget*> (tab_widget_->currentWidget());
     assert (buffer_widget);
     buffer_widget->exportSlot(overwrite);
 }

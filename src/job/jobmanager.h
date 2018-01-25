@@ -19,14 +19,13 @@
 #define JOBMANAGER_H_
 
 #ifndef Q_MOC_RUN
-#include <boost/thread/mutex.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #endif
 
 #include <list>
 #include <memory>
-#include <qobject.h>
-#include <qthread.h>
+#include <QMutex>
+#include <QThread>
 
 #include "singleton.h"
 #include "configurable.h"
@@ -79,7 +78,7 @@ protected:
     volatile bool stop_requested_;
     volatile bool stopped_;
 
-    boost::mutex mutex_;
+    QMutex mutex_;
     //unsigned int num_workers_;
 
     unsigned int update_time_;

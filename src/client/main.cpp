@@ -2,6 +2,7 @@
 #include <QSurfaceFormat>
 
 #include <iostream>
+#include <cstdlib>
 
 #include "global.h"
 #include "config.h"
@@ -13,6 +14,10 @@
 #include "mainwindow.h"
 #include "files.h"
 
+#if USE_EXPERIMENTAL_SOURCE == true
+#include <osgDB/Registry>
+#endif
+
 using namespace Utils;
 
 int main (int argc, char **argv)
@@ -22,21 +27,44 @@ int main (int argc, char **argv)
     {
         std::cout << "ATSDBClient: setting directory paths" << std::endl;
 
+        std::string system_install_path = SYSTEM_INSTALL_PATH;
+
+#if USE_EXPERIMENTAL_SOURCE == true
+        loginf << "ATSDBClient: includes experimental features";
+
+        const char* origin_path = getenv("ORIGIN");
+
+        if (origin_path)
+        {
+            loginf << "ATSDBClient: AppImage environment detected under '" << origin_path << "'";
+            system_install_path = origin_path;
+            system_install_path += "/atsdb";
+
+            loginf << "ATSDBClient: set install path to '" << system_install_path << "'";
+            assert (Files::directoryExists(system_install_path));
+
+            std::string osg_plugins_path = system_install_path+"/../plugins/osgPlugins-3.4.0";
+            osgDB::Registry::instance()->setLibraryFilePathList(osg_plugins_path);
+            loginf << "ATSDBClient: set install osg plugin path to '" << osg_plugins_path << "'";
+        }
+
+#endif
+
         std::cout << "ATSDBClient: checking if local configuration exists ... ";
 
         if (!Files::directoryExists(HOME_SUBDIRECTORY))
         {
             std::cout << " no" << std::endl;
 
-            if (!Files::directoryExists(SYSTEM_INSTALL_PATH))
+            if (!Files::directoryExists(system_install_path))
             {
-                std::cerr << "ATSDBClient: unable to locate system installation files at '" << SYSTEM_INSTALL_PATH
+                std::cerr << "ATSDBClient: unable to locate system installation files at '" << system_install_path
                           << "'" << std::endl;
                 return -1;
             }
-            std::cout << "ATSDBClient: copying files from system installation from '" << SYSTEM_INSTALL_PATH
+            std::cout << "ATSDBClient: copying files from system installation from '" << system_install_path
                       << "' to '" << HOME_SUBDIRECTORY <<  "' ... ";
-            if (!Files::copyRecursively(SYSTEM_INSTALL_PATH, HOME_SUBDIRECTORY))
+            if (!Files::copyRecursively(system_install_path, HOME_SUBDIRECTORY))
             {
                 std::cout << " failed" << std::endl;
                 return -1;
@@ -71,18 +99,15 @@ int main (int argc, char **argv)
         std::string config_version = config.getString("version");
         loginf << "ATSDBClient: configuration version " << config_version;
 
-#if USE_EXPERIMENTAL_SOURCE == true
-        loginf << "ATSDBClient: includes experimental features";
-#endif
-
         if (config.existsId("enable_multisampling") && config.getBool("enable_multisampling")
                 && config.existsId("multisampling"))
         {
             unsigned int num_samples = config.getUnsignedInt("multisampling");
             loginf << "ATSDBClient: enabling multisampling with " << num_samples << " samples";
-            QSurfaceFormat fmt;
-            fmt.setSamples(num_samples);
-            QSurfaceFormat::setDefaultFormat(fmt);
+            //TODO
+//            QSurfaceFormat fmt;
+//            fmt.setSamples(num_samples);
+//            QSurfaceFormat::setDefaultFormat(fmt);
         }
 
         ConfigurationManager::getInstance().init (config.getString("main_configuration_file"));

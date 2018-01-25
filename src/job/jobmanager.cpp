@@ -30,7 +30,7 @@ JobManager::JobManager()
     : Configurable ("JobManager", "JobManager0", 0, "threads.xml"), stop_requested_(false), stopped_(false), widget_(nullptr)
 {
     logdbg  << "JobManager: constructor";
-    boost::mutex::scoped_lock l(mutex_);
+    QMutexLocker locker(&mutex_);
 
     registerParameter ("update_time", &update_time_, 10);
 
@@ -97,7 +97,8 @@ void JobManager::cancelJob (std::shared_ptr<Job> job)
 
 bool JobManager::noJobs ()
 {
-    boost::mutex::scoped_lock l(mutex_);
+    QMutexLocker locker(&mutex_);
+
     return jobs_.size() == 0 && !active_db_job_ && queued_db_jobs_.size() == 0;
 }
 
@@ -257,13 +258,14 @@ JobManagerWidget *JobManager::widget()
 
 unsigned int JobManager::numJobs ()
 {
-    boost::mutex::scoped_lock l(mutex_);
+    QMutexLocker locker(&mutex_);
+
     return jobs_.size();
 }
 
 unsigned int JobManager::numDBJobs ()
 {
-    boost::mutex::scoped_lock l(mutex_);
+    QMutexLocker locker(&mutex_);
 
     return active_db_job_ ? queued_db_jobs_.size()+1 : queued_db_jobs_.size();
 }
