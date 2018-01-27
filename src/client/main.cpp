@@ -78,7 +78,8 @@ int main (int argc, char **argv)
 
             osgDB::Registry::instance()->setLibraryFilePathList(std::string(appdir) + "/appdir/lib");
 
-            CPLSetConfigOption( "GDAL_DATA", "appdir/atsdb/data/gdal");
+            std::string gdal_path = std::string(appdir)+"/appdir/atsdb/data/gdal";
+            CPLSetConfigOption("GDAL_DATA", gdal_path.c_str());
         }
 #endif
 
