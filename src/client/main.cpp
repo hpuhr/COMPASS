@@ -62,20 +62,34 @@ int main (int argc, char **argv)
 
         if (fuse)
         {
-            std::cout << "ATSDBClient: assuming fuse environment " << argv[0] << std::endl;
+            const char* appdir = std::getenv("APPDIR");
+            assert (appdir);
 
-            system_install_path = "../atsdb";
+            std::cout << "ATSDBClient: assuming fuse environment in " << appdir << std::endl;
+
+            std::cout << "ATSDBClient: 1: " << Files::directoryExists("./appdir/atsdb") << std::endl;
+            std::cout << "ATSDBClient: 2: " << Files::directoryExists("./atsdb") << std::endl;
+            std::cout << "ATSDBClient: 3: " << Files::directoryExists("../atsdb") << std::endl;
+            std::cout << "ATSDBClient: 4: " << Files::directoryExists("appdir/atsdb") << std::endl;
+            std::cout << "ATSDBClient: 5: " << Files::directoryExists("../appdir/atsdb") << std::endl;
+            std::cout << "ATSDBClient: 6: " << Files::directoryExists("atsdb") << std::endl;
+            std::cout << "ATSDBClient: 7: " << Files::directoryExists("../../atsdb") << std::endl;
+            std::cout << "ATSDBClient: 8: " << Files::directoryExists("$APPDIR/atsdb") << std::endl;
+
+            system_install_path = std::string(appdir) + "/appdir/atsdb";
 
             std::cout << "ATSDBClient: set install path to '" << system_install_path << "'" << std::endl;
             assert (Files::directoryExists(system_install_path));
 
+
             osgDB::FilePathList path_list;
+
             path_list.push_back("$ORIGIN/appdir/lib");
             path_list.push_back("$ORIGIN/lib");
             path_list.push_back("appdir/lib");
 
 //            std::string osg_plugins_path = "$ORIGIN/../lib/";
-            osgDB::Registry::instance()->setLibraryFilePathList(path_list);
+            osgDB::Registry::instance()->setLibraryFilePathList(std::string(appdir) + "/appdir/lib");
             //std::cout << "ATSDBClient: set install osg plugin path to '" << osg_plugins_path << "'" << std::endl;
         }
 #endif
