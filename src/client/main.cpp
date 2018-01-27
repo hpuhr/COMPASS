@@ -2,6 +2,7 @@
 #include <QSurfaceFormat>
 
 #include <boost/filesystem.hpp>
+#include <boost/program_options.hpp>
 
 #include <iostream>
 #include <cstdlib>
@@ -22,8 +23,29 @@
 
 using namespace Utils;
 
+namespace po = boost::program_options;
+
 int main (int argc, char **argv)
 {
+    bool fuse = false;
+
+    po::options_description desc("Allowed options");
+    desc.add_options()
+        ("help", "produce help message")
+        //("compression", po::value<int>(), "set compression level")
+        ("fuse,f", po::bool_switch(&fuse), "assume fuse environment")
+    ;
+
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+    po::notify(vm);
+
+    if (vm.count("help")) {
+        std::cout << desc << "\n";
+        return 1;
+    }
+
+
     // check if basic configuration works
     try
     {
@@ -31,28 +53,28 @@ int main (int argc, char **argv)
 
         std::string system_install_path = SYSTEM_INSTALL_PATH;
 
-        std::string app_path = boost::filesystem::system_complete(argv[0]).string();
+//        std::string app_path = boost::filesystem::system_complete(argv[0]).string();
 
-        std::cout <<"ATSDBClient: application path is '" << app_path << "'" << std::endl;
+//        std::cout <<"ATSDBClient: application path is '" << app_path << "'" << std::endl;
 
 #if USE_EXPERIMENTAL_SOURCE == true
         std::cout <<"ATSDBClient: includes experimental features" << std::endl;
 
-        if (app_path.find("/tmp") != std::string::npos)
+        if (fuse)
         {
-            std::string origin_path = app_path+"/..";
-            std::cout << "ATSDBClient: AppImage environment detected under '" << origin_path << "'" << std::endl;
-            system_install_path = origin_path;
-            system_install_path += "/local/atsdb";
+            std::cout << "ATSDBClient: assuming fuse environment" << std::endl;
+
+            std::string system_install_path = "../atsdb";
 
             std::cout << "ATSDBClient: set install path to '" << system_install_path << "'" << std::endl;
             assert (Files::directoryExists(system_install_path));
 
-            std::string osg_plugins_path = origin_path+"/plugins/osgPlugins-3.4.0";
+            std::string osg_plugins_path = "../lib/osgPlugins-3.4.0";
             osgDB::Registry::instance()->setLibraryFilePathList(osg_plugins_path);
             std::cout << "ATSDBClient: set install osg plugin path to '" << osg_plugins_path << "'" << std::endl;
         }
 #endif
+
         std::cout << "ATSDBClient: checking if local configuration exists ... ";
 
         if (!Files::directoryExists(HOME_SUBDIRECTORY))
