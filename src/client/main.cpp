@@ -30,22 +30,22 @@ int main (int argc, char **argv)
         std::string system_install_path = SYSTEM_INSTALL_PATH;
 
 #if USE_EXPERIMENTAL_SOURCE == true
-        loginf << "ATSDBClient: includes experimental features";
+        std::cout <<"ATSDBClient: includes experimental features";
 
         const char* origin_path = getenv("ORIGIN");
 
         if (origin_path)
         {
-            loginf << "ATSDBClient: AppImage environment detected under '" << origin_path << "'";
+            std::cout << "ATSDBClient: AppImage environment detected under '" << origin_path << "'" << std::endl;
             system_install_path = origin_path;
             system_install_path += "/atsdb";
 
-            loginf << "ATSDBClient: set install path to '" << system_install_path << "'";
+            std::cout << "ATSDBClient: set install path to '" << system_install_path << "'" << std::endl;
             assert (Files::directoryExists(system_install_path));
 
             std::string osg_plugins_path = system_install_path+"/../plugins/osgPlugins-3.4.0";
             osgDB::Registry::instance()->setLibraryFilePathList(osg_plugins_path);
-            loginf << "ATSDBClient: set install osg plugin path to '" << osg_plugins_path << "'";
+            std::cout << "ATSDBClient: set install osg plugin path to '" << osg_plugins_path << "'" << std::endl;
         }
 
 #endif
