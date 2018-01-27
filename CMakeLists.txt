@@ -30,7 +30,7 @@ set(CMAKE_AUTOMOC ON)
 add_definitions(${Qt5Widgets_DEFINITIONS})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 
-find_package ( Boost REQUIRED COMPONENTS regex system thread)
+find_package ( Boost REQUIRED COMPONENTS regex system thread filesystem)
 message("  Boost_INCLUDE_DIR: ${Boost_INCLUDE_DIR}")
 message("  Boost_LIBRARY_DIR: ${Boost_LIBRARY_DIR}")
 

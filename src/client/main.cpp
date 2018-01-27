@@ -1,6 +1,8 @@
 
 #include <QSurfaceFormat>
 
+#include <boost/filesystem.hpp>
+
 #include <iostream>
 #include <cstdlib>
 
@@ -29,27 +31,28 @@ int main (int argc, char **argv)
 
         std::string system_install_path = SYSTEM_INSTALL_PATH;
 
+        std::string app_path = boost::filesystem::system_complete(argv[0]).string();
+
+        std::cout <<"ATSDBClient: application path is '" << app_path << "'" << std::endl;
+
 #if USE_EXPERIMENTAL_SOURCE == true
-        std::cout <<"ATSDBClient: includes experimental features";
+        std::cout <<"ATSDBClient: includes experimental features" << std::endl;
 
-        const char* origin_path = getenv("ORIGIN");
-
-        if (origin_path)
+        if (app_path.find("/tmp") != std::string::npos)
         {
+            std::string origin_path = app_path+"/..";
             std::cout << "ATSDBClient: AppImage environment detected under '" << origin_path << "'" << std::endl;
             system_install_path = origin_path;
-            system_install_path += "/atsdb";
+            system_install_path += "/local/atsdb";
 
             std::cout << "ATSDBClient: set install path to '" << system_install_path << "'" << std::endl;
             assert (Files::directoryExists(system_install_path));
 
-            std::string osg_plugins_path = system_install_path+"/../plugins/osgPlugins-3.4.0";
+            std::string osg_plugins_path = origin_path+"/plugins/osgPlugins-3.4.0";
             osgDB::Registry::instance()->setLibraryFilePathList(osg_plugins_path);
             std::cout << "ATSDBClient: set install osg plugin path to '" << osg_plugins_path << "'" << std::endl;
         }
-
 #endif
-
         std::cout << "ATSDBClient: checking if local configuration exists ... ";
 
         if (!Files::directoryExists(HOME_SUBDIRECTORY))
