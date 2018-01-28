@@ -39,12 +39,14 @@
 %%%\memmansecheads
 
 %%%% Use the built-in division styling
-\headstyles{memman}
+%\headstyles{memman}
+
+\pagenumbering{arabic}
 
 %%% ToC down to subsections
-\settocdepth{subsection}
+\settocdepth{subsubsection}
 %%% Numbering down to subsections as well
-\setsecnumdepth{subsection}
+\setsecnumdepth{subsubsection}
 
 %%%%%%%%%%%%%%%%%%%%%%% glossary
 \makeglossary
@@ -152,11 +154,11 @@
 \firmlists
 \midsloppy
 \raggedbottom
-\chapterstyle{demo3}
+%\chapterstyle{demo3}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\input{memnoidxnum}
+%\input{memnoidxnum}
 
 \frontmatter
 \pagestyle{empty}
@@ -233,6 +235,16 @@ The \textbf{A}ir \textbf{T}raffic \textbf{S}urveillance \textbf{D}ata\textbf{B}a
 \item Runs on generic hardware
 \end{itemize}
 
+There also exists an integrated display solution, called the ATSDB display. Currently it is experimental, and still under heavy development. For this reasons, it is not released as source code, but can be downloaded as an AppImage as binary component only. Please note that the display functionality is described in the later chapter OSG View (in section \ref{sec:osg_view}). The following features currently exist:
+
+\begin{itemize}  
+\item High-performance display based on OpenSceneGraph
+\item Customizable map/terrain display based on osgEarth
+\item Customizable display of Database Objects
+\item Selection and labeling
+\item Relatively low memory footprint (e.g. 17 million target reports in 6 GB RAM)
+\end{itemize}
+
 \section{General Aspects}
 ATSDB is a highly specialized surveillance data processing framework, with a strong focus on high-performance and  a  low  memory  footprint,  to  process  massive  quantities  of  data.   Surveillance  data  is fetched from a database (limited by a filter system), then processed and displayed using so-called Views (visualization of aspects of the result set).\\\\
 
@@ -296,7 +308,32 @@ Please \textbf{note} that the SASS-C MySQL database name is not case sensitive (
 \chapter{Installation}
 \label{sec:installation}
 
-Currently, ATSDB has to be installed as source code and compiled by the user. Any recent Linux installation should work without issues. Regarding software version, no particularly new features were used, so older versions than the verified ones should also work. \\
+ATSDB can either be built from source (which exludes the OSG View, but allows development of additional features), or downloaded as an AppImage (binary distributable which includes the OSG View). The recommended option for non-developers is the AppImage.
+
+\section{Using the AppImage}
+
+To summarize, an AppImage is a form of binary distribution in one complete package, which does not require installation of any libraries or alteration of the operating system. Please refer to \url{https://appimage.org/} to get additional information.
+
+To obtain the ATSDB AppImage, download the most current distribution from TODO. To execute, make it executable using the following command:
+\begin{verbatim}
+chmod +x ATSDB-x86_64_release.AppImage
+\end{verbatim}
+
+Generally speaking, that is it. The application can be run using the following command:
+\begin{verbatim}
+./ATSDB-x86_64_release.AppImage -f
+\end{verbatim}
+
+The following notes that should be considered:
+
+\begin{itemize}  
+\item The AppImage should run under any Linux distribution of similiar date to Ubuntu 14.04 or later, but no guarantees can be made.
+\item The AppImage performance is somewhat lessened in comparison to the a later Ubuntu version, which in all probability is just that the graphics system is that outdated. This will be investigated further.
+\item OSG View rendering is performed according to the local graphics card and driver, and might be limited by their capabilities.
+\end{itemize}
+
+\section{Building from Source Code}
+Currently, ATSDB can be installed as source code and compiled by the user. Any recent Linux installation should work without issues. Regarding software version, no particularly new features were used, so older versions than the verified ones should also work. \\
 
 The following software has to be installed on the workstation:
 
@@ -436,14 +473,22 @@ Scanning dependencies of target atsdb_client
 [100%] Built target atsdb_client
 \end{verbatim}
 
-\chapter{Usage}
-\label{sec:usage}
-
-To start the ATSDB client, enter the ATSDB source/build folder, and execute:
+To install the ATSDB client, execute the following command in the build folder:
 
 \begin{verbatim}
-./atsdb_client
+sudo make install
 \end{verbatim}
+
+This will install binary and a data folder to your system directories, commonly in '/usr/local/bin/', '/usr/local/lib/' and '/usr/local/atsdb/' (or similiar, depending on you Linux distribution.
+
+To start the ATSDB client execute:
+
+\begin{verbatim}
+atsdb_client
+\end{verbatim}
+
+\chapter{Usage}
+\label{sec:usage}
 
 \section{Opening a database}
 \label{sec:startup}
@@ -491,6 +536,50 @@ For connecting to a MySQL database, several parameters have to be entered:
 \end{table}
 
 To connect to a defined MySQL server, press the 'Connect' button.\\
+
+Please note that it is not recommended to use SASS-C databases on which actual performance evaluations are to be performed. Using ATSDB, database operations can be performed which might impede results later obtained by using SASS-C. For this reason, it is recommended to either clone an evaluation or use one on which no later SASS-C evaluations are performed.
+
+If a remote server is used, e.g. a SASS-C workstation, remote access might be prohibited, which will result in an access permissions error during connecting. To resolve this, (generally) remote access can be enabled in the servers MySQL configuration. As a superuser, edit the file 'my.cnf', which is commonly found under '/etc/mysql/my.cnf'. 
+
+Find the line that states:
+\begin{verbatim}
+bind-address = 127.0.0.1
+\end{verbatim}
+
+Change the line to:
+
+\begin{verbatim}
+#bind-address = 127.0.0.1
+\end{verbatim}
+
+Then, restart the MySQL server using one the following commands:
+
+\begin{verbatim}
+/etc/init.d/mysqld restart
+
+#OR, depending on your distribution
+service mysql restart
+\end{verbatim}
+
+Then, to allow access to the databases, log into a MySQL client on the server as root and execute the following commands:
+
+\begin{verbatim}
+# log in as root, must be done as superuser
+mysql -u root
+
+# grant access rights for your MySQL user, 
+# e.g. 'sass', from the your local IP address, 
+# e.g. '192.168.0.104', using your password, e.g. 'sassc'
+GRANT ALL ON *.* to' 'sassc'@'192.168.0.104' IDENTIFIED BY 'sassc';
+
+# set access rights
+FLUSH PRIVILEGES;
+
+# exit the MySQL client
+exit
+\end{verbatim}
+
+After executing these steps once, remote access to this MySQL server from the specified IP address is enabled.
 
 If  a  wrong  database  name  or  IP  address  is  used,  error  messages  can  be  e.g.  \\
 
@@ -920,6 +1009,318 @@ The exported file can be opened in any editor, or for example imported into Libr
   \caption{Listbox View export in LibreOffice Calc}
   \label{fig:listbox_export_calc}
 \end{figure}
+
+\subsection{OSG View}
+\label{sec:osgview}
+
+The OSG View allows a graphical representation of target reports from the Database Objects. After creation, it displays a world map in the map widget on the left, supported by a configuration panel on the right hand side.
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm]{../screenshots/osgview_overview.png}
+  \caption{OSG View overview}
+  \label{fig:osgview_overview}
+\end{figure}
+
+The map window will automatically traverse to the medium location of the data in the current database.
+
+\subsubsection{Map Widget}
+\label{sec:osgview_map}
+
+In the map widget, several mouse and key operations are supported. The following terms are used:
+
+\begin{itemize}
+ \item LMB: Left mouse button
+ \item MMB: Middle mouse button
+ \item RMB: Right mouse button
+ \item CTRL: CTRL key
+\end{itemize}
+
+\begin{table}[H]
+  \center
+  \begin{tabular}{ | l | l | l |}
+    \hline
+    \textbf{Mouse Action} & \textbf{Key Action} &  \textbf{Description} \\ \hline
+    Single click & - & - \\ \hline
+    LMB click \& drag & - & Traverse map \\ \hline
+    - & Arrows & Traverse map \\ \hline
+    MMB click \& drag & - & Rotate map \\ \hline
+    RMB click \& drag & - & Zoom map \\ \hline
+    MMB scroll \& drag & - & Zoom map \\ \hline
+    LMB double click & - & Zoom to clicked location \\ \hline
+    RMB double click \& drag & - & Zoom away from clicked location \\ \hline
+    - & Space bar & Return to home position \\ \hline
+  \end{tabular}
+  \caption{Map widget view operations}
+\end{table}
+
+Further operations are defined in section \ref{sec:osgview_map_operations}.
+
+\subsubsection{Configuration Widget}
+\label{sec:osgview_config}
+
+In the configuration widget, several elements exist:
+
+\begin{itemize}
+ \item Layer widget: displays all currently existing layers
+ \item Height widget: configures if and how height information is used
+ \item Time filter: De/activates the time window filter
+\end{itemize}
+
+\subsubsection{Layer Widget}
+
+In the layer widget, a tree view is given to configure the display of the existing elements. The following main tree elements are:
+\begin{itemize}
+ \item Map: Shows current map layers
+ \item Geometry: Shows current DBO elements
+\end{itemize}
+
+\subsubsection{Changing the Background Map}
+
+Please note that, while the default background map is supplied ATSDB, the other background map types are downloaded from public Internet sources and therefore require an Internet connection. They are then cached locally to facilitate faster access. \\
+
+To change the background map, click the globe symbol {\includegraphics[scale=0.05]{../../data/icons/globe.png} in Map Layer to access the map selection. The following maps are commonly available:
+
+\begin{itemize}
+ \item arcgis.earth
+ \item minimal.earth
+ \item openstreetmap.earth
+ \item readymap.earth
+ \item readymap-detailed.earth
+\end{itemize}
+
+The map loading and display in based on the osgEarth library (\url{http://osgearth.org/}), as are to map file definitions. The map which can be set using this dialog is simply a file list from the folder '~/.atsdb/data/maps'. So, changes can be made to the supplied ones or custom user maps can be added to this folder. \\
+Please refer to \url{http://docs.osgearth.org/en/latest/references/earthfile.html} for a definition of an earth file.
+
+\newpage
+\paragraph{ArcGIS Map}
+
+As supplied in the osgEarth example files, this map data is obtained from ArcGIS Online (\url{https://doc.arcgis.com/en/arcgis-online/reference/what-is-agol.htm}). It shows satellite imagery, supplied with elevation data from ReadyMap. 
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm]{../screenshots/osgview_arcgis.png}
+  \caption{OSG View Arcgis map}
+\end{figure}
+
+\newpage
+\paragraph{Minimal Map}
+
+This minimal map shows national borders based on an ESRI shapefile, provided by Bjorn Sandvik on \url{thematicmapping.org}.
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm]{../screenshots/osgview_minimal.png}
+  \caption{OSG View minimal map}
+\end{figure}
+
+\newpage
+\paragraph{Open Street Map}
+
+This very useful map shows map data from \url{https://www.openstreetmap.org/}.
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm]{../screenshots/osgview_osm.png}
+  \caption{OSG View OpenStreetMap}
+\end{figure}
+
+It is possible to zoom in to a very high level of detail, to even inspect airport layouts.
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm]{../screenshots/osgview_osm_vienna.png}
+  \caption{OSG View OpenStreetMap Vienna Airport}
+\end{figure}
+
+\newpage
+\paragraph{ReadyMap}
+
+This map also shows satellite data, from \url{http://web.pelicanmapping.com/readymap-tiles/}. It includes an elevation layer, so ground elevation is observable.
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm]{../screenshots/osgview_ready.png}
+  \caption{OSG View ReadyMap}
+\end{figure}
+
+
+\paragraph{ReadyMap Detailed}
+
+This map shows the same data as ReadyMap, but to a higher detail level.
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm]{../screenshots/osgview_ready_detail.png}
+  \caption{OSG View ReadyMap detailed}
+\end{figure}
+
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm]{../screenshots/osgview_readymap_elav.png}
+  \caption{OSG View ReadyMap detailed elevation}
+\end{figure}
+
+
+\subsubsection{Loading Data}
+To load data, trigger a loading action from the Management widget. The data will be loaded as with the Listbox View, and displayed during the loading process. 
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm]{../screenshots/osgview_data.png}
+  \caption{OSG View data display}
+  \label{fig:osgview_data}
+\end{figure}
+
+Please note that since currently only an example dataset is used, until real surveillance data can be made available.
+
+Now, the loaded data is displayed in the following manner: For each DBO, a list of sensors exist, which supply the shown target reports. In the Geometry layers, the data is grouped as follows: Database Object $\rightarrow$ Sensor $\rightarrow$ Group. \\
+
+For each DBO, a default display configuration is set:
+
+\begin{itemize}
+ \item ADS-B: Blue square
+ \item MLAT: Red triangle
+ \item Radar: Green cross
+ \item Tracker: White circle
+\end{itemize}
+
+A sensor is of course a defined data source, e.g. a specific radar. A group currently is defined by a track number, and is connected by lines. If no track number is defined, the data is put into the 'Unassociated' group and not connected by lines.
+
+\subsubsection{Layer Operations}
+
+In the Layers widget, a number of operations are possible for each tree item.
+
+\begin{table}[H]
+  \center
+  \begin{tabular}{ | l | l | l |}
+    \hline
+    \textbf{Operation} & \textbf{Trigger} &  \textbf{Description} \\ \hline
+    View sub-items & Triangle & Opens or closes view of the sub-items \\ \hline
+    Display item & Checkbox & Enables or disables display of items (and all sub-items) \\ \hline
+    Display context menu & Click on symbol & Opens the items context menu \\ \hline
+  \end{tabular}
+  \caption{Layer operations}
+\end{table}
+
+The context menu allows several actions to be performed on an item. If an item has sub-items, the same action will automatically be performed on the child items.
+
+\begin{figure}[H]
+    \includegraphics[width=5cm]{../screenshots/osgview_layer_context_menu.png}
+  \caption{OSG View layer context menu}
+\end{figure}
+
+\begin{itemize}
+ \item Set Color: Open colour dialog to set the items colour
+ \item Set Symbol: Set the items symbol to one of the following values:
+\begin{itemize}
+ \item Cross
+ \item Circle
+ \item Square
+ \item Triangle
+\end{itemize}
+ \item Set Symbol Size: Set the symbols size
+ \item Set Line Width: Set the line width
+ \item Set Opacity: Set the items opacity
+ \item Hide children: Disable display off all children
+ \item Show Children: Enable display of all children
+ \item Clear Labels: Removes all labels
+\end{itemize}
+
+Please note that only the main Map item has a context menu, and only allows setting of map files and changing the opacity.
+
+\subsubsection{Map Widget Data Operations}
+\label{sec:osgview_map_operations}
+
+Several data-related operations can be also performed in the map widget.
+
+\begin{table}[H]
+  \center
+  \begin{tabular}{ | l | l | l |}
+    \hline
+    \textbf{Mouse Action} & \textbf{Key Action} &  \textbf{Description} \\ \hline
+    LMB click & CTRL & Toggle label display of a single target report \\ \hline
+    RMB click & CTRL & Show data context menu \\ \hline
+  \end{tabular}
+  \caption{Map widget data operations}
+\end{table}
+
+Label display is currently somewhat limited, but shows the following attributes:
+
+\begin{itemize}
+ \item C: Mode C code in feet, if available
+ \item A: Mode A code (octal), if available
+ \item CS: Mode S target indentification, if available
+ \item R: Record number in database
+ \item TA: Mode S target address (hexadecimal), if available
+ \item T: Time of day (HH:MM:SS.SSS)
+ \item TN: Track number, if available
+\end{itemize}
+
+Also, the label colour is always the same as the target report's.
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm]{../screenshots/osgview_data_operations.png}
+  \caption{OSG View data operations}
+\end{figure}
+
+The data context menu allows the following operations:
+
+\begin{itemize}
+ \item Toogle Label: Toggle label display of a single target report
+ \item Group: Same operations as on the item's group layer item
+\end{itemize}
+
+\subsubsection{Height Operations}
+
+Per default, a target reports height is not used for display, which is common in current air-traffic displays. However, in certain situation a true 3D display might be of interest to a user, and therefore several options where incorporated:
+
+\begin{itemize}
+ \item Use: Use the height based on Mode C $h_c$, transformed to meters
+ \item Use Offset: Whether to use an additative height offset
+ \item Offset Factor: Height offset value $h_o$
+ \item Use Scale: Whether to use an multiplicative factor
+ \item Scale Factor: Height scale factor value $h_s$
+ \item Connect none: Whether to draw lines to target reports with no height information
+\end{itemize}
+
+Generally, if no height information is given (no Mode C code), the height is either $0$ or the height offset (if used). That means that those target reports appear to the on the ground. If connection lines are drawn between the ones in the air and those without, a lot of annoying lines are shown.
+
+The formula to calculate the height is as follows:
+
+$$ h = h_o + h_s \cdot h_c [m]$$ 
+
+Please note that upon changes to the height usage, the complete geometry data is redrawn, which can take several seconds until complete.
+
+\subsubsection{Time Filter}
+
+Once activated, the time filter facilitates that only target reports within a specific time window are shown.
+
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm]{../screenshots/osgview_time_filter.png}
+  \caption{OSG View time filter}
+  \label{fig:osgview_time_filter}
+\end{figure}
+
+The following items exist:
+
+\begin{itemize}
+ \item Current: The start of the time window
+ \item Window length (s): Duration of the display time window
+ \item Current End: The end of the time window
+ \item Play button: Start/Stop the auto-play mode
+ \item Update interval [s]: Auto-play mode update interval
+ \item Update step [s]: Auto-play mode update step
+ \item Scrollbar: Manual time-scrolling
+\end{itemize}
+
+Please note that unfortunatly in the AppImage especially the time filtering is slower than was to be expected. This is currently under investigation.
+
+
 
 %\section{Glossary}
 %Buffer
