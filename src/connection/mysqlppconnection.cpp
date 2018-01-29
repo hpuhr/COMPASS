@@ -34,11 +34,10 @@
 
 using namespace Utils;
 
-MySQLppConnection::MySQLppConnection(const std::string &class_id, const std::string &instance_id, DBInterface *interface)
-    : DBConnection (class_id, instance_id, interface), interface_(*interface), connected_server_(nullptr), connection_(mysqlpp::Connection (false)),
-      prepared_query_(connection_.query()),
-      prepared_parameters_(mysqlpp::SQLQueryParms(&prepared_query_)), query_used_(false), transaction_(nullptr), prepared_command_(nullptr),
-      prepared_command_done_(true), widget_(nullptr), info_widget_(nullptr)
+MySQLppConnection::MySQLppConnection(const std::string &class_id, const std::string &instance_id,
+                                     DBInterface *interface)
+    : DBConnection (class_id, instance_id, interface), interface_(*interface), connection_(mysqlpp::Connection (false)),
+      prepared_query_(connection_.query()), prepared_parameters_(mysqlpp::SQLQueryParms(&prepared_query_))
 {
     registerParameter("used_server", &used_server_, "");
 
@@ -47,7 +46,6 @@ MySQLppConnection::MySQLppConnection(const std::string &class_id, const std::str
 
 MySQLppConnection::~MySQLppConnection()
 {
-
 }
 
 void MySQLppConnection::setServer (const std::string &server)
@@ -62,19 +60,37 @@ void MySQLppConnection::connectServer ()
     assert (servers_.count(used_server_) == 1);
     connected_server_ = servers_.at(used_server_);
 
-    loginf << "MySQLppConnection: connectServer: host " << connected_server_->host() << " port " << connected_server_->port()
-           << " user " << connected_server_->user() << " pw " << connected_server_->password();
+    loginf << "MySQLppConnection: connectServer: host " << connected_server_->host() << " port "
+           << connected_server_->port() << " user " << connected_server_->user() << " pw "
+           << connected_server_->password();
 
-    //bool connect(const char* db = 0, const char* server = 0, const char* user = 0, const char* password = 0, unsigned int port = 0);
+    //bool connect(const char* db = 0, const char* server = 0, const char* user = 0, const char* password = 0,
+    // unsigned int port = 0);
+
     bool ret = connection_.connect("", connected_server_->host().c_str(), connected_server_->user().c_str(),
                                    connected_server_->password().c_str(), connected_server_->port());
 
     if (!ret)
-    {
-        logerr << "MySQLppConnection: connectServer: connect failed, error " << connection_.errnum() << ": " << connection_.error();
-    }
+        logerr << "MySQLppConnection: connectServer: connect failed, error " << connection_.errnum() << ": "
+               << connection_.error();
 }
 
+void MySQLppConnection::createDatabase (const std::string &database_name)
+{
+    std::vector<std::string> databases = getDatabases();
+    assert (std::find(databases.begin(), databases.end(), database_name) == databases.end());
+
+    connection_.create_db(database_name.c_str());
+}
+
+void MySQLppConnection::deleteDatabase (const std::string &database_name)
+{
+    std::vector<std::string> databases = getDatabases();
+    assert (std::find(databases.begin(), databases.end(), database_name) != databases.end());
+
+    std::string drop_db = "DROP DATABASE IF EXISTS "+database_name+";";
+    executeSQL (drop_db); // drop if exists
+}
 
 void MySQLppConnection::openDatabase (const std::string &database_name)
 {
@@ -84,6 +100,7 @@ void MySQLppConnection::openDatabase (const std::string &database_name)
     //        executeSQL (drop_db); // drop if exists
     //        connection_.create_db(info->getDB().c_str()); // so, no database? create it first then.
     //    }
+
     connection_.select_db(database_name);
     loginf  << "MySQLppConnection: openDatabase: successfully opened database '" << database_name << "'";
 
@@ -132,7 +149,8 @@ void MySQLppConnection::executeSQL(const std::string &sql)
     mysqlpp::Query query = connection_.query(sql);
     if(!query.exec()) // execute it!
     {
-        logerr  << "MySQLppConnection: executeSQL: error when executing '" << sql<<"' message '" << query.error() << "'";
+        logerr  << "MySQLppConnection: executeSQL: error when executing '" << sql<<"' message '"
+                << query.error() << "'";
         throw std::runtime_error("MySQLppConnection: executeSQL: error when executing");
     }
 }
@@ -275,7 +293,8 @@ void MySQLppConnection::execute (const std::string &command, std::shared_ptr <Bu
 
     logdbg  << "MySQLppConnection: execute: iterating result";
     // Display results
-    unsigned int cnt=buffer->size();
+    size_t cnt = buffer->size();
+
     mysqlpp::StoreQueryResult::const_iterator it;
     for (it = res.begin(); it != res.end(); ++it)
     {
@@ -287,7 +306,8 @@ void MySQLppConnection::execute (const std::string &command, std::shared_ptr <Bu
     logdbg  << "MySQLppConnection: execute done with size " << buffer->size();
 }
 
-void MySQLppConnection::readRowIntoBuffer (mysqlpp::Row &row, const PropertyList &list, unsigned int num_properties, std::shared_ptr <Buffer> buffer, unsigned int index)
+void MySQLppConnection::readRowIntoBuffer (mysqlpp::Row &row, const PropertyList &list, unsigned int num_properties,
+                                           std::shared_ptr <Buffer> buffer, unsigned int index)
 {
     //logdbg << "MySQLppConnection::readRowIntoBuffer: start buffer size " << buffer->size() << " index " << index;
     for (unsigned int cnt=0; cnt < num_properties; cnt++)
@@ -367,7 +387,8 @@ void MySQLppConnection::prepareStatement (const std::string &sql)
 
     if (!(result_step_ = prepared_query_.use()))
     {
-        throw std::runtime_error ("MySQLppConnection: prepareStatement: query error '"+std::string(prepared_query_.error())+"'");
+        throw std::runtime_error ("MySQLppConnection: prepareStatement: query error '"
+                                  +std::string(prepared_query_.error())+"'");
     }
 
     query_used_=true;
@@ -498,7 +519,8 @@ std::vector <std::string> MySQLppConnection::getTableList()  // buffer of table 
     assert (result->containsData());
     std::shared_ptr <Buffer> buffer = result->buffer();
 
-    unsigned int size = buffer->size();
+    size_t size = buffer->size();
+
     for (unsigned int cnt=0; cnt < size; cnt++)
         tables.push_back(buffer->getString("name").get(cnt));
 
@@ -680,7 +702,7 @@ std::string MySQLppConnection::identifier () const
     return "MySQL: "+used_server_+": "+used_database_;
 }
 
-void MySQLppConnection::addServer (std::string name)
+void MySQLppConnection::addServer (const std::string& name)
 {
     logdbg << "MySQLppConnection: addServer: name '" << name << "'";
 
