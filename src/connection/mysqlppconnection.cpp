@@ -36,6 +36,8 @@
 #include <fstream>
 
 #include <QMessageBox>
+#include <QProgressDialog>
+#include <QCoreApplication>
 
 using namespace Utils;
 
@@ -751,19 +753,39 @@ void MySQLppConnection::generateSubConfigurable (const std::string &class_id, co
 void MySQLppConnection::importSQLFile (const std::string& filename)
 {
     loginf  << "MySQLppConnection: importSQLFile: importing " << filename;
-
-
     assert (Files::fileExists(filename));
 
-    loginf << "MySQLppConnection: importSQLFile: counting lines";
-    std::ifstream file_for_counting(filename);
-    file_for_counting.unsetf(std::ios_base::skipws);
+    QProgressDialog* progress_dialog = new QProgressDialog (tr("Importing SQL File"), tr(""), 0, 100);
+    progress_dialog->setCancelButton(0);
+    progress_dialog->setModal(true);
+    progress_dialog->setWindowModality(Qt::ApplicationModal);
+    progress_dialog->show();
+
+    while (QCoreApplication::hasPendingEvents())
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+    std::ifstream is;
+    is.open (filename.c_str(), std::ios::binary );
+    is.seekg (0, std::ios::end);
+    size_t file_byte_size = is.tellg();
+    is.close();
+    assert (file_byte_size);
+    loginf  << "MySQLppConnection: importSQLFile: file_byte_size: " << file_byte_size;
+
+    //progress_dialog->setValue(0);
+
+    while (QCoreApplication::hasPendingEvents())
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+    //loginf << "MySQLppConnection: importSQLFile: counting lines";
+    //std::ifstream file_for_counting(filename);
+    //file_for_counting.unsetf(std::ios_base::skipws);
 
     // count the newlines with an algorithm specialized for counting:
-    long line_count = std::count(std::istream_iterator<char>(file_for_counting), std::istream_iterator<char>(), '\n');
+    //long line_count = std::count(std::istream_iterator<char>(file_for_counting), std::istream_iterator<char>(), '\n');
 
-    loginf  << "MySQLppConnection: importSQLFile: lines: " << line_count << "\n";
-    file_for_counting.close();
+    //loginf  << "MySQLppConnection: importSQLFile: lines: " << line_count << "\n";
+    //file_for_counting.close();
 
     std::ifstream sql_file (filename);
     assert (sql_file.is_open());
@@ -772,9 +794,10 @@ void MySQLppConnection::importSQLFile (const std::string& filename)
     std::stringstream ss;
     //bool comment_found=false;
     size_t line_cnt = 0;
+    size_t byte_cnt = 0;
     size_t error_cnt = 0;
 
-    while ( getline (sql_file,line) )
+    while (getline (sql_file,line))
     {
         try
         {
@@ -783,27 +806,35 @@ void MySQLppConnection::importSQLFile (const std::string& filename)
 //                    || line.find ("--") != std::string::npos)
 //                continue;
 
+            byte_cnt += line.size();
+
             if (line.find ("delimiter") != std::string::npos || line.find ("DELIMITER") != std::string::npos)
             {
-                loginf << "MySQLppConnection: importSQLFile: breaking at delimiter, line " << line_cnt;
+                loginf << "MySQLppConnection: importSQLFile: breaking at delimiter, bytes " << byte_cnt;
                 break;
             }
 
             ss << line << '\n';
-            line_cnt ++;
 
             //if (line.find(";") != std::string::npos)
             if (line.back() == ';')
             {
-                if (line_cnt % 100 == 0)
-                    loginf << "MySQLppConnection: importSQLFile: line cnt " << line_cnt << " of " << line_count
-                           << " strlen " << ss.str().size() << "'";
+//                loginf << "MySQLppConnection: importSQLFile: line cnt " << line_cnt << " of " << line_count
+//                       << " strlen " << ss.str().size() << "'";
 
                 if (ss.str().size())
                     executeSQL (ss.str());
 
                 ss.str("");
             }
+
+            if (line_cnt % 50 == 0)
+            {
+                progress_dialog->setValue(100*byte_cnt/file_byte_size);
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            }
+
+            line_cnt ++;
         }
         catch (std::exception& e)
         {
@@ -819,6 +850,9 @@ void MySQLppConnection::importSQLFile (const std::string& filename)
         }
 
     }
+    delete progress_dialog;
+    progress_dialog = nullptr;
+
     sql_file.close();
     interface_.databaseContentChanged();
 }

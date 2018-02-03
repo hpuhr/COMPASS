@@ -74,7 +74,7 @@ void DBOLabelDefinitionWidget::cellChangedSlot (int row, int column)
 
     const std::map<std::string, DBOLabelEntry*>& entries = definition_->entries();
 
-    assert (row < entries.size());
+    assert (row < static_cast<int>(entries.size()));
 
     auto it = entries.begin();
     std::advance( it, row );
