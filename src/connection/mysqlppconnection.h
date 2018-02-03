@@ -99,6 +99,7 @@ public:
     MySQLServer& connectedServer () { assert (connected_server_); return *connected_server_; }
 
     void importSQLFile (const std::string& filename);
+    void importSQLArchiveFile (const std::string& filename);
 
 protected:
     DBInterface& interface_;

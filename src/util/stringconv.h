@@ -392,6 +392,18 @@ inline std::string getValueStringFromRepresentation (const std::string& represen
     }
 }
 
+inline bool hasEnding (std::string const &full_string, std::string const &ending)
+{
+    if (full_string.length() >= ending.length())
+    {
+        return (0 == full_string.compare (full_string.length() - ending.length(), ending.length(), ending));
+    }
+    else
+    {
+        return false;
+    }
+}
+
 std::string multiplyString (const std::string& value_str, double factor, PropertyDataType data_type);
 const std::string& getLargerValueString (const std::string& value_a_str, const std::string& value_b_str, PropertyDataType data_type);
 const std::string& getSmallerValueString (const std::string& value_a_str, const std::string& value_b_str, PropertyDataType data_type);

@@ -29,8 +29,12 @@
 #include "stringconv.h"
 #include "mysqlserver.h"
 #include "files.h"
+#include "stringconv.h"
 
 #include "boost/date_time/posix_time/posix_time.hpp"
+
+#include <archive.h>
+#include <archive_entry.h>
 
 #include <iostream>
 #include <fstream>
@@ -652,15 +656,15 @@ void MySQLppConnection::performanceTest ()
 
     finalizeCommand ();
 
-//    for (unsigned int cnt=0; cnt < num_reads; cnt++)
-//    {
-//        DBResult *result = readBulkCommand(&command,
-//                                           "SELECT sd_radar.REC_NUM, sd_radar.POS_SYS_X_NM, sd_radar.POS_SYS_Y_NM, sd_radar.MODEC_CODE_FT, sd_radar.TOD, sd_radar.DETECTION_TYPE, sd_radar.DS_ID FROM sd_radar",
-//                                           "",  chunk_size);
-//        Buffer *buffer = result->getBuffer();
-//        delete result;
-//        delete buffer;
-//    }
+    //    for (unsigned int cnt=0; cnt < num_reads; cnt++)
+    //    {
+    //        DBResult *result = readBulkCommand(&command,
+    //                                           "SELECT sd_radar.REC_NUM, sd_radar.POS_SYS_X_NM, sd_radar.POS_SYS_Y_NM, sd_radar.MODEC_CODE_FT, sd_radar.TOD, sd_radar.DETECTION_TYPE, sd_radar.DS_ID FROM sd_radar",
+    //                                           "",  chunk_size);
+    //        Buffer *buffer = result->getBuffer();
+    //        delete result;
+    //        delete buffer;
+    //    }
 
     stop_time = boost::posix_time::microsec_clock::local_time();
     boost::posix_time::time_duration diff = stop_time - start_time;
@@ -739,15 +743,15 @@ void MySQLppConnection::deleteUsedServer ()
 
 void MySQLppConnection::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
-  logdbg  << "MySQLppConnection: generateSubConfigurable: generating " << instance_id;
-  if (class_id == "MySQLServer")
-  {
-    MySQLServer *server = new MySQLServer (instance_id, *this);
-    assert (servers_.count (server->getInstanceId()) == 0);
-    servers_.insert (std::pair <std::string, MySQLServer*> (server->getInstanceId(), server));
-  }
-  else
-    throw std::runtime_error ("MySQLppConnection: generateSubConfigurable: unknown class_id "+class_id );
+    logdbg  << "MySQLppConnection: generateSubConfigurable: generating " << instance_id;
+    if (class_id == "MySQLServer")
+    {
+        MySQLServer *server = new MySQLServer (instance_id, *this);
+        assert (servers_.count (server->getInstanceId()) == 0);
+        servers_.insert (std::pair <std::string, MySQLServer*> (server->getInstanceId(), server));
+    }
+    else
+        throw std::runtime_error ("MySQLppConnection: generateSubConfigurable: unknown class_id "+class_id );
 }
 
 void MySQLppConnection::importSQLFile (const std::string& filename)
@@ -772,27 +776,14 @@ void MySQLppConnection::importSQLFile (const std::string& filename)
     assert (file_byte_size);
     loginf  << "MySQLppConnection: importSQLFile: file_byte_size: " << file_byte_size;
 
-    //progress_dialog->setValue(0);
-
     while (QCoreApplication::hasPendingEvents())
         QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-    //loginf << "MySQLppConnection: importSQLFile: counting lines";
-    //std::ifstream file_for_counting(filename);
-    //file_for_counting.unsetf(std::ios_base::skipws);
-
-    // count the newlines with an algorithm specialized for counting:
-    //long line_count = std::count(std::istream_iterator<char>(file_for_counting), std::istream_iterator<char>(), '\n');
-
-    //loginf  << "MySQLppConnection: importSQLFile: lines: " << line_count << "\n";
-    //file_for_counting.close();
 
     std::ifstream sql_file (filename);
     assert (sql_file.is_open());
 
     std::string line;
     std::stringstream ss;
-    //bool comment_found=false;
     size_t line_cnt = 0;
     size_t byte_cnt = 0;
     size_t error_cnt = 0;
@@ -801,11 +792,6 @@ void MySQLppConnection::importSQLFile (const std::string& filename)
     {
         try
         {
-            //skip comments
-//            if (line.find ("/*") != std::string::npos || line.find ("*/") != std::string::npos
-//                    || line.find ("--") != std::string::npos)
-//                continue;
-
             byte_cnt += line.size();
 
             if (line.find ("delimiter") != std::string::npos || line.find ("DELIMITER") != std::string::npos)
@@ -816,11 +802,10 @@ void MySQLppConnection::importSQLFile (const std::string& filename)
 
             ss << line << '\n';
 
-            //if (line.find(";") != std::string::npos)
             if (line.back() == ';')
             {
-//                loginf << "MySQLppConnection: importSQLFile: line cnt " << line_cnt << " of " << line_count
-//                       << " strlen " << ss.str().size() << "'";
+                //                loginf << "MySQLppConnection: importSQLFile: line cnt " << line_cnt << " of " << line_count
+                //                       << " strlen " << ss.str().size() << "'";
 
                 if (ss.str().size())
                     executeSQL (ss.str());
@@ -854,6 +839,154 @@ void MySQLppConnection::importSQLFile (const std::string& filename)
     progress_dialog = nullptr;
 
     sql_file.close();
+    interface_.databaseContentChanged();
+}
+
+void MySQLppConnection::importSQLArchiveFile(const std::string& filename)
+{
+    loginf  << "MySQLppConnection: importSQLArchiveFile: importing " << filename;
+    assert (Files::fileExists(filename));
+
+    // if gz but not tar.gz or tgz
+    bool raw = String::hasEnding (filename, ".gz") && !String::hasEnding (filename, ".tar.gz");
+
+    loginf  << "MySQLppConnection: importSQLArchiveFile: importing " << filename << " raw " << raw;
+
+    struct archive *a;
+    struct archive_entry *entry;
+    int r;
+
+    a = archive_read_new();
+
+    if (raw)
+    {
+        archive_read_support_filter_gzip(a);
+        archive_read_support_filter_bzip2(a);
+        archive_read_support_format_raw(a);
+    }
+    else
+    {
+        archive_read_support_filter_all(a);
+        archive_read_support_format_all(a);
+
+    }
+    r = archive_read_open_filename(a, filename.c_str(), 10240); // Note 1
+
+    if (r != ARCHIVE_OK)
+        throw std::runtime_error("MySQLppConnection: importSQLArchiveFile: archive error: "
+                                 +std::string(archive_error_string(a)));
+
+    const void *buff;
+    size_t size;
+    int64_t offset;
+
+    size_t line_cnt = 0;
+    size_t error_cnt = 0;
+    size_t byte_cnt = 0;
+
+    while (archive_read_next_header(a, &entry) == ARCHIVE_OK)
+    {
+        loginf << "Archive file found: " << archive_entry_pathname(entry) << " size " << archive_entry_size(entry);
+
+        bool done=false;
+
+        std::stringstream ss;
+
+        for (;;)
+        {
+            r = archive_read_data_block(a, &buff, &size, &offset);
+
+            if (r == ARCHIVE_EOF)
+                break;
+            if (r != ARCHIVE_OK)
+                throw std::runtime_error("MySQLppConnection: importSQLArchiveFile: archive error: "
+                                         +std::string(archive_error_string(a)));
+
+            std::string str (reinterpret_cast<char const*>(buff), size);
+
+            //loginf << "UGA read offset " << offset << " size " << size;
+
+            std::vector<std::string> lines = String::split(str, '\n');
+            std::string line;
+
+            //loginf << "UGA read str has " << lines.size() << " lines";
+
+            for (std::vector<std::string>::iterator line_it = lines.begin(); line_it != lines.end(); line_it++)
+            {
+                if (line_it + 1 == lines.end() )
+                {
+                    //loginf << "last one";
+                    ss << *line_it;
+                    break;
+                }
+
+                try
+                {
+                    ss << *line_it << '\n';
+
+                    line = ss.str();
+
+                    byte_cnt += line.size();
+
+                    if (line.find ("delimiter") != std::string::npos || line.find ("DELIMITER") != std::string::npos)
+                    {
+                        loginf << "MySQLppConnection: importSQLArchiveFile: breaking at delimiter, bytes " << byte_cnt;
+                        done = true;
+                        break;
+                    }
+
+                    if (line_it->back() == ';')
+                    {
+//                        loginf << "MySQLppConnection: importSQLArchiveFile: line cnt " << line_cnt
+//                               <<  " strlen " << ss.str().size() << "'";
+
+                        if (line.size())
+                            executeSQL (line+"\n");
+
+                        ss.str("");
+                    }
+
+                    if (line_cnt % 50 == 0)
+                    {
+                        loginf << "MySQLppConnection: importSQLArchiveFile: line cnt " << line_cnt;
+//                        progress_dialog->setValue(100*byte_cnt/file_byte_size);
+//                        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                    }
+
+                    line_cnt ++;
+                }
+                catch (std::exception& e)
+                {
+                    logwrn << "MySQLppConnection: importSQLArchiveFile: sql error '" << e.what() << "'";
+                    ss.str("");
+                    error_cnt++;
+
+                    if (error_cnt > 3)
+                    {
+                        logwrn << "MySQLppConnection: importSQLArchiveFile: quit after too many errors";
+                        done=true;
+                        break;
+                    }
+                }
+            }
+
+            if (done)
+                break;
+        }
+        loginf << "MySQLppConnection: importSQLArchiveFile: archive file " << archive_entry_pathname(entry) << " imported";
+    }
+
+    r = archive_read_close(a);
+    if (r != ARCHIVE_OK)
+        throw std::runtime_error("MySQLppConnection: importSQLArchiveFile: archive read close error: "
+                                 +std::string(archive_error_string(a)));
+
+    r = archive_read_free(a);
+
+    if (r != ARCHIVE_OK)
+        throw std::runtime_error("MySQLppConnection: importSQLArchiveFile: archive read free error: "
+                                 +std::string(archive_error_string(a)));
+
     interface_.databaseContentChanged();
 }
 

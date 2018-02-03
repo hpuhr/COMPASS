@@ -43,6 +43,7 @@ public slots:
 
     void showImportMenuSlot ();
     void importSQLTextSlot();
+    void importSQLTextFromArchiveSlot();
 
 public:
     explicit MySQLppConnectionWidget(MySQLppConnection& connection, QWidget* parent = 0);

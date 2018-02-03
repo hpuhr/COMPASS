@@ -75,6 +75,9 @@ MySQLppConnectionWidget::MySQLppConnectionWidget(MySQLppConnection &connection, 
     QAction* import_action = import_menu_.addAction("Import MySQL Text File");
     connect(import_action, &QAction::triggered, this, &MySQLppConnectionWidget::importSQLTextSlot);
 
+    QAction* import_archive_action = import_menu_.addAction("Import MySQL Text Archive File");
+    connect(import_archive_action, &QAction::triggered, this, &MySQLppConnectionWidget::importSQLTextFromArchiveSlot);
+
     setLayout (layout);
 }
 
@@ -134,13 +137,14 @@ void MySQLppConnectionWidget::serverConnectedSlot ()
     server_select_->setDisabled(true);
     add_button_->setDisabled(true);
     delete_button_->setDisabled(true);
-
-    import_button_->setDisabled(false);
 }
 
 void MySQLppConnectionWidget::databaseOpenedSlot()
 {
     logdbg << "MySQLppConnectionWidget: databaseOpenedSlot";
+
+    import_button_->setDisabled(false);
+
     emit databaseOpenedSignal ();
 }
 
@@ -177,6 +181,36 @@ void MySQLppConnectionWidget::importSQLTextSlot()
         loginf << "MySQLppConnectionWidget: importSQLTextSlot: file '" << filename << "'";
 
         connection_.importSQLFile(filename);
+    }
+}
+
+void MySQLppConnectionWidget::importSQLTextFromArchiveSlot()
+{
+    logdbg << "MySQLppConnectionWidget: importSQLTextFromArchiveSlot";
+
+    QFileDialog dialog(this);
+    dialog.setFileMode(QFileDialog::ExistingFile);
+    dialog.setNameFilter(tr("Archives (*.tar.gz *.gz *.tar *.zip *.tgz *.rar)"));
+    dialog.setViewMode(QFileDialog::Detail);
+
+    QStringList filenames;
+    if (dialog.exec())
+    {
+        filenames = dialog.selectedFiles();
+
+        if (filenames.size() > 1)
+        {
+            QMessageBox msgBox;
+            msgBox.setText("Only one file can be selected.");
+            msgBox.exec();
+            return;
+        }
+
+        std::string filename = filenames.at(0).toStdString();
+
+        loginf << "MySQLppConnectionWidget: importSQLTextFromArchiveSlot: file '" << filename << "'";
+
+        connection_.importSQLArchiveFile(filename);
     }
 }
 
