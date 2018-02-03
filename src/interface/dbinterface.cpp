@@ -124,7 +124,7 @@ void DBInterface::useConnection (const std::string &connection_type)
     assert (current_connection_);
 }
 
-void DBInterface::databaseOpened ()
+void DBInterface::databaseContentChanged ()
 {
     updateTableInfo();
 
@@ -133,7 +133,7 @@ void DBInterface::databaseOpened ()
 
     loginf << "DBInterface: databaseOpened: post-processed " << isPostProcessed ();
 
-    emit databaseOpenedSignal();
+    emit databaseContentChangedSignal();
 }
 
 void DBInterface::closeConnection ()

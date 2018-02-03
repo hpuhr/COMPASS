@@ -35,7 +35,7 @@ using namespace Utils::String;
  * Creates sub-configurables.
  */
 DBObjectManager::DBObjectManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb)
-: Configurable (class_id, instance_id, atsdb, "db_object.xml"), widget_(nullptr), load_widget_(nullptr) //, registered_parent_variables_ (false)
+: Configurable (class_id, instance_id, atsdb, "db_object.xml")
 {
     logdbg  << "DBObjectManager: constructor: creating subconfigurables";
 
@@ -48,7 +48,7 @@ DBObjectManager::DBObjectManager(const std::string &class_id, const std::string 
 
     registerParameter("use_limit", &use_limit_, false);
     registerParameter("limit_min", &limit_min_, 0);
-    registerParameter("limit_max", &limit_max_, 1000);
+    registerParameter("limit_max", &limit_max_, 100000);
 
     createSubConfigurables ();
 }
@@ -57,17 +57,6 @@ DBObjectManager::DBObjectManager(const std::string &class_id, const std::string 
  */
 DBObjectManager::~DBObjectManager()
 {
-//    if (registered_parent_variables_)
-//    {
-//        //loginf << "DBObjectManager: registerParentVariablesIfRequired: registering";
-//        std::map <std::string, DBObject*>::iterator it;
-
-//        for (it = objects_.begin(); it != objects_.end(); it++)
-//            if (it->second->isMeta())
-//                it->second->unregisterParentVariables();
-
-//        registered_parent_variables_=false;
-//    }
     for (auto it : objects_)
         delete it.second;
     objects_.clear();
@@ -101,9 +90,9 @@ void DBObjectManager::generateSubConfigurable (const std::string &class_id, cons
         logdbg  << "DBObjectManager: generateSubConfigurable: adding object type " << object->name();
         assert (objects_.find(object->name()) == objects_.end());
         objects_.insert(std::pair <std::string, DBObject*> (object->name(), object));
-        connect (this, SIGNAL(schemaChangedSignal()), object, SLOT(schemaChangedSlot()));
-        connect (this, SIGNAL(databaseOpenedSignal()), object, SLOT(databaseOpenedSlot()));
-        connect (object, SIGNAL(loadingDoneSignal(DBObject&)), this, SLOT(loadingDoneSlot(DBObject&)));
+        connect (this, &DBObjectManager::schemaChangedSignal, object, &DBObject::schemaChangedSlot);
+        connect (this, &DBObjectManager::databaseContentChangedSignal, object, &DBObject::databaseContentChangedSlot);
+        connect (object, &DBObject::loadingDoneSignal, this, &DBObjectManager::loadingDoneSlot);
         // TODO what if generation after db opening?
     }
     else if (class_id.compare ("MetaDBOVariable") == 0)
@@ -124,8 +113,6 @@ void DBObjectManager::checkSubConfigurables ()
 
 bool DBObjectManager::existsObject (const std::string &dbo_name)
 {
-    //registerParentVariablesIfRequired();
-
     return (objects_.find(dbo_name) != objects_.end());
 }
 
@@ -324,7 +311,8 @@ void DBObjectManager::loadSlot ()
             if (hasOrderMetaVariable())
                 variable = &orderMetaVariable().getFor(object.first);
 
-            // load (DBOVariableSet &read_set, bool use_filters, bool use_order, DBOVariable *order_variable, bool use_order_ascending, const std::string &limit_str="")
+            // load (DBOVariableSet &read_set, bool use_filters, bool use_order, DBOVariable *order_variable,
+            // bool use_order_ascending, const std::string &limit_str="")
             object.second->load(read_set, use_filters_, use_order_, variable, use_order_ascending_, limit_str);
         }
     }
@@ -336,9 +324,9 @@ void DBObjectManager::updateSchemaInformationSlot ()
     emit schemaChangedSignal();
 }
 
-void DBObjectManager::databaseOpenedSlot ()
+void DBObjectManager::databaseContentChangedSlot ()
 {
-    emit databaseOpenedSignal();
+    emit databaseContentChangedSignal();
 }
 
 void DBObjectManager::loadingDoneSlot (DBObject& object)

@@ -70,7 +70,7 @@ void SQLiteConnection::openFile (const std::string &file_name)
     char * sErrMsg = 0;
     sqlite3_exec(db_handle_, "PRAGMA synchronous = OFF", NULL, NULL, &sErrMsg);
 
-    interface_.databaseOpened();
+    interface_.databaseContentChanged();
 
     emit connectedSignal();
 }

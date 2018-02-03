@@ -19,6 +19,7 @@
 #define MYSQLPPCONNECTIONWIDGET_H
 
 #include <QWidget>
+#include <QMenu>
 
 class MySQLppConnection;
 class QComboBox;
@@ -40,17 +41,23 @@ public slots:
     void serverConnectedSlot ();
     void databaseOpenedSlot ();
 
+    void showImportMenuSlot ();
+    void importSQLTextSlot();
+
 public:
-    explicit MySQLppConnectionWidget(MySQLppConnection &connection, QWidget *parent = 0);
+    explicit MySQLppConnectionWidget(MySQLppConnection& connection, QWidget* parent = 0);
 
 protected:
-    MySQLppConnection &connection_;
+    MySQLppConnection& connection_;
 
-    QComboBox *server_select_;
-    QPushButton *add_button_;
-    QPushButton *delete_button_;
+    QComboBox* server_select_ {nullptr};
+    QPushButton* add_button_ {nullptr};
+    QPushButton* delete_button_ {nullptr};
 
-    QStackedWidget *server_widgets_;
+    QPushButton* import_button_ {nullptr};
+    QMenu import_menu_;
+
+    QStackedWidget* server_widgets_ {nullptr};
 
     void updateServers();
 };

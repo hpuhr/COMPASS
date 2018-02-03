@@ -18,6 +18,8 @@
 #include "mysqlppconnectionwidget.h"
 #include "mysqlserver.h"
 #include "logger.h"
+#include "atsdb.h"
+#include "dbobjectmanager.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -26,6 +28,8 @@
 #include <QLabel>
 #include <QInputDialog>
 #include <QStackedWidget>
+#include <QFileDialog>
+#include <QMessageBox>
 
 MySQLppConnectionWidget::MySQLppConnectionWidget(MySQLppConnection &connection, QWidget *parent)
     : QWidget(parent), connection_(connection)
@@ -40,7 +44,8 @@ MySQLppConnectionWidget::MySQLppConnectionWidget(MySQLppConnection &connection, 
     layout->addWidget(servers_label);
 
     server_select_ = new QComboBox ();
-    connect (server_select_, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(serverSelectedSlot(const QString &)));
+    connect (server_select_, SIGNAL(currentIndexChanged(const QString &)),
+             this, SLOT(serverSelectedSlot(const QString &)));
     layout->addWidget (server_select_);
     layout->addStretch();
 
@@ -61,6 +66,14 @@ MySQLppConnectionWidget::MySQLppConnectionWidget(MySQLppConnection &connection, 
     layout->addStretch();
 
     updateServers ();
+
+    import_button_ = new QPushButton ("Import");
+    connect (import_button_, SIGNAL(clicked()), this, SLOT(showImportMenuSlot()));
+    import_button_->setDisabled (true);
+    layout->addWidget(import_button_);
+
+    QAction* import_action = import_menu_.addAction("Import MySQL Text File");
+    connect(import_action, &QAction::triggered, this, &MySQLppConnectionWidget::importSQLTextSlot);
 
     setLayout (layout);
 }
@@ -103,8 +116,10 @@ void MySQLppConnectionWidget::serverSelectedSlot (const QString &value)
         connection_.setServer (value.toStdString());
 
         QWidget *widget = connection_.usedServer().widget();
-        QObject::connect(widget, SIGNAL(serverConnectedSignal()), this, SLOT(serverConnectedSlot()), static_cast<Qt::ConnectionType>(Qt::UniqueConnection));
-        QObject::connect(widget, SIGNAL(databaseOpenedSignal()), this, SLOT(databaseOpenedSlot()), static_cast<Qt::ConnectionType>(Qt::UniqueConnection));
+        QObject::connect(widget, SIGNAL(serverConnectedSignal()), this, SLOT(serverConnectedSlot()),
+                         static_cast<Qt::ConnectionType>(Qt::UniqueConnection));
+        QObject::connect(widget, SIGNAL(databaseOpenedSignal()), this, SLOT(databaseOpenedSlot()),
+                         static_cast<Qt::ConnectionType>(Qt::UniqueConnection));
 
         server_widgets_->addWidget(widget);
         delete_button_->setDisabled(false);
@@ -119,12 +134,50 @@ void MySQLppConnectionWidget::serverConnectedSlot ()
     server_select_->setDisabled(true);
     add_button_->setDisabled(true);
     delete_button_->setDisabled(true);
+
+    import_button_->setDisabled(false);
 }
 
 void MySQLppConnectionWidget::databaseOpenedSlot()
 {
     logdbg << "MySQLppConnectionWidget: databaseOpenedSlot";
     emit databaseOpenedSignal ();
+}
+
+void MySQLppConnectionWidget::showImportMenuSlot ()
+{
+    logdbg << "MySQLppConnectionWidget: showImportMenuSlot";
+    import_menu_.exec(QCursor::pos());
+}
+
+void MySQLppConnectionWidget::importSQLTextSlot()
+{
+    logdbg << "MySQLppConnectionWidget: importSQLTextSlot";
+
+    QFileDialog dialog(this);
+    dialog.setFileMode(QFileDialog::ExistingFile);
+    dialog.setNameFilter(tr("SQL (*.sql)"));
+    dialog.setViewMode(QFileDialog::Detail);
+
+    QStringList filenames;
+    if (dialog.exec())
+    {
+        filenames = dialog.selectedFiles();
+
+        if (filenames.size() > 1)
+        {
+            QMessageBox msgBox;
+            msgBox.setText("Only one file can be selected.");
+            msgBox.exec();
+            return;
+        }
+
+        std::string filename = filenames.at(0).toStdString();
+
+        loginf << "MySQLppConnectionWidget: importSQLTextSlot: file '" << filename << "'";
+
+        connection_.importSQLFile(filename);
+    }
 }
 
 void MySQLppConnectionWidget::updateServers()

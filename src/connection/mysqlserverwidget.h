@@ -40,6 +40,7 @@ public slots:
     void updateDatabaseSlot (const QString& value);
 
     void newDatabaseSlot ();
+    void clearDatabaseSlot ();
     void deleteDatabaseSlot ();
     void openDatabaseSlot ();
 
@@ -72,7 +73,9 @@ protected:
 
 
     QPushButton* new_button_ {nullptr};
+    QPushButton* clear_button_ {nullptr};
     QPushButton* delete_button_ {nullptr};
+
     QPushButton* open_button_ {nullptr};
 
     void updateDatabases ();

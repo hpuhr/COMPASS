@@ -28,8 +28,13 @@
 #include "dbtableinfo.h"
 #include "stringconv.h"
 #include "mysqlserver.h"
+#include "files.h"
 
 #include "boost/date_time/posix_time/posix_time.hpp"
+
+#include <iostream>
+#include <fstream>
+
 #include <QMessageBox>
 
 using namespace Utils;
@@ -40,6 +45,8 @@ MySQLppConnection::MySQLppConnection(const std::string &class_id, const std::str
       prepared_query_(connection_.query()), prepared_parameters_(mysqlpp::SQLQueryParms(&prepared_query_))
 {
     registerParameter("used_server", &used_server_, "");
+
+    connection_.set_option(new mysqlpp::LocalInfileOption(true));
 
     createSubConfigurables ();
 }
@@ -108,7 +115,7 @@ void MySQLppConnection::openDatabase (const std::string &database_name)
     used_database_ = database_name;
 
     emit connectedSignal();
-    interface_.databaseOpened();
+    interface_.databaseContentChanged();
 
     if (info_widget_)
         info_widget_->updateSlot();
@@ -741,7 +748,83 @@ void MySQLppConnection::generateSubConfigurable (const std::string &class_id, co
     throw std::runtime_error ("MySQLppConnection: generateSubConfigurable: unknown class_id "+class_id );
 }
 
-//DBResult *MySQLppConnection::readBulkCommand (DBCommand *command, std::string main_statement, std::string order_statement, unsigned int max_results)
+void MySQLppConnection::importSQLFile (const std::string& filename)
+{
+    loginf  << "MySQLppConnection: importSQLFile: importing " << filename;
+
+
+    assert (Files::fileExists(filename));
+
+    loginf << "MySQLppConnection: importSQLFile: counting lines";
+    std::ifstream file_for_counting(filename);
+    file_for_counting.unsetf(std::ios_base::skipws);
+
+    // count the newlines with an algorithm specialized for counting:
+    long line_count = std::count(std::istream_iterator<char>(file_for_counting), std::istream_iterator<char>(), '\n');
+
+    loginf  << "MySQLppConnection: importSQLFile: lines: " << line_count << "\n";
+    file_for_counting.close();
+
+    std::ifstream sql_file (filename);
+    assert (sql_file.is_open());
+
+    std::string line;
+    std::stringstream ss;
+    //bool comment_found=false;
+    size_t line_cnt = 0;
+    size_t error_cnt = 0;
+
+    while ( getline (sql_file,line) )
+    {
+        try
+        {
+            //skip comments
+//            if (line.find ("/*") != std::string::npos || line.find ("*/") != std::string::npos
+//                    || line.find ("--") != std::string::npos)
+//                continue;
+
+            if (line.find ("delimiter") != std::string::npos || line.find ("DELIMITER") != std::string::npos)
+            {
+                loginf << "MySQLppConnection: importSQLFile: breaking at delimiter, line " << line_cnt;
+                break;
+            }
+
+            ss << line << '\n';
+            line_cnt ++;
+
+            //if (line.find(";") != std::string::npos)
+            if (line.back() == ';')
+            {
+                if (line_cnt % 100 == 0)
+                    loginf << "MySQLppConnection: importSQLFile: line cnt " << line_cnt << " of " << line_count
+                           << " strlen " << ss.str().size() << "'";
+
+                if (ss.str().size())
+                    executeSQL (ss.str());
+
+                ss.str("");
+            }
+        }
+        catch (std::exception& e)
+        {
+            logwrn << "MySQLppConnection: importSQLFile: sql error '" << e.what() << "'";
+            ss.str("");
+            error_cnt++;
+
+            if (error_cnt > 3)
+            {
+                logwrn << "MySQLppConnection: importSQLFile: quit after too many errors";
+                break;
+            }
+        }
+
+    }
+    sql_file.close();
+    interface_.databaseContentChanged();
+}
+
+//DBResult *MySQLppConnection::readBulkCommand (DBCommand *command, std::string main_statement,
+//std::string order_statement, unsigned int max_results)
 //{
 //    assert (command);
 //    DBResult *dbresult = new DBResult ();

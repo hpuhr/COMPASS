@@ -78,6 +78,11 @@ MySQLServerWidget::MySQLServerWidget(MySQLppConnection& connection, MySQLServer&
     new_button_->setDisabled(true);
     op_layout->addWidget(new_button_);
 
+    clear_button_ = new QPushButton ("Clear");
+    connect (clear_button_, &QPushButton::clicked, this, &MySQLServerWidget::clearDatabaseSlot);
+    clear_button_->setDisabled (true);
+    op_layout->addWidget(clear_button_);
+
     delete_button_ = new QPushButton ("Delete");
     connect (delete_button_, &QPushButton::clicked, this, &MySQLServerWidget::deleteDatabaseSlot);
     delete_button_->setDisabled(true);
@@ -146,6 +151,7 @@ void MySQLServerWidget::connectSlot ()
     db_name_box_->setDisabled(false);
 
     new_button_->setDisabled(false);
+    clear_button_->setDisabled(false);
     delete_button_->setDisabled(false);
     open_button_->setDisabled(false);
 
@@ -194,6 +200,25 @@ void MySQLServerWidget::newDatabaseSlot ()
     }
 }
 
+void MySQLServerWidget::clearDatabaseSlot ()
+{
+    logdbg << "MySQLServerWidget: clearDatabaseSlot";
+
+    QMessageBox::StandardButton reply;
+    std::string question = "Please confirm clearing all data from database '";
+    question += server_.database().c_str();
+    question += "'.";
+    reply = QMessageBox::question(this, "Clear Database", question.c_str(), QMessageBox::Yes|QMessageBox::No);
+
+    if (reply == QMessageBox::Yes)
+    {
+        connection_.deleteDatabase(server_.database());
+        connection_.createDatabase(server_.database());
+        updateDatabases();
+    }
+}
+
+
 void MySQLServerWidget::deleteDatabaseSlot ()
 {
     logdbg << "MySQLServerWidget: deleteDatabaseSlot";
@@ -220,7 +245,9 @@ void MySQLServerWidget::openDatabaseSlot ()
     assert (db_name_box_);
 
     new_button_->setDisabled(true);
+    clear_button_->setDisabled(true);
     delete_button_->setDisabled(true);
+
     open_button_->setDisabled(true);
     db_name_box_->setDisabled(true);
 

@@ -60,7 +60,7 @@ ATSDB::ATSDB()
     assert (view_manager_);
 
     QObject::connect (db_schema_manager_, SIGNAL(schemaChangedSignal()), dbo_manager_, SLOT(updateSchemaInformationSlot()));
-    QObject::connect(db_interface_, SIGNAL(databaseOpenedSignal()), dbo_manager_, SLOT(databaseOpenedSlot()));
+    QObject::connect(db_interface_, SIGNAL(databaseContentChangedSignal()), dbo_manager_, SLOT(databaseContentChangedSlot()));
     //QObject::connect(db_interface_, SIGNAL(databaseOpenedSignal()), filter_manager_, SLOT(databaseOpenedSlot()));
 
     //reference_point_defined_=false;

@@ -113,7 +113,7 @@ public slots:
     void readJobDoneSlot();
     void finalizeReadJobDoneSlot();
 
-    void databaseOpenedSlot ();
+    void databaseContentChangedSlot ();
     void dataSourceDefinitionChanged ();
 
 public:
@@ -132,12 +132,12 @@ public:
     /// @brief Returns container with all variables
     const std::map<std::string, DBOVariable*> &variables () const;
     /// @brief Returns number of existing variables
-    unsigned int numVariables () const { return variables_.size(); }
+    size_t numVariables () const { return variables_.size(); }
 
     /// @brief Returns name of the object
     const std::string &name () const { return name_; }
     /// @brief Sets name of the object
-    void name (const std::string &name) { assert (name.size()>0); name_=name; }
+    void name (const std::string &name) { assert (name.size() > 0); name_=name; }
 
     /// @brief Returns description of the object
     const std::string &info () const { return info_; }
@@ -150,7 +150,8 @@ public:
     void loadingWanted (bool wanted) { loading_wanted_=wanted; }
     bool loadingWanted () { return loading_wanted_; }
 
-    void load (DBOVariableSet &read_set, bool use_filters, bool use_order, DBOVariable *order_variable, bool use_order_ascending, const std::string &limit_str="");
+    void load (DBOVariableSet& read_set, bool use_filters, bool use_order, DBOVariable* order_variable,
+               bool use_order_ascending, const std::string& limit_str="");
     std::map<int, std::string> loadLabelData (std::vector<int> rec_nums);
 
     /// @brief Returns if incremental read for DBO type was prepared
@@ -178,7 +179,9 @@ public:
     bool hasDataSourceDefinition (const std::string& schema) { return data_source_definitions_.count(schema); }
     void deleteDataSourceDefinition (const std::string& schema);
     /// @brief Returns container with all data source definitions
-    const std::map <std::string, DBODataSourceDefinition*> &dataSourceDefinitions () const { return data_source_definitions_; }
+    const std::map <std::string, DBODataSourceDefinition*>& dataSourceDefinitions () const {
+        return data_source_definitions_;
+    }
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
@@ -209,11 +212,11 @@ protected:
     /// DBO description
     std::string info_;
     /// DBO is loadable flag
-    bool is_loadable_; // loadable on its own
-    bool loading_wanted_;
-    size_t count_;
+    bool is_loadable_ {false}; // loadable on its own
+    bool loading_wanted_ {false};
+    size_t count_ {0};
 
-    DBOLabelDefinition* label_definition_{nullptr};
+    DBOLabelDefinition* label_definition_ {nullptr};
 
     std::shared_ptr <DBOReadDBJob> read_job_ {nullptr};
     std::vector <std::shared_ptr<Buffer>> read_job_data_;
@@ -232,15 +235,14 @@ protected:
     /// Container with all variables (variable identifier -> variable pointer)
     std::map<std::string, DBOVariable*> variables_;
 
-
     /// Current (in the current schema) main meta table
-    const MetaDBTable *current_meta_table_; // TODO rework
+    const MetaDBTable* current_meta_table_; // TODO rework
 
     /// Flag indicating if varaibles where checked. Not really used yet.
     bool variables_checked_;
 
-    DBObjectWidget *widget_;
-    DBObjectInfoWidget *info_widget_;
+    DBObjectWidget* widget_ {nullptr};
+    DBObjectInfoWidget* info_widget_{nullptr};
 
     virtual void checkSubConfigurables ();
     /// @brief Checks if variables really exist. Not used yet.

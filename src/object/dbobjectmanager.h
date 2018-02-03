@@ -45,12 +45,12 @@ class DBObjectManager : public QObject, public Configurable
 public slots:
     void loadSlot ();
     void updateSchemaInformationSlot ();
-    void databaseOpenedSlot ();
+    void databaseContentChangedSlot ();
     void loadingDoneSlot (DBObject& object);
 
 signals:
     void dbObjectsChangedSignal ();
-    void databaseOpenedSignal ();
+    void databaseContentChangedSignal ();
     void schemaChangedSignal ();
 
     void loadingStartedSignal ();
@@ -110,29 +110,25 @@ public:
     void clearOrderVariable ();
 
 protected:
-    bool use_filters_;
+    bool use_filters_ {false};
 
-    bool use_order_;
-    bool use_order_ascending_;
+    bool use_order_ {false};
+    bool use_order_ascending_ {false};
     std::string order_variable_dbo_name_;
     std::string order_variable_name_;
 
-    bool use_limit_;
-    unsigned int limit_min_;
-    unsigned int limit_max_;
+    bool use_limit_ {false};
+    unsigned int limit_min_ {0};
+    unsigned int limit_max_ {100000};
 
     /// Container with all DBOs (DBO name -> DBO pointer)
     std::map <std::string, DBObject*> objects_;
     std::map <std::string, MetaDBOVariable*> meta_variables_;
-    //bool registered_parent_variables_;
 
-    DBObjectManagerWidget *widget_;
-    DBObjectManagerLoadWidget *load_widget_;
+    DBObjectManagerWidget* widget_ {nullptr};
+    DBObjectManagerLoadWidget* load_widget_ {nullptr};
 
     virtual void checkSubConfigurables ();
-
-    /// @brief Small hack for minimum/maximum update. Refer to DBObject::registerParentVariables() for details.
-    //void registerParentVariablesIfRequired ();
 };
 
 #endif /* DBOBJECTMANAGER_H_ */

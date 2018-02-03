@@ -190,7 +190,8 @@ bool DBObject::hasCurrentDataSourceDefinition () const
     if (!ATSDB::instance().schemaManager().hasCurrentSchema())
         return false;
 
-    return (data_source_definitions_.find(ATSDB::instance().schemaManager().getCurrentSchema().name()) != data_source_definitions_.end());
+    return (data_source_definitions_.find(
+                ATSDB::instance().schemaManager().getCurrentSchema().name()) != data_source_definitions_.end());
 }
 
 const DBODataSourceDefinition& DBObject::currentDataSourceDefinition () const
@@ -219,7 +220,8 @@ void DBObject::buildDataSources()
     logdbg  << "DBObject: buildDataSources: building dbo " << name_;
     if (!is_loadable_ || !hasCurrentDataSourceDefinition ())
     {
-        logdbg << "DBObject: buildDataSources: not processed is loadable " << is_loadable_ << " has data source " << hasCurrentDataSourceDefinition ();
+        logdbg << "DBObject: buildDataSources: not processed is loadable " << is_loadable_
+               << " has data source " << hasCurrentDataSourceDefinition ();
         return;
     }
 
@@ -241,8 +243,8 @@ void DBObject::buildDataSources()
 
 
 /**
- * Returns true if current_meta_table_ is not null, else gets the current schema, checks and get the meta_table_ entry for
- * the current schema, and returns if the meta table for the current schema exists in the current schema.
+ * Returns true if current_meta_table_ is not null, else gets the current schema, checks and get the meta_table_
+ * entry for the current schema, and returns if the meta table for the current schema exists in the current schema.
  */
 bool DBObject::hasCurrentMetaTable () const
 {
@@ -560,9 +562,9 @@ void DBObject::finalizeReadJobDoneSlot()
 }
 
 
-void DBObject::databaseOpenedSlot ()
+void DBObject::databaseContentChangedSlot ()
 {
-    logdbg << "DBObject: " << name_ << " databaseOpenedSlot";
+    loginf << "DBObject: " << name_ << " databaseContentChangedSlot";
 
     assert (current_meta_table_);
     std::string table_name = current_meta_table_->mainTableName();
@@ -577,7 +579,7 @@ void DBObject::databaseOpenedSlot ()
     if (info_widget_)
         info_widget_->updateSlot();
 
-    logdbg << "DBObject: " << name_ << " databaseOpenedSlot: loadable " << is_loadable_ << " count " << count_;
+    loginf << "DBObject: " << name_ << " databaseContentChangedSlot: loadable " << is_loadable_ << " count " << count_;
 }
 
 bool DBObject::isLoading ()

@@ -65,7 +65,7 @@ class DBInterface : public QObject, public Configurable
 {
     Q_OBJECT
 signals:
-    void databaseOpenedSignal ();
+    void databaseContentChangedSignal ();
     void postProcessingDoneSignal ();
 
 public slots:
@@ -83,7 +83,7 @@ public:
     const std::string &usedConnection () { return used_connection_; }
     /// @brief Initializes a database connection based on the supplied type
     void useConnection (const std::string &connection_type);
-    void databaseOpened ();
+    void databaseContentChanged ();
     void closeConnection ();
 
     void updateTableInfo ();
