@@ -126,7 +126,7 @@ protected:
     /// Last prepared command
     std::shared_ptr<DBCommand> prepared_command_;
     /// Prepared command finished flag.
-    bool prepared_command_done_;
+    bool prepared_command_done_ {true};
 
     MySQLppConnectionWidget* widget_ {nullptr};
     MySQLppConnectionInfoWidget* info_widget_ {nullptr};
