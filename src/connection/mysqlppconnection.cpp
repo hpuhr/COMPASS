@@ -84,8 +84,8 @@ void MySQLppConnection::connectServer ()
                                    connected_server_->password().c_str(), connected_server_->port());
 
     if (!ret)
-        logerr << "MySQLppConnection: connectServer: connect failed, error " << connection_.errnum() << ": "
-               << connection_.error();
+        throw std::runtime_error("MySQL server connect failed with error "
+                                 + std::to_string(connection_.errnum()) + ": " + connection_.error());
 }
 
 void MySQLppConnection::createDatabase (const std::string &database_name)

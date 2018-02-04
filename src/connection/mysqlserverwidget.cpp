@@ -139,13 +139,25 @@ void MySQLServerWidget::connectSlot ()
     assert (connect_button_);
     assert (open_button_);
 
+    try
+    {
+        connection_.connectServer();
+    }
+    catch (std::runtime_error& e)
+    {
+        logerr << "MySQLServerWidget: connectSlot: connecting failed";
+
+        QMessageBox msgBox;
+        msgBox.setText(e.what());
+        msgBox.exec();
+        return;
+    }
+
     host_edit_->setDisabled(true);
     user_edit_->setDisabled(true);
     password_edit_->setDisabled(true);
     port_edit_->setDisabled(true);
     connect_button_->setDisabled(true);
-
-    connection_.connectServer();
 
     updateDatabases ();
     db_name_box_->setDisabled(false);
