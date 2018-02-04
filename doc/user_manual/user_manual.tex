@@ -29,6 +29,7 @@
 \usepackage{memlays}     % extra layout diagrams
 \usepackage{dpfloat}     % floats on facing pages
 \usepackage{fonttable}[2009/04/01]   % font tables
+\usepackage[export]{adjustbox}
 %%%%\usepackage{xr-hyper} \externaldocument{memdesign} Doesn't work, 
 %%%%                      Idea won't work in general for memman/memdesign
 %%%%                      as at display time, who knows where everything
@@ -218,6 +219,7 @@ The \textbf{A}ir \textbf{T}raffic \textbf{S}urveillance \textbf{D}ata\textbf{B}a
 
 \begin{itemize}  
 \item Support of multiple database systems, e.g. SCDB
+\item MySQL database import and management of SCDB databases
 \item High performance processing, low memory footprint
 \item Utilization of application during loading procedure
 \item Views for data inspection
@@ -321,7 +323,7 @@ chmod +x ATSDB-x86_64_release.AppImage
 
 Generally speaking, that is it. The application can be run using the following command:
 \begin{verbatim}
-./ATSDB-x86_64_release.AppImage -f
+./ATSDB-x86_64_release.AppImage
 \end{verbatim}
 
 The following notes that should be considered:
@@ -352,6 +354,7 @@ The following software has to be installed on the workstation:
     libgdal-dev & Geospatial data abstraction library & 2.2.1 \\ \hline
     tinyxml2-dev & XML parsing library & 5.0.1 \\ \hline
     log4cpp5-dev & Logging libary & 1.1.1 \\ \hline
+    libarchive-dev & Archive libary & 3.2.2 \\ \hline
     doxygen & Documentation generation & 1.8.13 \\ 
     \hline
   \end{tabular}
@@ -497,7 +500,7 @@ While ATSDB is more a database framework, it comes with a dedicated client. When
 
 \begin{figure}[H]
   \hspace*{-2cm}
-    \includegraphics[width=18cm]{../screenshots/db_config_connect.png}
+    \includegraphics[width=18cm,frame]{../screenshots/db_config_connect.png}
   \caption{Connecting to a database}
   \label{fig:db_connect}
 \end{figure}
@@ -507,12 +510,11 @@ On the lower left (depending on the database system) either a MySQL server conne
 
 On the right-hand side a database schema can be selected and edited (editing is only recommended for experienced users).
 
-\subsection{Database Selection}
-\subsubsection{MySQL database}
+\subsection{Connecting to a MySQL Server}
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=8cm]{../screenshots/mysql_server_selection.png}
+    \includegraphics[width=8cm,frame]{../screenshots/mysql_server_selection.png}
   \caption{Connecting to a MySQL server}
   \label{fig:mysql_connect}
 \end{figure}
@@ -536,6 +538,8 @@ For connecting to a MySQL database, several parameters have to be entered:
 \end{table}
 
 To connect to a defined MySQL server, press the 'Connect' button.\\
+
+\subsubsection{Access to SASS-C MySQL Servers}
 
 Please note that it is not recommended to use SASS-C databases on which actual performance evaluations are to be performed. Using ATSDB, database operations can be performed which might impede results later obtained by using SASS-C. For this reason, it is recommended to either clone an evaluation or use one on which no later SASS-C evaluations are performed.
 
@@ -581,36 +585,97 @@ exit
 
 After executing these steps once, remote access to this MySQL server from the specified IP address is enabled.
 
+\subsubsection{Error Messages}
+
 If  a  wrong  database  name  or  IP  address  is  used,  error  messages  can  be  e.g.  \\
 
-\begin{verbatim}
-MySQLConnection: executeSQL: error when executing
-\end{verbatim}
+\begin{figure}[H]
+  \center
+    \includegraphics[width=9cm,frame]{../screenshots/mysql_connect_error.png}
+  \caption{MySQL Server not found error.}
+\end{figure}
+
  or 
-\begin{verbatim}
-MySQLConnection:  init:  DB connection failed
-\end{verbatim} 
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=9cm,frame]{../screenshots/mysql_user_error.png}
+  \caption{MySQL user incorrect error.}
+\end{figure}
 
 If such an error occurs, correcting the server host name and or user/password should solve the problem.
+
+\subsubsection{Opening a MySQL Database}
 
 After successful connection, all existing databases in the server are shown in the 'Database name' drop-down menu. The last used one is selected automatically.
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=8cm]{../screenshots/mysql_database_selection.png}
+    \includegraphics[width=5.5cm,frame]{../screenshots/mysql_database_selection.png}
   \caption{Selecting a MySQL database.}
   \label{fig:mysql_db_select}
 \end{figure}
 
+Several actions are available:
 
-To open a database click the 'Open' button (lower left corner).
+\begin{itemize}  
+\item Drop-down selection: Selects the current database
+\item New button: Allows creation of a new database
+\item Clear button: Deletes all data with current database (after confirmation)
+\item Delete button: Deletes current database (after confirmation)
+\item Open button: Opens the current database
+\end{itemize}
+
+\subsubsection{Importing a MySQL Database}
+
+After opening a database, import functions are available by clicking the 'Import' button:
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=9cm,frame]{../screenshots/database_import.png}
+  \caption{Importing a MySQL database}
+\end{figure}
+
+\paragraph{Importing a MySQL Text File}
+
+A previously exported MySQL database can be read from a text file and written into the current database. After selecting this option, a file open dialog is shown which allows selection of '*.sql' files. Please note the following points:
+
+\begin{itemize}  
+\item The text file must contain valid MySQL statements
+\item MySQL functions/views are not imported, only data which can be inspected
+\item If more than 3 errors occur during the import process, it is aborted
+\item If the import process was aborted, the current database might contain already imported parts which are not deleted automatically
+\end{itemize}
+
+\paragraph{Importing a MySQL Text Archive File}
+
+A previously exported MySQL database can be read from a text archive file and written into the current database. After selecting this option, a file open dialog is shown which allows selection of '*.tar.gz *.gz *.tar *.zip *.tgz *.rar' files. Please note the following points:
+
+\begin{itemize}  
+\item The text file must follow the same points as in the \textbf{Importing a MySQL Text File} section.
+\item All files within the archive are read and imported into the database
+\item If more than 3 errors occur during the import process, it is aborted
+\item If the import process was aborted, the current database might contain already imported parts which are not deleted automatically
+\end{itemize}
+
+\paragraph{Importing a SASS-C Evaluation Export}
+
+The following steps must be taken:
+
+\begin{itemize}  
+\item An export from a SASS-C evaluation must exist, e.g. 'example.tgz'
+\item Using your favorite archive manager, extract the file 'tgz-tmp/<JOB\_NAME>/exported.sql.gz'
+\item After successfully connecting to a server, create a new database, e.g. '<job\_name>', and open it
+\item Click on the 'Import' button and select 'Import MySQL Text Archive File'
+\item Select the previously extracted 'exported.sql.gz'
+\end{itemize}
 
 \subsubsection{SQlite3 File container}
 For opening a file container, clicking the 'Select' button opens a file selection dialog, in which any SQLite3 file can be selected as data source.
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=8cm]{../screenshots/sqlite3_open.png}
+    \includegraphics[width=8cm,frame]{../screenshots/sqlite3_open.png}
   \caption{Opening a SQLite3 file container}
   \label{fig:sqlite3_open}
 \end{figure}
@@ -620,7 +685,7 @@ For a common user, selection of a pre-configured database schema is recommened. 
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=8cm]{../screenshots/database_schema_selection.png}
+    \includegraphics[width=8cm,frame]{../screenshots/database_schema_selection.png}
   \caption{Selecting a database schema}
   \label{fig:db_schema_select}
 \end{figure}
@@ -629,7 +694,7 @@ For experienced users, on the right-hand side a database schema can be selected 
 
 \begin{figure}[H]
   \hspace*{-1cm}
-    \includegraphics[width=16cm]{../screenshots/database_schema_configuration.png}
+    \includegraphics[width=16cm,frame]{../screenshots/database_schema_configuration.png}
   \caption{Configuring a database schema}
   \label{fig:db_schema_configuration}
 \end{figure}
@@ -648,7 +713,7 @@ Please \textbf{note} that during post-processing the application will not react 
 
 \begin{figure}[H]
   \hspace*{-2cm}
-    \includegraphics[width=18cm]{../screenshots/db_postprocessing.png}
+    \includegraphics[width=18cm,frame]{../screenshots/db_postprocessing.png}
   \caption{Post-processing a database}
   \label{fig:db_postprocessing}
 \end{figure}
@@ -671,7 +736,7 @@ After pressing the 'Start' button, a management window is shown.
 
 \begin{figure}[H]
   \hspace*{-2cm}
-    \includegraphics[width=18cm]{../screenshots/management.png}
+    \includegraphics[width=18cm,frame]{../screenshots/management.png}
   \caption{Main management window}
   \label{fig:management}
 \end{figure}
@@ -699,7 +764,7 @@ In this widget, general information about the database is given.
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=8cm]{../screenshots/management_database.png}
+    \includegraphics[width=8cm,frame]{../screenshots/management_database.png}
   \caption{Management: Database Information}
   \label{fig:management_database}
 \end{figure}
@@ -718,7 +783,7 @@ In this widget, information about the DBO's, the loaded dataset, and the loading
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=8cm]{../screenshots/management_dbos.png}
+    \includegraphics[width=8cm,frame]{../screenshots/management_dbos.png}
   \caption{Management: Database Objects}
   \label{fig:management_objects}
 \end{figure}
@@ -755,7 +820,7 @@ Using the ``Load'' button , a loading process using the current configuration is
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=8cm]{../screenshots/management_filters.png}
+    \includegraphics[width=8cm,frame]{../screenshots/management_filters.png}
   \caption{Management: Filters}
   \label{fig:management_filters}
 \end{figure}
@@ -786,7 +851,7 @@ For more information about filtering, please refer to Section \nameref{sec:filte
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=8cm]{../screenshots/management_views.png}
+    \includegraphics[width=8cm,frame]{../screenshots/management_views.png}
   \caption{Management: Views}
   \label{fig:management_views}
 \end{figure}
@@ -808,7 +873,7 @@ The ATSDB framework supports multi-threading. A number of processing steps (''Jo
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=8cm]{../screenshots/management_jobs.png}
+    \includegraphics[width=8cm,frame]{../screenshots/management_jobs.png}
   \caption{Management: Jobs}
   \label{fig:management_jobs}
 \end{figure}
@@ -823,7 +888,7 @@ When clicking the 'Add filter' button, a dialog is opened.
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=14cm]{../screenshots/filter_add.png}
+    \includegraphics[width=14cm,frame]{../screenshots/filter_add.png}
   \caption{Adding a filter}
   \label{fig:filter_add}
 \end{figure}
@@ -862,7 +927,7 @@ but have to be removed as described in the Section \nameref{sec:filter_editing}.
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=14cm]{../screenshots/filter_add2.png}
+    \includegraphics[width=14cm,frame]{../screenshots/filter_add2.png}
   \caption{Filled out filter dialog}
   \label{fig:filter_add2}
 \end{figure}
@@ -874,7 +939,7 @@ for persistence.
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=8cm]{../screenshots/filter_add3.png}
+    \includegraphics[width=8cm,frame]{../screenshots/filter_add3.png}
   \caption{Filter added}
   \label{fig:filter_add3}
 \end{figure}
@@ -904,7 +969,7 @@ To execute this task select ''Task``->  ''Calculate Radar Plot Position` in the 
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=14cm]{../screenshots/task_calc_radar.png}
+    \includegraphics[width=14cm,frame]{../screenshots/task_calc_radar.png}
   \caption{Calculate radar plot position task}
   \label{fig:task_calc_radar}
 \end{figure}
@@ -948,7 +1013,7 @@ A Listbox View displays the DBO records as text in tables, to allow full data in
 
 \begin{figure}[H]
     \hspace*{-2cm}
-    \includegraphics[width=18cm]{../screenshots/listbox_start.png}
+    \includegraphics[width=18cm,frame]{../screenshots/listbox_start.png}
   \caption{Listbox View startup}
   \label{fig:listbox_start}
 \end{figure}
@@ -959,7 +1024,7 @@ To limit, order based on a variable or load the dataset, the mechanism described
 
 \begin{figure}[H]
     \hspace*{-2cm}
-    \includegraphics[width=18cm]{../screenshots/listbox_loaded.png}
+    \includegraphics[width=18cm,frame]{../screenshots/listbox_loaded.png}
   \caption{Listbox View after loading}
   \label{fig:listbox_load}
 \end{figure}
@@ -986,7 +1051,7 @@ When pressing the ''Export`` button, a dialog is opened.
 
 \begin{figure}[H]
     \hspace*{-2cm}
-    \includegraphics[width=18cm]{../screenshots/listbox_export.png}
+    \includegraphics[width=18cm,frame]{../screenshots/listbox_export.png}
   \caption{Listbox View export}
   \label{fig:listbox_export}
 \end{figure}
@@ -996,7 +1061,7 @@ After export, a dialog is shown indicating that the export was completed.
 
 \begin{figure}[H]
     \hspace*{-2cm}
-    \includegraphics[width=18cm]{../screenshots/listbox_exported.png}
+    \includegraphics[width=18cm,frame]{../screenshots/listbox_exported.png}
   \caption{Listbox View export done}
   \label{fig:listbox_exported}
 \end{figure}
@@ -1005,7 +1070,7 @@ The exported file can be opened in any editor, or for example imported into Libr
 
 \begin{figure}[H]
     \hspace*{-2cm}
-    \includegraphics[width=18cm]{../screenshots/listbox_exported_calc.png}
+    \includegraphics[width=18cm,frame]{../screenshots/listbox_exported_calc.png}
   \caption{Listbox View export in LibreOffice Calc}
   \label{fig:listbox_export_calc}
 \end{figure}
@@ -1017,7 +1082,7 @@ The OSG View allows a graphical representation of target reports from the Databa
 
 \begin{figure}[H]
     \hspace*{-2cm}
-    \includegraphics[width=18cm]{../screenshots/osgview_overview.png}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_overview.png}
   \caption{OSG View overview}
   \label{fig:osgview_overview}
 \end{figure}
@@ -1099,7 +1164,7 @@ As supplied in the osgEarth example files, this map data is obtained from ArcGIS
 
 \begin{figure}[H]
     \hspace*{-2cm}
-    \includegraphics[width=18cm]{../screenshots/osgview_arcgis.png}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_arcgis.png}
   \caption{OSG View Arcgis map}
 \end{figure}
 
@@ -1110,7 +1175,7 @@ This minimal map shows national borders based on an ESRI shapefile, provided by 
 
 \begin{figure}[H]
     \hspace*{-2cm}
-    \includegraphics[width=18cm]{../screenshots/osgview_minimal.png}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_minimal.png}
   \caption{OSG View minimal map}
 \end{figure}
 
@@ -1121,7 +1186,7 @@ This very useful map shows map data from \url{https://www.openstreetmap.org/}.
 
 \begin{figure}[H]
     \hspace*{-2cm}
-    \includegraphics[width=18cm]{../screenshots/osgview_osm.png}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_osm.png}
   \caption{OSG View OpenStreetMap}
 \end{figure}
 
@@ -1129,7 +1194,7 @@ It is possible to zoom in to a very high level of detail, to even inspect airpor
 
 \begin{figure}[H]
     \hspace*{-2cm}
-    \includegraphics[width=18cm]{../screenshots/osgview_osm_vienna.png}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_osm_vienna.png}
   \caption{OSG View OpenStreetMap Vienna Airport}
 \end{figure}
 
@@ -1140,7 +1205,7 @@ This map also shows satellite data, from \url{http://web.pelicanmapping.com/read
 
 \begin{figure}[H]
     \hspace*{-2cm}
-    \includegraphics[width=18cm]{../screenshots/osgview_ready.png}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_ready.png}
   \caption{OSG View ReadyMap}
 \end{figure}
 
@@ -1151,7 +1216,7 @@ This map shows the same data as ReadyMap, but to a higher detail level.
 
 \begin{figure}[H]
     \hspace*{-2cm}
-    \includegraphics[width=18cm]{../screenshots/osgview_ready_detail.png}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_ready_detail.png}
   \caption{OSG View ReadyMap detailed}
 \end{figure}
 
@@ -1168,7 +1233,7 @@ To load data, trigger a loading action from the Management widget. The data will
 
 \begin{figure}[H]
     \hspace*{-2cm}
-    \includegraphics[width=18cm]{../screenshots/osgview_data.png}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_data.png}
   \caption{OSG View data display}
   \label{fig:osgview_data}
 \end{figure}
@@ -1207,7 +1272,7 @@ In the Layers widget, a number of operations are possible for each tree item.
 The context menu allows several actions to be performed on an item. If an item has sub-items, the same action will automatically be performed on the child items.
 
 \begin{figure}[H]
-    \includegraphics[width=5cm]{../screenshots/osgview_layer_context_menu.png}
+    \includegraphics[width=5cm,frame]{../screenshots/osgview_layer_context_menu.png}
   \caption{OSG View layer context menu}
 \end{figure}
 
@@ -1262,7 +1327,7 @@ Also, the label colour is always the same as the target report's.
 
 \begin{figure}[H]
     \hspace*{-2cm}
-    \includegraphics[width=18cm]{../screenshots/osgview_data_operations.png}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_data_operations.png}
   \caption{OSG View data operations}
 \end{figure}
 
@@ -1301,7 +1366,7 @@ Once activated, the time filter facilitates that only target reports within a sp
 
 \begin{figure}[H]
     \hspace*{-2cm}
-    \includegraphics[width=18cm]{../screenshots/osgview_time_filter.png}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_time_filter.png}
   \caption{OSG View time filter}
   \label{fig:osgview_time_filter}
 \end{figure}
