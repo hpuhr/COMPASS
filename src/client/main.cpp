@@ -28,23 +28,23 @@ namespace po = boost::program_options;
 
 int main (int argc, char **argv)
 {
-    bool fuse = false;
+//    bool fuse = false;
 
-    po::options_description desc("Allowed options");
-    desc.add_options()
-        ("help", "produce help message")
-        //("compression", po::value<int>(), "set compression level")
-        ("fuse,f", po::bool_switch(&fuse), "assume fuse environment")
-    ;
+//    po::options_description desc("Allowed options");
+//    desc.add_options()
+//        ("help", "produce help message")
+//        //("compression", po::value<int>(), "set compression level")
+//        ("fuse,f", po::bool_switch(&fuse), "assume fuse environment")
+//    ;
 
-    po::variables_map vm;
-    po::store(po::parse_command_line(argc, argv, desc), vm);
-    po::notify(vm);
+//    po::variables_map vm;
+//    po::store(po::parse_command_line(argc, argv, desc), vm);
+//    po::notify(vm);
 
-    if (vm.count("help")) {
-        std::cout << desc << "\n";
-        return 1;
-    }
+//    if (vm.count("help")) {
+//        std::cout << desc << "\n";
+//        return 1;
+//    }
 
 
     // check if basic configuration works
@@ -57,12 +57,11 @@ int main (int argc, char **argv)
 #if USE_EXPERIMENTAL_SOURCE == true
         std::cout <<"ATSDBClient: includes experimental features" << std::endl;
 
-        if (fuse)
+        const char* appdir = std::getenv("APPDIR");
+        if (appdir)
         {
-            const char* appdir = std::getenv("APPDIR");
+            std::cout << "ATSDBClient: assuming fuse environment in " << appdir << std::endl;
             assert (appdir);
-
-            //std::cout << "ATSDBClient: assuming fuse environment in " << appdir << std::endl;
 
             system_install_path = std::string(appdir) + "/appdir/atsdb";
 
