@@ -41,6 +41,7 @@
 
 #include <QMessageBox>
 #include <QProgressDialog>
+#include <QMessageBox>
 #include <QCoreApplication>
 
 using namespace Utils;
@@ -830,6 +831,13 @@ void MySQLppConnection::importSQLFile (const std::string& filename)
             if (error_cnt > 3)
             {
                 logwrn << "MySQLppConnection: importSQLFile: quit after too many errors";
+
+                QMessageBox m_warning (QMessageBox::Warning, "MySQL Text Import Failed",
+                                         "Quit after too many SQL errors. Please make sure that"
+                                         " the SQL file is correct.",
+                                         QMessageBox::Ok);
+                m_warning.exec();
+
                 break;
             }
         }
@@ -884,9 +892,18 @@ void MySQLppConnection::importSQLArchiveFile(const std::string& filename)
     size_t error_cnt = 0;
     size_t byte_cnt = 0;
 
+    QMessageBox msg_box;
+    std::string msg = "Importing archive '"+filename+"'.";
+    msg_box.setText(msg.c_str());
+    msg_box.setStandardButtons(QMessageBox::NoButton);
+    msg_box.show();
+    QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
     while (archive_read_next_header(a, &entry) == ARCHIVE_OK)
     {
         loginf << "Archive file found: " << archive_entry_pathname(entry) << " size " << archive_entry_size(entry);
+
+        msg_box.setInformativeText(archive_entry_pathname(entry));
 
         bool done=false;
 
@@ -948,7 +965,13 @@ void MySQLppConnection::importSQLArchiveFile(const std::string& filename)
 
                     if (line_cnt % 50 == 0)
                     {
-                        loginf << "MySQLppConnection: importSQLArchiveFile: line cnt " << line_cnt;
+                        logdbg << "MySQLppConnection: importSQLArchiveFile: line cnt " << line_cnt;
+                        msg = "Read " + std::to_string(line_cnt) + " lines from "
+                                + std::string(archive_entry_pathname(entry)) + " archive entry.";
+
+                        msg_box.setInformativeText(msg.c_str());
+                        msg_box.show();
+                        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 //                        progress_dialog->setValue(100*byte_cnt/file_byte_size);
 //                        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
                     }
@@ -964,6 +987,12 @@ void MySQLppConnection::importSQLArchiveFile(const std::string& filename)
                     if (error_cnt > 3)
                     {
                         logwrn << "MySQLppConnection: importSQLArchiveFile: quit after too many errors";
+
+                        QMessageBox m_warning (QMessageBox::Warning, "MySQL Archive Import Failed",
+                                                 "Quit after too many SQL errors. Please make sure that"
+                                                 " the archive is correct as specified in the user manual.",
+                                                 QMessageBox::Ok);
+                        m_warning.exec();
                         done=true;
                         break;
                     }
@@ -973,8 +1002,14 @@ void MySQLppConnection::importSQLArchiveFile(const std::string& filename)
             if (done)
                 break;
         }
+
+        if (done)
+            break;
+
         loginf << "MySQLppConnection: importSQLArchiveFile: archive file " << archive_entry_pathname(entry) << " imported";
     }
+
+    msg_box.close();
 
     r = archive_read_close(a);
     if (r != ARCHIVE_OK)
