@@ -20,6 +20,7 @@
 #include "logger.h"
 #include "atsdb.h"
 #include "dbobjectmanager.h"
+#include "dbobject.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -158,6 +159,24 @@ void MySQLppConnectionWidget::importSQLTextSlot()
 {
     logdbg << "MySQLppConnectionWidget: importSQLTextSlot";
 
+    bool any_data=false;
+
+    for (auto obj_it : ATSDB::instance().objectManager().objects())
+        if (obj_it.second->hasData())
+            any_data=true;
+
+    if (any_data)
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "Import SQL Text", "There is already data in the database. Please "
+                                                               " confirm with 'Yes' to continue, cancel with 'No'"
+                                                               " to abort import.",
+                                      QMessageBox::Yes|QMessageBox::No);
+
+        if (reply == QMessageBox::No)
+            return;
+    }
+
     QFileDialog dialog(this);
     dialog.setFileMode(QFileDialog::ExistingFile);
     dialog.setNameFilter(tr("SQL (*.sql)"));
@@ -187,6 +206,24 @@ void MySQLppConnectionWidget::importSQLTextSlot()
 void MySQLppConnectionWidget::importSQLTextFromArchiveSlot()
 {
     logdbg << "MySQLppConnectionWidget: importSQLTextFromArchiveSlot";
+
+    bool any_data=false;
+
+    for (auto obj_it : ATSDB::instance().objectManager().objects())
+        if (obj_it.second->hasData())
+            any_data=true;
+
+    if (any_data)
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "Import SQL Text Archive", "There is already data in the database. Please "
+                                                               " confirm with 'Yes' to continue, cancel with 'No'"
+                                                               " to abort import.",
+                                      QMessageBox::Yes|QMessageBox::No);
+
+        if (reply == QMessageBox::No)
+            return;
+    }
 
     QFileDialog dialog(this);
     dialog.setFileMode(QFileDialog::ExistingFile);

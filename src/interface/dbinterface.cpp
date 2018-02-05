@@ -300,8 +300,16 @@ std::set<int> DBInterface::queryActiveSensorNumbers(const DBObject &object)
     std::shared_ptr<Buffer> buffer = result->buffer();
     for (unsigned int cnt=0; cnt < buffer->size(); cnt++)
     {
-        int tmp = buffer->getInt(local_key_col.name()).get(cnt);
-        data.insert (tmp);
+        if (buffer->getInt(local_key_col.name()).isNone(cnt))
+        {
+            logwrn << "DBInterface: queryActiveSensorNumbers: object " << object.name()
+                   << " has NULL ds_id's, which will be omitted";
+        }
+        else
+        {
+            int tmp = buffer->getInt(local_key_col.name()).get(cnt);
+            data.insert (tmp);
+        }
     }
 
     logdbg << "DBInterface: queryActiveSensorNumbers: done";
@@ -344,7 +352,8 @@ std::map <int, DBODataSource> DBInterface::getDataSources (const DBObject &objec
     if (has_short_name)
     {
         short_name_col_name = meta.column(ds.shortNameColumn()).name();
-        assert (buffer->properties().hasProperty(short_name_col_name) && buffer->properties().get(short_name_col_name).dataType() == PropertyDataType::STRING);
+        assert (buffer->properties().hasProperty(short_name_col_name)
+                && buffer->properties().get(short_name_col_name).dataType() == PropertyDataType::STRING);
     }
 
     bool has_sac = ds.hasSacColumn();
@@ -352,7 +361,8 @@ std::map <int, DBODataSource> DBInterface::getDataSources (const DBObject &objec
     if (has_sac)
     {
         sac_col_name = meta.column(ds.sacColumn()).name();
-        assert (buffer->properties().hasProperty(sac_col_name) && buffer->properties().get(sac_col_name).dataType() == PropertyDataType::CHAR);
+        assert (buffer->properties().hasProperty(sac_col_name)
+                && buffer->properties().get(sac_col_name).dataType() == PropertyDataType::CHAR);
     }
 
     bool has_sic = ds.hasSicColumn();
@@ -360,7 +370,8 @@ std::map <int, DBODataSource> DBInterface::getDataSources (const DBObject &objec
     if (has_sic)
     {
         sic_col_name = meta.column(ds.sicColumn()).name();
-        assert (buffer->properties().hasProperty(sic_col_name) && buffer->properties().get(sic_col_name).dataType() == PropertyDataType::CHAR);
+        assert (buffer->properties().hasProperty(sic_col_name)
+                && buffer->properties().get(sic_col_name).dataType() == PropertyDataType::CHAR);
     }
 
     bool has_latitude = ds.hasLatitudeColumn();
@@ -368,7 +379,8 @@ std::map <int, DBODataSource> DBInterface::getDataSources (const DBObject &objec
     if (has_latitude)
     {
         latitude_col_name = meta.column(ds.latitudeColumn()).name();
-        assert (buffer->properties().hasProperty(latitude_col_name) && buffer->properties().get(latitude_col_name).dataType() == PropertyDataType::DOUBLE);
+        assert (buffer->properties().hasProperty(latitude_col_name)
+                && buffer->properties().get(latitude_col_name).dataType() == PropertyDataType::DOUBLE);
     }
 
     bool has_longitude = ds.hasLongitudeColumn();
@@ -376,7 +388,8 @@ std::map <int, DBODataSource> DBInterface::getDataSources (const DBObject &objec
     if (has_longitude)
     {
         longitude_col_name = meta.column(ds.longitudeColumn()).name();
-        assert (buffer->properties().hasProperty(longitude_col_name) && buffer->properties().get(longitude_col_name).dataType() == PropertyDataType::DOUBLE);
+        assert (buffer->properties().hasProperty(longitude_col_name)
+                && buffer->properties().get(longitude_col_name).dataType() == PropertyDataType::DOUBLE);
     }
 
     bool has_altitude = ds.hasAltitudeColumn();
@@ -384,7 +397,8 @@ std::map <int, DBODataSource> DBInterface::getDataSources (const DBObject &objec
     if (has_altitude)
     {
         altitude_col_name = meta.column(ds.altitudeColumn()).name();
-        assert (buffer->properties().hasProperty(altitude_col_name) || buffer->properties().get(altitude_col_name).dataType() == PropertyDataType::DOUBLE);
+        assert (buffer->properties().hasProperty(altitude_col_name)
+                && buffer->properties().get(altitude_col_name).dataType() == PropertyDataType::DOUBLE);
     }
 
 
@@ -392,8 +406,23 @@ std::map <int, DBODataSource> DBInterface::getDataSources (const DBObject &objec
 
     for (unsigned cnt = 0; cnt < buffer->size(); cnt++)
     {
+        if (buffer->getInt(foreign_key_col.name()).isNone(cnt))
+        {
+            loginf << "DBInterface: getDataSources: object " << object.name()
+                   << " has NULL key, which will be omitted";
+            continue;
+        }
+
+        if (buffer->getString(name_col.name()).isNone(cnt))
+        {
+            loginf << "DBInterface: getDataSources: object " << object.name()
+                   << " has NULL name, which will be omitted";
+            continue;
+        }
+
         int key = buffer->getInt(foreign_key_col.name()).get(cnt);
         std::string name = buffer->getString(name_col.name()).get(cnt);
+
         assert (sources.count(key) == 0);
         loginf << "DBInterface: getDataSources: object " << object.name() << " key " << key << " name " << name;
         sources.insert(std::pair<int, DBODataSource>(key, DBODataSource(key, name)));
@@ -540,9 +569,6 @@ std::pair<std::string, std::string> DBInterface::getMinMaxString (const DBOVaria
 
     // get min max as strings
 
-    //    if (!var->isMetaVariable())
-    //    {
-    logdbg  << "DBInterface: getMinMax: is not meta";
     DBCommand command;
     command.set(sql_generator_.getSelectMinMaxStatement(var.currentDBColumn().name(), var.dboName()));
     command.list(list);
@@ -558,7 +584,14 @@ std::pair<std::string, std::string> DBInterface::getMinMaxString (const DBOVaria
     assert (buffer);
     if (buffer->size() != 1)
     {
-        throw std::invalid_argument ("DBInterface: getMinMaxString: string buffer for variable " + var.name() + " empty");
+        throw std::invalid_argument ("DBInterface: getMinMaxString: string buffer for variable "
+                                     + var.name() + " empty");
+    }
+
+    if (buffer->getString("min").isNone(0) || buffer->getString("max").isNone(0))
+    {
+        logerr << "DBInterface: getMinMaxString: variable " << var.name() << " has NULL minimum/maximum";
+        return std::pair <std::string, std::string> (NULL_STRING, NULL_STRING);
     }
 
     std::string min = buffer->getString("min").get(0);
@@ -576,8 +609,6 @@ std::pair<std::string, std::string> DBInterface::getMinMaxString (const DBOVaria
 
     loginf << "DBInterface: getMinMaxString: var " << var.name() << " min " << min << " max " << max;
     return std::pair <std::string, std::string> (min, max);
-
-
 
     // TODO factor in units && representation?
 
@@ -737,6 +768,23 @@ void DBInterface::setPostProcessed (bool value)
 void DBInterface::postProcess ()
 {
     loginf << "DBInterface: postProcess: creating jobs";
+
+    bool any_data=false;
+
+    for (auto obj_it : ATSDB::instance().objectManager().objects())
+        if (obj_it.second->hasData())
+            any_data=true;
+
+    if (!any_data)
+    {
+        logwrn << "DBInterface: postProcess: no data in objects";
+
+        QMessageBox m_warning (QMessageBox::Warning, "No Data in Objects",
+                                 "None of the database objects contains any data. Post-processing was not performed.",
+                                 QMessageBox::Ok);
+        m_warning.exec();
+        return;
+    }
 
     if (!existsMinMaxTable())
         createMinMaxTable();

@@ -164,8 +164,17 @@ void MainWindow::startSlot ()
     if (force_post || !ATSDB::instance().interface().isPostProcessed ())
     {
         loginf << "MainWindow: startSlot: post-processing started";
-        connect (&ATSDB::instance().interface(), SIGNAL(postProcessingDoneSignal()), this, SLOT(postProcessingDoneSlot()));
+        connect (&ATSDB::instance().interface(), &DBInterface::postProcessingDoneSignal,
+                this, &MainWindow::postProcessingDoneSlot,Qt::UniqueConnection);
+
         ATSDB::instance().interface().postProcess();
+
+        if (!ATSDB::instance().interface().isPostProcessed())
+        {
+            logdbg  << "MainWindow: startSlot: post-processing not performed";
+            start_button_->setDisabled (false);
+            return;
+        }
     }
     else
         initAfterStart ();

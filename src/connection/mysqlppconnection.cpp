@@ -599,6 +599,11 @@ std::vector<std::string> MySQLppConnection::getDatabases ()
         for (unsigned int cnt=0; cnt < buffer->size(); cnt++)
         {
             std::string tmp = buffer->getString("name").get(cnt);
+
+            if (tmp == "mysql" || tmp == "information_schema"|| tmp == "performance_schema" || tmp == "sys")
+                // omit system databases
+                continue;
+
             names.push_back(tmp);
         }
     }
@@ -814,7 +819,7 @@ void MySQLppConnection::importSQLFile (const std::string& filename)
                 ss.str("");
             }
 
-            if (line_cnt % 50 == 0)
+            if (line_cnt % 10 == 0)
             {
                 progress_dialog->setValue(100*byte_cnt/file_byte_size);
                 QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
@@ -963,7 +968,7 @@ void MySQLppConnection::importSQLArchiveFile(const std::string& filename)
                         ss.str("");
                     }
 
-                    if (line_cnt % 50 == 0)
+                    if (line_cnt % 10 == 0)
                     {
                         logdbg << "MySQLppConnection: importSQLArchiveFile: line cnt " << line_cnt;
                         msg = "Read " + std::to_string(line_cnt) + " lines from "

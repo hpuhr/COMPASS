@@ -250,7 +250,17 @@ void MySQLServerWidget::deleteDatabaseSlot ()
 
 void MySQLServerWidget::openDatabaseSlot ()
 {
-    logdbg << "MySQLServerWidget: openDatabaseSlot";
+    loginf << "MySQLServerWidget: openDatabaseSlot: database '" << server_.database() << "'";
+
+    if (server_.database() == "")
+    {
+        QMessageBox m_warning (QMessageBox::Warning, "No Database Selected",
+                                 "Please select a valid database. New ones can be created using the 'New' button.",
+                                 QMessageBox::Ok);
+        m_warning.exec();
+        return;
+    }
+
     connection_.openDatabase(server_.database());
 
     assert (open_button_);

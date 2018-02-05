@@ -274,6 +274,8 @@ public:
                << " first_list_cnt " << first_list_cnt << " list_cnt " << list_cnt << " list size " << list_size
                << " first_list_row " << first_list_row;
 
+//        T none_index = std::numeric_limits<T>::max();
+
         for (; list_cnt < list_size; list_cnt++)
         {
             std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > array_list = data_.at(list_cnt);
@@ -289,6 +291,10 @@ public:
                 {
                     values[array_list->at(list_row_cnt)].push_back(list_cnt*BUFFER_ARRAY_SIZE+list_row_cnt);
                 }
+//                else // add to unknown sensor
+//                {
+//                    values[none_index].push_back(list_cnt*BUFFER_ARRAY_SIZE+list_row_cnt);
+//                }
             }
         }
 

@@ -240,6 +240,7 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (std::vector<int> 
     ArrayListTemplate<int>& rec_num_list = buffer->getInt("rec_num");
     for (size_t cnt=0; cnt < rec_num_list.size(); cnt++)
     {
+        assert (!rec_num_list.isNone(cnt));
         int rec_num = rec_num_list.get(cnt);
         assert (labels.count(rec_num) == 0);
         rec_num_to_index[rec_num] = cnt;
@@ -259,7 +260,7 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (std::vector<int> 
 
         for (size_t cnt=0; cnt < rec_num_list.size(); cnt++)
         {
-            int rec_num = rec_num_list.get(cnt);
+            int rec_num = rec_num_list.get(cnt); //already checked
 
             assert (rec_num_to_index.count(rec_num) == 1);
             size_t buffer_index = rec_num_to_index[rec_num];
