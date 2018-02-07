@@ -33,10 +33,10 @@
 #include <QHBoxLayout>
 #include <QInputDialog>
 #include <QStackedWidget>
+#include <QMessageBox>
 
 DBSchemaManagerWidget::DBSchemaManagerWidget(DBSchemaManager &manager, QWidget* parent, Qt::WindowFlags f)
- : QFrame(parent), manager_(manager), schema_select_(nullptr), add_button_(nullptr), delete_button_(nullptr),
-   schema_widgets_(nullptr)
+ : QFrame(parent), manager_(manager)
 {
     unsigned int frame_width = FRAME_SIZE;
     QFont font_bold;
@@ -47,25 +47,30 @@ DBSchemaManagerWidget::DBSchemaManagerWidget(DBSchemaManager &manager, QWidget* 
 
     QVBoxLayout *layout = new QVBoxLayout ();
 
-    QLabel *db_schema_label = new QLabel (tr("Database Schema Selection"));
+    QLabel *db_schema_label = new QLabel (tr("Database Schema"));
     db_schema_label->setFont (font_bold);
     layout->addWidget (db_schema_label);
 
     schema_select_ = new QComboBox ();
     updateSchemas();
-    connect (schema_select_, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(schemaSelectedSlot(const QString &)));
-    //schema_select_->setDisabled(true);
+    connect (schema_select_, SIGNAL(currentIndexChanged(const QString&)),
+             this, SLOT(schemaSelectedSlot(const QString&)));
+
     layout->addWidget(schema_select_);
 
     QHBoxLayout *button_layout = new QHBoxLayout ();
 
-    add_button_ = new QPushButton(tr("Add Schema"));
-    connect(add_button_, SIGNAL( clicked() ), this, SLOT( addSchemaSlot() ));
+    add_button_ = new QPushButton(tr("Add"));
+    connect(add_button_, &QPushButton::clicked, this, &DBSchemaManagerWidget::addSchemaSlot);
     button_layout->addWidget (add_button_);
 
-    delete_button_ = new QPushButton(tr("Delete Schema"));
-    connect(delete_button_, SIGNAL( clicked() ), this, SLOT( deleteSchemaSlot() ));
+    delete_button_ = new QPushButton(tr("Delete"));
+    connect(delete_button_, &QPushButton::clicked, this, &DBSchemaManagerWidget::deleteSchemaSlot);
     button_layout->addWidget (delete_button_);
+
+    lock_button_ = new QPushButton(tr("Lock"));
+    connect(lock_button_, &QPushButton::clicked, this, &DBSchemaManagerWidget::lockSchemaSlot);
+    button_layout->addWidget (lock_button_);
 
     layout->addLayout(button_layout);
     layout->addStretch();
@@ -107,6 +112,40 @@ void DBSchemaManagerWidget::deleteSchemaSlot ()
     manager_.deleteCurrentSchema();
 
     updateSchemas ();
+}
+
+void DBSchemaManagerWidget::lockSchemaSlot ()
+{
+    logdbg << "DBSchemaManagerWidget: lockSchemaSlot";
+
+    if (!manager_.hasCurrentSchema())
+    {
+        QMessageBox msgBox;
+        msgBox.setText("A schema needs to be selected.");
+        msgBox.exec();
+        return;
+    }
+
+    assert (schema_select_);
+    schema_select_->setDisabled (true);
+
+    assert (add_button_);
+    add_button_->setDisabled (true);
+
+    assert (delete_button_);
+    delete_button_->setDisabled (true);
+
+    assert (lock_button_);
+    lock_button_->setDisabled (true);
+
+    manager_.lockCurrentSchema();
+
+    for (int cnt=0; cnt < schema_widgets_->count(); cnt++)
+    {
+        DBSchemaWidget* widget = dynamic_cast<DBSchemaWidget*> (schema_widgets_->widget(cnt));
+        assert (widget);
+        widget->lock();
+    }
 }
 
 void DBSchemaManagerWidget::schemaSelectedSlot (const QString &value)
@@ -151,22 +190,12 @@ void DBSchemaManagerWidget::updateSchemas()
            schema_select_->setCurrentIndex(index);
         }
     }
-
 }
 
 
 void DBSchemaManagerWidget::databaseOpenedSlot ()
 {
     setDisabled(false);
-
-//    assert (schema_select_);
-//    schema_select_->setDisabled (false);
-
-//    assert (add_button_);
-//    add_button_->setDisabled (false);
-
-//    assert (delete_button_);
-//    delete_button_->setDisabled (false);
 }
 
 // and who are you? the proud lord said...

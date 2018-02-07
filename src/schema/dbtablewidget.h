@@ -29,6 +29,7 @@ class QComboBox;
 class QGridLayout;
 class QScrollArea;
 class QPushButton;
+class UnitSelectionWidget;
 
 /**
  * @brief Edit widget for a DBTable
@@ -40,31 +41,31 @@ class DBTableWidget : public QWidget
 signals:
 
 public slots:
-    void infoSlot (const QString &value);
-    /// @brief Creates all columns that exist in database table
-//    void createColumnsFromDB ();
-//    void createNewColumnsFromDB ();
-    /// @brief Sets a special null value
+    void infoSlot (const QString& value);
 //    void setSpecialNull (const QString &text);
 
 public:
     /// @brief Constructor
-    DBTableWidget(DBTable &table, QWidget * parent = 0, Qt::WindowFlags f = 0);
+    DBTableWidget(DBTable& table, QWidget* parent=0, Qt::WindowFlags f=0);
     /// @brief Destructor
     virtual ~DBTableWidget();
 
+    void lock ();
+
 protected:
     /// Represented table
-    DBTable &table_;
+    DBTable& table_;
 
     /// Table info edit field
-    QLineEdit *info_edit_;
+    QLineEdit* info_edit_ {nullptr};
 
     /// Grid with all table columns
-    QGridLayout *column_grid_;
+    QGridLayout* column_grid_ {nullptr};
 
     /// Container with all column special null edit fields
     //std::map <QLineEdit *, DBTableColumn* > column_grid_special_nulls_;
+
+    std::map <UnitSelectionWidget*, DBTableColumn*> column_unit_selection_widgets_;
 
     /// @brief Updates the table columns grid
     void updateColumnGrid ();

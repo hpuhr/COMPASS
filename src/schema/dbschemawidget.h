@@ -65,20 +65,26 @@ private slots:
 
 public:
     /// @brief Constructor
-    DBSchemaWidget(DBSchema &schema, QWidget * parent = 0, Qt::WindowFlags f = 0);
+    DBSchemaWidget(DBSchema &schema, QWidget* parent=0, Qt::WindowFlags f=0);
     /// @brief Destructor
     virtual ~DBSchemaWidget();
 
+    void lock ();
+
 protected:
     /// Schema to be edited
-    DBSchema &schema_;
-
-    QCheckBox *auto_populate_check_;
+    DBSchema& schema_;
 
     /// Grid for all tables
-    QGridLayout *table_grid_;
+    QGridLayout* table_grid_ {nullptr};
+
+    QPushButton* add_table_button_ {nullptr};
+    QPushButton* add_all_tables_button_ {nullptr};
+    QCheckBox* auto_populate_check_ {nullptr};
+
     /// Grid for all meta tables
-    QGridLayout *meta_table_grid_;
+    QGridLayout* meta_table_grid_ {nullptr};
+    QPushButton* add_ts_button_ {nullptr};
 
     /// Container for table edit buttons
     std::map <QPushButton*, DBTable*> edit_table_buttons_;
@@ -87,8 +93,6 @@ protected:
     /// Container for meta table edit buttons
     std::map <QPushButton*, MetaDBTable*> edit_meta_table_buttons_;
     std::map <QPushButton*, MetaDBTable*> delete_meta_table_buttons_;
-    /// @brief Creates GUI elements
-    void createElements ();
 
     /// Updates DBTable grid
     void updateTableGrid();

@@ -77,9 +77,22 @@ void DBSchemaManager::setCurrentSchema (const std::string &current_schema)
 {
     assert (current_schema.size() != 0);
     assert (schemas_.find(current_schema) != schemas_.end());
+
+    if (schema_locked_)
+    {
+        logwrn << "DBSchemaManager: setCurrentSchema: schema already locked";
+        return;
+    }
+
     current_schema_=current_schema;
 
     emit schemaChangedSignal();
+}
+
+void DBSchemaManager::lockCurrentSchema ()
+{
+    assert (hasCurrentSchema());
+    schema_locked_ = true;
 }
 
 bool DBSchemaManager::hasCurrentSchema ()

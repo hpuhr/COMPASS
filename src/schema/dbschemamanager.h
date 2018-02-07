@@ -37,6 +37,7 @@ class DBSchemaManager : public QObject, public Configurable
     Q_OBJECT
 signals:
     void schemaChangedSignal ();
+    void schemaLockedSignal ();
 
 public:
     /// @brief Constructor
@@ -63,7 +64,10 @@ public:
     /// @brief Renames the current schema
     void renameCurrentSchema (const std::string &new_name);
     /// @brief Sets the current schema
+
     void setCurrentSchema (const std::string &current_schema);
+    bool isCurrentSchemaLocked () { return schema_locked_; }
+    void lockCurrentSchema ();
     /// @brief Adds an empty schema with a given name
     void addEmptySchema (const std::string &name);
     /// @brief Adds an RDL schema with a given name
@@ -76,6 +80,8 @@ public:
 protected:
     /// Name of current DBSchema
     std::string current_schema_;
+    bool schema_locked_ {false};
+
     /// Container with all defined schemas (schema name -> DBSchema)
     std::map <std::string, DBSchema*> schemas_;
 
