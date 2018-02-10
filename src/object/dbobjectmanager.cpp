@@ -116,6 +116,11 @@ bool DBObjectManager::existsObject (const std::string &dbo_name)
     return (objects_.find(dbo_name) != objects_.end());
 }
 
+void DBObjectManager::schemaLockedSlot()
+{
+    unlock ();
+}
+
 DBObject &DBObjectManager::object (const std::string &dbo_name)
 {
     logdbg  << "DBObjectManager: object: name " << dbo_name;
@@ -162,6 +167,9 @@ DBObjectManagerWidget *DBObjectManager::widget()
     if (!widget_)
     {
         widget_ = new DBObjectManagerWidget (*this);
+
+        if (locked_)
+            widget_->lock ();
     }
 
     assert (widget_);
@@ -286,6 +294,28 @@ void DBObjectManager::clearOrderVariable ()
 {
     order_variable_dbo_name_="";
     order_variable_name_="";
+}
+
+void DBObjectManager::lock ()
+{
+    locked_ = true;
+
+    for (auto& object_it : objects_)
+        object_it.second->lock();
+
+    if (widget_)
+        widget_->lock();
+}
+
+void DBObjectManager::unlock ()
+{
+    locked_ = false;
+
+    for (auto& object_it : objects_)
+        object_it.second->unlock();
+
+    if (widget_)
+        widget_->unlock();
 }
 
 void DBObjectManager::loadSlot ()

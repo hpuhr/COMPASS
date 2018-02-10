@@ -24,8 +24,8 @@
 #include "dbinterface.h"
 #include "logger.h"
 
-DBTable::DBTable(const std::string &class_id, const std::string &instance_id, DBSchema *schema)
-    : Configurable (class_id, instance_id, schema), schema_(*schema), widget_(nullptr)
+DBTable::DBTable(const std::string& class_id, const std::string& instance_id, DBSchema& schema)
+    : Configurable (class_id, instance_id, &schema), schema_(schema)
 {
     registerParameter ("name", &name_, "");
     registerParameter ("info", &info_, "");
@@ -49,7 +49,7 @@ DBTable::~DBTable()
     }
 }
 
-void DBTable::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
+void DBTable::generateSubConfigurable (const std::string& class_id, const std::string& instance_id)
 {
     logdbg  << "DBTable: generateSubConfigurable: " << class_id_ << " instance " << instance_id_;
 
@@ -71,12 +71,12 @@ void DBTable::checkSubConfigurables ()
     // move along, sir.
 }
 
-bool DBTable::hasColumn (const std::string &name) const
+bool DBTable::hasColumn (const std::string& name) const
 {
     return columns_.find(name) != columns_.end();
 }
 
-const DBTableColumn &DBTable::column (const std::string &name) const
+const DBTableColumn& DBTable::column (const std::string& name) const
 {
     assert (columns_.find(name) != columns_.end());
     return *columns_.at(name);
@@ -107,11 +107,22 @@ void DBTable::populate ()
     }
 }
 
-DBTableWidget *DBTable::widget ()
+void DBTable::lock ()
+{
+    locked_ = true;
+
+    if (widget_)
+        widget_->lock();
+}
+
+DBTableWidget* DBTable::widget ()
 {
     if (!widget_)
     {
         widget_ = new DBTableWidget (*this);
+
+        if (locked_)
+            widget_->lock();
     }
 
     return widget_;

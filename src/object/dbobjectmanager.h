@@ -42,7 +42,9 @@ class DBSchemaManager;
 class DBObjectManager : public QObject, public Configurable
 {
     Q_OBJECT
+
 public slots:
+    void schemaLockedSlot ();
     void loadSlot ();
     void updateSchemaInformationSlot ();
     void databaseContentChangedSlot ();
@@ -58,30 +60,30 @@ signals:
 
 public:
     /// @brief Constructor
-    DBObjectManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb);
+    DBObjectManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb);
 
     /// @brief Returns if an object of type exists
-    bool existsObject (const std::string &dbo_name);
+    bool existsObject (const std::string& dbo_name);
     /// @brief Returns the object of type, if existing
-    DBObject &object (const std::string &dbo_name);
-    void deleteObject (const std::string &dbo_name);
+    DBObject &object (const std::string& dbo_name);
+    void deleteObject (const std::string& dbo_name);
     /// @brief Returns container with all DBObjects
     std::map <std::string, DBObject*>& objects () { return objects_; }
 
-    bool existsMetaVariable (const std::string &var_name);
+    bool existsMetaVariable (const std::string& var_name);
     /// @brief Returns the a meta variable, if existing
-    MetaDBOVariable &metaVariable (const std::string &var_name);
-    void deleteMetaVariable (const std::string &var_name);
+    MetaDBOVariable &metaVariable (const std::string& var_name);
+    void deleteMetaVariable (const std::string& var_name);
     /// @brief Returns container with all MetaVariables
     std::map <std::string, MetaDBOVariable*>& metaVariables () { return meta_variables_; }
 
-    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
+    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
 
     /// @brief Destructor
     virtual ~DBObjectManager();
 
-    DBObjectManagerWidget *widget();
-    DBObjectManagerLoadWidget *loadWidget();
+    DBObjectManagerWidget* widget();
+    DBObjectManagerLoadWidget* loadWidget();
 
     bool useLimit() const;
     void useLimit(bool useLimit);
@@ -102,12 +104,15 @@ public:
     void useOrderAscending(bool useOrderAscending);
 
     bool hasOrderVariable ();
-    DBOVariable &orderVariable ();
-    void orderVariable(DBOVariable &variable);
+    DBOVariable& orderVariable ();
+    void orderVariable(DBOVariable& variable);
     bool hasOrderMetaVariable ();
-    MetaDBOVariable &orderMetaVariable ();
-    void orderMetaVariable(MetaDBOVariable &variable);
+    MetaDBOVariable& orderMetaVariable ();
+    void orderMetaVariable(MetaDBOVariable& variable);
     void clearOrderVariable ();
+
+    void lock ();
+    void unlock ();
 
 protected:
     bool use_filters_ {false};
@@ -120,6 +125,8 @@ protected:
     bool use_limit_ {false};
     unsigned int limit_min_ {0};
     unsigned int limit_max_ {100000};
+
+    bool locked_ {false};
 
     /// Container with all DBOs (DBO name -> DBO pointer)
     std::map <std::string, DBObject*> objects_;

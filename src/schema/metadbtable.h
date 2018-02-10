@@ -42,7 +42,7 @@ class SubTableDefinition : public Configurable
 {
 public:
     /// @brief Constructor
-    SubTableDefinition(const std::string &class_id, const std::string &instance_id, Configurable *parent)
+    SubTableDefinition(const std::string& class_id, const std::string& instance_id, Configurable* parent)
         : Configurable (class_id, instance_id, parent)
     {
         registerParameter ("main_table_key", &main_table_key_, "");
@@ -53,11 +53,11 @@ public:
     virtual ~SubTableDefinition() {}
 
     /// @brief Returns local key
-    const std::string &mainTableKey () { return main_table_key_; }
+    const std::string& mainTableKey () { return main_table_key_; }
     /// @brief Returns meta sub-table name
-    const std::string &subTableName () { return sub_table_name_; }
+    const std::string& subTableName () { return sub_table_name_; }
     /// @brief Returns meta sub-table key
-    const std::string &subTableKey () { return sub_table_key_; }
+    const std::string& subTableKey () { return sub_table_key_; }
 
 protected:
     /// Local key
@@ -78,47 +78,43 @@ class MetaDBTable : public Configurable
 {
 public:
     /// @brief Constructor
-    MetaDBTable(const std::string &class_id, const std::string &instance_id, DBSchema *parent);
+    MetaDBTable(const std::string& class_id, const std::string& instance_id, DBSchema* parent);
     /// @brief Destructor
     virtual ~MetaDBTable();
 
-    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
+    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
 
-    const std::string &name () const { return name_; }
+    const std::string& name () const { return name_; }
     /// @brief Sets description
-    void name (const std::string &name);
+    void name (const std::string& name);
 
     /// @brief Returns description
-    const std::string &info () const { return info_; }
+    const std::string& info () const { return info_; }
     /// @brief Sets description
     void info (const std::string &info) { info_=info; }
 
     /// @brief Returns name of the main database table
-    const std::string &mainTableName () const { return main_table_name_; }
-    /// @brief Sets name of the main database table
-    //void mainTableName (const std::string &main_table_name);
-
-//    /// @brief Returns database table name for a variable
-//    const std::string &tableDBNameForVariable (std::string variable_name) const { return columns_.at(variable_name).dbTableName(); }
+    const std::string& mainTableName () const { return main_table_name_; }
 
     /// @brief Returns number of columns
     unsigned int numColumns () const { return columns_.size(); }
     /// @brief Returns if column with a given name exists
-    bool hasColumn (const std::string &column) const { return columns_.find (column) != columns_.end(); }
+    bool hasColumn (const std::string& column) const { return columns_.find (column) != columns_.end(); }
     /// @brief Returns container with all columns
     const std::map <std::string, const DBTableColumn&>& columns () const { return columns_; }
     /// @brief Returns column with a given name
-    const DBTableColumn &column (const std::string &column) const { return columns_.at(column); }
-    const DBTable &tableFor (const std::string &column) const;
+    const DBTableColumn &column (const std::string& column) const { return columns_.at(column); }
+    const DBTable &tableFor (const std::string& column) const;
 
     /// @brief Returns if meta sub-tables are defined
     bool hasSubTables () const { return sub_table_definitions_.size() > 0; }
     bool hasSubTable (const std::string& name) const { return sub_table_definitions_.count(name) > 0; }
     /// @brief Returns container with all meta sub-tables
-    const std::map <std::string, const DBTable &> &subTables () const { return sub_tables_; }
+    const std::map <std::string, const DBTable&> &subTables () const { return sub_tables_; }
     /// @brief Returns string with concatenated, comma separated meta sub-tables
     std::string subTableNames () const;
-    void addSubTable (const std::string &local_key, const std::string &sub_table_name, const std::string &sub_table_key);
+    void addSubTable (const std::string& local_key, const std::string& sub_table_name,
+                      const std::string& sub_table_key);
     void removeSubTable (const std::string& name);
 
     /// @brief Returns container with all sub meta-table definitions
@@ -130,6 +126,8 @@ public:
 
     MetaDBTableWidget *widget ();
 
+    void lock ();
+
 protected:
     /// Name
     std::string name_;
@@ -139,11 +137,13 @@ protected:
     std::string main_table_name_;
 
     /// Parent schema
-    DBSchema &schema_;
+    DBSchema& schema_;
     /// Main database table
-    const DBTable *main_table_;
+    const DBTable* main_table_ {nullptr};
 
-    MetaDBTableWidget *widget_;
+    bool locked_ {false};
+
+    MetaDBTableWidget* widget_ {nullptr};
 
     /// Container with all meta sub-table definitions
     std::map <std::string, SubTableDefinition*> sub_table_definitions_;
@@ -151,9 +151,6 @@ protected:
     std::map <std::string, const DBTable&> sub_tables_;
     /// Container with all table columns
     std::map <std::string, const DBTableColumn&> columns_;
-
-    /// @brief Creates sub meta-tables from their definitions (if required)
-    //void setSubTablesIfRequired ();
 
     virtual void checkSubConfigurables () {}
 

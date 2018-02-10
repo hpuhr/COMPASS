@@ -50,9 +50,8 @@
 
 using namespace Utils;
 
-DBObjectWidget::DBObjectWidget(DBObject *object, DBSchemaManager &schema_manager, QWidget * parent, Qt::WindowFlags f)
-    : QWidget (parent, f), object_(object), schema_manager_(schema_manager), name_edit_(0), info_edit_(0),
-      ds_schema_box_(0), meta_table_grid_(0), new_meta_schema_box_ (0), new_meta_box_ (0), dbovars_grid_(0), new_var_name_edit_(0), all_schemas_box_(0)
+DBObjectWidget::DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager, QWidget* parent, Qt::WindowFlags f)
+    : QWidget (parent, f), object_(object), schema_manager_(schema_manager)
 {
     assert (object_);
 
@@ -249,6 +248,17 @@ DBObjectWidget::~DBObjectWidget()
 {
 
 }
+
+void DBObjectWidget::lock ()
+{
+    locked_ = true;
+}
+
+void DBObjectWidget::unlock ()
+{
+    locked_ = false;
+}
+
 
 void DBObjectWidget::updateMetaSchemaSelection ()
 {

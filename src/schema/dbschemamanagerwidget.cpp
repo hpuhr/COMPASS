@@ -126,26 +126,7 @@ void DBSchemaManagerWidget::lockSchemaSlot ()
         return;
     }
 
-    assert (schema_select_);
-    schema_select_->setDisabled (true);
-
-    assert (add_button_);
-    add_button_->setDisabled (true);
-
-    assert (delete_button_);
-    delete_button_->setDisabled (true);
-
-    assert (lock_button_);
-    lock_button_->setDisabled (true);
-
-    manager_.lockCurrentSchema();
-
-    for (int cnt=0; cnt < schema_widgets_->count(); cnt++)
-    {
-        DBSchemaWidget* widget = dynamic_cast<DBSchemaWidget*> (schema_widgets_->widget(cnt));
-        assert (widget);
-        widget->lock();
-    }
+    manager_.lock();
 }
 
 void DBSchemaManagerWidget::schemaSelectedSlot (const QString &value)
@@ -161,14 +142,33 @@ void DBSchemaManagerWidget::schemaSelectedSlot (const QString &value)
         manager_.setCurrentSchema(value.toStdString());
 
         DBSchemaWidget *widget = manager_.getCurrentSchema().widget();
-//        QObject::connect(widget, SIGNAL(serverConnectedSignal()), this, SLOT(serverConnectedSlot()), static_cast<Qt::ConnectionType>(Qt::UniqueConnection));
-//        QObject::connect(widget, SIGNAL(databaseOpenedSignal()), this, SLOT(databaseOpenedSlot()), static_cast<Qt::ConnectionType>(Qt::UniqueConnection));
+//        QObject::connect(widget, SIGNAL(serverConnectedSignal()), this, SLOT(serverConnectedSlot()),
+//        static_cast<Qt::ConnectionType>(Qt::UniqueConnection));
+//        QObject::connect(widget, SIGNAL(databaseOpenedSignal()), this, SLOT(databaseOpenedSlot()),
+//        static_cast<Qt::ConnectionType>(Qt::UniqueConnection));
 
         schema_widgets_->addWidget(widget);
         delete_button_->setDisabled(false);
     }
     else
         delete_button_->setDisabled(true);
+}
+
+void DBSchemaManagerWidget::lock ()
+{
+    locked_ = true;
+
+    assert (schema_select_);
+    schema_select_->setDisabled (true);
+
+    assert (add_button_);
+    add_button_->setDisabled (true);
+
+    assert (delete_button_);
+    delete_button_->setDisabled (true);
+
+    assert (lock_button_);
+    lock_button_->setDisabled (true);
 }
 
 void DBSchemaManagerWidget::updateSchemas()

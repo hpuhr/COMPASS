@@ -25,8 +25,8 @@
 #include "logger.h"
 #include "metadbtablewidget.h"
 
-MetaDBTable::MetaDBTable(const std::string &class_id, const std::string &instance_id, DBSchema *parent)
-    : Configurable (class_id, instance_id, parent), schema_(*parent), main_table_ (nullptr), widget_(nullptr)
+MetaDBTable::MetaDBTable(const std::string& class_id, const std::string& instance_id, DBSchema* parent)
+    : Configurable (class_id, instance_id, parent), schema_(*parent)
 {
     registerParameter ("name", &name_, "");
     registerParameter ("info", &info_, "");
@@ -60,7 +60,7 @@ MetaDBTable::~MetaDBTable()
     }
 }
 
-void MetaDBTable::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
+void MetaDBTable::generateSubConfigurable (const std::string& class_id, const std::string& instance_id)
 {
     logdbg  << "MetaDBTable: generateSubConfigurable: " << class_id_ << " instance " << instance_id_;
 
@@ -68,7 +68,7 @@ void MetaDBTable::generateSubConfigurable (const std::string &class_id, const st
     {
         logdbg  << "MetaDBTable: generateSubConfigurable: generating sub table definition";
 
-        SubTableDefinition *def = new SubTableDefinition (class_id, instance_id, this);
+        SubTableDefinition* def = new SubTableDefinition (class_id, instance_id, this);
         sub_table_definitions_.insert (std::pair <std::string, SubTableDefinition*> (def->subTableName(), def));
 
         assert (schema_.hasTable(def->subTableName()));
@@ -85,13 +85,7 @@ void MetaDBTable::name (const std::string &name)
     schema_.updateMetaTables();
 }
 
-//void MetaDBTable::mainTableName (const std::string &main_table_name)
-//{
-//    assert (main_table_name.size() != 0);
-//    main_table_name_=main_table_name;
-//}
-
-const DBTable &MetaDBTable::tableFor (const std::string &column) const
+const DBTable &MetaDBTable::tableFor (const std::string& column) const
 {
     assert (hasColumn(column));
     return  columns_.at(column).table();
@@ -115,9 +109,11 @@ std::string MetaDBTable::subTableNames () const
     }
 }
 
-void MetaDBTable::addSubTable (const std::string &local_key, const std::string &sub_table_name, const std::string &sub_table_key)
+void MetaDBTable::addSubTable (const std::string& local_key, const std::string& sub_table_name,
+                               const std::string& sub_table_key)
 {
-    loginf << "MetaDBTable: addSubTable: local key " << local_key << " sub table name " << sub_table_name << " key " << sub_table_key;
+    loginf << "MetaDBTable: addSubTable: local key " << local_key << " sub table name " << sub_table_name
+           << " key " << sub_table_key;
     assert (!hasSubTable(sub_table_name));
 
     std::string instance_id = "SubTableDefinition"+name_+sub_table_name+"0";
@@ -142,11 +138,22 @@ void MetaDBTable::removeSubTable (const std::string& name)
     updateColumns();
 }
 
-MetaDBTableWidget *MetaDBTable::widget ()
+void MetaDBTable::lock ()
+{
+    locked_ = true;
+
+    if (widget_)
+        widget_->lock();
+}
+
+MetaDBTableWidget* MetaDBTable::widget ()
 {
     if (!widget_)
     {
         widget_ = new MetaDBTableWidget (*this);
+
+        if (locked_)
+             widget_->lock();
     }
     return widget_;
 }

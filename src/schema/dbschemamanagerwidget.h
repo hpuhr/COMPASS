@@ -32,7 +32,7 @@ class DBSchemaManagerWidget : public QFrame
     Q_OBJECT
 
 public:
-    explicit DBSchemaManagerWidget(DBSchemaManager &manager, QWidget* parent = 0, Qt::WindowFlags f = 0);
+    explicit DBSchemaManagerWidget(DBSchemaManager &manager, QWidget* parent=0, Qt::WindowFlags f=0);
     virtual ~DBSchemaManagerWidget();
 
 public slots:
@@ -44,8 +44,11 @@ public slots:
     /// @brief Sets the schema
     void schemaSelectedSlot (const QString &value);
 
+public:
+    void lock ();
+
 protected:
-    DBSchemaManager &manager_;
+    DBSchemaManager& manager_;
 
     /// Current schema selection field
     QComboBox* schema_select_ {nullptr};
@@ -55,6 +58,8 @@ protected:
     QPushButton* lock_button_  {nullptr};
 
     QStackedWidget* schema_widgets_ {nullptr};
+
+    bool locked_ {false};
 
     void updateSchemas();
 

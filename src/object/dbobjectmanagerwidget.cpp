@@ -45,7 +45,7 @@
 using namespace Utils;
 
 DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager &object_manager)
-    : object_manager_(object_manager), schema_manager_(ATSDB::instance().schemaManager()), dbobjects_grid_ (nullptr), meta_variables_grid_(nullptr), unlocked_(false)
+    : object_manager_(object_manager), schema_manager_(ATSDB::instance().schemaManager())
 {
     unsigned int frame_width = FRAME_SIZE;
 
@@ -112,7 +112,7 @@ DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager &object_manager)
 
     setLayout (main_layout);
 
-    setDisabled(true);
+    lock();
 }
 
 DBObjectManagerWidget::~DBObjectManagerWidget()
@@ -122,10 +122,19 @@ DBObjectManagerWidget::~DBObjectManagerWidget()
     edit_dbo_widgets_.clear();
 }
 
-void DBObjectManagerWidget::databaseOpenedSlot ()
+void DBObjectManagerWidget::lock ()
 {
-    unlocked_=true;
+    setDisabled(true);
 
+    for (auto it : edit_dbo_buttons_)
+        it.first->setDisabled (true);
+
+    for (auto it : delete_dbo_buttons_)
+        it.first->setDisabled (true);
+}
+
+void DBObjectManagerWidget::unlock ()
+{
     setDisabled(false);
 
     for (auto it : edit_dbo_buttons_)
@@ -133,6 +142,11 @@ void DBObjectManagerWidget::databaseOpenedSlot ()
 
     for (auto it : delete_dbo_buttons_)
         it.first->setDisabled (false);
+}
+
+void DBObjectManagerWidget::databaseOpenedSlot ()
+{
+
 }
 
 
@@ -278,7 +292,7 @@ void DBObjectManagerWidget::updateDBOsSlot ()
         edit->setIconSize(UI_ICON_SIZE);
         edit->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
         edit->setFlat(UI_ICON_BUTTON_FLAT);
-        edit->setDisabled(!active || !unlocked_);
+        edit->setDisabled(!active || locked_);
         connect(edit, SIGNAL( clicked() ), this, SLOT( editDBOSlot() ));
         dbobjects_grid_->addWidget (edit, row, 3);
         edit_dbo_buttons_[edit] = it->second;
@@ -288,7 +302,7 @@ void DBObjectManagerWidget::updateDBOsSlot ()
         del->setIconSize(UI_ICON_SIZE);
         del->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
         del->setFlat(UI_ICON_BUTTON_FLAT);
-        del->setDisabled(!unlocked_);
+        del->setDisabled(locked_);
         connect(del, SIGNAL( clicked() ), this, SLOT( deleteDBOSlot() ));
         dbobjects_grid_->addWidget (del, row, 4);
         delete_dbo_buttons_[del] = it->second;

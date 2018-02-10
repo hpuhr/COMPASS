@@ -67,22 +67,26 @@ public:
     /// @brief Destructor
     virtual ~DBObjectManagerWidget();
 
+    void lock ();
+    void unlock ();
+
 private:
     DBObjectManager &object_manager_;
     DBSchemaManager &schema_manager_;
     /// Grid with all DBObjects
-    QGridLayout *dbobjects_grid_;
-    QGridLayout *meta_variables_grid_;
+    QGridLayout* dbobjects_grid_ {nullptr};
+    QGridLayout* meta_variables_grid_ {nullptr};
+
     /// Editing functionality unlocked flag
-    bool unlocked_;
+    bool locked_ {false};
 
     /// New DBO add button
     //QPushButton *new_button_;
 
     /// Container with DBO edit buttons
-    std::map <QPushButton *, DBObject *> edit_dbo_buttons_;
+    std::map <QPushButton*, DBObject*> edit_dbo_buttons_;
     /// Container with DBO edit buttons
-    std::map <QPushButton *, DBObject *> delete_dbo_buttons_;
+    std::map <QPushButton*, DBObject*> delete_dbo_buttons_;
 
     /// Container with already existing edit DBO widgets
     std::map <DBObject*, DBObjectWidget*> edit_dbo_widgets_;

@@ -323,6 +323,9 @@ DBObjectWidget *DBObject::widget ()
     if (!widget_)
     {
         widget_ = new DBObjectWidget (this, ATSDB::instance().schemaManager());
+
+        if (locked_)
+            widget_->lock();
     }
 
     assert (widget_);
@@ -345,6 +348,23 @@ DBOLabelDefinitionWidget* DBObject::labelDefinitionWidget()
     assert (label_definition_);
     return label_definition_->widget();
 }
+
+void DBObject::lock ()
+{
+    locked_ = true;
+
+    if (widget_)
+        widget_->lock();
+}
+
+void DBObject::unlock ()
+{
+    locked_ = false;
+
+    if (widget_)
+        widget_->unlock();
+}
+
 
 void DBObject::schemaChangedSlot ()
 {

@@ -35,13 +35,14 @@ class DBSchemaManagerWidget;
 class DBSchemaManager : public QObject, public Configurable
 {
     Q_OBJECT
+
 signals:
-    void schemaChangedSignal ();
-    void schemaLockedSignal ();
+    void schemaChangedSignal();
+    void schemaLockedSignal();
 
 public:
     /// @brief Constructor
-    DBSchemaManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb);
+    DBSchemaManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb);
 
     /// @brief Destructor
     virtual ~DBSchemaManager();
@@ -49,13 +50,13 @@ public:
     /// @brief Returns flag indicating if current schema is defined and exists
     bool hasCurrentSchema ();
     /// @brief Returns name of the current schema
-    const std::string &getCurrentSchemaName ();
+    const std::string& getCurrentSchemaName ();
     /// @brief Returns the current DBSchema
-    DBSchema &getCurrentSchema ();
+    DBSchema& getCurrentSchema ();
     /// @brief Returns the DBSchema with a given name
-    DBSchema &getSchema (const std::string &name);
+    DBSchema& getSchema (const std::string& name);
     /// @brief Returns if DBSchema with a given name exists
-    bool hasSchema (const std::string &name);
+    bool hasSchema (const std::string& name);
     void deleteCurrentSchema ();
 
     /// @brief Returns container with all schemas
@@ -66,31 +67,29 @@ public:
     /// @brief Sets the current schema
 
     void setCurrentSchema (const std::string &current_schema);
-    bool isCurrentSchemaLocked () { return schema_locked_; }
-    void lockCurrentSchema ();
     /// @brief Adds an empty schema with a given name
-    void addEmptySchema (const std::string &name);
+    void addEmptySchema (const std::string& name);
     /// @brief Adds an RDL schema with a given name
     //void addRDLSchema (std::string name);
 
-    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
+    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
 
-    DBSchemaManagerWidget *widget();
+    DBSchemaManagerWidget* widget();
+
+    void lock ();
 
 protected:
     /// Name of current DBSchema
     std::string current_schema_;
-    bool schema_locked_ {false};
+    bool locked_ {false};
 
     /// Container with all defined schemas (schema name -> DBSchema)
     std::map <std::string, DBSchema*> schemas_;
 
-    DBSchemaManagerWidget *widget_;
+    DBSchemaManagerWidget* widget_ {nullptr};
 
     //void loadDBSchema (); // outdated method
     virtual void checkSubConfigurables ();
-
-
 };
 
 #endif /* DBSCHEMAMANAGER_H_ */

@@ -206,6 +206,9 @@ public:
 
     std::shared_ptr<Buffer> data () { return data_; }
 
+    void lock ();
+    void unlock ();
+
 protected:
     /// DBO name
     std::string name_;
@@ -223,6 +226,8 @@ protected:
     std::vector <std::shared_ptr <FinalizeDBOReadJob>> finalize_jobs_;
 
     std::shared_ptr<Buffer> data_;
+
+    bool locked_ {false};
 
     /// Container with all DBOSchemaMetaTableDefinitions
     std::vector <DBOSchemaMetaTableDefinition*> meta_table_definitions_;

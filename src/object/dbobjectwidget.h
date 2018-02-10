@@ -90,40 +90,43 @@ public slots:
 
 public:
     /// @brief Constructor
-    DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager, QWidget* parent = 0, Qt::WindowFlags f = 0);
+    DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager, QWidget* parent=0, Qt::WindowFlags f=0);
     /// @brief Destructor
     virtual ~DBObjectWidget();
 
+    void lock ();
+    void unlock ();
+
 private:
     /// @brief DBObject to be managed
-    DBObject* object_;
-    DBSchemaManager &schema_manager_;
+    DBObject* object_ {nullptr};
+    DBSchemaManager& schema_manager_;
 
     /// @brief DBO name
-    QLineEdit* name_edit_;
+    QLineEdit* name_edit_ {nullptr};
     /// @brief DBO info
-    QLineEdit* info_edit_;
+    QLineEdit* info_edit_ {nullptr};
 
     /// @brief Grid with all data sources
-    QGridLayout* ds_grid_;
+    QGridLayout* ds_grid_ {nullptr};
     /// @brief Container with data sources edit buttons
     std::map <QPushButton*, DBODataSourceDefinition*> ds_grid_edit_buttons_;
     /// @brief Container with data sources delete buttons
     std::map <QPushButton*, DBODataSourceDefinition*> ds_grid_delete_buttons_;
 
     /// @brief Add new data source schema selection
-    QComboBox* ds_schema_box_;
+    QComboBox* ds_schema_box_ {nullptr};
 
     /// @brief grid with all meta tables per schema
-    QGridLayout* meta_table_grid_;
+    QGridLayout* meta_table_grid_ {nullptr};
 
     /// @brief Add meta table for schema schema selection
-    QComboBox* new_meta_schema_box_;
+    QComboBox* new_meta_schema_box_ {nullptr};
     /// @brief Add meta table for schema meta table selection
-    QComboBox* new_meta_box_;
+    QComboBox* new_meta_box_ {nullptr};
 
     /// @brief Grid with all DBOVariables
-    QGridLayout* dbovars_grid_;
+    QGridLayout* dbovars_grid_ {nullptr};
 
     /// @brief Container with DBOVariable edit buttons
     std::map <QPushButton*, DBOVariable*> dbo_vars_grid_edit_buttons_;
@@ -131,12 +134,14 @@ private:
     std::map <QPushButton*, DBOVariable*> dbo_vars_grid_delete_buttons_;
 
     /// @brief New DBOVariable name edit field
-    QLineEdit* new_var_name_edit_;
+    QLineEdit* new_var_name_edit_ {nullptr};
 
     /// @brief Add all variables schema box
-    QComboBox* all_schemas_box_;
+    QComboBox* all_schemas_box_ {nullptr};
     /// @brief Add all variables button
-    QPushButton* add_all_button_;
+    QPushButton* add_all_button_ {nullptr};
+
+    bool locked_ {false};
 
     /// @brief Updates a schema selection box
     void updateSchemaSelectionBox (QComboBox* box);
