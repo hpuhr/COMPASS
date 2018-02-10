@@ -114,6 +114,8 @@ public:
     void lock ();
     void unlock ();
 
+    void quitLoading ();
+
 protected:
     bool use_filters_ {false};
 

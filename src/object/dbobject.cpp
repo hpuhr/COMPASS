@@ -424,6 +424,14 @@ void DBObject::load (DBOVariableSet &read_set, bool use_filters, bool use_order,
     JobManager::instance().addDBJob(read_job_);
 }
 
+void DBObject::quitLoading ()
+{
+    if (read_job_)
+    {
+        JobManager::instance().cancelJob(read_job_);
+    }
+}
+
 std::map<int, std::string> DBObject::loadLabelData (std::vector<int> rec_nums)
 {
     std::string custom_filter_clause;

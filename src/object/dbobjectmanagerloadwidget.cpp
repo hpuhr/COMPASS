@@ -36,7 +36,7 @@ using namespace Utils::String;
 
 DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager &object_manager)
     : object_manager_(object_manager), info_layout_(nullptr), filters_check_(nullptr), order_check_(nullptr),order_ascending_check_(nullptr),
-      order_variable_widget_(nullptr), limit_check_(nullptr), limit_min_edit_ (nullptr), limit_max_edit_(nullptr), load_all_button_(nullptr)
+      order_variable_widget_(nullptr), limit_check_(nullptr), limit_min_edit_ (nullptr), limit_max_edit_(nullptr), load_button_(nullptr)
 {
     unsigned int frame_width = FRAME_SIZE;
 
@@ -131,9 +131,9 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager &object_man
     main_layout->addStretch();
 
     // load
-    load_all_button_ = new QPushButton ("Load");
-    connect (load_all_button_, SIGNAL(clicked()), this, SLOT(loadAllSlot()));
-    main_layout->addWidget(load_all_button_);
+    load_button_ = new QPushButton ("Load");
+    connect (load_button_, SIGNAL(clicked()), this, SLOT(loadButtonSlot()));
+    main_layout->addWidget(load_button_);
 
     setLayout (main_layout);
 }
@@ -214,10 +214,30 @@ void DBObjectManagerLoadWidget::limitMaxChanged()
     object_manager_.limitMax(max);
 }
 
-void DBObjectManagerLoadWidget::loadAllSlot ()
+void DBObjectManagerLoadWidget::loadButtonSlot ()
 {
-    loginf << "DBObjectManagerLoadWidget: loadAllSlot";
+    loginf << "DBObjectManagerLoadWidget: loadButtonSlot";
+
+    assert (load_button_);
+
+    if (loading_)
+    {
+        load_button_->setDisabled (true);
+        object_manager_.quitLoading ();
+        return;
+    }
+
+    loading_ = true;
+    load_button_->setText("Stop");
+
     object_manager_.loadSlot();
+}
+
+void DBObjectManagerLoadWidget::loadingDone ()
+{
+    loading_ = false;
+    load_button_->setText("Load");
+    load_button_->setDisabled (false);
 }
 
 void DBObjectManagerLoadWidget::updateSlot ()

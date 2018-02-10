@@ -71,8 +71,8 @@ public:
     void unlock ();
 
 private:
-    DBObjectManager &object_manager_;
-    DBSchemaManager &schema_manager_;
+    DBObjectManager& object_manager_;
+    DBSchemaManager& schema_manager_;
     /// Grid with all DBObjects
     QGridLayout* dbobjects_grid_ {nullptr};
     QGridLayout* meta_variables_grid_ {nullptr};

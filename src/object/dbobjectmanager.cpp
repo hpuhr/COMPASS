@@ -321,6 +321,9 @@ void DBObjectManager::unlock ()
 void DBObjectManager::loadSlot ()
 {
     logdbg << "DBObjectManager: loadSlot";
+
+    bool load_job_created = false;
+
     for (auto object : objects())
     {
         if (object.second->loadable() && object.second->loadingWanted())
@@ -344,9 +347,25 @@ void DBObjectManager::loadSlot ()
             // load (DBOVariableSet &read_set, bool use_filters, bool use_order, DBOVariable *order_variable,
             // bool use_order_ascending, const std::string &limit_str="")
             object.second->load(read_set, use_filters_, use_order_, variable, use_order_ascending_, limit_str);
+
+            load_job_created = true;
         }
     }
     emit loadingStartedSignal();
+
+    if (!load_job_created)
+    {
+        if (load_widget_)
+            load_widget_->loadingDone();
+    }
+}
+
+void DBObjectManager::quitLoading ()
+{
+    loginf << "DBObjectManager: quitLoading";
+
+    for (auto object : objects())
+        object.second->quitLoading();
 }
 
 void DBObjectManager::updateSchemaInformationSlot ()
@@ -375,6 +394,9 @@ void DBObjectManager::loadingDoneSlot (DBObject& object)
     {
         loginf << "DBObjectManager: loadingDoneSlot: all done";
         emit allLoadingDoneSignal();
+
+        if (load_widget_)
+            load_widget_->loadingDone();
     }
     else
         logdbg << "DBObjectManager: loadingDoneSlot: not done";

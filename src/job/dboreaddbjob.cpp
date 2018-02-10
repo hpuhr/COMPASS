@@ -40,6 +40,12 @@ void DBOReadDBJob::run ()
     logdbg << "DBOReadDBJob: execute: start";
     started_ = true;
 
+    if (obsolete_)
+    {
+        done_=true;
+        return;
+    }
+
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
     db_interface_.prepareRead (dbobject_, read_list_, custom_filter_clause_, filtered_variables_, use_order_, order_variable_, use_order_ascending_, limit_str_);
@@ -56,9 +62,7 @@ void DBOReadDBJob::run ()
         if (!buffer)
         {
             logwrn << "DBOReadDBJob: execute: got null buffer";
-            db_interface_.finalizeReadStatement(dbobject_);
-            done_=true;
-            return;
+            break;
         }
         else
         {

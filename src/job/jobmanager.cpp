@@ -17,6 +17,7 @@
 
 #include <qtimer.h>
 #include <QThreadPool>
+#include <QCoreApplication>
 
 #include "jobmanager.h"
 #include "jobmanagerwidget.h"
@@ -76,7 +77,11 @@ void JobManager::cancelJob (std::shared_ptr<Job> job)
     job->setObsolete();
 
     while (!job->done()) // wait for finish
+    {
+        while (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         msleep(1);
+    }
 
     if (find(jobs_.begin(), jobs_.end(), job) != jobs_.end())
         jobs_.erase(find(jobs_.begin(), jobs_.end(), job));
@@ -91,6 +96,8 @@ void JobManager::cancelJob (std::shared_ptr<Job> job)
     }
 
     mutex_.unlock();
+
+    job->emitObsolete();
 
     updateWidget();
 }
@@ -238,6 +245,8 @@ void JobManager::shutdown ()
     while (!stopped_)
     {
         logdbg  << "JobManager: shutdown: waiting";
+        while (QCoreApplication::hasPendingEvents())
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         QThread::currentThread()->msleep(update_time_);
     }
 
