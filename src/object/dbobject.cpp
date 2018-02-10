@@ -428,7 +428,7 @@ void DBObject::quitLoading ()
 {
     if (read_job_)
     {
-        JobManager::instance().cancelJob(read_job_);
+        read_job_->setObsolete();
     }
 }
 

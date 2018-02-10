@@ -37,7 +37,7 @@ DBOReadDBJob::~DBOReadDBJob()
 
 void DBOReadDBJob::run ()
 {
-    logdbg << "DBOReadDBJob: execute: start";
+    loginf << "DBOReadDBJob: execute: " << dbobject_.name() << ": start";
     started_ = true;
 
     if (obsolete_)
@@ -57,16 +57,20 @@ void DBOReadDBJob::run ()
         std::shared_ptr<Buffer> buffer = db_interface_.readDataChunk(dbobject_, activate_key_search_);
         cnt++;
 
+        if (obsolete_)
+            break;
+
         assert (buffer->dboName() == dbobject_.name());
 
         if (!buffer)
         {
-            logwrn << "DBOReadDBJob: execute: got null buffer";
+            logwrn << "DBOReadDBJob: execute: " << dbobject_.name() << ": got null buffer";
             break;
         }
         else
         {
-            logdbg << "DBOReadDBJob: execute: intermediate signal, #buffers " << cnt << " last one " << buffer->lastOne();
+            loginf << "DBOReadDBJob: execute: " << dbobject_.name() << ": intermediate signal, #buffers "
+                   << cnt << " last one " << buffer->lastOne();
             row_count += buffer->size();
             emit intermediateSignal(buffer);
         }
@@ -75,18 +79,19 @@ void DBOReadDBJob::run ()
             break;
     }
 
-    logdbg << "DBOReadDBJob: execute: finalizing statement";
+    loginf << "DBOReadDBJob: execute: " << dbobject_.name() << ": finalizing statement";
     db_interface_.finalizeReadStatement(dbobject_);
 
     stop_time_ = boost::posix_time::microsec_clock::local_time();
     boost::posix_time::time_duration diff = stop_time_ - start_time_;
 
     if (diff.total_seconds() > 0)
-        loginf  << "DBOReadDBJob: run: done after " << diff << ", " << 1000.0*row_count/diff.total_milliseconds() << " el/s";
+        loginf << "DBOReadDBJob: execute: " << dbobject_.name() << ": done after " << diff << ", "
+               << 1000.0*row_count/diff.total_milliseconds() << " el/s";
 
 
     done_=true;
 
-    logdbg << "DBOReadDBJob: execute: done";
+    loginf << "DBOReadDBJob: execute: " << dbobject_.name() << ": done";
     return;
 }

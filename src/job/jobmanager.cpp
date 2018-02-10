@@ -78,9 +78,9 @@ void JobManager::cancelJob (std::shared_ptr<Job> job)
 
     while (!job->done()) // wait for finish
     {
-        while (QCoreApplication::hasPendingEvents())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-        msleep(1);
+        loginf << "JobManager: cancelJob: waiting to finish";
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        msleep(100);
     }
 
     if (find(jobs_.begin(), jobs_.end(), job) != jobs_.end())
@@ -123,76 +123,88 @@ void JobManager::run()
         mutex_.lock();
 
         bool changed=false;
-        bool last_one=false;
+        bool really_update_widget=false;
 
-        if (jobs_.size() > 0 || active_db_job_ || queued_db_jobs_.size() > 0)
+        while (jobs_.size() > 0)
         {
-            while (jobs_.size() > 0)
-            {
-                std::shared_ptr<Job> current = jobs_.front();
-                assert (current);
+            // process normal jobs
+            std::shared_ptr<Job> current = jobs_.front();
+            assert (current);
 
-                if( !current->obsolete() && !current->done() )
-                    break;
-
-                jobs_.pop_front();
-                changed = true;
-                logdbg << "JobManager: run: flushed job "+current->name();
-                if(current->obsolete())
-                {
-                    logdbg << "JobManager: run: flushing obsolete job";
-                    current->emitObsolete();
-                    continue;
-                }
-
-                logdbg << "JobManager: run: flushing done job";
-                current->emitDone();
-                logdbg << "JobManager: run: done job emitted "+current->name();
-
-                last_one = jobs_.size() == 0;
-            }
-
-            if (active_db_job_)
-            {
-                if(active_db_job_->obsolete())
-                {
-                    logdbg << "JobManager: run: flushing obsolete job";
-                    active_db_job_->emitObsolete();
-                    active_db_job_ = nullptr;
-                    changed = true;
-                }
-                else if (active_db_job_->done())
-                {
-                    logdbg << "JobManager: run: flushing obsolete job";
-                    active_db_job_->emitDone();
-                    active_db_job_ = nullptr;
-                    changed = true;
-                    last_one = true;
-                }
-            }
-
-            while (!active_db_job_ && queued_db_jobs_.size() > 0)
-            {
-                std::shared_ptr<Job> current = queued_db_jobs_.front();
-                queued_db_jobs_.pop_front();
-
-                assert (current);
-                assert (!current->done());
-
-                if (current->obsolete())
-                    continue;
-
-                logdbg << "JobManager: run: starting dbjob " << current->name();
-                active_db_job_ = current;
-
-                QThreadPool::globalInstance()->start(active_db_job_.get());
-                changed = true;
+            if (!current->obsolete() && !current->done())
                 break;
+
+            jobs_.pop_front();
+
+            changed = true;
+            logdbg << "JobManager: run: flushed job "+current->name();
+            if(current->obsolete())
+            {
+                logdbg << "JobManager: run: flushing obsolete job";
+                current->emitObsolete();
+                continue;
             }
 
-            if (changed && !active_db_job_ && queued_db_jobs_.size() == 0)
-                emit databaseIdle();
+            logdbg << "JobManager: run: flushing done job";
+            current->emitDone();
+            logdbg << "JobManager: run: done job emitted "+current->name();
+
+            really_update_widget = jobs_.size() == 0;
         }
+
+        if (active_db_job_)
+        {
+            // see if active db job done or obsolete
+            if(active_db_job_->obsolete())
+            {
+                logdbg << "JobManager: run: flushing db obsolete job";
+
+                while (!active_db_job_->done()) // wait for finish
+                {
+                    logdbg << "JobManager: run: waiting to obsolete finish";
+                    QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                    msleep(update_time_);
+                }
+
+                active_db_job_->emitObsolete();
+                active_db_job_ = nullptr;
+                changed = true;
+            }
+            else if (active_db_job_->done())
+            {
+                logdbg << "JobManager: run: flushing db done job";
+                active_db_job_->emitDone();
+                active_db_job_ = nullptr;
+                changed = true;
+                really_update_widget = true;
+            }
+        }
+
+        while (!active_db_job_ && queued_db_jobs_.size() > 0)
+        {
+            // start a new one if needed
+            std::shared_ptr<Job> current = queued_db_jobs_.front();
+            queued_db_jobs_.pop_front();
+
+            assert (current);
+            assert (!current->done());
+
+            if (current->obsolete())
+            {
+                current->emitObsolete();
+                continue;
+            }
+
+            logdbg << "JobManager: run: starting dbjob " << current->name();
+            active_db_job_ = current;
+
+            QThreadPool::globalInstance()->start(active_db_job_.get());
+            changed = true;
+            break;
+        }
+
+        if (changed && !active_db_job_ && queued_db_jobs_.size() == 0)
+            emit databaseIdle();
 
         mutex_.unlock();
 
@@ -203,8 +215,9 @@ void JobManager::run()
         }
 
         if (changed)
-            updateWidget(last_one);
+            updateWidget(really_update_widget);
 
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         msleep(update_time_);
     }
     stopped_=true;
