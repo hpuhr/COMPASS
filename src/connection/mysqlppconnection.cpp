@@ -210,6 +210,7 @@ void MySQLppConnection::endBindTransaction ()
 
 void MySQLppConnection::finalizeBindStatement ()
 {
+    prepared_query_.reset();
     query_used_=false;
 
     if (info_widget_)

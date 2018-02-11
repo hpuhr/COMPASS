@@ -34,7 +34,8 @@
 using namespace Utils::String;
 
 
-RadarPlotPositionCalculatorTaskWidget::RadarPlotPositionCalculatorTaskWidget(RadarPlotPositionCalculatorTask& task, QWidget * parent, Qt::WindowFlags f)
+RadarPlotPositionCalculatorTaskWidget::RadarPlotPositionCalculatorTaskWidget(RadarPlotPositionCalculatorTask& task,
+                                                                             QWidget* parent, Qt::WindowFlags f)
 : QWidget (parent, f), task_(task)
 {
     setMinimumSize(QSize(800, 600));
@@ -104,37 +105,12 @@ RadarPlotPositionCalculatorTaskWidget::RadarPlotPositionCalculatorTaskWidget(Rad
     connect (longitude_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
     grid->addWidget (longitude_box_, row_cnt, 1);
 
-    row_cnt++;
-    grid->addWidget (new QLabel ("Number of Plots"), row_cnt, 0);
-
-    count_label_ = new QLabel ("Unknown");
-    grid->addWidget (count_label_, row_cnt, 1);
-
-    row_cnt++;
-    grid->addWidget (new QLabel ("Number of Loaded Plots"), row_cnt, 0);
-
-    load_status_label_ = new QLabel ("0");
-    grid->addWidget (load_status_label_, row_cnt, 1);
-
-    row_cnt++;
-    grid->addWidget (new QLabel ("Number of Calculated Positions"), row_cnt, 0);
-
-    calculated_status_label_ = new QLabel ("0");
-    grid->addWidget (calculated_status_label_, row_cnt, 1);
-
-    row_cnt++;
-    grid->addWidget (new QLabel ("Number of Updated Plots"), row_cnt, 0);
-
-    written_status_label_ = new QLabel ("0");
-    grid->addWidget (written_status_label_, row_cnt, 1);
-
     main_layout->addLayout(grid);
+    //main_layout->addStretch();
 
     QPushButton *calc_button = new QPushButton ("Calculate");
     connect(calc_button, SIGNAL( clicked() ), this, SLOT( calculateSlot() ));
     main_layout->addWidget(calc_button);
-
-    main_layout->addStretch();
 
     setLayout (main_layout);
 

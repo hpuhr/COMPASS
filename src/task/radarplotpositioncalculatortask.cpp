@@ -31,10 +31,16 @@
 #include "projectionmanager.h"
 #include "updatebufferdbjob.h"
 #include "jobmanager.h"
+#include "stringconv.h"
+
+#include <QCoreApplication>
+#include <QMessageBox>
 
 using namespace Utils;
 
-RadarPlotPositionCalculatorTask::RadarPlotPositionCalculatorTask(const std::string &class_id, const std::string &instance_id, TaskManager* task_manager)
+RadarPlotPositionCalculatorTask::RadarPlotPositionCalculatorTask(const std::string& class_id,
+                                                                 const std::string& instance_id,
+                                                                 TaskManager* task_manager)
     : Configurable (class_id, instance_id, task_manager)
 {
     qRegisterMetaType<std::shared_ptr<Buffer>>("std::shared_ptr<Buffer>");
@@ -75,8 +81,10 @@ std::string RadarPlotPositionCalculatorTask::dbObjectStr() const
     return db_object_str_;
 }
 
-void RadarPlotPositionCalculatorTask::dbObjectStr(const std::string &db_object_str)
+void RadarPlotPositionCalculatorTask::dbObjectStr(const std::string& db_object_str)
 {
+    loginf << "RadarPlotPositionCalculatorTask: dbObjectStr: " << db_object_str;
+
     db_object_str_ = db_object_str;
 
     assert (ATSDB::instance().objectManager().existsObject(db_object_str_));
@@ -88,14 +96,19 @@ std::string RadarPlotPositionCalculatorTask::keyVarStr() const
     return key_var_str_;
 }
 
-void RadarPlotPositionCalculatorTask::keyVarStr(const std::string &key_var_str)
+void RadarPlotPositionCalculatorTask::keyVarStr(const std::string& key_var_str)
 {
+    loginf << "RadarPlotPositionCalculatorTask: keyVarStr: " << key_var_str;
+
     key_var_str_ = key_var_str;
-    if (db_object_)
+
+    if (db_object_ && key_var_str_.size())
     {
         assert (db_object_->hasVariable(key_var_str_));
         key_var_ = &db_object_->variable(key_var_str_);
     }
+    else
+        key_var_ = nullptr;
 }
 
 std::string RadarPlotPositionCalculatorTask::datasourceVarStr() const
@@ -103,14 +116,19 @@ std::string RadarPlotPositionCalculatorTask::datasourceVarStr() const
     return datasource_var_str_;
 }
 
-void RadarPlotPositionCalculatorTask::datasourceVarStr(const std::string &datasource_var_str)
+void RadarPlotPositionCalculatorTask::datasourceVarStr(const std::string& datasource_var_str)
 {
+    loginf << "RadarPlotPositionCalculatorTask: datasourceVarStr: " << datasource_var_str;
+
     datasource_var_str_ = datasource_var_str;
-    if (db_object_)
+
+    if (db_object_ && datasource_var_str_.size())
     {
         assert (db_object_->hasVariable(datasource_var_str_));
         datasource_var_ = &db_object_->variable(datasource_var_str_);
     }
+    else
+        datasource_var_ = nullptr;
 }
 
 std::string RadarPlotPositionCalculatorTask::rangeVarStr() const
@@ -118,14 +136,19 @@ std::string RadarPlotPositionCalculatorTask::rangeVarStr() const
     return range_var_str_;
 }
 
-void RadarPlotPositionCalculatorTask::rangeVarStr(const std::string &range_var_str)
+void RadarPlotPositionCalculatorTask::rangeVarStr(const std::string& range_var_str)
 {
+    loginf << "RadarPlotPositionCalculatorTask: rangeVarStr: " << range_var_str;
+
     range_var_str_ = range_var_str;
-    if (db_object_)
+
+    if (db_object_ && range_var_str_.size())
     {
         assert (db_object_->hasVariable(range_var_str_));
         range_var_ = &db_object_->variable(range_var_str_);
     }
+    else
+        range_var_ = nullptr;
 }
 
 std::string RadarPlotPositionCalculatorTask::azimuthVarStr() const
@@ -133,14 +156,19 @@ std::string RadarPlotPositionCalculatorTask::azimuthVarStr() const
     return azimuth_var_str_;
 }
 
-void RadarPlotPositionCalculatorTask::azimuthVarStr(const std::string &azimuth_var_str)
+void RadarPlotPositionCalculatorTask::azimuthVarStr(const std::string& azimuth_var_str)
 {
+    loginf << "RadarPlotPositionCalculatorTask: azimuthVarStr: " << azimuth_var_str;
+
     azimuth_var_str_ = azimuth_var_str;
-    if (db_object_)
+
+    if (db_object_ && azimuth_var_str_.size())
     {
         assert (db_object_->hasVariable(azimuth_var_str_));
         azimuth_var_ = &db_object_->variable(azimuth_var_str_);
     }
+    else
+        azimuth_var_ = nullptr;
 }
 
 std::string RadarPlotPositionCalculatorTask::altitudeVarStr() const
@@ -148,14 +176,19 @@ std::string RadarPlotPositionCalculatorTask::altitudeVarStr() const
     return altitude_var_str_;
 }
 
-void RadarPlotPositionCalculatorTask::altitudeVarStr(const std::string &altitude_var_str)
+void RadarPlotPositionCalculatorTask::altitudeVarStr(const std::string& altitude_var_str)
 {
+    loginf << "RadarPlotPositionCalculatorTask: altitudeVarStr: " << altitude_var_str;
+
     altitude_var_str_ = altitude_var_str;
-    if (db_object_)
+
+    if (db_object_ && altitude_var_str_.size())
     {
         assert (db_object_->hasVariable(altitude_var_str_));
         altitude_var_ = &db_object_->variable(altitude_var_str_);
     }
+    else
+        altitude_var_ = nullptr;
 }
 
 std::string RadarPlotPositionCalculatorTask::latitudeVarStr() const
@@ -163,14 +196,19 @@ std::string RadarPlotPositionCalculatorTask::latitudeVarStr() const
     return latitude_var_str_;
 }
 
-void RadarPlotPositionCalculatorTask::latitudeVarStr(const std::string &latitude_var_str)
+void RadarPlotPositionCalculatorTask::latitudeVarStr(const std::string& latitude_var_str)
 {
+    loginf << "RadarPlotPositionCalculatorTask: latitudeVarStr: " << latitude_var_str;
+
     latitude_var_str_ = latitude_var_str;
-    if (db_object_)
+
+    if (db_object_ && latitude_var_str_.size())
     {
         assert (db_object_->hasVariable(latitude_var_str_));
         latitude_var_ = &db_object_->variable(latitude_var_str_);
     }
+    else
+        latitude_var_ = nullptr;
 }
 
 std::string RadarPlotPositionCalculatorTask::longitudeVarStr() const
@@ -178,17 +216,22 @@ std::string RadarPlotPositionCalculatorTask::longitudeVarStr() const
     return longitude_var_str_;
 }
 
-void RadarPlotPositionCalculatorTask::longitudeVarStr(const std::string &longitude_var_str)
+void RadarPlotPositionCalculatorTask::longitudeVarStr(const std::string& longitude_var_str)
 {
+    loginf << "RadarPlotPositionCalculatorTask: longitudeVarStr: " << longitude_var_str;
+
     longitude_var_str_ = longitude_var_str;
-    if (db_object_)
+
+    if (db_object_ && longitude_var_str_.size())
     {
         assert (db_object_->hasVariable(longitude_var_str_));
         longitude_var_ = &db_object_->variable(longitude_var_str_);
     }
+    else
+        longitude_var_ = nullptr;
 }
 
-void RadarPlotPositionCalculatorTask::checkAndSetVariable (std::string &name_str, DBOVariable** var)
+void RadarPlotPositionCalculatorTask::checkAndSetVariable (std::string& name_str, DBOVariable** var)
 {
     if (db_object_)
     {
@@ -214,6 +257,15 @@ void RadarPlotPositionCalculatorTask::calculate ()
     loginf << "RadarPlotPositionCalculatorTask: calculate: start";
 
     calculating_=true;
+
+    std::string msg = "Loading object data.";
+    msg_box_ = new QMessageBox;
+    assert (msg_box_);
+    msg_box_->setText(msg.c_str());
+    msg_box_->setStandardButtons(QMessageBox::NoButton);
+    msg_box_->show();
+
+    QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
     num_loaded_=0;
 
@@ -243,6 +295,8 @@ void RadarPlotPositionCalculatorTask::calculate ()
 
     assert (db_object_);
 
+    target_report_count_ = db_object_->count();
+
     assert (key_var_);
     assert (datasource_var_);
     assert (range_var_);
@@ -262,22 +316,36 @@ void RadarPlotPositionCalculatorTask::calculate ()
     read_set.add(*latitude_var_);
     read_set.add(*longitude_var_);
 
-    //connect (db_object_, SIGNAL(newDataSignal(DBObject&)), this, SLOT(newDataSlot(DBObject&)));
+    connect (db_object_, SIGNAL(newDataSignal(DBObject&)), this, SLOT(newDataSlot(DBObject&)));
     connect (db_object_, SIGNAL(loadingDoneSignal(DBObject&)), this, SLOT(loadingDoneSlot(DBObject&)));
 
     db_object_->load (read_set, false, false, nullptr, false); //"0,100000"
-
-    //ATSDB::getInstance().startReading (this, DBO_PLOTS, read_list, "DETECTION_TYPE!=0", 0);
 }
 
-//void RadarPlotPositionCalculatorTask::newDataSlot (DBObject &object)
-//{
-//    loginf << "RadarPlotPositionCalculatorTask: newDataSlot";
-//}
+void RadarPlotPositionCalculatorTask::newDataSlot (DBObject &object)
+{
+    if (target_report_count_ != 0)
+    {
+        assert (msg_box_);
+        size_t loaded_cnt = object.loadedCount();
+
+        float done_percent = 100.0*loaded_cnt/target_report_count_;
+        std::string msg = "Loading object data: " + String::doubleToStringPrecision(done_percent, 2) + "%";
+        msg_box_->setText(msg.c_str());
+
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+    }
+}
 
 void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject &object)
 {
     loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: starting calculation";
+
+    if (calculated_) // TODO: done signal comes twice?
+        return;
+
+    disconnect (db_object_, SIGNAL(newDataSignal(DBObject&)), this, SLOT(newDataSlot(DBObject&)));
+    disconnect (db_object_, SIGNAL(loadingDoneSignal(DBObject&)), this, SLOT(loadingDoneSlot(DBObject&)));
 
     //
     //    std::pair<unsigned char, unsigned char> sac_sic_key;
@@ -338,9 +406,22 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject &object)
     double lat, lon;
     unsigned int update_cnt=0;
 
+    assert (msg_box_);
+    float done_percent;
+    std::string msg;
+
     loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: writing update_buffer";
     for (unsigned int cnt=0; cnt < read_size; cnt++)
     {
+        if (cnt % 50000 == 0 && target_report_count_ != 0)
+        {
+            done_percent = 100.0*cnt/target_report_count_;
+            msg = "Processing object data: " + String::doubleToStringPrecision(done_percent, 2) + "%";
+            msg_box_->setText(msg.c_str());
+
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        }
+
         if (read_buffer->getInt(key_var_str_).isNone(cnt))
         {
             logerr << "RadarPlotPositionCalculatorTask: loadingDoneSlot: key null";
@@ -408,12 +489,18 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject &object)
 
     loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: update_buffer size " << update_buffer->size();
 
-    UpdateBufferDBJob *job = new UpdateBufferDBJob(ATSDB::instance().interface(), object, *key_var_, update_buffer);
+    msg_box_->close();
+    delete msg_box_;
+    msg_box_ = nullptr;
+
+    UpdateBufferDBJob *job = new UpdateBufferDBJob(ATSDB::instance().interface(), object, *key_var_, update_buffer,
+                                                   true);
     job_ptr_ = std::shared_ptr<UpdateBufferDBJob> (job);
     connect (job, SIGNAL(doneSignal()), this, SLOT(updateDoneSlot()), Qt::QueuedConnection);
 
     JobManager::instance().addDBJob(job_ptr_);
 
+    calculated_ = true;
     loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: end";
 }
 
@@ -422,6 +509,16 @@ void RadarPlotPositionCalculatorTask::updateDoneSlot ()
     loginf << "RadarPlotPositionCalculatorTask: updateDoneSlot";
 
     job_ptr_ = nullptr;
+    db_object_->clearData();
+
+    msg_box_ = new QMessageBox;
+    assert (msg_box_);
+    msg_box_->setText("Plot position calculation successfull.\nIt is recommended to force a post-processing step now.");
+    msg_box_->setStandardButtons(QMessageBox::Ok);
+    msg_box_->exec();
+
+    delete msg_box_;
+    msg_box_ = nullptr;
 }
 
 bool RadarPlotPositionCalculatorTask::isCalculating ()

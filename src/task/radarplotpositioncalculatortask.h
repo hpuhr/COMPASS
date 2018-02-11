@@ -31,17 +31,20 @@ class RadarPlotPositionCalculatorTaskWidget;
 class TaskManager;
 class UpdateBufferDBJob;
 
+class QMessageBox;
+
 class RadarPlotPositionCalculatorTask : public QObject, public Configurable
 {
     Q_OBJECT
 
 public slots:
     //void newDataSlot (DBObject &object);
+    void newDataSlot (DBObject &object);
     void loadingDoneSlot (DBObject &object);
     void updateDoneSlot ();
 
 public:
-    RadarPlotPositionCalculatorTask(const std::string &class_id, const std::string &instance_id, TaskManager* task_manager);
+    RadarPlotPositionCalculatorTask(const std::string& class_id, const std::string& instance_id, TaskManager* task_manager);
     virtual ~RadarPlotPositionCalculatorTask();
 
     void calculate ();
@@ -52,28 +55,28 @@ public:
     RadarPlotPositionCalculatorTaskWidget* widget();
 
     std::string dbObjectStr() const;
-    void dbObjectStr(const std::string &db_object_str);
+    void dbObjectStr(const std::string& db_object_str);
 
     std::string keyVarStr() const;
-    void keyVarStr(const std::string &key_var_str);
+    void keyVarStr(const std::string& key_var_str);
 
     std::string datasourceVarStr() const;
-    void datasourceVarStr(const std::string &datasource_var_str);
+    void datasourceVarStr(const std::string& datasource_var_str);
 
     std::string rangeVarStr() const;
-    void rangeVarStr(const std::string &range_var_str);
+    void rangeVarStr(const std::string& range_var_str);
 
     std::string azimuthVarStr() const;
-    void azimuthVarStr(const std::string &azimuth_var_str);
+    void azimuthVarStr(const std::string& azimuth_var_str);
 
     std::string altitudeVarStr() const;
-    void altitudeVarStr(const std::string &altitude_var_str);
+    void altitudeVarStr(const std::string& altitude_var_str);
 
     std::string latitudeVarStr() const;
-    void latitudeVarStr(const std::string &latitude_var_str);
+    void latitudeVarStr(const std::string& latitude_var_str);
 
     std::string longitudeVarStr() const;
-    void longitudeVarStr(const std::string &longitude_var_str);
+    void longitudeVarStr(const std::string& longitude_var_str);
 
 protected:
     std::string db_object_str_;
@@ -105,10 +108,14 @@ protected:
     std::shared_ptr<UpdateBufferDBJob> job_ptr_;
 
     bool calculating_ {false};
+    bool calculated_ {false};
 
     unsigned int num_loaded_ {0};
 
     RadarPlotPositionCalculatorTaskWidget* widget_ {nullptr};
+
+    QMessageBox* msg_box_ {nullptr};
+    size_t target_report_count_{0};
 
     void checkAndSetVariable (std::string &name_str, DBOVariable** var);
 };

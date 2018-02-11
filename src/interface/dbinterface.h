@@ -112,7 +112,8 @@ public:
     //    /// @brief Writes a buffer to the database, into a table defined by write_table_names_ and DBO type
     //    void writeBuffer (Buffer *data);
     //    void writeBuffer (Buffer *data, std::string table_name);
-    void updateBuffer (DBObject &object, DBOVariable &key_var, std::shared_ptr<Buffer> buffer);
+    void updateBuffer (DBObject &object, DBOVariable &key_var, std::shared_ptr<Buffer> buffer,
+                       bool show_msg_box=false);
 
     //    /// @brief Prepares incremental read of DBO type
     void prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause, std::vector <DBOVariable *> filtered_variables,

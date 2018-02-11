@@ -153,6 +153,7 @@ public:
     void load (DBOVariableSet& read_set, bool use_filters, bool use_order, DBOVariable* order_variable,
                bool use_order_ascending, const std::string& limit_str="");
     void quitLoading ();
+    void clearData ();
 
     std::map<int, std::string> loadLabelData (std::vector<int> rec_nums);
 

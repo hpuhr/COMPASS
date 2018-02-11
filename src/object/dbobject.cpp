@@ -402,8 +402,7 @@ void DBObject::load (DBOVariableSet &read_set, bool use_filters, bool use_order,
         JobManager::instance().cancelJob(job_it);
     finalize_jobs_.clear();
 
-    if (data_)
-        data_ = nullptr;
+    clearData ();
 
     std::string custom_filter_clause;
     std::vector <DBOVariable *> filtered_variables;
@@ -436,6 +435,13 @@ void DBObject::quitLoading ()
     {
         read_job_->setObsolete();
     }
+}
+
+void DBObject::clearData ()
+{
+    if (data_)
+        data_ = nullptr;
+
 }
 
 std::map<int, std::string> DBObject::loadLabelData (std::vector<int> rec_nums)

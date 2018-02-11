@@ -46,7 +46,7 @@ class DBOVariableSelectionWidget : public QFrame
 
 protected slots:
     /// @brief Slot for menu triggered action
-    void triggerSlot( QAction* action );
+    void triggerSlot(QAction* action);
     /// @brief Slot for show menu
     void showMenuSlot();
 

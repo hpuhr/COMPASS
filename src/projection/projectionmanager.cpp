@@ -25,7 +25,7 @@
 #include "projectionmanagerwidget.h"
 
 ProjectionManager::ProjectionManager()
-: Configurable ("ProjectionManager", "ProjectionManager0", 0, "conf/projection.xml")
+: Configurable ("ProjectionManager", "ProjectionManager0", 0, "projection.xml")
 {
     loginf  << "ProjectionManager: constructor";
 

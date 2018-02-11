@@ -145,6 +145,9 @@ void MainWindow::databaseOpenedSlot()
     assert (start_button_);
     start_button_->setDisabled (false);
 
+    assert (task_menu_);
+    task_menu_->setDisabled(false);
+
     //    main_widget_ = new MFImport::MainWidget ();
     //    assert (main_widget_);
     //    widget_stack_->addWidget (main_widget_);
@@ -210,7 +213,7 @@ void MainWindow::initAfterStart ()
     tab_widget_->setCurrentIndex(1);
 
     assert (task_menu_);
-    task_menu_->setDisabled(false);
+    task_menu_->setDisabled(true);
 }
 
 void MainWindow::createMenus()

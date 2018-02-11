@@ -54,11 +54,6 @@ protected:
     DBOVariableSelectionWidget* latitude_box_ {nullptr};
     DBOVariableSelectionWidget* longitude_box_ {nullptr};
 
-    QLabel *count_label_ {nullptr};
-    QLabel *load_status_label_ {nullptr};
-    QLabel *calculated_status_label_ {nullptr};
-    QLabel *written_status_label_  {nullptr};
-
     void setDBOBject (const std::string& object_name);
 };
 

@@ -22,9 +22,11 @@
 #include "dbconnection.h"
 #include "sqlgenerator.h"
 #include "logger.h"
-
-//#include "data.h"
 #include "stringconv.h"
+
+#include <QMessageBox>
+#include <QCoreApplication>
+#include <QThread>
 
 using namespace Utils;
 
@@ -81,29 +83,62 @@ BufferWriter::~BufferWriter()
 //    logdbg  << "BufferWriter: write: end";
 //}
 
-void BufferWriter::update (std::shared_ptr<Buffer> buffer, DBObject &object, DBOVariable &key_var, std::string tablename)
+void BufferWriter::update (std::shared_ptr<Buffer> buffer, DBObject &object, DBOVariable &key_var,
+                           std::string tablename, bool show_msg_box)
 {
     loginf  << "BufferWriter: update: buffer size " << buffer->size() << " into table " << tablename;
 
     std::string bind_statement =  sql_generator_->createDBUpdateStringBind(buffer, object, key_var, tablename);
+    std::string msg;
+    float percent_done;
+    QMessageBox* msg_box = nullptr;
+
+    if (show_msg_box)
+    {
+        msg_box = new QMessageBox;
+        assert (msg_box);
+        msg = "Preparing to write object data.";
+        msg_box->setText(msg.c_str());
+        msg_box->setStandardButtons(QMessageBox::NoButton);
+        msg_box->show();
+    }
+
+    size_t buffer_size = buffer->size();
 
     loginf  << "BufferWriter: update: preparing bind statement";
     db_connection_->prepareBindStatement(bind_statement);
     db_connection_->beginBindTransaction();
 
     loginf  << "BufferWriter: update: starting inserts";
-    for (unsigned int cnt=0; cnt < buffer->size(); cnt++)
+    for (unsigned int cnt=0; cnt < buffer_size; cnt++)
     {
         insertBindStatementUpdateForCurrentIndex(buffer, cnt);
 
-        if (cnt % 100000 == 0)
-            loginf  << "BufferWriter: update: bind transactions cnt " << cnt;
+        if (cnt % 10000 == 0)
+        {
+            logdbg  << "BufferWriter: update: bind transactions cnt " << cnt;
+
+            if (msg_box && buffer_size != 0)
+            {
+                percent_done = 100.0*cnt/buffer_size;
+                msg = "Writing object data: " + String::doubleToStringPrecision(percent_done, 2)+"%";
+                msg_box->setText(msg.c_str());
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            }
+        }
     }
 
     loginf  << "BufferWriter: update: ending bind transactions";
     db_connection_->endBindTransaction();
     loginf  << "BufferWriter: update: finalizing bind statement";
     db_connection_->finalizeBindStatement();
+
+    if (msg_box)
+    {
+        msg_box->close();
+        delete msg_box;
+        msg_box = nullptr;
+    }
 
     logdbg  << "BufferWriter: update: end";
 }

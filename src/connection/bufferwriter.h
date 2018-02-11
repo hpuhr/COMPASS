@@ -46,7 +46,8 @@ public:
 
     /// @brief Write a buffer containing data into a table
     //void write (Buffer *data, std::string tablename);
-    void update (std::shared_ptr<Buffer> buffer, DBObject &object, DBOVariable &key_var, std::string tablename);
+    void update (std::shared_ptr<Buffer> buffer, DBObject &object, DBOVariable &key_var, std::string tablename,
+                 bool show_msg_box=false);
 
 private:
     /// Database connection to write the data to

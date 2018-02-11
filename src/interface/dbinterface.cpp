@@ -943,7 +943,8 @@ std::set<int> DBInterface::getActiveDataSources (const DBObject &object)
 //    buffer_writer_->write (data, table_name);
 //}
 
-void DBInterface::updateBuffer (DBObject &object, DBOVariable &key_var, std::shared_ptr<Buffer> buffer)
+void DBInterface::updateBuffer (DBObject &object, DBOVariable &key_var, std::shared_ptr<Buffer> buffer,
+                                bool show_msg_box)
 {
     QMutexLocker locker(&connection_mutex_);
 
@@ -962,10 +963,11 @@ void DBInterface::updateBuffer (DBObject &object, DBOVariable &key_var, std::sha
     for (unsigned int cnt=0; cnt < properties.size(); cnt++)
     {
         if (!table.hasColumn(properties.at(cnt).name()))
-            throw std::runtime_error ("DBInterface: updateBuffer: column '"+properties.at(cnt).name()+"' does not exist in table "+table.name());
+            throw std::runtime_error ("DBInterface: updateBuffer: column '"+properties.at(cnt).name()
+                                      +"' does not exist in table "+table.name());
     }
 
-    buffer_writer_->update (buffer, object, key_var, table.name());
+    buffer_writer_->update (buffer, object, key_var, table.name(), show_msg_box);
 }
 
 void DBInterface::prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause, std::vector <DBOVariable *> filtered_variables,
