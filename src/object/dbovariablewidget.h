@@ -52,20 +52,28 @@ public slots:
 
 public:
     /// @brief Constructor
-    DBOVariableWidget(DBOVariable &variable, QWidget * parent = 0, Qt::WindowFlags f = 0);
+    DBOVariableWidget(DBOVariable& variable, QWidget* parent=0, Qt::WindowFlags f=0);
     /// @brief Destructor
     virtual ~DBOVariableWidget();
 
+    void lock ();
+    void unlock ();
+
 private:
     /// @brief DBObject to be managed
-    DBOVariable &variable_;
+    DBOVariable& variable_;
+
+    bool locked_ {false};
 
     /// @brief DBOVariable name
-    QLineEdit *name_edit_;
+    QLineEdit* name_edit_ {nullptr};
     /// @brief DBOVariable info
-    QLineEdit *description_edit_;
-    DBOVariableDataTypeComboBox *type_combo_;
-    UnitSelectionWidget *unit_sel_;
+    QLineEdit* description_edit_ {nullptr};
+    DBOVariableDataTypeComboBox* type_combo_ {nullptr};
+    StringRepresentationComboBox* representation_box_ {nullptr};
+    UnitSelectionWidget* unit_sel_ {nullptr};
+
+    std::map <std::string, DBTableColumnComboBox*> schema_boxes_;
 };
 
 #endif /* DBOBJECTEDITWIDGET_H_ */

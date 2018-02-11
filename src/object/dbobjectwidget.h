@@ -107,6 +107,8 @@ private:
     /// @brief DBO info
     QLineEdit* info_edit_ {nullptr};
 
+    QPushButton* edit_label_button_ {nullptr};
+
     /// @brief Grid with all data sources
     QGridLayout* ds_grid_ {nullptr};
     /// @brief Container with data sources edit buttons
@@ -116,6 +118,7 @@ private:
 
     /// @brief Add new data source schema selection
     QComboBox* ds_schema_box_ {nullptr};
+    QPushButton* new_ds_button_ {nullptr};
 
     /// @brief grid with all meta tables per schema
     QGridLayout* meta_table_grid_ {nullptr};
@@ -124,6 +127,7 @@ private:
     QComboBox* new_meta_schema_box_ {nullptr};
     /// @brief Add meta table for schema meta table selection
     QComboBox* new_meta_box_ {nullptr};
+    QPushButton* new_meta_button_ {nullptr};
 
     /// @brief Grid with all DBOVariables
     QGridLayout* dbovars_grid_ {nullptr};
@@ -133,13 +137,9 @@ private:
     /// @brief Container with DBOVariable delete buttons
     std::map <QPushButton*, DBOVariable*> dbo_vars_grid_delete_buttons_;
 
-    /// @brief New DBOVariable name edit field
-    QLineEdit* new_var_name_edit_ {nullptr};
-
     /// @brief Add all variables schema box
     QComboBox* all_schemas_box_ {nullptr};
-    /// @brief Add all variables button
-    QPushButton* add_all_button_ {nullptr};
+    QPushButton* add_schema_button_ {nullptr};
 
     bool locked_ {false};
 

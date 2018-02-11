@@ -161,6 +161,9 @@ void MainWindow::startSlot ()
 
     bool force_post = postprocess_check_->checkState() == Qt::Checked;
 
+    ATSDB::instance().schemaManager().lock();
+    ATSDB::instance().objectManager().lock();
+
     if (force_post || !ATSDB::instance().interface().isPostProcessed ())
     {
         loginf << "MainWindow: startSlot: post-processing started";

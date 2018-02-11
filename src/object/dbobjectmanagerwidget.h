@@ -81,7 +81,8 @@ private:
     bool locked_ {false};
 
     /// New DBO add button
-    //QPushButton *new_button_;
+    QPushButton* add_dbo_button_ {nullptr};
+    QPushButton* add_metavar_button_ {nullptr};
 
     /// Container with DBO edit buttons
     std::map <QPushButton*, DBObject*> edit_dbo_buttons_;

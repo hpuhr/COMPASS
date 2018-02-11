@@ -363,15 +363,40 @@ std::string DBOVariable::getMaxStringRepresentation ()
 }
 
 
-DBOVariableWidget *DBOVariable::widget ()
+DBOVariableWidget* DBOVariable::widget ()
 {
     if (!widget_)
     {
         widget_ = new DBOVariableWidget (*this);
+
+        if (locked_)
+            widget_->lock();
     }
 
     assert (widget_);
     return widget_;
+}
+
+void DBOVariable::lock ()
+{
+    if (locked_)
+        return;
+
+    if (widget_)
+        widget_->lock();
+
+    locked_ = true;
+}
+
+void DBOVariable::unlock ()
+{
+    if (!locked_)
+        return;
+
+    if (widget_)
+        widget_->unlock();
+
+    locked_ = false;
 }
 
 String::Representation DBOVariable::representation() const

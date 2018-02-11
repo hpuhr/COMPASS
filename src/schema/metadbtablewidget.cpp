@@ -207,6 +207,7 @@ void MetaDBTableWidget::lock ()
     new_local_key_->setDisabled(true);
     new_table_->setDisabled(true);
     new_sub_key_->setDisabled(true);
+    add_button_->setDisabled(true);
 }
 
 //void MetaDBTableWidget::selectTable ()

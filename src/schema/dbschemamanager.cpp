@@ -197,6 +197,9 @@ DBSchemaManagerWidget* DBSchemaManager::widget()
 
 void DBSchemaManager::lock ()
 {
+    if (locked_)
+        return;
+
     locked_ = true;
 
     for (auto& schema_it : schemas_)
@@ -204,4 +207,6 @@ void DBSchemaManager::lock ()
 
     if (widget_)
         widget_->lock();
+
+    emit schemaLockedSignal();
 }

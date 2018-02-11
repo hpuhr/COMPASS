@@ -181,6 +181,9 @@ public:
     Utils::String::Representation representation() const;
     void representation(const Utils::String::Representation &representation);
 
+    void lock ();
+    void unlock ();
+
 protected:
     /// DBO parent
     DBObject &dbo_parent_;
@@ -206,6 +209,8 @@ protected:
     std::map <std::string, DBOSchemaVariableDefinition*> schema_variables_;
 
     DBOVariableWidget *widget_;
+
+    bool locked_ {false};
 
     virtual void checkSubConfigurables ();
     void setMinMax ();

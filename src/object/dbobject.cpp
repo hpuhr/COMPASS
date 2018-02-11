@@ -353,6 +353,9 @@ void DBObject::lock ()
 {
     locked_ = true;
 
+    for (auto& var_it : variables_)
+        var_it.second->lock();
+
     if (widget_)
         widget_->lock();
 }
@@ -360,6 +363,9 @@ void DBObject::lock ()
 void DBObject::unlock ()
 {
     locked_ = false;
+
+    for (auto& var_it : variables_)
+        var_it.second->unlock();
 
     if (widget_)
         widget_->unlock();

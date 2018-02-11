@@ -45,9 +45,8 @@
 
 using namespace Utils;
 
-DBOVariableWidget::DBOVariableWidget(DBOVariable &variable, QWidget *parent, Qt::WindowFlags f)
-    : QWidget (parent, f), variable_(variable), name_edit_(nullptr), description_edit_(nullptr), type_combo_(nullptr),
-      unit_sel_ (nullptr)
+DBOVariableWidget::DBOVariableWidget(DBOVariable& variable, QWidget* parent, Qt::WindowFlags f)
+    : QWidget (parent, f), variable_(variable)
 {
     setMinimumSize(QSize(800, 600));
 
@@ -93,8 +92,8 @@ DBOVariableWidget::DBOVariableWidget(DBOVariable &variable, QWidget *parent, Qt:
 
     properties_layout->addWidget(new QLabel ("Representation"), row, 0);
 
-    StringRepresentationComboBox *repr = new StringRepresentationComboBox (variable_);
-    properties_layout->addWidget (repr, row, 1);
+    representation_box_ = new StringRepresentationComboBox (variable_);
+    properties_layout->addWidget (representation_box_, row, 1);
     row++;
 
     QLabel *unit_label = new QLabel ("Unit");
@@ -107,6 +106,8 @@ DBOVariableWidget::DBOVariableWidget(DBOVariable &variable, QWidget *parent, Qt:
     auto metas = variable_.dbObject().metaTables ();
     auto schemas  = ATSDB::instance().schemaManager().getSchemas();
 
+    schema_boxes_.clear();
+
     for (auto sit = schemas.begin(); sit != schemas.end(); sit++)
     {
         if (metas.find (sit->second->name()) == metas.end())
@@ -116,8 +117,14 @@ DBOVariableWidget::DBOVariableWidget(DBOVariable &variable, QWidget *parent, Qt:
         QLabel *label = new QLabel (schema_string.c_str());
         properties_layout->addWidget(label, row, 0);
 
-        DBTableColumnComboBox *box = new DBTableColumnComboBox (sit->second->name(), metas[sit->second->name()], variable_);
+        DBTableColumnComboBox* box =
+                new DBTableColumnComboBox (sit->second->name(), metas[sit->second->name()], variable_);
+
         properties_layout->addWidget (box, row, 1);
+
+        assert (schema_boxes_.count(sit->second->name()) == 0);
+        schema_boxes_[sit->second->name()] = box;
+
         row++;
     }
 
@@ -132,6 +139,40 @@ DBOVariableWidget::DBOVariableWidget(DBOVariable &variable, QWidget *parent, Qt:
 DBOVariableWidget::~DBOVariableWidget()
 {
 
+}
+
+void DBOVariableWidget::lock ()
+{
+    if (locked_)
+        return;
+
+    name_edit_->setDisabled (true);
+    description_edit_->setDisabled (true);
+    type_combo_->setDisabled (true);
+    representation_box_->setDisabled (true);
+    unit_sel_->setDisabled (true);
+
+    for (auto& box_it : schema_boxes_)
+        box_it.second->setDisabled (true);
+
+    locked_ = true;
+}
+
+void DBOVariableWidget::unlock ()
+{
+    if (!locked_)
+        return;
+
+    name_edit_->setDisabled (false);
+    description_edit_->setDisabled (false);
+    type_combo_->setDisabled (false);
+    representation_box_->setDisabled (false);
+    unit_sel_->setDisabled (false);
+
+    for (auto& box_it : schema_boxes_)
+        box_it.second->setDisabled (false);
+
+    locked_ = false;
 }
 
 void DBOVariableWidget::editNameSlot ()

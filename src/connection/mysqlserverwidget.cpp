@@ -48,6 +48,7 @@ MySQLServerWidget::MySQLServerWidget(MySQLppConnection& connection, MySQLServer&
     layout->addWidget (new QLabel("Password"));
 
     password_edit_ = new QLineEdit (server.password().c_str());
+    password_edit_->setEchoMode(QLineEdit::Password);
     connect(password_edit_, &QLineEdit::textChanged, this, &MySQLServerWidget::updatePasswordSlot);
     layout->addWidget (password_edit_);
 

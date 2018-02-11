@@ -123,9 +123,34 @@ MetaDBOVariableWidget *MetaDBOVariable::widget ()
     if (!widget_)
     {
         widget_ = new MetaDBOVariableWidget (*this);
+
+        if (locked_)
+            widget_->lock();
     }
     assert (widget_);
     return widget_;
+}
+
+void MetaDBOVariable::unlock ()
+{
+    if (!locked_)
+        return;
+
+    locked_=false;
+
+    if (widget_)
+        widget_->unlock();
+}
+
+void MetaDBOVariable::lock ()
+{
+    if (locked_)
+        return;
+
+    locked_=true;
+
+    if (widget_)
+        widget_->lock();
 }
 
 std::string MetaDBOVariable::name() const

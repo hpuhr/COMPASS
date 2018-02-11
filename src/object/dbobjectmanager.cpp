@@ -51,6 +51,8 @@ DBObjectManager::DBObjectManager(const std::string &class_id, const std::string 
     registerParameter("limit_max", &limit_max_, 100000);
 
     createSubConfigurables ();
+
+    lock();
 }
 /**
  * Deletes all DBOs.
@@ -118,6 +120,7 @@ bool DBObjectManager::existsObject (const std::string &dbo_name)
 
 void DBObjectManager::schemaLockedSlot()
 {
+    loginf << "DBObjectManager: schemaLockedSlot";
     unlock ();
 }
 
@@ -298,10 +301,16 @@ void DBObjectManager::clearOrderVariable ()
 
 void DBObjectManager::lock ()
 {
+    if (locked_)
+        return;
+
     locked_ = true;
 
     for (auto& object_it : objects_)
         object_it.second->lock();
+
+    for (auto& meta_it : meta_variables_)
+        meta_it.second->lock();
 
     if (widget_)
         widget_->lock();
@@ -309,10 +318,17 @@ void DBObjectManager::lock ()
 
 void DBObjectManager::unlock ()
 {
+    if (!locked_)
+        return;
+
     locked_ = false;
 
     for (auto& object_it : objects_)
         object_it.second->unlock();
+
+    for (auto& meta_it : meta_variables_)
+        meta_it.second->unlock();
+
 
     if (widget_)
         widget_->unlock();

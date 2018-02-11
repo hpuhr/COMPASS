@@ -95,9 +95,9 @@ DBObjectWidget::DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager
 
     main_layout->addLayout (properties_main_layout);
 
-    QPushButton* show_labels = new QPushButton ("Edit Label Definition");
-    connect(show_labels, SIGNAL( clicked() ), this, SLOT( showLabelDefinitionWidgetSlot() ));
-    main_layout->addWidget(show_labels);
+    edit_label_button_ = new QPushButton ("Edit Label Definition");
+    connect(edit_label_button_, SIGNAL( clicked() ), this, SLOT( showLabelDefinitionWidgetSlot() ));
+    main_layout->addWidget(edit_label_button_);
 
     QHBoxLayout *upper_layout = new QHBoxLayout ();
 
@@ -141,9 +141,9 @@ DBObjectWidget::DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager
         updateMetaTableSelection ();
         new_layout->addWidget (new_meta_box_);
 
-        QPushButton *new_add = new QPushButton ("Add");
-        connect(new_add, SIGNAL( clicked() ), this, SLOT( addMetaTable() ));
-        new_layout->addWidget (new_add);
+        new_meta_button_ = new QPushButton ("Add");
+        connect(new_meta_button_, SIGNAL( clicked() ), this, SLOT( addMetaTable() ));
+        new_layout->addWidget (new_meta_button_);
 
         meta_layout->addLayout (new_layout);
 
@@ -184,9 +184,9 @@ DBObjectWidget::DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager
         updateDSSchemaSelection();
         new_ds_layout->addWidget (ds_schema_box_);
 
-        QPushButton *new_ds_add = new QPushButton ("Add");
-        connect(new_ds_add, SIGNAL( clicked() ), this, SLOT( addDataSource() ));
-        new_ds_layout->addWidget (new_ds_add);
+        new_ds_button_ = new QPushButton ("Add");
+        connect(new_ds_button_, SIGNAL( clicked() ), this, SLOT( addDataSource() ));
+        new_ds_layout->addWidget (new_ds_button_);
 
         ds_layout->addLayout(new_ds_layout);
 
@@ -231,15 +231,14 @@ DBObjectWidget::DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager
     updateAllVarsSchemaSelection();
     all_var_layout->addWidget (all_schemas_box_);
 
-    QPushButton *add_new_button_ = new QPushButton ("Add new");
-    connect(add_new_button_, SIGNAL( clicked() ), this, SLOT( addNewVariables() ));
-    all_var_layout->addWidget (add_new_button_);
+    add_schema_button_ = new QPushButton ("Add New");
+    connect(add_schema_button_, SIGNAL( clicked() ), this, SLOT( addNewVariables() ));
+    all_var_layout->addWidget (add_schema_button_);
 
 
     main_layout->addLayout (all_var_layout);
 
     setLayout (main_layout);
-
 
     show();
 }
@@ -251,11 +250,69 @@ DBObjectWidget::~DBObjectWidget()
 
 void DBObjectWidget::lock ()
 {
+    if (locked_)
+        return;
+
+    name_edit_->setDisabled (true);
+    info_edit_->setDisabled (true);
+    edit_label_button_->setDisabled (true);
+
+    for (auto& button_it : ds_grid_edit_buttons_)
+        button_it.first->setDisabled (true);
+
+    for (auto& button_it : ds_grid_delete_buttons_)
+        button_it.first->setDisabled (true);
+
+    ds_schema_box_->setDisabled (true);
+    new_ds_button_->setDisabled (true);
+
+    new_meta_schema_box_->setDisabled (true);
+    new_meta_box_->setDisabled (true);
+    new_meta_button_->setDisabled (true);
+
+    for (auto& button_it : dbo_vars_grid_edit_buttons_)
+        button_it.first->setDisabled (true);
+
+    for (auto& button_it : dbo_vars_grid_delete_buttons_)
+        button_it.first->setDisabled (true);
+
+    all_schemas_box_->setDisabled (true);
+    add_schema_button_->setDisabled (true);
+
     locked_ = true;
 }
 
 void DBObjectWidget::unlock ()
 {
+    if (!locked_)
+        return;
+
+    name_edit_->setDisabled (false);
+    info_edit_->setDisabled (false);
+    edit_label_button_->setDisabled (false);
+
+    for (auto& button_it : ds_grid_edit_buttons_)
+        button_it.first->setDisabled (false);
+
+    for (auto& button_it : ds_grid_delete_buttons_)
+        button_it.first->setDisabled (false);
+
+    ds_schema_box_->setDisabled (false);
+    new_ds_button_->setDisabled (false);
+
+    new_meta_schema_box_->setDisabled (false);
+    new_meta_box_->setDisabled (false);
+    new_meta_button_->setDisabled (false);
+
+    for (auto& button_it : dbo_vars_grid_edit_buttons_)
+        button_it.first->setDisabled (false);
+
+    for (auto& button_it : dbo_vars_grid_delete_buttons_)
+        button_it.first->setDisabled (false);
+
+    all_schemas_box_->setDisabled (false);
+    add_schema_button_->setDisabled (false);
+
     locked_ = false;
 }
 

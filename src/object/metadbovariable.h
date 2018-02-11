@@ -64,6 +64,9 @@ public:
 
     MetaDBOVariableWidget *widget ();
 
+    void unlock ();
+    void lock ();
+
 protected:
     std::string name_;
     std::string description_;
@@ -71,6 +74,8 @@ protected:
     DBObjectManager &object_manager_;
 
     MetaDBOVariableWidget *widget_;
+
+    bool locked_ {false};
 
     std::map <std::string, DBOVariableDefinition*> definitions_;
     std::map <std::string, DBOVariable&> variables_;
