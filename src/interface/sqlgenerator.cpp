@@ -89,7 +89,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand (const DBOb
     if (!schema.hasMetaTable(ds.metaTableName()))
         throw std::invalid_argument ("SQLGenerator: getDataSourcesSelectCommand: schema does has no meta table "+ds.metaTableName());
 
-    const MetaDBTable& meta =  schema.metaTable(ds.metaTableName());
+    const MetaDBTable& meta = schema.metaTable(ds.metaTableName());
     loginf << "SQLGenerator: getDataSourcesSelectCommand: object " << object.name() << " meta table " << meta.name() << " key col " << ds.foreignKey() << " name col " << ds.nameColumn();
     if (!meta.hasColumn(ds.foreignKey()))
         throw std::runtime_error ("SQLGenerator: getDataSourcesSelectCommand: meta table has no column "+ds.foreignKey());

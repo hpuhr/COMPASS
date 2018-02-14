@@ -35,14 +35,14 @@ class MetaDBTable;
 /**
  * @brief Definition of a meta table in a schema in a DBObject
  *
- * Simple storage class for a schema and a meta table, as strings. Used in a DBObject to save the definitions into the configuration,
- * and generate the pointers to the defined structures at from them.
+ * Simple storage class for a schema and a meta table, as strings. Used in a DBObject to save the definitions
+ * into the configuration, and generate the pointers to the defined structures at from them.
  */
 class DBOSchemaMetaTableDefinition : public Configurable
 {
 public:
     /// @brief Constructor, registers parameters
-    DBOSchemaMetaTableDefinition(const std::string &class_id, const std::string &instance_id, Configurable *parent)
+    DBOSchemaMetaTableDefinition(const std::string& class_id, const std::string& instance_id, Configurable* parent)
         : Configurable (class_id, instance_id, parent)
     {
         registerParameter ("schema", &schema_, "");
@@ -51,8 +51,8 @@ public:
     /// @brief Destructor
     virtual ~DBOSchemaMetaTableDefinition() {}
 
-    const std::string &schema () { return schema_; }
-    const std::string &metaTable () { return meta_table_; }
+    const std::string& schema () { return schema_; }
+    const std::string& metaTable () { return meta_table_; }
 
 protected:
     /// DBSchema identifier
@@ -102,8 +102,8 @@ class DBObject : public QObject, public Configurable
 {
     Q_OBJECT
 signals:
-    void newDataSignal (DBObject &object);
-    void loadingDoneSignal (DBObject &object);
+    void newDataSignal (DBObject& object);
+    void loadingDoneSignal (DBObject& object);
 
 public slots:
     void schemaChangedSlot ();
@@ -118,16 +118,16 @@ public slots:
 
 public:
     /// @brief Constructor
-    DBObject(std::string class_id, std::string instance_id, Configurable *parent);
+    DBObject(const std::string& class_id, const std::string& instance_id, Configurable* parent);
     /// @brief Desctructor
     virtual ~DBObject();
 
     /// @brief Returns flag indication if a DBOVariable identified by id exists
-    bool hasVariable (const std::string &id) const;
+    bool hasVariable (const std::string& id) const;
     /// @brief Returns variable identified by id
-    DBOVariable &variable (std::string variable_id) const;
+    DBOVariable& variable (const std::string& variable_id) const;
     /// @brief Deletes a variable identified by id
-    void deleteVariable (std::string id);
+    void deleteVariable (const std::string& id);
 
     /// @brief Returns container with all variables
     const std::map<std::string, DBOVariable*> &variables () const;
@@ -135,14 +135,14 @@ public:
     size_t numVariables () const { return variables_.size(); }
 
     /// @brief Returns name of the object
-    const std::string &name () const { return name_; }
+    const std::string& name () const { return name_; }
     /// @brief Sets name of the object
-    void name (const std::string &name) { assert (name.size() > 0); name_=name; }
+    void name (const std::string& name) { assert (name.size() > 0); name_=name; }
 
     /// @brief Returns description of the object
-    const std::string &info () const { return info_; }
+    const std::string& info () const { return info_; }
     /// @brief Sets description of the object
-    void info(std::string info) { info_=info; }
+    void info(const std::string& info) { info_=info; }
 
     /// @brief Returns if an object can be loaded
     bool loadable () const { return is_loadable_; }
@@ -168,10 +168,11 @@ public:
     /// @brief Returns container with all meta tables
     const std::map <std::string, std::string> &metaTables () const { return meta_tables_; }
     /// @brief Returns identifier of main meta table under DBSchema defined by schema
-    const std::string &metaTable (const std::string &schema) const;
+    bool hasMetaTable (const std::string& schema) const;
+    const std::string &metaTable (const std::string& schema) const;
 
     /// @brief Returns main meta table for current schema
-    const MetaDBTable &currentMetaTable () const;
+    const MetaDBTable& currentMetaTable () const;
     /// @brief Returns if current schema has main meta table
     bool hasCurrentMetaTable () const;
 
@@ -193,7 +194,7 @@ public:
     ///@brief Returns container with all defined data source for DBO type.
     const std::map<int, DBODataSource> &dataSources () { return data_sources_; }
     ///@brief Returns data source name for a DBO type and data source number.
-    std::string getNameOfSensor (int num);
+    const std::string& getNameOfSensor (int num);
 
     /// @brief Return if active data sources info is available
     bool hasActiveDataSourcesInfo ();
@@ -244,17 +245,17 @@ protected:
     std::map<std::string, DBOVariable*> variables_;
 
     /// Current (in the current schema) main meta table
-    const MetaDBTable* current_meta_table_; // TODO rework
+    MetaDBTable* current_meta_table_ {nullptr}; // TODO rework const?
 
     /// Flag indicating if varaibles where checked. Not really used yet.
-    bool variables_checked_;
+    //bool variables_checked_;
 
     DBObjectWidget* widget_ {nullptr};
     DBObjectInfoWidget* info_widget_{nullptr};
 
     virtual void checkSubConfigurables ();
     /// @brief Checks if variables really exist. Not used yet.
-    void checkVariables ();
+    //void checkVariables ();
 
     ///@brief Generates data sources information from previous post-processing.
     void buildDataSources();

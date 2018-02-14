@@ -39,6 +39,8 @@ DBSchemaManager::DBSchemaManager(const std::string& class_id, const std::string&
     if (current_schema_.size() != 0)
         if (schemas_.count(current_schema_) == 0)
             current_schema_="";
+
+    loginf << "DBSchemaManager: DBSchemaManager: current schema: '" << current_schema_ << "'";
 }
 
 /**
@@ -74,10 +76,11 @@ void DBSchemaManager::renameCurrentSchema (const std::string& new_name)
 
 void DBSchemaManager::setCurrentSchema (const std::string& current_schema)
 {
+    loginf << "DBSchemaManager: setCurrentSchema: " << current_schema;
+
     assert (!locked_);
     assert (current_schema.size() != 0);
     assert (schemas_.find(current_schema) != schemas_.end());
-
 
     current_schema_=current_schema;
 

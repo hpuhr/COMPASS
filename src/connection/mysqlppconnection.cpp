@@ -134,6 +134,7 @@ void MySQLppConnection::openDatabase (const std::string &database_name)
 void MySQLppConnection::disconnect()
 {
     connection_.disconnect();
+    connection_ready_ = false;
 
     for (auto it : servers_)
         delete it.second;
@@ -152,8 +153,6 @@ void MySQLppConnection::disconnect()
         delete info_widget_;
         info_widget_ = nullptr;
     }
-
-    connected_server_ = nullptr;
 }
 
 void MySQLppConnection::executeSQL(const std::string &sql)

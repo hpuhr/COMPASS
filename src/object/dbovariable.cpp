@@ -37,8 +37,8 @@
 
 using namespace Utils;
 
-DBOVariable::DBOVariable(const std::string &class_id, const std::string &instance_id, DBObject *parent)
-    : Property (), Configurable (class_id, instance_id, parent), dbo_parent_(*parent), widget_(nullptr)
+DBOVariable::DBOVariable(const std::string& class_id, const std::string& instance_id, DBObject* parent)
+    : Property (), Configurable (class_id, instance_id, parent), db_object_(*parent)
 {
     registerParameter ("name", &name_, "");
     registerParameter ("description", &description_, "");
@@ -61,6 +61,7 @@ DBOVariable::DBOVariable(const std::string &class_id, const std::string &instanc
     //loginf  << "DBOVariable: constructor: name " << id_ << " unitdim '" << unit_dimension_ << "' unitunit '" << unit_unit_ << "'";
 
     createSubConfigurables ();
+
 }
 
 DBOVariable::~DBOVariable()
@@ -76,11 +77,11 @@ DBOVariable::~DBOVariable()
     }
 }
 
-void DBOVariable::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
+void DBOVariable::generateSubConfigurable (const std::string& class_id, const std::string& instance_id)
 {
     if (class_id.compare("DBOSchemaVariableDefinition") == 0)
     {
-        DBOSchemaVariableDefinition *definition = new DBOSchemaVariableDefinition (class_id, instance_id, this);
+        DBOSchemaVariableDefinition* definition = new DBOSchemaVariableDefinition (class_id, instance_id, this);
         assert (schema_variables_.find (definition->getSchema()) == schema_variables_.end());
         schema_variables_[definition->getSchema()] = definition;
     }
@@ -88,7 +89,7 @@ void DBOVariable::generateSubConfigurable (const std::string &class_id, const st
         throw std::runtime_error ("DBOVariable: generateSubConfigurable: unknown class_id "+class_id);
 }
 
-bool DBOVariable::operator==(const DBOVariable &var)
+bool DBOVariable::operator==(const DBOVariable& var)
 {
     if (dboName() != var.dboName())
         return false;
@@ -160,27 +161,44 @@ void DBOVariable::print ()
 
 void DBOVariable::checkSubConfigurables ()
 {
-    // nothing to do here
+//    if (!hasCurrentSchema())
+//    {
+//        std::string schema_name = ATSDB::instance().schemaManager().getCurrentSchemaName();
+//        std::string instance = schema_name+"0";
+//        std::string meta_table_name = dbo_parent_.name();
+
+//        loginf << "DBOVariable: checkSubConfigurables: creating new schema definition for " << schema_name;
+
+//        Configuration &config = addNewSubConfiguration ("DBOSchemaVariableDefinition", instance);
+
+//        config.addParameterString ("schema", schema_name);
+//        config.addParameterString ("meta_table", meta_table_name);
+//        config.addParameterString ("variable_identifier", "");
+
+//        generateSubConfigurable("DBOSchemaVariableDefinition", instance);
+//    }
 }
 
-const std::string &DBOVariable::dboName () const
+const std::string& DBOVariable::dboName () const
 {
-    return dbo_parent_.name();
+    return db_object_.name();
 }
 
 
-bool DBOVariable::hasSchema (const std::string &schema) const
+bool DBOVariable::hasSchema (const std::string& schema) const
 {
-    return schema_variables_.find (schema) != schema_variables_.end();
+    //return schema_variables_.find (schema) != schema_variables_.end();
+    return db_object_.hasMetaTable(schema);
 }
 
-const std::string &DBOVariable::metaTable (const std::string &schema) const
+const std::string& DBOVariable::metaTable (const std::string& schema) const
 {
     assert (hasSchema(schema));
-    return schema_variables_.at(schema)->getMetaTable();
+    //return schema_variables_.at(schema)->getMetaTable();
+    return db_object_.metaTable(schema);
 }
 
-const std::string &DBOVariable::variableName (const std::string &schema) const
+const std::string& DBOVariable::variableName (const std::string& schema) const
 {
     assert (hasSchema(schema));
     return schema_variables_.at(schema)->getVariableIdentifier();
@@ -196,7 +214,7 @@ bool DBOVariable::hasCurrentDBColumn () const
     return ATSDB::instance().schemaManager().getCurrentSchema().metaTable(meta_tablename).hasColumn(meta_table_varid);
 }
 
-const DBTableColumn &DBOVariable::currentDBColumn () const
+const DBTableColumn& DBOVariable::currentDBColumn () const
 {
     assert (hasCurrentDBColumn());
 
@@ -213,24 +231,30 @@ bool DBOVariable::hasCurrentSchema () const
     return hasSchema(ATSDB::instance().schemaManager().getCurrentSchemaName());
 }
 
-const std::string &DBOVariable::currentMetaTableString () const
+const std::string& DBOVariable::currentMetaTableString () const
 {
-    assert (hasCurrentSchema());
-    std::string schema = ATSDB::instance().schemaManager().getCurrentSchemaName();
-    return schema_variables_.at(schema)->getMetaTable();
+//    assert (hasCurrentSchema());
+//    std::string schema = ATSDB::instance().schemaManager().getCurrentSchemaName();
+//    return schema_variables_.at(schema)->getMetaTable();
+
+    assert (db_object_.hasCurrentMetaTable());
+    return db_object_.currentMetaTable().name();
 
 }
 
-const MetaDBTable &DBOVariable::currentMetaTable () const
+const MetaDBTable& DBOVariable::currentMetaTable () const
 {
-    assert (hasCurrentSchema());
-    std::string schema = ATSDB::instance().schemaManager().getCurrentSchemaName();
-    std::string meta_table = schema_variables_.at(schema)->getMetaTable();
-    assert (ATSDB::instance().schemaManager().getCurrentSchema().hasMetaTable(meta_table));
-    return ATSDB::instance().schemaManager().getCurrentSchema().metaTable(meta_table);
+//    assert (hasCurrentSchema());
+//    std::string schema = ATSDB::instance().schemaManager().getCurrentSchemaName();
+//    std::string meta_table = schema_variables_.at(schema)->getMetaTable();
+//    assert (ATSDB::instance().schemaManager().getCurrentSchema().hasMetaTable(meta_table));
+//    return ATSDB::instance().schemaManager().getCurrentSchema().metaTable(meta_table);
+
+    assert (db_object_.hasCurrentMetaTable());
+    return db_object_.currentMetaTable();
 }
 
-const std::string &DBOVariable::currentVariableIdentifier () const
+const std::string& DBOVariable::currentVariableIdentifier () const
 {
     assert (hasCurrentSchema());
     std::string schema = ATSDB::instance().schemaManager().getCurrentSchemaName();
@@ -368,12 +392,12 @@ DBOVariableWidget* DBOVariable::widget ()
     if (!widget_)
     {
         widget_ = new DBOVariableWidget (*this);
+        assert (widget_);
 
         if (locked_)
             widget_->lock();
     }
 
-    assert (widget_);
     return widget_;
 }
 
@@ -404,7 +428,7 @@ String::Representation DBOVariable::representation() const
     return representation_;
 }
 
-void DBOVariable::representation(const String::Representation &representation)
+void DBOVariable::representation(const String::Representation& representation)
 {
     representation_str_ = String::representationToString(representation);
     representation_ = representation;

@@ -62,6 +62,7 @@ protected:
     bool locked_ {false};
 
     void updateSchemas();
+    void showCurrentSchemaWidget ();
 
 };
 

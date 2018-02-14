@@ -125,7 +125,6 @@ void DBObjectManagerWidget::lock ()
 //    for (auto it : edit_dbo_buttons_)
 //        it.first->setDisabled (true);
 
-
     for (auto it : delete_dbo_buttons_)
         it.first->setDisabled (true);
 
@@ -192,7 +191,8 @@ void DBObjectManagerWidget::addDBOSlot ()
         }
 
         bool ok;
-        QString item = QInputDialog::getItem(this, tr("Main Meta Table For DBObject"), tr("Select:"), items, 0, false, &ok);
+        QString item = QInputDialog::getItem(this, tr("Main Meta Table For DBObject"), tr("Select:"), items, 0,
+                                             false, &ok);
         if (ok && !item.isEmpty())
         {
             std::string meta_table_name = item.toStdString();
@@ -301,7 +301,7 @@ void DBObjectManagerWidget::updateDBOsSlot ()
         edit->setIconSize(UI_ICON_SIZE);
         edit->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
         edit->setFlat(UI_ICON_BUTTON_FLAT);
-        edit->setDisabled(!active || locked_);
+        //edit->setDisabled(!active || locked_);
         connect(edit, SIGNAL( clicked() ), this, SLOT( editDBOSlot() ));
         dbobjects_grid_->addWidget (edit, row, 3);
         edit_dbo_buttons_[edit] = it->second;
@@ -311,7 +311,7 @@ void DBObjectManagerWidget::updateDBOsSlot ()
         del->setIconSize(UI_ICON_SIZE);
         del->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
         del->setFlat(UI_ICON_BUTTON_FLAT);
-        del->setDisabled(locked_);
+        //del->setDisabled(locked_);
         connect(del, SIGNAL( clicked() ), this, SLOT( deleteDBOSlot() ));
         dbobjects_grid_->addWidget (del, row, 4);
         delete_dbo_buttons_[del] = it->second;
@@ -371,7 +371,8 @@ void DBObjectManagerWidget::addAllMetaVariablesSlot ()
                 if (obj_it == obj_it2)
                     continue;
 
-                if (obj_it2.second->hasVariable(var_it.first) && var_it.second->dataType() == obj_it2.second->variable(var_it.first).dataType())
+                if (obj_it2.second->hasVariable(var_it.first) && var_it.second->dataType()
+                        == obj_it2.second->variable(var_it.first).dataType())
                 {
                     found_dbos.push_back(obj_it2.first);
                 }
@@ -398,7 +399,8 @@ void DBObjectManagerWidget::addAllMetaVariablesSlot ()
                 {
                     if (!meta_var.existsIn(*dbo_it2))
                     {
-                        loginf << "DBObjectManagerWidget: addAllMetaVariablesSlot: adding meta variable " << var_it.first << " dbo variable " << var_it.first;
+                        loginf << "DBObjectManagerWidget: addAllMetaVariablesSlot: adding meta variable "
+                               << var_it.first << " dbo variable " << var_it.first;
                         meta_var.addVariable(*dbo_it2, var_it.first);
                     }
                 }

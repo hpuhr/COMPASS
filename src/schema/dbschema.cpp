@@ -96,9 +96,12 @@ void DBSchema::addTable(const std::string& name)
 
 void DBSchema::deleteTable (const std::string& name)
 {
+    loginf << "DBSchema: deleteTable: name " << name;
+
     assert (hasTable(name));
     delete tables_.at(name);
     tables_.erase (name);
+    assert (!hasTable(name));
 
     for (auto it : meta_tables_)
     {
@@ -128,7 +131,7 @@ bool DBSchema::hasMetaTable (const std::string& name) const
     return meta_tables_.find(name) != meta_tables_.end();
 }
 
-const MetaDBTable& DBSchema::metaTable (const std::string& name) const
+MetaDBTable& DBSchema::metaTable (const std::string& name) const
 {
     assert (hasMetaTable(name));
     return *meta_tables_.at(name);

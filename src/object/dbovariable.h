@@ -71,10 +71,11 @@ protected:
 class DBOSchemaVariableDefinition : public Configurable
 {
 public:
-    DBOSchemaVariableDefinition(const std::string &class_id, const std::string &instance_id, Configurable *parent) : Configurable (class_id, instance_id, parent)
+    DBOSchemaVariableDefinition(const std::string &class_id, const std::string &instance_id, Configurable *parent)
+        : Configurable (class_id, instance_id, parent)
     {
         registerParameter ("schema", &schema_, "");
-        registerParameter ("meta_table", &meta_table_, "");
+//        registerParameter ("meta_table", &meta_table_, "");
         registerParameter ("variable_identifier", &variable_identifier, "");
     }
     virtual ~DBOSchemaVariableDefinition() {}
@@ -82,15 +83,15 @@ public:
     const std::string &getSchema () { return schema_; }
     void setSchema(std::string schema) { schema_=schema; }
 
-    const std::string &getMetaTable () { return meta_table_; }
-    void setMetaTable(std::string meta_table) { meta_table_=meta_table; }
+//    const std::string &getMetaTable () { return meta_table_; }
+//    void setMetaTable(std::string meta_table) { meta_table_=meta_table; }
 
     const std::string &getVariableIdentifier () { return variable_identifier; }
     void setVariableIdentifier(std::string variable) { variable_identifier=variable; }
 
 protected:
     std::string schema_;
-    std::string meta_table_;
+//    std::string meta_table_;
     std::string variable_identifier;
 };
 
@@ -117,76 +118,76 @@ class DBOVariable : public QObject, public Property, public Configurable
     Q_OBJECT
 public:
     /// @brief Constructor
-    DBOVariable(const std::string &class_id, const std::string &instance_id, DBObject *parent);
+    DBOVariable(const std::string& class_id, const std::string& instance_id, DBObject* parent);
     /// @brief Desctructor
     virtual ~DBOVariable();
 
     /// @brief Comparison operator
-    bool operator==(const DBOVariable &var);
+    bool operator==(const DBOVariable& var);
 
     /// @brief Prints information for debugging
     void print ();
 
-    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
+    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
 
     /// @brief Returns variable identifier
-    const std::string &name () const { return name_; }
+    const std::string& name () const { return name_; }
     /// @brief Sets variable identifier
-    void name (const std::string &name) { name_=name; }
+    void name (const std::string& name) { name_=name; }
 
-    const std::string &dboName () const;
+    const std::string& dboName () const;
 
     /// @brief Returns variable description
-    const std::string &description () { return description_; }
+    const std::string& description () { return description_; }
     /// @brief Sets variable description
-    void description (const std::string &description) { description_=description; }
+    void description (const std::string& description) { description_=description; }
 
     /// @brief Returns of schema is present in schema_variables_
-    bool hasSchema (const std::string &schema) const;
+    bool hasSchema (const std::string& schema) const;
     /// @brief Returns meta table identifier for a given schema
-    const std::string &metaTable (const std::string &schema) const;
+    const std::string& metaTable (const std::string& schema) const;
     /// @brief Returns variable identifier for a given schema
-    const std::string &variableName (const std::string &schema) const;
+    const std::string& variableName (const std::string& schema) const;
 
     bool hasCurrentDBColumn () const;
-    const DBTableColumn &currentDBColumn () const;
+    const DBTableColumn& currentDBColumn () const;
 
     /// @brief Returns if current schema is present in schema_variables_
     bool hasCurrentSchema () const;
     /// @brief Returns meta table identifier for current schema
-    const std::string &currentMetaTableString () const;
+    const std::string& currentMetaTableString () const;
     /// @brief Returns meta table for current schema
-    const MetaDBTable &currentMetaTable () const;
+    const MetaDBTable& currentMetaTable () const;
     /// @brief Returns variable identifier for current schema
-    const std::string &currentVariableIdentifier () const;
+    const std::string& currentVariableIdentifier () const;
 
     /// @brief Returns if dimension information is present
     bool hasDimension () { return dimension_.size() > 0;}
     /// @brief Returns unit dimension
-    const std::string &dimensionConst () const{ return dimension_; } //TODO should be const
-    std::string &dimension () { return dimension_; } //TODO should be const
+    const std::string& dimensionConst () const{ return dimension_; } //TODO should be const
+    std::string& dimension () { return dimension_; } //TODO should be const
     /// @brief  Returns unit unit
-    const std::string &unitConst () const { return unit_; }
-    std::string &unit () { return unit_; }
+    const std::string& unitConst () const { return unit_; }
+    std::string& unit () { return unit_; }
 
-    DBObject &dbObject () const { return dbo_parent_; }
+    DBObject& dbObject () const { return db_object_; }
 
     std::string getMinString ();
     std::string getMaxString ();
     std::string getMinStringRepresentation ();
     std::string getMaxStringRepresentation ();
 
-    DBOVariableWidget *widget ();
+    DBOVariableWidget* widget ();
 
     Utils::String::Representation representation() const;
-    void representation(const Utils::String::Representation &representation);
+    void representation(const Utils::String::Representation& representation);
 
     void lock ();
     void unlock ();
 
 protected:
     /// DBO parent
-    DBObject &dbo_parent_;
+    DBObject& db_object_;
     /// Value representation type, based on enum STRING_REPRESENTATION
     std::string representation_str_;
     Utils::String::Representation representation_;
@@ -208,7 +209,7 @@ protected:
     /// Container with schema identified->schema-variable definitions
     std::map <std::string, DBOSchemaVariableDefinition*> schema_variables_;
 
-    DBOVariableWidget *widget_;
+    DBOVariableWidget* widget_ {nullptr};
 
     bool locked_ {false};
 

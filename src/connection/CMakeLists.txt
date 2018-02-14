@@ -14,8 +14,8 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/mysqlserverwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/sqlitefile.h"
         "${CMAKE_CURRENT_LIST_DIR}/sqliteconnection.h"
-        "${CMAKE_CURRENT_LIST_DIR}/sqliteconnectionwidget.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/sqliteconnectioninfowidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/sqliteconnectionwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/sqliteconnectioninfowidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/bufferwriter.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/bufferwriter.cpp"

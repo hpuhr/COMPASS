@@ -208,8 +208,12 @@ std::vector <std::string> DBInterface::getDatabases ()
 bool DBInterface::ready ()
 {
     if (!current_connection_)
+    {
+        loginf << "DBInterface: ready: no connection";
         return false;
+    }
 
+    loginf << "DBInterface: ready: connection ready " << current_connection_->ready();
     return current_connection_->ready();
 }
 
@@ -314,6 +318,35 @@ std::set<int> DBInterface::queryActiveSensorNumbers(const DBObject &object)
 
     logdbg << "DBInterface: queryActiveSensorNumbers: done";
     return data;
+}
+
+bool DBInterface::hasDataSourceTables (const DBObject& object)
+{
+    if (!object.hasCurrentDataSourceDefinition())
+        return false;
+
+    const DBODataSourceDefinition &ds = object.currentDataSourceDefinition ();
+    const DBSchema &schema = ATSDB::instance().schemaManager().getCurrentSchema();
+
+    if (!schema.hasMetaTable(ds.metaTableName()))
+        return false;
+
+    const MetaDBTable& meta = schema.metaTable(ds.metaTableName());
+
+    if (!meta.hasColumn(ds.foreignKey()))
+        return false;
+
+    //const DBTableColumn& foreign_key_col = meta.column(ds.foreignKey());
+
+    if (!meta.hasColumn(ds.nameColumn()))
+        return false;
+
+    std::string main_table_name = meta.mainTableName();
+
+    if (table_info_.count(main_table_name) == 0)
+        return false;
+
+    return true;
 }
 
 ///**

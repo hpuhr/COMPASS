@@ -52,8 +52,7 @@ DBSchemaManagerWidget::DBSchemaManagerWidget(DBSchemaManager &manager, QWidget* 
     layout->addWidget (db_schema_label);
 
     schema_select_ = new QComboBox ();
-    updateSchemas();
-    connect (schema_select_, SIGNAL(currentIndexChanged(const QString&)),
+    connect (schema_select_, SIGNAL(activated(const QString &)),
              this, SLOT(schemaSelectedSlot(const QString&)));
 
     layout->addWidget(schema_select_);
@@ -131,23 +130,14 @@ void DBSchemaManagerWidget::lockSchemaSlot ()
 
 void DBSchemaManagerWidget::schemaSelectedSlot (const QString &value)
 {
-    logdbg << "DBSchemaManagerWidget: schemaSelectedSlot: '" << value.toStdString() << "'";
-
-    assert (schema_widgets_);
-    while (schema_widgets_->count() > 0)
-        schema_widgets_->removeWidget(schema_widgets_->widget(0));
+    loginf << "DBSchemaManagerWidget: schemaSelectedSlot: '" << value.toStdString() << "'";
 
     if (value.size() > 0)
     {
         manager_.setCurrentSchema(value.toStdString());
 
-        DBSchemaWidget *widget = manager_.getCurrentSchema().widget();
-//        QObject::connect(widget, SIGNAL(serverConnectedSignal()), this, SLOT(serverConnectedSlot()),
-//        static_cast<Qt::ConnectionType>(Qt::UniqueConnection));
-//        QObject::connect(widget, SIGNAL(databaseOpenedSignal()), this, SLOT(databaseOpenedSlot()),
-//        static_cast<Qt::ConnectionType>(Qt::UniqueConnection));
+        showCurrentSchemaWidget();
 
-        schema_widgets_->addWidget(widget);
         delete_button_->setDisabled(false);
     }
     else
@@ -184,11 +174,26 @@ void DBSchemaManagerWidget::updateSchemas()
 
     if (manager_.hasCurrentSchema())
     {
-        int index = schema_select_->findText(manager_.getCurrentSchemaName().c_str());
+        std::string current_schema = manager_.getCurrentSchemaName();
+        int index = schema_select_->findText(current_schema.c_str());
         if (index != -1) // -1 for not found
         {
            schema_select_->setCurrentIndex(index);
+           showCurrentSchemaWidget();
         }
+    }
+}
+
+void DBSchemaManagerWidget::showCurrentSchemaWidget ()
+{
+    assert (schema_widgets_);
+    while (schema_widgets_->count() > 0)
+        schema_widgets_->removeWidget(schema_widgets_->widget(0));
+
+    if (manager_.hasCurrentSchema())
+    {
+        DBSchemaWidget *widget = manager_.getCurrentSchema().widget();
+        schema_widgets_->addWidget(widget);
     }
 }
 

@@ -103,6 +103,7 @@ public:
 
     DBConnection &connection ();
 
+    bool hasDataSourceTables (const DBObject& object);
     /// @brief Returns a container with all data sources for a DBO
     std::map <int, DBODataSource> getDataSources (const DBObject &object);
     bool hasActiveDataSources (const DBObject &object);

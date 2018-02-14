@@ -58,7 +58,7 @@ public:
     void deleteTable (const std::string& name);
 
     bool hasMetaTable (const std::string& name) const;
-    const MetaDBTable &metaTable (const std::string& name) const;
+    MetaDBTable &metaTable (const std::string& name) const;
     void addMetaTable (const std::string& name, const std::string& main_table_name);
     void deleteMetaTable (const std::string& name);
 
