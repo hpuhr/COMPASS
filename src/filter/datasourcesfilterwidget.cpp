@@ -19,7 +19,7 @@
 #include <QGridLayout>
 #include <QCheckBox>
 
-#include "sensorfilterwidget.h"
+#include "datasourcesfilterwidget.h"
 #include "filtermanager.h"
 #include "atsdb.h"
 #include "dbobjectmanager.h"
@@ -28,26 +28,10 @@
 /**
  * Initializes members, creates GUI elements.
  */
-SensorFilterWidget::SensorFilterWidget(SensorFilter &filter, std::string class_id, std::string instance_id)
+DataSourcesFilterWidget::DataSourcesFilterWidget(DataSourcesFilter& filter, const std::string& class_id,
+                                                 const std::string& instance_id)
     : DBFilterWidget (class_id, instance_id, filter), filter_ (filter), data_sources_(filter_.dataSources())
 {
-    createGUIElements();
-
-    // TODO fix sources observer
-    //createMenu (DBObjectManager::getInstance().getDBObject(dbo_type_)->hasActiveDataSourcesInfo());
-
-    updateCheckboxesChecked ();
-    updateCheckboxesDisabled ();
-}
-
-SensorFilterWidget::~SensorFilterWidget()
-{
-}
-
-void SensorFilterWidget::createGUIElements ()
-{
-    logdbg  << "SensorFilterWidget: createGUIElements";
-
     //    QPushButton *radar_select_all = new QPushButton(tr("All"));
     //    connect(radar_select_all, SIGNAL( clicked() ), this, SLOT( selectSensorsAll() ));
     //    QPushButton *radar_select_none = new QPushButton(tr("None"));
@@ -62,21 +46,21 @@ void SensorFilterWidget::createGUIElements ()
 
     child_layout_->addLayout (sensorboxlay);
 
-    std::map<int, SensorFilterDataSource>::iterator it;
+    std::map<int, DataSourcesFilterDataSource>::iterator it;
 
     unsigned int col, row;
     unsigned int cnt = 0;
 
     for (it = data_sources_.begin(); it != data_sources_.end(); it++)
     {
-        QCheckBox *radar_checkbox = new QCheckBox(tr(it->second.getName().c_str()));
+        QCheckBox* radar_checkbox = new QCheckBox(tr(it->second.getName().c_str()));
         radar_checkbox->setChecked(true);
         connect(radar_checkbox, SIGNAL(clicked()), this, SLOT(toggleDataSource ()));
 
         assert (data_sources_checkboxes_.find (radar_checkbox) == data_sources_checkboxes_.end());
         data_sources_checkboxes_ [radar_checkbox] = it->first;
 
-        logdbg << "SensorFilterWidget: createGUIElements: got sensor " << it->first << " name " <<  it->second.getName()
+        logdbg << "DataSourcesFilterWidget: createGUIElements: got sensor " << it->first << " name " <<  it->second.getName()
                << " active " << radar_checkbox->isChecked();
 
         row = 1 + cnt / 2;
@@ -85,13 +69,23 @@ void SensorFilterWidget::createGUIElements ()
         sensorboxlay->addWidget(radar_checkbox, row, col);
         cnt++;
     }
+
+    // TODO fix sources observer
+    //createMenu (DBObjectManager::getInstance().getDBObject(dbo_type_)->hasActiveDataSourcesInfo());
+
+    updateCheckboxesChecked ();
+    updateCheckboxesDisabled ();
 }
 
-void SensorFilterWidget::selectSensorsAll()
+DataSourcesFilterWidget::~DataSourcesFilterWidget()
 {
-    logdbg  << "SensorFilterWidget: selectSensorsAll";
+}
 
-    std::map<int, SensorFilterDataSource>::iterator it;
+void DataSourcesFilterWidget::selectSensorsAll()
+{
+    logdbg  << "DataSourcesFilterWidget: selectSensorsAll";
+
+    std::map<int, DataSourcesFilterDataSource>::iterator it;
 
     for (it = data_sources_.begin(); it != data_sources_.end(); it++)
     {
@@ -104,11 +98,11 @@ void SensorFilterWidget::selectSensorsAll()
 
     emit possibleFilterChange();
 }
-void SensorFilterWidget::selectSensorsNone()
+void DataSourcesFilterWidget::selectSensorsNone()
 {
-    logdbg  << "SensorFilterWidget: selectSensorsNone";
+    logdbg  << "DataSourcesFilterWidget: selectSensorsNone";
 
-    std::map<int, SensorFilterDataSource>::iterator it;
+    std::map<int, DataSourcesFilterDataSource>::iterator it;
 
     for (it = data_sources_.begin(); it != data_sources_.end(); it++)
     {
@@ -122,47 +116,47 @@ void SensorFilterWidget::selectSensorsNone()
     emit possibleFilterChange();
 }
 
-void SensorFilterWidget::update ()
+void DataSourcesFilterWidget::update ()
 {
-    logdbg << "SensorFilterWidget: update";
+    logdbg << "DataSourcesFilterWidget: update";
 
     updateCheckboxesChecked();
     updateCheckboxesDisabled();
 }
 
-void SensorFilterWidget::updateCheckboxesChecked ()
+void DataSourcesFilterWidget::updateCheckboxesChecked ()
 {
-    logdbg << "SensorFilterWidget: updateCheckboxesChecked";
+    logdbg << "DataSourcesFilterWidget: updateCheckboxesChecked";
     std::map<QCheckBox*, int>::iterator checkit;
 
     for (checkit = data_sources_checkboxes_.begin(); checkit != data_sources_checkboxes_.end(); checkit++)
     {
         assert (data_sources_.find (checkit->second) != data_sources_.end());
-        SensorFilterDataSource &src = data_sources_[checkit->second];
+        DataSourcesFilterDataSource &src = data_sources_[checkit->second];
         checkit->first->setChecked(src.isActiveInFilter());
     }
 }
 
 
-void SensorFilterWidget::updateCheckboxesDisabled ()
+void DataSourcesFilterWidget::updateCheckboxesDisabled ()
 {
-    logdbg << "SensorFilterWidget: updateCheckboxesDisabled: checkboxes " << data_sources_checkboxes_.size();
+    logdbg << "DataSourcesFilterWidget: updateCheckboxesDisabled: checkboxes " << data_sources_checkboxes_.size();
     std::map<QCheckBox*, int>::iterator checkit;
 
     for (checkit = data_sources_checkboxes_.begin(); checkit != data_sources_checkboxes_.end(); checkit++)
     {
         assert (data_sources_.find (checkit->second) != data_sources_.end());
-        SensorFilterDataSource &src = data_sources_[checkit->second];
+        DataSourcesFilterDataSource &src = data_sources_[checkit->second];
         checkit->first->setEnabled(src.isActiveInData());
-        logdbg << "SensorFilterWidget: updateCheckboxesDisabled: src " << src.getName() << " active "
+        logdbg << "DataSourcesFilterWidget: updateCheckboxesDisabled: src " << src.getName() << " active "
                << src.isActiveInData();
     }
 
 }
 
-void SensorFilterWidget::toggleDataSource ()
+void DataSourcesFilterWidget::toggleDataSource ()
 {
-    logdbg << "SensorFilterWidget: toggleDataSource";
+    logdbg << "DataSourcesFilterWidget: toggleDataSource";
     QCheckBox *check = (QCheckBox *) sender();
     assert (data_sources_checkboxes_.find (check) != data_sources_checkboxes_.end());
     int number = data_sources_checkboxes_[check];
@@ -177,9 +171,9 @@ void SensorFilterWidget::toggleDataSource ()
     emit possibleFilterChange();
 }
 
-void SensorFilterWidget::setSourcesInactive ()
+void DataSourcesFilterWidget::setSourcesInactive ()
 {
-    logdbg << "SensorFilterWidget: setSourcesInactive";
+    logdbg << "DataSourcesFilterWidget: setSourcesInactive";
 
     // TODO fix sources observer
     //    assert (!object->hasActiveDataSourcesInfo());
@@ -187,9 +181,9 @@ void SensorFilterWidget::setSourcesInactive ()
     createMenu(true);
 }
 
-void SensorFilterWidget::createMenu (bool inactive_disabled)
+void DataSourcesFilterWidget::createMenu (bool inactive_disabled)
 {
-    loginf << "SensorFilterWidget: createMenu";
+    loginf << "DataSourcesFilterWidget: createMenu";
 
     menu_.clear();
 

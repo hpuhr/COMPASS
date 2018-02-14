@@ -15,21 +15,21 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SENSORFILTER_H_
-#define SENSORFILTER_H_
+#ifndef DATASOURCESFILTER_H_
+#define DATASOURCESFILTER_H_
 
 #include "dbfilter.h"
 
 /**
- * @brief Definition for a data source in a SensorFilter
+ * @brief Definition for a data source in a DataSourcesFilter
  */
-class SensorFilterDataSource
+class DataSourcesFilterDataSource
 {
 public:
     /// @brief Constructor
-    SensorFilterDataSource () {}
+    DataSourcesFilterDataSource () {}
     /// @brief Destructor
-    virtual ~SensorFilterDataSource () {}
+    virtual ~DataSourcesFilterDataSource () {}
 
 protected:
     /// Number id
@@ -91,37 +91,38 @@ class DBObject;
 /**
  * @brief DBFilter specialization for non-generic sensor filters
  *
- * Each DBObject can have data sources, and if such data is contained in the database, a filter for the seperate data sources
- * should always exist. Should not have sub-filters or conditions.
+ * Each DBObject can have data sources, and if such data is contained in the database, a filter for the seperate
+ * data sources should always exist. Should not have sub-filters or conditions.
  *
  */
-class SensorFilter : public DBFilter
+class DataSourcesFilter : public DBFilter
 {
 public:
   /// @brief Constructor
-  SensorFilter(const std::string &class_id, const std::string &instance_id, Configurable *parent);
+  DataSourcesFilter(const std::string& class_id, const std::string& instance_id, Configurable* parent);
   /// @brief Desctructor
-  virtual ~SensorFilter();
+  virtual ~DataSourcesFilter();
 
-  virtual std::string getConditionString (const std::string &dbo_name, bool &first, std::vector <DBOVariable*>& filtered_variables);
+  virtual std::string getConditionString (const std::string& dbo_name, bool& first,
+                                          std::vector <DBOVariable*>& filtered_variables);
 
   virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
-  virtual bool filters (const std::string &dbo_type);
+  virtual bool filters (const std::string& dbo_name);
   virtual void reset ();
 
   const std::string& dbObjectName () { return dbo_name_; }
 
-  std::map<int, SensorFilterDataSource> &dataSources () { return data_sources_; }
+  std::map<int, DataSourcesFilterDataSource> &dataSources () { return data_sources_; }
 
 protected:
   /// DBO type
   std::string dbo_name_;
-  DBObject *object_{nullptr};
+  DBObject* object_{nullptr};
   /// Sensor id column name in database table
-  std::string sensor_column_name_;
+  std::string ds_column_name_;
   /// Container with all possible data sources and active flag pointers
-  std::map<int, SensorFilterDataSource> data_sources_;
+  std::map<int, DataSourcesFilterDataSource> data_sources_;
 
   /// @brief Load data sources and updates data_sources_ container
   void updateDataSources ();
@@ -132,4 +133,4 @@ protected:
   virtual void checkSubConfigurables ();
 };
 
-#endif /* SENSORFILTER_H_ */
+#endif /* DATASOURCESFILTER_H_ */

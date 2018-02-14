@@ -16,8 +16,8 @@
  */
 
 #include "atsdb.h"
-#include "sensorfilter.h"
-#include "sensorfilterwidget.h"
+#include "datasourcesfilter.h"
+#include "datasourcesfilterwidget.h"
 #include "logger.h"
 #include "dbobjectmanager.h"
 #include "dbobject.h"
@@ -26,19 +26,21 @@
 
 using namespace Utils;
 
-SensorFilter::SensorFilter(const std::string &class_id, const std::string &instance_id, Configurable *parent)
+DataSourcesFilter::DataSourcesFilter(const std::string& class_id, const std::string& instance_id, Configurable* parent)
 : DBFilter(class_id, instance_id, parent, false)
 {
     registerParameter ("dbo_name", &dbo_name_, "");
 
     if (!ATSDB::instance().objectManager().existsObject(dbo_name_))
-        throw std::invalid_argument ("SensorFilter: SensorFilter: instance "+instance_id+" has non-existing object "+dbo_name_);
+        throw std::invalid_argument ("DataSourcesFilter: DataSourcesFilter: instance "+instance_id
+                                     +" has non-existing object "+dbo_name_);
 
     object_ = &ATSDB::instance().objectManager().object(dbo_name_);
     if (!object_->hasCurrentDataSourceDefinition())
-        throw std::invalid_argument ("SensorFilter: SensorFilter: instance "+instance_id+" object "+dbo_name_+" has no data sources");
+        throw std::invalid_argument ("DataSourcesFilter: DataSourcesFilter: instance "+instance_id+" object "
+                                     +dbo_name_+" has no data sources");
 
-    sensor_column_name_ = object_->currentDataSourceDefinition().localKey();
+    ds_column_name_ = object_->currentDataSourceDefinition().localKey();
 
     updateDataSources ();
 
@@ -57,18 +59,19 @@ SensorFilter::SensorFilter(const std::string &class_id, const std::string &insta
     }
 }
 
-SensorFilter::~SensorFilter()
+DataSourcesFilter::~DataSourcesFilter()
 {
 }
 
-bool SensorFilter::filters (const std::string &dbo_type)
+bool DataSourcesFilter::filters (const std::string& dbo_type)
 {
     return dbo_name_ == dbo_type;
 }
 
-std::string SensorFilter::getConditionString (const std::string &dbo_name, bool &first, std::vector <DBOVariable*>& filtered_variables)
+std::string DataSourcesFilter::getConditionString (const std::string& dbo_name, bool& first,
+                                                   std::vector <DBOVariable*>& filtered_variables)
 {
-    logdbg  << "SensorFilter: getConditionString ";
+    logdbg  << "DataSourcesFilter: getConditionString ";
 
     std::stringstream ss;
 
@@ -76,15 +79,15 @@ std::string SensorFilter::getConditionString (const std::string &dbo_name, bool 
     {
         if (dbo_name == dbo_name_)
         {
-            assert (object_->hasVariable(sensor_column_name_));
-            filtered_variables.push_back(&object_->variable(sensor_column_name_));
+            assert (object_->hasVariable(ds_column_name_));
+            filtered_variables.push_back(&object_->variable(ds_column_name_));
 
             bool got_one=false;
             bool got_all=true;
 
             std::stringstream values;
 
-            std::map<int, SensorFilterDataSource>::iterator it;
+            std::map<int, DataSourcesFilterDataSource>::iterator it;
 
             for (it = data_sources_.begin(); it != data_sources_.end(); it++)
             {
@@ -109,26 +112,26 @@ std::string SensorFilter::getConditionString (const std::string &dbo_name, bool 
 
             //WHERE column_name IN (value1,value2,...)
             if (got_one)
-                ss << " " <<sensor_column_name_ << " IN (" << values.str() << ")";
+                ss << " " <<ds_column_name_ << " IN (" << values.str() << ")";
             else
             {
-                ss  << " "+sensor_column_name_+" IS NULL";
+                ss  << " "+ds_column_name_+" IS NULL";
             }
             first=false;
         }
     }
 
-    logdbg  << "SensorFilter: getConditionString: here '" <<ss.str() << "'";
+    logdbg  << "DataSourcesFilter: getConditionString: here '" <<ss.str() << "'";
 
     return ss.str();
 }
 
 
-void SensorFilter::updateDataSources ()
+void DataSourcesFilter::updateDataSources ()
 {
     if (!object_->hasDataSources ())
     {
-        logerr  << "SensorFilter: updateDataSources: type " << dbo_name_ << " has no data sources";
+        logerr  << "DataSourcesFilter: updateDataSources: type " << dbo_name_ << " has no data sources";
         return;
     }
 
@@ -146,17 +149,17 @@ void SensorFilter::updateDataSources ()
     }
 }
 
-void SensorFilter::updateDataSourcesActive ()
+void DataSourcesFilter::updateDataSourcesActive ()
 {
-    loginf << "SensorFilter: updateDataSourcesActive";
+    loginf << "DataSourcesFilter: updateDataSourcesActive";
 
     if (!object_->hasActiveDataSourcesInfo())
     {
-        logerr  << "SensorFilter: updateDataSourcesActive: type " << object_->name() << " has no active data sources info";
+        logerr  << "DataSourcesFilter: updateDataSourcesActive: type " << object_->name() << " has no active data sources info";
         return;
     }
 
-    std::map<int, SensorFilterDataSource>::iterator srcit;
+    std::map<int, DataSourcesFilterDataSource>::iterator srcit;
     for (srcit =  data_sources_.begin(); srcit !=  data_sources_.end(); srcit++)
         srcit->second.setActiveInData(false);
 
@@ -166,7 +169,7 @@ void SensorFilter::updateDataSourcesActive ()
     for (it = active_sources.begin(); it != active_sources.end(); it++)
     {
         assert (data_sources_.find(*it) != data_sources_.end());
-        SensorFilterDataSource &src = data_sources_[*it];
+        DataSourcesFilterDataSource &src = data_sources_[*it];
         src.setActiveInData(true);
     }
 
@@ -178,41 +181,42 @@ void SensorFilter::updateDataSourcesActive ()
 }
 
 
-void SensorFilter::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
+void DataSourcesFilter::generateSubConfigurable (const std::string& class_id, const std::string& instance_id)
 {
-    logdbg  << "SensorFilter: generateSubConfigurable: class_id " << class_id ;
+    logdbg  << "DataSourcesFilter: generateSubConfigurable: class_id " << class_id ;
 
-    if (class_id.compare("SensorFilterWidget") == 0)
+    if (class_id.compare("DataSourcesFilterWidget") == 0)
     {
         assert (!widget_);
-        widget_ = new SensorFilterWidget (*this, class_id, instance_id);
+        widget_ = new DataSourcesFilterWidget (*this, class_id, instance_id);
     }
     else
-        throw std::runtime_error ("SensorFilter: generateSubConfigurable: unknown class_id "+class_id);
+        throw std::runtime_error ("DataSourcesFilter: generateSubConfigurable: unknown class_id "+class_id);
 }
 
-void SensorFilter::checkSubConfigurables ()
+void DataSourcesFilter::checkSubConfigurables ()
 {
-    logdbg  << "SensorFilter: checkSubConfigurables";
+    logdbg  << "DataSourcesFilter: checkSubConfigurables";
 
     if (!widget_)
     {
-        logdbg  << "SensorFilter: checkSubConfigurables: generating my filter widget";
-        widget_ = new SensorFilterWidget (*this, "SensorFilterWidget", instance_id_+"Widget0");
+        logdbg  << "DataSourcesFilter: checkSubConfigurables: generating my filter widget";
+        widget_ = new DataSourcesFilterWidget (*this, "DataSourcesFilterWidget", instance_id_+"Widget0");
     }
     assert (widget_);
 
     for (unsigned int cnt=0; cnt < sub_filters_.size(); cnt++)
     {
         DBFilterWidget *filter = sub_filters_.at(cnt)->widget();
-        QObject::connect((QWidget*)filter, SIGNAL( possibleFilterChange() ), (QWidget*)widget_, SLOT( possibleSubFilterChange() ));
+        QObject::connect((QWidget*)filter, SIGNAL( possibleFilterChange() ),
+                         (QWidget*)widget_, SLOT( possibleSubFilterChange() ));
         widget_->addChildWidget (filter);
     }
 }
 
-void SensorFilter::reset ()
+void DataSourcesFilter::reset ()
 {
-    std::map<int, SensorFilterDataSource>::iterator it;
+    std::map<int, DataSourcesFilterDataSource>::iterator it;
     for (it = data_sources_.begin(); it != data_sources_.end(); it++)
     {
         it->second.setActiveInFilter(true);
@@ -220,9 +224,9 @@ void SensorFilter::reset ()
     widget_->update();
 }
 
-//void SensorFilter::notifyActiveSources ()
+//void DataSourcesFilter::notifyActiveSources ()
 //{
-//    logdbg << "SensorFilter: notifyActiveSources";
+//    logdbg << "DataSourcesFilter: notifyActiveSources";
 //    updateDataSourcesActive();
 
 //    if (widget_)

@@ -15,13 +15,13 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SENSORFILTERWIDGET_H_
-#define SENSORFILTERWIDGET_H_
+#ifndef DATASOURCESFILTERWIDGET_H_
+#define DATASOURCESFILTERWIDGET_H_
 
 #include <QMenu>
 
 #include "dbfilterwidget.h"
-#include "sensorfilter.h"
+#include "datasourcesfilter.h"
 
 class QGridLayout;
 
@@ -31,7 +31,7 @@ class QGridLayout;
  * Uses same control elements but has no management button. Holds all data sources for a DBObject with a checkbox for each
  * to enable/disable loading of data from this source.
  */
-class SensorFilterWidget : public DBFilterWidget
+class DataSourcesFilterWidget : public DBFilterWidget
 {
   Q_OBJECT
 protected slots:
@@ -45,12 +45,9 @@ protected slots:
 
 public:
   /// @brief Constructor
-  SensorFilterWidget(SensorFilter &filter, std::string class_id, std::string instance_id);
+  DataSourcesFilterWidget(DataSourcesFilter& filter, const std::string& class_id, const std::string& instance_id);
   /// @brief Destructor
-  virtual ~SensorFilterWidget();
-
-  /// @brief Create GUI elements
-  virtual void createGUIElements ();
+  virtual ~DataSourcesFilterWidget();
 
   /// @brief Returns the sensors active container
   //std::map<int, QCheckBox*> &getSensorActiveCheckboxes ();
@@ -64,13 +61,13 @@ protected:
   //std::map<int, std::string> sensor_names_;
 
   /// Represented sensor filter
-  SensorFilter &filter_;
+  DataSourcesFilter& filter_;
   /// Filtered DBObject type
-  std::string dbo_type_;
+  std::string dbo_name_;
   /// Grid layout for all sensor checkboxes
   //QGridLayout *sensorboxlay_;
   /// Container with checkboxes for all sensors (sensor number -> checkbox)
-  std::map<int, SensorFilterDataSource> &data_sources_;
+  std::map<int, DataSourcesFilterDataSource> &data_sources_;
 
   void updateCheckboxesChecked ();
   void updateCheckboxesDisabled ();
@@ -78,4 +75,4 @@ protected:
   void createMenu (bool inactive_disabled);
 };
 
-#endif /* SENSORFILTERWIDGET_H_ */
+#endif /* DATASOURCESFILTERWIDGET_H_ */
