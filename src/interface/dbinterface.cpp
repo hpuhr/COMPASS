@@ -591,6 +591,8 @@ void DBInterface::insertMinMax (const std::string& id, const std::string& object
  */
 std::pair<std::string, std::string> DBInterface::getMinMaxString (const DBOVariable& var)
 {
+    loginf << "DBInterface: getMinMaxString: var " << var.name();
+
     if (!var.dbObject().count()) // object doesn't exist in this database
         return std::pair<std::string, std::string> (NULL_STRING, NULL_STRING);
 

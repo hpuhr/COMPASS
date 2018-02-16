@@ -100,6 +100,8 @@ protected:
     DBODataSourceDefinitionWidget* widget_{nullptr};
 };
 
+Q_DECLARE_METATYPE(DBODataSourceDefinition*)
+
 class DBODataSource
 {
 public:

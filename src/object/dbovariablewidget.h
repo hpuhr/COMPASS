@@ -32,6 +32,7 @@ class DBTableColumnComboBox;
 class DBOVariableDataTypeComboBox;
 class StringRepresentationComboBox;
 class UnitSelectionWidget;
+class QGridLayout;
 
 /**
  * @brief Edit widget for a DBObject
@@ -74,6 +75,8 @@ private:
     UnitSelectionWidget* unit_sel_ {nullptr};
 
     std::map <std::string, DBTableColumnComboBox*> schema_boxes_;
+
+    void createSchemaBoxes (QGridLayout* properties_layout, int row);
 };
 
 #endif /* DBOBJECTEDITWIDGET_H_ */

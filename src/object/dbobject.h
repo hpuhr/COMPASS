@@ -123,11 +123,12 @@ public:
     virtual ~DBObject();
 
     /// @brief Returns flag indication if a DBOVariable identified by id exists
-    bool hasVariable (const std::string& id) const;
+    bool hasVariable (const std::string& name) const;
     /// @brief Returns variable identified by id
-    DBOVariable& variable (const std::string& variable_id) const;
+    DBOVariable& variable (const std::string& name) const;
+    void renameVariable (const std::string& name, const std::string& new_name);
     /// @brief Deletes a variable identified by id
-    void deleteVariable (const std::string& id);
+    void deleteVariable (const std::string& name);
 
     /// @brief Returns container with all variables
     const std::map<std::string, DBOVariable*> &variables () const;

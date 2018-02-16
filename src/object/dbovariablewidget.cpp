@@ -103,30 +103,7 @@ DBOVariableWidget::DBOVariableWidget(DBOVariable& variable, QWidget* parent, Qt:
     properties_layout->addWidget (unit_sel_, row, 1);
     row++;
 
-    auto metas = variable_.dbObject().metaTables ();
-    auto schemas  = ATSDB::instance().schemaManager().getSchemas();
-
-    schema_boxes_.clear();
-
-    for (auto sit = schemas.begin(); sit != schemas.end(); sit++)
-    {
-        if (metas.find (sit->second->name()) == metas.end())
-            continue;
-
-        std::string schema_string = "Schema: "+sit->second->name();
-        QLabel *label = new QLabel (schema_string.c_str());
-        properties_layout->addWidget(label, row, 0);
-
-        DBTableColumnComboBox* box =
-                new DBTableColumnComboBox (sit->second->name(), metas[sit->second->name()], variable_);
-
-        properties_layout->addWidget (box, row, 1);
-
-        assert (schema_boxes_.count(sit->second->name()) == 0);
-        schema_boxes_[sit->second->name()] = box;
-
-        row++;
-    }
+    createSchemaBoxes (properties_layout, row);
 
     main_layout->addLayout (properties_layout);
     main_layout->addStretch();
@@ -203,4 +180,41 @@ void DBOVariableWidget::editDataTypeSlot()
     variable_.dataType(type_combo_->getType());
     emit dboVariableChangedSignal();
 
+}
+
+void DBOVariableWidget::createSchemaBoxes (QGridLayout* properties_layout, int row)
+{
+    loginf << "DBOVariableWidget: createSchemaBoxes";
+
+    auto meta_tables = variable_.dbObject().metaTables ();
+    auto schemas  = ATSDB::instance().schemaManager().getSchemas();
+
+    assert (properties_layout);
+    schema_boxes_.clear();
+
+    std::string schema_name;
+
+    for (auto sit = schemas.begin(); sit != schemas.end(); sit++)
+    {
+        schema_name = sit->first;
+
+        if (meta_tables.find (schema_name) == meta_tables.end())
+            continue;
+
+        std::string schema_string = "Schema: "+schema_name;
+        QLabel *label = new QLabel (schema_string.c_str());
+        properties_layout->addWidget(label, row, 0);
+
+        assert (meta_tables.count(schema_name) == 1);
+        DBTableColumnComboBox* box = new DBTableColumnComboBox (schema_name, meta_tables[schema_name], variable_);
+
+        properties_layout->addWidget (box, row, 1);
+
+        assert (schema_boxes_.count(schema_name) == 0);
+        schema_boxes_[schema_name] = box;
+
+        row++;
+    }
+
+    loginf  << "DBOVariableWidget: createSchemaBoxes: done";
 }

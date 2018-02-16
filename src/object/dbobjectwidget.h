@@ -32,10 +32,11 @@ class QTextEdit;
 class DBObject;
 class DBODataSourceDefinition;
 class DBOVariable;
-class DBTableColumnComboBox;
+class DBSchemaSelectionComboBox;
 class DBOVariableDataTypeComboBox;
 class StringRepresentationComboBox;
 class DBSchemaManager;
+
 
 /**
  * @brief Edit widget for a DBObject
@@ -50,41 +51,38 @@ signals:
 
 public slots:
     /// @brief Adds all new DBOVariables
-    void addNewVariables ();
+    void addNewVariablesSlot ();
     /// @brief Adds a MetaDBTable
-    void addMetaTable();
+    void addMetaTableSlot();
 
-    /// @brief Updates data source schema selection
-    void updateDSSchemaSelection();
     /// @brief Updates data sources grid
-    void updateDataSourcesGrid ();
+    void updateDataSourcesGridSlot ();
     /// @brief Adds a data source
-    void addDataSource ();
+    void addDataSourceSlot ();
     /// @brief Edits a DBOVariable
-    void editDataSource();
+    void editDataSourceSlot();
     /// @brief Deletes a DBOVariable
-    void deleteDataSource();
+    void deleteDataSourceSlot();
 
     /// @brief Changes DBO name
-    void editName ();
+    void editNameSlot ();
     /// @brief Changes DBO info
-    void editInfo ();
+    void editInfoSlot ();
 
     /// @brief Edits a DBOVariable
-    void editDBOVar();
+    //void editDBOVarSlot();
+    void editDBOVariableNameSlot ();
+    void editDBOVariableDescriptionSlot ();
+    void editDBOVariableDBColumnSlot (const QString& text);
     /// @brief Deletes a DBOVariable
-    void deleteDBOVar();
+    void deleteDBOVarSlot();
 
     /// @brief Updates the DBOVariables grid
-    void updateDBOVarsGrid ();
-    /// @brief Updates the schema selection for meta table
-    void updateMetaSchemaSelection ();
-    /// @brief Updates the meta table selection
-    void updateMetaTableSelection ();
+    void updateDBOVarsGridSlot ();
     /// @brief Updates the schema selection for adding all variables
-    void updateAllVarsSchemaSelection ();
+    //void updateAllVarsSchemaSelectionSlot ();
     /// @brief Updates meta tables grid
-    void updateMetaTablesGrid();
+    void updateMetaTablesGridSlot();
 
     void showLabelDefinitionWidgetSlot();
 
@@ -112,39 +110,30 @@ private:
     /// @brief Grid with all data sources
     QGridLayout* ds_grid_ {nullptr};
     /// @brief Container with data sources edit buttons
-    std::map <QPushButton*, DBODataSourceDefinition*> ds_grid_edit_buttons_;
+    //std::map <QPushButton*, DBODataSourceDefinition*> ds_grid_edit_buttons_;
     /// @brief Container with data sources delete buttons
-    std::map <QPushButton*, DBODataSourceDefinition*> ds_grid_delete_buttons_;
+    //std::map <QPushButton*, DBODataSourceDefinition*> ds_grid_delete_buttons_;
 
-    /// @brief Add new data source schema selection
-    QComboBox* ds_schema_box_ {nullptr};
     QPushButton* new_ds_button_ {nullptr};
 
     /// @brief grid with all meta tables per schema
     QGridLayout* meta_table_grid_ {nullptr};
 
-    /// @brief Add meta table for schema schema selection
-    QComboBox* new_meta_schema_box_ {nullptr};
-    /// @brief Add meta table for schema meta table selection
-    QComboBox* new_meta_box_ {nullptr};
     QPushButton* new_meta_button_ {nullptr};
 
     /// @brief Grid with all DBOVariables
     QGridLayout* dbovars_grid_ {nullptr};
 
     /// @brief Container with DBOVariable edit buttons
-    std::map <QPushButton*, DBOVariable*> dbo_vars_grid_edit_buttons_;
+    //std::map <QPushButton*, DBOVariable*> dbo_vars_grid_edit_buttons_;
     /// @brief Container with DBOVariable delete buttons
-    std::map <QPushButton*, DBOVariable*> dbo_vars_grid_delete_buttons_;
+    //std::map <QPushButton*, DBOVariable*> dbo_vars_grid_delete_buttons_;
 
     /// @brief Add all variables schema box
-    QComboBox* all_schemas_box_ {nullptr};
+    DBSchemaSelectionComboBox* all_schemas_box_ {nullptr};
     QPushButton* add_schema_button_ {nullptr};
 
     bool locked_ {false};
-
-    /// @brief Updates a schema selection box
-    void updateSchemaSelectionBox (QComboBox* box);
 };
 
 #endif /* DBOBJECTEDITWIDGET_H_ */

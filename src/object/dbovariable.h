@@ -146,8 +146,11 @@ public:
     bool hasSchema (const std::string& schema) const;
     /// @brief Returns meta table identifier for a given schema
     const std::string& metaTable (const std::string& schema) const;
+
+    bool hasVariableName (const std::string& schema) const;
     /// @brief Returns variable identifier for a given schema
     const std::string& variableName (const std::string& schema) const;
+    void setVariableName (const std::string& schema, const std::string& name);
 
     bool hasCurrentDBColumn () const;
     const DBTableColumn& currentDBColumn () const;
@@ -216,5 +219,7 @@ protected:
     virtual void checkSubConfigurables ();
     void setMinMax ();
 };
+
+Q_DECLARE_METATYPE(DBOVariable*)
 
 #endif /* DBOVARIABLE_H_ */

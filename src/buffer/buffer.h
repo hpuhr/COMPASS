@@ -91,6 +91,17 @@ public:
     /// Copies current index from source buffer into this one. PropertyLists must have the same indices
     //void deepCopyRecordFrom (Buffer *src);
 
+    bool hasBool (const std::string &id);
+    bool hasChar (const std::string id);
+    bool hasUChar (const std::string &id);
+    bool hasInt (const std::string &id);
+    bool hasUInt (const std::string &id);
+    bool hasLongInt (const std::string &id);
+    bool hasULongInt (const std::string &id);
+    bool hasFloat (const std::string &id);
+    bool hasDouble (const std::string &id);
+    bool hasString (const std::string &id);
+
     ArrayListTemplate<bool> &getBool (const std::string &id);
     ArrayListTemplate<char> &getChar (const std::string id);
     ArrayListTemplate<unsigned char> &getUChar (const std::string &id);

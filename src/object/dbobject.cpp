@@ -148,24 +148,42 @@ void DBObject::checkSubConfigurables ()
     }
 }
 
-bool DBObject::hasVariable (const std::string& id) const
+bool DBObject::hasVariable (const std::string& name) const
 {
-    return (variables_.find (id) != variables_.end());
+    return (variables_.find (name) != variables_.end());
 }
 
-DBOVariable& DBObject::variable (const std::string& variable_id) const
+DBOVariable& DBObject::variable (const std::string& name) const
 {
-    assert (hasVariable (variable_id));
-    return *variables_.at(variable_id);
+    assert (hasVariable (name));
+    return *variables_.at(name);
 }
 
-void DBObject::deleteVariable (const std::string& id)
+void DBObject::renameVariable (const std::string& name, const std::string& new_name)
 {
-    assert (hasVariable (id));
+    loginf << "DBObject: renameVariable: name " << name << " new_name " << new_name;
 
-    DBOVariable* variable = variables_[id];
-    variables_.erase(variables_.find (id));
-    assert (!hasVariable (id));
+    assert (hasVariable (name));
+    assert (!hasVariable (new_name));
+
+    DBOVariable* variable = variables_.at(name);
+
+    variables_.erase(name);
+    assert (!hasVariable (name));
+
+    variable->name(new_name);
+    variables_[new_name] = variable;
+
+    assert (hasVariable (new_name));
+}
+
+void DBObject::deleteVariable (const std::string& name)
+{
+    assert (hasVariable (name));
+
+    DBOVariable* variable = variables_.at(name);
+    variables_.erase(variables_.find (name));
+    assert (!hasVariable (name));
     delete variable;
 }
 
@@ -383,6 +401,8 @@ void DBObject::unlock ()
 
 void DBObject::schemaChangedSlot ()
 {
+    loginf << "DBObject: schemaChangedSlot";
+
     if (ATSDB::instance().schemaManager().hasCurrentSchema())
     {
         DBSchema& schema = ATSDB::instance().schemaManager().getCurrentSchema();
@@ -400,6 +420,8 @@ void DBObject::schemaChangedSlot ()
     }
     else
         current_meta_table_ = nullptr;
+
+    databaseContentChangedSlot ();
 }
 
 void DBObject::load (DBOVariableSet& read_set, bool use_filters, bool use_order, DBOVariable* order_variable,

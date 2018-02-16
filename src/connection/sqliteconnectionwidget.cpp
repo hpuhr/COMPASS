@@ -54,7 +54,7 @@ SQLiteConnectionWidget::SQLiteConnectionWidget(SQLiteConnection &connection, QWi
     connect (add_button_, SIGNAL(clicked()), this, SLOT(addFileSlot()));
     layout->addWidget(add_button_);
 
-    delete_button_ = new QPushButton ("Delete");
+    delete_button_ = new QPushButton ("Remove");
     connect (delete_button_, SIGNAL(clicked()), this, SLOT(deleteFileSlot()));
     layout->addWidget(delete_button_);
     layout->addStretch();
@@ -116,6 +116,8 @@ void SQLiteConnectionWidget::openFileSlot ()
     {
         assert (connection_.hasFile(filename.toStdString()));
         connection_.openFile(filename.toStdString());
+
+        open_button_->setDisabled(true);
 
         emit databaseOpenedSignal();
     }
