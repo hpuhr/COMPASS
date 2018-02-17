@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <stdexcept>
+#include <iostream>
 
 #include <QFileInfo>
 #include <QString>
@@ -43,19 +44,32 @@ bool copyRecursively(const std::string& source_folder, const std::string& dest_f
     QDir sourceDir(sourceFolder);
 
     if(!sourceDir.exists())
+    {
+        std::cout << "Files: copyRecursively: source dir " << source_folder << " doesn't exist" << std::endl;
         return false;
+    }
 
     QDir destDir(destFolder);
     if(!destDir.exists())
         destDir.mkdir(destFolder);
 
+
     QStringList files = sourceDir.entryList(QDir::Files);
-    for(int i = 0; i< files.count(); i++) {
+    for(int i = 0; i< files.count(); i++)
+    {
         QString srcName = sourceFolder + QDir::separator() + files[i];
         QString destName = destFolder + QDir::separator() + files[i];
+
+        if (QFile::exists(destName))
+            QFile::remove(destName);
+
         success = QFile::copy(srcName, destName);
         if(!success)
+        {
+            std::cout << "Files: copyRecursively: file copy failed of " << srcName.toStdString()
+                 << " to " << destName.toStdString() << std::endl;
             return false;
+        }
     }
 
     files.clear();
@@ -66,7 +80,11 @@ bool copyRecursively(const std::string& source_folder, const std::string& dest_f
         QString destName = destFolder + QDir::separator() + files[i];
         success = copyRecursively(srcName.toStdString(), destName.toStdString());
         if(!success)
+        {
+            std::cout << "Files: copyRecursively: directory copy failed of " << srcName.toStdString()
+                 << " to " << destName.toStdString()  << std::endl;
             return false;
+        }
     }
 
     return true;

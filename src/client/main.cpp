@@ -28,24 +28,33 @@ namespace po = boost::program_options;
 
 int main (int argc, char **argv)
 {
-//    bool fuse = false;
+    bool reset_config = false;
 
-//    po::options_description desc("Allowed options");
-//    desc.add_options()
-//        ("help", "produce help message")
-//        //("compression", po::value<int>(), "set compression level")
-//        ("fuse,f", po::bool_switch(&fuse), "assume fuse environment")
-//    ;
+    po::options_description desc("Allowed options");
+    desc.add_options()
+        ("help", "produce help message")
+        //("compression", po::value<int>(), "set compression level")
+        ("reset-config,rc", po::bool_switch(&reset_config), "reset user configuration files")
+    ;
 
-//    po::variables_map vm;
-//    po::store(po::parse_command_line(argc, argv, desc), vm);
-//    po::notify(vm);
+    try
+    {
+        po::variables_map vm;
+        po::store(po::parse_command_line(argc, argv, desc), vm);
+        po::notify(vm);
 
-//    if (vm.count("help")) {
-//        std::cout << desc << "\n";
-//        return 1;
-//    }
-
+        if (vm.count("help"))
+        {
+            std::cout << desc << "\n";
+            return 1;
+        }
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << "ATSDBClient: unable to parse command line parameters: " << std::endl
+                  << e.what() << std::endl;
+        return 0;
+    }
 
     // check if basic configuration works
     try
@@ -106,6 +115,21 @@ int main (int argc, char **argv)
         else
         {
             std::cout << " yes" << std::endl;
+        }
+
+        if (reset_config)
+        {
+            std::string system_conf_path = system_install_path+"conf/";
+            std::string home_conf_path = HOME_SUBDIRECTORY+"conf/";
+
+            std::cout << "ATSDBClient: reset config from from '" << system_conf_path
+                      << "' to '" << home_conf_path <<  "' ... ";
+            if (!Files::copyRecursively(system_conf_path, home_conf_path))
+            {
+                std::cout << " failed" << std::endl;
+                return -1;
+            }
+            std::cout << " done" << std::endl;
         }
 
         std::cout << "ATSDBClient: opening simple config file at '" << HOME_CONF_DIRECTORY+"main.conf'" << std::endl;
