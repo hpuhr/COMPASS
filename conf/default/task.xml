@@ -1,2 +1,12 @@
 <Configuration class_id="TaskManager" instance_id="TaskManager0">
+    <Configuration class_id="RadarPlotPositionCalculatorTask" instance_id="RadarPlotPositionCalculatorTask0">
+        <ParameterString altitude_var_str="modec_code_ft"/>
+        <ParameterString azimuth_var_str="pos_azm_deg"/>
+        <ParameterString datasource_var_str="ds_id"/>
+        <ParameterString db_object_str="Radar"/>
+        <ParameterString key_var_str="rec_num"/>
+        <ParameterString latitude_var_str="pos_lat_deg"/>
+        <ParameterString longitude_var_str="pos_long_deg"/>
+        <ParameterString range_var_str="pos_range_nm"/>
+    </Configuration>
 </Configuration>
