@@ -267,6 +267,13 @@ public:
         size_t first_list_cnt = from_index/BUFFER_ARRAY_SIZE;
         unsigned list_cnt = first_list_cnt;
         unsigned list_size = to_index/BUFFER_ARRAY_SIZE;
+
+        if (to_index % BUFFER_ARRAY_SIZE != 0) // fix for less then one full array
+        {
+            logdbg << "ArrayList: distinctValuesWithIndexes: rest of data fix";
+            list_size += 1;
+        }
+
         size_t first_list_row = from_index%BUFFER_ARRAY_SIZE;
         size_t list_row_cnt = 0;
 
@@ -276,16 +283,19 @@ public:
 
 //        T none_index = std::numeric_limits<T>::max();
 
+        size_t array_size;
+
         for (; list_cnt < list_size; list_cnt++)
         {
             std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > array_list = data_.at(list_cnt);
+            array_size = array_list->size();
 
             if (list_cnt == first_list_cnt) // there is a start index
                 list_row_cnt=first_list_row;
             else
                 list_row_cnt=0;
 
-            for (; list_row_cnt < BUFFER_ARRAY_SIZE; list_row_cnt++)
+            for (; list_row_cnt < array_size; list_row_cnt++)
             {
                 if (!none_flags_.at(list_cnt)->at(list_row_cnt)) // not for none
                 {
