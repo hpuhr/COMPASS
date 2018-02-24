@@ -72,7 +72,7 @@ int main (int argc, char **argv)
             std::cout << "ATSDBClient: assuming fuse environment in " << appdir << std::endl;
             assert (appdir);
 
-            system_install_path = std::string(appdir) + "/appdir/atsdb";
+            system_install_path = std::string(appdir) + "/appdir/atsdb/";
 
             std::cout << "ATSDBClient: set install path to '" << system_install_path << "'" << std::endl;
             assert (Files::directoryExists(system_install_path));
