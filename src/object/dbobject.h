@@ -193,7 +193,7 @@ public:
     ///@brief Returns flag if data sources are defined for DBO type.
     bool hasDataSources () { return data_sources_.size() > 0; }
     ///@brief Returns container with all defined data source for DBO type.
-    const std::map<int, DBODataSource> &dataSources () { return data_sources_; }
+    std::map<int, DBODataSource>& dataSources () { return data_sources_; }
     ///@brief Returns data source name for a DBO type and data source number.
     const std::string& getNameOfSensor (int num);
 

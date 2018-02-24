@@ -168,25 +168,26 @@ DBODataSource::~DBODataSource()
 
 void DBODataSource::finalize ()
 {
-    assert (!finalized_);
+    bool ret = ProjectionManager::instance().geo2Cart(latitude_, longitude_, system_x_, system_y_);
 
-    ProjectionManager::instance().geo2Cart(latitude_, longitude_, system_x_, system_y_);
+    if (!ret)
+    {
+       logwrn << "DBODataSource: finalize: geo2cart return false for " << short_name_
+              << " lat " << latitude_ << " lon " << longitude_ << " x " << system_x_ << " y " << system_y_;
+       finalized_ = false;
+       return;
+    }
 
-    logdbg << "DBODataSource: finalize: " << short_name_ << " lat " << latitude_ << " lon " << longitude_ << " x " << system_x_ << " y " << system_y_;
-//    double center_system_x = ProjectionManager::instance().getCenterSystemX();
-//    double center_system_y = ProjectionManager::instance().getCenterSystemY();
+    loginf << "DBODataSource: finalize: " << short_name_ << " done";
 
-//    local_trans_x_ = center_system_x-system_x_;
-//    local_trans_y_ = center_system_y-system_y_;
-
-    finalized_=true;
+    finalized_ = true;
 }
 
 // azimuth degrees, range & altitude in meters
 void DBODataSource::calculateSystemCoordinates (double azimuth, double slant_range, double altitude, bool has_altitude, double &sys_x, double &sys_y)
 {
     if (!finalized_)
-        finalize ();
+        logerr << "DBODataSource: calculateSystemCoordinates: " << short_name_ << " not finalized";
 
     assert (finalized_);
 

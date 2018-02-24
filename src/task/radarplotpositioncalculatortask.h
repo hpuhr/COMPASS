@@ -103,7 +103,7 @@ protected:
     std::string longitude_var_str_;
     DBOVariable* longitude_var_{nullptr};
 
-    std::map<int, DBODataSource> data_sources_;
+    //std::map<int, DBODataSource> data_sources_;
 
     std::shared_ptr<UpdateBufferDBJob> job_ptr_;
 

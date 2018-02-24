@@ -26,17 +26,8 @@
 #include "projectionmanager.h"
 #include "projectionmanagerwidget.h"
 
-ProjectionManagerWidget::ProjectionManagerWidget(QWidget *parent, Qt::WindowFlags f)
- : QWidget (parent, f), world_proj_info_label_ (0), epsg_edit_ (0), cart_proj_info_label_(0)
-{
-    createGUIElements();
-}
-
-ProjectionManagerWidget::~ProjectionManagerWidget()
-{
-}
-
-void ProjectionManagerWidget::createGUIElements ()
+ProjectionManagerWidget::ProjectionManagerWidget(QWidget* parent, Qt::WindowFlags f)
+ : QWidget (parent, f)
 {
     QFont font_bold;
     font_bold.setBold(true);
@@ -80,6 +71,10 @@ void ProjectionManagerWidget::createGUIElements ()
     setLayout (layout);
 }
 
+ProjectionManagerWidget::~ProjectionManagerWidget()
+{
+}
+
 void ProjectionManagerWidget::changeEPSG ()
 {
     assert (epsg_edit_);
@@ -95,8 +90,10 @@ void ProjectionManagerWidget::changeEPSG ()
     }
     catch (...)
     {
-        std::string msg = "Forbidden value '"+value_str+"\n Please refer to http://spatialreference.org/ref/epsg/ for possible numbers";
-        QMessageBox::warning ( this, "Change Cartesian Coordinate", msg.c_str());
+        std::string msg = "Forbidden value '"+value_str
+                +"'\n Please refer to http://spatialreference.org/ref/epsg/ for possible numbers.";
+
+        QMessageBox::warning ( this, "Change EPSG Value", msg.c_str());
         epsg_edit_->setText(std::to_string(ProjectionManager::instance().getEPSG()).c_str());
         return;
     }

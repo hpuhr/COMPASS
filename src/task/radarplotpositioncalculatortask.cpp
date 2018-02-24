@@ -305,8 +305,6 @@ void RadarPlotPositionCalculatorTask::calculate ()
     assert (latitude_var_);
     assert (longitude_var_);
 
-    data_sources_ = db_object_->dataSources();
-
     DBOVariableSet read_set;
     read_set.add(*key_var_);
     read_set.add(*datasource_var_);
@@ -371,6 +369,10 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject &object)
 
     ProjectionManager &proj_man = ProjectionManager::instance();
 
+    std::map<int, DBODataSource>& data_sources = db_object_->dataSources();
+    for (auto& ds_it : data_sources)
+        assert (ds_it.second.isFinalized()); // has to be done before to check epsg
+
     std::shared_ptr<Buffer> read_buffer = object.data();
     unsigned int read_size = read_buffer->size();
     assert (read_size);
@@ -398,8 +400,7 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject &object)
     bool has_altitude;
     //double altitude_angle;
 
-    //    std::map <std::pair<unsigned char, unsigned char>, DataSource* > &data_sources = ATSDB::getInstance().getDataSourceInstances (DBO_PLOTS);
-    assert (data_sources_.size());
+    assert (data_sources.size());
 
     //    std::pair<unsigned char, unsigned char> sac_sic_key;
     double sys_x, sys_y;
@@ -411,6 +412,10 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject &object)
     std::string msg;
 
     loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: writing update_buffer";
+    bool ret;
+
+    size_t transformation_errors = 0;
+
     for (unsigned int cnt=0; cnt < read_size; cnt++)
     {
         if (cnt % 50000 == 0 && target_report_count_ != 0)
@@ -459,7 +464,7 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject &object)
     //        sac_sic_key.second= sic;
 
 
-        if (data_sources_.find(sensor_id) == data_sources_.end())
+        if (data_sources.find(sensor_id) == data_sources.end())
         {
             logerr << "RadarPlotPositionCalculatorTask: loadingDoneSlot: sensor id " << sensor_id << " unkown";
             continue;
@@ -472,12 +477,20 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject &object)
         altitude_m = 0.3048 * altitude_ft;
 
     //        //loginf << " DBO alt m " << altitude_m;
-        altitude_m -= data_sources_.at(sensor_id).altitude();
+        altitude_m -= data_sources.at(sensor_id).altitude();
 
             //altitude_angle = acos (altitude_m/pos_range_m);
 
-        data_sources_.at(sensor_id).calculateSystemCoordinates(pos_azm_deg, pos_range_m, altitude_m, has_altitude, sys_x, sys_y);
-        proj_man.cart2geo(sys_x, sys_y, lat, lon);
+        data_sources.at(sensor_id).calculateSystemCoordinates(pos_azm_deg, pos_range_m, altitude_m, has_altitude,
+                                                               sys_x, sys_y);
+
+        ret = proj_man.cart2geo(sys_x, sys_y, lat, lon);
+
+        if (!ret)
+        {
+            transformation_errors++;
+            continue;
+        }
 
         update_buffer->getDouble(latitude_var_dbname).set(update_cnt, lat);
         update_buffer->getDouble(longitude_var_dbname).set(update_cnt, lon);
@@ -487,14 +500,34 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject &object)
         //loginf << "uga cnt " << update_cnt << " rec_num " << rec_num << " lat " << lat << " long " << lon;
     }
 
-    loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: update_buffer size " << update_buffer->size();
+    loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: update_buffer size " << update_buffer->size()
+            << ", " <<  transformation_errors << " transformation errors";
 
     msg_box_->close();
     delete msg_box_;
     msg_box_ = nullptr;
 
-    UpdateBufferDBJob *job = new UpdateBufferDBJob(ATSDB::instance().interface(), object, *key_var_, update_buffer,
-                                                   true);
+    if (transformation_errors)
+    {
+        QMessageBox::StandardButton reply;
+
+        std::string question = "There were "+std::to_string(transformation_errors)
+                +" skipped coordinates with transformation errors, "
+                +std::to_string(update_buffer->size())
+                +" coordinates were projected correctly. Do you want to insert the data?";
+
+        reply = QMessageBox::question(nullptr, "Insert Data", question.c_str(), QMessageBox::Yes|QMessageBox::No);
+
+        if (reply == QMessageBox::No)
+        {
+            loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: aborted by user because of errors";
+            calculated_ = true;
+            return;
+        }
+    }
+
+    UpdateBufferDBJob *job = new UpdateBufferDBJob(ATSDB::instance().interface(), object, *key_var_,
+                                                   update_buffer, true);
     job_ptr_ = std::shared_ptr<UpdateBufferDBJob> (job);
     connect (job, SIGNAL(doneSignal()), this, SLOT(updateDoneSlot()), Qt::QueuedConnection);
 

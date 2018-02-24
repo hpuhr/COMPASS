@@ -31,15 +31,13 @@ public slots:
     void changeEPSG();
 
 public:
-    ProjectionManagerWidget(QWidget* parent = 0, Qt::WindowFlags f = 0);
+    ProjectionManagerWidget(QWidget* parent=0, Qt::WindowFlags f=0);
     virtual ~ProjectionManagerWidget();
 
 protected:
-    QLabel *world_proj_info_label_;
-    QLineEdit *epsg_edit_;
-    QLabel *cart_proj_info_label_;
-
-    void createGUIElements ();
+    QLabel* world_proj_info_label_ {nullptr};
+    QLineEdit* epsg_edit_ {nullptr};
+    QLabel* cart_proj_info_label_ {nullptr};
 };
 
 

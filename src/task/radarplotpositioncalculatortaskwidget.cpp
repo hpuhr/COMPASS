@@ -25,11 +25,13 @@
 #include "stringconv.h"
 #include "projectionmanager.h"
 #include "projectionmanagerwidget.h"
+#include "dbobjectmanager.h"
 
 #include <QVBoxLayout>
 #include <QGridLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QMessageBox>
 
 using namespace Utils::String;
 
@@ -108,9 +110,9 @@ RadarPlotPositionCalculatorTaskWidget::RadarPlotPositionCalculatorTaskWidget(Rad
     main_layout->addLayout(grid);
     //main_layout->addStretch();
 
-    QPushButton *calc_button = new QPushButton ("Calculate");
-    connect(calc_button, SIGNAL( clicked() ), this, SLOT( calculateSlot() ));
-    main_layout->addWidget(calc_button);
+    calc_button_ = new QPushButton ("Calculate");
+    connect(calc_button_, SIGNAL( clicked() ), this, SLOT( calculateSlot() ));
+    main_layout->addWidget(calc_button_);
 
     setLayout (main_layout);
 
@@ -224,6 +226,37 @@ void RadarPlotPositionCalculatorTaskWidget::anyVariableChangedSlot()
 void RadarPlotPositionCalculatorTaskWidget::calculateSlot ()
 {
     loginf << "RadarPlotPositionCalculatorTaskWidget: calculateSlot";
+
+    std::string db_object_str = task_.dbObjectStr();
+    DBObjectManager& obj_man = ATSDB::instance().objectManager();
+
+    assert (obj_man.existsObject(db_object_str));
+    DBObject& db_object = obj_man.object(db_object_str);
+
+    std::map<int, DBODataSource>& data_sources = db_object.dataSources();
+
+    bool not_final = false;
+    for (auto& ds_it : data_sources)
+    {
+        ds_it.second.finalize();
+        if (!ds_it.second.isFinalized())
+        {
+            not_final = true;
+            break;
+        }
+    }
+
+    if (not_final)
+    {
+        QMessageBox::warning (this, "EPSG Value Wrong",
+                              "The coordinates of the data sources of selected database object could not be calculated."
+                              " Please select a suitable EPSG value and try again");
+        return;
+    }
+
+    loginf << "RadarPlotPositionCalculatorTaskWidget: calculateSlot: starting calculation";
+
+    calc_button_->setDisabled(true);
 
     assert (!task_.isCalculating());
     task_.calculate();

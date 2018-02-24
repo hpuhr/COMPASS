@@ -124,7 +124,6 @@ public:
     void sic(unsigned char sic);
     unsigned char sic() const;
 
-
     bool hasLatitude() const;
     void latitude(double latitiude);
     double latitude() const;
@@ -139,8 +138,11 @@ public:
 
     void finalize ();
 
+    bool isFinalized () { return finalized_; } // returns false if projection can not be made because of error
+
     // azimuth degrees, range & altitude in meters
-    void calculateSystemCoordinates (double azimuth, double slant_range, double altitude, bool has_altitude, double &sys_x, double &sys_y);
+    void calculateSystemCoordinates (double azimuth, double slant_range, double altitude, bool has_altitude,
+                                     double &sys_x, double &sys_y);
 
 protected:
     unsigned int id_{0};
