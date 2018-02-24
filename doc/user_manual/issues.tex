@@ -1,0 +1,171 @@
+\chapter{Reporting Issues}
+
+There are several ways of reporting issues. The following steps have to be taken:
+
+\begin{itemize}  
+\item Check if the issue was already reported
+\item Collect all required information
+\item Report the issue
+\end{itemize} 
+
+Please also make sure that you are using the latest version of ATSDB, since the issue might already have been corrected in the current version.
+
+Also, if you're planning on using ATSDB, it is of benefit if you register on \url{https://github.com}, which can be done for free. It is then possible for you to comment on issues, create new ones or even contribute to the project.
+
+\section{Already Reported Issues}
+
+Please refer to \url{https://github.com/hpuhr/ATSDB/issues} for a list of the currently known issues. An issue can be ``Open'' meaning it was not yet fixed, or ``Closed'', meaning it was at least fixed in the source code. If it is closed, it does not mean that the fix is already included in the current AppImage, but that it will be in the next release.
+
+Please look through the issues and make sure that yours isn't already listed. If so, you can comment on it to indicate the severity for you. If not, please proceed to the next step.
+
+\section{Collect Information}
+
+Basically everything that is needed to reproduce the error should be submitted. Depending on the type of the error, this can differ, but at least the following information should be given:
+
+\begin{itemize}  
+\item Console log of the application
+\item Exact steps taken until the error occured
+\end{itemize} 
+
+\subsection{For Application Crashes}
+
+If the application crashed, it would also be of interest to get a stacktrace. This can be achieved by running the application using gdb (\url{https://www.gnu.org/software/gdb/}), which might have to be installed.
+
+Then, the application can be run using ``gdb ./ATSDB-XXX.AppImage''. The output will look similiar to this:
+
+\begin{verbatim}
+GNU gdb (Ubuntu 8.0.1-0ubuntu1) 8.0.1
+Copyright (C) 2017 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+<http://www.gnu.org/software/gdb/documentation/>.
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from ./ATSDB-x86_64_RELDBG_0220.AppImage...done.
+(gdb) 
+\end{verbatim}
+
+
+In the shown console, enter the command ``run''. This will run the application. Then, perform the same steps as previously to reproduce the application crash.
+
+When the crash occurs, the output should look like this:
+
+\begin{verbatim}
+Thread 1 "AppRun" received signal SIGINT, Interrupt.
+0x00007fffef950951 in __GI___poll (fds=0x7fffcc007630, nfds=3, timeout=15036) 
+at ../sysdeps/unix/sysv/linux/poll.c:29
+29	../sysdeps/unix/sysv/linux/poll.c: No such file or directory
+\end{verbatim}
+
+Then, enter the command ``backtrace''. This will show output similiar to this:
+
+\begin{verbatim}
+#0  0x00007fffef950951 in __GI___poll (fds=0x7fffcc007630, nfds=3, timeout=15036) at 
+../sysdeps/unix/sysv/linux/poll.c:29
+#1  0x00007fffec5bb169 in ?? () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#2  0x00007fffec5bb27c in g_main_context_iteration () 
+from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#3  0x00007ffff308998c in QEventDispatcherGlib::processEvents
+(QFlags<QEventLoop::ProcessEventsFlag>) ()
+   from /tmp/.mount_ATSDB-1XB9QP/appdir/bin/../lib/libQt5Core.so.5
+#4  0x00007ffff303b96b in QEventLoop::exec(QFlags<QEventLoop::ProcessEventsFlag>)
+ () from /tmp/.mount_ATSDB-1XB9QP/appdir/bin/../lib/libQt5Core.so.5
+#5  0x00007ffff30420e1 in QCoreApplication::exec() () from 
+/tmp/.mount_ATSDB-1XB9QP/appdir/bin/../lib/libQt5Core.so.5
+#6  0x00000000006be3c6 in main ()
+\end{verbatim}
+
+This is called a stacktrace. Please copy all of this text so that it can be subitted with the issue report.
+
+\subsection{For Graphical Issues}
+
+If a display issue exists, e.g. when wrong colors or display artefacts are shown, additional information is required.
+
+To find out which graphics card and driver are being used, the program ``glxinfo'' has to be used (it might have to be installed). Please execute the following command:
+
+\begin{verbatim}
+glxinfo | grep OpenGL
+\end{verbatim}
+
+The output might look something like this:
+
+\begin{verbatim}
+OpenGL vendor string: NVIDIA Corporation
+OpenGL renderer string: GeForce GTX 1080/PCIe/SSE2
+OpenGL core profile version string: 4.5.0 NVIDIA 384.111
+OpenGL core profile shading language version string: 4.50 NVIDIA
+OpenGL core profile context flags: (none)
+OpenGL core profile profile mask: core profile
+OpenGL core profile extensions:
+OpenGL version string: 4.5.0 NVIDIA 384.111
+OpenGL shading language version string: 4.50 NVIDIA
+OpenGL context flags: (none)
+OpenGL profile mask: (none)
+OpenGL extensions:
+OpenGL ES profile version string: OpenGL ES 3.2 NVIDIA 384.111
+OpenGL ES profile shading language version string: OpenGL ES GLSL ES 3.20
+OpenGL ES profile extensions:
+\end{verbatim}
+
+This shows that an NVidia graphics card exists, and the correct driver is used. Please add such output to the issue report.
+
+\subsubsection{Unsupported Graphics Cards or Drivers}
+
+Since there exist hundreds of different graphics card types, and several possible drivers for each of them, support will only be given for ATI or Nvidia graphics cards, with their native drivers.
+
+If different graphics cards or driver are used, the output of glxinfo might be similiar to this:
+
+\begin{verbatim}
+OpenGL vendor string: nouveau
+OpenGL renderer string: Gallium 0.4 on NVE6
+OpenGL core profile version string: 3.1 (Core Profile) Mesa 9.2.5
+OpenGL core profile shading language version string: 1.40
+OpenGL core profile context flags: (none)
+OpenGL core profile extensions:
+OpenGL version string: 3.0 Mesa 9.2.5
+OpenGL shading language version string: 1.30
+OpenGL context flags: (none)
+OpenGL extensions:
+\end{verbatim}
+
+Or this:
+
+\begin{verbatim}
+OpenGL vendor string: Intel Open Source Technology Center
+OpenGL renderer string: Mesa DRI Intel(R) Ivybridge Desktop 
+OpenGL core profile version string: 3.3 (Core Profile) Mesa 11.0.6
+OpenGL core profile shading language version string: 3.30
+OpenGL core profile context flags: (none)
+OpenGL core profile profile mask: core profile
+OpenGL core profile extensions:
+OpenGL version string: 3.0 Mesa 11.0.6
+OpenGL shading language version string: 1.30
+OpenGL context flags: (none)
+OpenGL extensions:
+OpenGL ES profile version string: OpenGL ES 3.0 Mesa 11.0.6
+OpenGL ES profile shading language version string: OpenGL ES GLSL ES 3.00
+OpenGL ES profile extensions:
+\end{verbatim}
+
+In such cases, the following issues can be expected and will currently not be addressed:
+
+\begin{itemize} 
+\item Application might not even start (OpenGl version error)
+\item Slow display performance (OpenGl emulation be CPU-based Mesa driver)
+\item Graphical display errors (wrong colours, artefacts, etc) 
+\end{itemize} 
+
+Please know that it might also work, but no guarantees or support can be given.
+
+\section{Issue Reporting}
+
+Please either create a new isse on GitHub (\url{https://github.com/hpuhr/ATSDB/issues}) or send a mail to \href{mailto:helmut.puhr@gmx.at}{helmut.puhr@gmx.at}, and include all of the previously collected information. If the supplied information is not enough you will be contacted as soon as time allows, with a request for further detail.
+
+

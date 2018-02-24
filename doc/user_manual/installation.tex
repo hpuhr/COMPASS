@@ -1,0 +1,182 @@
+\chapter{Installation}
+\label{sec:installation}
+
+ATSDB can either be built from source (which exludes the OSG View, but allows development of additional features), or downloaded as an AppImage (binary distributable which includes the OSG View). The recommended option for non-developers is the AppImage.
+
+\section{Using the AppImage}
+
+To summarize, an AppImage is a form of binary distribution in one complete package, which does not require installation of any libraries or alteration of the operating system. Please refer to \url{https://appimage.org/} to get additional information.
+
+To obtain the ATSDB AppImage, download the most current distribution from TODO. To execute, make it executable using the following command:
+\begin{verbatim}
+chmod +x ATSDB-x86_64_release.AppImage
+\end{verbatim}
+
+Generally speaking, that is it. The application can be run using the following command:
+\begin{verbatim}
+./ATSDB-x86_64_release.AppImage
+\end{verbatim}
+
+The following notes that should be considered:
+
+\begin{itemize}  
+\item The AppImage should run under any Linux distribution of similiar date to Ubuntu 14.04 or later, but no guarantees can be made.
+\item The AppImage performance is somewhat lessened in comparison to the a later Ubuntu version, which in all probability is just that the graphics system is that outdated. This will be investigated further.
+\item OSG View rendering is performed according to the local graphics card and driver, and might be limited by their capabilities.
+\end{itemize}
+
+\section{Building from Source Code}
+Currently, ATSDB can be installed as source code and compiled by the user. Any recent Linux installation should work without issues. Regarding software version, no particularly new features were used, so older versions than the verified ones should also work. \\
+
+The following software has to be installed on the workstation:
+
+\begin{table}[H]
+  \center
+  \begin{tabular}{ | l | l | l |}
+    \hline
+    \textbf{Package} & \textbf{Description} & \textbf{Verified version} \\ \hline
+    g++ & C++11 capable C++ compiler & 7.2.0 \\ \hline
+    cmake & CMake build tool & 3.9.1 \\ \hline
+    qt5-default & Qt5 development package & 5.9.1 \\ \hline
+    libboost-dev & Boost development libraries & 1.62.0.1 \\ \hline
+    mysql++-dev & MySQL library bindings & 3.2.2 \\ \hline
+    libmysqlclient-dev & MySQL development library & 1.0.2 \\ \hline
+    libsqlite3-dev & Sqlite3 development files & 3.2.2 \\ \hline
+    libgdal-dev & Geospatial data abstraction library & 2.2.1 \\ \hline
+    tinyxml2-dev & XML parsing library & 5.0.1 \\ \hline
+    log4cpp5-dev & Logging libary & 1.1.1 \\ \hline
+    libarchive-dev & Archive libary & 3.2.2 \\ \hline
+    doxygen & Documentation generation & 1.8.13 \\ 
+    \hline
+  \end{tabular}
+  \caption{Required software/libraries}
+\end{table}
+
+To install to source code, either download the latest released version from \\ \url{https://github.com/hpuhr/ATSDB/releases} \\
+or use the following command (git required) to clone the current repository:
+
+\begin{verbatim}
+git clone https://github.com/hpuhr/ATSDB.git
+\end{verbatim}
+
+Enter the ATSDB source folder, and execute cmake to create a Makefile:
+
+\begin{verbatim}
+cmake .
+\end{verbatim}
+
+The output should look like this:
+\begin{verbatim}
+sk@golem:~/test/ATSDB$ cmake .
+  Path: /home/sk/test/ATSDB
+-- The C compiler identification is GNU 7.2.0
+-- The CXX compiler identification is GNU 7.2.0
+-- Check for working C compiler: /usr/bin/cc
+-- Check for working C compiler: /usr/bin/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /usr/bin/c++
+-- Check for working CXX compiler: /usr/bin/c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+  System: Linux-4.13.0-16-generic
+  Install Path: /home/sk/test/ATSDB/dist
+  Platform: Linux
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Looking for pthread_create
+-- Looking for pthread_create - not found
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - found
+-- Found Threads: TRUE  
+-- Boost version: 1.62.0
+-- Found the following Boost libraries:
+--   regex
+--   system
+--   thread
+--   chrono
+--   date_time
+--   atomic
+  Boost_INCLUDE_DIR: /usr/include
+  Boost_LIBRARY_DIR: 
+  CMAKE_MODULE_PATH: /home/sk/test/ATSDB/cmake_modules
+-- Found MySQL: /usr/lib/libmysqlpp.so
+  MySQLpp_INCLUDE_DIR: /usr/include/mysql++
+  MySQLpp_LIBRARY: /usr/lib/libmysqlpp.so
+-- Found MySQL: /usr/lib/x86_64-linux-gnu/libmysqlclient.so
+  MYSQL_INCLUDE_DIR: /usr/include/mysql
+-- Found Sqlite3 header file in /usr/include
+-- Found Sqlite3 libraries: /usr/lib/x86_64-linux-gnu/libsqlite3.so
+  SQLite3_INCLUDE_DIR: /usr/include
+  SQLite3_LIBRARY_DIR: /usr/lib/x86_64-linux-gnu/libsqlite3.so
+-- Found Log4CPP
+  LOG4CPP_INCLUDE_DIR: /usr/include
+  LOG4CPP_LIBRARY: /usr/lib/x86_64-linux-gnu/liblog4cpp.so
+-- Found GDAL: /usr/lib/libgdal.so  
+  GDAL_INCLUDE_DIRS: /usr/include/gdal
+  GDAL_LIBRARIES: /usr/lib/libgdal.so
+  TINYXML2_INCLUDE_DIR: /usr/include
+  TINYXML2_LIBRARY: /usr/lib/x86_64-linux-gnu/libtinyxml2.so
+-- Found Doxygen: /usr/bin/doxygen (found version "1.8.13") found components:  doxygen 
+CPACK_SOURCE_IGNORE_FILES = /CMakeFiles/;/_CPack_Packages/;/dist/;/.git/;
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/sk/test/ATSDB
+\end{verbatim}
+
+Then, compile the source by executing:
+
+\begin{verbatim}
+make
+\end{verbatim}
+
+The output should look like this:
+
+\begin{verbatim}
+Scanning dependencies of target atsdb_autogen
+[  1%] Automatic MOC for target atsdb
+Generating MOC predefs moc_predefs.h
+Generating MOC source 2MJGWJB4P3/moc_mainwindow.cpp
+...
+Generating MOC source 3JYSCEOBDA/moc_viewmanagerwidget.cpp
+Generating MOC compilation mocs_compilation.cpp
+[  1%] Built target atsdb_autogen
+Scanning dependencies of target atsdb
+[  2%] Building CXX object CMakeFiles/atsdb.dir/src/atsdb.cpp.o
+[  2%] Building CXX object CMakeFiles/atsdb.dir/src/buffer/arraylist.cpp.o
+...
+[ 93%] Linking CXX shared library dist/lib/libatsdb.so
+[ 93%] Built target atsdb
+Scanning dependencies of target atsdb_client_autogen
+[ 94%] Automatic MOC for target atsdb_client
+Generating MOC predefs moc_predefs.h
+Generating MOC source 2MJGWJB4P3/moc_mainwindow.cpp
+...
+Generating MOC source 3JYSCEOBDA/moc_viewmanagerwidget.cpp
+Generating MOC compilation mocs_compilation.cpp
+[ 94%] Built target atsdb_client_autogen
+Scanning dependencies of target atsdb_client
+...
+[100%] Linking CXX executable atsdb_client
+[100%] Built target atsdb_client
+\end{verbatim}
+
+To install the ATSDB client, execute the following command in the build folder:
+
+\begin{verbatim}
+sudo make install
+\end{verbatim}
+
+This will install binary and a data folder to your system directories, commonly in '/usr/local/bin/', '/usr/local/lib/' and '/usr/local/atsdb/' (or similiar, depending on you Linux distribution.
+
+To start the ATSDB client execute:
+
+\begin{verbatim}
+atsdb_client
+\end{verbatim} 
