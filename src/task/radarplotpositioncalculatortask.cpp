@@ -552,6 +552,9 @@ void RadarPlotPositionCalculatorTask::updateDoneSlot ()
 
     delete msg_box_;
     msg_box_ = nullptr;
+
+    if (widget_)
+        widget_->calculationDoneSlot();
 }
 
 bool RadarPlotPositionCalculatorTask::isCalculating ()

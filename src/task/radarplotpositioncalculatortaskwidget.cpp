@@ -227,6 +227,8 @@ void RadarPlotPositionCalculatorTaskWidget::calculateSlot ()
 {
     loginf << "RadarPlotPositionCalculatorTaskWidget: calculateSlot";
 
+    assert (calc_button_);
+
     std::string db_object_str = task_.dbObjectStr();
     DBObjectManager& obj_man = ATSDB::instance().objectManager();
 
@@ -260,6 +262,12 @@ void RadarPlotPositionCalculatorTaskWidget::calculateSlot ()
 
     assert (!task_.isCalculating());
     task_.calculate();
+}
+
+void RadarPlotPositionCalculatorTaskWidget::calculationDoneSlot ()
+{
+    assert (calc_button_);
+    calc_button_->setDisabled(false);
 }
 
 

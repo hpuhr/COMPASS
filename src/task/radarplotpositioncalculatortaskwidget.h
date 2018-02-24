@@ -36,6 +36,7 @@ public slots:
     void dbObjectChangedSlot();
     void anyVariableChangedSlot();
     void calculateSlot ();
+    void calculationDoneSlot ();
 
 public:
     RadarPlotPositionCalculatorTaskWidget(RadarPlotPositionCalculatorTask& task, QWidget * parent = 0, Qt::WindowFlags f = 0);
