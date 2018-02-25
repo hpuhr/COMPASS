@@ -203,7 +203,8 @@ Utils::String::Representation MetaDBOVariable::representation ()
     for (auto variable_it : variables_)
     {
         if (variable_it.second.representation() != representation)
-            logerr << "MetaDBOVariable: dataType: meta var " << name_ << " has different representations in sub variables";
+            logerr << "MetaDBOVariable: dataType: meta var " << name_
+                   << " has different representations in sub variables";
     }
 
     return representation;
@@ -218,7 +219,8 @@ std::string MetaDBOVariable::getMinString () const
         if (value_string.size() == 0)
             value_string = variable_it.second.getMinString();
         else
-            value_string = Utils::String::getSmallerValueString (value_string, variable_it.second.getMinString(), dataType());
+            value_string = Utils::String::getSmallerValueString (value_string, variable_it.second.getMinString(),
+                                                                 dataType());
     }
     assert (value_string.size());
     return value_string;

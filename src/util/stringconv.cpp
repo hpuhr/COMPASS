@@ -190,13 +190,16 @@ const std::string& Utils::String::getLargerValueString (const std::string& value
         throw std::invalid_argument ("String: getLargerValueString: operation on string variable impossible");
     default:
         logerr  <<  "String: getLargerValueString:: unknown property type " << Property::asString(data_type);
-        throw std::runtime_error ("String: getLargerValueString:: unknown property type " + Property::asString(data_type));
+        throw std::runtime_error ("String: getLargerValueString:: unknown property type "
+                                  + Property::asString(data_type));
     }
 }
 
-const std::string& Utils::String::getSmallerValueString (const std::string& value_a_str, const std::string& value_b_str, PropertyDataType data_type)
+const std::string& Utils::String::getSmallerValueString (const std::string& value_a_str, const std::string& value_b_str,
+                                                         PropertyDataType data_type)
 {
-    logdbg << "String: getSmallerValueString: value a " << value_a_str << " b " << value_b_str << " data_type " << Property::asString(data_type);
+    logdbg << "String: getSmallerValueString: value a " << value_a_str << " b " << value_b_str << " data_type "
+           << Property::asString(data_type);
 
     if (value_a_str == NULL_STRING || value_b_str == NULL_STRING)
     {
