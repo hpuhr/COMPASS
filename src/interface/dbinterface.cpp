@@ -621,7 +621,8 @@ std::pair<std::string, std::string> DBInterface::getMinMaxString (const DBOVaria
     {
 //        throw std::invalid_argument ("DBInterface: getMinMaxString: string buffer for variable "
 //                                     + var.name() + " empty");
-        logerr << "DBInterface: getMinMaxString: variable " << var.name() << " has no minimum/maximum";
+        logerr << "DBInterface: getMinMaxString: variable " << var.name() << " has " << buffer->size()
+               << " minmax values";
         return std::pair <std::string, std::string> (NULL_STRING, NULL_STRING);
     }
 

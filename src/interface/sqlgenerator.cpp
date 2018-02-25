@@ -49,8 +49,9 @@ SQLGenerator::SQLGenerator(DBInterface &db_interface)
 
     std::stringstream ss;
 
-    ss << "CREATE TABLE " << TABLE_NAME_MINMAX << " (variable_name VARCHAR(255), object_name VARCHAR(255), min VARCHAR(255), max VARCHAR(255),"
-            "PRIMARY KEY (variable_name, object_name));";
+    ss << "CREATE TABLE " << TABLE_NAME_MINMAX
+       << " (variable_name VARCHAR(255), object_name VARCHAR(255), min VARCHAR(255), max VARCHAR(255),"
+             "PRIMARY KEY (variable_name, object_name));";
     table_minmax_create_statement_ = ss.str();
     ss.str(std::string());
 
@@ -87,17 +88,21 @@ std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand (const DBOb
     const DBSchema &schema = ATSDB::instance().schemaManager().getCurrentSchema();
 
     if (!schema.hasMetaTable(ds.metaTableName()))
-        throw std::invalid_argument ("SQLGenerator: getDataSourcesSelectCommand: schema does has no meta table "+ds.metaTableName());
+        throw std::invalid_argument ("SQLGenerator: getDataSourcesSelectCommand: schema does has no meta table "
+                                     + ds.metaTableName());
 
     const MetaDBTable& meta = schema.metaTable(ds.metaTableName());
-    loginf << "SQLGenerator: getDataSourcesSelectCommand: object " << object.name() << " meta table " << meta.name() << " key col " << ds.foreignKey() << " name col " << ds.nameColumn();
+    loginf << "SQLGenerator: getDataSourcesSelectCommand: object " << object.name() << " meta table " << meta.name()
+           << " key col " << ds.foreignKey() << " name col " << ds.nameColumn();
     if (!meta.hasColumn(ds.foreignKey()))
-        throw std::runtime_error ("SQLGenerator: getDataSourcesSelectCommand: meta table has no column "+ds.foreignKey());
+        throw std::runtime_error ("SQLGenerator: getDataSourcesSelectCommand: meta table has no column "
+                                  + ds.foreignKey());
 
     const DBTableColumn& foreign_key_col = meta.column(ds.foreignKey());
 
     if (!meta.hasColumn(ds.nameColumn()))
-        throw std::runtime_error ("SQLGenerator: getDataSourcesSelectCommand: meta table has no column "+ds.foreignKey());
+        throw std::runtime_error ("SQLGenerator: getDataSourcesSelectCommand: meta table has no column "
+                                  + ds.foreignKey());
 
     const DBTableColumn& name_col = meta.column(ds.nameColumn());
 
@@ -108,7 +113,8 @@ std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand (const DBOb
     if (ds.hasShortNameColumn())
     {
         if (!meta.hasColumn(ds.shortNameColumn()))
-            throw std::runtime_error ("SQLGenerator: getDataSourcesSelectCommand: meta table has no short name column "+ds.shortNameColumn());
+            throw std::runtime_error ("SQLGenerator: getDataSourcesSelectCommand: meta table has no short name column "
+                                      + ds.shortNameColumn());
         else
             columns.push_back(&meta.column(ds.shortNameColumn()));
     }
@@ -116,7 +122,8 @@ std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand (const DBOb
     if (ds.hasSacColumn())
     {
         if (!meta.hasColumn(ds.sacColumn()))
-            throw std::runtime_error ("SQLGenerator: getDataSourcesSelectCommand: meta table has no sac column "+ds.sacColumn());
+            throw std::runtime_error ("SQLGenerator: getDataSourcesSelectCommand: meta table has no sac column "
+                                      + ds.sacColumn());
         else
             columns.push_back(&meta.column(ds.sacColumn()));
     }
@@ -124,7 +131,8 @@ std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand (const DBOb
     if (ds.hasSicColumn())
     {
         if (!meta.hasColumn(ds.sicColumn()))
-            throw std::runtime_error ("SQLGenerator: getDataSourcesSelectCommand: meta table has no sic column "+ds.sicColumn());
+            throw std::runtime_error ("SQLGenerator: getDataSourcesSelectCommand: meta table has no sic column "
+                                      + ds.sicColumn());
         else
             columns.push_back(&meta.column(ds.sicColumn()));
     }
@@ -132,7 +140,8 @@ std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand (const DBOb
     if (ds.hasLatitudeColumn())
     {
         if (!meta.hasColumn(ds.latitudeColumn()))
-            throw std::runtime_error ("SQLGenerator: getDataSourcesSelectCommand: meta table has no latitude column "+ds.latitudeColumn());
+            throw std::runtime_error ("SQLGenerator: getDataSourcesSelectCommand: meta table has no latitude column "
+                                      + ds.latitudeColumn());
         else
             columns.push_back(&meta.column(ds.latitudeColumn()));
     }
@@ -140,7 +149,8 @@ std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand (const DBOb
     if (ds.hasLongitudeColumn())
     {
         if (!meta.hasColumn(ds.longitudeColumn()))
-            throw std::runtime_error ("SQLGenerator: getDataSourcesSelectCommand: meta table has no longitude column "+ds.longitudeColumn());
+            throw std::runtime_error ("SQLGenerator: getDataSourcesSelectCommand: meta table has no longitude column "
+                                      + ds.longitudeColumn());
         else
             columns.push_back(&meta.column(ds.longitudeColumn()));
     }
@@ -148,7 +158,8 @@ std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand (const DBOb
     if (ds.hasAltitudeColumn())
     {
         if (!meta.hasColumn(ds.altitudeColumn()))
-            throw std::runtime_error ("SQLGenerator: getDataSourcesSelectCommand: meta table has no altitude column "+ds.altitudeColumn());
+            throw std::runtime_error ("SQLGenerator: getDataSourcesSelectCommand: meta table has no altitude column "
+                                      + ds.altitudeColumn());
         else
             columns.push_back(&meta.column(ds.altitudeColumn()));
     }
@@ -340,7 +351,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getDistinctDataSourcesSelectCommand (co
 
 std::string SQLGenerator::getCountStatement (const std::string &table)
 {
-    return "SELECT COUNT(*) FROM " + table;
+    return "SELECT COUNT(*) FROM " + table + ";";
 }
 
 std::shared_ptr <DBCommand> SQLGenerator::getTableSelectMinMaxNormalStatement (const DBTable& table)
@@ -376,7 +387,7 @@ std::shared_ptr <DBCommand> SQLGenerator::getTableSelectMinMaxNormalStatement (c
         first = false;
     }
 
-    ss << " FROM " << table.name();
+    ss << " FROM " << table.name() << ";";
 
     command->set (ss.str());
     command->list(command_list);
@@ -435,28 +446,30 @@ std::string SQLGenerator::getInsertPropertyStatement (const std::string &id, con
 std::string SQLGenerator::getSelectPropertyStatement (const std::string &id)
 {
     stringstream ss;
-    ss << "SELECT value FROM " << TABLE_NAME_PROPERTIES << " WHERE id = '" << id << "'";
+    ss << "SELECT value FROM " << TABLE_NAME_PROPERTIES << " WHERE id = '" << id << "';";
     return ss.str();
 }
 
-std::string SQLGenerator::getInsertMinMaxStatement (const std::string& variable_name, const std::string& object_name, const std::string& min, const std::string& max)
+std::string SQLGenerator::getInsertMinMaxStatement (const std::string& variable_name, const std::string& object_name,
+                                                    const std::string& min, const std::string& max)
 {
     stringstream ss;
-    //ss << "INSERT INTO " << table_name_minxmax_<< " VALUES ('" << id <<"', '" << type <<"', '" << min<< "', '"<< max <<"');";
-    ss << "REPLACE INTO " << TABLE_NAME_MINMAX << " VALUES ('" << variable_name <<"', '" << object_name <<"', '" << min<< "', '"<< max <<"');";
+    ss << "REPLACE INTO " << TABLE_NAME_MINMAX << " VALUES ('" << variable_name <<"', '" << object_name <<"', '"
+       << min<< "', '"<< max <<"');";
     return ss.str();
 }
 std::string SQLGenerator::getSelectMinMaxStatement (const std::string& variable_name, const std::string& object_name)
 {
     stringstream ss;
-    ss << "SELECT min,max FROM " << TABLE_NAME_MINMAX<< " WHERE variable_name = '" << variable_name << "' AND object_name = '" << object_name << "'";
+    ss << "SELECT min,max FROM " << TABLE_NAME_MINMAX<< " WHERE variable_name = '" << variable_name
+       << "' AND object_name = '" << object_name << "';";
     return ss.str();
 }
 
 std::string SQLGenerator::getSelectMinMaxStatement ()
 {
     stringstream ss;
-    ss << "SELECT variable_name,object_name,min,max FROM " << TABLE_NAME_MINMAX;
+    ss << "SELECT variable_name,object_name,min,max FROM " << TABLE_NAME_MINMAX << ";";
     return ss.str();
 }
 
@@ -539,7 +552,8 @@ std::string SQLGenerator::getTablePropertiesCreateStatement ()
 //    return ss.str();
 //}
 
-std::string SQLGenerator::createDBUpdateStringBind(std::shared_ptr<Buffer> buffer, DBObject &object, DBOVariable &key_var, std::string tablename)
+std::string SQLGenerator::createDBUpdateStringBind(std::shared_ptr<Buffer> buffer, DBObject &object,
+                                                   DBOVariable &key_var, std::string tablename)
 {
     assert (buffer);
     assert (tablename.size() > 0);
@@ -564,15 +578,14 @@ std::string SQLGenerator::createDBUpdateStringBind(std::shared_ptr<Buffer> buffe
 //        db_type_set_=true;
 //    }
 
-
-
     if (key_var_name != properties.at(size-1).name())
         throw std::runtime_error ("SQLGenerator: createDBUpdateStringBind: id var not at last position");
 
     std::string connection_type = db_interface_.connection().type();
 
     if (connection_type != SQLITE_IDENTIFIER && connection_type != MYSQL_IDENTIFIER)
-        throw std::runtime_error ("SQLGenerator: createDBUpdateStringBind: not yet implemented db type "+connection_type);
+        throw std::runtime_error ("SQLGenerator: createDBUpdateStringBind: not yet implemented db type "
+                                  + connection_type);
 
     for (unsigned int cnt=0; cnt < size; cnt++)
     {
@@ -581,8 +594,8 @@ std::string SQLGenerator::createDBUpdateStringBind(std::shared_ptr<Buffer> buffe
             if (cnt == size-1)
                 continue;
             else
-                throw std::runtime_error ("SQLGenerator: createDBUpdateStringBind: id var at other than last position "+
-                                          std::to_string(cnt));
+                throw std::runtime_error ("SQLGenerator: createDBUpdateStringBind: id var at other than last position "
+                                          + std::to_string(cnt));
         }
         ss << properties.at(cnt).name() << "=";
 
@@ -731,11 +744,13 @@ std::string SQLGenerator::createDBUpdateStringBind(std::shared_ptr<Buffer> buffe
 //    return ss.str();
 //}
 
-std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const MetaDBTable &meta_table, DBOVariableSet read_list, const std::string &filter,
-                                                           std::vector <DBOVariable*> filtered_variables, bool use_order, DBOVariable *order_variable, bool use_order_ascending,
-                                                           const std::string &limit, bool left_join)
+std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (
+        const MetaDBTable &meta_table, DBOVariableSet read_list, const std::string &filter,
+        std::vector <DBOVariable*> filtered_variables, bool use_order, DBOVariable *order_variable,
+        bool use_order_ascending, const std::string &limit, bool left_join)
 {
-    logdbg  << "SQLGenerator: getSelectCommand: meta table " << meta_table.name() << " read list size " << read_list.getSize();
+    logdbg  << "SQLGenerator: getSelectCommand: meta table " << meta_table.name() << " read list size "
+            << read_list.getSize();
     assert (read_list.getSize() != 0);
 
     std::shared_ptr<DBCommand> command = std::make_shared<DBCommand>(DBCommand());
@@ -907,7 +922,6 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const MetaDBTable &me
 
     ss << ";";
 
-
     command->set(ss.str());
     command->list(property_list);
 
@@ -916,9 +930,11 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const MetaDBTable &me
     return command;
 }
 
-std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const MetaDBTable &meta_table, std::vector <const DBTableColumn*> columns, bool distinct)
+std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const MetaDBTable &meta_table,
+                                                           std::vector <const DBTableColumn*> columns, bool distinct)
 {
-    logdbg  << "SQLGenerator: getSelectCommand: meta table " << meta_table.name() << " db columns size " << columns.size();
+    logdbg  << "SQLGenerator: getSelectCommand: meta table " << meta_table.name() << " db columns size "
+            << columns.size();
     assert (columns.size() != 0);
 
     std::shared_ptr<DBCommand> command = std::make_shared<DBCommand>(DBCommand());
@@ -990,7 +1006,8 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand (const MetaDBTable &me
     return command;
 }
 
-std::string SQLGenerator::subTablesWhereClause(const MetaDBTable &meta_table, const std::vector <std::string> &used_tables)
+std::string SQLGenerator::subTablesWhereClause(const MetaDBTable &meta_table,
+                                               const std::vector <std::string> &used_tables)
 {
     std::stringstream ss;
 
@@ -1005,7 +1022,8 @@ std::string SQLGenerator::subTablesWhereClause(const MetaDBTable &meta_table, co
             ss << " AND ";
 
 
-        ss << meta_table.mainTableName() << "." << it.second->mainTableKey() << "=" << it.second->subTableName() << "." << it.second->subTableKey();
+        ss << meta_table.mainTableName() << "." << it.second->mainTableKey() << "=" << it.second->subTableName()
+           << "." << it.second->subTableKey();
         first=false;
     }
 
@@ -1023,7 +1041,9 @@ std::string SQLGenerator::subTableKeyClause (const MetaDBTable &meta_table, cons
     // found subtable
     std::stringstream ss;
 
-    ss << meta_table.mainTableName() << "." << subtable->mainTableKey() << "=" << subtable->subTableName() << "." << subtable->subTableKey();
+    ss << meta_table.mainTableName() << "." << subtable->mainTableKey() << "=" << subtable->subTableName() << "."
+       << subtable->subTableKey();
+
     return ss.str();
 }
 
