@@ -178,7 +178,7 @@ void ViewManagerWidget::addViewSlot()
 
 void ViewManagerWidget::update ()
 {
-    logdbg  << "ViewManagerWidget: update";
+    loginf  << "ViewManagerWidget: update";
 
     cont_widgets_.clear();
 

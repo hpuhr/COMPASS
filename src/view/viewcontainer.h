@@ -42,7 +42,8 @@ class ViewContainer : public QObject, public Configurable
     void deleteView ();
 
 public:
-    ViewContainer(const std::string &class_id, const std::string &instance_id, Configurable *parent, ViewManager *view_manager, QTabWidget *tab_widget);
+    ViewContainer(const std::string& class_id, const std::string& instance_id, Configurable* parent,
+                  ViewManager* view_manager, QTabWidget* tab_widget, int window_cnt);
     virtual ~ViewContainer();
 
     void addView (View *view);
@@ -51,7 +52,7 @@ public:
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
-    virtual std::string getName ();
+    virtual std::string getWindowName ();
     static unsigned int getViewCount () { return view_count_; }
 
     void addView(const std::string& class_name);
@@ -61,14 +62,17 @@ public:
 protected:
     ViewManager &view_manager_;
 
+
+    QTabWidget* tab_widget_ {nullptr};
+
+    int window_cnt_ {0};
+
     std::vector<View*> views_;
 
-    QTabWidget *tab_widget_;
-
     QMenu menu_;
-    QPushButton *last_active_manage_button_;
+    QPushButton* last_active_manage_button_ {nullptr};
 
-    ViewContainerConfigWidget *config_widget_;
+    ViewContainerConfigWidget* config_widget_ {nullptr};
 
     std::map <QPushButton*, View*> view_manage_buttons_;
 

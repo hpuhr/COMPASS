@@ -46,9 +46,10 @@ unsigned int ViewContainer::view_count_=0;
 
 using namespace Utils;
 
-ViewContainer::ViewContainer(const std::string &class_id, const std::string &instance_id, Configurable *parent, ViewManager *view_manager, QTabWidget *tab_widget)
-    : QObject(), Configurable( class_id, instance_id, parent ), view_manager_(*view_manager), tab_widget_(tab_widget), last_active_manage_button_ (nullptr),
-      config_widget_(nullptr)
+ViewContainer::ViewContainer(const std::string &class_id, const std::string &instance_id, Configurable *parent,
+                             ViewManager *view_manager, QTabWidget *tab_widget, int window_cnt)
+    : QObject(), Configurable( class_id, instance_id, parent ), view_manager_(*view_manager), tab_widget_(tab_widget),
+      window_cnt_ (window_cnt)
 {
     logdbg  << "ViewContainer: constructor: creating gui elements";
     assert (tab_widget_);
@@ -82,6 +83,9 @@ ViewContainer::~ViewContainer()
 void ViewContainer::addView(const std::string& class_name)
 {
     generateSubConfigurable (class_name, class_name+std::to_string(view_count_));
+
+    if (config_widget_)
+        config_widget_->updateSlot();
 }
 
 //void ViewContainer::addTemplateView (std::string template_name)
@@ -159,10 +163,13 @@ void ViewContainer::deleteView ()
     assert (view_manage_buttons_.find (last_active_manage_button_) != view_manage_buttons_.end());
     View *view = view_manage_buttons_ [last_active_manage_button_];
 
-    loginf << "ViewContainerWidget: deleteView: for view " << view->getInstanceId();
+    loginf << "ViewContainer: deleteView: for view " << view->getInstanceId();
     delete view;
 
     last_active_manage_button_=nullptr;
+
+    if (config_widget_)
+        config_widget_->updateSlot();
 }
 
 const std::vector<View*>& ViewContainer::getViews() const
@@ -234,9 +241,12 @@ void ViewContainer::checkSubConfigurables ()
     // move along sir
 }
 
-std::string ViewContainer::getName ()
+std::string ViewContainer::getWindowName ()
 {
-    return "MainWindow";
+    if (window_cnt_ == 0)
+        return "MainWindow";
+    else
+        return "Window"+std::to_string (window_cnt_);
 }
 
 ViewContainerConfigWidget *ViewContainer::configWidget ()

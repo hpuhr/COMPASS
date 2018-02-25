@@ -55,12 +55,12 @@ ViewContainerConfigWidget::ViewContainerConfigWidget( ViewContainer *view_contai
     namelayout->setMargin( 0 );
     blayout->addLayout( namelayout );
 
-    name_ = QString(view_container_->getName().c_str());//"Window " + QString::number( view_container_->getKey() );
+    name_ = QString(view_container_->getWindowName().c_str());//"Window " + QString::number( view_container_->getKey() );
     QLabel *head = new QLabel( name_ );
     head->setFont( font_bold );
     namelayout->addWidget( head );
 
-    if (view_container_->getName().compare("MainWindow") != 0)
+    if (view_container_->getWindowName().compare("MainWindow") != 0)
     {
         QToolButton *vdel = new QToolButton();
         vdel->setIcon( QIcon(Files::getIconFilepath("delete.png").c_str()));

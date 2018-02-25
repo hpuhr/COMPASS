@@ -68,7 +68,7 @@ protected:
 
     ViewManagerWidget* widget_{nullptr};
     bool initialized_{false};
-    QTabWidget* tab_widget_{nullptr};
+    QTabWidget* main_tab_widget_{nullptr};
 
     std::map <std::string, ViewContainer*> containers_;
     std::map <std::string, ViewContainerWidget*> container_widgets_;

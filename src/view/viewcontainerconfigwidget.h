@@ -61,7 +61,7 @@ public:
 
     //    void addTemplateView (std::string template_name);
 
-private slots:
+public slots:
     void updateSlot();
     void closeSlot();
 
