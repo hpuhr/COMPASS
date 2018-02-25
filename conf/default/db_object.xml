@@ -1,9 +1,9 @@
 <Configuration class_id="DBObjectManager" instance_id="DBObjectManager0">
-    <ParameterBool use_filters="0"/>
+    <ParameterBool use_filters="1"/>
     <ParameterBool use_limit="0"/>
     <ParameterBool use_order="1"/>
     <ParameterBool use_order_ascending="1"/>
-    <ParameterUnsignedInt limit_max="2000000"/>
+    <ParameterUnsignedInt limit_max="90000"/>
     <ParameterUnsignedInt limit_min="0"/>
     <ParameterString order_variable__name="tod"/>
     <ParameterString order_variable_dbo_name="Meta"/>
@@ -2165,7 +2165,7 @@
             </Configuration>
             <Configuration class_id="LabelEntry" instance_id="LabelEntrytarget_addr0">
                 <ParameterBool show="1"/>
-                <ParameterString prefix="TA"/>
+                <ParameterString prefix="TA "/>
                 <ParameterString suffix=""/>
                 <ParameterString variable_name="target_addr"/>
             </Configuration>

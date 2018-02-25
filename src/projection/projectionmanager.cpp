@@ -25,37 +25,13 @@
 #include "projectionmanagerwidget.h"
 #include "global.h"
 
-bool ProjectionManager::useSDLProjection() const
-{
-    return use_sdl_projection_;
-}
-
-void ProjectionManager::useSDLProjection(bool use_sdl_projection)
-{
-    use_sdl_projection_ = use_sdl_projection;
-
-    use_ogr_projection_ = !use_sdl_projection_;
-}
-
-bool ProjectionManager::useOGRProjection() const
-{
-    return use_ogr_projection_;
-}
-
-void ProjectionManager::useOGRProjection(bool use_ogr_projection)
-{
-    use_ogr_projection_ = use_ogr_projection;
-
-    use_sdl_projection_ = !use_ogr_projection_;
-}
-
 ProjectionManager::ProjectionManager()
     : Configurable ("ProjectionManager", "ProjectionManager0", 0, "projection.xml")
 {
     loginf  << "ProjectionManager: constructor";
 
-    registerParameter ("use_sdl_projection", &use_sdl_projection_, true);
-    registerParameter ("use_ogr_projection", &use_ogr_projection_, false);
+    registerParameter ("use_sdl_projection", &use_sdl_projection_, false);
+    registerParameter ("use_ogr_projection", &use_ogr_projection_, true);
 
     registerParameter ("sdl_system_latitude", &sdl_system_latitude_, 47.5);
     registerParameter ("sdl_system_longitude", &sdl_system_longitude_, 14.0);
@@ -245,4 +221,28 @@ float ProjectionManager::sdlSystemLongitude() const
 void ProjectionManager::sdlSystemLongitude(float sdl_system_longitude)
 {
     sdl_system_longitude_ = sdl_system_longitude;
+}
+
+bool ProjectionManager::useSDLProjection() const
+{
+    return use_sdl_projection_;
+}
+
+void ProjectionManager::useSDLProjection(bool use_sdl_projection)
+{
+    use_sdl_projection_ = use_sdl_projection;
+
+    use_ogr_projection_ = !use_sdl_projection_;
+}
+
+bool ProjectionManager::useOGRProjection() const
+{
+    return use_ogr_projection_;
+}
+
+void ProjectionManager::useOGRProjection(bool use_ogr_projection)
+{
+    use_ogr_projection_ = use_ogr_projection;
+
+    use_sdl_projection_ = !use_ogr_projection_;
 }
