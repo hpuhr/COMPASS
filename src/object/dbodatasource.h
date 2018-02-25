@@ -142,9 +142,11 @@ public:
     bool isFinalized () { return finalized_; } // returns false if projection can not be made because of error
 
     // azimuth degrees, range & altitude in meters
-    void calculateOGRSystemCoordinates (double azimuth, double slant_range, double altitude, bool has_altitude,
-                                     double &sys_x, double &sys_y);
+    bool calculateOGRSystemCoordinates (double azimuth_rad, double slant_range_m, bool has_baro_altitude,
+                                        double baro_altitude_ft, double &sys_x, double &sys_y);
 
+    bool calculateSDLGRSCoordinates (double azimuth_rad, double slant_range_m, bool has_baro_altitude,
+                                     double baro_altitude_ft, t_CPos& grs_pos);
 protected:
     unsigned int id_{0};
 

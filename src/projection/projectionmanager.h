@@ -19,6 +19,7 @@
 #define PROJECTIONMANAGER_H_
 
 #include <ogr_spatialref.h>
+#include "geomap.h"
 
 #include "configurable.h"
 #include "singleton.h"
@@ -39,6 +40,8 @@ protected:
     float sdl_system_latitude_;
     float sdl_system_longitude_;
 
+    t_Mapping_Info sdl_mapping_info_;
+
     unsigned int epsg_value_;
 
     OGRSpatialReference ogr_geo_;
@@ -58,13 +61,13 @@ public:
     /// @brief Return world plane size
     //double getWorldSize (double size);
 
-    /// @brief Scales world position height
-    //float transformHeight (float value);
-
     /// @brief Projects geo-coordinate in WGS-84 to cartesian coordinate, returns false on error
     bool ogrGeo2Cart (double latitude, double longitude, double& x_pos, double& y_pos);
     /// @brief Projects cartesian coordinate to geo-coordinate in WGS-84, returns false on error
     bool ogrCart2Geo (double x_pos, double y_pos, double& latitude, double& longitude);
+
+    /// @brief Projects cartesian coordinate to geo-coordinate in WGS-84, returns false on error
+    bool sdlGRS2Geo (t_CPos grs_pos, t_GPos& geo_pos);
 
     std::string getWorldPROJ4Info ();
     void setNewCartesianEPSG (unsigned int epsg_value);

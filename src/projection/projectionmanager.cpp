@@ -23,6 +23,7 @@
 
 #include "projectionmanager.h"
 #include "projectionmanagerwidget.h"
+#include "global.h"
 
 bool ProjectionManager::useSDLProjection() const
 {
@@ -56,8 +57,27 @@ ProjectionManager::ProjectionManager()
     registerParameter ("use_sdl_projection", &use_sdl_projection_, true);
     registerParameter ("use_ogr_projection", &use_ogr_projection_, false);
 
-    registerParameter ("sdl_system_latitude", &sdl_system_latitude_, 37.5);
+    registerParameter ("sdl_system_latitude", &sdl_system_latitude_, 47.5);
     registerParameter ("sdl_system_longitude", &sdl_system_longitude_, 14.0);
+
+    loginf  << "ProjectionManager: constructor: using sdl lat " << sdl_system_latitude_
+            << " long " << sdl_system_longitude_;
+
+    t_GPos geo_pos;
+
+    preset_gpos (&geo_pos);
+    preset_mapping_info (&sdl_mapping_info_);
+
+    geo_pos.latitude = sdl_system_latitude_ * DEG2RAD;
+    geo_pos.longitude = sdl_system_longitude_ * DEG2RAD;
+    geo_pos.altitude = 0.0; // TODO check if exists
+    geo_pos.defined = true;
+
+    t_Retc lrc;
+
+    lrc = geo_calc_info (geo_pos, &sdl_mapping_info_);
+
+    assert (lrc == RC_OKAY);
 
     registerParameter ("epsg_value", &epsg_value_, 31258); // 	MGI Austria GK M31.prj 	BMN – M31 	Greenwich
 
@@ -95,7 +115,7 @@ void ProjectionManager::shutdown ()
 
 bool ProjectionManager::ogrGeo2Cart (double latitude, double longitude, double& x_pos, double& y_pos)
 {
-    logdbg << "ProjectionManager: geo2Cart: lat " << latitude << " long " << longitude;
+    logdbg << "ProjectionManager: ogrGeo2Cart: lat " << latitude << " long " << longitude;
 
     x_pos = longitude;
     y_pos = latitude;
@@ -103,14 +123,14 @@ bool ProjectionManager::ogrGeo2Cart (double latitude, double longitude, double& 
     bool ret = ogr_geo2cart_->Transform(1, &x_pos, &y_pos);
 
     if (!ret)
-       logerr << "ProjectionManager: geo2Cart: error with longitude " << longitude << " latitude " << latitude;
+       logerr << "ProjectionManager: ogrGeo2Cart: error with longitude " << longitude << " latitude " << latitude;
 
     return ret;
 }
 
 bool ProjectionManager::ogrCart2Geo (double x_pos, double y_pos, double& latitude, double& longitude)
 {
-    logdbg << "ProjectionManager: cart2geo: x_pos " << x_pos << " y_pos " << y_pos;
+    logdbg << "ProjectionManager: ogrCart2Geo: x_pos " << x_pos << " y_pos " << y_pos;
 
     longitude = x_pos;
     latitude = y_pos;
@@ -118,9 +138,28 @@ bool ProjectionManager::ogrCart2Geo (double x_pos, double y_pos, double& latitud
     bool ret = ogr_cart2geo_->Transform(1, &longitude, &latitude);
 
     if (!ret)
-       logerr << "ProjectionManager: cart2geo: error with x_pos " << x_pos << " y_pos " << y_pos;
+       logerr << "ProjectionManager: ogrCart2Geo: error with x_pos " << x_pos << " y_pos " << y_pos;
 
     return ret;
+}
+
+bool ProjectionManager::sdlGRS2Geo (t_CPos grs_pos, t_GPos& geo_pos)
+{
+    //logdbg << "ProjectionManager: sdlGRS2Geo: x_pos " << x_pos << " y_pos " << y_pos;
+
+    t_Retc lrtc;
+//    t_CPos lcl_pos;
+
+//    lrtc = geo_grs_to_lcl (sdl_mapping_info_, grs_pos, &lcl_pos);
+
+    t_GPos tmp_geo_pos;
+
+    lrtc = geo_grs_to_llh (grs_pos, &tmp_geo_pos);
+
+    assert (lrtc == RC_OKAY);
+    geo_pos = tmp_geo_pos;
+
+    return true;
 }
 
 std::string ProjectionManager::getWorldPROJ4Info ()

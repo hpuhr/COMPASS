@@ -157,7 +157,7 @@ void DBODataSourceDefinition::nameColumn(const std::string &name_column)
 }
 
 DBODataSource::DBODataSource(unsigned int id, const std::string& name)
-: id_(id), name_(name)
+    : id_(id), name_(name)
 {
 }
 
@@ -180,9 +180,9 @@ void DBODataSource::finalize ()
 
         if (!ret)
         {
-           logwrn << "DBODataSource: finalize: ogrGeo2Cart return false for " << short_name_
-                  << " lat " << latitude_ << " lon " << longitude_ << " x " << ogr_system_x_ << " y " << ogr_system_y_;
-           return;
+            logwrn << "DBODataSource: finalize: ogrGeo2Cart return false for " << short_name_
+                   << " lat " << latitude_ << " lon " << longitude_ << " x " << ogr_system_x_ << " y " << ogr_system_y_;
+            return;
         }
     }
 
@@ -192,8 +192,8 @@ void DBODataSource::finalize ()
         preset_gpos (&geo_pos_);
         preset_mapping_info (&mapping_info_);
 
-        geo_pos_.latitude = latitude_;
-        geo_pos_.longitude = longitude_;
+        geo_pos_.latitude = latitude_ * DEG2RAD;
+        geo_pos_.longitude = longitude_ * DEG2RAD;
         geo_pos_.altitude = altitude_; // TODO check if exists
         geo_pos_.defined = true;
 
@@ -208,45 +208,224 @@ void DBODataSource::finalize ()
     finalized_ = true;
 }
 
-// azimuth degrees, range & altitude in meters
-void DBODataSource::calculateOGRSystemCoordinates (double azimuth, double slant_range, double altitude,
-                                                   bool has_altitude, double &sys_x, double &sys_y)
+// azimuth degrees, range nautical miles, altitude in meters
+bool DBODataSource::calculateOGRSystemCoordinates (double azimuth_rad, double slant_range_m, bool has_baro_altitude,
+                                                   double baro_altitude_ft, double &sys_x, double &sys_y)
 {
     if (!finalized_)
-        logerr << "DBODataSource: calculateSystemCoordinates: " << short_name_ << " not finalized";
+        logerr << "DBODataSource: calculateOGRSystemCoordinates: " << short_name_ << " not finalized";
 
     assert (finalized_);
 
-    double range;
+    //slant_range = 1852.0 * slant_range; // convert to meters
 
-//    if (slant_range <= altitude)
-//    {
-//        logerr << "DataSource: calculateSystemCoordinates: a " << azimuth << " sr " << slant_range << " alt " << altitude
-//                << ", assuming range = slant range";
-//        range = slant_range; // TODO pure act of desperation
-//    }
-//    else
-//        range = sqrt (slant_range*slant_range-altitude*altitude); // TODO: flatland
+    double horizontal_range = 0.0;
+    double altitude_m = 0.3048 * baro_altitude_ft;
 
-    if (has_altitude && slant_range > altitude)
-        range = sqrt (slant_range*slant_range-altitude*altitude);
+    //            altitude_m -= data_sources.at(sensor_id).altitude(); //TODO use this?
+
+    //    if (slant_range <= altitude)
+    //    {
+    //        logerr << "DataSource: calculateSystemCoordinates: a " << azimuth << " sr " << slant_range << " alt " << altitude
+    //                << ", assuming range = slant range";
+    //        range = slant_range; // TODO pure act of desperation
+    //    }
+    //    else
+    //        range = sqrt (slant_range*slant_range-altitude*altitude); // TODO: flatland
+
+    if (has_baro_altitude && slant_range_m > altitude_m)
+        horizontal_range = sqrt (slant_range_m*slant_range_m-altitude_m*altitude_m);
     else
-        range = slant_range; // TODO pure act of desperation
+        horizontal_range = slant_range_m; // TODO pure act of desperation
 
-    azimuth *= DEG2RAD;
-
-    sys_x = range * sin (azimuth);
-    sys_y = range * cos (azimuth);
+    sys_x = horizontal_range * sin (azimuth_rad);
+    sys_y = horizontal_range * cos (azimuth_rad);
 
     sys_x += ogr_system_x_;
     sys_y += ogr_system_y_;
 
     if (sys_x != sys_x || sys_y != sys_y)
     {
-        logerr << "DBODataSource: calculateSystemCoordinates: a " << azimuth << " sr " << slant_range << " alt " << altitude
-                << " range " << range << " sys_x " << sys_x << " sys_y " << sys_y;
-        throw std::runtime_error ("DBODataSource: calculateSystemCoordinates: failed transformation");
+        logerr << "DBODataSource: calculateOGRSystemCoordinates: a " << azimuth_rad << " sr " << slant_range_m
+               << " alt " << baro_altitude_ft << " hor.range " << horizontal_range
+               << " sys_x " << sys_x << " sys_y " << sys_y;
+        return false;
     }
+
+    return true;
+}
+
+// azimuth degrees, range nautical miles, altitude in meters
+bool DBODataSource::calculateSDLGRSCoordinates (double azimuth_rad, double slant_range_m, bool has_baro_altitude,
+                                                   double baro_altitude_ft, t_CPos& grs_pos)
+{
+    if (!finalized_)
+        logerr << "DBODataSource: calculateSDLSystemCoordinates: " << short_name_ << " not finalized";
+
+    assert (finalized_);
+
+    t_Retc lrc;
+    t_Real hgt = 0.0;    // Height for projection; metres
+    bool hgt_defined = false;    // Height for projection defined
+
+    if (has_baro_altitude)
+    {
+        double baro_altitude_m = 0.3048 * baro_altitude_ft;
+        hgt = map_mch_to_hae (baro_altitude_m);
+        hgt_defined = true;
+    }
+
+    // check height
+    if (!hgt_defined)
+    {
+        t_Real default_height;
+        // Default height; metres
+        t_Real default_height_gradient;
+        // Default height gradient
+
+        default_height = 100.0 * M_FL2MTR;
+        // Beware: hard-coded value
+        // Beware: no mapping by map_mch_to_hae()
+        default_height_gradient = 1.0 / (20.0 * M_NMI2MTR);
+        // Beware: hard-coded value
+
+        //        if (msg_ptr->rtgt.reported_ppos.present)
+        //        {
+        t_Real f;
+        // Factor
+        t_Real rng;
+        // Slant range; metres
+
+        rng = slant_range_m;
+        //if (msg_ptr->base.data_source_identifier.value == 0x7801) rng -= 235.0;
+
+        // Compute factor
+        f = 1.0;
+        if (rng > 0.0)
+        {
+            f = default_height_gradient * rng;
+            if (f > 1.0)
+            {
+                f = 1.0;
+            }
+        }
+
+        // Set assumed height
+        hgt = f * default_height;
+        hgt_defined = true;
+
+        // Remember this height
+        //        msg_ptr->proc.assumed_height.present = true;
+        //        msg_ptr->proc.assumed_height.value = hgt;
+        //        msg_ptr->proc.assumed_height.value_in_feet =
+        //                (t_Si32) (hgt / M_FT2MTR);
+
+        //#if DBGAID
+        //            dbg_printf (103225, " using height=%.2f [mtr]", hgt);
+        //#endif
+        //        }
+        //        else
+        //        {
+        //            // No polar position
+
+        //            // Set assumed height
+        //            hgt = default_height;
+        //            hgt_defined = true;
+
+        //            // Remember this height
+        //            msg_ptr->proc.assumed_height.present = true;
+        //            msg_ptr->proc.assumed_height.value = hgt;
+        //            msg_ptr->proc.assumed_height.value_in_feet =
+        //                    (t_Si32) (hgt / M_FT2MTR);
+
+        //#if DBGAID
+        //            dbg_printf (103225, " using height=%.2f [mtr]", hgt);
+        //#endif
+        //        }
+    }
+
+    bool elevation_present = false;
+    double elevation = 0.0;
+
+    // calculate elevation angle
+    if (hgt_defined) // must be at this point
+    {
+        t_Real elv;
+        // Elevation (above radar horizon); degrees
+        t_Real rng;
+        // Slant range; metres
+
+        rng = slant_range_m;
+        //if (msg_ptr->base.data_source_identifier.value == 0x7801) rng -= 235.0;
+
+        if (rng > 0.0)
+        {
+            lrc = geo_calc_elv (&mapping_info_, rng, hgt, &elv);
+
+            if (lrc == RC_OKAY)
+            {
+                elevation_present = true;
+                elevation = M_DEG2RAD * elv;
+            }
+        }
+    }
+
+    if (!elevation_present)
+    {
+        logerr << "DBODataSource: calculateDSLSystemCoordinates: a " << azimuth_rad << " sr " << slant_range_m
+               << " alt " << baro_altitude_ft << " elevation not present";
+        return false;
+    }
+
+    //    if (elevation_present)
+    //    {
+    t_Real azm;
+    // Azimuth; radians
+    t_Real elv;
+    // Elevation (above radar horizon); radians
+    t_Real rng;
+    // Slant range; metres
+
+    azm = azimuth_rad;
+    elv = elevation;
+    rng = slant_range_m;
+    //if (msg_ptr->base.data_source_identifier.value == 0x7801) rng -= 235.0;
+
+    assert (0.0 <= azm && azm < M_TWO_PI); //, "Invalid azimuth");
+    assert (-M_PI_HALF <= elv && elv <= +M_PI_HALF); //,"Invalid elevation");
+    assert (rng > 0.0); //, "Invalid slant range");
+
+    t_CPos lcl_pos;
+    // Local Cartesian position
+
+    lrc = geo_lpc_to_lcl (rng, azm, elv, &lcl_pos);
+    assert (lrc == RC_OKAY); //, "Cannot map to local Cartesian position");
+
+    t_CPos tmp_grs_pos;
+    // GRS position
+
+    lrc = geo_lcl_to_grs (&mapping_info_, lcl_pos, &tmp_grs_pos);
+    assert (lrc == RC_OKAY); //, "Cannot map to GRS position");
+
+    grs_pos = tmp_grs_pos;
+
+    //        t_CPos sys_pos;
+    //        // Position relative to system reference point
+
+    //        lrc = geo_grs_to_lcl (&(gp_areas->srp_mapping_info),
+    //                              grs_pos, &sys_pos);
+    //        Assert (lrc == RC_OKAY, "Cannot map to system coordinates");
+
+    //        msg_ptr->proc.uvh_position.defined = true;
+    //        msg_ptr->proc.uvh_position.value[M_CPOS_U] =
+    //                sys_pos.value[M_CPOS_X];
+    //        msg_ptr->proc.uvh_position.value[M_CPOS_V] =
+    //                sys_pos.value[M_CPOS_Y];
+    //        msg_ptr->proc.uvh_position.value[M_CPOS_H] =
+    //                hgt;
+    //    }
+
+    return true;
 }
 
 double DBODataSource::altitude() const

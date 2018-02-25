@@ -123,7 +123,7 @@ typedef struct
                    // WGS-84 height of radar or reference point
 } t_Mapping_Info;
 
-//extern t_Real map_mch_to_hae (t_Real mch);
+extern t_Real map_mch_to_hae (t_Real mch);
                    // Map SSR mode C height to WGS-84 height
 extern void preset_cpos (t_CPos *item_ptr);
                    // Preset Cartesian position

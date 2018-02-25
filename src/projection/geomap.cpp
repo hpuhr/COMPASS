@@ -665,16 +665,17 @@ void preset_mapping_info (t_Mapping_Info *info_ptr)
 /* map_mch_to_hae  -- Map SSR mode C height to WGS-84 height                  */
 /*----------------------------------------------------------------------------*/
 
-//t_Real map_mch_to_hae (t_Real mch)
-//{
-//    t_Real hae;    // WGS-84 height (above ellipsoid); metres
+t_Real map_mch_to_hae (t_Real mch)
+{
+    t_Real hae;    // WGS-84 height (above ellipsoid); metres
 
-//    // Map SSR mode C height
-//    hae = mode_c_offset + (1.0 + mode_c_factor) * mch;
+    // Map SSR mode C height
+    //hae = mode_c_offset + (1.0 + mode_c_factor) * mch; // mode_c_offset, mode_c_factor are zero
+    hae = mch;
 
-//    // We are done
-//    return hae;
-//}
+    // We are done
+    return hae;
+}
 
 /*----------------------------------------------------------------------------*/
 /* preset_cpos     -- Preset Cartesian position                               */

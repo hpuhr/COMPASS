@@ -369,6 +369,14 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject &object)
 
     ProjectionManager &proj_man = ProjectionManager::instance();
 
+    bool use_ogr_proj = proj_man.useOGRProjection();
+    bool use_sdl_proj = proj_man.useSDLProjection();
+
+    loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: projection method sdl " << use_sdl_proj
+           << " ogr " << use_ogr_proj;
+
+    assert (use_ogr_proj || use_sdl_proj);
+
     std::map<int, DBODataSource>& data_sources = db_object_->dataSources();
     for (auto& ds_it : data_sources)
         assert (ds_it.second.isFinalized()); // has to be done before
@@ -393,10 +401,11 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject &object)
     //unsigned char sac, sic;
     //bool has_position;
     double pos_azm_deg;
+    double pos_azm_rad;
     double pos_range_nm;
     double pos_range_m;
     double altitude_ft;
-    double altitude_m;
+    //double altitude_m;
     bool has_altitude;
     //double altitude_angle;
 
@@ -457,12 +466,7 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject &object)
         if (has_altitude)
             altitude_ft = read_buffer->getInt(altitude_var_str_).get(cnt);
         else
-            altitude_ft = 10000.0; // HACK
-
-
-    //        sac_sic_key.first = sac;
-    //        sac_sic_key.second= sic;
-
+            altitude_ft = 0.0; // has to assumed in projection later on
 
         if (data_sources.find(sensor_id) == data_sources.end())
         {
@@ -470,21 +474,40 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject &object)
             continue;
         }
 
+        pos_azm_rad = pos_azm_deg * DEG2RAD;
+
         pos_range_m = 1852.0 * pos_range_nm;
 
-        //loginf << " DB alt ft " << altitude_ft;
+        //altitude_m = 0.3048 * altitude_ft;
 
-        altitude_m = 0.3048 * altitude_ft;
+        if (use_ogr_proj)
+        {
+            ret = data_sources.at(sensor_id).calculateOGRSystemCoordinates(pos_azm_rad, pos_range_m, has_altitude,
+                                                                           altitude_ft, sys_x, sys_y);
+            if (ret)
+                ret = proj_man.ogrCart2Geo(sys_x, sys_y, lat, lon);
+        }
 
-    //        //loginf << " DBO alt m " << altitude_m;
-        altitude_m -= data_sources.at(sensor_id).altitude();
+        if (use_sdl_proj)
+        {
+            t_CPos grs_pos;
 
-            //altitude_angle = acos (altitude_m/pos_range_m);
+            ret = data_sources.at(sensor_id).calculateSDLGRSCoordinates(pos_azm_rad, pos_range_m, has_altitude,
+                                                                        altitude_ft, grs_pos);
+            if (ret)
+            {
+                t_GPos geo_pos;
 
-        data_sources.at(sensor_id).calculateOGRSystemCoordinates(pos_azm_deg, pos_range_m, altitude_m, has_altitude,
-                                                               sys_x, sys_y);
+                ret = proj_man.sdlGRS2Geo(grs_pos, geo_pos);
 
-        ret = proj_man.ogrCart2Geo(sys_x, sys_y, lat, lon);
+                if (ret)
+                {
+                    lat = geo_pos.latitude * RAD2DEG;
+                    lon = geo_pos.longitude * RAD2DEG;
+                    //lat = geo_pos.latitude; what to do with altitude?
+                }
+            }
+        }
 
         if (!ret)
         {
@@ -501,7 +524,7 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject &object)
     }
 
     loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: update_buffer size " << update_buffer->size()
-            << ", " <<  transformation_errors << " transformation errors";
+           << ", " <<  transformation_errors << " transformation errors";
 
     msg_box_->close();
     delete msg_box_;
