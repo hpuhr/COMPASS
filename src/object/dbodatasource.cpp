@@ -168,7 +168,7 @@ DBODataSource::~DBODataSource()
 
 void DBODataSource::finalize ()
 {
-    bool ret = ProjectionManager::instance().geo2Cart(latitude_, longitude_, system_x_, system_y_);
+    bool ret = ProjectionManager::instance().ogrGeo2Cart(latitude_, longitude_, system_x_, system_y_);
 
     if (!ret)
     {
@@ -184,7 +184,7 @@ void DBODataSource::finalize ()
 }
 
 // azimuth degrees, range & altitude in meters
-void DBODataSource::calculateSystemCoordinates (double azimuth, double slant_range, double altitude, bool has_altitude, double &sys_x, double &sys_y)
+void DBODataSource::calculateOGRSystemCoordinates (double azimuth, double slant_range, double altitude, bool has_altitude, double &sys_x, double &sys_y)
 {
     if (!finalized_)
         logerr << "DBODataSource: calculateSystemCoordinates: " << short_name_ << " not finalized";

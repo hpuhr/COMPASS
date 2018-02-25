@@ -21,6 +21,7 @@
 #include <QObject>
 
 #include "configurable.h"
+#include "geomap.h"
 
 class DBObject;
 class DBODataSourceDefinitionWidget;
@@ -141,7 +142,7 @@ public:
     bool isFinalized () { return finalized_; } // returns false if projection can not be made because of error
 
     // azimuth degrees, range & altitude in meters
-    void calculateSystemCoordinates (double azimuth, double slant_range, double altitude, bool has_altitude,
+    void calculateOGRSystemCoordinates (double azimuth, double slant_range, double altitude, bool has_altitude,
                                      double &sys_x, double &sys_y);
 
 protected:

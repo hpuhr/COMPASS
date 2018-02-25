@@ -33,39 +33,41 @@ class ProjectionManagerWidget;
 class ProjectionManager : public Singleton, public Configurable
 {
 protected:
+    float sdl_system_latitude_;
+    float sdl_system_longitude_;
 
     unsigned int epsg_value_;
 
-    OGRSpatialReference geo_;
-    OGRSpatialReference cart_;
+    OGRSpatialReference ogr_geo_;
+    OGRSpatialReference ogr_cart_;
 
-    OGRCoordinateTransformation* geo2cart_ {nullptr};
-    OGRCoordinateTransformation* cart2geo_ {nullptr};
+    OGRCoordinateTransformation* ogr_geo2cart_ {nullptr};
+    OGRCoordinateTransformation* ogr_cart2geo_ {nullptr};
 
     ProjectionManagerWidget* widget_ {nullptr};
 
     /// @brief Constructor
     ProjectionManager();
 
-    void createProjection ();
-
 public:
     /// @brief Desctructor
     virtual ~ProjectionManager();
     /// @brief Return world plane size
-    double getWorldSize (double size);
+    //double getWorldSize (double size);
 
     /// @brief Scales world position height
-    float transformHeight (float value);
+    //float transformHeight (float value);
 
     /// @brief Projects geo-coordinate in WGS-84 to cartesian coordinate, returns false on error
-    bool geo2Cart (double latitude, double longitude, double& x_pos, double& y_pos);
+    bool ogrGeo2Cart (double latitude, double longitude, double& x_pos, double& y_pos);
     /// @brief Projects cartesian coordinate to geo-coordinate in WGS-84, returns false on error
-    bool cart2geo (double x_pos, double y_pos, double& latitude, double& longitude);
+    bool ogrCart2Geo (double x_pos, double y_pos, double& latitude, double& longitude);
 
     std::string getWorldPROJ4Info ();
     void setNewCartesianEPSG (unsigned int epsg_value);
     std::string getCartesianPROJ4Info ();
+
+    void createOGRProjection ();
 
     unsigned int getEPSG () { return epsg_value_; }
 
@@ -79,6 +81,11 @@ public:
         static ProjectionManager instance;
         return instance;
     }
+    float sdlSystemLatitude() const;
+    void sdlSystemLatitude(float sdl_system_latitude);
+
+    float sdlSystemLongitude() const;
+    void sdlSystemLongitude(float sdl_system_longitude);
 };
 
 #endif /* PROJECTIONMANAGER_H_ */

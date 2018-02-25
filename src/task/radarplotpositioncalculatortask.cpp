@@ -481,10 +481,10 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject &object)
 
             //altitude_angle = acos (altitude_m/pos_range_m);
 
-        data_sources.at(sensor_id).calculateSystemCoordinates(pos_azm_deg, pos_range_m, altitude_m, has_altitude,
+        data_sources.at(sensor_id).calculateOGRSystemCoordinates(pos_azm_deg, pos_range_m, altitude_m, has_altitude,
                                                                sys_x, sys_y);
 
-        ret = proj_man.cart2geo(sys_x, sys_y, lat, lon);
+        ret = proj_man.ogrCart2Geo(sys_x, sys_y, lat, lon);
 
         if (!ret)
         {
