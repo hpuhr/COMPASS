@@ -33,6 +33,9 @@ class ProjectionManagerWidget;
 class ProjectionManager : public Singleton, public Configurable
 {
 protected:
+    bool use_sdl_projection_ {false};
+    bool use_ogr_projection_ {false};
+
     float sdl_system_latitude_;
     float sdl_system_longitude_;
 
@@ -86,6 +89,12 @@ public:
 
     float sdlSystemLongitude() const;
     void sdlSystemLongitude(float sdl_system_longitude);
+
+    bool useSDLProjection() const;
+    void useSDLProjection(bool use_sdl_projection);
+
+    bool useOGRProjection() const;
+    void useOGRProjection(bool use_ogr_projection);
 };
 
 #endif /* PROJECTIONMANAGER_H_ */

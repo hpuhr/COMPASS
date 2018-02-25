@@ -157,24 +157,25 @@ protected:
     unsigned char sac_;
 
     bool has_sic_{false};
-    unsigned char sic_{0};
+    unsigned char sic_ {0};
 
     bool has_latitude_{false};
-    double latitude_{0}; //degrees
+    double latitude_ {0}; //degrees
 
-    bool has_longitude_{false};
-    double longitude_{0}; // degrees
+    bool has_longitude_ {false};
+    double longitude_ {0}; // degrees
 
-    bool has_altitude_{false};
-    double altitude_{0};  // meter above msl
+    bool has_altitude_ {false};
+    double altitude_ {0};  // meter above msl
 
     bool finalized_ {false};
 
-    double system_x_;
-    double system_y_;
+    double ogr_system_x_ {0};
+    double ogr_system_y_ {0};
 
-//    double local_trans_x_;
-//    double local_trans_y_;
+    t_CPos grs_pos_;
+    t_GPos geo_pos_;
+    t_Mapping_Info mapping_info_;
 };
 
 #endif // DBODATASOURCE_H

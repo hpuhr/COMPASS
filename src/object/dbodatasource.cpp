@@ -168,14 +168,39 @@ DBODataSource::~DBODataSource()
 
 void DBODataSource::finalize ()
 {
-    bool ret = ProjectionManager::instance().ogrGeo2Cart(latitude_, longitude_, system_x_, system_y_);
+    finalized_ = false;
 
-    if (!ret)
+    ProjectionManager& proj_man = ProjectionManager::instance();
+
+    assert (proj_man.useOGRProjection() || proj_man.useSDLProjection());
+
+    if (proj_man.useOGRProjection())
     {
-       logwrn << "DBODataSource: finalize: geo2cart return false for " << short_name_
-              << " lat " << latitude_ << " lon " << longitude_ << " x " << system_x_ << " y " << system_y_;
-       finalized_ = false;
-       return;
+        bool ret = proj_man.ogrGeo2Cart(latitude_, longitude_, ogr_system_x_, ogr_system_y_);
+
+        if (!ret)
+        {
+           logwrn << "DBODataSource: finalize: ogrGeo2Cart return false for " << short_name_
+                  << " lat " << latitude_ << " lon " << longitude_ << " x " << ogr_system_x_ << " y " << ogr_system_y_;
+           return;
+        }
+    }
+
+    if (proj_man.useSDLProjection())
+    {
+        preset_cpos (&grs_pos_);
+        preset_gpos (&geo_pos_);
+        preset_mapping_info (&mapping_info_);
+
+        geo_pos_.latitude = latitude_;
+        geo_pos_.longitude = longitude_;
+        geo_pos_.altitude = altitude_; // TODO check if exists
+        geo_pos_.defined = true;
+
+        t_Retc lrc;
+
+        lrc = geo_calc_info (geo_pos_, &mapping_info_);
+        assert (lrc == RC_OKAY);
     }
 
     loginf << "DBODataSource: finalize: " << short_name_ << " done";
@@ -184,7 +209,8 @@ void DBODataSource::finalize ()
 }
 
 // azimuth degrees, range & altitude in meters
-void DBODataSource::calculateOGRSystemCoordinates (double azimuth, double slant_range, double altitude, bool has_altitude, double &sys_x, double &sys_y)
+void DBODataSource::calculateOGRSystemCoordinates (double azimuth, double slant_range, double altitude,
+                                                   bool has_altitude, double &sys_x, double &sys_y)
 {
     if (!finalized_)
         logerr << "DBODataSource: calculateSystemCoordinates: " << short_name_ << " not finalized";
@@ -212,8 +238,8 @@ void DBODataSource::calculateOGRSystemCoordinates (double azimuth, double slant_
     sys_x = range * sin (azimuth);
     sys_y = range * cos (azimuth);
 
-    sys_x += system_x_;
-    sys_y += system_y_;
+    sys_x += ogr_system_x_;
+    sys_y += ogr_system_y_;
 
     if (sys_x != sys_x || sys_y != sys_y)
     {

@@ -371,7 +371,7 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject &object)
 
     std::map<int, DBODataSource>& data_sources = db_object_->dataSources();
     for (auto& ds_it : data_sources)
-        assert (ds_it.second.isFinalized()); // has to be done before to check epsg
+        assert (ds_it.second.isFinalized()); // has to be done before
 
     std::shared_ptr<Buffer> read_buffer = object.data();
     unsigned int read_size = read_buffer->size();
