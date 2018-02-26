@@ -1,7 +1,7 @@
 \chapter{Introduction}
 
 This document has its focus on interaction and working procedures required to make use of the existing
-functionality. In this introduction, feature highlights are listed, followed by a brief summary of important aspects of  ATSDB. In the later section \nameref{sec:usage}, a functional, task-oriented overview is given. 
+functionality. In this introduction, feature highlights are listed, followed by a brief summary of important aspects of  ATSDB in \nameref{sec:key_concepts}. In the later section \nameref{sec:usage}, a functional, task-oriented overview is given. In the last section \nameref{sec:troubleshooting} details about reported isses are collected, as well as details on how to report new issues.
 %At the end of the document, a glossary is given.
 
 \section{Feature highlights}
@@ -28,14 +28,18 @@ The \textbf{A}ir \textbf{T}raffic \textbf{S}urveillance \textbf{D}ata\textbf{B}a
 \item Runs on generic hardware
 \end{itemize}
 
-There also exists an integrated display solution, called the ATSDB display. Currently it is experimental, and still under heavy development. For this reasons, it is not released as source code, but can be downloaded as an AppImage as binary component only. Please note that the display functionality is described in the later chapter OSG View (in section \ref{sec:osgview}). The following features currently exist:
+\subsection{Display}
+There also exists an integrated display solution, called the ATSDB display. Currently it is experimental, and still under heavy development. For this reasons, it is not released as source code, but can be downloaded as an AppImage as binary component only. Please note that the display functionality is described in the later chapter OSG View (in section \nameref{sec:osgview}).\\\\
+
+The following features currently exist:
 
 \begin{itemize}  
+\item Usage of data based on the highly flexible ATSDB framework
 \item High-performance display based on OpenSceneGraph
 \item Customizable map/terrain display based on osgEarth
 \item Customizable display of Database Objects
 \item Selection and labeling
-\item Relatively low memory footprint (e.g. 17 million target reports in 6 GB RAM)
+\item Relatively low memory footprint (e.g. 17 million target reports in 4.5 GB RAM)
 \end{itemize}
 
 \section{General Aspects}

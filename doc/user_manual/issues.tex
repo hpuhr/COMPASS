@@ -1,4 +1,27 @@
-\chapter{Reporting Issues}
+\chapter{Troubleshooting}
+\label{sec:troubleshooting}
+
+\section{Known Issues}
+
+\subsection{CentOS Fuse Usermount Permissions}
+
+On some operating systems, the following error message is shown when starting the AppImage:
+
+\begin{verbatim}
+fuse: failed to exec fusermount: Permission denied
+
+Cannot mount AppImage, please check your FUSE setup.
+You might still be able to extract the contents of this AppImage 
+if you run it with the --appimage-extract option. 
+See https://github.com/AppImage/AppImageKit/wiki/FUSE 
+for more information
+open dir error: No such file or directory
+\end{verbatim}
+
+
+As the message states, the current user has no permissions to correctly mount the AppImage. Please refer to the provded link \url{https://github.com/AppImage/AppImageKit/wiki/FUSE} for information how to resolve this.
+
+\section{Reporting Issues}
 
 There are several ways of reporting issues. The following steps have to be taken:
 
@@ -12,13 +35,13 @@ Please also make sure that you are using the latest version of ATSDB, since the 
 
 Also, if you're planning on using ATSDB, it is of benefit if you register on \url{https://github.com}, which can be done for free. It is then possible for you to comment on issues, create new ones or even contribute to the project.
 
-\section{Already Reported Issues}
+\subsection{Already Reported Issues}
 
 Please refer to \url{https://github.com/hpuhr/ATSDB/issues} for a list of the currently known issues. An issue can be ``Open'' meaning it was not yet fixed, or ``Closed'', meaning it was at least fixed in the source code. If it is closed, it does not mean that the fix is already included in the current AppImage, but that it will be in the next release.
 
 Please look through the issues and make sure that yours isn't already listed. If so, you can comment on it to indicate the severity for you. If not, please proceed to the next step.
 
-\section{Collect Information}
+\subsection{Collect Information}
 
 Basically everything that is needed to reproduce the error should be submitted. Depending on the type of the error, this can differ, but at least the following information should be given:
 
@@ -27,7 +50,7 @@ Basically everything that is needed to reproduce the error should be submitted. 
 \item Exact steps taken until the error occured
 \end{itemize} 
 
-\subsection{For Application Crashes}
+\subsubsection{For Application Crashes}
 
 If the application crashed, it would also be of interest to get a stacktrace. This can be achieved by running the application using gdb (\url{https://www.gnu.org/software/gdb/}), which might have to be installed.
 
@@ -84,39 +107,15 @@ from /lib/x86_64-linux-gnu/libglib-2.0.so.0
 
 This is called a stacktrace. Please copy all of this text so that it can be subitted with the issue report.
 
-\subsection{For Graphical Issues}
+\subsubsection{For Graphical Issues}
 
 If a display issue exists, e.g. when wrong colors or display artefacts are shown, additional information is required.
 
-To find out which graphics card and driver are being used, the program ``glxinfo'' has to be used (it might have to be installed). Please execute the following command:
 
-\begin{verbatim}
-glxinfo | grep OpenGL
-\end{verbatim}
-
-The output might look something like this:
-
-\begin{verbatim}
-OpenGL vendor string: NVIDIA Corporation
-OpenGL renderer string: GeForce GTX 1080/PCIe/SSE2
-OpenGL core profile version string: 4.5.0 NVIDIA 384.111
-OpenGL core profile shading language version string: 4.50 NVIDIA
-OpenGL core profile context flags: (none)
-OpenGL core profile profile mask: core profile
-OpenGL core profile extensions:
-OpenGL version string: 4.5.0 NVIDIA 384.111
-OpenGL shading language version string: 4.50 NVIDIA
-OpenGL context flags: (none)
-OpenGL profile mask: (none)
-OpenGL extensions:
-OpenGL ES profile version string: OpenGL ES 3.2 NVIDIA 384.111
-OpenGL ES profile shading language version string: OpenGL ES GLSL ES 3.20
-OpenGL ES profile extensions:
-\end{verbatim}
 
 This shows that an NVidia graphics card exists, and the correct driver is used. Please add such output to the issue report.
 
-\subsubsection{Unsupported Graphics Cards or Drivers}
+\paragraph{Unsupported Graphics Cards or Drivers}
 
 Since there exist hundreds of different graphics card types, and several possible drivers for each of them, support will only be given for ATI or Nvidia graphics cards, with their native drivers.
 
@@ -164,8 +163,8 @@ In such cases, the following issues can be expected and will currently not be ad
 
 Please know that it might also work, but no guarantees or support can be given.
 
-\section{Issue Reporting}
+\subsection{Issue Reporting}
 
-Please either create a new isse on GitHub (\url{https://github.com/hpuhr/ATSDB/issues}) or send a mail to \href{mailto:helmut.puhr@gmx.at}{helmut.puhr@gmx.at}, and include all of the previously collected information. If the supplied information is not enough you will be contacted as soon as time allows, with a request for further detail.
+Please either create a new isse on GitHub (\url{https://github.com/hpuhr/ATSDB/issues}) or send a mail to \href{mailto:atsdb@gmx.at}{atsdb@gmx.at}, and include all of the previously collected information. If the supplied information is not enough you will be contacted as soon as time allows, with a request for further detail.
 
 
