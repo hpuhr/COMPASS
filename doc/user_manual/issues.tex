@@ -23,7 +23,7 @@ As the message states, the current user has no permissions to correctly mount th
 
 \subsection{Missing glibc Library Versions}
 
-On some operating systems, the following error message is shown when starting the AppImage:
+On some operating systems, the following error message is shown when starting the AppImage:\\\\
 
 \begin{verbatim}
 /lib64/libc.so.6: version `GLIBC_2.14' not found (required by ...)
@@ -34,14 +34,30 @@ On some operating systems, the following error message is shown when starting th
 ...
 \end{verbatim}
 
-As stated in \url{https://github.com/AppImage/AppImageKit/issues/398}:
+As stated in \url{https://github.com/AppImage/AppImageKit/issues/398}: \\
 
-``...inside the AppImage requires a newer glibc version than is present on your target system (CentOS 6.7 in your example). The recommended way to produce an AppImage that would run on CentOS 6.7 would be to build on CentOS 6.x...''
+``...inside the AppImage requires a newer glibc version than is present on your target system (CentOS 6.7 in your example). The recommended way to produce an AppImage that would run on CentOS 6.7 would be to build on CentOS 6.x...''\\\\
 
-Unfortunately this means that even for e.g.  CentOS 6.* (or older) an AppImage produced using Ubuntu 14.04 will not run, and currently there no plans to build one (unless requested by large number of users).\\
+Unfortunately this means that for e.g. CentOS 6.* (or older) an AppImage produced using Ubuntu 14.04 will not run, and currently there no plans to build one (unless requested by large number of users).\\
 
 If this is the case for you please comment on \url{https://github.com/hpuhr/ATSDB/issues/35}.
 
+
+\subsection{Graphical Issues}
+
+For issues of the following nature:
+
+\begin{itemize} 
+\item Application might not even start (OpenGl version error)
+\item Slow display performance
+\item Graphical display errors (wrong colours, artefacts, etc) 
+\end{itemize} 
+
+If such a display issue exists, additional information is required. \\
+
+Please \textbf{verify} that the installed graphics card and driver in use match the supported version stated in \nameref{sec:graphics_installation}. \\
+
+Only if this is the case, please collect the output of \textit{glxinfo} and create an issue report as stated below.
 
 \section{Reporting Issues}
 
@@ -53,13 +69,13 @@ There are several ways of reporting issues. The following steps have to be taken
 \item Report the issue
 \end{itemize} 
 
-Please also make sure that you are using the latest version of ATSDB, since the issue might already have been corrected in the current version.
+Please also make sure that you are using the latest version of ATSDB, since the issue might already have been corrected in the current version. \\
 
 Also, if you're planning on using ATSDB, it is of benefit if you register on \url{https://github.com}, which can be done for free. It is then possible for you to comment on issues, create new ones or even contribute to the project.
 
 \subsection{Already Reported Issues}
 
-Please refer to \url{https://github.com/hpuhr/ATSDB/issues} for a list of the currently known issues. An issue can be ``Open'' meaning it was not yet fixed, or ``Closed'', meaning it was at least fixed in the source code. If it is closed, it does not mean that the fix is already included in the current AppImage, but that it will be in the next release.
+Please refer to \url{https://github.com/hpuhr/ATSDB/issues} for a list of the currently known issues. An issue can be ``Open'' meaning it was not yet fixed, or ``Closed'', meaning it was at least fixed in the source code. If it is closed, it does not mean that the fix is already included in the current AppImage, but that it will be in the next release. \\
 
 Please look through the issues and make sure that yours isn't already listed. If so, you can comment on it to indicate the severity for you. If not, please proceed to the next step.
 
@@ -129,64 +145,10 @@ from /lib/x86_64-linux-gnu/libglib-2.0.so.0
 
 This is called a stacktrace. Please copy all of this text so that it can be subitted with the issue report.
 
-\subsubsection{For Graphical Issues}
-
-If a display issue exists, e.g. when wrong colors or display artefacts are shown, additional information is required.
-
-
-
-This shows that an NVidia graphics card exists, and the correct driver is used. Please add such output to the issue report.
-
-\paragraph{Unsupported Graphics Cards or Drivers}
-
-Since there exist hundreds of different graphics card types, and several possible drivers for each of them, support will only be given for ATI or Nvidia graphics cards, with their native drivers.
-
-If different graphics cards or driver are used, the output of glxinfo might be similiar to this:
-
-\begin{verbatim}
-OpenGL vendor string: nouveau
-OpenGL renderer string: Gallium 0.4 on NVE6
-OpenGL core profile version string: 3.1 (Core Profile) Mesa 9.2.5
-OpenGL core profile shading language version string: 1.40
-OpenGL core profile context flags: (none)
-OpenGL core profile extensions:
-OpenGL version string: 3.0 Mesa 9.2.5
-OpenGL shading language version string: 1.30
-OpenGL context flags: (none)
-OpenGL extensions:
-\end{verbatim}
-
-Or this:
-
-\begin{verbatim}
-OpenGL vendor string: Intel Open Source Technology Center
-OpenGL renderer string: Mesa DRI Intel(R) Ivybridge Desktop 
-OpenGL core profile version string: 3.3 (Core Profile) Mesa 11.0.6
-OpenGL core profile shading language version string: 3.30
-OpenGL core profile context flags: (none)
-OpenGL core profile profile mask: core profile
-OpenGL core profile extensions:
-OpenGL version string: 3.0 Mesa 11.0.6
-OpenGL shading language version string: 1.30
-OpenGL context flags: (none)
-OpenGL extensions:
-OpenGL ES profile version string: OpenGL ES 3.0 Mesa 11.0.6
-OpenGL ES profile shading language version string: OpenGL ES GLSL ES 3.00
-OpenGL ES profile extensions:
-\end{verbatim}
-
-In such cases, the following issues can be expected and will currently not be addressed:
-
-\begin{itemize} 
-\item Application might not even start (OpenGl version error)
-\item Slow display performance (OpenGl emulation be CPU-based Mesa driver)
-\item Graphical display errors (wrong colours, artefacts, etc) 
-\end{itemize} 
-
-Please know that it might also work, but no guarantees or support can be given.
-
 \subsection{Issue Reporting}
 
-Please either create a new isse on GitHub (\url{https://github.com/hpuhr/ATSDB/issues}) or send a mail to \href{mailto:atsdb@gmx.at}{atsdb@gmx.at}, and include all of the previously collected information. If the supplied information is not enough you will be contacted as soon as time allows, with a request for further detail.
+Please either create a new isse on GitHub (\url{https://github.com/hpuhr/ATSDB/issues}) or send a mail to \href{mailto:atsdb@gmx.at}{atsdb@gmx.at}, and include all of the previously collected information. \\
+
+If the supplied information is not enough you will be contacted as soon as time allows, with a request for further detail.
 
 
