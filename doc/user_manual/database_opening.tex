@@ -79,7 +79,7 @@ mysql -u root
 # grant access rights for your MySQL user, 
 # e.g. 'sass', from the your local IP address, 
 # e.g. '192.168.0.104', using your password, e.g. 'sassc'
-GRANT ALL ON *.* to' 'sassc'@'192.168.0.104' IDENTIFIED BY 'sassc';
+GRANT ALL ON *.* to 'sassc'@'192.168.0.104' IDENTIFIED BY 'sassc';
 
 # set access rights
 FLUSH PRIVILEGES;
@@ -89,6 +89,14 @@ exit
 \end{verbatim}
 
 After executing these steps once, remote access to this MySQL server from the specified IP address is enabled.
+
+It might also be the case that your installation of SASS-C has an enabled firewall. If that is the case, access to be MySQL ports must be enabled.
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=15cm,frame]{../screenshots/centos_firewall.png}
+  \caption{MySQL Server firewall example}
+\end{figure}
 
 \subsubsection{Error Messages}
 
