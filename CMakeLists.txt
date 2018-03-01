@@ -120,7 +120,6 @@ target_link_libraries ( atsdb
     Qt5::OpenGL
     ${TINYXML2_LIBRARY}
     ${Boost_LIBRARIES}
-    Eigen3::Eigen
     ${LOG4CPP_LIBRARIES}
     ${MySQLpp_LIBRARY}
     ${MYSQL_LIBRARY}
