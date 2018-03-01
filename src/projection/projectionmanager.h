@@ -112,35 +112,7 @@ protected:
     OGRCoordinateTransformation* ogr_geo2cart_ {nullptr};
     OGRCoordinateTransformation* ogr_cart2geo_ {nullptr};
 
-//    float rs2g_system_latitude_;
-//    float rs2g_system_longitude_;
-//    float rs2g_system_height_;
-
-    //MatA* rs2g_A_;  // matrix (depends on current radar source selected)
-    //VecB* rs2g_b_;  // vector (depends on current radar source selected)
-//    MatA rs2g_R1_;  // matrix (depends on COP)
-//    VecB rs2g_T1_;  // vector (depends on COP)
-//    MatA rs2g_T_Ai_; // transposed matrix (depends on radar)
-//    VecB rs2g_bi_;  // vector (depends on radar)
-//    double rs2g_hi_; // height of selected radar
-//    double rs2g_Rti_; // earth radius of tangent sphere at the selected radar
-//    double rs2g_ho_; // height of COP
-//    double rs2g_Rto_; // earth radius of tangent sphere at the COP
-
     ProjectionManagerWidget* widget_ {nullptr};
-
-//    void initRS2G ();
-
-//    void rs2gFillMat(MatA& A); //, Radar& radar);
-//    void rs2gFillVec(VecB& b); //, Radar& radar);
-
-//    void RadSlant2SysXY(double* x, double* y, double* z);
-//    double Azimuth(double x, double y);
-//    void RadarSlant2LocalCart(VecB& input);
-//    void SysCart2SysStereo(VecB& b, double* x, double* y);
-//    void Geodesic2Geocentric(VecB& input);
-//    void LocalCart2Geocentric(VecB& input);
-
 };
 
 #endif /* PROJECTIONMANAGER_H_ */

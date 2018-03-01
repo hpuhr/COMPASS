@@ -446,38 +446,9 @@ void DBODataSource::initRS2G()
     MatA A_p0(3,3), A_q0(3,3);
     VecB b_p0(3), b_q0(3);
 
-    //    rs2g_A_(0,0) = -sin(long_rad);
-    //    rs2g_A_(0,1) = cos(long_rad);
-    //    rs2g_A_(0,2) = 0.0;
-    //    rs2g_A_(1,0) = -sin(lat_rad) * cos(long_rad);
-    //    rs2g_A_(1,1) = -sin(lat_rad) * sin(long_rad);
-    //    rs2g_A_(1,2) = cos(lat_rad);
-    //    rs2g_A_(2,0) = cos(lat_rad) * cos(long_rad);
-    //    rs2g_A_(2,1) = cos(lat_rad) * sin(long_rad);
-    //    rs2g_A_(2,2) = sin(lat_rad);
-
-    //#if defined(DEBUG_ARTAS_TRF)
-    //    print_all_matrix(A);
-    //#endif
-
-    //    for (it = trf_.begin(); it != trf_.end(); it++) {
-    //       if ((*it).first == reference) continue;
-
-    // #if defined(DEBUG_ARTAS_TRF)
-    //       printf("radar -> (%d) name:%s\n", (*it).first, (*it).second.rad->Name());
-    //       printf(" - lat:%s (%g) long:%s (%g)\n", (*it).second.rad->LatStr(), (*it).second.rad->Lat(), (*it).second.rad->LongStr(), (*it).second.rad->Long());
-    //       printf(" - height: %g\n", (*it).second.rad->Height());
-    // #endif
-
     rs2g_Rti_ = EE_A * (1 - EE_E2) / sqrt(pow(1 - EE_E2 * pow(sin(lat_rad), 2), 3));
-    // #if defined(DEBUG_ARTAS_TRF)
     //       printf(" - best earth radius:%g\n", (*it).second.rad->Rti());
-    // #endif
 
-    //       MatA *A_p0q0_ = new MatA(3,3);
-    // #if defined(DEBUG_ARTAS_TRF)
-    //       printf(" - radar matrix values\n");
-    // #endif
     rs2gFillMat(A_p0, lat_rad, long_rad);
     //mult(A_q0, trans(A_p0), *A_p0q0_); // A_p0q0 = A_q0 * Transpose(A_p0) in doxygen ...
     rs2g_A_p0q0_ = A_q0 * A_p0.transpose();
@@ -488,10 +459,6 @@ void DBODataSource::initRS2G()
     //       print_all_matrix(*A_p0q0_);
     // #endif
 
-    //       VecB *b_p0q0 = new VecB(3);
-    // #if defined(DEBUG_ARTAS_TRF)
-    //       printf(" - radar vector values\n");
-    // #endif
     rs2gFillVec(b_p0, lat_rad, long_rad, altitude_);
 
     //add(scaled(b_q0, -1.0), b_p0, b_p0); // b_p0 = b_p0 - b_q0 in doxygen ...
@@ -499,10 +466,6 @@ void DBODataSource::initRS2G()
 
     //mult(A_q0, b_p0, *b_p0q0);    // b_p0q0 = A_q0 * (b_p0 - b_q0) in doxygen ...
     rs2g_b_p0q0_ = A_q0 * b_p0;
-    // TODO check if ok
-
-
-    //(*it).second.b_p0q0 = b_p0q0;
 
     // #if defined(DEBUG_ARTAS_TRF)
     //       printf(" - radar vector final values\n");
@@ -511,20 +474,9 @@ void DBODataSource::initRS2G()
     //    }
 
     // from setradar
-//    A_ = (*it).second.A_p0q0;
-//    b_ = (*it).second.b_p0q0;
-
-//    MatA a_(3,3);
-//    rs2g_T_Ai_ = a_;
-//    rs2gFillMat(rs2g_T_Ai_, lat_rad, long_rad);
-//    rs2g_T_Ai_.transposeInPlace();
-
-//    VecB b_(3);
-//    rs2g_bi_ = b_;
     rs2gFillVec(rs2g_bi_, lat_rad, long_rad, altitude_);
 
     rs2g_hi_ = altitude_;
-//    rs2g_Rti_ = rs2g_Rto_;
 }
 
 double DBODataSource::rs2gAzimuth(double x, double y)
@@ -583,9 +535,7 @@ double DBODataSource::rs2gElevation(double z, double rho)
 
 void DBODataSource::radarSlant2LocalCart(VecB& local)
 {
-    //#if defined(DEBUG_ARTAS_TRF)
     logdbg << "radarSlant2LocalCart: in x: " << local[0] << " y: " << local[1] << " z: " << local[2];
-    //#endif
 
     double z = local[2];
     if (z == -1000.0)
@@ -595,19 +545,13 @@ void DBODataSource::radarSlant2LocalCart(VecB& local)
     double elevation = rs2gElevation(z, rho);
     double azimuth = rs2gAzimuth(local[0], local[1]);
 
-    //#if defined(DEBUG_ARTAS_TRF)
-    //   printf("rho:%g elev:%g azim:%g\n", rho, elevation, azimuth);
     logdbg << "radarSlant2LocalCart: rho: " << rho << " elevation: " << elevation << " azimuth: " << azimuth;
-    //#endif
 
     local[0] = rho * cos(elevation) * sin(azimuth);
     local[1] = rho * cos(elevation) * cos(azimuth);
     local[2] = rho * sin(elevation);
 
-    //#if defined(DEBUG_ARTAS_TRF)
-    //   printf("RadarSlant2LocalCart() => x:%g y:%g z:%g\n", local[0], local[1], local[2]);
     logdbg << "radarSlant2LocalCart: out x: " << local[0] << " y: " << local[1] << " z: " << local[2];
-    //#endif
 }
 
 void DBODataSource::sysCart2SysStereo(VecB& b, double* x, double* y)
@@ -615,40 +559,24 @@ void DBODataSource::sysCart2SysStereo(VecB& b, double* x, double* y)
     double H = sqrt(pow(b[0], 2) + pow(b[1], 2) + pow(b[2] + rs2g_ho_ + rs2g_Rto_, 2)) - rs2g_Rto_;
     double k = 2 * rs2g_Rto_ / (2 * rs2g_Rto_ + rs2g_ho_ + b[2] + H);
 
-    //#if defined(DEBUG_ARTAS_TRF)
-    //   printf("SysCart2SysStereo(x:%g y:%g z:%g) -> H:%g k:%g\n", b[0], b[1], b[2], H, k);
-    //#endif
-
     *x = k * b[0];
     *y = k * b[1];
-
-    //#if defined(DEBUG_ARTAS_TRF)
-    //   printf("SysCart2SysStereo() => x:%d y:%d\n", *x,*y);
-    //#endif
 }
 
 void DBODataSource::localCart2Geocentric(VecB& input)
 {
-    //#if defined(DEBUG_ARTAS_TRF)
     logdbg << "localCart2Geocentric: in x: " << input[0] << " y:" << input[1] << " z:" << input[2];
-    //#endif
 
     VecB Xinput(3);
 
     // local cartesian to geocentric
     //mult(T_Ai_, input, Xinput); // Xinput = Transposed(Ai_) * input
-
     Xinput = rs2g_T_Ai_ * input;
 
     //add(bi_, Xinput, input); // Xinput = Xinput + bi_
-    // TODO computation does not match comment
-
     input = Xinput + rs2g_bi_;
 
-    //#if defined(DEBUG_ARTAS_TRF)
-    //   printf("LocalCart2Geocentric() => x:%g y:%g z:%g\n", input[0], input[1], input[2]);
     logdbg << "localCart2Geocentric: out x: " << input[0] << " y:" << input[1] << " z:" << input[2];
-    //#endif
 }
 
 bool DBODataSource::calculateRadSlt2Geocentric (double x, double y, double z, Eigen::Vector3d& geoc_pos)
@@ -659,11 +587,7 @@ bool DBODataSource::calculateRadSlt2Geocentric (double x, double y, double z, Ei
     // the coordinates are in radar slant coordinates
     Xlocal[0] = x;
     Xlocal[1] = y;
-
-    //if (has_baro_altitude)
     Xlocal[2] = z;
-//    else
-//        Xlocal[2] = 0; // TODO check
 
     // radar slant to local cartesian
     radarSlant2LocalCart(Xlocal);
@@ -675,9 +599,8 @@ bool DBODataSource::calculateRadSlt2Geocentric (double x, double y, double z, Ei
 
     // geocentric to geodesic
     //Geocentric2Geodesic(Xlocal);
+    // done later
 
-    //     *lat = Xlocal[0];
-    //     *lng = Xlocal[1];
     return true;
 }
 
