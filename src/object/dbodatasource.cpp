@@ -175,7 +175,7 @@ void DBODataSource::finalize ()
 
     ProjectionManager& proj_man = ProjectionManager::instance();
 
-    assert (proj_man.useOGRProjection() || proj_man.useSDLProjection());
+    assert (proj_man.useOGRProjection() || proj_man.useSDLProjection() || proj_man.useRS2GProjection());
 
     if (proj_man.useOGRProjection())
     {
@@ -206,10 +206,10 @@ void DBODataSource::finalize ()
         assert (lrc == RC_OKAY);
     }
 
-    loginf << "DBODataSource: finalize: " << short_name_ << " done";
-
-    if (true)
+    if (proj_man.useRS2GProjection())
         initRS2G();
+
+    loginf << "DBODataSource: finalize: " << short_name_ << " done";
 
     finalized_ = true;
 }

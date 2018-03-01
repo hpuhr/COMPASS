@@ -369,12 +369,12 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject &object)
 
     ProjectionManager &proj_man = ProjectionManager::instance();
 
-    bool use_ogr_proj = false; //proj_man.useOGRProjection();
-    bool use_sdl_proj = false; //proj_man.useSDLProjection();
-    bool use_rs2g_proj = true;
+    bool use_ogr_proj = proj_man.useOGRProjection();
+    bool use_sdl_proj = proj_man.useSDLProjection();
+    bool use_rs2g_proj = proj_man.useRS2GProjection();
 
     loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: projection method sdl " << use_sdl_proj
-           << " ogr " << use_ogr_proj;
+           << " ogr " << use_ogr_proj << " rs2g " << use_rs2g_proj;
 
     assert (use_ogr_proj || use_sdl_proj || use_rs2g_proj);
 
@@ -416,6 +416,9 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject &object)
     double sys_x, sys_y;
     double lat, lon;
     unsigned int update_cnt=0;
+
+    double x1, y1, z1;
+    VecB pos;
 
     assert (msg_box_);
     float done_percent;
@@ -515,32 +518,13 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject &object)
 //            float rho; // (m)
 //            float theta; // (deg)
 
-            double x1;
-            double y1;
-            //if (pos_range_m != -1.0 && s.theta != -1.0) { // when available use the measured data
-               x1 = pos_range_m * sin(pos_azm_rad);
-               y1 = pos_range_m * cos(pos_azm_rad);
-//            }
-//            else { // default to non-measured data
-//               x1 = s.x;
-//               y1 = s.y;
-//            }
-
-               //double z; // radar Z coordinate (m)
-            double z1;
+            x1 = pos_range_m * sin(pos_azm_rad);
+            y1 = pos_range_m * cos(pos_azm_rad);
 
             if (has_altitude)
                 z1 = altitude_ft * FT2M;
             else
                 z1 = -1000.0;
-//            if (s.z != -1000.0) {
-//               z1 = s.z;
-//               prevMC = z1;
-//            } else if (prevMC != -1000.0)
-//               z1 = prevMC; // use previous modeC when not having one
-
-
-            VecB pos;
 
             logdbg << "local x " << x1 << " y " << y1 << " z " << z1;
 
