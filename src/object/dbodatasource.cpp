@@ -187,6 +187,8 @@ void DBODataSource::finalize ()
                    << " lat " << latitude_ << " lon " << longitude_ << " x " << ogr_system_x_ << " y " << ogr_system_y_;
             return;
         }
+
+        initRS2G(); // used for elevation calculation
     }
 
     if (proj_man.useSDLProjection())
@@ -239,13 +241,21 @@ bool DBODataSource::calculateOGRSystemCoordinates (double azimuth_rad, double sl
     //    else
     //        range = sqrt (slant_range*slant_range-altitude*altitude); // TODO: flatland
 
-    if (has_baro_altitude && slant_range_m > altitude_m)
-        horizontal_range = sqrt (slant_range_m*slant_range_m-altitude_m*altitude_m);
-    else
-        horizontal_range = slant_range_m; // TODO pure act of desperation
+//    if (has_baro_altitude && slant_range_m > altitude_m)
+//        horizontal_range = sqrt (slant_range_m*slant_range_m-altitude_m*altitude_m);
+//    else
+//        horizontal_range = slant_range_m; // TODO pure act of desperation
 
-    sys_x = horizontal_range * sin (azimuth_rad);
-    sys_y = horizontal_range * cos (azimuth_rad);
+//    sys_x = horizontal_range * sin (azimuth_rad);
+//    sys_y = horizontal_range * cos (azimuth_rad);
+
+    if (!has_baro_altitude)
+        altitude_m = altitude_;
+
+    double elevation = rs2gElevation(altitude_m, slant_range_m);
+
+    sys_x = slant_range_m * cos(elevation) * sin(azimuth_rad);
+    sys_y = slant_range_m * cos(elevation) * cos(azimuth_rad);
 
     sys_x += ogr_system_x_;
     sys_y += ogr_system_y_;
