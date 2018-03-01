@@ -369,13 +369,14 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject &object)
 
     ProjectionManager &proj_man = ProjectionManager::instance();
 
-    bool use_ogr_proj = proj_man.useOGRProjection();
-    bool use_sdl_proj = proj_man.useSDLProjection();
+    bool use_ogr_proj = false; //proj_man.useOGRProjection();
+    bool use_sdl_proj = false; //proj_man.useSDLProjection();
+    bool use_rs2g_proj = true;
 
     loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: projection method sdl " << use_sdl_proj
            << " ogr " << use_ogr_proj;
 
-    assert (use_ogr_proj || use_sdl_proj);
+    assert (use_ogr_proj || use_sdl_proj || use_rs2g_proj);
 
     std::map<int, DBODataSource>& data_sources = db_object_->dataSources();
     for (auto& ds_it : data_sources)
@@ -506,6 +507,55 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject &object)
                     lon = geo_pos.longitude * RAD2DEG;
                     //lat = geo_pos.latitude; what to do with altitude?
                 }
+            }
+        }
+
+        if (use_rs2g_proj)
+        {
+//            float rho; // (m)
+//            float theta; // (deg)
+
+            double x1;
+            double y1;
+            //if (pos_range_m != -1.0 && s.theta != -1.0) { // when available use the measured data
+               x1 = pos_range_m * sin(pos_azm_rad);
+               y1 = pos_range_m * cos(pos_azm_rad);
+//            }
+//            else { // default to non-measured data
+//               x1 = s.x;
+//               y1 = s.y;
+//            }
+
+               //double z; // radar Z coordinate (m)
+            double z1;
+
+            if (has_altitude)
+                z1 = altitude_ft * FT2M;
+            else
+                z1 = -1000.0;
+//            if (s.z != -1000.0) {
+//               z1 = s.z;
+//               prevMC = z1;
+//            } else if (prevMC != -1000.0)
+//               z1 = prevMC; // use previous modeC when not having one
+
+
+            VecB pos;
+
+            logdbg << "local x " << x1 << " y " << y1 << " z " << z1;
+
+            ret = data_sources.at(sensor_id).calculateRadSlt2Geocentric(x1, y1, z1, pos);
+            if (ret)
+            {
+                logdbg << "geoc x " << pos[0] << " y " << pos[1] << " z " << pos[2];
+
+                ret = geocentric2Geodesic(pos);
+
+                lat = pos [0];
+                lon = pos [1];
+
+                logdbg << "geod x " << pos[0] << " y " << pos[1];
+                //what to do with altitude?
             }
         }
 

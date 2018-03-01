@@ -37,6 +37,8 @@ message("  Boost_LIBRARY_DIR: ${Boost_LIBRARY_DIR}")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH};${ATSDB_PATH}/cmake_modules)
 message("  CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}") 
 
+find_package (Eigen3 3.3 REQUIRED)
+
 find_package ( MySQLpp REQUIRED )
 message("  MySQLpp_INCLUDE_DIR: ${MySQLpp_INCLUDE_DIR}") 
 message("  MySQLpp_LIBRARY: ${MySQLpp_LIBRARY}") 
@@ -117,6 +119,7 @@ target_link_libraries ( atsdb
     Qt5::OpenGL
     ${TINYXML2_LIBRARY}
     ${Boost_LIBRARIES}
+    Eigen3::Eigen
     ${LOG4CPP_LIBRARIES}
     ${MySQLpp_LIBRARY}
     ${MYSQL_LIBRARY}

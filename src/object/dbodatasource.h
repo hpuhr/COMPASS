@@ -20,6 +20,8 @@
 
 #include <QObject>
 
+#include "rs2g.h"
+
 #include "configurable.h"
 #include "geomap.h"
 
@@ -147,6 +149,9 @@ public:
 
     bool calculateSDLGRSCoordinates (double azimuth_rad, double slant_range_m, bool has_baro_altitude,
                                      double baro_altitude_ft, t_CPos& grs_pos);
+
+    bool calculateRadSlt2Geocentric (double x, double y, double z, Eigen::Vector3d& geoc_pos);
+
 protected:
     unsigned int id_{0};
 
@@ -178,6 +183,26 @@ protected:
     t_CPos grs_pos_;
     t_GPos geo_pos_;
     t_Mapping_Info mapping_info_;
+
+    MatA rs2g_A_;
+
+    MatA rs2g_T_Ai_; // transposed matrix (depends on radar)
+    VecB rs2g_bi_;  // vector (depends on radar)
+    double rs2g_hi_; // height of selected radar
+    double rs2g_Rti_; // earth radius of tangent sphere at the selected radar
+    double rs2g_ho_; // height of COP
+    double rs2g_Rto_; // earth radius of tangent sphere at the COP
+
+    MatA rs2g_A_p0q0_;
+    VecB rs2g_b_p0q0_;
+
+    void initRS2G ();
+    double rs2gAzimuth(double x, double y);
+    double rs2gElevation(double z, double rho);
+    void radarSlant2LocalCart(VecB& local);
+    void sysCart2SysStereo(VecB& b, double* x, double* y);
+    void localCart2Geocentric(VecB& input);
+
 };
 
 #endif // DBODATASOURCE_H
