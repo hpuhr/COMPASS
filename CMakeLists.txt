@@ -37,7 +37,7 @@ message("  Boost_LIBRARY_DIR: ${Boost_LIBRARY_DIR}")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH};${ATSDB_PATH}/cmake_modules)
 message("  CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}") 
 
-find_package (Eigen3 3.3 REQUIRED)
+find_package (Eigen3 3.2 REQUIRED)
 
 find_package ( MySQLpp REQUIRED )
 message("  MySQLpp_INCLUDE_DIR: ${MySQLpp_INCLUDE_DIR}") 
@@ -107,6 +107,7 @@ include_directories (
     ${TINYXML2_INCLUDE_DIR}
     ${OPENSCENEGRAPH_INCLUDE_DIRS}
     ${LibArchive_INCLUDE_DIRS}
+    ${EIGEN3_INCLUDE_DIR}
     )
 
 link_directories(
