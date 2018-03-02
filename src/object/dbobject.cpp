@@ -515,7 +515,9 @@ std::map<int, std::string> DBObject::loadLabelData (std::vector<int> rec_nums)
     std::string custom_filter_clause;
     bool first=true;
 
-    custom_filter_clause = "rec_num in (";
+    assert (hasVariable("rec_num"));
+
+    custom_filter_clause = variable("rec_num").currentDBColumn().identifier()+" in (";
     for (auto& rec_num : rec_nums)
     {
         if (first)

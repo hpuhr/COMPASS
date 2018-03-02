@@ -682,8 +682,6 @@ void DBObjectWidget::updateDBOVarsGridSlot ()
             delete child->widget();
         delete child;
     }
-    //    dbo_vars_grid_edit_buttons_.clear();
-    //    dbo_vars_grid_delete_buttons_.clear();
 
     logdbg  << "DBObjectWidget: updateDBOVarsGrid: creating first row";
 
