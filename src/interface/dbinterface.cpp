@@ -209,11 +209,11 @@ bool DBInterface::ready ()
 {
     if (!current_connection_)
     {
-        loginf << "DBInterface: ready: no connection";
+        logwrn << "DBInterface: ready: no connection";
         return false;
     }
 
-    loginf << "DBInterface: ready: connection ready " << current_connection_->ready();
+    logdbg << "DBInterface: ready: connection ready " << current_connection_->ready();
     return current_connection_->ready();
 }
 
@@ -619,8 +619,8 @@ std::pair<std::string, std::string> DBInterface::getMinMaxString (const DBOVaria
     assert (buffer);
     if (buffer->size() != 1)
     {
-//        throw std::invalid_argument ("DBInterface: getMinMaxString: string buffer for variable "
-//                                     + var.name() + " empty");
+        //        throw std::invalid_argument ("DBInterface: getMinMaxString: string buffer for variable "
+        //                                     + var.name() + " empty");
         logerr << "DBInterface: getMinMaxString: variable " << var.name() << " has " << buffer->size()
                << " minmax values";
         return std::pair <std::string, std::string> (NULL_STRING, NULL_STRING);
@@ -818,8 +818,8 @@ void DBInterface::postProcess ()
         logwrn << "DBInterface: postProcess: no data in objects";
 
         QMessageBox m_warning (QMessageBox::Warning, "No Data in Objects",
-                                 "None of the database objects contains any data. Post-processing was not performed.",
-                                 QMessageBox::Ok);
+                               "None of the database objects contains any data. Post-processing was not performed.",
+                               QMessageBox::Ok);
         m_warning.exec();
         return;
     }
@@ -981,19 +981,20 @@ std::set<int> DBInterface::getActiveDataSources (const DBObject &object)
 //    buffer_writer_->write (data, table_name);
 //}
 
-void DBInterface::updateBuffer (DBObject &object, DBOVariable &key_var, std::shared_ptr<Buffer> buffer)
+void DBInterface::updateBuffer (DBObject &object, DBOVariable &key_var, std::shared_ptr<Buffer> buffer,
+                                size_t from_index, size_t to_index)
 {
     QMutexLocker locker(&connection_mutex_);
 
     assert (current_connection_);
     assert (buffer);
 
-    if (!buffer_writer_)
-        buffer_writer_ = new BufferWriter (current_connection_, &sql_generator_);
+    //    if (!buffer_writer_)
+    //        buffer_writer_ = new BufferWriter (current_connection_, &sql_generator_);
 
-    assert (buffer_writer_);
+    //    assert (buffer_writer_);
 
-    const DBTable &table = object.currentMetaTable().mainTable();
+    const DBTable& table = object.currentMetaTable().mainTable();
 
     const PropertyList &properties = buffer->properties();
 
@@ -1004,7 +1005,36 @@ void DBInterface::updateBuffer (DBObject &object, DBOVariable &key_var, std::sha
                                       +"' does not exist in table "+table.name());
     }
 
-    buffer_writer_->update (buffer, object, key_var, table.name());
+    //buffer_writer_->update (buffer, object, key_var, table.name());
+    std::string bind_statement =  sql_generator_.createDBUpdateStringBind(buffer, object, key_var, table.name());
+
+    logdbg  << "DBInterface: updateBuffer: preparing bind statement";
+    current_connection_->prepareBindStatement(bind_statement);
+    current_connection_->beginBindTransaction();
+
+    logdbg  << "DBInterface: updateBuffer: starting inserts";
+    for (unsigned int cnt=from_index; cnt <= to_index; cnt++)
+    {
+        insertBindStatementUpdateForCurrentIndex(buffer, cnt);
+
+//        if (cnt % 10000 == 0)
+//        {
+//            logdbg  << "DBInterface: updateBuffer: bind transactions cnt " << cnt;
+
+            //            if (msg_box && buffer_size != 0)
+            //            {
+            //                percent_done = 100.0*cnt/buffer_size;
+            //                msg = "Writing object data: " + String::doubleToStringPrecision(percent_done, 2)+"%";
+            //                msg_box->setText(msg.c_str());
+            //                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            //            }
+//        }
+    }
+
+    logdbg  << "DBInterface: updateBuffer: ending bind transactions";
+    current_connection_->endBindTransaction();
+    logdbg  << "DBInterface: update: finalizing bind statement";
+    current_connection_->finalizeBindStatement();
 }
 
 void DBInterface::prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause, std::vector <DBOVariable *> filtered_variables,
@@ -1196,6 +1226,90 @@ std::shared_ptr<DBResult> DBInterface::queryMinMaxNormalForTable (const DBTable&
     //loginf  << "DBInterface: queryMinMaxForTable: executing command '" << command->getCommandString() << "'";
     std::shared_ptr<DBResult> result = current_connection_->execute(*command);
     return result;
+}
+
+void DBInterface::insertBindStatementUpdateForCurrentIndex (std::shared_ptr<Buffer> buffer, unsigned int row)
+{
+    assert (buffer);
+    logdbg  << "DBInterface: insertBindStatementUpdateForCurrentIndex: start";
+    const PropertyList &list =buffer->properties();
+    unsigned int size = list.size();
+    logdbg  << "DBInterface: insertBindStatementUpdateForCurrentIndex: creating bind for " << size << " elements";
+
+    std::string connection_type = current_connection_->type();
+
+    assert (connection_type == MYSQL_IDENTIFIER || connection_type == SQLITE_IDENTIFIER);
+
+    unsigned int index_cnt=0;
+
+    logdbg << "DBInterface: insertBindStatementUpdateForCurrentIndex: starting for loop";
+    for (unsigned int cnt=0; cnt < size; cnt++)
+    {
+        const Property &property = list.at(cnt);
+        PropertyDataType data_type = property.dataType();
+
+        logdbg  << "DBInterface: insertBindStatementUpdateForCurrentIndex: for at cnt " << cnt << " id "
+                << property.name();
+
+        if (connection_type == SQLITE_IDENTIFIER)
+            index_cnt=cnt+2;
+        else if (connection_type == MYSQL_IDENTIFIER)
+            index_cnt=cnt+1;
+        else
+            throw std::runtime_error ("DBInterface: insertBindStatementForCurrentIndex: unknown db type");
+
+        if (buffer->isNone(property, row))
+        {
+            current_connection_->bindVariableNull (index_cnt);
+            continue;
+        }
+
+        switch (data_type)
+        {
+        case PropertyDataType::BOOL:
+            current_connection_->bindVariable (index_cnt, static_cast<int> (buffer->getBool(property.name()).get(row)));
+            break;
+        case PropertyDataType::CHAR:
+            current_connection_->bindVariable (index_cnt, static_cast<int> (buffer->getChar(property.name()).get(row)));
+            break;
+        case PropertyDataType::UCHAR:
+            current_connection_->bindVariable (index_cnt, static_cast<int> (buffer->getUChar(property.name()).get(row)));
+            break;
+        case PropertyDataType::INT:
+            current_connection_->bindVariable (index_cnt, static_cast<int> (buffer->getInt(property.name()).get(row)));
+            break;
+        case PropertyDataType::UINT:
+            assert (false);
+            break;
+        case PropertyDataType::LONGINT:
+            assert (false);
+            break;
+        case PropertyDataType::ULONGINT:
+            assert (false);
+            break;
+        case PropertyDataType::FLOAT:
+            current_connection_->bindVariable (index_cnt, static_cast<double> (buffer->getFloat(property.name()).get(row)));
+            break;
+        case PropertyDataType::DOUBLE:
+            current_connection_->bindVariable (index_cnt, buffer->getDouble(property.name()).get(row));
+            break;
+        case PropertyDataType::STRING:
+            if (connection_type == SQLITE_IDENTIFIER)
+                current_connection_->bindVariable (index_cnt, buffer->getString(property.name()).get(row));
+            else //MYSQL assumed
+                current_connection_->bindVariable (index_cnt, "'"+buffer->getString(property.name()).get(row)+"'");
+            break;
+        default:
+            logerr  <<  "Buffer: insertBindStatementUpdateForCurrentIndex: unknown property type "
+                     << Property::asString(data_type);
+            throw std::runtime_error ("Buffer: insertBindStatementUpdateForCurrentIndex: unknown property type "
+                                      + Property::asString(data_type));
+        }
+    }
+
+    current_connection_->stepAndClearBindings();
+
+    logdbg  << "DBInterface: insertBindStatementUpdateForCurrentIndex: done";
 }
 
 //DBResult *DBInterface::queryMinMaxForColumn (DBTableColumn *column, std::string table)

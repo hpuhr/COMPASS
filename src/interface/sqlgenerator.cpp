@@ -568,7 +568,7 @@ std::string SQLGenerator::createDBUpdateStringBind(std::shared_ptr<Buffer> buffe
 
     std::string key_var_name = key_var.currentDBColumn().name();
 
-    loginf << "SQLGenerator: createDBUpdateStringBind: idvar name " << key_var_name;
+    logdbg << "SQLGenerator: createDBUpdateStringBind: idvar name " << key_var_name;
 
     ss << "UPDATE " << tablename << " SET ";
 
@@ -619,7 +619,7 @@ std::string SQLGenerator::createDBUpdateStringBind(std::shared_ptr<Buffer> buffe
 
     ss << ";";
 
-    loginf << "SQLGenerator: createDBUpdateStringBind: var update string '" << ss.str() << "'";
+    logdbg << "SQLGenerator: createDBUpdateStringBind: var update string '" << ss.str() << "'";
 
     return ss.str();
 }

@@ -106,6 +106,7 @@ signals:
     void newDataSignal (DBObject& object);
     void loadingDoneSignal (DBObject& object);
 
+    void updateProgressSignal (float percent);
     void updateDoneSignal (DBObject& object);
 
 public slots:
@@ -116,6 +117,7 @@ public slots:
     void readJobDoneSlot();
     void finalizeReadJobDoneSlot();
 
+    void updateProgressSlot (float percent);
     void updateDoneSlot ();
 
     void databaseContentChangedSlot ();

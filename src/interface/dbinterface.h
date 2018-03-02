@@ -113,7 +113,8 @@ public:
     //    /// @brief Writes a buffer to the database, into a table defined by write_table_names_ and DBO type
     //    void writeBuffer (Buffer *data);
     //    void writeBuffer (Buffer *data, std::string table_name);
-    void updateBuffer (DBObject &object, DBOVariable &key_var, std::shared_ptr<Buffer> buffer);
+    void updateBuffer (DBObject &object, DBOVariable &key_var, std::shared_ptr<Buffer> buffer, size_t from_index,
+                       size_t to_index);
 
     //    /// @brief Prepares incremental read of DBO type
     void prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
@@ -226,6 +227,8 @@ protected:
     unsigned int postprocess_job_num_{0};
 
     virtual void checkSubConfigurables ();
+
+    void insertBindStatementUpdateForCurrentIndex (std::shared_ptr<Buffer> buffer, unsigned int row);
 
     void setPostProcessed (bool value);
     //    /// @brief Returns buffer with min/max data from another Buffer with the string contents. Delete returned buffer yourself.

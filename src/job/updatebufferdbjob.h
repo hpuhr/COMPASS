@@ -33,6 +33,11 @@ class DBOVariable;
  */
 class UpdateBufferDBJob : public Job
 {
+    Q_OBJECT
+
+signals:
+    void updateProgressSignal (float percent);
+
 public:
     UpdateBufferDBJob(DBInterface &db_interface, DBObject &dbobject, DBOVariable &key_var,
                       std::shared_ptr<Buffer> buffer);

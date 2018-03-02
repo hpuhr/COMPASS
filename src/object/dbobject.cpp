@@ -492,8 +492,15 @@ void DBObject::updateData (DBOVariable &key_var, std::shared_ptr<Buffer> buffer)
                                                                             *this, key_var, buffer));
 
     connect (update_job_.get(), SIGNAL(doneSignal()), this, SLOT(updateDoneSlot()), Qt::QueuedConnection);
+    connect (update_job_.get(), SIGNAL(updateProgressSignal(float)), this, SLOT(updateProgressSlot(float)),
+             Qt::QueuedConnection);
 
     JobManager::instance().addDBJob(update_job_);
+}
+
+void DBObject::updateProgressSlot (float percent)
+{
+    emit updateProgressSignal(percent);
 }
 
 void DBObject::updateDoneSlot ()

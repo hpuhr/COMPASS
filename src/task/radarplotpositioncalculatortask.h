@@ -42,9 +42,10 @@ public slots:
     void newDataSlot (DBObject& object);
     void loadingDoneSlot (DBObject& object);
 
+    void updateProgressSlot (float percent);
     void updateDoneSlot (DBObject& object);
 
-    void updateBufferJobStatusSlot ();
+    //void updateBufferJobStatusSlot ();
 
 public:
     RadarPlotPositionCalculatorTask(const std::string& class_id, const std::string& instance_id, TaskManager* task_manager);

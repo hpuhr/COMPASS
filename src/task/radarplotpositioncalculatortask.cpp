@@ -585,7 +585,7 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
 
     msg_box_ = new QMessageBox;
     assert (msg_box_);
-    msg = "Writing object data, this can take up to a few minutes.";
+    msg = "Writing object data";
     msg_box_->setText(msg.c_str());
     msg_box_->setStandardButtons(QMessageBox::NoButton);
     msg_box_->show();
@@ -593,16 +593,19 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
     db_object_->updateData(*key_var_, update_buffer);
 
     connect (db_object_, SIGNAL(updateDoneSignal(DBObject&)), this, SLOT(updateDoneSlot(DBObject&)));
-
-//    UpdateBufferDBJob *job = new UpdateBufferDBJob(ATSDB::instance().interface(), *db_object_, *key_var_,
-//                                                   update_buffer);
-//    job_ptr_ = std::shared_ptr<UpdateBufferDBJob> (job);
-//    connect (job, SIGNAL(doneSignal()), this, SLOT(updateDoneSlot()), Qt::QueuedConnection);
-
-//    JobManager::instance().addDBJob(job_ptr_);
+    connect (db_object_, SIGNAL(updateProgressSignal(float)), this, SLOT(updateProgressSlot(float)));
 
     calculated_ = true;
     loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: end";
+}
+
+void RadarPlotPositionCalculatorTask::updateProgressSlot (float percent)
+{
+    logdbg << "RadarPlotPositionCalculatorTask: updateProgressSlot: " << percent;
+
+    assert (msg_box_);
+    std::string msg = "Writing object data: " + String::doubleToStringPrecision(percent, 2) + "%";
+    msg_box_->setText(msg.c_str());
 }
 
 void RadarPlotPositionCalculatorTask::updateDoneSlot (DBObject& object)
@@ -610,6 +613,7 @@ void RadarPlotPositionCalculatorTask::updateDoneSlot (DBObject& object)
     loginf << "RadarPlotPositionCalculatorTask: updateDoneSlot";
 
     disconnect (db_object_, SIGNAL(updateDoneSignal(DBObject&)), this, SLOT(updateDoneSlot(DBObject&)));
+    disconnect (db_object_, SIGNAL(updateProgressSignal(float)), this, SLOT(updateProgressSlot(float)));
 
     assert (msg_box_);
     msg_box_->close();
@@ -632,10 +636,10 @@ void RadarPlotPositionCalculatorTask::updateDoneSlot (DBObject& object)
         widget_->calculationDoneSlot();
 }
 
-void RadarPlotPositionCalculatorTask::updateBufferJobStatusSlot ()
-{
+//void RadarPlotPositionCalculatorTask::updateBufferJobStatusSlot ()
+//{
 
-}
+//}
 
 bool RadarPlotPositionCalculatorTask::isCalculating ()
 {

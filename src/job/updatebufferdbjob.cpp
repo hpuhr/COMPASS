@@ -48,8 +48,29 @@ void UpdateBufferDBJob::run ()
 
     loading_start_time_ = boost::posix_time::microsec_clock::local_time();
 
-    loginf  << "UpdateBufferDBJob: run: writing object " << dbobject_.name() << " key " << key_var_.name() << " size " << buffer_->size();
-    db_interface_.updateBuffer (dbobject_, key_var_, buffer_);
+    unsigned int steps = buffer_->size() / 10000;
+
+    loginf  << "UpdateBufferDBJob: run: writing object " << dbobject_.name() << " key " << key_var_.name()
+            << " size " << buffer_->size();
+
+    unsigned int index_from = 0;
+    unsigned int index_to = 0;
+
+    for (unsigned int cnt = 0; cnt <= steps; cnt++)
+    {
+        index_from = cnt * 10000;
+        index_to = index_from + 10000;
+
+        if (index_to > buffer_->size()-1)
+            index_to = buffer_->size()-1;
+
+        loginf << "UpdateBufferDBJob: run: step " << cnt << " steps " << steps << " from " << index_from
+               << " to " << index_to;
+
+        db_interface_.updateBuffer (dbobject_, key_var_, buffer_, index_from, index_to);
+
+        emit updateProgressSignal(100.0*index_to/buffer_->size());
+    }
 
     loading_stop_time_ = boost::posix_time::microsec_clock::local_time();
 
