@@ -57,20 +57,21 @@ signals:
 
 public:
     /// @brief Constructor
-    ListBoxView(const std::string& class_id, const std::string& instance_id, ViewContainer *w, ViewManager &view_manager);
+    ListBoxView(const std::string& class_id, const std::string& instance_id, ViewContainer* w,
+                ViewManager& view_manager);
     /// @brief Destructor
     virtual ~ListBoxView();
 
-    void update( bool atOnce=false );
+    void update (bool atOnce=false);
     void clearData();
     bool init();
 
-    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
+    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
 
     /// @brief Returns the used data source
     ListBoxViewDataSource *getDataSource () { assert (data_source_); return data_source_; }
 
-    virtual DBOVariableSet getSet (const std::string &dbo_name);
+    virtual DBOVariableSet getSet (const std::string& dbo_name);
 
     bool usePresentation() const;
     void usePresentation(bool use_presentation);
@@ -80,14 +81,14 @@ public:
 
 protected:
     /// For data display
-    ListBoxViewWidget* widget_;
+    ListBoxViewWidget* widget_ {nullptr};
     /// For data loading
-    ListBoxViewDataSource *data_source_;
+    ListBoxViewDataSource* data_source_ {nullptr};
 
     /// Use presentation
-    bool use_presentation_;
+    bool use_presentation_ {true};
     /// Overwrite during export, if not, it appends
-    bool overwrite_csv_;
+    bool overwrite_csv_ {false};
 
     virtual void checkSubConfigurables ();
 };

@@ -28,8 +28,10 @@
 
 #include <QMessageBox>
 
-ListBoxViewDataSource::ListBoxViewDataSource(const std::string &class_id, const std::string &instance_id, Configurable *parent)
-: QObject(), Configurable (class_id, instance_id, parent), set_(nullptr), selection_entries_ (ViewSelection::getInstance().getEntries())
+ListBoxViewDataSource::ListBoxViewDataSource(const std::string& class_id, const std::string& instance_id,
+                                             Configurable* parent)
+    : QObject(), Configurable (class_id, instance_id, parent),
+      selection_entries_ (ViewSelection::getInstance().getEntries())
 {
     //registerParameter ("use_selection", &use_selection_, true);
 
@@ -41,8 +43,6 @@ ListBoxViewDataSource::ListBoxViewDataSource(const std::string &class_id, const 
         connect (object.second, SIGNAL (loadingDoneSignal(DBObject &)), this, SLOT(loadingDoneSlot(DBObject&)));
     }
 
-    //use_filters_=false;
-
     createSubConfigurables ();
 }
 
@@ -51,13 +51,15 @@ ListBoxViewDataSource::~ListBoxViewDataSource()
     if (set_)
     {
         delete set_;
-        set_=0;
+        set_ = nullptr;
     }
 }
 
-void ListBoxViewDataSource::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
+void ListBoxViewDataSource::generateSubConfigurable (const std::string& class_id, const std::string& instance_id)
 {
-    logdbg  << "ListBoxViewDataSource: generateSubConfigurable: class_id " << class_id << " instance_id " << instance_id;
+    logdbg  << "ListBoxViewDataSource: generateSubConfigurable: class_id " << class_id << " instance_id "
+            << instance_id;
+
     if (class_id.compare("DBOVariableOrderedSet") == 0)
     {
         assert (set_ == 0);
@@ -70,9 +72,49 @@ void ListBoxViewDataSource::generateSubConfigurable (const std::string &class_id
 void ListBoxViewDataSource::checkSubConfigurables ()
 {
     if (set_ == nullptr)
+    {
         generateSubConfigurable ("DBOVariableOrderedSet", "DBOVariableOrderedSet0");
-    
-    assert (set_);
+        assert (set_);
+
+        DBObjectManager& obj_man = ATSDB::instance().objectManager();
+
+        if (obj_man.existsMetaVariable("rec_num"))
+            set_->add (obj_man.metaVariable("rec_num"));
+
+        //        Time of Day
+        if (obj_man.existsMetaVariable("tod"))
+            set_->add (obj_man.metaVariable("tod"));
+
+        //        Datasource
+        if (obj_man.existsMetaVariable("ds_id"))
+            set_->add (obj_man.metaVariable("ds_id"));
+
+        //        Lat/Long
+        if (obj_man.existsMetaVariable("pos_lat_deg"))
+            set_->add (obj_man.metaVariable("pos_lat_deg"));
+        if (obj_man.existsMetaVariable("pos_long_deg"))
+            set_->add (obj_man.metaVariable("pos_long_deg"));
+
+        //        Mode 3/A code
+        if (obj_man.existsMetaVariable("mode3a_code"))
+            set_->add (obj_man.metaVariable("mode3a_code"));
+
+        //        Mode S TA
+        if (obj_man.existsMetaVariable("target_addr"))
+            set_->add (obj_man.metaVariable("target_addr"));
+
+        //        Mode S Callsign
+        if (obj_man.existsMetaVariable("callsign"))
+            set_->add (obj_man.metaVariable("callsign"));
+
+        //        Mode C
+        if (obj_man.existsMetaVariable("modec_code_ft"))
+            set_->add (obj_man.metaVariable("modec_code_ft"));
+
+        //        Track Number
+        if (obj_man.existsMetaVariable("track_num"))
+            set_->add (obj_man.metaVariable("track_num"));
+    }
 }
 
 void ListBoxViewDataSource::loadingStartedSlot ()
