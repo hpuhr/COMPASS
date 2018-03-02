@@ -39,6 +39,7 @@
 #include "dbolabeldefinition.h"
 #include "dbolabeldefinitionwidget.h"
 #include "data.h"
+#include "updatebufferdbjob.h"
 
 /**
  * Registers parameters, creates sub configurables
@@ -481,7 +482,25 @@ void DBObject::clearData ()
 {
     if (data_)
         data_ = nullptr;
+}
 
+void DBObject::updateData (DBOVariable &key_var, std::shared_ptr<Buffer> buffer)
+{
+    assert (!update_job_);
+
+    update_job_ = std::shared_ptr<UpdateBufferDBJob> (new UpdateBufferDBJob(ATSDB::instance().interface(),
+                                                                            *this, key_var, buffer));
+
+    connect (update_job_.get(), SIGNAL(doneSignal()), this, SLOT(updateDoneSlot()), Qt::QueuedConnection);
+
+    JobManager::instance().addDBJob(update_job_);
+}
+
+void DBObject::updateDoneSlot ()
+{
+    update_job_ = nullptr;
+
+    emit updateDoneSignal (*this);
 }
 
 std::map<int, std::string> DBObject::loadLabelData (std::vector<int> rec_nums)

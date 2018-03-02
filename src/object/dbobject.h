@@ -66,6 +66,7 @@ class DBObjectInfoWidget;
 class Buffer;
 class Job;
 class DBOReadDBJob;
+class UpdateBufferDBJob;
 class FinalizeDBOReadJob;
 class DBOVariableSet;
 class DBOLabelDefinition;
@@ -105,6 +106,8 @@ signals:
     void newDataSignal (DBObject& object);
     void loadingDoneSignal (DBObject& object);
 
+    void updateDoneSignal (DBObject& object);
+
 public slots:
     void schemaChangedSlot ();
 
@@ -112,6 +115,8 @@ public slots:
     void readJobObsoleteSlot ();
     void readJobDoneSlot();
     void finalizeReadJobDoneSlot();
+
+    void updateDoneSlot ();
 
     void databaseContentChangedSlot ();
     void dataSourceDefinitionChanged ();
@@ -155,6 +160,8 @@ public:
                bool use_order_ascending, const std::string& limit_str="");
     void quitLoading ();
     void clearData ();
+
+    void updateData (DBOVariable &key_var, std::shared_ptr<Buffer> buffer);
 
     std::map<int, std::string> loadLabelData (std::vector<int> rec_nums);
 
@@ -229,6 +236,8 @@ protected:
     std::shared_ptr <DBOReadDBJob> read_job_ {nullptr};
     std::vector <std::shared_ptr<Buffer>> read_job_data_;
     std::vector <std::shared_ptr <FinalizeDBOReadJob>> finalize_jobs_;
+
+    std::shared_ptr <UpdateBufferDBJob> update_job_ {nullptr};
 
     std::shared_ptr<Buffer> data_;
 

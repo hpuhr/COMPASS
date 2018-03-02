@@ -29,7 +29,6 @@
 #include "propertylist.h"
 #include "taskmanager.h"
 #include "projectionmanager.h"
-#include "updatebufferdbjob.h"
 #include "jobmanager.h"
 #include "stringconv.h"
 
@@ -44,6 +43,7 @@ RadarPlotPositionCalculatorTask::RadarPlotPositionCalculatorTask(const std::stri
     : Configurable (class_id, instance_id, task_manager)
 {
     qRegisterMetaType<std::shared_ptr<Buffer>>("std::shared_ptr<Buffer>");
+    //qRegisterMetaType<DBObject>("DBObject");
 
     registerParameter("db_object_str", &db_object_str_, "");
     registerParameter("key_var_str", &key_var_str_, "");
@@ -320,12 +320,12 @@ void RadarPlotPositionCalculatorTask::calculate ()
     db_object_->load (read_set, false, false, nullptr, false); //"0,100000"
 }
 
-void RadarPlotPositionCalculatorTask::newDataSlot (DBObject &object)
+void RadarPlotPositionCalculatorTask::newDataSlot (DBObject& object)
 {
     if (target_report_count_ != 0)
     {
         assert (msg_box_);
-        size_t loaded_cnt = object.loadedCount();
+        size_t loaded_cnt = db_object_->loadedCount();
 
         float done_percent = 100.0*loaded_cnt/target_report_count_;
         std::string msg = "Loading object data: " + String::doubleToStringPrecision(done_percent, 2) + "%";
@@ -335,7 +335,7 @@ void RadarPlotPositionCalculatorTask::newDataSlot (DBObject &object)
     }
 }
 
-void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject &object)
+void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
 {
     loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: starting calculation";
 
@@ -382,7 +382,7 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject &object)
     for (auto& ds_it : data_sources)
         assert (ds_it.second.isFinalized()); // has to be done before
 
-    std::shared_ptr<Buffer> read_buffer = object.data();
+    std::shared_ptr<Buffer> read_buffer = db_object_->data();
     unsigned int read_size = read_buffer->size();
     assert (read_size);
 
@@ -583,20 +583,38 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject &object)
         }
     }
 
-    UpdateBufferDBJob *job = new UpdateBufferDBJob(ATSDB::instance().interface(), object, *key_var_,
-                                                   update_buffer, true);
-    job_ptr_ = std::shared_ptr<UpdateBufferDBJob> (job);
-    connect (job, SIGNAL(doneSignal()), this, SLOT(updateDoneSlot()), Qt::QueuedConnection);
+    msg_box_ = new QMessageBox;
+    assert (msg_box_);
+    msg = "Writing object data, this can take up to a few minutes.";
+    msg_box_->setText(msg.c_str());
+    msg_box_->setStandardButtons(QMessageBox::NoButton);
+    msg_box_->show();
 
-    JobManager::instance().addDBJob(job_ptr_);
+    db_object_->updateData(*key_var_, update_buffer);
+
+    connect (db_object_, SIGNAL(updateDoneSignal(DBObject&)), this, SLOT(updateDoneSlot(DBObject&)));
+
+//    UpdateBufferDBJob *job = new UpdateBufferDBJob(ATSDB::instance().interface(), *db_object_, *key_var_,
+//                                                   update_buffer);
+//    job_ptr_ = std::shared_ptr<UpdateBufferDBJob> (job);
+//    connect (job, SIGNAL(doneSignal()), this, SLOT(updateDoneSlot()), Qt::QueuedConnection);
+
+//    JobManager::instance().addDBJob(job_ptr_);
 
     calculated_ = true;
     loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: end";
 }
 
-void RadarPlotPositionCalculatorTask::updateDoneSlot ()
+void RadarPlotPositionCalculatorTask::updateDoneSlot (DBObject& object)
 {
     loginf << "RadarPlotPositionCalculatorTask: updateDoneSlot";
+
+    disconnect (db_object_, SIGNAL(updateDoneSignal(DBObject&)), this, SLOT(updateDoneSlot(DBObject&)));
+
+    assert (msg_box_);
+    msg_box_->close();
+    delete msg_box_;
+    msg_box_ = nullptr;
 
     job_ptr_ = nullptr;
     db_object_->clearData();
@@ -612,6 +630,11 @@ void RadarPlotPositionCalculatorTask::updateDoneSlot ()
 
     if (widget_)
         widget_->calculationDoneSlot();
+}
+
+void RadarPlotPositionCalculatorTask::updateBufferJobStatusSlot ()
+{
+
 }
 
 bool RadarPlotPositionCalculatorTask::isCalculating ()

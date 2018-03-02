@@ -35,7 +35,7 @@ class UpdateBufferDBJob : public Job
 {
 public:
     UpdateBufferDBJob(DBInterface &db_interface, DBObject &dbobject, DBOVariable &key_var,
-                      std::shared_ptr<Buffer> buffer, bool show_msg_box=false);
+                      std::shared_ptr<Buffer> buffer);
 
     virtual ~UpdateBufferDBJob();
 
@@ -48,8 +48,6 @@ protected:
     DBObject &dbobject_;
     DBOVariable &key_var_;
     std::shared_ptr<Buffer> buffer_;
-
-    bool show_msg_box_ {false};
 };
 
 #endif /* UpdateBufferDBJob_H_ */

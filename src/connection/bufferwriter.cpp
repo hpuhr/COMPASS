@@ -84,7 +84,7 @@ BufferWriter::~BufferWriter()
 //}
 
 void BufferWriter::update (std::shared_ptr<Buffer> buffer, DBObject &object, DBOVariable &key_var,
-                           std::string tablename, bool show_msg_box)
+                           std::string tablename)
 {
     loginf  << "BufferWriter: update: buffer size " << buffer->size() << " into table " << tablename;
 
@@ -93,15 +93,15 @@ void BufferWriter::update (std::shared_ptr<Buffer> buffer, DBObject &object, DBO
     float percent_done;
     QMessageBox* msg_box = nullptr;
 
-    if (show_msg_box)
-    {
-        msg_box = new QMessageBox;
-        assert (msg_box);
-        msg = "Preparing to write object data.";
-        msg_box->setText(msg.c_str());
-        msg_box->setStandardButtons(QMessageBox::NoButton);
-        msg_box->show();
-    }
+//    if (show_msg_box)
+//    {
+//        msg_box = new QMessageBox;
+//        assert (msg_box);
+//        msg = "Preparing to write object data.";
+//        msg_box->setText(msg.c_str());
+//        msg_box->setStandardButtons(QMessageBox::NoButton);
+//        msg_box->show();
+//    }
 
     size_t buffer_size = buffer->size();
 
@@ -118,13 +118,13 @@ void BufferWriter::update (std::shared_ptr<Buffer> buffer, DBObject &object, DBO
         {
             logdbg  << "BufferWriter: update: bind transactions cnt " << cnt;
 
-            if (msg_box && buffer_size != 0)
-            {
-                percent_done = 100.0*cnt/buffer_size;
-                msg = "Writing object data: " + String::doubleToStringPrecision(percent_done, 2)+"%";
-                msg_box->setText(msg.c_str());
-                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-            }
+//            if (msg_box && buffer_size != 0)
+//            {
+//                percent_done = 100.0*cnt/buffer_size;
+//                msg = "Writing object data: " + String::doubleToStringPrecision(percent_done, 2)+"%";
+//                msg_box->setText(msg.c_str());
+//                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+//            }
         }
     }
 
@@ -133,12 +133,12 @@ void BufferWriter::update (std::shared_ptr<Buffer> buffer, DBObject &object, DBO
     loginf  << "BufferWriter: update: finalizing bind statement";
     db_connection_->finalizeBindStatement();
 
-    if (msg_box)
-    {
-        msg_box->close();
-        delete msg_box;
-        msg_box = nullptr;
-    }
+//    if (msg_box)
+//    {
+//        msg_box->close();
+//        delete msg_box;
+//        msg_box = nullptr;
+//    }
 
     logdbg  << "BufferWriter: update: end";
 }

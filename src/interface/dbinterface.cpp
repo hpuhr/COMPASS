@@ -981,8 +981,7 @@ std::set<int> DBInterface::getActiveDataSources (const DBObject &object)
 //    buffer_writer_->write (data, table_name);
 //}
 
-void DBInterface::updateBuffer (DBObject &object, DBOVariable &key_var, std::shared_ptr<Buffer> buffer,
-                                bool show_msg_box)
+void DBInterface::updateBuffer (DBObject &object, DBOVariable &key_var, std::shared_ptr<Buffer> buffer)
 {
     QMutexLocker locker(&connection_mutex_);
 
@@ -1005,7 +1004,7 @@ void DBInterface::updateBuffer (DBObject &object, DBOVariable &key_var, std::sha
                                       +"' does not exist in table "+table.name());
     }
 
-    buffer_writer_->update (buffer, object, key_var, table.name(), show_msg_box);
+    buffer_writer_->update (buffer, object, key_var, table.name());
 }
 
 void DBInterface::prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause, std::vector <DBOVariable *> filtered_variables,

@@ -32,7 +32,7 @@ ProjectionManager::ProjectionManager()
 
     registerParameter ("use_sdl_projection", &use_sdl_projection_, false);
     registerParameter ("use_ogr_projection", &use_ogr_projection_, true);
-    registerParameter ("use_rs2g_projection_", &use_ogr_projection_, false);
+    registerParameter ("use_rs2g_projection_", &use_rs2g_projection_, false);
 
     registerParameter ("sdl_system_latitude", &sdl_system_latitude_, 47.5);
     registerParameter ("sdl_system_longitude", &sdl_system_longitude_, 14.0);

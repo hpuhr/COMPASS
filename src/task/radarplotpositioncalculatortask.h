@@ -39,9 +39,12 @@ class RadarPlotPositionCalculatorTask : public QObject, public Configurable
 
 public slots:
     //void newDataSlot (DBObject &object);
-    void newDataSlot (DBObject &object);
-    void loadingDoneSlot (DBObject &object);
-    void updateDoneSlot ();
+    void newDataSlot (DBObject& object);
+    void loadingDoneSlot (DBObject& object);
+
+    void updateDoneSlot (DBObject& object);
+
+    void updateBufferJobStatusSlot ();
 
 public:
     RadarPlotPositionCalculatorTask(const std::string& class_id, const std::string& instance_id, TaskManager* task_manager);

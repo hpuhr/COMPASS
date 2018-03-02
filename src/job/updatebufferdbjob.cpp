@@ -28,9 +28,8 @@
 using namespace Utils::String;
 
 UpdateBufferDBJob::UpdateBufferDBJob(DBInterface &db_interface, DBObject &dbobject, DBOVariable &key_var,
-                                     std::shared_ptr<Buffer> buffer, bool show_msg_box)
-: Job("UpdateBufferDBJob"), db_interface_(db_interface), dbobject_(dbobject), key_var_(key_var), buffer_(buffer),
-  show_msg_box_ (show_msg_box)
+                                     std::shared_ptr<Buffer> buffer)
+: Job("UpdateBufferDBJob"), db_interface_(db_interface), dbobject_(dbobject), key_var_(key_var), buffer_(buffer)
 {
     assert (buffer_);
 }
@@ -50,7 +49,7 @@ void UpdateBufferDBJob::run ()
     loading_start_time_ = boost::posix_time::microsec_clock::local_time();
 
     loginf  << "UpdateBufferDBJob: run: writing object " << dbobject_.name() << " key " << key_var_.name() << " size " << buffer_->size();
-    db_interface_.updateBuffer (dbobject_, key_var_, buffer_, show_msg_box_);
+    db_interface_.updateBuffer (dbobject_, key_var_, buffer_);
 
     loading_stop_time_ = boost::posix_time::microsec_clock::local_time();
 
