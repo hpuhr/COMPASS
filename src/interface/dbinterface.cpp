@@ -24,7 +24,6 @@
 
 #include "atsdb.h"
 #include "buffer.h"
-#include "bufferwriter.h"
 #include "config.h"
 #include "dbobject.h"
 #include "dbodatasource.h"
@@ -64,21 +63,14 @@ using namespace Utils;
  * write_table_names_,
  */
 DBInterface::DBInterface(std::string class_id, std::string instance_id, ATSDB *atsdb)
-    : Configurable (class_id, instance_id, atsdb), current_connection_(nullptr), sql_generator_(*this), widget_(nullptr), info_widget_(nullptr)
+    : Configurable (class_id, instance_id, atsdb), current_connection_(nullptr), sql_generator_(*this),
+      widget_(nullptr), info_widget_(nullptr)
 {
     QMutexLocker locker(&connection_mutex_);
 
     //registerParameter ("database_name", &database_name_, "");
     registerParameter ("read_chunk_size", &read_chunk_size_, 50000);
     registerParameter ("used_connection", &used_connection_, "");
-
-    //TODO writing process should be different.
-    //    write_table_names_[DBO_PLOTS] = "Plot";
-    //    write_table_names_[DBO_SYSTEM_TRACKS] = "SystemTrack";
-    //    write_table_names_[DBO_MLAT] = "MLAT";
-    //    write_table_names_[DBO_ADS_B] = "ADSB";
-    //    write_table_names_[DBO_REFERENCE_TRAJECTORIES] = "ReferenceTrajectory";
-    //    write_table_names_[DBO_SENSOR_INFORMATION] = "PlotSensor";
 
     createSubConfigurables();
 }
@@ -98,12 +90,6 @@ DBInterface::~DBInterface()
     connections_.clear();
 
     assert (!widget_);
-
-    if (buffer_writer_)
-    {
-        delete buffer_writer_;
-        buffer_writer_=0;
-    }
 
     logdbg  << "DBInterface: desctructor: end";
 }
@@ -989,11 +975,6 @@ void DBInterface::updateBuffer (DBObject &object, DBOVariable &key_var, std::sha
     assert (current_connection_);
     assert (buffer);
 
-    //    if (!buffer_writer_)
-    //        buffer_writer_ = new BufferWriter (current_connection_, &sql_generator_);
-
-    //    assert (buffer_writer_);
-
     const DBTable& table = object.currentMetaTable().mainTable();
 
     const PropertyList &properties = buffer->properties();
@@ -1005,7 +986,6 @@ void DBInterface::updateBuffer (DBObject &object, DBOVariable &key_var, std::sha
                                       +"' does not exist in table "+table.name());
     }
 
-    //buffer_writer_->update (buffer, object, key_var, table.name());
     std::string bind_statement =  sql_generator_.createDBUpdateStringBind(buffer, object, key_var, table.name());
 
     logdbg  << "DBInterface: updateBuffer: preparing bind statement";
@@ -1016,19 +996,6 @@ void DBInterface::updateBuffer (DBObject &object, DBOVariable &key_var, std::sha
     for (unsigned int cnt=from_index; cnt <= to_index; cnt++)
     {
         insertBindStatementUpdateForCurrentIndex(buffer, cnt);
-
-//        if (cnt % 10000 == 0)
-//        {
-//            logdbg  << "DBInterface: updateBuffer: bind transactions cnt " << cnt;
-
-            //            if (msg_box && buffer_size != 0)
-            //            {
-            //                percent_done = 100.0*cnt/buffer_size;
-            //                msg = "Writing object data: " + String::doubleToStringPrecision(percent_done, 2)+"%";
-            //                msg_box->setText(msg.c_str());
-            //                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-            //            }
-//        }
     }
 
     logdbg  << "DBInterface: updateBuffer: ending bind transactions";

@@ -205,17 +205,11 @@ protected:
     /// Protects the database
     QMutex connection_mutex_;
 
-    /// Container with all table names, based on DBO type
-    // TODO solve this
-    //std::map <std::string, std::string> write_table_names_;
     /// Size of a read chunk in incremental reading process
     unsigned int read_chunk_size_;
 
     /// Generates SQL statements
     SQLGenerator sql_generator_;
-
-    /// Writes buffer to the database
-    BufferWriter *buffer_writer_{nullptr};
 
     DBInterfaceWidget *widget_;
     DBInterfaceInfoWidget *info_widget_;
