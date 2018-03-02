@@ -109,6 +109,8 @@ signals:
     void updateProgressSignal (float percent);
     void updateDoneSignal (DBObject& object);
 
+    void labelDefinitionChangedSignal ();
+
 public slots:
     void schemaChangedSlot ();
 

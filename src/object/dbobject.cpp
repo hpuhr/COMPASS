@@ -528,7 +528,8 @@ std::map<int, std::string> DBObject::loadLabelData (std::vector<int> rec_nums)
     custom_filter_clause += ");";
 
     DBOVariableSet read_list = label_definition_->readList();
-    assert(read_list.hasVariable(variable("rec_num")));
+    if (!read_list.hasVariable(variable("rec_num")))
+        read_list.add(variable("rec_num"));
 
     boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
@@ -543,7 +544,6 @@ std::map<int, std::string> DBObject::loadLabelData (std::vector<int> rec_nums)
    Utils::Data::finalizeBuffer(read_list, buffer);
 
    std::map<int, std::string> labels = label_definition_->generateLabels (rec_nums, buffer);
-
 
    boost::posix_time::ptime stop_time = boost::posix_time::microsec_clock::local_time();
    boost::posix_time::time_duration diff = stop_time - start_time;

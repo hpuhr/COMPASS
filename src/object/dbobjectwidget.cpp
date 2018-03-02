@@ -226,7 +226,7 @@ void DBObjectWidget::lock ()
 
     name_edit_->setDisabled (true);
     info_edit_->setDisabled (true);
-    edit_label_button_->setDisabled (true);
+    //edit_label_button_->setDisabled (true);
 
     for (int i = 0; i < ds_grid_->count(); ++i)
     {

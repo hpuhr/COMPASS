@@ -13,21 +13,14 @@
 
 
 DBOLabelEntry::DBOLabelEntry(const std::string& class_id, const std::string& instance_id, DBOLabelDefinition* parent)
-    : Configurable (class_id, instance_id, parent)
+    : Configurable (class_id, instance_id, parent), def_parent_(parent)
 {
-    //    registerParameter("index", &index, 0);
     registerParameter("variable_name", &variable_name_, "");
-    //registerParameter("dbo_type_int", &dbo_type_int_, 0);
     registerParameter("show", &show_, false);
     registerParameter("prefix", &prefix_, "");
     registerParameter("suffix", &suffix_, "");
 
     createSubConfigurables ();
-
-    //  if (!DBObjectManager::getInstance().existsDBOVariable((DB_OBJECT_TYPE) dbo_type_int, variable_id))
-    //      thbuffer_index std::runtime_error ("LabelEntry: constructor: dbo variable '"+variable_id+"' does not exist");
-
-    //  variable = DBObjectManager::getInstance().getDBOVariable((DB_OBJECT_TYPE) dbo_type_int, variable_id);
 }
 
 DBOLabelEntry::~DBOLabelEntry()
@@ -53,6 +46,9 @@ bool DBOLabelEntry::show() const
 void DBOLabelEntry::show(bool show)
 {
     show_ = show;
+
+    assert (def_parent_);
+    def_parent_->labelDefinitionChangedSlot();
 }
 
 std::string DBOLabelEntry::prefix() const
@@ -63,6 +59,9 @@ std::string DBOLabelEntry::prefix() const
 void DBOLabelEntry::prefix(const std::string& prefix)
 {
     prefix_ = prefix;
+
+    assert (def_parent_);
+    def_parent_->labelDefinitionChangedSlot();
 }
 
 std::string DBOLabelEntry::suffix() const
@@ -73,11 +72,16 @@ std::string DBOLabelEntry::suffix() const
 void DBOLabelEntry::suffix(const std::string& suffix)
 {
     suffix_ = suffix;
+
+    assert (def_parent_);
+    def_parent_->labelDefinitionChangedSlot();
 }
 
 DBOLabelDefinition::DBOLabelDefinition(const std::string& class_id, const std::string& instance_id, DBObject* parent)
     : Configurable (class_id, instance_id, parent), db_object_(parent)
 {
+    assert (db_object_);
+
     createSubConfigurables ();
 }
 
@@ -123,18 +127,6 @@ void DBOLabelDefinition::checkLabelDefintions()
     //TODO check if up to date
 }
 
-//void DBOLabelDefinition::print ()
-//{
-//  std::map <std::string, LabelEntry*>::iterator it;
-
-//  std::vector <std::string> present_ids;
-
-//  for (it=entries_.begin(); it != entries_.end(); it++)
-//  {
-//    std::cout << it->second->variable->id_ << std::endl;
-//  }
-//}
-
 void DBOLabelDefinition::generateSubConfigurable (const std::string& class_id, const std::string& instance_id)
 {
     if (class_id == "LabelEntry")
@@ -142,14 +134,6 @@ void DBOLabelDefinition::generateSubConfigurable (const std::string& class_id, c
         logdbg  << "DBOLabelDefinition: generateSubConfigurable: instance_id " << instance_id;
 
         DBOLabelEntry* entry = new DBOLabelEntry (class_id, instance_id, this);
-
-        //        if (!db_object_->hasVariable(entry->variableName()))
-        //        {
-        //            logwrn << "DBOLabelDefinition: generateSubConfigurable: outdated label definition for variable " << entry->variableName();
-        //            delete entry;
-        //            return;
-        //        }
-
         assert (entries_.find(entry->variableName()) == entries_.end());
         entries_ [entry->variableName()] = entry;
     }
@@ -161,6 +145,7 @@ void DBOLabelDefinition::checkSubConfigurables ()
 {
     logdbg  << "DBOLabelDefinition: checkSubConfigurables: object " << db_object_->name();
 
+    assert (db_object_);
     const std::map<std::string, DBOVariable*>& variables = db_object_->variables();
 
     std::string variable_name;
@@ -362,4 +347,11 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (std::vector<int> 
     }
 
     return labels;
+}
+
+void DBOLabelDefinition::labelDefinitionChangedSlot ()
+{
+    assert (db_object_);
+
+    emit db_object_->labelDefinitionChangedSignal();
 }

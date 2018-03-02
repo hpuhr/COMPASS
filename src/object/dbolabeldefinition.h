@@ -34,15 +34,12 @@ public:
     void suffix(const std::string& suffix);
 
 protected:
-    DBOLabelDefinition* parent_;
-    //  unsigned int index;
+    DBOLabelDefinition* def_parent_ {nullptr};
     std::string variable_name_;
-    //unsigned int dbo_type_int_;
+
     bool show_; // show in label
     std::string prefix_;
     std::string suffix_;
-
-    //DBOVariable *variable_{nullptr};
 
     virtual void checkSubConfigurables () {}
 };
@@ -54,8 +51,8 @@ class DBOLabelDefinition : public QObject, public Configurable
 {
     Q_OBJECT
 
-signals:
-  void changedLabelDefinitionSignal ();
+public slots:
+    void labelDefinitionChangedSlot ();
 
 public:
     DBOLabelDefinition(const std::string& class_id, const std::string& instance_id, DBObject* parent);
@@ -68,16 +65,16 @@ public:
     void updateReadList ();
     void checkLabelDefintions();
 
-    //void print ();
-
     virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
 
     DBOLabelDefinitionWidget* widget ();
 
     std::map<int, std::string> generateLabels (std::vector<int> rec_nums, std::shared_ptr<Buffer> buffer);
 
+
+
 protected:
-    DBObject* db_object_{nullptr};
+    DBObject* db_object_ {nullptr};
     std::map<std::string, DBOLabelEntry*> entries_; //varname -> labelentry
 
     DBOVariableSet read_list_;
