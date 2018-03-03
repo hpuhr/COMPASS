@@ -41,7 +41,7 @@
 //using namespace Utils;
 
 BufferTableWidget::BufferTableWidget(DBObject &object, QWidget * parent, Qt::WindowFlags f)
-: QWidget (parent, f), object_(object), table_ (nullptr), model_(nullptr), variables_(nullptr)
+: QWidget (parent, f), object_(object), table_ (nullptr), model_(nullptr) //, variables_(nullptr)
 {
     setAutoFillBackground(true);
 

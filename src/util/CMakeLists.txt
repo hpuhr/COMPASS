@@ -19,7 +19,6 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/files.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/logger.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/number.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/stringconv.cpp"
 )
 
 

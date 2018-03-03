@@ -28,6 +28,7 @@
 #include "logger.h"
 #include "property.h"
 #include "stringconv.h"
+//#include "dbovariable.h"
 
 static const unsigned int BUFFER_ARRAY_SIZE=10000;
 
@@ -59,9 +60,9 @@ public:
     /// @brief Sets all elements to initial value and None information to true
     virtual void clear()=0;
 
-    bool hasSpecialRepresentation () { return representation_ != Utils::String::Representation::STANDARD; }
-    Utils::String::Representation representation() const;
-    void representation(const Utils::String::Representation &representation);
+//    bool hasSpecialRepresentation () { return representation_ != DBOVariable::Representation::STANDARD; }
+//    DBOVariable::Representation representation() const;
+//    void representation(const DBOVariable::Representation& representation);
 
     virtual const std::string getAsString (size_t index)=0;
 
@@ -73,7 +74,7 @@ protected:
     /// Size of data arrays
     size_t max_size_;
 
-    Utils::String::Representation representation_;
+//    DBOVariable::Representation representation_;
 
     std::vector < std::shared_ptr< std::array<bool,BUFFER_ARRAY_SIZE> > > none_flags_;
     //std::vector <std::shared_ptr<std::bitset<BUFFER_ARRAY_SIZE>>> none_flags_;
@@ -139,20 +140,20 @@ public:
         return Utils::String::getValueString (data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE));
     }
 
-    /// @brief Returns representation string of a specific value
-    const std::string getAsRepresentationString (size_t index)
-    {
-        if (index > size_)
-            throw std::out_of_range ("ArrayListTemplate: getAsRepresentationString out of index "+std::to_string(index));
+//    /// @brief Returns representation string of a specific value
+//    const std::string getAsRepresentationString (size_t index)
+//    {
+//        if (index > size_)
+//            throw std::out_of_range ("ArrayListTemplate: getAsRepresentationString out of index "+std::to_string(index));
 
-        if (isNone(index))
-            throw std::out_of_range ("ArrayListTemplate: getAsRepresentationString of None value "+std::to_string(index));
+//        if (isNone(index))
+//            throw std::out_of_range ("ArrayListTemplate: getAsRepresentationString of None value "+std::to_string(index));
 
-        if (representation_ == Utils::String::Representation::STANDARD)
-            return Utils::String::getValueString (data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE));
+//        if (representation_ == DBOVariable::Representation::STANDARD)
+//            return getValueString (data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE));
 
-        return Utils::String::getAsSpecialRepresentationString (data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE), representation_);
-    }
+//        return getAsSpecialRepresentationString (data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE), representation_);
+//    }
 
     /// @brief Sets specific value
     void set (size_t index, T value)

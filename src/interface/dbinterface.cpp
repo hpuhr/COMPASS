@@ -52,8 +52,7 @@
 #include "unitmanager.h"
 #include "dbtableinfo.h"
 #include "dbtable.h"
-
-#include "string.h"
+#include "stringconv.h"
 
 using namespace Utils;
 
@@ -627,8 +626,8 @@ std::pair<std::string, std::string> DBInterface::getMinMaxString (const DBOVaria
         const Dimension &dimension = UnitManager::instance().dimension (var.dimensionConst());
         double factor = dimension.getFactor (column.unit(), var.unitConst());
 
-        min = String::multiplyString(min, factor, var.dataType());
-        max = String::multiplyString(max, factor, var.dataType());
+        min = var.multiplyString(min, factor);
+        max = var.multiplyString(max, factor);
     }
 
     loginf << "DBInterface: getMinMaxString: var " << var.name() << " min " << min << " max " << max;

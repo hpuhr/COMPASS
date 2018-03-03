@@ -81,9 +81,10 @@ void BufferCSVExportJob::run ()
                     null = buffer_->getBool(properties.at(col).name()).isNone(row);
                     if (!null)
                     {
-                        if (use_presentation_)
-                            value_str = buffer_->getBool(properties.at(col).name()).getAsRepresentationString(row);
-                        else
+                        // TODO
+//                        if (use_presentation_)
+//                            value_str = buffer_->getBool(properties.at(col).name()).getAsRepresentationString(row);
+//                        else
                             value_str = buffer_->getBool(properties.at(col).name()).getAsString(row);
                     }
                 }
@@ -92,8 +93,10 @@ void BufferCSVExportJob::run ()
                     null = buffer_->getChar(properties.at(col).name()).isNone(row);
                     if (!null)
                     {
-                        if (use_presentation_)
-                            value_str = buffer_->getChar(properties.at(col).name()).getAsRepresentationString(row);
+//                        if (use_presentation_)
+//                            value_str = buffer_->getChar(properties.at(col).name()).getAsRepresentationString(row);
+//                        else
+                            value_str = buffer_->getChar(properties.at(col).name()).getAsString(row);
                     }
                 }
                 else if (data_type == PropertyDataType::UCHAR)
@@ -101,9 +104,9 @@ void BufferCSVExportJob::run ()
                     null = buffer_->getUChar(properties.at(col).name()).isNone(row);
                     if (!null)
                     {
-                        if (use_presentation_)
-                            value_str = buffer_->getUChar(properties.at(col).name()).getAsRepresentationString(row);
-                        else
+//                        if (use_presentation_)
+//                            value_str = buffer_->getUChar(properties.at(col).name()).getAsRepresentationString(row);
+//                        else
                             value_str = buffer_->getUChar(properties.at(col).name()).getAsString(row);
                     }
                 }
@@ -112,9 +115,9 @@ void BufferCSVExportJob::run ()
                     null = buffer_->getInt(properties.at(col).name()).isNone(row);
                     if (!null)
                     {
-                        if (use_presentation_)
-                            value_str = buffer_->getInt(properties.at(col).name()).getAsRepresentationString(row);
-                        else
+//                        if (use_presentation_)
+//                            value_str = buffer_->getInt(properties.at(col).name()).getAsRepresentationString(row);
+//                        else
                             value_str = buffer_->getInt(properties.at(col).name()).getAsString(row);
                     }
                 }
@@ -123,9 +126,9 @@ void BufferCSVExportJob::run ()
                     null = buffer_->getUInt(properties.at(col).name()).isNone(row);
                     if (!null)
                     {
-                        if (use_presentation_)
-                            value_str = buffer_->getUInt(properties.at(col).name()).getAsRepresentationString(row);
-                        else
+//                        if (use_presentation_)
+//                            value_str = buffer_->getUInt(properties.at(col).name()).getAsRepresentationString(row);
+//                        else
                             value_str = buffer_->getUInt(properties.at(col).name()).getAsString(row);
                     }
                 }
@@ -134,9 +137,9 @@ void BufferCSVExportJob::run ()
                     null = buffer_->getLongInt(properties.at(col).name()).isNone(row);
                     if (!null)
                     {
-                        if (use_presentation_)
-                            value_str = buffer_->getLongInt(properties.at(col).name()).getAsRepresentationString(row);
-                        else
+//                        if (use_presentation_)
+//                            value_str = buffer_->getLongInt(properties.at(col).name()).getAsRepresentationString(row);
+//                        else
                             value_str = buffer_->getLongInt(properties.at(col).name()).getAsString(row);
                     }
                 }
@@ -145,9 +148,9 @@ void BufferCSVExportJob::run ()
                     null = buffer_->getULongInt(properties.at(col).name()).isNone(row);
                     if (!null)
                     {
-                        if (use_presentation_)
-                            value_str = buffer_->getULongInt(properties.at(col).name()).getAsRepresentationString(row);
-                        else
+//                        if (use_presentation_)
+//                            value_str = buffer_->getULongInt(properties.at(col).name()).getAsRepresentationString(row);
+//                        else
                             value_str = buffer_->getULongInt(properties.at(col).name()).getAsString(row);
                     }
                 }
@@ -156,9 +159,9 @@ void BufferCSVExportJob::run ()
                     null = buffer_->getFloat(properties.at(col).name()).isNone(row);
                     if (!null)
                     {
-                        if (use_presentation_)
-                            value_str = buffer_->getFloat(properties.at(col).name()).getAsRepresentationString(row);
-                        else
+//                        if (use_presentation_)
+//                            value_str = buffer_->getFloat(properties.at(col).name()).getAsRepresentationString(row);
+//                        else
                             value_str = buffer_->getFloat(properties.at(col).name()).getAsString(row);
                     }
                 }
@@ -167,9 +170,9 @@ void BufferCSVExportJob::run ()
                     null = buffer_->getDouble(properties.at(col).name()).isNone(row);
                     if (!null)
                     {
-                        if (use_presentation_)
-                            value_str = buffer_->getDouble(properties.at(col).name()).getAsRepresentationString(row);
-                        else
+//                        if (use_presentation_)
+//                            value_str = buffer_->getDouble(properties.at(col).name()).getAsRepresentationString(row);
+//                        else
                             value_str = buffer_->getDouble(properties.at(col).name()).getAsString(row);
                     }
                 }

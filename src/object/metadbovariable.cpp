@@ -194,11 +194,11 @@ const std::string &MetaDBOVariable::dataTypeString() const
     return Property::asString(dataType());
 }
 
-Utils::String::Representation MetaDBOVariable::representation ()
+DBOVariable::Representation MetaDBOVariable::representation ()
 {
     assert (hasVariables());
 
-    Utils::String::Representation representation = variables_.begin()->second.representation();
+    DBOVariable::Representation representation = variables_.begin()->second.representation();
 
     for (auto variable_it : variables_)
     {
@@ -219,8 +219,7 @@ std::string MetaDBOVariable::getMinString () const
         if (value_string.size() == 0)
             value_string = variable_it.second.getMinString();
         else
-            value_string = Utils::String::getSmallerValueString (value_string, variable_it.second.getMinString(),
-                                                                 dataType());
+            value_string = variable_it.second.getSmallerValueString (value_string, variable_it.second.getMinString());
     }
     assert (value_string.size());
     return value_string;
@@ -235,7 +234,7 @@ std::string MetaDBOVariable::getMaxString () const
         if (value_string.size() == 0)
             value_string = variable_it.second.getMaxString();
         else
-            value_string = Utils::String::getLargerValueString (value_string, variable_it.second.getMaxString(), dataType());
+            value_string = variable_it.second.getLargerValueString (value_string, variable_it.second.getMaxString());
     }
     assert (value_string.size());
     return value_string;
@@ -243,12 +242,14 @@ std::string MetaDBOVariable::getMaxString () const
 
 std::string MetaDBOVariable::getMinStringRepresentation () const
 {
-    return Utils::String::getRepresentationStringFromValue(getMinString(), dataType(), variables_.begin()->second.representation());
+    assert (variables_.size());
+    return variables_.begin()->second.getRepresentationStringFromValue(getMinString());
 }
 
 std::string MetaDBOVariable::getMaxStringRepresentation () const
 {
-    return Utils::String::getRepresentationStringFromValue(getMaxString(), dataType(), variables_.begin()->second.representation());
+    assert (variables_.size());
+    return variables_.begin()->second.getRepresentationStringFromValue(getMaxString());
 
 }
 

@@ -37,6 +37,34 @@
 
 using namespace Utils;
 
+std::map<DBOVariable::Representation,std::string> DBOVariable::representation_2_string_ {
+        {DBOVariable::Representation::STANDARD, "STANDARD"},
+        {DBOVariable::Representation::SECONDS_TO_TIME, "SECONDS_TO_TIME"},
+        {DBOVariable::Representation::DEC_TO_OCTAL, "DEC_TO_OCTAL"},
+        {DBOVariable::Representation::DEC_TO_HEX, "DEC_TO_HEX"},
+        {DBOVariable::Representation::FEET_TO_FLIGHTLEVEL, "FEET_TO_FLIGHTLEVEL"}
+};
+
+std::map<std::string, DBOVariable::Representation> DBOVariable::string_2_representation_ {
+        {"STANDARD", DBOVariable::Representation::STANDARD},
+        {"SECONDS_TO_TIME", DBOVariable::Representation::SECONDS_TO_TIME},
+        {"DEC_TO_OCTAL", DBOVariable::Representation::DEC_TO_OCTAL},
+        {"DEC_TO_HEX", DBOVariable::Representation::DEC_TO_HEX},
+        {"FEET_TO_FLIGHTLEVEL", DBOVariable::Representation::FEET_TO_FLIGHTLEVEL}
+};
+
+DBOVariable::Representation DBOVariable::stringToRepresentation (const std::string &representation_str)
+{
+    assert (string_2_representation_.count(representation_str) == 1);
+    return string_2_representation_.at(representation_str);
+}
+
+std::string DBOVariable::representationToString (Representation representation)
+{
+    assert (representation_2_string_.count(representation) == 1);
+    return representation_2_string_.at(representation);
+}
+
 DBOVariable::DBOVariable(const std::string& class_id, const std::string& instance_id, DBObject* parent)
     : Property (), Configurable (class_id, instance_id, parent), db_object_(*parent)
 {
@@ -53,10 +81,10 @@ DBOVariable::DBOVariable(const std::string& class_id, const std::string& instanc
 
     if (representation_str_.size() == 0)
     {
-        representation_str_ = String::representationToString(String::Representation::STANDARD);
+        representation_str_ = representationToString(Representation::STANDARD);
     }
 
-    representation_ = String::stringToRepresentation(representation_str_);
+    representation_ = stringToRepresentation(representation_str_);
 
     //loginf  << "DBOVariable: constructor: name " << id_ << " unitdim '" << unit_dimension_ << "' unitunit '" << unit_unit_ << "'";
 
@@ -335,7 +363,8 @@ std::string DBOVariable::getMinString ()
         double factor = dimension.getFactor (table_column.unit(), unit());
         logdbg  << "DBOVariable: getMinString: adapting " << name() << " with unit transformation factor " << factor;
 
-        String::multiplyString (min, factor, dataType());
+        // TODO check
+        multiplyString (min, factor);
     }
 
     logdbg << "DBOVariable: getMinString: object " << dboName() << " name " << name() << " returning " << min;
@@ -383,7 +412,8 @@ std::string DBOVariable::getMaxString ()
         double factor = dimension.getFactor (table_column.unit(), unit());
         logdbg  << "DBOVariable: getMaxString: adapting " << name() << " with unit transformation factor " << factor;
 
-        String::multiplyString (max, factor, dataType());
+        // TODO check
+        multiplyString (max, factor);
     }
 
     logdbg << "DBOVariable: getMaxString: object " << dboName() << " name " << name() << " returning " << max;
@@ -392,18 +422,18 @@ std::string DBOVariable::getMaxString ()
 
 std::string DBOVariable::getMinStringRepresentation ()
 {
-    if (representation_ == String::Representation::STANDARD)
+    if (representation_ == Representation::STANDARD)
         return getMinString();
     else
-        return String::getRepresentationStringFromValue(getMinString(), data_type_, representation_);
+        return getRepresentationStringFromValue(getMinString());
 }
 
 std::string DBOVariable::getMaxStringRepresentation ()
 {
-    if (representation_ == String::Representation::STANDARD)
+    if (representation_ == Representation::STANDARD)
         return getMaxString();
     else
-        return String::getRepresentationStringFromValue(getMaxString(), data_type_, representation_);
+        return getRepresentationStringFromValue(getMaxString());
 }
 
 
@@ -443,13 +473,333 @@ void DBOVariable::unlock ()
     locked_ = false;
 }
 
-String::Representation DBOVariable::representation() const
+DBOVariable::Representation DBOVariable::representation() const
 {
     return representation_;
 }
 
-void DBOVariable::representation(const String::Representation& representation)
+const std::string& DBOVariable::representationString () const
 {
-    representation_str_ = String::representationToString(representation);
+    return representation_str_;
+}
+
+void DBOVariable::representation(const DBOVariable::Representation& representation)
+{
+    representation_str_ = representationToString(representation);
     representation_ = representation;
+}
+
+std::string DBOVariable::getRepresentationStringFromValue (const std::string& value_str) const
+{
+    logdbg << "DBOVariable: getRepresentationStringFromValue: value " << value_str << " data_type "
+           << Property::asString(data_type_)
+           << " representation " << representationToString(representation_);
+
+    if (value_str == NULL_STRING)
+        return value_str;
+
+    if (representation_ == DBOVariable::Representation::STANDARD)
+        return value_str;
+
+    switch (data_type_)
+    {
+    case PropertyDataType::BOOL:
+    {
+        bool value = std::stoul(value_str);
+        return getAsSpecialRepresentationString (value);
+    }
+    case PropertyDataType::CHAR:
+    {
+        char value = std::stoi(value_str);
+        return getAsSpecialRepresentationString (value);
+    }
+    case PropertyDataType::UCHAR:
+    {
+        unsigned char value = std::stoul(value_str);
+        return getAsSpecialRepresentationString (value);
+    }
+    case PropertyDataType::INT:
+    {
+        int value = std::stoi(value_str);
+        return getAsSpecialRepresentationString (value);
+    }
+    case PropertyDataType::UINT:
+    {
+        unsigned int value = std::stoul(value_str);
+        return getAsSpecialRepresentationString (value);
+    }
+    case PropertyDataType::LONGINT:
+    {
+        long value = std::stol(value_str);
+        return getAsSpecialRepresentationString (value);
+    }
+    case PropertyDataType::ULONGINT:
+    {
+        unsigned long value = std::stoul(value_str);
+        return getAsSpecialRepresentationString (value);
+    }
+    case PropertyDataType::FLOAT:
+    {
+        float value = std::stof(value_str);
+        return getAsSpecialRepresentationString (value);
+    }
+    case PropertyDataType::DOUBLE:
+    {
+        double value = std::stod(value_str);
+        return getAsSpecialRepresentationString (value);
+    }
+    case PropertyDataType::STRING:
+        throw std::invalid_argument ("DBOVariable: getRepresentationStringFromValue: representation of string variable"
+                                     " impossible");
+    default:
+        logerr << "DBOVariable: getRepresentationStringFromValue:: unknown property type "
+               << Property::asString(data_type_);
+        throw std::runtime_error ("DBOVariable: getRepresentationStringFromValue:: unknown property type "
+                                  + Property::asString(data_type_));
+    }
+}
+
+std::string DBOVariable::getValueStringFromRepresentation (const std::string& representation_str) const
+{
+    if (representation_str == NULL_STRING)
+        return representation_str;
+
+    if (representation_ == DBOVariable::Representation::SECONDS_TO_TIME)
+    {
+        return String::getValueString(Utils::String::timeFromString (representation_str));
+    }
+    else if (representation_ == DBOVariable::Representation::DEC_TO_OCTAL)
+    {
+        return String::getValueString(Utils::String::intFromOctalString(representation_str));
+    }
+    else if (representation_ == DBOVariable::Representation::DEC_TO_HEX)
+    {
+        return String::getValueString(Utils::String::intFromHexString(representation_str));
+    }
+    else if (representation_ == DBOVariable::Representation::FEET_TO_FLIGHTLEVEL)
+    {
+        return String::getValueString(std::stod(representation_str)*100.0);
+    }
+    else
+    {
+        throw std::runtime_error ("Utils: String: getAsSpecialRepresentationString: unknown representation");
+    }
+}
+
+std::string DBOVariable::multiplyString (const std::string& value_str, double factor) const
+{
+    logdbg << "DBOVariable: multiplyString: value " << value_str << " factor " << factor << " data_type "
+           << Property::asString(data_type_);
+
+    if (value_str == NULL_STRING)
+        return value_str;
+
+    std::string return_string;
+
+    switch (data_type_)
+    {
+    case PropertyDataType::BOOL:
+    {
+        bool value = std::stoul(value_str);
+        value = value && factor;
+        return_string = std::to_string(value);
+        break;
+    }
+    case PropertyDataType::CHAR:
+    {
+        char value = std::stoi(value_str);
+        value *= factor;
+        return_string = std::to_string(value);
+        break;
+    }
+    case PropertyDataType::UCHAR:
+    {
+        unsigned char value = std::stoul(value_str);
+        value *= factor;
+        return_string = std::to_string(value);
+        break;
+    }
+    case PropertyDataType::INT:
+    {
+        int value = std::stoi(value_str);
+        value *= factor;
+        return_string = std::to_string(value);
+        break;
+    }
+    case PropertyDataType::UINT:
+    {
+        unsigned int value = std::stoul(value_str);
+        value *= factor;
+        return_string = std::to_string(value);
+        break;
+    }
+    case PropertyDataType::LONGINT:
+    {
+        long value = std::stol(value_str);
+        value *= factor;
+        return_string = std::to_string(value);
+        break;
+    }
+    case PropertyDataType::ULONGINT:
+    {
+        unsigned long value = std::stoul(value_str);
+        value *= factor;
+        return_string = std::to_string(value);
+        break;
+    }
+    case PropertyDataType::FLOAT:
+    {
+        float value = std::stof(value_str);
+        value *= factor;
+        return_string = String::getValueString(value);
+        break;
+    }
+    case PropertyDataType::DOUBLE:
+    {
+        double value = std::stod(value_str);
+        value *= factor;
+        return_string = String::getValueString(value);
+        break;
+    }
+    case PropertyDataType::STRING:
+        throw std::invalid_argument ("DBOVariable: multiplyString: multiplication of string variable impossible");
+    default:
+        logerr  <<  "DBOVariable: multiplyString:: unknown property type " << Property::asString(data_type_);
+        throw std::runtime_error ("DBOVariable: multiplyString:: unknown property type "
+                                  + Property::asString(data_type_));
+    }
+
+    logdbg  <<  "DBOVariable: multiplyString: return value " << return_string;
+
+    return return_string;
+}
+
+const std::string& DBOVariable::getLargerValueString (const std::string& value_a_str, const std::string& value_b_str)
+ const
+{
+    logdbg << "DBOVariable: getLargerValueString: value a " << value_a_str << " b " << value_b_str
+           << " data_type " << Property::asString(data_type_);
+
+    if (value_a_str == NULL_STRING || value_b_str == NULL_STRING)
+    {
+        if (value_a_str != NULL_STRING)
+            return value_a_str;
+        if (value_b_str != NULL_STRING)
+            return value_b_str;
+        return NULL_STRING;
+    }
+
+    switch (data_type_)
+    {
+    case PropertyDataType::BOOL:
+    case PropertyDataType::UCHAR:
+    case PropertyDataType::UINT:
+    case PropertyDataType::ULONGINT:
+    {
+        if (std::stoul(value_a_str) > std::stoul(value_b_str))
+            return value_a_str;
+        else
+            return value_b_str;
+    }
+    case PropertyDataType::CHAR:
+    case PropertyDataType::INT:
+    {
+        if (std::stoi(value_a_str) > std::stoi(value_b_str))
+            return value_a_str;
+        else
+            return value_b_str;
+    }
+    case PropertyDataType::LONGINT:
+    {
+        if (std::stol(value_a_str) > std::stol(value_b_str))
+            return value_a_str;
+        else
+            return value_b_str;
+    }
+    case PropertyDataType::FLOAT:
+    {
+        if (std::stof(value_a_str) > std::stof(value_b_str))
+            return value_a_str;
+        else
+            return value_b_str;
+    }
+    case PropertyDataType::DOUBLE:
+    {
+        if (std::stod(value_a_str) > std::stod(value_b_str))
+            return value_a_str;
+        else
+            return value_b_str;
+    }
+    case PropertyDataType::STRING:
+        throw std::invalid_argument ("DBOVariable: getLargerValueString: operation on string variable impossible");
+    default:
+        logerr  <<  "DBOVariable: getLargerValueString:: unknown property type " << Property::asString(data_type_);
+        throw std::runtime_error ("DBOVariable: getLargerValueString:: unknown property type "
+                                  + Property::asString(data_type_));
+    }
+}
+
+const std::string& DBOVariable::getSmallerValueString (const std::string& value_a_str, const std::string& value_b_str)
+  const
+{
+    logdbg << "DBOVariable: getSmallerValueString: value a " << value_a_str << " b " << value_b_str << " data_type "
+           << Property::asString(data_type_);
+
+    if (value_a_str == NULL_STRING || value_b_str == NULL_STRING)
+    {
+        if (value_a_str != NULL_STRING)
+            return value_a_str;
+        if (value_b_str != NULL_STRING)
+            return value_b_str;
+        return NULL_STRING;
+    }
+
+    switch (data_type_)
+    {
+    case PropertyDataType::BOOL:
+    case PropertyDataType::UCHAR:
+    case PropertyDataType::UINT:
+    case PropertyDataType::ULONGINT:
+    {
+        if (std::stoul(value_a_str) < std::stoul(value_b_str))
+            return value_a_str;
+        else
+            return value_b_str;
+    }
+    case PropertyDataType::CHAR:
+    case PropertyDataType::INT:
+    {
+        if (std::stoi(value_a_str) < std::stoi(value_b_str))
+            return value_a_str;
+        else
+            return value_b_str;
+    }
+    case PropertyDataType::LONGINT:
+    {
+        if (std::stol(value_a_str) < std::stol(value_b_str))
+            return value_a_str;
+        else
+            return value_b_str;
+    }
+    case PropertyDataType::FLOAT:
+    {
+        if (std::stof(value_a_str) < std::stof(value_b_str))
+            return value_a_str;
+        else
+            return value_b_str;
+    }
+    case PropertyDataType::DOUBLE:
+    {
+        if (std::stod(value_a_str) < std::stod(value_b_str))
+            return value_a_str;
+        else
+            return value_b_str;
+    }
+    case PropertyDataType::STRING:
+        throw std::invalid_argument ("DBOVariable: getSmallerValueString: operation on string variable impossible");
+    default:
+        logerr  <<  "DBOVariable: getSmallerValueString:: unknown property type " << Property::asString(data_type_);
+        throw std::runtime_error ("DBOVariable: getSmallerValueString:: unknown property type "
+                                  + Property::asString(data_type_));
+    }
 }

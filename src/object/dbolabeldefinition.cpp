@@ -257,7 +257,8 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
                 null = buffer->getBool(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
-                    value_str = buffer->getBool(variable->name()).getAsRepresentationString(buffer_index);
+                    value_str = variable->getRepresentationStringFromValue(
+                                buffer->getBool(variable->name()).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::CHAR)
@@ -265,7 +266,8 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
                 null = buffer->getChar(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
-                    value_str = buffer->getChar(variable->name()).getAsRepresentationString(buffer_index);
+                    value_str = variable->getRepresentationStringFromValue(
+                                buffer->getChar(variable->name()).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::UCHAR)
@@ -273,7 +275,8 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
                 null = buffer->getUChar(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
-                    value_str = buffer->getUChar(variable->name()).getAsRepresentationString(buffer_index);
+                    value_str = variable->getRepresentationStringFromValue(
+                                buffer->getUChar(variable->name()).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::INT)
@@ -281,7 +284,8 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
                 null = buffer->getInt(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
-                    value_str = buffer->getInt(variable->name()).getAsRepresentationString(buffer_index);
+                    value_str = variable->getRepresentationStringFromValue(
+                                buffer->getInt(variable->name()).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::UINT)
@@ -289,7 +293,8 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
                 null = buffer->getUInt(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
-                    value_str = buffer->getUInt(variable->name()).getAsRepresentationString(buffer_index);
+                    value_str = variable->getRepresentationStringFromValue(
+                                buffer->getUInt(variable->name()).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::LONGINT)
@@ -297,7 +302,8 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
                 null = buffer->getLongInt(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
-                    value_str = buffer->getLongInt(variable->name()).getAsRepresentationString(buffer_index);
+                    value_str = variable->getRepresentationStringFromValue(
+                                buffer->getLongInt(variable->name()).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::ULONGINT)
@@ -305,7 +311,8 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
                 null = buffer->getULongInt(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
-                    value_str = buffer->getULongInt(variable->name()).getAsRepresentationString(buffer_index);
+                    value_str = variable->getRepresentationStringFromValue(
+                                buffer->getULongInt(variable->name()).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::FLOAT)
@@ -313,7 +320,8 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
                 null = buffer->getFloat(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
-                    value_str = buffer->getFloat(variable->name()).getAsRepresentationString(buffer_index);
+                    value_str = variable->getRepresentationStringFromValue(
+                                buffer->getFloat(variable->name()).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::DOUBLE)
@@ -321,7 +329,8 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
                 null = buffer->getDouble(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
-                    value_str = buffer->getDouble(variable->name()).getAsRepresentationString(buffer_index);
+                    value_str = variable->getRepresentationStringFromValue(
+                                buffer->getDouble(variable->name()).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::STRING)
@@ -329,7 +338,8 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
                 null = buffer->getString(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
-                    value_str = buffer->getString(variable->name()).getAsString(buffer_index);
+                    value_str = variable->getRepresentationStringFromValue(
+                                buffer->getString(variable->name()).getAsString(buffer_index));
                 }
             }
             else

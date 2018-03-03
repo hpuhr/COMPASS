@@ -225,14 +225,6 @@ inline double doubleFromLongitudeString(std::string &longitude_str)
     return x;
 }
 
-enum class Representation { STANDARD, SECONDS_TO_TIME, DEC_TO_OCTAL, DEC_TO_HEX, FEET_TO_FLIGHTLEVEL};
-
-extern std::map<Representation, std::string> representation_2_string;
-extern std::map<std::string, Representation> string_2_representation;
-
-Representation stringToRepresentation (const std::string &representation_str);
-std::string representationToString (Representation representation);
-
 inline std::string getValueString (const std::string &value)
 {
     return value;
@@ -261,136 +253,6 @@ template <typename T> std::string getValueString (T value)
     return std::to_string(value);
 }
 
-template <typename T> std::string getAsSpecialRepresentationString (T value, Representation representation)
-{
-    std::ostringstream out;
-    try
-    {
-        if (representation == Utils::String::Representation::SECONDS_TO_TIME)
-        {
-            return Utils::String::timeStringFromDouble (value);
-        }
-        else if (representation == Utils::String::Representation::DEC_TO_OCTAL)
-        {
-            out << std::oct << std::setfill ('0') << std::setw (4) << value;
-        }
-        else if (representation == Utils::String::Representation::DEC_TO_HEX)
-        {
-            out << std::uppercase << std::hex << value;
-        }
-        else if (representation == Utils::String::Representation::FEET_TO_FLIGHTLEVEL)
-        {
-            out << value/100.0;
-        }
-        else
-        {
-            throw std::runtime_error ("Utils: String: getAsSpecialRepresentationString: unknown representation");
-        }
-    }
-    catch(std::exception& e)
-    {
-        logerr  << "Utils: String: getAsSpecialRepresentationString: exception thrown: " << e.what();
-    }
-    catch(...)
-    {
-        logerr  << "Utils: String: getAsSpecialRepresentationString: exception thrown";;
-    }
-
-    return out.str();
-}
-
-inline std::string getRepresentationStringFromValue (const std::string& value_str, PropertyDataType data_type, Representation representation)
-{
-    logdbg << "String: getRepresentationStringFromValue: value " << value_str << " data_type " << Property::asString(data_type)
-           << " representation " << Utils::String::representationToString(representation);
-
-    if (value_str == NULL_STRING)
-        return value_str;
-
-    if (representation == Utils::String::Representation::STANDARD)
-        return value_str;
-
-    switch (data_type)
-    {
-    case PropertyDataType::BOOL:
-    {
-        bool value = std::stoul(value_str);
-        return Utils::String::getAsSpecialRepresentationString (value, representation);
-    }
-    case PropertyDataType::CHAR:
-    {
-        char value = std::stoi(value_str);
-        return Utils::String::getAsSpecialRepresentationString (value, representation);
-    }
-    case PropertyDataType::UCHAR:
-    {
-        unsigned char value = std::stoul(value_str);
-        return Utils::String::getAsSpecialRepresentationString (value, representation);
-    }
-    case PropertyDataType::INT:
-    {
-        int value = std::stoi(value_str);
-        return Utils::String::getAsSpecialRepresentationString (value, representation);
-    }
-    case PropertyDataType::UINT:
-    {
-        unsigned int value = std::stoul(value_str);
-        return Utils::String::getAsSpecialRepresentationString (value, representation);
-    }
-    case PropertyDataType::LONGINT:
-    {
-        long value = std::stol(value_str);
-        return Utils::String::getAsSpecialRepresentationString (value, representation);
-    }
-    case PropertyDataType::ULONGINT:
-    {
-        unsigned long value = std::stoul(value_str);
-        return Utils::String::getAsSpecialRepresentationString (value, representation);
-    }
-    case PropertyDataType::FLOAT:
-    {
-        float value = std::stof(value_str);
-        return Utils::String::getAsSpecialRepresentationString (value, representation);
-    }
-    case PropertyDataType::DOUBLE:
-    {
-        double value = std::stod(value_str);
-        return Utils::String::getAsSpecialRepresentationString (value, representation);
-    }
-    case PropertyDataType::STRING:
-        throw std::invalid_argument ("String: getRepresentationStringFromValue: representation of string variable impossible");
-    default:
-        logerr  <<  "String: getRepresentationStringFromValue:: unknown property type " << Property::asString(data_type);
-        throw std::runtime_error ("String: getRepresentationStringFromValue:: unknown property type " + Property::asString(data_type));
-    }
-}
-
-inline std::string getValueStringFromRepresentation (const std::string& representation_str, Representation representation)
-{
-    if (representation_str == NULL_STRING)
-        return representation_str;
-
-    if (representation == Utils::String::Representation::SECONDS_TO_TIME)
-    {
-        return getValueString(timeFromString (representation_str));
-    }
-    else if (representation == Utils::String::Representation::DEC_TO_OCTAL)
-    {
-        return getValueString(intFromOctalString(representation_str));
-    }
-    else if (representation == Utils::String::Representation::DEC_TO_HEX)
-    {
-        return getValueString(intFromHexString(representation_str));
-    }
-    else if (representation == Utils::String::Representation::FEET_TO_FLIGHTLEVEL)
-    {
-        return getValueString(std::stod(representation_str)*100.0);
-    }
-    else
-    {
-        throw std::runtime_error ("Utils: String: getAsSpecialRepresentationString: unknown representation");
-    }
-}
 
 inline bool hasEnding (std::string const &full_string, std::string const &ending)
 {
@@ -404,9 +266,6 @@ inline bool hasEnding (std::string const &full_string, std::string const &ending
     }
 }
 
-std::string multiplyString (const std::string& value_str, double factor, PropertyDataType data_type);
-const std::string& getLargerValueString (const std::string& value_a_str, const std::string& value_b_str, PropertyDataType data_type);
-const std::string& getSmallerValueString (const std::string& value_a_str, const std::string& value_b_str, PropertyDataType data_type);
 }
 
 

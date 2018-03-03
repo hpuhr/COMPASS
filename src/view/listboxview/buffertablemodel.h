@@ -25,6 +25,7 @@
 class Buffer;
 class DBObject;
 class BufferCSVExportJob;
+class DBOVariableSet;
 
 class BufferTableModel : public QAbstractTableModel
 {
@@ -54,7 +55,7 @@ public:
     void usePresentation (bool use_presentation);
 
 protected:
-    DBObject &object_;
+    DBObject& object_;
     std::shared_ptr <Buffer> buffer_;
 
     std::shared_ptr <BufferCSVExportJob> export_job_;

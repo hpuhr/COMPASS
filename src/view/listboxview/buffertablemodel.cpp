@@ -22,6 +22,7 @@
 #include "buffercsvexportjob.h"
 #include "jobmanager.h"
 #include "global.h"
+#include "dbovariableset.h"
 
 BufferTableModel::BufferTableModel(QObject *parent, DBObject &object)
     :QAbstractTableModel(parent), object_(object)
@@ -87,9 +88,10 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
             null = buffer_->getBool(properties.at(col).name()).isNone(row);
             if (!null)
             {
-                if (use_presentation_)
-                    value_str = buffer_->getBool(properties.at(col).name()).getAsRepresentationString(row);
-                else
+                // TODO
+//                if (use_presentation_)
+//                    value_str = buffer_->getBool(properties.at(col).name()).getAsRepresentationString(row);
+//                else
                     value_str = buffer_->getBool(properties.at(col).name()).getAsString(row);
             }
         }
@@ -98,8 +100,10 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
             null = buffer_->getChar(properties.at(col).name()).isNone(row);
             if (!null)
             {
-                if (use_presentation_)
-                    value_str = buffer_->getChar(properties.at(col).name()).getAsRepresentationString(row);
+//                if (use_presentation_)
+//                    value_str = buffer_->getChar(properties.at(col).name()).getAsRepresentationString(row);
+//                else
+                    value_str = buffer_->getChar(properties.at(col).name()).getAsString(row);
             }
         }
         else if (data_type == PropertyDataType::UCHAR)
@@ -107,9 +111,9 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
             null = buffer_->getUChar(properties.at(col).name()).isNone(row);
             if (!null)
             {
-                if (use_presentation_)
-                    value_str = buffer_->getUChar(properties.at(col).name()).getAsRepresentationString(row);
-                else
+//                if (use_presentation_)
+//                    value_str = buffer_->getUChar(properties.at(col).name()).getAsRepresentationString(row);
+//                else
                     value_str = buffer_->getUChar(properties.at(col).name()).getAsString(row);
             }
         }
@@ -118,9 +122,9 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
             null = buffer_->getInt(properties.at(col).name()).isNone(row);
             if (!null)
             {
-                if (use_presentation_)
-                    value_str = buffer_->getInt(properties.at(col).name()).getAsRepresentationString(row);
-                else
+//                if (use_presentation_)
+//                    value_str = buffer_->getInt(properties.at(col).name()).getAsRepresentationString(row);
+//                else
                     value_str = buffer_->getInt(properties.at(col).name()).getAsString(row);
             }
         }
@@ -129,9 +133,9 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
             null = buffer_->getUInt(properties.at(col).name()).isNone(row);
             if (!null)
             {
-                if (use_presentation_)
-                    value_str = buffer_->getUInt(properties.at(col).name()).getAsRepresentationString(row);
-                else
+//                if (use_presentation_)
+//                    value_str = buffer_->getUInt(properties.at(col).name()).getAsRepresentationString(row);
+//                else
                     value_str = buffer_->getUInt(properties.at(col).name()).getAsString(row);
             }
         }
@@ -140,9 +144,9 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
             null = buffer_->getLongInt(properties.at(col).name()).isNone(row);
             if (!null)
             {
-                if (use_presentation_)
-                    value_str = buffer_->getLongInt(properties.at(col).name()).getAsRepresentationString(row);
-                else
+//                if (use_presentation_)
+//                    value_str = buffer_->getLongInt(properties.at(col).name()).getAsRepresentationString(row);
+//                else
                     value_str = buffer_->getLongInt(properties.at(col).name()).getAsString(row);
             }
         }
@@ -151,9 +155,9 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
             null = buffer_->getULongInt(properties.at(col).name()).isNone(row);
             if (!null)
             {
-                if (use_presentation_)
-                    value_str = buffer_->getULongInt(properties.at(col).name()).getAsRepresentationString(row);
-                else
+//                if (use_presentation_)
+//                    value_str = buffer_->getULongInt(properties.at(col).name()).getAsRepresentationString(row);
+//                else
                     value_str = buffer_->getULongInt(properties.at(col).name()).getAsString(row);
             }
         }
@@ -162,9 +166,9 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
             null = buffer_->getFloat(properties.at(col).name()).isNone(row);
             if (!null)
             {
-                if (use_presentation_)
-                    value_str = buffer_->getFloat(properties.at(col).name()).getAsRepresentationString(row);
-                else
+//                if (use_presentation_)
+//                    value_str = buffer_->getFloat(properties.at(col).name()).getAsRepresentationString(row);
+//                else
                     value_str = buffer_->getFloat(properties.at(col).name()).getAsString(row);
             }
         }
@@ -173,9 +177,9 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
             null = buffer_->getDouble(properties.at(col).name()).isNone(row);
             if (!null)
             {
-                if (use_presentation_)
-                    value_str = buffer_->getDouble(properties.at(col).name()).getAsRepresentationString(row);
-                else
+//                if (use_presentation_)
+//                    value_str = buffer_->getDouble(properties.at(col).name()).getAsRepresentationString(row);
+//                else
                     value_str = buffer_->getDouble(properties.at(col).name()).getAsString(row);
             }
         }

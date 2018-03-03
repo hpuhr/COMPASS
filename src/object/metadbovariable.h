@@ -36,7 +36,7 @@ public:
     bool hasVariables () const { return variables_.size() > 0; }
     PropertyDataType dataType () const;
     const std::string &dataTypeString() const;
-    Utils::String::Representation representation ();
+    DBOVariable::Representation representation ();
 
     /// @brief Return if variable exist in DBO of type
     bool existsIn (const std::string &dbo_name);

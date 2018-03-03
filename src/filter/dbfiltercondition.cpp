@@ -336,8 +336,8 @@ std::string DBFilterCondition::getTransformedValue (const std::string& untransfo
     {
         std::string value_str = value_it;
 
-        if (variable->representation() != String::Representation::STANDARD)
-            value_str = String::getValueStringFromRepresentation(value_str, variable->representation()); // fix representation
+        if (variable->representation() != DBOVariable::Representation::STANDARD)
+            value_str = variable->getValueStringFromRepresentation(value_str); // fix representation
 
         logdbg << "DBFilterCondition: getTransformedValue: value string " << value_str;
 
@@ -349,7 +349,7 @@ std::string DBFilterCondition::getTransformedValue (const std::string& untransfo
             double factor = dimension.getFactor (column.unit(), variable->unit());
             logdbg  << "DBFilterCondition: getTransformedValue: correct unit transformation with factor " << factor;
 
-            value_str = String::multiplyString(value_str, 1.0/factor, variable->dataType());
+            value_str = variable->multiplyString(value_str, 1.0/factor);
         }
         logdbg << "DBFilterCondition: getTransformedValue: transformed value string " << value_str;
         transformed_value_strings.push_back(value_str);

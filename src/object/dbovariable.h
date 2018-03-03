@@ -27,8 +27,6 @@
 #include "configurable.h"
 #include "stringconv.h"
 
-//#include <boost/algorithm/string.hpp>
-
 class DBTableColumn;
 
 /**
@@ -75,7 +73,6 @@ public:
         : Configurable (class_id, instance_id, parent)
     {
         registerParameter ("schema", &schema_, "");
-//        registerParameter ("meta_table", &meta_table_, "");
         registerParameter ("variable_identifier", &variable_identifier, "");
     }
     virtual ~DBOSchemaVariableDefinition() {}
@@ -83,15 +80,11 @@ public:
     const std::string &getSchema () { return schema_; }
     void setSchema(std::string schema) { schema_=schema; }
 
-//    const std::string &getMetaTable () { return meta_table_; }
-//    void setMetaTable(std::string meta_table) { meta_table_=meta_table; }
-
     const std::string &getVariableIdentifier () { return variable_identifier; }
     void setVariableIdentifier(std::string variable) { variable_identifier=variable; }
 
 protected:
     std::string schema_;
-//    std::string meta_table_;
     std::string variable_identifier;
 };
 
@@ -117,6 +110,12 @@ class DBOVariable : public QObject, public Property, public Configurable
 {
     Q_OBJECT
 public:
+    enum class Representation { STANDARD, SECONDS_TO_TIME, DEC_TO_OCTAL, DEC_TO_HEX, FEET_TO_FLIGHTLEVEL};
+
+    static Representation stringToRepresentation (const std::string &representation_str);
+    static std::string representationToString (Representation representation);
+    static const std::map<Representation, std::string>& Representations() { return representation_2_string_; }
+
     /// @brief Constructor
     DBOVariable(const std::string& class_id, const std::string& instance_id, DBObject* parent);
     /// @brief Desctructor
@@ -182,18 +181,67 @@ public:
 
     DBOVariableWidget* widget ();
 
-    Utils::String::Representation representation() const;
-    void representation(const Utils::String::Representation& representation);
+    Representation representation() const;
+    const std::string& representationString () const;
+    void representation(const Representation& representation);
+
+    template <typename T> std::string getAsSpecialRepresentationString (T value) const
+    {
+        std::ostringstream out;
+        try
+        {
+            if (representation_ == DBOVariable::Representation::SECONDS_TO_TIME)
+            {
+                return Utils::String::timeStringFromDouble (value);
+            }
+            else if (representation_ == DBOVariable::Representation::DEC_TO_OCTAL)
+            {
+                out << std::oct << std::setfill ('0') << std::setw (4) << value;
+            }
+            else if (representation_ == DBOVariable::Representation::DEC_TO_HEX)
+            {
+                out << std::uppercase << std::hex << value;
+            }
+            else if (representation_ == DBOVariable::Representation::FEET_TO_FLIGHTLEVEL)
+            {
+                out << value/100.0;
+            }
+            else
+            {
+                throw std::runtime_error ("DBOVariable: getAsSpecialRepresentationString: unknown representation");
+            }
+        }
+        catch(std::exception& e)
+        {
+            logerr  << "DBOVariable: getAsSpecialRepresentationString: exception thrown: " << e.what();
+        }
+        catch(...)
+        {
+            logerr  << "DBOVariable: getAsSpecialRepresentationString: exception thrown";;
+        }
+
+        return out.str();
+    }
+
+    std::string getRepresentationStringFromValue (const std::string& value_str) const;
+    std::string getValueStringFromRepresentation (const std::string& representation_str) const;
+
+    std::string multiplyString (const std::string& value_str, double factor) const;
+    const std::string& getLargerValueString (const std::string& value_a_str, const std::string& value_b_str) const;
+    const std::string& getSmallerValueString (const std::string& value_a_str, const std::string& value_b_str) const;
 
     void lock ();
     void unlock ();
 
 protected:
+    static std::map<Representation, std::string> representation_2_string_;
+    static std::map<std::string, Representation> string_2_representation_;
+
     /// DBO parent
     DBObject& db_object_;
     /// Value representation type, based on enum STRING_REPRESENTATION
     std::string representation_str_;
-    Utils::String::Representation representation_;
+    Representation representation_;
 
     /// Description
     std::string description_;

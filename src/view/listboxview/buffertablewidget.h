@@ -66,11 +66,9 @@ public:
     /// @brief Destructor
     virtual ~BufferTableWidget();
 
-
     void clear ();
     /// @brief Shows Buffer content in table
     void show (std::shared_ptr<Buffer> buffer); //, DBOVariableSet *variables, bool database_view
-
 
 protected:
     DBObject &object_;
@@ -79,7 +77,7 @@ protected:
     BufferTableModel *model_;
 
     /// Variable read lost
-    DBOVariableSet *variables_;
+    //DBOVariableSet* variables_;
     /// Table header list
     QStringList header_list_;
 

@@ -22,74 +22,76 @@ void finalizeBuffer (DBOVariableSet &read_list, std::shared_ptr<Buffer> buffer)
 
     for (auto var_it : variables)
     {
-        logdbg << "Data: finalizeBuffer: variable " << var_it->name() << " has representation " << Utils::String::representationToString(var_it->representation());
+        logdbg << "Data: finalizeBuffer: variable " << var_it->name() << " has representation "
+               << var_it->representationString();
         const DBTableColumn &column = var_it->currentDBColumn ();
         assert (properties.hasProperty(column.name()));
         const Property &property = properties.get(column.name());
         assert (property.dataType() == var_it->dataType());
 
-        if (var_it->representation() != Utils::String::Representation::STANDARD) // do representation stuff
-        {
-            Utils::String::Representation rep = var_it->representation();
-            logdbg << "Data: finalizeBuffer: variable " << var_it->name() << ": setting string representation " << Utils::String::representationToString(rep);
+//        if (var_it->representation() != DBOVariable::Representation::STANDARD) // do representation stuff
+//        {
+//            DBOVariable::Representation rep = var_it->representation();
+//            logdbg << "Data: finalizeBuffer: variable " << var_it->name() << ": setting string representation "
+//                   << var_it->representationToString(rep);
 
-            switch (property.dataType())
-            {
-            case PropertyDataType::BOOL:
-            {
-                buffer->getBool (property.name()).representation(rep);
-                break;
-            }
-            case PropertyDataType::CHAR:
-            {
-                buffer->getChar (property.name()).representation(rep);
-                break;
-            }
-            case PropertyDataType::UCHAR:
-            {
-                buffer->getUChar (property.name()).representation(rep);
-                break;
-            }
-            case PropertyDataType::INT:
-            {
-                buffer->getInt (property.name()).representation(rep);
-                break;
-            }
-            case PropertyDataType::UINT:
-            {
-                buffer->getUInt (property.name()).representation(rep);
-                break;
-            }
-            case PropertyDataType::LONGINT:
-            {
-                buffer->getLongInt (property.name()).representation(rep);
-                break;
-            }
-            case PropertyDataType::ULONGINT:
-            {
-                buffer->getULongInt (property.name()).representation(rep);
-                break;
-            }
-            case PropertyDataType::FLOAT:
-            {
-                buffer->getFloat (property.name()).representation(rep);
+//            switch (property.dataType())
+//            {
+//            case PropertyDataType::BOOL:
+//            {
+//                buffer->getBool (property.name()).representation(rep);
+//                break;
+//            }
+//            case PropertyDataType::CHAR:
+//            {
+//                buffer->getChar (property.name()).representation(rep);
+//                break;
+//            }
+//            case PropertyDataType::UCHAR:
+//            {
+//                buffer->getUChar (property.name()).representation(rep);
+//                break;
+//            }
+//            case PropertyDataType::INT:
+//            {
+//                buffer->getInt (property.name()).representation(rep);
+//                break;
+//            }
+//            case PropertyDataType::UINT:
+//            {
+//                buffer->getUInt (property.name()).representation(rep);
+//                break;
+//            }
+//            case PropertyDataType::LONGINT:
+//            {
+//                buffer->getLongInt (property.name()).representation(rep);
+//                break;
+//            }
+//            case PropertyDataType::ULONGINT:
+//            {
+//                buffer->getULongInt (property.name()).representation(rep);
+//                break;
+//            }
+//            case PropertyDataType::FLOAT:
+//            {
+//                buffer->getFloat (property.name()).representation(rep);
 
-                break;
-            }
-            case PropertyDataType::DOUBLE:
-            {
-                buffer->getDouble (property.name()).representation(rep);
-                break;
-            }
-            case PropertyDataType::STRING:
-                logerr << "Data: finalizeBuffer: string representation for string variable " << var_it->name() << " impossible";
-                break;
-            default:
-                logerr  <<  "Data: finalizeBuffer: unknown property type " << Property::asString(property.dataType());
-                throw std::runtime_error ("Data: finalizeBuffer: unknown property type "+Property::asString(property.dataType()));
-            }
+//                break;
+//            }
+//            case PropertyDataType::DOUBLE:
+//            {
+//                buffer->getDouble (property.name()).representation(rep);
+//                break;
+//            }
+//            case PropertyDataType::STRING:
+//                logerr << "Data: finalizeBuffer: string representation for string variable " << var_it->name() << " impossible";
+//                break;
+//            default:
+//                logerr  <<  "Data: finalizeBuffer: unknown property type " << Property::asString(property.dataType());
+//                throw std::runtime_error ("Data: finalizeBuffer: unknown property type "+Property::asString(property.dataType()));
+//            }
 
-        }
+//        }
 
         if (column.dimension() != var_it->dimension())
             logwrn << "Data: finalizeBuffer: variable " << var_it->name() << " has differing dimensions " << column.dimension() << " " << var_it->dimension();
