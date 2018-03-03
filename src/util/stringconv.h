@@ -98,7 +98,8 @@ inline std::string timeStringFromDouble (double seconds, bool milliseconds=true)
     minutes = static_cast<int> (static_cast<double>(static_cast<int> (seconds)%3600)/60.0);
     seconds = seconds-hours*3600.0-minutes*60.0;
 
-    out << std::fixed << std::setw(2) << std::setfill('0') << hours << ":" << std::setw(2) << std::setfill('0') << minutes << ":";
+    out << std::fixed << std::setw(2) << std::setfill('0') << hours << ":" << std::setw(2) << std::setfill('0')
+        << minutes << ":";
 
     if (milliseconds)
         out << std::setw(6) << std::setfill('0') << std::setprecision(3) << seconds;
@@ -267,7 +268,6 @@ inline bool hasEnding (std::string const &full_string, std::string const &ending
 }
 
 }
-
 
 //template <typename T> std::string formatBinaryString (T val)
 //{

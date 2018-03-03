@@ -188,7 +188,6 @@ void DBOLabelDefinition::checkSubConfigurables ()
 
             Configuration &configuration = addNewSubConfiguration ("LabelEntry", instance_id);
             configuration.addParameterString("variable_name", variable_name);
-            //configuration.addParameterUnsignedInt("dbo_type_int", dbo_type_int_);
             configuration.addParameterBool("show", show);
             configuration.addParameterString("prefix", prefix);
             configuration.addParameterString("suffix", suffix);

@@ -114,7 +114,8 @@ void DBObject::generateSubConfigurable (const std::string &class_id, const std::
         DBOSchemaMetaTableDefinition* def = new DBOSchemaMetaTableDefinition (class_id, instance_id, this);
         meta_table_definitions_.push_back (def);
 
-        logdbg  << "DBObject "<< name() << ": generateSubConfigurable: schema " << def->schema() << " meta " << def->metaTable();
+        logdbg  << "DBObject "<< name() << ": generateSubConfigurable: schema " << def->schema() << " meta "
+                << def->metaTable();
 
         assert (meta_tables_.find (def->schema()) == meta_tables_.end());
         meta_tables_[def->schema()] = def->metaTable();

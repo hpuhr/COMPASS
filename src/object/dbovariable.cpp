@@ -325,99 +325,24 @@ void DBOVariable::setMinMax ()
 
 std::string DBOVariable::getMinString ()
 {
-    //    if (isMetaVariable())
-//    {
-//        std::map <DB_OBJECT_TYPE, std::string>::iterator it;
-//        for (it = sub_variables_.begin(); it != sub_variables_.end(); it++)
-//        {
-//            DBOVariable *var = DBObjectManager::getInstance().getDBOVariable(it->first, it->second);
-//            if (it == sub_variables_.begin())
-//                min = var->getMinString();
-//            else if (!isLargerAs(min, var->getMinString(), (PROPERTY_DATA_TYPE) data_type_int_))
-//            {
-//                logdbg << "DBOVariable: getMinString: new min " << var->getMinString() << " old " << min;
-//                min = var->getMinString();
-//            }
-//        }
-//    }
-
     if (!min_max_set_)
-        setMinMax();
+        setMinMax(); // already unit transformed
 
     assert (min_max_set_);
 
-    std::string min = min_;
-
-    const DBTableColumn& table_column = currentDBColumn();
-
-    if (hasDimension() || table_column.hasDimension())
-    {
-        if (dimension() != table_column.dimension())
-        {
-            logerr << "DBOVariable: getMinString: unit transformation inconsistent: var " << name() << " has dimension " << dimension()
-                                                                      << " table column " << table_column.name() << " has dimension " << table_column.dimension();
-            throw std::runtime_error ("DBOVariable: getMinString: unit transformation error");
-        }
-
-        const Dimension &dimension = UnitManager::instance().dimension (dimension_);
-        double factor = dimension.getFactor (table_column.unit(), unit());
-        logdbg  << "DBOVariable: getMinString: adapting " << name() << " with unit transformation factor " << factor;
-
-        // TODO check
-        multiplyString (min, factor);
-    }
-
-    logdbg << "DBOVariable: getMinString: object " << dboName() << " name " << name() << " returning " << min;
-    return min;
+    logdbg << "DBOVariable: getMinString: object " << dboName() << " name " << name() << " returning " << min_;
+    return min_;
 }
 
 std::string DBOVariable::getMaxString ()
 {
-    //    if (isMetaVariable())
-//    {
-//        std::map <DB_OBJECT_TYPE, std::string>::iterator it;
-//        for (it = sub_variables_.begin(); it != sub_variables_.end(); it++)
-//        {
-//            DBOVariable *var = DBObjectManager::getInstance().getDBOVariable(it->first, it->second);
-//            if (it == sub_variables_.begin())
-//                max = var->getMaxString();
-//            else if (isLargerAs(max, var->getMaxString(), (PROPERTY_DATA_TYPE) data_type_int_))
-//            {
-//                logdbg << "DBOVariable: getMaxString: new max " << var->getMaxString() << " old " << max;
-//                max = var->getMaxString();
-//            }
-//        }
-//    }
-
-
     if (!min_max_set_)
-        setMinMax();
+        setMinMax(); // is already unit transformed
 
     assert (min_max_set_);
 
-    std::string max = max_;
-
-    const DBTableColumn& table_column = currentDBColumn();
-
-    if (hasDimension() || table_column.hasDimension())
-    {
-        if (dimension() != table_column.dimension())
-        {
-            logerr << "DBOVariable: getMaxString: unit transformation inconsistent: var " << name() << " has dimension " << dimension()
-                                                                      << " table column " << table_column.name() << " has dimension " << table_column.dimension();
-            throw std::runtime_error ("DBOVariable: getMaxString: unit transformation error");
-        }
-
-        const Dimension &dimension = UnitManager::instance().dimension (dimension_);
-        double factor = dimension.getFactor (table_column.unit(), unit());
-        logdbg  << "DBOVariable: getMaxString: adapting " << name() << " with unit transformation factor " << factor;
-
-        // TODO check
-        multiplyString (max, factor);
-    }
-
-    logdbg << "DBOVariable: getMaxString: object " << dboName() << " name " << name() << " returning " << max;
-    return max;
+    logdbg << "DBOVariable: getMaxString: object " << dboName() << " name " << name() << " returning " << max_;
+    return max_;
 }
 
 std::string DBOVariable::getMinStringRepresentation ()

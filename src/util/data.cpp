@@ -29,75 +29,13 @@ void finalizeBuffer (DBOVariableSet &read_list, std::shared_ptr<Buffer> buffer)
         const Property &property = properties.get(column.name());
         assert (property.dataType() == var_it->dataType());
 
-//        if (var_it->representation() != DBOVariable::Representation::STANDARD) // do representation stuff
-//        {
-//            DBOVariable::Representation rep = var_it->representation();
-//            logdbg << "Data: finalizeBuffer: variable " << var_it->name() << ": setting string representation "
-//                   << var_it->representationToString(rep);
-
-//            switch (property.dataType())
-//            {
-//            case PropertyDataType::BOOL:
-//            {
-//                buffer->getBool (property.name()).representation(rep);
-//                break;
-//            }
-//            case PropertyDataType::CHAR:
-//            {
-//                buffer->getChar (property.name()).representation(rep);
-//                break;
-//            }
-//            case PropertyDataType::UCHAR:
-//            {
-//                buffer->getUChar (property.name()).representation(rep);
-//                break;
-//            }
-//            case PropertyDataType::INT:
-//            {
-//                buffer->getInt (property.name()).representation(rep);
-//                break;
-//            }
-//            case PropertyDataType::UINT:
-//            {
-//                buffer->getUInt (property.name()).representation(rep);
-//                break;
-//            }
-//            case PropertyDataType::LONGINT:
-//            {
-//                buffer->getLongInt (property.name()).representation(rep);
-//                break;
-//            }
-//            case PropertyDataType::ULONGINT:
-//            {
-//                buffer->getULongInt (property.name()).representation(rep);
-//                break;
-//            }
-//            case PropertyDataType::FLOAT:
-//            {
-//                buffer->getFloat (property.name()).representation(rep);
-
-//                break;
-//            }
-//            case PropertyDataType::DOUBLE:
-//            {
-//                buffer->getDouble (property.name()).representation(rep);
-//                break;
-//            }
-//            case PropertyDataType::STRING:
-//                logerr << "Data: finalizeBuffer: string representation for string variable " << var_it->name() << " impossible";
-//                break;
-//            default:
-//                logerr  <<  "Data: finalizeBuffer: unknown property type " << Property::asString(property.dataType());
-//                throw std::runtime_error ("Data: finalizeBuffer: unknown property type "+Property::asString(property.dataType()));
-//            }
-
-//        }
-
         if (column.dimension() != var_it->dimension())
-            logwrn << "Data: finalizeBuffer: variable " << var_it->name() << " has differing dimensions " << column.dimension() << " " << var_it->dimension();
+            logwrn << "Data: finalizeBuffer: variable " << var_it->name() << " has differing dimensions "
+                   << column.dimension() << " " << var_it->dimension();
         else if (column.unit() != var_it->unit()) // do unit conversion stuff
         {
-            logdbg << "Data: finalizeBuffer: variable " << var_it->name() << " of same dimension has different units " << column.unit() << " " << var_it->unit();
+            logdbg << "Data: finalizeBuffer: variable " << var_it->name() << " of same dimension has different units "
+                   << column.unit() << " " << var_it->unit();
 
             const Dimension &dimension = UnitManager::instance().dimension (var_it->dimension());
             double factor = dimension.getFactor (column.unit(), var_it->unit());
@@ -163,18 +101,23 @@ void finalizeBuffer (DBOVariableSet &read_list, std::shared_ptr<Buffer> buffer)
                 break;
             }
             case PropertyDataType::STRING:
-                logerr << "Data: finalizeBuffer: unit transformation for string variable " << var_it->name() << " impossible";
+                logerr << "Data: finalizeBuffer: unit transformation for string variable " << var_it->name()
+                       << " impossible";
                 break;
             default:
-                logerr  <<  "Data: finalizeBuffer: unknown property type " << Property::asString(property.dataType());
-                throw std::runtime_error ("Data: finalizeBuffer: unknown property type "+Property::asString(property.dataType()));
+                logerr  <<  "Data: finalizeBuffer: unknown property type "
+                         << Property::asString(property.dataType());
+                throw std::runtime_error ("Data: finalizeBuffer: unknown property type "
+                                          + Property::asString(property.dataType()));
             }
         }
 
         // rename to reflect dbo variable
         if (property.name() != var_it->name())
         {
-            //loginf << "Data: finalizeBuffer: renaming property " << property.name() << " to dbo variable name " << var_it->name();
+            //loginf << "Data: finalizeBuffer: renaming property " << property.name() << " to dbo variable name "
+            //<< var_it->name();
+
             switch (property.dataType())
             {
             case PropertyDataType::BOOL:
@@ -228,8 +171,10 @@ void finalizeBuffer (DBOVariableSet &read_list, std::shared_ptr<Buffer> buffer)
                 break;
             }
             default:
-                logerr  <<  "Data: finalizeBuffer: unknown property type " << Property::asString(property.dataType());
-                throw std::runtime_error ("Data: finalizeBuffer: unknown property type "+Property::asString(property.dataType()));
+                logerr  <<  "Data: finalizeBuffer: unknown property type "
+                         << Property::asString(property.dataType());
+                throw std::runtime_error ("Data: finalizeBuffer: unknown property type "
+                                          + Property::asString(property.dataType()));
             }
         }
     }

@@ -53,19 +53,20 @@ signals:
 
 public:
     /// @brief Constructor
-    DBFilterCondition(const std::string &class_id, const std::string &instance_id, DBFilter *filter_parent);
+    DBFilterCondition(const std::string& class_id, const std::string& instance_id, DBFilter* filter_parent);
     /// @brief Desctructor
     virtual ~DBFilterCondition();
 
     /// @brief Invert the condition. Not used yet.
     void invert ();
     /// @brief Returns if condition is active for the DBO type
-    bool filters (const std::string &dbo_name);
+    bool filters (const std::string& dbo_name);
     /// @brief Returns condition string for a DBO type
-    std::string getConditionString (const std::string &dbo_name, bool &first, std::vector <DBOVariable*>& filtered_variables);
+    std::string getConditionString (const std::string& dbo_name, bool& first,
+                                    std::vector <DBOVariable*>& filtered_variables);
 
     /// @brief Returns the widget
-    QWidget *getWidget () { assert(widget_); return widget_;}
+    QWidget* getWidget () { assert(widget_); return widget_;}
 
     /// @brief Updates the GUI elements
     void update ();
@@ -76,9 +77,9 @@ public:
     void setChanged (bool changed) { changed_=changed; }
 
     /// @brief Returns DBOVariable which is used in the condition
-    DBOVariable *getVariable () { return variable_; }
+    DBOVariable* getVariable () { return variable_; }
     /// @brief Sets the DBOVariable which is used in the condition
-    void setVariable (DBOVariable *variable);
+    void setVariable (DBOVariable* variable);
 
     /// @brief Returns if absolute value of the DBOVariable should be used
     bool getAbsoluteValue () { return absolute_value_; }
@@ -107,13 +108,13 @@ public:
 
 private:
     /// @brief Parent filter
-    DBFilter *filter_parent_;
+    DBFilter* filter_parent_ {nullptr};
     /// @brief Operator
     std::string operator_;
     /// @brief AND operator flag, not used yet.
-    bool op_and_;
+    bool op_and_ {true};
     /// @brief Absolute value flag.
-    bool absolute_value_;
+    bool absolute_value_ {false};
     /// @brief Current value
     std::string value_;
     /// @brief Reset value
@@ -124,21 +125,21 @@ private:
     std::string variable_name_;
 
     /// @brief Pointer to DBO variable
-    DBOVariable *variable_;
-    MetaDBOVariable *meta_variable_;
+    DBOVariable* variable_ {nullptr};
+    MetaDBOVariable* meta_variable_ {nullptr};
 
     /// @brief Changed flag
-    bool changed_;
-    bool invalid_;
+    bool changed_ {true};
+    bool invalid_ {false};
 
     /// @brief Widget with condition elements
-    QWidget *widget_;
+    QWidget* widget_ {nullptr};
     /// @brief Value edit field
-    QLineEdit *edit_;
+    QLineEdit* edit_ {nullptr};
     /// @brief Variable name and operator label
-    QLabel *label_;
+    QLabel* label_  {nullptr};
 
-    std::string getTransformedValue (const std::string& untransformed_value, DBOVariable *variable);
+    std::string getTransformedValue (const std::string& untransformed_value, DBOVariable* variable);
     bool checkValueInvalid (const std::string& new_value);
 };
 

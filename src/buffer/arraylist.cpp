@@ -24,7 +24,6 @@ typedef std::numeric_limits<float> float_limit;
 #include "arraylist.h"
 
 ArrayListBase::ArrayListBase ()
-    : size_(0), max_size_(0) //, representation_(DBOVariable::Representation::STANDARD)
 {
 
 }
@@ -68,21 +67,10 @@ bool ArrayListBase::isNone(size_t index)
     return (*none_flags_[index/BUFFER_ARRAY_SIZE])[index%BUFFER_ARRAY_SIZE];
 }
 
-//DBOVariable::Representation ArrayListBase::representation() const
-//{
-//    return representation_;
-//}
-
-//void ArrayListBase::representation(const DBOVariable::Representation& representation)
-//{
-//    logdbg << "ArrayList: representation: name " << id_ << " set to representation "
-//           << DBOVariable::representationToString(representation);
-//    representation_ = representation;
-//}
-
 void ArrayListBase::allocatedNewNoneArray ()
 {
-    std::shared_ptr< std::array<bool,BUFFER_ARRAY_SIZE> > new_array_ptr = std::make_shared<std::array<bool,BUFFER_ARRAY_SIZE>>();
+    std::shared_ptr< std::array<bool,BUFFER_ARRAY_SIZE> > new_array_ptr =
+            std::make_shared<std::array<bool,BUFFER_ARRAY_SIZE>>();
 
     new_array_ptr->fill(true);
 

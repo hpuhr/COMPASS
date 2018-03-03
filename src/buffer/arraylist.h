@@ -60,24 +60,17 @@ public:
     /// @brief Sets all elements to initial value and None information to true
     virtual void clear()=0;
 
-//    bool hasSpecialRepresentation () { return representation_ != DBOVariable::Representation::STANDARD; }
-//    DBOVariable::Representation representation() const;
-//    void representation(const DBOVariable::Representation& representation);
-
     virtual const std::string getAsString (size_t index)=0;
 
 protected:
     /// Identifier of contained data
     std::string id_;
     /// Size of the data contents, maximum index of set+1
-    size_t size_;
+    size_t size_ {0};
     /// Size of data arrays
-    size_t max_size_;
-
-//    DBOVariable::Representation representation_;
+    size_t max_size_ {0};
 
     std::vector < std::shared_ptr< std::array<bool,BUFFER_ARRAY_SIZE> > > none_flags_;
-    //std::vector <std::shared_ptr<std::bitset<BUFFER_ARRAY_SIZE>>> none_flags_;
 
     /// @brief Allocates a new none array
     void allocatedNewNoneArray ();
@@ -140,21 +133,6 @@ public:
         return Utils::String::getValueString (data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE));
     }
 
-//    /// @brief Returns representation string of a specific value
-//    const std::string getAsRepresentationString (size_t index)
-//    {
-//        if (index > size_)
-//            throw std::out_of_range ("ArrayListTemplate: getAsRepresentationString out of index "+std::to_string(index));
-
-//        if (isNone(index))
-//            throw std::out_of_range ("ArrayListTemplate: getAsRepresentationString of None value "+std::to_string(index));
-
-//        if (representation_ == DBOVariable::Representation::STANDARD)
-//            return getValueString (data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE));
-
-//        return getAsSpecialRepresentationString (data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE), representation_);
-//    }
-
     /// @brief Sets specific value
     void set (size_t index, T value)
     {
@@ -162,12 +140,14 @@ public:
 
         if (index >= max_size_)
         {
-            //logdbg << "ArrayListTemplate:set: adding new arrays for index " << index << " current max size " << max_size_;
+            //logdbg << "ArrayListTemplate:set: adding new arrays for index " << index << " current max size "
+            // << max_size_;
             while (index >= max_size_)
                 allocateNewArray ();
         }
 
-        //logdbg << "ArrayListTemplate: set: setting index " << index << " to value " << value << " using array " << index/BUFFER_ARRAY_SIZE << " array_index " << index%BUFFER_ARRAY_SIZE;
+        //logdbg << "ArrayListTemplate: set: setting index " << index << " to value " << value << " using array "
+        //<< index/BUFFER_ARRAY_SIZE << " array_index " << index%BUFFER_ARRAY_SIZE;
 
         data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE) = value;
 
@@ -184,7 +164,8 @@ public:
     {
         if (index >= max_size_)
         {
-            //logdbg << "ArrayListTemplate:setNone: adding new arrays for index " << index << " current max size " << max_size_;
+            //logdbg << "ArrayListTemplate:setNone: adding new arrays for index " << index << " current max size "
+            //<< max_size_;
             while (index >= max_size_)
                 allocateNewArray ();
         }
@@ -194,7 +175,9 @@ public:
 
     void addData (ArrayListTemplate<T> &other)
     {
-        logdbg << "ArrayListTemplate: addData: data size " << data_.size() << " none flags size " << none_flags_.size() << " size " << size_ << " max " << max_size_;
+        logdbg << "ArrayListTemplate: addData: data size " << data_.size() << " none flags size " << none_flags_.size()
+               << " size " << size_ << " max " << max_size_;
+
         data_.insert(data_.end(), other.data_.begin(), other.data_.end());
         none_flags_.insert(none_flags_.end(), other.none_flags_.begin(), other.none_flags_.end());
         assert (data_.size() == none_flags_.size());
@@ -206,7 +189,8 @@ public:
         other.size_=0;
         other.max_size_=0;
 
-        logdbg << "ArrayListTemplate: addData: end data size " << data_.size() << " none flags size " << none_flags_.size() << " size " << size_ << " max " << max_size_;
+        logdbg << "ArrayListTemplate: addData: end data size " << data_.size() << " none flags size "
+               << none_flags_.size() << " size " << size_ << " max " << max_size_;
     }
 
     ArrayListTemplate<T>& operator*=(double factor)
@@ -320,7 +304,9 @@ protected:
     /// @brief Adds a new data container
     void allocateNewArray ()
     {
-        std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > new_array_ptr = std::make_shared<std::array<T,BUFFER_ARRAY_SIZE>>();
+        std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > new_array_ptr =
+                std::make_shared<std::array<T,BUFFER_ARRAY_SIZE>>();
+
         data_.push_back(new_array_ptr);
         max_size_ += BUFFER_ARRAY_SIZE;
 
