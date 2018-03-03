@@ -167,7 +167,7 @@ public:
 
     void updateData (DBOVariable &key_var, std::shared_ptr<Buffer> buffer);
 
-    std::map<int, std::string> loadLabelData (std::vector<int> rec_nums);
+    std::map<int, std::string> loadLabelData (std::vector<int> rec_nums, int break_item_cnt);
 
     /// @brief Returns if incremental read for DBO type was prepared
     bool isLoading ();

@@ -211,7 +211,8 @@ DBOLabelDefinitionWidget* DBOLabelDefinition::widget ()
     return widget_;
 }
 
-std::map<int, std::string> DBOLabelDefinition::generateLabels (std::vector<int> rec_nums, std::shared_ptr<Buffer> buffer)
+std::map<int, std::string> DBOLabelDefinition::generateLabels (
+        std::vector<int> rec_nums, std::shared_ptr<Buffer> buffer, int break_item_cnt)
 {
     const PropertyList &buffer_properties = buffer->properties();
     assert (buffer_properties.size() >= read_list_.getSize());
@@ -236,6 +237,7 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (std::vector<int> 
     DBOLabelEntry* entry;
     bool null;
 
+    int var_count = 0;
     for (DBOVariable* variable : read_list_.getSet())
     {
         data_type = variable->dataType();
@@ -336,7 +338,11 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (std::vector<int> 
 
             if (!null)
             {
-                if (labels[rec_num].size() != 0)
+                if (var_count == break_item_cnt - 1)
+                {
+                    labels[rec_num] += "\n";
+                }
+                else if (labels[rec_num].size() != 0)
                 {
                     labels[rec_num] += " ";
                 }
@@ -344,6 +350,11 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (std::vector<int> 
                 labels[rec_num] += entry->prefix()+value_str+entry->suffix();
             }
         }
+
+        var_count++;
+
+        if (var_count == break_item_cnt)
+            var_count = 0;
     }
 
     return labels;

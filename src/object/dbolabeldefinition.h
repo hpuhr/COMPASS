@@ -69,9 +69,8 @@ public:
 
     DBOLabelDefinitionWidget* widget ();
 
-    std::map<int, std::string> generateLabels (std::vector<int> rec_nums, std::shared_ptr<Buffer> buffer);
-
-
+    std::map<int, std::string> generateLabels (std::vector<int> rec_nums, std::shared_ptr<Buffer> buffer,
+                                               int break_item_cnt);
 
 protected:
     DBObject* db_object_ {nullptr};

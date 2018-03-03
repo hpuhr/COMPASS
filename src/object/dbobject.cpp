@@ -451,8 +451,8 @@ void DBObject::load (DBOVariableSet& read_set, bool use_filters, bool use_order,
         custom_filter_clause = ATSDB::instance().filterManager().getSQLCondition (name_, filtered_variables);
     }
 
-//    DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
-//    DBOVariable *order, const std::string &limit_str, bool activate_key_search
+    //    DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
+    //    DBOVariable *order, const std::string &limit_str, bool activate_key_search
 
     read_job_ = std::shared_ptr<DBOReadDBJob> (new DBOReadDBJob (ATSDB::instance().interface(), *this,
                                                                  read_set, custom_filter_clause,
@@ -510,7 +510,7 @@ void DBObject::updateDoneSlot ()
     emit updateDoneSignal (*this);
 }
 
-std::map<int, std::string> DBObject::loadLabelData (std::vector<int> rec_nums)
+std::map<int, std::string> DBObject::loadLabelData (std::vector<int> rec_nums, int break_item_cnt)
 {
     std::string custom_filter_clause;
     bool first=true;
@@ -541,18 +541,21 @@ std::map<int, std::string> DBObject::loadLabelData (std::vector<int> rec_nums)
     std::shared_ptr<Buffer> buffer = db_interface.readDataChunk(*this, false);
     db_interface.finalizeReadStatement(*this);
 
+    if (buffer->size() != rec_nums.size())
+        throw std::runtime_error ("DBObject "+name_+": loadLabelData: failed to load label for "+custom_filter_clause);
+
     assert (buffer->size() == rec_nums.size());
 
-   Utils::Data::finalizeBuffer(read_list, buffer);
+    Utils::Data::finalizeBuffer(read_list, buffer);
 
-   std::map<int, std::string> labels = label_definition_->generateLabels (rec_nums, buffer);
+    std::map<int, std::string> labels = label_definition_->generateLabels (rec_nums, buffer, break_item_cnt);
 
-   boost::posix_time::ptime stop_time = boost::posix_time::microsec_clock::local_time();
-   boost::posix_time::time_duration diff = stop_time - start_time;
+    boost::posix_time::ptime stop_time = boost::posix_time::microsec_clock::local_time();
+    boost::posix_time::time_duration diff = stop_time - start_time;
 
-   loginf  << "DBObject: loadLabelData: done after " << diff.total_milliseconds() << " ms";
+    loginf  << "DBObject: loadLabelData: done after " << diff.total_milliseconds() << " ms";
 
-   return labels;
+    return labels;
 }
 
 void DBObject::readJobIntermediateSlot (std::shared_ptr<Buffer> buffer)
