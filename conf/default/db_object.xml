@@ -3,7 +3,7 @@
     <ParameterBool use_limit="0"/>
     <ParameterBool use_order="1"/>
     <ParameterBool use_order_ascending="1"/>
-    <ParameterUnsignedInt limit_max="90000"/>
+    <ParameterUnsignedInt limit_max="2000000"/>
     <ParameterUnsignedInt limit_min="0"/>
     <ParameterString order_variable__name="tod"/>
     <ParameterString order_variable_dbo_name="Meta"/>
@@ -133,8 +133,8 @@
                 <ParameterString variable_name="dom_posix"/>
             </Configuration>
             <Configuration class_id="LabelEntry" instance_id="LabelEntryds_id0">
-                <ParameterBool show="0"/>
-                <ParameterString prefix=""/>
+                <ParameterBool show="1"/>
+                <ParameterString prefix="DS "/>
                 <ParameterString suffix=""/>
                 <ParameterString variable_name="ds_id"/>
             </Configuration>
@@ -422,7 +422,7 @@
             </Configuration>
             <Configuration class_id="LabelEntry" instance_id="LabelEntrytarget_addr0">
                 <ParameterBool show="1"/>
-                <ParameterString prefix="TA"/>
+                <ParameterString prefix="TA "/>
                 <ParameterString suffix=""/>
                 <ParameterString variable_name="target_addr"/>
             </Configuration>
@@ -767,7 +767,7 @@
             <ParameterString description="Common Source Description ID, derived from SAC/SIC, Station Code etc."/>
             <ParameterString dimension=""/>
             <ParameterString name="ds_id"/>
-            <ParameterString representation_str="STANDARD"/>
+            <ParameterString representation_str="DATA_SRC_NAME"/>
             <ParameterString unit=""/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBds_id0">
                 <ParameterString meta_table="ADSB"/>
@@ -1762,8 +1762,8 @@
                 <ParameterString variable_name="dom_posix"/>
             </Configuration>
             <Configuration class_id="LabelEntry" instance_id="LabelEntryds_id0">
-                <ParameterBool show="0"/>
-                <ParameterString prefix=""/>
+                <ParameterBool show="1"/>
+                <ParameterString prefix="DS "/>
                 <ParameterString suffix=""/>
                 <ParameterString variable_name="ds_id"/>
             </Configuration>
@@ -2116,7 +2116,7 @@
                 <ParameterString variable_name="rdp_chain"/>
             </Configuration>
             <Configuration class_id="LabelEntry" instance_id="LabelEntryrec_num0">
-                <ParameterBool show="1"/>
+                <ParameterBool show="0"/>
                 <ParameterString prefix="R "/>
                 <ParameterString suffix=""/>
                 <ParameterString variable_name="rec_num"/>
@@ -2572,7 +2572,7 @@
             <ParameterString description="Common Source Description ID, derived from SAC/SIC, Station Code etc."/>
             <ParameterString dimension=""/>
             <ParameterString name="ds_id"/>
-            <ParameterString representation_str="STANDARD"/>
+            <ParameterString representation_str="DATA_SRC_NAME"/>
             <ParameterString unit=""/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATds_id0">
                 <ParameterString meta_table="MLAT"/>
@@ -3945,8 +3945,8 @@
                 <ParameterString variable_name="dom_posix"/>
             </Configuration>
             <Configuration class_id="LabelEntry" instance_id="LabelEntryds_id0">
-                <ParameterBool show="0"/>
-                <ParameterString prefix=""/>
+                <ParameterBool show="1"/>
+                <ParameterString prefix="DS "/>
                 <ParameterString suffix=""/>
                 <ParameterString variable_name="ds_id"/>
             </Configuration>
@@ -4797,7 +4797,7 @@
             <ParameterString description="DATA SOURCE ID, is derived from table DS and its sub tables"/>
             <ParameterString dimension=""/>
             <ParameterString name="ds_id"/>
-            <ParameterString representation_str="STANDARD"/>
+            <ParameterString representation_str="DATA_SRC_NAME"/>
             <ParameterString unit=""/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadards_id0">
                 <ParameterString meta_table="Radar"/>
@@ -6250,8 +6250,8 @@
                 <ParameterString variable_name="dom_posix"/>
             </Configuration>
             <Configuration class_id="LabelEntry" instance_id="LabelEntryds_id0">
-                <ParameterBool show="0"/>
-                <ParameterString prefix=""/>
+                <ParameterBool show="1"/>
+                <ParameterString prefix="DS "/>
                 <ParameterString suffix=""/>
                 <ParameterString variable_name="ds_id"/>
             </Configuration>
@@ -6880,7 +6880,7 @@
             <ParameterString description="DATA SOURCE ID, is derived from table DS and its sub tables"/>
             <ParameterString dimension=""/>
             <ParameterString name="ds_id"/>
-            <ParameterString representation_str="STANDARD"/>
+            <ParameterString representation_str="DATA_SRC_NAME"/>
             <ParameterString unit=""/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerds_id0">
                 <ParameterString meta_table="Tracker"/>

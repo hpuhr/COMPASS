@@ -26,6 +26,7 @@
 #include "property.h"
 #include "configurable.h"
 #include "stringconv.h"
+#include "dbobject.h"
 
 class DBTableColumn;
 
@@ -110,7 +111,14 @@ class DBOVariable : public QObject, public Property, public Configurable
 {
     Q_OBJECT
 public:
-    enum class Representation { STANDARD, SECONDS_TO_TIME, DEC_TO_OCTAL, DEC_TO_HEX, FEET_TO_FLIGHTLEVEL};
+    enum class Representation {
+        STANDARD,
+        SECONDS_TO_TIME,
+        DEC_TO_OCTAL,
+        DEC_TO_HEX,
+        FEET_TO_FLIGHTLEVEL,
+        DATA_SRC_NAME
+    };
 
     static Representation stringToRepresentation (const std::string &representation_str);
     static std::string representationToString (Representation representation);
@@ -205,6 +213,28 @@ public:
             else if (representation_ == DBOVariable::Representation::FEET_TO_FLIGHTLEVEL)
             {
                 out << value/100.0;
+            }
+            else if (representation_ == DBOVariable::Representation::DATA_SRC_NAME)
+            {
+                if (db_object_.hasDataSources())
+                {
+                    std::map<int, DBODataSource>& data_sources = db_object_.dataSources();
+
+                    for (auto& ds_it : data_sources)
+                    {
+                        if (std::to_string(ds_it.first) == std::to_string(value))
+                        {
+                            if (ds_it.second.hasShortName())
+                                return ds_it.second.shortName();
+                            else
+                                return ds_it.second.name();
+                        }
+                    }
+                    // not found, return original
+                }
+                // has no datasources, return original
+
+                return std::to_string(value);
             }
             else
             {

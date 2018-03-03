@@ -38,19 +38,21 @@
 using namespace Utils;
 
 std::map<DBOVariable::Representation,std::string> DBOVariable::representation_2_string_ {
-        {DBOVariable::Representation::STANDARD, "STANDARD"},
-        {DBOVariable::Representation::SECONDS_TO_TIME, "SECONDS_TO_TIME"},
-        {DBOVariable::Representation::DEC_TO_OCTAL, "DEC_TO_OCTAL"},
-        {DBOVariable::Representation::DEC_TO_HEX, "DEC_TO_HEX"},
-        {DBOVariable::Representation::FEET_TO_FLIGHTLEVEL, "FEET_TO_FLIGHTLEVEL"}
+    {DBOVariable::Representation::STANDARD, "STANDARD"},
+    {DBOVariable::Representation::SECONDS_TO_TIME, "SECONDS_TO_TIME"},
+    {DBOVariable::Representation::DEC_TO_OCTAL, "DEC_TO_OCTAL"},
+    {DBOVariable::Representation::DEC_TO_HEX, "DEC_TO_HEX"},
+    {DBOVariable::Representation::FEET_TO_FLIGHTLEVEL, "FEET_TO_FLIGHTLEVEL"},
+    {DBOVariable::Representation::DATA_SRC_NAME, "DATA_SRC_NAME"}
 };
 
 std::map<std::string, DBOVariable::Representation> DBOVariable::string_2_representation_ {
-        {"STANDARD", DBOVariable::Representation::STANDARD},
-        {"SECONDS_TO_TIME", DBOVariable::Representation::SECONDS_TO_TIME},
-        {"DEC_TO_OCTAL", DBOVariable::Representation::DEC_TO_OCTAL},
-        {"DEC_TO_HEX", DBOVariable::Representation::DEC_TO_HEX},
-        {"FEET_TO_FLIGHTLEVEL", DBOVariable::Representation::FEET_TO_FLIGHTLEVEL}
+    {"STANDARD", DBOVariable::Representation::STANDARD},
+    {"SECONDS_TO_TIME", DBOVariable::Representation::SECONDS_TO_TIME},
+    {"DEC_TO_OCTAL", DBOVariable::Representation::DEC_TO_OCTAL},
+    {"DEC_TO_HEX", DBOVariable::Representation::DEC_TO_HEX},
+    {"FEET_TO_FLIGHTLEVEL", DBOVariable::Representation::FEET_TO_FLIGHTLEVEL},
+    {"DATA_SRC_NAME", DBOVariable::Representation::DATA_SRC_NAME}
 };
 
 DBOVariable::Representation DBOVariable::stringToRepresentation (const std::string &representation_str)
@@ -189,22 +191,22 @@ void DBOVariable::print ()
 
 void DBOVariable::checkSubConfigurables ()
 {
-//    if (!hasCurrentSchema())
-//    {
-//        std::string schema_name = ATSDB::instance().schemaManager().getCurrentSchemaName();
-//        std::string instance = schema_name+"0";
-//        std::string meta_table_name = dbo_parent_.name();
+    //    if (!hasCurrentSchema())
+    //    {
+    //        std::string schema_name = ATSDB::instance().schemaManager().getCurrentSchemaName();
+    //        std::string instance = schema_name+"0";
+    //        std::string meta_table_name = dbo_parent_.name();
 
-//        loginf << "DBOVariable: checkSubConfigurables: creating new schema definition for " << schema_name;
+    //        loginf << "DBOVariable: checkSubConfigurables: creating new schema definition for " << schema_name;
 
-//        Configuration &config = addNewSubConfiguration ("DBOSchemaVariableDefinition", instance);
+    //        Configuration &config = addNewSubConfiguration ("DBOSchemaVariableDefinition", instance);
 
-//        config.addParameterString ("schema", schema_name);
-//        config.addParameterString ("meta_table", meta_table_name);
-//        config.addParameterString ("variable_identifier", "");
+    //        config.addParameterString ("schema", schema_name);
+    //        config.addParameterString ("meta_table", meta_table_name);
+    //        config.addParameterString ("variable_identifier", "");
 
-//        generateSubConfigurable("DBOSchemaVariableDefinition", instance);
-//    }
+    //        generateSubConfigurable("DBOSchemaVariableDefinition", instance);
+    //    }
 }
 
 const std::string& DBOVariable::dboName () const
@@ -505,6 +507,26 @@ std::string DBOVariable::getValueStringFromRepresentation (const std::string& re
     {
         return String::getValueString(std::stod(representation_str)*100.0);
     }
+    else if (representation_ == DBOVariable::Representation::DATA_SRC_NAME)
+    {
+        if (db_object_.hasDataSources())
+        {
+            std::map<int, DBODataSource>& data_sources = db_object_.dataSources();
+
+            for (auto& ds_it : data_sources)
+            {
+                if ((ds_it.second.hasShortName() && representation_str == ds_it.second.shortName())
+                        || representation_str == ds_it.second.name())
+                {
+                    return std::to_string (ds_it.first);
+                }
+            }
+            // not found, return original
+        }
+        // has no datasources, return original
+
+        return representation_str;
+    }
     else
     {
         throw std::runtime_error ("Utils: String: getAsSpecialRepresentationString: unknown representation");
@@ -600,7 +622,7 @@ std::string DBOVariable::multiplyString (const std::string& value_str, double fa
 }
 
 const std::string& DBOVariable::getLargerValueString (const std::string& value_a_str, const std::string& value_b_str)
- const
+const
 {
     logdbg << "DBOVariable: getLargerValueString: value a " << value_a_str << " b " << value_b_str
            << " data_type " << Property::asString(data_type_);
@@ -665,7 +687,7 @@ const std::string& DBOVariable::getLargerValueString (const std::string& value_a
 }
 
 const std::string& DBOVariable::getSmallerValueString (const std::string& value_a_str, const std::string& value_b_str)
-  const
+const
 {
     logdbg << "DBOVariable: getSmallerValueString: value a " << value_a_str << " b " << value_b_str << " data_type "
            << Property::asString(data_type_);
