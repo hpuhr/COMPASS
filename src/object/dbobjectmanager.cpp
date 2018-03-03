@@ -347,6 +347,13 @@ void DBObjectManager::loadSlot ()
             loginf << "DBObjectManager: loadSlot: loading object " << object.first;
             DBOVariableSet read_set = ATSDB::instance().viewManager().getReadSet(object.first);
 
+            if (read_set.getSize() == 0)
+            {
+                loginf << "DBObjectManager: loadSlot: skipping loading of object " << object.first
+                       << " since an empty read list was detected";
+                continue;
+            }
+
             std::string limit_str = "";
             if (use_limit_)
             {

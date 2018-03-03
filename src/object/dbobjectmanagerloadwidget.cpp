@@ -21,6 +21,7 @@
 #include <QGridLayout>
 #include <QLineEdit>
 #include <QCheckBox>
+#include <QMessageBox>
 
 #include "dbovariable.h"
 #include "dbobject.h"
@@ -29,6 +30,7 @@
 #include "dbobjectmanager.h"
 #include "dbovariableselectionwidget.h"
 #include "atsdb.h"
+#include "viewmanager.h"
 #include "global.h"
 #include "stringconv.h"
 
@@ -217,6 +219,16 @@ void DBObjectManagerLoadWidget::limitMaxChanged()
 void DBObjectManagerLoadWidget::loadButtonSlot ()
 {
     loginf << "DBObjectManagerLoadWidget: loadButtonSlot";
+
+    if (ATSDB::instance().viewManager().getViews().size() == 0)
+    {
+        QMessageBox m_warning (QMessageBox::Warning, "Loading Not Possible",
+                               "There are no Views active, so loading is not possible.",
+                               QMessageBox::Ok);
+
+        m_warning.exec();
+        return;
+    }
 
     assert (load_button_);
 
