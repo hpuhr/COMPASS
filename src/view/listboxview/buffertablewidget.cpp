@@ -36,24 +36,22 @@
 #include "buffertablewidget.h"
 #include "buffertablemodel.h"
 #include "viewselection.h"
+#include "listboxviewdatasource.h"
 //#include "Data.h"
 
 //using namespace Utils;
 
-BufferTableWidget::BufferTableWidget(DBObject &object, QWidget * parent, Qt::WindowFlags f)
-: QWidget (parent, f), object_(object), table_ (nullptr), model_(nullptr) //, variables_(nullptr)
+BufferTableWidget::BufferTableWidget(DBObject &object, ListBoxViewDataSource& data_source, QWidget * parent, Qt::WindowFlags f)
+: QWidget (parent, f), object_(object), data_source_(data_source)
 {
     setAutoFillBackground(true);
 
     QVBoxLayout *layout = new QVBoxLayout ();
-//    table_ = new QTableWidget ();
-//    table_->setAlternatingRowColors(true);
 
     table_ = new QTableView (this);
-    model_ = new BufferTableModel (this, object_);
+    model_ = new BufferTableModel (this, object_, data_source_);
     table_->setModel(model_);
 
-    //connect( table_, SIGNAL( itemClicked( QTableWidgetItem * )), this, SLOT( itemChanged ( QTableWidgetItem * )));
     connect (model_, SIGNAL(exportDoneSignal(bool)), this, SLOT(exportDoneSlot(bool)));
 
     layout->addWidget (table_);
@@ -113,11 +111,11 @@ BufferTableWidget::~BufferTableWidget()
 //        logerr << "BufferTableWidget: itemChanged: unknown table item";
 //}
 
-void BufferTableWidget::keyPressEvent ( QKeyEvent * event )
-{
-    logdbg  << "BufferTableWidget: keyPressEvent: got keypressed";
+//void BufferTableWidget::keyPressEvent ( QKeyEvent * event )
+//{
+//    logdbg  << "BufferTableWidget: keyPressEvent: got keypressed";
 
-    assert (table_);
+//    assert (table_);
 
     //TODO
 //    if (event->modifiers()  & Qt::ControlModifier)
@@ -227,7 +225,7 @@ void BufferTableWidget::keyPressEvent ( QKeyEvent * event )
 //            clipboard->setText(header_string+copy_table);
 //        }
 //    }
-}
+//}
 
 void BufferTableWidget::clear ()
 {

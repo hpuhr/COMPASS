@@ -19,10 +19,12 @@
 #include <sstream>
 
 #include "buffercsvexportjob.h"
+#include "dbovariable.h"
 
 
-BufferCSVExportJob::BufferCSVExportJob(std::shared_ptr<Buffer> buffer, const std::string& file_name, bool overwrite, bool use_presentation)
-    : Job("BufferCSVExportJob"), buffer_(buffer), file_name_(file_name), overwrite_(overwrite),
+BufferCSVExportJob::BufferCSVExportJob(std::shared_ptr<Buffer> buffer, const DBOVariableSet& read_set,
+                                       const std::string& file_name, bool overwrite, bool use_presentation)
+    : Job("BufferCSVExportJob"), buffer_(buffer), read_set_(read_set), file_name_(file_name), overwrite_(overwrite),
       use_presentation_(use_presentation)
 {
     assert (file_name_.size());
@@ -50,20 +52,19 @@ void BufferCSVExportJob::run ()
     if (output_file)
     {
         const PropertyList &properties = buffer_->properties();
-        size_t properties_size = properties.size();
+        size_t read_set_size = read_set_.getSize();
         size_t buffer_size = buffer_->size();
-        PropertyDataType data_type;
         std::stringstream ss;
         bool null;
         std::string value_str;
         size_t row=0;
 
-        for (size_t col=0; col < properties_size; col++)
+        for (size_t col=0; col < read_set_size; col++)
         {
             if (col != 0)
                 ss << ";";
 
-            ss << properties.at(col).name();
+            ss << read_set_.getVariable(col).name();
         }
         output_file << ss.str() << "\n";
 
@@ -72,116 +73,139 @@ void BufferCSVExportJob::run ()
         {
             ss.str("");
 
-            for (size_t col=0; col < properties_size; col++)
+            for (size_t col=0; col < read_set_size; col++)
             {
-                data_type = properties.at(col).dataType();
+                value_str = "";
+
+                DBOVariable& variable = read_set_.getVariable(col);
+                PropertyDataType data_type = variable.dataType();
+
+                std::string property_name = variable.name();
 
                 if (data_type == PropertyDataType::BOOL)
                 {
-                    null = buffer_->getBool(properties.at(col).name()).isNone(row);
+                    assert (buffer_->hasBool(property_name));
+                    null = buffer_->getBool(property_name).isNone(row);
                     if (!null)
                     {
-                        // TODO
-//                        if (use_presentation_)
-//                            value_str = buffer_->getBool(properties.at(col).name()).getAsRepresentationString(row);
-//                        else
-                            value_str = buffer_->getBool(properties.at(col).name()).getAsString(row);
+                        if (use_presentation_)
+                            value_str = variable.getRepresentationStringFromValue(
+                                        buffer_->getBool(property_name).getAsString(row));
+                        else
+                            value_str = buffer_->getBool(property_name).getAsString(row);
                     }
                 }
                 else if (data_type == PropertyDataType::CHAR)
                 {
-                    null = buffer_->getChar(properties.at(col).name()).isNone(row);
+                    assert (buffer_->hasChar(property_name));
+                    null = buffer_->getChar(property_name).isNone(row);
                     if (!null)
                     {
-//                        if (use_presentation_)
-//                            value_str = buffer_->getChar(properties.at(col).name()).getAsRepresentationString(row);
-//                        else
-                            value_str = buffer_->getChar(properties.at(col).name()).getAsString(row);
+                        if (use_presentation_)
+                            value_str = variable.getRepresentationStringFromValue(
+                                        buffer_->getChar(property_name).getAsString(row));
+                        else
+                            value_str = buffer_->getChar(property_name).getAsString(row);
                     }
                 }
                 else if (data_type == PropertyDataType::UCHAR)
                 {
-                    null = buffer_->getUChar(properties.at(col).name()).isNone(row);
+                    assert (buffer_->hasUChar(property_name));
+                    null = buffer_->getUChar(property_name).isNone(row);
                     if (!null)
                     {
-//                        if (use_presentation_)
-//                            value_str = buffer_->getUChar(properties.at(col).name()).getAsRepresentationString(row);
-//                        else
-                            value_str = buffer_->getUChar(properties.at(col).name()).getAsString(row);
+                        if (use_presentation_)
+                            value_str = variable.getRepresentationStringFromValue(
+                                        buffer_->getUChar(property_name).getAsString(row));
+                        else
+                            value_str = buffer_->getUChar(property_name).getAsString(row);
                     }
                 }
                 else if (data_type == PropertyDataType::INT)
                 {
-                    null = buffer_->getInt(properties.at(col).name()).isNone(row);
+                    assert (buffer_->hasInt(property_name));
+                    null = buffer_->getInt(property_name).isNone(row);
                     if (!null)
                     {
-//                        if (use_presentation_)
-//                            value_str = buffer_->getInt(properties.at(col).name()).getAsRepresentationString(row);
-//                        else
-                            value_str = buffer_->getInt(properties.at(col).name()).getAsString(row);
+                        if (use_presentation_)
+                            value_str = variable.getRepresentationStringFromValue(
+                                        buffer_->getInt(property_name).getAsString(row));
+                        else
+                            value_str = buffer_->getInt(property_name).getAsString(row);
                     }
                 }
                 else if (data_type == PropertyDataType::UINT)
                 {
+                    assert (buffer_->hasUInt(property_name));
                     null = buffer_->getUInt(properties.at(col).name()).isNone(row);
                     if (!null)
                     {
-//                        if (use_presentation_)
-//                            value_str = buffer_->getUInt(properties.at(col).name()).getAsRepresentationString(row);
-//                        else
-                            value_str = buffer_->getUInt(properties.at(col).name()).getAsString(row);
+                        if (use_presentation_)
+                            value_str = variable.getRepresentationStringFromValue(
+                                        buffer_->getUInt(property_name).getAsString(row));
+                        else
+                            value_str = buffer_->getUInt(property_name).getAsString(row);
                     }
                 }
                 else if (data_type == PropertyDataType::LONGINT)
                 {
-                    null = buffer_->getLongInt(properties.at(col).name()).isNone(row);
+                    assert (buffer_->hasLongInt(property_name));
+                    null = buffer_->getLongInt(property_name).isNone(row);
                     if (!null)
                     {
-//                        if (use_presentation_)
-//                            value_str = buffer_->getLongInt(properties.at(col).name()).getAsRepresentationString(row);
-//                        else
-                            value_str = buffer_->getLongInt(properties.at(col).name()).getAsString(row);
+                        if (use_presentation_)
+                            value_str = variable.getRepresentationStringFromValue(
+                                        buffer_->getLongInt(property_name).getAsString(row));
+                        else
+                            value_str = buffer_->getLongInt(property_name).getAsString(row);
                     }
                 }
                 else if (data_type == PropertyDataType::ULONGINT)
                 {
-                    null = buffer_->getULongInt(properties.at(col).name()).isNone(row);
+                    assert (buffer_->hasULongInt(property_name));
+                    null = buffer_->getULongInt(property_name).isNone(row);
                     if (!null)
                     {
-//                        if (use_presentation_)
-//                            value_str = buffer_->getULongInt(properties.at(col).name()).getAsRepresentationString(row);
-//                        else
-                            value_str = buffer_->getULongInt(properties.at(col).name()).getAsString(row);
+                        if (use_presentation_)
+                            value_str = variable.getRepresentationStringFromValue(
+                                        buffer_->getULongInt(property_name).getAsString(row));
+                        else
+                            value_str = buffer_->getULongInt(property_name).getAsString(row);
                     }
                 }
                 else if (data_type == PropertyDataType::FLOAT)
                 {
+                    assert (buffer_->hasFloat(property_name));
                     null = buffer_->getFloat(properties.at(col).name()).isNone(row);
                     if (!null)
                     {
-//                        if (use_presentation_)
-//                            value_str = buffer_->getFloat(properties.at(col).name()).getAsRepresentationString(row);
-//                        else
-                            value_str = buffer_->getFloat(properties.at(col).name()).getAsString(row);
+                        if (use_presentation_)
+                            value_str = variable.getRepresentationStringFromValue(
+                                        buffer_->getFloat(property_name).getAsString(row));
+                        else
+                            value_str = buffer_->getFloat(property_name).getAsString(row);
                     }
                 }
                 else if (data_type == PropertyDataType::DOUBLE)
                 {
-                    null = buffer_->getDouble(properties.at(col).name()).isNone(row);
+                    assert (buffer_->hasDouble(property_name));
+                    null = buffer_->getDouble(property_name).isNone(row);
                     if (!null)
                     {
-//                        if (use_presentation_)
-//                            value_str = buffer_->getDouble(properties.at(col).name()).getAsRepresentationString(row);
-//                        else
-                            value_str = buffer_->getDouble(properties.at(col).name()).getAsString(row);
+                        if (use_presentation_)
+                            value_str = variable.getRepresentationStringFromValue(
+                                        buffer_->getDouble(property_name).getAsString(row));
+                        else
+                            value_str = buffer_->getDouble(property_name).getAsString(row);
                     }
                 }
                 else if (data_type == PropertyDataType::STRING)
                 {
-                    null = buffer_->getString(properties.at(col).name()).isNone(row);
+                    assert (buffer_->hasString(property_name));
+                    null = buffer_->getString(property_name).isNone(row);
                     if (!null)
                     {
-                        value_str = buffer_->getString(properties.at(col).name()).getAsString(row);
+                        value_str = buffer_->getString(property_name).getAsString(row);
                     }
                 }
                 else

@@ -33,6 +33,7 @@ class QStringList;
 class Buffer;
 class DBOVariableSet;
 class DBObject;
+class ListBoxViewDataSource;
 
 /**
  * @brief Widget with table representation of a Buffer's data contents
@@ -53,8 +54,6 @@ signals:
     void exportDoneSignal (bool cancelled);
 
 public slots:
-    /// @brief Is called when table item is clicked, un/checks selection checkboxes
-    //void itemChanged (QTableWidgetItem *item);
     void exportSlot(bool overwrite);
     void exportDoneSlot (bool cancelled);
 
@@ -62,30 +61,23 @@ public slots:
 
 public:
     /// @brief Constructor
-    BufferTableWidget(DBObject &object, QWidget * parent = 0, Qt::WindowFlags f = 0);
+    BufferTableWidget(DBObject &object, ListBoxViewDataSource& data_source, QWidget * parent = 0, Qt::WindowFlags f = 0);
     /// @brief Destructor
     virtual ~BufferTableWidget();
 
     void clear ();
     /// @brief Shows Buffer content in table
-    void show (std::shared_ptr<Buffer> buffer); //, DBOVariableSet *variables, bool database_view
+    void show (std::shared_ptr<Buffer> buffer);
 
 protected:
-    DBObject &object_;
+    DBObject& object_;
+    ListBoxViewDataSource& data_source_;
     /// Table with items
-    QTableView *table_;
-    BufferTableModel *model_;
-
-    /// Variable read lost
-    //DBOVariableSet* variables_;
-    /// Table header list
-    QStringList header_list_;
-
-    /// Container with selection checkboxes
-    //std::map <QTableWidgetItem*, unsigned int> selection_checkboxes_;
+    QTableView* table_ {nullptr};
+    BufferTableModel* model_ {nullptr};
 
     /// @brief Is called when keys are pressed
-    virtual void keyPressEvent (QKeyEvent * event);
+    //virtual void keyPressEvent (QKeyEvent * event);
 };
 
 #endif /* BUFFERTABLEWIDGET_H_ */

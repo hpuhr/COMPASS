@@ -58,7 +58,7 @@ public:
     virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
 
     /// @brief Returns variable read list
-    DBOVariableOrderedSet* getSet () { return set_; }
+    DBOVariableOrderedSet* getSet () { assert (set_); return set_; }
     /// @brief Returns stored result Buffers
     //std::map <DB_OBJECT_TYPE, Buffer*> &getData () { return data_; }
 
