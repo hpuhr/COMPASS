@@ -157,7 +157,8 @@ std::string DBFilterCondition::getConditionString (const std::string &dbo_name, 
     }
     first=false;
 
-    ss << variable_prefix << table_db_name << "." << column.name() << variable_suffix << " " << operator_  << " " << getTransformedValue (value_, variable);
+    ss << variable_prefix << table_db_name << "." << column.name() << variable_suffix << " " << operator_  << " "
+       << getTransformedValue (value_, variable);
 
     if (find (filtered_variables.begin(), filtered_variables.end(), variable) == filtered_variables.end())
         filtered_variables.push_back(variable);
@@ -275,6 +276,12 @@ bool DBFilterCondition::checkValueInvalid (const std::string& new_value)
 {
     assert (variable_ || meta_variable_);
     std::vector <DBOVariable*> variables;
+
+    if (new_value.size() == 0)
+    {
+        loginf << "DBFilterCondition: checkValueInvalid: no value, returning invalid";
+        return true;
+    }
 
     if (meta_variable_)
     {
