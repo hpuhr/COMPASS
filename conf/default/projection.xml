@@ -1,6 +1,14 @@
 <Configuration class_id="ProjectionManager" instance_id="ProjectionManager0">
-    <ParameterUnsignedInt epsg_value="31258"/>
+    <ParameterBool use_ogr_projection="0"/>
+    <ParameterBool use_rs2g_projection_="1"/>
+    <ParameterBool use_sdl_projection="0"/>
+    <ParameterUnsignedInt epsg_value="20790"/>
     <ParameterFloat minimal_height="0.00000000"/>
+    <ParameterFloat rs2g_system_height="0.00000000"/>
+    <ParameterFloat rs2g_system_latitude="47.50000000"/>
+    <ParameterFloat rs2g_system_longitude="14.00000000"/>
+    <ParameterFloat sdl_system_latitude="47.50000000"/>
+    <ParameterFloat sdl_system_longitude="14.00000000"/>
     <ParameterDouble center_latitude="47.500000000000"/>
     <ParameterDouble center_longitude="14.000000000000"/>
     <ParameterDouble height_scale="2000.000000000000"/>
