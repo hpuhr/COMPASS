@@ -901,6 +901,16 @@ void MySQLppConnection::importSQLFile (const std::string& filename)
     delete progress_dialog;
     progress_dialog = nullptr;
 
+    QMessageBox msgBox;
+    std::string msg;
+    if (error_cnt)
+        msg = "The SQL file was imported with "+std::to_string(error_cnt)+" SQL errors.";
+    else
+        msg = "The SQL file was imported without SQL errors.";
+
+    msgBox.setText(msg.c_str());
+    msgBox.exec();
+
     sql_file.close();
     interface_.databaseContentChanged();
 }
@@ -1067,6 +1077,15 @@ void MySQLppConnection::importSQLArchiveFile(const std::string& filename)
     }
 
     msg_box.close();
+
+    QMessageBox msgBox;
+    if (error_cnt)
+        msg = "The SQL archive file was imported with "+std::to_string(error_cnt)+" SQL errors.";
+    else
+        msg = "The SQL archive file was imported without SQL errors.";
+
+    msgBox.setText(msg.c_str());
+    msgBox.exec();
 
     r = archive_read_close(a);
     if (r != ARCHIVE_OK)

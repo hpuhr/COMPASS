@@ -64,7 +64,7 @@ void UpdateBufferDBJob::run ()
         if (index_to > buffer_->size()-1)
             index_to = buffer_->size()-1;
 
-        loginf << "UpdateBufferDBJob: run: step " << cnt << " steps " << steps << " from " << index_from
+        logdbg << "UpdateBufferDBJob: run: step " << cnt << " steps " << steps << " from " << index_from
                << " to " << index_to;
 
         db_interface_.updateBuffer (dbobject_, key_var_, buffer_, index_from, index_to);

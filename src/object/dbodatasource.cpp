@@ -446,6 +446,9 @@ bool DBODataSource::calculateSDLGRSCoordinates (double azimuth_rad, double slant
 
 void DBODataSource::initRS2G()
 {
+    loginf << "DBODataSource: initRS2G: name " << name_ << " lat " << latitude_ << " long " << longitude_
+           << " altitude " << altitude_;
+
     double lat_rad = latitude_ * DEG2RAD;
     double long_rad = longitude_ * DEG2RAD;
 
@@ -536,8 +539,14 @@ double DBODataSource::rs2gElevation(double z, double rho)
     double elevation = 0.0;
 
     if (rho >= ALMOST_ZERO)
-        elevation = asin((2 * rs2g_Rti_ * (z - rs2g_hi_) + pow(z, 2) - pow(rs2g_hi_, 2) - pow(rho, 2)) /
-                         (2 * rho * (rs2g_Rti_ + rs2g_hi_)));
+    {
+//        elevation = asin((2 * rs2g_Rti_ * (z - rs2g_hi_) + pow(z, 2) - pow(rs2g_hi_, 2) - pow(rho, 2)) /
+//                         (2 * rho * (rs2g_Rti_ + rs2g_hi_)));
+        elevation = asin((z - rs2g_hi_)/rho);
+
+//        if (rho < 50000)
+//            loginf << "DBODataSource: rs2gElevation: z " << z << " rho " << rho << " elev " << elevation;
+    }
 
     return elevation;
 }
@@ -551,11 +560,16 @@ void DBODataSource::radarSlant2LocalCart(VecB& local)
     if (z == -1000.0)
         z = rs2g_hi_; // the Z value has not been filled so use at least the radar height
 
-    double rho = sqrt(pow(local[0], 2) + pow(local[1], 2) + pow(z, 2));
+    //double rho = sqrt(pow(local[0], 2) + pow(local[1], 2) + pow(z, 2));
+    double rho = sqrt(pow(local[0], 2) + pow(local[1], 2));
     double elevation = rs2gElevation(z, rho);
     double azimuth = rs2gAzimuth(local[0], local[1]);
 
-    logdbg << "radarSlant2LocalCart: rho: " << rho << " elevation: " << elevation << " azimuth: " << azimuth;
+//    if (rho < 50000)
+//    {
+//        loginf << "radarSlant2LocalCart: in x: " << local[0] << " y: " << local[1] << " z: " << local[2];
+//        loginf << "radarSlant2LocalCart: rho: " << rho << " elevation: " << elevation << " azimuth: " << azimuth;
+//    }
 
     local[0] = rho * cos(elevation) * sin(azimuth);
     local[1] = rho * cos(elevation) * cos(azimuth);
@@ -591,6 +605,10 @@ void DBODataSource::localCart2Geocentric(VecB& input)
 
 bool DBODataSource::calculateRadSlt2Geocentric (double x, double y, double z, Eigen::Vector3d& geoc_pos)
 {
+    if (!finalized_)
+        logerr << "DBODataSource: calculateRadSlt2Geocentric: " << short_name_ << " not finalized";
+
+    assert (finalized_);
 
     VecB Xlocal(3);  //, Xsystem(3);
 
