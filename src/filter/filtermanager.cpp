@@ -26,11 +26,11 @@
 #include "dbinterface.h"
 #include "dbconnection.h"
 #include "filtermanagerwidget.h"
-#include "sensorfilter.h"
+#include "datasourcesfilter.h"
 
 
-FilterManager::FilterManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb)
-: Configurable (class_id, instance_id, atsdb, "conf/config_filter.xml"), widget_(nullptr)
+FilterManager::FilterManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb)
+: Configurable (class_id, instance_id, atsdb, "filter.xml")
 {
     logdbg  << "FilterManager: constructor";
 
@@ -50,18 +50,18 @@ FilterManager::~FilterManager()
     }
 }
 
-void FilterManager::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
+void FilterManager::generateSubConfigurable (const std::string& class_id, const std::string& instance_id)
 {
     if (class_id == "DBFilter")
     {
         DBFilter *filter = new DBFilter (class_id, instance_id, this);
         filters_.push_back (filter);
     }
-    else if (class_id.compare ("SensorFilter") == 0)
+    else if (class_id.compare ("DataSourcesFilter") == 0)
     {
         try
         {
-            SensorFilter *filter = new SensorFilter (class_id, instance_id, this);
+            DataSourcesFilter *filter = new DataSourcesFilter (class_id, instance_id, this);
             filters_.push_back (filter);
         }
         catch (const std::exception& e)
@@ -84,26 +84,27 @@ void FilterManager::checkSubConfigurables ()
         bool exists = false;
         for (auto fil_it : filters_)
         {
-            SensorFilter *sensor_filter = reinterpret_cast<SensorFilter *> (fil_it);
+            DataSourcesFilter *sensor_filter = dynamic_cast<DataSourcesFilter*> (fil_it);
             if (sensor_filter && sensor_filter->dbObjectName() == dbo_it.first)
             {
                 exists = true;
                 break;
             }
         }
+
         if (exists)
             continue;
 
         loginf << "FilterManager: checkSubConfigurables: generating sensor filter for " << dbo_it.first;
 
-        std::string instance_id = dbo_it.second->name()+"Sensors";
-        Configuration &sensorfilter_configuration = addNewSubConfiguration ("SensorFilter", instance_id);
-        sensorfilter_configuration.addParameterString ("dbo_name", dbo_it.first);
-        generateSubConfigurable ("SensorFilter", instance_id);
+        std::string instance_id = dbo_it.second->name()+"DataSources";
+        Configuration &ds_filter_configuration = addNewSubConfiguration ("DataSourcesFilter", instance_id);
+        ds_filter_configuration.addParameterString ("dbo_name", dbo_it.first);
+        generateSubConfigurable ("DataSourcesFilter", instance_id);
     }
 }
 
-std::string FilterManager::getSQLCondition (const std::string &dbo_name, std::vector <DBOVariable*>& filtered_variables)
+std::string FilterManager::getSQLCondition (const std::string& dbo_name, std::vector <DBOVariable*>& filtered_variables)
 {
     assert (ATSDB::instance().objectManager().object(dbo_name).loadable());
 
@@ -111,11 +112,15 @@ std::string FilterManager::getSQLCondition (const std::string &dbo_name, std::ve
 
     bool first=true;
 
-    for (unsigned int cnt=0; cnt < filters_.size(); cnt++)
+    for (auto* filter : filters_)
     {
-        if (filters_.at(cnt)->getActive() && filters_.at(cnt)->filters (dbo_name))
+        loginf << "FilterManager: getSQLCondition: filter " << filter->getInstanceId()
+               << " active " << filter->getActive()
+               << " filters " << dbo_name << " " << filter->filters (dbo_name);
+
+        if (filter->getActive() && filter->filters (dbo_name))
         {
-            ss << filters_.at(cnt)->getConditionString (dbo_name, first, filtered_variables);
+            ss << filter->getConditionString (dbo_name, first, filtered_variables);
         }
     }
 
@@ -144,7 +149,7 @@ void FilterManager::reset ()
     }
 }
 
-void FilterManager::deleteFilterSlot (DBFilter *filter)
+void FilterManager::deleteFilterSlot (DBFilter* filter)
 {
     std::vector <DBFilter*>::iterator it;
 

@@ -18,6 +18,8 @@
 #ifndef BUFFERTABLEMODEL_H
 #define BUFFERTABLEMODEL_H
 
+#include "dbovariableset.h"
+
 #include <memory>
 
 #include <QAbstractTableModel>
@@ -25,6 +27,7 @@
 class Buffer;
 class DBObject;
 class BufferCSVExportJob;
+class ListBoxViewDataSource;
 
 class BufferTableModel : public QAbstractTableModel
 {
@@ -38,7 +41,7 @@ public slots:
     void exportJobDoneSlot();
 
 public:
-    BufferTableModel(QObject *parent, DBObject &object);
+    BufferTableModel(QObject* parent, DBObject& object, ListBoxViewDataSource& data_source);
     virtual ~BufferTableModel();
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const ;
@@ -49,17 +52,20 @@ public:
     void clearData ();
     void setData (std::shared_ptr <Buffer> buffer);
 
-    void saveAsCSV (const std::string &file_name, bool overwrite);
+    void saveAsCSV (const std::string& file_name, bool overwrite);
 
     void usePresentation (bool use_presentation);
 
 protected:
-    DBObject &object_;
+    DBObject& object_;
+    ListBoxViewDataSource& data_source_;
+
     std::shared_ptr <Buffer> buffer_;
+    DBOVariableSet read_set_;
 
     std::shared_ptr <BufferCSVExportJob> export_job_;
 
-    bool use_presentation_;
+    bool use_presentation_ {true};
 };
 
 #endif // BUFFERTABLEMODEL_H

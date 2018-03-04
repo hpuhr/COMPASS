@@ -22,8 +22,8 @@
 #include "dbschemawidget.h"
 #include "logger.h"
 
-DBSchema::DBSchema(const std::string &class_id, const std::string &instance_id, Configurable *parent)
-    : Configurable (class_id, instance_id, parent), widget_(nullptr)
+DBSchema::DBSchema(const std::string& class_id, const std::string& instance_id, Configurable* parent)
+    : Configurable (class_id, instance_id, parent)
 {
     registerParameter ("name", &name_, (std::string) "");
     assert (name_.size() != 0);
@@ -48,14 +48,14 @@ DBSchema::~DBSchema()
     meta_tables_.clear();
 }
 
-void DBSchema::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
+void DBSchema::generateSubConfigurable (const std::string& class_id, const std::string& instance_id)
 {
     logdbg  << "DBSchema: generateSubConfigurable: " << class_id_ << " instance " << instance_id_;
 
     if (class_id.compare("DBTable") == 0)
     {
         loginf  << "DBSchema '" << name_ << "': generateSubConfigurable: generating DBTable " << instance_id;
-        DBTable *table = new DBTable ("DBTable", instance_id, this);
+        DBTable* table = new DBTable ("DBTable", instance_id, *this);
         assert (table->name().size() != 0);
         assert (tables_.find(table->name()) == tables_.end());
         tables_.insert (std::pair <std::string, DBTable*> (table->name(), table));
@@ -74,12 +74,18 @@ void DBSchema::generateSubConfigurable (const std::string &class_id, const std::
         throw std::runtime_error ("DBSchema: generateSubConfigurable: unknown class_id "+class_id);
 }
 
-void DBSchema::addTable(const std::string &name)
+const DBTable& DBSchema::table (const std::string& name) const
+{
+    assert (tables_.find(name) != tables_.end());
+    return *tables_.at(name);
+}
+
+void DBSchema::addTable(const std::string& name)
 {
     assert (!hasTable(name));
     assert (children_.count("DBTable"+name) == 0);
 
-    Configuration &table_config = addNewSubConfiguration ("DBTable", name);
+    Configuration& table_config = addNewSubConfiguration ("DBTable", name);
     table_config.addParameterString ("name", name);
 
     generateSubConfigurable("DBTable", name);
@@ -88,11 +94,14 @@ void DBSchema::addTable(const std::string &name)
     emit changedSignal();
 }
 
-void DBSchema::deleteTable (const std::string &name)
+void DBSchema::deleteTable (const std::string& name)
 {
+    loginf << "DBSchema: deleteTable: name " << name;
+
     assert (hasTable(name));
     delete tables_.at(name);
     tables_.erase (name);
+    assert (!hasTable(name));
 
     for (auto it : meta_tables_)
     {
@@ -109,7 +118,7 @@ void DBSchema::deleteTable (const std::string &name)
     emit changedSignal();
 }
 
-void DBSchema::populateTable (const std::string &name)
+void DBSchema::populateTable (const std::string& name)
 {
     assert (hasTable(name));
     tables_.at(name)->populate();
@@ -117,12 +126,18 @@ void DBSchema::populateTable (const std::string &name)
     emit changedSignal();
 }
 
-bool DBSchema::hasMetaTable (const std::string &name) const
+bool DBSchema::hasMetaTable (const std::string& name) const
 {
     return meta_tables_.find(name) != meta_tables_.end();
 }
 
-void DBSchema::addMetaTable(const std::string &name, const std::string &main_table_name)
+MetaDBTable& DBSchema::metaTable (const std::string& name) const
+{
+    assert (hasMetaTable(name));
+    return *meta_tables_.at(name);
+}
+
+void DBSchema::addMetaTable(const std::string& name, const std::string& main_table_name)
 {
     assert (!hasMetaTable(name));
     assert (children_.count("MetaDBTable"+name) == 0);
@@ -137,7 +152,7 @@ void DBSchema::addMetaTable(const std::string &name, const std::string &main_tab
     emit changedSignal();
 }
 
-void DBSchema::deleteMetaTable (const std::string &name)
+void DBSchema::deleteMetaTable (const std::string& name)
 {
     assert (hasMetaTable(name));
     delete meta_tables_.at(name);
@@ -170,7 +185,7 @@ void DBSchema::updateMetaTables ()
     }
 }
 
-DBSchemaWidget *DBSchema::widget ()
+DBSchemaWidget* DBSchema::widget ()
 {
     if (!widget_)
     {
@@ -179,5 +194,19 @@ DBSchemaWidget *DBSchema::widget ()
 
     assert (widget_);
     return widget_;
+}
+
+void DBSchema::lock ()
+{
+    locked_ = true;
+
+    for (auto& table_it : tables_)
+        table_it.second->lock();
+
+    for (auto& meta_table_it : meta_tables_)
+        meta_table_it.second->lock();
+
+    if (widget_)
+        widget_->lock();
 }
 

@@ -50,10 +50,10 @@ public:
     StringRepresentationComboBox(DBOVariable &variable, QWidget * parent = 0)
     : QComboBox(parent), variable_(variable)
     {
-        for (auto it : Utils::String::string_2_representation)
-            addItem (it.first.c_str());
+        for (auto it : DBOVariable::Representations())
+            addItem (it.second.c_str());
 
-        setCurrentText (Utils::String::representationToString(variable_.representation()).c_str());
+        setCurrentText (DBOVariable::representationToString(variable_.representation()).c_str());
         //connect(this, SIGNAL( activated(const QString &) ), this, SIGNAL( changedRepresentation() ));
         connect(this, SIGNAL(currentTextChanged(const QString &)), this, SLOT(changedSlot()));
     }
@@ -62,16 +62,16 @@ public:
     virtual ~StringRepresentationComboBox() {}
 
     /// @brief Returns the currently selected representation
-    Utils::String::Representation representation ()
+    DBOVariable::Representation representation ()
     {
         std::string text = currentText().toStdString();
-        return Utils::String::stringToRepresentation(text);
+        return DBOVariable::stringToRepresentation(text);
     }
 
     /// @brief Sets the currently selected representation
-    void representation (Utils::String::Representation type)
+    void representation (DBOVariable::Representation type)
     {
-        setCurrentText (Utils::String::representationToString(type).c_str());
+        setCurrentText (DBOVariable::representationToString(type).c_str());
     }
 
 protected:

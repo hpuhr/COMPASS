@@ -1,9 +1,0 @@
-<Configuration class_id="ProjectionManager" instance_id="ProjectionManager0">
-    <ParameterUnsignedInt epsg_value="31258"/>
-    <ParameterFloat minimal_height="0.00000000"/>
-    <ParameterDouble center_latitude="47.500000000000"/>
-    <ParameterDouble center_longitude="14.000000000000"/>
-    <ParameterDouble height_scale="2000.000000000000"/>
-    <ParameterDouble projection_plane_width="1000000.000000000000"/>
-    <ParameterDouble world_scale="2000.000000000000"/>
-</Configuration>

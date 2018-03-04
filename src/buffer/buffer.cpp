@@ -45,9 +45,9 @@ Buffer::Buffer()
  * \param type DBO type
  */
 Buffer::Buffer(PropertyList properties, const std::string &dbo_name)
-: dbo_name_(dbo_name), last_one_(false)
-//, first_write_(true),
-//search_active_(false), search_key_pos_(-1), search_key_min_ (-1), search_key_max_ (-1)
+    : dbo_name_(dbo_name), last_one_(false)
+    //, first_write_(true),
+    //search_active_(false), search_key_pos_(-1), search_key_min_ (-1), search_key_max_ (-1)
 {
     logdbg  << "Buffer: constructor: start";
 
@@ -81,7 +81,7 @@ Buffer::~Buffer()
     arrays_double_.clear();
     arrays_string_.clear();
 
-//    last_one_=false;
+    //    last_one_=false;
 
     logdbg  << "Buffer: destructor: end";
 }
@@ -246,6 +246,56 @@ void Buffer::addProperty (std::string id, PropertyDataType type)
 void Buffer::addProperty (const Property &property)
 {
     addProperty (property.name(), property.dataType());
+}
+
+bool Buffer::hasBool (const std::string &id)
+{
+    return arrays_bool_.count(id) != 0;
+}
+
+bool Buffer::hasChar (const std::string id)
+{
+    return arrays_char_.count(id) != 0;
+}
+
+bool Buffer::hasUChar (const std::string &id)
+{
+    return arrays_uchar_.count(id) != 0;
+}
+
+bool Buffer::hasInt (const std::string &id)
+{
+    return arrays_int_.count(id) != 0;
+}
+
+bool Buffer::hasUInt (const std::string &id)
+{
+    return arrays_uint_.count(id) != 0;
+}
+
+bool Buffer::hasLongInt (const std::string &id)
+{
+    return arrays_long_int_.count(id) != 0;
+}
+
+bool Buffer::hasULongInt (const std::string &id)
+{
+    return arrays_ulong_int_.count(id) != 0;
+}
+
+bool Buffer::hasFloat (const std::string &id)
+{
+    return arrays_float_.count(id) != 0;
+}
+
+bool Buffer::hasDouble (const std::string &id)
+{
+    return arrays_double_.count(id) != 0;
+}
+
+bool Buffer::hasString (const std::string &id)
+{
+    return arrays_string_.count(id) != 0;
 }
 
 ArrayListTemplate<bool> &Buffer::getBool (const std::string &id)
@@ -540,32 +590,32 @@ void Buffer::seizeBuffer (Buffer &org_buffer)
     //org_buffer->containers_.clear();
     //all your containers belong to us
 
-//    logdbg  << "Buffer: seizeBuffer: setting indexes";
+    //    logdbg  << "Buffer: seizeBuffer: setting indexes";
 
-//    max_index_ = containers_.size()*size_per_container_-1;
+    //    max_index_ = containers_.size()*size_per_container_-1;
 
-//    if (first_write_)
-//    {
-//        max_used_index_ =  org_buffer->max_used_index_;
-//    }
-//    else
-//    {
-//        max_used_index_ +=  org_buffer->getSize();
-//    }
+    //    if (first_write_)
+    //    {
+    //        max_used_index_ =  org_buffer->max_used_index_;
+    //    }
+    //    else
+    //    {
+    //        max_used_index_ +=  org_buffer->getSize();
+    //    }
 
-//    org_buffer->index_=0;
-//    org_buffer->max_index_=0;
-//    org_buffer->max_used_index_=0;
+    //    org_buffer->index_=0;
+    //    org_buffer->max_index_=0;
+    //    org_buffer->max_used_index_=0;
 
-//    first_write_=false;
+    //    first_write_=false;
 
-//    logdbg  << "Buffer: seizeBuffer: this: cont " << containers_.size() << " max_index " << max_index_ << " max_used_index " << max_used_index_ << " first " << first_write_;
-//    logdbg  << "Buffer: seizeBuffer: org: cont " << org_buffer->containers_.size() << " max_index " << org_buffer->max_index_ << " max_used_index " << org_buffer->max_used_index_ << " first " << org_buffer->first_write_;
+    //    logdbg  << "Buffer: seizeBuffer: this: cont " << containers_.size() << " max_index " << max_index_ << " max_used_index " << max_used_index_ << " first " << first_write_;
+    //    logdbg  << "Buffer: seizeBuffer: org: cont " << org_buffer->containers_.size() << " max_index " << org_buffer->max_index_ << " max_used_index " << org_buffer->max_used_index_ << " first " << org_buffer->first_write_;
 
-//    if (search_active_)
-//    {
-//        updateContainerKeyInfo ();
-//    }
+    //    if (search_active_)
+    //    {
+    //        updateContainerKeyInfo ();
+    //    }
 
     logdbg  << "Buffer: seizeBuffer: end";
 }
@@ -595,34 +645,34 @@ Buffer *Buffer::getShallowCopy ()
     //TODO FIXME
     assert (false);
     return new Buffer();
-//    Buffer *shallow_copy = new Buffer (member_list_, dbo_type_);
-//    shallow_copy->id_ = id_;
+    //    Buffer *shallow_copy = new Buffer (member_list_, dbo_type_);
+    //    shallow_copy->id_ = id_;
 
-//    shallow_copy->index_=index_;
-//    shallow_copy->max_index_=max_index_;
-//    shallow_copy->max_used_index_=max_used_index_;
-//    shallow_copy->index_container_=index_container_;
-//    shallow_copy->index_in_container_=index_in_container_;
-//    shallow_copy->size_per_container_ = size_per_container_;
+    //    shallow_copy->index_=index_;
+    //    shallow_copy->max_index_=max_index_;
+    //    shallow_copy->max_used_index_=max_used_index_;
+    //    shallow_copy->index_container_=index_container_;
+    //    shallow_copy->index_in_container_=index_in_container_;
+    //    shallow_copy->size_per_container_ = size_per_container_;
 
-//    for (unsigned int cnt=0; cnt < containers_.size(); cnt++)
-//    {
-//        shallow_copy->containers_.push_back(containers_.at(cnt)->getShallowCopy());
-//    }
+    //    for (unsigned int cnt=0; cnt < containers_.size(); cnt++)
+    //    {
+    //        shallow_copy->containers_.push_back(containers_.at(cnt)->getShallowCopy());
+    //    }
 
-//    shallow_copy->first_write_=first_write_;
-//    shallow_copy->empty_=empty_;
-//    shallow_copy->adresses_=adresses_;
-//    shallow_copy->last_one_=last_one_;
+    //    shallow_copy->first_write_=first_write_;
+    //    shallow_copy->empty_=empty_;
+    //    shallow_copy->adresses_=adresses_;
+    //    shallow_copy->last_one_=last_one_;
 
-//    assert (shallow_copy->containers_.size() == containers_.size());
+    //    assert (shallow_copy->containers_.size() == containers_.size());
 
-//    if (search_active_)
-//    {
-//        shallow_copy->activateKeySearch (search_key_pos_);
-//    }
+    //    if (search_active_)
+    //    {
+    //        shallow_copy->activateKeySearch (search_key_pos_);
+    //    }
 
-//    return shallow_copy;
+    //    return shallow_copy;
 }
 
 bool Buffer::full ()

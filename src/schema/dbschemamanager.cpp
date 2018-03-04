@@ -29,8 +29,8 @@
 /**
  * Registers current_schema as parameter, creates sub-configurables (schemas), checks if current_schema exists (if defined).
  */
-DBSchemaManager::DBSchemaManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb)
-: Configurable (class_id, instance_id, atsdb, "conf/config_db_schema.xml"), widget_(nullptr)
+DBSchemaManager::DBSchemaManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb)
+: Configurable (class_id, instance_id, atsdb, "db_schema.xml")
 {
     registerParameter ("current_schema", &current_schema_, (std::string)"");
 
@@ -40,6 +40,7 @@ DBSchemaManager::DBSchemaManager(const std::string &class_id, const std::string 
         if (schemas_.count(current_schema_) == 0)
             current_schema_="";
 
+    loginf << "DBSchemaManager: DBSchemaManager: current schema: '" << current_schema_ << "'";
 }
 
 /**
@@ -59,7 +60,7 @@ DBSchemaManager::~DBSchemaManager()
 
 }
 
-void DBSchemaManager::renameCurrentSchema (const std::string &new_name)
+void DBSchemaManager::renameCurrentSchema (const std::string& new_name)
 {
     assert (hasCurrentSchema());
 
@@ -73,10 +74,14 @@ void DBSchemaManager::renameCurrentSchema (const std::string &new_name)
     emit schemaChangedSignal();
 }
 
-void DBSchemaManager::setCurrentSchema (const std::string &current_schema)
+void DBSchemaManager::setCurrentSchema (const std::string& current_schema)
 {
+    loginf << "DBSchemaManager: setCurrentSchema: " << current_schema;
+
+    assert (!locked_);
     assert (current_schema.size() != 0);
     assert (schemas_.find(current_schema) != schemas_.end());
+
     current_schema_=current_schema;
 
     emit schemaChangedSignal();
@@ -88,8 +93,8 @@ bool DBSchemaManager::hasCurrentSchema ()
     {
         if (schemas_.find(current_schema_) == schemas_.end())
         {
-            logerr << "DBSchemaManager: hasCurrentSchema: schema '" << current_schema_ << "' not found in " << schemas_.size()
-                          << " schemas";
+            logerr << "DBSchemaManager: hasCurrentSchema: schema '" << current_schema_ << "' not found in "
+                   << schemas_.size() << " schemas";
             return false;
         }
         else
@@ -97,12 +102,12 @@ bool DBSchemaManager::hasCurrentSchema ()
     }
     else
     {
-        logerr << "DBSchemaManager: hasCurrentSchema: schema '" << current_schema_ << "' not found in " << schemas_.size()
-                      << " schemas";
+        logerr << "DBSchemaManager: hasCurrentSchema: schema '" << current_schema_ << "' not found in "
+               << schemas_.size() << " schemas";
         return false;
     }
 }
-const std::string &DBSchemaManager::getCurrentSchemaName ()
+const std::string& DBSchemaManager::getCurrentSchemaName ()
 {
     assert (hasCurrentSchema());
     return current_schema_;
@@ -146,7 +151,7 @@ DBSchema &DBSchemaManager::getCurrentSchema ()
     return *schemas_.at(current_schema_);
 }
 
-DBSchema &DBSchemaManager::getSchema (const std::string &name)
+DBSchema& DBSchemaManager::getSchema (const std::string& name)
 {
     assert (schemas_.find(name) != schemas_.end());
     return *schemas_.at(name);
@@ -163,12 +168,12 @@ void DBSchemaManager::deleteCurrentSchema ()
     emit schemaChangedSignal();
 }
 
-bool DBSchemaManager::hasSchema (const std::string &name)
+bool DBSchemaManager::hasSchema (const std::string& name)
 {
     return schemas_.find(name) != schemas_.end();
 }
 
-void DBSchemaManager::addEmptySchema (const std::string &name)
+void DBSchemaManager::addEmptySchema (const std::string& name)
 {
     std::string schema_name="DBSchema"+name+"0";
     Configuration &schema_configuration = addNewSubConfiguration ("DBSchema", schema_name);
@@ -179,13 +184,32 @@ void DBSchemaManager::addEmptySchema (const std::string &name)
         setCurrentSchema(name);
 }
 
-DBSchemaManagerWidget *DBSchemaManager::widget()
+DBSchemaManagerWidget* DBSchemaManager::widget()
 {
     if (!widget_)
     {
         widget_ = new DBSchemaManagerWidget (*this);
+
+        if (locked_)
+            widget_->lock();
     }
 
     assert (widget_);
     return widget_;
+}
+
+void DBSchemaManager::lock ()
+{
+    if (locked_)
+        return;
+
+    locked_ = true;
+
+    for (auto& schema_it : schemas_)
+        schema_it.second->lock();
+
+    if (widget_)
+        widget_->lock();
+
+    emit schemaLockedSignal();
 }

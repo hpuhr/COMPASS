@@ -147,7 +147,7 @@ DBOVariableSet& DBOVariableSet::operator= (const DBOVariableSet &source)
     return *this;
 }
 
-DBOVariable &DBOVariableSet::getVariable (unsigned int index)
+DBOVariable &DBOVariableSet::getVariable (unsigned int index) const
 {
   assert (index < set_.size());
   return *set_.at(index);

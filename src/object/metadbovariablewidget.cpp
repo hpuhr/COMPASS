@@ -35,8 +35,8 @@
 
 using namespace Utils;
 
-MetaDBOVariableWidget::MetaDBOVariableWidget(MetaDBOVariable &variable, QWidget *parent, Qt::WindowFlags f)
-    : QWidget (parent, f), variable_(variable), name_edit_(nullptr), description_edit_(nullptr), grid_layout_ (nullptr)
+MetaDBOVariableWidget::MetaDBOVariableWidget(MetaDBOVariable& variable, QWidget* parent, Qt::WindowFlags f)
+    : QWidget (parent, f), variable_(variable)
 {
     setMinimumSize(QSize(800, 600));
 
@@ -46,17 +46,17 @@ MetaDBOVariableWidget::MetaDBOVariableWidget(MetaDBOVariable &variable, QWidget 
     QFont font_big;
     font_big.setPointSize(18);
 
-    QVBoxLayout *main_layout = new QVBoxLayout ();
+    QVBoxLayout* main_layout = new QVBoxLayout ();
 
-    QLabel *main_label = new QLabel ("Edit Meta DB object variable");
+    QLabel* main_label = new QLabel ("Edit Meta DB object variable");
     main_label->setFont (font_big);
     main_layout->addWidget (main_label);
 
     // object parameters
-    QGridLayout *properties_layout = new QGridLayout ();
+    QGridLayout* properties_layout = new QGridLayout ();
 
     unsigned int row=0;
-    QLabel *name_label = new QLabel ("Name");
+    QLabel* name_label = new QLabel ("Name");
     properties_layout->addWidget(name_label, row, 0);
 
     name_edit_ = new QLineEdit (variable_.name().c_str());
@@ -64,7 +64,7 @@ MetaDBOVariableWidget::MetaDBOVariableWidget(MetaDBOVariable &variable, QWidget 
     properties_layout->addWidget (name_edit_, row, 1);
     row++;
 
-    QLabel *description_label = new QLabel ("Description");
+    QLabel* description_label = new QLabel ("Description");
     properties_layout->addWidget(description_label, row, 0);
 
     description_edit_ = new QLineEdit (variable_.description().c_str());
@@ -89,6 +89,26 @@ MetaDBOVariableWidget::MetaDBOVariableWidget(MetaDBOVariable &variable, QWidget 
 MetaDBOVariableWidget::~MetaDBOVariableWidget()
 {
 
+}
+
+void MetaDBOVariableWidget::lock ()
+{
+    if (locked_)
+        return;
+
+    locked_ = true;
+
+    setDisabled (true);
+}
+
+void MetaDBOVariableWidget::unlock ()
+{
+    if (!locked_)
+        return;
+
+    locked_ = false;
+
+    setDisabled (false);
 }
 
 void MetaDBOVariableWidget::editNameSlot ()
@@ -116,7 +136,7 @@ void MetaDBOVariableWidget::editDescriptionSlot()
 
 void MetaDBOVariableWidget::subVariableChangedSlot ()
 {
-    DBOVariableSelectionWidget *var_sel = dynamic_cast <DBOVariableSelectionWidget*> (QObject::sender());
+    DBOVariableSelectionWidget* var_sel = dynamic_cast <DBOVariableSelectionWidget*> (QObject::sender());
     assert (var_sel);
     assert (!var_sel->hasMetaVariable());
     assert (selection_widgets_.count(var_sel) > 0);
@@ -129,7 +149,7 @@ void MetaDBOVariableWidget::subVariableChangedSlot ()
     if (var_sel->hasVariable())
     {
         assert (!variable_.existsIn(obj_name));
-        DBOVariable &variable = var_sel->selectedVariable();
+        DBOVariable& variable = var_sel->selectedVariable();
         variable_.addVariable(obj_name, variable.name());
     }
 }
@@ -153,7 +173,7 @@ void MetaDBOVariableWidget::updateSlot ()
     {
         grid_layout_->addWidget(new QLabel (object_it.first.c_str()), row, 0);
 
-        DBOVariableSelectionWidget *var_sel = new DBOVariableSelectionWidget (true);
+        DBOVariableSelectionWidget* var_sel = new DBOVariableSelectionWidget (true);
         var_sel->showDBOOnly(object_it.first);
 
         if (variable_.existsIn(object_it.first))

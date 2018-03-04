@@ -37,7 +37,7 @@
 #include "filtereditwidget.h"
 #include "filtermanager.h"
 #include "logger.h"
-
+#include "files.h"
 #include "stringconv.h"
 
 using namespace Utils;
@@ -287,7 +287,7 @@ void FilterEditWidget::updateConditionsGrid()
     for (it = conditions.begin(); it != conditions.end(); it++)
     {
         QPushButton *del = new QPushButton ();
-        del->setIcon(QIcon(QPixmap("./Data/icons/close_icon.png")));
+        del->setIcon(QIcon(Files::getIconFilepath("delete.png").c_str()));
         del->setFixedSize ( 20, 20 );
         del->setFlat(true);
         connect(del, SIGNAL( clicked() ), this, SLOT( deleteCondition() ));

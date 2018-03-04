@@ -44,31 +44,30 @@
 #include "atsdb.h"
 #include "buffer.h"
 #include "global.h"
-
+#include "files.h"
 #include "stringconv.h"
 
 using namespace Utils;
 
 DBSchemaWidget::DBSchemaWidget(DBSchema &schema, QWidget * parent, Qt::WindowFlags f)
-: QWidget (parent, f), schema_(schema), auto_populate_check_(nullptr), table_grid_(nullptr), meta_table_grid_(nullptr)
+: QWidget (parent, f), schema_(schema)
 {
     QFont font_bold;
     font_bold.setBold(true);
 
-    QVBoxLayout *main_layout = new QVBoxLayout ();
+    QVBoxLayout* main_layout = new QVBoxLayout ();
 
     // tables
-    QVBoxLayout *tables_layout = new QVBoxLayout ();
+    QVBoxLayout* tables_layout = new QVBoxLayout ();
 
-    QLabel *tables_label = new QLabel ("Tables");
+    QLabel* tables_label = new QLabel ("Tables");
     tables_label->setFont (font_bold);
     tables_layout->addWidget (tables_label);
 
-
-    QScrollArea *table_scroll_area = new QScrollArea ();
+    QScrollArea* table_scroll_area = new QScrollArea ();
     table_scroll_area->setWidgetResizable (true);
 
-    QWidget *table_scroll_widget = new QWidget ();
+    QWidget* table_scroll_widget = new QWidget ();
 
     table_grid_ = new QGridLayout ();
     table_scroll_widget->setLayout(table_grid_);
@@ -78,15 +77,15 @@ DBSchemaWidget::DBSchemaWidget(DBSchema &schema, QWidget * parent, Qt::WindowFla
     tables_layout->addWidget (table_scroll_area);
 
     // table buttons
-    QHBoxLayout *table_button_layout =  new QHBoxLayout ();
+    QHBoxLayout* table_button_layout =  new QHBoxLayout ();
 
-    QPushButton *add_table = new QPushButton ("Add Table");
-    connect(add_table, SIGNAL( clicked() ), this, SLOT( addTableSlot() ));
-    table_button_layout->addWidget (add_table);
+    add_table_button_ = new QPushButton ("Add");
+    connect(add_table_button_, &QPushButton::clicked, this, &DBSchemaWidget::addTableSlot);
+    table_button_layout->addWidget (add_table_button_);
 
-    QPushButton *add_all = new QPushButton ("Add All Tables");
-    connect(add_all, SIGNAL( clicked() ), this, SLOT( addAllTablesSlot() ));
-    table_button_layout->addWidget (add_all);
+    add_all_tables_button_ = new QPushButton ("Add All");
+    connect(add_all_tables_button_, &QPushButton::clicked, this, &DBSchemaWidget::addAllTablesSlot);
+    table_button_layout->addWidget (add_all_tables_button_);
 
     auto_populate_check_ = new QCheckBox ("Auto Populate");
     auto_populate_check_->setChecked(true);
@@ -98,18 +97,16 @@ DBSchemaWidget::DBSchemaWidget(DBSchema &schema, QWidget * parent, Qt::WindowFla
     main_layout->addStretch();
 
     // meta tables
+    QVBoxLayout* meta_tables_layout = new QVBoxLayout ();
 
-    QVBoxLayout *meta_tables_layout = new QVBoxLayout ();
-
-    QLabel *meta_tables_label = new QLabel ("Meta Tables");
+    QLabel* meta_tables_label = new QLabel ("Meta Tables");
     meta_tables_label->setFont (font_bold);
     meta_tables_layout->addWidget (meta_tables_label);
 
-
-    QScrollArea *meta_table_scroll_area = new QScrollArea ();
+    QScrollArea* meta_table_scroll_area = new QScrollArea ();
     meta_table_scroll_area->setWidgetResizable (true);
 
-    QWidget *meta_table_scroll_widget = new QWidget ();
+    QWidget* meta_table_scroll_widget = new QWidget ();
 
     meta_table_grid_ = new QGridLayout ();
     meta_table_scroll_widget->setLayout(meta_table_grid_);
@@ -119,12 +116,11 @@ DBSchemaWidget::DBSchemaWidget(DBSchema &schema, QWidget * parent, Qt::WindowFla
     meta_tables_layout->addWidget (meta_table_scroll_area);
 
     // meta table buttons
+    QHBoxLayout* add_ts_layout =  new QHBoxLayout ();
 
-    QHBoxLayout *add_ts_layout =  new QHBoxLayout ();
-
-    QPushButton *add_ts_button = new QPushButton ("Add");
-    connect(add_ts_button, SIGNAL( clicked() ), this, SLOT( addMetaTableSlot() ));
-    add_ts_layout->addWidget (add_ts_button);
+    add_ts_button_ = new QPushButton ("Add");
+    connect(add_ts_button_, &QPushButton::clicked, this, &DBSchemaWidget::addMetaTableSlot);
+    add_ts_layout->addWidget (add_ts_button_);
 
     meta_tables_layout->addLayout (add_ts_layout);
 
@@ -139,22 +135,26 @@ DBSchemaWidget::DBSchemaWidget(DBSchema &schema, QWidget * parent, Qt::WindowFla
 
 DBSchemaWidget::~DBSchemaWidget()
 {
-//    std::map <DBTable *, DBTableEditWidget*>::iterator it;
-//    for (it = edit_table_widgets_.begin(); it != edit_table_widgets_.end(); it++)
-//    {
-//        it->second->close();
-//        delete it->second;
-//    }
-//    edit_table_widgets_.clear();
+    edit_table_buttons_.clear();
+    delete_table_buttons_.clear();
+    edit_meta_table_buttons_.clear();
+    delete_meta_table_buttons_.clear();
+    // layouts will delete the rest
+}
 
+void DBSchemaWidget::lock ()
+{
+    for (auto &it : delete_table_buttons_)
+        it.first->setDisabled(true);
 
-//    std::map <MetaDBTable *, MetaDBTableEditWidget*>::iterator it2;
-//    for (it2 = edit_meta_table_widgets_.begin(); it2 != edit_meta_table_widgets_.end(); it2++)
-//    {
-//        it2->second->close();
-//        delete it2->second;
-//    }
-//    edit_meta_table_widgets_.clear();
+    add_table_button_->setDisabled(true);
+    add_all_tables_button_->setDisabled(true);
+    auto_populate_check_->setDisabled(true);
+
+    for (auto &it : delete_meta_table_buttons_)
+        it.first->setDisabled(true);
+
+    add_ts_button_->setDisabled(true);
 }
 
 void DBSchemaWidget::addTableSlot()
@@ -186,7 +186,6 @@ void DBSchemaWidget::addTableSlot()
             schema_.populateTable(name);
 
         updateTableGrid();
-        //updateMetaTablesGrid();
     }
 }
 
@@ -206,8 +205,6 @@ void DBSchemaWidget::addAllTablesSlot()
     }
 
    updateTableGrid();
-   //updateMetaTablesGrid();
-
 }
 
 void DBSchemaWidget::addMetaTableSlot()
@@ -263,10 +260,6 @@ void DBSchemaWidget::updateTableGrid()
     name_label->setFont (font_bold);
     table_grid_->addWidget (name_label, 0, 0);
 
-//    QLabel *numel_label = new QLabel ("# columns");
-//    numel_label->setFont (font_bold);
-//    table_grid_->addWidget (numel_label, 0, 1);
-
     QLabel *key_label = new QLabel ("Key");
     key_label->setFont (font_bold);
     table_grid_->addWidget (key_label, 0, 1);
@@ -283,11 +276,8 @@ void DBSchemaWidget::updateTableGrid()
 
     unsigned int row=1;
 
-    QPixmap edit_pixmap("./data/icons/edit.png");
-    QIcon edit_icon(edit_pixmap);
-
-    QPixmap del_pixmap("./data/icons/delete.png");
-    QIcon del_icon(del_pixmap);
+    QIcon edit_icon(Files::getIconFilepath("edit.png").c_str());
+    QIcon del_icon(Files::getIconFilepath("delete.png").c_str());
 
     edit_table_buttons_.clear();
     delete_table_buttons_.clear();
@@ -369,11 +359,8 @@ void DBSchemaWidget::updateMetaTableGrid()
 
     unsigned int row=1;
 
-    QPixmap edit_pixmap("./data/icons/edit.png");
-    QIcon edit_icon(edit_pixmap);
-
-    QPixmap del_pixmap("./data/icons/delete.png");
-    QIcon del_icon(del_pixmap);
+    QIcon edit_icon(Files::getIconFilepath("edit.png").c_str());
+    QIcon del_icon(Files::getIconFilepath("delete.png").c_str());
 
     edit_meta_table_buttons_.clear();
     delete_meta_table_buttons_.clear();

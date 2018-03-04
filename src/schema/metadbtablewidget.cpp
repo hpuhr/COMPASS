@@ -34,9 +34,8 @@
 #include "logger.h"
 #include "stringconv.h"
 
-MetaDBTableWidget::MetaDBTableWidget(MetaDBTable &meta_table, QWidget * parent, Qt::WindowFlags f)
-: QWidget (parent, f), meta_table_ (meta_table), name_edit_ (0), info_edit_(0), key_box_(0), //table_box_ (0)
-  sub_tables_grid_ (0), column_grid_(0), new_local_key_ (0), new_table_(0), new_sub_key_(0)
+MetaDBTableWidget::MetaDBTableWidget(MetaDBTable& meta_table, QWidget* parent, Qt::WindowFlags f)
+: QWidget (parent, f), meta_table_ (meta_table)
 {
     QSettings settings("ATSDB", "MetaDBTableWidget");
     restoreGeometry(settings.value("MetaDBTableWidget/geometry").toByteArray());
@@ -63,23 +62,15 @@ MetaDBTableWidget::MetaDBTableWidget(MetaDBTable &meta_table, QWidget * parent, 
     properties_layout->addWidget (name_label, 0, 0);
 
     name_edit_ = new QLineEdit (meta_table_.name().c_str());
-    connect(name_edit_, SIGNAL(textChanged(const QString &)), this, SLOT( editNameSlot(const QString &) ));
+    connect(name_edit_, &QLineEdit::textChanged, this, &MetaDBTableWidget::editNameSlot);
     properties_layout->addWidget (name_edit_, 0, 1);
 
     QLabel *info_label = new QLabel ("Description");
     properties_layout->addWidget (info_label, 1, 0);
 
     info_edit_ = new QLineEdit (meta_table_.info().c_str());
-    connect(info_edit_, SIGNAL(textChanged(const QString &)), this, SLOT( editInfoSlot(const QString &) ));
+    connect(info_edit_, &QLineEdit::textChanged, this, &MetaDBTableWidget::editInfoSlot);
     properties_layout->addWidget (info_edit_, 1, 1);
-
-//    QLabel *table_label = new QLabel ("Table name");
-//    properties_layout->addWidget (table_label, 2, 0);
-
-//    table_box_ = new QComboBox ();
-//    updateTableSelection ();
-//    connect(table_box_, SIGNAL( activated(const QString &) ), this, SLOT( selectTable() ));
-//    properties_layout->addWidget (table_box_, 2, 1);
 
     main_layout->addLayout (properties_layout);
 
@@ -124,7 +115,7 @@ MetaDBTableWidget::MetaDBTableWidget(MetaDBTable &meta_table, QWidget * parent, 
 
     new_table_ = new QComboBox ();
     updateNewSubTableSelectionSlot();
-    connect(new_table_, SIGNAL( activated(const QString &) ), this, SLOT( updateSubKeySelectionSlot() ));
+    connect(new_table_, SIGNAL(activated(const QString&)), this, SLOT(updateSubKeySelectionSlot()));
     new_grid->addWidget (new_table_,1,1);
 
     QLabel *subkey_label = new QLabel ("Sub table key");
@@ -134,9 +125,9 @@ MetaDBTableWidget::MetaDBTableWidget(MetaDBTable &meta_table, QWidget * parent, 
     updateSubKeySelectionSlot();
     new_grid->addWidget (new_sub_key_,1,2);
 
-    QPushButton *new_struct_add = new QPushButton ("Add");
-    connect(new_struct_add, SIGNAL( clicked() ), this, SLOT( addSubTableSlot() ));
-    new_grid->addWidget (new_struct_add, 1, 3);
+    add_button_ = new QPushButton ("Add");
+    connect(add_button_, SIGNAL( clicked() ), this, SLOT( addSubTableSlot() ));
+    new_grid->addWidget (add_button_, 1, 3);
 
     new_sub_table_layout->addLayout (new_grid);
     main_layout->addLayout (new_sub_table_layout);
@@ -194,16 +185,29 @@ void MetaDBTableWidget::addSubTableSlot ()
     }
 }
 
-void MetaDBTableWidget::editNameSlot (const QString &text)
+void MetaDBTableWidget::editNameSlot (const QString& text)
 {
     meta_table_.name (text.toStdString());
     emit changedMetaTable();
 }
-void MetaDBTableWidget::editInfoSlot (const QString &text)
+void MetaDBTableWidget::editInfoSlot (const QString& text)
 {
     assert (info_edit_);
     meta_table_.info (text.toStdString());
     emit changedMetaTable();
+}
+
+void MetaDBTableWidget::lock ()
+{
+    locked_ = true;
+
+    name_edit_->setDisabled(true);
+    info_edit_->setDisabled(true);
+
+    new_local_key_->setDisabled(true);
+    new_table_->setDisabled(true);
+    new_sub_key_->setDisabled(true);
+    add_button_->setDisabled(true);
 }
 
 //void MetaDBTableWidget::selectTable ()

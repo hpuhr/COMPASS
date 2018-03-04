@@ -48,8 +48,9 @@ using namespace Utils;
 /**
  * Initializes members, registers parameters, create GUI elements.
  */
-DBFilterCondition::DBFilterCondition(const std::string &class_id, const std::string &instance_id, DBFilter *filter_parent)
-: Configurable (class_id, instance_id, filter_parent), filter_parent_(filter_parent), variable_(nullptr), meta_variable_(nullptr), changed_(true)
+DBFilterCondition::DBFilterCondition(const std::string& class_id, const std::string& instance_id,
+                                     DBFilter* filter_parent)
+: Configurable (class_id, instance_id, filter_parent), filter_parent_(filter_parent)
 {
     registerParameter ("operator", &operator_, ">");
     registerParameter ("op_and", &op_and_, true);
@@ -63,13 +64,16 @@ DBFilterCondition::DBFilterCondition(const std::string &class_id, const std::str
     if (variable_dbo_name_ == META_OBJECT_NAME)
     {
         if (!ATSDB::instance().objectManager().existsMetaVariable(variable_name_))
-            throw std::runtime_error ("DBFilterCondition: constructor: meta dbo variable '"+variable_name_+"' does not exist");
+            throw std::runtime_error ("DBFilterCondition: constructor: meta dbo variable '" + variable_name_
+                                      + "' does not exist");
         meta_variable_ = &ATSDB::instance().objectManager().metaVariable(variable_name_);
     }
     else
     {
-        if (!ATSDB::instance().objectManager().existsObject(variable_dbo_name_) || !ATSDB::instance().objectManager().object(variable_dbo_name_).hasVariable(variable_name_))
-            throw std::runtime_error ("DBFilterCondition: constructor: dbo variable '"+variable_name_+"' does not exist");
+        if (!ATSDB::instance().objectManager().existsObject(variable_dbo_name_)
+                || !ATSDB::instance().objectManager().object(variable_dbo_name_).hasVariable(variable_name_))
+            throw std::runtime_error ("DBFilterCondition: constructor: dbo variable '" + variable_name_
+                                      + "' does not exist");
 
         variable_ = &ATSDB::instance().objectManager().object(variable_dbo_name_).variable(variable_name_);
     }
@@ -118,7 +122,8 @@ bool DBFilterCondition::filters (const std::string &dbo_name)
         return variable_dbo_name_ == dbo_name;
 }
 
-std::string DBFilterCondition::getConditionString (const std::string &dbo_name, bool &first, std::vector <DBOVariable*>& filtered_variables)
+std::string DBFilterCondition::getConditionString (const std::string &dbo_name, bool &first,
+                                                   std::vector <DBOVariable*>& filtered_variables)
 {
     logdbg << "DBFilterCondition: getConditionString: object " << dbo_name << " first " << first;
     std::stringstream ss;
@@ -134,7 +139,7 @@ std::string DBFilterCondition::getConditionString (const std::string &dbo_name, 
 
     assert (variable_ || meta_variable_);
 
-    DBOVariable *variable=nullptr;
+    DBOVariable* variable=nullptr;
 
     if (meta_variable_)
     {
@@ -144,8 +149,8 @@ std::string DBFilterCondition::getConditionString (const std::string &dbo_name, 
     else
         variable = variable_;
 
-    const DBTableColumn &column = variable->currentDBColumn();
-    const MetaDBTable &meta_table = variable->currentMetaTable();
+    const DBTableColumn& column = variable->currentDBColumn();
+    const MetaDBTable& meta_table = variable->currentMetaTable();
     std::string table_db_name = meta_table.tableFor(column.identifier()).name();
 
     if (!first)
@@ -157,7 +162,8 @@ std::string DBFilterCondition::getConditionString (const std::string &dbo_name, 
     }
     first=false;
 
-    ss << variable_prefix << table_db_name << "." << column.name() << variable_suffix << " " << operator_  << " " << getTransformedValue (value_, variable);
+    ss << variable_prefix << table_db_name << "." << column.name() << variable_suffix << " " << operator_  << " "
+       << getTransformedValue (value_, variable);
 
     if (find (filtered_variables.begin(), filtered_variables.end(), variable) == filtered_variables.end())
         filtered_variables.push_back(variable);
@@ -192,9 +198,11 @@ void DBFilterCondition::valueChanged ()
     loginf  << "DBFilterCondition: valueChanged: value_ '" << value_ << "' invalid " << invalid_;
 
     if (invalid_)
-        edit_->setStyleSheet("QLineEdit { background: rgb(255, 100, 100); selection-background-color: rgb(255, 200, 200); }");
+        edit_->setStyleSheet("QLineEdit { background: rgb(255, 100, 100); selection-background-color:"
+                             " rgb(255, 200, 200); }");
     else
-        edit_->setStyleSheet("QLineEdit { background: rgb(255, 255, 255); selection-background-color: rgb(200, 200, 200); }");
+        edit_->setStyleSheet("QLineEdit { background: rgb(255, 255, 255); selection-background-color:"
+                             " rgb(200, 200, 200); }");
 }
 
 /**
@@ -276,6 +284,12 @@ bool DBFilterCondition::checkValueInvalid (const std::string& new_value)
     assert (variable_ || meta_variable_);
     std::vector <DBOVariable*> variables;
 
+    if (new_value.size() == 0)
+    {
+        loginf << "DBFilterCondition: checkValueInvalid: no value, returning invalid";
+        return true;
+    }
+
     if (meta_variable_)
     {
         for (auto var_it : meta_variable_->variables())
@@ -306,7 +320,7 @@ bool DBFilterCondition::checkValueInvalid (const std::string& new_value)
     return invalid;
 }
 
-std::string DBFilterCondition::getTransformedValue (const std::string& untransformed_value, DBOVariable *variable)
+std::string DBFilterCondition::getTransformedValue (const std::string& untransformed_value, DBOVariable* variable)
 {
     assert (variable);
     const DBTableColumn &column = variable->currentDBColumn();
@@ -323,26 +337,28 @@ std::string DBFilterCondition::getTransformedValue (const std::string& untransfo
         value_strings.push_back(untransformed_value);
     }
 
-    logdbg << "DBFilterCondition: getTransformedValue: in value strings '" << boost::algorithm::join(value_strings, ",") << "'";
+    logdbg << "DBFilterCondition: getTransformedValue: in value strings '"
+           << boost::algorithm::join(value_strings, ",") << "'";
 
     for (auto value_it : value_strings)
     {
         std::string value_str = value_it;
 
-        if (variable->representation() != String::Representation::STANDARD)
-            value_str = String::getValueStringFromRepresentation(value_str, variable->representation()); // fix representation
+        if (variable->representation() != DBOVariable::Representation::STANDARD)
+            value_str = variable->getValueStringFromRepresentation(value_str); // fix representation
 
         logdbg << "DBFilterCondition: getTransformedValue: value string " << value_str;
 
         if (column.unit() != variable->unit()) // do unit conversion stuff
         {
-            logdbg << "DBFilterCondition: getTransformedValue: variable " << variable->name() << " of same dimension has different units " << column.unit() << " " << variable->unit();
+            logdbg << "DBFilterCondition: getTransformedValue: variable " << variable->name()
+                   << " of same dimension has different units " << column.unit() << " " << variable->unit();
 
             const Dimension &dimension = UnitManager::instance().dimension (variable->dimension());
             double factor = dimension.getFactor (column.unit(), variable->unit());
             logdbg  << "DBFilterCondition: getTransformedValue: correct unit transformation with factor " << factor;
 
-            value_str = String::multiplyString(value_str, 1.0/factor, variable->dataType());
+            value_str = variable->multiplyString(value_str, 1.0/factor);
         }
         logdbg << "DBFilterCondition: getTransformedValue: transformed value string " << value_str;
         transformed_value_strings.push_back(value_str);

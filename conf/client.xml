@@ -1,8 +1,0 @@
-<?1.0?>
-<Configuration>
-    <SubConfigurationFile class_id="ATSDB" instance_id="ATSDB0" path="conf/atsdb.xml"/>
-    <SubConfigurationFile class_id="JobManager" instance_id="JobManager0" path="conf/threads.xml"/>
-    <SubConfigurationFile class_id="UnitManager" instance_id="UnitManager0" path="conf/units.xml"/>
-    <SubConfigurationFile class_id="ProjectionManager" instance_id="ProjectionManager0" path="conf/projection.xml"/>
-    <SubConfigurationFile class_id="WorkerThreadManager" instance_id="WorkerThreadManager0" path="conf/threads.xml"/>
-</Configuration>

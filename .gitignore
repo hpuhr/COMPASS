@@ -1,0 +1,14 @@
+build/
+experimental_src/
+*.aux
+*.ego
+*.ent
+*.glo
+*.idx
+*.lof
+*.log
+*.lot
+*.out
+*.backup
+*.toc
+

@@ -23,17 +23,21 @@
 
 #include "job.h"
 #include "buffer.h"
+#include "dbovariableset.h"
 
 class BufferCSVExportJob : public Job
 {
 public:
-    BufferCSVExportJob(std::shared_ptr<Buffer> buffer, const std::string& file_name, bool overwrite, bool use_presentation);
+    BufferCSVExportJob(std::shared_ptr<Buffer> buffer, const DBOVariableSet& read_set, const std::string& file_name,
+                       bool overwrite, bool use_presentation);
     virtual ~BufferCSVExportJob();
 
     virtual void run ();
 
 protected:
     std::shared_ptr<Buffer> buffer_;
+    DBOVariableSet read_set_;
+
     std::string file_name_;
     bool overwrite_;
     bool use_presentation_;

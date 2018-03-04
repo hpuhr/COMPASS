@@ -45,7 +45,7 @@ signals:
 public slots:
     void loadingStartedSlot();
     /// @brief Called when new result Buffer was delivered
-    void updateData (DBObject &object, std::shared_ptr<Buffer> buffer);
+    void updateData (DBObject& object, std::shared_ptr<Buffer> buffer);
 
     void exportDataSlot(bool overwrite);
     void exportDoneSlot (bool cancelled);
@@ -54,7 +54,7 @@ public slots:
 
 public:
     /// @brief Constructor
-    ListBoxViewDataWidget(ListBoxViewDataSource *data_source, QWidget* parent=nullptr, Qt::WindowFlags f=0);
+    ListBoxViewDataWidget(ListBoxViewDataSource* data_source, QWidget* parent=nullptr, Qt::WindowFlags f=0);
     /// @brief Destructor
     virtual ~ListBoxViewDataWidget();
 
@@ -63,9 +63,9 @@ public:
 
 protected:
     /// Data source
-    ListBoxViewDataSource *data_source_;
+    ListBoxViewDataSource* data_source_ {nullptr};
     /// Main tab widget
-    QTabWidget *tab_widget_;
+    QTabWidget* tab_widget_ {nullptr};
     /// Container with all table widgets
     std::map <std::string, BufferTableWidget*> buffer_tables_;
 };

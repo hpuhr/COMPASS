@@ -22,16 +22,15 @@
 #include "dbobject.h"
 #include "dbovariable.h"
 #include "metadbovariable.h"
-
+#include "files.h"
 #include "global.h"
 
 #include <QPushButton>
 #include <QLabel>
 #include <QGridLayout>
 
+using namespace Utils;
 
-/*
- */
 DBOVariableSelectionWidget::DBOVariableSelectionWidget (bool h_box, QWidget* parent)
     :   QFrame (parent), variable_selected_(false), meta_variable_selected_(false),
       show_empty_variable_(true), show_meta_variables_(false), show_meta_variables_only_(false), show_dbo_only_(false)
@@ -41,14 +40,12 @@ DBOVariableSelectionWidget::DBOVariableSelectionWidget (bool h_box, QWidget* par
 
     QBoxLayout *layout;
 
-    QPixmap* pixmap = new QPixmap("./data/icons/expand.png");
-
     object_label_ = new QLabel (this);
     variable_label_ = new QLabel (this);
     variable_label_->setAlignment (Qt::AlignRight);
 
     QPushButton *sel_button = new QPushButton(this);
-    sel_button->setIcon(QIcon(*pixmap));
+    sel_button->setIcon(QIcon(Files::getIconFilepath("expand.png").c_str()));
     sel_button->setFixedSize (UI_ICON_SIZE);
     sel_button->setFlat(UI_ICON_BUTTON_FLAT);
 
@@ -201,6 +198,8 @@ void DBOVariableSelectionWidget::triggerSlot( QAction* action )
 
     object_label_->setText (obj_name.c_str());
     variable_label_->setText (var_name.c_str());
+
+    loginf << "DBOVariableSelectionWidget: triggerSlot: obj " << obj_name.c_str() << " var " << var_name.c_str();
 
     emit selectionChanged();
 }

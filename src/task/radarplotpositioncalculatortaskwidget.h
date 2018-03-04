@@ -26,6 +26,8 @@ class RadarPlotPositionCalculatorTask;
 class DBObjectComboBox;
 class DBOVariableSelectionWidget;
 
+class QPushButton;
+
 class RadarPlotPositionCalculatorTaskWidget : public QWidget
 {
     Q_OBJECT
@@ -34,6 +36,7 @@ public slots:
     void dbObjectChangedSlot();
     void anyVariableChangedSlot();
     void calculateSlot ();
+    void calculationDoneSlot ();
 
 public:
     RadarPlotPositionCalculatorTaskWidget(RadarPlotPositionCalculatorTask& task, QWidget * parent = 0, Qt::WindowFlags f = 0);
@@ -54,10 +57,7 @@ protected:
     DBOVariableSelectionWidget* latitude_box_ {nullptr};
     DBOVariableSelectionWidget* longitude_box_ {nullptr};
 
-    QLabel *count_label_ {nullptr};
-    QLabel *load_status_label_ {nullptr};
-    QLabel *calculated_status_label_ {nullptr};
-    QLabel *written_status_label_  {nullptr};
+    QPushButton* calc_button_ {nullptr};
 
     void setDBOBject (const std::string& object_name);
 };

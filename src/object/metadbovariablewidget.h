@@ -53,20 +53,25 @@ public slots:
 
 public:
     /// @brief Constructor
-    MetaDBOVariableWidget(MetaDBOVariable &variable, QWidget * parent = 0, Qt::WindowFlags f = 0);
+    MetaDBOVariableWidget(MetaDBOVariable& variable, QWidget* parent=0, Qt::WindowFlags f=0);
     /// @brief Destructor
     virtual ~MetaDBOVariableWidget();
 
+    void lock ();
+    void unlock ();
+
 private:
     /// @brief DBObject to be managed
-    MetaDBOVariable &variable_;
+    MetaDBOVariable& variable_;
 
     /// @brief DBOVariable name
-    QLineEdit *name_edit_;
+    QLineEdit* name_edit_ {nullptr};
     /// @brief DBOVariable info
-    QLineEdit *description_edit_;
+    QLineEdit* description_edit_ {nullptr};
 
-    QGridLayout *grid_layout_;
+    QGridLayout* grid_layout_ {nullptr};
+
+    bool locked_ {false};
 
     std::map <DBOVariableSelectionWidget*, std::string> selection_widgets_;
 };

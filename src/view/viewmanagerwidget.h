@@ -19,12 +19,14 @@
 #define VIEWSWIDGET_H_
 
 #include <QFrame>
+#include <QStringList>
 #include <map>
 
 class ViewManager;
 class ViewContainerConfigWidget;
 class QVBoxLayout;
 class QPushButton;
+class QAction;
 
 class ViewManagerWidget : public QFrame
 {
@@ -33,17 +35,9 @@ private slots:
     void databaseBusy ();
     void databaseIdle ();
 
+    void addViewMenuSlot();
     void addViewSlot();
-    //  void addGeographicViewSlot();
-    //  void addHistogramViewSlot();
-    void addListBoxViewSlot();
-    //  void addMosaicViewSlot();
-    //  void addScatterPlotViewSlot();
-    //  void addGeographicViewNewWindowSlot();
-    //  void addHistogramViewNewWindowSlot();
-    void addListBoxViewNewWindowSlot();
-    //  void addMosaicViewNewWindowSlot();
-    //  void addScatterPlotViewNewWindowSlot();
+    void addViewNewWindowSlot();
     //  void addTemplateSlot ();
     //  void addTemplateNewWindowSlot ();
 
@@ -60,6 +54,7 @@ private:
 
     QPushButton *add_button_;
 
+    QStringList view_class_list_;
     std::vector<ViewContainerConfigWidget*> cont_widgets_;
     std::map <QAction*, std::pair<std::string, int> > add_template_actions_;
 };

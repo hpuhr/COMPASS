@@ -20,12 +20,15 @@
 #include "dbobject.h"
 #include "global.h"
 #include "dbovariableorderedsetwidget.h"
+#include "files.h"
 
 #include <QPushButton>
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QListWidget>
+
+using namespace Utils;
 
 DBOVariableOrderedSetWidget::DBOVariableOrderedSetWidget(DBOVariableOrderedSet &set, QWidget * parent, Qt::WindowFlags f)
 : QWidget (parent, f), set_(set), list_widget_(nullptr), current_index_(-1)
@@ -49,11 +52,8 @@ DBOVariableOrderedSetWidget::DBOVariableOrderedSetWidget(DBOVariableOrderedSet &
 
     QVBoxLayout *vupdown_layout = new QVBoxLayout();
 
-    QPixmap* pixmapdown = new QPixmap("./data/icons/collapse.png");
-    QPixmap* pixmapup = new QPixmap("./data/icons/expand.png");
-
     QPushButton *down = new QPushButton ();
-    down->setIcon(QIcon(*pixmapdown));
+    down->setIcon(QIcon(Files::getIconFilepath("collapse.png").c_str()));
     down->setFixedSize (UI_ICON_SIZE);
     down->setFlat(UI_ICON_BUTTON_FLAT);
     down->setToolTip(tr("Move variable down"));
@@ -65,7 +65,7 @@ DBOVariableOrderedSetWidget::DBOVariableOrderedSetWidget(DBOVariableOrderedSet &
     vupdown_layout->addStretch();
 
     QPushButton *up = new QPushButton ();
-    up->setIcon(QIcon(*pixmapup));
+    up->setIcon(QIcon(Files::getIconFilepath("expand.png").c_str()));
     up->setFixedSize (UI_ICON_SIZE);
     up->setFlat(UI_ICON_BUTTON_FLAT);
     up->setToolTip(tr("Move variable up"));

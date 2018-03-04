@@ -39,12 +39,13 @@
 #include "stringconv.h"
 #include "atsdb.h"
 #include "global.h"
+#include "files.h"
 //#include "MetaDBObjectEditWidget.h"
 
-using namespace Utils::String;
+using namespace Utils;
 
 DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager &object_manager)
-    : object_manager_(object_manager), schema_manager_(ATSDB::instance().schemaManager()), dbobjects_grid_ (nullptr), meta_variables_grid_(nullptr), unlocked_(false)
+    : object_manager_(object_manager), schema_manager_(ATSDB::instance().schemaManager())
 {
     unsigned int frame_width = FRAME_SIZE;
 
@@ -77,10 +78,9 @@ DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager &object_manager)
     main_layout->addWidget (dbo_scroll);
 
     // new dbobject
-    QPushButton *new_button = new QPushButton("Add");
-    connect(new_button, SIGNAL(clicked()), this, SLOT(addDBOSlot()));
-    //new_button->setDisabled (true);
-    main_layout->addWidget (new_button);
+    add_dbo_button_ = new QPushButton("Add");
+    connect(add_dbo_button_, SIGNAL(clicked()), this, SLOT(addDBOSlot()));
+    main_layout->addWidget (add_dbo_button_);
 
     main_layout->addStretch();
 
@@ -104,14 +104,13 @@ DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager &object_manager)
 
     main_layout->addWidget (meta_scroll);
 
-    QPushButton *add_meta_button = new QPushButton("Add");
-    connect(add_meta_button, SIGNAL(clicked()), this, SLOT(addAllMetaVariablesSlot()));
-    //new_button->setDisabled (true);
-    main_layout->addWidget (add_meta_button);
+    add_metavar_button_ = new QPushButton("Add");
+    connect(add_metavar_button_, SIGNAL(clicked()), this, SLOT(addAllMetaVariablesSlot()));
+    main_layout->addWidget (add_metavar_button_);
 
     setLayout (main_layout);
 
-    setDisabled(true);
+    lock();
 }
 
 DBObjectManagerWidget::~DBObjectManagerWidget()
@@ -121,17 +120,41 @@ DBObjectManagerWidget::~DBObjectManagerWidget()
     edit_dbo_widgets_.clear();
 }
 
-void DBObjectManagerWidget::databaseOpenedSlot ()
+void DBObjectManagerWidget::lock ()
 {
-    unlocked_=true;
+//    for (auto it : edit_dbo_buttons_)
+//        it.first->setDisabled (true);
 
-    setDisabled(false);
+    for (auto it : delete_dbo_buttons_)
+        it.first->setDisabled (true);
 
-    for (auto it : edit_dbo_buttons_)
-        it.first->setDisabled (!it.second->hasCurrentMetaTable());
+    add_dbo_button_->setDisabled (true);
+
+    for (auto it : delete_meta_buttons_)
+        it.first->setDisabled (true);
+
+    add_metavar_button_->setDisabled (true);
+}
+
+void DBObjectManagerWidget::unlock ()
+{
+//    for (auto it : edit_dbo_buttons_)
+//        it.first->setDisabled (!it.second->hasCurrentMetaTable());
 
     for (auto it : delete_dbo_buttons_)
         it.first->setDisabled (false);
+
+    add_dbo_button_->setDisabled (false);
+
+    for (auto it : delete_meta_buttons_)
+        it.first->setDisabled (false);
+
+    add_metavar_button_->setDisabled (false);
+}
+
+void DBObjectManagerWidget::databaseOpenedSlot ()
+{
+
 }
 
 
@@ -168,7 +191,8 @@ void DBObjectManagerWidget::addDBOSlot ()
         }
 
         bool ok;
-        QString item = QInputDialog::getItem(this, tr("Main Meta Table For DBObject"), tr("Select:"), items, 0, false, &ok);
+        QString item = QInputDialog::getItem(this, tr("Main Meta Table For DBObject"), tr("Select:"), items, 0,
+                                             false, &ok);
         if (ok && !item.isEmpty())
         {
             std::string meta_table_name = item.toStdString();
@@ -233,11 +257,8 @@ void DBObjectManagerWidget::updateDBOsSlot ()
         delete child;
     }
 
-    QPixmap edit_pixmap("./data/icons/edit.png");
-    QIcon edit_icon(edit_pixmap);
-
-    QPixmap del_pixmap("./data/icons/delete.png");
-    QIcon del_icon(del_pixmap);
+    QIcon edit_icon(Files::getIconFilepath("edit.png").c_str());
+    QIcon del_icon(Files::getIconFilepath("delete.png").c_str());
 
     edit_dbo_buttons_.clear();
     delete_dbo_buttons_.clear();
@@ -280,7 +301,7 @@ void DBObjectManagerWidget::updateDBOsSlot ()
         edit->setIconSize(UI_ICON_SIZE);
         edit->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
         edit->setFlat(UI_ICON_BUTTON_FLAT);
-        edit->setDisabled(!active || !unlocked_);
+        //edit->setDisabled(!active || locked_);
         connect(edit, SIGNAL( clicked() ), this, SLOT( editDBOSlot() ));
         dbobjects_grid_->addWidget (edit, row, 3);
         edit_dbo_buttons_[edit] = it->second;
@@ -290,7 +311,7 @@ void DBObjectManagerWidget::updateDBOsSlot ()
         del->setIconSize(UI_ICON_SIZE);
         del->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
         del->setFlat(UI_ICON_BUTTON_FLAT);
-        del->setDisabled(!unlocked_);
+        //del->setDisabled(locked_);
         connect(del, SIGNAL( clicked() ), this, SLOT( deleteDBOSlot() ));
         dbobjects_grid_->addWidget (del, row, 4);
         delete_dbo_buttons_[del] = it->second;
@@ -350,7 +371,8 @@ void DBObjectManagerWidget::addAllMetaVariablesSlot ()
                 if (obj_it == obj_it2)
                     continue;
 
-                if (obj_it2.second->hasVariable(var_it.first) && var_it.second->dataType() == obj_it2.second->variable(var_it.first).dataType())
+                if (obj_it2.second->hasVariable(var_it.first) && var_it.second->dataType()
+                        == obj_it2.second->variable(var_it.first).dataType())
                 {
                     found_dbos.push_back(obj_it2.first);
                 }
@@ -377,7 +399,8 @@ void DBObjectManagerWidget::addAllMetaVariablesSlot ()
                 {
                     if (!meta_var.existsIn(*dbo_it2))
                     {
-                        loginf << "DBObjectManagerWidget: addAllMetaVariablesSlot: adding meta variable " << var_it.first << " dbo variable " << var_it.first;
+                        loginf << "DBObjectManagerWidget: addAllMetaVariablesSlot: adding meta variable "
+                               << var_it.first << " dbo variable " << var_it.first;
                         meta_var.addVariable(*dbo_it2, var_it.first);
                     }
                 }
@@ -403,11 +426,8 @@ void DBObjectManagerWidget::updateMetaVariablesSlot ()
         delete child;
     }
 
-    QPixmap edit_pixmap("./data/icons/edit.png");
-    QIcon edit_icon(edit_pixmap);
-
-    QPixmap del_pixmap("./data/icons/delete.png");
-    QIcon del_icon(del_pixmap);
+    QIcon edit_icon(Files::getIconFilepath("edit.png").c_str());
+    QIcon del_icon(Files::getIconFilepath("delete.png").c_str());
 
     edit_meta_buttons_.clear();
     delete_meta_buttons_.clear();

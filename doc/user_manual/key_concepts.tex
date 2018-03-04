@@ -1,0 +1,51 @@
+\chapter{Key Concepts}
+\label{sec:key_concepts}
+
+In this section, a few key concepts are introduced to give a somewhat deeper understanding of ATSDB and to allow the reader to understand some main design choices made by the author. This should also give indications about the strengths and draw-backs of the chosen approach.
+
+\section*{Database Systems}
+A database allows for storage, retrieval and filtering of the data of interest. While SQL has some definitive drawbacks, it was chosen since support of the SASS-C database SCDB was wanted.\\
+Currently  two  database  systems  are  supported:  MySQL  and  SQLite3.   MySQL  relies  on  an  independent background process, which holds several databases and can also be accessed over a network connection.\\
+SQLite3 encapsulates one database in a single file container, which is read from a storage medium (e.g. hard drive).
+
+\section*{Configuration}
+At startup, several configuration files are loaded, and at shutdown the current configuration state of ATSDB is saved.  But configuration is not just a matter of components having the same parameters, but also what components exist. To give an example: Each existing View is saved, and when the program is started again, the previously active Views are created.  The same holds for the filters, or the database interface/schema. \\
+This way, a user can have a specific program configuration for a specific usage situation, which can be instantly reused for a different dataset, using have a completely configurable database schema or filter configuration. \\
+This allows for a high degree of flexibility, but somewhat complicates software development.
+
+\section*{Flexible Database Interface}
+Using such a configuration, a flexible database interface method was implemented to allow general displaying of data in different database systems and schemas.  How this was done would require a detailed discussion, which will be skipped for the moment.\\
+To summarize, several database schemas can be stored in configuration files, each of which is a structured collection of database tables and their logical dependencies. Such information is used in one set of Database Objects (\textbf{DBO}s). In each database system, any database schema can be used.
+
+\section*{Database Objects}
+A Database Object (\textbf{DBO}) is defined by a name and has a collection of variables. For example, radar plots and system tracks are database objects, and each has variables holding time, position, Mode 3/A codes and Mode C heights and so on. From a database, if such a DBO is present, it can be loaded and displayed.\\
+
+To allow displaying data from different DBOs in the same system, so-called meta-variables were  introduced, which hold variables that are present in some or all DBOs (with a possibly different name or unit).  For example, there meta-variable 'tod', which is a collection of sub-variables for each existing DBO and the respective ``Time of Day'' variable.
+
+\section*{Data Loading}
+In ATSDB, a unified data loading process was chosen, meaning that only exactly one common dataset is loaded, which can be inspected using Views. When started, data is incrementally read from the database, stored in the resulting dataset, and distributed to the active Views. Each time such a loading process is triggered, all Views clear their dataset and gradually update. \\
+This makes working with the data somewhat easier to understand, since only one dataset exists, while on the other hand it does not allow several independent datasets (e.g. with different filters) to be loaded.
+
+\section*{Generating a Database}
+\label{sec:generation}
+
+A database has to be generated before it can be opened with ATSDB.  This section describes how such
+a process can be performed, however it is by no means a complete guide.
+
+\section*{SASS-C Verif}
+A complete treatment of how to generate a database using the highly sophisticated SASS-C Verif frame work  is  out  of  the  scope  of  this  document.   However,  a  short  summary  of  the  necessary  steps  will  be presented here.\\
+
+\begin{itemize}  
+\item Import a previous evaluation job
+\item Set data recording path, e.g. 'somelocation/\%iffile.if'
+\item Run IRIS command
+\item Run OTR command
+\item Run CMP command with all but RA
+\item Run CMP command with just RA
+\end{itemize}
+
+After  these  steps,  a  database  was  generated  and  filled  with  data.   The  name  of  the  database  (which
+will  be  needed  during  the  opening  process)  is  equivalent  to  the  job  name,  e.g.   'job\_v7\_mainsacso\_0005', 'HelloWorld' etc. \\
+
+Please \textbf{note} that the SASS-C MySQL database name is not case sensitive ('job\_v7\_mainsacso\_0005' is the same as 'JOB\_V7\_MAINSACSO\_0005').
+ 

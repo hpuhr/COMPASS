@@ -123,9 +123,34 @@ MetaDBOVariableWidget *MetaDBOVariable::widget ()
     if (!widget_)
     {
         widget_ = new MetaDBOVariableWidget (*this);
+
+        if (locked_)
+            widget_->lock();
     }
     assert (widget_);
     return widget_;
+}
+
+void MetaDBOVariable::unlock ()
+{
+    if (!locked_)
+        return;
+
+    locked_=false;
+
+    if (widget_)
+        widget_->unlock();
+}
+
+void MetaDBOVariable::lock ()
+{
+    if (locked_)
+        return;
+
+    locked_=true;
+
+    if (widget_)
+        widget_->lock();
 }
 
 std::string MetaDBOVariable::name() const
@@ -148,7 +173,7 @@ void MetaDBOVariable::description(const std::string &description)
     description_ = description;
 }
 
-PropertyDataType MetaDBOVariable::dataType ()
+PropertyDataType MetaDBOVariable::dataType () const
 {
     assert (hasVariables());
 
@@ -163,28 +188,29 @@ PropertyDataType MetaDBOVariable::dataType ()
     return data_type;
 }
 
-const std::string &MetaDBOVariable::dataTypeString()
+const std::string &MetaDBOVariable::dataTypeString() const
 {
     assert (hasVariables());
     return Property::asString(dataType());
 }
 
-Utils::String::Representation MetaDBOVariable::representation ()
+DBOVariable::Representation MetaDBOVariable::representation ()
 {
     assert (hasVariables());
 
-    Utils::String::Representation representation = variables_.begin()->second.representation();
+    DBOVariable::Representation representation = variables_.begin()->second.representation();
 
     for (auto variable_it : variables_)
     {
         if (variable_it.second.representation() != representation)
-            logerr << "MetaDBOVariable: dataType: meta var " << name_ << " has different representations in sub variables";
+            logerr << "MetaDBOVariable: dataType: meta var " << name_
+                   << " has different representations in sub variables";
     }
 
     return representation;
 }
 
-std::string MetaDBOVariable::getMinString ()
+std::string MetaDBOVariable::getMinString () const
 {
     std::string value_string;
 
@@ -193,13 +219,13 @@ std::string MetaDBOVariable::getMinString ()
         if (value_string.size() == 0)
             value_string = variable_it.second.getMinString();
         else
-            value_string = Utils::String::getSmallerValueString (value_string, variable_it.second.getMinString(), dataType());
+            value_string = variable_it.second.getSmallerValueString (value_string, variable_it.second.getMinString());
     }
     assert (value_string.size());
     return value_string;
 }
 
-std::string MetaDBOVariable::getMaxString ()
+std::string MetaDBOVariable::getMaxString () const
 {
     std::string value_string;
 
@@ -208,20 +234,22 @@ std::string MetaDBOVariable::getMaxString ()
         if (value_string.size() == 0)
             value_string = variable_it.second.getMaxString();
         else
-            value_string = Utils::String::getLargerValueString (value_string, variable_it.second.getMaxString(), dataType());
+            value_string = variable_it.second.getLargerValueString (value_string, variable_it.second.getMaxString());
     }
     assert (value_string.size());
     return value_string;
 }
 
-std::string MetaDBOVariable::getMinStringRepresentation ()
+std::string MetaDBOVariable::getMinStringRepresentation () const
 {
-    return Utils::String::getRepresentationStringFromValue(getMinString(), dataType(), variables_.begin()->second.representation());
+    assert (variables_.size());
+    return variables_.begin()->second.getRepresentationStringFromValue(getMinString());
 }
 
-std::string MetaDBOVariable::getMaxStringRepresentation ()
+std::string MetaDBOVariable::getMaxStringRepresentation () const
 {
-    return Utils::String::getRepresentationStringFromValue(getMaxString(), dataType(), variables_.begin()->second.representation());
+    assert (variables_.size());
+    return variables_.begin()->second.getRepresentationStringFromValue(getMaxString());
 
 }
 

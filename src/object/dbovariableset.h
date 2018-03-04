@@ -65,13 +65,13 @@ public:
   /// @brief Returns container with all variables
   std::vector <DBOVariable*> &getSet () { return set_;}
   /// @brief Returns variable at a given index
-  DBOVariable &getVariable (unsigned int index);
+  DBOVariable &getVariable (unsigned int index) const;
 
   /// @brief Prints contents, for debugging purposes
   void print ();
 
   /// @brief Returns number of variables in the set
-  unsigned int getSize () { return set_.size(); }
+  unsigned int getSize () const { return set_.size(); }
 
 protected:
   /// Container with all variables in the set

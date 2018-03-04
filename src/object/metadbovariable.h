@@ -33,10 +33,10 @@ public:
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
-    bool hasVariables () { return variables_.size() > 0; }
-    PropertyDataType dataType ();
-    const std::string &dataTypeString();
-    Utils::String::Representation representation ();
+    bool hasVariables () const { return variables_.size() > 0; }
+    PropertyDataType dataType () const;
+    const std::string &dataTypeString() const;
+    DBOVariable::Representation representation ();
 
     /// @brief Return if variable exist in DBO of type
     bool existsIn (const std::string &dbo_name);
@@ -57,12 +57,15 @@ public:
     std::string description() const;
     void description(const std::string &description);
 
-    std::string getMinString ();
-    std::string getMaxString ();
-    std::string getMinStringRepresentation ();
-    std::string getMaxStringRepresentation ();
+    std::string getMinString () const;
+    std::string getMaxString () const;
+    std::string getMinStringRepresentation () const;
+    std::string getMaxStringRepresentation () const;
 
     MetaDBOVariableWidget *widget ();
+
+    void unlock ();
+    void lock ();
 
 protected:
     std::string name_;
@@ -72,17 +75,12 @@ protected:
 
     MetaDBOVariableWidget *widget_;
 
+    bool locked_ {false};
+
     std::map <std::string, DBOVariableDefinition*> definitions_;
     std::map <std::string, DBOVariable&> variables_;
 
     virtual void checkSubConfigurables ();
-
-    /// @brief Registers a parent variable
-  //  void registerParentVariable (DBOVariable *parent);
-  //  /// @brief Unregisters a parent variable
-  //  void unregisterParentVariable (DBOVariable *parent);
-
-
 };
 
 #endif // METADBOVARIABLE_H

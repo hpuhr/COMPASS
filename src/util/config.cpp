@@ -22,6 +22,7 @@
 #include "logger.h"
 #include "config.h"
 #include "stringconv.h"
+#include "files.h"
 
 using namespace std;
 using namespace Utils;
@@ -50,13 +51,12 @@ void SimpleConfig::loadFile()
 {
     assert (!opened_);
 
-    ifstream grab(config_filename_.c_str());
+    std::string config_path = HOME_CONF_DIRECTORY+config_filename_;
 
-    //check file exists
-    if (!grab)
-    {
-        throw std::runtime_error ("Config: loadFile: file '"+config_filename_+"' not found");
-    }
+    Files::verifyFileExists (config_path);
+
+    ifstream grab(config_path.c_str());
+    assert (grab);
 
     while(!grab.eof())
     {

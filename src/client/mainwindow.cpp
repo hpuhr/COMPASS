@@ -59,6 +59,7 @@
 #include "taskmanager.h"
 #include "radarplotpositioncalculatortask.h"
 #include "radarplotpositioncalculatortaskwidget.h"
+#include "files.h"
 
 using namespace Utils;
 using namespace std;
@@ -71,8 +72,7 @@ MainWindow::MainWindow()
 {
     logdbg  << "MainWindow: constructor";
 
-    QPixmap atsdb_pixmap("./data/icons/atsdb.png");
-    QIcon atsdb_icon(atsdb_pixmap);
+    QIcon atsdb_icon(Files::getIconFilepath("atsdb.png").c_str());
     setWindowIcon(atsdb_icon); // for the glory of the empire
 
     QSettings settings("ATSDB", "Client");
@@ -145,6 +145,9 @@ void MainWindow::databaseOpenedSlot()
     assert (start_button_);
     start_button_->setDisabled (false);
 
+    assert (task_menu_);
+    task_menu_->setDisabled(false);
+
     //    main_widget_ = new MFImport::MainWidget ();
     //    assert (main_widget_);
     //    widget_stack_->addWidget (main_widget_);
@@ -161,11 +164,23 @@ void MainWindow::startSlot ()
 
     bool force_post = postprocess_check_->checkState() == Qt::Checked;
 
+    ATSDB::instance().schemaManager().lock();
+    ATSDB::instance().objectManager().lock();
+
     if (force_post || !ATSDB::instance().interface().isPostProcessed ())
     {
         loginf << "MainWindow: startSlot: post-processing started";
-        connect (&ATSDB::instance().interface(), SIGNAL(postProcessingDoneSignal()), this, SLOT(postProcessingDoneSlot()));
+        connect (&ATSDB::instance().interface(), &DBInterface::postProcessingDoneSignal,
+                this, &MainWindow::postProcessingDoneSlot,Qt::UniqueConnection);
+
         ATSDB::instance().interface().postProcess();
+
+        if (!ATSDB::instance().interface().isPostProcessed())
+        {
+            logdbg  << "MainWindow: startSlot: post-processing not performed";
+            start_button_->setDisabled (false);
+            return;
+        }
     }
     else
         initAfterStart ();
@@ -198,7 +213,7 @@ void MainWindow::initAfterStart ()
     tab_widget_->setCurrentIndex(1);
 
     assert (task_menu_);
-    task_menu_->setDisabled(false);
+    task_menu_->setDisabled(true);
 }
 
 void MainWindow::createMenus()

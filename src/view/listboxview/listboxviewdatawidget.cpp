@@ -27,7 +27,7 @@
 #include "logger.h"
 #include "atsdb.h"
 
-ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxViewDataSource *data_source, QWidget * parent, Qt::WindowFlags f)
+ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxViewDataSource* data_source, QWidget * parent, Qt::WindowFlags f)
     : QWidget (parent, f), data_source_ (data_source)
 {
     assert (data_source_);
@@ -41,7 +41,7 @@ ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxViewDataSource *data_source,
     {
         if (object.second->hasData())
         {
-            BufferTableWidget *buffer_table = new BufferTableWidget (*object.second);
+            BufferTableWidget *buffer_table = new BufferTableWidget (*object.second, *data_source_);
             tab_widget_->addTab (buffer_table , object.first.c_str());
             buffer_tables_[object.first] = buffer_table;
             connect (buffer_table, SIGNAL(exportDoneSignal(bool)), this, SLOT(exportDoneSlot(bool)));
@@ -91,7 +91,7 @@ void ListBoxViewDataWidget::exportDataSlot(bool overwrite)
 {
     logdbg << "ListBoxViewDataWidget: exportDataSlot";
     assert (tab_widget_);
-    BufferTableWidget *buffer_widget = reinterpret_cast<BufferTableWidget *> (tab_widget_->currentWidget());
+    BufferTableWidget *buffer_widget = dynamic_cast<BufferTableWidget*> (tab_widget_->currentWidget());
     assert (buffer_widget);
     buffer_widget->exportSlot(overwrite);
 }

@@ -27,66 +27,71 @@ class DBSchema;
 /**
  * @brief Database table definition
  *
- * Has some parameters (name, name in database, key column name, description) and a collection of DBTableColumn instances.
+ * Has some parameters (name, name in database, key column name, description) and a collection of DBTableColumn
+ *  instances.
  */
 class DBTable : public Configurable
 {
 public:
-  /// @brief Constructor
-  DBTable(const std::string &class_id, const std::string &instance_id, DBSchema *schema);
-  /// @brief Destructor
-  virtual ~DBTable();
+    /// @brief Constructor
+    DBTable(const std::string& class_id, const std::string& instance_id, DBSchema& schema);
+    /// @brief Destructor
+    virtual ~DBTable();
 
-  virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
+    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
 
-  /// @brief Sets the identifier name, is the name in the database
-  //void name (const std::string &name) {assert (name.size() != 0); name_ = name;}
-  /// @brief Returns the identifier name
-  const std::string &name () const { return name_; }
+    /// @brief Returns the identifier name
+    const std::string& name () const { return name_; }
 
-  /// @brief Sets the description
-  void info (const std::string &info) { info_=info; }
-  /// @brief Returns the description
-  const std::string &info () const { return info_; }
+    /// @brief Sets the description
+    void info (const std::string& info) { info_=info; }
+    /// @brief Returns the description
+    const std::string& info () const { return info_; }
 
-  bool hasColumn (const std::string &name) const;
-  /// @brief Returns the DBTableColumn identified by the given name
-  const DBTableColumn &column (const std::string &name) const;
-  /// @brief Returns number of defined database columns
-  unsigned int numColumns () const { return columns_.size(); }
-  /// @brief Deletes a given column
-  void deleteColumn (const std::string &name);
+    bool hasColumn (const std::string& name) const;
+    /// @brief Returns the DBTableColumn identified by the given name
+    const DBTableColumn& column (const std::string& name) const;
+    /// @brief Returns number of defined database columns
+    unsigned int numColumns () const { return columns_.size(); }
+    /// @brief Deletes a given column
+    void deleteColumn (const std::string &name);
 
-  /// @brief Returns container with all table columns
-  const std::map <std::string, DBTableColumn*>& columns () const { return columns_; }
+    /// @brief Returns container with all table columns
+    const std::map <std::string, DBTableColumn*>& columns () const { return columns_; }
 
-  /// @brief Returns if the name of the key column is defined
-  bool hasKey() const { return key_name_.size() > 0; }
-  /// @brief Sets the name of the key column
-  void key (const std::string &key) { key_name_ = key; }
-  /// @brief Returns name of the key column
-  const std::string &key () const { return key_name_; }
+    /// @brief Returns if the name of the key column is defined
+    bool hasKey() const { return key_name_.size() > 0; }
+    /// @brief Sets the name of the key column
+    void key (const std::string& key) { key_name_ = key; }
+    /// @brief Returns name of the key column
+    const std::string& key () const { return key_name_; }
 
-  void populate ();
+    void populate ();
 
-  DBTableWidget *widget ();
+    void lock ();
+    bool isLocked () { return locked_; }
+
+
+    DBTableWidget* widget ();
 
 private:
-  DBSchema &schema_;
+    DBSchema &schema_;
 
-  DBTableWidget *widget_;
+    bool locked_ {false};
 
-  /// Table name identifier
-  std::string name_;
-  /// Description
-  std::string info_;
-  /// Name of the key column
-  std::string key_name_;
-  /// Container with all table columns (column name -> DBTableColumn)
-  std::map <std::string, DBTableColumn*> columns_;
+    DBTableWidget* widget_ {nullptr};
+
+    /// Table name identifier
+    std::string name_;
+    /// Description
+    std::string info_;
+    /// Name of the key column
+    std::string key_name_;
+    /// Container with all table columns (column name -> DBTableColumn)
+    std::map <std::string, DBTableColumn*> columns_;
 
 protected:
-  virtual void checkSubConfigurables ();
+    virtual void checkSubConfigurables ();
 };
 
 #endif /* DBTABLE_H_ */

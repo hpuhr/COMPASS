@@ -18,7 +18,7 @@
 #ifndef DBINTERFACE_H_
 #define DBINTERFACE_H_
 
-#include <boost/thread/mutex.hpp>
+#include <QMutex>
 #include <set>
 #include <memory>
 #include <qobject.h>
@@ -65,7 +65,7 @@ class DBInterface : public QObject, public Configurable
 {
     Q_OBJECT
 signals:
-    void databaseOpenedSignal ();
+    void databaseContentChangedSignal ();
     void postProcessingDoneSignal ();
 
 public slots:
@@ -83,7 +83,7 @@ public:
     const std::string &usedConnection () { return used_connection_; }
     /// @brief Initializes a database connection based on the supplied type
     void useConnection (const std::string &connection_type);
-    void databaseOpened ();
+    void databaseContentChanged ();
     void closeConnection ();
 
     void updateTableInfo ();
@@ -103,6 +103,7 @@ public:
 
     DBConnection &connection ();
 
+    bool hasDataSourceTables (const DBObject& object);
     /// @brief Returns a container with all data sources for a DBO
     std::map <int, DBODataSource> getDataSources (const DBObject &object);
     bool hasActiveDataSources (const DBObject &object);
@@ -112,11 +113,14 @@ public:
     //    /// @brief Writes a buffer to the database, into a table defined by write_table_names_ and DBO type
     //    void writeBuffer (Buffer *data);
     //    void writeBuffer (Buffer *data, std::string table_name);
-    void updateBuffer (DBObject &object, DBOVariable &key_var, std::shared_ptr<Buffer> buffer);
+    void updateBuffer (DBObject &object, DBOVariable &key_var, std::shared_ptr<Buffer> buffer, size_t from_index,
+                       size_t to_index);
 
     //    /// @brief Prepares incremental read of DBO type
-    void prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause, std::vector <DBOVariable *> filtered_variables,
-                      bool use_order=false, DBOVariable *order_variable=nullptr, bool use_order_ascending=false, const std::string &limit="");
+    void prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
+                      std::vector <DBOVariable *> filtered_variables, bool use_order=false,
+                      DBOVariable *order_variable=nullptr, bool use_order_ascending=false, const std::string &limit="");
+
     /// @brief Returns data chunk of DBO type
     std::shared_ptr <Buffer> readDataChunk (const DBObject &dbobject, bool activate_key_search);
     /// @brief Cleans up incremental read of DBO type
@@ -138,6 +142,7 @@ public:
     std::string getProperty (const std::string& id);
     bool hasProperty (const std::string& id);
 
+    bool existsTable (const std::string& table_name);
     /// @brief Returns if minimum/maximum table exists
     bool existsMinMaxTable ();
     /// @brief Returns the minimum/maximum table
@@ -198,19 +203,13 @@ protected:
     bool initialized_;
 
     /// Protects the database
-    boost::mutex connection_mutex_;
+    QMutex connection_mutex_;
 
-    /// Container with all table names, based on DBO type
-    // TODO solve this
-    //std::map <std::string, std::string> write_table_names_;
     /// Size of a read chunk in incremental reading process
     unsigned int read_chunk_size_;
 
     /// Generates SQL statements
     SQLGenerator sql_generator_;
-
-    /// Writes buffer to the database
-    BufferWriter *buffer_writer_{nullptr};
 
     DBInterfaceWidget *widget_;
     DBInterfaceInfoWidget *info_widget_;
@@ -222,6 +221,8 @@ protected:
     unsigned int postprocess_job_num_{0};
 
     virtual void checkSubConfigurables ();
+
+    void insertBindStatementUpdateForCurrentIndex (std::shared_ptr<Buffer> buffer, unsigned int row);
 
     void setPostProcessed (bool value);
     //    /// @brief Returns buffer with min/max data from another Buffer with the string contents. Delete returned buffer yourself.

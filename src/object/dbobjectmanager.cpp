@@ -34,8 +34,8 @@ using namespace Utils::String;
 /**
  * Creates sub-configurables.
  */
-DBObjectManager::DBObjectManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb)
-: Configurable (class_id, instance_id, atsdb, "conf/config_dbo.xml"), widget_(nullptr), load_widget_(nullptr) //, registered_parent_variables_ (false)
+DBObjectManager::DBObjectManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb)
+: Configurable (class_id, instance_id, atsdb, "db_object.xml")
 {
     logdbg  << "DBObjectManager: constructor: creating subconfigurables";
 
@@ -48,26 +48,17 @@ DBObjectManager::DBObjectManager(const std::string &class_id, const std::string 
 
     registerParameter("use_limit", &use_limit_, false);
     registerParameter("limit_min", &limit_min_, 0);
-    registerParameter("limit_max", &limit_max_, 1000);
+    registerParameter("limit_max", &limit_max_, 100000);
 
     createSubConfigurables ();
+
+    lock();
 }
 /**
  * Deletes all DBOs.
  */
 DBObjectManager::~DBObjectManager()
 {
-//    if (registered_parent_variables_)
-//    {
-//        //loginf << "DBObjectManager: registerParentVariablesIfRequired: registering";
-//        std::map <std::string, DBObject*>::iterator it;
-
-//        for (it = objects_.begin(); it != objects_.end(); it++)
-//            if (it->second->isMeta())
-//                it->second->unregisterParentVariables();
-
-//        registered_parent_variables_=false;
-//    }
     for (auto it : objects_)
         delete it.second;
     objects_.clear();
@@ -101,8 +92,9 @@ void DBObjectManager::generateSubConfigurable (const std::string &class_id, cons
         logdbg  << "DBObjectManager: generateSubConfigurable: adding object type " << object->name();
         assert (objects_.find(object->name()) == objects_.end());
         objects_.insert(std::pair <std::string, DBObject*> (object->name(), object));
-        connect (this, SIGNAL(schemaChangedSignal()), object, SLOT(schemaChangedSlot()));
-        connect (this, SIGNAL(databaseOpenedSignal()), object, SLOT(databaseOpenedSlot()));
+        connect (this, &DBObjectManager::schemaChangedSignal, object, &DBObject::schemaChangedSlot);
+        connect (this, &DBObjectManager::databaseContentChangedSignal, object, &DBObject::databaseContentChangedSlot);
+        connect (object, &DBObject::loadingDoneSignal, this, &DBObjectManager::loadingDoneSlot);
         // TODO what if generation after db opening?
     }
     else if (class_id.compare ("MetaDBOVariable") == 0)
@@ -123,16 +115,18 @@ void DBObjectManager::checkSubConfigurables ()
 
 bool DBObjectManager::existsObject (const std::string &dbo_name)
 {
-    //registerParentVariablesIfRequired();
-
     return (objects_.find(dbo_name) != objects_.end());
+}
+
+void DBObjectManager::schemaLockedSlot()
+{
+    loginf << "DBObjectManager: schemaLockedSlot";
+    unlock ();
 }
 
 DBObject &DBObjectManager::object (const std::string &dbo_name)
 {
     logdbg  << "DBObjectManager: object: name " << dbo_name;
-
-    //registerParentVariablesIfRequired();
 
     assert (objects_.find(dbo_name) != objects_.end());
 
@@ -171,67 +165,14 @@ void DBObjectManager::deleteMetaVariable (const std::string &var_name)
     meta_variables_.erase(var_name);
 }
 
-
-/**
- * Checks if variable exists, returns it if found.
- *
- * \exception std::runtime_error if variable not found.
- */
-//DBOVariable *DBObjectManager::getDBOVariable (const std::string &dbo_type, std::string id)
-//{
-//    logdbg  << "DBObjectManager: getDBOVariable: type " << dbo_type << " id " << id;
-
-//    //registerParentVariablesIfRequired();
-
-//    assert (existsDBObject(dbo_type));
-//    assert (id.size() > 0);
-
-//    if (!existsDBOVariable (dbo_type, id))
-//    {
-//        logerr  << "DBObjectManager: getDBOVariable: variable unknown type " << dbo_type << " id " << id;
-//        throw std::runtime_error("DBObjectManager: getDBOVariable: variable unknown");
-//    }
-
-//    return getDBObject (dbo_type)->getVariable(id);
-//}
-
-//std::map <std::string, DBOVariable*> &DBObjectManager::getDBOVariables (const std::string &dbo_type)
-//{
-//    //registerParentVariablesIfRequired();
-
-//    assert (existsDBObject(dbo_type));
-//    return getDBObject (dbo_type)->getVariables();
-//}
-
-//bool DBObjectManager::existsDBOVariable (const std::string &dbo_type, std::string id)
-//{
-//    //registerParentVariablesIfRequired();
-
-//    if (!existsDBObject(dbo_type))
-//        return false;
-//    return getDBObject (dbo_type)->hasVariable(id);
-//}
-
-//void DBObjectManager::registerParentVariablesIfRequired ()
-//{
-//    if (!registered_parent_variables_)
-//    {
-//        //loginf << "DBObjectManager: registerParentVariablesIfRequired: registering";
-//        std::map <std::string, DBObject*>::iterator it;
-
-//        for (it = objects_.begin(); it != objects_.end(); it++)
-//            if (it->second->isMeta())
-//                it->second->registerParentVariables();
-
-//        registered_parent_variables_=true;
-//    }
-//}
-
 DBObjectManagerWidget *DBObjectManager::widget()
 {
     if (!widget_)
     {
         widget_ = new DBObjectManagerWidget (*this);
+
+        if (locked_)
+            widget_->lock ();
     }
 
     assert (widget_);
@@ -358,15 +299,60 @@ void DBObjectManager::clearOrderVariable ()
     order_variable_name_="";
 }
 
+void DBObjectManager::lock ()
+{
+    if (locked_)
+        return;
+
+    locked_ = true;
+
+    for (auto& object_it : objects_)
+        object_it.second->lock();
+
+    for (auto& meta_it : meta_variables_)
+        meta_it.second->lock();
+
+    if (widget_)
+        widget_->lock();
+}
+
+void DBObjectManager::unlock ()
+{
+    if (!locked_)
+        return;
+
+    locked_ = false;
+
+    for (auto& object_it : objects_)
+        object_it.second->unlock();
+
+    for (auto& meta_it : meta_variables_)
+        meta_it.second->unlock();
+
+
+    if (widget_)
+        widget_->unlock();
+}
+
 void DBObjectManager::loadSlot ()
 {
-    loginf << "DBObjectManager: loadSlot";
+    logdbg << "DBObjectManager: loadSlot";
+
+    bool load_job_created = false;
+
     for (auto object : objects())
     {
-        logdbg << "DBObjectManager: loadSlot: object " << object.first << " wanted loading " << object.second->loadingWanted();
-        if (object.second->loadingWanted())
+        if (object.second->loadable() && object.second->loadingWanted())
         {
+            loginf << "DBObjectManager: loadSlot: loading object " << object.first;
             DBOVariableSet read_set = ATSDB::instance().viewManager().getReadSet(object.first);
+
+            if (read_set.getSize() == 0)
+            {
+                loginf << "DBObjectManager: loadSlot: skipping loading of object " << object.first
+                       << " since an empty read list was detected";
+                continue;
+            }
 
             std::string limit_str = "";
             if (use_limit_)
@@ -381,11 +367,28 @@ void DBObjectManager::loadSlot ()
             if (hasOrderMetaVariable())
                 variable = &orderMetaVariable().getFor(object.first);
 
-            // load (DBOVariableSet &read_set, bool use_filters, bool use_order, DBOVariable *order_variable, bool use_order_ascending, const std::string &limit_str="")
+            // load (DBOVariableSet &read_set, bool use_filters, bool use_order, DBOVariable *order_variable,
+            // bool use_order_ascending, const std::string &limit_str="")
             object.second->load(read_set, use_filters_, use_order_, variable, use_order_ascending_, limit_str);
+
+            load_job_created = true;
         }
     }
     emit loadingStartedSignal();
+
+    if (!load_job_created)
+    {
+        if (load_widget_)
+            load_widget_->loadingDone();
+    }
+}
+
+void DBObjectManager::quitLoading ()
+{
+    loginf << "DBObjectManager: quitLoading";
+
+    for (auto object : objects())
+        object.second->quitLoading();
 }
 
 void DBObjectManager::updateSchemaInformationSlot ()
@@ -393,7 +396,31 @@ void DBObjectManager::updateSchemaInformationSlot ()
     emit schemaChangedSignal();
 }
 
-void DBObjectManager::databaseOpenedSlot ()
+void DBObjectManager::databaseContentChangedSlot ()
 {
-    emit databaseOpenedSignal();
+    emit databaseContentChangedSignal();
+}
+
+void DBObjectManager::loadingDoneSlot (DBObject& object)
+{
+    bool done=true;
+
+    for (auto object_it : objects())
+        if (object_it.second->isLoading())
+        {
+            logdbg << "DBObjectManager: loadingDoneSlot: " << object_it.first << " still loading";
+            done = false;
+            break;
+        }
+
+    if (done)
+    {
+        loginf << "DBObjectManager: loadingDoneSlot: all done";
+        emit allLoadingDoneSignal();
+
+        if (load_widget_)
+            load_widget_->loadingDone();
+    }
+    else
+        logdbg << "DBObjectManager: loadingDoneSlot: not done";
 }

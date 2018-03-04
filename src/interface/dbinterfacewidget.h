@@ -47,7 +47,6 @@ public:
 protected:
     DBInterface &interface_;
 
-    //QVBoxLayout *connection_layout_;
     QStackedWidget *connection_stack_;
 
     void useConnection (std::string connection_type);

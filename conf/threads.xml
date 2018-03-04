@@ -1,4 +1,0 @@
-<Configuration class_id="WorkerThreadManager" instance_id="WorkerThreadManager0">
-    <ParameterUnsignedInt num_workers="3"/>
-    <ParameterUnsignedInt update_time="10"/>
-</Configuration>

@@ -70,13 +70,19 @@ void SQLiteConnection::openFile (const std::string &file_name)
     char * sErrMsg = 0;
     sqlite3_exec(db_handle_, "PRAGMA synchronous = OFF", NULL, NULL, &sErrMsg);
 
-    interface_.databaseOpened();
+    connection_ready_ = true;
+
+    interface_.databaseContentChanged();
 
     emit connectedSignal();
 }
 
 void SQLiteConnection::disconnect()
 {
+    loginf << "SQLiteConnection: disconnect";
+
+    connection_ready_ = false;
+
     if (widget_)
     {
         delete widget_;
@@ -475,8 +481,17 @@ std::vector <std::string> SQLiteConnection::getTableList()  // buffer of table n
     std::shared_ptr <Buffer> buffer = result->buffer();
 
     unsigned int size = buffer->size();
+    std::string table_name;
+
     for (unsigned int cnt=0; cnt < size; cnt++)
+    {
+        table_name = buffer->getString("name").get(cnt);
+
+        if (table_name.find("sqlite") != std::string::npos) //ignore sqlite system tables
+            continue;
+
         tables.push_back(buffer->getString("name").get(cnt));
+    }
 
     return tables;
 }
@@ -506,7 +521,7 @@ DBTableInfo SQLiteConnection::getColumnList(const std::string &table) // buffer 
 
     for (unsigned int cnt=0; cnt < buffer->size(); cnt++)
     {
-        loginf << "UGA " << table << ": "  << buffer->getString("name").get(cnt);
+        //loginf << "UGA " << table << ": "  << buffer->getString("name").get(cnt);
 
         std::string data_type = buffer->getString("type").get(cnt);
 

@@ -35,17 +35,15 @@
 #include "projectionmanager.h"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/thread.hpp>
-#include <boost/function.hpp>
 #include <qobject.h>
 
 using namespace std;
 
 /**
- * Locks state_mutex_, sets init state, creates members, starts the thread using go.
+ * Sets init state, creates members, starts the thread using go.
  */
 ATSDB::ATSDB()
- : Configurable ("ATSDB", "ATSDB0", 0, "conf/atsdb.xml"), initialized_(false), db_interface_(nullptr), dbo_manager_(nullptr), db_schema_manager_ (nullptr),
+ : Configurable ("ATSDB", "ATSDB0", 0, "atsdb.xml"), initialized_(false), db_interface_(nullptr), dbo_manager_(nullptr), db_schema_manager_ (nullptr),
    filter_manager_(nullptr), view_manager_(nullptr)
 {
     logdbg  << "ATSDB: constructor: start";
@@ -62,7 +60,8 @@ ATSDB::ATSDB()
     assert (view_manager_);
 
     QObject::connect (db_schema_manager_, SIGNAL(schemaChangedSignal()), dbo_manager_, SLOT(updateSchemaInformationSlot()));
-    QObject::connect(db_interface_, SIGNAL(databaseOpenedSignal()), dbo_manager_, SLOT(databaseOpenedSlot()));
+    QObject::connect (db_schema_manager_, SIGNAL(schemaLockedSignal()), dbo_manager_, SLOT(schemaLockedSlot()));
+    QObject::connect (db_interface_, SIGNAL(databaseContentChangedSignal()), dbo_manager_, SLOT(databaseContentChangedSlot()));
     //QObject::connect(db_interface_, SIGNAL(databaseOpenedSignal()), filter_manager_, SLOT(databaseOpenedSlot()));
 
     //reference_point_defined_=false;
@@ -246,7 +245,7 @@ bool ATSDB::ready ()
 }
 
 ///**
-// * Calls stop, locks state_mutex_. If data was written uning the StructureReader, this process is finished correctly.
+// * Calls stop. If data was written uning the StructureReader, this process is finished correctly.
 // * State is set to DB_STATE_SHUTDOWN and ouput buffers are cleared.
 // */
 void ATSDB::shutdown ()

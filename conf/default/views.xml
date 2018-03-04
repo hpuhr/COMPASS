@@ -1,0 +1,63 @@
+<Configuration class_id="ViewManager" instance_id="ViewManager0">
+    <Configuration class_id="ViewContainer" instance_id="ViewContainer0">
+        <Configuration class_id="ListBoxView" instance_id="ListBoxView0">
+            <ParameterBool overwrite_csv="1"/>
+            <ParameterBool use_presentation="1"/>
+            <Configuration class_id="ListBoxViewDataSource" instance_id="ListBoxViewDataSource0">
+                <Configuration class_id="DBOVariableOrderedSet" instance_id="DBOVariableOrderedSet0">
+                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitioncallsign0">
+                        <ParameterUnsignedInt index="7"/>
+                        <ParameterString dbo_name="Meta"/>
+                        <ParameterString dbo_variable_name="callsign"/>
+                    </Configuration>
+                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionds_id0">
+                        <ParameterUnsignedInt index="2"/>
+                        <ParameterString dbo_name="Meta"/>
+                        <ParameterString dbo_variable_name="ds_id"/>
+                    </Configuration>
+                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionmode3a_code0">
+                        <ParameterUnsignedInt index="5"/>
+                        <ParameterString dbo_name="Meta"/>
+                        <ParameterString dbo_variable_name="mode3a_code"/>
+                    </Configuration>
+                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionmodec_code_ft0">
+                        <ParameterUnsignedInt index="8"/>
+                        <ParameterString dbo_name="Meta"/>
+                        <ParameterString dbo_variable_name="modec_code_ft"/>
+                    </Configuration>
+                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionpos_lat_deg0">
+                        <ParameterUnsignedInt index="3"/>
+                        <ParameterString dbo_name="Meta"/>
+                        <ParameterString dbo_variable_name="pos_lat_deg"/>
+                    </Configuration>
+                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionpos_long_deg0">
+                        <ParameterUnsignedInt index="4"/>
+                        <ParameterString dbo_name="Meta"/>
+                        <ParameterString dbo_variable_name="pos_long_deg"/>
+                    </Configuration>
+                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionrec_num0">
+                        <ParameterUnsignedInt index="0"/>
+                        <ParameterString dbo_name="Meta"/>
+                        <ParameterString dbo_variable_name="rec_num"/>
+                    </Configuration>
+                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitiontarget_addr0">
+                        <ParameterUnsignedInt index="6"/>
+                        <ParameterString dbo_name="Meta"/>
+                        <ParameterString dbo_variable_name="target_addr"/>
+                    </Configuration>
+                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitiontod0">
+                        <ParameterUnsignedInt index="1"/>
+                        <ParameterString dbo_name="Meta"/>
+                        <ParameterString dbo_variable_name="tod"/>
+                    </Configuration>
+                    <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitiontrack_num0">
+                        <ParameterUnsignedInt index="9"/>
+                        <ParameterString dbo_name="Meta"/>
+                        <ParameterString dbo_variable_name="track_num"/>
+                    </Configuration>
+                </Configuration>
+            </Configuration>
+            <Configuration class_id="ListBoxViewWidget" instance_id="ListBoxViewWidget0"/>
+        </Configuration>
+    </Configuration>
+</Configuration>

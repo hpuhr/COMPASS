@@ -19,11 +19,26 @@
 #define PROJECTIONMANAGER_H_
 
 #include <ogr_spatialref.h>
+#include "geomap.h"
+#include "rs2g.h"
+
+//#include <Eigen/Dense>
 
 #include "configurable.h"
 #include "singleton.h"
 
 class ProjectionManagerWidget;
+
+//typedef mtl::matrix<double,
+//               mtl::rectangle<3,3>,
+//               mtl::dense<>,
+//               mtl::row_major>::type MatA;
+
+//typedef Eigen::Matrix3d MatA;
+
+//typedef mtl::dense1D<double> VecB;
+
+//typedef Eigen::Vector2d VecB;
 
 /**
  * @brief Singleton for coordinate projection handling
@@ -33,75 +48,30 @@ class ProjectionManagerWidget;
 class ProjectionManager : public Singleton, public Configurable
 {
 protected:
-//    /// Height offset
-//    float minimal_height_;
-//    /// System center latitude
-//    double center_latitude_;
-//    /// System center longitude
-//    double center_longitude_;
-
-//    double center_system_x_; //without transform
-//    double center_system_y_; //without transform
-
-//    /// World scale plane width
-//    double projection_plane_width_;
-//    /// World scale constant
-//    double world_scale_;
-//    /// World height scale factor
-//    double height_scale_;
-//    /// World center point in x
-
-//    double mult_factor_;
-//    double trans_x_factor_;
-//    double trans_y_factor_;
-
-    unsigned int epsg_value_;
-
-    OGRSpatialReference geo_;
-    OGRSpatialReference cart_;
-
-    OGRCoordinateTransformation *geo2cart_{nullptr};
-    OGRCoordinateTransformation *cart2geo_{nullptr};
-
-    ProjectionManagerWidget *widget_{nullptr};
-
     /// @brief Constructor
     ProjectionManager();
-
-    void createProjection ();
 
 public:
     /// @brief Desctructor
     virtual ~ProjectionManager();
-    /// @brief Return world plane size
-    double getWorldSize (double size);
 
-    /// @brief Scales world position height
-    float transformHeight (float value);
+    /// @brief Projects cartesian coordinate to geo-coordinate in WGS-84, returns false on error
+    bool sdlGRS2Geo (t_CPos grs_pos, t_GPos& geo_pos);
 
-    /// @brief Projects geo-coordinate in WGS-84 to cartesian coordinate, transform flag to ogre coordinates, else meters
-    void geo2Cart (double latitude, double longitude, double &x_pos, double &y_pos); //, bool transform=true
-    /// @brief Projects cartesian coordinate to geo-coordinate in WGS-84
-    void cart2geo (double x_pos, double y_pos, double &latitude, double &longitude); //, bool transform=true
+    /// @brief Projects geo-coordinate in WGS-84 to cartesian coordinate, returns false on error
+    bool ogrGeo2Cart (double latitude, double longitude, double& x_pos, double& y_pos);
+    /// @brief Projects cartesian coordinate to geo-coordinate in WGS-84, returns false on error
+    bool ogrCart2Geo (double x_pos, double y_pos, double& latitude, double& longitude);
 
-//    double getCenterLatitude () { return center_latitude_; }
-//    double getCenterLongitude () { return center_longitude_; }
-
-//    double getCenterSystemX () { return center_system_x_; } // without transform
-//    double getCenterSystemY () { return center_system_y_; } // without transform
-
-//    void setCenterLatitude (double value) { center_latitude_ = value; }
-//    void setCenterLongitude (double value) { center_longitude_ = value; }
-
-    //std::string getWorldWKTInfo ();
     std::string getWorldPROJ4Info ();
     void setNewCartesianEPSG (unsigned int epsg_value);
-    //std::string getCartesianWKTInfo ();
     std::string getCartesianPROJ4Info ();
+
+    void createOGRProjection ();
 
     unsigned int getEPSG () { return epsg_value_; }
 
-    ProjectionManagerWidget *widget ();
+    ProjectionManagerWidget* widget ();
 
     void shutdown ();
 
@@ -111,6 +81,38 @@ public:
         static ProjectionManager instance;
         return instance;
     }
+    float sdlSystemLatitude() const;
+    void sdlSystemLatitude(float sdl_system_latitude);
+
+    float sdlSystemLongitude() const;
+    void sdlSystemLongitude(float sdl_system_longitude);
+
+    bool useSDLProjection() const;
+    void useSDLProjection(bool use_sdl_projection);
+
+    bool useOGRProjection() const;
+    void useOGRProjection(bool use_ogr_projection);
+
+    bool useRS2GProjection() const;
+    void useRS2GProjection(bool use_rs2g_projection);
+
+protected:
+    bool use_sdl_projection_ {false};
+    bool use_ogr_projection_ {false};
+    bool use_rs2g_projection_ {false};
+
+    float sdl_system_latitude_;
+    float sdl_system_longitude_;
+    t_Mapping_Info sdl_mapping_info_;
+
+    unsigned int epsg_value_;
+    OGRSpatialReference ogr_geo_;
+    OGRSpatialReference ogr_cart_;
+
+    OGRCoordinateTransformation* ogr_geo2cart_ {nullptr};
+    OGRCoordinateTransformation* ogr_cart2geo_ {nullptr};
+
+    ProjectionManagerWidget* widget_ {nullptr};
 };
 
 #endif /* PROJECTIONMANAGER_H_ */

@@ -33,7 +33,7 @@ class DBInterfaceInfoWidget : public QFrame
 
 public slots:
     //void update ();
-    void databaseOpenedSlot ();
+    void databaseContentChangedSlot ();
 
 public:
     /// @brief Constructor

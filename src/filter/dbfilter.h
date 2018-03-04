@@ -52,7 +52,7 @@ public:
     /// @brief Adds a sub-filter. Not used yet.
     void addSubFilter (DBFilter *filter);
     /// @brief Returns if the DBObject of type is filtered by this filter
-    bool filters (const std::string &dbo_type);
+    virtual bool filters (const std::string &dbo_type);
 
     /// @brief Get if the filter configuration has changed
     bool getChanged ();
@@ -65,7 +65,7 @@ public:
     void setVisible (bool visible);
 
     /// @brief Returns the filter name
-    std::string getName () { return name_; }
+    const std::string& getName () { return name_; }
     /// @brief Sets the filter name
     void setName (const std::string &name);
 

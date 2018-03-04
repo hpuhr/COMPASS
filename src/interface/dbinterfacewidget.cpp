@@ -65,7 +65,8 @@ DBInterfaceWidget::DBInterfaceWidget(DBInterface &interface, QWidget* parent, Qt
         grplayout->addWidget (radio);
 
         connection_stack_->addWidget(it.second->widget());
-        QObject::connect(it.second->widget(), SIGNAL(databaseOpenedSignal()), this, SLOT(databaseOpenedSlot()), static_cast<Qt::ConnectionType>(Qt::UniqueConnection));
+        QObject::connect(it.second->widget(), SIGNAL(databaseOpenedSignal()),
+                         this, SLOT(databaseOpenedSlot()), static_cast<Qt::ConnectionType>(Qt::UniqueConnection));
     }
     groupBox->setLayout(grplayout);
     layout->addWidget(groupBox);

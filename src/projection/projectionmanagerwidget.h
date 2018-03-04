@@ -22,24 +22,32 @@
 
 class QLineEdit;
 class QLabel;
+class QRadioButton;
+
+class ProjectionManager;
 
 class ProjectionManagerWidget : public QWidget
 {
     Q_OBJECT
 
 public slots:
-    void changeEPSG();
+    void projectionChangedSlot();
+    void changedEPSGSlot();
 
 public:
-    ProjectionManagerWidget(QWidget* parent = 0, Qt::WindowFlags f = 0);
+    ProjectionManagerWidget(ProjectionManager& proj_man, QWidget* parent=0, Qt::WindowFlags f=0);
     virtual ~ProjectionManagerWidget();
 
 protected:
-    QLabel *world_proj_info_label_;
-    QLineEdit *epsg_edit_;
-    QLabel *cart_proj_info_label_;
+    ProjectionManager& projection_manager_;
 
-    void createGUIElements ();
+    QRadioButton* ogr_radio_ {nullptr};
+    QLabel* world_proj_info_label_ {nullptr};
+    QLineEdit* epsg_edit_ {nullptr};
+    QLabel* cart_proj_info_label_ {nullptr};
+
+    QRadioButton* sdl_radio_ {nullptr};
+    QRadioButton* rs2g_radio_ {nullptr};
 };
 
 

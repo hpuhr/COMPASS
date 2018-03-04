@@ -23,8 +23,6 @@
 #include "dbovariableset.h"
 #include "configurable.h"
 
-#include <boost/thread/mutex.hpp>
-#include <boost/function.hpp>
 #include <set>
 #include <map>
 #include <vector>

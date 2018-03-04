@@ -20,11 +20,11 @@
 #include "configuration.h"
 #include "configurable.h"
 #include "logger.h"
+#include "files.h"
 
 #include "stringconv.h"
 
 using namespace Utils;
-
 
 using namespace tinyxml2;
 
@@ -633,7 +633,11 @@ void Configuration::parseXMLFileElement (tinyxml2::XMLElement *element)
     {
         XMLDocument *sub_config_file_doc = new XMLDocument ();
 
-        if (sub_config_file_doc->LoadFile(path.c_str()) == 0)
+        std::string file_path = CURRENT_CONF_DIRECTORY+path;
+        loginf << "Configuration: parseXMLFileElement: loading file '" << file_path << "'";
+        Files::verifyFileExists(file_path);
+
+        if (sub_config_file_doc->LoadFile(file_path.c_str()) == 0)
         {
             XMLElement *element;
 
@@ -739,10 +743,13 @@ XMLElement *Configuration::generateXMLElement (tinyxml2::XMLDocument *parent_doc
 
     if (configuration_filename_.size() > 0)
     {
-        logdbg  << "Configuration: generateElement: saving sub-configuration file '" << configuration_filename_ << "'";
-
         document->LinkEndChild( element );
-        document->SaveFile(configuration_filename_.c_str());
+
+        std::string file_path = CURRENT_CONF_DIRECTORY+configuration_filename_;
+        loginf  << "Configuration: generateElement: saving sub-configuration file '" << file_path << "'";
+        Files::verifyFileExists(file_path);
+
+        document->SaveFile(file_path.c_str());
         delete document;
 
         XMLElement *sub_file_element = parent_document->NewElement( "SubConfigurationFile" );

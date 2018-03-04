@@ -52,32 +52,35 @@ public slots:
     /// @brief Called when limit maximum is changed
     void limitMaxChanged();
 
-    void loadAllSlot ();
+    void loadButtonSlot ();
     void updateSlot ();
 
 public:
     /// @brief Constructor
-    DBObjectManagerLoadWidget(DBObjectManager &object_manager);
+    DBObjectManagerLoadWidget(DBObjectManager& object_manager);
     /// @brief Destructor
     virtual ~DBObjectManagerLoadWidget();
 
+    void loadingDone ();
+
 private:
-    DBObjectManager &object_manager_;
-    QVBoxLayout *info_layout_;
+    DBObjectManager& object_manager_;
+    QVBoxLayout* info_layout_ {nullptr};
 
-    QCheckBox *filters_check_;
-    QCheckBox *order_check_;
-    QCheckBox *order_ascending_check_;
+    QCheckBox* filters_check_ {nullptr};
+    QCheckBox* order_check_ {nullptr};
+    QCheckBox* order_ascending_check_ {nullptr};
     /// Order-by variable selection widget
-    DBOVariableSelectionWidget *order_variable_widget_;
-    QCheckBox *limit_check_;
+    DBOVariableSelectionWidget* order_variable_widget_ {nullptr};
+    QCheckBox* limit_check_ {nullptr};
     /// Limit minimum edit field
-    QLineEdit *limit_min_edit_;
+    QLineEdit* limit_min_edit_ {nullptr};
     /// Limit maximum edit field
-    QLineEdit *limit_max_edit_;
+    QLineEdit* limit_max_edit_ {nullptr};
 
-    QPushButton *load_all_button_;
+    QPushButton* load_button_ {nullptr};
 
+    bool loading_ {false};
 };
 
 #endif /* DBOBJECTMANAGERINFOWIDGET_H_ */

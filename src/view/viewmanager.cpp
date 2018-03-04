@@ -33,7 +33,7 @@
 using namespace Utils;
 
 ViewManager::ViewManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb)
-    : Configurable (class_id, instance_id, atsdb, "conf/config_views.xml"), atsdb_(*atsdb), widget_(nullptr), initialized_(false), container_count_(0)
+    : Configurable (class_id, instance_id, atsdb, "views.xml"), atsdb_(*atsdb)
 {
     logdbg  << "ViewManager: constructor";
 }
@@ -42,9 +42,9 @@ void ViewManager::init (QTabWidget *tab_widget)
 {
     logdbg  << "ViewManager: init";
     assert (tab_widget);
-    assert (!tab_widget_);
+    assert (!main_tab_widget_);
     assert (!initialized_);
-    tab_widget_=tab_widget;
+    main_tab_widget_=tab_widget;
 
     initialized_=true;
 
@@ -99,7 +99,7 @@ void ViewManager::generateSubConfigurable (const std::string &class_id, const st
 
     if (class_id.compare ("ViewContainer") == 0)
     {
-        ViewContainer *container = new ViewContainer (class_id, instance_id, this, this, tab_widget_);
+        ViewContainer *container = new ViewContainer (class_id, instance_id, this, this, main_tab_widget_, 0);
         assert (containers_.count(instance_id) == 0);
         containers_.insert (std::pair <std::string, ViewContainer*> (instance_id, container));
 
@@ -111,7 +111,8 @@ void ViewManager::generateSubConfigurable (const std::string &class_id, const st
     {
         ViewContainerWidget *container_widget = new ViewContainerWidget (class_id, instance_id, this);
         assert (containers_.count(container_widget->viewContainer().getInstanceId()) == 0);
-        containers_.insert (std::pair <std::string, ViewContainer*> (container_widget->viewContainer().getInstanceId(), &container_widget->viewContainer()));
+        containers_.insert (std::pair <std::string, ViewContainer*> (container_widget->viewContainer().getInstanceId(),
+                                                                     &container_widget->viewContainer()));
         assert (container_widgets_.count(instance_id) == 0);
         container_widgets_.insert (std::pair <std::string, ViewContainerWidget*> (instance_id, container_widget));
 

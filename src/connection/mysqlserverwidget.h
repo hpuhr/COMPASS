@@ -31,13 +31,17 @@ class MySQLServerWidget : public QWidget
     Q_OBJECT
 
 public slots:
-    void updateHostSlot (const QString &value);
-    void updateUserSlot (const QString &value);
-    void updatePasswordSlot (const QString &value);
-    void updatePortSlot (const QString &value);
+    void updateHostSlot (const QString& value);
+    void updateUserSlot (const QString& value);
+    void updatePasswordSlot (const QString& value);
+    void updatePortSlot (const QString& value);
     void connectSlot ();
 
-    void updateDatabaseSlot (const QString &value);
+    void updateDatabaseSlot (const QString& value);
+
+    void newDatabaseSlot ();
+    void clearDatabaseSlot ();
+    void deleteDatabaseSlot ();
     void openDatabaseSlot ();
 
 signals:
@@ -45,30 +49,34 @@ signals:
     void databaseOpenedSignal ();
 
 public:
-    explicit MySQLServerWidget(MySQLppConnection &connection, MySQLServer &server, QWidget *parent = 0);
+    explicit MySQLServerWidget(MySQLppConnection& connection, MySQLServer& server, QWidget* parent = 0);
     virtual ~MySQLServerWidget ();
 
 protected:
-    MySQLppConnection &connection_;
-    MySQLServer &server_;
+    MySQLppConnection& connection_;
+    MySQLServer& server_;
 
     /// MySQL ip address edit field
-    QLineEdit *host_edit_;
+    QLineEdit* host_edit_ {nullptr};
     /// MySQL username edit field
-    QLineEdit *user_edit_;
+    QLineEdit* user_edit_ {nullptr};
     /// MySQL password edit field
-    QLineEdit *password_edit_;
+    QLineEdit* password_edit_ {nullptr};
     /// MySQL port edit field
-    QLineEdit *port_edit_;
+    QLineEdit* port_edit_ {nullptr};
 
     /// Open connection button
     QPushButton *connect_button_;
 
     /// MySQL database name edit field
-    //QLineEdit *mysql_db_name_edit_;
-    QComboBox *db_name_box_;
+    QComboBox *db_name_box_ {nullptr};
 
-    QPushButton *open_button_;
+
+    QPushButton* new_button_ {nullptr};
+    QPushButton* clear_button_ {nullptr};
+    QPushButton* delete_button_ {nullptr};
+
+    QPushButton* open_button_ {nullptr};
 
     void updateDatabases ();
 };

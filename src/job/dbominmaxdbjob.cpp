@@ -15,6 +15,8 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "boost/date_time/posix_time/posix_time.hpp"
+
 #include "dbominmaxdbjob.h"
 #include "dbinterface.h"
 #include "sqlgenerator.h"
@@ -34,7 +36,7 @@
 using namespace Utils;
 
 DBOMinMaxDBJob::DBOMinMaxDBJob(DBInterface& db_interface, const DBObject& object)
-: Job(), db_interface_(db_interface), object_(object)
+: Job("DBOMinMaxDBJob"), db_interface_(db_interface), object_(object)
 {
 }
 
@@ -152,7 +154,11 @@ void DBOMinMaxDBJob::createMinMaxValuesNormal ()
 
     for (auto table_it : object_.currentMetaTable().subTables())
     {
-        processTable (table_it.second);
+
+        if (db_interface_.existsTable(table_it.first))
+            processTable (table_it.second);
+        else
+            logwrn << "DBOMinMaxDBJob: createMinMaxValuesNormal: table '" << table_it.first << " not in database";
     }
 }
 
@@ -177,6 +183,13 @@ void DBOMinMaxDBJob::processTable (const DBTable& table)
     logdbg  << "DBInterface: createMinMaxValues: setting variables";
 
     assert (buffer);
+
+    if (buffer->size() == 0)
+    {
+        logwrn << "DBOMinMaxDBJob: processTable: table '" << table.name() << "' has no data";
+        return;
+    }
+
     assert (buffer->size() == 1);
 
     std::string min;

@@ -41,24 +41,24 @@ class ListBoxViewDataSource : public QObject, public Configurable
     Q_OBJECT
 public slots:
     void loadingStartedSlot ();
-    void newDataSlot (DBObject &object);
-    void loadingDoneSlot (DBObject &object);
+    void newDataSlot (DBObject& object);
+    void loadingDoneSlot (DBObject& object);
 
 signals:
     void loadingStartedSignal ();
     /// @brief Emitted when resulting buffer was delivered
-    void updateData (DBObject &object, std::shared_ptr<Buffer> buffer);
+    void updateData (DBObject& object, std::shared_ptr<Buffer> buffer);
 
 public:
     /// @brief Constructor
-    ListBoxViewDataSource(const std::string &class_id, const std::string &instance_id, Configurable *parent);
+    ListBoxViewDataSource(const std::string& class_id, const std::string& instance_id, Configurable* parent);
     /// @brief Destructor
     virtual ~ListBoxViewDataSource();
 
-    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
+    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
 
     /// @brief Returns variable read list
-    DBOVariableOrderedSet *getSet () { return set_; }
+    DBOVariableOrderedSet* getSet () { assert (set_); return set_; }
     /// @brief Returns stored result Buffers
     //std::map <DB_OBJECT_TYPE, Buffer*> &getData () { return data_; }
 
@@ -69,10 +69,10 @@ public:
 
 protected:
     /// Variable read list
-    DBOVariableOrderedSet *set_;
+    DBOVariableOrderedSet* set_ {nullptr};
 
     /// Selected DBObject records
-    ViewSelectionEntries &selection_entries_;
+    ViewSelectionEntries& selection_entries_;
 
     virtual void checkSubConfigurables ();
 };

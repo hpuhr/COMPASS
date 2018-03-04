@@ -79,7 +79,8 @@ void ViewContainerWidget::generateSubConfigurable (const std::string &class_id, 
     {
         assert (tab_widget_);
         assert (!view_container_);
-        view_container_ = new ViewContainer (class_id, instance_id, this, &view_manager_, tab_widget_);
+        view_container_ = new ViewContainer (class_id, instance_id, this, &view_manager_, tab_widget_,
+                                             String::getAppendedInt(instance_id_));
         assert (view_container_);
     }
     else

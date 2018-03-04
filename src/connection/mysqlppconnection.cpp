@@ -28,26 +28,38 @@
 #include "dbtableinfo.h"
 #include "stringconv.h"
 #include "mysqlserver.h"
+#include "files.h"
+#include "stringconv.h"
 
 #include "boost/date_time/posix_time/posix_time.hpp"
+
+#include <archive.h>
+#include <archive_entry.h>
+
+#include <iostream>
+#include <fstream>
+
 #include <QMessageBox>
+#include <QProgressDialog>
+#include <QMessageBox>
+#include <QCoreApplication>
 
 using namespace Utils;
 
-MySQLppConnection::MySQLppConnection(const std::string &class_id, const std::string &instance_id, DBInterface *interface)
-    : DBConnection (class_id, instance_id, interface), interface_(*interface), connected_server_(nullptr), connection_(mysqlpp::Connection (false)),
-      prepared_query_(connection_.query()),
-      prepared_parameters_(mysqlpp::SQLQueryParms(&prepared_query_)), query_used_(false), transaction_(nullptr), prepared_command_(nullptr),
-      prepared_command_done_(true), widget_(nullptr), info_widget_(nullptr)
+MySQLppConnection::MySQLppConnection(const std::string &class_id, const std::string &instance_id,
+                                     DBInterface *interface)
+    : DBConnection (class_id, instance_id, interface), interface_(*interface), connection_(mysqlpp::Connection ()),
+      prepared_query_(connection_.query()), prepared_parameters_(mysqlpp::SQLQueryParms(&prepared_query_))
 {
     registerParameter("used_server", &used_server_, "");
+
+    connection_.set_option(new mysqlpp::LocalInfileOption(true));
 
     createSubConfigurables ();
 }
 
 MySQLppConnection::~MySQLppConnection()
 {
-
 }
 
 void MySQLppConnection::setServer (const std::string &server)
@@ -59,13 +71,40 @@ void MySQLppConnection::setServer (const std::string &server)
 
 void MySQLppConnection::connectServer ()
 {
-    logdbg << "MySQLppConnection: connectServer";
-
     assert (servers_.count(used_server_) == 1);
     connected_server_ = servers_.at(used_server_);
-    connection_.connect("", connected_server_->host().c_str(), connected_server_->user().c_str(), connected_server_->password().c_str(), connected_server_->port());
+
+    loginf << "MySQLppConnection: connectServer: host " << connected_server_->host() << " port "
+           << connected_server_->port() << " user " << connected_server_->user() << " pw "
+           << connected_server_->password();
+
+    //bool connect(const char* db = 0, const char* server = 0, const char* user = 0, const char* password = 0,
+    // unsigned int port = 0);
+
+    bool ret = connection_.connect("", connected_server_->host().c_str(), connected_server_->user().c_str(),
+                                   connected_server_->password().c_str(), connected_server_->port());
+
+    if (!ret)
+        throw std::runtime_error("MySQL server connect failed with error "
+                                 + std::to_string(connection_.errnum()) + ": " + connection_.error());
 }
 
+void MySQLppConnection::createDatabase (const std::string &database_name)
+{
+    std::vector<std::string> databases = getDatabases();
+    assert (std::find(databases.begin(), databases.end(), database_name) == databases.end());
+
+    connection_.create_db(database_name.c_str());
+}
+
+void MySQLppConnection::deleteDatabase (const std::string &database_name)
+{
+    std::vector<std::string> databases = getDatabases();
+    assert (std::find(databases.begin(), databases.end(), database_name) != databases.end());
+
+    std::string drop_db = "DROP DATABASE IF EXISTS "+database_name+";";
+    executeSQL (drop_db); // drop if exists
+}
 
 void MySQLppConnection::openDatabase (const std::string &database_name)
 {
@@ -75,6 +114,7 @@ void MySQLppConnection::openDatabase (const std::string &database_name)
     //        executeSQL (drop_db); // drop if exists
     //        connection_.create_db(info->getDB().c_str()); // so, no database? create it first then.
     //    }
+
     connection_.select_db(database_name);
     loginf  << "MySQLppConnection: openDatabase: successfully opened database '" << database_name << "'";
 
@@ -82,7 +122,7 @@ void MySQLppConnection::openDatabase (const std::string &database_name)
     used_database_ = database_name;
 
     emit connectedSignal();
-    interface_.databaseOpened();
+    interface_.databaseContentChanged();
 
     if (info_widget_)
         info_widget_->updateSlot();
@@ -94,6 +134,7 @@ void MySQLppConnection::openDatabase (const std::string &database_name)
 void MySQLppConnection::disconnect()
 {
     connection_.disconnect();
+    connection_ready_ = false;
 
     for (auto it : servers_)
         delete it.second;
@@ -112,20 +153,39 @@ void MySQLppConnection::disconnect()
         delete info_widget_;
         info_widget_ = nullptr;
     }
-
-    connected_server_ = nullptr;
 }
 
 void MySQLppConnection::executeSQL(const std::string &sql)
 {
     logdbg  << "MySQLppConnection: executeSQL: sql statement execute: '" <<sql << "'";
 
-    mysqlpp::Query query = connection_.query(sql);
-    if(!query.exec()) // execute it!
+    assert (!query_used_);
+    assert (!prepared_command_);
+    assert (prepared_command_done_);
+
+    query_used_=true;
+
+    try
     {
-        logerr  << "MySQLppConnection: executeSQL: error when executing '" << sql<<"' message '" << query.error() << "'";
-        throw std::runtime_error("MySQLppConnection: executeSQL: error when executing");
+        mysqlpp::Query query = connection_.query(sql);
+
+        if(!query.exec()) // execute it!
+        {
+            logerr  << "MySQLppConnection: executeSQL: error when executing '" << sql<<"' message '"
+                    << query.error() << "'";
+            logwrn << "MySQLppConnection: executeSQL: sql statement '" << sql << "'";
+        }
     }
+    catch (std::exception& e)
+    {
+        logwrn << "MySQLppConnection: executeSQL: sql error '" << e.what() << "'";
+        logwrn << "MySQLppConnection: executeSQL: sql statement '" << sql << "'";
+        query_used_=false;
+
+        return;
+    }
+
+    query_used_=false;
 }
 
 void MySQLppConnection::prepareBindStatement (const std::string &statement)
@@ -169,6 +229,9 @@ void MySQLppConnection::endBindTransaction ()
 
 void MySQLppConnection::finalizeBindStatement ()
 {
+    assert (query_used_);
+
+    prepared_query_.reset();
     query_used_=false;
 
     if (info_widget_)
@@ -251,9 +314,15 @@ std::shared_ptr <DBResult> MySQLppConnection::execute (const DBCommandList &comm
 
 void MySQLppConnection::execute (const std::string &command, std::shared_ptr <Buffer> buffer)
 {
-    logdbg  << "MySQLppConnection: execute: command '" << command << "'";
+    logdbg  << "MySQLppConnection: execute: command '" << command << "' with buffer";
 
     assert (buffer);
+    assert (!query_used_);
+    assert (!prepared_command_);
+    assert (prepared_command_done_);
+
+    query_used_=true;
+
     unsigned int num_properties=0;
 
     const PropertyList &list = buffer->properties();
@@ -266,7 +335,8 @@ void MySQLppConnection::execute (const std::string &command, std::shared_ptr <Bu
 
     logdbg  << "MySQLppConnection: execute: iterating result";
     // Display results
-    unsigned int cnt=buffer->size();
+    size_t cnt = buffer->size();
+
     mysqlpp::StoreQueryResult::const_iterator it;
     for (it = res.begin(); it != res.end(); ++it)
     {
@@ -275,10 +345,13 @@ void MySQLppConnection::execute (const std::string &command, std::shared_ptr <Bu
         cnt++;
     }
 
+    query_used_=false;
+
     logdbg  << "MySQLppConnection: execute done with size " << buffer->size();
 }
 
-void MySQLppConnection::readRowIntoBuffer (mysqlpp::Row &row, const PropertyList &list, unsigned int num_properties, std::shared_ptr <Buffer> buffer, unsigned int index)
+void MySQLppConnection::readRowIntoBuffer (mysqlpp::Row &row, const PropertyList &list, unsigned int num_properties,
+                                           std::shared_ptr <Buffer> buffer, unsigned int index)
 {
     //logdbg << "MySQLppConnection::readRowIntoBuffer: start buffer size " << buffer->size() << " index " << index;
     for (unsigned int cnt=0; cnt < num_properties; cnt++)
@@ -335,12 +408,20 @@ void MySQLppConnection::execute (const std::string &command)
 {
     logdbg  << "MySQLppConnection: execute: command '" << command << "'";
 
+    assert (!query_used_);
+    assert (!prepared_command_);
+    assert (prepared_command_done_);
+
+    query_used_=true;
+
     logdbg  << "MySQLppConnection: execute: creating query";
     mysqlpp::Query query = connection_.query(command);
     logdbg  << "MySQLppConnection: execute: creating storequeryresult";
     mysqlpp::StoreQueryResult res = query.store();
 
     assert (res.begin() == res.end());
+
+    query_used_=false;
     logdbg  << "MySQLppConnection: execute done";
 }
 
@@ -350,6 +431,7 @@ void MySQLppConnection::prepareStatement (const std::string &sql)
     logdbg  << "MySQLppConnection: prepareStatement: sql '" << sql << "'";
 
     assert (!query_used_);
+    query_used_=true;
 
     result_step_ = mysqlpp::UseQueryResult ();
 
@@ -358,10 +440,9 @@ void MySQLppConnection::prepareStatement (const std::string &sql)
 
     if (!(result_step_ = prepared_query_.use()))
     {
-        throw std::runtime_error ("MySQLppConnection: prepareStatement: query error '"+std::string(prepared_query_.error())+"'");
+        throw std::runtime_error ("MySQLppConnection: prepareStatement: query error '"
+                                  +std::string(prepared_query_.error())+"'");
     }
-
-    query_used_=true;
 
     if (info_widget_)
         info_widget_->updateSlot();
@@ -371,6 +452,10 @@ void MySQLppConnection::prepareStatement (const std::string &sql)
 void MySQLppConnection::finalizeStatement ()
 {
     logdbg  << "MySQLppConnection: finalizeStatement";
+
+    assert (query_used_);
+
+    prepared_query_.clear();
     prepared_query_.reset();
     query_used_=false;
 
@@ -454,6 +539,14 @@ void MySQLppConnection::finalizeCommand ()
     assert (prepared_command_);
     //assert (prepared_command_done_); true if ok, false if quit job
 
+    bool first = true;
+    while (mysqlpp::Row row = result_step_.fetch_row())
+        if (first)
+        {
+            loginf << "MySQLppConnection: finalizeCommand: stepping through result set to finalize";
+            first = false;
+        }
+
     prepared_command_=nullptr; // should be deleted by caller
     prepared_command_done_=true;
     finalizeStatement();
@@ -489,7 +582,8 @@ std::vector <std::string> MySQLppConnection::getTableList()  // buffer of table 
     assert (result->containsData());
     std::shared_ptr <Buffer> buffer = result->buffer();
 
-    unsigned int size = buffer->size();
+    size_t size = buffer->size();
+
     for (unsigned int cnt=0; cnt < size; cnt++)
         tables.push_back(buffer->getString("name").get(cnt));
 
@@ -554,6 +648,11 @@ std::vector<std::string> MySQLppConnection::getDatabases ()
         for (unsigned int cnt=0; cnt < buffer->size(); cnt++)
         {
             std::string tmp = buffer->getString("name").get(cnt);
+
+            if (tmp == "mysql" || tmp == "information_schema"|| tmp == "performance_schema" || tmp == "sys")
+                // omit system databases
+                continue;
+
             names.push_back(tmp);
         }
     }
@@ -612,15 +711,15 @@ void MySQLppConnection::performanceTest ()
 
     finalizeCommand ();
 
-//    for (unsigned int cnt=0; cnt < num_reads; cnt++)
-//    {
-//        DBResult *result = readBulkCommand(&command,
-//                                           "SELECT sd_radar.REC_NUM, sd_radar.POS_SYS_X_NM, sd_radar.POS_SYS_Y_NM, sd_radar.MODEC_CODE_FT, sd_radar.TOD, sd_radar.DETECTION_TYPE, sd_radar.DS_ID FROM sd_radar",
-//                                           "",  chunk_size);
-//        Buffer *buffer = result->getBuffer();
-//        delete result;
-//        delete buffer;
-//    }
+    //    for (unsigned int cnt=0; cnt < num_reads; cnt++)
+    //    {
+    //        DBResult *result = readBulkCommand(&command,
+    //                                           "SELECT sd_radar.REC_NUM, sd_radar.POS_SYS_X_NM, sd_radar.POS_SYS_Y_NM, sd_radar.MODEC_CODE_FT, sd_radar.TOD, sd_radar.DETECTION_TYPE, sd_radar.DS_ID FROM sd_radar",
+    //                                           "",  chunk_size);
+    //        Buffer *buffer = result->getBuffer();
+    //        delete result;
+    //        delete buffer;
+    //    }
 
     stop_time = boost::posix_time::microsec_clock::local_time();
     boost::posix_time::time_duration diff = stop_time - start_time;
@@ -671,7 +770,7 @@ std::string MySQLppConnection::identifier () const
     return "MySQL: "+used_server_+": "+used_database_;
 }
 
-void MySQLppConnection::addServer (std::string name)
+void MySQLppConnection::addServer (const std::string& name)
 {
     logdbg << "MySQLppConnection: addServer: name '" << name << "'";
 
@@ -699,18 +798,311 @@ void MySQLppConnection::deleteUsedServer ()
 
 void MySQLppConnection::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
-  logdbg  << "MySQLppConnection: generateSubConfigurable: generating " << instance_id;
-  if (class_id == "MySQLServer")
-  {
-    MySQLServer *server = new MySQLServer (instance_id, *this);
-    assert (servers_.count (server->getInstanceId()) == 0);
-    servers_.insert (std::pair <std::string, MySQLServer*> (server->getInstanceId(), server));
-  }
-  else
-    throw std::runtime_error ("MySQLppConnection: generateSubConfigurable: unknown class_id "+class_id );
+    logdbg  << "MySQLppConnection: generateSubConfigurable: generating " << instance_id;
+    if (class_id == "MySQLServer")
+    {
+        MySQLServer *server = new MySQLServer (instance_id, *this);
+        assert (servers_.count (server->getInstanceId()) == 0);
+        servers_.insert (std::pair <std::string, MySQLServer*> (server->getInstanceId(), server));
+    }
+    else
+        throw std::runtime_error ("MySQLppConnection: generateSubConfigurable: unknown class_id "+class_id );
 }
 
-//DBResult *MySQLppConnection::readBulkCommand (DBCommand *command, std::string main_statement, std::string order_statement, unsigned int max_results)
+void MySQLppConnection::importSQLFile (const std::string& filename)
+{
+    loginf  << "MySQLppConnection: importSQLFile: importing " << filename;
+    assert (Files::fileExists(filename));
+
+    QProgressDialog* progress_dialog = new QProgressDialog (tr("Importing SQL File"), tr(""), 0, 100);
+    progress_dialog->setCancelButton(0);
+    progress_dialog->setModal(true);
+    progress_dialog->setWindowModality(Qt::ApplicationModal);
+    progress_dialog->show();
+
+    for (unsigned int cnt=0; cnt < 10; cnt++)
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+    std::ifstream is;
+    is.open (filename.c_str(), std::ios::binary );
+    is.seekg (0, std::ios::end);
+    size_t file_byte_size = is.tellg();
+    is.close();
+    assert (file_byte_size);
+    loginf  << "MySQLppConnection: importSQLFile: file_byte_size: " << file_byte_size;
+
+    for (unsigned int cnt=0; cnt < 10; cnt++)
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+    std::ifstream sql_file (filename);
+    assert (sql_file.is_open());
+
+    std::string line;
+    std::stringstream ss;
+    size_t line_cnt = 0;
+    size_t byte_cnt = 0;
+    size_t error_cnt = 0;
+
+    while (getline (sql_file,line))
+    {
+        try
+        {
+            byte_cnt += line.size();
+
+            if (line.find ("delimiter") != std::string::npos || line.find ("DELIMITER") != std::string::npos
+                    || line.find ("VIEW") != std::string::npos)
+            {
+                loginf << "MySQLppConnection: importSQLFile: breaking at delimiter, bytes " << byte_cnt;
+                break;
+            }
+
+            ss << line << '\n';
+
+            if (line.back() == ';')
+            {
+                //                loginf << "MySQLppConnection: importSQLFile: line cnt " << line_cnt << " of " << line_count
+                //                       << " strlen " << ss.str().size() << "'";
+
+                if (ss.str().size())
+                    executeSQL (ss.str());
+
+                ss.str("");
+            }
+
+            if (line_cnt % 10 == 0)
+            {
+                progress_dialog->setValue(100*byte_cnt/file_byte_size);
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            }
+
+            line_cnt ++;
+        }
+        catch (std::exception& e)
+        {
+            logwrn << "MySQLppConnection: importSQLFile: sql error '" << e.what() << "'";
+            ss.str("");
+            error_cnt++;
+
+            if (error_cnt > 3)
+            {
+                logwrn << "MySQLppConnection: importSQLFile: quit after too many errors";
+
+                QMessageBox m_warning (QMessageBox::Warning, "MySQL Text Import Failed",
+                                       "Quit after too many SQL errors. Please make sure that"
+                                       " the SQL file is correct.",
+                                       QMessageBox::Ok);
+                m_warning.exec();
+
+                break;
+            }
+        }
+
+    }
+    delete progress_dialog;
+    progress_dialog = nullptr;
+
+    QMessageBox msgBox;
+    std::string msg;
+    if (error_cnt)
+        msg = "The SQL file was imported with "+std::to_string(error_cnt)+" SQL errors.";
+    else
+        msg = "The SQL file was imported without SQL errors.";
+
+    msgBox.setText(msg.c_str());
+    msgBox.exec();
+
+    sql_file.close();
+    interface_.databaseContentChanged();
+}
+
+void MySQLppConnection::importSQLArchiveFile(const std::string& filename)
+{
+    loginf  << "MySQLppConnection: importSQLArchiveFile: importing " << filename;
+    assert (Files::fileExists(filename));
+
+    // if gz but not tar.gz or tgz
+    bool raw = String::hasEnding (filename, ".gz") && !String::hasEnding (filename, ".tar.gz");
+
+    loginf  << "MySQLppConnection: importSQLArchiveFile: importing " << filename << " raw " << raw;
+
+    struct archive *a;
+    struct archive_entry *entry;
+    int r;
+
+    a = archive_read_new();
+
+    if (raw)
+    {
+        archive_read_support_filter_gzip(a);
+        archive_read_support_filter_bzip2(a);
+        archive_read_support_format_raw(a);
+    }
+    else
+    {
+        archive_read_support_filter_all(a);
+        archive_read_support_format_all(a);
+
+    }
+    r = archive_read_open_filename(a, filename.c_str(), 10240); // Note 1
+
+    if (r != ARCHIVE_OK)
+        throw std::runtime_error("MySQLppConnection: importSQLArchiveFile: archive error: "
+                                 +std::string(archive_error_string(a)));
+
+    const void *buff;
+    size_t size;
+    int64_t offset;
+
+    size_t line_cnt = 0;
+    size_t error_cnt = 0;
+    size_t byte_cnt = 0;
+
+    QMessageBox msg_box;
+    std::string msg = "Importing archive '"+filename+"'.";
+    msg_box.setText(msg.c_str());
+    msg_box.setStandardButtons(QMessageBox::NoButton);
+    msg_box.show();
+
+    for (unsigned int cnt=0; cnt < 10; cnt++)
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+    while (archive_read_next_header(a, &entry) == ARCHIVE_OK)
+    {
+        loginf << "Archive file found: " << archive_entry_pathname(entry) << " size " << archive_entry_size(entry);
+
+        msg_box.setInformativeText(archive_entry_pathname(entry));
+
+        bool done=false;
+
+        std::stringstream ss;
+
+        for (;;)
+        {
+            r = archive_read_data_block(a, &buff, &size, &offset);
+
+            if (r == ARCHIVE_EOF)
+                break;
+            if (r != ARCHIVE_OK)
+                throw std::runtime_error("MySQLppConnection: importSQLArchiveFile: archive error: "
+                                         +std::string(archive_error_string(a)));
+
+            std::string str (reinterpret_cast<char const*>(buff), size);
+
+            //loginf << "UGA read offset " << offset << " size " << size;
+
+            std::vector<std::string> lines = String::split(str, '\n');
+            std::string line;
+
+            //loginf << "UGA read str has " << lines.size() << " lines";
+
+            for (std::vector<std::string>::iterator line_it = lines.begin(); line_it != lines.end(); line_it++)
+            {
+                if (line_it + 1 == lines.end() )
+                {
+                    //loginf << "last one";
+                    ss << *line_it;
+                    break;
+                }
+
+                try
+                {
+                    ss << *line_it << '\n';
+
+                    line = ss.str();
+
+                    byte_cnt += line.size();
+
+                    if (line.find ("delimiter") != std::string::npos || line.find ("DELIMITER") != std::string::npos)
+                    {
+                        loginf << "MySQLppConnection: importSQLArchiveFile: breaking at delimiter, bytes " << byte_cnt;
+                        done = true;
+                        break;
+                    }
+
+                    if (line_it->back() == ';')
+                    {
+                        //                        loginf << "MySQLppConnection: importSQLArchiveFile: line cnt " << line_cnt
+                        //                               <<  " strlen " << ss.str().size() << "'";
+
+                        if (line.size())
+                            executeSQL (line+"\n");
+
+                        ss.str("");
+                    }
+
+                    if (line_cnt % 10 == 0)
+                    {
+                        logdbg << "MySQLppConnection: importSQLArchiveFile: line cnt " << line_cnt;
+                        msg = "Read " + std::to_string(line_cnt) + " lines from "
+                                + std::string(archive_entry_pathname(entry)) + " archive entry.";
+
+                        msg_box.setInformativeText(msg.c_str());
+                        msg_box.show();
+                        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                        //                        progress_dialog->setValue(100*byte_cnt/file_byte_size);
+                        //                        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                    }
+
+                    line_cnt ++;
+                }
+                catch (std::exception& e)
+                {
+                    logwrn << "MySQLppConnection: importSQLArchiveFile: sql error '" << e.what() << "'";
+                    ss.str("");
+                    error_cnt++;
+
+                    if (error_cnt > 3)
+                    {
+                        logwrn << "MySQLppConnection: importSQLArchiveFile: quit after too many errors";
+
+                        QMessageBox m_warning (QMessageBox::Warning, "MySQL Archive Import Failed",
+                                               "Quit after too many SQL errors. Please make sure that"
+                                               " the archive is correct as specified in the user manual.",
+                                               QMessageBox::Ok);
+                        m_warning.exec();
+                        done=true;
+                        break;
+                    }
+                }
+            }
+
+            if (done)
+                break;
+        }
+
+        if (done)
+            break;
+
+        loginf << "MySQLppConnection: importSQLArchiveFile: archive file " << archive_entry_pathname(entry) << " imported";
+    }
+
+    msg_box.close();
+
+    QMessageBox msgBox;
+    if (error_cnt)
+        msg = "The SQL archive file was imported with "+std::to_string(error_cnt)+" SQL errors.";
+    else
+        msg = "The SQL archive file was imported without SQL errors.";
+
+    msgBox.setText(msg.c_str());
+    msgBox.exec();
+
+    r = archive_read_close(a);
+    if (r != ARCHIVE_OK)
+        throw std::runtime_error("MySQLppConnection: importSQLArchiveFile: archive read close error: "
+                                 +std::string(archive_error_string(a)));
+
+    r = archive_read_free(a);
+
+    if (r != ARCHIVE_OK)
+        throw std::runtime_error("MySQLppConnection: importSQLArchiveFile: archive read free error: "
+                                 +std::string(archive_error_string(a)));
+
+    interface_.databaseContentChanged();
+}
+
+//DBResult *MySQLppConnection::readBulkCommand (DBCommand *command, std::string main_statement,
+//std::string order_statement, unsigned int max_results)
 //{
 //    assert (command);
 //    DBResult *dbresult = new DBResult ();

@@ -20,12 +20,14 @@
 #include "viewcontainerwidget.h"
 #include "viewcontainer.h"
 #include "global.h"
+#include "files.h"
 
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QToolButton>
 #include <QMessageBox>
 
+using namespace Utils;
 
 ViewContainerConfigWidget::ViewContainerConfigWidget( ViewContainer *view_container, QWidget* parent )
 :   QWidget( parent ), view_container_( view_container )
@@ -53,15 +55,15 @@ ViewContainerConfigWidget::ViewContainerConfigWidget( ViewContainer *view_contai
     namelayout->setMargin( 0 );
     blayout->addLayout( namelayout );
 
-    name_ = QString(view_container_->getName().c_str());//"Window " + QString::number( view_container_->getKey() );
+    name_ = QString(view_container_->getWindowName().c_str());//"Window " + QString::number( view_container_->getKey() );
     QLabel *head = new QLabel( name_ );
     head->setFont( font_bold );
     namelayout->addWidget( head );
 
-    if (view_container_->getName().compare("MainWindow") != 0)
+    if (view_container_->getWindowName().compare("MainWindow") != 0)
     {
         QToolButton *vdel = new QToolButton();
-        vdel->setIcon( QIcon( "./data/icons/delete.png" ) );
+        vdel->setIcon( QIcon(Files::getIconFilepath("delete.png").c_str()));
         namelayout->addWidget( vdel );
         connect( vdel, SIGNAL(clicked()), this, SLOT(closeSlot()) );
     }
@@ -77,55 +79,11 @@ ViewContainerConfigWidget::~ViewContainerConfigWidget()
 {
 }
 
-
-//void ViewContainerConfigWidget::addGeographicView()
-//{
-//    //TODO
-//    if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
-//        return;
-
-//    view_container_->addGeographicView();
-//    updateSlot();
-//}
-
-
-//void ViewContainerConfigWidget::addScatterPlotView()
-//{
-//    //TODO
-//    if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
-//        return;
-
-//    view_container_->addScatterPlotView();
-//    updateSlot();
-//}
-
-//
-//
-//void ViewContainerConfigWidget::addHistogramView()
-//{
-//    //TODO
-//    if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
-//        return;
-
-//    view_container_->addHistogramView();
-//    updateSlot();
-//}
-
-void ViewContainerConfigWidget::addListBoxView()
+void ViewContainerConfigWidget::addView(const std::string& class_name)
 {
-    view_container_->addListBoxView();
+    view_container_->addView(class_name);
     updateSlot();
 }
-
-//void ViewContainerConfigWidget::addMosaicView()
-//{
-//    //TODO
-//    if( DBResultSetManager::getInstance().isCurrentlyLoadingData() )
-//        return;
-
-//    view_container_->addMosaicView();
-//    updateSlot();
-//}
 
 //void ViewContainerConfigWidget::addTemplateView (std::string template_name)
 //{
@@ -203,7 +161,7 @@ ViewControlWidget::ViewControlWidget( View* view, QWidget* parent )
     namelayout->addWidget( label );
 
     QToolButton *vdel = new QToolButton();
-    vdel->setIcon( QIcon( "./data/icons/delete.png" ) );
+    vdel->setIcon( QIcon(Files::getIconFilepath("delete.png").c_str()));
     connect( vdel, SIGNAL(clicked()), this, SLOT(removeViewSlot()));
     namelayout->addWidget( vdel );
     //namelayout->addStretch( 1 );
@@ -211,9 +169,9 @@ ViewControlWidget::ViewControlWidget( View* view, QWidget* parent )
     load_ = new QLabel();
     load_->setText( "Idle" );
     flayout->addWidget( load_ );
-    connect( view, SIGNAL(loadingStarted()), this, SLOT(loadingStartedSlot()) );
-    connect( view, SIGNAL(loadingFinished()), this, SLOT(loadingFinishedSlot()) );
-    connect( view, SIGNAL(loadingTime(double)), this, SLOT(loadingTimeSlot(double)) );
+    connect (view, SIGNAL(loadingStarted()), this, SLOT(loadingStartedSlot()));
+    connect (view, SIGNAL(loadingFinished()), this, SLOT(loadingFinishedSlot()));
+    connect (view, SIGNAL(loadingTime(double)), this, SLOT(loadingTimeSlot(double)));
 }
 
 /*

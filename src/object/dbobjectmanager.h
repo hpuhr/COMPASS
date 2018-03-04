@@ -42,44 +42,48 @@ class DBSchemaManager;
 class DBObjectManager : public QObject, public Configurable
 {
     Q_OBJECT
+
 public slots:
+    void schemaLockedSlot ();
     void loadSlot ();
     void updateSchemaInformationSlot ();
-    void databaseOpenedSlot ();
+    void databaseContentChangedSlot ();
+    void loadingDoneSlot (DBObject& object);
 
 signals:
     void dbObjectsChangedSignal ();
-    void databaseOpenedSignal ();
+    void databaseContentChangedSignal ();
     void schemaChangedSignal ();
 
     void loadingStartedSignal ();
+    void allLoadingDoneSignal ();
 
 public:
     /// @brief Constructor
-    DBObjectManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb);
+    DBObjectManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb);
 
     /// @brief Returns if an object of type exists
-    bool existsObject (const std::string &dbo_name);
+    bool existsObject (const std::string& dbo_name);
     /// @brief Returns the object of type, if existing
-    DBObject &object (const std::string &dbo_name);
-    void deleteObject (const std::string &dbo_name);
+    DBObject &object (const std::string& dbo_name);
+    void deleteObject (const std::string& dbo_name);
     /// @brief Returns container with all DBObjects
     std::map <std::string, DBObject*>& objects () { return objects_; }
 
-    bool existsMetaVariable (const std::string &var_name);
+    bool existsMetaVariable (const std::string& var_name);
     /// @brief Returns the a meta variable, if existing
-    MetaDBOVariable &metaVariable (const std::string &var_name);
-    void deleteMetaVariable (const std::string &var_name);
+    MetaDBOVariable &metaVariable (const std::string& var_name);
+    void deleteMetaVariable (const std::string& var_name);
     /// @brief Returns container with all MetaVariables
     std::map <std::string, MetaDBOVariable*>& metaVariables () { return meta_variables_; }
 
-    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
+    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
 
     /// @brief Destructor
     virtual ~DBObjectManager();
 
-    DBObjectManagerWidget *widget();
-    DBObjectManagerLoadWidget *loadWidget();
+    DBObjectManagerWidget* widget();
+    DBObjectManagerLoadWidget* loadWidget();
 
     bool useLimit() const;
     void useLimit(bool useLimit);
@@ -100,37 +104,40 @@ public:
     void useOrderAscending(bool useOrderAscending);
 
     bool hasOrderVariable ();
-    DBOVariable &orderVariable ();
-    void orderVariable(DBOVariable &variable);
+    DBOVariable& orderVariable ();
+    void orderVariable(DBOVariable& variable);
     bool hasOrderMetaVariable ();
-    MetaDBOVariable &orderMetaVariable ();
-    void orderMetaVariable(MetaDBOVariable &variable);
+    MetaDBOVariable& orderMetaVariable ();
+    void orderMetaVariable(MetaDBOVariable& variable);
     void clearOrderVariable ();
 
-protected:
-    bool use_filters_;
+    void lock ();
+    void unlock ();
 
-    bool use_order_;
-    bool use_order_ascending_;
+    void quitLoading ();
+
+protected:
+    bool use_filters_ {false};
+
+    bool use_order_ {false};
+    bool use_order_ascending_ {false};
     std::string order_variable_dbo_name_;
     std::string order_variable_name_;
 
-    bool use_limit_;
-    unsigned int limit_min_;
-    unsigned int limit_max_;
+    bool use_limit_ {false};
+    unsigned int limit_min_ {0};
+    unsigned int limit_max_ {100000};
+
+    bool locked_ {false};
 
     /// Container with all DBOs (DBO name -> DBO pointer)
     std::map <std::string, DBObject*> objects_;
     std::map <std::string, MetaDBOVariable*> meta_variables_;
-    //bool registered_parent_variables_;
 
-    DBObjectManagerWidget *widget_;
-    DBObjectManagerLoadWidget *load_widget_;
+    DBObjectManagerWidget* widget_ {nullptr};
+    DBObjectManagerLoadWidget* load_widget_ {nullptr};
 
     virtual void checkSubConfigurables ();
-
-    /// @brief Small hack for minimum/maximum update. Refer to DBObject::registerParentVariables() for details.
-    //void registerParentVariablesIfRequired ();
 };
 
 #endif /* DBOBJECTMANAGER_H_ */

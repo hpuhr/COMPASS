@@ -1,0 +1,4 @@
+<Configuration class_id="JobManager" instance_id="JobManager0">
+    <ParameterUnsignedInt num_workers="3"/>
+    <ParameterUnsignedInt update_time="10"/>
+</Configuration>

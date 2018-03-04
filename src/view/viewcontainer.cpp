@@ -26,13 +26,14 @@
 #include "view.h"
 #include "viewmanager.h"
 #include "listboxview.h"
-//#include "GeographicView.h"
-//#include "HistogramView.h"
-//#include "ScatterPlotView.h"
-//#include "MosaicView.h"
 
 #include "stringconv.h"
 #include "global.h"
+#include "files.h"
+
+#if USE_EXPERIMENTAL_SOURCE == true
+#include "osgview.h"
+#endif
 
 #include <QHBoxLayout>
 #include <QPushButton>
@@ -43,11 +44,12 @@
 
 unsigned int ViewContainer::view_count_=0;
 
-using namespace Utils::String;
+using namespace Utils;
 
-ViewContainer::ViewContainer(const std::string &class_id, const std::string &instance_id, Configurable *parent, ViewManager *view_manager, QTabWidget *tab_widget)
-    : QObject(), Configurable( class_id, instance_id, parent ), view_manager_(*view_manager), tab_widget_(tab_widget), last_active_manage_button_ (nullptr),
-      config_widget_(nullptr)
+ViewContainer::ViewContainer(const std::string &class_id, const std::string &instance_id, Configurable *parent,
+                             ViewManager *view_manager, QTabWidget *tab_widget, int window_cnt)
+    : QObject(), Configurable( class_id, instance_id, parent ), view_manager_(*view_manager), tab_widget_(tab_widget),
+      window_cnt_ (window_cnt)
 {
     logdbg  << "ViewContainer: constructor: creating gui elements";
     assert (tab_widget_);
@@ -78,30 +80,13 @@ ViewContainer::~ViewContainer()
     views_.clear();
 }
 
-//void ViewContainer::addGeographicView()
-//{
-//  generateSubConfigurable ("GeographicView", "GeographicView"+intToString(view_count_));
-//}
-
-//void ViewContainer::addHistogramView()
-//{
-//  generateSubConfigurable ("HistogramView", "HistogramView"+intToString(view_count_));
-//}
-
-void ViewContainer::addListBoxView()
+void ViewContainer::addView(const std::string& class_name)
 {
-    generateSubConfigurable ("ListBoxView", "ListBoxView"+std::to_string(view_count_));
+    generateSubConfigurable (class_name, class_name+std::to_string(view_count_));
+
+    if (config_widget_)
+        config_widget_->updateSlot();
 }
-
-//void ViewContainer::addMosaicView()
-//{
-//  generateSubConfigurable ("MosaicView", "MosaicView"+intToString(view_count_));
-//}
-
-//void ViewContainer::addScatterPlotView()
-//{
-//  generateSubConfigurable ("ScatterPlotView", "ScatterPlotView"+intToString(view_count_));
-//}
 
 //void ViewContainer::addTemplateView (std::string template_name)
 //{
@@ -128,7 +113,7 @@ void ViewContainer::addView (View *view)
     int index = tab_widget_->addTab( w, QString::fromStdString( view->getName() ) );
 
     QPushButton *manage_button = new QPushButton();
-    manage_button->setIcon( QIcon( "./data/icons/edit.png" ) );
+    manage_button->setIcon (QIcon(Files::getIconFilepath("edit.png").c_str()));
     manage_button->setFixedSize (UI_ICON_SIZE);
     manage_button->setFlat(UI_ICON_BUTTON_FLAT);
     manage_button->setToolTip(tr("Manage view"));
@@ -178,10 +163,13 @@ void ViewContainer::deleteView ()
     assert (view_manage_buttons_.find (last_active_manage_button_) != view_manage_buttons_.end());
     View *view = view_manage_buttons_ [last_active_manage_button_];
 
-    loginf << "ViewContainerWidget: deleteView: for view " << view->getInstanceId();
+    loginf << "ViewContainer: deleteView: for view " << view->getInstanceId();
     delete view;
 
     last_active_manage_button_=nullptr;
+
+    if (config_widget_)
+        config_widget_->updateSlot();
 }
 
 const std::vector<View*>& ViewContainer::getViews() const
@@ -194,7 +182,7 @@ void ViewContainer::generateSubConfigurable (const std::string &class_id, const 
     if (class_id.compare ("ListBoxView") == 0)
     {
         ListBoxView* view = new ListBoxView ( class_id, instance_id, this, view_manager_);
-        unsigned int number = getAppendedInt (instance_id);
+        unsigned int number = String::getAppendedInt (instance_id);
 
         if (number >= view_count_)
             view_count_ = number+1;
@@ -202,16 +190,18 @@ void ViewContainer::generateSubConfigurable (const std::string &class_id, const 
         assert( view );
         view->init();
     }
-    //  else if (class_id.compare ("GeographicView") == 0)
-    //  {
-    //    GeographicView* view = new GeographicView ( class_id, instance_id, this );
-    //    unsigned int number = getAppendedInt (instance_id);
-    //    if (number >= view_count_)
-    //      view_count_ = number+1;
+#if USE_EXPERIMENTAL_SOURCE == true
+    else if (class_id.compare ("OSGView") == 0)
+    {
+        OSGView* view = new OSGView (class_id, instance_id, this, view_manager_);
+        unsigned int number = String::getAppendedInt (instance_id);
+        if (number >= view_count_)
+            view_count_ = number+1;
 
-    //    assert( view );
-    //    view->init();
-    //  }
+        assert( view );
+        view->init();
+    }
+#endif
     //  else if (class_id.compare ("HistogramView") == 0)
     //  {
     //    HistogramView* view = new HistogramView ( class_id, instance_id, this );
@@ -251,9 +241,12 @@ void ViewContainer::checkSubConfigurables ()
     // move along sir
 }
 
-std::string ViewContainer::getName ()
+std::string ViewContainer::getWindowName ()
 {
-    return "MainWindow";
+    if (window_cnt_ == 0)
+        return "MainWindow";
+    else
+        return "Window"+std::to_string (window_cnt_);
 }
 
 ViewContainerConfigWidget *ViewContainer::configWidget ()

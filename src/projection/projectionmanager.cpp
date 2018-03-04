@@ -23,63 +23,58 @@
 
 #include "projectionmanager.h"
 #include "projectionmanagerwidget.h"
+#include "global.h"
 
 ProjectionManager::ProjectionManager()
-: Configurable ("ProjectionManager", "ProjectionManager0", 0, "conf/projection.xml")
+    : Configurable ("ProjectionManager", "ProjectionManager0", 0, "projection.xml")
 {
     loginf  << "ProjectionManager: constructor";
 
-//    registerParameter("center_latitude", &center_latitude_, 47.5);
-//    registerParameter("center_longitude", &center_longitude_, 14.0);
+    registerParameter ("use_sdl_projection", &use_sdl_projection_, false);
+    registerParameter ("use_ogr_projection", &use_ogr_projection_, true);
+    registerParameter ("use_rs2g_projection_", &use_rs2g_projection_, false);
 
-//    registerParameter("minimal_height", &minimal_height_, 0.0);
-//    registerParameter("projection_plane_width", &projection_plane_width_, 1e6);
-//    registerParameter("world_scale", &world_scale_, 2000);
-//    registerParameter("height_scale", &height_scale_, 2000);
+    registerParameter ("sdl_system_latitude", &sdl_system_latitude_, 47.5);
+    registerParameter ("sdl_system_longitude", &sdl_system_longitude_, 14.0);
+
+    loginf  << "ProjectionManager: constructor: using sdl lat " << sdl_system_latitude_
+            << " long " << sdl_system_longitude_;
+
+    // init sdl
+    t_GPos geo_pos;
+
+    preset_gpos (&geo_pos);
+    preset_mapping_info (&sdl_mapping_info_);
+
+    geo_pos.latitude = sdl_system_latitude_ * DEG2RAD;
+    geo_pos.longitude = sdl_system_longitude_ * DEG2RAD;
+    geo_pos.altitude = 0.0; // TODO check if exists
+    geo_pos.defined = true;
+
+    t_Retc lrc;
+
+    lrc = geo_calc_info (geo_pos, &sdl_mapping_info_);
+
+    assert (lrc == RC_OKAY);
 
     registerParameter ("epsg_value", &epsg_value_, 31258); // 	MGI Austria GK M31.prj 	BMN – M31 	Greenwich
 
-    geo_.SetWellKnownGeogCS("WGS84");
-    createProjection();
+    // init ogr
+    ogr_geo_.SetWellKnownGeogCS("WGS84");
+    createOGRProjection();
 
-//    mult_factor_ = 1.0;
-
-//    geo2Cart(center_latitude_, center_longitude_, center_system_x_, center_system_y_, false);
-
-//    double center_pos_x, center_pos_y;
-//    double center_lat, center_long;
-
-//    mult_factor_ = world_scale_/projection_plane_width_;
-//    trans_x_factor_=0;
-//    trans_x_factor_=0;
-
-//    loginf << "ProjectionManager: constructor: center lat " << center_latitude_ << " long " << center_longitude_;
-
-//    geo2Cart(center_latitude_, center_longitude_, center_pos_x, center_pos_y);
-//    loginf << "ProjectionManager: constructor: center there x " << center_pos_x << " y " << center_pos_y;
-
-//    trans_x_factor_ = -center_pos_x;
-//    trans_y_factor_ = -center_pos_y;
-
-//    geo2Cart(center_latitude_, center_longitude_, center_pos_x, center_pos_y);
-//    cart2geo(center_pos_x, center_pos_y, center_lat, center_long);
-//    loginf << "ProjectionManager: constructor: center back again lat " << center_lat << " long " << center_long;
-
-//    geo2Cart(center_latitude_, center_longitude_, center_pos_x, center_pos_y);
-//    assert (center_pos_x < 0.0001);
-//    assert (center_pos_y < 0.0001);
-    //loginf << "ProjectionManager: constructor: 2 got x " << center_pos_x << " y " << center_pos_y;
+    // init radSlt2Geo
 }
 
 ProjectionManager::~ProjectionManager()
 {
-    assert (geo2cart_);
-    delete geo2cart_;
-    geo2cart_=0;
+    assert (ogr_geo2cart_);
+    delete ogr_geo2cart_;
+    ogr_geo2cart_=0;
 
-    assert (cart2geo_);
-    delete cart2geo_;
-    cart2geo_=0;
+    assert (ogr_cart2geo_);
+    delete ogr_cart2geo_;
+    ogr_cart2geo_=0;
 
     if (widget_)
     {
@@ -99,55 +94,59 @@ void ProjectionManager::shutdown ()
     }
 }
 
-//double  ProjectionManager::getWorldSize (double size)
-//{
-//    return size*mult_factor_;
-//}
-
-//float ProjectionManager::transformHeight (float value)
-//{
-//    return value*height_scale_;///projection_plane_width_;
-//}
-
-void ProjectionManager::geo2Cart (double latitude, double longitude, double &x_pos, double &y_pos)
+bool ProjectionManager::ogrGeo2Cart (double latitude, double longitude, double& x_pos, double& y_pos)
 {
-    //loginf << "ProjectionManager: geo2Cart: lat " << latitude << " long " << longitude;
+    logdbg << "ProjectionManager: ogrGeo2Cart: lat " << latitude << " long " << longitude;
 
     x_pos = longitude;
     y_pos = latitude;
 
-    bool ret = geo2cart_->Transform(1, &x_pos, &y_pos);
-    assert (ret);
+    bool ret = ogr_geo2cart_->Transform(1, &x_pos, &y_pos);
 
-//    if (transform)
-//    {
-//        x_pos = (x_pos*mult_factor_) + trans_x_factor_;
-//        y_pos = (-y_pos*mult_factor_) + trans_y_factor_;
-//    }
+    if (!ret)
+        logerr << "ProjectionManager: ogrGeo2Cart: error with longitude " << longitude << " latitude " << latitude;
+
+    return ret;
 }
 
-void ProjectionManager::cart2geo (double x_pos, double y_pos, double &latitude, double &longitude)
+bool ProjectionManager::ogrCart2Geo (double x_pos, double y_pos, double& latitude, double& longitude)
 {
-//    if (transform)
-//    {
-//        x_pos = (x_pos-trans_x_factor_)/mult_factor_;
-//        y_pos = -(y_pos-trans_y_factor_)/mult_factor_;
-//    }
+    logdbg << "ProjectionManager: ogrCart2Geo: x_pos " << x_pos << " y_pos " << y_pos;
+
     longitude = x_pos;
     latitude = y_pos;
 
-    bool ret = cart2geo_->Transform(1, &longitude, &latitude);
+    bool ret = ogr_cart2geo_->Transform(1, &longitude, &latitude);
 
     if (!ret)
-       logerr << "ProjectionManager: cart2geo: x_pos " << x_pos << " y_pos " << y_pos;
+        logerr << "ProjectionManager: ogrCart2Geo: error with x_pos " << x_pos << " y_pos " << y_pos;
 
-    assert (ret);
+    return ret;
+}
+
+bool ProjectionManager::sdlGRS2Geo (t_CPos grs_pos, t_GPos& geo_pos)
+{
+    //logdbg << "ProjectionManager: sdlGRS2Geo: x_pos " << x_pos << " y_pos " << y_pos;
+
+    t_Retc lrtc;
+    //    t_CPos lcl_pos;
+
+    //    lrtc = geo_grs_to_lcl (sdl_mapping_info_, grs_pos, &lcl_pos);
+
+    t_GPos tmp_geo_pos;
+
+    lrtc = geo_grs_to_llh (grs_pos, &tmp_geo_pos);
+
+    assert (lrtc == RC_OKAY);
+    geo_pos = tmp_geo_pos;
+
+    return true;
 }
 
 std::string ProjectionManager::getWorldPROJ4Info ()
 {
     char *tmp=0;
-    geo_.exportToProj4(&tmp);
+    ogr_geo_.exportToProj4(&tmp);
     std::string info = tmp;
     CPLFree (tmp);
 
@@ -159,51 +158,121 @@ std::string ProjectionManager::getWorldPROJ4Info ()
 void ProjectionManager::setNewCartesianEPSG (unsigned int epsg_value)
 {
     epsg_value_=epsg_value;
-    createProjection();
+    createOGRProjection();
 }
 
-void ProjectionManager::createProjection ()
+void ProjectionManager::createOGRProjection ()
 {
-    OGRErr error = cart_.importFromEPSG(epsg_value_);
+    OGRErr error = ogr_cart_.importFromEPSG(epsg_value_);
     if (error != OGRERR_NONE)
-        throw std::runtime_error ("ProjectionManager: createProjection: cartesian EPSG value "+std::to_string(epsg_value_)+" caused ORG error "
-        +std::to_string((int)error));
+        throw std::runtime_error ("ProjectionManager: createProjection: cartesian EPSG value "
+                                  +std::to_string(epsg_value_)+" caused OGR error "
+                                  +std::to_string((int)error));
 
-    if (geo2cart_)
+    if (ogr_geo2cart_)
     {
-        delete geo2cart_;
-        geo2cart_=0;
+        delete ogr_geo2cart_;
+        ogr_geo2cart_=0;
     }
-    geo2cart_ = OGRCreateCoordinateTransformation( &geo_, &cart_ );
-    assert (geo2cart_);
+    ogr_geo2cart_ = OGRCreateCoordinateTransformation( &ogr_geo_, &ogr_cart_ );
+    assert (ogr_geo2cart_);
 
-    if (cart2geo_)
+    if (ogr_cart2geo_)
     {
-        delete cart2geo_;
-        cart2geo_=0;
+        delete ogr_cart2geo_;
+        ogr_cart2geo_=0;
     }
-    cart2geo_ = OGRCreateCoordinateTransformation( &cart_, &geo_ );
-    assert (cart2geo_);
+    ogr_cart2geo_ = OGRCreateCoordinateTransformation( &ogr_cart_, &ogr_geo_ );
+    assert (ogr_cart2geo_);
 }
 
 std::string ProjectionManager::getCartesianPROJ4Info ()
 {
     char *tmp=0;
-    cart_.exportToProj4(&tmp);
+    ogr_cart_.exportToProj4(&tmp);
     std::string info = tmp;
     CPLFree (tmp);
 
-    //loginf << "ProjectionManager: getCartesianPROJ4Info: '" << info << "'";
+    logdbg << "ProjectionManager: getCartesianPROJ4Info: '" << info << "'";
 
     return info;
 }
 
-ProjectionManagerWidget *ProjectionManager::widget ()
+ProjectionManagerWidget* ProjectionManager::widget ()
 {
     if (!widget_)
     {
-        widget_ = new ProjectionManagerWidget ();
+        widget_ = new ProjectionManagerWidget (*this);
     }
     assert (widget_);
     return widget_;
 }
+
+float ProjectionManager::sdlSystemLatitude() const
+{
+    return sdl_system_latitude_;
+}
+
+void ProjectionManager::sdlSystemLatitude(float sdl_system_latitude)
+{
+    sdl_system_latitude_ = sdl_system_latitude;
+}
+
+float ProjectionManager::sdlSystemLongitude() const
+{
+    return sdl_system_longitude_;
+}
+
+void ProjectionManager::sdlSystemLongitude(float sdl_system_longitude)
+{
+    sdl_system_longitude_ = sdl_system_longitude;
+}
+
+bool ProjectionManager::useSDLProjection() const
+{
+    return use_sdl_projection_;
+}
+
+void ProjectionManager::useSDLProjection(bool use_sdl_projection)
+{
+    use_sdl_projection_ = use_sdl_projection;
+
+    if (use_sdl_projection_)
+    {
+        use_ogr_projection_ = false;
+        use_rs2g_projection_ = false;
+    }
+}
+
+bool ProjectionManager::useOGRProjection() const
+{
+    return use_ogr_projection_;
+}
+
+void ProjectionManager::useOGRProjection(bool use_ogr_projection)
+{
+    use_ogr_projection_ = use_ogr_projection;
+
+    if (use_ogr_projection_)
+    {
+        use_sdl_projection_ = false;
+        use_rs2g_projection_ = false;
+    }
+}
+
+bool ProjectionManager::useRS2GProjection() const
+{
+    return use_rs2g_projection_;
+}
+
+void ProjectionManager::useRS2GProjection(bool use_rs2g_projection)
+{
+    use_rs2g_projection_ = use_rs2g_projection;
+
+    if (use_rs2g_projection_)
+    {
+        use_sdl_projection_ = false;
+        use_ogr_projection_ = false;
+    }
+}
+

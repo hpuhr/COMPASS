@@ -47,14 +47,6 @@ public slots:
 
     /// @brief Adds new sub meta table
     void addSubTableSlot ();
-    /// @brief Edits sub meta table
-    //void editSubMetaTable ();
-
-    /// @brief Sets main database table
-    //void selectTable ();
-
-    /// @brief Updates main database table selection
-    //void updateTableSelection();
     /// @brief Updates sub tables grid
     void updateSubTablesGridSlot ();
     void updateColumnsGridSlot ();
@@ -65,41 +57,40 @@ public slots:
     /// @brief Updates sub key selection for new meta sub table
     void updateSubKeySelectionSlot ();
 
+    void lock ();
+
 public:
     /// @brief Constructor
-    MetaDBTableWidget(MetaDBTable &meta_table, QWidget * parent = 0, Qt::WindowFlags f = 0);
+    MetaDBTableWidget(MetaDBTable& meta_table, QWidget* parent=0, Qt::WindowFlags f=0);
     /// @brief Destructor
     virtual ~MetaDBTableWidget();
 
 protected:
     /// Represented meta table
-    MetaDBTable &meta_table_;
+    MetaDBTable& meta_table_;
 
     /// Name edit field
-    QLineEdit *name_edit_;
+    QLineEdit* name_edit_ {nullptr};
     /// Info edit field
-    QLineEdit *info_edit_;
-    /// Main database table selection field
-    //QComboBox *table_box_;
+    QLineEdit* info_edit_ {nullptr};
     /// Key selection field
-    QComboBox *key_box_;
+    //QComboBox* key_box_ {nullptr};
 
     /// Grid with all sub meta tables
-    QGridLayout *sub_tables_grid_;
+    QGridLayout* sub_tables_grid_ {nullptr};
 
-    QGridLayout *column_grid_;
+    QGridLayout* column_grid_ {nullptr};
 
     /// New sub meta table local key selection
-    QComboBox *new_local_key_;
+    QComboBox* new_local_key_ {nullptr};
     /// New sub meta table meta table selection
-    QComboBox *new_table_;
+    QComboBox* new_table_ {nullptr};
     /// New sub meta table sub key selection
-    QComboBox *new_sub_key_;
+    QComboBox* new_sub_key_ {nullptr};
 
-    /// Container with all edit buttons for sub meta tables
-    //std::map <QPushButton *, MetaDBTable *> edit_sub_meta_table_buttons_;
-    /// Container with existing sub meta table edit widgets
-    //std::map <MetaDBTable *, MetaDBTableWidget*> edit_sub_meta_table_widgets_;
+    QPushButton* add_button_ {nullptr};
+
+    bool locked_ {false};
 };
 
 #endif /* METADBTABLEEDITWIDGET_H_ */

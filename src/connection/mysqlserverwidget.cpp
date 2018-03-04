@@ -25,41 +25,41 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QComboBox>
+#include <QInputDialog>
+#include <QMessageBox>
 
-MySQLServerWidget::MySQLServerWidget(MySQLppConnection &connection, MySQLServer &server, QWidget *parent)
+MySQLServerWidget::MySQLServerWidget(MySQLppConnection& connection, MySQLServer& server, QWidget* parent)
     : QWidget (parent), connection_(connection), server_(server)
 {
     QVBoxLayout *layout = new QVBoxLayout ();
 
-//    QLabel *main = new QLabel (server.getInstanceId().c_str());
-//    layout->addWidget(main);
-
     layout->addWidget (new QLabel("Server Host"));
 
     host_edit_ = new QLineEdit (server_.host().c_str());
-    connect(host_edit_, SIGNAL(textChanged(const QString &)), this, SLOT(updateHostSlot(const QString &)));
+    connect(host_edit_, &QLineEdit::textChanged, this, &MySQLServerWidget::updateHostSlot);
     layout->addWidget (host_edit_);
 
     layout->addWidget (new QLabel("Username"));
 
     user_edit_ = new QLineEdit (server_.user().c_str());
-    connect(user_edit_, SIGNAL(textChanged(const QString &)), this, SLOT(updateUserSlot(const QString &)));
+    connect(user_edit_, &QLineEdit::textChanged, this, &MySQLServerWidget::updateUserSlot);
     layout->addWidget (user_edit_);
 
     layout->addWidget (new QLabel("Password"));
 
     password_edit_ = new QLineEdit (server.password().c_str());
-    connect(password_edit_, SIGNAL(textChanged(const QString &)), this, SLOT(updatePasswordSlot(const QString &)));
+    password_edit_->setEchoMode(QLineEdit::Password);
+    connect(password_edit_, &QLineEdit::textChanged, this, &MySQLServerWidget::updatePasswordSlot);
     layout->addWidget (password_edit_);
 
     layout->addWidget (new QLabel("Port number"));
 
     port_edit_ = new QLineEdit (QString::number(server.port()));
-    connect(port_edit_, SIGNAL(textChanged(const QString &)), this, SLOT(updatePortSlot(const QString &)));
+    connect(port_edit_, &QLineEdit::textChanged, this, &MySQLServerWidget::updatePortSlot);
     layout->addWidget (port_edit_);
 
     connect_button_ = new QPushButton ("Connect");
-    connect (connect_button_, SIGNAL(clicked()), this, SLOT(connectSlot()));
+    connect (connect_button_, &QPushButton::clicked, this, &MySQLServerWidget::connectSlot);
     layout->addWidget(connect_button_);
 
     layout->addStretch();
@@ -67,13 +67,32 @@ MySQLServerWidget::MySQLServerWidget(MySQLppConnection &connection, MySQLServer 
     layout->addWidget (new QLabel("Database name"));
 
     db_name_box_ = new QComboBox ();
-    connect (db_name_box_, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(updateDatabaseSlot(const QString &)));
+    connect (db_name_box_, SIGNAL(currentIndexChanged(const QString &)),
+             this, SLOT(updateDatabaseSlot(const QString &)));
     db_name_box_->setDisabled(true);
     layout->addWidget (db_name_box_);
 
+    QHBoxLayout* op_layout = new QHBoxLayout;
+
+    new_button_ = new QPushButton ("New");
+    connect (new_button_, &QPushButton::clicked, this, &MySQLServerWidget::newDatabaseSlot);
+    new_button_->setDisabled(true);
+    op_layout->addWidget(new_button_);
+
+    clear_button_ = new QPushButton ("Clear");
+    connect (clear_button_, &QPushButton::clicked, this, &MySQLServerWidget::clearDatabaseSlot);
+    clear_button_->setDisabled (true);
+    op_layout->addWidget(clear_button_);
+
+    delete_button_ = new QPushButton ("Delete");
+    connect (delete_button_, &QPushButton::clicked, this, &MySQLServerWidget::deleteDatabaseSlot);
+    delete_button_->setDisabled(true);
+    op_layout->addWidget(delete_button_);
+
+    layout->addLayout(op_layout);
+
     open_button_ = new QPushButton ("Open");
-    //open_button_->setFont(font_bold);
-    connect (open_button_, SIGNAL(clicked()), this, SLOT(openDatabaseSlot()));
+    connect (open_button_, &QPushButton::clicked, this, &MySQLServerWidget::openDatabaseSlot);
     open_button_->setDisabled(true);
     layout->addWidget(open_button_);
 
@@ -106,7 +125,7 @@ void MySQLServerWidget::updatePasswordSlot (const QString &value)
 void MySQLServerWidget::updatePortSlot (const QString &value)
 {
     logdbg << "MySQLServerWidget: updatePortSlot: value '" << value.toStdString() << "'";
-    server_.port(value.toInt());
+    server_.port(value.toUInt());
 }
 
 void MySQLServerWidget::connectSlot ()
@@ -121,16 +140,32 @@ void MySQLServerWidget::connectSlot ()
     assert (connect_button_);
     assert (open_button_);
 
+    try
+    {
+        connection_.connectServer();
+    }
+    catch (std::runtime_error& e)
+    {
+        logerr << "MySQLServerWidget: connectSlot: connecting failed";
+
+        QMessageBox msgBox;
+        msgBox.setText(e.what());
+        msgBox.exec();
+        return;
+    }
+
     host_edit_->setDisabled(true);
     user_edit_->setDisabled(true);
     password_edit_->setDisabled(true);
     port_edit_->setDisabled(true);
     connect_button_->setDisabled(true);
 
-    connection_.connectServer();
-
     updateDatabases ();
     db_name_box_->setDisabled(false);
+
+    new_button_->setDisabled(false);
+    clear_button_->setDisabled(false);
+    delete_button_->setDisabled(false);
     open_button_->setDisabled(false);
 
     emit serverConnectedSignal ();
@@ -155,15 +190,6 @@ void MySQLServerWidget::updateDatabases ()
     {
        db_name_box_->setCurrentIndex(index);
     }
-
-//    index = db_name_box_->currentIndex();
-//    if (index != -1)
-//    {
-//        QString selected = db_name_box_->itemText(index); //get selected
-//        logdbg << "MySQLppConnectionWidget: updateDatabases: got database '" << selected.toStdString() << "'";
-//        updateDatabaseSlot (selected);
-//    }
-
 }
 
 void MySQLServerWidget::updateDatabaseSlot (const QString &value)
@@ -172,13 +198,79 @@ void MySQLServerWidget::updateDatabaseSlot (const QString &value)
     server_.database(value.toStdString());
 }
 
+void MySQLServerWidget::newDatabaseSlot ()
+{
+    logdbg << "MySQLServerWidget: newDatabaseSlot";
+
+    bool ok;
+    QString text = QInputDialog::getText(this, tr("QInputDialog::getText()"), tr("Database name:"), QLineEdit::Normal,
+                                         "example", &ok);
+    if (ok && !text.isEmpty())
+    {
+        connection_.createDatabase(text.toStdString());
+        server_.database(text.toStdString());
+        updateDatabases();
+    }
+}
+
+void MySQLServerWidget::clearDatabaseSlot ()
+{
+    logdbg << "MySQLServerWidget: clearDatabaseSlot";
+
+    QMessageBox::StandardButton reply;
+    std::string question = "Please confirm clearing all data from database '";
+    question += server_.database().c_str();
+    question += "'.";
+    reply = QMessageBox::question(this, "Clear Database", question.c_str(), QMessageBox::Yes|QMessageBox::No);
+
+    if (reply == QMessageBox::Yes)
+    {
+        connection_.deleteDatabase(server_.database());
+        connection_.createDatabase(server_.database());
+        updateDatabases();
+    }
+}
+
+
+void MySQLServerWidget::deleteDatabaseSlot ()
+{
+    logdbg << "MySQLServerWidget: deleteDatabaseSlot";
+
+    QMessageBox::StandardButton reply;
+    std::string question = "Please confirm deletion of database '";
+    question += server_.database().c_str();
+    question += "'.";
+    reply = QMessageBox::question(this, "Delete Database", question.c_str(), QMessageBox::Yes|QMessageBox::No);
+
+    if (reply == QMessageBox::Yes)
+    {
+        connection_.deleteDatabase(server_.database());
+        updateDatabases();
+    }
+}
+
 void MySQLServerWidget::openDatabaseSlot ()
 {
-    logdbg << "MySQLServerWidget: openDatabaseSlot";
+    loginf << "MySQLServerWidget: openDatabaseSlot: database '" << server_.database() << "'";
+
+    if (server_.database() == "")
+    {
+        QMessageBox m_warning (QMessageBox::Warning, "No Database Selected",
+                                 "Please select a valid database. New ones can be created using the 'New' button.",
+                                 QMessageBox::Ok);
+        m_warning.exec();
+        return;
+    }
+
     connection_.openDatabase(server_.database());
 
     assert (open_button_);
     assert (db_name_box_);
+
+    new_button_->setDisabled(true);
+    clear_button_->setDisabled(true);
+    delete_button_->setDisabled(true);
+
     open_button_->setDisabled(true);
     db_name_box_->setDisabled(true);
 
