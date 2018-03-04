@@ -15,10 +15,10 @@ This allows for a high degree of flexibility, but somewhat complicates software 
 
 \section*{Flexible Database Interface}
 Using such a configuration, a flexible database interface method was implemented to allow general displaying of data in different database systems and schemas.  How this was done would require a detailed discussion, which will be skipped for the moment.\\
-To summarize, several database schemas can be stored in configuration files, each of which is a structured collection of database tables and their logical dependencies. Such information is used in one set of Database Objects (DBOs). In each database system, any database schema can be used.
+To summarize, several database schemas can be stored in configuration files, each of which is a structured collection of database tables and their logical dependencies. Such information is used in one set of Database Objects (\textbf{DBO}s). In each database system, any database schema can be used.
 
 \section*{Database Objects}
-A Database Object (DBO) is defined by a name and has a collection of variables. For example, radar plots and system tracks are database objects, and each has variables holding time, position, Mode 3/A codes and Mode C heights and so on. From a database, if such a DBO is present, it can be loaded and displayed.\\
+A Database Object (\textbf{DBO}) is defined by a name and has a collection of variables. For example, radar plots and system tracks are database objects, and each has variables holding time, position, Mode 3/A codes and Mode C heights and so on. From a database, if such a DBO is present, it can be loaded and displayed.\\
 
 To allow displaying data from different DBOs in the same system, so-called meta-variables were  introduced, which hold variables that are present in some or all DBOs (with a possibly different name or unit).  For example, there meta-variable 'tod', which is a collection of sub-variables for each existing DBO and the respective ``Time of Day'' variable.
 

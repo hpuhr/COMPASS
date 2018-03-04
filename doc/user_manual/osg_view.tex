@@ -42,7 +42,26 @@ In the map widget, several mouse and key operations are supported. The following
   \caption{Map widget view operations}
 \end{table}
 
-Further operations are defined in section Map Widget Data Operations.
+Further operations are defined in section Map Widget Data Operations. \\
+
+In the lower-left corner, the data status information is given:
+
+\begin{itemize}
+ \item Status
+\begin{itemize}
+ \item Idle: Nothing to do
+ \item Loading: Loading in progress
+ \item Done: Loading/redraw done
+ \item Redrawing: Redraw in progress
+\end{itemize}
+ \item Time Begin: First timestamp in the data, in HH:MM:SS
+ \item Time End: last timestamp in the data, in HH:MM:SS
+ \item Loaded: Number of loaded target reports (from the database)
+ \item Skipped: Number of not-drawn target reports
+ \item Loaded: Number of drawn target reports
+\end{itemize}
+
+In the lower-right corner, the ATSDB version is shown.
 
 \subsubsection{Configuration Widget}
 \label{sec:osgview_config}
@@ -51,8 +70,18 @@ In the configuration widget, several elements exist:
 
 \begin{itemize}
  \item Layer widget: displays all currently existing layers
- \item Height widget: configures if and how height information is used
- \item Time filter: De/activates the time window filter
+ \item Configuration area
+\begin{itemize}
+ \item Configure labels: Allows configuration of the labels
+ \item Connect groups: Whether grouped target reports should be connected using lines
+ \item Connect None Height: If groups are connected, whether target reports with not height information should be connected
+ \item Time Filter: Activates the Time Window Filter
+ \item Use Height: Whether height information should be used to create a 3D presentation
+ \item Offset Factor: If height information is used, this factor is added to the height
+ \item Scale Factor: If height information is used, this factor is used to multiply the height
+ \item Null Offset: If height information is used, this factor is used for target reports without height information
+ \item Redraw button: Triggers a re-draw of the geometry, e.g. after a one of the above options was used
+\end{itemize}
 \end{itemize}
 
 \subsubsection{Layer Widget}
@@ -234,20 +263,6 @@ Several data-related operations can be also performed in the map widget.
   \caption{Map widget data operations}
 \end{table}
 
-Label display is currently somewhat limited, but shows the following attributes:
-
-\begin{itemize}
- \item C: Mode C code in feet, if available
- \item A: Mode A code (octal), if available
- \item CS: Mode S target indentification, if available
- \item R: Record number in database
- \item TA: Mode S target address (hexadecimal), if available
- \item T: Time of day (HH:MM:SS.SSS)
- \item TN: Track number, if available
-\end{itemize}
-
-Also, the label colour is always the same as the target report's.
-
 \begin{figure}[H]
     \hspace*{-2cm}
     \includegraphics[width=18cm,frame]{../screenshots/osgview_data_operations.png}
@@ -261,30 +276,61 @@ The data context menu allows the following operations:
  \item Group: Same operations as on the item's group layer item
 \end{itemize}
 
-\subsubsection{Height Operations}
+\subsubsection{Data Labeling}
 
-Per default, a target reports height is not used for display, which is common in current air-traffic displays. However, in certain situation a true 3D display might be of interest to a user, and therefore several options where incorporated:
+Using the operations described in the previous section, labels can be shown for target reports.
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_labels.png}
+  \caption{OSG View Labels}
+\end{figure}
+
+Using the ``Configure Labels'' button, the following operations are supported:
 
 \begin{itemize}
- \item Use: Use the height based on Mode C $h_c$, transformed to meters
- \item Use Offset: Whether to use an additative height offset
- \item Offset Factor: Height offset value $h_o$
- \item Use Scale: Whether to use an multiplicative factor
- \item Scale Factor: Height scale factor value $h_s$
- \item Connect none: Whether to draw lines to target reports with no height information
+ \item Clear: Clears all labels
+ \item Edit: Edits which variables are shown, for each DBO
+ \item Line Break: Sets after how many variable entries a line break is used
+ \item Background color: Sets the background colour of the label
 \end{itemize}
 
-Generally, if no height information is given (no Mode C code), the height is either $0$ or the height offset (if used). That means that those target reports appear to the on the ground. If connection lines are drawn between the ones in the air and those without, a lot of annoying lines are shown.
+When a edit window for a DBO label definition is opened, a window like the following is shown:
 
-The formula to calculate the height is as follows:
+\begin{figure}[H]
+    \includegraphics[width=12cm,frame]{../screenshots/osgview_label_edit.png}
+  \caption{OSG View Label Editing}
+\end{figure}
 
-$$ h = h_o + h_s \cdot h_c [m]$$ 
+For each DBO, for each variable it can be selected if the value is presented (using the checkbox), and a prefix and suffix can be defined. The changes made to the prefix and suffix are made by double-clicking on the respective field, entering a new value, and setting the value by pressing enter. Upon each change, the existing labels in the OSG View are updated automatically. \\
 
-Please note that upon changes to the height usage, the complete geometry data is redrawn, which can take several seconds until complete.
+A few notes about labels:
+
+\begin{itemize}
+ \item The label definition and presentation is persisted in the configuration
+ \item The label colour is always the same as the target report's
+ \item A variable value is only shown if it is present (not NULL)
+ \item Labels are shown at the target reports position, matched to the lower-left corner
+ \item A line break is given after the configured number of values. If values are not shown (NULL), the line break is still made at the same postion, to keep the value shown in the same line for all target reports.
+\end{itemize}
+
+\subsubsection{Group Lines}
+
+Grouping is currently performed on track number. If the ``Connect Groups'' checkbox is set, connection lines between all target reports in the same group are drawn, except for the ``Unassociated group'', where not track number was set.
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_no_lines.png}
+  \caption{OSG View Data without lines}
+\end{figure}
+
+If the height information is used (3D view), if target reports without height information are connected, the lines clutter the display. The ``Connect None Height'' checkbox allows to set the behaviour. \\
+
+Please \textbf{note} that changes both these values requires a manual redraw using the ``Redraw'' button.
 
 \subsubsection{Time Filter}
 
-Once activated, the time filter facilitates that only target reports within a specific time window are shown.
+Once activated using the ``Time Filter'' checkbox, the time filter facilitates that only target reports within a specific time window are shown.
 
 
 \begin{figure}[H]
@@ -306,5 +352,30 @@ The following items exist:
  \item Scrollbar: Manual time-scrolling
 \end{itemize}
 
-Please note that unfortunatly in the AppImage especially the time filtering is slower than was to be expected. This is currently under investigation.
+During usage of the time filter, changes in the Configuration Widget was suppressed, but changes in the Layers Widgets are possible.
+
+\subsubsection{Height Operations}
+
+Per default, a target reports height is not used for display, which is common in current air-traffic displays. However, in certain situation a true 3D display might be of interest to a user, and therefore several options where incorporated:
+
+\begin{itemize}
+ \item Use Height: Use the height based on Mode C $h_c$, transformed to meters
+ \item Offset Factor: If height information is used, this factor $h_o$ is added to the height
+ \item Scale Factor: If height information is used, this factor $h_s$ is used to multiply the height
+ \item Null Offset: If height information is used, this factor $h_n$ is used for target reports without height information
+\end{itemize}
+
+Generally, if no height information is given (no Mode C code), the height is either $0$ or the height offset (if used). That means that those target reports appear to the on the ground. If connection lines are drawn between the ones in the air and those without, a lot of annoying lines are shown.
+
+The formula to calculate the height (if existing) is as follows:
+
+$$ h = h_o + h_s \cdot h_c [m]$$ 
+
+If no height information is given:
+
+$$ h = h_n [m]$$ 
+
+Please note that upon changes to the height usage, a manual redraw has to be performed using the ``Redraw'' button.
+
+
  

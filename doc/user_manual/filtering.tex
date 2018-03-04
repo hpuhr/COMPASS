@@ -28,7 +28,7 @@ An operator can be chosen with the drop-down menu, the supplied operators are co
     >= & Greater than or equal \\ \hline
     < & Less than \\ \hline
     <= & Less than or equal \\ \hline
-    IN & Matches a value in a list \\ \hline
+    IN & Matches a value in a comma-separated list \\ \hline
     LIKE & Pattern matching with \% and \_ \\ \hline
     IS & Value NULL: No value exists \\ \hline
     IS NOT & Value NULL: Value exists \\
@@ -62,18 +62,14 @@ for persistence.
   \label{fig:filter_add3}
 \end{figure}
 
-\subsection{Editing a Filter}
-\label{sec:filter_editing}
+\subsection{Managing Filters}
+\label{sec:filter_management}
 
-Currently, filter editing has been disabled and will be added at a later version.
+By clicking on the gear symbold {\includegraphics[scale=0.025]{../../data/icons/edit.png}, a menu allows the following operations on the filter:
 
-%A filter can be reset (load reset values), edited or deleted.  When clicking on the manage button, a context menu appears. Please select the appropriate action, for editing select 'Edit'.
-
-%(image here)
-
-%When the 'Filter name' field is edited, its name is changed.  A new condition can be added using the
-%'Define condition' elements, in the same manner as in the 'New filter' process. All existing conditions are
-%shown at the bottom in rows.  Each condition can be deleted using the delete button, or changed using the elements in the appropriate row.
-%All changes are immediately propagated to the filter in the Management tab.  When done, the window
-%can be closed using the 'Close' button on the lower right.
+\begin{itemize}  
+\item Reset: Resets the filter to its default values.
+\item Edit: Has been disabled and will be added at a later version.
+\item Delete: Deletes a filter and permanently removes it from the configuration.
+\end{itemize}
  

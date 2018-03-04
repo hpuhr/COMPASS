@@ -50,3 +50,32 @@ As storage medium, a database is used.  Different database systems are supported
 When such a previously generated database is opened for the first time, some post-processing is performed, to ease usage and to increase startup speed.  When data is loaded using a database query, a filter configuration may restrict the data leading to a result set.  Such a result set can be analyzed using Views, e.g. the Listbox view.\\
 
 Each View defines which parts of the database are required to fulfill its purpose, and only such parts are loaded.  During a loading process from the database, subsets of the query result are immediately added to the current result set and all views are updated. 
+
+\section{Acknowledgments}
+
+The following libraries are used in the project (list not exhaustive):
+
+\begin{itemize}  
+\item Qt5
+\item Boost
+\item MySQL++
+\item MySQLClient
+\item SQLite3
+\item GDAL
+\item TinyXML2
+\item Log4Cpp
+\item Archive
+\item Eigen3
+\item OpenSceneGraph
+\item OSGEarth
+\end{itemize}
+
+Many thanks to the developers of these. Your work is awesome.
+
+\subsection{Contributors}
+
+Also, several persons were involved during testing of ATSDB. Many thanks to you as well, if you'd like to named please let me know.
+
+\section{Disclaimer}
+
+THE SOFTWARE IS PROVIDED ``AS IS'', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

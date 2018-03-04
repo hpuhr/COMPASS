@@ -151,7 +151,7 @@ Please know that they might also work, but no guarantees or support can be given
 
 To summarize, an AppImage is a form of binary distribution in one complete package, which does not require installation of any libraries or alteration of the operating system. Please refer to \url{https://appimage.org/} to get additional information.
 
-To obtain the ATSDB AppImage, download the most current distribution from TODO. To execute, make it executable using the following command:
+To obtain the ATSDB AppImage, download the most current AppImage from \url{https://github.com/hpuhr/ATSDB/releases}. To execute, make it executable using the following command:
 \begin{verbatim}
 chmod +x ATSDB-x86_64_release.AppImage
 \end{verbatim}
@@ -190,6 +190,7 @@ The following software has to be installed on the workstation:
     tinyxml2-dev & XML parsing library & 5.0.1 \\ \hline
     log4cpp5-dev & Logging libary & 1.1.1 \\ \hline
     libarchive-dev & Archive libary & 3.2.2 \\ \hline
+    libeigen3-dev & Linear algebra libary & 3.3.4 \\ \hline
     doxygen & Documentation generation & 1.8.13 \\ 
     \hline
   \end{tabular}
@@ -267,7 +268,8 @@ sk@golem:~/test/ATSDB$ cmake .
   GDAL_LIBRARIES: /usr/lib/libgdal.so
   TINYXML2_INCLUDE_DIR: /usr/include
   TINYXML2_LIBRARY: /usr/lib/x86_64-linux-gnu/libtinyxml2.so
--- Found Doxygen: /usr/bin/doxygen (found version "1.8.13") found components:  doxygen 
+-- Found Doxygen: /usr/bin/doxygen (found version "1.8.13") found components:
+    doxygen 
 CPACK_SOURCE_IGNORE_FILES = /CMakeFiles/;/_CPack_Packages/;/dist/;/.git/;
 -- Configuring done
 -- Generating done
