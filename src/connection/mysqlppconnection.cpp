@@ -165,12 +165,24 @@ void MySQLppConnection::executeSQL(const std::string &sql)
 
     query_used_=true;
 
-    mysqlpp::Query query = connection_.query(sql);
-    if(!query.exec()) // execute it!
+    try
     {
-        logerr  << "MySQLppConnection: executeSQL: error when executing '" << sql<<"' message '"
-                << query.error() << "'";
-        throw std::runtime_error("MySQLppConnection: executeSQL: error when executing");
+        mysqlpp::Query query = connection_.query(sql);
+
+        if(!query.exec()) // execute it!
+        {
+            logerr  << "MySQLppConnection: executeSQL: error when executing '" << sql<<"' message '"
+                    << query.error() << "'";
+            logwrn << "MySQLppConnection: executeSQL: sql statement '" << sql << "'";
+        }
+    }
+    catch (std::exception& e)
+    {
+        logwrn << "MySQLppConnection: executeSQL: sql error '" << e.what() << "'";
+        logwrn << "MySQLppConnection: executeSQL: sql statement '" << sql << "'";
+        query_used_=false;
+
+        return;
     }
 
     query_used_=false;
@@ -837,7 +849,8 @@ void MySQLppConnection::importSQLFile (const std::string& filename)
         {
             byte_cnt += line.size();
 
-            if (line.find ("delimiter") != std::string::npos || line.find ("DELIMITER") != std::string::npos)
+            if (line.find ("delimiter") != std::string::npos || line.find ("DELIMITER") != std::string::npos
+                    || line.find ("VIEW") != std::string::npos)
             {
                 loginf << "MySQLppConnection: importSQLFile: breaking at delimiter, bytes " << byte_cnt;
                 break;
@@ -875,9 +888,9 @@ void MySQLppConnection::importSQLFile (const std::string& filename)
                 logwrn << "MySQLppConnection: importSQLFile: quit after too many errors";
 
                 QMessageBox m_warning (QMessageBox::Warning, "MySQL Text Import Failed",
-                                         "Quit after too many SQL errors. Please make sure that"
-                                         " the SQL file is correct.",
-                                         QMessageBox::Ok);
+                                       "Quit after too many SQL errors. Please make sure that"
+                                       " the SQL file is correct.",
+                                       QMessageBox::Ok);
                 m_warning.exec();
 
                 break;
@@ -939,7 +952,9 @@ void MySQLppConnection::importSQLArchiveFile(const std::string& filename)
     msg_box.setText(msg.c_str());
     msg_box.setStandardButtons(QMessageBox::NoButton);
     msg_box.show();
-    QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+    for (unsigned int cnt=0; cnt < 10; cnt++)
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
     while (archive_read_next_header(a, &entry) == ARCHIVE_OK)
     {
@@ -996,8 +1011,8 @@ void MySQLppConnection::importSQLArchiveFile(const std::string& filename)
 
                     if (line_it->back() == ';')
                     {
-//                        loginf << "MySQLppConnection: importSQLArchiveFile: line cnt " << line_cnt
-//                               <<  " strlen " << ss.str().size() << "'";
+                        //                        loginf << "MySQLppConnection: importSQLArchiveFile: line cnt " << line_cnt
+                        //                               <<  " strlen " << ss.str().size() << "'";
 
                         if (line.size())
                             executeSQL (line+"\n");
@@ -1014,8 +1029,8 @@ void MySQLppConnection::importSQLArchiveFile(const std::string& filename)
                         msg_box.setInformativeText(msg.c_str());
                         msg_box.show();
                         QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-//                        progress_dialog->setValue(100*byte_cnt/file_byte_size);
-//                        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                        //                        progress_dialog->setValue(100*byte_cnt/file_byte_size);
+                        //                        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
                     }
 
                     line_cnt ++;
@@ -1031,9 +1046,9 @@ void MySQLppConnection::importSQLArchiveFile(const std::string& filename)
                         logwrn << "MySQLppConnection: importSQLArchiveFile: quit after too many errors";
 
                         QMessageBox m_warning (QMessageBox::Warning, "MySQL Archive Import Failed",
-                                                 "Quit after too many SQL errors. Please make sure that"
-                                                 " the archive is correct as specified in the user manual.",
-                                                 QMessageBox::Ok);
+                                               "Quit after too many SQL errors. Please make sure that"
+                                               " the archive is correct as specified in the user manual.",
+                                               QMessageBox::Ok);
                         m_warning.exec();
                         done=true;
                         break;
