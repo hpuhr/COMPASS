@@ -808,7 +808,7 @@ void MySQLppConnection::importSQLFile (const std::string& filename)
     progress_dialog->setWindowModality(Qt::ApplicationModal);
     progress_dialog->show();
 
-    while (QCoreApplication::hasPendingEvents())
+    for (unsigned int cnt=0; cnt < 10; cnt++)
         QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
     std::ifstream is;
@@ -819,7 +819,7 @@ void MySQLppConnection::importSQLFile (const std::string& filename)
     assert (file_byte_size);
     loginf  << "MySQLppConnection: importSQLFile: file_byte_size: " << file_byte_size;
 
-    while (QCoreApplication::hasPendingEvents())
+    for (unsigned int cnt=0; cnt < 10; cnt++)
         QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
     std::ifstream sql_file (filename);
