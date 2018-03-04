@@ -23,10 +23,14 @@
 #include "buffer.h"
 #include "logger.h"
 
-DBOReadDBJob::DBOReadDBJob(DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause, std::vector <DBOVariable *> filtered_variables,
-                           bool use_order, DBOVariable *order_variable, bool use_order_ascending, const std::string &limit_str, bool activate_key_search)
-: Job("DBOReadDBJob"), db_interface_(db_interface), dbobject_(dbobject), read_list_(read_list), custom_filter_clause_ (custom_filter_clause), filtered_variables_(filtered_variables),
-  use_order_(use_order), order_variable_(order_variable), use_order_ascending_(use_order_ascending), limit_str_(limit_str), activate_key_search_(activate_key_search)
+DBOReadDBJob::DBOReadDBJob(DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list,
+                           std::string custom_filter_clause, std::vector <DBOVariable *> filtered_variables,
+                           bool use_order, DBOVariable *order_variable, bool use_order_ascending,
+                           const std::string &limit_str, bool activate_key_search)
+: Job("DBOReadDBJob"), db_interface_(db_interface), dbobject_(dbobject), read_list_(read_list),
+  custom_filter_clause_ (custom_filter_clause), filtered_variables_(filtered_variables),
+  use_order_(use_order), order_variable_(order_variable), use_order_ascending_(use_order_ascending),
+  limit_str_(limit_str), activate_key_search_(activate_key_search)
 {
 }
 
@@ -37,39 +41,44 @@ DBOReadDBJob::~DBOReadDBJob()
 
 void DBOReadDBJob::run ()
 {
-    loginf << "DBOReadDBJob: execute: " << dbobject_.name() << ": start";
+    loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": start";
     started_ = true;
 
     if (obsolete_)
     {
+        loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": obsolete before prepared";
         done_=true;
         return;
     }
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
-    db_interface_.prepareRead (dbobject_, read_list_, custom_filter_clause_, filtered_variables_, use_order_, order_variable_, use_order_ascending_, limit_str_);
+    db_interface_.prepareRead (dbobject_, read_list_, custom_filter_clause_, filtered_variables_, use_order_,
+                               order_variable_, use_order_ascending_, limit_str_);
 
     unsigned int cnt=0;
     unsigned int row_count=0;
-    while (!done_ && !obsolete_)
+    while (!done_)
     {
         std::shared_ptr<Buffer> buffer = db_interface_.readDataChunk(dbobject_, activate_key_search_);
         cnt++;
 
         if (obsolete_)
+        {
+            loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": obsolete after prepared";
             break;
+        }
 
         assert (buffer->dboName() == dbobject_.name());
 
         if (!buffer)
         {
-            logwrn << "DBOReadDBJob: execute: " << dbobject_.name() << ": got null buffer";
+            logwrn << "DBOReadDBJob: run: " << dbobject_.name() << ": got null buffer";
             break;
         }
         else
         {
-            logdbg << "DBOReadDBJob: execute: " << dbobject_.name() << ": intermediate signal, #buffers "
+            logdbg << "DBOReadDBJob: run: " << dbobject_.name() << ": intermediate signal, #buffers "
                    << cnt << " last one " << buffer->lastOne();
             row_count += buffer->size();
             emit intermediateSignal(buffer);
@@ -79,19 +88,19 @@ void DBOReadDBJob::run ()
             break;
     }
 
-    loginf << "DBOReadDBJob: execute: " << dbobject_.name() << ": finalizing statement";
+    loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": finalizing statement";
     db_interface_.finalizeReadStatement(dbobject_);
 
     stop_time_ = boost::posix_time::microsec_clock::local_time();
     boost::posix_time::time_duration diff = stop_time_ - start_time_;
 
     if (diff.total_seconds() > 0)
-        loginf << "DBOReadDBJob: execute: " << dbobject_.name() << ": done after " << diff << ", "
+        loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": done after " << diff << ", "
                << 1000.0*row_count/diff.total_milliseconds() << " el/s";
 
 
     done_=true;
 
-    loginf << "DBOReadDBJob: execute: " << dbobject_.name() << ": done";
+    loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": done";
     return;
 }

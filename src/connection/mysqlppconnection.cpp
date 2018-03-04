@@ -48,7 +48,7 @@ using namespace Utils;
 
 MySQLppConnection::MySQLppConnection(const std::string &class_id, const std::string &instance_id,
                                      DBInterface *interface)
-    : DBConnection (class_id, instance_id, interface), interface_(*interface), connection_(mysqlpp::Connection (false)),
+    : DBConnection (class_id, instance_id, interface), interface_(*interface), connection_(mysqlpp::Connection ()),
       prepared_query_(connection_.query()), prepared_parameters_(mysqlpp::SQLQueryParms(&prepared_query_))
 {
     registerParameter("used_server", &used_server_, "");
@@ -159,6 +159,12 @@ void MySQLppConnection::executeSQL(const std::string &sql)
 {
     logdbg  << "MySQLppConnection: executeSQL: sql statement execute: '" <<sql << "'";
 
+    assert (!query_used_);
+    assert (!prepared_command_);
+    assert (prepared_command_done_);
+
+    query_used_=true;
+
     mysqlpp::Query query = connection_.query(sql);
     if(!query.exec()) // execute it!
     {
@@ -166,6 +172,8 @@ void MySQLppConnection::executeSQL(const std::string &sql)
                 << query.error() << "'";
         throw std::runtime_error("MySQLppConnection: executeSQL: error when executing");
     }
+
+    query_used_=false;
 }
 
 void MySQLppConnection::prepareBindStatement (const std::string &statement)
@@ -209,6 +217,8 @@ void MySQLppConnection::endBindTransaction ()
 
 void MySQLppConnection::finalizeBindStatement ()
 {
+    assert (query_used_);
+
     prepared_query_.reset();
     query_used_=false;
 
@@ -292,9 +302,15 @@ std::shared_ptr <DBResult> MySQLppConnection::execute (const DBCommandList &comm
 
 void MySQLppConnection::execute (const std::string &command, std::shared_ptr <Buffer> buffer)
 {
-    logdbg  << "MySQLppConnection: execute: command '" << command << "'";
+    logdbg  << "MySQLppConnection: execute: command '" << command << "' with buffer";
 
     assert (buffer);
+    assert (!query_used_);
+    assert (!prepared_command_);
+    assert (prepared_command_done_);
+
+    query_used_=true;
+
     unsigned int num_properties=0;
 
     const PropertyList &list = buffer->properties();
@@ -316,6 +332,8 @@ void MySQLppConnection::execute (const std::string &command, std::shared_ptr <Bu
         readRowIntoBuffer (row, list, num_properties, buffer, cnt);
         cnt++;
     }
+
+    query_used_=false;
 
     logdbg  << "MySQLppConnection: execute done with size " << buffer->size();
 }
@@ -378,12 +396,20 @@ void MySQLppConnection::execute (const std::string &command)
 {
     logdbg  << "MySQLppConnection: execute: command '" << command << "'";
 
+    assert (!query_used_);
+    assert (!prepared_command_);
+    assert (prepared_command_done_);
+
+    query_used_=true;
+
     logdbg  << "MySQLppConnection: execute: creating query";
     mysqlpp::Query query = connection_.query(command);
     logdbg  << "MySQLppConnection: execute: creating storequeryresult";
     mysqlpp::StoreQueryResult res = query.store();
 
     assert (res.begin() == res.end());
+
+    query_used_=false;
     logdbg  << "MySQLppConnection: execute done";
 }
 
@@ -393,6 +419,7 @@ void MySQLppConnection::prepareStatement (const std::string &sql)
     logdbg  << "MySQLppConnection: prepareStatement: sql '" << sql << "'";
 
     assert (!query_used_);
+    query_used_=true;
 
     result_step_ = mysqlpp::UseQueryResult ();
 
@@ -405,8 +432,6 @@ void MySQLppConnection::prepareStatement (const std::string &sql)
                                   +std::string(prepared_query_.error())+"'");
     }
 
-    query_used_=true;
-
     if (info_widget_)
         info_widget_->updateSlot();
 
@@ -415,6 +440,10 @@ void MySQLppConnection::prepareStatement (const std::string &sql)
 void MySQLppConnection::finalizeStatement ()
 {
     logdbg  << "MySQLppConnection: finalizeStatement";
+
+    assert (query_used_);
+
+    prepared_query_.clear();
     prepared_query_.reset();
     query_used_=false;
 
@@ -497,6 +526,14 @@ void MySQLppConnection::finalizeCommand ()
     logdbg  << "MySQLppConnection: finalizeCommand";
     assert (prepared_command_);
     //assert (prepared_command_done_); true if ok, false if quit job
+
+    bool first = true;
+    while (mysqlpp::Row row = result_step_.fetch_row())
+        if (first)
+        {
+            loginf << "MySQLppConnection: finalizeCommand: stepping through result set to finalize";
+            first = false;
+        }
 
     prepared_command_=nullptr; // should be deleted by caller
     prepared_command_done_=true;

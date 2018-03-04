@@ -63,11 +63,11 @@ public:
 protected:
     std::string name_;
     ///
-    bool started_;
+    bool started_ {false};
     /// Done flag
-    bool done_;
+    bool done_ {false};
     /// Obsolete flag
-    bool obsolete_;
+    bool obsolete_ {false};
 
     virtual void setDone () { done_=true; }
 };

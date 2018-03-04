@@ -315,6 +315,8 @@ void DBOVariable::setMinMax ()
 {
     assert (!min_max_set_);
 
+    logdbg << "DBOVariable " << db_object_.name() << " " << name_ << ": setMinMax";
+
     std::pair<std::string, std::string> min_max = ATSDB::instance().interface().getMinMaxString(*this);
 
     min_=min_max.first;

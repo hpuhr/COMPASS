@@ -576,10 +576,13 @@ void DBInterface::insertMinMax (const std::string& id, const std::string& object
  */
 std::pair<std::string, std::string> DBInterface::getMinMaxString (const DBOVariable& var)
 {
-    loginf << "DBInterface: getMinMaxString: var " << var.name();
+    logdbg << "DBInterface: getMinMaxString: var " << var.name();
 
     if (!var.dbObject().count()) // object doesn't exist in this database
+    {
+        logdbg << "DBInterface: getMinMaxString: var " << var.name() << " not in db";
         return std::pair<std::string, std::string> (NULL_STRING, NULL_STRING);
+    }
 
     QMutexLocker locker(&connection_mutex_);
 
@@ -593,7 +596,7 @@ std::pair<std::string, std::string> DBInterface::getMinMaxString (const DBOVaria
     command.set(sql_generator_.getSelectMinMaxStatement(var.currentDBColumn().name(), var.dboName()));
     command.list(list);
 
-    loginf << "DBInterface: getMinMaxString: sql '" << command.get() << "'";
+    logdbg << "DBInterface: getMinMaxString: sql '" << command.get() << "'";
 
     std::shared_ptr<DBResult> result = current_connection_->execute(command);
 
@@ -630,9 +633,8 @@ std::pair<std::string, std::string> DBInterface::getMinMaxString (const DBOVaria
         max = var.multiplyString(max, factor);
     }
 
-    loginf << "DBInterface: getMinMaxString: var " << var.name() << " min " << min << " max " << max;
+    logdbg << "DBInterface: getMinMaxString: var " << var.name() << " min " << min << " max " << max;
     return std::pair <std::string, std::string> (min, max);
-
 }
 
 bool DBInterface::isPostProcessed ()
