@@ -75,7 +75,7 @@ ProjectionManagerWidget::ProjectionManagerWidget(ProjectionManager& proj_man, QW
     //connect (sdl_radio_, &QRadioButton::toggled, this, &ProjectionManagerWidget::projectionChangedSlot);
     //sdl_radio_->setChecked(projection_manager_.useSDLProjection());
     sdl_radio_->setDisabled(true);
-    layout->addWidget(sdl_radio_);
+    //layout->addWidget(sdl_radio_);
 
     rs2g_radio_  = new QRadioButton ("RS2G Projection");
     connect (rs2g_radio_, &QRadioButton::toggled, this, &ProjectionManagerWidget::projectionChangedSlot);
