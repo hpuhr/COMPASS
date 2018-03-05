@@ -182,7 +182,7 @@ void MySQLppConnection::executeSQL(const std::string &sql)
         logwrn << "MySQLppConnection: executeSQL: sql statement '" << sql << "'";
         query_used_=false;
 
-        return;
+        throw;
     }
 
     query_used_=false;
@@ -1012,7 +1012,8 @@ void MySQLppConnection::importSQLArchiveFile(const std::string& filename)
 
                     byte_cnt += line.size();
 
-                    if (line.find ("delimiter") != std::string::npos || line.find ("DELIMITER") != std::string::npos)
+                    if (line.find ("delimiter") != std::string::npos || line.find ("DELIMITER") != std::string::npos
+                            || line.find ("VIEW") != std::string::npos)
                     {
                         loginf << "MySQLppConnection: importSQLArchiveFile: breaking at delimiter, bytes " << byte_cnt;
                         done = true;
