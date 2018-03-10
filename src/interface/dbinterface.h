@@ -122,7 +122,7 @@ public:
                       DBOVariable *order_variable=nullptr, bool use_order_ascending=false, const std::string &limit="");
 
     /// @brief Returns data chunk of DBO type
-    std::shared_ptr <Buffer> readDataChunk (const DBObject &dbobject, bool activate_key_search);
+    std::shared_ptr <Buffer> readDataChunk (const DBObject &dbobject);
     /// @brief Cleans up incremental read of DBO type
     void finalizeReadStatement (const DBObject &dbobject);
     /// @brief Sets reading_done_ flags

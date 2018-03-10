@@ -453,12 +453,12 @@ void DBObject::load (DBOVariableSet& read_set, bool use_filters, bool use_order,
     }
 
     //    DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
-    //    DBOVariable *order, const std::string &limit_str, bool activate_key_search
+    //    DBOVariable *order, const std::string &limit_str
 
     read_job_ = std::shared_ptr<DBOReadDBJob> (new DBOReadDBJob (ATSDB::instance().interface(), *this,
                                                                  read_set, custom_filter_clause,
                                                                  filtered_variables, use_order, order_variable,
-                                                                 use_order_ascending, limit_str, false));
+                                                                 use_order_ascending, limit_str));
 
     connect (read_job_.get(), SIGNAL(intermediateSignal(std::shared_ptr<Buffer>)),
              this, SLOT(readJobIntermediateSlot(std::shared_ptr<Buffer>)), Qt::QueuedConnection);
@@ -539,7 +539,7 @@ std::map<int, std::string> DBObject::loadLabelData (std::vector<int> rec_nums, i
     DBInterface& db_interface = ATSDB::instance().interface ();
 
     db_interface.prepareRead (*this, read_list, custom_filter_clause, {}, false, nullptr, false, "");
-    std::shared_ptr<Buffer> buffer = db_interface.readDataChunk(*this, false);
+    std::shared_ptr<Buffer> buffer = db_interface.readDataChunk(*this);
     db_interface.finalizeReadStatement(*this);
 
     if (buffer->size() != rec_nums.size())

@@ -866,7 +866,7 @@ void DBInterface::prepareRead (const DBObject &dbobject, DBOVariableSet read_lis
 /**
  * Retrieves result from connection stepPreparedCommand, calls activateKeySearch on buffer and returns it.
  */
-std::shared_ptr <Buffer> DBInterface::readDataChunk (const DBObject &dbobject, bool activate_key_search)
+std::shared_ptr <Buffer> DBInterface::readDataChunk (const DBObject &dbobject)
 {
     // locked by prepareRead
     assert (current_connection_);
@@ -876,14 +876,12 @@ std::shared_ptr <Buffer> DBInterface::readDataChunk (const DBObject &dbobject, b
     if (!result)
     {
         logerr  << "DBInterface: readDataChunk: connection returned error";
-        //TODO inform object
         throw std::runtime_error ("DBInterface: readDataChunk: connection returned error");
     }
 
     if (!result->containsData())
     {
         logerr  << "DBInterface: readDataChunk: buffer does not contain data";
-        //TODO inform object
         throw std::runtime_error ("DBInterface: readDataChunk: buffer does not contain data");
     }
 
@@ -892,26 +890,9 @@ std::shared_ptr <Buffer> DBInterface::readDataChunk (const DBObject &dbobject, b
     buffer->dboName(dbobject.name());
 
     assert (buffer);
-    if (buffer->firstWrite())
-    {
-        return buffer; // HACK UGGGA WAS 0
-    }
 
     bool last_one = current_connection_->getPreparedCommandDone();
     buffer->lastOne (last_one);
-
-    assert (!activate_key_search); // TODO FIXXXXME
-
-    //    if (activate_key_search)
-    //    {
-    //        assert (DBObjectManager::getInstance().existsDBOVariable (DBO_UNDEFINED, "id"));
-    //        assert (DBObjectManager::getInstance().getDBOVariable (DBO_UNDEFINED, "id")->existsIn (type));
-    //        std::string id_name = DBObjectManager::getInstance().getDBOVariable (DBO_UNDEFINED, "id")->getFor(type)->getName();
-    //        assert (buffer->getPropertyList()->hasProperty(id_name));
-    //        logdbg << "DBInterface: readDataChunk: key search id " << id_name << " index " << buffer->getPropertyList()->getPropertyIndex(id_name)
-    //                                                    << " buffer first " << buffer->getFirstWrite() << " size " << buffer->getSize();
-    //        buffer->activateKeySearch(buffer->getPropertyList()->getPropertyIndex(id_name));
-    //    }
 
     return buffer;
 }

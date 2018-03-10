@@ -584,6 +584,9 @@ void Buffer::seizeBuffer (Buffer &org_buffer)
         it.second->addData(*org_buffer.arrays_string_.at(it.first));
     org_buffer.arrays_string_.clear();
 
+    if (org_buffer.lastOne())
+        last_one_ = true;
+
     logdbg  << "Buffer: seizeBuffer: size " << size();
 
     //containers_.insert (containers_.end(), org_containers.begin(), org_containers.end());
