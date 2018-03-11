@@ -528,7 +528,7 @@ std::map<int, std::string> DBObject::loadLabelData (std::vector<int> rec_nums, i
 
         custom_filter_clause += std::to_string(rec_num);
     }
-    custom_filter_clause += ");";
+    custom_filter_clause += ")";
 
     DBOVariableSet read_list = label_definition_->readList();
     if (!read_list.hasVariable(variable("rec_num")))
