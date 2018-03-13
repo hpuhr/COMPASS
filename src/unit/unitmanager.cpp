@@ -57,6 +57,15 @@ void UnitManager::checkSubConfigurables ()
         dimensions_.at("Length")->addUnit ("Nautical Mile", 1.0/1852.0, "");
     }
 
+    if (dimensions_.count("Height") == 0)
+    {
+        addNewSubConfiguration ("Dimension", "Height");
+        generateSubConfigurable("Dimension", "Height");
+
+        dimensions_.at("Height")->addUnit ("Feet", 1.0, "");
+        dimensions_.at("Height")->addUnit ("Flight Level", 1/100.0, "");
+    }
+
     if (dimensions_.count("Time") == 0)
     {
         addNewSubConfiguration ("Dimension", "Time");
