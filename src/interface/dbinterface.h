@@ -152,7 +152,8 @@ public:
     /// (dbo type, id) -> (min, max)
     std::map <std::pair<std::string, std::string>, std::pair<std::string, std::string> > getMinMaxInfo ();
     /// @brief Inserts a minimum/maximum value pair
-    void insertMinMax (const std::string& id, const std::string& object_name, const std::string& min, const std::string& max);
+    void insertMinMax (const std::string& id, const std::string& object_name, const std::string& min,
+                       const std::string& max);
 
     /// @brief Returns if database was post processed
     bool isPostProcessed ();

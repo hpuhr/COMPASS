@@ -25,12 +25,14 @@
 #include "dbschemamanager.h"
 #include "logger.h"
 #include "buffer.h"
+#include "dbinterface.h"
 
 /**
  * Registers current_schema as parameter, creates sub-configurables (schemas), checks if current_schema exists (if defined).
  */
-DBSchemaManager::DBSchemaManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb)
-: Configurable (class_id, instance_id, atsdb, "db_schema.xml")
+DBSchemaManager::DBSchemaManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb,
+                                 DBInterface& db_interface)
+: Configurable (class_id, instance_id, atsdb, "db_schema.xml"), db_interface_(db_interface)
 {
     registerParameter ("current_schema", &current_schema_, (std::string)"");
 
@@ -126,7 +128,7 @@ void DBSchemaManager::generateSubConfigurable (const std::string &class_id, cons
     if (class_id.compare("DBSchema") == 0)
     {
         logdbg  << "DBSchema: generateSubConfigurable: generating DBTable";
-        DBSchema *schema = new DBSchema ("DBSchema", instance_id, this);
+        DBSchema *schema = new DBSchema ("DBSchema", instance_id, this, db_interface_);
         assert (schema->name().size() != 0);
         assert (schemas_.find(schema->name()) == schemas_.end());
         schemas_.insert (std::pair <std::string, DBSchema*> (schema->name(), schema));
@@ -212,4 +214,13 @@ void DBSchemaManager::lock ()
         widget_->lock();
 
     emit schemaLockedSignal();
+}
+
+void DBSchemaManager::databaseContentChangedSlot ()
+{
+    loginf << "DBSchemaManager: databaseContentChangedSlot";
+
+    for (auto& schema_it : schemas_)
+        schema_it.second->updateOnDatabase();
+
 }

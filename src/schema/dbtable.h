@@ -23,6 +23,7 @@
 class DBTableColumn;
 class DBTableWidget;
 class DBSchema;
+class DBInterface;
 
 /**
  * @brief Database table definition
@@ -34,7 +35,7 @@ class DBTable : public Configurable
 {
 public:
     /// @brief Constructor
-    DBTable(const std::string& class_id, const std::string& instance_id, DBSchema& schema);
+    DBTable(const std::string& class_id, const std::string& instance_id, DBSchema& schema, DBInterface& db_interface);
     /// @brief Destructor
     virtual ~DBTable();
 
@@ -71,11 +72,15 @@ public:
     void lock ();
     bool isLocked () { return locked_; }
 
-
     DBTableWidget* widget ();
+
+    void updateOnDatabase(); // check what informations is present in the current db
+
+    bool existsInDB () const { return exists_in_db_; }
 
 private:
     DBSchema &schema_;
+    DBInterface& db_interface_;
 
     bool locked_ {false};
 
@@ -89,6 +94,8 @@ private:
     std::string key_name_;
     /// Container with all table columns (column name -> DBTableColumn)
     std::map <std::string, DBTableColumn*> columns_;
+
+    bool exists_in_db_ {false};
 
 protected:
     virtual void checkSubConfigurables ();

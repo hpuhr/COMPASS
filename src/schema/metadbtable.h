@@ -23,12 +23,10 @@
 
 #include "configurable.h"
 #include "dbtablecolumn.h"
-//#include "DBTable.h"
-//#include "DBSchema.h"
 
-//class DBTableColumn;
 class DBTable;
 class DBSchema;
+class DBInterface;
 
 /**
  * @brief Sub-table definition for a DBMetaTable
@@ -78,7 +76,8 @@ class MetaDBTable : public Configurable
 {
 public:
     /// @brief Constructor
-    MetaDBTable(const std::string& class_id, const std::string& instance_id, DBSchema* parent);
+    MetaDBTable(const std::string& class_id, const std::string& instance_id, DBSchema* parent,
+                DBInterface& db_interface);
     /// @brief Destructor
     virtual ~MetaDBTable();
 
@@ -128,7 +127,15 @@ public:
 
     void lock ();
 
+    void updateOnDatabase(); // check what informations is present in the current db
+
+    bool existsInDB () const { return exists_in_db_; }
+
 protected:
+    /// Parent schema
+    DBSchema& schema_;
+    DBInterface& db_interface_;
+
     /// Name
     std::string name_;
     /// Description
@@ -136,8 +143,6 @@ protected:
     /// Main table name
     std::string main_table_name_;
 
-    /// Parent schema
-    DBSchema& schema_;
     /// Main database table
     const DBTable* main_table_ {nullptr};
 
@@ -151,6 +156,8 @@ protected:
     std::map <std::string, const DBTable&> sub_tables_;
     /// Container with all table columns
     std::map <std::string, const DBTableColumn&> columns_;
+
+    bool exists_in_db_ {false};
 
     virtual void checkSubConfigurables () {}
 

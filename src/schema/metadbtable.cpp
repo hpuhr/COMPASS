@@ -24,9 +24,11 @@
 #include "atsdb.h"
 #include "logger.h"
 #include "metadbtablewidget.h"
+#include "dbinterface.h"
 
-MetaDBTable::MetaDBTable(const std::string& class_id, const std::string& instance_id, DBSchema* parent)
-    : Configurable (class_id, instance_id, parent), schema_(*parent)
+MetaDBTable::MetaDBTable(const std::string& class_id, const std::string& instance_id, DBSchema* parent,
+                         DBInterface& db_interface)
+    : Configurable (class_id, instance_id, parent), schema_(*parent), db_interface_(db_interface)
 {
     registerParameter ("name", &name_, "");
     registerParameter ("info", &info_, "");
@@ -168,7 +170,7 @@ void MetaDBTable::updateColumns ()
         columns_.insert (std::pair <std::string, const DBTableColumn&> (it.second->identifier(), *it.second));
     }
 
-    for (auto it: sub_tables_)
+    for (auto it : sub_tables_)
     {
         for (auto it2 : it.second.columns())
         {
@@ -177,6 +179,16 @@ void MetaDBTable::updateColumns ()
             columns_.insert (std::pair <std::string, const DBTableColumn&> (it2.second->identifier(), *it2.second));
         }
     }
+}
+
+void MetaDBTable::updateOnDatabase()
+{
+    exists_in_db_ = main_table_->existsInDB();
+
+    for (auto table_it : sub_tables_)
+        exists_in_db_ = exists_in_db_ | table_it.second.existsInDB();
+
+    loginf << "MetaDBTable: updateOnDatabase: " << name_ << " exists in db " << exists_in_db_;
 }
 
 //void MetaDBTable::setSubTablesIfRequired ()

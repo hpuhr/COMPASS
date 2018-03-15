@@ -24,8 +24,9 @@
 #include "dbinterface.h"
 #include "logger.h"
 
-DBTable::DBTable(const std::string& class_id, const std::string& instance_id, DBSchema& schema)
-    : Configurable (class_id, instance_id, &schema), schema_(schema)
+DBTable::DBTable(const std::string& class_id, const std::string& instance_id, DBSchema& schema,
+                 DBInterface& db_interface)
+    : Configurable (class_id, instance_id, &schema), schema_(schema), db_interface_(db_interface)
 {
     registerParameter ("name", &name_, "");
     registerParameter ("info", &info_, "");
@@ -55,7 +56,7 @@ void DBTable::generateSubConfigurable (const std::string& class_id, const std::s
 
     if (class_id == "DBTableColumn")
     {
-        DBTableColumn *column = new DBTableColumn ("DBTableColumn", instance_id, this);
+        DBTableColumn *column = new DBTableColumn ("DBTableColumn", instance_id, this, db_interface_);
         assert (column->name().size() != 0);
         assert (columns_.find(column->name()) == columns_.end());
         columns_.insert (std::pair <std::string, DBTableColumn*> (column->name(), column));
@@ -127,3 +128,18 @@ DBTableWidget* DBTable::widget ()
 
     return widget_;
 }
+
+void DBTable::updateOnDatabase()
+{
+    exists_in_db_ = false;
+
+    for (auto col_it : columns_)
+    {
+        col_it.second->updateOnDatabase();
+
+        exists_in_db_ = exists_in_db_ | col_it.second->existsInDB(); // exists if any exist
+    }
+
+    loginf << "DBTable: updateOnDatabase: " << name_ << " exists in db " << exists_in_db_;
+}
+
