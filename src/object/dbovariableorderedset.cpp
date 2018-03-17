@@ -258,6 +258,36 @@ DBOVariableSet DBOVariableOrderedSet::getFor (const std::string &dbo_name)
     return type_set;
 }
 
+DBOVariableSet DBOVariableOrderedSet::getExistingInDBFor (const std::string &dbo_name)
+{
+    logdbg  << "DBOVariableOrderedSet: getExistingInDBFor: type " << dbo_name;
+
+    DBObjectManager &manager = ATSDB::instance().objectManager();
+    DBOVariableSet type_set;
+    std::map <unsigned int, DBOVariableOrderDefinition*>::iterator it;
+
+    for (it=variable_definitions_.begin(); it != variable_definitions_.end(); it++)
+    {
+        if (it->second->dboName() == META_OBJECT_NAME)
+        {
+            assert (manager.existsMetaVariable(it->second->variableName()));
+            if (manager.metaVariable(it->second->variableName()).existsIn(dbo_name) &&
+                    manager.metaVariable(it->second->variableName()).existsInDB() &&
+                    manager.metaVariable(it->second->variableName()).getFor(dbo_name).existsInDB())
+                type_set.add (manager.metaVariable(it->second->variableName()).getFor(dbo_name));
+        }
+        else if (it->second->dboName() == dbo_name)
+        {
+            assert (manager.existsObject(dbo_name));
+            assert (manager.object(dbo_name).hasVariable(it->second->variableName()));
+            if (manager.object(dbo_name).variable(it->second->variableName()).existsInDB())
+                type_set.add (manager.object(dbo_name).variable(it->second->variableName()));
+        }
+    }
+
+    return type_set;
+}
+
 //DBOVariableSet DBOVariableOrderedSet::getUnorderedSet () const
 //{
 //  logdbg  << "DBOVariableOrderedSet: getSet";

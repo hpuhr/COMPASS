@@ -41,7 +41,8 @@
 
 //using namespace Utils;
 
-BufferTableWidget::BufferTableWidget(DBObject &object, ListBoxViewDataSource& data_source, QWidget * parent, Qt::WindowFlags f)
+BufferTableWidget::BufferTableWidget(DBObject &object, ListBoxViewDataSource& data_source, QWidget* parent,
+                                     Qt::WindowFlags f)
 : QWidget (parent, f), object_(object), data_source_(data_source)
 {
     setAutoFillBackground(true);
@@ -64,6 +65,96 @@ BufferTableWidget::BufferTableWidget(DBObject &object, ListBoxViewDataSource& da
 BufferTableWidget::~BufferTableWidget()
 {
 }
+
+
+
+void BufferTableWidget::clear ()
+{
+    assert (model_);
+
+    model_->clearData();
+}
+
+void BufferTableWidget::show (std::shared_ptr<Buffer> buffer) //, DBOVariableSet *variables, bool database_view
+{
+    assert (buffer);
+
+    logdbg  << "BufferTableWidget: show: object " << object_.name() << " buffer size " << buffer->size()
+            << " properties " << buffer->properties().size();
+    assert (table_);
+    assert (model_);
+
+    model_->setData(buffer);
+    table_->resizeColumnsToContents();
+
+//    ViewSelectionEntries &selection_entries = ViewSelection::getInstance().getEntries();
+//    ViewSelectionEntries::iterator it;
+//    std::map <unsigned int, QTableWidgetItem*>::iterator it2;
+
+//    logdbg  << "BufferTableWidget: show: selection size " << selection_entries.size();
+
+//    for (it = selection_entries.begin(); it != selection_entries.end(); it++)
+//    {
+//        ViewSelectionEntry &entry=*it;
+//        if (entry.isDBO())
+//        {
+//            if ((unsigned int) entry.id_.first == type_)
+//            {
+//                //loginf << "BufferTableWidget: show: check at " << entry.id_.second << " is correct type"<< endl;
+//                it2 = selected_items.find(entry.id_.second);
+//                if (it2 != selected_items.end())
+//                {
+//                    it2->second->setCheckState ( Qt::Checked );
+//                }
+//            }
+//        }
+//    }
+
+    logdbg  << " BufferTableWidget: show: end";
+}
+
+void BufferTableWidget::exportSlot(bool overwrite)
+{
+    loginf << "BufferTableWidget: exportSlot: object " << object_.name();
+
+    QString file_name;
+    if (overwrite)
+    {
+        file_name = QFileDialog::getSaveFileName(this, ("Save "+object_.name()+" as CSV").c_str(), "",
+                                                 tr("Comma-separated values (*.csv);;All Files (*)"));
+    }
+    else
+    {
+        file_name = QFileDialog::getSaveFileName(this, ("Save "+object_.name()+" as CSV").c_str(), "",
+                                                 tr("Comma-separated values (*.csv);;All Files (*)"), nullptr,
+                                                 QFileDialog::DontConfirmOverwrite);
+    }
+
+    if (file_name.size())
+    {
+        loginf << "BufferTableWidget: exportSlot: export filename " << file_name.toStdString();
+        assert (model_);
+        model_->saveAsCSV(file_name.toStdString(), overwrite);
+    }
+    else
+    {
+        emit exportDoneSignal (true);
+    }
+}
+
+void BufferTableWidget::exportDoneSlot (bool cancelled)
+{
+    emit exportDoneSignal (cancelled);
+}
+
+void BufferTableWidget::usePresentationSlot (bool use_presentation)
+{
+    assert (model_);
+    model_->usePresentation(use_presentation);
+    assert (table_);
+    table_->resizeColumnsToContents();
+}
+
 
 //void BufferTableWidget::itemChanged (QTableWidgetItem *item)
 //{
@@ -226,87 +317,3 @@ BufferTableWidget::~BufferTableWidget()
 //        }
 //    }
 //}
-
-void BufferTableWidget::clear ()
-{
-    assert (model_);
-
-    model_->clearData();
-}
-
-void BufferTableWidget::show (std::shared_ptr<Buffer> buffer) //, DBOVariableSet *variables, bool database_view
-{
-    assert (buffer);
-
-    logdbg  << "BufferTableWidget: show: object " << object_.name() << " buffer size " << buffer->size() << " properties " << buffer->properties().size();
-    assert (table_);
-    assert (model_);
-
-    model_->setData(buffer);
-    table_->resizeColumnsToContents();
-
-//    ViewSelectionEntries &selection_entries = ViewSelection::getInstance().getEntries();
-//    ViewSelectionEntries::iterator it;
-//    std::map <unsigned int, QTableWidgetItem*>::iterator it2;
-
-//    logdbg  << "BufferTableWidget: show: selection size " << selection_entries.size();
-
-//    for (it = selection_entries.begin(); it != selection_entries.end(); it++)
-//    {
-//        ViewSelectionEntry &entry=*it;
-//        if (entry.isDBO())
-//        {
-//            if ((unsigned int) entry.id_.first == type_)
-//            {
-//                //loginf << "BufferTableWidget: show: check at " << entry.id_.second << " is correct type"<< endl;
-//                it2 = selected_items.find(entry.id_.second);
-//                if (it2 != selected_items.end())
-//                {
-//                    it2->second->setCheckState ( Qt::Checked );
-//                }
-//            }
-//        }
-//    }
-
-    logdbg  << " BufferTableWidget: show: end";
-}
-
-void BufferTableWidget::exportSlot(bool overwrite)
-{
-    loginf << "BufferTableWidget: exportSlot: object " << object_.name();
-
-    QString file_name;
-    if (overwrite)
-    {
-        file_name = QFileDialog::getSaveFileName(this, ("Save "+object_.name()+" as CSV").c_str(), "", tr("Comma-separated values (*.csv);;All Files (*)"));
-    }
-    else
-    {
-        file_name = QFileDialog::getSaveFileName(this, ("Save "+object_.name()+" as CSV").c_str(), "", tr("Comma-separated values (*.csv);;All Files (*)"), nullptr,
-                                                 QFileDialog::DontConfirmOverwrite);
-    }
-
-    if (file_name.size())
-    {
-        loginf << "BufferTableWidget: exportSlot: export filename " << file_name.toStdString();
-        assert (model_);
-        model_->saveAsCSV(file_name.toStdString(), overwrite);
-    }
-    else
-    {
-        emit exportDoneSignal (true);
-    }
-}
-
-void BufferTableWidget::exportDoneSlot (bool cancelled)
-{
-    emit exportDoneSignal (cancelled);
-}
-
-void BufferTableWidget::usePresentationSlot (bool use_presentation)
-{
-    assert (model_);
-    model_->usePresentation(use_presentation);
-    assert (table_);
-    table_->resizeColumnsToContents();
-}

@@ -317,10 +317,20 @@ void DBOVariable::setMinMax ()
 
     logdbg << "DBOVariable " << db_object_.name() << " " << name_ << ": setMinMax";
 
-    std::pair<std::string, std::string> min_max = ATSDB::instance().interface().getMinMaxString(*this);
+    if (!dbObject().existsInDB() // object doesn't exist in this database
+            || !dbObject().count()
+            || !existsInDB())
+    {
+        min_ = NULL_STRING;
+        max_ = NULL_STRING;
+    }
+    else
+    {
+        std::pair<std::string, std::string> min_max = ATSDB::instance().interface().getMinMaxString(*this);
 
-    min_=min_max.first;
-    max_=min_max.second;
+        min_ = min_max.first;
+        max_ = min_max.second;
+    }
 
     min_max_set_=true;
 

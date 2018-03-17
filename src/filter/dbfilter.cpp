@@ -179,7 +179,8 @@ bool DBFilter::filters (const std::string &dbo_type)
 /**
  * If active, returns concatenated condition strings from all sub-conditions and sub-filters, else returns empty string.
  */
-std::string DBFilter::getConditionString (const std::string &dbo_name, bool &first, std::vector <DBOVariable*>& filtered_variables)
+std::string DBFilter::getConditionString (const std::string &dbo_name, bool &first,
+                                          std::vector <DBOVariable*>& filtered_variables)
 {
     std::stringstream ss;
 

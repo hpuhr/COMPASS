@@ -556,6 +556,8 @@ std::string SQLGenerator::createDBUpdateStringBind(std::shared_ptr<Buffer> buffe
                                                    DBOVariable &key_var, std::string tablename)
 {
     assert (buffer);
+    assert (object.existsInDB());
+    assert (key_var.existsInDB());
     assert (tablename.size() > 0);
 
     const std::vector <Property> &properties = buffer->properties().properties();

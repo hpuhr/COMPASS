@@ -271,9 +271,10 @@ std::set<int> DBInterface::queryActiveSensorNumbers(const DBObject &object)
 {
     logdbg  << "DBInterface: queryActiveSensorNumbers: start";
 
-    QMutexLocker locker(&connection_mutex_);
-
+    assert (object.existsInDB());
     assert (object.hasCurrentDataSourceDefinition());
+
+    QMutexLocker locker(&connection_mutex_);
 
     std::string local_key_dbovar = object.currentDataSourceDefinition().localKey();
     assert (object.hasVariable(local_key_dbovar));
@@ -308,6 +309,9 @@ std::set<int> DBInterface::queryActiveSensorNumbers(const DBObject &object)
 
 bool DBInterface::hasDataSourceTables (const DBObject& object)
 {
+    if (!object.existsInDB())
+        return false;
+
     if (!object.hasCurrentDataSourceDefinition())
         return false;
 
@@ -339,6 +343,8 @@ bool DBInterface::hasDataSourceTables (const DBObject& object)
 std::map <int, DBODataSource> DBInterface::getDataSources (const DBObject &object)
 {
     logdbg  << "DBInterface: getDataSourceDescription: start";
+
+    assert (object.existsInDB());
 
     QMutexLocker locker(&connection_mutex_);
 
@@ -578,9 +584,21 @@ std::pair<std::string, std::string> DBInterface::getMinMaxString (const DBOVaria
 {
     logdbg << "DBInterface: getMinMaxString: var " << var.name();
 
+    if (!var.dbObject().existsInDB()) // object doesn't exist in this database
+    {
+        logerr << "DBInterface: getMinMaxString: parent object of var " << var.name() << " does not exist in db";
+        return std::pair<std::string, std::string> (NULL_STRING, NULL_STRING);
+    }
+
     if (!var.dbObject().count()) // object doesn't exist in this database
     {
-        logdbg << "DBInterface: getMinMaxString: var " << var.name() << " not in db";
+        logerr << "DBInterface: getMinMaxString: parent object of var " << var.name() << " has no data in db";
+        return std::pair<std::string, std::string> (NULL_STRING, NULL_STRING);
+    }
+
+    if (!var.existsInDB()) // variable doesn't exist in this database
+    {
+        logerr << "DBInterface: getMinMaxString: var " << var.name() << " does not exist in db";
         return std::pair<std::string, std::string> (NULL_STRING, NULL_STRING);
     }
 
@@ -746,6 +764,9 @@ void DBInterface::postProcessingJobDoneSlot()
 
 bool DBInterface::hasActiveDataSources (const DBObject &object)
 {
+    if (!object.existsInDB())
+        return false;
+
     if (!existsPropertiesTable())
         return false;
 
@@ -759,18 +780,20 @@ std::set<int> DBInterface::getActiveDataSources (const DBObject &object)
 {
     logdbg  << "DBInterface: getActiveDataSources: start";
 
+    assert (hasActiveDataSources (object));
+
     std::string tmp = getProperty(ACTIVE_DATA_SOURCES_PROPERTY_PREFIX+object.name());
 
     std::set<int> ret;
 
     std::vector<std::string> tmp2 = String::split(tmp, ',');
 
-    logdbg  << "DBInterface: getActiveDataSources: got "<< tmp2.size() << " parts from '" << tmp << "'" ;
+    loginf  << "DBInterface: getActiveDataSources: got "<< tmp2.size() << " parts from '" << tmp << "'" ;
 
     for (unsigned int cnt=0; cnt < tmp2.size(); cnt++)
     {
         ret.insert (std::stoi(tmp2.at(cnt)));
-        logdbg  << "DBInterface: getActiveDataSources: got active radar "<< cnt << " '"
+        loginf  << "DBInterface: getActiveDataSources: got active source " << cnt << " '"
                 << std::stoi(tmp2.at(cnt)) << "'" ;
     }
 
@@ -811,11 +834,37 @@ std::set<int> DBInterface::getActiveDataSources (const DBObject &object)
 //    buffer_writer_->write (data, table_name);
 //}
 
-void DBInterface::updateBuffer (DBObject &object, DBOVariable &key_var, std::shared_ptr<Buffer> buffer,
+bool DBInterface::checkUpdateBuffer (DBObject &object, DBOVariable &key_var, std::shared_ptr<Buffer> buffer)
+{
+    if (!object.existsInDB())
+        return false;
+
+    if (!key_var.existsInDB())
+        return false;
+
+    const DBTable& table = object.currentMetaTable().mainTable();
+
+    if (!table.existsInDB()) // might be redundant
+        return false;
+
+    const PropertyList &properties = buffer->properties();
+
+    for (unsigned int cnt=0; cnt < properties.size(); cnt++)
+    {
+        if (!table.hasColumn(properties.at(cnt).name()))
+            return false;
+
+        if (!table.column(properties.at(cnt).name()).existsInDB())
+            return false;
+    }
+
+    return true;
+}
+
+void DBInterface::updateBuffer (DBObject& object, DBOVariable& key_var, std::shared_ptr<Buffer> buffer,
                                 size_t from_index, size_t to_index)
 {
-    QMutexLocker locker(&connection_mutex_);
-
+    assert (checkUpdateBuffer(object, key_var, buffer));
     assert (current_connection_);
     assert (buffer);
 
@@ -831,6 +880,8 @@ void DBInterface::updateBuffer (DBObject &object, DBOVariable &key_var, std::sha
     }
 
     std::string bind_statement =  sql_generator_.createDBUpdateStringBind(buffer, object, key_var, table.name());
+
+    QMutexLocker locker(&connection_mutex_);
 
     logdbg  << "DBInterface: updateBuffer: preparing bind statement";
     current_connection_->prepareBindStatement(bind_statement);
@@ -852,8 +903,20 @@ void DBInterface::prepareRead (const DBObject &dbobject, DBOVariableSet read_lis
                                std::vector <DBOVariable *> filtered_variables, bool use_order,
                                DBOVariable *order_variable, bool use_order_ascending, const std::string &limit)
 {
-    connection_mutex_.lock();
     assert (current_connection_);
+
+    assert (dbobject.existsInDB());
+
+    for (auto& var_it : read_list.getSet())
+        assert(var_it->existsInDB());
+
+    for (auto& var_it : filtered_variables)
+        assert(var_it->existsInDB());
+
+    if (order_variable)
+        assert (order_variable->existsInDB());
+
+    connection_mutex_.lock();
 
     std::shared_ptr<DBCommand> read = sql_generator_.getSelectCommand (
                 dbobject.currentMetaTable(), read_list, custom_filter_clause, filtered_variables, use_order,

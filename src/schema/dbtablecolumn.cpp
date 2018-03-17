@@ -114,5 +114,5 @@ void DBTableColumn::updateOnDatabase()
             exists_in_db_ = true;
     }
 
-    loginf << "DBTableColumn: updateOnDatabase: " << name_ << " exists in db " << exists_in_db_;
+    logdbg << "DBTableColumn: updateOnDatabase: " << name_ << " exists in db " << exists_in_db_;
 }

@@ -233,6 +233,7 @@ void RadarPlotPositionCalculatorTask::longitudeVarStr(const std::string& longitu
 
 void RadarPlotPositionCalculatorTask::checkAndSetVariable (std::string& name_str, DBOVariable** var)
 {
+    // TODO rework to only asserting, check must be done before
     if (db_object_)
     {
         if (!db_object_->hasVariable(name_str))
@@ -246,15 +247,68 @@ void RadarPlotPositionCalculatorTask::checkAndSetVariable (std::string& name_str
             *var = &db_object_->variable(name_str);
             loginf << "RadarPlotPositionCalculatorTask::checkAndSetVariable: var " << name_str << " set";
             assert (var);
+            assert((*var)->existsInDB());
         }
     }
     else
+    {
         loginf << "RadarPlotPositionCalculatorTask::checkAndSetVariable: dbobject null";
+        name_str = "";
+        var = nullptr;
+    }
+}
+
+bool RadarPlotPositionCalculatorTask::canCalculate ()
+{
+    if (!db_object_str_.size())
+        return false;
+
+    if (!ATSDB::instance().objectManager().existsObject(db_object_str_))
+        return false;
+
+    DBObject& object = ATSDB::instance().objectManager().object(db_object_str_);
+
+    if (!object.loadable())
+        return false;
+
+    if (!object.count())
+        return false;
+
+    if (!key_var_str_.size()
+            || !datasource_var_str_.size()
+            || !range_var_str_.size()
+            || !azimuth_var_str_.size()
+            || !altitude_var_str_.size()
+            || !latitude_var_str_.size()
+            || !longitude_var_str_.size())
+        return false;
+
+    if (!object.hasVariable(key_var_str_)
+            || !object.hasVariable(datasource_var_str_)
+            || !object.hasVariable(range_var_str_)
+            || !object.hasVariable(azimuth_var_str_)
+            || !object.hasVariable(altitude_var_str_)
+            || !object.hasVariable(latitude_var_str_)
+            || !object.hasVariable(longitude_var_str_))
+        return false;
+
+    if (!object.variable(key_var_str_).existsInDB()
+            || !object.variable(datasource_var_str_).existsInDB()
+            || !object.variable(range_var_str_).existsInDB()
+            || !object.variable(azimuth_var_str_).existsInDB()
+            || !object.variable(altitude_var_str_).existsInDB()
+            || !object.variable(latitude_var_str_).existsInDB()
+            || !object.variable(longitude_var_str_).existsInDB())
+        return false;
+
+    return true;
 }
 
 void RadarPlotPositionCalculatorTask::calculate ()
 {
     loginf << "RadarPlotPositionCalculatorTask: calculate: start";
+
+    assert (canCalculate());
 
     calculating_=true;
 

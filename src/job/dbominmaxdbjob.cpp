@@ -38,6 +38,9 @@ using namespace Utils;
 DBOMinMaxDBJob::DBOMinMaxDBJob(DBInterface& db_interface, const DBObject& object)
 : Job("DBOMinMaxDBJob"), db_interface_(db_interface), object_(object)
 {
+    assert (db_interface_.existsMinMaxTable());
+    assert (object_.existsInDB());
+    assert (object_.currentMetaTable().mainTable().existsInDB());
 }
 
 DBOMinMaxDBJob::~DBOMinMaxDBJob()
@@ -66,6 +69,102 @@ void DBOMinMaxDBJob::run ()
 
     loginf  << "PostProcessDBJob: run: db postprocessing done (" << load_time << " s).";
     done_=true;
+}
+
+void DBOMinMaxDBJob::createMinMaxValuesNormal ()
+{
+    assert (db_interface_.existsMinMaxTable());
+
+    processTable (object_.currentMetaTable().mainTable());
+
+    for (auto table_it : object_.currentMetaTable().subTables())
+    {
+
+        if (table_it.second.existsInDB())
+            processTable (table_it.second);
+        else
+            loginf << "DBOMinMaxDBJob: createMinMaxValuesNormal: table '" << table_it.first << " does not exist in db";
+    }
+}
+
+void DBOMinMaxDBJob::processTable (const DBTable& table)
+{
+    loginf  << "DBInterface: processTable: getting minimum and maximum of all variables of table " << table.name();
+
+    assert (table.existsInDB());
+    std::vector <std::string> minmax;
+
+    std::vector <std::pair <std::string, std::string> > inserted_variable_names; // object name, variable
+
+    logdbg  << "DBInterface: createMinMaxValues: executing command";
+    std::shared_ptr<DBResult> result = db_interface_.queryMinMaxNormalForTable (table);
+
+    assert (result);
+    assert (result->containsData());
+
+    //std::string text;
+    std::shared_ptr<Buffer> buffer = result->buffer();
+
+    logdbg  << "DBInterface: createMinMaxValues: setting variables";
+
+    assert (buffer);
+
+    if (buffer->size() == 0)
+    {
+        logwrn << "DBOMinMaxDBJob: processTable: table '" << table.name() << "' has no data";
+        return;
+    }
+
+    assert (buffer->size() == 1);
+
+    std::string min;
+    std::string max;
+
+    for (auto col_it : table.columns()) // over variables/properties
+    {
+        minmax.clear();
+
+//        if (column->hasSpecialNull())
+//        {
+//            cnt2++;
+//            continue;
+//        }
+        assert (buffer->properties().hasProperty(col_it.first+"MIN"));
+        assert (buffer->properties().hasProperty(col_it.first+"MAX"));
+
+        if (buffer->getString(col_it.first+"MIN").isNone(0))
+            min = NULL_STRING;
+        else
+            min = buffer->getString(col_it.first+"MIN").get(0);
+        minmax.push_back (min);
+
+        if (buffer->getString(col_it.first+"MAX").isNone(0))
+            max = NULL_STRING;
+        else
+            max = buffer->getString(col_it.first+"MAX").get(0);
+        minmax.push_back (max);
+        //                if (minmax.at(0) == minmax.at(1))
+        //                {
+        //                    loginf << "DBInterface: createMinMaxValues: id " << column->getName() << " type " <<  dboit->first
+        //                            << " has same min/max value '" << minmax.at(0) << "'";
+        //                    continue;
+        //                }
+
+        if (minmax.at(0) == NULL_STRING || minmax.at(1) == NULL_STRING)
+        {
+            loginf << "DBInterface: createMinMaxValues: id " << col_it.first << " object " << object_.name() << " has NULL values";
+            continue;
+        }
+
+        if (find(inserted_variable_names.begin(), inserted_variable_names.end(),
+                 std::pair<std::string, std::string> (object_.name(), col_it.first)) == inserted_variable_names.end())
+        {
+            loginf << "DBInterface: createMinMaxValues: inserting id " << col_it.first << " object " <<  object_.name() <<
+                      " min " << minmax.at(0) << " max " << minmax.at(1);
+            db_interface_.insertMinMax(col_it.first, object_.name(), minmax.at(0), minmax.at(1));
+            inserted_variable_names.push_back (std::pair<std::string, std::string> (object_.name(), col_it.first));
+        }
+    }
 }
 
 
@@ -146,98 +245,4 @@ void DBOMinMaxDBJob::run ()
 //    }
 //}
 
-void DBOMinMaxDBJob::createMinMaxValuesNormal ()
-{
-    assert (db_interface_.existsMinMaxTable());
 
-    processTable (object_.currentMetaTable().mainTable());
-
-    for (auto table_it : object_.currentMetaTable().subTables())
-    {
-
-        if (db_interface_.existsTable(table_it.first))
-            processTable (table_it.second);
-        else
-            logwrn << "DBOMinMaxDBJob: createMinMaxValuesNormal: table '" << table_it.first << " not in database";
-    }
-}
-
-void DBOMinMaxDBJob::processTable (const DBTable& table)
-{
-    loginf  << "DBInterface: processTable: getting minimum and maximum of all variables of table " << table.name();
-
-    //std::string tmpstr;
-    std::vector <std::string> minmax;
-
-    std::vector <std::pair <std::string, std::string> > inserted_variable_names; // object name, variable
-
-    logdbg  << "DBInterface: createMinMaxValues: executing command";
-    std::shared_ptr<DBResult> result = db_interface_.queryMinMaxNormalForTable (table);
-
-    assert (result);
-    assert (result->containsData());
-
-    //std::string text;
-    std::shared_ptr<Buffer> buffer = result->buffer();
-
-    logdbg  << "DBInterface: createMinMaxValues: setting variables";
-
-    assert (buffer);
-
-    if (buffer->size() == 0)
-    {
-        logwrn << "DBOMinMaxDBJob: processTable: table '" << table.name() << "' has no data";
-        return;
-    }
-
-    assert (buffer->size() == 1);
-
-    std::string min;
-    std::string max;
-
-    for (auto col_it : table.columns()) // over variables/properties
-    {
-        minmax.clear();
-
-//        if (column->hasSpecialNull())
-//        {
-//            cnt2++;
-//            continue;
-//        }
-        assert (buffer->properties().hasProperty(col_it.first+"MIN"));
-        assert (buffer->properties().hasProperty(col_it.first+"MAX"));
-
-        if (buffer->getString(col_it.first+"MIN").isNone(0))
-            min = NULL_STRING;
-        else
-            min = buffer->getString(col_it.first+"MIN").get(0);
-        minmax.push_back (min);
-
-        if (buffer->getString(col_it.first+"MAX").isNone(0))
-            max = NULL_STRING;
-        else
-            max = buffer->getString(col_it.first+"MAX").get(0);
-        minmax.push_back (max);
-        //                if (minmax.at(0) == minmax.at(1))
-        //                {
-        //                    loginf << "DBInterface: createMinMaxValues: id " << column->getName() << " type " <<  dboit->first
-        //                            << " has same min/max value '" << minmax.at(0) << "'";
-        //                    continue;
-        //                }
-
-        if (minmax.at(0) == NULL_STRING || minmax.at(1) == NULL_STRING)
-        {
-            loginf << "DBInterface: createMinMaxValues: id " << col_it.first << " object " << object_.name() << " has NULL values";
-            continue;
-        }
-
-        if (find(inserted_variable_names.begin(), inserted_variable_names.end(),
-                 std::pair<std::string, std::string> (object_.name(), col_it.first)) == inserted_variable_names.end())
-        {
-            loginf << "DBInterface: createMinMaxValues: inserting id " << col_it.first << " object " <<  object_.name() <<
-                      " min " << minmax.at(0) << " max " << minmax.at(1);
-            db_interface_.insertMinMax(col_it.first, object_.name(), minmax.at(0), minmax.at(1));
-            inserted_variable_names.push_back (std::pair<std::string, std::string> (object_.name(), col_it.first));
-        }
-    }
-}

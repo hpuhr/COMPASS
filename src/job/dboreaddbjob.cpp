@@ -24,7 +24,7 @@
 #include "logger.h"
 
 DBOReadDBJob::DBOReadDBJob(DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list,
-                           std::string custom_filter_clause, std::vector <DBOVariable *> filtered_variables,
+                           std::string custom_filter_clause, std::vector <DBOVariable*> filtered_variables,
                            bool use_order, DBOVariable *order_variable, bool use_order_ascending,
                            const std::string &limit_str)
 : Job("DBOReadDBJob"), db_interface_(db_interface), dbobject_(dbobject), read_list_(read_list),
@@ -32,6 +32,16 @@ DBOReadDBJob::DBOReadDBJob(DBInterface &db_interface, DBObject &dbobject, DBOVar
   use_order_(use_order), order_variable_(order_variable), use_order_ascending_(use_order_ascending),
   limit_str_(limit_str)
 {
+    assert (dbobject_.existsInDB());
+
+    for (auto& var_it : read_list_.getSet())
+        assert(var_it->existsInDB());
+
+    for (auto& var_it : filtered_variables_)
+        assert(var_it->existsInDB());
+
+    if (order_variable_)
+        assert (order_variable_->existsInDB());
 }
 
 DBOReadDBJob::~DBOReadDBJob()

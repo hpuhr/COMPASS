@@ -227,6 +227,15 @@ void RadarPlotPositionCalculatorTaskWidget::calculateSlot ()
 {
     loginf << "RadarPlotPositionCalculatorTaskWidget: calculateSlot";
 
+    if (!task_.canCalculate())
+    {
+        QMessageBox::warning (this, "Unable to Calculate",
+                              "The task can not be peformed with the entered items.\n"
+                              "The following conditions have to be met: The DBObject must exist, must have data, and"
+                              " all variables have to be set and exist in the current schema and database");
+        return;
+    }
+
     assert (calc_button_);
 
     std::string db_object_str = task_.dbObjectStr();

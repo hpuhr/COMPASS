@@ -113,6 +113,7 @@ public:
     //    /// @brief Writes a buffer to the database, into a table defined by write_table_names_ and DBO type
     //    void writeBuffer (Buffer *data);
     //    void writeBuffer (Buffer *data, std::string table_name);
+    bool checkUpdateBuffer (DBObject &object, DBOVariable &key_var, std::shared_ptr<Buffer> buffer);
     void updateBuffer (DBObject &object, DBOVariable &key_var, std::shared_ptr<Buffer> buffer, size_t from_index,
                        size_t to_index);
 

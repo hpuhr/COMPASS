@@ -144,10 +144,25 @@ std::string DBFilterCondition::getConditionString (const std::string &dbo_name, 
     if (meta_variable_)
     {
         assert (meta_variable_->existsIn(dbo_name));
+
+        if (!meta_variable_->existsInDB())
+        {
+            logwrn << "DBFilterCondition: getConditionString: object " << dbo_name << " meta variable "
+                   << meta_variable_->name() << " does not exist in db";
+            return "";
+        }
+
         variable = &meta_variable_->getFor(dbo_name);
     }
     else
         variable = variable_;
+
+    if (!variable->existsInDB())
+    {
+        logwrn << "DBFilterCondition: getConditionString: object " << dbo_name << " variable "
+               << variable->name() << " does not exist in db";
+        return "";
+    }
 
     const DBTableColumn& column = variable->currentDBColumn();
     const MetaDBTable& meta_table = variable->currentMetaTable();

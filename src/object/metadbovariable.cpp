@@ -72,7 +72,8 @@ void MetaDBOVariable::generateSubConfigurable (const std::string &class_id, cons
         assert (variables_.find(dbo_name) == variables_.end());
 
         definitions_[dbo_name] = definition;
-        variables_.insert(std::pair<std::string, DBOVariable&> (dbo_name, object_manager_.object(dbo_name).variable(dbovar_name)));
+        variables_.insert(std::pair<std::string, DBOVariable&> (
+                              dbo_name, object_manager_.object(dbo_name).variable(dbovar_name)));
     }
     else
         throw std::runtime_error ("DBOVariable: generateSubConfigurable: unknown class_id "+class_id);

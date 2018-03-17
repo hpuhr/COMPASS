@@ -94,6 +94,8 @@ public:
 
     /// @brief Returns name of the main database table
     const std::string& mainTableName () const { return main_table_name_; }
+    /// @brief Returns main database table
+    const DBTable& mainTable() const { assert (main_table_); return *main_table_; }
 
     /// @brief Returns number of columns
     unsigned int numColumns () const { return columns_.size(); }
@@ -119,8 +121,6 @@ public:
     /// @brief Returns container with all sub meta-table definitions
     const std::map <std::string, SubTableDefinition*>& subTableDefinitions () const { return sub_table_definitions_; }
 
-    /// @brief Returns main database table
-    const DBTable &mainTable() const { return *main_table_; }
     const DBSchema &schema() const { return schema_; }
 
     MetaDBTableWidget *widget ();
