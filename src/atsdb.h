@@ -39,7 +39,6 @@ class FilterManager;
 class TaskManager;
 class ViewManager;
 //class StructureReader;
-class DBOVariable;
 class Job;
 class BufferReceiver;
 

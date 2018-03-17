@@ -253,3 +253,12 @@ std::string MetaDBOVariable::getMaxStringRepresentation () const
 
 }
 
+bool MetaDBOVariable::existsInDB () const
+{
+    bool exists_in_db = false;
+
+    for (auto variable_it : variables_)
+        exists_in_db = exists_in_db | variable_it.second.existsInDB();
+
+    return exists_in_db;
+}

@@ -752,3 +752,12 @@ const
                                   + Property::asString(data_type_));
     }
 }
+
+bool DBOVariable::existsInDB () const
+{
+    if (!hasCurrentDBColumn())
+        return false;
+    else
+        return currentDBColumn().existsInDB();
+}
+

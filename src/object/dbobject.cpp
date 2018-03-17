@@ -723,3 +723,11 @@ size_t DBObject::loadedCount ()
     else
         return 0;
 }
+
+bool DBObject::existsInDB () const
+{
+    if (!hasCurrentMetaTable())
+        return false;
+    else
+        return currentMetaTable().existsInDB();
+}

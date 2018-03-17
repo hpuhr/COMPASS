@@ -78,7 +78,7 @@ public:
     void createSubConfigurables () {}
 
     void updateOnDatabase(); // check what informations is present in the current db
-    bool existsInDB () { return exists_in_db_; }
+    bool existsInDB () const { return exists_in_db_; }
 
 protected:
     DBTable &table_;

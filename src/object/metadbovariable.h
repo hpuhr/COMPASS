@@ -67,6 +67,8 @@ public:
     void unlock ();
     void lock ();
 
+    bool existsInDB () const;
+
 protected:
     std::string name_;
     std::string description_;
