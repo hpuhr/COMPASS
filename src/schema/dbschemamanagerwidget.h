@@ -47,6 +47,8 @@ public slots:
 public:
     void lock ();
 
+    void updateSchemas();
+
 protected:
     DBSchemaManager& manager_;
 
@@ -61,7 +63,6 @@ protected:
 
     bool locked_ {false};
 
-    void updateSchemas();
     void showCurrentSchemaWidget ();
 
 };

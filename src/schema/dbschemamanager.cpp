@@ -223,4 +223,6 @@ void DBSchemaManager::databaseContentChangedSlot ()
     for (auto& schema_it : schemas_)
         schema_it.second->updateOnDatabase();
 
+    if (widget_)
+        widget_->updateSchemas();
 }
