@@ -17,8 +17,15 @@ readme.txt: This file
 Released Version v0.1.0-beta
 ----------------------------
 
-Appimage: https://github.com/hpuhr/ATSDB/releases/download/0.1.0-beta/ATSDB-x86_64_v0.1.0-beta.AppImage
+Stable Appimage: https://github.com/hpuhr/ATSDB/releases/download/0.1.0-beta/ATSDB-x86_64_v0.1.0-beta.AppImage
+Experimental AppImage: https://github.com/hpuhr/ATSDB/releases/download/v0.1.0-beta.1/ATSDB-x86_64_v0.1.0-beta.1.AppImage
+
 User Manual: https://github.com/hpuhr/ATSDB/releases/download/0.1.0-beta/user_manual_v0.1.0-beta.pdf
+
+Newsletter
+----------
+If you are interested in our bi-weekly newsletter, please send a mail to atsdb@gmx.at with the subject "Register".
+
 
 Author
 ------
