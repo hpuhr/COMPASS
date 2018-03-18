@@ -24,6 +24,7 @@
 class DBTable;
 class MetaDBTable;
 class DBSchemaWidget;
+class DBInterface;
 
 /**
  * @brief Encapsulates a database schema
@@ -39,7 +40,8 @@ signals:
 
 public:
     /// @brief Constructor
-    DBSchema(const std::string& class_id, const std::string& instance_id, Configurable* parent);
+    DBSchema(const std::string& class_id, const std::string& instance_id, Configurable* parent,
+             DBInterface& db_interface);
     /// @brief Destructor
     virtual ~DBSchema();
 
@@ -77,11 +79,15 @@ public:
     DBSchemaWidget* widget ();
 
     void lock ();
+    void updateOnDatabase(); // check what informations is present in the current db
+
+    bool existsInDB () const { return exists_in_db_; }
 
 protected:
     virtual void checkSubConfigurables () {}
 
 private:
+    DBInterface& db_interface_;
     /// Name of the schema
     std::string name_;
 
@@ -93,6 +99,8 @@ private:
     std::map <std::string, MetaDBTable*> meta_tables_;
 
     DBSchemaWidget* widget_ {nullptr};
+
+    bool exists_in_db_ {false};
 };
 
 #endif /* DBSCHEMA_H_ */

@@ -24,14 +24,24 @@
 #include "logger.h"
 
 DBOReadDBJob::DBOReadDBJob(DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list,
-                           std::string custom_filter_clause, std::vector <DBOVariable *> filtered_variables,
+                           std::string custom_filter_clause, std::vector <DBOVariable*> filtered_variables,
                            bool use_order, DBOVariable *order_variable, bool use_order_ascending,
-                           const std::string &limit_str, bool activate_key_search)
+                           const std::string &limit_str)
 : Job("DBOReadDBJob"), db_interface_(db_interface), dbobject_(dbobject), read_list_(read_list),
   custom_filter_clause_ (custom_filter_clause), filtered_variables_(filtered_variables),
   use_order_(use_order), order_variable_(order_variable), use_order_ascending_(use_order_ascending),
-  limit_str_(limit_str), activate_key_search_(activate_key_search)
+  limit_str_(limit_str)
 {
+    assert (dbobject_.existsInDB());
+
+    for (auto& var_it : read_list_.getSet())
+        assert(var_it->existsInDB());
+
+    for (auto& var_it : filtered_variables_)
+        assert(var_it->existsInDB());
+
+    if (order_variable_)
+        assert (order_variable_->existsInDB());
 }
 
 DBOReadDBJob::~DBOReadDBJob()
@@ -60,7 +70,9 @@ void DBOReadDBJob::run ()
     unsigned int row_count=0;
     while (!done_)
     {
-        std::shared_ptr<Buffer> buffer = db_interface_.readDataChunk(dbobject_, activate_key_search_);
+        std::shared_ptr<Buffer> buffer = db_interface_.readDataChunk(dbobject_);
+        assert (buffer);
+
         cnt++;
 
         if (obsolete_)
@@ -71,18 +83,10 @@ void DBOReadDBJob::run ()
 
         assert (buffer->dboName() == dbobject_.name());
 
-        if (!buffer)
-        {
-            logwrn << "DBOReadDBJob: run: " << dbobject_.name() << ": got null buffer";
-            break;
-        }
-        else
-        {
-            logdbg << "DBOReadDBJob: run: " << dbobject_.name() << ": intermediate signal, #buffers "
-                   << cnt << " last one " << buffer->lastOne();
-            row_count += buffer->size();
-            emit intermediateSignal(buffer);
-        }
+        logdbg << "DBOReadDBJob: run: " << dbobject_.name() << ": intermediate signal, #buffers "
+               << cnt << " last one " << buffer->lastOne();
+        row_count += buffer->size();
+        emit intermediateSignal(buffer);
 
         if (buffer->lastOne())
             break;

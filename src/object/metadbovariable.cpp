@@ -72,7 +72,8 @@ void MetaDBOVariable::generateSubConfigurable (const std::string &class_id, cons
         assert (variables_.find(dbo_name) == variables_.end());
 
         definitions_[dbo_name] = definition;
-        variables_.insert(std::pair<std::string, DBOVariable&> (dbo_name, object_manager_.object(dbo_name).variable(dbovar_name)));
+        variables_.insert(std::pair<std::string, DBOVariable&> (
+                              dbo_name, object_manager_.object(dbo_name).variable(dbovar_name)));
     }
     else
         throw std::runtime_error ("DBOVariable: generateSubConfigurable: unknown class_id "+class_id);
@@ -253,3 +254,12 @@ std::string MetaDBOVariable::getMaxStringRepresentation () const
 
 }
 
+bool MetaDBOVariable::existsInDB () const
+{
+    bool exists_in_db = false;
+
+    for (auto variable_it : variables_)
+        exists_in_db = exists_in_db | variable_it.second.existsInDB();
+
+    return exists_in_db;
+}

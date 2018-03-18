@@ -21,6 +21,7 @@
 #include "logger.h"
 #include "dbobjectmanager.h"
 #include "dbobject.h"
+#include "dbovariable.h"
 
 #include "stringconv.h"
 
@@ -36,23 +37,43 @@ DataSourcesFilter::DataSourcesFilter(const std::string& class_id, const std::str
                                      +" has non-existing object "+dbo_name_);
 
     object_ = &ATSDB::instance().objectManager().object(dbo_name_);
+
     if (!object_->hasCurrentDataSourceDefinition())
-        throw std::invalid_argument ("DataSourcesFilter: DataSourcesFilter: instance "+instance_id+" object "
-                                     +dbo_name_+" has no data sources");
+    {
+        logerr << "DataSourcesFilter: DataSourcesFilter: instance "+instance_id+" object "
+               << dbo_name_+" has no data sources";
+        disabled_ = true;
+        return;
+    }
+
+    if (!object_->hasDataSources())
+    {
+        disabled_ = true;
+        return;
+    }
+
+    if (!object_->existsInDB())
+    {
+        disabled_ = true;
+        return;
+    }
 
     ds_column_name_ = object_->currentDataSourceDefinition().localKey();
 
-    updateDataSources ();
+    if (object_->hasDataSources ())
+        updateDataSources ();
 
     if (object_->hasActiveDataSourcesInfo())
         updateDataSourcesActive();
 
+
     createSubConfigurables();
 
     assert (widget_);
+
     if (object_->count() == 0)
     {
-        active_=false;
+        active_ = false;
         widget_->setInvisible();
         widget_->update();
         widget_->setDisabled(true);
@@ -80,6 +101,19 @@ std::string DataSourcesFilter::getConditionString (const std::string& dbo_name, 
         if (dbo_name == dbo_name_)
         {
             assert (object_->hasVariable(ds_column_name_));
+
+            if (!object_->existsInDB())
+            {
+                logwrn << "DataSourcesFilter: getConditionString: object " << object_->name() << " not in db";
+                return "";
+            }
+
+            if (!object_->variable(ds_column_name_).existsInDB())
+            {
+                logwrn << "DataSourcesFilter: getConditionString: variable " << ds_column_name_ << " not in db";
+                return "";
+            }
+
             filtered_variables.push_back(&object_->variable(ds_column_name_));
 
             bool got_one=false;
@@ -144,7 +178,8 @@ void DataSourcesFilter::updateDataSources ()
             data_sources_[src_it.first].setActiveInFilter(true);
             data_sources_[src_it.first].setActiveInData(true);
 
-            registerParameter ("LoadSensorNumber"+std::to_string(src_it.first), &data_sources_[src_it.first].getActiveInFilterReference(), true);
+            registerParameter ("LoadSensorNumber"+std::to_string(src_it.first),
+                               &data_sources_[src_it.first].getActiveInFilterReference(), true);
         }
     }
 }
@@ -155,7 +190,8 @@ void DataSourcesFilter::updateDataSourcesActive ()
 
     if (!object_->hasActiveDataSourcesInfo())
     {
-        logerr  << "DataSourcesFilter: updateDataSourcesActive: type " << object_->name() << " has no active data sources info";
+        logerr  << "DataSourcesFilter: updateDataSourcesActive: type " << object_->name()
+                << " has no active data sources info";
         return;
     }
 

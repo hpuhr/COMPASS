@@ -263,6 +263,8 @@ public:
     void lock ();
     void unlock ();
 
+    bool existsInDB () const;
+
 protected:
     static std::map<Representation, std::string> representation_2_string_;
     static std::map<std::string, Representation> string_2_representation_;

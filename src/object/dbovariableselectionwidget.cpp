@@ -32,8 +32,7 @@
 using namespace Utils;
 
 DBOVariableSelectionWidget::DBOVariableSelectionWidget (bool h_box, QWidget* parent)
-    :   QFrame (parent), variable_selected_(false), meta_variable_selected_(false),
-      show_empty_variable_(true), show_meta_variables_(false), show_meta_variables_only_(false), show_dbo_only_(false)
+    :   QFrame (parent)
 {
     setFrameStyle(QFrame::Panel | QFrame::Sunken);
     setLineWidth(1);
@@ -112,6 +111,9 @@ void DBOVariableSelectionWidget::updateMenuEntries()
 
         for (auto variable_it : ATSDB::instance().objectManager().object(only_dbo_name_).variables())
         {
+            if (show_existing_in_db_only_ && !variable_it.second->existsInDB())
+                continue;
+
             QAction* action = menu_.addAction(QString::fromStdString (variable_it.first));
 
             QVariantMap vmap;
@@ -126,6 +128,9 @@ void DBOVariableSelectionWidget::updateMenuEntries()
             QMenu* meta_menu = menu_.addMenu(QString::fromStdString (META_OBJECT_NAME));
             for (auto meta_it : ATSDB::instance().objectManager().metaVariables())
             {
+                if (show_existing_in_db_only_ && !meta_it.second->existsInDB())
+                    continue;
+
                 QAction* action = meta_menu->addAction(QString::fromStdString (meta_it.first));
 
                 QVariantMap vmap;
@@ -147,6 +152,9 @@ void DBOVariableSelectionWidget::updateMenuEntries()
 
             for (auto variable_it : variables)
             {
+                if (show_existing_in_db_only_ && !variable_it.second->existsInDB())
+                    continue;
+
                 QAction* action = m2->addAction(QString::fromStdString (variable_it.first));
 
                 QVariantMap vmap;
@@ -293,6 +301,16 @@ void DBOVariableSelectionWidget::showEmptyVariable(bool show_empty_variable)
     show_empty_variable_ = show_empty_variable;
 
     updateMenuEntries();
+}
+
+bool DBOVariableSelectionWidget::showExistingInDBOnly() const
+{
+    return show_existing_in_db_only_;
+}
+
+void DBOVariableSelectionWidget::showExistingInDBOnly(bool show)
+{
+    show_existing_in_db_only_ = show;
 }
 
 

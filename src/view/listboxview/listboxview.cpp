@@ -112,7 +112,7 @@ DBOVariableSet ListBoxView::getSet (const std::string& dbo_name)
 {
     assert (data_source_);
 
-    return data_source_->getSet()->getFor(dbo_name);
+    return data_source_->getSet()->getExistingInDBFor(dbo_name);
 }
 
 

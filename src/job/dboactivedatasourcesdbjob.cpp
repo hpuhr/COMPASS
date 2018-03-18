@@ -27,6 +27,7 @@ using namespace Utils;
 DBOActiveDataSourcesDBJob::DBOActiveDataSourcesDBJob(DBInterface& db_interface, DBObject &object)
 : Job("DBOActiveDataSourcesDBJob"), db_interface_(db_interface), object_(object)
 {
+    assert (object_.existsInDB());
 }
 
 DBOActiveDataSourcesDBJob::~DBOActiveDataSourcesDBJob()

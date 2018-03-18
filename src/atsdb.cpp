@@ -61,6 +61,7 @@ ATSDB::ATSDB()
 
     QObject::connect (db_schema_manager_, SIGNAL(schemaChangedSignal()), dbo_manager_, SLOT(updateSchemaInformationSlot()));
     QObject::connect (db_schema_manager_, SIGNAL(schemaLockedSignal()), dbo_manager_, SLOT(schemaLockedSlot()));
+    QObject::connect (db_interface_, SIGNAL(databaseContentChangedSignal()), db_schema_manager_, SLOT(databaseContentChangedSlot()));
     QObject::connect (db_interface_, SIGNAL(databaseContentChangedSignal()), dbo_manager_, SLOT(databaseContentChangedSlot()));
     //QObject::connect(db_interface_, SIGNAL(databaseOpenedSignal()), filter_manager_, SLOT(databaseOpenedSlot()));
 
@@ -128,8 +129,9 @@ void ATSDB::generateSubConfigurable (const std::string &class_id, const std::str
     }
     else if (class_id == "DBSchemaManager")
     {
+        assert (db_interface_);
         assert (db_schema_manager_ == nullptr);
-        db_schema_manager_ = new DBSchemaManager (class_id, instance_id, this);
+        db_schema_manager_ = new DBSchemaManager (class_id, instance_id, this, *db_interface_);
         assert (db_schema_manager_ != nullptr);
     }
     else if (class_id == "FilterManager")
@@ -164,6 +166,7 @@ void ATSDB::checkSubConfigurables ()
     }
     if (dbo_manager_ == nullptr)
     {
+        assert (db_interface_);
         addNewSubConfiguration ("DBObjectManager", "DBObjectManager0");
         generateSubConfigurable ("DBObjectManager", "DBObjectManager0");
         assert (dbo_manager_ != nullptr);

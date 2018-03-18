@@ -183,7 +183,7 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
             else if (data_type == PropertyDataType::FLOAT)
             {
                 assert (buffer_->hasFloat(property_name));
-                null = buffer_->getFloat(properties.at(col).name()).isNone(row);
+                null = buffer_->getFloat(property_name).isNone(row);
                 if (!null)
                 {
                     if (use_presentation_)

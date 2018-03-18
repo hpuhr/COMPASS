@@ -117,7 +117,9 @@ void DBOLabelDefinition::updateReadList ()
         if (it.second->show())
         {
             assert (db_object_->hasVariable(it.second->variableName()));
-            read_list_.add(db_object_->variable(it.second->variableName()));
+
+            if (db_object_->variable(it.second->variableName()).existsInDB())
+                read_list_.add(db_object_->variable(it.second->variableName()));
         }
     }
 }
@@ -253,6 +255,7 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
 
             if (data_type == PropertyDataType::BOOL)
             {
+                assert (buffer->hasBool(variable->name()));
                 null = buffer->getBool(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
@@ -262,6 +265,7 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
             }
             else if (data_type == PropertyDataType::CHAR)
             {
+                assert (buffer->hasChar(variable->name()));
                 null = buffer->getChar(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
@@ -271,6 +275,7 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
             }
             else if (data_type == PropertyDataType::UCHAR)
             {
+                assert (buffer->hasUChar(variable->name()));
                 null = buffer->getUChar(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
@@ -280,6 +285,7 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
             }
             else if (data_type == PropertyDataType::INT)
             {
+                assert (buffer->hasInt(variable->name()));
                 null = buffer->getInt(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
@@ -289,6 +295,7 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
             }
             else if (data_type == PropertyDataType::UINT)
             {
+                assert (buffer->hasUInt(variable->name()));
                 null = buffer->getUInt(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
@@ -298,6 +305,7 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
             }
             else if (data_type == PropertyDataType::LONGINT)
             {
+                assert (buffer->hasLongInt(variable->name()));
                 null = buffer->getLongInt(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
@@ -307,6 +315,7 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
             }
             else if (data_type == PropertyDataType::ULONGINT)
             {
+                assert (buffer->hasULongInt(variable->name()));
                 null = buffer->getULongInt(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
@@ -316,6 +325,7 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
             }
             else if (data_type == PropertyDataType::FLOAT)
             {
+                assert (buffer->hasFloat(variable->name()));
                 null = buffer->getFloat(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
@@ -325,6 +335,7 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
             }
             else if (data_type == PropertyDataType::DOUBLE)
             {
+                assert (buffer->hasDouble(variable->name()));
                 null = buffer->getDouble(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
@@ -334,6 +345,7 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
             }
             else if (data_type == PropertyDataType::STRING)
             {
+                assert (buffer->hasString(variable->name()));
                 null = buffer->getString(variable->name()).isNone(buffer_index);
                 if (!null)
                 {

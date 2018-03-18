@@ -266,6 +266,9 @@ void DBOVariable::setVariableName (const std::string& schema_name, const std::st
 
 bool DBOVariable::hasCurrentDBColumn () const
 {
+    if (!db_object_.hasCurrentMetaTable())
+        return false;
+
     std::string meta_tablename = currentMetaTableString ();
     std::string meta_table_varid = currentVariableIdentifier ();
 
@@ -317,10 +320,20 @@ void DBOVariable::setMinMax ()
 
     logdbg << "DBOVariable " << db_object_.name() << " " << name_ << ": setMinMax";
 
-    std::pair<std::string, std::string> min_max = ATSDB::instance().interface().getMinMaxString(*this);
+    if (!dbObject().existsInDB() // object doesn't exist in this database
+            || !dbObject().count()
+            || !existsInDB())
+    {
+        min_ = NULL_STRING;
+        max_ = NULL_STRING;
+    }
+    else
+    {
+        std::pair<std::string, std::string> min_max = ATSDB::instance().interface().getMinMaxString(*this);
 
-    min_=min_max.first;
-    max_=min_max.second;
+        min_ = min_max.first;
+        max_ = min_max.second;
+    }
 
     min_max_set_=true;
 
@@ -752,3 +765,15 @@ const
                                   + Property::asString(data_type_));
     }
 }
+
+bool DBOVariable::existsInDB () const
+{
+    if (!db_object_.hasCurrentMetaTable())
+        return false;
+
+    if (!hasCurrentDBColumn())
+        return false;
+    else
+        return currentDBColumn().existsInDB();
+}
+

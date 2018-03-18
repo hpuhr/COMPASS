@@ -15,36 +15,38 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <boost/assign/list_of.hpp>
-
 #include "dbtable.h"
 #include "dbtablecolumn.h"
 #include "logger.h"
 #include "unitselectionwidget.h"
+#include "dbinterface.h"
+#include "dbtableinfo.h"
 
 // TODO watch out for unsigned
-std::map<std::string, PropertyDataType> DBTableColumn::db_types_2_data_types_ = boost::assign::map_list_of
-        ("bool", PropertyDataType::BOOL)
-        ("tinyint", PropertyDataType::CHAR)
-        //("UCHAR", PropertyDataType::UCHAR)
-        ("smallint", PropertyDataType::INT)
-        ("mediumint", PropertyDataType::INT)
-        ("int", PropertyDataType::INT)
-        //("UINT", PropertyDataType::UCHAR)
-        ("bigint", PropertyDataType::LONGINT)
-        //("ULONGINT", PropertyDataType::ULONGINT)
-        ("float", PropertyDataType::FLOAT)
-        ("double", PropertyDataType::DOUBLE)
-        ("enum", PropertyDataType::STRING)
-        ("tinyblob", PropertyDataType::STRING)
-        ("char", PropertyDataType::STRING)
-        ("blob", PropertyDataType::STRING)
-        ("mediumblob", PropertyDataType::STRING)
-        ("longblob", PropertyDataType::STRING)
-        ("varchar", PropertyDataType::STRING);
+std::map<std::string, PropertyDataType> DBTableColumn::db_types_2_data_types_ {
+        {"bool", PropertyDataType::BOOL},
+        {"tinyint", PropertyDataType::CHAR},
+        //{""UCHAR", PropertyDataType::UCHAR},
+        {"smallint", PropertyDataType::INT},
+        {"mediumint", PropertyDataType::INT},
+        {"int", PropertyDataType::INT},
+        //{""UINT", PropertyDataType::UCHAR},
+        {"bigint", PropertyDataType::LONGINT},
+        //{""ULONGINT", PropertyDataType::ULONGINT},
+        {"float", PropertyDataType::FLOAT},
+        {"double", PropertyDataType::DOUBLE},
+        {"enum", PropertyDataType::STRING},
+        {"tinyblob", PropertyDataType::STRING},
+        {"char", PropertyDataType::STRING},
+        {"blob", PropertyDataType::STRING},
+        {"mediumblob", PropertyDataType::STRING},
+        {"longblob", PropertyDataType::STRING},
+        {"varchar", PropertyDataType::STRING}
+};
 
-DBTableColumn::DBTableColumn(const std::string &class_id, const std::string &instance_id, DBTable *table)
- : Configurable (class_id, instance_id, table), table_(*table), widget_(nullptr)
+DBTableColumn::DBTableColumn(const std::string &class_id, const std::string &instance_id, DBTable *table,
+                             DBInterface& db_interface)
+ : Configurable (class_id, instance_id, table), table_(*table), db_interface_(db_interface)
 {
   registerParameter ("name", &name_, "");
   registerParameter ("type", &type_, "");
@@ -85,7 +87,7 @@ PropertyDataType DBTableColumn::propertyType () const
 }
 
 
-UnitSelectionWidget *DBTableColumn::unitWidget ()
+UnitSelectionWidget* DBTableColumn::unitWidget ()
 {
     if (!widget_)
     {
@@ -94,4 +96,23 @@ UnitSelectionWidget *DBTableColumn::unitWidget ()
     }
 
     return widget_;
+}
+
+void DBTableColumn::updateOnDatabase()
+{
+    exists_in_db_ = false;
+
+    const std::map <std::string, DBTableInfo> &all_table_infos = db_interface_.tableInfo ();
+
+    std::string table_name = table_.name();
+
+    if (all_table_infos.count(table_name) != 0)
+    {
+        const DBTableInfo& table_info = all_table_infos.at(table_name);
+
+        if (table_info.hasColumn(name_))
+            exists_in_db_ = true;
+    }
+
+    logdbg << "DBTableColumn: updateOnDatabase: " << name_ << " exists in db " << exists_in_db_;
 }

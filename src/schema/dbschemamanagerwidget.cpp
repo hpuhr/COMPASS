@@ -25,6 +25,8 @@
 #include "dbschemamanager.h"
 #include "logger.h"
 #include "global.h"
+#include "atsdb.h"
+#include "dbinterface.h"
 
 #include <QLabel>
 #include <QPushButton>
@@ -136,6 +138,13 @@ void DBSchemaManagerWidget::schemaSelectedSlot (const QString &value)
     {
         manager_.setCurrentSchema(value.toStdString());
 
+        if (!manager_.getCurrentSchema().existsInDB())
+            schema_select_->setStyleSheet("QComboBox { background: rgb(255, 100, 100); selection-background-color:"
+                                          " rgb(255, 200, 200); }");
+        else
+            schema_select_->setStyleSheet("QComboBox { background: rgb(255, 255, 255); selection-background-color:"
+                                         " rgb(200, 200, 200); }");
+
         showCurrentSchemaWidget();
 
         delete_button_->setDisabled(false);
@@ -167,6 +176,8 @@ void DBSchemaManagerWidget::updateSchemas()
 
     schema_select_->clear();
 
+    bool schema_wrong = false;
+
     for (auto it : manager_.getSchemas())
     {
         schema_select_->addItem (it.first.c_str());
@@ -181,7 +192,21 @@ void DBSchemaManagerWidget::updateSchemas()
            schema_select_->setCurrentIndex(index);
            showCurrentSchemaWidget();
         }
+        else
+            schema_wrong = true;
+
+        if (!manager_.getCurrentSchema().existsInDB())
+            schema_wrong = true;
     }
+    else
+        schema_wrong = true;
+
+    if (schema_wrong && ATSDB::instance().interface().ready())
+        schema_select_->setStyleSheet("QComboBox { background: rgb(255, 100, 100); selection-background-color:"
+                                      " rgb(255, 200, 200); }");
+    else
+        schema_select_->setStyleSheet("QComboBox { background: rgb(255, 255, 255); selection-background-color:"
+                                     " rgb(200, 200, 200); }");
 }
 
 void DBSchemaManagerWidget::showCurrentSchemaWidget ()
@@ -201,6 +226,7 @@ void DBSchemaManagerWidget::showCurrentSchemaWidget ()
 void DBSchemaManagerWidget::databaseOpenedSlot ()
 {
     setDisabled(false);
+    updateSchemas();
 }
 
 // and who are you? the proud lord said...

@@ -23,7 +23,7 @@
 
 DBOVariableSet::DBOVariableSet()
 {
-  changed_=false;
+    changed_=false;
 }
 
 DBOVariableSet::~DBOVariableSet()
@@ -32,43 +32,43 @@ DBOVariableSet::~DBOVariableSet()
 
 bool DBOVariableSet::add (DBOVariable &var)
 {
-  if (find (set_.begin(), set_.end(), &var) == set_.end())
-  {
-    set_.push_back (&var);
-    changed_=true;
-    return true;
-  }
-  return false;
+    if (find (set_.begin(), set_.end(), &var) == set_.end())
+    {
+        set_.push_back (&var);
+        changed_=true;
+        return true;
+    }
+    return false;
 }
 
 bool DBOVariableSet::add (const DBOVariable &var)
 {
-  if (find (set_.begin(), set_.end(), &var) == set_.end())
-  {
-    set_.push_back ( (DBOVariable *) (&var)); // TODO this is ugly
-    changed_=true;
-    return true;
-  }
-  return false;
+    if (find (set_.begin(), set_.end(), &var) == set_.end())
+    {
+        set_.push_back ( (DBOVariable *) (&var)); // TODO this is ugly
+        changed_=true;
+        return true;
+    }
+    return false;
 }
 
 bool DBOVariableSet::add (DBOVariableSet &set)
 {
-  std::vector <DBOVariable*> &setset = set.getSet();
-  std::vector <DBOVariable*>::iterator it;
+    std::vector <DBOVariable*> &setset = set.getSet();
+    std::vector <DBOVariable*>::iterator it;
 
-  bool added=false;
+    bool added=false;
 
-  for (it=setset.begin(); it != setset.end(); it++)
-  {
-    if (find (set_.begin(), set_.end(), *it) == set_.end())
+    for (it=setset.begin(); it != setset.end(); it++)
     {
-      set_.push_back (*it);
-      changed_=true;
-      added=true;
+        if (find (set_.begin(), set_.end(), *it) == set_.end())
+        {
+            set_.push_back (*it);
+            changed_=true;
+            added=true;
+        }
     }
-  }
-  return added;
+    return added;
 }
 
 //bool DBOVariableSet::addOnly (DBOVariableSet &set, const std::string &dbo_type)
@@ -99,11 +99,11 @@ bool DBOVariableSet::add (DBOVariableSet &set)
 
 void DBOVariableSet::removeVariableAt (unsigned int index)
 {
-  assert (index < set_.size());
+    assert (index < set_.size());
 
-  set_.erase ( set_.begin()+index );
+    set_.erase ( set_.begin()+index );
 
-  changed_=true;
+    changed_=true;
 }
 
 //DBOVariableSet *DBOVariableSet::getFor (const std::string &dbo_type)
@@ -149,57 +149,69 @@ DBOVariableSet& DBOVariableSet::operator= (const DBOVariableSet &source)
 
 DBOVariable &DBOVariableSet::getVariable (unsigned int index) const
 {
-  assert (index < set_.size());
-  return *set_.at(index);
+    assert (index < set_.size());
+    return *set_.at(index);
 }
 
 bool DBOVariableSet::intersect (DBOVariableSet &set)
 {
 
-  std::vector <DBOVariable*> org_set=set_;
-  set_.clear();
-  bool added=false;
+    std::vector <DBOVariable*> org_set=set_;
+    set_.clear();
+    bool added=false;
 
-  std::vector <DBOVariable*> &setset = set.getSet();
-  std::vector <DBOVariable*>::iterator it;
-  std::vector <DBOVariable*>::iterator it2;
+    std::vector <DBOVariable*> &setset = set.getSet();
+    std::vector <DBOVariable*>::iterator it;
+    std::vector <DBOVariable*>::iterator it2;
 
-  for (it=org_set.begin(); it != org_set.end(); it++) // traverse original list
-  {
-    it2 = find (setset.begin(), setset.end(), *it);
-    if (it2 == setset.end()) // other set hasn't var
+    for (it=org_set.begin(); it != org_set.end(); it++) // traverse original list
     {
-      changed_=true;
-      added=true;
+        it2 = find (setset.begin(), setset.end(), *it);
+        if (it2 == setset.end()) // other set hasn't var
+        {
+            changed_=true;
+            added=true;
+        }
+        else
+            set_.push_back(*it);
     }
-    else
-      set_.push_back(*it);
-  }
 
-  logdbg  << "DBOVariableSet: intersect: size " << set_.size() << " other size " << set.getSet().size() <<  " done";
-  return added;
+    logdbg  << "DBOVariableSet: intersect: size " << set_.size() << " other size " << set.getSet().size() <<  " done";
+    return added;
 }
 
 void DBOVariableSet::print ()
 {
-  logdbg  << "DBOVariableSet: print: size" << set_.size() << " changed " << changed_;
-  std::vector <DBOVariable*>::iterator it;
+    logdbg  << "DBOVariableSet: print: size" << set_.size() << " changed " << changed_;
+    std::vector <DBOVariable*>::iterator it;
 
-  for (it=set_.begin(); it != set_.end(); it++)
-  {
-    (*it)->print();
-  }
+    for (it=set_.begin(); it != set_.end(); it++)
+    {
+        (*it)->print();
+    }
 }
 
 void DBOVariableSet::clear ()
 {
-  set_.clear();
-  changed_=true;
+    set_.clear();
+    changed_=true;
 }
 
 bool DBOVariableSet::hasVariable (DBOVariable &variable)
 {
-  return find (set_.begin(), set_.end(), &variable) != set_.end();
+    return find (set_.begin(), set_.end(), &variable) != set_.end();
 }
 
+std::vector <DBOVariable*> DBOVariableSet::getExistsInDBSet ()
+{
+    std::vector <DBOVariable*> active_vars;
+
+    for (auto& var_it : set_)
+    {
+        if (var_it->existsInDB())
+            active_vars.push_back (var_it);
+    }
+
+    return active_vars;
+}
 

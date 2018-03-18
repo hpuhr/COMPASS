@@ -83,12 +83,12 @@ DBObjectManager::~DBObjectManager()
 /**
  * Can create DBOs.
  */
-void DBObjectManager::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
+void DBObjectManager::generateSubConfigurable (const std::string& class_id, const std::string& instance_id)
 {
     logdbg  << "DBObjectManager: generateSubConfigurable: class_id " << class_id << " instance_id " << instance_id;
     if (class_id.compare ("DBObject") == 0)
     {
-        DBObject *object = new DBObject (class_id, instance_id, this);
+        DBObject* object = new DBObject (class_id, instance_id, this);
         logdbg  << "DBObjectManager: generateSubConfigurable: adding object type " << object->name();
         assert (objects_.find(object->name()) == objects_.end());
         objects_.insert(std::pair <std::string, DBObject*> (object->name(), object));
@@ -99,7 +99,7 @@ void DBObjectManager::generateSubConfigurable (const std::string &class_id, cons
     }
     else if (class_id.compare ("MetaDBOVariable") == 0)
     {
-        MetaDBOVariable *meta_var = new MetaDBOVariable (class_id, instance_id, this);
+        MetaDBOVariable* meta_var = new MetaDBOVariable (class_id, instance_id, this);
         logdbg  << "DBObjectManager: generateSubConfigurable: adding meta var type " << meta_var->name();
         assert (meta_variables_.find(meta_var->name()) == meta_variables_.end());
         meta_variables_.insert(std::pair <std::string, MetaDBOVariable*> (meta_var->name(), meta_var));
@@ -113,7 +113,7 @@ void DBObjectManager::checkSubConfigurables ()
     // nothing to do, must be defined in configuration
 }
 
-bool DBObjectManager::existsObject (const std::string &dbo_name)
+bool DBObjectManager::existsObject (const std::string& dbo_name)
 {
     return (objects_.find(dbo_name) != objects_.end());
 }
@@ -124,7 +124,7 @@ void DBObjectManager::schemaLockedSlot()
     unlock ();
 }
 
-DBObject &DBObjectManager::object (const std::string &dbo_name)
+DBObject& DBObjectManager::object (const std::string& dbo_name)
 {
     logdbg  << "DBObjectManager: object: name " << dbo_name;
 
@@ -133,7 +133,7 @@ DBObject &DBObjectManager::object (const std::string &dbo_name)
     return *objects_.at(dbo_name);
 }
 
-void DBObjectManager::deleteObject (const std::string &dbo_name)
+void DBObjectManager::deleteObject (const std::string& dbo_name)
 {
     logdbg  << "DBObjectManager: deleteObject: name " << dbo_name;
     assert (existsObject(dbo_name));
@@ -143,12 +143,12 @@ void DBObjectManager::deleteObject (const std::string &dbo_name)
     emit dbObjectsChangedSignal();
 }
 
-bool DBObjectManager::existsMetaVariable (const std::string &var_name)
+bool DBObjectManager::existsMetaVariable (const std::string& var_name)
 {
     return (meta_variables_.find(var_name) != meta_variables_.end());
 }
 
-MetaDBOVariable &DBObjectManager::metaVariable (const std::string &var_name)
+MetaDBOVariable& DBObjectManager::metaVariable (const std::string& var_name)
 {
     logdbg  << "DBObjectManager: metaVariable: name " << var_name;
 
@@ -157,7 +157,7 @@ MetaDBOVariable &DBObjectManager::metaVariable (const std::string &var_name)
     return *meta_variables_.at(var_name);
 }
 
-void DBObjectManager::deleteMetaVariable (const std::string &var_name)
+void DBObjectManager::deleteMetaVariable (const std::string& var_name)
 {
     logdbg  << "DBObjectManager: deleteMetaVariable: name " << var_name;
     assert (existsMetaVariable(var_name));
@@ -165,7 +165,7 @@ void DBObjectManager::deleteMetaVariable (const std::string &var_name)
     meta_variables_.erase(var_name);
 }
 
-DBObjectManagerWidget *DBObjectManager::widget()
+DBObjectManagerWidget* DBObjectManager::widget()
 {
     if (!widget_)
     {
@@ -179,7 +179,7 @@ DBObjectManagerWidget *DBObjectManager::widget()
     return widget_;
 }
 
-DBObjectManagerLoadWidget *DBObjectManager::loadWidget()
+DBObjectManagerLoadWidget* DBObjectManager::loadWidget()
 {
     if (!load_widget_)
     {
@@ -281,7 +281,7 @@ bool DBObjectManager::hasOrderMetaVariable ()
     return false;
 }
 
-MetaDBOVariable &DBObjectManager::orderMetaVariable ()
+MetaDBOVariable& DBObjectManager::orderMetaVariable ()
 {
     assert (hasOrderMetaVariable());
     return metaVariable(order_variable_name_);

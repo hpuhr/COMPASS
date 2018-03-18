@@ -24,6 +24,7 @@
 class ATSDB;
 class DBSchema;
 class DBSchemaManagerWidget;
+class DBInterface;
 
 /**
  * @brief Singleton for managing DBSchema instances
@@ -40,9 +41,13 @@ signals:
     void schemaChangedSignal();
     void schemaLockedSignal();
 
+public slots:
+    void databaseContentChangedSlot ();
+
 public:
     /// @brief Constructor
-    DBSchemaManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb);
+    DBSchemaManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb,
+                    DBInterface& db_interface);
 
     /// @brief Destructor
     virtual ~DBSchemaManager();
@@ -79,6 +84,7 @@ public:
     void lock ();
 
 protected:
+    DBInterface& db_interface_;
     /// Name of current DBSchema
     std::string current_schema_;
     bool locked_ {false};

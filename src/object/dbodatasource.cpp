@@ -23,7 +23,8 @@
 
 #include <cmath>
 
-DBODataSourceDefinition::DBODataSourceDefinition(const std::string &class_id, const std::string &instance_id, DBObject* object)
+DBODataSourceDefinition::DBODataSourceDefinition(const std::string &class_id, const std::string &instance_id,
+                                                 DBObject* object)
     : Configurable (class_id, instance_id, object), object_(object)
 {
     registerParameter ("schema", &schema_, "");

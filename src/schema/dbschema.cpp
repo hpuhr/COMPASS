@@ -22,8 +22,9 @@
 #include "dbschemawidget.h"
 #include "logger.h"
 
-DBSchema::DBSchema(const std::string& class_id, const std::string& instance_id, Configurable* parent)
-    : Configurable (class_id, instance_id, parent)
+DBSchema::DBSchema(const std::string& class_id, const std::string& instance_id, Configurable* parent,
+                   DBInterface& db_interface)
+    : Configurable (class_id, instance_id, parent), db_interface_(db_interface)
 {
     registerParameter ("name", &name_, (std::string) "");
     assert (name_.size() != 0);
@@ -55,7 +56,7 @@ void DBSchema::generateSubConfigurable (const std::string& class_id, const std::
     if (class_id.compare("DBTable") == 0)
     {
         loginf  << "DBSchema '" << name_ << "': generateSubConfigurable: generating DBTable " << instance_id;
-        DBTable* table = new DBTable ("DBTable", instance_id, *this);
+        DBTable* table = new DBTable ("DBTable", instance_id, *this, db_interface_);
         assert (table->name().size() != 0);
         assert (tables_.find(table->name()) == tables_.end());
         tables_.insert (std::pair <std::string, DBTable*> (table->name(), table));
@@ -64,7 +65,7 @@ void DBSchema::generateSubConfigurable (const std::string& class_id, const std::
     else if (class_id.compare("MetaDBTable") == 0)
     {
         logdbg  << "DBSchema '" << name_ << "': generateSubConfigurable: generating MetaDBTable " << instance_id;
-        MetaDBTable *meta_table = new MetaDBTable ("MetaDBTable", instance_id, this);
+        MetaDBTable *meta_table = new MetaDBTable ("MetaDBTable", instance_id, this, db_interface_);
         assert (meta_table->name().size() != 0);
         assert (meta_tables_.find(meta_table->name()) == meta_tables_.end());
         meta_tables_.insert(std::pair<std::string, MetaDBTable*>(meta_table->name(), meta_table));
@@ -210,3 +211,19 @@ void DBSchema::lock ()
         widget_->lock();
 }
 
+void DBSchema::updateOnDatabase()
+{
+    exists_in_db_ = false;
+
+    for (auto& table_it : tables_)
+    {
+        table_it.second->updateOnDatabase();
+
+        exists_in_db_ = exists_in_db_ | table_it.second->existsInDB();
+    }
+
+    for (auto& meta_table_it : meta_tables_)
+        meta_table_it.second->updateOnDatabase();
+
+    loginf << "DBSchema: updateOnDatabase: " << name_<< " exists in db " << exists_in_db_;
+}

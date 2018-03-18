@@ -48,9 +48,11 @@ public slots:
     //void updateBufferJobStatusSlot ();
 
 public:
-    RadarPlotPositionCalculatorTask(const std::string& class_id, const std::string& instance_id, TaskManager* task_manager);
+    RadarPlotPositionCalculatorTask(const std::string& class_id, const std::string& instance_id,
+                                    TaskManager* task_manager);
     virtual ~RadarPlotPositionCalculatorTask();
 
+    bool canCalculate ();
     void calculate ();
 
     bool isCalculating ();
@@ -106,8 +108,6 @@ protected:
 
     std::string longitude_var_str_;
     DBOVariable* longitude_var_{nullptr};
-
-    //std::map<int, DBODataSource> data_sources_;
 
     std::shared_ptr<UpdateBufferDBJob> job_ptr_;
 

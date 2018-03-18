@@ -424,14 +424,11 @@ std::shared_ptr <DBResult> SQLiteConnection::stepPreparedCommand (unsigned int m
 
     if (result == SQLITE_DONE || buffer->size() == 0 || done)
     {
+        assert (done);
         logdbg  << "SQLiteConnection: stepPreparedCommand: reading done";
         prepared_command_done_=true;
 
-        if (done)
-            buffer->lastOne(true);
-        else
-            buffer=nullptr;
-
+        buffer->lastOne(true);
     }
 
 

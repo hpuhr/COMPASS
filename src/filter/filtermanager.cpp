@@ -54,6 +54,13 @@ void FilterManager::generateSubConfigurable (const std::string& class_id, const 
 {
     if (class_id == "DBFilter")
     {
+        if (hasSubConfigurable(class_id, instance_id))
+        {
+            logerr << "FilterManager: generateSubConfigurable: filter " << instance_id
+                   << " already present";
+            return;
+        }
+
         DBFilter *filter = new DBFilter (class_id, instance_id, this);
         filters_.push_back (filter);
     }
@@ -61,12 +68,28 @@ void FilterManager::generateSubConfigurable (const std::string& class_id, const 
     {
         try
         {
-            DataSourcesFilter *filter = new DataSourcesFilter (class_id, instance_id, this);
-            filters_.push_back (filter);
+            if (hasSubConfigurable(class_id, instance_id))
+            {
+                logerr << "FilterManager: generateSubConfigurable: data sources filter " << instance_id
+                       << " already present";
+                return;
+            }
+
+            DataSourcesFilter* filter = new DataSourcesFilter (class_id, instance_id, this);
+            if (filter->disabled())
+            {
+                loginf << "FilterManager: generateSubConfigurable: deleting disabled data source filter for object "
+                       << filter->dbObjectName();
+                //removeChildConfigurable (*filter);
+                //configuration_.removeSubConfiguration(class_id, instance_id);
+                delete filter;
+            }
+            else
+                filters_.push_back (filter);
         }
         catch (const std::exception& e)
         {
-            loginf << "FilterManager: generateSubConfigurable: sensor filter exception '" << e.what() << "', deleting";
+            loginf << "FilterManager: generateSubConfigurable: data source filter exception '" << e.what() << "', deleting";
             configuration_.removeSubConfiguration(class_id, instance_id);
         }
     }
@@ -78,7 +101,8 @@ void FilterManager::checkSubConfigurables ()
     // watch those sensors
     for (auto dbo_it : ATSDB::instance().objectManager().objects())
     {
-        if (!dbo_it.second->hasCurrentDataSourceDefinition())
+        if (!dbo_it.second->hasCurrentDataSourceDefinition() || !dbo_it.second->hasDataSources()
+                || !dbo_it.second->existsInDB())
             continue;
 
         bool exists = false;

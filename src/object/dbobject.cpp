@@ -241,9 +241,11 @@ void DBObject::buildDataSources()
     data_sources_.clear();
 
     logdbg  << "DBObject: buildDataSources: building dbo " << name_;
-    if (!is_loadable_ || !hasCurrentDataSourceDefinition ())
+
+    if (!existsInDB() || !is_loadable_ || !hasCurrentDataSourceDefinition ())
     {
-        logdbg << "DBObject: buildDataSources: not processed is loadable " << is_loadable_
+        logerr << "DBObject: buildDataSources: not processed, exists " << existsInDB()
+               << " is loadable " << is_loadable_
                << " has data source " << hasCurrentDataSourceDefinition ();
         return;
     }
@@ -430,6 +432,13 @@ void DBObject::load (DBOVariableSet& read_set, bool use_filters, bool use_order,
                      bool use_order_ascending, const std::string &limit_str)
 {
     assert (is_loadable_);
+    assert (existsInDB());
+
+    for (auto& var_it : read_set.getSet())
+        assert (var_it->existsInDB());
+
+    if (order_variable)
+        assert (order_variable->existsInDB());
 
     if (read_job_)
     {
@@ -445,20 +454,23 @@ void DBObject::load (DBOVariableSet& read_set, bool use_filters, bool use_order,
     clearData ();
 
     std::string custom_filter_clause;
-    std::vector <DBOVariable *> filtered_variables;
+    std::vector <DBOVariable*> filtered_variables;
 
     if (use_filters)
     {
         custom_filter_clause = ATSDB::instance().filterManager().getSQLCondition (name_, filtered_variables);
     }
 
+    for (auto& var_it : filtered_variables)
+        assert (var_it->existsInDB());
+
     //    DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
-    //    DBOVariable *order, const std::string &limit_str, bool activate_key_search
+    //    DBOVariable *order, const std::string &limit_str
 
     read_job_ = std::shared_ptr<DBOReadDBJob> (new DBOReadDBJob (ATSDB::instance().interface(), *this,
                                                                  read_set, custom_filter_clause,
                                                                  filtered_variables, use_order, order_variable,
-                                                                 use_order_ascending, limit_str, false));
+                                                                 use_order_ascending, limit_str));
 
     connect (read_job_.get(), SIGNAL(intermediateSignal(std::shared_ptr<Buffer>)),
              this, SLOT(readJobIntermediateSlot(std::shared_ptr<Buffer>)), Qt::QueuedConnection);
@@ -489,6 +501,10 @@ void DBObject::updateData (DBOVariable &key_var, std::shared_ptr<Buffer> buffer)
 {
     assert (!update_job_);
 
+    assert (existsInDB());
+    assert (key_var.existsInDB());
+    assert (ATSDB::instance().interface().checkUpdateBuffer(*this, key_var, buffer));
+
     update_job_ = std::shared_ptr<UpdateBufferDBJob> (new UpdateBufferDBJob(ATSDB::instance().interface(),
                                                                             *this, key_var, buffer));
 
@@ -513,10 +529,15 @@ void DBObject::updateDoneSlot ()
 
 std::map<int, std::string> DBObject::loadLabelData (std::vector<int> rec_nums, int break_item_cnt)
 {
+    assert (is_loadable_);
+    assert (existsInDB());
+
     std::string custom_filter_clause;
     bool first=true;
 
+    // TODO rework to key variable
     assert (hasVariable("rec_num"));
+    assert (variable("rec_num").existsInDB());
 
     custom_filter_clause = variable("rec_num").currentDBColumn().identifier()+" in (";
     for (auto& rec_num : rec_nums)
@@ -528,18 +549,22 @@ std::map<int, std::string> DBObject::loadLabelData (std::vector<int> rec_nums, i
 
         custom_filter_clause += std::to_string(rec_num);
     }
-    custom_filter_clause += ");";
+    custom_filter_clause += ")";
 
     DBOVariableSet read_list = label_definition_->readList();
+
     if (!read_list.hasVariable(variable("rec_num")))
         read_list.add(variable("rec_num"));
+
+    for (auto& var_it : read_list.getSet())
+        assert (var_it->existsInDB());
 
     boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
     DBInterface& db_interface = ATSDB::instance().interface ();
 
     db_interface.prepareRead (*this, read_list, custom_filter_clause, {}, false, nullptr, false, "");
-    std::shared_ptr<Buffer> buffer = db_interface.readDataChunk(*this, false);
+    std::shared_ptr<Buffer> buffer = db_interface.readDataChunk(*this);
     db_interface.finalizeReadStatement(*this);
 
     if (buffer->size() != rec_nums.size())
@@ -676,8 +701,6 @@ void DBObject::finalizeReadJobDoneSlot()
 
 void DBObject::databaseContentChangedSlot ()
 {
-    loginf << "DBObject: " << name_ << " databaseContentChangedSlot";
-
     if (!current_meta_table_)
     {
         logwrn << "DBObject: databaseContentChangedSlot: object " << name_ << " has no current meta table";
@@ -688,12 +711,17 @@ void DBObject::databaseContentChangedSlot ()
     assert (current_meta_table_);
     std::string table_name = current_meta_table_->mainTableName();
 
-    is_loadable_ = ATSDB::instance().interface().tableInfo().count(table_name) > 0;
+    is_loadable_ = current_meta_table_->existsInDB() && ATSDB::instance().interface().tableInfo().count(table_name) > 0;
 
     if (is_loadable_)
         count_ = ATSDB::instance().interface().count (table_name);
 
-    buildDataSources();
+    loginf << "DBObject: " << name_ << " databaseContentChangedSlot: exists in db "
+           << current_meta_table_->existsInDB() << " count " << count_;
+
+    data_sources_.clear();
+    if (current_meta_table_->existsInDB())
+        buildDataSources();
 
     if (info_widget_)
         info_widget_->updateSlot();
@@ -722,4 +750,12 @@ size_t DBObject::loadedCount ()
         return data_->size();
     else
         return 0;
+}
+
+bool DBObject::existsInDB () const
+{
+    if (!hasCurrentMetaTable())
+        return false;
+    else
+        return currentMetaTable().existsInDB();
 }

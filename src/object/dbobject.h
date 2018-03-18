@@ -225,6 +225,8 @@ public:
     void lock ();
     void unlock ();
 
+    bool existsInDB () const;
+
 protected:
     /// DBO name
     std::string name_;

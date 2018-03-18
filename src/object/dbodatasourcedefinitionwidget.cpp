@@ -29,7 +29,8 @@
 #include "dbschema.h"
 #include "metadbtable.h"
 
-DBODataSourceDefinitionWidget::DBODataSourceDefinitionWidget(DBObject& object, DBODataSourceDefinition &definition, QWidget *parent, Qt::WindowFlags f)
+DBODataSourceDefinitionWidget::DBODataSourceDefinitionWidget(DBObject& object, DBODataSourceDefinition& definition,
+                                                             QWidget* parent, Qt::WindowFlags f)
     : QWidget (parent, f), object_(object), definition_(definition), schema_manager_(ATSDB::instance().schemaManager())
 {
     setMinimumSize(QSize(800, 600));

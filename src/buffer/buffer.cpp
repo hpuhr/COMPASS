@@ -301,81 +301,83 @@ bool Buffer::hasString (const std::string &id)
 ArrayListTemplate<bool> &Buffer::getBool (const std::string &id)
 {
     if (arrays_bool_.count(id) == 0)
-        throw std::runtime_error ("Buffer: getBool: unknown id "+id);
+        logerr << "Buffer: getBool: unknown id " << id;
 
-    return *arrays_bool_[id];
+    return *arrays_bool_.at(id);
 }
 
 ArrayListTemplate<char> &Buffer::getChar (const std::string id)
 {
     if (arrays_char_.count(id) == 0)
-        throw std::runtime_error ("Buffer: getChar: unknown id "+id);
+        logerr << "Buffer: getChar: unknown id " << id;
 
-    return *arrays_char_[id];
+    return *arrays_char_.at(id);
 }
 
 ArrayListTemplate<unsigned char> &Buffer::getUChar (const std::string &id)
 {
     if (arrays_uchar_.count(id) == 0)
-        throw std::runtime_error ("Buffer: getUChar: unknown id "+id);
+        logerr << "Buffer: getUChar: unknown id " << id;
 
-    return *arrays_uchar_[id];
+    return *arrays_uchar_.at(id);
 }
 
 ArrayListTemplate<int> &Buffer::getInt (const std::string &id)
 {
     if (arrays_int_.count(id) == 0)
-        throw std::runtime_error ("Buffer: getInt: unknown id "+id);
+        logerr << "Buffer: getInt: unknown id " << id;
 
-    return *arrays_int_[id];
+    return *arrays_int_.at(id);
 }
 
 ArrayListTemplate<unsigned int> &Buffer::getUInt (const std::string &id)
 {
     if (arrays_uint_.count(id) == 0)
-        throw std::runtime_error ("Buffer: getUInt: unknown id "+id);
+        logerr << "Buffer: getUInt: unknown id " << id;
 
-    return *arrays_uint_[id];
+    return *arrays_uint_.at(id);
 }
 
 ArrayListTemplate<long int> &Buffer::getLongInt (const std::string &id)
 {
     if (arrays_long_int_.count(id) == 0)
-        throw std::runtime_error ("Buffer: getLongInt: unknown id "+id);
+        logerr << "Buffer: getLongInt: unknown id " << id;
 
-    return *arrays_long_int_[id];
+    return *arrays_long_int_.at(id);
 }
 
 ArrayListTemplate<unsigned long int> &Buffer::getULongInt (const std::string &id)
 {
-    if (arrays_ulong_int_.count(id) == 0)
-        throw std::runtime_error ("Buffer: getULongInt: unknown id "+id);
+     if (arrays_ulong_int_.count(id) == 0)
+         logerr << "Buffer: getULongInt: unknown id " << id;
 
-    return *arrays_ulong_int_[id];
+    return *arrays_ulong_int_.at(id);
 }
 
 ArrayListTemplate<float> &Buffer::getFloat (const std::string &id)
 {
-    if (arrays_float_.count(id) == 0)
-        throw std::runtime_error ("Buffer: getFloat: unknown id "+id);
+    //assert (arrays_float_.count(id) != 0);
 
-    return *arrays_float_[id];
+    if (arrays_float_.count(id) == 0)
+        logerr << "Buffer: getBool: unknown id " << id;
+
+    return *arrays_float_.at(id);
 }
 
 ArrayListTemplate<double> &Buffer::getDouble (const std::string &id)
 {
     if (arrays_double_.count(id) == 0)
-        throw std::runtime_error ("Buffer: getDouble: unknown id "+id);
+        logerr << "Buffer: getDouble: unknown id " << id;
 
-    return *arrays_double_[id];
+    return *arrays_double_.at(id);
 }
 
 ArrayListTemplate<std::string> &Buffer::getString (const std::string &id)
 {
     if (arrays_string_.count(id) == 0)
-        throw std::runtime_error ("Buffer: getString: unknown id "+id);
+        logerr << "Buffer: getBool: unknown id " << id;
 
-    return *arrays_string_[id];
+    return *arrays_string_.at(id);
 }
 
 void Buffer::renameBool (const std::string &id, const std::string &id_new)
@@ -583,6 +585,9 @@ void Buffer::seizeBuffer (Buffer &org_buffer)
     for (auto it : arrays_string_)
         it.second->addData(*org_buffer.arrays_string_.at(it.first));
     org_buffer.arrays_string_.clear();
+
+    if (org_buffer.lastOne())
+        last_one_ = true;
 
     logdbg  << "Buffer: seizeBuffer: size " << size();
 

@@ -33,7 +33,7 @@
 
 
 DBObjectInfoWidget::DBObjectInfoWidget(DBObject &object, QWidget *parent, Qt::WindowFlags f)
-    : QWidget (parent, f), object_(object), main_layout_(nullptr), main_check_(nullptr), status_label_(nullptr), loaded_count_label_(nullptr)
+    : QWidget (parent, f), object_(object)
 {
     QFont font_bold;
     font_bold.setBold(true);

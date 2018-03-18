@@ -45,13 +45,15 @@ void finalizeBuffer (DBOVariableSet &read_list, std::shared_ptr<Buffer> buffer)
             {
             case PropertyDataType::BOOL:
             {
-                ArrayListTemplate<bool> &array_list = buffer->getBool (property.name());
+                assert (buffer->hasBool(property.name()));
+                ArrayListTemplate<bool> &array_list = buffer->getBool(property.name());
                 logwrn << "Data: finalizeBuffer: double multiplication of boolean variable " << var_it->name();
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::CHAR:
             {
+                assert (buffer->hasChar(property.name()));
                 ArrayListTemplate<char> &array_list = buffer->getChar (property.name());
                 logwrn << "Data: finalizeBuffer: double multiplication of char variable " << var_it->name();
                 array_list *= factor;
@@ -59,6 +61,7 @@ void finalizeBuffer (DBOVariableSet &read_list, std::shared_ptr<Buffer> buffer)
             }
             case PropertyDataType::UCHAR:
             {
+                assert (buffer->hasUChar(property.name()));
                 ArrayListTemplate<unsigned char> &array_list = buffer->getUChar (property.name());
                 logwrn << "Data: finalizeBuffer: double multiplication of unsigned char variable " << var_it->name();
                 array_list *= factor;
@@ -66,37 +69,43 @@ void finalizeBuffer (DBOVariableSet &read_list, std::shared_ptr<Buffer> buffer)
             }
             case PropertyDataType::INT:
             {
+                assert (buffer->hasInt(property.name()));
                 ArrayListTemplate<int> &array_list = buffer->getInt (property.name());
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::UINT:
             {
+                assert (buffer->hasUInt(property.name()));
                 ArrayListTemplate<unsigned int> &array_list = buffer->getUInt (property.name());
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::LONGINT:
             {
+                assert (buffer->hasLongInt(property.name()));
                 ArrayListTemplate<long> &array_list = buffer->getLongInt(property.name());
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::ULONGINT:
             {
+                assert (buffer->hasULongInt(property.name()));
                 ArrayListTemplate<unsigned long> &array_list = buffer->getULongInt(property.name());
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::FLOAT:
             {
-                ArrayListTemplate<float> &array_list = buffer->getFloat (property.name());
+                assert (buffer->hasFloat(property.name()));
+                ArrayListTemplate<float> &array_list = buffer->getFloat(property.name());
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::DOUBLE:
             {
-                ArrayListTemplate<double> &array_list = buffer->getDouble (property.name());
+                assert (buffer->hasDouble(property.name()));
+                ArrayListTemplate<double> &array_list = buffer->getDouble(property.name());
                 array_list *= factor;
                 break;
             }

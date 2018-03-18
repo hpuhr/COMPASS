@@ -90,23 +90,28 @@ public:
     bool showEmptyVariable() const;
     void showEmptyVariable(bool show_empty_variable);
 
+    bool showExistingInDBOnly() const;
+    void showExistingInDBOnly(bool show);
+
 private:
     /// Variable type information
-    QLabel* object_label_;
+    QLabel* object_label_ {nullptr};
     /// Variable name information
-    QLabel* variable_label_;
+    QLabel* variable_label_ {nullptr};
     /// Context menu for variable selection
     QMenu menu_;
 
-    bool variable_selected_;
-    bool meta_variable_selected_;
+    bool variable_selected_ {false};
+    bool meta_variable_selected_ {false};
 
-    bool show_empty_variable_;
+    bool show_empty_variable_ {true};
 
-    bool show_meta_variables_;
-    bool show_meta_variables_only_;
+    bool show_meta_variables_ {false};
+    bool show_meta_variables_only_ {false};
 
-    bool show_dbo_only_;
+    bool show_existing_in_db_only_ {false};
+
+    bool show_dbo_only_ {false};
     std::string only_dbo_name_;
 
     /// @brief Updates selection menu entries
