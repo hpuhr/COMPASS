@@ -701,8 +701,6 @@ void DBObject::finalizeReadJobDoneSlot()
 
 void DBObject::databaseContentChangedSlot ()
 {
-    loginf << "DBObject: " << name_ << " databaseContentChangedSlot";
-
     if (!current_meta_table_)
     {
         logwrn << "DBObject: databaseContentChangedSlot: object " << name_ << " has no current meta table";
@@ -717,6 +715,9 @@ void DBObject::databaseContentChangedSlot ()
 
     if (is_loadable_)
         count_ = ATSDB::instance().interface().count (table_name);
+
+    loginf << "DBObject: " << name_ << " databaseContentChangedSlot: exists in db "
+           << current_meta_table_->existsInDB() << " count " << count_;
 
     data_sources_.clear();
     if (current_meta_table_->existsInDB())
