@@ -104,7 +104,8 @@ public:
     /// @brief Resets condition by setting value_ to reset_value_
     void reset ();
 
-    bool invalid() const;
+    bool valueInvalid() const { return value_invalid_; }
+    bool usable() const { return usable_; }
 
 private:
     /// @brief Parent filter
@@ -129,8 +130,9 @@ private:
     MetaDBOVariable* meta_variable_ {nullptr};
 
     /// @brief Changed flag
+    bool usable_ {true};
     bool changed_ {true};
-    bool invalid_ {false};
+    bool value_invalid_ {false};
 
     /// @brief Widget with condition elements
     QWidget* widget_ {nullptr};

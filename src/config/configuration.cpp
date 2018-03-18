@@ -851,9 +851,19 @@ Configuration &Configuration::getSubConfiguration (const std::string &class_id, 
 
 void Configuration::removeSubConfiguration (const std::string &class_id, const std::string &instance_id)
 {
-    logdbg << "Configuration: removeSubConfiguration: me "  << class_id_ << " " << instance_id_ << " you " << class_id << " " << instance_id;
+    logdbg << "Configuration: removeSubConfiguration: me "  << class_id_ << " " << instance_id_ << " you "
+           << class_id << " " << instance_id;
 
     std::pair<std::string, std::string> key (class_id, instance_id);
+
+    if (sub_configurations_.find (key) == sub_configurations_.end())
+    {
+        logerr << "Configuration: removeSubConfiguration: class_id_ " << class_id_ << " instance_id_ " << instance_id_
+               << ": sub class_id " << class_id << " instance_id " << instance_id
+               << " not found";
+        return;
+    }
+
     assert (sub_configurations_.find (key) != sub_configurations_.end());
     sub_configurations_.erase(sub_configurations_.find (key));
 }

@@ -53,6 +53,11 @@ void Dimension::addUnit (const std::string &name, double factor, const std::stri
     generateSubConfigurable("Unit", name);
 }
 
+bool Dimension::hasUnit (const std::string &unit) const
+{
+    return units_.find(unit) != units_.end();
+}
+
 double Dimension::getFactor (const std::string &unit_source, const std::string &unit_destination) const
 {
     logdbg << "Dimension: getFactor: unit src '" << unit_source << "' dst '" << unit_destination << "'";

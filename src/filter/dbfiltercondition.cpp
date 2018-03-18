@@ -67,6 +67,10 @@ DBFilterCondition::DBFilterCondition(const std::string& class_id, const std::str
             throw std::runtime_error ("DBFilterCondition: constructor: meta dbo variable '" + variable_name_
                                       + "' does not exist");
         meta_variable_ = &ATSDB::instance().objectManager().metaVariable(variable_name_);
+        assert (meta_variable_);
+
+        if (!meta_variable_->existsInDB())
+            usable_ = false;
     }
     else
     {
@@ -76,13 +80,21 @@ DBFilterCondition::DBFilterCondition(const std::string& class_id, const std::str
                                       + "' does not exist");
 
         variable_ = &ATSDB::instance().objectManager().object(variable_dbo_name_).variable(variable_name_);
+
+        assert (variable_);
+
+        if (!variable_->existsInDB())
+            usable_ = false;
     }
 
     registerParameter ("reset_value", &reset_value_, std::string("value"));
     registerParameter ("value", &value_, "");
 
-    invalid_ = checkValueInvalid (value_);
-    loginf << "DBFilterCondition: DBFilterCondition: " << instance_id << " value " << value_ << " invalid " << invalid_;
+    if (usable_)
+        value_invalid_ = checkValueInvalid (value_);
+
+    loginf << "DBFilterCondition: DBFilterCondition: " << instance_id << " value " << value_
+           << " usable " << usable_ << " invalid " << value_invalid_;
 
     widget_ = new QWidget ();
     QHBoxLayout *layout = new QHBoxLayout ();
@@ -97,6 +109,9 @@ DBFilterCondition::DBFilterCondition(const std::string& class_id, const std::str
     layout->addWidget(edit_);
 
     widget_->setLayout (layout);
+
+    if (!usable_)
+        widget_->setDisabled(true);
 }
 
 DBFilterCondition::~DBFilterCondition()
@@ -114,9 +129,14 @@ void DBFilterCondition::invert ()
  */
 bool DBFilterCondition::filters (const std::string &dbo_name)
 {
+    assert (usable_);
+
     if (meta_variable_)
     {
-        return meta_variable_->existsIn(dbo_name);
+        if (meta_variable_->existsIn(dbo_name))
+            return meta_variable_->getFor(dbo_name).existsInDB();
+        else
+            return false;
     }
     else
         return variable_dbo_name_ == dbo_name;
@@ -126,6 +146,8 @@ std::string DBFilterCondition::getConditionString (const std::string &dbo_name, 
                                                    std::vector <DBOVariable*>& filtered_variables)
 {
     logdbg << "DBFilterCondition: getConditionString: object " << dbo_name << " first " << first;
+    assert (usable_);
+
     std::stringstream ss;
 
     std::string variable_prefix;
@@ -196,13 +218,14 @@ std::string DBFilterCondition::getConditionString (const std::string &dbo_name, 
 void DBFilterCondition::valueChanged ()
 {
     logdbg  << "DBFilterCondition: valueChanged";
+    assert (usable_);
     assert  (edit_);
 
     std::string new_value = edit_->text().toStdString();
 
-    invalid_ = checkValueInvalid (new_value);
+    value_invalid_ = checkValueInvalid (new_value);
 
-    if (!invalid_ && value_ != new_value)
+    if (!value_invalid_ && value_ != new_value)
     {
         value_ = new_value;
         changed_=true;
@@ -210,9 +233,9 @@ void DBFilterCondition::valueChanged ()
         emit possibleFilterChange();
     }
 
-    loginf  << "DBFilterCondition: valueChanged: value_ '" << value_ << "' invalid " << invalid_;
+    loginf  << "DBFilterCondition: valueChanged: value_ '" << value_ << "' invalid " << value_invalid_;
 
-    if (invalid_)
+    if (value_invalid_)
         edit_->setStyleSheet("QLineEdit { background: rgb(255, 100, 100); selection-background-color:"
                              " rgb(255, 200, 200); }");
     else
@@ -244,6 +267,8 @@ void DBFilterCondition::update ()
 
 void DBFilterCondition::reset ()
 {
+    assert (usable_);
+
     std::string value;
 
     if (reset_value_.compare ("MIN") == 0 || reset_value_.compare ("MAX") == 0)
@@ -282,21 +307,18 @@ void DBFilterCondition::reset ()
         value=reset_value_;
 
     value_=value;
-    invalid_ = checkValueInvalid(value_);
+    value_invalid_ = checkValueInvalid(value_);
 
-    loginf  << "DBFilterCondition: reset: value '" << value_ << " invalid " << invalid_;
+    loginf  << "DBFilterCondition: reset: value '" << value_ << " invalid " << value_invalid_;
 
     update();
-}
-
-bool DBFilterCondition::invalid() const
-{
-    return invalid_;
 }
 
 bool DBFilterCondition::checkValueInvalid (const std::string& new_value)
 {
     assert (variable_ || meta_variable_);
+    assert (usable_);
+
     std::vector <DBOVariable*> variables;
 
     if (new_value.size() == 0)
@@ -308,7 +330,10 @@ bool DBFilterCondition::checkValueInvalid (const std::string& new_value)
     if (meta_variable_)
     {
         for (auto var_it : meta_variable_->variables())
-            variables.push_back(&var_it.second);
+        {
+            if (var_it.second.existsInDB())
+                variables.push_back(&var_it.second);
+        }
     }
     else
         variables.push_back(variable_);
@@ -339,6 +364,7 @@ std::string DBFilterCondition::getTransformedValue (const std::string& untransfo
 {
     assert (variable);
     const DBTableColumn &column = variable->currentDBColumn();
+    assert (column.existsInDB());
 
     std::vector<std::string> value_strings;
     std::vector<std::string> transformed_value_strings;
@@ -370,10 +396,27 @@ std::string DBFilterCondition::getTransformedValue (const std::string& untransfo
                    << " of same dimension has different units " << column.unit() << " " << variable->unit();
 
             const Dimension &dimension = UnitManager::instance().dimension (variable->dimension());
-            double factor = dimension.getFactor (column.unit(), variable->unit());
-            logdbg  << "DBFilterCondition: getTransformedValue: correct unit transformation with factor " << factor;
 
-            value_str = variable->multiplyString(value_str, 1.0/factor);
+            if (!dimension.hasUnit(column.unit()))
+            {
+                logerr << "DBFilterCondition: getTransformedValue: variable " << variable->name()
+                       << " has unknown column unit '" << column.unit() << "' in dimension " << variable->dimension();
+                //  no transformation possible
+            }
+            else if (!dimension.hasUnit(variable->unit()))
+            {
+                logerr << "DBFilterCondition: getTransformedValue: variable " << variable->name()
+                       << " has unknown variable unit '" << variable->unit() << "' in dimension "
+                       << variable->dimension();
+                //  no transformation possible
+            }
+            else
+            {
+                double factor = dimension.getFactor (column.unit(), variable->unit());
+                logdbg  << "DBFilterCondition: getTransformedValue: correct unit transformation with factor " << factor;
+
+                value_str = variable->multiplyString(value_str, 1.0/factor);
+            }
         }
         logdbg << "DBFilterCondition: getTransformedValue: transformed value string " << value_str;
         transformed_value_strings.push_back(value_str);

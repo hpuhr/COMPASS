@@ -37,12 +37,28 @@ DataSourcesFilter::DataSourcesFilter(const std::string& class_id, const std::str
                                      +" has non-existing object "+dbo_name_);
 
     object_ = &ATSDB::instance().objectManager().object(dbo_name_);
+
     if (!object_->hasCurrentDataSourceDefinition())
-        throw std::invalid_argument ("DataSourcesFilter: DataSourcesFilter: instance "+instance_id+" object "
-                                     +dbo_name_+" has no data sources");
+    {
+        logerr << "DataSourcesFilter: DataSourcesFilter: instance "+instance_id+" object "
+               << dbo_name_+" has no data sources";
+        disabled_ = true;
+        return;
+    }
+
+    if (!object_->hasDataSources())
+    {
+        disabled_ = true;
+        return;
+    }
+
+    if (!object_->existsInDB())
+    {
+        disabled_ = true;
+        return;
+    }
 
     ds_column_name_ = object_->currentDataSourceDefinition().localKey();
-
 
     if (object_->hasDataSources ())
         updateDataSources ();
@@ -54,9 +70,10 @@ DataSourcesFilter::DataSourcesFilter(const std::string& class_id, const std::str
     createSubConfigurables();
 
     assert (widget_);
+
     if (object_->count() == 0)
     {
-        active_=false;
+        active_ = false;
         widget_->setInvisible();
         widget_->update();
         widget_->setDisabled(true);

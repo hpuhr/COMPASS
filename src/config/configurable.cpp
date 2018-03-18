@@ -57,6 +57,8 @@ Configurable::~Configurable()
 
     if (parent_)
     {
+        logdbg  << "Configurable: destructor: class_id " << class_id_ << " instance_id " << instance_id_
+                << ": removal from parent";
         parent_->removeChildConfigurable (*this);
     }
     else

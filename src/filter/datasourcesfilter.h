@@ -118,7 +118,7 @@ public:
 protected:
   /// DBO type
   std::string dbo_name_;
-  DBObject* object_{nullptr};
+  DBObject* object_ {nullptr};
   /// Sensor id column name in database table
   std::string ds_column_name_;
   /// Container with all possible data sources and active flag pointers

@@ -266,6 +266,9 @@ void DBOVariable::setVariableName (const std::string& schema_name, const std::st
 
 bool DBOVariable::hasCurrentDBColumn () const
 {
+    if (!db_object_.hasCurrentMetaTable())
+        return false;
+
     std::string meta_tablename = currentMetaTableString ();
     std::string meta_table_varid = currentVariableIdentifier ();
 
@@ -765,6 +768,9 @@ const
 
 bool DBOVariable::existsInDB () const
 {
+    if (!db_object_.hasCurrentMetaTable())
+        return false;
+
     if (!hasCurrentDBColumn())
         return false;
     else

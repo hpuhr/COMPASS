@@ -29,7 +29,7 @@
  * Initializes members, registers parameters and creates sub-configurables if class id is DBFilter.
  */
 DBFilter::DBFilter(const std::string &class_id, const std::string &instance_id, Configurable *parent, bool is_generic)
-: Configurable (class_id, instance_id, parent), widget_ (nullptr), is_generic_(is_generic) // filter_manager_(*filter_manager),
+: Configurable (class_id, instance_id, parent), is_generic_(is_generic) // filter_manager_(*filter_manager),
 {
     registerParameter ("active", &active_, false);
     registerParameter ("op_and_", &op_and_, true);
@@ -51,7 +51,7 @@ DBFilter::~DBFilter()
     if (widget_)
     {
         delete widget_;
-        widget_=nullptr;
+        widget_ = nullptr;
     }
 
     for (unsigned int cnt=0; cnt < sub_filters_.size(); cnt++)
@@ -76,6 +76,8 @@ void DBFilter::setActive (bool active)
 //    if (active_ && !active)
 //        FilterManager::getInstance().setChanged();
 
+    assert (!disabled_);
+
     active_=active;
 
     for (unsigned int cnt=0; cnt < sub_filters_.size(); cnt++)
@@ -98,6 +100,8 @@ bool DBFilter::getActive ()
  */
 bool DBFilter::getChanged ()
 {
+    assert (!disabled_);
+
     bool ret = changed_;
 
     for (unsigned int cnt=0; cnt < conditions_.size(); cnt++)
@@ -119,6 +123,8 @@ bool DBFilter::getChanged ()
  */
 void DBFilter::setChanged (bool changed)
 {
+    assert (!disabled_);
+
     changed_=changed;
 
     for (unsigned int cnt=0; cnt < conditions_.size(); cnt++)
@@ -139,17 +145,22 @@ bool DBFilter::getVisible ()
 }
 void DBFilter::setVisible (bool visible)
 {
-    visible_=visible;
+    assert (!disabled_);
+
+    visible_ = visible;
 }
 
 void DBFilter::setName (const std::string &name)
 {
+    assert (!disabled_);
+
     name_=name;
+
     if (widget_)
         widget_->update();
 }
 
-void DBFilter::addSubFilter (DBFilter *filter)
+void DBFilter::addSubFilter (DBFilter* filter)
 {
     sub_filters_.push_back (filter);
 }
@@ -159,6 +170,8 @@ void DBFilter::addSubFilter (DBFilter *filter)
  */
 bool DBFilter::filters (const std::string &dbo_type)
 {
+    assert (!disabled_);
+
     bool ret = false;
 
     for (unsigned int cnt=0; cnt < conditions_.size(); cnt++)
@@ -182,13 +195,15 @@ bool DBFilter::filters (const std::string &dbo_type)
 std::string DBFilter::getConditionString (const std::string &dbo_name, bool &first,
                                           std::vector <DBOVariable*>& filtered_variables)
 {
+    assert (!disabled_);
+
     std::stringstream ss;
 
     if (active_)
     {
         for (unsigned int cnt=0; cnt < conditions_.size(); cnt++)
         {
-            if (conditions_.at(cnt)->invalid())
+            if (conditions_.at(cnt)->valueInvalid())
             {
                 logwrn  << "DBFilter " << instance_id_ << ": getConditionString: invalid condition, will be skipped";
                 continue;
@@ -205,13 +220,16 @@ std::string DBFilter::getConditionString (const std::string &dbo_name, bool &fir
         }
     }
 
-    loginf  << "DBFilter " << instance_id_ << ": getConditionString: object " << dbo_name << " here '" << ss.str() << "' first " << first;
+    loginf  << "DBFilter " << instance_id_ << ": getConditionString: object " << dbo_name << " here '" << ss.str()
+            << "' first " << first;
 
     return ss.str();
 }
 
 void DBFilter::setAnd (bool op_and)
 {
+    assert (!disabled_);
+
     if (op_and_ != op_and)
     {
         op_and_=op_and;
@@ -225,6 +243,8 @@ void DBFilter::setAnd (bool op_and)
 
 void DBFilter::invert ()
 {
+    assert (!disabled_);
+
     op_and_=!op_and_;
 
     for (unsigned int cnt=0; cnt < conditions_.size(); cnt++)
@@ -260,11 +280,21 @@ void DBFilter::generateSubConfigurable (const std::string &class_id, const std::
     else if (class_id == "DBFilterCondition")
     {
         logdbg  << "DBFilter: generateSubConfigurable: generating condition";
-        DBFilterCondition *condition = new DBFilterCondition (class_id, instance_id, this);
+        DBFilterCondition* condition = new DBFilterCondition (class_id, instance_id, this);
         conditions_.push_back (condition);
 
-        if (widget_) // bit of a hack. think about order of generation.
-            widget_->updateChildWidget();
+        disabled_ = disabled_ | !condition->usable();
+
+        if (widget_)
+        {
+            if (disabled_) // bit of a hack. think about order of generation.
+            {
+                widget_->setInvisible ();
+                widget_->setDisabled(true);
+            }
+            else
+                widget_->updateChildWidget();
+        }
     }
     else if (class_id == "DBFilter")
     {
@@ -286,6 +316,12 @@ void DBFilter::checkSubConfigurables ()
     {
         logdbg  << "DBFilter: checkSubConfigurables: generating generic filter widget";
         widget_ = new DBFilterWidget ("DBFilterWidget", instance_id_+"Widget0", *this);
+
+        if (disabled_)
+        {
+            widget_->setInvisible ();
+            widget_->setDisabled(true);
+        }
     }
     assert (widget_);
 
@@ -293,7 +329,8 @@ void DBFilter::checkSubConfigurables ()
     for (unsigned int cnt=0; cnt < sub_filters_.size(); cnt++)
     {
         DBFilterWidget *filter = sub_filters_.at(cnt)->widget();
-        QObject::connect((QWidget*)filter, SIGNAL( possibleFilterChange() ), (QWidget*)widget_, SLOT( possibleSubFilterChange() ));
+        QObject::connect((QWidget*)filter, SIGNAL( possibleFilterChange() ),
+                         (QWidget*)widget_, SLOT( possibleSubFilterChange() ));
         widget_->addChildWidget (filter);
     }
 }
@@ -303,6 +340,8 @@ void DBFilter::checkSubConfigurables ()
  */
 void DBFilter::reset ()
 {
+    assert (!disabled_);
+
     for (unsigned int cnt=0; cnt < conditions_.size(); cnt++)
     {
         conditions_.at(cnt)->reset();
@@ -323,7 +362,7 @@ void DBFilter::deleteCondition (DBFilterCondition *condition)
     delete condition;
 }
 
-DBFilterWidget *DBFilter::widget ()
+DBFilterWidget* DBFilter::widget ()
 {
     assert (widget_);
     return widget_;
