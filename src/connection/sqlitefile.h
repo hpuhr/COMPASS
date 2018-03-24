@@ -20,17 +20,16 @@
 
 #include "configurable.h"
 
-class SQLiteFile : public Configurable
+class SavedFile : public Configurable
 {
 public:
-    SQLiteFile(const std::string class_id, const std::string &instance_id, Configurable *parent)
+    SavedFile(const std::string class_id, const std::string &instance_id, Configurable *parent)
         : Configurable (class_id, instance_id, parent)
     {
         registerParameter ("name", &name_, "");
     }
-    virtual ~SQLiteFile () {}
+    virtual ~SavedFile () {}
 
-    /// Returns the database server name or IP address
     const std::string &name () const { return name_; }
     void name (const std::string &name) { name_ = name; }
 

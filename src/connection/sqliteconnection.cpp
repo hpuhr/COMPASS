@@ -542,12 +542,12 @@ void SQLiteConnection::generateSubConfigurable (const std::string &class_id, con
 {
     if (class_id == "SQLiteFile")
     {
-      SQLiteFile *file = new SQLiteFile (class_id, instance_id, this);
+      SavedFile *file = new SavedFile (class_id, instance_id, this);
       assert (file_list_.count (file->name()) == 0);
-      file_list_.insert (std::pair <std::string, SQLiteFile*> (file->name(), file));
+      file_list_.insert (std::pair <std::string, SavedFile*> (file->name(), file));
     }
     else
-    throw std::runtime_error ("SQLiteConnection: generateSubConfigurable: unknown class_id "+class_id );
+        throw std::runtime_error ("SQLiteConnection: generateSubConfigurable: unknown class_id "+class_id );
 }
 
 QWidget *SQLiteConnection::widget ()

@@ -32,7 +32,7 @@
 #include <QMessageBox>
 
 SQLiteConnectionWidget::SQLiteConnectionWidget(SQLiteConnection &connection, QWidget *parent)
-    : QWidget(parent), connection_(connection), file_list_ (nullptr), add_button_(nullptr), delete_button_(nullptr), open_button_(nullptr)
+    : QWidget(parent), connection_(connection)
 {
     QFont font_bold;
     font_bold.setBold(true);
@@ -70,7 +70,7 @@ SQLiteConnectionWidget::SQLiteConnectionWidget(SQLiteConnection &connection, QWi
 
 void SQLiteConnectionWidget::addFileSlot ()
 {
-    QString filename = QFileDialog::getOpenFileName(this, tr("Open SQLite3 File"));
+    QString filename = QFileDialog::getOpenFileName(this, tr("Add SQLite3 File"));
 
     if (filename.size() > 0)
     {
@@ -83,7 +83,7 @@ void SQLiteConnectionWidget::deleteFileSlot ()
 {
     if (!file_list_->currentItem())
     {
-        QMessageBox m_warning (QMessageBox::Warning, "SQLite3 Database Open Failed",
+        QMessageBox m_warning (QMessageBox::Warning, "SQLite3 File Deletion Failed",
                                  "Please select a file in the list.",
                                  QMessageBox::Ok);
         m_warning.exec();

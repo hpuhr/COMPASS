@@ -24,17 +24,17 @@ public slots:
     void updateFileListSlot ();
 
 public:
-    explicit SQLiteConnectionWidget(SQLiteConnection &connection, QWidget *parent = 0);
+    explicit SQLiteConnectionWidget(SQLiteConnection& connection, QWidget* parent=0);
 
 protected:
-    SQLiteConnection &connection_;
+    SQLiteConnection& connection_;
 
-    QListWidget *file_list_;
+    QListWidget* file_list_ {nullptr};
 
-    QPushButton *add_button_;
-    QPushButton *delete_button_;
+    QPushButton* add_button_ {nullptr};
+    QPushButton* delete_button_ {nullptr};
 
-    QPushButton *open_button_;
+    QPushButton* open_button_ {nullptr};
 };
 
 #endif // SQLiteCONNECTIONWIDGET_H

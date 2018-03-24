@@ -9,6 +9,7 @@ class DBObjectComboBox;
 class DBOVariableSelectionWidget;
 
 class QPushButton;
+class QListWidget;
 
 class JSONImporterTaskWidget : public QWidget
 {
@@ -18,8 +19,11 @@ public slots:
     void dbObjectChangedSlot();
     void testImportSlot ();
     void importSlot ();
-    void testImportDoneSlot ();
-    void importDoneSlot ();
+    void importDoneSlot (bool test);
+
+    void addFileSlot ();
+    void deleteFileSlot ();
+    void updateFileListSlot ();
 
 public:
     JSONImporterTaskWidget(JSONImporterTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
@@ -27,11 +31,12 @@ public:
 
     void update ();
 
-    void testImport();
-    void import();
-
 protected:
     JSONImporterTask& task_;
+
+    QListWidget* file_list_ {nullptr};
+    QPushButton* add_button_ {nullptr};
+    QPushButton* delete_button_ {nullptr};
 
     DBObjectComboBox* object_box_ {nullptr};
 

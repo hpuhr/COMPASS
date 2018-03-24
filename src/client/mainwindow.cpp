@@ -235,7 +235,7 @@ void MainWindow::createMenus()
     QMenu* file_menu = menuBar()->addMenu(tr("&File"));
     file_menu->addAction(exit_action);
 
-    QAction* json_importer_task_action = new QAction(tr("Import JSON Data"), this);
+    QAction* json_importer_task_action = new QAction(tr("Import ADSBexchange JSON Data"), this);
     connect(json_importer_task_action, &QAction::triggered, this, &MainWindow::addJSONImporterTaskSlot);
 
     QAction* radar_plot_position_calculator_task_action = new QAction(
