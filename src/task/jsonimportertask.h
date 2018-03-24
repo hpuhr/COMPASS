@@ -25,7 +25,7 @@ public:
     std::string dbObjectStr() const;
     void dbObjectStr(const std::string& db_object_str);
 
-    void importFile(const std::string& filename, bool test);
+    bool importFile(const std::string& filename, bool test);
 
     const std::map <std::string, SavedFile*> &fileList () { return file_list_; }
     bool hasFile (const std::string &filename) { return file_list_.count (filename) > 0; }
