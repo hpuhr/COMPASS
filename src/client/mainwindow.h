@@ -54,6 +54,7 @@ private slots:
     void databaseOpenedSlot();
     /// @brief If database is open, switch to ManagementWidget
     void startSlot ();
+    void addJSONImporterTaskSlot ();
     void addRadarPlotPositionCalculatorTaskSlot ();
 
     /// @brief Handles key press events

@@ -22,6 +22,7 @@
 #include "configurable.h"
 
 class ATSDB;
+class JSONImporterTask;
 class RadarPlotPositionCalculatorTask;
 
 class TaskManager : public Configurable
@@ -31,6 +32,7 @@ public:
 
     virtual ~TaskManager();
 
+    JSONImporterTask* getJSONImporterTask();
     RadarPlotPositionCalculatorTask* getRadarPlotPositionCalculatorTask();
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
@@ -38,6 +40,7 @@ public:
     void shutdown ();
 
 protected:
+    JSONImporterTask* json_importer_task_ {nullptr};
     RadarPlotPositionCalculatorTask* radar_plot_position_calculator_task_ {nullptr};
 
     virtual void checkSubConfigurables ();

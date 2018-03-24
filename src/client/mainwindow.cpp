@@ -35,7 +35,6 @@
 #include <QThread>
 #include <QTabWidget>
 
-//#include "Buffer.h"
 #include "mainwindow.h"
 #include "global.h"
 #include "logger.h"
@@ -54,9 +53,9 @@
 #include "stringconv.h"
 #include "jobmanager.h"
 #include "viewmanager.h"
-//#include "ProjectionManager.h"
-//#include "ProjectionManagerWidget.h"
 #include "taskmanager.h"
+#include "jsonimportertask.h"
+#include "jsonimportertaskwidget.h"
 #include "radarplotpositioncalculatortask.h"
 #include "radarplotpositioncalculatortaskwidget.h"
 #include "files.h"
@@ -68,7 +67,8 @@ using namespace std;
 //{
 
 MainWindow::MainWindow()
-    : tab_widget_(nullptr), dbinterface_widget_(nullptr), dbschema_manager_widget_(nullptr),  object_manager_widget_ (nullptr), management_widget_(nullptr), start_button_(nullptr)
+    : tab_widget_(nullptr), dbinterface_widget_(nullptr), dbschema_manager_widget_(nullptr),
+      object_manager_widget_ (nullptr), management_widget_(nullptr), start_button_(nullptr)
 {
     logdbg  << "MainWindow: constructor";
 
@@ -186,6 +186,13 @@ void MainWindow::startSlot ()
         initAfterStart ();
 }
 
+void MainWindow::addJSONImporterTaskSlot ()
+{
+    loginf  << "MainWindow: addJSONImporterTaskSlot";
+
+    ATSDB::instance().taskManager().getJSONImporterTask()->widget()->show();
+}
+
 void MainWindow::addRadarPlotPositionCalculatorTaskSlot ()
 {
     loginf  << "MainWindow: addRadarPlotPositionCalculatorTaskSlot";
@@ -220,19 +227,24 @@ void MainWindow::createMenus()
 {
     logdbg  << "MainWindow: createMenus";
 
-    QAction *exit_action = new QAction(tr("E&xit"), this);
+    QAction* exit_action = new QAction(tr("E&xit"), this);
     exit_action->setShortcuts(QKeySequence::Quit);
     exit_action->setStatusTip(tr("Exit the application"));
     connect(exit_action, SIGNAL(triggered()), this, SLOT(close()));
 
-    QMenu *file_menu = menuBar()->addMenu(tr("&File"));
+    QMenu* file_menu = menuBar()->addMenu(tr("&File"));
     file_menu->addAction(exit_action);
 
+    QAction* json_importer_task_action = new QAction(tr("Import JSON Data"), this);
+    connect(json_importer_task_action, &QAction::triggered, this, &MainWindow::addJSONImporterTaskSlot);
 
-    QAction *radar_plot_position_calculator_task_action = new QAction(tr("Perform Radar Plot Position Calculation"), this);
-    connect(radar_plot_position_calculator_task_action, SIGNAL(triggered()), this, SLOT(addRadarPlotPositionCalculatorTaskSlot()));
+    QAction* radar_plot_position_calculator_task_action = new QAction(
+                tr("Perform Radar Plot Position Calculation"), this);
+    connect(radar_plot_position_calculator_task_action, &QAction::triggered,
+            this, &MainWindow::addRadarPlotPositionCalculatorTaskSlot);
 
     task_menu_ = menuBar()->addMenu(tr("&Task"));
+    task_menu_->addAction(json_importer_task_action);
     task_menu_->addAction(radar_plot_position_calculator_task_action);
     task_menu_->setDisabled(true);
 }

@@ -67,6 +67,11 @@ find_package ( LibArchive REQUIRED )
 message("  LibArchive_INCLUDE_DIRS: ${LibArchive_INCLUDE_DIRS}")
 message("  LibArchive_LIBRARIES: ${LibArchive_LIBRARIES}")
 
+find_package ( JSONCPP REQUIRED )
+message("  JSONCPP_INCLUDE_DIR: ${JSONCPP_INCLUDE_DIR}")
+message("  JSONCPP_LIBRARY: ${JSONCPP_LIBRARY}")
+
+
 add_library(atsdb "")
 
 message("Install path: ${CMAKE_INSTALL_PREFIX}")
@@ -108,6 +113,7 @@ include_directories (
     ${OPENSCENEGRAPH_INCLUDE_DIRS}
     ${LibArchive_INCLUDE_DIRS}
     ${EIGEN3_INCLUDE_DIR}
+    ${JSONCPP_INCLUDE_DIR}
     )
 
 link_directories(
@@ -125,7 +131,8 @@ target_link_libraries ( atsdb
     ${MYSQL_LIBRARY}
     ${GDAL_LIBRARIES}
     ${SQLITE3_LIBRARIES}
-    ${LibArchive_LIBRARIES})
+    ${LibArchive_LIBRARIES}
+    ${JSONCPP_LIBRARY})
 
 message("Installing using prefix: ${CMAKE_INSTALL_PREFIX}")
 install(DIRECTORY "conf" DESTINATION atsdb)
