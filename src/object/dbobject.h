@@ -165,6 +165,7 @@ public:
     void quitLoading ();
     void clearData ();
 
+    void insertData (std::shared_ptr<Buffer> buffer);
     void updateData (DBOVariable &key_var, std::shared_ptr<Buffer> buffer);
 
     std::map<int, std::string> loadLabelData (std::vector<int> rec_nums, int break_item_cnt);

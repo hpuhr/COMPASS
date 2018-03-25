@@ -120,8 +120,7 @@ public:
     void removeProperty (const std::string &id)
     {
         logdbg << "PropertyList: removeProperty: start";
-        if (!hasProperty(id))
-            throw std::runtime_error ("PropteryList: removeProperty: property "+id+" does not exists");
+        assert (hasProperty(id));
 
         std::vector <Property>::iterator it;
 
@@ -134,7 +133,8 @@ public:
                 return;
             }
         }
-        throw std::runtime_error("PropteryList: removeProperty: property "+id+" could not be removed");
+        logerr << "PropertyList: removeProperty: property " << id << " could not be removed";
+        assert (false);
     }
 
     /**
@@ -142,11 +142,10 @@ public:
      *
      * \exception std::runtime_error if identifier not found
      */
-    const Property &get (const std::string &id) const
+    const Property& get (const std::string& id) const
     {
         logdbg << "PropertyList: get: start";
-        if (!hasProperty(id))
-            throw std::runtime_error ("PropteryList: get: property "+id+" does not exists");
+        assert (hasProperty(id));
 
         std::vector <Property>::const_iterator it;
 
@@ -157,7 +156,8 @@ public:
                 return *it;
             }
         }
-        throw std::runtime_error("PropteryList: get: property "+id+" not found");
+        logerr << "PropertyList: get: property " << id << " not found";
+        assert (false);
     }
 
     /**
@@ -165,7 +165,7 @@ public:
      *
      * \exception std::runtime_error if identifier not found
      */
-    unsigned int getPropertyIndex (const std::string &id) const
+    unsigned int getPropertyIndex (const std::string& id) const
     {
         logdbg << "PropertyList: getPropertyIndex: start";
         if (!hasProperty(id))
@@ -174,7 +174,7 @@ public:
         unsigned int cnt=0;
         for (auto it : properties_)
         {
-            if (it.name().compare (id) == 0)
+            if (it.name() == id)
             {
                 return cnt;
             }
@@ -184,13 +184,13 @@ public:
     }
 
     /// @brief Returns flag indicating if property is in list
-    bool hasProperty (const std::string &id) const
+    bool hasProperty (const std::string& id) const
     {
         logdbg << "PropertyList: hasProperty: start";
 
         for (auto it : properties_)
         {
-            if (it.name().compare (id) == 0)
+            if (it.name() == id)
                 return true;
         }
 

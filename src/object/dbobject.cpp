@@ -38,7 +38,6 @@
 #include "dbtableinfo.h"
 #include "dbolabeldefinition.h"
 #include "dbolabeldefinitionwidget.h"
-#include "data.h"
 #include "updatebufferdbjob.h"
 
 /**
@@ -497,6 +496,11 @@ void DBObject::clearData ()
         data_ = nullptr;
 }
 
+void DBObject::insertData (std::shared_ptr<Buffer> buffer)
+{
+
+}
+
 void DBObject::updateData (DBOVariable &key_var, std::shared_ptr<Buffer> buffer)
 {
     assert (!update_job_);
@@ -572,7 +576,7 @@ std::map<int, std::string> DBObject::loadLabelData (std::vector<int> rec_nums, i
 
     assert (buffer->size() == rec_nums.size());
 
-    Utils::Data::finalizeBuffer(read_list, buffer);
+    buffer->transformVariables(read_list, true);
 
     std::map<int, std::string> labels = label_definition_->generateLabels (rec_nums, buffer, break_item_cnt);
 

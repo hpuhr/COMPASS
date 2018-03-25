@@ -213,49 +213,49 @@ bool JSONImporterTask::importFile(const std::string& filename, bool test)
     assert (longitude_var_ && longitude_var_->hasCurrentDBColumn());
     assert (tod_var_ && tod_var_->hasCurrentDBColumn());
 
-    const DBTable& main_table = db_object_->currentMetaTable().mainTable();
-    assert (main_table.hasColumn(key_var_->currentDBColumn().name()));
-    assert (main_table.hasColumn(dsid_var_->currentDBColumn().name()));
-    assert (main_table.hasColumn(target_addr_var_->currentDBColumn().name()));
-    assert (main_table.hasColumn(callsign_var_->currentDBColumn().name()));
-    assert (main_table.hasColumn(altitude_baro_var_->currentDBColumn().name()));
-    assert (main_table.hasColumn(altitude_geo_var_->currentDBColumn().name()));
-    assert (main_table.hasColumn(latitude_var_->currentDBColumn().name()));
-    assert (main_table.hasColumn(longitude_var_->currentDBColumn().name()));
-    assert (main_table.hasColumn(tod_var_->currentDBColumn().name()));
+//    const DBTable& main_table = db_object_->currentMetaTable().mainTable();
+//    assert (main_table.hasColumn(key_var_->currentDBColumn().name()));
+//    assert (main_table.hasColumn(dsid_var_->currentDBColumn().name()));
+//    assert (main_table.hasColumn(target_addr_var_->currentDBColumn().name()));
+//    assert (main_table.hasColumn(callsign_var_->currentDBColumn().name()));
+//    assert (main_table.hasColumn(altitude_baro_var_->currentDBColumn().name()));
+//    assert (main_table.hasColumn(altitude_geo_var_->currentDBColumn().name()));
+//    assert (main_table.hasColumn(latitude_var_->currentDBColumn().name()));
+//    assert (main_table.hasColumn(longitude_var_->currentDBColumn().name()));
+//    assert (main_table.hasColumn(tod_var_->currentDBColumn().name()));
 
-    const DBTableColumn& key_var_col = key_var_->currentDBColumn();
-    const DBTableColumn& dsid_var_col = dsid_var_->currentDBColumn();
-    const DBTableColumn& target_addr_var_col = target_addr_var_->currentDBColumn();
-    const DBTableColumn& callsign_var_col = callsign_var_->currentDBColumn();
-    const DBTableColumn& altitude_baro_var_col = altitude_baro_var_->currentDBColumn();
-    const DBTableColumn& altitude_geo_var_col = altitude_geo_var_->currentDBColumn();
-    const DBTableColumn& latitude_var_col = latitude_var_->currentDBColumn();
-    const DBTableColumn& longitude_var_col = longitude_var_->currentDBColumn();
-    const DBTableColumn& tod_var_col = tod_var_->currentDBColumn();
+//    const DBTableColumn& key_var_col = key_var_->currentDBColumn();
+//    const DBTableColumn& dsid_var_col = dsid_var_->currentDBColumn();
+//    const DBTableColumn& target_addr_var_col = target_addr_var_->currentDBColumn();
+//    const DBTableColumn& callsign_var_col = callsign_var_->currentDBColumn();
+//    const DBTableColumn& altitude_baro_var_col = altitude_baro_var_->currentDBColumn();
+//    const DBTableColumn& altitude_geo_var_col = altitude_geo_var_->currentDBColumn();
+//    const DBTableColumn& latitude_var_col = latitude_var_->currentDBColumn();
+//    const DBTableColumn& longitude_var_col = longitude_var_->currentDBColumn();
+//    const DBTableColumn& tod_var_col = tod_var_->currentDBColumn();
 
     PropertyList list;
-    list.addProperty(key_var_col.name(), key_var_col.propertyType());
-    list.addProperty(dsid_var_col.name(), dsid_var_col.propertyType());
-    list.addProperty(target_addr_var_col.name(), target_addr_var_col.propertyType());
-    list.addProperty(callsign_var_col.name(), callsign_var_col.propertyType());
-    list.addProperty(altitude_baro_var_col.name(), altitude_baro_var_col.propertyType());
-    list.addProperty(altitude_geo_var_col.name(), altitude_geo_var_col.propertyType());
-    list.addProperty(latitude_var_col.name(), latitude_var_col.propertyType());
-    list.addProperty(longitude_var_col.name(), longitude_var_col.propertyType());
-    list.addProperty(tod_var_col.name(), tod_var_col.propertyType());
+    list.addProperty(key_var_->name(), key_var_->dataType());
+    list.addProperty(dsid_var_->name(), dsid_var_->dataType());
+    list.addProperty(target_addr_var_->name(), target_addr_var_->dataType());
+    list.addProperty(callsign_var_->name(), callsign_var_->dataType());
+    list.addProperty(altitude_baro_var_->name(), altitude_baro_var_->dataType());
+    list.addProperty(altitude_geo_var_->name(), altitude_geo_var_->dataType());
+    list.addProperty(latitude_var_->name(), latitude_var_->dataType());
+    list.addProperty(longitude_var_->name(), longitude_var_->dataType());
+    list.addProperty(tod_var_->name(), tod_var_->dataType());
 
     std::shared_ptr<Buffer> buffer_ptr = std::shared_ptr<Buffer> (new Buffer (list, db_object_->name()));
 
-    ArrayListTemplate<int>& key_al = buffer_ptr->getInt(key_var_col.name());
-    ArrayListTemplate<int>& dsid_al = buffer_ptr->getInt(dsid_var_col.name());
-    ArrayListTemplate<int>& target_addr_al = buffer_ptr->getInt(target_addr_var_col.name());
-    ArrayListTemplate<std::string>& callsign_al = buffer_ptr->getString(callsign_var_col.name());
-    ArrayListTemplate<int>& altitude_baro_al = buffer_ptr->getInt(altitude_baro_var_col.name());
-    ArrayListTemplate<double>& altitude_geo_al = buffer_ptr->getDouble(altitude_geo_var_col.name());
-    ArrayListTemplate<double>& latitude_al = buffer_ptr->getDouble(latitude_var_col.name());
-    ArrayListTemplate<double>& longitude_al = buffer_ptr->getDouble(longitude_var_col.name());
-    ArrayListTemplate<int>& tod_al = buffer_ptr->getInt(tod_var_col.name()); // hack
+    ArrayListTemplate<int>& key_al = buffer_ptr->getInt(key_var_->name());
+    ArrayListTemplate<int>& dsid_al = buffer_ptr->getInt(dsid_var_->name());
+    ArrayListTemplate<int>& target_addr_al = buffer_ptr->getInt(target_addr_var_->name());
+    ArrayListTemplate<std::string>& callsign_al = buffer_ptr->getString(callsign_var_->name());
+    ArrayListTemplate<int>& altitude_baro_al = buffer_ptr->getInt(altitude_baro_var_->name());
+    ArrayListTemplate<double>& altitude_geo_al = buffer_ptr->getDouble(altitude_geo_var_->name());
+    ArrayListTemplate<double>& latitude_al = buffer_ptr->getDouble(latitude_var_->name());
+    ArrayListTemplate<double>& longitude_al = buffer_ptr->getDouble(longitude_var_->name());
+    ArrayListTemplate<float>& tod_al = buffer_ptr->getFloat(tod_var_->name());
 
     std::ifstream ifs(filename);
     Json::Reader reader;
@@ -393,7 +393,7 @@ bool JSONImporterTask::importFile(const std::string& filename, bool test)
                 {
                     epoch_ms = (*tr_it)["PosTime"].asLargestUInt();
                     date_time.setMSecsSinceEpoch(epoch_ms);
-                    tod = 128 * String::timeFromString(date_time.toString("hh:mm:ss.zzz").toStdString()); // HACK
+                    tod = String::timeFromString(date_time.toString("hh:mm:ss.zzz").toStdString());
                 }
 
                 //    Mlat (boolean) – True if the latitude and longitude appear to have been calculated by an MLAT
