@@ -238,21 +238,21 @@ void RadarPlotPositionCalculatorTask::checkAndSetVariable (std::string& name_str
     {
         if (!db_object_->hasVariable(name_str))
         {
-            loginf << "RadarPlotPositionCalculatorTask::checkAndSetVariable: var " << name_str << " does not exist";
+            loginf << "RadarPlotPositionCalculatorTask: checkAndSetVariable: var " << name_str << " does not exist";
             name_str = "";
             var = nullptr;
         }
         else
         {
             *var = &db_object_->variable(name_str);
-            loginf << "RadarPlotPositionCalculatorTask::checkAndSetVariable: var " << name_str << " set";
+            loginf << "RadarPlotPositionCalculatorTask: checkAndSetVariable: var " << name_str << " set";
             assert (var);
             assert((*var)->existsInDB());
         }
     }
     else
     {
-        loginf << "RadarPlotPositionCalculatorTask::checkAndSetVariable: dbobject null";
+        loginf << "RadarPlotPositionCalculatorTask: checkAndSetVariable: dbobject null";
         name_str = "";
         var = nullptr;
     }

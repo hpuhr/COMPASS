@@ -4,12 +4,19 @@
 #include "atsdb.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
+#include "dbovariable.h"
 #include "sqlitefile.h"
 #include "files.h"
 #include "stringconv.h"
+#include "metadbtable.h"
+#include "dbtable.h"
+#include "dbtablecolumn.h"
+#include "propertylist.h"
+#include "buffer.h"
 
 #include <stdexcept>
 #include <fstream>
+#include <memory>
 
 #include <QDateTime>
 
@@ -23,6 +30,16 @@ JSONImporterTask::JSONImporterTask(const std::string& class_id, const std::strin
 {
     registerParameter("last_filename", &last_filename_, "");
     registerParameter("db_object_str", &db_object_str_, "");
+
+    key_var_str_ = "rec_num";
+    dsid_var_str_ = "ds_id";
+    target_addr_var_str_ = "target_addr";
+    callsign_var_str_ = "callsign";
+    altitude_baro_var_str_ = "alt_baro_ft";
+    altitude_geo_var_str_ = "alt_geo_ft";
+    latitude_var_str_ = "pos_lat_deg";
+    longitude_var_str_ = "pos_long_deg";
+    tod_var_str_ = "tod";
 
     createSubConfigurables();
 }
@@ -102,15 +119,143 @@ void JSONImporterTask::dbObjectStr(const std::string& db_object_str)
     db_object_ = &ATSDB::instance().objectManager().object(db_object_str_);
 }
 
+bool JSONImporterTask::canImportFile (const std::string& filename)
+{
+    if (!Files::fileExists(filename))
+        return false;
+
+    if (!ATSDB::instance().objectManager().existsObject(db_object_str_))
+        return false;
+
+    DBObject& object = ATSDB::instance().objectManager().object(db_object_str_);
+
+    if (!key_var_str_.size()
+            || !dsid_var_str_.size()
+            || !target_addr_var_str_.size()
+            || !callsign_var_str_.size()
+            || !altitude_baro_var_str_.size()
+            || !altitude_geo_var_str_.size()
+            || !latitude_var_str_.size()
+            || !longitude_var_str_.size()
+            || !tod_var_str_.size())
+        return false;
+
+    if (!object.hasVariable(key_var_str_)
+            || !object.hasVariable(dsid_var_str_)
+            || !object.hasVariable(target_addr_var_str_)
+            || !object.hasVariable(callsign_var_str_)
+            || !object.hasVariable(altitude_baro_var_str_)
+            || !object.hasVariable(altitude_geo_var_str_)
+            || !object.hasVariable(latitude_var_str_)
+            || !object.hasVariable(longitude_var_str_)
+            || !object.hasVariable(tod_var_str_))
+        return false;
+
+    if (!object.variable(key_var_str_).existsInDB()
+            || !object.variable(dsid_var_str_).existsInDB()
+            || !object.variable(target_addr_var_str_).existsInDB()
+            || !object.variable(callsign_var_str_).existsInDB()
+            || !object.variable(altitude_baro_var_str_).existsInDB()
+            || !object.variable(altitude_geo_var_str_).existsInDB()
+            || !object.variable(latitude_var_str_).existsInDB()
+            || !object.variable(longitude_var_str_).existsInDB()
+            || !object.variable(tod_var_str_).existsInDB())
+        return false;
+
+    return true;
+}
+
 bool JSONImporterTask::importFile(const std::string& filename, bool test)
 {
     loginf << "JSONImporterTask: importFile: filename " << filename << " test " << test;
 
-    if (!Files::fileExists(filename))
+    if (!canImportFile(filename))
     {
-        logerr << "JSONImporterTask: importFile: filename " << filename << " does not exist";
+        logerr << "JSONImporterTask: importFile: unable to import";
         return false;
     }
+
+    if (db_object_str_.size())
+    {
+        if (!ATSDB::instance().objectManager().existsObject(db_object_str_))
+            db_object_str_="";
+        else
+            db_object_ = &ATSDB::instance().objectManager().object(db_object_str_);
+    }
+    assert (db_object_);
+
+    if (key_var_str_.size())
+        checkAndSetVariable (key_var_str_, &key_var_);
+    if (dsid_var_str_.size())
+        checkAndSetVariable (dsid_var_str_, &dsid_var_);
+    if (target_addr_var_str_.size())
+        checkAndSetVariable (target_addr_var_str_, &target_addr_var_);
+    if (callsign_var_str_.size())
+        checkAndSetVariable (callsign_var_str_, &callsign_var_);
+    if (altitude_baro_var_str_.size())
+        checkAndSetVariable (altitude_baro_var_str_, &altitude_baro_var_);
+    if (altitude_geo_var_str_.size())
+        checkAndSetVariable (altitude_geo_var_str_, &altitude_geo_var_);
+    if (latitude_var_str_.size())
+        checkAndSetVariable (latitude_var_str_, &latitude_var_);
+    if (longitude_var_str_.size())
+        checkAndSetVariable (longitude_var_str_, &longitude_var_);
+    if (tod_var_str_.size())
+        checkAndSetVariable (tod_var_str_, &tod_var_);
+
+    assert (key_var_ && key_var_->hasCurrentDBColumn());
+    assert (dsid_var_ && dsid_var_->hasCurrentDBColumn());
+    assert (target_addr_var_ && target_addr_var_->hasCurrentDBColumn());
+    assert (callsign_var_ && callsign_var_->hasCurrentDBColumn());
+    assert (altitude_baro_var_ && altitude_baro_var_->hasCurrentDBColumn());
+    assert (altitude_geo_var_ && altitude_geo_var_->hasCurrentDBColumn());
+    assert (latitude_var_ && latitude_var_->hasCurrentDBColumn());
+    assert (longitude_var_ && longitude_var_->hasCurrentDBColumn());
+    assert (tod_var_ && tod_var_->hasCurrentDBColumn());
+
+    const DBTable& main_table = db_object_->currentMetaTable().mainTable();
+    assert (main_table.hasColumn(key_var_->currentDBColumn().name()));
+    assert (main_table.hasColumn(dsid_var_->currentDBColumn().name()));
+    assert (main_table.hasColumn(target_addr_var_->currentDBColumn().name()));
+    assert (main_table.hasColumn(callsign_var_->currentDBColumn().name()));
+    assert (main_table.hasColumn(altitude_baro_var_->currentDBColumn().name()));
+    assert (main_table.hasColumn(altitude_geo_var_->currentDBColumn().name()));
+    assert (main_table.hasColumn(latitude_var_->currentDBColumn().name()));
+    assert (main_table.hasColumn(longitude_var_->currentDBColumn().name()));
+    assert (main_table.hasColumn(tod_var_->currentDBColumn().name()));
+
+    const DBTableColumn& key_var_col = key_var_->currentDBColumn();
+    const DBTableColumn& dsid_var_col = dsid_var_->currentDBColumn();
+    const DBTableColumn& target_addr_var_col = target_addr_var_->currentDBColumn();
+    const DBTableColumn& callsign_var_col = callsign_var_->currentDBColumn();
+    const DBTableColumn& altitude_baro_var_col = altitude_baro_var_->currentDBColumn();
+    const DBTableColumn& altitude_geo_var_col = altitude_geo_var_->currentDBColumn();
+    const DBTableColumn& latitude_var_col = latitude_var_->currentDBColumn();
+    const DBTableColumn& longitude_var_col = longitude_var_->currentDBColumn();
+    const DBTableColumn& tod_var_col = tod_var_->currentDBColumn();
+
+    PropertyList list;
+    list.addProperty(key_var_col.name(), key_var_col.propertyType());
+    list.addProperty(dsid_var_col.name(), dsid_var_col.propertyType());
+    list.addProperty(target_addr_var_col.name(), target_addr_var_col.propertyType());
+    list.addProperty(callsign_var_col.name(), callsign_var_col.propertyType());
+    list.addProperty(altitude_baro_var_col.name(), altitude_baro_var_col.propertyType());
+    list.addProperty(altitude_geo_var_col.name(), altitude_geo_var_col.propertyType());
+    list.addProperty(latitude_var_col.name(), latitude_var_col.propertyType());
+    list.addProperty(longitude_var_col.name(), longitude_var_col.propertyType());
+    list.addProperty(tod_var_col.name(), tod_var_col.propertyType());
+
+    std::shared_ptr<Buffer> buffer_ptr = std::shared_ptr<Buffer> (new Buffer (list, db_object_->name()));
+
+    ArrayListTemplate<int>& key_al = buffer_ptr->getInt(key_var_col.name());
+    ArrayListTemplate<int>& dsid_al = buffer_ptr->getInt(dsid_var_col.name());
+    ArrayListTemplate<int>& target_addr_al = buffer_ptr->getInt(target_addr_var_col.name());
+    ArrayListTemplate<std::string>& callsign_al = buffer_ptr->getString(callsign_var_col.name());
+    ArrayListTemplate<int>& altitude_baro_al = buffer_ptr->getInt(altitude_baro_var_col.name());
+    ArrayListTemplate<double>& altitude_geo_al = buffer_ptr->getDouble(altitude_geo_var_col.name());
+    ArrayListTemplate<double>& latitude_al = buffer_ptr->getDouble(latitude_var_col.name());
+    ArrayListTemplate<double>& longitude_al = buffer_ptr->getDouble(longitude_var_col.name());
+    ArrayListTemplate<int>& tod_al = buffer_ptr->getInt(tod_var_col.name()); // hack
 
     std::ifstream ifs(filename);
     Json::Reader reader;
@@ -133,6 +278,7 @@ bool JSONImporterTask::importFile(const std::string& filename, bool test)
     bool time_valid;
     unsigned long epoch_ms;
     QDateTime date_time;
+    double tod;
 
     unsigned int skipped = 0;
     unsigned int inserted = 0;
@@ -247,6 +393,7 @@ bool JSONImporterTask::importFile(const std::string& filename, bool test)
                 {
                     epoch_ms = (*tr_it)["PosTime"].asLargestUInt();
                     date_time.setMSecsSinceEpoch(epoch_ms);
+                    tod = 128 * String::timeFromString(date_time.toString("hh:mm:ss.zzz").toStdString()); // HACK
                 }
 
                 //    Mlat (boolean) – True if the latitude and longitude appear to have been calculated by an MLAT
@@ -417,10 +564,23 @@ bool JSONImporterTask::importFile(const std::string& filename, bool test)
                            << " cs " << (callsign_valid ? callsign : "NULL")
                            << " alt_baro " << (altitude_baro_valid ? std::to_string(altitude_baro_ft) : "NULL")
                            << " alt_geo " << (altitude_geo_valid ? std::to_string(altitude_geo_ft) : "NULL")
-                           << " lat " << (latitude_valid ? std::to_string(latitude_deg) : "NULL")
-                           << " lon " << (longitude_valid ? std::to_string(longitude_deg) : "NULL")
-                           << " dt " << (time_valid ? date_time.toString("yyyy.MM.dd hh:mm:ss.zzz").toStdString()
-                                                    : "NULL");
+                           << " lat " << std::to_string(latitude_deg)
+                           << " lon " << std::to_string(longitude_deg)
+                           << " dt " << date_time.toString("yyyy.MM.dd hh:mm:ss.zzz").toStdString();
+
+                    key_al.set(inserted, rec_num);
+                    dsid_al.set(inserted, receiver);
+                    target_addr_al.set(inserted, target_address);
+                    if (callsign_valid)
+                        callsign_al.set(inserted, callsign);
+                    if (altitude_baro_valid)
+                        altitude_baro_al.set(inserted, altitude_baro_ft);
+                    if (altitude_geo_valid)
+                        altitude_geo_al.set(inserted, altitude_geo_ft);
+                    latitude_al.set(inserted, latitude_deg);
+                    longitude_al.set(inserted, longitude_deg);
+                    tod_al.set(inserted, (int) tod);
+
                     inserted++;
                 }
                 else
@@ -430,6 +590,8 @@ bool JSONImporterTask::importFile(const std::string& filename, bool test)
             }
         }
     }
+    assert (buffer_ptr->size() == inserted);
+
     if (rec_num != 0)
         loginf << "JSONImporterTask: importFile: all " << rec_num
                << " inserted " << inserted << " (" << String::percentToString(100.0 * inserted/rec_num) << "%)"
@@ -437,14 +599,32 @@ bool JSONImporterTask::importFile(const std::string& filename, bool test)
     else
         loginf << "JSONImporterTask: importFile: all "<< rec_num << " inserted " << inserted << " skipped " << skipped;
 
-    //    cout << "Book: " << obj["book"].asString() << endl;
-    //    cout << "Year: " << obj["year"].asUInt() << endl;
-    //    const Json::Value& characters = obj["characters"]; // array of characters
-    //    for (int i = 0; i < characters.size(); i++)
-    //    {
-    //        cout << "    name: " << characters[i]["name"].asString();
-    //        cout << " chapter: " << characters[i]["chapter"].asUInt();
-    //    }
-
     return true;
+}
+
+void JSONImporterTask::checkAndSetVariable (std::string& name_str, DBOVariable** var)
+{
+    // TODO rework to only asserting, check must be done before
+    if (db_object_)
+    {
+        if (!db_object_->hasVariable(name_str))
+        {
+            loginf << "JSONImporterTask: checkAndSetVariable: var " << name_str << " does not exist";
+            name_str = "";
+            var = nullptr;
+        }
+        else
+        {
+            *var = &db_object_->variable(name_str);
+            loginf << "JSONImporterTask: checkAndSetVariable: var " << name_str << " set";
+            assert (var);
+            assert((*var)->existsInDB());
+        }
+    }
+    else
+    {
+        loginf << "JSONImporterTask: checkAndSetVariable: dbobject null";
+        name_str = "";
+        var = nullptr;
+    }
 }
