@@ -642,7 +642,7 @@ bool Buffer::isNone (const Property& property, unsigned int row_cnt)
 
 }
 
-void Buffer::transformVariables (DBOVariableSet& list, bool prop2dbovar)
+void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
 {
     std::vector <DBOVariable*> &variables = list.getSet ();
 
@@ -653,9 +653,25 @@ void Buffer::transformVariables (DBOVariableSet& list, bool prop2dbovar)
         assert (var_it->hasCurrentDBColumn());
         const DBTableColumn &column = var_it->currentDBColumn ();
 
-        assert (properties_.hasProperty(column.name()));
-        const Property &property = properties_.get(column.name());
-        assert (property.dataType() == var_it->dataType());
+        PropertyDataType data_type = var_it->dataType();
+
+        std::string current_var_name;
+        std::string transformed_var_name;
+
+        if (tc2dbovar)
+        {
+            assert (properties_.hasProperty(column.name()));
+            assert (properties_.get(column.name()).dataType() == var_it->dataType());
+            current_var_name = column.name();
+            transformed_var_name = var_it->name();
+        }
+        else
+        {
+            assert (properties_.hasProperty(var_it->name()));
+            assert (properties_.get(var_it->name()).dataType() == column.propertyType());
+            current_var_name = var_it->name();
+            transformed_var_name = column.name();
+        }
 
         if (column.dimension() != var_it->dimension())
             logwrn << "Buffer: transformVariables:: variable " << var_it->name()
@@ -668,19 +684,19 @@ void Buffer::transformVariables (DBOVariableSet& list, bool prop2dbovar)
             const Dimension &dimension = UnitManager::instance().dimension (var_it->dimension());
             double factor;
 
-            if (prop2dbovar)
+            if (tc2dbovar)
                 factor = dimension.getFactor (column.unit(), var_it->unit());
             else
                 factor = dimension.getFactor (var_it->unit(), column.unit());
 
             logdbg  << "Buffer: transformVariables: correct unit transformation with factor " << factor;
 
-            switch (property.dataType())
+            switch (data_type)
             {
             case PropertyDataType::BOOL:
             {
-                assert (hasBool(property.name()));
-                ArrayListTemplate<bool> &array_list = getBool(property.name());
+                assert (hasBool(current_var_name));
+                ArrayListTemplate<bool> &array_list = getBool(current_var_name);
                 logwrn << "Buffer: transformVariables: double multiplication of boolean variable "
                        << var_it->name();
                 array_list *= factor;
@@ -688,8 +704,8 @@ void Buffer::transformVariables (DBOVariableSet& list, bool prop2dbovar)
             }
             case PropertyDataType::CHAR:
             {
-                assert (hasChar(property.name()));
-                ArrayListTemplate<char> &array_list = getChar (property.name());
+                assert (hasChar(current_var_name));
+                ArrayListTemplate<char> &array_list = getChar (current_var_name);
                 logwrn << "Buffer: transformVariables: double multiplication of char variable "
                        << var_it->name();
                 array_list *= factor;
@@ -697,8 +713,8 @@ void Buffer::transformVariables (DBOVariableSet& list, bool prop2dbovar)
             }
             case PropertyDataType::UCHAR:
             {
-                assert (hasUChar(property.name()));
-                ArrayListTemplate<unsigned char> &array_list = getUChar (property.name());
+                assert (hasUChar(current_var_name));
+                ArrayListTemplate<unsigned char> &array_list = getUChar (current_var_name);
                 logwrn << "Buffer: transformVariables: double multiplication of unsigned char variable "
                        << var_it->name();
                 array_list *= factor;
@@ -706,43 +722,43 @@ void Buffer::transformVariables (DBOVariableSet& list, bool prop2dbovar)
             }
             case PropertyDataType::INT:
             {
-                assert (hasInt(property.name()));
-                ArrayListTemplate<int> &array_list = getInt (property.name());
+                assert (hasInt(current_var_name));
+                ArrayListTemplate<int> &array_list = getInt (current_var_name);
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::UINT:
             {
-                assert (hasUInt(property.name()));
-                ArrayListTemplate<unsigned int> &array_list = getUInt (property.name());
+                assert (hasUInt(current_var_name));
+                ArrayListTemplate<unsigned int> &array_list = getUInt (current_var_name);
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::LONGINT:
             {
-                assert (hasLongInt(property.name()));
-                ArrayListTemplate<long> &array_list = getLongInt(property.name());
+                assert (hasLongInt(current_var_name));
+                ArrayListTemplate<long> &array_list = getLongInt(current_var_name);
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::ULONGINT:
             {
-                assert (hasULongInt(property.name()));
-                ArrayListTemplate<unsigned long> &array_list = getULongInt(property.name());
+                assert (hasULongInt(current_var_name));
+                ArrayListTemplate<unsigned long> &array_list = getULongInt(current_var_name);
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::FLOAT:
             {
-                assert (hasFloat(property.name()));
-                ArrayListTemplate<float> &array_list = getFloat(property.name());
+                assert (hasFloat(current_var_name));
+                ArrayListTemplate<float> &array_list = getFloat(current_var_name);
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::DOUBLE:
             {
-                assert (hasDouble(property.name()));
-                ArrayListTemplate<double> &array_list = getDouble(property.name());
+                assert (hasDouble(current_var_name));
+                ArrayListTemplate<double> &array_list = getDouble(current_var_name);
                 array_list *= factor;
                 break;
             }
@@ -752,89 +768,75 @@ void Buffer::transformVariables (DBOVariableSet& list, bool prop2dbovar)
                 break;
             default:
                 logerr  <<  "Buffer: transformVariables: unknown property type "
-                         << Property::asString(property.dataType());
+                         << Property::asString(data_type);
                 throw std::runtime_error ("Buffer: transformVariables: unknown property type "
-                                          + Property::asString(property.dataType()));
+                                          + Property::asString(data_type));
             }
         }
 
         // rename to reflect dbo variable
-        if (property.name() != var_it->name())
+        if (current_var_name != transformed_var_name)
         {
-            logdbg << "Buffer: transformVariables: renaming property " << property.name()
-                   << " to dbo variable name " << var_it->name();
+            logdbg << "Buffer: transformVariables: renaming variable " << current_var_name
+                   << " to variable name " << transformed_var_name;
 
-            std::string current_name;
-            std::string new_name;
-
-            if (prop2dbovar)
-            {
-                current_name = property.name();
-                new_name = var_it->name();
-            }
-            else
-            {
-                current_name = var_it->name();
-                new_name = property.name();
-            }
-
-            switch (property.dataType())
+            switch (data_type)
             {
             case PropertyDataType::BOOL:
             {
-                renameBool (current_name, new_name);
+                renameBool (current_var_name, transformed_var_name);
                 break;
             }
             case PropertyDataType::CHAR:
             {
-                renameChar (current_name, new_name);
+                renameChar (current_var_name, transformed_var_name);
                 break;
             }
             case PropertyDataType::UCHAR:
             {
-                renameUChar (current_name, new_name);
+                renameUChar (current_var_name, transformed_var_name);
                 break;
             }
             case PropertyDataType::INT:
             {
-                renameInt (current_name, new_name);
+                renameInt (current_var_name, transformed_var_name);
                 break;
             }
             case PropertyDataType::UINT:
             {
-                renameUInt (current_name, new_name);
+                renameUInt (current_var_name, transformed_var_name);
                 break;
             }
             case PropertyDataType::LONGINT:
             {
-                renameLongInt (current_name, new_name);
+                renameLongInt (current_var_name, transformed_var_name);
                 break;
             }
             case PropertyDataType::ULONGINT:
             {
-                renameULongInt (current_name, new_name);
+                renameULongInt (current_var_name, transformed_var_name);
                 break;
             }
             case PropertyDataType::FLOAT:
             {
-                renameFloat (current_name, new_name);
+                renameFloat (current_var_name, transformed_var_name);
                 break;
             }
             case PropertyDataType::DOUBLE:
             {
-                renameDouble (current_name, new_name);
+                renameDouble (current_var_name, transformed_var_name);
                 break;
             }
             case PropertyDataType::STRING:
             {
-                renameString (current_name, new_name);
+                renameString (current_var_name, transformed_var_name);
                 break;
             }
             default:
                 logerr  <<  "Buffer: transformVariables: unknown property type "
-                         << Property::asString(property.dataType());
+                         << Property::asString(data_type);
                 throw std::runtime_error ("Buffer: transformVariables: unknown property type "
-                                          + Property::asString(property.dataType()));
+                                          + Property::asString(data_type));
             }
         }
     }

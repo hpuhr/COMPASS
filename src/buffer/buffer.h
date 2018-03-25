@@ -120,7 +120,7 @@ public:
 
     bool isNone (const Property& property, unsigned int row_cnt);
 
-    void transformVariables (DBOVariableSet& list, bool prop2dbovar); // prop2dbovar true for db->dbo, false dbo->db
+    void transformVariables (DBOVariableSet& list, bool tc2dbovar); // tc2dbovar true for db->dbo, false dbo->db
 
 protected:
     /// Unique buffer id, copied when getting shallow copies

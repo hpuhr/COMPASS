@@ -440,14 +440,14 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
     unsigned int read_size = read_buffer->size();
     assert (read_size);
 
-    std::string latitude_var_dbname = latitude_var_->currentDBColumn().name();
-    std::string longitude_var_dbname = longitude_var_->currentDBColumn().name();
-    std::string keyvar_var_dbname = key_var_->currentDBColumn().name();
+//    std::string latitude_var_dbname = latitude_var_->currentDBColumn().name();
+//    std::string longitude_var_dbname = longitude_var_->currentDBColumn().name();
+//    std::string keyvar_var_dbname = key_var_->currentDBColumn().name();
 
     PropertyList update_buffer_list;
-    update_buffer_list.addProperty(latitude_var_dbname, PropertyDataType::DOUBLE);
-    update_buffer_list.addProperty(longitude_var_dbname, PropertyDataType::DOUBLE);
-    update_buffer_list.addProperty(keyvar_var_dbname, PropertyDataType::INT);
+    update_buffer_list.addProperty(latitude_var_str_, PropertyDataType::DOUBLE);
+    update_buffer_list.addProperty(longitude_var_str_, PropertyDataType::DOUBLE);
+    update_buffer_list.addProperty(key_var_str_, PropertyDataType::INT);
 
     std::shared_ptr<Buffer> update_buffer = std::shared_ptr<Buffer> (new Buffer (update_buffer_list,db_object_->name()));
 
@@ -603,9 +603,9 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
             continue;
         }
 
-        update_buffer->getDouble(latitude_var_dbname).set(update_cnt, lat);
-        update_buffer->getDouble(longitude_var_dbname).set(update_cnt, lon);
-        update_buffer->getInt(keyvar_var_dbname).set(update_cnt, rec_num);
+        update_buffer->getDouble(latitude_var_str_).set(update_cnt, lat);
+        update_buffer->getDouble(longitude_var_str_).set(update_cnt, lon);
+        update_buffer->getInt(key_var_str_).set(update_cnt, rec_num);
         update_cnt++;
 
         //loginf << "uga cnt " << update_cnt << " rec_num " << rec_num << " lat " << lat << " long " << lon;
@@ -644,7 +644,12 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
     msg_box_->setStandardButtons(QMessageBox::NoButton);
     msg_box_->show();
 
-    db_object_->updateData(*key_var_, update_buffer);
+    DBOVariableSet list;
+    list.add(*latitude_var_);
+    list.add(*longitude_var_);
+    list.add(*key_var_);
+
+    db_object_->updateData(*key_var_, list, update_buffer);
 
     connect (db_object_, SIGNAL(updateDoneSignal(DBObject&)), this, SLOT(updateDoneSlot(DBObject&)));
     connect (db_object_, SIGNAL(updateProgressSignal(float)), this, SLOT(updateProgressSlot(float)));

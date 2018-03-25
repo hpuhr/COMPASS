@@ -496,18 +496,20 @@ void DBObject::clearData ()
         data_ = nullptr;
 }
 
-void DBObject::insertData (std::shared_ptr<Buffer> buffer)
+void DBObject::insertData (DBOVariableSet& list, std::shared_ptr<Buffer> buffer)
 {
 
 }
 
-void DBObject::updateData (DBOVariable &key_var, std::shared_ptr<Buffer> buffer)
+void DBObject::updateData (DBOVariable &key_var, DBOVariableSet& list, std::shared_ptr<Buffer> buffer)
 {
     assert (!update_job_);
 
     assert (existsInDB());
     assert (key_var.existsInDB());
-    assert (ATSDB::instance().interface().checkUpdateBuffer(*this, key_var, buffer));
+    assert (ATSDB::instance().interface().checkUpdateBuffer(*this, key_var, list, buffer));
+
+    buffer->transformVariables(list, false); // back again
 
     update_job_ = std::shared_ptr<UpdateBufferDBJob> (new UpdateBufferDBJob(ATSDB::instance().interface(),
                                                                             *this, key_var, buffer));

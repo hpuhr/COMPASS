@@ -834,7 +834,8 @@ std::set<int> DBInterface::getActiveDataSources (const DBObject &object)
 //    buffer_writer_->write (data, table_name);
 //}
 
-bool DBInterface::checkUpdateBuffer (DBObject &object, DBOVariable &key_var, std::shared_ptr<Buffer> buffer)
+bool DBInterface::checkUpdateBuffer (DBObject &object, DBOVariable &key_var, DBOVariableSet& list,
+                                     std::shared_ptr<Buffer> buffer)
 {
     if (!object.existsInDB())
         return false;
@@ -849,14 +850,29 @@ bool DBInterface::checkUpdateBuffer (DBObject &object, DBOVariable &key_var, std
 
     const PropertyList &properties = buffer->properties();
 
-    for (unsigned int cnt=0; cnt < properties.size(); cnt++)
+    for (auto& var_it : list.getSet())
     {
-        if (!table.hasColumn(properties.at(cnt).name()))
+        if (!properties.hasProperty(var_it->name()))
             return false;
 
-        if (!table.column(properties.at(cnt).name()).existsInDB())
+        if (!var_it->hasCurrentDBColumn())
             return false;
+
+        const DBTableColumn& col = var_it->currentDBColumn ();
+
+        if (!col.existsInDB())
+            return false;
+
     }
+
+//    for (unsigned int cnt=0; cnt < properties.size(); cnt++)
+//    {
+//        if (!table.hasColumn(properties.at(cnt).name()))
+//            return false;
+
+//        if (!table.column(properties.at(cnt).name()).existsInDB())
+//            return false;
+//    }
 
     return true;
 }
@@ -864,7 +880,7 @@ bool DBInterface::checkUpdateBuffer (DBObject &object, DBOVariable &key_var, std
 void DBInterface::updateBuffer (DBObject& object, DBOVariable& key_var, std::shared_ptr<Buffer> buffer,
                                 size_t from_index, size_t to_index)
 {
-    assert (checkUpdateBuffer(object, key_var, buffer));
+    //assert (checkUpdateBuffer(object, key_var, buffer));
     assert (current_connection_);
     assert (buffer);
 
