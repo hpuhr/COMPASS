@@ -368,8 +368,8 @@ void RadarPlotPositionCalculatorTask::calculate ()
     read_set.add(*latitude_var_);
     read_set.add(*longitude_var_);
 
-    connect (db_object_, SIGNAL(newDataSignal(DBObject&)), this, SLOT(newDataSlot(DBObject&)));
-    connect (db_object_, SIGNAL(loadingDoneSignal(DBObject&)), this, SLOT(loadingDoneSlot(DBObject&)));
+    connect (db_object_, &DBObject::newDataSignal, this, &RadarPlotPositionCalculatorTask::newDataSlot);
+    connect (db_object_, &DBObject::loadingDoneSignal, this, &RadarPlotPositionCalculatorTask::loadingDoneSlot);
 
     db_object_->load (read_set, false, false, nullptr, false); //"0,100000"
 }
@@ -449,7 +449,8 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
     update_buffer_list.addProperty(longitude_var_str_, PropertyDataType::DOUBLE);
     update_buffer_list.addProperty(key_var_str_, PropertyDataType::INT);
 
-    std::shared_ptr<Buffer> update_buffer = std::shared_ptr<Buffer> (new Buffer (update_buffer_list,db_object_->name()));
+    std::shared_ptr<Buffer> update_buffer = std::shared_ptr<Buffer> (new Buffer (
+                                                                         update_buffer_list,db_object_->name()));
 
     int rec_num;
     int sensor_id;
@@ -651,8 +652,8 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
 
     db_object_->updateData(*key_var_, list, update_buffer);
 
-    connect (db_object_, SIGNAL(updateDoneSignal(DBObject&)), this, SLOT(updateDoneSlot(DBObject&)));
-    connect (db_object_, SIGNAL(updateProgressSignal(float)), this, SLOT(updateProgressSlot(float)));
+    connect (db_object_, &DBObject::updateDoneSignal, this, &RadarPlotPositionCalculatorTask::updateDoneSlot);
+    connect (db_object_, &DBObject::updateProgressSignal, this, &RadarPlotPositionCalculatorTask::updateProgressSlot);
 
     calculated_ = true;
     loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: end";
@@ -671,8 +672,9 @@ void RadarPlotPositionCalculatorTask::updateDoneSlot (DBObject& object)
 {
     loginf << "RadarPlotPositionCalculatorTask: updateDoneSlot";
 
-    disconnect (db_object_, SIGNAL(updateDoneSignal(DBObject&)), this, SLOT(updateDoneSlot(DBObject&)));
-    disconnect (db_object_, SIGNAL(updateProgressSignal(float)), this, SLOT(updateProgressSlot(float)));
+    disconnect (db_object_, &DBObject::updateDoneSignal, this, &RadarPlotPositionCalculatorTask::updateDoneSlot);
+    disconnect (db_object_, &DBObject::updateProgressSignal, this,
+                &RadarPlotPositionCalculatorTask::updateProgressSlot);
 
     assert (msg_box_);
     msg_box_->close();

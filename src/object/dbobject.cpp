@@ -38,6 +38,7 @@
 #include "dbtableinfo.h"
 #include "dbolabeldefinition.h"
 #include "dbolabeldefinitionwidget.h"
+#include "insertbufferdbjob.h"
 #include "updatebufferdbjob.h"
 
 /**
@@ -498,7 +499,34 @@ void DBObject::clearData ()
 
 void DBObject::insertData (DBOVariableSet& list, std::shared_ptr<Buffer> buffer)
 {
+    assert (!insert_job_);
 
+    assert (existsInDB());
+    //assert (key_var.existsInDB());
+    //assert (ATSDB::instance().interface().checkUpdateBuffer(*this, key_var, list, buffer));
+
+    buffer->transformVariables(list, false); // back again
+
+    insert_job_ = std::shared_ptr<InsertBufferDBJob> (new InsertBufferDBJob(ATSDB::instance().interface(),
+                                                                            *this, buffer));
+
+    connect (insert_job_.get(), &InsertBufferDBJob::doneSignal, this, &DBObject::insertDoneSlot, Qt::QueuedConnection);
+    connect (insert_job_.get(), &InsertBufferDBJob::insertProgressSignal, this, &DBObject::insertProgressSlot,
+             Qt::QueuedConnection);
+
+    JobManager::instance().addDBJob(insert_job_);
+}
+
+void DBObject::insertProgressSlot (float percent)
+{
+    emit insertProgressSignal(percent);
+}
+
+void DBObject::insertDoneSlot ()
+{
+    insert_job_ = nullptr;
+
+    emit insertDoneSignal (*this);
 }
 
 void DBObject::updateData (DBOVariable &key_var, DBOVariableSet& list, std::shared_ptr<Buffer> buffer)
@@ -514,8 +542,8 @@ void DBObject::updateData (DBOVariable &key_var, DBOVariableSet& list, std::shar
     update_job_ = std::shared_ptr<UpdateBufferDBJob> (new UpdateBufferDBJob(ATSDB::instance().interface(),
                                                                             *this, key_var, buffer));
 
-    connect (update_job_.get(), SIGNAL(doneSignal()), this, SLOT(updateDoneSlot()), Qt::QueuedConnection);
-    connect (update_job_.get(), SIGNAL(updateProgressSignal(float)), this, SLOT(updateProgressSlot(float)),
+    connect (update_job_.get(), &UpdateBufferDBJob::doneSignal, this, &DBObject::updateDoneSlot, Qt::QueuedConnection);
+    connect (update_job_.get(), &UpdateBufferDBJob::updateProgressSignal, this, &DBObject::updateProgressSlot,
              Qt::QueuedConnection);
 
     JobManager::instance().addDBJob(update_job_);

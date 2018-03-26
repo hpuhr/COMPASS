@@ -834,6 +834,43 @@ std::set<int> DBInterface::getActiveDataSources (const DBObject &object)
 //    buffer_writer_->write (data, table_name);
 //}
 
+void DBInterface::insertBuffer (DBObject& object, std::shared_ptr<Buffer> buffer, size_t from_index, size_t to_index)
+{
+    //assert (checkUpdateBuffer(object, key_var, buffer));
+    assert (current_connection_);
+    assert (buffer);
+
+    const DBTable& table = object.currentMetaTable().mainTable();
+
+    const PropertyList &properties = buffer->properties();
+
+    for (unsigned int cnt=0; cnt < properties.size(); cnt++)
+    {
+        if (!table.hasColumn(properties.at(cnt).name()))
+            throw std::runtime_error ("DBInterface: insertBuffer: column '"+properties.at(cnt).name()
+                                      +"' does not exist in table "+table.name());
+    }
+
+    std::string bind_statement = sql_generator_.insertDBUpdateStringBind(buffer, object, table.name());
+
+    QMutexLocker locker(&connection_mutex_);
+
+    logdbg  << "DBInterface: insertBuffer: preparing bind statement";
+    current_connection_->prepareBindStatement(bind_statement);
+    current_connection_->beginBindTransaction();
+
+    logdbg  << "DBInterface: insertBuffer: starting inserts";
+    for (unsigned int cnt=from_index; cnt <= to_index; cnt++)
+    {
+        insertBindStatementUpdateForCurrentIndex(buffer, cnt);
+    }
+
+    logdbg  << "DBInterface: insertBuffer: ending bind transactions";
+    current_connection_->endBindTransaction();
+    logdbg  << "DBInterface: insertBuffer: finalizing bind statement";
+    current_connection_->finalizeBindStatement();
+}
+
 bool DBInterface::checkUpdateBuffer (DBObject &object, DBOVariable &key_var, DBOVariableSet& list,
                                      std::shared_ptr<Buffer> buffer)
 {
@@ -1048,7 +1085,7 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex (std::shared_ptr<Buff
                 << property.name();
 
         if (connection_type == SQLITE_IDENTIFIER)
-            index_cnt=cnt+2;
+            index_cnt=cnt+1;
         else if (connection_type == MYSQL_IDENTIFIER)
             index_cnt=cnt+1;
         else

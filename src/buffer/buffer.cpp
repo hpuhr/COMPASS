@@ -644,6 +644,7 @@ bool Buffer::isNone (const Property& property, unsigned int row_cnt)
 
 void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
 {
+    // TODO add proper data type conversion
     std::vector <DBOVariable*> &variables = list.getSet ();
 
     for (auto var_it : variables)
@@ -661,6 +662,7 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
         if (tc2dbovar)
         {
             assert (properties_.hasProperty(column.name()));
+            // TODO HACK should be column data type
             assert (properties_.get(column.name()).dataType() == var_it->dataType());
             current_var_name = column.name();
             transformed_var_name = var_it->name();
@@ -668,7 +670,11 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
         else
         {
             assert (properties_.hasProperty(var_it->name()));
-            assert (properties_.get(var_it->name()).dataType() == column.propertyType());
+            loginf << "Buffer: transformVariables: var " << var_it->name() << " prop dt "
+                   << Property::asString(properties_.get(var_it->name()).dataType()) << " col dt "
+                   << Property::asString(column.propertyType());
+            // TODO HACK
+            //assert (properties_.get(var_it->name()).dataType() == column.propertyType());
             current_var_name = var_it->name();
             transformed_var_name = column.name();
         }

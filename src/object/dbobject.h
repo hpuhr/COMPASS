@@ -66,6 +66,7 @@ class DBObjectInfoWidget;
 class Buffer;
 class Job;
 class DBOReadDBJob;
+class InsertBufferDBJob;
 class UpdateBufferDBJob;
 class FinalizeDBOReadJob;
 class DBOVariableSet;
@@ -106,6 +107,9 @@ signals:
     void newDataSignal (DBObject& object);
     void loadingDoneSignal (DBObject& object);
 
+    void insertProgressSignal (float percent);
+    void insertDoneSignal (DBObject& object);
+
     void updateProgressSignal (float percent);
     void updateDoneSignal (DBObject& object);
 
@@ -118,6 +122,9 @@ public slots:
     void readJobObsoleteSlot ();
     void readJobDoneSlot();
     void finalizeReadJobDoneSlot();
+
+    void insertProgressSlot (float percent);
+    void insertDoneSlot ();
 
     void updateProgressSlot (float percent);
     void updateDoneSlot ();
@@ -246,6 +253,7 @@ protected:
     std::vector <std::shared_ptr<Buffer>> read_job_data_;
     std::vector <std::shared_ptr <FinalizeDBOReadJob>> finalize_jobs_;
 
+    std::shared_ptr <InsertBufferDBJob> insert_job_ {nullptr};
     std::shared_ptr <UpdateBufferDBJob> update_job_ {nullptr};
 
     std::shared_ptr<Buffer> data_;

@@ -47,9 +47,11 @@ public:
     virtual ~SQLGenerator();
 
     /// @brief Returns statement to bind variables for buffer contents
+    std::string insertDBUpdateStringBind(std::shared_ptr<Buffer> buffer, DBObject &object, std::string tablename);
 //    std::string createDBInsertStringBind(Buffer *buffer, const std::string &tablename);
     /// @brief Returns statement to bind variables for buffer contents
-    std::string createDBUpdateStringBind(std::shared_ptr<Buffer> buffer, DBObject &object, DBOVariable &key_var, std::string tablename);
+    std::string createDBUpdateStringBind(std::shared_ptr<Buffer> buffer, DBObject &object, DBOVariable &key_var,
+                                         std::string tablename);
 //    /// @brief Returns statement to create table for buffer contents
 //    std::string createDBCreateString (Buffer *buffer, const std::string &tablename);
 

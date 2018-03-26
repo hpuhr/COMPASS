@@ -14,6 +14,10 @@ class DBOVariable;
 class JSONImporterTask : public QObject, public Configurable
 {
         Q_OBJECT
+public slots:
+    void insertProgressSlot (float percent);
+    void insertDoneSlot (DBObject& object);
+
 public:
     JSONImporterTask(const std::string& class_id, const std::string& instance_id,
                      TaskManager* task_manager);

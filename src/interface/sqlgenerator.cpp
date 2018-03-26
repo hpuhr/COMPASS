@@ -437,7 +437,8 @@ std::string SQLGenerator::getInsertPropertyStatement (const std::string &id, con
 {
     stringstream ss;
     assert (id.size() < 255);
-    assert (value.size() < 1701);
+    if (value.size() > 1000)
+        logwrn << "SQLGenerator: getInsertPropertyStatement: value size very large (" << value.size() << ")";
 
     // REPLACE into table (id, name, age) values(1, "A", 19)
     ss << "REPLACE INTO " << TABLE_NAME_PROPERTIES << " VALUES ('" << id <<"', '" << value <<"');";
@@ -551,6 +552,56 @@ std::string SQLGenerator::getTablePropertiesCreateStatement ()
 
 //    return ss.str();
 //}
+
+std::string SQLGenerator::insertDBUpdateStringBind(std::shared_ptr<Buffer> buffer, DBObject &object,
+                                                   std::string tablename)
+{
+    assert (buffer);
+    //assert (object.existsInDB());
+    //assert (key_var.existsInDB());
+    assert (tablename.size() > 0);
+
+    const std::vector <Property> &properties = buffer->properties().properties();
+
+    // INSERT INTO table_name (column1, column2, column3, ...) VALUES (value1, value2, value3, ...);
+
+    unsigned int size = properties.size();
+    logdbg  << "SQLGenerator: insertDBUpdateStringBind: creating db string";
+    std::stringstream ss;//create a stringstream
+
+    ss << "INSERT INTO " << tablename << " (";
+
+    std::string connection_type = db_interface_.connection().type();
+
+    if (connection_type != SQLITE_IDENTIFIER && connection_type != MYSQL_IDENTIFIER)
+        throw std::runtime_error ("SQLGenerator: insertDBUpdateStringBind: not yet implemented db type "
+                                  + connection_type);
+
+    std::stringstream values_ss;
+    values_ss << "VALUES (";
+
+    for (unsigned int cnt=0; cnt < size; cnt++)
+    {
+        ss << properties.at(cnt).name();
+
+        if (connection_type == SQLITE_IDENTIFIER)
+            values_ss << "@VAR"+std::to_string(cnt+1);
+        else if (connection_type == MYSQL_IDENTIFIER)
+            values_ss << "%"+std::to_string(cnt+1);
+
+        if (cnt != size-1)
+        {
+            ss << ", ";
+            values_ss << ", ";
+        }
+    }
+
+    ss << ") " << values_ss.str() << ");";
+
+    loginf << "SQLGenerator: insertDBUpdateStringBind: var insert string '" << ss.str() << "'";
+
+    return ss.str();
+}
 
 std::string SQLGenerator::createDBUpdateStringBind(std::shared_ptr<Buffer> buffer, DBObject &object,
                                                    DBOVariable &key_var, std::string tablename)

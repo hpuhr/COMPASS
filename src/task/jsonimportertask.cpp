@@ -213,27 +213,6 @@ bool JSONImporterTask::importFile(const std::string& filename, bool test)
     assert (longitude_var_ && longitude_var_->hasCurrentDBColumn());
     assert (tod_var_ && tod_var_->hasCurrentDBColumn());
 
-//    const DBTable& main_table = db_object_->currentMetaTable().mainTable();
-//    assert (main_table.hasColumn(key_var_->currentDBColumn().name()));
-//    assert (main_table.hasColumn(dsid_var_->currentDBColumn().name()));
-//    assert (main_table.hasColumn(target_addr_var_->currentDBColumn().name()));
-//    assert (main_table.hasColumn(callsign_var_->currentDBColumn().name()));
-//    assert (main_table.hasColumn(altitude_baro_var_->currentDBColumn().name()));
-//    assert (main_table.hasColumn(altitude_geo_var_->currentDBColumn().name()));
-//    assert (main_table.hasColumn(latitude_var_->currentDBColumn().name()));
-//    assert (main_table.hasColumn(longitude_var_->currentDBColumn().name()));
-//    assert (main_table.hasColumn(tod_var_->currentDBColumn().name()));
-
-//    const DBTableColumn& key_var_col = key_var_->currentDBColumn();
-//    const DBTableColumn& dsid_var_col = dsid_var_->currentDBColumn();
-//    const DBTableColumn& target_addr_var_col = target_addr_var_->currentDBColumn();
-//    const DBTableColumn& callsign_var_col = callsign_var_->currentDBColumn();
-//    const DBTableColumn& altitude_baro_var_col = altitude_baro_var_->currentDBColumn();
-//    const DBTableColumn& altitude_geo_var_col = altitude_geo_var_->currentDBColumn();
-//    const DBTableColumn& latitude_var_col = latitude_var_->currentDBColumn();
-//    const DBTableColumn& longitude_var_col = longitude_var_->currentDBColumn();
-//    const DBTableColumn& tod_var_col = tod_var_->currentDBColumn();
-
     PropertyList list;
     list.addProperty(key_var_->name(), key_var_->dataType());
     list.addProperty(dsid_var_->name(), dsid_var_->dataType());
@@ -569,7 +548,8 @@ bool JSONImporterTask::importFile(const std::string& filename, bool test)
                            << " dt " << date_time.toString("yyyy.MM.dd hh:mm:ss.zzz").toStdString();
 
                     key_al.set(inserted, rec_num);
-                    dsid_al.set(inserted, receiver);
+                    //dsid_al.set(inserted, receiver);
+                    dsid_al.set(inserted, 1);
                     target_addr_al.set(inserted, target_address);
                     if (callsign_valid)
                         callsign_al.set(inserted, callsign);
@@ -593,13 +573,47 @@ bool JSONImporterTask::importFile(const std::string& filename, bool test)
     assert (buffer_ptr->size() == inserted);
 
     if (rec_num != 0)
+    {
+        if (!test)
+        {
+            loginf << "JSONImporterTask: importFile: inserting into database";
+
+            DBOVariableSet var_list;
+            var_list.add(*key_var_);
+            var_list.add(*dsid_var_);
+            var_list.add(*target_addr_var_);
+            var_list.add(*callsign_var_);
+            var_list.add(*altitude_baro_var_);
+            var_list.add(*altitude_geo_var_);
+            var_list.add(*latitude_var_);
+            var_list.add(*longitude_var_);
+            var_list.add(*tod_var_);
+
+            connect (db_object_, &DBObject::insertDoneSignal, this, &JSONImporterTask::insertDoneSlot);
+            connect (db_object_, &DBObject::insertProgressSignal, this, &JSONImporterTask::insertProgressSlot);
+
+            db_object_->insertData(var_list, buffer_ptr);
+        }
+
         loginf << "JSONImporterTask: importFile: all " << rec_num
-               << " inserted " << inserted << " (" << String::percentToString(100.0 * inserted/rec_num) << "%)"
+               << " to be inserted " << inserted << " (" << String::percentToString(100.0 * inserted/rec_num) << "%)"
                << " skipped " << skipped<< " (" << String::percentToString(100.0 * skipped/rec_num) << "%)";
+    }
     else
-        loginf << "JSONImporterTask: importFile: all "<< rec_num << " inserted " << inserted << " skipped " << skipped;
+        loginf << "JSONImporterTask: importFile: all "<< rec_num << " to be inserted " << inserted << " skipped "
+               << skipped;
 
     return true;
+}
+
+void JSONImporterTask::insertProgressSlot (float percent)
+{
+    loginf << "JSONImporterTask: insertProgressSlot: " << String::percentToString(percent) << "%";
+}
+
+void JSONImporterTask::insertDoneSlot (DBObject& object)
+{
+    loginf << "JSONImporterTask: insertDoneSlot";
 }
 
 void JSONImporterTask::checkAndSetVariable (std::string& name_str, DBOVariable** var)
