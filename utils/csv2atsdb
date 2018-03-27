@@ -899,5 +899,5 @@ if ($csvFileList) {
    }
    close(FILE_LIST);
 } else {
-   processFile($recnum, $dsId, $survType, $survName, $csvDelimiter, $splitLines, $csvFile, $sqliteFile) if (! -s $csvFile);
+   processFile($recnum, $dsId, $survType, $survName, $csvDelimiter, $splitLines, $csvFile, $sqliteFile) if (-s $csvFile);
 }
