@@ -53,7 +53,7 @@ usage: $0 ( -f <file> | -l <file list> ) [ -o <file> ] [ -n <name> ] [ -t <type>
 
        -b <lines> ::= split the CSV file into chunks of 'lines' each
             a qualifier (multiplier factor) can be used
-            { 'K' ::= 10x3; 'M' ::= 10x6; 'G' ::= 10x9 }
+            { 'M' ::= 10^6; 'G' ::= 10^9 }
 
        -keep ::= keep the existing database and append new data to it
 
@@ -675,7 +675,7 @@ CREATE TABLE \`sd_track\` \(
 };
 
 sub processFile {
-   my ($recNum, $sType, $sName, $delimiter, $fileChunk, $csvData, $sqliteDB) = @_;
+   my ($recNum, $ds_id, $sType, $sName, $delimiter, $fileChunk, $csvData, $sqliteDB) = @_;
 
    my $configTableName;
    my $dataTableName;
@@ -697,7 +697,7 @@ sub processFile {
       $sName = 'TRAKR' if (!$sName);
    } else {
       print "unknown type: $sType ($csvData shall not be converted) => bailing out!\n";
-      return -1;
+      return $recNum;
    }
 
    # prepare CSV file for import
@@ -705,29 +705,11 @@ sub processFile {
 
    my %sensorIdList = ();
    my $dsIdIx = -1;
-   my $defaultDsId = 1;
-
    my $recNumIx = -1;
-
-   if ($fileChunk =~ m/^\d+[KMG]?$/) {
-      (my $base = $fileChunk) =~ s/^(\d+)[\D*]?$/\1/g;
-      (my $factor = $fileChunk) =~ s/^$base(\S*)$/\1/g;
-      $fileChunk = $base;
-      if ($factor) {
-         if ($factor eq 'K') {
-            $fileChunk = $base * 1000;
-         } elsif ($factor eq 'M') {
-            $fileChunk = $base * 1000000;
-         } elsif ($factor eq 'G') {
-            $fileChunk = $base * 1000000000;
-         }
-      }
-   } else {
-      $fileChunk = "";
-   }
 
    my $tmpCSV = "/tmp/.csv2atsdb";
    my $tmpCSVcnt = 1;
+
    open(CSV, "<$csvData") or die "cannot open csv file '$csvData' for reading";
    while (<CSV>) {
       chop;
@@ -737,7 +719,7 @@ sub processFile {
 
          if (!/ds_id/i) {
             $csvHeader .= "${delimiter}DS_ID";
-            $sensorIdList{$defaultDsId}++;
+            $sensorIdList{$ds_id}++;
          } else {
             my $ix = 0;
             foreach (split("$delimiter", $csvHeader)) {
@@ -774,7 +756,7 @@ sub processFile {
       $recNum++;
 
       if ($dsIdIx == -1) {
-         $line .= "${delimiter}$defaultDsId";
+         $line .= "${delimiter}$ds_id";
       } else {
          my @data = split("$delimiter");
          $sensorIdList{@data[$dsIdIx]}++;
@@ -886,14 +868,12 @@ if (!$keepDB) {
 # cleanup
 unlink $defaultSchemaFile if (!$schemaFile);
 
-if ($splitLines =~ m/^\d+[KMG]?$/) {
+if ($splitLines =~ m/^\d+[MG]?$/) {
    (my $base = $splitLines) =~ s/^(\d+)[\D*]?$/\1/g;
    (my $factor = $splitLines) =~ s/^$base(\S*)$/\1/g;
    $splitLines = $base;
    if ($factor) {
-      if ($factor eq 'K') {
-         $splitLines = $base * 1000;
-      } elsif ($factor eq 'M') {
+      if ($factor eq 'M') {
          $splitLines = $base * 1000000;
       } elsif ($factor eq 'G') {
          $splitLines = $base * 1000000000;
@@ -904,6 +884,7 @@ if ($splitLines =~ m/^\d+[KMG]?$/) {
 }
 
 my $recnum = 0;
+my $dsId = 1;
 if ($csvFileList) {
    open(FILE_LIST, "<$csvFileList") or die "cannot open '$csvFileList' for reading";
    print "processing file list $csvFileList\n";
@@ -911,11 +892,12 @@ if ($csvFileList) {
       chop;
       next if (!$_);
       my @file = split(";");
-      next if (! -s @file[2]);
+      next if ($#file < 2 || ! -s @file[2]);
       print " * parsing type:@file[0] name:@file[1] file:@file[2]\n";
-      $recnum = processFile($recnum, @file[0], @file[1], $csvDelimiter, $splitLines, @file[2], $sqliteFile);
+      $recnum = processFile($recnum, $dsId, @file[0], @file[1], $csvDelimiter, $splitLines, @file[2], $sqliteFile);
+      $dsId++;
    }
    close(FILE_LIST);
 } else {
-   processFile($recnum, $survType, $survName, $csvDelimiter, $splitLines, $csvFile, $sqliteFile);
+   processFile($recnum, $dsId, $survType, $survName, $csvDelimiter, $splitLines, $csvFile, $sqliteFile) if (! -s $csvFile);
 }
