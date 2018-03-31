@@ -1,0 +1,189 @@
+\chapter{Utilities}
+\section{Extending ATSDB}
+\label{sec:Extending ATSDB}
+
+The ATSDB interface can be extended beyond the two database systems provided by default. \\
+
+Taking advantage of the schema inherited from SASS-C simpler formats, like comma separated values (CSV), can be used. \\
+
+To be able to use the OSGviews a minimal subset of fields needs to be present. The required minimal subset of fields is defined by default and loaded as meta variables in the table view. \\
+
+\begin{table}[H]
+  \center
+  \begin{tabular}{ | l | l | l |}
+    \hline
+    \textbf{Field Name} & \textbf{Description} & \textbf{Coding} \\ \hline
+    pos\_lat\_deg & Latitude & decimal degrees \\ \hline
+    pos\_long\_deg & Longitude & decimal degrees \\ \hline
+    tod & Time Of Day & [0, 24[ hours in 1/128 of a second \\ \hline
+    modec\_code\_ft & Mode-C & decimal (feet) \\ \hline
+    track\_num & Track Number & decimal \\ \hline
+    mode3a\_code & Mode-A & decimal \\ \hline
+    target\_addr & 24 bit address & decimal \\ \hline
+    callsign & Callsign & 1 to 7 characters \\ \hline
+  \end{tabular}
+  \caption{Required fields for a CSV file}
+\end{table}
+
+The strictly minimal subset of fields for OSGview is the following:
+\begin{itemize}
+\item for 2D display: \textbf{pos\_lat\_deg}, \textbf{pos\_long\_deg} and \textbf{tod}
+\item for 3D display: the same as for 2D and \textbf{modec\_code\_ft}
+\\
+\end{itemize}
+
+The remaining fields are useful to qualify the reports and enable trajectories. \\
+
+\newpage
+Two fields need not be present in the CSV file because they are strongly related to the internal behaviour of SASS-C. The script creates the required values automatically.
+\begin{itemize}
+\item \textit{rec\_num}
+\item \textit{ds\_id}
+\\
+\end{itemize}
+
+If extra fields are required those have to be defined taking into account the existing fields in the schema for each kind of surveillance datasource, i.e. Radar, MLAT, ADS-B and Tracker. \\
+
+The names defined in the schema must be maintained. The coding of each field must also be maintained.
+
+\subsubsection{Importing CSV files exported by ATSDB}
+
+ATSDB can export CSV files (refer to section \nameref{sec:exporting}), those files can be loaded back into ATSDB with the help of the script \textbf{csv2atsdb}. \\
+
+The script expects a mandatory CSV file name and at least the datasource type, which can be one of:
+\label{sec:datasrc_type}
+\begin{itemize}
+\item \textbf{A}: the CSV files contains data from an ADS-B ground station
+\item \textbf{W}: the CSV files contains data from an MLAT/WAM sensor
+\item \textbf{R}: the CSV files contains data from a radar
+\item \textbf{T}: the CSV files contains data from a tracker
+\\
+\end{itemize}
+
+The following are examples of the four accepted datasources.
+
+\begin{verbatim}
+# loading an ADS-B file
+
+$ csv2atsdb -f ADS-B.csv -t A
+
+
+# loading an MLAT/WAM file
+
+$ csv2atsdb -f MLAT.csv -t W
+
+
+# loading a Radar file
+
+$ csv2atsdb -f Radar.csv -t R
+
+
+# loading a Tracker file
+
+$ csv2atsdb -f Tracker.csv -t T
+\end{verbatim}
+
+It is also possible to combine several datasources and import them into ATSDB by using the option \textbf{-l}. This option requires a file where each row holds a datasource definition. \\
+
+Each datasource is defined by three fields, separated by semicolons ';' :
+\begin{itemize}
+\item \textbf{type}: the datasource type (one of 'A', 'W', 'R' or 'T'), this field is \textbf{mandatory}
+\item \textbf{name}: the name of the datasource, this field is \textbf{optional}
+\item \textbf{CSV file}: the CSV file name, this field is \textbf{mandatory}
+\\
+\end{itemize}
+
+If a row is not correctly defined its contents shall be discarded. Comments can be made after the CSV file name. A semicolon after the CSV file name marks the start of comments. \\
+
+The following is an example of loading a list of datasources. \\
+Please note that an \textit{output file name} \textbf{must} be specified.
+
+\begin{verbatim}
+$ cat ImportList
+A;ADS-B;ads-b_only.csv; This is a comment
+R;RAD;radar_only.csv
+W;WAM;wam_only.csv; COMMENT number 2
+T;ARTAS;tracker_only.csv
+
+$ csv2atsdb -l ImportList -o mixing_datasources.db
+\end{verbatim}
+
+The option \textbf{-h} or the lack of parameters prints a summary of the switches one can use with the script csv2atsdb.
+
+\begin{verbatim}
+$ csv2atsdb
+usage: /path-to-script/csv2atsdb ( -f <file> | -l <file list> ) [ -o <file> ]
+                                 [ -n <name> ] [ -t <type> ] [ -keep ]
+                                 [ -d <delimiter> ] [ -s <schema> ] [ -b <lines> ] [-h]
+
+       -f <file> ::= file name of the surveillance CSV file
+       -l <file list> ::= file name of a surveillance CSV file list
+            each line has the form:
+            <type>;[<name>];<filename>;comment
+            ex:
+               A;;ADS-B.csv; this datasource has no name
+               A;adsb1;ads-b1.csv
+
+       -o <file> ::= file name of the output surveillance sqlite DB file
+            (default: same basename as the CSV input file with extension '.db')
+
+       -n <name> ::= sensor name
+
+       -t <type> ::= { 'T' ::= tracker, 'W' ::= WAM, 'A' ::= ADS-B, 'R' ::= radar }
+
+       -d <delimiter> ::= CSV delimiter (default: semicolon ';')
+
+       -s <schema> ::= filename containig schema to be used instead
+                       of the default schema
+
+       -b <lines> ::= split the CSV file into chunks of 'lines' each
+            a qualifier (multiplier factor) can be used
+            { 'M' ::= 10^6; 'G' ::= 10^9 }
+
+       -keep ::= keep the existing database and append new data to it
+
+       -h ::= this help
+\end{verbatim}
+
+By default and after converting the CSV file(s) an SQLite3 file container is created in the current working directory with the same name as the CSV file and extension '.db'. \\
+
+This file can be loaded into ATSDB by choosing the option 'Opening a SQLite3 File Container' (refer to section \nameref{sec:sqlite_fc})
+
+\subsection{ADS-B exchange}
+
+ADS-B exchange is a project housed at \url{https://www.adsbexchange.com/}. \\
+
+From the preamble of the home page one can read: \\\\
+\textit{Welcome to ADSBexchange.com, a co-op of ADS-B/Mode S/MLAT feeders from around the world, and the world's largest source of unfiltered flight data.  Thanks to our worldwide community of participants, if the data is broadcast over the air, you can find it here.  This opens up a whole new world of interesting traffic for hobbyists, \textbf{without materially affecting security for anyone}. \\}
+
+It is usually possible to obtain a dataset from any day prior to the current one, covering the whole world. \\
+
+The data contents is coded in JSON and is described in \url{https://www.adsbexchange.com/datafields/}. \\
+
+The user could try to obtain a day with:
+\begin{verbatim}
+$wget http://history.adsbexchange.com/Aircraftlist.json/2016-06-20.zip
+\end{verbatim}
+
+The time taken to get the file depends on the user's internet provider. The files are usually around 8G bytes.
+
+To create a file loadable in ATSDB, and after installing the ATSDB utils, the user can run the 'test.sh' script found in the utils directory. \\
+
+The script expects to find an ADS-B exchange database in the current working directory and generates a SQLite3 database ready to be loaded into ATSDB containing the traffic between 08Z and 09Z of the given day.
+
+\subsection{Installing ATSDB utils}
+
+The csv2atsdb is a perl script and has no dependency on other perl modules although requiring two other scripts:
+\begin{itemize}
+\item \textbf{termsql}: Convert text from a file or from stdin into SQL table and query it instantly. Uses sqlite as backend. The idea is to make SQL into a tool on the command line or in scripts. (\url{https://github.com/tobimensch/termsql}). \textit{termsql} is a python script.
+\item \textbf{mysql2sqlite}: Converts MySQL dump to SQLite3 compatible dump (\url{https://github.com/dumblob/mysql2sqlite}). \textit{mysql2sqlite} is an awk script.
+\\
+\end{itemize}
+
+It is assumed that a perl, python and awk interpreters are present and accessible in the users' PATH.
+
+It is also assumed that \textbf{bash} is being used as the shell. \\
+
+To install the ATSDB utils run the 'setup.sh' script found in the utils directory. \\
+
+NOTE: the termsql script expects a python package 'sqlparse' with a version greater than 0.1.14. For more information on how to install python packages refer to \url{https://packaging.python.org/tutorials/installing-packages/}.
