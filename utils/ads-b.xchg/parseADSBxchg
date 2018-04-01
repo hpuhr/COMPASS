@@ -39,10 +39,12 @@ sub usage
 {
    my $err = shift and select STDERR;
    print <<EOU;
-usage: $0 [-f <file>] [-atsdb] [-d] [-h]
-      -f <file> ::= file name of the JSON data
-      -atsdb    ::= output to interface with ATSDB (CSV format)
-      -d        ::= debug mode
+usage: $0 ( -f <file> | -j <database> ) [-n] [-a] [-d] [-h]
+      -j <database> ::= JSON database name
+      -f <file> ::= JSON file name
+      -m ::= include MLAT reports
+      -a ::= output to interface with ATSDB (CSV format)
+      -d ::= debug mode
 EOU
    exit $err;
 }
@@ -51,17 +53,21 @@ EOU
 use Getopt::Long;
 use DateTime;
 
+my $database;
 my $file;
+my $incMLAT;
 my $atsdb;
 my $debug;
 GetOptions(
    "help|?"   => sub { usage (0); },
-   'file=s' => \$file,
-   'atsdb' => \$atsdb,
+   'j=s' => \$database,
+   'f=s' => \$file,
+   'm' => \$incMLAT,
+   'a' => \$atsdb,
    'd' => \$debug,
 );
 
-&usage() if (!$file);
+&usage() if (!$file && !$database);
 
 sub time2_128sec {
    # input time in HH:MM:SS.ccc
@@ -149,7 +155,10 @@ sub ads021 {
             $trp = "GBS";
          }
       }
-      $mlat = "MLAT" if (/^Mlat:true/);
+      if (/^Mlat:true/) {
+         $mlat = "MLAT";
+         return if (!$incMLAT);
+      }
       if (/^Trt:/) {
          (my $type) = /Trt:(\S+)/;
          $tt = $tt{$type};
@@ -164,10 +173,12 @@ sub ads021 {
 
    $mC = "" if ($trp eq "GBS");
 
-   if ($atsdb) {
-      push @{ $ads{ $mS } }, "$lat;$lng;$tmrp;$mS;$mA;$mC;$csn;$fom;$ec;$trp;$rcvr;$vel;$hdg;$rocd;$gH;$sA" if ($tmrp);
-   } else {
-      push @{ $ads{ $mS } }, "$lat;$lng;$tmrp;$mS;$mA;$tN;$mlat;$mC;$csn;$fom;$ec;$trp;$rcvr;$ts;$vel;$hdg;$rocd;$tt;$gH;$sA;$sH;$wtc" if ($tmrp);
+   if ($tmrp) {
+      if ($atsdb) {
+         push @{ $ads{ $mS } }, "$lat;$lng;$tmrp;$mS;$mA;$mC;$csn;$fom;$ec;$trp;$rcvr;$vel;$hdg;$rocd;$gH;$sA";
+      } else {
+         push @{ $ads{ $mS } }, "$lat;$lng;$tmrp;$mS;$mA;$tN;$mlat;$mC;$csn;$fom;$ec;$trp;$rcvr;$ts;$vel;$hdg;$rocd;$tt;$gH;$sA;$sH;$wtc";
+      }
    }
 
    if ($cos) {
@@ -216,22 +227,33 @@ sub ads021 {
 # main
 # -------------------------------------------------------------------------------------------
 
-my $count = 0;
-my $countMax = 0;
-foreach (`ls ${file}-*Z.json`) {
-   chop;
-   my @nr = split("-");
-   my $cm = pop(@nr);
-   $cm =~ s/^(\d+)Z\.json$/\1/g;
-   $countMax = $cm if ($cm > $countMax);
-}
+if ($database) {
+   my $count = 0;
+   my $countMax = 0;
+   foreach (`ls ${database}-*Z.json`) {
+      chop;
+      my @nr = split("-");
+      my $cm = pop(@nr);
+      $cm =~ s/^(\d+)Z\.json$/\1/g;
+      $countMax = $cm if ($cm > $countMax);
+   }
 
-while ($count <= $countMax) {
-   my $cnt = sprintf "%04d", $count;
-   my $filei = "${file}-${cnt}Z.json";
-   $count++;
-   open(FILE, "<$filei") or next;
-   print "PARSING: $filei\n";
+   while ($count <= $countMax) {
+      my $cnt = sprintf "%04d", $count;
+      my $filei = "${file}-${cnt}Z.json";
+      $count++;
+      open(FILE, "<$filei") or next;
+      print "PARSING: $filei\n";
+      while(<FILE>) {
+         chop;
+         s%[\/\\"]%%g;
+         ads021($_) if (/Lat:/ && /Long:/);
+      }
+      close(FILE);
+   }
+} else {
+   open(FILE, "<$file") or next;
+   print "PARSING: $file\n";
    while(<FILE>) {
       chop;
       s%[\/\\"]%%g;
