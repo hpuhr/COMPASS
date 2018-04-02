@@ -17,6 +17,7 @@ signals:
     void databaseOpenedSignal ();
 
 public slots:
+    void newFileSlot ();
     void addFileSlot ();
     void deleteFileSlot ();
     void openFileSlot ();
@@ -31,6 +32,7 @@ protected:
 
     QListWidget* file_list_ {nullptr};
 
+    QPushButton* new_button_ {nullptr};
     QPushButton* add_button_ {nullptr};
     QPushButton* delete_button_ {nullptr};
 

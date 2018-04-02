@@ -22,6 +22,7 @@
 #include "dbinterface.h"
 #include "dbobject.h"
 #include "dbovariable.h"
+#include "metadbtable.h"
 
 #include "stringconv.h"
 
@@ -55,6 +56,8 @@ void InsertBufferDBJob::run ()
     unsigned int index_from = 0;
     unsigned int index_to = 0;
 
+    DBTable& table = dbobject_.currentMetaTable().mainTable();
+
     for (unsigned int cnt = 0; cnt <= steps; cnt++)
     {
         index_from = cnt * 10000;
@@ -66,7 +69,7 @@ void InsertBufferDBJob::run ()
         logdbg << "InsertBufferDBJob: run: step " << cnt << " steps " << steps << " from " << index_from
                << " to " << index_to;
 
-        db_interface_.insertBuffer (dbobject_, buffer_, index_from, index_to);
+        db_interface_.insertBuffer (table, buffer_, index_from, index_to);
 
         emit insertProgressSignal(100.0*index_to/buffer_->size());
     }

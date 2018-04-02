@@ -248,6 +248,24 @@ bool DBInterface::existsTable (const std::string& table_name)
     return table_info_.count (table_name) == 1;
 }
 
+void DBInterface::createTable (DBTable& table)
+{
+    assert (!existsTable(table.name()));
+
+    std::string statement = sql_generator_.getCreateTableStatement(table);
+
+    QMutexLocker locker(&connection_mutex_);
+
+    current_connection_->executeSQL(statement);
+
+    locker.unlock();
+
+    updateTableInfo();
+    table.updateOnDatabase();
+
+    //emit databaseContentChangedSignal();
+}
+
 /**
  * Returns existsTable for table name.
  */
@@ -342,7 +360,7 @@ bool DBInterface::hasDataSourceTables (const DBObject& object)
 // */
 std::map <int, DBODataSource> DBInterface::getDataSources (const DBObject &object)
 {
-    logdbg  << "DBInterface: getDataSourceDescription: start";
+    loginf  << "DBInterface: getDataSources: start";
 
     assert (object.existsInDB());
 
@@ -350,7 +368,7 @@ std::map <int, DBODataSource> DBInterface::getDataSources (const DBObject &objec
 
     std::shared_ptr<DBCommand> command = sql_generator_.getDataSourcesSelectCommand(object);
 
-    logdbg << "DBInterface: getDataSourceDescription: sql '" << command->get() << "'";
+    loginf << "DBInterface: getDataSources: sql '" << command->get() << "'";
 
     std::shared_ptr <DBResult> result = current_connection_->execute(*command);
     assert (result->containsData());
@@ -834,13 +852,12 @@ std::set<int> DBInterface::getActiveDataSources (const DBObject &object)
 //    buffer_writer_->write (data, table_name);
 //}
 
-void DBInterface::insertBuffer (DBObject& object, std::shared_ptr<Buffer> buffer, size_t from_index, size_t to_index)
+void DBInterface::insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer, size_t from_index,
+                                size_t to_index)
 {
     //assert (checkUpdateBuffer(object, key_var, buffer));
     assert (current_connection_);
     assert (buffer);
-
-    const DBTable& table = object.currentMetaTable().mainTable();
 
     const PropertyList &properties = buffer->properties();
 
@@ -851,7 +868,12 @@ void DBInterface::insertBuffer (DBObject& object, std::shared_ptr<Buffer> buffer
                                       +"' does not exist in table "+table.name());
     }
 
-    std::string bind_statement = sql_generator_.insertDBUpdateStringBind(buffer, object, table.name());
+    if (!table.existsInDB())
+        createTable(table);
+
+    assert (table.existsInDB());
+
+    std::string bind_statement = sql_generator_.insertDBUpdateStringBind(buffer, table.name());
 
     QMutexLocker locker(&connection_mutex_);
 

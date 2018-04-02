@@ -46,8 +46,9 @@ public:
     /// @brief Destructor
     virtual ~SQLGenerator();
 
+    std::string getCreateTableStatement (const DBTable& table);
     /// @brief Returns statement to bind variables for buffer contents
-    std::string insertDBUpdateStringBind(std::shared_ptr<Buffer> buffer, DBObject &object, std::string tablename);
+    std::string insertDBUpdateStringBind(std::shared_ptr<Buffer> buffer, std::string tablename);
 //    std::string createDBInsertStringBind(Buffer *buffer, const std::string &tablename);
     /// @brief Returns statement to bind variables for buffer contents
     std::string createDBUpdateStringBind(std::shared_ptr<Buffer> buffer, DBObject &object, DBOVariable &key_var,
@@ -57,10 +58,12 @@ public:
 
     /// @brief Returns general select statement
     std::shared_ptr<DBCommand> getSelectCommand (const MetaDBTable &meta_table, DBOVariableSet read_list,
-            const std::string &filter, std::vector <DBOVariable *> filtered_variables, bool use_order=false, DBOVariable *order_variable=nullptr, bool use_order_ascending=false,
+            const std::string &filter, std::vector <DBOVariable *> filtered_variables, bool use_order=false,
+                                                 DBOVariable *order_variable=nullptr, bool use_order_ascending=false,
             const std::string &limit="", bool left_join=false);
 
-    std::shared_ptr<DBCommand> getSelectCommand (const MetaDBTable &meta_table, std::vector <const DBTableColumn*> columns, bool distinct=false);
+    std::shared_ptr<DBCommand> getSelectCommand (const MetaDBTable &meta_table,
+                                                 std::vector <const DBTableColumn*> columns, bool distinct=false);
     ///@brief Returns command for all data sources select for dbo
     std::shared_ptr<DBCommand> getDataSourcesSelectCommand (const DBObject &object);
 

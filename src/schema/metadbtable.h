@@ -95,7 +95,7 @@ public:
     /// @brief Returns name of the main database table
     const std::string& mainTableName () const { return main_table_name_; }
     /// @brief Returns main database table
-    const DBTable& mainTable() const { assert (main_table_); return *main_table_; }
+    DBTable& mainTable() const { assert (main_table_); return *main_table_; }
 
     /// @brief Returns number of columns
     unsigned int numColumns () const { return columns_.size(); }
@@ -105,13 +105,13 @@ public:
     const std::map <std::string, const DBTableColumn&>& columns () const { return columns_; }
     /// @brief Returns column with a given name
     const DBTableColumn &column (const std::string& column) const { return columns_.at(column); }
-    const DBTable &tableFor (const std::string& column) const;
+    DBTable& tableFor (const std::string& column) const;
 
     /// @brief Returns if meta sub-tables are defined
     bool hasSubTables () const { return sub_table_definitions_.size() > 0; }
     bool hasSubTable (const std::string& name) const { return sub_table_definitions_.count(name) > 0; }
     /// @brief Returns container with all meta sub-tables
-    const std::map <std::string, const DBTable&> &subTables () const { return sub_tables_; }
+    const std::map <std::string, DBTable&> &subTables () const { return sub_tables_; }
     /// @brief Returns string with concatenated, comma separated meta sub-tables
     std::string subTableNames () const;
     void addSubTable (const std::string& local_key, const std::string& sub_table_name,
@@ -144,7 +144,7 @@ protected:
     std::string main_table_name_;
 
     /// Main database table
-    const DBTable* main_table_ {nullptr};
+    DBTable* main_table_ {nullptr};
 
     bool locked_ {false};
 
@@ -153,7 +153,7 @@ protected:
     /// Container with all meta sub-table definitions
     std::map <std::string, SubTableDefinition*> sub_table_definitions_;
     /// Container with all meta sub-tables
-    std::map <std::string, const DBTable&> sub_tables_;
+    std::map <std::string, DBTable&> sub_tables_;
     /// Container with all table columns
     std::map <std::string, const DBTableColumn&> columns_;
 

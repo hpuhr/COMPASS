@@ -50,6 +50,10 @@ SQLiteConnectionWidget::SQLiteConnectionWidget(SQLiteConnection &connection, QWi
     file_list_->setSelectionMode( QAbstractItemView::SingleSelection );
     layout->addWidget(file_list_);
 
+    new_button_ = new QPushButton ("New");
+    connect (new_button_, SIGNAL(clicked()), this, SLOT(newFileSlot()));
+    layout->addWidget(new_button_);
+
     add_button_ = new QPushButton ("Add");
     connect (add_button_, SIGNAL(clicked()), this, SLOT(addFileSlot()));
     layout->addWidget(add_button_);
@@ -66,6 +70,18 @@ SQLiteConnectionWidget::SQLiteConnectionWidget(SQLiteConnection &connection, QWi
     updateFileListSlot ();
 
     setLayout (layout);
+}
+
+void SQLiteConnectionWidget::newFileSlot ()
+{
+    QString filename = QFileDialog::getSaveFileName(this, tr("New SQLite3 File"),
+                                                    "", tr(""));
+
+    if (filename.size() > 0)
+    {
+        if (!connection_.hasFile(filename.toStdString()))
+            connection_.addFile(filename.toStdString());
+    }
 }
 
 void SQLiteConnectionWidget::addFileSlot ()

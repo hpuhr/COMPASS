@@ -169,7 +169,8 @@ void FilterManager::reset ()
 {
     for (unsigned int cnt=0; cnt < filters_.size(); cnt++)
     {
-        filters_.at(cnt)->reset();
+        if (!filters_.at(cnt)->disabled())
+            filters_.at(cnt)->reset();
     }
 }
 

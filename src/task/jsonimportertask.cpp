@@ -17,6 +17,7 @@
 #include <stdexcept>
 #include <fstream>
 #include <memory>
+#include <algorithm>
 
 #include <QDateTime>
 
@@ -151,16 +152,16 @@ bool JSONImporterTask::canImportFile (const std::string& filename)
             || !object.hasVariable(tod_var_str_))
         return false;
 
-    if (!object.variable(key_var_str_).existsInDB()
-            || !object.variable(dsid_var_str_).existsInDB()
-            || !object.variable(target_addr_var_str_).existsInDB()
-            || !object.variable(callsign_var_str_).existsInDB()
-            || !object.variable(altitude_baro_var_str_).existsInDB()
-            || !object.variable(altitude_geo_var_str_).existsInDB()
-            || !object.variable(latitude_var_str_).existsInDB()
-            || !object.variable(longitude_var_str_).existsInDB()
-            || !object.variable(tod_var_str_).existsInDB())
-        return false;
+//    if (!object.variable(key_var_str_).existsInDB()
+//            || !object.variable(dsid_var_str_).existsInDB()
+//            || !object.variable(target_addr_var_str_).existsInDB()
+//            || !object.variable(callsign_var_str_).existsInDB()
+//            || !object.variable(altitude_baro_var_str_).existsInDB()
+//            || !object.variable(altitude_geo_var_str_).existsInDB()
+//            || !object.variable(latitude_var_str_).existsInDB()
+//            || !object.variable(longitude_var_str_).existsInDB()
+//            || !object.variable(tod_var_str_).existsInDB())
+//        return false;
 
     return true;
 }
@@ -242,7 +243,7 @@ bool JSONImporterTask::importFile(const std::string& filename, bool test)
     reader.parse(ifs, obj); // reader can also read strings
 
     unsigned int rec_num = 0;
-    unsigned int receiver;
+    int receiver;
     unsigned int target_address;
     bool callsign_valid;
     std::string callsign;
@@ -261,6 +262,13 @@ bool JSONImporterTask::importFile(const std::string& filename, bool test)
 
     unsigned int skipped = 0;
     unsigned int inserted = 0;
+
+    std::map <int, std::string> existing_datasources;
+
+    for (auto& src_it : db_object_->dataSources())
+        existing_datasources[src_it.first] = src_it.second.name();
+
+    std::map <int, std::string> datasources;
 
     for (Json::Value::const_iterator it = obj.begin(); it != obj.end(); ++it)
     {
@@ -296,6 +304,9 @@ bool JSONImporterTask::importFile(const std::string& filename, bool test)
                 //        XXX – a unique number assigned to feeds.  Static on server 100.  Dynamic on other servers.
                 assert (!(*tr_it)["Rcvr"].isNull());
                 receiver = (*tr_it)["Rcvr"].asUInt();
+
+                if (existing_datasources.count(receiver) == 0 && datasources.count(receiver) == 0)
+                    datasources[receiver] = std::to_string(receiver);
 
                 //    HasSig (boolean) – True if the aircraft has a signal level associated with it. The level will be
                 // included in the “Sig” field.
@@ -548,8 +559,7 @@ bool JSONImporterTask::importFile(const std::string& filename, bool test)
                            << " dt " << date_time.toString("yyyy.MM.dd hh:mm:ss.zzz").toStdString();
 
                     key_al.set(inserted, rec_num);
-                    //dsid_al.set(inserted, receiver);
-                    dsid_al.set(inserted, 1);
+                    dsid_al.set(inserted, receiver);
                     target_addr_al.set(inserted, target_address);
                     if (callsign_valid)
                         callsign_al.set(inserted, callsign);
@@ -593,6 +603,12 @@ bool JSONImporterTask::importFile(const std::string& filename, bool test)
             connect (db_object_, &DBObject::insertProgressSignal, this, &JSONImporterTask::insertProgressSlot);
 
             db_object_->insertData(var_list, buffer_ptr);
+
+            if (datasources.size())
+            {
+                loginf << "JSONImporterTask: importFile: inserting " << datasources.size() << " data sources";
+                db_object_->addDataSources(datasources);
+            }
         }
 
         loginf << "JSONImporterTask: importFile: all " << rec_num
@@ -632,7 +648,7 @@ void JSONImporterTask::checkAndSetVariable (std::string& name_str, DBOVariable**
             *var = &db_object_->variable(name_str);
             loginf << "JSONImporterTask: checkAndSetVariable: var " << name_str << " set";
             assert (var);
-            assert((*var)->existsInDB());
+            //assert((*var)->existsInDB());
         }
     }
     else

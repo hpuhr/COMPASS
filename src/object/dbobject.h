@@ -209,10 +209,13 @@ public:
         return data_source_definitions_;
     }
 
+
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
     ///@brief Returns flag if data sources are defined for DBO type.
     bool hasDataSources () { return data_sources_.size() > 0; }
+    void addDataSource (int key_value, const std::string& name); // needs postprocessing after
+    void addDataSources (std::map <int, std::string>& sources);
     ///@brief Returns container with all defined data source for DBO type.
     std::map<int, DBODataSource>& dataSources () { return data_sources_; }
     ///@brief Returns data source name for a DBO type and data source number.

@@ -113,7 +113,7 @@ public:
     //    /// @brief Writes a buffer to the database, into a table defined by write_table_names_ and DBO type
     //    void writeBuffer (Buffer *data);
     //    void writeBuffer (Buffer *data, std::string table_name);
-    void insertBuffer (DBObject &object, std::shared_ptr<Buffer> buffer, size_t from_index,
+    void insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer, size_t from_index,
                        size_t to_index);
 
     bool checkUpdateBuffer (DBObject &object, DBOVariable &key_var, DBOVariableSet& list,
@@ -148,6 +148,7 @@ public:
     bool hasProperty (const std::string& id);
 
     bool existsTable (const std::string& table_name);
+    void createTable (DBTable& table);
     /// @brief Returns if minimum/maximum table exists
     bool existsMinMaxTable ();
     /// @brief Returns the minimum/maximum table

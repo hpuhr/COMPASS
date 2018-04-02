@@ -311,6 +311,131 @@ const MetaDBTable& DBObject::currentMetaTable () const
 //    variables_checked_=true;
 //}
 
+void DBObject::addDataSource (int key_value, const std::string& name)
+{
+    assert (hasCurrentDataSourceDefinition());
+
+    const DBODataSourceDefinition &mos_def = currentDataSourceDefinition ();
+    std::string meta_table_name = mos_def.metaTableName();
+    std::string key_col_name = mos_def.foreignKey();
+    std::string name_col_name = mos_def.nameColumn();
+
+    const DBSchema &schema = ATSDB::instance().schemaManager().getCurrentSchema();
+    assert (schema.hasMetaTable(meta_table_name));
+
+    const MetaDBTable& meta =  schema.metaTable(meta_table_name);
+    assert (meta.hasColumn(key_col_name));
+    assert (meta.hasColumn(name_col_name));
+
+    const DBTableColumn& foreign_key_col = meta.column(key_col_name);
+    const DBTableColumn& name_col = meta.column(name_col_name);
+
+    PropertyList list;
+    list.addProperty(foreign_key_col.name(), PropertyDataType::INT);
+    list.addProperty(name_col.name(), PropertyDataType::STRING);
+
+    std::shared_ptr<Buffer> buffer_ptr = std::shared_ptr<Buffer> (new Buffer (list, name_));
+
+    buffer_ptr->getInt(foreign_key_col.name()).set(0, key_value);
+    buffer_ptr->getString(name_col.name()).set(0, name);
+
+    assert (ATSDB::instance().schemaManager().getCurrentSchema().hasMetaTable(meta_table_name));
+    MetaDBTable& meta_table = ATSDB::instance().schemaManager().getCurrentSchema().metaTable(meta_table_name);
+
+    DBInterface& db_interface = ATSDB::instance().interface();
+
+    // create all needed tables
+    DBTable& main_table = meta_table.mainTable();
+    if (!main_table.existsInDB())
+        db_interface.createTable(main_table);
+
+    // do sub table
+    DBTable& db_table_name = meta_table.tableFor(name_col.identifier());
+    db_interface.insertBuffer(db_table_name, buffer_ptr, 0, 0);
+
+    if (main_table.name() != db_table_name.name()) // HACK of sub tables exist. should be rewritten
+    {
+        PropertyList main_list;
+        main_list.addProperty(foreign_key_col.name(), PropertyDataType::INT);
+
+        std::shared_ptr<Buffer> main_buffer_ptr = std::shared_ptr<Buffer> (new Buffer (main_list, name_));
+
+        main_buffer_ptr->getInt(foreign_key_col.name()).set(0, key_value);
+
+        db_interface.insertBuffer(main_table, main_buffer_ptr, 0, 0);
+    }
+
+    emit db_interface.databaseContentChangedSignal();
+
+}
+
+void DBObject::addDataSources (std::map <int, std::string>& sources)
+{
+    assert (hasCurrentDataSourceDefinition());
+
+    const DBODataSourceDefinition &mos_def = currentDataSourceDefinition ();
+    std::string meta_table_name = mos_def.metaTableName();
+    std::string key_col_name = mos_def.foreignKey();
+    std::string name_col_name = mos_def.nameColumn();
+
+    const DBSchema &schema = ATSDB::instance().schemaManager().getCurrentSchema();
+    assert (schema.hasMetaTable(meta_table_name));
+
+    const MetaDBTable& meta =  schema.metaTable(meta_table_name);
+    assert (meta.hasColumn(key_col_name));
+    assert (meta.hasColumn(name_col_name));
+
+    const DBTableColumn& foreign_key_col = meta.column(key_col_name);
+    const DBTableColumn& name_col = meta.column(name_col_name);
+
+    PropertyList list;
+    list.addProperty(foreign_key_col.name(), PropertyDataType::INT);
+    list.addProperty(name_col.name(), PropertyDataType::STRING);
+
+    std::shared_ptr<Buffer> buffer_ptr = std::shared_ptr<Buffer> (new Buffer (list, name_));
+
+    unsigned int cnt=0;
+    for (auto& src_it : sources)
+    {
+        buffer_ptr->getInt(foreign_key_col.name()).set(cnt, src_it.first);
+        buffer_ptr->getString(name_col.name()).set(cnt, src_it.second);
+        cnt++;
+    }
+
+    assert (ATSDB::instance().schemaManager().getCurrentSchema().hasMetaTable(meta_table_name));
+    MetaDBTable& meta_table = ATSDB::instance().schemaManager().getCurrentSchema().metaTable(meta_table_name);
+
+    DBInterface& db_interface = ATSDB::instance().interface();
+
+    // create all needed tables
+    DBTable& main_table = meta_table.mainTable();
+    if (!main_table.existsInDB())
+        db_interface.createTable(main_table);
+
+    // do sub table
+    DBTable& db_table_name = meta_table.tableFor(name_col.identifier());
+    db_interface.insertBuffer(db_table_name, buffer_ptr, 0, buffer_ptr->size()-1);
+
+    if (main_table.name() != db_table_name.name()) // HACK of sub tables exist. should be rewritten
+    {
+        PropertyList main_list;
+        main_list.addProperty(foreign_key_col.name(), PropertyDataType::INT);
+
+        std::shared_ptr<Buffer> main_buffer_ptr = std::shared_ptr<Buffer> (new Buffer (main_list, name_));
+
+        cnt=0;
+        for (auto& src_it : sources)
+        {
+            main_buffer_ptr->getInt(foreign_key_col.name()).set(cnt, src_it.first);
+            cnt++;
+        }
+
+        db_interface.insertBuffer(main_table, main_buffer_ptr, 0, main_buffer_ptr->size()-1);
+    }
+
+    emit db_interface.databaseContentChangedSignal();
+}
+
 const std::string& DBObject::getNameOfSensor (int num)
 {
     assert (data_sources_.count(num) > 0);
@@ -501,7 +626,7 @@ void DBObject::insertData (DBOVariableSet& list, std::shared_ptr<Buffer> buffer)
 {
     assert (!insert_job_);
 
-    assert (existsInDB());
+    //assert (existsInDB());
     //assert (key_var.existsInDB());
     //assert (ATSDB::instance().interface().checkUpdateBuffer(*this, key_var, list, buffer));
 
@@ -527,6 +652,7 @@ void DBObject::insertDoneSlot ()
     insert_job_ = nullptr;
 
     emit insertDoneSignal (*this);
+    emit ATSDB::instance().interface().databaseContentChangedSignal();
 }
 
 void DBObject::updateData (DBOVariable &key_var, DBOVariableSet& list, std::shared_ptr<Buffer> buffer)
