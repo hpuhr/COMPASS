@@ -438,7 +438,7 @@ std::shared_ptr <DBCommand> SQLGenerator::getTableSelectMinMaxNormalStatement (c
 //        if (column->hasSpecialNull())
 //            continue;
 
-        logdbg  << "SQLGenerator: getMainTableSelectMinMaxStatement: current name " << col_it.first;
+        logdbg  << "SQLGenerator: getTableSelectMinMaxNormalStatement: current name " << col_it.first;
 
         if (!first)
             ss << ",";
@@ -456,7 +456,7 @@ std::shared_ptr <DBCommand> SQLGenerator::getTableSelectMinMaxNormalStatement (c
     command->set (ss.str());
     command->list(command_list);
 
-    logdbg  << "SQLGenerator: getMainTableSelectMinMaxStatement: sql '" << ss.str() << "'";
+    logdbg  << "SQLGenerator: getTableSelectMinMaxNormalStatement: sql '" << ss.str() << "'";
 
     return command;
 }

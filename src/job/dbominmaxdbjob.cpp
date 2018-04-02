@@ -79,7 +79,6 @@ void DBOMinMaxDBJob::createMinMaxValuesNormal ()
 
     for (auto table_it : object_.currentMetaTable().subTables())
     {
-
         if (table_it.second.existsInDB())
             processTable (table_it.second);
         else
@@ -120,7 +119,7 @@ void DBOMinMaxDBJob::processTable (const DBTable& table)
     std::string min;
     std::string max;
 
-    for (auto col_it : table.columns()) // over variables/properties
+    for (auto& col_it : table.columns()) // over variables/properties
     {
         minmax.clear();
 
@@ -143,6 +142,8 @@ void DBOMinMaxDBJob::processTable (const DBTable& table)
         else
             max = buffer->getString(col_it.first+"MAX").get(0);
         minmax.push_back (max);
+
+        //loginf << "UGA var " << col_it.first << " min '" << min << "' max '" << max << "'";
         //                if (minmax.at(0) == minmax.at(1))
         //                {
         //                    loginf << "DBInterface: createMinMaxValues: id " << column->getName() << " type " <<  dboit->first

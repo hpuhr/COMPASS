@@ -222,7 +222,7 @@ std::string MetaDBOVariable::getMinString () const
         else
             value_string = variable_it.second.getSmallerValueString (value_string, variable_it.second.getMinString());
     }
-    assert (value_string.size());
+    //assert (value_string.size());
     return value_string;
 }
 
@@ -237,7 +237,7 @@ std::string MetaDBOVariable::getMaxString () const
         else
             value_string = variable_it.second.getLargerValueString (value_string, variable_it.second.getMaxString());
     }
-    assert (value_string.size());
+    //assert (value_string.size());
     return value_string;
 }
 
