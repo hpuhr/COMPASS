@@ -76,6 +76,8 @@ chmod +x /tmp/.check-python-mod
 /tmp/.check-python-mod
 rm /tmp/.check-python-mod
 
+cd -
+
 #
 # copy remaining scripts to
 #

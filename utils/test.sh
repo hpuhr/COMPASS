@@ -20,7 +20,7 @@ fi
 
 ADSBxchg=`echo $ADSBdb | sed 's/\.zip$//g'`
 
-prepADSBxchg -j $ADSBxchg.zip -t 8 -a
+prepADSBxchg -f $ADSBxchg.zip -t 8 -a
 csv2atsdb -f $ADSBxchg/08/ADS-Bxchg.$ADSBxchg.csv -n ADSBx -t A -b 1M
 
 #
