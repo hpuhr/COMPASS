@@ -15,7 +15,7 @@ To be able to use the OSGView a minimal subset of fields needs to be present. Th
     \textbf{Field Name} & \textbf{Description} & \textbf{Coding} \\ \hline
     pos\_lat\_deg & Latitude & decimal degrees \\ \hline
     pos\_long\_deg & Longitude & decimal degrees \\ \hline
-    tod & Time Of Day & [0, 24] hours in 1/128 of a second \\ \hline
+    tod & Time Of Day & [0, 24) hours in 1/128 of a second \\ \hline
     modec\_code\_ft & Mode-C & decimal (feet) \\ \hline
     track\_num & Track Number & decimal \\ \hline
     mode3a\_code & Mode-A & decimal \\ \hline
@@ -197,15 +197,3 @@ The time taken to get the file depends on the user's internet provider. The file
 To create a file loadable in ATSDB, and after installing the ATSDB utils, the user can run the 'test.sh' script found in the utils directory. \\
 
 The script expects to find an ADS-B exchange database in the current working directory and generates a SQLite3 database ready to be loaded into ATSDB containing the traffic between 08Z and 09Z of the given day.
-
-If the perl module DateTime is missing, it can be installed using:
-
-\begin{verbatim}
-$ perl -MCPAN -e shell
-cpan> install DateTime
-cpan> q
-\end{verbatim}
-
-Under Ubuntu, this took a while.
-
-
