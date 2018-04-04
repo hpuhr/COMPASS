@@ -21,6 +21,7 @@ add_path() {
 
 INSTALL_DIR=$HOME/bin
 ATSDB_SCRIPTS="csv2atsdb ads-b.xchg/parseADSBxchg ads-b.xchg/prepADSBxchg"
+pushd .
 
 if [ ! -d $INSTALL_DIR ]; then
    mkdir $INSTALL_DIR
@@ -76,13 +77,13 @@ chmod +x /tmp/.check-python-mod
 /tmp/.check-python-mod
 rm /tmp/.check-python-mod
 
-cd -
-
 #
-# copy remaining scripts to
+# copy remaining scripts to the installation directory
 #
+popd
 for file in $ATSDB_SCRIPTS
 do
+   chmod +x $file
    cp $file $INSTALL_DIR
 done
 
@@ -93,4 +94,3 @@ if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
   echo "$INSTALL_DIR is missing in your PATH, adding it."
   add_path $HOME/.bashrc $INSTALL_DIR
 fi
-
