@@ -296,7 +296,7 @@ foreach $s_ (sort {$a cmp $b} keys %ads) {
 
       my ($S_, $M_, $H_, $day_, $month_, $year_) = (gmtime($sec))[0,1,2,3,4,5];
 
-      my $date = ($year_+1900)."-".($month_+1)."-$day_";
+      my $date = sprintf("%04d-%02d-%02d", $year_ + 1900, $month_ + 1, $day_);
       next if ($database && $database ne $date);
 
       my $time = sprintf("%02d:%02d:%02d.%03d",$H_,$M_,$S_,$ms);
