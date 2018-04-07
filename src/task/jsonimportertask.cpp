@@ -20,8 +20,13 @@
 #include <algorithm>
 
 #include <QDateTime>
+#include <QCoreApplication>
+#include <QThread>
 
 #include <jsoncpp/json/json.h>
+
+#include <archive.h>
+#include <archive_entry.h>
 
 using namespace Utils;
 
@@ -31,6 +36,10 @@ JSONImporterTask::JSONImporterTask(const std::string& class_id, const std::strin
 {
     registerParameter("last_filename", &last_filename_, "");
     registerParameter("db_object_str", &db_object_str_, "");
+
+    registerParameter("use_time_filter", &use_time_filter_, false);
+    registerParameter("time_filter_min", &time_filter_min_, 0);
+    registerParameter("time_filter_max", &time_filter_max_, 24*3600);
 
     key_var_str_ = "rec_num";
     dsid_var_str_ = "ds_id";
@@ -105,6 +114,37 @@ void JSONImporterTask::removeFile (const std::string &filename)
         widget_->updateFileListSlot();
 }
 
+bool JSONImporterTask::useTimeFilter() const
+{
+    return use_time_filter_;
+}
+
+void JSONImporterTask::useTimeFilter(bool value)
+{
+    use_time_filter_ = value;
+}
+
+float JSONImporterTask::timeFilterMin() const
+{
+    return time_filter_min_;
+}
+
+void JSONImporterTask::timeFilterMin(float value)
+{
+    time_filter_min_ = value;
+}
+
+float JSONImporterTask::timeFilterMax() const
+{
+    return time_filter_max_;
+}
+
+void JSONImporterTask::timeFilterMax(float value)
+{
+    time_filter_max_ = value;
+}
+
+
 std::string JSONImporterTask::dbObjectStr() const
 {
     return db_object_str_;
@@ -123,10 +163,16 @@ void JSONImporterTask::dbObjectStr(const std::string& db_object_str)
 bool JSONImporterTask::canImportFile (const std::string& filename)
 {
     if (!Files::fileExists(filename))
+    {
+        loginf << "JSONImporterTask: canImportFile: not possible since file does not exist";
         return false;
+    }
 
     if (!ATSDB::instance().objectManager().existsObject(db_object_str_))
+    {
+        loginf << "JSONImporterTask: canImportFile: not possible since DBObject does not exist";
         return false;
+    }
 
     DBObject& object = ATSDB::instance().objectManager().object(db_object_str_);
 
@@ -139,7 +185,10 @@ bool JSONImporterTask::canImportFile (const std::string& filename)
             || !latitude_var_str_.size()
             || !longitude_var_str_.size()
             || !tod_var_str_.size())
+    {
+        loginf << "JSONImporterTask: canImportFile: not possible since variables are not set";
         return false;
+    }
 
     if (!object.hasVariable(key_var_str_)
             || !object.hasVariable(dsid_var_str_)
@@ -150,31 +199,23 @@ bool JSONImporterTask::canImportFile (const std::string& filename)
             || !object.hasVariable(latitude_var_str_)
             || !object.hasVariable(longitude_var_str_)
             || !object.hasVariable(tod_var_str_))
+    {
+        loginf << "JSONImporterTask: canImportFile: not possible since variables not in DBObject";
         return false;
+    }
 
-//    if (!object.variable(key_var_str_).existsInDB()
-//            || !object.variable(dsid_var_str_).existsInDB()
-//            || !object.variable(target_addr_var_str_).existsInDB()
-//            || !object.variable(callsign_var_str_).existsInDB()
-//            || !object.variable(altitude_baro_var_str_).existsInDB()
-//            || !object.variable(altitude_geo_var_str_).existsInDB()
-//            || !object.variable(latitude_var_str_).existsInDB()
-//            || !object.variable(longitude_var_str_).existsInDB()
-//            || !object.variable(tod_var_str_).existsInDB())
-//        return false;
+    if (use_time_filter_ && time_filter_min_ >= time_filter_max_)
+    {
+        loginf << "JSONImporterTask: canImportFile: time filter values wrong";
+        return false;
+    }
 
     return true;
 }
 
-bool JSONImporterTask::importFile(const std::string& filename, bool test)
+void JSONImporterTask::importFile(const std::string& filename, bool test)
 {
     loginf << "JSONImporterTask: importFile: filename " << filename << " test " << test;
-
-    if (!canImportFile(filename))
-    {
-        logerr << "JSONImporterTask: importFile: unable to import";
-        return false;
-    }
 
     if (db_object_str_.size())
     {
@@ -185,23 +226,136 @@ bool JSONImporterTask::importFile(const std::string& filename, bool test)
     }
     assert (db_object_);
 
-    if (key_var_str_.size())
+    if (!canImportFile(filename))
+    {
+        logerr << "JSONImporterTask: importFile: unable to import";
+        return;
+    }
+
+    std::ifstream ifs(filename);
+    Json::Reader reader;
+    Json::Value obj;
+    reader.parse(ifs, obj); // reader can also read strings
+
+    parseJSON (obj, test);
+
+    return;
+}
+
+void JSONImporterTask::importFileArchive (const std::string& filename, bool test)
+{
+    loginf << "JSONImporterTask: importFileArchive: filename " << filename << " test " << test;
+
+    if (db_object_str_.size())
+    {
+        if (!ATSDB::instance().objectManager().existsObject(db_object_str_))
+            db_object_str_="";
+        else
+            db_object_ = &ATSDB::instance().objectManager().object(db_object_str_);
+    }
+    assert (db_object_);
+
+    if (!canImportFile(filename))
+    {
+        logerr << "JSONImporterTask: importFileArchive: unable to import";
+        return;
+    }
+
+    // if gz but not tar.gz or tgz
+    bool raw = String::hasEnding (filename, ".gz") && !String::hasEnding (filename, ".tar.gz");
+
+    loginf  << "JSONImporterTask: importFileArchive: importing " << filename << " raw " << raw;
+
+    struct archive *a;
+    struct archive_entry *entry;
+    int r;
+
+    a = archive_read_new();
+
+    if (raw)
+    {
+        archive_read_support_filter_gzip(a);
+        archive_read_support_filter_bzip2(a);
+        archive_read_support_format_raw(a);
+    }
+    else
+    {
+        archive_read_support_filter_all(a);
+        archive_read_support_format_all(a);
+
+    }
+    r = archive_read_open_filename(a, filename.c_str(), 10240); // Note 1
+
+    if (r != ARCHIVE_OK)
+        throw std::runtime_error("JSONImporterTask: importFileArchive: archive error: "
+                                 +std::string(archive_error_string(a)));
+
+    const void *buff;
+    size_t size;
+    int64_t offset;
+
+    std::stringstream ss;
+    Json::Reader reader;
+    Json::Value obj;
+
+    while (archive_read_next_header(a, &entry) == ARCHIVE_OK)
+    {
+        for (unsigned int cnt=0; cnt < 10; cnt++)
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+        ss.str("");
+
+        for (;;)
+        {
+            r = archive_read_data_block(a, &buff, &size, &offset);
+
+            if (r == ARCHIVE_EOF)
+                break;
+            if (r != ARCHIVE_OK)
+                throw std::runtime_error("JSONImporterTask: importFileArchive: archive error: "
+                                         +std::string(archive_error_string(a)));
+
+            std::string str (reinterpret_cast<char const*>(buff), size);
+            ss << str;
+
+        }
+
+        loginf  << "JSONImporterTask: importFileArchive: got entry with " << ss.str().size() << " chars";
+        reader.parse(ss.str(), obj); // reader can also read strings
+
+        while (insert_active_)
+        {
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            QThread::msleep (10);
+        }
+        parseJSON (obj, test);
+    }
+
+    return;
+}
+
+void JSONImporterTask::parseJSON (Json::Value& object, bool test)
+{
+    loginf << "JSONImporterTask: parseJSON";
+    assert (!insert_active_);
+
+    if (!key_var_ && key_var_str_.size())
         checkAndSetVariable (key_var_str_, &key_var_);
-    if (dsid_var_str_.size())
+    if (!dsid_var_ && dsid_var_str_.size())
         checkAndSetVariable (dsid_var_str_, &dsid_var_);
-    if (target_addr_var_str_.size())
+    if (!target_addr_var_ && target_addr_var_str_.size())
         checkAndSetVariable (target_addr_var_str_, &target_addr_var_);
-    if (callsign_var_str_.size())
+    if (!callsign_var_ && callsign_var_str_.size())
         checkAndSetVariable (callsign_var_str_, &callsign_var_);
-    if (altitude_baro_var_str_.size())
+    if (!altitude_baro_var_ && altitude_baro_var_str_.size())
         checkAndSetVariable (altitude_baro_var_str_, &altitude_baro_var_);
-    if (altitude_geo_var_str_.size())
+    if (!altitude_geo_var_ && altitude_geo_var_str_.size())
         checkAndSetVariable (altitude_geo_var_str_, &altitude_geo_var_);
-    if (latitude_var_str_.size())
+    if (!latitude_var_ && latitude_var_str_.size())
         checkAndSetVariable (latitude_var_str_, &latitude_var_);
-    if (longitude_var_str_.size())
+    if (!longitude_var_ && longitude_var_str_.size())
         checkAndSetVariable (longitude_var_str_, &longitude_var_);
-    if (tod_var_str_.size())
+    if (!tod_var_ && tod_var_str_.size())
         checkAndSetVariable (tod_var_str_, &tod_var_);
 
     assert (key_var_ && key_var_->hasCurrentDBColumn());
@@ -237,13 +391,10 @@ bool JSONImporterTask::importFile(const std::string& filename, bool test)
     ArrayListTemplate<double>& longitude_al = buffer_ptr->getDouble(longitude_var_->name());
     ArrayListTemplate<float>& tod_al = buffer_ptr->getFloat(tod_var_->name());
 
-    std::ifstream ifs(filename);
-    Json::Reader reader;
-    Json::Value obj;
-    reader.parse(ifs, obj); // reader can also read strings
-
-    unsigned int rec_num = 0;
+    unsigned int all_cnt = 0;
+    bool receiver_valid;
     int receiver;
+    bool target_address_valid;
     unsigned int target_address;
     bool callsign_valid;
     std::string callsign;
@@ -270,13 +421,13 @@ bool JSONImporterTask::importFile(const std::string& filename, bool test)
 
     std::map <int, std::string> datasources;
 
-    for (Json::Value::const_iterator it = obj.begin(); it != obj.end(); ++it)
+    for (Json::Value::const_iterator it = object.begin(); it != object.end(); ++it)
     {
-        loginf << it.key().asString(); // << ':' << it->asInt() << '\n';
+        logdbg << it.key().asString(); // << ':' << it->asInt() << '\n';
 
         if (it.key().asString() == "acList")
         {
-            Json::Value ac_list = obj["acList"];
+            Json::Value ac_list = object["acList"];
             //Json::Value& ac_list = it.v;
             for (Json::Value::const_iterator tr_it = ac_list.begin(); tr_it != ac_list.end(); ++tr_it)
             {
@@ -302,8 +453,9 @@ bool JSONImporterTask::importFile(const std::string& filename, bool test)
                 //            5 = Satellite/Inmarsat/JAERO
                 //            6 = Aggregated from a group of receivers
                 //        XXX – a unique number assigned to feeds.  Static on server 100.  Dynamic on other servers.
-                assert (!(*tr_it)["Rcvr"].isNull());
-                receiver = (*tr_it)["Rcvr"].asUInt();
+                receiver_valid = !(*tr_it)["Rcvr"].isNull();
+                if (receiver_valid)
+                    receiver = (*tr_it)["Rcvr"].asUInt();
 
                 if (existing_datasources.count(receiver) == 0 && datasources.count(receiver) == 0)
                     datasources[receiver] = std::to_string(receiver);
@@ -325,8 +477,9 @@ bool JSONImporterTask::importFile(const std::string& filename, bool test)
                 // the same.  If the registration number changes, which can happen sometimes when an aircraft is sold
                 // to an owner in another country, the ICAO hex code will also change.
 
-                assert (!(*tr_it)["Icao"].isNull());
-                target_address = String::intFromHexString((*tr_it)["Icao"].asString());
+                target_address_valid = !(*tr_it)["Icao"].isNull();
+                if (target_address_valid)
+                    target_address = String::intFromHexString((*tr_it)["Icao"].asString());
 
                 //    Reg (alphanumeric) – Aircraft registration number.  This is looked up via a database based on the
                 // ICAO code.  This information is only as good as the database, and is not pulled off the airwaves. It
@@ -384,6 +537,13 @@ bool JSONImporterTask::importFile(const std::string& filename, bool test)
                     epoch_ms = (*tr_it)["PosTime"].asLargestUInt();
                     date_time.setMSecsSinceEpoch(epoch_ms);
                     tod = String::timeFromString(date_time.toString("hh:mm:ss.zzz").toStdString());
+
+                    if (use_time_filter_ && (tod < time_filter_min_ || tod > time_filter_max_))
+                    {
+                        skipped++;
+                        all_cnt++;
+                        continue;
+                    }
                 }
 
                 //    Mlat (boolean) – True if the latitude and longitude appear to have been calculated by an MLAT
@@ -546,9 +706,9 @@ bool JSONImporterTask::importFile(const std::string& filename, bool test)
 
                 //    Source (string) – Internal use only.
 
-                if (latitude_valid && longitude_valid && time_valid)
+                if (receiver_valid && target_address_valid && latitude_valid && longitude_valid && time_valid)
                 {
-                    loginf << "\t rn " << rec_num
+                    logdbg << "\t rn " << rec_num_cnt_
                            << " rc " << receiver
                            << " ta " << target_address
                            << " cs " << (callsign_valid ? callsign : "NULL")
@@ -558,7 +718,7 @@ bool JSONImporterTask::importFile(const std::string& filename, bool test)
                            << " lon " << std::to_string(longitude_deg)
                            << " dt " << date_time.toString("yyyy.MM.dd hh:mm:ss.zzz").toStdString();
 
-                    key_al.set(inserted, rec_num);
+                    key_al.set(inserted, rec_num_cnt_);
                     dsid_al.set(inserted, receiver);
                     target_addr_al.set(inserted, target_address);
                     if (callsign_valid)
@@ -572,21 +732,30 @@ bool JSONImporterTask::importFile(const std::string& filename, bool test)
                     tod_al.set(inserted, (int) tod);
 
                     inserted++;
+                    rec_num_cnt_++;
                 }
                 else
                     skipped++;
 
-                rec_num++;
+                all_cnt++;
             }
         }
     }
     assert (buffer_ptr->size() == inserted);
 
-    if (rec_num != 0)
+    if (buffer_ptr->size() != 0)
     {
         if (!test)
         {
-            loginf << "JSONImporterTask: importFile: inserting into database";
+            loginf << "JSONImporterTask: parseJSON: inserting into database";
+
+            insert_active_ = true;
+
+            if (datasources.size())
+            {
+                loginf << "JSONImporterTask: parseJSON: inserting " << datasources.size() << " data sources";
+                db_object_->addDataSources(datasources);
+            }
 
             DBOVariableSet var_list;
             var_list.add(*key_var_);
@@ -599,27 +768,21 @@ bool JSONImporterTask::importFile(const std::string& filename, bool test)
             var_list.add(*longitude_var_);
             var_list.add(*tod_var_);
 
-            connect (db_object_, &DBObject::insertDoneSignal, this, &JSONImporterTask::insertDoneSlot);
-            connect (db_object_, &DBObject::insertProgressSignal, this, &JSONImporterTask::insertProgressSlot);
+            connect (db_object_, &DBObject::insertDoneSignal, this, &JSONImporterTask::insertDoneSlot,
+                     Qt::UniqueConnection);
+            connect (db_object_, &DBObject::insertProgressSignal, this, &JSONImporterTask::insertProgressSlot,
+                     Qt::UniqueConnection);
 
             db_object_->insertData(var_list, buffer_ptr);
-
-            if (datasources.size())
-            {
-                loginf << "JSONImporterTask: importFile: inserting " << datasources.size() << " data sources";
-                db_object_->addDataSources(datasources);
-            }
         }
 
-        loginf << "JSONImporterTask: importFile: all " << rec_num
-               << " to be inserted " << inserted << " (" << String::percentToString(100.0 * inserted/rec_num) << "%)"
-               << " skipped " << skipped<< " (" << String::percentToString(100.0 * skipped/rec_num) << "%)";
+        loginf << "JSONImporterTask: parseJSON: all " << all_cnt << " rec_num_cnt " << rec_num_cnt_
+               << " to be inserted " << inserted << " (" << String::percentToString(100.0 * inserted/all_cnt) << "%)"
+               << " skipped " << skipped<< " (" << String::percentToString(100.0 * skipped/all_cnt) << "%)";
     }
     else
-        loginf << "JSONImporterTask: importFile: all "<< rec_num << " to be inserted " << inserted << " skipped "
-               << skipped;
-
-    return true;
+        loginf << "JSONImporterTask: parseJSON: all " << all_cnt << " rec_num_cnt "<< rec_num_cnt_
+               << " to be inserted " << inserted << " skipped " << skipped;
 }
 
 void JSONImporterTask::insertProgressSlot (float percent)
@@ -630,6 +793,7 @@ void JSONImporterTask::insertProgressSlot (float percent)
 void JSONImporterTask::insertDoneSlot (DBObject& object)
 {
     loginf << "JSONImporterTask: insertDoneSlot";
+    insert_active_ = false;
 }
 
 void JSONImporterTask::checkAndSetVariable (std::string& name_str, DBOVariable** var)

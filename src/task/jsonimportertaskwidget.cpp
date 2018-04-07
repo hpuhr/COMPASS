@@ -9,12 +9,16 @@
 #include "dbobjectmanager.h"
 
 #include <QVBoxLayout>
-#include <QGridLayout>
+#include <QFormLayout>
 #include <QLabel>
 #include <QPushButton>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QListWidget>
+#include <QCheckBox>
+#include <QLineEdit>
+
+using namespace Utils;
 
 JSONImporterTaskWidget::JSONImporterTaskWidget(JSONImporterTask& task, QWidget* parent, Qt::WindowFlags f)
 : QWidget (parent, f), task_(task)
@@ -53,18 +57,31 @@ JSONImporterTaskWidget::JSONImporterTaskWidget(JSONImporterTask& task, QWidget* 
     main_layout->addWidget(delete_button_);
     main_layout->addStretch();
 
-    QGridLayout *grid = new QGridLayout ();
-    unsigned int row_cnt=0;
-
-    grid->addWidget (new QLabel ("DBObject"), row_cnt, 0);
+    QFormLayout *stuff_layout = new QFormLayout;
+    stuff_layout->setFormAlignment(Qt::AlignRight | Qt::AlignTop);
 
     object_box_ = new DBObjectComboBox (false);
     connect (object_box_, SIGNAL(changedObject()), this, SLOT(dbObjectChangedSlot()));
-    grid->addWidget (object_box_, row_cnt, 1);
+    stuff_layout->addRow(tr("DBObject"), object_box_);
 
-    // TODO
+    filter_time_check_ = new QCheckBox ();
+    filter_time_check_->setChecked(task_.useTimeFilter());
+    connect (filter_time_check_, SIGNAL(toggled(bool)), this, SLOT(useTimeFilterChangedSlot(bool)));
+    stuff_layout->addRow("Filter Time", filter_time_check_);
 
-    main_layout->addLayout(grid);
+    filter_time_min_edit_ = new QLineEdit ();
+    filter_time_min_edit_->setText(String::timeStringFromDouble(task_.timeFilterMin()).c_str());
+    connect (filter_time_min_edit_, SIGNAL(textChanged(QString)), this, SLOT(timeFilterMinChangedSlot()));
+    stuff_layout->addRow("Filter Time Minimum", filter_time_min_edit_);
+
+    filter_time_max_edit_ = new QLineEdit ();
+    filter_time_max_edit_->setText(String::timeStringFromDouble(task_.timeFilterMax()).c_str());
+    connect (filter_time_max_edit_, SIGNAL(textChanged(QString)), this, SLOT(timeFilterMaxChangedSlot()));
+    stuff_layout->addRow("Filter Time Maximum", filter_time_max_edit_);
+
+    main_layout->addLayout(stuff_layout);
+
+    main_layout->addStretch();
 
     test_button_ = new QPushButton ("Test Import");
     connect(test_button_, &QPushButton::clicked, this, &JSONImporterTaskWidget::testImportSlot);
@@ -162,7 +179,11 @@ void JSONImporterTaskWidget::testImportSlot ()
     if (filename.size() > 0)
     {
         assert (task_.hasFile(filename.toStdString()));
-        task_.importFile(filename.toStdString(), true);
+
+        if (filename.endsWith(".zip") || filename.endsWith(".gz") || filename.endsWith(".tgz"))
+            task_.importFileArchive(filename.toStdString(), true);
+        else
+            task_.importFile(filename.toStdString(), true);
 
         test_button_->setDisabled(true);
         import_button_->setDisabled(true);
@@ -186,7 +207,11 @@ void JSONImporterTaskWidget::importSlot ()
     if (filename.size() > 0)
     {
         assert (task_.hasFile(filename.toStdString()));
-        task_.importFile(filename.toStdString(), false);
+
+        if (filename.endsWith(".zip") || filename.endsWith(".gz") || filename.endsWith(".tgz"))
+            task_.importFileArchive(filename.toStdString(), false);
+        else
+            task_.importFile(filename.toStdString(), false);
 
         test_button_->setDisabled(true);
         import_button_->setDisabled(true);
@@ -211,4 +236,37 @@ void JSONImporterTaskWidget::setDBOBject (const std::string& object_name)
 
 //    latitude_box_->showDBOOnly(object_name);
 //    longitude_box_->showDBOOnly(object_name);
+}
+
+void JSONImporterTaskWidget::useTimeFilterChangedSlot (bool checked)
+{
+    task_.useTimeFilter(checked);
+}
+
+void JSONImporterTaskWidget::timeFilterMinChangedSlot ()
+{
+    assert (filter_time_min_edit_);
+
+    if (filter_time_min_edit_->text().size() == 0)
+        return;
+
+    std::string tmp = filter_time_min_edit_->text().toStdString();
+    float value = String::timeFromString(tmp);
+
+    if (value > 0 && value < 24*3600)
+        task_.timeFilterMin(value);
+}
+
+void JSONImporterTaskWidget::timeFilterMaxChangedSlot ()
+{
+    assert (filter_time_max_edit_);
+
+    if (filter_time_max_edit_->text().size() == 0)
+        return;
+
+    std::string tmp = filter_time_max_edit_->text().toStdString();
+    float value = String::timeFromString(tmp);
+
+    if (value > 0 && value < 24*3600)
+        task_.timeFilterMax(value);
 }

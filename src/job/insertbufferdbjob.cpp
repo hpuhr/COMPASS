@@ -49,7 +49,9 @@ void InsertBufferDBJob::run ()
 
     loading_start_time_ = boost::posix_time::microsec_clock::local_time();
 
-    unsigned int steps = buffer_->size() / 10000;
+    unsigned int insert_size = 20000;
+
+    unsigned int steps = buffer_->size() / insert_size;
 
     loginf  << "InsertBufferDBJob: run: writing object " << dbobject_.name() << " size " << buffer_->size();
 
@@ -60,13 +62,13 @@ void InsertBufferDBJob::run ()
 
     for (unsigned int cnt = 0; cnt <= steps; cnt++)
     {
-        index_from = cnt * 10000;
-        index_to = index_from + 10000;
+        index_from = cnt * insert_size;
+        index_to = index_from + insert_size -1;
 
         if (index_to > buffer_->size()-1)
             index_to = buffer_->size()-1;
 
-        logdbg << "InsertBufferDBJob: run: step " << cnt << " steps " << steps << " from " << index_from
+        loginf << "InsertBufferDBJob: run: step " << cnt << " steps " << steps << " from " << index_from
                << " to " << index_to;
 
         db_interface_.insertBuffer (table, buffer_, index_from, index_to);

@@ -149,7 +149,8 @@ void SQLiteConnection::stepAndClearBindings ()
         }
         else if (ret2 > SQLITE_OK  && ret2 < SQLITE_ROW)
         {
-            logerr  << "DBInterface: stepAndClearBindings: error while bind: " << ret2;
+            logerr  << "DBInterface: stepAndClearBindings: error while bind: " << ret2 << ": "
+                    << sqlite3_errmsg(db_handle_);
             throw std::runtime_error ("DBInterface: stepAndClearBindings: error while bind");
         }
     }

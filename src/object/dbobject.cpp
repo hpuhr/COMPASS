@@ -313,6 +313,7 @@ const MetaDBTable& DBObject::currentMetaTable () const
 
 void DBObject::addDataSource (int key_value, const std::string& name)
 {
+    loginf << "DBObject: addDataSources: inserting source " << name;
     assert (hasCurrentDataSourceDefinition());
 
     const DBODataSourceDefinition &mos_def = currentDataSourceDefinition ();
@@ -366,11 +367,11 @@ void DBObject::addDataSource (int key_value, const std::string& name)
     }
 
     emit db_interface.databaseContentChangedSignal();
-
 }
 
 void DBObject::addDataSources (std::map <int, std::string>& sources)
 {
+    loginf << "DBObject: addDataSources: inserting " << sources.size() << " sources";
     assert (hasCurrentDataSourceDefinition());
 
     const DBODataSourceDefinition &mos_def = currentDataSourceDefinition ();
@@ -652,7 +653,7 @@ void DBObject::insertDoneSlot ()
     insert_job_ = nullptr;
 
     emit insertDoneSignal (*this);
-    emit ATSDB::instance().interface().databaseContentChangedSignal();
+    //emit ATSDB::instance().interface().databaseContentChangedSignal();
 }
 
 void DBObject::updateData (DBOVariable &key_var, DBOVariableSet& list, std::shared_ptr<Buffer> buffer)

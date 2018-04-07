@@ -11,6 +11,11 @@ class SavedFile;
 class DBObject;
 class DBOVariable;
 
+namespace Json
+{
+    class Value;
+}
+
 class JSONImporterTask : public QObject, public Configurable
 {
         Q_OBJECT
@@ -31,7 +36,8 @@ public:
     void dbObjectStr(const std::string& db_object_str);
 
     bool canImportFile (const std::string& filename);
-    bool importFile (const std::string& filename, bool test);
+    void importFile (const std::string& filename, bool test);
+    void importFileArchive (const std::string& filename, bool test);
 
     const std::map <std::string, SavedFile*> &fileList () { return file_list_; }
     bool hasFile (const std::string &filename) { return file_list_.count (filename) > 0; }
@@ -39,6 +45,16 @@ public:
     void removeFile (const std::string &filename);
 
     const std::string &lastFilename () { return last_filename_; }
+
+    bool useTimeFilter() const;
+    void useTimeFilter(bool value);
+
+    float timeFilterMin() const;
+    void timeFilterMin(float value);
+
+    float timeFilterMax() const;
+    void timeFilterMax(float value);
+
 
 protected:
     std::map <std::string, SavedFile*> file_list_;
@@ -76,7 +92,16 @@ protected:
 
     JSONImporterTaskWidget* widget_ {nullptr};
 
+    bool insert_active_ {false};
+    unsigned int rec_num_cnt_ {0};
+
+    bool use_time_filter_ {false};
+    float time_filter_min_ {0};
+    float time_filter_max_ {0};
+
     void checkAndSetVariable (std::string &name_str, DBOVariable** var);
+
+    void parseJSON (Json::Value& object, bool test);
 };
 
 #endif // JSONIMPORTERTASK_H

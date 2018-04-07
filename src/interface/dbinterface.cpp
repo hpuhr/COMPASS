@@ -855,6 +855,9 @@ std::set<int> DBInterface::getActiveDataSources (const DBObject &object)
 void DBInterface::insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer, size_t from_index,
                                 size_t to_index)
 {
+    loginf << "DBInterface: insertBuffer: table " << table.name() << " buffer size " << buffer->size()
+           << " from " << from_index << " to " << to_index;
+
     //assert (checkUpdateBuffer(object, key_var, buffer));
     assert (current_connection_);
     assert (buffer);
