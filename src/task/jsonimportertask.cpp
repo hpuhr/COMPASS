@@ -22,6 +22,9 @@
 #include <QDateTime>
 #include <QCoreApplication>
 #include <QThread>
+#include <QMessageBox>
+
+#include "boost/date_time/posix_time/posix_time.hpp"
 
 #include <jsoncpp/json/json.h>
 
@@ -266,6 +269,8 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
 
     loginf  << "JSONImporterTask: importFileArchive: importing " << filename << " raw " << raw;
 
+    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
+
     struct archive *a;
     struct archive_entry *entry;
     int r;
@@ -298,10 +303,34 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
     Json::Reader reader;
     Json::Value obj;
 
+    QMessageBox msg_box;
+    std::string msg = "Importing archive '"+filename+"'.";
+    msg_box.setText(msg.c_str());
+    msg_box.setStandardButtons(QMessageBox::NoButton);
+    msg_box.show();
+
+
+    unsigned int entry_cnt = 0;
+
     while (archive_read_next_header(a, &entry) == ARCHIVE_OK)
     {
-        for (unsigned int cnt=0; cnt < 10; cnt++)
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+//        for (unsigned int cnt=0; cnt < 10; cnt++)
+//            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+        loginf << "Archive file found: " << archive_entry_pathname(entry) << " size " << archive_entry_size(entry);
+
+        msg = "Reading archive entry " + std::to_string(entry_cnt) + ": "
+                + std::string(archive_entry_pathname(entry)) + ".\n";
+        if (all_cnt_)
+            msg +=  + "# of updates: " + std::to_string(all_cnt_)
+                    + "\n# of skipped updates: " + std::to_string(skipped_cnt_)
+                    + "(" +String::percentToString(100.0 * skipped_cnt_/all_cnt_) + "%)"
+                    + "\n# of inserted updates: " + std::to_string(inserted_cnt_)
+                    + "(" +String::percentToString(100.0 * inserted_cnt_/all_cnt_) + "%)";
+
+        msg_box.setInformativeText(msg.c_str());
+        msg_box.show();
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
         ss.str("");
 
@@ -317,7 +346,6 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
 
             std::string str (reinterpret_cast<char const*>(buff), size);
             ss << str;
-
         }
 
         loginf  << "JSONImporterTask: importFileArchive: got entry with " << ss.str().size() << " chars";
@@ -330,6 +358,40 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
         }
         parseJSON (obj, test);
     }
+
+    r = archive_read_close(a);
+    if (r != ARCHIVE_OK)
+        throw std::runtime_error("JSONImporterTask: importFileArchive: archive read close error: "
+                                 +std::string(archive_error_string(a)));
+
+    r = archive_read_free(a);
+
+    if (r != ARCHIVE_OK)
+        throw std::runtime_error("JSONImporterTask: importFileArchive: archive read free error: "
+                                 +std::string(archive_error_string(a)));
+
+    msg_box.close();
+
+    for (unsigned int cnt=0; cnt < 10; cnt++)
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+    boost::posix_time::ptime stop_time = boost::posix_time::microsec_clock::local_time();
+    boost::posix_time::time_duration diff = stop_time - start_time;
+
+    std::string time_str = std::to_string(diff.hours())+":"+std::to_string(diff.minutes())
+            +":"+std::to_string(diff.seconds());
+
+    QMessageBox msgBox;
+    msg = "Reading archive " + filename + " with " + std::to_string(entry_cnt) + " entries finished successfully in "
+            + time_str+".\n";
+    if (all_cnt_)
+        msg +=  + "# of updates: " + std::to_string(all_cnt_)
+                + "\n# of skipped updates: " + std::to_string(skipped_cnt_)
+                + "(" +String::percentToString(100.0 * skipped_cnt_/all_cnt_) + "%)"
+                + "\n# of inserted updates: " + std::to_string(inserted_cnt_)
+                + "(" +String::percentToString(100.0 * inserted_cnt_/all_cnt_) + "%)";
+    msgBox.setText(msg.c_str());
+    msgBox.exec();
 
     return;
 }
@@ -391,7 +453,7 @@ void JSONImporterTask::parseJSON (Json::Value& object, bool test)
     ArrayListTemplate<double>& longitude_al = buffer_ptr->getDouble(longitude_var_->name());
     ArrayListTemplate<float>& tod_al = buffer_ptr->getFloat(tod_var_->name());
 
-    unsigned int all_cnt = 0;
+//    unsigned int all_cnt = 0;
     bool receiver_valid;
     int receiver;
     bool target_address_valid;
@@ -411,15 +473,14 @@ void JSONImporterTask::parseJSON (Json::Value& object, bool test)
     QDateTime date_time;
     double tod;
 
-    unsigned int skipped = 0;
-    unsigned int inserted = 0;
-
-    std::map <int, std::string> existing_datasources;
+//    unsigned int skipped = 0;
+    unsigned int row_cnt = 0;
 
     for (auto& src_it : db_object_->dataSources())
-        existing_datasources[src_it.first] = src_it.second.name();
+        if (datasources_existing_.count(src_it.first) == 0)
+            datasources_existing_[src_it.first] = src_it.second.name();
 
-    std::map <int, std::string> datasources;
+    std::map <int, std::string> datasources_to_add;
 
     for (Json::Value::const_iterator it = object.begin(); it != object.end(); ++it)
     {
@@ -457,8 +518,8 @@ void JSONImporterTask::parseJSON (Json::Value& object, bool test)
                 if (receiver_valid)
                     receiver = (*tr_it)["Rcvr"].asUInt();
 
-                if (existing_datasources.count(receiver) == 0 && datasources.count(receiver) == 0)
-                    datasources[receiver] = std::to_string(receiver);
+                if (datasources_existing_.count(receiver) == 0 && datasources_to_add.count(receiver) == 0)
+                    datasources_to_add[receiver] = std::to_string(receiver);
 
                 //    HasSig (boolean) – True if the aircraft has a signal level associated with it. The level will be
                 // included in the “Sig” field.
@@ -540,8 +601,8 @@ void JSONImporterTask::parseJSON (Json::Value& object, bool test)
 
                     if (use_time_filter_ && (tod < time_filter_min_ || tod > time_filter_max_))
                     {
-                        skipped++;
-                        all_cnt++;
+                        skipped_cnt_++;
+                        all_cnt_++;
                         continue;
                     }
                 }
@@ -718,30 +779,31 @@ void JSONImporterTask::parseJSON (Json::Value& object, bool test)
                            << " lon " << std::to_string(longitude_deg)
                            << " dt " << date_time.toString("yyyy.MM.dd hh:mm:ss.zzz").toStdString();
 
-                    key_al.set(inserted, rec_num_cnt_);
-                    dsid_al.set(inserted, receiver);
-                    target_addr_al.set(inserted, target_address);
+                    key_al.set(row_cnt, rec_num_cnt_);
+                    dsid_al.set(row_cnt, receiver);
+                    target_addr_al.set(row_cnt, target_address);
                     if (callsign_valid)
-                        callsign_al.set(inserted, callsign);
+                        callsign_al.set(row_cnt, callsign);
                     if (altitude_baro_valid)
-                        altitude_baro_al.set(inserted, altitude_baro_ft);
+                        altitude_baro_al.set(row_cnt, altitude_baro_ft);
                     if (altitude_geo_valid)
-                        altitude_geo_al.set(inserted, altitude_geo_ft);
-                    latitude_al.set(inserted, latitude_deg);
-                    longitude_al.set(inserted, longitude_deg);
-                    tod_al.set(inserted, (int) tod);
+                        altitude_geo_al.set(row_cnt, altitude_geo_ft);
+                    latitude_al.set(row_cnt, latitude_deg);
+                    longitude_al.set(row_cnt, longitude_deg);
+                    tod_al.set(row_cnt, (int) tod);
 
-                    inserted++;
+                    row_cnt++;
                     rec_num_cnt_++;
+                    inserted_cnt_++;
                 }
                 else
-                    skipped++;
+                    skipped_cnt_++;
 
-                all_cnt++;
+                all_cnt_++;
             }
         }
     }
-    assert (buffer_ptr->size() == inserted);
+    assert (buffer_ptr->size() == row_cnt);
 
     if (buffer_ptr->size() != 0)
     {
@@ -751,10 +813,14 @@ void JSONImporterTask::parseJSON (Json::Value& object, bool test)
 
             insert_active_ = true;
 
-            if (datasources.size())
+            if (datasources_to_add.size())
             {
-                loginf << "JSONImporterTask: parseJSON: inserting " << datasources.size() << " data sources";
-                db_object_->addDataSources(datasources);
+                loginf << "JSONImporterTask: parseJSON: inserting " << datasources_to_add.size() << " data sources";
+                db_object_->addDataSources(datasources_to_add);
+
+                for (auto& src_it : datasources_to_add)
+                    datasources_existing_ [src_it.first] = src_it.second;
+                datasources_to_add.clear();
             }
 
             DBOVariableSet var_list;
@@ -776,13 +842,13 @@ void JSONImporterTask::parseJSON (Json::Value& object, bool test)
             db_object_->insertData(var_list, buffer_ptr);
         }
 
-        loginf << "JSONImporterTask: parseJSON: all " << all_cnt << " rec_num_cnt " << rec_num_cnt_
-               << " to be inserted " << inserted << " (" << String::percentToString(100.0 * inserted/all_cnt) << "%)"
-               << " skipped " << skipped<< " (" << String::percentToString(100.0 * skipped/all_cnt) << "%)";
+//        loginf << "JSONImporterTask: parseJSON: all " << all_cnt << " rec_num_cnt " << rec_num_cnt_
+//               << " to be inserted " << row_cnt << " (" << String::percentToString(100.0 * row_cnt/all_cnt) << "%)"
+//               << " skipped " << skipped<< " (" << String::percentToString(100.0 * skipped/all_cnt) << "%)";
     }
-    else
-        loginf << "JSONImporterTask: parseJSON: all " << all_cnt << " rec_num_cnt "<< rec_num_cnt_
-               << " to be inserted " << inserted << " skipped " << skipped;
+//    else
+//        loginf << "JSONImporterTask: parseJSON: all " << all_cnt << " rec_num_cnt "<< rec_num_cnt_
+//               << " to be inserted " << row_cnt << " skipped " << skipped;
 }
 
 void JSONImporterTask::insertProgressSlot (float percent)

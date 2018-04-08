@@ -50,6 +50,12 @@ protected:
     QLineEdit* filter_time_min_edit_ {nullptr};
     QLineEdit* filter_time_max_edit_ {nullptr};
 
+//    QCheckBox* filter_position_check_ {nullptr};
+//    QLineEdit* filter_lat_min_edit_ {nullptr};
+//    QLineEdit* filter_lat_max_edit_ {nullptr};
+//    QLineEdit* filter_lon_min_edit_ {nullptr};
+//    QLineEdit* filter_lon_max_edit_ {nullptr};
+
     QPushButton* test_button_ {nullptr};
     QPushButton* import_button_ {nullptr};
 

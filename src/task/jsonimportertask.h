@@ -94,10 +94,15 @@ protected:
 
     bool insert_active_ {false};
     unsigned int rec_num_cnt_ {0};
+    unsigned int all_cnt_ {0};
+    unsigned int skipped_cnt_ {0};
+    unsigned int inserted_cnt_ {0};
 
     bool use_time_filter_ {false};
     float time_filter_min_ {0};
     float time_filter_max_ {0};
+
+    std::map <int, std::string> datasources_existing_;
 
     void checkAndSetVariable (std::string &name_str, DBOVariable** var);
 
