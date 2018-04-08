@@ -787,6 +787,15 @@ sub processFile {
       my $resultData = `termsql -i $csvData -o $sqliteDB -d '$delimiter' -p '$delimiter' -1 -k 'REC_NUM' -C -m csv -t $dataTableName --append`;
    }
 
+   # change the empty values into NULL values
+   open(PROCESS, "|sqlite3 $sqliteDB > /dev/null") or die "cannot open 'sqlite3' for writing";
+   foreach (split($delimiter, $csvHeader)) {
+      # rec_num and ds_id if existing are not supposed to contain empty values
+      next if (/^rec_num$/i || /^ds_id$/i);
+      print PROCESS "update $dataTableName set $_ = NULL where $_ = '';";
+   }
+   close PROCESS;
+
    # fill the sensor configuration data
    my $configAll = "/tmp/.csv2atsdb.le_ds";
    open(LE_DS, ">$configAll") or die "cannot open '$configAll' for writing";
