@@ -63,12 +63,13 @@ void SQLiteConnection::openFile (const std::string &file_name)
     {
         // Even in case of an error we get a valid db_handle (for the
         // purpose of calling sqlite3_errmsg on it ...)
-        logerr  <<  "SQLiteConnection: createRDBFile: error " <<  result << " " <<  sqlite3_errmsg(db_handle_);
+        logerr  <<  "SQLiteConnection: openFile: error " <<  result << " " <<  sqlite3_errmsg(db_handle_);
         sqlite3_close(db_handle_);
-        throw std::runtime_error ("SQLiteConnection: createRDBFile: error");
+        throw std::runtime_error ("SQLiteConnection: openFile: error");
     }
     char * sErrMsg = 0;
     sqlite3_exec(db_handle_, "PRAGMA synchronous = OFF", NULL, NULL, &sErrMsg);
+    sqlite3_exec(db_handle_, "PRAGMA journal_mode = OFF", NULL, NULL, &sErrMsg);
 
     connection_ready_ = true;
 

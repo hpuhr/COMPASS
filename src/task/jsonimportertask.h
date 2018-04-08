@@ -2,14 +2,18 @@
 #define JSONIMPORTERTASK_H
 
 #include "configurable.h"
+#include "dbovariableset.h"
 
 #include <QObject>
+
+#include <memory>
 
 class TaskManager;
 class JSONImporterTaskWidget;
 class SavedFile;
 class DBObject;
 class DBOVariable;
+class Buffer;
 
 namespace Json
 {
@@ -131,11 +135,16 @@ protected:
     bool join_data_sources_ {false};
     bool separate_mlat_data_ {false};
 
+    PropertyList list_;
+    DBOVariableSet var_list_;
+
     std::map <int, std::string> datasources_existing_;
+    std::map <int, std::string> datasources_to_add_;
 
     void checkAndSetVariable (std::string &name_str, DBOVariable** var);
 
-    void parseJSON (Json::Value& object, bool test);
+    std::shared_ptr<Buffer> parseJSON (Json::Value& object, bool test);
+    void insertData (std::shared_ptr<Buffer> buffer);
 };
 
 #endif // JSONIMPORTERTASK_H

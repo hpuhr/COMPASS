@@ -318,7 +318,10 @@ void JSONImporterTask::importFile(const std::string& filename, bool test)
     Json::Value obj;
     reader.parse(ifs, obj); // reader can also read strings
 
-    parseJSON (obj, test);
+    std::shared_ptr<Buffer> buffer_ptr = parseJSON (obj, test);
+
+    if (!test)
+        insertData (buffer_ptr);
 
     return;
 }
@@ -438,12 +441,16 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
         loginf  << "JSONImporterTask: importFileArchive: got entry with " << ss.str().size() << " chars";
         reader.parse(ss.str(), obj); // reader can also read strings
 
+        std::shared_ptr<Buffer> buffer_ptr = parseJSON (obj, test);
+
         while (insert_active_)
         {
             QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
             QThread::msleep (10);
         }
-        parseJSON (obj, test);
+
+        if (!test)
+            insertData (buffer_ptr);
         entry_cnt++;
     }
 
@@ -484,10 +491,9 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
     return;
 }
 
-void JSONImporterTask::parseJSON (Json::Value& object, bool test)
+std::shared_ptr<Buffer> JSONImporterTask::parseJSON (Json::Value& object, bool test)
 {
     loginf << "JSONImporterTask: parseJSON";
-    assert (!insert_active_);
 
     if (!key_var_ && key_var_str_.size())
         checkAndSetVariable (key_var_str_, &key_var_);
@@ -518,18 +524,20 @@ void JSONImporterTask::parseJSON (Json::Value& object, bool test)
     assert (longitude_var_ && longitude_var_->hasCurrentDBColumn());
     assert (tod_var_ && tod_var_->hasCurrentDBColumn());
 
-    PropertyList list;
-    list.addProperty(key_var_->name(), key_var_->dataType());
-    list.addProperty(dsid_var_->name(), dsid_var_->dataType());
-    list.addProperty(target_addr_var_->name(), target_addr_var_->dataType());
-    list.addProperty(callsign_var_->name(), callsign_var_->dataType());
-    list.addProperty(altitude_baro_var_->name(), altitude_baro_var_->dataType());
-    list.addProperty(altitude_geo_var_->name(), altitude_geo_var_->dataType());
-    list.addProperty(latitude_var_->name(), latitude_var_->dataType());
-    list.addProperty(longitude_var_->name(), longitude_var_->dataType());
-    list.addProperty(tod_var_->name(), tod_var_->dataType());
+    if (list_.size() == 0) // only if empty, only at first time
+    {
+        list_.addProperty(key_var_->name(), key_var_->dataType());
+        list_.addProperty(dsid_var_->name(), dsid_var_->dataType());
+        list_.addProperty(target_addr_var_->name(), target_addr_var_->dataType());
+        list_.addProperty(callsign_var_->name(), callsign_var_->dataType());
+        list_.addProperty(altitude_baro_var_->name(), altitude_baro_var_->dataType());
+        list_.addProperty(altitude_geo_var_->name(), altitude_geo_var_->dataType());
+        list_.addProperty(latitude_var_->name(), latitude_var_->dataType());
+        list_.addProperty(longitude_var_->name(), longitude_var_->dataType());
+        list_.addProperty(tod_var_->name(), tod_var_->dataType());
+    }
 
-    std::shared_ptr<Buffer> buffer_ptr = std::shared_ptr<Buffer> (new Buffer (list, db_object_->name()));
+    std::shared_ptr<Buffer> buffer_ptr = std::shared_ptr<Buffer> (new Buffer (list_, db_object_->name()));
 
     ArrayListTemplate<int>& key_al = buffer_ptr->getInt(key_var_->name());
     ArrayListTemplate<int>& dsid_al = buffer_ptr->getInt(dsid_var_->name());
@@ -570,8 +578,6 @@ void JSONImporterTask::parseJSON (Json::Value& object, bool test)
     for (auto& src_it : db_object_->dataSources())
         if (datasources_existing_.count(src_it.first) == 0)
             datasources_existing_[src_it.first] = src_it.second.name();
-
-    std::map <int, std::string> datasources_to_add;
 
     bool skip_this;
 
@@ -922,8 +928,8 @@ void JSONImporterTask::parseJSON (Json::Value& object, bool test)
                     rec_num_cnt_++;
                     inserted_cnt_++;
 
-                    if (datasources_existing_.count(receiver) == 0 && datasources_to_add.count(receiver) == 0)
-                        datasources_to_add[receiver] = receiver_name;
+                    if (datasources_existing_.count(receiver) == 0 && datasources_to_add_.count(receiver) == 0)
+                        datasources_to_add_[receiver] = receiver_name;
                 }
                 else
                     skipped_cnt_++;
@@ -934,50 +940,57 @@ void JSONImporterTask::parseJSON (Json::Value& object, bool test)
     }
     assert (buffer_ptr->size() == row_cnt);
 
-    if (buffer_ptr->size() != 0)
-    {
-        if (!test)
-        {
-            loginf << "JSONImporterTask: parseJSON: inserting into database";
-
-            insert_active_ = true;
-
-            if (datasources_to_add.size())
+//    if (buffer_ptr->size() != 0)
+//    {
+//        if (!test)
+//        {
+            if (var_list_.getSize() == 0) // fill if empty, only at first time
             {
-                loginf << "JSONImporterTask: parseJSON: inserting " << datasources_to_add.size() << " data sources";
-                db_object_->addDataSources(datasources_to_add);
-
-                for (auto& src_it : datasources_to_add)
-                    datasources_existing_ [src_it.first] = src_it.second;
-                datasources_to_add.clear();
+                var_list_.add(*key_var_);
+                var_list_.add(*dsid_var_);
+                var_list_.add(*target_addr_var_);
+                var_list_.add(*callsign_var_);
+                var_list_.add(*altitude_baro_var_);
+                var_list_.add(*altitude_geo_var_);
+                var_list_.add(*latitude_var_);
+                var_list_.add(*longitude_var_);
+                var_list_.add(*tod_var_);
             }
-
-            DBOVariableSet var_list;
-            var_list.add(*key_var_);
-            var_list.add(*dsid_var_);
-            var_list.add(*target_addr_var_);
-            var_list.add(*callsign_var_);
-            var_list.add(*altitude_baro_var_);
-            var_list.add(*altitude_geo_var_);
-            var_list.add(*latitude_var_);
-            var_list.add(*longitude_var_);
-            var_list.add(*tod_var_);
-
-            connect (db_object_, &DBObject::insertDoneSignal, this, &JSONImporterTask::insertDoneSlot,
-                     Qt::UniqueConnection);
-            connect (db_object_, &DBObject::insertProgressSignal, this, &JSONImporterTask::insertProgressSlot,
-                     Qt::UniqueConnection);
-
-            db_object_->insertData(var_list, buffer_ptr);
-        }
+//        }
 
 //        loginf << "JSONImporterTask: parseJSON: all " << all_cnt << " rec_num_cnt " << rec_num_cnt_
 //               << " to be inserted " << row_cnt << " (" << String::percentToString(100.0 * row_cnt/all_cnt) << "%)"
 //               << " skipped " << skipped<< " (" << String::percentToString(100.0 * skipped/all_cnt) << "%)";
-    }
+//    }
 //    else
 //        loginf << "JSONImporterTask: parseJSON: all " << all_cnt << " rec_num_cnt "<< rec_num_cnt_
 //               << " to be inserted " << row_cnt << " skipped " << skipped;
+
+    return buffer_ptr;
+}
+
+void JSONImporterTask::insertData (std::shared_ptr<Buffer> buffer)
+{
+    loginf << "JSONImporterTask: insertData: inserting into database";
+
+    insert_active_ = true;
+
+    if (datasources_to_add_.size())
+    {
+        loginf << "JSONImporterTask: insertData: inserting " << datasources_to_add_.size() << " data sources";
+        db_object_->addDataSources(datasources_to_add_);
+
+        for (auto& src_it : datasources_to_add_)
+            datasources_existing_ [src_it.first] = src_it.second;
+        datasources_to_add_.clear();
+    }
+
+    connect (db_object_, &DBObject::insertDoneSignal, this, &JSONImporterTask::insertDoneSlot,
+             Qt::UniqueConnection);
+    connect (db_object_, &DBObject::insertProgressSignal, this, &JSONImporterTask::insertProgressSlot,
+             Qt::UniqueConnection);
+
+    db_object_->insertData(var_list_, buffer);
 }
 
 void JSONImporterTask::insertProgressSlot (float percent)
