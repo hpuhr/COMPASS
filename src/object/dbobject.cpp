@@ -653,7 +653,7 @@ void DBObject::insertDoneSlot ()
     insert_job_ = nullptr;
 
     emit insertDoneSignal (*this);
-    //emit ATSDB::instance().interface().databaseContentChangedSignal();
+    emit ATSDB::instance().interface().databaseContentChangedSignal();
 }
 
 void DBObject::updateData (DBOVariable &key_var, DBOVariableSet& list, std::shared_ptr<Buffer> buffer)

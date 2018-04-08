@@ -40,9 +40,18 @@ JSONImporterTask::JSONImporterTask(const std::string& class_id, const std::strin
     registerParameter("last_filename", &last_filename_, "");
     registerParameter("db_object_str", &db_object_str_, "");
 
+    registerParameter("join_data_sources", &join_data_sources_, false);
+    registerParameter("separate_mlat_data", &separate_mlat_data_, false);
+
     registerParameter("use_time_filter", &use_time_filter_, false);
     registerParameter("time_filter_min", &time_filter_min_, 0);
     registerParameter("time_filter_max", &time_filter_max_, 24*3600);
+
+    registerParameter("use_position_filter", &use_position_filter_, false);
+    registerParameter("pos_filter_lat_min", &pos_filter_lat_min_, -90);
+    registerParameter("pos_filter_lat_max", &pos_filter_lat_max_, 90);
+    registerParameter("pos_filter_lon_min", &pos_filter_lon_min_, -180);
+    registerParameter("pos_filter_lon_max", &pos_filter_lon_max_, 180);
 
     key_var_str_ = "rec_num";
     dsid_var_str_ = "ds_id";
@@ -147,6 +156,75 @@ void JSONImporterTask::timeFilterMax(float value)
     time_filter_max_ = value;
 }
 
+bool JSONImporterTask::joinDataSources() const
+{
+    return join_data_sources_;
+}
+
+void JSONImporterTask::joinDataSources(bool value)
+{
+    join_data_sources_ = value;
+}
+
+bool JSONImporterTask::separateMLATData() const
+{
+    return separate_mlat_data_;
+}
+
+void JSONImporterTask::separateMLATData(bool value)
+{
+    separate_mlat_data_ = value;
+}
+
+bool JSONImporterTask::usePositionFilter() const
+{
+    return use_position_filter_;
+}
+
+void JSONImporterTask::usePositionFilter(bool use_position_filter)
+{
+    use_position_filter_ = use_position_filter;
+}
+
+float JSONImporterTask::positionFilterLatitudeMin() const
+{
+    return pos_filter_lat_min_;
+}
+
+void JSONImporterTask::positionFilterLatitudeMin(float value)
+{
+    pos_filter_lat_min_ = value;
+}
+
+float JSONImporterTask::positionFilterLatitudeMax() const
+{
+    return pos_filter_lat_max_;
+}
+
+void JSONImporterTask::positionFilterLatitudeMax(float value)
+{
+    pos_filter_lat_max_ = value;
+}
+
+float JSONImporterTask::positionFilterLongitudeMin() const
+{
+    return pos_filter_lon_min_;
+}
+
+void JSONImporterTask::positionFilterLongitudeMin(float value)
+{
+    pos_filter_lon_min_ = value;
+}
+
+float JSONImporterTask::positionFilterLongitudeMax() const
+{
+    return pos_filter_lon_max_;
+}
+
+void JSONImporterTask::positionFilterLongitudeMax(float value)
+{
+    pos_filter_lon_max_ = value;
+}
 
 std::string JSONImporterTask::dbObjectStr() const
 {
@@ -269,6 +347,15 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
 
     loginf  << "JSONImporterTask: importFileArchive: importing " << filename << " raw " << raw;
 
+    if (use_time_filter_)
+        loginf  << "JSONImporterTask: importFileArchive: using time filter min " << time_filter_min_
+                << " max " << time_filter_max_;
+
+    if (use_position_filter_)
+        loginf  << "JSONImporterTask: importFileArchive: using position filter latitude min " << pos_filter_lat_min_
+                << " max " << pos_filter_lat_max_ << " longitude min " << pos_filter_lon_min_
+                << " max " << pos_filter_lon_max_;
+
     boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
     struct archive *a;
@@ -324,9 +411,9 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
         if (all_cnt_)
             msg +=  + "# of updates: " + std::to_string(all_cnt_)
                     + "\n# of skipped updates: " + std::to_string(skipped_cnt_)
-                    + "(" +String::percentToString(100.0 * skipped_cnt_/all_cnt_) + "%)"
+                    + " (" +String::percentToString(100.0 * skipped_cnt_/all_cnt_) + "%)"
                     + "\n# of inserted updates: " + std::to_string(inserted_cnt_)
-                    + "(" +String::percentToString(100.0 * inserted_cnt_/all_cnt_) + "%)";
+                    + " (" +String::percentToString(100.0 * inserted_cnt_/all_cnt_) + "%)";
 
         msg_box.setInformativeText(msg.c_str());
         msg_box.show();
@@ -357,6 +444,7 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
             QThread::msleep (10);
         }
         parseJSON (obj, test);
+        entry_cnt++;
     }
 
     r = archive_read_close(a);
@@ -378,8 +466,8 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
     boost::posix_time::ptime stop_time = boost::posix_time::microsec_clock::local_time();
     boost::posix_time::time_duration diff = stop_time - start_time;
 
-    std::string time_str = std::to_string(diff.hours())+":"+std::to_string(diff.minutes())
-            +":"+std::to_string(diff.seconds());
+    std::string time_str = std::to_string(diff.hours())+"h "+std::to_string(diff.minutes())
+            +"m "+std::to_string(diff.seconds())+"s";
 
     QMessageBox msgBox;
     msg = "Reading archive " + filename + " with " + std::to_string(entry_cnt) + " entries finished successfully in "
@@ -387,9 +475,9 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
     if (all_cnt_)
         msg +=  + "# of updates: " + std::to_string(all_cnt_)
                 + "\n# of skipped updates: " + std::to_string(skipped_cnt_)
-                + "(" +String::percentToString(100.0 * skipped_cnt_/all_cnt_) + "%)"
+                + " (" +String::percentToString(100.0 * skipped_cnt_/all_cnt_) + "%)"
                 + "\n# of inserted updates: " + std::to_string(inserted_cnt_)
-                + "(" +String::percentToString(100.0 * inserted_cnt_/all_cnt_) + "%)";
+                + " (" +String::percentToString(100.0 * inserted_cnt_/all_cnt_) + "%)";
     msgBox.setText(msg.c_str());
     msgBox.exec();
 
@@ -456,6 +544,7 @@ void JSONImporterTask::parseJSON (Json::Value& object, bool test)
 //    unsigned int all_cnt = 0;
     bool receiver_valid;
     int receiver;
+    std::string receiver_name;
     bool target_address_valid;
     unsigned int target_address;
     bool callsign_valid;
@@ -472,6 +561,8 @@ void JSONImporterTask::parseJSON (Json::Value& object, bool test)
     unsigned long epoch_ms;
     QDateTime date_time;
     double tod;
+    bool mlat_valid;
+    bool mlat;
 
 //    unsigned int skipped = 0;
     unsigned int row_cnt = 0;
@@ -481,6 +572,8 @@ void JSONImporterTask::parseJSON (Json::Value& object, bool test)
             datasources_existing_[src_it.first] = src_it.second.name();
 
     std::map <int, std::string> datasources_to_add;
+
+    bool skip_this;
 
     for (Json::Value::const_iterator it = object.begin(); it != object.end(); ++it)
     {
@@ -492,6 +585,7 @@ void JSONImporterTask::parseJSON (Json::Value& object, bool test)
             //Json::Value& ac_list = it.v;
             for (Json::Value::const_iterator tr_it = ac_list.begin(); tr_it != ac_list.end(); ++tr_it)
             {
+                skip_this = false;
                 //loginf << tr_it.key().asString();
 
                 // from https://www.adsbexchange.com/datafields/
@@ -516,10 +610,16 @@ void JSONImporterTask::parseJSON (Json::Value& object, bool test)
                 //        XXX – a unique number assigned to feeds.  Static on server 100.  Dynamic on other servers.
                 receiver_valid = !(*tr_it)["Rcvr"].isNull();
                 if (receiver_valid)
+                {
                     receiver = (*tr_it)["Rcvr"].asUInt();
+                    receiver_name = std::to_string(receiver);
+                }
+                else
+                    skip_this = true;
 
-                if (datasources_existing_.count(receiver) == 0 && datasources_to_add.count(receiver) == 0)
-                    datasources_to_add[receiver] = std::to_string(receiver);
+                // moved down to mlat
+//                if (datasources_existing_.count(receiver) == 0 && datasources_to_add.count(receiver) == 0)
+//                    datasources_to_add[receiver] = std::to_string(receiver);
 
                 //    HasSig (boolean) – True if the aircraft has a signal level associated with it. The level will be
                 // included in the “Sig” field.
@@ -541,6 +641,8 @@ void JSONImporterTask::parseJSON (Json::Value& object, bool test)
                 target_address_valid = !(*tr_it)["Icao"].isNull();
                 if (target_address_valid)
                     target_address = String::intFromHexString((*tr_it)["Icao"].asString());
+                else
+                    skip_this = true;
 
                 //    Reg (alphanumeric) – Aircraft registration number.  This is looked up via a database based on the
                 // ICAO code.  This information is only as good as the database, and is not pulled off the airwaves. It
@@ -582,11 +684,20 @@ void JSONImporterTask::parseJSON (Json::Value& object, bool test)
                 latitude_valid = !(*tr_it)["Lat"].isNull();
                 if (latitude_valid)
                     latitude_deg = (*tr_it)["Lat"].asFloat();
+                else
+                    skip_this = true;
 
                 //    Long (float) – The aircraft’s longitude over the ground.
                 longitude_valid =!(*tr_it)["Long"].isNull();
                 if (longitude_valid)
                     longitude_deg = (*tr_it)["Long"].asFloat();
+                else
+                    skip_this = true;
+
+                if (!skip_this && use_position_filter_
+                        && (latitude_deg < pos_filter_lat_min_ || latitude_deg > pos_filter_lat_max_
+                        || longitude_deg < pos_filter_lon_min_ || longitude_deg > pos_filter_lon_max_))
+                    skip_this = true;
 
                 //    PosTime (epoch milliseconds) – The time (at UTC in JavaScript ticks, UNIX epoch format in
                 // milliseconds) that the position was last reported by the aircraft. This field is the time at which
@@ -600,12 +711,10 @@ void JSONImporterTask::parseJSON (Json::Value& object, bool test)
                     tod = String::timeFromString(date_time.toString("hh:mm:ss.zzz").toStdString());
 
                     if (use_time_filter_ && (tod < time_filter_min_ || tod > time_filter_max_))
-                    {
-                        skipped_cnt_++;
-                        all_cnt_++;
-                        continue;
-                    }
+                        skip_this = true;
                 }
+                else
+                    skip_this = true;
 
                 //    Mlat (boolean) – True if the latitude and longitude appear to have been calculated by an MLAT
                 // (multilateration) server and were not transmitted by the aircraft. Multilateration is based on the
@@ -614,6 +723,23 @@ void JSONImporterTask::parseJSON (Json::Value& object, bool test)
                 // aircraft tracks. Aircraft that have Mode S (and have not upgraded to ADS-B) can sometimes be tracked
                 // via multilateration.  It requires 3-4 ground stations in different locations to be receiving the
                 // aircraft signal simultaneously in order to allow the calculation.
+                mlat_valid = !(*tr_it)["Mlat"].isNull();
+
+                if (mlat_valid)
+                    mlat = (*tr_it)["Mlat"].asBool();
+
+                if (join_data_sources_) // init for ADS-B
+                {
+                    receiver_valid = true;
+                    receiver = 0;
+                    receiver_name = "ADS-B";
+
+                    if (mlat_valid && separate_mlat_data_ && mlat)
+                    {
+                        receiver = 1;
+                        receiver_name = "MLAT";
+                    }
+                }
 
                 //    TisB (boolean) – True if the last message received for the aircraft was from a TIS-B source.
 
@@ -767,7 +893,7 @@ void JSONImporterTask::parseJSON (Json::Value& object, bool test)
 
                 //    Source (string) – Internal use only.
 
-                if (receiver_valid && target_address_valid && latitude_valid && longitude_valid && time_valid)
+                if (!skip_this)
                 {
                     logdbg << "\t rn " << rec_num_cnt_
                            << " rc " << receiver
@@ -795,6 +921,9 @@ void JSONImporterTask::parseJSON (Json::Value& object, bool test)
                     row_cnt++;
                     rec_num_cnt_++;
                     inserted_cnt_++;
+
+                    if (datasources_existing_.count(receiver) == 0 && datasources_to_add.count(receiver) == 0)
+                        datasources_to_add[receiver] = receiver_name;
                 }
                 else
                     skipped_cnt_++;
