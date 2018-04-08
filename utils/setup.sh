@@ -51,6 +51,17 @@ unzip master.zip
 mv termsql-master/termsql $INSTALL_DIR
 rm -rf master.zip termsql-master
 
+which sqlite3 > /dev/null
+if [ $? -ne 0 ]; then
+   # NOTE: the most recent version at the time of this setup.sh is v3.23.0
+   #       other versions might be available.
+   # the current version was generated for 32bit architecture
+   wget http://www.sqlite.org/2018/sqlite-tools-linux-x86-3230000.zip
+   unzip -u -n -qq sqlite-tools-linux-x86-3230000.zip "*sqlite3"
+   mv sqlite-tools-linux-x86-3230000/sqlite3 $INSTALL_DIR
+   rm -rf sqlite-tools-linux-x86-3230000.zip sqlite-tools-linux-x86-3230000
+fi
+
 #
 # check if python dependencies are present and ok
 #
