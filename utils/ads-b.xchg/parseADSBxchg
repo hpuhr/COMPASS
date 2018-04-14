@@ -51,7 +51,6 @@ EOU
 
 # included modules
 use Getopt::Long;
-use DateTime;
 
 my $database;
 my $file;
@@ -75,6 +74,19 @@ sub time2_128sec {
    my ($t) = @_;
    my ($tH, $tM, $tS) = split(":", $t);
    return sprintf("%d", 128 * (($tH * 60 + $tM) * 60 + $tS));
+}
+
+sub parseFile {
+   my ($file) = @_;
+
+   open(FILE, "<$file") or return;
+   print "PARSING: $file\n";
+   while(<FILE>) {
+      chop;
+      s%[\/\\"]%%g;
+      ads021($_) if (/Lat:/ && /Long:/);
+   }
+   close(FILE);
 }
 
 my %tt = (
@@ -227,39 +239,23 @@ sub ads021 {
 # main
 # -------------------------------------------------------------------------------------------
 
+my @files = ();
+
 if ($database) {
-   my $count = 0;
-   my $countMax = 0;
    foreach (`ls ${database}-*Z.json`) {
       chop;
       my @nr = split("-");
       my $cm = pop(@nr);
       $cm =~ s/^(\d+)Z\.json$/\1/g;
-      $countMax = $cm if ($cm > $countMax);
-   }
-
-   while ($count <= $countMax) {
-      my $cnt = sprintf "%04d", $count;
-      my $filei = "${file}-${cnt}Z.json";
-      $count++;
-      open(FILE, "<$filei") or next;
-      print "PARSING: $filei\n";
-      while(<FILE>) {
-         chop;
-         s%[\/\\"]%%g;
-         ads021($_) if (/Lat:/ && /Long:/);
-      }
-      close(FILE);
+      my $f_ = sprintf "%s-%04dZ.json", $database, $cm;
+      push(@files, $f_);
    }
 } else {
-   open(FILE, "<$file") or next;
-   print "PARSING: $file\n";
-   while(<FILE>) {
-      chop;
-      s%[\/\\"]%%g;
-      ads021($_) if (/Lat:/ && /Long:/);
-   }
-   close(FILE);
+   push(@files, $file);
+}
+
+foreach (@files) {
+   parseFile($_);
 }
 
 # ---------------------------------------------------------------------------------
@@ -298,12 +294,12 @@ foreach $s_ (sort {$a cmp $b} keys %ads) {
       (my $sec = $t_) =~ s/^(\d{10}).+$/\1/g;
       (my $ms = $t_) =~ s/^\d{10}(\d+)$/\1/g;
 
-      my $dt = "";
-      eval { $dt = DateTime->from_epoch( epoch => $sec ) };
-      warn "Problem! [$@] => t:$_ [$time{$_}]\n" if ($@);
+      my ($S_, $M_, $H_, $day_, $month_, $year_) = (gmtime($sec))[0,1,2,3,4,5];
 
-      (my $hms = $dt) =~ s/^.+T//g;
-      my $time = "$hms.$ms";
+      my $date = sprintf("%04d-%02d-%02d", $year_ + 1900, $month_ + 1, $day_);
+      next if ($database && $database ne $date);
+
+      my $time = sprintf("%02d:%02d:%02d.%03d",$H_,$M_,$S_,$ms);
 
       $timeDupe{"$mS_#$time"}++;
       next if($timeDupe{"$mS_#$time"} > 1); # ignore repetitions with the same time

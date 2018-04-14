@@ -21,6 +21,7 @@ add_path() {
 
 INSTALL_DIR=$HOME/bin
 ATSDB_SCRIPTS="csv2atsdb ads-b.xchg/parseADSBxchg ads-b.xchg/prepADSBxchg"
+pushd .
 
 if [ ! -d $INSTALL_DIR ]; then
    mkdir $INSTALL_DIR
@@ -50,6 +51,17 @@ unzip master.zip
 mv termsql-master/termsql $INSTALL_DIR
 rm -rf master.zip termsql-master
 
+which sqlite3 > /dev/null
+if [ $? -ne 0 ]; then
+   # NOTE: the most recent version at the time of this setup.sh is v3.23.0
+   #       other versions might be available.
+   # the current version was generated for 32bit architecture
+   wget http://www.sqlite.org/2018/sqlite-tools-linux-x86-3230000.zip
+   unzip -u -n -qq sqlite-tools-linux-x86-3230000.zip "*sqlite3"
+   mv sqlite-tools-linux-x86-3230000/sqlite3 $INSTALL_DIR
+   rm -rf sqlite-tools-linux-x86-3230000.zip sqlite-tools-linux-x86-3230000
+fi
+
 #
 # check if python dependencies are present and ok
 #
@@ -76,13 +88,13 @@ chmod +x /tmp/.check-python-mod
 /tmp/.check-python-mod
 rm /tmp/.check-python-mod
 
-cd -
-
 #
-# copy remaining scripts to
+# copy remaining scripts to the installation directory
 #
+popd
 for file in $ATSDB_SCRIPTS
 do
+   chmod +x $file
    cp $file $INSTALL_DIR
 done
 
@@ -93,4 +105,3 @@ if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
   echo "$INSTALL_DIR is missing in your PATH, adding it."
   add_path $HOME/.bashrc $INSTALL_DIR
 fi
-

@@ -66,7 +66,7 @@ do
    fi
    unzip -d $ADSB_FILE/$HOUR $INPUT_FILE "${ADSB_FILE}-${HOUR}??Z.json"
    (cd $ADSB_FILE/$HOUR; \
-    parseADSBxchg -f $ADSB_FILE $ATSDB $DEBUG; \
+    parseADSBxchg -j $ADSB_FILE $ATSDB $DEBUG; \
     rm *.json; \
     if [ ! -z "$ATSDB" ]; then \
        echo $CSV_HDR > ADS-Bxchg.$ADSB_FILE.csv; \
