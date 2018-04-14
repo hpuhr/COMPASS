@@ -75,7 +75,7 @@ void MetaDBTable::generateSubConfigurable (const std::string& class_id, const st
 
         assert (schema_.hasTable(def->subTableName()));
         assert (sub_tables_.count(def->subTableName()) == 0);
-        sub_tables_.insert( std::pair<std::string, const DBTable&> (def->subTableName(), schema_.table(def->subTableName())) );
+        sub_tables_.insert( std::pair<std::string, DBTable&> (def->subTableName(), schema_.table(def->subTableName())));
     }
     else
         throw std::runtime_error ("MetaDBTable: generateSubConfigurable: unknown class_id "+class_id);
@@ -87,10 +87,10 @@ void MetaDBTable::name (const std::string &name)
     schema_.updateMetaTables();
 }
 
-const DBTable &MetaDBTable::tableFor (const std::string& column) const
+DBTable &MetaDBTable::tableFor (const std::string& column) const
 {
     assert (hasColumn(column));
-    return  columns_.at(column).table();
+    return columns_.at(column).table();
 }
 
 std::string MetaDBTable::subTableNames () const

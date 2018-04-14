@@ -506,6 +506,8 @@ std::string DBOVariable::getValueStringFromRepresentation (const std::string& re
     if (representation_str == NULL_STRING)
         return representation_str;
 
+    assert (representation_ != DBOVariable::Representation::STANDARD);
+
     if (representation_ == DBOVariable::Representation::SECONDS_TO_TIME)
     {
         return String::getValueString(Utils::String::timeFromString (representation_str));
@@ -544,7 +546,8 @@ std::string DBOVariable::getValueStringFromRepresentation (const std::string& re
     }
     else
     {
-        throw std::runtime_error ("Utils: String: getAsSpecialRepresentationString: unknown representation");
+        throw std::runtime_error ("Utils: String: getValueStringFromRepresentation: unknown representation "
+                                  + std::to_string((int) representation_));
     }
 }
 

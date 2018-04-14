@@ -23,7 +23,7 @@
 #include "propertylist.h"
 #include "arraylist.h"
 
-//class PropertyContainer;
+class DBOVariableSet;
 
 /**
  * @brief Fast, dynamic data container
@@ -56,40 +56,19 @@ public:
     void addProperty (std::string id, PropertyDataType type);
     void addProperty (const Property &property);
 
-    /// @brief Print function for debugging.
-//    void print (unsigned int num_elements);
-//    void printLong (unsigned int num_elements);
-
     /// @brief Returns boolean indicating if any data was ever written.
     bool firstWrite ();
-    /// @brief Sets data was written flag.
-    //void setWritten () { first_write_=false; };
 
     /// @brief Returns boolean indicating if buffer is the last of one DB operation.
     bool lastOne() { return last_one_;}
     /// @brief Sets if buffer is the last one of one DB operation.
     void lastOne (bool last_one) { last_one_=last_one; }
 
-    /// @brief Returns buffer containing the data of this buffer and re-initializes.
-    //Buffer *transferData ();
-
-    /// @brief Returns a shallow copy of the this buffer.
-    Buffer *getShallowCopy ();
-
-    /// @brief Activates key search on given property index.
-    //void activateKeySearch (unsigned int key_pos);
-
-    /// @brief Sets index that where key matches, returns true if found, else false.
-    //bool setIndexForKey (unsigned int key);
-
     /// @brief Returns flag indicating if buffer is filled to a multiple of BUFFER_ARRAY_SIZE.
     bool full ();
 
     /// @brief Returns the buffers id
     unsigned int id() const { return id_; }
-
-    /// Copies current index from source buffer into this one. PropertyLists must have the same indices
-    //void deepCopyRecordFrom (Buffer *src);
 
     bool hasBool (const std::string &id);
     bool hasChar (const std::string id);
@@ -141,6 +120,8 @@ public:
 
     bool isNone (const Property& property, unsigned int row_cnt);
 
+    void transformVariables (DBOVariableSet& list, bool tc2dbovar); // tc2dbovar true for db->dbo, false dbo->db
+
 protected:
     /// Unique buffer id, copied when getting shallow copies
     unsigned int id_;
@@ -162,20 +143,9 @@ protected:
     std::map <std::string, std::shared_ptr<ArrayListTemplate<float>>> arrays_float_;
     std::map <std::string, std::shared_ptr<ArrayListTemplate<double>>> arrays_double_;
     std::map <std::string, std::shared_ptr<ArrayListTemplate<std::string>>> arrays_string_;
-    /// Flag indicating if data any was written
-    //bool first_write_;
 
     /// Flag indicating if buffer is the last of a DB operation
     bool last_one_;
-
-    /// Flag indicating if key search is possible
-//    bool search_active_;
-    /// Key property index, key must be positive and monotonous
-//    int search_key_pos_;
-    /// Key minimum
-//    int search_key_min_;
-    /// Key maximum
-//    int search_key_max_;
 
     static unsigned int ids_;
 };

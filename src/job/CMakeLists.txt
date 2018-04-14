@@ -13,6 +13,7 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/dboactivedatasourcesdbjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbominmaxdbjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/finalizedboreadjob.h"
+        "${CMAKE_CURRENT_LIST_DIR}/insertbufferdbjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/updatebufferdbjob.h"
     #        src/job/dbovariabledistinctstatisticsdbjob.h
     #        src/job/dbocountdbjob.h
@@ -25,6 +26,7 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/dboreaddbjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/finalizedboreadjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/buffercsvexportjob.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/insertbufferdbjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/updatebufferdbjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/jobmanager.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/jobmanagerwidget.cpp"

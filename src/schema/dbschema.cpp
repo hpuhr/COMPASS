@@ -75,7 +75,7 @@ void DBSchema::generateSubConfigurable (const std::string& class_id, const std::
         throw std::runtime_error ("DBSchema: generateSubConfigurable: unknown class_id "+class_id);
 }
 
-const DBTable& DBSchema::table (const std::string& name) const
+DBTable& DBSchema::table (const std::string& name) const
 {
     assert (tables_.find(name) != tables_.end());
     return *tables_.at(name);

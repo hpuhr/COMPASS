@@ -71,7 +71,7 @@ public:
     //  void specialNull (std::string special_null) { special_null_ = special_null; }
     //  const std::string &specialNull () const { return special_null_; }
 
-    const DBTable &table() const { return table_; }
+    DBTable &table() const { return table_; }
 
     UnitSelectionWidget *unitWidget ();
 

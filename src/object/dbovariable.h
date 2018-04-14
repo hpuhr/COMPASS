@@ -98,12 +98,13 @@ class DBOVariableWidget;
  *
  * Abstracted variable, which has two basic mechanisms.
  *
- * For one, the variable might not really exist in a table, but is a surrogate abstraction for a number of variables in different
- * DBObjects (meta variable) which carry the same content. When used, depending on the DBO type, one can get the really existing
- * DBOVariable using the getFor function.
+ * For one, the variable might not really exist in a table, but is a surrogate abstraction for a number of variables in
+ * different DBObjects (meta variable) which carry the same content. When used, depending on the DBO type, one can get
+ * the really existing DBOVariable using the getFor function.
  *
- * For the second, a DBOVariable is an abstraction of the underlying variable in the meta table which may differ for different
- * schemas. Therefore, a DBOSchemaVariableDefinition is used, which defines the all possible underlying variables.
+ * For the second, a DBOVariable is an abstraction of the underlying variable in the meta table which may differ for
+ * different schemas. Therefore, a DBOSchemaVariableDefinition is used, which defines the all possible underlying
+ * variables.
  *
  * Based on Property (data type definition).
  */
@@ -195,6 +196,8 @@ public:
 
     template <typename T> std::string getAsSpecialRepresentationString (T value) const
     {
+        assert (representation_ != DBOVariable::Representation::STANDARD);
+
         std::ostringstream out;
         try
         {
@@ -238,7 +241,8 @@ public:
             }
             else
             {
-                throw std::runtime_error ("DBOVariable: getAsSpecialRepresentationString: unknown representation");
+                throw std::runtime_error ("DBOVariable: getAsSpecialRepresentationString: unknown representation "
+                                          +std::to_string((int) representation_));
             }
         }
         catch(std::exception& e)

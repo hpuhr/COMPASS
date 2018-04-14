@@ -263,8 +263,8 @@ bool DBODataSource::calculateOGRSystemCoordinates (double azimuth_rad, double sl
 
     if (sys_x != sys_x || sys_y != sys_y)
     {
-        logerr << "DBODataSource: calculateOGRSystemCoordinates: a " << azimuth_rad << " sr " << slant_range_m
-               << " alt " << baro_altitude_ft << " hor.range " << horizontal_range
+        loginf << "DBODataSource: calculateOGRSystemCoordinates: error calculatign a " << azimuth_rad << " sr "
+               << slant_range_m << " alt " << baro_altitude_ft << " hor.range " << horizontal_range
                << " sys_x " << sys_x << " sys_y " << sys_y;
         return false;
     }
@@ -389,7 +389,7 @@ bool DBODataSource::calculateSDLGRSCoordinates (double azimuth_rad, double slant
 
     if (!elevation_present)
     {
-        logerr << "DBODataSource: calculateDSLSystemCoordinates: a " << azimuth_rad << " sr " << slant_range_m
+        loginf << "DBODataSource: calculateDSLSystemCoordinates: a " << azimuth_rad << " sr " << slant_range_m
                << " alt " << baro_altitude_ft << " elevation not present";
         return false;
     }

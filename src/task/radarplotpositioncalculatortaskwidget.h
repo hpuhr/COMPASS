@@ -39,7 +39,8 @@ public slots:
     void calculationDoneSlot ();
 
 public:
-    RadarPlotPositionCalculatorTaskWidget(RadarPlotPositionCalculatorTask& task, QWidget * parent = 0, Qt::WindowFlags f = 0);
+    RadarPlotPositionCalculatorTaskWidget(RadarPlotPositionCalculatorTask& task, QWidget* parent=0,
+                                          Qt::WindowFlags f=0);
     virtual ~RadarPlotPositionCalculatorTaskWidget();
 
     void update ();
