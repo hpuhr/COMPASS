@@ -140,7 +140,8 @@ The option \textbf{-h} or the lack of parameters prints a summary of the switche
 $ csv2atsdb
 usage: /path-to-script/csv2atsdb ( -f <file> | -l <file list> ) [ -o <file> ]
                                  [ -n <name> ] [ -t <type> ] [ -keep ]
-                                 [ -d <delimiter> ] [ -s <schema> ] [ -b <lines> ] [-h]
+                                 [ -d <delimiter> ] [ -s <schema> ] 
+                                 [ -b <lines> ] [-h]
 
        -f <file> ::= file name of the surveillance CSV file
        -l <file list> ::= file name of a surveillance CSV file list
@@ -155,7 +156,8 @@ usage: /path-to-script/csv2atsdb ( -f <file> | -l <file list> ) [ -o <file> ]
 
        -n <name> ::= sensor name
 
-       -t <type> ::= { 'T' ::= tracker, 'W' ::= WAM, 'A' ::= ADS-B, 'R' ::= radar }
+       -t <type> ::= { 'T' ::= tracker, 'W' ::= WAM, 'A' ::= ADS-B, 
+                       'R' ::= radar }
 
        -d <delimiter> ::= CSV delimiter (default: semicolon ';')
 

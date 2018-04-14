@@ -414,12 +414,22 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
 
     unsigned int entry_cnt = 0;
 
+    size_t archive_read_time = 0;
+    size_t archive_parse_time = 0;
+    size_t json_parse_time = 0;
+    size_t wait_time = 0;
+    size_t insert_time = 0;
+
+    boost::posix_time::ptime tmp_time;
+
     while (archive_read_next_header(a, &entry) == ARCHIVE_OK)
     {
 //        for (unsigned int cnt=0; cnt < 10; cnt++)
 //            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
         loginf << "Archive file found: " << archive_entry_pathname(entry) << " size " << archive_entry_size(entry);
+
+        tmp_time = boost::posix_time::microsec_clock::local_time();
 
         msg = "Reading archive entry " + std::to_string(entry_cnt) + ": "
                 + std::string(archive_entry_pathname(entry)) + ".\n";
@@ -450,10 +460,19 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
             ss << str;
         }
 
+        archive_read_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
+        tmp_time = boost::posix_time::microsec_clock::local_time();
+
         loginf  << "JSONImporterTask: importFileArchive: got entry with " << ss.str().size() << " chars";
         reader.parse(ss.str(), obj); // reader can also read strings
 
+        archive_parse_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
+        tmp_time = boost::posix_time::microsec_clock::local_time();
+
         std::shared_ptr<Buffer> buffer_ptr = parseJSON (obj, test);
+
+        json_parse_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
+        tmp_time = boost::posix_time::microsec_clock::local_time();
 
         if (buffer_ptr->size())
         {
@@ -462,9 +481,19 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
                 QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
                 QThread::msleep (10);
             }
+            wait_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
+            tmp_time = boost::posix_time::microsec_clock::local_time();
 
             if (!test)
                 insertData (buffer_ptr);
+
+            insert_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
+
+            loginf << "JSONImporterTask: importFileArchive: time: archive_read_time " << archive_read_time/1000.0
+                   << " archive_parse_time " << archive_parse_time/1000.0
+                   << " json_parse_time " << json_parse_time/1000.0
+                   << " wait_time " << wait_time/1000.0
+                   << " insert_time " << insert_time/1000.0;
         }
         entry_cnt++;
     }
