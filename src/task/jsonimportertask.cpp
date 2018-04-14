@@ -38,7 +38,7 @@ JSONImporterTask::JSONImporterTask(const std::string& class_id, const std::strin
     : Configurable (class_id, instance_id, task_manager)
 {
     registerParameter("last_filename", &last_filename_, "");
-    registerParameter("db_object_str", &db_object_str_, "");
+    registerParameter("db_object_str", &db_object_str_, "ADSB");
 
     registerParameter("join_data_sources", &join_data_sources_, false);
     registerParameter("separate_mlat_data", &separate_mlat_data_, false);

@@ -61,6 +61,8 @@ JSONImporterTaskWidget::JSONImporterTaskWidget(JSONImporterTask& task, QWidget* 
     stuff_layout->setFormAlignment(Qt::AlignRight | Qt::AlignTop);
 
     object_box_ = new DBObjectComboBox (false);
+    if (task_.dbObjectStr().size())
+        object_box_->setObjectName(task_.dbObjectStr());
     connect (object_box_, SIGNAL(changedObject()), this, SLOT(dbObjectChangedSlot()));
     stuff_layout->addRow(tr("DBObject"), object_box_);
 
