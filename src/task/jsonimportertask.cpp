@@ -323,6 +323,18 @@ void JSONImporterTask::importFile(const std::string& filename, bool test)
     if (!test)
         insertData (buffer_ptr);
 
+    QMessageBox msgBox;
+    std::string msg = "Reading archive " + filename + " finished successfully.\n";
+    if (all_cnt_)
+        msg +=  + "# of updates: " + std::to_string(all_cnt_)
+                + "\n# of skipped updates: " + std::to_string(skipped_cnt_)
+                + " (" +String::percentToString(100.0 * skipped_cnt_/all_cnt_) + "%)"
+                + "\n# of inserted updates: " + std::to_string(inserted_cnt_)
+                + " (" +String::percentToString(100.0 * inserted_cnt_/all_cnt_) + "%)";
+    msgBox.setText(msg.c_str());
+    msgBox.exec();
+
+
     return;
 }
 
@@ -443,14 +455,17 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
 
         std::shared_ptr<Buffer> buffer_ptr = parseJSON (obj, test);
 
-        while (insert_active_)
+        if (buffer_ptr->size())
         {
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-            QThread::msleep (10);
-        }
+            while (insert_active_)
+            {
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                QThread::msleep (10);
+            }
 
-        if (!test)
-            insertData (buffer_ptr);
+            if (!test)
+                insertData (buffer_ptr);
+        }
         entry_cnt++;
     }
 

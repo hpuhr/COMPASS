@@ -292,7 +292,8 @@ void SQLiteConnection::execute (const std::string &command, std::shared_ptr <Buf
     finalizeStatement();
 }
 
-void SQLiteConnection::readRowIntoBuffer (const PropertyList &list, unsigned int num_properties, std::shared_ptr <Buffer> buffer, unsigned int index)
+void SQLiteConnection::readRowIntoBuffer (const PropertyList &list, unsigned int num_properties,
+                                          std::shared_ptr <Buffer> buffer, unsigned int index)
 {
     for (unsigned int cnt=0; cnt < num_properties; cnt++)
     {
@@ -405,7 +406,9 @@ std::shared_ptr <DBResult> SQLiteConnection::stepPreparedCommand (unsigned int m
     for (result = sqlite3_step(statement_); result == SQLITE_ROW; result = sqlite3_step(statement_))
     {
         readRowIntoBuffer (list, num_properties, buffer, cnt);
-        assert (buffer->size() == cnt+1);
+
+        if (buffer->size()) // 0 == 1 otherwise
+            assert (buffer->size() == cnt+1);
 
         if (max_results != 0 && cnt >= max_results)
         {

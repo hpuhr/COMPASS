@@ -54,6 +54,7 @@ void InsertBufferDBJob::run ()
     unsigned int steps = buffer_->size() / insert_size;
 
     loginf  << "InsertBufferDBJob: run: writing object " << dbobject_.name() << " size " << buffer_->size();
+    assert (buffer_->size());
 
     unsigned int index_from = 0;
     unsigned int index_to = 0;

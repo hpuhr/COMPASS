@@ -114,7 +114,7 @@ std::string SQLGenerator::getCreateTableStatement (const DBTable& table)
         ss << " " << data_type;
 
         if (col_it.second->isKey())
-            ss << " PRIMARY KEY";
+            ss << " PRIMARY KEY NOT NULL";
 
         if (cnt != table.columns().size()-1)
             ss << ",";

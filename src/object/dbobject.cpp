@@ -627,10 +627,6 @@ void DBObject::insertData (DBOVariableSet& list, std::shared_ptr<Buffer> buffer)
 {
     assert (!insert_job_);
 
-    //assert (existsInDB());
-    //assert (key_var.existsInDB());
-    //assert (ATSDB::instance().interface().checkUpdateBuffer(*this, key_var, list, buffer));
-
     buffer->transformVariables(list, false); // back again
 
     insert_job_ = std::shared_ptr<InsertBufferDBJob> (new InsertBufferDBJob(ATSDB::instance().interface(),

@@ -250,6 +250,7 @@ bool DBInterface::existsTable (const std::string& table_name)
 
 void DBInterface::createTable (DBTable& table)
 {
+    loginf << "DBInterface: createTable: " << table.name();
     assert (!existsTable(table.name()));
 
     std::string statement = sql_generator_.getCreateTableStatement(table);
@@ -263,6 +264,7 @@ void DBInterface::createTable (DBTable& table)
     updateTableInfo();
     table.updateOnDatabase();
 
+    assert (table.existsInDB());
     //emit databaseContentChangedSignal();
 }
 
