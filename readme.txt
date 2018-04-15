@@ -17,10 +17,9 @@ readme.txt: This file
 Released Version v0.1.0-beta
 ----------------------------
 
-Stable Appimage: https://github.com/hpuhr/ATSDB/releases/download/0.1.0-beta/ATSDB-x86_64_v0.1.0-beta.AppImage
-Experimental AppImage: https://github.com/hpuhr/ATSDB/releases/download/v0.1.0-beta.1/ATSDB-x86_64_v0.1.0-beta.1.AppImage
+Stable Appimage: https://github.com/hpuhr/ATSDB/releases/download/0.1.1-beta/ATSDB-x86_64_v0.1.1-beta.AppImage
 
-User Manual: https://github.com/hpuhr/ATSDB/releases/download/0.1.0-beta/user_manual_v0.1.0-beta.pdf
+User Manual: https://github.com/hpuhr/ATSDB/releases/download/0.1.1-beta/user_manual_v0.1.1-beta.pdf
 
 Newsletter
 ----------
@@ -42,6 +41,9 @@ https://www.gnu.org/licenses/gpl-3.0.en.html
 The binary is released under Creative Commons Attribution 4.0 International (CC BY 4.0)
 Human readable: https://creativecommons.org/licenses/by/4.0/
 Legal: https://creativecommons.org/licenses/by/4.0/legalcode
+
+While it is permitted to use the AppImage for commercial purposes, the used open-source libraries might still prohibit this without further permission. It is the responsibility of
+the user to see to inspect the user manual and confirm that their use cases are permitted under the referenced licenses.
 
 Disclaimer
 ----------
