@@ -251,7 +251,11 @@ bool DBInterface::existsTable (const std::string& table_name)
 void DBInterface::createTable (DBTable& table)
 {
     loginf << "DBInterface: createTable: " << table.name();
-    assert (!existsTable(table.name()));
+    if (existsTable(table.name()))
+    {
+        logerr << "DBInterface: createTable: table " << table.name() << " already exists";
+        return;
+    }
 
     std::string statement = sql_generator_.getCreateTableStatement(table);
 
@@ -873,7 +877,7 @@ void DBInterface::insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer, 
                                       +"' does not exist in table "+table.name());
     }
 
-    if (!table.existsInDB())
+    if (!table.existsInDB() && !existsTable(table.name())) // check for both since information might not be updated yet
         createTable(table);
 
     assert (table.existsInDB());
