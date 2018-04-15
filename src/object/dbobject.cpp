@@ -347,7 +347,7 @@ void DBObject::addDataSource (int key_value, const std::string& name)
 
     // create all needed tables
     DBTable& main_table = meta_table.mainTable();
-    if (!main_table.existsInDB()  && !db_interface.existsTable(main_table.name()))
+    if (!main_table.existsInDB())
         // check for both since information might not be updated yet
         db_interface.createTable(main_table);
 
@@ -411,7 +411,7 @@ void DBObject::addDataSources (std::map <int, std::string>& sources)
 
     // create all needed tables
     DBTable& main_table = meta_table.mainTable();
-    if (!main_table.existsInDB()  && !db_interface.existsTable(main_table.name()))
+    if (!main_table.existsInDB())
         // check for both since information might not be updated yet
         db_interface.createTable(main_table);
 
