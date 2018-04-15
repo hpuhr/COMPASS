@@ -42,8 +42,7 @@ The binary is released under Creative Commons Attribution 4.0 International (CC 
 Human readable: https://creativecommons.org/licenses/by/4.0/
 Legal: https://creativecommons.org/licenses/by/4.0/legalcode
 
-While it is permitted to use the AppImage for commercial purposes, the used open-source libraries might still prohibit this without further permission. It is the responsibility of
-the user to see to inspect the user manual and confirm that their use cases are permitted under the referenced licenses.
+While it is permitted to use the AppImage for commercial purposes, the used open-source libraries might still prohibit this without further permission. It is the responsibility of the user to inspect the user manual and confirm that their use cases are permitted under the referenced licenses.
 
 Disclaimer
 ----------
