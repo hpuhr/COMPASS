@@ -12,6 +12,15 @@ The OSG View allows a graphical representation of target reports from the Databa
 
 The map window will automatically traverse to the medium location of the data in the current database.
 
+After loading, the target reports will be shown.
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_overview_loaded.png}
+  \caption{OSG View overview after loading}
+\end{figure}
+
+
 \subsubsection{Map Widget}
 \label{sec:osgview_map}
 
@@ -73,9 +82,11 @@ In the configuration widget, several elements exist:
  \item Configuration area
 \begin{itemize}
  \item Configure labels: Allows configuration of the labels
+ \item Time Filter: Activates the Time Window Filter
+ \item Use Depth Check: Activates line-of-sight depth check. Only recommended if height is used
+ \item Group Variable: Meta DBOVariable used to create groups. Currently, only track number and Mode S address are supported
  \item Connect groups: Whether grouped target reports should be connected using lines
  \item Connect None Height: If groups are connected, whether target reports with not height information should be connected
- \item Time Filter: Activates the Time Window Filter
  \item Use Height: Whether height information should be used to create a 3D presentation
  \item Offset Factor: If height information is used, this factor is added to the height
  \item Scale Factor: If height information is used, this factor is used to multiply the height
@@ -314,23 +325,9 @@ A few notes about labels:
  \item A line break is given after the configured number of values. If values are not shown (NULL), the line break is still made at the same postion, to keep the value shown in the same line for all target reports.
 \end{itemize}
 
-\subsubsection{Group Lines}
-
-Grouping is currently performed on track number. If the ``Connect Groups'' checkbox is set, connection lines between all target reports in the same group are drawn, except for the ``Unassociated group'', where not track number was set.
-
-\begin{figure}[H]
-    \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/osgview_no_lines.png}
-  \caption{OSG View Data without lines}
-\end{figure}
-
-If the height information is used (3D view), if target reports without height information are connected, the lines clutter the display. The ``Connect None Height'' checkbox allows to set the behaviour. \\
-
-Please \textbf{note} that changes both these values requires a manual redraw using the ``Redraw'' button.
-
 \subsubsection{Time Filter}
 
-Once activated using the ``Time Filter'' checkbox, the time filter facilitates that only target reports within a specific time window are shown.
+Once activated using the ``Time Filter'' checkbox,  the time filter facilitates that only target reports within a specific time window are shown.
 
 
 \begin{figure}[H]
@@ -353,6 +350,43 @@ The following items exist:
 \end{itemize}
 
 During usage of the time filter, changes in the Configuration Widget was suppressed, but changes in the Layers Widgets are possible.
+
+\subsubsection{Depth Check}
+
+Once activated using the ``Use Depth Check'' checkbox, during drawing it is checked wether data is occluded in the depicted scene. E.g. if target reports are ``below ground'', they are not shown.
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_depth_check.png}
+  \caption{OSG View depth check}
+\end{figure}
+
+Please note that this should only be used in 3D, since in a 2D projection graphical artifacts exist. This is currently under investigation.
+
+\subsubsection{Group Variable}
+
+In this selectection the Meta DBOVariable used to create groups can be changed. Currently, only track number and Mode S address are supported. If e.g. data is shown, that has no track number but a Mode S address, this can be used to connect the respective targets.
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_group_variable.png}
+  \caption{OSG View group variable}
+\end{figure}
+
+
+\subsubsection{Group Lines}
+
+Grouping is currently performed on track number. If the ``Connect Groups'' checkbox is set, connection lines between all target reports in the same group are drawn, except for the ``Unassociated group'', where not track number was set.
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_no_lines.png}
+  \caption{OSG View Data without lines}
+\end{figure}
+
+If the height information is used (3D view), if target reports without height information are connected, the lines clutter the display. The ``Connect None Height'' checkbox allows to set the behaviour. \\
+
+Please \textbf{note} that changes both these values requires a manual redraw using the ``Redraw'' button.
 
 \subsubsection{Height Operations}
 
@@ -377,5 +411,11 @@ $$ h = h_n [m]$$
 
 Please note that upon changes to the height usage, a manual redraw has to be performed using the ``Redraw'' button.
 
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_use_height.png}
+  \caption{OSG View use height}
+\end{figure}
 
  

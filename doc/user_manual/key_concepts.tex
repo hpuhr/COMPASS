@@ -26,10 +26,10 @@ To allow displaying data from different DBOs in the same system, so-called meta-
 In ATSDB, a unified data loading process was chosen, meaning that only exactly one common dataset is loaded, which can be inspected using Views. When started, data is incrementally read from the database, stored in the resulting dataset, and distributed to the active Views. Each time such a loading process is triggered, all Views clear their dataset and gradually update. \\
 This makes working with the data somewhat easier to understand, since only one dataset exists, while on the other hand it does not allow several independent datasets (e.g. with different filters) to be loaded.
 
-\section*{Generating a Database}
+\section*{Generating a Verif Database}
 \label{sec:generation}
 
-A database has to be generated before it can be opened with ATSDB.  This section describes how such
+A SASS-C Verif database has to be generated before it can be opened with ATSDB.  This section describes how such
 a process can be performed, however it is by no means a complete guide.
 
 \section*{SASS-C Verif}

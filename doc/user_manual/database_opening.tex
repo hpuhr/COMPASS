@@ -186,9 +186,17 @@ The following steps must be taken:
 \item Select the previously extracted 'exported.sql.gz'
 \end{itemize}
 
-\subsubsection{SQlite3 File container}
+\subsection{Opening a SQlite3 File Container}
 \label{sec:sqlite_fc}
-For opening a file container, clicking the 'Select' button opens a file selection dialog, in which any SQLite3 file can be selected as data source.
+For opening a file container, three actions are available:
+
+\begin{itemize}  
+\item New: Creates a new (empty) SQLite3 container and adds it to the 'File Selection' list
+\item Add: Adds an existing  SQLite3 container and adds it to the 'File Selection' list
+\item Remove: Removes an entry from the 'File Selection' list
+\end{itemize}
+
+After selection of the wanted database container, the 'Open' button can be used for opening the database container.
 
 \begin{figure}[H]
   \center
@@ -221,9 +229,61 @@ Also, after locking the database schema, the existing Database Objects can be ed
 \subsection{Tasks}
 \label{sec:tasks}
 
-Since in SASS-C Verif radar plot coordinates are not given as latitude/longitude, which are the main coordinates for all processing in ATSDB, optionally these coordinates can be re-calculated and set in the database using the ''Calculate Radar Plot Position`` Task.
+\subsubsection{Importing ADS-B Exchange JSON Data}
+
+For information about ADS-B exchange please refer to section \nameref{sec:adsbex}. \\
+
+It is usually possible to obtain a dataset from any day prior to the current one, covering the whole world. \\
+
+Please be aware that using the produced data for commercial purposes (without a specific agreement) would violate the ADSB exchange terms \& conditions. Please refer to \url{https://www.adsbexchange.com/legal-and-privacy/} for additional information.\\
+
+To execute this task select ''Task``->  ''Import ADSBexchange JSON data` in the top menu bar.
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=14cm,frame]{../screenshots/adsbex_json_import.png}
+  \caption{Import ADSBexchange JSON data task}
+\end{figure}
+
+In the 'File Selection' list, a list of available JSON data files is given. Entries can be added using the 'Add' button or removed using the 'Remove' buttons. Please note that either native JSON text files can be imported, or archives containing the same with the following formats: *.zip, *.gz, *.tgz \\
+
+The following options are available:
+\begin{itemize}  
+\item DBObject: Target DBObject where the data will be inserted
+\item Join Data Sources: If checked, all data will be inserted using one data source, otherwise the JSON receiver ID will be used, which will create a large number of data sources.
+\item Seperate MLAT Data Source (if joined): If the previous point is active, a second data source containing only the data flagged as MLAT will be created.
+\item Filter Time: Activates the time filter during import
+\item Filter Time Minimum/Maximum: Filter thresholds in HH:MM:SS.SSS
+\item Filter Position: Activates the position filter during import
+\item Latitude Minimum/Maximum: Filter thresholds in for the WGS-84 latitude
+\item Longitude Minimum/Maximum: Filter thresholds in for the WGS-84 longitude
+\end{itemize}
+
+Using the 'Test Import' button, the import function can be tested without inserting the data into the database, the 'Import' imports the selected file with the given options.
+
+During import a status indication will be shown as follows:
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=10cm,frame]{../screenshots/json_import_status.png}
+  \caption{Import ADSBexchange JSON data task status}
+\end{figure}
+
+After import, a confirmation will be shown as follows:
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=10cm,frame]{../screenshots/json_import_done.png}
+  \caption{Import ADSBexchange JSON data task done}
+\end{figure}
+
+Please note that importing a fill day of data (\textasciitilde8GB archive) will take about 40 minutes and generate a database of \textasciitilde2GB.
+
 
 \subsubsection{Calculate Radar Plot Position}
+
+Since in SASS-C Verif radar plot coordinates are not given as latitude/longitude, which are the main coordinates for all processing in ATSDB, optionally these coordinates can be re-calculated and set in the database using the ''Calculate Radar Plot Position`` Task.
+
 To execute this task select ''Task``->  ''Calculate Radar Plot Position` in the top menu bar.
 
 \begin{figure}[H]
