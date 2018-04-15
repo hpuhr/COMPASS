@@ -170,7 +170,8 @@ void DBFilter::addSubFilter (DBFilter* filter)
  */
 bool DBFilter::filters (const std::string &dbo_type)
 {
-    assert (!disabled_);
+    if (disabled_)
+        return false;
 
     bool ret = false;
 
@@ -340,7 +341,8 @@ void DBFilter::checkSubConfigurables ()
  */
 void DBFilter::reset ()
 {
-    assert (!disabled_);
+    if (disabled_)
+        return;
 
     for (unsigned int cnt=0; cnt < conditions_.size(); cnt++)
     {

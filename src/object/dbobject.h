@@ -66,6 +66,7 @@ class DBObjectInfoWidget;
 class Buffer;
 class Job;
 class DBOReadDBJob;
+class InsertBufferDBJob;
 class UpdateBufferDBJob;
 class FinalizeDBOReadJob;
 class DBOVariableSet;
@@ -106,6 +107,9 @@ signals:
     void newDataSignal (DBObject& object);
     void loadingDoneSignal (DBObject& object);
 
+    void insertProgressSignal (float percent);
+    void insertDoneSignal (DBObject& object);
+
     void updateProgressSignal (float percent);
     void updateDoneSignal (DBObject& object);
 
@@ -118,6 +122,9 @@ public slots:
     void readJobObsoleteSlot ();
     void readJobDoneSlot();
     void finalizeReadJobDoneSlot();
+
+    void insertProgressSlot (float percent);
+    void insertDoneSlot ();
 
     void updateProgressSlot (float percent);
     void updateDoneSlot ();
@@ -165,7 +172,10 @@ public:
     void quitLoading ();
     void clearData ();
 
-    void updateData (DBOVariable &key_var, std::shared_ptr<Buffer> buffer);
+    // takes buffers with dbovar names & datatypes & units, converts itself
+    void insertData (DBOVariableSet& list, std::shared_ptr<Buffer> buffer);
+    // takes buffers with dbovar names & datatypes & units, converts itself
+    void updateData (DBOVariable &key_var, DBOVariableSet& list, std::shared_ptr<Buffer> buffer);
 
     std::map<int, std::string> loadLabelData (std::vector<int> rec_nums, int break_item_cnt);
 
@@ -199,10 +209,13 @@ public:
         return data_source_definitions_;
     }
 
+
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
     ///@brief Returns flag if data sources are defined for DBO type.
     bool hasDataSources () { return data_sources_.size() > 0; }
+    void addDataSource (int key_value, const std::string& name); // needs postprocessing after
+    void addDataSources (std::map <int, std::string>& sources);
     ///@brief Returns container with all defined data source for DBO type.
     std::map<int, DBODataSource>& dataSources () { return data_sources_; }
     ///@brief Returns data source name for a DBO type and data source number.
@@ -243,6 +256,7 @@ protected:
     std::vector <std::shared_ptr<Buffer>> read_job_data_;
     std::vector <std::shared_ptr <FinalizeDBOReadJob>> finalize_jobs_;
 
+    std::shared_ptr <InsertBufferDBJob> insert_job_ {nullptr};
     std::shared_ptr <UpdateBufferDBJob> update_job_ {nullptr};
 
     std::shared_ptr<Buffer> data_;

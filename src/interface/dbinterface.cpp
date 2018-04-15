@@ -248,6 +248,30 @@ bool DBInterface::existsTable (const std::string& table_name)
     return table_info_.count (table_name) == 1;
 }
 
+void DBInterface::createTable (DBTable& table)
+{
+    loginf << "DBInterface: createTable: " << table.name();
+    if (existsTable(table.name()))
+    {
+        logerr << "DBInterface: createTable: table " << table.name() << " already exists";
+        return;
+    }
+
+    std::string statement = sql_generator_.getCreateTableStatement(table);
+
+    QMutexLocker locker(&connection_mutex_);
+
+    current_connection_->executeSQL(statement);
+
+    locker.unlock();
+
+    updateTableInfo();
+    table.updateOnDatabase();
+
+    assert (table.existsInDB());
+    //emit databaseContentChangedSignal();
+}
+
 /**
  * Returns existsTable for table name.
  */
@@ -342,7 +366,7 @@ bool DBInterface::hasDataSourceTables (const DBObject& object)
 // */
 std::map <int, DBODataSource> DBInterface::getDataSources (const DBObject &object)
 {
-    logdbg  << "DBInterface: getDataSourceDescription: start";
+    loginf  << "DBInterface: getDataSources: start";
 
     assert (object.existsInDB());
 
@@ -350,7 +374,7 @@ std::map <int, DBODataSource> DBInterface::getDataSources (const DBObject &objec
 
     std::shared_ptr<DBCommand> command = sql_generator_.getDataSourcesSelectCommand(object);
 
-    logdbg << "DBInterface: getDataSourceDescription: sql '" << command->get() << "'";
+    loginf << "DBInterface: getDataSources: sql '" << command->get() << "'";
 
     std::shared_ptr <DBResult> result = current_connection_->execute(*command);
     assert (result->containsData());
@@ -834,7 +858,52 @@ std::set<int> DBInterface::getActiveDataSources (const DBObject &object)
 //    buffer_writer_->write (data, table_name);
 //}
 
-bool DBInterface::checkUpdateBuffer (DBObject &object, DBOVariable &key_var, std::shared_ptr<Buffer> buffer)
+void DBInterface::insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer, size_t from_index,
+                                size_t to_index)
+{
+    loginf << "DBInterface: insertBuffer: table " << table.name() << " buffer size " << buffer->size()
+           << " from " << from_index << " to " << to_index;
+
+    //assert (checkUpdateBuffer(object, key_var, buffer));
+    assert (current_connection_);
+    assert (buffer);
+
+    const PropertyList &properties = buffer->properties();
+
+    for (unsigned int cnt=0; cnt < properties.size(); cnt++)
+    {
+        if (!table.hasColumn(properties.at(cnt).name()))
+            throw std::runtime_error ("DBInterface: insertBuffer: column '"+properties.at(cnt).name()
+                                      +"' does not exist in table "+table.name());
+    }
+
+    if (!table.existsInDB() && !existsTable(table.name())) // check for both since information might not be updated yet
+        createTable(table);
+
+    assert (table.existsInDB());
+
+    std::string bind_statement = sql_generator_.insertDBUpdateStringBind(buffer, table.name());
+
+    QMutexLocker locker(&connection_mutex_);
+
+    logdbg  << "DBInterface: insertBuffer: preparing bind statement";
+    current_connection_->prepareBindStatement(bind_statement);
+    current_connection_->beginBindTransaction();
+
+    logdbg  << "DBInterface: insertBuffer: starting inserts";
+    for (unsigned int cnt=from_index; cnt <= to_index; cnt++)
+    {
+        insertBindStatementUpdateForCurrentIndex(buffer, cnt);
+    }
+
+    logdbg  << "DBInterface: insertBuffer: ending bind transactions";
+    current_connection_->endBindTransaction();
+    logdbg  << "DBInterface: insertBuffer: finalizing bind statement";
+    current_connection_->finalizeBindStatement();
+}
+
+bool DBInterface::checkUpdateBuffer (DBObject &object, DBOVariable &key_var, DBOVariableSet& list,
+                                     std::shared_ptr<Buffer> buffer)
 {
     if (!object.existsInDB())
         return false;
@@ -849,14 +918,29 @@ bool DBInterface::checkUpdateBuffer (DBObject &object, DBOVariable &key_var, std
 
     const PropertyList &properties = buffer->properties();
 
-    for (unsigned int cnt=0; cnt < properties.size(); cnt++)
+    for (auto& var_it : list.getSet())
     {
-        if (!table.hasColumn(properties.at(cnt).name()))
+        if (!properties.hasProperty(var_it->name()))
             return false;
 
-        if (!table.column(properties.at(cnt).name()).existsInDB())
+        if (!var_it->hasCurrentDBColumn())
             return false;
+
+        const DBTableColumn& col = var_it->currentDBColumn ();
+
+        if (!col.existsInDB())
+            return false;
+
     }
+
+//    for (unsigned int cnt=0; cnt < properties.size(); cnt++)
+//    {
+//        if (!table.hasColumn(properties.at(cnt).name()))
+//            return false;
+
+//        if (!table.column(properties.at(cnt).name()).existsInDB())
+//            return false;
+//    }
 
     return true;
 }
@@ -864,7 +948,7 @@ bool DBInterface::checkUpdateBuffer (DBObject &object, DBOVariable &key_var, std
 void DBInterface::updateBuffer (DBObject& object, DBOVariable& key_var, std::shared_ptr<Buffer> buffer,
                                 size_t from_index, size_t to_index)
 {
-    assert (checkUpdateBuffer(object, key_var, buffer));
+    //assert (checkUpdateBuffer(object, key_var, buffer));
     assert (current_connection_);
     assert (buffer);
 
@@ -1032,7 +1116,7 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex (std::shared_ptr<Buff
                 << property.name();
 
         if (connection_type == SQLITE_IDENTIFIER)
-            index_cnt=cnt+2;
+            index_cnt=cnt+1;
         else if (connection_type == MYSQL_IDENTIFIER)
             index_cnt=cnt+1;
         else

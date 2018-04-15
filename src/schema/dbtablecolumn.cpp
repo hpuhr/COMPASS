@@ -100,7 +100,7 @@ UnitSelectionWidget* DBTableColumn::unitWidget ()
 
 void DBTableColumn::updateOnDatabase()
 {
-    exists_in_db_ = false;
+    bool exists = false;
 
     const std::map <std::string, DBTableInfo> &all_table_infos = db_interface_.tableInfo ();
 
@@ -111,8 +111,11 @@ void DBTableColumn::updateOnDatabase()
         const DBTableInfo& table_info = all_table_infos.at(table_name);
 
         if (table_info.hasColumn(name_))
-            exists_in_db_ = true;
+            exists = true;
     }
 
-    logdbg << "DBTableColumn: updateOnDatabase: " << name_ << " exists in db " << exists_in_db_;
+    exists_in_db_ = exists;
+
+    logdbg << "DBTableColumn: updateOnDatabase: table " <<  table_name << " column "
+           << name_ << " exists in db " << exists_in_db_;
 }

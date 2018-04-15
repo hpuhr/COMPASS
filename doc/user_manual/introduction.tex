@@ -1,8 +1,9 @@
 \chapter{Introduction}
 
 This document has its focus on interaction and working procedures required to make use of the existing
-functionality. In this introduction, feature highlights are listed, followed by a brief summary of important aspects of  ATSDB in \nameref{sec:key_concepts}. In the later section \nameref{sec:usage}, a functional, task-oriented overview is given. In the last section \nameref{sec:troubleshooting} details about reported isses are collected, as well as details on how to report new issues.
-%At the end of the document, a glossary is given.
+functionality. In this introduction, feature highlights are listed, followed by a brief summary of important aspects of  ATSDB in \nameref{sec:key_concepts}. In the later section \nameref{sec:usage}, a functional, task-oriented overview is given. In the section \nameref{sec:troubleshooting} details about reported isses are collected, as well as details on how to report new issues.
+
+In the section \nameref{sec:utils} some information is given how data can be manually imported into ATSDB. In the last section \nameref{sec:licensing} information is given about under what conditions ATSDB can be used and what libraries with what licences are used in the background.
 
 \section{Feature highlights}
 
@@ -11,6 +12,7 @@ The \textbf{A}ir \textbf{T}raffic \textbf{S}urveillance \textbf{D}ata\textbf{B}a
 \begin{itemize}  
 \item Support of multiple database systems, e.g. SCDB
 \item MySQL database import and management of SCDB databases
+\item JSON import from ADS-B exchange
 \item High performance processing, low memory footprint
 \item Utilization of application during loading procedure
 \item Views for data inspection
@@ -64,10 +66,11 @@ The following libraries are used in the project (list not exhaustive):
 \item GDAL
 \item TinyXML2
 \item Log4Cpp
-\item Archive
+\item LibArchive
 \item Eigen3
 \item OpenSceneGraph
 \item OSGEarth
+\item JSONcpp
 \end{itemize}
 
 Many thanks to the developers of these. Your work is awesome.
@@ -76,6 +79,4 @@ Many thanks to the developers of these. Your work is awesome.
 
 Also, several persons were involved during testing of ATSDB. Many thanks to you as well, if you'd like to be named please let me know.
 
-\section{Disclaimer}
 
-THE SOFTWARE IS PROVIDED ``AS IS'', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

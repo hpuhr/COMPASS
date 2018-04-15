@@ -21,7 +21,6 @@
 #include "dbobject.h"
 #include "dbovariableset.h"
 #include "buffer.h"
-#include "data.h"
 
 FinalizeDBOReadJob::FinalizeDBOReadJob(DBObject &dbobject, DBOVariableSet &read_list, std::shared_ptr<Buffer> buffer)
     : Job("FinalizeDBOReadJob"), dbobject_(dbobject), read_list_(read_list), buffer_ (buffer)
@@ -39,7 +38,7 @@ void FinalizeDBOReadJob::run ()
     logdbg << "FinalizeDBOReadJob: run: read_list size " << read_list_.getSize();
     started_ = true;
 
-    Utils::Data::finalizeBuffer(read_list_, buffer_);
+    buffer_->transformVariables(read_list_, true);
 
     logdbg << "FinalizeDBOReadJob: run: done";
     done_=true;

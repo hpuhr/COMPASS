@@ -17,6 +17,7 @@
 
 #include "atsdb.h"
 #include "taskmanager.h"
+#include "jsonimportertask.h"
 #include "radarplotpositioncalculatortask.h"
 
 #include <cassert>
@@ -29,11 +30,23 @@ TaskManager::TaskManager(const std::string &class_id, const std::string &instanc
 
 TaskManager::~TaskManager()
 {
+    if (json_importer_task_)
+    {
+        delete json_importer_task_;
+        json_importer_task_ = nullptr;
+    }
+
     if (radar_plot_position_calculator_task_)
     {
         delete radar_plot_position_calculator_task_;
-        radar_plot_position_calculator_task_=nullptr;
+        radar_plot_position_calculator_task_ = nullptr;
     }
+}
+
+JSONImporterTask* TaskManager::getJSONImporterTask()
+{
+    assert (json_importer_task_);
+    return json_importer_task_;
 }
 
 RadarPlotPositionCalculatorTask* TaskManager::getRadarPlotPositionCalculatorTask()
@@ -44,7 +57,13 @@ RadarPlotPositionCalculatorTask* TaskManager::getRadarPlotPositionCalculatorTask
 
 void TaskManager::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
-    if (class_id.compare ("RadarPlotPositionCalculatorTask") == 0)
+    if (class_id.compare ("JSONImporterTask") == 0)
+    {
+        assert (!json_importer_task_);
+        json_importer_task_ = new JSONImporterTask (class_id, instance_id, this);
+        assert (json_importer_task_);
+    }
+    else if (class_id.compare ("RadarPlotPositionCalculatorTask") == 0)
     {
         assert (!radar_plot_position_calculator_task_);
         radar_plot_position_calculator_task_ = new RadarPlotPositionCalculatorTask (class_id, instance_id, this);
@@ -56,14 +75,20 @@ void TaskManager::generateSubConfigurable (const std::string &class_id, const st
 
 void TaskManager::checkSubConfigurables ()
 {
-    if (!radar_plot_position_calculator_task_)
+    if (!json_importer_task_)
     {
-        radar_plot_position_calculator_task_ = new RadarPlotPositionCalculatorTask ("RadarPlotPositionCalculatorTask", "RadarPlotPositionCalculatorTask0", this);
+        json_importer_task_ = new JSONImporterTask ("JSONImporterTask", "JSONImporterTask", this);
+        assert (json_importer_task_);
+    }
+    else if (!radar_plot_position_calculator_task_)
+    {
+        radar_plot_position_calculator_task_ = new RadarPlotPositionCalculatorTask (
+                    "RadarPlotPositionCalculatorTask", "RadarPlotPositionCalculatorTask0", this);
         assert (radar_plot_position_calculator_task_);
     }
 }
 
 void TaskManager::shutdown ()
 {
-    // TODO waiting for jobs
+    // TODO waiting for tasks?
 }

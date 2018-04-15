@@ -64,6 +64,70 @@ SQLGenerator::~SQLGenerator()
 {
 }
 
+std::string SQLGenerator::getCreateTableStatement (const DBTable& table)
+{
+    std::stringstream ss;
+
+//    CREATE TABLE contacts (
+//     contact_id integer PRIMARY KEY,
+//     first_name text NOT NULL,
+//     last_name text NOT NULL,
+//     email text NOT NULL UNIQUE,
+//     phone text NOT NULL UNIQUE
+//    );
+
+    // sqlite
+//    if (data_type == "BOOLEAN")
+//        data_type = "BOOL";
+//    else if (data_type == "TEXT")
+//        data_type = "STRING";
+//    else if (data_type == "REAL")
+//        data_type = "DOUBLE";
+//    else if (data_type == "INTEGER")
+//        data_type = "INT";
+    // mysql same
+
+    ss << "CREATE TABLE " << table.name() << "(";
+
+    std::string data_type;
+    std::string connection_type = db_interface_.connection().type();
+
+    unsigned int cnt = 0;
+    for (auto& col_it : table.columns())
+    {
+        ss << col_it.second->name();
+
+        data_type = col_it.second->type();
+
+//        if (connection_type == SQLITE_IDENTIFIER) // && connection_type != MYSQL_IDENTIFIE
+//        {
+//            if (data_type == "BOOL")
+//                data_type = "BOOLEAN";
+//            else if (data_type == "STRING")
+//                data_type = "TEXT";
+//            else if (data_type == "DOUBLE")
+//                data_type = "REAL";
+//            else if (data_type == "INT")
+//                data_type = "INTEGER";
+//        }
+
+        ss << " " << data_type;
+
+        if (col_it.second->isKey())
+            ss << " PRIMARY KEY NOT NULL";
+
+        if (cnt != table.columns().size()-1)
+            ss << ",";
+
+        cnt++;
+    }
+
+    ss << ");";
+
+    loginf << "SQLGenerator: getCreateTableStatement: sql '" << ss.str() << "'";
+    return ss.str();
+}
+
 //std::shared_ptr<DBCommand> SQLGenerator::getSelectCommand(const DBObject &object, const DBOVariableSet &read_list, const std::string &custom_filter_clause,
 //                                                          std::vector<std::string> &filtered_variable_names, DBOVariable *order,  const std::string &limit_str)
 //{
@@ -374,7 +438,7 @@ std::shared_ptr <DBCommand> SQLGenerator::getTableSelectMinMaxNormalStatement (c
 //        if (column->hasSpecialNull())
 //            continue;
 
-        logdbg  << "SQLGenerator: getMainTableSelectMinMaxStatement: current name " << col_it.first;
+        logdbg  << "SQLGenerator: getTableSelectMinMaxNormalStatement: current name " << col_it.first;
 
         if (!first)
             ss << ",";
@@ -392,7 +456,7 @@ std::shared_ptr <DBCommand> SQLGenerator::getTableSelectMinMaxNormalStatement (c
     command->set (ss.str());
     command->list(command_list);
 
-    logdbg  << "SQLGenerator: getMainTableSelectMinMaxStatement: sql '" << ss.str() << "'";
+    logdbg  << "SQLGenerator: getTableSelectMinMaxNormalStatement: sql '" << ss.str() << "'";
 
     return command;
 }
@@ -437,7 +501,8 @@ std::string SQLGenerator::getInsertPropertyStatement (const std::string &id, con
 {
     stringstream ss;
     assert (id.size() < 255);
-    assert (value.size() < 1701);
+    if (value.size() > 1000)
+        logwrn << "SQLGenerator: getInsertPropertyStatement: value size very large (" << value.size() << ")";
 
     // REPLACE into table (id, name, age) values(1, "A", 19)
     ss << "REPLACE INTO " << TABLE_NAME_PROPERTIES << " VALUES ('" << id <<"', '" << value <<"');";
@@ -551,6 +616,55 @@ std::string SQLGenerator::getTablePropertiesCreateStatement ()
 
 //    return ss.str();
 //}
+
+std::string SQLGenerator::insertDBUpdateStringBind(std::shared_ptr<Buffer> buffer, std::string tablename)
+{
+    assert (buffer);
+    //assert (object.existsInDB());
+    //assert (key_var.existsInDB());
+    assert (tablename.size() > 0);
+
+    const std::vector <Property> &properties = buffer->properties().properties();
+
+    // INSERT INTO table_name (column1, column2, column3, ...) VALUES (value1, value2, value3, ...);
+
+    unsigned int size = properties.size();
+    logdbg  << "SQLGenerator: insertDBUpdateStringBind: creating db string";
+    std::stringstream ss;//create a stringstream
+
+    ss << "INSERT INTO " << tablename << " (";
+
+    std::string connection_type = db_interface_.connection().type();
+
+    if (connection_type != SQLITE_IDENTIFIER && connection_type != MYSQL_IDENTIFIER)
+        throw std::runtime_error ("SQLGenerator: insertDBUpdateStringBind: not yet implemented db type "
+                                  + connection_type);
+
+    std::stringstream values_ss;
+    values_ss << "VALUES (";
+
+    for (unsigned int cnt=0; cnt < size; cnt++)
+    {
+        ss << properties.at(cnt).name();
+
+        if (connection_type == SQLITE_IDENTIFIER)
+            values_ss << "@VAR"+std::to_string(cnt+1);
+        else if (connection_type == MYSQL_IDENTIFIER)
+            values_ss << "%"+std::to_string(cnt+1);
+
+        if (cnt != size-1)
+        {
+            ss << ", ";
+            values_ss << ", ";
+        }
+    }
+
+    ss << ") " << values_ss.str() << ");";
+
+    loginf << "SQLGenerator: insertDBUpdateStringBind: var insert string '" << ss.str() << "'";
+
+    return ss.str();
+}
 
 std::string SQLGenerator::createDBUpdateStringBind(std::shared_ptr<Buffer> buffer, DBObject &object,
                                                    DBOVariable &key_var, std::string tablename)

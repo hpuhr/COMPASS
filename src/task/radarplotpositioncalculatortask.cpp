@@ -238,21 +238,21 @@ void RadarPlotPositionCalculatorTask::checkAndSetVariable (std::string& name_str
     {
         if (!db_object_->hasVariable(name_str))
         {
-            loginf << "RadarPlotPositionCalculatorTask::checkAndSetVariable: var " << name_str << " does not exist";
+            loginf << "RadarPlotPositionCalculatorTask: checkAndSetVariable: var " << name_str << " does not exist";
             name_str = "";
             var = nullptr;
         }
         else
         {
             *var = &db_object_->variable(name_str);
-            loginf << "RadarPlotPositionCalculatorTask::checkAndSetVariable: var " << name_str << " set";
+            loginf << "RadarPlotPositionCalculatorTask: checkAndSetVariable: var " << name_str << " set";
             assert (var);
             assert((*var)->existsInDB());
         }
     }
     else
     {
-        loginf << "RadarPlotPositionCalculatorTask::checkAndSetVariable: dbobject null";
+        loginf << "RadarPlotPositionCalculatorTask: checkAndSetVariable: dbobject null";
         name_str = "";
         var = nullptr;
     }
@@ -368,8 +368,8 @@ void RadarPlotPositionCalculatorTask::calculate ()
     read_set.add(*latitude_var_);
     read_set.add(*longitude_var_);
 
-    connect (db_object_, SIGNAL(newDataSignal(DBObject&)), this, SLOT(newDataSlot(DBObject&)));
-    connect (db_object_, SIGNAL(loadingDoneSignal(DBObject&)), this, SLOT(loadingDoneSlot(DBObject&)));
+    connect (db_object_, &DBObject::newDataSignal, this, &RadarPlotPositionCalculatorTask::newDataSlot);
+    connect (db_object_, &DBObject::loadingDoneSignal, this, &RadarPlotPositionCalculatorTask::loadingDoneSlot);
 
     db_object_->load (read_set, false, false, nullptr, false); //"0,100000"
 }
@@ -440,16 +440,17 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
     unsigned int read_size = read_buffer->size();
     assert (read_size);
 
-    std::string latitude_var_dbname = latitude_var_->currentDBColumn().name();
-    std::string longitude_var_dbname = longitude_var_->currentDBColumn().name();
-    std::string keyvar_var_dbname = key_var_->currentDBColumn().name();
+//    std::string latitude_var_dbname = latitude_var_->currentDBColumn().name();
+//    std::string longitude_var_dbname = longitude_var_->currentDBColumn().name();
+//    std::string keyvar_var_dbname = key_var_->currentDBColumn().name();
 
     PropertyList update_buffer_list;
-    update_buffer_list.addProperty(latitude_var_dbname, PropertyDataType::DOUBLE);
-    update_buffer_list.addProperty(longitude_var_dbname, PropertyDataType::DOUBLE);
-    update_buffer_list.addProperty(keyvar_var_dbname, PropertyDataType::INT);
+    update_buffer_list.addProperty(latitude_var_str_, PropertyDataType::DOUBLE);
+    update_buffer_list.addProperty(longitude_var_str_, PropertyDataType::DOUBLE);
+    update_buffer_list.addProperty(key_var_str_, PropertyDataType::INT);
 
-    std::shared_ptr<Buffer> update_buffer = std::shared_ptr<Buffer> (new Buffer (update_buffer_list,db_object_->name()));
+    std::shared_ptr<Buffer> update_buffer = std::shared_ptr<Buffer> (new Buffer (
+                                                                         update_buffer_list,db_object_->name()));
 
     int rec_num;
     int sensor_id;
@@ -603,9 +604,9 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
             continue;
         }
 
-        update_buffer->getDouble(latitude_var_dbname).set(update_cnt, lat);
-        update_buffer->getDouble(longitude_var_dbname).set(update_cnt, lon);
-        update_buffer->getInt(keyvar_var_dbname).set(update_cnt, rec_num);
+        update_buffer->getDouble(latitude_var_str_).set(update_cnt, lat);
+        update_buffer->getDouble(longitude_var_str_).set(update_cnt, lon);
+        update_buffer->getInt(key_var_str_).set(update_cnt, rec_num);
         update_cnt++;
 
         //loginf << "uga cnt " << update_cnt << " rec_num " << rec_num << " lat " << lat << " long " << lon;
@@ -644,10 +645,15 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
     msg_box_->setStandardButtons(QMessageBox::NoButton);
     msg_box_->show();
 
-    db_object_->updateData(*key_var_, update_buffer);
+    DBOVariableSet list;
+    list.add(*latitude_var_);
+    list.add(*longitude_var_);
+    list.add(*key_var_);
 
-    connect (db_object_, SIGNAL(updateDoneSignal(DBObject&)), this, SLOT(updateDoneSlot(DBObject&)));
-    connect (db_object_, SIGNAL(updateProgressSignal(float)), this, SLOT(updateProgressSlot(float)));
+    db_object_->updateData(*key_var_, list, update_buffer);
+
+    connect (db_object_, &DBObject::updateDoneSignal, this, &RadarPlotPositionCalculatorTask::updateDoneSlot);
+    connect (db_object_, &DBObject::updateProgressSignal, this, &RadarPlotPositionCalculatorTask::updateProgressSlot);
 
     calculated_ = true;
     loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: end";
@@ -666,8 +672,9 @@ void RadarPlotPositionCalculatorTask::updateDoneSlot (DBObject& object)
 {
     loginf << "RadarPlotPositionCalculatorTask: updateDoneSlot";
 
-    disconnect (db_object_, SIGNAL(updateDoneSignal(DBObject&)), this, SLOT(updateDoneSlot(DBObject&)));
-    disconnect (db_object_, SIGNAL(updateProgressSignal(float)), this, SLOT(updateProgressSlot(float)));
+    disconnect (db_object_, &DBObject::updateDoneSignal, this, &RadarPlotPositionCalculatorTask::updateDoneSlot);
+    disconnect (db_object_, &DBObject::updateProgressSignal, this,
+                &RadarPlotPositionCalculatorTask::updateProgressSlot);
 
     assert (msg_box_);
     msg_box_->close();

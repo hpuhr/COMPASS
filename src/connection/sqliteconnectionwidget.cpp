@@ -32,7 +32,7 @@
 #include <QMessageBox>
 
 SQLiteConnectionWidget::SQLiteConnectionWidget(SQLiteConnection &connection, QWidget *parent)
-    : QWidget(parent), connection_(connection), file_list_ (nullptr), add_button_(nullptr), delete_button_(nullptr), open_button_(nullptr)
+    : QWidget(parent), connection_(connection)
 {
     QFont font_bold;
     font_bold.setBold(true);
@@ -49,6 +49,10 @@ SQLiteConnectionWidget::SQLiteConnectionWidget(SQLiteConnection &connection, QWi
     file_list_->setSelectionBehavior( QAbstractItemView::SelectItems );
     file_list_->setSelectionMode( QAbstractItemView::SingleSelection );
     layout->addWidget(file_list_);
+
+    new_button_ = new QPushButton ("New");
+    connect (new_button_, SIGNAL(clicked()), this, SLOT(newFileSlot()));
+    layout->addWidget(new_button_);
 
     add_button_ = new QPushButton ("Add");
     connect (add_button_, SIGNAL(clicked()), this, SLOT(addFileSlot()));
@@ -68,9 +72,21 @@ SQLiteConnectionWidget::SQLiteConnectionWidget(SQLiteConnection &connection, QWi
     setLayout (layout);
 }
 
+void SQLiteConnectionWidget::newFileSlot ()
+{
+    QString filename = QFileDialog::getSaveFileName(this, tr("New SQLite3 File"),
+                                                    "", tr(""));
+
+    if (filename.size() > 0)
+    {
+        if (!connection_.hasFile(filename.toStdString()))
+            connection_.addFile(filename.toStdString());
+    }
+}
+
 void SQLiteConnectionWidget::addFileSlot ()
 {
-    QString filename = QFileDialog::getOpenFileName(this, tr("Open SQLite3 File"));
+    QString filename = QFileDialog::getOpenFileName(this, tr("Add SQLite3 File"));
 
     if (filename.size() > 0)
     {
@@ -83,7 +99,7 @@ void SQLiteConnectionWidget::deleteFileSlot ()
 {
     if (!file_list_->currentItem())
     {
-        QMessageBox m_warning (QMessageBox::Warning, "SQLite3 Database Open Failed",
+        QMessageBox m_warning (QMessageBox::Warning, "SQLite3 File Deletion Failed",
                                  "Please select a file in the list.",
                                  QMessageBox::Ok);
         m_warning.exec();

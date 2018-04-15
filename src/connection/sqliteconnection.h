@@ -28,7 +28,7 @@ class Buffer;
 class DBInterface;
 class SQLiteConnectionWidget;
 class SQLiteConnectionInfoWidget;
-class SQLiteFile;
+class SavedFile;
 class PropertyList;
 
 /**
@@ -77,7 +77,7 @@ public:
     std::string identifier () const;
     std::string type () const override { return SQLITE_IDENTIFIER; }
 
-    const std::map <std::string, SQLiteFile*> &fileList () { return file_list_; }
+    const std::map <std::string, SavedFile*> &fileList () { return file_list_; }
     bool hasFile (const std::string &filename) { return file_list_.count (filename) > 0; }
     void addFile (const std::string &filename);
     void removeFile (const std::string &filename);
@@ -99,7 +99,7 @@ protected:
     SQLiteConnectionWidget *widget_;
     SQLiteConnectionInfoWidget *info_widget_;
 
-    std::map <std::string, SQLiteFile*> file_list_;
+    std::map <std::string, SavedFile*> file_list_;
 
     void execute (const std::string &command);
     void execute (const std::string &command, std::shared_ptr <Buffer> buffer);

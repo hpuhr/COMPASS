@@ -53,7 +53,7 @@ public:
     const std::string& name () const { return name_; }
 
     /// @brief Returns the DBTable with the supplied name
-    const DBTable& table (const std::string& name) const;
+    DBTable& table (const std::string& name) const;
     /// @brief returns flag if a table with the given name exists
     bool hasTable (const std::string& name) const { return tables_.find(name) != tables_.end(); }
     void addTable (const std::string& name);

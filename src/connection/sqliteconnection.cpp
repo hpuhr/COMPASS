@@ -63,12 +63,13 @@ void SQLiteConnection::openFile (const std::string &file_name)
     {
         // Even in case of an error we get a valid db_handle (for the
         // purpose of calling sqlite3_errmsg on it ...)
-        logerr  <<  "SQLiteConnection: createRDBFile: error " <<  result << " " <<  sqlite3_errmsg(db_handle_);
+        logerr  <<  "SQLiteConnection: openFile: error " <<  result << " " <<  sqlite3_errmsg(db_handle_);
         sqlite3_close(db_handle_);
-        throw std::runtime_error ("SQLiteConnection: createRDBFile: error");
+        throw std::runtime_error ("SQLiteConnection: openFile: error");
     }
     char * sErrMsg = 0;
     sqlite3_exec(db_handle_, "PRAGMA synchronous = OFF", NULL, NULL, &sErrMsg);
+    sqlite3_exec(db_handle_, "PRAGMA journal_mode = OFF", NULL, NULL, &sErrMsg);
 
     connection_ready_ = true;
 
@@ -149,7 +150,8 @@ void SQLiteConnection::stepAndClearBindings ()
         }
         else if (ret2 > SQLITE_OK  && ret2 < SQLITE_ROW)
         {
-            logerr  << "DBInterface: stepAndClearBindings: error while bind: " << ret2;
+            logerr  << "DBInterface: stepAndClearBindings: error while bind: " << ret2 << ": "
+                    << sqlite3_errmsg(db_handle_);
             throw std::runtime_error ("DBInterface: stepAndClearBindings: error while bind");
         }
     }
@@ -290,7 +292,8 @@ void SQLiteConnection::execute (const std::string &command, std::shared_ptr <Buf
     finalizeStatement();
 }
 
-void SQLiteConnection::readRowIntoBuffer (const PropertyList &list, unsigned int num_properties, std::shared_ptr <Buffer> buffer, unsigned int index)
+void SQLiteConnection::readRowIntoBuffer (const PropertyList &list, unsigned int num_properties,
+                                          std::shared_ptr <Buffer> buffer, unsigned int index)
 {
     for (unsigned int cnt=0; cnt < num_properties; cnt++)
     {
@@ -403,7 +406,9 @@ std::shared_ptr <DBResult> SQLiteConnection::stepPreparedCommand (unsigned int m
     for (result = sqlite3_step(statement_); result == SQLITE_ROW; result = sqlite3_step(statement_))
     {
         readRowIntoBuffer (list, num_properties, buffer, cnt);
-        assert (buffer->size() == cnt+1);
+
+        if (buffer->size()) // 0 == 1 otherwise
+            assert (buffer->size() == cnt+1);
 
         if (max_results != 0 && cnt >= max_results)
         {
@@ -542,12 +547,12 @@ void SQLiteConnection::generateSubConfigurable (const std::string &class_id, con
 {
     if (class_id == "SQLiteFile")
     {
-      SQLiteFile *file = new SQLiteFile (class_id, instance_id, this);
+      SavedFile *file = new SavedFile (class_id, instance_id, this);
       assert (file_list_.count (file->name()) == 0);
-      file_list_.insert (std::pair <std::string, SQLiteFile*> (file->name(), file));
+      file_list_.insert (std::pair <std::string, SavedFile*> (file->name(), file));
     }
     else
-    throw std::runtime_error ("SQLiteConnection: generateSubConfigurable: unknown class_id "+class_id );
+        throw std::runtime_error ("SQLiteConnection: generateSubConfigurable: unknown class_id "+class_id );
 }
 
 QWidget *SQLiteConnection::widget ()

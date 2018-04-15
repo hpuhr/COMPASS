@@ -108,7 +108,6 @@ RadarPlotPositionCalculatorTaskWidget::RadarPlotPositionCalculatorTaskWidget(Rad
     grid->addWidget (longitude_box_, row_cnt, 1);
 
     main_layout->addLayout(grid);
-    //main_layout->addStretch();
 
     calc_button_ = new QPushButton ("Calculate");
     connect(calc_button_, SIGNAL( clicked() ), this, SLOT( calculateSlot() ));
