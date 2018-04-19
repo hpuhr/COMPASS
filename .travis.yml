@@ -6,7 +6,6 @@ addons:
      - cmake
      - qtbase5-dev
      - libqt5opengl5-dev
-     - libqwt-qt5-dev
      - libboost-dev
      - libeigen3-dev
      - libmysqlclient-dev
