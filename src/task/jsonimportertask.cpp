@@ -625,7 +625,7 @@ std::shared_ptr<Buffer> JSONImporterTask::parseJSON (Json::Value& object, bool t
 
     bool skip_this;
 
-    for (Json::Value::const_iterator it = object.cbegin(); it != object.cend(); ++it)
+    for (Json::ValueConstIterator it = object.begin(); it != object.end(); ++it)
     {
         logdbg << it.key().asString(); // << ':' << it->asInt() << '\n';
 
@@ -633,7 +633,7 @@ std::shared_ptr<Buffer> JSONImporterTask::parseJSON (Json::Value& object, bool t
         {
             Json::Value ac_list = object["acList"];
             //Json::Value& ac_list = it.v;
-            for (Json::Value::const_iterator tr_it = ac_list.cbegin(); tr_it != ac_list.cend(); ++tr_it)
+            for (Json::ValueConstIterator tr_it = ac_list.begin(); tr_it != ac_list.end(); ++tr_it)
             {
                 skip_this = false;
                 //loginf << tr_it.key().asString();
