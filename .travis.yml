@@ -18,6 +18,9 @@ addons:
      - libarchive-dev
      - libjsoncpp-dev
 
+compiler:
+ - gcc
+
 script:
  - mkdir build
  - cd build
