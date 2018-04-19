@@ -22,6 +22,7 @@ addons:
 
 compiler:
  - gcc
+ - clang
 
 script:
  - mkdir build
