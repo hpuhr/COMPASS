@@ -12,7 +12,7 @@ addons:
      - libboost-program-options-dev
      - libeigen3-dev
      - libmysqlclient-dev
-     - libmysqlcppconn-dev
+     - libmysql++-dev
      - libsqlite3-dev
      - liblog4cpp5-dev
      - libgdal-dev
