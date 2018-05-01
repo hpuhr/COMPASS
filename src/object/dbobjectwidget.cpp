@@ -444,10 +444,10 @@ void DBObjectWidget::updateDataSourcesGridSlot ()
 
     for (auto& ds_it : object_->dataSourceDefinitions ())
     {
-        QLabel *schema = new QLabel (ds_it.second->schema().c_str());
+        QLabel *schema = new QLabel (ds_it.second.schema().c_str());
         ds_grid_->addWidget (schema, row, 0);
 
-        QVariant data = QVariant::fromValue(ds_it.second);
+        QVariant data = QVariant::fromValue(&ds_it.second);
 
         QPushButton *edit = new QPushButton ();
         edit->setIcon(edit_icon);

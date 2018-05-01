@@ -207,7 +207,7 @@ public:
     bool hasDataSourceDefinition (const std::string& schema) { return data_source_definitions_.count(schema); }
     void deleteDataSourceDefinition (const std::string& schema);
     /// @brief Returns container with all data source definitions
-    const std::map <std::string, DBODataSourceDefinition*>& dataSourceDefinitions () const {
+    const std::map <std::string, DBODataSourceDefinition>& dataSourceDefinitions () const {
         return data_source_definitions_;
     }
 
@@ -268,7 +268,7 @@ protected:
     std::map <std::string, DBOSchemaMetaTableDefinition> meta_table_definitions_;
 
     /// Container with data source definitions (schema identifier -> data source definition pointer)
-    std::map <std::string, DBODataSourceDefinition*> data_source_definitions_;
+    std::map <std::string, DBODataSourceDefinition> data_source_definitions_;
     std::map<int, DBODataSource> data_sources_;
     /// Container with all variables (variable identifier -> variable pointer)
     std::map<std::string, DBOVariable*> variables_;

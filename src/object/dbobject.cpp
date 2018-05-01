@@ -73,10 +73,6 @@ DBObject::~DBObject()
         label_definition_=nullptr;
     }
 
-    for (auto it : data_source_definitions_)
-        delete it.second;
-    data_source_definitions_.clear();
-
     for (auto it : variables_)
         delete it.second;
     variables_.clear();
@@ -112,17 +108,25 @@ void DBObject::generateSubConfigurable (const std::string &class_id, const std::
         std::string schema_name = configuration_.getSubConfiguration(
                     class_id, instance_id).getParameterConfigValueString("schema");
 
+        assert (meta_table_definitions_.find(schema_name) == meta_table_definitions_.end());
+
         meta_table_definitions_.emplace(std::piecewise_construct,
                      std::forward_as_tuple(schema_name),  // args for key
                      std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
     }
     else if (class_id.compare ("DBODataSourceDefinition") == 0)
     {
-        DBODataSourceDefinition* def = new DBODataSourceDefinition (class_id, instance_id, this);
-        assert (data_source_definitions_.find(def->schema()) == data_source_definitions_.end());
-        connect (def, SIGNAL(definitionChangedSignal()), this, SLOT(dataSourceDefinitionChanged()));
+        std::string schema_name = configuration_.getSubConfiguration(
+                    class_id, instance_id).getParameterConfigValueString("schema");
 
-        data_source_definitions_.insert (std::pair<std::string, DBODataSourceDefinition*> (def->schema(), def));
+        assert (data_source_definitions_.find(schema_name) == data_source_definitions_.end());
+
+        data_source_definitions_.emplace(std::piecewise_construct,
+                     std::forward_as_tuple(schema_name),  // args for key
+                     std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
+
+        connect (&data_source_definitions_.at(schema_name), SIGNAL(definitionChangedSignal()),
+                 this, SLOT(dataSourceDefinitionChanged()));
     }
     else if (class_id.compare ("DBOLabelDefinition") == 0)
     {
@@ -228,13 +232,12 @@ bool DBObject::hasCurrentDataSourceDefinition () const
 const DBODataSourceDefinition& DBObject::currentDataSourceDefinition () const
 {
     assert (hasCurrentDataSourceDefinition());
-    return *data_source_definitions_.at(ATSDB::instance().schemaManager().getCurrentSchema().name());
+    return data_source_definitions_.at(ATSDB::instance().schemaManager().getCurrentSchema().name());
 }
 
 void DBObject::deleteDataSourceDefinition (const std::string& schema)
 {
     assert (data_source_definitions_.count(schema) == 1);
-    delete data_source_definitions_.at(schema);
     data_source_definitions_.erase(schema);
 
     if (widget_)
