@@ -414,6 +414,66 @@ void Configuration::getParameter (const std::string &parameter_id, std::string &
     value = *(parameters_string_.at(parameter_id).pointer_);
 }
 
+bool Configuration::getParameterConfigValueBool (const std::string &parameter_id)
+{
+    if (parameters_bool_.count(parameter_id) == 0)
+        throw std::runtime_error ("Configuration: getParameterConfigValueBool: unknown parameter id " + parameter_id);
+
+    assert (parameters_bool_.at(parameter_id).getParameterType().compare ("ParameterBool") == 0);
+
+    return parameters_bool_.at(parameter_id).config_value_;
+}
+
+int Configuration::getParameterConfigValueInt (const std::string &parameter_id)
+{
+    if (parameters_int_.count(parameter_id) == 0)
+        throw std::runtime_error ("Configuration: getParameterConfigValueInt: unknown parameter id " + parameter_id);
+
+    assert (parameters_int_.at(parameter_id).getParameterType().compare ("ParameterInt") == 0);
+
+    return parameters_int_.at(parameter_id).config_value_;
+}
+
+unsigned int Configuration::getParameterConfigValueUint (const std::string &parameter_id)
+{
+    if (parameters_uint_.count(parameter_id) == 0)
+        throw std::runtime_error ("Configuration: getParameterConfigValueUint: unknown parameter id " + parameter_id);
+
+    assert (parameters_uint_.at(parameter_id).getParameterType().compare ("ParameterUnsignedInt") == 0);
+
+    return parameters_uint_.at(parameter_id).config_value_;
+}
+
+float Configuration::getParameterConfigValueFloat (const std::string &parameter_id)
+{
+    if (parameters_float_.count(parameter_id) == 0)
+        throw std::runtime_error ("Configuration: getParameterConfigValueFloat: unknown parameter id " + parameter_id);
+
+    assert (parameters_float_.at(parameter_id).getParameterType().compare ("ParameterFloat") == 0);
+
+    return parameters_float_.at(parameter_id).config_value_;
+}
+
+double Configuration::getParameterConfigValueDouble (const std::string &parameter_id)
+{
+    if (parameters_double_.count(parameter_id) == 0)
+        throw std::runtime_error ("Configuration: getParameterConfigValueDouble: unknown parameter id " + parameter_id);
+
+    assert (parameters_double_.at(parameter_id).getParameterType().compare ("ParameterDouble") == 0);
+
+    return parameters_double_.at(parameter_id).config_value_;
+}
+
+std::string Configuration::getParameterConfigValueString (const std::string &parameter_id)
+{
+    if (parameters_string_.count(parameter_id) == 0)
+        throw std::runtime_error ("Configuration: getParameterConfigValueString: string: unknown parameter id "
+                                  + parameter_id);
+
+    assert (parameters_string_.at(parameter_id).getParameterType().compare ("ParameterString") == 0);
+
+    return parameters_string_.at(parameter_id).config_value_;
+}
 
 void Configuration::parseXMLElement (XMLElement *element)
 {

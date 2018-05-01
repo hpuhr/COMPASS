@@ -188,7 +188,7 @@ public:
     size_t loadedCount ();
 
     /// @brief Returns container with all meta tables
-    const std::map <std::string, std::unique_ptr<DBOSchemaMetaTableDefinition>>& metaTables () const {
+    const std::map <std::string, DBOSchemaMetaTableDefinition>& metaTables () const {
         return meta_table_definitions_; }
     /// @brief Returns identifier of main meta table under DBSchema defined by schema
     bool hasMetaTable (const std::string& schema) const;
@@ -265,7 +265,7 @@ protected:
     bool locked_ {false};
 
     /// Container with all DBOSchemaMetaTableDefinitions
-    std::map <std::string, std::unique_ptr<DBOSchemaMetaTableDefinition>> meta_table_definitions_;
+    std::map <std::string, DBOSchemaMetaTableDefinition> meta_table_definitions_;
 
     /// Container with data source definitions (schema identifier -> data source definition pointer)
     std::map <std::string, DBODataSourceDefinition*> data_source_definitions_;

@@ -108,14 +108,13 @@ void DBObject::generateSubConfigurable (const std::string &class_id, const std::
     }
     else if (class_id.compare ("DBOSchemaMetaTableDefinition") == 0)
     {
-        std::unique_ptr<DBOSchemaMetaTableDefinition> def ( new DBOSchemaMetaTableDefinition (
-                                                                class_id, instance_id, this));
+        logdbg << "DBObject: generateSubConfigurable: creating DBOSchemaMetaTableDefinition";
+        std::string schema_name = configuration_.getSubConfiguration(
+                    class_id, instance_id).getParameterConfigValueString("schema");
 
-        assert (meta_table_definitions_.find (def->schema()) == meta_table_definitions_.end());
-        meta_table_definitions_.insert (std::make_pair(def->schema(), std::move(def)));
-
-//        logdbg  << "DBObject "<< name() << ": generateSubConfigurable: schema " << def.schema() << " meta "
-//                << def.metaTable();
+        meta_table_definitions_.emplace(std::piecewise_construct,
+                     std::forward_as_tuple(schema_name),  // args for key
+                     std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
     }
     else if (class_id.compare ("DBODataSourceDefinition") == 0)
     {
@@ -199,7 +198,7 @@ bool DBObject::hasMetaTable (const std::string& schema) const
 const std::string& DBObject::metaTable (const std::string& schema) const
 {
     assert (hasMetaTable(schema));
-    return meta_table_definitions_.at(schema)->metaTable();
+    return meta_table_definitions_.at(schema).metaTable();
 }
 
 void DBObject::deleteMetaTable (const std::string& schema)
@@ -560,7 +559,7 @@ void DBObject::schemaChangedSlot ()
             return;
         }
 
-        std::string meta_table_name = meta_table_definitions_.at(schema.name())->metaTable();
+        std::string meta_table_name = meta_table_definitions_.at(schema.name()).metaTable();
         assert (schema.hasMetaTable (meta_table_name));
         current_meta_table_ = &schema.metaTable (meta_table_name);
     }

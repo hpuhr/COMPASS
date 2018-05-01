@@ -567,7 +567,7 @@ void DBObjectWidget::updateMetaTablesGridSlot()
         QLabel *schema = new QLabel (it->first.c_str());
         meta_table_grid_->addWidget (schema, row, 0);
 
-        QLabel *meta= new QLabel (it->second->metaTable().c_str());
+        QLabel *meta= new QLabel (it->second.metaTable().c_str());
         meta_table_grid_->addWidget (meta, row, 1);
 
         QPushButton *del = new QPushButton ();
@@ -795,7 +795,7 @@ void DBObjectWidget::updateDBOVarsGridSlot ()
 
             assert (meta_tables.count(schema_name) == 1);
             DBTableColumnComboBox* box = new DBTableColumnComboBox (schema_name,
-                                                                    meta_tables.at(schema_name)->metaTable(),
+                                                                    meta_tables.at(schema_name).metaTable(),
                                                                     *var_it.second);
             box->setProperty("variable", data);
             box->setProperty("schema", QString(schema_name.c_str()));

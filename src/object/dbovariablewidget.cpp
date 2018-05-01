@@ -206,7 +206,7 @@ void DBOVariableWidget::createSchemaBoxes (QGridLayout* properties_layout, int r
         properties_layout->addWidget(label, row, 0);
 
         assert (meta_tables.count(schema_name) == 1);
-        DBTableColumnComboBox* box = new DBTableColumnComboBox (schema_name, meta_tables.at(schema_name)->metaTable(),
+        DBTableColumnComboBox* box = new DBTableColumnComboBox (schema_name, meta_tables.at(schema_name).metaTable(),
                                                                 variable_);
 
         properties_layout->addWidget (box, row, 1);

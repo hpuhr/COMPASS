@@ -46,6 +46,12 @@ Configurable::Configurable(const std::string &class_id, const std::string &insta
     logdbg  << "Configurable: constructor: class_id " << class_id_ << " instance_id " << instance_id_ << " end";
 }
 
+//Configurable& Configurable::operator=(Configurable&& other)
+//{
+//    loginf << "Configurable: move operator: " << class_id_ << " " << instance_id_;
+//    return *this;
+//}
+
 /**
  * If parent is set, unregisters from it using removeChildConfigurable, if not, calls unregisterRootConfigurable.
  *
@@ -110,7 +116,7 @@ void Configurable::registerParameter (const std::string &parameter_id, std::stri
 
 Configuration &Configurable::registerSubConfigurable (Configurable &child)
 {
-    logdbg  << "Configurable: registerSubConfigurable: child " << child.getInstanceId();
+    logdbg  << "Configurable " << instance_id_ << " registerSubConfigurable: child " << child.getInstanceId();
     const std::string &key = child.getKeyId();
 
     if (children_.find (key) != children_.end())
@@ -126,7 +132,7 @@ Configuration &Configurable::registerSubConfigurable (Configurable &child)
 
 void Configurable::removeChildConfigurable (Configurable &child)
 {
-    logdbg  << "Configurable: removeChildConfigurable: child " << child.getInstanceId();
+    logdbg  << "Configurable " << instance_id_ << " removeChildConfigurable: child " << child.getInstanceId();
 
     const std::string &key = child.getKeyId();
     assert (children_.find (key) != children_.end());

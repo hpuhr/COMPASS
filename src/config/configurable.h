@@ -51,7 +51,9 @@ class Configurable
 {
 public:
     /// @brief Constructor
-    Configurable (const std::string &class_id, const std::string &instance_id, Configurable *parent=0, const std::string &configuration_filename="");
+    Configurable (const std::string &class_id, const std::string &instance_id, Configurable *parent=0,
+                  const std::string &configuration_filename="");
+    //Configurable& operator=(Configurable&& other);
     /// @brief Destructor
     virtual ~Configurable();
 

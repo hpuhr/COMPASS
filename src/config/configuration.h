@@ -222,6 +222,13 @@ public:
     /// @brief Writes data value if a string parameter to an argument
     void getParameter (const std::string &parameter_id, std::string &value);
 
+    bool getParameterConfigValueBool (const std::string &parameter_id);
+    int getParameterConfigValueInt (const std::string &parameter_id);
+    unsigned int getParameterConfigValueUint (const std::string &parameter_id);
+    float getParameterConfigValueFloat (const std::string &parameter_id);
+    double getParameterConfigValueDouble (const std::string &parameter_id);
+    std::string getParameterConfigValueString (const std::string &parameter_id);
+
     /// @brief Parses an XML element
     void parseXMLElement (tinyxml2::XMLElement *element);
     /// @brief Generates an XML configuration element
@@ -241,7 +248,7 @@ public:
     /// @brief Returns flag if special filename has been set
     bool hasConfigurationFilename ();
     /// @brief Return special filename
-    const std::string & getConfigurationFilename ();
+    const std::string& getConfigurationFilename ();
 
     /// @brief Adds a new sub-configuration and returns reference
     Configuration &addNewSubConfiguration (const std::string &class_id, const std::string &instance_id);
