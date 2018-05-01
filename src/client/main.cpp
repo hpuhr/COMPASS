@@ -172,6 +172,7 @@ int main (int argc, char **argv)
     {
         logerr  << "Main: Caught Exception '" << ex.what() << "'";
         logerr.flush();
+        //assert (false);
 
         return -1;
     }
@@ -179,6 +180,7 @@ int main (int argc, char **argv)
     {
         logerr  << "Main: Caught Exception";
         logerr.flush();
+        //assert (false);
 
         return -1;
     }

@@ -16,6 +16,7 @@
  */
 
 #include <algorithm>
+#include <memory>
 
 #include "dbtable.h"
 #include "dbschema.h"
@@ -76,10 +77,6 @@ DBObject::~DBObject()
         delete it.second;
     data_source_definitions_.clear();
 
-    for (auto it : meta_table_definitions_)
-        delete it.second;
-    meta_table_definitions_.clear();
-
     for (auto it : variables_)
         delete it.second;
     variables_.clear();
@@ -111,12 +108,14 @@ void DBObject::generateSubConfigurable (const std::string &class_id, const std::
     }
     else if (class_id.compare ("DBOSchemaMetaTableDefinition") == 0)
     {
-        DBOSchemaMetaTableDefinition* def = new DBOSchemaMetaTableDefinition (class_id, instance_id, this);
-        assert (meta_table_definitions_.find (def->schema()) == meta_table_definitions_.end());
-        meta_table_definitions_.insert (std::pair <std::string, DBOSchemaMetaTableDefinition*> (def->schema(), def));
+        std::unique_ptr<DBOSchemaMetaTableDefinition> def ( new DBOSchemaMetaTableDefinition (
+                                                                class_id, instance_id, this));
 
-        logdbg  << "DBObject "<< name() << ": generateSubConfigurable: schema " << def->schema() << " meta "
-                << def->metaTable();
+        assert (meta_table_definitions_.find (def->schema()) == meta_table_definitions_.end());
+        meta_table_definitions_.insert (std::make_pair(def->schema(), std::move(def)));
+
+//        logdbg  << "DBObject "<< name() << ": generateSubConfigurable: schema " << def.schema() << " meta "
+//                << def.metaTable();
     }
     else if (class_id.compare ("DBODataSourceDefinition") == 0)
     {
@@ -208,7 +207,6 @@ void DBObject::deleteMetaTable (const std::string& schema)
     assert (hasMetaTable(schema));
 
     std::string meta_table_name = metaTable(schema);
-    delete meta_table_definitions_.at(schema);
     meta_table_definitions_.erase(meta_table_name);
     assert (!hasMetaTable(schema));
 

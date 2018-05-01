@@ -559,7 +559,7 @@ void DBObjectWidget::updateMetaTablesGridSlot()
     meta_label->setFont (font_bold);
     meta_table_grid_->addWidget (meta_label, 0, 1);
 
-    auto metas = object_->metaTables ();
+    auto& metas = object_->metaTables ();
 
     unsigned int row=1;
     for (auto it = metas.begin(); it != metas.end(); it++)
