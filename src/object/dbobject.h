@@ -251,7 +251,7 @@ protected:
     bool loading_wanted_ {false};
     size_t count_ {0};
 
-    DBOLabelDefinition* label_definition_ {nullptr};
+    std::unique_ptr<DBOLabelDefinition> label_definition_;
 
     std::shared_ptr <DBOReadDBJob> read_job_ {nullptr};
     std::vector <std::shared_ptr<Buffer>> read_job_data_;
@@ -276,8 +276,8 @@ protected:
     /// Current (in the current schema) main meta table
     MetaDBTable* current_meta_table_ {nullptr}; // TODO rework const?
 
-    DBObjectWidget* widget_ {nullptr};
-    DBObjectInfoWidget* info_widget_{nullptr};
+    std::unique_ptr<DBObjectWidget> widget_;
+    std::unique_ptr<DBObjectInfoWidget> info_widget_;
 
     virtual void checkSubConfigurables ();
 

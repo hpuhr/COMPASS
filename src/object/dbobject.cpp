@@ -67,27 +67,9 @@ DBObject::~DBObject()
 
     data_sources_.clear();
 
-    if (label_definition_)
-    {
-        delete label_definition_;
-        label_definition_=nullptr;
-    }
-
     for (auto it : variables_)
         delete it.second;
     variables_.clear();
-
-    if (widget_)
-    {
-        delete widget_;
-        widget_=nullptr;
-    }
-
-    if (info_widget_)
-    {
-        delete info_widget_;
-        info_widget_=nullptr;
-    }
 }
 
 /**
@@ -130,10 +112,8 @@ void DBObject::generateSubConfigurable (const std::string &class_id, const std::
     }
     else if (class_id.compare ("DBOLabelDefinition") == 0)
     {
-        DBOLabelDefinition* def = new DBOLabelDefinition (class_id, instance_id, this);
         assert (!label_definition_);
-        //connect (def, SIGNAL(definitionChangedSignal()), this, SLOT(dataSourceDefinitionChanged()));
-        label_definition_ = def;
+        label_definition_.reset (new DBOLabelDefinition (class_id, instance_id, this));
     }
     else
         throw std::runtime_error ("DBObject: generateSubConfigurable: unknown class_id "+class_id );
@@ -497,25 +477,25 @@ DBObjectWidget* DBObject::widget ()
 {
     if (!widget_)
     {
-        widget_ = new DBObjectWidget (this, ATSDB::instance().schemaManager());
+        widget_.reset(new DBObjectWidget (this, ATSDB::instance().schemaManager()));
         assert (widget_);
 
         if (locked_)
             widget_->lock();
     }
 
-    return widget_;
+    return widget_.get(); // needed for qt integration, not pretty
 }
 
 DBObjectInfoWidget *DBObject::infoWidget ()
 {
     if (!info_widget_)
     {
-        info_widget_ = new DBObjectInfoWidget (*this);
+        info_widget_.reset (new DBObjectInfoWidget (*this));
         assert (info_widget_);
     }
 
-    return info_widget_;
+    return info_widget_.get(); // needed for qt integration, not pretty
 }
 
 DBOLabelDefinitionWidget* DBObject::labelDefinitionWidget()
