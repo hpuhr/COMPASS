@@ -77,7 +77,7 @@ DBObject::~DBObject()
     data_source_definitions_.clear();
 
     for (auto it : meta_table_definitions_)
-        delete it;
+        delete it.second;
     meta_table_definitions_.clear();
 
     for (auto it : variables_)
@@ -112,13 +112,11 @@ void DBObject::generateSubConfigurable (const std::string &class_id, const std::
     else if (class_id.compare ("DBOSchemaMetaTableDefinition") == 0)
     {
         DBOSchemaMetaTableDefinition* def = new DBOSchemaMetaTableDefinition (class_id, instance_id, this);
-        meta_table_definitions_.push_back (def);
+        assert (meta_table_definitions_.find (def->schema()) == meta_table_definitions_.end());
+        meta_table_definitions_.insert (std::pair <std::string, DBOSchemaMetaTableDefinition*> (def->schema(), def));
 
         logdbg  << "DBObject "<< name() << ": generateSubConfigurable: schema " << def->schema() << " meta "
                 << def->metaTable();
-
-        assert (meta_tables_.find (def->schema()) == meta_tables_.end());
-        meta_tables_[def->schema()] = def->metaTable();
     }
     else if (class_id.compare ("DBODataSourceDefinition") == 0)
     {
@@ -196,13 +194,26 @@ const std::map<std::string, DBOVariable*>& DBObject::variables () const
 
 bool DBObject::hasMetaTable (const std::string& schema) const
 {
-    return meta_tables_.find(schema) != meta_tables_.end();
+    return meta_table_definitions_.find(schema) != meta_table_definitions_.end();
 }
 
 const std::string& DBObject::metaTable (const std::string& schema) const
 {
     assert (hasMetaTable(schema));
-    return meta_tables_.at(schema);
+    return meta_table_definitions_.at(schema)->metaTable();
+}
+
+void DBObject::deleteMetaTable (const std::string& schema)
+{
+    assert (hasMetaTable(schema));
+
+    std::string meta_table_name = metaTable(schema);
+    delete meta_table_definitions_.at(schema);
+    meta_table_definitions_.erase(meta_table_name);
+    assert (!hasMetaTable(schema));
+
+    if (current_meta_table_->name() == meta_table_name)
+        current_meta_table_ = nullptr;
 }
 
 /**
@@ -228,6 +239,11 @@ void DBObject::deleteDataSourceDefinition (const std::string& schema)
     assert (data_source_definitions_.count(schema) == 1);
     delete data_source_definitions_.at(schema);
     data_source_definitions_.erase(schema);
+
+    if (widget_)
+        widget_->updateDataSourcesGridSlot();
+
+    buildDataSources();
 }
 
 void DBObject::dataSourceDefinitionChanged ()
@@ -539,14 +555,14 @@ void DBObject::schemaChangedSlot ()
     {
         DBSchema& schema = ATSDB::instance().schemaManager().getCurrentSchema();
 
-        if (meta_tables_.find(schema.name()) == meta_tables_.end())
+        if (!hasMetaTable(schema.name()))
         {
             logwrn << "DBObject: schemaChangedSlot: object " << name_ << " has not main meta table for current schema";
             current_meta_table_ = nullptr;
             return;
         }
 
-        std::string meta_table_name = meta_tables_ .at(schema.name());
+        std::string meta_table_name = meta_table_definitions_.at(schema.name())->metaTable();
         assert (schema.hasMetaTable (meta_table_name));
         current_meta_table_ = &schema.metaTable (meta_table_name);
     }

@@ -188,10 +188,11 @@ public:
     size_t loadedCount ();
 
     /// @brief Returns container with all meta tables
-    const std::map <std::string, std::string> &metaTables () const { return meta_tables_; }
+    const std::map <std::string, DBOSchemaMetaTableDefinition*> &metaTables () const { return meta_table_definitions_; }
     /// @brief Returns identifier of main meta table under DBSchema defined by schema
     bool hasMetaTable (const std::string& schema) const;
-    const std::string &metaTable (const std::string& schema) const;
+    const std::string& metaTable (const std::string& schema) const;
+    void deleteMetaTable (const std::string& schema);
 
     /// @brief Returns main meta table for current schema
     const MetaDBTable& currentMetaTable () const;
@@ -208,7 +209,6 @@ public:
     const std::map <std::string, DBODataSourceDefinition*>& dataSourceDefinitions () const {
         return data_source_definitions_;
     }
-
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
@@ -264,9 +264,7 @@ protected:
     bool locked_ {false};
 
     /// Container with all DBOSchemaMetaTableDefinitions
-    std::vector <DBOSchemaMetaTableDefinition*> meta_table_definitions_;
-    /// Container with the main meta tables for schemas (schema identifier -> meta_table identifier)
-    std::map <std::string, std::string> meta_tables_;
+    std::map <std::string, DBOSchemaMetaTableDefinition*> meta_table_definitions_;
 
     /// Container with data source definitions (schema identifier -> data source definition pointer)
     std::map <std::string, DBODataSourceDefinition*> data_source_definitions_;
@@ -277,15 +275,10 @@ protected:
     /// Current (in the current schema) main meta table
     MetaDBTable* current_meta_table_ {nullptr}; // TODO rework const?
 
-    /// Flag indicating if varaibles where checked. Not really used yet.
-    //bool variables_checked_;
-
     DBObjectWidget* widget_ {nullptr};
     DBObjectInfoWidget* info_widget_{nullptr};
 
     virtual void checkSubConfigurables ();
-    /// @brief Checks if variables really exist. Not used yet.
-    //void checkVariables ();
 
     ///@brief Generates data sources information from previous post-processing.
     void buildDataSources();
