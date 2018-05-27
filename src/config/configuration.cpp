@@ -829,7 +829,7 @@ void Configuration::createSubConfigurables (Configurable *configurable)
                configurable->getInstanceId()   ;
 
     std::map<std::pair<std::string, std::string>, Configuration >::iterator it;
-
+    // TODO what if map changed (deleting of config) during iteration
     for (it = sub_configurations_.begin(); it != sub_configurations_.end(); it++)
     {
         //ConfigurableDefinition &mos_def = sub_configurables_.at(cnt);
@@ -951,110 +951,3 @@ void Configuration::addSubTemplate (Configuration *configuration, const std::str
     delete configuration;
 }
 
-template<> void ConfigurableParameter<bool>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
-{
-    config_value_ = attribute->BoolValue();
-}
-
-template<> void ConfigurableParameter<int>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
-{
-    config_value_ = attribute->IntValue();
-}
-
-template<> void ConfigurableParameter<unsigned int>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
-{
-    config_value_ = attribute->UnsignedValue();
-}
-
-template<> void ConfigurableParameter<float>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
-{
-    config_value_ = attribute->FloatValue();
-}
-
-template<> void ConfigurableParameter<double>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
-{
-    config_value_ = attribute->DoubleValue();
-}
-
-template<> void ConfigurableParameter<std::string>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
-{
-    config_value_ = attribute->Value();
-}
-
-template<> std::string ConfigurableParameter<bool>::getParameterType () const
-{
-    return "ParameterBool";
-}
-
-template<> std::string ConfigurableParameter<int>::getParameterType () const
-{
-    return "ParameterInt";
-}
-
-template<> std::string ConfigurableParameter<unsigned int>::getParameterType () const
-{
-    return "ParameterUnsignedInt";
-}
-
-template<> std::string ConfigurableParameter<float>::getParameterType () const
-{
-    return "ParameterFloat";
-}
-
-template<> std::string ConfigurableParameter<double>::getParameterType () const
-{
-    return "ParameterDouble";
-}
-
-template<> std::string ConfigurableParameter<std::string>::getParameterType () const
-{
-    return "ParameterString";
-}
-
-template<> std::string ConfigurableParameter<bool>::getParameterValue () const
-{
-    if (pointer_)
-        return std::to_string(*pointer_);
-    else
-        return std::to_string(config_value_);
-}
-
-template<> std::string ConfigurableParameter<int>::getParameterValue () const
-{
-    if (pointer_)
-        return std::to_string(*pointer_);
-    else
-        return std::to_string(config_value_);
-}
-
-template<> std::string ConfigurableParameter<unsigned int>::getParameterValue () const
-{
-    if (pointer_)
-        return std::to_string(*pointer_);
-    else
-        return std::to_string(config_value_);
-}
-
-template<> std::string ConfigurableParameter<float>::getParameterValue () const
-{
-    if (pointer_)
-        return Utils::String::doubleToStringPrecision(*pointer_, 8);
-    else
-        return Utils::String::doubleToStringPrecision(config_value_, 8);
-}
-
-template<> std::string ConfigurableParameter<double>::getParameterValue () const
-{
-    if (pointer_)
-        return Utils::String::doubleToStringPrecision(*pointer_, 12);
-    else
-        return Utils::String::doubleToStringPrecision(config_value_, 12);
-}
-
-template<> std::string ConfigurableParameter<std::string>::getParameterValue () const
-{
-    if (pointer_)
-        return *pointer_;
-    else
-        return config_value_;
-}
