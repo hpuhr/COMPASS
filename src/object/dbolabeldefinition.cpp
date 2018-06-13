@@ -148,18 +148,18 @@ void DBOLabelDefinition::checkSubConfigurables ()
     logdbg  << "DBOLabelDefinition: checkSubConfigurables: object " << db_object_->name();
 
     assert (db_object_);
-    const std::map<std::string, DBOVariable*>& variables = db_object_->variables();
+    const std::map<std::string, DBOVariable>& variables = db_object_->variables();
 
     std::string variable_name;
     bool show=false;
     std::string prefix;
     std::string suffix;
 
-    for (auto it : variables)
+    for (auto& it : variables)
     {
-        if (entries_.find (it.second->name()) == entries_.end())
+        if (entries_.find (it.second.name()) == entries_.end())
         {
-            variable_name = it.second->name();
+            variable_name = it.second.name();
             show=false;
             prefix="";
             suffix="";

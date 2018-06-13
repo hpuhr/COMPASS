@@ -20,6 +20,7 @@
 
 #include <string>
 #include <vector>
+#include <cassert>
 
 #include "configurable.h"
 #include "dbtablecolumn.h"

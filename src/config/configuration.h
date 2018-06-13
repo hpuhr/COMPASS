@@ -25,7 +25,6 @@
 
 #include <tinyxml2.h>
 
-#include "logger.h"
 #include "string.h"
 #include "configurableparameter.h"
 
@@ -43,15 +42,16 @@ class Configuration
 {
 public:
     /// @brief Constructor
-    Configuration(const std::string &class_id, const std::string &instance_id, const std::string &configuration_filename="");
+    Configuration(const std::string& class_id, const std::string& instance_id,
+                  const std::string& configuration_filename="");
 
     /// @brief Copy constructor
     Configuration(const Configuration &source);
     /// @brief Destructor
     virtual ~Configuration();
 
-    Configuration& operator= (const Configuration &source);
-    Configuration *clone ();
+//    Configuration& operator= (const Configuration &source);
+//    Configuration *clone ();
 
     /// @brief Registers a boolean parameter
     void registerParameter (const std::string &parameter_id, bool *pointer, bool default_value);
@@ -160,7 +160,7 @@ protected:
     /// Instance identifier
     std::string instance_id_;
     /// Flag indicating if configuration has been used by configurable
-    bool used_;
+    bool used_ {false};
     /// Special XML configuration filename
     std::string configuration_filename_;
 
@@ -175,7 +175,7 @@ protected:
     std::map<std::pair<std::string, std::string>, Configuration> sub_configurations_;
 
     /// Flag which indicates if instance is a template
-    bool template_flag_;
+    bool template_flag_ {false};
     /// Template name, empty if no template
     std::string template_name_;
 

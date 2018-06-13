@@ -19,7 +19,9 @@
 #define DBSCHEMA_H_
 
 #include "configurable.h"
+
 #include <qobject.h>
+#include <cassert>
 
 class DBTable;
 class MetaDBTable;

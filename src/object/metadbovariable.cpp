@@ -67,6 +67,16 @@ void MetaDBOVariable::generateSubConfigurable (const std::string &class_id, cons
         // DBOVAR LOWERCASE HACK
         //boost::algorithm::to_lower(dbovar_name);
 
+        if (!object_manager_.existsObject(dbo_name)
+                || !object_manager_.object(dbo_name).hasVariable(dbovar_name)
+                || variables_.find(dbo_name) != variables_.end())
+            {
+                logerr << "MetaDBOVariable: generateSubConfigurable: name " << name_
+                       << " dbovariable definition " << instance_id << " has error, deleting";
+                delete definition;
+                return;
+            }
+
         assert (object_manager_.existsObject(dbo_name));
         assert (object_manager_.object(dbo_name).hasVariable(dbovar_name));
         assert (variables_.find(dbo_name) == variables_.end());

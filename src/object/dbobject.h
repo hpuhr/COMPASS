@@ -141,13 +141,13 @@ public:
     /// @brief Returns flag indication if a DBOVariable identified by id exists
     bool hasVariable (const std::string& name) const;
     /// @brief Returns variable identified by id
-    DBOVariable& variable (const std::string& name) const;
+    DBOVariable& variable (const std::string& name);
     void renameVariable (const std::string& name, const std::string& new_name);
     /// @brief Deletes a variable identified by id
     void deleteVariable (const std::string& name);
 
     /// @brief Returns container with all variables
-    const std::map<std::string, DBOVariable*> &variables () const;
+    std::map<std::string, DBOVariable>& variables ();
     /// @brief Returns number of existing variables
     size_t numVariables () const { return variables_.size(); }
 
@@ -226,7 +226,7 @@ public:
     bool hasActiveDataSourcesInfo ();
 
     /// @brief Returns container with the active data sources information
-    const std::set<int> getActiveDataSources () const;
+    const std::set<int> getActiveDataSources ();
 
     std::string status ();
 
@@ -271,7 +271,7 @@ protected:
     std::map <std::string, DBODataSourceDefinition> data_source_definitions_;
     std::map<int, DBODataSource> data_sources_;
     /// Container with all variables (variable identifier -> variable pointer)
-    std::map<std::string, DBOVariable*> variables_;
+    std::map<std::string, DBOVariable> variables_;
 
     /// Current (in the current schema) main meta table
     MetaDBTable* current_meta_table_ {nullptr}; // TODO rework const?

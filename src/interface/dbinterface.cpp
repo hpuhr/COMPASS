@@ -291,7 +291,7 @@ bool DBInterface::existsPropertiesTable ()
 ///**
 // * Gets SQL command for data sources list and packs the resulting buffer into a set, which is returned.
 // */
-std::set<int> DBInterface::queryActiveSensorNumbers(const DBObject &object)
+std::set<int> DBInterface::queryActiveSensorNumbers(DBObject &object)
 {
     logdbg  << "DBInterface: queryActiveSensorNumbers: start";
 
@@ -331,7 +331,7 @@ std::set<int> DBInterface::queryActiveSensorNumbers(const DBObject &object)
     return data;
 }
 
-bool DBInterface::hasDataSourceTables (const DBObject& object)
+bool DBInterface::hasDataSourceTables (DBObject& object)
 {
     if (!object.existsInDB())
         return false;
@@ -364,7 +364,7 @@ bool DBInterface::hasDataSourceTables (const DBObject& object)
 ///**
 // * Gets SQL command, executes it and returns resulting buffer.
 // */
-std::map <int, DBODataSource> DBInterface::getDataSources (const DBObject &object)
+std::map <int, DBODataSource> DBInterface::getDataSources (DBObject &object)
 {
     loginf  << "DBInterface: getDataSources: start";
 
@@ -786,7 +786,7 @@ void DBInterface::postProcessingJobDoneSlot()
         postprocess_dialog_->setValue(postprocess_job_num_-postprocess_jobs_.size());
 }
 
-bool DBInterface::hasActiveDataSources (const DBObject &object)
+bool DBInterface::hasActiveDataSources (DBObject &object)
 {
     if (!object.existsInDB())
         return false;
@@ -800,7 +800,7 @@ bool DBInterface::hasActiveDataSources (const DBObject &object)
 /**
  * Gets active sensor numbers as property, splits it and packs it into a set.
  */
-std::set<int> DBInterface::getActiveDataSources (const DBObject &object)
+std::set<int> DBInterface::getActiveDataSources (DBObject &object)
 {
     logdbg  << "DBInterface: getActiveDataSources: start";
 

@@ -119,6 +119,36 @@ void DBOVariable::generateSubConfigurable (const std::string& class_id, const st
         throw std::runtime_error ("DBOVariable: generateSubConfigurable: unknown class_id "+class_id);
 }
 
+//DBOVariable& DBOVariable::operator=(DBOVariable&& other)
+//{
+//    db_object_ = *other.db_object_;
+
+//    representation_str_ = other.representation_str_;
+//    other.representation_str_ = "";
+
+//    representation_ = other.representation_;
+//    other.representation_ = Representation.STANDARD;
+
+//    description_ = other.description_;
+
+//    min_max_set_ = other.min_max_set_;
+//    min_ = min_;
+//    max_ = max_;
+
+//    dimension_ = dimension_;
+//    unit_ = unit_;
+
+//    schema_variables_.insert(make_move_iterator(begin(other.schema_variables_)),
+//             make_move_iterator(end(other.schema_variables_)));
+
+//    widget_ = other.widget_;
+
+//    locked_ = other.locked_;
+
+//    return *this;
+//}
+
+
 bool DBOVariable::operator==(const DBOVariable& var)
 {
     if (dboName() != var.dboName())

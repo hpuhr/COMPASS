@@ -2,10 +2,7 @@
 #define CONFIGURABLPPARAMETER_H
 
 #include <tinyxml2.h>
-
 #include <string>
-
-#include "logger.h"
 
 class Configurable;
 

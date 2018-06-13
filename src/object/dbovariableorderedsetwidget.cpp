@@ -120,11 +120,11 @@ void DBOVariableOrderedSetWidget::updateMenuEntries()
     for (auto object_it : ATSDB::instance().objectManager().objects())
     {
 
-        auto variables = object_it.second->variables();
+        auto& variables = object_it.second->variables();
 
         QMenu* m2 = menu_.addMenu(QString::fromStdString(object_it.first));
 
-        for (auto variable_it : variables)
+        for (auto& variable_it : variables)
         {
             QAction* action = m2->addAction(QString::fromStdString (variable_it.first));
 

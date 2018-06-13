@@ -64,12 +64,6 @@ DBObject::DBObject(const std::string& class_id, const std::string& instance_id, 
 DBObject::~DBObject()
 {
     current_meta_table_ = nullptr;
-
-    data_sources_.clear();
-
-    for (auto it : variables_)
-        delete it.second;
-    variables_.clear();
 }
 
 /**
@@ -80,9 +74,16 @@ void DBObject::generateSubConfigurable (const std::string &class_id, const std::
     logdbg  << "DBObject: generateSubConfigurable: generating variable " << instance_id;
     if (class_id.compare ("DBOVariable") == 0)
     {
-        DBOVariable* variable = new DBOVariable (class_id, instance_id, this);
-        assert (variables_.find (variable->name()) == variables_.end());
-        variables_.insert (std::pair <std::string, DBOVariable*> (variable->name(), variable));
+        std::string var_name = configuration_.getSubConfiguration(
+                    class_id, instance_id).getParameterConfigValueString("name");
+
+        assert (variables_.find (var_name) == variables_.end());
+
+        loginf  << "DBObject: generateSubConfigurable: generating variable " << instance_id << " with name " << var_name;
+
+        variables_.emplace(std::piecewise_construct,
+                     std::forward_as_tuple(var_name),  // args for key
+                     std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
     }
     else if (class_id.compare ("DBOSchemaMetaTableDefinition") == 0)
     {
@@ -132,13 +133,19 @@ void DBObject::checkSubConfigurables ()
 
 bool DBObject::hasVariable (const std::string& name) const
 {
-    return (variables_.find (name) != variables_.end());
+    if (variables_.find (name) == variables_.end())
+    {
+        logwrn << "DBObject: hasVariable: name " << name_ << " has no variable " << name;
+        return false;
+    }
+    else
+        return true;
 }
 
-DBOVariable& DBObject::variable (const std::string& name) const
+DBOVariable& DBObject::variable (const std::string& name)
 {
     assert (hasVariable (name));
-    return *variables_.at(name);
+    return variables_.at(name);
 }
 
 void DBObject::renameVariable (const std::string& name, const std::string& new_name)
@@ -148,13 +155,9 @@ void DBObject::renameVariable (const std::string& name, const std::string& new_n
     assert (hasVariable (name));
     assert (!hasVariable (new_name));
 
-    DBOVariable* variable = variables_.at(name);
-
+    // UGA TODO
+    //variables_.emplace (std::make_pair(new_name, std::move(variables_.at(name))));
     variables_.erase(name);
-    assert (!hasVariable (name));
-
-    variable->name(new_name);
-    variables_[new_name] = variable;
 
     assert (hasVariable (new_name));
 }
@@ -162,14 +165,11 @@ void DBObject::renameVariable (const std::string& name, const std::string& new_n
 void DBObject::deleteVariable (const std::string& name)
 {
     assert (hasVariable (name));
-
-    DBOVariable* variable = variables_.at(name);
-    variables_.erase(variables_.find (name));
+    variables_.erase(name);
     assert (!hasVariable (name));
-    delete variable;
 }
 
-const std::map<std::string, DBOVariable*>& DBObject::variables () const
+std::map<std::string, DBOVariable>& DBObject::variables ()
 {
     return variables_;
 }
@@ -447,7 +447,7 @@ bool DBObject::hasActiveDataSourcesInfo ()
     return ATSDB::instance().interface().hasActiveDataSources(*this);
 }
 
-const std::set<int> DBObject::getActiveDataSources () const
+const std::set<int> DBObject::getActiveDataSources ()
 {
     return ATSDB::instance().interface().getActiveDataSources(*this);
 }
@@ -509,7 +509,7 @@ void DBObject::lock ()
     locked_ = true;
 
     for (auto& var_it : variables_)
-        var_it.second->lock();
+        var_it.second.lock();
 
     if (widget_)
         widget_->lock();
@@ -520,7 +520,7 @@ void DBObject::unlock ()
     locked_ = false;
 
     for (auto& var_it : variables_)
-        var_it.second->unlock();
+        var_it.second.unlock();
 
     if (widget_)
         widget_->unlock();

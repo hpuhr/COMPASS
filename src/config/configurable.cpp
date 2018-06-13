@@ -196,14 +196,14 @@ bool Configurable::hasSubConfigurable(const std::string &class_id, const std::st
     return ( children_.find(class_id+instance_id) != children_.end() );
 }
 
-void Configurable::saveConfigurationAsTemplate (const std::string &template_name)
-{
-    assert (parent_);
-    parent_->saveTemplateConfiguration(this, template_name);
-}
+//void Configurable::saveConfigurationAsTemplate (const std::string &template_name)
+//{
+//    assert (parent_);
+//    parent_->saveTemplateConfiguration(this, template_name);
+//}
 
-void Configurable::saveTemplateConfiguration (Configurable *child, const std::string &template_name)
-{
-    assert (configuration_.getSubTemplateNameFree(template_name));
-    configuration_.addSubTemplate(child->getConfiguration().clone(), template_name);
-}
+//void Configurable::saveTemplateConfiguration (Configurable *child, const std::string &template_name)
+//{
+//    assert (configuration_.getSubTemplateNameFree(template_name));
+//    configuration_.addSubTemplate(child->getConfiguration().clone(), template_name);
+//}

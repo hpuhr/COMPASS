@@ -247,7 +247,7 @@ void DBODataSourceDefinitionWidget::changedAltitudeColumnSlot ()
 void DBODataSourceDefinitionWidget::updateLocalKeySlot()
 {
     logdbg  << "DBODataSourceDefinitionWidget: updateLocalKeySlot";
-    auto variables = object_.variables ();
+    auto& variables = object_.variables ();
 
     std::string selection;
 
@@ -263,10 +263,10 @@ void DBODataSourceDefinitionWidget::updateLocalKeySlot()
     unsigned int cnt=0;
     for (auto it = variables.begin(); it != variables.end(); it++)
     {
-        if (selection.size()>0 && selection.compare(it->second->name()) == 0)
+        if (selection.size()>0 && selection.compare(it->second.name()) == 0)
             index_cnt=cnt;
 
-        local_key_box_->addItem (it->second->name().c_str());
+        local_key_box_->addItem (it->second.name().c_str());
 
         cnt++;
     }

@@ -752,12 +752,14 @@ void DBObjectWidget::updateDBOVarsGridSlot ()
         row++;
         col = 0;
 
+        DBOVariable& test = var_it.second;
+
         //QVariant data = QVariant(qMetaTypeId<QObject*>(), var_it.second);
         //QVariant data = QVariant::fromValue(dynamic_cast<QObject*>(var_it.second));
-        QVariant data = QVariant::fromValue(var_it.second);
+        QVariant data = QVariant::fromValue(&test);
 
         //logdbg  << "DBObjectWidget: updateDBOVarsGrid: creating variable row for " << it->first << " name";
-        QLineEdit* name_edit = new QLineEdit (var_it.second->name().c_str());
+        QLineEdit* name_edit = new QLineEdit (var_it.second.name().c_str());
         name_edit->setMaximumWidth(200);
         name_edit->setProperty("variable", data);
         connect(name_edit, SIGNAL (returnPressed()), this, SLOT(editDBOVariableNameSlot()));
@@ -765,23 +767,23 @@ void DBObjectWidget::updateDBOVarsGridSlot ()
 
         //logdbg  << "DBObjectWidget: updateDBOVarsGrid: creating variable row for " << it->first << " info";
         col++;
-        QLineEdit* description_edit = new QLineEdit (var_it.second->description().c_str());
+        QLineEdit* description_edit = new QLineEdit (var_it.second.description().c_str());
         description_edit->setMaximumWidth(300);
         description_edit->setProperty("variable", data);
         connect(description_edit, SIGNAL (returnPressed()), this, SLOT(editDBOVariableDescriptionSlot()));
         dbovars_grid_->addWidget (description_edit, row, col);
 
         col++;
-        DBOVariableDataTypeComboBox* type_combo = new DBOVariableDataTypeComboBox (*var_it.second);
+        DBOVariableDataTypeComboBox* type_combo = new DBOVariableDataTypeComboBox (var_it.second);
         dbovars_grid_->addWidget (type_combo, row, col);
 
         col++;
-        UnitSelectionWidget* unit_sel = new UnitSelectionWidget(var_it.second->dimension(),
-                                                                var_it.second->unit());
+        UnitSelectionWidget* unit_sel = new UnitSelectionWidget(var_it.second.dimension(),
+                                                                var_it.second.unit());
         dbovars_grid_->addWidget (unit_sel, row, col);
 
         col++;
-        StringRepresentationComboBox* representation_box = new StringRepresentationComboBox (*var_it.second);
+        StringRepresentationComboBox* representation_box = new StringRepresentationComboBox (var_it.second);
         dbovars_grid_->addWidget (representation_box, row, col);
 
         for (auto schema_it = schemas.begin(); schema_it != schemas.end(); schema_it++)
@@ -796,7 +798,7 @@ void DBObjectWidget::updateDBOVarsGridSlot ()
             assert (meta_tables.count(schema_name) == 1);
             DBTableColumnComboBox* box = new DBTableColumnComboBox (schema_name,
                                                                     meta_tables.at(schema_name).metaTable(),
-                                                                    *var_it.second);
+                                                                    var_it.second);
             box->setProperty("variable", data);
             box->setProperty("schema", QString(schema_name.c_str()));
             connect(box, SIGNAL (activated(const QString&)), this, SLOT(editDBOVariableDBColumnSlot(const QString&)));

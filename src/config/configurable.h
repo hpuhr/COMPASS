@@ -76,7 +76,7 @@ public:
     /// @brief Returns configuration for this class
     Configuration &getConfiguration () { return configuration_; }
     /// @brief Saves the current configuration as template at its parent
-    void saveConfigurationAsTemplate (const std::string &template_name);
+    //void saveConfigurationAsTemplate (const std::string &template_name);
 
 protected:
     /// Class identifier
@@ -109,7 +109,7 @@ protected:
     /// @brief Override to check if required sub-configurables exist
     virtual void checkSubConfigurables ();
     /// @brief Saves the specified child's configuration as template
-    void saveTemplateConfiguration (Configurable *child, const std::string &template_name);
+    //void saveTemplateConfiguration (Configurable *child, const std::string &template_name);
 
     /// @brief Adds a configurable as a child
     Configuration &registerSubConfigurable (Configurable &child);

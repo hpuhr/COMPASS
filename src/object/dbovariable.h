@@ -130,6 +130,7 @@ public:
     /// @brief Desctructor
     virtual ~DBOVariable();
 
+    //DBOVariable& operator=(DBOVariable&& other);
     /// @brief Comparison operator
     bool operator==(const DBOVariable& var);
 
@@ -146,7 +147,7 @@ public:
     const std::string& dboName () const;
 
     /// @brief Returns variable description
-    const std::string& description () { return description_; }
+    const std::string& description () const { return description_; }
     /// @brief Sets variable description
     void description (const std::string& description) { description_=description; }
 
@@ -305,5 +306,6 @@ protected:
 };
 
 Q_DECLARE_METATYPE(DBOVariable*)
+//Q_DECLARE_METATYPE(DBOVariable)
 
 #endif /* DBOVARIABLE_H_ */

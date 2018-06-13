@@ -109,9 +109,9 @@ void DBOVariableSelectionWidget::updateMenuEntries()
     {
         assert (ATSDB::instance().objectManager().existsObject(only_dbo_name_));
 
-        for (auto variable_it : ATSDB::instance().objectManager().object(only_dbo_name_).variables())
+        for (auto& variable_it : ATSDB::instance().objectManager().object(only_dbo_name_).variables())
         {
-            if (show_existing_in_db_only_ && !variable_it.second->existsInDB())
+            if (show_existing_in_db_only_ && !variable_it.second.existsInDB())
                 continue;
 
             QAction* action = menu_.addAction(QString::fromStdString (variable_it.first));
@@ -146,13 +146,13 @@ void DBOVariableSelectionWidget::updateMenuEntries()
         for (auto object_it : ATSDB::instance().objectManager().objects())
         {
 
-            auto variables = object_it.second->variables();
+            auto& variables = object_it.second->variables();
 
             QMenu* m2 = menu_.addMenu(QString::fromStdString(object_it.first));
 
-            for (auto variable_it : variables)
+            for (auto& variable_it : variables)
             {
-                if (show_existing_in_db_only_ && !variable_it.second->existsInDB())
+                if (show_existing_in_db_only_ && !variable_it.second.existsInDB())
                     continue;
 
                 QAction* action = m2->addAction(QString::fromStdString (variable_it.first));

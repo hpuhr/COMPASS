@@ -359,9 +359,9 @@ void DBObjectManagerWidget::addAllMetaVariablesSlot ()
 
     bool changed = false;
 
-    for (auto obj_it : objects)
+    for (auto& obj_it : objects)
     {
-        for (auto var_it : obj_it.second->variables())
+        for (auto& var_it : obj_it.second->variables())
         {
             found_dbos.clear();
             found_dbos.push_back(obj_it.first); // original object
@@ -371,7 +371,7 @@ void DBObjectManagerWidget::addAllMetaVariablesSlot ()
                 if (obj_it == obj_it2)
                     continue;
 
-                if (obj_it2.second->hasVariable(var_it.first) && var_it.second->dataType()
+                if (obj_it2.second->hasVariable(var_it.first) && var_it.second.dataType()
                         == obj_it2.second->variable(var_it.first).dataType())
                 {
                     found_dbos.push_back(obj_it2.first);

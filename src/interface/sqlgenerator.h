@@ -65,10 +65,10 @@ public:
     std::shared_ptr<DBCommand> getSelectCommand (const MetaDBTable &meta_table,
                                                  std::vector <const DBTableColumn*> columns, bool distinct=false);
     ///@brief Returns command for all data sources select for dbo
-    std::shared_ptr<DBCommand> getDataSourcesSelectCommand (const DBObject &object);
+    std::shared_ptr<DBCommand> getDataSourcesSelectCommand (DBObject &object);
 
     /// @brief Returns command for active data sources select
-    std::shared_ptr<DBCommand> getDistinctDataSourcesSelectCommand (const DBObject &object);
+    std::shared_ptr<DBCommand> getDistinctDataSourcesSelectCommand (DBObject &object);
 
 //    DBCommand *getDistinctStatistics (const std::string &dbo_type, DBOVariable *variable, unsigned int sensor_number);
 
