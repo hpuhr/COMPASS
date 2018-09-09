@@ -361,7 +361,7 @@ void DBObjectManagerWidget::addAllMetaVariablesSlot ()
 
     for (auto& obj_it : objects)
     {
-        for (auto& var_it : obj_it.second->variables())
+        for (auto& var_it : *obj_it.second)
         {
             found_dbos.clear();
             found_dbos.push_back(obj_it.first); // original object

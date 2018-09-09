@@ -747,7 +747,7 @@ void DBObjectWidget::updateDBOVarsGridSlot ()
 
     logdbg  << "DBObjectWidget: updateDBOVarsGrid: creating variable rows";
 
-    for (auto& var_it : object_->variables())
+    for (auto& var_it : *object_)
     {
         row++;
         col = 0;

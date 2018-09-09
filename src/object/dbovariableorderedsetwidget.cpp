@@ -120,16 +120,14 @@ void DBOVariableOrderedSetWidget::updateMenuEntries()
     for (auto object_it : ATSDB::instance().objectManager().objects())
     {
 
-        auto& variables = object_it.second->variables();
-
         QMenu* m2 = menu_.addMenu(QString::fromStdString(object_it.first));
 
-        for (auto& variable_it : variables)
+        for (auto& var_it : *object_it.second)
         {
-            QAction* action = m2->addAction(QString::fromStdString (variable_it.first));
+            QAction* action = m2->addAction(QString::fromStdString (var_it.first));
 
             QVariantMap vmap;
-            vmap.insert (QString::fromStdString (variable_it.first), QVariant (QString::fromStdString (object_it.first)));
+            vmap.insert (QString::fromStdString (var_it.first), QVariant (QString::fromStdString (object_it.first)));
             action->setData (QVariant (vmap));
         }
     }

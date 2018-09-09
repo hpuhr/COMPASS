@@ -170,11 +170,6 @@ void DBObject::deleteVariable (const std::string& name)
     assert (!hasVariable (name));
 }
 
-std::map<std::string, DBOVariable>& DBObject::variables ()
-{
-    return variables_;
-}
-
 bool DBObject::hasMetaTable (const std::string& schema) const
 {
     return meta_table_definitions_.find(schema) != meta_table_definitions_.end();

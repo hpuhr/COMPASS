@@ -147,7 +147,12 @@ public:
     void deleteVariable (const std::string& name);
 
     /// @brief Returns container with all variables
-    std::map<std::string, DBOVariable>& variables ();
+    //std::map<std::string, DBOVariable>& variables () { return variables_; }
+
+    using DBOVariableIterator = typename std::map<std::string, DBOVariable>::iterator;
+    DBOVariableIterator begin() { return variables_.begin(); }
+    DBOVariableIterator end() { return variables_.end(); }
+
     /// @brief Returns number of existing variables
     size_t numVariables () const { return variables_.size(); }
 
