@@ -207,7 +207,7 @@ std::string DBFilterCondition::getConditionString (const std::string &dbo_name, 
 
 
     if (ss.str().size() > 0)
-        logdbg  << "DBFilterCondition " << instance_id_<<": getConditionString: '" << ss.str()<<"'";
+        logdbg  << "DBFilterCondition " << getInstanceId()<<": getConditionString: '" << ss.str()<<"'";
 
     return ss.str();
 }

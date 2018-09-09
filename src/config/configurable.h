@@ -21,6 +21,7 @@
 #include <tinyxml2.h>
 #include <vector>
 #include <map>
+#include <assert.h>
 
 #include "configuration.h"
 
@@ -51,9 +52,14 @@ class Configurable
 {
 public:
     /// @brief Constructor
-    Configurable (const std::string &class_id, const std::string &instance_id, Configurable *parent=0,
-                  const std::string &configuration_filename="");
-    //Configurable& operator=(Configurable&& other);
+    Configurable (const std::string &class_id, const std::string &instance_id, Configurable *parent=nullptr,
+                  const std::string &root_configuration_filename="");
+    /// @brief Default constructor, for STL containers
+    Configurable () = default;
+
+    Configurable(const Configurable&) = delete;
+    Configurable& operator=(const Configurable& other) = delete;
+    Configurable& operator=(Configurable&& other) = delete;
     /// @brief Destructor
     virtual ~Configurable();
 
@@ -73,26 +79,29 @@ public:
     /// @brief Returns if a specified sub-configurable exists
     bool hasSubConfigurable(const std::string &class_id, const std::string &instance_id);
 
+    Configurable& parent() { assert (parent_); return *parent_; }
     /// @brief Returns configuration for this class
-    Configuration &getConfiguration () { return configuration_; }
+    Configuration& getConfiguration () { return *configuration_; }
     /// @brief Saves the current configuration as template at its parent
     //void saveConfigurationAsTemplate (const std::string &template_name);
 
-protected:
+private:
     /// Class identifier
     std::string class_id_;
     /// Instance identifier
     std::string instance_id_;
     /// Key identifier
     std::string key_id_;
-    /// Parent pointer, null if Singleton
-    Configurable *parent_;
+    /// Parent pointer, null if Singleton or empty
+    Configurable* parent_ {nullptr};
     /// Configuration
-    Configuration &configuration_;
+    Configuration* configuration_ {nullptr};
+    bool is_root_ {false};
 
     /// Container for all sub-configurables (class id + instance id -> Configurable)
     std::map <std::string, Configurable&> children_;
 
+protected:
     /// @brief Registers a bool parameter
     void registerParameter (const std::string &parameter_id, bool *pointer, bool default_value);
     /// @brief Registers a int parameter

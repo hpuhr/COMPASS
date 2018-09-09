@@ -163,7 +163,8 @@ bool DBOVariable::operator==(const DBOVariable& var)
 
 void DBOVariable::print ()
 {
-    loginf  << "DBOVariable: print: dbo " << parent_->getInstanceId() << " id " << name_ << " data type " << data_type_str_;
+    loginf  << "DBOVariable: print: dbo " << Configurable::parent().getInstanceId() << " id " << name_
+            << " data type " << data_type_str_;
 }
 
 //    if (transform)

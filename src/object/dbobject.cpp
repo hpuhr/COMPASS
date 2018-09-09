@@ -55,7 +55,7 @@ DBObject::DBObject(const std::string& class_id, const std::string& instance_id, 
 
     qRegisterMetaType<std::shared_ptr<Buffer>>("std::shared_ptr<Buffer>");
 
-    logdbg  << "DBObject: constructor: created with instance_id " << instance_id_ << " name " << name_;
+    logdbg  << "DBObject: constructor: created with instance_id " << getInstanceId() << " name " << name_;
 }
 
 /**
@@ -74,7 +74,7 @@ void DBObject::generateSubConfigurable (const std::string &class_id, const std::
     logdbg  << "DBObject: generateSubConfigurable: generating variable " << instance_id;
     if (class_id.compare ("DBOVariable") == 0)
     {
-        std::string var_name = configuration_.getSubConfiguration(
+        std::string var_name = getConfiguration().getSubConfiguration(
                     class_id, instance_id).getParameterConfigValueString("name");
 
         assert (variables_.find (var_name) == variables_.end());
@@ -88,7 +88,7 @@ void DBObject::generateSubConfigurable (const std::string &class_id, const std::
     else if (class_id.compare ("DBOSchemaMetaTableDefinition") == 0)
     {
         logdbg << "DBObject: generateSubConfigurable: creating DBOSchemaMetaTableDefinition";
-        std::string schema_name = configuration_.getSubConfiguration(
+        std::string schema_name = getConfiguration().getSubConfiguration(
                     class_id, instance_id).getParameterConfigValueString("schema");
 
         assert (meta_table_definitions_.find(schema_name) == meta_table_definitions_.end());
@@ -99,7 +99,7 @@ void DBObject::generateSubConfigurable (const std::string &class_id, const std::
     }
     else if (class_id.compare ("DBODataSourceDefinition") == 0)
     {
-        std::string schema_name = configuration_.getSubConfiguration(
+        std::string schema_name = getConfiguration().getSubConfiguration(
                     class_id, instance_id).getParameterConfigValueString("schema");
 
         assert (data_source_definitions_.find(schema_name) == data_source_definitions_.end());

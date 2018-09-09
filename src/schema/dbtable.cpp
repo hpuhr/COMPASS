@@ -52,7 +52,7 @@ DBTable::~DBTable()
 
 void DBTable::generateSubConfigurable (const std::string& class_id, const std::string& instance_id)
 {
-    logdbg  << "DBTable: generateSubConfigurable: " << class_id_ << " instance " << instance_id_;
+    logdbg  << "DBTable: generateSubConfigurable: " << getClassId() << " instance " << getInstanceId();
 
     if (class_id == "DBTableColumn")
     {

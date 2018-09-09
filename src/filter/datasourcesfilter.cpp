@@ -237,7 +237,7 @@ void DataSourcesFilter::checkSubConfigurables ()
     if (!widget_)
     {
         logdbg  << "DataSourcesFilter: checkSubConfigurables: generating my filter widget";
-        widget_ = new DataSourcesFilterWidget (*this, "DataSourcesFilterWidget", instance_id_+"Widget0");
+        widget_ = new DataSourcesFilterWidget (*this, "DataSourcesFilterWidget", getInstanceId()+"Widget0");
     }
     assert (widget_);
 

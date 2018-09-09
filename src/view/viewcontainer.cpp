@@ -65,7 +65,7 @@ ViewContainer::ViewContainer(const std::string &class_id, const std::string &ins
 
 ViewContainer::~ViewContainer()
 {
-    view_manager_.removeContainer(instance_id_);
+    view_manager_.removeContainer(getInstanceId());
 
     if (config_widget_)
     {

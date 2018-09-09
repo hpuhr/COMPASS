@@ -61,7 +61,7 @@ ConfigurationManager::~ConfigurationManager()
  * Adds Configurable to the root_configurables_ container, return either Configuration from root_configurations_
  * (if exists) or generates a new one.
  */
-Configuration &ConfigurationManager::registerRootConfigurable(Configurable &configurable)
+Configuration& ConfigurationManager::registerRootConfigurable(Configurable &configurable)
 {
     assert (initialized_);
 
