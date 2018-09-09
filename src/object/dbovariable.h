@@ -27,68 +27,9 @@
 #include "configurable.h"
 #include "stringconv.h"
 #include "dbobject.h"
+#include "dbovariableschema.h"
 
 class DBTableColumn;
-
-/**
- * @brief Definition of DBOVariable by DBO type and string identifier.
- *
- * Used by DBOVariable.
- */
-class DBOVariableDefinition : public Configurable
-{
-public:
-    DBOVariableDefinition(const std::string &class_id, const std::string &instance_id, Configurable *parent)
-        : Configurable (class_id, instance_id, parent)
-    {
-        registerParameter ("dbo_name", &dbo_name_, "");
-        registerParameter ("dbo_variable_name", &dbo_variable_name_, "");
-
-        // DBOVAR LOWERCASE HACK
-        //boost::algorithm::to_lower(dbo_variable_name_);
-
-        assert (dbo_variable_name_.size() > 0);
-    }
-    virtual ~DBOVariableDefinition() {}
-
-    const std::string &dboName () { return dbo_name_; }
-    void dboName (const std::string &dbo_name) { dbo_name_=dbo_name; }
-
-    const std::string &variableName () { return dbo_variable_name_; }
-    void variableName (const std::string &dbo_variable_name) { dbo_variable_name_=dbo_variable_name; }
-
-protected:
-    std::string dbo_name_;
-    std::string dbo_variable_name_;
-};
-
-/**
- * @brief Definition of a variable, based on identifiers of the schema, meta table and variable name.
- *
- * Used by DBOVariable.
- */
-class DBOSchemaVariableDefinition : public Configurable
-{
-public:
-    DBOSchemaVariableDefinition(const std::string &class_id, const std::string &instance_id, Configurable *parent)
-        : Configurable (class_id, instance_id, parent)
-    {
-        registerParameter ("schema", &schema_, "");
-        registerParameter ("variable_identifier", &variable_identifier, "");
-    }
-    virtual ~DBOSchemaVariableDefinition() {}
-
-    const std::string &getSchema () { return schema_; }
-    void setSchema(std::string schema) { schema_=schema; }
-
-    const std::string &getVariableIdentifier () { return variable_identifier; }
-    void setVariableIdentifier(std::string variable) { variable_identifier=variable; }
-
-protected:
-    std::string schema_;
-    std::string variable_identifier;
-};
-
 class DBObject;
 class MetaDBTable;
 class DBOVariableWidget;
@@ -127,6 +68,9 @@ public:
 
     /// @brief Constructor
     DBOVariable(const std::string& class_id, const std::string& instance_id, DBObject* parent);
+    DBOVariable() = default;
+    /// @brief Move constructor
+    DBOVariable& operator=(DBOVariable&& other);
     /// @brief Desctructor
     virtual ~DBOVariable();
 
@@ -142,7 +86,7 @@ public:
     /// @brief Returns variable identifier
     const std::string& name () const { return name_; }
     /// @brief Sets variable identifier
-    void name (const std::string& name) { name_=name; }
+    void name (const std::string& name);
 
     const std::string& dboName () const;
 
@@ -182,7 +126,7 @@ public:
     const std::string& unitConst () const { return unit_; }
     std::string& unit () { return unit_; }
 
-    DBObject& dbObject () const { return db_object_; }
+    DBObject& dbObject () const { assert (db_object_); return *db_object_; }
 
     std::string getMinString ();
     std::string getMaxString ();
@@ -220,9 +164,10 @@ public:
             }
             else if (representation_ == DBOVariable::Representation::DATA_SRC_NAME)
             {
-                if (db_object_.hasDataSources())
+                assert (db_object_);
+                if (db_object_->hasDataSources())
                 {
-                    std::map<int, DBODataSource>& data_sources = db_object_.dataSources();
+                    std::map<int, DBODataSource>& data_sources = db_object_->dataSources();
 
                     for (auto& ds_it : data_sources)
                     {
@@ -270,12 +215,12 @@ public:
 
     bool existsInDB () const;
 
-protected:
+private:
     static std::map<Representation, std::string> representation_2_string_;
     static std::map<std::string, Representation> string_2_representation_;
 
     /// DBO parent
-    DBObject& db_object_;
+    DBObject* db_object_ {nullptr};
     /// Value representation type, based on enum STRING_REPRESENTATION
     std::string representation_str_;
     Representation representation_;
@@ -283,7 +228,7 @@ protected:
     /// Description
     std::string description_;
 
-    bool min_max_set_{false};
+    bool min_max_set_ {false};
     /// Minimum as string
     std::string min_;
     /// Maximum as string
@@ -301,6 +246,7 @@ protected:
 
     bool locked_ {false};
 
+protected:
     virtual void checkSubConfigurables ();
     void setMinMax ();
 };

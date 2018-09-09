@@ -60,11 +60,40 @@ Configurable::Configurable(const std::string &class_id, const std::string &insta
     logdbg  << "Configurable: constructor: class_id " << class_id_ << " instance_id " << instance_id_ << " end";
 }
 
-//Configurable& Configurable::operator=(Configurable&& other)
-//{
-//    loginf << "Configurable: move operator: " << class_id_ << " " << instance_id_;
-//    return *this;
-//}
+Configurable& Configurable::operator=(Configurable&& other)
+{
+    loginf << "Configurable: move operator: moving";
+
+    parent_ = other.parent_;
+    if (parent_)
+        parent_->removeChildConfigurable(other, false);
+    other.parent_ = nullptr;
+
+    children_ = other.children_;
+    for (auto& child_it : children_)
+        child_it.second.parent (*this);
+    other.children_.clear();
+
+    class_id_ = other.class_id_;
+    other.class_id_ = "";
+
+    instance_id_ = other.instance_id_;
+    other.instance_id_ = "";
+
+    key_id_ = other.key_id_;
+    other.key_id_ = "";
+
+    if (parent_)
+        parent_->registerSubConfigurable(*this, true);
+
+    configuration_ = other.configuration_;
+    other.configuration_ = nullptr;
+
+    other.is_root_ = is_root_;
+    other.is_root_ = false;
+
+    return *this;
+}
 
 /**
  * If parent is set, unregisters from it using removeChildConfigurable, if not, calls unregisterRootConfigurable.
@@ -136,7 +165,7 @@ void Configurable::registerParameter (const std::string &parameter_id, std::stri
     configuration_->registerParameter (parameter_id, pointer, default_value);
 }
 
-Configuration &Configurable::registerSubConfigurable (Configurable& child)
+Configuration &Configurable::registerSubConfigurable (Configurable& child, bool config_must_exist)
 {
     logdbg  << "Configurable " << instance_id_ << " registerSubConfigurable: child " << child.instanceId();
     assert (configuration_);
@@ -151,10 +180,13 @@ Configuration &Configurable::registerSubConfigurable (Configurable& child)
     logdbg  << "Configurable " << instance_id_ << ": registerSubConfigurable: " << key;
     children_.insert (std::pair<std::string, Configurable&> (key, child));
 
+    if (config_must_exist)
+        assert (configuration_->hasSubConfiguration(child.classId(), child.instanceId()));
+
     return configuration_->getSubConfiguration(child.classId(), child.instanceId());
 }
 
-void Configurable::removeChildConfigurable (Configurable &child)
+void Configurable::removeChildConfigurable (Configurable &child, bool remove_config)
 {
     logdbg  << "Configurable " << instance_id_ << " removeChildConfigurable: child " << child.instanceId();
 
@@ -165,7 +197,8 @@ void Configurable::removeChildConfigurable (Configurable &child)
     logdbg  << "Configurable " << instance_id_ << ": removeChildConfigurable: " << key;
     children_.erase(children_.find(key));
 
-    configuration_->removeSubConfiguration(child.classId(), child.instanceId());
+    if (remove_config)
+        configuration_->removeSubConfiguration(child.classId(), child.instanceId());
 }
 
 

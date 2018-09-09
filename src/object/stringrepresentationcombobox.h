@@ -41,21 +41,22 @@ public slots:
     void changedSlot ()
     {
         loginf << "StringRepresentationComboBox: changed " << currentText().toStdString();
-        variable_.representation(representation());
+        variable_->representation(representation());
     }
 
 
 public:
     /// @brief Constructor
     StringRepresentationComboBox(DBOVariable &variable, QWidget * parent = 0)
-    : QComboBox(parent), variable_(variable)
+    : QComboBox(parent), variable_(&variable)
     {
         for (auto it : DBOVariable::Representations())
             addItem (it.second.c_str());
 
-        setCurrentText (DBOVariable::representationToString(variable_.representation()).c_str());
+        update ();
+
         //connect(this, SIGNAL( activated(const QString &) ), this, SIGNAL( changedRepresentation() ));
-        connect(this, SIGNAL(currentTextChanged(const QString &)), this, SLOT(changedSlot()));
+        connect(this, SIGNAL(currentTextChanged(const QString&)), this, SLOT(changedSlot()));
     }
 
     /// @brief Destructor
@@ -74,9 +75,21 @@ public:
         setCurrentText (DBOVariable::representationToString(type).c_str());
     }
 
+    void setVariable (DBOVariable& variable)
+    {
+        variable_ = &variable;
+
+        update();
+    }
+
 protected:
     /// Used variable
-    DBOVariable &variable_;
+    DBOVariable* variable_ {nullptr};
+
+    void update ()
+    {
+        setCurrentText (DBOVariable::representationToString(variable_->representation()).c_str());
+    }
 };
 
 

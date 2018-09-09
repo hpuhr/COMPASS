@@ -258,6 +258,74 @@ void Configuration::registerParameter (const std::string& parameter_id, std::str
            << *(parameters_string_.at(parameter_id).pointer_);
 }
 
+void Configuration::updateParameterPointer (const std::string& parameter_id, bool* pointer)
+{
+    logdbg  << "Configuration " << instance_id_ << ": updateParameterPointer: bool: " << parameter_id;
+
+    assert (pointer);
+
+    assert (parameters_bool_.find(parameter_id) != parameters_bool_.end());
+
+    parameters_bool_.at(parameter_id).pointer_ = pointer;
+    used_=true;
+}
+
+void Configuration::updateParameterPointer (const std::string& parameter_id, int* pointer)
+{
+    logdbg  << "Configuration " << instance_id_ << ": updateParameterPointer: int: " << parameter_id;
+
+    assert (pointer);
+    assert (parameters_int_.find(parameter_id) != parameters_int_.end());
+
+    parameters_int_.at(parameter_id).pointer_ = pointer;
+    used_=true;
+}
+
+void Configuration::updateParameterPointer (const std::string& parameter_id, unsigned int* pointer)
+{
+    logdbg  << "Configuration " << instance_id_ << ": updateParameterPointer: uint: " << parameter_id;
+
+    assert (pointer);
+    assert (parameters_uint_.find(parameter_id) != parameters_uint_.end());
+
+    parameters_uint_.at(parameter_id).pointer_ = pointer;
+    used_=true;
+}
+
+void Configuration::updateParameterPointer (const std::string& parameter_id, float* pointer)
+{
+    logdbg  << "Configuration " << instance_id_ << ": updateParameterPointer: float: " << parameter_id;
+
+    assert (pointer);
+    assert (parameters_float_.find(parameter_id) != parameters_float_.end());
+
+    parameters_float_.at(parameter_id).pointer_ = pointer;
+    used_=true;
+}
+
+void Configuration::updateParameterPointer (const std::string& parameter_id, double* pointer)
+{
+    logdbg  << "Configuration " << instance_id_ << ": updateParameterPointer: double: " << parameter_id;
+
+    assert (pointer);
+    assert (parameters_double_.find(parameter_id) != parameters_double_.end());
+
+    parameters_double_.at(parameter_id).pointer_ = pointer;
+    used_=true;
+}
+
+void Configuration::updateParameterPointer (const std::string& parameter_id, std::string* pointer)
+{
+    logdbg  << "Configuration " << instance_id_ << ": updateParameterPointer: string: " << parameter_id;
+
+    assert (pointer);
+    assert (parameters_string_.find(parameter_id) != parameters_string_.end());
+
+    parameters_string_.at(parameter_id).pointer_ = pointer;
+    used_=true;
+}
+
+
 void Configuration::addParameterBool (const std::string& parameter_id, bool default_value)
 {
     logdbg  << "Configuration: addParameterBool: parameter " << parameter_id << " default " << default_value;
@@ -603,7 +671,7 @@ void Configuration::parseXMLConfigurationElement (tinyxml2::XMLElement* element)
             const XMLAttribute* attribute=parameter_element->FirstAttribute();
             while (attribute)
             {
-                loginf  << "Configuration: parseXMLConfigurationElement: attribute " << attribute->Name()
+                logdbg  << "Configuration: parseXMLConfigurationElement: attribute " << attribute->Name()
                         << "  value "<< attribute->Value();
 
                 if (strcmp ("instance_id", attribute->Name()) == 0)
@@ -903,6 +971,12 @@ const std::string &Configuration::getConfigurationFilename ()
 {
     assert (hasConfigurationFilename());
     return configuration_filename_;
+}
+
+bool Configuration::hasSubConfiguration (const std::string &class_id, const std::string &instance_id)
+{
+    std::pair<std::string, std::string> key (class_id, instance_id);
+    return sub_configurations_.find (key) != sub_configurations_.end();
 }
 
 Configuration &Configuration::addNewSubConfiguration (const std::string &class_id, const std::string &instance_id)

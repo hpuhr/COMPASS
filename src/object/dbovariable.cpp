@@ -68,7 +68,7 @@ std::string DBOVariable::representationToString (Representation representation)
 }
 
 DBOVariable::DBOVariable(const std::string& class_id, const std::string& instance_id, DBObject* parent)
-    : Property (), Configurable (class_id, instance_id, parent), db_object_(*parent)
+    : Property (), Configurable (class_id, instance_id, parent), db_object_(parent)
 {
     registerParameter ("name", &name_, "");
     registerParameter ("description", &description_, "");
@@ -92,6 +92,66 @@ DBOVariable::DBOVariable(const std::string& class_id, const std::string& instanc
 
     createSubConfigurables ();
 
+}
+
+DBOVariable& DBOVariable::operator=(DBOVariable&& other)
+//: Configurable(std::move(other))
+{
+    loginf << "DBOVariable: move operator: moving";
+
+    data_type_ = other.data_type_;
+    data_type_str_ = other.data_type_str_;
+
+    name_ = other.name_;
+    other.name_ = "";
+
+    db_object_ = other.db_object_;
+    other.db_object_ = nullptr;
+
+    representation_str_ = other.representation_str_;
+    other.representation_str_ = "";
+
+    representation_ = other.representation_;
+    other.representation_ = Representation::STANDARD;
+
+    description_ = other.description_;
+    other.description_ = "";
+
+    min_max_set_ = other.min_max_set_;
+    other.min_max_set_ = false;
+
+    min_ = other.min_;
+    other.min_ = "";
+
+    max_ = other.max_;
+    other.max_ = "";
+
+    dimension_ = other.dimension_;
+    other.dimension_ = "";
+
+    unit_ = other.unit_;
+    other.unit_ = "";
+
+    schema_variables_ = other.schema_variables_;
+    other.schema_variables_.clear();
+
+    widget_ = other.widget_;
+    if (widget_)
+        widget_->setVariable(*this);
+    other.widget_ = nullptr;
+
+    locked_ = other.locked_;
+    other.locked_ = false;
+
+    other.configuration().updateParameterPointer ("name", &name_);
+    other.configuration().updateParameterPointer ("description", &description_);
+    other.configuration().updateParameterPointer ("data_type_str", &data_type_str_);
+    other.configuration().updateParameterPointer ("representation_str", &representation_str_);
+    other.configuration().updateParameterPointer ("dimension", &dimension_);
+    other.configuration().updateParameterPointer ("unit", &unit_);
+
+    //return *this;
+    return static_cast<DBOVariable&>(Configurable::operator=(std::move(other)));
 }
 
 DBOVariable::~DBOVariable()
@@ -242,21 +302,29 @@ void DBOVariable::checkSubConfigurables ()
 
 const std::string& DBOVariable::dboName () const
 {
-    return db_object_.name();
+    assert (db_object_);
+    return db_object_->name();
 }
 
+void DBOVariable::name (const std::string& name)
+{
+    loginf << "DBOVariable: name: old " << name_ << " new " << name;
+    name_=name;
+}
 
 bool DBOVariable::hasSchema (const std::string& schema) const
 {
     //return schema_variables_.find (schema) != schema_variables_.end();
-    return db_object_.hasMetaTable(schema);
+    assert (db_object_);
+    return db_object_->hasMetaTable(schema);
 }
 
 const std::string& DBOVariable::metaTable (const std::string& schema) const
 {
     assert (hasSchema(schema));
     //return schema_variables_.at(schema)->getMetaTable();
-    return db_object_.metaTable(schema);
+    assert (db_object_);
+    return db_object_->metaTable(schema);
 }
 
 bool DBOVariable::hasVariableName (const std::string& schema) const
@@ -283,7 +351,8 @@ void DBOVariable::setVariableName (const std::string& schema_name, const std::st
     else
     {
         logdbg << "DBOVariable: setVariableName: creating new";
-        std::string var_instance = "DBOSchemaVariableDefinition"+db_object_.name()+name+"0";
+        assert (db_object_);
+        std::string var_instance = "DBOSchemaVariableDefinition"+db_object_->name()+name+"0";
 
         Configuration &var_configuration = addNewSubConfiguration ("DBOSchemaVariableDefinition", var_instance);
         var_configuration.addParameterString ("schema", schema_name);
@@ -297,7 +366,8 @@ void DBOVariable::setVariableName (const std::string& schema_name, const std::st
 
 bool DBOVariable::hasCurrentDBColumn () const
 {
-    if (!db_object_.hasCurrentMetaTable())
+    assert (db_object_);
+    if (!db_object_->hasCurrentMetaTable())
         return false;
 
     std::string meta_tablename = currentMetaTableString ();
@@ -327,15 +397,17 @@ bool DBOVariable::hasCurrentSchema () const
 
 const std::string& DBOVariable::currentMetaTableString () const
 {
-    assert (db_object_.hasCurrentMetaTable());
-    return db_object_.currentMetaTable().name();
+    assert (db_object_);
+    assert (db_object_->hasCurrentMetaTable());
+    return db_object_->currentMetaTable().name();
 
 }
 
 const MetaDBTable& DBOVariable::currentMetaTable () const
 {
-    assert (db_object_.hasCurrentMetaTable());
-    return db_object_.currentMetaTable();
+    assert (db_object_);
+    assert (db_object_->hasCurrentMetaTable());
+    return db_object_->currentMetaTable();
 }
 
 const std::string& DBOVariable::currentVariableIdentifier () const
@@ -349,7 +421,8 @@ void DBOVariable::setMinMax ()
 {
     assert (!min_max_set_);
 
-    logdbg << "DBOVariable " << db_object_.name() << " " << name_ << ": setMinMax";
+    assert (db_object_);
+    logdbg << "DBOVariable " << db_object_->name() << " " << name_ << ": setMinMax";
 
     if (!dbObject().existsInDB() // object doesn't exist in this database
             || !dbObject().count()
@@ -557,9 +630,10 @@ std::string DBOVariable::getValueStringFromRepresentation (const std::string& re
     }
     else if (representation_ == DBOVariable::Representation::DATA_SRC_NAME)
     {
-        if (db_object_.hasDataSources())
+        assert (db_object_);
+        if (db_object_->hasDataSources())
         {
-            std::map<int, DBODataSource>& data_sources = db_object_.dataSources();
+            std::map<int, DBODataSource>& data_sources = db_object_->dataSources();
 
             for (auto& ds_it : data_sources)
             {
@@ -802,7 +876,9 @@ const
 
 bool DBOVariable::existsInDB () const
 {
-    if (!db_object_.hasCurrentMetaTable())
+    assert (db_object_);
+
+    if (!db_object_->hasCurrentMetaTable())
         return false;
 
     if (!hasCurrentDBColumn())

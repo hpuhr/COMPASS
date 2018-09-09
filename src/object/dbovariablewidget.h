@@ -60,9 +60,14 @@ public:
     void lock ();
     void unlock ();
 
+    void setVariable (DBOVariable& variable);
+    void update ();
+
 private:
     /// @brief DBObject to be managed
-    DBOVariable& variable_;
+    DBOVariable* variable_ {nullptr};
+    QGridLayout* properties_layout_ {nullptr};
+    int schema_boxes_row_ {0};
 
     bool locked_ {false};
 
@@ -76,7 +81,7 @@ private:
 
     std::map <std::string, DBTableColumnComboBox*> schema_boxes_;
 
-    void createSchemaBoxes (QGridLayout* properties_layout, int row);
+    void createSchemaBoxes ();
 };
 
 #endif /* DBOBJECTEDITWIDGET_H_ */

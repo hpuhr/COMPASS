@@ -66,6 +66,19 @@ public:
     /// @brief Registers a string parameter
     void registerParameter (const std::string &parameter_id, std::string *pointer, const std::string &default_value);
 
+    /// @brief Updates a boolean parameter pointer
+    void updateParameterPointer (const std::string &parameter_id, bool *pointer);
+    /// @brief Updates an int parameter pointer
+    void updateParameterPointer (const std::string &parameter_id, int *pointer);
+    /// @brief Updates an unsigned int parameter pointer
+    void updateParameterPointer (const std::string &parameter_id, unsigned int *pointer);
+    /// @brief Updates a float parameter pointer
+    void updateParameterPointer (const std::string &parameter_id, float *pointer);
+    /// @brief Updates a double parameter pointer
+    void updateParameterPointer (const std::string &parameter_id, double *pointer);
+    /// @brief Updates a string parameter pointer
+    void updateParameterPointer (const std::string &parameter_id, std::string *pointer);
+
     /// @brief Adds a boolean parameter
     void addParameterBool (const std::string &parameter_id, bool default_value);
     /// @brief Adds an integer parameter
@@ -120,6 +133,7 @@ public:
     /// @brief Return special filename
     const std::string& getConfigurationFilename ();
 
+    bool hasSubConfiguration (const std::string &class_id, const std::string &instance_id);
     /// @brief Adds a new sub-configuration and returns reference
     Configuration &addNewSubConfiguration (const std::string &class_id, const std::string &instance_id);
     /// @brief Adds a new sub-configuration and returns reference

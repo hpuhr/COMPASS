@@ -56,10 +56,11 @@ public:
                   const std::string &root_configuration_filename="");
     /// @brief Default constructor, for STL containers
     Configurable () = default;
-
     Configurable(const Configurable&) = delete;
+
     Configurable& operator=(const Configurable& other) = delete;
-    Configurable& operator=(Configurable&& other) = delete;
+    /// @brief Move constructor
+    Configurable& operator=(Configurable&& other);
     /// @brief Destructor
     virtual ~Configurable();
 
@@ -80,6 +81,7 @@ public:
     bool hasSubConfigurable(const std::string &class_id, const std::string &instance_id);
 
     Configurable& parent() { assert (parent_); return *parent_; }
+    void parent(Configurable& parent) { parent_=&parent; }
     /// @brief Returns configuration for this class
     Configuration& configuration () { assert (configuration_); return *configuration_; }
     /// @brief Saves the current configuration as template at its parent
@@ -128,9 +130,9 @@ protected:
     //void saveTemplateConfiguration (Configurable *child, const std::string &template_name);
 
     /// @brief Adds a configurable as a child
-    Configuration &registerSubConfigurable (Configurable &child);
+    Configuration &registerSubConfigurable (Configurable &child, bool config_must_exist=false);
     /// @brief Removes a child configurable
-    void removeChildConfigurable (Configurable &child);
+    void removeChildConfigurable (Configurable &child, bool remove_config=true);
 
 };
 
