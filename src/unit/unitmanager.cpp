@@ -37,8 +37,8 @@ void UnitManager::generateSubConfigurable (const std::string &class_id, const st
     if (class_id == "Dimension")
     {
         Dimension *dimension = new Dimension (class_id, instance_id, this);
-        assert (dimensions_.find(dimension->getInstanceId()) == dimensions_.end());
-        dimensions_.insert (std::pair <std::string, Dimension*> (dimension->getInstanceId(), dimension));
+        assert (dimensions_.find(dimension->instanceId()) == dimensions_.end());
+        dimensions_.insert (std::pair <std::string, Dimension*> (dimension->instanceId(), dimension));
     }
     else
         throw std::runtime_error ("UnitManager: generateSubConfigurable: unknown class_id "+class_id );

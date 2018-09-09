@@ -802,8 +802,8 @@ void MySQLppConnection::generateSubConfigurable (const std::string &class_id, co
     if (class_id == "MySQLServer")
     {
         MySQLServer *server = new MySQLServer (instance_id, *this);
-        assert (servers_.count (server->getInstanceId()) == 0);
-        servers_.insert (std::pair <std::string, MySQLServer*> (server->getInstanceId(), server));
+        assert (servers_.count (server->instanceId()) == 0);
+        servers_.insert (std::pair <std::string, MySQLServer*> (server->instanceId(), server));
     }
     else
         throw std::runtime_error ("MySQLppConnection: generateSubConfigurable: unknown class_id "+class_id );

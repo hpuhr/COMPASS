@@ -81,9 +81,16 @@ public:
 
     Configurable& parent() { assert (parent_); return *parent_; }
     /// @brief Returns configuration for this class
-    Configuration& getConfiguration () { return *configuration_; }
+    Configuration& configuration () { assert (configuration_); return *configuration_; }
     /// @brief Saves the current configuration as template at its parent
     //void saveConfigurationAsTemplate (const std::string &template_name);
+
+    /// @brief Returns instance identifier
+    const std::string &instanceId () const { return instance_id_; }
+    /// @brief Returns class identifier
+    const std::string &classId () const { return class_id_; }
+    /// @brief Returns key identifier (class_id + instance_id)
+    const std::string &keyId () const { return key_id_; }
 
 private:
     /// Class identifier
@@ -125,13 +132,6 @@ protected:
     /// @brief Removes a child configurable
     void removeChildConfigurable (Configurable &child);
 
-public:
-    /// @brief Returns instance identifier
-    const std::string &getInstanceId () const { return instance_id_; }
-    /// @brief Returns class identifier
-    const std::string &getClassId () const { return class_id_; }
-    /// @brief Returns key identifier (class_id + instance_id)
-    const std::string &getKeyId () const { return key_id_; }
 };
 
 #endif /* CONFIGURABLE_H_ */

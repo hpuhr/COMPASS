@@ -65,7 +65,7 @@ ViewContainer::ViewContainer(const std::string &class_id, const std::string &ins
 
 ViewContainer::~ViewContainer()
 {
-    view_manager_.removeContainer(getInstanceId());
+    view_manager_.removeContainer(instanceId());
 
     if (config_widget_)
     {
@@ -163,7 +163,7 @@ void ViewContainer::deleteView ()
     assert (view_manage_buttons_.find (last_active_manage_button_) != view_manage_buttons_.end());
     View *view = view_manage_buttons_ [last_active_manage_button_];
 
-    loginf << "ViewContainer: deleteView: for view " << view->getInstanceId();
+    loginf << "ViewContainer: deleteView: for view " << view->instanceId();
     delete view;
 
     last_active_manage_button_=nullptr;

@@ -110,8 +110,8 @@ void ViewManager::generateSubConfigurable (const std::string &class_id, const st
     else if (class_id.compare ("ViewContainerWidget") == 0)
     {
         ViewContainerWidget *container_widget = new ViewContainerWidget (class_id, instance_id, this);
-        assert (containers_.count(container_widget->viewContainer().getInstanceId()) == 0);
-        containers_.insert (std::pair <std::string, ViewContainer*> (container_widget->viewContainer().getInstanceId(),
+        assert (containers_.count(container_widget->viewContainer().instanceId()) == 0);
+        containers_.insert (std::pair <std::string, ViewContainer*> (container_widget->viewContainer().instanceId(),
                                                                      &container_widget->viewContainer()));
         assert (container_widgets_.count(instance_id) == 0);
         container_widgets_.insert (std::pair <std::string, ViewContainerWidget*> (instance_id, container_widget));
@@ -180,7 +180,7 @@ void ViewManager::registerView (View *view)
     logdbg  << "ViewManager: registerView";
     assert (view);
     assert (!isRegistered(view));
-    views_[view->getInstanceId()]=view;
+    views_[view->instanceId()]=view;
 }
 
 void ViewManager::unregisterView (View *view)
@@ -191,7 +191,7 @@ void ViewManager::unregisterView (View *view)
 
     std::map<std::string, View*>::iterator it;
 
-    it=views_.find(view->getInstanceId());
+    it=views_.find(view->instanceId());
     views_.erase(it);
 }
 
@@ -202,7 +202,7 @@ bool ViewManager::isRegistered (View *view)
 
     std::map<std::string, View*>::iterator it;
 
-    it=views_.find(view->getInstanceId());
+    it=views_.find(view->instanceId());
 
     return !(it == views_.end());
 }

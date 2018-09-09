@@ -213,15 +213,15 @@ void DBInterface::generateSubConfigurable (const std::string &class_id, const st
     if (class_id == "MySQLppConnection")
     {
         MySQLppConnection *connection = new MySQLppConnection (class_id, instance_id, this);
-        assert (connections_.count (connection->getInstanceId()) == 0);
-        connections_.insert (std::pair <std::string, DBConnection*> (connection->getInstanceId(),
+        assert (connections_.count (connection->instanceId()) == 0);
+        connections_.insert (std::pair <std::string, DBConnection*> (connection->instanceId(),
                                                                      dynamic_cast<DBConnection*>(connection)));
     }
     else if (class_id == "SQLiteConnection")
     {
         SQLiteConnection *connection = new SQLiteConnection (class_id, instance_id, this);
-        assert (connections_.count (connection->getInstanceId()) == 0);
-        connections_.insert (std::pair <std::string, DBConnection*> (connection->getInstanceId(),
+        assert (connections_.count (connection->instanceId()) == 0);
+        connections_.insert (std::pair <std::string, DBConnection*> (connection->instanceId(),
                                                                      dynamic_cast<DBConnection*>(connection)));
     }
     else

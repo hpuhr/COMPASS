@@ -873,7 +873,7 @@ XMLElement *Configuration::generateXMLElement (tinyxml2::XMLDocument *parent_doc
 void Configuration::createSubConfigurables (Configurable *configurable)
 {
     logdbg  << "Configuration: createSubConfigurables: config instance " << instance_id_ << " configurable instance " <<
-               configurable->getInstanceId()   ;
+               configurable->instanceId()   ;
 
     std::map<std::pair<std::string, std::string>, Configuration >::iterator it;
     // TODO what if map changed (deleting of config) during iteration

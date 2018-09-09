@@ -123,7 +123,7 @@ const std::string& DBSchemaManager::getCurrentSchemaName ()
  */
 void DBSchemaManager::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
-    logdbg  << "DBSchemaManager: generateSubConfigurable: " << getClassId() << " instance " << getInstanceId();
+    logdbg  << "DBSchemaManager: generateSubConfigurable: " << classId() << " instance " << instanceId();
 
     if (class_id.compare("DBSchema") == 0)
     {

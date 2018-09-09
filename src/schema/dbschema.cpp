@@ -51,7 +51,7 @@ DBSchema::~DBSchema()
 
 void DBSchema::generateSubConfigurable (const std::string& class_id, const std::string& instance_id)
 {
-    logdbg  << "DBSchema: generateSubConfigurable: " << getClassId() << " instance " << getInstanceId();
+    logdbg  << "DBSchema: generateSubConfigurable: " << classId() << " instance " << instanceId();
 
     if (class_id.compare("DBTable") == 0)
     {
@@ -182,7 +182,7 @@ void DBSchema::updateMetaTables ()
 
     for (auto it : old_meta_tables)
     {
-        meta_tables_.insert (std::pair <std::string, MetaDBTable*> (it.second->getInstanceId(), it.second));
+        meta_tables_.insert (std::pair <std::string, MetaDBTable*> (it.second->instanceId(), it.second));
     }
 }
 

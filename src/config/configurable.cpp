@@ -138,10 +138,10 @@ void Configurable::registerParameter (const std::string &parameter_id, std::stri
 
 Configuration &Configurable::registerSubConfigurable (Configurable& child)
 {
-    logdbg  << "Configurable " << instance_id_ << " registerSubConfigurable: child " << child.getInstanceId();
+    logdbg  << "Configurable " << instance_id_ << " registerSubConfigurable: child " << child.instanceId();
     assert (configuration_);
 
-    const std::string &key = child.getKeyId();
+    const std::string &key = child.keyId();
 
     if (children_.find (key) != children_.end())
     {
@@ -151,21 +151,21 @@ Configuration &Configurable::registerSubConfigurable (Configurable& child)
     logdbg  << "Configurable " << instance_id_ << ": registerSubConfigurable: " << key;
     children_.insert (std::pair<std::string, Configurable&> (key, child));
 
-    return configuration_->getSubConfiguration(child.getClassId(), child.getInstanceId());
+    return configuration_->getSubConfiguration(child.classId(), child.instanceId());
 }
 
 void Configurable::removeChildConfigurable (Configurable &child)
 {
-    logdbg  << "Configurable " << instance_id_ << " removeChildConfigurable: child " << child.getInstanceId();
+    logdbg  << "Configurable " << instance_id_ << " removeChildConfigurable: child " << child.instanceId();
 
     assert (configuration_);
 
-    const std::string &key = child.getKeyId();
+    const std::string &key = child.keyId();
     assert (children_.find (key) != children_.end());
     logdbg  << "Configurable " << instance_id_ << ": removeChildConfigurable: " << key;
     children_.erase(children_.find(key));
 
-    configuration_->removeSubConfiguration(child.getClassId(), child.getInstanceId());
+    configuration_->removeSubConfiguration(child.classId(), child.instanceId());
 }
 
 

@@ -90,7 +90,7 @@ void FilterManager::generateSubConfigurable (const std::string& class_id, const 
         catch (const std::exception& e)
         {
             loginf << "FilterManager: generateSubConfigurable: data source filter exception '" << e.what() << "', deleting";
-            getConfiguration().removeSubConfiguration(class_id, instance_id);
+            configuration().removeSubConfiguration(class_id, instance_id);
         }
     }
     else
@@ -138,7 +138,7 @@ std::string FilterManager::getSQLCondition (const std::string& dbo_name, std::ve
 
     for (auto* filter : filters_)
     {
-        loginf << "FilterManager: getSQLCondition: filter " << filter->getInstanceId()
+        loginf << "FilterManager: getSQLCondition: filter " << filter->instanceId()
                << " active " << filter->getActive()
                << " filters " << dbo_name << " " << filter->filters (dbo_name);
 
