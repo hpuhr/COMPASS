@@ -697,7 +697,7 @@ void DBInterface::postProcess ()
 
     bool any_data=false;
 
-    for (auto obj_it : ATSDB::instance().objectManager().objects())
+    for (auto obj_it : ATSDB::instance().objectManager())
         if (obj_it.second->hasData())
             any_data=true;
 
@@ -717,7 +717,7 @@ void DBInterface::postProcess ()
     else
         clearTableContent (TABLE_NAME_MINMAX);
 
-    for (auto obj_it : ATSDB::instance().objectManager().objects())
+    for (auto obj_it : ATSDB::instance().objectManager())
     {
         if (!obj_it.second->hasData())
             continue;

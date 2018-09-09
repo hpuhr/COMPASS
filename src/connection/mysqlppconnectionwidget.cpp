@@ -161,7 +161,7 @@ void MySQLppConnectionWidget::importSQLTextSlot()
 
     bool any_data=false;
 
-    for (auto obj_it : ATSDB::instance().objectManager().objects())
+    for (auto obj_it : ATSDB::instance().objectManager())
         if (obj_it.second->hasData())
             any_data=true;
 
@@ -209,7 +209,7 @@ void MySQLppConnectionWidget::importSQLTextFromArchiveSlot()
 
     bool any_data=false;
 
-    for (auto obj_it : ATSDB::instance().objectManager().objects())
+    for (auto obj_it : ATSDB::instance().objectManager())
         if (obj_it.second->hasData())
             any_data=true;
 

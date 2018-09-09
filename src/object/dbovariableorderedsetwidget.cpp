@@ -117,7 +117,7 @@ void DBOVariableOrderedSetWidget::updateMenuEntries()
 
     }
 
-    for (auto object_it : ATSDB::instance().objectManager().objects())
+    for (auto& object_it : ATSDB::instance().objectManager())
     {
 
         QMenu* m2 = menu_.addMenu(QString::fromStdString(object_it.first));

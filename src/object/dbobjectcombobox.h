@@ -41,17 +41,17 @@ public:
     DBObjectComboBox(bool allow_meta, QWidget * parent = 0)
     : QComboBox(parent), allow_meta_ (allow_meta)
     {
-        assert (ATSDB::instance().objectManager().objects().size());
+        assert (ATSDB::instance().objectManager().size());
         if (allow_meta_)
             addItem (META_OBJECT_NAME.c_str());
 
-        for (auto obj_it : ATSDB::instance().objectManager().objects())
+        for (auto& obj_it : ATSDB::instance().objectManager())
         {
             addItem (obj_it.first.c_str());
         }
 
         setCurrentIndex (0);
-        connect(this, SIGNAL( activated(const QString &) ), this, SIGNAL( changedObject() ));
+        connect(this, SIGNAL(activated(const QString &)), this, SIGNAL(changedObject()));
 
     }
     /// @brief Destructor

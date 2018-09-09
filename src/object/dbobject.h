@@ -146,9 +146,6 @@ public:
     /// @brief Deletes a variable identified by id
     void deleteVariable (const std::string& name);
 
-    /// @brief Returns container with all variables
-    //std::map<std::string, DBOVariable>& variables () { return variables_; }
-
     using DBOVariableIterator = typename std::map<std::string, DBOVariable>::iterator;
     DBOVariableIterator begin() { return variables_.begin(); }
     DBOVariableIterator end() { return variables_.end(); }
