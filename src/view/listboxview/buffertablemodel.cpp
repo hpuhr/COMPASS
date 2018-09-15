@@ -91,128 +91,128 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
 
             if (data_type == PropertyDataType::BOOL)
             {
-                assert (buffer_->hasBool(property_name));
-                null = buffer_->getBool(property_name).isNone(row);
+                assert (buffer_->has<bool>(property_name));
+                null = buffer_->get<bool>(property_name).isNone(row);
                 if (!null)
                 {
                     if (use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
-                                    buffer_->getBool(property_name).getAsString(row));
+                                    buffer_->get<bool>(property_name).getAsString(row));
                     else
-                        value_str = buffer_->getBool(property_name).getAsString(row);
+                        value_str = buffer_->get<bool>(property_name).getAsString(row);
                 }
             }
             else if (data_type == PropertyDataType::CHAR)
             {
-                assert (buffer_->hasChar(property_name));
-                null = buffer_->getChar(property_name).isNone(row);
+                assert (buffer_->has<char>(property_name));
+                null = buffer_->get<char>(property_name).isNone(row);
                 if (!null)
                 {
                     if (use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
-                                    buffer_->getChar(property_name).getAsString(row));
+                                    buffer_->get<char>(property_name).getAsString(row));
                     else
-                        value_str = buffer_->getChar(property_name).getAsString(row);
+                        value_str = buffer_->get<char>(property_name).getAsString(row);
                 }
             }
             else if (data_type == PropertyDataType::UCHAR)
             {
-                assert (buffer_->hasUChar(property_name));
-                null = buffer_->getUChar(property_name).isNone(row);
+                assert (buffer_->has<unsigned char>(property_name));
+                null = buffer_->get<unsigned char>(property_name).isNone(row);
                 if (!null)
                 {
                     if (use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
-                                    buffer_->getUChar(property_name).getAsString(row));
+                                    buffer_->get<unsigned char>(property_name).getAsString(row));
                     else
-                        value_str = buffer_->getUChar(property_name).getAsString(row);
+                        value_str = buffer_->get<unsigned char>(property_name).getAsString(row);
                 }
             }
             else if (data_type == PropertyDataType::INT)
             {
-                assert (buffer_->hasInt(property_name));
-                null = buffer_->getInt(property_name).isNone(row);
+                assert (buffer_->has<int>(property_name));
+                null = buffer_->get<int>(property_name).isNone(row);
                 if (!null)
                 {
                     if (use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
-                                    buffer_->getInt(property_name).getAsString(row));
+                                    buffer_->get<int>(property_name).getAsString(row));
                     else
-                        value_str = buffer_->getInt(property_name).getAsString(row);
+                        value_str = buffer_->get<int>(property_name).getAsString(row);
                 }
             }
             else if (data_type == PropertyDataType::UINT)
             {
-                assert (buffer_->hasUInt(property_name));
-                null = buffer_->getUInt(properties.at(col).name()).isNone(row);
+                assert (buffer_->has<unsigned int>(property_name));
+                null = buffer_->get<unsigned int>(properties.at(col).name()).isNone(row);
                 if (!null)
                 {
                     if (use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
-                                    buffer_->getUInt(property_name).getAsString(row));
+                                    buffer_->get<unsigned int>(property_name).getAsString(row));
                     else
-                        value_str = buffer_->getUInt(property_name).getAsString(row);
+                        value_str = buffer_->get<unsigned int>(property_name).getAsString(row);
                 }
             }
             else if (data_type == PropertyDataType::LONGINT)
             {
-                assert (buffer_->hasLongInt(property_name));
-                null = buffer_->getLongInt(property_name).isNone(row);
+                assert (buffer_->has<long int>(property_name));
+                null = buffer_->get<long int>(property_name).isNone(row);
                 if (!null)
                 {
                     if (use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
-                                    buffer_->getLongInt(property_name).getAsString(row));
+                                    buffer_->get<long int>(property_name).getAsString(row));
                     else
-                        value_str = buffer_->getLongInt(property_name).getAsString(row);
+                        value_str = buffer_->get<long int>(property_name).getAsString(row);
                 }
             }
             else if (data_type == PropertyDataType::ULONGINT)
             {
-                assert (buffer_->hasULongInt(property_name));
-                null = buffer_->getULongInt(property_name).isNone(row);
+                assert (buffer_->has<unsigned long int>(property_name));
+                null = buffer_->get<unsigned long int>(property_name).isNone(row);
                 if (!null)
                 {
                     if (use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
-                                    buffer_->getULongInt(property_name).getAsString(row));
+                                    buffer_->get<unsigned long int>(property_name).getAsString(row));
                     else
-                        value_str = buffer_->getULongInt(property_name).getAsString(row);
+                        value_str = buffer_->get<unsigned long int>(property_name).getAsString(row);
                 }
             }
             else if (data_type == PropertyDataType::FLOAT)
             {
-                assert (buffer_->hasFloat(property_name));
-                null = buffer_->getFloat(property_name).isNone(row);
+                assert (buffer_->has<float>(property_name));
+                null = buffer_->get<float>(property_name).isNone(row);
                 if (!null)
                 {
                     if (use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
-                                    buffer_->getFloat(property_name).getAsString(row));
+                                    buffer_->get<float>(property_name).getAsString(row));
                     else
-                        value_str = buffer_->getFloat(property_name).getAsString(row);
+                        value_str = buffer_->get<float>(property_name).getAsString(row);
                 }
             }
             else if (data_type == PropertyDataType::DOUBLE)
             {
-                assert (buffer_->hasDouble(property_name));
-                null = buffer_->getDouble(property_name).isNone(row);
+                assert (buffer_->has<double>(property_name));
+                null = buffer_->get<double>(property_name).isNone(row);
                 if (!null)
                 {
                     if (use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
-                                    buffer_->getDouble(property_name).getAsString(row));
+                                    buffer_->get<double>(property_name).getAsString(row));
                     else
-                        value_str = buffer_->getDouble(property_name).getAsString(row);
+                        value_str = buffer_->get<double>(property_name).getAsString(row);
                 }
             }
             else if (data_type == PropertyDataType::STRING)
             {
-                assert (buffer_->hasString(property_name));
-                null = buffer_->getString(property_name).isNone(row);
+                assert (buffer_->has<std::string>(property_name));
+                null = buffer_->get<std::string>(property_name).isNone(row);
                 if (!null)
                 {
-                    value_str = buffer_->getString(property_name).getAsString(row);
+                    value_str = buffer_->get<std::string>(property_name).getAsString(row);
                 }
             }
             else

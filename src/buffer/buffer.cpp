@@ -160,256 +160,6 @@ void Buffer::addProperty (const Property &property)
     addProperty (property.name(), property.dataType());
 }
 
-bool Buffer::hasBool (const std::string &id)
-{
-    return getArrayListMap<bool>().count(id) != 0;
-}
-
-bool Buffer::hasChar (const std::string id)
-{
-    return getArrayListMap<char>().count(id) != 0;
-}
-
-bool Buffer::hasUChar (const std::string &id)
-{
-    return getArrayListMap<unsigned char>().count(id) != 0;
-}
-
-bool Buffer::hasInt (const std::string &id)
-{
-    return getArrayListMap<int>().count(id) != 0;
-}
-
-bool Buffer::hasUInt (const std::string &id)
-{
-    return getArrayListMap<unsigned int>().count(id) != 0;
-}
-
-bool Buffer::hasLongInt (const std::string &id)
-{
-    return getArrayListMap<long int>().count(id) != 0;
-}
-
-bool Buffer::hasULongInt (const std::string &id)
-{
-    return getArrayListMap<unsigned long int>().count(id) != 0;
-}
-
-bool Buffer::hasFloat (const std::string &id)
-{
-    return getArrayListMap<float>().count(id) != 0;
-}
-
-bool Buffer::hasDouble (const std::string &id)
-{
-    return getArrayListMap<double>().count(id) != 0;
-}
-
-bool Buffer::hasString (const std::string &id)
-{
-    return getArrayListMap<std::string>().count(id) != 0;
-}
-
-ArrayListTemplate<bool> &Buffer::getBool (const std::string &id)
-{
-    if (getArrayListMap<bool>().count(id) == 0)
-        logerr << "Buffer: getBool: unknown id " << id;
-
-    return *getArrayListMap<bool>().at(id);
-}
-
-ArrayListTemplate<char> &Buffer::getChar (const std::string id)
-{
-    if (getArrayListMap<char>().count(id) == 0)
-        logerr << "Buffer: getChar: unknown id " << id;
-
-    return *getArrayListMap<char>().at(id);
-}
-
-ArrayListTemplate<unsigned char> &Buffer::getUChar (const std::string &id)
-{
-    if (getArrayListMap<unsigned char>().count(id) == 0)
-        logerr << "Buffer: getUChar: unknown id " << id;
-
-    return *getArrayListMap<unsigned char>().at(id);
-}
-
-ArrayListTemplate<int> &Buffer::getInt (const std::string &id)
-{
-    if (getArrayListMap<int>().count(id) == 0)
-        logerr << "Buffer: getInt: unknown id " << id;
-
-    return *getArrayListMap<int>().at(id);
-}
-
-ArrayListTemplate<unsigned int> &Buffer::getUInt (const std::string &id)
-{
-    if (getArrayListMap<unsigned int>().count(id) == 0)
-        logerr << "Buffer: getUInt: unknown id " << id;
-
-    return *getArrayListMap<unsigned int>().at(id);
-}
-
-ArrayListTemplate<long int> &Buffer::getLongInt (const std::string &id)
-{
-    if (getArrayListMap<long int>().count(id) == 0)
-        logerr << "Buffer: getLongInt: unknown id " << id;
-
-    return *getArrayListMap<long int>().at(id);
-}
-
-ArrayListTemplate<unsigned long int> &Buffer::getULongInt (const std::string &id)
-{
-     if (getArrayListMap<unsigned long int>().count(id) == 0)
-         logerr << "Buffer: getULongInt: unknown id " << id;
-
-    return *getArrayListMap<unsigned long int>().at(id);
-}
-
-ArrayListTemplate<float> &Buffer::getFloat (const std::string &id)
-{
-    if (getArrayListMap<float>().count(id) == 0)
-        logerr << "Buffer: getBool: unknown id " << id;
-
-    return *getArrayListMap<float>().at(id);
-}
-
-ArrayListTemplate<double> &Buffer::getDouble (const std::string &id)
-{
-    if (getArrayListMap<double>().count(id) == 0)
-        logerr << "Buffer: getDouble: unknown id " << id;
-
-    return *getArrayListMap<double>().at(id);
-}
-
-ArrayListTemplate<std::string> &Buffer::getString (const std::string &id)
-{
-    if (getArrayListMap<std::string>().count(id) == 0)
-        logerr << "Buffer: getBool: unknown id " << id;
-
-    return *getArrayListMap<std::string>().at(id);
-}
-
-void Buffer::renameBool (const std::string &id, const std::string &id_new)
-{
-    logdbg << "Buffer: renameBool: current " << id << " new " << id_new;
-
-    renameArrayListMapEntry<bool>(id, id_new);
-
-    assert (properties_.hasProperty(id));
-    Property old_property = properties_.get(id);
-    properties_.removeProperty(id);
-    properties_.addProperty(id_new, old_property.dataType());
-}
-
-void Buffer::renameChar (const std::string &id, const std::string &id_new)
-{
-    logdbg << "Buffer: renameChar: current " << id << " new " << id_new;
-
-    renameArrayListMapEntry<char>(id, id_new);
-
-    assert (properties_.hasProperty(id));
-    Property old_property = properties_.get(id);
-    properties_.removeProperty(id);
-    properties_.addProperty(id_new, old_property.dataType());
-}
-
-void Buffer::renameUChar (const std::string &id, const std::string &id_new)
-{
-    logdbg << "Buffer: renameUChar: current " << id << " new " << id_new;
-
-    renameArrayListMapEntry<unsigned char>(id, id_new);
-
-    assert (properties_.hasProperty(id));
-    Property old_property = properties_.get(id);
-    properties_.removeProperty(id);
-    properties_.addProperty(id_new, old_property.dataType());
-}
-
-void Buffer::renameInt (const std::string &id, const std::string &id_new)
-{
-    logdbg << "Buffer: renameInt: current " << id << " new " << id_new;
-
-    renameArrayListMapEntry<int>(id, id_new);
-
-    assert (properties_.hasProperty(id));
-    Property old_property = properties_.get(id);
-    properties_.removeProperty(id);
-    properties_.addProperty(id_new, old_property.dataType());
-}
-
-void Buffer::renameUInt (const std::string &id, const std::string &id_new)
-{
-    logdbg << "Buffer: renameUInt: current " << id << " new " << id_new;
-
-    renameArrayListMapEntry<unsigned int>(id, id_new);
-
-    assert (properties_.hasProperty(id));
-    Property old_property = properties_.get(id);
-    properties_.removeProperty(id);
-    properties_.addProperty(id_new, old_property.dataType());
-}
-
-void Buffer::renameLongInt (const std::string &id, const std::string &id_new)
-{
-    logdbg << "Buffer: renameLongInt: current " << id << " new " << id_new;
-
-    renameArrayListMapEntry<long int>(id, id_new);
-
-    assert (properties_.hasProperty(id));
-    Property old_property = properties_.get(id);
-    properties_.removeProperty(id);
-    properties_.addProperty(id_new, old_property.dataType());
-}
-
-void Buffer::renameULongInt (const std::string &id, const std::string &id_new)
-{
-    logdbg << "Buffer: renameULongInt: current " << id << " new " << id_new;
-
-    renameArrayListMapEntry<unsigned long>(id, id_new);
-
-    assert (properties_.hasProperty(id));
-    Property old_property = properties_.get(id);
-    properties_.removeProperty(id);
-    properties_.addProperty(id_new, old_property.dataType());
-}
-
-void Buffer::renameFloat (const std::string &id, const std::string &id_new)
-{
-    logdbg << "Buffer: renameFloat: current " << id << " new " << id_new;
-
-    renameArrayListMapEntry<float>(id, id_new);
-
-    assert (properties_.hasProperty(id));
-    Property old_property = properties_.get(id);
-    properties_.removeProperty(id);
-    properties_.addProperty(id_new, old_property.dataType());
-}
-
-void Buffer::renameDouble (const std::string &id, const std::string &id_new)
-{
-    logdbg << "Buffer: renameDouble: current " << id << " new " << id_new;
-
-    renameArrayListMapEntry<double>(id, id_new);
-
-    assert (properties_.hasProperty(id));
-    Property old_property = properties_.get(id);
-    properties_.removeProperty(id);
-    properties_.addProperty(id_new, old_property.dataType());
-}
-
-void Buffer::renameString (const std::string &id, const std::string &id_new)
-{
-    logdbg << "Buffer: renameString: current " << id << " new " << id_new;
-
-    renameArrayListMapEntry<std::string>(id, id_new);
-
-    assert (properties_.hasProperty(id));
-    Property old_property = properties_.get(id);
-    properties_.removeProperty(id);
-    properties_.addProperty(id_new, old_property.dataType());
-}
-
 void Buffer::seizeBuffer (Buffer &org_buffer)
 {
     logdbg  << "Buffer: seizeBuffer: start";
@@ -619,8 +369,8 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
             {
             case PropertyDataType::BOOL:
             {
-                assert (hasBool(current_var_name));
-                ArrayListTemplate<bool> &array_list = getBool(current_var_name);
+                assert (has<bool>(current_var_name));
+                ArrayListTemplate<bool> &array_list = get<bool>(current_var_name);
                 logwrn << "Buffer: transformVariables: double multiplication of boolean variable "
                        << var_it->name();
                 array_list *= factor;
@@ -628,8 +378,8 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
             }
             case PropertyDataType::CHAR:
             {
-                assert (hasChar(current_var_name));
-                ArrayListTemplate<char> &array_list = getChar (current_var_name);
+                assert (has<char>(current_var_name));
+                ArrayListTemplate<char> &array_list = get<char> (current_var_name);
                 logwrn << "Buffer: transformVariables: double multiplication of char variable "
                        << var_it->name();
                 array_list *= factor;
@@ -637,8 +387,8 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
             }
             case PropertyDataType::UCHAR:
             {
-                assert (hasUChar(current_var_name));
-                ArrayListTemplate<unsigned char> &array_list = getUChar (current_var_name);
+                assert (has<unsigned char>(current_var_name));
+                ArrayListTemplate<unsigned char> &array_list = get<unsigned char> (current_var_name);
                 logwrn << "Buffer: transformVariables: double multiplication of unsigned char variable "
                        << var_it->name();
                 array_list *= factor;
@@ -646,43 +396,43 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
             }
             case PropertyDataType::INT:
             {
-                assert (hasInt(current_var_name));
-                ArrayListTemplate<int> &array_list = getInt (current_var_name);
+                assert (has<int>(current_var_name));
+                ArrayListTemplate<int> &array_list = get<int> (current_var_name);
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::UINT:
             {
-                assert (hasUInt(current_var_name));
-                ArrayListTemplate<unsigned int> &array_list = getUInt (current_var_name);
+                assert (has<unsigned int>(current_var_name));
+                ArrayListTemplate<unsigned int> &array_list = get<unsigned int> (current_var_name);
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::LONGINT:
             {
-                assert (hasLongInt(current_var_name));
-                ArrayListTemplate<long> &array_list = getLongInt(current_var_name);
+                assert (has<long int>(current_var_name));
+                ArrayListTemplate<long int> &array_list = get<long int>(current_var_name);
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::ULONGINT:
             {
-                assert (hasULongInt(current_var_name));
-                ArrayListTemplate<unsigned long> &array_list = getULongInt(current_var_name);
+                assert (has<unsigned long>(current_var_name));
+                ArrayListTemplate<unsigned long> &array_list = get<unsigned long>(current_var_name);
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::FLOAT:
             {
-                assert (hasFloat(current_var_name));
-                ArrayListTemplate<float> &array_list = getFloat(current_var_name);
+                assert (has<float>(current_var_name));
+                ArrayListTemplate<float> &array_list = get<float>(current_var_name);
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::DOUBLE:
             {
-                assert (hasDouble(current_var_name));
-                ArrayListTemplate<double> &array_list = getDouble(current_var_name);
+                assert (has<double>(current_var_name));
+                ArrayListTemplate<double> &array_list = get<double>(current_var_name);
                 array_list *= factor;
                 break;
             }
@@ -708,52 +458,52 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
             {
             case PropertyDataType::BOOL:
             {
-                renameBool (current_var_name, transformed_var_name);
+                rename<bool> (current_var_name, transformed_var_name);
                 break;
             }
             case PropertyDataType::CHAR:
             {
-                renameChar (current_var_name, transformed_var_name);
+                rename<char> (current_var_name, transformed_var_name);
                 break;
             }
             case PropertyDataType::UCHAR:
             {
-                renameUChar (current_var_name, transformed_var_name);
+                rename<unsigned char> (current_var_name, transformed_var_name);
                 break;
             }
             case PropertyDataType::INT:
             {
-                renameInt (current_var_name, transformed_var_name);
+                rename<int> (current_var_name, transformed_var_name);
                 break;
             }
             case PropertyDataType::UINT:
             {
-                renameUInt (current_var_name, transformed_var_name);
+                rename<unsigned int> (current_var_name, transformed_var_name);
                 break;
             }
             case PropertyDataType::LONGINT:
             {
-                renameLongInt (current_var_name, transformed_var_name);
+                rename<long int> (current_var_name, transformed_var_name);
                 break;
             }
             case PropertyDataType::ULONGINT:
             {
-                renameULongInt (current_var_name, transformed_var_name);
+                rename<unsigned long int> (current_var_name, transformed_var_name);
                 break;
             }
             case PropertyDataType::FLOAT:
             {
-                renameFloat (current_var_name, transformed_var_name);
+                rename<float> (current_var_name, transformed_var_name);
                 break;
             }
             case PropertyDataType::DOUBLE:
             {
-                renameDouble (current_var_name, transformed_var_name);
+                rename<double> (current_var_name, transformed_var_name);
                 break;
             }
             case PropertyDataType::STRING:
             {
-                renameString (current_var_name, transformed_var_name);
+                rename<std::string> (current_var_name, transformed_var_name);
                 break;
             }
             default:

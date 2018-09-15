@@ -495,35 +495,36 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
             QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         }
 
-        if (read_buffer->getInt(key_var_str_).isNone(cnt))
+        if (read_buffer->get<int>(key_var_str_).isNone(cnt))
         {
             logerr << "RadarPlotPositionCalculatorTask: loadingDoneSlot: key null";
             continue;
         }
-        rec_num = read_buffer->getInt(key_var_str_).get(cnt);
+        rec_num = read_buffer->get<int>(key_var_str_).get(cnt);
 
-        if (read_buffer->getInt(datasource_var_str_).isNone(cnt))
+        if (read_buffer->get<int>(datasource_var_str_).isNone(cnt))
         {
             logerr << "RadarPlotPositionCalculatorTask: loadingDoneSlot: data source null";
             continue;
         }
-        sensor_id = read_buffer->getInt(datasource_var_str_).get(cnt);
+        sensor_id = read_buffer->get<int>(datasource_var_str_).get(cnt);
 
         //sac = *((unsigned char*)adresses->at(1));
         //sic = *((unsigned char*)adresses->at(2));
 
-        if (read_buffer->getDouble(azimuth_var_str_).isNone(cnt) || read_buffer->getDouble(range_var_str_).isNone(cnt))
+        if (read_buffer->get<double>(azimuth_var_str_).isNone(cnt)
+                || read_buffer->get<double>(range_var_str_).isNone(cnt))
         {
             logdbg << "RadarPlotPositionCalculatorTask: loadingDoneSlot: position null";
             continue;
         }
 
-        pos_azm_deg =  read_buffer->getDouble(azimuth_var_str_).get(cnt);
-        pos_range_nm =  read_buffer->getDouble(range_var_str_).get(cnt);
+        pos_azm_deg =  read_buffer->get<double>(azimuth_var_str_).get(cnt);
+        pos_range_nm =  read_buffer->get<double>(range_var_str_).get(cnt);
 
-        has_altitude = !read_buffer->getInt(altitude_var_str_).isNone(cnt);
+        has_altitude = !read_buffer->get<int>(altitude_var_str_).isNone(cnt);
         if (has_altitude)
-            altitude_ft = read_buffer->getInt(altitude_var_str_).get(cnt);
+            altitude_ft = read_buffer->get<int>(altitude_var_str_).get(cnt);
         else
             altitude_ft = 0.0; // has to assumed in projection later on
 
@@ -604,9 +605,9 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
             continue;
         }
 
-        update_buffer->getDouble(latitude_var_str_).set(update_cnt, lat);
-        update_buffer->getDouble(longitude_var_str_).set(update_cnt, lon);
-        update_buffer->getInt(key_var_str_).set(update_cnt, rec_num);
+        update_buffer->get<double>(latitude_var_str_).set(update_cnt, lat);
+        update_buffer->get<double>(longitude_var_str_).set(update_cnt, lon);
+        update_buffer->get<int>(key_var_str_).set(update_cnt, rec_num);
         update_cnt++;
 
         //loginf << "uga cnt " << update_cnt << " rec_num " << rec_num << " lat " << lat << " long " << lon;

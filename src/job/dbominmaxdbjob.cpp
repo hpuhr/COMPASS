@@ -131,16 +131,16 @@ void DBOMinMaxDBJob::processTable (const DBTable& table)
         assert (buffer->properties().hasProperty(col_it.first+"MIN"));
         assert (buffer->properties().hasProperty(col_it.first+"MAX"));
 
-        if (buffer->getString(col_it.first+"MIN").isNone(0))
+        if (buffer->get<std::string>(col_it.first+"MIN").isNone(0))
             min = NULL_STRING;
         else
-            min = buffer->getString(col_it.first+"MIN").get(0);
+            min = buffer->get<std::string>(col_it.first+"MIN").get(0);
         minmax.push_back (min);
 
-        if (buffer->getString(col_it.first+"MAX").isNone(0))
+        if (buffer->get<std::string>(col_it.first+"MAX").isNone(0))
             max = NULL_STRING;
         else
-            max = buffer->getString(col_it.first+"MAX").get(0);
+            max = buffer->get<std::string>(col_it.first+"MAX").get(0);
         minmax.push_back (max);
 
         //loginf << "UGA var " << col_it.first << " min '" << min << "' max '" << max << "'";

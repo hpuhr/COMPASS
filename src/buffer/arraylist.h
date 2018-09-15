@@ -74,8 +74,6 @@ protected:
     /// Size of data arrays
     size_t max_size_ {0};
 
-    /// @brief Allocates a new none array
-    //void allocatedNewNoneArray ();
     /// @brief Sets all elements to None value
     void setAllNone();
     /// @brief Sets specific element to not None value

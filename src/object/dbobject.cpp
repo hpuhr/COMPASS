@@ -329,8 +329,8 @@ void DBObject::addDataSource (int key_value, const std::string& name)
 
     std::shared_ptr<Buffer> buffer_ptr = std::shared_ptr<Buffer> (new Buffer (list, name_));
 
-    buffer_ptr->getInt(foreign_key_col.name()).set(0, key_value);
-    buffer_ptr->getString(name_col.name()).set(0, name);
+    buffer_ptr->get<int>(foreign_key_col.name()).set(0, key_value);
+    buffer_ptr->get<std::string>(name_col.name()).set(0, name);
 
     assert (ATSDB::instance().schemaManager().getCurrentSchema().hasMetaTable(meta_table_name));
     MetaDBTable& meta_table = ATSDB::instance().schemaManager().getCurrentSchema().metaTable(meta_table_name);
@@ -354,7 +354,7 @@ void DBObject::addDataSource (int key_value, const std::string& name)
 
         std::shared_ptr<Buffer> main_buffer_ptr = std::shared_ptr<Buffer> (new Buffer (main_list, name_));
 
-        main_buffer_ptr->getInt(foreign_key_col.name()).set(0, key_value);
+        main_buffer_ptr->get<int>(foreign_key_col.name()).set(0, key_value);
 
         db_interface.insertBuffer(main_table, main_buffer_ptr, 0, 0);
     }
@@ -391,8 +391,8 @@ void DBObject::addDataSources (std::map <int, std::string>& sources)
     unsigned int cnt=0;
     for (auto& src_it : sources)
     {
-        buffer_ptr->getInt(foreign_key_col.name()).set(cnt, src_it.first);
-        buffer_ptr->getString(name_col.name()).set(cnt, src_it.second);
+        buffer_ptr->get<int>(foreign_key_col.name()).set(cnt, src_it.first);
+        buffer_ptr->get<std::string>(name_col.name()).set(cnt, src_it.second);
         cnt++;
     }
 
@@ -421,7 +421,7 @@ void DBObject::addDataSources (std::map <int, std::string>& sources)
         cnt=0;
         for (auto& src_it : sources)
         {
-            main_buffer_ptr->getInt(foreign_key_col.name()).set(cnt, src_it.first);
+            main_buffer_ptr->get<int>(foreign_key_col.name()).set(cnt, src_it.first);
             cnt++;
         }
 

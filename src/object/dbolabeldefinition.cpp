@@ -223,7 +223,7 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
     std::map<int, std::string> labels;
 
     std::map<int, size_t> rec_num_to_index;
-    ArrayListTemplate<int>& rec_num_list = buffer->getInt("rec_num");
+    ArrayListTemplate<int>& rec_num_list = buffer->get<int>("rec_num");
     for (size_t cnt=0; cnt < rec_num_list.size(); cnt++)
     {
         assert (!rec_num_list.isNone(cnt));
@@ -254,102 +254,102 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
 
             if (data_type == PropertyDataType::BOOL)
             {
-                assert (buffer->hasBool(variable->name()));
-                null = buffer->getBool(variable->name()).isNone(buffer_index);
+                assert (buffer->has<bool>(variable->name()));
+                null = buffer->get<bool>(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                                buffer->getBool(variable->name()).getAsString(buffer_index));
+                                buffer->get<bool>(variable->name()).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::CHAR)
             {
-                assert (buffer->hasChar(variable->name()));
-                null = buffer->getChar(variable->name()).isNone(buffer_index);
+                assert (buffer->has<char>(variable->name()));
+                null = buffer->get<char>(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                                buffer->getChar(variable->name()).getAsString(buffer_index));
+                                buffer->get<char>(variable->name()).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::UCHAR)
             {
-                assert (buffer->hasUChar(variable->name()));
-                null = buffer->getUChar(variable->name()).isNone(buffer_index);
+                assert (buffer->has<unsigned char>(variable->name()));
+                null = buffer->get<unsigned char>(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                                buffer->getUChar(variable->name()).getAsString(buffer_index));
+                                buffer->get<unsigned char>(variable->name()).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::INT)
             {
-                assert (buffer->hasInt(variable->name()));
-                null = buffer->getInt(variable->name()).isNone(buffer_index);
+                assert (buffer->has<int>(variable->name()));
+                null = buffer->get<int>(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                                buffer->getInt(variable->name()).getAsString(buffer_index));
+                                buffer->get<int>(variable->name()).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::UINT)
             {
-                assert (buffer->hasUInt(variable->name()));
-                null = buffer->getUInt(variable->name()).isNone(buffer_index);
+                assert (buffer->has<unsigned int>(variable->name()));
+                null = buffer->get<unsigned int>(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                                buffer->getUInt(variable->name()).getAsString(buffer_index));
+                                buffer->get<unsigned int>(variable->name()).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::LONGINT)
             {
-                assert (buffer->hasLongInt(variable->name()));
-                null = buffer->getLongInt(variable->name()).isNone(buffer_index);
+                assert (buffer->has<long int>(variable->name()));
+                null = buffer->get<long int>(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                                buffer->getLongInt(variable->name()).getAsString(buffer_index));
+                                buffer->get<long int>(variable->name()).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::ULONGINT)
             {
-                assert (buffer->hasULongInt(variable->name()));
-                null = buffer->getULongInt(variable->name()).isNone(buffer_index);
+                assert (buffer->has<unsigned long int>(variable->name()));
+                null = buffer->get<unsigned long int>(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                                buffer->getULongInt(variable->name()).getAsString(buffer_index));
+                                buffer->get<unsigned long int>(variable->name()).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::FLOAT)
             {
-                assert (buffer->hasFloat(variable->name()));
-                null = buffer->getFloat(variable->name()).isNone(buffer_index);
+                assert (buffer->has<float>(variable->name()));
+                null = buffer->get<float>(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                                buffer->getFloat(variable->name()).getAsString(buffer_index));
+                                buffer->get<float>(variable->name()).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::DOUBLE)
             {
-                assert (buffer->hasDouble(variable->name()));
-                null = buffer->getDouble(variable->name()).isNone(buffer_index);
+                assert (buffer->has<double>(variable->name()));
+                null = buffer->get<double>(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                                buffer->getDouble(variable->name()).getAsString(buffer_index));
+                                buffer->get<double>(variable->name()).getAsString(buffer_index));
                 }
             }
             else if (data_type == PropertyDataType::STRING)
             {
-                assert (buffer->hasString(variable->name()));
-                null = buffer->getString(variable->name()).isNone(buffer_index);
+                assert (buffer->has<std::string>(variable->name()));
+                null = buffer->get<std::string>(variable->name()).isNone(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
-                                buffer->getString(variable->name()).getAsString(buffer_index));
+                                buffer->get<std::string>(variable->name()).getAsString(buffer_index));
                 }
             }
             else
