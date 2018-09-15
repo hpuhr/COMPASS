@@ -62,6 +62,10 @@ public:
 
     virtual const std::string getAsString (size_t index)=0;
 
+private:
+    //std::vector < std::shared_ptr< std::array<bool,BUFFER_ARRAY_SIZE> > > none_flags_;
+    std::vector <bool> none_flags_;
+
 protected:
     /// Identifier of contained data
     std::string id_;
@@ -70,14 +74,14 @@ protected:
     /// Size of data arrays
     size_t max_size_ {0};
 
-    std::vector < std::shared_ptr< std::array<bool,BUFFER_ARRAY_SIZE> > > none_flags_;
-
     /// @brief Allocates a new none array
-    void allocatedNewNoneArray ();
+    //void allocatedNewNoneArray ();
     /// @brief Sets all elements to None value
     void setAllNone();
     /// @brief Sets specific element to not None value
     void unsetNone (size_t index);
+
+    void addNone (ArrayListBase& other);
 };
 
 
@@ -175,22 +179,22 @@ public:
 
     void addData (ArrayListTemplate<T> &other)
     {
-        logdbg << "ArrayListTemplate: addData: data size " << data_.size() << " none flags size " << none_flags_.size()
+        logdbg << "ArrayListTemplate: addData: data size " << data_.size()
                << " size " << size_ << " max " << max_size_;
 
         data_.insert(data_.end(), other.data_.begin(), other.data_.end());
-        none_flags_.insert(none_flags_.end(), other.none_flags_.begin(), other.none_flags_.end());
-        assert (data_.size() == none_flags_.size());
+        addNone(other);
+        //assert (data_.size() == none_flags_.size());
         size_ = max_size_ + other.size_;
         max_size_ += other.max_size_;
 
         other.data_.clear();
-        other.none_flags_.clear();
+        other.setAllNone();
         other.size_=0;
         other.max_size_=0;
 
-        logdbg << "ArrayListTemplate: addData: end data size " << data_.size() << " none flags size "
-               << none_flags_.size() << " size " << size_ << " max " << max_size_;
+        logdbg << "ArrayListTemplate: addData: end data size " << data_.size()
+               << " size " << size_ << " max " << max_size_;
     }
 
     ArrayListTemplate<T>& operator*=(double factor)
@@ -220,7 +224,7 @@ public:
             first_list_row = index%BUFFER_ARRAY_SIZE;
         }
 
-        for (; list_cnt < data_.size(); list_cnt++)
+        for (; list_cnt < data_.size(); ++list_cnt)
         {
             std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > array_list = data_.at(list_cnt);
 
@@ -229,14 +233,16 @@ public:
             else
                 list_row_cnt=0;
 
-            for (; list_row_cnt < BUFFER_ARRAY_SIZE; list_row_cnt++)
+            for (; list_row_cnt < BUFFER_ARRAY_SIZE; ++list_row_cnt)
             {
-                if (!none_flags_.at(list_cnt)->at(list_row_cnt)) // not for none
+                if (!none_flags_.at(index)) // not for none
                 {
                     value = array_list->at(list_row_cnt);
                     if (values.count(value) == 0)
                         values.insert(value);
                 }
+
+                ++index;
             }
         }
         return values;
@@ -269,8 +275,9 @@ public:
 //        T none_index = std::numeric_limits<T>::max();
 
         size_t array_size;
+        size_t index = from_index;
 
-        for (; list_cnt < list_size; list_cnt++)
+        for (; list_cnt < list_size; ++list_cnt)
         {
             std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > array_list = data_.at(list_cnt);
             array_size = array_list->size();
@@ -280,9 +287,9 @@ public:
             else
                 list_row_cnt=0;
 
-            for (; list_row_cnt < array_size; list_row_cnt++)
+            for (; list_row_cnt < array_size; ++list_row_cnt)
             {
-                if (!none_flags_.at(list_cnt)->at(list_row_cnt)) // not for none
+                if (!isNone(index)) // not for none
                 {
                     values[array_list->at(list_row_cnt)].push_back(list_cnt*BUFFER_ARRAY_SIZE+list_row_cnt);
                 }
@@ -290,6 +297,7 @@ public:
 //                {
 //                    values[none_index].push_back(list_cnt*BUFFER_ARRAY_SIZE+list_row_cnt);
 //                }
+                ++index;
             }
         }
 
@@ -310,9 +318,9 @@ protected:
         data_.push_back(new_array_ptr);
         max_size_ += BUFFER_ARRAY_SIZE;
 
-        allocatedNewNoneArray();
+        //allocatedNewNoneArray();
 
-        assert (data_.size() == none_flags_.size());
+        //assert (data_.size() == none_flags_.size());
 
         //logdbg << "ArrayListTemplate: allocateNewArray: added new array current max size " << max_size_;
     }
