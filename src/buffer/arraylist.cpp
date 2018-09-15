@@ -45,8 +45,6 @@ size_t ArrayListBase::maximumSize ()
 
 void ArrayListBase::setAllNone()
 {
-//    for (auto it : none_flags_)
-//        it->fill(true);
     std::fill (none_flags_.begin(),none_flags_.end(), true);
 }
 
@@ -143,20 +141,25 @@ void ArrayListBase::addNone (ArrayListBase& other)
 template <>
 ArrayListTemplate<bool>& ArrayListTemplate<bool>::operator*=(double factor)
 {
-    size_t list_size = data_.size();
+//    size_t list_size = data_.size();
+//    bool tmp_factor = static_cast<bool> (factor);
+
+//    size_t index=0;
+
+//    for (size_t list_cnt=0; list_cnt < list_size; list_cnt++)
+//    {
+//        for (size_t cnt=0; cnt < BUFFER_ARRAY_SIZE; cnt++)
+//        {
+//            if (!isNone(index)) // not for none
+//                data_.at(list_cnt)->at(cnt) = data_.at(list_cnt)->at(cnt) && tmp_factor;
+//            ++index;
+//        }
+//    }
+
     bool tmp_factor = static_cast<bool> (factor);
 
-    size_t index=0;
-
-    for (size_t list_cnt=0; list_cnt < list_size; list_cnt++)
-    {
-        for (size_t cnt=0; cnt < BUFFER_ARRAY_SIZE; cnt++)
-        {
-            if (!isNone(index)) // not for none
-                data_.at(list_cnt)->at(cnt) = data_.at(list_cnt)->at(cnt) && tmp_factor;
-            ++index;
-        }
-    }
+    for (auto data_it : data_)
+        data_it = data_it && tmp_factor;
 
     return *this;
 }

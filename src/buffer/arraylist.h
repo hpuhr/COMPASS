@@ -102,14 +102,12 @@ public:
     /// @brief Sets all elements to false
     virtual void clear() override
     {
-        for (auto& data_it : data_)
-            data_it->fill(T());
-
+        std::fill (data_.begin(),data_.end(), T());
         setAllNone();
     }
 
     /// @brief Returns const reference to a specific value
-    const T &get (size_t index)
+    const T get (size_t index)
     {
         assert (index <= size_);
         assert (!isNone(index));
@@ -120,7 +118,7 @@ public:
         if (isNone(index))
             throw std::out_of_range ("ArrayListTemplate: get of None value "+std::to_string(index));
 
-        return data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
+        return data_.at(index);
     }
 
     /// @brief Returns string of a specific value
@@ -132,7 +130,7 @@ public:
         if (isNone(index))
             throw std::out_of_range ("ArrayListTemplate: getAsString of None value "+std::to_string(index));
 
-        return Utils::String::getValueString (data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE));
+        return Utils::String::getValueString (data_.at(index));
     }
 
     /// @brief Sets specific value
@@ -148,10 +146,7 @@ public:
                 allocateNewArray ();
         }
 
-        //logdbg << "ArrayListTemplate: set: setting index " << index << " to value " << value << " using array "
-        //<< index/BUFFER_ARRAY_SIZE << " array_index " << index%BUFFER_ARRAY_SIZE;
-
-        data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE) = value;
+        data_.at(index) = value;
 
         if (index >= size_)
             size_= index+1;
@@ -198,8 +193,7 @@ public:
     ArrayListTemplate<T>& operator*=(double factor)
     {
         for (auto &data_it : data_)
-            for (unsigned int cnt=0; cnt < BUFFER_ARRAY_SIZE; cnt++)
-                data_it->at(cnt) *= factor;
+            data_it *= factor;
 
         return *this;
     }
@@ -210,40 +204,15 @@ public:
 
         T value;
 
-        size_t first_list_cnt=0;
-        unsigned list_cnt=0;
-
-        size_t first_list_row=0;
-        size_t list_row_cnt;
-
-        if (index)
+        for (; index < data_.size(); ++index)
         {
-            first_list_cnt = index/BUFFER_ARRAY_SIZE;
-            first_list_row = index%BUFFER_ARRAY_SIZE;
-        }
-
-        for (; list_cnt < data_.size(); ++list_cnt)
-        {
-            std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > array_list = data_.at(list_cnt);
-
-            if (index && list_cnt == first_list_cnt) // there is a start index
-                list_row_cnt=first_list_row;
-            else
-                list_row_cnt=0;
-
-            for (; list_row_cnt < BUFFER_ARRAY_SIZE; ++list_row_cnt)
+            if (!none_flags_.at(index)) // not for none
             {
-                if (!none_flags_.at(index)) // not for none
-                {
-                    value = array_list->at(list_row_cnt);
-                    if (values.count(value) == 0)
-                        values.insert(value);
-                }
-
-                ++index;
+                value = data_.at(index);
+                if (values.count(value) == 0)
+                    values.insert(value);
             }
         }
-        return values;
     }
 
     std::map<T, std::vector<size_t>> distinctValuesWithIndexes (size_t from_index, size_t to_index)
@@ -253,49 +222,11 @@ public:
         assert (to_index);
         assert (from_index < to_index);
 
-        size_t first_list_cnt = from_index/BUFFER_ARRAY_SIZE;
-        unsigned list_cnt = first_list_cnt;
-        unsigned list_size = to_index/BUFFER_ARRAY_SIZE;
-
-        if (to_index % BUFFER_ARRAY_SIZE != 0) // fix for less then one full array
+        for (size_t index = from_index; index < to_index; ++index)
         {
-            logdbg << "ArrayList: distinctValuesWithIndexes: rest of data fix";
-            list_size += 1;
-        }
-
-        size_t first_list_row = from_index%BUFFER_ARRAY_SIZE;
-        size_t list_row_cnt = 0;
-
-        logdbg << "ArrayList: distinctValuesWithIndexes: from_index " << from_index << " to_index " << to_index
-               << " first_list_cnt " << first_list_cnt << " list_cnt " << list_cnt << " list size " << list_size
-               << " first_list_row " << first_list_row;
-
-//        T none_index = std::numeric_limits<T>::max();
-
-        size_t array_size;
-        size_t index = from_index;
-
-        for (; list_cnt < list_size; ++list_cnt)
-        {
-            std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > array_list = data_.at(list_cnt);
-            array_size = array_list->size();
-
-            if (list_cnt == first_list_cnt) // there is a start index
-                list_row_cnt=first_list_row;
-            else
-                list_row_cnt=0;
-
-            for (; list_row_cnt < array_size; ++list_row_cnt)
+            if (!isNone(index)) // not for none
             {
-                if (!isNone(index)) // not for none
-                {
-                    values[array_list->at(list_row_cnt)].push_back(list_cnt*BUFFER_ARRAY_SIZE+list_row_cnt);
-                }
-//                else // add to unknown sensor
-//                {
-//                    values[none_index].push_back(list_cnt*BUFFER_ARRAY_SIZE+list_row_cnt);
-//                }
-                ++index;
+                values[data_.at(index)].push_back(index);
             }
         }
 
@@ -304,23 +235,14 @@ public:
     }
 
 protected:
-    /// Data containers
-    std::vector < std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > > data_;
+    /// Data container
+    std::vector<T> data_;
 
     /// @brief Adds a new data container
     void allocateNewArray ()
     {
-        std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > new_array_ptr =
-                std::make_shared<std::array<T,BUFFER_ARRAY_SIZE>>();
-
-        data_.push_back(new_array_ptr);
         max_size_ += BUFFER_ARRAY_SIZE;
-
-        //allocatedNewNoneArray();
-
-        //assert (data_.size() == none_flags_.size());
-
-        //logdbg << "ArrayListTemplate: allocateNewArray: added new array current max size " << max_size_;
+        data_.resize(max_size_, T());
     }
 };
 
