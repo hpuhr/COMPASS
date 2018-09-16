@@ -26,8 +26,8 @@
 #include "dbovariableset.h"
 #include "dbodatasource.h"
 #include "configurable.h"
+#include "dbovariable.h"
 
-class DBOVariable;
 class PropertyList;
 class MetaDBTable;
 //class ActiveSourcesObserver;

@@ -26,7 +26,7 @@
 #include "property.h"
 #include "configurable.h"
 #include "stringconv.h"
-#include "dbobject.h"
+//#include "dbobject.h"
 #include "dbovariableschema.h"
 
 class DBTableColumn;
@@ -164,26 +164,7 @@ public:
             }
             else if (representation_ == DBOVariable::Representation::DATA_SRC_NAME)
             {
-                assert (db_object_);
-                if (db_object_->hasDataSources())
-                {
-                    std::map<int, DBODataSource>& data_sources = db_object_->dataSources();
-
-                    for (auto& ds_it : data_sources)
-                    {
-                        if (std::to_string(ds_it.first) == std::to_string(value))
-                        {
-                            if (ds_it.second.hasShortName())
-                                return ds_it.second.shortName();
-                            else
-                                return ds_it.second.name();
-                        }
-                    }
-                    // not found, return original
-                }
-                // has no datasources, return original
-
-                return std::to_string(value);
+                 return getDataSourcesAsString(std::to_string(value)); 
             }
             else
             {
@@ -245,6 +226,8 @@ private:
     DBOVariableWidget* widget_ {nullptr};
 
     bool locked_ {false};
+
+    std::string getDataSourcesAsString(const std::string& value) const;
 
 protected:
     virtual void checkSubConfigurables ();

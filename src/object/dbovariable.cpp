@@ -887,3 +887,27 @@ bool DBOVariable::existsInDB () const
         return currentDBColumn().existsInDB();
 }
 
+std::string DBOVariable::getDataSourcesAsString (const std::string& value) const
+{
+                assert (db_object_);
+                if (db_object_->hasDataSources())
+                {
+                    std::map<int, DBODataSource>& data_sources = db_object_->dataSources();
+
+                    for (auto& ds_it : data_sources)
+                    {
+                        if (std::to_string(ds_it.first) == value)
+                        {
+                            if (ds_it.second.hasShortName())
+                                return ds_it.second.shortName();
+                            else
+                                return ds_it.second.name();
+                        }
+                    }
+                    // not found, return original
+                }
+                // has no datasources, return original
+
+                return value;
+}
+

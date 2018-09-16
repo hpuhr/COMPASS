@@ -26,7 +26,6 @@
 #include "dbinterfaceinfowidget.h"
 #include "dbobjectmanager.h"
 #include "dbobjectmanagerloadwidget.h"
-#include "dbobject.h"
 #include "filtermanager.h"
 #include "filtermanagerwidget.h"
 #include "viewmanager.h"

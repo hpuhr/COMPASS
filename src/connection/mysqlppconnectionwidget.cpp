@@ -18,9 +18,9 @@
 #include "mysqlppconnectionwidget.h"
 #include "mysqlserver.h"
 #include "logger.h"
-#include "atsdb.h"
 #include "dbobjectmanager.h"
 #include "dbobject.h"
+#include "atsdb.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
