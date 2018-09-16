@@ -447,7 +447,8 @@ void DBObjectWidget::updateDataSourcesGridSlot ()
         QLabel *schema = new QLabel (ds_it.second.schema().c_str());
         ds_grid_->addWidget (schema, row, 0);
 
-        QVariant data = QVariant::fromValue(&ds_it.second);
+        DBODataSourceDefinition* dsdef = &ds_it.second;
+        QVariant data = QVariant::fromValue(dsdef);
 
         QPushButton *edit = new QPushButton ();
         edit->setIcon(edit_icon);
@@ -530,6 +531,15 @@ void DBObjectWidget::deleteDataSourceSlot()
 void DBObjectWidget::deleteMetaTableSlot()
 {
     loginf  << "DBObjectWidget: deleteMetaTableSlot";
+
+    QPushButton* button = static_cast<QPushButton*>(sender());
+    QVariant data = button->property("schema");
+
+    std::string schema = data.value<QString>().toStdString();
+
+    assert (object_);
+    assert (object_->hasMetaTable(schema));
+    object_->deleteMetaTable(schema);
 }
 
 void DBObjectWidget::updateMetaTablesGridSlot()

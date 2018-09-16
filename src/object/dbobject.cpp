@@ -186,11 +186,14 @@ void DBObject::deleteMetaTable (const std::string& schema)
     assert (hasMetaTable(schema));
 
     std::string meta_table_name = metaTable(schema);
-    meta_table_definitions_.erase(meta_table_name);
+    meta_table_definitions_.erase(schema);
     assert (!hasMetaTable(schema));
 
     if (current_meta_table_->name() == meta_table_name)
         current_meta_table_ = nullptr;
+
+    if (widget_)
+        widget_->updateMetaTablesGridSlot();
 }
 
 /**
