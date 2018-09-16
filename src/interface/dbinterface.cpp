@@ -665,6 +665,8 @@ std::pair<std::string, std::string> DBInterface::getMinMaxString (const DBOVaria
     std::string min = buffer->get<std::string>("min").get(0);
     std::string max = buffer->get<std::string>("max").get(0);
 
+    logdbg << "DBInterface: getMinMaxString: minstr '" << min << " maxstr " << max;
+
     const DBTableColumn &column = var.currentDBColumn ();
     if (column.unit() != var.unitConst()) // do unit conversion stuff
     {

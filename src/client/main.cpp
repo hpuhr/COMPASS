@@ -225,6 +225,8 @@ int main (int argc, char **argv)
         logerr  << "Main: Caught Exception '" << ex.what() << "'";
         logerr.flush();
 
+        //assert (false);
+
         if (ATSDB::instance().ready())
             ATSDB::instance().shutdown();
 
@@ -234,6 +236,8 @@ int main (int argc, char **argv)
     {
         logerr  << "Main: Caught Exception";
         logerr.flush();
+
+        //assert (false);
 
         if (ATSDB::instance().ready())
             ATSDB::instance().shutdown();
