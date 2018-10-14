@@ -152,6 +152,7 @@ void DBTableWidget::updateColumnGrid ()
     unit_label->setFont(font_bold);
     column_grid_->addWidget (unit_label, 0,3);
 
+
 //    QLabel *null_label = new QLabel ("Special null"); //TODO
 //    null_label->setFont(font_bold);
 //    column_grid_->addWidget (null_label, 0,4);

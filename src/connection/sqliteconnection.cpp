@@ -52,7 +52,7 @@ SQLiteConnection::~SQLiteConnection()
 
 void SQLiteConnection::openFile (const std::string &file_name)
 {
-    loginf << "SQLiteConnection: openFile";
+    loginf << "SQLiteConnection: openFile: " << file_name;
 
     last_filename_=file_name;
     assert (last_filename_.size() > 0);

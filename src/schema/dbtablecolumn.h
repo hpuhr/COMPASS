@@ -80,6 +80,9 @@ public:
     void updateOnDatabase(); // check what informations is present in the current db
     bool existsInDB () const { return exists_in_db_; }
 
+    std::string numberConversionType() const;
+    void numberConversionType(const std::string& number_conversion_type);
+
 protected:
     DBTable &table_;
     DBInterface& db_interface_;
@@ -99,6 +102,8 @@ protected:
     std::string unit_;
     /// Special value signifying null value
     std::string special_null_;
+    /// Special number conversion type
+    std::string number_conversion_type_;
 
     UnitSelectionWidget* widget_ {nullptr};
 

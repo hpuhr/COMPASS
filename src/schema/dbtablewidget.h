@@ -30,6 +30,7 @@ class QGridLayout;
 class QScrollArea;
 class QPushButton;
 class UnitSelectionWidget;
+class DBTableColumnNumberConversionTypeComboBox;
 
 /**
  * @brief Edit widget for a DBTable

@@ -243,6 +243,8 @@ public:
 
     bool existsInDB () const;
 
+    void print ();
+
 protected:
     /// DBO name
     std::string name_;

@@ -89,7 +89,7 @@ DBObjectWidget::DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager
 
         QGridLayout *grid_layout = new QGridLayout ();
 
-        QLabel *name_label = new QLabel ("Table name");
+        QLabel *name_label = new QLabel ("Database object name");
         grid_layout->addWidget (name_label, 0, 0);
 
         name_edit_ = new QLineEdit (object_->name().c_str());
@@ -108,6 +108,10 @@ DBObjectWidget::DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager
         edit_label_button_ = new QPushButton ("Edit Label Definition");
         connect(edit_label_button_, SIGNAL( clicked() ), this, SLOT( showLabelDefinitionWidgetSlot() ));
         properties_layout->addWidget(edit_label_button_);
+
+        QPushButton* print_button_ = new QPushButton ("Print");
+        connect(print_button_, SIGNAL( clicked() ), this, SLOT( printSlot() ));
+        properties_layout->addWidget(print_button_);
 
         properties_frame->setLayout (properties_layout);
 
@@ -596,6 +600,12 @@ void DBObjectWidget::showLabelDefinitionWidgetSlot()
 {
     assert (object_);
     object_->labelDefinitionWidget()->show();
+}
+
+void DBObjectWidget::printSlot ()
+{
+    assert (object_);
+    object_->print();
 }
 
 void DBObjectWidget::addNewVariablesSlot ()

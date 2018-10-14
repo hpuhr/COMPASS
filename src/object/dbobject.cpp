@@ -913,3 +913,52 @@ bool DBObject::existsInDB () const
     else
         return currentMetaTable().existsInDB();
 }
+
+void DBObject::print ()
+{
+    assert (hasCurrentMetaTable());
+
+    std::stringstream ss;
+
+    ss << "COLID";
+    ss << " && COLTYPE";
+    ss << " && COLKEY";
+    ss << " && COLCOMMENT";
+    ss << " && COLCIM";
+    ss << " && COLUNIT";
+    ss << " && OBNAME";
+    ss << " && OBDESC";
+    ss << " && OBDIM";
+    ss << " && OBUNIT";
+    ss << " && OBREP";
+    ss << std::endl;
+
+    for (auto& col_it : currentMetaTable ().columns())
+    {
+        const DBTableColumn& col = col_it.second;
+        ss << col.identifier();
+        ss << " && " << col.type();
+        ss << " && " << col.isKey();
+        ss << " && " << col.comment();
+        ss << " && " << col.dimension();
+        ss << " && " << col.unit();
+
+        for (auto& var_it : variables_)
+        {
+            DBOVariable& var = var_it.second;
+            if (var.hasCurrentDBColumn() && var.currentDBColumn().identifier() == col.identifier())
+            {
+                ss << " && " << var.name();
+                ss << " && " << var.description();
+                ss << " && " << var.dimension();
+                ss << " && " << var.unit();
+                ss << " && " << var.representationString();
+            }
+        }
+
+        ss << std::endl;
+    }
+
+    loginf << "DBObject " << name() << ":\n" << ss.str();
+
+}

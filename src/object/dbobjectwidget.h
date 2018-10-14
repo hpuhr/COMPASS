@@ -87,6 +87,8 @@ public slots:
 
     void showLabelDefinitionWidgetSlot();
 
+    void printSlot ();
+
 public:
     /// @brief Constructor
     DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager, QWidget* parent=0, Qt::WindowFlags f=0);

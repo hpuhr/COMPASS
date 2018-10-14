@@ -18,6 +18,10 @@
 #ifndef NUMBER_H_
 #define NUMBER_H_
 
+#include "arraylist.h"
+
+#include <string>
+
 namespace Utils
 {
 
@@ -29,6 +33,8 @@ extern float randomNumber (float min, float max);
 extern float roundToNearest(float num);
 /// @brief Returns angle (degrees) calculated from given values
 extern double calculateAngle( double degrees, double minutes, double seconds );
+
+extern void convert (const std::string& conversion_type, ArrayListTemplate<unsigned int> &array_list);
 }
 
 }
