@@ -54,7 +54,7 @@ DBTableColumn::DBTableColumn(const std::string &class_id, const std::string &ins
   registerParameter ("comment", &comment_, "");
   registerParameter ("dimension", &dimension_, "");
   registerParameter ("unit", &unit_, "");
-  registerParameter ("number_conversion_type", &number_conversion_type_, "");
+  registerParameter ("data_format", &data_format_, "");
   registerParameter ("special_null", &special_null_, "");
 
   identifier_ = table_.name()+"."+name_;
@@ -121,13 +121,13 @@ void DBTableColumn::updateOnDatabase()
            << name_ << " exists in db " << exists_in_db_;
 }
 
-std::string DBTableColumn::numberConversionType() const
+Format& DBTableColumn::dataFormat()
 {
-    return number_conversion_type_;
+    return data_format_;
 }
 
-void DBTableColumn::numberConversionType(const std::string& number_conversion_type)
-{
-    loginf << "DBTableColumn " << identifier() << ": numberConversionType: " << number_conversion_type;
-    number_conversion_type_ = number_conversion_type;
-}
+//void DBTableColumn::dataFormat(const std::string& data_format)
+//{
+//    loginf << "DBTableColumn " << identifier() << ": dataFormat: " << data_format_;
+//    data_format_ = data_format;
+//}
