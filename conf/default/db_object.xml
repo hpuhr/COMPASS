@@ -1,5 +1,5 @@
 <Configuration class_id="DBObjectManager" instance_id="DBObjectManager0">
-    <ParameterBool use_filters="0"/>
+    <ParameterBool use_filters="1"/>
     <ParameterBool use_limit="0"/>
     <ParameterBool use_order="1"/>
     <ParameterBool use_order_ascending="1"/>
@@ -4310,7 +4310,7 @@
             <ParameterString description=""/>
             <ParameterString dimension=""/>
             <ParameterString name="mode_a_code"/>
-            <ParameterString representation_str="STANDARD"/>
+            <ParameterString representation_str="DEC_TO_OCTAL"/>
             <ParameterString unit=""/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionPSRmode_a_code0">
                 <ParameterString schema="Simple"/>
@@ -4596,7 +4596,7 @@
             <ParameterString description=""/>
             <ParameterString dimension=""/>
             <ParameterString name="target_address"/>
-            <ParameterString representation_str="STANDARD"/>
+            <ParameterString representation_str="DEC_TO_HEX"/>
             <ParameterString unit=""/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionPSRtarget_address0">
                 <ParameterString schema="Simple"/>
@@ -7696,7 +7696,7 @@
             <ParameterString description=""/>
             <ParameterString dimension=""/>
             <ParameterString name="mode_a_code"/>
-            <ParameterString representation_str="STANDARD"/>
+            <ParameterString representation_str="DEC_TO_OCTAL"/>
             <ParameterString unit=""/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionReferencemode_a_code0">
                 <ParameterString schema="Simple"/>
@@ -7982,7 +7982,7 @@
             <ParameterString description=""/>
             <ParameterString dimension=""/>
             <ParameterString name="target_address"/>
-            <ParameterString representation_str="STANDARD"/>
+            <ParameterString representation_str="DEC_TO_HEX"/>
             <ParameterString unit=""/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionReferencetarget_address0">
                 <ParameterString schema="Simple"/>
@@ -8771,7 +8771,7 @@
             <ParameterString description=""/>
             <ParameterString dimension=""/>
             <ParameterString name="mode_a_code"/>
-            <ParameterString representation_str="STANDARD"/>
+            <ParameterString representation_str="DEC_TO_OCTAL"/>
             <ParameterString unit=""/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionSSRmode_a_code0">
                 <ParameterString schema="Simple"/>
@@ -9057,7 +9057,7 @@
             <ParameterString description=""/>
             <ParameterString dimension=""/>
             <ParameterString name="target_address"/>
-            <ParameterString representation_str="STANDARD"/>
+            <ParameterString representation_str="DEC_TO_HEX"/>
             <ParameterString unit=""/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionSSRtarget_address0">
                 <ParameterString schema="Simple"/>

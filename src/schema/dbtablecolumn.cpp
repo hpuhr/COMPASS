@@ -121,11 +121,6 @@ void DBTableColumn::updateOnDatabase()
            << name_ << " exists in db " << exists_in_db_;
 }
 
-Format& DBTableColumn::dataFormat()
-{
-    return data_format_;
-}
-
 //void DBTableColumn::dataFormat(const std::string& data_format)
 //{
 //    loginf << "DBTableColumn " << identifier() << ": dataFormat: " << data_format_;

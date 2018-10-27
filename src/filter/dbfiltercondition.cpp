@@ -418,7 +418,20 @@ std::string DBFilterCondition::getTransformedValue (const std::string& untransfo
                 value_str = variable->multiplyString(value_str, 1.0/factor);
             }
         }
+
         logdbg << "DBFilterCondition: getTransformedValue: transformed value string " << value_str;
+
+        if (column.dataFormat() == "")
+            ;
+        else if (column.dataFormat() == "hexadecimal")
+            value_str = String::hexStringFromInt(std::stoi(value_str));
+        else if (column.dataFormat() == "octal")
+            value_str = String::octStringFromInt(std::stoi(value_str));
+        else
+            logwrn << "DBFilterCondition: getTransformedValue: variable '" << variable->name() << "' unknown format '"
+                   << column.dataFormat() << "'";
+
+        logdbg << "DBFilterCondition: getTransformedValue: data format transformed value string " << value_str;
         transformed_value_strings.push_back(value_str);
     }
 

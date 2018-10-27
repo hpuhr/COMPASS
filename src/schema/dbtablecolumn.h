@@ -81,7 +81,8 @@ public:
     void updateOnDatabase(); // check what informations is present in the current db
     bool existsInDB () const { return exists_in_db_; }
 
-    Format& dataFormat();
+    Format& dataFormat()  { return data_format_; }
+    const Format& dataFormat() const { return data_format_; }
     //void dataFormat(const std::string& data_format);
 
 protected:
