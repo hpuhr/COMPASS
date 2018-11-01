@@ -23,73 +23,73 @@ typedef std::numeric_limits<float> float_limit;
 
 #include "arraylist.h"
 
-ArrayListBase::ArrayListBase ()
-{
+//ArrayListBase::ArrayListBase ()
+//{
 
-}
+//}
 
-ArrayListBase::~ArrayListBase ()
-{
+//ArrayListBase::~ArrayListBase ()
+//{
 
-}
+//}
 
-size_t ArrayListBase::size ()
-{
-    return size_;
-}
+//size_t ArrayListBase::size ()
+//{
+//    ;
+//}
 
-size_t ArrayListBase::maximumSize ()
-{
-    return max_size_;
-}
+//size_t ArrayListBase::maximumSize ()
+//{
+//    return max_size_;
+//}
 
-void ArrayListBase::setAllNone()
-{
-    std::fill (none_flags_.begin(),none_flags_.end(), true);
-}
+//void ArrayListBase::setAllNone()
+//{
+//    std::fill (none_flags_.begin(),none_flags_.end(), true);
+//}
 
-void ArrayListBase::setNone(size_t index)
-{
-    if (index >= size_)
-        logerr << "ArrayListBase: setNone: index " << index << " too large for size " << size_;
-    assert (index < size_);
+//void ArrayListBase::setNone(size_t index)
+//{
+//    if (index >= size_)
+//        logerr << "ArrayListBase: setNone: index " << index << " too large for size " << size_;
+//    assert (index < size_);
 
-    if (index >= none_flags_.size()) // allocate new stuff, fill all new with not none
-        none_flags_.resize(index+1, true);
+//    if (index >= none_flags_.size()) // allocate new stuff, fill all new with not none
+//        none_flags_.resize(index+1, true);
 
-    none_flags_.at(index) = true;
-}
+//    none_flags_.at(index) = true;
+//}
 
-void ArrayListBase::unsetNone (size_t index)
-{
-    if (index >= size_)
-        logerr << "ArrayListBase: unsetNone: index " << index << " too large for size " << size_;
+//void ArrayListBase::unsetNone (size_t index)
+//{
+//    if (index >= size_)
+//        logerr << "ArrayListBase: unsetNone: index " << index << " too large for size " << size_;
 
-    assert (index < size_);
+//    assert (index < size_);
 
-    if (index >= none_flags_.size()) // allocate new stuff, fill all new with not none
-        none_flags_.resize(index+1, true);
+//    if (index >= none_flags_.size()) // allocate new stuff, fill all new with not none
+//        none_flags_.resize(index+1, true);
 
-    none_flags_.at(index) = false;
-}
+//    none_flags_.at(index) = false;
+//}
 
-bool ArrayListBase::isNone(size_t index)
-{
-    if (index >= size_)
-        return true;
+//bool ArrayListBase::isNone(size_t index)
+//{
+////    if (index >= size_)
+////        return true;
 
-    if (index >= none_flags_.size()) // not yet allocated, can't be none
-        return false;
+////    if (index >= none_flags_.size()) // not yet allocated, can't be none
+////        return false;
 
-    bool ret = none_flags_.at(index);
+//    bool ret = none_flags_.at(index);
 
-    return ret;
-}
+//    return ret;
+//}
 
-void ArrayListBase::addNone (ArrayListBase& other)
-{
-    none_flags_.insert(none_flags_.end(), other.none_flags_.begin(), other.none_flags_.end());
-}
+//void ArrayListBase::addNone (ArrayListBase& other)
+//{
+//    none_flags_.insert(none_flags_.end(), other.none_flags_.begin(), other.none_flags_.end());
+//}
 
 //template <class T>
 //ArrayListTemplate<T>& ArrayListTemplate<T>::operator*=(double factor)

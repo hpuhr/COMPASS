@@ -297,49 +297,70 @@ void SQLiteConnection::readRowIntoBuffer (const PropertyList &list, unsigned int
 {
     for (unsigned int cnt=0; cnt < num_properties; cnt++)
     {
-        if (sqlite3_column_type(statement_, cnt) != SQLITE_NULL)
-        {
-            const Property &prop=list.at(cnt);
+        const Property &prop=list.at(cnt);
 
-            switch (prop.dataType())
-            {
-            case PropertyDataType::BOOL:
+        switch (prop.dataType())
+        {
+        case PropertyDataType::BOOL:
+            if (sqlite3_column_type(statement_, cnt) != SQLITE_NULL)
                 buffer->get<bool>(prop.name()).set(index, static_cast<bool> (sqlite3_column_int(statement_, cnt)));
-                //loginf  << "sqlex: bool " << prop->id_ << " val " << *ptr;
-                break;
-            case PropertyDataType::UCHAR:
+            else
+                buffer->get<bool>(prop.name()).setNone(index);
+            //loginf  << "sqlex: bool " << prop->id_ << " val " << *ptr;
+            break;
+        case PropertyDataType::UCHAR:
+            if (sqlite3_column_type(statement_, cnt) != SQLITE_NULL)
                 buffer->get<unsigned char>(prop.name()).set(index, static_cast<unsigned char> (sqlite3_column_int(statement_, cnt)));
-                //loginf  << "sqlex: uchar " << prop->id_ << " val " << *ptr;
-                break;
-            case PropertyDataType::CHAR:
+            else
+                buffer->get<unsigned char>(prop.name()).setNone(index);
+            //loginf  << "sqlex: uchar " << prop->id_ << " val " << *ptr;
+            break;
+        case PropertyDataType::CHAR:
+            if (sqlite3_column_type(statement_, cnt) != SQLITE_NULL)
                 buffer->get<char>(prop.name()).set(index, static_cast<signed char> (sqlite3_column_int(statement_, cnt)));
-                //loginf  << "sqlex: char " << prop->id_ << " val " << *ptr;
-                break;
-            case PropertyDataType::INT:
+            else
+                buffer->get<char>(prop.name()).setNone(index);
+            //loginf  << "sqlex: char " << prop->id_ << " val " << *ptr;
+            break;
+        case PropertyDataType::INT:
+            if (sqlite3_column_type(statement_, cnt) != SQLITE_NULL)
                 buffer->get<int>(prop.name()).set(index, static_cast<int> (sqlite3_column_int(statement_, cnt)));
-                //loginf  << "sqlex: int " << prop->id_ << " val " << *ptr;
-                break;
-            case PropertyDataType::UINT:
+            else
+                buffer->get<int>(prop.name()).setNone(index);
+            //loginf  << "sqlex: int " << prop->id_ << " val " << *ptr;
+            break;
+        case PropertyDataType::UINT:
+            if (sqlite3_column_type(statement_, cnt) != SQLITE_NULL)
                 buffer->get<unsigned int>(prop.name()).set(index, static_cast<unsigned int> (sqlite3_column_int(statement_, cnt)));
-                //loginf  << "sqlex: uint " << prop->id_ << " val " << *ptr;
-                break;
-            case PropertyDataType::STRING:
+            else
+                buffer->get<unsigned int>(prop.name()).setNone(index);
+            //loginf  << "sqlex: uint " << prop->id_ << " val " << *ptr;
+            break;
+        case PropertyDataType::STRING:
+            if (sqlite3_column_type(statement_, cnt) != SQLITE_NULL)
                 buffer->get<std::string>(prop.name()).set(index, std::string (reinterpret_cast<const char*> (sqlite3_column_text(statement_, cnt))));
-                //loginf  << "sqlex: string " << prop->id_ << " val " << *ptr;
-                break;
-            case PropertyDataType::FLOAT:
+            else
+                buffer->get<std::string>(prop.name()).setNone(index);
+            //loginf  << "sqlex: string " << prop->id_ << " val " << *ptr;
+            break;
+        case PropertyDataType::FLOAT:
+            if (sqlite3_column_type(statement_, cnt) != SQLITE_NULL)
                 buffer->get<float>(prop.name()).set(index, static_cast<float> (sqlite3_column_double (statement_, cnt)));
-                //loginf  << "sqlex: float " << prop->id_ << " val " << *ptr;
-                break;
-            case PropertyDataType::DOUBLE:
+            else
+                buffer->get<float>(prop.name()).setNone(index);
+            //loginf  << "sqlex: float " << prop->id_ << " val " << *ptr;
+            break;
+        case PropertyDataType::DOUBLE:
+            if (sqlite3_column_type(statement_, cnt) != SQLITE_NULL)
                 buffer->get<double>(prop.name()).set(index, static_cast<double> (sqlite3_column_double (statement_, cnt)));
-                //loginf  << "sqlex: double " << prop->id_ << " val " << *ptr;
-                break;
-            default:
-                logerr  <<  "MySQLppConnection: readRowIntoBuffer: unknown property type";
-                throw std::runtime_error ("MySQLppConnection: readRowIntoBuffer: unknown property type");
-                break;
-            }
+            else
+                buffer->get<double>(prop.name()).setNone(index);
+            //loginf  << "sqlex: double " << prop->id_ << " val " << *ptr;
+            break;
+        default:
+            logerr  <<  "MySQLppConnection: readRowIntoBuffer: unknown property type";
+            throw std::runtime_error ("MySQLppConnection: readRowIntoBuffer: unknown property type");
+            break;
         }
     }
 }

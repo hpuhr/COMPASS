@@ -34,6 +34,8 @@
 
 static const unsigned int BUFFER_ARRAY_SIZE=10000;
 
+const bool ARRAYLIST_PEDANTIC_CHECKING=false;
+
 /**
  * @brief List interface of fixed-size arrays to be used in Buffer classes.
  *
@@ -43,21 +45,33 @@ class ArrayListBase
 {
 public:
     /// @brief Constructor
-    ArrayListBase ();
+    ArrayListBase () {}
     /// @brief Destructor
-    virtual ~ArrayListBase ();
+    virtual ~ArrayListBase () {}
 
     /// @brief Returns size of the list
-    size_t size ();
+    size_t size () { return none_flags_.size(); }
 
     /// @brief Returns current maximum size of the list
-    size_t maximumSize ();
+    //size_t maximumSize ();
 
     /// @brief Sets specific element to None value
-    virtual void setNone(size_t size_t);
+    virtual void setNone(size_t index)
+    {
+        if (index >= none_flags_.size()) // allocate new stuff, fill all new with not none
+            none_flags_.resize(index+1, true);
+
+        none_flags_.at(index) = true;
+    }
 
     /// @brief Checks if specific element is None
-    bool isNone(size_t size_t);
+    bool isNone(size_t index)
+    {
+        if (ARRAYLIST_PEDANTIC_CHECKING)
+            assert (index < none_flags_.size());
+
+        return none_flags_.at(index);
+    }
 
     /// @brief Sets all elements to initial value and None information to true
     virtual void clear()=0;
@@ -70,18 +84,28 @@ private:
 
 protected:
     /// Identifier of contained data
-    std::string id_;
+    //std::string id_;
     /// Size of the data contents, maximum index of set+1
-    size_t size_ {0};
+    //size_t size_ {0};
     /// Size of data arrays
-    size_t max_size_ {0};
+    //size_t max_size_ {0};
 
     /// @brief Sets all elements to None value
-    void setAllNone();
-    /// @brief Sets specific element to not None value
-    void unsetNone (size_t index);
+    void setAllNone() { std::fill (none_flags_.begin(), none_flags_.end(), true); }
 
-    void addNone (ArrayListBase& other);
+    /// @brief Sets specific element to not None value
+    void unsetNone (size_t index)
+    {
+        if (index >= none_flags_.size()) // allocate new stuff, fill all new with not none
+            none_flags_.resize(index+1, true);
+
+        none_flags_.at(index) = false;
+    }
+
+    void addNone (ArrayListBase& other)
+    {
+        none_flags_.insert(none_flags_.end(), other.none_flags_.begin(), other.none_flags_.end());
+    }
 };
 
 
@@ -111,14 +135,15 @@ public:
     /// @brief Returns const reference to a specific value
     const T get (size_t index)
     {
-        assert (index <= size_);
-        assert (!isNone(index));
+        //assert (index <= size_);
+//        if (ARRAYLIST_PEDANTIC_CHECKING)
+//            assert (!isNone(index));
 
-        if (index > size_)
-            throw std::out_of_range ("ArrayListTemplate: get out of index "+std::to_string(index));
+//        if (index > size_)
+//            throw std::out_of_range ("ArrayListTemplate: get out of index "+std::to_string(index));
 
         if (isNone(index))
-            throw std::out_of_range ("ArrayListTemplate: get of None value "+std::to_string(index));
+            throw std::runtime_error ("ArrayListTemplate: get of None value "+std::to_string(index));
 
         return data_.at(index);
     }
@@ -126,11 +151,11 @@ public:
     /// @brief Returns string of a specific value
     const std::string getAsString (size_t index) override
     {
-        if (index > size_)
-            throw std::out_of_range ("ArrayListTemplate: getAsString out of index "+std::to_string(index));
+//        if (index > size_)
+//            throw std::out_of_range ("ArrayListTemplate: getAsString out of index "+std::to_string(index));
 
         if (isNone(index))
-            throw std::out_of_range ("ArrayListTemplate: getAsString of None value "+std::to_string(index));
+            throw std::runtime_error ("ArrayListTemplate: getAsString of None value "+std::to_string(index));
 
         return Utils::String::getValueString (data_.at(index));
     }
@@ -140,56 +165,65 @@ public:
     {
         //loginf << "ArrayListBool:set: index " << index << " current size-1 " << size_-1;
 
-        if (index >= max_size_)
+//        if (index >= max_size_)
+//        {
+//            //logdbg << "ArrayListTemplate:set: adding new arrays for index " << index << " current max size "
+//            // << max_size_;
+//            while (index >= max_size_)
+//                allocateNewArray ();
+//        }
+
+        if (index >= data_.size()) // allocate new stuff, fill all new with not none
         {
-            //logdbg << "ArrayListTemplate:set: adding new arrays for index " << index << " current max size "
-            // << max_size_;
-            while (index >= max_size_)
-                allocateNewArray ();
+            data_.resize(index+1, T());
         }
 
         data_.at(index) = value;
 
-        if (index >= size_)
-            size_= index+1;
+//        if (index >= size_)
+//            size_= index+1;
 
         //logdbg << "ArrayListTemplate: set: size " << size_ << " max_size " << max_size_;
 
         unsetNone(index);
+
+        if (ARRAYLIST_PEDANTIC_CHECKING)
+            assert (data_.size() == ArrayListBase::size());
     }
 
     /// @brief Sets specific element to None value
     virtual void setNone(size_t index) override
     {
-        if (index >= max_size_)
+        if (index >= data_.size()) // allocate new stuff, fill all new with not none
         {
-            //logdbg << "ArrayListTemplate:setNone: adding new arrays for index " << index << " current max size "
-            //<< max_size_;
-            while (index >= max_size_)
-                allocateNewArray ();
+            data_.resize(index+1, T());
         }
 
         ArrayListBase::setNone(index);
+
+        if (ARRAYLIST_PEDANTIC_CHECKING)
+            assert (data_.size() == ArrayListBase::size());
     }
 
     void addData (ArrayListTemplate<T> &other)
     {
-        logdbg << "ArrayListTemplate: addData: data size " << data_.size()
-               << " size " << size_ << " max " << max_size_;
+        logdbg << "ArrayListTemplate: addData: data size " << data_.size();
 
         data_.insert(data_.end(), other.data_.begin(), other.data_.end());
         addNone(other);
         //assert (data_.size() == none_flags_.size());
-        size_ = max_size_ + other.size_;
-        max_size_ += other.max_size_;
+        //size_ = max_size_ + other.size_;
+        //max_size_ += other.max_size_;
 
         other.data_.clear();
         other.setAllNone();
-        other.size_=0;
-        other.max_size_=0;
+        //other.size_=0;
+        //other.max_size_=0;
 
-        logdbg << "ArrayListTemplate: addData: end data size " << data_.size()
-               << " size " << size_ << " max " << max_size_;
+        if (ARRAYLIST_PEDANTIC_CHECKING)
+            assert (data_.size() == ArrayListBase::size());
+
+        logdbg << "ArrayListTemplate: addData: end data size " << data_.size();
     }
 
     ArrayListTemplate<T>& operator*=(double factor)
@@ -223,11 +257,19 @@ public:
 
         assert (to_index);
         assert (from_index < to_index);
+        assert (from_index < data_.size());
+        assert (to_index < data_.size());
 
-        for (size_t index = from_index; index < to_index; ++index)
+        for (size_t index = from_index; index <= to_index; ++index)
         {
             if (!isNone(index)) // not for none
             {
+                if (ARRAYLIST_PEDANTIC_CHECKING)
+                {
+                    assert (index < data_.size());
+                    assert (index < ArrayListBase::size());
+                }
+
                 values[data_.at(index)].push_back(index);
             }
         }
@@ -268,11 +310,11 @@ protected:
     std::vector<T> data_;
 
     /// @brief Adds a new data container
-    void allocateNewArray ()
-    {
-        max_size_ += BUFFER_ARRAY_SIZE;
-        data_.resize(max_size_, T());
-    }
+//    void allocateNewArray ()
+//    {
+//        max_size_ += BUFFER_ARRAY_SIZE;
+//        data_.resize(max_size_, T());
+//    }
 };
 
 

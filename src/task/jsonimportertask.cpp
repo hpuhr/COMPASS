@@ -958,12 +958,22 @@ std::shared_ptr<Buffer> JSONImporterTask::parseJSON (Json::Value& object, bool t
                     key_al.set(row_cnt, rec_num_cnt_);
                     dsid_al.set(row_cnt, receiver);
                     target_addr_al.set(row_cnt, target_address);
+
                     if (callsign_valid)
                         callsign_al.set(row_cnt, callsign);
+                    else
+                        callsign_al.setNone(row_cnt);
+
                     if (altitude_baro_valid)
                         altitude_baro_al.set(row_cnt, altitude_baro_ft);
+                    else
+                        altitude_baro_al.setNone(row_cnt);
+
                     if (altitude_geo_valid)
                         altitude_geo_al.set(row_cnt, altitude_geo_ft);
+                    else
+                        altitude_geo_al.setNone(row_cnt);
+
                     latitude_al.set(row_cnt, latitude_deg);
                     longitude_al.set(row_cnt, longitude_deg);
                     tod_al.set(row_cnt, (int) tod);
