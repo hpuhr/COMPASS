@@ -630,12 +630,12 @@ void DBObjectWidget::addNewVariablesSlot ()
 
     assert (object_->hasMetaTable(schema_name));
     std::string meta_name = object_->metaTable (schema_name);
-    loginf  << "DBObjectWidget: addNewVariables: for meta " << meta_name;
+    logdbg  << "DBObjectWidget: addNewVariables: for meta " << meta_name;
 
     assert (schema_manager_.getCurrentSchema().hasMetaTable(meta_name));
     const MetaDBTable &meta = schema_manager_.getCurrentSchema().metaTable(meta_name);
 
-    loginf  << "DBObjectWidget: addNewVariables: traversing columns";
+    logdbg  << "DBObjectWidget: addNewVariables: traversing columns";
     for (auto& col_it : meta.columns())
     {
         const DBTableColumn& col = col_it.second;

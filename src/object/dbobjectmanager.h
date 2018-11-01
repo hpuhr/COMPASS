@@ -80,6 +80,8 @@ public:
     /// @brief Returns container with all MetaVariables
     std::map <std::string, MetaDBOVariable*>& metaVariables () { return meta_variables_; }
 
+    bool usedInMetaVariable (const DBOVariable& variable);
+
     virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
 
     /// @brief Destructor

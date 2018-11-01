@@ -129,6 +129,15 @@ void MetaDBOVariable::addVariable (const std::string &dbo_name, const std::strin
     generateSubConfigurable ("DBOVariableDefinition", instance_id);
 }
 
+bool MetaDBOVariable::uses (const DBOVariable& variable)
+{
+    for (auto& var_it : variables_)
+        if (var_it.second == variable)
+            return true;
+
+    return false;
+}
+
 MetaDBOVariableWidget *MetaDBOVariable::widget ()
 {
     if (!widget_)

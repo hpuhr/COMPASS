@@ -364,6 +364,13 @@ void DBObjectManagerWidget::addAllMetaVariablesSlot ()
     {
         for (auto& var_it : *obj_it.second)
         {
+            if (object_manager_.usedInMetaVariable(var_it.second))
+            {
+                loginf << "DBObjectManagerWidget: addAllMetaVariablesSlot: not adding dbovariable " << var_it.first
+                       << " since already used";
+                continue;
+            }
+
             found_dbos.clear();
             found_dbos.push_back(obj_it.first); // original object
 

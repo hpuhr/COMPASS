@@ -165,6 +165,15 @@ void DBObjectManager::deleteMetaVariable (const std::string& var_name)
     meta_variables_.erase(var_name);
 }
 
+bool DBObjectManager::usedInMetaVariable (const DBOVariable& variable)
+{
+    for (auto& meta_it : meta_variables_)
+        if (meta_it.second->uses (variable))
+            return true;
+
+    return false;
+}
+
 DBObjectManagerWidget* DBObjectManager::widget()
 {
     if (!widget_)

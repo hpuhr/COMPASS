@@ -149,7 +149,6 @@ void DBObject::renameVariable (const std::string& name, const std::string& new_n
     assert (hasVariable (name));
     assert (!hasVariable (new_name));
 
-    // UGA TODO
     variables_[new_name] = std::move(variables_.at(name));
     variables_.erase(name);
 
