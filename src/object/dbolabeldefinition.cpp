@@ -126,27 +126,6 @@ void DBOLabelDefinition::updateReadList ()
 
 void DBOLabelDefinition::checkLabelDefintions()
 {
-    //TODO check if up to date
-}
-
-void DBOLabelDefinition::generateSubConfigurable (const std::string& class_id, const std::string& instance_id)
-{
-    if (class_id == "LabelEntry")
-    {
-        logdbg  << "DBOLabelDefinition: generateSubConfigurable: instance_id " << instance_id;
-
-        DBOLabelEntry* entry = new DBOLabelEntry (class_id, instance_id, this);
-        assert (entries_.find(entry->variableName()) == entries_.end());
-        entries_ [entry->variableName()] = entry;
-    }
-    else
-        throw std::runtime_error ("DBOLabelDefinition: generateSubConfigurable: unknown class_id "+class_id );
-}
-
-void DBOLabelDefinition::checkSubConfigurables ()
-{
-    logdbg  << "DBOLabelDefinition: checkSubConfigurables: object " << db_object_->name();
-
     assert (db_object_);
 
     std::string variable_name;
@@ -196,6 +175,27 @@ void DBOLabelDefinition::checkSubConfigurables ()
         }
     }
 }
+
+void DBOLabelDefinition::generateSubConfigurable (const std::string& class_id, const std::string& instance_id)
+{
+    if (class_id == "LabelEntry")
+    {
+        logdbg  << "DBOLabelDefinition: generateSubConfigurable: instance_id " << instance_id;
+
+        DBOLabelEntry* entry = new DBOLabelEntry (class_id, instance_id, this);
+        assert (entries_.find(entry->variableName()) == entries_.end());
+        entries_ [entry->variableName()] = entry;
+    }
+    else
+        throw std::runtime_error ("DBOLabelDefinition: generateSubConfigurable: unknown class_id "+class_id );
+}
+
+void DBOLabelDefinition::checkSubConfigurables ()
+{
+    logdbg  << "DBOLabelDefinition: checkSubConfigurables: object " << db_object_->name();
+
+    checkLabelDefintions();
+}
 DBOLabelEntry& DBOLabelDefinition::entry (const std::string& variable_name)
 {
     return *entries_.at(variable_name);
@@ -205,6 +205,8 @@ DBOLabelDefinitionWidget* DBOLabelDefinition::widget ()
 {
     if (!widget_)
     {
+        checkLabelDefintions();
+
         widget_ = new DBOLabelDefinitionWidget (this);
         assert (widget_);
     }

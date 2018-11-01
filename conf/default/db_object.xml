@@ -1,5 +1,5 @@
 <Configuration class_id="DBObjectManager" instance_id="DBObjectManager0">
-    <ParameterBool use_filters="1"/>
+    <ParameterBool use_filters="0"/>
     <ParameterBool use_limit="0"/>
     <ParameterBool use_order="1"/>
     <ParameterBool use_order_ascending="1"/>
@@ -146,8 +146,8 @@
                 <ParameterString variable_name="dom_posix"/>
             </Configuration>
             <Configuration class_id="LabelEntry" instance_id="LabelEntryds_id0">
-                <ParameterBool show="0"/>
-                <ParameterString prefix=""/>
+                <ParameterBool show="1"/>
+                <ParameterString prefix="DS "/>
                 <ParameterString suffix=""/>
                 <ParameterString variable_name="ds_id"/>
             </Configuration>
@@ -1824,8 +1824,8 @@
                 <ParameterString variable_name="dom_posix"/>
             </Configuration>
             <Configuration class_id="LabelEntry" instance_id="LabelEntryds_id0">
-                <ParameterBool show="0"/>
-                <ParameterString prefix=""/>
+                <ParameterBool show="1"/>
+                <ParameterString prefix="DS "/>
                 <ParameterString suffix=""/>
                 <ParameterString variable_name="ds_id"/>
             </Configuration>
@@ -3935,7 +3935,488 @@
             <ParameterString short_name_column="sensors.shortname"/>
             <ParameterString sic_column=""/>
         </Configuration>
-        <Configuration class_id="DBOLabelDefinition" instance_id="DBOLabelDefinition0"/>
+        <Configuration class_id="DBOLabelDefinition" instance_id="DBOLabelDefinition0">
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryaccelerating0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="accelerating"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryacceleration0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="acceleration"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryadsb0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="adsb"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryaltitude_geometric0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="altitude_geometric"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryamplitude_max0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="amplitude_max"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryazimuth0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="azimuth"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrychain0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="chain"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryclimbing0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="climbing"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrycoasting0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="coasting"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrydate0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="date"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrydecelerating0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="decelerating"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrydescending0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="descending"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrydo_never_show0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="do_never_show"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrydo_not_show0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="do_not_show"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryemergency0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="emergency"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryextrapolated0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="extrapolated"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryflight_level0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="flight_level"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryflightplan_ext_id0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="flightplan_ext_id"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryflightplan_id0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="flightplan_id"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryflightplan_target_identification0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="flightplan_target_identification"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryfused0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="fused"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryground0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="ground"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrygroundspeed_x0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="groundspeed_x"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrygroundspeed_y0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="groundspeed_y"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryhijack0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="hijack"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrylatitude0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="latitude"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrylongitude0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="longitude"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrymlat0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="mlat"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrymode_a_code0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="mode_a_code"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrymode_a_code_changed0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="mode_a_code_changed"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrymode_s0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="mode_s"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryorientation0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="orientation"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryparking0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="parking"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryplot_id0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="plot_id"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryplot_id_chain0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="plot_id_chain"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryposition_x0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="position_x"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryposition_x_variance0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="position_x_variance"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryposition_xy_covariance0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="position_xy_covariance"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryposition_y0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="position_y"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryposition_y_variance0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="position_y_variance"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrypsr0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="psr"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryradiofailure0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="radiofailure"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryrange_slant0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="range_slant"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryrec_num0">
+                <ParameterBool show="1"/>
+                <ParameterString prefix="R "/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="rec_num"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryrocd0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="rocd"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrysensor_id0">
+                <ParameterBool show="1"/>
+                <ParameterString prefix="DS "/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="sensor_id"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrysimulated0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="simulated"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrysmoothed0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="smoothed"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryspi0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="spi"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryssr0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="ssr"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytarget_address0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="target_address"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytarget_identification0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="target_identification"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytarget_length0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="target_length"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytarget_width0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="target_width"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytentative0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="tentative"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytime_detection0">
+                <ParameterBool show="1"/>
+                <ParameterString prefix="T "/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="time_detection"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytime_last_flightlevel0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="time_last_flightlevel"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytime_last_geometric_altitude0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="time_last_geometric_altitude"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytime_last_mode_a0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="time_last_mode_a"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytime_last_target_address0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="time_last_target_address"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytime_recording0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="time_recording"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytime_recording_daq_pos0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="time_recording_daq_pos"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytouchdown_runway_id0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="touchdown_runway_id"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytouchdown_t0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="touchdown_t"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytouchdown_thres_dist0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="touchdown_thres_dist"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytouchdown_x0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="touchdown_x"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytouchdown_y0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="touchdown_y"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="track"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack_begin0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="track_begin"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack_comments0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="track_comments"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack_end0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="track_end"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack_id0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="track_id"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack_num0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="track_num"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack_recovered0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="track_recovered"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryturn_left0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="turn_left"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryturn_right0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="turn_right"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryturnrate0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="turnrate"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryuncooperative0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="uncooperative"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryvehicle0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="vehicle"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryvehicle_type0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="vehicle_type"/>
+            </Configuration>
+        </Configuration>
         <Configuration class_id="DBOSchemaMetaTableDefinition" instance_id="DBOSchemaMetaTableDefinition0">
             <ParameterString meta_table="PSR"/>
             <ParameterString schema="Simple"/>
@@ -7360,7 +7841,476 @@
             <ParameterString short_name_column="sensors.shortname"/>
             <ParameterString sic_column=""/>
         </Configuration>
-        <Configuration class_id="DBOLabelDefinition" instance_id="DBOLabelDefinition0"/>
+        <Configuration class_id="DBOLabelDefinition" instance_id="DBOLabelDefinition0">
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryaccelerating0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="accelerating"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryacceleration0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="acceleration"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryadsb0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="adsb"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryaltitude_geometric0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="altitude_geometric"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryamplitude_max0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="amplitude_max"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryazimuth0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="azimuth"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryclimbing0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="climbing"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrycoasting0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="coasting"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrydate0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="date"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrydecelerating0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="decelerating"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrydescending0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="descending"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryemergency0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="emergency"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryextrapolated0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="extrapolated"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryflight_level0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="flight_level"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryflightplan_ext_id0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="flightplan_ext_id"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryflightplan_id0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="flightplan_id"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryflightplan_target_identification0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="flightplan_target_identification"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryfused0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="fused"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryground0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="ground"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrygroundspeed_x0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="groundspeed_x"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrygroundspeed_y0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="groundspeed_y"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryhijack0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="hijack"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrylatitude0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="latitude"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrylongitude0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="longitude"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrymlat0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="mlat"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrymode_a_code0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="mode_a_code"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrymode_a_code_changed0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="mode_a_code_changed"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrymode_s0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="mode_s"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryorientation0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="orientation"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryparking0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="parking"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryplot_id0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="plot_id"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryplot_id_chain0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="plot_id_chain"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryposition_x0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="position_x"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryposition_x_variance0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="position_x_variance"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryposition_xy_covariance0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="position_xy_covariance"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryposition_y0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="position_y"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryposition_y_variance0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="position_y_variance"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrypsr0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="psr"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryradiofailure0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="radiofailure"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryrange_slant0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="range_slant"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryrec_num0">
+                <ParameterBool show="1"/>
+                <ParameterString prefix="R "/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="rec_num"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryrocd0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="rocd"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrysensor_id0">
+                <ParameterBool show="1"/>
+                <ParameterString prefix="DS "/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="sensor_id"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrysimulated0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="simulated"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrysmoothed0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="smoothed"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryspi0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="spi"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryssr0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="ssr"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytarget_address0">
+                <ParameterBool show="1"/>
+                <ParameterString prefix="TA "/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="target_address"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytarget_identification0">
+                <ParameterBool show="1"/>
+                <ParameterString prefix="CS "/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="target_identification"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytarget_length0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="target_length"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytarget_width0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="target_width"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytentative0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="tentative"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytime_detection0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix="T "/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="time_detection"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytime_last_flightlevel0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="time_last_flightlevel"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytime_last_geometric_altitude0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="time_last_geometric_altitude"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytime_last_mode_a0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="time_last_mode_a"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytime_last_target_address0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="time_last_target_address"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytime_recording0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="time_recording"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytime_recording_daq_pos0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="time_recording_daq_pos"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytouchdown_runway_id0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="touchdown_runway_id"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytouchdown_t0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="touchdown_t"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytouchdown_thres_dist0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="touchdown_thres_dist"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytouchdown_x0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="touchdown_x"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytouchdown_y0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="touchdown_y"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="track"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack_begin0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="track_begin"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack_comments0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="track_comments"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack_end0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="track_end"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack_id0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="track_id"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack_num0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="track_num"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack_recovered0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="track_recovered"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryturn_left0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="turn_left"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryturn_right0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="turn_right"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryturnrate0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="turnrate"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryuncooperative0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="uncooperative"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryunique_track_num0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="unique_track_num"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryvehicle0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="vehicle"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryvehicle_type0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="vehicle_type"/>
+            </Configuration>
+        </Configuration>
         <Configuration class_id="DBOSchemaMetaTableDefinition" instance_id="DBOSchemaMetaTableDefinition0">
             <ParameterString meta_table="Reference"/>
             <ParameterString schema="Simple"/>
@@ -8396,7 +9346,488 @@
             <ParameterString short_name_column="sensors.shortname"/>
             <ParameterString sic_column=""/>
         </Configuration>
-        <Configuration class_id="DBOLabelDefinition" instance_id="DBOLabelDefinition0"/>
+        <Configuration class_id="DBOLabelDefinition" instance_id="DBOLabelDefinition0">
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryaccelerating0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="accelerating"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryacceleration0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="acceleration"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryadsb0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="adsb"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryaltitude_geometric0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="altitude_geometric"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryamplitude_max0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="amplitude_max"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryazimuth0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="azimuth"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrychain0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="chain"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryclimbing0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="climbing"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrycoasting0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="coasting"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrydate0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="date"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrydecelerating0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="decelerating"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrydescending0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="descending"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrydo_never_show0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="do_never_show"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrydo_not_show0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="do_not_show"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryemergency0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="emergency"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryextrapolated0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="extrapolated"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryflight_level0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="flight_level"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryflightplan_ext_id0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="flightplan_ext_id"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryflightplan_id0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="flightplan_id"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryflightplan_target_identification0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="flightplan_target_identification"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryfused0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="fused"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryground0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="ground"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrygroundspeed_x0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="groundspeed_x"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrygroundspeed_y0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="groundspeed_y"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryhijack0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="hijack"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrylatitude0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="latitude"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrylongitude0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="longitude"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrymlat0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="mlat"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrymode_a_code0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix="A "/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="mode_a_code"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrymode_a_code_changed0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="mode_a_code_changed"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrymode_s0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="mode_s"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryorientation0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="orientation"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryparking0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="parking"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryplot_id0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="plot_id"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryplot_id_chain0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="plot_id_chain"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryposition_x0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="position_x"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryposition_x_variance0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="position_x_variance"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryposition_xy_covariance0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="position_xy_covariance"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryposition_y0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="position_y"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryposition_y_variance0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="position_y_variance"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrypsr0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="psr"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryradiofailure0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="radiofailure"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryrange_slant0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="range_slant"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryrec_num0">
+                <ParameterBool show="1"/>
+                <ParameterString prefix="R "/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="rec_num"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryrocd0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="rocd"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrysensor_id0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="sensor_id"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrysimulated0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="simulated"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrysmoothed0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="smoothed"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryspi0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="spi"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryssr0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="ssr"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytarget_address0">
+                <ParameterBool show="1"/>
+                <ParameterString prefix="TA "/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="target_address"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytarget_identification0">
+                <ParameterBool show="1"/>
+                <ParameterString prefix="CS "/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="target_identification"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytarget_length0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="target_length"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytarget_width0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="target_width"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytentative0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="tentative"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytime_detection0">
+                <ParameterBool show="1"/>
+                <ParameterString prefix="T "/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="time_detection"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytime_last_flightlevel0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="time_last_flightlevel"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytime_last_geometric_altitude0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="time_last_geometric_altitude"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytime_last_mode_a0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="time_last_mode_a"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytime_last_target_address0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="time_last_target_address"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytime_recording0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="time_recording"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytime_recording_daq_pos0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="time_recording_daq_pos"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytouchdown_runway_id0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="touchdown_runway_id"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytouchdown_t0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="touchdown_t"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytouchdown_thres_dist0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="touchdown_thres_dist"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytouchdown_x0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="touchdown_x"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytouchdown_y0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="touchdown_y"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="track"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack_begin0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="track_begin"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack_comments0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="track_comments"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack_end0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="track_end"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack_id0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="track_id"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack_num0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="track_num"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack_recovered0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="track_recovered"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryturn_left0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="turn_left"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryturn_right0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="turn_right"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryturnrate0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="turnrate"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryuncooperative0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="uncooperative"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryvehicle0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="vehicle"/>
+            </Configuration>
+            <Configuration class_id="LabelEntry" instance_id="LabelEntryvehicle_type0">
+                <ParameterBool show="0"/>
+                <ParameterString prefix=""/>
+                <ParameterString suffix=""/>
+                <ParameterString variable_name="vehicle_type"/>
+            </Configuration>
+        </Configuration>
         <Configuration class_id="DBOSchemaMetaTableDefinition" instance_id="DBOSchemaMetaTableDefinition0">
             <ParameterString meta_table="SSR"/>
             <ParameterString schema="Simple"/>
