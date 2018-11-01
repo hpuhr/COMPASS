@@ -30,7 +30,6 @@
 #include "logger.h"
 #include "property.h"
 #include "stringconv.h"
-//#include "dbovariable.h"
 
 static const unsigned int BUFFER_ARRAY_SIZE=10000;
 
@@ -51,9 +50,6 @@ public:
 
     /// @brief Returns size of the list
     size_t size () { return none_flags_.size(); }
-
-    /// @brief Returns current maximum size of the list
-    //size_t maximumSize ();
 
     /// @brief Sets specific element to None value
     virtual void setNone(size_t index)
@@ -83,13 +79,6 @@ private:
     std::vector <bool> none_flags_;
 
 protected:
-    /// Identifier of contained data
-    //std::string id_;
-    /// Size of the data contents, maximum index of set+1
-    //size_t size_ {0};
-    /// Size of data arrays
-    //size_t max_size_ {0};
-
     /// @brief Sets all elements to None value
     void setAllNone() { std::fill (none_flags_.begin(), none_flags_.end(), true); }
 
@@ -135,13 +124,6 @@ public:
     /// @brief Returns const reference to a specific value
     const T get (size_t index)
     {
-        //assert (index <= size_);
-//        if (ARRAYLIST_PEDANTIC_CHECKING)
-//            assert (!isNone(index));
-
-//        if (index > size_)
-//            throw std::out_of_range ("ArrayListTemplate: get out of index "+std::to_string(index));
-
         if (isNone(index))
             throw std::runtime_error ("ArrayListTemplate: get of None value "+std::to_string(index));
 
@@ -151,9 +133,6 @@ public:
     /// @brief Returns string of a specific value
     const std::string getAsString (size_t index) override
     {
-//        if (index > size_)
-//            throw std::out_of_range ("ArrayListTemplate: getAsString out of index "+std::to_string(index));
-
         if (isNone(index))
             throw std::runtime_error ("ArrayListTemplate: getAsString of None value "+std::to_string(index));
 
@@ -163,25 +142,12 @@ public:
     /// @brief Sets specific value
     void set (size_t index, T value)
     {
-        //loginf << "ArrayListBool:set: index " << index << " current size-1 " << size_-1;
-
-//        if (index >= max_size_)
-//        {
-//            //logdbg << "ArrayListTemplate:set: adding new arrays for index " << index << " current max size "
-//            // << max_size_;
-//            while (index >= max_size_)
-//                allocateNewArray ();
-//        }
-
         if (index >= data_.size()) // allocate new stuff, fill all new with not none
         {
             data_.resize(index+1, T());
         }
 
         data_.at(index) = value;
-
-//        if (index >= size_)
-//            size_= index+1;
 
         //logdbg << "ArrayListTemplate: set: size " << size_ << " max_size " << max_size_;
 
@@ -211,14 +177,9 @@ public:
 
         data_.insert(data_.end(), other.data_.begin(), other.data_.end());
         addNone(other);
-        //assert (data_.size() == none_flags_.size());
-        //size_ = max_size_ + other.size_;
-        //max_size_ += other.max_size_;
 
         other.data_.clear();
         other.setAllNone();
-        //other.size_=0;
-        //other.max_size_=0;
 
         if (ARRAYLIST_PEDANTIC_CHECKING)
             assert (data_.size() == ArrayListBase::size());
@@ -308,13 +269,6 @@ public:
 protected:
     /// Data container
     std::vector<T> data_;
-
-    /// @brief Adds a new data container
-//    void allocateNewArray ()
-//    {
-//        max_size_ += BUFFER_ARRAY_SIZE;
-//        data_.resize(max_size_, T());
-//    }
 };
 
 
