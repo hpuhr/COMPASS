@@ -133,13 +133,7 @@ void DBObject::checkSubConfigurables ()
 
 bool DBObject::hasVariable (const std::string& name) const
 {
-    if (variables_.find (name) == variables_.end())
-    {
-        logwrn << "DBObject: hasVariable: name " << name_ << " has no variable " << name;
-        return false;
-    }
-    else
-        return true;
+    return variables_.find (name) != variables_.end();
 }
 
 DBOVariable& DBObject::variable (const std::string& name)
@@ -168,6 +162,24 @@ void DBObject::deleteVariable (const std::string& name)
     assert (hasVariable (name));
     variables_.erase(name);
     assert (!hasVariable (name));
+}
+
+bool DBObject::uses (const DBTableColumn& column) const
+{
+    logdbg << "DBObject " << name_ << ": uses: column " << column.name();
+
+    for (auto& dbovar_it : variables_)
+    {
+        const DBOVariable& var = dbovar_it.second;
+
+        if (!var.hasCurrentDBColumn())
+            continue;
+
+        if (var.currentDBColumn() == column)
+            return true;
+    }
+
+    return false;
 }
 
 bool DBObject::hasMetaTable (const std::string& schema) const

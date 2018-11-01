@@ -48,6 +48,8 @@ public:
 
     const std::string &identifier () const { return identifier_; }
 
+    bool operator ==(const DBTableColumn& b) const;
+
     /// @brief Sets the data type
     void type (const std::string &type) { type_=type; }
     /// @brief Returns the data type

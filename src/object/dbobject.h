@@ -146,6 +146,8 @@ public:
     /// @brief Deletes a variable identified by id
     void deleteVariable (const std::string& name);
 
+    bool uses (const DBTableColumn& column) const;
+
     using DBOVariableIterator = typename std::map<std::string, DBOVariable>::iterator;
     DBOVariableIterator begin() { return variables_.begin(); }
     DBOVariableIterator end() { return variables_.end(); }

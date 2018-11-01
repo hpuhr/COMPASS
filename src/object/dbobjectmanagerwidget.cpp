@@ -154,10 +154,8 @@ void DBObjectManagerWidget::unlock ()
 
 void DBObjectManagerWidget::databaseOpenedSlot ()
 {
-
+    loginf << "DBObjectManagerWidget: databaseOpenedSlot";
 }
-
-
 
 void DBObjectManagerWidget::addDBOSlot ()
 {
@@ -282,19 +280,25 @@ void DBObjectManagerWidget::updateDBOsSlot ()
 
     for (auto& obj_it : object_manager_)
     {
-        QLabel *name = new QLabel (obj_it.second->name().c_str());
+        QLabel* name = new QLabel (obj_it.second->name().c_str());
+//        if (!obj_it.second->existsInDB())
+//        {
+//            QFont font = name->font();
+//            font.setStrikeOut(true);
+//            name->setFont(font);
+//        }
         dbobjects_grid_->addWidget (name, row, 0);
 
-        QLabel *numel = new QLabel ((std::to_string(obj_it.second->numVariables())).c_str());
+        QLabel* numel = new QLabel ((std::to_string(obj_it.second->numVariables())).c_str());
         dbobjects_grid_->addWidget (numel, row, 1);
 
         bool active = obj_it.second->hasCurrentMetaTable();
-        QLabel *meta = new QLabel ("None");
+        QLabel* meta = new QLabel ("None");
         if (active)
             meta->setText(obj_it.second->currentMetaTable().name().c_str());
         dbobjects_grid_->addWidget (meta, row, 2);
 
-        QPushButton *edit = new QPushButton ();
+        QPushButton* edit = new QPushButton ();
         edit->setIcon(edit_icon);
         edit->setIconSize(UI_ICON_SIZE);
         edit->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
@@ -304,7 +308,7 @@ void DBObjectManagerWidget::updateDBOsSlot ()
         dbobjects_grid_->addWidget (edit, row, 3);
         edit_dbo_buttons_[edit] = obj_it.second;
 
-        QPushButton *del = new QPushButton ();
+        QPushButton* del = new QPushButton ();
         del->setIcon(del_icon);
         del->setIconSize(UI_ICON_SIZE);
         del->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);

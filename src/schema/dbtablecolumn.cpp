@@ -78,6 +78,23 @@ void DBTableColumn::name (const std::string &name)
     table_.name()+"."+name_;
 }
 
+bool DBTableColumn::operator ==(const DBTableColumn& b) const
+{
+    if (table_.name() != b.table().name() ||
+            name_ != b.name_ ||
+            identifier_ != identifier_ ||
+            type_ != b.type_ ||
+            is_key_ != b.is_key_ ||
+            comment_ != b.comment_ ||
+            dimension_ != b.dimension_ ||
+            unit_ != b.unit_ ||
+            special_null_ != b.special_null_ ||
+            data_format_ != b.data_format_)
+        return false;
+
+    return true;
+}
+
 PropertyDataType DBTableColumn::propertyType () const
 {
 //        BOOL, CHAR, UCHAR, INT, UINT, LONGINT, ULONGINT, FLOAT, DOUBLE, STRING

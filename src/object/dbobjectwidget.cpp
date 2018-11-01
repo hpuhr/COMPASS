@@ -194,17 +194,19 @@ DBObjectWidget::DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager
 
     QHBoxLayout *all_var_layout = new QHBoxLayout ();
 
-    QLabel *all_var_label = new QLabel ("Create variables");
+    all_var_layout->addStretch();
+
+    QLabel *all_var_label = new QLabel ("Add unused DBOVariables in current schema");
     all_var_label->setFont (font_bold);
     all_var_layout->addWidget (all_var_label);
 
-    QLabel *all_var_schema_label = new QLabel ("Schema");
-    all_var_layout->addWidget (all_var_schema_label);
+//    QLabel *all_var_schema_label = new QLabel ("Schema");
+//    all_var_layout->addWidget (all_var_schema_label);
 
-    all_schemas_box_ = new DBSchemaSelectionComboBox ();
-    //updateAllVarsSchemaSelectionSlot();
-    all_schemas_box_->update();
-    all_var_layout->addWidget (all_schemas_box_);
+//    all_schemas_box_ = new DBSchemaSelectionComboBox ();
+//    //updateAllVarsSchemaSelectionSlot();
+//    all_schemas_box_->update();
+//    all_var_layout->addWidget (all_schemas_box_);
 
     add_schema_button_ = new QPushButton ("Add New");
     connect(add_schema_button_, SIGNAL( clicked() ), this, SLOT( addNewVariablesSlot() ));
@@ -250,7 +252,7 @@ void DBObjectWidget::lock ()
             widget->setDisabled(true);
     }
 
-    all_schemas_box_->setDisabled (true);
+    //all_schemas_box_->setDisabled (true);
     add_schema_button_->setDisabled (true);
 
     locked_ = true;
@@ -283,7 +285,7 @@ void DBObjectWidget::unlock ()
             widget->setDisabled(false);
     }
 
-    all_schemas_box_->setDisabled (false);
+    //all_schemas_box_->setDisabled (false);
     add_schema_button_->setDisabled (false);
 
     locked_ = false;
@@ -610,28 +612,48 @@ void DBObjectWidget::printSlot ()
 
 void DBObjectWidget::addNewVariablesSlot ()
 {
-    logdbg  << "DBObjectWidget: addNewVariables";
     assert (object_);
-    assert (all_schemas_box_);
+    //assert (all_schemas_box_);
 
-    if (all_schemas_box_->count() == 0)
-        return;
+//    if (all_schemas_box_->count() == 0)
+//        return;
 
-    std::string schema_name = all_schemas_box_->currentText().toStdString();
-    std::string meta_name = object_->metaTable (schema_name);
-
-    const MetaDBTable &meta = schema_manager_.getCurrentSchema().metaTable(meta_name);
-    auto columns = meta.columns ();
-
-    for (auto it = columns.begin(); it != columns.end(); it++)
+    if (!schema_manager_.hasCurrentSchema())
     {
-        std::string column_name = it->second.name();
+        logerr  << "DBObjectWidget: addNewVariables: no current schema defined";
+        return;
+    }
+
+    std::string schema_name = schema_manager_.getCurrentSchema().name();
+
+    loginf  << "DBObjectWidget: addNewVariables: object " << object_->name() << " schema " << schema_name;
+
+    assert (object_->hasMetaTable(schema_name));
+    std::string meta_name = object_->metaTable (schema_name);
+    loginf  << "DBObjectWidget: addNewVariables: for meta " << meta_name;
+
+    assert (schema_manager_.getCurrentSchema().hasMetaTable(meta_name));
+    const MetaDBTable &meta = schema_manager_.getCurrentSchema().metaTable(meta_name);
+
+    loginf  << "DBObjectWidget: addNewVariables: traversing columns";
+    for (auto& col_it : meta.columns())
+    {
+        const DBTableColumn& col = col_it.second;
+        logdbg  << "DBObjectWidget: addNewVariables: checking column " << col.name();
+
+        std::string column_name = col.name();
         boost::algorithm::to_lower(column_name);
-        std::string column_identifier = it->second.identifier();
+        std::string column_identifier = col.identifier();
         boost::algorithm::to_lower(column_identifier);
 
-        if (object_->hasVariable(column_name) || object_->hasVariable(column_identifier))
+        if (object_->uses(col))
+        {
+            loginf  << "DBObjectWidget: addNewVariables: not adding column '" << column_name
+                    << "' since already used";
             continue;
+        }
+        else
+            loginf  << "DBObjectWidget: addNewVariables: adding column '" << column_name;
 
         std::string column_name_to_use;
 
@@ -645,18 +667,21 @@ void DBObjectWidget::addNewVariablesSlot ()
         Configuration &config = object_->addNewSubConfiguration ("DBOVariable", instance);
 
         config.addParameterString ("name", column_name_to_use);
-        config.addParameterString ("data_type_str", Property::asString(it->second.propertyType()));
+        config.addParameterString ("data_type_str", Property::asString(col.propertyType()));
         config.addParameterString ("dbo_name", object_->name());
-        config.addParameterString ("description", it->second.comment());
+        config.addParameterString ("description", col.comment());
 
         std::string var_instance = "DBOSchemaVariableDefinition"+object_->name()+column_name+"0";
 
         Configuration &var_configuration = config.addNewSubConfiguration ("DBOSchemaVariableDefinition", var_instance);
         var_configuration.addParameterString ("schema", schema_name);
         //var_configuration.addParameterString ("meta_table", meta.name());
-        var_configuration.addParameterString ("variable_identifier", it->second.identifier());
+        var_configuration.addParameterString ("variable_identifier", col.identifier());
 
         object_->generateSubConfigurable("DBOVariable", instance);
+
+        loginf  << "DBObjectWidget: addNewVariables: added column '" << column_name_to_use
+                << "' as variable";
     }
     updateDBOVarsGridSlot();
 }

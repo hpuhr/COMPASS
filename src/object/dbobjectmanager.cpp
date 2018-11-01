@@ -170,6 +170,7 @@ DBObjectManagerWidget* DBObjectManager::widget()
     if (!widget_)
     {
         widget_ = new DBObjectManagerWidget (*this);
+        //connect (this, SIGNAL(databaseContentChangedSignal), widget_, SLOT(updateDBOsSlot));
 
         if (locked_)
             widget_->lock ();
