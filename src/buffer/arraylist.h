@@ -25,6 +25,8 @@
 #include <iomanip>
 #include <array>
 
+#include <type_traits>
+
 #include "logger.h"
 #include "property.h"
 #include "stringconv.h"
@@ -234,6 +236,33 @@ public:
         return values;
     }
 
+    void convertToStandardFormat(const std::string& from_format)
+    {
+        static_assert (std::is_integral<T>::value, "only defined for integer types");
+
+        std::string value_str;
+        //T value;
+
+        size_t data_size = data_.size();
+        for (size_t cnt=0; cnt < data_size; cnt++)
+        {
+            if (isNone(cnt))
+                continue;
+
+            value_str = std::to_string(data_[cnt]);
+
+//            if (from_format == "hexadecimal")
+//                value = std::stoi(value_str, 0, 16);
+//            else
+            if (from_format == "octal")
+            {
+                data_[cnt] = std::stoi(value_str, 0, 8);
+            }
+            else
+                assert (false);
+        }
+    }
+
 protected:
     /// Data container
     std::vector<T> data_;
@@ -246,6 +275,13 @@ protected:
     }
 };
 
+
+// For integral types only:
+//template<typename T>
+//typename std::enable_if<std::is_integral<T>::value>::type f(T t)
+//{
+//    // ...
+//}
 
 //template <>
 //const std::string ArrayListTemplate<std::string>::getAsString (size_t index);

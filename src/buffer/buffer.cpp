@@ -347,6 +347,63 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
             transformed_var_name = column.name();
         }
 
+        if (column.dataFormat() != "") // do format conversion stuff
+        {
+            loginf << "Buffer: transformVariables: column " << column.name()
+                   << " has to-be-removed format " << column.dataFormat();
+
+            switch (data_type)
+            {
+            case PropertyDataType::CHAR:
+            {
+                assert (has<char>(current_var_name));
+                ArrayListTemplate<char> &array_list = get<char> (current_var_name);
+                array_list.convertToStandardFormat(column.dataFormat());
+                break;
+            }
+            case PropertyDataType::UCHAR:
+            {
+                assert (has<unsigned char>(current_var_name));
+                ArrayListTemplate<unsigned char> &array_list = get<unsigned char> (current_var_name);
+                array_list.convertToStandardFormat(column.dataFormat());
+                break;
+            }
+            case PropertyDataType::INT:
+            {
+                assert (has<int>(current_var_name));
+                ArrayListTemplate<int> &array_list = get<int> (current_var_name);
+                array_list.convertToStandardFormat(column.dataFormat());
+                break;
+            }
+            case PropertyDataType::UINT:
+            {
+                assert (has<unsigned int>(current_var_name));
+                ArrayListTemplate<unsigned int> &array_list = get<unsigned int> (current_var_name);
+                array_list.convertToStandardFormat(column.dataFormat());
+                break;
+            }
+            case PropertyDataType::LONGINT:
+            {
+                assert (has<long int>(current_var_name));
+                ArrayListTemplate<long int> &array_list = get<long int>(current_var_name);
+                array_list.convertToStandardFormat(column.dataFormat());
+                break;
+            }
+            case PropertyDataType::ULONGINT:
+            {
+                assert (has<unsigned long>(current_var_name));
+                ArrayListTemplate<unsigned long> &array_list = get<unsigned long>(current_var_name);
+                array_list.convertToStandardFormat(column.dataFormat());
+                break;
+            }
+            default:
+                logerr  <<  "Buffer: transformVariables: format conversion impossible for property type "
+                         << Property::asString(data_type);
+                throw std::runtime_error ("Buffer: transformVariables: impossible property type "
+                                          + Property::asString(data_type));
+            }
+        }
+
         if (column.dimension() != var_it->dimension())
             logwrn << "Buffer: transformVariables:: variable " << var_it->name()
                    << " has differing dimensions " << column.dimension() << " " << var_it->dimension();

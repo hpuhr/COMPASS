@@ -54,6 +54,37 @@ int BufferTableModel::columnCount(const QModelIndex & /*parent*/) const
 {
     logdbg << "BufferTableModel: columnCount: " << read_set_.getSize();
     return read_set_.getSize();
+
+//    if (buffer_)
+//    {
+//        return buffer_->properties().size();
+//    }
+//    else
+//        return 0;
+}
+
+QVariant BufferTableModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (role != Qt::DisplayRole)
+        return QVariant();
+
+    if (orientation == Qt::Horizontal)
+    {
+        logdbg << "BufferTableModel: headerData: section " << section;
+        unsigned int col = section;
+
+//        const PropertyList &properties = buffer_->properties();
+//        assert (col < properties.size());
+//        return QString (properties.at(col).name().c_str());
+
+        assert (col < read_set_.getSize());
+        DBOVariable& variable = read_set_.getVariable(col);
+        return QString (variable.name().c_str());
+    }
+    else if(orientation == Qt::Vertical)
+        return section;
+
+    return QVariant();
 }
 
 QVariant BufferTableModel::data(const QModelIndex &index, int role) const
@@ -224,26 +255,6 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
                 return QString (value_str.c_str());
         }
     }
-    return QVariant();
-}
-
-QVariant BufferTableModel::headerData(int section, Qt::Orientation orientation, int role) const
-{
-    if (role != Qt::DisplayRole)
-        return QVariant();
-
-    if (orientation == Qt::Horizontal)
-    {
-        logdbg << "BufferTableModel: headerData: section " << section;
-        const PropertyList &properties = buffer_->properties();
-        unsigned int col = section;
-
-        assert (col < properties.size());
-        return QString (properties.at(col).name().c_str());
-    }
-    else if(orientation == Qt::Vertical)
-        return section;
-
     return QVariant();
 }
 
