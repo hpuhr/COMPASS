@@ -377,6 +377,10 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
             var_count = 0;
     }
 
+    if (read_list_.getSet().size() == 0)
+        for (auto rec_num : rec_nums)
+            labels[rec_num] = "Label Definition empty";
+
     return labels;
 }
 

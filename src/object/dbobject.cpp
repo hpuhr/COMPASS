@@ -79,7 +79,7 @@ void DBObject::generateSubConfigurable (const std::string &class_id, const std::
 
         assert (variables_.find (var_name) == variables_.end());
 
-        loginf  << "DBObject: generateSubConfigurable: generating variable " << instance_id << " with name " << var_name;
+        logdbg << "DBObject: generateSubConfigurable: generating variable " << instance_id << " with name " << var_name;
 
         variables_.emplace(std::piecewise_construct,
                      std::forward_as_tuple(var_name),  // args for key
