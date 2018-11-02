@@ -3,6 +3,7 @@
 
 #include "configurable.h"
 #include "dbovariableset.h"
+#include "json.hpp"
 
 #include <QObject>
 
@@ -15,10 +16,10 @@ class DBObject;
 class DBOVariable;
 class Buffer;
 
-namespace Json
-{
-    class Value;
-}
+//namespace nlohmann
+//{
+//    class json;
+//}
 
 class JSONImporterTask : public QObject, public Configurable
 {
@@ -143,7 +144,7 @@ protected:
 
     void checkAndSetVariable (std::string &name_str, DBOVariable** var);
 
-    std::shared_ptr<Buffer> parseJSON (Json::Value& object, bool test);
+    std::shared_ptr<Buffer> parseJSON (nlohmann::json& j, bool test);
     void insertData (std::shared_ptr<Buffer> buffer);
 };
 

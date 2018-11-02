@@ -26,12 +26,14 @@
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
-#include <jsoncpp/json/json.h>
+//#include <jsoncpp/json/json.h>
+//#include "json.hpp"
 
 #include <archive.h>
 #include <archive_entry.h>
 
 using namespace Utils;
+using namespace nlohmann;
 
 JSONImporterTask::JSONImporterTask(const std::string& class_id, const std::string& instance_id,
                                    TaskManager* task_manager)
@@ -314,11 +316,12 @@ void JSONImporterTask::importFile(const std::string& filename, bool test)
     }
 
     std::ifstream ifs(filename);
-    Json::Reader reader;
-    Json::Value obj;
-    reader.parse(ifs, obj); // reader can also read strings
+//    Json::Reader reader;
+//    Json::Value obj;
+//    reader.parse(ifs, obj); // reader can also read strings
+    json j = json::parse(ifs);
 
-    std::shared_ptr<Buffer> buffer_ptr = parseJSON (obj, test);
+    std::shared_ptr<Buffer> buffer_ptr = parseJSON (j, test);
 
     if (!test)
         insertData (buffer_ptr);
@@ -402,8 +405,9 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
     int64_t offset;
 
     std::stringstream ss;
-    Json::Reader reader;
-    Json::Value obj;
+//    json j;
+//    Json::Reader reader;
+//    Json::Value obj;
 
     QMessageBox msg_box;
     std::string msg = "Importing archive '"+filename+"'.";
@@ -464,38 +468,49 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
         tmp_time = boost::posix_time::microsec_clock::local_time();
 
         loginf  << "JSONImporterTask: importFileArchive: got entry with " << ss.str().size() << " chars";
-        reader.parse(ss.str(), obj); // reader can also read strings
+        //reader.parse(ss.str(), obj); // reader can also read strings
 
-        archive_parse_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
-        tmp_time = boost::posix_time::microsec_clock::local_time();
-
-        std::shared_ptr<Buffer> buffer_ptr = parseJSON (obj, test);
-
-        json_parse_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
-        tmp_time = boost::posix_time::microsec_clock::local_time();
-
-        if (buffer_ptr->size())
+        try
         {
-            while (insert_active_)
-            {
-                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-                QThread::msleep (10);
-            }
-            wait_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
+            json j = json::parse(ss.str());
+
+            archive_parse_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
             tmp_time = boost::posix_time::microsec_clock::local_time();
 
-            if (!test)
-                insertData (buffer_ptr);
+            std::shared_ptr<Buffer> buffer_ptr = parseJSON (j, test);
 
-            insert_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
+            json_parse_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
+            tmp_time = boost::posix_time::microsec_clock::local_time();
 
-            loginf << "JSONImporterTask: importFileArchive: time: archive_read_time " << archive_read_time/1000.0
-                   << " archive_parse_time " << archive_parse_time/1000.0
-                   << " json_parse_time " << json_parse_time/1000.0
-                   << " wait_time " << wait_time/1000.0
-                   << " insert_time " << insert_time/1000.0;
+            if (buffer_ptr->size())
+            {
+                while (insert_active_)
+                {
+                    QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                    QThread::msleep (10);
+                }
+                wait_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
+                tmp_time = boost::posix_time::microsec_clock::local_time();
+
+                if (!test)
+                    insertData (buffer_ptr);
+
+                insert_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
+
+                loginf << "JSONImporterTask: importFileArchive: time: archive_read_time " << archive_read_time/1000.0
+                       << " archive_parse_time " << archive_parse_time/1000.0
+                       << " json_parse_time " << json_parse_time/1000.0
+                       << " wait_time " << wait_time/1000.0
+                       << " insert_time " << insert_time/1000.0;
+            }
+            entry_cnt++;
         }
-        entry_cnt++;
+        catch (std::exception e)
+        {
+            logerr << "JSONImporterTask: importFileArchive: json parsing error: " << e.what()
+                   << ", skipping entry ";
+            continue;
+        }
     }
 
     r = archive_read_close(a);
@@ -535,7 +550,7 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
     return;
 }
 
-std::shared_ptr<Buffer> JSONImporterTask::parseJSON (Json::Value& object, bool test)
+std::shared_ptr<Buffer> JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
 {
     loginf << "JSONImporterTask: parseJSON";
 
@@ -594,26 +609,26 @@ std::shared_ptr<Buffer> JSONImporterTask::parseJSON (Json::Value& object, bool t
     ArrayListTemplate<float>& tod_al = buffer_ptr->get<float>(tod_var_->name());
 
 //    unsigned int all_cnt = 0;
-    bool receiver_valid;
+    bool receiver_valid {false};
     int receiver;
     std::string receiver_name;
-    bool target_address_valid;
+    bool target_address_valid {false};
     unsigned int target_address;
     bool callsign_valid;
     std::string callsign;
-    bool altitude_baro_valid;
+    bool altitude_baro_valid {false};
     float altitude_baro_ft;
     bool altitude_geo_valid;
     float altitude_geo_ft;
-    bool latitude_valid;
+    bool latitude_valid {false};
     double latitude_deg;
-    bool longitude_valid;
+    bool longitude_valid {false};
     double longitude_deg;
-    bool time_valid;
+    bool time_valid {false};
     unsigned long epoch_ms;
     QDateTime date_time;
     double tod;
-    bool mlat_valid;
+    bool mlat_valid {false};
     bool mlat;
 
 //    unsigned int skipped = 0;
@@ -625,16 +640,21 @@ std::shared_ptr<Buffer> JSONImporterTask::parseJSON (Json::Value& object, bool t
 
     bool skip_this;
 
-    for (auto it = object.begin(); it != object.end(); ++it)
+    for (json::iterator it = j.begin(); it != j.end(); ++it)
     {
-        logdbg << it.key().asString(); // << ':' << it->asInt() << '\n';
+        logdbg << it.key(); // << ':' << it->asInt() << '\n';
 
-        if (it.key().asString() == "acList")
+        if (it.key() == "acList")
         {
-            Json::Value ac_list = object["acList"];
+            json& ac_list = it.value();
+            assert (ac_list.is_array());
+
             //Json::Value& ac_list = it.v;
             for (auto tr_it = ac_list.begin(); tr_it != ac_list.end(); ++tr_it)
             {
+                json& tr = tr_it.value();
+                assert (tr.is_object());
+
                 skip_this = false;
                 //loginf << tr_it.key().asString();
 
@@ -658,10 +678,10 @@ std::shared_ptr<Buffer> JSONImporterTask::parseJSON (Json::Value& object, bool t
                 //            5 = Satellite/Inmarsat/JAERO
                 //            6 = Aggregated from a group of receivers
                 //        XXX – a unique number assigned to feeds.  Static on server 100.  Dynamic on other servers.
-                receiver_valid = !(*tr_it)["Rcvr"].isNull();
+                receiver_valid = tr.find("Rcvr") != tr.end();
                 if (receiver_valid)
                 {
-                    receiver = (*tr_it)["Rcvr"].asUInt();
+                    receiver = tr["Rcvr"];
                     receiver_name = std::to_string(receiver);
                 }
                 else
@@ -688,19 +708,19 @@ std::shared_ptr<Buffer> JSONImporterTask::parseJSON (Json::Value& object, bool t
                 // the same.  If the registration number changes, which can happen sometimes when an aircraft is sold
                 // to an owner in another country, the ICAO hex code will also change.
 
-                target_address_valid = !(*tr_it)["Icao"].isNull();
+                target_address_valid = tr.find("Icao") != tr.end();
                 if (target_address_valid)
-                    target_address = String::intFromHexString((*tr_it)["Icao"].asString());
+                    target_address = String::intFromHexString(tr["Icao"]);
                 else
                     skip_this = true;
 
                 //    Reg (alphanumeric) – Aircraft registration number.  This is looked up via a database based on the
                 // ICAO code.  This information is only as good as the database, and is not pulled off the airwaves. It
                 // is not broadcast by the aircraft.
-                callsign_valid = !(*tr_it)["Reg"].isNull();
+                callsign_valid = tr.find("Reg") != tr.end();
 
                 if (callsign_valid)
-                    callsign = (*tr_it)["Reg"].asString();
+                    callsign = tr["Reg"];
 
                 //    Fseen (datetime – epoch format) – date and time the receiver first started seeing the aircraft on
                 // this flight.  Accurate for a single receiver, but as the plane is detected by different receivers,
@@ -713,15 +733,15 @@ std::shared_ptr<Buffer> JSONImporterTask::parseJSON (Json::Value& object, bool t
                 // between receiving servers.
 
                 //    Alt (integer) – The altitude in feet at standard pressure. (broadcast by the aircraft)
-                altitude_baro_valid = !(*tr_it)["Alt"].isNull();
+                altitude_baro_valid = tr.find("Alt") != tr.end();
                 if (altitude_baro_valid)
-                    altitude_baro_ft = (*tr_it)["Alt"].asInt();
+                    altitude_baro_ft = tr["Alt"];
 
                 //    Galt (integer) – The altitude adjusted for local air pressure, should be roughly the height above
                 // mean sea level.
-                altitude_geo_valid = !(*tr_it)["Galt"].isNull();
+                altitude_geo_valid = tr.find("Galt") != tr.end();
                 if (altitude_geo_valid)
-                    altitude_geo_ft = (*tr_it)["Galt"].asInt();
+                    altitude_geo_ft = tr["Galt"];
 
                 //    InHG (float) – The air pressure in inches of mercury that was used to calculate the AMSL altitude
                 // from the standard pressure altitude.
@@ -731,16 +751,16 @@ std::shared_ptr<Buffer> JSONImporterTask::parseJSON (Json::Value& object, bool t
                 // otherwise.
 
                 //    Lat (float) – The aircraft’s latitude over the ground.
-                latitude_valid = !(*tr_it)["Lat"].isNull();
+                latitude_valid = tr.find("Lat") != tr.end();
                 if (latitude_valid)
-                    latitude_deg = (*tr_it)["Lat"].asFloat();
+                    latitude_deg = tr["Lat"];
                 else
                     skip_this = true;
 
                 //    Long (float) – The aircraft’s longitude over the ground.
-                longitude_valid =!(*tr_it)["Long"].isNull();
+                longitude_valid = tr.find("Long") != tr.end();
                 if (longitude_valid)
-                    longitude_deg = (*tr_it)["Long"].asFloat();
+                    longitude_deg = tr["Long"];
                 else
                     skip_this = true;
 
@@ -753,10 +773,10 @@ std::shared_ptr<Buffer> JSONImporterTask::parseJSON (Json::Value& object, bool t
                 // milliseconds) that the position was last reported by the aircraft. This field is the time at which
                 // the aircraft was at the lat/long/altitude reported above. https://www.epochconverter.com/ may be
                 // helpful.
-                time_valid = !(*tr_it)["PosTime"].isNull();
+                time_valid = tr.find("PosTime") != tr.end();
                 if (time_valid)
                 {
-                    epoch_ms = (*tr_it)["PosTime"].asLargestUInt();
+                    epoch_ms = tr["PosTime"];
                     date_time.setMSecsSinceEpoch(epoch_ms);
                     tod = String::timeFromString(date_time.toString("hh:mm:ss.zzz").toStdString());
 
@@ -773,10 +793,10 @@ std::shared_ptr<Buffer> JSONImporterTask::parseJSON (Json::Value& object, bool t
                 // aircraft tracks. Aircraft that have Mode S (and have not upgraded to ADS-B) can sometimes be tracked
                 // via multilateration.  It requires 3-4 ground stations in different locations to be receiving the
                 // aircraft signal simultaneously in order to allow the calculation.
-                mlat_valid = !(*tr_it)["Mlat"].isNull();
+                mlat_valid = tr.find("Mlat") != tr.end();
 
                 if (mlat_valid)
-                    mlat = (*tr_it)["Mlat"].asBool();
+                    mlat = tr["Mlat"];
 
                 if (join_data_sources_) // init for ADS-B
                 {

@@ -67,9 +67,9 @@ find_package ( LibArchive REQUIRED )
 message("  LibArchive_INCLUDE_DIRS: ${LibArchive_INCLUDE_DIRS}")
 message("  LibArchive_LIBRARIES: ${LibArchive_LIBRARIES}")
 
-find_package ( JSONCPP REQUIRED )
-message("  JSONCPP_INCLUDE_DIR: ${JSONCPP_INCLUDE_DIR}")
-message("  JSONCPP_LIBRARY: ${JSONCPP_LIBRARY}")
+#find_package ( JSONCPP REQUIRED )
+#message("  JSONCPP_INCLUDE_DIR: ${JSONCPP_INCLUDE_DIR}")
+#message("  JSONCPP_LIBRARY: ${JSONCPP_LIBRARY}")
 
 
 add_library(atsdb "")
