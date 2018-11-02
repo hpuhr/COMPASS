@@ -12,11 +12,15 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/stringconv.h"
         "${CMAKE_CURRENT_LIST_DIR}/singleton.h"
         "${CMAKE_CURRENT_LIST_DIR}/logger.h"
+        "${CMAKE_CURRENT_LIST_DIR}/format.h"
+        "${CMAKE_CURRENT_LIST_DIR}/formatselectionwidget.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/config.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/files.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/format.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/logger.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/number.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/formatselectionwidget.cpp"
 )
 
 

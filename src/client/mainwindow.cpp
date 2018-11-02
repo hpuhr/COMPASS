@@ -40,7 +40,6 @@
 #include "logger.h"
 #include "config.h"
 #include "configurationmanager.h"
-#include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "dbobjectmanagerwidget.h"
 #include "atsdb.h"

@@ -19,6 +19,7 @@
 #define DBFILTERCONDITION_H_
 
 #include <QObject>
+#include <cassert>
 
 #include "configurable.h"
 

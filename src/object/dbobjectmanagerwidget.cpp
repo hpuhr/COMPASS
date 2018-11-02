@@ -154,10 +154,8 @@ void DBObjectManagerWidget::unlock ()
 
 void DBObjectManagerWidget::databaseOpenedSlot ()
 {
-
+    loginf << "DBObjectManagerWidget: databaseOpenedSlot";
 }
-
-
 
 void DBObjectManagerWidget::addDBOSlot ()
 {
@@ -280,23 +278,27 @@ void DBObjectManagerWidget::updateDBOsSlot ()
 
     unsigned int row=1;
 
-    auto objects = object_manager_.objects();
-
-    for (auto it = objects.begin(); it != objects.end(); it++)
+    for (auto& obj_it : object_manager_)
     {
-        QLabel *name = new QLabel (it->second->name().c_str());
+        QLabel* name = new QLabel (obj_it.second->name().c_str());
+//        if (!obj_it.second->existsInDB())
+//        {
+//            QFont font = name->font();
+//            font.setStrikeOut(true);
+//            name->setFont(font);
+//        }
         dbobjects_grid_->addWidget (name, row, 0);
 
-        QLabel *numel = new QLabel ((std::to_string(it->second->numVariables())).c_str());
+        QLabel* numel = new QLabel ((std::to_string(obj_it.second->numVariables())).c_str());
         dbobjects_grid_->addWidget (numel, row, 1);
 
-        bool active = it->second->hasCurrentMetaTable();
-        QLabel *meta = new QLabel ("None");
+        bool active = obj_it.second->hasCurrentMetaTable();
+        QLabel* meta = new QLabel ("None");
         if (active)
-            meta->setText(it->second->currentMetaTable().name().c_str());
+            meta->setText(obj_it.second->currentMetaTable().name().c_str());
         dbobjects_grid_->addWidget (meta, row, 2);
 
-        QPushButton *edit = new QPushButton ();
+        QPushButton* edit = new QPushButton ();
         edit->setIcon(edit_icon);
         edit->setIconSize(UI_ICON_SIZE);
         edit->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
@@ -304,9 +306,9 @@ void DBObjectManagerWidget::updateDBOsSlot ()
         //edit->setDisabled(!active || locked_);
         connect(edit, SIGNAL( clicked() ), this, SLOT( editDBOSlot() ));
         dbobjects_grid_->addWidget (edit, row, 3);
-        edit_dbo_buttons_[edit] = it->second;
+        edit_dbo_buttons_[edit] = obj_it.second;
 
-        QPushButton *del = new QPushButton ();
+        QPushButton* del = new QPushButton ();
         del->setIcon(del_icon);
         del->setIconSize(UI_ICON_SIZE);
         del->setMaximumWidth(UI_ICON_BUTTON_MAX_WIDTH);
@@ -314,7 +316,7 @@ void DBObjectManagerWidget::updateDBOsSlot ()
         //del->setDisabled(locked_);
         connect(del, SIGNAL( clicked() ), this, SLOT( deleteDBOSlot() ));
         dbobjects_grid_->addWidget (del, row, 4);
-        delete_dbo_buttons_[del] = it->second;
+        delete_dbo_buttons_[del] = obj_it.second;
 
         row++;
     }
@@ -354,24 +356,30 @@ void DBObjectManagerWidget::deleteMetaVariableSlot ()
 
 void DBObjectManagerWidget::addAllMetaVariablesSlot ()
 {
-    auto objects = object_manager_.objects();
     std::vector <std::string> found_dbos;
 
     bool changed = false;
 
-    for (auto obj_it : objects)
+    for (auto& obj_it : object_manager_)
     {
-        for (auto var_it : obj_it.second->variables())
+        for (auto& var_it : *obj_it.second)
         {
+            if (object_manager_.usedInMetaVariable(var_it.second))
+            {
+                loginf << "DBObjectManagerWidget: addAllMetaVariablesSlot: not adding dbovariable " << var_it.first
+                       << " since already used";
+                continue;
+            }
+
             found_dbos.clear();
             found_dbos.push_back(obj_it.first); // original object
 
-            for (auto obj_it2 : objects)
+            for (auto& obj_it2 : object_manager_)
             {
                 if (obj_it == obj_it2)
                     continue;
 
-                if (obj_it2.second->hasVariable(var_it.first) && var_it.second->dataType()
+                if (obj_it2.second->hasVariable(var_it.first) && var_it.second.dataType()
                         == obj_it2.second->variable(var_it.first).dataType())
                 {
                     found_dbos.push_back(obj_it2.first);

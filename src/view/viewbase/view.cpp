@@ -90,7 +90,7 @@ bool View::init()
  */
 const std::string& View::getName() const
 {
-  return instance_id_;
+  return instanceId();
 }
 
 /**

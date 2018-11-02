@@ -16,6 +16,7 @@
  */
 
 #include <algorithm>
+#include <memory>
 
 #include "dbtable.h"
 #include "dbschema.h"
@@ -54,7 +55,7 @@ DBObject::DBObject(const std::string& class_id, const std::string& instance_id, 
 
     qRegisterMetaType<std::shared_ptr<Buffer>>("std::shared_ptr<Buffer>");
 
-    logdbg  << "DBObject: constructor: created with instance_id " << instance_id_ << " name " << name_;
+    logdbg  << "DBObject: constructor: created with instance_id " << instanceId() << " name " << name_;
 }
 
 /**
@@ -63,38 +64,6 @@ DBObject::DBObject(const std::string& class_id, const std::string& instance_id, 
 DBObject::~DBObject()
 {
     current_meta_table_ = nullptr;
-
-    data_sources_.clear();
-
-    if (label_definition_)
-    {
-        delete label_definition_;
-        label_definition_=nullptr;
-    }
-
-    for (auto it : data_source_definitions_)
-        delete it.second;
-    data_source_definitions_.clear();
-
-    for (auto it : meta_table_definitions_)
-        delete it;
-    meta_table_definitions_.clear();
-
-    for (auto it : variables_)
-        delete it.second;
-    variables_.clear();
-
-    if (widget_)
-    {
-        delete widget_;
-        widget_=nullptr;
-    }
-
-    if (info_widget_)
-    {
-        delete info_widget_;
-        info_widget_=nullptr;
-    }
 }
 
 /**
@@ -105,35 +74,47 @@ void DBObject::generateSubConfigurable (const std::string &class_id, const std::
     logdbg  << "DBObject: generateSubConfigurable: generating variable " << instance_id;
     if (class_id.compare ("DBOVariable") == 0)
     {
-        DBOVariable* variable = new DBOVariable (class_id, instance_id, this);
-        assert (variables_.find (variable->name()) == variables_.end());
-        variables_.insert (std::pair <std::string, DBOVariable*> (variable->name(), variable));
+        std::string var_name = configuration().getSubConfiguration(
+                    class_id, instance_id).getParameterConfigValueString("name");
+
+        assert (variables_.find (var_name) == variables_.end());
+
+        logdbg << "DBObject: generateSubConfigurable: generating variable " << instance_id << " with name " << var_name;
+
+        variables_.emplace(std::piecewise_construct,
+                     std::forward_as_tuple(var_name),  // args for key
+                     std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
     }
     else if (class_id.compare ("DBOSchemaMetaTableDefinition") == 0)
     {
-        DBOSchemaMetaTableDefinition* def = new DBOSchemaMetaTableDefinition (class_id, instance_id, this);
-        meta_table_definitions_.push_back (def);
+        logdbg << "DBObject: generateSubConfigurable: creating DBOSchemaMetaTableDefinition";
+        std::string schema_name = configuration().getSubConfiguration(
+                    class_id, instance_id).getParameterConfigValueString("schema");
 
-        logdbg  << "DBObject "<< name() << ": generateSubConfigurable: schema " << def->schema() << " meta "
-                << def->metaTable();
+        assert (meta_table_definitions_.find(schema_name) == meta_table_definitions_.end());
 
-        assert (meta_tables_.find (def->schema()) == meta_tables_.end());
-        meta_tables_[def->schema()] = def->metaTable();
+        meta_table_definitions_.emplace(std::piecewise_construct,
+                     std::forward_as_tuple(schema_name),  // args for key
+                     std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
     }
     else if (class_id.compare ("DBODataSourceDefinition") == 0)
     {
-        DBODataSourceDefinition* def = new DBODataSourceDefinition (class_id, instance_id, this);
-        assert (data_source_definitions_.find(def->schema()) == data_source_definitions_.end());
-        connect (def, SIGNAL(definitionChangedSignal()), this, SLOT(dataSourceDefinitionChanged()));
+        std::string schema_name = configuration().getSubConfiguration(
+                    class_id, instance_id).getParameterConfigValueString("schema");
 
-        data_source_definitions_.insert (std::pair<std::string, DBODataSourceDefinition*> (def->schema(), def));
+        assert (data_source_definitions_.find(schema_name) == data_source_definitions_.end());
+
+        data_source_definitions_.emplace(std::piecewise_construct,
+                     std::forward_as_tuple(schema_name),  // args for key
+                     std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
+
+        connect (&data_source_definitions_.at(schema_name), SIGNAL(definitionChangedSignal()),
+                 this, SLOT(dataSourceDefinitionChanged()));
     }
     else if (class_id.compare ("DBOLabelDefinition") == 0)
     {
-        DBOLabelDefinition* def = new DBOLabelDefinition (class_id, instance_id, this);
         assert (!label_definition_);
-        //connect (def, SIGNAL(definitionChangedSignal()), this, SLOT(dataSourceDefinitionChanged()));
-        label_definition_ = def;
+        label_definition_.reset (new DBOLabelDefinition (class_id, instance_id, this));
     }
     else
         throw std::runtime_error ("DBObject: generateSubConfigurable: unknown class_id "+class_id );
@@ -152,13 +133,13 @@ void DBObject::checkSubConfigurables ()
 
 bool DBObject::hasVariable (const std::string& name) const
 {
-    return (variables_.find (name) != variables_.end());
+    return variables_.find (name) != variables_.end();
 }
 
-DBOVariable& DBObject::variable (const std::string& name) const
+DBOVariable& DBObject::variable (const std::string& name)
 {
     assert (hasVariable (name));
-    return *variables_.at(name);
+    return variables_.at(name);
 }
 
 void DBObject::renameVariable (const std::string& name, const std::string& new_name)
@@ -168,41 +149,62 @@ void DBObject::renameVariable (const std::string& name, const std::string& new_n
     assert (hasVariable (name));
     assert (!hasVariable (new_name));
 
-    DBOVariable* variable = variables_.at(name);
-
+    variables_[new_name] = std::move(variables_.at(name));
     variables_.erase(name);
-    assert (!hasVariable (name));
-
-    variable->name(new_name);
-    variables_[new_name] = variable;
 
     assert (hasVariable (new_name));
+    variables_.at(new_name).name(new_name);
 }
 
 void DBObject::deleteVariable (const std::string& name)
 {
     assert (hasVariable (name));
-
-    DBOVariable* variable = variables_.at(name);
-    variables_.erase(variables_.find (name));
+    variables_.erase(name);
     assert (!hasVariable (name));
-    delete variable;
 }
 
-const std::map<std::string, DBOVariable*>& DBObject::variables () const
+bool DBObject::uses (const DBTableColumn& column) const
 {
-    return variables_;
+    logdbg << "DBObject " << name_ << ": uses: column " << column.name();
+
+    for (auto& dbovar_it : variables_)
+    {
+        const DBOVariable& var = dbovar_it.second;
+
+        if (!var.hasCurrentDBColumn())
+            continue;
+
+        if (var.currentDBColumn() == column)
+            return true;
+    }
+
+    return false;
 }
 
 bool DBObject::hasMetaTable (const std::string& schema) const
 {
-    return meta_tables_.find(schema) != meta_tables_.end();
+    return meta_table_definitions_.find(schema) != meta_table_definitions_.end();
 }
 
 const std::string& DBObject::metaTable (const std::string& schema) const
 {
     assert (hasMetaTable(schema));
-    return meta_tables_.at(schema);
+    return meta_table_definitions_.at(schema).metaTable();
+}
+
+void DBObject::deleteMetaTable (const std::string& schema)
+{
+    assert (hasMetaTable(schema));
+
+    std::string meta_table_name = metaTable(schema);
+    meta_table_definitions_.erase(schema);
+    assert (!hasMetaTable(schema));
+
+    if (current_meta_table_->name() == meta_table_name)
+        current_meta_table_ = nullptr;
+
+    if (widget_)
+        widget_->updateMetaTablesGridSlot();
 }
 
 /**
@@ -220,14 +222,18 @@ bool DBObject::hasCurrentDataSourceDefinition () const
 const DBODataSourceDefinition& DBObject::currentDataSourceDefinition () const
 {
     assert (hasCurrentDataSourceDefinition());
-    return *data_source_definitions_.at(ATSDB::instance().schemaManager().getCurrentSchema().name());
+    return data_source_definitions_.at(ATSDB::instance().schemaManager().getCurrentSchema().name());
 }
 
 void DBObject::deleteDataSourceDefinition (const std::string& schema)
 {
     assert (data_source_definitions_.count(schema) == 1);
-    delete data_source_definitions_.at(schema);
     data_source_definitions_.erase(schema);
+
+    if (widget_)
+        widget_->updateDataSourcesGridSlot();
+
+    buildDataSources();
 }
 
 void DBObject::dataSourceDefinitionChanged ()
@@ -337,8 +343,8 @@ void DBObject::addDataSource (int key_value, const std::string& name)
 
     std::shared_ptr<Buffer> buffer_ptr = std::shared_ptr<Buffer> (new Buffer (list, name_));
 
-    buffer_ptr->getInt(foreign_key_col.name()).set(0, key_value);
-    buffer_ptr->getString(name_col.name()).set(0, name);
+    buffer_ptr->get<int>(foreign_key_col.name()).set(0, key_value);
+    buffer_ptr->get<std::string>(name_col.name()).set(0, name);
 
     assert (ATSDB::instance().schemaManager().getCurrentSchema().hasMetaTable(meta_table_name));
     MetaDBTable& meta_table = ATSDB::instance().schemaManager().getCurrentSchema().metaTable(meta_table_name);
@@ -362,7 +368,7 @@ void DBObject::addDataSource (int key_value, const std::string& name)
 
         std::shared_ptr<Buffer> main_buffer_ptr = std::shared_ptr<Buffer> (new Buffer (main_list, name_));
 
-        main_buffer_ptr->getInt(foreign_key_col.name()).set(0, key_value);
+        main_buffer_ptr->get<int>(foreign_key_col.name()).set(0, key_value);
 
         db_interface.insertBuffer(main_table, main_buffer_ptr, 0, 0);
     }
@@ -399,8 +405,8 @@ void DBObject::addDataSources (std::map <int, std::string>& sources)
     unsigned int cnt=0;
     for (auto& src_it : sources)
     {
-        buffer_ptr->getInt(foreign_key_col.name()).set(cnt, src_it.first);
-        buffer_ptr->getString(name_col.name()).set(cnt, src_it.second);
+        buffer_ptr->get<int>(foreign_key_col.name()).set(cnt, src_it.first);
+        buffer_ptr->get<std::string>(name_col.name()).set(cnt, src_it.second);
         cnt++;
     }
 
@@ -429,7 +435,7 @@ void DBObject::addDataSources (std::map <int, std::string>& sources)
         cnt=0;
         for (auto& src_it : sources)
         {
-            main_buffer_ptr->getInt(foreign_key_col.name()).set(cnt, src_it.first);
+            main_buffer_ptr->get<int>(foreign_key_col.name()).set(cnt, src_it.first);
             cnt++;
         }
 
@@ -451,7 +457,7 @@ bool DBObject::hasActiveDataSourcesInfo ()
     return ATSDB::instance().interface().hasActiveDataSources(*this);
 }
 
-const std::set<int> DBObject::getActiveDataSources () const
+const std::set<int> DBObject::getActiveDataSources ()
 {
     return ATSDB::instance().interface().getActiveDataSources(*this);
 }
@@ -481,25 +487,25 @@ DBObjectWidget* DBObject::widget ()
 {
     if (!widget_)
     {
-        widget_ = new DBObjectWidget (this, ATSDB::instance().schemaManager());
+        widget_.reset(new DBObjectWidget (this, ATSDB::instance().schemaManager()));
         assert (widget_);
 
         if (locked_)
             widget_->lock();
     }
 
-    return widget_;
+    return widget_.get(); // needed for qt integration, not pretty
 }
 
 DBObjectInfoWidget *DBObject::infoWidget ()
 {
     if (!info_widget_)
     {
-        info_widget_ = new DBObjectInfoWidget (*this);
+        info_widget_.reset (new DBObjectInfoWidget (*this));
         assert (info_widget_);
     }
 
-    return info_widget_;
+    return info_widget_.get(); // needed for qt integration, not pretty
 }
 
 DBOLabelDefinitionWidget* DBObject::labelDefinitionWidget()
@@ -513,7 +519,7 @@ void DBObject::lock ()
     locked_ = true;
 
     for (auto& var_it : variables_)
-        var_it.second->lock();
+        var_it.second.lock();
 
     if (widget_)
         widget_->lock();
@@ -524,7 +530,7 @@ void DBObject::unlock ()
     locked_ = false;
 
     for (auto& var_it : variables_)
-        var_it.second->unlock();
+        var_it.second.unlock();
 
     if (widget_)
         widget_->unlock();
@@ -539,14 +545,14 @@ void DBObject::schemaChangedSlot ()
     {
         DBSchema& schema = ATSDB::instance().schemaManager().getCurrentSchema();
 
-        if (meta_tables_.find(schema.name()) == meta_tables_.end())
+        if (!hasMetaTable(schema.name()))
         {
             logwrn << "DBObject: schemaChangedSlot: object " << name_ << " has not main meta table for current schema";
             current_meta_table_ = nullptr;
             return;
         }
 
-        std::string meta_table_name = meta_tables_ .at(schema.name());
+        std::string meta_table_name = meta_table_definitions_.at(schema.name()).metaTable();
         assert (schema.hasMetaTable (meta_table_name));
         current_meta_table_ = &schema.metaTable (meta_table_name);
     }
@@ -917,4 +923,53 @@ bool DBObject::existsInDB () const
         return false;
     else
         return currentMetaTable().existsInDB();
+}
+
+void DBObject::print ()
+{
+    assert (hasCurrentMetaTable());
+
+    std::stringstream ss;
+
+    ss << "COLID";
+    ss << " && COLTYPE";
+    ss << " && COLKEY";
+    ss << " && COLCOMMENT";
+    ss << " && COLCIM";
+    ss << " && COLUNIT";
+    ss << " && OBNAME";
+    ss << " && OBDESC";
+    ss << " && OBDIM";
+    ss << " && OBUNIT";
+    ss << " && OBREP";
+    ss << std::endl;
+
+    for (auto& col_it : currentMetaTable ().columns())
+    {
+        const DBTableColumn& col = col_it.second;
+        ss << col.identifier();
+        ss << " && " << col.type();
+        ss << " && " << col.isKey();
+        ss << " && " << col.comment();
+        ss << " && " << col.dimension();
+        ss << " && " << col.unit();
+
+        for (auto& var_it : variables_)
+        {
+            DBOVariable& var = var_it.second;
+            if (var.hasCurrentDBColumn() && var.currentDBColumn().identifier() == col.identifier())
+            {
+                ss << " && " << var.name();
+                ss << " && " << var.description();
+                ss << " && " << var.dimension();
+                ss << " && " << var.unit();
+                ss << " && " << var.representationString();
+            }
+        }
+
+        ss << std::endl;
+    }
+
+    loginf << "DBObject " << name() << ":\n" << ss.str();
+
 }

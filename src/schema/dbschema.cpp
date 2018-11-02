@@ -51,7 +51,7 @@ DBSchema::~DBSchema()
 
 void DBSchema::generateSubConfigurable (const std::string& class_id, const std::string& instance_id)
 {
-    logdbg  << "DBSchema: generateSubConfigurable: " << class_id_ << " instance " << instance_id_;
+    logdbg  << "DBSchema: generateSubConfigurable: " << classId() << " instance " << instanceId();
 
     if (class_id.compare("DBTable") == 0)
     {
@@ -84,7 +84,7 @@ DBTable& DBSchema::table (const std::string& name) const
 void DBSchema::addTable(const std::string& name)
 {
     assert (!hasTable(name));
-    assert (children_.count("DBTable"+name) == 0);
+    assert (!hasSubConfigurable("DBTable", name));
 
     Configuration& table_config = addNewSubConfiguration ("DBTable", name);
     table_config.addParameterString ("name", name);
@@ -141,7 +141,7 @@ MetaDBTable& DBSchema::metaTable (const std::string& name) const
 void DBSchema::addMetaTable(const std::string& name, const std::string& main_table_name)
 {
     assert (!hasMetaTable(name));
-    assert (children_.count("MetaDBTable"+name) == 0);
+    assert (!hasSubConfigurable("MetaDBTable", name));
 
     Configuration &table_config = addNewSubConfiguration ("MetaDBTable", "MetaDBTable"+name);
     table_config.addParameterString ("name", name);
@@ -182,7 +182,7 @@ void DBSchema::updateMetaTables ()
 
     for (auto it : old_meta_tables)
     {
-        meta_tables_.insert (std::pair <std::string, MetaDBTable*> (it.second->getInstanceId(), it.second));
+        meta_tables_.insert (std::pair <std::string, MetaDBTable*> (it.second->instanceId(), it.second));
     }
 }
 

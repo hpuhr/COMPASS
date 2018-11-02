@@ -18,9 +18,9 @@
 #include "mysqlppconnectionwidget.h"
 #include "mysqlserver.h"
 #include "logger.h"
-#include "atsdb.h"
 #include "dbobjectmanager.h"
 #include "dbobject.h"
+#include "atsdb.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -161,7 +161,7 @@ void MySQLppConnectionWidget::importSQLTextSlot()
 
     bool any_data=false;
 
-    for (auto obj_it : ATSDB::instance().objectManager().objects())
+    for (auto obj_it : ATSDB::instance().objectManager())
         if (obj_it.second->hasData())
             any_data=true;
 
@@ -209,7 +209,7 @@ void MySQLppConnectionWidget::importSQLTextFromArchiveSlot()
 
     bool any_data=false;
 
-    for (auto obj_it : ATSDB::instance().objectManager().objects())
+    for (auto obj_it : ATSDB::instance().objectManager())
         if (obj_it.second->hasData())
             any_data=true;
 

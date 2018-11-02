@@ -37,10 +37,10 @@ ListBoxViewDataSource::ListBoxViewDataSource(const std::string& class_id, const 
 
     connect (&ATSDB::instance().objectManager(), SIGNAL(loadingStartedSignal()), this, SLOT(loadingStartedSlot()));
 
-    for (auto object : ATSDB::instance().objectManager().objects())
+    for (auto& obj_it : ATSDB::instance().objectManager())
     {
-        connect (object.second, SIGNAL (newDataSignal(DBObject &)), this, SLOT(newDataSlot(DBObject&)));
-        connect (object.second, SIGNAL (loadingDoneSignal(DBObject &)), this, SLOT(loadingDoneSlot(DBObject&)));
+        connect (obj_it.second, SIGNAL (newDataSignal(DBObject&)), this, SLOT(newDataSlot(DBObject&)));
+        connect (obj_it.second, SIGNAL (loadingDoneSignal(DBObject &)), this, SLOT(loadingDoneSlot(DBObject&)));
     }
 
     createSubConfigurables ();

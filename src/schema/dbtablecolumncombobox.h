@@ -45,7 +45,7 @@ private:
     /// Meta table name
     std::string meta_table_;
     /// Variable
-    DBOVariable &variable_;
+    DBOVariable& variable_;
 };
 
 

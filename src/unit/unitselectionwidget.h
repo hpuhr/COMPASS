@@ -41,6 +41,8 @@ public:
     /// @brief Destructor
     virtual ~UnitSelectionWidget();
 
+    void update (std::string &dimension, std::string &unit);
+
 protected:
     /// Unit dimension reference
     std::string &dimension_;

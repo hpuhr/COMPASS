@@ -89,7 +89,7 @@ DBObjectWidget::DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager
 
         QGridLayout *grid_layout = new QGridLayout ();
 
-        QLabel *name_label = new QLabel ("Table name");
+        QLabel *name_label = new QLabel ("Database object name");
         grid_layout->addWidget (name_label, 0, 0);
 
         name_edit_ = new QLineEdit (object_->name().c_str());
@@ -108,6 +108,10 @@ DBObjectWidget::DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager
         edit_label_button_ = new QPushButton ("Edit Label Definition");
         connect(edit_label_button_, SIGNAL( clicked() ), this, SLOT( showLabelDefinitionWidgetSlot() ));
         properties_layout->addWidget(edit_label_button_);
+
+        QPushButton* print_button_ = new QPushButton ("Print");
+        connect(print_button_, SIGNAL( clicked() ), this, SLOT( printSlot() ));
+        properties_layout->addWidget(print_button_);
 
         properties_frame->setLayout (properties_layout);
 
@@ -190,17 +194,19 @@ DBObjectWidget::DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager
 
     QHBoxLayout *all_var_layout = new QHBoxLayout ();
 
-    QLabel *all_var_label = new QLabel ("Create variables");
+    all_var_layout->addStretch();
+
+    QLabel *all_var_label = new QLabel ("Add unused DBOVariables in current schema");
     all_var_label->setFont (font_bold);
     all_var_layout->addWidget (all_var_label);
 
-    QLabel *all_var_schema_label = new QLabel ("Schema");
-    all_var_layout->addWidget (all_var_schema_label);
+//    QLabel *all_var_schema_label = new QLabel ("Schema");
+//    all_var_layout->addWidget (all_var_schema_label);
 
-    all_schemas_box_ = new DBSchemaSelectionComboBox ();
-    //updateAllVarsSchemaSelectionSlot();
-    all_schemas_box_->update();
-    all_var_layout->addWidget (all_schemas_box_);
+//    all_schemas_box_ = new DBSchemaSelectionComboBox ();
+//    //updateAllVarsSchemaSelectionSlot();
+//    all_schemas_box_->update();
+//    all_var_layout->addWidget (all_schemas_box_);
 
     add_schema_button_ = new QPushButton ("Add New");
     connect(add_schema_button_, SIGNAL( clicked() ), this, SLOT( addNewVariablesSlot() ));
@@ -246,7 +252,7 @@ void DBObjectWidget::lock ()
             widget->setDisabled(true);
     }
 
-    all_schemas_box_->setDisabled (true);
+    //all_schemas_box_->setDisabled (true);
     add_schema_button_->setDisabled (true);
 
     locked_ = true;
@@ -279,7 +285,7 @@ void DBObjectWidget::unlock ()
             widget->setDisabled(false);
     }
 
-    all_schemas_box_->setDisabled (false);
+    //all_schemas_box_->setDisabled (false);
     add_schema_button_->setDisabled (false);
 
     locked_ = false;
@@ -421,8 +427,6 @@ void DBObjectWidget::updateDataSourcesGridSlot ()
             delete child->widget();
         delete child;
     }
-    //ds_grid_edit_buttons_.clear();
-    //ds_grid_delete_buttons_.clear();
 
     QFont font_bold;
     font_bold.setBold(true);
@@ -444,22 +448,19 @@ void DBObjectWidget::updateDataSourcesGridSlot ()
 
     unsigned int row=1;
 
-
-
     for (auto& ds_it : object_->dataSourceDefinitions ())
     {
-        QLabel *schema = new QLabel (ds_it.second->schema().c_str());
+        QLabel *schema = new QLabel (ds_it.second.schema().c_str());
         ds_grid_->addWidget (schema, row, 0);
 
-        QVariant data = QVariant::fromValue(ds_it.second);
+        DBODataSourceDefinition* dsdef = &ds_it.second;
+        QVariant data = QVariant::fromValue(dsdef);
 
         QPushButton *edit = new QPushButton ();
         edit->setIcon(edit_icon);
         edit->setFixedSize ( UI_ICON_SIZE );
         edit->setFlat(UI_ICON_BUTTON_FLAT);
         connect(edit, SIGNAL(clicked()), this, SLOT(editDataSourceSlot()));
-        //assert (ds_grid_edit_buttons_.find(edit) == ds_grid_edit_buttons_.end());
-        //ds_grid_edit_buttons_ [edit] = it->second;
         edit->setProperty("data_source", data);
         ds_grid_->addWidget (edit, row, 1);
 
@@ -468,8 +469,6 @@ void DBObjectWidget::updateDataSourcesGridSlot ()
         del->setFixedSize ( UI_ICON_SIZE );
         del->setFlat(UI_ICON_BUTTON_FLAT);
         connect(del, SIGNAL(clicked()), this, SLOT(deleteDataSourceSlot()));
-        //        assert (ds_grid_delete_buttons_.find(del) == ds_grid_delete_buttons_.end());
-        //        ds_grid_delete_buttons_ [del] = it->second;
         del->setProperty("data_source", data);
         ds_grid_->addWidget (del, row, 2);
 
@@ -519,20 +518,35 @@ void DBObjectWidget::editDataSourceSlot()
     DBODataSourceDefinition* definition = data.value<DBODataSourceDefinition*>();
     assert (definition);
     definition->widget()->show();
-    //    assert (ds_grid_edit_buttons_.find(button) != ds_grid_edit_buttons_.end());
-    //    ds_grid_edit_buttons_.at(button)->widget()->show();
 }
 
 void DBObjectWidget::deleteDataSourceSlot()
 {
     logdbg  << "DBObjectWidget: deleteDBOVar";
-    //QPushButton *button = static_cast<QPushButton*>(sender());
-    //assert (ds_grid_delete_buttons_.find(button) != ds_grid_delete_buttons_.end());
-    //TODO
-    //object_->deleteVariable (ds_grid_delete_buttons_.at(button)->name());
-    //updateDataSourcesGrid();
+
+    QPushButton* button = static_cast<QPushButton*>(sender());
+    QVariant data = button->property("data_source");
+
+    DBODataSourceDefinition* definition = data.value<DBODataSourceDefinition*>();
+    assert (definition);
+    assert (object_);
+    assert (object_->hasDataSourceDefinition (definition->schema()));
+    object_->deleteDataSourceDefinition (definition->schema());
 }
 
+void DBObjectWidget::deleteMetaTableSlot()
+{
+    loginf  << "DBObjectWidget: deleteMetaTableSlot";
+
+    QPushButton* button = static_cast<QPushButton*>(sender());
+    QVariant data = button->property("schema");
+
+    std::string schema = data.value<QString>().toStdString();
+
+    assert (object_);
+    assert (object_->hasMetaTable(schema));
+    object_->deleteMetaTable(schema);
+}
 
 void DBObjectWidget::updateMetaTablesGridSlot()
 {
@@ -551,6 +565,8 @@ void DBObjectWidget::updateMetaTablesGridSlot()
     QFont font_bold;
     font_bold.setBold(true);
 
+    QIcon del_icon(Files::getIconFilepath("delete.png").c_str());
+
     QLabel *schema_label = new QLabel ("Schema");
     schema_label->setFont (font_bold);
     meta_table_grid_->addWidget (schema_label, 0, 0);
@@ -559,7 +575,7 @@ void DBObjectWidget::updateMetaTablesGridSlot()
     meta_label->setFont (font_bold);
     meta_table_grid_->addWidget (meta_label, 0, 1);
 
-    auto metas = object_->metaTables ();
+    auto& metas = object_->metaTables ();
 
     unsigned int row=1;
     for (auto it = metas.begin(); it != metas.end(); it++)
@@ -567,12 +583,20 @@ void DBObjectWidget::updateMetaTablesGridSlot()
         QLabel *schema = new QLabel (it->first.c_str());
         meta_table_grid_->addWidget (schema, row, 0);
 
-        QLabel *meta= new QLabel (it->second.c_str());
+        QLabel *meta= new QLabel (it->second.metaTable().c_str());
         meta_table_grid_->addWidget (meta, row, 1);
+
+        QPushButton *del = new QPushButton ();
+        del->setIcon(del_icon);
+        del->setFixedSize ( UI_ICON_SIZE );
+        del->setFlat(UI_ICON_BUTTON_FLAT);
+        connect(del, SIGNAL(clicked()), this, SLOT(deleteMetaTableSlot()));
+        del->setProperty("schema", QVariant(it->first.c_str()));
+        meta_table_grid_->addWidget (del, row, 2);
+
         row++;
     }
 }
-
 
 void DBObjectWidget::showLabelDefinitionWidgetSlot()
 {
@@ -580,30 +604,56 @@ void DBObjectWidget::showLabelDefinitionWidgetSlot()
     object_->labelDefinitionWidget()->show();
 }
 
+void DBObjectWidget::printSlot ()
+{
+    assert (object_);
+    object_->print();
+}
+
 void DBObjectWidget::addNewVariablesSlot ()
 {
-    logdbg  << "DBObjectWidget: addNewVariables";
     assert (object_);
-    assert (all_schemas_box_);
+    //assert (all_schemas_box_);
 
-    if (all_schemas_box_->count() == 0)
-        return;
+//    if (all_schemas_box_->count() == 0)
+//        return;
 
-    std::string schema_name = all_schemas_box_->currentText().toStdString();
-    std::string meta_name = object_->metaTable (schema_name);
-
-    const MetaDBTable &meta = schema_manager_.getCurrentSchema().metaTable(meta_name);
-    auto columns = meta.columns ();
-
-    for (auto it = columns.begin(); it != columns.end(); it++)
+    if (!schema_manager_.hasCurrentSchema())
     {
-        std::string column_name = it->second.name();
+        logerr  << "DBObjectWidget: addNewVariables: no current schema defined";
+        return;
+    }
+
+    std::string schema_name = schema_manager_.getCurrentSchema().name();
+
+    loginf  << "DBObjectWidget: addNewVariables: object " << object_->name() << " schema " << schema_name;
+
+    assert (object_->hasMetaTable(schema_name));
+    std::string meta_name = object_->metaTable (schema_name);
+    logdbg  << "DBObjectWidget: addNewVariables: for meta " << meta_name;
+
+    assert (schema_manager_.getCurrentSchema().hasMetaTable(meta_name));
+    const MetaDBTable &meta = schema_manager_.getCurrentSchema().metaTable(meta_name);
+
+    logdbg  << "DBObjectWidget: addNewVariables: traversing columns";
+    for (auto& col_it : meta.columns())
+    {
+        const DBTableColumn& col = col_it.second;
+        logdbg  << "DBObjectWidget: addNewVariables: checking column " << col.name();
+
+        std::string column_name = col.name();
         boost::algorithm::to_lower(column_name);
-        std::string column_identifier = it->second.identifier();
+        std::string column_identifier = col.identifier();
         boost::algorithm::to_lower(column_identifier);
 
-        if (object_->hasVariable(column_name) || object_->hasVariable(column_identifier))
+        if (object_->uses(col))
+        {
+            loginf  << "DBObjectWidget: addNewVariables: not adding column '" << column_name
+                    << "' since already used";
             continue;
+        }
+        else
+            loginf  << "DBObjectWidget: addNewVariables: adding column '" << column_name;
 
         std::string column_name_to_use;
 
@@ -617,18 +667,21 @@ void DBObjectWidget::addNewVariablesSlot ()
         Configuration &config = object_->addNewSubConfiguration ("DBOVariable", instance);
 
         config.addParameterString ("name", column_name_to_use);
-        config.addParameterString ("data_type_str", Property::asString(it->second.propertyType()));
+        config.addParameterString ("data_type_str", Property::asString(col.propertyType()));
         config.addParameterString ("dbo_name", object_->name());
-        config.addParameterString ("description", it->second.comment());
+        config.addParameterString ("description", col.comment());
 
         std::string var_instance = "DBOSchemaVariableDefinition"+object_->name()+column_name+"0";
 
         Configuration &var_configuration = config.addNewSubConfiguration ("DBOSchemaVariableDefinition", var_instance);
         var_configuration.addParameterString ("schema", schema_name);
         //var_configuration.addParameterString ("meta_table", meta.name());
-        var_configuration.addParameterString ("variable_identifier", it->second.identifier());
+        var_configuration.addParameterString ("variable_identifier", col.identifier());
 
         object_->generateSubConfigurable("DBOVariable", instance);
+
+        loginf  << "DBObjectWidget: addNewVariables: added column '" << column_name_to_use
+                << "' as variable";
     }
     updateDBOVarsGridSlot();
 }
@@ -739,17 +792,19 @@ void DBObjectWidget::updateDBOVarsGridSlot ()
 
     logdbg  << "DBObjectWidget: updateDBOVarsGrid: creating variable rows";
 
-    for (auto& var_it : object_->variables())
+    for (auto& var_it : *object_)
     {
         row++;
         col = 0;
 
+        DBOVariable& test = var_it.second;
+
         //QVariant data = QVariant(qMetaTypeId<QObject*>(), var_it.second);
         //QVariant data = QVariant::fromValue(dynamic_cast<QObject*>(var_it.second));
-        QVariant data = QVariant::fromValue(var_it.second);
+        QVariant data = QVariant::fromValue(&test);
 
         //logdbg  << "DBObjectWidget: updateDBOVarsGrid: creating variable row for " << it->first << " name";
-        QLineEdit* name_edit = new QLineEdit (var_it.second->name().c_str());
+        QLineEdit* name_edit = new QLineEdit (var_it.second.name().c_str());
         name_edit->setMaximumWidth(200);
         name_edit->setProperty("variable", data);
         connect(name_edit, SIGNAL (returnPressed()), this, SLOT(editDBOVariableNameSlot()));
@@ -757,23 +812,23 @@ void DBObjectWidget::updateDBOVarsGridSlot ()
 
         //logdbg  << "DBObjectWidget: updateDBOVarsGrid: creating variable row for " << it->first << " info";
         col++;
-        QLineEdit* description_edit = new QLineEdit (var_it.second->description().c_str());
+        QLineEdit* description_edit = new QLineEdit (var_it.second.description().c_str());
         description_edit->setMaximumWidth(300);
         description_edit->setProperty("variable", data);
         connect(description_edit, SIGNAL (returnPressed()), this, SLOT(editDBOVariableDescriptionSlot()));
         dbovars_grid_->addWidget (description_edit, row, col);
 
         col++;
-        DBOVariableDataTypeComboBox* type_combo = new DBOVariableDataTypeComboBox (*var_it.second);
+        DBOVariableDataTypeComboBox* type_combo = new DBOVariableDataTypeComboBox (var_it.second);
         dbovars_grid_->addWidget (type_combo, row, col);
 
         col++;
-        UnitSelectionWidget* unit_sel = new UnitSelectionWidget(var_it.second->dimension(),
-                                                                var_it.second->unit());
+        UnitSelectionWidget* unit_sel = new UnitSelectionWidget(var_it.second.dimension(),
+                                                                var_it.second.unit());
         dbovars_grid_->addWidget (unit_sel, row, col);
 
         col++;
-        StringRepresentationComboBox* representation_box = new StringRepresentationComboBox (*var_it.second);
+        StringRepresentationComboBox* representation_box = new StringRepresentationComboBox (var_it.second);
         dbovars_grid_->addWidget (representation_box, row, col);
 
         for (auto schema_it = schemas.begin(); schema_it != schemas.end(); schema_it++)
@@ -786,8 +841,9 @@ void DBObjectWidget::updateDBOVarsGridSlot ()
             col++;
 
             assert (meta_tables.count(schema_name) == 1);
-            DBTableColumnComboBox* box = new DBTableColumnComboBox (schema_name, meta_tables.at(schema_name),
-                                                                    *var_it.second);
+            DBTableColumnComboBox* box = new DBTableColumnComboBox (schema_name,
+                                                                    meta_tables.at(schema_name).metaTable(),
+                                                                    var_it.second);
             box->setProperty("variable", data);
             box->setProperty("schema", QString(schema_name.c_str()));
             connect(box, SIGNAL (activated(const QString&)), this, SLOT(editDBOVariableDBColumnSlot(const QString&)));

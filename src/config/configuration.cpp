@@ -34,9 +34,9 @@ using namespace tinyxml2;
  * \param configuration_id configuration identifier
  * \param configuration_filename special filename, default ""
  */
-Configuration::Configuration(const std::string &class_id, const std::string &instance_id, const std::string &configuration_filename)
-    : class_id_(class_id), instance_id_(instance_id), used_(false), configuration_filename_(configuration_filename),
-      template_flag_ (false)
+Configuration::Configuration(const std::string& class_id, const std::string& instance_id,
+                             const std::string& configuration_filename)
+    : class_id_(class_id), instance_id_(instance_id), configuration_filename_(configuration_filename)
 {
     logdbg  << "Configuration: constructor: class " << class_id_ << " instance " << instance_id_;
     assert (class_id_.size() != 0);
@@ -49,38 +49,38 @@ Configuration::Configuration(const Configuration &source)
     operator=(source);
 }
 
-Configuration& Configuration::operator= (const Configuration &source)
-{
-    class_id_ = source.class_id_;
-    /// Instance identifier
-    instance_id_ = source.instance_id_; // needs to be overwritten
-    /// Flag indicating if configuration has been used by configurable
-    used_ = false;
-    /// Special XML configuration filename
-    configuration_filename_ = source.configuration_filename_;
+//Configuration& Configuration::operator= (const Configuration &source)
+//{
+//    class_id_ = source.class_id_;
+//    /// Instance identifier
+//    instance_id_ = source.instance_id_; // needs to be overwritten
+//    /// Flag indicating if configuration has been used by configurable
+//    used_ = false;
+//    /// Special XML configuration filename
+//    configuration_filename_ = source.configuration_filename_;
 
-    template_flag_=source.template_flag_;
-    template_name_=source.template_name_;
+//    template_flag_=source.template_flag_;
+//    template_name_=source.template_name_;
 
-    /// Container for all parameters (parameter identifier -> ConfigurableParameterBase)
-    parameters_bool_ = source.parameters_bool_;
-    parameters_int_ = source.parameters_int_;
-    parameters_uint_ = source.parameters_uint_;
-    parameters_float_ = source.parameters_float_;
-    parameters_double_ = source.parameters_double_;
-    parameters_string_ = source.parameters_string_;
+//    /// Container for all parameters (parameter identifier -> ConfigurableParameterBase)
+//    parameters_bool_ = source.parameters_bool_;
+//    parameters_int_ = source.parameters_int_;
+//    parameters_uint_ = source.parameters_uint_;
+//    parameters_float_ = source.parameters_float_;
+//    parameters_double_ = source.parameters_double_;
+//    parameters_string_ = source.parameters_string_;
 
-    /// Container for all added sub-configurables
-    sub_configurations_ = source.sub_configurations_;
+//    /// Container for all added sub-configurables
+//    sub_configurations_ = source.sub_configurations_;
 
-    // return the existing object
-    return *this;
-}
+//    // return the existing object
+//    return *this;
+//}
 
-Configuration *Configuration::clone ()
-{
-    return new Configuration (*this);
-}
+//Configuration *Configuration::clone ()
+//{
+//    return new Configuration (*this);
+//}
 
 Configuration::~Configuration()
 {
@@ -113,7 +113,7 @@ void Configuration::resetToDefault ()
         it->second.resetToDefault();
 }
 
-void Configuration::registerParameter (const std::string &parameter_id, bool *pointer, bool default_value)
+void Configuration::registerParameter (const std::string& parameter_id, bool* pointer, bool default_value)
 {
     logdbg  << "Configuration " << instance_id_ << ": registerParameter: bool: " << parameter_id;
 
@@ -121,7 +121,8 @@ void Configuration::registerParameter (const std::string &parameter_id, bool *po
 
     if (parameters_bool_.find(parameter_id) == parameters_bool_.end()) // new parameter, didnt exist in config
     {
-        parameters_bool_.insert (std::pair<std::string, ConfigurableParameter<bool> > (parameter_id, ConfigurableParameter<bool>()));
+        parameters_bool_.insert (std::pair<std::string, ConfigurableParameter<bool>> (parameter_id,
+                                                                                      ConfigurableParameter<bool>()));
         parameters_bool_.at(parameter_id).parameter_id_=parameter_id;
         parameters_bool_.at(parameter_id).config_value_=default_value;
     }
@@ -131,11 +132,12 @@ void Configuration::registerParameter (const std::string &parameter_id, bool *po
     *(parameters_bool_.at(parameter_id).pointer_) = parameters_bool_.at(parameter_id).config_value_;
     used_=true;
 
-    logdbg << "Configuration " << instance_id_ << ": registerParameter "<< parameter_id << ": bool, value is " << *(parameters_bool_.at(parameter_id).pointer_);
+    logdbg << "Configuration " << instance_id_ << ": registerParameter "<< parameter_id << ": bool, value is "
+           << *(parameters_bool_.at(parameter_id).pointer_);
 }
 
 
-void Configuration::registerParameter (const std::string &parameter_id, int *pointer, int default_value)
+void Configuration::registerParameter (const std::string &parameter_id, int* pointer, int default_value)
 {
     logdbg  << "Configuration " << instance_id_ << ": registerParameter: int: " << parameter_id;
 
@@ -143,7 +145,8 @@ void Configuration::registerParameter (const std::string &parameter_id, int *poi
 
     if (parameters_int_.find(parameter_id) == parameters_int_.end()) // new parameter, didnt exist in config
     {
-        parameters_int_.insert (std::pair<std::string, ConfigurableParameter<int> > (parameter_id, ConfigurableParameter<int>()));
+        parameters_int_.insert (std::pair<std::string, ConfigurableParameter<int>> (parameter_id,
+                                                                                     ConfigurableParameter<int>()));
         parameters_int_.at(parameter_id).parameter_id_=parameter_id;
         parameters_int_.at(parameter_id).config_value_=default_value;
     }
@@ -153,10 +156,12 @@ void Configuration::registerParameter (const std::string &parameter_id, int *poi
     *(parameters_int_.at(parameter_id).pointer_) = parameters_int_.at(parameter_id).config_value_;
     used_=true;
 
-    logdbg << "Configuration " << instance_id_ << ": registerParameter "<< parameter_id << ": int, value is " << *(parameters_int_.at(parameter_id).pointer_);
+    logdbg << "Configuration " << instance_id_ << ": registerParameter "<< parameter_id << ": int, value is "
+           << *(parameters_int_.at(parameter_id).pointer_);
 }
 
-void Configuration::registerParameter (const std::string &parameter_id, unsigned int *pointer, unsigned int default_value)
+void Configuration::registerParameter (const std::string& parameter_id, unsigned int* pointer,
+                                       unsigned int default_value)
 {
     logdbg  << "Configuration " << instance_id_ << ": registerParameter: unsigned int: " << parameter_id;
 
@@ -164,7 +169,10 @@ void Configuration::registerParameter (const std::string &parameter_id, unsigned
 
     if (parameters_uint_.find(parameter_id) == parameters_uint_.end()) // new parameter, didnt exist in config
     {
-        parameters_uint_.insert (std::pair<std::string, ConfigurableParameter<unsigned int> > (parameter_id, ConfigurableParameter<unsigned int>()));
+        parameters_uint_.insert (
+                    std::pair<std::string, ConfigurableParameter<unsigned int>> (
+                        parameter_id, ConfigurableParameter<unsigned int>()));
+
         parameters_uint_.at(parameter_id).parameter_id_=parameter_id;
         parameters_uint_.at(parameter_id).config_value_=default_value;
     }
@@ -174,10 +182,11 @@ void Configuration::registerParameter (const std::string &parameter_id, unsigned
     *(parameters_uint_.at(parameter_id).pointer_) = parameters_uint_.at(parameter_id).config_value_;
     used_=true;
 
-    logdbg << "Configuration " << instance_id_ << ": registerParameter "<< parameter_id << ": unsigned int, value is " << *(parameters_uint_.at(parameter_id).pointer_);
+    logdbg << "Configuration " << instance_id_ << ": registerParameter "<< parameter_id << ": unsigned int, value is "
+           << *(parameters_uint_.at(parameter_id).pointer_);
 }
 
-void Configuration::registerParameter (const std::string &parameter_id, float *pointer, float default_value)
+void Configuration::registerParameter (const std::string& parameter_id, float* pointer, float default_value)
 {
     logdbg  << "Configuration " << instance_id_ << ": registerParameter: float: " << parameter_id;
 
@@ -185,7 +194,9 @@ void Configuration::registerParameter (const std::string &parameter_id, float *p
 
     if (parameters_float_.find(parameter_id) == parameters_float_.end()) // new parameter, didnt exist in config
     {
-        parameters_float_.insert (std::pair<std::string, ConfigurableParameter<float> > (parameter_id, ConfigurableParameter<float>()));
+        parameters_float_.insert (std::pair<std::string, ConfigurableParameter<float>> (
+                                      parameter_id, ConfigurableParameter<float>()));
+
         parameters_float_.at(parameter_id).parameter_id_=parameter_id;
         parameters_float_.at(parameter_id).config_value_=default_value;
     }
@@ -195,10 +206,11 @@ void Configuration::registerParameter (const std::string &parameter_id, float *p
     *(parameters_float_.at(parameter_id).pointer_) = parameters_float_.at(parameter_id).config_value_;
     used_=true;
 
-    logdbg << "Configuration " << instance_id_ << ": registerParameter "<< parameter_id << ": float, value is " << *(parameters_float_.at(parameter_id).pointer_);
+    logdbg << "Configuration " << instance_id_ << ": registerParameter "<< parameter_id << ": float, value is "
+           << *(parameters_float_.at(parameter_id).pointer_);
 }
 
-void Configuration::registerParameter (const std::string &parameter_id, double *pointer, double default_value)
+void Configuration::registerParameter (const std::string& parameter_id, double* pointer, double default_value)
 {
     logdbg  << "Configuration " << instance_id_ << ": registerParameter: double: " << parameter_id;
 
@@ -206,7 +218,8 @@ void Configuration::registerParameter (const std::string &parameter_id, double *
 
     if (parameters_double_.find(parameter_id) == parameters_double_.end()) // new parameter, didnt exist in config
     {
-        parameters_double_.insert (std::pair<std::string, ConfigurableParameter<double> > (parameter_id, ConfigurableParameter<double>()));
+        parameters_double_.insert (std::pair<std::string, ConfigurableParameter<double>> (
+                                       parameter_id, ConfigurableParameter<double>()));
         parameters_double_.at(parameter_id).parameter_id_=parameter_id;
         parameters_double_.at(parameter_id).config_value_=default_value;
     }
@@ -216,10 +229,12 @@ void Configuration::registerParameter (const std::string &parameter_id, double *
     *(parameters_double_.at(parameter_id).pointer_) = parameters_double_.at(parameter_id).config_value_;
     used_=true;
 
-    logdbg << "Configuration " << instance_id_ << ": registerParameter "<< parameter_id << ": double, value is " << *(parameters_double_.at(parameter_id).pointer_);
+    logdbg << "Configuration " << instance_id_ << ": registerParameter "<< parameter_id << ": double, value is "
+           << *(parameters_double_.at(parameter_id).pointer_);
 }
 
-void Configuration::registerParameter (const std::string &parameter_id, std::string *pointer, const std::string &default_value)
+void Configuration::registerParameter (const std::string& parameter_id, std::string* pointer,
+                                       const std::string& default_value)
 {
     logdbg  << "Configuration " << instance_id_ << ": registerParameter: string: " << parameter_id;
 
@@ -227,7 +242,9 @@ void Configuration::registerParameter (const std::string &parameter_id, std::str
 
     if (parameters_string_.find(parameter_id) == parameters_string_.end()) // new parameter, didnt exist in config
     {
-        parameters_string_.insert (std::pair<std::string, ConfigurableParameter<std::string> > (parameter_id, ConfigurableParameter<std::string>()));
+        parameters_string_.insert (std::pair<std::string, ConfigurableParameter<std::string> > (
+                                       parameter_id, ConfigurableParameter<std::string>()));
+
         parameters_string_.at(parameter_id).parameter_id_=parameter_id;
         parameters_string_.at(parameter_id).config_value_=default_value;
     }
@@ -237,10 +254,79 @@ void Configuration::registerParameter (const std::string &parameter_id, std::str
     *(parameters_string_.at(parameter_id).pointer_) = parameters_string_.at(parameter_id).config_value_;
     used_=true;
 
-    logdbg << "Configuration " << instance_id_ << ": registerParameter "<< parameter_id << ": string, value is " << *(parameters_string_.at(parameter_id).pointer_);
+    logdbg << "Configuration " << instance_id_ << ": registerParameter "<< parameter_id << ": string, value is "
+           << *(parameters_string_.at(parameter_id).pointer_);
 }
 
-void Configuration::addParameterBool (const std::string &parameter_id, bool default_value)
+void Configuration::updateParameterPointer (const std::string& parameter_id, bool* pointer)
+{
+    logdbg  << "Configuration " << instance_id_ << ": updateParameterPointer: bool: " << parameter_id;
+
+    assert (pointer);
+
+    assert (parameters_bool_.find(parameter_id) != parameters_bool_.end());
+
+    parameters_bool_.at(parameter_id).pointer_ = pointer;
+    used_=true;
+}
+
+void Configuration::updateParameterPointer (const std::string& parameter_id, int* pointer)
+{
+    logdbg  << "Configuration " << instance_id_ << ": updateParameterPointer: int: " << parameter_id;
+
+    assert (pointer);
+    assert (parameters_int_.find(parameter_id) != parameters_int_.end());
+
+    parameters_int_.at(parameter_id).pointer_ = pointer;
+    used_=true;
+}
+
+void Configuration::updateParameterPointer (const std::string& parameter_id, unsigned int* pointer)
+{
+    logdbg  << "Configuration " << instance_id_ << ": updateParameterPointer: uint: " << parameter_id;
+
+    assert (pointer);
+    assert (parameters_uint_.find(parameter_id) != parameters_uint_.end());
+
+    parameters_uint_.at(parameter_id).pointer_ = pointer;
+    used_=true;
+}
+
+void Configuration::updateParameterPointer (const std::string& parameter_id, float* pointer)
+{
+    logdbg  << "Configuration " << instance_id_ << ": updateParameterPointer: float: " << parameter_id;
+
+    assert (pointer);
+    assert (parameters_float_.find(parameter_id) != parameters_float_.end());
+
+    parameters_float_.at(parameter_id).pointer_ = pointer;
+    used_=true;
+}
+
+void Configuration::updateParameterPointer (const std::string& parameter_id, double* pointer)
+{
+    logdbg  << "Configuration " << instance_id_ << ": updateParameterPointer: double: " << parameter_id;
+
+    assert (pointer);
+    assert (parameters_double_.find(parameter_id) != parameters_double_.end());
+
+    parameters_double_.at(parameter_id).pointer_ = pointer;
+    used_=true;
+}
+
+void Configuration::updateParameterPointer (const std::string& parameter_id, std::string* pointer)
+{
+    logdbg  << "Configuration " << instance_id_ << ": updateParameterPointer: string: " << parameter_id;
+
+    assert (pointer);
+    assert (parameters_string_.find(parameter_id) != parameters_string_.end());
+
+    parameters_string_.at(parameter_id).pointer_ = pointer;
+    used_=true;
+}
+
+
+void Configuration::addParameterBool (const std::string& parameter_id, bool default_value)
 {
     logdbg  << "Configuration: addParameterBool: parameter " << parameter_id << " default " << default_value;
     if (parameters_bool_.find(parameter_id) != parameters_bool_.end())
@@ -249,14 +335,16 @@ void Configuration::addParameterBool (const std::string &parameter_id, bool defa
         return;
     }
 
-    parameters_bool_.insert (std::pair<std::string, ConfigurableParameter<bool> > (parameter_id, ConfigurableParameter<bool>()));
+    parameters_bool_.insert (std::pair<std::string, ConfigurableParameter<bool>> (
+                                 parameter_id, ConfigurableParameter<bool>()));
+
     parameters_bool_.at(parameter_id).parameter_id_=parameter_id;
     parameters_bool_.at(parameter_id).pointer_=0;
     parameters_bool_.at(parameter_id).default_value_=default_value;
     parameters_bool_.at(parameter_id).config_value_=default_value;
 }
 
-void Configuration::addParameterInt (const std::string &parameter_id, int default_value)
+void Configuration::addParameterInt (const std::string& parameter_id, int default_value)
 {
     logdbg  << "Configuration: addParameterInt: parameter " << parameter_id << " default " << default_value;
     if (parameters_int_.find(parameter_id) != parameters_int_.end())
@@ -265,15 +353,16 @@ void Configuration::addParameterInt (const std::string &parameter_id, int defaul
         return;
     }
 
-    parameters_int_.insert (std::pair<std::string, ConfigurableParameter<int> > (parameter_id, ConfigurableParameter<int>()));
+    parameters_int_.insert (std::pair<std::string, ConfigurableParameter<int>> (
+                                parameter_id, ConfigurableParameter<int>()));
+
     parameters_int_.at(parameter_id).parameter_id_=parameter_id;
     parameters_int_.at(parameter_id).pointer_=0;
     parameters_int_.at(parameter_id).default_value_=default_value;
     parameters_int_.at(parameter_id).config_value_=default_value;
-
 }
 
-void Configuration::addParameterUnsignedInt (const std::string &parameter_id, unsigned int default_value)
+void Configuration::addParameterUnsignedInt (const std::string& parameter_id, unsigned int default_value)
 {
     logdbg  << "Configuration: addParameterUnsignedInt: parameter " << parameter_id << " default " << default_value;
     if (parameters_uint_.find(parameter_id) != parameters_uint_.end())
@@ -282,14 +371,15 @@ void Configuration::addParameterUnsignedInt (const std::string &parameter_id, un
         return;
     }
 
-    parameters_uint_.insert (std::pair<std::string, ConfigurableParameter<unsigned int> > (parameter_id, ConfigurableParameter<unsigned int>()));
+    parameters_uint_.insert (std::pair<std::string, ConfigurableParameter<unsigned int>> (
+                                 parameter_id, ConfigurableParameter<unsigned int>()));
     parameters_uint_.at(parameter_id).parameter_id_=parameter_id;
     parameters_uint_.at(parameter_id).pointer_=0;
     parameters_uint_.at(parameter_id).default_value_=default_value;
     parameters_uint_.at(parameter_id).config_value_=default_value;
 }
 
-void Configuration::addParameterFloat (const std::string &parameter_id, float default_value)
+void Configuration::addParameterFloat (const std::string& parameter_id, float default_value)
 {
     logdbg  << "Configuration: addParameterFloat: parameter " << parameter_id << " default " << default_value;
     if (parameters_float_.find(parameter_id) != parameters_float_.end())
@@ -298,14 +388,16 @@ void Configuration::addParameterFloat (const std::string &parameter_id, float de
         return;
     }
 
-    parameters_float_.insert (std::pair<std::string, ConfigurableParameter<float> > (parameter_id, ConfigurableParameter<float>()));
+    parameters_float_.insert (std::pair<std::string, ConfigurableParameter<float>> (
+                                  parameter_id, ConfigurableParameter<float>()));
+
     parameters_float_.at(parameter_id).parameter_id_=parameter_id;
     parameters_float_.at(parameter_id).pointer_=0;
     parameters_float_.at(parameter_id).default_value_=default_value;
     parameters_float_.at(parameter_id).config_value_=default_value;
 }
 
-void Configuration::addParameterDouble (const std::string &parameter_id, double default_value)
+void Configuration::addParameterDouble (const std::string& parameter_id, double default_value)
 {
     logdbg  << "Configuration: addParameterDouble: parameter " << parameter_id << " default " << default_value;
     if (parameters_double_.find(parameter_id) != parameters_double_.end())
@@ -314,14 +406,16 @@ void Configuration::addParameterDouble (const std::string &parameter_id, double 
         return;
     }
 
-    parameters_double_.insert (std::pair<std::string, ConfigurableParameter<double> > (parameter_id, ConfigurableParameter<double>()));
+    parameters_double_.insert (std::pair<std::string, ConfigurableParameter<double>> (
+                                   parameter_id, ConfigurableParameter<double>()));
+
     parameters_double_.at(parameter_id).parameter_id_=parameter_id;
     parameters_double_.at(parameter_id).pointer_=0;
     parameters_double_.at(parameter_id).default_value_=default_value;
     parameters_double_.at(parameter_id).config_value_=default_value;
 }
 
-void Configuration::addParameterString (const std::string &parameter_id, const std::string &default_value)
+void Configuration::addParameterString (const std::string& parameter_id, const std::string &default_value)
 {
     logdbg  << "Configuration: addParameterString: parameter " << parameter_id << " default " << default_value;
     if (parameters_string_.find(parameter_id) != parameters_string_.end())
@@ -330,14 +424,16 @@ void Configuration::addParameterString (const std::string &parameter_id, const s
         return;
     }
 
-    parameters_string_.insert (std::pair<std::string, ConfigurableParameter<std::string> > (parameter_id, ConfigurableParameter<std::string>()));
+    parameters_string_.insert (std::pair<std::string, ConfigurableParameter<std::string>> (
+                                   parameter_id, ConfigurableParameter<std::string>()));
+
     parameters_string_.at(parameter_id).parameter_id_=parameter_id;
     parameters_string_.at(parameter_id).pointer_=0;
     parameters_string_.at(parameter_id).default_value_=default_value;
     parameters_string_.at(parameter_id).config_value_=default_value;
 }
 
-void Configuration::getParameter (const std::string &parameter_id, bool &value)
+void Configuration::getParameter (const std::string& parameter_id, bool& value)
 {
     if (parameters_bool_.count(parameter_id) == 0)
         throw std::runtime_error ("Configuration: getParameter: bool: unknown parameter id "+parameter_id);
@@ -350,7 +446,7 @@ void Configuration::getParameter (const std::string &parameter_id, bool &value)
     value = *(parameters_bool_.at(parameter_id).pointer_);
 }
 
-void Configuration::getParameter (const std::string &parameter_id, int &value)
+void Configuration::getParameter (const std::string& parameter_id, int& value)
 {
     if (parameters_int_.count(parameter_id) == 0)
         throw std::runtime_error ("Configuration: getParameter: int: unknown parameter id "+parameter_id);
@@ -363,7 +459,7 @@ void Configuration::getParameter (const std::string &parameter_id, int &value)
     value = *(parameters_int_.at(parameter_id).pointer_);
 }
 
-void Configuration::getParameter (const std::string &parameter_id, unsigned int &value)
+void Configuration::getParameter (const std::string& parameter_id, unsigned int& value)
 {
     if (parameters_uint_.count(parameter_id) == 0)
         throw std::runtime_error ("Configuration: getParameter: uint: unknown parameter id "+parameter_id);
@@ -376,7 +472,7 @@ void Configuration::getParameter (const std::string &parameter_id, unsigned int 
     value = *(parameters_uint_.at(parameter_id).pointer_);
 }
 
-void Configuration::getParameter (const std::string &parameter_id, float &value)
+void Configuration::getParameter (const std::string& parameter_id, float& value)
 {
     if (parameters_float_.count(parameter_id) == 0)
         throw std::runtime_error ("Configuration: getParameter: float: unknown parameter id "+parameter_id);
@@ -401,7 +497,7 @@ void Configuration::getParameter (const std::string &parameter_id, double &value
 
     value = *(parameters_double_.at(parameter_id).pointer_);
 }
-void Configuration::getParameter (const std::string &parameter_id, std::string &value)
+void Configuration::getParameter (const std::string& parameter_id, std::string& value)
 {
     if (parameters_string_.count(parameter_id) == 0)
         throw std::runtime_error ("Configuration: getParameter: string: unknown parameter id "+parameter_id);
@@ -414,8 +510,68 @@ void Configuration::getParameter (const std::string &parameter_id, std::string &
     value = *(parameters_string_.at(parameter_id).pointer_);
 }
 
+bool Configuration::getParameterConfigValueBool (const std::string& parameter_id)
+{
+    if (parameters_bool_.count(parameter_id) == 0)
+        throw std::runtime_error ("Configuration: getParameterConfigValueBool: unknown parameter id " + parameter_id);
 
-void Configuration::parseXMLElement (XMLElement *element)
+    assert (parameters_bool_.at(parameter_id).getParameterType().compare ("ParameterBool") == 0);
+
+    return parameters_bool_.at(parameter_id).config_value_;
+}
+
+int Configuration::getParameterConfigValueInt (const std::string& parameter_id)
+{
+    if (parameters_int_.count(parameter_id) == 0)
+        throw std::runtime_error ("Configuration: getParameterConfigValueInt: unknown parameter id " + parameter_id);
+
+    assert (parameters_int_.at(parameter_id).getParameterType().compare ("ParameterInt") == 0);
+
+    return parameters_int_.at(parameter_id).config_value_;
+}
+
+unsigned int Configuration::getParameterConfigValueUint (const std::string& parameter_id)
+{
+    if (parameters_uint_.count(parameter_id) == 0)
+        throw std::runtime_error ("Configuration: getParameterConfigValueUint: unknown parameter id " + parameter_id);
+
+    assert (parameters_uint_.at(parameter_id).getParameterType().compare ("ParameterUnsignedInt") == 0);
+
+    return parameters_uint_.at(parameter_id).config_value_;
+}
+
+float Configuration::getParameterConfigValueFloat (const std::string& parameter_id)
+{
+    if (parameters_float_.count(parameter_id) == 0)
+        throw std::runtime_error ("Configuration: getParameterConfigValueFloat: unknown parameter id " + parameter_id);
+
+    assert (parameters_float_.at(parameter_id).getParameterType().compare ("ParameterFloat") == 0);
+
+    return parameters_float_.at(parameter_id).config_value_;
+}
+
+double Configuration::getParameterConfigValueDouble (const std::string& parameter_id)
+{
+    if (parameters_double_.count(parameter_id) == 0)
+        throw std::runtime_error ("Configuration: getParameterConfigValueDouble: unknown parameter id " + parameter_id);
+
+    assert (parameters_double_.at(parameter_id).getParameterType().compare ("ParameterDouble") == 0);
+
+    return parameters_double_.at(parameter_id).config_value_;
+}
+
+std::string Configuration::getParameterConfigValueString (const std::string& parameter_id)
+{
+    if (parameters_string_.count(parameter_id) == 0)
+        throw std::runtime_error ("Configuration: getParameterConfigValueString: string: unknown parameter id "
+                                  + parameter_id);
+
+    assert (parameters_string_.at(parameter_id).getParameterType().compare ("ParameterString") == 0);
+
+    return parameters_string_.at(parameter_id).config_value_;
+}
+
+void Configuration::parseXMLElement (XMLElement* element)
 {
     logdbg  << "Configuration " << instance_id_ << ": parseElement";
 
@@ -433,72 +589,79 @@ void Configuration::parseXMLElement (XMLElement *element)
         throw std::runtime_error (std::string("Configuration: parseXMLElement: unknown element ")+element->Value());
 }
 
-void Configuration::parseXMLConfigurationElement (tinyxml2::XMLElement *element)
+void Configuration::parseXMLConfigurationElement (tinyxml2::XMLElement* element)
 {
     XMLElement * parameter_element;
 
     for ( parameter_element = element->FirstChildElement(); parameter_element != 0;
           parameter_element = parameter_element->NextSiblingElement())
     {
-        logdbg  << "Configuration " << instance_id_ << ": parseXMLConfigurationElement: found element '" << parameter_element->Value() << "'";
-        if (strcmp ("ParameterBool", parameter_element->Value() ) == 0)
+        logdbg  << "Configuration " << instance_id_ << ": parseXMLConfigurationElement: found element '"
+                << parameter_element->Value() << "'";
+        if (std::strcmp (parameter_element->Value(), "ParameterBool") == 0)
         {
             logdbg  << "Configuration " << instance_id_ << ": parseXMLConfigurationElement: is ParameterBool";
             ConfigurableParameter<bool> parameter;
             parameter.parseElement(parameter_element);
 
             assert (parameters_bool_.count(parameter.parameter_id_) == 0);
-            parameters_bool_.insert (std::pair <std::string, ConfigurableParameter<bool> > (parameter.parameter_id_, parameter));
+            parameters_bool_.insert (std::pair <std::string, ConfigurableParameter<bool>> (
+                                         parameter.parameter_id_, parameter));
         }
-        else if (strcmp ("ParameterInt", parameter_element->Value() ) == 0)
+        else if (std::strcmp (parameter_element->Value(), "ParameterInt") == 0)
         {
             logdbg  << "Configuration " << instance_id_ << ": parseXMLConfigurationElement: is ParameterInt";
             ConfigurableParameter<int> parameter;
             parameter.parseElement(parameter_element);
 
             assert (parameters_int_.count(parameter.parameter_id_) == 0);
-            parameters_int_.insert (std::pair <std::string, ConfigurableParameter<int> > (parameter.parameter_id_, parameter));
+            parameters_int_.insert (std::pair <std::string, ConfigurableParameter<int>> (
+                                        parameter.parameter_id_, parameter));
         }
-        else if (strcmp ("ParameterUnsignedInt", parameter_element->Value() ) == 0)
+        else if (std::strcmp (parameter_element->Value(), "ParameterUnsignedInt") == 0)
         {
             logdbg  << "Configuration " << instance_id_ << ": parseXMLConfigurationElement: is ParameterUnsignedInt";
             ConfigurableParameter<unsigned int> parameter;
             parameter.parseElement(parameter_element);
 
             assert (parameters_uint_.count(parameter.parameter_id_) == 0);
-            parameters_uint_.insert (std::pair <std::string, ConfigurableParameter<unsigned int> > (parameter.parameter_id_, parameter));
+            parameters_uint_.insert (std::pair <std::string, ConfigurableParameter<unsigned int>> (
+                                         parameter.parameter_id_, parameter));
         }
-        else if (strcmp ("ParameterFloat", parameter_element->Value() ) == 0)
+        else if (std::strcmp (parameter_element->Value(), "ParameterFloat") == 0)
         {
             logdbg  << "Configuration " << instance_id_ << ": parseXMLConfigurationElement: is ParameterFloat";
             ConfigurableParameter<float> parameter;
             parameter.parseElement(parameter_element);
 
             assert (parameters_float_.count(parameter.parameter_id_) == 0);
-            parameters_float_.insert (std::pair <std::string, ConfigurableParameter<float> > (parameter.parameter_id_, parameter));
+            parameters_float_.insert (std::pair <std::string, ConfigurableParameter<float>> (
+                                          parameter.parameter_id_, parameter));
         }
-        else if (strcmp ("ParameterDouble", parameter_element->Value() ) == 0)
+        else if (std::strcmp (parameter_element->Value(), "ParameterDouble") == 0)
         {
             logdbg  << "Configuration " << instance_id_ << ": parseXMLConfigurationElement: is ParameterDouble";
             ConfigurableParameter<double> parameter;
             parameter.parseElement(parameter_element);
 
             assert (parameters_double_.count(parameter.parameter_id_) == 0);
-            parameters_double_.insert (std::pair <std::string, ConfigurableParameter<double> > (parameter.parameter_id_, parameter));
+            parameters_double_.insert (std::pair <std::string, ConfigurableParameter<double>> (
+                                           parameter.parameter_id_, parameter));
         }
-        else if (strcmp ("ParameterString", parameter_element->Value() ) == 0)
+        else if (std::strcmp (parameter_element->Value(), "ParameterString") == 0)
         {
             logdbg  << "Configuration " << instance_id_ << ": parseXMLConfigurationElement: is ParameterString";
             ConfigurableParameter<std::string> parameter;
             parameter.parseElement(parameter_element);
 
             assert (parameters_string_.count(parameter.parameter_id_) == 0);
-            parameters_string_.insert (std::pair <std::string, ConfigurableParameter<std::string> > (parameter.parameter_id_, parameter));
+            parameters_string_.insert (std::pair <std::string, ConfigurableParameter<std::string>> (
+                                           parameter.parameter_id_, parameter));
         }
-        else if (strcmp ("Configuration", parameter_element->Value() ) == 0)
+        else if (std::strcmp ("Configuration", parameter_element->Value() ) == 0)
         {
-            //            loginf << "Configuration: parseXMLElement: parsing configuration " << class_id_ << " instance "
-            //                    << instance_id_;
+                logdbg << "Configuration: parseXMLConfigurationElement: parsing configuration " << class_id_
+                       << " instance " << instance_id_;
 
             const char *class_id=0;
             const char *instance_id=0;
@@ -508,7 +671,9 @@ void Configuration::parseXMLConfigurationElement (tinyxml2::XMLElement *element)
             const XMLAttribute* attribute=parameter_element->FirstAttribute();
             while (attribute)
             {
-                //loginf  << "Configuration: parseXMLElement: attribute " << attribute->Name() << "  value "<< attribute->Value();
+                logdbg  << "Configuration: parseXMLConfigurationElement: attribute " << attribute->Name()
+                        << "  value "<< attribute->Value();
+
                 if (strcmp ("instance_id", attribute->Name()) == 0)
                     instance_id=attribute->Value();
                 else if (strcmp ("class_id", attribute->Name()) == 0)
@@ -535,10 +700,13 @@ void Configuration::parseXMLConfigurationElement (tinyxml2::XMLElement *element)
 
             if (template_flag)
             {
-                loginf << "Configuration: parseXMLConfigurationElement: found template class " << class_id << " instance "
-                       << instance_id;
+                loginf << "Configuration: parseXMLConfigurationElement: found template class " << class_id
+                       << " instance " << instance_id;
+
                 assert (configuration_templates_.find(template_name) == configuration_templates_.end());
-                configuration_templates_.insert(std::pair <std::string, Configuration> (template_name, Configuration (class_id, instance_id)));
+                configuration_templates_.insert(std::pair <std::string, Configuration> (template_name, Configuration (
+                                                                                            class_id, instance_id)));
+
                 configuration_templates_.at(template_name).parseXMLElement(parameter_element);
                 configuration_templates_.at(template_name).setTemplate(true, template_name);
             }
@@ -546,11 +714,13 @@ void Configuration::parseXMLConfigurationElement (tinyxml2::XMLElement *element)
             {
                 std::pair <std::string, std::string> key (class_id, instance_id);
                 assert (sub_configurations_.find(key) == sub_configurations_.end());
-                sub_configurations_.insert(std::pair <std::pair<std::string, std::string>, Configuration> (key, Configuration (class_id, instance_id)));
+                sub_configurations_.insert(std::pair <std::pair<std::string, std::string>, Configuration> (
+                                               key, Configuration (class_id, instance_id)));
+
                 sub_configurations_.at(key).parseXMLElement(parameter_element);
             }
         }
-        else if (strcmp ("SubConfigurationFile", parameter_element->Value() ) == 0)
+        else if (std::strcmp (parameter_element->Value(), "SubConfigurationFile") == 0)
         {
             logdbg  << "Configuration: parseXMLConfigurationElement: is SubConfigurationFile";
 
@@ -570,7 +740,8 @@ void Configuration::parseXMLConfigurationElement (tinyxml2::XMLElement *element)
                 else if (strcmp ("path", attribute->Name()) == 0)
                     path=attribute->Value();
                 else
-                    throw std::runtime_error (std::string ("Configuration: parseXMLConfigurationElement: unknown attribute ")
+                    throw std::runtime_error (std::string ("Configuration: parseXMLConfigurationElement: unknown"
+                                                           " attribute ")
                                               +attribute->Name());
 
                 attribute=attribute->Next();
@@ -579,23 +750,27 @@ void Configuration::parseXMLConfigurationElement (tinyxml2::XMLElement *element)
             if (class_id.size() && instance_id.size() && path.size())
             {
 
-                logdbg << "Configuration: parseXMLConfigurationElement: creating new configuration for class " << class_id <<
-                          " instance " << instance_id;
+                logdbg << "Configuration: parseXMLConfigurationElement: creating new configuration for class "
+                       << class_id << " instance " << instance_id;
 
                 std::pair <std::string, std::string> key (class_id, instance_id);
                 assert (sub_configurations_.find(key) == sub_configurations_.end());
-                sub_configurations_.insert(std::pair <std::pair<std::string, std::string>, Configuration> (key, Configuration (class_id, instance_id)));
+                sub_configurations_.insert(std::pair <std::pair<std::string, std::string>, Configuration> (
+                                               key, Configuration (class_id, instance_id)));
+
                 sub_configurations_.at(key).setConfigurationFilename (path);
                 sub_configurations_.at(key).parseXMLElement(parameter_element);
             }
             else
-                throw std::runtime_error ("error: Configuration: parseXMLConfigurationElement: configuration misses attributes");
+                throw std::runtime_error ("error: Configuration: parseXMLConfigurationElement: configuration misses"
+                                          " attributes");
 
 
         }
         else
         {
-            throw std::runtime_error (std::string("Configuration: parseXMLConfigurationElement: unknown section ")+parameter_element->Value());
+            throw std::runtime_error (std::string("Configuration: parseXMLConfigurationElement: unknown section ")
+                                      +parameter_element->Value());
         }
     }
 
@@ -766,15 +941,15 @@ XMLElement *Configuration::generateXMLElement (tinyxml2::XMLDocument *parent_doc
 void Configuration::createSubConfigurables (Configurable *configurable)
 {
     logdbg  << "Configuration: createSubConfigurables: config instance " << instance_id_ << " configurable instance " <<
-               configurable->getInstanceId()   ;
+               configurable->instanceId()   ;
 
     std::map<std::pair<std::string, std::string>, Configuration >::iterator it;
-
+    // TODO what if map changed (deleting of config) during iteration
     for (it = sub_configurations_.begin(); it != sub_configurations_.end(); it++)
     {
         //ConfigurableDefinition &mos_def = sub_configurables_.at(cnt);
-        logdbg << "Configuration: createSubConfigurables: generateSubConfigurable: class_id '" << it->first.first << "' instance_id '"
-               << it->first.second <<"'";
+        logdbg << "Configuration: createSubConfigurables: generateSubConfigurable: class_id '" << it->first.first
+               << "' instance_id '" << it->first.second <<"'";
         configurable->generateSubConfigurable (it->first.first, it->first.second);
     }
 
@@ -798,11 +973,18 @@ const std::string &Configuration::getConfigurationFilename ()
     return configuration_filename_;
 }
 
+bool Configuration::hasSubConfiguration (const std::string &class_id, const std::string &instance_id)
+{
+    std::pair<std::string, std::string> key (class_id, instance_id);
+    return sub_configurations_.find (key) != sub_configurations_.end();
+}
+
 Configuration &Configuration::addNewSubConfiguration (const std::string &class_id, const std::string &instance_id)
 {
     std::pair<std::string, std::string> key (class_id, instance_id);
     assert (sub_configurations_.find (key) == sub_configurations_.end());
-    sub_configurations_.insert(std::pair <std::pair<std::string, std::string>, Configuration> (key, Configuration (class_id, instance_id)));
+    sub_configurations_.insert(std::pair <std::pair<std::string, std::string>, Configuration> (
+                                   key, Configuration (class_id, instance_id)));
     return sub_configurations_.at(key);
 }
 
@@ -840,8 +1022,9 @@ Configuration &Configuration::getSubConfiguration (const std::string &class_id, 
 
     if (sub_configurations_.find (key) == sub_configurations_.end())
     {
-        loginf << "Configuration instance " << instance_id_ <<": getSubConfiguration: creating new (empty) configuration for class " << class_id <<
-                  " instance " << instance_id;
+        loginf << "Configuration instance " << instance_id_
+               << ": getSubConfiguration: creating new (empty) configuration for class " << class_id
+               << " instance " << instance_id;
         addNewSubConfiguration(class_id, instance_id);
     }
 
@@ -891,110 +1074,3 @@ void Configuration::addSubTemplate (Configuration *configuration, const std::str
     delete configuration;
 }
 
-template<> void ConfigurableParameter<bool>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
-{
-    config_value_ = attribute->BoolValue();
-}
-
-template<> void ConfigurableParameter<int>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
-{
-    config_value_ = attribute->IntValue();
-}
-
-template<> void ConfigurableParameter<unsigned int>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
-{
-    config_value_ = attribute->UnsignedValue();
-}
-
-template<> void ConfigurableParameter<float>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
-{
-    config_value_ = attribute->FloatValue();
-}
-
-template<> void ConfigurableParameter<double>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
-{
-    config_value_ = attribute->DoubleValue();
-}
-
-template<> void ConfigurableParameter<std::string>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
-{
-    config_value_ = attribute->Value();
-}
-
-template<> std::string ConfigurableParameter<bool>::getParameterType () const
-{
-    return "ParameterBool";
-}
-
-template<> std::string ConfigurableParameter<int>::getParameterType () const
-{
-    return "ParameterInt";
-}
-
-template<> std::string ConfigurableParameter<unsigned int>::getParameterType () const
-{
-    return "ParameterUnsignedInt";
-}
-
-template<> std::string ConfigurableParameter<float>::getParameterType () const
-{
-    return "ParameterFloat";
-}
-
-template<> std::string ConfigurableParameter<double>::getParameterType () const
-{
-    return "ParameterDouble";
-}
-
-template<> std::string ConfigurableParameter<std::string>::getParameterType () const
-{
-    return "ParameterString";
-}
-
-template<> std::string ConfigurableParameter<bool>::getParameterValue () const
-{
-    if (pointer_)
-        return std::to_string(*pointer_);
-    else
-        return std::to_string(config_value_);
-}
-
-template<> std::string ConfigurableParameter<int>::getParameterValue () const
-{
-    if (pointer_)
-        return std::to_string(*pointer_);
-    else
-        return std::to_string(config_value_);
-}
-
-template<> std::string ConfigurableParameter<unsigned int>::getParameterValue () const
-{
-    if (pointer_)
-        return std::to_string(*pointer_);
-    else
-        return std::to_string(config_value_);
-}
-
-template<> std::string ConfigurableParameter<float>::getParameterValue () const
-{
-    if (pointer_)
-        return Utils::String::doubleToStringPrecision(*pointer_, 8);
-    else
-        return Utils::String::doubleToStringPrecision(config_value_, 8);
-}
-
-template<> std::string ConfigurableParameter<double>::getParameterValue () const
-{
-    if (pointer_)
-        return Utils::String::doubleToStringPrecision(*pointer_, 12);
-    else
-        return Utils::String::doubleToStringPrecision(config_value_, 12);
-}
-
-template<> std::string ConfigurableParameter<std::string>::getParameterValue () const
-{
-    if (pointer_)
-        return *pointer_;
-    else
-        return config_value_;
-}

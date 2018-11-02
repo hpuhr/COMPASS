@@ -67,8 +67,11 @@ public:
     /// @brief Returns the object of type, if existing
     DBObject &object (const std::string& dbo_name);
     void deleteObject (const std::string& dbo_name);
-    /// @brief Returns container with all DBObjects
-    std::map <std::string, DBObject*>& objects () { return objects_; }
+
+    using DBObjectIterator = typename std::map<std::string, DBObject*>::iterator;
+    DBObjectIterator begin() { return objects_.begin(); }
+    DBObjectIterator end() { return objects_.end(); }
+    size_t size() { return objects_.size(); }
 
     bool existsMetaVariable (const std::string& var_name);
     /// @brief Returns the a meta variable, if existing
@@ -76,6 +79,8 @@ public:
     void deleteMetaVariable (const std::string& var_name);
     /// @brief Returns container with all MetaVariables
     std::map <std::string, MetaDBOVariable*>& metaVariables () { return meta_variables_; }
+
+    bool usedInMetaVariable (const DBOVariable& variable);
 
     virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
 

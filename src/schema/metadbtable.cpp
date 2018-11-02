@@ -64,7 +64,7 @@ MetaDBTable::~MetaDBTable()
 
 void MetaDBTable::generateSubConfigurable (const std::string& class_id, const std::string& instance_id)
 {
-    logdbg  << "MetaDBTable: generateSubConfigurable: " << class_id_ << " instance " << instance_id_;
+    logdbg  << "MetaDBTable: generateSubConfigurable: " << classId() << " instance " << instanceId();
 
     if (class_id == "SubTableDefinition") // subtable
     {

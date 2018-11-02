@@ -21,6 +21,7 @@
 #include <string>
 #include "configurable.h"
 #include "property.h"
+#include "format.h"
 
 class DBInterface;
 class DBTable;
@@ -46,6 +47,8 @@ public:
     const std::string &name() const { return name_; }
 
     const std::string &identifier () const { return identifier_; }
+
+    bool operator ==(const DBTableColumn& b) const;
 
     /// @brief Sets the data type
     void type (const std::string &type) { type_=type; }
@@ -80,6 +83,10 @@ public:
     void updateOnDatabase(); // check what informations is present in the current db
     bool existsInDB () const { return exists_in_db_; }
 
+    Format& dataFormat()  { return data_format_; }
+    const Format& dataFormat() const { return data_format_; }
+    //void dataFormat(const std::string& data_format);
+
 protected:
     DBTable &table_;
     DBInterface& db_interface_;
@@ -99,6 +106,8 @@ protected:
     std::string unit_;
     /// Special value signifying null value
     std::string special_null_;
+    /// Data format
+    Format data_format_;
 
     UnitSelectionWidget* widget_ {nullptr};
 

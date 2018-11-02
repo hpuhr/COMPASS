@@ -16,6 +16,7 @@
  */
 
 #include "number.h"
+#include "logger.h"
 
 #include <stdlib.h>
 #include <math.h>
@@ -39,6 +40,11 @@ double calculateAngle( double degrees, double minutes, double seconds )
 {
     return degrees + minutes / 60.0 + seconds / 3600.0;
 }
+
+}
+
+void convert (const std::string& conversion_type, ArrayListTemplate<unsigned int> &array_list)
+{
 
 }
 }

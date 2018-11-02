@@ -37,7 +37,7 @@ DBFilter::DBFilter(const std::string &class_id, const std::string &instance_id, 
     registerParameter ("visible", &visible_, false);
     registerParameter ("name", &name_, instance_id);
 
-    if (class_id_.compare("DBFilter")==0) // else do it in subclass
+    if (classId().compare("DBFilter")==0) // else do it in subclass
         createSubConfigurables();
 }
 
@@ -46,7 +46,7 @@ DBFilter::DBFilter(const std::string &class_id, const std::string &instance_id, 
  */
 DBFilter::~DBFilter()
 {
-    logdbg  << "DBFilter: destructor: instance_id " << instance_id_;
+    logdbg  << "DBFilter: destructor: instance_id " << instanceId();
 
     if (widget_)
     {
@@ -206,7 +206,7 @@ std::string DBFilter::getConditionString (const std::string &dbo_name, bool &fir
         {
             if (conditions_.at(cnt)->valueInvalid())
             {
-                logwrn  << "DBFilter " << instance_id_ << ": getConditionString: invalid condition, will be skipped";
+                logwrn  << "DBFilter " << instanceId() << ": getConditionString: invalid condition, will be skipped";
                 continue;
             }
 
@@ -221,7 +221,7 @@ std::string DBFilter::getConditionString (const std::string &dbo_name, bool &fir
         }
     }
 
-    loginf  << "DBFilter " << instance_id_ << ": getConditionString: object " << dbo_name << " here '" << ss.str()
+    loginf  << "DBFilter " << instanceId() << ": getConditionString: object " << dbo_name << " here '" << ss.str()
             << "' first " << first;
 
     return ss.str();
@@ -270,7 +270,7 @@ void DBFilter::invert ()
  */
 void DBFilter::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
-    logdbg  << "DBFilter: generateSubConfigurable: " << class_id_ << " instance " << instance_id_;
+    logdbg  << "DBFilter: generateSubConfigurable: " << classId() << " instance " << instanceId();
 
     if (class_id == "DBFilterWidget")
     {
@@ -311,12 +311,12 @@ void DBFilter::generateSubConfigurable (const std::string &class_id, const std::
  */
 void DBFilter::checkSubConfigurables ()
 {
-    logdbg  << "DBFilter: checkSubConfigurables: " << class_id_;
+    logdbg  << "DBFilter: checkSubConfigurables: " << classId();
 
     if (!widget_)
     {
         logdbg  << "DBFilter: checkSubConfigurables: generating generic filter widget";
-        widget_ = new DBFilterWidget ("DBFilterWidget", instance_id_+"Widget0", *this);
+        widget_ = new DBFilterWidget ("DBFilterWidget", instanceId()+"Widget0", *this);
 
         if (disabled_)
         {

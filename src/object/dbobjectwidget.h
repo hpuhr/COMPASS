@@ -59,9 +59,9 @@ public slots:
     void updateDataSourcesGridSlot ();
     /// @brief Adds a data source
     void addDataSourceSlot ();
-    /// @brief Edits a DBOVariable
+    /// @brief Edits a data source
     void editDataSourceSlot();
-    /// @brief Deletes a DBOVariable
+    /// @brief Deletes a data source
     void deleteDataSourceSlot();
 
     /// @brief Changes DBO name
@@ -81,10 +81,13 @@ public slots:
     void updateDBOVarsGridSlot ();
     /// @brief Updates the schema selection for adding all variables
     //void updateAllVarsSchemaSelectionSlot ();
+    void deleteMetaTableSlot();
     /// @brief Updates meta tables grid
     void updateMetaTablesGridSlot();
 
     void showLabelDefinitionWidgetSlot();
+
+    void printSlot ();
 
 public:
     /// @brief Constructor
@@ -109,10 +112,6 @@ private:
 
     /// @brief Grid with all data sources
     QGridLayout* ds_grid_ {nullptr};
-    /// @brief Container with data sources edit buttons
-    //std::map <QPushButton*, DBODataSourceDefinition*> ds_grid_edit_buttons_;
-    /// @brief Container with data sources delete buttons
-    //std::map <QPushButton*, DBODataSourceDefinition*> ds_grid_delete_buttons_;
 
     QPushButton* new_ds_button_ {nullptr};
 
@@ -124,13 +123,8 @@ private:
     /// @brief Grid with all DBOVariables
     QGridLayout* dbovars_grid_ {nullptr};
 
-    /// @brief Container with DBOVariable edit buttons
-    //std::map <QPushButton*, DBOVariable*> dbo_vars_grid_edit_buttons_;
-    /// @brief Container with DBOVariable delete buttons
-    //std::map <QPushButton*, DBOVariable*> dbo_vars_grid_delete_buttons_;
-
     /// @brief Add all variables schema box
-    DBSchemaSelectionComboBox* all_schemas_box_ {nullptr};
+    //DBSchemaSelectionComboBox* all_schemas_box_ {nullptr};
     QPushButton* add_schema_button_ {nullptr};
 
     bool locked_ {false};

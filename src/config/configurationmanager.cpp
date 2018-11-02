@@ -61,12 +61,12 @@ ConfigurationManager::~ConfigurationManager()
  * Adds Configurable to the root_configurables_ container, return either Configuration from root_configurations_
  * (if exists) or generates a new one.
  */
-Configuration &ConfigurationManager::registerRootConfigurable(Configurable &configurable)
+Configuration& ConfigurationManager::registerRootConfigurable(Configurable &configurable)
 {
     assert (initialized_);
 
-    logdbg  << "ConfigurationManager: registerRootConfigurable: " << configurable.getInstanceId();
-    std::pair<std::string, std::string> key (configurable.getClassId(), configurable.getInstanceId());
+    logdbg  << "ConfigurationManager: registerRootConfigurable: " << configurable.instanceId();
+    std::pair<std::string, std::string> key (configurable.classId(), configurable.instanceId());
     assert (root_configurables_.find (key) == root_configurables_.end());
 
     //root_configurables_.insert(key)=configurable;
@@ -75,10 +75,10 @@ Configuration &ConfigurationManager::registerRootConfigurable(Configurable &conf
     if (root_configurations_.find (key) == root_configurations_.end()) // does not exist
     {
         loginf << "ConfigurationManager: getRootConfiguration: creating new configuration for class "
-                << configurable.getClassId() << " instance " << configurable.getInstanceId();
+                << configurable.classId() << " instance " << configurable.instanceId();
 
         root_configurations_.insert( std::pair<std::pair<std::string, std::string>, Configuration>
-                                     (key, Configuration (configurable.getClassId(), configurable.getInstanceId())) );
+                                     (key, Configuration (configurable.classId(), configurable.instanceId())) );
 
     }
     return root_configurations_.at(key);
@@ -91,8 +91,8 @@ void ConfigurationManager::unregisterRootConfigurable(Configurable &configurable
 {
     assert (initialized_);
 
-    logdbg  << "ConfigurationManager: unregisterRootConfigurable: " << configurable.getInstanceId();
-    std::pair<std::string, std::string> key (configurable.getClassId(), configurable.getInstanceId());
+    logdbg  << "ConfigurationManager: unregisterRootConfigurable: " << configurable.instanceId();
+    std::pair<std::string, std::string> key (configurable.classId(), configurable.instanceId());
     assert (root_configurables_.find(key) != root_configurables_.end());
     root_configurables_.erase (root_configurables_.find(key));
 }
@@ -197,7 +197,7 @@ void ConfigurationManager::saveConfiguration ()
     for (auto it : root_configurables_) //iterate over root configurables
     {
         logdbg << "ConfigurationManager: saveConfiguration: for configurable " << it.first.second;
-        root_element->LinkEndChild(it.second.getConfiguration().generateXMLElement(document));
+        root_element->LinkEndChild(it.second.configuration().generateXMLElement(document));
     }
 
     for (auto it : root_configurations_) // iterate over root configurations

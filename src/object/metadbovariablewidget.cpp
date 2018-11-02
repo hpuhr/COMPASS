@@ -169,18 +169,18 @@ void MetaDBOVariableWidget::updateSlot ()
     selection_widgets_.clear();
 
     unsigned int row = 0;
-    for (auto object_it : ATSDB::instance().objectManager().objects())
+    for (auto& obj_it : ATSDB::instance().objectManager())
     {
-        grid_layout_->addWidget(new QLabel (object_it.first.c_str()), row, 0);
+        grid_layout_->addWidget(new QLabel (obj_it.first.c_str()), row, 0);
 
         DBOVariableSelectionWidget* var_sel = new DBOVariableSelectionWidget (true);
-        var_sel->showDBOOnly(object_it.first);
+        var_sel->showDBOOnly(obj_it.first);
 
-        if (variable_.existsIn(object_it.first))
-            var_sel->selectedVariable (variable_.getFor(object_it.first));
+        if (variable_.existsIn(obj_it.first))
+            var_sel->selectedVariable (variable_.getFor(obj_it.first));
 
         connect (var_sel, SIGNAL(selectionChanged()), this, SLOT(subVariableChangedSlot()));
-        selection_widgets_[var_sel] = object_it.first;
+        selection_widgets_[var_sel] = obj_it.first;
 
         grid_layout_->addWidget(var_sel, row, 1);
         row++;

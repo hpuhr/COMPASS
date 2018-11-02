@@ -25,12 +25,15 @@
 #include <iomanip>
 #include <array>
 
+#include <type_traits>
+
 #include "logger.h"
 #include "property.h"
 #include "stringconv.h"
-//#include "dbovariable.h"
 
 static const unsigned int BUFFER_ARRAY_SIZE=10000;
+
+const bool ARRAYLIST_PEDANTIC_CHECKING=false;
 
 /**
  * @brief List interface of fixed-size arrays to be used in Buffer classes.
@@ -41,43 +44,57 @@ class ArrayListBase
 {
 public:
     /// @brief Constructor
-    ArrayListBase ();
+    ArrayListBase () {}
     /// @brief Destructor
-    virtual ~ArrayListBase ();
+    virtual ~ArrayListBase () {}
 
     /// @brief Returns size of the list
-    size_t size ();
-
-    /// @brief Returns current maximum size of the list
-    size_t maximumSize ();
+    size_t size () { return none_flags_.size(); }
 
     /// @brief Sets specific element to None value
-    virtual void setNone(size_t size_t);
+    virtual void setNone(size_t index)
+    {
+        if (index >= none_flags_.size()) // allocate new stuff, fill all new with not none
+            none_flags_.resize(index+1, true);
+
+        none_flags_.at(index) = true;
+    }
 
     /// @brief Checks if specific element is None
-    bool isNone(size_t size_t);
+    bool isNone(size_t index)
+    {
+        if (ARRAYLIST_PEDANTIC_CHECKING)
+            assert (index < none_flags_.size());
+
+        return none_flags_.at(index);
+    }
 
     /// @brief Sets all elements to initial value and None information to true
     virtual void clear()=0;
 
     virtual const std::string getAsString (size_t index)=0;
 
+private:
+    //std::vector < std::shared_ptr< std::array<bool,BUFFER_ARRAY_SIZE> > > none_flags_;
+    std::vector <bool> none_flags_;
+
 protected:
-    /// Identifier of contained data
-    std::string id_;
-    /// Size of the data contents, maximum index of set+1
-    size_t size_ {0};
-    /// Size of data arrays
-    size_t max_size_ {0};
-
-    std::vector < std::shared_ptr< std::array<bool,BUFFER_ARRAY_SIZE> > > none_flags_;
-
-    /// @brief Allocates a new none array
-    void allocatedNewNoneArray ();
     /// @brief Sets all elements to None value
-    void setAllNone();
+    void setAllNone() { std::fill (none_flags_.begin(), none_flags_.end(), true); }
+
     /// @brief Sets specific element to not None value
-    void unsetNone (size_t index);
+    void unsetNone (size_t index)
+    {
+        if (index >= none_flags_.size()) // allocate new stuff, fill all new with not none
+            none_flags_.resize(index+1, true);
+
+        none_flags_.at(index) = false;
+    }
+
+    void addNone (ArrayListBase& other)
+    {
+        none_flags_.insert(none_flags_.end(), other.none_flags_.begin(), other.none_flags_.end());
+    }
 };
 
 
@@ -100,104 +117,80 @@ public:
     /// @brief Sets all elements to false
     virtual void clear() override
     {
-        for (auto& data_it : data_)
-            data_it->fill(T());
-
+        std::fill (data_.begin(),data_.end(), T());
         setAllNone();
     }
 
     /// @brief Returns const reference to a specific value
-    const T &get (size_t index)
+    const T get (size_t index)
     {
-        assert (index <= size_);
-        assert (!isNone(index));
-
-        if (index > size_)
-            throw std::out_of_range ("ArrayListTemplate: get out of index "+std::to_string(index));
-
         if (isNone(index))
-            throw std::out_of_range ("ArrayListTemplate: get of None value "+std::to_string(index));
+            throw std::runtime_error ("ArrayListTemplate: get of None value "+std::to_string(index));
 
-        return data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE);
+        return data_.at(index);
     }
 
     /// @brief Returns string of a specific value
     const std::string getAsString (size_t index) override
     {
-        if (index > size_)
-            throw std::out_of_range ("ArrayListTemplate: getAsString out of index "+std::to_string(index));
-
         if (isNone(index))
-            throw std::out_of_range ("ArrayListTemplate: getAsString of None value "+std::to_string(index));
+            throw std::runtime_error ("ArrayListTemplate: getAsString of None value "+std::to_string(index));
 
-        return Utils::String::getValueString (data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE));
+        return Utils::String::getValueString (data_.at(index));
     }
 
     /// @brief Sets specific value
     void set (size_t index, T value)
     {
-        //loginf << "ArrayListBool:set: index " << index << " current size-1 " << size_-1;
-
-        if (index >= max_size_)
+        if (index >= data_.size()) // allocate new stuff, fill all new with not none
         {
-            //logdbg << "ArrayListTemplate:set: adding new arrays for index " << index << " current max size "
-            // << max_size_;
-            while (index >= max_size_)
-                allocateNewArray ();
+            data_.resize(index+1, T());
         }
 
-        //logdbg << "ArrayListTemplate: set: setting index " << index << " to value " << value << " using array "
-        //<< index/BUFFER_ARRAY_SIZE << " array_index " << index%BUFFER_ARRAY_SIZE;
-
-        data_[index/BUFFER_ARRAY_SIZE]->at (index%BUFFER_ARRAY_SIZE) = value;
-
-        if (index >= size_)
-            size_= index+1;
+        data_.at(index) = value;
 
         //logdbg << "ArrayListTemplate: set: size " << size_ << " max_size " << max_size_;
 
         unsetNone(index);
+
+        if (ARRAYLIST_PEDANTIC_CHECKING)
+            assert (data_.size() == ArrayListBase::size());
     }
 
     /// @brief Sets specific element to None value
     virtual void setNone(size_t index) override
     {
-        if (index >= max_size_)
+        if (index >= data_.size()) // allocate new stuff, fill all new with not none
         {
-            //logdbg << "ArrayListTemplate:setNone: adding new arrays for index " << index << " current max size "
-            //<< max_size_;
-            while (index >= max_size_)
-                allocateNewArray ();
+            data_.resize(index+1, T());
         }
 
         ArrayListBase::setNone(index);
+
+        if (ARRAYLIST_PEDANTIC_CHECKING)
+            assert (data_.size() == ArrayListBase::size());
     }
 
     void addData (ArrayListTemplate<T> &other)
     {
-        logdbg << "ArrayListTemplate: addData: data size " << data_.size() << " none flags size " << none_flags_.size()
-               << " size " << size_ << " max " << max_size_;
+        logdbg << "ArrayListTemplate: addData: data size " << data_.size();
 
         data_.insert(data_.end(), other.data_.begin(), other.data_.end());
-        none_flags_.insert(none_flags_.end(), other.none_flags_.begin(), other.none_flags_.end());
-        assert (data_.size() == none_flags_.size());
-        size_ = max_size_ + other.size_;
-        max_size_ += other.max_size_;
+        addNone(other);
 
         other.data_.clear();
-        other.none_flags_.clear();
-        other.size_=0;
-        other.max_size_=0;
+        other.setAllNone();
 
-        logdbg << "ArrayListTemplate: addData: end data size " << data_.size() << " none flags size "
-               << none_flags_.size() << " size " << size_ << " max " << max_size_;
+        if (ARRAYLIST_PEDANTIC_CHECKING)
+            assert (data_.size() == ArrayListBase::size());
+
+        logdbg << "ArrayListTemplate: addData: end data size " << data_.size();
     }
 
     ArrayListTemplate<T>& operator*=(double factor)
     {
         for (auto &data_it : data_)
-            for (unsigned int cnt=0; cnt < BUFFER_ARRAY_SIZE; cnt++)
-                data_it->at(cnt) *= factor;
+            data_it *= factor;
 
         return *this;
     }
@@ -208,38 +201,15 @@ public:
 
         T value;
 
-        size_t first_list_cnt=0;
-        unsigned list_cnt=0;
-
-        size_t first_list_row=0;
-        size_t list_row_cnt;
-
-        if (index)
+        for (; index < data_.size(); ++index)
         {
-            first_list_cnt = index/BUFFER_ARRAY_SIZE;
-            first_list_row = index%BUFFER_ARRAY_SIZE;
-        }
-
-        for (; list_cnt < data_.size(); list_cnt++)
-        {
-            std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > array_list = data_.at(list_cnt);
-
-            if (index && list_cnt == first_list_cnt) // there is a start index
-                list_row_cnt=first_list_row;
-            else
-                list_row_cnt=0;
-
-            for (; list_row_cnt < BUFFER_ARRAY_SIZE; list_row_cnt++)
+            if (!none_flags_.at(index)) // not for none
             {
-                if (!none_flags_.at(list_cnt)->at(list_row_cnt)) // not for none
-                {
-                    value = array_list->at(list_row_cnt);
-                    if (values.count(value) == 0)
-                        values.insert(value);
-                }
+                value = data_.at(index);
+                if (values.count(value) == 0)
+                    values.insert(value);
             }
         }
-        return values;
     }
 
     std::map<T, std::vector<size_t>> distinctValuesWithIndexes (size_t from_index, size_t to_index)
@@ -248,48 +218,20 @@ public:
 
         assert (to_index);
         assert (from_index < to_index);
+        assert (from_index < data_.size());
+        assert (to_index < data_.size());
 
-        size_t first_list_cnt = from_index/BUFFER_ARRAY_SIZE;
-        unsigned list_cnt = first_list_cnt;
-        unsigned list_size = to_index/BUFFER_ARRAY_SIZE;
-
-        if (to_index % BUFFER_ARRAY_SIZE != 0) // fix for less then one full array
+        for (size_t index = from_index; index <= to_index; ++index)
         {
-            logdbg << "ArrayList: distinctValuesWithIndexes: rest of data fix";
-            list_size += 1;
-        }
-
-        size_t first_list_row = from_index%BUFFER_ARRAY_SIZE;
-        size_t list_row_cnt = 0;
-
-        logdbg << "ArrayList: distinctValuesWithIndexes: from_index " << from_index << " to_index " << to_index
-               << " first_list_cnt " << first_list_cnt << " list_cnt " << list_cnt << " list size " << list_size
-               << " first_list_row " << first_list_row;
-
-//        T none_index = std::numeric_limits<T>::max();
-
-        size_t array_size;
-
-        for (; list_cnt < list_size; list_cnt++)
-        {
-            std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > array_list = data_.at(list_cnt);
-            array_size = array_list->size();
-
-            if (list_cnt == first_list_cnt) // there is a start index
-                list_row_cnt=first_list_row;
-            else
-                list_row_cnt=0;
-
-            for (; list_row_cnt < array_size; list_row_cnt++)
+            if (!isNone(index)) // not for none
             {
-                if (!none_flags_.at(list_cnt)->at(list_row_cnt)) // not for none
+                if (ARRAYLIST_PEDANTIC_CHECKING)
                 {
-                    values[array_list->at(list_row_cnt)].push_back(list_cnt*BUFFER_ARRAY_SIZE+list_row_cnt);
+                    assert (index < data_.size());
+                    assert (index < ArrayListBase::size());
                 }
-//                else // add to unknown sensor
-//                {
-//                    values[none_index].push_back(list_cnt*BUFFER_ARRAY_SIZE+list_row_cnt);
-//                }
+
+                values[data_.at(index)].push_back(index);
             }
         }
 
@@ -297,27 +239,45 @@ public:
         return values;
     }
 
-protected:
-    /// Data containers
-    std::vector < std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > > data_;
-
-    /// @brief Adds a new data container
-    void allocateNewArray ()
+    void convertToStandardFormat(const std::string& from_format)
     {
-        std::shared_ptr< std::array<T,BUFFER_ARRAY_SIZE> > new_array_ptr =
-                std::make_shared<std::array<T,BUFFER_ARRAY_SIZE>>();
+        static_assert (std::is_integral<T>::value, "only defined for integer types");
 
-        data_.push_back(new_array_ptr);
-        max_size_ += BUFFER_ARRAY_SIZE;
+        std::string value_str;
+        //T value;
 
-        allocatedNewNoneArray();
+        size_t data_size = data_.size();
+        for (size_t cnt=0; cnt < data_size; cnt++)
+        {
+            if (isNone(cnt))
+                continue;
 
-        assert (data_.size() == none_flags_.size());
+            value_str = std::to_string(data_[cnt]);
 
-        //logdbg << "ArrayListTemplate: allocateNewArray: added new array current max size " << max_size_;
+//            if (from_format == "hexadecimal")
+//                value = std::stoi(value_str, 0, 16);
+//            else
+            if (from_format == "octal")
+            {
+                data_[cnt] = std::stoi(value_str, 0, 8);
+            }
+            else
+                assert (false);
+        }
     }
+
+protected:
+    /// Data container
+    std::vector<T> data_;
 };
 
+
+// For integral types only:
+//template<typename T>
+//typename std::enable_if<std::is_integral<T>::value>::type f(T t)
+//{
+//    // ...
+//}
 
 //template <>
 //const std::string ArrayListTemplate<std::string>::getAsString (size_t index);

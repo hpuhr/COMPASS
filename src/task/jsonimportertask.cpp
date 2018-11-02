@@ -583,15 +583,15 @@ std::shared_ptr<Buffer> JSONImporterTask::parseJSON (Json::Value& object, bool t
 
     std::shared_ptr<Buffer> buffer_ptr = std::shared_ptr<Buffer> (new Buffer (list_, db_object_->name()));
 
-    ArrayListTemplate<int>& key_al = buffer_ptr->getInt(key_var_->name());
-    ArrayListTemplate<int>& dsid_al = buffer_ptr->getInt(dsid_var_->name());
-    ArrayListTemplate<int>& target_addr_al = buffer_ptr->getInt(target_addr_var_->name());
-    ArrayListTemplate<std::string>& callsign_al = buffer_ptr->getString(callsign_var_->name());
-    ArrayListTemplate<int>& altitude_baro_al = buffer_ptr->getInt(altitude_baro_var_->name());
-    ArrayListTemplate<double>& altitude_geo_al = buffer_ptr->getDouble(altitude_geo_var_->name());
-    ArrayListTemplate<double>& latitude_al = buffer_ptr->getDouble(latitude_var_->name());
-    ArrayListTemplate<double>& longitude_al = buffer_ptr->getDouble(longitude_var_->name());
-    ArrayListTemplate<float>& tod_al = buffer_ptr->getFloat(tod_var_->name());
+    ArrayListTemplate<int>& key_al = buffer_ptr->get<int>(key_var_->name());
+    ArrayListTemplate<int>& dsid_al = buffer_ptr->get<int>(dsid_var_->name());
+    ArrayListTemplate<int>& target_addr_al = buffer_ptr->get<int>(target_addr_var_->name());
+    ArrayListTemplate<std::string>& callsign_al = buffer_ptr->get<std::string>(callsign_var_->name());
+    ArrayListTemplate<int>& altitude_baro_al = buffer_ptr->get<int>(altitude_baro_var_->name());
+    ArrayListTemplate<double>& altitude_geo_al = buffer_ptr->get<double>(altitude_geo_var_->name());
+    ArrayListTemplate<double>& latitude_al = buffer_ptr->get<double>(latitude_var_->name());
+    ArrayListTemplate<double>& longitude_al = buffer_ptr->get<double>(longitude_var_->name());
+    ArrayListTemplate<float>& tod_al = buffer_ptr->get<float>(tod_var_->name());
 
 //    unsigned int all_cnt = 0;
     bool receiver_valid;
@@ -625,7 +625,7 @@ std::shared_ptr<Buffer> JSONImporterTask::parseJSON (Json::Value& object, bool t
 
     bool skip_this;
 
-    for (Json::Value::const_iterator it = object.begin(); it != object.end(); ++it)
+    for (auto it = object.begin(); it != object.end(); ++it)
     {
         logdbg << it.key().asString(); // << ':' << it->asInt() << '\n';
 
@@ -633,7 +633,7 @@ std::shared_ptr<Buffer> JSONImporterTask::parseJSON (Json::Value& object, bool t
         {
             Json::Value ac_list = object["acList"];
             //Json::Value& ac_list = it.v;
-            for (Json::Value::const_iterator tr_it = ac_list.begin(); tr_it != ac_list.end(); ++tr_it)
+            for (auto tr_it = ac_list.begin(); tr_it != ac_list.end(); ++tr_it)
             {
                 skip_this = false;
                 //loginf << tr_it.key().asString();
@@ -958,12 +958,22 @@ std::shared_ptr<Buffer> JSONImporterTask::parseJSON (Json::Value& object, bool t
                     key_al.set(row_cnt, rec_num_cnt_);
                     dsid_al.set(row_cnt, receiver);
                     target_addr_al.set(row_cnt, target_address);
+
                     if (callsign_valid)
                         callsign_al.set(row_cnt, callsign);
+                    else
+                        callsign_al.setNone(row_cnt);
+
                     if (altitude_baro_valid)
                         altitude_baro_al.set(row_cnt, altitude_baro_ft);
+                    else
+                        altitude_baro_al.setNone(row_cnt);
+
                     if (altitude_geo_valid)
                         altitude_geo_al.set(row_cnt, altitude_geo_ft);
+                    else
+                        altitude_geo_al.setNone(row_cnt);
+
                     latitude_al.set(row_cnt, latitude_deg);
                     longitude_al.set(row_cnt, longitude_deg);
                     tod_al.set(row_cnt, (int) tod);
