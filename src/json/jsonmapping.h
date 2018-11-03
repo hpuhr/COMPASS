@@ -58,6 +58,9 @@ public:
 
     unsigned int parseJSON (nlohmann::json& j, bool test);
 
+    bool overrideKeyVariable() const;
+    void overrideKeyVariable(bool override);
+
 private:
     DBObject& db_object_;
 
@@ -65,6 +68,12 @@ private:
     std::string json_key_; // * for all
     std::string json_value_;
     std::vector <JsonKey2DBOVariableMapping> data_mappings_;
+
+    bool override_key_variable_;
+    bool has_key_mapping_ {false};
+    bool has_key_variable_ {false};
+
+    unsigned int key_count_ {0};
 
     PropertyList list_;
     std::shared_ptr<Buffer> buffer_;

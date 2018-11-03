@@ -317,6 +317,27 @@ const MetaDBTable& DBObject::currentMetaTable () const
 //    variables_checked_=true;
 //}
 
+bool DBObject::hasKeyVariable ()
+{
+    for (auto& var_it : variables_)
+        if (var_it.second.isKey())
+            return true;
+
+    return false;
+}
+
+
+DBOVariable& DBObject::getKeyVariable()
+{
+    assert (hasKeyVariable());
+
+    for (auto& var_it : variables_)
+        if (var_it.second.isKey())
+            return var_it.second;
+
+    throw std::runtime_error ("DBObject: getKeyVariable: no key variable found");
+}
+
 void DBObject::addDataSource (int key_value, const std::string& name)
 {
     loginf << "DBObject: addDataSources: inserting source " << name;

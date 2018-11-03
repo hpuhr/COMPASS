@@ -52,6 +52,12 @@ void JsonMapping::addMapping (JsonKey2DBOVariableMapping mapping)
 
     data_mappings_.push_back(mapping);
     list_.addProperty(mapping.variable_.name(), mapping.variable_.dataType());
+
+    if (mapping.variable_.isKey())
+    {
+        assert (mapping.variable_.dataType() == PropertyDataType::INT);
+        has_key_mapping_ = true;
+    }
 }
 
 std::shared_ptr<Buffer> JsonMapping::buffer() const
@@ -66,6 +72,27 @@ void JsonMapping::clearBuffer ()
 
 unsigned int JsonMapping::parseJSON (nlohmann::json& j, bool test)
 {
+    DBOVariable* key_var {nullptr};
+
+    if (key_count_ == 0 && !has_key_mapping_ && db_object_.hasKeyVariable()) // first time only, add key variable
+        has_key_variable_ = true;
+    else
+        has_key_variable_ = has_key_mapping_; // couldn't be added, can only have if mapped one exists
+
+    if (has_key_variable_)
+    {
+        key_var = &db_object_.getKeyVariable();
+        assert (key_var);
+        assert (key_var->dataType() == PropertyDataType::INT);
+        list_.addProperty(key_var->name(), key_var->dataType());
+    }
+
+    if (override_key_variable_ && !has_key_variable_)
+    {
+        logwrn << "JsonMapping: parseJSON: override key set but no key variable exists, disabling override";
+        override_key_variable_ = false;
+    }
+
     assert (buffer_ == nullptr);
     buffer_ = std::shared_ptr<Buffer> (new Buffer (list_, db_object_.name()));
 
@@ -110,7 +137,8 @@ unsigned int JsonMapping::parseJSON (nlohmann::json& j, bool test)
                     if (data_it.mandatory_ &&
                             (tr.find (data_it.json_key_) == tr.end() || tr[data_it.json_key_] == nullptr))
                     {
-                        loginf << "skipping because of lack of data, not found "
+                        loginf << "skipping because of lack of data, "
+                               << data_it.json_key_ << " not found "
                                << (tr.find (data_it.json_key_) == tr.end()) << " null "
                                << (tr[data_it.json_key_] == nullptr);
                         skip_this = true;
@@ -459,10 +487,16 @@ unsigned int JsonMapping::parseJSON (nlohmann::json& j, bool test)
                                 throw std::runtime_error ("JsonMapping: parseJSON: impossible property type "
                                                           + Property::asString(data_type));
                             }
-
-
-                            //data_it[json_key_]
                         }
+                    }
+
+                    if (override_key_variable_)
+                    {
+                        assert (key_var);
+                        assert (buffer_->has<int>(key_var->name()));
+                        ArrayListTemplate<int> &array_list = buffer_->get<int> (key_var->name());
+                        array_list.set(row_cnt, key_count_);
+                        loginf << "override key " << array_list.get(row_cnt);
                     }
 
                     //                    logdbg << "\t rn " << rec_num_cnt_
@@ -506,6 +540,7 @@ unsigned int JsonMapping::parseJSON (nlohmann::json& j, bool test)
                     //                        datasources_to_add_[receiver] = receiver_name;
 
                     row_cnt++;
+                    key_count_++;
                 }
                 else
                 {
@@ -519,5 +554,15 @@ unsigned int JsonMapping::parseJSON (nlohmann::json& j, bool test)
     }
 
     return row_cnt;
+}
+
+bool JsonMapping::overrideKeyVariable() const
+{
+    return override_key_variable_;
+}
+
+void JsonMapping::overrideKeyVariable(bool override)
+{
+    override_key_variable_ = override;
 }
 

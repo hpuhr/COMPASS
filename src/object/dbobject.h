@@ -217,6 +217,9 @@ public:
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
+    bool hasKeyVariable ();
+    DBOVariable& getKeyVariable();
+
     ///@brief Returns flag if data sources are defined for DBO type.
     bool hasDataSources () { return data_sources_.size() > 0; }
     void addDataSource (int key_value, const std::string& name); // needs postprocessing after

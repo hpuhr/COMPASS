@@ -108,6 +108,8 @@ public:
     bool hasCurrentDBColumn () const;
     const DBTableColumn& currentDBColumn () const;
 
+    bool isKey ();
+
     /// @brief Returns if current schema is present in schema_variables_
     bool hasCurrentSchema () const;
     /// @brief Returns meta table identifier for current schema

@@ -397,6 +397,11 @@ const DBTableColumn& DBOVariable::currentDBColumn () const
     return ATSDB::instance().schemaManager().getCurrentSchema().metaTable(meta_tablename).column(meta_table_varid);
 }
 
+bool DBOVariable::isKey ()
+{
+    return hasCurrentDBColumn() && currentDBColumn().isKey();
+}
+
 bool DBOVariable::hasCurrentSchema () const
 {
     return hasSchema(ATSDB::instance().schemaManager().getCurrentSchemaName());

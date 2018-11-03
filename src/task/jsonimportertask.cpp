@@ -551,6 +551,7 @@ std::shared_ptr<Buffer> JSONImporterTask::parseJSON (nlohmann::json& j, bool tes
         mappings_.at(0).JSONKey("*");
         mappings_.at(0).JSONValue("*");
         mappings_.at(0).JSONContainerKey("acList");
+        mappings_.at(0).overrideKeyVariable(true);
 
         //    key_var_str_ = "rec_num";
         //    dsid_var_str_ = "ds_id";
