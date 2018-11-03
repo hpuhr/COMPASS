@@ -17,7 +17,7 @@ const std::map<PropertyDataType, std::vector<std::string>> Format::format_option
     {PropertyDataType::ULONGINT,   integer_formats},
     {PropertyDataType::FLOAT,      no_format},
     {PropertyDataType::DOUBLE,     no_format},
-    {PropertyDataType::STRING,     no_format}};
+    {PropertyDataType::STRING,     {"", "decimal", "hexadecimal", "octal", "epoch_tod"}}};
 
 void Format::set(PropertyDataType data_type, const std::string& value)
 {

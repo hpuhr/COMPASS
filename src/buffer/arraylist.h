@@ -27,6 +27,8 @@
 
 #include <type_traits>
 
+#include <QDateTime>
+
 #include "logger.h"
 #include "property.h"
 #include "stringconv.h"
@@ -157,6 +159,33 @@ public:
             assert (data_.size() == ArrayListBase::size());
     }
 
+    void setFromFormat (size_t index, const std::string& format, const std::string& value_str)
+    {
+        T value;
+
+        if (format == "octal")
+        {
+            value = std::stoi(value_str, 0, 8);
+        }
+        else if (format == "hexadecimal")
+        {
+            value = std::stoi(value_str, 0, 16);
+        }
+        else if (format == "epoch_tod")
+        {
+            QDateTime date_time;
+            date_time.setMSecsSinceEpoch(std::stoul(value_str));
+            value = Utils::String::timeFromString(date_time.toString("hh:mm:ss.zzz").toStdString());
+        }
+        else
+        {
+            logerr << "ArrayListTemplate: setFromFormat: unknown format '" << format << "'";
+            assert (false);
+        }
+
+        set (index, value);
+    }
+
     /// @brief Sets specific element to None value
     virtual void setNone(size_t index) override
     {
@@ -254,15 +283,15 @@ public:
 
             value_str = std::to_string(data_[cnt]);
 
-//            if (from_format == "hexadecimal")
-//                value = std::stoi(value_str, 0, 16);
-//            else
             if (from_format == "octal")
             {
                 data_[cnt] = std::stoi(value_str, 0, 8);
             }
             else
+            {
+                logerr << "ArrayListTemplate: convertToStandardFormat: unknown format '" << from_format << "'";
                 assert (false);
+            }
         }
     }
 

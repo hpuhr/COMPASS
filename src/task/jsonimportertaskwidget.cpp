@@ -60,11 +60,11 @@ JSONImporterTaskWidget::JSONImporterTaskWidget(JSONImporterTask& task, QWidget* 
     QFormLayout *stuff_layout = new QFormLayout;
     stuff_layout->setFormAlignment(Qt::AlignRight | Qt::AlignTop);
 
-    object_box_ = new DBObjectComboBox (false);
-    if (task_.dbObjectStr().size())
-        object_box_->setObjectName(task_.dbObjectStr());
-    connect (object_box_, SIGNAL(changedObject()), this, SLOT(dbObjectChangedSlot()));
-    stuff_layout->addRow(tr("DBObject"), object_box_);
+//    object_box_ = new DBObjectComboBox (false);
+//    if (task_.dbObjectStr().size())
+//        object_box_->setObjectName(task_.dbObjectStr());
+//    connect (object_box_, SIGNAL(changedObject()), this, SLOT(dbObjectChangedSlot()));
+//    stuff_layout->addRow(tr("DBObject"), object_box_);
 
     join_sources_check_ = new QCheckBox ();
     join_sources_check_->setChecked(task_.joinDataSources());
@@ -191,15 +191,15 @@ void JSONImporterTaskWidget::update ()
 
 }
 
-void JSONImporterTaskWidget::dbObjectChangedSlot()
-{
-    assert (object_box_);
+//void JSONImporterTaskWidget::dbObjectChangedSlot()
+//{
+//    assert (object_box_);
 
-    std::string object_name = object_box_->getObjectName();
+//    std::string object_name = object_box_->getObjectName();
 
-    loginf << "JSONImporterTaskWidget: dbObjectChangedSlot: " << object_name;
-    setDBOBject (object_name);
-}
+//    loginf << "JSONImporterTaskWidget: dbObjectChangedSlot: " << object_name;
+//    setDBOBject (object_name);
+//}
 
 void JSONImporterTaskWidget::testImportSlot ()
 {
@@ -263,9 +263,9 @@ void JSONImporterTaskWidget::importDoneSlot (bool test)
     loginf << "JSONImporterTaskWidget: importDoneSlot: test " << test;
 }
 
-void JSONImporterTaskWidget::setDBOBject (const std::string& object_name)
-{
-    task_.dbObjectStr(object_name);
+//void JSONImporterTaskWidget::setDBOBject (const std::string& object_name)
+//{
+//    task_.dbObjectStr(object_name);
 
 //    key_box_->showDBOOnly(object_name);
 //    datasource_box_->showDBOOnly(object_name);
@@ -275,7 +275,7 @@ void JSONImporterTaskWidget::setDBOBject (const std::string& object_name)
 
 //    latitude_box_->showDBOOnly(object_name);
 //    longitude_box_->showDBOOnly(object_name);
-}
+//}
 
 void JSONImporterTaskWidget::joinDataSourcesChangedSlot (bool checked)
 {

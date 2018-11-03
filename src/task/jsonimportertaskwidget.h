@@ -18,7 +18,7 @@ class JSONImporterTaskWidget : public QWidget
     Q_OBJECT
 
 public slots:
-    void dbObjectChangedSlot();
+    //void dbObjectChangedSlot();
     void testImportSlot ();
     void importSlot ();
     void importDoneSlot (bool test);
@@ -50,7 +50,7 @@ protected:
     QPushButton* add_button_ {nullptr};
     QPushButton* delete_button_ {nullptr};
 
-    DBObjectComboBox* object_box_ {nullptr};
+    //DBObjectComboBox* object_box_ {nullptr};
 
     QCheckBox* join_sources_check_ {nullptr};
     QCheckBox* separate_mlat_check_ {nullptr};
@@ -68,7 +68,7 @@ protected:
     QPushButton* test_button_ {nullptr};
     QPushButton* import_button_ {nullptr};
 
-    void setDBOBject (const std::string& object_name);
+    //void setDBOBject (const std::string& object_name);
 };
 
 #endif // JSONIMPORTERTASKWIDGET_H
