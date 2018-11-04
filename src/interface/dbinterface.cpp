@@ -366,7 +366,7 @@ bool DBInterface::hasDataSourceTables (DBObject& object)
 // */
 std::map <int, DBODataSource> DBInterface::getDataSources (DBObject &object)
 {
-    loginf  << "DBInterface: getDataSources: start";
+    logdbg  << "DBInterface: getDataSources: start";
 
     assert (object.existsInDB());
 
@@ -374,7 +374,7 @@ std::map <int, DBODataSource> DBInterface::getDataSources (DBObject &object)
 
     std::shared_ptr<DBCommand> command = sql_generator_.getDataSourcesSelectCommand(object);
 
-    loginf << "DBInterface: getDataSources: sql '" << command->get() << "'";
+    logdbg << "DBInterface: getDataSources: sql '" << command->get() << "'";
 
     std::shared_ptr <DBResult> result = current_connection_->execute(*command);
     assert (result->containsData());
@@ -471,7 +471,7 @@ std::map <int, DBODataSource> DBInterface::getDataSources (DBObject &object)
         std::string name = buffer->get<std::string>(name_col.name()).get(cnt);
 
         assert (sources.count(key) == 0);
-        loginf << "DBInterface: getDataSources: object " << object.name() << " key " << key << " name " << name;
+        logdbg << "DBInterface: getDataSources: object " << object.name() << " key " << key << " name " << name;
         sources.insert(std::pair<int, DBODataSource>(key, DBODataSource(key, name)));
 
         if (has_short_name && !buffer->get<std::string>(short_name_col_name).isNone(cnt))

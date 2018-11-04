@@ -75,10 +75,14 @@ unsigned int JsonMapping::parseJSON (nlohmann::json& j, bool test)
 {
     DBOVariable* key_var {nullptr};
 
-    if (key_count_ == 0 && !has_key_mapping_ && db_object_.hasKeyVariable()) // first time only, add key variable
-        has_key_variable_ = true;
-    else
-        has_key_variable_ = has_key_mapping_; // couldn't be added, can only have if mapped one exists
+    if (key_count_ == 0)
+    {
+        if (!has_key_mapping_ && db_object_.hasKeyVariable()) // first time only, add key variable
+            has_key_variable_ = true;
+        else
+            has_key_variable_ = has_key_mapping_; // couldn't be added, can only have if mapped one exists
+
+    }
 
     if (has_key_variable_)
     {
@@ -95,8 +99,9 @@ unsigned int JsonMapping::parseJSON (nlohmann::json& j, bool test)
         override_key_variable_ = false;
     }
 
-    assert (buffer_ == nullptr);
-    buffer_ = std::shared_ptr<Buffer> (new Buffer (list_, db_object_.name()));
+    assert (buffer_ == nullptr || buffer_->size() == 0);
+    if (buffer_ == nullptr)
+        buffer_ = std::shared_ptr<Buffer> (new Buffer (list_, db_object_.name()));
 
     unsigned int row_cnt = 0;
     unsigned int skipped_cnt = 0;
@@ -419,7 +424,7 @@ unsigned int JsonMapping::parseJSON (nlohmann::json& j, bool test)
                             }
                             case PropertyDataType::DOUBLE:
                             {
-                                loginf << "double " << current_var_name << " json " << tr[data_it.json_key_]
+                                logdbg << "double " << current_var_name << " json " << tr[data_it.json_key_]
                                        << " format '" << data_it.json_value_format_ << "'";
                                 assert (buffer_->has<double>(current_var_name));
                                 ArrayListTemplate<double> &array_list =
@@ -589,7 +594,7 @@ unsigned int JsonMapping::parseJSON (nlohmann::json& j, bool test)
                         assert (buffer_->has<int>(key_var->name()));
                         ArrayListTemplate<int>& array_list = buffer_->get<int> (key_var->name());
                         array_list.set(row_cnt, key_count_);
-                        logdbg << "override key " << array_list.get(row_cnt);
+                        loginf << "override key " << array_list.get(row_cnt) << " size " << buffer_->size();
                     }
 
                     row_cnt++;

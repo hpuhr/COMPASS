@@ -100,6 +100,8 @@ protected:
     bool join_data_sources_ {false};
     bool separate_mlat_data_ {false};
 
+    std::set <int> added_data_sources_;
+
     void parseJSON (nlohmann::json& j, bool test);
     void insertData ();
     void clearData ();

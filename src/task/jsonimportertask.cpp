@@ -248,9 +248,35 @@ void JSONImporterTask::importFile(const std::string& filename, bool test)
     }
 
     std::ifstream ifs(filename);
-    json j = json::parse(ifs);
+    std::stringstream ss;
 
-    parseJSON (j, test);
+    char c;
+    unsigned int open_count {0};
+
+    while (ifs.get(c))          // loop getting single characters
+    {
+        if (c == '{')
+            ++open_count;
+        else if (c == '}')
+            --open_count;
+        ss << c;
+
+        if (c == '\n') // next lines after objects
+            continue;
+
+        if (open_count == 0)
+        {
+            //loginf << "got part '" << ss.str() << "'";
+
+            json j = json::parse(ss.str());
+
+            parseJSON (j, test);
+
+            ss.str("");
+
+            //loginf << "UGA2 cleared";
+        }
+    }
 
     if (!test)
         insertData ();
@@ -337,18 +363,18 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
 
     unsigned int entry_cnt = 0;
 
-    size_t archive_read_time = 0;
-    size_t archive_parse_time = 0;
-    size_t json_parse_time = 0;
-    size_t wait_time = 0;
-    size_t insert_time = 0;
+    //    size_t archive_read_time = 0;
+    //    size_t archive_parse_time = 0;
+    //    size_t json_parse_time = 0;
+    //    size_t wait_time = 0;
+    //    size_t insert_time = 0;
 
     boost::posix_time::ptime tmp_time;
 
     while (archive_read_next_header(a, &entry) == ARCHIVE_OK)
     {
-//        for (unsigned int cnt=0; cnt < 10; cnt++)
-//            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        //        for (unsigned int cnt=0; cnt < 10; cnt++)
+        //            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
         loginf << "Archive file found: " << archive_entry_pathname(entry) << " size " << archive_entry_size(entry);
 
@@ -367,7 +393,8 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
         msg_box.show();
         QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
-        ss.str("");
+        //ss.str("");
+        unsigned int open_count {0};
 
         for (;;)
         {
@@ -380,55 +407,79 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
                                          +std::string(archive_error_string(a)));
 
             std::string str (reinterpret_cast<char const*>(buff), size);
-            ss << str;
-        }
 
-        archive_read_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
-        tmp_time = boost::posix_time::microsec_clock::local_time();
-
-        loginf  << "JSONImporterTask: importFileArchive: got entry with " << ss.str().size() << " chars";
-
-        try
-        {
-            json j = json::parse(ss.str());
-
-            archive_parse_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
-            tmp_time = boost::posix_time::microsec_clock::local_time();
-
-            parseJSON (j, test);
-
-            json_parse_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
-            tmp_time = boost::posix_time::microsec_clock::local_time();
-
-            while (insert_active_)
+            for (char c : str)
             {
-                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-                QThread::msleep (10);
+                if (c == '{')
+                    ++open_count;
+                else if (c == '}')
+                    --open_count;
+                ss << c;
+
+                if (c == '\n') // next lines after objects
+                    continue;
+
+                if (open_count == 0)
+                {
+                    loginf << "got part '" << ss.str() << "'";
+
+                    json j = json::parse(ss.str());
+
+                    parseJSON (j, test);
+
+                    ss.str("");
+
+                    //loginf << "UGA2 cleared";
+                }
             }
-            wait_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
-            tmp_time = boost::posix_time::microsec_clock::local_time();
-
-            if (!test)
-                insertData ();
-            else
-                clearData();
-
-            insert_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
-
-            loginf << "JSONImporterTask: importFileArchive: time: archive_read_time " << archive_read_time/1000.0
-                   << " archive_parse_time " << archive_parse_time/1000.0
-                   << " json_parse_time " << json_parse_time/1000.0
-                   << " wait_time " << wait_time/1000.0
-                   << " insert_time " << insert_time/1000.0;
-
-            entry_cnt++;
         }
-        catch (std::exception e)
+
+        //        archive_read_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
+        //        tmp_time = boost::posix_time::microsec_clock::local_time();
+
+        loginf  << "JSONImporterTask: importFileArchive: parsed entry";
+
+        //        try
+        //        {
+        //            json j = json::parse(ss.str());
+
+        //            archive_parse_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
+        //            tmp_time = boost::posix_time::microsec_clock::local_time();
+
+        //            parseJSON (j, test);
+
+        //            json_parse_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
+        //            tmp_time = boost::posix_time::microsec_clock::local_time();
+
+        while (insert_active_)
         {
-            logerr << "JSONImporterTask: importFileArchive: json parsing error: " << e.what()
-                   << ", skipping entry ";
-            continue;
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            QThread::msleep (10);
         }
+        //            wait_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
+        //            tmp_time = boost::posix_time::microsec_clock::local_time();
+
+        if (!test)
+            insertData ();
+        else
+            clearData();
+
+        //            insert_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
+
+        //            loginf << "JSONImporterTask: importFileArchive: time: archive_read_time " << archive_read_time/1000.0
+        //                   << " archive_parse_time " << archive_parse_time/1000.0
+        //                   << " json_parse_time " << json_parse_time/1000.0
+        //                   << " wait_time " << wait_time/1000.0
+        //                   << " insert_time " << insert_time/1000.0;
+
+        entry_cnt++;
+        //        }
+        //        catch (std::exception e)
+        //        {
+        //            logerr << "JSONImporterTask: importFileArchive: json parsing error: " << e.what()
+        //                   << ", skipping entry ";
+        //            continue;
+        //        }
     }
 
     r = archive_read_close(a);
@@ -489,11 +540,11 @@ void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
                                     Format(PropertyDataType::STRING, "hexadecimal")});
         mappings_.at(0).addMapping({"Reg", db_object.variable("callsign"), false});
         mappings_.at(0).addMapping({"Alt", db_object.variable("alt_baro_ft"), false});
-        mappings_.at(0).addMapping({"Galt", db_object.variable("alt_geo_ft"), false});
+        mappings_.at(0).addMapping({"GAlt", db_object.variable("alt_geo_ft"), false});
         mappings_.at(0).addMapping({"Lat", db_object.variable("pos_lat_deg"), true});
         mappings_.at(0).addMapping({"Long", db_object.variable("pos_long_deg"), true});
         mappings_.at(0).addMapping({"PosTime", db_object.variable("tod"), true,
-                                   Format(PropertyDataType::STRING, "epoch_tod")});
+                                    Format(PropertyDataType::STRING, "epoch_tod")});
     }
 
     unsigned int row_cnt = 0;
@@ -519,7 +570,7 @@ void JSONImporterTask::insertData ()
             DBObject& db_object = map_it.dbObject();
             std::shared_ptr<Buffer> buffer = map_it.buffer();
 
-            loginf << "JSONImporterTask: insertData: " << db_object.name() << " connecting";
+            loginf << "JSONImporterTask: insertData: " << db_object.name() << " buffer " << buffer->size();
 
             connect (&db_object, &DBObject::insertDoneSignal, this, &JSONImporterTask::insertDoneSlot,
                      Qt::UniqueConnection);
@@ -529,7 +580,7 @@ void JSONImporterTask::insertData ()
 
             if (map_it.dataSourceVariableName() != "")
             {
-                loginf << "JSONImporterTask: insertData: adding new data sources";
+                logdbg << "JSONImporterTask: insertData: adding new data sources";
 
                 std::string data_source_var_name = map_it.dataSourceVariableName();
 
@@ -547,32 +598,32 @@ void JSONImporterTask::insertData ()
                 std::set<int> data_source_keys = data_source_key_list.distinctValues();
 
                 for (auto ds_key_it : data_source_keys)
-                    if (datasources_existing.count(ds_key_it) == 0)
+                    if (datasources_existing.count(ds_key_it) == 0 && added_data_sources_.count(ds_key_it) == 0)
                     {
                         if (datasources_to_add.count(ds_key_it) == 0)
                         {
-                            loginf << "JSONImporterTask: insertData: adding new data source "
+                            logdbg << "JSONImporterTask: insertData: adding new data source "
                                    << std::to_string(ds_key_it);
                             datasources_to_add[ds_key_it] = std::to_string(ds_key_it);
-
+                            added_data_sources_.insert(ds_key_it);
                         }
                     }
 
                 db_object.addDataSources(datasources_to_add);
             }
 
-            loginf << "JSONImporterTask: insertData: " << db_object.name() << " inserting";
+            logdbg << "JSONImporterTask: insertData: " << db_object.name() << " inserting";
 
             db_object.insertData(map_it.variableList(), buffer);
 
-            loginf << "JSONImporterTask: insertData: " << db_object.name() << " clearing";
+            logdbg << "JSONImporterTask: insertData: " << db_object.name() << " clearing";
             map_it.clearBuffer();
         }
         else
-            loginf << "JSONImporterTask: insertData: emtpy buffer for " << map_it.dbObject().name();
+            logdbg << "JSONImporterTask: insertData: emtpy buffer for " << map_it.dbObject().name();
     }
 
-
+    loginf << "JSONImporterTask: insertData: done";
 }
 
 void JSONImporterTask::clearData ()
