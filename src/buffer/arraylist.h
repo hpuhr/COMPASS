@@ -232,13 +232,15 @@ public:
 
         for (; index < data_.size(); ++index)
         {
-            if (!none_flags_.at(index)) // not for none
+            if (!isNone(index)) // not for none
             {
                 value = data_.at(index);
                 if (values.count(value) == 0)
                     values.insert(value);
             }
         }
+
+        return values;
     }
 
     std::map<T, std::vector<size_t>> distinctValuesWithIndexes (size_t from_index, size_t to_index)

@@ -670,3 +670,23 @@ DBOVariableSet& JsonMapping::variableList()
     return var_list_;
 }
 
+bool JsonMapping::overrideDataSource() const
+{
+    return override_data_source_;
+}
+
+void JsonMapping::OverrideDataSource(bool override)
+{
+    override_data_source_ = override;
+}
+
+std::string JsonMapping::dataSourceVariableName() const
+{
+    return data_source_variable_name_;
+}
+
+void JsonMapping::dataSourceVariableName(const std::string& name)
+{
+    data_source_variable_name_ = name;
+}
+

@@ -64,6 +64,12 @@ public:
 
     DBOVariableSet& variableList();
 
+    bool overrideDataSource() const;
+    void OverrideDataSource(bool override);
+
+    std::string dataSourceVariableName() const;
+    void dataSourceVariableName(const std::string& name);
+
 private:
     DBObject& db_object_;
 
@@ -74,9 +80,12 @@ private:
 
     DBOVariableSet var_list_;
 
-    bool override_key_variable_;
+    bool override_key_variable_ {false};
     bool has_key_mapping_ {false};
     bool has_key_variable_ {false};
+
+    bool override_data_source_ {false};
+    std::string data_source_variable_name_;
 
     unsigned int key_count_ {0};
 

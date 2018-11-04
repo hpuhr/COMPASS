@@ -560,6 +560,7 @@ void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
         mappings_.at(0).JSONValue("*");
         mappings_.at(0).JSONContainerKey("acList");
         mappings_.at(0).overrideKeyVariable(true);
+        mappings_.at(0).dataSourceVariableName("ds_id");
 
         //    key_var_str_ = "rec_num";
         //    dsid_var_str_ = "ds_id";
@@ -641,6 +642,7 @@ void JSONImporterTask::insertData ()
         if (map_it.buffer() != nullptr && map_it.buffer()->size() != 0)
         {
             DBObject& db_object = map_it.dbObject();
+            std::shared_ptr<Buffer> buffer = map_it.buffer();
 
             loginf << "JSONImporterTask: insertData: " << db_object.name() << " connecting";
 
@@ -649,9 +651,44 @@ void JSONImporterTask::insertData ()
             connect (&db_object, &DBObject::insertProgressSignal, this, &JSONImporterTask::insertProgressSlot,
                      Qt::UniqueConnection);
 
+
+            if (map_it.dataSourceVariableName() != "")
+            {
+                loginf << "JSONImporterTask: insertData: adding new data sources";
+
+                std::string data_source_var_name = map_it.dataSourceVariableName();
+
+                std::map <int, DBODataSource> datasources_existing;
+                if (db_object.hasDataSources())
+                    datasources_existing = db_object.dataSources();
+
+                std::map <int, std::string> datasources_to_add;
+
+                assert (buffer->properties().hasProperty(data_source_var_name));
+                assert (buffer->properties().get(data_source_var_name).dataType() == PropertyDataType::INT);
+
+                assert(buffer->has<int>(data_source_var_name));
+                ArrayListTemplate<int>& data_source_key_list = buffer->get<int> (data_source_var_name);
+                std::set<int> data_source_keys = data_source_key_list.distinctValues();
+
+                for (auto ds_key_it : data_source_keys)
+                    if (datasources_existing.count(ds_key_it) == 0)
+                    {
+                        if (datasources_to_add.count(ds_key_it) == 0)
+                        {
+                            loginf << "JSONImporterTask: insertData: adding new data source "
+                                   << std::to_string(ds_key_it);
+                            datasources_to_add[ds_key_it] = std::to_string(ds_key_it);
+
+                        }
+                    }
+
+                db_object.addDataSources(datasources_to_add);
+            }
+
             loginf << "JSONImporterTask: insertData: " << db_object.name() << " inserting";
 
-            db_object.insertData(map_it.variableList(), map_it.buffer());
+            db_object.insertData(map_it.variableList(), buffer);
 
             loginf << "JSONImporterTask: insertData: " << db_object.name() << " clearing";
             map_it.clearBuffer();

@@ -136,8 +136,8 @@ protected:
 
     //DBOVariableSet var_list_;
 
-    std::map <int, std::string> datasources_existing_;
-    std::map <int, std::string> datasources_to_add_;
+//    std::map <int, std::string> datasources_existing_;
+//    std::map <int, std::string> datasources_to_add_;
 
     void checkAndSetVariable (std::string &name_str, DBOVariable** var);
 
