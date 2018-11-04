@@ -8,6 +8,7 @@
 #include "json.hpp"
 #include "format.h"
 #include "dbovariable.h"
+#include "dbovariableset.h"
 
 class DBObject;
 class DBOVariable;
@@ -61,6 +62,8 @@ public:
     bool overrideKeyVariable() const;
     void overrideKeyVariable(bool override);
 
+    DBOVariableSet& variableList();
+
 private:
     DBObject& db_object_;
 
@@ -68,6 +71,8 @@ private:
     std::string json_key_; // * for all
     std::string json_value_;
     std::vector <JsonKey2DBOVariableMapping> data_mappings_;
+
+    DBOVariableSet var_list_;
 
     bool override_key_variable_;
     bool has_key_mapping_ {false};

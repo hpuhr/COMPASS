@@ -338,9 +338,10 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
         else
         {
             assert (properties_.hasProperty(var_it->name()));
-            loginf << "Buffer: transformVariables: var " << var_it->name() << " prop dt "
-                   << Property::asString(properties_.get(var_it->name()).dataType()) << " col dt "
-                   << Property::asString(column.propertyType());
+            loginf << "Buffer: transformVariables: var " << var_it->name()
+                   << " col " << column.name()
+                   << " prop dt " << Property::asString(properties_.get(var_it->name()).dataType())
+                   << " col dt " << Property::asString(column.propertyType());
             // TODO HACK
             //assert (properties_.get(var_it->name()).dataType() == column.propertyType());
             current_var_name = var_it->name();
@@ -508,7 +509,7 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
         // rename to reflect dbo variable
         if (current_var_name != transformed_var_name)
         {
-            logdbg << "Buffer: transformVariables: renaming variable " << current_var_name
+            loginf << "Buffer: transformVariables: renaming variable " << current_var_name
                    << " to variable name " << transformed_var_name;
 
             switch (data_type)

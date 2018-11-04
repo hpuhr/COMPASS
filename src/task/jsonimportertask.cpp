@@ -60,6 +60,12 @@ JSONImporterTask::JSONImporterTask(const std::string& class_id, const std::strin
 
 JSONImporterTask::~JSONImporterTask()
 {
+    if (widget_)
+    {
+        delete widget_;
+        widget_ = nullptr;
+    }
+
     for (auto it : file_list_)
         delete it.second;
 
@@ -309,10 +315,12 @@ void JSONImporterTask::importFile(const std::string& filename, bool test)
 //    reader.parse(ifs, obj); // reader can also read strings
     json j = json::parse(ifs);
 
-    std::shared_ptr<Buffer> buffer_ptr = parseJSON (j, test);
+    parseJSON (j, test);
 
     if (!test)
-        insertData (buffer_ptr);
+        insertData ();
+    else
+        clearData();
 
     QMessageBox msgBox;
     std::string msg = "Reading archive " + filename + " finished successfully.\n";
@@ -465,32 +473,32 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
             archive_parse_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
             tmp_time = boost::posix_time::microsec_clock::local_time();
 
-            std::shared_ptr<Buffer> buffer_ptr = parseJSON (j, test);
+            parseJSON (j, test);
 
             json_parse_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
             tmp_time = boost::posix_time::microsec_clock::local_time();
 
-            if (buffer_ptr->size())
+            while (insert_active_)
             {
-                while (insert_active_)
-                {
-                    QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-                    QThread::msleep (10);
-                }
-                wait_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
-                tmp_time = boost::posix_time::microsec_clock::local_time();
-
-                if (!test)
-                    insertData (buffer_ptr);
-
-                insert_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
-
-                loginf << "JSONImporterTask: importFileArchive: time: archive_read_time " << archive_read_time/1000.0
-                       << " archive_parse_time " << archive_parse_time/1000.0
-                       << " json_parse_time " << json_parse_time/1000.0
-                       << " wait_time " << wait_time/1000.0
-                       << " insert_time " << insert_time/1000.0;
+                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                QThread::msleep (10);
             }
+            wait_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
+            tmp_time = boost::posix_time::microsec_clock::local_time();
+
+            if (!test)
+                insertData ();
+            else
+                clearData();
+
+            insert_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
+
+            loginf << "JSONImporterTask: importFileArchive: time: archive_read_time " << archive_read_time/1000.0
+                   << " archive_parse_time " << archive_parse_time/1000.0
+                   << " json_parse_time " << json_parse_time/1000.0
+                   << " wait_time " << wait_time/1000.0
+                   << " insert_time " << insert_time/1000.0;
+
             entry_cnt++;
         }
         catch (std::exception e)
@@ -538,7 +546,7 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
     return;
 }
 
-std::shared_ptr<Buffer> JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
+void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
 {
     loginf << "JSONImporterTask: parseJSON";
 
@@ -585,7 +593,6 @@ std::shared_ptr<Buffer> JSONImporterTask::parseJSON (nlohmann::json& j, bool tes
     {
         row_cnt += map_it.parseJSON(j, test);
         loginf << "JSONImporterTask: parseJSON: parsed " << map_it.dbObject().name() << " with " << row_cnt << " rows";
-        map_it.clearBuffer();
     }
 
 //    assert (buffer_ptr->size() == row_cnt);
@@ -611,11 +618,9 @@ std::shared_ptr<Buffer> JSONImporterTask::parseJSON (nlohmann::json& j, bool tes
 //        loginf << "JSONImporterTask: parseJSON: all " << all_cnt << " rec_num_cnt "<< rec_num_cnt_
 //               << " to be inserted " << row_cnt << " skipped " << skipped;
 
-    //return buffer_ptr;
-    return nullptr;
 }
 
-void JSONImporterTask::insertData (std::shared_ptr<Buffer> buffer)
+void JSONImporterTask::insertData ()
 {
     loginf << "JSONImporterTask: insertData: inserting into database";
 
@@ -631,12 +636,37 @@ void JSONImporterTask::insertData (std::shared_ptr<Buffer> buffer)
 //        datasources_to_add_.clear();
 //    }
 
-//    connect (db_object_, &DBObject::insertDoneSignal, this, &JSONImporterTask::insertDoneSlot,
-//             Qt::UniqueConnection);
-//    connect (db_object_, &DBObject::insertProgressSignal, this, &JSONImporterTask::insertProgressSlot,
-//             Qt::UniqueConnection);
+    for (auto& map_it : mappings_)
+    {
+        if (map_it.buffer() != nullptr && map_it.buffer()->size() != 0)
+        {
+            DBObject& db_object = map_it.dbObject();
 
-//    db_object_->insertData(var_list_, buffer);
+            loginf << "JSONImporterTask: insertData: " << db_object.name() << " connecting";
+
+            connect (&db_object, &DBObject::insertDoneSignal, this, &JSONImporterTask::insertDoneSlot,
+                     Qt::UniqueConnection);
+            connect (&db_object, &DBObject::insertProgressSignal, this, &JSONImporterTask::insertProgressSlot,
+                     Qt::UniqueConnection);
+
+            loginf << "JSONImporterTask: insertData: " << db_object.name() << " inserting";
+
+            db_object.insertData(map_it.variableList(), map_it.buffer());
+
+            loginf << "JSONImporterTask: insertData: " << db_object.name() << " clearing";
+            map_it.clearBuffer();
+        }
+        else
+            loginf << "JSONImporterTask: insertData: emtpy buffer for " << map_it.dbObject().name();
+    }
+
+
+}
+
+void JSONImporterTask::clearData ()
+{
+    for (auto& map_it : mappings_)
+        map_it.clearBuffer();
 }
 
 void JSONImporterTask::insertProgressSlot (float percent)

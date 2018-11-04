@@ -319,6 +319,9 @@ const MetaDBTable& DBObject::currentMetaTable () const
 
 bool DBObject::hasKeyVariable ()
 {
+    if (hasCurrentMetaTable())
+        return currentMetaTable().mainTable().hasKey();
+
     for (auto& var_it : variables_)
         if (var_it.second.isKey())
             return true;
@@ -331,9 +334,25 @@ DBOVariable& DBObject::getKeyVariable()
 {
     assert (hasKeyVariable());
 
-    for (auto& var_it : variables_)
+    if (hasCurrentMetaTable()) // search in main table
+    {
+         std::string key_col_name = currentMetaTable().mainTable().key();
+
+         for (auto& var_it : variables_)
+             if (var_it.second.hasCurrentDBColumn() && var_it.second.currentDBColumn().name() == key_col_name)
+             {
+                 loginf << "DBObject " << name() << ": getKeyVariable: returning var " << var_it.second.name();
+                 return var_it.second;
+             }
+    }
+
+
+    for (auto& var_it : variables_) // search in any
         if (var_it.second.isKey())
+        {
+            loginf << "DBObject " << name() << ": getKeyVariable: returning first found var " << var_it.second.name();
             return var_it.second;
+        }
 
     throw std::runtime_error ("DBObject: getKeyVariable: no key variable found");
 }
@@ -654,6 +673,7 @@ void DBObject::clearData ()
 
 void DBObject::insertData (DBOVariableSet& list, std::shared_ptr<Buffer> buffer)
 {
+    logdbg << "DBObject: insertData";
     assert (!insert_job_);
 
     buffer->transformVariables(list, false); // back again
@@ -666,6 +686,8 @@ void DBObject::insertData (DBOVariableSet& list, std::shared_ptr<Buffer> buffer)
              Qt::QueuedConnection);
 
     JobManager::instance().addDBJob(insert_job_);
+
+    logdbg << "DBObject: insertData: end";
 }
 
 void DBObject::insertProgressSlot (float percent)

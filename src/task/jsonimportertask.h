@@ -141,8 +141,9 @@ protected:
 
     void checkAndSetVariable (std::string &name_str, DBOVariable** var);
 
-    std::shared_ptr<Buffer> parseJSON (nlohmann::json& j, bool test);
-    void insertData (std::shared_ptr<Buffer> buffer);
+    void parseJSON (nlohmann::json& j, bool test);
+    void insertData ();
+    void clearData ();
 };
 
 #endif // JSONIMPORTERTASK_H

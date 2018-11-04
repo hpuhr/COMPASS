@@ -872,8 +872,10 @@ void DBInterface::insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer, 
 
     const PropertyList &properties = buffer->properties();
 
-    for (unsigned int cnt=0; cnt < properties.size(); cnt++)
+    for (unsigned int cnt=0; cnt < properties.size(); ++cnt)
     {
+        logdbg << "DBInterface: insertBuffer: checking column '" << properties.at(cnt).name() << "'";
+
         if (!table.hasColumn(properties.at(cnt).name()))
             throw std::runtime_error ("DBInterface: insertBuffer: column '"+properties.at(cnt).name()
                                       +"' does not exist in table "+table.name());
