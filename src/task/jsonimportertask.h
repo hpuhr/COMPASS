@@ -77,41 +77,7 @@ protected:
     std::map <std::string, SavedFile*> file_list_;
     std::string last_filename_;
 
-//    std::string db_object_str_;
-//    DBObject* db_object_{nullptr};
-
-//    std::string key_var_str_;
-//    DBOVariable* key_var_{nullptr};
-
-//    std::string dsid_var_str_;
-//    DBOVariable* dsid_var_{nullptr};
-
-//    std::string target_addr_var_str_;
-//    DBOVariable* target_addr_var_{nullptr};
-
-//    std::string callsign_var_str_;
-//    DBOVariable* callsign_var_{nullptr};
-
-//    std::string altitude_baro_var_str_;
-//    DBOVariable* altitude_baro_var_{nullptr};
-
-//    std::string altitude_geo_var_str_;
-//    DBOVariable* altitude_geo_var_{nullptr};
-
-//    std::string latitude_var_str_;
-//    DBOVariable* latitude_var_{nullptr};
-
-//    std::string longitude_var_str_;
-//    DBOVariable* longitude_var_{nullptr};
-
-//    std::string tod_var_str_;
-//    DBOVariable* tod_var_{nullptr};
-
     std::vector <JsonMapping> mappings_;
-
-//    std::map <DBObject*, JsonMappingInfo> mappings_;
-//    std::map <DBObject*, std::shared_ptr<Buffer>> buffers_;
-//    std::map <DBObject*, PropertyList> lists_;
 
     JSONImporterTaskWidget* widget_ {nullptr};
 
@@ -133,13 +99,6 @@ protected:
 
     bool join_data_sources_ {false};
     bool separate_mlat_data_ {false};
-
-    //DBOVariableSet var_list_;
-
-//    std::map <int, std::string> datasources_existing_;
-//    std::map <int, std::string> datasources_to_add_;
-
-    void checkAndSetVariable (std::string &name_str, DBOVariable** var);
 
     void parseJSON (nlohmann::json& j, bool test);
     void insertData ();

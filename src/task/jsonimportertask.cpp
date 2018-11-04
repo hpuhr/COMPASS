@@ -26,9 +26,6 @@
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
-//#include <jsoncpp/json/json.h>
-//#include "json.hpp"
-
 #include <archive.h>
 #include <archive_entry.h>
 
@@ -40,7 +37,6 @@ JSONImporterTask::JSONImporterTask(const std::string& class_id, const std::strin
     : Configurable (class_id, instance_id, task_manager)
 {
     registerParameter("last_filename", &last_filename_, "");
-    //registerParameter("db_object_str", &db_object_str_, "ADSB");
 
     registerParameter("join_data_sources", &join_data_sources_, false);
     registerParameter("separate_mlat_data", &separate_mlat_data_, false);
@@ -224,21 +220,6 @@ void JSONImporterTask::positionFilterLongitudeMax(float value)
     pos_filter_lon_max_ = value;
 }
 
-//std::string JSONImporterTask::dbObjectStr() const
-//{
-//    return db_object_str_;
-//}
-
-//void JSONImporterTask::dbObjectStr(const std::string& db_object_str)
-//{
-//    loginf << "JSONImporterTask: dbObjectStr: " << db_object_str;
-
-//    db_object_str_ = db_object_str;
-
-//    assert (ATSDB::instance().objectManager().existsObject(db_object_str_));
-//    db_object_ = &ATSDB::instance().objectManager().object(db_object_str_);
-//}
-
 bool JSONImporterTask::canImportFile (const std::string& filename)
 {
     if (!Files::fileExists(filename))
@@ -253,55 +234,12 @@ bool JSONImporterTask::canImportFile (const std::string& filename)
         return false;
     }
 
-//    if (!key_var_str_.size()
-//            || !dsid_var_str_.size()
-//            || !target_addr_var_str_.size()
-//            || !callsign_var_str_.size()
-//            || !altitude_baro_var_str_.size()
-//            || !altitude_geo_var_str_.size()
-//            || !latitude_var_str_.size()
-//            || !longitude_var_str_.size()
-//            || !tod_var_str_.size())
-//    {
-//        loginf << "JSONImporterTask: canImportFile: not possible since variables are not set";
-//        return false;
-//    }
-
-//    if (!object.hasVariable(key_var_str_)
-//            || !object.hasVariable(dsid_var_str_)
-//            || !object.hasVariable(target_addr_var_str_)
-//            || !object.hasVariable(callsign_var_str_)
-//            || !object.hasVariable(altitude_baro_var_str_)
-//            || !object.hasVariable(altitude_geo_var_str_)
-//            || !object.hasVariable(latitude_var_str_)
-//            || !object.hasVariable(longitude_var_str_)
-//            || !object.hasVariable(tod_var_str_))
-//    {
-//        loginf << "JSONImporterTask: canImportFile: not possible since variables not in DBObject";
-//        return false;
-//    }
-
-//    if (use_time_filter_ && time_filter_min_ >= time_filter_max_)
-//    {
-//        loginf << "JSONImporterTask: canImportFile: time filter values wrong";
-//        return false;
-//    }
-
     return true;
 }
 
 void JSONImporterTask::importFile(const std::string& filename, bool test)
 {
     loginf << "JSONImporterTask: importFile: filename " << filename << " test " << test;
-
-//    if (db_object_str_.size())
-//    {
-//        if (!ATSDB::instance().objectManager().existsObject(db_object_str_))
-//            db_object_str_="";
-//        else
-//            db_object_ = &ATSDB::instance().objectManager().object(db_object_str_);
-//    }
-//    assert (db_object_);
 
     if (!canImportFile(filename))
     {
@@ -310,9 +248,6 @@ void JSONImporterTask::importFile(const std::string& filename, bool test)
     }
 
     std::ifstream ifs(filename);
-//    Json::Reader reader;
-//    Json::Value obj;
-//    reader.parse(ifs, obj); // reader can also read strings
     json j = json::parse(ifs);
 
     parseJSON (j, test);
@@ -340,15 +275,6 @@ void JSONImporterTask::importFile(const std::string& filename, bool test)
 void JSONImporterTask::importFileArchive (const std::string& filename, bool test)
 {
     loginf << "JSONImporterTask: importFileArchive: filename " << filename << " test " << test;
-
-//    if (db_object_str_.size())
-//    {
-//        if (!ATSDB::instance().objectManager().existsObject(db_object_str_))
-//            db_object_str_="";
-//        else
-//            db_object_ = &ATSDB::instance().objectManager().object(db_object_str_);
-//    }
-//    assert (db_object_);
 
     if (!canImportFile(filename))
     {
@@ -401,9 +327,6 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
     int64_t offset;
 
     std::stringstream ss;
-//    json j;
-//    Json::Reader reader;
-//    Json::Value obj;
 
     QMessageBox msg_box;
     std::string msg = "Importing archive '"+filename+"'.";
@@ -464,7 +387,6 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
         tmp_time = boost::posix_time::microsec_clock::local_time();
 
         loginf  << "JSONImporterTask: importFileArchive: got entry with " << ss.str().size() << " chars";
-        //reader.parse(ss.str(), obj); // reader can also read strings
 
         try
         {
@@ -562,31 +484,17 @@ void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
         mappings_.at(0).overrideKeyVariable(true);
         mappings_.at(0).dataSourceVariableName("ds_id");
 
-        //    key_var_str_ = "rec_num";
-        //    dsid_var_str_ = "ds_id";
         mappings_.at(0).addMapping({"Rcvr", db_object.variable("ds_id"), true});
-        //    target_addr_var_str_ = "target_addr";
         mappings_.at(0).addMapping({"Icao", db_object.variable("target_addr"), true,
                                     Format(PropertyDataType::STRING, "hexadecimal")});
-        //    callsign_var_str_ = "callsign";
         mappings_.at(0).addMapping({"Reg", db_object.variable("callsign"), false});
-        //    altitude_baro_var_str_ = "alt_baro_ft";
         mappings_.at(0).addMapping({"Alt", db_object.variable("alt_baro_ft"), false});
-        //    altitude_geo_var_str_ = "alt_geo_ft";
         mappings_.at(0).addMapping({"Galt", db_object.variable("alt_geo_ft"), false});
-        //    latitude_var_str_ = "pos_lat_deg";
         mappings_.at(0).addMapping({"Lat", db_object.variable("pos_lat_deg"), true});
-        //    longitude_var_str_ = "pos_long_deg";
         mappings_.at(0).addMapping({"Long", db_object.variable("pos_long_deg"), true});
-        //    tod_var_str_ = "tod";
         mappings_.at(0).addMapping({"PosTime", db_object.variable("tod"), true,
                                    Format(PropertyDataType::STRING, "epoch_tod")});
     }
-
-
-//    for (auto& src_it : db_object_->dataSources())
-//        if (datasources_existing_.count(src_it.first) == 0)
-//            datasources_existing_[src_it.first] = src_it.second.name();
 
     unsigned int row_cnt = 0;
 
@@ -596,29 +504,6 @@ void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
         loginf << "JSONImporterTask: parseJSON: parsed " << map_it.dbObject().name() << " with " << row_cnt << " rows";
     }
 
-//    assert (buffer_ptr->size() == row_cnt);
-
-//    if (var_list_.getSize() == 0) // fill if empty, only at first time
-//    {
-//        var_list_.add(*key_var_);
-//        var_list_.add(*dsid_var_);
-//        var_list_.add(*target_addr_var_);
-//        var_list_.add(*callsign_var_);
-//        var_list_.add(*altitude_baro_var_);
-//        var_list_.add(*altitude_geo_var_);
-//        var_list_.add(*latitude_var_);
-//        var_list_.add(*longitude_var_);
-//        var_list_.add(*tod_var_);
-//    }
-
-//        loginf << "JSONImporterTask: parseJSON: all " << all_cnt << " rec_num_cnt " << rec_num_cnt_
-//               << " to be inserted " << row_cnt << " (" << String::percentToString(100.0 * row_cnt/all_cnt) << "%)"
-//               << " skipped " << skipped<< " (" << String::percentToString(100.0 * skipped/all_cnt) << "%)";
-//    }
-//    else
-//        loginf << "JSONImporterTask: parseJSON: all " << all_cnt << " rec_num_cnt "<< rec_num_cnt_
-//               << " to be inserted " << row_cnt << " skipped " << skipped;
-
 }
 
 void JSONImporterTask::insertData ()
@@ -626,16 +511,6 @@ void JSONImporterTask::insertData ()
     loginf << "JSONImporterTask: insertData: inserting into database";
 
     insert_active_ = true;
-
-//    if (datasources_to_add_.size())
-//    {
-//        loginf << "JSONImporterTask: insertData: inserting " << datasources_to_add_.size() << " data sources";
-//        db_object_->addDataSources(datasources_to_add_);
-
-//        for (auto& src_it : datasources_to_add_)
-//            datasources_existing_ [src_it.first] = src_it.second;
-//        datasources_to_add_.clear();
-//    }
 
     for (auto& map_it : mappings_)
     {
@@ -717,29 +592,3 @@ void JSONImporterTask::insertDoneSlot (DBObject& object)
     insert_active_ = false;
 }
 
-void JSONImporterTask::checkAndSetVariable (std::string& name_str, DBOVariable** var)
-{
-    // TODO rework to only asserting, check must be done before
-//    if (db_object_)
-//    {
-//        if (!db_object_->hasVariable(name_str))
-//        {
-//            loginf << "JSONImporterTask: checkAndSetVariable: var " << name_str << " does not exist";
-//            name_str = "";
-//            var = nullptr;
-//        }
-//        else
-//        {
-//            *var = &db_object_->variable(name_str);
-//            loginf << "JSONImporterTask: checkAndSetVariable: var " << name_str << " set";
-//            assert (var);
-//            //assert((*var)->existsInDB());
-//        }
-//    }
-//    else
-//    {
-//        loginf << "JSONImporterTask: checkAndSetVariable: dbobject null";
-//        name_str = "";
-//        var = nullptr;
-//    }
-}

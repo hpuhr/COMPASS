@@ -113,7 +113,6 @@ unsigned int JsonMapping::parseJSON (nlohmann::json& j, bool test)
             json& ac_list = it.value();
             assert (ac_list.is_array());
 
-            //Json::Value& ac_list = it.v;
             loginf << "parsing target reports";
             for (auto tr_it = ac_list.begin(); tr_it != ac_list.end(); ++tr_it)
             {
@@ -195,8 +194,6 @@ unsigned int JsonMapping::parseJSON (nlohmann::json& j, bool test)
                                     }
                                 }
 
-                                //array_list.set(row_cnt, static_cast<unsigned int> (tr[data_it.json_key_]));
-
                                 break;
                             }
                             case PropertyDataType::CHAR:
@@ -205,7 +202,6 @@ unsigned int JsonMapping::parseJSON (nlohmann::json& j, bool test)
                                        << " format '" << data_it.json_value_format_ << "'";
                                 assert (buffer_->has<char>(current_var_name));
                                 ArrayListTemplate<char> &array_list = buffer_->get<char> (current_var_name);
-                                //array_list.convertToStandardFormat(column.dataFormat());
 
                                 if (null_value)
                                     array_list.setNone(row_cnt);
@@ -228,8 +224,6 @@ unsigned int JsonMapping::parseJSON (nlohmann::json& j, bool test)
                                         array_list.setNone(row_cnt);
                                     }
                                 }
-
-                                //array_list.set(row_cnt, static_cast<unsigned int> (tr[data_it.json_key_]));
 
                                 break;
                             }
@@ -588,46 +582,6 @@ unsigned int JsonMapping::parseJSON (nlohmann::json& j, bool test)
                             }
                         }
                     }
-
-                    //                    logdbg << "\t rn " << rec_num_cnt_
-                    //                           << " rc " << receiver
-                    //                           << " ta " << target_address
-                    //                           << " cs " << (callsign_valid ? callsign : "NULL")
-                    //                           << " alt_baro " << (altitude_baro_valid ? std::to_string(altitude_baro_ft) : "NULL")
-                    //                           << " alt_geo " << (altitude_geo_valid ? std::to_string(altitude_geo_ft) : "NULL")
-                    //                           << " lat " << std::to_string(latitude_deg)
-                    //                           << " lon " << std::to_string(longitude_deg)
-                    //                           << " dt " << date_time.toString("yyyy.MM.dd hh:mm:ss.zzz").toStdString();
-
-                    //                    key_al.set(row_cnt, rec_num_cnt_);
-                    //                    dsid_al.set(row_cnt, receiver);
-                    //                    target_addr_al.set(row_cnt, target_address);
-
-                    //                    if (callsign_valid)
-                    //                        callsign_al.set(row_cnt, callsign);
-                    //                    else
-                    //                        callsign_al.setNone(row_cnt);
-
-                    //                    if (altitude_baro_valid)
-                    //                        altitude_baro_al.set(row_cnt, altitude_baro_ft);
-                    //                    else
-                    //                        altitude_baro_al.setNone(row_cnt);
-
-                    //                    if (altitude_geo_valid)
-                    //                        altitude_geo_al.set(row_cnt, altitude_geo_ft);
-                    //                    else
-                    //                        altitude_geo_al.setNone(row_cnt);
-
-                    //                    latitude_al.set(row_cnt, latitude_deg);
-                    //                    longitude_al.set(row_cnt, longitude_deg);
-                    //                    tod_al.set(row_cnt, (int) tod);
-
-                    //                    row_cnt++;
-                    //                    rec_num_cnt_++;
-                    //                    inserted_cnt_++;
-
-                    //                    if (datasources_existing_.count(receiver) == 0 && datasources_to_add_.count(receiver) == 0)
-                    //                        datasources_to_add_[receiver] = receiver_name;
 
                     if (override_key_variable_)
                     {
