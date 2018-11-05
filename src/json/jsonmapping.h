@@ -9,6 +9,7 @@
 #include "format.h"
 #include "dbovariable.h"
 #include "dbovariableset.h"
+#include "arraylist.h"
 
 class DBObject;
 class DBOVariable;
@@ -26,10 +27,89 @@ public:
         : json_key_(json_key), variable_(variable), mandatory_(mandatory), json_value_format_(variable_.dataType(), "")
     {}
 
+    bool hasKey (nlohmann::json& j) { return j.find (json_key_) != j.end(); }
+    bool isNull (nlohmann::json& j) { return j[json_key_] == nullptr; }
+    nlohmann::json& getValue (nlohmann::json& j) { return j[json_key_]; }
+
+    template<typename T>
+    void setValue(ArrayListTemplate<T>& array_list, unsigned int row_cnt, nlohmann::json& j)
+    {
+        if (isNull(j))
+            array_list.setNone(row_cnt);
+        else
+        {
+            try
+            {
+                if (json_value_format_ == "")
+                    array_list.set(row_cnt, getValue(j));
+                else
+                    array_list.setFromFormat(row_cnt, json_value_format_,
+                                             toString(getValue(j)));
+
+                logdbg << "JsonKey2DBOVariableMapping: setValue: json " << getValue(j)
+                       << " buffer " << array_list.get(row_cnt);
+            }
+            catch (nlohmann::json::exception& e)
+            {
+                logerr  <<  "JsonMapping: parseJSON: json exception " << e.what();
+                array_list.setNone(row_cnt);
+            }
+        }
+    }
+
+    void setValue(ArrayListTemplate<char>& array_list, unsigned int row_cnt, nlohmann::json& j)
+    {
+        if (isNull(j))
+            array_list.setNone(row_cnt);
+        else
+        {
+            try
+            {
+                if (json_value_format_ == "")
+                    array_list.set(row_cnt, static_cast<int> (getValue(j)));
+                else
+                    array_list.setFromFormat(row_cnt, json_value_format_,
+                                             toString(getValue(j)));
+
+                logdbg << "JsonKey2DBOVariableMapping: setValue: json " << getValue(j)
+                       << " buffer " << array_list.get(row_cnt);
+            }
+            catch (nlohmann::json::exception& e)
+            {
+                logerr  <<  "JsonMapping: parseJSON: json exception " << e.what();
+                array_list.setNone(row_cnt);
+            }
+        }
+    }
+
+
+private:
     std::string json_key_;
     DBOVariable& variable_;
     bool mandatory_;
     Format json_value_format_;
+
+    inline std::string toString(const nlohmann::json& j)
+    {
+        if (j.type() == nlohmann::json::value_t::string) {
+            return j.get<std::string>();
+        }
+
+        return j.dump();
+    }
+
+public:
+    std::string jsonKey() const;
+    void jsonKey(const std::string &json_key);
+
+    DBOVariable& variable() const;
+    //void variable(const DBOVariable &variable);
+
+    bool mandatory() const;
+    void mandatory(bool mandatory);
+
+    Format jsonValueFormat() const;
+    void jsonValueFormat(const Format &json_value_format);
 };
 
 class JsonMapping
@@ -37,7 +117,6 @@ class JsonMapping
     using MappingIterator = std::vector<JsonKey2DBOVariableMapping>::iterator;
 public:
     JsonMapping (DBObject& dbObject);
-
 
     DBObject &dbObject() const;
 

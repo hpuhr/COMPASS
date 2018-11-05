@@ -48,15 +48,15 @@ void JsonMapping::JSONContainerKey(const std::string& key)
 }
 void JsonMapping::addMapping (JsonKey2DBOVariableMapping mapping)
 {
-    assert (mapping.variable_.hasCurrentDBColumn());
+    assert (mapping.variable().hasCurrentDBColumn());
 
     data_mappings_.push_back(mapping);
-    list_.addProperty(mapping.variable_.name(), mapping.variable_.dataType());
-    var_list_.add(mapping.variable_);
+    list_.addProperty(mapping.variable().name(), mapping.variable().dataType());
+    var_list_.add(mapping.variable());
 
-    if (mapping.variable_.isKey())
+    if (mapping.variable().isKey())
     {
-        assert (mapping.variable_.dataType() == PropertyDataType::INT);
+        assert (mapping.variable().dataType() == PropertyDataType::INT);
         has_key_mapping_ = true;
     }
 }
@@ -140,13 +140,13 @@ unsigned int JsonMapping::parseJSON (nlohmann::json& j, bool test)
                 // check if all required data exists and is not null
                 for (auto& data_it : data_mappings_)
                 {
-                    if (data_it.mandatory_ &&
-                            (tr.find (data_it.json_key_) == tr.end() || tr[data_it.json_key_] == nullptr))
+                    logdbg << "checking data mapping key " << data_it.jsonKey();
+
+                    if (data_it.mandatory() && (!data_it.hasKey(tr) || data_it.isNull(tr)))
                     {
-                        logdbg << "skipping because of lack of data, "
-                               << data_it.json_key_ << " not found "
-                               << (tr.find (data_it.json_key_) == tr.end()) << " null "
-                               << (tr[data_it.json_key_] == nullptr);
+                        loginf << "skipping because of lack of data, " << data_it.jsonKey()
+                               << " not found " << !data_it.hasKey(tr)
+                               << " null " << data_it.isNull(tr);
                         skip_this = true;
                         break;
                     }
@@ -154,331 +154,108 @@ unsigned int JsonMapping::parseJSON (nlohmann::json& j, bool test)
 
                 if (!skip_this)
                 {
-                    logdbg << "not skipping";
+                    loginf << "not skipping";
 
                     PropertyDataType data_type;
                     std::string current_var_name;
-                    bool null_value;
 
                     for (auto& data_it : data_mappings_)
                     {
-                        if (tr.find (data_it.json_key_) != tr.end())
+                        logdbg << "setting data mapping key " << data_it.jsonKey();
+
+                        if (data_it.hasKey(tr))
                         {
-                            data_type = data_it.variable_.dataType();
-                            current_var_name = data_it.variable_.name();
-                            null_value = tr[data_it.json_key_] == nullptr;
+                            data_type = data_it.variable().dataType();
+                            current_var_name = data_it.variable().name();
 
                             switch (data_type)
                             {
                             case PropertyDataType::BOOL:
                             {
-                                logdbg << "bool " << current_var_name << " json " << tr[data_it.json_key_]
-                                       << " format '" << data_it.json_value_format_ << "'";
+                                loginf << "bool " << current_var_name << " json " << data_it.getValue(tr)
+                                       << " format '" << data_it.jsonValueFormat() << "'";
                                 assert (buffer_->has<bool>(current_var_name));
-                                ArrayListTemplate<bool> &array_list = buffer_->get<bool> (current_var_name);
-
-                                if (null_value)
-                                    array_list.setNone(row_cnt);
-                                else
-                                {
-                                    try
-                                    {
-                                        if (data_it.json_value_format_ == "")
-                                            array_list.set(row_cnt, tr[data_it.json_key_]);
-                                        else
-                                            array_list.setFromFormat(row_cnt, data_it.json_value_format_,
-                                                                     toString(tr[data_it.json_key_]));
-
-                                        logdbg << "bool " << current_var_name << " json " << tr[data_it.json_key_]
-                                               << " buffer " << array_list.get(row_cnt);
-                                    }
-                                    catch (json::exception& e)
-                                    {
-                                        logerr  <<  "JsonMapping: parseJSON: json exception " << e.what();
-                                        array_list.setNone(row_cnt);
-                                    }
-                                }
+                                data_it.setValue (buffer_->get<bool> (current_var_name), row_cnt, tr);
 
                                 break;
                             }
                             case PropertyDataType::CHAR:
                             {
-                                logdbg << "char " << current_var_name << " json " << tr[data_it.json_key_]
-                                       << " format '" << data_it.json_value_format_ << "'";
+                                loginf << "char " << current_var_name << " json " << data_it.getValue(tr)
+                                       << " format '" << data_it.jsonValueFormat() << "'";
                                 assert (buffer_->has<char>(current_var_name));
-                                ArrayListTemplate<char> &array_list = buffer_->get<char> (current_var_name);
-
-                                if (null_value)
-                                    array_list.setNone(row_cnt);
-                                else
-                                {
-                                    try
-                                    {
-                                        if (data_it.json_value_format_ == "")
-                                            array_list.set(row_cnt, static_cast<unsigned int> (tr[data_it.json_key_]));
-                                        else
-                                            array_list.setFromFormat(row_cnt, data_it.json_value_format_,
-                                                                     toString(tr[data_it.json_key_]));
-
-                                        logdbg << "char " << current_var_name << " json " << tr[data_it.json_key_]
-                                               << " buffer " << array_list.get(row_cnt);
-                                    }
-                                    catch (json::exception& e)
-                                    {
-                                        logerr  <<  "JsonMapping: parseJSON: json exception " << e.what();
-                                        array_list.setNone(row_cnt);
-                                    }
-                                }
+                                data_it.setValue (buffer_->get<char> (current_var_name), row_cnt, tr);
 
                                 break;
                             }
                             case PropertyDataType::UCHAR:
                             {
-                                logdbg << "uchar " << current_var_name << " json " << tr[data_it.json_key_]
-                                       << " format '" << data_it.json_value_format_ << "'";
+                                loginf << "uchar " << current_var_name << " json " << data_it.getValue(tr)
+                                       << " format '" << data_it.jsonValueFormat() << "'";
                                 assert (buffer_->has<unsigned char>(current_var_name));
-                                ArrayListTemplate<unsigned char> &array_list =
-                                        buffer_->get<unsigned char> (current_var_name);
-
-                                if (null_value)
-                                    array_list.setNone(row_cnt);
-                                else
-                                {
-                                    try
-                                    {
-                                        if (data_it.json_value_format_ == "")
-                                            array_list.set(row_cnt, tr[data_it.json_key_]);
-                                        else
-                                            array_list.setFromFormat(row_cnt, data_it.json_value_format_,
-                                                                     toString(tr[data_it.json_key_]));
-
-                                        logdbg << "uchar " << current_var_name << " json " << tr[data_it.json_key_]
-                                               << " buffer " << array_list.get(row_cnt);
-                                    }
-                                    catch (json::exception& e)
-                                    {
-                                        logerr  <<  "JsonMapping: parseJSON: json exception " << e.what();
-                                        array_list.setNone(row_cnt);
-                                    }
-                                }
+                                data_it.setValue (buffer_->get<unsigned char> (current_var_name), row_cnt, tr);
 
                                 break;
                             }
                             case PropertyDataType::INT:
                             {
-                                logdbg << "int " << current_var_name << " json " << tr[data_it.json_key_]
-                                       << " format '" << data_it.json_value_format_ << "'";
+                                logdbg << "int " << current_var_name << " json " << data_it.getValue(tr)
+                                       << " format '" << data_it.jsonValueFormat() << "'";
                                 assert (buffer_->has<int>(current_var_name));
-                                ArrayListTemplate<int> &array_list =
-                                        buffer_->get<int> (current_var_name);
-
-                                if (null_value)
-                                    array_list.setNone(row_cnt);
-                                else
-                                {
-                                    try
-                                    {
-                                        if (data_it.json_value_format_ == "")
-                                            array_list.set(row_cnt, tr[data_it.json_key_]);
-                                        else
-                                            array_list.setFromFormat(row_cnt, data_it.json_value_format_,
-                                                                     toString(tr[data_it.json_key_]));
-
-                                        logdbg << "int " << current_var_name << " json " << tr[data_it.json_key_]
-                                               << " buffer " << array_list.get(row_cnt);
-                                    }
-                                    catch (json::exception& e)
-                                    {
-                                        logerr  <<  "JsonMapping: parseJSON: json exception " << e.what();
-                                        array_list.setNone(row_cnt);
-                                    }
-                                }
+                                data_it.setValue (buffer_->get<int> (current_var_name), row_cnt, tr);
 
                                 break;
                             }
                             case PropertyDataType::UINT:
                             {
-                                logdbg << "uint " << current_var_name << " json " << tr[data_it.json_key_]
-                                       << " format '" << data_it.json_value_format_ << "'";
+                                loginf << "uint " << current_var_name << " json " << data_it.getValue(tr)
+                                       << " format '" << data_it.jsonValueFormat() << "'";
                                 assert (buffer_->has<unsigned int>(current_var_name));
-                                ArrayListTemplate<unsigned int> &array_list =
-                                        buffer_->get<unsigned int> (current_var_name);
-
-                                if (null_value)
-                                    array_list.setNone(row_cnt);
-                                else
-                                {
-                                    try
-                                    {
-                                        if (data_it.json_value_format_ == "")
-                                            array_list.set(row_cnt, tr[data_it.json_key_]);
-                                        else
-                                            array_list.setFromFormat(row_cnt, data_it.json_value_format_,
-                                                                     toString(tr[data_it.json_key_]));
-
-                                        logdbg << "uint " << current_var_name << " json " << tr[data_it.json_key_]
-                                               << " buffer " << array_list.get(row_cnt);
-                                    }
-                                    catch (json::exception& e)
-                                    {
-                                        logerr  <<  "JsonMapping: parseJSON: json exception " << e.what();
-                                        array_list.setNone(row_cnt);
-                                    }
-                                }
+                                data_it.setValue (buffer_->get<unsigned int> (current_var_name), row_cnt, tr);
 
                                 break;
                             }
                             case PropertyDataType::LONGINT:
                             {
-                                logdbg << "long " << current_var_name << " json " << tr[data_it.json_key_]
-                                       << " format '" << data_it.json_value_format_ << "'";
+                                loginf << "long " << current_var_name << " json " << data_it.getValue(tr)
+                                       << " format '" << data_it.jsonValueFormat() << "'";
                                 assert (buffer_->has<long int>(current_var_name));
-                                ArrayListTemplate<long int> &array_list =
-                                        buffer_->get<long int>(current_var_name);
-
-                                if (null_value)
-                                    array_list.setNone(row_cnt);
-                                else
-                                {
-                                    try
-                                    {
-                                        if (data_it.json_value_format_ == "")
-                                            array_list.set(row_cnt, tr[data_it.json_key_]);
-                                        else
-                                            array_list.setFromFormat(row_cnt, data_it.json_value_format_,
-                                                                     toString(tr[data_it.json_key_]));
-
-                                        logdbg << "long " << current_var_name << " json " << tr[data_it.json_key_]
-                                               << " buffer " << array_list.get(row_cnt);
-                                    }
-                                    catch (json::exception& e)
-                                    {
-                                        logerr  <<  "JsonMapping: parseJSON: json exception " << e.what();
-                                        array_list.setNone(row_cnt);
-                                    }
-                                }
+                                data_it.setValue (buffer_->get<long int> (current_var_name), row_cnt, tr);
 
                                 break;
                             }
                             case PropertyDataType::ULONGINT:
                             {
-                                logdbg << "ulong " << current_var_name << " json " << tr[data_it.json_key_]
-                                       << " format '" << data_it.json_value_format_ << "'";
+                                loginf << "ulong " << current_var_name << " json " << data_it.getValue(tr)
+                                       << " format '" << data_it.jsonValueFormat() << "'";
                                 assert (buffer_->has<unsigned long>(current_var_name));
-                                ArrayListTemplate<unsigned long> &array_list =
-                                        buffer_->get<unsigned long>(current_var_name);
+                                data_it.setValue (buffer_->get<unsigned long> (current_var_name), row_cnt, tr);
 
-                                if (null_value)
-                                    array_list.setNone(row_cnt);
-                                else
-                                {
-                                    try
-                                    {
-                                        if (data_it.json_value_format_ == "")
-                                            array_list.set(row_cnt, tr[data_it.json_key_]);
-                                        else
-                                            array_list.setFromFormat(row_cnt, data_it.json_value_format_,
-                                                                     toString(tr[data_it.json_key_]));
-
-                                        logdbg << "ulong " << current_var_name << " json " << tr[data_it.json_key_]
-                                               << " buffer " << array_list.get(row_cnt);
-                                    }
-                                    catch (json::exception& e)
-                                    {
-                                        logerr  <<  "JsonMapping: parseJSON: json exception " << e.what();
-                                        array_list.setNone(row_cnt);
-                                    }
-                                }
                                 break;
                             }
                             case PropertyDataType::FLOAT:
                             {
-                                logdbg << "float " << current_var_name << " json " << tr[data_it.json_key_]
-                                       << " format '" << data_it.json_value_format_ << "'";
+                                loginf << "float " << current_var_name << " json " << data_it.getValue(tr)
+                                       << " format '" << data_it.jsonValueFormat() << "'";
                                 assert (buffer_->has<float>(current_var_name));
-                                ArrayListTemplate<float> &array_list =
-                                        buffer_->get<float>(current_var_name);
-
-                                if (null_value)
-                                    array_list.setNone(row_cnt);
-                                else
-                                {
-                                    try
-                                    {
-                                        if (data_it.json_value_format_ == "")
-                                            array_list.set(row_cnt, tr[data_it.json_key_]);
-                                        else
-                                            array_list.setFromFormat(row_cnt, data_it.json_value_format_,
-                                                                     toString(tr[data_it.json_key_]));
-
-                                        logdbg << "float " << current_var_name << " json " << tr[data_it.json_key_]
-                                               << " buffer " << array_list.get(row_cnt);
-                                    }
-                                    catch (json::exception& e)
-                                    {
-                                        logerr  <<  "JsonMapping: parseJSON: json exception " << e.what();
-                                        array_list.setNone(row_cnt);
-                                    }
-                                }
+                                data_it.setValue (buffer_->get<float> (current_var_name), row_cnt, tr);
                                 break;
                             }
                             case PropertyDataType::DOUBLE:
                             {
-                                logdbg << "double " << current_var_name << " json " << tr[data_it.json_key_]
-                                       << " format '" << data_it.json_value_format_ << "'";
+                                loginf << "double " << current_var_name << " json " << data_it.getValue(tr)
+                                       << " format '" << data_it.jsonValueFormat() << "'";
                                 assert (buffer_->has<double>(current_var_name));
-                                ArrayListTemplate<double> &array_list =
-                                        buffer_->get<double>(current_var_name);
-
-                                if (null_value)
-                                    array_list.setNone(row_cnt);
-                                else
-                                {
-                                    try
-                                    {
-                                        if (data_it.json_value_format_ == "")
-                                            array_list.set(row_cnt, tr[data_it.json_key_]);
-                                        else
-                                            array_list.setFromFormat(row_cnt, data_it.json_value_format_,
-                                                                     toString(tr[data_it.json_key_]));
-
-                                        logdbg << "double " << current_var_name << " json " << tr[data_it.json_key_]
-                                               << " buffer " << array_list.get(row_cnt);
-                                    }
-                                    catch (json::exception& e)
-                                    {
-                                        logerr  <<  "JsonMapping: parseJSON: json exception " << e.what();
-                                        array_list.setNone(row_cnt);
-                                    }
-                                }
+                                data_it.setValue (buffer_->get<double> (current_var_name), row_cnt, tr);
 
                                 break;
                             }
                             case PropertyDataType::STRING:
                             {
-                                logdbg << "string " << current_var_name << " json " << tr[data_it.json_key_]
-                                       << " format '" << data_it.json_value_format_ << "'";
+                                loginf << "string " << current_var_name << " json " << data_it.getValue(tr)
+                                       << " format '" << data_it.jsonValueFormat() << "'";
                                 assert (buffer_->has<std::string>(current_var_name));
-                                ArrayListTemplate<std::string> &array_list =
-                                        buffer_->get<std::string>(current_var_name);
-
-                                if (null_value)
-                                    array_list.setNone(row_cnt);
-                                else
-                                {
-                                    try
-                                    {
-                                        assert (data_it.json_value_format_ == "");
-                                        array_list.set(row_cnt, tr[data_it.json_key_]);
-                                        logdbg << "string " << current_var_name << " json " << tr[data_it.json_key_]
-                                               << " buffer " << array_list.get(row_cnt);
-                                    }
-                                    catch (json::exception& e)
-                                    {
-                                        logerr  <<  "JsonMapping: parseJSON: json exception " << e.what();
-                                        array_list.setNone(row_cnt);
-                                    }
-                                }
+                                data_it.setValue (buffer_->get<std::string> (current_var_name), row_cnt, tr);
 
                                 break;
                             }
@@ -491,10 +268,10 @@ unsigned int JsonMapping::parseJSON (nlohmann::json& j, bool test)
                         }
                         else
                         {
-                            loginf  <<  "JsonMapping: parseJSON: key " << data_it.json_key_ << " not found, setting 0";
+                            loginf  <<  "JsonMapping: parseJSON: key " << data_it.jsonKey()<< " not found, setting 0";
 
-                            data_type = data_it.variable_.dataType();
-                            current_var_name = data_it.variable_.name();
+                            data_type = data_it.variable().dataType();
+                            current_var_name = data_it.variable().name();
 
                             switch (data_type)
                             {
@@ -649,3 +426,43 @@ void JsonMapping::dataSourceVariableName(const std::string& name)
     data_source_variable_name_ = name;
 }
 
+
+DBOVariable &JsonKey2DBOVariableMapping::variable() const
+{
+    return variable_;
+}
+
+//void JsonKey2DBOVariableMapping::variable(const DBOVariable &variable)
+//{
+//    variable_ = variable;
+//}
+
+bool JsonKey2DBOVariableMapping::mandatory() const
+{
+    return mandatory_;
+}
+
+void JsonKey2DBOVariableMapping::mandatory(bool mandatory)
+{
+    mandatory_ = mandatory;
+}
+
+Format JsonKey2DBOVariableMapping::jsonValueFormat() const
+{
+    return json_value_format_;
+}
+
+void JsonKey2DBOVariableMapping::jsonValueFormat(const Format &json_value_format)
+{
+    json_value_format_ = json_value_format;
+}
+
+std::string JsonKey2DBOVariableMapping::jsonKey() const
+{
+    return json_key_;
+}
+
+void JsonKey2DBOVariableMapping::jsonKey(const std::string &json_key)
+{
+    json_key_ = json_key;
+}

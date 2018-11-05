@@ -561,12 +561,12 @@ void JSONImporterTask::insertData ()
 {
     loginf << "JSONImporterTask: insertData: inserting into database";
 
-    insert_active_ = true;
-
     for (auto& map_it : mappings_)
     {
         if (map_it.buffer() != nullptr && map_it.buffer()->size() != 0)
         {
+            insert_active_ = true;
+
             DBObject& db_object = map_it.dbObject();
             std::shared_ptr<Buffer> buffer = map_it.buffer();
 
