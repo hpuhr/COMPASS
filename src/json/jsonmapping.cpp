@@ -99,26 +99,25 @@ unsigned int JsonMapping::parseJSON (nlohmann::json& j, bool test)
         override_key_variable_ = false;
     }
 
-    assert (buffer_ == nullptr || buffer_->size() == 0);
+    //assert (buffer_ == nullptr || buffer_->size() == 0);
     if (buffer_ == nullptr)
         buffer_ = std::shared_ptr<Buffer> (new Buffer (list_, db_object_.name()));
 
-    unsigned int row_cnt = 0;
+    unsigned int row_cnt = buffer_->size();
     unsigned int skipped_cnt = 0;
     unsigned int all_cnt = 0;
 
-    bool skip_this;
+    bool skipped;
 
-    for (json::iterator it = j.begin(); it != j.end(); ++it)
+    if (json_container_key_.size())
     {
-        loginf << it.key(); // << ':' << it->asInt() << '\n';
-
-        if (it.key() == json_container_key_)
+        if (j.find(json_container_key_) != j.end())
         {
-            json& ac_list = it.value();
+            json& ac_list = j.at(json_container_key_);
             assert (ac_list.is_array());
 
-            loginf << "parsing target reports";
+            loginf << "found target report array in '" << json_container_key_  << "', parsing";
+
             for (auto tr_it = ac_list.begin(); tr_it != ac_list.end(); ++tr_it)
             {
                 logdbg << "new target report";
@@ -126,245 +125,10 @@ unsigned int JsonMapping::parseJSON (nlohmann::json& j, bool test)
                 json& tr = tr_it.value();
                 assert (tr.is_object());
 
-                if (json_key_ != "*" && json_value_ != "*")
+                skipped = parseTargetReport (tr, row_cnt);
+
+                if (!skipped)
                 {
-                    logdbg << "skipping because of key";
-                    skip_this = true;
-
-                    if (tr.find (json_key_) == tr.end() || tr[json_key_] != json_value_)
-                        continue;
-                }
-
-                skip_this = false;
-
-                // check if all required data exists and is not null
-                for (auto& data_it : data_mappings_)
-                {
-                    logdbg << "checking data mapping key " << data_it.jsonKey();
-
-                    if (data_it.mandatory() && (!data_it.hasKey(tr) || data_it.isNull(tr)))
-                    {
-                        loginf << "skipping because of lack of data, " << data_it.jsonKey()
-                               << " not found " << !data_it.hasKey(tr)
-                               << " null " << data_it.isNull(tr);
-                        skip_this = true;
-                        break;
-                    }
-                }
-
-                if (!skip_this)
-                {
-                    loginf << "not skipping";
-
-                    PropertyDataType data_type;
-                    std::string current_var_name;
-
-                    for (auto& data_it : data_mappings_)
-                    {
-                        logdbg << "setting data mapping key " << data_it.jsonKey();
-
-                        if (data_it.hasKey(tr))
-                        {
-                            data_type = data_it.variable().dataType();
-                            current_var_name = data_it.variable().name();
-
-                            switch (data_type)
-                            {
-                            case PropertyDataType::BOOL:
-                            {
-                                loginf << "bool " << current_var_name << " json " << data_it.getValue(tr)
-                                       << " format '" << data_it.jsonValueFormat() << "'";
-                                assert (buffer_->has<bool>(current_var_name));
-                                data_it.setValue (buffer_->get<bool> (current_var_name), row_cnt, tr);
-
-                                break;
-                            }
-                            case PropertyDataType::CHAR:
-                            {
-                                loginf << "char " << current_var_name << " json " << data_it.getValue(tr)
-                                       << " format '" << data_it.jsonValueFormat() << "'";
-                                assert (buffer_->has<char>(current_var_name));
-                                data_it.setValue (buffer_->get<char> (current_var_name), row_cnt, tr);
-
-                                break;
-                            }
-                            case PropertyDataType::UCHAR:
-                            {
-                                loginf << "uchar " << current_var_name << " json " << data_it.getValue(tr)
-                                       << " format '" << data_it.jsonValueFormat() << "'";
-                                assert (buffer_->has<unsigned char>(current_var_name));
-                                data_it.setValue (buffer_->get<unsigned char> (current_var_name), row_cnt, tr);
-
-                                break;
-                            }
-                            case PropertyDataType::INT:
-                            {
-                                logdbg << "int " << current_var_name << " json " << data_it.getValue(tr)
-                                       << " format '" << data_it.jsonValueFormat() << "'";
-                                assert (buffer_->has<int>(current_var_name));
-                                data_it.setValue (buffer_->get<int> (current_var_name), row_cnt, tr);
-
-                                break;
-                            }
-                            case PropertyDataType::UINT:
-                            {
-                                loginf << "uint " << current_var_name << " json " << data_it.getValue(tr)
-                                       << " format '" << data_it.jsonValueFormat() << "'";
-                                assert (buffer_->has<unsigned int>(current_var_name));
-                                data_it.setValue (buffer_->get<unsigned int> (current_var_name), row_cnt, tr);
-
-                                break;
-                            }
-                            case PropertyDataType::LONGINT:
-                            {
-                                loginf << "long " << current_var_name << " json " << data_it.getValue(tr)
-                                       << " format '" << data_it.jsonValueFormat() << "'";
-                                assert (buffer_->has<long int>(current_var_name));
-                                data_it.setValue (buffer_->get<long int> (current_var_name), row_cnt, tr);
-
-                                break;
-                            }
-                            case PropertyDataType::ULONGINT:
-                            {
-                                loginf << "ulong " << current_var_name << " json " << data_it.getValue(tr)
-                                       << " format '" << data_it.jsonValueFormat() << "'";
-                                assert (buffer_->has<unsigned long>(current_var_name));
-                                data_it.setValue (buffer_->get<unsigned long> (current_var_name), row_cnt, tr);
-
-                                break;
-                            }
-                            case PropertyDataType::FLOAT:
-                            {
-                                loginf << "float " << current_var_name << " json " << data_it.getValue(tr)
-                                       << " format '" << data_it.jsonValueFormat() << "'";
-                                assert (buffer_->has<float>(current_var_name));
-                                data_it.setValue (buffer_->get<float> (current_var_name), row_cnt, tr);
-                                break;
-                            }
-                            case PropertyDataType::DOUBLE:
-                            {
-                                loginf << "double " << current_var_name << " json " << data_it.getValue(tr)
-                                       << " format '" << data_it.jsonValueFormat() << "'";
-                                assert (buffer_->has<double>(current_var_name));
-                                data_it.setValue (buffer_->get<double> (current_var_name), row_cnt, tr);
-
-                                break;
-                            }
-                            case PropertyDataType::STRING:
-                            {
-                                loginf << "string " << current_var_name << " json " << data_it.getValue(tr)
-                                       << " format '" << data_it.jsonValueFormat() << "'";
-                                assert (buffer_->has<std::string>(current_var_name));
-                                data_it.setValue (buffer_->get<std::string> (current_var_name), row_cnt, tr);
-
-                                break;
-                            }
-                            default:
-                                logerr  <<  "JsonMapping: parseJSON: impossible for property type "
-                                         << Property::asString(data_type);
-                                throw std::runtime_error ("JsonMapping: parseJSON: impossible property type "
-                                                          + Property::asString(data_type));
-                            }
-                        }
-                        else
-                        {
-                            loginf  <<  "JsonMapping: parseJSON: key " << data_it.jsonKey()<< " not found, setting 0";
-
-                            data_type = data_it.variable().dataType();
-                            current_var_name = data_it.variable().name();
-
-                            switch (data_type)
-                            {
-                            case PropertyDataType::BOOL:
-                            {
-                                assert (buffer_->has<bool>(current_var_name));
-                                ArrayListTemplate<bool> &array_list = buffer_->get<bool> (current_var_name);
-                                array_list.setNone(row_cnt);
-                                break;
-                            }
-                            case PropertyDataType::CHAR:
-                            {
-                                assert (buffer_->has<char>(current_var_name));
-                                ArrayListTemplate<char> &array_list = buffer_->get<char> (current_var_name);
-                                array_list.setNone(row_cnt);
-                                break;
-                            }
-                            case PropertyDataType::UCHAR:
-                            {
-                                assert (buffer_->has<unsigned char>(current_var_name));
-                                ArrayListTemplate<unsigned char> &array_list =
-                                        buffer_->get<unsigned char> (current_var_name);
-                                array_list.setNone(row_cnt);
-                                break;
-                            }
-                            case PropertyDataType::INT:
-                            {
-                                assert (buffer_->has<int>(current_var_name));
-                                ArrayListTemplate<int> &array_list =
-                                        buffer_->get<int> (current_var_name);
-                                array_list.setNone(row_cnt);
-                                break;
-                            }
-                            case PropertyDataType::UINT:
-                            {
-                                assert (buffer_->has<unsigned int>(current_var_name));
-                                ArrayListTemplate<unsigned int> &array_list =
-                                        buffer_->get<unsigned int> (current_var_name);
-                                array_list.setNone(row_cnt);
-                                break;
-                            }
-                            case PropertyDataType::LONGINT:
-                            {
-                                assert (buffer_->has<long int>(current_var_name));
-                                ArrayListTemplate<long int> &array_list =
-                                        buffer_->get<long int>(current_var_name);
-                                array_list.setNone(row_cnt);
-
-                                break;
-                            }
-                            case PropertyDataType::ULONGINT:
-                            {
-                                assert (buffer_->has<unsigned long>(current_var_name));
-                                ArrayListTemplate<unsigned long> &array_list =
-                                        buffer_->get<unsigned long>(current_var_name);
-                                array_list.setNone(row_cnt);
-
-                                break;
-                            }
-                            case PropertyDataType::FLOAT:
-                            {
-                                assert (buffer_->has<float>(current_var_name));
-                                ArrayListTemplate<float> &array_list =
-                                        buffer_->get<float>(current_var_name);
-                                array_list.setNone(row_cnt);
-                                break;
-                            }
-                            case PropertyDataType::DOUBLE:
-                            {
-                                assert (buffer_->has<double>(current_var_name));
-                                ArrayListTemplate<double> &array_list =
-                                        buffer_->get<double>(current_var_name);
-                                array_list.setNone(row_cnt);
-
-                                break;
-                            }
-                            case PropertyDataType::STRING:
-                            {
-                                assert (buffer_->has<std::string>(current_var_name));
-                                ArrayListTemplate<std::string> &array_list =
-                                        buffer_->get<std::string>(current_var_name);
-                                array_list.setNone(row_cnt);
-                                break;
-                            }
-                            default:
-                                logerr  <<  "JsonMapping: parseJSON: set null impossible for property type "
-                                         << Property::asString(data_type);
-                                throw std::runtime_error ("JsonMapping: parseJSON: set null impossible property type "
-                                                          + Property::asString(data_type));
-                            }
-                        }
-                    }
-
                     if (override_key_variable_)
                     {
                         assert (key_var);
@@ -374,21 +138,292 @@ unsigned int JsonMapping::parseJSON (nlohmann::json& j, bool test)
                         loginf << "override key " << array_list.get(row_cnt) << " size " << buffer_->size();
                     }
 
-                    row_cnt++;
-                    key_count_++;
+                    ++row_cnt;
+                    ++key_count_;
                 }
                 else
-                {
-                    logdbg << "skipping";
-                    skipped_cnt++;
-                }
+                    ++skipped_cnt;
 
-                all_cnt++;
+                ++all_cnt;
             }
         }
+        else
+            loginf << "found target report array '" << json_container_key_  << "' not found";
+    }
+    else
+    {
+        loginf << "found single target report";
+        assert (j.is_object());
+
+        skipped = parseTargetReport (j, row_cnt);
+
+        if (!skipped)
+        {
+            if (override_key_variable_)
+            {
+                assert (key_var);
+                assert (buffer_->has<int>(key_var->name()));
+                ArrayListTemplate<int>& array_list = buffer_->get<int> (key_var->name());
+                array_list.set(row_cnt, key_count_);
+                loginf << "override key " << array_list.get(row_cnt) << " size " << buffer_->size();
+            }
+
+            ++row_cnt;
+            ++key_count_;
+        }
+
     }
 
     return row_cnt;
+}
+
+bool JsonMapping::parseTargetReport (const nlohmann::json& tr, size_t row_cnt)
+{
+    // check key match
+    if (json_key_ != "*" && json_value_ != "*")
+    {
+        if (tr.find (json_key_) != tr.end())
+        {
+            if (tr.at(json_key_) != json_value_)
+            {
+                loginf << "JsonMapping: parseTargetReport: skipping because of wrong key value " << tr.at(json_key_);
+                return true;
+            }
+            else
+                loginf << "JsonMapping: parseTargetReport: parsing with correct key and value";
+        }
+        else
+        {
+            loginf << "JsonMapping: parseTargetReport: skipping because of missing key '" << json_key_ << "'";
+            return true;
+        }
+    }
+
+    // check if all required data exists and is not null
+    for (auto& data_it : data_mappings_)
+    {
+        logdbg << "checking data mapping key " << data_it.jsonKey();
+
+        if (data_it.mandatory() && (!data_it.hasKey(tr) || data_it.isNull(tr)))
+        {
+            loginf << "skipping because of lack of data, " << data_it.jsonKey()
+                   << " not found " << !data_it.hasKey(tr)
+                   << " null " << data_it.isNull(tr);
+            return true;
+        }
+    }
+
+    loginf << "not skipping";
+
+    PropertyDataType data_type;
+    std::string current_var_name;
+
+    for (auto& data_it : data_mappings_)
+    {
+        logdbg << "setting data mapping key " << data_it.jsonKey();
+
+        if (data_it.hasKey(tr))
+        {
+            data_type = data_it.variable().dataType();
+            current_var_name = data_it.variable().name();
+
+            switch (data_type)
+            {
+            case PropertyDataType::BOOL:
+            {
+                loginf << "bool " << current_var_name << " json " << data_it.getValue(tr)
+                       << " format '" << data_it.jsonValueFormat() << "'";
+                assert (buffer_->has<bool>(current_var_name));
+                data_it.setValue (buffer_->get<bool> (current_var_name), row_cnt, tr);
+
+                break;
+            }
+            case PropertyDataType::CHAR:
+            {
+                loginf << "char " << current_var_name << " json " << data_it.getValue(tr)
+                       << " format '" << data_it.jsonValueFormat() << "'";
+                assert (buffer_->has<char>(current_var_name));
+                data_it.setValue (buffer_->get<char> (current_var_name), row_cnt, tr);
+
+                break;
+            }
+            case PropertyDataType::UCHAR:
+            {
+                loginf << "uchar " << current_var_name << " json " << data_it.getValue(tr)
+                       << " format '" << data_it.jsonValueFormat() << "'";
+                assert (buffer_->has<unsigned char>(current_var_name));
+                data_it.setValue (buffer_->get<unsigned char> (current_var_name), row_cnt, tr);
+
+                break;
+            }
+            case PropertyDataType::INT:
+            {
+                logdbg << "int " << current_var_name << " json " << data_it.getValue(tr)
+                       << " format '" << data_it.jsonValueFormat() << "'";
+                assert (buffer_->has<int>(current_var_name));
+                data_it.setValue (buffer_->get<int> (current_var_name), row_cnt, tr);
+
+                break;
+            }
+            case PropertyDataType::UINT:
+            {
+                loginf << "uint " << current_var_name << " json " << data_it.getValue(tr)
+                       << " format '" << data_it.jsonValueFormat() << "'";
+                assert (buffer_->has<unsigned int>(current_var_name));
+                data_it.setValue (buffer_->get<unsigned int> (current_var_name), row_cnt, tr);
+
+                break;
+            }
+            case PropertyDataType::LONGINT:
+            {
+                loginf << "long " << current_var_name << " json " << data_it.getValue(tr)
+                       << " format '" << data_it.jsonValueFormat() << "'";
+                assert (buffer_->has<long int>(current_var_name));
+                data_it.setValue (buffer_->get<long int> (current_var_name), row_cnt, tr);
+
+                break;
+            }
+            case PropertyDataType::ULONGINT:
+            {
+                loginf << "ulong " << current_var_name << " json " << data_it.getValue(tr)
+                       << " format '" << data_it.jsonValueFormat() << "'";
+                assert (buffer_->has<unsigned long>(current_var_name));
+                data_it.setValue (buffer_->get<unsigned long> (current_var_name), row_cnt, tr);
+
+                break;
+            }
+            case PropertyDataType::FLOAT:
+            {
+                loginf << "float " << current_var_name << " json " << data_it.getValue(tr)
+                       << " format '" << data_it.jsonValueFormat() << "'";
+                assert (buffer_->has<float>(current_var_name));
+                data_it.setValue (buffer_->get<float> (current_var_name), row_cnt, tr);
+                break;
+            }
+            case PropertyDataType::DOUBLE:
+            {
+                loginf << "double " << current_var_name << " json " << data_it.getValue(tr)
+                       << " format '" << data_it.jsonValueFormat() << "'";
+                assert (buffer_->has<double>(current_var_name));
+                data_it.setValue (buffer_->get<double> (current_var_name), row_cnt, tr);
+
+                break;
+            }
+            case PropertyDataType::STRING:
+            {
+                loginf << "string " << current_var_name << " json " << data_it.getValue(tr)
+                       << " format '" << data_it.jsonValueFormat() << "'";
+                assert (buffer_->has<std::string>(current_var_name));
+                data_it.setValue (buffer_->get<std::string> (current_var_name), row_cnt, tr);
+
+                break;
+            }
+            default:
+                logerr  <<  "JsonMapping: parseJSON: impossible for property type "
+                         << Property::asString(data_type);
+                throw std::runtime_error ("JsonMapping: parseJSON: impossible property type "
+                                          + Property::asString(data_type));
+            }
+        }
+        else
+        {
+            loginf  <<  "JsonMapping: parseJSON: key " << data_it.jsonKey()<< " not found, setting 0";
+
+            data_type = data_it.variable().dataType();
+            current_var_name = data_it.variable().name();
+
+            switch (data_type)
+            {
+            case PropertyDataType::BOOL:
+            {
+                assert (buffer_->has<bool>(current_var_name));
+                ArrayListTemplate<bool> &array_list = buffer_->get<bool> (current_var_name);
+                array_list.setNone(row_cnt);
+                break;
+            }
+            case PropertyDataType::CHAR:
+            {
+                assert (buffer_->has<char>(current_var_name));
+                ArrayListTemplate<char> &array_list = buffer_->get<char> (current_var_name);
+                array_list.setNone(row_cnt);
+                break;
+            }
+            case PropertyDataType::UCHAR:
+            {
+                assert (buffer_->has<unsigned char>(current_var_name));
+                ArrayListTemplate<unsigned char> &array_list =
+                        buffer_->get<unsigned char> (current_var_name);
+                array_list.setNone(row_cnt);
+                break;
+            }
+            case PropertyDataType::INT:
+            {
+                assert (buffer_->has<int>(current_var_name));
+                ArrayListTemplate<int> &array_list =
+                        buffer_->get<int> (current_var_name);
+                array_list.setNone(row_cnt);
+                break;
+            }
+            case PropertyDataType::UINT:
+            {
+                assert (buffer_->has<unsigned int>(current_var_name));
+                ArrayListTemplate<unsigned int> &array_list =
+                        buffer_->get<unsigned int> (current_var_name);
+                array_list.setNone(row_cnt);
+                break;
+            }
+            case PropertyDataType::LONGINT:
+            {
+                assert (buffer_->has<long int>(current_var_name));
+                ArrayListTemplate<long int> &array_list =
+                        buffer_->get<long int>(current_var_name);
+                array_list.setNone(row_cnt);
+
+                break;
+            }
+            case PropertyDataType::ULONGINT:
+            {
+                assert (buffer_->has<unsigned long>(current_var_name));
+                ArrayListTemplate<unsigned long> &array_list =
+                        buffer_->get<unsigned long>(current_var_name);
+                array_list.setNone(row_cnt);
+
+                break;
+            }
+            case PropertyDataType::FLOAT:
+            {
+                assert (buffer_->has<float>(current_var_name));
+                ArrayListTemplate<float> &array_list =
+                        buffer_->get<float>(current_var_name);
+                array_list.setNone(row_cnt);
+                break;
+            }
+            case PropertyDataType::DOUBLE:
+            {
+                assert (buffer_->has<double>(current_var_name));
+                ArrayListTemplate<double> &array_list =
+                        buffer_->get<double>(current_var_name);
+                array_list.setNone(row_cnt);
+
+                break;
+            }
+            case PropertyDataType::STRING:
+            {
+                assert (buffer_->has<std::string>(current_var_name));
+                ArrayListTemplate<std::string> &array_list =
+                        buffer_->get<std::string>(current_var_name);
+                array_list.setNone(row_cnt);
+                break;
+            }
+            default:
+                logerr  <<  "JsonMapping: parseJSON: set null impossible for property type "
+                         << Property::asString(data_type);
+                throw std::runtime_error ("JsonMapping: parseJSON: set null impossible property type "
+                                          + Property::asString(data_type));
+            }
+        }
+    }
+    return false;
 }
 
 bool JsonMapping::overrideKeyVariable() const

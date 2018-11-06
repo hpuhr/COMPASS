@@ -29,6 +29,7 @@ public:
     {
         sub_keys_ = Utils::String::split(json_key_, '.');
         has_sub_keys_ = sub_keys_.size() > 1;
+        num_sub_keys_ = sub_keys_.size();
 
         loginf << "JsonKey2DBOVariableMapping: ctor: key " << json_key_ << " num subkeys " << sub_keys_.size();
 
@@ -39,10 +40,17 @@ public:
         if (has_sub_keys_)
         {
             const nlohmann::json* k = &j;
-            for (auto& sub_key : sub_keys_)
+            std::string sub_key;
+
+            for (unsigned int cnt=0; cnt < num_sub_keys_; ++cnt)
             {
+                sub_key = sub_keys_.at(cnt);
+
                 if (k->find (sub_key) != k->end())
                 {
+                    if (cnt == num_sub_keys_-1)
+                        break;
+
                     if (k->at(sub_key).is_object())
                         k = &k->at(sub_key);
                     else
@@ -62,10 +70,17 @@ public:
         if (has_sub_keys_)
         {
             const nlohmann::json* k = &j;
-            for (auto& sub_key : sub_keys_)
+            std::string sub_key;
+
+            for (unsigned int cnt=0; cnt < num_sub_keys_; ++cnt)
             {
+                sub_key = sub_keys_.at(cnt);
+
                 if (k->find (sub_key) != k->end())
                 {
+                    if (cnt == num_sub_keys_-1)
+                        return k->at(sub_key).is_null();
+
                     if (k->at(sub_key).is_object())
                         k = &k->at(sub_key);
                     else
@@ -74,7 +89,7 @@ public:
                 else
                     return true;
             }
-            return *k == nullptr;
+            return true;
         }
         else
         {
@@ -91,10 +106,17 @@ public:
         if (has_sub_keys_)
         {
             const nlohmann::json* k = &j;
-            for (auto& sub_key : sub_keys_)
+            std::string sub_key;
+
+            for (unsigned int cnt=0; cnt < num_sub_keys_; ++cnt)
             {
+                sub_key = sub_keys_.at(cnt);
+
                 if (k->find (sub_key) != k->end())
                 {
+                    if (cnt == num_sub_keys_-1)
+                        return k->at(sub_key);
+
                     if (k->at(sub_key).is_object())
                         k = &k->at(sub_key);
                     else
@@ -174,6 +196,7 @@ private:
 
     bool has_sub_keys_ {false};
     std::vector<std::string> sub_keys_;
+    unsigned int num_sub_keys_;
 
     nlohmann::json nullptr_ = nullptr;
 
@@ -259,7 +282,9 @@ private:
     PropertyList list_;
     std::shared_ptr<Buffer> buffer_;
 
-    inline std::string toString(const nlohmann::json &j)
+    bool parseTargetReport (const nlohmann::json& tr, size_t row_cnt);
+
+    inline std::string toString(const nlohmann::json& j)
     {
         if (j.type() == nlohmann::json::value_t::string) {
             return j.get<std::string>();

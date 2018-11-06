@@ -528,23 +528,39 @@ void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
         assert (ATSDB::instance().objectManager().existsObject("ADSB"));
         DBObject& db_object = ATSDB::instance().objectManager().object("ADSB");
 
+//        mappings_.push_back(JsonMapping (db_object));
+//        mappings_.at(0).JSONKey("*");
+//        mappings_.at(0).JSONValue("*");
+//        mappings_.at(0).JSONContainerKey("acList");
+//        mappings_.at(0).overrideKeyVariable(true);
+//        mappings_.at(0).dataSourceVariableName("ds_id");
+
+//        mappings_.at(0).addMapping({"Rcvr", db_object.variable("ds_id"), true});
+//        mappings_.at(0).addMapping({"Icao", db_object.variable("target_addr"), true,
+//                                    Format(PropertyDataType::STRING, "hexadecimal")});
+//        mappings_.at(0).addMapping({"Reg", db_object.variable("callsign"), false});
+//        mappings_.at(0).addMapping({"Alt", db_object.variable("alt_baro_ft"), false});
+//        mappings_.at(0).addMapping({"GAlt", db_object.variable("alt_geo_ft"), false});
+//        mappings_.at(0).addMapping({"Lat", db_object.variable("pos_lat_deg"), true});
+//        mappings_.at(0).addMapping({"Long", db_object.variable("pos_long_deg"), true});
+//        mappings_.at(0).addMapping({"PosTime", db_object.variable("tod"), true,
+//                                    Format(PropertyDataType::STRING, "epoch_tod")});
+
         mappings_.push_back(JsonMapping (db_object));
-        mappings_.at(0).JSONKey("*");
-        mappings_.at(0).JSONValue("*");
-        mappings_.at(0).JSONContainerKey("acList");
+        mappings_.at(0).JSONKey("message_type");
+        mappings_.at(0).JSONValue("ads-b target");
+        //mappings_.at(0).JSONContainerKey("acList");
         mappings_.at(0).overrideKeyVariable(true);
         mappings_.at(0).dataSourceVariableName("ds_id");
 
-        mappings_.at(0).addMapping({"Rcvr", db_object.variable("ds_id"), true});
-        mappings_.at(0).addMapping({"Icao", db_object.variable("target_addr"), true,
-                                    Format(PropertyDataType::STRING, "hexadecimal")});
-        mappings_.at(0).addMapping({"Reg", db_object.variable("callsign"), false});
-        mappings_.at(0).addMapping({"Alt", db_object.variable("alt_baro_ft"), false});
-        mappings_.at(0).addMapping({"GAlt", db_object.variable("alt_geo_ft"), false});
-        mappings_.at(0).addMapping({"Lat", db_object.variable("pos_lat_deg"), true});
-        mappings_.at(0).addMapping({"Long", db_object.variable("pos_long_deg"), true});
-        mappings_.at(0).addMapping({"PosTime", db_object.variable("tod"), true,
-                                    Format(PropertyDataType::STRING, "epoch_tod")});
+        mappings_.at(0).addMapping({"data_source_identifier.value", db_object.variable("ds_id"), true});
+        mappings_.at(0).addMapping({"target_address", db_object.variable("target_addr"), true});
+        mappings_.at(0).addMapping({"target_identification.value_idt", db_object.variable("callsign"), false});
+        mappings_.at(0).addMapping({"mode_c_height.value_ft", db_object.variable("alt_baro_ft"), false});
+        //mappings_.at(0).addMapping({"GAlt", db_object.variable("alt_geo_ft"), false});
+        mappings_.at(0).addMapping({"wgs84_position.value_lat_rad", db_object.variable("pos_lat_deg"), true});
+        mappings_.at(0).addMapping({"wgs84_position.value_lon_rad", db_object.variable("pos_long_deg"), true});
+        mappings_.at(0).addMapping({"time_of_report", db_object.variable("tod"), true});
     }
 
     unsigned int row_cnt = 0;
