@@ -3,7 +3,7 @@
     <ParameterBool use_limit="0"/>
     <ParameterBool use_order="1"/>
     <ParameterBool use_order_ascending="1"/>
-    <ParameterUnsignedInt limit_max="100000"/>
+    <ParameterUnsignedInt limit_max="1000000"/>
     <ParameterUnsignedInt limit_min="0"/>
     <ParameterString order_variable__name="tod"/>
     <ParameterString order_variable_dbo_name="Meta"/>
@@ -1644,10 +1644,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="ADSB"/>
             <ParameterString description="WGS84 coordinate latitude"/>
-            <ParameterString dimension="Position"/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="pos_lat_deg"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit="WGS 84"/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBpos_lat_deg0">
                 <ParameterString meta_table="ADSB"/>
                 <ParameterString schema="SCDB"/>
@@ -1662,10 +1662,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="ADSB"/>
             <ParameterString description="WGS84 coordinate longitude"/>
-            <ParameterString dimension="Position"/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="pos_long_deg"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit="WGS 84"/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBpos_long_deg0">
                 <ParameterString meta_table="ADSB"/>
                 <ParameterString schema="SCDB"/>
@@ -4495,10 +4495,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="MLAT"/>
             <ParameterString description="latitude in degrees"/>
-            <ParameterString dimension="Position"/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="pos_lat_deg"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit="WGS 84"/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATpos_lat_deg0">
                 <ParameterString meta_table="MLAT"/>
                 <ParameterString schema="SCDB"/>
@@ -4583,10 +4583,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="MLAT"/>
             <ParameterString description="longitude in degrees"/>
-            <ParameterString dimension="Position"/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="pos_long_deg"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit="WGS 84"/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATpos_long_deg0">
                 <ParameterString meta_table="MLAT"/>
                 <ParameterString schema="SCDB"/>
@@ -6596,10 +6596,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="PSR"/>
             <ParameterString description=""/>
-            <ParameterString dimension="Position"/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="latitude"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit="WGS 84"/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionPSRlatitude0">
                 <ParameterString schema="Simple"/>
                 <ParameterString variable_identifier="sd_primary.latitude"/>
@@ -6609,10 +6609,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="PSR"/>
             <ParameterString description=""/>
-            <ParameterString dimension="Position"/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="longitude"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit="WGS 84"/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionPSRlongitude0">
                 <ParameterString schema="Simple"/>
                 <ParameterString variable_identifier="sd_primary.longitude"/>
@@ -8936,10 +8936,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="Radar"/>
             <ParameterString description="WGS84 coordinate latitude"/>
-            <ParameterString dimension="Position"/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="pos_lat_deg"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit="WGS 84"/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarpos_lat_deg0">
                 <ParameterString meta_table="Radar"/>
                 <ParameterString schema="SCDB"/>
@@ -9010,10 +9010,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="Radar"/>
             <ParameterString description="WGS84 coordinate longitude"/>
-            <ParameterString dimension="Position"/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="pos_long_deg"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit="WGS 84"/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarpos_long_deg0">
                 <ParameterString meta_table="Radar"/>
                 <ParameterString schema="SCDB"/>
@@ -10451,10 +10451,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="Reference"/>
             <ParameterString description=""/>
-            <ParameterString dimension="Position"/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="latitude"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit="WGS 84"/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionReferencelatitude0">
                 <ParameterString schema="Simple"/>
                 <ParameterString variable_identifier="sd_reftraj.latitude"/>
@@ -10464,10 +10464,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="Reference"/>
             <ParameterString description=""/>
-            <ParameterString dimension="Position"/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="longitude"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit="WGS 84"/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionReferencelongitude0">
                 <ParameterString schema="Simple"/>
                 <ParameterString variable_identifier="sd_reftraj.longitude"/>
@@ -12007,10 +12007,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="SSR"/>
             <ParameterString description=""/>
-            <ParameterString dimension="Position"/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="latitude"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit="WGS 84"/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionSSRlatitude0">
                 <ParameterString schema="Simple"/>
                 <ParameterString variable_identifier="sd_ssr.latitude"/>
@@ -12020,10 +12020,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="SSR"/>
             <ParameterString description=""/>
-            <ParameterString dimension="Position"/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="longitude"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit="WGS 84"/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionSSRlongitude0">
                 <ParameterString schema="Simple"/>
                 <ParameterString variable_identifier="sd_ssr.longitude"/>
@@ -14317,10 +14317,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="Tracker"/>
             <ParameterString description="Calculated WGS84 track latitude position (low or high resolution) [I062/105 or I062/106]"/>
-            <ParameterString dimension="Position"/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="pos_lat_deg"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit="WGS 84"/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerpos_lat_deg0">
                 <ParameterString meta_table="Tracker"/>
                 <ParameterString schema="SCDB"/>
@@ -14405,10 +14405,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="Tracker"/>
             <ParameterString description="Calculated WGS84 track longitude position (low or high resolution) [I062/105 or I062/106]"/>
-            <ParameterString dimension="Position"/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="pos_long_deg"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit="WGS 84"/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerpos_long_deg0">
                 <ParameterString meta_table="Tracker"/>
                 <ParameterString schema="SCDB"/>

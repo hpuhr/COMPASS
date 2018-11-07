@@ -427,7 +427,7 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
 
                 if (open_count == 0)
                 {
-                    loginf << "got part '" << ss.str() << "'";
+                    //loginf << "got part '" << ss.str() << "'";
 
                     json j = json::parse(ss.str());
 
@@ -443,7 +443,7 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
         //        archive_read_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
         //        tmp_time = boost::posix_time::microsec_clock::local_time();
 
-        loginf  << "JSONImporterTask: importFileArchive: parsed entry";
+        logdbg  << "JSONImporterTask: importFileArchive: parsed entry";
 
         //        try
         //        {
@@ -533,7 +533,7 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
 
 void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
 {
-    loginf << "JSONImporterTask: parseJSON";
+    logdbg << "JSONImporterTask: parseJSON";
 
     if (mappings_.size() == 0)
     {
@@ -570,8 +570,10 @@ void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
         mappings_.at(0).addMapping({"target_identification.value_idt", db_object.variable("callsign"), false});
         mappings_.at(0).addMapping({"mode_c_height.value_ft", db_object.variable("alt_baro_ft"), false});
         //mappings_.at(0).addMapping({"GAlt", db_object.variable("alt_geo_ft"), false});
-        mappings_.at(0).addMapping({"wgs84_position.value_lat_rad", db_object.variable("pos_lat_deg"), true});
-        mappings_.at(0).addMapping({"wgs84_position.value_lon_rad", db_object.variable("pos_long_deg"), true});
+        mappings_.at(0).addMapping({"wgs84_position.value_lat_rad", db_object.variable("pos_lat_deg"), true,
+                                   "Angle", "Radians"});
+        mappings_.at(0).addMapping({"wgs84_position.value_lon_rad", db_object.variable("pos_long_deg"), true,
+                                   "Angle", "Radians"});
         mappings_.at(0).addMapping({"time_of_report", db_object.variable("tod"), true});
     }
 
@@ -580,7 +582,10 @@ void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
     for (auto& map_it : mappings_)
     {
         row_cnt += map_it.parseJSON(j, test);
-        loginf << "JSONImporterTask: parseJSON: parsed " << map_it.dbObject().name() << " with " << row_cnt << " rows";
+
+        if (row_cnt != 0 && row_cnt % 1000 == 0)
+            loginf << "JSONImporterTask: parseJSON: parsed " << map_it.dbObject().name() << " with " << row_cnt << " rows";
+        // TODO only works for 1
     }
 
 }
@@ -602,8 +607,6 @@ void JSONImporterTask::insertData ()
     {
         if (map_it.buffer() != nullptr && map_it.buffer()->size() != 0)
         {
-            map_it.transformBuffer();
-
             insert_active_ = true;
 
             DBObject& db_object = map_it.dbObject();

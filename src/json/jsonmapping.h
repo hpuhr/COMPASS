@@ -29,6 +29,11 @@ public:
     {}
 
     JsonKey2DBOVariableMapping (const std::string& json_key, DBOVariable& variable, bool mandatory,
+                                const std::string& dimension, const std::string& unit)
+        : JsonKey2DBOVariableMapping(json_key, variable, mandatory, {variable_.dataType(), ""}, dimension, unit)
+    {}
+
+    JsonKey2DBOVariableMapping (const std::string& json_key, DBOVariable& variable, bool mandatory,
                                 Format json_value_format, const std::string& dimension, const std::string& unit)
         : json_key_(json_key), variable_(variable), mandatory_(mandatory), json_value_format_(json_value_format),
           dimension_(dimension), unit_(unit)

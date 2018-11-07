@@ -341,7 +341,7 @@ DBOVariable& DBObject::getKeyVariable()
          for (auto& var_it : variables_)
              if (var_it.second.hasCurrentDBColumn() && var_it.second.currentDBColumn().name() == key_col_name)
              {
-                 loginf << "DBObject " << name() << ": getKeyVariable: returning var " << var_it.second.name();
+                 logdbg << "DBObject " << name() << ": getKeyVariable: returning var " << var_it.second.name();
                  return var_it.second;
              }
     }

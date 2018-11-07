@@ -1,5 +1,5 @@
 <Configuration class_id="DBSchemaManager" instance_id="DBSchemaManager0">
-    <ParameterString current_schema="Simple"/>
+    <ParameterString current_schema="SCDB"/>
     <Configuration class_id="DBSchema" instance_id="DBSchemaSCDB0">
         <ParameterString name="SCDB"/>
         <Configuration class_id="DBTable" instance_id="cmp_aa">
@@ -2812,23 +2812,23 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="WGS84 coordinate latitude"/>
                 <ParameterString data_format=""/>
-                <ParameterString dimension="Position"/>
+                <ParameterString dimension="Angle"/>
                 <ParameterString name="POS_LAT_DEG"/>
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
-                <ParameterString unit="WGS 84"/>
+                <ParameterString unit="Degree"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_LONG_DEG">
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="WGS84 coordinate longitude"/>
                 <ParameterString data_format=""/>
-                <ParameterString dimension="Position"/>
+                <ParameterString dimension="Angle"/>
                 <ParameterString name="POS_LONG_DEG"/>
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
-                <ParameterString unit="WGS 84"/>
+                <ParameterString unit="Degree"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_SYS_X_NM">
                 <ParameterBool is_key="0"/>
@@ -3596,14 +3596,14 @@
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_LAT_DEG">
                 <ParameterBool is_key="0"/>
-                <ParameterString comment="latitude in degrees"/>
+                <ParameterString comment="latitude in Degree"/>
                 <ParameterString data_format=""/>
-                <ParameterString dimension="Position"/>
+                <ParameterString dimension="Angle"/>
                 <ParameterString name="POS_LAT_DEG"/>
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
-                <ParameterString unit="WGS 84"/>
+                <ParameterString unit="Degree"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_LAT_DEG_CALC">
                 <ParameterBool is_key="0"/>
@@ -3662,14 +3662,14 @@
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_LONG_DEG">
                 <ParameterBool is_key="0"/>
-                <ParameterString comment="longitude in degrees"/>
+                <ParameterString comment="longitude in Degree"/>
                 <ParameterString data_format=""/>
-                <ParameterString dimension="Position"/>
+                <ParameterString dimension="Angle"/>
                 <ParameterString name="POS_LONG_DEG"/>
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
-                <ParameterString unit="WGS 84"/>
+                <ParameterString unit="Degree"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_LONG_DEG_CALC">
                 <ParameterBool is_key="0"/>
@@ -4736,12 +4736,12 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="WGS84 coordinate latitude"/>
                 <ParameterString data_format=""/>
-                <ParameterString dimension="Position"/>
+                <ParameterString dimension="Angle"/>
                 <ParameterString name="POS_LAT_DEG"/>
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
-                <ParameterString unit="WGS 84"/>
+                <ParameterString unit="Degree"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_LOCAL_X_NM">
                 <ParameterBool is_key="0"/>
@@ -4791,12 +4791,12 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="WGS84 coordinate longitude"/>
                 <ParameterString data_format=""/>
-                <ParameterString dimension="Position"/>
+                <ParameterString dimension="Angle"/>
                 <ParameterString name="POS_LONG_DEG"/>
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
-                <ParameterString unit="WGS 84"/>
+                <ParameterString unit="Degree"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_RANGE_NM">
                 <ParameterBool is_key="0"/>
@@ -5654,12 +5654,12 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Calculated WGS84 track latitude position (low or high resolution) [I062/105 or I062/106]"/>
                 <ParameterString data_format=""/>
-                <ParameterString dimension="Position"/>
+                <ParameterString dimension="Angle"/>
                 <ParameterString name="POS_LAT_DEG"/>
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
-                <ParameterString unit="WGS 84"/>
+                <ParameterString unit="Degree"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_LAT_DEG_CALC">
                 <ParameterBool is_key="0"/>
@@ -5720,12 +5720,12 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Calculated WGS84 track longitude position (low or high resolution) [I062/105 or I062/106]"/>
                 <ParameterString data_format=""/>
-                <ParameterString dimension="Position"/>
+                <ParameterString dimension="Angle"/>
                 <ParameterString name="POS_LONG_DEG"/>
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
-                <ParameterString unit="WGS 84"/>
+                <ParameterString unit="Degree"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_LONG_DEG_CALC">
                 <ParameterBool is_key="0"/>
@@ -6369,23 +6369,23 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=""/>
                 <ParameterString data_format=""/>
-                <ParameterString dimension="Position"/>
+                <ParameterString dimension="Angle"/>
                 <ParameterString name="latitude"/>
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="FLOAT"/>
-                <ParameterString unit="WGS 84"/>
+                <ParameterString unit="Degree"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="longitude">
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=""/>
                 <ParameterString data_format=""/>
-                <ParameterString dimension="Position"/>
+                <ParameterString dimension="Angle"/>
                 <ParameterString name="longitude"/>
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="FLOAT"/>
-                <ParameterString unit="WGS 84"/>
+                <ParameterString unit="Degree"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="mlat">
                 <ParameterBool is_key="0"/>
@@ -7325,23 +7325,23 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=""/>
                 <ParameterString data_format=""/>
-                <ParameterString dimension="Position"/>
+                <ParameterString dimension="Angle"/>
                 <ParameterString name="latitude"/>
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="FLOAT"/>
-                <ParameterString unit="WGS 84"/>
+                <ParameterString unit="Degree"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="longitude">
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=""/>
                 <ParameterString data_format=""/>
-                <ParameterString dimension="Position"/>
+                <ParameterString dimension="Angle"/>
                 <ParameterString name="longitude"/>
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="FLOAT"/>
-                <ParameterString unit="WGS 84"/>
+                <ParameterString unit="Degree"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="mlat">
                 <ParameterBool is_key="0"/>
@@ -8281,23 +8281,23 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=""/>
                 <ParameterString data_format=""/>
-                <ParameterString dimension="Position"/>
+                <ParameterString dimension="Angle"/>
                 <ParameterString name="latitude"/>
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="FLOAT"/>
-                <ParameterString unit="WGS 84"/>
+                <ParameterString unit="Degree"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="longitude">
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=""/>
                 <ParameterString data_format=""/>
-                <ParameterString dimension="Position"/>
+                <ParameterString dimension="Angle"/>
                 <ParameterString name="longitude"/>
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="FLOAT"/>
-                <ParameterString unit="WGS 84"/>
+                <ParameterString unit="Degree"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="mlat">
                 <ParameterBool is_key="0"/>
@@ -9204,23 +9204,23 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=""/>
                 <ParameterString data_format=""/>
-                <ParameterString dimension="Position"/>
+                <ParameterString dimension="Angle"/>
                 <ParameterString name="latitude"/>
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="FLOAT"/>
-                <ParameterString unit="WGS 84"/>
+                <ParameterString unit="Degree"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="longitude">
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=""/>
                 <ParameterString data_format=""/>
-                <ParameterString dimension="Position"/>
+                <ParameterString dimension="Angle"/>
                 <ParameterString name="longitude"/>
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="FLOAT"/>
-                <ParameterString unit="WGS 84"/>
+                <ParameterString unit="Degree"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="mlat">
                 <ParameterBool is_key="0"/>
@@ -10100,23 +10100,23 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=""/>
                 <ParameterString data_format=""/>
-                <ParameterString dimension="Position"/>
+                <ParameterString dimension="Angle"/>
                 <ParameterString name="latitude"/>
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="FLOAT"/>
-                <ParameterString unit="WGS 84"/>
+                <ParameterString unit="Degree"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="longitude">
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=""/>
                 <ParameterString data_format=""/>
-                <ParameterString dimension="Position"/>
+                <ParameterString dimension="Angle"/>
                 <ParameterString name="longitude"/>
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="FLOAT"/>
-                <ParameterString unit="WGS 84"/>
+                <ParameterString unit="Degree"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="mlat">
                 <ParameterBool is_key="0"/>
@@ -11056,23 +11056,23 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=""/>
                 <ParameterString data_format=""/>
-                <ParameterString dimension="Position"/>
+                <ParameterString dimension="Angle"/>
                 <ParameterString name="latitude"/>
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="FLOAT"/>
-                <ParameterString unit="WGS 84"/>
+                <ParameterString unit="Degree"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="longitude">
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=""/>
                 <ParameterString data_format=""/>
-                <ParameterString dimension="Position"/>
+                <ParameterString dimension="Angle"/>
                 <ParameterString name="longitude"/>
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="FLOAT"/>
-                <ParameterString unit="WGS 84"/>
+                <ParameterString unit="Degree"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="mlat">
                 <ParameterBool is_key="0"/>
