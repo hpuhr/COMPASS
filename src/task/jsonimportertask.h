@@ -103,6 +103,7 @@ protected:
     std::set <int> added_data_sources_;
 
     void parseJSON (nlohmann::json& j, bool test);
+    void transformBuffers ();
     void insertData ();
     void clearData ();
 };

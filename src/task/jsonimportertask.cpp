@@ -279,9 +279,15 @@ void JSONImporterTask::importFile(const std::string& filename, bool test)
     }
 
     if (!test)
+    {
+        transformBuffers();
         insertData ();
+    }
     else
+    {
+        transformBuffers();
         clearData();
+    }
 
     QMessageBox msgBox;
     std::string msg = "Reading archive " + filename + " finished successfully.\n";
@@ -460,9 +466,15 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
         //            tmp_time = boost::posix_time::microsec_clock::local_time();
 
         if (!test)
+        {
+            transformBuffers();
             insertData ();
+        }
         else
+        {
+            transformBuffers();
             clearData();
+        }
 
         //            insert_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
 
@@ -573,6 +585,15 @@ void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
 
 }
 
+void JSONImporterTask::transformBuffers ()
+{
+    loginf << "JSONImporterTask: transformBuffers";
+
+    for (auto& map_it : mappings_)
+            if (map_it.buffer() != nullptr && map_it.buffer()->size() != 0)
+                map_it.transformBuffer();
+}
+
 void JSONImporterTask::insertData ()
 {
     loginf << "JSONImporterTask: insertData: inserting into database";
@@ -581,6 +602,8 @@ void JSONImporterTask::insertData ()
     {
         if (map_it.buffer() != nullptr && map_it.buffer()->size() != 0)
         {
+            map_it.transformBuffer();
+
             insert_active_ = true;
 
             DBObject& db_object = map_it.dbObject();

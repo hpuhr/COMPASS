@@ -3,6 +3,8 @@
 #include "dbovariable.h"
 #include "buffer.h"
 #include "dbobject.h"
+#include "unitmanager.h"
+#include "unit.h"
 
 using namespace nlohmann;
 
@@ -426,6 +428,114 @@ bool JsonMapping::parseTargetReport (const nlohmann::json& tr, size_t row_cnt)
     return false;
 }
 
+void JsonMapping::transformBuffer ()
+{
+    for (auto& data_it : data_mappings_)
+    {
+        if (data_it.dimension() != data_it.variable().dimension())
+            logwrn << "JsonMapping: transformBuffer: variable " << data_it.variable().name()
+                   << " has differing dimensions " << data_it.dimension() << " " << data_it.variable().dimension();
+        else if (data_it.unit() != data_it.variable().unit()) // do unit conversion stuff
+        {
+            logdbg << "JsonMapping: transformBuffer: variable " << data_it.variable().name()
+                   << " of same dimension has different units " << data_it.unit() << " " << data_it.variable().unit();
+
+            const Dimension &dimension = UnitManager::instance().dimension (data_it.variable().dimension());
+            double factor;
+
+            factor = dimension.getFactor (data_it.unit(), data_it.variable().unit());
+            std::string current_var_name = data_it.variable().name();
+            PropertyDataType data_type = data_it.variable().dataType();
+
+            logdbg  << "JsonMapping: transformBuffer: correct unit transformation with factor " << factor;
+
+            switch (data_type)
+            {
+            case PropertyDataType::BOOL:
+            {
+                assert (buffer_->has<bool>(current_var_name));
+                ArrayListTemplate<bool> &array_list = buffer_->get<bool>(current_var_name);
+                logwrn << "JsonMapping: transformBuffer: double multiplication of boolean variable "
+                       << current_var_name;
+                array_list *= factor;
+                break;
+            }
+            case PropertyDataType::CHAR:
+            {
+                assert (buffer_->has<char>(current_var_name));
+                ArrayListTemplate<char> &array_list = buffer_->get<char> (current_var_name);
+                logwrn << "JsonMapping: transformBuffer: double multiplication of char variable "
+                       << current_var_name;
+                array_list *= factor;
+                break;
+            }
+            case PropertyDataType::UCHAR:
+            {
+                assert (buffer_->has<unsigned char>(current_var_name));
+                ArrayListTemplate<unsigned char> &array_list = buffer_->get<unsigned char> (current_var_name);
+                logwrn << "JsonMapping: transformBuffer: double multiplication of unsigned char variable "
+                       << current_var_name;
+                array_list *= factor;
+                break;
+            }
+            case PropertyDataType::INT:
+            {
+                assert (buffer_->has<int>(current_var_name));
+                ArrayListTemplate<int> &array_list = buffer_->get<int> (current_var_name);
+                array_list *= factor;
+                break;
+            }
+            case PropertyDataType::UINT:
+            {
+                assert (buffer_->has<unsigned int>(current_var_name));
+                ArrayListTemplate<unsigned int> &array_list = buffer_->get<unsigned int> (current_var_name);
+                array_list *= factor;
+                break;
+            }
+            case PropertyDataType::LONGINT:
+            {
+                assert (buffer_->has<long int>(current_var_name));
+                ArrayListTemplate<long int> &array_list = buffer_->get<long int>(current_var_name);
+                array_list *= factor;
+                break;
+            }
+            case PropertyDataType::ULONGINT:
+            {
+                assert (buffer_->has<unsigned long>(current_var_name));
+                ArrayListTemplate<unsigned long> &array_list = buffer_->get<unsigned long>(current_var_name);
+                array_list *= factor;
+                break;
+            }
+            case PropertyDataType::FLOAT:
+            {
+                assert (buffer_->has<float>(current_var_name));
+                ArrayListTemplate<float> &array_list = buffer_->get<float>(current_var_name);
+                array_list *= factor;
+                break;
+            }
+            case PropertyDataType::DOUBLE:
+            {
+                assert (buffer_->has<double>(current_var_name));
+                ArrayListTemplate<double> &array_list = buffer_->get<double>(current_var_name);
+                array_list *= factor;
+                break;
+            }
+            case PropertyDataType::STRING:
+                logerr << "JsonMapping: transformBuffer: unit transformation for string variable "
+                       << data_it.variable().name() << " impossible";
+                break;
+            default:
+                logerr  <<  "JsonMapping: transformBuffer: unknown property type "
+                         << Property::asString(data_type);
+                throw std::runtime_error ("JsonMapping: transformBuffer: unknown property type "
+                                          + Property::asString(data_type));
+            }
+        }
+    }
+
+}
+
+
 bool JsonMapping::overrideKeyVariable() const
 {
     return override_key_variable_;
@@ -501,3 +611,4 @@ void JsonKey2DBOVariableMapping::jsonKey(const std::string &json_key)
 {
     json_key_ = json_key;
 }
+

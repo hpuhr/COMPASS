@@ -19,13 +19,19 @@ class Buffer;
 class JsonKey2DBOVariableMapping
 {
 public:
-    JsonKey2DBOVariableMapping (std::string json_key, DBOVariable& variable, bool mandatory)
-        : JsonKey2DBOVariableMapping(json_key, variable, mandatory, {variable_.dataType(), ""})
+    JsonKey2DBOVariableMapping (const std::string& json_key, DBOVariable& variable, bool mandatory)
+        : JsonKey2DBOVariableMapping(json_key, variable, mandatory, {variable_.dataType(), ""}, "", "")
     {}
 
-    JsonKey2DBOVariableMapping (std::string json_key, DBOVariable& variable, bool mandatory,
+    JsonKey2DBOVariableMapping (const std::string& json_key, DBOVariable& variable, bool mandatory,
                                 Format json_value_format)
-        : json_key_(json_key), variable_(variable), mandatory_(mandatory), json_value_format_(json_value_format)
+        : JsonKey2DBOVariableMapping(json_key, variable, mandatory, json_value_format, "", "")
+    {}
+
+    JsonKey2DBOVariableMapping (const std::string& json_key, DBOVariable& variable, bool mandatory,
+                                Format json_value_format, const std::string& dimension, const std::string& unit)
+        : json_key_(json_key), variable_(variable), mandatory_(mandatory), json_value_format_(json_value_format),
+          dimension_(dimension), unit_(unit)
     {
         sub_keys_ = Utils::String::split(json_key_, '.');
         has_sub_keys_ = sub_keys_.size() > 1;
@@ -187,12 +193,22 @@ public:
         }
     }
 
+    bool hasDimension () const { return dimension_.size() > 0; }
+    /// @brief Returns dimension contained in the column
+    const std::string &dimension () const { return dimension_; }
+    /// @brief Returns unit
+    const std::string &unit () const { return unit_; }
 
 private:
     std::string json_key_;
     DBOVariable& variable_;
     bool mandatory_;
     Format json_value_format_;
+
+    /// Unit dimension
+    std::string dimension_;
+    /// Unit
+    std::string unit_;
 
     bool has_sub_keys_ {false};
     std::vector<std::string> sub_keys_;
@@ -259,6 +275,8 @@ public:
 
     std::string dataSourceVariableName() const;
     void dataSourceVariableName(const std::string& name);
+
+    void transformBuffer ();
 
 private:
     DBObject& db_object_;
