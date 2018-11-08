@@ -12,7 +12,7 @@ const std::map<PropertyDataType, std::vector<std::string>> Format::format_option
     {PropertyDataType::CHAR,       integer_formats},
     {PropertyDataType::UCHAR,      integer_formats},
     {PropertyDataType::INT,        integer_formats},
-    {PropertyDataType::UCHAR,      integer_formats},
+    {PropertyDataType::UINT,       integer_formats},
     {PropertyDataType::LONGINT,    integer_formats},
     {PropertyDataType::ULONGINT,   integer_formats},
     {PropertyDataType::FLOAT,      no_format},
