@@ -253,6 +253,8 @@ void JSONImporterTask::importFile(const std::string& filename, bool test)
     char c;
     unsigned int open_count {0};
 
+    unsigned int parsed_objects = 0;
+
     while (ifs.get(c))          // loop getting single characters
     {
         if (c == '{')
@@ -272,12 +274,30 @@ void JSONImporterTask::importFile(const std::string& filename, bool test)
 
             parseJSON (j, test);
 
+            ++parsed_objects;
             ss.str("");
+
+            if (parsed_objects != 0 && parsed_objects % 10000 == 0)
+            {
+                loginf << "JSONImporterTask: importFile: inserting after " << parsed_objects << " parsed objects";
+
+                if (!test)
+                {
+                    transformBuffers();
+                    insertData ();
+                }
+                else
+                {
+                    transformBuffers();
+                    clearData();
+                }
+            }
 
             //loginf << "UGA2 cleared";
         }
     }
 
+    loginf << "JSONImporterTask: importFile: final inserting after " << parsed_objects << " parsed objects";
     if (!test)
     {
         transformBuffers();
@@ -401,6 +421,7 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
 
         //ss.str("");
         unsigned int open_count {0};
+        unsigned int parsed_objects {0};
 
         for (;;)
         {
@@ -433,7 +454,25 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
 
                     parseJSON (j, test);
 
+                    ++parsed_objects;
                     ss.str("");
+
+                    if (parsed_objects != 0 && parsed_objects % 10000 == 0)
+                    {
+                        loginf << "JSONImporterTask: importFile: inserting importFileArchive "
+                               << parsed_objects << " parsed objects";
+
+                        if (!test)
+                        {
+                            transformBuffers();
+                            insertData ();
+                        }
+                        else
+                        {
+                            transformBuffers();
+                            clearData();
+                        }
+                    }
 
                     //loginf << "UGA2 cleared";
                 }
@@ -457,13 +496,10 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
         //            json_parse_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
         //            tmp_time = boost::posix_time::microsec_clock::local_time();
 
-        while (insert_active_)
-        {
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-            QThread::msleep (10);
-        }
         //            wait_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
         //            tmp_time = boost::posix_time::microsec_clock::local_time();
+
+        loginf << "JSONImporterTask: importFileArchive: final inserting after " << parsed_objects << " parsed objects";
 
         if (!test)
         {
@@ -603,11 +639,17 @@ void JSONImporterTask::insertData ()
 {
     loginf << "JSONImporterTask: insertData: inserting into database";
 
+    while (insert_active_)
+    {
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QThread::msleep (10);
+    }
+
     for (auto& map_it : mappings_)
     {
         if (map_it.buffer() != nullptr && map_it.buffer()->size() != 0)
         {
-            insert_active_ = true;
+            ++insert_active_;
 
             DBObject& db_object = map_it.dbObject();
             std::shared_ptr<Buffer> buffer = map_it.buffer();
@@ -651,7 +693,8 @@ void JSONImporterTask::insertData ()
                         }
                     }
 
-                db_object.addDataSources(datasources_to_add);
+                if (datasources_to_add.size())
+                    db_object.addDataSources(datasources_to_add);
             }
 
             logdbg << "JSONImporterTask: insertData: " << db_object.name() << " inserting";
@@ -682,6 +725,6 @@ void JSONImporterTask::insertProgressSlot (float percent)
 void JSONImporterTask::insertDoneSlot (DBObject& object)
 {
     loginf << "JSONImporterTask: insertDoneSlot";
-    insert_active_ = false;
+    --insert_active_;
 }
 

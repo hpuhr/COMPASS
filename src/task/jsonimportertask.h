@@ -81,7 +81,7 @@ protected:
 
     JSONImporterTaskWidget* widget_ {nullptr};
 
-    bool insert_active_ {false};
+    unsigned int insert_active_ {0};
     unsigned int rec_num_cnt_ {0};
     unsigned int all_cnt_ {0};
     unsigned int skipped_cnt_ {0};
