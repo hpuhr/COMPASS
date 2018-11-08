@@ -395,7 +395,6 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
     //    size_t wait_time = 0;
     //    size_t insert_time = 0;
 
-    boost::posix_time::ptime tmp_time;
 
     while (archive_read_next_header(a, &entry) == ARCHIVE_OK)
     {
@@ -403,8 +402,6 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
         //            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
         loginf << "Archive file found: " << archive_entry_pathname(entry) << " size " << archive_entry_size(entry);
-
-        tmp_time = boost::posix_time::microsec_clock::local_time();
 
         msg = "Reading archive entry " + std::to_string(entry_cnt) + ": "
                 + std::string(archive_entry_pathname(entry)) + ".\n";
@@ -417,11 +414,14 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
 
         msg_box.setInformativeText(msg.c_str());
         msg_box.show();
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+        for (unsigned int cnt=0; cnt < 10; ++cnt)
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
         //ss.str("");
         unsigned int open_count {0};
         unsigned int parsed_objects {0};
+        boost::posix_time::ptime entry_start_time = boost::posix_time::microsec_clock::local_time();
 
         for (;;)
         {
@@ -459,8 +459,12 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
 
                     if (parsed_objects != 0 && parsed_objects % 10000 == 0)
                     {
+                        float num_secs = (boost::posix_time::microsec_clock::local_time()
+                                          - entry_start_time).total_milliseconds()/1000.0;
+
                         loginf << "JSONImporterTask: importFile: inserting importFileArchive "
-                               << parsed_objects << " parsed objects";
+                               << parsed_objects << " parsed objects, "
+                               << String::doubleToStringPrecision(parsed_objects/num_secs,2) << " e/s";
 
                         if (!test)
                         {
@@ -499,7 +503,11 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
         //            wait_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
         //            tmp_time = boost::posix_time::microsec_clock::local_time();
 
-        loginf << "JSONImporterTask: importFileArchive: final inserting after " << parsed_objects << " parsed objects";
+        float num_secs = (boost::posix_time::microsec_clock::local_time()
+                          - entry_start_time).total_milliseconds()/1000.0;
+
+        loginf << "JSONImporterTask: importFileArchive: final inserting after " << parsed_objects << " parsed objects, "
+               << String::doubleToStringPrecision(parsed_objects/num_secs,2) << " e/s";;
 
         if (!test)
         {
@@ -573,57 +581,91 @@ void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
 
     if (mappings_.size() == 0)
     {
-        assert (ATSDB::instance().objectManager().existsObject("ADSB"));
-        DBObject& db_object = ATSDB::instance().objectManager().object("ADSB");
+        {
+            assert (ATSDB::instance().objectManager().existsObject("ADSB"));
+            DBObject& db_object = ATSDB::instance().objectManager().object("ADSB");
 
-//        mappings_.push_back(JsonMapping (db_object));
-//        mappings_.at(0).JSONKey("*");
-//        mappings_.at(0).JSONValue("*");
-//        mappings_.at(0).JSONContainerKey("acList");
-//        mappings_.at(0).overrideKeyVariable(true);
-//        mappings_.at(0).dataSourceVariableName("ds_id");
+            //        mappings_.push_back(JsonMapping (db_object));
+            //        mappings_.at(0).JSONKey("*");
+            //        mappings_.at(0).JSONValue("*");
+            //        mappings_.at(0).JSONContainerKey("acList");
+            //        mappings_.at(0).overrideKeyVariable(true);
+            //        mappings_.at(0).dataSourceVariableName("ds_id");
 
-//        mappings_.at(0).addMapping({"Rcvr", db_object.variable("ds_id"), true});
-//        mappings_.at(0).addMapping({"Icao", db_object.variable("target_addr"), true,
-//                                    Format(PropertyDataType::STRING, "hexadecimal")});
-//        mappings_.at(0).addMapping({"Reg", db_object.variable("callsign"), false});
-//        mappings_.at(0).addMapping({"Alt", db_object.variable("alt_baro_ft"), false});
-//        mappings_.at(0).addMapping({"GAlt", db_object.variable("alt_geo_ft"), false});
-//        mappings_.at(0).addMapping({"Lat", db_object.variable("pos_lat_deg"), true});
-//        mappings_.at(0).addMapping({"Long", db_object.variable("pos_long_deg"), true});
-//        mappings_.at(0).addMapping({"PosTime", db_object.variable("tod"), true,
-//                                    Format(PropertyDataType::STRING, "epoch_tod")});
+            //        mappings_.at(0).addMapping({"Rcvr", db_object.variable("ds_id"), true});
+            //        mappings_.at(0).addMapping({"Icao", db_object.variable("target_addr"), true,
+            //                                    Format(PropertyDataType::STRING, "hexadecimal")});
+            //        mappings_.at(0).addMapping({"Reg", db_object.variable("callsign"), false});
+            //        mappings_.at(0).addMapping({"Alt", db_object.variable("alt_baro_ft"), false});
+            //        mappings_.at(0).addMapping({"GAlt", db_object.variable("alt_geo_ft"), false});
+            //        mappings_.at(0).addMapping({"Lat", db_object.variable("pos_lat_deg"), true});
+            //        mappings_.at(0).addMapping({"Long", db_object.variable("pos_long_deg"), true});
+            //        mappings_.at(0).addMapping({"PosTime", db_object.variable("tod"), true,
+            //                                    Format(PropertyDataType::STRING, "epoch_tod")});
 
-        mappings_.push_back(JsonMapping (db_object));
-        mappings_.at(0).JSONKey("message_type");
-        mappings_.at(0).JSONValue("ads-b target");
-        //mappings_.at(0).JSONContainerKey("acList");
-        mappings_.at(0).overrideKeyVariable(true);
-        mappings_.at(0).dataSourceVariableName("ds_id");
+            mappings_.push_back(JsonMapping (db_object));
+            mappings_.at(0).JSONKey("message_type");
+            mappings_.at(0).JSONValue("ads-b target");
+            mappings_.at(0).overrideKeyVariable(true);
+            mappings_.at(0).dataSourceVariableName("ds_id");
 
-        mappings_.at(0).addMapping({"data_source_identifier.value", db_object.variable("ds_id"), true});
-        mappings_.at(0).addMapping({"target_address", db_object.variable("target_addr"), true});
-        mappings_.at(0).addMapping({"target_identification.value_idt", db_object.variable("callsign"), false});
-        mappings_.at(0).addMapping({"mode_c_height.value_ft", db_object.variable("alt_baro_ft"), false});
-        //mappings_.at(0).addMapping({"GAlt", db_object.variable("alt_geo_ft"), false});
-        mappings_.at(0).addMapping({"wgs84_position.value_lat_rad", db_object.variable("pos_lat_deg"), true,
-                                   "Angle", "Radians"});
-        mappings_.at(0).addMapping({"wgs84_position.value_lon_rad", db_object.variable("pos_long_deg"), true,
-                                   "Angle", "Radians"});
-        mappings_.at(0).addMapping({"time_of_report", db_object.variable("tod"), true});
+            mappings_.at(0).addMapping({"data_source_identifier.value", db_object.variable("ds_id"), true});
+            mappings_.at(0).addMapping({"target_address", db_object.variable("target_addr"), true});
+            mappings_.at(0).addMapping({"target_identification.value_idt", db_object.variable("callsign"), false});
+            mappings_.at(0).addMapping({"mode_c_height.value_ft", db_object.variable("alt_baro_ft"), false});
+            mappings_.at(0).addMapping({"wgs84_position.value_lat_rad", db_object.variable("pos_lat_deg"), true,
+                                        "Angle", "Radians"});
+            mappings_.at(0).addMapping({"wgs84_position.value_lon_rad", db_object.variable("pos_long_deg"), true,
+                                        "Angle", "Radians"});
+            mappings_.at(0).addMapping({"time_of_report", db_object.variable("tod"), true});
+        }
+
+        {
+            assert (ATSDB::instance().objectManager().existsObject("MLAT"));
+            DBObject& db_object = ATSDB::instance().objectManager().object("MLAT");
+
+            mappings_.push_back(JsonMapping (db_object));
+            mappings_.at(1).JSONKey("message_type");
+            mappings_.at(1).JSONValue("mlat target");
+            mappings_.at(1).overrideKeyVariable(true);
+            mappings_.at(1).dataSourceVariableName("ds_id");
+
+            mappings_.at(1).addMapping({"data_source_identifier.value", db_object.variable("ds_id"), true});
+            mappings_.at(1).addMapping({"target_address", db_object.variable("target_addr"), true});
+            mappings_.at(1).addMapping({"target_identification.value_idt", db_object.variable("callsign"), false});
+            mappings_.at(1).addMapping({"mode_c_height.value_ft", db_object.variable("flight_level_ft"), false});
+            mappings_.at(1).addMapping({"wgs84_position.value_lat_rad", db_object.variable("pos_lat_deg"), true,
+                                        "Angle", "Radians"});
+            mappings_.at(1).addMapping({"wgs84_position.value_lon_rad", db_object.variable("pos_long_deg"), true,
+                                        "Angle", "Radians"});
+            mappings_.at(1).addMapping({"detection_time", db_object.variable("tod"), true});
+        }
+
+        {
+            assert (ATSDB::instance().objectManager().existsObject("Tracker"));
+            DBObject& db_object = ATSDB::instance().objectManager().object("Tracker");
+
+            mappings_.push_back(JsonMapping (db_object));
+            mappings_.at(2).JSONKey("message_type");
+            mappings_.at(2).JSONValue("track update");
+            mappings_.at(2).overrideKeyVariable(true);
+            mappings_.at(2).dataSourceVariableName("ds_id");
+
+            mappings_.at(2).addMapping({"server_sacsic.value", db_object.variable("ds_id"), true});
+            mappings_.at(2).addMapping({"aircraft_address", db_object.variable("target_addr"), true});
+            mappings_.at(2).addMapping({"aircraft_identification.value_idt", db_object.variable("callsign"), false});
+            mappings_.at(2).addMapping({"calculated_track_flight_level.value_feet",
+                                        db_object.variable("modec_code_ft"), false});
+            mappings_.at(2).addMapping({"calculated_wgs84_position.value_latitude_rad",
+                                        db_object.variable("pos_lat_deg"), true, "Angle", "Radians"});
+            mappings_.at(2).addMapping({"calculated_wgs84_position.value_longitude_rad",
+                                        db_object.variable("pos_long_deg"), true, "Angle", "Radians"});
+            mappings_.at(2).addMapping({"time_of_last_update", db_object.variable("tod"), true});
+        }
     }
-
-    unsigned int row_cnt = 0;
 
     for (auto& map_it : mappings_)
-    {
-        row_cnt += map_it.parseJSON(j, test);
-
-        if (row_cnt != 0 && row_cnt % 1000 == 0)
-            loginf << "JSONImporterTask: parseJSON: parsed " << map_it.dbObject().name() << " with " << row_cnt << " rows";
-        // TODO only works for 1
-    }
-
+        map_it.parseJSON(j, test);
 }
 
 void JSONImporterTask::transformBuffers ()
@@ -631,8 +673,8 @@ void JSONImporterTask::transformBuffers ()
     loginf << "JSONImporterTask: transformBuffers";
 
     for (auto& map_it : mappings_)
-            if (map_it.buffer() != nullptr && map_it.buffer()->size() != 0)
-                map_it.transformBuffer();
+        if (map_it.buffer() != nullptr && map_it.buffer()->size() != 0)
+            map_it.transformBuffer();
 }
 
 void JSONImporterTask::insertData ()
@@ -724,7 +766,7 @@ void JSONImporterTask::insertProgressSlot (float percent)
 
 void JSONImporterTask::insertDoneSlot (DBObject& object)
 {
-    loginf << "JSONImporterTask: insertDoneSlot";
+    logdbg << "JSONImporterTask: insertDoneSlot";
     --insert_active_;
 }
 

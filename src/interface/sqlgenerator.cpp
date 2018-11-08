@@ -156,7 +156,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand (DBObject &
                                      + ds.metaTableName());
 
     const MetaDBTable& meta = schema.metaTable(ds.metaTableName());
-    loginf << "SQLGenerator: getDataSourcesSelectCommand: object " << object.name() << " meta table " << meta.name()
+    logdbg << "SQLGenerator: getDataSourcesSelectCommand: object " << object.name() << " meta table " << meta.name()
            << " key col " << ds.foreignKey() << " name col " << ds.nameColumn();
     if (!meta.hasColumn(ds.foreignKey()))
         throw std::runtime_error ("SQLGenerator: getDataSourcesSelectCommand: meta table has no column "
@@ -661,7 +661,7 @@ std::string SQLGenerator::insertDBUpdateStringBind(std::shared_ptr<Buffer> buffe
 
     ss << ") " << values_ss.str() << ");";
 
-    loginf << "SQLGenerator: insertDBUpdateStringBind: var insert string '" << ss.str() << "'";
+    logdbg << "SQLGenerator: insertDBUpdateStringBind: var insert string '" << ss.str() << "'";
 
     return ss.str();
 }

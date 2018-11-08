@@ -167,7 +167,7 @@ public:
             }
             catch (nlohmann::json::exception& e)
             {
-                logerr  <<  "JsonMapping: parseJSON: json exception " << e.what();
+                logerr  <<  "JsonKey2DBOVariableMapping: setValue: key " << json_key_ << " json exception " << e.what();
                 array_list.setNone(row_cnt);
             }
         }
@@ -192,7 +192,7 @@ public:
             }
             catch (nlohmann::json::exception& e)
             {
-                logerr  <<  "JsonMapping: parseJSON: json exception " << e.what();
+                logerr  <<  "JsonKey2DBOVariableMapping: setValue: key " << json_key_ << " json exception " << e.what();
                 array_list.setNone(row_cnt);
             }
         }

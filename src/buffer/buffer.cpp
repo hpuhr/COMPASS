@@ -338,7 +338,7 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
         else
         {
             assert (properties_.hasProperty(var_it->name()));
-            loginf << "Buffer: transformVariables: var " << var_it->name()
+            logdbg << "Buffer: transformVariables: var " << var_it->name()
                    << " col " << column.name()
                    << " prop dt " << Property::asString(properties_.get(var_it->name()).dataType())
                    << " col dt " << Property::asString(column.propertyType());
@@ -350,7 +350,7 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
 
         if (column.dataFormat() != "") // do format conversion stuff
         {
-            loginf << "Buffer: transformVariables: column " << column.name()
+            logdbg << "Buffer: transformVariables: column " << column.name()
                    << " has to-be-removed format " << column.dataFormat();
 
             switch (data_type)
@@ -509,7 +509,7 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
         // rename to reflect dbo variable
         if (current_var_name != transformed_var_name)
         {
-            loginf << "Buffer: transformVariables: renaming variable " << current_var_name
+            logdbg << "Buffer: transformVariables: renaming variable " << current_var_name
                    << " to variable name " << transformed_var_name;
 
             switch (data_type)

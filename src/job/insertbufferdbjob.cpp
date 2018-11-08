@@ -42,7 +42,7 @@ InsertBufferDBJob::~InsertBufferDBJob()
 
 void InsertBufferDBJob::run ()
 {
-    loginf  << "InsertBufferDBJob: run: start";
+    logdbg  << "InsertBufferDBJob: run: start";
 
     boost::posix_time::ptime loading_start_time_;
     boost::posix_time::ptime loading_stop_time_;
@@ -69,7 +69,7 @@ void InsertBufferDBJob::run ()
         if (index_to > buffer_->size()-1)
             index_to = buffer_->size()-1;
 
-        loginf << "InsertBufferDBJob: run: step " << cnt << " steps " << steps << " from " << index_from
+        logdbg << "InsertBufferDBJob: run: step " << cnt << " steps " << steps << " from " << index_from
                << " to " << index_to;
 
         db_interface_.insertBuffer (table, buffer_, index_from, index_to);

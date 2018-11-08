@@ -911,7 +911,7 @@ void DBObject::databaseContentChangedSlot ()
 {
     if (!current_meta_table_)
     {
-        logwrn << "DBObject: databaseContentChangedSlot: object " << name_ << " has no current meta table";
+        logdbg << "DBObject: databaseContentChangedSlot: object " << name_ << " has no current meta table";
         is_loadable_ = false;
         return;
     }
@@ -924,7 +924,7 @@ void DBObject::databaseContentChangedSlot ()
     if (is_loadable_)
         count_ = ATSDB::instance().interface().count (table_name);
 
-    loginf << "DBObject: " << name_ << " databaseContentChangedSlot: exists in db "
+    logdbg << "DBObject: " << name_ << " databaseContentChangedSlot: exists in db "
            << current_meta_table_->existsInDB() << " count " << count_;
 
     data_sources_.clear();
@@ -934,7 +934,7 @@ void DBObject::databaseContentChangedSlot ()
     if (info_widget_)
         info_widget_->updateSlot();
 
-    loginf << "DBObject: " << name_ << " databaseContentChangedSlot: loadable " << is_loadable_ << " count " << count_;
+    logdbg << "DBObject: " << name_ << " databaseContentChangedSlot: loadable " << is_loadable_ << " count " << count_;
 }
 
 bool DBObject::isLoading ()

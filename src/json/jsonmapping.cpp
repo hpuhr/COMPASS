@@ -324,15 +324,15 @@ bool JsonMapping::parseTargetReport (const nlohmann::json& tr, size_t row_cnt)
                 break;
             }
             default:
-                logerr  <<  "JsonMapping: parseJSON: impossible for property type "
+                logerr  <<  "JsonMapping: parseTargetReport: impossible for property type "
                          << Property::asString(data_type);
-                throw std::runtime_error ("JsonMapping: parseJSON: impossible property type "
+                throw std::runtime_error ("JsonMapping: parseTargetReport: impossible property type "
                                           + Property::asString(data_type));
             }
         }
         else
         {
-            logdbg  <<  "JsonMapping: parseJSON: key " << data_it.jsonKey()<< " not found, setting 0";
+            logdbg  <<  "JsonMapping: parseTargetReport: key " << data_it.jsonKey()<< " not found, setting 0";
 
             data_type = data_it.variable().dataType();
             current_var_name = data_it.variable().name();
@@ -421,9 +421,9 @@ bool JsonMapping::parseTargetReport (const nlohmann::json& tr, size_t row_cnt)
                 break;
             }
             default:
-                logerr  <<  "JsonMapping: parseJSON: set null impossible for property type "
+                logerr  <<  "JsonMapping: parseTargetReport: set null impossible for property type "
                          << Property::asString(data_type);
-                throw std::runtime_error ("JsonMapping: parseJSON: set null impossible property type "
+                throw std::runtime_error ("JsonMapping: parseTargetReport: set null impossible property type "
                                           + Property::asString(data_type));
             }
         }
@@ -440,7 +440,7 @@ void JsonMapping::transformBuffer ()
                    << " has differing dimensions " << data_it.dimension() << " " << data_it.variable().dimension();
         else if (data_it.unit() != data_it.variable().unit()) // do unit conversion stuff
         {
-            loginf << "JsonMapping: transformBuffer: variable " << data_it.variable().name()
+            logdbg << "JsonMapping: transformBuffer: variable " << data_it.variable().name()
                    << " of same dimension has different units " << data_it.unit() << " " << data_it.variable().unit();
 
             const Dimension &dimension = UnitManager::instance().dimension (data_it.variable().dimension());
@@ -450,7 +450,7 @@ void JsonMapping::transformBuffer ()
             std::string current_var_name = data_it.variable().name();
             PropertyDataType data_type = data_it.variable().dataType();
 
-            loginf  << "JsonMapping: transformBuffer: correct unit transformation with factor " << factor;
+            logdbg  << "JsonMapping: transformBuffer: correct unit transformation with factor " << factor;
 
             switch (data_type)
             {
