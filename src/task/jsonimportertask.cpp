@@ -277,7 +277,7 @@ void JSONImporterTask::importFile(const std::string& filename, bool test)
             ++parsed_objects;
             ss.str("");
 
-            if (parsed_objects != 0 && parsed_objects % 10000 == 0)
+            if (parsed_objects != 0 && parsed_objects % 50000 == 0)
             {
                 loginf << "JSONImporterTask: importFile: inserting after " << parsed_objects << " parsed objects";
 
@@ -475,7 +475,7 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
                     my_parse_time += (boost::posix_time::microsec_clock::local_time()
                                       - tmp_time).total_milliseconds();
 
-                    if (parsed_objects != 0 && parsed_objects % 10000 == 0)
+                    if (parsed_objects != 0 && parsed_objects % 50000 == 0)
                     {
                         float num_secs = (boost::posix_time::microsec_clock::local_time()
                                           - entry_start_time).total_milliseconds()/1000.0;
@@ -639,9 +639,9 @@ void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
             mappings_.at(0).addMapping({"target_identification.value_idt", db_object.variable("callsign"), false});
             mappings_.at(0).addMapping({"mode_c_height.value_ft", db_object.variable("alt_baro_ft"), false});
             mappings_.at(0).addMapping({"wgs84_position.value_lat_rad", db_object.variable("pos_lat_deg"), true,
-                                        "Angle", "Radians"});
+                                        "Angle", "Radian"});
             mappings_.at(0).addMapping({"wgs84_position.value_lon_rad", db_object.variable("pos_long_deg"), true,
-                                        "Angle", "Radians"});
+                                        "Angle", "Radian"});
             mappings_.at(0).addMapping({"time_of_report", db_object.variable("tod"), true});
         }
 
@@ -660,10 +660,32 @@ void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
             mappings_.at(1).addMapping({"target_identification.value_idt", db_object.variable("callsign"), false});
             mappings_.at(1).addMapping({"mode_c_height.value_ft", db_object.variable("flight_level_ft"), false});
             mappings_.at(1).addMapping({"wgs84_position.value_lat_rad", db_object.variable("pos_lat_deg"), true,
-                                        "Angle", "Radians"});
+                                        "Angle", "Radian"});
             mappings_.at(1).addMapping({"wgs84_position.value_lon_rad", db_object.variable("pos_long_deg"), true,
-                                        "Angle", "Radians"});
+                                        "Angle", "Radian"});
             mappings_.at(1).addMapping({"detection_time", db_object.variable("tod"), true});
+        }
+
+        {
+            assert (ATSDB::instance().objectManager().existsObject("Radar"));
+            DBObject& db_object = ATSDB::instance().objectManager().object("Radar");
+
+            mappings_.push_back(JsonMapping (db_object));
+            mappings_.at(2).JSONKey("message_type");
+            mappings_.at(2).JSONValue("radar target");
+            mappings_.at(2).overrideKeyVariable(true);
+            mappings_.at(2).dataSourceVariableName("ds_id");
+
+            mappings_.at(2).addMapping({"data_source_identifier.value", db_object.variable("ds_id"), true});
+            mappings_.at(2).addMapping({"aircraft_address", db_object.variable("target_addr"), true});
+            mappings_.at(2).addMapping({"aircraft_identification.value_idt", db_object.variable("callsign"), false});
+            mappings_.at(2).addMapping({"mode_c_height.value_ft",
+                                        db_object.variable("modec_code_ft"), false});
+            mappings_.at(2).addMapping({"measured_azm_rad",
+                                        db_object.variable("pos_azm_deg"), true, "Angle", "Radian"});
+            mappings_.at(2).addMapping({"measured_rng_m",
+                                        db_object.variable("pos_range_nm"), true, "Length", "Meter"});
+            mappings_.at(2).addMapping({"detection_time", db_object.variable("tod"), true});
         }
 
         {
@@ -671,21 +693,21 @@ void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
             DBObject& db_object = ATSDB::instance().objectManager().object("Tracker");
 
             mappings_.push_back(JsonMapping (db_object));
-            mappings_.at(2).JSONKey("message_type");
-            mappings_.at(2).JSONValue("track update");
-            mappings_.at(2).overrideKeyVariable(true);
-            mappings_.at(2).dataSourceVariableName("ds_id");
+            mappings_.at(3).JSONKey("message_type");
+            mappings_.at(3).JSONValue("track update");
+            mappings_.at(3).overrideKeyVariable(true);
+            mappings_.at(3).dataSourceVariableName("ds_id");
 
-            mappings_.at(2).addMapping({"server_sacsic.value", db_object.variable("ds_id"), true});
-            mappings_.at(2).addMapping({"aircraft_address", db_object.variable("target_addr"), true});
-            mappings_.at(2).addMapping({"aircraft_identification.value_idt", db_object.variable("callsign"), false});
-            mappings_.at(2).addMapping({"calculated_track_flight_level.value_feet",
+            mappings_.at(3).addMapping({"server_sacsic.value", db_object.variable("ds_id"), true});
+            mappings_.at(3).addMapping({"aircraft_address", db_object.variable("target_addr"), true});
+            mappings_.at(3).addMapping({"aircraft_identification.value_idt", db_object.variable("callsign"), false});
+            mappings_.at(3).addMapping({"calculated_track_flight_level.value_feet",
                                         db_object.variable("modec_code_ft"), false});
-            mappings_.at(2).addMapping({"calculated_wgs84_position.value_latitude_rad",
-                                        db_object.variable("pos_lat_deg"), true, "Angle", "Radians"});
-            mappings_.at(2).addMapping({"calculated_wgs84_position.value_longitude_rad",
-                                        db_object.variable("pos_long_deg"), true, "Angle", "Radians"});
-            mappings_.at(2).addMapping({"time_of_last_update", db_object.variable("tod"), true});
+            mappings_.at(3).addMapping({"calculated_wgs84_position.value_latitude_rad",
+                                        db_object.variable("pos_lat_deg"), true, "Angle", "Radian"});
+            mappings_.at(3).addMapping({"calculated_wgs84_position.value_longitude_rad",
+                                        db_object.variable("pos_long_deg"), true, "Angle", "Radian"});
+            mappings_.at(3).addMapping({"time_of_last_update", db_object.variable("tod"), true});
         }
     }
 

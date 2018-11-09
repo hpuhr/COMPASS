@@ -114,7 +114,7 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
 
         if (!properties.hasProperty(variable.name()))
         {
-            logerr << "BufferTableModel: data: variable " << variable.name() << " not present in buffer";
+            logdbg << "BufferTableModel: data: variable " << variable.name() << " not present in buffer";
         }
         else
         {
