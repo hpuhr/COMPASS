@@ -42,7 +42,7 @@ public:
         has_sub_keys_ = sub_keys_.size() > 1;
         num_sub_keys_ = sub_keys_.size();
 
-        loginf << "JsonKey2DBOVariableMapping: ctor: key " << json_key_ << " num subkeys " << sub_keys_.size();
+        logdbg << "JsonKey2DBOVariableMapping: ctor: key " << json_key_ << " num subkeys " << sub_keys_.size();
 
     }
 

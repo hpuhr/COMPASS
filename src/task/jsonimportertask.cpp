@@ -401,7 +401,8 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
         //        for (unsigned int cnt=0; cnt < 10; cnt++)
         //            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
-        loginf << "Archive file found: " << archive_entry_pathname(entry) << " size " << archive_entry_size(entry);
+        loginf << "JSONImporterTask: importFileArchive: parsing archive file: "
+               << archive_entry_pathname(entry) << " size " << archive_entry_size(entry);
 
         msg = "Reading archive entry " + std::to_string(entry_cnt) + ": "
                 + std::string(archive_entry_pathname(entry)) + ".\n";
@@ -656,6 +657,7 @@ void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
             mappings_.at(1).dataSourceVariableName("ds_id");
 
             mappings_.at(1).addMapping({"data_source_identifier.value", db_object.variable("ds_id"), true});
+            mappings_.at(1).addMapping({"mode_3a_info.code", db_object.variable("mode3a_code"), false});
             mappings_.at(1).addMapping({"target_address", db_object.variable("target_addr"), true});
             mappings_.at(1).addMapping({"target_identification.value_idt", db_object.variable("callsign"), false});
             mappings_.at(1).addMapping({"mode_c_height.value_ft", db_object.variable("flight_level_ft"), false});
@@ -677,7 +679,8 @@ void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
             mappings_.at(2).dataSourceVariableName("ds_id");
 
             mappings_.at(2).addMapping({"data_source_identifier.value", db_object.variable("ds_id"), true});
-            mappings_.at(2).addMapping({"aircraft_address", db_object.variable("target_addr"), false});
+            mappings_.at(2).addMapping({"mode_3_info.code", db_object.variable("mode3a_code"), false});
+            mappings_.at(2).addMapping({"target_address", db_object.variable("target_addr"), false});
             mappings_.at(2).addMapping({"aircraft_identification.value_idt", db_object.variable("callsign"), false});
             mappings_.at(2).addMapping({"mode_c_height.value_ft",
                                         db_object.variable("modec_code_ft"), false});
@@ -699,6 +702,7 @@ void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
             mappings_.at(3).dataSourceVariableName("ds_id");
 
             mappings_.at(3).addMapping({"server_sacsic.value", db_object.variable("ds_id"), true});
+            mappings_.at(3).addMapping({"mode_3a_info.code", db_object.variable("mode3a_code"), false});
             mappings_.at(3).addMapping({"aircraft_address", db_object.variable("target_addr"), true});
             mappings_.at(3).addMapping({"aircraft_identification.value_idt", db_object.variable("callsign"), false});
             mappings_.at(3).addMapping({"calculated_track_flight_level.value_feet",
