@@ -4714,12 +4714,12 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Measured position in polar coordinates: Theta in ¿¿ [I001/040, I048/040]"/>
                 <ParameterString data_format=""/>
-                <ParameterString dimension=""/>
+                <ParameterString dimension="Angle"/>
                 <ParameterString name="POS_AZM_DEG"/>
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
-                <ParameterString unit=""/>
+                <ParameterString unit="Degree"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_AZM_DEG_CALC">
                 <ParameterBool is_key="0"/>
@@ -4802,12 +4802,12 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Measured position in polar coordinates: Rho in NM [I001/040, I048/040]"/>
                 <ParameterString data_format=""/>
-                <ParameterString dimension=""/>
+                <ParameterString dimension="Length"/>
                 <ParameterString name="POS_RANGE_NM"/>
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
-                <ParameterString unit=""/>
+                <ParameterString unit="Nautical Mile"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_RANGE_NM_CALC">
                 <ParameterBool is_key="0"/>

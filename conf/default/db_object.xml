@@ -8908,10 +8908,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="Radar"/>
             <ParameterString description="Measured position in polar coordinates: Theta in ¿¿ [I001/040, I048/040]"/>
-            <ParameterString dimension=""/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="pos_azm_deg"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarpos_azm_deg0">
                 <ParameterString meta_table="Radar"/>
                 <ParameterString schema="SCDB"/>
@@ -9028,10 +9028,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="Radar"/>
             <ParameterString description="Measured position in polar coordinates: Rho in NM [I001/040, I048/040]"/>
-            <ParameterString dimension=""/>
+            <ParameterString dimension="Length"/>
             <ParameterString name="pos_range_nm"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
+            <ParameterString unit="Nautical Mile"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarpos_range_nm0">
                 <ParameterString meta_table="Radar"/>
                 <ParameterString schema="SCDB"/>

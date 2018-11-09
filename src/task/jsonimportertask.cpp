@@ -677,7 +677,7 @@ void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
             mappings_.at(2).dataSourceVariableName("ds_id");
 
             mappings_.at(2).addMapping({"data_source_identifier.value", db_object.variable("ds_id"), true});
-            mappings_.at(2).addMapping({"aircraft_address", db_object.variable("target_addr"), true});
+            mappings_.at(2).addMapping({"aircraft_address", db_object.variable("target_addr"), false});
             mappings_.at(2).addMapping({"aircraft_identification.value_idt", db_object.variable("callsign"), false});
             mappings_.at(2).addMapping({"mode_c_height.value_ft",
                                         db_object.variable("modec_code_ft"), false});
