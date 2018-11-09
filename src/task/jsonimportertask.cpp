@@ -638,12 +638,13 @@ void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
             mappings_.at(0).addMapping({"data_source_identifier.value", db_object.variable("ds_id"), true});
             mappings_.at(0).addMapping({"target_address", db_object.variable("target_addr"), true});
             mappings_.at(0).addMapping({"target_identification.value_idt", db_object.variable("callsign"), false});
-            mappings_.at(0).addMapping({"mode_c_height.value_ft", db_object.variable("alt_baro_ft"), false});
+            mappings_.at(0).addMapping({"mode_c_height.value_ft", db_object.variable("alt_baro_ft"), false,
+                                        "Height", "Feet"});
             mappings_.at(0).addMapping({"wgs84_position.value_lat_rad", db_object.variable("pos_lat_deg"), true,
                                         "Angle", "Radian"});
             mappings_.at(0).addMapping({"wgs84_position.value_lon_rad", db_object.variable("pos_long_deg"), true,
                                         "Angle", "Radian"});
-            mappings_.at(0).addMapping({"time_of_report", db_object.variable("tod"), true});
+            mappings_.at(0).addMapping({"time_of_report", db_object.variable("tod"), true, "Time", "Second"});
         }
 
         {
@@ -660,12 +661,13 @@ void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
             mappings_.at(1).addMapping({"mode_3a_info.code", db_object.variable("mode3a_code"), false});
             mappings_.at(1).addMapping({"target_address", db_object.variable("target_addr"), true});
             mappings_.at(1).addMapping({"target_identification.value_idt", db_object.variable("callsign"), false});
-            mappings_.at(1).addMapping({"mode_c_height.value_ft", db_object.variable("flight_level_ft"), false});
+            mappings_.at(1).addMapping({"mode_c_height.value_ft", db_object.variable("flight_level_ft"), false,
+                                       "Height", "Feet"});
             mappings_.at(1).addMapping({"wgs84_position.value_lat_rad", db_object.variable("pos_lat_deg"), true,
                                         "Angle", "Radian"});
             mappings_.at(1).addMapping({"wgs84_position.value_lon_rad", db_object.variable("pos_long_deg"), true,
                                         "Angle", "Radian"});
-            mappings_.at(1).addMapping({"detection_time", db_object.variable("tod"), true});
+            mappings_.at(1).addMapping({"detection_time", db_object.variable("tod"), true, "Time", "Second"});
         }
 
         {
@@ -682,13 +684,13 @@ void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
             mappings_.at(2).addMapping({"mode_3_info.code", db_object.variable("mode3a_code"), false});
             mappings_.at(2).addMapping({"target_address", db_object.variable("target_addr"), false});
             mappings_.at(2).addMapping({"aircraft_identification.value_idt", db_object.variable("callsign"), false});
-            mappings_.at(2).addMapping({"mode_c_height.value_ft",
-                                        db_object.variable("modec_code_ft"), false});
-            mappings_.at(2).addMapping({"measured_azm_rad",
-                                        db_object.variable("pos_azm_deg"), true, "Angle", "Radian"});
-            mappings_.at(2).addMapping({"measured_rng_m",
-                                        db_object.variable("pos_range_nm"), true, "Length", "Meter"});
-            mappings_.at(2).addMapping({"detection_time", db_object.variable("tod"), true});
+            mappings_.at(2).addMapping({"mode_c_height.value_ft", db_object.variable("modec_code_ft"), false,
+                                       "Height", "Feet"});
+            mappings_.at(2).addMapping({"measured_azm_rad", db_object.variable("pos_azm_deg"), true,
+                                        "Angle", "Radian"});
+            mappings_.at(2).addMapping({"measured_rng_m", db_object.variable("pos_range_nm"), true,
+                                        "Length", "Meter"});
+            mappings_.at(2).addMapping({"detection_time", db_object.variable("tod"), true, "Time", "Second"});
         }
 
         {
@@ -705,13 +707,13 @@ void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
             mappings_.at(3).addMapping({"mode_3a_info.code", db_object.variable("mode3a_code"), false});
             mappings_.at(3).addMapping({"aircraft_address", db_object.variable("target_addr"), true});
             mappings_.at(3).addMapping({"aircraft_identification.value_idt", db_object.variable("callsign"), false});
-            mappings_.at(3).addMapping({"calculated_track_flight_level.value_feet",
-                                        db_object.variable("modec_code_ft"), false});
+            mappings_.at(3).addMapping({"calculated_track_flight_level.value_feet", db_object.variable("modec_code_ft"),
+                                        false, "Height", "Feet"});
             mappings_.at(3).addMapping({"calculated_wgs84_position.value_latitude_rad",
                                         db_object.variable("pos_lat_deg"), true, "Angle", "Radian"});
             mappings_.at(3).addMapping({"calculated_wgs84_position.value_longitude_rad",
                                         db_object.variable("pos_long_deg"), true, "Angle", "Radian"});
-            mappings_.at(3).addMapping({"time_of_last_update", db_object.variable("tod"), true});
+            mappings_.at(3).addMapping({"time_of_last_update", db_object.variable("tod"), true, "Time", "Second"});
         }
     }
 
