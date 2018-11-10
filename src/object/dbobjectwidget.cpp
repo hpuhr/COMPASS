@@ -70,7 +70,7 @@ DBObjectWidget::DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager
 
     QVBoxLayout *main_layout = new QVBoxLayout ();
 
-    QLabel *main_label = new QLabel ("Edit DB object");
+    QLabel *main_label = new QLabel ("Edit DBObject");
     main_label->setFont (font_big);
     main_layout->addWidget (main_label);
 
@@ -126,7 +126,7 @@ DBObjectWidget::DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager
 
         QVBoxLayout *meta_layout = new QVBoxLayout ();
 
-        QLabel *meta_label = new QLabel ("Meta tables");
+        QLabel *meta_label = new QLabel ("Meta Tables");
         meta_label->setFont (font_big);
         meta_layout->addWidget (meta_label);
 
@@ -152,7 +152,7 @@ DBObjectWidget::DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager
 
         QVBoxLayout *ds_layout = new QVBoxLayout ();
 
-        QLabel *ds_label = new QLabel ("Data sources");
+        QLabel *ds_label = new QLabel ("Data Source Definitions");
         ds_label->setFont (font_big);
         ds_layout->addWidget (ds_label);
 

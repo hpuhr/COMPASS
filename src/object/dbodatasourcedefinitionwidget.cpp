@@ -413,18 +413,13 @@ void DBODataSourceDefinitionWidget::updateAltitudeColumnSlot()
     updateVariableSelectionBox (altitude_box_, schema_name, meta_table_name, definition_.altitudeColumn(), true);
 }
 
-void DBODataSourceDefinitionWidget::updateVariableSelectionBox (QComboBox* box, const std::string& schema_name, const std::string& meta_table_name, const std::string& value,
+void DBODataSourceDefinitionWidget::updateVariableSelectionBox (QComboBox* box, const std::string& schema_name,
+                                                                const std::string& meta_table_name,
+                                                                const std::string& value,
                                                                 bool empty_allowed)
 {
     logdbg  << "DBODataSourceDefinitionWidget: updateVariableSelectionBox: value " << value;
     assert (box);
-
-    std::string selection;
-
-    if (box->count() > 0)
-        selection = box->currentText().toStdString();
-    else
-        selection = value;
 
     while (box->count() > 0)
         box->removeItem (0);
@@ -437,30 +432,12 @@ void DBODataSourceDefinitionWidget::updateVariableSelectionBox (QComboBox* box, 
 
     auto table_columns =  meta_table.columns();
 
-    int index_cnt=-1;
-    unsigned int cnt=0;
-
     if (empty_allowed)
-    {
         box->addItem ("");
-        if (selection == "")
-            index_cnt = 0;
-    }
 
     for (auto it = table_columns.begin(); it != table_columns.end(); it++)
-    {
-        if (selection.size()>0 && selection == it->first)
-            index_cnt=cnt;
-
         box->addItem (it->first.c_str());
 
-        cnt++;
-    }
+    box->setCurrentText(value.c_str());
 
-    if (index_cnt == -1)
-    {
-        logwrn << "DBODataSourceDefinitionWidget: updateVariableSelectionBox: selection '" << selection << "' not found, setting to first value";
-        index_cnt=0;
-    }
-    box->setCurrentIndex (index_cnt);
 }

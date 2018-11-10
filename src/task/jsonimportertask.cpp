@@ -389,13 +389,6 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
 
     unsigned int entry_cnt = 0;
 
-    //    size_t archive_read_time = 0;
-    //    size_t archive_parse_time = 0;
-    //    size_t json_parse_time = 0;
-    //    size_t wait_time = 0;
-    //    size_t insert_time = 0;
-
-
     while (archive_read_next_header(a, &entry) == ARCHIVE_OK)
     {
         //        for (unsigned int cnt=0; cnt < 10; cnt++)
@@ -416,19 +409,19 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
         msg_box.setInformativeText(msg.c_str());
         msg_box.show();
 
-        for (unsigned int cnt=0; cnt < 10; ++cnt)
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+//        for (unsigned int cnt=0; cnt < 50; ++cnt)
+//            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
-        //ss.str("");
         unsigned int open_count {0};
         unsigned int parsed_objects {0};
         boost::posix_time::ptime entry_start_time = boost::posix_time::microsec_clock::local_time();
 
         boost::posix_time::ptime tmp_time = boost::posix_time::microsec_clock::local_time();
 
-        unsigned int read_time = 0;
-        unsigned int nloh_parse_time = 0;
-        unsigned int my_parse_time = 0;
+        double read_time = 0;
+        double nloh_parse_time = 0;
+        double my_parse_time = 0;
+        double insert_time = 0;
 
         for (;;)
         {
@@ -455,17 +448,14 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
 
                 if (open_count == 0)
                 {
-                    //loginf << "got part '" << ss.str() << "'";
-
                     read_time += (boost::posix_time::microsec_clock::local_time()
-                                 - tmp_time).total_milliseconds();
-
+                                 - tmp_time).total_nanoseconds();
                     tmp_time = boost::posix_time::microsec_clock::local_time();
 
                     json j = json::parse(ss.str());
 
                     nloh_parse_time += (boost::posix_time::microsec_clock::local_time()
-                                 - tmp_time).total_milliseconds();
+                                 - tmp_time).total_nanoseconds();
                     tmp_time = boost::posix_time::microsec_clock::local_time();
 
                     parseJSON (j, test);
@@ -474,19 +464,29 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
                     ss.str("");
 
                     my_parse_time += (boost::posix_time::microsec_clock::local_time()
-                                      - tmp_time).total_milliseconds();
+                                      - tmp_time).total_nanoseconds();
+                    tmp_time = boost::posix_time::microsec_clock::local_time();
 
                     if (parsed_objects != 0 && parsed_objects % 50000 == 0)
                     {
                         float num_secs = (boost::posix_time::microsec_clock::local_time()
                                           - entry_start_time).total_milliseconds()/1000.0;
 
-                        loginf << "JSONImporterTask: importFile: inserting importFileArchive "
-                               << parsed_objects << " parsed objects, "
-                               << String::doubleToStringPrecision(parsed_objects/num_secs,2) << " e/s "
-                               << " read " << read_time/1000.0
-                               << " nloh parse " << nloh_parse_time/1000.0
-                               << " my parse " << my_parse_time/1000.0;
+                        std::string info_str = "in " + std::to_string(num_secs) + "s " +
+                                std::to_string(parsed_objects) + " parsed objects, "
+                                + String::doubleToStringPrecision(parsed_objects/num_secs,2) + " e/s"
+                                + " read time "
+                                + String::doubleToStringPrecision(read_time*1e-9,2) + "s"
+                                + " json parse time "
+                                + String::doubleToStringPrecision(nloh_parse_time*1e-9,2) + "s"
+                                + " mapping time "
+                                + String::doubleToStringPrecision(my_parse_time*1e-9,2) + "s"
+                                + " insert time "
+                                + String::doubleToStringPrecision(insert_time*1e-9,2) + "s";
+
+                        loginf << "JSONImporterTask: importFileArchive: " << info_str;
+
+                        msg_box.setInformativeText(info_str.c_str());
 
                         if (!test)
                         {
@@ -500,34 +500,12 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
                         }
                     }
 
+                    insert_time += (boost::posix_time::microsec_clock::local_time()
+                                      - tmp_time).total_nanoseconds();
                     tmp_time = boost::posix_time::microsec_clock::local_time();
-
-                    //loginf << "UGA2 cleared";
                 }
             }
         }
-
-        //        archive_read_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
-        //        tmp_time = boost::posix_time::microsec_clock::local_time();
-
-        loginf  << "JSONImporterTask: importFileArchive: parsed entry: read " << read_time/1000.0
-                << " nloh parse " << nloh_parse_time/1000.0
-                << " my parse " << my_parse_time/1000.0;
-
-        //        try
-        //        {
-        //            json j = json::parse(ss.str());
-
-        //            archive_parse_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
-        //            tmp_time = boost::posix_time::microsec_clock::local_time();
-
-        //            parseJSON (j, test);
-
-        //            json_parse_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
-        //            tmp_time = boost::posix_time::microsec_clock::local_time();
-
-        //            wait_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
-        //            tmp_time = boost::posix_time::microsec_clock::local_time();
 
         float num_secs = (boost::posix_time::microsec_clock::local_time()
                           - entry_start_time).total_milliseconds()/1000.0;
@@ -546,22 +524,7 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
             clearData();
         }
 
-        //            insert_time += (boost::posix_time::microsec_clock::local_time() - tmp_time).total_milliseconds();
-
-        //            loginf << "JSONImporterTask: importFileArchive: time: archive_read_time " << archive_read_time/1000.0
-        //                   << " archive_parse_time " << archive_parse_time/1000.0
-        //                   << " json_parse_time " << json_parse_time/1000.0
-        //                   << " wait_time " << wait_time/1000.0
-        //                   << " insert_time " << insert_time/1000.0;
-
         entry_cnt++;
-        //        }
-        //        catch (std::exception e)
-        //        {
-        //            logerr << "JSONImporterTask: importFileArchive: json parsing error: " << e.what()
-        //                   << ", skipping entry ";
-        //            continue;
-        //        }
     }
 
     r = archive_read_close(a);
