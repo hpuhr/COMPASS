@@ -646,14 +646,12 @@ std::string DBOVariable::getValueStringFromRepresentation (const std::string& re
         assert (db_object_);
         if (db_object_->hasDataSources())
         {
-            std::map<int, DBODataSource>& data_sources = db_object_->dataSources();
-
-            for (auto& ds_it : data_sources)
+            for (auto ds_it = db_object_->dsBegin(); ds_it != db_object_->dsEnd(); ++ds_it)
             {
-                if ((ds_it.second.hasShortName() && representation_str == ds_it.second.shortName())
-                        || representation_str == ds_it.second.name())
+                if ((ds_it->second.hasShortName() && representation_str == ds_it->second.shortName())
+                        || representation_str == ds_it->second.name())
                 {
-                    return std::to_string (ds_it.first);
+                    return std::to_string (ds_it->first);
                 }
             }
             // not found, return original
@@ -905,16 +903,14 @@ std::string DBOVariable::getDataSourcesAsString (const std::string& value) const
     assert (db_object_);
     if (db_object_->hasDataSources())
     {
-        std::map<int, DBODataSource>& data_sources = db_object_->dataSources();
-
-        for (auto& ds_it : data_sources)
+        for (auto ds_it = db_object_->dsBegin(); ds_it != db_object_->dsEnd(); ++ds_it)
         {
-            if (std::to_string(ds_it.first) == value)
+            if (std::to_string(ds_it->first) == value)
             {
-                if (ds_it.second.hasShortName())
-                    return ds_it.second.shortName();
+                if (ds_it->second.hasShortName())
+                    return ds_it->second.shortName();
                 else
-                    return ds_it.second.name();
+                    return ds_it->second.name();
             }
         }
         // not found, return original

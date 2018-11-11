@@ -154,18 +154,6 @@ public:
     DBOVariableIterator begin() { return variables_.begin(); }
     DBOVariableIterator end() { return variables_.end(); }
 
-    using StoredDataSourceIterator = typename std::map<std::string, StoredDBODataSource>::iterator;
-    StoredDataSourceIterator storedDSBegin() { return stored_data_sources_.begin(); }
-    StoredDataSourceIterator storedDSEnd() { return stored_data_sources_.end(); }
-
-    /// @brief Returns flag indication if a StoredDBODataSource identified by name exists
-    bool hasStoredDataSource (const std::string& name) const;
-    /// @brief Returns variable identified by id
-    StoredDBODataSource& storedDataSource (const std::string& name);
-    void renameStoredDataSource (const std::string& name, const std::string& new_name);
-    /// @brief Deletes a variable identified by id
-    void deleteStoredDataSource (const std::string& name);
-
     /// @brief Returns number of existing variables
     size_t numVariables () const { return variables_.size(); }
 
@@ -234,14 +222,31 @@ public:
     bool hasKeyVariable ();
     DBOVariable& getKeyVariable();
 
+    using StoredDataSourceIterator = typename std::map<std::string, StoredDBODataSource>::iterator;
+    StoredDataSourceIterator storedDSBegin() { return stored_data_sources_.begin(); }
+    StoredDataSourceIterator storedDSEnd() { return stored_data_sources_.end(); }
+
+    /// @brief Returns flag indication if a StoredDBODataSource identified by name exists
+    bool hasStoredDataSource (const std::string& name) const;
+    /// @brief Returns variable identified by id
+    StoredDBODataSource& storedDataSource (const std::string& name);
+    void renameStoredDataSource (const std::string& name, const std::string& new_name);
+    /// @brief Deletes a variable identified by id
+    void deleteStoredDataSource (const std::string& name);
+
+
+    using DataSourceIterator = typename std::map<int, DBODataSource>::iterator;
+    DataSourceIterator dsBegin() { return data_sources_.begin(); }
+    DataSourceIterator dsEnd() { return data_sources_.end(); }
+
     ///@brief Returns flag if data sources are defined for DBO type.
     bool hasDataSources () { return data_sources_.size() > 0; }
     void addDataSource (int key_value, const std::string& name); // needs postprocessing after
     void addDataSources (std::map <int, std::string>& sources);
-    ///@brief Returns container with all defined data source for DBO type.
-    std::map<int, DBODataSource>& dataSources () { return data_sources_; }
+    bool hasDataSource (int id);
+    DBODataSource& getDataSource (int id);
     ///@brief Returns data source name for a DBO type and data source number.
-    const std::string& getNameOfSensor (int num);
+    const std::string& getNameOfSensor (int id);
 
     /// @brief Return if active data sources info is available
     bool hasActiveDataSourcesInfo ();
@@ -291,7 +296,7 @@ protected:
     std::map <std::string, DBOSchemaMetaTableDefinition> meta_table_definitions_;
 
     /// Container with data source definitions (schema identifier -> data source definition pointer)
-    std::map <std::string, DBODataSourceDefinition> data_source_definitions_;
+    std::map<std::string, DBODataSourceDefinition> data_source_definitions_;
     std::map<std::string, StoredDBODataSource> stored_data_sources_;
     std::map<int, DBODataSource> data_sources_;
     /// Container with all variables (variable identifier -> variable pointer)

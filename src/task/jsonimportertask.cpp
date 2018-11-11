@@ -726,9 +726,10 @@ void JSONImporterTask::insertData ()
 
                 std::string data_source_var_name = map_it.dataSourceVariableName();
 
-                std::map <int, DBODataSource> datasources_existing;
+                std::set <int> datasources_existing;
                 if (db_object.hasDataSources())
-                    datasources_existing = db_object.dataSources();
+                    for (auto ds_it = db_object.dsBegin(); ds_it != db_object.dsEnd(); ++ds_it)
+                        datasources_existing.insert(ds_it->first);
 
                 std::map <int, std::string> datasources_to_add;
 

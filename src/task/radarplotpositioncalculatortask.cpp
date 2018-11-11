@@ -432,9 +432,8 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
 
     assert (use_ogr_proj || use_sdl_proj || use_rs2g_proj);
 
-    std::map<int, DBODataSource>& data_sources = db_object_->dataSources();
-    for (auto& ds_it : data_sources)
-        assert (ds_it.second.isFinalized()); // has to be done before
+    for (auto ds_it = db_object_->dsBegin(); ds_it != db_object_->dsEnd(); ++ds_it)
+        assert (ds_it->second.isFinalized()); // has to be done before
 
     std::shared_ptr<Buffer> read_buffer = db_object_->data();
     unsigned int read_size = read_buffer->size();
@@ -465,7 +464,7 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
     bool has_altitude;
     //double altitude_angle;
 
-    assert (data_sources.size());
+    assert (db_object_->hasDataSources());
 
     //    std::pair<unsigned char, unsigned char> sac_sic_key;
     double sys_x, sys_y;
@@ -528,11 +527,13 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
         else
             altitude_ft = 0.0; // has to assumed in projection later on
 
-        if (data_sources.find(sensor_id) == data_sources.end())
+        if (!db_object_->hasDataSource(sensor_id))
         {
             logerr << "RadarPlotPositionCalculatorTask: loadingDoneSlot: sensor id " << sensor_id << " unkown";
             continue;
         }
+
+        DBODataSource& data_source = db_object_->getDataSource(sensor_id);
 
         pos_azm_rad = pos_azm_deg * DEG2RAD;
 
@@ -542,8 +543,8 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
 
         if (use_ogr_proj)
         {
-            ret = data_sources.at(sensor_id).calculateOGRSystemCoordinates(pos_azm_rad, pos_range_m, has_altitude,
-                                                                           altitude_ft, sys_x, sys_y);
+            ret = data_source.calculateOGRSystemCoordinates(pos_azm_rad, pos_range_m, has_altitude, altitude_ft,
+                                                            sys_x, sys_y);
             if (ret)
                 ret = proj_man.ogrCart2Geo(sys_x, sys_y, lat, lon);
         }
@@ -552,8 +553,7 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
         {
             t_CPos grs_pos;
 
-            ret = data_sources.at(sensor_id).calculateSDLGRSCoordinates(pos_azm_rad, pos_range_m, has_altitude,
-                                                                        altitude_ft, grs_pos);
+            ret = data_source.calculateSDLGRSCoordinates(pos_azm_rad, pos_range_m, has_altitude, altitude_ft, grs_pos);
             if (ret)
             {
                 t_GPos geo_pos;
@@ -584,7 +584,7 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
 
             logdbg << "local x " << x1 << " y " << y1 << " z " << z1;
 
-            ret = data_sources.at(sensor_id).calculateRadSlt2Geocentric(x1, y1, z1, pos);
+            ret = data_source.calculateRadSlt2Geocentric(x1, y1, z1, pos);
             if (ret)
             {
                 logdbg << "geoc x " << pos[0] << " y " << pos[1] << " z " << pos[2];

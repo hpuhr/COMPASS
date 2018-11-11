@@ -169,17 +169,17 @@ void DataSourcesFilter::updateDataSources ()
         return;
     }
 
-    for (auto src_it : object_->dataSources())
+    for (auto ds_it = object_->dsBegin(); ds_it != object_->dsEnd(); ++ds_it)
     {
-        if (data_sources_.find(src_it.first) == data_sources_.end())
+        if (data_sources_.find(ds_it->first) == data_sources_.end())
         {
-            data_sources_[src_it.first].setNumber(src_it.first);
-            data_sources_[src_it.first].setName(src_it.second.name());
-            data_sources_[src_it.first].setActiveInFilter(true);
-            data_sources_[src_it.first].setActiveInData(true);
+            data_sources_[ds_it->first].setNumber(ds_it->first);
+            data_sources_[ds_it->first].setName(ds_it->second.name());
+            data_sources_[ds_it->first].setActiveInFilter(true);
+            data_sources_[ds_it->first].setActiveInData(true);
 
-            registerParameter ("LoadSensorNumber"+std::to_string(src_it.first),
-                               &data_sources_[src_it.first].getActiveInFilterReference(), true);
+            registerParameter ("LoadSensorNumber"+std::to_string(ds_it->first),
+                               &data_sources_[ds_it->first].getActiveInFilterReference(), true);
         }
     }
 }

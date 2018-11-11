@@ -530,11 +530,22 @@ void DBObject::addDataSources (std::map <int, std::string>& sources)
     emit db_interface.databaseContentChangedSignal();
 }
 
-const std::string& DBObject::getNameOfSensor (int num)
+bool DBObject::hasDataSource (int id)
 {
-    assert (data_sources_.count(num) > 0);
+    return data_sources_.count(id) > 0;
+}
 
-    return data_sources_.at(num).name();
+DBODataSource& DBObject::getDataSource (int id)
+{
+    assert (hasDataSource (id));
+    return data_sources_.at(id);
+}
+
+const std::string& DBObject::getNameOfSensor (int id)
+{
+    assert (hasDataSource (id));
+
+    return data_sources_.at(id).name();
 }
 
 bool DBObject::hasActiveDataSourcesInfo ()
