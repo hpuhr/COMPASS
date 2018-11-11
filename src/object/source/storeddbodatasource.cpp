@@ -18,11 +18,6 @@ StoredDBODataSource::StoredDBODataSource(const std::string& class_id, const std:
 
 StoredDBODataSource::~StoredDBODataSource ()
 {
-    if (widget_)
-    {
-        delete widget_;
-        widget_ = nullptr;
-    }
 }
 
 StoredDBODataSource& StoredDBODataSource::operator=(StoredDBODataSource&& other)
@@ -55,10 +50,10 @@ StoredDBODataSource& StoredDBODataSource::operator=(StoredDBODataSource&& other)
     altitude_ = other.altitude_;
     other.altitude_ = 0;
 
-//    widget_ = other.widget_;
-//    if (widget_)
-//        widget_->setVariable(*this);
-//    other.widget_ = nullptr;
+    widget_ = std::move(other.widget_);
+    if (widget_)
+        widget_->setDataSource(*this);
+    //other.widget_ = nullptr;
 
     other.configuration().updateParameterPointer ("id", &id_);
     other.configuration().updateParameterPointer ("name", &name_);
@@ -158,8 +153,8 @@ StoredDBODataSourceWidget* StoredDBODataSource::widget ()
 {
     if (!widget_)
     {
-        widget_ = new StoredDBODataSourceWidget (*this);
+        widget_.reset (new StoredDBODataSourceWidget (*this));
         assert (widget_);
     }
-    return widget_;
+    return widget_.get();
 }

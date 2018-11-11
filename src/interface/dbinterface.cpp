@@ -472,7 +472,11 @@ std::map <int, DBODataSource> DBInterface::getDataSources (DBObject &object)
 
         assert (sources.count(key) == 0);
         logdbg << "DBInterface: getDataSources: object " << object.name() << " key " << key << " name " << name;
-        sources.insert(std::pair<int, DBODataSource>(key, DBODataSource(key, name)));
+        //sources.insert(std::make_pair(key, DBODataSource(key, name)));
+
+        sources.emplace(std::piecewise_construct,
+                     std::forward_as_tuple(key),  // args for key
+                     std::forward_as_tuple(key, name));  // args for mapped value
 
         if (has_short_name && !buffer->get<std::string>(short_name_col_name).isNone(cnt))
             sources.at(key).shortName(buffer->get<std::string>(short_name_col_name).get(cnt));

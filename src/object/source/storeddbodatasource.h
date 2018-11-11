@@ -4,6 +4,7 @@
 #include "configurable.h"
 
 #include <string>
+#include <memory>
 
 class DBObject;
 class StoredDBODataSourceWidget;
@@ -56,7 +57,7 @@ private:
     double longitude_ {0}; // degrees
     double altitude_ {0};  // meter above msl
 
-    StoredDBODataSourceWidget* widget_ {nullptr};
+    std::unique_ptr<StoredDBODataSourceWidget> widget_;
 
 protected:
     virtual void checkSubConfigurables () {}

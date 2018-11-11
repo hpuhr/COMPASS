@@ -6,7 +6,7 @@
 #include <QLineEdit>
 
 DBODataSourceWidget::DBODataSourceWidget(DBODataSource& data_source, QWidget* parent, Qt::WindowFlags f)
-    : QWidget (parent, f), data_source_(data_source)
+    : QWidget (parent, f), data_source_(&data_source)
 {
     QHBoxLayout* main_layout = new QHBoxLayout ();
 
@@ -47,6 +47,12 @@ DBODataSourceWidget::DBODataSourceWidget(DBODataSource& data_source, QWidget* pa
     setLayout(main_layout);
 }
 
+void DBODataSourceWidget::setDataSource (DBODataSource& data_source)
+{
+    data_source_ = &data_source;
+    update();
+}
+
 void DBODataSourceWidget::update ()
 {
     updateIdSlot();
@@ -70,15 +76,15 @@ void DBODataSourceWidget::changedIdSlot ()
         updateIdSlot();
     }
     else
-        data_source_.id(id);
+        data_source_->id(id);
 }
 void DBODataSourceWidget::changedShortNameColumnSlot ()
 {
-    data_source_.shortName(short_name_edit_->text().toStdString());
+    data_source_->shortName(short_name_edit_->text().toStdString());
 }
 void DBODataSourceWidget::changedNameColumnSlot ()
 {
-    data_source_.name(name_edit_->text().toStdString());
+    data_source_->name(name_edit_->text().toStdString());
 
 }
 void DBODataSourceWidget::changedSacColumnSlot ()
@@ -92,7 +98,7 @@ void DBODataSourceWidget::changedSacColumnSlot ()
         updateSacColumnSlot();
     }
     else
-        data_source_.sac(sac);
+        data_source_->sac(sac);
 }
 void DBODataSourceWidget::changedSicColumnSlot ()
 {
@@ -105,7 +111,7 @@ void DBODataSourceWidget::changedSicColumnSlot ()
         updateSicColumnSlot();
     }
     else
-        data_source_.sic(sic);
+        data_source_->sic(sic);
 }
 void DBODataSourceWidget::changedLatitudeColumnSlot ()
 {
@@ -118,7 +124,7 @@ void DBODataSourceWidget::changedLatitudeColumnSlot ()
         updateLatitudeColumnSlot();
     }
     else
-        data_source_.latitude(value);
+        data_source_->latitude(value);
 }
 void DBODataSourceWidget::changedLongitudeColumnSlot ()
 {
@@ -131,7 +137,7 @@ void DBODataSourceWidget::changedLongitudeColumnSlot ()
         updateLongitudeColumnSlot();
     }
     else
-        data_source_.longitude(value);
+        data_source_->longitude(value);
 }
 void DBODataSourceWidget::changedAltitudeColumnSlot ()
 {
@@ -144,46 +150,46 @@ void DBODataSourceWidget::changedAltitudeColumnSlot ()
         updateAltitudeColumnSlot();
     }
     else
-        data_source_.altitude(value);
+        data_source_->altitude(value);
 }
 
 void DBODataSourceWidget::updateIdSlot()
 {
     assert (id_edit_);
-    id_edit_->setText({data_source_.id()});
+    id_edit_->setText({data_source_->id()});
 }
 void DBODataSourceWidget::updateShortNameColumnSlot ()
 {
     assert (short_name_edit_);
-    short_name_edit_->setText(data_source_.shortName().c_str());
+    short_name_edit_->setText(data_source_->shortName().c_str());
 }
 void DBODataSourceWidget::updateNameColumnSlot ()
 {
     assert (name_edit_);
-    name_edit_->setText(data_source_.name().c_str());
+    name_edit_->setText(data_source_->name().c_str());
 }
 void DBODataSourceWidget::updateSacColumnSlot ()
 {
     assert (sac_edit_);
-    sac_edit_->setText({data_source_.sac()});
+    sac_edit_->setText({data_source_->sac()});
 }
 void DBODataSourceWidget::updateSicColumnSlot ()
 {
     assert (sic_edit_);
-    sic_edit_->setText(data_source_.shortName().c_str());
+    sic_edit_->setText(data_source_->shortName().c_str());
 }
 void DBODataSourceWidget::updateLatitudeColumnSlot ()
 {
     assert (latitude_edit_);
-    latitude_edit_->setText(data_source_.shortName().c_str());
+    latitude_edit_->setText(data_source_->shortName().c_str());
 }
 void DBODataSourceWidget::updateLongitudeColumnSlot ()
 {
     assert (longitude_edit_);
-    longitude_edit_->setText(data_source_.shortName().c_str());
+    longitude_edit_->setText(data_source_->shortName().c_str());
 }
 void DBODataSourceWidget::updateAltitudeColumnSlot ()
 {
     assert (altitude_edit_);
-    altitude_edit_->setText(data_source_.shortName().c_str());
+    altitude_edit_->setText(data_source_->shortName().c_str());
 }

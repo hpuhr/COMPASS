@@ -41,6 +41,8 @@
 #include "dbolabeldefinitionwidget.h"
 #include "insertbufferdbjob.h"
 #include "updatebufferdbjob.h"
+#include "dboeditdatasourceswidget.h"
+#include "storeddbodatasourcewidget.h"
 
 /**
  * Registers parameters, creates sub configurables
@@ -213,6 +215,7 @@ void DBObject::renameStoredDataSource (const std::string& name, const std::strin
     assert (!hasStoredDataSource (new_name));
 
     stored_data_sources_[new_name] = std::move(stored_data_sources_.at(name));
+
     stored_data_sources_.erase(name);
 
     assert (hasStoredDataSource (new_name));
@@ -608,6 +611,16 @@ DBOLabelDefinitionWidget* DBObject::labelDefinitionWidget()
 {
     assert (label_definition_);
     return label_definition_->widget();
+}
+
+DBOEditDataSourcesWidget* DBObject::editDataSourcesWidget()
+{
+    if (!edit_ds_widget_)
+    {
+        edit_ds_widget_.reset(new DBOEditDataSourcesWidget (this));
+    }
+
+    return edit_ds_widget_.get();
 }
 
 void DBObject::lock ()

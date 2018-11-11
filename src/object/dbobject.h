@@ -65,6 +65,7 @@ protected:
 
 class DBObjectWidget;
 class DBObjectInfoWidget;
+class DBOEditDataSourcesWidget;
 class Buffer;
 class Job;
 class DBOReadDBJob;
@@ -259,6 +260,7 @@ public:
     DBObjectWidget* widget ();
     DBObjectInfoWidget* infoWidget ();
     DBOLabelDefinitionWidget* labelDefinitionWidget();
+    DBOEditDataSourcesWidget* editDataSourcesWidget();
 
     std::shared_ptr<Buffer> data () { return data_; }
 
@@ -307,6 +309,7 @@ protected:
 
     std::unique_ptr<DBObjectWidget> widget_;
     std::unique_ptr<DBObjectInfoWidget> info_widget_;
+    std::unique_ptr<DBOEditDataSourcesWidget> edit_ds_widget_;
 
     virtual void checkSubConfigurables ();
 

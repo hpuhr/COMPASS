@@ -36,10 +36,12 @@ public:
     StoredDBODataSourceWidget(StoredDBODataSource& data_source, QWidget* parent=0, Qt::WindowFlags f=0);
     virtual ~StoredDBODataSourceWidget() {}
 
+    void setDataSource (StoredDBODataSource& data_source);
+
     void update ();
 
 private:
-    StoredDBODataSource& data_source_;
+    StoredDBODataSource* data_source_;
 
     QLineEdit* id_edit_{nullptr};
     QLineEdit* short_name_edit_{nullptr};

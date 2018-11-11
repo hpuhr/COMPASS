@@ -18,6 +18,8 @@
 #ifndef DBODATASOURCE_H
 #define DBODATASOURCE_H
 
+#include <memory>
+
 #include "rs2g.h"
 #include "geomap.h"
 
@@ -28,6 +30,8 @@ class DBODataSource
 {
 public:
     DBODataSource(unsigned int id, const std::string& name);
+    DBODataSource() = default;
+    DBODataSource& operator=(DBODataSource&& other);
     virtual ~DBODataSource();
 
     unsigned int id() const;
@@ -98,7 +102,7 @@ protected:
     bool has_altitude_ {false};
     double altitude_ {0};  // meter above msl
 
-    DBODataSourceWidget* widget_ {nullptr};
+    std::unique_ptr<DBODataSourceWidget> widget_;
 
     bool finalized_ {false};
 

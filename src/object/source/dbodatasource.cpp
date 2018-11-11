@@ -28,15 +28,45 @@
 DBODataSource::DBODataSource(unsigned int id, const std::string& name)
     : id_(id), name_(name)
 {
+
+}
+
+DBODataSource& DBODataSource::operator=(DBODataSource&& other)
+{
+    loginf << "DBODataSource: move operator: moving";
+
+    id_ = other.id_;
+
+    name_ = other.name_;
+    other.name_ = "";
+
+    short_name_ = other.short_name_;
+    other.short_name_ = "";
+
+    sac_ = other.sac_;
+    other.sac_ = 0;
+
+    sic_ = other.sic_;
+    other.sic_ = 0;
+
+    latitude_ = other.latitude_;
+    other.latitude_ = 0.0;
+
+    longitude_ = other.longitude_;
+    other.longitude_ = 0.0;
+
+    altitude_ = other.altitude_;
+    other.altitude_ = 0;
+
+    widget_ = std::move(other.widget_);
+    if (widget_)
+        widget_->setDataSource(*this);
+
+    return *this; //static_cast<DBODataSource&>(Configurable::operator=(std::move(other)));
 }
 
 DBODataSource::~DBODataSource()
 {
-    if (widget_)
-    {
-        delete widget_;
-        widget_ = nullptr;
-    }
 }
 
 void DBODataSource::finalize ()
@@ -618,8 +648,8 @@ DBODataSourceWidget* DBODataSource::widget ()
 {
     if (!widget_)
     {
-        widget_ = new DBODataSourceWidget (*this);
+        widget_.reset(new DBODataSourceWidget (*this));
         assert (widget_);
     }
-    return widget_;
+    return widget_.get();
 }

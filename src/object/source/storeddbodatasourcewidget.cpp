@@ -8,7 +8,7 @@
 
 StoredDBODataSourceWidget::StoredDBODataSourceWidget(StoredDBODataSource& data_source, QWidget* parent,
                                                      Qt::WindowFlags f)
-    : QWidget (parent, f), data_source_(data_source)
+    : QWidget (parent, f), data_source_(&data_source)
 {
     QHBoxLayout* main_layout = new QHBoxLayout ();
 
@@ -49,6 +49,13 @@ StoredDBODataSourceWidget::StoredDBODataSourceWidget(StoredDBODataSource& data_s
     setLayout(main_layout);
 }
 
+void StoredDBODataSourceWidget::setDataSource (StoredDBODataSource& data_source)
+{
+    data_source_ = &data_source;
+
+    update();
+}
+
 void StoredDBODataSourceWidget::update ()
 {
     updateIdSlot();
@@ -72,16 +79,16 @@ void StoredDBODataSourceWidget::changedIdSlot ()
         updateIdSlot();
     }
     else
-        data_source_.id(id);
+        data_source_->id(id);
 }
 
 void StoredDBODataSourceWidget::changedShortNameColumnSlot ()
 {
-    data_source_.shortName(short_name_edit_->text().toStdString());
+    data_source_->shortName(short_name_edit_->text().toStdString());
 }
 void StoredDBODataSourceWidget::changedNameColumnSlot ()
 {
-    data_source_.name(name_edit_->text().toStdString());
+    data_source_->name(name_edit_->text().toStdString());
 
 }
 void StoredDBODataSourceWidget::changedSacColumnSlot ()
@@ -95,7 +102,7 @@ void StoredDBODataSourceWidget::changedSacColumnSlot ()
         updateSacColumnSlot();
     }
     else
-        data_source_.sac(sac);
+        data_source_->sac(sac);
 }
 void StoredDBODataSourceWidget::changedSicColumnSlot ()
 {
@@ -108,7 +115,7 @@ void StoredDBODataSourceWidget::changedSicColumnSlot ()
         updateSicColumnSlot();
     }
     else
-        data_source_.sic(sic);
+        data_source_->sic(sic);
 }
 void StoredDBODataSourceWidget::changedLatitudeColumnSlot ()
 {
@@ -121,7 +128,7 @@ void StoredDBODataSourceWidget::changedLatitudeColumnSlot ()
         updateLatitudeColumnSlot();
     }
     else
-        data_source_.latitude(value);
+        data_source_->latitude(value);
 }
 void StoredDBODataSourceWidget::changedLongitudeColumnSlot ()
 {
@@ -134,7 +141,7 @@ void StoredDBODataSourceWidget::changedLongitudeColumnSlot ()
         updateLongitudeColumnSlot();
     }
     else
-        data_source_.longitude(value);
+        data_source_->longitude(value);
 }
 void StoredDBODataSourceWidget::changedAltitudeColumnSlot ()
 {
@@ -147,47 +154,47 @@ void StoredDBODataSourceWidget::changedAltitudeColumnSlot ()
         updateAltitudeColumnSlot();
     }
     else
-        data_source_.altitude(value);
+        data_source_->altitude(value);
 }
 
 void StoredDBODataSourceWidget::updateIdSlot()
 {
     assert (id_edit_);
-    id_edit_->setText({data_source_.id()});
+    id_edit_->setText({data_source_->id()});
 }
 void StoredDBODataSourceWidget::updateShortNameColumnSlot ()
 {
     assert (short_name_edit_);
-    short_name_edit_->setText(data_source_.shortName().c_str());
+    short_name_edit_->setText(data_source_->shortName().c_str());
 }
 void StoredDBODataSourceWidget::updateNameColumnSlot ()
 {
     assert (name_edit_);
-    name_edit_->setText(data_source_.name().c_str());
+    name_edit_->setText(data_source_->name().c_str());
 }
 void StoredDBODataSourceWidget::updateSacColumnSlot ()
 {
     assert (sac_edit_);
-    sac_edit_->setText({data_source_.sac()});
+    sac_edit_->setText({data_source_->sac()});
 }
 void StoredDBODataSourceWidget::updateSicColumnSlot ()
 {
     assert (sic_edit_);
-    sic_edit_->setText(data_source_.shortName().c_str());
+    sic_edit_->setText(data_source_->shortName().c_str());
 }
 void StoredDBODataSourceWidget::updateLatitudeColumnSlot ()
 {
     assert (latitude_edit_);
-    latitude_edit_->setText(data_source_.shortName().c_str());
+    latitude_edit_->setText(data_source_->shortName().c_str());
 }
 void StoredDBODataSourceWidget::updateLongitudeColumnSlot ()
 {
     assert (longitude_edit_);
-    longitude_edit_->setText(data_source_.shortName().c_str());
+    longitude_edit_->setText(data_source_->shortName().c_str());
 }
 void StoredDBODataSourceWidget::updateAltitudeColumnSlot ()
 {
     assert (altitude_edit_);
-    altitude_edit_->setText(data_source_.shortName().c_str());
+    altitude_edit_->setText(data_source_->shortName().c_str());
 }
 

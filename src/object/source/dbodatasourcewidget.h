@@ -36,10 +36,12 @@ public:
     DBODataSourceWidget(DBODataSource& data_source, QWidget* parent=0, Qt::WindowFlags f=0);
     virtual ~DBODataSourceWidget() {}
 
+    void setDataSource (DBODataSource& data_source);
+
     void update ();
 
 private:
-    DBODataSource& data_source_;
+    DBODataSource* data_source_;
 
     QLineEdit* id_edit_{nullptr};
     QLineEdit* short_name_edit_{nullptr};
