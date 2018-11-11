@@ -16,6 +16,7 @@
  */
 
 #include "dbodatasource.h"
+#include "dbodatasourcewidget.h"
 #include "dbobject.h"
 #include "projectionmanager.h"
 #include "rs2g.h"
@@ -31,7 +32,11 @@ DBODataSource::DBODataSource(unsigned int id, const std::string& name)
 
 DBODataSource::~DBODataSource()
 {
-
+    if (widget_)
+    {
+        delete widget_;
+        widget_ = nullptr;
+    }
 }
 
 void DBODataSource::finalize ()
@@ -607,4 +612,14 @@ void DBODataSource::shortName(const std::string &short_name)
 void DBODataSource::sic(unsigned char sic)
 {
     this->sic_ = sic;
+}
+
+DBODataSourceWidget* DBODataSource::widget ()
+{
+    if (!widget_)
+    {
+        widget_ = new DBODataSourceWidget (*this);
+        assert (widget_);
+    }
+    return widget_;
 }

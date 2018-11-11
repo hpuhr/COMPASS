@@ -6,16 +6,20 @@
 #include <string>
 
 class DBObject;
+class StoredDBODataSourceWidget;
 
 class StoredDBODataSource : public Configurable
 {
 public:
     StoredDBODataSource(const std::string& class_id, const std::string& instance_id, DBObject* object);
     StoredDBODataSource() = default;
+    virtual ~StoredDBODataSource ();
+
     /// @brief Move constructor
     StoredDBODataSource& operator=(StoredDBODataSource&& other);
 
     unsigned int id() const;
+    void id(unsigned int id);
 
     void name(const std::string &name);
     const std::string &name() const;
@@ -38,6 +42,8 @@ public:
     void altitude(double altitude);
     double altitude() const;
 
+    StoredDBODataSourceWidget* widget ();
+
 private:
     DBObject* object_;
 
@@ -49,6 +55,8 @@ private:
     double latitude_ {0}; //degrees
     double longitude_ {0}; // degrees
     double altitude_ {0};  // meter above msl
+
+    StoredDBODataSourceWidget* widget_ {nullptr};
 
 protected:
     virtual void checkSubConfigurables () {}

@@ -1,4 +1,5 @@
 #include "storeddbodatasource.h"
+#include "storeddbodatasourcewidget.h"
 
 #include "dbobject.h"
 
@@ -13,6 +14,15 @@ StoredDBODataSource::StoredDBODataSource(const std::string& class_id, const std:
     registerParameter ("latitude", &latitude_, 0);
     registerParameter ("longitude", &longitude_, 0);
     registerParameter ("altitude", &altitude_, 0);
+}
+
+StoredDBODataSource::~StoredDBODataSource ()
+{
+    if (widget_)
+    {
+        delete widget_;
+        widget_ = nullptr;
+    }
 }
 
 StoredDBODataSource& StoredDBODataSource::operator=(StoredDBODataSource&& other)
@@ -71,6 +81,12 @@ double StoredDBODataSource::altitude() const
 unsigned int StoredDBODataSource::id() const
 {
     return id_;
+}
+
+void StoredDBODataSource::id(unsigned int id)
+{
+    // TODO
+    assert (false);
 }
 
 double StoredDBODataSource::latitude() const
@@ -136,4 +152,14 @@ void StoredDBODataSource::shortName(const std::string &short_name)
 void StoredDBODataSource::sic(unsigned char sic)
 {
     this->sic_ = sic;
+}
+
+StoredDBODataSourceWidget* StoredDBODataSource::widget ()
+{
+    if (!widget_)
+    {
+        widget_ = new StoredDBODataSourceWidget (*this);
+        assert (widget_);
+    }
+    return widget_;
 }

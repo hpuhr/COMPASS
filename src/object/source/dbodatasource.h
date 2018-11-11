@@ -18,15 +18,11 @@
 #ifndef DBODATASOURCE_H
 #define DBODATASOURCE_H
 
-
-
 #include "rs2g.h"
-
-
 #include "geomap.h"
 
 class DBObject;
-
+class DBODataSourceWidget;
 
 class DBODataSource
 {
@@ -64,6 +60,8 @@ public:
     void altitude(double altitude);
     double altitude() const;
 
+    DBODataSourceWidget* widget ();
+
     void finalize ();
 
     bool isFinalized () { return finalized_; } // returns false if projection can not be made because of error
@@ -99,6 +97,8 @@ protected:
 
     bool has_altitude_ {false};
     double altitude_ {0};  // meter above msl
+
+    DBODataSourceWidget* widget_ {nullptr};
 
     bool finalized_ {false};
 

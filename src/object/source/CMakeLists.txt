@@ -11,12 +11,14 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/dbodatasourcedefinitionwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/dboadddatasourcedialog.h"
         "${CMAKE_CURRENT_LIST_DIR}/storeddbodatasource.h"
+        "${CMAKE_CURRENT_LIST_DIR}/storeddbodatasourcewidget.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/dbodatasource.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbodatasourcewidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbodatasourcedefinition.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbodatasourcedefinitionwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/storeddbodatasource.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/storeddbodatasourcewidget.cpp"
 )
 
 
