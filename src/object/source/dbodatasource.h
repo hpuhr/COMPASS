@@ -35,8 +35,10 @@ public:
     virtual ~DBODataSource();
 
     unsigned int id() const;
+    void id(unsigned int id);
 
     const std::string &name() const;
+    void name(const std::string &name);
 
     bool hasShortName() const;
     void shortName(const std::string &short_name);

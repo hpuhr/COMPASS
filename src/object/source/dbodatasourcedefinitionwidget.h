@@ -15,9 +15,8 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DBODATASOURCEWIDGET_H
-#define DBODATASOURCEWIDGET_H
-
+#ifndef DBODATASOURCEDEFINITIONWIDGET_H
+#define DBODATASOURCEDEFINITIONWIDGET_H
 
 #include <QWidget>
 
@@ -29,6 +28,7 @@ class DBSchemaManager;
 class DBODataSourceDefinitionWidget: public QWidget
 {
     Q_OBJECT
+
 public slots:
     void changedForeignKeySlot ();
     void changedLocalKeySlot();
@@ -59,7 +59,8 @@ public slots:
 //signals:
 //    void definitionChangedSignal();
 public:
-    DBODataSourceDefinitionWidget(DBObject& object, DBODataSourceDefinition& definition, QWidget * parent = 0, Qt::WindowFlags f = 0);
+    DBODataSourceDefinitionWidget(DBObject& object, DBODataSourceDefinition& definition, QWidget* parent=0,
+                                  Qt::WindowFlags f=0);
     virtual ~DBODataSourceDefinitionWidget();
 
 private:
@@ -83,8 +84,10 @@ private:
     QComboBox* altitude_box_{nullptr};
 
     /// @brief Updates a variable selection box
-    void updateVariableSelectionBox (QComboBox* box, const std::string& schema_name, const std::string& meta_table_name, const std::string& value, bool empty_allowed=false);
+    void updateVariableSelectionBox (QComboBox* box, const std::string& schema_name,
+                                     const std::string& meta_table_name, const std::string& value,
+                                     bool empty_allowed=false);
 
 };
 
-#endif // DBODATASOURCEWIDGET_H
+#endif // DBODATASOURCEDEFINITIONWIDGET_H

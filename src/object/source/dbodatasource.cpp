@@ -507,6 +507,12 @@ unsigned int DBODataSource::id() const
     return id_;
 }
 
+void DBODataSource::id(unsigned int id)
+{
+    // TODO
+    assert (false);
+}
+
 double DBODataSource::latitude() const
 {
     return latitude_;
@@ -550,6 +556,12 @@ bool DBODataSource::hasAltitude() const
 const std::string &DBODataSource::name() const
 {
     return name_;
+}
+
+void DBODataSource::name(const std::string &name)
+{
+    // TODO
+    assert (false);
 }
 
 unsigned char DBODataSource::sac() const
