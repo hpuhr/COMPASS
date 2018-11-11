@@ -26,6 +26,7 @@
 #include "dbovariableset.h"
 #include "dbodatasource.h"
 #include "dbodatasourcedefinition.h"
+#include "storeddbodatasource.h"
 #include "configurable.h"
 #include "dbovariable.h"
 
@@ -153,6 +154,18 @@ public:
     DBOVariableIterator begin() { return variables_.begin(); }
     DBOVariableIterator end() { return variables_.end(); }
 
+    using StoredDataSourceIterator = typename std::map<std::string, StoredDBODataSource>::iterator;
+    StoredDataSourceIterator storedDSBegin() { return stored_data_sources_.begin(); }
+    StoredDataSourceIterator storedDSEnd() { return stored_data_sources_.end(); }
+
+    /// @brief Returns flag indication if a StoredDBODataSource identified by name exists
+    bool hasStoredDataSource (const std::string& name) const;
+    /// @brief Returns variable identified by id
+    StoredDBODataSource& storedDataSource (const std::string& name);
+    void renameStoredDataSource (const std::string& name, const std::string& new_name);
+    /// @brief Deletes a variable identified by id
+    void deleteStoredDataSource (const std::string& name);
+
     /// @brief Returns number of existing variables
     size_t numVariables () const { return variables_.size(); }
 
@@ -279,6 +292,7 @@ protected:
 
     /// Container with data source definitions (schema identifier -> data source definition pointer)
     std::map <std::string, DBODataSourceDefinition> data_source_definitions_;
+    std::map<std::string, StoredDBODataSource> stored_data_sources_;
     std::map<int, DBODataSource> data_sources_;
     /// Container with all variables (variable identifier -> variable pointer)
     std::map<std::string, DBOVariable> variables_;

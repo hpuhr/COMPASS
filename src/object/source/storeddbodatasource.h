@@ -10,10 +10,14 @@ class DBObject;
 class StoredDBODataSource : public Configurable
 {
 public:
-    StoredDBODataSource(const std::string& class_id, const std::string& instance_id, DBObject& object);
+    StoredDBODataSource(const std::string& class_id, const std::string& instance_id, DBObject* object);
+    StoredDBODataSource() = default;
+    /// @brief Move constructor
+    StoredDBODataSource& operator=(StoredDBODataSource&& other);
 
     unsigned int id() const;
 
+    void name(const std::string &name);
     const std::string &name() const;
 
     void shortName(const std::string &short_name);
@@ -35,12 +39,12 @@ public:
     double altitude() const;
 
 private:
-    DBObject& object_;
+    DBObject* object_;
 
     unsigned int id_{0};
     std::string name_;
     std::string short_name_;
-    unsigned int sac_;
+    unsigned int sac_ {0};
     unsigned int sic_ {0};
     double latitude_ {0}; //degrees
     double longitude_ {0}; // degrees

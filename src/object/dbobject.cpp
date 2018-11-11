@@ -72,7 +72,7 @@ DBObject::~DBObject()
 void DBObject::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
     logdbg  << "DBObject: generateSubConfigurable: generating variable " << instance_id;
-    if (class_id.compare ("DBOVariable") == 0)
+    if (class_id == "DBOVariable")
     {
         std::string var_name = configuration().getSubConfiguration(
                     class_id, instance_id).getParameterConfigValueString("name");
@@ -85,7 +85,7 @@ void DBObject::generateSubConfigurable (const std::string &class_id, const std::
                      std::forward_as_tuple(var_name),  // args for key
                      std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
     }
-    else if (class_id.compare ("DBOSchemaMetaTableDefinition") == 0)
+    else if (class_id == "DBOSchemaMetaTableDefinition")
     {
         logdbg << "DBObject: generateSubConfigurable: creating DBOSchemaMetaTableDefinition";
         std::string schema_name = configuration().getSubConfiguration(
@@ -97,7 +97,7 @@ void DBObject::generateSubConfigurable (const std::string &class_id, const std::
                      std::forward_as_tuple(schema_name),  // args for key
                      std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
     }
-    else if (class_id.compare ("DBODataSourceDefinition") == 0)
+    else if (class_id == "DBODataSourceDefinition")
     {
         std::string schema_name = configuration().getSubConfiguration(
                     class_id, instance_id).getParameterConfigValueString("schema");
@@ -111,10 +111,23 @@ void DBObject::generateSubConfigurable (const std::string &class_id, const std::
         connect (&data_source_definitions_.at(schema_name), SIGNAL(definitionChangedSignal()),
                  this, SLOT(dataSourceDefinitionChanged()));
     }
-    else if (class_id.compare ("DBOLabelDefinition") == 0)
+    else if (class_id == "DBOLabelDefinition")
     {
         assert (!label_definition_);
         label_definition_.reset (new DBOLabelDefinition (class_id, instance_id, this));
+    }
+    else if (class_id == "StoredDBODataSource")
+    {
+        std::string name = configuration().getSubConfiguration(
+                    class_id, instance_id).getParameterConfigValueString("name");
+
+        assert (stored_data_sources_.find (name) == stored_data_sources_.end());
+
+        logdbg << "DBObject: generateSubConfigurable: generating stored DS " << instance_id << " with name " << name;
+
+        stored_data_sources_.emplace(std::piecewise_construct,
+                                     std::forward_as_tuple(name),  // args for key
+                                     std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
     }
     else
         throw std::runtime_error ("DBObject: generateSubConfigurable: unknown class_id "+class_id );
@@ -179,6 +192,38 @@ bool DBObject::uses (const DBTableColumn& column) const
     }
 
     return false;
+}
+
+bool DBObject::hasStoredDataSource (const std::string& name) const
+{
+    return stored_data_sources_.find (name) != stored_data_sources_.end();
+}
+
+StoredDBODataSource& DBObject::storedDataSource (const std::string& name)
+{
+    assert (hasStoredDataSource (name));
+    return stored_data_sources_.at(name);
+}
+
+void DBObject::renameStoredDataSource (const std::string& name, const std::string& new_name)
+{
+    loginf << "DBObject: renameStoredDataSource: name " << name << " new_name " << new_name;
+
+    assert (hasStoredDataSource (name));
+    assert (!hasStoredDataSource (new_name));
+
+    stored_data_sources_[new_name] = std::move(stored_data_sources_.at(name));
+    stored_data_sources_.erase(name);
+
+    assert (hasStoredDataSource (new_name));
+    stored_data_sources_.at(new_name).name(new_name);
+}
+
+void DBObject::deleteStoredDataSource (const std::string& name)
+{
+    assert (hasStoredDataSource (name));
+    stored_data_sources_.erase(name);
+    assert (!hasStoredDataSource (name));
 }
 
 bool DBObject::hasMetaTable (const std::string& schema) const
