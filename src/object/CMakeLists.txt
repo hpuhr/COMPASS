@@ -15,9 +15,6 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/dbobjectmanager.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbobjectmanagerwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbobjectmanagerloadwidget.h"
-#        "${CMAKE_CURRENT_LIST_DIR}/dbodatasource.h"
-#        "${CMAKE_CURRENT_LIST_DIR}/dbodatasourcedefinitionwidget.h"
-#        "${CMAKE_CURRENT_LIST_DIR}/dboadddatasourcedialog.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbolabeldefinition.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbolabeldefinitionwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/dboaddschemametatabledialog.h"
@@ -29,8 +26,6 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/dbobjectmanager.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbobjectmanagerwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbobjectmanagerloadwidget.cpp"
-#        "${CMAKE_CURRENT_LIST_DIR}/dbodatasource.cpp"
-#        "${CMAKE_CURRENT_LIST_DIR}/dbodatasourcedefinitionwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbolabeldefinition.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbolabeldefinitionwidget.cpp"
 )

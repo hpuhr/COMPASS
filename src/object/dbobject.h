@@ -25,6 +25,7 @@
 #include "global.h"
 #include "dbovariableset.h"
 #include "dbodatasource.h"
+#include "dbodatasourcedefinition.h"
 #include "configurable.h"
 #include "dbovariable.h"
 
@@ -207,7 +208,7 @@ public:
     /// @brief Returns if a data source is defined in the current schema
     bool hasCurrentDataSourceDefinition () const;
     /// @brief Returns current data source definition
-    const DBODataSourceDefinition &currentDataSourceDefinition () const;
+    const DBODataSourceDefinition& currentDataSourceDefinition () const;
     bool hasDataSourceDefinition (const std::string& schema) { return data_source_definitions_.count(schema); }
     void deleteDataSourceDefinition (const std::string& schema);
     /// @brief Returns container with all data source definitions
