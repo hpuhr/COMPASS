@@ -34,6 +34,19 @@ namespace Utils
 namespace String
 {
 
+inline bool isNumber (const std::string& number_str)
+{
+    try
+    {
+        std::stoi(number_str);
+    }
+    catch (std::invalid_argument e)
+    {
+        return false;
+    }
+    return true;
+}
+
 inline std::string intToString(int number, int width, char c)
 {
     std::ostringstream out;

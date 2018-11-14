@@ -6,6 +6,7 @@
 #include <QWidget>
 
 class QLineEdit;
+class QGridLayout;
 
 class DBODataSourceWidget : public QWidget
 {
@@ -13,7 +14,7 @@ class DBODataSourceWidget : public QWidget
 
 public slots:
     // slots for setting by QLineEdit
-    void changedIdSlot ();
+    //void changedIdSlot ();
     void changedShortNameColumnSlot ();
     void changedNameColumnSlot ();
     void changedSacColumnSlot ();
@@ -33,7 +34,7 @@ public slots:
     void updateAltitudeColumnSlot ();
 
 public:
-    DBODataSourceWidget(DBODataSource& data_source, QWidget* parent=0, Qt::WindowFlags f=0);
+    DBODataSourceWidget(DBODataSource& data_source, bool add_headers=false, QWidget* parent=0, Qt::WindowFlags f=0);
     virtual ~DBODataSourceWidget() {}
 
     void setDataSource (DBODataSource& data_source);

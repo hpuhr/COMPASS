@@ -13,7 +13,7 @@ class StoredDBODataSourceWidget : public QWidget
 
 public slots:
     // slots for setting by QLineEdit
-    void changedIdSlot ();
+    //void changedIdSlot ();
     void changedShortNameColumnSlot ();
     void changedNameColumnSlot ();
     void changedSacColumnSlot ();
@@ -33,7 +33,8 @@ public slots:
     void updateAltitudeColumnSlot ();
 
 public:
-    StoredDBODataSourceWidget(StoredDBODataSource& data_source, QWidget* parent=0, Qt::WindowFlags f=0);
+    StoredDBODataSourceWidget(StoredDBODataSource& data_source, bool add_headers=false,
+                              QWidget* parent=0, Qt::WindowFlags f=0);
     virtual ~StoredDBODataSourceWidget() {}
 
     void setDataSource (StoredDBODataSource& data_source);

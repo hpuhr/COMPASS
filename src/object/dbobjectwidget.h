@@ -86,7 +86,7 @@ public slots:
     void updateMetaTablesGridSlot();
 
     void showLabelDefinitionWidgetSlot();
-
+    void editDataSourcesSlot();
     void printSlot ();
 
 public:
@@ -109,6 +109,7 @@ private:
     QLineEdit* info_edit_ {nullptr};
 
     QPushButton* edit_label_button_ {nullptr};
+    QPushButton* edit_ds_button_ {nullptr};
 
     /// @brief Grid with all data sources
     QGridLayout* ds_grid_ {nullptr};

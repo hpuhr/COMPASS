@@ -476,7 +476,7 @@ std::map <int, DBODataSource> DBInterface::getDataSources (DBObject &object)
 
         sources.emplace(std::piecewise_construct,
                      std::forward_as_tuple(key),  // args for key
-                     std::forward_as_tuple(key, name));  // args for mapped value
+                     std::forward_as_tuple(object, key, name));  // args for mapped value
 
         if (has_short_name && !buffer->get<std::string>(short_name_col_name).isNone(cnt))
             sources.at(key).shortName(buffer->get<std::string>(short_name_col_name).get(cnt));

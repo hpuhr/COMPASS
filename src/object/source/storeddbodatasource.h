@@ -6,7 +6,10 @@
 #include <string>
 #include <memory>
 
+#include <QWidget>
+
 class DBObject;
+class DBODataSource;
 class StoredDBODataSourceWidget;
 
 class StoredDBODataSource : public Configurable
@@ -16,6 +19,8 @@ public:
     StoredDBODataSource() = default;
     virtual ~StoredDBODataSource ();
 
+    // copy from dbds, everything but id
+    StoredDBODataSource& operator=(DBODataSource& other);
     /// @brief Move constructor
     StoredDBODataSource& operator=(StoredDBODataSource&& other);
 
@@ -43,10 +48,10 @@ public:
     void altitude(double altitude);
     double altitude() const;
 
-    StoredDBODataSourceWidget* widget ();
+    StoredDBODataSourceWidget* widget (bool add_headers=false, QWidget* parent=0, Qt::WindowFlags f=0);
 
 private:
-    DBObject* object_;
+    DBObject* object_ {nullptr};
 
     unsigned int id_{0};
     std::string name_;

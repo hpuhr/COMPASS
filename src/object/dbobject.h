@@ -27,6 +27,7 @@
 #include "dbodatasource.h"
 #include "dbodatasourcedefinition.h"
 #include "storeddbodatasource.h"
+#include "dboeditdatasourceactionoptions.h"
 #include "configurable.h"
 #include "dbovariable.h"
 
@@ -75,6 +76,8 @@ class FinalizeDBOReadJob;
 class DBOVariableSet;
 class DBOLabelDefinition;
 class DBOLabelDefinitionWidget;
+
+using DBOEditDataSourceActionOptionsCollection = typename std::map<unsigned int, DBOEditDataSourceActionOptions>;
 
 /**
  * @brief Abstract data description of an object stored in a database
@@ -223,17 +226,18 @@ public:
     bool hasKeyVariable ();
     DBOVariable& getKeyVariable();
 
-    using StoredDataSourceIterator = typename std::map<std::string, StoredDBODataSource>::iterator;
+    using StoredDataSourceIterator = typename std::map<unsigned int, StoredDBODataSource>::iterator;
     StoredDataSourceIterator storedDSBegin() { return stored_data_sources_.begin(); }
     StoredDataSourceIterator storedDSEnd() { return stored_data_sources_.end(); }
 
     /// @brief Returns flag indication if a StoredDBODataSource identified by name exists
-    bool hasStoredDataSource (const std::string& name) const;
+    bool hasStoredDataSource (unsigned int id) const;
     /// @brief Returns variable identified by id
-    StoredDBODataSource& storedDataSource (const std::string& name);
-    void renameStoredDataSource (const std::string& name, const std::string& new_name);
-    /// @brief Deletes a variable identified by id
-    void deleteStoredDataSource (const std::string& name);
+    StoredDBODataSource& storedDataSource (unsigned int id);
+    StoredDBODataSource& addNewStoredDataSource ();
+//    void renameStoredDataSource (const std::string& name, const std::string& new_name);
+//    /// @brief Deletes a variable identified by id
+//    void deleteStoredDataSource (const std::string& name);
 
 
     using DataSourceIterator = typename std::map<int, DBODataSource>::iterator;
@@ -248,6 +252,9 @@ public:
     DBODataSource& getDataSource (int id);
     ///@brief Returns data source name for a DBO type and data source number.
     const std::string& getNameOfSensor (int id);
+
+    DBOEditDataSourceActionOptionsCollection getSyncOptionsFromDB ();
+    DBOEditDataSourceActionOptionsCollection getSyncOptionsFromCfg ();
 
     /// @brief Return if active data sources info is available
     bool hasActiveDataSourcesInfo ();
@@ -297,9 +304,11 @@ protected:
     /// Container with all DBOSchemaMetaTableDefinitions
     std::map <std::string, DBOSchemaMetaTableDefinition> meta_table_definitions_;
 
+    std::unique_ptr<DBOEditDataSourcesWidget> edit_ds_widget_;
+
     /// Container with data source definitions (schema identifier -> data source definition pointer)
     std::map<std::string, DBODataSourceDefinition> data_source_definitions_;
-    std::map<std::string, StoredDBODataSource> stored_data_sources_;
+    std::map<unsigned int, StoredDBODataSource> stored_data_sources_;
     std::map<int, DBODataSource> data_sources_;
     /// Container with all variables (variable identifier -> variable pointer)
     std::map<std::string, DBOVariable> variables_;
@@ -309,7 +318,6 @@ protected:
 
     std::unique_ptr<DBObjectWidget> widget_;
     std::unique_ptr<DBObjectInfoWidget> info_widget_;
-    std::unique_ptr<DBOEditDataSourcesWidget> edit_ds_widget_;
 
     virtual void checkSubConfigurables ();
 

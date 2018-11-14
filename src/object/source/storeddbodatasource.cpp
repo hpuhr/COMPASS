@@ -1,5 +1,6 @@
 #include "storeddbodatasource.h"
 #include "storeddbodatasourcewidget.h"
+#include "dbodatasource.h"
 
 #include "dbobject.h"
 
@@ -18,6 +19,20 @@ StoredDBODataSource::StoredDBODataSource(const std::string& class_id, const std:
 
 StoredDBODataSource::~StoredDBODataSource ()
 {
+}
+
+StoredDBODataSource& StoredDBODataSource::operator=(DBODataSource& other)
+{
+    id_ = other.id();
+    name_ = other.name();
+    short_name_ = other.shortName();
+    sac_ = other.sac();
+    sic_ = other.sic();
+    latitude_ = other.latitude();
+    longitude_ = other.longitude();
+    altitude_ = other.altitude();
+
+    return *this;
 }
 
 StoredDBODataSource& StoredDBODataSource::operator=(StoredDBODataSource&& other)
@@ -149,11 +164,11 @@ void StoredDBODataSource::sic(unsigned char sic)
     this->sic_ = sic;
 }
 
-StoredDBODataSourceWidget* StoredDBODataSource::widget ()
+StoredDBODataSourceWidget* StoredDBODataSource::widget (bool add_headers, QWidget* parent, Qt::WindowFlags f)
 {
     if (!widget_)
     {
-        widget_.reset (new StoredDBODataSourceWidget (*this));
+        widget_.reset (new StoredDBODataSourceWidget (*this, add_headers, parent, f));
         assert (widget_);
     }
     return widget_.get();

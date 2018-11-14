@@ -42,6 +42,7 @@
 #include "insertbufferdbjob.h"
 #include "updatebufferdbjob.h"
 #include "dboeditdatasourceswidget.h"
+#include "dboeditdatasourceactionoptionswidget.h"
 #include "storeddbodatasourcewidget.h"
 
 /**
@@ -65,6 +66,8 @@ DBObject::DBObject(const std::string& class_id, const std::string& instance_id, 
  */
 DBObject::~DBObject()
 {
+    logdbg  << "DBObject: dtor: " << name_;
+
     current_meta_table_ = nullptr;
 }
 
@@ -120,15 +123,15 @@ void DBObject::generateSubConfigurable (const std::string &class_id, const std::
     }
     else if (class_id == "StoredDBODataSource")
     {
-        std::string name = configuration().getSubConfiguration(
-                    class_id, instance_id).getParameterConfigValueString("name");
+        unsigned int id = configuration().getSubConfiguration(
+                    class_id, instance_id).getParameterConfigValueUint("id");
 
-        assert (stored_data_sources_.find (name) == stored_data_sources_.end());
+        assert (stored_data_sources_.find (id) == stored_data_sources_.end());
 
-        logdbg << "DBObject: generateSubConfigurable: generating stored DS " << instance_id << " with name " << name;
+        loginf << "DBObject: generateSubConfigurable: generating stored DS " << instance_id << " with id " << id;
 
         stored_data_sources_.emplace(std::piecewise_construct,
-                                     std::forward_as_tuple(name),  // args for key
+                                     std::forward_as_tuple(id),  // args for key
                                      std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
     }
     else
@@ -196,38 +199,55 @@ bool DBObject::uses (const DBTableColumn& column) const
     return false;
 }
 
-bool DBObject::hasStoredDataSource (const std::string& name) const
+bool DBObject::hasStoredDataSource (unsigned int id) const
 {
-    return stored_data_sources_.find (name) != stored_data_sources_.end();
+    return stored_data_sources_.find (id) != stored_data_sources_.end();
 }
 
-StoredDBODataSource& DBObject::storedDataSource (const std::string& name)
+StoredDBODataSource& DBObject::storedDataSource (unsigned int id)
 {
-    assert (hasStoredDataSource (name));
-    return stored_data_sources_.at(name);
+    assert (hasStoredDataSource (id));
+    return stored_data_sources_.at(id);
 }
 
-void DBObject::renameStoredDataSource (const std::string& name, const std::string& new_name)
+StoredDBODataSource& DBObject::addNewStoredDataSource ()
 {
-    loginf << "DBObject: renameStoredDataSource: name " << name << " new_name " << new_name;
+    unsigned int id = stored_data_sources_.size() ? stored_data_sources_.rbegin()->first+1 : 0;
 
-    assert (hasStoredDataSource (name));
-    assert (!hasStoredDataSource (new_name));
+    loginf << "DBObject: addNewStoredDataSource: new id " << id;
 
-    stored_data_sources_[new_name] = std::move(stored_data_sources_.at(name));
+    assert (!hasStoredDataSource (id));
 
-    stored_data_sources_.erase(name);
+    Configuration& config = configuration().addNewSubConfiguration("StoredDBODataSource",
+                                                                   "StoredDBODataSource"+std::to_string(id));
+    config.addParameterUnsignedInt ("id", id);
 
-    assert (hasStoredDataSource (new_name));
-    stored_data_sources_.at(new_name).name(new_name);
+    generateSubConfigurable("StoredDBODataSource", "StoredDBODataSource"+std::to_string(id));
+
+    return storedDataSource(id);
 }
 
-void DBObject::deleteStoredDataSource (const std::string& name)
-{
-    assert (hasStoredDataSource (name));
-    stored_data_sources_.erase(name);
-    assert (!hasStoredDataSource (name));
-}
+//void DBObject::renameStoredDataSource (const std::string& name, const std::string& new_name)
+//{
+//    loginf << "DBObject: renameStoredDataSource: name " << name << " new_name " << new_name;
+
+//    assert (hasStoredDataSource (name));
+//    assert (!hasStoredDataSource (new_name));
+
+//    stored_data_sources_[new_name] = std::move(stored_data_sources_.at(name));
+
+//    stored_data_sources_.erase(name);
+
+//    assert (hasStoredDataSource (new_name));
+//    stored_data_sources_.at(new_name).name(new_name);
+//}
+
+//void DBObject::deleteStoredDataSource (const std::string& name)
+//{
+//    assert (hasStoredDataSource (name));
+//    stored_data_sources_.erase(name);
+//    assert (!hasStoredDataSource (name));
+//}
 
 bool DBObject::hasMetaTable (const std::string& schema) const
 {
@@ -310,7 +330,7 @@ void DBObject::buildDataSources()
         return;
     }
 
-    logdbg  << "DBObject: buildDataSources: building data sources for " << name_;
+    loginf  << "DBObject: buildDataSources: building data sources for " << name_;
 
     try
     {
@@ -549,6 +569,34 @@ const std::string& DBObject::getNameOfSensor (int id)
     assert (hasDataSource (id));
 
     return data_sources_.at(id).name();
+}
+
+DBOEditDataSourceActionOptionsCollection DBObject::getSyncOptionsFromDB ()
+{
+    DBOEditDataSourceActionOptionsCollection options_collection;
+
+    for (auto& ds_it : data_sources_)
+    {
+        assert (ds_it.first > 0); // todo refactor to uint?
+        unsigned int id = ds_it.first;
+        options_collection [id] = DBOEditDataSourceActionOptionsCreator::getSyncOptionsFromDB (*this, ds_it.second);
+    }
+
+    return options_collection;
+}
+
+DBOEditDataSourceActionOptionsCollection DBObject::getSyncOptionsFromCfg ()
+{
+    DBOEditDataSourceActionOptionsCollection options_collection;
+
+    for (auto& ds_it : stored_data_sources_)
+    {
+        assert (ds_it.first > 0); // todo refactor to uint?
+        unsigned int id = ds_it.first;
+        options_collection [id] = DBOEditDataSourceActionOptionsCreator::getSyncOptionsFromCfg (*this, ds_it.second);
+    }
+
+    return options_collection;
 }
 
 bool DBObject::hasActiveDataSourcesInfo ()

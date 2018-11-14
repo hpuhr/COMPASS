@@ -1,46 +1,61 @@
 #include "dbodatasourcewidget.h"
 #include "logger.h"
 
-#include <QHBoxLayout>
+#include <QGridLayout>
 #include <QLabel>
 #include <QLineEdit>
 
-DBODataSourceWidget::DBODataSourceWidget(DBODataSource& data_source, QWidget* parent, Qt::WindowFlags f)
+DBODataSourceWidget::DBODataSourceWidget(DBODataSource& data_source, bool add_headers,
+                                         QWidget* parent, Qt::WindowFlags f)
     : QWidget (parent, f), data_source_(&data_source)
 {
-    QHBoxLayout* main_layout = new QHBoxLayout ();
+    logdbg << "DBODataSourceWidget: ctor: " << data_source.name();
 
-    main_layout->addWidget (new QLabel ("ID"));
+    QGridLayout* main_layout = new QGridLayout ();
+
+    unsigned int row = 0;
+    unsigned int col = 0;
+
+    if (add_headers)
+    {
+        main_layout->addWidget (new QLabel ("ID"), row, col++);
+        main_layout->addWidget (new QLabel ("Short Name"), row, col++);
+        main_layout->addWidget (new QLabel ("Name"), row, col++);
+        main_layout->addWidget (new QLabel ("SAC"), row, col++);
+        main_layout->addWidget (new QLabel ("SIC"), row, col++);
+        main_layout->addWidget (new QLabel ("Latitude"), row, col++);
+        main_layout->addWidget (new QLabel ("Longitude"), row, col++);
+        main_layout->addWidget (new QLabel ("Altitude"), row, col++);
+        ++row;
+        col = 0;
+    }
+
     id_edit_ = new QLineEdit ();
-    main_layout->addWidget (id_edit_);
+    main_layout->addWidget (id_edit_, row, col++);
 
-    main_layout->addWidget (new QLabel ("Short Name"));
     short_name_edit_ = new QLineEdit ();
-    main_layout->addWidget (short_name_edit_);
+    main_layout->addWidget (short_name_edit_, row, col++);
 
-    main_layout->addWidget (new QLabel ("Name"));
     name_edit_ = new QLineEdit ();
-    main_layout->addWidget (name_edit_);
+    main_layout->addWidget (name_edit_, row, col++);
 
-    main_layout->addWidget (new QLabel ("SAC"));
     sac_edit_ = new QLineEdit ();
-    main_layout->addWidget (sac_edit_);
+    main_layout->addWidget (sac_edit_, row, col++);
 
-    main_layout->addWidget (new QLabel ("SIC"));
+
     sic_edit_ = new QLineEdit ();
-    main_layout->addWidget (sic_edit_);
+    main_layout->addWidget (sic_edit_, row, col++);
 
-    main_layout->addWidget (new QLabel ("Latitude"));
     latitude_edit_ = new QLineEdit ();
-    main_layout->addWidget (latitude_edit_);
+    main_layout->addWidget (latitude_edit_, row, col++);
 
-    main_layout->addWidget (new QLabel ("Longitude"));
+
     longitude_edit_ = new QLineEdit ();
-    main_layout->addWidget (longitude_edit_);
+    main_layout->addWidget (longitude_edit_, row, col++);
 
-    main_layout->addWidget (new QLabel ("Altitude"));
+
     altitude_edit_ = new QLineEdit ();
-    main_layout->addWidget (altitude_edit_);
+    main_layout->addWidget (altitude_edit_, row, col++);
 
     update();
 
@@ -65,19 +80,19 @@ void DBODataSourceWidget::update ()
     updateAltitudeColumnSlot ();
 }
 
-void DBODataSourceWidget::changedIdSlot ()
-{
-    bool ok;
-    unsigned int id = id_edit_->text().toUInt(&ok);
+//void DBODataSourceWidget::changedIdSlot ()
+//{
+//    bool ok;
+//    unsigned int id = id_edit_->text().toUInt(&ok);
 
-    if (!ok)
-    {
-        logwrn << "DBODataSourceWidget: changedIdSlot: conversion failed";
-        updateIdSlot();
-    }
-    else
-        data_source_->id(id);
-}
+//    if (!ok)
+//    {
+//        logwrn << "DBODataSourceWidget: changedIdSlot: conversion failed";
+//        updateIdSlot();
+//    }
+//    else
+//        data_source_->id(id);
+//}
 void DBODataSourceWidget::changedShortNameColumnSlot ()
 {
     data_source_->shortName(short_name_edit_->text().toStdString());
@@ -156,7 +171,7 @@ void DBODataSourceWidget::changedAltitudeColumnSlot ()
 void DBODataSourceWidget::updateIdSlot()
 {
     assert (id_edit_);
-    id_edit_->setText({data_source_->id()});
+    id_edit_->setText(QString::number(data_source_->id()));
 }
 void DBODataSourceWidget::updateShortNameColumnSlot ()
 {
@@ -171,25 +186,25 @@ void DBODataSourceWidget::updateNameColumnSlot ()
 void DBODataSourceWidget::updateSacColumnSlot ()
 {
     assert (sac_edit_);
-    sac_edit_->setText({data_source_->sac()});
+    sac_edit_->setText(QString::number(data_source_->sac()));
 }
 void DBODataSourceWidget::updateSicColumnSlot ()
 {
     assert (sic_edit_);
-    sic_edit_->setText(data_source_->shortName().c_str());
+    sic_edit_->setText(QString::number(data_source_->sic()));
 }
 void DBODataSourceWidget::updateLatitudeColumnSlot ()
 {
     assert (latitude_edit_);
-    latitude_edit_->setText(data_source_->shortName().c_str());
+    latitude_edit_->setText(QString::number(data_source_->latitude(), 'g', 12));
 }
 void DBODataSourceWidget::updateLongitudeColumnSlot ()
 {
     assert (longitude_edit_);
-    longitude_edit_->setText(data_source_->shortName().c_str());
+    longitude_edit_->setText(QString::number(data_source_->longitude(), 'g', 12));
 }
 void DBODataSourceWidget::updateAltitudeColumnSlot ()
 {
     assert (altitude_edit_);
-    altitude_edit_->setText(data_source_->shortName().c_str());
+    altitude_edit_->setText(QString::number(data_source_->altitude(), 'g', 12));
 }

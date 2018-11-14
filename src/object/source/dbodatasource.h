@@ -19,23 +19,30 @@
 #define DBODATASOURCE_H
 
 #include <memory>
+#include <QWidget>
 
 #include "rs2g.h"
 #include "geomap.h"
+#include "dboeditdatasourceactionoptions.h"
 
 class DBObject;
 class DBODataSourceWidget;
+class QGridLayout;
 
 class DBODataSource
 {
 public:
-    DBODataSource(unsigned int id, const std::string& name);
+    DBODataSource(DBObject& object, unsigned int id, const std::string& name);
     DBODataSource() = default;
+
+    // copy from dbds, everything but id
+    DBODataSource& operator=(StoredDBODataSource& other);
     DBODataSource& operator=(DBODataSource&& other);
+
     virtual ~DBODataSource();
 
     unsigned int id() const;
-    void id(unsigned int id);
+    //void id(unsigned int id);
 
     const std::string &name() const;
     void name(const std::string &name);
@@ -64,7 +71,7 @@ public:
     void altitude(double altitude);
     double altitude() const;
 
-    DBODataSourceWidget* widget ();
+    DBODataSourceWidget* widget (bool add_headers=false, QWidget* parent=0, Qt::WindowFlags f=0);
 
     void finalize ();
 
@@ -80,6 +87,7 @@ public:
     bool calculateRadSlt2Geocentric (double x, double y, double z, Eigen::Vector3d& geoc_pos);
 
 protected:
+    DBObject* object_;
     unsigned int id_{0};
 
     std::string name_;

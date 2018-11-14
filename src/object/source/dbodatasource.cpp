@@ -20,21 +20,38 @@
 #include "dbobject.h"
 #include "projectionmanager.h"
 #include "rs2g.h"
+#include "dboeditdatasourceaction.h"
+#include "storeddbodatasource.h"
 
 #include <cmath>
 
 
 
-DBODataSource::DBODataSource(unsigned int id, const std::string& name)
-    : id_(id), name_(name)
+DBODataSource::DBODataSource(DBObject& object, unsigned int id, const std::string& name)
+    : object_(&object), id_(id), name_(name)
 {
 
+}
+
+DBODataSource& DBODataSource::operator=(StoredDBODataSource& other)
+{
+    id_ = other.id();
+    name_ = other.name();
+    short_name_ = other.shortName();
+    sac_ = other.sac();
+    sic_ = other.sic();
+    latitude_ = other.latitude();
+    longitude_ = other.longitude();
+    altitude_ = other.altitude();
+
+    return *this;
 }
 
 DBODataSource& DBODataSource::operator=(DBODataSource&& other)
 {
     loginf << "DBODataSource: move operator: moving";
 
+    object_ = other.object_;
     id_ = other.id_;
 
     name_ = other.name_;
@@ -67,6 +84,7 @@ DBODataSource& DBODataSource::operator=(DBODataSource&& other)
 
 DBODataSource::~DBODataSource()
 {
+    logdbg << "DBODataSource: dtor: id " << std::to_string(id_);
 }
 
 void DBODataSource::finalize ()
@@ -542,11 +560,11 @@ unsigned int DBODataSource::id() const
     return id_;
 }
 
-void DBODataSource::id(unsigned int id)
-{
-    // TODO
-    assert (false);
-}
+//void DBODataSource::id(unsigned int id)
+//{
+//    // TODO
+//    assert (false);
+//}
 
 double DBODataSource::latitude() const
 {
@@ -644,12 +662,14 @@ void DBODataSource::sic(unsigned char sic)
     this->sic_ = sic;
 }
 
-DBODataSourceWidget* DBODataSource::widget ()
+DBODataSourceWidget* DBODataSource::widget (bool add_headers, QWidget* parent, Qt::WindowFlags f)
 {
     if (!widget_)
     {
-        widget_.reset(new DBODataSourceWidget (*this));
+        widget_.reset(new DBODataSourceWidget (*this, add_headers, parent, f));
         assert (widget_);
     }
     return widget_.get();
 }
+
+
