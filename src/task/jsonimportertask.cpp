@@ -570,7 +570,10 @@ void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
 
     if (mappings_.size() == 0)
     {
+        unsigned int index;
         {
+            index = mappings_.size();
+
             assert (ATSDB::instance().objectManager().existsObject("ADSB"));
             DBObject& db_object = ATSDB::instance().objectManager().object("ADSB");
 
@@ -593,90 +596,101 @@ void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
             //                                    Format(PropertyDataType::STRING, "epoch_tod")});
 
             mappings_.push_back(JsonMapping (db_object));
-            mappings_.at(0).JSONKey("message_type");
-            mappings_.at(0).JSONValue("ads-b target");
-            mappings_.at(0).overrideKeyVariable(true);
-            mappings_.at(0).dataSourceVariableName("ds_id");
+            mappings_.at(index).JSONKey("message_type");
+            mappings_.at(index).JSONValue("ads-b target");
+            mappings_.at(index).overrideKeyVariable(true);
+            mappings_.at(index).dataSourceVariableName("ds_id");
 
-            mappings_.at(0).addMapping({"data_source_identifier.value", db_object.variable("ds_id"), true});
-            mappings_.at(0).addMapping({"target_address", db_object.variable("target_addr"), true});
-            mappings_.at(0).addMapping({"target_identification.value_idt", db_object.variable("callsign"), false});
-            mappings_.at(0).addMapping({"mode_c_height.value_ft", db_object.variable("alt_baro_ft"), false,
+            mappings_.at(index).addMapping({"data_source_identifier.value", db_object.variable("ds_id"), true});
+            mappings_.at(index).addMapping({"data_source_identifier.sac", db_object.variable("sac"), true});
+            mappings_.at(index).addMapping({"data_source_identifier.sic", db_object.variable("sic"), true});
+            mappings_.at(index).addMapping({"target_address", db_object.variable("target_addr"), true});
+            mappings_.at(index).addMapping({"target_identification.value_idt", db_object.variable("callsign"), false});
+            mappings_.at(index).addMapping({"mode_c_height.value_ft", db_object.variable("alt_baro_ft"), false,
                                         "Height", "Feet"});
-            mappings_.at(0).addMapping({"wgs84_position.value_lat_rad", db_object.variable("pos_lat_deg"), true,
+            mappings_.at(index).addMapping({"wgs84_position.value_lat_rad", db_object.variable("pos_lat_deg"), true,
                                         "Angle", "Radian"});
-            mappings_.at(0).addMapping({"wgs84_position.value_lon_rad", db_object.variable("pos_long_deg"), true,
+            mappings_.at(index).addMapping({"wgs84_position.value_lon_rad", db_object.variable("pos_long_deg"), true,
                                         "Angle", "Radian"});
-            mappings_.at(0).addMapping({"time_of_report", db_object.variable("tod"), true, "Time", "Second"});
+            mappings_.at(index).addMapping({"time_of_report", db_object.variable("tod"), true, "Time", "Second"});
         }
 
         {
+            index = mappings_.size();
             assert (ATSDB::instance().objectManager().existsObject("MLAT"));
             DBObject& db_object = ATSDB::instance().objectManager().object("MLAT");
 
             mappings_.push_back(JsonMapping (db_object));
-            mappings_.at(1).JSONKey("message_type");
-            mappings_.at(1).JSONValue("mlat target");
-            mappings_.at(1).overrideKeyVariable(true);
-            mappings_.at(1).dataSourceVariableName("ds_id");
+            mappings_.at(index).JSONKey("message_type");
+            mappings_.at(index).JSONValue("mlat target");
+            mappings_.at(index).overrideKeyVariable(true);
+            mappings_.at(index).dataSourceVariableName("ds_id");
 
-            mappings_.at(1).addMapping({"data_source_identifier.value", db_object.variable("ds_id"), true});
-            mappings_.at(1).addMapping({"mode_3a_info.code", db_object.variable("mode3a_code"), false});
-            mappings_.at(1).addMapping({"target_address", db_object.variable("target_addr"), true});
-            mappings_.at(1).addMapping({"target_identification.value_idt", db_object.variable("callsign"), false});
-            mappings_.at(1).addMapping({"mode_c_height.value_ft", db_object.variable("flight_level_ft"), false,
+            mappings_.at(index).addMapping({"data_source_identifier.value", db_object.variable("ds_id"), true});
+            mappings_.at(index).addMapping({"data_source_identifier.sac", db_object.variable("sac"), true});
+            mappings_.at(index).addMapping({"data_source_identifier.sic", db_object.variable("sic"), true});
+            mappings_.at(index).addMapping({"mode_3a_info.code", db_object.variable("mode3a_code"), false});
+            mappings_.at(index).addMapping({"target_address", db_object.variable("target_addr"), true});
+            mappings_.at(index).addMapping({"target_identification.value_idt", db_object.variable("callsign"), false});
+            mappings_.at(index).addMapping({"mode_c_height.value_ft", db_object.variable("flight_level_ft"), false,
                                        "Height", "Feet"});
-            mappings_.at(1).addMapping({"wgs84_position.value_lat_rad", db_object.variable("pos_lat_deg"), true,
+            mappings_.at(index).addMapping({"wgs84_position.value_lat_rad", db_object.variable("pos_lat_deg"), true,
                                         "Angle", "Radian"});
-            mappings_.at(1).addMapping({"wgs84_position.value_lon_rad", db_object.variable("pos_long_deg"), true,
+            mappings_.at(index).addMapping({"wgs84_position.value_lon_rad", db_object.variable("pos_long_deg"), true,
                                         "Angle", "Radian"});
-            mappings_.at(1).addMapping({"detection_time", db_object.variable("tod"), true, "Time", "Second"});
+            mappings_.at(index).addMapping({"detection_time", db_object.variable("tod"), true, "Time", "Second"});
         }
 
         {
+            index = mappings_.size();
             assert (ATSDB::instance().objectManager().existsObject("Radar"));
             DBObject& db_object = ATSDB::instance().objectManager().object("Radar");
 
             mappings_.push_back(JsonMapping (db_object));
-            mappings_.at(2).JSONKey("message_type");
-            mappings_.at(2).JSONValue("radar target");
-            mappings_.at(2).overrideKeyVariable(true);
-            mappings_.at(2).dataSourceVariableName("ds_id");
+            mappings_.at(index).JSONKey("message_type");
+            mappings_.at(index).JSONValue("radar target");
+            mappings_.at(index).overrideKeyVariable(true);
+            mappings_.at(index).dataSourceVariableName("ds_id");
 
-            mappings_.at(2).addMapping({"data_source_identifier.value", db_object.variable("ds_id"), true});
-            mappings_.at(2).addMapping({"mode_3_info.code", db_object.variable("mode3a_code"), false});
-            mappings_.at(2).addMapping({"target_address", db_object.variable("target_addr"), false});
-            mappings_.at(2).addMapping({"aircraft_identification.value_idt", db_object.variable("callsign"), false});
-            mappings_.at(2).addMapping({"mode_c_height.value_ft", db_object.variable("modec_code_ft"), false,
+            mappings_.at(index).addMapping({"data_source_identifier.value", db_object.variable("ds_id"), true});
+            mappings_.at(index).addMapping({"data_source_identifier.sac", db_object.variable("sac"), true});
+            mappings_.at(index).addMapping({"data_source_identifier.sic", db_object.variable("sic"), true});
+            mappings_.at(index).addMapping({"mode_3_info.code", db_object.variable("mode3a_code"), false});
+            mappings_.at(index).addMapping({"target_address", db_object.variable("target_addr"), false});
+            mappings_.at(index).addMapping({"aircraft_identification.value_idt", db_object.variable("callsign"), false});
+            mappings_.at(index).addMapping({"mode_c_height.value_ft", db_object.variable("modec_code_ft"), false,
                                        "Height", "Feet"});
-            mappings_.at(2).addMapping({"measured_azm_rad", db_object.variable("pos_azm_deg"), true,
+            mappings_.at(index).addMapping({"measured_azm_rad", db_object.variable("pos_azm_deg"), true,
                                         "Angle", "Radian"});
-            mappings_.at(2).addMapping({"measured_rng_m", db_object.variable("pos_range_nm"), true,
+            mappings_.at(index).addMapping({"measured_rng_m", db_object.variable("pos_range_nm"), true,
                                         "Length", "Meter"});
-            mappings_.at(2).addMapping({"detection_time", db_object.variable("tod"), true, "Time", "Second"});
+            mappings_.at(index).addMapping({"detection_time", db_object.variable("tod"), true, "Time", "Second"});
         }
 
         {
+            index = mappings_.size();
             assert (ATSDB::instance().objectManager().existsObject("Tracker"));
             DBObject& db_object = ATSDB::instance().objectManager().object("Tracker");
 
             mappings_.push_back(JsonMapping (db_object));
-            mappings_.at(3).JSONKey("message_type");
-            mappings_.at(3).JSONValue("track update");
-            mappings_.at(3).overrideKeyVariable(true);
-            mappings_.at(3).dataSourceVariableName("ds_id");
+            mappings_.at(index).JSONKey("message_type");
+            mappings_.at(index).JSONValue("track update");
+            mappings_.at(index).overrideKeyVariable(true);
+            mappings_.at(index).dataSourceVariableName("ds_id");
 
-            mappings_.at(3).addMapping({"server_sacsic.value", db_object.variable("ds_id"), true});
-            mappings_.at(3).addMapping({"mode_3a_info.code", db_object.variable("mode3a_code"), false});
-            mappings_.at(3).addMapping({"aircraft_address", db_object.variable("target_addr"), true});
-            mappings_.at(3).addMapping({"aircraft_identification.value_idt", db_object.variable("callsign"), false});
-            mappings_.at(3).addMapping({"calculated_track_flight_level.value_feet", db_object.variable("modec_code_ft"),
+            mappings_.at(index).addMapping({"server_sacsic.value", db_object.variable("ds_id"), true});
+            mappings_.at(index).addMapping({"server_sacsic.sac", db_object.variable("sac"), true});
+            mappings_.at(index).addMapping({"server_sacsic.sic", db_object.variable("sic"), true});
+            mappings_.at(index).addMapping({"mode_3a_info.code", db_object.variable("mode3a_code"), false});
+            mappings_.at(index).addMapping({"aircraft_address", db_object.variable("target_addr"), true});
+            mappings_.at(index).addMapping({"aircraft_identification.value_idt", db_object.variable("callsign"), false});
+            mappings_.at(index).addMapping({"calculated_track_flight_level.value_feet", db_object.variable("modec_code_ft"),
                                         false, "Height", "Feet"});
-            mappings_.at(3).addMapping({"calculated_wgs84_position.value_latitude_rad",
+            mappings_.at(index).addMapping({"calculated_wgs84_position.value_latitude_rad",
                                         db_object.variable("pos_lat_deg"), true, "Angle", "Radian"});
-            mappings_.at(3).addMapping({"calculated_wgs84_position.value_longitude_rad",
+            mappings_.at(index).addMapping({"calculated_wgs84_position.value_longitude_rad",
                                         db_object.variable("pos_long_deg"), true, "Angle", "Radian"});
-            mappings_.at(3).addMapping({"time_of_last_update", db_object.variable("tod"), true, "Time", "Second"});
+            mappings_.at(index).addMapping({"time_of_last_update", db_object.variable("tod"), true, "Time", "Second"});
         }
     }
 
@@ -703,6 +717,8 @@ void JSONImporterTask::insertData ()
         QThread::msleep (10);
     }
 
+    bool has_sac_sic = false;
+
     for (auto& map_it : mappings_)
     {
         if (map_it.buffer() != nullptr && map_it.buffer()->size() != 0)
@@ -711,6 +727,11 @@ void JSONImporterTask::insertData ()
 
             DBObject& db_object = map_it.dbObject();
             std::shared_ptr<Buffer> buffer = map_it.buffer();
+
+            has_sac_sic = db_object.hasVariable("sac") && db_object.hasVariable("sic")
+                    && buffer->has<char>("sac") && buffer->has<char>("sic");
+
+            loginf << "JSONImporterTask: insertData: " << db_object.name() << " has sac/sic " << has_sac_sic;
 
             loginf << "JSONImporterTask: insertData: " << db_object.name() << " buffer " << buffer->size();
 
@@ -726,13 +747,14 @@ void JSONImporterTask::insertData ()
 
                 std::string data_source_var_name = map_it.dataSourceVariableName();
 
+
+                // collect existing datasources
                 std::set <int> datasources_existing;
                 if (db_object.hasDataSources())
                     for (auto ds_it = db_object.dsBegin(); ds_it != db_object.dsEnd(); ++ds_it)
                         datasources_existing.insert(ds_it->first);
 
-                std::map <int, std::string> datasources_to_add;
-
+                // getting key list and distinct values
                 assert (buffer->properties().hasProperty(data_source_var_name));
                 assert (buffer->properties().get(data_source_var_name).dataType() == PropertyDataType::INT);
 
@@ -740,20 +762,60 @@ void JSONImporterTask::insertData ()
                 ArrayListTemplate<int>& data_source_key_list = buffer->get<int> (data_source_var_name);
                 std::set<int> data_source_keys = data_source_key_list.distinctValues();
 
+                std::map <int, std::pair<char, char>> sac_sics; // keyvar->(sac,sic)
+                // collect sac/sics
+                if (has_sac_sic)
+                {
+                    ArrayListTemplate<char>& sac_list = buffer->get<char> ("sac");
+                    ArrayListTemplate<char>& sic_list = buffer->get<char> ("sic");
+
+                    size_t size = buffer->size();
+                    int key_val;
+                    for (unsigned int cnt=0; cnt < size; ++cnt)
+                    {
+                        key_val = data_source_key_list.get(cnt);
+
+                        if (datasources_existing.count(key_val) != 0)
+                            continue;
+
+                        if (sac_sics.count(key_val) == 0)
+                        {
+                            loginf << "JSONImporterTask: insertData: found new ds " << key_val << " for sac/sic";
+
+                            assert (!sac_list.isNone(cnt) && !sic_list.isNone(cnt));
+                            sac_sics[key_val] = std::pair<char, char> (sac_list.get(cnt), sic_list.get(cnt));
+
+                            loginf << "JSONImporterTask: insertData: source " << key_val
+                                   << " sac " << static_cast<int>(sac_list.get(cnt))
+                                   << " sic " << static_cast<int>(sic_list.get(cnt));
+                        }
+                    }
+
+                }
+
+                // adding datasources
+                std::map <int, std::pair<int,int>> datasources_to_add;
+
                 for (auto ds_key_it : data_source_keys)
                     if (datasources_existing.count(ds_key_it) == 0 && added_data_sources_.count(ds_key_it) == 0)
                     {
                         if (datasources_to_add.count(ds_key_it) == 0)
                         {
-                            logdbg << "JSONImporterTask: insertData: adding new data source "
-                                   << std::to_string(ds_key_it);
-                            datasources_to_add[ds_key_it] = std::to_string(ds_key_it);
+                            loginf << "JSONImporterTask: insertData: adding new data source " << ds_key_it;
+                            if (sac_sics.count(ds_key_it) == 0)
+                                datasources_to_add[ds_key_it] = {-1,-1};
+                            else
+                                datasources_to_add[ds_key_it] = {sac_sics.at(ds_key_it).first,
+                                                                 sac_sics.at(ds_key_it).second};
+
                             added_data_sources_.insert(ds_key_it);
                         }
                     }
 
                 if (datasources_to_add.size())
+                {
                     db_object.addDataSources(datasources_to_add);
+                }
             }
 
             logdbg << "JSONImporterTask: insertData: " << db_object.name() << " inserting";

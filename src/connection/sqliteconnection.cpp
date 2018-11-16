@@ -521,6 +521,8 @@ std::vector <std::string> SQLiteConnection::getTableList()  // buffer of table n
 
 DBTableInfo SQLiteConnection::getColumnList(const std::string &table) // buffer of column name string, data type
 {
+    logdbg << "SQLiteConnection: getColumnList: table " << table;
+
     DBTableInfo table_info (table);
 
     DBCommand command;
@@ -546,6 +548,8 @@ DBTableInfo SQLiteConnection::getColumnList(const std::string &table) // buffer 
     {
         //loginf << "UGA " << table << ": "  << buffer->getString("name").get(cnt);
 
+        assert (buffer->has<std::string>("type"));
+
         std::string data_type = buffer->get<std::string>("type").get(cnt);
 
         if (data_type == "BOOLEAN")
@@ -556,6 +560,10 @@ DBTableInfo SQLiteConnection::getColumnList(const std::string &table) // buffer 
             data_type = "DOUBLE";
         else if (data_type == "INTEGER")
             data_type = "INT";
+
+        assert (buffer->has<std::string>("name"));
+        assert (buffer->has<int>("pk"));
+        assert (buffer->has<int>("notnull"));
 
         table_info.addColumn (buffer->get<std::string>("name").get(cnt), data_type,
                               buffer->get<int>("pk").get(cnt) > 0, !buffer->get<int>("notnull").get(cnt), "");

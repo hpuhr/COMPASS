@@ -25,6 +25,7 @@ class Buffer;
 class DBObject;
 class DBInterface;
 class DBOVariable;
+class DBTable;
 
 /**
  * @brief Buffer write job
@@ -51,6 +52,8 @@ protected:
     DBInterface &db_interface_;
     DBObject &dbobject_;
     std::shared_ptr<Buffer> buffer_;
+
+    void partialInsertBuffer (DBTable& table);
 };
 
 #endif /* INSERTBUFFERDBJOB_H_ */

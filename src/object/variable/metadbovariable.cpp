@@ -72,8 +72,8 @@ void MetaDBOVariable::generateSubConfigurable (const std::string &class_id, cons
                 || variables_.find(dbo_name) != variables_.end())
             {
                 logerr << "MetaDBOVariable: generateSubConfigurable: name " << name_
-                       << " dbovariable definition " << instance_id << " has error, deleting";
-                delete definition;
+                       << " dbovariable definition " << instance_id << " has error, ignoring";
+                //delete definition;
                 return;
             }
 

@@ -138,10 +138,12 @@ void DBTable::updateOnDatabase()
         col_it.second->updateOnDatabase();
 
         exists = exists_in_db_ | col_it.second->existsInDB(); // exists if any exist
+        logdbg << "DBTable " << name_ << "::updateOnDatabase: exists " << exists_in_db_
+               << " col " << col_it.first << " exists " << col_it.second->existsInDB();
     }
 
     exists_in_db_ = exists;
 
-    logdbg << "DBTable: updateOnDatabase: " << name_ << " exists in db " << exists_in_db_;
+    loginf << "DBTable: updateOnDatabase: " << name_ << " exists in db " << exists_in_db_;
 }
 

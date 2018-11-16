@@ -188,7 +188,7 @@ void MetaDBTable::updateOnDatabase()
     for (auto table_it : sub_tables_)
         exists_in_db_ = exists_in_db_ | table_it.second.existsInDB();
 
-    logdbg << "MetaDBTable: updateOnDatabase: " << name_ << " exists in db " << exists_in_db_;
+    loginf << "MetaDBTable: updateOnDatabase: " << name_ << " exists in db " << exists_in_db_;
 }
 
 //void MetaDBTable::setSubTablesIfRequired ()

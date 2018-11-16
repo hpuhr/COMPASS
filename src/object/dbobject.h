@@ -206,7 +206,7 @@ public:
     void deleteMetaTable (const std::string& schema);
 
     /// @brief Returns main meta table for current schema
-    const MetaDBTable& currentMetaTable () const;
+    MetaDBTable& currentMetaTable () const;
     /// @brief Returns if current schema has main meta table
     bool hasCurrentMetaTable () const;
 
@@ -247,7 +247,7 @@ public:
     ///@brief Returns flag if data sources are defined for DBO type.
     bool hasDataSources () { return data_sources_.size() > 0; }
     void addDataSource (int key_value, const std::string& name); // needs postprocessing after
-    void addDataSources (std::map <int, std::string>& sources);
+    void addDataSources (std::map <int, std::pair<int,int>>& sources);
     bool hasDataSource (int id);
     DBODataSource& getDataSource (int id);
     ///@brief Returns data source name for a DBO type and data source number.

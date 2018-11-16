@@ -113,8 +113,9 @@ public:
     //    /// @brief Writes a buffer to the database, into a table defined by write_table_names_ and DBO type
     //    void writeBuffer (Buffer *data);
     //    void writeBuffer (Buffer *data, std::string table_name);
-    void insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer, size_t from_index,
-                       size_t to_index);
+//    void insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer, size_t from_index,
+//                       size_t to_index);
+    void insertBuffer (MetaDBTable& meta_table, std::shared_ptr<Buffer> buffer);
 
     bool checkUpdateBuffer (DBObject &object, DBOVariable &key_var, DBOVariableSet& list,
                             std::shared_ptr<Buffer> buffer);
@@ -234,6 +235,9 @@ protected:
     void setPostProcessed (bool value);
     //    /// @brief Returns buffer with min/max data from another Buffer with the string contents. Delete returned buffer yourself.
     //    Buffer *createFromMinMaxStringBuffer (Buffer *string_buffer, PropertyDataType data_type);
+
+    std::shared_ptr<Buffer> getPartialBuffer (DBTable& table, std::shared_ptr<Buffer> buffer);
+    void partialInsertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer);
 };
 
 #endif /* SQLITE3CONNECTION_H_ */

@@ -225,5 +225,5 @@ void DBSchema::updateOnDatabase()
     for (auto& meta_table_it : meta_tables_)
         meta_table_it.second->updateOnDatabase();
 
-    logdbg << "DBSchema: updateOnDatabase: " << name_<< " exists in db " << exists_in_db_;
+    loginf << "DBSchema: updateOnDatabase: " << name_<< " exists in db " << exists_in_db_;
 }

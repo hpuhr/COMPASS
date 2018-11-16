@@ -147,12 +147,13 @@ void DBInterface::closeConnection ()
 void DBInterface::updateTableInfo ()
 {
     QMutexLocker locker(&connection_mutex_);
+    loginf << "DBInterface: updateTableInfo";
     table_info_.clear();
 
     assert (current_connection_);
     table_info_ = current_connection_->getTableInfo();
 
-    loginf << "DBInterface::updateTableInfo: found " << table_info_.size() << " tables";
+    loginf << "DBInterface: updateTableInfo: found " << table_info_.size() << " tables";
 }
 
 DBInterfaceWidget *DBInterface::widget()
@@ -245,6 +246,7 @@ void DBInterface::checkSubConfigurables ()
 
 bool DBInterface::existsTable (const std::string& table_name)
 {
+    QMutexLocker locker(&connection_mutex_); // TODO
     return table_info_.count (table_name) == 1;
 }
 
@@ -268,6 +270,7 @@ void DBInterface::createTable (DBTable& table)
     updateTableInfo();
     table.updateOnDatabase();
 
+    loginf << "DBInterface: createTable: checking " << table.name();
     assert (table.existsInDB());
     //emit databaseContentChangedSignal();
 }
@@ -277,7 +280,7 @@ void DBInterface::createTable (DBTable& table)
  */
 bool DBInterface::existsMinMaxTable ()
 {
-    return table_info_.count (TABLE_NAME_MINMAX) == 1;
+    return existsTable(TABLE_NAME_MINMAX);
 }
 
 /**
@@ -285,7 +288,7 @@ bool DBInterface::existsMinMaxTable ()
  */
 bool DBInterface::existsPropertiesTable ()
 {
-    return table_info_.count (TABLE_NAME_PROPERTIES) == 1;
+    return existsTable(TABLE_NAME_PROPERTIES);
 }
 
 ///**
@@ -333,8 +336,8 @@ std::set<int> DBInterface::queryActiveSensorNumbers(DBObject &object)
 
 bool DBInterface::hasDataSourceTables (DBObject& object)
 {
-    if (!object.existsInDB())
-        return false;
+//    if (!object.existsInDB())
+//        return false;
 
     if (!object.hasCurrentDataSourceDefinition())
         return false;
@@ -355,7 +358,7 @@ bool DBInterface::hasDataSourceTables (DBObject& object)
 
     std::string main_table_name = meta.mainTableName();
 
-    if (table_info_.count(main_table_name) == 0)
+    if (!existsTable(main_table_name))
         return false;
 
     return true;
@@ -368,7 +371,7 @@ std::map <int, DBODataSource> DBInterface::getDataSources (DBObject &object)
 {
     logdbg  << "DBInterface: getDataSources: start";
 
-    assert (object.existsInDB());
+    //assert (object.existsInDB());
 
     QMutexLocker locker(&connection_mutex_);
 
@@ -503,7 +506,7 @@ std::map <int, DBODataSource> DBInterface::getDataSources (DBObject &object)
 size_t DBInterface::count (const std::string &table)
 {
     logdbg  << "DBInterface: count: table " << table;
-    assert (table_info_.count(table) > 0);
+    assert (existsTable(table));
 
     QMutexLocker locker(&connection_mutex_);
     assert (current_connection_);
@@ -864,13 +867,91 @@ std::set<int> DBInterface::getActiveDataSources (DBObject &object)
 //    buffer_writer_->write (data, table_name);
 //}
 
-void DBInterface::insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer, size_t from_index,
-                                size_t to_index)
+void DBInterface::insertBuffer (MetaDBTable& meta_table, std::shared_ptr<Buffer> buffer)
 {
-    logdbg << "DBInterface: insertBuffer: table " << table.name() << " buffer size " << buffer->size()
-           << " from " << from_index << " to " << to_index;
+    loginf << "DBInterface: insertBuffer: meta " << meta_table.name() << " buffer size " << buffer->size();
 
-    //assert (checkUpdateBuffer(object, key_var, buffer));
+    std::shared_ptr<Buffer> partial_buffer = getPartialBuffer(meta_table.mainTable(), buffer);
+    assert (partial_buffer->size());
+    partialInsertBuffer(meta_table.mainTable(), partial_buffer);
+
+    for (auto& sub_it : meta_table.subTables())
+    {
+        partial_buffer = getPartialBuffer(sub_it.second, buffer);
+        assert (partial_buffer->size());
+        partialInsertBuffer(sub_it.second, partial_buffer);
+    }
+
+}
+
+std::shared_ptr<Buffer> DBInterface::getPartialBuffer (DBTable& table, std::shared_ptr<Buffer> buffer)
+{
+    loginf << "DBInterface: getPartialBuffer: table " << table.name() << " buffer size " << buffer->size();
+    std::shared_ptr<Buffer> tmp_buffer {new Buffer()};
+
+    PropertyList org_properties = buffer->properties();
+    for (unsigned int cnt=0; cnt < org_properties.size(); ++cnt)
+    {
+        Property org_prop = org_properties.at(cnt);
+
+        if (table.hasColumn(org_prop.name()))
+            // && table.column(org_prop.name()).propertyType() == org_prop.dataType()
+        {
+            loginf << "DBInterface: getPartialBuffer: table " << table.name() << " adding property " << org_prop.name();
+            tmp_buffer->addProperty(org_prop);
+
+            switch (org_prop.dataType())
+            {
+            case PropertyDataType::BOOL:
+                tmp_buffer->get<bool>(org_prop.name()) = buffer->get<bool>(org_prop.name());
+                break;
+            case PropertyDataType::CHAR:
+                tmp_buffer->get<char>(org_prop.name()) = buffer->get<char>(org_prop.name());
+                break;
+            case PropertyDataType::UCHAR:
+                tmp_buffer->get<unsigned char>(org_prop.name()) = buffer->get<unsigned char>(org_prop.name());
+                break;
+            case PropertyDataType::INT:
+                tmp_buffer->get<int>(org_prop.name()) = buffer->get<int>(org_prop.name());
+                break;
+            case PropertyDataType::UINT:
+                tmp_buffer->get<unsigned int>(org_prop.name()) = buffer->get<unsigned int>(org_prop.name());
+                break;
+            case PropertyDataType::LONGINT:
+                tmp_buffer->get<long int>(org_prop.name()) = buffer->get<long int>(org_prop.name());
+                break;
+            case PropertyDataType::ULONGINT:
+                tmp_buffer->get<unsigned long int>(org_prop.name()) = buffer->get<unsigned long int>(org_prop.name());
+                break;
+            case PropertyDataType::FLOAT:
+                tmp_buffer->get<float>(org_prop.name()) = buffer->get<float>(org_prop.name());
+                break;
+            case PropertyDataType::DOUBLE:
+                tmp_buffer->get<double>(org_prop.name()) = buffer->get<double>(org_prop.name());
+                break;
+            case PropertyDataType::STRING:
+                tmp_buffer->get<std::string>(org_prop.name()) = buffer->get<std::string>(org_prop.name());
+                break;
+            default:
+                logerr  <<  "IDBInterface: getPartialBuffer: unknown property type "
+                         << Property::asString(org_prop.dataType());
+                throw std::runtime_error ("DBInterface: getPartialBuffer: unknown property type "
+                                          + Property::asString(org_prop.dataType()));
+            }
+        }
+        else
+            loginf << "DBInterface: getPartialBuffer: table " << table.name()
+                   << " skipping property " << org_prop.name();
+    }
+
+    loginf << "DBInterface: getPartialBuffer: end with partial buffer size " << tmp_buffer->size();
+    return tmp_buffer;
+}
+
+void DBInterface::partialInsertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer)
+{
+    loginf << "DBInterface: partialInsertBuffer: table " << table.name() << " buffer size " << buffer->size();
+
     assert (current_connection_);
     assert (buffer);
 
@@ -878,10 +959,10 @@ void DBInterface::insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer, 
 
     for (unsigned int cnt=0; cnt < properties.size(); ++cnt)
     {
-        logdbg << "DBInterface: insertBuffer: checking column '" << properties.at(cnt).name() << "'";
+        logdbg << "DBInterface: partialInsertBuffer: checking column '" << properties.at(cnt).name() << "'";
 
         if (!table.hasColumn(properties.at(cnt).name()))
-            throw std::runtime_error ("DBInterface: insertBuffer: column '"+properties.at(cnt).name()
+            throw std::runtime_error ("DBInterface: partialInsertBuffer: column '"+properties.at(cnt).name()
                                       +"' does not exist in table "+table.name());
     }
 
@@ -894,19 +975,20 @@ void DBInterface::insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer, 
 
     QMutexLocker locker(&connection_mutex_);
 
-    logdbg  << "DBInterface: insertBuffer: preparing bind statement";
+    logdbg  << "DBInterface: partialInsertBuffer: preparing bind statement";
     current_connection_->prepareBindStatement(bind_statement);
     current_connection_->beginBindTransaction();
 
-    logdbg  << "DBInterface: insertBuffer: starting inserts";
-    for (unsigned int cnt=from_index; cnt <= to_index; cnt++)
+    logdbg  << "DBInterface: partialInsertBuffer: starting inserts";
+    size_t size = buffer->size();
+    for (unsigned int cnt=0; cnt < size; ++cnt)
     {
         insertBindStatementUpdateForCurrentIndex(buffer, cnt);
     }
 
-    logdbg  << "DBInterface: insertBuffer: ending bind transactions";
+    logdbg  << "DBInterface: partialInsertBuffer: ending bind transactions";
     current_connection_->endBindTransaction();
-    logdbg  << "DBInterface: insertBuffer: finalizing bind statement";
+    logdbg  << "DBInterface: partialInsertBuffer: finalizing bind statement";
     current_connection_->finalizeBindStatement();
 }
 
@@ -1121,7 +1203,7 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex (std::shared_ptr<Buff
         PropertyDataType data_type = property.dataType();
 
         logdbg  << "DBInterface: insertBindStatementUpdateForCurrentIndex: for at cnt " << cnt << " id "
-                << property.name();
+                << property.name() << " index cnt " << index_cnt;
 
         if (connection_type == SQLITE_IDENTIFIER)
             index_cnt=cnt+1;

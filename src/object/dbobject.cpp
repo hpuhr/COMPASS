@@ -316,11 +316,17 @@ void DBObject::buildDataSources()
 
     logdbg  << "DBObject: buildDataSources: building dbo " << name_;
 
-    if (!existsInDB() || !is_loadable_ || !hasCurrentDataSourceDefinition ())
+//    if (!existsInDB() || !is_loadable_ || !hasCurrentDataSourceDefinition ())
+//    {
+//        logerr << "DBObject: buildDataSources: not processed, exists " << existsInDB()
+//               << " is loadable " << is_loadable_
+//               << " has data source " << hasCurrentDataSourceDefinition ();
+//        return;
+//    }
+
+    if (!hasCurrentDataSourceDefinition ())
     {
-        logerr << "DBObject: buildDataSources: not processed, exists " << existsInDB()
-               << " is loadable " << is_loadable_
-               << " has data source " << hasCurrentDataSourceDefinition ();
+        logerr << "DBObject: buildDataSources: has data source definition " << hasCurrentDataSourceDefinition ();
         return;
     }
 
@@ -360,7 +366,7 @@ bool DBObject::hasCurrentMetaTable () const
  * If current_meta_table_ is not set, it is set be getting the current schema, and getting the current meta table from
  * the schema by its identifier. Then current_meta_table_ is returned.
  */
-const MetaDBTable& DBObject::currentMetaTable () const
+MetaDBTable& DBObject::currentMetaTable () const
 {
     assert (current_meta_table_);
     return *current_meta_table_;
@@ -458,41 +464,55 @@ void DBObject::addDataSource (int key_value, const std::string& name)
     MetaDBTable& meta_table = ATSDB::instance().schemaManager().getCurrentSchema().metaTable(meta_table_name);
 
     DBInterface& db_interface = ATSDB::instance().interface();
+    db_interface.insertBuffer(meta_table, buffer_ptr);
 
     // create all needed tables
-    DBTable& main_table = meta_table.mainTable();
-    if (!main_table.existsInDB())
-        // check for both since information might not be updated yet
-        db_interface.createTable(main_table);
+//    DBTable& main_table = meta_table.mainTable();
+//    if (!main_table.existsInDB())
+//        // check for both since information might not be updated yet
+//        db_interface.createTable(main_table);
 
     // do sub table
-    DBTable& db_table_name = meta_table.tableFor(name_col.identifier());
-    db_interface.insertBuffer(db_table_name, buffer_ptr, 0, 0);
+//    DBTable& db_table_name = meta_table.tableFor(name_col.identifier());
+//    db_interface.insertBuffer(db_table_name, buffer_ptr, 0, 0);
 
-    if (main_table.name() != db_table_name.name()) // HACK of sub tables exist. should be rewritten
-    {
-        PropertyList main_list;
-        main_list.addProperty(foreign_key_col.name(), PropertyDataType::INT);
+//    if (main_table.name() != db_table_name.name()) // HACK of sub tables exist. should be rewritten
+//    {
+//        PropertyList main_list;
+//        main_list.addProperty(foreign_key_col.name(), PropertyDataType::INT);
 
-        std::shared_ptr<Buffer> main_buffer_ptr = std::shared_ptr<Buffer> (new Buffer (main_list, name_));
+//        std::shared_ptr<Buffer> main_buffer_ptr = std::shared_ptr<Buffer> (new Buffer (main_list, name_));
 
-        main_buffer_ptr->get<int>(foreign_key_col.name()).set(0, key_value);
+//        main_buffer_ptr->get<int>(foreign_key_col.name()).set(0, key_value);
 
-        db_interface.insertBuffer(main_table, main_buffer_ptr, 0, 0);
-    }
+//        db_interface.insertBuffer(main_table, main_buffer_ptr, 0, 0);
+//    }
 
+    loginf << "DBObject: addDataSources: emitting signal";
     emit db_interface.databaseContentChangedSignal();
+    // TODO should not be done here
+//    db_interface.updateTableInfo ();
+//    ATSDB::instance().schemaManager().databaseContentChangedSlot();
+//    buildDataSources();
 }
 
-void DBObject::addDataSources (std::map <int, std::string>& sources)
+// TODO hack
+void DBObject::addDataSources (std::map <int, std::pair<int,int>>& sources)
 {
-    loginf << "DBObject: addDataSources: inserting " << sources.size() << " sources";
+    loginf << "DBObject: addDataSources: " << name() << " inserting " << sources.size() << " sources";
     assert (hasCurrentDataSourceDefinition());
 
     const DBODataSourceDefinition &mos_def = currentDataSourceDefinition ();
     std::string meta_table_name = mos_def.metaTableName();
+
     std::string key_col_name = mos_def.foreignKey();
     std::string name_col_name = mos_def.nameColumn();
+    std::string short_name_col_name = mos_def.shortNameColumn();
+    std::string sac_col_name = mos_def.sacColumn();
+    std::string sic_col_name = mos_def.sicColumn();
+    std::string latitude_col_name = mos_def.latitudeColumn();
+    std::string longitude_col_name = mos_def.longitudeColumn();
+    std::string altitude_col_name = mos_def.altitudeColumn();
 
     const DBSchema &schema = ATSDB::instance().schemaManager().getCurrentSchema();
     assert (schema.hasMetaTable(meta_table_name));
@@ -500,21 +520,131 @@ void DBObject::addDataSources (std::map <int, std::string>& sources)
     const MetaDBTable& meta =  schema.metaTable(meta_table_name);
     assert (meta.hasColumn(key_col_name));
     assert (meta.hasColumn(name_col_name));
+    assert (meta.hasColumn(short_name_col_name));
+    assert (meta.hasColumn(sac_col_name));
+    assert (meta.hasColumn(sic_col_name));
+
+    bool has_lat_long = meta.hasColumn(latitude_col_name) && meta.hasColumn(longitude_col_name);
+    bool has_altitude = meta.hasColumn(altitude_col_name);
 
     const DBTableColumn& foreign_key_col = meta.column(key_col_name);
     const DBTableColumn& name_col = meta.column(name_col_name);
+    const DBTableColumn& short_name_col = meta.column(short_name_col_name);
+    const DBTableColumn& sac_col = meta.column(sac_col_name);
+    const DBTableColumn& sic_col = meta.column(sic_col_name);
+    //const DBTableColumn& latitude_col = meta.column(latitude_col_name);
+    //const DBTableColumn& longitude_col = meta.column(longitude_col_name);
+    //const DBTableColumn& altitude_col = meta.column(altitude_col_name);
 
     PropertyList list;
-    list.addProperty(foreign_key_col.name(), PropertyDataType::INT);
-    list.addProperty(name_col.name(), PropertyDataType::STRING);
+    list.addProperty(foreign_key_col.name(), foreign_key_col.propertyType());
+    list.addProperty(name_col.name(), name_col.propertyType());
+    list.addProperty(short_name_col.name(), short_name_col.propertyType());
+    list.addProperty(sac_col.name(), sac_col.propertyType());
+    list.addProperty(sic_col.name(), sic_col.propertyType());
+
+    if (has_lat_long)
+    {
+        list.addProperty(meta.column(latitude_col_name).name(), meta.column(latitude_col_name).propertyType());
+        list.addProperty(meta.column(longitude_col_name).name(), meta.column(longitude_col_name).propertyType());
+    }
+
+    if (has_altitude)
+        list.addProperty(meta.column(altitude_col_name).name(), meta.column(altitude_col_name).propertyType());
+
+    loginf << "DBObject: addDataSources: " << name() << " has lat/long " << has_lat_long << " has alt " << has_altitude;
 
     std::shared_ptr<Buffer> buffer_ptr = std::shared_ptr<Buffer> (new Buffer (list, name_));
 
     unsigned int cnt=0;
+    int sac, sic;
+    bool has_sac_sic;
+    std::string name;
+
     for (auto& src_it : sources)
     {
+        sac = src_it.second.first;
+        sic = src_it.second.second;
+        has_sac_sic = sac >= 0 && sic >= 0;
+
+        name = std::to_string(src_it.first);
+
+        if (has_sac_sic)
+        {
+            bool stored_found = false;
+            unsigned int stored_id;
+
+            for (auto& stored_it : stored_data_sources_)
+            {
+                if (stored_it.second.sac() == sac && stored_it.second.sic())
+                {
+                    stored_found = true;
+                    stored_id = stored_it.first;
+                    break;
+                }
+            }
+
+            if (stored_found)
+            {
+                assert (hasStoredDataSource(stored_id));
+                StoredDBODataSource& src = storedDataSource(stored_id);
+
+                name = src.name();
+                buffer_ptr->get<std::string>(short_name_col.name()).set(cnt, src.shortName());
+                buffer_ptr->get<char>(sac_col.name()).set(cnt, src.sac());
+                buffer_ptr->get<char>(sic_col.name()).set(cnt, src.sic());
+
+                loginf << "DBObject: addDataSources: " << name << " stored found id " << stored_id
+                       << " sac " << static_cast<int> (src.sac()) << " sic " << static_cast<int> (src.sic());
+
+                if (has_lat_long)
+                {
+                    loginf << "DBObject: addDataSources: " << name << " stored found has lat/long";
+
+                    buffer_ptr->get<double>(meta.column(latitude_col_name).name()).set(cnt, src.latitude());
+                    buffer_ptr->get<double>(meta.column(longitude_col_name).name()).set(cnt, src.longitude());
+                }
+
+                if (has_altitude)
+                {
+                    loginf << "DBObject: addDataSources: " << name << " stored found has alt";
+                    buffer_ptr->get<double>(meta.column(altitude_col_name).name()).set(cnt, src.altitude());
+                }
+            }
+            else
+            {
+                buffer_ptr->get<std::string>(short_name_col.name()).setNone(cnt);
+                buffer_ptr->get<char>(sac_col.name()).setNone(cnt);
+                buffer_ptr->get<char>(sic_col.name()).setNone(cnt);
+
+                if (has_lat_long)
+                {
+                    buffer_ptr->get<double>(meta.column(latitude_col_name).name()).setNone(cnt);
+                    buffer_ptr->get<double>(meta.column(longitude_col_name).name()).setNone(cnt);
+                }
+
+                if (has_altitude)
+                    buffer_ptr->get<double>(meta.column(altitude_col_name).name()).setNone(cnt);
+            }
+        }
+        else
+        {
+            buffer_ptr->get<std::string>(short_name_col.name()).setNone(cnt);
+            buffer_ptr->get<char>(sac_col.name()).setNone(cnt);
+            buffer_ptr->get<char>(sic_col.name()).setNone(cnt);
+
+            if (has_lat_long)
+            {
+                buffer_ptr->get<double>(meta.column(latitude_col_name).name()).setNone(cnt);
+                buffer_ptr->get<double>(meta.column(longitude_col_name).name()).setNone(cnt);
+            }
+
+            if (has_altitude)
+                buffer_ptr->get<double>(meta.column(altitude_col_name).name()).setNone(cnt);
+        }
+
         buffer_ptr->get<int>(foreign_key_col.name()).set(cnt, src_it.first);
-        buffer_ptr->get<std::string>(name_col.name()).set(cnt, src_it.second);
+        buffer_ptr->get<std::string>(name_col.name()).set(cnt, name);
         cnt++;
     }
 
@@ -522,35 +652,42 @@ void DBObject::addDataSources (std::map <int, std::string>& sources)
     MetaDBTable& meta_table = ATSDB::instance().schemaManager().getCurrentSchema().metaTable(meta_table_name);
 
     DBInterface& db_interface = ATSDB::instance().interface();
+    db_interface.insertBuffer(meta_table, buffer_ptr);
 
     // create all needed tables
-    DBTable& main_table = meta_table.mainTable();
-    if (!main_table.existsInDB())
-        // check for both since information might not be updated yet
-        db_interface.createTable(main_table);
+//    DBTable& main_table = meta_table.mainTable();
+//    if (!main_table.existsInDB())
+//        // check for both since information might not be updated yet
+//        db_interface.createTable(main_table);
 
-    // do sub table
-    DBTable& db_table_name = meta_table.tableFor(name_col.identifier());
-    db_interface.insertBuffer(db_table_name, buffer_ptr, 0, buffer_ptr->size()-1);
+//    // do sub table
+//    DBTable& db_table_name = meta_table.tableFor(name_col.identifier());
+//    db_interface.insertBuffer(db_table_name, buffer_ptr, 0, buffer_ptr->size()-1);
 
-    if (main_table.name() != db_table_name.name()) // HACK of sub tables exist. should be rewritten
-    {
-        PropertyList main_list;
-        main_list.addProperty(foreign_key_col.name(), PropertyDataType::INT);
+//    if (main_table.name() != db_table_name.name()) // HACK of sub tables exist. should be rewritten
+//    {
+//        PropertyList main_list;
+//        main_list.addProperty(foreign_key_col.name(), PropertyDataType::INT);
 
-        std::shared_ptr<Buffer> main_buffer_ptr = std::shared_ptr<Buffer> (new Buffer (main_list, name_));
+//        std::shared_ptr<Buffer> main_buffer_ptr = std::shared_ptr<Buffer> (new Buffer (main_list, name_));
 
-        cnt=0;
-        for (auto& src_it : sources)
-        {
-            main_buffer_ptr->get<int>(foreign_key_col.name()).set(cnt, src_it.first);
-            cnt++;
-        }
+//        cnt=0;
+//        for (auto& src_it : sources)
+//        {
+//            main_buffer_ptr->get<int>(foreign_key_col.name()).set(cnt, src_it.first);
+//            cnt++;
+//        }
 
-        db_interface.insertBuffer(main_table, main_buffer_ptr, 0, main_buffer_ptr->size()-1);
-    }
+//        db_interface.insertBuffer(main_table, main_buffer_ptr, 0, main_buffer_ptr->size()-1);
+//    }
 
+    loginf << "DBObject: addDataSources: emitting signal";
+    // TODO should not be done here
+//    db_interface.updateTableInfo ();
+//    ATSDB::instance().schemaManager().databaseContentChangedSlot();
+//    buildDataSources();
     emit db_interface.databaseContentChangedSignal();
+
 }
 
 bool DBObject::hasDataSource (int id)
@@ -1026,6 +1163,8 @@ void DBObject::finalizeReadJobDoneSlot()
 
 void DBObject::databaseContentChangedSlot ()
 {
+    loginf << "DBObject: databaseContentChangedSlot";
+
     if (!current_meta_table_)
     {
         logdbg << "DBObject: databaseContentChangedSlot: object " << name_ << " has no current meta table";
