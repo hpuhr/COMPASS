@@ -176,7 +176,10 @@ void DBODataSourceWidget::updateIdSlot()
 void DBODataSourceWidget::updateShortNameColumnSlot ()
 {
     assert (short_name_edit_);
-    short_name_edit_->setText(data_source_->shortName().c_str());
+    if (data_source_->hasShortName())
+        short_name_edit_->setText(data_source_->shortName().c_str());
+    else
+        short_name_edit_->setText("");
 }
 void DBODataSourceWidget::updateNameColumnSlot ()
 {
@@ -186,25 +189,40 @@ void DBODataSourceWidget::updateNameColumnSlot ()
 void DBODataSourceWidget::updateSacColumnSlot ()
 {
     assert (sac_edit_);
-    sac_edit_->setText(QString::number(data_source_->sac()));
+    if (data_source_->hasSac())
+        sac_edit_->setText(QString::number(data_source_->sac()));
+    else
+        sac_edit_->setText("");
 }
 void DBODataSourceWidget::updateSicColumnSlot ()
 {
     assert (sic_edit_);
-    sic_edit_->setText(QString::number(data_source_->sic()));
+    if (data_source_->hasSic())
+        sic_edit_->setText(QString::number(data_source_->sic()));
+    else
+        sic_edit_->setText("");
 }
 void DBODataSourceWidget::updateLatitudeColumnSlot ()
 {
     assert (latitude_edit_);
-    latitude_edit_->setText(QString::number(data_source_->latitude(), 'g', 12));
+    if (data_source_->hasLatitude())
+        latitude_edit_->setText(QString::number(data_source_->latitude(), 'g', 12));
+    else
+        latitude_edit_->setText("");
 }
 void DBODataSourceWidget::updateLongitudeColumnSlot ()
 {
     assert (longitude_edit_);
-    longitude_edit_->setText(QString::number(data_source_->longitude(), 'g', 12));
+    if (data_source_->hasLongitude())
+        longitude_edit_->setText(QString::number(data_source_->longitude(), 'g', 12));
+    else
+        longitude_edit_->setText("");
 }
 void DBODataSourceWidget::updateAltitudeColumnSlot ()
 {
     assert (altitude_edit_);
-    altitude_edit_->setText(QString::number(data_source_->altitude(), 'g', 12));
+    if (data_source_->hasAltitude())
+        altitude_edit_->setText(QString::number(data_source_->altitude(), 'g', 12));
+    else
+        altitude_edit_->setText("");
 }

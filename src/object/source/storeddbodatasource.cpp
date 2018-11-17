@@ -25,12 +25,18 @@ StoredDBODataSource& StoredDBODataSource::operator=(DBODataSource& other)
 {
     id_ = other.id();
     name_ = other.name();
-    short_name_ = other.shortName();
-    sac_ = other.sac();
-    sic_ = other.sic();
-    latitude_ = other.latitude();
-    longitude_ = other.longitude();
-    altitude_ = other.altitude();
+    if (other.hasShortName())
+        short_name_ = other.shortName();
+    if (other.hasSac())
+        sac_ = other.sac();
+    if (other.hasSic())
+        sic_ = other.sic();
+    if (other.hasLatitude())
+        latitude_ = other.latitude();
+    if (other.hasLongitude())
+        longitude_ = other.longitude();
+    if (other.hasAltitude())
+        altitude_ = other.altitude();
 
     return *this;
 }
@@ -109,11 +115,6 @@ double StoredDBODataSource::longitude() const
     return longitude_;
 }
 
-void StoredDBODataSource::name(const std::string &name)
-{
-    name_ = name;
-}
-
 const std::string &StoredDBODataSource::name() const
 {
     return name_;
@@ -134,33 +135,46 @@ unsigned char StoredDBODataSource::sic() const
     return sic_;
 }
 
+
+void StoredDBODataSource::name(const std::string &name)
+{
+    loginf << "StoredDBODataSource " << id_ << ": name: " << name;
+    name_ = name;
+}
+
+void StoredDBODataSource::shortName(const std::string &short_name)
+{
+    loginf << "StoredDBODataSource " << id_ << ": shortName: " << short_name;
+    this->short_name_ = short_name;
+}
+
 void StoredDBODataSource::altitude(double altitude)
 {
+    loginf << "StoredDBODataSource " << id_ << ": altitude: " << altitude;
     this->altitude_ = altitude;
 }
 
-void StoredDBODataSource::latitude(double latitiude)
+void StoredDBODataSource::latitude(double latitude)
 {
-    this->latitude_ = latitiude;
+    loginf << "StoredDBODataSource " << id_ << ": latitude: " << latitude;
+    this->latitude_ = latitude;
 }
 
 void StoredDBODataSource::longitude(double longitude)
 {
+    loginf << "StoredDBODataSource " << id_ << ": longitude: " << longitude;
     this->longitude_ = longitude;
 }
 
 void StoredDBODataSource::sac(unsigned char sac)
 {
+    loginf << "StoredDBODataSource " << id_ << ": sac: " << static_cast<int> (sac);
     this->sac_ = sac;
-}
-
-void StoredDBODataSource::shortName(const std::string &short_name)
-{
-    this->short_name_ = short_name;
 }
 
 void StoredDBODataSource::sic(unsigned char sic)
 {
+    loginf << "StoredDBODataSource " << id_ << ": sic: " << static_cast<int> (sic);
     this->sic_ = sic;
 }
 

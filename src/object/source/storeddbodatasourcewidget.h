@@ -14,13 +14,13 @@ class StoredDBODataSourceWidget : public QWidget
 public slots:
     // slots for setting by QLineEdit
     //void changedIdSlot ();
-    void changedShortNameColumnSlot ();
-    void changedNameColumnSlot ();
-    void changedSacColumnSlot ();
-    void changedSicColumnSlot ();
-    void changedLatitudeColumnSlot ();
-    void changedLongitudeColumnSlot ();
-    void changedAltitudeColumnSlot ();
+    void changedShortNameColumnSlot (const QString& value_str);
+    void changedNameColumnSlot (const QString& value_str);
+    void changedSacColumnSlot (const QString& value_str);
+    void changedSicColumnSlot (const QString& value_str);
+    void changedLatitudeColumnSlot (const QString& value_str);
+    void changedLongitudeColumnSlot (const QString& value_str);
+    void changedAltitudeColumnSlot (const QString& value_str);
 
     // slots for updating from ds
     void updateIdSlot();

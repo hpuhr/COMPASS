@@ -101,7 +101,7 @@ DBObjectWidget::DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager
         grid_layout->addWidget (info_label, 1, 0);
 
         info_edit_ = new QLineEdit (object_->info().c_str());
-        connect(info_edit_, SIGNAL( returnPressed() ), this, SLOT( editInfoSlot() ));
+        connect(info_edit_, SIGNAL(returnPressed()), this, SLOT(editInfoSlot()));
         grid_layout->addWidget (info_edit_, 1, 1);
 
         properties_layout->addLayout (grid_layout);

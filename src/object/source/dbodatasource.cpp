@@ -579,7 +579,6 @@ double DBODataSource::longitude() const
 
 bool DBODataSource::hasShortName() const
 {
-    assert (has_short_name_);
     return has_short_name_;
 }
 

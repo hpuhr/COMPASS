@@ -32,30 +32,35 @@ StoredDBODataSourceWidget::StoredDBODataSourceWidget(StoredDBODataSource& data_s
     }
 
     id_edit_ = new QLineEdit ();
+    id_edit_->setReadOnly(true);
     main_layout->addWidget (id_edit_, row, col++);
 
     short_name_edit_ = new QLineEdit ();
+    connect(short_name_edit_, &QLineEdit::textChanged, this, &StoredDBODataSourceWidget::changedShortNameColumnSlot);
     main_layout->addWidget (short_name_edit_, row, col++);
 
     name_edit_ = new QLineEdit ();
+    connect(name_edit_, &QLineEdit::textChanged, this, &StoredDBODataSourceWidget::changedNameColumnSlot);
     main_layout->addWidget (name_edit_, row, col++);
 
     sac_edit_ = new QLineEdit ();
+    connect(sac_edit_, &QLineEdit::textChanged, this, &StoredDBODataSourceWidget::changedSacColumnSlot);
     main_layout->addWidget (sac_edit_, row, col++);
 
-
     sic_edit_ = new QLineEdit ();
+    connect(sic_edit_, &QLineEdit::textChanged, this, &StoredDBODataSourceWidget::changedSicColumnSlot);
     main_layout->addWidget (sic_edit_, row, col++);
 
     latitude_edit_ = new QLineEdit ();
+    connect(latitude_edit_, &QLineEdit::textChanged, this, &StoredDBODataSourceWidget::changedLatitudeColumnSlot);
     main_layout->addWidget (latitude_edit_, row, col++);
 
-
     longitude_edit_ = new QLineEdit ();
+    connect(longitude_edit_, &QLineEdit::textChanged, this, &StoredDBODataSourceWidget::changedLongitudeColumnSlot);
     main_layout->addWidget (longitude_edit_, row, col++);
 
-
     altitude_edit_ = new QLineEdit ();
+    connect(altitude_edit_, &QLineEdit::textChanged, this, &StoredDBODataSourceWidget::changedAltitudeColumnSlot);
     main_layout->addWidget (altitude_edit_, row, col++);
 
     update();
@@ -96,19 +101,20 @@ void StoredDBODataSourceWidget::update ()
 //        data_source_->id(id);
 //}
 
-void StoredDBODataSourceWidget::changedShortNameColumnSlot ()
+void StoredDBODataSourceWidget::changedNameColumnSlot (const QString& value)
 {
-    data_source_->shortName(short_name_edit_->text().toStdString());
+    data_source_->name(value.toStdString());
 }
-void StoredDBODataSourceWidget::changedNameColumnSlot ()
-{
-    data_source_->name(name_edit_->text().toStdString());
 
+void StoredDBODataSourceWidget::changedShortNameColumnSlot (const QString& value_str)
+{
+    data_source_->shortName(value_str.toStdString());
 }
-void StoredDBODataSourceWidget::changedSacColumnSlot ()
+
+void StoredDBODataSourceWidget::changedSacColumnSlot (const QString& value_str)
 {
     bool ok;
-    unsigned char sac = sac_edit_->text().toUShort(&ok);
+    unsigned char sac = value_str.toUShort(&ok);
 
     if (!ok)
     {
@@ -118,10 +124,10 @@ void StoredDBODataSourceWidget::changedSacColumnSlot ()
     else
         data_source_->sac(sac);
 }
-void StoredDBODataSourceWidget::changedSicColumnSlot ()
+void StoredDBODataSourceWidget::changedSicColumnSlot (const QString& value_str)
 {
     bool ok;
-    unsigned char sic = sic_edit_->text().toUShort(&ok);
+    unsigned char sic = value_str.toUShort(&ok);
 
     if (!ok)
     {
@@ -131,10 +137,10 @@ void StoredDBODataSourceWidget::changedSicColumnSlot ()
     else
         data_source_->sic(sic);
 }
-void StoredDBODataSourceWidget::changedLatitudeColumnSlot ()
+void StoredDBODataSourceWidget::changedLatitudeColumnSlot (const QString& value_str)
 {
     bool ok;
-    double value = latitude_edit_->text().toDouble(&ok);
+    double value = value_str.toDouble(&ok);
 
     if (!ok)
     {
@@ -144,10 +150,10 @@ void StoredDBODataSourceWidget::changedLatitudeColumnSlot ()
     else
         data_source_->latitude(value);
 }
-void StoredDBODataSourceWidget::changedLongitudeColumnSlot ()
+void StoredDBODataSourceWidget::changedLongitudeColumnSlot (const QString& value_str)
 {
     bool ok;
-    double value = longitude_edit_->text().toDouble(&ok);
+    double value = value_str.toDouble(&ok);
 
     if (!ok)
     {
@@ -157,10 +163,10 @@ void StoredDBODataSourceWidget::changedLongitudeColumnSlot ()
     else
         data_source_->longitude(value);
 }
-void StoredDBODataSourceWidget::changedAltitudeColumnSlot ()
+void StoredDBODataSourceWidget::changedAltitudeColumnSlot (const QString& value_str)
 {
     bool ok;
-    double value = altitude_edit_->text().toDouble(&ok);
+    double value = value_str.toDouble(&ok);
 
     if (!ok)
     {
@@ -176,6 +182,7 @@ void StoredDBODataSourceWidget::updateIdSlot()
     assert (id_edit_);
     id_edit_->setText(QString::number(data_source_->id()));
 }
+
 void StoredDBODataSourceWidget::updateShortNameColumnSlot ()
 {
     assert (short_name_edit_);
