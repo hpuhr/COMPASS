@@ -576,7 +576,7 @@ void DBObject::addDataSources (std::map <int, std::pair<int,int>>& sources)
 
             for (auto& stored_it : stored_data_sources_)
             {
-                if (stored_it.second.sac() == sac && stored_it.second.sic())
+                if (stored_it.second.sac() == sac && stored_it.second.sic() == sic)
                 {
                     stored_found = true;
                     stored_id = stored_it.first;
@@ -594,7 +594,8 @@ void DBObject::addDataSources (std::map <int, std::pair<int,int>>& sources)
                 buffer_ptr->get<char>(sac_col.name()).set(cnt, src.sac());
                 buffer_ptr->get<char>(sic_col.name()).set(cnt, src.sic());
 
-                loginf << "DBObject: addDataSources: " << name << " stored found id " << stored_id
+                loginf << "DBObject: addDataSources: id " << src_it.first << " sac " << sac << " sic " << sic
+                       << " found stored name " << name << " id " << stored_id
                        << " sac " << static_cast<int> (src.sac()) << " sic " << static_cast<int> (src.sic());
 
                 if (has_lat_long)

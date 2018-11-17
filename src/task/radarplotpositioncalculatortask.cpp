@@ -530,10 +530,17 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
         if (!db_object_->hasDataSource(sensor_id))
         {
             logerr << "RadarPlotPositionCalculatorTask: loadingDoneSlot: sensor id " << sensor_id << " unkown";
+            transformation_errors++;
             continue;
         }
 
         DBODataSource& data_source = db_object_->getDataSource(sensor_id);
+
+        if (!data_source.hasLatitude() || !data_source.hasLongitude())
+        {
+            transformation_errors++;
+            continue;
+        }
 
         pos_azm_rad = pos_azm_deg * DEG2RAD;
 

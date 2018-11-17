@@ -55,25 +55,18 @@ DBODataSource& DBODataSource::operator=(DBODataSource&& other)
     id_ = other.id_;
 
     name_ = other.name_;
-    other.name_ = "";
-
+    has_short_name_ = other.has_short_name_;
     short_name_ = other.short_name_;
-    other.short_name_ = "";
-
+    has_sac_ = other.has_sac_;
     sac_ = other.sac_;
-    other.sac_ = 0;
-
+    has_sic_ = other.has_sic_;
     sic_ = other.sic_;
-    other.sic_ = 0;
-
+    has_latitude_ = other.has_latitude_;
     latitude_ = other.latitude_;
-    other.latitude_ = 0.0;
-
+    has_longitude_ = other.has_longitude_;
     longitude_ = other.longitude_;
-    other.longitude_ = 0.0;
-
+    has_altitude_ = other.has_altitude_;
     altitude_ = other.altitude_;
-    other.altitude_ = 0;
 
     widget_ = std::move(other.widget_);
     if (widget_)
@@ -550,8 +543,14 @@ bool DBODataSource::calculateRadSlt2Geocentric (double x, double y, double z, Ei
     return true;
 }
 
+bool DBODataSource::hasLatitude() const
+{
+    return has_latitude_;
+}
+
 double DBODataSource::altitude() const
 {
+    assert (has_altitude_);
     return altitude_;
 }
 
@@ -568,16 +567,19 @@ unsigned int DBODataSource::id() const
 
 double DBODataSource::latitude() const
 {
+    assert (has_latitude_);
     return latitude_;
 }
 
 double DBODataSource::longitude() const
 {
+    assert (has_longitude_);
     return longitude_;
 }
 
 bool DBODataSource::hasShortName() const
 {
+    assert (has_short_name_);
     return has_short_name_;
 }
 
@@ -589,11 +591,6 @@ bool DBODataSource::hasSac() const
 bool DBODataSource::hasSic() const
 {
     return has_sic_;
-}
-
-bool DBODataSource::hasLatitude() const
-{
-    return has_latitude_;
 }
 
 bool DBODataSource::hasLongitude() const
@@ -619,46 +616,55 @@ void DBODataSource::name(const std::string &name)
 
 unsigned char DBODataSource::sac() const
 {
+    assert (has_sac_);
     return sac_;
 }
 
 const std::string &DBODataSource::shortName() const
 {
+    assert (has_short_name_);
     return short_name_;
 }
 
 unsigned char DBODataSource::sic() const
 {
+    assert (has_sic_);
     return sic_;
 }
 
 void DBODataSource::altitude(double altitude)
 {
+    has_altitude_ = true;
     this->altitude_ = altitude;
 }
 
 void DBODataSource::latitude(double latitiude)
 {
+    has_latitude_= true;
     this->latitude_ = latitiude;
 }
 
 void DBODataSource::longitude(double longitude)
 {
+    has_longitude_ = true;
     this->longitude_ = longitude;
 }
 
 void DBODataSource::sac(unsigned char sac)
 {
+    has_sac_ = true;
     this->sac_ = sac;
 }
 
 void DBODataSource::shortName(const std::string &short_name)
 {
+    has_short_name_ = true;
     this->short_name_ = short_name;
 }
 
 void DBODataSource::sic(unsigned char sic)
 {
+    has_sic_ = true;
     this->sic_ = sic;
 }
 
