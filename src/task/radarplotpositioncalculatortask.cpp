@@ -396,8 +396,8 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
     if (calculated_) // TODO: done signal comes twice?
         return;
 
-    disconnect (db_object_, SIGNAL(newDataSignal(DBObject&)), this, SLOT(newDataSlot(DBObject&)));
-    disconnect (db_object_, SIGNAL(loadingDoneSignal(DBObject&)), this, SLOT(loadingDoneSlot(DBObject&)));
+    disconnect (db_object_, &DBObject::newDataSignal, this, &RadarPlotPositionCalculatorTask::newDataSlot);
+    disconnect (db_object_, &DBObject::loadingDoneSignal, this, &RadarPlotPositionCalculatorTask::loadingDoneSlot);
 
     //
     //    std::pair<unsigned char, unsigned char> sac_sic_key;

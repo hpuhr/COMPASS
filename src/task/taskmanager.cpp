@@ -18,7 +18,9 @@
 #include "atsdb.h"
 #include "taskmanager.h"
 #include "jsonimportertask.h"
+#include "jsonimportertaskwidget.h"
 #include "radarplotpositioncalculatortask.h"
+#include "radarplotpositioncalculatortaskwidget.h"
 
 #include <cassert>
 
@@ -76,6 +78,19 @@ void TaskManager::checkSubConfigurables ()
         radar_plot_position_calculator_task_ = new RadarPlotPositionCalculatorTask (
                     "RadarPlotPositionCalculatorTask", "RadarPlotPositionCalculatorTask0", this);
         assert (radar_plot_position_calculator_task_);
+    }
+}
+
+void TaskManager::disable ()
+{
+    if (json_importer_task_)
+    {
+        json_importer_task_->widget()->close();
+    }
+
+    if (radar_plot_position_calculator_task_)
+    {
+        radar_plot_position_calculator_task_->widget()->close();
     }
 }
 
