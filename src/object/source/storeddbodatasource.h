@@ -25,7 +25,7 @@ public:
     StoredDBODataSource& operator=(StoredDBODataSource&& other);
 
     unsigned int id() const;
-    void id(unsigned int id);
+    //void id(unsigned int id);
 
     void name(const std::string &name);
     const std::string &name() const;
@@ -49,6 +49,8 @@ public:
     double altitude() const;
 
     StoredDBODataSourceWidget* widget (bool add_headers=false, QWidget* parent=0, Qt::WindowFlags f=0);
+
+    DBObject& object () { assert (object_); return *object_; }
 
 private:
     DBObject* object_ {nullptr};

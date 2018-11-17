@@ -242,12 +242,15 @@ StoredDBODataSource& DBObject::addNewStoredDataSource ()
 //    stored_data_sources_.at(new_name).name(new_name);
 //}
 
-//void DBObject::deleteStoredDataSource (const std::string& name)
-//{
-//    assert (hasStoredDataSource (name));
-//    stored_data_sources_.erase(name);
-//    assert (!hasStoredDataSource (name));
-//}
+void DBObject::deleteStoredDataSource (unsigned int id)
+{
+    assert (hasStoredDataSource (id));
+    stored_data_sources_.erase(id);
+    assert (!hasStoredDataSource (id));
+
+    if (edit_ds_widget_)
+        edit_ds_widget_->update();
+}
 
 bool DBObject::hasMetaTable (const std::string& schema) const
 {
@@ -466,40 +469,13 @@ void DBObject::addDataSource (int key_value, const std::string& name)
     DBInterface& db_interface = ATSDB::instance().interface();
     db_interface.insertBuffer(meta_table, buffer_ptr);
 
-    // create all needed tables
-//    DBTable& main_table = meta_table.mainTable();
-//    if (!main_table.existsInDB())
-//        // check for both since information might not be updated yet
-//        db_interface.createTable(main_table);
-
-    // do sub table
-//    DBTable& db_table_name = meta_table.tableFor(name_col.identifier());
-//    db_interface.insertBuffer(db_table_name, buffer_ptr, 0, 0);
-
-//    if (main_table.name() != db_table_name.name()) // HACK of sub tables exist. should be rewritten
-//    {
-//        PropertyList main_list;
-//        main_list.addProperty(foreign_key_col.name(), PropertyDataType::INT);
-
-//        std::shared_ptr<Buffer> main_buffer_ptr = std::shared_ptr<Buffer> (new Buffer (main_list, name_));
-
-//        main_buffer_ptr->get<int>(foreign_key_col.name()).set(0, key_value);
-
-//        db_interface.insertBuffer(main_table, main_buffer_ptr, 0, 0);
-//    }
-
-    loginf << "DBObject: addDataSources: emitting signal";
+    logdbg << "DBObject: addDataSources: emitting signal";
     emit db_interface.databaseContentChangedSignal();
-    // TODO should not be done here
-//    db_interface.updateTableInfo ();
-//    ATSDB::instance().schemaManager().databaseContentChangedSlot();
-//    buildDataSources();
 }
 
-// TODO hack
 void DBObject::addDataSources (std::map <int, std::pair<int,int>>& sources)
 {
-    loginf << "DBObject: addDataSources: " << name() << " inserting " << sources.size() << " sources";
+    loginf << "DBObject " << name_ << ": addDataSources:  inserting " << sources.size() << " sources";
     assert (hasCurrentDataSourceDefinition());
 
     const DBODataSourceDefinition &mos_def = currentDataSourceDefinition ();
@@ -565,7 +541,7 @@ void DBObject::addDataSources (std::map <int, std::pair<int,int>>& sources)
     {
         sac = src_it.second.first;
         sic = src_it.second.second;
-        has_sac_sic = sac >= 0 && sic >= 0;
+        has_sac_sic = (sac >= 0) && (sic >= 0);
 
         name = std::to_string(src_it.first);
 
@@ -594,7 +570,8 @@ void DBObject::addDataSources (std::map <int, std::pair<int,int>>& sources)
                 buffer_ptr->get<char>(sac_col.name()).set(cnt, src.sac());
                 buffer_ptr->get<char>(sic_col.name()).set(cnt, src.sic());
 
-                loginf << "DBObject: addDataSources: id " << src_it.first << " sac " << sac << " sic " << sic
+                loginf << "DBObject " << name_ << ": addDataSources: id " << src_it.first
+                       << " sac " << sac << " sic " << sic
                        << " found stored name " << name << " id " << stored_id
                        << " sac " << static_cast<int> (src.sac()) << " sic " << static_cast<int> (src.sic());
 
@@ -615,8 +592,8 @@ void DBObject::addDataSources (std::map <int, std::pair<int,int>>& sources)
             else
             {
                 buffer_ptr->get<std::string>(short_name_col.name()).setNone(cnt);
-                buffer_ptr->get<char>(sac_col.name()).setNone(cnt);
-                buffer_ptr->get<char>(sic_col.name()).setNone(cnt);
+                buffer_ptr->get<char>(sac_col.name()).set(cnt, sac);
+                buffer_ptr->get<char>(sic_col.name()).set(cnt, sic);
 
                 if (has_lat_long)
                 {
@@ -655,38 +632,7 @@ void DBObject::addDataSources (std::map <int, std::pair<int,int>>& sources)
     DBInterface& db_interface = ATSDB::instance().interface();
     db_interface.insertBuffer(meta_table, buffer_ptr);
 
-    // create all needed tables
-//    DBTable& main_table = meta_table.mainTable();
-//    if (!main_table.existsInDB())
-//        // check for both since information might not be updated yet
-//        db_interface.createTable(main_table);
-
-//    // do sub table
-//    DBTable& db_table_name = meta_table.tableFor(name_col.identifier());
-//    db_interface.insertBuffer(db_table_name, buffer_ptr, 0, buffer_ptr->size()-1);
-
-//    if (main_table.name() != db_table_name.name()) // HACK of sub tables exist. should be rewritten
-//    {
-//        PropertyList main_list;
-//        main_list.addProperty(foreign_key_col.name(), PropertyDataType::INT);
-
-//        std::shared_ptr<Buffer> main_buffer_ptr = std::shared_ptr<Buffer> (new Buffer (main_list, name_));
-
-//        cnt=0;
-//        for (auto& src_it : sources)
-//        {
-//            main_buffer_ptr->get<int>(foreign_key_col.name()).set(cnt, src_it.first);
-//            cnt++;
-//        }
-
-//        db_interface.insertBuffer(main_table, main_buffer_ptr, 0, main_buffer_ptr->size()-1);
-//    }
-
-    loginf << "DBObject: addDataSources: emitting signal";
-    // TODO should not be done here
-//    db_interface.updateTableInfo ();
-//    ATSDB::instance().schemaManager().databaseContentChangedSlot();
-//    buildDataSources();
+    logdbg << "DBObject: addDataSources: emitting signal";
     emit db_interface.databaseContentChangedSignal();
 
 }

@@ -56,13 +56,17 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(DBObject* object, QWidget *pa
     config_ds_layout_ = new QVBoxLayout();
     config_layout->addLayout(config_ds_layout_);
 
+    QPushButton* add_stored_button = new QPushButton ("Add New");
+    connect(add_stored_button, &QPushButton::clicked, this, &DBOEditDataSourcesWidget::addStoredDSSlot);
+    config_layout->addWidget(add_stored_button);
+
     QIcon right_icon(Files::getIconFilepath("arrow_to_right.png").c_str());
 
     sync_from_cfg_button_ = new QPushButton ("Sync to DB");
     sync_from_cfg_button_->setIcon(right_icon);
     //sync_from_cfg_button_->setMaximumWidth(200);
     //sync_from_cfg_button_->setLayoutDirection(Qt::RightToLeft);
-    connect(sync_from_cfg_button_, SIGNAL(clicked()), this, SLOT(syncOptionsFromCfg()));
+    connect(sync_from_cfg_button_, SIGNAL(clicked()), this, SLOT(syncOptionsFromCfgSlot()));
     config_layout->addWidget(sync_from_cfg_button_);
 
     config_frame->setLayout (config_layout);
@@ -88,7 +92,7 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(DBObject* object, QWidget *pa
     action_layout->addLayout(action_layout_);
 
     perform_actions_button_ = new QPushButton ("Perform Actions");
-    connect(perform_actions_button_, SIGNAL(clicked()), this, SLOT(performActions()));
+    connect(perform_actions_button_, SIGNAL(clicked()), this, SLOT(performActionsSlot()));
     action_layout->addWidget(perform_actions_button_);
     perform_actions_button_->setDisabled(true);
 
@@ -118,7 +122,7 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(DBObject* object, QWidget *pa
     sync_from_db_button_->setIcon(left_icon);
     //sync_from_db_button_->setMaximumWidth(200);
     //sync_from_db_button_->setLayoutDirection(Qt::LeftToRight);
-    connect(sync_from_db_button_, SIGNAL(clicked()), this, SLOT(syncOptionsFromDB()));
+    connect(sync_from_db_button_, SIGNAL(clicked()), this, SLOT(syncOptionsFromDBSlot()));
     db_layout->addWidget(sync_from_db_button_);
 
     db_frame->setLayout (db_layout);
@@ -172,9 +176,9 @@ void DBOEditDataSourcesWidget::update ()
     }
 }
 
-void DBOEditDataSourcesWidget::syncOptionsFromDB()
+void DBOEditDataSourcesWidget::syncOptionsFromDBSlot()
 {
-    loginf << "DBOEditDataSourcesWidget: syncOptionsFromDB";
+    loginf << "DBOEditDataSourcesWidget: syncOptionsFromDBSlot";
 
     assert (object_);
     action_collection_ = object_->getSyncOptionsFromDB();
@@ -183,9 +187,18 @@ void DBOEditDataSourcesWidget::syncOptionsFromDB()
     displaySyncOptions ();
 }
 
-void DBOEditDataSourcesWidget::syncOptionsFromCfg()
+void DBOEditDataSourcesWidget::addStoredDSSlot ()
 {
-    loginf << "DBOEditDataSourcesWidget: syncOptionsFromCfg";
+    loginf << "DBOEditDataSourcesWidget: addStoredDSSlot";
+    assert (object_);
+    object_->addNewStoredDataSource ();
+
+    update();
+}
+
+void DBOEditDataSourcesWidget::syncOptionsFromCfgSlot()
+{
+    loginf << "DBOEditDataSourcesWidget: syncOptionsFromCfgSlot";
 
     assert (object_);
     action_collection_ = object_->getSyncOptionsFromCfg();
@@ -195,9 +208,9 @@ void DBOEditDataSourcesWidget::syncOptionsFromCfg()
 }
 
 
-void DBOEditDataSourcesWidget::performActions()
+void DBOEditDataSourcesWidget::performActionsSlot()
 {
-    loginf << "DBOEditDataSourcesWidget: performActions";
+    loginf << "DBOEditDataSourcesWidget: performActionsSlot";
 
     for (auto& opt_it : action_collection_)
         if (opt_it.second.performFlag())

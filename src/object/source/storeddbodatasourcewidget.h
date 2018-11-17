@@ -32,6 +32,8 @@ public slots:
     void updateLongitudeColumnSlot ();
     void updateAltitudeColumnSlot ();
 
+    void deleteSlot ();
+
 public:
     StoredDBODataSourceWidget(StoredDBODataSource& data_source, bool add_headers=false,
                               QWidget* parent=0, Qt::WindowFlags f=0);

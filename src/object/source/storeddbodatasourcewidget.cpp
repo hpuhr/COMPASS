@@ -1,10 +1,14 @@
 #include "storeddbodatasourcewidget.h"
-
+#include "dbobject.h"
 #include "logger.h"
+#include "files.h"
 
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
+#include <QPushButton>
+
+using namespace Utils;
 
 StoredDBODataSourceWidget::StoredDBODataSourceWidget(StoredDBODataSource& data_source, bool add_headers,
                                                      QWidget* parent, Qt::WindowFlags f)
@@ -62,6 +66,15 @@ StoredDBODataSourceWidget::StoredDBODataSourceWidget(StoredDBODataSource& data_s
     altitude_edit_ = new QLineEdit ();
     connect(altitude_edit_, &QLineEdit::textChanged, this, &StoredDBODataSourceWidget::changedAltitudeColumnSlot);
     main_layout->addWidget (altitude_edit_, row, col++);
+
+    QIcon del_icon(Files::getIconFilepath("delete.png").c_str());
+
+    QPushButton* del_button = new QPushButton ();
+    del_button->setIcon(del_icon);
+    del_button->setFixedSize (UI_ICON_SIZE);
+    del_button->setFlat(UI_ICON_BUTTON_FLAT);
+    connect(del_button, &QPushButton::clicked, this, &StoredDBODataSourceWidget::deleteSlot);
+    main_layout->addWidget (del_button, row, col++);
 
     update();
 
@@ -217,5 +230,11 @@ void StoredDBODataSourceWidget::updateAltitudeColumnSlot ()
 {
     assert (altitude_edit_);
     altitude_edit_->setText(QString::number(data_source_->altitude(), 'g', 12));
+}
+
+void StoredDBODataSourceWidget::deleteSlot ()
+{
+    assert (data_source_);
+    data_source_->object().deleteStoredDataSource(data_source_->id());
 }
 

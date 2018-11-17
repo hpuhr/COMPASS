@@ -23,7 +23,7 @@ StoredDBODataSource::~StoredDBODataSource ()
 
 StoredDBODataSource& StoredDBODataSource::operator=(DBODataSource& other)
 {
-    id_ = other.id();
+    //id_ = other.id();
     name_ = other.name();
     if (other.hasShortName())
         short_name_ = other.shortName();
@@ -48,7 +48,7 @@ StoredDBODataSource& StoredDBODataSource::operator=(StoredDBODataSource&& other)
     object_ = other.object_;
     other.object_ = nullptr;
 
-    id_ = other.id_;
+    //id_ = other.id_;
 
     name_ = other.name_;
     other.name_ = "";
@@ -99,11 +99,11 @@ unsigned int StoredDBODataSource::id() const
     return id_;
 }
 
-void StoredDBODataSource::id(unsigned int id)
-{
-    // TODO
-    assert (false);
-}
+//void StoredDBODataSource::id(unsigned int id)
+//{
+//    // TODO
+//    assert (false);
+//}
 
 double StoredDBODataSource::latitude() const
 {

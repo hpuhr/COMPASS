@@ -235,9 +235,8 @@ public:
     /// @brief Returns variable identified by id
     StoredDBODataSource& storedDataSource (unsigned int id);
     StoredDBODataSource& addNewStoredDataSource ();
-//    void renameStoredDataSource (const std::string& name, const std::string& new_name);
 //    /// @brief Deletes a variable identified by id
-//    void deleteStoredDataSource (const std::string& name);
+    void deleteStoredDataSource (unsigned int id);
 
 
     using DataSourceIterator = typename std::map<int, DBODataSource>::iterator;

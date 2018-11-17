@@ -14,9 +14,12 @@ class DBOEditDataSourcesWidget : public QWidget
 {
     Q_OBJECT
 public slots:
-    void syncOptionsFromDB();
-    void syncOptionsFromCfg();
-    void performActions();
+    void syncOptionsFromDBSlot();
+    void addStoredDSSlot ();
+
+    void syncOptionsFromCfgSlot();
+
+    void performActionsSlot();
 
 public:
     DBOEditDataSourcesWidget(DBObject* object, QWidget* parent=0, Qt::WindowFlags f=0);
