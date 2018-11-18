@@ -1044,14 +1044,14 @@ bool DBInterface::checkUpdateBuffer (DBObject &object, DBOVariable &key_var, DBO
 }
 
 // TODO: only works on main table
-void DBInterface::updateBuffer (DBObject& object, DBOVariable& key_var, std::shared_ptr<Buffer> buffer,
+void DBInterface::updateBuffer (MetaDBTable& meta_table, const DBTableColumn& key_col, std::shared_ptr<Buffer> buffer,
                                 size_t from_index, size_t to_index)
 {
     //assert (checkUpdateBuffer(object, key_var, buffer));
     assert (current_connection_);
     assert (buffer);
 
-    const DBTable& table = object.currentMetaTable().mainTable();
+    const DBTable& table = meta_table.mainTable();
 
     const PropertyList &properties = buffer->properties();
 
@@ -1062,7 +1062,7 @@ void DBInterface::updateBuffer (DBObject& object, DBOVariable& key_var, std::sha
                                       +"' does not exist in table "+table.name());
     }
 
-    std::string bind_statement =  sql_generator_.createDBUpdateStringBind(buffer, object, key_var, table.name());
+    std::string bind_statement =  sql_generator_.createDBUpdateStringBind(buffer, key_col, table.name());
 
     QMutexLocker locker(&connection_mutex_);
 

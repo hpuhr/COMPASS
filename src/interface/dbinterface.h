@@ -120,8 +120,8 @@ public:
 
     bool checkUpdateBuffer (DBObject &object, DBOVariable &key_var, DBOVariableSet& list,
                             std::shared_ptr<Buffer> buffer);
-    void updateBuffer (DBObject &object, DBOVariable &key_var, std::shared_ptr<Buffer> buffer, size_t from_index,
-                       size_t to_index);
+    void updateBuffer (MetaDBTable& meta_table, const DBTableColumn& key_col, std::shared_ptr<Buffer> buffer,
+                       size_t from_index, size_t to_index);
 
     //    /// @brief Prepares incremental read of DBO type
     void prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
