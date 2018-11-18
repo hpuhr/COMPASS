@@ -1043,6 +1043,7 @@ bool DBInterface::checkUpdateBuffer (DBObject &object, DBOVariable &key_var, DBO
     return true;
 }
 
+// TODO: only works on main table
 void DBInterface::updateBuffer (DBObject& object, DBOVariable& key_var, std::shared_ptr<Buffer> buffer,
                                 size_t from_index, size_t to_index)
 {

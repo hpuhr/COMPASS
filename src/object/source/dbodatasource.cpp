@@ -25,24 +25,36 @@
 
 #include <cmath>
 
-
-
 DBODataSource::DBODataSource(DBObject& object, unsigned int id, const std::string& name)
     : object_(&object), id_(id), name_(name)
 {
-
 }
 
 DBODataSource& DBODataSource::operator=(StoredDBODataSource& other)
 {
-    id_ = other.id();
+    //id_ = other.id(); not copied, keep own
     name_ = other.name();
-    short_name_ = other.shortName();
-    sac_ = other.sac();
-    sic_ = other.sic();
-    latitude_ = other.latitude();
-    longitude_ = other.longitude();
-    altitude_ = other.altitude();
+    has_short_name_ = other.hasShortName();
+    if (has_short_name_)
+        short_name_ = other.shortName();
+    has_sac_ = other.hasSac();
+    if (has_sac_)
+        sac_ = other.sac();
+    has_sic_ = other.hasSic();
+    if (has_sic_)
+        sic_ = other.sic();
+    has_latitude_ = other.hasLatitude();
+    if (has_latitude_)
+        latitude_ = other.latitude();
+    has_longitude_ = other.hasLongitude();
+    if (has_longitude_)
+        longitude_ = other.longitude();
+    has_altitude_ = other.hasAltitude();
+    if (has_altitude_)
+        altitude_ = other.altitude();
+
+    if (widget_)
+        widget_->update();
 
     return *this;
 }
@@ -72,7 +84,7 @@ DBODataSource& DBODataSource::operator=(DBODataSource&& other)
     if (widget_)
         widget_->setDataSource(*this);
 
-    return *this; //static_cast<DBODataSource&>(Configurable::operator=(std::move(other)));
+    return *this;
 }
 
 bool DBODataSource::operator==(StoredDBODataSource& other)
@@ -86,12 +98,18 @@ bool DBODataSource::operator==(StoredDBODataSource& other)
            << " alt " << (fabs(altitude_ - other.altitude()) < 1e-10);
 
     return (name_ == other.name()) &&
-            (short_name_ == other.shortName()) &&
-            (sac_ == other.sac()) &&
-            (sic_ == other.sic()) &&
-            (fabs(latitude_ - other.latitude()) < 1e-10) &&
-            (fabs(longitude_ - other.longitude()) < 1e-10) &&
-            (fabs(altitude_ - other.altitude()) < 1e-10);
+            (has_short_name_ == other.hasShortName()) &&
+            (has_short_name_ ? short_name_ == other.shortName() : true) &&
+            (has_sac_ == other.hasSac()) &&
+            (has_sac_ ? sac_ == other.sac() : true) &&
+            (has_sic_ == other.hasSic()) &&
+            (has_sic_ ? sic_ == other.sic() : true) &&
+            (has_latitude_ == other.hasLatitude()) &&
+            (has_latitude_ ? fabs(latitude_ - other.latitude()) < 1e-10 : true) &&
+            (has_longitude_ == other.hasLongitude()) &&
+            (has_longitude_ ? fabs(longitude_ - other.longitude()) < 1e-10 : true) &&
+            (has_altitude_ == other.hasAltitude()) &&
+            (has_altitude_? fabs(altitude_ - other.altitude()) < 1e-10 : true);
 }
 
 DBODataSource::~DBODataSource()
@@ -628,8 +646,7 @@ const std::string &DBODataSource::name() const
 
 void DBODataSource::name(const std::string &name)
 {
-    // TODO
-    assert (false);
+    this->name_ = name;
 }
 
 unsigned char DBODataSource::sac() const
@@ -696,4 +713,8 @@ DBODataSourceWidget* DBODataSource::widget (bool add_headers, QWidget* parent, Q
     return widget_.get();
 }
 
-
+void DBODataSource::updateInDatabase ()
+{
+    assert (object_);
+    object_->updateDataSource(id_);
+}

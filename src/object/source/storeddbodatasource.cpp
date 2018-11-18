@@ -29,7 +29,8 @@ StoredDBODataSource::~StoredDBODataSource ()
 
 StoredDBODataSource& StoredDBODataSource::operator=(DBODataSource& other)
 {
-    //id_ = other.id();
+    //id_ = other.id(); not copied, keep own
+
     name_ = other.name();
     has_short_name_ = other.hasShortName();
     if (has_short_name_)

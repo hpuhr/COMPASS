@@ -1,4 +1,5 @@
 #include "dbodatasourcewidget.h"
+#include "invalidqlineedit.h"
 #include "logger.h"
 
 #include <QGridLayout>
@@ -19,8 +20,8 @@ DBODataSourceWidget::DBODataSourceWidget(DBODataSource& data_source, bool add_he
     if (add_headers)
     {
         main_layout->addWidget (new QLabel ("ID"), row, col++);
-        main_layout->addWidget (new QLabel ("Short Name"), row, col++);
         main_layout->addWidget (new QLabel ("Name"), row, col++);
+        main_layout->addWidget (new QLabel ("Short Name"), row, col++);
         main_layout->addWidget (new QLabel ("SAC"), row, col++);
         main_layout->addWidget (new QLabel ("SIC"), row, col++);
         main_layout->addWidget (new QLabel ("Latitude"), row, col++);
@@ -31,30 +32,42 @@ DBODataSourceWidget::DBODataSourceWidget(DBODataSource& data_source, bool add_he
     }
 
     id_edit_ = new QLineEdit ();
+    id_edit_->setReadOnly(true);
     main_layout->addWidget (id_edit_, row, col++);
 
     name_edit_ = new QLineEdit ();
+    connect(name_edit_, &QLineEdit::textEdited, this, &DBODataSourceWidget::changedNameColumnSlot);
     main_layout->addWidget (name_edit_, row, col++);
 
     short_name_edit_ = new QLineEdit ();
+    connect(short_name_edit_, &QLineEdit::textEdited,
+            this, &DBODataSourceWidget::changedShortNameColumnSlot);
     main_layout->addWidget (short_name_edit_, row, col++);
 
-    sac_edit_ = new QLineEdit ();
+    sac_edit_ = new InvalidQLineEdit ();
+    connect(sac_edit_, &InvalidQLineEdit::textEdited, this, &DBODataSourceWidget::changedSacColumnSlot);
     main_layout->addWidget (sac_edit_, row, col++);
 
 
-    sic_edit_ = new QLineEdit ();
+    sic_edit_ = new InvalidQLineEdit ();
+    connect(sic_edit_, &InvalidQLineEdit::textEdited, this, &DBODataSourceWidget::changedSicColumnSlot);
     main_layout->addWidget (sic_edit_, row, col++);
 
-    latitude_edit_ = new QLineEdit ();
+    latitude_edit_ = new InvalidQLineEdit ();
+    connect(latitude_edit_, &InvalidQLineEdit::textEdited,
+            this, &DBODataSourceWidget::changedLatitudeColumnSlot);
     main_layout->addWidget (latitude_edit_, row, col++);
 
 
-    longitude_edit_ = new QLineEdit ();
+    longitude_edit_ = new InvalidQLineEdit ();
+    connect(longitude_edit_, &InvalidQLineEdit::textEdited,
+            this, &DBODataSourceWidget::changedLongitudeColumnSlot);
     main_layout->addWidget (longitude_edit_, row, col++);
 
 
-    altitude_edit_ = new QLineEdit ();
+    altitude_edit_ = new InvalidQLineEdit ();
+    connect(altitude_edit_, &InvalidQLineEdit::textEdited,
+            this, &DBODataSourceWidget::changedAltitudeColumnSlot);
     main_layout->addWidget (altitude_edit_, row, col++);
 
     update();
@@ -80,27 +93,15 @@ void DBODataSourceWidget::update ()
     updateAltitudeColumnSlot ();
 }
 
-//void DBODataSourceWidget::changedIdSlot ()
-//{
-//    bool ok;
-//    unsigned int id = id_edit_->text().toUInt(&ok);
-
-//    if (!ok)
-//    {
-//        logwrn << "DBODataSourceWidget: changedIdSlot: conversion failed";
-//        updateIdSlot();
-//    }
-//    else
-//        data_source_->id(id);
-//}
 void DBODataSourceWidget::changedShortNameColumnSlot ()
 {
     data_source_->shortName(short_name_edit_->text().toStdString());
+    data_source_->updateInDatabase();
 }
 void DBODataSourceWidget::changedNameColumnSlot ()
 {
     data_source_->name(name_edit_->text().toStdString());
-
+    data_source_->updateInDatabase();
 }
 void DBODataSourceWidget::changedSacColumnSlot ()
 {
@@ -113,7 +114,10 @@ void DBODataSourceWidget::changedSacColumnSlot ()
         updateSacColumnSlot();
     }
     else
+    {
         data_source_->sac(sac);
+        data_source_->updateInDatabase();
+    }
 }
 void DBODataSourceWidget::changedSicColumnSlot ()
 {
@@ -126,7 +130,10 @@ void DBODataSourceWidget::changedSicColumnSlot ()
         updateSicColumnSlot();
     }
     else
+    {
         data_source_->sic(sic);
+        data_source_->updateInDatabase();
+    }
 }
 void DBODataSourceWidget::changedLatitudeColumnSlot ()
 {
@@ -139,7 +146,10 @@ void DBODataSourceWidget::changedLatitudeColumnSlot ()
         updateLatitudeColumnSlot();
     }
     else
+    {
         data_source_->latitude(value);
+        data_source_->updateInDatabase();
+    }
 }
 void DBODataSourceWidget::changedLongitudeColumnSlot ()
 {
@@ -152,7 +162,10 @@ void DBODataSourceWidget::changedLongitudeColumnSlot ()
         updateLongitudeColumnSlot();
     }
     else
+    {
         data_source_->longitude(value);
+        data_source_->updateInDatabase();
+    }
 }
 void DBODataSourceWidget::changedAltitudeColumnSlot ()
 {
@@ -165,7 +178,10 @@ void DBODataSourceWidget::changedAltitudeColumnSlot ()
         updateAltitudeColumnSlot();
     }
     else
+    {
         data_source_->altitude(value);
+        data_source_->updateInDatabase();
+    }
 }
 
 void DBODataSourceWidget::updateIdSlot()

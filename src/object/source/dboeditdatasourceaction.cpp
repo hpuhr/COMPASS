@@ -61,6 +61,19 @@ void DBOEditDataSourceAction::perform (DBObject& object, const std::string& sour
 
             object.storedDataSource(tgt_id) = object.getDataSource(src_id);
         }
+        else if (source_type == "Config" && target_type_ == "DB")
+        {
+            assert (String::isNumber(source_id));
+            unsigned int src_id = std::stoi(source_id);
+            assert (object.hasStoredDataSource(src_id));
+
+            assert (String::isNumber(target_id_));
+            unsigned int tgt_id = std::stoi(target_id_);
+            assert (object.hasDataSource(tgt_id));
+
+            object.getDataSource(tgt_id) = object.storedDataSource(src_id);
+            object.updateDataSource(tgt_id);
+        }
         else
             logerr << "DBOEditDataSourceAction: perform: unsupported action Add src " << source_type
                    << " tgt " << target_type_;

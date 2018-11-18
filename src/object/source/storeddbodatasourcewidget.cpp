@@ -2,6 +2,7 @@
 #include "dbobject.h"
 #include "logger.h"
 #include "files.h"
+#include "invalidqlineedit.h"
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -40,34 +41,34 @@ StoredDBODataSourceWidget::StoredDBODataSourceWidget(StoredDBODataSource& data_s
     main_layout->addWidget (id_edit_, row, col++);
 
     name_edit_ = new QLineEdit ();
-    connect(name_edit_, &QLineEdit::textChanged, this, &StoredDBODataSourceWidget::changedNameColumnSlot);
+    connect(name_edit_, &QLineEdit::textEdited, this, &StoredDBODataSourceWidget::changedNameColumnSlot);
     main_layout->addWidget (name_edit_, row, col++);
 
     short_name_edit_ = new InvalidQLineEdit ();
-    connect(short_name_edit_, &InvalidQLineEdit::textChanged,
+    connect(short_name_edit_, &InvalidQLineEdit::textEdited,
             this, &StoredDBODataSourceWidget::changedShortNameColumnSlot);
     main_layout->addWidget (short_name_edit_, row, col++);
 
     sac_edit_ = new InvalidQLineEdit ();
-    connect(sac_edit_, &InvalidQLineEdit::textChanged, this, &StoredDBODataSourceWidget::changedSacColumnSlot);
+    connect(sac_edit_, &InvalidQLineEdit::textEdited, this, &StoredDBODataSourceWidget::changedSacColumnSlot);
     main_layout->addWidget (sac_edit_, row, col++);
 
     sic_edit_ = new InvalidQLineEdit ();
-    connect(sic_edit_, &InvalidQLineEdit::textChanged, this, &StoredDBODataSourceWidget::changedSicColumnSlot);
+    connect(sic_edit_, &InvalidQLineEdit::textEdited, this, &StoredDBODataSourceWidget::changedSicColumnSlot);
     main_layout->addWidget (sic_edit_, row, col++);
 
     latitude_edit_ = new InvalidQLineEdit ();
-    connect(latitude_edit_, &InvalidQLineEdit::textChanged,
+    connect(latitude_edit_, &InvalidQLineEdit::textEdited,
             this, &StoredDBODataSourceWidget::changedLatitudeColumnSlot);
     main_layout->addWidget (latitude_edit_, row, col++);
 
     longitude_edit_ = new InvalidQLineEdit ();
-    connect(longitude_edit_, &InvalidQLineEdit::textChanged,
+    connect(longitude_edit_, &InvalidQLineEdit::textEdited,
             this, &StoredDBODataSourceWidget::changedLongitudeColumnSlot);
     main_layout->addWidget (longitude_edit_, row, col++);
 
     altitude_edit_ = new InvalidQLineEdit ();
-    connect(altitude_edit_, &InvalidQLineEdit::textChanged,
+    connect(altitude_edit_, &InvalidQLineEdit::textEdited,
             this, &StoredDBODataSourceWidget::changedAltitudeColumnSlot);
     main_layout->addWidget (altitude_edit_, row, col++);
 

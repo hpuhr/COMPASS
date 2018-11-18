@@ -7,6 +7,7 @@
 
 class QLineEdit;
 class QGridLayout;
+class InvalidQLineEdit;
 
 class DBODataSourceWidget : public QWidget
 {
@@ -45,13 +46,13 @@ private:
     DBODataSource* data_source_;
 
     QLineEdit* id_edit_{nullptr};
-    QLineEdit* short_name_edit_{nullptr};
     QLineEdit* name_edit_{nullptr};
-    QLineEdit* sac_edit_{nullptr};
-    QLineEdit* sic_edit_{nullptr};
-    QLineEdit* latitude_edit_{nullptr};
-    QLineEdit* longitude_edit_{nullptr};
-    QLineEdit* altitude_edit_{nullptr};
+    QLineEdit* short_name_edit_{nullptr};
+    InvalidQLineEdit* sac_edit_{nullptr};
+    InvalidQLineEdit* sic_edit_{nullptr};
+    InvalidQLineEdit* latitude_edit_{nullptr};
+    InvalidQLineEdit* longitude_edit_{nullptr};
+    InvalidQLineEdit* altitude_edit_{nullptr};
 };
 
 #endif // DBODATASOURCEWIDGET_H
