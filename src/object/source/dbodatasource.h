@@ -90,6 +90,8 @@ public:
 
     bool calculateRadSlt2Geocentric (double x, double y, double z, Eigen::Vector3d& geoc_pos);
 
+    DBObject& object() { assert (object_); return *object_; }
+
 protected:
     DBObject* object_;
     unsigned int id_{0};

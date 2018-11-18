@@ -106,6 +106,7 @@ public:
     bool hasDataSourceTables (DBObject& object);
     /// @brief Returns a container with all data sources for a DBO
     std::map <int, DBODataSource> getDataSources (DBObject &object);
+    void updateDataSource (DBODataSource& data_source);
     bool hasActiveDataSources (DBObject &object);
     /// @brief Returns a set with all active data source ids for a DBO type
     std::set<int> getActiveDataSources (DBObject &object);

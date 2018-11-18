@@ -33,11 +33,11 @@ DBODataSourceWidget::DBODataSourceWidget(DBODataSource& data_source, bool add_he
     id_edit_ = new QLineEdit ();
     main_layout->addWidget (id_edit_, row, col++);
 
-    short_name_edit_ = new QLineEdit ();
-    main_layout->addWidget (short_name_edit_, row, col++);
-
     name_edit_ = new QLineEdit ();
     main_layout->addWidget (name_edit_, row, col++);
+
+    short_name_edit_ = new QLineEdit ();
+    main_layout->addWidget (short_name_edit_, row, col++);
 
     sac_edit_ = new QLineEdit ();
     main_layout->addWidget (sac_edit_, row, col++);

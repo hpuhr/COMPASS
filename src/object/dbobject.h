@@ -249,6 +249,7 @@ public:
     void addDataSources (std::map <int, std::pair<int,int>>& sources);
     bool hasDataSource (int id);
     DBODataSource& getDataSource (int id);
+    void updateDataSource (int id);
     ///@brief Returns data source name for a DBO type and data source number.
     const std::string& getNameOfSensor (int id);
 

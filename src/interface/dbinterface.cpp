@@ -364,6 +364,14 @@ bool DBInterface::hasDataSourceTables (DBObject& object)
     return true;
 }
 
+void DBInterface::updateDataSource (DBODataSource& data_source)
+{
+    loginf << "DBInterface: updateDataSource: object " << data_source.object().name()
+           << " source " << data_source.id();
+
+    // TODO
+}
+
 ///**
 // * Gets SQL command, executes it and returns resulting buffer.
 // */

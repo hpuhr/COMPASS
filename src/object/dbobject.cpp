@@ -648,6 +648,12 @@ DBODataSource& DBObject::getDataSource (int id)
     return data_sources_.at(id);
 }
 
+void DBObject::updateDataSource (int id)
+{
+    assert (hasDataSource (id));
+    ATSDB::instance().interface().updateDataSource(getDataSource(id));
+}
+
 const std::string& DBObject::getNameOfSensor (int id)
 {
     assert (hasDataSource (id));

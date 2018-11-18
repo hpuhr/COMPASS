@@ -4,8 +4,23 @@
 #include "storeddbodatasource.h"
 
 #include <QWidget>
+#include <QLineEdit>
 
-class QLineEdit;
+class InvalidQLineEdit : public QLineEdit
+{
+public:
+    explicit InvalidQLineEdit(QWidget *parent = Q_NULLPTR) : QLineEdit(parent) {}
+    explicit InvalidQLineEdit(const QString &text, QWidget *parent = Q_NULLPTR) : QLineEdit (text, parent) {}
+
+    void setValid (bool value) {
+        if (value)
+            setStyleSheet("QLineEdit { background: rgb(255, 255, 255); selection-background-color:"
+                                         " rgb(200, 200, 200); }");
+        else
+            setStyleSheet("QLineEdit { background: rgb(255, 100, 100); selection-background-color:"
+                                         " rgb(255, 200, 200); }");
+    }
+};
 
 class StoredDBODataSourceWidget : public QWidget
 {
@@ -47,13 +62,13 @@ private:
     StoredDBODataSource* data_source_;
 
     QLineEdit* id_edit_{nullptr};
-    QLineEdit* short_name_edit_{nullptr};
     QLineEdit* name_edit_{nullptr};
-    QLineEdit* sac_edit_{nullptr};
-    QLineEdit* sic_edit_{nullptr};
-    QLineEdit* latitude_edit_{nullptr};
-    QLineEdit* longitude_edit_{nullptr};
-    QLineEdit* altitude_edit_{nullptr};
+    InvalidQLineEdit* short_name_edit_{nullptr};
+    InvalidQLineEdit* sac_edit_{nullptr};
+    InvalidQLineEdit* sic_edit_{nullptr};
+    InvalidQLineEdit* latitude_edit_{nullptr};
+    InvalidQLineEdit* longitude_edit_{nullptr};
+    InvalidQLineEdit* altitude_edit_{nullptr};
 };
 
 #endif // STOREDDBODATASOURCEWIDGET_H
