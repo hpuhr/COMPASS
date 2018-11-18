@@ -667,7 +667,7 @@ DBOEditDataSourceActionOptionsCollection DBObject::getSyncOptionsFromDB ()
 
     for (auto& ds_it : data_sources_)
     {
-        assert (ds_it.first > 0); // todo refactor to uint?
+        assert (ds_it.first >= 0); // todo refactor to uint?
         unsigned int id = ds_it.first;
         options_collection [id] = DBOEditDataSourceActionOptionsCreator::getSyncOptionsFromDB (*this, ds_it.second);
     }
@@ -681,7 +681,7 @@ DBOEditDataSourceActionOptionsCollection DBObject::getSyncOptionsFromCfg ()
 
     for (auto& ds_it : stored_data_sources_)
     {
-        assert (ds_it.first > 0); // todo refactor to uint?
+        assert (ds_it.first >= 0); // todo refactor to uint?
         unsigned int id = ds_it.first;
         options_collection [id] = DBOEditDataSourceActionOptionsCreator::getSyncOptionsFromCfg (*this, ds_it.second);
     }

@@ -117,11 +117,16 @@ public:
 //    void insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer, size_t from_index,
 //                       size_t to_index);
     void insertBuffer (MetaDBTable& meta_table, std::shared_ptr<Buffer> buffer);
+    void insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer);
 
     bool checkUpdateBuffer (DBObject &object, DBOVariable &key_var, DBOVariableSet& list,
                             std::shared_ptr<Buffer> buffer);
     void updateBuffer (MetaDBTable& meta_table, const DBTableColumn& key_col, std::shared_ptr<Buffer> buffer,
-                       size_t from_index, size_t to_index);
+                       int from_index=-1, int to_index=-1); // no indexes means full buffer
+    void updateBuffer (DBTable& table, const DBTableColumn& key_col, std::shared_ptr<Buffer> buffer,
+                       int from_index=-1, int to_index=-1); // no indexes means full buffer
+
+    std::shared_ptr<Buffer> getPartialBuffer (DBTable& table, std::shared_ptr<Buffer> buffer);
 
     //    /// @brief Prepares incremental read of DBO type
     void prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
@@ -236,9 +241,6 @@ protected:
     void setPostProcessed (bool value);
     //    /// @brief Returns buffer with min/max data from another Buffer with the string contents. Delete returned buffer yourself.
     //    Buffer *createFromMinMaxStringBuffer (Buffer *string_buffer, PropertyDataType data_type);
-
-    std::shared_ptr<Buffer> getPartialBuffer (DBTable& table, std::shared_ptr<Buffer> buffer);
-    void partialInsertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer);
 };
 
 #endif /* SQLITE3CONNECTION_H_ */

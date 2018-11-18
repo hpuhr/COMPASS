@@ -135,7 +135,7 @@ DBOEditDataSourceActionOptions getSyncOptionsFromCfg (DBObject& object, StoredDB
 
     assert (options.numOptions() > 0);
     options.currentActionId(options.numOptions()-1);
-    options.performFlag(true);
+    options.performFlag(options.currentActionId() != 0);
 
     return options;
 }

@@ -336,8 +336,8 @@ std::set<int> DBInterface::queryActiveSensorNumbers(DBObject &object)
 
 bool DBInterface::hasDataSourceTables (DBObject& object)
 {
-//    if (!object.existsInDB())
-//        return false;
+    //    if (!object.existsInDB())
+    //        return false;
 
     if (!object.hasCurrentDataSourceDefinition())
         return false;
@@ -369,7 +369,99 @@ void DBInterface::updateDataSource (DBODataSource& data_source)
     loginf << "DBInterface: updateDataSource: object " << data_source.object().name()
            << " source " << data_source.id();
 
-    // TODO
+    DBObject& object = data_source.object();
+    std::shared_ptr <Buffer> buffer {new Buffer()};
+
+    const DBODataSourceDefinition &ds_def = object.currentDataSourceDefinition ();
+    const DBSchema &schema = ATSDB::instance().schemaManager().getCurrentSchema();
+    assert (schema.hasMetaTable(ds_def.metaTableName()));
+
+    MetaDBTable& meta =  schema.metaTable(ds_def.metaTableName());
+
+    const DBTableColumn& foreign_key_col = meta.column(ds_def.foreignKey());
+
+    const DBTableColumn& name_col = meta.column(ds_def.nameColumn());
+    assert (name_col.propertyType() == PropertyDataType::STRING);
+    buffer->addProperty(name_col.name(), name_col.propertyType());
+    buffer->get<std::string>(name_col.name()).set(0, data_source.name());
+
+    if (ds_def.hasShortNameColumn())
+    {
+        const DBTableColumn& short_name_col = meta.column(ds_def.shortNameColumn());
+        assert (short_name_col.propertyType() == PropertyDataType::STRING);
+        buffer->addProperty(short_name_col.name(), short_name_col.propertyType());
+        if (data_source.hasShortName())
+            buffer->get<std::string>(short_name_col.name()).set(0, data_source.shortName());
+        else
+            buffer->get<std::string>(short_name_col.name()).setNone(0);
+    }
+
+
+    if (ds_def.hasSacColumn())
+    {
+        const DBTableColumn& sac_col = meta.column(ds_def.sacColumn());
+        assert (sac_col.propertyType() == PropertyDataType::CHAR);
+        buffer->addProperty(sac_col.name(), sac_col.propertyType());
+        if (data_source.hasSac())
+            buffer->get<char>(sac_col.name()).set(0, data_source.sac());
+        else
+            buffer->get<char>(sac_col.name()).setNone(0);
+    }
+
+    if (ds_def.hasSicColumn())
+    {
+        const DBTableColumn& sic_col = meta.column(ds_def.sicColumn());
+        assert (sic_col.propertyType() == PropertyDataType::CHAR);
+        buffer->addProperty(sic_col.name(), sic_col.propertyType());
+        if (data_source.hasSic())
+            buffer->get<char>(sic_col.name()).set(0, data_source.sic());
+        else
+            buffer->get<char>(sic_col.name()).setNone(0);
+    }
+
+    if (ds_def.hasLatitudeColumn())
+    {
+        const DBTableColumn& lat_col = meta.column(ds_def.latitudeColumn());
+        assert (lat_col.propertyType() == PropertyDataType::DOUBLE);
+        buffer->addProperty(lat_col.name(), lat_col.propertyType());
+        if (data_source.hasLatitude())
+            buffer->get<double>(lat_col.name()).set(0, data_source.latitude());
+        else
+            buffer->get<double>(lat_col.name()).setNone(0);
+    }
+
+    if (ds_def.hasLongitudeColumn())
+    {
+        const DBTableColumn& lon_col = meta.column(ds_def.longitudeColumn());
+        assert (lon_col.propertyType() == PropertyDataType::DOUBLE);
+        buffer->addProperty(lon_col.name(), lon_col.propertyType());
+        if (data_source.hasLongitude())
+            buffer->get<double>(lon_col.name()).set(0, data_source.longitude());
+        else
+            buffer->get<double>(lon_col.name()).setNone(0);
+    }
+
+    if (ds_def.hasAltitudeColumn())
+    {
+        const DBTableColumn& alt_col = meta.column(ds_def.altitudeColumn());
+        assert (alt_col.propertyType() == PropertyDataType::DOUBLE);
+        buffer->addProperty(alt_col.name(), alt_col.propertyType());
+        if (data_source.hasAltitude())
+            buffer->get<double>(alt_col.name()).set(0, data_source.altitude());
+        else
+            buffer->get<double>(alt_col.name()).setNone(0);
+    }
+
+    assert (foreign_key_col.propertyType() == PropertyDataType::INT);
+    buffer->addProperty(foreign_key_col.name(), foreign_key_col.propertyType());
+    buffer->get<int>(foreign_key_col.name()).set(0, data_source.id());
+
+
+    loginf << "DBInterface: updateDataSource: updating";
+
+    updateBuffer (meta, foreign_key_col, buffer);
+
+    loginf << "DBInterface: updateDataSource: update done";
 }
 
 ///**
@@ -486,8 +578,8 @@ std::map <int, DBODataSource> DBInterface::getDataSources (DBObject &object)
         //sources.insert(std::make_pair(key, DBODataSource(key, name)));
 
         sources.emplace(std::piecewise_construct,
-                     std::forward_as_tuple(key),  // args for key
-                     std::forward_as_tuple(object, key, name));  // args for mapped value
+                        std::forward_as_tuple(key),  // args for key
+                        std::forward_as_tuple(object, key, name));  // args for mapped value
 
         if (has_short_name && !buffer->get<std::string>(short_name_col_name).isNone(cnt))
             sources.at(key).shortName(buffer->get<std::string>(short_name_col_name).get(cnt));
@@ -881,15 +973,58 @@ void DBInterface::insertBuffer (MetaDBTable& meta_table, std::shared_ptr<Buffer>
 
     std::shared_ptr<Buffer> partial_buffer = getPartialBuffer(meta_table.mainTable(), buffer);
     assert (partial_buffer->size());
-    partialInsertBuffer(meta_table.mainTable(), partial_buffer);
+    insertBuffer(meta_table.mainTable(), partial_buffer);
 
     for (auto& sub_it : meta_table.subTables())
     {
         partial_buffer = getPartialBuffer(sub_it.second, buffer);
         assert (partial_buffer->size());
-        partialInsertBuffer(sub_it.second, partial_buffer);
+        insertBuffer(sub_it.second, partial_buffer);
+    }
+}
+
+void DBInterface::insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer)
+{
+    loginf << "DBInterface: partialInsertBuffer: table " << table.name() << " buffer size " << buffer->size();
+
+    assert (current_connection_);
+    assert (buffer);
+
+    const PropertyList &properties = buffer->properties();
+
+    for (unsigned int cnt=0; cnt < properties.size(); ++cnt)
+    {
+        logdbg << "DBInterface: partialInsertBuffer: checking column '" << properties.at(cnt).name() << "'";
+
+        if (!table.hasColumn(properties.at(cnt).name()))
+            throw std::runtime_error ("DBInterface: partialInsertBuffer: column '"+properties.at(cnt).name()
+                                      +"' does not exist in table "+table.name());
     }
 
+    if (!table.existsInDB() && !existsTable(table.name())) // check for both since information might not be updated yet
+        createTable(table);
+
+    assert (table.existsInDB());
+
+    std::string bind_statement = sql_generator_.insertDBUpdateStringBind(buffer, table.name());
+
+    QMutexLocker locker(&connection_mutex_);
+
+    logdbg  << "DBInterface: partialInsertBuffer: preparing bind statement";
+    current_connection_->prepareBindStatement(bind_statement);
+    current_connection_->beginBindTransaction();
+
+    logdbg  << "DBInterface: partialInsertBuffer: starting inserts";
+    size_t size = buffer->size();
+    for (unsigned int cnt=0; cnt < size; ++cnt)
+    {
+        insertBindStatementUpdateForCurrentIndex(buffer, cnt);
+    }
+
+    logdbg  << "DBInterface: partialInsertBuffer: ending bind transactions";
+    current_connection_->endBindTransaction();
+    logdbg  << "DBInterface: partialInsertBuffer: finalizing bind statement";
+    current_connection_->finalizeBindStatement();
 }
 
 std::shared_ptr<Buffer> DBInterface::getPartialBuffer (DBTable& table, std::shared_ptr<Buffer> buffer)
@@ -956,50 +1091,6 @@ std::shared_ptr<Buffer> DBInterface::getPartialBuffer (DBTable& table, std::shar
     return tmp_buffer;
 }
 
-void DBInterface::partialInsertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer)
-{
-    loginf << "DBInterface: partialInsertBuffer: table " << table.name() << " buffer size " << buffer->size();
-
-    assert (current_connection_);
-    assert (buffer);
-
-    const PropertyList &properties = buffer->properties();
-
-    for (unsigned int cnt=0; cnt < properties.size(); ++cnt)
-    {
-        logdbg << "DBInterface: partialInsertBuffer: checking column '" << properties.at(cnt).name() << "'";
-
-        if (!table.hasColumn(properties.at(cnt).name()))
-            throw std::runtime_error ("DBInterface: partialInsertBuffer: column '"+properties.at(cnt).name()
-                                      +"' does not exist in table "+table.name());
-    }
-
-    if (!table.existsInDB() && !existsTable(table.name())) // check for both since information might not be updated yet
-        createTable(table);
-
-    assert (table.existsInDB());
-
-    std::string bind_statement = sql_generator_.insertDBUpdateStringBind(buffer, table.name());
-
-    QMutexLocker locker(&connection_mutex_);
-
-    logdbg  << "DBInterface: partialInsertBuffer: preparing bind statement";
-    current_connection_->prepareBindStatement(bind_statement);
-    current_connection_->beginBindTransaction();
-
-    logdbg  << "DBInterface: partialInsertBuffer: starting inserts";
-    size_t size = buffer->size();
-    for (unsigned int cnt=0; cnt < size; ++cnt)
-    {
-        insertBindStatementUpdateForCurrentIndex(buffer, cnt);
-    }
-
-    logdbg  << "DBInterface: partialInsertBuffer: ending bind transactions";
-    current_connection_->endBindTransaction();
-    logdbg  << "DBInterface: partialInsertBuffer: finalizing bind statement";
-    current_connection_->finalizeBindStatement();
-}
-
 bool DBInterface::checkUpdateBuffer (DBObject &object, DBOVariable &key_var, DBOVariableSet& list,
                                      std::shared_ptr<Buffer> buffer)
 {
@@ -1031,27 +1122,59 @@ bool DBInterface::checkUpdateBuffer (DBObject &object, DBOVariable &key_var, DBO
 
     }
 
-//    for (unsigned int cnt=0; cnt < properties.size(); cnt++)
-//    {
-//        if (!table.hasColumn(properties.at(cnt).name()))
-//            return false;
+    //    for (unsigned int cnt=0; cnt < properties.size(); cnt++)
+    //    {
+    //        if (!table.hasColumn(properties.at(cnt).name()))
+    //            return false;
 
-//        if (!table.column(properties.at(cnt).name()).existsInDB())
-//            return false;
-//    }
+    //        if (!table.column(properties.at(cnt).name()).existsInDB())
+    //            return false;
+    //    }
 
     return true;
 }
 
-// TODO: only works on main table
 void DBInterface::updateBuffer (MetaDBTable& meta_table, const DBTableColumn& key_col, std::shared_ptr<Buffer> buffer,
-                                size_t from_index, size_t to_index)
+                                int from_index, int to_index)
 {
+    loginf << "DBInterface: updateBuffer: meta " << meta_table.name() << " buffer size " << buffer->size()
+           << " key " << key_col.identifier();
+
+    std::shared_ptr<Buffer> partial_buffer = getPartialBuffer(meta_table.mainTable(), buffer);
+    assert (partial_buffer->size());
+    updateBuffer(meta_table.mainTable(), key_col, partial_buffer, from_index, to_index);
+
+    for (auto& sub_it : meta_table.subTables())
+    {
+        if (sub_it.second.hasColumn(key_col.name()))
+        {
+            const DBTableColumn& sub_key_col = sub_it.second.column(key_col.name());
+            loginf << "DBInterface: updateBuffer: got sub table " << sub_it.second.name()
+                   << " key col " << sub_key_col.identifier();
+
+            partial_buffer = getPartialBuffer(sub_it.second, buffer);
+            if (partial_buffer->size())
+            {
+                loginf << "DBInterface: updateBuffer: doing update for sub table " << sub_it.second.name();
+                updateBuffer(sub_it.second, sub_key_col, partial_buffer, from_index, to_index);
+            }
+            else
+                loginf << "DBInterface: updateBuffer: empty buffer for sub table " << sub_it.second.name();
+        }
+        else
+            loginf << "DBInterface: updateBuffer: key not found in sub table " << sub_it.second.name();
+    }
+}
+
+void DBInterface::updateBuffer (DBTable& table, const DBTableColumn& key_col, std::shared_ptr<Buffer> buffer,
+                                int from_index, int to_index)
+{
+    loginf << "DBInterface: updateBuffer: table " << table.name() << " buffer size " << buffer->size()
+           << " key " << key_col.identifier();
+
     //assert (checkUpdateBuffer(object, key_var, buffer));
     assert (current_connection_);
     assert (buffer);
-
-    const DBTable& table = meta_table.mainTable();
 
     const PropertyList &properties = buffer->properties();
 
@@ -1070,8 +1193,13 @@ void DBInterface::updateBuffer (MetaDBTable& meta_table, const DBTableColumn& ke
     current_connection_->prepareBindStatement(bind_statement);
     current_connection_->beginBindTransaction();
 
+    if (from_index < 0)
+        from_index = 0;
+    if (to_index < 0)
+        to_index = buffer->size()-1;
+
     logdbg  << "DBInterface: updateBuffer: starting inserts";
-    for (unsigned int cnt=from_index; cnt <= to_index; cnt++)
+    for (int cnt=from_index; cnt <= to_index; cnt++)
     {
         insertBindStatementUpdateForCurrentIndex(buffer, cnt);
     }
