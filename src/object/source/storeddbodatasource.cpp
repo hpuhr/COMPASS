@@ -88,6 +88,24 @@ StoredDBODataSource& StoredDBODataSource::operator=(StoredDBODataSource&& other)
     return static_cast<StoredDBODataSource&>(Configurable::operator=(std::move(other)));
 }
 
+bool StoredDBODataSource::operator==(DBODataSource& other)
+{
+    logdbg << "StoredDBODataSource: operator==: name " << (name_ == other.name())
+           << " short " << (short_name_ == other.shortName())
+           << " sac " << (sac_ == other.sac())
+           << " sic " << (sic_ == other.sic())
+           << " lat " << (fabs(latitude_ - other.latitude()) < 1e-10)
+           << " long " << (fabs(longitude_ - other.longitude()) < 1e-10)
+           << " alt " << (fabs(altitude_ - other.altitude()) < 1e-10);
+
+    return (name_ == other.name()) &&
+            (short_name_ == other.shortName()) &&
+            (sac_ == other.sac()) &&
+            (sic_ == other.sic()) &&
+            (fabs(latitude_ - other.latitude()) < 1e-10) &&
+            (fabs(longitude_ - other.longitude()) < 1e-10) &&
+            (fabs(altitude_ - other.altitude()) < 1e-10);
+}
 
 double StoredDBODataSource::altitude() const
 {

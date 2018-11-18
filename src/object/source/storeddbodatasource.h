@@ -24,6 +24,10 @@ public:
     /// @brief Move constructor
     StoredDBODataSource& operator=(StoredDBODataSource&& other);
 
+    // comparison
+    bool operator==(DBODataSource& other);
+    bool operator!=(DBODataSource& other) { return !(*this == other); }
+
     unsigned int id() const;
     //void id(unsigned int id);
 

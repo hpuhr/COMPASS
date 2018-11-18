@@ -56,6 +56,8 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(DBObject* object, QWidget *pa
     config_ds_layout_ = new QVBoxLayout();
     config_layout->addLayout(config_ds_layout_);
 
+    config_layout->addStretch();
+
     QPushButton* add_stored_button = new QPushButton ("Add New");
     connect(add_stored_button, &QPushButton::clicked, this, &DBOEditDataSourcesWidget::addStoredDSSlot);
     config_layout->addWidget(add_stored_button);
@@ -91,11 +93,27 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(DBObject* object, QWidget *pa
     action_layout_ = new QGridLayout();
     action_layout->addLayout(action_layout_);
 
-    perform_actions_button_ = new QPushButton ("Perform Actions");
-    connect(perform_actions_button_, SIGNAL(clicked()), this, SLOT(performActionsSlot()));
-    action_layout->addWidget(perform_actions_button_);
-    perform_actions_button_->setDisabled(true);
+    // action selection buttons
+    QHBoxLayout* action_select_layout = new QHBoxLayout();
 
+    action_layout->addStretch();
+
+    select_all_actions_ = new QPushButton ("Select All");
+    connect(select_all_actions_, &QPushButton::clicked, this, &DBOEditDataSourcesWidget::selectAllActionsSlot);
+    action_select_layout->addWidget(select_all_actions_);
+
+    deselect_all_actions_ = new QPushButton ("Select None");
+    connect(deselect_all_actions_, &QPushButton::clicked, this, &DBOEditDataSourcesWidget::deselectAllActionsSlot);
+    action_select_layout->addWidget(deselect_all_actions_);
+
+    action_layout->addLayout(action_select_layout);
+
+    // perform actions
+    perform_actions_button_ = new QPushButton ("Perform Actions");
+    connect(perform_actions_button_, &QPushButton::clicked, this, &DBOEditDataSourcesWidget::performActionsSlot);
+    action_layout->addWidget(perform_actions_button_);
+
+    updateActionButtons();
     action_frame->setLayout (action_layout);
 
     sources_layout->addWidget(action_frame);
@@ -115,6 +133,8 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(DBObject* object, QWidget *pa
 
     db_ds_layout_ = new QGridLayout();
     db_layout->addLayout(db_ds_layout_);
+
+    db_layout->addStretch();
 
     QIcon left_icon(Files::getIconFilepath("arrow_to_left.png").c_str());
 
@@ -208,6 +228,25 @@ void DBOEditDataSourcesWidget::syncOptionsFromCfgSlot()
 }
 
 
+void DBOEditDataSourcesWidget::selectAllActionsSlot()
+{
+    loginf << "DBOEditDataSourcesWidget: selectAllActionsSlot";
+
+    for (auto& opt_it : action_collection_)
+        opt_it.second.performFlag(opt_it.second.currentActionId() != 0); // select all not None
+
+    updateActionButtons();
+}
+void DBOEditDataSourcesWidget::deselectAllActionsSlot()
+{
+    loginf << "DBOEditDataSourcesWidget: deselectAllActionsSlot";
+
+    for (auto& opt_it : action_collection_)
+        opt_it.second.performFlag(false);
+
+    updateActionButtons();
+}
+
 void DBOEditDataSourcesWidget::performActionsSlot()
 {
     loginf << "DBOEditDataSourcesWidget: performActionsSlot";
@@ -250,6 +289,28 @@ void DBOEditDataSourcesWidget::displaySyncOptions ()
         action_layout_->addWidget(op_it.second.widget(), row++, 0);
     }
 
+    updateActionButtons();
+}
+
+void DBOEditDataSourcesWidget::updateActionButtons()
+{
+    assert (select_all_actions_);
+    assert (deselect_all_actions_);
     assert (perform_actions_button_);
-    perform_actions_button_->setDisabled(row <= 1);
+
+    bool disabled = !haveActionsToPerform();
+
+    select_all_actions_->setDisabled(disabled);
+    deselect_all_actions_->setDisabled(disabled);
+    perform_actions_button_->setDisabled(disabled);
+}
+
+
+bool DBOEditDataSourcesWidget::haveActionsToPerform ()
+{
+//    for (auto& opt_it : action_collection_)
+//        if (opt_it.second.performFlag() && opt_it.second.currentActionId() != 0)
+//            return true;
+
+    return action_collection_.size() > 0;
 }

@@ -16,7 +16,8 @@ DBOEditDataSourceActionOptionsWidget::DBOEditDataSourceActionOptionsWidget(DBOEd
     main_layout->addWidget(perform_check_);
 
     action_box_ = new QComboBox();
-    connect(action_box_, SIGNAL(activated(int)), this, SLOT(changedActionSlot (int)));
+    connect(action_box_, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated),
+            this, &DBOEditDataSourceActionOptionsWidget::changedActionSlot);
     main_layout->addWidget(action_box_);
 
     update();

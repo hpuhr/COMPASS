@@ -25,6 +25,9 @@ bool DBOEditDataSourceActionOptions::performFlag() const
 void DBOEditDataSourceActionOptions::performFlag(bool perform_flag)
 {
     perform_ = perform_flag;
+
+    if (widget_)
+        widget_->update();
 }
 
 std::string DBOEditDataSourceActionOptions::sourceType() const
@@ -87,17 +90,31 @@ DBOEditDataSourceActionOptions getSyncOptionsFromDB (DBObject& object, DBODataSo
     DBOEditDataSourceActionOptions options {object, "DB", std::to_string(source.id())};
     options.addPossibleAction("Add", "Config", "New");
 
+    bool found_equivalent = false;
+
     for (auto stored_it = object.storedDSBegin(); stored_it != object.storedDSEnd(); ++stored_it)
     {
         if (stored_it->second.sac() == source.sac() && stored_it->second.sic() == source.sic())
         {
-            options.addPossibleAction("Overwrite", "Config", std::to_string(stored_it->second.id()));
+            if (stored_it->second != source)
+                options.addPossibleAction("Overwrite", "Config", std::to_string(stored_it->second.id()));
+            else
+                found_equivalent = true;
         }
     }
 
     assert (options.numOptions() > 0);
-    options.currentActionId(options.numOptions()-1);
-    options.performFlag(true);
+
+    if (found_equivalent)
+    {
+        options.currentActionId(0);
+        options.performFlag(false);
+    }
+    else
+    {
+        options.currentActionId(options.numOptions()-1);
+        options.performFlag(true);
+    }
 
     return options;
 }
@@ -105,13 +122,14 @@ DBOEditDataSourceActionOptions getSyncOptionsFromDB (DBObject& object, DBODataSo
 DBOEditDataSourceActionOptions getSyncOptionsFromCfg (DBObject& object, StoredDBODataSource& source)
 {
     DBOEditDataSourceActionOptions options {object, "Config", std::to_string(source.id())};
-    options.addPossibleAction("Add", "DB", "New");
+    //options.addPossibleAction("Add", "DB", "New");
 
     for (auto stored_it = object.dsBegin(); stored_it != object.dsEnd(); ++stored_it)
     {
         if (stored_it->second.sac() == source.sac() && stored_it->second.sic() == source.sic())
         {
-            options.addPossibleAction("Overwrite", "DB", std::to_string(stored_it->second.id()));
+            if (stored_it->second != source)
+                options.addPossibleAction("Overwrite", "DB", std::to_string(stored_it->second.id()));
         }
     }
 

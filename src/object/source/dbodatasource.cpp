@@ -75,6 +75,25 @@ DBODataSource& DBODataSource::operator=(DBODataSource&& other)
     return *this; //static_cast<DBODataSource&>(Configurable::operator=(std::move(other)));
 }
 
+bool DBODataSource::operator==(StoredDBODataSource& other)
+{
+    logdbg << "DBODataSource: operator==: name " << (name_ == other.name())
+           << " short " << (short_name_ == other.shortName())
+           << " sac " << (sac_ == other.sac())
+           << " sic " << (sic_ == other.sic())
+           << " lat " << (fabs(latitude_ - other.latitude()) < 1e-10)
+           << " long " << (fabs(longitude_ - other.longitude()) < 1e-10)
+           << " alt " << (fabs(altitude_ - other.altitude()) < 1e-10);
+
+    return (name_ == other.name()) &&
+            (short_name_ == other.shortName()) &&
+            (sac_ == other.sac()) &&
+            (sic_ == other.sic()) &&
+            (fabs(latitude_ - other.latitude()) < 1e-10) &&
+            (fabs(longitude_ - other.longitude()) < 1e-10) &&
+            (fabs(altitude_ - other.altitude()) < 1e-10);
+}
+
 DBODataSource::~DBODataSource()
 {
     logdbg << "DBODataSource: dtor: id " << std::to_string(id_);
@@ -152,13 +171,13 @@ bool DBODataSource::calculateOGRSystemCoordinates (double azimuth_rad, double sl
     //    else
     //        range = sqrt (slant_range*slant_range-altitude*altitude); // TODO: flatland
 
-//    if (has_baro_altitude && slant_range_m > altitude_m)
-//        horizontal_range = sqrt (slant_range_m*slant_range_m-altitude_m*altitude_m);
-//    else
-//        horizontal_range = slant_range_m; // TODO pure act of desperation
+    //    if (has_baro_altitude && slant_range_m > altitude_m)
+    //        horizontal_range = sqrt (slant_range_m*slant_range_m-altitude_m*altitude_m);
+    //    else
+    //        horizontal_range = slant_range_m; // TODO pure act of desperation
 
-//    sys_x = horizontal_range * sin (azimuth_rad);
-//    sys_y = horizontal_range * cos (azimuth_rad);
+    //    sys_x = horizontal_range * sin (azimuth_rad);
+    //    sys_y = horizontal_range * cos (azimuth_rad);
 
     if (!has_baro_altitude)
         altitude_m = altitude_;
@@ -451,12 +470,12 @@ double DBODataSource::rs2gElevation(double z, double rho)
 
     if (rho >= ALMOST_ZERO)
     {
-//        elevation = asin((2 * rs2g_Rti_ * (z - rs2g_hi_) + pow(z, 2) - pow(rs2g_hi_, 2) - pow(rho, 2)) /
-//                         (2 * rho * (rs2g_Rti_ + rs2g_hi_)));
+        //        elevation = asin((2 * rs2g_Rti_ * (z - rs2g_hi_) + pow(z, 2) - pow(rs2g_hi_, 2) - pow(rho, 2)) /
+        //                         (2 * rho * (rs2g_Rti_ + rs2g_hi_)));
         elevation = asin((z - rs2g_hi_)/rho);
 
-//        if (rho < 50000)
-//            loginf << "DBODataSource: rs2gElevation: z " << z << " rho " << rho << " elev " << elevation;
+        //        if (rho < 50000)
+        //            loginf << "DBODataSource: rs2gElevation: z " << z << " rho " << rho << " elev " << elevation;
     }
 
     return elevation;
@@ -476,11 +495,11 @@ void DBODataSource::radarSlant2LocalCart(VecB& local)
     double elevation = rs2gElevation(z, rho);
     double azimuth = rs2gAzimuth(local[0], local[1]);
 
-//    if (rho < 50000)
-//    {
-//        loginf << "radarSlant2LocalCart: in x: " << local[0] << " y: " << local[1] << " z: " << local[2];
-//        loginf << "radarSlant2LocalCart: rho: " << rho << " elevation: " << elevation << " azimuth: " << azimuth;
-//    }
+    //    if (rho < 50000)
+    //    {
+    //        loginf << "radarSlant2LocalCart: in x: " << local[0] << " y: " << local[1] << " z: " << local[2];
+    //        loginf << "radarSlant2LocalCart: rho: " << rho << " elevation: " << elevation << " azimuth: " << azimuth;
+    //    }
 
     local[0] = rho * cos(elevation) * sin(azimuth);
     local[1] = rho * cos(elevation) * cos(azimuth);

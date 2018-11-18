@@ -39,6 +39,10 @@ public:
     DBODataSource& operator=(StoredDBODataSource& other);
     DBODataSource& operator=(DBODataSource&& other);
 
+    // comparison
+    bool operator==(StoredDBODataSource& other);
+    bool operator!=(StoredDBODataSource& other) { return !(*this == other); }
+
     virtual ~DBODataSource();
 
     unsigned int id() const;

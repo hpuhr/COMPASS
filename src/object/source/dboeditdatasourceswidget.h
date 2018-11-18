@@ -19,6 +19,8 @@ public slots:
 
     void syncOptionsFromCfgSlot();
 
+    void selectAllActionsSlot();
+    void deselectAllActionsSlot();
     void performActionsSlot();
 
 public:
@@ -38,6 +40,9 @@ private:
     std::string action_heading_;
     QGridLayout* action_layout_ {nullptr};
     DBOEditDataSourceActionOptionsCollection action_collection_;
+
+    QPushButton* select_all_actions_ {nullptr};
+    QPushButton* deselect_all_actions_ {nullptr};
     QPushButton* perform_actions_button_ {nullptr};
 
     QGridLayout* db_ds_layout_ {nullptr};
@@ -45,6 +50,9 @@ private:
 
     void clearSyncOptions();
     void displaySyncOptions ();
+
+    void updateActionButtons();
+    bool haveActionsToPerform ();
 };
 
 #endif // DBOEDITDATASOURCESWIDGET_H

@@ -43,6 +43,27 @@ void DBOEditDataSourceAction::perform (DBObject& object, const std::string& sour
             assert (object.hasDataSource(id));
             object.addNewStoredDataSource() = object.getDataSource(id);
         }
+        else
+            logerr << "DBOEditDataSourceAction: perform: unsupported action Add src " << source_type
+                   << " tgt " << target_type_;
+    }
+    else if (action_ == "Overwrite")
+    {
+        if (source_type == "DB" && target_type_ == "Config")
+        {
+            assert (String::isNumber(source_id));
+            unsigned int src_id = std::stoi(source_id);
+            assert (object.hasDataSource(src_id));
+
+            assert (String::isNumber(target_id_));
+            unsigned int tgt_id = std::stoi(target_id_);
+            assert (object.hasStoredDataSource(tgt_id));
+
+            object.storedDataSource(tgt_id) = object.getDataSource(src_id);
+        }
+        else
+            logerr << "DBOEditDataSourceAction: perform: unsupported action Add src " << source_type
+                   << " tgt " << target_type_;
     }
 }
 
