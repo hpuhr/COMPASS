@@ -1040,7 +1040,7 @@ std::shared_ptr<Buffer> DBInterface::getPartialBuffer (DBTable& table, std::shar
         if (table.hasColumn(org_prop.name()))
             // && table.column(org_prop.name()).propertyType() == org_prop.dataType()
         {
-            loginf << "DBInterface: getPartialBuffer: table " << table.name() << " adding property " << org_prop.name();
+            logdbg << "DBInterface: getPartialBuffer: table " << table.name() << " adding property " << org_prop.name();
             tmp_buffer->addProperty(org_prop);
 
             switch (org_prop.dataType())
@@ -1083,11 +1083,11 @@ std::shared_ptr<Buffer> DBInterface::getPartialBuffer (DBTable& table, std::shar
             }
         }
         else
-            loginf << "DBInterface: getPartialBuffer: table " << table.name()
+            logdbg << "DBInterface: getPartialBuffer: table " << table.name()
                    << " skipping property " << org_prop.name();
     }
 
-    loginf << "DBInterface: getPartialBuffer: end with partial buffer size " << tmp_buffer->size();
+    logdbg << "DBInterface: getPartialBuffer: end with partial buffer size " << tmp_buffer->size();
     return tmp_buffer;
 }
 
@@ -1189,7 +1189,7 @@ void DBInterface::updateBuffer (DBTable& table, const DBTableColumn& key_col, st
 
     QMutexLocker locker(&connection_mutex_);
 
-    logdbg  << "DBInterface: updateBuffer: preparing bind statement";
+    loginf  << "DBInterface: updateBuffer: preparing bind statement '" << bind_statement << "'";
     current_connection_->prepareBindStatement(bind_statement);
     current_connection_->beginBindTransaction();
 
@@ -1201,6 +1201,7 @@ void DBInterface::updateBuffer (DBTable& table, const DBTableColumn& key_col, st
     logdbg  << "DBInterface: updateBuffer: starting inserts";
     for (int cnt=from_index; cnt <= to_index; cnt++)
     {
+        logdbg  << "DBInterface: updateBuffer: insert cnt " << cnt;
         insertBindStatementUpdateForCurrentIndex(buffer, cnt);
     }
 
@@ -1339,7 +1340,7 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex (std::shared_ptr<Buff
         const Property &property = list.at(cnt);
         PropertyDataType data_type = property.dataType();
 
-        logdbg  << "DBInterface: insertBindStatementUpdateForCurrentIndex: for at cnt " << cnt << " id "
+        logdbg  << "DBInterface: insertBindStatementUpdateForCurrentIndex: at cnt " << cnt << " id "
                 << property.name() << " index cnt " << index_cnt;
 
         if (connection_type == SQLITE_IDENTIFIER)
@@ -1352,6 +1353,7 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex (std::shared_ptr<Buff
         if (buffer->isNone(property, row))
         {
             current_connection_->bindVariableNull (index_cnt);
+            logdbg  << "DBInterface: insertBindStatementUpdateForCurrentIndex: at " << cnt << " is null";
             continue;
         }
 

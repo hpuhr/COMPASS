@@ -39,7 +39,7 @@ DBODataSourceWidget::DBODataSourceWidget(DBODataSource& data_source, bool add_he
     connect(name_edit_, &QLineEdit::textEdited, this, &DBODataSourceWidget::changedNameColumnSlot);
     main_layout->addWidget (name_edit_, row, col++);
 
-    short_name_edit_ = new QLineEdit ();
+    short_name_edit_ = new InvalidQLineEdit ();
     connect(short_name_edit_, &QLineEdit::textEdited,
             this, &DBODataSourceWidget::changedShortNameColumnSlot);
     main_layout->addWidget (short_name_edit_, row, col++);
@@ -195,7 +195,7 @@ void DBODataSourceWidget::updateShortNameColumnSlot ()
     if (data_source_->hasShortName())
         short_name_edit_->setText(data_source_->shortName().c_str());
     else
-        short_name_edit_->setText("");
+        short_name_edit_->setValid(false);
 }
 void DBODataSourceWidget::updateNameColumnSlot ()
 {
@@ -208,7 +208,7 @@ void DBODataSourceWidget::updateSacColumnSlot ()
     if (data_source_->hasSac())
         sac_edit_->setText(QString::number(data_source_->sac()));
     else
-        sac_edit_->setText("");
+        sac_edit_->setValid(false);
 }
 void DBODataSourceWidget::updateSicColumnSlot ()
 {
@@ -216,7 +216,7 @@ void DBODataSourceWidget::updateSicColumnSlot ()
     if (data_source_->hasSic())
         sic_edit_->setText(QString::number(data_source_->sic()));
     else
-        sic_edit_->setText("");
+        sic_edit_->setValid(false);
 }
 void DBODataSourceWidget::updateLatitudeColumnSlot ()
 {
@@ -224,7 +224,7 @@ void DBODataSourceWidget::updateLatitudeColumnSlot ()
     if (data_source_->hasLatitude())
         latitude_edit_->setText(QString::number(data_source_->latitude(), 'g', 12));
     else
-        latitude_edit_->setText("");
+        latitude_edit_->setValid(false);
 }
 void DBODataSourceWidget::updateLongitudeColumnSlot ()
 {
@@ -232,7 +232,7 @@ void DBODataSourceWidget::updateLongitudeColumnSlot ()
     if (data_source_->hasLongitude())
         longitude_edit_->setText(QString::number(data_source_->longitude(), 'g', 12));
     else
-        longitude_edit_->setText("");
+        longitude_edit_->setValid(false);
 }
 void DBODataSourceWidget::updateAltitudeColumnSlot ()
 {
@@ -240,5 +240,5 @@ void DBODataSourceWidget::updateAltitudeColumnSlot ()
     if (data_source_->hasAltitude())
         altitude_edit_->setText(QString::number(data_source_->altitude(), 'g', 12));
     else
-        altitude_edit_->setText("");
+        altitude_edit_->setValid(false);
 }

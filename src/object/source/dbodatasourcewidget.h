@@ -47,7 +47,7 @@ private:
 
     QLineEdit* id_edit_{nullptr};
     QLineEdit* name_edit_{nullptr};
-    QLineEdit* short_name_edit_{nullptr};
+    InvalidQLineEdit* short_name_edit_{nullptr};
     InvalidQLineEdit* sac_edit_{nullptr};
     InvalidQLineEdit* sic_edit_{nullptr};
     InvalidQLineEdit* latitude_edit_{nullptr};

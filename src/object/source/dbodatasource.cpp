@@ -56,6 +56,14 @@ DBODataSource& DBODataSource::operator=(StoredDBODataSource& other)
     if (widget_)
         widget_->update();
 
+    loginf << "DBODataSource: operator=: name " << name_
+           << " short name " << (has_short_name_ ? short_name_ : "false")
+           << " sac " << (has_sac_ ? std::to_string(static_cast<int>(sac_)) : "false")
+           << " sic " << (has_sic_ ? std::to_string(static_cast<int>(sic_)) : "false")
+           << " lat " << (has_latitude_ ? std::to_string(latitude_) : "false")
+           << " lon " << (has_longitude_ ? std::to_string(longitude_) : "false")
+           << " alt " << (has_altitude_ ? std::to_string(altitude_) : "false");
+
     return *this;
 }
 

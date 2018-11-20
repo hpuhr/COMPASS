@@ -567,6 +567,7 @@ void DBObject::addDataSources (std::map <int, std::pair<int,int>>& sources)
 
                 name = src.name();
                 buffer_ptr->get<std::string>(short_name_col.name()).set(cnt, src.shortName());
+
                 buffer_ptr->get<char>(sac_col.name()).set(cnt, src.sac());
                 buffer_ptr->get<char>(sic_col.name()).set(cnt, src.sic());
 
@@ -579,14 +580,29 @@ void DBObject::addDataSources (std::map <int, std::pair<int,int>>& sources)
                 {
                     loginf << "DBObject: addDataSources: " << name << " stored found has lat/long";
 
-                    buffer_ptr->get<double>(meta.column(latitude_col_name).name()).set(cnt, src.latitude());
-                    buffer_ptr->get<double>(meta.column(longitude_col_name).name()).set(cnt, src.longitude());
+                    if (src.hasLatitude())
+                        buffer_ptr->get<double>(meta.column(latitude_col_name).name()).set(cnt, src.latitude());
+                    else
+                        buffer_ptr->get<double>(meta.column(latitude_col_name).name()).setNone(cnt);
+
+                    if (src.hasLongitude())
+                        buffer_ptr->get<double>(meta.column(longitude_col_name).name()).set(cnt, src.longitude());
+                    else
+                        buffer_ptr->get<double>(meta.column(longitude_col_name).name()).setNone(cnt);
                 }
+//                else
+//                {
+//                    buffer_ptr->get<double>(meta.column(latitude_col_name).name()).set(cnt, src.latitude());
+//                    buffer_ptr->get<double>(meta.column(longitude_col_name).name()).set(cnt, src.longitude());
+//                }
 
                 if (has_altitude)
                 {
                     loginf << "DBObject: addDataSources: " << name << " stored found has alt";
-                    buffer_ptr->get<double>(meta.column(altitude_col_name).name()).set(cnt, src.altitude());
+                    if (src.hasAltitude())
+                        buffer_ptr->get<double>(meta.column(altitude_col_name).name()).set(cnt, src.altitude());
+                    else
+                        buffer_ptr->get<double>(meta.column(altitude_col_name).name()).setNone(cnt);
                 }
             }
             else

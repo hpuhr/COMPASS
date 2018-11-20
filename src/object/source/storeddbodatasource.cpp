@@ -135,6 +135,7 @@ bool StoredDBODataSource::operator==(DBODataSource& other)
 
 double StoredDBODataSource::altitude() const
 {
+    assert (has_altitude_);
     return altitude_;
 }
 
@@ -145,11 +146,13 @@ unsigned int StoredDBODataSource::id() const
 
 double StoredDBODataSource::latitude() const
 {
+    assert (hasLatitude());
     return latitude_;
 }
 
 double StoredDBODataSource::longitude() const
 {
+    assert (hasLongitude());
     return longitude_;
 }
 
@@ -160,16 +163,19 @@ const std::string &StoredDBODataSource::name() const
 
 unsigned char StoredDBODataSource::sac() const
 {
+    assert (has_sac_);
     return sac_;
 }
 
 const std::string &StoredDBODataSource::shortName() const
 {
+    assert (has_short_name_);
     return short_name_;
 }
 
 unsigned char StoredDBODataSource::sic() const
 {
+    assert (has_sic_);
     return sic_;
 }
 
