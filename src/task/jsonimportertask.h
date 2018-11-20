@@ -4,6 +4,7 @@
 #include "configurable.h"
 #include "json.hpp"
 #include "jsonmapping.h"
+#include "readjsonfilepartjob.h"
 
 #include <QObject>
 
@@ -19,6 +20,9 @@ class JSONImporterTask : public QObject, public Configurable
 public slots:
     void insertProgressSlot (float percent);
     void insertDoneSlot (DBObject& object);
+
+    void readJSONFilePartDoneSlot ();
+    void readJSONFilePartObsoleteSlot ();
 
 public:
     JSONImporterTask(const std::string& class_id, const std::string& instance_id,
@@ -101,6 +105,9 @@ protected:
     bool separate_mlat_data_ {false};
 
     std::set <int> added_data_sources_;
+
+    std::shared_ptr <ReadJSONFilePartJob> read_json_job_;
+    bool test_ {false};
 
     void parseJSON (nlohmann::json& j, bool test);
     void transformBuffers ();

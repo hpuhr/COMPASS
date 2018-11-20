@@ -13,6 +13,7 @@
 #include "dbtablecolumn.h"
 #include "propertylist.h"
 #include "buffer.h"
+#include "jobmanager.h"
 
 #include <stdexcept>
 #include <fstream>
@@ -247,79 +248,14 @@ void JSONImporterTask::importFile(const std::string& filename, bool test)
         return;
     }
 
-    std::ifstream ifs(filename);
-    std::stringstream ss;
+    test_ = test;
 
-    char c;
-    unsigned int open_count {0};
+    read_json_job_ = std::shared_ptr<ReadJSONFilePartJob> (new ReadJSONFilePartJob (filename, false, 10000));
+    connect (read_json_job_.get(), SIGNAL(obsoleteSignal()), this, SLOT(readJSONFilePartObsoleteSlot()),
+             Qt::QueuedConnection);
+    connect (read_json_job_.get(), SIGNAL(doneSignal()), this, SLOT(readJSONFilePartDoneSlot()), Qt::QueuedConnection);
 
-    unsigned int parsed_objects = 0;
-
-    while (ifs.get(c))          // loop getting single characters
-    {
-        if (c == '{')
-            ++open_count;
-        else if (c == '}')
-            --open_count;
-        ss << c;
-
-        if (c == '\n') // next lines after objects
-            continue;
-
-        if (open_count == 0)
-        {
-            //loginf << "got part '" << ss.str() << "'";
-
-            json j = json::parse(ss.str());
-
-            parseJSON (j, test);
-
-            ++parsed_objects;
-            ss.str("");
-
-            if (parsed_objects != 0 && parsed_objects % 50000 == 0)
-            {
-                loginf << "JSONImporterTask: importFile: inserting after " << parsed_objects << " parsed objects";
-
-                if (!test)
-                {
-                    transformBuffers();
-                    insertData ();
-                }
-                else
-                {
-                    transformBuffers();
-                    clearData();
-                }
-            }
-
-            //loginf << "UGA2 cleared";
-        }
-    }
-
-    loginf << "JSONImporterTask: importFile: final inserting after " << parsed_objects << " parsed objects";
-    if (!test)
-    {
-        transformBuffers();
-        insertData ();
-    }
-    else
-    {
-        transformBuffers();
-        clearData();
-    }
-
-    QMessageBox msgBox;
-    std::string msg = "Reading archive " + filename + " finished successfully.\n";
-    if (all_cnt_)
-        msg +=  + "# of updates: " + std::to_string(all_cnt_)
-                + "\n# of skipped updates: " + std::to_string(skipped_cnt_)
-                + " (" +String::percentToString(100.0 * skipped_cnt_/all_cnt_) + "%)"
-                + "\n# of inserted updates: " + std::to_string(inserted_cnt_)
-                + " (" +String::percentToString(100.0 * inserted_cnt_/all_cnt_) + "%)";
-    msgBox.setText(msg.c_str());
-    msgBox.exec();
-
+    JobManager::instance().addJob(read_json_job_);
 
     return;
 }
@@ -409,8 +345,8 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
         msg_box.setInformativeText(msg.c_str());
         msg_box.show();
 
-//        for (unsigned int cnt=0; cnt < 50; ++cnt)
-//            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        //        for (unsigned int cnt=0; cnt < 50; ++cnt)
+        //            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
         unsigned int open_count {0};
         unsigned int parsed_objects {0};
@@ -449,13 +385,13 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
                 if (open_count == 0)
                 {
                     read_time += (boost::posix_time::microsec_clock::local_time()
-                                 - tmp_time).total_nanoseconds();
+                                  - tmp_time).total_nanoseconds();
                     tmp_time = boost::posix_time::microsec_clock::local_time();
 
                     json j = json::parse(ss.str());
 
                     nloh_parse_time += (boost::posix_time::microsec_clock::local_time()
-                                 - tmp_time).total_nanoseconds();
+                                        - tmp_time).total_nanoseconds();
                     tmp_time = boost::posix_time::microsec_clock::local_time();
 
                     parseJSON (j, test);
@@ -501,7 +437,7 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
                     }
 
                     insert_time += (boost::posix_time::microsec_clock::local_time()
-                                      - tmp_time).total_nanoseconds();
+                                    - tmp_time).total_nanoseconds();
                     tmp_time = boost::posix_time::microsec_clock::local_time();
                 }
             }
@@ -607,11 +543,11 @@ void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
             mappings_.at(index).addMapping({"target_address", db_object.variable("target_addr"), true});
             mappings_.at(index).addMapping({"target_identification.value_idt", db_object.variable("callsign"), false});
             mappings_.at(index).addMapping({"mode_c_height.value_ft", db_object.variable("alt_baro_ft"), false,
-                                        "Height", "Feet"});
+                                            "Height", "Feet"});
             mappings_.at(index).addMapping({"wgs84_position.value_lat_rad", db_object.variable("pos_lat_deg"), true,
-                                        "Angle", "Radian"});
+                                            "Angle", "Radian"});
             mappings_.at(index).addMapping({"wgs84_position.value_lon_rad", db_object.variable("pos_long_deg"), true,
-                                        "Angle", "Radian"});
+                                            "Angle", "Radian"});
             mappings_.at(index).addMapping({"time_of_report", db_object.variable("tod"), true, "Time", "Second"});
         }
 
@@ -633,11 +569,11 @@ void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
             mappings_.at(index).addMapping({"target_address", db_object.variable("target_addr"), true});
             mappings_.at(index).addMapping({"target_identification.value_idt", db_object.variable("callsign"), false});
             mappings_.at(index).addMapping({"mode_c_height.value_ft", db_object.variable("flight_level_ft"), false,
-                                       "Height", "Feet"});
+                                            "Height", "Feet"});
             mappings_.at(index).addMapping({"wgs84_position.value_lat_rad", db_object.variable("pos_lat_deg"), true,
-                                        "Angle", "Radian"});
+                                            "Angle", "Radian"});
             mappings_.at(index).addMapping({"wgs84_position.value_lon_rad", db_object.variable("pos_long_deg"), true,
-                                        "Angle", "Radian"});
+                                            "Angle", "Radian"});
             mappings_.at(index).addMapping({"detection_time", db_object.variable("tod"), true, "Time", "Second"});
         }
 
@@ -659,11 +595,11 @@ void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
             mappings_.at(index).addMapping({"target_address", db_object.variable("target_addr"), false});
             mappings_.at(index).addMapping({"aircraft_identification.value_idt", db_object.variable("callsign"), false});
             mappings_.at(index).addMapping({"mode_c_height.value_ft", db_object.variable("modec_code_ft"), false,
-                                       "Height", "Feet"});
+                                            "Height", "Feet"});
             mappings_.at(index).addMapping({"measured_azm_rad", db_object.variable("pos_azm_deg"), true,
-                                        "Angle", "Radian"});
+                                            "Angle", "Radian"});
             mappings_.at(index).addMapping({"measured_rng_m", db_object.variable("pos_range_nm"), true,
-                                        "Length", "Meter"});
+                                            "Length", "Meter"});
             mappings_.at(index).addMapping({"detection_time", db_object.variable("tod"), true, "Time", "Second"});
         }
 
@@ -685,11 +621,11 @@ void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
             mappings_.at(index).addMapping({"aircraft_address", db_object.variable("target_addr"), true});
             mappings_.at(index).addMapping({"aircraft_identification.value_idt", db_object.variable("callsign"), false});
             mappings_.at(index).addMapping({"calculated_track_flight_level.value_feet", db_object.variable("modec_code_ft"),
-                                        false, "Height", "Feet"});
+                                            false, "Height", "Feet"});
             mappings_.at(index).addMapping({"calculated_wgs84_position.value_latitude_rad",
-                                        db_object.variable("pos_lat_deg"), true, "Angle", "Radian"});
+                                            db_object.variable("pos_lat_deg"), true, "Angle", "Radian"});
             mappings_.at(index).addMapping({"calculated_wgs84_position.value_longitude_rad",
-                                        db_object.variable("pos_long_deg"), true, "Angle", "Radian"});
+                                            db_object.variable("pos_long_deg"), true, "Angle", "Radian"});
             mappings_.at(index).addMapping({"time_of_last_update", db_object.variable("tod"), true, "Time", "Second"});
         }
     }
@@ -849,3 +785,57 @@ void JSONImporterTask::insertDoneSlot (DBObject& object)
     --insert_active_;
 }
 
+void JSONImporterTask::readJSONFilePartDoneSlot ()
+{
+    loginf << "JSONImporterTask: readJSONFilePartDoneSlot";
+
+    //loginf << "got part '" << ss.str() << "'";
+
+    std::vector <std::string> objects = std::move(read_json_job_->objects());
+    assert (!read_json_job_->objects().size());
+
+    for (auto& str_it : objects)
+    {
+        json j = json::parse(str_it);
+
+        parseJSON (j, test_);
+    }
+
+    loginf << "JSONImporterTask: readJSONFilePartDoneSlot: inserting " << objects.size() << " parsed objects";
+    if (!test_)
+    {
+        transformBuffers();
+        insertData ();
+    }
+    else
+    {
+        transformBuffers();
+        clearData();
+    }
+
+    if (read_json_job_->fileReadDone())
+    {
+        loginf << "JSONImporterTask: readJSONFilePartDoneSlot: read done";
+    }
+    else
+    {
+        loginf << "JSONImporterTask: readJSONFilePartDoneSlot: read continue";
+        read_json_job_->resetDone();
+        JobManager::instance().addJob(read_json_job_);
+    }
+
+//    QMessageBox msgBox;
+//    std::string msg = "Reading archive " + filename + " finished successfully.\n";
+//    if (all_cnt_)
+//        msg +=  + "# of updates: " + std::to_string(all_cnt_)
+//                + "\n# of skipped updates: " + std::to_string(skipped_cnt_)
+//                + " (" +String::percentToString(100.0 * skipped_cnt_/all_cnt_) + "%)"
+//                + "\n# of inserted updates: " + std::to_string(inserted_cnt_)
+//                + " (" +String::percentToString(100.0 * inserted_cnt_/all_cnt_) + "%)";
+//    msgBox.setText(msg.c_str());
+//    msgBox.exec();
+}
+void JSONImporterTask::readJSONFilePartObsoleteSlot ()
+{
+    loginf << "JSONImporterTask: readJSONFilePartObsoleteSlot";
+}
