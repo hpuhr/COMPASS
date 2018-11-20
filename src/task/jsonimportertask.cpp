@@ -25,11 +25,6 @@
 #include <QThread>
 #include <QMessageBox>
 
-#include "boost/date_time/posix_time/posix_time.hpp"
-
-#include <archive.h>
-#include <archive_entry.h>
-
 using namespace Utils;
 using namespace nlohmann;
 
@@ -250,6 +245,8 @@ void JSONImporterTask::importFile(const std::string& filename, bool test)
 
     test_ = test;
 
+    start_time_ = boost::posix_time::microsec_clock::local_time();
+
     read_json_job_ = std::shared_ptr<ReadJSONFilePartJob> (new ReadJSONFilePartJob (filename, false, 10000));
     connect (read_json_job_.get(), SIGNAL(obsoleteSignal()), this, SLOT(readJSONFilePartObsoleteSlot()),
              Qt::QueuedConnection);
@@ -270,232 +267,125 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
         return;
     }
 
-    // if gz but not tar.gz or tgz
-    bool raw = String::hasEnding (filename, ".gz") && !String::hasEnding (filename, ".tar.gz");
+    test_ = test;
 
-    loginf  << "JSONImporterTask: importFileArchive: importing " << filename << " raw " << raw;
+    start_time_ = boost::posix_time::microsec_clock::local_time();
 
-    if (use_time_filter_)
-        loginf  << "JSONImporterTask: importFileArchive: using time filter min " << time_filter_min_
-                << " max " << time_filter_max_;
+    read_json_job_ = std::shared_ptr<ReadJSONFilePartJob> (new ReadJSONFilePartJob (filename, true, 10000));
+    connect (read_json_job_.get(), SIGNAL(obsoleteSignal()), this, SLOT(readJSONFilePartObsoleteSlot()),
+             Qt::QueuedConnection);
+    connect (read_json_job_.get(), SIGNAL(doneSignal()), this, SLOT(readJSONFilePartDoneSlot()), Qt::QueuedConnection);
 
-    if (use_position_filter_)
-        loginf  << "JSONImporterTask: importFileArchive: using position filter latitude min " << pos_filter_lat_min_
-                << " max " << pos_filter_lat_max_ << " longitude min " << pos_filter_lon_min_
-                << " max " << pos_filter_lon_max_;
+    JobManager::instance().addJob(read_json_job_);
 
-    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
-
-    struct archive *a;
-    struct archive_entry *entry;
-    int r;
-
-    a = archive_read_new();
-
-    if (raw)
-    {
-        archive_read_support_filter_gzip(a);
-        archive_read_support_filter_bzip2(a);
-        archive_read_support_format_raw(a);
-    }
-    else
-    {
-        archive_read_support_filter_all(a);
-        archive_read_support_format_all(a);
-
-    }
-    r = archive_read_open_filename(a, filename.c_str(), 10240); // Note 1
-
-    if (r != ARCHIVE_OK)
-        throw std::runtime_error("JSONImporterTask: importFileArchive: archive error: "
-                                 +std::string(archive_error_string(a)));
-
-    const void *buff;
-    size_t size;
-    int64_t offset;
-
-    std::stringstream ss;
-
-    QMessageBox msg_box;
-    std::string msg = "Importing archive '"+filename+"'.";
-    msg_box.setText(msg.c_str());
-    msg_box.setStandardButtons(QMessageBox::NoButton);
-    msg_box.show();
+//    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
 
-    unsigned int entry_cnt = 0;
 
-    while (archive_read_next_header(a, &entry) == ARCHIVE_OK)
-    {
-        //        for (unsigned int cnt=0; cnt < 10; cnt++)
-        //            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
-        loginf << "JSONImporterTask: importFileArchive: parsing archive file: "
-               << archive_entry_pathname(entry) << " size " << archive_entry_size(entry);
 
-        msg = "Reading archive entry " + std::to_string(entry_cnt) + ": "
-                + std::string(archive_entry_pathname(entry)) + ".\n";
-        if (all_cnt_)
-            msg +=  + "# of updates: " + std::to_string(all_cnt_)
-                    + "\n# of skipped updates: " + std::to_string(skipped_cnt_)
-                    + " (" +String::percentToString(100.0 * skipped_cnt_/all_cnt_) + "%)"
-                    + "\n# of inserted updates: " + std::to_string(inserted_cnt_)
-                    + " (" +String::percentToString(100.0 * inserted_cnt_/all_cnt_) + "%)";
+//                    read_time += (boost::posix_time::microsec_clock::local_time()
+//                                  - tmp_time).total_nanoseconds();
+//                    tmp_time = boost::posix_time::microsec_clock::local_time();
 
-        msg_box.setInformativeText(msg.c_str());
-        msg_box.show();
+//                    json j = json::parse(ss.str());
 
-        //        for (unsigned int cnt=0; cnt < 50; ++cnt)
-        //            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+//                    nloh_parse_time += (boost::posix_time::microsec_clock::local_time()
+//                                        - tmp_time).total_nanoseconds();
+//                    tmp_time = boost::posix_time::microsec_clock::local_time();
 
-        unsigned int open_count {0};
-        unsigned int parsed_objects {0};
-        boost::posix_time::ptime entry_start_time = boost::posix_time::microsec_clock::local_time();
+//                    parseJSON (j, test);
 
-        boost::posix_time::ptime tmp_time = boost::posix_time::microsec_clock::local_time();
+//                    ++parsed_objects;
+//                    ss.str("");
 
-        double read_time = 0;
-        double nloh_parse_time = 0;
-        double my_parse_time = 0;
-        double insert_time = 0;
+//                    my_parse_time += (boost::posix_time::microsec_clock::local_time()
+//                                      - tmp_time).total_nanoseconds();
+//                    tmp_time = boost::posix_time::microsec_clock::local_time();
 
-        for (;;)
-        {
-            r = archive_read_data_block(a, &buff, &size, &offset);
+//                    if (parsed_objects != 0 && parsed_objects % 50000 == 0)
+//                    {
+//                        float num_secs = (boost::posix_time::microsec_clock::local_time()
+//                                          - entry_start_time).total_milliseconds()/1000.0;
 
-            if (r == ARCHIVE_EOF)
-                break;
-            if (r != ARCHIVE_OK)
-                throw std::runtime_error("JSONImporterTask: importFileArchive: archive error: "
-                                         +std::string(archive_error_string(a)));
+//                        std::string info_str = "in " + std::to_string(num_secs) + "s " +
+//                                std::to_string(parsed_objects) + " parsed objects, "
+//                                + String::doubleToStringPrecision(parsed_objects/num_secs,2) + " e/s"
+//                                + " read time "
+//                                + String::doubleToStringPrecision(read_time*1e-9,2) + "s"
+//                                + " json parse time "
+//                                + String::doubleToStringPrecision(nloh_parse_time*1e-9,2) + "s"
+//                                + " mapping time "
+//                                + String::doubleToStringPrecision(my_parse_time*1e-9,2) + "s"
+//                                + " insert time "
+//                                + String::doubleToStringPrecision(insert_time*1e-9,2) + "s";
 
-            std::string str (reinterpret_cast<char const*>(buff), size);
+//                        loginf << "JSONImporterTask: importFileArchive: " << info_str;
 
-            for (char c : str)
-            {
-                if (c == '{')
-                    ++open_count;
-                else if (c == '}')
-                    --open_count;
-                ss << c;
+//                        msg_box.setInformativeText(info_str.c_str());
 
-                if (c == '\n') // next lines after objects
-                    continue;
+//                        if (!test)
+//                        {
+//                            transformBuffers();
+//                            insertData ();
+//                        }
+//                        else
+//                        {
+//                            transformBuffers();
+//                            clearData();
+//                        }
+//                    }
 
-                if (open_count == 0)
-                {
-                    read_time += (boost::posix_time::microsec_clock::local_time()
-                                  - tmp_time).total_nanoseconds();
-                    tmp_time = boost::posix_time::microsec_clock::local_time();
+//                    insert_time += (boost::posix_time::microsec_clock::local_time()
+//                                    - tmp_time).total_nanoseconds();
+//                    tmp_time = boost::posix_time::microsec_clock::local_time();
+//                }
+//            }
+//        }
 
-                    json j = json::parse(ss.str());
+//        float num_secs = (boost::posix_time::microsec_clock::local_time()
+//                          - entry_start_time).total_milliseconds()/1000.0;
 
-                    nloh_parse_time += (boost::posix_time::microsec_clock::local_time()
-                                        - tmp_time).total_nanoseconds();
-                    tmp_time = boost::posix_time::microsec_clock::local_time();
+//        loginf << "JSONImporterTask: importFileArchive: final inserting after " << parsed_objects << " parsed objects, "
+//               << String::doubleToStringPrecision(parsed_objects/num_secs,2) << " e/s";;
 
-                    parseJSON (j, test);
+//        if (!test)
+//        {
+//            transformBuffers();
+//            insertData ();
+//        }
+//        else
+//        {
+//            transformBuffers();
+//            clearData();
+//        }
 
-                    ++parsed_objects;
-                    ss.str("");
+//        entry_cnt++;
+//    }
 
-                    my_parse_time += (boost::posix_time::microsec_clock::local_time()
-                                      - tmp_time).total_nanoseconds();
-                    tmp_time = boost::posix_time::microsec_clock::local_time();
 
-                    if (parsed_objects != 0 && parsed_objects % 50000 == 0)
-                    {
-                        float num_secs = (boost::posix_time::microsec_clock::local_time()
-                                          - entry_start_time).total_milliseconds()/1000.0;
+//    msg_box.close();
 
-                        std::string info_str = "in " + std::to_string(num_secs) + "s " +
-                                std::to_string(parsed_objects) + " parsed objects, "
-                                + String::doubleToStringPrecision(parsed_objects/num_secs,2) + " e/s"
-                                + " read time "
-                                + String::doubleToStringPrecision(read_time*1e-9,2) + "s"
-                                + " json parse time "
-                                + String::doubleToStringPrecision(nloh_parse_time*1e-9,2) + "s"
-                                + " mapping time "
-                                + String::doubleToStringPrecision(my_parse_time*1e-9,2) + "s"
-                                + " insert time "
-                                + String::doubleToStringPrecision(insert_time*1e-9,2) + "s";
+//    for (unsigned int cnt=0; cnt < 10; cnt++)
+//        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
 
-                        loginf << "JSONImporterTask: importFileArchive: " << info_str;
+//    boost::posix_time::ptime stop_time = boost::posix_time::microsec_clock::local_time();
+//    boost::posix_time::time_duration diff = stop_time - start_time;
 
-                        msg_box.setInformativeText(info_str.c_str());
+//    std::string time_str = std::to_string(diff.hours())+"h "+std::to_string(diff.minutes())
+//            +"m "+std::to_string(diff.seconds())+"s";
 
-                        if (!test)
-                        {
-                            transformBuffers();
-                            insertData ();
-                        }
-                        else
-                        {
-                            transformBuffers();
-                            clearData();
-                        }
-                    }
-
-                    insert_time += (boost::posix_time::microsec_clock::local_time()
-                                    - tmp_time).total_nanoseconds();
-                    tmp_time = boost::posix_time::microsec_clock::local_time();
-                }
-            }
-        }
-
-        float num_secs = (boost::posix_time::microsec_clock::local_time()
-                          - entry_start_time).total_milliseconds()/1000.0;
-
-        loginf << "JSONImporterTask: importFileArchive: final inserting after " << parsed_objects << " parsed objects, "
-               << String::doubleToStringPrecision(parsed_objects/num_secs,2) << " e/s";;
-
-        if (!test)
-        {
-            transformBuffers();
-            insertData ();
-        }
-        else
-        {
-            transformBuffers();
-            clearData();
-        }
-
-        entry_cnt++;
-    }
-
-    r = archive_read_close(a);
-    if (r != ARCHIVE_OK)
-        throw std::runtime_error("JSONImporterTask: importFileArchive: archive read close error: "
-                                 +std::string(archive_error_string(a)));
-
-    r = archive_read_free(a);
-
-    if (r != ARCHIVE_OK)
-        throw std::runtime_error("JSONImporterTask: importFileArchive: archive read free error: "
-                                 +std::string(archive_error_string(a)));
-
-    msg_box.close();
-
-    for (unsigned int cnt=0; cnt < 10; cnt++)
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-    boost::posix_time::ptime stop_time = boost::posix_time::microsec_clock::local_time();
-    boost::posix_time::time_duration diff = stop_time - start_time;
-
-    std::string time_str = std::to_string(diff.hours())+"h "+std::to_string(diff.minutes())
-            +"m "+std::to_string(diff.seconds())+"s";
-
-    QMessageBox msgBox;
-    msg = "Reading archive " + filename + " with " + std::to_string(entry_cnt) + " entries finished successfully in "
-            + time_str+".\n";
-    if (all_cnt_)
-        msg +=  + "# of updates: " + std::to_string(all_cnt_)
-                + "\n# of skipped updates: " + std::to_string(skipped_cnt_)
-                + " (" +String::percentToString(100.0 * skipped_cnt_/all_cnt_) + "%)"
-                + "\n# of inserted updates: " + std::to_string(inserted_cnt_)
-                + " (" +String::percentToString(100.0 * inserted_cnt_/all_cnt_) + "%)";
-    msgBox.setText(msg.c_str());
-    msgBox.exec();
+//    QMessageBox msgBox;
+//    msg = "Reading archive " + filename + " with " + std::to_string(entry_cnt) + " entries finished successfully in "
+//            + time_str+".\n";
+//    if (all_cnt_)
+//        msg +=  + "# of updates: " + std::to_string(all_cnt_)
+//                + "\n# of skipped updates: " + std::to_string(skipped_cnt_)
+//                + " (" +String::percentToString(100.0 * skipped_cnt_/all_cnt_) + "%)"
+//                + "\n# of inserted updates: " + std::to_string(inserted_cnt_)
+//                + " (" +String::percentToString(100.0 * inserted_cnt_/all_cnt_) + "%)";
+//    msgBox.setText(msg.c_str());
+//    msgBox.exec();
 
     return;
 }
@@ -815,7 +705,20 @@ void JSONImporterTask::readJSONFilePartDoneSlot ()
 
     if (read_json_job_->fileReadDone())
     {
-        loginf << "JSONImporterTask: readJSONFilePartDoneSlot: read done";
+        stop_time_ = boost::posix_time::microsec_clock::local_time();
+
+        boost::posix_time::time_duration diff = stop_time_ - start_time_;
+
+        std::string time_str = std::to_string(diff.hours())+"h "+std::to_string(diff.minutes())
+                +"m "+std::to_string(diff.seconds())+"s";
+
+        loginf << "JSONImporterTask: readJSONFilePartDoneSlot: read done after " << time_str;
+
+        QMessageBox msgBox;
+        std::string msg = "Reading archive finished successfully.\n";
+        msg +=  + "In " + time_str;
+        msgBox.setText(msg.c_str());
+        msgBox.exec();
     }
     else
     {

@@ -10,6 +10,8 @@
 
 #include <memory>
 
+#include "boost/date_time/posix_time/posix_time.hpp"
+
 class TaskManager;
 class JSONImporterTaskWidget;
 class SavedFile;
@@ -108,6 +110,9 @@ protected:
 
     std::shared_ptr <ReadJSONFilePartJob> read_json_job_;
     bool test_ {false};
+
+    boost::posix_time::ptime start_time_;
+    boost::posix_time::ptime stop_time_;
 
     void parseJSON (nlohmann::json& j, bool test);
     void transformBuffers ();

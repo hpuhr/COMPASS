@@ -33,6 +33,13 @@ protected:
     std::ifstream file_stream_;
     std::stringstream tmp_stream_;
 
+    unsigned int open_count_ {0};
+
+    struct archive *a;
+    struct archive_entry *entry;
+    int64_t offset;
+    bool entry_not_done_ {false};
+
     std::vector<std::string> objects_;
 
     void performInit ();
