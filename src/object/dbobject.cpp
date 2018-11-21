@@ -339,7 +339,7 @@ void DBObject::buildDataSources()
         return;
     }
 
-    loginf  << "DBObject: buildDataSources: building data sources for " << name_;
+    logdbg  << "DBObject: buildDataSources: building data sources for " << name_;
 
     try
     {
@@ -1132,7 +1132,7 @@ void DBObject::finalizeReadJobDoneSlot()
 
 void DBObject::databaseContentChangedSlot ()
 {
-    loginf << "DBObject: databaseContentChangedSlot";
+    logdbg << "DBObject: databaseContentChangedSlot";
 
     if (!current_meta_table_)
     {

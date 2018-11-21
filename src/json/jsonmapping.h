@@ -292,10 +292,13 @@ public:
     MappingIterator begin() { return data_mappings_.begin(); }
     MappingIterator end() { return data_mappings_.end(); }
 
-    std::shared_ptr<Buffer> buffer() const;
+    bool hasFilledBuffer ();
+    std::shared_ptr<Buffer> buffer();
     void clearBuffer ();
 
-    unsigned int parseJSON (nlohmann::json& j, bool test);
+    void transformBuffer ();
+
+    unsigned int parseJSON (nlohmann::json& j);
 
     bool overrideKeyVariable() const;
     void overrideKeyVariable(bool override);
@@ -308,7 +311,8 @@ public:
     std::string dataSourceVariableName() const;
     void dataSourceVariableName(const std::string& name);
 
-    void transformBuffer ();
+    unsigned int keyCount() const;
+    void keyCount(unsigned int keyCount);
 
 private:
     DBObject& db_object_;
@@ -327,6 +331,7 @@ private:
     bool override_data_source_ {false};
     std::string data_source_variable_name_;
 
+    bool key_initialized_ {false};
     unsigned int key_count_ {0};
     DBOVariable* key_variable_ {nullptr};
 

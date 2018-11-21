@@ -14,6 +14,8 @@
 #include "propertylist.h"
 #include "buffer.h"
 #include "jobmanager.h"
+#include "jsonparsejob.h"
+#include "jsonmappingjob.h"
 
 #include <stdexcept>
 #include <fstream>
@@ -56,6 +58,12 @@ JSONImporterTask::~JSONImporterTask()
     {
         delete widget_;
         widget_ = nullptr;
+    }
+
+    if (msg_box_)
+    {
+        delete msg_box_;
+        msg_box_ = nullptr;
     }
 
     for (auto it : file_list_)
@@ -243,7 +251,10 @@ void JSONImporterTask::importFile(const std::string& filename, bool test)
         return;
     }
 
+    filename_ = filename;
+    archive_ = false;
     test_ = test;
+    all_done_ = false;
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
@@ -253,6 +264,8 @@ void JSONImporterTask::importFile(const std::string& filename, bool test)
     connect (read_json_job_.get(), SIGNAL(doneSignal()), this, SLOT(readJSONFilePartDoneSlot()), Qt::QueuedConnection);
 
     JobManager::instance().addJob(read_json_job_);
+
+    updateMsgBox();
 
     return;
 }
@@ -267,7 +280,10 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
         return;
     }
 
+    filename_ = filename;
+    archive_ = true;
     test_ = test;
+    all_done_ = false;
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
@@ -277,6 +293,8 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
     connect (read_json_job_.get(), SIGNAL(doneSignal()), this, SLOT(readJSONFilePartDoneSlot()), Qt::QueuedConnection);
 
     JobManager::instance().addJob(read_json_job_);
+
+    updateMsgBox();
 
 //    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
 
@@ -390,7 +408,7 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
     return;
 }
 
-void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
+void JSONImporterTask::createMappings ()
 {
     logdbg << "JSONImporterTask: parseJSON";
 
@@ -520,20 +538,13 @@ void JSONImporterTask::parseJSON (nlohmann::json& j, bool test)
         }
     }
 
-    for (auto& map_it : mappings_)
-        map_it.parseJSON(j, test);
+    //std::vector <JsonMapping> mappings = mappings_;
+
+//    for (auto& map_it : mappings_)
+//        map_it.parseJSON(j, test);
 }
 
-void JSONImporterTask::transformBuffers ()
-{
-    loginf << "JSONImporterTask: transformBuffers";
-
-    for (auto& map_it : mappings_)
-        if (map_it.buffer() != nullptr && map_it.buffer()->size() != 0)
-            map_it.transformBuffer();
-}
-
-void JSONImporterTask::insertData ()
+void JSONImporterTask::insertData (std::vector <JsonMapping>& mappings)
 {
     loginf << "JSONImporterTask: insertData: inserting into database";
 
@@ -545,7 +556,7 @@ void JSONImporterTask::insertData ()
 
     bool has_sac_sic = false;
 
-    for (auto& map_it : mappings_)
+    for (auto& map_it : mappings)
     {
         if (map_it.buffer() != nullptr && map_it.buffer()->size() != 0)
         {
@@ -647,6 +658,7 @@ void JSONImporterTask::insertData ()
             logdbg << "JSONImporterTask: insertData: " << db_object.name() << " inserting";
 
             db_object.insertData(map_it.variableList(), buffer);
+            objects_inserted_ += buffer->size();
 
             logdbg << "JSONImporterTask: insertData: " << db_object.name() << " clearing";
             map_it.clearBuffer();
@@ -664,6 +676,50 @@ void JSONImporterTask::clearData ()
         map_it.clearBuffer();
 }
 
+void JSONImporterTask::updateMsgBox ()
+{
+    if (!msg_box_)
+    {
+        msg_box_ = new QMessageBox ();
+        assert (msg_box_);
+    }
+
+    std::string msg;
+
+    if (test_)
+        msg = "Testing import of";
+    else
+        msg = "Importing";
+
+    if (archive_)
+        msg += " archive";
+    msg += " file '"+filename_+"'\n";
+
+    stop_time_ = boost::posix_time::microsec_clock::local_time();
+
+    boost::posix_time::time_duration diff = stop_time_ - start_time_;
+
+    std::string time_str = std::to_string(diff.hours())+"h "+std::to_string(diff.minutes())
+            +"m "+std::to_string(diff.seconds())+"s";
+
+    msg += "Elapsed Time: "+time_str+"\n";
+    msg += "Bytes read: "+String::doubleToStringPrecision(bytes_read_/(1024.0*1024.0),2)+" MB\n";
+    msg += "Objects read: "+std::to_string(objects_read_)+"\n";
+    msg += "Objects parsed: "+std::to_string(objects_parsed_)+"\n";
+    msg += "Objects mapped: "+std::to_string(objects_mapped_)+"\n";
+    msg += "Objects inserted: "+std::to_string(objects_inserted_)+"\n";
+    if (diff.total_seconds() > 0)
+        msg += "Object rate: "+String::doubleToStringPrecision(objects_inserted_/diff.total_seconds(),2)+" e/s";
+
+    msg_box_->setText(msg.c_str());
+    if (all_done_)
+        msg_box_->setStandardButtons(QMessageBox::Ok);
+    else
+        msg_box_->setStandardButtons(QMessageBox::NoButton);
+
+    msg_box_->show();
+}
+
 void JSONImporterTask::insertProgressSlot (float percent)
 {
     loginf << "JSONImporterTask: insertProgressSlot: " << String::percentToString(percent) << "%";
@@ -673,37 +729,8 @@ void JSONImporterTask::insertDoneSlot (DBObject& object)
 {
     logdbg << "JSONImporterTask: insertDoneSlot";
     --insert_active_;
-}
 
-void JSONImporterTask::readJSONFilePartDoneSlot ()
-{
-    loginf << "JSONImporterTask: readJSONFilePartDoneSlot";
-
-    //loginf << "got part '" << ss.str() << "'";
-
-    std::vector <std::string> objects = std::move(read_json_job_->objects());
-    assert (!read_json_job_->objects().size());
-
-    for (auto& str_it : objects)
-    {
-        json j = json::parse(str_it);
-
-        parseJSON (j, test_);
-    }
-
-    loginf << "JSONImporterTask: readJSONFilePartDoneSlot: inserting " << objects.size() << " parsed objects";
-    if (!test_)
-    {
-        transformBuffers();
-        insertData ();
-    }
-    else
-    {
-        transformBuffers();
-        clearData();
-    }
-
-    if (read_json_job_->fileReadDone())
+    if (read_json_job_ == nullptr && json_parse_job_ == nullptr && json_map_jobs_.size() == 0 && insert_active_ == 0)
     {
         stop_time_ = boost::posix_time::microsec_clock::local_time();
 
@@ -712,33 +739,130 @@ void JSONImporterTask::readJSONFilePartDoneSlot ()
         std::string time_str = std::to_string(diff.hours())+"h "+std::to_string(diff.minutes())
                 +"m "+std::to_string(diff.seconds())+"s";
 
-        loginf << "JSONImporterTask: readJSONFilePartDoneSlot: read done after " << time_str;
+        loginf << "JSONImporterTask: insertDoneSlot: read done after " << time_str;
 
-        QMessageBox msgBox;
-        std::string msg = "Reading archive finished successfully.\n";
-        msg +=  + "In " + time_str;
-        msgBox.setText(msg.c_str());
-        msgBox.exec();
+        all_done_ = true;
     }
-    else
+
+    updateMsgBox();
+}
+
+void JSONImporterTask::readJSONFilePartDoneSlot ()
+{
+    loginf << "JSONImporterTask: readJSONFilePartDoneSlot";
+
+    ReadJSONFilePartJob* read_job = dynamic_cast<ReadJSONFilePartJob*>(QObject::sender());
+    assert (read_job);
+    bytes_read_ += read_job->bytesRead();
+    objects_read_ += read_job->objects().size();
+
+    //loginf << "got part '" << ss.str() << "'";
+
+    std::vector <std::string> objects = std::move(read_json_job_->objects());
+    assert (!read_json_job_->objects().size());
+
+    assert (!json_parse_job_);
+
+    json_parse_job_ = std::shared_ptr<JSONParseJob> (new JSONParseJob (std::move(objects)));
+    connect (json_parse_job_.get(), SIGNAL(obsoleteSignal()), this, SLOT(parseJSONObsoleteSlot()),
+             Qt::QueuedConnection);
+    connect (json_parse_job_.get(), SIGNAL(doneSignal()), this, SLOT(parseJSONDoneSlot()), Qt::QueuedConnection);
+
+    JobManager::instance().addJob(json_parse_job_);
+
+    updateMsgBox();
+
+    if (!read_json_job_->fileReadDone())
     {
         loginf << "JSONImporterTask: readJSONFilePartDoneSlot: read continue";
         read_json_job_->resetDone();
         JobManager::instance().addJob(read_json_job_);
     }
-
-//    QMessageBox msgBox;
-//    std::string msg = "Reading archive " + filename + " finished successfully.\n";
-//    if (all_cnt_)
-//        msg +=  + "# of updates: " + std::to_string(all_cnt_)
-//                + "\n# of skipped updates: " + std::to_string(skipped_cnt_)
-//                + " (" +String::percentToString(100.0 * skipped_cnt_/all_cnt_) + "%)"
-//                + "\n# of inserted updates: " + std::to_string(inserted_cnt_)
-//                + " (" +String::percentToString(100.0 * inserted_cnt_/all_cnt_) + "%)";
-//    msgBox.setText(msg.c_str());
-//    msgBox.exec();
+    else
+        read_json_job_ = nullptr;
 }
 void JSONImporterTask::readJSONFilePartObsoleteSlot ()
 {
     loginf << "JSONImporterTask: readJSONFilePartObsoleteSlot";
+}
+
+void JSONImporterTask::parseJSONDoneSlot ()
+{
+    loginf << "JSONImporterTask: parseJSONDoneSlot";
+
+    JSONParseJob* parse_job = dynamic_cast<JSONParseJob*>(QObject::sender());
+    assert (parse_job);
+
+    std::vector<json> json_objects = std::move(parse_job->jsonObjects());
+    json_parse_job_ = nullptr;
+
+    loginf << "JSONImporterTask: parseJSONDoneSlot: " << json_objects.size() << " parsed objects";
+
+    objects_parsed_ += json_objects.size();
+
+    createMappings();
+
+
+    while (json_objects.size())
+    {
+        size_t count = 2000;
+
+        if (json_objects.size() < count)
+            count = json_objects.size();
+
+        std::vector<json> json_objects_part;
+
+        auto it = std::next(json_objects.begin(), count);
+
+        std::move(json_objects.begin(), it, std::back_inserter(json_objects_part));  // ##
+
+        json_objects.erase(json_objects.begin(), it);
+
+        std::shared_ptr<JSONMappingJob> json_map_job = std::shared_ptr<JSONMappingJob> (new JSONMappingJob (std::move(json_objects_part), mappings_));
+        connect (json_map_job.get(), SIGNAL(obsoleteSignal()), this, SLOT(mapJSONObsoleteSlot()),
+                 Qt::QueuedConnection);
+        connect (json_map_job.get(), SIGNAL(doneSignal()), this, SLOT(mapJSONDoneSlot()), Qt::QueuedConnection);
+
+        json_map_jobs_.push_back(json_map_job);
+
+        JobManager::instance().addJob(json_map_job);
+
+        for (auto& map_it : mappings_) // increase key counts
+            map_it.keyCount(map_it.keyCount()+count);
+    }
+    updateMsgBox();
+}
+
+void JSONImporterTask::parseJSONObsoleteSlot ()
+{
+    loginf << "JSONImporterTask: parseJSONObsoleteSlot";
+}
+
+void JSONImporterTask::mapJSONDoneSlot ()
+{
+    loginf << "JSONImporterTask: mapJSONDoneSlot";
+
+    JSONMappingJob* map_job = dynamic_cast<JSONMappingJob*>(QObject::sender());
+    assert (map_job);
+
+    std::vector <JsonMapping> mappings = map_job->mappings();
+
+    json_map_jobs_.erase(json_map_jobs_.begin());
+
+    for (auto& map_it : mappings)
+    {
+        if (map_it.hasFilledBuffer())
+            objects_mapped_ += map_it.buffer()->size();
+    }
+
+    loginf << "JSONImporterTask: parseJSONDoneSlot: inserting parsed objects";
+
+    if (!test_)
+        insertData (mappings);
+
+    updateMsgBox();
+}
+void JSONImporterTask::mapJSONObsoleteSlot ()
+{
+    loginf << "JSONImporterTask: mapJSONObsoleteSlot";
 }

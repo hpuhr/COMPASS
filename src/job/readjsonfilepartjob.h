@@ -22,6 +22,8 @@ public:
 
     std::vector<std::string>& objects(); // for moving out
 
+    size_t bytesRead() const;
+
 protected:
     std::string file_name_;
     bool archive_ {false};
@@ -40,6 +42,7 @@ protected:
     int64_t offset;
     bool entry_not_done_ {false};
 
+    size_t bytes_read_ {0};
     std::vector<std::string> objects_;
 
     void performInit ();

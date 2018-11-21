@@ -170,6 +170,7 @@ void ReadJSONFilePartJob::readFilePart ()
                         --open_count_;
 
                     tmp_stream_ << c;
+                    ++bytes_read_;
 
                     if (c == '\n') // next lines after objects
                         continue;
@@ -219,6 +220,7 @@ void ReadJSONFilePartJob::readFilePart ()
                 --open_count_;
 
             tmp_stream_ << c;
+            ++bytes_read_;
 
             if (c == '\n') // next lines after objects
                 continue;
@@ -247,6 +249,7 @@ void ReadJSONFilePartJob::resetDone ()
     assert (!file_read_done_);
     assert (!objects_.size());
     done_ = false; // yet another part
+    bytes_read_ = 0;
 }
 
 bool ReadJSONFilePartJob::fileReadDone() const
@@ -257,6 +260,11 @@ bool ReadJSONFilePartJob::fileReadDone() const
 std::vector<std::string>& ReadJSONFilePartJob::objects()
 {
     return objects_;
+}
+
+size_t ReadJSONFilePartJob::bytesRead() const
+{
+    return bytes_read_;
 }
 
 

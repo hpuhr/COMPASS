@@ -15,6 +15,9 @@
 class TaskManager;
 class JSONImporterTaskWidget;
 class SavedFile;
+class QMessageBox;
+class JSONParseJob;
+class JSONMappingJob;
 
 class JSONImporterTask : public QObject, public Configurable
 {
@@ -25,6 +28,12 @@ public slots:
 
     void readJSONFilePartDoneSlot ();
     void readJSONFilePartObsoleteSlot ();
+
+    void parseJSONDoneSlot ();
+    void parseJSONObsoleteSlot ();
+
+    void mapJSONDoneSlot ();
+    void mapJSONObsoleteSlot ();
 
 public:
     JSONImporterTask(const std::string& class_id, const std::string& instance_id,
@@ -109,15 +118,31 @@ protected:
     std::set <int> added_data_sources_;
 
     std::shared_ptr <ReadJSONFilePartJob> read_json_job_;
+    std::shared_ptr <JSONParseJob> json_parse_job_;
+    std::vector<std::shared_ptr <JSONMappingJob>> json_map_jobs_;
+
+    std::string filename_;
     bool test_ {false};
+    bool archive_ {false};
 
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;
 
-    void parseJSON (nlohmann::json& j, bool test);
-    void transformBuffers ();
-    void insertData ();
+    unsigned int bytes_read_ {0};
+    unsigned int objects_read_ {0};
+    unsigned int objects_parsed_ {0};
+    unsigned int objects_mapped_ {0};
+    unsigned int objects_inserted_ {0};
+    bool all_done_ {false};
+
+    QMessageBox* msg_box_ {nullptr};
+
+    void createMappings ();
+    //void transformBuffers ();
+    void insertData (std::vector <JsonMapping>& mappings);
     void clearData ();
+
+    void updateMsgBox ();
 };
 
 #endif // JSONIMPORTERTASK_H

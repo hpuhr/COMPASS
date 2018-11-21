@@ -63,7 +63,14 @@ void JsonMapping::addMapping (JsonKey2DBOVariableMapping mapping)
     }
 }
 
-std::shared_ptr<Buffer> JsonMapping::buffer() const
+bool JsonMapping::hasFilledBuffer ()
+{
+    if (!buffer_)
+        return false;
+    return buffer_->size() > 0;
+}
+
+std::shared_ptr<Buffer> JsonMapping::buffer()
 {
     return buffer_;
 }
@@ -73,9 +80,9 @@ void JsonMapping::clearBuffer ()
     buffer_ = nullptr;
 }
 
-unsigned int JsonMapping::parseJSON (nlohmann::json& j, bool test)
+unsigned int JsonMapping::parseJSON (nlohmann::json& j)
 {
-    if (key_count_ == 0)
+    if (!key_initialized_)
     {
         if (!has_key_mapping_ && db_object_.hasKeyVariable()) // first time only, add key variable
             has_key_variable_ = true;
@@ -101,6 +108,8 @@ unsigned int JsonMapping::parseJSON (nlohmann::json& j, bool test)
         }
 
         not_parse_all_ = (json_key_ != "*") && (json_value_ != "*");
+
+        key_initialized_ = true;
     }
 
     //assert (buffer_ == nullptr || buffer_->size() == 0);
@@ -550,6 +559,16 @@ std::string JsonMapping::dataSourceVariableName() const
 void JsonMapping::dataSourceVariableName(const std::string& name)
 {
     data_source_variable_name_ = name;
+}
+
+unsigned int JsonMapping::keyCount() const
+{
+    return key_count_;
+}
+
+void JsonMapping::keyCount(unsigned int key_count)
+{
+    key_count_ = key_count;
 }
 
 
