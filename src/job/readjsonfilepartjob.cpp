@@ -22,10 +22,10 @@ ReadJSONFilePartJob::~ReadJSONFilePartJob()
         else
         {
 
-        r = archive_read_free(a);
+            r = archive_read_free(a);
 
-        if (r != ARCHIVE_OK)
-            logerr << "JSONImporterTask: importFileArchive: archive read free error: " << std::string(archive_error_string(a));
+            if (r != ARCHIVE_OK)
+                logerr << "JSONImporterTask: importFileArchive: archive read free error: " << std::string(archive_error_string(a));
         }
     }
     else
@@ -34,7 +34,7 @@ ReadJSONFilePartJob::~ReadJSONFilePartJob()
 
 void ReadJSONFilePartJob::run ()
 {
-    loginf << "ReadJSONFilePartJob: run: start";
+    logdbg << "ReadJSONFilePartJob: run: start";
     started_ = true;
 
     assert (!done_);
@@ -52,7 +52,7 @@ void ReadJSONFilePartJob::run ()
 
     done_=true;
 
-    loginf << "ReadJSONFilePartJob: run: done";
+    logdbg << "ReadJSONFilePartJob: run: done";
     return;
 }
 
@@ -65,7 +65,7 @@ void ReadJSONFilePartJob::performInit ()
         // if gz but not tar.gz or tgz
         bool raw = String::hasEnding (file_name_, ".gz") && !String::hasEnding (file_name_, ".tar.gz");
 
-        loginf  << "JSONImporterTask: importFileArchive: importing " << file_name_ << " raw " << raw;
+        loginf  << "ReadJSONFilePartJob: performInit: importing " << file_name_ << " raw " << raw;
 
         int r;
 
@@ -86,7 +86,7 @@ void ReadJSONFilePartJob::performInit ()
         r = archive_read_open_filename(a, file_name_.c_str(), 10240); // Note 1
 
         if (r != ARCHIVE_OK)
-            throw std::runtime_error("JSONImporterTask: importFileArchive: archive error: "
+            throw std::runtime_error("ReadJSONFilePartJob: performInit: archive error: "
                                      +std::string(archive_error_string(a)));
     }
     else
@@ -99,56 +99,21 @@ void ReadJSONFilePartJob::performInit ()
 
 void ReadJSONFilePartJob::readFilePart ()
 {
+    logdbg << "ReadJSONFilePartJob: readFilePart";
+
     if (archive_)
     {
         const void *buff;
         size_t size;
 
-    //    std::stringstream ss;
-
-    //    QMessageBox msg_box;
-    //    std::string msg = "Importing archive '"+filename+"'.";
-    //    msg_box.setText(msg.c_str());
-    //    msg_box.setStandardButtons(QMessageBox::NoButton);
-    //    msg_box.show();
-
-
-        //unsigned int entry_cnt = 0;
         int r;
 
         while (entry_not_done_ || archive_read_next_header(a, &entry) == ARCHIVE_OK)
         {
-            //        for (unsigned int cnt=0; cnt < 10; cnt++)
-            //            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-            loginf << "JSONImporterTask: importFileArchive: parsing archive file: "
+            loginf << "ReadJSONFilePartJob: readFilePart: parsing archive file: "
                    << archive_entry_pathname(entry) << " size " << archive_entry_size(entry);
 
-//            msg = "Reading archive entry " + std::to_string(entry_cnt) + ": "
-//                    + std::string(archive_entry_pathname(entry)) + ".\n";
-//            if (all_cnt_)
-//                msg +=  + "# of updates: " + std::to_string(all_cnt_)
-//                        + "\n# of skipped updates: " + std::to_string(skipped_cnt_)
-//                        + " (" +String::percentToString(100.0 * skipped_cnt_/all_cnt_) + "%)"
-//                        + "\n# of inserted updates: " + std::to_string(inserted_cnt_)
-//                        + " (" +String::percentToString(100.0 * inserted_cnt_/all_cnt_) + "%)";
-
-//            msg_box.setInformativeText(msg.c_str());
-//            msg_box.show();
-
-            //        for (unsigned int cnt=0; cnt < 50; ++cnt)
-            //            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-
             unsigned int parsed_objects {0};
-//            boost::posix_time::ptime entry_start_time = boost::posix_time::microsec_clock::local_time();
-
-//            boost::posix_time::ptime tmp_time = boost::posix_time::microsec_clock::local_time();
-
-//            double read_time = 0;
-//            double nloh_parse_time = 0;
-//            double my_parse_time = 0;
-//            double insert_time = 0;
 
             for (;;)
             {
@@ -157,7 +122,7 @@ void ReadJSONFilePartJob::readFilePart ()
                 if (r == ARCHIVE_EOF)
                     break;
                 if (r != ARCHIVE_OK)
-                    throw std::runtime_error("JSONImporterTask: importFileArchive: archive error: "
+                    throw std::runtime_error("ReadJSONFilePartJob: readFilePart: archive error: "
                                              +std::string(archive_error_string(a)));
 
                 std::string str (reinterpret_cast<char const*>(buff), size);
@@ -249,7 +214,7 @@ void ReadJSONFilePartJob::resetDone ()
     assert (!file_read_done_);
     assert (!objects_.size());
     done_ = false; // yet another part
-    bytes_read_ = 0;
+    //bytes_read_ = 0;
 }
 
 bool ReadJSONFilePartJob::fileReadDone() const

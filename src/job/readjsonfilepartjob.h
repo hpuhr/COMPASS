@@ -48,8 +48,6 @@ protected:
     void performInit ();
     void readFilePart ();
 
-    //boost::posix_time::ptime start_time_;
-    //boost::posix_time::ptime stop_time_;
 };
 
 #endif // READJSONFILEPARTJOB_H

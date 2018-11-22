@@ -15,6 +15,8 @@ JSONMappingJob::~JSONMappingJob()
 
 void JSONMappingJob::run ()
 {
+    logdbg << "JSONMappingJob: run";
+
     started_ = true;
 
     for (auto& j_it : json_objects_)
@@ -26,6 +28,7 @@ void JSONMappingJob::run ()
             map_it.transformBuffer();
 
     done_ = true;
+    logdbg << "JSONMappingJob: run: done";
 }
 
 std::vector <JsonMapping>&& JSONMappingJob::mappings()

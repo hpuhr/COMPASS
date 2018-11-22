@@ -44,9 +44,6 @@ public:
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
-//    std::string dbObjectStr() const;
-//    void dbObjectStr(const std::string& db_object_str);
-
     bool canImportFile (const std::string& filename);
     void importFile (const std::string& filename, bool test);
     void importFileArchive (const std::string& filename, bool test);
@@ -57,36 +54,6 @@ public:
     void removeFile (const std::string &filename);
 
     const std::string &lastFilename () { return last_filename_; }
-
-//    bool useTimeFilter() const;
-//    void useTimeFilter(bool value);
-
-//    float timeFilterMin() const;
-//    void timeFilterMin(float value);
-
-//    float timeFilterMax() const;
-//    void timeFilterMax(float value);
-
-//    bool joinDataSources() const;
-//    void joinDataSources(bool value);
-
-//    bool separateMLATData() const;
-//    void separateMLATData(bool value);
-
-//    bool usePositionFilter() const;
-//    void usePositionFilter(bool value);
-
-//    float positionFilterLatitudeMin() const;
-//    void positionFilterLatitudeMin(float value);
-
-//    float positionFilterLatitudeMax() const;
-//    void positionFilterLatitudeMax(float value);
-
-//    float positionFilterLongitudeMin() const;
-//    void positionFilterLongitudeMin(float value);
-
-//    float positionFilterLongitudeMax() const;
-//    void positionFilterLongitudeMax(float value);
 
 protected:
     std::map <std::string, SavedFile*> file_list_;
@@ -101,19 +68,6 @@ protected:
     unsigned int all_cnt_ {0};
     unsigned int skipped_cnt_ {0};
     unsigned int inserted_cnt_ {0};
-
-//    bool use_time_filter_ {false};
-//    float time_filter_min_ {0};
-//    float time_filter_max_ {0};
-
-//    bool use_position_filter_ {false};
-//    float pos_filter_lat_min_ {0};
-//    float pos_filter_lat_max_ {0};
-//    float pos_filter_lon_min_ {0};
-//    float pos_filter_lon_max_ {0};
-
-//    bool join_data_sources_ {false};
-//    bool separate_mlat_data_ {false};
 
     std::set <int> added_data_sources_;
 
@@ -140,7 +94,6 @@ protected:
     QMessageBox* msg_box_ {nullptr};
 
     void createMappings ();
-    //void transformBuffers ();
     void insertData ();
     void clearData ();
 

@@ -36,19 +36,6 @@ JSONImporterTask::JSONImporterTask(const std::string& class_id, const std::strin
 {
     registerParameter("last_filename", &last_filename_, "");
 
-//    registerParameter("join_data_sources", &join_data_sources_, false);
-//    registerParameter("separate_mlat_data", &separate_mlat_data_, false);
-
-//    registerParameter("use_time_filter", &use_time_filter_, false);
-//    registerParameter("time_filter_min", &time_filter_min_, 0);
-//    registerParameter("time_filter_max", &time_filter_max_, 24*3600);
-
-//    registerParameter("use_position_filter", &use_position_filter_, false);
-//    registerParameter("pos_filter_lat_min", &pos_filter_lat_min_, -90);
-//    registerParameter("pos_filter_lat_max", &pos_filter_lat_max_, 90);
-//    registerParameter("pos_filter_lon_min", &pos_filter_lon_min_, -180);
-//    registerParameter("pos_filter_lon_max", &pos_filter_lon_max_, 180);
-
     createSubConfigurables();
 }
 
@@ -124,106 +111,6 @@ void JSONImporterTask::removeFile (const std::string &filename)
         widget_->updateFileListSlot();
 }
 
-//bool JSONImporterTask::useTimeFilter() const
-//{
-//    return use_time_filter_;
-//}
-
-//void JSONImporterTask::useTimeFilter(bool value)
-//{
-//    use_time_filter_ = value;
-//}
-
-//float JSONImporterTask::timeFilterMin() const
-//{
-//    return time_filter_min_;
-//}
-
-//void JSONImporterTask::timeFilterMin(float value)
-//{
-//    time_filter_min_ = value;
-//}
-
-//float JSONImporterTask::timeFilterMax() const
-//{
-//    return time_filter_max_;
-//}
-
-//void JSONImporterTask::timeFilterMax(float value)
-//{
-//    time_filter_max_ = value;
-//}
-
-//bool JSONImporterTask::joinDataSources() const
-//{
-//    return join_data_sources_;
-//}
-
-//void JSONImporterTask::joinDataSources(bool value)
-//{
-//    join_data_sources_ = value;
-//}
-
-//bool JSONImporterTask::separateMLATData() const
-//{
-//    return separate_mlat_data_;
-//}
-
-//void JSONImporterTask::separateMLATData(bool value)
-//{
-//    separate_mlat_data_ = value;
-//}
-
-//bool JSONImporterTask::usePositionFilter() const
-//{
-//    return use_position_filter_;
-//}
-
-//void JSONImporterTask::usePositionFilter(bool use_position_filter)
-//{
-//    use_position_filter_ = use_position_filter;
-//}
-
-//float JSONImporterTask::positionFilterLatitudeMin() const
-//{
-//    return pos_filter_lat_min_;
-//}
-
-//void JSONImporterTask::positionFilterLatitudeMin(float value)
-//{
-//    pos_filter_lat_min_ = value;
-//}
-
-//float JSONImporterTask::positionFilterLatitudeMax() const
-//{
-//    return pos_filter_lat_max_;
-//}
-
-//void JSONImporterTask::positionFilterLatitudeMax(float value)
-//{
-//    pos_filter_lat_max_ = value;
-//}
-
-//float JSONImporterTask::positionFilterLongitudeMin() const
-//{
-//    return pos_filter_lon_min_;
-//}
-
-//void JSONImporterTask::positionFilterLongitudeMin(float value)
-//{
-//    pos_filter_lon_min_ = value;
-//}
-
-//float JSONImporterTask::positionFilterLongitudeMax() const
-//{
-//    return pos_filter_lon_max_;
-//}
-
-//void JSONImporterTask::positionFilterLongitudeMax(float value)
-//{
-//    pos_filter_lon_max_ = value;
-//}
-
 bool JSONImporterTask::canImportFile (const std::string& filename)
 {
     if (!Files::fileExists(filename))
@@ -296,121 +183,12 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
 
     updateMsgBox();
 
-//    boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::local_time();
-
-
-
-
-
-//                    read_time += (boost::posix_time::microsec_clock::local_time()
-//                                  - tmp_time).total_nanoseconds();
-//                    tmp_time = boost::posix_time::microsec_clock::local_time();
-
-//                    json j = json::parse(ss.str());
-
-//                    nloh_parse_time += (boost::posix_time::microsec_clock::local_time()
-//                                        - tmp_time).total_nanoseconds();
-//                    tmp_time = boost::posix_time::microsec_clock::local_time();
-
-//                    parseJSON (j, test);
-
-//                    ++parsed_objects;
-//                    ss.str("");
-
-//                    my_parse_time += (boost::posix_time::microsec_clock::local_time()
-//                                      - tmp_time).total_nanoseconds();
-//                    tmp_time = boost::posix_time::microsec_clock::local_time();
-
-//                    if (parsed_objects != 0 && parsed_objects % 50000 == 0)
-//                    {
-//                        float num_secs = (boost::posix_time::microsec_clock::local_time()
-//                                          - entry_start_time).total_milliseconds()/1000.0;
-
-//                        std::string info_str = "in " + std::to_string(num_secs) + "s " +
-//                                std::to_string(parsed_objects) + " parsed objects, "
-//                                + String::doubleToStringPrecision(parsed_objects/num_secs,2) + " e/s"
-//                                + " read time "
-//                                + String::doubleToStringPrecision(read_time*1e-9,2) + "s"
-//                                + " json parse time "
-//                                + String::doubleToStringPrecision(nloh_parse_time*1e-9,2) + "s"
-//                                + " mapping time "
-//                                + String::doubleToStringPrecision(my_parse_time*1e-9,2) + "s"
-//                                + " insert time "
-//                                + String::doubleToStringPrecision(insert_time*1e-9,2) + "s";
-
-//                        loginf << "JSONImporterTask: importFileArchive: " << info_str;
-
-//                        msg_box.setInformativeText(info_str.c_str());
-
-//                        if (!test)
-//                        {
-//                            transformBuffers();
-//                            insertData ();
-//                        }
-//                        else
-//                        {
-//                            transformBuffers();
-//                            clearData();
-//                        }
-//                    }
-
-//                    insert_time += (boost::posix_time::microsec_clock::local_time()
-//                                    - tmp_time).total_nanoseconds();
-//                    tmp_time = boost::posix_time::microsec_clock::local_time();
-//                }
-//            }
-//        }
-
-//        float num_secs = (boost::posix_time::microsec_clock::local_time()
-//                          - entry_start_time).total_milliseconds()/1000.0;
-
-//        loginf << "JSONImporterTask: importFileArchive: final inserting after " << parsed_objects << " parsed objects, "
-//               << String::doubleToStringPrecision(parsed_objects/num_secs,2) << " e/s";;
-
-//        if (!test)
-//        {
-//            transformBuffers();
-//            insertData ();
-//        }
-//        else
-//        {
-//            transformBuffers();
-//            clearData();
-//        }
-
-//        entry_cnt++;
-//    }
-
-
-//    msg_box.close();
-
-//    for (unsigned int cnt=0; cnt < 10; cnt++)
-//        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-//    boost::posix_time::ptime stop_time = boost::posix_time::microsec_clock::local_time();
-//    boost::posix_time::time_duration diff = stop_time - start_time;
-
-//    std::string time_str = std::to_string(diff.hours())+"h "+std::to_string(diff.minutes())
-//            +"m "+std::to_string(diff.seconds())+"s";
-
-//    QMessageBox msgBox;
-//    msg = "Reading archive " + filename + " with " + std::to_string(entry_cnt) + " entries finished successfully in "
-//            + time_str+".\n";
-//    if (all_cnt_)
-//        msg +=  + "# of updates: " + std::to_string(all_cnt_)
-//                + "\n# of skipped updates: " + std::to_string(skipped_cnt_)
-//                + " (" +String::percentToString(100.0 * skipped_cnt_/all_cnt_) + "%)"
-//                + "\n# of inserted updates: " + std::to_string(inserted_cnt_)
-//                + " (" +String::percentToString(100.0 * inserted_cnt_/all_cnt_) + "%)";
-//    msgBox.setText(msg.c_str());
-//    msgBox.exec();
-
     return;
 }
 
 void JSONImporterTask::createMappings ()
 {
-    logdbg << "JSONImporterTask: parseJSON";
+    logdbg << "JSONImporterTask: createMappings";
 
     if (mappings_.size() == 0)
     {
@@ -541,11 +319,6 @@ void JSONImporterTask::createMappings ()
             mappings_.at(index).initializeKey();
         }
     }
-
-    //std::vector <JsonMapping> mappings = mappings_;
-
-//    for (auto& map_it : mappings_)
-//        map_it.parseJSON(j, test);
 }
 
 void JSONImporterTask::insertData ()
@@ -572,9 +345,9 @@ void JSONImporterTask::insertData ()
             has_sac_sic = db_object.hasVariable("sac") && db_object.hasVariable("sic")
                     && buffer->has<char>("sac") && buffer->has<char>("sic");
 
-            loginf << "JSONImporterTask: insertData: " << db_object.name() << " has sac/sic " << has_sac_sic;
+            logdbg << "JSONImporterTask: insertData: " << db_object.name() << " has sac/sic " << has_sac_sic;
 
-            loginf << "JSONImporterTask: insertData: " << db_object.name() << " buffer " << buffer->size();
+            logdbg << "JSONImporterTask: insertData: " << db_object.name() << " buffer " << buffer->size();
 
             connect (&db_object, &DBObject::insertDoneSignal, this, &JSONImporterTask::insertDoneSlot,
                      Qt::UniqueConnection);
@@ -621,7 +394,7 @@ void JSONImporterTask::insertData ()
 
                         if (sac_sics.count(key_val) == 0)
                         {
-                            loginf << "JSONImporterTask: insertData: found new ds " << key_val << " for sac/sic";
+                            logdbg << "JSONImporterTask: insertData: found new ds " << key_val << " for sac/sic";
 
                             assert (!sac_list.isNone(cnt) && !sic_list.isNone(cnt));
                             sac_sics[key_val] = std::pair<char, char> (sac_list.get(cnt), sic_list.get(cnt));
@@ -642,7 +415,7 @@ void JSONImporterTask::insertData ()
                     {
                         if (datasources_to_add.count(ds_key_it) == 0)
                         {
-                            loginf << "JSONImporterTask: insertData: adding new data source " << ds_key_it;
+                            logdbg << "JSONImporterTask: insertData: adding new data source " << ds_key_it;
                             if (sac_sics.count(ds_key_it) == 0)
                                 datasources_to_add[ds_key_it] = {-1,-1};
                             else
@@ -675,7 +448,7 @@ void JSONImporterTask::insertData ()
 
     assert (buffers_.size() == 0);
 
-    loginf << "JSONImporterTask: insertData: done";
+    logdbg << "JSONImporterTask: insertData: done";
 }
 
 void JSONImporterTask::clearData ()
@@ -711,13 +484,13 @@ void JSONImporterTask::updateMsgBox ()
             +"m "+std::to_string(diff.seconds())+"s";
 
     msg += "Elapsed Time: "+time_str+"\n";
-    msg += "Bytes read: "+String::doubleToStringPrecision(bytes_read_/(1024.0*1024.0),2)+" MB\n";
+    msg += "Bytes read: "+String::doubleToStringPrecision(static_cast<float>(bytes_read_)*1e-6,2)+" MB\n";
     msg += "Objects read: "+std::to_string(objects_read_)+"\n";
     msg += "Objects parsed: "+std::to_string(objects_parsed_)+"\n";
     msg += "Objects mapped: "+std::to_string(objects_mapped_)+"\n";
     msg += "Objects inserted: "+std::to_string(objects_inserted_)+"\n";
     if (diff.total_seconds() > 0)
-        msg += "Object rate: "+String::doubleToStringPrecision(objects_inserted_/diff.total_seconds(),2)+" e/s";
+        msg += "Object rate: "+std::to_string(objects_inserted_/diff.total_seconds())+" e/s";
 
     msg_box_->setText(msg.c_str());
     if (all_done_)
@@ -730,7 +503,7 @@ void JSONImporterTask::updateMsgBox ()
 
 void JSONImporterTask::insertProgressSlot (float percent)
 {
-    loginf << "JSONImporterTask: insertProgressSlot: " << String::percentToString(percent) << "%";
+    logdbg << "JSONImporterTask: insertProgressSlot: " << String::percentToString(percent) << "%";
 }
 
 void JSONImporterTask::insertDoneSlot (DBObject& object)
@@ -751,22 +524,19 @@ void JSONImporterTask::insertDoneSlot (DBObject& object)
 
         all_done_ = true;
     }
-//    else
-//         loginf << "JSONImporterTask: insertDoneSlot: NOT done after "
-//                << " a " << (read_json_job_ == nullptr) << " b " << (json_parse_jobs_.size() == 0) << " c "
-//                << (json_map_jobs_.size() == 0) << " d " << (insert_active_ == 0);
 
     updateMsgBox();
 }
 
 void JSONImporterTask::readJSONFilePartDoneSlot ()
 {
-    loginf << "JSONImporterTask: readJSONFilePartDoneSlot";
+    logdbg << "JSONImporterTask: readJSONFilePartDoneSlot";
 
     ReadJSONFilePartJob* read_job = dynamic_cast<ReadJSONFilePartJob*>(QObject::sender());
     assert (read_job);
-    bytes_read_ += read_job->bytesRead();
+    bytes_read_ = read_job->bytesRead();
     objects_read_ += read_job->objects().size();
+    loginf << "JSONImporterTask: readJSONFilePartDoneSlot: bytes " << bytes_read_;
 
     //loginf << "got part '" << ss.str() << "'";
 
@@ -799,12 +569,12 @@ void JSONImporterTask::readJSONFilePartDoneSlot ()
 }
 void JSONImporterTask::readJSONFilePartObsoleteSlot ()
 {
-    loginf << "JSONImporterTask: readJSONFilePartObsoleteSlot";
+    logdbg << "JSONImporterTask: readJSONFilePartObsoleteSlot";
 }
 
 void JSONImporterTask::parseJSONDoneSlot ()
 {
-    loginf << "JSONImporterTask: parseJSONDoneSlot";
+    logdbg << "JSONImporterTask: parseJSONDoneSlot";
 
     JSONParseJob* parse_job = dynamic_cast<JSONParseJob*>(QObject::sender());
     assert (parse_job);
@@ -812,7 +582,7 @@ void JSONImporterTask::parseJSONDoneSlot ()
     std::vector<json> json_objects = std::move(parse_job->jsonObjects());
     json_parse_jobs_.erase(json_parse_jobs_.begin());
 
-    loginf << "JSONImporterTask: parseJSONDoneSlot: " << json_objects.size() << " parsed objects";
+    logdbg << "JSONImporterTask: parseJSONDoneSlot: " << json_objects.size() << " parsed objects";
 
     objects_parsed_ += json_objects.size();
 
@@ -859,17 +629,18 @@ void JSONImporterTask::parseJSONDoneSlot ()
 
     for (auto& map_it : mappings_) // increase key counts
         map_it.keyCount(map_it.keyCount()+count);
+
     updateMsgBox();
 }
 
 void JSONImporterTask::parseJSONObsoleteSlot ()
 {
-    loginf << "JSONImporterTask: parseJSONObsoleteSlot";
+    logdbg << "JSONImporterTask: parseJSONObsoleteSlot";
 }
 
 void JSONImporterTask::mapJSONDoneSlot ()
 {
-    loginf << "JSONImporterTask: mapJSONDoneSlot";
+    logdbg << "JSONImporterTask: mapJSONDoneSlot";
 
     JSONMappingJob* map_job = dynamic_cast<JSONMappingJob*>(QObject::sender());
     assert (map_job);
@@ -895,27 +666,26 @@ void JSONImporterTask::mapJSONDoneSlot ()
 
     updateMsgBox();
 
-    insertData();
+ //   insertData();
 
-    //if (read_json_job_ == nullptr && json_parse_jobs_.size() == 0 && json_map_jobs_.size() == 0)
-//    for (auto& buf_it : buffers_)
-//    {
-//        if (buf_it.second->size() > 10000)
-//        {
-//            loginf << "JSONImporterTask: parseJSONDoneSlot: inserting part of parsed objects";
-//            insertData ();
-//            return;
-//        }
-//    }
+    for (auto& buf_it : buffers_)
+    {
+        if (buf_it.second->size() > 10000)
+        {
+            loginf << "JSONImporterTask: mapJSONDoneSlot: inserting part of parsed objects";
+            insertData ();
+            return;
+        }
+    }
 
-//    if (read_json_job_ == nullptr && json_parse_jobs_.size() == 0 && json_map_jobs_.size() == 0)
-//    {
-//        loginf << "JSONImporterTask: parseJSONDoneSlot: inserting parsed objects at end";
-//        insertData ();
-//    }
+    if (read_json_job_ == nullptr && json_parse_jobs_.size() == 0 && json_map_jobs_.size() == 0)
+    {
+        loginf << "JSONImporterTask: mapJSONDoneSlot: inserting parsed objects at end";
+        insertData ();
+    }
 
 }
 void JSONImporterTask::mapJSONObsoleteSlot ()
 {
-    loginf << "JSONImporterTask: mapJSONObsoleteSlot";
+    logdbg << "JSONImporterTask: mapJSONObsoleteSlot";
 }
