@@ -225,6 +225,150 @@ public:
         }
     }
 
+    // return bool mandatory missing
+    template<typename T>
+    bool findAndSetValue(const nlohmann::json& j, ArrayListTemplate<T>& array_list, unsigned int row_cnt)
+    {
+        const nlohmann::json* val_ptr = &j;
+
+        if (has_sub_keys_)
+        {
+            for (std::string& sub_key : sub_keys_)
+            {
+                if (val_ptr->find (sub_key) != val_ptr->end())
+                {
+                    if (sub_key == sub_keys_.back()) // last found
+                    {
+                        val_ptr = &val_ptr->at(sub_key);
+                        break;
+                    }
+
+                    if (val_ptr->at(sub_key).is_object()) // not last, step in
+                        val_ptr = &val_ptr->at(sub_key);
+                    else // not last key, and not object
+                    {
+                        val_ptr = nullptr;
+                        break;
+                    }
+                }
+                else // not found
+                {
+                    val_ptr = nullptr;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            if (val_ptr->find (json_key_) != val_ptr->end())
+                val_ptr = &val_ptr->at(json_key_);
+            else
+                val_ptr = nullptr;
+        }
+
+        if (val_ptr == nullptr || *val_ptr == nullptr)
+        {
+            if (mandatory_)
+                return true;
+
+            array_list.setNone(row_cnt);
+            return false;
+        }
+        else
+        {
+            try
+            {
+                T tmp = *val_ptr;
+                if (json_value_format_ == "")
+                    array_list.set(row_cnt, tmp);
+                else
+                    array_list.setFromFormat(row_cnt, json_value_format_,
+                                             toString(tmp));
+
+                logdbg << "JsonKey2DBOVariableMapping: setValue: json " << *val_ptr
+                       << " buffer " << array_list.get(row_cnt);
+            }
+            catch (nlohmann::json::exception& e)
+            {
+                logerr  <<  "JsonKey2DBOVariableMapping: setValue: key " << json_key_ << " json exception " << e.what();
+                array_list.setNone(row_cnt);
+            }
+        }
+
+        return false; // everything ok
+    }
+
+    bool findAndSetValue(const nlohmann::json& j, ArrayListTemplate<char>& array_list, unsigned int row_cnt)
+    {
+        const nlohmann::json* val_ptr = &j;
+
+        if (has_sub_keys_)
+        {
+            for (std::string& sub_key : sub_keys_)
+            {
+                if (val_ptr->find (sub_key) != val_ptr->end())
+                {
+                    if (sub_key == sub_keys_.back()) // last found
+                    {
+                        val_ptr = &val_ptr->at(sub_key);
+                        break;
+                    }
+
+                    if (val_ptr->at(sub_key).is_object()) // not last, step in
+                        val_ptr = &val_ptr->at(sub_key);
+                    else // not last key, and not object
+                    {
+                        val_ptr = nullptr;
+                        break;
+                    }
+                }
+                else // not found
+                {
+                    val_ptr = nullptr;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            if (val_ptr->find (json_key_) != val_ptr->end())
+                val_ptr = &val_ptr->at(json_key_);
+            else
+                val_ptr = nullptr;
+        }
+
+        if (val_ptr == nullptr || *val_ptr == nullptr)
+        {
+            if (mandatory_)
+                return true;
+
+            array_list.setNone(row_cnt);
+            return false;
+        }
+        else
+        {
+            try
+            {
+                char tmp = static_cast<int> (*val_ptr);
+                if (json_value_format_ == "")
+                    array_list.set(row_cnt, tmp);
+                else
+                    array_list.setFromFormat(row_cnt, json_value_format_,
+                                             toString(tmp));
+
+                logdbg << "JsonKey2DBOVariableMapping: setValue: json " << *val_ptr
+                       << " buffer " << array_list.get(row_cnt);
+            }
+            catch (nlohmann::json::exception& e)
+            {
+                logerr  <<  "JsonKey2DBOVariableMapping: setValue: key " << json_key_ << " json exception " << e.what();
+                array_list.setNone(row_cnt);
+            }
+        }
+
+        return false; // everything ok
+    }
+
     bool hasDimension () const { return dimension_.size() > 0; }
     /// @brief Returns dimension contained in the column
     const std::string &dimension () const { return dimension_; }

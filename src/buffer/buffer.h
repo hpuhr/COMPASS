@@ -118,6 +118,7 @@ public:
 
     /// @brief  Returns maximal used index size
     const size_t size ();
+    void cutToSize (size_t size);
 
     /// @brief Returns PropertyList
     const PropertyList &properties ()

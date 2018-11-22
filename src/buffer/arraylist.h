@@ -52,6 +52,12 @@ public:
 
     /// @brief Returns size of the list
     size_t noneSize () { return none_flags_.size(); }
+    void cutToSize (size_t size)
+    {
+        assert (size <= none_flags_.size());
+        while (none_flags_.size() > size)
+            none_flags_.pop_back();
+    }
 
     /// @brief Sets specific element to None value
     virtual void setNone(size_t index)
@@ -313,6 +319,14 @@ public:
     }
 
     size_t size() { return data_.size(); }
+
+    void cutToSize (size_t size)
+    {
+        ArrayListBase::cutToSize(size);
+        assert (size <= data_.size());
+        while (data_.size() > size)
+            data_.pop_back();
+    }
 
 protected:
     /// Data container

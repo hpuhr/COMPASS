@@ -231,6 +231,30 @@ const size_t Buffer::size ()
     return size;
 }
 
+void Buffer::cutToSize (size_t size)
+{
+    for (auto it : getArrayListMap<bool>())
+        it.second->cutToSize(size);
+    for (auto it : getArrayListMap<char>())
+        it.second->cutToSize(size);
+    for (auto it : getArrayListMap<unsigned char>())
+        it.second->cutToSize(size);
+    for (auto it : getArrayListMap<int>())
+        it.second->cutToSize(size);
+    for (auto it : getArrayListMap<unsigned int>())
+        it.second->cutToSize(size);
+    for (auto it : getArrayListMap<long int>())
+        it.second->cutToSize(size);
+    for (auto it : getArrayListMap<unsigned long int>())
+        it.second->cutToSize(size);
+    for (auto it : getArrayListMap<float>())
+        it.second->cutToSize(size);
+    for (auto it : getArrayListMap<double>())
+        it.second->cutToSize(size);
+    for (auto it : getArrayListMap<std::string>())
+        it.second->cutToSize(size);
+}
+
 bool Buffer::firstWrite ()
 {
     std::vector <ArrayListBase *>::const_iterator it;

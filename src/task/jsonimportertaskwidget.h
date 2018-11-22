@@ -27,15 +27,15 @@ public slots:
     void deleteFileSlot ();
     void updateFileListSlot ();
 
-    void joinDataSourcesChangedSlot (bool checked);
-    void separateMLATChangedSlot (bool checked);
+//    void joinDataSourcesChangedSlot (bool checked);
+//    void separateMLATChangedSlot (bool checked);
 
-    void useTimeFilterChangedSlot (bool checked);
-    void timeFilterMinChangedSlot ();
-    void timeFilterMaxChangedSlot ();
+//    void useTimeFilterChangedSlot (bool checked);
+//    void timeFilterMinChangedSlot ();
+//    void timeFilterMaxChangedSlot ();
 
-    void usePositionFilterChangedSlot (bool checked);
-    void positionFilterChangedSlot ();
+//    void usePositionFilterChangedSlot (bool checked);
+//    void positionFilterChangedSlot ();
 
 public:
     JSONImporterTaskWidget(JSONImporterTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
@@ -52,18 +52,18 @@ protected:
 
     //DBObjectComboBox* object_box_ {nullptr};
 
-    QCheckBox* join_sources_check_ {nullptr};
-    QCheckBox* separate_mlat_check_ {nullptr};
+//    QCheckBox* join_sources_check_ {nullptr};
+//    QCheckBox* separate_mlat_check_ {nullptr};
 
-    QCheckBox* filter_time_check_ {nullptr};
-    QLineEdit* filter_time_min_edit_ {nullptr};
-    QLineEdit* filter_time_max_edit_ {nullptr};
+//    QCheckBox* filter_time_check_ {nullptr};
+//    QLineEdit* filter_time_min_edit_ {nullptr};
+//    QLineEdit* filter_time_max_edit_ {nullptr};
 
-    QCheckBox* filter_position_check_ {nullptr};
-    QLineEdit* filter_lat_min_edit_ {nullptr};
-    QLineEdit* filter_lat_max_edit_ {nullptr};
-    QLineEdit* filter_lon_min_edit_ {nullptr};
-    QLineEdit* filter_lon_max_edit_ {nullptr};
+//    QCheckBox* filter_position_check_ {nullptr};
+//    QLineEdit* filter_lat_min_edit_ {nullptr};
+//    QLineEdit* filter_lat_max_edit_ {nullptr};
+//    QLineEdit* filter_lon_min_edit_ {nullptr};
+//    QLineEdit* filter_lon_max_edit_ {nullptr};
 
     QPushButton* test_button_ {nullptr};
     QPushButton* import_button_ {nullptr};

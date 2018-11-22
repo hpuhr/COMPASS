@@ -36,18 +36,18 @@ JSONImporterTask::JSONImporterTask(const std::string& class_id, const std::strin
 {
     registerParameter("last_filename", &last_filename_, "");
 
-    registerParameter("join_data_sources", &join_data_sources_, false);
-    registerParameter("separate_mlat_data", &separate_mlat_data_, false);
+//    registerParameter("join_data_sources", &join_data_sources_, false);
+//    registerParameter("separate_mlat_data", &separate_mlat_data_, false);
 
-    registerParameter("use_time_filter", &use_time_filter_, false);
-    registerParameter("time_filter_min", &time_filter_min_, 0);
-    registerParameter("time_filter_max", &time_filter_max_, 24*3600);
+//    registerParameter("use_time_filter", &use_time_filter_, false);
+//    registerParameter("time_filter_min", &time_filter_min_, 0);
+//    registerParameter("time_filter_max", &time_filter_max_, 24*3600);
 
-    registerParameter("use_position_filter", &use_position_filter_, false);
-    registerParameter("pos_filter_lat_min", &pos_filter_lat_min_, -90);
-    registerParameter("pos_filter_lat_max", &pos_filter_lat_max_, 90);
-    registerParameter("pos_filter_lon_min", &pos_filter_lon_min_, -180);
-    registerParameter("pos_filter_lon_max", &pos_filter_lon_max_, 180);
+//    registerParameter("use_position_filter", &use_position_filter_, false);
+//    registerParameter("pos_filter_lat_min", &pos_filter_lat_min_, -90);
+//    registerParameter("pos_filter_lat_max", &pos_filter_lat_max_, 90);
+//    registerParameter("pos_filter_lon_min", &pos_filter_lon_min_, -180);
+//    registerParameter("pos_filter_lon_max", &pos_filter_lon_max_, 180);
 
     createSubConfigurables();
 }
@@ -124,105 +124,105 @@ void JSONImporterTask::removeFile (const std::string &filename)
         widget_->updateFileListSlot();
 }
 
-bool JSONImporterTask::useTimeFilter() const
-{
-    return use_time_filter_;
-}
+//bool JSONImporterTask::useTimeFilter() const
+//{
+//    return use_time_filter_;
+//}
 
-void JSONImporterTask::useTimeFilter(bool value)
-{
-    use_time_filter_ = value;
-}
+//void JSONImporterTask::useTimeFilter(bool value)
+//{
+//    use_time_filter_ = value;
+//}
 
-float JSONImporterTask::timeFilterMin() const
-{
-    return time_filter_min_;
-}
+//float JSONImporterTask::timeFilterMin() const
+//{
+//    return time_filter_min_;
+//}
 
-void JSONImporterTask::timeFilterMin(float value)
-{
-    time_filter_min_ = value;
-}
+//void JSONImporterTask::timeFilterMin(float value)
+//{
+//    time_filter_min_ = value;
+//}
 
-float JSONImporterTask::timeFilterMax() const
-{
-    return time_filter_max_;
-}
+//float JSONImporterTask::timeFilterMax() const
+//{
+//    return time_filter_max_;
+//}
 
-void JSONImporterTask::timeFilterMax(float value)
-{
-    time_filter_max_ = value;
-}
+//void JSONImporterTask::timeFilterMax(float value)
+//{
+//    time_filter_max_ = value;
+//}
 
-bool JSONImporterTask::joinDataSources() const
-{
-    return join_data_sources_;
-}
+//bool JSONImporterTask::joinDataSources() const
+//{
+//    return join_data_sources_;
+//}
 
-void JSONImporterTask::joinDataSources(bool value)
-{
-    join_data_sources_ = value;
-}
+//void JSONImporterTask::joinDataSources(bool value)
+//{
+//    join_data_sources_ = value;
+//}
 
-bool JSONImporterTask::separateMLATData() const
-{
-    return separate_mlat_data_;
-}
+//bool JSONImporterTask::separateMLATData() const
+//{
+//    return separate_mlat_data_;
+//}
 
-void JSONImporterTask::separateMLATData(bool value)
-{
-    separate_mlat_data_ = value;
-}
+//void JSONImporterTask::separateMLATData(bool value)
+//{
+//    separate_mlat_data_ = value;
+//}
 
-bool JSONImporterTask::usePositionFilter() const
-{
-    return use_position_filter_;
-}
+//bool JSONImporterTask::usePositionFilter() const
+//{
+//    return use_position_filter_;
+//}
 
-void JSONImporterTask::usePositionFilter(bool use_position_filter)
-{
-    use_position_filter_ = use_position_filter;
-}
+//void JSONImporterTask::usePositionFilter(bool use_position_filter)
+//{
+//    use_position_filter_ = use_position_filter;
+//}
 
-float JSONImporterTask::positionFilterLatitudeMin() const
-{
-    return pos_filter_lat_min_;
-}
+//float JSONImporterTask::positionFilterLatitudeMin() const
+//{
+//    return pos_filter_lat_min_;
+//}
 
-void JSONImporterTask::positionFilterLatitudeMin(float value)
-{
-    pos_filter_lat_min_ = value;
-}
+//void JSONImporterTask::positionFilterLatitudeMin(float value)
+//{
+//    pos_filter_lat_min_ = value;
+//}
 
-float JSONImporterTask::positionFilterLatitudeMax() const
-{
-    return pos_filter_lat_max_;
-}
+//float JSONImporterTask::positionFilterLatitudeMax() const
+//{
+//    return pos_filter_lat_max_;
+//}
 
-void JSONImporterTask::positionFilterLatitudeMax(float value)
-{
-    pos_filter_lat_max_ = value;
-}
+//void JSONImporterTask::positionFilterLatitudeMax(float value)
+//{
+//    pos_filter_lat_max_ = value;
+//}
 
-float JSONImporterTask::positionFilterLongitudeMin() const
-{
-    return pos_filter_lon_min_;
-}
+//float JSONImporterTask::positionFilterLongitudeMin() const
+//{
+//    return pos_filter_lon_min_;
+//}
 
-void JSONImporterTask::positionFilterLongitudeMin(float value)
-{
-    pos_filter_lon_min_ = value;
-}
+//void JSONImporterTask::positionFilterLongitudeMin(float value)
+//{
+//    pos_filter_lon_min_ = value;
+//}
 
-float JSONImporterTask::positionFilterLongitudeMax() const
-{
-    return pos_filter_lon_max_;
-}
+//float JSONImporterTask::positionFilterLongitudeMax() const
+//{
+//    return pos_filter_lon_max_;
+//}
 
-void JSONImporterTask::positionFilterLongitudeMax(float value)
-{
-    pos_filter_lon_max_ = value;
-}
+//void JSONImporterTask::positionFilterLongitudeMax(float value)
+//{
+//    pos_filter_lon_max_ = value;
+//}
 
 bool JSONImporterTask::canImportFile (const std::string& filename)
 {
