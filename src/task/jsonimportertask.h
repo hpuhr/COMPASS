@@ -135,11 +135,13 @@ protected:
     unsigned int objects_inserted_ {0};
     bool all_done_ {false};
 
+    std::map <std::string, std::shared_ptr<Buffer>> buffers_;
+
     QMessageBox* msg_box_ {nullptr};
 
     void createMappings ();
     //void transformBuffers ();
-    void insertData (std::vector <JsonMapping>& mappings);
+    void insertData ();
     void clearData ();
 
     void updateMsgBox ();

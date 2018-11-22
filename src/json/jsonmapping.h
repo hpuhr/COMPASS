@@ -314,6 +314,9 @@ public:
     unsigned int keyCount() const;
     void keyCount(unsigned int keyCount);
 
+    bool keyInitialized() { return key_initialized_; }
+    void initializeKey ();
+
 private:
     DBObject& db_object_;
 

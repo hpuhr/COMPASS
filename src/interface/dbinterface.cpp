@@ -1029,7 +1029,7 @@ void DBInterface::insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer)
 
 std::shared_ptr<Buffer> DBInterface::getPartialBuffer (DBTable& table, std::shared_ptr<Buffer> buffer)
 {
-    loginf << "DBInterface: getPartialBuffer: table " << table.name() << " buffer size " << buffer->size();
+    logdbg << "DBInterface: getPartialBuffer: table " << table.name() << " buffer size " << buffer->size();
     std::shared_ptr<Buffer> tmp_buffer {new Buffer()};
 
     PropertyList org_properties = buffer->properties();
@@ -1040,7 +1040,7 @@ std::shared_ptr<Buffer> DBInterface::getPartialBuffer (DBTable& table, std::shar
         if (table.hasColumn(org_prop.name()))
             // && table.column(org_prop.name()).propertyType() == org_prop.dataType()
         {
-            logdbg << "DBInterface: getPartialBuffer: table " << table.name() << " adding property " << org_prop.name();
+            loginf << "DBInterface: getPartialBuffer: table " << table.name() << " adding property " << org_prop.name();
             tmp_buffer->addProperty(org_prop);
 
             switch (org_prop.dataType())

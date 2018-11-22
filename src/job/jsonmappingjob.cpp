@@ -23,7 +23,9 @@ void JSONMappingJob::run ()
 
     for (auto& map_it : mappings_)
         if (map_it.hasFilledBuffer())
+        {
             map_it.transformBuffer();
+        }
 
     done_ = true;
 }

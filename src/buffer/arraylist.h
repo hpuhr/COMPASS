@@ -51,7 +51,7 @@ public:
     virtual ~ArrayListBase () {}
 
     /// @brief Returns size of the list
-    size_t size () { return none_flags_.size(); }
+    size_t noneSize () { return none_flags_.size(); }
 
     /// @brief Sets specific element to None value
     virtual void setNone(size_t index)
@@ -75,6 +75,18 @@ public:
     virtual void clear()=0;
 
     virtual const std::string getAsString (size_t index)=0;
+
+    void checkNotNone ()
+    {
+        for (size_t cnt=0; cnt < none_flags_.size(); cnt++)
+        {
+           if (none_flags_.at(cnt))
+           {
+               logerr << "cnt " << cnt << " none";
+               assert (false);
+           }
+        }
+    }
 
 private:
     //std::vector < std::shared_ptr< std::array<bool,BUFFER_ARRAY_SIZE> > > none_flags_;
@@ -156,7 +168,7 @@ public:
         unsetNone(index);
 
         if (ARRAYLIST_PEDANTIC_CHECKING)
-            assert (data_.size() == ArrayListBase::size());
+            assert (data_.size() == noneSize());
     }
 
     void setFromFormat (size_t index, const std::string& format, const std::string& value_str)
@@ -197,12 +209,15 @@ public:
         ArrayListBase::setNone(index);
 
         if (ARRAYLIST_PEDANTIC_CHECKING)
-            assert (data_.size() == ArrayListBase::size());
+            assert (data_.size() == noneSize());
     }
 
     void addData (ArrayListTemplate<T> &other)
     {
         logdbg << "ArrayListTemplate: addData: data size " << data_.size();
+
+        assert (size() == noneSize());
+        assert (other.size() == other.noneSize());
 
         data_.insert(data_.end(), other.data_.begin(), other.data_.end());
         addNone(other);
@@ -211,7 +226,7 @@ public:
         other.setAllNone();
 
         if (ARRAYLIST_PEDANTIC_CHECKING)
-            assert (data_.size() == ArrayListBase::size());
+            assert (data_.size() == noneSize());
 
         logdbg << "ArrayListTemplate: addData: end data size " << data_.size();
     }
@@ -259,7 +274,7 @@ public:
                 if (ARRAYLIST_PEDANTIC_CHECKING)
                 {
                     assert (index < data_.size());
-                    assert (index < ArrayListBase::size());
+                    assert (index < noneSize());
                 }
 
                 values[data_.at(index)].push_back(index);
@@ -296,6 +311,8 @@ public:
             }
         }
     }
+
+    size_t size() { return data_.size(); }
 
 protected:
     /// Data container

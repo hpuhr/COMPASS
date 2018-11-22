@@ -164,9 +164,9 @@ void Buffer::seizeBuffer (Buffer &org_buffer)
 {
     logdbg  << "Buffer: seizeBuffer: start";
 
-    logdbg  << "Buffer: seizeBuffer: full " << full() << " size " << size() << " first write " << firstWrite();
+    logdbg  << "Buffer: seizeBuffer: size " << size() << " other size " << org_buffer.size();
 
-    assert (full() || firstWrite()); //|| first_write_
+    //assert (full() || firstWrite()); //|| first_write_
 
     org_buffer.properties_.clear();
 
@@ -187,10 +187,10 @@ void Buffer::seizeBuffer (Buffer &org_buffer)
     logdbg  << "Buffer: seizeBuffer: end size " << size();
 }
 
-bool Buffer::full ()
-{
-    return size()%BUFFER_ARRAY_SIZE == 0;
-}
+//bool Buffer::full ()
+//{
+//    return size()%BUFFER_ARRAY_SIZE == 0;
+//}
 
 const size_t Buffer::size ()
 {
@@ -321,6 +321,9 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
                << var_it->representationString();
         assert (var_it->hasCurrentDBColumn());
         const DBTableColumn &column = var_it->currentDBColumn ();
+
+        logdbg << "Buffer: transformVariables: variable " << var_it->name() << " col "
+               << column.name();
 
         PropertyDataType data_type = var_it->dataType();
 
@@ -509,7 +512,7 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
         // rename to reflect dbo variable
         if (current_var_name != transformed_var_name)
         {
-            logdbg << "Buffer: transformVariables: renaming variable " << current_var_name
+            loginf << "Buffer: transformVariables: renaming variable " << current_var_name
                    << " to variable name " << transformed_var_name;
 
             switch (data_type)

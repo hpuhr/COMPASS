@@ -90,7 +90,7 @@ public:
     void lastOne (bool last_one) { last_one_=last_one; }
 
     /// @brief Returns flag indicating if buffer is filled to a multiple of BUFFER_ARRAY_SIZE.
-    bool full ();
+    //bool full ();
 
     /// @brief Returns the buffers id
     unsigned int id() const { return id_; }

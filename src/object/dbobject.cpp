@@ -896,7 +896,11 @@ void DBObject::clearData ()
 
 void DBObject::insertData (DBOVariableSet& list, std::shared_ptr<Buffer> buffer)
 {
-    logdbg << "DBObject: insertData";
+    loginf << "DBObject " << name_ << ": insertData";
+
+    if (hasKeyVariable())
+        assert (list.hasVariable(getKeyVariable()));
+
     assert (!insert_job_);
 
     buffer->transformVariables(list, false); // back again

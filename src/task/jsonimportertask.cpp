@@ -457,6 +457,7 @@ void JSONImporterTask::createMappings ()
             mappings_.at(index).addMapping({"wgs84_position.value_lon_rad", db_object.variable("pos_long_deg"), true,
                                             "Angle", "Radian"});
             mappings_.at(index).addMapping({"time_of_report", db_object.variable("tod"), true, "Time", "Second"});
+            mappings_.at(index).initializeKey();
         }
 
         {
@@ -483,6 +484,7 @@ void JSONImporterTask::createMappings ()
             mappings_.at(index).addMapping({"wgs84_position.value_lon_rad", db_object.variable("pos_long_deg"), true,
                                             "Angle", "Radian"});
             mappings_.at(index).addMapping({"detection_time", db_object.variable("tod"), true, "Time", "Second"});
+            mappings_.at(index).initializeKey();
         }
 
         {
@@ -509,6 +511,7 @@ void JSONImporterTask::createMappings ()
             mappings_.at(index).addMapping({"measured_rng_m", db_object.variable("pos_range_nm"), true,
                                             "Length", "Meter"});
             mappings_.at(index).addMapping({"detection_time", db_object.variable("tod"), true, "Time", "Second"});
+            mappings_.at(index).initializeKey();
         }
 
         {
@@ -535,6 +538,7 @@ void JSONImporterTask::createMappings ()
             mappings_.at(index).addMapping({"calculated_wgs84_position.value_longitude_rad",
                                             db_object.variable("pos_long_deg"), true, "Angle", "Radian"});
             mappings_.at(index).addMapping({"time_of_last_update", db_object.variable("tod"), true, "Time", "Second"});
+            mappings_.at(index).initializeKey();
         }
     }
 
@@ -544,7 +548,7 @@ void JSONImporterTask::createMappings ()
 //        map_it.parseJSON(j, test);
 }
 
-void JSONImporterTask::insertData (std::vector <JsonMapping>& mappings)
+void JSONImporterTask::insertData ()
 {
     loginf << "JSONImporterTask: insertData: inserting into database";
 
@@ -556,14 +560,14 @@ void JSONImporterTask::insertData (std::vector <JsonMapping>& mappings)
 
     bool has_sac_sic = false;
 
-    for (auto& map_it : mappings)
+    for (auto& map_it : mappings_)
     {
-        if (map_it.buffer() != nullptr && map_it.buffer()->size() != 0)
+        if (buffers_.count(map_it.dbObject().name()) != 0)
         {
             ++insert_active_;
 
             DBObject& db_object = map_it.dbObject();
-            std::shared_ptr<Buffer> buffer = map_it.buffer();
+            std::shared_ptr<Buffer> buffer = buffers_.at(map_it.dbObject().name());
 
             has_sac_sic = db_object.hasVariable("sac") && db_object.hasVariable("sic")
                     && buffer->has<char>("sac") && buffer->has<char>("sic");
@@ -662,10 +666,14 @@ void JSONImporterTask::insertData (std::vector <JsonMapping>& mappings)
 
             logdbg << "JSONImporterTask: insertData: " << db_object.name() << " clearing";
             map_it.clearBuffer();
+
+            buffers_.erase(map_it.dbObject().name());
         }
         else
             logdbg << "JSONImporterTask: insertData: emtpy buffer for " << map_it.dbObject().name();
     }
+
+    assert (buffers_.size() == 0);
 
     loginf << "JSONImporterTask: insertData: done";
 }
@@ -852,15 +860,25 @@ void JSONImporterTask::mapJSONDoneSlot ()
     for (auto& map_it : mappings)
     {
         if (map_it.hasFilledBuffer())
+        {
             objects_mapped_ += map_it.buffer()->size();
+
+            if (buffers_.count(map_it.dbObject().name()) == 0)
+                buffers_[map_it.dbObject().name()] = map_it.buffer();
+            else
+            {
+                buffers_.at(map_it.dbObject().name())->seizeBuffer(*map_it.buffer().get());
+            }
+        }
     }
 
-    loginf << "JSONImporterTask: parseJSONDoneSlot: inserting parsed objects";
-
-    if (!test_)
-        insertData (mappings);
-
     updateMsgBox();
+
+    if (read_json_job_ == nullptr && json_parse_job_ == nullptr && json_map_jobs_.size() == 0)
+    {
+        loginf << "JSONImporterTask: parseJSONDoneSlot: inserting parsed objects";
+        insertData ();
+    }
 }
 void JSONImporterTask::mapJSONObsoleteSlot ()
 {

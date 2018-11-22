@@ -80,7 +80,7 @@ void JsonMapping::clearBuffer ()
     buffer_ = nullptr;
 }
 
-unsigned int JsonMapping::parseJSON (nlohmann::json& j)
+void JsonMapping::initializeKey ()
 {
     if (!key_initialized_)
     {
@@ -111,6 +111,12 @@ unsigned int JsonMapping::parseJSON (nlohmann::json& j)
 
         key_initialized_ = true;
     }
+}
+
+unsigned int JsonMapping::parseJSON (nlohmann::json& j)
+{
+    if (!key_initialized_)
+        initializeKey ();
 
     //assert (buffer_ == nullptr || buffer_->size() == 0);
     if (buffer_ == nullptr)
@@ -147,7 +153,7 @@ unsigned int JsonMapping::parseJSON (nlohmann::json& j)
                         assert (key_variable_);
                         assert (buffer_->has<int>(key_variable_->name()));
                         buffer_->get<int> (key_variable_->name()).set(row_cnt, key_count_);
-                        //loginf << "override key " << array_list.get(row_cnt) << " size " << buffer_->size();
+                        //loginf << "override key row " << row_cnt << " val " << key_count_;
                     }
 
                     ++row_cnt;
@@ -176,7 +182,7 @@ unsigned int JsonMapping::parseJSON (nlohmann::json& j)
                 assert (key_variable_);
                 assert (buffer_->has<int>(key_variable_->name()));
                 buffer_->get<int> (key_variable_->name()).set(row_cnt, key_count_);
-                //logdbg << "override key " << array_list.get(row_cnt) << " size " << buffer_->size();
+                //loginf << "override key row " << row_cnt << " val " << key_count_;
             }
 
             ++row_cnt;
@@ -420,6 +426,8 @@ bool JsonMapping::parseTargetReport (const nlohmann::json& tr, size_t row_cnt)
 
 void JsonMapping::transformBuffer ()
 {
+    loginf << "JsonMapping: transformBuffer: object " << db_object_.name();
+
     for (auto& data_it : data_mappings_)
     {
         if (data_it.dimension() != data_it.variable().dimension())
