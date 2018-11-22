@@ -426,7 +426,7 @@ bool JsonMapping::parseTargetReport (const nlohmann::json& tr, size_t row_cnt)
 
 void JsonMapping::transformBuffer ()
 {
-    loginf << "JsonMapping: transformBuffer: object " << db_object_.name();
+    logdbg << "JsonMapping: transformBuffer: object " << db_object_.name();
 
     for (auto& data_it : data_mappings_)
     {

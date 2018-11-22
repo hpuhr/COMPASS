@@ -33,9 +33,9 @@
 #include "property.h"
 #include "stringconv.h"
 
-static const unsigned int BUFFER_ARRAY_SIZE=10000;
+//static const unsigned int BUFFER_ARRAY_SIZE=10000;
 
-const bool ARRAYLIST_PEDANTIC_CHECKING=true;
+const bool ARRAYLIST_PEDANTIC_CHECKING=false;
 
 /**
  * @brief List interface of fixed-size arrays to be used in Buffer classes.

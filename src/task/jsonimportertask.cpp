@@ -751,10 +751,10 @@ void JSONImporterTask::insertDoneSlot (DBObject& object)
 
         all_done_ = true;
     }
-    else
-         loginf << "JSONImporterTask: insertDoneSlot: NOT done after "
-                << " a " << (read_json_job_ == nullptr) << " b " << (json_parse_jobs_.size() == 0) << " c "
-                << (json_map_jobs_.size() == 0) << " d " << (insert_active_ == 0);
+//    else
+//         loginf << "JSONImporterTask: insertDoneSlot: NOT done after "
+//                << " a " << (read_json_job_ == nullptr) << " b " << (json_parse_jobs_.size() == 0) << " c "
+//                << (json_map_jobs_.size() == 0) << " d " << (insert_active_ == 0);
 
     updateMsgBox();
 }
@@ -818,34 +818,47 @@ void JSONImporterTask::parseJSONDoneSlot ()
 
     createMappings();
 
+//    while (json_objects.size())
+//    {
+//        size_t count = 2000;
 
-    while (json_objects.size())
-    {
-        size_t count = 2000;
+//        if (json_objects.size() < count)
+//            count = json_objects.size();
 
-        if (json_objects.size() < count)
-            count = json_objects.size();
+//        std::vector<json> json_objects_part;
 
-        std::vector<json> json_objects_part;
+//        auto it = std::next(json_objects.begin(), count);
 
-        auto it = std::next(json_objects.begin(), count);
+//        std::move(json_objects.begin(), it, std::back_inserter(json_objects_part));  // ##
 
-        std::move(json_objects.begin(), it, std::back_inserter(json_objects_part));  // ##
+//        json_objects.erase(json_objects.begin(), it);
 
-        json_objects.erase(json_objects.begin(), it);
+//        std::shared_ptr<JSONMappingJob> json_map_job = std::shared_ptr<JSONMappingJob> (new JSONMappingJob (std::move(json_objects_part), mappings_));
+//        connect (json_map_job.get(), SIGNAL(obsoleteSignal()), this, SLOT(mapJSONObsoleteSlot()),
+//                 Qt::QueuedConnection);
+//        connect (json_map_job.get(), SIGNAL(doneSignal()), this, SLOT(mapJSONDoneSlot()), Qt::QueuedConnection);
 
-        std::shared_ptr<JSONMappingJob> json_map_job = std::shared_ptr<JSONMappingJob> (new JSONMappingJob (std::move(json_objects_part), mappings_));
-        connect (json_map_job.get(), SIGNAL(obsoleteSignal()), this, SLOT(mapJSONObsoleteSlot()),
-                 Qt::QueuedConnection);
-        connect (json_map_job.get(), SIGNAL(doneSignal()), this, SLOT(mapJSONDoneSlot()), Qt::QueuedConnection);
+//        json_map_jobs_.push_back(json_map_job);
 
-        json_map_jobs_.push_back(json_map_job);
+//        JobManager::instance().addJob(json_map_job);
 
-        JobManager::instance().addJob(json_map_job);
+//        for (auto& map_it : mappings_) // increase key counts
+//            map_it.keyCount(map_it.keyCount()+count);
+//    }
 
-        for (auto& map_it : mappings_) // increase key counts
-            map_it.keyCount(map_it.keyCount()+count);
-    }
+    int count = json_objects.size();
+
+    std::shared_ptr<JSONMappingJob> json_map_job = std::shared_ptr<JSONMappingJob> (new JSONMappingJob (std::move(json_objects), mappings_));
+    connect (json_map_job.get(), SIGNAL(obsoleteSignal()), this, SLOT(mapJSONObsoleteSlot()),
+             Qt::QueuedConnection);
+    connect (json_map_job.get(), SIGNAL(doneSignal()), this, SLOT(mapJSONDoneSlot()), Qt::QueuedConnection);
+
+    json_map_jobs_.push_back(json_map_job);
+
+    JobManager::instance().addJob(json_map_job);
+
+    for (auto& map_it : mappings_) // increase key counts
+        map_it.keyCount(map_it.keyCount()+count);
     updateMsgBox();
 }
 
@@ -882,22 +895,24 @@ void JSONImporterTask::mapJSONDoneSlot ()
 
     updateMsgBox();
 
-    //if (read_json_job_ == nullptr && json_parse_jobs_.size() == 0 && json_map_jobs_.size() == 0)
-    for (auto& buf_it : buffers_)
-    {
-        if (buf_it.second->size() > 10000)
-        {
-            loginf << "JSONImporterTask: parseJSONDoneSlot: inserting part of parsed objects";
-            insertData ();
-            return;
-        }
-    }
+    insertData();
 
-    if (read_json_job_ == nullptr && json_parse_jobs_.size() == 0 && json_map_jobs_.size() == 0)
-    {
-        loginf << "JSONImporterTask: parseJSONDoneSlot: inserting parsed objects at end";
-        insertData ();
-    }
+    //if (read_json_job_ == nullptr && json_parse_jobs_.size() == 0 && json_map_jobs_.size() == 0)
+//    for (auto& buf_it : buffers_)
+//    {
+//        if (buf_it.second->size() > 10000)
+//        {
+//            loginf << "JSONImporterTask: parseJSONDoneSlot: inserting part of parsed objects";
+//            insertData ();
+//            return;
+//        }
+//    }
+
+//    if (read_json_job_ == nullptr && json_parse_jobs_.size() == 0 && json_map_jobs_.size() == 0)
+//    {
+//        loginf << "JSONImporterTask: parseJSONDoneSlot: inserting parsed objects at end";
+//        insertData ();
+//    }
 
 }
 void JSONImporterTask::mapJSONObsoleteSlot ()
