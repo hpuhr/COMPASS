@@ -1040,7 +1040,7 @@ std::shared_ptr<Buffer> DBInterface::getPartialBuffer (DBTable& table, std::shar
         if (table.hasColumn(org_prop.name()))
             // && table.column(org_prop.name()).propertyType() == org_prop.dataType()
         {
-            loginf << "DBInterface: getPartialBuffer: table " << table.name() << " adding property " << org_prop.name();
+            logdbg << "DBInterface: getPartialBuffer: table " << table.name() << " adding property " << org_prop.name();
             tmp_buffer->addProperty(org_prop);
 
             switch (org_prop.dataType())
@@ -1137,7 +1137,7 @@ bool DBInterface::checkUpdateBuffer (DBObject &object, DBOVariable &key_var, DBO
 void DBInterface::updateBuffer (MetaDBTable& meta_table, const DBTableColumn& key_col, std::shared_ptr<Buffer> buffer,
                                 int from_index, int to_index)
 {
-    loginf << "DBInterface: updateBuffer: meta " << meta_table.name() << " buffer size " << buffer->size()
+    logdbg << "DBInterface: updateBuffer: meta " << meta_table.name() << " buffer size " << buffer->size()
            << " key " << key_col.identifier();
 
     std::shared_ptr<Buffer> partial_buffer = getPartialBuffer(meta_table.mainTable(), buffer);
@@ -1149,27 +1149,27 @@ void DBInterface::updateBuffer (MetaDBTable& meta_table, const DBTableColumn& ke
         if (sub_it.second.hasColumn(key_col.name()))
         {
             const DBTableColumn& sub_key_col = sub_it.second.column(key_col.name());
-            loginf << "DBInterface: updateBuffer: got sub table " << sub_it.second.name()
+            logdbg << "DBInterface: updateBuffer: got sub table " << sub_it.second.name()
                    << " key col " << sub_key_col.identifier();
 
             partial_buffer = getPartialBuffer(sub_it.second, buffer);
             if (partial_buffer->size())
             {
-                loginf << "DBInterface: updateBuffer: doing update for sub table " << sub_it.second.name();
+                logdbg << "DBInterface: updateBuffer: doing update for sub table " << sub_it.second.name();
                 updateBuffer(sub_it.second, sub_key_col, partial_buffer, from_index, to_index);
             }
             else
-                loginf << "DBInterface: updateBuffer: empty buffer for sub table " << sub_it.second.name();
+                logdbg << "DBInterface: updateBuffer: empty buffer for sub table " << sub_it.second.name();
         }
         else
-            loginf << "DBInterface: updateBuffer: key not found in sub table " << sub_it.second.name();
+            logdbg << "DBInterface: updateBuffer: key not found in sub table " << sub_it.second.name();
     }
 }
 
 void DBInterface::updateBuffer (DBTable& table, const DBTableColumn& key_col, std::shared_ptr<Buffer> buffer,
                                 int from_index, int to_index)
 {
-    loginf << "DBInterface: updateBuffer: table " << table.name() << " buffer size " << buffer->size()
+    logdbg << "DBInterface: updateBuffer: table " << table.name() << " buffer size " << buffer->size()
            << " key " << key_col.identifier();
 
     //assert (checkUpdateBuffer(object, key_var, buffer));
@@ -1189,7 +1189,7 @@ void DBInterface::updateBuffer (DBTable& table, const DBTableColumn& key_col, st
 
     QMutexLocker locker(&connection_mutex_);
 
-    loginf  << "DBInterface: updateBuffer: preparing bind statement '" << bind_statement << "'";
+    logdbg  << "DBInterface: updateBuffer: preparing bind statement '" << bind_statement << "'";
     current_connection_->prepareBindStatement(bind_statement);
     current_connection_->beginBindTransaction();
 

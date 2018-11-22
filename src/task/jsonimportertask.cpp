@@ -738,7 +738,7 @@ void JSONImporterTask::insertDoneSlot (DBObject& object)
     logdbg << "JSONImporterTask: insertDoneSlot";
     --insert_active_;
 
-    if (read_json_job_ == nullptr && json_parse_job_ == nullptr && json_map_jobs_.size() == 0 && insert_active_ == 0)
+    if (read_json_job_ == nullptr && json_parse_jobs_.size() == 0 && json_map_jobs_.size() == 0 && insert_active_ == 0)
     {
         stop_time_ = boost::posix_time::microsec_clock::local_time();
 
@@ -751,6 +751,10 @@ void JSONImporterTask::insertDoneSlot (DBObject& object)
 
         all_done_ = true;
     }
+    else
+         loginf << "JSONImporterTask: insertDoneSlot: NOT done after "
+                << " a " << (read_json_job_ == nullptr) << " b " << (json_parse_jobs_.size() == 0) << " c "
+                << (json_map_jobs_.size() == 0) << " d " << (insert_active_ == 0);
 
     updateMsgBox();
 }
@@ -766,19 +770,9 @@ void JSONImporterTask::readJSONFilePartDoneSlot ()
 
     //loginf << "got part '" << ss.str() << "'";
 
+    // restart read job
     std::vector <std::string> objects = std::move(read_json_job_->objects());
     assert (!read_json_job_->objects().size());
-
-    assert (!json_parse_job_);
-
-    json_parse_job_ = std::shared_ptr<JSONParseJob> (new JSONParseJob (std::move(objects)));
-    connect (json_parse_job_.get(), SIGNAL(obsoleteSignal()), this, SLOT(parseJSONObsoleteSlot()),
-             Qt::QueuedConnection);
-    connect (json_parse_job_.get(), SIGNAL(doneSignal()), this, SLOT(parseJSONDoneSlot()), Qt::QueuedConnection);
-
-    JobManager::instance().addJob(json_parse_job_);
-
-    updateMsgBox();
 
     if (!read_json_job_->fileReadDone())
     {
@@ -788,6 +782,20 @@ void JSONImporterTask::readJSONFilePartDoneSlot ()
     }
     else
         read_json_job_ = nullptr;
+
+    // start parse job
+    std::shared_ptr<JSONParseJob> json_parse_job = std::shared_ptr<JSONParseJob> (new JSONParseJob (std::move(objects)));
+    connect (json_parse_job.get(), SIGNAL(obsoleteSignal()), this, SLOT(parseJSONObsoleteSlot()),
+             Qt::QueuedConnection);
+    connect (json_parse_job.get(), SIGNAL(doneSignal()), this, SLOT(parseJSONDoneSlot()), Qt::QueuedConnection);
+
+    JobManager::instance().addJob(json_parse_job);
+
+    json_parse_jobs_.push_back(json_parse_job);
+
+    updateMsgBox();
+
+
 }
 void JSONImporterTask::readJSONFilePartObsoleteSlot ()
 {
@@ -802,7 +810,7 @@ void JSONImporterTask::parseJSONDoneSlot ()
     assert (parse_job);
 
     std::vector<json> json_objects = std::move(parse_job->jsonObjects());
-    json_parse_job_ = nullptr;
+    json_parse_jobs_.erase(json_parse_jobs_.begin());
 
     loginf << "JSONImporterTask: parseJSONDoneSlot: " << json_objects.size() << " parsed objects";
 
@@ -874,11 +882,23 @@ void JSONImporterTask::mapJSONDoneSlot ()
 
     updateMsgBox();
 
-    if (read_json_job_ == nullptr && json_parse_job_ == nullptr && json_map_jobs_.size() == 0)
+    //if (read_json_job_ == nullptr && json_parse_jobs_.size() == 0 && json_map_jobs_.size() == 0)
+    for (auto& buf_it : buffers_)
     {
-        loginf << "JSONImporterTask: parseJSONDoneSlot: inserting parsed objects";
+        if (buf_it.second->size() > 10000)
+        {
+            loginf << "JSONImporterTask: parseJSONDoneSlot: inserting part of parsed objects";
+            insertData ();
+            return;
+        }
+    }
+
+    if (read_json_job_ == nullptr && json_parse_jobs_.size() == 0 && json_map_jobs_.size() == 0)
+    {
+        loginf << "JSONImporterTask: parseJSONDoneSlot: inserting parsed objects at end";
         insertData ();
     }
+
 }
 void JSONImporterTask::mapJSONObsoleteSlot ()
 {

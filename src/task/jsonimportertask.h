@@ -118,7 +118,7 @@ protected:
     std::set <int> added_data_sources_;
 
     std::shared_ptr <ReadJSONFilePartJob> read_json_job_;
-    std::shared_ptr <JSONParseJob> json_parse_job_;
+    std::vector<std::shared_ptr <JSONParseJob>> json_parse_jobs_;
     std::vector<std::shared_ptr <JSONMappingJob>> json_map_jobs_;
 
     std::string filename_;

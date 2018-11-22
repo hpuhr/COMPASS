@@ -512,7 +512,7 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
         // rename to reflect dbo variable
         if (current_var_name != transformed_var_name)
         {
-            loginf << "Buffer: transformVariables: renaming variable " << current_var_name
+            logdbg << "Buffer: transformVariables: renaming variable " << current_var_name
                    << " to variable name " << transformed_var_name;
 
             switch (data_type)
