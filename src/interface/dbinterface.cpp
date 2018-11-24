@@ -53,7 +53,6 @@
 #include "dbtableinfo.h"
 #include "dbtable.h"
 #include "stringconv.h"
-#include "arraylist.h"
 
 using namespace Utils;
 
@@ -1031,62 +1030,26 @@ void DBInterface::insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer)
 std::shared_ptr<Buffer> DBInterface::getPartialBuffer (DBTable& table, std::shared_ptr<Buffer> buffer)
 {
     logdbg << "DBInterface: getPartialBuffer: table " << table.name() << " buffer size " << buffer->size();
-    std::shared_ptr<Buffer> tmp_buffer {new Buffer()};
 
     PropertyList org_properties = buffer->properties();
+    PropertyList partial_properties;
+
     for (unsigned int cnt=0; cnt < org_properties.size(); ++cnt)
     {
         Property org_prop = org_properties.at(cnt);
 
         if (table.hasColumn(org_prop.name()))
-            // && table.column(org_prop.name()).propertyType() == org_prop.dataType()
         {
             logdbg << "DBInterface: getPartialBuffer: table " << table.name() << " adding property " << org_prop.name();
-            tmp_buffer->addProperty(org_prop);
+            partial_properties.addProperty(org_prop);
 
-            switch (org_prop.dataType())
-            {
-            case PropertyDataType::BOOL:
-                tmp_buffer->get<bool>(org_prop.name()).copyData(buffer->get<bool>(org_prop.name()));
-                break;
-            case PropertyDataType::CHAR:
-                tmp_buffer->get<char>(org_prop.name()).copyData(buffer->get<char>(org_prop.name()));
-                break;
-            case PropertyDataType::UCHAR:
-                tmp_buffer->get<unsigned char>(org_prop.name()).copyData(buffer->get<unsigned char>(org_prop.name()));
-                break;
-            case PropertyDataType::INT:
-                tmp_buffer->get<int>(org_prop.name()).copyData(buffer->get<int>(org_prop.name()));
-                break;
-            case PropertyDataType::UINT:
-                tmp_buffer->get<unsigned int>(org_prop.name()).copyData(buffer->get<unsigned int>(org_prop.name()));
-                break;
-            case PropertyDataType::LONGINT:
-                tmp_buffer->get<long int>(org_prop.name()).copyData(buffer->get<long int>(org_prop.name()));
-                break;
-            case PropertyDataType::ULONGINT:
-                tmp_buffer->get<unsigned long int>(org_prop.name()).copyData(buffer->get<unsigned long int>(org_prop.name()));
-                break;
-            case PropertyDataType::FLOAT:
-                tmp_buffer->get<float>(org_prop.name()).copyData(buffer->get<float>(org_prop.name()));
-                break;
-            case PropertyDataType::DOUBLE:
-                tmp_buffer->get<double>(org_prop.name()).copyData(buffer->get<double>(org_prop.name()));
-                break;
-            case PropertyDataType::STRING:
-                tmp_buffer->get<std::string>(org_prop.name()).copyData(buffer->get<std::string>(org_prop.name()));
-                break;
-            default:
-                logerr  <<  "IDBInterface: getPartialBuffer: unknown property type "
-                         << Property::asString(org_prop.dataType());
-                throw std::runtime_error ("DBInterface: getPartialBuffer: unknown property type "
-                                          + Property::asString(org_prop.dataType()));
-            }
         }
         else
             logdbg << "DBInterface: getPartialBuffer: table " << table.name()
                    << " skipping property " << org_prop.name();
     }
+
+    std::shared_ptr<Buffer> tmp_buffer = buffer->getPartialCopy(partial_properties);
 
     logdbg << "DBInterface: getPartialBuffer: end with partial buffer size " << tmp_buffer->size();
     return tmp_buffer;

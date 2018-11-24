@@ -182,6 +182,8 @@ void Buffer::seizeBuffer (Buffer &org_buffer)
     seizeArrayListMap<double>(org_buffer);
     seizeArrayListMap<std::string>(org_buffer);
 
+    data_size_ += org_buffer.data_size_;
+
     if (org_buffer.lastOne())
         last_one_ = true;
 
@@ -540,62 +542,60 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
     }
 }
 
-
-template<typename T> inline bool Buffer::has (const std::string &id)
+std::shared_ptr<Buffer> Buffer::getPartialCopy (const PropertyList& partial_properties)
 {
-    return getArrayListMap<T>().count(id) != 0;
+    std::shared_ptr<Buffer> tmp_buffer {new Buffer()};
+
+    for (unsigned int cnt=0; cnt < partial_properties.size(); ++cnt)
+    {
+        Property prop = partial_properties.at(cnt);
+
+        logdbg << "Buffer: getPartialCopy: adding property " << prop.name();
+        tmp_buffer->addProperty(prop);
+
+        switch (prop.dataType())
+        {
+        case PropertyDataType::BOOL:
+            tmp_buffer->get<bool>(prop.name()).copyData(get<bool>(prop.name()));
+            break;
+        case PropertyDataType::CHAR:
+            tmp_buffer->get<char>(prop.name()).copyData(get<char>(prop.name()));
+            break;
+        case PropertyDataType::UCHAR:
+            tmp_buffer->get<unsigned char>(prop.name()).copyData(get<unsigned char>(prop.name()));
+            break;
+        case PropertyDataType::INT:
+            tmp_buffer->get<int>(prop.name()).copyData(get<int>(prop.name()));
+            break;
+        case PropertyDataType::UINT:
+            tmp_buffer->get<unsigned int>(prop.name()).copyData(get<unsigned int>(prop.name()));
+            break;
+        case PropertyDataType::LONGINT:
+            tmp_buffer->get<long int>(prop.name()).copyData(get<long int>(prop.name()));
+            break;
+        case PropertyDataType::ULONGINT:
+            tmp_buffer->get<unsigned long int>(prop.name()).copyData(get<unsigned long int>(prop.name()));
+            break;
+        case PropertyDataType::FLOAT:
+            tmp_buffer->get<float>(prop.name()).copyData(get<float>(prop.name()));
+            break;
+        case PropertyDataType::DOUBLE:
+            tmp_buffer->get<double>(prop.name()).copyData(get<double>(prop.name()));
+            break;
+        case PropertyDataType::STRING:
+            tmp_buffer->get<std::string>(prop.name()).copyData(get<std::string>(prop.name()));
+            break;
+        default:
+            logerr  <<  "Buffer: getPartialCopy: unknown property type "
+                     << Property::asString(prop.dataType());
+            throw std::runtime_error ("Buffer: getPartialCopy: unknown property type "
+                                      + Property::asString(prop.dataType()));
+        }
+    }
+
+    return tmp_buffer;
 }
 
-template<typename T> ArrayListTemplate<T>& Buffer::get (const std::string &id)
-{
-    return *(std::get< Index<std::map <std::string, std::shared_ptr<ArrayListTemplate<T>>>,
-            ArrayListMapTupel>::value > (array_list_tuple_)).at(id);
-}
 
-template<typename T> void Buffer::rename (const std::string &id, const std::string &id_new)
-{
-    renameArrayListMapEntry<T>(id, id_new);
-
-    assert (properties_.hasProperty(id));
-    Property old_property = properties_.get(id);
-    properties_.removeProperty(id);
-    properties_.addProperty(id_new, old_property.dataType());
-}
-
-// private stuff
-
-template<typename T> std::map <std::string, std::shared_ptr<ArrayListTemplate<T>>>& Buffer::getArrayListMap ()
-{
-    return std::get< Index<std::map <std::string, std::shared_ptr<ArrayListTemplate<T>>>,
-            ArrayListMapTupel>::value > (array_list_tuple_);
-}
-template<typename T> void Buffer::renameArrayListMapEntry (const std::string &id, const std::string &id_new)
-{
-    assert (getArrayListMap<T>().count(id) == 1);
-    assert (getArrayListMap<T>().count(id_new) == 0);
-    std::shared_ptr<ArrayListTemplate<T>> array_list = getArrayListMap<T>().at(id);
-    getArrayListMap<T>().erase(id);
-    getArrayListMap<T>()[id_new]=array_list;
-}
-
-template<typename T> void Buffer::seizeArrayListMap (Buffer &org_buffer)
-{
-    assert (getArrayListMap<T>().size() == org_buffer.getArrayListMap<T>().size());
-
-    for (auto it : getArrayListMap<T>())
-        it.second->addData(*org_buffer.getArrayListMap<T>().at(it.first));
-    org_buffer.getArrayListMap<T>().clear();
-}
-
-template <>
-ArrayListTemplate<bool>& ArrayListTemplate<bool>::operator*=(double factor)
-{
-    bool tmp_factor = static_cast<bool> (factor);
-
-    for (auto data_it : data_)
-        data_it = data_it && tmp_factor;
-
-    return *this;
-}
 
 
