@@ -271,7 +271,7 @@ public:
             if (mandatory_)
                 return true;
 
-            array_list.setNone(row_cnt);
+            //array_list.setNone(row_cnt);
             return false;
         }
         else
@@ -282,8 +282,7 @@ public:
                 if (json_value_format_ == "")
                     array_list.set(row_cnt, tmp);
                 else
-                    array_list.setFromFormat(row_cnt, json_value_format_,
-                                             toString(tmp));
+                    array_list.setFromFormat(row_cnt, json_value_format_, toString(tmp));
 
                 logdbg << "JsonKey2DBOVariableMapping: setValue: json " << *val_ptr
                        << " buffer " << array_list.get(row_cnt);
@@ -342,7 +341,7 @@ public:
             if (mandatory_)
                 return true;
 
-            array_list.setNone(row_cnt);
+            //array_list.setNone(row_cnt);
             return false;
         }
         else

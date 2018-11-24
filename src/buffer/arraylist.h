@@ -32,8 +32,7 @@
 #include "stringconv.h"
 #include "arraylist.h"
 #include "buffer.h"
-
-//static const unsigned int BUFFER_ARRAY_SIZE=10000;
+#include "property.h"
 
 const bool BUFFER_PEDANTIC_CHECKING=false;
 
@@ -48,9 +47,6 @@ class ArrayListTemplate
     friend class Buffer;
 
 public:
-    /// @brief Constructor
-    ArrayListTemplate (Buffer& buffer);
-
     /// @brief Destructor
     virtual ~ArrayListTemplate () {}
 
@@ -94,6 +90,7 @@ public:
 
 
 private:
+    Property property_;
     Buffer& buffer_;
     /// Data container
     std::vector<T> data_;
@@ -103,56 +100,84 @@ private:
     /// @brief Sets specific element to not None value
     void unsetNone (size_t index);
 
+    void resizeDataTo (size_t size);
+    void resizeNoneTo (size_t size);
     void addData (ArrayListTemplate<T>& other);
     void copyData (ArrayListTemplate<T>& other);
     void cutToSize (size_t size);
 
-    void addNone (ArrayListTemplate<T>& other);
+    /// @brief Constructor, only for friend Buffer
+    ArrayListTemplate (Property& property, Buffer& buffer);
+
+
+    //void addNone (ArrayListTemplate<T>& other);
 
     /// @brief Sets specific element to None value
-    void setNoneFlag(size_t index);
+    //void setNoneFlag(size_t index);
 };
 
 
-template <class T> ArrayListTemplate<T>::ArrayListTemplate (Buffer& buffer) : buffer_(buffer) {}
+template <class T> ArrayListTemplate<T>::ArrayListTemplate (Property& property, Buffer& buffer)
+    : property_(property), buffer_(buffer) {}
 
 template <class T> void ArrayListTemplate<T>::clear()
 {
+    logdbg << "ArrayListTemplate " << property_.name() << ": clear";
     std::fill (data_.begin(),data_.end(), T());
     std::fill (none_flags_.begin(), none_flags_.end(), true);
 }
 
 template <class T> const T ArrayListTemplate<T>::get (size_t index)
 {
+    logdbg << "ArrayListTemplate " << property_.name() << ": get: index " << index;
     if (BUFFER_PEDANTIC_CHECKING)
-        assert (index < buffer_.data_size_);
+    {
+        assert (data_.size() <= buffer_.data_size_);
+        assert (none_flags_.size() <= buffer_.data_size_);
+        assert (index < data_.size());
+        assert (index < data_.size());
+    }
 
     if (isNone(index))
+    {
+        if (BUFFER_PEDANTIC_CHECKING)
+        {
+            logerr << "ArrayListTemplate " << property_.name() << ": get: index " << index << " is none";
+            assert (false);
+        }
+
         throw std::runtime_error ("ArrayListTemplate: get of None value "+std::to_string(index));
+    }
 
     return data_.at(index);
 }
 
 template <class T> const std::string ArrayListTemplate<T>::getAsString (size_t index)
 {
-    if (BUFFER_PEDANTIC_CHECKING)
-        assert (index < buffer_.data_size_);
-
-    if (isNone(index))
-        throw std::runtime_error ("ArrayListTemplate: getAsString of None value "+std::to_string(index));
-
-    return Utils::String::getValueString (data_.at(index));
+    logdbg << "ArrayListTemplate " << property_.name() << ": getAsString";
+    return Utils::String::getValueString (get(index));
 }
 
 template <class T> void ArrayListTemplate<T>::set (size_t index, T value)
 {
+    logdbg << "ArrayListTemplate " << property_.name() << ": set: index " << index << " value '" << value << "'";
+
+    if (BUFFER_PEDANTIC_CHECKING)
+    {
+        assert (data_.size() <= buffer_.data_size_);
+        assert (none_flags_.size() <= buffer_.data_size_);
+    }
+
     if (index >= data_.size()) // allocate new stuff, fill all new with not none
     {
-        data_.resize(index+1, T());
+        if (index != data_.size()) // some where left out
+            resizeNoneTo(index+1);
 
-        if (buffer_.data_size_ < data_.size())
-            buffer_.data_size_ = data_.size();
+        resizeDataTo (index+1);
     }
+
+    if (BUFFER_PEDANTIC_CHECKING)
+        assert (index < data_.size());
 
     data_.at(index) = value;
     unsetNone(index);
@@ -163,6 +188,7 @@ template <class T> void ArrayListTemplate<T>::set (size_t index, T value)
 template <class T> void ArrayListTemplate<T>::setFromFormat (size_t index, const std::string& format,
                                                              const std::string& value_str)
 {
+    logdbg << "ArrayListTemplate " << property_.name() << ": setFromFormat";
     T value;
 
     if (format == "octal")
@@ -190,45 +216,164 @@ template <class T> void ArrayListTemplate<T>::setFromFormat (size_t index, const
 
 template <class T> void ArrayListTemplate<T>::setNone(size_t index)
 {
-    if (index >= data_.size()) // allocate new stuff, fill all new with not none
-    {
-        data_.resize(index+1, T());
+    logdbg << "ArrayListTemplate " << property_.name() << ": setNone: index " << index;
 
-        if (buffer_.data_size_ < data_.size())
-            buffer_.data_size_ = data_.size();
+    if (BUFFER_PEDANTIC_CHECKING)
+    {
+        assert (data_.size() <= buffer_.data_size_);
+        assert (none_flags_.size() <= buffer_.data_size_);
     }
 
-    setNoneFlag(index);
+    if (index >= none_flags_.size()) // none flags to small
+        resizeNoneTo (index+1);
+
+    if (BUFFER_PEDANTIC_CHECKING)
+        assert (index < none_flags_.size());
+
+    none_flags_.at(index) = true;
+}
+
+/// @brief Checks if specific element is None
+template <class T> bool ArrayListTemplate<T>::isNone(size_t index)
+{
+    logdbg << "ArrayListTemplate " << property_.name() << ": isNone: index " << index;
+
+    if (BUFFER_PEDANTIC_CHECKING)
+    {
+        assert (data_.size() <= buffer_.data_size_);
+        assert (none_flags_.size() <= buffer_.data_size_);
+        assert (index < buffer_.data_size_);
+    }
+
+    if (index < none_flags_.size()) // if stored, return value
+        return none_flags_.at(index);
+
+    // none not stored, so all set are not none
+
+    if (index >= data_.size()) // not yet set
+        return true;
+
+    // must be set
+    return false;
+}
+
+template <class T> void ArrayListTemplate<T>::resizeDataTo (size_t size)
+{
+    logdbg << "ArrayListTemplate " << property_.name() << ": resizeDataTo: size " << size;
+
+    if (BUFFER_PEDANTIC_CHECKING)
+    {
+        assert (data_.size() <= buffer_.data_size_);
+        assert (data_.size() < size); // only to be called if needed
+    }
+
+    data_.resize(size, T());
+
+    if (buffer_.data_size_ < data_.size()) // set new data size
+        buffer_.data_size_ = data_.size();
+}
+
+template <class T> void ArrayListTemplate<T>::resizeNoneTo (size_t size)
+{
+    logdbg << "ArrayListTemplate " << property_.name() << ": resizeNoneTo: size " << size;
+
+    if (BUFFER_PEDANTIC_CHECKING)
+        assert (none_flags_.size() <= buffer_.data_size_);
+
+    if (data_.size() > none_flags_.size()) // data was set w/o none, adjust & fill with set values
+        none_flags_.resize(data_.size(), false);
+
+    if (none_flags_.size() < size) // adjust to new size, fill with none values
+        none_flags_.resize(size, true);
+
+    if (buffer_.data_size_ < none_flags_.size()) // set new data size
+        buffer_.data_size_ = none_flags_.size();
+
+    if (BUFFER_PEDANTIC_CHECKING)
+        assert (size == none_flags_.size());
 }
 
 template <class T> void ArrayListTemplate<T>::addData (ArrayListTemplate<T>& other)
 {
-    logdbg << "ArrayListTemplate: addData: data size " << data_.size();
+    logdbg << "ArrayListTemplate " << property_.name() << ": addData";
 
+    if (BUFFER_PEDANTIC_CHECKING)
+    {
+        assert (data_.size() <= buffer_.data_size_);
+        assert (none_flags_.size() <= buffer_.data_size_);
+    }
+
+    if (!other.data_.size() && other.none_flags_.size()) // if other has none flags set, need to fill my nones
+    {
+        logdbg << "ArrayListTemplate " << property_.name() << ": addData: 1: other no data resizing none";
+        resizeNoneTo (buffer_.data_size_);
+        logdbg << "ArrayListTemplate " << property_.name() << ": addData: 1: inserting none";
+        none_flags_.insert(none_flags_.end(), other.none_flags_.begin(), other.none_flags_.end());
+        goto DONE;
+    }
+
+    if (other.data_.size() && !other.none_flags_.size()) // if other has everything set
+    {
+        logdbg << "ArrayListTemplate " << property_.name() << ": addData: 2: other has everything set";
+
+        if (data_.size() < buffer_.data_size_) // need to size data up
+        {
+            logdbg << "ArrayListTemplate " << property_.name() << ": addData: 2: data not full, setting none";
+            resizeNoneTo (buffer_.data_size_);
+
+            logdbg << "ArrayListTemplate " << property_.name() << ": addData: 2: resizing data";
+            resizeDataTo (buffer_.data_size_);
+        }
+
+        logdbg << "ArrayListTemplate " << property_.name() << ": addData: 2: inserting data";
+        data_.insert(data_.end(), other.data_.begin(), other.data_.end());
+        goto DONE;
+    }
+
+    logdbg << "ArrayListTemplate " << property_.name() << ": addData: 3: mixture, both have data & nones";
+
+    logdbg << "ArrayListTemplate " << property_.name() << ": addData: 3: resizing none to " << buffer_.data_size_;
+    resizeNoneTo (buffer_.data_size_);
+    logdbg << "ArrayListTemplate " << property_.name() << ": addData: 3: inserting nones";
+    none_flags_.insert(none_flags_.end(), other.none_flags_.begin(), other.none_flags_.end());
+
+    if (data_.size() < buffer_.data_size_) // need to size data up
+    {
+        logdbg << "ArrayListTemplate " << property_.name() << ": addData: 3: resizing data";
+        resizeDataTo (buffer_.data_size_);
+    }
+
+    logdbg << "ArrayListTemplate " << property_.name() << ": addData: 3: inserting data";
     data_.insert(data_.end(), other.data_.begin(), other.data_.end());
-    addNone(other);
 
-    other.data_.clear();
-    std::fill (other.none_flags_.begin(), other.none_flags_.end(), true);
-
+DONE:
     // size is adjusted in Buffer::seizeBuffer
 
-    logdbg << "ArrayListTemplate: addData: end data size " << data_.size();
+    logdbg << "ArrayListTemplate " << property_.name() << ": addData: end";
 }
 
 template <class T> void ArrayListTemplate<T>::copyData (ArrayListTemplate<T>& other)
 {
+    logdbg << "ArrayListTemplate " << property_.name() << ": copyData";
+
     data_ = other.data_;
     none_flags_ = other.none_flags_;
 
-    // TODO not good, buffer size might be too big
+    // is only done for new buffers in Buffer::getPartialCopy, so no size-too-big isse
 
     if (buffer_.data_size_ < data_.size())
         buffer_.data_size_ = data_.size();
+
+    if (buffer_.data_size_ < none_flags_.size())
+        buffer_.data_size_ = none_flags_.size();
+
+    logdbg << "ArrayListTemplate " << property_.name() << ": copyData: end";
 }
 
 template <class T> ArrayListTemplate<T>& ArrayListTemplate<T>::operator*=(double factor)
 {
+    logdbg << "ArrayListTemplate " << property_.name() << ": operator*=";
+
     for (auto &data_it : data_)
         data_it *= factor;
 
@@ -237,6 +382,8 @@ template <class T> ArrayListTemplate<T>& ArrayListTemplate<T>::operator*=(double
 
 template <class T> std::set<T> ArrayListTemplate<T>::distinctValues (size_t index)
 {
+    logdbg << "ArrayListTemplate " << property_.name() << ": distinctValues";
+
     std::set<T> values;
 
     T value;
@@ -257,28 +404,43 @@ template <class T> std::set<T> ArrayListTemplate<T>::distinctValues (size_t inde
 template <class T> std::map<T, std::vector<size_t>> ArrayListTemplate<T>::distinctValuesWithIndexes (size_t from_index,
                                                                                                      size_t to_index)
 {
+    logdbg << "ArrayListTemplate " << property_.name() << ": distinctValuesWithIndexes";
+
     std::map<T, std::vector<size_t>> values;
 
-    assert (to_index);
     assert (from_index < to_index);
-    assert (from_index < data_.size());
-    assert (to_index < data_.size());
+
+    if (BUFFER_PEDANTIC_CHECKING)
+    {
+        assert (to_index);
+        assert (from_index < buffer_.data_size_);
+        assert (to_index < buffer_.data_size_);
+        assert (data_.size() <= buffer_.data_size_);
+        assert (none_flags_.size() <= buffer_.data_size_);
+    }
+
+    if (from_index+1 > data_.size()) // no data
+        return values;
 
     for (size_t index = from_index; index <= to_index; ++index)
     {
-        if (BUFFER_PEDANTIC_CHECKING)
-            assert (index < data_.size());
-
         if (!isNone(index)) // not for none
+        {
+            if (BUFFER_PEDANTIC_CHECKING)
+                assert (index < data_.size());
+
             values[data_.at(index)].push_back(index);
+        }
     }
 
-    logdbg << "ArrayList: distinctValuesWithIndexes: done with " << values.size();
+    logdbg << "ArrayListTemplate " << property_.name() << ": distinctValuesWithIndexes: done with " << values.size();
     return values;
 }
 
 template <class T> void ArrayListTemplate<T>::convertToStandardFormat(const std::string& from_format)
 {
+    logdbg << "ArrayListTemplate " << property_.name() << ": convertToStandardFormat";
+
     static_assert (std::is_integral<T>::value, "only defined for integer types");
 
     std::string value_str;
@@ -290,11 +452,11 @@ template <class T> void ArrayListTemplate<T>::convertToStandardFormat(const std:
         if (isNone(cnt))
             continue;
 
-        value_str = std::to_string(data_[cnt]);
+        value_str = std::to_string(data_.at(cnt));
 
         if (from_format == "octal")
         {
-            data_[cnt] = std::stoi(value_str, 0, 8);
+            data_.at(cnt) = std::stoi(value_str, 0, 8);
         }
         else
         {
@@ -308,7 +470,18 @@ template <class T> size_t ArrayListTemplate<T>::size() { return data_.size(); }
 
 template <class T> void ArrayListTemplate<T>::cutToSize (size_t size)
 {
-    assert (size <= data_.size());
+    logdbg << "ArrayListTemplate " << property_.name() << ": cutToSize: size " << size;
+
+    if (BUFFER_PEDANTIC_CHECKING)
+    {
+        assert (data_.size() <= buffer_.data_size_);
+        assert (none_flags_.size() <= buffer_.data_size_);
+    }
+
+//    if (size > data_.size())
+//        return;
+
+    //assert (size <= data_.size());
 
     while (none_flags_.size() > size)
         none_flags_.pop_back();
@@ -331,34 +504,39 @@ template <class T> void ArrayListTemplate<T>::cutToSize (size_t size)
 //}
 
 /// @brief Sets specific element to None value
-template <class T> void ArrayListTemplate<T>::setNoneFlag(size_t index)
-{
-    if (index >= none_flags_.size()) // do need to allocate stuff for setting
-    {
-        if (none_flags_.size() < data_.size()) // for already set data, set not null
-            none_flags_.resize(data_.size(), false);
+//template <class T> void ArrayListTemplate<T>::setNoneFlag(size_t index)
+//{
+//    if (BUFFER_PEDANTIC_CHECKING)
+//    {
+//        assert (data_.size() <= buffer_.data_size_);
+//        assert (none_flags_.size() <= buffer_.data_size_);
+//    }
 
-        // allocate new stuff, fill all new with not none
-        none_flags_.resize(index+1, true);
-    }
+//    if (index >= none_flags_.size()) // do need to allocate stuff for setting
+//    {
+//        if (none_flags_.size() < data_.size()) // for already set data, set not null
+//            none_flags_.resize(data_.size(), false);
 
-    none_flags_.at(index) = true;
-}
+//        // allocate new stuff, fill all new with not none
+//        none_flags_.resize(index+1, true);
+//    }
 
-/// @brief Checks if specific element is None
-template <class T> bool ArrayListTemplate<T>::isNone(size_t index)
-{
-    if (BUFFER_PEDANTIC_CHECKING)
-        assert (index < buffer_.data_size_);
+//    if (BUFFER_PEDANTIC_CHECKING)
+//    {
+//        assert (index < buffer_.data_size_);
+//        assert (index < data_.size());
+//        assert (index < none_flags_.size());
+//    }
 
-    if (index >= none_flags_.size())
-        return false;
+//    none_flags_.at(index) = true;
+//}
 
-    return none_flags_.at(index);
-}
+
 
 template <class T> void ArrayListTemplate<T>::checkNotNone ()
 {
+    logdbg << "ArrayListTemplate " << property_.name() << ": checkNotNone";
+
     for (size_t cnt=0; cnt < none_flags_.size(); cnt++)
     {
        if (none_flags_.at(cnt))
@@ -374,23 +552,30 @@ template <class T> void ArrayListTemplate<T>::checkNotNone ()
 /// @brief Sets specific element to not None value
 template <class T> void ArrayListTemplate<T>::unsetNone (size_t index)
 {
+    logdbg << "ArrayListTemplate " << property_.name() << ": unsetNone";
+
     if (BUFFER_PEDANTIC_CHECKING)
+    {
+        assert (data_.size() <= buffer_.data_size_);
+        assert (none_flags_.size() <= buffer_.data_size_);
         assert (index < buffer_.data_size_);
+        assert (index < data_.size());
+    }
 
     if (index < none_flags_.size()) // if was already set
         none_flags_.at(index) = false;
 }
 
-template <class T> void ArrayListTemplate<T>::addNone (ArrayListTemplate<T>& other)
-{
-    if (other.none_flags_.size())
-    {
-        if (none_flags_.size() < data_.size()) // for already set data, set not null
-            none_flags_.resize(data_.size(), false);
+//template <class T> void ArrayListTemplate<T>::addNone (ArrayListTemplate<T>& other)
+//{
+//    if (other.none_flags_.size())
+//    {
+//        if (none_flags_.size() < data_.size()) // for already set data, set not null
+//            none_flags_.resize(data_.size(), false);
 
-        none_flags_.insert(none_flags_.end(), other.none_flags_.begin(), other.none_flags_.end());
-    }
-}
+//        none_flags_.insert(none_flags_.end(), other.none_flags_.begin(), other.none_flags_.end());
+//    }
+//}
 
 //template <>
 //ArrayListTemplate<bool>& ArrayListTemplate<bool>::operator*=(double factor)

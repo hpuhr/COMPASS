@@ -94,57 +94,61 @@ void Buffer::addProperty (std::string id, PropertyDataType type)
     if (properties_.hasProperty(id))
         throw std::runtime_error ("Buffer: addProperty: property "+id+" already exists");
 
+    Property property = Property (id, type);
+
     switch (type)
     {
     case PropertyDataType::BOOL:
         assert (getArrayListMap<bool>().count(id) == 0);
         getArrayListMap<bool>()[id] =
-                std::shared_ptr<ArrayListTemplate<bool>> (new ArrayListTemplate<bool>(*this));
+                std::shared_ptr<ArrayListTemplate<bool>> (new ArrayListTemplate<bool>(property, *this));
         break;
     case PropertyDataType::CHAR:
         assert (getArrayListMap<char>().count(id) == 0);
         getArrayListMap<char>() [id] =
-                std::shared_ptr<ArrayListTemplate<char>> (new ArrayListTemplate<char>(*this));
+                std::shared_ptr<ArrayListTemplate<char>> (new ArrayListTemplate<char>(property, *this));
         break;
     case PropertyDataType::UCHAR:
         assert (getArrayListMap<unsigned char>().count(id) == 0);
         getArrayListMap<unsigned char>() [id] =
-                std::shared_ptr<ArrayListTemplate<unsigned char>> (new ArrayListTemplate<unsigned char>(*this));
+                std::shared_ptr<ArrayListTemplate<unsigned char>> (new ArrayListTemplate<unsigned char>(property,
+                                                                                                        *this));
         break;
     case PropertyDataType::INT:
         assert (getArrayListMap<int>().count(id) == 0);
         getArrayListMap<int>() [id] =
-                std::shared_ptr<ArrayListTemplate<int>> (new ArrayListTemplate<int>(*this));
+                std::shared_ptr<ArrayListTemplate<int>> (new ArrayListTemplate<int>(property, *this));
         break;
     case PropertyDataType::UINT:
         assert (getArrayListMap<unsigned int>().count(id) == 0);
         getArrayListMap<unsigned int>() [id] =
-                std::shared_ptr<ArrayListTemplate<unsigned int>> (new ArrayListTemplate<unsigned int>(*this));
+                std::shared_ptr<ArrayListTemplate<unsigned int>> (new ArrayListTemplate<unsigned int>(property, *this));
         break;
     case PropertyDataType::LONGINT:
         assert (getArrayListMap<long int>().count(id) == 0);
         getArrayListMap<long int>() [id] =
-                std::shared_ptr<ArrayListTemplate<long>> (new ArrayListTemplate<long>(*this));
+                std::shared_ptr<ArrayListTemplate<long>> (new ArrayListTemplate<long>(property, *this));
         break;
     case PropertyDataType::ULONGINT:
         assert (getArrayListMap<unsigned long int>().count(id) == 0);
         getArrayListMap<unsigned long int>() [id] =
-                std::shared_ptr<ArrayListTemplate<unsigned long>> (new ArrayListTemplate<unsigned long>(*this));
+                std::shared_ptr<ArrayListTemplate<unsigned long>> (new ArrayListTemplate<unsigned long>(property,
+                                                                                                        *this));
         break;
     case PropertyDataType::FLOAT:
         assert (getArrayListMap<float>().count(id) == 0);
         getArrayListMap<float>() [id] =
-                std::shared_ptr<ArrayListTemplate<float>> (new ArrayListTemplate<float>(*this));
+                std::shared_ptr<ArrayListTemplate<float>> (new ArrayListTemplate<float>(property, *this));
         break;
     case PropertyDataType::DOUBLE:
         assert (getArrayListMap<double>().count(id) == 0);
         getArrayListMap<double>() [id] =
-                std::shared_ptr<ArrayListTemplate<double>> (new ArrayListTemplate<double>(*this));
+                std::shared_ptr<ArrayListTemplate<double>> (new ArrayListTemplate<double>(property, *this));
         break;
     case PropertyDataType::STRING:
         assert (getArrayListMap<std::string>().count(id) == 0);
         getArrayListMap<std::string>() [id] =
-                std::shared_ptr<ArrayListTemplate<std::string>> (new ArrayListTemplate<std::string>(*this));
+                std::shared_ptr<ArrayListTemplate<std::string>> (new ArrayListTemplate<std::string>(property, *this));
         break;
     default:
         logerr  <<  "Buffer: addProperty: unknown property type " << Property::asString(type);

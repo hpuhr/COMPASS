@@ -420,7 +420,8 @@ bool JsonMapping::parseTargetReport (const nlohmann::json& tr, size_t row_cnt)
     if (mandatory_missing)
     {
         // cleanup
-        buffer_->cutToSize(row_cnt);
+        if (buffer_->size() > row_cnt)
+            buffer_->cutToSize(row_cnt);
     }
 
     return mandatory_missing;
