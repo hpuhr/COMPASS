@@ -27,6 +27,7 @@
 #include "stringconv.h"
 #include "unitmanager.h"
 #include "unit.h"
+#include "arraylist.h"
 
 unsigned int Buffer::ids_ = 0;
 
@@ -53,7 +54,6 @@ Buffer::Buffer()
  */
 Buffer::Buffer(PropertyList properties, const std::string &dbo_name)
     : dbo_name_(dbo_name), last_one_(false)
-    //search_active_(false), search_key_pos_(-1), search_key_min_ (-1), search_key_max_ (-1)
 {
     logdbg  << "Buffer: constructor: start";
 
@@ -74,6 +74,7 @@ Buffer::~Buffer()
     logdbg  << "Buffer: destructor: start";
 
     properties_.clear();
+    data_size_ = 0;
 
     logdbg  << "Buffer: destructor: end";
 }
@@ -98,52 +99,52 @@ void Buffer::addProperty (std::string id, PropertyDataType type)
     case PropertyDataType::BOOL:
         assert (getArrayListMap<bool>().count(id) == 0);
         getArrayListMap<bool>()[id] =
-                std::shared_ptr<ArrayListTemplate<bool>> (new ArrayListTemplate<bool>());
+                std::shared_ptr<ArrayListTemplate<bool>> (new ArrayListTemplate<bool>(*this));
         break;
     case PropertyDataType::CHAR:
         assert (getArrayListMap<char>().count(id) == 0);
         getArrayListMap<char>() [id] =
-                std::shared_ptr<ArrayListTemplate<char>> (new ArrayListTemplate<char>());
+                std::shared_ptr<ArrayListTemplate<char>> (new ArrayListTemplate<char>(*this));
         break;
     case PropertyDataType::UCHAR:
         assert (getArrayListMap<unsigned char>().count(id) == 0);
         getArrayListMap<unsigned char>() [id] =
-                std::shared_ptr<ArrayListTemplate<unsigned char>> (new ArrayListTemplate<unsigned char>());
+                std::shared_ptr<ArrayListTemplate<unsigned char>> (new ArrayListTemplate<unsigned char>(*this));
         break;
     case PropertyDataType::INT:
         assert (getArrayListMap<int>().count(id) == 0);
         getArrayListMap<int>() [id] =
-                std::shared_ptr<ArrayListTemplate<int>> (new ArrayListTemplate<int>());
+                std::shared_ptr<ArrayListTemplate<int>> (new ArrayListTemplate<int>(*this));
         break;
     case PropertyDataType::UINT:
         assert (getArrayListMap<unsigned int>().count(id) == 0);
         getArrayListMap<unsigned int>() [id] =
-                std::shared_ptr<ArrayListTemplate<unsigned int>> (new ArrayListTemplate<unsigned int>());
+                std::shared_ptr<ArrayListTemplate<unsigned int>> (new ArrayListTemplate<unsigned int>(*this));
         break;
     case PropertyDataType::LONGINT:
         assert (getArrayListMap<long int>().count(id) == 0);
         getArrayListMap<long int>() [id] =
-                std::shared_ptr<ArrayListTemplate<long>> (new ArrayListTemplate<long>());
+                std::shared_ptr<ArrayListTemplate<long>> (new ArrayListTemplate<long>(*this));
         break;
     case PropertyDataType::ULONGINT:
         assert (getArrayListMap<unsigned long int>().count(id) == 0);
         getArrayListMap<unsigned long int>() [id] =
-                std::shared_ptr<ArrayListTemplate<unsigned long>> (new ArrayListTemplate<unsigned long>());
+                std::shared_ptr<ArrayListTemplate<unsigned long>> (new ArrayListTemplate<unsigned long>(*this));
         break;
     case PropertyDataType::FLOAT:
         assert (getArrayListMap<float>().count(id) == 0);
         getArrayListMap<float>() [id] =
-                std::shared_ptr<ArrayListTemplate<float>> (new ArrayListTemplate<float>());
+                std::shared_ptr<ArrayListTemplate<float>> (new ArrayListTemplate<float>(*this));
         break;
     case PropertyDataType::DOUBLE:
         assert (getArrayListMap<double>().count(id) == 0);
         getArrayListMap<double>() [id] =
-                std::shared_ptr<ArrayListTemplate<double>> (new ArrayListTemplate<double>());
+                std::shared_ptr<ArrayListTemplate<double>> (new ArrayListTemplate<double>(*this));
         break;
     case PropertyDataType::STRING:
         assert (getArrayListMap<std::string>().count(id) == 0);
         getArrayListMap<std::string>() [id] =
-                std::shared_ptr<ArrayListTemplate<std::string>> (new ArrayListTemplate<std::string>());
+                std::shared_ptr<ArrayListTemplate<std::string>> (new ArrayListTemplate<std::string>(*this));
         break;
     default:
         logerr  <<  "Buffer: addProperty: unknown property type " << Property::asString(type);
@@ -187,114 +188,52 @@ void Buffer::seizeBuffer (Buffer &org_buffer)
     logdbg  << "Buffer: seizeBuffer: end size " << size();
 }
 
-//bool Buffer::full ()
-//{
-//    return size()%BUFFER_ARRAY_SIZE == 0;
-//}
-
 const size_t Buffer::size ()
 {
-    size_t size = 0;
-
-    for (auto it : getArrayListMap<bool>())
-        if (it.second->size() > size)
-            size = it.second->size();
-    for (auto it : getArrayListMap<char>())
-        if (it.second->size() > size)
-            size = it.second->size();
-    for (auto it : getArrayListMap<unsigned char>())
-        if (it.second->size() > size)
-            size = it.second->size();
-    for (auto it : getArrayListMap<int>())
-        if (it.second->size() > size)
-            size = it.second->size();
-    for (auto it : getArrayListMap<unsigned int>())
-        if (it.second->size() > size)
-            size = it.second->size();
-    for (auto it : getArrayListMap<long int>())
-        if (it.second->size() > size)
-            size = it.second->size();
-    for (auto it : getArrayListMap<unsigned long int>())
-        if (it.second->size() > size)
-            size = it.second->size();
-    for (auto it : getArrayListMap<float>())
-        if (it.second->size() > size)
-            size = it.second->size();
-    for (auto it : getArrayListMap<double>())
-        if (it.second->size() > size)
-            size = it.second->size();
-    for (auto it : getArrayListMap<std::string>())
-        if (it.second->size() > size)
-            size = it.second->size();
-
-    //loginf << "Buffer: size: " << size;
-    return size;
+    return data_size_;
 }
 
 void Buffer::cutToSize (size_t size)
 {
-    for (auto it : getArrayListMap<bool>())
+    for (auto& it : getArrayListMap<bool>())
         it.second->cutToSize(size);
-    for (auto it : getArrayListMap<char>())
+    for (auto& it : getArrayListMap<char>())
         it.second->cutToSize(size);
-    for (auto it : getArrayListMap<unsigned char>())
+    for (auto& it : getArrayListMap<unsigned char>())
         it.second->cutToSize(size);
-    for (auto it : getArrayListMap<int>())
+    for (auto& it : getArrayListMap<int>())
         it.second->cutToSize(size);
-    for (auto it : getArrayListMap<unsigned int>())
+    for (auto& it : getArrayListMap<unsigned int>())
         it.second->cutToSize(size);
-    for (auto it : getArrayListMap<long int>())
+    for (auto& it : getArrayListMap<long int>())
         it.second->cutToSize(size);
-    for (auto it : getArrayListMap<unsigned long int>())
+    for (auto& it : getArrayListMap<unsigned long int>())
         it.second->cutToSize(size);
-    for (auto it : getArrayListMap<float>())
+    for (auto& it : getArrayListMap<float>())
         it.second->cutToSize(size);
-    for (auto it : getArrayListMap<double>())
+    for (auto& it : getArrayListMap<double>())
         it.second->cutToSize(size);
-    for (auto it : getArrayListMap<std::string>())
+    for (auto& it : getArrayListMap<std::string>())
         it.second->cutToSize(size);
+
+    data_size_ = size;
+}
+
+const PropertyList& Buffer::properties ()
+{
+    return properties_;
 }
 
 bool Buffer::firstWrite ()
 {
-    std::vector <ArrayListBase *>::const_iterator it;
-
-    for (auto it : getArrayListMap<bool>())
-        if (it.second->size() > 0)
-            return false;
-    for (auto it : getArrayListMap<char>())
-        if (it.second->size() > 0)
-            return false;
-    for (auto it : getArrayListMap<unsigned char>())
-        if (it.second->size() > 0)
-            return false;
-    for (auto it : getArrayListMap<int>())
-        if (it.second->size() > 0)
-            return false;
-    for (auto it : getArrayListMap<unsigned int>())
-        if (it.second->size() > 0)
-            return false;
-    for (auto it : getArrayListMap<long int>())
-        if (it.second->size() > 0)
-            return false;
-    for (auto it : getArrayListMap<unsigned long int>())
-        if (it.second->size() > 0)
-            return false;
-    for (auto it : getArrayListMap<float>())
-        if (it.second->size() > 0)
-            return false;
-    for (auto it : getArrayListMap<double>())
-        if (it.second->size() > 0)
-            return false;
-    for (auto it : getArrayListMap<std::string>())
-        if (it.second->size() > 0)
-            return false;
-
-    return true;
+    return data_size_ == 0;
 }
 
 bool Buffer::isNone (const Property& property, unsigned int row_cnt)
 {
+    if (BUFFER_PEDANTIC_CHECKING)
+        assert (row_cnt < data_size_);
+
     switch (property.dataType())
     {
     case PropertyDataType::BOOL:
@@ -602,5 +541,61 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
 }
 
 
+template<typename T> inline bool Buffer::has (const std::string &id)
+{
+    return getArrayListMap<T>().count(id) != 0;
+}
+
+template<typename T> ArrayListTemplate<T>& Buffer::get (const std::string &id)
+{
+    return *(std::get< Index<std::map <std::string, std::shared_ptr<ArrayListTemplate<T>>>,
+            ArrayListMapTupel>::value > (array_list_tuple_)).at(id);
+}
+
+template<typename T> void Buffer::rename (const std::string &id, const std::string &id_new)
+{
+    renameArrayListMapEntry<T>(id, id_new);
+
+    assert (properties_.hasProperty(id));
+    Property old_property = properties_.get(id);
+    properties_.removeProperty(id);
+    properties_.addProperty(id_new, old_property.dataType());
+}
+
+// private stuff
+
+template<typename T> std::map <std::string, std::shared_ptr<ArrayListTemplate<T>>>& Buffer::getArrayListMap ()
+{
+    return std::get< Index<std::map <std::string, std::shared_ptr<ArrayListTemplate<T>>>,
+            ArrayListMapTupel>::value > (array_list_tuple_);
+}
+template<typename T> void Buffer::renameArrayListMapEntry (const std::string &id, const std::string &id_new)
+{
+    assert (getArrayListMap<T>().count(id) == 1);
+    assert (getArrayListMap<T>().count(id_new) == 0);
+    std::shared_ptr<ArrayListTemplate<T>> array_list = getArrayListMap<T>().at(id);
+    getArrayListMap<T>().erase(id);
+    getArrayListMap<T>()[id_new]=array_list;
+}
+
+template<typename T> void Buffer::seizeArrayListMap (Buffer &org_buffer)
+{
+    assert (getArrayListMap<T>().size() == org_buffer.getArrayListMap<T>().size());
+
+    for (auto it : getArrayListMap<T>())
+        it.second->addData(*org_buffer.getArrayListMap<T>().at(it.first));
+    org_buffer.getArrayListMap<T>().clear();
+}
+
+template <>
+ArrayListTemplate<bool>& ArrayListTemplate<bool>::operator*=(double factor)
+{
+    bool tmp_factor = static_cast<bool> (factor);
+
+    for (auto data_it : data_)
+        data_it = data_it && tmp_factor;
+
+    return *this;
+}
 
 

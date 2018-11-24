@@ -24,6 +24,7 @@
 #include "global.h"
 #include "dbovariableset.h"
 #include "listboxviewdatasource.h"
+#include "arraylist.h"
 //#include "dbtablecolumn.h"
 
 BufferTableModel::BufferTableModel(QObject *parent, DBObject &object, ListBoxViewDataSource& data_source)

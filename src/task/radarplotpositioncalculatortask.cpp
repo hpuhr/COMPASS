@@ -31,6 +31,7 @@
 #include "projectionmanager.h"
 #include "jobmanager.h"
 #include "stringconv.h"
+#include "arraylist.h"
 
 #include <QCoreApplication>
 #include <QMessageBox>

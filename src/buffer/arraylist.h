@@ -24,99 +24,14 @@
 #include <sstream>
 #include <iomanip>
 #include <array>
-
-#include <type_traits>
-
-#include <QDateTime>
-
-#include "logger.h"
-#include "property.h"
-#include "stringconv.h"
+#include <set>
+#include <map>
 
 //static const unsigned int BUFFER_ARRAY_SIZE=10000;
 
-const bool ARRAYLIST_PEDANTIC_CHECKING=false;
+const bool BUFFER_PEDANTIC_CHECKING=false;
 
-/**
- * @brief List interface of fixed-size arrays to be used in Buffer classes.
- *
- * Was written for easy management of arrays of different data types.
- */
-class ArrayListBase
-{
-public:
-    /// @brief Constructor
-    ArrayListBase () {}
-    /// @brief Destructor
-    virtual ~ArrayListBase () {}
-
-    /// @brief Returns size of the list
-    size_t noneSize () { return none_flags_.size(); }
-    void cutToSize (size_t size)
-    {
-        assert (size <= none_flags_.size());
-        while (none_flags_.size() > size)
-            none_flags_.pop_back();
-    }
-
-    /// @brief Sets specific element to None value
-    virtual void setNone(size_t index)
-    {
-        if (index >= none_flags_.size()) // allocate new stuff, fill all new with not none
-            none_flags_.resize(index+1, true);
-
-        none_flags_.at(index) = true;
-    }
-
-    /// @brief Checks if specific element is None
-    bool isNone(size_t index)
-    {
-        if (ARRAYLIST_PEDANTIC_CHECKING)
-            assert (index < none_flags_.size());
-
-        return none_flags_.at(index);
-    }
-
-    /// @brief Sets all elements to initial value and None information to true
-    virtual void clear()=0;
-
-    virtual const std::string getAsString (size_t index)=0;
-
-    void checkNotNone ()
-    {
-        for (size_t cnt=0; cnt < none_flags_.size(); cnt++)
-        {
-           if (none_flags_.at(cnt))
-           {
-               logerr << "cnt " << cnt << " none";
-               assert (false);
-           }
-        }
-    }
-
-private:
-    //std::vector < std::shared_ptr< std::array<bool,BUFFER_ARRAY_SIZE> > > none_flags_;
-    std::vector <bool> none_flags_;
-
-protected:
-    /// @brief Sets all elements to None value
-    void setAllNone() { std::fill (none_flags_.begin(), none_flags_.end(), true); }
-
-    /// @brief Sets specific element to not None value
-    void unsetNone (size_t index)
-    {
-        if (index >= none_flags_.size()) // allocate new stuff, fill all new with not none
-            none_flags_.resize(index+1, true);
-
-        none_flags_.at(index) = false;
-    }
-
-    void addNone (ArrayListBase& other)
-    {
-        none_flags_.insert(none_flags_.end(), other.none_flags_.begin(), other.none_flags_.end());
-    }
-};
-
+class Buffer;
 
 /**
  * @brief Template List of fixed-size arrays to be used in Buffer classes.
@@ -124,214 +39,82 @@ protected:
  * Was written for easy management of arrays of different data types.
  */
 template <class T>
-class ArrayListTemplate : public ArrayListBase
+class ArrayListTemplate
 {
+    friend class Buffer;
+
 public:
     /// @brief Constructor
-    ArrayListTemplate ()
-        : ArrayListBase () {}
+    ArrayListTemplate (Buffer& buffer);
 
     /// @brief Destructor
     virtual ~ArrayListTemplate () {}
 
     /// @brief Sets all elements to false
-    virtual void clear() override
-    {
-        std::fill (data_.begin(),data_.end(), T());
-        setAllNone();
-    }
+    void clear();
 
     /// @brief Returns const reference to a specific value
-    const T get (size_t index)
-    {
-        if (isNone(index))
-            throw std::runtime_error ("ArrayListTemplate: get of None value "+std::to_string(index));
-
-        return data_.at(index);
-    }
+    const T get (size_t index);
 
     /// @brief Returns string of a specific value
-    const std::string getAsString (size_t index) override
-    {
-        if (isNone(index))
-            throw std::runtime_error ("ArrayListTemplate: getAsString of None value "+std::to_string(index));
-
-        return Utils::String::getValueString (data_.at(index));
-    }
+    const std::string getAsString (size_t index);
 
     /// @brief Sets specific value
-    void set (size_t index, T value)
-    {
-        if (index >= data_.size()) // allocate new stuff, fill all new with not none
-        {
-            data_.resize(index+1, T());
-        }
+    void set (size_t index, T value);
 
-        data_.at(index) = value;
-
-        //logdbg << "ArrayListTemplate: set: size " << size_ << " max_size " << max_size_;
-
-        unsetNone(index);
-
-        if (ARRAYLIST_PEDANTIC_CHECKING)
-            assert (data_.size() == noneSize());
-    }
-
-    void setFromFormat (size_t index, const std::string& format, const std::string& value_str)
-    {
-        T value;
-
-        if (format == "octal")
-        {
-            value = std::stoi(value_str, 0, 8);
-        }
-        else if (format == "hexadecimal")
-        {
-            value = std::stoi(value_str, 0, 16);
-        }
-        else if (format == "epoch_tod")
-        {
-            QDateTime date_time;
-            date_time.setMSecsSinceEpoch(std::stoul(value_str));
-            value = Utils::String::timeFromString(date_time.toString("hh:mm:ss.zzz").toStdString());
-        }
-        else
-        {
-            logerr << "ArrayListTemplate: setFromFormat: unknown format '" << format << "'";
-            assert (false);
-        }
-
-        set (index, value);
-    }
+    void setFromFormat (size_t index, const std::string& format, const std::string& value_str);
 
     /// @brief Sets specific element to None value
-    virtual void setNone(size_t index) override
-    {
-        if (index >= data_.size()) // allocate new stuff, fill all new with not none
-        {
-            data_.resize(index+1, T());
-        }
+    void setNone(size_t index);
 
-        ArrayListBase::setNone(index);
+    void addData (ArrayListTemplate<T>& other);
 
-        if (ARRAYLIST_PEDANTIC_CHECKING)
-            assert (data_.size() == noneSize());
-    }
+    void copyData (ArrayListTemplate<T>& other);
 
-    void addData (ArrayListTemplate<T> &other)
-    {
-        logdbg << "ArrayListTemplate: addData: data size " << data_.size();
+    ArrayListTemplate<T>& operator*=(double factor);
 
-        assert (size() == noneSize());
-        assert (other.size() == other.noneSize());
+    std::set<T> distinctValues (size_t index=0);
 
-        data_.insert(data_.end(), other.data_.begin(), other.data_.end());
-        addNone(other);
+    std::map<T, std::vector<size_t>> distinctValuesWithIndexes (size_t from_index, size_t to_index);
 
-        other.data_.clear();
-        other.setAllNone();
+    void convertToStandardFormat(const std::string& from_format);
 
-        if (ARRAYLIST_PEDANTIC_CHECKING)
-            assert (data_.size() == noneSize());
+    size_t size();
 
-        logdbg << "ArrayListTemplate: addData: end data size " << data_.size();
-    }
+    void cutToSize (size_t size);
 
-    ArrayListTemplate<T>& operator*=(double factor)
-    {
-        for (auto &data_it : data_)
-            data_it *= factor;
+    /// @brief Returns size of the list
+    size_t noneSize ();
 
-        return *this;
-    }
+    void cutNoneToSize (size_t size);
 
-    std::set<T> distinctValues (size_t index=0)
-    {
-        std::set<T> values;
+    /// @brief Sets specific element to None value
+    void setNoneFlag(size_t index);
 
-        T value;
+    /// @brief Checks if specific element is None
+    bool isNone(size_t index);
 
-        for (; index < data_.size(); ++index)
-        {
-            if (!isNone(index)) // not for none
-            {
-                value = data_.at(index);
-                if (values.count(value) == 0)
-                    values.insert(value);
-            }
-        }
+    void checkNotNone ();
 
-        return values;
-    }
 
-    std::map<T, std::vector<size_t>> distinctValuesWithIndexes (size_t from_index, size_t to_index)
-    {
-        std::map<T, std::vector<size_t>> values;
-
-        assert (to_index);
-        assert (from_index < to_index);
-        assert (from_index < data_.size());
-        assert (to_index < data_.size());
-
-        for (size_t index = from_index; index <= to_index; ++index)
-        {
-            if (!isNone(index)) // not for none
-            {
-                if (ARRAYLIST_PEDANTIC_CHECKING)
-                {
-                    assert (index < data_.size());
-                    assert (index < noneSize());
-                }
-
-                values[data_.at(index)].push_back(index);
-            }
-        }
-
-        logdbg << "ArrayList: distinctValuesWithIndexes: done with " << values.size();
-        return values;
-    }
-
-    void convertToStandardFormat(const std::string& from_format)
-    {
-        static_assert (std::is_integral<T>::value, "only defined for integer types");
-
-        std::string value_str;
-        //T value;
-
-        size_t data_size = data_.size();
-        for (size_t cnt=0; cnt < data_size; cnt++)
-        {
-            if (isNone(cnt))
-                continue;
-
-            value_str = std::to_string(data_[cnt]);
-
-            if (from_format == "octal")
-            {
-                data_[cnt] = std::stoi(value_str, 0, 8);
-            }
-            else
-            {
-                logerr << "ArrayListTemplate: convertToStandardFormat: unknown format '" << from_format << "'";
-                assert (false);
-            }
-        }
-    }
-
-    size_t size() { return data_.size(); }
-
-    void cutToSize (size_t size)
-    {
-        ArrayListBase::cutToSize(size);
-        assert (size <= data_.size());
-        while (data_.size() > size)
-            data_.pop_back();
-    }
-
-protected:
+private:
+    Buffer& buffer_;
     /// Data container
     std::vector<T> data_;
+    // None flags container
+    std::vector <bool> none_flags_;
+
+    /// @brief Sets all elements to None value
+    void setAllNone();
+
+    /// @brief Sets specific element to not None value
+    void unsetNone (size_t index);
+
+    void addNone (ArrayListTemplate<T>& other);
 };
+
+//template <class T> Base* Foo<T>::convert(ID) const {return new Bar<T>;}
+
 
 
 // For integral types only:

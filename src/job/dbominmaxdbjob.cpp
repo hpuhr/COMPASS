@@ -33,6 +33,7 @@
 #include "string.h"
 #include "stringconv.h"
 #include "global.h"
+#include "arraylist.h"
 
 using namespace Utils;
 

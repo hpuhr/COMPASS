@@ -53,6 +53,7 @@
 #include "dbtableinfo.h"
 #include "dbtable.h"
 #include "stringconv.h"
+#include "arraylist.h"
 
 using namespace Utils;
 
@@ -1046,34 +1047,34 @@ std::shared_ptr<Buffer> DBInterface::getPartialBuffer (DBTable& table, std::shar
             switch (org_prop.dataType())
             {
             case PropertyDataType::BOOL:
-                tmp_buffer->get<bool>(org_prop.name()) = buffer->get<bool>(org_prop.name());
+                tmp_buffer->get<bool>(org_prop.name()).copyData(buffer->get<bool>(org_prop.name()));
                 break;
             case PropertyDataType::CHAR:
-                tmp_buffer->get<char>(org_prop.name()) = buffer->get<char>(org_prop.name());
+                tmp_buffer->get<char>(org_prop.name()).copyData(buffer->get<char>(org_prop.name()));
                 break;
             case PropertyDataType::UCHAR:
-                tmp_buffer->get<unsigned char>(org_prop.name()) = buffer->get<unsigned char>(org_prop.name());
+                tmp_buffer->get<unsigned char>(org_prop.name()).copyData(buffer->get<unsigned char>(org_prop.name()));
                 break;
             case PropertyDataType::INT:
-                tmp_buffer->get<int>(org_prop.name()) = buffer->get<int>(org_prop.name());
+                tmp_buffer->get<int>(org_prop.name()).copyData(buffer->get<int>(org_prop.name()));
                 break;
             case PropertyDataType::UINT:
-                tmp_buffer->get<unsigned int>(org_prop.name()) = buffer->get<unsigned int>(org_prop.name());
+                tmp_buffer->get<unsigned int>(org_prop.name()).copyData(buffer->get<unsigned int>(org_prop.name()));
                 break;
             case PropertyDataType::LONGINT:
-                tmp_buffer->get<long int>(org_prop.name()) = buffer->get<long int>(org_prop.name());
+                tmp_buffer->get<long int>(org_prop.name()).copyData(buffer->get<long int>(org_prop.name()));
                 break;
             case PropertyDataType::ULONGINT:
-                tmp_buffer->get<unsigned long int>(org_prop.name()) = buffer->get<unsigned long int>(org_prop.name());
+                tmp_buffer->get<unsigned long int>(org_prop.name()).copyData(buffer->get<unsigned long int>(org_prop.name()));
                 break;
             case PropertyDataType::FLOAT:
-                tmp_buffer->get<float>(org_prop.name()) = buffer->get<float>(org_prop.name());
+                tmp_buffer->get<float>(org_prop.name()).copyData(buffer->get<float>(org_prop.name()));
                 break;
             case PropertyDataType::DOUBLE:
-                tmp_buffer->get<double>(org_prop.name()) = buffer->get<double>(org_prop.name());
+                tmp_buffer->get<double>(org_prop.name()).copyData(buffer->get<double>(org_prop.name()));
                 break;
             case PropertyDataType::STRING:
-                tmp_buffer->get<std::string>(org_prop.name()) = buffer->get<std::string>(org_prop.name());
+                tmp_buffer->get<std::string>(org_prop.name()).copyData(buffer->get<std::string>(org_prop.name()));
                 break;
             default:
                 logerr  <<  "IDBInterface: getPartialBuffer: unknown property type "

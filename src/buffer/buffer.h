@@ -21,10 +21,13 @@
 #include <unordered_map>
 #include <tuple>
 #include <vector>
+#include <memory>
+
 #include "propertylist.h"
-#include "arraylist.h"
 
 class DBOVariableSet;
+
+template <class T> class ArrayListTemplate;
 
 typedef std::tuple< std::map <std::string, std::shared_ptr<ArrayListTemplate<bool>>>,
 std::map <std::string, std::shared_ptr<ArrayListTemplate<char>>>,
@@ -64,6 +67,8 @@ struct Index<T, std::tuple<U, Types...>> {
  */
 class Buffer
 {
+    template<class T> friend class ArrayListTemplate;
+
 public:
     /// @brief Default constructor.
     Buffer ();
@@ -71,8 +76,6 @@ public:
     Buffer(PropertyList properties, const std::string &dbo_name="");
     /// @brief Desctructor.
     virtual ~Buffer();
-
-    /// @brief Set addresses to point to values of element at index.
 
     /// @brief Adds all containers of org_buffer and removes them from org_buffer.
     void seizeBuffer (Buffer &org_buffer);
@@ -89,45 +92,24 @@ public:
     /// @brief Sets if buffer is the last one of one DB operation.
     void lastOne (bool last_one) { last_one_=last_one; }
 
-    /// @brief Returns flag indicating if buffer is filled to a multiple of BUFFER_ARRAY_SIZE.
-    //bool full ();
-
     /// @brief Returns the buffers id
     unsigned int id() const { return id_; }
 
-    template<typename T> inline bool has (const std::string &id)
-    {
-        return getArrayListMap<T>().count(id) != 0;
-    }
+    template<typename T> bool has (const std::string &id);
 
-    template<typename T> inline ArrayListTemplate<T>& get (const std::string &id)
-    {
-        return *(std::get< Index<std::map <std::string, std::shared_ptr<ArrayListTemplate<T>>>,
-                ArrayListMapTupel>::value > (array_list_tuple_)).at(id);
-    }
+    template<typename T> ArrayListTemplate<T>& get (const std::string &id);
 
-    template<typename T> void rename (const std::string &id, const std::string &id_new)
-    {
-        renameArrayListMapEntry<T>(id, id_new);
+    template<typename T> void rename (const std::string &id, const std::string &id_new);
 
-        assert (properties_.hasProperty(id));
-        Property old_property = properties_.get(id);
-        properties_.removeProperty(id);
-        properties_.addProperty(id_new, old_property.dataType());
-    }
-
-    /// @brief  Returns maximal used index size
+    /// @brief  Returns current size
     const size_t size ();
     void cutToSize (size_t size);
 
     /// @brief Returns PropertyList
-    const PropertyList &properties ()
-    {
-        return properties_;
-    }
+    const PropertyList& properties ();
 
     /// @brief Returns DBO type
-    const std::string &dboName () { return dbo_name_; }
+    const std::string& dboName () { return dbo_name_; }
 
     /// @brief Sets DBO type
     void dboName (const std::string &dbo_name) { dbo_name_=dbo_name;}
@@ -145,6 +127,7 @@ protected:
     std::string dbo_name_;
 
     ArrayListMapTupel array_list_tuple_;
+    size_t data_size_ {0};
 
     /// Flag indicating if buffer is the last of a DB operation
     bool last_one_;
@@ -152,28 +135,11 @@ protected:
     static unsigned int ids_;
 
 private:
-    template<typename T> inline std::map <std::string, std::shared_ptr<ArrayListTemplate<T>>>& getArrayListMap ()
-    {
-        return std::get< Index<std::map <std::string, std::shared_ptr<ArrayListTemplate<T>>>,
-                ArrayListMapTupel>::value > (array_list_tuple_);
-    }
-    template<typename T> void renameArrayListMapEntry (const std::string &id, const std::string &id_new)
-    {
-        assert (getArrayListMap<T>().count(id) == 1);
-        assert (getArrayListMap<T>().count(id_new) == 0);
-        std::shared_ptr<ArrayListTemplate<T>> array_list = getArrayListMap<T>().at(id);
-        getArrayListMap<T>().erase(id);
-        getArrayListMap<T>()[id_new]=array_list;
-    }
-
-    template<typename T> void seizeArrayListMap (Buffer &org_buffer)
-    {
-        assert (getArrayListMap<T>().size() == org_buffer.getArrayListMap<T>().size());
-
-        for (auto it : getArrayListMap<T>())
-            it.second->addData(*org_buffer.getArrayListMap<T>().at(it.first));
-        org_buffer.getArrayListMap<T>().clear();
-    }
+    template<typename T> inline std::map <std::string, std::shared_ptr<ArrayListTemplate<T>>>& getArrayListMap ();
+    template<typename T> void renameArrayListMapEntry (const std::string &id, const std::string &id_new);
+    template<typename T> void seizeArrayListMap (Buffer &org_buffer);
 };
+
+
 
 #endif /* BUFFER_H_ */

@@ -7,6 +7,7 @@
 #include "buffer.h"
 #include "propertylist.h"
 #include "global.h"
+#include "arraylist.h"
 
 #include <iostream>
 #include <string>

@@ -44,6 +44,7 @@
 #include "dboeditdatasourceswidget.h"
 #include "dboeditdatasourceactionoptionswidget.h"
 #include "storeddbodatasourcewidget.h"
+#include "arraylist.h"
 
 /**
  * Registers parameters, creates sub configurables

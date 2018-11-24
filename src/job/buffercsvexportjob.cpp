@@ -20,7 +20,7 @@
 
 #include "buffercsvexportjob.h"
 #include "dbovariable.h"
-
+#include "arraylist.h"
 
 BufferCSVExportJob::BufferCSVExportJob(std::shared_ptr<Buffer> buffer, const DBOVariableSet& read_set,
                                        const std::string& file_name, bool overwrite, bool use_presentation)
