@@ -194,7 +194,10 @@ void StoredDBODataSourceWidget::updateShortNameColumnSlot ()
     assert (short_name_edit_);
 
     if (data_source_->hasShortName())
+    {
         short_name_edit_->setText(data_source_->shortName().c_str());
+        short_name_edit_->setValid(true);
+    }
     else
         short_name_edit_->setValid(false);
 }
@@ -207,7 +210,10 @@ void StoredDBODataSourceWidget::updateSacColumnSlot ()
 {
     assert (sac_edit_);
     if (data_source_->hasSac())
+    {
         sac_edit_->setText(QString::number(data_source_->sac()));
+        sac_edit_->setValid(true);
+    }
     else
         sac_edit_->setValid(false);
 }
@@ -216,7 +222,10 @@ void StoredDBODataSourceWidget::updateSicColumnSlot ()
     assert (sic_edit_);
 
     if (data_source_->hasSic())
+    {
         sic_edit_->setText(QString::number(data_source_->sic()));
+        sic_edit_->setValid(true);
+    }
     else
         sic_edit_->setValid(false);
 }
@@ -225,7 +234,10 @@ void StoredDBODataSourceWidget::updateLatitudeColumnSlot ()
     assert (latitude_edit_);
 
     if (data_source_->hasLatitude())
+    {
         latitude_edit_->setText(QString::number(data_source_->latitude(), 'g', 12));
+        latitude_edit_->setValid(true);
+    }
     else
         latitude_edit_->setValid(false);
 
@@ -235,7 +247,10 @@ void StoredDBODataSourceWidget::updateLongitudeColumnSlot ()
     assert (longitude_edit_);
 
     if (data_source_->hasLongitude())
+    {
         longitude_edit_->setText(QString::number(data_source_->longitude(), 'g', 12));
+        longitude_edit_->setValid(true);
+    }
     else
         longitude_edit_->setValid(false);
 
@@ -244,7 +259,10 @@ void StoredDBODataSourceWidget::updateAltitudeColumnSlot ()
 {
     assert (altitude_edit_);
     if (data_source_->hasAltitude())
+    {
         altitude_edit_->setText(QString::number(data_source_->altitude(), 'g', 12));
+        altitude_edit_->setValid(true);
+    }
     else
         altitude_edit_->setValid(false);
 }
