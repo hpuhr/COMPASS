@@ -24,8 +24,6 @@
 #include "global.h"
 #include "dbovariableset.h"
 #include "listboxviewdatasource.h"
-#include "arraylist.h"
-//#include "dbtablecolumn.h"
 
 BufferTableModel::BufferTableModel(QObject *parent, DBObject &object, ListBoxViewDataSource& data_source)
     : QAbstractTableModel(parent), object_(object), data_source_(data_source)
@@ -124,7 +122,7 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
             if (data_type == PropertyDataType::BOOL)
             {
                 assert (buffer_->has<bool>(property_name));
-                null = buffer_->get<bool>(property_name).isNone(row);
+                null = buffer_->get<bool>(property_name).isNull(row);
                 if (!null)
                 {
                     if (use_presentation_)
@@ -137,7 +135,7 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
             else if (data_type == PropertyDataType::CHAR)
             {
                 assert (buffer_->has<char>(property_name));
-                null = buffer_->get<char>(property_name).isNone(row);
+                null = buffer_->get<char>(property_name).isNull(row);
                 if (!null)
                 {
                     if (use_presentation_)
@@ -150,7 +148,7 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
             else if (data_type == PropertyDataType::UCHAR)
             {
                 assert (buffer_->has<unsigned char>(property_name));
-                null = buffer_->get<unsigned char>(property_name).isNone(row);
+                null = buffer_->get<unsigned char>(property_name).isNull(row);
                 if (!null)
                 {
                     if (use_presentation_)
@@ -163,7 +161,7 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
             else if (data_type == PropertyDataType::INT)
             {
                 assert (buffer_->has<int>(property_name));
-                null = buffer_->get<int>(property_name).isNone(row);
+                null = buffer_->get<int>(property_name).isNull(row);
                 if (!null)
                 {
                     if (use_presentation_)
@@ -176,7 +174,7 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
             else if (data_type == PropertyDataType::UINT)
             {
                 assert (buffer_->has<unsigned int>(property_name));
-                null = buffer_->get<unsigned int>(properties.at(col).name()).isNone(row);
+                null = buffer_->get<unsigned int>(properties.at(col).name()).isNull(row);
                 if (!null)
                 {
                     if (use_presentation_)
@@ -189,7 +187,7 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
             else if (data_type == PropertyDataType::LONGINT)
             {
                 assert (buffer_->has<long int>(property_name));
-                null = buffer_->get<long int>(property_name).isNone(row);
+                null = buffer_->get<long int>(property_name).isNull(row);
                 if (!null)
                 {
                     if (use_presentation_)
@@ -202,7 +200,7 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
             else if (data_type == PropertyDataType::ULONGINT)
             {
                 assert (buffer_->has<unsigned long int>(property_name));
-                null = buffer_->get<unsigned long int>(property_name).isNone(row);
+                null = buffer_->get<unsigned long int>(property_name).isNull(row);
                 if (!null)
                 {
                     if (use_presentation_)
@@ -215,7 +213,7 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
             else if (data_type == PropertyDataType::FLOAT)
             {
                 assert (buffer_->has<float>(property_name));
-                null = buffer_->get<float>(property_name).isNone(row);
+                null = buffer_->get<float>(property_name).isNull(row);
                 if (!null)
                 {
                     if (use_presentation_)
@@ -228,7 +226,7 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
             else if (data_type == PropertyDataType::DOUBLE)
             {
                 assert (buffer_->has<double>(property_name));
-                null = buffer_->get<double>(property_name).isNone(row);
+                null = buffer_->get<double>(property_name).isNull(row);
                 if (!null)
                 {
                     if (use_presentation_)
@@ -241,7 +239,7 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
             else if (data_type == PropertyDataType::STRING)
             {
                 assert (buffer_->has<std::string>(property_name));
-                null = buffer_->get<std::string>(property_name).isNone(row);
+                null = buffer_->get<std::string>(property_name).isNull(row);
                 if (!null)
                 {
                     value_str = buffer_->get<std::string>(property_name).getAsString(row);

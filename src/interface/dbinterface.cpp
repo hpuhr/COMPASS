@@ -318,7 +318,7 @@ std::set<int> DBInterface::queryActiveSensorNumbers(DBObject &object)
     std::shared_ptr<Buffer> buffer = result->buffer();
     for (unsigned int cnt=0; cnt < buffer->size(); cnt++)
     {
-        if (buffer->get<int>(local_key_col.name()).isNone(cnt))
+        if (buffer->get<int>(local_key_col.name()).isNull(cnt))
         {
             logwrn << "DBInterface: queryActiveSensorNumbers: object " << object.name()
                    << " has NULL ds_id's, which will be omitted";
@@ -556,14 +556,14 @@ std::map <int, DBODataSource> DBInterface::getDataSources (DBObject &object)
 
     for (unsigned cnt = 0; cnt < buffer->size(); cnt++)
     {
-        if (buffer->get<int>(foreign_key_col.name()).isNone(cnt))
+        if (buffer->get<int>(foreign_key_col.name()).isNull(cnt))
         {
             loginf << "DBInterface: getDataSources: object " << object.name()
                    << " has NULL key, which will be omitted";
             continue;
         }
 
-        if (buffer->get<std::string>(name_col.name()).isNone(cnt))
+        if (buffer->get<std::string>(name_col.name()).isNull(cnt))
         {
             loginf << "DBInterface: getDataSources: object " << object.name()
                    << " has NULL name, which will be omitted";
@@ -581,22 +581,22 @@ std::map <int, DBODataSource> DBInterface::getDataSources (DBObject &object)
                         std::forward_as_tuple(key),  // args for key
                         std::forward_as_tuple(object, key, name));  // args for mapped value
 
-        if (has_short_name && !buffer->get<std::string>(short_name_col_name).isNone(cnt))
+        if (has_short_name && !buffer->get<std::string>(short_name_col_name).isNull(cnt))
             sources.at(key).shortName(buffer->get<std::string>(short_name_col_name).get(cnt));
 
-        if (has_sac && !buffer->get<char>(sac_col_name).isNone(cnt))
+        if (has_sac && !buffer->get<char>(sac_col_name).isNull(cnt))
             sources.at(key).sac(buffer->get<char>(sac_col_name).get(cnt));
 
-        if (has_sic && !buffer->get<char>(sic_col_name).isNone(cnt))
+        if (has_sic && !buffer->get<char>(sic_col_name).isNull(cnt))
             sources.at(key).sic(buffer->get<char>(sic_col_name).get(cnt));
 
-        if (has_latitude && !buffer->get<double>(latitude_col_name).isNone(cnt))
+        if (has_latitude && !buffer->get<double>(latitude_col_name).isNull(cnt))
             sources.at(key).latitude(buffer->get<double>(latitude_col_name).get(cnt));
 
-        if (has_longitude && !buffer->get<double>(longitude_col_name).isNone(cnt))
+        if (has_longitude && !buffer->get<double>(longitude_col_name).isNull(cnt))
             sources.at(key).longitude(buffer->get<double>(longitude_col_name).get(cnt));
 
-        if (has_altitude && !buffer->get<double>(altitude_col_name).isNone(cnt))
+        if (has_altitude && !buffer->get<double>(altitude_col_name).isNull(cnt))
             sources.at(key).altitude(buffer->get<double>(altitude_col_name).get(cnt));
     }
 
@@ -763,7 +763,7 @@ std::pair<std::string, std::string> DBInterface::getMinMaxString (const DBOVaria
         return std::pair <std::string, std::string> (NULL_STRING, NULL_STRING);
     }
 
-    if (buffer->get<std::string>("min").isNone(0) || buffer->get<std::string>("max").isNone(0))
+    if (buffer->get<std::string>("min").isNull(0) || buffer->get<std::string>("max").isNull(0))
     {
         logerr << "DBInterface: getMinMaxString: variable " << var.name() << " has NULL minimum/maximum";
         return std::pair <std::string, std::string> (NULL_STRING, NULL_STRING);

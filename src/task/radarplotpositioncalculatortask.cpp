@@ -31,7 +31,6 @@
 #include "projectionmanager.h"
 #include "jobmanager.h"
 #include "stringconv.h"
-#include "arraylist.h"
 
 #include <QCoreApplication>
 #include <QMessageBox>
@@ -495,14 +494,14 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
             QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         }
 
-        if (read_buffer->get<int>(key_var_str_).isNone(cnt))
+        if (read_buffer->get<int>(key_var_str_).isNull(cnt))
         {
             logerr << "RadarPlotPositionCalculatorTask: loadingDoneSlot: key null";
             continue;
         }
         rec_num = read_buffer->get<int>(key_var_str_).get(cnt);
 
-        if (read_buffer->get<int>(datasource_var_str_).isNone(cnt))
+        if (read_buffer->get<int>(datasource_var_str_).isNull(cnt))
         {
             logerr << "RadarPlotPositionCalculatorTask: loadingDoneSlot: data source null";
             continue;
@@ -512,8 +511,8 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
         //sac = *((unsigned char*)adresses->at(1));
         //sic = *((unsigned char*)adresses->at(2));
 
-        if (read_buffer->get<double>(azimuth_var_str_).isNone(cnt)
-                || read_buffer->get<double>(range_var_str_).isNone(cnt))
+        if (read_buffer->get<double>(azimuth_var_str_).isNull(cnt)
+                || read_buffer->get<double>(range_var_str_).isNull(cnt))
         {
             logdbg << "RadarPlotPositionCalculatorTask: loadingDoneSlot: position null";
             continue;
@@ -522,7 +521,7 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
         pos_azm_deg =  read_buffer->get<double>(azimuth_var_str_).get(cnt);
         pos_range_nm =  read_buffer->get<double>(range_var_str_).get(cnt);
 
-        has_altitude = !read_buffer->get<int>(altitude_var_str_).isNone(cnt);
+        has_altitude = !read_buffer->get<int>(altitude_var_str_).isNull(cnt);
         if (has_altitude)
             altitude_ft = read_buffer->get<int>(altitude_var_str_).get(cnt);
         else

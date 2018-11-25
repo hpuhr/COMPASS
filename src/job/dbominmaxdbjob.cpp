@@ -33,7 +33,6 @@
 #include "string.h"
 #include "stringconv.h"
 #include "global.h"
-#include "arraylist.h"
 
 using namespace Utils;
 
@@ -133,12 +132,12 @@ void DBOMinMaxDBJob::processTable (const DBTable& table)
         assert (buffer->properties().hasProperty(col_it.first+"MIN"));
         assert (buffer->properties().hasProperty(col_it.first+"MAX"));
 
-        if (buffer->get<std::string>(col_it.first+"MIN").isNone(0))
+        if (buffer->get<std::string>(col_it.first+"MIN").isNull(0))
             min = NULL_STRING;
         else
             min = buffer->get<std::string>(col_it.first+"MIN").get(0);
 
-        if (buffer->get<std::string>(col_it.first+"MAX").isNone(0))
+        if (buffer->get<std::string>(col_it.first+"MAX").isNull(0))
             max = NULL_STRING;
         else
             max = buffer->get<std::string>(col_it.first+"MAX").get(0);

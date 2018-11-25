@@ -21,14 +21,14 @@
 #include <QDateTime>
 
 #include "stringconv.h"
-#include "arraylist.h"
+#include "nullablevector.h"
 #include "buffer.h"
 
 typedef std::numeric_limits<double> double_limit;
 typedef std::numeric_limits<float> float_limit;
 
 template <>
-ArrayListTemplate<bool>& ArrayListTemplate<bool>::operator*=(double factor)
+NullableVector<bool>& NullableVector<bool>::operator*=(double factor)
 {
     bool tmp_factor = static_cast<bool> (factor);
 

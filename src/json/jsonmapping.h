@@ -9,8 +9,8 @@
 #include "format.h"
 #include "dbovariable.h"
 #include "dbovariableset.h"
-#include "arraylist.h"
 #include "stringconv.h"
+#include "nullablevector.h"
 
 class DBObject;
 class DBOVariable;
@@ -175,7 +175,7 @@ public:
     }
 
     template<typename T>
-    void setValue(ArrayListTemplate<T>& array_list, unsigned int row_cnt, const nlohmann::json& j)
+    void setValue(NullableVector<T>& array_list, unsigned int row_cnt, const nlohmann::json& j)
     {
         if (j == nullptr)
             array_list.setNone(row_cnt);
@@ -200,7 +200,7 @@ public:
         }
     }
 
-    void setValue(ArrayListTemplate<char>& array_list, unsigned int row_cnt, const nlohmann::json& j)
+    void setValue(NullableVector<char>& array_list, unsigned int row_cnt, const nlohmann::json& j)
     {
         if (j == nullptr)
             array_list.setNone(row_cnt);
@@ -227,7 +227,7 @@ public:
 
     // return bool mandatory missing
     template<typename T>
-    bool findAndSetValue(const nlohmann::json& j, ArrayListTemplate<T>& array_list, unsigned int row_cnt)
+    bool findAndSetValue(const nlohmann::json& j, NullableVector<T>& array_list, unsigned int row_cnt)
     {
         const nlohmann::json* val_ptr = &j;
 
@@ -297,7 +297,7 @@ public:
         return false; // everything ok
     }
 
-    bool findAndSetValue(const nlohmann::json& j, ArrayListTemplate<char>& array_list, unsigned int row_cnt)
+    bool findAndSetValue(const nlohmann::json& j, NullableVector<char>& array_list, unsigned int row_cnt)
     {
         const nlohmann::json* val_ptr = &j;
 

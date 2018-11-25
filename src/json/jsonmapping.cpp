@@ -455,7 +455,7 @@ void JsonMapping::transformBuffer ()
             case PropertyDataType::BOOL:
             {
                 assert (buffer_->has<bool>(current_var_name));
-                ArrayListTemplate<bool> &array_list = buffer_->get<bool>(current_var_name);
+                NullableVector<bool> &array_list = buffer_->get<bool>(current_var_name);
                 logwrn << "JsonMapping: transformBuffer: double multiplication of boolean variable "
                        << current_var_name;
                 array_list *= factor;
@@ -464,7 +464,7 @@ void JsonMapping::transformBuffer ()
             case PropertyDataType::CHAR:
             {
                 assert (buffer_->has<char>(current_var_name));
-                ArrayListTemplate<char> &array_list = buffer_->get<char> (current_var_name);
+                NullableVector<char> &array_list = buffer_->get<char> (current_var_name);
                 logwrn << "JsonMapping: transformBuffer: double multiplication of char variable "
                        << current_var_name;
                 array_list *= factor;
@@ -473,7 +473,7 @@ void JsonMapping::transformBuffer ()
             case PropertyDataType::UCHAR:
             {
                 assert (buffer_->has<unsigned char>(current_var_name));
-                ArrayListTemplate<unsigned char> &array_list = buffer_->get<unsigned char> (current_var_name);
+                NullableVector<unsigned char> &array_list = buffer_->get<unsigned char> (current_var_name);
                 logwrn << "JsonMapping: transformBuffer: double multiplication of unsigned char variable "
                        << current_var_name;
                 array_list *= factor;
@@ -482,42 +482,42 @@ void JsonMapping::transformBuffer ()
             case PropertyDataType::INT:
             {
                 assert (buffer_->has<int>(current_var_name));
-                ArrayListTemplate<int> &array_list = buffer_->get<int> (current_var_name);
+                NullableVector<int> &array_list = buffer_->get<int> (current_var_name);
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::UINT:
             {
                 assert (buffer_->has<unsigned int>(current_var_name));
-                ArrayListTemplate<unsigned int> &array_list = buffer_->get<unsigned int> (current_var_name);
+                NullableVector<unsigned int> &array_list = buffer_->get<unsigned int> (current_var_name);
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::LONGINT:
             {
                 assert (buffer_->has<long int>(current_var_name));
-                ArrayListTemplate<long int> &array_list = buffer_->get<long int>(current_var_name);
+                NullableVector<long int> &array_list = buffer_->get<long int>(current_var_name);
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::ULONGINT:
             {
                 assert (buffer_->has<unsigned long>(current_var_name));
-                ArrayListTemplate<unsigned long> &array_list = buffer_->get<unsigned long>(current_var_name);
+                NullableVector<unsigned long> &array_list = buffer_->get<unsigned long>(current_var_name);
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::FLOAT:
             {
                 assert (buffer_->has<float>(current_var_name));
-                ArrayListTemplate<float> &array_list = buffer_->get<float>(current_var_name);
+                NullableVector<float> &array_list = buffer_->get<float>(current_var_name);
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::DOUBLE:
             {
                 assert (buffer_->has<double>(current_var_name));
-                ArrayListTemplate<double> &array_list = buffer_->get<double>(current_var_name);
+                NullableVector<double> &array_list = buffer_->get<double>(current_var_name);
                 array_list *= factor;
                 break;
             }

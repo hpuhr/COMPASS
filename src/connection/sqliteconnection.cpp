@@ -30,7 +30,6 @@
 #include "dbinterface.h"
 #include "dbtableinfo.h"
 #include "stringconv.h"
-#include "arraylist.h"
 
 SQLiteConnection::SQLiteConnection(const std::string &class_id, const std::string &instance_id, DBInterface *interface)
 : DBConnection (class_id, instance_id, interface), interface_(*interface), db_handle_(nullptr), prepared_command_(nullptr), prepared_command_done_(false),

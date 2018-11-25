@@ -27,18 +27,18 @@
 
 class DBOVariableSet;
 
-template <class T> class ArrayListTemplate;
+template <class T> class NullableVector;
 
-typedef std::tuple< std::map <std::string, std::shared_ptr<ArrayListTemplate<bool>>>,
-std::map <std::string, std::shared_ptr<ArrayListTemplate<char>>>,
-std::map <std::string, std::shared_ptr<ArrayListTemplate<unsigned char>>>,
-std::map <std::string, std::shared_ptr<ArrayListTemplate<int>>>,
-std::map <std::string, std::shared_ptr<ArrayListTemplate<unsigned int>>>,
-std::map <std::string, std::shared_ptr<ArrayListTemplate<long int>>> ,
-std::map <std::string, std::shared_ptr<ArrayListTemplate<unsigned long int>>>,
-std::map <std::string, std::shared_ptr<ArrayListTemplate<float>>>,
-std::map <std::string, std::shared_ptr<ArrayListTemplate<double>>>,
-std::map <std::string, std::shared_ptr<ArrayListTemplate<std::string>>> > ArrayListMapTupel;
+typedef std::tuple< std::map <std::string, std::shared_ptr<NullableVector<bool>>>,
+std::map <std::string, std::shared_ptr<NullableVector<char>>>,
+std::map <std::string, std::shared_ptr<NullableVector<unsigned char>>>,
+std::map <std::string, std::shared_ptr<NullableVector<int>>>,
+std::map <std::string, std::shared_ptr<NullableVector<unsigned int>>>,
+std::map <std::string, std::shared_ptr<NullableVector<long int>>> ,
+std::map <std::string, std::shared_ptr<NullableVector<unsigned long int>>>,
+std::map <std::string, std::shared_ptr<NullableVector<float>>>,
+std::map <std::string, std::shared_ptr<NullableVector<double>>>,
+std::map <std::string, std::shared_ptr<NullableVector<std::string>>> > ArrayListMapTupel;
 
 template <class T, class Tuple>
 struct Index;
@@ -67,7 +67,7 @@ struct Index<T, std::tuple<U, Types...>> {
  */
 class Buffer
 {
-    template<class T> friend class ArrayListTemplate;
+    template<class T> friend class NullableVector;
 
 public:
     /// @brief Default constructor.
@@ -97,7 +97,7 @@ public:
 
     template<typename T> bool has (const std::string &id);
 
-    template<typename T> ArrayListTemplate<T>& get (const std::string &id);
+    template<typename T> NullableVector<T>& get (const std::string &id);
 
     template<typename T> void rename (const std::string &id, const std::string &id_new);
 
@@ -137,21 +137,21 @@ protected:
     static unsigned int ids_;
 
 private:
-    template<typename T> inline std::map <std::string, std::shared_ptr<ArrayListTemplate<T>>>& getArrayListMap ();
+    template<typename T> inline std::map <std::string, std::shared_ptr<NullableVector<T>>>& getArrayListMap ();
     template<typename T> void renameArrayListMapEntry (const std::string &id, const std::string &id_new);
     template<typename T> void seizeArrayListMap (Buffer &org_buffer);
 };
 
-#include "arraylist.h"
+#include "nullablevector.h"
 
 template<typename T> inline bool Buffer::has (const std::string &id)
 {
     return getArrayListMap<T>().count(id) != 0;
 }
 
-template<typename T> ArrayListTemplate<T>& Buffer::get (const std::string &id)
+template<typename T> NullableVector<T>& Buffer::get (const std::string &id)
 {
-    return *(std::get< Index<std::map <std::string, std::shared_ptr<ArrayListTemplate<T>>>,
+    return *(std::get< Index<std::map <std::string, std::shared_ptr<NullableVector<T>>>,
             ArrayListMapTupel>::value > (array_list_tuple_)).at(id);
 }
 
@@ -167,16 +167,16 @@ template<typename T> void Buffer::rename (const std::string &id, const std::stri
 
 // private stuff
 
-template<typename T> std::map <std::string, std::shared_ptr<ArrayListTemplate<T>>>& Buffer::getArrayListMap ()
+template<typename T> std::map <std::string, std::shared_ptr<NullableVector<T>>>& Buffer::getArrayListMap ()
 {
-    return std::get< Index<std::map <std::string, std::shared_ptr<ArrayListTemplate<T>>>,
+    return std::get< Index<std::map <std::string, std::shared_ptr<NullableVector<T>>>,
             ArrayListMapTupel>::value > (array_list_tuple_);
 }
 template<typename T> void Buffer::renameArrayListMapEntry (const std::string &id, const std::string &id_new)
 {
     assert (getArrayListMap<T>().count(id) == 1);
     assert (getArrayListMap<T>().count(id_new) == 0);
-    std::shared_ptr<ArrayListTemplate<T>> array_list = getArrayListMap<T>().at(id);
+    std::shared_ptr<NullableVector<T>> array_list = getArrayListMap<T>().at(id);
     getArrayListMap<T>().erase(id);
     getArrayListMap<T>()[id_new]=array_list;
 }

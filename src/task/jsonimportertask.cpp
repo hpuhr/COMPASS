@@ -373,15 +373,15 @@ void JSONImporterTask::insertData ()
                 assert (buffer->properties().get(data_source_var_name).dataType() == PropertyDataType::INT);
 
                 assert(buffer->has<int>(data_source_var_name));
-                ArrayListTemplate<int>& data_source_key_list = buffer->get<int> (data_source_var_name);
+                NullableVector<int>& data_source_key_list = buffer->get<int> (data_source_var_name);
                 std::set<int> data_source_keys = data_source_key_list.distinctValues();
 
                 std::map <int, std::pair<char, char>> sac_sics; // keyvar->(sac,sic)
                 // collect sac/sics
                 if (has_sac_sic)
                 {
-                    ArrayListTemplate<char>& sac_list = buffer->get<char> ("sac");
-                    ArrayListTemplate<char>& sic_list = buffer->get<char> ("sic");
+                    NullableVector<char>& sac_list = buffer->get<char> ("sac");
+                    NullableVector<char>& sic_list = buffer->get<char> ("sic");
 
                     size_t size = buffer->size();
                     int key_val;
@@ -396,7 +396,7 @@ void JSONImporterTask::insertData ()
                         {
                             logdbg << "JSONImporterTask: insertData: found new ds " << key_val << " for sac/sic";
 
-                            assert (!sac_list.isNone(cnt) && !sic_list.isNone(cnt));
+                            assert (!sac_list.isNull(cnt) && !sic_list.isNull(cnt));
                             sac_sics[key_val] = std::pair<char, char> (sac_list.get(cnt), sic_list.get(cnt));
 
                             loginf << "JSONImporterTask: insertData: source " << key_val
