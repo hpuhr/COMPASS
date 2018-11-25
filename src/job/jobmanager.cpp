@@ -28,7 +28,8 @@
 using namespace Utils;
 
 JobManager::JobManager()
-    : Configurable ("JobManager", "JobManager0", 0, "threads.xml"), stop_requested_(false), stopped_(false), widget_(nullptr)
+    : Configurable ("JobManager", "JobManager0", 0, "threads.xml"), stop_requested_(false), stopped_(false),
+      widget_(nullptr)
 {
     logdbg  << "JobManager: constructor";
     QMutexLocker locker(&mutex_);
@@ -47,8 +48,21 @@ void JobManager::addJob (std::shared_ptr<Job> job)
 {
     mutex_.lock();
 
-    logdbg << "JobManager: addJob: " << job->name() << " num " << jobs_.size()+1;
+    logdbg << "JobManager: addJob: " << job->name() << " num " << jobs_.size();
     jobs_.push_back(job);
+    mutex_.unlock();
+
+    QThreadPool::globalInstance()->start(job.get());
+
+    updateWidget();
+}
+
+void JobManager::addNonBlockingJob (std::shared_ptr<Job> job)
+{
+    mutex_.lock();
+
+    loginf << "JobManager: addNonBlockingJob: " << job->name() << " num " << non_blocking_jobs_.size();
+    non_blocking_jobs_.push_back(job);
     mutex_.unlock();
 
     QThreadPool::globalInstance()->start(job.get());
@@ -152,6 +166,39 @@ void JobManager::run()
             really_update_widget = jobs_.size() == 0;
         }
 
+        for(auto it = non_blocking_jobs_.begin(); it != non_blocking_jobs_.end();)
+        {
+            assert (*it);
+
+            if((*it)->obsolete() || (*it)->done())
+            {
+                std::shared_ptr<Job> job = *it;
+                logdbg << "JobManager: run: processing non-blocking job "+job->name();
+
+                it = non_blocking_jobs_.erase(it);
+
+                changed = true;
+
+                logdbg << "JobManager: run: flushed non-blocking job "+job->name();
+                if(job->obsolete())
+                {
+                    logdbg << "JobManager: run: flushing obsolete non-blocking job";
+                    job->emitObsolete();
+                    continue;
+                }
+
+                logdbg << "JobManager: run: flushing done non-blocking job";
+                job->emitDone();
+                logdbg << "JobManager: run: done non-blocking job emitted "+job->name();
+
+                really_update_widget = non_blocking_jobs_.size() == 0;
+            }
+            else
+            {
+                ++it;
+            }
+        }
+
         if (active_db_job_)
         {
             // see if active db job done or obsolete
@@ -162,7 +209,7 @@ void JobManager::run()
                 while (!active_db_job_->done()) // wait for finish
                 {
                     logdbg << "JobManager: run: waiting to obsolete finish";
-                    QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                    //QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
                     msleep(update_time_);
                 }
 
@@ -217,7 +264,7 @@ void JobManager::run()
         if (changed)
             updateWidget(really_update_widget);
 
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        //QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         msleep(update_time_);
     }
     stopped_=true;
@@ -244,12 +291,15 @@ void JobManager::shutdown ()
     for (auto job : jobs_)
         job->setObsolete ();
 
-//    while (jobs_.size() > 0 || active_db_job_ || queued_db_jobs_.size() > 0 )
-//    {
-//        mutex_.unlock();
-//        msleep(update_time_);
-//        mutex_.lock();
-//    }
+    for (auto job : non_blocking_jobs_)
+        job->setObsolete ();
+
+    //    while (jobs_.size() > 0 || active_db_job_ || queued_db_jobs_.size() > 0 )
+    //    {
+    //        mutex_.unlock();
+    //        msleep(update_time_);
+    //        mutex_.lock();
+    //    }
 
     mutex_.unlock();
     logdbg  << "JobManager: shutdown: setting stop requested";
@@ -282,7 +332,7 @@ unsigned int JobManager::numJobs ()
 {
     QMutexLocker locker(&mutex_);
 
-    return jobs_.size();
+    return jobs_.size() + non_blocking_jobs_.size();
 }
 
 unsigned int JobManager::numDBJobs ()

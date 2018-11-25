@@ -40,7 +40,7 @@ signals:
 
 public:
     /// @brief Constructor
-    Job(const std::string& name) : name_(name), started_(false), done_ (false), obsolete_(false)
+    Job(const std::string& name) : name_(name)
     { setAutoDelete(false); }
     /// @brief Destructor
     virtual ~Job() {}

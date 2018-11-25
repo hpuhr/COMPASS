@@ -150,7 +150,7 @@ void JSONImporterTask::importFile(const std::string& filename, bool test)
              Qt::QueuedConnection);
     connect (read_json_job_.get(), SIGNAL(doneSignal()), this, SLOT(readJSONFilePartDoneSlot()), Qt::QueuedConnection);
 
-    JobManager::instance().addJob(read_json_job_);
+    JobManager::instance().addNonBlockingJob(read_json_job_);
 
     updateMsgBox();
 
@@ -179,7 +179,7 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
              Qt::QueuedConnection);
     connect (read_json_job_.get(), SIGNAL(doneSignal()), this, SLOT(readJSONFilePartDoneSlot()), Qt::QueuedConnection);
 
-    JobManager::instance().addJob(read_json_job_);
+    JobManager::instance().addNonBlockingJob(read_json_job_);
 
     updateMsgBox();
 
@@ -549,7 +549,7 @@ void JSONImporterTask::readJSONFilePartDoneSlot ()
     {
         loginf << "JSONImporterTask: readJSONFilePartDoneSlot: read continue";
         read_json_job_->resetDone();
-        JobManager::instance().addJob(read_json_job_);
+        JobManager::instance().addNonBlockingJob(read_json_job_);
     }
     else
         read_json_job_ = nullptr;
@@ -670,13 +670,16 @@ void JSONImporterTask::mapJSONDoneSlot ()
 
  //   insertData();
 
-    for (auto& buf_it : buffers_)
+    if (!insert_active_)
     {
-        if (buf_it.second->size() > 10000)
+        for (auto& buf_it : buffers_)
         {
-            loginf << "JSONImporterTask: mapJSONDoneSlot: inserting part of parsed objects";
-            insertData ();
-            return;
+            if (buf_it.second->size() > 10000)
+            {
+                loginf << "JSONImporterTask: mapJSONDoneSlot: inserting part of parsed objects";
+                insertData ();
+                return;
+            }
         }
     }
 
