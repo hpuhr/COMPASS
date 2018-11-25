@@ -18,14 +18,15 @@ ReadJSONFilePartJob::~ReadJSONFilePartJob()
     {
         int r = archive_read_close(a);
         if (r != ARCHIVE_OK)
-            logerr << "JSONImporterTask: importFileArchive: archive read close error: " << std::string(archive_error_string(a));
+            logerr << "JSONImporterTask: importFileArchive: archive read close error: "
+                   << std::string(archive_error_string(a));
         else
         {
-
             r = archive_read_free(a);
 
             if (r != ARCHIVE_OK)
-                logerr << "JSONImporterTask: importFileArchive: archive read free error: " << std::string(archive_error_string(a));
+                logerr << "JSONImporterTask: importFileArchive: archive read free error: "
+                       << std::string(archive_error_string(a));
         }
     }
     else
@@ -113,8 +114,6 @@ void ReadJSONFilePartJob::readFilePart ()
             loginf << "ReadJSONFilePartJob: readFilePart: parsing archive file: "
                    << archive_entry_pathname(entry) << " size " << archive_entry_size(entry);
 
-            unsigned int parsed_objects {0};
-
             for (;;)
             {
                 r = archive_read_data_block(a, &buff, &size, &offset);
@@ -144,12 +143,11 @@ void ReadJSONFilePartJob::readFilePart ()
                     {
                         objects_.push_back(tmp_stream_.str());
                         tmp_stream_.str("");
-                        ++parsed_objects;
                     }
 
                 }
 
-                if (parsed_objects > num_objects_) // parsed buffer, reached obj limit
+                if (objects_.size() > num_objects_) // parsed buffer, reached obj limit
                 {
                     entry_not_done_ = true;
                     return;
@@ -175,9 +173,7 @@ void ReadJSONFilePartJob::readFilePart ()
     {
         char c;
 
-        unsigned int parsed_objects = 0;
-
-        while (file_stream_.get(c) && parsed_objects < num_objects_) // loop getting single characters
+        while (file_stream_.get(c) && objects_.size() < num_objects_) // loop getting single characters
         {
             if (c == '{')
                 ++open_count_;
@@ -195,14 +191,13 @@ void ReadJSONFilePartJob::readFilePart ()
                 //loginf << "ReadJSONFilePartJob: readFilePart: obj '" << tmp_stream_.str() << "'";
                 objects_.push_back(tmp_stream_.str());
                 tmp_stream_.str("");
-                ++parsed_objects;
             }
         }
 
-        if (parsed_objects != num_objects_)
+        if (objects_.size() != num_objects_)
             file_read_done_ = true;
 
-        loginf << "ReadJSONFilePartJob: readFilePart: parsed " << parsed_objects << " done " << file_read_done_;
+        loginf << "ReadJSONFilePartJob: readFilePart: parsed " << objects_.size() << " done " << file_read_done_;
 
         assert (open_count_ == 0); // nothing left open
         assert (tmp_stream_.str().size() == 0 || tmp_stream_.str() == "\n");
@@ -214,7 +209,6 @@ void ReadJSONFilePartJob::resetDone ()
     assert (!file_read_done_);
     assert (!objects_.size());
     done_ = false; // yet another part
-    //bytes_read_ = 0;
 }
 
 bool ReadJSONFilePartJob::fileReadDone() const

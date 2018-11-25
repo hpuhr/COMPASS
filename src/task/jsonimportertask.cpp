@@ -484,8 +484,12 @@ void JSONImporterTask::updateMsgBox ()
             +"m "+std::to_string(diff.seconds())+"s";
 
     msg += "Elapsed Time: "+time_str+"\n";
-    msg += "Bytes read: "+std::to_string(bytes_read_)+" B\n";
-    msg += "MBytes read: "+String::doubleToStringPrecision(static_cast<double>(bytes_read_)*1e-6,2)+" MB\n";
+
+    if (bytes_read_ > 1e9)
+        msg += "Bytes read: "+String::doubleToStringPrecision(static_cast<double>(bytes_read_)*1e-9,2)+" GB\n";
+    else
+        msg += "Bytes read: "+String::doubleToStringPrecision(static_cast<double>(bytes_read_)*1e-6,2)+" MB\n";
+
     msg += "Objects read: "+std::to_string(objects_read_)+"\n";
     msg += "Objects parsed: "+std::to_string(objects_parsed_)+"\n";
     msg += "Objects mapped: "+std::to_string(objects_mapped_)+"\n";
@@ -533,10 +537,10 @@ void JSONImporterTask::readJSONFilePartDoneSlot ()
 {
     logdbg << "JSONImporterTask: readJSONFilePartDoneSlot";
 
-    ReadJSONFilePartJob* read_job = dynamic_cast<ReadJSONFilePartJob*>(QObject::sender());
-    assert (read_job);
-    bytes_read_ = read_job->bytesRead();
-    objects_read_ += read_job->objects().size();
+    //ReadJSONFilePartJob* read_job = dynamic_cast<ReadJSONFilePartJob*>(QObject::sender());
+    assert (read_json_job_);
+    bytes_read_ = read_json_job_->bytesRead();
+    objects_read_ += read_json_job_->objects().size();
     loginf << "JSONImporterTask: readJSONFilePartDoneSlot: bytes " << bytes_read_;
 
     //loginf << "got part '" << ss.str() << "'";

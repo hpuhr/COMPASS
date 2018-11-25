@@ -82,7 +82,7 @@ protected:
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;
 
-    unsigned int bytes_read_ {0};
+    size_t bytes_read_ {0};
     unsigned int objects_read_ {0};
     unsigned int objects_parsed_ {0};
     unsigned int objects_mapped_ {0};
