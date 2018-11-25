@@ -480,24 +480,57 @@ void JSONImporterTask::updateMsgBox ()
 
     boost::posix_time::time_duration diff = stop_time_ - start_time_;
 
-    std::string time_str = std::to_string(diff.hours())+"h "+std::to_string(diff.minutes())
-            +"m "+std::to_string(diff.seconds())+"s";
+    std::string elapsed_time_str = String::timeStringFromDouble(diff.total_milliseconds()/1000.0, false);
 
-    msg += "Elapsed Time: "+time_str+"\n";
+    if (objects_parsed_ && objects_mapped_ && objects_inserted_
+            && statistics_calc_objects_inserted_ != objects_inserted_)
+    {
+        double avg_obj_bytes = static_cast<double>(bytes_read_)/static_cast<double>(objects_parsed_);
+        double num_obj_total = static_cast<double>(bytes_to_read_)/avg_obj_bytes;
+
+        assert (objects_skipped_ < objects_parsed_);
+        double not_skipped_ratio =
+                static_cast<double>(objects_parsed_-objects_skipped_)/static_cast<double>(objects_parsed_);
+        double remaining_obj_num = (num_obj_total*not_skipped_ratio)-objects_inserted_;
+
+//        loginf << "UGA avg bytes " << avg_obj_bytes << " num total " << num_obj_total << " not skipped ratio "
+//               << not_skipped_ratio << " all mapped " << num_obj_total*not_skipped_ratio
+//               << " obj ins " << objects_inserted_ << " remain obj " << remaining_obj_num;
+
+        if (remaining_obj_num < 0)
+            remaining_obj_num = 0;
+
+        double avg_time_per_obj_s = diff.total_seconds()/static_cast<double>(objects_inserted_);
+//        loginf << "UGA2 abg per obj " << avg_time_per_obj_s;
+        double time_remaining_s = remaining_obj_num*avg_time_per_obj_s;
+
+        statistics_calc_objects_inserted_ = objects_inserted_;
+        remaining_time_str_ = String::timeStringFromDouble(time_remaining_s, false);
+        object_rate_str_ = std::to_string(objects_inserted_/diff.total_seconds());
+    }
+
+    msg += "Elapsed Time: "+elapsed_time_str+"\n";
 
     if (bytes_read_ > 1e9)
-        msg += "Bytes read: "+String::doubleToStringPrecision(static_cast<double>(bytes_read_)*1e-9,2)+" GB\n";
+        msg += "Data read: "+String::doubleToStringPrecision(static_cast<double>(bytes_read_)*1e-9,2)+" GB";
     else
-        msg += "Bytes read: "+String::doubleToStringPrecision(static_cast<double>(bytes_read_)*1e-6,2)+" MB\n";
+        msg += "Data read: "+String::doubleToStringPrecision(static_cast<double>(bytes_read_)*1e-6,2)+" MB";
+
+    msg += " ("+std::to_string(static_cast<int>(read_status_percent_))+"%)\n";
 
     msg += "Objects read: "+std::to_string(objects_read_)+"\n";
     msg += "Objects parsed: "+std::to_string(objects_parsed_)+"\n";
+    msg += "Objects skipped: "+std::to_string(objects_skipped_)+"\n";
     msg += "Objects mapped: "+std::to_string(objects_mapped_)+"\n";
-    msg += "Objects inserted: "+std::to_string(objects_inserted_)+"\n";
-    if (diff.total_seconds() > 0)
-        msg += "Object rate: "+std::to_string(objects_inserted_/diff.total_seconds())+" e/s";
+    msg += "Objects inserted: "+std::to_string(objects_inserted_);
+
+    msg += "\n\nObject rate: "+object_rate_str_+" e/s";
+
+    if (!all_done_)
+        msg += "\nEstimated remaining time: "+remaining_time_str_;
 
     msg_box_->setText(msg.c_str());
+
     if (all_done_)
         msg_box_->setStandardButtons(QMessageBox::Ok);
     else
@@ -540,6 +573,8 @@ void JSONImporterTask::readJSONFilePartDoneSlot ()
     //ReadJSONFilePartJob* read_job = dynamic_cast<ReadJSONFilePartJob*>(QObject::sender());
     assert (read_json_job_);
     bytes_read_ = read_json_job_->bytesRead();
+    bytes_to_read_ = read_json_job_->bytesToRead();
+    read_status_percent_ = read_json_job_->getStatusPercent();
     objects_read_ += read_json_job_->objects().size();
     loginf << "JSONImporterTask: readJSONFilePartDoneSlot: bytes " << bytes_read_;
 
@@ -650,6 +685,8 @@ void JSONImporterTask::mapJSONDoneSlot ()
 
     JSONMappingJob* map_job = dynamic_cast<JSONMappingJob*>(QObject::sender());
     assert (map_job);
+
+    objects_skipped_ += map_job->numSkipped();
 
     std::vector <JsonMapping> mappings = map_job->mappings();
 

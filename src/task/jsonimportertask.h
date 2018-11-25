@@ -83,11 +83,18 @@ protected:
     boost::posix_time::ptime stop_time_;
 
     size_t bytes_read_ {0};
+    size_t bytes_to_read_ {0};
+    float read_status_percent_ {0.0};
     unsigned int objects_read_ {0};
     unsigned int objects_parsed_ {0};
+    unsigned int objects_skipped_ {0};
     unsigned int objects_mapped_ {0};
     unsigned int objects_inserted_ {0};
     bool all_done_ {false};
+
+    size_t statistics_calc_objects_inserted_ {0};
+    std::string object_rate_str_ {"0"};
+    std::string remaining_time_str_ {"?"};
 
     std::map <std::string, std::shared_ptr<Buffer>> buffers_;
 

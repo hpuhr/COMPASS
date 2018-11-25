@@ -23,6 +23,9 @@ public:
     std::vector<std::string>& objects(); // for moving out
 
     size_t bytesRead() const;
+    size_t bytesToRead() const;
+
+    float getStatusPercent ();
 
 protected:
     std::string file_name_;
@@ -42,12 +45,15 @@ protected:
     int64_t offset;
     bool entry_not_done_ {false};
 
+    size_t bytes_to_read_ {0};
     size_t bytes_read_ {0};
     std::vector<std::string> objects_;
 
     void performInit ();
     void readFilePart ();
 
+    void openArchive (bool raw);
+    void closeArchive ();
 };
 
 #endif // READJSONFILEPARTJOB_H

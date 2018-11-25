@@ -23,9 +23,16 @@ void JSONMappingJob::run ()
         for (auto& map_it : mappings_)
             map_it.parseJSON(j_it);
 
+    unsigned int num_mapped {0};
+
     for (auto& map_it : mappings_)
         if (map_it.hasFilledBuffer())
+        {
             map_it.transformBuffer();
+            num_mapped += map_it.buffer()->size();
+        }
+
+    num_skipped_ = json_objects_.size() - num_mapped;
 
     done_ = true;
     logdbg << "JSONMappingJob: run: done";
@@ -34,4 +41,9 @@ void JSONMappingJob::run ()
 std::vector <JsonMapping>&& JSONMappingJob::mappings()
 {
     return std::move(mappings_);
+}
+
+size_t JSONMappingJob::numSkipped() const
+{
+    return num_skipped_;
 }

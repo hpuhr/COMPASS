@@ -20,7 +20,11 @@ public:
 
     std::vector <JsonMapping>&& mappings(); // to be moved out
 
+    size_t numSkipped() const;
+
 private:
+    size_t num_skipped_ {0};
+
     std::vector<nlohmann::json> json_objects_;
     std::vector <JsonMapping> mappings_;
 };

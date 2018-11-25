@@ -15,20 +15,7 @@ ReadJSONFilePartJob::ReadJSONFilePartJob(const std::string& file_name, bool arch
 ReadJSONFilePartJob::~ReadJSONFilePartJob()
 {
     if (archive_)
-    {
-        int r = archive_read_close(a);
-        if (r != ARCHIVE_OK)
-            logerr << "JSONImporterTask: importFileArchive: archive read close error: "
-                   << std::string(archive_error_string(a));
-        else
-        {
-            r = archive_read_free(a);
-
-            if (r != ARCHIVE_OK)
-                logerr << "JSONImporterTask: importFileArchive: archive read free error: "
-                       << std::string(archive_error_string(a));
-        }
-    }
+        closeArchive();
     else
         file_stream_.close();
 }
@@ -68,31 +55,26 @@ void ReadJSONFilePartJob::performInit ()
 
         loginf  << "ReadJSONFilePartJob: performInit: importing " << file_name_ << " raw " << raw;
 
-        int r;
+        openArchive(raw);
 
-        a = archive_read_new();
-
-        if (raw)
+        while (archive_read_next_header(a, &entry) == ARCHIVE_OK)
         {
-            archive_read_support_filter_gzip(a);
-            archive_read_support_filter_bzip2(a);
-            archive_read_support_format_raw(a);
+            loginf << "ReadJSONFilePartJob: performInit: got "
+                   << archive_entry_pathname(entry) << " size " << archive_entry_size(entry);
+            bytes_to_read_ += archive_entry_size(entry);
         }
-        else
-        {
-            archive_read_support_filter_all(a);
-            archive_read_support_format_all(a);
 
-        }
-        r = archive_read_open_filename(a, file_name_.c_str(), 10240); // Note 1
+        closeArchive();
+        openArchive(raw); // slightly dirty
 
-        if (r != ARCHIVE_OK)
-            throw std::runtime_error("ReadJSONFilePartJob: performInit: archive error: "
-                                     +std::string(archive_error_string(a)));
+        loginf << "ReadJSONFilePartJob: performInit: archive size " << bytes_to_read_;
     }
     else
     {
-        file_stream_.open(file_name_);
+        file_stream_.open(file_name_, std::ios::ate);
+        bytes_to_read_ = file_stream_.tellg();
+        loginf << "ReadJSONFilePartJob: performInit: non-archive size " << bytes_to_read_;
+        file_stream_.seekg(0);
     }
 
     init_performed_ = true;
@@ -226,5 +208,60 @@ size_t ReadJSONFilePartJob::bytesRead() const
     return bytes_read_;
 }
 
+size_t ReadJSONFilePartJob::bytesToRead() const
+{
+    return bytes_to_read_;
+}
 
+void ReadJSONFilePartJob::openArchive (bool raw)
+{
+    int r;
 
+    a = archive_read_new();
+
+    if (raw)
+    {
+        archive_read_support_filter_gzip(a);
+        archive_read_support_filter_bzip2(a);
+        archive_read_support_format_raw(a);
+    }
+    else
+    {
+        archive_read_support_filter_all(a);
+        archive_read_support_format_all(a);
+
+    }
+    r = archive_read_open_filename(a, file_name_.c_str(), 10240); // Note 1
+
+    if (r != ARCHIVE_OK)
+        logerr << "JSONImporterTask: openArchive: archive open error: "
+               << std::string(archive_error_string(a));
+}
+void ReadJSONFilePartJob::closeArchive ()
+{
+    int r = archive_read_close(a);
+    if (r != ARCHIVE_OK)
+        logerr << "JSONImporterTask: closeArchive: archive read close error: "
+               << std::string(archive_error_string(a));
+    else
+    {
+        r = archive_read_free(a);
+
+        if (r != ARCHIVE_OK)
+            logerr << "JSONImporterTask: closeArchive: archive read free error: "
+                   << std::string(archive_error_string(a));
+    }
+
+    if (r != ARCHIVE_OK)
+        throw std::runtime_error("ReadJSONFilePartJob: closeArchive: archive error: "
+                                 +std::string(archive_error_string(a)));
+}
+
+float ReadJSONFilePartJob::getStatusPercent ()
+{
+    if (bytes_to_read_ == 0)
+        return 0.0;
+    else
+        return 100.0*static_cast<double>(bytes_read_)/static_cast<double>(bytes_to_read_);
+
+}
