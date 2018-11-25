@@ -484,7 +484,8 @@ void JSONImporterTask::updateMsgBox ()
             +"m "+std::to_string(diff.seconds())+"s";
 
     msg += "Elapsed Time: "+time_str+"\n";
-    msg += "Bytes read: "+String::doubleToStringPrecision(static_cast<double>(bytes_read_)*1e-6,2)+" MB\n";
+    msg += "Bytes read: "+std::to_string(bytes_read_)+" B\n";
+    msg += "MBytes read: "+String::doubleToStringPrecision(static_cast<double>(bytes_read_)*1e-6,2)+" MB\n";
     msg += "Objects read: "+std::to_string(objects_read_)+"\n";
     msg += "Objects parsed: "+std::to_string(objects_parsed_)+"\n";
     msg += "Objects mapped: "+std::to_string(objects_mapped_)+"\n";
@@ -618,7 +619,8 @@ void JSONImporterTask::parseJSONDoneSlot ()
 
     int count = json_objects.size();
 
-    std::shared_ptr<JSONMappingJob> json_map_job = std::shared_ptr<JSONMappingJob> (new JSONMappingJob (std::move(json_objects), mappings_));
+    std::shared_ptr<JSONMappingJob> json_map_job =
+            std::shared_ptr<JSONMappingJob> (new JSONMappingJob (std::move(json_objects), mappings_));
     connect (json_map_job.get(), SIGNAL(obsoleteSignal()), this, SLOT(mapJSONObsoleteSlot()),
              Qt::QueuedConnection);
     connect (json_map_job.get(), SIGNAL(doneSignal()), this, SLOT(mapJSONDoneSlot()), Qt::QueuedConnection);

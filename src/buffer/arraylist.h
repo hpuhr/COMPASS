@@ -77,12 +77,6 @@ public:
 
     size_t size();
 
-
-    /// @brief Returns size of the list
-    //size_t noneSize ();
-
-    //void cutNoneToSize (size_t size);
-
     /// @brief Checks if specific element is None
     bool isNone(size_t index);
 
@@ -109,11 +103,6 @@ private:
     /// @brief Constructor, only for friend Buffer
     ArrayListTemplate (Property& property, Buffer& buffer);
 
-
-    //void addNone (ArrayListTemplate<T>& other);
-
-    /// @brief Sets specific element to None value
-    //void setNoneFlag(size_t index);
 };
 
 
@@ -478,11 +467,6 @@ template <class T> void ArrayListTemplate<T>::cutToSize (size_t size)
         assert (none_flags_.size() <= buffer_.data_size_);
     }
 
-//    if (size > data_.size())
-//        return;
-
-    //assert (size <= data_.size());
-
     while (none_flags_.size() > size)
         none_flags_.pop_back();
 
@@ -491,47 +475,6 @@ template <class T> void ArrayListTemplate<T>::cutToSize (size_t size)
 
     // size set in Buffer::cutToSize
 }
-
-/// @brief Returns size of the list
-//template <class T> size_t ArrayListTemplate<T>::noneSize () { return none_flags_.size(); }
-
-//template <class T> void ArrayListTemplate<T>::cutNoneToSize (size_t size)
-//{
-//    while (none_flags_.size() > size)
-//        none_flags_.pop_back();
-
-//    // size set in Buffer::cutToSize
-//}
-
-/// @brief Sets specific element to None value
-//template <class T> void ArrayListTemplate<T>::setNoneFlag(size_t index)
-//{
-//    if (BUFFER_PEDANTIC_CHECKING)
-//    {
-//        assert (data_.size() <= buffer_.data_size_);
-//        assert (none_flags_.size() <= buffer_.data_size_);
-//    }
-
-//    if (index >= none_flags_.size()) // do need to allocate stuff for setting
-//    {
-//        if (none_flags_.size() < data_.size()) // for already set data, set not null
-//            none_flags_.resize(data_.size(), false);
-
-//        // allocate new stuff, fill all new with not none
-//        none_flags_.resize(index+1, true);
-//    }
-
-//    if (BUFFER_PEDANTIC_CHECKING)
-//    {
-//        assert (index < buffer_.data_size_);
-//        assert (index < data_.size());
-//        assert (index < none_flags_.size());
-//    }
-
-//    none_flags_.at(index) = true;
-//}
-
-
 
 template <class T> void ArrayListTemplate<T>::checkNotNone ()
 {
@@ -566,32 +509,7 @@ template <class T> void ArrayListTemplate<T>::unsetNone (size_t index)
         none_flags_.at(index) = false;
 }
 
-//template <class T> void ArrayListTemplate<T>::addNone (ArrayListTemplate<T>& other)
-//{
-//    if (other.none_flags_.size())
-//    {
-//        if (none_flags_.size() < data_.size()) // for already set data, set not null
-//            none_flags_.resize(data_.size(), false);
-
-//        none_flags_.insert(none_flags_.end(), other.none_flags_.begin(), other.none_flags_.end());
-//    }
-//}
-
-//template <>
-//ArrayListTemplate<bool>& ArrayListTemplate<bool>::operator*=(double factor)
-//{
-//    bool tmp_factor = static_cast<bool> (factor);
-
-//    for (auto data_it : data_)
-//        data_it = data_it && tmp_factor;
-
-//    return *this;
-//}
-
-
 //template <class T> Base* Foo<T>::convert(ID) const {return new Bar<T>;}
-
-
 
 // For integral types only:
 //template<typename T>
