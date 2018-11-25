@@ -583,12 +583,12 @@ void DBObject::addDataSources (std::map <int, std::pair<int,int>>& sources)
                     if (src.hasLatitude())
                         buffer_ptr->get<double>(meta.column(latitude_col_name).name()).set(cnt, src.latitude());
                     else
-                        buffer_ptr->get<double>(meta.column(latitude_col_name).name()).setNone(cnt);
+                        buffer_ptr->get<double>(meta.column(latitude_col_name).name()).setNull(cnt);
 
                     if (src.hasLongitude())
                         buffer_ptr->get<double>(meta.column(longitude_col_name).name()).set(cnt, src.longitude());
                     else
-                        buffer_ptr->get<double>(meta.column(longitude_col_name).name()).setNone(cnt);
+                        buffer_ptr->get<double>(meta.column(longitude_col_name).name()).setNull(cnt);
                 }
 //                else
 //                {
@@ -602,39 +602,39 @@ void DBObject::addDataSources (std::map <int, std::pair<int,int>>& sources)
                     if (src.hasAltitude())
                         buffer_ptr->get<double>(meta.column(altitude_col_name).name()).set(cnt, src.altitude());
                     else
-                        buffer_ptr->get<double>(meta.column(altitude_col_name).name()).setNone(cnt);
+                        buffer_ptr->get<double>(meta.column(altitude_col_name).name()).setNull(cnt);
                 }
             }
             else
             {
-                buffer_ptr->get<std::string>(short_name_col.name()).setNone(cnt);
+                buffer_ptr->get<std::string>(short_name_col.name()).setNull(cnt);
                 buffer_ptr->get<char>(sac_col.name()).set(cnt, sac);
                 buffer_ptr->get<char>(sic_col.name()).set(cnt, sic);
 
                 if (has_lat_long)
                 {
-                    buffer_ptr->get<double>(meta.column(latitude_col_name).name()).setNone(cnt);
-                    buffer_ptr->get<double>(meta.column(longitude_col_name).name()).setNone(cnt);
+                    buffer_ptr->get<double>(meta.column(latitude_col_name).name()).setNull(cnt);
+                    buffer_ptr->get<double>(meta.column(longitude_col_name).name()).setNull(cnt);
                 }
 
                 if (has_altitude)
-                    buffer_ptr->get<double>(meta.column(altitude_col_name).name()).setNone(cnt);
+                    buffer_ptr->get<double>(meta.column(altitude_col_name).name()).setNull(cnt);
             }
         }
         else
         {
-            buffer_ptr->get<std::string>(short_name_col.name()).setNone(cnt);
-            buffer_ptr->get<char>(sac_col.name()).setNone(cnt);
-            buffer_ptr->get<char>(sic_col.name()).setNone(cnt);
+            buffer_ptr->get<std::string>(short_name_col.name()).setNull(cnt);
+            buffer_ptr->get<char>(sac_col.name()).setNull(cnt);
+            buffer_ptr->get<char>(sic_col.name()).setNull(cnt);
 
             if (has_lat_long)
             {
-                buffer_ptr->get<double>(meta.column(latitude_col_name).name()).setNone(cnt);
-                buffer_ptr->get<double>(meta.column(longitude_col_name).name()).setNone(cnt);
+                buffer_ptr->get<double>(meta.column(latitude_col_name).name()).setNull(cnt);
+                buffer_ptr->get<double>(meta.column(longitude_col_name).name()).setNull(cnt);
             }
 
             if (has_altitude)
-                buffer_ptr->get<double>(meta.column(altitude_col_name).name()).setNone(cnt);
+                buffer_ptr->get<double>(meta.column(altitude_col_name).name()).setNull(cnt);
         }
 
         buffer_ptr->get<int>(foreign_key_col.name()).set(cnt, src_it.first);

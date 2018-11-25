@@ -63,8 +63,8 @@ public:
 
     void setFromFormat (size_t index, const std::string& format, const std::string& value_str);
 
-    /// @brief Sets specific element to None value
-    void setNone(size_t index);
+    /// @brief Sets specific element to Null value
+    void setNull(size_t index);
 
     NullableVector<T>& operator*=(double factor);
 
@@ -76,10 +76,10 @@ public:
 
     size_t size();
 
-    /// @brief Checks if specific element is None
+    /// @brief Checks if specific element is Null
     bool isNull(size_t index);
 
-    void checkNotNone ();
+    void checkNotNull ();
 
 
 private:
@@ -87,14 +87,14 @@ private:
     Buffer& buffer_;
     /// Data container
     std::vector<T> data_;
-    // None flags container
+    // Null flags container
     std::vector <bool> null_flags_;
 
-    /// @brief Sets specific element to not None value
+    /// @brief Sets specific element to not Null value
     void unsetNull (size_t index);
 
     void resizeDataTo (size_t size);
-    void resizeNoneTo (size_t size);
+    void resizeNullTo (size_t size);
     void addData (NullableVector<T>& other);
     void copyData (NullableVector<T>& other);
     void cutToSize (size_t size);
@@ -130,11 +130,11 @@ template <class T> const T NullableVector<T>::get (size_t index)
     {
         if (BUFFER_PEDANTIC_CHECKING)
         {
-            logerr << "ArrayListTemplate " << property_.name() << ": get: index " << index << " is none";
+            logerr << "ArrayListTemplate " << property_.name() << ": get: index " << index << " is null";
             assert (false);
         }
 
-        throw std::runtime_error ("ArrayListTemplate: get of None value "+std::to_string(index));
+        throw std::runtime_error ("ArrayListTemplate: get of Null value "+std::to_string(index));
     }
 
     return data_.at(index);
@@ -156,10 +156,10 @@ template <class T> void NullableVector<T>::set (size_t index, T value)
         assert (null_flags_.size() <= buffer_.data_size_);
     }
 
-    if (index >= data_.size()) // allocate new stuff, fill all new with not none
+    if (index >= data_.size()) // allocate new stuff, fill all new with not null
     {
         if (index != data_.size()) // some where left out
-            resizeNoneTo(index+1);
+            resizeNullTo(index+1);
 
         resizeDataTo (index+1);
     }
@@ -202,9 +202,9 @@ template <class T> void NullableVector<T>::setFromFormat (size_t index, const st
     set (index, value);
 }
 
-template <class T> void NullableVector<T>::setNone(size_t index)
+template <class T> void NullableVector<T>::setNull(size_t index)
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": setNone: index " << index;
+    logdbg << "ArrayListTemplate " << property_.name() << ": setNull: index " << index;
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
@@ -212,8 +212,8 @@ template <class T> void NullableVector<T>::setNone(size_t index)
         assert (null_flags_.size() <= buffer_.data_size_);
     }
 
-    if (index >= null_flags_.size()) // none flags to small
-        resizeNoneTo (index+1);
+    if (index >= null_flags_.size()) // null flags to small
+        resizeNullTo (index+1);
 
     if (BUFFER_PEDANTIC_CHECKING)
         assert (index < null_flags_.size());
@@ -221,10 +221,10 @@ template <class T> void NullableVector<T>::setNone(size_t index)
     null_flags_.at(index) = true;
 }
 
-/// @brief Checks if specific element is None
+/// @brief Checks if specific element is Null
 template <class T> bool NullableVector<T>::isNull(size_t index)
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": isNone: index " << index;
+    logdbg << "ArrayListTemplate " << property_.name() << ": isNull: index " << index;
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
@@ -236,7 +236,7 @@ template <class T> bool NullableVector<T>::isNull(size_t index)
     if (index < null_flags_.size()) // if stored, return value
         return null_flags_.at(index);
 
-    // none not stored, so all set are not none
+    // null not stored, so all set are not null
 
     if (index >= data_.size()) // not yet set
         return true;
@@ -261,17 +261,17 @@ template <class T> void NullableVector<T>::resizeDataTo (size_t size)
         buffer_.data_size_ = data_.size();
 }
 
-template <class T> void NullableVector<T>::resizeNoneTo (size_t size)
+template <class T> void NullableVector<T>::resizeNullTo (size_t size)
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": resizeNoneTo: size " << size;
+    logdbg << "ArrayListTemplate " << property_.name() << ": resizeNullTo: size " << size;
 
     if (BUFFER_PEDANTIC_CHECKING)
         assert (null_flags_.size() <= buffer_.data_size_);
 
-    if (data_.size() > null_flags_.size()) // data was set w/o none, adjust & fill with set values
+    if (data_.size() > null_flags_.size()) // data was set w/o null, adjust & fill with set values
         null_flags_.resize(data_.size(), false);
 
-    if (null_flags_.size() < size) // adjust to new size, fill with none values
+    if (null_flags_.size() < size) // adjust to new size, fill with null values
         null_flags_.resize(size, true);
 
     if (buffer_.data_size_ < null_flags_.size()) // set new data size
@@ -291,11 +291,11 @@ template <class T> void NullableVector<T>::addData (NullableVector<T>& other)
         assert (null_flags_.size() <= buffer_.data_size_);
     }
 
-    if (!other.data_.size() && other.null_flags_.size()) // if other has none flags set, need to fill my nones
+    if (!other.data_.size() && other.null_flags_.size()) // if other has null flags set, need to fill my nulls
     {
-        logdbg << "ArrayListTemplate " << property_.name() << ": addData: 1: other no data resizing none";
-        resizeNoneTo (buffer_.data_size_);
-        logdbg << "ArrayListTemplate " << property_.name() << ": addData: 1: inserting none";
+        logdbg << "ArrayListTemplate " << property_.name() << ": addData: 1: other no data resizing null";
+        resizeNullTo (buffer_.data_size_);
+        logdbg << "ArrayListTemplate " << property_.name() << ": addData: 1: inserting null";
         null_flags_.insert(null_flags_.end(), other.null_flags_.begin(), other.null_flags_.end());
         goto DONE;
     }
@@ -306,8 +306,8 @@ template <class T> void NullableVector<T>::addData (NullableVector<T>& other)
 
         if (data_.size() < buffer_.data_size_) // need to size data up
         {
-            logdbg << "ArrayListTemplate " << property_.name() << ": addData: 2: data not full, setting none";
-            resizeNoneTo (buffer_.data_size_);
+            logdbg << "ArrayListTemplate " << property_.name() << ": addData: 2: data not full, setting null";
+            resizeNullTo (buffer_.data_size_);
 
             logdbg << "ArrayListTemplate " << property_.name() << ": addData: 2: resizing data";
             resizeDataTo (buffer_.data_size_);
@@ -318,11 +318,11 @@ template <class T> void NullableVector<T>::addData (NullableVector<T>& other)
         goto DONE;
     }
 
-    logdbg << "ArrayListTemplate " << property_.name() << ": addData: 3: mixture, both have data & nones";
+    logdbg << "ArrayListTemplate " << property_.name() << ": addData: 3: mixture, both have data & nulls";
 
-    logdbg << "ArrayListTemplate " << property_.name() << ": addData: 3: resizing none to " << buffer_.data_size_;
-    resizeNoneTo (buffer_.data_size_);
-    logdbg << "ArrayListTemplate " << property_.name() << ": addData: 3: inserting nones";
+    logdbg << "ArrayListTemplate " << property_.name() << ": addData: 3: resizing null to " << buffer_.data_size_;
+    resizeNullTo (buffer_.data_size_);
+    logdbg << "ArrayListTemplate " << property_.name() << ": addData: 3: inserting nulls";
     null_flags_.insert(null_flags_.end(), other.null_flags_.begin(), other.null_flags_.end());
 
     if (data_.size() < buffer_.data_size_) // need to size data up
@@ -378,7 +378,7 @@ template <class T> std::set<T> NullableVector<T>::distinctValues (size_t index)
 
     for (; index < data_.size(); ++index)
     {
-        if (!isNull(index)) // not for none
+        if (!isNull(index)) // not for null
         {
             value = data_.at(index);
             if (values.count(value) == 0)
@@ -412,7 +412,7 @@ template <class T> std::map<T, std::vector<size_t>> NullableVector<T>::distinctV
 
     for (size_t index = from_index; index <= to_index; ++index)
     {
-        if (!isNull(index)) // not for none
+        if (!isNull(index)) // not for null
         {
             if (BUFFER_PEDANTIC_CHECKING)
                 assert (index < data_.size());
@@ -475,15 +475,15 @@ template <class T> void NullableVector<T>::cutToSize (size_t size)
     // size set in Buffer::cutToSize
 }
 
-template <class T> void NullableVector<T>::checkNotNone ()
+template <class T> void NullableVector<T>::checkNotNull ()
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": checkNotNone";
+    logdbg << "ArrayListTemplate " << property_.name() << ": checkNotNull";
 
     for (size_t cnt=0; cnt < null_flags_.size(); cnt++)
     {
        if (null_flags_.at(cnt))
        {
-           logerr << "cnt " << cnt << " none";
+           logerr << "cnt " << cnt << " null";
            assert (false);
        }
     }
@@ -491,10 +491,10 @@ template <class T> void NullableVector<T>::checkNotNone ()
 
 // private stuff
 
-/// @brief Sets specific element to not None value
+/// @brief Sets specific element to not Null value
 template <class T> void NullableVector<T>::unsetNull (size_t index)
 {
-    logdbg << "ArrayListTemplate " << property_.name() << ": unsetNone";
+    logdbg << "ArrayListTemplate " << property_.name() << ": unsetNull";
 
     if (BUFFER_PEDANTIC_CHECKING)
     {

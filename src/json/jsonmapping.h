@@ -178,7 +178,7 @@ public:
     void setValue(NullableVector<T>& array_list, unsigned int row_cnt, const nlohmann::json& j)
     {
         if (j == nullptr)
-            array_list.setNone(row_cnt);
+            array_list.setNull(row_cnt);
         else
         {
             try
@@ -195,7 +195,7 @@ public:
             catch (nlohmann::json::exception& e)
             {
                 logerr  <<  "JsonKey2DBOVariableMapping: setValue: key " << json_key_ << " json exception " << e.what();
-                array_list.setNone(row_cnt);
+                array_list.setNull(row_cnt);
             }
         }
     }
@@ -203,7 +203,7 @@ public:
     void setValue(NullableVector<char>& array_list, unsigned int row_cnt, const nlohmann::json& j)
     {
         if (j == nullptr)
-            array_list.setNone(row_cnt);
+            array_list.setNull(row_cnt);
         else
         {
             try
@@ -220,7 +220,7 @@ public:
             catch (nlohmann::json::exception& e)
             {
                 logerr  <<  "JsonKey2DBOVariableMapping: setValue: key " << json_key_ << " json exception " << e.what();
-                array_list.setNone(row_cnt);
+                array_list.setNull(row_cnt);
             }
         }
     }
@@ -271,7 +271,7 @@ public:
             if (mandatory_)
                 return true;
 
-            //array_list.setNone(row_cnt);
+            //array_list.setNull(row_cnt);
             return false;
         }
         else
@@ -290,7 +290,7 @@ public:
             catch (nlohmann::json::exception& e)
             {
                 logerr  <<  "JsonKey2DBOVariableMapping: setValue: key " << json_key_ << " json exception " << e.what();
-                array_list.setNone(row_cnt);
+                array_list.setNull(row_cnt);
             }
         }
 
@@ -341,7 +341,7 @@ public:
             if (mandatory_)
                 return true;
 
-            //array_list.setNone(row_cnt);
+            //array_list.setNull(row_cnt);
             return false;
         }
         else
@@ -361,7 +361,7 @@ public:
             catch (nlohmann::json::exception& e)
             {
                 logerr  <<  "JsonKey2DBOVariableMapping: setValue: key " << json_key_ << " json exception " << e.what();
-                array_list.setNone(row_cnt);
+                array_list.setNull(row_cnt);
             }
         }
 

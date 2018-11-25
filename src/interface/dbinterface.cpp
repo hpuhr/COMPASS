@@ -393,7 +393,7 @@ void DBInterface::updateDataSource (DBODataSource& data_source)
         if (data_source.hasShortName())
             buffer->get<std::string>(short_name_col.name()).set(0, data_source.shortName());
         else
-            buffer->get<std::string>(short_name_col.name()).setNone(0);
+            buffer->get<std::string>(short_name_col.name()).setNull(0);
     }
 
 
@@ -405,7 +405,7 @@ void DBInterface::updateDataSource (DBODataSource& data_source)
         if (data_source.hasSac())
             buffer->get<char>(sac_col.name()).set(0, data_source.sac());
         else
-            buffer->get<char>(sac_col.name()).setNone(0);
+            buffer->get<char>(sac_col.name()).setNull(0);
     }
 
     if (ds_def.hasSicColumn())
@@ -416,7 +416,7 @@ void DBInterface::updateDataSource (DBODataSource& data_source)
         if (data_source.hasSic())
             buffer->get<char>(sic_col.name()).set(0, data_source.sic());
         else
-            buffer->get<char>(sic_col.name()).setNone(0);
+            buffer->get<char>(sic_col.name()).setNull(0);
     }
 
     if (ds_def.hasLatitudeColumn())
@@ -427,7 +427,7 @@ void DBInterface::updateDataSource (DBODataSource& data_source)
         if (data_source.hasLatitude())
             buffer->get<double>(lat_col.name()).set(0, data_source.latitude());
         else
-            buffer->get<double>(lat_col.name()).setNone(0);
+            buffer->get<double>(lat_col.name()).setNull(0);
     }
 
     if (ds_def.hasLongitudeColumn())
@@ -438,7 +438,7 @@ void DBInterface::updateDataSource (DBODataSource& data_source)
         if (data_source.hasLongitude())
             buffer->get<double>(lon_col.name()).set(0, data_source.longitude());
         else
-            buffer->get<double>(lon_col.name()).setNone(0);
+            buffer->get<double>(lon_col.name()).setNull(0);
     }
 
     if (ds_def.hasAltitudeColumn())
@@ -449,7 +449,7 @@ void DBInterface::updateDataSource (DBODataSource& data_source)
         if (data_source.hasAltitude())
             buffer->get<double>(alt_col.name()).set(0, data_source.altitude());
         else
-            buffer->get<double>(alt_col.name()).setNone(0);
+            buffer->get<double>(alt_col.name()).setNull(0);
     }
 
     assert (foreign_key_col.propertyType() == PropertyDataType::INT);
