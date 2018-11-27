@@ -60,6 +60,7 @@ protected:
     std::string last_filename_;
 
     std::vector <JsonMapping> mappings_;
+    size_t key_count_ {0};
 
     JSONImporterTaskWidget* widget_ {nullptr};
 
@@ -102,7 +103,7 @@ protected:
 
     void createMappings ();
     void insertData ();
-    void clearData ();
+    //void clearData ();
 
     void updateMsgBox ();
 };

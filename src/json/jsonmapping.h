@@ -227,13 +227,13 @@ public:
 
     // return bool mandatory missing
     template<typename T>
-    bool findAndSetValue(const nlohmann::json& j, NullableVector<T>& array_list, unsigned int row_cnt)
+    bool findAndSetValue(const nlohmann::json& j, NullableVector<T>& array_list, unsigned int row_cnt) const
     {
         const nlohmann::json* val_ptr = &j;
 
         if (has_sub_keys_)
         {
-            for (std::string& sub_key : sub_keys_)
+            for (const std::string& sub_key : sub_keys_)
             {
                 if (val_ptr->find (sub_key) != val_ptr->end())
                 {
@@ -297,13 +297,13 @@ public:
         return false; // everything ok
     }
 
-    bool findAndSetValue(const nlohmann::json& j, NullableVector<char>& array_list, unsigned int row_cnt)
+    bool findAndSetValue(const nlohmann::json& j, NullableVector<char>& array_list, unsigned int row_cnt) const
     {
         const nlohmann::json* val_ptr = &j;
 
         if (has_sub_keys_)
         {
-            for (std::string& sub_key : sub_keys_)
+            for (const std::string& sub_key : sub_keys_)
             {
                 if (val_ptr->find (sub_key) != val_ptr->end())
                 {
@@ -352,8 +352,7 @@ public:
                 if (json_value_format_ == "")
                     array_list.set(row_cnt, tmp);
                 else
-                    array_list.setFromFormat(row_cnt, json_value_format_,
-                                             toString(tmp));
+                    array_list.setFromFormat(row_cnt, json_value_format_, toString(tmp));
 
                 logdbg << "JsonKey2DBOVariableMapping: setValue: json " << *val_ptr
                        << " buffer " << array_list.get(row_cnt);
@@ -391,7 +390,7 @@ private:
 
     nlohmann::json nullptr_ = nullptr;
 
-    inline std::string toString(const nlohmann::json& j)
+    inline std::string toString(const nlohmann::json& j) const
     {
         if (j.type() == nlohmann::json::value_t::string) {
             return j.get<std::string>();
@@ -435,18 +434,18 @@ public:
     MappingIterator begin() { return data_mappings_.begin(); }
     MappingIterator end() { return data_mappings_.end(); }
 
-    bool hasFilledBuffer ();
-    std::shared_ptr<Buffer> buffer();
-    void clearBuffer ();
+//    bool hasFilledBuffer ();
+//    std::shared_ptr<Buffer> buffer();
+//    void clearBuffer ();
 
-    void transformBuffer ();
+    void transformBuffer (std::shared_ptr<Buffer> buffer, long key_begin=-1) const;
 
-    unsigned int parseJSON (nlohmann::json& j);
+    unsigned int parseJSON (nlohmann::json& j, std::shared_ptr<Buffer> buffer) const;
 
     bool overrideKeyVariable() const;
     void overrideKeyVariable(bool override);
 
-    DBOVariableSet& variableList();
+    const DBOVariableSet& variableList() const;
 
     bool overrideDataSource() const;
     void OverrideDataSource(bool override);
@@ -454,11 +453,13 @@ public:
     std::string dataSourceVariableName() const;
     void dataSourceVariableName(const std::string& name);
 
-    unsigned int keyCount() const;
-    void keyCount(unsigned int keyCount);
+//    unsigned int keyCount() const;
+//    void keyCount(unsigned int keyCount);
 
-    bool keyInitialized() { return key_initialized_; }
-    void initializeKey ();
+    bool initialized() const { return initialized_; }
+    void initialize ();
+
+    std::shared_ptr<Buffer> getNewBuffer () const;
 
 private:
     DBObject& db_object_;
@@ -477,16 +478,16 @@ private:
     bool override_data_source_ {false};
     std::string data_source_variable_name_;
 
-    bool key_initialized_ {false};
-    unsigned int key_count_ {0};
+    bool initialized_ {false};
+    //unsigned int key_count_ {0};
     DBOVariable* key_variable_ {nullptr};
 
     bool not_parse_all_ {false};
 
     PropertyList list_;
-    std::shared_ptr<Buffer> buffer_;
+    //std::shared_ptr<Buffer> buffer_;
 
-    bool parseTargetReport (const nlohmann::json& tr, size_t row_cnt);
+    bool parseTargetReport (const nlohmann::json& tr, std::shared_ptr<Buffer> buffer, size_t row_cnt) const;
 
     inline std::string toString(const nlohmann::json& j)
     {

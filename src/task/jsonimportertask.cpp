@@ -143,6 +143,10 @@ void JSONImporterTask::importFile(const std::string& filename, bool test)
     test_ = test;
     all_done_ = false;
 
+    for (auto& map_it : mappings_)
+        if (!map_it.initialized())
+            map_it.initialize();
+
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
     read_json_job_ = std::shared_ptr<ReadJSONFilePartJob> (new ReadJSONFilePartJob (filename, false, 10000));
@@ -171,6 +175,10 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
     archive_ = true;
     test_ = test;
     all_done_ = false;
+
+    for (auto& map_it : mappings_)
+        if (!map_it.initialized())
+            map_it.initialize();
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
@@ -235,7 +243,7 @@ void JSONImporterTask::createMappings ()
             mappings_.at(index).addMapping({"wgs84_position.value_lon_rad", db_object.variable("pos_long_deg"), true,
                                             "Angle", "Radian"});
             mappings_.at(index).addMapping({"time_of_report", db_object.variable("tod"), true, "Time", "Second"});
-            mappings_.at(index).initializeKey();
+            mappings_.at(index).initialize();
         }
 
         {
@@ -262,7 +270,7 @@ void JSONImporterTask::createMappings ()
             mappings_.at(index).addMapping({"wgs84_position.value_lon_rad", db_object.variable("pos_long_deg"), true,
                                             "Angle", "Radian"});
             mappings_.at(index).addMapping({"detection_time", db_object.variable("tod"), true, "Time", "Second"});
-            mappings_.at(index).initializeKey();
+            mappings_.at(index).initialize();
         }
 
         {
@@ -289,7 +297,7 @@ void JSONImporterTask::createMappings ()
             mappings_.at(index).addMapping({"measured_rng_m", db_object.variable("pos_range_nm"), true,
                                             "Length", "Meter"});
             mappings_.at(index).addMapping({"detection_time", db_object.variable("tod"), true, "Time", "Second"});
-            mappings_.at(index).initializeKey();
+            mappings_.at(index).initialize();
         }
 
         {
@@ -316,7 +324,7 @@ void JSONImporterTask::createMappings ()
             mappings_.at(index).addMapping({"calculated_wgs84_position.value_longitude_rad",
                                             db_object.variable("pos_long_deg"), true, "Angle", "Radian"});
             mappings_.at(index).addMapping({"time_of_last_update", db_object.variable("tod"), true, "Time", "Second"});
-            mappings_.at(index).initializeKey();
+            mappings_.at(index).initialize();
         }
     }
 }
@@ -434,11 +442,12 @@ void JSONImporterTask::insertData ()
 
             logdbg << "JSONImporterTask: insertData: " << db_object.name() << " inserting";
 
-            db_object.insertData(map_it.variableList(), buffer);
+            DBOVariableSet set = map_it.variableList();
+            db_object.insertData(set, buffer);
             objects_inserted_ += buffer->size();
 
             logdbg << "JSONImporterTask: insertData: " << db_object.name() << " clearing";
-            map_it.clearBuffer();
+            //map_it.clearBuffer();
 
             buffers_.erase(map_it.dbObject().name());
         }
@@ -451,11 +460,11 @@ void JSONImporterTask::insertData ()
     logdbg << "JSONImporterTask: insertData: done";
 }
 
-void JSONImporterTask::clearData ()
-{
-    for (auto& map_it : mappings_)
-        map_it.clearBuffer();
-}
+//void JSONImporterTask::clearData ()
+//{
+//    for (auto& map_it : mappings_)
+//        map_it.clearBuffer();
+//}
 
 void JSONImporterTask::updateMsgBox ()
 {
@@ -656,10 +665,10 @@ void JSONImporterTask::parseJSONDoneSlot ()
 //            map_it.keyCount(map_it.keyCount()+count);
 //    }
 
-    int count = json_objects.size();
+    size_t count = json_objects.size();
 
     std::shared_ptr<JSONMappingJob> json_map_job =
-            std::shared_ptr<JSONMappingJob> (new JSONMappingJob (std::move(json_objects), mappings_));
+            std::shared_ptr<JSONMappingJob> (new JSONMappingJob (std::move(json_objects), mappings_, key_count_));
     connect (json_map_job.get(), SIGNAL(obsoleteSignal()), this, SLOT(mapJSONObsoleteSlot()),
              Qt::QueuedConnection);
     connect (json_map_job.get(), SIGNAL(doneSignal()), this, SLOT(mapJSONDoneSlot()), Qt::QueuedConnection);
@@ -668,8 +677,10 @@ void JSONImporterTask::parseJSONDoneSlot ()
 
     JobManager::instance().addJob(json_map_job);
 
-    for (auto& map_it : mappings_) // increase key counts
-        map_it.keyCount(map_it.keyCount()+count);
+    key_count_ += count;
+
+    //for (auto& map_it : mappings_) // increase key counts
+    //    map_it.keyCount(map_it.keyCount()+count);
 
     updateMsgBox();
 }
@@ -681,29 +692,30 @@ void JSONImporterTask::parseJSONObsoleteSlot ()
 
 void JSONImporterTask::mapJSONDoneSlot ()
 {
-    logdbg << "JSONImporterTask: mapJSONDoneSlot";
+    loginf << "JSONImporterTask: mapJSONDoneSlot";
 
     JSONMappingJob* map_job = dynamic_cast<JSONMappingJob*>(QObject::sender());
     assert (map_job);
 
     objects_skipped_ += map_job->numSkipped();
 
-    std::vector <JsonMapping> mappings = map_job->mappings();
+    std::map <std::string, std::shared_ptr<Buffer>> job_buffers = map_job->buffers();
+
+    //std::vector <JsonMapping> mappings = map_job->mappings();
 
     json_map_jobs_.erase(json_map_jobs_.begin());
 
-    for (auto& map_it : mappings)
+    for (auto& buf_it : job_buffers)
     {
-        if (map_it.hasFilledBuffer())
+        if (buf_it.second && buf_it.second->size())
         {
-            objects_mapped_ += map_it.buffer()->size();
+            std::shared_ptr<Buffer> job_buffer = buf_it.second;
+            objects_mapped_ += job_buffer->size();
 
-            if (buffers_.count(map_it.dbObject().name()) == 0)
-                buffers_[map_it.dbObject().name()] = map_it.buffer();
+            if (buffers_.count(buf_it.first) == 0)
+                buffers_[buf_it.first] = job_buffer;
             else
-            {
-                buffers_.at(map_it.dbObject().name())->seizeBuffer(*map_it.buffer().get());
-            }
+                buffers_.at(buf_it.first)->seizeBuffer(*job_buffer.get());
         }
     }
 

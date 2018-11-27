@@ -63,26 +63,26 @@ void JsonMapping::addMapping (JsonKey2DBOVariableMapping mapping)
     }
 }
 
-bool JsonMapping::hasFilledBuffer ()
-{
-    if (!buffer_)
-        return false;
-    return buffer_->size() > 0;
-}
+//bool JsonMapping::hasFilledBuffer ()
+//{
+//    if (!buffer_)
+//        return false;
+//    return buffer_->size() > 0;
+//}
 
-std::shared_ptr<Buffer> JsonMapping::buffer()
-{
-    return buffer_;
-}
+//std::shared_ptr<Buffer> JsonMapping::buffer()
+//{
+//    return buffer_;
+//}
 
-void JsonMapping::clearBuffer ()
-{
-    buffer_ = nullptr;
-}
+//void JsonMapping::clearBuffer ()
+//{
+//    buffer_ = nullptr;
+//}
 
-void JsonMapping::initializeKey ()
+void JsonMapping::initialize ()
 {
-    if (!key_initialized_)
+    if (!initialized_)
     {
         if (!has_key_mapping_ && db_object_.hasKeyVariable()) // first time only, add key variable
             has_key_variable_ = true;
@@ -103,26 +103,30 @@ void JsonMapping::initializeKey ()
 
         if (override_key_variable_ && !has_key_variable_)
         {
-            logwrn << "JsonMapping: parseJSON: override key set but no key variable exists, disabling override";
+            logwrn << "JsonMapping: initialize: override key set but no key variable exists, disabling override";
             override_key_variable_ = false;
         }
 
         not_parse_all_ = (json_key_ != "*") && (json_value_ != "*");
 
-        key_initialized_ = true;
+        initialized_ = true;
     }
 }
 
-unsigned int JsonMapping::parseJSON (nlohmann::json& j)
+std::shared_ptr<Buffer> JsonMapping::getNewBuffer () const
 {
-    if (!key_initialized_)
-        initializeKey ();
+    assert (initialized_);
+    return std::shared_ptr<Buffer> {new Buffer (list_, db_object_.name())};
+}
+
+unsigned int JsonMapping::parseJSON (nlohmann::json& j, std::shared_ptr<Buffer> buffer) const
+{
+    assert (initialized_);
 
     //assert (buffer_ == nullptr || buffer_->size() == 0);
-    if (buffer_ == nullptr)
-        buffer_ = std::shared_ptr<Buffer> (new Buffer (list_, db_object_.name()));
+    assert (buffer != nullptr);
 
-    unsigned int row_cnt = buffer_->size();
+    unsigned int row_cnt = buffer->size();
     unsigned int skipped_cnt = 0;
     unsigned int all_cnt = 0;
 
@@ -144,20 +148,20 @@ unsigned int JsonMapping::parseJSON (nlohmann::json& j)
                 json& tr = tr_it.value();
                 assert (tr.is_object());
 
-                skipped = parseTargetReport (tr, row_cnt);
+                skipped = parseTargetReport (tr, buffer, row_cnt);
 
                 if (!skipped)
                 {
-                    if (override_key_variable_)
-                    {
-                        assert (key_variable_);
-                        assert (buffer_->has<int>(key_variable_->name()));
-                        buffer_->get<int> (key_variable_->name()).set(row_cnt, key_count_);
-                        //loginf << "override key row " << row_cnt << " val " << key_count_;
-                    }
+//                    if (override_key_variable_)
+//                    {
+//                        assert (key_variable_);
+//                        assert (buffer->has<int>(key_variable_->name()));
+//                        buffer->get<int> (key_variable_->name()).set(row_cnt, key_count_);
+//                        //loginf << "override key row " << row_cnt << " val " << key_count_;
+//                    }
 
                     ++row_cnt;
-                    ++key_count_;
+//                    ++key_count_;
                 }
                 else
                     ++skipped_cnt;
@@ -173,20 +177,20 @@ unsigned int JsonMapping::parseJSON (nlohmann::json& j)
         //loginf << "found single target report";
         assert (j.is_object());
 
-        skipped = parseTargetReport (j, row_cnt);
+        skipped = parseTargetReport (j, buffer, row_cnt);
 
         if (!skipped)
         {
-            if (override_key_variable_)
-            {
-                assert (key_variable_);
-                assert (buffer_->has<int>(key_variable_->name()));
-                buffer_->get<int> (key_variable_->name()).set(row_cnt, key_count_);
-                //loginf << "override key row " << row_cnt << " val " << key_count_;
-            }
+//            if (override_key_variable_)
+//            {
+//                assert (key_variable_);
+//                assert (buffer->has<int>(key_variable_->name()));
+//                buffer->get<int> (key_variable_->name()).set(row_cnt, key_count_);
+//                //loginf << "override key row " << row_cnt << " val " << key_count_;
+//            }
 
             ++row_cnt;
-            ++key_count_;
+//            ++key_count_;
         }
 
     }
@@ -194,7 +198,7 @@ unsigned int JsonMapping::parseJSON (nlohmann::json& j)
     return row_cnt;
 }
 
-bool JsonMapping::parseTargetReport (const nlohmann::json& tr, size_t row_cnt)
+bool JsonMapping::parseTargetReport (const nlohmann::json& tr, std::shared_ptr<Buffer> buffer, size_t row_cnt) const
 {
     // check key match
     if (not_parse_all_)
@@ -237,7 +241,7 @@ bool JsonMapping::parseTargetReport (const nlohmann::json& tr, size_t row_cnt)
 
     bool mandatory_missing;
 
-    for (auto& data_it : data_mappings_)
+    for (const auto& data_it : data_mappings_)
     {
         //logdbg << "setting data mapping key " << data_it.jsonKey();
 
@@ -253,79 +257,79 @@ bool JsonMapping::parseTargetReport (const nlohmann::json& tr, size_t row_cnt)
         case PropertyDataType::BOOL:
         {
             logdbg << "bool " << current_var_name << " format '" << data_it.jsonValueFormat() << "'";
-            assert (buffer_->has<bool>(current_var_name));
-            mandatory_missing = data_it.findAndSetValue (tr, buffer_->get<bool> (current_var_name), row_cnt);
+            assert (buffer->has<bool>(current_var_name));
+            mandatory_missing = data_it.findAndSetValue (tr, buffer->get<bool> (current_var_name), row_cnt);
 
             break;
         }
         case PropertyDataType::CHAR:
         {
             logdbg << "char " << current_var_name << " format '" << data_it.jsonValueFormat() << "'";
-            assert (buffer_->has<char>(current_var_name));
-            mandatory_missing = data_it.findAndSetValue (tr, buffer_->get<char> (current_var_name), row_cnt);
+            assert (buffer->has<char>(current_var_name));
+            mandatory_missing = data_it.findAndSetValue (tr, buffer->get<char> (current_var_name), row_cnt);
 
             break;
         }
         case PropertyDataType::UCHAR:
         {
             logdbg << "uchar " << current_var_name << " format '" << data_it.jsonValueFormat() << "'";
-            assert (buffer_->has<unsigned char>(current_var_name));
-            mandatory_missing = data_it.findAndSetValue (tr, buffer_->get<unsigned char> (current_var_name), row_cnt);
+            assert (buffer->has<unsigned char>(current_var_name));
+            mandatory_missing = data_it.findAndSetValue (tr, buffer->get<unsigned char> (current_var_name), row_cnt);
 
             break;
         }
         case PropertyDataType::INT:
         {
             logdbg << "int " << current_var_name << " format '" << data_it.jsonValueFormat() << "'";
-            assert (buffer_->has<int>(current_var_name));
-            mandatory_missing = data_it.findAndSetValue (tr, buffer_->get<int> (current_var_name), row_cnt);
+            assert (buffer->has<int>(current_var_name));
+            mandatory_missing = data_it.findAndSetValue (tr, buffer->get<int> (current_var_name), row_cnt);
 
             break;
         }
         case PropertyDataType::UINT:
         {
             logdbg << "uint " << current_var_name << " format '" << data_it.jsonValueFormat() << "'";
-            assert (buffer_->has<unsigned int>(current_var_name));
-            mandatory_missing = data_it.findAndSetValue (tr, buffer_->get<unsigned int> (current_var_name), row_cnt);
+            assert (buffer->has<unsigned int>(current_var_name));
+            mandatory_missing = data_it.findAndSetValue (tr, buffer->get<unsigned int> (current_var_name), row_cnt);
 
             break;
         }
         case PropertyDataType::LONGINT:
         {
             logdbg << "long " << current_var_name << " format '" << data_it.jsonValueFormat() << "'";
-            assert (buffer_->has<long int>(current_var_name));
-            mandatory_missing = data_it.findAndSetValue (tr, buffer_->get<long int> (current_var_name), row_cnt);
+            assert (buffer->has<long int>(current_var_name));
+            mandatory_missing = data_it.findAndSetValue (tr, buffer->get<long int> (current_var_name), row_cnt);
 
             break;
         }
         case PropertyDataType::ULONGINT:
         {
             logdbg << "ulong " << current_var_name << " format '" << data_it.jsonValueFormat() << "'";
-            assert (buffer_->has<unsigned long>(current_var_name));
-            mandatory_missing = data_it.findAndSetValue (tr, buffer_->get<unsigned long> (current_var_name), row_cnt);
+            assert (buffer->has<unsigned long>(current_var_name));
+            mandatory_missing = data_it.findAndSetValue (tr, buffer->get<unsigned long> (current_var_name), row_cnt);
 
             break;
         }
         case PropertyDataType::FLOAT:
         {
             logdbg << "float " << current_var_name << " format '" << data_it.jsonValueFormat() << "'";
-            assert (buffer_->has<float>(current_var_name));
-            mandatory_missing = data_it.findAndSetValue (tr, buffer_->get<float> (current_var_name), row_cnt);
+            assert (buffer->has<float>(current_var_name));
+            mandatory_missing = data_it.findAndSetValue (tr, buffer->get<float> (current_var_name), row_cnt);
             break;
         }
         case PropertyDataType::DOUBLE:
         {
             logdbg << "double " << current_var_name << " format '" << data_it.jsonValueFormat() << "'";
-            assert (buffer_->has<double>(current_var_name));
-            mandatory_missing = data_it.findAndSetValue (tr, buffer_->get<double> (current_var_name), row_cnt);
+            assert (buffer->has<double>(current_var_name));
+            mandatory_missing = data_it.findAndSetValue (tr, buffer->get<double> (current_var_name), row_cnt);
 
             break;
         }
         case PropertyDataType::STRING:
         {
             logdbg << "string " << current_var_name << " format '" << data_it.jsonValueFormat() << "'";
-            assert (buffer_->has<std::string>(current_var_name));
-            mandatory_missing = data_it.findAndSetValue (tr, buffer_->get<std::string> (current_var_name), row_cnt);
+            assert (buffer->has<std::string>(current_var_name));
+            mandatory_missing = data_it.findAndSetValue (tr, buffer->get<std::string> (current_var_name), row_cnt);
 
             break;
         }
@@ -420,16 +424,29 @@ bool JsonMapping::parseTargetReport (const nlohmann::json& tr, size_t row_cnt)
     if (mandatory_missing)
     {
         // cleanup
-        if (buffer_->size() > row_cnt)
-            buffer_->cutToSize(row_cnt);
+        if (buffer->size() > row_cnt)
+            buffer->cutToSize(row_cnt);
     }
 
     return mandatory_missing;
 }
 
-void JsonMapping::transformBuffer ()
+void JsonMapping::transformBuffer (std::shared_ptr<Buffer> buffer, long key_begin) const
 {
     logdbg << "JsonMapping: transformBuffer: object " << db_object_.name();
+
+    if (override_key_variable_)
+    {
+        assert (key_begin >= 0);
+        size_t key_cnt = key_begin;
+        assert (key_variable_);
+        assert (buffer->has<int>(key_variable_->name()));
+        NullableVector<int>& key_vector = buffer->get<int> (key_variable_->name());
+        size_t size = buffer->size();
+
+        for (size_t cnt=0; cnt < size; ++cnt)
+            key_vector.set(cnt, key_cnt++);
+    }
 
     for (auto& data_it : data_mappings_)
     {
@@ -454,8 +471,8 @@ void JsonMapping::transformBuffer ()
             {
             case PropertyDataType::BOOL:
             {
-                assert (buffer_->has<bool>(current_var_name));
-                NullableVector<bool> &array_list = buffer_->get<bool>(current_var_name);
+                assert (buffer->has<bool>(current_var_name));
+                NullableVector<bool> &array_list = buffer->get<bool>(current_var_name);
                 logwrn << "JsonMapping: transformBuffer: double multiplication of boolean variable "
                        << current_var_name;
                 array_list *= factor;
@@ -463,8 +480,8 @@ void JsonMapping::transformBuffer ()
             }
             case PropertyDataType::CHAR:
             {
-                assert (buffer_->has<char>(current_var_name));
-                NullableVector<char> &array_list = buffer_->get<char> (current_var_name);
+                assert (buffer->has<char>(current_var_name));
+                NullableVector<char> &array_list = buffer->get<char> (current_var_name);
                 logwrn << "JsonMapping: transformBuffer: double multiplication of char variable "
                        << current_var_name;
                 array_list *= factor;
@@ -472,8 +489,8 @@ void JsonMapping::transformBuffer ()
             }
             case PropertyDataType::UCHAR:
             {
-                assert (buffer_->has<unsigned char>(current_var_name));
-                NullableVector<unsigned char> &array_list = buffer_->get<unsigned char> (current_var_name);
+                assert (buffer->has<unsigned char>(current_var_name));
+                NullableVector<unsigned char> &array_list = buffer->get<unsigned char> (current_var_name);
                 logwrn << "JsonMapping: transformBuffer: double multiplication of unsigned char variable "
                        << current_var_name;
                 array_list *= factor;
@@ -481,43 +498,43 @@ void JsonMapping::transformBuffer ()
             }
             case PropertyDataType::INT:
             {
-                assert (buffer_->has<int>(current_var_name));
-                NullableVector<int> &array_list = buffer_->get<int> (current_var_name);
+                assert (buffer->has<int>(current_var_name));
+                NullableVector<int> &array_list = buffer->get<int> (current_var_name);
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::UINT:
             {
-                assert (buffer_->has<unsigned int>(current_var_name));
-                NullableVector<unsigned int> &array_list = buffer_->get<unsigned int> (current_var_name);
+                assert (buffer->has<unsigned int>(current_var_name));
+                NullableVector<unsigned int> &array_list = buffer->get<unsigned int> (current_var_name);
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::LONGINT:
             {
-                assert (buffer_->has<long int>(current_var_name));
-                NullableVector<long int> &array_list = buffer_->get<long int>(current_var_name);
+                assert (buffer->has<long int>(current_var_name));
+                NullableVector<long int> &array_list = buffer->get<long int>(current_var_name);
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::ULONGINT:
             {
-                assert (buffer_->has<unsigned long>(current_var_name));
-                NullableVector<unsigned long> &array_list = buffer_->get<unsigned long>(current_var_name);
+                assert (buffer->has<unsigned long>(current_var_name));
+                NullableVector<unsigned long> &array_list = buffer->get<unsigned long>(current_var_name);
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::FLOAT:
             {
-                assert (buffer_->has<float>(current_var_name));
-                NullableVector<float> &array_list = buffer_->get<float>(current_var_name);
+                assert (buffer->has<float>(current_var_name));
+                NullableVector<float> &array_list = buffer->get<float>(current_var_name);
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::DOUBLE:
             {
-                assert (buffer_->has<double>(current_var_name));
-                NullableVector<double> &array_list = buffer_->get<double>(current_var_name);
+                assert (buffer->has<double>(current_var_name));
+                NullableVector<double> &array_list = buffer->get<double>(current_var_name);
                 array_list *= factor;
                 break;
             }
@@ -547,7 +564,7 @@ void JsonMapping::overrideKeyVariable(bool override)
     override_key_variable_ = override;
 }
 
-DBOVariableSet& JsonMapping::variableList()
+const DBOVariableSet& JsonMapping::variableList() const
 {
     return var_list_;
 }
@@ -572,15 +589,15 @@ void JsonMapping::dataSourceVariableName(const std::string& name)
     data_source_variable_name_ = name;
 }
 
-unsigned int JsonMapping::keyCount() const
-{
-    return key_count_;
-}
+//unsigned int JsonMapping::keyCount() const
+//{
+//    return key_count_;
+//}
 
-void JsonMapping::keyCount(unsigned int key_count)
-{
-    key_count_ = key_count;
-}
+//void JsonMapping::keyCount(unsigned int key_count)
+//{
+//    key_count_ = key_count;
+//}
 
 
 DBOVariable &JsonKey2DBOVariableMapping::variable() const
