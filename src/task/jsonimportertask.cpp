@@ -228,9 +228,11 @@ void JSONImporterTask::createMappings ()
             mappings_.push_back(JsonMapping (db_object));
             mappings_.at(index).JSONKey("message_type");
             mappings_.at(index).JSONValue("ads-b target");
-            mappings_.at(index).overrideKeyVariable(true);
+            mappings_.at(index).overrideKeyVariable(false);
+//            mappings_.at(index).overrideKeyVariable(true);
             mappings_.at(index).dataSourceVariableName("ds_id");
 
+            mappings_.at(index).addMapping({"rec_num", db_object.variable("rec_num"), true});
             mappings_.at(index).addMapping({"data_source_identifier.value", db_object.variable("ds_id"), true});
             mappings_.at(index).addMapping({"data_source_identifier.sac", db_object.variable("sac"), true});
             mappings_.at(index).addMapping({"data_source_identifier.sic", db_object.variable("sic"), true});
@@ -254,9 +256,11 @@ void JSONImporterTask::createMappings ()
             mappings_.push_back(JsonMapping (db_object));
             mappings_.at(index).JSONKey("message_type");
             mappings_.at(index).JSONValue("mlat target");
-            mappings_.at(index).overrideKeyVariable(true);
+            mappings_.at(index).overrideKeyVariable(false);
+//            mappings_.at(index).overrideKeyVariable(true);
             mappings_.at(index).dataSourceVariableName("ds_id");
 
+            mappings_.at(index).addMapping({"rec_num", db_object.variable("rec_num"), true});
             mappings_.at(index).addMapping({"data_source_identifier.value", db_object.variable("ds_id"), true});
             mappings_.at(index).addMapping({"data_source_identifier.sac", db_object.variable("sac"), true});
             mappings_.at(index).addMapping({"data_source_identifier.sic", db_object.variable("sic"), true});
@@ -281,9 +285,11 @@ void JSONImporterTask::createMappings ()
             mappings_.push_back(JsonMapping (db_object));
             mappings_.at(index).JSONKey("message_type");
             mappings_.at(index).JSONValue("radar target");
-            mappings_.at(index).overrideKeyVariable(true);
+            mappings_.at(index).overrideKeyVariable(false);
+//            mappings_.at(index).overrideKeyVariable(true);
             mappings_.at(index).dataSourceVariableName("ds_id");
 
+            mappings_.at(index).addMapping({"rec_num", db_object.variable("rec_num"), true});
             mappings_.at(index).addMapping({"data_source_identifier.value", db_object.variable("ds_id"), true});
             mappings_.at(index).addMapping({"data_source_identifier.sac", db_object.variable("sac"), true});
             mappings_.at(index).addMapping({"data_source_identifier.sic", db_object.variable("sic"), true});
@@ -308,9 +314,11 @@ void JSONImporterTask::createMappings ()
             mappings_.push_back(JsonMapping (db_object));
             mappings_.at(index).JSONKey("message_type");
             mappings_.at(index).JSONValue("track update");
-            mappings_.at(index).overrideKeyVariable(true);
+            mappings_.at(index).overrideKeyVariable(false);
+//            mappings_.at(index).overrideKeyVariable(true);
             mappings_.at(index).dataSourceVariableName("ds_id");
 
+            mappings_.at(index).addMapping({"rec_num", db_object.variable("rec_num"), true});
             mappings_.at(index).addMapping({"server_sacsic.value", db_object.variable("ds_id"), true});
             mappings_.at(index).addMapping({"server_sacsic.sac", db_object.variable("sac"), true});
             mappings_.at(index).addMapping({"server_sacsic.sic", db_object.variable("sic"), true});
