@@ -3,7 +3,7 @@
 
 #include "configurable.h"
 #include "json.hpp"
-#include "jsonmapping.h"
+#include "jsonobjectparser.h"
 #include "readjsonfilepartjob.h"
 
 #include <QObject>
@@ -21,7 +21,8 @@ class JSONMappingJob;
 
 class JSONImporterTask : public QObject, public Configurable
 {
-        Q_OBJECT
+    Q_OBJECT
+
 public slots:
     void insertProgressSlot (float percent);
     void insertDoneSlot (DBObject& object);
@@ -59,7 +60,7 @@ protected:
     std::map <std::string, SavedFile*> file_list_;
     std::string last_filename_;
 
-    std::vector <JsonMapping> mappings_;
+    std::vector <JSONObjectParser> mappings_;
     size_t key_count_ {0};
 
     JSONImporterTaskWidget* widget_ {nullptr};

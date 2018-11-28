@@ -225,7 +225,7 @@ void JSONImporterTask::createMappings ()
             //        mappings_.at(0).addMapping({"PosTime", db_object.variable("tod"), true,
             //                                    Format(PropertyDataType::STRING, "epoch_tod")});
 
-            mappings_.push_back(JsonMapping (db_object));
+            mappings_.push_back(JSONObjectParser (db_object));
             mappings_.at(index).JSONKey("message_type");
             mappings_.at(index).JSONValue("ads-b target");
             mappings_.at(index).overrideKeyVariable(false);
@@ -253,7 +253,7 @@ void JSONImporterTask::createMappings ()
             assert (ATSDB::instance().objectManager().existsObject("MLAT"));
             DBObject& db_object = ATSDB::instance().objectManager().object("MLAT");
 
-            mappings_.push_back(JsonMapping (db_object));
+            mappings_.push_back(JSONObjectParser (db_object));
             mappings_.at(index).JSONKey("message_type");
             mappings_.at(index).JSONValue("mlat target");
             mappings_.at(index).overrideKeyVariable(false);
@@ -282,7 +282,7 @@ void JSONImporterTask::createMappings ()
             assert (ATSDB::instance().objectManager().existsObject("Radar"));
             DBObject& db_object = ATSDB::instance().objectManager().object("Radar");
 
-            mappings_.push_back(JsonMapping (db_object));
+            mappings_.push_back(JSONObjectParser (db_object));
             mappings_.at(index).JSONKey("message_type");
             mappings_.at(index).JSONValue("radar target");
             mappings_.at(index).overrideKeyVariable(false);
@@ -311,7 +311,7 @@ void JSONImporterTask::createMappings ()
             assert (ATSDB::instance().objectManager().existsObject("Tracker"));
             DBObject& db_object = ATSDB::instance().objectManager().object("Tracker");
 
-            mappings_.push_back(JsonMapping (db_object));
+            mappings_.push_back(JSONObjectParser (db_object));
             mappings_.at(index).JSONKey("message_type");
             mappings_.at(index).JSONValue("track update");
             mappings_.at(index).overrideKeyVariable(false);

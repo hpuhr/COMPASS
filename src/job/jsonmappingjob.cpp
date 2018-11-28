@@ -1,9 +1,9 @@
 #include "jsonmappingjob.h"
-#include "jsonmapping.h"
+#include "jsonobjectparser.h"
 #include "buffer.h"
 #include "dbobject.h"
 
-JSONMappingJob::JSONMappingJob(std::vector<nlohmann::json>&& json_objects, const std::vector <JsonMapping>& mappings,
+JSONMappingJob::JSONMappingJob(std::vector<nlohmann::json>&& json_objects, const std::vector <JSONObjectParser>& mappings,
                                size_t key_count)
     : Job ("JSONMappingJob"), json_objects_(json_objects), mappings_(mappings), key_count_(key_count)
 {

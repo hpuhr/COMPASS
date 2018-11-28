@@ -1,6 +1,5 @@
-#include "jsonmapping.h"
+#include "jsonobjectparser.h"
 
-#include "dbovariable.h"
 #include "buffer.h"
 #include "dbobject.h"
 #include "unitmanager.h"
@@ -8,47 +7,47 @@
 
 using namespace nlohmann;
 
-JsonMapping::JsonMapping (DBObject& db_object)
+JSONObjectParser::JSONObjectParser (DBObject& db_object)
     : db_object_(db_object)
 {
 
 }
 
-DBObject &JsonMapping::dbObject() const
+DBObject &JSONObjectParser::dbObject() const
 {
     return db_object_;
 }
 
-std::string JsonMapping::JSONKey() const
+std::string JSONObjectParser::JSONKey() const
 {
     return json_key_;
 }
 
-void JsonMapping::JSONKey(const std::string& json_key)
+void JSONObjectParser::JSONKey(const std::string& json_key)
 {
     json_key_ = json_key;
 }
 
-std::string JsonMapping::JSONValue() const
+std::string JSONObjectParser::JSONValue() const
 {
     return json_value_;
 }
 
-void JsonMapping::JSONValue(const std::string& json_value)
+void JSONObjectParser::JSONValue(const std::string& json_value)
 {
     json_value_ = json_value;
 }
 
-std::string JsonMapping::JSONContainerKey() const
+std::string JSONObjectParser::JSONContainerKey() const
 {
     return json_container_key_;
 }
 
-void JsonMapping::JSONContainerKey(const std::string& key)
+void JSONObjectParser::JSONContainerKey(const std::string& key)
 {
     json_container_key_ = key;
 }
-void JsonMapping::addMapping (JsonKey2DBOVariableMapping mapping)
+void JSONObjectParser::addMapping (JSONDataMapping mapping)
 {
     assert (mapping.variable().hasCurrentDBColumn());
 
@@ -63,24 +62,7 @@ void JsonMapping::addMapping (JsonKey2DBOVariableMapping mapping)
     }
 }
 
-//bool JsonMapping::hasFilledBuffer ()
-//{
-//    if (!buffer_)
-//        return false;
-//    return buffer_->size() > 0;
-//}
-
-//std::shared_ptr<Buffer> JsonMapping::buffer()
-//{
-//    return buffer_;
-//}
-
-//void JsonMapping::clearBuffer ()
-//{
-//    buffer_ = nullptr;
-//}
-
-void JsonMapping::initialize ()
+void JSONObjectParser::initialize ()
 {
     if (!initialized_)
     {
@@ -113,17 +95,16 @@ void JsonMapping::initialize ()
     }
 }
 
-std::shared_ptr<Buffer> JsonMapping::getNewBuffer () const
+std::shared_ptr<Buffer> JSONObjectParser::getNewBuffer () const
 {
     assert (initialized_);
     return std::shared_ptr<Buffer> {new Buffer (list_, db_object_.name())};
 }
 
-unsigned int JsonMapping::parseJSON (nlohmann::json& j, std::shared_ptr<Buffer> buffer) const
+unsigned int JSONObjectParser::parseJSON (nlohmann::json& j, std::shared_ptr<Buffer> buffer) const
 {
     assert (initialized_);
 
-    //assert (buffer_ == nullptr || buffer_->size() == 0);
     assert (buffer != nullptr);
 
     unsigned int row_cnt = buffer->size();
@@ -151,18 +132,7 @@ unsigned int JsonMapping::parseJSON (nlohmann::json& j, std::shared_ptr<Buffer> 
                 skipped = parseTargetReport (tr, buffer, row_cnt);
 
                 if (!skipped)
-                {
-//                    if (override_key_variable_)
-//                    {
-//                        assert (key_variable_);
-//                        assert (buffer->has<int>(key_variable_->name()));
-//                        buffer->get<int> (key_variable_->name()).set(row_cnt, key_count_);
-//                        //loginf << "override key row " << row_cnt << " val " << key_count_;
-//                    }
-
                     ++row_cnt;
-//                    ++key_count_;
-                }
                 else
                     ++skipped_cnt;
 
@@ -180,25 +150,13 @@ unsigned int JsonMapping::parseJSON (nlohmann::json& j, std::shared_ptr<Buffer> 
         skipped = parseTargetReport (j, buffer, row_cnt);
 
         if (!skipped)
-        {
-//            if (override_key_variable_)
-//            {
-//                assert (key_variable_);
-//                assert (buffer->has<int>(key_variable_->name()));
-//                buffer->get<int> (key_variable_->name()).set(row_cnt, key_count_);
-//                //loginf << "override key row " << row_cnt << " val " << key_count_;
-//            }
-
             ++row_cnt;
-//            ++key_count_;
-        }
-
     }
 
     return row_cnt;
 }
 
-bool JsonMapping::parseTargetReport (const nlohmann::json& tr, std::shared_ptr<Buffer> buffer, size_t row_cnt) const
+bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_ptr<Buffer> buffer, size_t row_cnt) const
 {
     // check key match
     if (not_parse_all_)
@@ -220,22 +178,6 @@ bool JsonMapping::parseTargetReport (const nlohmann::json& tr, std::shared_ptr<B
         }
     }
 
-    // check if all required data exists and is not null
-    //    for (auto& data_it : data_mappings_)
-    //    {
-    //        logdbg << "checking data mapping key " << data_it.jsonKey();
-
-    //        if (data_it.mandatory() && (!data_it.hasKey(tr) || data_it.isNull(tr)))
-    //        {
-    //            logdbg << "skipping because of lack of data, " << data_it.jsonKey()
-    //                   << " not found " << !data_it.hasKey(tr)
-    //                   << " null " << data_it.isNull(tr);
-    //            return true;
-    //        }
-    //    }
-
-    //loginf << "not skipping";
-
     PropertyDataType data_type;
     std::string current_var_name;
 
@@ -245,10 +187,6 @@ bool JsonMapping::parseTargetReport (const nlohmann::json& tr, std::shared_ptr<B
     {
         //logdbg << "setting data mapping key " << data_it.jsonKey();
 
-        //        const nlohmann::json& tr_val = data_it.getValue(tr);
-
-        //        if (tr_val != nullptr)
-        //        {
         data_type = data_it.variable().dataType();
         current_var_name = data_it.variable().name();
 
@@ -342,83 +280,6 @@ bool JsonMapping::parseTargetReport (const nlohmann::json& tr, std::shared_ptr<B
 
         if (mandatory_missing)
             break;
-        //        }
-        //        else
-        //        {
-        //            logdbg  <<  "JsonMapping: parseTargetReport: key " << data_it.jsonKey()<< " not found, setting 0";
-
-        //            data_type = data_it.variable().dataType();
-        //            current_var_name = data_it.variable().name();
-
-        //            switch (data_type)
-        //            {
-        //            case PropertyDataType::BOOL:
-        //            {
-        //                assert (buffer_->has<bool>(current_var_name));
-        //                buffer_->get<bool> (current_var_name).setNone(row_cnt);
-        //                break;
-        //            }
-        //            case PropertyDataType::CHAR:
-        //            {
-        //                assert (buffer_->has<char>(current_var_name));
-        //                buffer_->get<char> (current_var_name).setNone(row_cnt);
-        //                break;
-        //            }
-        //            case PropertyDataType::UCHAR:
-        //            {
-        //                assert (buffer_->has<unsigned char>(current_var_name));
-        //                buffer_->get<unsigned char> (current_var_name).setNone(row_cnt);
-        //                break;
-        //            }
-        //            case PropertyDataType::INT:
-        //            {
-        //                assert (buffer_->has<int>(current_var_name));
-        //                buffer_->get<int> (current_var_name).setNone(row_cnt);
-        //                break;
-        //            }
-        //            case PropertyDataType::UINT:
-        //            {
-        //                assert (buffer_->has<unsigned int>(current_var_name));
-        //                buffer_->get<unsigned int> (current_var_name).setNone(row_cnt);
-        //                break;
-        //            }
-        //            case PropertyDataType::LONGINT:
-        //            {
-        //                assert (buffer_->has<long int>(current_var_name));
-        //                buffer_->get<long int> (current_var_name).setNone(row_cnt);
-        //                break;
-        //            }
-        //            case PropertyDataType::ULONGINT:
-        //            {
-        //                assert (buffer_->has<unsigned long>(current_var_name));
-        //                buffer_->get<unsigned long> (current_var_name).setNone(row_cnt);
-        //                break;
-        //            }
-        //            case PropertyDataType::FLOAT:
-        //            {
-        //                assert (buffer_->has<float>(current_var_name));
-        //                buffer_->get<float> (current_var_name).setNone(row_cnt);
-        //                break;
-        //            }
-        //            case PropertyDataType::DOUBLE:
-        //            {
-        //                assert (buffer_->has<double>(current_var_name));
-        //                buffer_->get<double> (current_var_name).setNone(row_cnt);
-        //                break;
-        //            }
-        //            case PropertyDataType::STRING:
-        //            {
-        //                assert (buffer_->has<std::string>(current_var_name));
-        //                buffer_->get<std::string> (current_var_name).setNone(row_cnt);
-        //                break;
-        //            }
-        //            default:
-        //                logerr  <<  "JsonMapping: parseTargetReport: set null impossible for property type "
-        //                         << Property::asString(data_type);
-        //                throw std::runtime_error ("JsonMapping: parseTargetReport: set null impossible property type "
-        //                                          + Property::asString(data_type));
-        //            }
-        //        }
     }
 
     if (mandatory_missing)
@@ -431,7 +292,7 @@ bool JsonMapping::parseTargetReport (const nlohmann::json& tr, std::shared_ptr<B
     return mandatory_missing;
 }
 
-void JsonMapping::transformBuffer (std::shared_ptr<Buffer> buffer, long key_begin) const
+void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key_begin) const
 {
     logdbg << "JsonMapping: transformBuffer: object " << db_object_.name();
 
@@ -553,90 +414,41 @@ void JsonMapping::transformBuffer (std::shared_ptr<Buffer> buffer, long key_begi
 
 }
 
-
-bool JsonMapping::overrideKeyVariable() const
+bool JSONObjectParser::overrideKeyVariable() const
 {
     return override_key_variable_;
 }
 
-void JsonMapping::overrideKeyVariable(bool override)
+void JSONObjectParser::overrideKeyVariable(bool override)
 {
     override_key_variable_ = override;
 }
 
-const DBOVariableSet& JsonMapping::variableList() const
+const DBOVariableSet& JSONObjectParser::variableList() const
 {
     return var_list_;
 }
 
-bool JsonMapping::overrideDataSource() const
+bool JSONObjectParser::overrideDataSource() const
 {
     return override_data_source_;
 }
 
-void JsonMapping::OverrideDataSource(bool override)
+void JSONObjectParser::OverrideDataSource(bool override)
 {
     override_data_source_ = override;
 }
 
-std::string JsonMapping::dataSourceVariableName() const
+std::string JSONObjectParser::dataSourceVariableName() const
 {
     return data_source_variable_name_;
 }
 
-void JsonMapping::dataSourceVariableName(const std::string& name)
+void JSONObjectParser::dataSourceVariableName(const std::string& name)
 {
     data_source_variable_name_ = name;
 }
 
-//unsigned int JsonMapping::keyCount() const
-//{
-//    return key_count_;
-//}
-
-//void JsonMapping::keyCount(unsigned int key_count)
-//{
-//    key_count_ = key_count;
-//}
 
 
-DBOVariable &JsonKey2DBOVariableMapping::variable() const
-{
-    return variable_;
-}
-
-//void JsonKey2DBOVariableMapping::variable(const DBOVariable &variable)
-//{
-//    variable_ = variable;
-//}
-
-bool JsonKey2DBOVariableMapping::mandatory() const
-{
-    return mandatory_;
-}
-
-void JsonKey2DBOVariableMapping::mandatory(bool mandatory)
-{
-    mandatory_ = mandatory;
-}
-
-Format JsonKey2DBOVariableMapping::jsonValueFormat() const
-{
-    return json_value_format_;
-}
-
-void JsonKey2DBOVariableMapping::jsonValueFormat(const Format &json_value_format)
-{
-    json_value_format_ = json_value_format;
-}
-
-std::string JsonKey2DBOVariableMapping::jsonKey() const
-{
-    return json_key_;
-}
-
-void JsonKey2DBOVariableMapping::jsonKey(const std::string &json_key)
-{
-    json_key_ = json_key;
-}
 

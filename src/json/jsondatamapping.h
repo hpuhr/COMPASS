@@ -1,50 +1,26 @@
-#ifndef JSONMAPPING_H
-#define JSONMAPPING_H
+#ifndef JSONDATAMAPPING_H
+#define JSONDATAMAPPING_H
 
-#include <string>
-#include <memory>
-
-#include "propertylist.h"
 #include "json.hpp"
+#include "logger.h"
 #include "format.h"
-#include "dbovariable.h"
-#include "dbovariableset.h"
-#include "stringconv.h"
 #include "nullablevector.h"
 
-class DBObject;
 class DBOVariable;
-class Buffer;
 
-class JsonKey2DBOVariableMapping
+class JSONDataMapping
 {
 public:
-    JsonKey2DBOVariableMapping (const std::string& json_key, DBOVariable& variable, bool mandatory)
-        : JsonKey2DBOVariableMapping(json_key, variable, mandatory, {variable.dataType(), ""}, "", "")
-    {}
+    JSONDataMapping (const std::string& json_key, DBOVariable& variable, bool mandatory);
 
-    JsonKey2DBOVariableMapping (const std::string& json_key, DBOVariable& variable, bool mandatory,
-                                Format json_value_format)
-        : JsonKey2DBOVariableMapping(json_key, variable, mandatory, json_value_format, "", "")
-    {}
+    JSONDataMapping (const std::string& json_key, DBOVariable& variable, bool mandatory,
+                                Format json_value_format);
 
-    JsonKey2DBOVariableMapping (const std::string& json_key, DBOVariable& variable, bool mandatory,
-                                const std::string& dimension, const std::string& unit)
-        : JsonKey2DBOVariableMapping(json_key, variable, mandatory, {variable.dataType(), ""}, dimension, unit)
-    {}
+    JSONDataMapping (const std::string& json_key, DBOVariable& variable, bool mandatory,
+                                const std::string& dimension, const std::string& unit);
 
-    JsonKey2DBOVariableMapping (const std::string& json_key, DBOVariable& variable, bool mandatory,
-                                Format json_value_format, const std::string& dimension, const std::string& unit)
-        : json_key_(json_key), variable_(variable), mandatory_(mandatory), json_value_format_(json_value_format),
-          dimension_(dimension), unit_(unit)
-    {
-        sub_keys_ = Utils::String::split(json_key_, '.');
-        has_sub_keys_ = sub_keys_.size() > 1;
-        num_sub_keys_ = sub_keys_.size();
-
-        logdbg << "JsonKey2DBOVariableMapping: ctor: key " << json_key_ << " num subkeys " << sub_keys_.size();
-
-    }
+    JSONDataMapping (const std::string& json_key, DBOVariable& variable, bool mandatory,
+                                Format json_value_format, const std::string& dimension, const std::string& unit);
 
     bool hasKey (const nlohmann::json& j)
     {
@@ -110,42 +86,6 @@ public:
                 return true;
         }
     }
-    //const nlohmann::json& getValue (const nlohmann::json& j) { return j[json_key_]; }
-
-    //    inline nlohmann::json& getValue (nlohmann::json j)
-    //    {
-    //        if (has_sub_keys_)
-    //        {
-    //            nlohmann::json* k = &j;
-    //            std::string sub_key;
-
-    //            for (unsigned int cnt=0; cnt < num_sub_keys_; ++cnt)
-    //            {
-    //                sub_key = sub_keys_.at(cnt);
-
-    //                if (k->find (sub_key) != k->end())
-    //                {
-    //                    if (cnt == num_sub_keys_-1)
-    //                        return k->at(sub_key);
-
-    //                    if (k->at(sub_key).is_object())
-    //                        k = &k->at(sub_key);
-    //                    else
-    //                        return nullptr_;
-    //                }
-    //                else
-    //                    return nullptr_;
-    //            }
-    //            return *k;
-    //        }
-    //        else
-    //        {
-    //            if (j.find (json_key_) != j.end())
-    //                return j.at(json_key_);
-    //            else
-    //                return nullptr_;
-    //        }
-    //    }
 
     inline const nlohmann::json& getValue (const nlohmann::json& j, unsigned int index=0)
     {
@@ -404,7 +344,6 @@ public:
     void jsonKey(const std::string &json_key);
 
     DBOVariable& variable() const;
-    //void variable(const DBOVariable &variable);
 
     bool mandatory() const;
     void mandatory(bool mandatory);
@@ -413,92 +352,4 @@ public:
     void jsonValueFormat(const Format &json_value_format);
 };
 
-class JsonMapping
-{
-    using MappingIterator = std::vector<JsonKey2DBOVariableMapping>::iterator;
-public:
-    JsonMapping (DBObject& dbObject);
-
-    DBObject &dbObject() const;
-
-    std::string JSONKey() const;
-    void JSONKey(const std::string& json_key);
-
-    std::string JSONValue() const;
-    void JSONValue(const std::string& json_value);
-
-    std::string JSONContainerKey() const;
-    void JSONContainerKey(const std::string& key);
-
-    void addMapping (JsonKey2DBOVariableMapping mapping);
-    MappingIterator begin() { return data_mappings_.begin(); }
-    MappingIterator end() { return data_mappings_.end(); }
-
-//    bool hasFilledBuffer ();
-//    std::shared_ptr<Buffer> buffer();
-//    void clearBuffer ();
-
-    void transformBuffer (std::shared_ptr<Buffer> buffer, long key_begin=-1) const;
-
-    unsigned int parseJSON (nlohmann::json& j, std::shared_ptr<Buffer> buffer) const;
-
-    bool overrideKeyVariable() const;
-    void overrideKeyVariable(bool override);
-
-    const DBOVariableSet& variableList() const;
-
-    bool overrideDataSource() const;
-    void OverrideDataSource(bool override);
-
-    std::string dataSourceVariableName() const;
-    void dataSourceVariableName(const std::string& name);
-
-//    unsigned int keyCount() const;
-//    void keyCount(unsigned int keyCount);
-
-    bool initialized() const { return initialized_; }
-    void initialize ();
-
-    std::shared_ptr<Buffer> getNewBuffer () const;
-
-private:
-    DBObject& db_object_;
-
-    std::string json_container_key_;  // location of container with target report data
-    std::string json_key_; // * for all
-    std::string json_value_;
-    std::vector <JsonKey2DBOVariableMapping> data_mappings_;
-
-    DBOVariableSet var_list_;
-
-    bool override_key_variable_ {false};
-    bool has_key_mapping_ {false};
-    bool has_key_variable_ {false};
-
-    bool override_data_source_ {false};
-    std::string data_source_variable_name_;
-
-    bool initialized_ {false};
-    //unsigned int key_count_ {0};
-    DBOVariable* key_variable_ {nullptr};
-
-    bool not_parse_all_ {false};
-
-    PropertyList list_;
-    //std::shared_ptr<Buffer> buffer_;
-
-    bool parseTargetReport (const nlohmann::json& tr, std::shared_ptr<Buffer> buffer, size_t row_cnt) const;
-
-    inline std::string toString(const nlohmann::json& j)
-    {
-        if (j.type() == nlohmann::json::value_t::string) {
-            return j.get<std::string>();
-        }
-
-        return j.dump();
-    }
-
-};
-
-
-#endif // JSONMAPPING_H
+#endif // JSONDATAMAPPING_H
