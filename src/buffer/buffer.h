@@ -57,13 +57,8 @@ struct Index<T, std::tuple<U, Types...>> {
  * @brief Fast, dynamic data container
  *
  * Encapsulates general data storage with access functions with maximum efficiency.
- * Performs basic checks, allocates new PropertyContainers when space is needed, but NOT thread-safe.
+ * Performs basic checks, allocates new data when space is needed, but NOT thread-safe.
  *
- * Buffers can also exchange the underlying PropertyContainers to allow shallow copies or appending data.
- *
- * Another function is the key search. If within the buffer there exists a monotonous unsigned integer value, it can be used
- * as key. To activate this key search, use activateKeySearch() with the appropriate Property index. After that,
- * setIndexForKey() can be called.
  */
 class Buffer
 {

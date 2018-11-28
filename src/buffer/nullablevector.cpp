@@ -15,17 +15,7 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cassert>
-#include <limits>
-
-#include <QDateTime>
-
-#include "stringconv.h"
 #include "nullablevector.h"
-#include "buffer.h"
-
-typedef std::numeric_limits<double> double_limit;
-typedef std::numeric_limits<float> float_limit;
 
 template <>
 NullableVector<bool>& NullableVector<bool>::operator*=(double factor)

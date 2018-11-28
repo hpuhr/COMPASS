@@ -171,8 +171,6 @@ void Buffer::seizeBuffer (Buffer &org_buffer)
 
     logdbg  << "Buffer: seizeBuffer: size " << size() << " other size " << org_buffer.size();
 
-    //assert (full() || firstWrite()); //|| first_write_
-
     org_buffer.properties_.clear();
 
     seizeArrayListMap<bool>(org_buffer);

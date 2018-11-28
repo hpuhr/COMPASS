@@ -508,24 +508,6 @@ template <class T> void NullableVector<T>::unsetNull (size_t index)
         null_flags_.at(index) = false;
 }
 
-//template <class T> Base* Foo<T>::convert(ID) const {return new Bar<T>;}
-
-// For integral types only:
-//template<typename T>
-//typename std::enable_if<std::is_integral<T>::value>::type f(T t)
-//{
-//    // ...
-//}
-
-//template <>
-//const std::string ArrayListTemplate<std::string>::getAsString (size_t index);
-
-//template <>
-//const std::string ArrayListTemplate<float>::getAsString (size_t index);
-
-//template <>
-//const std::string ArrayListTemplate<double>::getAsString (size_t index);
-
 template <>
 NullableVector<bool>& NullableVector<bool>::operator*=(double factor);
 
