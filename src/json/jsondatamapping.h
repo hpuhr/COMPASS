@@ -5,6 +5,7 @@
 #include "logger.h"
 #include "format.h"
 #include "nullablevector.h"
+#include "jsonutils.h"
 
 class DBOVariable;
 
@@ -22,148 +23,148 @@ public:
     JSONDataMapping (const std::string& json_key, DBOVariable& variable, bool mandatory,
                                 Format json_value_format, const std::string& dimension, const std::string& unit);
 
-    bool hasKey (const nlohmann::json& j)
-    {
-        if (has_sub_keys_)
-        {
-            const nlohmann::json* k = &j;
-            std::string sub_key;
+//    bool hasKey (const nlohmann::json& j)
+//    {
+//        if (has_sub_keys_)
+//        {
+//            const nlohmann::json* k = &j;
+//            std::string sub_key;
 
-            for (unsigned int cnt=0; cnt < num_sub_keys_; ++cnt)
-            {
-                sub_key = sub_keys_.at(cnt);
+//            for (unsigned int cnt=0; cnt < num_sub_keys_; ++cnt)
+//            {
+//                sub_key = sub_keys_.at(cnt);
 
-                if (k->find (sub_key) != k->end())
-                {
-                    if (cnt == num_sub_keys_-1)
-                        break;
+//                if (k->find (sub_key) != k->end())
+//                {
+//                    if (cnt == num_sub_keys_-1)
+//                        break;
 
-                    if (k->at(sub_key).is_object())
-                        k = &k->at(sub_key);
-                    else
-                        return false;
-                }
-                else
-                    return false;
-            }
-            return true;
-        }
-        else
-            return j.find (json_key_) != j.end();
-    }
+//                    if (k->at(sub_key).is_object())
+//                        k = &k->at(sub_key);
+//                    else
+//                        return false;
+//                }
+//                else
+//                    return false;
+//            }
+//            return true;
+//        }
+//        else
+//            return j.find (json_key_) != j.end();
+//    }
 
-    bool isNull (const nlohmann::json& j)
-    {
-        if (has_sub_keys_)
-        {
-            const nlohmann::json* k = &j;
-            std::string sub_key;
+//    bool isNull (const nlohmann::json& j)
+//    {
+//        if (has_sub_keys_)
+//        {
+//            const nlohmann::json* k = &j;
+//            std::string sub_key;
 
-            for (unsigned int cnt=0; cnt < num_sub_keys_; ++cnt)
-            {
-                sub_key = sub_keys_.at(cnt);
+//            for (unsigned int cnt=0; cnt < num_sub_keys_; ++cnt)
+//            {
+//                sub_key = sub_keys_.at(cnt);
 
-                if (k->find (sub_key) != k->end())
-                {
-                    if (cnt == num_sub_keys_-1)
-                        return k->at(sub_key).is_null();
+//                if (k->find (sub_key) != k->end())
+//                {
+//                    if (cnt == num_sub_keys_-1)
+//                        return k->at(sub_key).is_null();
 
-                    if (k->at(sub_key).is_object())
-                        k = &k->at(sub_key);
-                    else
-                        return true;
-                }
-                else
-                    return true;
-            }
-            return true;
-        }
-        else
-        {
-            if (j.find (json_key_) != j.end())
-                return j.at(json_key_) == nullptr;
-            else
-                return true;
-        }
-    }
+//                    if (k->at(sub_key).is_object())
+//                        k = &k->at(sub_key);
+//                    else
+//                        return true;
+//                }
+//                else
+//                    return true;
+//            }
+//            return true;
+//        }
+//        else
+//        {
+//            if (j.find (json_key_) != j.end())
+//                return j.at(json_key_) == nullptr;
+//            else
+//                return true;
+//        }
+//    }
 
-    inline const nlohmann::json& getValue (const nlohmann::json& j, unsigned int index=0)
-    {
-        if (has_sub_keys_)
-        {
-            std::string& sub_key = sub_keys_.at(index);
+//    inline const nlohmann::json& getValue (const nlohmann::json& j, unsigned int index=0)
+//    {
+//        if (has_sub_keys_)
+//        {
+//            std::string& sub_key = sub_keys_.at(index);
 
-            if (j.find (sub_key) != j.end())
-            {
-                if (index == num_sub_keys_-1)
-                    return j.at(sub_key);
+//            if (j.find (sub_key) != j.end())
+//            {
+//                if (index == num_sub_keys_-1)
+//                    return j.at(sub_key);
 
-                if (j.at(sub_key).is_object())
-                    return getValue(j.at(sub_key), index+1);
-                else
-                    return nullptr_;
-            }
-        }
-        else
-        {
-            if (j.find (json_key_) != j.end())
-                return j.at(json_key_);
-            else
-                return nullptr_;
-        }
-        return nullptr_;
-    }
+//                if (j.at(sub_key).is_object())
+//                    return getValue(j.at(sub_key), index+1);
+//                else
+//                    return nullptr_;
+//            }
+//        }
+//        else
+//        {
+//            if (j.find (json_key_) != j.end())
+//                return j.at(json_key_);
+//            else
+//                return nullptr_;
+//        }
+//        return nullptr_;
+//    }
 
-    template<typename T>
-    void setValue(NullableVector<T>& array_list, unsigned int row_cnt, const nlohmann::json& j)
-    {
-        if (j == nullptr)
-            array_list.setNull(row_cnt);
-        else
-        {
-            try
-            {
-                if (json_value_format_ == "")
-                    array_list.set(row_cnt, j);
-                else
-                    array_list.setFromFormat(row_cnt, json_value_format_,
-                                             toString(j));
+//    template<typename T>
+//    void setValue(NullableVector<T>& array_list, unsigned int row_cnt, const nlohmann::json& j)
+//    {
+//        if (j == nullptr)
+//            array_list.setNull(row_cnt);
+//        else
+//        {
+//            try
+//            {
+//                if (json_value_format_ == "")
+//                    array_list.set(row_cnt, j);
+//                else
+//                    array_list.setFromFormat(row_cnt, json_value_format_,
+//                                             toString(j));
 
-                logdbg << "JsonKey2DBOVariableMapping: setValue: json " << j
-                       << " buffer " << array_list.get(row_cnt);
-            }
-            catch (nlohmann::json::exception& e)
-            {
-                logerr  <<  "JsonKey2DBOVariableMapping: setValue: key " << json_key_ << " json exception " << e.what();
-                array_list.setNull(row_cnt);
-            }
-        }
-    }
+//                logdbg << "JsonKey2DBOVariableMapping: setValue: json " << j
+//                       << " buffer " << array_list.get(row_cnt);
+//            }
+//            catch (nlohmann::json::exception& e)
+//            {
+//                logerr  <<  "JsonKey2DBOVariableMapping: setValue: key " << json_key_ << " json exception " << e.what();
+//                array_list.setNull(row_cnt);
+//            }
+//        }
+//    }
 
-    void setValue(NullableVector<char>& array_list, unsigned int row_cnt, const nlohmann::json& j)
-    {
-        if (j == nullptr)
-            array_list.setNull(row_cnt);
-        else
-        {
-            try
-            {
-                if (json_value_format_ == "")
-                    array_list.set(row_cnt, static_cast<int> (j));
-                else
-                    array_list.setFromFormat(row_cnt, json_value_format_,
-                                             toString(j));
+//    void setValue(NullableVector<char>& array_list, unsigned int row_cnt, const nlohmann::json& j)
+//    {
+//        if (j == nullptr)
+//            array_list.setNull(row_cnt);
+//        else
+//        {
+//            try
+//            {
+//                if (json_value_format_ == "")
+//                    array_list.set(row_cnt, static_cast<int> (j));
+//                else
+//                    array_list.setFromFormat(row_cnt, json_value_format_,
+//                                             toString(j));
 
-                logdbg << "JsonKey2DBOVariableMapping: setValue: json " << j
-                       << " buffer " << array_list.get(row_cnt);
-            }
-            catch (nlohmann::json::exception& e)
-            {
-                logerr  <<  "JsonKey2DBOVariableMapping: setValue: key " << json_key_ << " json exception " << e.what();
-                array_list.setNull(row_cnt);
-            }
-        }
-    }
+//                logdbg << "JsonKey2DBOVariableMapping: setValue: json " << j
+//                       << " buffer " << array_list.get(row_cnt);
+//            }
+//            catch (nlohmann::json::exception& e)
+//            {
+//                logerr  <<  "JsonKey2DBOVariableMapping: setValue: key " << json_key_ << " json exception " << e.what();
+//                array_list.setNull(row_cnt);
+//            }
+//        }
+//    }
 
     // return bool mandatory missing
     template<typename T>
@@ -222,7 +223,7 @@ public:
                 if (json_value_format_ == "")
                     array_list.set(row_cnt, tmp);
                 else
-                    array_list.setFromFormat(row_cnt, json_value_format_, toString(tmp));
+                    array_list.setFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(tmp));
 
                 logdbg << "JsonKey2DBOVariableMapping: setValue: json " << *val_ptr
                        << " buffer " << array_list.get(row_cnt);
@@ -292,7 +293,7 @@ public:
                 if (json_value_format_ == "")
                     array_list.set(row_cnt, tmp);
                 else
-                    array_list.setFromFormat(row_cnt, json_value_format_, toString(tmp));
+                    array_list.setFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(tmp));
 
                 logdbg << "JsonKey2DBOVariableMapping: setValue: json " << *val_ptr
                        << " buffer " << array_list.get(row_cnt);
@@ -329,15 +330,6 @@ private:
     unsigned int num_sub_keys_;
 
     nlohmann::json nullptr_ = nullptr;
-
-    inline std::string toString(const nlohmann::json& j) const
-    {
-        if (j.type() == nlohmann::json::value_t::string) {
-            return j.get<std::string>();
-        }
-
-        return j.dump();
-    }
 
 public:
     std::string jsonKey() const;

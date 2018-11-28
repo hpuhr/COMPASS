@@ -3,7 +3,7 @@
     <ParameterBool use_limit="0"/>
     <ParameterBool use_order="1"/>
     <ParameterBool use_order_ascending="1"/>
-    <ParameterUnsignedInt limit_max="1000000"/>
+    <ParameterUnsignedInt limit_max="200000"/>
     <ParameterUnsignedInt limit_min="0"/>
     <ParameterString order_variable__name="tod"/>
     <ParameterString order_variable_dbo_name="Meta"/>
@@ -9351,20 +9351,20 @@
             <ParameterString short_name="OLS"/>
         </Configuration>
         <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource15">
-            <ParameterBool has_altitude="0"/>
-            <ParameterBool has_latitude="0"/>
-            <ParameterBool has_longitude="0"/>
+            <ParameterBool has_altitude="1"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
             <ParameterBool has_sac="1"/>
             <ParameterBool has_short_name="1"/>
             <ParameterBool has_sic="1"/>
             <ParameterUnsignedInt id="15"/>
             <ParameterUnsignedInt sac="50"/>
             <ParameterUnsignedInt sic="20"/>
-            <ParameterDouble altitude="0.000000000000"/>
-            <ParameterDouble latitude="0.000000000000"/>
-            <ParameterDouble longitude="0.000000000000"/>
-            <ParameterString name="Unknown"/>
-            <ParameterString short_name="UKN"/>
+            <ParameterDouble altitude="2144.000000000000"/>
+            <ParameterDouble latitude="46.787108333300"/>
+            <ParameterDouble longitude="14.971150000000"/>
+            <ParameterString name="ModeS_Koralpe"/>
+            <ParameterString short_name="KOR"/>
         </Configuration>
         <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource2">
             <ParameterBool has_altitude="1"/>

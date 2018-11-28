@@ -13,7 +13,16 @@
             </Configuration>
         </Configuration>
         <Configuration class_id="SQLiteConnection" instance_id="SQLite Connection">
-            <ParameterString last_filename="/media/sk/Data/atsdb_data/2017-11-30_europe.db"/>
+            <ParameterString last_filename="/home/sk/data/test.db"/>
+            <Configuration class_id="SQLiteFile" instance_id="SQLiteFilehomeskdata2017-05-04-0930-1020.db">
+                <ParameterString name="/home/sk/data/2017-05-04-0930-1020.db"/>
+            </Configuration>
+            <Configuration class_id="SQLiteFile" instance_id="SQLiteFilehomeskdatatest.db">
+                <ParameterString name="/home/sk/data/test.db"/>
+            </Configuration>
+            <Configuration class_id="SQLiteFile" instance_id="SQLiteFilehomeskdatatestdrive_20180131_dfuse2_td.adb">
+                <ParameterString name="/home/sk/data/testdrive_20180131_dfuse2_td.adb"/>
+            </Configuration>
             <Configuration class_id="SQLiteFile" instance_id="SQLiteFilemediaskDataatsdb_data2017-11-30_europe.db">
                 <ParameterString name="/media/sk/Data/atsdb_data/2017-11-30_europe.db"/>
             </Configuration>

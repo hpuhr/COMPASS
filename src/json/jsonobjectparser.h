@@ -82,16 +82,6 @@ private:
     PropertyList list_;
 
     bool parseTargetReport (const nlohmann::json& tr, std::shared_ptr<Buffer> buffer, size_t row_cnt) const;
-
-    inline std::string toString(const nlohmann::json& j)
-    {
-        if (j.type() == nlohmann::json::value_t::string) {
-            return j.get<std::string>();
-        }
-
-        return j.dump();
-    }
-
 };
 
 #endif // JSONOBJECTPARSER_H
