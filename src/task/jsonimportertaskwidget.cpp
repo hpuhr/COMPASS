@@ -60,6 +60,7 @@ JSONImporterTaskWidget::JSONImporterTaskWidget(JSONImporterTask& task, QWidget* 
         file_list_->setTextElideMode (Qt::ElideNone);
         file_list_->setSelectionBehavior( QAbstractItemView::SelectItems );
         file_list_->setSelectionMode( QAbstractItemView::SingleSelection );
+        connect (file_list_, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(selectedFileSlot()));
         files_layout->addWidget(file_list_);
 
         QHBoxLayout* button_layout = new QHBoxLayout();
@@ -194,7 +195,9 @@ void JSONImporterTaskWidget::addFileSlot ()
 
 void JSONImporterTaskWidget::deleteFileSlot ()
 {
-    if (!file_list_->currentItem())
+    loginf << "JSONImporterTaskWidget: deleteFileSlot";
+
+    if (!file_list_->currentItem() || !task_.currentFilename().size())
     {
         QMessageBox m_warning (QMessageBox::Warning, "JSON File Deletion Failed",
                                  "Please select a file in the list.",
@@ -203,13 +206,19 @@ void JSONImporterTaskWidget::deleteFileSlot ()
         return;
     }
 
-    QString filename = file_list_->currentItem()->text();
+    assert (task_.currentFilename().size());
+    assert (task_.hasFile(task_.currentFilename()));
+    task_.removeCurrentFilename();
+}
 
-    if (filename.size() > 0)
-    {
-        assert (task_.hasFile(filename.toStdString()));
-        task_.removeFile (filename.toStdString());
-    }
+void JSONImporterTaskWidget::selectedFileSlot ()
+{
+    loginf << "JSONImporterTaskWidget: selectedFileSlot";
+    assert (file_list_->currentItem());
+
+    QString filename = file_list_->currentItem()->text();
+    assert (task_.hasFile(filename.toStdString()));
+    task_.currentFilename (filename.toStdString());
 }
 
 void JSONImporterTaskWidget::updateFileListSlot ()
@@ -219,7 +228,7 @@ void JSONImporterTaskWidget::updateFileListSlot ()
     for (auto it : task_.fileList())
     {
         QListWidgetItem *item = new QListWidgetItem(tr(it.first.c_str()), file_list_);
-        if (it.first == task_.lastFilename())
+        if (it.first == task_.currentFilename())
             file_list_->setCurrentItem(item);
     }
 }

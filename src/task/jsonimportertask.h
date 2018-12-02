@@ -54,8 +54,9 @@ public:
     const std::map <std::string, SavedFile*> &fileList () { return file_list_; }
     bool hasFile (const std::string &filename) { return file_list_.count (filename) > 0; }
     void addFile (const std::string &filename);
-    void removeFile (const std::string &filename);
-    const std::string &lastFilename () { return last_filename_; }
+    void removeCurrentFilename ();
+    void currentFilename (const std::string last_filename) { current_filename_ = last_filename; }
+    const std::string &currentFilename () { return current_filename_; }
 
     JSONParsingSchemaIterator begin() { return schemas_.begin(); }
     JSONParsingSchemaIterator end() { return schemas_.end(); }
@@ -67,7 +68,7 @@ public:
 
 protected:
     std::map <std::string, SavedFile*> file_list_;
-    std::string last_filename_;
+    std::string current_filename_;
 
     std::string current_schema_;
     std::map <std::string, JSONParsingSchema> schemas_;

@@ -34,7 +34,7 @@ JSONImporterTask::JSONImporterTask(const std::string& class_id, const std::strin
                                    TaskManager* task_manager)
     : Configurable (class_id, instance_id, task_manager)
 {
-    registerParameter("last_filename", &last_filename_, "");
+    registerParameter("current_filename", &current_filename_, "");
     registerParameter("current_schema", &current_schema_, "");
 
     createSubConfigurables();
@@ -114,13 +114,16 @@ void JSONImporterTask::addFile (const std::string &filename)
         widget_->updateFileListSlot();
 }
 
-void JSONImporterTask::removeFile (const std::string &filename)
+void JSONImporterTask::removeCurrentFilename ()
 {
-    if (file_list_.count (filename) != 1)
-        throw std::invalid_argument ("JSONImporterTask: addFile: name '"+filename+"' not in use");
+    assert (current_filename_.size());
+    assert (hasFile(current_filename_));
 
-    delete file_list_.at(filename);
-    file_list_.erase(filename);
+    if (file_list_.count (current_filename_) != 1)
+        throw std::invalid_argument ("JSONImporterTask: addFile: name '"+current_filename_+"' not in use");
+
+    delete file_list_.at(current_filename_);
+    file_list_.erase(current_filename_);
 
     if (widget_)
         widget_->updateFileListSlot();

@@ -25,6 +25,7 @@ public slots:
 
     void addFileSlot ();
     void deleteFileSlot ();
+    void selectedFileSlot ();
     void updateFileListSlot ();
 
     void addSchemaSlot();
