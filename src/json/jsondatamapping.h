@@ -7,6 +7,9 @@
 #include "nullablevector.h"
 #include "jsonutils.h"
 #include "configurable.h"
+#include "jsondatamappingwidget.h"
+
+#include <memory>
 
 class DBOVariable;
 class JSONObjectParser;
@@ -337,6 +340,8 @@ public:
 
     virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id) {}
 
+    JSONDataMappingWidget* widget ();
+
 private:
     std::string json_key_;
 
@@ -358,7 +363,7 @@ private:
     std::vector<std::string> sub_keys_;
     unsigned int num_sub_keys_;
 
-    //nlohmann::json nullptr_ = nullptr;
+    std::unique_ptr<JSONDataMappingWidget> widget_;
 
 protected:
     virtual void checkSubConfigurables () {}

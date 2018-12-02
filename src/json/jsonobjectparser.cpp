@@ -67,6 +67,11 @@ JSONObjectParser& JSONObjectParser::operator=(JSONObjectParser&& other)
     other.configuration().updateParameterPointer ("override_key_variable", &override_key_variable_);
     other.configuration().updateParameterPointer ("override_data_source", &override_data_source_);
 
+    widget_ = std::move(other.widget_);
+    if (widget_)
+        widget_->setParser(*this);
+    other.widget_ = nullptr;
+
     return static_cast<JSONObjectParser&>(Configurable::operator=(std::move(other)));
 }
 
@@ -545,6 +550,16 @@ void JSONObjectParser::dataSourceVariableName(const std::string& name)
     data_source_variable_name_ = name;
 }
 
+JSONObjectParserWidget* JSONObjectParser::widget ()
+{
+    if (!widget_)
+    {
+        widget_.reset(new JSONObjectParserWidget (*this));
+        assert (widget_);
+    }
+
+    return widget_.get(); // needed for qt integration, not pretty
+}
 
 
 

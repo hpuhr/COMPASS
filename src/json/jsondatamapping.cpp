@@ -4,20 +4,7 @@
 #include "dbobject.h"
 #include "atsdb.h"
 #include "jsonobjectparser.h"
-
-//JSONDataMapping::JSONDataMapping (const std::string& json_key, DBOVariable& variable, bool mandatory)
-//    : JSONDataMapping(json_key, variable, mandatory, {variable.dataType(), ""}, "", "")
-//{}
-
-//JSONDataMapping::JSONDataMapping (const std::string& json_key, DBOVariable& variable, bool mandatory,
-//                            Format json_value_format)
-//    : JSONDataMapping(json_key, variable, mandatory, json_value_format, "", "")
-//{}
-
-//JSONDataMapping::JSONDataMapping (const std::string& json_key, DBOVariable& variable, bool mandatory,
-//                            const std::string& dimension, const std::string& unit)
-//    : JSONDataMapping(json_key, variable, mandatory, {variable.dataType(), ""}, dimension, unit)
-//{}
+#include "jsondatamappingwidget.h"
 
 JSONDataMapping::JSONDataMapping (const std::string& class_id, const std::string& instance_id, JSONObjectParser& parent)
     : Configurable (class_id, instance_id, &parent)
@@ -83,6 +70,11 @@ JSONDataMapping& JSONDataMapping::operator=(JSONDataMapping&& other)
     other.configuration().updateParameterPointer ("dimension", &dimension_);
     other.configuration().updateParameterPointer ("unit", &unit_);
 
+    widget_ = std::move(other.widget_);
+    if (widget_)
+        widget_->setMapping(*this);
+    other.widget_ = nullptr;
+
     return static_cast<JSONDataMapping&>(Configurable::operator=(std::move(other)));
 }
 
@@ -135,4 +127,15 @@ void JSONDataMapping::jsonKey(const std::string &json_key)
     sub_keys_ = Utils::String::split(json_key_, '.');
     has_sub_keys_ = sub_keys_.size() > 1;
     num_sub_keys_ = sub_keys_.size();
+}
+
+JSONDataMappingWidget* JSONDataMapping::widget ()
+{
+    if (!widget_)
+    {
+        widget_.reset(new JSONDataMappingWidget (*this));
+        assert (widget_);
+    }
+
+    return widget_.get(); // needed for qt integration, not pretty
 }

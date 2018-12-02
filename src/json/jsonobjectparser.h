@@ -11,6 +11,7 @@
 #include "dbovariableset.h"
 #include "stringconv.h"
 #include "jsondatamapping.h"
+#include "jsonobjectparserwidget.h"
 
 class DBObject;
 class DBOVariable;
@@ -65,6 +66,8 @@ public:
 
     virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
 
+    JSONObjectParserWidget* widget ();
+
 private:
     std::string db_object_name_;
     DBObject* db_object_ {nullptr};
@@ -89,6 +92,8 @@ private:
     bool not_parse_all_ {false};
 
     PropertyList list_;
+
+    std::unique_ptr<JSONObjectParserWidget> widget_;
 
     bool parseTargetReport (const nlohmann::json& tr, std::shared_ptr<Buffer> buffer, size_t row_cnt) const;
 
