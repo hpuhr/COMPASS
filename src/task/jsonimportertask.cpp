@@ -67,6 +67,10 @@ void JSONImporterTask::generateSubConfigurable (const std::string &class_id, con
         assert (file_list_.count (file->name()) == 0);
         file_list_.insert (std::pair <std::string, SavedFile*> (file->name(), file));
     }
+    else if (class_id == "JSONObjectParser")
+    {
+        mappings_.emplace_back (class_id, instance_id, this);
+    }
     else
         throw std::runtime_error ("JSONImporterTask: generateSubConfigurable: unknown class_id "+class_id );
 }
@@ -198,143 +202,143 @@ void JSONImporterTask::createMappings ()
 {
     logdbg << "JSONImporterTask: createMappings";
 
-    if (mappings_.size() == 0)
-    {
-        unsigned int index;
-        {
-            index = mappings_.size();
+//    if (mappings_.size() == 0)
+//    {
+//        unsigned int index;
+//        {
+//            index = mappings_.size();
 
-            assert (ATSDB::instance().objectManager().existsObject("ADSB"));
-            DBObject& db_object = ATSDB::instance().objectManager().object("ADSB");
+//            assert (ATSDB::instance().objectManager().existsObject("ADSB"));
+//            DBObject& db_object = ATSDB::instance().objectManager().object("ADSB");
 
-            //        mappings_.push_back(JsonMapping (db_object));
-            //        mappings_.at(0).JSONKey("*");
-            //        mappings_.at(0).JSONValue("*");
-            //        mappings_.at(0).JSONContainerKey("acList");
-            //        mappings_.at(0).overrideKeyVariable(true);
-            //        mappings_.at(0).dataSourceVariableName("ds_id");
+//            //        mappings_.push_back(JsonMapping (db_object));
+//            //        mappings_.at(0).JSONKey("*");
+//            //        mappings_.at(0).JSONValue("*");
+//            //        mappings_.at(0).JSONContainerKey("acList");
+//            //        mappings_.at(0).overrideKeyVariable(true);
+//            //        mappings_.at(0).dataSourceVariableName("ds_id");
 
-            //        mappings_.at(0).addMapping({"Rcvr", db_object.variable("ds_id"), true});
-            //        mappings_.at(0).addMapping({"Icao", db_object.variable("target_addr"), true,
-            //                                    Format(PropertyDataType::STRING, "hexadecimal")});
-            //        mappings_.at(0).addMapping({"Reg", db_object.variable("callsign"), false});
-            //        mappings_.at(0).addMapping({"Alt", db_object.variable("alt_baro_ft"), false});
-            //        mappings_.at(0).addMapping({"GAlt", db_object.variable("alt_geo_ft"), false});
-            //        mappings_.at(0).addMapping({"Lat", db_object.variable("pos_lat_deg"), true});
-            //        mappings_.at(0).addMapping({"Long", db_object.variable("pos_long_deg"), true});
-            //        mappings_.at(0).addMapping({"PosTime", db_object.variable("tod"), true,
-            //                                    Format(PropertyDataType::STRING, "epoch_tod")});
+//            //        mappings_.at(0).addMapping({"Rcvr", db_object.variable("ds_id"), true});
+//            //        mappings_.at(0).addMapping({"Icao", db_object.variable("target_addr"), true,
+//            //                                    Format(PropertyDataType::STRING, "hexadecimal")});
+//            //        mappings_.at(0).addMapping({"Reg", db_object.variable("callsign"), false});
+//            //        mappings_.at(0).addMapping({"Alt", db_object.variable("alt_baro_ft"), false});
+//            //        mappings_.at(0).addMapping({"GAlt", db_object.variable("alt_geo_ft"), false});
+//            //        mappings_.at(0).addMapping({"Lat", db_object.variable("pos_lat_deg"), true});
+//            //        mappings_.at(0).addMapping({"Long", db_object.variable("pos_long_deg"), true});
+//            //        mappings_.at(0).addMapping({"PosTime", db_object.variable("tod"), true,
+//            //                                    Format(PropertyDataType::STRING, "epoch_tod")});
 
-            mappings_.push_back(JSONObjectParser (db_object));
-            mappings_.at(index).JSONKey("message_type");
-            mappings_.at(index).JSONValue("ads-b target");
-            mappings_.at(index).overrideKeyVariable(false);
-//            mappings_.at(index).overrideKeyVariable(true);
-            mappings_.at(index).dataSourceVariableName("ds_id");
+//            mappings_.push_back(JSONObjectParser (db_object));
+//            mappings_.at(index).JSONKey("message_type");
+//            mappings_.at(index).JSONValue("ads-b target");
+//            mappings_.at(index).overrideKeyVariable(false);
+////            mappings_.at(index).overrideKeyVariable(true);
+//            mappings_.at(index).dataSourceVariableName("ds_id");
 
-            mappings_.at(index).addMapping({"rec_num", db_object.variable("rec_num"), true});
-            mappings_.at(index).addMapping({"data_source_identifier.value", db_object.variable("ds_id"), true});
-            mappings_.at(index).addMapping({"data_source_identifier.sac", db_object.variable("sac"), true});
-            mappings_.at(index).addMapping({"data_source_identifier.sic", db_object.variable("sic"), true});
-            mappings_.at(index).addMapping({"target_address", db_object.variable("target_addr"), true});
-            mappings_.at(index).addMapping({"target_identification.value_idt", db_object.variable("callsign"), false});
-            mappings_.at(index).addMapping({"mode_c_height.value_ft", db_object.variable("alt_baro_ft"), false,
-                                            "Height", "Feet"});
-            mappings_.at(index).addMapping({"wgs84_position.value_lat_rad", db_object.variable("pos_lat_deg"), true,
-                                            "Angle", "Radian"});
-            mappings_.at(index).addMapping({"wgs84_position.value_lon_rad", db_object.variable("pos_long_deg"), true,
-                                            "Angle", "Radian"});
-            mappings_.at(index).addMapping({"time_of_report", db_object.variable("tod"), true, "Time", "Second"});
-            mappings_.at(index).initialize();
-        }
+//            mappings_.at(index).addMapping({"rec_num", db_object.variable("rec_num"), true});
+//            mappings_.at(index).addMapping({"data_source_identifier.value", db_object.variable("ds_id"), true});
+//            mappings_.at(index).addMapping({"data_source_identifier.sac", db_object.variable("sac"), true});
+//            mappings_.at(index).addMapping({"data_source_identifier.sic", db_object.variable("sic"), true});
+//            mappings_.at(index).addMapping({"target_address", db_object.variable("target_addr"), true});
+//            mappings_.at(index).addMapping({"target_identification.value_idt", db_object.variable("callsign"), false});
+//            mappings_.at(index).addMapping({"mode_c_height.value_ft", db_object.variable("alt_baro_ft"), false,
+//                                            "Height", "Feet"});
+//            mappings_.at(index).addMapping({"wgs84_position.value_lat_rad", db_object.variable("pos_lat_deg"), true,
+//                                            "Angle", "Radian"});
+//            mappings_.at(index).addMapping({"wgs84_position.value_lon_rad", db_object.variable("pos_long_deg"), true,
+//                                            "Angle", "Radian"});
+//            mappings_.at(index).addMapping({"time_of_report", db_object.variable("tod"), true, "Time", "Second"});
+//            mappings_.at(index).initialize();
+//        }
 
-        {
-            index = mappings_.size();
-            assert (ATSDB::instance().objectManager().existsObject("MLAT"));
-            DBObject& db_object = ATSDB::instance().objectManager().object("MLAT");
+//        {
+//            index = mappings_.size();
+//            assert (ATSDB::instance().objectManager().existsObject("MLAT"));
+//            DBObject& db_object = ATSDB::instance().objectManager().object("MLAT");
 
-            mappings_.push_back(JSONObjectParser (db_object));
-            mappings_.at(index).JSONKey("message_type");
-            mappings_.at(index).JSONValue("mlat target");
-            mappings_.at(index).overrideKeyVariable(false);
-//            mappings_.at(index).overrideKeyVariable(true);
-            mappings_.at(index).dataSourceVariableName("ds_id");
+//            mappings_.push_back(JSONObjectParser (db_object));
+//            mappings_.at(index).JSONKey("message_type");
+//            mappings_.at(index).JSONValue("mlat target");
+//            mappings_.at(index).overrideKeyVariable(false);
+////            mappings_.at(index).overrideKeyVariable(true);
+//            mappings_.at(index).dataSourceVariableName("ds_id");
 
-            mappings_.at(index).addMapping({"rec_num", db_object.variable("rec_num"), true});
-            mappings_.at(index).addMapping({"data_source_identifier.value", db_object.variable("ds_id"), true});
-            mappings_.at(index).addMapping({"data_source_identifier.sac", db_object.variable("sac"), true});
-            mappings_.at(index).addMapping({"data_source_identifier.sic", db_object.variable("sic"), true});
-            mappings_.at(index).addMapping({"mode_3a_info.code", db_object.variable("mode3a_code"), false});
-            mappings_.at(index).addMapping({"target_address", db_object.variable("target_addr"), true});
-            mappings_.at(index).addMapping({"target_identification.value_idt", db_object.variable("callsign"), false});
-            mappings_.at(index).addMapping({"mode_c_height.value_ft", db_object.variable("flight_level_ft"), false,
-                                            "Height", "Feet"});
-            mappings_.at(index).addMapping({"wgs84_position.value_lat_rad", db_object.variable("pos_lat_deg"), true,
-                                            "Angle", "Radian"});
-            mappings_.at(index).addMapping({"wgs84_position.value_lon_rad", db_object.variable("pos_long_deg"), true,
-                                            "Angle", "Radian"});
-            mappings_.at(index).addMapping({"detection_time", db_object.variable("tod"), true, "Time", "Second"});
-            mappings_.at(index).initialize();
-        }
+//            mappings_.at(index).addMapping({"rec_num", db_object.variable("rec_num"), true});
+//            mappings_.at(index).addMapping({"data_source_identifier.value", db_object.variable("ds_id"), true});
+//            mappings_.at(index).addMapping({"data_source_identifier.sac", db_object.variable("sac"), true});
+//            mappings_.at(index).addMapping({"data_source_identifier.sic", db_object.variable("sic"), true});
+//            mappings_.at(index).addMapping({"mode_3a_info.code", db_object.variable("mode3a_code"), false});
+//            mappings_.at(index).addMapping({"target_address", db_object.variable("target_addr"), true});
+//            mappings_.at(index).addMapping({"target_identification.value_idt", db_object.variable("callsign"), false});
+//            mappings_.at(index).addMapping({"mode_c_height.value_ft", db_object.variable("flight_level_ft"), false,
+//                                            "Height", "Feet"});
+//            mappings_.at(index).addMapping({"wgs84_position.value_lat_rad", db_object.variable("pos_lat_deg"), true,
+//                                            "Angle", "Radian"});
+//            mappings_.at(index).addMapping({"wgs84_position.value_lon_rad", db_object.variable("pos_long_deg"), true,
+//                                            "Angle", "Radian"});
+//            mappings_.at(index).addMapping({"detection_time", db_object.variable("tod"), true, "Time", "Second"});
+//            mappings_.at(index).initialize();
+//        }
 
-        {
-            index = mappings_.size();
-            assert (ATSDB::instance().objectManager().existsObject("Radar"));
-            DBObject& db_object = ATSDB::instance().objectManager().object("Radar");
+//        {
+//            index = mappings_.size();
+//            assert (ATSDB::instance().objectManager().existsObject("Radar"));
+//            DBObject& db_object = ATSDB::instance().objectManager().object("Radar");
 
-            mappings_.push_back(JSONObjectParser (db_object));
-            mappings_.at(index).JSONKey("message_type");
-            mappings_.at(index).JSONValue("radar target");
-            mappings_.at(index).overrideKeyVariable(false);
-//            mappings_.at(index).overrideKeyVariable(true);
-            mappings_.at(index).dataSourceVariableName("ds_id");
+//            mappings_.push_back(JSONObjectParser (db_object));
+//            mappings_.at(index).JSONKey("message_type");
+//            mappings_.at(index).JSONValue("radar target");
+//            mappings_.at(index).overrideKeyVariable(false);
+////            mappings_.at(index).overrideKeyVariable(true);
+//            mappings_.at(index).dataSourceVariableName("ds_id");
 
-            mappings_.at(index).addMapping({"rec_num", db_object.variable("rec_num"), true});
-            mappings_.at(index).addMapping({"data_source_identifier.value", db_object.variable("ds_id"), true});
-            mappings_.at(index).addMapping({"data_source_identifier.sac", db_object.variable("sac"), true});
-            mappings_.at(index).addMapping({"data_source_identifier.sic", db_object.variable("sic"), true});
-            mappings_.at(index).addMapping({"mode_3_info.code", db_object.variable("mode3a_code"), false});
-            mappings_.at(index).addMapping({"target_address", db_object.variable("target_addr"), false});
-            mappings_.at(index).addMapping({"aircraft_identification.value_idt", db_object.variable("callsign"), false});
-            mappings_.at(index).addMapping({"mode_c_height.value_ft", db_object.variable("modec_code_ft"), false,
-                                            "Height", "Feet"});
-            mappings_.at(index).addMapping({"measured_azm_rad", db_object.variable("pos_azm_deg"), true,
-                                            "Angle", "Radian"});
-            mappings_.at(index).addMapping({"measured_rng_m", db_object.variable("pos_range_nm"), true,
-                                            "Length", "Meter"});
-            mappings_.at(index).addMapping({"detection_time", db_object.variable("tod"), true, "Time", "Second"});
-            mappings_.at(index).initialize();
-        }
+//            mappings_.at(index).addMapping({"rec_num", db_object.variable("rec_num"), true});
+//            mappings_.at(index).addMapping({"data_source_identifier.value", db_object.variable("ds_id"), true});
+//            mappings_.at(index).addMapping({"data_source_identifier.sac", db_object.variable("sac"), true});
+//            mappings_.at(index).addMapping({"data_source_identifier.sic", db_object.variable("sic"), true});
+//            mappings_.at(index).addMapping({"mode_3_info.code", db_object.variable("mode3a_code"), false});
+//            mappings_.at(index).addMapping({"target_address", db_object.variable("target_addr"), false});
+//            mappings_.at(index).addMapping({"aircraft_identification.value_idt", db_object.variable("callsign"), false});
+//            mappings_.at(index).addMapping({"mode_c_height.value_ft", db_object.variable("modec_code_ft"), false,
+//                                            "Height", "Feet"});
+//            mappings_.at(index).addMapping({"measured_azm_rad", db_object.variable("pos_azm_deg"), true,
+//                                            "Angle", "Radian"});
+//            mappings_.at(index).addMapping({"measured_rng_m", db_object.variable("pos_range_nm"), true,
+//                                            "Length", "Meter"});
+//            mappings_.at(index).addMapping({"detection_time", db_object.variable("tod"), true, "Time", "Second"});
+//            mappings_.at(index).initialize();
+//        }
 
-        {
-            index = mappings_.size();
-            assert (ATSDB::instance().objectManager().existsObject("Tracker"));
-            DBObject& db_object = ATSDB::instance().objectManager().object("Tracker");
+//        {
+//            index = mappings_.size();
+//            assert (ATSDB::instance().objectManager().existsObject("Tracker"));
+//            DBObject& db_object = ATSDB::instance().objectManager().object("Tracker");
 
-            mappings_.push_back(JSONObjectParser (db_object));
-            mappings_.at(index).JSONKey("message_type");
-            mappings_.at(index).JSONValue("track update");
-            mappings_.at(index).overrideKeyVariable(false);
-//            mappings_.at(index).overrideKeyVariable(true);
-            mappings_.at(index).dataSourceVariableName("ds_id");
+//            mappings_.push_back(JSONObjectParser (db_object));
+//            mappings_.at(index).JSONKey("message_type");
+//            mappings_.at(index).JSONValue("track update");
+//            mappings_.at(index).overrideKeyVariable(false);
+////            mappings_.at(index).overrideKeyVariable(true);
+//            mappings_.at(index).dataSourceVariableName("ds_id");
 
-            mappings_.at(index).addMapping({"rec_num", db_object.variable("rec_num"), true});
-            mappings_.at(index).addMapping({"server_sacsic.value", db_object.variable("ds_id"), true});
-            mappings_.at(index).addMapping({"server_sacsic.sac", db_object.variable("sac"), true});
-            mappings_.at(index).addMapping({"server_sacsic.sic", db_object.variable("sic"), true});
-            mappings_.at(index).addMapping({"mode_3a_info.code", db_object.variable("mode3a_code"), false});
-            mappings_.at(index).addMapping({"aircraft_address", db_object.variable("target_addr"), true});
-            mappings_.at(index).addMapping({"aircraft_identification.value_idt", db_object.variable("callsign"), false});
-            mappings_.at(index).addMapping({"calculated_track_flight_level.value_feet", db_object.variable("modec_code_ft"),
-                                            false, "Height", "Feet"});
-            mappings_.at(index).addMapping({"calculated_wgs84_position.value_latitude_rad",
-                                            db_object.variable("pos_lat_deg"), true, "Angle", "Radian"});
-            mappings_.at(index).addMapping({"calculated_wgs84_position.value_longitude_rad",
-                                            db_object.variable("pos_long_deg"), true, "Angle", "Radian"});
-            mappings_.at(index).addMapping({"time_of_last_update", db_object.variable("tod"), true, "Time", "Second"});
-            mappings_.at(index).initialize();
-        }
-    }
+//            mappings_.at(index).addMapping({"rec_num", db_object.variable("rec_num"), true});
+//            mappings_.at(index).addMapping({"server_sacsic.value", db_object.variable("ds_id"), true});
+//            mappings_.at(index).addMapping({"server_sacsic.sac", db_object.variable("sac"), true});
+//            mappings_.at(index).addMapping({"server_sacsic.sic", db_object.variable("sic"), true});
+//            mappings_.at(index).addMapping({"mode_3a_info.code", db_object.variable("mode3a_code"), false});
+//            mappings_.at(index).addMapping({"aircraft_address", db_object.variable("target_addr"), true});
+//            mappings_.at(index).addMapping({"aircraft_identification.value_idt", db_object.variable("callsign"), false});
+//            mappings_.at(index).addMapping({"calculated_track_flight_level.value_feet", db_object.variable("modec_code_ft"),
+//                                            false, "Height", "Feet"});
+//            mappings_.at(index).addMapping({"calculated_wgs84_position.value_latitude_rad",
+//                                            db_object.variable("pos_lat_deg"), true, "Angle", "Radian"});
+//            mappings_.at(index).addMapping({"calculated_wgs84_position.value_longitude_rad",
+//                                            db_object.variable("pos_long_deg"), true, "Angle", "Radian"});
+//            mappings_.at(index).addMapping({"time_of_last_update", db_object.variable("tod"), true, "Time", "Second"});
+//            mappings_.at(index).initialize();
+//        }
+//    }
 }
 
 void JSONImporterTask::insertData ()

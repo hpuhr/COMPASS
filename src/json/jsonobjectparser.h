@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "propertylist.h"
-
+#include "configurable.h"
 #include "format.h"
 #include "dbovariable.h"
 #include "dbovariableset.h"
@@ -16,11 +16,17 @@ class DBObject;
 class DBOVariable;
 class Buffer;
 
-class JSONObjectParser
+class JSONObjectParser : public Configurable
 {
     using MappingIterator = std::vector<JSONDataMapping>::iterator;
 public:
-    JSONObjectParser (DBObject& dbObject);
+    //JSONObjectParser () = default;
+    JSONObjectParser (const std::string& class_id, const std::string& instance_id, Configurable* parent);
+    JSONObjectParser() = default;
+    JSONObjectParser(JSONObjectParser&& other) { *this = std::move(other); }
+
+    /// @brief Move constructor
+    JSONObjectParser& operator=(JSONObjectParser&& other);
 
     DBObject &dbObject() const;
 
@@ -33,7 +39,7 @@ public:
     std::string JSONContainerKey() const;
     void JSONContainerKey(const std::string& key);
 
-    void addMapping (JSONDataMapping mapping);
+    //void addMapping (JSONDataMapping mapping);
     MappingIterator begin() { return data_mappings_.begin(); }
     MappingIterator end() { return data_mappings_.end(); }
 
@@ -57,8 +63,11 @@ public:
 
     std::shared_ptr<Buffer> getNewBuffer () const;
 
+    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
+
 private:
-    DBObject& db_object_;
+    std::string db_object_name_;
+    DBObject* db_object_ {nullptr};
 
     std::string json_container_key_;  // location of container with target report data
     std::string json_key_; // * for all
@@ -82,6 +91,9 @@ private:
     PropertyList list_;
 
     bool parseTargetReport (const nlohmann::json& tr, std::shared_ptr<Buffer> buffer, size_t row_cnt) const;
+
+protected:
+    virtual void checkSubConfigurables () {}
 };
 
 #endif // JSONOBJECTPARSER_H

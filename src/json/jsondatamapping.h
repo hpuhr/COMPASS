@@ -6,22 +6,29 @@
 #include "format.h"
 #include "nullablevector.h"
 #include "jsonutils.h"
+#include "configurable.h"
 
 class DBOVariable;
+class JSONObjectParser;
 
-class JSONDataMapping
+class JSONDataMapping : public Configurable
 {
 public:
-    JSONDataMapping (const std::string& json_key, DBOVariable& variable, bool mandatory);
+    JSONDataMapping (const std::string& class_id, const std::string& instance_id, JSONObjectParser& parent);
+    JSONDataMapping() = default;
+    JSONDataMapping(JSONDataMapping&& other) { *this = std::move(other); }
 
-    JSONDataMapping (const std::string& json_key, DBOVariable& variable, bool mandatory,
-                                Format json_value_format);
+    /// @brief Move constructor
+    JSONDataMapping& operator=(JSONDataMapping&& other);
 
-    JSONDataMapping (const std::string& json_key, DBOVariable& variable, bool mandatory,
-                                const std::string& dimension, const std::string& unit);
+//    JSONDataMapping (const std::string& json_key, DBOVariable& variable, bool mandatory,
+//                                Format json_value_format);
 
-    JSONDataMapping (const std::string& json_key, DBOVariable& variable, bool mandatory,
-                                Format json_value_format, const std::string& dimension, const std::string& unit);
+//    JSONDataMapping (const std::string& json_key, DBOVariable& variable, bool mandatory,
+//                                const std::string& dimension, const std::string& unit);
+
+//    JSONDataMapping (const std::string& json_key, DBOVariable& variable, bool mandatory,
+//                                Format json_value_format, const std::string& dimension, const std::string& unit);
 
 //    bool hasKey (const nlohmann::json& j)
 //    {
@@ -220,10 +227,10 @@ public:
             try
             {
                 T tmp = *val_ptr;
-                if (json_value_format_ == "")
+                if (*json_value_format_.get() == "")
                     array_list.set(row_cnt, tmp);
                 else
-                    array_list.setFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(tmp));
+                    array_list.setFromFormat(row_cnt, *json_value_format_.get(), Utils::JSON::toString(tmp));
 
                 logdbg << "JsonKey2DBOVariableMapping: setValue: json " << *val_ptr
                        << " buffer " << array_list.get(row_cnt);
@@ -290,10 +297,10 @@ public:
             try
             {
                 char tmp = static_cast<int> (*val_ptr);
-                if (json_value_format_ == "")
+                if (*json_value_format_.get() == "")
                     array_list.set(row_cnt, tmp);
                 else
-                    array_list.setFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(tmp));
+                    array_list.setFromFormat(row_cnt, *json_value_format_.get(), Utils::JSON::toString(tmp));
 
                 logdbg << "JsonKey2DBOVariableMapping: setValue: json " << *val_ptr
                        << " buffer " << array_list.get(row_cnt);
@@ -314,11 +321,33 @@ public:
     /// @brief Returns unit
     const std::string &unit () const { return unit_; }
 
+    std::string jsonKey() const;
+    void jsonKey(const std::string &json_key);
+
+    DBOVariable& variable() const;
+
+    bool mandatory() const;
+    void mandatory(bool mandatory);
+
+    Format jsonValueFormat() const;
+    //void jsonValueFormat(const Format &json_value_format);
+
+    std::string dbObjectName() const;
+    std::string dboVariableName() const;
+
+    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id) {}
+
 private:
     std::string json_key_;
-    DBOVariable& variable_;
-    bool mandatory_;
-    Format json_value_format_;
+
+    std::string db_object_name_;
+    std::string dbovariable_name_;
+    DBOVariable* variable_ {nullptr};
+
+    bool mandatory_ {false};
+
+    std::string json_value_format_str_;
+    std::unique_ptr<Format> json_value_format_;
 
     /// Unit dimension
     std::string dimension_;
@@ -329,19 +358,10 @@ private:
     std::vector<std::string> sub_keys_;
     unsigned int num_sub_keys_;
 
-    nlohmann::json nullptr_ = nullptr;
+    //nlohmann::json nullptr_ = nullptr;
 
-public:
-    std::string jsonKey() const;
-    void jsonKey(const std::string &json_key);
-
-    DBOVariable& variable() const;
-
-    bool mandatory() const;
-    void mandatory(bool mandatory);
-
-    Format jsonValueFormat() const;
-    void jsonValueFormat(const Format &json_value_format);
+protected:
+    virtual void checkSubConfigurables () {}
 };
 
 #endif // JSONDATAMAPPING_H
