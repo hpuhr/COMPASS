@@ -19,6 +19,7 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/dbolabeldefinitionwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/dboaddschemametatabledialog.h"
         "${CMAKE_CURRENT_LIST_DIR}/stringrepresentationcombobox.h"
+        "${CMAKE_CURRENT_LIST_DIR}/selectdbobjectdialog.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/dbobject.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbobjectwidget.cpp"

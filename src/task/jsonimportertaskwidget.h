@@ -12,6 +12,7 @@ class QPushButton;
 class QListWidget;
 class QCheckBox;
 class QLineEdit;
+class QComboBox;
 
 class JSONImporterTaskWidget : public QWidget
 {
@@ -26,6 +27,10 @@ public slots:
     void deleteFileSlot ();
     void updateFileListSlot ();
 
+    void addSchemaSlot();
+    void removeSchemaSlot();
+    void selectedSchemaChangedSlot(const QString& text);
+
 public:
     JSONImporterTaskWidget(JSONImporterTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
     virtual ~JSONImporterTaskWidget();
@@ -36,14 +41,19 @@ protected:
     JSONImporterTask& task_;
 
     QListWidget* file_list_ {nullptr};
-    QPushButton* add_button_ {nullptr};
-    QPushButton* delete_button_ {nullptr};
+    QPushButton* add_file_button_ {nullptr};
+    QPushButton* delete_file_button_ {nullptr};
+
+    QComboBox* schema_box_ {nullptr};
+    QPushButton* add_schema_button_ {nullptr};
+    QPushButton* delete_schema_button_ {nullptr};
 
     QListWidget* object_parser_list_ {nullptr};
 
     QPushButton* test_button_ {nullptr};
     QPushButton* import_button_ {nullptr};
 
+    void updateSchemasBox();
     void updateParserList ();
 };
 

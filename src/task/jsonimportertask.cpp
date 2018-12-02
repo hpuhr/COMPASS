@@ -126,6 +126,20 @@ void JSONImporterTask::removeFile (const std::string &filename)
         widget_->updateFileListSlot();
 }
 
+void JSONImporterTask::removeCurrentSchema ()
+{
+    assert (hasSchema(current_schema_));
+    schemas_.erase(current_schema_);
+    assert (!hasSchema(current_schema_));
+
+    current_schema_ = "";
+
+    if (schemas_.size())
+        current_schema_ = schemas_.begin()->first;
+
+    loginf << "JSONImporterTask: removeCurrentSchema: set current schema '" << currentSchema() << "'";
+}
+
 std::string JSONImporterTask::currentSchema() const
 {
     return current_schema_;

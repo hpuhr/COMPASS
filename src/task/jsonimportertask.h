@@ -55,11 +55,12 @@ public:
     bool hasFile (const std::string &filename) { return file_list_.count (filename) > 0; }
     void addFile (const std::string &filename);
     void removeFile (const std::string &filename);
+    const std::string &lastFilename () { return last_filename_; }
 
     JSONParsingSchemaIterator begin() { return schemas_.begin(); }
     JSONParsingSchemaIterator end() { return schemas_.end(); }
-
-    const std::string &lastFilename () { return last_filename_; }
+    bool hasSchema(const std::string& name) { return schemas_.count(name) > 0; }
+    void removeCurrentSchema ();
 
     std::string currentSchema() const;
     void currentSchema(const std::string &currentSchema);
