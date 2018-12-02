@@ -21,7 +21,6 @@ class JSONObjectParser : public Configurable
 {
     using MappingIterator = std::vector<JSONDataMapping>::iterator;
 public:
-    //JSONObjectParser () = default;
     JSONObjectParser (const std::string& class_id, const std::string& instance_id, Configurable* parent);
     JSONObjectParser() = default;
     JSONObjectParser(JSONObjectParser&& other) { *this = std::move(other); }
@@ -40,7 +39,6 @@ public:
     std::string JSONContainerKey() const;
     void JSONContainerKey(const std::string& key);
 
-    //void addMapping (JSONDataMapping mapping);
     MappingIterator begin() { return data_mappings_.begin(); }
     MappingIterator end() { return data_mappings_.end(); }
 

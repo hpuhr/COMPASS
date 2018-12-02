@@ -33,10 +33,11 @@ JSONImporterTaskWidget::JSONImporterTaskWidget(JSONImporterTask& task, QWidget* 
 
     QVBoxLayout *main_layout = new QVBoxLayout ();
 
-    QLabel *main_label = new QLabel ("Import ADSBexchange JSON data");
+    QLabel *main_label = new QLabel ("Import JSON data");
     main_label->setFont (font_big);
     main_layout->addWidget (main_label);
 
+    // file stuff
     QLabel *files_label = new QLabel ("File Selection");
     files_label->setFont(font_bold);
     main_layout->addWidget(files_label);
@@ -57,66 +58,21 @@ JSONImporterTaskWidget::JSONImporterTaskWidget(JSONImporterTask& task, QWidget* 
     main_layout->addWidget(delete_button_);
     main_layout->addStretch();
 
+    // json object parser stuff
+    QLabel *parser_label = new QLabel ("JSON Object Parsers");
+    parser_label->setFont(font_bold);
+    main_layout->addWidget(parser_label);
+
+    object_parser_list_ = new QListWidget ();
+    //file_list_->setTextElideMode (Qt::ElideNone);
+    object_parser_list_->setSelectionBehavior( QAbstractItemView::SelectItems );
+    object_parser_list_->setSelectionMode( QAbstractItemView::SingleSelection );
+    main_layout->addWidget(object_parser_list_);
+
+
+    // rest
     QFormLayout *stuff_layout = new QFormLayout;
     stuff_layout->setFormAlignment(Qt::AlignRight | Qt::AlignTop);
-
-//    object_box_ = new DBObjectComboBox (false);
-//    if (task_.dbObjectStr().size())
-//        object_box_->setObjectName(task_.dbObjectStr());
-//    connect (object_box_, SIGNAL(changedObject()), this, SLOT(dbObjectChangedSlot()));
-//    stuff_layout->addRow(tr("DBObject"), object_box_);
-
-//    join_sources_check_ = new QCheckBox ();
-//    join_sources_check_->setChecked(task_.joinDataSources());
-//    connect (join_sources_check_, SIGNAL(toggled(bool)), this, SLOT(joinDataSourcesChangedSlot(bool)));
-//    stuff_layout->addRow("Join Data Sources", join_sources_check_);
-
-//    separate_mlat_check_ = new QCheckBox ();
-//    separate_mlat_check_->setChecked(task_.separateMLATData());
-//    connect (separate_mlat_check_, SIGNAL(toggled(bool)), this, SLOT(separateMLATChangedSlot(bool)));
-//    stuff_layout->addRow("Separate MLAT Data Source (if joined)", separate_mlat_check_);
-
-//    // time filter stuff
-//    filter_time_check_ = new QCheckBox ();
-//    filter_time_check_->setChecked(task_.useTimeFilter());
-//    connect (filter_time_check_, SIGNAL(toggled(bool)), this, SLOT(useTimeFilterChangedSlot(bool)));
-//    stuff_layout->addRow("Filter Time", filter_time_check_);
-
-//    filter_time_min_edit_ = new QLineEdit ();
-//    filter_time_min_edit_->setText(String::timeStringFromDouble(task_.timeFilterMin()).c_str());
-//    connect (filter_time_min_edit_, SIGNAL(textChanged(QString)), this, SLOT(timeFilterMinChangedSlot()));
-//    stuff_layout->addRow("Filter Time Minimum", filter_time_min_edit_);
-
-//    filter_time_max_edit_ = new QLineEdit ();
-//    filter_time_max_edit_->setText(String::timeStringFromDouble(task_.timeFilterMax()).c_str());
-//    connect (filter_time_max_edit_, SIGNAL(textChanged(QString)), this, SLOT(timeFilterMaxChangedSlot()));
-//    stuff_layout->addRow("Filter Time Maximum", filter_time_max_edit_);
-
-//    // position filter stuff
-//    filter_position_check_ = new QCheckBox ();
-//    filter_position_check_->setChecked(task_.usePositionFilter());
-//    connect (filter_position_check_, SIGNAL(toggled(bool)), this, SLOT(usePositionFilterChangedSlot(bool)));
-//    stuff_layout->addRow("Filter Position", filter_position_check_);
-
-//    filter_lat_min_edit_ = new QLineEdit ();
-//    filter_lat_min_edit_->setText(std::to_string(task_.positionFilterLatitudeMin()).c_str());
-//    connect (filter_lat_min_edit_, SIGNAL(textChanged(QString)), this, SLOT(positionFilterChangedSlot()));
-//    stuff_layout->addRow("Latitude Minimum", filter_lat_min_edit_);
-
-//    filter_lat_max_edit_ = new QLineEdit ();
-//    filter_lat_max_edit_->setText(std::to_string(task_.positionFilterLatitudeMax()).c_str());
-//    connect (filter_lat_max_edit_, SIGNAL(textChanged(QString)), this, SLOT(positionFilterChangedSlot()));
-//    stuff_layout->addRow("Latitude Maximum", filter_lat_max_edit_);
-
-//    filter_lon_min_edit_ = new QLineEdit ();
-//    filter_lon_min_edit_->setText(std::to_string(task_.positionFilterLongitudeMin()).c_str());
-//    connect (filter_lon_min_edit_, SIGNAL(textChanged(QString)), this, SLOT(positionFilterChangedSlot()));
-//    stuff_layout->addRow("Longitude Minimum", filter_lon_min_edit_);
-
-//    filter_lon_max_edit_ = new QLineEdit ();
-//    filter_lon_max_edit_->setText(std::to_string(task_.positionFilterLongitudeMax()).c_str());
-//    connect (filter_lon_max_edit_, SIGNAL(textChanged(QString)), this, SLOT(positionFilterChangedSlot()));
-//    stuff_layout->addRow("Longitude Maximum", filter_lon_max_edit_);
 
     main_layout->addLayout(stuff_layout);
 
@@ -191,16 +147,6 @@ void JSONImporterTaskWidget::update ()
 
 }
 
-//void JSONImporterTaskWidget::dbObjectChangedSlot()
-//{
-//    assert (object_box_);
-
-//    std::string object_name = object_box_->getObjectName();
-
-//    loginf << "JSONImporterTaskWidget: dbObjectChangedSlot: " << object_name;
-//    setDBOBject (object_name);
-//}
-
 void JSONImporterTaskWidget::testImportSlot ()
 {
     loginf << "JSONImporterTaskWidget: testImportSlot";
@@ -263,109 +209,7 @@ void JSONImporterTaskWidget::importDoneSlot (bool test)
     loginf << "JSONImporterTaskWidget: importDoneSlot: test " << test;
 }
 
-//void JSONImporterTaskWidget::setDBOBject (const std::string& object_name)
-//{
-//    task_.dbObjectStr(object_name);
+void JSONImporterTaskWidget::updateParserList ()
+{
 
-//    key_box_->showDBOOnly(object_name);
-//    datasource_box_->showDBOOnly(object_name);
-//    range_box_->showDBOOnly(object_name);
-//    azimuth_box_->showDBOOnly(object_name);
-//    altitude_box_->showDBOOnly(object_name);
-
-//    latitude_box_->showDBOOnly(object_name);
-//    longitude_box_->showDBOOnly(object_name);
-//}
-
-//void JSONImporterTaskWidget::joinDataSourcesChangedSlot (bool checked)
-//{
-//    task_.joinDataSources(checked);
-//}
-
-//void JSONImporterTaskWidget::separateMLATChangedSlot (bool checked)
-//{
-//    task_.separateMLATData(checked);
-//}
-
-//void JSONImporterTaskWidget::useTimeFilterChangedSlot (bool checked)
-//{
-//    task_.useTimeFilter(checked);
-//}
-
-//void JSONImporterTaskWidget::timeFilterMinChangedSlot ()
-//{
-//    assert (filter_time_min_edit_);
-
-//    if (filter_time_min_edit_->text().size() == 0)
-//        return;
-
-//    std::string tmp = filter_time_min_edit_->text().toStdString();
-//    float value = String::timeFromString(tmp);
-
-//    if (value > 0 && value < 24*3600)
-//        task_.timeFilterMin(value);
-//}
-
-//void JSONImporterTaskWidget::timeFilterMaxChangedSlot ()
-//{
-//    assert (filter_time_max_edit_);
-
-//    if (filter_time_max_edit_->text().size() == 0)
-//        return;
-
-//    std::string tmp = filter_time_max_edit_->text().toStdString();
-//    float value = String::timeFromString(tmp);
-
-//    if (value > 0 && value < 24*3600)
-//        task_.timeFilterMax(value);
-//}
-
-//void JSONImporterTaskWidget::usePositionFilterChangedSlot (bool checked)
-//{
-//    task_.usePositionFilter(checked);
-//}
-
-//void JSONImporterTaskWidget::positionFilterChangedSlot ()
-//{
-//    assert (filter_lat_min_edit_);
-//    assert (filter_lat_max_edit_);
-//    assert (filter_lon_min_edit_);
-//    assert (filter_lon_max_edit_);
-
-//    bool failed = false;
-
-//    try
-//    {
-//        float lat_min = std::stof(filter_lat_min_edit_->text().toStdString());
-
-//        if (lat_min > -90 && lat_min < 90)
-//            task_.positionFilterLatitudeMin(lat_min);
-//        else
-//            failed = true;
-
-//        float lat_max = std::stof(filter_lat_max_edit_->text().toStdString());
-//        if (lat_max > -90 && lat_max < 90)
-//            task_.positionFilterLatitudeMax(lat_max);
-//        else
-//            failed = true;
-
-//        float lon_min = std::stof(filter_lon_min_edit_->text().toStdString());
-//        if (lon_min > -180 && lon_min < 180)
-//            task_.positionFilterLongitudeMin(lon_min);
-//        else
-//            failed = true;
-
-//        float lon_max = std::stof(filter_lon_max_edit_->text().toStdString());
-//        if (lon_max > -180 && lon_max < 180)
-//            task_.positionFilterLongitudeMax(lon_max);
-//        else
-//            failed = true;
-//    }
-//    catch (std::exception& e)
-//    {
-//        loginf << "JSONImporterTaskWidget: positionFilterChangedSlot: value conversion failed";
-//    }
-
-//    if (failed)
-//        loginf << "JSONImporterTaskWidget: positionFilterChangedSlot: value conversion failed";
-//}
+}

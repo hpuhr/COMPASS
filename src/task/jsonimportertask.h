@@ -3,7 +3,7 @@
 
 #include "configurable.h"
 #include "json.hpp"
-#include "jsonobjectparser.h"
+#include "jsonparsingschema.h"
 #include "readjsonfilepartjob.h"
 
 #include <QObject>
@@ -22,6 +22,8 @@ class JSONMappingJob;
 class JSONImporterTask : public QObject, public Configurable
 {
     Q_OBJECT
+
+    using JSONParsingSchemaIterator = std::map<std::string, JSONParsingSchema>::iterator;
 
 public slots:
     void insertProgressSlot (float percent);
@@ -54,13 +56,20 @@ public:
     void addFile (const std::string &filename);
     void removeFile (const std::string &filename);
 
+    JSONParsingSchemaIterator begin() { return schemas_.begin(); }
+    JSONParsingSchemaIterator end() { return schemas_.end(); }
+
     const std::string &lastFilename () { return last_filename_; }
+
+    std::string currentSchema() const;
+    void currentSchema(const std::string &currentSchema);
 
 protected:
     std::map <std::string, SavedFile*> file_list_;
     std::string last_filename_;
 
-    std::vector <JSONObjectParser> mappings_;
+    std::string current_schema_;
+    std::map <std::string, JSONParsingSchema> schemas_;
     size_t key_count_ {0};
 
     JSONImporterTaskWidget* widget_ {nullptr};
@@ -102,11 +111,13 @@ protected:
 
     QMessageBox* msg_box_ {nullptr};
 
-    void createMappings ();
+    //void createMappings ();
     void insertData ();
     //void clearData ();
 
     void updateMsgBox ();
+
+    virtual void checkSubConfigurables () {}
 };
 
 #endif // JSONIMPORTERTASK_H

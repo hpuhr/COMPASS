@@ -35,6 +35,7 @@ JSONImporterTask::JSONImporterTask(const std::string& class_id, const std::strin
     : Configurable (class_id, instance_id, task_manager)
 {
     registerParameter("last_filename", &last_filename_, "");
+    registerParameter("current_schema", &current_schema_, "");
 
     createSubConfigurables();
 }
@@ -67,9 +68,19 @@ void JSONImporterTask::generateSubConfigurable (const std::string &class_id, con
         assert (file_list_.count (file->name()) == 0);
         file_list_.insert (std::pair <std::string, SavedFile*> (file->name(), file));
     }
-    else if (class_id == "JSONObjectParser")
+    else if (class_id == "JSONParsingSchema")
     {
-        mappings_.emplace_back (class_id, instance_id, this);
+        std::string name = configuration().getSubConfiguration(
+                    class_id, instance_id).getParameterConfigValueString("name");
+
+        assert (schemas_.find (name) == schemas_.end());
+
+        logdbg << "JSONImporterTask: generateSubConfigurable: generating schema " << instance_id
+               << " with name " << name;
+
+        schemas_.emplace(std::piecewise_construct,
+                     std::forward_as_tuple(name),  // args for key
+                     std::forward_as_tuple(class_id, instance_id, *this));  // args for mapped value
     }
     else
         throw std::runtime_error ("JSONImporterTask: generateSubConfigurable: unknown class_id "+class_id );
@@ -115,6 +126,16 @@ void JSONImporterTask::removeFile (const std::string &filename)
         widget_->updateFileListSlot();
 }
 
+std::string JSONImporterTask::currentSchema() const
+{
+    return current_schema_;
+}
+
+void JSONImporterTask::currentSchema(const std::string &current_schema)
+{
+    current_schema_ = current_schema;
+}
+
 bool JSONImporterTask::canImportFile (const std::string& filename)
 {
     if (!Files::fileExists(filename))
@@ -126,6 +147,15 @@ bool JSONImporterTask::canImportFile (const std::string& filename)
     if (!ATSDB::instance().objectManager().existsObject("ADSB"))
     {
         loginf << "JSONImporterTask: canImportFile: not possible since DBObject does not exist";
+        return false;
+    }
+
+    if (!current_schema_.size())
+        return false;
+
+    if (!schemas_.count(current_schema_))
+    {
+        current_schema_ = "";
         return false;
     }
 
@@ -147,7 +177,9 @@ void JSONImporterTask::importFile(const std::string& filename, bool test)
     test_ = test;
     all_done_ = false;
 
-    for (auto& map_it : mappings_)
+    assert (schemas_.count(current_schema_));
+
+    for (auto& map_it : schemas_.at(current_schema_))
         if (!map_it.initialized())
             map_it.initialize();
 
@@ -180,7 +212,9 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
     test_ = test;
     all_done_ = false;
 
-    for (auto& map_it : mappings_)
+    assert (schemas_.count(current_schema_));
+
+    for (auto& map_it : schemas_.at(current_schema_))
         if (!map_it.initialized())
             map_it.initialize();
 
@@ -198,9 +232,9 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
     return;
 }
 
-void JSONImporterTask::createMappings ()
-{
-    logdbg << "JSONImporterTask: createMappings";
+//void JSONImporterTask::createMappings ()
+//{
+//    logdbg << "JSONImporterTask: createMappings";
 
 //    if (mappings_.size() == 0)
 //    {
@@ -339,7 +373,7 @@ void JSONImporterTask::createMappings ()
 //            mappings_.at(index).initialize();
 //        }
 //    }
-}
+// }
 
 void JSONImporterTask::insertData ()
 {
@@ -353,7 +387,9 @@ void JSONImporterTask::insertData ()
 
     bool has_sac_sic = false;
 
-    for (auto& map_it : mappings_)
+    assert (schemas_.count(current_schema_));
+
+    for (auto& map_it : schemas_.at(current_schema_))
     {
         if (buffers_.count(map_it.dbObject().name()) != 0)
         {
@@ -647,7 +683,7 @@ void JSONImporterTask::parseJSONDoneSlot ()
 
     objects_parsed_ += json_objects.size();
 
-    createMappings();
+//    createMappings();
 
 //    while (json_objects.size())
 //    {
@@ -679,8 +715,11 @@ void JSONImporterTask::parseJSONDoneSlot ()
 
     size_t count = json_objects.size();
 
+    assert (schemas_.count(current_schema_));
+
     std::shared_ptr<JSONMappingJob> json_map_job =
-            std::shared_ptr<JSONMappingJob> (new JSONMappingJob (std::move(json_objects), mappings_, key_count_));
+            std::shared_ptr<JSONMappingJob> (new JSONMappingJob (std::move(json_objects),
+                                                                 schemas_.at(current_schema_).mappings(), key_count_));
     connect (json_map_job.get(), SIGNAL(obsoleteSignal()), this, SLOT(mapJSONObsoleteSlot()),
              Qt::QueuedConnection);
     connect (json_map_job.get(), SIGNAL(doneSignal()), this, SLOT(mapJSONDoneSlot()), Qt::QueuedConnection);

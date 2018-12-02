@@ -6,7 +6,8 @@
 #include "jsonobjectparser.h"
 #include "jsondatamappingwidget.h"
 
-JSONDataMapping::JSONDataMapping (const std::string& class_id, const std::string& instance_id, JSONObjectParser& parent)
+JSONDataMapping::JSONDataMapping (const std::string& class_id, const std::string& instance_id,
+                                  JSONObjectParser& parent)
     : Configurable (class_id, instance_id, &parent)
 {
     registerParameter("json_key", &json_key_, "");
