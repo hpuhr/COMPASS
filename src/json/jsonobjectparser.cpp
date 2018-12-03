@@ -15,11 +15,13 @@ JSONObjectParser::JSONObjectParser (const std::string& class_id, const std::stri
     registerParameter("db_object_name", &db_object_name_, "");
 
     registerParameter("json_container_key", &json_container_key_, "");
-    registerParameter("json_key", &json_key_, "");
+    registerParameter("json_key", &json_key_, "*");
     registerParameter("json_value", &json_value_, "");
 
     registerParameter("override_key_variable", &override_key_variable_, false);
+
     registerParameter("override_data_source", &override_data_source_, false);
+    registerParameter("data_source_variable_name", &data_source_variable_name_, "");
 
     assert (db_object_name_.size());
 
@@ -114,6 +116,8 @@ std::string JSONObjectParser::JSONKey() const
 
 void JSONObjectParser::JSONKey(const std::string& json_key)
 {
+    loginf << "JSONObjectParser: JSONKey: " << json_key;
+
     json_key_ = json_key;
 }
 
@@ -124,6 +128,8 @@ std::string JSONObjectParser::JSONValue() const
 
 void JSONObjectParser::JSONValue(const std::string& json_value)
 {
+    loginf << "JSONObjectParser: JSONValue: " << json_value;
+
     json_value_ = json_value;
 }
 
@@ -134,6 +140,8 @@ std::string JSONObjectParser::JSONContainerKey() const
 
 void JSONObjectParser::JSONContainerKey(const std::string& key)
 {
+    loginf << "JSONObjectParser: JSONContainerKey: " << key;
+
     json_container_key_ = key;
 }
 //void JSONObjectParser::addMapping (JSONDataMapping mapping)
@@ -524,6 +532,8 @@ bool JSONObjectParser::overrideKeyVariable() const
 
 void JSONObjectParser::overrideKeyVariable(bool override)
 {
+    loginf << "JSONObjectParser: overrideKeyVariable: " << override;
+
     override_key_variable_ = override;
 }
 
@@ -537,18 +547,22 @@ bool JSONObjectParser::overrideDataSource() const
     return override_data_source_;
 }
 
-void JSONObjectParser::OverrideDataSource(bool override)
+void JSONObjectParser::overrideDataSource(bool override)
 {
+    loginf << "JSONObjectParser: overrideDataSource: " << override;
     override_data_source_ = override;
 }
 
 std::string JSONObjectParser::dataSourceVariableName() const
 {
+
     return data_source_variable_name_;
 }
 
 void JSONObjectParser::dataSourceVariableName(const std::string& name)
 {
+    loginf << "JSONObjectParser: dataSourceVariableName: " << name;
+
     data_source_variable_name_ = name;
 }
 

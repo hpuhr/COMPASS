@@ -52,7 +52,7 @@ public:
     const DBOVariableSet& variableList() const;
 
     bool overrideDataSource() const;
-    void OverrideDataSource(bool override);
+    void overrideDataSource(bool override);
 
     std::string dataSourceVariableName() const;
     void dataSourceVariableName(const std::string& name);
