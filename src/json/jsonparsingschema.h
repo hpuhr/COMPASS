@@ -10,7 +10,7 @@ class JSONImporterTask;
 
 class JSONParsingSchema : public Configurable
 {
-    using JSONObjectParserIterator = std::vector<JSONObjectParser>::iterator;
+    using JSONObjectParserIterator = std::map<std::string, JSONObjectParser>::iterator;
 
 public:
     JSONParsingSchema(const std::string& class_id, const std::string& instance_id, JSONImporterTask& task);
@@ -20,10 +20,12 @@ public:
     /// @brief Move constructor
     JSONParsingSchema& operator=(JSONParsingSchema&& other);
 
-    JSONObjectParserIterator begin() { return mappings_.begin(); }
-    JSONObjectParserIterator end() { return mappings_.end(); }
+    JSONObjectParserIterator begin() { return parsers_.begin(); }
+    JSONObjectParserIterator end() { return parsers_.end(); }
 
-    const std::vector<JSONObjectParser>& mappings () { return mappings_; }
+    const std::map<std::string, JSONObjectParser>& parsers () { return parsers_; }
+    bool hasObjectParser (const std::string& name) { return parsers_.count(name) > 0; }
+    JSONObjectParser& parser (const std::string& name);
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
@@ -33,7 +35,7 @@ public:
 private:
     std::string name_;
     JSONImporterTask* task_ {nullptr};
-    std::vector <JSONObjectParser> mappings_;
+    std::map <std::string, JSONObjectParser> parsers_;
 
 protected:
     virtual void checkSubConfigurables () {}

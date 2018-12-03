@@ -14,14 +14,6 @@ JSONObjectParser::JSONObjectParser (const std::string& class_id, const std::stri
 {
     registerParameter("db_object_name", &db_object_name_, "");
 
-    DBObjectManager& obj_man = ATSDB::instance().objectManager();
-
-    if (!obj_man.existsObject(db_object_name_))
-        logwrn << "JSONObjectParser: ctor: dbobject '" << db_object_name_ << "' does not exist";
-    else
-        db_object_ = &obj_man.object(db_object_name_);
-
-
     registerParameter("json_container_key", &json_container_key_, "");
     registerParameter("json_key", &json_key_, "");
     registerParameter("json_value", &json_value_, "");
@@ -111,6 +103,7 @@ void JSONObjectParser::generateSubConfigurable (const std::string& class_id, con
 
 DBObject& JSONObjectParser::dbObject() const
 {
+    assert (db_object_);
     return *db_object_;
 }
 
@@ -160,6 +153,15 @@ void JSONObjectParser::JSONContainerKey(const std::string& key)
 
 void JSONObjectParser::initialize ()
 {
+    assert (!db_object_);
+
+    DBObjectManager& obj_man = ATSDB::instance().objectManager();
+
+    if (!obj_man.existsObject(db_object_name_))
+        logwrn << "JSONObjectParser: ctor: dbobject '" << db_object_name_ << "' does not exist";
+    else
+        db_object_ = &obj_man.object(db_object_name_);
+
     assert (db_object_);
 
     if (!initialized_)
@@ -559,6 +561,11 @@ JSONObjectParserWidget* JSONObjectParser::widget ()
     }
 
     return widget_.get(); // needed for qt integration, not pretty
+}
+
+std::string JSONObjectParser::dbObjectName() const
+{
+    return db_object_name_;
 }
 
 

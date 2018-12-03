@@ -1,4 +1,5 @@
 #include "jsonobjectparserwidget.h"
+#include "jsonobjectparser.h"
 
 #include <QVBoxLayout>
 #include <QGridLayout>
@@ -13,7 +14,8 @@ JSONObjectParserWidget::JSONObjectParserWidget(JSONObjectParser& parser, QWidget
 
     QVBoxLayout *main_layout = new QVBoxLayout ();
 
-    QLabel *main_label = new QLabel ("JSON Parser ");
+    std::string tmp ="JSON Object Parser " + parser_->dbObjectName();
+    QLabel *main_label = new QLabel (tmp.c_str());
     main_label->setFont (font_bold);
     main_layout->addWidget (main_label);
 

@@ -66,6 +66,8 @@ public:
 
     JSONObjectParserWidget* widget ();
 
+    std::string dbObjectName() const;
+
 private:
     std::string db_object_name_;
     DBObject* db_object_ {nullptr};
@@ -73,7 +75,6 @@ private:
     std::string json_container_key_;  // location of container with target report data
     std::string json_key_; // * for all
     std::string json_value_;
-    std::vector <JSONDataMapping> data_mappings_;
 
     DBOVariableSet var_list_;
 
@@ -92,6 +93,8 @@ private:
     PropertyList list_;
 
     std::unique_ptr<JSONObjectParserWidget> widget_;
+
+    std::vector <JSONDataMapping> data_mappings_;
 
     bool parseTargetReport (const nlohmann::json& tr, std::shared_ptr<Buffer> buffer, size_t row_cnt) const;
 

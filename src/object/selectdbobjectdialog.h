@@ -1,5 +1,5 @@
-#ifndef ADDJSONPARSINGSCHEMADIALOG_H
-#define ADDJSONPARSINGSCHEMADIALOG_H
+#ifndef SELECTDBOBJECTDIALOG_H
+#define SELECTDBOBJECTDIALOG_H
 
 #include <QDialogButtonBox>
 #include <QGridLayout>
@@ -9,12 +9,12 @@
 
 #include "dbobjectcombobox.h"
 
-class AddJSONParsingSchemaDialog : public QDialog
+class SelectDBObjectDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    AddJSONParsingSchemaDialog ()
+    SelectDBObjectDialog ()
     {
         setMinimumWidth(300);
 
@@ -77,4 +77,4 @@ protected:
 //    }
 };
 
-#endif // ADDJSONPARSINGSCHEMADIALOG_H
+#endif // SELECTDBOBJECTDIALOG_H

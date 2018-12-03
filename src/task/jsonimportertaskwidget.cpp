@@ -7,6 +7,7 @@
 #include "atsdb.h"
 #include "stringconv.h"
 #include "dbobjectmanager.h"
+#include "selectdbobjectdialog.h"
 
 #include <QVBoxLayout>
 #include <QFormLayout>
@@ -19,11 +20,12 @@
 #include <QLineEdit>
 #include <QFrame>
 #include <QInputDialog>
+#include <QStackedWidget>
 
 using namespace Utils;
 
 JSONImporterTaskWidget::JSONImporterTaskWidget(JSONImporterTask& task, QWidget* parent, Qt::WindowFlags f)
-: QWidget (parent, f), task_(task)
+    : QWidget (parent, f), task_(task)
 {
     setMinimumSize(QSize(800, 600));
 
@@ -35,13 +37,13 @@ JSONImporterTaskWidget::JSONImporterTaskWidget(JSONImporterTask& task, QWidget* 
 
     int frame_width_small = 1;
 
-    QVBoxLayout *main_layout = new QVBoxLayout ();
+    main_layout_ = new QHBoxLayout ();
+
+    QVBoxLayout* left_layout = new QVBoxLayout ();
 
     QLabel *main_label = new QLabel ("Import JSON data");
     main_label->setFont (font_big);
-    main_layout->addWidget (main_label);
-
-    QVBoxLayout* left_layout = new QVBoxLayout ();
+    left_layout->addWidget (main_label);
 
     // file stuff
     {
@@ -61,6 +63,8 @@ JSONImporterTaskWidget::JSONImporterTaskWidget(JSONImporterTask& task, QWidget* 
         file_list_->setSelectionBehavior( QAbstractItemView::SelectItems );
         file_list_->setSelectionMode( QAbstractItemView::SingleSelection );
         connect (file_list_, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(selectedFileSlot()));
+
+        updateFileListSlot ();
         files_layout->addWidget(file_list_);
 
         QHBoxLayout* button_layout = new QHBoxLayout();
@@ -132,17 +136,20 @@ JSONImporterTaskWidget::JSONImporterTaskWidget(JSONImporterTask& task, QWidget* 
         //file_list_->setTextElideMode (Qt::ElideNone);
         object_parser_list_->setSelectionBehavior( QAbstractItemView::SelectItems );
         object_parser_list_->setSelectionMode( QAbstractItemView::SingleSelection );
+        connect (object_parser_list_, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(selectedObjectParserSlot()));
+
+        updateParserList();
         parsers_layout->addWidget(object_parser_list_);
 
         QHBoxLayout* button_layout = new QHBoxLayout();
 
-        QPushButton* add_button = new QPushButton ("Add");
-        //connect (add_button_, SIGNAL(clicked()), this, SLOT(addFileSlot()));
-        button_layout->addWidget(add_button);
+        add_object_parser_button_ = new QPushButton ("Add");
+        connect (add_object_parser_button_, SIGNAL(clicked()), this, SLOT(addObjectParserSlot()));
+        button_layout->addWidget(add_object_parser_button_);
 
-        QPushButton* delete_button = new QPushButton ("Remove");
-        //connect (delete_button_, SIGNAL(clicked()), this, SLOT(deleteFileSlot()));
-        button_layout->addWidget(delete_button);
+        delete_object_parser_button_ = new QPushButton ("Remove");
+        connect (delete_object_parser_button_, SIGNAL(clicked()), this, SLOT(removeObjectParserSlot()));
+        button_layout->addWidget(delete_object_parser_button_);
 
         parsers_layout->addLayout(button_layout);
 
@@ -151,27 +158,27 @@ JSONImporterTaskWidget::JSONImporterTaskWidget(JSONImporterTask& task, QWidget* 
         left_layout->addWidget (parsers_frame, 1);
     }
 
-//    QFormLayout *stuff_layout = new QFormLayout;
-//    stuff_layout->setFormAlignment(Qt::AlignRight | Qt::AlignTop);
-//    stuff_layout->addLayout(left_layout);
+    //    QFormLayout *stuff_layout = new QFormLayout;
+    //    stuff_layout->setFormAlignment(Qt::AlignRight | Qt::AlignTop);
+    //    stuff_layout->addLayout(left_layout);
 
-//    main_layout->addLayout(stuff_layout);
+    //    main_layout->addLayout(stuff_layout);
 
-    main_layout->addLayout(left_layout);
-
-    //main_layout->addStretch();
 
     test_button_ = new QPushButton ("Test Import");
     connect(test_button_, &QPushButton::clicked, this, &JSONImporterTaskWidget::testImportSlot);
-    main_layout->addWidget(test_button_);
+    left_layout->addWidget(test_button_);
 
     import_button_ = new QPushButton ("Import");
     connect(import_button_, &QPushButton::clicked, this, &JSONImporterTaskWidget::importSlot);
-    main_layout->addWidget(import_button_);
+    left_layout->addWidget(import_button_);
 
-    setLayout (main_layout);
+    main_layout_->addLayout(left_layout);
 
-    updateFileListSlot ();
+    //main_layout->addStretch();
+
+    setLayout (main_layout_);
+
     update();
 
     show();
@@ -200,8 +207,8 @@ void JSONImporterTaskWidget::deleteFileSlot ()
     if (!file_list_->currentItem() || !task_.currentFilename().size())
     {
         QMessageBox m_warning (QMessageBox::Warning, "JSON File Deletion Failed",
-                                 "Please select a file in the list.",
-                                 QMessageBox::Ok);
+                               "Please select a file in the list.",
+                               QMessageBox::Ok);
         m_warning.exec();
         return;
     }
@@ -223,6 +230,8 @@ void JSONImporterTaskWidget::selectedFileSlot ()
 
 void JSONImporterTaskWidget::updateFileListSlot ()
 {
+    assert (file_list_);
+
     file_list_->clear();
 
     for (auto it : task_.fileList())
@@ -275,46 +284,17 @@ void JSONImporterTaskWidget::addSchemaSlot()
         task_.generateSubConfigurable("JSONParsingSchema", instance);
         updateSchemasBox();
     }
-
-//    SelectDBObjectDialog dialog;
-
-//    int ret = dialog.exec();
-
-//    if (ret == QDialog::Accepted)
-
-//    {
-//        std::string name = dialog.selectedObject();
-//        loginf << "JSONImporterTaskWidget: addSchemaSlot: obj " << name;
-
-//        if (task_.hasSchema(name))
-//        {
-//            QMessageBox m_warning (QMessageBox::Warning, "JSON Parsing Schema Adding Failed",
-//                                   "Schema is already defined for the selected object.",
-//                                   QMessageBox::Ok);
-
-//            m_warning.exec();
-//            return;
-//        }
-
-//        std::string instance = "JSONParsingSchema"+name+"0";
-
-//        Configuration &config = task_.addNewSubConfiguration ("JSONParsingSchema", instance);
-//        config.addParameterString ("name", name);
-
-//        task_.generateSubConfigurable("JSONParsingSchema", instance);
-//        updateSchemasBox();
-//    }
 }
 
 void JSONImporterTaskWidget::removeSchemaSlot()
 {
     loginf << "JSONImporterTaskWidget: removeSchemaSlot";
 
-    if (!task_.currentSchema().size())
+    if (!task_.currentSchemaName().size())
     {
         QMessageBox m_warning (QMessageBox::Warning, "JSON File Deletion Failed",
-                                 "Please select a file in the list.",
-                                 QMessageBox::Ok);
+                               "Please select a file in the list.",
+                               QMessageBox::Ok);
         m_warning.exec();
         return;
     }
@@ -328,7 +308,7 @@ void JSONImporterTaskWidget::selectedSchemaChangedSlot(const QString& text)
     loginf << "JSONImporterTaskWidget: selectedSchemaChangedSlot: text " << text.toStdString();
 
     assert (task_.hasSchema(text.toStdString()));
-    task_.currentSchema(text.toStdString());
+    task_.currentSchemaName(text.toStdString());
 }
 
 void JSONImporterTaskWidget::updateSchemasBox()
@@ -342,10 +322,99 @@ void JSONImporterTaskWidget::updateSchemasBox()
         schema_box_->addItem(schema_it.first.c_str());
     }
 
-    if (task_.currentSchema().size())
+    if (task_.currentSchemaName().size())
     {
-        schema_box_->setCurrentText(task_.currentSchema().c_str());
+        schema_box_->setCurrentText(task_.currentSchemaName().c_str());
     }
+    else if (schema_box_->currentText().size())
+    {
+        task_.currentSchemaName(schema_box_->currentText().toStdString());
+    }
+}
+
+void JSONImporterTaskWidget::addObjectParserSlot ()
+{
+    if (!task_.hasCurrentSchema())
+    {
+        QMessageBox m_warning (QMessageBox::Warning, "JSON Object Parser Adding Failed",
+                               "No current JSON Parsing Schema is selected.",
+                               QMessageBox::Ok);
+
+        m_warning.exec();
+        return;
+    }
+
+    SelectDBObjectDialog dialog;
+
+    int ret = dialog.exec();
+
+    if (ret == QDialog::Accepted)
+    {
+        std::string name = dialog.selectedObject();
+        loginf << "JSONImporterTaskWidget: addObjectParserSlot: obj " << name;
+
+        JSONParsingSchema& current = task_.currentSchema();
+
+        if (current.hasObjectParser(name))
+        {
+            QMessageBox m_warning (QMessageBox::Warning, "JSON Object Parser Adding Failed",
+                                   "Object parser is already defined for the selected object.",
+                                   QMessageBox::Ok);
+
+            m_warning.exec();
+            return;
+        }
+
+        std::string instance = "JSONObjectParser"+name+"0";
+
+        Configuration &config = current.addNewSubConfiguration ("JSONObjectParser", instance);
+        config.addParameterString ("db_object_name", name);
+
+        current.generateSubConfigurable("JSONObjectParser", instance);
+        updateParserList();
+    }
+}
+void JSONImporterTaskWidget::removeObjectParserSlot ()
+{
+    loginf << "JSONImporterTaskWidget: removeObjectParserSlot";
+}
+
+void JSONImporterTaskWidget::selectedObjectParserSlot ()
+{
+    loginf << "JSONImporterTaskWidget: selectedObjectParserSlot";
+
+    if (!object_parser_widgets_)
+    {
+        assert (main_layout_);
+
+        int frame_width_small = 1;
+
+        QFrame *right_frame = new QFrame ();
+        right_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
+        right_frame->setLineWidth(frame_width_small);
+
+        object_parser_widgets_ = new QStackedWidget ();
+
+        QVBoxLayout* tmp = new QVBoxLayout ();
+        tmp->addWidget(object_parser_widgets_);
+
+        right_frame->setLayout(tmp);
+
+        main_layout_->addWidget(right_frame);
+    }
+
+    assert (object_parser_widgets_);
+    while (object_parser_widgets_->count() > 0)
+        object_parser_widgets_->removeWidget(object_parser_widgets_->widget(0));
+
+    assert (object_parser_list_);
+    assert (object_parser_list_->currentItem());
+
+    std::string name = object_parser_list_->currentItem()->text().toStdString();
+
+    assert (task_.hasCurrentSchema());
+    assert (task_.currentSchema().hasObjectParser(name));
+    object_parser_widgets_->addWidget(task_.currentSchema().parser(name).widget());
 }
 
 void JSONImporterTaskWidget::update ()
@@ -360,8 +429,8 @@ void JSONImporterTaskWidget::testImportSlot ()
     if (!file_list_->currentItem())
     {
         QMessageBox m_warning (QMessageBox::Warning, "JSON File Test Import Failed",
-                                 "Please select a file in the list.",
-                                 QMessageBox::Ok);
+                               "Please select a file in the list.",
+                               QMessageBox::Ok);
         m_warning.exec();
         return;
     }
@@ -388,8 +457,8 @@ void JSONImporterTaskWidget::importSlot ()
     if (!file_list_->currentItem())
     {
         QMessageBox m_warning (QMessageBox::Warning, "JSON File Import Failed",
-                                 "Please select a file in the list.",
-                                 QMessageBox::Ok);
+                               "Please select a file in the list.",
+                               QMessageBox::Ok);
         m_warning.exec();
         return;
     }
@@ -418,4 +487,18 @@ void JSONImporterTaskWidget::importDoneSlot (bool test)
 void JSONImporterTaskWidget::updateParserList ()
 {
     loginf << "JSONImporterTaskWidget: updateParserList";
+
+    assert (object_parser_list_);
+    object_parser_list_->clear();
+
+    if (task_.hasCurrentSchema())
+    {
+        for (auto& parser_it : task_.currentSchema())
+        {
+            QListWidgetItem* item = new QListWidgetItem(tr(parser_it.first.c_str()), object_parser_list_);
+            assert (item);
+//            if (it.first == task_.currentFilename())
+//                file_list_->setCurrentItem(item);
+        }
+    }
 }

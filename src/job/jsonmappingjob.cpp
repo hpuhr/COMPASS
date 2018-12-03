@@ -3,9 +3,9 @@
 #include "buffer.h"
 #include "dbobject.h"
 
-JSONMappingJob::JSONMappingJob(std::vector<nlohmann::json>&& json_objects, const std::vector <JSONObjectParser>& mappings,
-                               size_t key_count)
-    : Job ("JSONMappingJob"), json_objects_(json_objects), mappings_(mappings), key_count_(key_count)
+JSONMappingJob::JSONMappingJob(std::vector<nlohmann::json>&& json_objects,
+                               const std::map <std::string, JSONObjectParser>& mappings, size_t key_count)
+    : Job ("JSONMappingJob"), json_objects_(json_objects), parsers_(mappings), key_count_(key_count)
 {
 
 }
@@ -21,23 +21,23 @@ void JSONMappingJob::run ()
 
     started_ = true;
 
-    for (auto& map_it : mappings_)
-        buffers_[map_it.dbObject().name()] = map_it.getNewBuffer();
+    for (auto& parser_it : parsers_)
+        buffers_[parser_it.second.dbObject().name()] = parser_it.second.getNewBuffer();
 
     for (auto& j_it : json_objects_)
-        for (auto& map_it : mappings_)
-            map_it.parseJSON(j_it, buffers_.at(map_it.dbObject().name()));
+        for (auto& map_it : parsers_)
+            map_it.second.parseJSON(j_it, buffers_.at(map_it.second.dbObject().name()));
 
     unsigned int num_mapped {0};
 
-    for (auto& map_it : mappings_)
+    for (auto& parser_it : parsers_)
     {
-        assert (buffers_.count(map_it.dbObject().name()));
-        std::shared_ptr<Buffer> buffer = buffers_.at(map_it.dbObject().name());
+        assert (buffers_.count(parser_it.second.dbObject().name()));
+        std::shared_ptr<Buffer> buffer = buffers_.at(parser_it.second.dbObject().name());
 
         if (buffer && buffer->size())
         {
-            map_it.transformBuffer(buffer, key_count_);
+            parser_it.second.transformBuffer(buffer, key_count_);
             num_mapped += buffer->size();
         }
     }

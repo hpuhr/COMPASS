@@ -61,20 +61,22 @@ public:
     JSONParsingSchemaIterator begin() { return schemas_.begin(); }
     JSONParsingSchemaIterator end() { return schemas_.end(); }
     bool hasSchema(const std::string& name) { return schemas_.count(name) > 0; }
+    bool hasCurrentSchema ();
+    JSONParsingSchema& currentSchema();
     void removeCurrentSchema ();
 
-    std::string currentSchema() const;
-    void currentSchema(const std::string &currentSchema);
+    std::string currentSchemaName() const;
+    void currentSchemaName(const std::string &currentSchema);
 
 protected:
     std::map <std::string, SavedFile*> file_list_;
     std::string current_filename_;
 
+    std::unique_ptr<JSONImporterTaskWidget> widget_;
+
     std::string current_schema_;
     std::map <std::string, JSONParsingSchema> schemas_;
     size_t key_count_ {0};
-
-    JSONImporterTaskWidget* widget_ {nullptr};
 
     unsigned int insert_active_ {0};
     unsigned int rec_num_cnt_ {0};

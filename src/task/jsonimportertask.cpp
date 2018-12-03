@@ -42,12 +42,6 @@ JSONImporterTask::JSONImporterTask(const std::string& class_id, const std::strin
 
 JSONImporterTask::~JSONImporterTask()
 {
-    if (widget_)
-    {
-        delete widget_;
-        widget_ = nullptr;
-    }
-
     if (msg_box_)
     {
         delete msg_box_;
@@ -91,11 +85,11 @@ JSONImporterTaskWidget* JSONImporterTask::widget()
 {
     if (!widget_)
     {
-        widget_ = new JSONImporterTaskWidget (*this);
+        widget_.reset(new JSONImporterTaskWidget (*this));
     }
 
     assert (widget_);
-    return widget_;
+    return widget_.get();
 }
 
 void JSONImporterTask::addFile (const std::string &filename)
@@ -129,6 +123,20 @@ void JSONImporterTask::removeCurrentFilename ()
         widget_->updateFileListSlot();
 }
 
+bool JSONImporterTask::hasCurrentSchema ()
+{
+    if (!current_schema_.size())
+        return false;
+
+    return schemas_.count(current_schema_) > 0;
+}
+
+JSONParsingSchema& JSONImporterTask::currentSchema()
+{
+    assert (hasCurrentSchema());
+    return schemas_.at(current_schema_);
+}
+
 void JSONImporterTask::removeCurrentSchema ()
 {
     assert (hasSchema(current_schema_));
@@ -140,15 +148,15 @@ void JSONImporterTask::removeCurrentSchema ()
     if (schemas_.size())
         current_schema_ = schemas_.begin()->first;
 
-    loginf << "JSONImporterTask: removeCurrentSchema: set current schema '" << currentSchema() << "'";
+    loginf << "JSONImporterTask: removeCurrentSchema: set current schema '" << currentSchemaName() << "'";
 }
 
-std::string JSONImporterTask::currentSchema() const
+std::string JSONImporterTask::currentSchemaName() const
 {
     return current_schema_;
 }
 
-void JSONImporterTask::currentSchema(const std::string &current_schema)
+void JSONImporterTask::currentSchemaName(const std::string &current_schema)
 {
     current_schema_ = current_schema;
 }
@@ -197,8 +205,8 @@ void JSONImporterTask::importFile(const std::string& filename, bool test)
     assert (schemas_.count(current_schema_));
 
     for (auto& map_it : schemas_.at(current_schema_))
-        if (!map_it.initialized())
-            map_it.initialize();
+        if (!map_it.second.initialized())
+            map_it.second.initialize();
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
@@ -232,8 +240,8 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
     assert (schemas_.count(current_schema_));
 
     for (auto& map_it : schemas_.at(current_schema_))
-        if (!map_it.initialized())
-            map_it.initialize();
+        if (!map_it.second.initialized())
+            map_it.second.initialize();
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
@@ -406,14 +414,14 @@ void JSONImporterTask::insertData ()
 
     assert (schemas_.count(current_schema_));
 
-    for (auto& map_it : schemas_.at(current_schema_))
+    for (auto& parser_it : schemas_.at(current_schema_))
     {
-        if (buffers_.count(map_it.dbObject().name()) != 0)
+        if (buffers_.count(parser_it.second.dbObject().name()) != 0)
         {
             ++insert_active_;
 
-            DBObject& db_object = map_it.dbObject();
-            std::shared_ptr<Buffer> buffer = buffers_.at(map_it.dbObject().name());
+            DBObject& db_object = parser_it.second.dbObject();
+            std::shared_ptr<Buffer> buffer = buffers_.at(parser_it.second.dbObject().name());
 
             has_sac_sic = db_object.hasVariable("sac") && db_object.hasVariable("sic")
                     && buffer->has<char>("sac") && buffer->has<char>("sic");
@@ -428,11 +436,11 @@ void JSONImporterTask::insertData ()
                      Qt::UniqueConnection);
 
 
-            if (map_it.dataSourceVariableName() != "")
+            if (parser_it.second.dataSourceVariableName() != "")
             {
                 logdbg << "JSONImporterTask: insertData: adding new data sources";
 
-                std::string data_source_var_name = map_it.dataSourceVariableName();
+                std::string data_source_var_name = parser_it.second.dataSourceVariableName();
 
 
                 // collect existing datasources
@@ -507,17 +515,17 @@ void JSONImporterTask::insertData ()
 
             logdbg << "JSONImporterTask: insertData: " << db_object.name() << " inserting";
 
-            DBOVariableSet set = map_it.variableList();
+            DBOVariableSet set = parser_it.second.variableList();
             db_object.insertData(set, buffer);
             objects_inserted_ += buffer->size();
 
             logdbg << "JSONImporterTask: insertData: " << db_object.name() << " clearing";
             //map_it.clearBuffer();
 
-            buffers_.erase(map_it.dbObject().name());
+            buffers_.erase(parser_it.second.dbObject().name());
         }
         else
-            logdbg << "JSONImporterTask: insertData: emtpy buffer for " << map_it.dbObject().name();
+            logdbg << "JSONImporterTask: insertData: emtpy buffer for " << parser_it.second.dbObject().name();
     }
 
     assert (buffers_.size() == 0);
@@ -736,7 +744,7 @@ void JSONImporterTask::parseJSONDoneSlot ()
 
     std::shared_ptr<JSONMappingJob> json_map_job =
             std::shared_ptr<JSONMappingJob> (new JSONMappingJob (std::move(json_objects),
-                                                                 schemas_.at(current_schema_).mappings(), key_count_));
+                                                                 schemas_.at(current_schema_).parsers(), key_count_));
     connect (json_map_job.get(), SIGNAL(obsoleteSignal()), this, SLOT(mapJSONObsoleteSlot()),
              Qt::QueuedConnection);
     connect (json_map_job.get(), SIGNAL(doneSignal()), this, SLOT(mapJSONDoneSlot()), Qt::QueuedConnection);
