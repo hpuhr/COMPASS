@@ -43,8 +43,8 @@ using namespace std;
  * Sets init state, creates members, starts the thread using go.
  */
 ATSDB::ATSDB()
- : Configurable ("ATSDB", "ATSDB0", 0, "atsdb.xml"), initialized_(false), db_interface_(nullptr), dbo_manager_(nullptr), db_schema_manager_ (nullptr),
-   filter_manager_(nullptr), view_manager_(nullptr)
+ : Configurable ("ATSDB", "ATSDB0", 0, "atsdb.xml"), initialized_(false), db_interface_(nullptr), dbo_manager_(nullptr),
+   db_schema_manager_ (nullptr), filter_manager_(nullptr), view_manager_(nullptr)
 {
     logdbg  << "ATSDB: constructor: start";
 

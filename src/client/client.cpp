@@ -40,10 +40,12 @@ bool Client::notify(QObject * receiver, QEvent * event)
     catch(std::exception& e)
     {
         logerr  << "Client: Exception thrown: " << e.what();
+        //assert (false);
         QMessageBox::critical( NULL, "Client::notify(): Exception", QString( e.what() ) );
     }
     catch(...)
     {
+        //assert (false);
         QMessageBox::critical( NULL, "Client::notify(): Exception", "Unknown exception" );
     }
     return false;

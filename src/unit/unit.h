@@ -40,7 +40,7 @@ public:
       registerParameter("definition", &definition_, "");
       registerParameter("factor", &factor_, 1.0);
 
-      logdbg << "Unit: constructor: dimension " << parent.getInstanceId() << " unit " << instance_id << " factor " << factor_;
+      logdbg << "Unit: constructor: dimension " << parent.instanceId() << " unit " << instance_id << " factor " << factor_;
   }
   /// @brief Destructor
   virtual ~Unit() {}

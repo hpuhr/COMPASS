@@ -24,6 +24,7 @@
 #include "projectionmanager.h"
 #include "projectionmanagerwidget.h"
 #include "global.h"
+#include "logger.h"
 
 ProjectionManager::ProjectionManager()
     : Configurable ("ProjectionManager", "ProjectionManager0", 0, "projection.xml")

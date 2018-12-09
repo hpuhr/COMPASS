@@ -37,7 +37,8 @@ public:
     bool hasDimension (const std::string &name) { return dimensions_.count(name) > 0; }
 
     /// @brief Returns unit with a given name
-    const Dimension &dimension (const std::string &name) { return *dimensions_.at(name); }
+    const Dimension &dimension (const std::string &name) { assert (hasDimension(name));
+                                                           return *dimensions_.at(name); }
     /// @brief Return container with all units
     const std::map <std::string, Dimension*> &dimensions () { return dimensions_; }
 

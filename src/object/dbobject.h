@@ -26,8 +26,8 @@
 #include "dbovariableset.h"
 #include "dbodatasource.h"
 #include "configurable.h"
+#include "dbovariable.h"
 
-class DBOVariable;
 class PropertyList;
 class MetaDBTable;
 //class ActiveSourcesObserver;
@@ -51,8 +51,8 @@ public:
     /// @brief Destructor
     virtual ~DBOSchemaMetaTableDefinition() {}
 
-    const std::string& schema () { return schema_; }
-    const std::string& metaTable () { return meta_table_; }
+    const std::string& schema () const { return schema_; }
+    const std::string& metaTable () const { return meta_table_; }
 
 protected:
     /// DBSchema identifier
@@ -141,13 +141,17 @@ public:
     /// @brief Returns flag indication if a DBOVariable identified by id exists
     bool hasVariable (const std::string& name) const;
     /// @brief Returns variable identified by id
-    DBOVariable& variable (const std::string& name) const;
+    DBOVariable& variable (const std::string& name);
     void renameVariable (const std::string& name, const std::string& new_name);
     /// @brief Deletes a variable identified by id
     void deleteVariable (const std::string& name);
 
-    /// @brief Returns container with all variables
-    const std::map<std::string, DBOVariable*> &variables () const;
+    bool uses (const DBTableColumn& column) const;
+
+    using DBOVariableIterator = typename std::map<std::string, DBOVariable>::iterator;
+    DBOVariableIterator begin() { return variables_.begin(); }
+    DBOVariableIterator end() { return variables_.end(); }
+
     /// @brief Returns number of existing variables
     size_t numVariables () const { return variables_.size(); }
 
@@ -188,10 +192,12 @@ public:
     size_t loadedCount ();
 
     /// @brief Returns container with all meta tables
-    const std::map <std::string, std::string> &metaTables () const { return meta_tables_; }
+    const std::map <std::string, DBOSchemaMetaTableDefinition>& metaTables () const {
+        return meta_table_definitions_; }
     /// @brief Returns identifier of main meta table under DBSchema defined by schema
     bool hasMetaTable (const std::string& schema) const;
-    const std::string &metaTable (const std::string& schema) const;
+    const std::string& metaTable (const std::string& schema) const;
+    void deleteMetaTable (const std::string& schema);
 
     /// @brief Returns main meta table for current schema
     const MetaDBTable& currentMetaTable () const;
@@ -205,10 +211,9 @@ public:
     bool hasDataSourceDefinition (const std::string& schema) { return data_source_definitions_.count(schema); }
     void deleteDataSourceDefinition (const std::string& schema);
     /// @brief Returns container with all data source definitions
-    const std::map <std::string, DBODataSourceDefinition*>& dataSourceDefinitions () const {
+    std::map <std::string, DBODataSourceDefinition>& dataSourceDefinitions () {
         return data_source_definitions_;
     }
-
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
@@ -225,7 +230,7 @@ public:
     bool hasActiveDataSourcesInfo ();
 
     /// @brief Returns container with the active data sources information
-    const std::set<int> getActiveDataSources () const;
+    const std::set<int> getActiveDataSources ();
 
     std::string status ();
 
@@ -240,6 +245,8 @@ public:
 
     bool existsInDB () const;
 
+    void print ();
+
 protected:
     /// DBO name
     std::string name_;
@@ -250,7 +257,7 @@ protected:
     bool loading_wanted_ {false};
     size_t count_ {0};
 
-    DBOLabelDefinition* label_definition_ {nullptr};
+    std::unique_ptr<DBOLabelDefinition> label_definition_;
 
     std::shared_ptr <DBOReadDBJob> read_job_ {nullptr};
     std::vector <std::shared_ptr<Buffer>> read_job_data_;
@@ -264,28 +271,21 @@ protected:
     bool locked_ {false};
 
     /// Container with all DBOSchemaMetaTableDefinitions
-    std::vector <DBOSchemaMetaTableDefinition*> meta_table_definitions_;
-    /// Container with the main meta tables for schemas (schema identifier -> meta_table identifier)
-    std::map <std::string, std::string> meta_tables_;
+    std::map <std::string, DBOSchemaMetaTableDefinition> meta_table_definitions_;
 
     /// Container with data source definitions (schema identifier -> data source definition pointer)
-    std::map <std::string, DBODataSourceDefinition*> data_source_definitions_;
+    std::map <std::string, DBODataSourceDefinition> data_source_definitions_;
     std::map<int, DBODataSource> data_sources_;
     /// Container with all variables (variable identifier -> variable pointer)
-    std::map<std::string, DBOVariable*> variables_;
+    std::map<std::string, DBOVariable> variables_;
 
     /// Current (in the current schema) main meta table
     MetaDBTable* current_meta_table_ {nullptr}; // TODO rework const?
 
-    /// Flag indicating if varaibles where checked. Not really used yet.
-    //bool variables_checked_;
-
-    DBObjectWidget* widget_ {nullptr};
-    DBObjectInfoWidget* info_widget_{nullptr};
+    std::unique_ptr<DBObjectWidget> widget_;
+    std::unique_ptr<DBObjectInfoWidget> info_widget_;
 
     virtual void checkSubConfigurables ();
-    /// @brief Checks if variables really exist. Not used yet.
-    //void checkVariables ();
 
     ///@brief Generates data sources information from previous post-processing.
     void buildDataSources();

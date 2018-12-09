@@ -37,8 +37,8 @@ void Dimension::generateSubConfigurable (const std::string &class_id, const std:
     if (class_id == "Unit")
     {
         Unit *unit = new Unit (class_id, instance_id, *this);
-        assert (units_.find(unit->getInstanceId()) == units_.end());
-        units_.insert (std::pair <std::string, Unit*> (unit->getInstanceId(), unit));
+        assert (units_.find(unit->instanceId()) == units_.end());
+        units_.insert (std::pair <std::string, Unit*> (unit->instanceId(), unit));
 
     }
     else

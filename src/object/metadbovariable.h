@@ -50,6 +50,7 @@ public:
     void addVariable (const std::string &dbo_name, const std::string &dbovariable_name);
 
     const std::map <std::string, DBOVariable&> &variables () { return variables_; }
+    bool uses (const DBOVariable& variable);
 
     std::string name() const;
     void name(const std::string &name);

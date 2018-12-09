@@ -109,15 +109,15 @@ void DBOVariableSelectionWidget::updateMenuEntries()
     {
         assert (ATSDB::instance().objectManager().existsObject(only_dbo_name_));
 
-        for (auto variable_it : ATSDB::instance().objectManager().object(only_dbo_name_).variables())
+        for (auto& var_it : ATSDB::instance().objectManager().object(only_dbo_name_))
         {
-            if (show_existing_in_db_only_ && !variable_it.second->existsInDB())
+            if (show_existing_in_db_only_ && !var_it.second.existsInDB())
                 continue;
 
-            QAction* action = menu_.addAction(QString::fromStdString (variable_it.first));
+            QAction* action = menu_.addAction(QString::fromStdString (var_it.first));
 
             QVariantMap vmap;
-            vmap.insert (QString::fromStdString (variable_it.first), QVariant (QString::fromStdString (only_dbo_name_)));
+            vmap.insert (QString::fromStdString (var_it.first), QVariant (QString::fromStdString (only_dbo_name_)));
             action->setData (QVariant (vmap));
         }
     }
@@ -143,22 +143,20 @@ void DBOVariableSelectionWidget::updateMenuEntries()
         if (show_meta_variables_only_)
             return;
 
-        for (auto object_it : ATSDB::instance().objectManager().objects())
+        for (auto& object_it : ATSDB::instance().objectManager())
         {
-
-            auto variables = object_it.second->variables();
 
             QMenu* m2 = menu_.addMenu(QString::fromStdString(object_it.first));
 
-            for (auto variable_it : variables)
+            for (auto& var_it : *object_it.second)
             {
-                if (show_existing_in_db_only_ && !variable_it.second->existsInDB())
+                if (show_existing_in_db_only_ && !var_it.second.existsInDB())
                     continue;
 
-                QAction* action = m2->addAction(QString::fromStdString (variable_it.first));
+                QAction* action = m2->addAction(QString::fromStdString (var_it.first));
 
                 QVariantMap vmap;
-                vmap.insert (QString::fromStdString (variable_it.first), QVariant (QString::fromStdString (object_it.first)));
+                vmap.insert (QString::fromStdString (var_it.first), QVariant (QString::fromStdString (object_it.first)));
                 action->setData (QVariant (vmap));
             }
         }

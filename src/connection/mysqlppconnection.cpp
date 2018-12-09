@@ -356,42 +356,64 @@ void MySQLppConnection::readRowIntoBuffer (mysqlpp::Row &row, const PropertyList
     //logdbg << "MySQLppConnection::readRowIntoBuffer: start buffer size " << buffer->size() << " index " << index;
     for (unsigned int cnt=0; cnt < num_properties; cnt++)
     {
-        if (row[cnt] != mysqlpp::null)
-        {
             const Property &prop=list.at(cnt);
 
             switch (prop.dataType())
             {
             case PropertyDataType::BOOL:
-                buffer->getBool(prop.name()).set(index, static_cast<bool> (row[cnt]));
+                if (row[cnt] != mysqlpp::null)
+                    buffer->get<bool>(prop.name()).set(index, static_cast<bool> (row[cnt]));
+                else
+                    buffer->get<bool>(prop.name()).setNone(index);
                 //loginf  << "sqlex: bool " << prop->id_ << " val " << *ptr;
                 break;
             case PropertyDataType::UCHAR:
-                buffer->getUChar(prop.name()).set(index, static_cast<unsigned char> (row[cnt]));
+                if (row[cnt] != mysqlpp::null)
+                    buffer->get<unsigned char>(prop.name()).set(index, static_cast<unsigned char> (row[cnt]));
+                else
+                    buffer->get<unsigned char>(prop.name()).setNone(index);
                 //loginf  << "sqlex: uchar " << prop->id_ << " val " << *ptr;
                 break;
             case PropertyDataType::CHAR:
-                buffer->getChar(prop.name()).set(index, static_cast<signed char> (row[cnt]));
+                if (row[cnt] != mysqlpp::null)
+                    buffer->get<char>(prop.name()).set(index, static_cast<signed char> (row[cnt]));
+                else
+                    buffer->get<char>(prop.name()).setNone(index);
                 //loginf  << "sqlex: char " << prop->id_ << " val " << *ptr;
                 break;
             case PropertyDataType::INT:
-                buffer->getInt(prop.name()).set(index, static_cast<int> (row[cnt]));
+                if (row[cnt] != mysqlpp::null)
+                    buffer->get<int>(prop.name()).set(index, static_cast<int> (row[cnt]));
+                else
+                    buffer->get<int>(prop.name()).setNone(index);
                 //loginf  << "sqlex: int " << prop->id_ << " val " << *ptr;
                 break;
             case PropertyDataType::UINT:
-                buffer->getUInt(prop.name()).set(index, static_cast<unsigned int> (row[cnt]));
+                if (row[cnt] != mysqlpp::null)
+                    buffer->get<unsigned int>(prop.name()).set(index, static_cast<unsigned int> (row[cnt]));
+                else
+                    buffer->get<unsigned int>(prop.name()).setNone(index);
                 //loginf  << "sqlex: uint " << prop->id_ << " val " << *ptr;
                 break;
             case PropertyDataType::STRING:
-                buffer->getString(prop.name()).set(index, static_cast<const char *> (row[cnt]));
+                if (row[cnt] != mysqlpp::null)
+                    buffer->get<std::string>(prop.name()).set(index, static_cast<const char *> (row[cnt]));
+                else
+                    buffer->get<std::string>(prop.name()).setNone(index);
                 //loginf  << "sqlex: string " << prop->id_ << " val " << *ptr;
                 break;
             case PropertyDataType::FLOAT:
-                buffer->getFloat(prop.name()).set(index, static_cast<float> (row[cnt]));
+                if (row[cnt] != mysqlpp::null)
+                    buffer->get<float>(prop.name()).set(index, static_cast<float> (row[cnt]));
+                else
+                    buffer->get<float>(prop.name()).setNone(index);
                 //loginf  << "sqlex: float " << prop->id_ << " val " << *ptr;
                 break;
             case PropertyDataType::DOUBLE:
-                buffer->getDouble(prop.name()).set(index, static_cast<double> (row[cnt]));
+                if (row[cnt] != mysqlpp::null)
+                    buffer->get<double>(prop.name()).set(index, static_cast<double> (row[cnt]));
+                else
+                    buffer->get<double>(prop.name()).setNone(index);
                 //loginf  << "sqlex: double " << prop->id_ << " val " << *ptr;
                 break;
             default:
@@ -399,7 +421,6 @@ void MySQLppConnection::readRowIntoBuffer (mysqlpp::Row &row, const PropertyList
                 throw std::runtime_error ("MySQLppConnection: readRowIntoBuffer: unknown property type");
                 break;
             }
-        }
     }
     //logdbg << "MySQLppConnection::readRowIntoBuffer: end buffer size " << buffer->size() << " index " << index;
 }
@@ -585,7 +606,7 @@ std::vector <std::string> MySQLppConnection::getTableList()  // buffer of table 
     size_t size = buffer->size();
 
     for (unsigned int cnt=0; cnt < size; cnt++)
-        tables.push_back(buffer->getString("name").get(cnt));
+        tables.push_back(buffer->get<std::string>("name").get(cnt));
 
     return tables;
 }
@@ -620,9 +641,11 @@ DBTableInfo MySQLppConnection::getColumnList(const std::string &table) // buffer
 
     for (unsigned int cnt=0; cnt < buffer->size(); cnt++)
     {
-        table_info.addColumn (buffer->getString("COLUMN_NAME").get(cnt), buffer->getString("DATA_TYPE").get(cnt),
-                              buffer->getString("COLUMN_KEY").get(cnt) == "PRI", buffer->getBool("IS_NULLABLE").get(cnt),
-                              buffer->getString("COLUMN_COMMENT").get(cnt));
+        table_info.addColumn (buffer->get<std::string>("COLUMN_NAME").get(cnt),
+                              buffer->get<std::string>("DATA_TYPE").get(cnt),
+                              buffer->get<std::string>("COLUMN_KEY").get(cnt) == "PRI",
+                              buffer->get<bool>("IS_NULLABLE").get(cnt),
+                              buffer->get<std::string>("COLUMN_COMMENT").get(cnt));
     }
 
     return table_info;
@@ -647,7 +670,7 @@ std::vector<std::string> MySQLppConnection::getDatabases ()
     {
         for (unsigned int cnt=0; cnt < buffer->size(); cnt++)
         {
-            std::string tmp = buffer->getString("name").get(cnt);
+            std::string tmp = buffer->get<std::string>("name").get(cnt);
 
             if (tmp == "mysql" || tmp == "information_schema"|| tmp == "performance_schema" || tmp == "sys")
                 // omit system databases
@@ -802,8 +825,8 @@ void MySQLppConnection::generateSubConfigurable (const std::string &class_id, co
     if (class_id == "MySQLServer")
     {
         MySQLServer *server = new MySQLServer (instance_id, *this);
-        assert (servers_.count (server->getInstanceId()) == 0);
-        servers_.insert (std::pair <std::string, MySQLServer*> (server->getInstanceId(), server));
+        assert (servers_.count (server->instanceId()) == 0);
+        servers_.insert (std::pair <std::string, MySQLServer*> (server->instanceId(), server));
     }
     else
         throw std::runtime_error ("MySQLppConnection: generateSubConfigurable: unknown class_id "+class_id );

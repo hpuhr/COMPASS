@@ -213,15 +213,15 @@ void DBInterface::generateSubConfigurable (const std::string &class_id, const st
     if (class_id == "MySQLppConnection")
     {
         MySQLppConnection *connection = new MySQLppConnection (class_id, instance_id, this);
-        assert (connections_.count (connection->getInstanceId()) == 0);
-        connections_.insert (std::pair <std::string, DBConnection*> (connection->getInstanceId(),
+        assert (connections_.count (connection->instanceId()) == 0);
+        connections_.insert (std::pair <std::string, DBConnection*> (connection->instanceId(),
                                                                      dynamic_cast<DBConnection*>(connection)));
     }
     else if (class_id == "SQLiteConnection")
     {
         SQLiteConnection *connection = new SQLiteConnection (class_id, instance_id, this);
-        assert (connections_.count (connection->getInstanceId()) == 0);
-        connections_.insert (std::pair <std::string, DBConnection*> (connection->getInstanceId(),
+        assert (connections_.count (connection->instanceId()) == 0);
+        connections_.insert (std::pair <std::string, DBConnection*> (connection->instanceId(),
                                                                      dynamic_cast<DBConnection*>(connection)));
     }
     else
@@ -291,7 +291,7 @@ bool DBInterface::existsPropertiesTable ()
 ///**
 // * Gets SQL command for data sources list and packs the resulting buffer into a set, which is returned.
 // */
-std::set<int> DBInterface::queryActiveSensorNumbers(const DBObject &object)
+std::set<int> DBInterface::queryActiveSensorNumbers(DBObject &object)
 {
     logdbg  << "DBInterface: queryActiveSensorNumbers: start";
 
@@ -315,14 +315,14 @@ std::set<int> DBInterface::queryActiveSensorNumbers(const DBObject &object)
     std::shared_ptr<Buffer> buffer = result->buffer();
     for (unsigned int cnt=0; cnt < buffer->size(); cnt++)
     {
-        if (buffer->getInt(local_key_col.name()).isNone(cnt))
+        if (buffer->get<int>(local_key_col.name()).isNone(cnt))
         {
             logwrn << "DBInterface: queryActiveSensorNumbers: object " << object.name()
                    << " has NULL ds_id's, which will be omitted";
         }
         else
         {
-            int tmp = buffer->getInt(local_key_col.name()).get(cnt);
+            int tmp = buffer->get<int>(local_key_col.name()).get(cnt);
             data.insert (tmp);
         }
     }
@@ -331,7 +331,7 @@ std::set<int> DBInterface::queryActiveSensorNumbers(const DBObject &object)
     return data;
 }
 
-bool DBInterface::hasDataSourceTables (const DBObject& object)
+bool DBInterface::hasDataSourceTables (DBObject& object)
 {
     if (!object.existsInDB())
         return false;
@@ -364,7 +364,7 @@ bool DBInterface::hasDataSourceTables (const DBObject& object)
 ///**
 // * Gets SQL command, executes it and returns resulting buffer.
 // */
-std::map <int, DBODataSource> DBInterface::getDataSources (const DBObject &object)
+std::map <int, DBODataSource> DBInterface::getDataSources (DBObject &object)
 {
     loginf  << "DBInterface: getDataSources: start";
 
@@ -453,44 +453,44 @@ std::map <int, DBODataSource> DBInterface::getDataSources (const DBObject &objec
 
     for (unsigned cnt = 0; cnt < buffer->size(); cnt++)
     {
-        if (buffer->getInt(foreign_key_col.name()).isNone(cnt))
+        if (buffer->get<int>(foreign_key_col.name()).isNone(cnt))
         {
             loginf << "DBInterface: getDataSources: object " << object.name()
                    << " has NULL key, which will be omitted";
             continue;
         }
 
-        if (buffer->getString(name_col.name()).isNone(cnt))
+        if (buffer->get<std::string>(name_col.name()).isNone(cnt))
         {
             loginf << "DBInterface: getDataSources: object " << object.name()
                    << " has NULL name, which will be omitted";
             continue;
         }
 
-        int key = buffer->getInt(foreign_key_col.name()).get(cnt);
-        std::string name = buffer->getString(name_col.name()).get(cnt);
+        int key = buffer->get<int>(foreign_key_col.name()).get(cnt);
+        std::string name = buffer->get<std::string>(name_col.name()).get(cnt);
 
         assert (sources.count(key) == 0);
         loginf << "DBInterface: getDataSources: object " << object.name() << " key " << key << " name " << name;
         sources.insert(std::pair<int, DBODataSource>(key, DBODataSource(key, name)));
 
-        if (has_short_name && !buffer->getString(short_name_col_name).isNone(cnt))
-            sources.at(key).shortName(buffer->getString(short_name_col_name).get(cnt));
+        if (has_short_name && !buffer->get<std::string>(short_name_col_name).isNone(cnt))
+            sources.at(key).shortName(buffer->get<std::string>(short_name_col_name).get(cnt));
 
-        if (has_sac && !buffer->getChar(sac_col_name).isNone(cnt))
-            sources.at(key).sac(buffer->getChar(sac_col_name).get(cnt));
+        if (has_sac && !buffer->get<char>(sac_col_name).isNone(cnt))
+            sources.at(key).sac(buffer->get<char>(sac_col_name).get(cnt));
 
-        if (has_sic && !buffer->getChar(sic_col_name).isNone(cnt))
-            sources.at(key).sic(buffer->getChar(sic_col_name).get(cnt));
+        if (has_sic && !buffer->get<char>(sic_col_name).isNone(cnt))
+            sources.at(key).sic(buffer->get<char>(sic_col_name).get(cnt));
 
-        if (has_latitude && !buffer->getDouble(latitude_col_name).isNone(cnt))
-            sources.at(key).latitude(buffer->getDouble(latitude_col_name).get(cnt));
+        if (has_latitude && !buffer->get<double>(latitude_col_name).isNone(cnt))
+            sources.at(key).latitude(buffer->get<double>(latitude_col_name).get(cnt));
 
-        if (has_longitude && !buffer->getDouble(longitude_col_name).isNone(cnt))
-            sources.at(key).longitude(buffer->getDouble(longitude_col_name).get(cnt));
+        if (has_longitude && !buffer->get<double>(longitude_col_name).isNone(cnt))
+            sources.at(key).longitude(buffer->get<double>(longitude_col_name).get(cnt));
 
-        if (has_altitude && !buffer->getDouble(altitude_col_name).isNone(cnt))
-            sources.at(key).altitude(buffer->getDouble(altitude_col_name).get(cnt));
+        if (has_altitude && !buffer->get<double>(altitude_col_name).isNone(cnt))
+            sources.at(key).altitude(buffer->get<double>(altitude_col_name).get(cnt));
     }
 
     return sources;
@@ -518,7 +518,7 @@ size_t DBInterface::count (const std::string &table)
     std::shared_ptr <DBResult> result = current_connection_->execute(command);
 
     assert (result->containsData());
-    int tmp = result->buffer()->getInt("count").get(0);
+    int tmp = result->buffer()->get<int>("count").get(0);
 
     logdbg  << "DBInterface: count: " << table << ": "<< tmp <<" end";
     return static_cast<size_t> (tmp);
@@ -560,7 +560,7 @@ std::string DBInterface::getProperty (const std::string& id)
 
     assert (buffer->size() == 1);
 
-    text = buffer->getString("property").get(0);
+    text = buffer->get<std::string>("property").get(0);
 
     logdbg  << "DBInterface: getProperty: end id " << id << " value " << text;
     return text;
@@ -656,14 +656,16 @@ std::pair<std::string, std::string> DBInterface::getMinMaxString (const DBOVaria
         return std::pair <std::string, std::string> (NULL_STRING, NULL_STRING);
     }
 
-    if (buffer->getString("min").isNone(0) || buffer->getString("max").isNone(0))
+    if (buffer->get<std::string>("min").isNone(0) || buffer->get<std::string>("max").isNone(0))
     {
         logerr << "DBInterface: getMinMaxString: variable " << var.name() << " has NULL minimum/maximum";
         return std::pair <std::string, std::string> (NULL_STRING, NULL_STRING);
     }
 
-    std::string min = buffer->getString("min").get(0);
-    std::string max = buffer->getString("max").get(0);
+    std::string min = buffer->get<std::string>("min").get(0);
+    std::string max = buffer->get<std::string>("max").get(0);
+
+    logdbg << "DBInterface: getMinMaxString: minstr '" << min << " maxstr " << max;
 
     const DBTableColumn &column = var.currentDBColumn ();
     if (column.unit() != var.unitConst()) // do unit conversion stuff
@@ -697,7 +699,7 @@ void DBInterface::postProcess ()
 
     bool any_data=false;
 
-    for (auto obj_it : ATSDB::instance().objectManager().objects())
+    for (auto obj_it : ATSDB::instance().objectManager())
         if (obj_it.second->hasData())
             any_data=true;
 
@@ -717,7 +719,7 @@ void DBInterface::postProcess ()
     else
         clearTableContent (TABLE_NAME_MINMAX);
 
-    for (auto obj_it : ATSDB::instance().objectManager().objects())
+    for (auto obj_it : ATSDB::instance().objectManager())
     {
         if (!obj_it.second->hasData())
             continue;
@@ -786,7 +788,7 @@ void DBInterface::postProcessingJobDoneSlot()
         postprocess_dialog_->setValue(postprocess_job_num_-postprocess_jobs_.size());
 }
 
-bool DBInterface::hasActiveDataSources (const DBObject &object)
+bool DBInterface::hasActiveDataSources (DBObject &object)
 {
     if (!object.existsInDB())
         return false;
@@ -800,7 +802,7 @@ bool DBInterface::hasActiveDataSources (const DBObject &object)
 /**
  * Gets active sensor numbers as property, splits it and packs it into a set.
  */
-std::set<int> DBInterface::getActiveDataSources (const DBObject &object)
+std::set<int> DBInterface::getActiveDataSources (DBObject &object)
 {
     logdbg  << "DBInterface: getActiveDataSources: start";
 
@@ -1132,19 +1134,19 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex (std::shared_ptr<Buff
         {
         case PropertyDataType::BOOL:
             current_connection_->bindVariable (index_cnt,
-                                               static_cast<int> (buffer->getBool(property.name()).get(row)));
+                                               static_cast<int> (buffer->get<bool>(property.name()).get(row)));
             break;
         case PropertyDataType::CHAR:
             current_connection_->bindVariable (index_cnt,
-                                               static_cast<int> (buffer->getChar(property.name()).get(row)));
+                                               static_cast<int> (buffer->get<char>(property.name()).get(row)));
             break;
         case PropertyDataType::UCHAR:
             current_connection_->bindVariable (index_cnt,
-                                               static_cast<int> (buffer->getUChar(property.name()).get(row)));
+                                               static_cast<int> (buffer->get<unsigned char>(property.name()).get(row)));
             break;
         case PropertyDataType::INT:
             current_connection_->bindVariable (index_cnt,
-                                               static_cast<int> (buffer->getInt(property.name()).get(row)));
+                                               static_cast<int> (buffer->get<int>(property.name()).get(row)));
             break;
         case PropertyDataType::UINT:
             assert (false);
@@ -1157,16 +1159,16 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex (std::shared_ptr<Buff
             break;
         case PropertyDataType::FLOAT:
             current_connection_->bindVariable (index_cnt,
-                                               static_cast<double> (buffer->getFloat(property.name()).get(row)));
+                                               static_cast<double> (buffer->get<float>(property.name()).get(row)));
             break;
         case PropertyDataType::DOUBLE:
-            current_connection_->bindVariable (index_cnt, buffer->getDouble(property.name()).get(row));
+            current_connection_->bindVariable (index_cnt, buffer->get<double>(property.name()).get(row));
             break;
         case PropertyDataType::STRING:
             if (connection_type == SQLITE_IDENTIFIER)
-                current_connection_->bindVariable (index_cnt, buffer->getString(property.name()).get(row));
+                current_connection_->bindVariable (index_cnt, buffer->get<std::string>(property.name()).get(row));
             else //MYSQL assumed
-                current_connection_->bindVariable (index_cnt, "'"+buffer->getString(property.name()).get(row)+"'");
+                current_connection_->bindVariable (index_cnt, "'"+buffer->get<std::string>(property.name()).get(row)+"'");
             break;
         default:
             logerr  <<  "Buffer: insertBindStatementUpdateForCurrentIndex: unknown property type "

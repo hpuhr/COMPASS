@@ -1,35 +1,26 @@
 <Configuration class_id="TaskManager" instance_id="TaskManager0">
     <Configuration class_id="JSONImporterTask" instance_id="JSONImporterTask">
-        <ParameterBool join_data_sources="1"/>
+        <ParameterBool join_data_sources="0"/>
         <ParameterBool separate_mlat_data="0"/>
         <ParameterBool use_position_filter="0"/>
         <ParameterBool use_time_filter="0"/>
-        <ParameterFloat pos_filter_lat_max="60.00000000"/>
-        <ParameterFloat pos_filter_lat_min="36.00000000"/>
-        <ParameterFloat pos_filter_lon_max="27.00000000"/>
-        <ParameterFloat pos_filter_lon_min="-14.00000000"/>
-        <ParameterFloat time_filter_max="32400.00000000"/>
-        <ParameterFloat time_filter_min="28800.00000000"/>
+        <ParameterFloat pos_filter_lat_max="90.00000000"/>
+        <ParameterFloat pos_filter_lat_min="-90.00000000"/>
+        <ParameterFloat pos_filter_lon_max="180.00000000"/>
+        <ParameterFloat pos_filter_lon_min="-180.00000000"/>
+        <ParameterFloat time_filter_max="86400.00000000"/>
+        <ParameterFloat time_filter_min="0.00000000"/>
         <ParameterString db_object_str="ADSB"/>
         <ParameterString last_filename=""/>
-        <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdata2017-11-30-0804Z.json">
-            <ParameterString name="/home/sk/data/2017-11-30-0804Z.json"/>
-        </Configuration>
-        <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdata2017-11-30-small.zip">
-            <ParameterString name="/home/sk/data/2017-11-30-small.zip"/>
-        </Configuration>
-        <Configuration class_id="JSONFile" instance_id="JSONFilemediaskDataatsdb_data2017-11-30.zip">
-            <ParameterString name="/media/sk/Data/atsdb_data/2017-11-30.zip"/>
-        </Configuration>
     </Configuration>
     <Configuration class_id="RadarPlotPositionCalculatorTask" instance_id="RadarPlotPositionCalculatorTask0">
-        <ParameterString altitude_var_str=""/>
-        <ParameterString azimuth_var_str=""/>
-        <ParameterString datasource_var_str=""/>
-        <ParameterString db_object_str=""/>
-        <ParameterString key_var_str=""/>
-        <ParameterString latitude_var_str=""/>
-        <ParameterString longitude_var_str=""/>
-        <ParameterString range_var_str=""/>
+        <ParameterString altitude_var_str="modec_code_ft"/>
+        <ParameterString azimuth_var_str="pos_azm_deg"/>
+        <ParameterString datasource_var_str="ds_id"/>
+        <ParameterString db_object_str="Radar"/>
+        <ParameterString key_var_str="rec_num"/>
+        <ParameterString latitude_var_str="pos_lat_deg"/>
+        <ParameterString longitude_var_str="pos_long_deg"/>
+        <ParameterString range_var_str="pos_range_nm"/>
     </Configuration>
 </Configuration>

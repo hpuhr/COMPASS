@@ -20,6 +20,7 @@
 
 #include <string>
 #include <vector>
+#include <cassert>
 
 #include "configurable.h"
 #include "dbtablecolumn.h"
@@ -104,7 +105,8 @@ public:
     /// @brief Returns container with all columns
     const std::map <std::string, const DBTableColumn&>& columns () const { return columns_; }
     /// @brief Returns column with a given name
-    const DBTableColumn &column (const std::string& column) const { return columns_.at(column); }
+    const DBTableColumn &column (const std::string& column) const { assert (hasColumn(column));
+                return columns_.at(column); }
     DBTable& tableFor (const std::string& column) const;
 
     /// @brief Returns if meta sub-tables are defined

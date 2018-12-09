@@ -46,7 +46,7 @@
 using namespace Utils;
 
 DBOVariableWidget::DBOVariableWidget(DBOVariable& variable, QWidget* parent, Qt::WindowFlags f)
-    : QWidget (parent, f), variable_(variable)
+    : QWidget (parent, f), variable_(&variable)
 {
     setMinimumSize(QSize(800, 600));
 
@@ -63,49 +63,50 @@ DBOVariableWidget::DBOVariableWidget(DBOVariable& variable, QWidget* parent, Qt:
     main_layout->addWidget (main_label);
 
     // object parameters
-    QGridLayout *properties_layout = new QGridLayout ();
+    properties_layout_ = new QGridLayout ();
 
     unsigned int row=0;
     QLabel *name_label = new QLabel ("Name");
-    properties_layout->addWidget(name_label, row, 0);
+    properties_layout_->addWidget(name_label, row, 0);
 
-    name_edit_ = new QLineEdit (variable_.name().c_str());
+    name_edit_ = new QLineEdit (variable_->name().c_str());
     connect(name_edit_, SIGNAL( returnPressed() ), this, SLOT( editNameSlot() ));
-    properties_layout->addWidget (name_edit_, row, 1);
+    properties_layout_->addWidget (name_edit_, row, 1);
     row++;
 
     QLabel *description_label = new QLabel ("Description");
-    properties_layout->addWidget(description_label, row, 0);
+    properties_layout_->addWidget(description_label, row, 0);
 
-    description_edit_ = new QLineEdit (variable_.description().c_str());
+    description_edit_ = new QLineEdit (variable_->description().c_str());
     connect(description_edit_, SIGNAL( returnPressed() ), this, SLOT( editDescriptionSlot() ));
-    properties_layout->addWidget (description_edit_, row, 1);
+    properties_layout_->addWidget (description_edit_, row, 1);
     row++;
 
     QLabel *type_label = new QLabel ("Data Type");
-    properties_layout->addWidget(type_label, row, 0);
+    properties_layout_->addWidget(type_label, row, 0);
 
-    type_combo_ = new DBOVariableDataTypeComboBox (variable_);
+    type_combo_ = new DBOVariableDataTypeComboBox (*variable_);
     connect (type_combo_, SIGNAL(changedType()), this, SLOT(editDataTypeSlot()));
-    properties_layout->addWidget (type_combo_, row, 1);
+    properties_layout_->addWidget (type_combo_, row, 1);
     row++;
 
-    properties_layout->addWidget(new QLabel ("Representation"), row, 0);
+    properties_layout_->addWidget(new QLabel ("Representation"), row, 0);
 
-    representation_box_ = new StringRepresentationComboBox (variable_);
-    properties_layout->addWidget (representation_box_, row, 1);
+    representation_box_ = new StringRepresentationComboBox (*variable_);
+    properties_layout_->addWidget (representation_box_, row, 1);
     row++;
 
     QLabel *unit_label = new QLabel ("Unit");
-    properties_layout->addWidget(unit_label, row, 0);
+    properties_layout_->addWidget(unit_label, row, 0);
 
-    unit_sel_ = new UnitSelectionWidget (variable_.dimension(), variable_.unit());
-    properties_layout->addWidget (unit_sel_, row, 1);
+    unit_sel_ = new UnitSelectionWidget (variable_->dimension(), variable_->unit());
+    properties_layout_->addWidget (unit_sel_, row, 1);
     row++;
 
-    createSchemaBoxes (properties_layout, row);
+    schema_boxes_row_ = row;
+    createSchemaBoxes ();
 
-    main_layout->addLayout (properties_layout);
+    main_layout->addLayout (properties_layout_);
     main_layout->addStretch();
 
     setLayout (main_layout);
@@ -152,6 +153,24 @@ void DBOVariableWidget::unlock ()
     locked_ = false;
 }
 
+void DBOVariableWidget::setVariable (DBOVariable& variable)
+{
+    variable_ = &variable;
+
+    update ();
+}
+
+void DBOVariableWidget::update ()
+{
+    name_edit_->setText(variable_->name().c_str());
+    description_edit_->setText(variable_->description().c_str());
+    type_combo_->setVariable(*variable_);
+    representation_box_->setVariable(*variable_);
+    unit_sel_->update(variable_->dimension(), variable_->unit());
+
+    createSchemaBoxes ();
+}
+
 void DBOVariableWidget::editNameSlot ()
 {
     logdbg  << "DBOVariableWidget: editName";
@@ -159,7 +178,7 @@ void DBOVariableWidget::editNameSlot ()
 
     std::string text = name_edit_->text().toStdString();
     assert (text.size()>0);
-    variable_.name (text);
+    variable_->name (text);
     emit dboVariableChangedSignal();
 }
 void DBOVariableWidget::editDescriptionSlot()
@@ -169,7 +188,7 @@ void DBOVariableWidget::editDescriptionSlot()
 
     std::string text = description_edit_->text().toStdString();
     assert (text.size()>0);
-    variable_.description (text);
+    variable_->description (text);
     emit dboVariableChangedSignal();
 }
 
@@ -177,20 +196,22 @@ void DBOVariableWidget::editDataTypeSlot()
 {
     logdbg  << "DBOVariableWidget: editDataTypeSlot";
     assert (type_combo_);
-    variable_.dataType(type_combo_->getType());
+    variable_->dataType(type_combo_->getType());
     emit dboVariableChangedSignal();
 
 }
 
-void DBOVariableWidget::createSchemaBoxes (QGridLayout* properties_layout, int row)
+void DBOVariableWidget::createSchemaBoxes ()
 {
     loginf << "DBOVariableWidget: createSchemaBoxes";
 
-    auto meta_tables = variable_.dbObject().metaTables ();
-    auto schemas  = ATSDB::instance().schemaManager().getSchemas();
+    auto& meta_tables = variable_->dbObject().metaTables();
+    auto& schemas  = ATSDB::instance().schemaManager().getSchemas();
 
-    assert (properties_layout);
+    assert (properties_layout_);
     schema_boxes_.clear();
+
+    int row = schema_boxes_row_;
 
     std::string schema_name;
 
@@ -203,12 +224,13 @@ void DBOVariableWidget::createSchemaBoxes (QGridLayout* properties_layout, int r
 
         std::string schema_string = "Schema: "+schema_name;
         QLabel *label = new QLabel (schema_string.c_str());
-        properties_layout->addWidget(label, row, 0);
+        properties_layout_->addWidget(label, row, 0);
 
         assert (meta_tables.count(schema_name) == 1);
-        DBTableColumnComboBox* box = new DBTableColumnComboBox (schema_name, meta_tables[schema_name], variable_);
+        DBTableColumnComboBox* box = new DBTableColumnComboBox (schema_name, meta_tables.at(schema_name).metaTable(),
+                                                                *variable_);
 
-        properties_layout->addWidget (box, row, 1);
+        properties_layout_->addWidget (box, schema_boxes_row_, 1);
 
         assert (schema_boxes_.count(schema_name) == 0);
         schema_boxes_[schema_name] = box;

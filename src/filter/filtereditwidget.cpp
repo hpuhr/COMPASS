@@ -46,7 +46,7 @@ FilterEditWidget::FilterEditWidget(DBFilter *filter, QWidget *parent)
     : QWidget (parent), filter_ (filter)
 {
     condition_variable_widget_=0;
-    setWindowTitle(tr(("Edit Filter "+filter_->getInstanceId()).c_str()));
+    setWindowTitle(tr(("Edit Filter "+filter_->instanceId()).c_str()));
     setAttribute(Qt::WA_DeleteOnClose);
 
     setMinimumSize (800, 600);

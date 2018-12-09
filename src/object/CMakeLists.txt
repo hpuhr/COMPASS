@@ -20,6 +20,7 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/dbodatasourcedefinitionwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/dboadddatasourcedialog.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbovariable.h"
+        "${CMAKE_CURRENT_LIST_DIR}/dbovariableschema.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbovariableset.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbovariableorderedset.h"
         "${CMAKE_CURRENT_LIST_DIR}/dbovariableorderedsetwidget.h"

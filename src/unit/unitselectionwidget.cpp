@@ -22,77 +22,84 @@
 #include "logger.h"
 
 UnitSelectionWidget::UnitSelectionWidget(std::string &dimension, std::string &unit)
- : QPushButton (), dimension_(dimension), unit_(unit)
+    : QPushButton (), dimension_(dimension), unit_(unit)
 {
-  logdbg  << "UnitSelectionWidget: constructor";
+    logdbg  << "UnitSelectionWidget: constructor";
 
-  if (dimension_.size() > 0)
-    setText (QString::fromStdString(dimension_)+":"+QString::fromStdString(unit_));
+    update (dimension, unit);
 
-  createMenu();
+    createMenu();
 
-  connect( &menu_, SIGNAL(triggered(QAction*)), this, SLOT(triggerSlot(QAction*)));
-  connect( this, SIGNAL(clicked()), this, SLOT(showMenuSlot()) );
+    connect( &menu_, SIGNAL(triggered(QAction*)), this, SLOT(triggerSlot(QAction*)));
+    connect( this, SIGNAL(clicked()), this, SLOT(showMenuSlot()) );
 }
 
 UnitSelectionWidget::~UnitSelectionWidget()
 {
 }
 
+void UnitSelectionWidget::update (std::string &dimension, std::string &unit)
+{
+    if (dimension_.size() > 0)
+        setText (QString::fromStdString(dimension_)+":"+QString::fromStdString(unit_));
+    else
+        setText("");
+}
+
 void UnitSelectionWidget::createMenu()
 {
-  logdbg  << "UnitSelectionWidget: createMenu";
-  menu_.addAction( "" );
+    logdbg  << "UnitSelectionWidget: createMenu";
+    menu_.addAction( "" );
 
-  for (auto it : UnitManager::instance().dimensions())
-  {
-    const std::map <std::string, Unit*> &units = it.second->units();
-
-    if (units.size() > 0)
+    for (auto it : UnitManager::instance().dimensions())
     {
-//      loginf  << "UnitSelectionWidget: createMenu: unit " << it->first;
-      QMenu* m2 = menu_.addMenu( QString::fromStdString(it.first));
+        const std::map <std::string, Unit*> &units = it.second->units();
 
-      for (auto it2: units)
-      {
-//        loginf  << "UnitSelectionWidget: createMenu: unitunit " << unitit->first;
-        QAction* action = m2->addAction( QString::fromStdString(it2.first) );
+        if (units.size() > 0)
+        {
+            //      loginf  << "UnitSelectionWidget: createMenu: unit " << it->first;
+            QMenu* m2 = menu_.addMenu( QString::fromStdString(it.first));
 
-        QVariantMap vmap;
-        vmap.insert( QString::fromStdString(it2.first), QVariant( QString::fromStdString(it.first) ) );
-        action->setData( QVariant( vmap ) );
-      }
+            for (auto it2: units)
+            {
+                //        loginf  << "UnitSelectionWidget: createMenu: unitunit " << unitit->first;
+                QAction* action = m2->addAction( QString::fromStdString(it2.first) );
+
+                QVariantMap vmap;
+                vmap.insert( QString::fromStdString(it2.first), QVariant( QString::fromStdString(it.first) ) );
+                action->setData( QVariant( vmap ) );
+            }
+        }
     }
-  }
 
-//  loginf  << "UnitSelectionWidget: createMenu: end";
+    //  loginf  << "UnitSelectionWidget: createMenu: end";
 }
 
 void UnitSelectionWidget::showMenuSlot()
 {
-  menu_.exec( QCursor::pos() );
+    menu_.exec( QCursor::pos() );
 }
 
 void UnitSelectionWidget::triggerSlot( QAction* action )
 {
-  QVariantMap vmap = action->data().toMap();
-  std::string dimension, unit;
+    QVariantMap vmap = action->data().toMap();
+    std::string dimension, unit;
 
-  if (action->text().size() != 0)
-  {
-    dimension = vmap.begin().value().toString().toStdString();
-    unit = vmap.begin().key().toStdString();
-  }
+    if (action->text().size() != 0)
+    {
+        dimension = vmap.begin().value().toString().toStdString();
+        unit = vmap.begin().key().toStdString();
+    }
 
-  loginf  << "UnitSelectionWidget: triggerSlot: got dimension " << dimension << " unit " << unit;
+    loginf  << "UnitSelectionWidget: triggerSlot: got dimension " << dimension << " unit " << unit;
 
-  dimension_ = dimension;
-  unit_ = unit;
+    dimension_ = dimension;
+    unit_ = unit;
 
-  if (dimension_.size() > 0)
-    setText (QString::fromStdString(dimension_)+":"+QString::fromStdString(unit_));
-  else
-      setText ("");
+    if (dimension_.size() > 0)
+        setText (QString::fromStdString(dimension_)+":"+QString::fromStdString(unit_));
+    else
+        setText ("");
 
-//  emit selectionChanged();
+    //  emit selectionChanged();
 }

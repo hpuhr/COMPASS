@@ -31,6 +31,7 @@
 #include "dbtable.h"
 #include "dbcommand.h"
 #include "string.h"
+#include "stringconv.h"
 #include "global.h"
 
 using namespace Utils;
@@ -131,37 +132,60 @@ void DBOMinMaxDBJob::processTable (const DBTable& table)
         assert (buffer->properties().hasProperty(col_it.first+"MIN"));
         assert (buffer->properties().hasProperty(col_it.first+"MAX"));
 
-        if (buffer->getString(col_it.first+"MIN").isNone(0))
+        if (buffer->get<std::string>(col_it.first+"MIN").isNone(0))
             min = NULL_STRING;
         else
-            min = buffer->getString(col_it.first+"MIN").get(0);
-        minmax.push_back (min);
+            min = buffer->get<std::string>(col_it.first+"MIN").get(0);
 
-        if (buffer->getString(col_it.first+"MAX").isNone(0))
+        if (buffer->get<std::string>(col_it.first+"MAX").isNone(0))
             max = NULL_STRING;
         else
-            max = buffer->getString(col_it.first+"MAX").get(0);
+            max = buffer->get<std::string>(col_it.first+"MAX").get(0);
+
+        if (col_it.second->dataFormat() == "")
+            ;
+        else if (col_it.second->dataFormat() == "hexadecimal")
+        {
+            if (min != NULL_STRING)
+                min = std::to_string(std::stoi(min, 0, 16));
+            if (max != NULL_STRING)
+                max = std::to_string(std::stoi(max, 0, 16));
+        }
+        else if (col_it.second->dataFormat() == "octal")
+        {
+            if (min != NULL_STRING)
+                min = std::to_string(std::stoi(min, 0, 8));
+            if (max != NULL_STRING)
+                max = std::to_string(std::stoi(max, 0, 8));
+        }
+        else
+            logwrn << "DBOMinMaxDBJob: processTable: table '" << table.name() << "' unknown format '"
+                   << col_it.second->dataFormat() << "'";
+
+        minmax.push_back (min);
         minmax.push_back (max);
 
         //loginf << "UGA var " << col_it.first << " min '" << min << "' max '" << max << "'";
         //                if (minmax.at(0) == minmax.at(1))
         //                {
-        //                    loginf << "DBInterface: createMinMaxValues: id " << column->getName() << " type " <<  dboit->first
+        //                    loginf << "DBInterface: createMinMaxValues: id " << column->getName() << " type "
+        // <<  dboit->first
         //                            << " has same min/max value '" << minmax.at(0) << "'";
         //                    continue;
         //                }
 
         if (minmax.at(0) == NULL_STRING || minmax.at(1) == NULL_STRING)
         {
-            loginf << "DBInterface: createMinMaxValues: id " << col_it.first << " object " << object_.name() << " has NULL values";
+            loginf << "DBInterface: createMinMaxValues: id " << col_it.first << " object " << object_.name()
+                   << " has NULL values";
             continue;
         }
 
         if (find(inserted_variable_names.begin(), inserted_variable_names.end(),
                  std::pair<std::string, std::string> (object_.name(), col_it.first)) == inserted_variable_names.end())
         {
-            loginf << "DBInterface: createMinMaxValues: inserting id " << col_it.first << " object " <<  object_.name() <<
-                      " min " << minmax.at(0) << " max " << minmax.at(1);
+            loginf << "DBInterface: createMinMaxValues: inserting id " << col_it.first << " object " <<  object_.name()
+                   << " min " << minmax.at(0) << " max " << minmax.at(1);
             db_interface_.insertMinMax(col_it.first, object_.name(), minmax.at(0), minmax.at(1));
             inserted_variable_names.push_back (std::pair<std::string, std::string> (object_.name(), col_it.first));
         }

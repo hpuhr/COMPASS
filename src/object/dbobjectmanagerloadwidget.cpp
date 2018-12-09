@@ -260,8 +260,8 @@ void DBObjectManagerLoadWidget::updateSlot ()
         info_layout_->removeItem(item);
     }
 
-    for (auto object : object_manager_.objects())
+    for (auto& obj_it : object_manager_)
     {
-        info_layout_->addWidget(object.second->infoWidget());
+        info_layout_->addWidget(obj_it.second->infoWidget());
     }
 }

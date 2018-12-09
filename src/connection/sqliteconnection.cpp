@@ -52,7 +52,7 @@ SQLiteConnection::~SQLiteConnection()
 
 void SQLiteConnection::openFile (const std::string &file_name)
 {
-    loginf << "SQLiteConnection: openFile";
+    loginf << "SQLiteConnection: openFile: " << file_name;
 
     last_filename_=file_name;
     assert (last_filename_.size() > 0);
@@ -297,49 +297,70 @@ void SQLiteConnection::readRowIntoBuffer (const PropertyList &list, unsigned int
 {
     for (unsigned int cnt=0; cnt < num_properties; cnt++)
     {
-        if (sqlite3_column_type(statement_, cnt) != SQLITE_NULL)
-        {
-            const Property &prop=list.at(cnt);
+        const Property &prop=list.at(cnt);
 
-            switch (prop.dataType())
-            {
-            case PropertyDataType::BOOL:
-                buffer->getBool(prop.name()).set(index, static_cast<bool> (sqlite3_column_int(statement_, cnt)));
-                //loginf  << "sqlex: bool " << prop->id_ << " val " << *ptr;
-                break;
-            case PropertyDataType::UCHAR:
-                buffer->getUChar(prop.name()).set(index, static_cast<unsigned char> (sqlite3_column_int(statement_, cnt)));
-                //loginf  << "sqlex: uchar " << prop->id_ << " val " << *ptr;
-                break;
-            case PropertyDataType::CHAR:
-                buffer->getChar(prop.name()).set(index, static_cast<signed char> (sqlite3_column_int(statement_, cnt)));
-                //loginf  << "sqlex: char " << prop->id_ << " val " << *ptr;
-                break;
-            case PropertyDataType::INT:
-                buffer->getInt(prop.name()).set(index, static_cast<int> (sqlite3_column_int(statement_, cnt)));
-                //loginf  << "sqlex: int " << prop->id_ << " val " << *ptr;
-                break;
-            case PropertyDataType::UINT:
-                buffer->getUInt(prop.name()).set(index, static_cast<unsigned int> (sqlite3_column_int(statement_, cnt)));
-                //loginf  << "sqlex: uint " << prop->id_ << " val " << *ptr;
-                break;
-            case PropertyDataType::STRING:
-                buffer->getString(prop.name()).set(index, std::string (reinterpret_cast<const char*> (sqlite3_column_text(statement_, cnt))));
-                //loginf  << "sqlex: string " << prop->id_ << " val " << *ptr;
-                break;
-            case PropertyDataType::FLOAT:
-                buffer->getFloat(prop.name()).set(index, static_cast<float> (sqlite3_column_double (statement_, cnt)));
-                //loginf  << "sqlex: float " << prop->id_ << " val " << *ptr;
-                break;
-            case PropertyDataType::DOUBLE:
-                buffer->getDouble(prop.name()).set(index, static_cast<double> (sqlite3_column_double (statement_, cnt)));
-                //loginf  << "sqlex: double " << prop->id_ << " val " << *ptr;
-                break;
-            default:
-                logerr  <<  "MySQLppConnection: readRowIntoBuffer: unknown property type";
-                throw std::runtime_error ("MySQLppConnection: readRowIntoBuffer: unknown property type");
-                break;
-            }
+        switch (prop.dataType())
+        {
+        case PropertyDataType::BOOL:
+            if (sqlite3_column_type(statement_, cnt) != SQLITE_NULL)
+                buffer->get<bool>(prop.name()).set(index, static_cast<bool> (sqlite3_column_int(statement_, cnt)));
+            else
+                buffer->get<bool>(prop.name()).setNone(index);
+            //loginf  << "sqlex: bool " << prop->id_ << " val " << *ptr;
+            break;
+        case PropertyDataType::UCHAR:
+            if (sqlite3_column_type(statement_, cnt) != SQLITE_NULL)
+                buffer->get<unsigned char>(prop.name()).set(index, static_cast<unsigned char> (sqlite3_column_int(statement_, cnt)));
+            else
+                buffer->get<unsigned char>(prop.name()).setNone(index);
+            //loginf  << "sqlex: uchar " << prop->id_ << " val " << *ptr;
+            break;
+        case PropertyDataType::CHAR:
+            if (sqlite3_column_type(statement_, cnt) != SQLITE_NULL)
+                buffer->get<char>(prop.name()).set(index, static_cast<signed char> (sqlite3_column_int(statement_, cnt)));
+            else
+                buffer->get<char>(prop.name()).setNone(index);
+            //loginf  << "sqlex: char " << prop->id_ << " val " << *ptr;
+            break;
+        case PropertyDataType::INT:
+            if (sqlite3_column_type(statement_, cnt) != SQLITE_NULL)
+                buffer->get<int>(prop.name()).set(index, static_cast<int> (sqlite3_column_int(statement_, cnt)));
+            else
+                buffer->get<int>(prop.name()).setNone(index);
+            //loginf  << "sqlex: int " << prop->id_ << " val " << *ptr;
+            break;
+        case PropertyDataType::UINT:
+            if (sqlite3_column_type(statement_, cnt) != SQLITE_NULL)
+                buffer->get<unsigned int>(prop.name()).set(index, static_cast<unsigned int> (sqlite3_column_int(statement_, cnt)));
+            else
+                buffer->get<unsigned int>(prop.name()).setNone(index);
+            //loginf  << "sqlex: uint " << prop->id_ << " val " << *ptr;
+            break;
+        case PropertyDataType::STRING:
+            if (sqlite3_column_type(statement_, cnt) != SQLITE_NULL)
+                buffer->get<std::string>(prop.name()).set(index, std::string (reinterpret_cast<const char*> (sqlite3_column_text(statement_, cnt))));
+            else
+                buffer->get<std::string>(prop.name()).setNone(index);
+            //loginf  << "sqlex: string " << prop->id_ << " val " << *ptr;
+            break;
+        case PropertyDataType::FLOAT:
+            if (sqlite3_column_type(statement_, cnt) != SQLITE_NULL)
+                buffer->get<float>(prop.name()).set(index, static_cast<float> (sqlite3_column_double (statement_, cnt)));
+            else
+                buffer->get<float>(prop.name()).setNone(index);
+            //loginf  << "sqlex: float " << prop->id_ << " val " << *ptr;
+            break;
+        case PropertyDataType::DOUBLE:
+            if (sqlite3_column_type(statement_, cnt) != SQLITE_NULL)
+                buffer->get<double>(prop.name()).set(index, static_cast<double> (sqlite3_column_double (statement_, cnt)));
+            else
+                buffer->get<double>(prop.name()).setNone(index);
+            //loginf  << "sqlex: double " << prop->id_ << " val " << *ptr;
+            break;
+        default:
+            logerr  <<  "MySQLppConnection: readRowIntoBuffer: unknown property type";
+            throw std::runtime_error ("MySQLppConnection: readRowIntoBuffer: unknown property type");
+            break;
         }
     }
 }
@@ -487,12 +508,12 @@ std::vector <std::string> SQLiteConnection::getTableList()  // buffer of table n
 
     for (unsigned int cnt=0; cnt < size; cnt++)
     {
-        table_name = buffer->getString("name").get(cnt);
+        table_name = buffer->get<std::string>("name").get(cnt);
 
         if (table_name.find("sqlite") != std::string::npos) //ignore sqlite system tables
             continue;
 
-        tables.push_back(buffer->getString("name").get(cnt));
+        tables.push_back(buffer->get<std::string>("name").get(cnt));
     }
 
     return tables;
@@ -525,7 +546,7 @@ DBTableInfo SQLiteConnection::getColumnList(const std::string &table) // buffer 
     {
         //loginf << "UGA " << table << ": "  << buffer->getString("name").get(cnt);
 
-        std::string data_type = buffer->getString("type").get(cnt);
+        std::string data_type = buffer->get<std::string>("type").get(cnt);
 
         if (data_type == "BOOLEAN")
             data_type = "BOOL";
@@ -536,8 +557,8 @@ DBTableInfo SQLiteConnection::getColumnList(const std::string &table) // buffer 
         else if (data_type == "INTEGER")
             data_type = "INT";
 
-        table_info.addColumn (buffer->getString("name").get(cnt), data_type,
-                              buffer->getInt("pk").get(cnt) > 0, !buffer->getInt("notnull").get(cnt), "");
+        table_info.addColumn (buffer->get<std::string>("name").get(cnt), data_type,
+                              buffer->get<int>("pk").get(cnt) > 0, !buffer->get<int>("notnull").get(cnt), "");
     }
 
     return table_info;

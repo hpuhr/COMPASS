@@ -37,13 +37,13 @@ ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxViewDataSource* data_source,
     tab_widget_ = new QTabWidget();
     layout->addWidget (tab_widget_);
 
-    for (auto object : ATSDB::instance().objectManager().objects())
+    for (auto& obj_it : ATSDB::instance().objectManager())
     {
-        if (object.second->hasData())
+        if (obj_it.second->hasData())
         {
-            BufferTableWidget *buffer_table = new BufferTableWidget (*object.second, *data_source_);
-            tab_widget_->addTab (buffer_table , object.first.c_str());
-            buffer_tables_[object.first] = buffer_table;
+            BufferTableWidget *buffer_table = new BufferTableWidget (*obj_it.second, *data_source_);
+            tab_widget_->addTab (buffer_table , obj_it.first.c_str());
+            buffer_tables_[obj_it.first] = buffer_table;
             connect (buffer_table, SIGNAL(exportDoneSignal(bool)), this, SLOT(exportDoneSlot(bool)));
             connect (this, SIGNAL(usePresentationSignal(bool)), buffer_table, SLOT(usePresentationSlot(bool)));
         }

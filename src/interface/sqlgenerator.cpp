@@ -144,7 +144,7 @@ std::string SQLGenerator::getCreateTableStatement (const DBTable& table)
 
 //}
 
-std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand (const DBObject &object)
+std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand (DBObject &object)
 {
     assert (object.hasCurrentDataSourceDefinition ());
 
@@ -246,7 +246,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand (const DBOb
     return getSelectCommand (meta, columns);
 }
 
-std::shared_ptr<DBCommand> SQLGenerator::getDistinctDataSourcesSelectCommand (const DBObject &object)
+std::shared_ptr<DBCommand> SQLGenerator::getDistinctDataSourcesSelectCommand (DBObject &object)
 {
     // "SELECT DISTINCT sensor_number__value FROM " << table_names_.at(DBO_PLOTS) << " WHERE mapped_position__present = '1' AND sensor_number__present = '1' ORDER BY sensor_number__value;";
     //return distinct_radar_numbers_statement_;

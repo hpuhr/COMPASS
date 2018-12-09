@@ -20,27 +20,27 @@
 
 #include "propertylist.h"
 #include "singleton.h"
-#include "dbovariableset.h"
+//#include "dbovariableset.h"
 #include "configurable.h"
 
 #include <set>
 #include <map>
 #include <vector>
 
-class Buffer;
-class DataSource;
+//class Buffer;
+//class DataSource;
 class DBInterface;
-class DBTableInfo;
-class DBObject;
+//class DBTableInfo;
+//class DBObject;
 class DBObjectManager;
-class DBSchema;
+//class DBSchema;
 class DBSchemaManager;
 class FilterManager;
 class TaskManager;
 class ViewManager;
 //class StructureReader;
-class Job;
-class BufferReceiver;
+//class Job;
+//class BufferReceiver;
 
 /**
  * @mainpage  ATSDB Main Page

@@ -104,6 +104,7 @@ protected:
 };
 
 Q_DECLARE_METATYPE(DBODataSourceDefinition*)
+Q_DECLARE_METATYPE(const DBODataSourceDefinition*)
 
 class DBODataSource
 {

@@ -30,6 +30,7 @@
 #include "dbtablecolumn.h"
 #include "logger.h"
 #include "unitselectionwidget.h"
+#include "formatselectionwidget.h"
 
 #include "stringconv.h"
 
@@ -156,9 +157,13 @@ void DBTableWidget::updateColumnGrid ()
 //    null_label->setFont(font_bold);
 //    column_grid_->addWidget (null_label, 0,4);
 
+    QLabel* data_format_label = new QLabel ("Data Format");
+    data_format_label->setFont(font_bold);
+    column_grid_->addWidget (data_format_label, 0,4);
+
     QLabel* comment_label = new QLabel ("Comment");
     comment_label->setFont(font_bold);
-    column_grid_->addWidget (comment_label, 0,4);
+    column_grid_->addWidget (comment_label, 0,5);
 
 
     unsigned int row=1;
@@ -177,6 +182,10 @@ void DBTableWidget::updateColumnGrid ()
         column_grid_->addWidget (unit_widget, row, 3);
         column_unit_selection_widgets_[unit_widget] = it.second;
 
+        FormatSelectionWidget* data_format_widget = new FormatSelectionWidget (it.second->propertyType(),
+                                                                               it.second->dataFormat());
+        column_grid_->addWidget (data_format_widget, row, 4);
+
 //        QLineEdit *edit = new QLineEdit (it.second->specialNull().c_str());
 //        connect (edit, SIGNAL(textChanged(const QString &)), this, SLOT (setSpecialNull(const QString &)));
 //        column_grid_->addWidget (edit, row, 4);
@@ -184,7 +193,7 @@ void DBTableWidget::updateColumnGrid ()
 //        column_grid_special_nulls_ [edit] = it.second;
 
         QLabel *comment = new QLabel (it.second->comment().c_str());
-        column_grid_->addWidget (comment, row, 4);
+        column_grid_->addWidget (comment, row, 5);
 
         row++;
     }

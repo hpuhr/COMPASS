@@ -165,11 +165,21 @@ void DBObjectManager::deleteMetaVariable (const std::string& var_name)
     meta_variables_.erase(var_name);
 }
 
+bool DBObjectManager::usedInMetaVariable (const DBOVariable& variable)
+{
+    for (auto& meta_it : meta_variables_)
+        if (meta_it.second->uses (variable))
+            return true;
+
+    return false;
+}
+
 DBObjectManagerWidget* DBObjectManager::widget()
 {
     if (!widget_)
     {
         widget_ = new DBObjectManagerWidget (*this);
+        //connect (this, SIGNAL(databaseContentChangedSignal), widget_, SLOT(updateDBOsSlot));
 
         if (locked_)
             widget_->lock ();
@@ -340,7 +350,7 @@ void DBObjectManager::loadSlot ()
 
     bool load_job_created = false;
 
-    for (auto object : objects())
+    for (auto& object : objects_)
     {
         if (object.second->loadable() && object.second->loadingWanted())
         {
@@ -387,7 +397,7 @@ void DBObjectManager::quitLoading ()
 {
     loginf << "DBObjectManager: quitLoading";
 
-    for (auto object : objects())
+    for (auto& object : objects_)
         object.second->quitLoading();
 }
 
@@ -405,7 +415,7 @@ void DBObjectManager::loadingDoneSlot (DBObject& object)
 {
     bool done=true;
 
-    for (auto object_it : objects())
+    for (auto& object_it : objects_)
         if (object_it.second->isLoading())
         {
             logdbg << "DBObjectManager: loadingDoneSlot: " << object_it.first << " still loading";

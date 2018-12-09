@@ -40,13 +40,13 @@ public slots:
     /// @brief Sets the data type
     void changed ()
     {
-        variable_.dataType(getType());
+        variable_->dataType(getType());
     }
 
 public:
     /// @brief Constructor
-    DBOVariableDataTypeComboBox(DBOVariable &variable, QWidget * parent = 0)
-    : QComboBox(parent), variable_(variable)
+    DBOVariableDataTypeComboBox(DBOVariable& variable, QWidget * parent = 0)
+    : QComboBox(parent), variable_(&variable)
     {
         const std::map<PropertyDataType,std::string> &datatypes2str = Property::dataTypes2Strings();
         for (auto it = datatypes2str.begin(); it != datatypes2str.end(); it++)
@@ -54,11 +54,10 @@ public:
             addItem (it->second.c_str());
         }
 
-        int index = findText(QString(variable_.dataTypeString().c_str()));
-        assert (index >= 0);
-        setCurrentIndex (index);
-        connect(this, SIGNAL( activated(const QString &) ), this, SIGNAL( changedType() ));
-        connect(this, SIGNAL( activated(const QString &) ), this, SLOT( changed() ));
+        update();
+
+        connect(this, SIGNAL(activated(const QString &)), this, SIGNAL(changedType()));
+        connect(this, SIGNAL(activated(const QString &)), this, SLOT(changed()));
 
     }
     /// @brief Destructor
@@ -78,9 +77,23 @@ public:
         setCurrentIndex (index);
     }
 
+    void setVariable (DBOVariable& variable)
+    {
+        variable_ = &variable;
+
+        update();
+    }
+
 protected:
     /// Used variable
-    DBOVariable &variable_;
+    DBOVariable* variable_ {nullptr};
+
+    void update ()
+    {
+        int index = findText(QString(variable_->dataTypeString().c_str()));
+        assert (index >= 0);
+        setCurrentIndex (index);
+    }
 };
 
 #endif /* DBOVARIABLEDATATYPECOMBOBOX_H_ */

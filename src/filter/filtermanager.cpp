@@ -90,7 +90,7 @@ void FilterManager::generateSubConfigurable (const std::string& class_id, const 
         catch (const std::exception& e)
         {
             loginf << "FilterManager: generateSubConfigurable: data source filter exception '" << e.what() << "', deleting";
-            configuration_.removeSubConfiguration(class_id, instance_id);
+            configuration().removeSubConfiguration(class_id, instance_id);
         }
     }
     else
@@ -99,17 +99,17 @@ void FilterManager::generateSubConfigurable (const std::string& class_id, const 
 void FilterManager::checkSubConfigurables ()
 {
     // watch those sensors
-    for (auto dbo_it : ATSDB::instance().objectManager().objects())
+    for (auto& obj_it : ATSDB::instance().objectManager())
     {
-        if (!dbo_it.second->hasCurrentDataSourceDefinition() || !dbo_it.second->hasDataSources()
-                || !dbo_it.second->existsInDB())
+        if (!obj_it.second->hasCurrentDataSourceDefinition() || !obj_it.second->hasDataSources()
+                || !obj_it.second->existsInDB())
             continue;
 
         bool exists = false;
         for (auto fil_it : filters_)
         {
             DataSourcesFilter *sensor_filter = dynamic_cast<DataSourcesFilter*> (fil_it);
-            if (sensor_filter && sensor_filter->dbObjectName() == dbo_it.first)
+            if (sensor_filter && sensor_filter->dbObjectName() == obj_it.first)
             {
                 exists = true;
                 break;
@@ -119,11 +119,11 @@ void FilterManager::checkSubConfigurables ()
         if (exists)
             continue;
 
-        loginf << "FilterManager: checkSubConfigurables: generating sensor filter for " << dbo_it.first;
+        loginf << "FilterManager: checkSubConfigurables: generating sensor filter for " << obj_it.first;
 
-        std::string instance_id = dbo_it.second->name()+"DataSources";
+        std::string instance_id = obj_it.second->name()+"DataSources";
         Configuration &ds_filter_configuration = addNewSubConfiguration ("DataSourcesFilter", instance_id);
-        ds_filter_configuration.addParameterString ("dbo_name", dbo_it.first);
+        ds_filter_configuration.addParameterString ("dbo_name", obj_it.first);
         generateSubConfigurable ("DataSourcesFilter", instance_id);
     }
 }
@@ -138,7 +138,7 @@ std::string FilterManager::getSQLCondition (const std::string& dbo_name, std::ve
 
     for (auto* filter : filters_)
     {
-        loginf << "FilterManager: getSQLCondition: filter " << filter->getInstanceId()
+        loginf << "FilterManager: getSQLCondition: filter " << filter->instanceId()
                << " active " << filter->getActive()
                << " filters " << dbo_name << " " << filter->filters (dbo_name);
 

@@ -20,144 +20,13 @@
 
 #include <map>
 #include <string>
-#include <tinyxml2.h>
 #include <typeinfo>
 #include <vector>
 
-#include "logger.h"
+#include <tinyxml2.h>
+
 #include "string.h"
-
-class Configurable;
-
-/**
- * @brief Configuration parameter template class
- *
- * @details Several types of parameters are implement here:
- * "ParameterBool", "ParameterInt", "ParameterUnsignedInt", "ParameterFloat", "ParameterDouble", "ParameterString"
- *
- * For all such types one template class was implemented to unify setting and retrieving the XML configuration.
- */
-template <class T> class ConfigurableParameter //: public ConfigurableParameterBase
-{
-public:
-    /// Constructor, initializes members
-    explicit ConfigurableParameter () : pointer_(0)
-    {}
-
-    /// Copy constructor, uses assignment operator
-    ConfigurableParameter(const ConfigurableParameter &source)
-    {
-        operator=(source);
-    }
-
-    /// Assignment operator, make deep copy and discards the pointer.
-    virtual ConfigurableParameter& operator= (const ConfigurableParameter &source)
-    {
-        parameter_id_ = source.parameter_id_;
-        pointer_=0;
-        if (source.pointer_)
-            config_value_ = *source.pointer_;
-        else
-            config_value_ = source.config_value_;
-        default_value_ = source.default_value_;
-
-        return *this;
-    }
-
-    /// Desctructor
-    virtual ~ConfigurableParameter () {}
-    /// Parameter identifier
-    std::string parameter_id_;
-    /// Template pointer to real value
-    T *pointer_;
-    /// Template configuration value
-    T config_value_;
-    /// Template default value as given by registerParameter
-    T default_value_;
-
-    /// Parses an element from the XML configuration and sets parameter_id_ and config_value_ (using a stringstream)
-    void parseElement (const tinyxml2::XMLElement *element)
-    {
-        std::string configuration_id = element->Value();
-        const tinyxml2::XMLAttribute* attribute=element->FirstAttribute();
-        while (attribute)
-        {
-            logdbg  << "ConfigurableParameter " << configuration_id << ": parseElement: attribute " << attribute->Name() << "  value "<< attribute->Value();
-
-            parameter_id_=attribute->Name();
-            setConfigValue (attribute);
-
-            attribute=attribute->Next();
-            assert (!attribute);
-        }
-    }
-
-    /**
-     * Returns the parameter type as string
-     *
-     * \exception std::runtime_error if unknown class is used
-     */
-    std::string getParameterType () const
-    {
-        throw std::runtime_error ("ConfigurableParameter: getParameterType: unknown class type");
-    }
-
-    /// Returns parameter identifier
-    const std::string &getParameterId () const
-    {
-        return parameter_id_;
-    }
-
-    /// Returns parameter value as string (using a stringstream)
-    std::string getParameterValue () const
-    {
-        throw std::runtime_error ("ConfigurableParameter: getParameterValue: unknown class type");
-    }
-
-    /// Sets pointer_ to default value if valid, otherwise sets config_value_ to default_value_
-    void resetToDefault ()
-    {
-        std::stringstream ss;
-        ss << "ConfigurableParameter: resetToDefault: parameter '" << parameter_id_ << "' default value '" << default_value_ << "'";
-
-        if (pointer_)
-        {
-            ss << " ptr not null value '" << *pointer_ << "'";
-            *pointer_=default_value_;
-        }
-        else
-        {
-            ss << " ptr null";
-            config_value_=default_value_;
-        }
-
-        loginf  << ss.str();
-    }
-
-protected:
-    void setConfigValue (const tinyxml2::XMLAttribute* attribute);
-};
-
-template<> void ConfigurableParameter<bool>::setConfigValue (const tinyxml2::XMLAttribute* attribute);
-template<> void ConfigurableParameter<int>::setConfigValue (const tinyxml2::XMLAttribute* attribute);
-template<> void ConfigurableParameter<unsigned int>::setConfigValue (const tinyxml2::XMLAttribute* attribute);
-template<> void ConfigurableParameter<float>::setConfigValue (const tinyxml2::XMLAttribute* attribute);
-template<> void ConfigurableParameter<double>::setConfigValue (const tinyxml2::XMLAttribute* attribute);
-template<> void ConfigurableParameter<std::string>::setConfigValue (const tinyxml2::XMLAttribute* attribute);
-
-template<> std::string ConfigurableParameter<bool>::getParameterType () const;
-template<> std::string ConfigurableParameter<int>::getParameterType () const;
-template<> std::string ConfigurableParameter<unsigned int>::getParameterType () const;
-template<> std::string ConfigurableParameter<float>::getParameterType () const;
-template<> std::string ConfigurableParameter<double>::getParameterType () const;
-template<> std::string ConfigurableParameter<std::string>::getParameterType () const;
-
-template<> std::string ConfigurableParameter<bool>::getParameterValue () const;
-template<> std::string ConfigurableParameter<int>::getParameterValue () const;
-template<> std::string ConfigurableParameter<unsigned int>::getParameterValue () const;
-template<> std::string ConfigurableParameter<float>::getParameterValue () const;
-template<> std::string ConfigurableParameter<double>::getParameterValue () const;
-template<> std::string ConfigurableParameter<std::string>::getParameterValue () const;
+#include "configurableparameter.h"
 
 /**
  * @brief Configuration storage and retrieval container class
@@ -173,15 +42,16 @@ class Configuration
 {
 public:
     /// @brief Constructor
-    Configuration(const std::string &class_id, const std::string &instance_id, const std::string &configuration_filename="");
+    Configuration(const std::string& class_id, const std::string& instance_id,
+                  const std::string& configuration_filename="");
 
     /// @brief Copy constructor
     Configuration(const Configuration &source);
     /// @brief Destructor
     virtual ~Configuration();
 
-    Configuration& operator= (const Configuration &source);
-    Configuration *clone ();
+//    Configuration& operator= (const Configuration &source);
+//    Configuration *clone ();
 
     /// @brief Registers a boolean parameter
     void registerParameter (const std::string &parameter_id, bool *pointer, bool default_value);
@@ -195,6 +65,19 @@ public:
     void registerParameter (const std::string &parameter_id, double *pointer, double default_value);
     /// @brief Registers a string parameter
     void registerParameter (const std::string &parameter_id, std::string *pointer, const std::string &default_value);
+
+    /// @brief Updates a boolean parameter pointer
+    void updateParameterPointer (const std::string &parameter_id, bool *pointer);
+    /// @brief Updates an int parameter pointer
+    void updateParameterPointer (const std::string &parameter_id, int *pointer);
+    /// @brief Updates an unsigned int parameter pointer
+    void updateParameterPointer (const std::string &parameter_id, unsigned int *pointer);
+    /// @brief Updates a float parameter pointer
+    void updateParameterPointer (const std::string &parameter_id, float *pointer);
+    /// @brief Updates a double parameter pointer
+    void updateParameterPointer (const std::string &parameter_id, double *pointer);
+    /// @brief Updates a string parameter pointer
+    void updateParameterPointer (const std::string &parameter_id, std::string *pointer);
 
     /// @brief Adds a boolean parameter
     void addParameterBool (const std::string &parameter_id, bool default_value);
@@ -222,6 +105,13 @@ public:
     /// @brief Writes data value if a string parameter to an argument
     void getParameter (const std::string &parameter_id, std::string &value);
 
+    bool getParameterConfigValueBool (const std::string &parameter_id);
+    int getParameterConfigValueInt (const std::string &parameter_id);
+    unsigned int getParameterConfigValueUint (const std::string &parameter_id);
+    float getParameterConfigValueFloat (const std::string &parameter_id);
+    double getParameterConfigValueDouble (const std::string &parameter_id);
+    std::string getParameterConfigValueString (const std::string &parameter_id);
+
     /// @brief Parses an XML element
     void parseXMLElement (tinyxml2::XMLElement *element);
     /// @brief Generates an XML configuration element
@@ -241,8 +131,9 @@ public:
     /// @brief Returns flag if special filename has been set
     bool hasConfigurationFilename ();
     /// @brief Return special filename
-    const std::string & getConfigurationFilename ();
+    const std::string& getConfigurationFilename ();
 
+    bool hasSubConfiguration (const std::string &class_id, const std::string &instance_id);
     /// @brief Adds a new sub-configuration and returns reference
     Configuration &addNewSubConfiguration (const std::string &class_id, const std::string &instance_id);
     /// @brief Adds a new sub-configuration and returns reference
@@ -283,7 +174,7 @@ protected:
     /// Instance identifier
     std::string instance_id_;
     /// Flag indicating if configuration has been used by configurable
-    bool used_;
+    bool used_ {false};
     /// Special XML configuration filename
     std::string configuration_filename_;
 
@@ -298,7 +189,7 @@ protected:
     std::map<std::pair<std::string, std::string>, Configuration> sub_configurations_;
 
     /// Flag which indicates if instance is a template
-    bool template_flag_;
+    bool template_flag_ {false};
     /// Template name, empty if no template
     std::string template_name_;
 
