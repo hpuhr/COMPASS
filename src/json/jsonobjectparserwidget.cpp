@@ -4,7 +4,7 @@
 #include "files.h"
 #include "configuration.h"
 #include "dbovariableselectionwidget.h"
-#include "formatselectionwidget.h"
+#include "datatypeformatselectionwidget.h"
 #include "unitselectionwidget.h"
 #include "dbovariable.h"
 
@@ -133,7 +133,7 @@ void JSONObjectParserWidget::updateMappingsGrid()
         delete child;
     }
 
-    format_selections_.clear();
+    //format_selections_.clear();
 
     QFont font_bold;
     font_bold.setBold(true);
@@ -192,7 +192,7 @@ void JSONObjectParserWidget::updateMappingsGrid()
             var_sel->selectedVariable(map_it.variable());
         connect(var_sel, SIGNAL(selectionChanged()), this, SLOT(mappingDBOVariableChangedSlot()));
         var_sel->setProperty("mapping", data);
-        var_sel->setProperty("row", row);
+        //var_sel->setProperty("row", row);
         mappings_grid_->addWidget(var_sel, row, 2);
 
         QCheckBox* mandatory_check = new QCheckBox ();
@@ -205,13 +205,15 @@ void JSONObjectParserWidget::updateMappingsGrid()
         mappings_grid_->addWidget (unit_sel, row, 4);
         //column_unit_selection_widgets_[unit_widget] = it.second;
 
-        if (map_it.hasVariable())
-        {
-            FormatSelectionWidget* data_format_widget = new FormatSelectionWidget (map_it.variable().dataType(),
-                                                                               map_it.jsonValueFormatRef());
+//        if (map_it.hasVariable())
+//        {
+            DataTypeFormatSelectionWidget* data_format_widget
+                    = new DataTypeFormatSelectionWidget (map_it.formatDataTypeRef(),
+                                                         map_it.jsonValueFormatRef());
+
             mappings_grid_->addWidget (data_format_widget, row, 5);
-            format_selections_[row-1] = data_format_widget;
-        }
+//            format_selections_[row-1] = data_format_widget;
+//        }
 
         QPushButton *del = new QPushButton ();
         del->setIcon(del_icon);
@@ -219,6 +221,7 @@ void JSONObjectParserWidget::updateMappingsGrid()
         del->setFlat(UI_ICON_BUTTON_FLAT);
         connect(del, SIGNAL(clicked()), this, SLOT(mappingDeleteSlot()));
         del->setProperty("mapping", data);
+        del->setProperty("row", row-1);
         mappings_grid_->addWidget (del, row, 6);
 
         row++;
@@ -326,7 +329,7 @@ void JSONObjectParserWidget::mappingDBOVariableChangedSlot()
     DBOVariableSelectionWidget* var_widget = static_cast<DBOVariableSelectionWidget*>(sender());
     assert (var_widget);
     QVariant data = var_widget->property("mapping");
-    unsigned int row = var_widget->property("row").toUInt();
+    //unsigned int row = var_widget->property("row").toUInt();
 
     JSONDataMapping* mapping = data.value<JSONDataMapping*>();
     assert (mapping);
@@ -336,16 +339,18 @@ void JSONObjectParserWidget::mappingDBOVariableChangedSlot()
         loginf << "JSONObjectParserWidget: mappingDBOVariableChangedSlot: variable set";
 
         mapping->dboVariableName(var_widget->selectedVariable().name());
-        if (format_selections_.count(row) == 1)
-            format_selections_.at(row)->update(mapping->variable().dataType(),
-                                               mapping->jsonValueFormatRef());
-        else
-        {
-            FormatSelectionWidget* data_format_widget = new FormatSelectionWidget (mapping->variable().dataType(),
-                                                                               mapping->jsonValueFormatRef());
-            mappings_grid_->addWidget (data_format_widget, row, 5);
-            format_selections_[row] = data_format_widget;
-        }
+//        if (format_selections_.count(row) == 1)
+//            format_selections_.at(row)->update(mapping->formatDataTypeRef(),
+//                                               mapping->jsonValueFormatRef());
+//        else
+//        {
+//            DataTypeFormatSelectionWidget* data_format_widget
+//                    = new DataTypeFormatSelectionWidget (mapping->formatDataTypeRef(),
+//                                                         mapping->jsonValueFormatRef());
+
+//            mappings_grid_->addWidget (data_format_widget, row, 5);
+//            format_selections_[row] = data_format_widget;
+//        }
     }
     else
     {
@@ -353,12 +358,12 @@ void JSONObjectParserWidget::mappingDBOVariableChangedSlot()
 
         mapping->dboVariableName("");
 
-        if (format_selections_.count(row) == 1)
-        {
-            mappings_grid_->removeWidget(format_selections_.at(row));
-            delete format_selections_.at(row);
-            format_selections_.erase(row);
-        }
+//        if (format_selections_.count(row) == 1)
+//        {
+//            mappings_grid_->removeWidget(format_selections_.at(row));
+//            delete format_selections_.at(row);
+//            format_selections_.erase(row);
+//        }
     }
 }
 
@@ -386,5 +391,12 @@ void JSONObjectParserWidget::mappingDeleteSlot()
 
     JSONDataMapping* mapping = data.value<JSONDataMapping*>();
     assert (mapping);
+
+    unsigned int row = widget->property("row").toUInt();
+
+    assert (parser_->hasMapping(row));
+    parser_->removeMapping(row);
+
+    updateMappingsGrid();
 }
 

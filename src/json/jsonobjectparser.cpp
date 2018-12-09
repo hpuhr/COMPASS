@@ -7,6 +7,8 @@
 #include "dbobjectmanager.h"
 #include "atsdb.h"
 
+#include <algorithm>
+
 using namespace nlohmann;
 
 JSONObjectParser::JSONObjectParser (const std::string& class_id, const std::string& instance_id, Configurable* parent)
@@ -197,6 +199,14 @@ void JSONObjectParser::initialize ()
         {
             logwrn << "JsonMapping: initialize: override key set but no key variable exists, disabling override";
             override_key_variable_ = false;
+        }
+        else
+        {
+            assert (data_source_variable_name_.size());
+            assert (db_object_->hasVariable(data_source_variable_name_));
+
+            list_.addProperty(data_source_variable_name_, PropertyDataType::INT);
+            var_list_.add(db_object_->variable(data_source_variable_name_));
         }
 
         not_parse_all_ = (json_key_ != "*") && (json_value_ != "*");
@@ -404,14 +414,40 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
     return mandatory_missing;
 }
 
+bool JSONObjectParser::hasMapping (unsigned int index) const
+{
+    return index < data_mappings_.size();
+}
+void JSONObjectParser::removeMapping (unsigned int index)
+{
+    assert (hasMapping(index));
+    data_mappings_.erase(data_mappings_.begin()+index);
+}
+
 void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key_begin) const
 {
     assert (db_object_);
 
-    logdbg << "JsonMapping: transformBuffer: object " << db_object_->name();
+    loginf << "JsonMapping: transformBuffer: object " << db_object_->name();
+
+    if (override_data_source_)
+    {
+        loginf << "JsonMapping: transformBuffer: overiding data source for object " << db_object_->name()
+               << " ds id name '" << data_source_variable_name_ << "'";
+        assert (data_source_variable_name_.size());
+        assert (buffer->has<int>(data_source_variable_name_));
+
+        //buffer->addProperty(data_source_variable_name_, PropertyDataType::INT);
+        NullableVector<int>& ds_id_vector = buffer->get<int> (data_source_variable_name_);
+        size_t size = buffer->size();
+
+        for (size_t cnt=0; cnt < size; ++cnt)
+            ds_id_vector.set(cnt, 0);
+    }
 
     if (override_key_variable_)
     {
+        loginf << "JsonMapping: transformBuffer: overiding key variable for object " << db_object_->name();
         assert (key_begin >= 0);
         size_t key_cnt = key_begin;
         assert (key_variable_);

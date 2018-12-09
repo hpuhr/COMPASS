@@ -299,6 +299,8 @@ void JSONImporterTaskWidget::removeSchemaSlot()
 
     task_.removeCurrentSchema();
     updateSchemasBox();
+    updateParserList();
+    selectedObjectParserSlot ();
 }
 
 void JSONImporterTaskWidget::selectedSchemaChangedSlot(const QString& text)
@@ -307,6 +309,9 @@ void JSONImporterTaskWidget::selectedSchemaChangedSlot(const QString& text)
 
     assert (task_.hasSchema(text.toStdString()));
     task_.currentSchemaName(text.toStdString());
+
+    updateParserList();
+    selectedObjectParserSlot ();
 }
 
 void JSONImporterTaskWidget::updateSchemasBox()
@@ -375,6 +380,20 @@ void JSONImporterTaskWidget::addObjectParserSlot ()
 void JSONImporterTaskWidget::removeObjectParserSlot ()
 {
     loginf << "JSONImporterTaskWidget: removeObjectParserSlot";
+
+    if (object_parser_list_->currentItem())
+    {
+        std::string name = object_parser_list_->currentItem()->text().toStdString();
+
+        assert (task_.hasCurrentSchema());
+        JSONParsingSchema& current = task_.currentSchema();
+
+        assert (current.hasObjectParser(name));
+        current.removeParser(name);
+
+        updateParserList();
+        selectedObjectParserSlot();
+    }
 }
 
 void JSONImporterTaskWidget::selectedObjectParserSlot ()
@@ -409,13 +428,15 @@ void JSONImporterTaskWidget::selectedObjectParserSlot ()
         object_parser_widgets_->removeWidget(object_parser_widgets_->widget(0));
 
     assert (object_parser_list_);
-    assert (object_parser_list_->currentItem());
 
-    std::string name = object_parser_list_->currentItem()->text().toStdString();
+    if (object_parser_list_->currentItem())
+    {
+        std::string name = object_parser_list_->currentItem()->text().toStdString();
 
-    assert (task_.hasCurrentSchema());
-    assert (task_.currentSchema().hasObjectParser(name));
-    object_parser_widgets_->addWidget(task_.currentSchema().parser(name).widget());
+        assert (task_.hasCurrentSchema());
+        assert (task_.currentSchema().hasObjectParser(name));
+        object_parser_widgets_->addWidget(task_.currentSchema().parser(name).widget());
+    }
 }
 
 void JSONImporterTaskWidget::update ()

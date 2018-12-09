@@ -54,6 +54,8 @@ protected:
 
     void openArchive (bool raw);
     void closeArchive ();
+
+    void cleanCommas ();
 };
 
 #endif // READJSONFILEPARTJOB_H

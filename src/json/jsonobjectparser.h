@@ -41,6 +41,8 @@ public:
 
     MappingIterator begin() { return data_mappings_.begin(); }
     MappingIterator end() { return data_mappings_.end(); }
+    bool hasMapping (unsigned int index) const;
+    void removeMapping (unsigned int index);
 
     void transformBuffer (std::shared_ptr<Buffer> buffer, long key_begin=-1) const;
 

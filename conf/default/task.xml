@@ -14,6 +14,9 @@
         <ParameterString current_schema="SDDL"/>
         <ParameterString db_object_str="ADSB"/>
         <ParameterString last_filename="/home/sk/data/json_50k.zip"/>
+        <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdata2017-11-30-0401Z.json">
+            <ParameterString name="/home/sk/data/2017-11-30-0401Z.json"/>
+        </Configuration>
         <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdata2017-11-30-0804Z.json">
             <ParameterString name="/home/sk/data/2017-11-30-0804Z.json"/>
         </Configuration>
@@ -41,6 +44,95 @@
         <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdatatext.json">
             <ParameterString name="/home/sk/data/text.json"/>
         </Configuration>
+        <Configuration class_id="JSONParsingSchema" instance_id="JSONParsingSchemaADSBExchange0">
+            <ParameterString name="ADSBExchange"/>
+            <Configuration class_id="JSONObjectParser" instance_id="JSONObjectParserADSB0">
+                <ParameterBool override_data_source="1"/>
+                <ParameterBool override_key_variable="1"/>
+                <ParameterString data_source_variable_name="ds_id"/>
+                <ParameterString db_object_name="ADSB"/>
+                <ParameterString json_container_key="acList"/>
+                <ParameterString json_key="*"/>
+                <ParameterString json_value="*"/>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping0">
+                    <ParameterBool active="0"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="target_addr"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="Icao"/>
+                    <ParameterString json_value_format="hexadecimal"/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping1">
+                    <ParameterBool active="0"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="callsign"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="Reg"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping2">
+                    <ParameterBool active="0"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="alt_baro_ft"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="Alt"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping3">
+                    <ParameterBool active="0"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="alt_geo_ft"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="GAlt"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping4">
+                    <ParameterBool active="0"/>
+                    <ParameterBool mandatory="1"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="pos_lat_deg"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="Lat"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping5">
+                    <ParameterBool active="0"/>
+                    <ParameterBool mandatory="1"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="pos_long_deg"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="Long"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping6">
+                    <ParameterBool active="0"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="tod"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type="STRING"/>
+                    <ParameterString json_key="PosTime"/>
+                    <ParameterString json_value_format="epoch_tod"/>
+                    <ParameterString unit=""/>
+                </Configuration>
+            </Configuration>
+        </Configuration>
         <Configuration class_id="JSONParsingSchema" instance_id="JSONParsingSchemaSDDL0">
             <ParameterString name="SDDL"/>
             <Configuration class_id="JSONObjectParser" instance_id="JSONObjectParserADSB0">
@@ -57,8 +149,9 @@
                     <ParameterString db_object_name="ADSB"/>
                     <ParameterString dbovariable_name="rec_num"/>
                     <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="rec_num"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping1">
@@ -67,8 +160,9 @@
                     <ParameterString db_object_name="ADSB"/>
                     <ParameterString dbovariable_name="ds_id"/>
                     <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="data_source_identifier.value"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping2">
@@ -77,8 +171,9 @@
                     <ParameterString db_object_name="ADSB"/>
                     <ParameterString dbovariable_name="sac"/>
                     <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="data_source_identifier.sac"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping3">
@@ -87,8 +182,9 @@
                     <ParameterString db_object_name="ADSB"/>
                     <ParameterString dbovariable_name="sic"/>
                     <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="data_source_identifier.sic"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping4">
@@ -97,8 +193,9 @@
                     <ParameterString db_object_name="ADSB"/>
                     <ParameterString dbovariable_name="target_addr"/>
                     <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="target_address"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping5">
@@ -107,8 +204,9 @@
                     <ParameterString db_object_name="ADSB"/>
                     <ParameterString dbovariable_name="callsign"/>
                     <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="target_identification.value_idt"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping6">
@@ -117,8 +215,9 @@
                     <ParameterString db_object_name="ADSB"/>
                     <ParameterString dbovariable_name="alt_baro_ft"/>
                     <ParameterString dimension="Height"/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="mode_c_height.value_ft"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit="Feet"/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping7">
@@ -127,8 +226,9 @@
                     <ParameterString db_object_name="ADSB"/>
                     <ParameterString dbovariable_name="pos_lat_deg"/>
                     <ParameterString dimension="Angle"/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="wgs84_position.value_lat_rad"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit="Radian"/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping8">
@@ -137,8 +237,9 @@
                     <ParameterString db_object_name="ADSB"/>
                     <ParameterString dbovariable_name="pos_long_deg"/>
                     <ParameterString dimension="Angle"/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="wgs84_position.value_lon_rad"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit="Radian"/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping9">
@@ -147,8 +248,9 @@
                     <ParameterString db_object_name="ADSB"/>
                     <ParameterString dbovariable_name="tod"/>
                     <ParameterString dimension="Time"/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="time_of_report"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit="Second"/>
                 </Configuration>
             </Configuration>
@@ -166,8 +268,9 @@
                     <ParameterString db_object_name="MLAT"/>
                     <ParameterString dbovariable_name="rec_num"/>
                     <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="rec_num"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping1">
@@ -176,8 +279,9 @@
                     <ParameterString db_object_name="MLAT"/>
                     <ParameterString dbovariable_name="ds_id"/>
                     <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="data_source_identifier.value"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping10">
@@ -186,8 +290,9 @@
                     <ParameterString db_object_name="MLAT"/>
                     <ParameterString dbovariable_name="tod"/>
                     <ParameterString dimension="Time"/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="detection_time"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit="Second"/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping2">
@@ -196,8 +301,9 @@
                     <ParameterString db_object_name="MLAT"/>
                     <ParameterString dbovariable_name="sac"/>
                     <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="data_source_identifier.sac"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping3">
@@ -206,8 +312,9 @@
                     <ParameterString db_object_name="MLAT"/>
                     <ParameterString dbovariable_name="sic"/>
                     <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="data_source_identifier.sic"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping4">
@@ -216,8 +323,9 @@
                     <ParameterString db_object_name="MLAT"/>
                     <ParameterString dbovariable_name="mode3a_code"/>
                     <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="mode_3a_info.code"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping5">
@@ -226,8 +334,9 @@
                     <ParameterString db_object_name="MLAT"/>
                     <ParameterString dbovariable_name="target_addr"/>
                     <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="target_address"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping6">
@@ -236,8 +345,9 @@
                     <ParameterString db_object_name="MLAT"/>
                     <ParameterString dbovariable_name="callsign"/>
                     <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="target_identification.value_idt"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping7">
@@ -246,8 +356,9 @@
                     <ParameterString db_object_name="MLAT"/>
                     <ParameterString dbovariable_name="flight_level_ft"/>
                     <ParameterString dimension="Height"/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="mode_c_height.value_ft"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit="Feet"/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping8">
@@ -256,8 +367,9 @@
                     <ParameterString db_object_name="MLAT"/>
                     <ParameterString dbovariable_name="pos_lat_deg"/>
                     <ParameterString dimension="Angle"/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="wgs84_position.value_lat_rad"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit="Radian"/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping9">
@@ -266,8 +378,9 @@
                     <ParameterString db_object_name="MLAT"/>
                     <ParameterString dbovariable_name="pos_long_deg"/>
                     <ParameterString dimension="Angle"/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="wgs84_position.value_lon_rad"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit="Radian"/>
                 </Configuration>
             </Configuration>
@@ -285,8 +398,9 @@
                     <ParameterString db_object_name="Radar"/>
                     <ParameterString dbovariable_name="rec_num"/>
                     <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="rec_num"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping1">
@@ -295,8 +409,9 @@
                     <ParameterString db_object_name="Radar"/>
                     <ParameterString dbovariable_name="ds_id"/>
                     <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="data_source_identifier.value"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping10">
@@ -305,8 +420,9 @@
                     <ParameterString db_object_name="Radar"/>
                     <ParameterString dbovariable_name="tod"/>
                     <ParameterString dimension="Time"/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="detection_time"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit="Second"/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping2">
@@ -315,8 +431,9 @@
                     <ParameterString db_object_name="Radar"/>
                     <ParameterString dbovariable_name="sac"/>
                     <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="data_source_identifier.sac"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping3">
@@ -325,8 +442,9 @@
                     <ParameterString db_object_name="Radar"/>
                     <ParameterString dbovariable_name="sic"/>
                     <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="data_source_identifier.sic"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping4">
@@ -335,8 +453,9 @@
                     <ParameterString db_object_name="Radar"/>
                     <ParameterString dbovariable_name="mode3a_code"/>
                     <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="mode_3_info.code"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping5">
@@ -345,8 +464,9 @@
                     <ParameterString db_object_name="Radar"/>
                     <ParameterString dbovariable_name="target_addr"/>
                     <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="target_address"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping6">
@@ -355,8 +475,9 @@
                     <ParameterString db_object_name="Radar"/>
                     <ParameterString dbovariable_name="callsign"/>
                     <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="aircraft_identification.value_idt"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping7">
@@ -365,8 +486,9 @@
                     <ParameterString db_object_name="Radar"/>
                     <ParameterString dbovariable_name="modec_code_ft"/>
                     <ParameterString dimension="Height"/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="mode_c_height.value_ft"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit="Feet"/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping8">
@@ -375,8 +497,9 @@
                     <ParameterString db_object_name="Radar"/>
                     <ParameterString dbovariable_name="pos_azm_deg"/>
                     <ParameterString dimension="Angle"/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="measured_azm_rad"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit="Radian"/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping9">
@@ -385,8 +508,9 @@
                     <ParameterString db_object_name="Radar"/>
                     <ParameterString dbovariable_name="pos_range_nm"/>
                     <ParameterString dimension="Length"/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="measured_rng_m"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit="Meter"/>
                 </Configuration>
             </Configuration>
@@ -404,8 +528,9 @@
                     <ParameterString db_object_name="Tracker"/>
                     <ParameterString dbovariable_name="rec_num"/>
                     <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="rec_num"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping1">
@@ -414,8 +539,9 @@
                     <ParameterString db_object_name="Tracker"/>
                     <ParameterString dbovariable_name="ds_id"/>
                     <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="server_sacsic.value"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping10">
@@ -424,8 +550,9 @@
                     <ParameterString db_object_name="Tracker"/>
                     <ParameterString dbovariable_name="tod"/>
                     <ParameterString dimension="Time"/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="time_of_last_update"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit="Second"/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping2">
@@ -434,8 +561,9 @@
                     <ParameterString db_object_name="Tracker"/>
                     <ParameterString dbovariable_name="sac"/>
                     <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="server_sacsic.sac"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping3">
@@ -444,8 +572,9 @@
                     <ParameterString db_object_name="Tracker"/>
                     <ParameterString dbovariable_name="sic"/>
                     <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="server_sacsic.sic"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping4">
@@ -454,8 +583,9 @@
                     <ParameterString db_object_name="Tracker"/>
                     <ParameterString dbovariable_name="mode3a_code"/>
                     <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="mode_3a_info.code"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping5">
@@ -464,8 +594,9 @@
                     <ParameterString db_object_name="Tracker"/>
                     <ParameterString dbovariable_name="target_addr"/>
                     <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="aircraft_address"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping6">
@@ -474,8 +605,9 @@
                     <ParameterString db_object_name="Tracker"/>
                     <ParameterString dbovariable_name="callsign"/>
                     <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="aircraft_identification.value_idt"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping7">
@@ -484,8 +616,9 @@
                     <ParameterString db_object_name="Tracker"/>
                     <ParameterString dbovariable_name="modec_code_ft"/>
                     <ParameterString dimension="Height"/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="calculated_track_flight_level.value_feet"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit="Feet"/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping8">
@@ -494,8 +627,9 @@
                     <ParameterString db_object_name="Tracker"/>
                     <ParameterString dbovariable_name="pos_lat_deg"/>
                     <ParameterString dimension="Angle"/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="calculated_wgs84_position.value_latitude_rad"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit="Radian"/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping9">
@@ -504,8 +638,9 @@
                     <ParameterString db_object_name="Tracker"/>
                     <ParameterString dbovariable_name="pos_long_deg"/>
                     <ParameterString dimension="Angle"/>
+                    <ParameterString format_data_type=""/>
                     <ParameterString json_key="calculated_wgs84_position.value_longitude_rad"/>
-                    <ParameterString json_value_format_str=""/>
+                    <ParameterString json_value_format=""/>
                     <ParameterString unit="Radian"/>
                 </Configuration>
             </Configuration>

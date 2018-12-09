@@ -26,6 +26,7 @@ public:
     const std::map<std::string, JSONObjectParser>& parsers () { return parsers_; }
     bool hasObjectParser (const std::string& name) { return parsers_.count(name) > 0; }
     JSONObjectParser& parser (const std::string& name);
+    void removeParser (const std::string& name);
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 

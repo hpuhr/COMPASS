@@ -229,14 +229,14 @@ public:
         {
             try
             {
-                T tmp = *val_ptr;
-                if (*json_value_format_.get() == "")
-                    array_list.set(row_cnt, tmp);
+                //T tmp = *val_ptr;
+                if (json_value_format_ == "")
+                    array_list.set(row_cnt, *val_ptr);
                 else
-                    array_list.setFromFormat(row_cnt, *json_value_format_.get(), Utils::JSON::toString(tmp));
+                    array_list.setFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(*val_ptr));
 
-                logdbg << "JsonKey2DBOVariableMapping: setValue: json " << *val_ptr
-                       << " buffer " << array_list.get(row_cnt);
+//                logdbg << "JsonKey2DBOVariableMapping: setValue: json " << *val_ptr
+//                       << " buffer " << array_list.get(row_cnt);
             }
             catch (nlohmann::json::exception& e)
             {
@@ -299,11 +299,11 @@ public:
         {
             try
             {
-                char tmp = static_cast<int> (*val_ptr);
-                if (*json_value_format_.get() == "")
-                    array_list.set(row_cnt, tmp);
+                //char tmp = static_cast<int> (*val_ptr);
+                if (json_value_format_ == "")
+                    array_list.set(row_cnt, static_cast<int> (*val_ptr));
                 else
-                    array_list.setFromFormat(row_cnt, *json_value_format_.get(), Utils::JSON::toString(tmp));
+                    array_list.setFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(*val_ptr));
 
                 logdbg << "JsonKey2DBOVariableMapping: setValue: json " << *val_ptr
                        << " buffer " << array_list.get(row_cnt);
@@ -353,6 +353,8 @@ public:
 
     void initializeIfRequired ();
 
+    std::string& formatDataTypeRef();
+
 private:
     bool initialized_ {false};
 
@@ -365,8 +367,9 @@ private:
 
     bool mandatory_ {false};
 
-    std::string json_value_format_str_;
-    std::unique_ptr<Format> json_value_format_;
+    std::string format_data_type_;
+    Format json_value_format_;
+    //std::unique_ptr<Format> json_value_format_;
 
     /// Unit dimension
     std::string dimension_;

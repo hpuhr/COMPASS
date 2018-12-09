@@ -7,7 +7,7 @@ class JSONObjectParser;
 class QLineEdit;
 class QCheckBox;
 class QGridLayout;
-class FormatSelectionWidget;
+class DataTypeFormatSelectionWidget;
 
 class JSONObjectParserWidget : public QWidget
 {
@@ -48,7 +48,7 @@ private:
 
     QGridLayout* mappings_grid_ {nullptr};
 
-    std::map<unsigned int, FormatSelectionWidget*> format_selections_;
+    //std::map<unsigned int, DataTypeFormatSelectionWidget*> format_selections_;
 
     void update ();
 

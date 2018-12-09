@@ -38,6 +38,8 @@ void ReadJSONFilePartJob::run ()
     while (!file_read_done_ && objects_.size() < num_objects_)
         readFilePart();
 
+    //cleanCommas ();
+
     done_=true;
 
     logdbg << "ReadJSONFilePartJob: run: done";
@@ -263,5 +265,79 @@ float ReadJSONFilePartJob::getStatusPercent ()
         return 0.0;
     else
         return 100.0*static_cast<double>(bytes_read_)/static_cast<double>(bytes_to_read_);
+}
 
+void ReadJSONFilePartJob::cleanCommas ()
+{
+    loginf << "ReadJSONFilePartJob: cleanCommas: " << objects_.size() << " objects";
+
+    size_t size; //, org_size;
+    bool current_char_comma;
+    bool last_char_comma;
+    bool unwanted_commas_detected;
+    size_t index_commas_begin;
+    size_t cut_size;
+
+    for (auto& str_it : objects_)
+    {
+        //tmp = str_it;
+
+        size = str_it.size();
+        //org_size = str_it.size();
+
+        //loginf << "ReadJSONFilePartJob: cleanCommas: cleaning " << size << " chars";
+
+        last_char_comma = false;
+        unwanted_commas_detected = false;
+
+        //loginf << "ReadJSONFilePartJob: cleanCommas: org '" << str_it << "'";
+
+        for (size_t cnt=0; cnt < size; ++cnt)
+        {
+            current_char_comma = str_it.at(cnt) == ',';
+
+            if (current_char_comma)
+            {
+                if (last_char_comma)
+                {
+                    if (!unwanted_commas_detected)
+                    {
+                        unwanted_commas_detected = true;
+
+                        assert (cnt != 0);
+                        index_commas_begin = cnt-1;
+                        loginf << "ReadJSONFilePartJob: cleanCommas: cut begin " << index_commas_begin;
+                    }
+                }
+            }
+            else if (unwanted_commas_detected) // current not commas, but previous
+            {
+                cut_size = cnt-index_commas_begin;
+
+                if (str_it.at(cnt) == '{')
+                    --cut_size;
+
+                loginf << "ReadJSONFilePartJob: cleanCommas: cutting "
+                       << index_commas_begin << " , " << cnt-index_commas_begin << ": between '"
+                       << str_it.substr(index_commas_begin-4, (cnt-index_commas_begin)+8)
+                       <<  "' exact '"
+                       << str_it.substr(index_commas_begin, cut_size) << "'";
+
+                str_it.erase(index_commas_begin, cut_size);
+                size = str_it.size();
+                unwanted_commas_detected = false;
+                cnt = index_commas_begin;
+
+                loginf << "ReadJSONFilePartJob: cleanCommas: after cut '"
+                       << str_it.substr(index_commas_begin-4, cut_size+8) << "'";
+            }
+
+            last_char_comma = current_char_comma;
+        }
+
+//        if (org_size != str_it.size())
+//            loginf << "ReadJSONFilePartJob: cleanCommas: cleaned org "  << org_size << " to "
+//                   << str_it.size() << " chars str " << str_it << "'";
+
+    }
 }

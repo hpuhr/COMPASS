@@ -65,3 +65,9 @@ JSONObjectParser& JSONParsingSchema::parser (const std::string& name)
     assert (hasObjectParser(name));
     return parsers_.at(name);
 }
+
+void JSONParsingSchema::removeParser (const std::string& name)
+{
+    assert (hasObjectParser(name));
+    parsers_.erase(name);
+}

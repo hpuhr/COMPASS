@@ -18,9 +18,11 @@ JSONDataMapping::JSONDataMapping (const std::string& class_id, const std::string
 
     registerParameter("mandatory", &mandatory_, false);
 
-    registerParameter("json_value_format_str", &json_value_format_str_, "");
-    if (variable_)
-        json_value_format_.reset(new Format (variable_->dataType(), json_value_format_str_));
+    registerParameter ("format_data_type", &format_data_type_, "");
+    registerParameter ("json_value_format", &json_value_format_, "");
+    //registerParameter("json_value_format_str", &json_value_format_str_, "");
+    //if (variable_)
+    //    json_value_format_.reset(new Format (variable_->dataType(), json_value_format_str_));
 
     registerParameter("dimension", &dimension_, "");
     registerParameter("unit", &unit_, "");
@@ -43,7 +45,8 @@ JSONDataMapping& JSONDataMapping::operator=(JSONDataMapping&& other)
     variable_ = other.variable_;
 
     mandatory_ = other.mandatory_;
-    json_value_format_str_ = other.json_value_format_str_;
+    //json_value_format_ = other.json_value_format_;
+    format_data_type_ = other.format_data_type_;
     json_value_format_ = std::move(other.json_value_format_);
 
     dimension_ = other.dimension_;
@@ -58,7 +61,8 @@ JSONDataMapping& JSONDataMapping::operator=(JSONDataMapping&& other)
     other.configuration().updateParameterPointer ("db_object_name", &db_object_name_);
     other.configuration().updateParameterPointer ("dbovariable_name", &dbovariable_name_);
     other.configuration().updateParameterPointer ("mandatory", &mandatory_);
-    other.configuration().updateParameterPointer ("json_value_format_str", &json_value_format_str_);
+    other.configuration().updateParameterPointer ("format_data_type", &format_data_type_);
+    other.configuration().updateParameterPointer ("json_value_format", &json_value_format_);
     other.configuration().updateParameterPointer ("dimension", &dimension_);
     other.configuration().updateParameterPointer ("unit", &unit_);
 
@@ -76,6 +80,11 @@ void JSONDataMapping::initializeIfRequired ()
         initialize();
 
     assert (initialized_);
+}
+
+std::string& JSONDataMapping::formatDataTypeRef()
+{
+    return format_data_type_;
 }
 
 DBOVariable& JSONDataMapping::variable() const
@@ -99,15 +108,15 @@ void JSONDataMapping::mandatory(bool mandatory)
 Format JSONDataMapping::jsonValueFormat() const
 {
     assert (initialized_);
-    assert (json_value_format_);
-    return *json_value_format_.get();
+    //assert (json_value_format_);
+    return json_value_format_;
 }
 
 Format& JSONDataMapping::jsonValueFormatRef()
 {
     assert (initialized_);
-    assert (json_value_format_);
-    return *json_value_format_.get();
+    //assert (json_value_format_);
+    return json_value_format_;
 }
 
 //void JSONDataMapping::jsonValueFormat(const Format &json_value_format)
@@ -175,28 +184,34 @@ void JSONDataMapping::active(bool active)
 
 void JSONDataMapping::initialize ()
 {
-    loginf << "JSONDataMapping: updateVariable";
+    loginf << "JSONDataMapping: initialize";
 
     assert (!initialized_);
 
     DBObjectManager& obj_man = ATSDB::instance().objectManager();
 
     if (db_object_name_.size() && !obj_man.existsObject(db_object_name_))
-        logwrn << "JSONDataMapping: ctor: dbobject '" << db_object_name_ << "' does not exist";
+        logwrn << "JSONDataMapping: initialize: dbobject '" << db_object_name_ << "' does not exist";
 
     if (db_object_name_.size() && obj_man.existsObject(db_object_name_)
             && dbovariable_name_.size() && !obj_man.object(db_object_name_).hasVariable(dbovariable_name_))
-        logwrn << "JSONDataMapping: ctor: dbobject " << db_object_name_ << " variable '" << dbovariable_name_
+        logwrn << "JSONDataMapping: initialize: dbobject " << db_object_name_ << " variable '" << dbovariable_name_
                << "' does not exist";
 
     if (db_object_name_.size() && obj_man.existsObject(db_object_name_)
             && dbovariable_name_.size() && obj_man.object(db_object_name_).hasVariable(dbovariable_name_))
         variable_ = &obj_man.object(db_object_name_).variable(dbovariable_name_);
 
-    if (variable_)
+    if (format_data_type_.size())
     {
-        loginf << "JSONDataMapping: updateVariable: set variable "<< variable_->name();
-        json_value_format_.reset(new Format (variable_->dataType(), json_value_format_str_));
+        loginf << "JSONDataMapping: initialize: setting format from dt " << format_data_type_
+               << " format " << json_value_format_;
+        json_value_format_ = Format (Property::asDataType(format_data_type_), json_value_format_);
+    }
+    else if (variable_)
+    {
+        loginf << "JSONDataMapping: updateVariable: setting format from variable "<< variable_->name();
+        json_value_format_ = Format (variable_->dataType(), json_value_format_);
     }
     else
         loginf << "JSONDataMapping: updateVariable: variable not set";
