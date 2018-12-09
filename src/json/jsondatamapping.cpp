@@ -10,27 +10,16 @@ JSONDataMapping::JSONDataMapping (const std::string& class_id, const std::string
                                   JSONObjectParser& parent)
     : Configurable (class_id, instance_id, &parent)
 {
+    registerParameter("active", &active_, false);
     registerParameter("json_key", &json_key_, "");
 
     registerParameter("db_object_name", &db_object_name_, "");
     registerParameter("dbovariable_name", &dbovariable_name_, "");
 
-    DBObjectManager& obj_man = ATSDB::instance().objectManager();
-
-    if (!obj_man.existsObject(db_object_name_))
-        logwrn << "JSONDataMapping: ctor: dbobject '" << db_object_name_ << "' does not exist";
-    else if (!obj_man.object(db_object_name_).hasVariable(dbovariable_name_))
-        logwrn << "JSONDataMapping: ctor: dbobject " << db_object_name_ << " variable '" << dbovariable_name_
-               << "' does not exist";
-    else
-        variable_ = &obj_man.object(db_object_name_).variable(dbovariable_name_);
-
     registerParameter("mandatory", &mandatory_, false);
 
     registerParameter("json_value_format_str", &json_value_format_str_, "");
-    if (!variable_)
-        logwrn << "JSONDataMapping: ctor: can not set format since variable is missing";
-    else
+    if (variable_)
         json_value_format_.reset(new Format (variable_->dataType(), json_value_format_str_));
 
     registerParameter("dimension", &dimension_, "");
@@ -47,6 +36,7 @@ JSONDataMapping::JSONDataMapping (const std::string& class_id, const std::string
 
 JSONDataMapping& JSONDataMapping::operator=(JSONDataMapping&& other)
 {
+    active_ = other.active_;
     json_key_ = other.json_key_;
     db_object_name_ = other.db_object_name_;
     dbovariable_name_ = other.dbovariable_name_;
@@ -63,6 +53,7 @@ JSONDataMapping& JSONDataMapping::operator=(JSONDataMapping&& other)
     sub_keys_ = std::move(other.sub_keys_);
     num_sub_keys_ = other.num_sub_keys_;
 
+    other.configuration().updateParameterPointer ("active", &active_);
     other.configuration().updateParameterPointer ("json_key", &json_key_);
     other.configuration().updateParameterPointer ("db_object_name", &db_object_name_);
     other.configuration().updateParameterPointer ("dbovariable_name", &dbovariable_name_);
@@ -79,8 +70,17 @@ JSONDataMapping& JSONDataMapping::operator=(JSONDataMapping&& other)
     return static_cast<JSONDataMapping&>(Configurable::operator=(std::move(other)));
 }
 
-DBOVariable &JSONDataMapping::variable() const
+void JSONDataMapping::initializeIfRequired ()
 {
+    if (!initialized_)
+        initialize();
+
+    assert (initialized_);
+}
+
+DBOVariable& JSONDataMapping::variable() const
+{
+    assert (initialized_);
     assert (variable_);
     return *variable_;
 }
@@ -92,11 +92,20 @@ bool JSONDataMapping::mandatory() const
 
 void JSONDataMapping::mandatory(bool mandatory)
 {
+    loginf << "JSONDataMapping: mandatory: " << mandatory;
     mandatory_ = mandatory;
 }
 
 Format JSONDataMapping::jsonValueFormat() const
 {
+    assert (initialized_);
+    assert (json_value_format_);
+    return *json_value_format_.get();
+}
+
+Format& JSONDataMapping::jsonValueFormatRef()
+{
+    assert (initialized_);
     assert (json_value_format_);
     return *json_value_format_.get();
 }
@@ -111,6 +120,16 @@ std::string JSONDataMapping::dbObjectName() const
     return db_object_name_;
 }
 
+void JSONDataMapping::dboVariableName(const std::string& name)
+{
+    loginf << "JSONDataMapping: dboVariableName: " << name;
+
+    dbovariable_name_ = name;
+    initialized_ = false;
+
+    initialize ();
+}
+
 std::string JSONDataMapping::dboVariableName() const
 {
     return dbovariable_name_;
@@ -123,6 +142,8 @@ std::string JSONDataMapping::jsonKey() const
 
 void JSONDataMapping::jsonKey(const std::string &json_key)
 {
+    loginf << "JSONDataMapping: jsonKey: " << json_key;
+
     json_key_ = json_key;
 
     sub_keys_ = Utils::String::split(json_key_, '.');
@@ -130,13 +151,56 @@ void JSONDataMapping::jsonKey(const std::string &json_key)
     num_sub_keys_ = sub_keys_.size();
 }
 
-JSONDataMappingWidget* JSONDataMapping::widget ()
-{
-    if (!widget_)
-    {
-        widget_.reset(new JSONDataMappingWidget (*this));
-        assert (widget_);
-    }
+//JSONDataMappingWidget* JSONDataMapping::widget ()
+//{
+//    if (!widget_)
+//    {
+//        widget_.reset(new JSONDataMappingWidget (*this));
+//        assert (widget_);
+//    }
 
-    return widget_.get(); // needed for qt integration, not pretty
+//    return widget_.get(); // needed for qt integration, not pretty
+//}
+
+bool JSONDataMapping::active() const
+{
+    return active_;
 }
+
+void JSONDataMapping::active(bool active)
+{
+    loginf << "JSONDataMapping: active: " << active;
+    active_ = active;
+}
+
+void JSONDataMapping::initialize ()
+{
+    loginf << "JSONDataMapping: updateVariable";
+
+    assert (!initialized_);
+
+    DBObjectManager& obj_man = ATSDB::instance().objectManager();
+
+    if (db_object_name_.size() && !obj_man.existsObject(db_object_name_))
+        logwrn << "JSONDataMapping: ctor: dbobject '" << db_object_name_ << "' does not exist";
+
+    if (db_object_name_.size() && obj_man.existsObject(db_object_name_)
+            && dbovariable_name_.size() && !obj_man.object(db_object_name_).hasVariable(dbovariable_name_))
+        logwrn << "JSONDataMapping: ctor: dbobject " << db_object_name_ << " variable '" << dbovariable_name_
+               << "' does not exist";
+
+    if (db_object_name_.size() && obj_man.existsObject(db_object_name_)
+            && dbovariable_name_.size() && obj_man.object(db_object_name_).hasVariable(dbovariable_name_))
+        variable_ = &obj_man.object(db_object_name_).variable(dbovariable_name_);
+
+    if (variable_)
+    {
+        loginf << "JSONDataMapping: updateVariable: set variable "<< variable_->name();
+        json_value_format_.reset(new Format (variable_->dataType(), json_value_format_str_));
+    }
+    else
+        loginf << "JSONDataMapping: updateVariable: variable not set";
+
+    initialized_ =  true;
+}
+

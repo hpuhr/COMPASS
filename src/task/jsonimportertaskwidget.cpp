@@ -175,8 +175,6 @@ JSONImporterTaskWidget::JSONImporterTaskWidget(JSONImporterTask& task, QWidget* 
 
     main_layout_->addLayout(left_layout);
 
-    //main_layout->addStretch();
-
     setLayout (main_layout_);
 
     update();
@@ -386,6 +384,7 @@ void JSONImporterTaskWidget::selectedObjectParserSlot ()
     if (!object_parser_widgets_)
     {
         assert (main_layout_);
+        setMinimumSize(QSize(1200, 600));
 
         int frame_width_small = 1;
 
@@ -394,6 +393,8 @@ void JSONImporterTaskWidget::selectedObjectParserSlot ()
         right_frame->setLineWidth(frame_width_small);
 
         object_parser_widgets_ = new QStackedWidget ();
+
+        object_parser_widgets_->setMinimumWidth(800);
 
         QVBoxLayout* tmp = new QVBoxLayout ();
         tmp->addWidget(object_parser_widgets_);

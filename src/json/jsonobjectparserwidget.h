@@ -6,6 +6,8 @@
 class JSONObjectParser;
 class QLineEdit;
 class QCheckBox;
+class QGridLayout;
+class FormatSelectionWidget;
 
 class JSONObjectParserWidget : public QWidget
 {
@@ -19,6 +21,14 @@ public slots:
 
     void overrideDataSourceChangedSlot ();
     void dataSourceVariableChangedSlot ();
+
+    void addNewMappingSlot();
+
+    void mappingActiveChangedSlot();
+    void mappingKeyChangedSlot();
+    void mappingDBOVariableChangedSlot();
+    void mappingMandatoryChangedSlot();
+    void mappingDeleteSlot();
 
 public:
     explicit JSONObjectParserWidget(JSONObjectParser& parser, QWidget *parent = nullptr);
@@ -36,7 +46,13 @@ private:
     QCheckBox* override_data_source_check_ {nullptr};
     QLineEdit* data_source_variable_name_edit_ {nullptr};
 
+    QGridLayout* mappings_grid_ {nullptr};
+
+    std::map<unsigned int, FormatSelectionWidget*> format_selections_;
+
     void update ();
+
+    void updateMappingsGrid();
 };
 
 #endif // JSONOBJECTPARSERWIDGET_H

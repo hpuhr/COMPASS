@@ -320,29 +320,43 @@ public:
 
     bool hasDimension () const { return dimension_.size() > 0; }
     /// @brief Returns dimension contained in the column
-    const std::string &dimension () const { return dimension_; }
+    std::string& dimensionRef () { return dimension_; }
+    const std::string& dimension () const { return dimension_; }
     /// @brief Returns unit
-    const std::string &unit () const { return unit_; }
+    std::string& unitRef () { return unit_; }
+    const std::string& unit () const { return unit_; }
 
     std::string jsonKey() const;
     void jsonKey(const std::string &json_key);
 
+    bool active() const;
+    void active(bool active);
+
+    bool hasVariable () { return variable_ != nullptr; }
     DBOVariable& variable() const;
 
     bool mandatory() const;
     void mandatory(bool mandatory);
 
     Format jsonValueFormat() const;
+    Format& jsonValueFormatRef();
     //void jsonValueFormat(const Format &json_value_format);
 
     std::string dbObjectName() const;
+
+    void dboVariableName(const std::string& name);
     std::string dboVariableName() const;
 
     virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id) {}
 
-    JSONDataMappingWidget* widget ();
+    //JSONDataMappingWidget* widget ();
+
+    void initializeIfRequired ();
 
 private:
+    bool initialized_ {false};
+
+    bool active_ {false};
     std::string json_key_;
 
     std::string db_object_name_;
@@ -365,8 +379,12 @@ private:
 
     std::unique_ptr<JSONDataMappingWidget> widget_;
 
+    void initialize ();
+
 protected:
     virtual void checkSubConfigurables () {}
 };
+
+Q_DECLARE_METATYPE(JSONDataMapping*)
 
 #endif // JSONDATAMAPPING_H

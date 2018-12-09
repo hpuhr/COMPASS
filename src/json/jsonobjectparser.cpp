@@ -85,19 +85,6 @@ void JSONObjectParser::generateSubConfigurable (const std::string& class_id, con
 //                                     std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
 
         data_mappings_.emplace_back (class_id, instance_id, *this);
-
-
-        JSONDataMapping& mapping = data_mappings_.back();
-
-        assert (mapping.variable().hasCurrentDBColumn());
-        list_.addProperty(mapping.variable().name(), mapping.variable().dataType());
-        var_list_.add(mapping.variable());
-
-        if (mapping.variable().isKey())
-        {
-            assert (mapping.variable().dataType() == PropertyDataType::INT);
-            has_key_mapping_ = true;
-        }
     }
     else
         throw std::runtime_error ("DBObject: generateSubConfigurable: unknown class_id "+class_id );
@@ -174,6 +161,21 @@ void JSONObjectParser::initialize ()
 
     if (!initialized_)
     {
+        for (auto& mapping : data_mappings_)
+        {
+            mapping.initializeIfRequired();
+
+            assert (mapping.variable().hasCurrentDBColumn());
+            list_.addProperty(mapping.variable().name(), mapping.variable().dataType());
+            var_list_.add(mapping.variable());
+
+            if (mapping.variable().isKey())
+            {
+                assert (mapping.variable().dataType() == PropertyDataType::INT);
+                has_key_mapping_ = true;
+            }
+        }
+
         if (!has_key_mapping_ && db_object_->hasKeyVariable()) // first time only, add key variable
             has_key_variable_ = true;
         else
