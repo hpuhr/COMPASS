@@ -2,30 +2,41 @@
 #define JSONIMPORTERTASK_H
 
 #include "configurable.h"
-#include "dbovariableset.h"
+#include "json.hpp"
+#include "jsonparsingschema.h"
+#include "readjsonfilepartjob.h"
 
 #include <QObject>
 
 #include <memory>
 
+#include "boost/date_time/posix_time/posix_time.hpp"
+
 class TaskManager;
 class JSONImporterTaskWidget;
 class SavedFile;
-class DBObject;
-class DBOVariable;
-class Buffer;
-
-namespace Json
-{
-    class Value;
-}
+class QMessageBox;
+class JSONParseJob;
+class JSONMappingJob;
 
 class JSONImporterTask : public QObject, public Configurable
 {
-        Q_OBJECT
+    Q_OBJECT
+
+    using JSONParsingSchemaIterator = std::map<std::string, JSONParsingSchema>::iterator;
+
 public slots:
     void insertProgressSlot (float percent);
     void insertDoneSlot (DBObject& object);
+
+    void readJSONFilePartDoneSlot ();
+    void readJSONFilePartObsoleteSlot ();
+
+    void parseJSONDoneSlot ();
+    void parseJSONObsoleteSlot ();
+
+    void mapJSONDoneSlot ();
+    void mapJSONObsoleteSlot ();
 
 public:
     JSONImporterTask(const std::string& class_id, const std::string& instance_id,
@@ -36,9 +47,6 @@ public:
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
-    std::string dbObjectStr() const;
-    void dbObjectStr(const std::string& db_object_str);
-
     bool canImportFile (const std::string& filename);
     void importFile (const std::string& filename, bool test);
     void importFileArchive (const std::string& filename, bool test);
@@ -46,105 +54,74 @@ public:
     const std::map <std::string, SavedFile*> &fileList () { return file_list_; }
     bool hasFile (const std::string &filename) { return file_list_.count (filename) > 0; }
     void addFile (const std::string &filename);
-    void removeFile (const std::string &filename);
+    void removeCurrentFilename ();
+    void currentFilename (const std::string last_filename) { current_filename_ = last_filename; }
+    const std::string &currentFilename () { return current_filename_; }
 
-    const std::string &lastFilename () { return last_filename_; }
+    JSONParsingSchemaIterator begin() { return schemas_.begin(); }
+    JSONParsingSchemaIterator end() { return schemas_.end(); }
+    bool hasSchema(const std::string& name) { return schemas_.count(name) > 0; }
+    bool hasCurrentSchema ();
+    JSONParsingSchema& currentSchema();
+    void removeCurrentSchema ();
 
-    bool useTimeFilter() const;
-    void useTimeFilter(bool value);
-
-    float timeFilterMin() const;
-    void timeFilterMin(float value);
-
-    float timeFilterMax() const;
-    void timeFilterMax(float value);
-
-    bool joinDataSources() const;
-    void joinDataSources(bool value);
-
-    bool separateMLATData() const;
-    void separateMLATData(bool value);
-
-    bool usePositionFilter() const;
-    void usePositionFilter(bool value);
-
-    float positionFilterLatitudeMin() const;
-    void positionFilterLatitudeMin(float value);
-
-    float positionFilterLatitudeMax() const;
-    void positionFilterLatitudeMax(float value);
-
-    float positionFilterLongitudeMin() const;
-    void positionFilterLongitudeMin(float value);
-
-    float positionFilterLongitudeMax() const;
-    void positionFilterLongitudeMax(float value);
+    std::string currentSchemaName() const;
+    void currentSchemaName(const std::string &currentSchema);
 
 protected:
     std::map <std::string, SavedFile*> file_list_;
-    std::string last_filename_;
+    std::string current_filename_;
 
-    std::string db_object_str_;
-    DBObject* db_object_{nullptr};
+    std::unique_ptr<JSONImporterTaskWidget> widget_;
 
-    std::string key_var_str_;
-    DBOVariable* key_var_{nullptr};
+    std::string current_schema_;
+    std::map <std::string, JSONParsingSchema> schemas_;
+    size_t key_count_ {0};
 
-    std::string dsid_var_str_;
-    DBOVariable* dsid_var_{nullptr};
-
-    std::string target_addr_var_str_;
-    DBOVariable* target_addr_var_{nullptr};
-
-    std::string callsign_var_str_;
-    DBOVariable* callsign_var_{nullptr};
-
-    std::string altitude_baro_var_str_;
-    DBOVariable* altitude_baro_var_{nullptr};
-
-    std::string altitude_geo_var_str_;
-    DBOVariable* altitude_geo_var_{nullptr};
-
-    std::string latitude_var_str_;
-    DBOVariable* latitude_var_{nullptr};
-
-    std::string longitude_var_str_;
-    DBOVariable* longitude_var_{nullptr};
-
-    std::string tod_var_str_;
-    DBOVariable* tod_var_{nullptr};
-
-    JSONImporterTaskWidget* widget_ {nullptr};
-
-    bool insert_active_ {false};
+    unsigned int insert_active_ {0};
     unsigned int rec_num_cnt_ {0};
     unsigned int all_cnt_ {0};
     unsigned int skipped_cnt_ {0};
     unsigned int inserted_cnt_ {0};
 
-    bool use_time_filter_ {false};
-    float time_filter_min_ {0};
-    float time_filter_max_ {0};
+    std::set <int> added_data_sources_;
 
-    bool use_position_filter_ {false};
-    float pos_filter_lat_min_ {0};
-    float pos_filter_lat_max_ {0};
-    float pos_filter_lon_min_ {0};
-    float pos_filter_lon_max_ {0};
+    std::shared_ptr <ReadJSONFilePartJob> read_json_job_;
+    std::vector<std::shared_ptr <JSONParseJob>> json_parse_jobs_;
+    std::vector<std::shared_ptr <JSONMappingJob>> json_map_jobs_;
 
-    bool join_data_sources_ {false};
-    bool separate_mlat_data_ {false};
+    std::string filename_;
+    bool test_ {false};
+    bool archive_ {false};
 
-    PropertyList list_;
-    DBOVariableSet var_list_;
+    boost::posix_time::ptime start_time_;
+    boost::posix_time::ptime stop_time_;
 
-    std::map <int, std::string> datasources_existing_;
-    std::map <int, std::string> datasources_to_add_;
+    size_t bytes_read_ {0};
+    size_t bytes_to_read_ {0};
+    float read_status_percent_ {0.0};
+    unsigned int objects_read_ {0};
+    unsigned int objects_parsed_ {0};
+    unsigned int objects_skipped_ {0};
+    unsigned int objects_mapped_ {0};
+    unsigned int objects_inserted_ {0};
+    bool all_done_ {false};
 
-    void checkAndSetVariable (std::string &name_str, DBOVariable** var);
+    size_t statistics_calc_objects_inserted_ {0};
+    std::string object_rate_str_ {"0"};
+    std::string remaining_time_str_ {"?"};
 
-    std::shared_ptr<Buffer> parseJSON (Json::Value& object, bool test);
-    void insertData (std::shared_ptr<Buffer> buffer);
+    std::map <std::string, std::shared_ptr<Buffer>> buffers_;
+
+    QMessageBox* msg_box_ {nullptr};
+
+    //void createMappings ();
+    void insertData ();
+    //void clearData ();
+
+    void updateMsgBox ();
+
+    virtual void checkSubConfigurables () {}
 };
 
 #endif // JSONIMPORTERTASK_H

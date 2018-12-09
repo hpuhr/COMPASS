@@ -43,7 +43,7 @@ double calculateAngle( double degrees, double minutes, double seconds )
 
 }
 
-void convert (const std::string& conversion_type, ArrayListTemplate<unsigned int> &array_list)
+void convert (const std::string& conversion_type, NullableVector<unsigned int> &array_list)
 {
 
 }

@@ -47,6 +47,7 @@
 #include "dbodatasourcedefinitionwidget.h"
 #include "dboaddschemametatabledialog.h"
 #include "dboadddatasourcedialog.h"
+#include "dboeditdatasourceswidget.h"
 #include "files.h"
 #include "stringconv.h"
 #include "atsdb.h"
@@ -70,7 +71,7 @@ DBObjectWidget::DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager
 
     QVBoxLayout *main_layout = new QVBoxLayout ();
 
-    QLabel *main_label = new QLabel ("Edit DB object");
+    QLabel *main_label = new QLabel ("Edit DBObject");
     main_label->setFont (font_big);
     main_layout->addWidget (main_label);
 
@@ -100,7 +101,7 @@ DBObjectWidget::DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager
         grid_layout->addWidget (info_label, 1, 0);
 
         info_edit_ = new QLineEdit (object_->info().c_str());
-        connect(info_edit_, SIGNAL( returnPressed() ), this, SLOT( editInfoSlot() ));
+        connect(info_edit_, SIGNAL(returnPressed()), this, SLOT(editInfoSlot()));
         grid_layout->addWidget (info_edit_, 1, 1);
 
         properties_layout->addLayout (grid_layout);
@@ -108,6 +109,11 @@ DBObjectWidget::DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager
         edit_label_button_ = new QPushButton ("Edit Label Definition");
         connect(edit_label_button_, SIGNAL( clicked() ), this, SLOT( showLabelDefinitionWidgetSlot() ));
         properties_layout->addWidget(edit_label_button_);
+
+        edit_ds_button_ = new QPushButton ("Edit Data Sources");
+        connect(edit_ds_button_, SIGNAL( clicked() ), this, SLOT( editDataSourcesSlot() ));
+        properties_layout->addWidget(edit_ds_button_);
+
 
         QPushButton* print_button_ = new QPushButton ("Print");
         connect(print_button_, SIGNAL( clicked() ), this, SLOT( printSlot() ));
@@ -126,7 +132,7 @@ DBObjectWidget::DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager
 
         QVBoxLayout *meta_layout = new QVBoxLayout ();
 
-        QLabel *meta_label = new QLabel ("Meta tables");
+        QLabel *meta_label = new QLabel ("Meta Tables");
         meta_label->setFont (font_big);
         meta_layout->addWidget (meta_label);
 
@@ -152,7 +158,7 @@ DBObjectWidget::DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager
 
         QVBoxLayout *ds_layout = new QVBoxLayout ();
 
-        QLabel *ds_label = new QLabel ("Data sources");
+        QLabel *ds_label = new QLabel ("Data Source Definitions");
         ds_label->setFont (font_big);
         ds_layout->addWidget (ds_label);
 
@@ -232,7 +238,8 @@ void DBObjectWidget::lock ()
 
     name_edit_->setDisabled (true);
     info_edit_->setDisabled (true);
-    //edit_label_button_->setDisabled (true);
+    edit_label_button_->setDisabled (true);
+    edit_ds_button_->setDisabled (true);
 
     for (int i = 0; i < ds_grid_->count(); ++i)
     {
@@ -266,6 +273,7 @@ void DBObjectWidget::unlock ()
     name_edit_->setDisabled (false);
     info_edit_->setDisabled (false);
     edit_label_button_->setDisabled (false);
+    edit_ds_button_->setDisabled (false);
 
     for (int i = 0; i < ds_grid_->count(); ++i)
     {
@@ -602,6 +610,12 @@ void DBObjectWidget::showLabelDefinitionWidgetSlot()
 {
     assert (object_);
     object_->labelDefinitionWidget()->show();
+}
+
+void DBObjectWidget::editDataSourcesSlot()
+{
+    assert (object_);
+    object_->editDataSourcesWidget()->show();
 }
 
 void DBObjectWidget::printSlot ()

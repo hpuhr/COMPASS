@@ -165,6 +165,7 @@ void MainWindow::startSlot ()
 
     ATSDB::instance().schemaManager().lock();
     ATSDB::instance().objectManager().lock();
+    ATSDB::instance().taskManager().disable();
 
     if (force_post || !ATSDB::instance().interface().isPostProcessed ())
     {

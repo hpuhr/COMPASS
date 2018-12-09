@@ -15,16 +15,10 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <cassert>
-#include <limits>
-
-typedef std::numeric_limits<double> double_limit;
-typedef std::numeric_limits<float> float_limit;
-
-#include "arraylist.h"
+#include "nullablevector.h"
 
 template <>
-ArrayListTemplate<bool>& ArrayListTemplate<bool>::operator*=(double factor)
+NullableVector<bool>& NullableVector<bool>::operator*=(double factor)
 {
     bool tmp_factor = static_cast<bool> (factor);
 
@@ -33,4 +27,6 @@ ArrayListTemplate<bool>& ArrayListTemplate<bool>::operator*=(double factor)
 
     return *this;
 }
+
+
 

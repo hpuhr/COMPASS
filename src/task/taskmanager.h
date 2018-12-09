@@ -37,6 +37,7 @@ public:
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
+    void disable ();
     void shutdown ();
 
 protected:

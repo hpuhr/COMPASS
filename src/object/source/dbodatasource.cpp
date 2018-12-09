@@ -16,158 +16,113 @@
  */
 
 #include "dbodatasource.h"
+#include "dbodatasourcewidget.h"
 #include "dbobject.h"
-#include "dbodatasourcedefinitionwidget.h"
 #include "projectionmanager.h"
 #include "rs2g.h"
+#include "dboeditdatasourceaction.h"
+#include "storeddbodatasource.h"
 
 #include <cmath>
 
-DBODataSourceDefinition::DBODataSourceDefinition(const std::string &class_id, const std::string &instance_id,
-                                                 DBObject* object)
-    : Configurable (class_id, instance_id, object), object_(object)
+DBODataSource::DBODataSource(DBObject& object, unsigned int id, const std::string& name)
+    : object_(&object), id_(id), name_(name)
 {
-    registerParameter ("schema", &schema_, "");
-    registerParameter ("local_key", &local_key_, "");
-    registerParameter ("meta_table", &meta_table_,  "");
-    registerParameter ("foreign_key", &foreign_key_, "");
-    registerParameter ("short_name_column", &short_name_column_, "");
-    registerParameter ("name_column", &name_column_, "");
-    registerParameter ("sac_column", &sac_column_, "");
-    registerParameter ("sic_column", &sic_column_, "");
-    registerParameter ("latitude_column", &latitude_column_, "");
-    registerParameter ("longitude_column", &longitude_column_, "");
-    registerParameter ("altitude_column", &altitude_column_, "");
 }
 
-DBODataSourceDefinition::~DBODataSourceDefinition()
+DBODataSource& DBODataSource::operator=(StoredDBODataSource& other)
 {
+    //id_ = other.id(); not copied, keep own
+    name_ = other.name();
+    has_short_name_ = other.hasShortName();
+    if (has_short_name_)
+        short_name_ = other.shortName();
+    has_sac_ = other.hasSac();
+    if (has_sac_)
+        sac_ = other.sac();
+    has_sic_ = other.hasSic();
+    if (has_sic_)
+        sic_ = other.sic();
+    has_latitude_ = other.hasLatitude();
+    if (has_latitude_)
+        latitude_ = other.latitude();
+    has_longitude_ = other.hasLongitude();
+    if (has_longitude_)
+        longitude_ = other.longitude();
+    has_altitude_ = other.hasAltitude();
+    if (has_altitude_)
+        altitude_ = other.altitude();
+
     if (widget_)
-    {
-        delete widget_;
-        widget_ = nullptr;
-    }
+        widget_->update();
+
+    loginf << "DBODataSource: operator=: name " << name_
+           << " short name " << (has_short_name_ ? short_name_ : "false")
+           << " sac " << (has_sac_ ? std::to_string(static_cast<int>(sac_)) : "false")
+           << " sic " << (has_sic_ ? std::to_string(static_cast<int>(sic_)) : "false")
+           << " lat " << (has_latitude_ ? std::to_string(latitude_) : "false")
+           << " lon " << (has_longitude_ ? std::to_string(longitude_) : "false")
+           << " alt " << (has_altitude_ ? std::to_string(altitude_) : "false");
+
+    return *this;
 }
 
-DBODataSourceDefinitionWidget* DBODataSourceDefinition::widget ()
+DBODataSource& DBODataSource::operator=(DBODataSource&& other)
 {
-    if (!widget_)
-    {
-        widget_ = new DBODataSourceDefinitionWidget (*object_, *this);
-    }
+    loginf << "DBODataSource: move operator: moving";
 
-    assert (widget_);
-    return widget_;
+    object_ = other.object_;
+    id_ = other.id_;
+
+    name_ = other.name_;
+    has_short_name_ = other.has_short_name_;
+    short_name_ = other.short_name_;
+    has_sac_ = other.has_sac_;
+    sac_ = other.sac_;
+    has_sic_ = other.has_sic_;
+    sic_ = other.sic_;
+    has_latitude_ = other.has_latitude_;
+    latitude_ = other.latitude_;
+    has_longitude_ = other.has_longitude_;
+    longitude_ = other.longitude_;
+    has_altitude_ = other.has_altitude_;
+    altitude_ = other.altitude_;
+
+    widget_ = std::move(other.widget_);
+    if (widget_)
+        widget_->setDataSource(*this);
+
+    return *this;
 }
 
-std::string DBODataSourceDefinition::latitudeColumn() const
+bool DBODataSource::operator==(StoredDBODataSource& other)
 {
-    return latitude_column_;
-}
+    logdbg << "DBODataSource: operator==: name " << (name_ == other.name())
+           << " short " << (short_name_ == other.shortName())
+           << " sac " << (sac_ == other.sac())
+           << " sic " << (sic_ == other.sic())
+           << " lat " << (fabs(latitude_ - other.latitude()) < 1e-10)
+           << " long " << (fabs(longitude_ - other.longitude()) < 1e-10)
+           << " alt " << (fabs(altitude_ - other.altitude()) < 1e-10);
 
-std::string DBODataSourceDefinition::longitudeColumn() const
-{
-    return longitude_column_;
-}
-
-void DBODataSourceDefinition::longitudeColumn(const std::string &longitude_column)
-{
-    loginf << "DBODataSourceDefinition: localKey: value " << longitude_column;
-    longitude_column_ = longitude_column;
-    emit definitionChangedSignal();
-}
-
-std::string DBODataSourceDefinition::shortNameColumn() const
-{
-    return short_name_column_;
-}
-
-void DBODataSourceDefinition::shortNameColumn(const std::string &short_name_column)
-{
-    loginf << "DBODataSourceDefinition: shortNameColumn: value " << short_name_column;
-    short_name_column_ = short_name_column;
-    emit definitionChangedSignal();
-}
-
-std::string DBODataSourceDefinition::sacColumn() const
-{
-    return sac_column_;
-}
-
-void DBODataSourceDefinition::sacColumn(const std::string &sac_column)
-{
-    loginf << "DBODataSourceDefinition: sacColumn: value " << sac_column;
-    sac_column_ = sac_column;
-    emit definitionChangedSignal();
-}
-
-std::string DBODataSourceDefinition::sicColumn() const
-{
-    return sic_column_;
-}
-
-void DBODataSourceDefinition::sicColumn(const std::string &sic_column)
-{
-    loginf << "DBODataSourceDefinition: sicColumn: value " << sic_column;
-    sic_column_ = sic_column;
-    emit definitionChangedSignal();
-}
-
-std::string DBODataSourceDefinition::altitudeColumn() const
-{
-    return altitude_column_;
-}
-
-void DBODataSourceDefinition::altitudeColumn(const std::string &altitude_column)
-{
-    loginf << "DBODataSourceDefinition: altitudeColumn: value " << altitude_column;
-    altitude_column_ = altitude_column;
-    emit definitionChangedSignal();
-}
-
-void DBODataSourceDefinition::latitudeColumn(const std::string &latitude_column)
-{
-    loginf << "DBODataSourceDefinition: latitudeColumn: value " << latitude_column;
-    latitude_column_ = latitude_column;
-    emit definitionChangedSignal();
-}
-
-void DBODataSourceDefinition::localKey(const std::string &local_key)
-{
-    loginf << "DBODataSourceDefinition: localKey: value " << local_key;
-    local_key_ = local_key;
-    emit definitionChangedSignal();
-}
-
-void DBODataSourceDefinition::metaTable(const std::string &meta_table)
-{
-    loginf << "DBODataSourceDefinition: metaTable: value " << meta_table;
-    meta_table_ = meta_table;
-    emit definitionChangedSignal();
-}
-
-void DBODataSourceDefinition::foreignKey(const std::string &foreign_key)
-{
-    loginf << "DBODataSourceDefinition: foreignKey: value " << foreign_key;
-    foreign_key_ = foreign_key;
-    emit definitionChangedSignal();
-}
-
-void DBODataSourceDefinition::nameColumn(const std::string &name_column)
-{
-    loginf << "DBODataSourceDefinition: nameColumn: value " << name_column;
-    name_column_ = name_column;
-    emit definitionChangedSignal();
-}
-
-DBODataSource::DBODataSource(unsigned int id, const std::string& name)
-    : id_(id), name_(name)
-{
+    return (name_ == other.name()) &&
+            (has_short_name_ == other.hasShortName()) &&
+            (has_short_name_ ? short_name_ == other.shortName() : true) &&
+            (has_sac_ == other.hasSac()) &&
+            (has_sac_ ? sac_ == other.sac() : true) &&
+            (has_sic_ == other.hasSic()) &&
+            (has_sic_ ? sic_ == other.sic() : true) &&
+            (has_latitude_ == other.hasLatitude()) &&
+            (has_latitude_ ? fabs(latitude_ - other.latitude()) < 1e-10 : true) &&
+            (has_longitude_ == other.hasLongitude()) &&
+            (has_longitude_ ? fabs(longitude_ - other.longitude()) < 1e-10 : true) &&
+            (has_altitude_ == other.hasAltitude()) &&
+            (has_altitude_? fabs(altitude_ - other.altitude()) < 1e-10 : true);
 }
 
 DBODataSource::~DBODataSource()
 {
-
+    logdbg << "DBODataSource: dtor: id " << std::to_string(id_);
 }
 
 void DBODataSource::finalize ()
@@ -242,13 +197,13 @@ bool DBODataSource::calculateOGRSystemCoordinates (double azimuth_rad, double sl
     //    else
     //        range = sqrt (slant_range*slant_range-altitude*altitude); // TODO: flatland
 
-//    if (has_baro_altitude && slant_range_m > altitude_m)
-//        horizontal_range = sqrt (slant_range_m*slant_range_m-altitude_m*altitude_m);
-//    else
-//        horizontal_range = slant_range_m; // TODO pure act of desperation
+    //    if (has_baro_altitude && slant_range_m > altitude_m)
+    //        horizontal_range = sqrt (slant_range_m*slant_range_m-altitude_m*altitude_m);
+    //    else
+    //        horizontal_range = slant_range_m; // TODO pure act of desperation
 
-//    sys_x = horizontal_range * sin (azimuth_rad);
-//    sys_y = horizontal_range * cos (azimuth_rad);
+    //    sys_x = horizontal_range * sin (azimuth_rad);
+    //    sys_y = horizontal_range * cos (azimuth_rad);
 
     if (!has_baro_altitude)
         altitude_m = altitude_;
@@ -541,12 +496,12 @@ double DBODataSource::rs2gElevation(double z, double rho)
 
     if (rho >= ALMOST_ZERO)
     {
-//        elevation = asin((2 * rs2g_Rti_ * (z - rs2g_hi_) + pow(z, 2) - pow(rs2g_hi_, 2) - pow(rho, 2)) /
-//                         (2 * rho * (rs2g_Rti_ + rs2g_hi_)));
+        //        elevation = asin((2 * rs2g_Rti_ * (z - rs2g_hi_) + pow(z, 2) - pow(rs2g_hi_, 2) - pow(rho, 2)) /
+        //                         (2 * rho * (rs2g_Rti_ + rs2g_hi_)));
         elevation = asin((z - rs2g_hi_)/rho);
 
-//        if (rho < 50000)
-//            loginf << "DBODataSource: rs2gElevation: z " << z << " rho " << rho << " elev " << elevation;
+        //        if (rho < 50000)
+        //            loginf << "DBODataSource: rs2gElevation: z " << z << " rho " << rho << " elev " << elevation;
     }
 
     return elevation;
@@ -566,11 +521,11 @@ void DBODataSource::radarSlant2LocalCart(VecB& local)
     double elevation = rs2gElevation(z, rho);
     double azimuth = rs2gAzimuth(local[0], local[1]);
 
-//    if (rho < 50000)
-//    {
-//        loginf << "radarSlant2LocalCart: in x: " << local[0] << " y: " << local[1] << " z: " << local[2];
-//        loginf << "radarSlant2LocalCart: rho: " << rho << " elevation: " << elevation << " azimuth: " << azimuth;
-//    }
+    //    if (rho < 50000)
+    //    {
+    //        loginf << "radarSlant2LocalCart: in x: " << local[0] << " y: " << local[1] << " z: " << local[2];
+    //        loginf << "radarSlant2LocalCart: rho: " << rho << " elevation: " << elevation << " azimuth: " << azimuth;
+    //    }
 
     local[0] = rho * cos(elevation) * sin(azimuth);
     local[1] = rho * cos(elevation) * cos(azimuth);
@@ -633,8 +588,14 @@ bool DBODataSource::calculateRadSlt2Geocentric (double x, double y, double z, Ei
     return true;
 }
 
+bool DBODataSource::hasLatitude() const
+{
+    return has_latitude_;
+}
+
 double DBODataSource::altitude() const
 {
+    assert (has_altitude_);
     return altitude_;
 }
 
@@ -643,13 +604,21 @@ unsigned int DBODataSource::id() const
     return id_;
 }
 
+//void DBODataSource::id(unsigned int id)
+//{
+//    // TODO
+//    assert (false);
+//}
+
 double DBODataSource::latitude() const
 {
+    assert (has_latitude_);
     return latitude_;
 }
 
 double DBODataSource::longitude() const
 {
+    assert (has_longitude_);
     return longitude_;
 }
 
@@ -668,11 +637,6 @@ bool DBODataSource::hasSic() const
     return has_sic_;
 }
 
-bool DBODataSource::hasLatitude() const
-{
-    return has_latitude_;
-}
-
 bool DBODataSource::hasLongitude() const
 {
     return has_longitude_;
@@ -688,47 +652,77 @@ const std::string &DBODataSource::name() const
     return name_;
 }
 
+void DBODataSource::name(const std::string &name)
+{
+    this->name_ = name;
+}
+
 unsigned char DBODataSource::sac() const
 {
+    assert (has_sac_);
     return sac_;
 }
 
 const std::string &DBODataSource::shortName() const
 {
+    assert (has_short_name_);
     return short_name_;
 }
 
 unsigned char DBODataSource::sic() const
 {
+    assert (has_sic_);
     return sic_;
 }
 
 void DBODataSource::altitude(double altitude)
 {
+    has_altitude_ = true;
     this->altitude_ = altitude;
 }
 
 void DBODataSource::latitude(double latitiude)
 {
+    has_latitude_= true;
     this->latitude_ = latitiude;
 }
 
 void DBODataSource::longitude(double longitude)
 {
+    has_longitude_ = true;
     this->longitude_ = longitude;
 }
 
 void DBODataSource::sac(unsigned char sac)
 {
+    has_sac_ = true;
     this->sac_ = sac;
 }
 
 void DBODataSource::shortName(const std::string &short_name)
 {
+    has_short_name_ = true;
     this->short_name_ = short_name;
 }
 
 void DBODataSource::sic(unsigned char sic)
 {
+    has_sic_ = true;
     this->sic_ = sic;
+}
+
+DBODataSourceWidget* DBODataSource::widget (bool add_headers, QWidget* parent, Qt::WindowFlags f)
+{
+    if (!widget_)
+    {
+        widget_.reset(new DBODataSourceWidget (*this, add_headers, parent, f));
+        assert (widget_);
+    }
+    return widget_.get();
+}
+
+void DBODataSource::updateInDatabase ()
+{
+    assert (object_);
+    object_->updateDataSource(id_);
 }

@@ -3,7 +3,7 @@
     <ParameterBool use_limit="0"/>
     <ParameterBool use_order="1"/>
     <ParameterBool use_order_ascending="1"/>
-    <ParameterUnsignedInt limit_max="100000"/>
+    <ParameterUnsignedInt limit_max="200000"/>
     <ParameterUnsignedInt limit_min="0"/>
     <ParameterString order_variable__name="tod"/>
     <ParameterString order_variable_dbo_name="Meta"/>
@@ -13,9 +13,9 @@
         <Configuration class_id="DBODataSourceDefinition" instance_id="DBODataSourceDefinitionADSBSCDB0">
             <ParameterString altitude_column=""/>
             <ParameterString foreign_key="le_ds.DS_ID"/>
-            <ParameterString latitude_column=""/>
+            <ParameterString latitude_column="ds_ads.POS_LAT_DEG"/>
             <ParameterString local_key="ds_id"/>
-            <ParameterString longitude_column=""/>
+            <ParameterString longitude_column="ds_ads.POS_LONG_DEG"/>
             <ParameterString meta_table="ADSBDataSources"/>
             <ParameterString name_column="le_ds.DS_NAME"/>
             <ParameterString sac_column="le_ds.SAC"/>
@@ -26,29 +26,17 @@
         <Configuration class_id="DBODataSourceDefinition" instance_id="DBODataSourceDefinitionADSBSimple0">
             <ParameterString altitude_column=""/>
             <ParameterString foreign_key="sensors.sensor_id"/>
-            <ParameterString latitude_column=""/>
+            <ParameterString latitude_column="sensors.latitude"/>
             <ParameterString local_key="ds_id"/>
-            <ParameterString longitude_column=""/>
+            <ParameterString longitude_column="sensors.longitude"/>
             <ParameterString meta_table="DataSources"/>
             <ParameterString name_column="sensors.name"/>
-            <ParameterString sac_column=""/>
+            <ParameterString sac_column="sensors.sac"/>
             <ParameterString schema="Simple"/>
             <ParameterString short_name_column="sensors.shortname"/>
-            <ParameterString sic_column=""/>
+            <ParameterString sic_column="sensors.sic"/>
         </Configuration>
         <Configuration class_id="DBOLabelDefinition" instance_id="DBOLabelDefinition0">
-            <Configuration class_id="LabelEntry" instance_id="LabelEntryacross_track_error_m0">
-                <ParameterBool show="0"/>
-                <ParameterString prefix=""/>
-                <ParameterString suffix=""/>
-                <ParameterString variable_name="across_track_error_m"/>
-            </Configuration>
-            <Configuration class_id="LabelEntry" instance_id="LabelEntryaction_id0">
-                <ParameterBool show="0"/>
-                <ParameterString prefix=""/>
-                <ParameterString suffix=""/>
-                <ParameterString variable_name="action_id"/>
-            </Configuration>
             <Configuration class_id="LabelEntry" instance_id="LabelEntryairspeed_kt0">
                 <ParameterBool show="0"/>
                 <ParameterString prefix=""/>
@@ -552,34 +540,6 @@
                 <ParameterString variable_identifier="sd_adsb.acceleration"/>
             </Configuration>
         </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBacross_track_error_m0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="ADSB"/>
-            <ParameterString description="Transversal error related to the RRT course."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="across_track_error_m"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBacross_track_error_m0">
-                <ParameterString meta_table="ADSB"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.ACROSS_TRACK_ERROR_M"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBaction_id0">
-            <ParameterString data_type_str="INT"/>
-            <ParameterString dbo_name="ADSB"/>
-            <ParameterString description="Action identifier."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="action_id"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBaction_id0">
-                <ParameterString meta_table="ADSB"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.ACTION_ID"/>
-            </Configuration>
-        </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBadsb0">
             <ParameterString data_type_str="BOOL"/>
             <ParameterString dbo_name="ADSB"/>
@@ -619,20 +579,6 @@
                 <ParameterString meta_table="ADSB"/>
                 <ParameterString schema="SCDB"/>
                 <ParameterString variable_identifier="sd_ads.AIRSPEED_MACH"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBalong_track_error_m0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="ADSB"/>
-            <ParameterString description="Longitudinal error related to the RRT course."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="along_track_error_m"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBalong_track_error_m0">
-                <ParameterString meta_table="ADSB"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.ALONG_TRACK_ERROR_M"/>
             </Configuration>
         </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBalt_baro_ft0">
@@ -718,20 +664,6 @@
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBazimuth0">
                 <ParameterString schema="Simple"/>
                 <ParameterString variable_identifier="sd_adsb.azimuth"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBazimuth_error_deg0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="ADSB"/>
-            <ParameterString description="Azimuth error."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="azimuth_error_deg"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBazimuth_error_deg0">
-                <ParameterString meta_table="ADSB"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.AZIMUTH_ERROR_DEG"/>
             </Configuration>
         </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBbaro_vertical_rate_ftm0">
@@ -1245,34 +1177,6 @@
                 <ParameterString variable_identifier="sd_ads.GROUND_BIT"/>
             </Configuration>
         </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBgroundcourse_error_deg0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="ADSB"/>
-            <ParameterString description="Course error related to the local tracker."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="groundcourse_error_deg"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBgroundcourse_error_deg0">
-                <ParameterString meta_table="ADSB"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.GROUNDCOURSE_ERROR_DEG"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBgroundspeed_error_kt0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="ADSB"/>
-            <ParameterString description="Ground speed error related to the local tracker."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="groundspeed_error_kt"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBgroundspeed_error_kt0">
-                <ParameterString meta_table="ADSB"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.GROUNDSPEED_ERROR_KT"/>
-            </Configuration>
-        </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBgroundspeed_kt0">
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="ADSB"/>
@@ -1340,20 +1244,6 @@
                 <ParameterString variable_identifier="sd_adsb.hijack"/>
             </Configuration>
         </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBhorizontal_error_m0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="ADSB"/>
-            <ParameterString description="Position error (positions projected to the Earth&apos;s surface)."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="horizontal_error_m"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBhorizontal_error_m0">
-                <ParameterString meta_table="ADSB"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.HORIZONTAL_ERROR_M"/>
-            </Configuration>
-        </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBinter_sel_altitude_ft0">
             <ParameterString data_type_str="INT"/>
             <ParameterString dbo_name="ADSB"/>
@@ -1394,48 +1284,6 @@
                 <ParameterString meta_table="ADSB"/>
                 <ParameterString schema="SCDB"/>
                 <ParameterString variable_identifier="sd_ads.INTER_SEL_ALTITUDE_SOURCE"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBis_consec_large_error0">
-            <ParameterString data_type_str="STRING"/>
-            <ParameterString dbo_name="ADSB"/>
-            <ParameterString description="&apos;Y&apos; if the plot is part of a consecutive secuence of large erros., &apos;N&apos; otherwise"/>
-            <ParameterString dimension=""/>
-            <ParameterString name="is_consec_large_error"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBis_consec_large_error0">
-                <ParameterString meta_table="ADSB"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.IS_CONSEC_LARGE_ERROR"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBis_jump0">
-            <ParameterString data_type_str="STRING"/>
-            <ParameterString dbo_name="ADSB"/>
-            <ParameterString description="&apos;Y&apos; if the plot is a jump, &apos;N&apos; otherwise"/>
-            <ParameterString dimension=""/>
-            <ParameterString name="is_jump"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBis_jump0">
-                <ParameterString meta_table="ADSB"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.IS_JUMP"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBlatency_s0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="ADSB"/>
-            <ParameterString description="Along residual error divided by the instantaneous groundspeed."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="latency_s"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBlatency_s0">
-                <ParameterString meta_table="ADSB"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.LATENCY_S"/>
             </Configuration>
         </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBline_id0">
@@ -1644,10 +1492,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="ADSB"/>
             <ParameterString description="WGS84 coordinate latitude"/>
-            <ParameterString dimension="Position"/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="pos_lat_deg"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit="WGS 84"/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBpos_lat_deg0">
                 <ParameterString meta_table="ADSB"/>
                 <ParameterString schema="SCDB"/>
@@ -1662,10 +1510,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="ADSB"/>
             <ParameterString description="WGS84 coordinate longitude"/>
-            <ParameterString dimension="Position"/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="pos_long_deg"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit="WGS 84"/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBpos_long_deg0">
                 <ParameterString meta_table="ADSB"/>
                 <ParameterString schema="SCDB"/>
@@ -1807,20 +1655,6 @@
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBradiofailure0">
                 <ParameterString schema="Simple"/>
                 <ParameterString variable_identifier="sd_adsb.radiofailure"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBrange_error_m0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="ADSB"/>
-            <ParameterString description="Range error."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="range_error_m"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBrange_error_m0">
-                <ParameterString meta_table="ADSB"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.RANGE_ERROR_M"/>
             </Configuration>
         </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBrange_slant0">
@@ -2572,47 +2406,21 @@
                 <ParameterString variable_identifier="sd_ads.VELOCITY_ACCURACY"/>
             </Configuration>
         </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBverticalspeed_error_ftm0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="ADSB"/>
-            <ParameterString description="Vertical speed error related to the RRT course."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="verticalspeed_error_ftm"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBverticalspeed_error_ftm0">
-                <ParameterString meta_table="ADSB"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.VERTICALSPEED_ERROR_FTM"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBx_error_m0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="ADSB"/>
-            <ParameterString description="Position error measured on X axis."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="x_error_m"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBx_error_m0">
-                <ParameterString meta_table="ADSB"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.X_ERROR_M"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBy_error_m0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="ADSB"/>
-            <ParameterString description="Position error measured on Y axis."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="y_error_m"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBy_error_m0">
-                <ParameterString meta_table="ADSB"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.Y_ERROR_M"/>
-            </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource0">
+            <ParameterBool has_altitude="0"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="0"/>
+            <ParameterUnsignedInt sac="50"/>
+            <ParameterUnsignedInt sic="80"/>
+            <ParameterDouble altitude="0.000000000000"/>
+            <ParameterDouble latitude="47.500000000000"/>
+            <ParameterDouble longitude="14.000000000000"/>
+            <ParameterString name="AWAM ADS-B"/>
+            <ParameterString short_name="ADS"/>
         </Configuration>
     </Configuration>
     <Configuration class_id="DBObject" instance_id="DBObjectMLAT0">
@@ -2621,9 +2429,9 @@
         <Configuration class_id="DBODataSourceDefinition" instance_id="DBODataSourceDefinitionMLATSCDB0">
             <ParameterString altitude_column=""/>
             <ParameterString foreign_key="ds_mlat.DS_ID"/>
-            <ParameterString latitude_column=""/>
+            <ParameterString latitude_column="ds_mlat.POS_LAT_DEG"/>
             <ParameterString local_key="ds_id"/>
-            <ParameterString longitude_column=""/>
+            <ParameterString longitude_column="ds_mlat.POS_LONG_DEG"/>
             <ParameterString meta_table="MLATDataSources"/>
             <ParameterString name_column="le_ds.DS_NAME"/>
             <ParameterString sac_column="le_ds.SAC"/>
@@ -2634,15 +2442,15 @@
         <Configuration class_id="DBODataSourceDefinition" instance_id="DBODataSourceDefinitionMLATSimple0">
             <ParameterString altitude_column=""/>
             <ParameterString foreign_key="sensors.sensor_id"/>
-            <ParameterString latitude_column=""/>
+            <ParameterString latitude_column="sensors.latitude"/>
             <ParameterString local_key="ds_id"/>
-            <ParameterString longitude_column=""/>
+            <ParameterString longitude_column="sensors.longitude"/>
             <ParameterString meta_table="DataSources"/>
             <ParameterString name_column="sensors.name"/>
-            <ParameterString sac_column=""/>
+            <ParameterString sac_column="sensors.sac"/>
             <ParameterString schema="Simple"/>
             <ParameterString short_name_column="sensors.shortname"/>
-            <ParameterString sic_column=""/>
+            <ParameterString sic_column="sensors.sic"/>
         </Configuration>
         <Configuration class_id="DBOLabelDefinition" instance_id="DBOLabelDefinition0">
             <Configuration class_id="LabelEntry" instance_id="LabelEntryacas_aircraft_identification0">
@@ -2698,18 +2506,6 @@
                 <ParameterString prefix=""/>
                 <ParameterString suffix=""/>
                 <ParameterString variable_name="accel_ay_ms2"/>
-            </Configuration>
-            <Configuration class_id="LabelEntry" instance_id="LabelEntryacross_track_error_m0">
-                <ParameterBool show="0"/>
-                <ParameterString prefix=""/>
-                <ParameterString suffix=""/>
-                <ParameterString variable_name="across_track_error_m"/>
-            </Configuration>
-            <Configuration class_id="LabelEntry" instance_id="LabelEntryaction_id0">
-                <ParameterBool show="0"/>
-                <ParameterString prefix=""/>
-                <ParameterString suffix=""/>
-                <ParameterString variable_name="action_id"/>
             </Configuration>
             <Configuration class_id="LabelEntry" instance_id="LabelEntryalong_track_error_m0">
                 <ParameterBool show="0"/>
@@ -3454,34 +3250,6 @@
                 <ParameterString variable_identifier="sd_mlat.acceleration"/>
             </Configuration>
         </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATacross_track_error_m0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString description="Transversal error related to the RRT course."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="across_track_error_m"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATacross_track_error_m0">
-                <ParameterString meta_table="MLAT"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.ACROSS_TRACK_ERROR_M"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATaction_id0">
-            <ParameterString data_type_str="INT"/>
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString description="Action identifier."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="action_id"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATaction_id0">
-                <ParameterString meta_table="MLAT"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.ACTION_ID"/>
-            </Configuration>
-        </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATadsb0">
             <ParameterString data_type_str="BOOL"/>
             <ParameterString dbo_name="MLAT"/>
@@ -3493,20 +3261,6 @@
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATadsb0">
                 <ParameterString schema="Simple"/>
                 <ParameterString variable_identifier="sd_mlat.adsb"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATalong_track_error_m0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString description="Longitudinal error related to the RRT course."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="along_track_error_m"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATalong_track_error_m0">
-                <ParameterString meta_table="MLAT"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.ALONG_TRACK_ERROR_M"/>
             </Configuration>
         </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATalt_geo_ft0">
@@ -3560,20 +3314,6 @@
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATazimuth0">
                 <ParameterString schema="Simple"/>
                 <ParameterString variable_identifier="sd_mlat.azimuth"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATazimuth_error_deg0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString description="Azimuth error."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="azimuth_error_deg"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATazimuth_error_deg0">
-                <ParameterString meta_table="MLAT"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.AZIMUTH_ERROR_DEG"/>
             </Configuration>
         </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATcalc_alt_geo_ft0">
@@ -3965,34 +3705,6 @@
                 <ParameterString variable_identifier="sd_mlat.GROUND_BIT"/>
             </Configuration>
         </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATgroundcourse_error_deg0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString description="Course error related to the local tracker."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="groundcourse_error_deg"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATgroundcourse_error_deg0">
-                <ParameterString meta_table="MLAT"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.GROUNDCOURSE_ERROR_DEG"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATgroundspeed_error_kt0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString description="Ground speed error related to the local tracker."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="groundspeed_error_kt"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATgroundspeed_error_kt0">
-                <ParameterString meta_table="MLAT"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.GROUNDSPEED_ERROR_KT"/>
-            </Configuration>
-        </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATgroundspeed_x0">
             <ParameterString data_type_str="FLOAT"/>
             <ParameterString dbo_name="MLAT"/>
@@ -4058,62 +3770,6 @@
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLAThijack0">
                 <ParameterString schema="Simple"/>
                 <ParameterString variable_identifier="sd_mlat.hijack"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLAThorizontal_error_m0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString description="Position error (positions projected to the Earth&apos;s surface)."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="horizontal_error_m"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLAThorizontal_error_m0">
-                <ParameterString meta_table="MLAT"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.HORIZONTAL_ERROR_M"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATis_consec_large_error0">
-            <ParameterString data_type_str="STRING"/>
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString description="&apos;Y&apos; if the plot is part of a consecutive secuence of large erros., &apos;N&apos; otherwise"/>
-            <ParameterString dimension=""/>
-            <ParameterString name="is_consec_large_error"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATis_consec_large_error0">
-                <ParameterString meta_table="MLAT"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.IS_CONSEC_LARGE_ERROR"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATis_jump0">
-            <ParameterString data_type_str="STRING"/>
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString description="&apos;Y&apos; if the plot is a jump, &apos;N&apos; otherwise"/>
-            <ParameterString dimension=""/>
-            <ParameterString name="is_jump"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATis_jump0">
-                <ParameterString meta_table="MLAT"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.IS_JUMP"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATlatency_s0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString description="Along residual error divided by the instantaneous groundspeed."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="latency_s"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATlatency_s0">
-                <ParameterString meta_table="MLAT"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.LATENCY_S"/>
             </Configuration>
         </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATline_id0">
@@ -4495,10 +4151,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="MLAT"/>
             <ParameterString description="latitude in degrees"/>
-            <ParameterString dimension="Position"/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="pos_lat_deg"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit="WGS 84"/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATpos_lat_deg0">
                 <ParameterString meta_table="MLAT"/>
                 <ParameterString schema="SCDB"/>
@@ -4583,10 +4239,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="MLAT"/>
             <ParameterString description="longitude in degrees"/>
-            <ParameterString dimension="Position"/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="pos_long_deg"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit="WGS 84"/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATpos_long_deg0">
                 <ParameterString meta_table="MLAT"/>
                 <ParameterString schema="SCDB"/>
@@ -4868,20 +4524,6 @@
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATradiofailure0">
                 <ParameterString schema="Simple"/>
                 <ParameterString variable_identifier="sd_mlat.radiofailure"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATrange_error_m0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString description="Range error."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="range_error_m"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATrange_error_m0">
-                <ParameterString meta_table="MLAT"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.RANGE_ERROR_M"/>
             </Configuration>
         </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATrange_slant0">
@@ -5722,47 +5364,181 @@
                 <ParameterString variable_identifier="sd_mlat.VELOCITY_VY_MS"/>
             </Configuration>
         </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATverticalspeed_error_ftm0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString description="Vertical speed error related to the RRT course."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="verticalspeed_error_ftm"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATverticalspeed_error_ftm0">
-                <ParameterString meta_table="MLAT"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.VERTICALSPEED_ERROR_FTM"/>
-            </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource0">
+            <ParameterBool has_altitude="0"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="0"/>
+            <ParameterUnsignedInt sac="50"/>
+            <ParameterUnsignedInt sic="70"/>
+            <ParameterDouble altitude="0.000000000000"/>
+            <ParameterDouble latitude="47.500000000000"/>
+            <ParameterDouble longitude="14.000000000000"/>
+            <ParameterString name="AWAM_TMA_Wien"/>
+            <ParameterString short_name="WTV"/>
         </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATx_error_m0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString description="Position error measured on X axis."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="x_error_m"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATx_error_m0">
-                <ParameterString meta_table="MLAT"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.X_ERROR_M"/>
-            </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource1">
+            <ParameterBool has_altitude="0"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="1"/>
+            <ParameterUnsignedInt sac="50"/>
+            <ParameterUnsignedInt sic="71"/>
+            <ParameterDouble altitude="0.000000000000"/>
+            <ParameterDouble latitude="47.500000000000"/>
+            <ParameterDouble longitude="14.000000000000"/>
+            <ParameterString name="AWAM_TMA_Linz"/>
+            <ParameterString short_name="WTL"/>
         </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableMLATy_error_m0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString description="Position error measured on Y axis."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="y_error_m"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATy_error_m0">
-                <ParameterString meta_table="MLAT"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.Y_ERROR_M"/>
-            </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource10">
+            <ParameterBool has_altitude="0"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="10"/>
+            <ParameterUnsignedInt sac="50"/>
+            <ParameterUnsignedInt sic="81"/>
+            <ParameterDouble altitude="0.000000000000"/>
+            <ParameterDouble latitude="47.500000000000"/>
+            <ParameterDouble longitude="14.000000000000"/>
+            <ParameterString name="AWAM_GND"/>
+            <ParameterString short_name="WGND"/>
+        </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource2">
+            <ParameterBool has_altitude="0"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="2"/>
+            <ParameterUnsignedInt sac="50"/>
+            <ParameterUnsignedInt sic="72"/>
+            <ParameterDouble altitude="0.000000000000"/>
+            <ParameterDouble latitude="47.500000000000"/>
+            <ParameterDouble longitude="14.000000000000"/>
+            <ParameterString name="AWAM_TMA_Salzburg"/>
+            <ParameterString short_name="WTS"/>
+        </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource3">
+            <ParameterBool has_altitude="0"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="3"/>
+            <ParameterUnsignedInt sac="50"/>
+            <ParameterUnsignedInt sic="73"/>
+            <ParameterDouble altitude="0.000000000000"/>
+            <ParameterDouble latitude="47.500000000000"/>
+            <ParameterDouble longitude="14.000000000000"/>
+            <ParameterString name="AWAM_TMA_Innsbruck"/>
+            <ParameterString short_name="WTI"/>
+        </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource4">
+            <ParameterBool has_altitude="0"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="4"/>
+            <ParameterUnsignedInt sac="50"/>
+            <ParameterUnsignedInt sic="75"/>
+            <ParameterDouble altitude="0.000000000000"/>
+            <ParameterDouble latitude="47.500000000000"/>
+            <ParameterDouble longitude="14.000000000000"/>
+            <ParameterString name="AWAM_TMA_Graz"/>
+            <ParameterString short_name="WTG"/>
+        </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource5">
+            <ParameterBool has_altitude="0"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="5"/>
+            <ParameterUnsignedInt sac="50"/>
+            <ParameterUnsignedInt sic="76"/>
+            <ParameterDouble altitude="0.000000000000"/>
+            <ParameterDouble latitude="47.500000000000"/>
+            <ParameterDouble longitude="14.000000000000"/>
+            <ParameterString name="AWAM_Lower_West"/>
+            <ParameterString short_name="WLW"/>
+        </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource6">
+            <ParameterBool has_altitude="0"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="6"/>
+            <ParameterUnsignedInt sac="50"/>
+            <ParameterUnsignedInt sic="77"/>
+            <ParameterDouble altitude="0.000000000000"/>
+            <ParameterDouble latitude="47.500000000000"/>
+            <ParameterDouble longitude="14.000000000000"/>
+            <ParameterString name="AWAM_Lower_East"/>
+            <ParameterString short_name="WLE"/>
+        </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource7">
+            <ParameterBool has_altitude="0"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="7"/>
+            <ParameterUnsignedInt sac="50"/>
+            <ParameterUnsignedInt sic="78"/>
+            <ParameterDouble altitude="0.000000000000"/>
+            <ParameterDouble latitude="47.500000000000"/>
+            <ParameterDouble longitude="14.000000000000"/>
+            <ParameterString name="AWAM_Upper"/>
+            <ParameterString short_name="WUP"/>
+        </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource8">
+            <ParameterBool has_altitude="0"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="8"/>
+            <ParameterUnsignedInt sac="50"/>
+            <ParameterUnsignedInt sic="74"/>
+            <ParameterDouble altitude="0.000000000000"/>
+            <ParameterDouble latitude="47.500000000000"/>
+            <ParameterDouble longitude="14.000000000000"/>
+            <ParameterString name="AWAM_TMA_Klagenfurt"/>
+            <ParameterString short_name="WTK"/>
+        </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource9">
+            <ParameterBool has_altitude="0"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="9"/>
+            <ParameterUnsignedInt sac="50"/>
+            <ParameterUnsignedInt sic="79"/>
+            <ParameterDouble altitude="0.000000000000"/>
+            <ParameterDouble latitude="47.500000000000"/>
+            <ParameterDouble longitude="14.000000000000"/>
+            <ParameterString name="AWAM_All"/>
+            <ParameterString short_name="WAL"/>
         </Configuration>
     </Configuration>
     <Configuration class_id="DBObject" instance_id="DBObjectPSR0">
@@ -5771,15 +5547,15 @@
         <Configuration class_id="DBODataSourceDefinition" instance_id="DBODataSourceDefinitionPSRSimple0">
             <ParameterString altitude_column=""/>
             <ParameterString foreign_key="sensors.sensor_id"/>
-            <ParameterString latitude_column=""/>
+            <ParameterString latitude_column="sensors.latitude"/>
             <ParameterString local_key="sensor_id"/>
-            <ParameterString longitude_column=""/>
+            <ParameterString longitude_column="sensors.longitude"/>
             <ParameterString meta_table="DataSources"/>
             <ParameterString name_column="sensors.name"/>
-            <ParameterString sac_column=""/>
+            <ParameterString sac_column="sensors.sac"/>
             <ParameterString schema="Simple"/>
             <ParameterString short_name_column="sensors.shortname"/>
-            <ParameterString sic_column=""/>
+            <ParameterString sic_column="sensors.sic"/>
         </Configuration>
         <Configuration class_id="DBOLabelDefinition" instance_id="DBOLabelDefinition0">
             <Configuration class_id="LabelEntry" instance_id="LabelEntryaccelerating0">
@@ -6596,10 +6372,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="PSR"/>
             <ParameterString description=""/>
-            <ParameterString dimension="Position"/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="latitude"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit="WGS 84"/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionPSRlatitude0">
                 <ParameterString schema="Simple"/>
                 <ParameterString variable_identifier="sd_primary.latitude"/>
@@ -6609,10 +6385,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="PSR"/>
             <ParameterString description=""/>
-            <ParameterString dimension="Position"/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="longitude"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit="WGS 84"/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionPSRlongitude0">
                 <ParameterString schema="Simple"/>
                 <ParameterString variable_identifier="sd_primary.longitude"/>
@@ -7367,18 +7143,6 @@
                 <ParameterString suffix=""/>
                 <ParameterString variable_name="acas_modes_service"/>
             </Configuration>
-            <Configuration class_id="LabelEntry" instance_id="LabelEntryacross_track_error_m0">
-                <ParameterBool show="0"/>
-                <ParameterString prefix=""/>
-                <ParameterString suffix=""/>
-                <ParameterString variable_name="across_track_error_m"/>
-            </Configuration>
-            <Configuration class_id="LabelEntry" instance_id="LabelEntryaction_id0">
-                <ParameterBool show="0"/>
-                <ParameterString prefix=""/>
-                <ParameterString suffix=""/>
-                <ParameterString variable_name="action_id"/>
-            </Configuration>
             <Configuration class_id="LabelEntry" instance_id="LabelEntryalong_track_error_m0">
                 <ParameterBool show="0"/>
                 <ParameterString prefix=""/>
@@ -8118,48 +7882,6 @@
                 <ParameterString variable_identifier="sd_radar.ACAS_MODES_SERVICE"/>
             </Configuration>
         </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadaracross_track_error_m0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString description="Transversal error related to the RRT course."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="across_track_error_m"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadaracross_track_error_m0">
-                <ParameterString meta_table="Radar"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.ACROSS_TRACK_ERROR_M"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadaraction_id0">
-            <ParameterString data_type_str="INT"/>
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString description="Action identifier."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="action_id"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadaraction_id0">
-                <ParameterString meta_table="Radar"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.ACTION_ID"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadaralong_track_error_m0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString description="Longitudinal error related to the RRT course."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="along_track_error_m"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadaralong_track_error_m0">
-                <ParameterString meta_table="Radar"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.ALONG_TRACK_ERROR_M"/>
-            </Configuration>
-        </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarantenna0">
             <ParameterString data_type_str="STRING"/>
             <ParameterString dbo_name="Radar"/>
@@ -8172,20 +7894,6 @@
                 <ParameterString meta_table="Radar"/>
                 <ParameterString schema="SCDB"/>
                 <ParameterString variable_identifier="sd_radar.ANTENNA"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarazimuth_error_deg0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString description="Azimuth error."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="azimuth_error_deg"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarazimuth_error_deg0">
-                <ParameterString meta_table="Radar"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.AZIMUTH_ERROR_DEG"/>
             </Configuration>
         </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarcalc_alt_geo_ft0">
@@ -8336,34 +8044,6 @@
                 <ParameterString variable_identifier="sd_radar.GEO_AREA_MASK"/>
             </Configuration>
         </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadargroundcourse_error_deg0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString description="Course error related to the local tracker."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="groundcourse_error_deg"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadargroundcourse_error_deg0">
-                <ParameterString meta_table="Radar"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.GROUNDCOURSE_ERROR_DEG"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadargroundspeed_error_kt0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString description="Ground speed error related to the local tracker."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="groundspeed_error_kt"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadargroundspeed_error_kt0">
-                <ParameterString meta_table="Radar"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.GROUNDSPEED_ERROR_KT"/>
-            </Configuration>
-        </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarhash_code0">
             <ParameterString data_type_str="STRING"/>
             <ParameterString dbo_name="Radar"/>
@@ -8392,20 +8072,6 @@
                 <ParameterString variable_identifier="sd_radar.HEIGHT_3D_FT"/>
             </Configuration>
         </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarhorizontal_error_m0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString description="Position error (positions projected to the Earth&apos;s surface)."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="horizontal_error_m"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarhorizontal_error_m0">
-                <ParameterString meta_table="Radar"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.HORIZONTAL_ERROR_M"/>
-            </Configuration>
-        </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableRadaric_code0">
             <ParameterString data_type_str="INT"/>
             <ParameterString dbo_name="Radar"/>
@@ -8418,48 +8084,6 @@
                 <ParameterString meta_table="Radar"/>
                 <ParameterString schema="SCDB"/>
                 <ParameterString variable_identifier="sd_radar.IC_CODE"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadaris_consec_large_error0">
-            <ParameterString data_type_str="STRING"/>
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString description="&apos;Y&apos; if the plot is part of a consecutive secuence of large erros., &apos;N&apos; otherwise"/>
-            <ParameterString dimension=""/>
-            <ParameterString name="is_consec_large_error"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadaris_consec_large_error0">
-                <ParameterString meta_table="Radar"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.IS_CONSEC_LARGE_ERROR"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadaris_jump0">
-            <ParameterString data_type_str="STRING"/>
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString description="&apos;Y&apos; if the plot is a jump, &apos;N&apos; otherwise"/>
-            <ParameterString dimension=""/>
-            <ParameterString name="is_jump"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadaris_jump0">
-                <ParameterString meta_table="Radar"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.IS_JUMP"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarlatency_s0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString description="Along residual error divided by the instantaneous groundspeed."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="latency_s"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarlatency_s0">
-                <ParameterString meta_table="Radar"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.LATENCY_S"/>
             </Configuration>
         </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarline_id0">
@@ -8908,10 +8532,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="Radar"/>
             <ParameterString description="Measured position in polar coordinates: Theta in ¿¿ [I001/040, I048/040]"/>
-            <ParameterString dimension=""/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="pos_azm_deg"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarpos_azm_deg0">
                 <ParameterString meta_table="Radar"/>
                 <ParameterString schema="SCDB"/>
@@ -8936,10 +8560,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="Radar"/>
             <ParameterString description="WGS84 coordinate latitude"/>
-            <ParameterString dimension="Position"/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="pos_lat_deg"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit="WGS 84"/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarpos_lat_deg0">
                 <ParameterString meta_table="Radar"/>
                 <ParameterString schema="SCDB"/>
@@ -9010,10 +8634,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="Radar"/>
             <ParameterString description="WGS84 coordinate longitude"/>
-            <ParameterString dimension="Position"/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="pos_long_deg"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit="WGS 84"/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarpos_long_deg0">
                 <ParameterString meta_table="Radar"/>
                 <ParameterString schema="SCDB"/>
@@ -9028,10 +8652,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="Radar"/>
             <ParameterString description="Measured position in polar coordinates: Rho in NM [I001/040, I048/040]"/>
-            <ParameterString dimension=""/>
+            <ParameterString dimension="Length"/>
             <ParameterString name="pos_range_nm"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
+            <ParameterString unit="Nautical Mile"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarpos_range_nm0">
                 <ParameterString meta_table="Radar"/>
                 <ParameterString schema="SCDB"/>
@@ -9134,20 +8758,6 @@
                 <ParameterString meta_table="Radar"/>
                 <ParameterString schema="SCDB"/>
                 <ParameterString variable_identifier="sd_radar.PSR_SSR_RANGE_DIFF_NM"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarrange_error_m0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString description="Range error."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="range_error_m"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarrange_error_m0">
-                <ParameterString meta_table="Radar"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.RANGE_ERROR_M"/>
             </Configuration>
         </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarraw_msg0">
@@ -9628,47 +9238,261 @@
                 <ParameterString variable_identifier="sd_radar.TRACK_TYPE"/>
             </Configuration>
         </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarverticalspeed_error_ftm0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString description="Vertical speed error related to the RRT course."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="verticalspeed_error_ftm"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarverticalspeed_error_ftm0">
-                <ParameterString meta_table="Radar"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.VERTICALSPEED_ERROR_FTM"/>
-            </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource0">
+            <ParameterBool has_altitude="1"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="0"/>
+            <ParameterUnsignedInt sac="50"/>
+            <ParameterUnsignedInt sic="11"/>
+            <ParameterDouble altitude="247.000000000000"/>
+            <ParameterDouble latitude="48.104369444400"/>
+            <ParameterDouble longitude="16.560975000000"/>
+            <ParameterString name="ASR_Schwechat"/>
+            <ParameterString short_name="VIE"/>
         </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadarx_error_m0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString description="Position error measured on X axis."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="x_error_m"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadarx_error_m0">
-                <ParameterString meta_table="Radar"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.X_ERROR_M"/>
-            </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource1">
+            <ParameterBool has_altitude="1"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="1"/>
+            <ParameterUnsignedInt sac="50"/>
+            <ParameterUnsignedInt sic="13"/>
+            <ParameterDouble altitude="226.000000000000"/>
+            <ParameterDouble latitude="48.100561111100"/>
+            <ParameterDouble longitude="16.577808333300"/>
+            <ParameterString name="Mode-S_Schwechat"/>
+            <ParameterString short_name="VIS"/>
         </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableRadary_error_m0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString description="Position error measured on Y axis."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="y_error_m"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionRadary_error_m0">
-                <ParameterString meta_table="Radar"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.Y_ERROR_M"/>
-            </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource10">
+            <ParameterBool has_altitude="1"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="10"/>
+            <ParameterUnsignedInt sac="98"/>
+            <ParameterUnsignedInt sic="15"/>
+            <ParameterDouble altitude="461.000000000000"/>
+            <ParameterDouble latitude="48.382291666700"/>
+            <ParameterDouble longitude="11.801427777800"/>
+            <ParameterString name="ASR_Muenchen_Nord"/>
+            <ParameterString short_name="MUN"/>
+        </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource11">
+            <ParameterBool has_altitude="1"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="11"/>
+            <ParameterUnsignedInt sac="98"/>
+            <ParameterUnsignedInt sic="16"/>
+            <ParameterDouble altitude="460.700000000000"/>
+            <ParameterDouble latitude="48.311075000000"/>
+            <ParameterDouble longitude="11.814461111100"/>
+            <ParameterString name="ASR_Muenchen_Sued"/>
+            <ParameterString short_name="MUS"/>
+        </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource12">
+            <ParameterBool has_altitude="1"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="12"/>
+            <ParameterUnsignedInt sac="98"/>
+            <ParameterUnsignedInt sic="43"/>
+            <ParameterDouble altitude="1001.000000000000"/>
+            <ParameterDouble latitude="48.131191666700"/>
+            <ParameterDouble longitude="8.775341666670"/>
+            <ParameterString name="SSR_Gosheim"/>
+            <ParameterString short_name="GOS"/>
+        </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource13">
+            <ParameterBool has_altitude="1"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="13"/>
+            <ParameterUnsignedInt sac="40"/>
+            <ParameterUnsignedInt sic="30"/>
+            <ParameterDouble altitude="849.000000000000"/>
+            <ParameterDouble latitude="47.481751166700"/>
+            <ParameterDouble longitude="8.402748500000"/>
+            <ParameterString name="SSR_Laegern"/>
+            <ParameterString short_name="LAE"/>
+        </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource14">
+            <ParameterBool has_altitude="1"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="14"/>
+            <ParameterUnsignedInt sac="147"/>
+            <ParameterUnsignedInt sic="23"/>
+            <ParameterDouble altitude="432.000000000000"/>
+            <ParameterDouble latitude="46.095977777800"/>
+            <ParameterDouble longitude="14.566750000000"/>
+            <ParameterString name="SSR_Oljska_Gora"/>
+            <ParameterString short_name="OLS"/>
+        </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource15">
+            <ParameterBool has_altitude="1"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="15"/>
+            <ParameterUnsignedInt sac="50"/>
+            <ParameterUnsignedInt sic="20"/>
+            <ParameterDouble altitude="2144.000000000000"/>
+            <ParameterDouble latitude="46.787108333300"/>
+            <ParameterDouble longitude="14.971150000000"/>
+            <ParameterString name="ModeS_Koralpe"/>
+            <ParameterString short_name="KOR"/>
+        </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource2">
+            <ParameterBool has_altitude="1"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="2"/>
+            <ParameterUnsignedInt sac="50"/>
+            <ParameterUnsignedInt sic="0"/>
+            <ParameterDouble altitude="323.000000000000"/>
+            <ParameterDouble latitude="48.239027777800"/>
+            <ParameterDouble longitude="14.182188888900"/>
+            <ParameterString name="Mode-S_Linz"/>
+            <ParameterString short_name="LNZ"/>
+        </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource3">
+            <ParameterBool has_altitude="1"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="3"/>
+            <ParameterUnsignedInt sac="50"/>
+            <ParameterUnsignedInt sic="7"/>
+            <ParameterDouble altitude="870.000000000000"/>
+            <ParameterDouble latitude="47.918133333300"/>
+            <ParameterDouble longitude="13.004616666700"/>
+            <ParameterString name="ASR_Haunsberg"/>
+            <ParameterString short_name="SBG"/>
+        </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource4">
+            <ParameterBool has_altitude="1"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="4"/>
+            <ParameterUnsignedInt sac="50"/>
+            <ParameterUnsignedInt sic="10"/>
+            <ParameterDouble altitude="802.000000000000"/>
+            <ParameterDouble latitude="48.470858333300"/>
+            <ParameterDouble longitude="13.685319444400"/>
+            <ParameterString name="SSR_Feichtberg"/>
+            <ParameterString short_name="FEI"/>
+        </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource5">
+            <ParameterBool has_altitude="1"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="5"/>
+            <ParameterUnsignedInt sac="50"/>
+            <ParameterUnsignedInt sic="9"/>
+            <ParameterDouble altitude="527.000000000000"/>
+            <ParameterDouble latitude="48.577869444400"/>
+            <ParameterDouble longitude="16.395350000000"/>
+            <ParameterString name="SSR_Buschberg"/>
+            <ParameterString short_name="BUB"/>
+        </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource6">
+            <ParameterBool has_altitude="1"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="6"/>
+            <ParameterUnsignedInt sac="50"/>
+            <ParameterUnsignedInt sic="12"/>
+            <ParameterDouble altitude="360.000000000000"/>
+            <ParameterDouble latitude="46.986677777800"/>
+            <ParameterDouble longitude="15.431991666700"/>
+            <ParameterString name="ASR_Graz"/>
+            <ParameterString short_name="GRZ"/>
+        </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource7">
+            <ParameterBool has_altitude="1"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="7"/>
+            <ParameterUnsignedInt sac="50"/>
+            <ParameterUnsignedInt sic="8"/>
+            <ParameterDouble altitude="2144.000000000000"/>
+            <ParameterDouble latitude="46.787108333300"/>
+            <ParameterDouble longitude="14.971150000000"/>
+            <ParameterString name="SSR_Koralpe"/>
+            <ParameterString short_name="KOR"/>
+        </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource8">
+            <ParameterBool has_altitude="1"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="8"/>
+            <ParameterUnsignedInt sac="50"/>
+            <ParameterUnsignedInt sic="48"/>
+            <ParameterDouble altitude="672.000000000000"/>
+            <ParameterDouble latitude="47.196513888900"/>
+            <ParameterDouble longitude="14.749852777800"/>
+            <ParameterString name="ASR_Zeltweg"/>
+            <ParameterString short_name="ZWG"/>
+        </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource9">
+            <ParameterBool has_altitude="1"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="9"/>
+            <ParameterUnsignedInt sac="48"/>
+            <ParameterUnsignedInt sic="1"/>
+            <ParameterDouble altitude="591.000000000000"/>
+            <ParameterDouble latitude="48.260713888900"/>
+            <ParameterDouble longitude="17.163286111100"/>
+            <ParameterString name="SSR_Javornik"/>
+            <ParameterString short_name="JAV"/>
         </Configuration>
     </Configuration>
     <Configuration class_id="DBObject" instance_id="DBObjectReference0">
@@ -10451,10 +10275,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="Reference"/>
             <ParameterString description=""/>
-            <ParameterString dimension="Position"/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="latitude"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit="WGS 84"/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionReferencelatitude0">
                 <ParameterString schema="Simple"/>
                 <ParameterString variable_identifier="sd_reftraj.latitude"/>
@@ -10464,10 +10288,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="Reference"/>
             <ParameterString description=""/>
-            <ParameterString dimension="Position"/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="longitude"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit="WGS 84"/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionReferencelongitude0">
                 <ParameterString schema="Simple"/>
                 <ParameterString variable_identifier="sd_reftraj.longitude"/>
@@ -11182,15 +11006,15 @@
         <Configuration class_id="DBODataSourceDefinition" instance_id="DBODataSourceDefinitionSSRSimple0">
             <ParameterString altitude_column=""/>
             <ParameterString foreign_key="sensors.sensor_id"/>
-            <ParameterString latitude_column=""/>
+            <ParameterString latitude_column="sensors.latitude"/>
             <ParameterString local_key="sensor_id"/>
-            <ParameterString longitude_column=""/>
+            <ParameterString longitude_column="sensors.longitude"/>
             <ParameterString meta_table="DataSources"/>
             <ParameterString name_column="sensors.name"/>
-            <ParameterString sac_column=""/>
+            <ParameterString sac_column="sensors.sac"/>
             <ParameterString schema="Simple"/>
             <ParameterString short_name_column="sensors.shortname"/>
-            <ParameterString sic_column=""/>
+            <ParameterString sic_column="sensors.sic"/>
         </Configuration>
         <Configuration class_id="DBOLabelDefinition" instance_id="DBOLabelDefinition0">
             <Configuration class_id="LabelEntry" instance_id="LabelEntryaccelerating0">
@@ -12007,10 +11831,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="SSR"/>
             <ParameterString description=""/>
-            <ParameterString dimension="Position"/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="latitude"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit="WGS 84"/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionSSRlatitude0">
                 <ParameterString schema="Simple"/>
                 <ParameterString variable_identifier="sd_ssr.latitude"/>
@@ -12020,10 +11844,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="SSR"/>
             <ParameterString description=""/>
-            <ParameterString dimension="Position"/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="longitude"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit="WGS 84"/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionSSRlongitude0">
                 <ParameterString schema="Simple"/>
                 <ParameterString variable_identifier="sd_ssr.longitude"/>
@@ -12725,9 +12549,9 @@
         <Configuration class_id="DBODataSourceDefinition" instance_id="DBODataSourceDefinitionTrackerSCDB0">
             <ParameterString altitude_column=""/>
             <ParameterString foreign_key="le_ds.DS_ID"/>
-            <ParameterString latitude_column=""/>
+            <ParameterString latitude_column="ds_tracker.POS_LAT_DEG"/>
             <ParameterString local_key="ds_id"/>
-            <ParameterString longitude_column=""/>
+            <ParameterString longitude_column="ds_tracker.POS_LONG_DEG"/>
             <ParameterString meta_table="TrackerDataSources"/>
             <ParameterString name_column="le_ds.DS_NAME"/>
             <ParameterString sac_column="le_ds.SAC"/>
@@ -12738,29 +12562,17 @@
         <Configuration class_id="DBODataSourceDefinition" instance_id="DBODataSourceDefinitionTrackerSimple0">
             <ParameterString altitude_column=""/>
             <ParameterString foreign_key="sensors.sensor_id"/>
-            <ParameterString latitude_column=""/>
+            <ParameterString latitude_column="sensors.latitude"/>
             <ParameterString local_key="ds_id"/>
-            <ParameterString longitude_column=""/>
+            <ParameterString longitude_column="sensors.longitude"/>
             <ParameterString meta_table="DataSources"/>
             <ParameterString name_column="sensors.name"/>
-            <ParameterString sac_column=""/>
+            <ParameterString sac_column="sensors.sac"/>
             <ParameterString schema="Simple"/>
             <ParameterString short_name_column="sensors.shortname"/>
-            <ParameterString sic_column=""/>
+            <ParameterString sic_column="sensors.sic"/>
         </Configuration>
         <Configuration class_id="DBOLabelDefinition" instance_id="DBOLabelDefinition0">
-            <Configuration class_id="LabelEntry" instance_id="LabelEntryacross_track_error_m0">
-                <ParameterBool show="0"/>
-                <ParameterString prefix=""/>
-                <ParameterString suffix=""/>
-                <ParameterString variable_name="across_track_error_m"/>
-            </Configuration>
-            <Configuration class_id="LabelEntry" instance_id="LabelEntryaction_id0">
-                <ParameterBool show="0"/>
-                <ParameterString prefix=""/>
-                <ParameterString suffix=""/>
-                <ParameterString variable_name="action_id"/>
-            </Configuration>
             <Configuration class_id="LabelEntry" instance_id="LabelEntryaircraft_derived0">
                 <ParameterBool show="0"/>
                 <ParameterString prefix=""/>
@@ -13276,34 +13088,6 @@
                 <ParameterString variable_identifier="sd_track.acceleration"/>
             </Configuration>
         </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackeracross_track_error_m0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="Tracker"/>
-            <ParameterString description="Transversal error related to the RRT course."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="across_track_error_m"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackeracross_track_error_m0">
-                <ParameterString meta_table="Tracker"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.ACROSS_TRACK_ERROR_M"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackeraction_id0">
-            <ParameterString data_type_str="INT"/>
-            <ParameterString dbo_name="Tracker"/>
-            <ParameterString description="Action identifier."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="action_id"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackeraction_id0">
-                <ParameterString meta_table="Tracker"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.ACTION_ID"/>
-            </Configuration>
-        </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackeradsb0">
             <ParameterString data_type_str="BOOL"/>
             <ParameterString dbo_name="Tracker"/>
@@ -13329,20 +13113,6 @@
                 <ParameterString meta_table="Tracker"/>
                 <ParameterString schema="SCDB"/>
                 <ParameterString variable_identifier="sd_track.AIRCRAFT_DERIVED"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackeralong_track_error_m0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="Tracker"/>
-            <ParameterString description="Longitudinal error related to the RRT course."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="along_track_error_m"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackeralong_track_error_m0">
-                <ParameterString meta_table="Tracker"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.ALONG_TRACK_ERROR_M"/>
             </Configuration>
         </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackeralt_baro_ft0">
@@ -13424,20 +13194,6 @@
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerazimuth0">
                 <ParameterString schema="Simple"/>
                 <ParameterString variable_identifier="sd_track.azimuth"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerazimuth_error_deg0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="Tracker"/>
-            <ParameterString description="Azimuth error."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="azimuth_error_deg"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerazimuth_error_deg0">
-                <ParameterString meta_table="Tracker"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.AZIMUTH_ERROR_DEG"/>
             </Configuration>
         </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackercalc_alt_geo_ft0">
@@ -13797,34 +13553,6 @@
                 <ParameterString variable_identifier="sd_track.ground"/>
             </Configuration>
         </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackergroundcourse_error_deg0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="Tracker"/>
-            <ParameterString description="Course error related to the local tracker."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="groundcourse_error_deg"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackergroundcourse_error_deg0">
-                <ParameterString meta_table="Tracker"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.GROUNDCOURSE_ERROR_DEG"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackergroundspeed_error_kt0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="Tracker"/>
-            <ParameterString description="Ground speed error related to the local tracker."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="groundspeed_error_kt"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackergroundspeed_error_kt0">
-                <ParameterString meta_table="Tracker"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.GROUNDSPEED_ERROR_KT"/>
-            </Configuration>
-        </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackergroundspeed_kt0">
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="Tracker"/>
@@ -13906,20 +13634,6 @@
                 <ParameterString variable_identifier="sd_track.hijack"/>
             </Configuration>
         </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerhorizontal_error_m0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="Tracker"/>
-            <ParameterString description="Position error (positions projected to the Earth&apos;s surface)."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="horizontal_error_m"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerhorizontal_error_m0">
-                <ParameterString meta_table="Tracker"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.HORIZONTAL_ERROR_M"/>
-            </Configuration>
-        </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackeric_code0">
             <ParameterString data_type_str="INT"/>
             <ParameterString dbo_name="Tracker"/>
@@ -13932,48 +13646,6 @@
                 <ParameterString meta_table="Tracker"/>
                 <ParameterString schema="SCDB"/>
                 <ParameterString variable_identifier="sd_track.IC_CODE"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackeris_consec_large_error0">
-            <ParameterString data_type_str="STRING"/>
-            <ParameterString dbo_name="Tracker"/>
-            <ParameterString description="&apos;Y&apos; if the plot is part of a consecutive secuence of large erros., &apos;N&apos; otherwise"/>
-            <ParameterString dimension=""/>
-            <ParameterString name="is_consec_large_error"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackeris_consec_large_error0">
-                <ParameterString meta_table="Tracker"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.IS_CONSEC_LARGE_ERROR"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackeris_jump0">
-            <ParameterString data_type_str="STRING"/>
-            <ParameterString dbo_name="Tracker"/>
-            <ParameterString description="&apos;Y&apos; if the plot is a jump, &apos;N&apos; otherwise"/>
-            <ParameterString dimension=""/>
-            <ParameterString name="is_jump"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackeris_jump0">
-                <ParameterString meta_table="Tracker"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.IS_JUMP"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerlatency_s0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="Tracker"/>
-            <ParameterString description="Along residual error divided by the instantaneous groundspeed."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="latency_s"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerlatency_s0">
-                <ParameterString meta_table="Tracker"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.LATENCY_S"/>
             </Configuration>
         </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerline_id0">
@@ -14317,10 +13989,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="Tracker"/>
             <ParameterString description="Calculated WGS84 track latitude position (low or high resolution) [I062/105 or I062/106]"/>
-            <ParameterString dimension="Position"/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="pos_lat_deg"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit="WGS 84"/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerpos_lat_deg0">
                 <ParameterString meta_table="Tracker"/>
                 <ParameterString schema="SCDB"/>
@@ -14405,10 +14077,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="Tracker"/>
             <ParameterString description="Calculated WGS84 track longitude position (low or high resolution) [I062/105 or I062/106]"/>
-            <ParameterString dimension="Position"/>
+            <ParameterString dimension="Angle"/>
             <ParameterString name="pos_long_deg"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit="WGS 84"/>
+            <ParameterString unit="Degree"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerpos_long_deg0">
                 <ParameterString meta_table="Tracker"/>
                 <ParameterString schema="SCDB"/>
@@ -14550,20 +14222,6 @@
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerradiofailure0">
                 <ParameterString schema="Simple"/>
                 <ParameterString variable_identifier="sd_track.radiofailure"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerrange_error_m0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="Tracker"/>
-            <ParameterString description="Range error."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="range_error_m"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerrange_error_m0">
-                <ParameterString meta_table="Tracker"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.RANGE_ERROR_M"/>
             </Configuration>
         </Configuration>
         <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerrange_slant0">
@@ -15319,47 +14977,21 @@
                 <ParameterString variable_identifier="sd_track.vehicle_type"/>
             </Configuration>
         </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerverticalspeed_error_ftm0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="Tracker"/>
-            <ParameterString description="Vertical speed error related to the RRT course."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="verticalspeed_error_ftm"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerverticalspeed_error_ftm0">
-                <ParameterString meta_table="Tracker"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.VERTICALSPEED_ERROR_FTM"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerx_error_m0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="Tracker"/>
-            <ParameterString description="Position error measured on X axis."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="x_error_m"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerx_error_m0">
-                <ParameterString meta_table="Tracker"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.X_ERROR_M"/>
-            </Configuration>
-        </Configuration>
-        <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackery_error_m0">
-            <ParameterString data_type_str="DOUBLE"/>
-            <ParameterString dbo_name="Tracker"/>
-            <ParameterString description="Position error measured on Y axis."/>
-            <ParameterString dimension=""/>
-            <ParameterString name="y_error_m"/>
-            <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
-            <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackery_error_m0">
-                <ParameterString meta_table="Tracker"/>
-                <ParameterString schema="SCDB"/>
-                <ParameterString variable_identifier="cmp_aa.Y_ERROR_M"/>
-            </Configuration>
+        <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource0">
+            <ParameterBool has_altitude="0"/>
+            <ParameterBool has_latitude="1"/>
+            <ParameterBool has_longitude="1"/>
+            <ParameterBool has_sac="1"/>
+            <ParameterBool has_short_name="1"/>
+            <ParameterBool has_sic="1"/>
+            <ParameterUnsignedInt id="0"/>
+            <ParameterUnsignedInt sac="0"/>
+            <ParameterUnsignedInt sic="0"/>
+            <ParameterDouble altitude="0.000000000000"/>
+            <ParameterDouble latitude="47.500000000000"/>
+            <ParameterDouble longitude="14.000000000000"/>
+            <ParameterString name="OTR - otr1"/>
+            <ParameterString short_name="OTR"/>
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableacas_aircraft_identification0">
@@ -15502,46 +15134,6 @@
             <ParameterString dbo_variable_name="acceleration"/>
         </Configuration>
     </Configuration>
-    <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableacross_track_error_m0">
-        <ParameterString description=""/>
-        <ParameterString name="across_track_error_m"/>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBacross_track_error_m0">
-            <ParameterString dbo_name="ADSB"/>
-            <ParameterString dbo_variable_name="across_track_error_m"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATacross_track_error_m0">
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString dbo_variable_name="across_track_error_m"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadaracross_track_error_m0">
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString dbo_variable_name="across_track_error_m"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionTrackeracross_track_error_m0">
-            <ParameterString dbo_name="Tracker"/>
-            <ParameterString dbo_variable_name="across_track_error_m"/>
-        </Configuration>
-    </Configuration>
-    <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableaction_id0">
-        <ParameterString description=""/>
-        <ParameterString name="action_id"/>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBaction_id0">
-            <ParameterString dbo_name="ADSB"/>
-            <ParameterString dbo_variable_name="action_id"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATaction_id0">
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString dbo_variable_name="action_id"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadaraction_id0">
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString dbo_variable_name="action_id"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionTrackeraction_id0">
-            <ParameterString dbo_name="Tracker"/>
-            <ParameterString dbo_variable_name="action_id"/>
-        </Configuration>
-    </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableadsb0">
         <ParameterString description=""/>
         <ParameterString name="adsb"/>
@@ -15568,26 +15160,6 @@
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionTrackeradsb0">
             <ParameterString dbo_name="Tracker"/>
             <ParameterString dbo_variable_name="adsb"/>
-        </Configuration>
-    </Configuration>
-    <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariablealong_track_error_m0">
-        <ParameterString description=""/>
-        <ParameterString name="along_track_error_m"/>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBalong_track_error_m0">
-            <ParameterString dbo_name="ADSB"/>
-            <ParameterString dbo_variable_name="along_track_error_m"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATalong_track_error_m0">
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString dbo_variable_name="along_track_error_m"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadaralong_track_error_m0">
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString dbo_variable_name="along_track_error_m"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionTrackeralong_track_error_m0">
-            <ParameterString dbo_name="Tracker"/>
-            <ParameterString dbo_variable_name="along_track_error_m"/>
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariablealt_baro_ft0">
@@ -15696,26 +15268,6 @@
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionTrackerazimuth0">
             <ParameterString dbo_name="Tracker"/>
             <ParameterString dbo_variable_name="azimuth"/>
-        </Configuration>
-    </Configuration>
-    <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableazimuth_error_deg0">
-        <ParameterString description=""/>
-        <ParameterString name="azimuth_error_deg"/>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBazimuth_error_deg0">
-            <ParameterString dbo_name="ADSB"/>
-            <ParameterString dbo_variable_name="azimuth_error_deg"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATazimuth_error_deg0">
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString dbo_variable_name="azimuth_error_deg"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadarazimuth_error_deg0">
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString dbo_variable_name="azimuth_error_deg"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionTrackerazimuth_error_deg0">
-            <ParameterString dbo_name="Tracker"/>
-            <ParameterString dbo_variable_name="azimuth_error_deg"/>
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariablecalc_alt_geo_ft0">
@@ -16338,46 +15890,6 @@
             <ParameterString dbo_variable_name="ground_bit"/>
         </Configuration>
     </Configuration>
-    <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariablegroundcourse_error_deg0">
-        <ParameterString description=""/>
-        <ParameterString name="groundcourse_error_deg"/>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBgroundcourse_error_deg0">
-            <ParameterString dbo_name="ADSB"/>
-            <ParameterString dbo_variable_name="groundcourse_error_deg"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATgroundcourse_error_deg0">
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString dbo_variable_name="groundcourse_error_deg"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadargroundcourse_error_deg0">
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString dbo_variable_name="groundcourse_error_deg"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionTrackergroundcourse_error_deg0">
-            <ParameterString dbo_name="Tracker"/>
-            <ParameterString dbo_variable_name="groundcourse_error_deg"/>
-        </Configuration>
-    </Configuration>
-    <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariablegroundspeed_error_kt0">
-        <ParameterString description=""/>
-        <ParameterString name="groundspeed_error_kt"/>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBgroundspeed_error_kt0">
-            <ParameterString dbo_name="ADSB"/>
-            <ParameterString dbo_variable_name="groundspeed_error_kt"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATgroundspeed_error_kt0">
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString dbo_variable_name="groundspeed_error_kt"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadargroundspeed_error_kt0">
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString dbo_variable_name="groundspeed_error_kt"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionTrackergroundspeed_error_kt0">
-            <ParameterString dbo_name="Tracker"/>
-            <ParameterString dbo_variable_name="groundspeed_error_kt"/>
-        </Configuration>
-    </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariablegroundspeed_kt0">
         <ParameterString description=""/>
         <ParameterString name="groundspeed_kt"/>
@@ -16506,26 +16018,6 @@
             <ParameterString dbo_variable_name="hijack"/>
         </Configuration>
     </Configuration>
-    <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariablehorizontal_error_m0">
-        <ParameterString description=""/>
-        <ParameterString name="horizontal_error_m"/>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBhorizontal_error_m0">
-            <ParameterString dbo_name="ADSB"/>
-            <ParameterString dbo_variable_name="horizontal_error_m"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLAThorizontal_error_m0">
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString dbo_variable_name="horizontal_error_m"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadarhorizontal_error_m0">
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString dbo_variable_name="horizontal_error_m"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionTrackerhorizontal_error_m0">
-            <ParameterString dbo_name="Tracker"/>
-            <ParameterString dbo_variable_name="horizontal_error_m"/>
-        </Configuration>
-    </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableic_code0">
         <ParameterString description=""/>
         <ParameterString name="ic_code"/>
@@ -16536,66 +16028,6 @@
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionTrackeric_code0">
             <ParameterString dbo_name="Tracker"/>
             <ParameterString dbo_variable_name="ic_code"/>
-        </Configuration>
-    </Configuration>
-    <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableis_consec_large_error0">
-        <ParameterString description=""/>
-        <ParameterString name="is_consec_large_error"/>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBis_consec_large_error0">
-            <ParameterString dbo_name="ADSB"/>
-            <ParameterString dbo_variable_name="is_consec_large_error"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATis_consec_large_error0">
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString dbo_variable_name="is_consec_large_error"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadaris_consec_large_error0">
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString dbo_variable_name="is_consec_large_error"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionTrackeris_consec_large_error0">
-            <ParameterString dbo_name="Tracker"/>
-            <ParameterString dbo_variable_name="is_consec_large_error"/>
-        </Configuration>
-    </Configuration>
-    <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableis_jump0">
-        <ParameterString description=""/>
-        <ParameterString name="is_jump"/>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBis_jump0">
-            <ParameterString dbo_name="ADSB"/>
-            <ParameterString dbo_variable_name="is_jump"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATis_jump0">
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString dbo_variable_name="is_jump"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadaris_jump0">
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString dbo_variable_name="is_jump"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionTrackeris_jump0">
-            <ParameterString dbo_name="Tracker"/>
-            <ParameterString dbo_variable_name="is_jump"/>
-        </Configuration>
-    </Configuration>
-    <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariablelatency_s0">
-        <ParameterString description=""/>
-        <ParameterString name="latency_s"/>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBlatency_s0">
-            <ParameterString dbo_name="ADSB"/>
-            <ParameterString dbo_variable_name="latency_s"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATlatency_s0">
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString dbo_variable_name="latency_s"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadarlatency_s0">
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString dbo_variable_name="latency_s"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionTrackerlatency_s0">
-            <ParameterString dbo_name="Tracker"/>
-            <ParameterString dbo_variable_name="latency_s"/>
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableline_id0">
@@ -17504,26 +16936,6 @@
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionTrackerradiofailure0">
             <ParameterString dbo_name="Tracker"/>
             <ParameterString dbo_variable_name="radiofailure"/>
-        </Configuration>
-    </Configuration>
-    <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariablerange_error_m0">
-        <ParameterString description=""/>
-        <ParameterString name="range_error_m"/>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBrange_error_m0">
-            <ParameterString dbo_name="ADSB"/>
-            <ParameterString dbo_variable_name="range_error_m"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATrange_error_m0">
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString dbo_variable_name="range_error_m"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadarrange_error_m0">
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString dbo_variable_name="range_error_m"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionTrackerrange_error_m0">
-            <ParameterString dbo_name="Tracker"/>
-            <ParameterString dbo_variable_name="range_error_m"/>
         </Configuration>
     </Configuration>
     <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariablerange_slant0">
@@ -18832,66 +18244,6 @@
         <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionTrackervehicle_type0">
             <ParameterString dbo_name="Tracker"/>
             <ParameterString dbo_variable_name="vehicle_type"/>
-        </Configuration>
-    </Configuration>
-    <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariableverticalspeed_error_ftm0">
-        <ParameterString description=""/>
-        <ParameterString name="verticalspeed_error_ftm"/>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBverticalspeed_error_ftm0">
-            <ParameterString dbo_name="ADSB"/>
-            <ParameterString dbo_variable_name="verticalspeed_error_ftm"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATverticalspeed_error_ftm0">
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString dbo_variable_name="verticalspeed_error_ftm"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadarverticalspeed_error_ftm0">
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString dbo_variable_name="verticalspeed_error_ftm"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionTrackerverticalspeed_error_ftm0">
-            <ParameterString dbo_name="Tracker"/>
-            <ParameterString dbo_variable_name="verticalspeed_error_ftm"/>
-        </Configuration>
-    </Configuration>
-    <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariablex_error_m0">
-        <ParameterString description=""/>
-        <ParameterString name="x_error_m"/>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBx_error_m0">
-            <ParameterString dbo_name="ADSB"/>
-            <ParameterString dbo_variable_name="x_error_m"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATx_error_m0">
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString dbo_variable_name="x_error_m"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadarx_error_m0">
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString dbo_variable_name="x_error_m"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionTrackerx_error_m0">
-            <ParameterString dbo_name="Tracker"/>
-            <ParameterString dbo_variable_name="x_error_m"/>
-        </Configuration>
-    </Configuration>
-    <Configuration class_id="MetaDBOVariable" instance_id="MetaDBOVariabley_error_m0">
-        <ParameterString description=""/>
-        <ParameterString name="y_error_m"/>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionADSBy_error_m0">
-            <ParameterString dbo_name="ADSB"/>
-            <ParameterString dbo_variable_name="y_error_m"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionMLATy_error_m0">
-            <ParameterString dbo_name="MLAT"/>
-            <ParameterString dbo_variable_name="y_error_m"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionRadary_error_m0">
-            <ParameterString dbo_name="Radar"/>
-            <ParameterString dbo_variable_name="y_error_m"/>
-        </Configuration>
-        <Configuration class_id="DBOVariableDefinition" instance_id="DBOVariableDefinitionTrackery_error_m0">
-            <ParameterString dbo_name="Tracker"/>
-            <ParameterString dbo_variable_name="y_error_m"/>
         </Configuration>
     </Configuration>
 </Configuration>

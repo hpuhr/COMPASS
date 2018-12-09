@@ -55,6 +55,7 @@ public:
     virtual ~JobManager();
 
     void addJob (std::shared_ptr<Job> job);
+    void addNonBlockingJob (std::shared_ptr<Job> job);
     void addDBJob (std::shared_ptr<Job> job);
     void cancelJob (std::shared_ptr<Job> job);
 
@@ -79,11 +80,11 @@ protected:
     volatile bool stopped_;
 
     QMutex mutex_;
-    //unsigned int num_workers_;
 
     unsigned int update_time_;
 
     std::list <std::shared_ptr<Job>> jobs_;
+    std::list <std::shared_ptr<Job>> non_blocking_jobs_;
 
     std::shared_ptr<Job> active_db_job_;
     std::list <std::shared_ptr<Job>> queued_db_jobs_;

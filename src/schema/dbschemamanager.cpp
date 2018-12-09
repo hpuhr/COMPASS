@@ -218,7 +218,7 @@ void DBSchemaManager::lock ()
 
 void DBSchemaManager::databaseContentChangedSlot ()
 {
-    loginf << "DBSchemaManager: databaseContentChangedSlot";
+    logdbg << "DBSchemaManager: databaseContentChangedSlot";
 
     for (auto& schema_it : schemas_)
         schema_it.second->updateOnDatabase();

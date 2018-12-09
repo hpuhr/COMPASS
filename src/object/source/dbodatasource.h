@@ -18,103 +18,38 @@
 #ifndef DBODATASOURCE_H
 #define DBODATASOURCE_H
 
-#include <QObject>
+#include <memory>
+#include <QWidget>
 
 #include "rs2g.h"
-
-#include "configurable.h"
 #include "geomap.h"
+#include "dboeditdatasourceactionoptions.h"
 
 class DBObject;
-class DBODataSourceDefinitionWidget;
-
-/**
- * @brief Definition of a data source for a DBObject
- */
-class DBODataSourceDefinition : public QObject, public Configurable
-{
-    Q_OBJECT
-
-signals:
-    void definitionChangedSignal();
-
-public:
-    /// @brief Constructor, registers parameters
-    DBODataSourceDefinition(const std::string &class_id, const std::string &instance_id, DBObject* object);
-    virtual ~DBODataSourceDefinition();
-
-    const std::string& schema () const { return schema_; }
-
-    const std::string& localKey () const { return local_key_; }
-    void localKey(const std::string &local_key);
-    const std::string& metaTableName () const { return meta_table_; }
-    void metaTable(const std::string &meta_table);
-    const std::string& foreignKey () const { return foreign_key_; }
-    void foreignKey(const std::string &foreign_key);
-    const std::string& nameColumn () const { return name_column_; }
-    void nameColumn(const std::string &name_column);
-
-    DBODataSourceDefinitionWidget* widget ();
-
-    bool hasLatitudeColumn () const { return latitude_column_.size() > 0; }
-    std::string latitudeColumn() const;
-    void latitudeColumn(const std::string &latitude_column);
-
-    bool hasLongitudeColumn () const { return longitude_column_.size() > 0; }
-    std::string longitudeColumn() const;
-    void longitudeColumn(const std::string &longitude_column);
-
-    bool hasShortNameColumn () const { return short_name_column_.size() > 0; }
-    std::string shortNameColumn() const;
-    void shortNameColumn(const std::string &short_name_column);
-
-    bool hasSacColumn () const { return sac_column_.size() > 0; }
-    std::string sacColumn() const;
-    void sacColumn(const std::string &sac_column);
-
-    bool hasSicColumn () const { return sic_column_.size() > 0; }
-    std::string sicColumn() const;
-    void sicColumn(const std::string &sic_column);
-
-    bool hasAltitudeColumn () const { return altitude_column_.size() > 0; }
-    std::string altitudeColumn() const;
-    void altitudeColumn(const std::string &altitude_column);
-
-protected:
-    DBObject* object_{nullptr};
-
-    /// DBSchema identifier
-    std::string schema_;
-    /// Identifier for key in main table
-    std::string local_key_;
-    /// Identifier for meta table with data sources
-    std::string meta_table_;
-    /// Identifier for key in meta table with data sources
-    std::string foreign_key_;
-    /// Identifier for sensor name column in meta table with data sources
-    std::string short_name_column_;
-    std::string name_column_;
-    std::string sac_column_;
-    std::string sic_column_;
-    std::string latitude_column_;
-    std::string longitude_column_;
-    std::string altitude_column_;
-
-    DBODataSourceDefinitionWidget* widget_{nullptr};
-};
-
-Q_DECLARE_METATYPE(DBODataSourceDefinition*)
-Q_DECLARE_METATYPE(const DBODataSourceDefinition*)
+class DBODataSourceWidget;
+class QGridLayout;
 
 class DBODataSource
 {
 public:
-    DBODataSource(unsigned int id, const std::string& name);
+    DBODataSource(DBObject& object, unsigned int id, const std::string& name);
+    DBODataSource() = default;
+
+    // copy from dbds, everything but id
+    DBODataSource& operator=(StoredDBODataSource& other);
+    DBODataSource& operator=(DBODataSource&& other);
+
+    // comparison
+    bool operator==(StoredDBODataSource& other);
+    bool operator!=(StoredDBODataSource& other) { return !(*this == other); }
+
     virtual ~DBODataSource();
 
     unsigned int id() const;
+    //void id(unsigned int id);
 
     const std::string &name() const;
+    void name(const std::string &name);
 
     bool hasShortName() const;
     void shortName(const std::string &short_name);
@@ -140,6 +75,8 @@ public:
     void altitude(double altitude);
     double altitude() const;
 
+    DBODataSourceWidget* widget (bool add_headers=false, QWidget* parent=0, Qt::WindowFlags f=0);
+
     void finalize ();
 
     bool isFinalized () { return finalized_; } // returns false if projection can not be made because of error
@@ -153,7 +90,11 @@ public:
 
     bool calculateRadSlt2Geocentric (double x, double y, double z, Eigen::Vector3d& geoc_pos);
 
+    DBObject& object() { assert (object_); return *object_; }
+    void updateInDatabase (); // not called automatically in setters
+
 protected:
+    DBObject* object_;
     unsigned int id_{0};
 
     std::string name_;
@@ -175,6 +116,8 @@ protected:
 
     bool has_altitude_ {false};
     double altitude_ {0};  // meter above msl
+
+    std::unique_ptr<DBODataSourceWidget> widget_;
 
     bool finalized_ {false};
 
