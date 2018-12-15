@@ -95,6 +95,7 @@ void ReadJSONFilePartJob::readFilePart ()
         size_t size;
 
         int r;
+        bool closed_bracked = false;
 
         while (entry_not_done_ || archive_read_next_header(a, &entry) == ARCHIVE_OK)
         {
@@ -118,19 +119,26 @@ void ReadJSONFilePartJob::readFilePart ()
 
                 for (char c : str)
                 {
+                    closed_bracked = false;
+
                     if (c == '{')
                         ++open_count_;
                     else if (c == '}')
+                    {
                         --open_count_;
+                        closed_bracked = true;
+                    }
 
-                    tmp_stream_ << c;
+                    if (open_count_ || closed_bracked) // only add if enclosed by brackets
+                        tmp_stream_ << c;
+
                     ++bytes_read_;
                     ++bytes_read_tmp_;
 
                     if (c == '\n') // next lines after objects
                         continue;
 
-                    if (open_count_ == 0)
+                    if (closed_bracked && open_count_ == 0)
                     {
                         objects_.push_back(tmp_stream_.str());
                         tmp_stream_.str("");
