@@ -588,7 +588,7 @@ void JSONImporterTask::updateMsgBox ()
 
             statistics_calc_objects_inserted_ = objects_inserted_;
             remaining_time_str_ = String::timeStringFromDouble(time_remaining_s, false);
-            object_rate_str_ = std::to_string(objects_inserted_/diff.total_seconds());
+            object_rate_str_ = std::to_string(static_cast<int>(objects_inserted_/(diff.total_milliseconds()/1000.0)));
         }
         else // unknown number of skipped objects
         {
@@ -602,7 +602,7 @@ void JSONImporterTask::updateMsgBox ()
 
             statistics_calc_objects_inserted_ = objects_inserted_;
             remaining_time_str_ = String::timeStringFromDouble(time_remaining_s, false);
-            object_rate_str_ = std::to_string(objects_inserted_/diff.total_seconds());
+            object_rate_str_ = std::to_string(static_cast<int>(objects_inserted_/(diff.total_milliseconds()/1000.0)));
         }
     }
 

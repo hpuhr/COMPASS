@@ -175,7 +175,7 @@ std::shared_ptr<Buffer> JSONObjectParser::getNewBuffer () const
     return std::shared_ptr<Buffer> {new Buffer (list_, db_object_->name())};
 }
 
-unsigned int JSONObjectParser::parseJSON (nlohmann::json& j, std::shared_ptr<Buffer> buffer) const
+std::pair<size_t, size_t> JSONObjectParser::parseJSON (nlohmann::json& j, std::shared_ptr<Buffer> buffer) const
 {
     assert (initialized_);
 
@@ -228,7 +228,7 @@ unsigned int JSONObjectParser::parseJSON (nlohmann::json& j, std::shared_ptr<Buf
             ++row_cnt;
     }
 
-    return row_cnt;
+    return {skipped_cnt, row_cnt};
 }
 
 bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_ptr<Buffer> buffer,

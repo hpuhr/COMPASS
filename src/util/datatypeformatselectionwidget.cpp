@@ -89,7 +89,7 @@ void DataTypeFormatSelectionWidget::triggerSlot( QAction* action )
     loginf  << "DataTypeFormatSelectionWidget: triggerSlot: got data type '" << data_type_str
             << "' format '" << format_str << "'";
 
-    if (data_type_str.size() && format_.size())
+    if (data_type_str.size() && format_str.size())
     {
         PropertyDataType data_type = Property::asDataType(data_type_str);
         format_.set(data_type, format_str);

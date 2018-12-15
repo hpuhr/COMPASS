@@ -10,8 +10,8 @@
         <ParameterFloat pos_filter_lon_min="-180.00000000"/>
         <ParameterFloat time_filter_max="86400.00000000"/>
         <ParameterFloat time_filter_min="0.00000000"/>
-        <ParameterString current_filename="/home/sk/data/2017-11-30-small.zip"/>
-        <ParameterString current_schema="ADSBExchange"/>
+        <ParameterString current_filename="/home/sk/data/states_2018-12-10-11.json"/>
+        <ParameterString current_schema="OpenSkyNetwork"/>
         <ParameterString db_object_str="ADSB"/>
         <ParameterString last_filename="/home/sk/data/json_50k.zip"/>
         <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdata2017-11-30-0401Z.json">
@@ -40,6 +40,12 @@
         </Configuration>
         <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdatajson_all.zip">
             <ParameterString name="/home/sk/data/json_all.zip"/>
+        </Configuration>
+        <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdatastates_2018-12-10-11.json">
+            <ParameterString name="/home/sk/data/states_2018-12-10-11.json"/>
+        </Configuration>
+        <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdatastates_2018-12-10-11_small.json">
+            <ParameterString name="/home/sk/data/states_2018-12-10-11_small.json"/>
         </Configuration>
         <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdatatext.json">
             <ParameterString name="/home/sk/data/text.json"/>
@@ -127,8 +133,96 @@
                     <ParameterString dimension=""/>
                     <ParameterString format_data_type="STRING"/>
                     <ParameterString json_key="PosTime"/>
-                    <ParameterString json_value_format="epoch_tod"/>
+                    <ParameterString json_value_format="epoch_tod_ms"/>
                     <ParameterString unit=""/>
+                </Configuration>
+            </Configuration>
+        </Configuration>
+        <Configuration class_id="JSONParsingSchema" instance_id="JSONParsingSchemaOpenSkyNetwork0">
+            <ParameterString name="OpenSkyNetwork"/>
+            <Configuration class_id="JSONObjectParser" instance_id="JSONObjectParserADSB0">
+                <ParameterBool override_data_source="1"/>
+                <ParameterString data_source_variable_name="ds_id"/>
+                <ParameterString db_object_name="ADSB"/>
+                <ParameterString json_container_key=""/>
+                <ParameterString json_key="*"/>
+                <ParameterString json_value="*"/>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping0">
+                    <ParameterBool active="0"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="target_addr"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="icao24"/>
+                    <ParameterString json_value_format="hexadecimal"/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping1">
+                    <ParameterBool active="0"/>
+                    <ParameterBool mandatory="1"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="pos_lat_deg"/>
+                    <ParameterString dimension="Angle"/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="lat"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit="Degree"/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping2">
+                    <ParameterBool active="0"/>
+                    <ParameterBool mandatory="1"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="pos_long_deg"/>
+                    <ParameterString dimension="Angle"/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="lon"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit="Degree"/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping3">
+                    <ParameterBool active="0"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="tod"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type="STRING"/>
+                    <ParameterString json_key="time"/>
+                    <ParameterString json_value_format="epoch_tod_s"/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping4">
+                    <ParameterBool active="0"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="callsign"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="callsign"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping5">
+                    <ParameterBool active="0"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="alt_baro_ft"/>
+                    <ParameterString dimension="Height"/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="baroaltitude"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit="Meter"/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping6">
+                    <ParameterBool active="0"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="alt_geo_ft"/>
+                    <ParameterString dimension="Height"/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="geoaltitude"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit="Meter"/>
                 </Configuration>
             </Configuration>
         </Configuration>

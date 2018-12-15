@@ -78,11 +78,11 @@ protected:
     std::map <std::string, JSONParsingSchema> schemas_;
     size_t key_count_ {0};
 
-    unsigned int insert_active_ {0};
-    unsigned int rec_num_cnt_ {0};
-    unsigned int all_cnt_ {0};
-    unsigned int skipped_cnt_ {0};
-    unsigned int inserted_cnt_ {0};
+    size_t insert_active_ {0};
+    size_t rec_num_cnt_ {0};
+    size_t all_cnt_ {0};
+    size_t skipped_cnt_ {0};
+    size_t inserted_cnt_ {0};
 
     std::set <int> added_data_sources_;
 
@@ -100,11 +100,11 @@ protected:
     size_t bytes_read_ {0};
     size_t bytes_to_read_ {0};
     float read_status_percent_ {0.0};
-    unsigned int objects_read_ {0};
-    unsigned int objects_parsed_ {0};
-    unsigned int objects_skipped_ {0};
-    unsigned int objects_mapped_ {0};
-    unsigned int objects_inserted_ {0};
+    size_t objects_read_ {0};
+    size_t objects_parsed_ {0};
+    size_t objects_skipped_ {0};
+    size_t objects_mapped_ {0};
+    size_t objects_inserted_ {0};
     bool all_done_ {false};
 
     size_t statistics_calc_objects_inserted_ {0};

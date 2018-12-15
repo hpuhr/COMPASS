@@ -46,7 +46,8 @@ public:
 
     void transformBuffer (std::shared_ptr<Buffer> buffer, long key_begin=-1) const;
 
-    unsigned int parseJSON (nlohmann::json& j, std::shared_ptr<Buffer> buffer) const;
+    // returns skipped, parsed
+    std::pair<size_t, size_t> parseJSON (nlohmann::json& j, std::shared_ptr<Buffer> buffer) const;
 
     const DBOVariableSet& variableList() const;
 

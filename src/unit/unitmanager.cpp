@@ -75,6 +75,7 @@ void UnitManager::checkSubConfigurables ()
 
         dimensions_.at("Height")->addUnit ("Feet", 1.0, "");
         dimensions_.at("Height")->addUnit ("Flight Level", 1/100.0, "");
+        dimensions_.at("Height")->addUnit ("Meter", 0.3048, "");
     }
 
     if (dimensions_.count("Time") == 0)

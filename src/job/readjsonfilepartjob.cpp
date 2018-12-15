@@ -41,7 +41,7 @@ void ReadJSONFilePartJob::run ()
     //while (!file_read_done_ && objects_.size() < num_objects_)
     readFilePart();
 
-    cleanCommas ();
+    //cleanCommas ();
 
     done_=true;
 
@@ -142,7 +142,7 @@ void ReadJSONFilePartJob::readFilePart ()
                     // parsed buffer, reached obj limit
                 {
                     //|| (objects_.size() && bytes_read_tmp_ > 1e7)
-                    loginf << "UGA returning " << bytes_read_tmp_;
+                    //loginf << "UGA returning " << bytes_read_tmp_;
                     entry_not_done_ = true;
                     return;
                 }
@@ -166,21 +166,29 @@ void ReadJSONFilePartJob::readFilePart ()
     else
     {
         char c;
+        bool closed_bracked = false;
 
         while (file_stream_.get(c) && objects_.size() < num_objects_) // loop getting single characters
         {
+            closed_bracked = false;
+
             if (c == '{')
                 ++open_count_;
             else if (c == '}')
+            {
                 --open_count_;
+                closed_bracked = true;
+            }
 
-            tmp_stream_ << c;
+            if (open_count_ || closed_bracked) // only add if enclosed by brackets
+                tmp_stream_ << c;
+
             ++bytes_read_;
 
             if (c == '\n') // next lines after objects
                 continue;
 
-            if (open_count_ == 0)
+            if (closed_bracked && open_count_ == 0)
             {
                 //loginf << "ReadJSONFilePartJob: readFilePart: obj '" << tmp_stream_.str() << "'";
                 objects_.push_back(tmp_stream_.str());
