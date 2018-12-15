@@ -5,6 +5,8 @@
 #include <archive.h>
 #include <archive_entry.h>
 
+#include <regex>
+
 using namespace Utils;
 
 ReadJSONFilePartJob::ReadJSONFilePartJob(const std::string& file_name, bool archive, unsigned int num_objects)
@@ -38,7 +40,7 @@ void ReadJSONFilePartJob::run ()
     while (!file_read_done_ && objects_.size() < num_objects_)
         readFilePart();
 
-    //cleanCommas ();
+    cleanCommas ();
 
     done_=true;
 
@@ -84,7 +86,7 @@ void ReadJSONFilePartJob::performInit ()
 
 void ReadJSONFilePartJob::readFilePart ()
 {
-    logdbg << "ReadJSONFilePartJob: readFilePart";
+    loginf << "ReadJSONFilePartJob: readFilePart: begin";
 
     if (archive_)
     {
@@ -92,6 +94,8 @@ void ReadJSONFilePartJob::readFilePart ()
         size_t size;
 
         int r;
+
+        size_t bytes_read_now = 0;
 
         while (entry_not_done_ || archive_read_next_header(a, &entry) == ARCHIVE_OK)
         {
@@ -119,6 +123,7 @@ void ReadJSONFilePartJob::readFilePart ()
 
                     tmp_stream_ << c;
                     ++bytes_read_;
+                    ++bytes_read_now;
 
                     if (c == '\n') // next lines after objects
                         continue;
@@ -131,7 +136,7 @@ void ReadJSONFilePartJob::readFilePart ()
 
                 }
 
-                if (objects_.size() > num_objects_) // parsed buffer, reached obj limit
+                if (objects_.size() > num_objects_) // parsed buffer, reached obj limit || (num_objects_ && bytes_read_now > 1e8)
                 {
                     entry_not_done_ = true;
                     return;
@@ -186,6 +191,8 @@ void ReadJSONFilePartJob::readFilePart ()
         assert (open_count_ == 0); // nothing left open
         assert (tmp_stream_.str().size() == 0 || tmp_stream_.str() == "\n");
     }
+
+    loginf << "ReadJSONFilePartJob: readFilePart: done";
 }
 
 void ReadJSONFilePartJob::resetDone ()
@@ -271,73 +278,19 @@ void ReadJSONFilePartJob::cleanCommas ()
 {
     loginf << "ReadJSONFilePartJob: cleanCommas: " << objects_.size() << " objects";
 
-    size_t size; //, org_size;
-    bool current_char_comma;
-    bool last_char_comma;
-    bool unwanted_commas_detected;
-    size_t index_commas_begin;
-    size_t cut_size;
+    std::regex commas_between_brackets("\\[(,|\n)+\\]");
+    std::regex multiple_commas(",\\n*,+");
+    std::regex stupid_commas_at_bracket_begin("\\[\\n*,+");
+    std::regex stupid_commas_at_bracket_end(",+\\n*\\]");
 
     for (auto& str_it : objects_)
     {
-        //tmp = str_it;
+        str_it = std::regex_replace(str_it, commas_between_brackets, "[]");
+        str_it = std::regex_replace(str_it, multiple_commas, ",");
+        str_it = std::regex_replace(str_it, stupid_commas_at_bracket_begin, "[");
+        str_it = std::regex_replace(str_it, stupid_commas_at_bracket_end, "]");
 
-        size = str_it.size();
-        //org_size = str_it.size();
-
-        //loginf << "ReadJSONFilePartJob: cleanCommas: cleaning " << size << " chars";
-
-        last_char_comma = false;
-        unwanted_commas_detected = false;
-
-        //loginf << "ReadJSONFilePartJob: cleanCommas: org '" << str_it << "'";
-
-        for (size_t cnt=0; cnt < size; ++cnt)
-        {
-            current_char_comma = str_it.at(cnt) == ',';
-
-            if (current_char_comma)
-            {
-                if (last_char_comma)
-                {
-                    if (!unwanted_commas_detected)
-                    {
-                        unwanted_commas_detected = true;
-
-                        assert (cnt != 0);
-                        index_commas_begin = cnt-1;
-                        loginf << "ReadJSONFilePartJob: cleanCommas: cut begin " << index_commas_begin;
-                    }
-                }
-            }
-            else if (unwanted_commas_detected) // current not commas, but previous
-            {
-                cut_size = cnt-index_commas_begin;
-
-                if (str_it.at(cnt) == '{')
-                    --cut_size;
-
-                loginf << "ReadJSONFilePartJob: cleanCommas: cutting "
-                       << index_commas_begin << " , " << cnt-index_commas_begin << ": between '"
-                       << str_it.substr(index_commas_begin-4, (cnt-index_commas_begin)+8)
-                       <<  "' exact '"
-                       << str_it.substr(index_commas_begin, cut_size) << "'";
-
-                str_it.erase(index_commas_begin, cut_size);
-                size = str_it.size();
-                unwanted_commas_detected = false;
-                cnt = index_commas_begin;
-
-                loginf << "ReadJSONFilePartJob: cleanCommas: after cut '"
-                       << str_it.substr(index_commas_begin-4, cut_size+8) << "'";
-            }
-
-            last_char_comma = current_char_comma;
-        }
-
-//        if (org_size != str_it.size())
-//            loginf << "ReadJSONFilePartJob: cleanCommas: cleaned org "  << org_size << " to "
-//                   << str_it.size() << " chars str " << str_it << "'";
-
+        // \[(,|\n)+\]   commas between brackets
+        // /,(?!["{}[\]])/g  multiple commas
     }
 }

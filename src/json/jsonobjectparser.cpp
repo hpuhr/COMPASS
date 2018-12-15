@@ -261,7 +261,8 @@ unsigned int JSONObjectParser::parseJSON (nlohmann::json& j, std::shared_ptr<Buf
             }
         }
         else
-            loginf << "found target report array '" << json_container_key_  << "' not found";
+            loginf << "JSONObjectParser: parseJSON: found target report array but '"
+                   << json_container_key_  << "' not found";
     }
     else
     {

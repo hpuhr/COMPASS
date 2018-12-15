@@ -16,7 +16,7 @@ JSONParseJob::~JSONParseJob()
 
 void JSONParseJob::run ()
 {
-    logdbg << "JSONParseJob: run: start";
+    loginf << "JSONParseJob: run: start with " << objects_.size() << " objects";
 
     started_ = true;
     for (auto& str_it : objects_)
@@ -33,7 +33,7 @@ void JSONParseJob::run ()
         ++objects_parsed_;
     }
 
-    logdbg << "JSONParseJob: run: done with " << objects_parsed_ << " objects";
+    loginf << "JSONParseJob: run: done with " << objects_parsed_ << " objects";
     done_ = true;
 }
 
