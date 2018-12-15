@@ -898,8 +898,8 @@ void DBObject::insertData (DBOVariableSet& list, std::shared_ptr<Buffer> buffer)
 {
     loginf << "DBObject " << name_ << ": insertData";
 
-    if (hasKeyVariable())
-        assert (list.hasVariable(getKeyVariable()));
+//    if (hasKeyVariable()) // not required since autoincrement
+//        assert (list.hasVariable(getKeyVariable()));
 
     assert (!insert_job_);
 

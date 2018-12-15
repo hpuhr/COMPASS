@@ -53,12 +53,6 @@ JSONObjectParserWidget::JSONObjectParserWidget(JSONObjectParser& parser, QWidget
     connect(json_value_edit_, SIGNAL(textEdited(const QString&)), this, SLOT(jsonValueChangedSlot()));
     grid->addWidget(json_value_edit_, row++, 1);
 
-    grid->addWidget(new QLabel("Override Key Variable"));
-
-    override_key_variable_check_ = new QCheckBox ();
-    connect(override_key_variable_check_, SIGNAL(stateChanged(int)), this, SLOT(overrideKeyVariabledChangedSlot()));
-    grid->addWidget(override_key_variable_check_, row++, 1);
-
     grid->addWidget(new QLabel("Override Data Source"));
 
     override_data_source_check_ = new QCheckBox ();
@@ -105,7 +99,6 @@ void JSONObjectParserWidget::update ()
     assert (json_container_key_edit_);
     assert (json_key_edit_);
     assert (json_value_edit_);
-    assert (override_key_variable_check_);
     assert (override_data_source_check_);
     assert (data_source_variable_name_edit_);
 
@@ -113,9 +106,6 @@ void JSONObjectParserWidget::update ()
     json_key_edit_->setText(parser_->JSONKey().c_str());
     json_value_edit_->setText(parser_->JSONValue().c_str());
 
-    override_key_variable_check_->setChecked(parser_->overrideKeyVariable());
-
-    override_data_source_check_->setChecked(parser_->overrideDataSource());
     data_source_variable_name_edit_->setText(parser_->dataSourceVariableName().c_str());
 }
 
@@ -255,14 +245,6 @@ void JSONObjectParserWidget::jsonValueChangedSlot ()
     assert (json_value_edit_);
 
     parser_->JSONValue(json_value_edit_->text().toStdString());
-}
-
-void JSONObjectParserWidget::overrideKeyVariabledChangedSlot ()
-{
-    assert (parser_);
-    assert (override_key_variable_check_);
-
-    parser_->overrideKeyVariable(override_key_variable_check_->isChecked());
 }
 
 void JSONObjectParserWidget::overrideDataSourceChangedSlot ()

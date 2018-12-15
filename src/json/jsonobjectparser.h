@@ -48,9 +48,6 @@ public:
 
     unsigned int parseJSON (nlohmann::json& j, std::shared_ptr<Buffer> buffer) const;
 
-    bool overrideKeyVariable() const;
-    void overrideKeyVariable(bool override);
-
     const DBOVariableSet& variableList() const;
 
     bool overrideDataSource() const;
@@ -80,15 +77,10 @@ private:
 
     DBOVariableSet var_list_;
 
-    bool override_key_variable_ {false};
-    bool has_key_mapping_ {false};
-    bool has_key_variable_ {false};
-
     bool override_data_source_ {false};
     std::string data_source_variable_name_;
 
     bool initialized_ {false};
-    DBOVariable* key_variable_ {nullptr};
 
     bool not_parse_all_ {false};
 

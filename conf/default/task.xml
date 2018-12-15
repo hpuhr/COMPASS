@@ -10,8 +10,8 @@
         <ParameterFloat pos_filter_lon_min="-180.00000000"/>
         <ParameterFloat time_filter_max="86400.00000000"/>
         <ParameterFloat time_filter_min="0.00000000"/>
-        <ParameterString current_filename="/home/sk/data/json_10m.zip"/>
-        <ParameterString current_schema="SDDL"/>
+        <ParameterString current_filename="/home/sk/data/2017-11-30-small.zip"/>
+        <ParameterString current_schema="ADSBExchange"/>
         <ParameterString db_object_str="ADSB"/>
         <ParameterString last_filename="/home/sk/data/json_50k.zip"/>
         <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdata2017-11-30-0401Z.json">
@@ -48,7 +48,6 @@
             <ParameterString name="ADSBExchange"/>
             <Configuration class_id="JSONObjectParser" instance_id="JSONObjectParserADSB0">
                 <ParameterBool override_data_source="1"/>
-                <ParameterBool override_key_variable="1"/>
                 <ParameterString data_source_variable_name="ds_id"/>
                 <ParameterString db_object_name="ADSB"/>
                 <ParameterString json_container_key="acList"/>
@@ -137,7 +136,6 @@
             <ParameterString name="SDDL"/>
             <Configuration class_id="JSONObjectParser" instance_id="JSONObjectParserADSB0">
                 <ParameterBool override_data_source="0"/>
-                <ParameterBool override_key_variable="0"/>
                 <ParameterString data_source_variable_name="ds_id"/>
                 <ParameterString db_object_name="ADSB"/>
                 <ParameterString json_container_key=""/>
@@ -256,7 +254,6 @@
             </Configuration>
             <Configuration class_id="JSONObjectParser" instance_id="JSONObjectParserMLAT0">
                 <ParameterBool override_data_source="0"/>
-                <ParameterBool override_key_variable="0"/>
                 <ParameterString data_source_variable_name="ds_id"/>
                 <ParameterString db_object_name="MLAT"/>
                 <ParameterString json_container_key=""/>
@@ -386,7 +383,6 @@
             </Configuration>
             <Configuration class_id="JSONObjectParser" instance_id="JSONObjectParserRadar0">
                 <ParameterBool override_data_source="0"/>
-                <ParameterBool override_key_variable="0"/>
                 <ParameterString data_source_variable_name="ds_id"/>
                 <ParameterString db_object_name="Radar"/>
                 <ParameterString json_container_key=""/>
@@ -516,7 +512,6 @@
             </Configuration>
             <Configuration class_id="JSONObjectParser" instance_id="JSONObjectParserTracker0">
                 <ParameterBool override_data_source="0"/>
-                <ParameterBool override_key_variable="0"/>
                 <ParameterString data_source_variable_name="ds_id"/>
                 <ParameterString db_object_name="Tracker"/>
                 <ParameterString json_container_key=""/>

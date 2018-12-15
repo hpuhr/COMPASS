@@ -20,8 +20,6 @@ JSONObjectParser::JSONObjectParser (const std::string& class_id, const std::stri
     registerParameter("json_key", &json_key_, "*");
     registerParameter("json_value", &json_value_, "");
 
-    registerParameter("override_key_variable", &override_key_variable_, false);
-
     registerParameter("override_data_source", &override_data_source_, false);
     registerParameter("data_source_variable_name", &data_source_variable_name_, "");
 
@@ -43,15 +41,10 @@ JSONObjectParser& JSONObjectParser::operator=(JSONObjectParser&& other)
 
     var_list_ = other.var_list_;
 
-    override_key_variable_ = other.override_key_variable_;
-    has_key_mapping_ = other.has_key_mapping_;
-    has_key_variable_ = other.has_key_variable_;
-
     override_data_source_ = other.override_data_source_;
     data_source_variable_name_ = other.data_source_variable_name_;
 
     initialized_ = other.initialized_;
-    key_variable_ = other.key_variable_;
 
     not_parse_all_ = other.not_parse_all_;
 
@@ -60,7 +53,6 @@ JSONObjectParser& JSONObjectParser::operator=(JSONObjectParser&& other)
     other.configuration().updateParameterPointer ("db_object_name", &db_object_name_);
     other.configuration().updateParameterPointer ("json_key", &json_key_);
     other.configuration().updateParameterPointer ("json_value", &json_value_);
-    other.configuration().updateParameterPointer ("override_key_variable", &override_key_variable_);
     other.configuration().updateParameterPointer ("override_data_source", &override_data_source_);
 
     widget_ = std::move(other.widget_);
@@ -75,17 +67,6 @@ void JSONObjectParser::generateSubConfigurable (const std::string& class_id, con
 {
     if (class_id == "JSONDataMapping")
     {
-//        unsigned int id = configuration().getSubConfiguration(
-//                    class_id, instance_id).getParameterConfigValueUint("id");
-
-//        assert (stored_data_sources_.find (id) == stored_data_sources_.end());
-
-//        loginf << "DBObject: generateSubConfigurable: generating stored DS " << instance_id << " with id " << id;
-
-//        stored_data_sources_.emplace(std::piecewise_construct,
-//                                     std::forward_as_tuple(id),  // args for key
-//                                     std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
-
         data_mappings_.emplace_back (class_id, instance_id, *this);
     }
     else
@@ -170,37 +151,9 @@ void JSONObjectParser::initialize ()
             assert (mapping.variable().hasCurrentDBColumn());
             list_.addProperty(mapping.variable().name(), mapping.variable().dataType());
             var_list_.add(mapping.variable());
-
-            if (mapping.variable().isKey())
-            {
-                assert (mapping.variable().dataType() == PropertyDataType::INT);
-                has_key_mapping_ = true;
-            }
         }
 
-        if (!has_key_mapping_ && db_object_->hasKeyVariable()) // first time only, add key variable
-            has_key_variable_ = true;
-        else
-            has_key_variable_ = has_key_mapping_; // couldn't be added, can only have if mapped one exists
-
-        if (has_key_variable_ && key_variable_ == nullptr)
-        {
-            key_variable_ = &db_object_->getKeyVariable();
-            assert (key_variable_);
-            assert (key_variable_->dataType() == PropertyDataType::INT);
-            if (!list_.hasProperty(key_variable_->name()))
-            {
-                list_.addProperty(key_variable_->name(), key_variable_->dataType());
-                var_list_.add(*key_variable_);
-            }
-        }
-
-        if (override_key_variable_ && !has_key_variable_)
-        {
-            logwrn << "JsonMapping: initialize: override key set but no key variable exists, disabling override";
-            override_key_variable_ = false;
-        }
-        else
+        if (override_data_source_)
         {
             assert (data_source_variable_name_.size());
             assert (db_object_->hasVariable(data_source_variable_name_));
@@ -446,20 +399,6 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
             ds_id_vector.set(cnt, 0);
     }
 
-    if (override_key_variable_)
-    {
-        loginf << "JsonMapping: transformBuffer: overiding key variable for object " << db_object_->name();
-        assert (key_begin >= 0);
-        size_t key_cnt = key_begin;
-        assert (key_variable_);
-        assert (buffer->has<int>(key_variable_->name()));
-        NullableVector<int>& key_vector = buffer->get<int> (key_variable_->name());
-        size_t size = buffer->size();
-
-        for (size_t cnt=0; cnt < size; ++cnt)
-            key_vector.set(cnt, key_cnt++);
-    }
-
     for (auto& data_it : data_mappings_)
     {
         if (data_it.dimension() != data_it.variable().dimension())
@@ -562,18 +501,6 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
             }
         }
     }
-}
-
-bool JSONObjectParser::overrideKeyVariable() const
-{
-    return override_key_variable_;
-}
-
-void JSONObjectParser::overrideKeyVariable(bool override)
-{
-    loginf << "JSONObjectParser: overrideKeyVariable: " << override;
-
-    override_key_variable_ = override;
 }
 
 const DBOVariableSet& JSONObjectParser::variableList() const
