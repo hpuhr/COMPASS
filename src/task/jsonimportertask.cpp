@@ -665,7 +665,7 @@ void JSONImporterTask::insertDoneSlot (DBObject& object)
 
 void JSONImporterTask::readJSONFilePartDoneSlot ()
 {
-    logdbg << "JSONImporterTask: readJSONFilePartDoneSlot";
+    loginf << "JSONImporterTask: readJSONFilePartDoneSlot";
 
     //ReadJSONFilePartJob* read_job = dynamic_cast<ReadJSONFilePartJob*>(QObject::sender());
     assert (read_json_job_);

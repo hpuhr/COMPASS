@@ -111,10 +111,17 @@ std::string SQLGenerator::getCreateTableStatement (const DBTable& table)
 //                data_type = "INTEGER";
 //        }
 
-        ss << " " << data_type;
-
         if (col_it.second->isKey())
-            ss << " PRIMARY KEY NOT NULL";
+        {
+            if (data_type == "int")
+                ss << " INTEGER PRIMARY KEY AUTOINCREMENT";
+            else
+                ss << " " << data_type << " PRIMARY KEY";
+
+            ss << " NOT NULL";
+        }
+        else
+            ss << " " << data_type;
 
         if (cnt != table.columns().size()-1)
             ss << ",";

@@ -47,6 +47,7 @@ protected:
 
     size_t bytes_to_read_ {0};
     size_t bytes_read_ {0};
+    size_t bytes_read_tmp_ {0};
     std::vector<std::string> objects_;
 
     void performInit ();

@@ -30,6 +30,7 @@ void ReadJSONFilePartJob::run ()
     assert (!done_);
     assert (!file_read_done_);
     assert (!objects_.size());
+    assert (!bytes_read_tmp_);
 
     if (!init_performed_)
     {
@@ -37,8 +38,8 @@ void ReadJSONFilePartJob::run ()
         assert (init_performed_);
     }
 
-    while (!file_read_done_ && objects_.size() < num_objects_)
-        readFilePart();
+    //while (!file_read_done_ && objects_.size() < num_objects_)
+    readFilePart();
 
     cleanCommas ();
 
@@ -95,8 +96,6 @@ void ReadJSONFilePartJob::readFilePart ()
 
         int r;
 
-        size_t bytes_read_now = 0;
-
         while (entry_not_done_ || archive_read_next_header(a, &entry) == ARCHIVE_OK)
         {
             loginf << "ReadJSONFilePartJob: readFilePart: parsing archive file: "
@@ -107,7 +106,10 @@ void ReadJSONFilePartJob::readFilePart ()
                 r = archive_read_data_block(a, &buff, &size, &offset);
 
                 if (r == ARCHIVE_EOF)
+                {
+                    entry_not_done_ = false;
                     break;
+                }
                 if (r != ARCHIVE_OK)
                     throw std::runtime_error("ReadJSONFilePartJob: readFilePart: archive error: "
                                              +std::string(archive_error_string(a)));
@@ -123,7 +125,7 @@ void ReadJSONFilePartJob::readFilePart ()
 
                     tmp_stream_ << c;
                     ++bytes_read_;
-                    ++bytes_read_now;
+                    ++bytes_read_tmp_;
 
                     if (c == '\n') // next lines after objects
                         continue;
@@ -136,8 +138,11 @@ void ReadJSONFilePartJob::readFilePart ()
 
                 }
 
-                if (objects_.size() > num_objects_) // parsed buffer, reached obj limit || (num_objects_ && bytes_read_now > 1e8)
+                if (objects_.size() > num_objects_ || (objects_.size() && bytes_read_tmp_ > 1e7))
+                    // parsed buffer, reached obj limit
                 {
+                    //|| (objects_.size() && bytes_read_tmp_ > 1e7)
+                    loginf << "UGA returning " << bytes_read_tmp_;
                     entry_not_done_ = true;
                     return;
                 }
@@ -200,6 +205,7 @@ void ReadJSONFilePartJob::resetDone ()
     assert (!file_read_done_);
     assert (!objects_.size());
     done_ = false; // yet another part
+    bytes_read_tmp_ = 0;
 }
 
 bool ReadJSONFilePartJob::fileReadDone() const
