@@ -196,7 +196,7 @@ template <class T> void NullableVector<T>::setFromFormat (size_t index, const st
     else if (format == "epoch_tod_s")
     {
         QDateTime date_time;
-        date_time.setSecsSinceEpoch(std::stoul(value_str));
+        date_time.setMSecsSinceEpoch(1000*std::stoul(value_str));
         value = Utils::String::timeFromString(date_time.toString("hh:mm:ss.zzz").toStdString());
     }
     else
