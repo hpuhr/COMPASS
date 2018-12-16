@@ -1,55 +1,6 @@
 <Configuration class_id="TaskManager" instance_id="TaskManager0">
     <Configuration class_id="JSONImporterTask" instance_id="JSONImporterTask">
-        <ParameterBool join_data_sources="0"/>
-        <ParameterBool separate_mlat_data="0"/>
-        <ParameterBool use_position_filter="0"/>
-        <ParameterBool use_time_filter="0"/>
-        <ParameterFloat pos_filter_lat_max="90.00000000"/>
-        <ParameterFloat pos_filter_lat_min="-90.00000000"/>
-        <ParameterFloat pos_filter_lon_max="180.00000000"/>
-        <ParameterFloat pos_filter_lon_min="-180.00000000"/>
-        <ParameterFloat time_filter_max="86400.00000000"/>
-        <ParameterFloat time_filter_min="0.00000000"/>
-        <ParameterString current_filename="/home/sk/data/states_2018-12-10-11.json.gz"/>
         <ParameterString current_schema="OpenSkyNetwork"/>
-        <ParameterString db_object_str="ADSB"/>
-        <ParameterString last_filename="/home/sk/data/json_50k.zip"/>
-        <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdata2017-11-30-0525Z.json">
-            <ParameterString name="/home/sk/data/2017-11-30-0525Z.json"/>
-        </Configuration>
-        <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdata2017-11-30-small.zip">
-            <ParameterString name="/home/sk/data/2017-11-30-small.zip"/>
-        </Configuration>
-        <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdata2017-11-30-smallest.zip">
-            <ParameterString name="/home/sk/data/2017-11-30-smallest.zip"/>
-        </Configuration>
-        <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdatajson_10k.zip">
-            <ParameterString name="/home/sk/data/json_10k.zip"/>
-        </Configuration>
-        <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdatajson_10m.zip">
-            <ParameterString name="/home/sk/data/json_10m.zip"/>
-        </Configuration>
-        <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdatajson_1m.zip">
-            <ParameterString name="/home/sk/data/json_1m.zip"/>
-        </Configuration>
-        <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdatajson_50k.zip">
-            <ParameterString name="/home/sk/data/json_50k.zip"/>
-        </Configuration>
-        <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdatajson_all.zip">
-            <ParameterString name="/home/sk/data/json_all.zip"/>
-        </Configuration>
-        <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdatastates_2018-12-10-11.json">
-            <ParameterString name="/home/sk/data/states_2018-12-10-11.json"/>
-        </Configuration>
-        <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdatastates_2018-12-10-11.json.gz">
-            <ParameterString name="/home/sk/data/states_2018-12-10-11.json.gz"/>
-        </Configuration>
-        <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdatastates_2018-12-10-11_small.json">
-            <ParameterString name="/home/sk/data/states_2018-12-10-11_small.json"/>
-        </Configuration>
-        <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdatatext.json">
-            <ParameterString name="/home/sk/data/text.json"/>
-        </Configuration>
         <Configuration class_id="JSONParsingSchema" instance_id="JSONParsingSchemaADSBExchange0">
             <ParameterString name="ADSBExchange"/>
             <Configuration class_id="JSONObjectParser" instance_id="JSONObjectParserADSB0">
