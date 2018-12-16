@@ -87,6 +87,11 @@ std::string& JSONDataMapping::formatDataTypeRef()
     return format_data_type_;
 }
 
+bool JSONDataMapping::initialized() const
+{
+    return initialized_;
+}
+
 DBOVariable& JSONDataMapping::variable() const
 {
     assert (initialized_);

@@ -68,6 +68,8 @@ public:
 
     std::string dbObjectName() const;
 
+    void setMappingActive (JSONDataMapping& mapping, bool active);
+
 private:
     std::string db_object_name_;
     DBObject* db_object_ {nullptr};

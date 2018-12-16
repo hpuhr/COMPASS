@@ -101,9 +101,14 @@ void DBOVariableSet::removeVariableAt (unsigned int index)
 {
     assert (index < set_.size());
 
-    set_.erase ( set_.begin()+index );
+    set_.erase (set_.begin()+index);
 
     changed_=true;
+}
+
+void DBOVariableSet::removeVariable (const DBOVariable &var)
+{
+    set_.erase(std::remove(set_.begin(), set_.end(), &var), set_.end());
 }
 
 //DBOVariableSet *DBOVariableSet::getFor (const std::string &dbo_type)

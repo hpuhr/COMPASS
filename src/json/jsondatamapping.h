@@ -355,6 +355,8 @@ public:
 
     std::string& formatDataTypeRef();
 
+    bool initialized() const;
+
 private:
     bool initialized_ {false};
 

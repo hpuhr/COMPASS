@@ -146,9 +146,15 @@ void JSONObjectParser::initialize ()
     {
         for (auto& mapping : data_mappings_)
         {
+            if (!mapping.active())
+            {
+                assert (!mapping.mandatory());
+                continue;
+            }
+
             mapping.initializeIfRequired();
 
-            assert (mapping.variable().hasCurrentDBColumn());
+            //assert (mapping.variable().hasCurrentDBColumn());
             list_.addProperty(mapping.variable().name(), mapping.variable().dataType());
             var_list_.add(mapping.variable());
         }
@@ -262,91 +268,97 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
 
     bool mandatory_missing;
 
-    for (const auto& data_it : data_mappings_)
+    for (const auto& map_it : data_mappings_)
     {
+        if (!map_it.active())
+        {
+            assert (!map_it.mandatory());
+            continue;
+        }
+
         //logdbg << "setting data mapping key " << data_it.jsonKey();
 
-        data_type = data_it.variable().dataType();
-        current_var_name = data_it.variable().name();
+        data_type = map_it.variable().dataType();
+        current_var_name = map_it.variable().name();
 
         switch (data_type)
         {
         case PropertyDataType::BOOL:
         {
-            logdbg << "bool " << current_var_name << " format '" << data_it.jsonValueFormat() << "'";
+            logdbg << "bool " << current_var_name << " format '" << map_it.jsonValueFormat() << "'";
             assert (buffer->has<bool>(current_var_name));
-            mandatory_missing = data_it.findAndSetValue (tr, buffer->get<bool> (current_var_name), row_cnt);
+            mandatory_missing = map_it.findAndSetValue (tr, buffer->get<bool> (current_var_name), row_cnt);
 
             break;
         }
         case PropertyDataType::CHAR:
         {
-            logdbg << "char " << current_var_name << " format '" << data_it.jsonValueFormat() << "'";
+            logdbg << "char " << current_var_name << " format '" << map_it.jsonValueFormat() << "'";
             assert (buffer->has<char>(current_var_name));
-            mandatory_missing = data_it.findAndSetValue (tr, buffer->get<char> (current_var_name), row_cnt);
+            mandatory_missing = map_it.findAndSetValue (tr, buffer->get<char> (current_var_name), row_cnt);
 
             break;
         }
         case PropertyDataType::UCHAR:
         {
-            logdbg << "uchar " << current_var_name << " format '" << data_it.jsonValueFormat() << "'";
+            logdbg << "uchar " << current_var_name << " format '" << map_it.jsonValueFormat() << "'";
             assert (buffer->has<unsigned char>(current_var_name));
-            mandatory_missing = data_it.findAndSetValue (tr, buffer->get<unsigned char> (current_var_name), row_cnt);
+            mandatory_missing = map_it.findAndSetValue (tr, buffer->get<unsigned char> (current_var_name), row_cnt);
 
             break;
         }
         case PropertyDataType::INT:
         {
-            logdbg << "int " << current_var_name << " format '" << data_it.jsonValueFormat() << "'";
+            logdbg << "int " << current_var_name << " format '" << map_it.jsonValueFormat() << "'";
             assert (buffer->has<int>(current_var_name));
-            mandatory_missing = data_it.findAndSetValue (tr, buffer->get<int> (current_var_name), row_cnt);
+            mandatory_missing = map_it.findAndSetValue (tr, buffer->get<int> (current_var_name), row_cnt);
 
             break;
         }
         case PropertyDataType::UINT:
         {
-            logdbg << "uint " << current_var_name << " format '" << data_it.jsonValueFormat() << "'";
+            logdbg << "uint " << current_var_name << " format '" << map_it.jsonValueFormat() << "'";
             assert (buffer->has<unsigned int>(current_var_name));
-            mandatory_missing = data_it.findAndSetValue (tr, buffer->get<unsigned int> (current_var_name), row_cnt);
+            mandatory_missing = map_it.findAndSetValue (tr, buffer->get<unsigned int> (current_var_name), row_cnt);
 
             break;
         }
         case PropertyDataType::LONGINT:
         {
-            logdbg << "long " << current_var_name << " format '" << data_it.jsonValueFormat() << "'";
+            logdbg << "long " << current_var_name << " format '" << map_it.jsonValueFormat() << "'";
             assert (buffer->has<long int>(current_var_name));
-            mandatory_missing = data_it.findAndSetValue (tr, buffer->get<long int> (current_var_name), row_cnt);
+            mandatory_missing = map_it.findAndSetValue (tr, buffer->get<long int> (current_var_name), row_cnt);
 
             break;
         }
         case PropertyDataType::ULONGINT:
         {
-            logdbg << "ulong " << current_var_name << " format '" << data_it.jsonValueFormat() << "'";
+            logdbg << "ulong " << current_var_name << " format '" << map_it.jsonValueFormat() << "'";
             assert (buffer->has<unsigned long>(current_var_name));
-            mandatory_missing = data_it.findAndSetValue (tr, buffer->get<unsigned long> (current_var_name), row_cnt);
+            mandatory_missing = map_it.findAndSetValue (tr, buffer->get<unsigned long> (current_var_name), row_cnt);
 
             break;
         }
         case PropertyDataType::FLOAT:
         {
-            logdbg << "float " << current_var_name << " format '" << data_it.jsonValueFormat() << "'";
+            logdbg << "float " << current_var_name << " format '" << map_it.jsonValueFormat() << "'";
             assert (buffer->has<float>(current_var_name));
-            mandatory_missing = data_it.findAndSetValue (tr, buffer->get<float> (current_var_name), row_cnt);
+            mandatory_missing = map_it.findAndSetValue (tr, buffer->get<float> (current_var_name), row_cnt);
             break;
         }
         case PropertyDataType::DOUBLE:
         {
-            logdbg << "double " << current_var_name << " format '" << data_it.jsonValueFormat() << "'";
+            logdbg << "double " << current_var_name << " format '" << map_it.jsonValueFormat() << "'";
             assert (buffer->has<double>(current_var_name));
-            mandatory_missing = data_it.findAndSetValue (tr, buffer->get<double> (current_var_name), row_cnt);
+            mandatory_missing = map_it.findAndSetValue (tr, buffer->get<double> (current_var_name), row_cnt);
 
             break;
         }
         case PropertyDataType::STRING:
         {
-            logdbg << "string " << current_var_name << " format '" << data_it.jsonValueFormat() << "'";
+            logdbg << "string " << current_var_name << " format '" << map_it.jsonValueFormat() << "'";
             assert (buffer->has<std::string>(current_var_name));
-            mandatory_missing = data_it.findAndSetValue (tr, buffer->get<std::string> (current_var_name), row_cnt);
+            mandatory_missing = map_it.findAndSetValue (tr, buffer->get<std::string> (current_var_name), row_cnt);
 
             break;
         }
@@ -378,6 +390,15 @@ bool JSONObjectParser::hasMapping (unsigned int index) const
 void JSONObjectParser::removeMapping (unsigned int index)
 {
     assert (hasMapping(index));
+
+    JSONDataMapping& mapping = data_mappings_.at(index);
+
+    if (mapping.initialized())
+    {
+        list_.removeProperty(mapping.variable().name());
+        var_list_.removeVariable(mapping.variable());
+    }
+
     data_mappings_.erase(data_mappings_.begin()+index);
 }
 
@@ -549,6 +570,25 @@ JSONObjectParserWidget* JSONObjectParser::widget ()
 std::string JSONObjectParser::dbObjectName() const
 {
     return db_object_name_;
+}
+
+void JSONObjectParser::setMappingActive (JSONDataMapping& mapping, bool active)
+{
+    if (!mapping.initialized())
+        mapping.initializeIfRequired();
+
+    if (active)
+    {
+        list_.addProperty(mapping.variable().name(), mapping.variable().dataType());
+        var_list_.add(mapping.variable());
+    }
+    else
+    {
+        list_.removeProperty(mapping.variable().name());
+        var_list_.removeVariable(mapping.variable());
+    }
+
+    mapping.active(active);
 }
 
 

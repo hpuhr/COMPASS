@@ -15,6 +15,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QScrollArea>
+#include <QMessageBox>
 
 using namespace Utils;
 
@@ -287,7 +288,20 @@ void JSONObjectParserWidget::mappingActiveChangedSlot()
     JSONDataMapping* mapping = data.value<JSONDataMapping*>();
     assert (mapping);
 
-    mapping->active(widget->checkState() == Qt::Checked);
+    if (mapping->mandatory() && widget->checkState() != Qt::Checked)
+    {
+        QMessageBox m_warning (QMessageBox::Warning, "Deactivation failed",
+                               "Deactivation of mandatory variables is not allowed.",
+                               QMessageBox::Ok);
+
+        m_warning.exec();
+
+        widget->setChecked(true);
+
+        return;
+    }
+
+    parser_->setMappingActive(*mapping, widget->checkState() == Qt::Checked);
 }
 
 void JSONObjectParserWidget::mappingKeyChangedSlot()

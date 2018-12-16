@@ -52,6 +52,7 @@ public:
   //bool addOnly (DBOVariableSet &set, const std::string &dbo_type);
   /// @brief Removes variable at a given index
   void removeVariableAt (unsigned int index);
+  void removeVariable (const DBOVariable &var);
   /// @brief Intersects with another set of variables
   bool intersect (DBOVariableSet &set);
   /// @brief Removes all variables
