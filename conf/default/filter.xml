@@ -11,7 +11,7 @@
             <ParameterBool op_and="1"/>
             <ParameterString operator="&gt;="/>
             <ParameterString reset_value="MIN"/>
-            <ParameterString value="-400"/>
+            <ParameterString value="-1197"/>
             <ParameterString variable_dbo_name="Meta"/>
             <ParameterString variable_name="modec_code_ft"/>
         </Configuration>
@@ -20,7 +20,7 @@
             <ParameterBool op_and="1"/>
             <ParameterString operator="&lt;="/>
             <ParameterString reset_value="MAX"/>
-            <ParameterString value="3684652"/>
+            <ParameterString value="126797"/>
             <ParameterString variable_dbo_name="Meta"/>
             <ParameterString variable_name="modec_code_ft"/>
         </Configuration>
@@ -58,7 +58,7 @@
             <ParameterBool op_and="1"/>
             <ParameterString operator="&gt;="/>
             <ParameterString reset_value="-43.648169566"/>
-            <ParameterString value="40"/>
+            <ParameterString value="-43.648169566"/>
             <ParameterString variable_dbo_name="Meta"/>
             <ParameterString variable_name="pos_lat_deg"/>
         </Configuration>
@@ -67,7 +67,7 @@
             <ParameterBool op_and="1"/>
             <ParameterString operator="&lt;="/>
             <ParameterString reset_value="68.0724334717"/>
-            <ParameterString value="60"/>
+            <ParameterString value="68.0724334717"/>
             <ParameterString variable_dbo_name="Meta"/>
             <ParameterString variable_name="pos_lat_deg"/>
         </Configuration>
@@ -76,7 +76,7 @@
             <ParameterBool op_and="1"/>
             <ParameterString operator="&gt;="/>
             <ParameterString reset_value="-157.4582330112"/>
-            <ParameterString value="0"/>
+            <ParameterString value="-157.4582330112"/>
             <ParameterString variable_dbo_name="Meta"/>
             <ParameterString variable_name="pos_long_deg"/>
         </Configuration>
@@ -85,7 +85,7 @@
             <ParameterBool op_and="1"/>
             <ParameterString operator="&lt;="/>
             <ParameterString reset_value="175.067021796"/>
-            <ParameterString value="30"/>
+            <ParameterString value="175.067021796"/>
             <ParameterString variable_dbo_name="Meta"/>
             <ParameterString variable_name="pos_long_deg"/>
         </Configuration>
@@ -123,7 +123,7 @@
             <ParameterBool op_and="1"/>
             <ParameterString operator="&gt;="/>
             <ParameterString reset_value="MIN"/>
-            <ParameterString value="05:04:08.000"/>
+            <ParameterString value="12:00:00.000"/>
             <ParameterString variable_dbo_name="Meta"/>
             <ParameterString variable_name="tod"/>
         </Configuration>
@@ -132,7 +132,7 @@
             <ParameterBool op_and="1"/>
             <ParameterString operator="&lt;="/>
             <ParameterString reset_value="MAX"/>
-            <ParameterString value="06:32:34.000"/>
+            <ParameterString value="12:59:50.000"/>
             <ParameterString variable_dbo_name="Meta"/>
             <ParameterString variable_name="tod"/>
         </Configuration>

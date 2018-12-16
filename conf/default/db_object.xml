@@ -1,5 +1,5 @@
 <Configuration class_id="DBObjectManager" instance_id="DBObjectManager0">
-    <ParameterBool use_filters="0"/>
+    <ParameterBool use_filters="1"/>
     <ParameterBool use_limit="0"/>
     <ParameterBool use_order="1"/>
     <ParameterBool use_order_ascending="1"/>
@@ -603,10 +603,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="ADSB"/>
             <ParameterString description="Geometric altitude, 3D Height"/>
-            <ParameterString dimension=""/>
+            <ParameterString dimension="Height"/>
             <ParameterString name="alt_geo_ft"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
+            <ParameterString unit="Feet"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBalt_geo_ft0">
                 <ParameterString meta_table="ADSB"/>
                 <ParameterString schema="SCDB"/>
@@ -13147,10 +13147,10 @@
             <ParameterString data_type_str="DOUBLE"/>
             <ParameterString dbo_name="Tracker"/>
             <ParameterString description="Calculated geometric altitude  [I030/130,I062/130 dependend on I062/080 SRC]"/>
-            <ParameterString dimension=""/>
+            <ParameterString dimension="Height"/>
             <ParameterString name="alt_geo_ft"/>
             <ParameterString representation_str="STANDARD"/>
-            <ParameterString unit=""/>
+            <ParameterString unit="Feet"/>
             <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackeralt_geo_ft0">
                 <ParameterString meta_table="Tracker"/>
                 <ParameterString schema="SCDB"/>

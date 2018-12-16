@@ -18,6 +18,10 @@
             <ParameterDouble factor="0.010000000000"/>
             <ParameterString definition=""/>
         </Configuration>
+        <Configuration class_id="Unit" instance_id="Meter">
+            <ParameterDouble factor="0.304800000000"/>
+            <ParameterString definition=""/>
+        </Configuration>
     </Configuration>
     <Configuration class_id="Dimension" instance_id="Length">
         <Configuration class_id="Unit" instance_id="Kilometer">

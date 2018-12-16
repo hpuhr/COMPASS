@@ -10,15 +10,12 @@
         <ParameterFloat pos_filter_lon_min="-180.00000000"/>
         <ParameterFloat time_filter_max="86400.00000000"/>
         <ParameterFloat time_filter_min="0.00000000"/>
-        <ParameterString current_filename="/home/sk/data/states_2018-12-10-11.json"/>
+        <ParameterString current_filename="/home/sk/data/states_2018-12-10-11.json.gz"/>
         <ParameterString current_schema="OpenSkyNetwork"/>
         <ParameterString db_object_str="ADSB"/>
         <ParameterString last_filename="/home/sk/data/json_50k.zip"/>
-        <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdata2017-11-30-0401Z.json">
-            <ParameterString name="/home/sk/data/2017-11-30-0401Z.json"/>
-        </Configuration>
-        <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdata2017-11-30-0804Z.json">
-            <ParameterString name="/home/sk/data/2017-11-30-0804Z.json"/>
+        <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdata2017-11-30-0525Z.json">
+            <ParameterString name="/home/sk/data/2017-11-30-0525Z.json"/>
         </Configuration>
         <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdata2017-11-30-small.zip">
             <ParameterString name="/home/sk/data/2017-11-30-small.zip"/>
@@ -43,6 +40,9 @@
         </Configuration>
         <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdatastates_2018-12-10-11.json">
             <ParameterString name="/home/sk/data/states_2018-12-10-11.json"/>
+        </Configuration>
+        <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdatastates_2018-12-10-11.json.gz">
+            <ParameterString name="/home/sk/data/states_2018-12-10-11.json.gz"/>
         </Configuration>
         <Configuration class_id="JSONFile" instance_id="JSONFilehomeskdatastates_2018-12-10-11_small.json">
             <ParameterString name="/home/sk/data/states_2018-12-10-11_small.json"/>
@@ -104,7 +104,7 @@
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping4">
-                    <ParameterBool active="0"/>
+                    <ParameterBool active="1"/>
                     <ParameterBool mandatory="1"/>
                     <ParameterString db_object_name="ADSB"/>
                     <ParameterString dbovariable_name="pos_lat_deg"/>
@@ -115,7 +115,7 @@
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping5">
-                    <ParameterBool active="0"/>
+                    <ParameterBool active="1"/>
                     <ParameterBool mandatory="1"/>
                     <ParameterString db_object_name="ADSB"/>
                     <ParameterString dbovariable_name="pos_long_deg"/>
@@ -126,15 +126,15 @@
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping6">
-                    <ParameterBool active="0"/>
+                    <ParameterBool active="1"/>
                     <ParameterBool mandatory="0"/>
                     <ParameterString db_object_name="ADSB"/>
                     <ParameterString dbovariable_name="tod"/>
-                    <ParameterString dimension=""/>
+                    <ParameterString dimension="Time"/>
                     <ParameterString format_data_type="STRING"/>
                     <ParameterString json_key="PosTime"/>
                     <ParameterString json_value_format="epoch_tod_ms"/>
-                    <ParameterString unit=""/>
+                    <ParameterString unit="Second"/>
                 </Configuration>
             </Configuration>
         </Configuration>
@@ -148,7 +148,7 @@
                 <ParameterString json_key="*"/>
                 <ParameterString json_value="*"/>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping0">
-                    <ParameterBool active="0"/>
+                    <ParameterBool active="1"/>
                     <ParameterBool mandatory="0"/>
                     <ParameterString db_object_name="ADSB"/>
                     <ParameterString dbovariable_name="target_addr"/>
@@ -159,7 +159,7 @@
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping1">
-                    <ParameterBool active="0"/>
+                    <ParameterBool active="1"/>
                     <ParameterBool mandatory="1"/>
                     <ParameterString db_object_name="ADSB"/>
                     <ParameterString dbovariable_name="pos_lat_deg"/>
@@ -170,7 +170,7 @@
                     <ParameterString unit="Degree"/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping2">
-                    <ParameterBool active="0"/>
+                    <ParameterBool active="1"/>
                     <ParameterBool mandatory="1"/>
                     <ParameterString db_object_name="ADSB"/>
                     <ParameterString dbovariable_name="pos_long_deg"/>
@@ -181,18 +181,18 @@
                     <ParameterString unit="Degree"/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping3">
-                    <ParameterBool active="0"/>
+                    <ParameterBool active="1"/>
                     <ParameterBool mandatory="0"/>
                     <ParameterString db_object_name="ADSB"/>
                     <ParameterString dbovariable_name="tod"/>
-                    <ParameterString dimension=""/>
+                    <ParameterString dimension="Time"/>
                     <ParameterString format_data_type="STRING"/>
                     <ParameterString json_key="time"/>
                     <ParameterString json_value_format="epoch_tod_s"/>
-                    <ParameterString unit=""/>
+                    <ParameterString unit="Second"/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping4">
-                    <ParameterBool active="0"/>
+                    <ParameterBool active="1"/>
                     <ParameterBool mandatory="0"/>
                     <ParameterString db_object_name="ADSB"/>
                     <ParameterString dbovariable_name="callsign"/>
@@ -203,7 +203,7 @@
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping5">
-                    <ParameterBool active="0"/>
+                    <ParameterBool active="1"/>
                     <ParameterBool mandatory="0"/>
                     <ParameterString db_object_name="ADSB"/>
                     <ParameterString dbovariable_name="alt_baro_ft"/>
@@ -214,7 +214,7 @@
                     <ParameterString unit="Meter"/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping6">
-                    <ParameterBool active="0"/>
+                    <ParameterBool active="1"/>
                     <ParameterBool mandatory="0"/>
                     <ParameterString db_object_name="ADSB"/>
                     <ParameterString dbovariable_name="alt_geo_ft"/>

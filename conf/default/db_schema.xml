@@ -2235,12 +2235,12 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Geometric altitude, 3D Height"/>
                 <ParameterString data_format=""/>
-                <ParameterString dimension=""/>
+                <ParameterString dimension="Height"/>
                 <ParameterString name="ALT_GEO_FT"/>
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
-                <ParameterString unit=""/>
+                <ParameterString unit="Feet"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="ALT_REPORTING_CAPABILITY_FT">
                 <ParameterBool is_key="0"/>
@@ -5099,12 +5099,12 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Calculated barometric altitude [I030/130,I062/135 dependend on I062/080 SRC]"/>
                 <ParameterString data_format=""/>
-                <ParameterString dimension=""/>
+                <ParameterString dimension="Height"/>
                 <ParameterString name="ALT_BARO_FT"/>
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="mediumint"/>
-                <ParameterString unit=""/>
+                <ParameterString unit="Feet"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="ALT_BARO_MORE_RELIABLE">
                 <ParameterBool is_key="0"/>
@@ -5121,12 +5121,12 @@
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Calculated geometric altitude  [I030/130,I062/130 dependend on I062/080 SRC]"/>
                 <ParameterString data_format=""/>
-                <ParameterString dimension=""/>
+                <ParameterString dimension="Height"/>
                 <ParameterString name="ALT_GEO_FT"/>
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
-                <ParameterString unit=""/>
+                <ParameterString unit="Feet"/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="CALC_ALT_GEO_FT">
                 <ParameterBool is_key="0"/>
