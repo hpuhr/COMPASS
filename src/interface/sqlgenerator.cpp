@@ -99,6 +99,14 @@ std::string SQLGenerator::getCreateTableStatement (const DBTable& table)
 
         data_type = col_it.second->type();
 
+        if (connection_type == MYSQL_IDENTIFIER)
+        {
+            if (data_type == "varchar")
+                data_type = "text"; // hacky
+            else if (data_type == "enum")
+                data_type = "int"; // hacky
+        }
+
 //        if (connection_type == SQLITE_IDENTIFIER) // && connection_type != MYSQL_IDENTIFIE
 //        {
 //            if (data_type == "BOOL")
@@ -113,10 +121,21 @@ std::string SQLGenerator::getCreateTableStatement (const DBTable& table)
 
         if (col_it.second->isKey())
         {
-            if (data_type == "int")
-                ss << " INTEGER PRIMARY KEY AUTOINCREMENT";
+            if (connection_type == SQLITE_IDENTIFIER)
+            {
+                if (data_type == "int") // mysql defaults autoincrement
+                    ss << " INTEGER PRIMARY KEY AUTOINCREMENT";
+                else
+                    ss << " " << data_type << " PRIMARY KEY";
+            }
             else
-                ss << " " << data_type << " PRIMARY KEY";
+            {
+                assert (connection_type == MYSQL_IDENTIFIER);
+                if (data_type == "int")
+                    ss << " INTEGER PRIMARY KEY AUTO_INCREMENT";
+                else
+                    ss << " " << data_type << " PRIMARY KEY";
+            }
 
             ss << " NOT NULL";
         }
