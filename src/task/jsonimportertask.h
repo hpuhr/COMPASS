@@ -115,9 +115,9 @@ protected:
 
     QMessageBox* msg_box_ {nullptr};
 
-    //void createMappings ();
     void insertData ();
-    //void clearData ();
+
+    void checkAllDone ();
 
     void updateMsgBox ();
 

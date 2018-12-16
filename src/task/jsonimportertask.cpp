@@ -257,148 +257,156 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
     return;
 }
 
-//void JSONImporterTask::createMappings ()
-//{
-//    logdbg << "JSONImporterTask: createMappings";
+void JSONImporterTask::readJSONFilePartDoneSlot ()
+{
+    loginf << "JSONImporterTask: readJSONFilePartDoneSlot";
 
-//    if (mappings_.size() == 0)
-//    {
-//        unsigned int index;
-//        {
-//            index = mappings_.size();
+    //ReadJSONFilePartJob* read_job = dynamic_cast<ReadJSONFilePartJob*>(QObject::sender());
+    assert (read_json_job_);
+    bytes_read_ = read_json_job_->bytesRead();
+    bytes_to_read_ = read_json_job_->bytesToRead();
+    read_status_percent_ = read_json_job_->getStatusPercent();
+    objects_read_ += read_json_job_->objects().size();
+    loginf << "JSONImporterTask: readJSONFilePartDoneSlot: bytes " << bytes_read_;
 
-//            assert (ATSDB::instance().objectManager().existsObject("ADSB"));
-//            DBObject& db_object = ATSDB::instance().objectManager().object("ADSB");
+    //loginf << "got part '" << ss.str() << "'";
 
-//            //        mappings_.push_back(JsonMapping (db_object));
-//            //        mappings_.at(0).JSONKey("*");
-//            //        mappings_.at(0).JSONValue("*");
-//            //        mappings_.at(0).JSONContainerKey("acList");
-//            //        mappings_.at(0).overrideKeyVariable(true);
-//            //        mappings_.at(0).dataSourceVariableName("ds_id");
+    // restart read job
+    std::vector <std::string> objects = std::move(read_json_job_->objects());
+    assert (!read_json_job_->objects().size());
 
-//            //        mappings_.at(0).addMapping({"Rcvr", db_object.variable("ds_id"), true});
-//            //        mappings_.at(0).addMapping({"Icao", db_object.variable("target_addr"), true,
-//            //                                    Format(PropertyDataType::STRING, "hexadecimal")});
-//            //        mappings_.at(0).addMapping({"Reg", db_object.variable("callsign"), false});
-//            //        mappings_.at(0).addMapping({"Alt", db_object.variable("alt_baro_ft"), false});
-//            //        mappings_.at(0).addMapping({"GAlt", db_object.variable("alt_geo_ft"), false});
-//            //        mappings_.at(0).addMapping({"Lat", db_object.variable("pos_lat_deg"), true});
-//            //        mappings_.at(0).addMapping({"Long", db_object.variable("pos_long_deg"), true});
-//            //        mappings_.at(0).addMapping({"PosTime", db_object.variable("tod"), true,
-//            //                                    Format(PropertyDataType::STRING, "epoch_tod")});
+    if (!read_json_job_->fileReadDone())
+    {
+        loginf << "JSONImporterTask: readJSONFilePartDoneSlot: read continue";
+        read_json_job_->resetDone();
+        JobManager::instance().addNonBlockingJob(read_json_job_);
+    }
+    else
+        read_json_job_ = nullptr;
 
-//            mappings_.push_back(JSONObjectParser (db_object));
-//            mappings_.at(index).JSONKey("message_type");
-//            mappings_.at(index).JSONValue("ads-b target");
-//            mappings_.at(index).overrideKeyVariable(false);
-////            mappings_.at(index).overrideKeyVariable(true);
-//            mappings_.at(index).dataSourceVariableName("ds_id");
+    // start parse job
+    std::shared_ptr<JSONParseJob> json_parse_job = std::shared_ptr<JSONParseJob> (new JSONParseJob (std::move(objects)));
+    connect (json_parse_job.get(), SIGNAL(obsoleteSignal()), this, SLOT(parseJSONObsoleteSlot()),
+             Qt::QueuedConnection);
+    connect (json_parse_job.get(), SIGNAL(doneSignal()), this, SLOT(parseJSONDoneSlot()), Qt::QueuedConnection);
 
-//            mappings_.at(index).addMapping({"rec_num", db_object.variable("rec_num"), true});
-//            mappings_.at(index).addMapping({"data_source_identifier.value", db_object.variable("ds_id"), true});
-//            mappings_.at(index).addMapping({"data_source_identifier.sac", db_object.variable("sac"), true});
-//            mappings_.at(index).addMapping({"data_source_identifier.sic", db_object.variable("sic"), true});
-//            mappings_.at(index).addMapping({"target_address", db_object.variable("target_addr"), true});
-//            mappings_.at(index).addMapping({"target_identification.value_idt", db_object.variable("callsign"), false});
-//            mappings_.at(index).addMapping({"mode_c_height.value_ft", db_object.variable("alt_baro_ft"), false,
-//                                            "Height", "Feet"});
-//            mappings_.at(index).addMapping({"wgs84_position.value_lat_rad", db_object.variable("pos_lat_deg"), true,
-//                                            "Angle", "Radian"});
-//            mappings_.at(index).addMapping({"wgs84_position.value_lon_rad", db_object.variable("pos_long_deg"), true,
-//                                            "Angle", "Radian"});
-//            mappings_.at(index).addMapping({"time_of_report", db_object.variable("tod"), true, "Time", "Second"});
-//            mappings_.at(index).initialize();
-//        }
+    JobManager::instance().addJob(json_parse_job);
 
-//        {
-//            index = mappings_.size();
-//            assert (ATSDB::instance().objectManager().existsObject("MLAT"));
-//            DBObject& db_object = ATSDB::instance().objectManager().object("MLAT");
+    json_parse_jobs_.push_back(json_parse_job);
 
-//            mappings_.push_back(JSONObjectParser (db_object));
-//            mappings_.at(index).JSONKey("message_type");
-//            mappings_.at(index).JSONValue("mlat target");
-//            mappings_.at(index).overrideKeyVariable(false);
-////            mappings_.at(index).overrideKeyVariable(true);
-//            mappings_.at(index).dataSourceVariableName("ds_id");
+    updateMsgBox();
 
-//            mappings_.at(index).addMapping({"rec_num", db_object.variable("rec_num"), true});
-//            mappings_.at(index).addMapping({"data_source_identifier.value", db_object.variable("ds_id"), true});
-//            mappings_.at(index).addMapping({"data_source_identifier.sac", db_object.variable("sac"), true});
-//            mappings_.at(index).addMapping({"data_source_identifier.sic", db_object.variable("sic"), true});
-//            mappings_.at(index).addMapping({"mode_3a_info.code", db_object.variable("mode3a_code"), false});
-//            mappings_.at(index).addMapping({"target_address", db_object.variable("target_addr"), true});
-//            mappings_.at(index).addMapping({"target_identification.value_idt", db_object.variable("callsign"), false});
-//            mappings_.at(index).addMapping({"mode_c_height.value_ft", db_object.variable("flight_level_ft"), false,
-//                                            "Height", "Feet"});
-//            mappings_.at(index).addMapping({"wgs84_position.value_lat_rad", db_object.variable("pos_lat_deg"), true,
-//                                            "Angle", "Radian"});
-//            mappings_.at(index).addMapping({"wgs84_position.value_lon_rad", db_object.variable("pos_long_deg"), true,
-//                                            "Angle", "Radian"});
-//            mappings_.at(index).addMapping({"detection_time", db_object.variable("tod"), true, "Time", "Second"});
-//            mappings_.at(index).initialize();
-//        }
 
-//        {
-//            index = mappings_.size();
-//            assert (ATSDB::instance().objectManager().existsObject("Radar"));
-//            DBObject& db_object = ATSDB::instance().objectManager().object("Radar");
+}
+void JSONImporterTask::readJSONFilePartObsoleteSlot ()
+{
+    logdbg << "JSONImporterTask: readJSONFilePartObsoleteSlot";
+}
 
-//            mappings_.push_back(JSONObjectParser (db_object));
-//            mappings_.at(index).JSONKey("message_type");
-//            mappings_.at(index).JSONValue("radar target");
-//            mappings_.at(index).overrideKeyVariable(false);
-////            mappings_.at(index).overrideKeyVariable(true);
-//            mappings_.at(index).dataSourceVariableName("ds_id");
+void JSONImporterTask::parseJSONDoneSlot ()
+{
+    logdbg << "JSONImporterTask: parseJSONDoneSlot";
 
-//            mappings_.at(index).addMapping({"rec_num", db_object.variable("rec_num"), true});
-//            mappings_.at(index).addMapping({"data_source_identifier.value", db_object.variable("ds_id"), true});
-//            mappings_.at(index).addMapping({"data_source_identifier.sac", db_object.variable("sac"), true});
-//            mappings_.at(index).addMapping({"data_source_identifier.sic", db_object.variable("sic"), true});
-//            mappings_.at(index).addMapping({"mode_3_info.code", db_object.variable("mode3a_code"), false});
-//            mappings_.at(index).addMapping({"target_address", db_object.variable("target_addr"), false});
-//            mappings_.at(index).addMapping({"aircraft_identification.value_idt", db_object.variable("callsign"), false});
-//            mappings_.at(index).addMapping({"mode_c_height.value_ft", db_object.variable("modec_code_ft"), false,
-//                                            "Height", "Feet"});
-//            mappings_.at(index).addMapping({"measured_azm_rad", db_object.variable("pos_azm_deg"), true,
-//                                            "Angle", "Radian"});
-//            mappings_.at(index).addMapping({"measured_rng_m", db_object.variable("pos_range_nm"), true,
-//                                            "Length", "Meter"});
-//            mappings_.at(index).addMapping({"detection_time", db_object.variable("tod"), true, "Time", "Second"});
-//            mappings_.at(index).initialize();
-//        }
+    JSONParseJob* parse_job = dynamic_cast<JSONParseJob*>(QObject::sender());
+    assert (parse_job);
 
-//        {
-//            index = mappings_.size();
-//            assert (ATSDB::instance().objectManager().existsObject("Tracker"));
-//            DBObject& db_object = ATSDB::instance().objectManager().object("Tracker");
+    std::vector<json> json_objects = std::move(parse_job->jsonObjects());
+    json_parse_jobs_.erase(json_parse_jobs_.begin());
 
-//            mappings_.push_back(JSONObjectParser (db_object));
-//            mappings_.at(index).JSONKey("message_type");
-//            mappings_.at(index).JSONValue("track update");
-//            mappings_.at(index).overrideKeyVariable(false);
-////            mappings_.at(index).overrideKeyVariable(true);
-//            mappings_.at(index).dataSourceVariableName("ds_id");
+    logdbg << "JSONImporterTask: parseJSONDoneSlot: " << json_objects.size() << " parsed objects";
 
-//            mappings_.at(index).addMapping({"rec_num", db_object.variable("rec_num"), true});
-//            mappings_.at(index).addMapping({"server_sacsic.value", db_object.variable("ds_id"), true});
-//            mappings_.at(index).addMapping({"server_sacsic.sac", db_object.variable("sac"), true});
-//            mappings_.at(index).addMapping({"server_sacsic.sic", db_object.variable("sic"), true});
-//            mappings_.at(index).addMapping({"mode_3a_info.code", db_object.variable("mode3a_code"), false});
-//            mappings_.at(index).addMapping({"aircraft_address", db_object.variable("target_addr"), true});
-//            mappings_.at(index).addMapping({"aircraft_identification.value_idt", db_object.variable("callsign"), false});
-//            mappings_.at(index).addMapping({"calculated_track_flight_level.value_feet", db_object.variable("modec_code_ft"),
-//                                            false, "Height", "Feet"});
-//            mappings_.at(index).addMapping({"calculated_wgs84_position.value_latitude_rad",
-//                                            db_object.variable("pos_lat_deg"), true, "Angle", "Radian"});
-//            mappings_.at(index).addMapping({"calculated_wgs84_position.value_longitude_rad",
-//                                            db_object.variable("pos_long_deg"), true, "Angle", "Radian"});
-//            mappings_.at(index).addMapping({"time_of_last_update", db_object.variable("tod"), true, "Time", "Second"});
-//            mappings_.at(index).initialize();
-//        }
-//    }
-// }
+    objects_parsed_ += json_objects.size();
+    size_t count = json_objects.size();
+
+    assert (schemas_.count(current_schema_));
+
+    std::shared_ptr<JSONMappingJob> json_map_job =
+            std::shared_ptr<JSONMappingJob> (new JSONMappingJob (std::move(json_objects),
+                                                                 schemas_.at(current_schema_).parsers(), key_count_));
+    connect (json_map_job.get(), SIGNAL(obsoleteSignal()), this, SLOT(mapJSONObsoleteSlot()),
+             Qt::QueuedConnection);
+    connect (json_map_job.get(), SIGNAL(doneSignal()), this, SLOT(mapJSONDoneSlot()), Qt::QueuedConnection);
+
+    json_map_jobs_.push_back(json_map_job);
+
+    JobManager::instance().addJob(json_map_job);
+
+    key_count_ += count;
+
+    updateMsgBox();
+}
+
+void JSONImporterTask::parseJSONObsoleteSlot ()
+{
+    logdbg << "JSONImporterTask: parseJSONObsoleteSlot";
+}
+
+void JSONImporterTask::mapJSONDoneSlot ()
+{
+    loginf << "JSONImporterTask: mapJSONDoneSlot";
+
+    JSONMappingJob* map_job = dynamic_cast<JSONMappingJob*>(QObject::sender());
+    assert (map_job);
+
+    loginf << "JSONImporterTask: mapJSONDoneSlot: skipped " << map_job->numSkipped()
+           << " all skipped " << objects_skipped_;
+    objects_skipped_ += map_job->numSkipped();
+
+    std::map <std::string, std::shared_ptr<Buffer>> job_buffers = map_job->buffers();
+
+    json_map_jobs_.erase(json_map_jobs_.begin());
+
+    for (auto& buf_it : job_buffers)
+        if (buf_it.second && buf_it.second->size())
+            objects_mapped_ += buf_it.second->size();
+
+    if (test_ || !objects_mapped_)
+    {
+        checkAllDone();
+        updateMsgBox();
+        return;
+    }
+
+    for (auto& buf_it : job_buffers)
+    {
+        if (buf_it.second && buf_it.second->size())
+        {
+            std::shared_ptr<Buffer> job_buffer = buf_it.second;
+
+            if (buffers_.count(buf_it.first) == 0)
+                buffers_[buf_it.first] = job_buffer;
+            else
+                buffers_.at(buf_it.first)->seizeBuffer(*job_buffer.get());
+        }
+    }
+
+    updateMsgBox();
+
+    if (!insert_active_)
+    {
+        for (auto& buf_it : buffers_)
+        {
+            if (buf_it.second->size() > 10000)
+            {
+                loginf << "JSONImporterTask: mapJSONDoneSlot: inserting part of parsed objects";
+                insertData ();
+                return;
+            }
+        }
+    }
+
+    if (read_json_job_ == nullptr && json_parse_jobs_.size() == 0 && json_map_jobs_.size() == 0)
+    {
+        loginf << "JSONImporterTask: mapJSONDoneSlot: inserting parsed objects at end";
+        insertData ();
+    }
+
+}
+
+void JSONImporterTask::mapJSONObsoleteSlot ()
+{
+    logdbg << "JSONImporterTask: mapJSONObsoleteSlot";
+}
 
 void JSONImporterTask::insertData ()
 {
@@ -520,8 +528,6 @@ void JSONImporterTask::insertData ()
             objects_inserted_ += buffer->size();
 
             logdbg << "JSONImporterTask: insertData: " << db_object.name() << " clearing";
-            //map_it.clearBuffer();
-
             buffers_.erase(parser_it.second.dbObject().name());
         }
         else
@@ -533,11 +539,26 @@ void JSONImporterTask::insertData ()
     logdbg << "JSONImporterTask: insertData: done";
 }
 
-//void JSONImporterTask::clearData ()
-//{
-//    for (auto& map_it : mappings_)
-//        map_it.clearBuffer();
-//}
+void JSONImporterTask::checkAllDone ()
+{
+    if (!all_done_ && read_json_job_ == nullptr && json_parse_jobs_.size() == 0 && json_map_jobs_.size() == 0
+            && insert_active_ == 0)
+    {
+        stop_time_ = boost::posix_time::microsec_clock::local_time();
+
+        boost::posix_time::time_duration diff = stop_time_ - start_time_;
+
+        std::string time_str = std::to_string(diff.hours())+"h "+std::to_string(diff.minutes())
+                +"m "+std::to_string(diff.seconds())+"s";
+
+        loginf << "JSONImporterTask: checkAllDone: read done after " << time_str;
+
+        all_done_ = true;
+
+        if (widget_)
+            widget_->importDoneSlot(test_);
+    }
+}
 
 void JSONImporterTask::updateMsgBox ()
 {
@@ -646,197 +667,11 @@ void JSONImporterTask::insertDoneSlot (DBObject& object)
     logdbg << "JSONImporterTask: insertDoneSlot";
     --insert_active_;
 
-    if (read_json_job_ == nullptr && json_parse_jobs_.size() == 0 && json_map_jobs_.size() == 0 && insert_active_ == 0)
-    {
-        stop_time_ = boost::posix_time::microsec_clock::local_time();
-
-        boost::posix_time::time_duration diff = stop_time_ - start_time_;
-
-        std::string time_str = std::to_string(diff.hours())+"h "+std::to_string(diff.minutes())
-                +"m "+std::to_string(diff.seconds())+"s";
-
-        loginf << "JSONImporterTask: insertDoneSlot: read done after " << time_str;
-
-        all_done_ = true;
-    }
-
+    checkAllDone();
     updateMsgBox();
 }
 
-void JSONImporterTask::readJSONFilePartDoneSlot ()
-{
-    loginf << "JSONImporterTask: readJSONFilePartDoneSlot";
-
-    //ReadJSONFilePartJob* read_job = dynamic_cast<ReadJSONFilePartJob*>(QObject::sender());
-    assert (read_json_job_);
-    bytes_read_ = read_json_job_->bytesRead();
-    bytes_to_read_ = read_json_job_->bytesToRead();
-    read_status_percent_ = read_json_job_->getStatusPercent();
-    objects_read_ += read_json_job_->objects().size();
-    loginf << "JSONImporterTask: readJSONFilePartDoneSlot: bytes " << bytes_read_;
-
-    //loginf << "got part '" << ss.str() << "'";
-
-    // restart read job
-    std::vector <std::string> objects = std::move(read_json_job_->objects());
-    assert (!read_json_job_->objects().size());
-
-    if (!read_json_job_->fileReadDone())
-    {
-        loginf << "JSONImporterTask: readJSONFilePartDoneSlot: read continue";
-        read_json_job_->resetDone();
-        JobManager::instance().addNonBlockingJob(read_json_job_);
-    }
-    else
-        read_json_job_ = nullptr;
-
-    // start parse job
-    std::shared_ptr<JSONParseJob> json_parse_job = std::shared_ptr<JSONParseJob> (new JSONParseJob (std::move(objects)));
-    connect (json_parse_job.get(), SIGNAL(obsoleteSignal()), this, SLOT(parseJSONObsoleteSlot()),
-             Qt::QueuedConnection);
-    connect (json_parse_job.get(), SIGNAL(doneSignal()), this, SLOT(parseJSONDoneSlot()), Qt::QueuedConnection);
-
-    JobManager::instance().addJob(json_parse_job);
-
-    json_parse_jobs_.push_back(json_parse_job);
-
-    updateMsgBox();
 
 
-}
-void JSONImporterTask::readJSONFilePartObsoleteSlot ()
-{
-    logdbg << "JSONImporterTask: readJSONFilePartObsoleteSlot";
-}
 
-void JSONImporterTask::parseJSONDoneSlot ()
-{
-    logdbg << "JSONImporterTask: parseJSONDoneSlot";
 
-    JSONParseJob* parse_job = dynamic_cast<JSONParseJob*>(QObject::sender());
-    assert (parse_job);
-
-    std::vector<json> json_objects = std::move(parse_job->jsonObjects());
-    json_parse_jobs_.erase(json_parse_jobs_.begin());
-
-    logdbg << "JSONImporterTask: parseJSONDoneSlot: " << json_objects.size() << " parsed objects";
-
-    objects_parsed_ += json_objects.size();
-
-//    createMappings();
-
-//    while (json_objects.size())
-//    {
-//        size_t count = 2000;
-
-//        if (json_objects.size() < count)
-//            count = json_objects.size();
-
-//        std::vector<json> json_objects_part;
-
-//        auto it = std::next(json_objects.begin(), count);
-
-//        std::move(json_objects.begin(), it, std::back_inserter(json_objects_part));  // ##
-
-//        json_objects.erase(json_objects.begin(), it);
-
-//        std::shared_ptr<JSONMappingJob> json_map_job = std::shared_ptr<JSONMappingJob> (new JSONMappingJob (std::move(json_objects_part), mappings_));
-//        connect (json_map_job.get(), SIGNAL(obsoleteSignal()), this, SLOT(mapJSONObsoleteSlot()),
-//                 Qt::QueuedConnection);
-//        connect (json_map_job.get(), SIGNAL(doneSignal()), this, SLOT(mapJSONDoneSlot()), Qt::QueuedConnection);
-
-//        json_map_jobs_.push_back(json_map_job);
-
-//        JobManager::instance().addJob(json_map_job);
-
-//        for (auto& map_it : mappings_) // increase key counts
-//            map_it.keyCount(map_it.keyCount()+count);
-//    }
-
-    size_t count = json_objects.size();
-
-    assert (schemas_.count(current_schema_));
-
-    std::shared_ptr<JSONMappingJob> json_map_job =
-            std::shared_ptr<JSONMappingJob> (new JSONMappingJob (std::move(json_objects),
-                                                                 schemas_.at(current_schema_).parsers(), key_count_));
-    connect (json_map_job.get(), SIGNAL(obsoleteSignal()), this, SLOT(mapJSONObsoleteSlot()),
-             Qt::QueuedConnection);
-    connect (json_map_job.get(), SIGNAL(doneSignal()), this, SLOT(mapJSONDoneSlot()), Qt::QueuedConnection);
-
-    json_map_jobs_.push_back(json_map_job);
-
-    JobManager::instance().addJob(json_map_job);
-
-    key_count_ += count;
-
-    //for (auto& map_it : mappings_) // increase key counts
-    //    map_it.keyCount(map_it.keyCount()+count);
-
-    updateMsgBox();
-}
-
-void JSONImporterTask::parseJSONObsoleteSlot ()
-{
-    logdbg << "JSONImporterTask: parseJSONObsoleteSlot";
-}
-
-void JSONImporterTask::mapJSONDoneSlot ()
-{
-    loginf << "JSONImporterTask: mapJSONDoneSlot";
-
-    JSONMappingJob* map_job = dynamic_cast<JSONMappingJob*>(QObject::sender());
-    assert (map_job);
-
-    loginf << "JSONImporterTask: mapJSONDoneSlot: skipped " << map_job->numSkipped()
-           << " all skipped " << objects_skipped_;
-    objects_skipped_ += map_job->numSkipped();
-
-    std::map <std::string, std::shared_ptr<Buffer>> job_buffers = map_job->buffers();
-
-    //std::vector <JsonMapping> mappings = map_job->mappings();
-
-    json_map_jobs_.erase(json_map_jobs_.begin());
-
-    for (auto& buf_it : job_buffers)
-    {
-        if (buf_it.second && buf_it.second->size())
-        {
-            std::shared_ptr<Buffer> job_buffer = buf_it.second;
-            objects_mapped_ += job_buffer->size();
-
-            if (buffers_.count(buf_it.first) == 0)
-                buffers_[buf_it.first] = job_buffer;
-            else
-                buffers_.at(buf_it.first)->seizeBuffer(*job_buffer.get());
-        }
-    }
-
-    updateMsgBox();
-
- //   insertData();
-
-    if (!insert_active_)
-    {
-        for (auto& buf_it : buffers_)
-        {
-            if (buf_it.second->size() > 10000)
-            {
-                loginf << "JSONImporterTask: mapJSONDoneSlot: inserting part of parsed objects";
-                insertData ();
-                return;
-            }
-        }
-    }
-
-    if (read_json_job_ == nullptr && json_parse_jobs_.size() == 0 && json_map_jobs_.size() == 0)
-    {
-        loginf << "JSONImporterTask: mapJSONDoneSlot: inserting parsed objects at end";
-        insertData ();
-    }
-
-}
-void JSONImporterTask::mapJSONObsoleteSlot ()
-{
-    logdbg << "JSONImporterTask: mapJSONObsoleteSlot";
-}

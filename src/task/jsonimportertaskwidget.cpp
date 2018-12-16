@@ -497,13 +497,15 @@ void JSONImporterTaskWidget::importSlot ()
 
         test_button_->setDisabled(true);
         import_button_->setDisabled(true);
-
     }
 }
 
 void JSONImporterTaskWidget::importDoneSlot (bool test)
 {
     loginf << "JSONImporterTaskWidget: importDoneSlot: test " << test;
+
+    test_button_->setDisabled(false);
+    import_button_->setDisabled(false);
 }
 
 void JSONImporterTaskWidget::updateParserList ()
@@ -519,8 +521,6 @@ void JSONImporterTaskWidget::updateParserList ()
         {
             QListWidgetItem* item = new QListWidgetItem(tr(parser_it.first.c_str()), object_parser_list_);
             assert (item);
-//            if (it.first == task_.currentFilename())
-//                file_list_->setCurrentItem(item);
         }
     }
 }
