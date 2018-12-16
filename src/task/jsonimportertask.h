@@ -79,10 +79,6 @@ protected:
     size_t key_count_ {0};
 
     size_t insert_active_ {0};
-    size_t rec_num_cnt_ {0};
-    size_t all_cnt_ {0};
-    size_t skipped_cnt_ {0};
-    size_t inserted_cnt_ {0};
 
     std::set <int> added_data_sources_;
 
@@ -100,16 +96,21 @@ protected:
     size_t bytes_read_ {0};
     size_t bytes_to_read_ {0};
     float read_status_percent_ {0.0};
+
     size_t objects_read_ {0};
     size_t objects_parsed_ {0};
-    size_t objects_skipped_ {0};
+    size_t objects_parse_errors_ {0};
+
     size_t objects_mapped_ {0};
+    size_t objects_not_mapped_ {0};
+
+    size_t objects_created_ {0};
     size_t objects_inserted_ {0};
     bool all_done_ {false};
 
     size_t statistics_calc_objects_inserted_ {0};
-    std::string object_rate_str_ {"0"};
-    std::string remaining_time_str_ {"?"};
+    std::string object_rate_str_;
+    std::string remaining_time_str_;
 
     std::map <std::string, std::shared_ptr<Buffer>> buffers_;
 

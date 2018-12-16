@@ -22,16 +22,16 @@ public:
 
     //std::vector <JsonMapping>&& mappings(); // to be moved out
 
-    size_t numParsed() const;
-    size_t numSkipped() const;
     size_t numMapped() const;
+    size_t numNotMapped() const;
+    size_t numCreated() const;
 
     std::map<std::string, std::shared_ptr<Buffer>>&& buffers () { return std::move(buffers_); }
 
 private:
-    size_t num_parsed_ {0};
-    size_t num_skipped_ {0};
-    size_t num_mapped_ {0};
+    size_t num_mapped_ {0}; // number of parsed where a parse was successful
+    size_t num_not_mapped_ {0}; // number of parsed where no parse was successful
+    size_t num_created_ {0}; // number of created objects from parsing
 
     std::vector<nlohmann::json> json_objects_;
     const std::map <std::string, JSONObjectParser>& parsers_;

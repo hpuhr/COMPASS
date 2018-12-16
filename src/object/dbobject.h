@@ -183,7 +183,7 @@ public:
     void clearData ();
 
     // takes buffers with dbovar names & datatypes & units, converts itself
-    void insertData (DBOVariableSet& list, std::shared_ptr<Buffer> buffer);
+    void insertData (DBOVariableSet& list, std::shared_ptr<Buffer> buffer, bool emit_change=true);
     // takes buffers with dbovar names & datatypes & units, converts itself
     void updateData (DBOVariable &key_var, DBOVariableSet& list, std::shared_ptr<Buffer> buffer);
 

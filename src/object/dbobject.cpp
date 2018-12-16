@@ -894,19 +894,16 @@ void DBObject::clearData ()
         data_ = nullptr;
 }
 
-void DBObject::insertData (DBOVariableSet& list, std::shared_ptr<Buffer> buffer)
+void DBObject::insertData (DBOVariableSet& list, std::shared_ptr<Buffer> buffer, bool emit_change)
 {
     loginf << "DBObject " << name_ << ": insertData";
-
-//    if (hasKeyVariable()) // not required since autoincrement
-//        assert (list.hasVariable(getKeyVariable()));
 
     assert (!insert_job_);
 
     buffer->transformVariables(list, false); // back again
 
     insert_job_ = std::shared_ptr<InsertBufferDBJob> (new InsertBufferDBJob(ATSDB::instance().interface(),
-                                                                            *this, buffer));
+                                                                            *this, buffer, emit_change));
 
     connect (insert_job_.get(), &InsertBufferDBJob::doneSignal, this, &DBObject::insertDoneSlot, Qt::QueuedConnection);
     connect (insert_job_.get(), &InsertBufferDBJob::insertProgressSignal, this, &DBObject::insertProgressSlot,
@@ -924,10 +921,14 @@ void DBObject::insertProgressSlot (float percent)
 
 void DBObject::insertDoneSlot ()
 {
+    assert (insert_job_);
+    bool emit_change = insert_job_->emitChange();
     insert_job_ = nullptr;
 
     emit insertDoneSignal (*this);
-    emit ATSDB::instance().interface().databaseContentChangedSignal();
+
+    if (emit_change)
+        emit ATSDB::instance().interface().databaseContentChangedSignal();
 }
 
 void DBObject::updateData (DBOVariable &key_var, DBOVariableSet& list, std::shared_ptr<Buffer> buffer)

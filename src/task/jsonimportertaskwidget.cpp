@@ -400,32 +400,9 @@ void JSONImporterTaskWidget::selectedObjectParserSlot ()
 {
     loginf << "JSONImporterTaskWidget: selectedObjectParserSlot";
 
-    if (!object_parser_widgets_)
-    {
-        assert (main_layout_);
-        setMinimumSize(QSize(1200, 600));
-
-        int frame_width_small = 1;
-
-        QFrame *right_frame = new QFrame ();
-        right_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
-        right_frame->setLineWidth(frame_width_small);
-
-        object_parser_widgets_ = new QStackedWidget ();
-
-        object_parser_widgets_->setMinimumWidth(800);
-
-        QVBoxLayout* tmp = new QVBoxLayout ();
-        tmp->addWidget(object_parser_widgets_);
-
-        right_frame->setLayout(tmp);
-
-        main_layout_->addWidget(right_frame);
-    }
-
-    assert (object_parser_widgets_);
-    while (object_parser_widgets_->count() > 0)
-        object_parser_widgets_->removeWidget(object_parser_widgets_->widget(0));
+   if (object_parser_widget_)
+        while (object_parser_widget_->count() > 0)
+            object_parser_widget_->removeWidget(object_parser_widget_->widget(0));
 
     assert (object_parser_list_);
 
@@ -435,8 +412,39 @@ void JSONImporterTaskWidget::selectedObjectParserSlot ()
 
         assert (task_.hasCurrentSchema());
         assert (task_.currentSchema().hasObjectParser(name));
-        object_parser_widgets_->addWidget(task_.currentSchema().parser(name).widget());
+
+        if (!object_parser_widget_)
+            createObjectParserWidget();
+
+        object_parser_widget_->addWidget(task_.currentSchema().parser(name).widget());
+        //object_parser_widgets_->show();
     }
+//    else
+//        object_parser_widgets_->hide();
+}
+
+void JSONImporterTaskWidget::createObjectParserWidget()
+{
+    assert (!object_parser_widget_);
+    assert (main_layout_);
+    setMinimumSize(QSize(1200, 600));
+
+    int frame_width_small = 1;
+
+    QFrame *right_frame = new QFrame ();
+    right_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
+    right_frame->setLineWidth(frame_width_small);
+
+    object_parser_widget_ = new QStackedWidget ();
+
+    object_parser_widget_->setMinimumWidth(800);
+
+    QVBoxLayout* tmp = new QVBoxLayout ();
+    tmp->addWidget(object_parser_widget_);
+
+    right_frame->setLayout(tmp);
+
+    main_layout_->addWidget(right_frame);
 }
 
 void JSONImporterTaskWidget::update ()
@@ -461,6 +469,15 @@ void JSONImporterTaskWidget::testImportSlot ()
     if (filename.size() > 0)
     {
         assert (task_.hasFile(filename.toStdString()));
+
+        if (!task_.canImportFile(filename.toStdString()))
+        {
+            QMessageBox m_warning (QMessageBox::Warning, "JSON File Test Import Failed",
+                                   "File does not exist.",
+                                   QMessageBox::Ok);
+            m_warning.exec();
+            return;
+        }
 
         if (filename.endsWith(".zip") || filename.endsWith(".gz") || filename.endsWith(".tgz"))
             task_.importFileArchive(filename.toStdString(), true);

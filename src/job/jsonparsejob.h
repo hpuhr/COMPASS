@@ -15,12 +15,14 @@ public:
     std::vector<nlohmann::json>& jsonObjects(); // for move operation
 
     size_t objectsParsed() const;
+    size_t parseErrors() const;
 
 private:
     std::vector<std::string> objects_;
     std::vector<nlohmann::json> json_objects_;
 
     size_t objects_parsed_ {0};
+    size_t parse_errors_ {0};
 };
 
 #endif // JSONPARSEJOB_H

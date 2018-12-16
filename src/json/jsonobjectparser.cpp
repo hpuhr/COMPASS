@@ -175,20 +175,23 @@ std::shared_ptr<Buffer> JSONObjectParser::getNewBuffer () const
     return std::shared_ptr<Buffer> {new Buffer (list_, db_object_->name())};
 }
 
-std::pair<size_t, size_t> JSONObjectParser::parseJSON (nlohmann::json& j, std::shared_ptr<Buffer> buffer) const
+bool JSONObjectParser::parseJSON (nlohmann::json& j, std::shared_ptr<Buffer> buffer) const
 {
     assert (initialized_);
 
     assert (buffer != nullptr);
 
-    unsigned int row_cnt = buffer->size();
-    unsigned int skipped_cnt = 0;
-    unsigned int all_cnt = 0;
+    size_t row_cnt = buffer->size();
+    size_t skipped_cnt = 0;
 
-    bool skipped;
+    //size_t all_cnt = 0;
+
+    bool parsed_any = false;
 
     if (json_container_key_.size())
     {
+        bool parsed = false;
+
         if (j.find(json_container_key_) != j.end())
         {
             json& ac_list = j.at(json_container_key_);
@@ -203,17 +206,17 @@ std::pair<size_t, size_t> JSONObjectParser::parseJSON (nlohmann::json& j, std::s
                 json& tr = tr_it.value();
                 assert (tr.is_object());
 
-                skipped = parseTargetReport (tr, buffer, row_cnt);
+                parsed = parseTargetReport (tr, buffer, row_cnt);
 
-                if (!skipped)
+                if (parsed)
                     ++row_cnt;
                 else
                     ++skipped_cnt;
 
-                ++all_cnt;
+                parsed_any |= parsed;
             }
         }
-        else
+        else // parsed stays false
             loginf << "JSONObjectParser: parseJSON: found target report array but '"
                    << json_container_key_  << "' not found";
     }
@@ -222,13 +225,13 @@ std::pair<size_t, size_t> JSONObjectParser::parseJSON (nlohmann::json& j, std::s
         //loginf << "found single target report";
         assert (j.is_object());
 
-        skipped = parseTargetReport (j, buffer, row_cnt);
+        parsed_any = parseTargetReport (j, buffer, row_cnt);
 
-        if (!skipped)
-            ++row_cnt;
+//        if (!skipped)
+//            ++row_cnt;
     }
 
-    return {skipped_cnt, row_cnt};
+    return parsed_any;
 }
 
 bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_ptr<Buffer> buffer,
@@ -242,7 +245,7 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
             if (tr.at(json_key_) != json_value_)
             {
                 logdbg << "JsonMapping: parseTargetReport: skipping because of wrong key value " << tr.at(json_key_);
-                return true;
+                return false;
             }
             else
                 logdbg << "JsonMapping: parseTargetReport: parsing with correct key and value";
@@ -250,7 +253,7 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
         else
         {
             logdbg << "JsonMapping: parseTargetReport: skipping because of missing key '" << json_key_ << "'";
-            return true;
+            return false;
         }
     }
 
@@ -365,7 +368,7 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
             buffer->cutToSize(row_cnt);
     }
 
-    return mandatory_missing;
+    return !mandatory_missing;
 }
 
 bool JSONObjectParser::hasMapping (unsigned int index) const

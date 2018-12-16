@@ -191,16 +191,22 @@ void JSONImporterTask::importFile(const std::string& filename, bool test)
 {
     loginf << "JSONImporterTask: importFile: filename " << filename << " test " << test;
 
-    if (!canImportFile(filename))
-    {
-        logerr << "JSONImporterTask: importFile: unable to import";
-        return;
-    }
+    assert (canImportFile(filename));
 
     filename_ = filename;
     archive_ = false;
     test_ = test;
     all_done_ = false;
+
+    objects_read_ = 0;
+    objects_parsed_ = 0;
+    objects_parse_errors_ = 0;
+
+    objects_mapped_ = 0;
+    objects_not_mapped_ = 0;
+
+    objects_created_ = 0;
+    objects_inserted_ = 0;
 
     assert (schemas_.count(current_schema_));
 
@@ -226,16 +232,22 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
 {
     loginf << "JSONImporterTask: importFileArchive: filename " << filename << " test " << test;
 
-    if (!canImportFile(filename))
-    {
-        logerr << "JSONImporterTask: importFileArchive: unable to import";
-        return;
-    }
+    assert (canImportFile(filename));
 
     filename_ = filename;
     archive_ = true;
     test_ = test;
     all_done_ = false;
+
+    objects_read_ = 0;
+    objects_parsed_ = 0;
+    objects_parse_errors_ = 0;
+
+    objects_mapped_ = 0;
+    objects_not_mapped_ = 0;
+
+    objects_created_ = 0;
+    objects_inserted_ = 0;
 
     assert (schemas_.count(current_schema_));
 
@@ -261,13 +273,13 @@ void JSONImporterTask::readJSONFilePartDoneSlot ()
 {
     loginf << "JSONImporterTask: readJSONFilePartDoneSlot";
 
-    //ReadJSONFilePartJob* read_job = dynamic_cast<ReadJSONFilePartJob*>(QObject::sender());
     assert (read_json_job_);
     bytes_read_ = read_json_job_->bytesRead();
     bytes_to_read_ = read_json_job_->bytesToRead();
     read_status_percent_ = read_json_job_->getStatusPercent();
     objects_read_ += read_json_job_->objects().size();
-    loginf << "JSONImporterTask: readJSONFilePartDoneSlot: bytes " << bytes_read_;
+    loginf << "JSONImporterTask: readJSONFilePartDoneSlot: bytes " << bytes_read_ << " to read " << bytes_to_read_
+           << " percent " << read_status_percent_;
 
     //loginf << "got part '" << ss.str() << "'";
 
@@ -285,19 +297,20 @@ void JSONImporterTask::readJSONFilePartDoneSlot ()
         read_json_job_ = nullptr;
 
     // start parse job
-    std::shared_ptr<JSONParseJob> json_parse_job = std::shared_ptr<JSONParseJob> (new JSONParseJob (std::move(objects)));
+    std::shared_ptr<JSONParseJob> json_parse_job = std::shared_ptr<JSONParseJob> (
+                new JSONParseJob (std::move(objects)));
     connect (json_parse_job.get(), SIGNAL(obsoleteSignal()), this, SLOT(parseJSONObsoleteSlot()),
              Qt::QueuedConnection);
-    connect (json_parse_job.get(), SIGNAL(doneSignal()), this, SLOT(parseJSONDoneSlot()), Qt::QueuedConnection);
+    connect (json_parse_job.get(), SIGNAL(doneSignal()), this, SLOT(parseJSONDoneSlot()),
+             Qt::QueuedConnection);
 
     JobManager::instance().addJob(json_parse_job);
 
     json_parse_jobs_.push_back(json_parse_job);
 
     updateMsgBox();
-
-
 }
+
 void JSONImporterTask::readJSONFilePartObsoleteSlot ()
 {
     logdbg << "JSONImporterTask: readJSONFilePartObsoleteSlot";
@@ -310,12 +323,14 @@ void JSONImporterTask::parseJSONDoneSlot ()
     JSONParseJob* parse_job = dynamic_cast<JSONParseJob*>(QObject::sender());
     assert (parse_job);
 
+    objects_parsed_ += parse_job->objectsParsed();
+    objects_parse_errors_ += parse_job->parseErrors();
     std::vector<json> json_objects = std::move(parse_job->jsonObjects());
+
     json_parse_jobs_.erase(json_parse_jobs_.begin());
 
     logdbg << "JSONImporterTask: parseJSONDoneSlot: " << json_objects.size() << " parsed objects";
 
-    objects_parsed_ += json_objects.size();
     size_t count = json_objects.size();
 
     assert (schemas_.count(current_schema_));
@@ -348,9 +363,13 @@ void JSONImporterTask::mapJSONDoneSlot ()
     JSONMappingJob* map_job = dynamic_cast<JSONMappingJob*>(QObject::sender());
     assert (map_job);
 
-    loginf << "JSONImporterTask: mapJSONDoneSlot: skipped " << map_job->numSkipped()
-           << " all skipped " << objects_skipped_;
-    objects_skipped_ += map_job->numSkipped();
+    loginf << "JSONImporterTask: mapJSONDoneSlot: skipped " << map_job->numNotMapped()
+           << " all skipped " << objects_not_mapped_;
+
+    objects_mapped_ += map_job->numMapped();
+    objects_not_mapped_ += map_job->numNotMapped();
+
+    objects_created_ += map_job->numCreated();
 
     std::map <std::string, std::shared_ptr<Buffer>> job_buffers = map_job->buffers();
 
@@ -419,6 +438,7 @@ void JSONImporterTask::insertData ()
     }
 
     bool has_sac_sic = false;
+    bool emit_change = (read_json_job_ == nullptr && json_parse_jobs_.size() == 0 && json_map_jobs_.size() == 0);
 
     assert (schemas_.count(current_schema_));
 
@@ -521,10 +541,10 @@ void JSONImporterTask::insertData ()
                 }
             }
 
-            logdbg << "JSONImporterTask: insertData: " << db_object.name() << " inserting";
+            logdbg << "JSONImporterTask: insertData: " << db_object.name() << " inserting, change" << emit_change;
 
             DBOVariableSet set = parser_it.second.variableList();
-            db_object.insertData(set, buffer);
+            db_object.insertData(set, buffer, emit_change);
             objects_inserted_ += buffer->size();
 
             logdbg << "JSONImporterTask: insertData: " << db_object.name() << " clearing";
@@ -585,46 +605,48 @@ void JSONImporterTask::updateMsgBox ()
 
     std::string elapsed_time_str = String::timeStringFromDouble(diff.total_milliseconds()/1000.0, false);
 
-    if (objects_parsed_ && objects_mapped_ && objects_inserted_
-            && statistics_calc_objects_inserted_ != objects_inserted_)
+    // calculate insert rate
+    double objects_per_second = 0.0;
+    bool objects_per_second_updated = false;
+    if (objects_inserted_ && statistics_calc_objects_inserted_ != objects_inserted_)
     {
-        double avg_obj_bytes = static_cast<double>(bytes_read_)/static_cast<double>(objects_parsed_);
-        double num_obj_total = static_cast<double>(bytes_to_read_)/avg_obj_bytes;
+        objects_per_second = objects_inserted_/(diff.total_milliseconds()/1000.0);
+        objects_per_second_updated = true;
 
-        if (objects_skipped_ < objects_parsed_) // skipped objects ok
+        statistics_calc_objects_inserted_ = objects_inserted_;
+        object_rate_str_ = std::to_string(static_cast<int>(objects_per_second));
+    }
+
+    // calculate remaining time
+    if (objects_per_second_updated && bytes_to_read_ && objects_parsed_ && objects_mapped_)
+    {
+        double avg_time_per_obj_s = 1.0/objects_per_second;
+
+        double avg_mapped_obj_bytes = static_cast<double>(bytes_read_)/static_cast<double>(objects_mapped_);
+        double num_obj_total = static_cast<double>(bytes_to_read_)/avg_mapped_obj_bytes;
+
+        double remaining_obj_num = 0.0;
+
+        if (objects_not_mapped_ < objects_parsed_) // skipped objects ok
         {
             double not_skipped_ratio =
-                    static_cast<double>(objects_parsed_-objects_skipped_)/static_cast<double>(objects_parsed_);
-            double remaining_obj_num = (num_obj_total*not_skipped_ratio)-objects_inserted_;
+                    static_cast<double>(objects_parsed_-objects_not_mapped_)/static_cast<double>(objects_parsed_);
+            remaining_obj_num = (num_obj_total*not_skipped_ratio)-objects_inserted_;
 
     //        loginf << "UGA avg bytes " << avg_obj_bytes << " num total " << num_obj_total << " not skipped ratio "
     //               << not_skipped_ratio << " all mapped " << num_obj_total*not_skipped_ratio
     //               << " obj ins " << objects_inserted_ << " remain obj " << remaining_obj_num;
-
-            if (remaining_obj_num < 0)
-                remaining_obj_num = 0;
-
-            double avg_time_per_obj_s = diff.total_seconds()/static_cast<double>(objects_inserted_);
-            double time_remaining_s = remaining_obj_num*avg_time_per_obj_s;
-
-            statistics_calc_objects_inserted_ = objects_inserted_;
-            remaining_time_str_ = String::timeStringFromDouble(time_remaining_s, false);
-            object_rate_str_ = std::to_string(static_cast<int>(objects_inserted_/(diff.total_milliseconds()/1000.0)));
         }
         else // unknown number of skipped objects
         {
-            double remaining_obj_num = num_obj_total-objects_inserted_;
-
-            if (remaining_obj_num < 0)
-                remaining_obj_num = 0;
-
-            double avg_time_per_obj_s = diff.total_seconds()/static_cast<double>(objects_inserted_);
-            double time_remaining_s = remaining_obj_num*avg_time_per_obj_s;
-
-            statistics_calc_objects_inserted_ = objects_inserted_;
-            remaining_time_str_ = String::timeStringFromDouble(time_remaining_s, false);
-            object_rate_str_ = std::to_string(static_cast<int>(objects_inserted_/(diff.total_milliseconds()/1000.0)));
+            remaining_obj_num = num_obj_total-objects_inserted_;
         }
+
+        if (remaining_obj_num < 0.0)
+            remaining_obj_num = 0.0;
+
+        double time_remaining_s = remaining_obj_num*avg_time_per_obj_s;
+        remaining_time_str_ = String::timeStringFromDouble(time_remaining_s, false);
     }
 
     msg += "Elapsed Time: "+elapsed_time_str+"\n";
@@ -634,17 +656,25 @@ void JSONImporterTask::updateMsgBox ()
     else
         msg += "Data read: "+String::doubleToStringPrecision(static_cast<double>(bytes_read_)*1e-6,2)+" MB";
 
-    msg += " ("+std::to_string(static_cast<int>(read_status_percent_))+"%)\n";
+    if (bytes_to_read_)
+        msg += " ("+std::to_string(static_cast<int>(read_status_percent_))+"%)\n\n";
+    else
+        msg += "\n\n";
 
     msg += "Objects read: "+std::to_string(objects_read_)+"\n";
     msg += "Objects parsed: "+std::to_string(objects_parsed_)+"\n";
-    msg += "Objects skipped: "+std::to_string(objects_skipped_)+"\n";
+    msg += "Objects parse errors: "+std::to_string(objects_parse_errors_)+"\n\n";
+
     msg += "Objects mapped: "+std::to_string(objects_mapped_)+"\n";
-    msg += "Objects inserted: "+std::to_string(objects_inserted_);
+    msg += "Objects not mapped: "+std::to_string(objects_not_mapped_)+"\n\n";
 
-    msg += "\n\nObject rate: "+object_rate_str_+" e/s";
+    msg += "Objects created: "+std::to_string(objects_created_)+"\n";
+    msg += "Objects inserted: "+std::to_string(objects_inserted_)+"\n\n";
 
-    if (!all_done_)
+    if (object_rate_str_.size())
+        msg += "Object rate: "+object_rate_str_+" e/s";
+
+    if (!all_done_ && remaining_time_str_.size())
         msg += "\nEstimated remaining time: "+remaining_time_str_;
 
     msg_box_->setText(msg.c_str());

@@ -30,11 +30,11 @@
 
 using namespace Utils::String;
 
-InsertBufferDBJob::InsertBufferDBJob(DBInterface &db_interface, DBObject &dbobject, std::shared_ptr<Buffer> buffer)
-: Job("InsertBufferDBJob"), db_interface_(db_interface), dbobject_(dbobject), buffer_(buffer)
+InsertBufferDBJob::InsertBufferDBJob(DBInterface &db_interface, DBObject &dbobject, std::shared_ptr<Buffer> buffer,
+                                     bool emit_change)
+: Job("InsertBufferDBJob"), db_interface_(db_interface), dbobject_(dbobject), buffer_(buffer), emit_change_(emit_change)
 {
     assert (buffer_);
-    //assert (dbobject_.existsInDB());
 }
 
 InsertBufferDBJob::~InsertBufferDBJob()
@@ -63,6 +63,11 @@ void InsertBufferDBJob::run ()
 
     loginf  << "InsertBufferDBJob: run: buffer write done (" << doubleToStringPrecision(load_time, 2) << " s).";
     done_=true;
+}
+
+bool InsertBufferDBJob::emitChange() const
+{
+    return emit_change_;
 }
 
 

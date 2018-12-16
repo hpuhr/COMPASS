@@ -24,16 +24,24 @@ void JSONMappingJob::run ()
     for (auto& parser_it : parsers_)
         buffers_[parser_it.second.dbObject().name()] = parser_it.second.getNewBuffer();
 
-    std::pair <size_t, size_t> skipped_parsed;
-
+    bool parsed;
+    bool parsed_any = false;
 
     for (auto& j_it : json_objects_)
+    {
+        parsed = false;
+        parsed_any = false;
+
         for (auto& map_it : parsers_)
         {
-            skipped_parsed = map_it.second.parseJSON(j_it, buffers_.at(map_it.second.dbObject().name()));
-            num_skipped_ += skipped_parsed.first;
-            num_parsed_ += skipped_parsed.second;
+            parsed = map_it.second.parseJSON(j_it, buffers_.at(map_it.second.dbObject().name()));
+            parsed_any |= parsed;
         }
+        if (parsed_any)
+            ++num_mapped_;
+        else
+            ++num_not_mapped_;
+    }
 
     for (auto& parser_it : parsers_)
     {
@@ -43,11 +51,11 @@ void JSONMappingJob::run ()
         if (buffer && buffer->size())
         {
             parser_it.second.transformBuffer(buffer, key_count_);
-            num_mapped_ += buffer->size();
+            num_created_ += buffer->size();
         }
     }
     done_ = true;
-    logdbg << "JSONMappingJob: run: done: mapped " << num_mapped_ << " skipped " << num_skipped_;
+    logdbg << "JSONMappingJob: run: done: mapped " << num_created_ << " skipped " << num_not_mapped_;
 }
 
 //std::vector <JsonMapping>&& JSONMappingJob::mappings()
@@ -55,18 +63,18 @@ void JSONMappingJob::run ()
 //    return std::move(mappings_);
 //}
 
-size_t JSONMappingJob::numParsed() const
-{
-    return num_parsed_;
-}
-
-
-size_t JSONMappingJob::numSkipped() const
-{
-    return num_skipped_;
-}
-
 size_t JSONMappingJob::numMapped() const
 {
     return num_mapped_;
+}
+
+
+size_t JSONMappingJob::numNotMapped() const
+{
+    return num_not_mapped_;
+}
+
+size_t JSONMappingJob::numCreated() const
+{
+    return num_created_;
 }

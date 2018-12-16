@@ -61,7 +61,7 @@ protected:
     QPushButton* add_object_parser_button_ {nullptr};
     QPushButton* delete_object_parser_button_ {nullptr};
 
-    QStackedWidget* object_parser_widgets_ {nullptr};
+    QStackedWidget* object_parser_widget_ {nullptr};
     //QHBoxLayout* object_parser_layout_ {nullptr};
 
     QPushButton* test_button_ {nullptr};
@@ -69,6 +69,7 @@ protected:
 
     void updateSchemasBox();
     void updateParserList ();
+    void createObjectParserWidget();
 };
 
 #endif // JSONIMPORTERTASKWIDGET_H

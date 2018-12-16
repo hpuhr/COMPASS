@@ -28,18 +28,24 @@ void JSONParseJob::run ()
         catch (nlohmann::detail::parse_error e)
         {
             logwrn << "JSONParseJob: run: parse error " << e.what() << " in '" << str_it << "'";
+            ++parse_errors_;
             continue;
         }
         ++objects_parsed_;
     }
 
-    loginf << "JSONParseJob: run: done with " << objects_parsed_ << " objects";
+    loginf << "JSONParseJob: run: done with " << objects_parsed_ << " objects, errors " << parse_errors_;
     done_ = true;
 }
 
 size_t JSONParseJob::objectsParsed() const
 {
     return objects_parsed_;
+}
+
+size_t JSONParseJob::parseErrors() const
+{
+    return parse_errors_;
 }
 
 std::vector<nlohmann::json>& JSONParseJob::jsonObjects()

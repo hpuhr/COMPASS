@@ -46,8 +46,8 @@ public:
 
     void transformBuffer (std::shared_ptr<Buffer> buffer, long key_begin=-1) const;
 
-    // returns skipped, parsed
-    std::pair<size_t, size_t> parseJSON (nlohmann::json& j, std::shared_ptr<Buffer> buffer) const;
+    // returs true on successful parse
+    bool parseJSON (nlohmann::json& j, std::shared_ptr<Buffer> buffer) const;
 
     const DBOVariableSet& variableList() const;
 
@@ -91,6 +91,7 @@ private:
 
     std::vector <JSONDataMapping> data_mappings_;
 
+    // returns true on successful parse
     bool parseTargetReport (const nlohmann::json& tr, std::shared_ptr<Buffer> buffer, size_t row_cnt) const;
 
 protected:
