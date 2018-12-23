@@ -307,10 +307,10 @@ void ReadJSONFilePartJob::cleanCommas ()
 
     for (auto& str_it : objects_)
     {
-        str_it = std::regex_replace(str_it, commas_between_brackets, "[]");
-        str_it = std::regex_replace(str_it, multiple_commas, ",");
-        str_it = std::regex_replace(str_it, stupid_commas_at_bracket_begin, "[");
-        str_it = std::regex_replace(str_it, stupid_commas_at_bracket_end, "]");
+        str_it = std::regex_replace(str_it, commas_between_brackets, {"[]"});
+        str_it = std::regex_replace(str_it, multiple_commas, {","});
+        str_it = std::regex_replace(str_it, stupid_commas_at_bracket_begin, {"["});
+        str_it = std::regex_replace(str_it, stupid_commas_at_bracket_end, {"]"});
 
         // \[(,|\n)+\]   commas between brackets
         // /,(?!["{}[\]])/g  multiple commas
