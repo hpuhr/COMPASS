@@ -20,6 +20,7 @@
 
 #include <QSize>
 #include <math.h>
+#include <string>
 
 static const std::string VERSION = "@CPACK_PACKAGE_VERSION_MAJOR@.@CPACK_PACKAGE_VERSION_MINOR@.@CPACK_PACKAGE_VERSION_PATCH@";
 
