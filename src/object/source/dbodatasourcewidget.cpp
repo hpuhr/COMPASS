@@ -52,7 +52,7 @@ DBODataSourceWidget::DBODataSourceWidget(DBODataSource& data_source, bool add_he
     id_edit_->setReadOnly(true);
     main_layout->addWidget (id_edit_, row, col++);
 
-    name_edit_ = new QLineEdit ();
+    name_edit_ = new InvalidQLineEdit ();
     connect(name_edit_, &QLineEdit::textEdited, this, &DBODataSourceWidget::changedNameColumnSlot);
     main_layout->addWidget (name_edit_, row, col++);
 
@@ -112,18 +112,26 @@ void DBODataSourceWidget::update ()
 
 void DBODataSourceWidget::changedShortNameColumnSlot ()
 {
-    data_source_->shortName(short_name_edit_->text().toStdString());
+    std::string value = short_name_edit_->text().toStdString();
+    short_name_edit_->setValid(value.size());
+
+    data_source_->shortName(value);
     data_source_->updateInDatabase();
+
 }
 void DBODataSourceWidget::changedNameColumnSlot ()
 {
-    data_source_->name(name_edit_->text().toStdString());
+    std::string value = name_edit_->text().toStdString();
+    name_edit_->setValid(value.size());
+
+    data_source_->name(value);
     data_source_->updateInDatabase();
 }
 void DBODataSourceWidget::changedSacColumnSlot ()
 {
     bool ok;
     unsigned char sac = sac_edit_->text().toUShort(&ok);
+    sac_edit_->setValid(ok);
 
     if (!ok)
     {
@@ -140,6 +148,7 @@ void DBODataSourceWidget::changedSicColumnSlot ()
 {
     bool ok;
     unsigned char sic = sic_edit_->text().toUShort(&ok);
+    sic_edit_->setValid(ok);
 
     if (!ok)
     {
@@ -156,6 +165,7 @@ void DBODataSourceWidget::changedLatitudeColumnSlot ()
 {
     bool ok;
     double value = latitude_edit_->text().toDouble(&ok);
+    latitude_edit_->setValid(ok);
 
     if (!ok)
     {
@@ -172,6 +182,7 @@ void DBODataSourceWidget::changedLongitudeColumnSlot ()
 {
     bool ok;
     double value = longitude_edit_->text().toDouble(&ok);
+    longitude_edit_->setValid(ok);
 
     if (!ok)
     {
@@ -188,6 +199,7 @@ void DBODataSourceWidget::changedAltitudeColumnSlot ()
 {
     bool ok;
     double value = altitude_edit_->text().toDouble(&ok);
+    altitude_edit_->setValid(ok);
 
     if (!ok)
     {

@@ -63,7 +63,7 @@ private:
     DBODataSource* data_source_;
 
     QLineEdit* id_edit_{nullptr};
-    QLineEdit* name_edit_{nullptr};
+    InvalidQLineEdit* name_edit_{nullptr};
     InvalidQLineEdit* short_name_edit_{nullptr};
     InvalidQLineEdit* sac_edit_{nullptr};
     InvalidQLineEdit* sic_edit_{nullptr};
