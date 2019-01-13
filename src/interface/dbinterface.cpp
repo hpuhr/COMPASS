@@ -507,12 +507,17 @@ std::map <int, DBODataSource> DBInterface::getDataSources (DBObject &object)
     }
 
     bool has_sac = ds.hasSacColumn();
+    bool has_int_sacsic = false;
     std::string sac_col_name;
     if (has_sac)
     {
         sac_col_name = meta.column(ds.sacColumn()).name();
-        assert (buffer->properties().hasProperty(sac_col_name)
-                && buffer->properties().get(sac_col_name).dataType() == PropertyDataType::CHAR);
+        assert (buffer->properties().hasProperty(sac_col_name));
+
+        if (buffer->properties().get(sac_col_name).dataType() == PropertyDataType::INT)
+            has_int_sacsic = true;
+        else
+            assert (buffer->properties().get(sac_col_name).dataType() == PropertyDataType::CHAR);
     }
 
     bool has_sic = ds.hasSicColumn();
@@ -520,8 +525,12 @@ std::map <int, DBODataSource> DBInterface::getDataSources (DBObject &object)
     if (has_sic)
     {
         sic_col_name = meta.column(ds.sicColumn()).name();
-        assert (buffer->properties().hasProperty(sic_col_name)
-                && buffer->properties().get(sic_col_name).dataType() == PropertyDataType::CHAR);
+        assert (buffer->properties().hasProperty(sic_col_name));
+
+        if (has_int_sacsic)
+            assert (buffer->properties().get(sic_col_name).dataType() == PropertyDataType::INT);
+        else
+            assert (buffer->properties().get(sic_col_name).dataType() == PropertyDataType::CHAR);
     }
 
     bool has_latitude = ds.hasLatitudeColumn();
@@ -584,11 +593,33 @@ std::map <int, DBODataSource> DBInterface::getDataSources (DBObject &object)
         if (has_short_name && !buffer->get<std::string>(short_name_col_name).isNull(cnt))
             sources.at(key).shortName(buffer->get<std::string>(short_name_col_name).get(cnt));
 
-        if (has_sac && !buffer->get<char>(sac_col_name).isNull(cnt))
-            sources.at(key).sac(buffer->get<char>(sac_col_name).get(cnt));
+        if (has_sac)
+        {
+            if (has_int_sacsic)
+            {
+                if (!buffer->get<int>(sac_col_name).isNull(cnt))
+                    sources.at(key).sac(buffer->get<int>(sac_col_name).get(cnt));
+            }
+            else
+            {
+                if (!buffer->get<char>(sac_col_name).isNull(cnt))
+                    sources.at(key).sac(buffer->get<char>(sac_col_name).get(cnt));
+            }
+        }
 
-        if (has_sic && !buffer->get<char>(sic_col_name).isNull(cnt))
-            sources.at(key).sic(buffer->get<char>(sic_col_name).get(cnt));
+        if (has_sic)
+        {
+            if (has_int_sacsic)
+            {
+                if (!buffer->get<int>(sic_col_name).isNull(cnt))
+                    sources.at(key).sic(buffer->get<int>(sic_col_name).get(cnt));
+            }
+            else
+            {
+                if (!buffer->get<char>(sic_col_name).isNull(cnt))
+                    sources.at(key).sic(buffer->get<char>(sic_col_name).get(cnt));
+            }
+        }
 
         if (has_latitude && !buffer->get<double>(latitude_col_name).isNull(cnt))
             sources.at(key).latitude(buffer->get<double>(latitude_col_name).get(cnt));
