@@ -25,6 +25,9 @@
 #include "global.h"
 #include "dbovariableset.h"
 #include "dbodatasource.h"
+#include "dbodatasourcedefinition.h"
+#include "storeddbodatasource.h"
+#include "dboeditdatasourceactionoptions.h"
 #include "configurable.h"
 #include "dbovariable.h"
 
@@ -63,6 +66,7 @@ protected:
 
 class DBObjectWidget;
 class DBObjectInfoWidget;
+class DBOEditDataSourcesWidget;
 class Buffer;
 class Job;
 class DBOReadDBJob;
@@ -72,6 +76,8 @@ class FinalizeDBOReadJob;
 class DBOVariableSet;
 class DBOLabelDefinition;
 class DBOLabelDefinitionWidget;
+
+using DBOEditDataSourceActionOptionsCollection = typename std::map<unsigned int, DBOEditDataSourceActionOptions>;
 
 /**
  * @brief Abstract data description of an object stored in a database
@@ -177,7 +183,7 @@ public:
     void clearData ();
 
     // takes buffers with dbovar names & datatypes & units, converts itself
-    void insertData (DBOVariableSet& list, std::shared_ptr<Buffer> buffer);
+    void insertData (DBOVariableSet& list, std::shared_ptr<Buffer> buffer, bool emit_change=true);
     // takes buffers with dbovar names & datatypes & units, converts itself
     void updateData (DBOVariable &key_var, DBOVariableSet& list, std::shared_ptr<Buffer> buffer);
 
@@ -200,14 +206,14 @@ public:
     void deleteMetaTable (const std::string& schema);
 
     /// @brief Returns main meta table for current schema
-    const MetaDBTable& currentMetaTable () const;
+    MetaDBTable& currentMetaTable () const;
     /// @brief Returns if current schema has main meta table
     bool hasCurrentMetaTable () const;
 
     /// @brief Returns if a data source is defined in the current schema
     bool hasCurrentDataSourceDefinition () const;
     /// @brief Returns current data source definition
-    const DBODataSourceDefinition &currentDataSourceDefinition () const;
+    const DBODataSourceDefinition& currentDataSourceDefinition () const;
     bool hasDataSourceDefinition (const std::string& schema) { return data_source_definitions_.count(schema); }
     void deleteDataSourceDefinition (const std::string& schema);
     /// @brief Returns container with all data source definitions
@@ -217,14 +223,38 @@ public:
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
+    bool hasKeyVariable ();
+    DBOVariable& getKeyVariable();
+
+    using StoredDataSourceIterator = typename std::map<unsigned int, StoredDBODataSource>::iterator;
+    StoredDataSourceIterator storedDSBegin() { return stored_data_sources_.begin(); }
+    StoredDataSourceIterator storedDSEnd() { return stored_data_sources_.end(); }
+
+    /// @brief Returns flag indication if a StoredDBODataSource identified by name exists
+    bool hasStoredDataSource (unsigned int id) const;
+    /// @brief Returns variable identified by id
+    StoredDBODataSource& storedDataSource (unsigned int id);
+    StoredDBODataSource& addNewStoredDataSource ();
+//    /// @brief Deletes a variable identified by id
+    void deleteStoredDataSource (unsigned int id);
+
+
+    using DataSourceIterator = typename std::map<int, DBODataSource>::iterator;
+    DataSourceIterator dsBegin() { return data_sources_.begin(); }
+    DataSourceIterator dsEnd() { return data_sources_.end(); }
+
     ///@brief Returns flag if data sources are defined for DBO type.
     bool hasDataSources () { return data_sources_.size() > 0; }
     void addDataSource (int key_value, const std::string& name); // needs postprocessing after
-    void addDataSources (std::map <int, std::string>& sources);
-    ///@brief Returns container with all defined data source for DBO type.
-    std::map<int, DBODataSource>& dataSources () { return data_sources_; }
+    void addDataSources (std::map <int, std::pair<int,int>>& sources);
+    bool hasDataSource (int id);
+    DBODataSource& getDataSource (int id);
+    void updateDataSource (int id);
     ///@brief Returns data source name for a DBO type and data source number.
-    const std::string& getNameOfSensor (int num);
+    const std::string& getNameOfSensor (int id);
+
+    DBOEditDataSourceActionOptionsCollection getSyncOptionsFromDB ();
+    DBOEditDataSourceActionOptionsCollection getSyncOptionsFromCfg ();
 
     /// @brief Return if active data sources info is available
     bool hasActiveDataSourcesInfo ();
@@ -237,6 +267,7 @@ public:
     DBObjectWidget* widget ();
     DBObjectInfoWidget* infoWidget ();
     DBOLabelDefinitionWidget* labelDefinitionWidget();
+    DBOEditDataSourcesWidget* editDataSourcesWidget();
 
     std::shared_ptr<Buffer> data () { return data_; }
 
@@ -273,8 +304,11 @@ protected:
     /// Container with all DBOSchemaMetaTableDefinitions
     std::map <std::string, DBOSchemaMetaTableDefinition> meta_table_definitions_;
 
+    std::unique_ptr<DBOEditDataSourcesWidget> edit_ds_widget_;
+
     /// Container with data source definitions (schema identifier -> data source definition pointer)
-    std::map <std::string, DBODataSourceDefinition> data_source_definitions_;
+    std::map<std::string, DBODataSourceDefinition> data_source_definitions_;
+    std::map<unsigned int, StoredDBODataSource> stored_data_sources_;
     std::map<int, DBODataSource> data_sources_;
     /// Container with all variables (variable identifier -> variable pointer)
     std::map<std::string, DBOVariable> variables_;

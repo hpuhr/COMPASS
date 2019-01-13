@@ -1,3 +1,20 @@
+/*
+ * This file is part of ATSDB.
+ *
+ * ATSDB is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * ATSDB is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef JSONIMPORTERTASKWIDGET_H
 #define JSONIMPORTERTASKWIDGET_H
 
@@ -12,30 +29,31 @@ class QPushButton;
 class QListWidget;
 class QCheckBox;
 class QLineEdit;
+class QComboBox;
+class QHBoxLayout;
+class QStackedWidget;
 
 class JSONImporterTaskWidget : public QWidget
 {
     Q_OBJECT
 
 public slots:
-    void dbObjectChangedSlot();
     void testImportSlot ();
     void importSlot ();
     void importDoneSlot (bool test);
 
     void addFileSlot ();
     void deleteFileSlot ();
+    void selectedFileSlot ();
     void updateFileListSlot ();
 
-    void joinDataSourcesChangedSlot (bool checked);
-    void separateMLATChangedSlot (bool checked);
+    void addSchemaSlot();
+    void removeSchemaSlot();
+    void selectedSchemaChangedSlot(const QString& text);
 
-    void useTimeFilterChangedSlot (bool checked);
-    void timeFilterMinChangedSlot ();
-    void timeFilterMaxChangedSlot ();
-
-    void usePositionFilterChangedSlot (bool checked);
-    void positionFilterChangedSlot ();
+    void addObjectParserSlot ();
+    void removeObjectParserSlot ();
+    void selectedObjectParserSlot ();
 
 public:
     JSONImporterTaskWidget(JSONImporterTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
@@ -46,29 +64,29 @@ public:
 protected:
     JSONImporterTask& task_;
 
+    QHBoxLayout *main_layout_ {nullptr};
+
     QListWidget* file_list_ {nullptr};
-    QPushButton* add_button_ {nullptr};
-    QPushButton* delete_button_ {nullptr};
+    QPushButton* add_file_button_ {nullptr};
+    QPushButton* delete_file_button_ {nullptr};
 
-    DBObjectComboBox* object_box_ {nullptr};
+    QComboBox* schema_box_ {nullptr};
+    QPushButton* add_schema_button_ {nullptr};
+    QPushButton* delete_schema_button_ {nullptr};
 
-    QCheckBox* join_sources_check_ {nullptr};
-    QCheckBox* separate_mlat_check_ {nullptr};
+    QListWidget* object_parser_list_ {nullptr};
+    QPushButton* add_object_parser_button_ {nullptr};
+    QPushButton* delete_object_parser_button_ {nullptr};
 
-    QCheckBox* filter_time_check_ {nullptr};
-    QLineEdit* filter_time_min_edit_ {nullptr};
-    QLineEdit* filter_time_max_edit_ {nullptr};
-
-    QCheckBox* filter_position_check_ {nullptr};
-    QLineEdit* filter_lat_min_edit_ {nullptr};
-    QLineEdit* filter_lat_max_edit_ {nullptr};
-    QLineEdit* filter_lon_min_edit_ {nullptr};
-    QLineEdit* filter_lon_max_edit_ {nullptr};
+    QStackedWidget* object_parser_widget_ {nullptr};
+    //QHBoxLayout* object_parser_layout_ {nullptr};
 
     QPushButton* test_button_ {nullptr};
     QPushButton* import_button_ {nullptr};
 
-    void setDBOBject (const std::string& object_name);
+    void updateSchemasBox();
+    void updateParserList ();
+    void createObjectParserWidget();
 };
 
 #endif // JSONIMPORTERTASKWIDGET_H

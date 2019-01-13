@@ -21,7 +21,6 @@
 #include "buffercsvexportjob.h"
 #include "dbovariable.h"
 
-
 BufferCSVExportJob::BufferCSVExportJob(std::shared_ptr<Buffer> buffer, const DBOVariableSet& read_set,
                                        const std::string& file_name, bool overwrite, bool use_presentation)
     : Job("BufferCSVExportJob"), buffer_(buffer), read_set_(read_set), file_name_(file_name), overwrite_(overwrite),
@@ -85,7 +84,7 @@ void BufferCSVExportJob::run ()
                 if (data_type == PropertyDataType::BOOL)
                 {
                     assert (buffer_->has<bool>(property_name));
-                    null = buffer_->get<bool>(property_name).isNone(row);
+                    null = buffer_->get<bool>(property_name).isNull(row);
                     if (!null)
                     {
                         if (use_presentation_)
@@ -98,7 +97,7 @@ void BufferCSVExportJob::run ()
                 else if (data_type == PropertyDataType::CHAR)
                 {
                     assert (buffer_->has<char>(property_name));
-                    null = buffer_->get<char>(property_name).isNone(row);
+                    null = buffer_->get<char>(property_name).isNull(row);
                     if (!null)
                     {
                         if (use_presentation_)
@@ -111,7 +110,7 @@ void BufferCSVExportJob::run ()
                 else if (data_type == PropertyDataType::UCHAR)
                 {
                     assert (buffer_->has<unsigned char>(property_name));
-                    null = buffer_->get<unsigned char>(property_name).isNone(row);
+                    null = buffer_->get<unsigned char>(property_name).isNull(row);
                     if (!null)
                     {
                         if (use_presentation_)
@@ -124,7 +123,7 @@ void BufferCSVExportJob::run ()
                 else if (data_type == PropertyDataType::INT)
                 {
                     assert (buffer_->has<int>(property_name));
-                    null = buffer_->get<int>(property_name).isNone(row);
+                    null = buffer_->get<int>(property_name).isNull(row);
                     if (!null)
                     {
                         if (use_presentation_)
@@ -137,7 +136,7 @@ void BufferCSVExportJob::run ()
                 else if (data_type == PropertyDataType::UINT)
                 {
                     assert (buffer_->has<unsigned int>(property_name));
-                    null = buffer_->get<unsigned int>(properties.at(col).name()).isNone(row);
+                    null = buffer_->get<unsigned int>(properties.at(col).name()).isNull(row);
                     if (!null)
                     {
                         if (use_presentation_)
@@ -150,7 +149,7 @@ void BufferCSVExportJob::run ()
                 else if (data_type == PropertyDataType::LONGINT)
                 {
                     assert (buffer_->has<long int>(property_name));
-                    null = buffer_->get<long int>(property_name).isNone(row);
+                    null = buffer_->get<long int>(property_name).isNull(row);
                     if (!null)
                     {
                         if (use_presentation_)
@@ -163,7 +162,7 @@ void BufferCSVExportJob::run ()
                 else if (data_type == PropertyDataType::ULONGINT)
                 {
                     assert (buffer_->has<unsigned long int>(property_name));
-                    null = buffer_->get<unsigned long int>(property_name).isNone(row);
+                    null = buffer_->get<unsigned long int>(property_name).isNull(row);
                     if (!null)
                     {
                         if (use_presentation_)
@@ -176,7 +175,7 @@ void BufferCSVExportJob::run ()
                 else if (data_type == PropertyDataType::FLOAT)
                 {
                     assert (buffer_->has<float>(property_name));
-                    null = buffer_->get<float>(properties.at(col).name()).isNone(row);
+                    null = buffer_->get<float>(properties.at(col).name()).isNull(row);
                     if (!null)
                     {
                         if (use_presentation_)
@@ -189,7 +188,7 @@ void BufferCSVExportJob::run ()
                 else if (data_type == PropertyDataType::DOUBLE)
                 {
                     assert (buffer_->has<double>(property_name));
-                    null = buffer_->get<double>(property_name).isNone(row);
+                    null = buffer_->get<double>(property_name).isNull(row);
                     if (!null)
                     {
                         if (use_presentation_)
@@ -202,7 +201,7 @@ void BufferCSVExportJob::run ()
                 else if (data_type == PropertyDataType::STRING)
                 {
                     assert (buffer_->has<std::string>(property_name));
-                    null = buffer_->get<std::string>(property_name).isNone(row);
+                    null = buffer_->get<std::string>(property_name).isNull(row);
                     if (!null)
                     {
                         value_str = buffer_->get<std::string>(property_name).getAsString(row);

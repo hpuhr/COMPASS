@@ -69,7 +69,8 @@ void UpdateBufferDBJob::run ()
         logdbg << "UpdateBufferDBJob: run: step " << cnt << " steps " << steps << " from " << index_from
                << " to " << index_to;
 
-        db_interface_.updateBuffer (dbobject_, key_var_, buffer_, index_from, index_to);
+        db_interface_.updateBuffer (dbobject_.currentMetaTable(), key_var_.currentDBColumn(), buffer_,
+                                    index_from, index_to);
 
         emit updateProgressSignal(100.0*index_to/buffer_->size());
     }

@@ -363,57 +363,57 @@ void MySQLppConnection::readRowIntoBuffer (mysqlpp::Row &row, const PropertyList
             case PropertyDataType::BOOL:
                 if (row[cnt] != mysqlpp::null)
                     buffer->get<bool>(prop.name()).set(index, static_cast<bool> (row[cnt]));
-                else
-                    buffer->get<bool>(prop.name()).setNone(index);
+//                else
+//                    buffer->get<bool>(prop.name()).setNone(index);
                 //loginf  << "sqlex: bool " << prop->id_ << " val " << *ptr;
                 break;
             case PropertyDataType::UCHAR:
                 if (row[cnt] != mysqlpp::null)
                     buffer->get<unsigned char>(prop.name()).set(index, static_cast<unsigned char> (row[cnt]));
-                else
-                    buffer->get<unsigned char>(prop.name()).setNone(index);
+//                else
+//                    buffer->get<unsigned char>(prop.name()).setNone(index);
                 //loginf  << "sqlex: uchar " << prop->id_ << " val " << *ptr;
                 break;
             case PropertyDataType::CHAR:
                 if (row[cnt] != mysqlpp::null)
                     buffer->get<char>(prop.name()).set(index, static_cast<signed char> (row[cnt]));
-                else
-                    buffer->get<char>(prop.name()).setNone(index);
+//                else
+//                    buffer->get<char>(prop.name()).setNone(index);
                 //loginf  << "sqlex: char " << prop->id_ << " val " << *ptr;
                 break;
             case PropertyDataType::INT:
                 if (row[cnt] != mysqlpp::null)
                     buffer->get<int>(prop.name()).set(index, static_cast<int> (row[cnt]));
-                else
-                    buffer->get<int>(prop.name()).setNone(index);
+//                else
+//                    buffer->get<int>(prop.name()).setNone(index);
                 //loginf  << "sqlex: int " << prop->id_ << " val " << *ptr;
                 break;
             case PropertyDataType::UINT:
                 if (row[cnt] != mysqlpp::null)
                     buffer->get<unsigned int>(prop.name()).set(index, static_cast<unsigned int> (row[cnt]));
-                else
-                    buffer->get<unsigned int>(prop.name()).setNone(index);
+//                else
+//                    buffer->get<unsigned int>(prop.name()).setNone(index);
                 //loginf  << "sqlex: uint " << prop->id_ << " val " << *ptr;
                 break;
             case PropertyDataType::STRING:
                 if (row[cnt] != mysqlpp::null)
                     buffer->get<std::string>(prop.name()).set(index, static_cast<const char *> (row[cnt]));
-                else
-                    buffer->get<std::string>(prop.name()).setNone(index);
+//                else
+//                    buffer->get<std::string>(prop.name()).setNone(index);
                 //loginf  << "sqlex: string " << prop->id_ << " val " << *ptr;
                 break;
             case PropertyDataType::FLOAT:
                 if (row[cnt] != mysqlpp::null)
                     buffer->get<float>(prop.name()).set(index, static_cast<float> (row[cnt]));
-                else
-                    buffer->get<float>(prop.name()).setNone(index);
+//                else
+//                    buffer->get<float>(prop.name()).setNone(index);
                 //loginf  << "sqlex: float " << prop->id_ << " val " << *ptr;
                 break;
             case PropertyDataType::DOUBLE:
                 if (row[cnt] != mysqlpp::null)
                     buffer->get<double>(prop.name()).set(index, static_cast<double> (row[cnt]));
-                else
-                    buffer->get<double>(prop.name()).setNone(index);
+//                else
+//                    buffer->get<double>(prop.name()).setNone(index);
                 //loginf  << "sqlex: double " << prop->id_ << " val " << *ptr;
                 break;
             default:

@@ -19,6 +19,8 @@
 #include "dimension.h"
 #include "logger.h"
 
+#include <math.h>
+
 UnitManager::UnitManager()
 : Configurable ("UnitManager", "UnitManager0", 0, "units.xml")
 {
@@ -46,6 +48,15 @@ void UnitManager::generateSubConfigurable (const std::string &class_id, const st
 
 void UnitManager::checkSubConfigurables ()
 {
+    if (dimensions_.count("Angle") == 0)
+    {
+        addNewSubConfiguration ("Dimension", "Angle");
+        generateSubConfigurable("Dimension", "Angle");
+
+        dimensions_.at("Angle")->addUnit ("Degree", 1.0, "");
+        dimensions_.at("Angle")->addUnit ("Radian", 180.0/M_PI, "");
+    }
+
     if (dimensions_.count("Length") == 0)
     {
         addNewSubConfiguration ("Dimension", "Length");
@@ -64,6 +75,7 @@ void UnitManager::checkSubConfigurables ()
 
         dimensions_.at("Height")->addUnit ("Feet", 1.0, "");
         dimensions_.at("Height")->addUnit ("Flight Level", 1/100.0, "");
+        dimensions_.at("Height")->addUnit ("Meter", 0.3048, "");
     }
 
     if (dimensions_.count("Time") == 0)
@@ -88,7 +100,6 @@ void UnitManager::checkSubConfigurables ()
         dimensions_.at("Position")->addUnit ("Kilometer", 1.0/1000.0, "");
         dimensions_.at("Position")->addUnit ("Mile", 1.0/1609.344, "");
         dimensions_.at("Position")->addUnit ("Nautical Mile", 1.0/1852.0, "");
-        dimensions_.at("Position")->addUnit ("WGS 84", 0, "");
     }
 }
 

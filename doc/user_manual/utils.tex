@@ -1,8 +1,317 @@
 \chapter{Utilities}
 \label{sec:utils}
 
+\section{SDDL}
+\label{sec:sddl}
+
+The SDDL tool is a open-source ASTERIX decoder and lister, please refer to \href{https://github.com/kobelbauer/sddl/}{SDDL} for more information. This text only aims at provding a short usage guide.\\
+
+While it is possible to download and build from the source code, this usage guide recommends downloading the a release AppImage from \href{https://github.com/kobelbauer/sddl/releases}{Releases}. Please make sure that at least version 1.1.0 with included JSON functions is used.
+
+After downloading, set the executable flag on the file: 
+
+\begin{verbatim}
+$ chmod +x SDDL-json-x86_64.AppImage
+\end{verbatim}
+
+After this, the file can be executed. The help text can be obtained with the following command:
+\begin{verbatim}
+$ ./SDDL-json-x86_64.AppImage
+*** Surveillance Data Decoder and Lister			   v1.1.0 ***
+2000-2018 by Helmut Kobelbauer, Sinabelkirchen/Austria.
+
+SDDL is free software: you can redistribute it and/or modify it under
+ the terms of the GNU General Public License as published by the Free Software
+ Foundation, either version 3 of the License, or (at your option) any later version.
+
+SDDL is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details
+
+Users are invited to report issues or requests for improvement
+ however the provider has no obligation to process users' requests and
+ provide fixes and/or enhancements.
+
+The 'Surveillance Data Decoder and Lister' utility may be used as follows:
+
+ sddl { option } [ input_path [ list_path ] ]
+
+where the following options are supported:
+ -ah=xxx		use value (in FL) as assumed height
+ -all			list all levels
+ -cat			list ASTERIX category
+ -cat=xxx		only this ASTERIX category to be listed
+ -categories		print list of supported ASTERIX categories
+ -f			forced overwrite for list file
+ -fd			checking frame against data time
+ -fl=nn			frame limit (only first nn frames are listed)
+ -formats		print list of recording and data formats
+ -gv			list ground vector (for radar and system tracks)
+ -help			print some help info (and abort)
+ -hex			list hex dump
+ -if=pathname		path name of input file
+ -l=nn			list level (1/2=verbose, 3=one message per line)
+ -lf=pathname		path name of list file
+ -json-type=type	output type of json file to be written, possible types: 
+                none,test,print,text,cbor,msgpack,ubjson,
+                zip-text,zip-cbor,zip-msgpack,zip-ubjson
+ -json-file=pathname	path name of json file to be written
+ -list_065		list ASTERIX category 065 messages
+ -list_dsi		list data source identifiers (SAC/SIC)
+ -list_gh		list geometric height
+ -list_lus		list last updating sensor (for system tracks)
+ -list_only_bg		list only system tracks from background service
+ -list_only_cy		list only system tracks from complementary service
+ -list_service_id	list service identification (for system tracks)
+ -ll=nn			length limit (only first nn bytes are listed)
+ -ml			handle multiple lines (per sensor)
+ -mof			list mode of flight (for system tracks)
+ -nft			don't list frame time
+ -no_utc		No UTC time of day in list file
+ -progress		show some progress indication
+ -reftrj		input file holds reference trajectories
+ -soe			stop on (ASTERIX) error
+ -sqn			with sequence numbers
+ -srv_id=xxx		filter ARTAS output by service_identification
+ -ssta			list sensor status information
+ -start_date=yyyy-mm-dd	start date
+ -start_offset=nnn	start offset in input file
+ -subtypes		print list of supported format subtypes
+ -timebias=ttt		time bias (milliseconds)
+ -tn12			system track number with 12 bits (legacy)
+ -utc			UTC time of day in list file (default)
+ -wgs84			list WGS-84 position
+
+'input_path' and 'list_path' are the (local or full)
+ path names of the respective files.
+
+For comments or questions our e-mail address is: sddl@gmx.at
+Thank you for using this software.
+
+*** End of Surveillance Data Decoder and Lister ***
+\end{verbatim}
+
+To print the list of supported ASTERIX categories and editions, use:
+\begin{verbatim}
+$ ./SDDL-json-x86_64.AppImage -categories
+*** Surveillance Data Decoder and Lister			   v1.1.0 ***
+2000-2018 by Helmut Kobelbauer, Sinabelkirchen/Austria.
+
+SDDL is free software: you can redistribute it and/or modify it under
+ the terms of the GNU General Public License as published by the Free Software
+ Foundation, either version 3 of the License, or (at your option) any later version.
+
+SDDL is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details
+
+Users are invited to report issues or requests for improvement
+ however the provider has no obligation to process users' requests and
+ provide fixes and/or enhancements.
+
+The 'sddl' utility at the moment supports the following ASTERIX categories:
+
+ ASTERIX category 000	n.a.	April 1998
+ ASTERIX category 001	1.1 	August 2002
+ ASTERIX category 002	1.0 	November 1997
+ ASTERIX category 003	n.a.	April 1998
+ ASTERIX category 004	1.2 	March 2007
+ ASTERIX category 007	----	not supported
+ ASTERIX category 008	1.0 	November 1997
+ ASTERIX category 009	----	not supported
+ ASTERIX category 010	1.1 	March 2007
+  option -vsn010=0.24s	0.24*	Sensis (Heathrow MDS modifications)
+ ASTERIX category 011	0.17	December 2001
+  option -vsn011=0.14	0.14	October 2000
+  option -vsn011=0.14i	0.14*	Sensis (Inn valley modification)
+ ASTERIX category 016	    	unknown
+ ASTERIX category 017	0.5	February 1999
+ ASTERIX category 018	----	not supported
+ ASTERIX category 019	1.1	March 2007
+ ASTERIX category 020	1.5	April 2008
+  option -vsn020=1.0	1.0	November 2005
+  option -vsn020=1.2	1.2	April 2007
+  option -vsn020=1.5	1.5	April 2008
+ ASTERIX category 021	2.1	May 2011
+  option -vsn021=0.12	0.12	February 2001
+  option -vsn021=0.13	0.13	June 2001
+  option -vsn021=0.20	0.20	December 2002
+  option -vsn021=0.23	0.23	November 2003
+  option -vsn021=1.0P	1.0P	April 2008
+  option -vsn021=1.4	1.4	July 2009
+  option -vsn021=2.1	2.1	May 2011
+  option -vsn021=2.4	2.4	15 June 2015
+ ASTERIX category 023	1.2	March 2009
+  option -vsn023=0.11	0.11	December 2002
+  option -vsn023=1.0P	1.0P	April 2008
+  option -vsn023=1.1	1.1	September 2008
+  option -vsn023=1.2	1.2	March 2009
+ ASTERIX category 030	2.8.1	26 February 1999
+ ASTERIX category 031	2.8.1	26 February 1999
+ ASTERIX category 032	2.8.1	26 February 1999
+ ASTERIX category 034	1.27	May 2007
+ ASTERIX category 048	1.15	April 2007
+  option -vsn048=1.14	1.14	November 2000
+  option -vsn048=1.15	1.15	April 2007
+  option -vsn048=1.16	1.16	March 2009
+ ASTERIX category 062	1.3	April 2005
+ ASTERIX category 063	1.0	March 2004
+ ASTERIX category 065	0.12	March 2003
+  option -vsn065=0.12	0.12	March 2003
+  option -vsn065=1.3	1.3	April 2007
+ ASTERIX category 221	?	?
+ ASTERIX category 247	1.2	February 2008
+ ASTERIX category 252	2.8.1	26 February 1999
+
+If you need additional categories or versions, please send us an e-mail:
+ sddl@gmx.at
+
+*** End of Surveillance Data Decoder and Lister ***
+\end{verbatim}
+
+To list the supported framing formats, use:
+\begin{verbatim}
+./SDDL-json-x86_64.AppImage -formats
+*** Surveillance Data Decoder and Lister			   v1.1.0 ***
+2000-2018 by Helmut Kobelbauer, Sinabelkirchen/Austria.
+
+SDDL is free software: you can redistribute it and/or modify it under
+ the terms of the GNU General Public License as published by the Free Software
+ Foundation, either version 3 of the License, or (at your option) any later version.
+
+SDDL is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details
+
+Users are invited to report issues or requests for improvement
+ however the provider has no obligation to process users' requests and
+ provide fixes and/or enhancements.
+
+The 'sddl' utility at the moment supports the following recording formats:
+
+ -asf     (ASTERIX in) IOSS Final Format recording
+ -ioss    SASS-C IOSS (Final) recording (default)
+ -net     Binary 'netto' recording
+ -rec     Sequence of records
+ -rff     Comsoft (TM) RFF recording
+
+Our 'sddl' utility at the moment supports the following data formats:
+
+ -asf     ASTERIX (in IOSS Final Format recording)
+ -asx     ASTERIX data format (default)
+ -zzz     Unknown data format - ignore
+
+Please be aware that NOT EVERY combination of recording and data formats
+ is reasonable.
+
+Thank you for using our software.
+
+*** End of Surveillance Data Decoder and Lister ***
+\end{verbatim}
+
+To list an existing ASTERIX recording 'test.rff' with RFF framing, use:
+\begin{verbatim}
+./SDDL-json-x86_64.AppImage -rff test.rff
+\end{verbatim}
+
+This will output the contained ASTERIX data with one line per target report/status message. To limit parsing to the first 10000 bytes (for testing), use:
+\begin{verbatim}
+./SDDL-json-x86_64.AppImage -rff test.rff -ll=10000
+\end{verbatim}
+
+To limit text output (for testing/benchmarking) with enable progress, use:
+\begin{verbatim}
+./SDDL-json-x86_64.AppImage -rff test.rff -l=0 -progress
+*** Surveillance Data Decoder and Lister			   v1.1.0 ***
+2000-2018 by Helmut Kobelbauer, Sinabelkirchen/Austria.
+
+SDDL is free software: you can redistribute it and/or modify it under
+ the terms of the GNU General Public License as published by the Free Software
+ Foundation, either version 3 of the License, or (at your option) any later version.
+
+SDDL is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details
+
+Users are invited to report issues or requests for improvement
+ however the provider has no obligation to process users' requests and
+ provide fixes and/or enhancements.
+
+-> List level set to 0
+-> Show progress indication
+-> Using ASTERIX as default data format ...
+-> Input file 'test.rff' opened ...
+-> 100 KB of input data read and processed
+...
+-> 220 MB of input data read and processed
+; end of input file
+; length=227970515 byte(s)
+-> End of input file reached
+
+-> Processed 227970515 bytes in 12.819 seconds (about 16.960 MB/sec;
+163279 frames/sec)
+
+*** End of Surveillance Data Decoder and Lister ***
+\end{verbatim}
+
+JSON output can be obtained in several ways:
+\begin{itemize}
+\item none: No JSON output, default mode
+\item test: JSON output is generated, but not printed or written
+\item print: JSON output is generated and printed to console
+\item text: JSON output is generated and written as text to a file, for which a filename must be set
+\item cbor: JSON output is generated and written as CBOR to a file, for which a filename must be set
+\item msgpack: JSON output is generated and written as MSGPack to a file, for which a filename must be set
+\item ubjson: JSON output is generated and written as UBJSON to a file, for which a filename must be set
+\item zip-text: JSON output is generated and written as text to a ZIP archive file, for which a filename must be set
+\item zip-cbor: JSON output is generated and written as CBOR to a ZIP archive file, for which a filename must be set
+\item zip-msgpack: JSON output is generated and written as MSGPack to a ZIP archive file, for which a filename must be set
+\item zip-ubjson: JSON output is generated and written as UBJSON to a ZIP archive file, for which a filename must be set
+\end{itemize}
+
+For parsing in ATSDB, only the 'text' or 'zip-text' mode are currently supported. Use the first only for smaller dataset, the latter provides good compression. The resulting ZIP file will be about twice the size of the original ASTERIX file.
+
+To decode and write a JSON zip-text file 'test\_json.zip', use:
+\begin{verbatim}
+./SDDL-json-x86_64.AppImage -rff test.rff -l=0 -progress -json-type=zip-text 
+-json-file=test_json.zip
+*** Surveillance Data Decoder and Lister			   v1.1.0 ***
+2000-2018 by Helmut Kobelbauer, Sinabelkirchen/Austria.
+
+SDDL is free software: you can redistribute it and/or modify it under
+ the terms of the GNU General Public License as published by the Free Software
+ Foundation, either version 3 of the License, or (at your option) any later version.
+
+SDDL is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details
+
+Users are invited to report issues or requests for improvement
+ however the provider has no obligation to process users' requests and
+ provide fixes and/or enhancements.
+
+-> List level set to 0
+-> Show progress indication
+-> Output JSON type 'zip-text'
+-> Export JSON to filename 'test_json.zip'
+-> Using ASTERIX as default data format ...
+-> Input file 'test.rff' opened ...
+-> 100 KB of input data read and processed
+...
+-> 220 MB of input data read and processed
+; end of input file
+; length=227970515 byte(s)
+-> End of input file reached
+
+-> Processed 227970515 bytes in 106.411 seconds (about 2.043 MB/sec; 19669 frames/sec)
+
+*** End of Surveillance Data Decoder and Lister ***
+\end{verbatim}
+
+For the used example file, this will result in a 420 MB ZIP file, which contains a text file with 7GB of JSON text. This ZIP archive can then be used in ATSB, according to the procedure described in \nameref{sec:json_import}
+
 \section{Extending ATSDB}
-\label{sec:Extending ATSDB}
+\label{sec:extending_atsdb}
 
 The ATSDB interface can be extended beyond the two database systems provided by default. \\
 

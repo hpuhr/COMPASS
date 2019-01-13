@@ -99,6 +99,14 @@ std::string SQLGenerator::getCreateTableStatement (const DBTable& table)
 
         data_type = col_it.second->type();
 
+        if (connection_type == MYSQL_IDENTIFIER)
+        {
+            if (data_type == "varchar")
+                data_type = "text"; // hacky
+            else if (data_type == "enum")
+                data_type = "int"; // hacky
+        }
+
 //        if (connection_type == SQLITE_IDENTIFIER) // && connection_type != MYSQL_IDENTIFIE
 //        {
 //            if (data_type == "BOOL")
@@ -111,10 +119,28 @@ std::string SQLGenerator::getCreateTableStatement (const DBTable& table)
 //                data_type = "INTEGER";
 //        }
 
-        ss << " " << data_type;
-
         if (col_it.second->isKey())
-            ss << " PRIMARY KEY NOT NULL";
+        {
+            if (connection_type == SQLITE_IDENTIFIER)
+            {
+                if (data_type == "int") // mysql defaults autoincrement
+                    ss << " INTEGER PRIMARY KEY AUTOINCREMENT";
+                else
+                    ss << " " << data_type << " PRIMARY KEY";
+            }
+            else
+            {
+                assert (connection_type == MYSQL_IDENTIFIER);
+                if (data_type == "int")
+                    ss << " INTEGER PRIMARY KEY AUTO_INCREMENT";
+                else
+                    ss << " " << data_type << " PRIMARY KEY";
+            }
+
+            ss << " NOT NULL";
+        }
+        else
+            ss << " " << data_type;
 
         if (cnt != table.columns().size()-1)
             ss << ",";
@@ -156,7 +182,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getDataSourcesSelectCommand (DBObject &
                                      + ds.metaTableName());
 
     const MetaDBTable& meta = schema.metaTable(ds.metaTableName());
-    loginf << "SQLGenerator: getDataSourcesSelectCommand: object " << object.name() << " meta table " << meta.name()
+    logdbg << "SQLGenerator: getDataSourcesSelectCommand: object " << object.name() << " meta table " << meta.name()
            << " key col " << ds.foreignKey() << " name col " << ds.nameColumn();
     if (!meta.hasColumn(ds.foreignKey()))
         throw std::runtime_error ("SQLGenerator: getDataSourcesSelectCommand: meta table has no column "
@@ -661,17 +687,16 @@ std::string SQLGenerator::insertDBUpdateStringBind(std::shared_ptr<Buffer> buffe
 
     ss << ") " << values_ss.str() << ");";
 
-    loginf << "SQLGenerator: insertDBUpdateStringBind: var insert string '" << ss.str() << "'";
+    logdbg << "SQLGenerator: insertDBUpdateStringBind: var insert string '" << ss.str() << "'";
 
     return ss.str();
 }
 
-std::string SQLGenerator::createDBUpdateStringBind(std::shared_ptr<Buffer> buffer, DBObject &object,
-                                                   DBOVariable &key_var, std::string tablename)
+std::string SQLGenerator::createDBUpdateStringBind(std::shared_ptr<Buffer> buffer, const DBTableColumn& key_col,
+                                                   std::string tablename)
 {
     assert (buffer);
-    assert (object.existsInDB());
-    assert (key_var.existsInDB());
+    assert (key_col.existsInDB());
     assert (tablename.size() > 0);
 
     const std::vector <Property> &properties = buffer->properties().properties();
@@ -682,9 +707,9 @@ std::string SQLGenerator::createDBUpdateStringBind(std::shared_ptr<Buffer> buffe
     logdbg  << "SQLGenerator: createDBUpdateStringBind: creating db string";
     std::stringstream ss;//create a stringstream
 
-    std::string key_var_name = key_var.currentDBColumn().name();
+    std::string key_col_name = key_col.name();
 
-    logdbg << "SQLGenerator: createDBUpdateStringBind: idvar name " << key_var_name;
+    logdbg << "SQLGenerator: createDBUpdateStringBind: idvar name " << key_col_name;
 
     ss << "UPDATE " << tablename << " SET ";
 
@@ -694,7 +719,7 @@ std::string SQLGenerator::createDBUpdateStringBind(std::shared_ptr<Buffer> buffe
 //        db_type_set_=true;
 //    }
 
-    if (key_var_name != properties.at(size-1).name())
+    if (key_col_name != properties.at(size-1).name())
         throw std::runtime_error ("SQLGenerator: createDBUpdateStringBind: id var not at last position");
 
     std::string connection_type = db_interface_.connection().type();
@@ -705,7 +730,7 @@ std::string SQLGenerator::createDBUpdateStringBind(std::shared_ptr<Buffer> buffe
 
     for (unsigned int cnt=0; cnt < size; cnt++)
     {
-        if (key_var_name == properties.at(cnt).name())
+        if (key_col_name == properties.at(cnt).name())
         {
             if (cnt == size-1)
                 continue;
@@ -726,7 +751,7 @@ std::string SQLGenerator::createDBUpdateStringBind(std::shared_ptr<Buffer> buffe
         }
     }
 
-    ss << " WHERE " << key_var_name << "=";
+    ss << " WHERE " << key_col_name << "=";
 
     if (connection_type == SQLITE_IDENTIFIER)
         ss << "@VAR" << std::to_string (size);

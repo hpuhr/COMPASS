@@ -57,7 +57,7 @@ public:
     PropertyDataType propertyType () const;
 
     /// @brief Sets key flag
-    void isKey (bool is_key) { is_key_=is_key;}
+    void isKey (bool is_key) { is_key_=is_key; }
     /// @brief Returns key flag
     bool isKey () const { return is_key_; }
 

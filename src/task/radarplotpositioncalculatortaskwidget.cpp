@@ -243,13 +243,11 @@ void RadarPlotPositionCalculatorTaskWidget::calculateSlot ()
     assert (obj_man.existsObject(db_object_str));
     DBObject& db_object = obj_man.object(db_object_str);
 
-    std::map<int, DBODataSource>& data_sources = db_object.dataSources();
-
     bool not_final = false;
-    for (auto& ds_it : data_sources)
+    for (auto ds_it = db_object.dsBegin(); ds_it != db_object.dsEnd(); ++ds_it)
     {
-        ds_it.second.finalize();
-        if (!ds_it.second.isFinalized())
+        ds_it->second.finalize();
+        if (!ds_it->second.isFinalized())
         {
             not_final = true;
             break;

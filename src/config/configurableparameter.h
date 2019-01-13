@@ -61,6 +61,7 @@ protected:
     void setConfigValue (const tinyxml2::XMLAttribute* attribute);
 };
 
+//template<> void A<int>::AFnc(); // <- note, no function body
 
 template<> void ConfigurableParameter<bool>::setConfigValue (const tinyxml2::XMLAttribute* attribute);
 template<> void ConfigurableParameter<int>::setConfigValue (const tinyxml2::XMLAttribute* attribute);
@@ -82,12 +83,5 @@ template<> std::string ConfigurableParameter<unsigned int>::getParameterValue ()
 template<> std::string ConfigurableParameter<float>::getParameterValue () const;
 template<> std::string ConfigurableParameter<double>::getParameterValue () const;
 template<> std::string ConfigurableParameter<std::string>::getParameterValue () const;
-
-template class ConfigurableParameter<bool>;
-template class ConfigurableParameter<int>;
-template class ConfigurableParameter<unsigned int>;
-template class ConfigurableParameter<float>;
-template class ConfigurableParameter<double>;
-template class ConfigurableParameter<std::string>;
 
 #endif // CONFIGURABLPPARAMETER_H

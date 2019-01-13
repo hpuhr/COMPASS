@@ -189,3 +189,9 @@ template<> std::string ConfigurableParameter<std::string>::getParameterValue () 
         return config_value_;
 }
 
+template class ConfigurableParameter<bool>;
+template class ConfigurableParameter<int>;
+template class ConfigurableParameter<unsigned int>;
+template class ConfigurableParameter<float>;
+template class ConfigurableParameter<double>;
+template class ConfigurableParameter<std::string>;

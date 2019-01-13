@@ -1,5 +1,5 @@
 <Configuration class_id="FilterManager" instance_id="FilterManager0">
-    <ParameterString db_id="MySQL:_Localhost:_example"/>
+    <ParameterString db_id="SQLite:_/home/sk/data/test.db"/>
     <Configuration class_id="DBFilter" instance_id="Barometric Altitude">
         <ParameterBool active="0"/>
         <ParameterBool changed="1"/>
@@ -11,7 +11,7 @@
             <ParameterBool op_and="1"/>
             <ParameterString operator="&gt;="/>
             <ParameterString reset_value="MIN"/>
-            <ParameterString value="-204700"/>
+            <ParameterString value="-1197"/>
             <ParameterString variable_dbo_name="Meta"/>
             <ParameterString variable_name="modec_code_ft"/>
         </Configuration>
@@ -20,7 +20,7 @@
             <ParameterBool op_and="1"/>
             <ParameterString operator="&lt;="/>
             <ParameterString reset_value="MAX"/>
-            <ParameterString value="126700"/>
+            <ParameterString value="126797"/>
             <ParameterString variable_dbo_name="Meta"/>
             <ParameterString variable_name="modec_code_ft"/>
         </Configuration>
@@ -47,6 +47,52 @@
             <ParameterBool visible="0"/>
         </Configuration>
     </Configuration>
+    <Configuration class_id="DBFilter" instance_id="Position">
+        <ParameterBool active="1"/>
+        <ParameterBool changed="1"/>
+        <ParameterBool op_and_="1"/>
+        <ParameterBool visible="0"/>
+        <ParameterString name="Position"/>
+        <Configuration class_id="DBFilterCondition" instance_id="PositionCondition1">
+            <ParameterBool absolute_value="0"/>
+            <ParameterBool op_and="1"/>
+            <ParameterString operator="&gt;="/>
+            <ParameterString reset_value="-43.648169566"/>
+            <ParameterString value="-43.648169566"/>
+            <ParameterString variable_dbo_name="Meta"/>
+            <ParameterString variable_name="pos_lat_deg"/>
+        </Configuration>
+        <Configuration class_id="DBFilterCondition" instance_id="PositionCondition2">
+            <ParameterBool absolute_value="0"/>
+            <ParameterBool op_and="1"/>
+            <ParameterString operator="&lt;="/>
+            <ParameterString reset_value="68.0724334717"/>
+            <ParameterString value="68.0724334717"/>
+            <ParameterString variable_dbo_name="Meta"/>
+            <ParameterString variable_name="pos_lat_deg"/>
+        </Configuration>
+        <Configuration class_id="DBFilterCondition" instance_id="PositionCondition3">
+            <ParameterBool absolute_value="0"/>
+            <ParameterBool op_and="1"/>
+            <ParameterString operator="&gt;="/>
+            <ParameterString reset_value="-157.4582330112"/>
+            <ParameterString value="-157.4582330112"/>
+            <ParameterString variable_dbo_name="Meta"/>
+            <ParameterString variable_name="pos_long_deg"/>
+        </Configuration>
+        <Configuration class_id="DBFilterCondition" instance_id="PositionCondition4">
+            <ParameterBool absolute_value="0"/>
+            <ParameterBool op_and="1"/>
+            <ParameterString operator="&lt;="/>
+            <ParameterString reset_value="175.067021796"/>
+            <ParameterString value="175.067021796"/>
+            <ParameterString variable_dbo_name="Meta"/>
+            <ParameterString variable_name="pos_long_deg"/>
+        </Configuration>
+        <Configuration class_id="DBFilterWidget" instance_id="PositionWidget0">
+            <ParameterBool visible="1"/>
+        </Configuration>
+    </Configuration>
     <Configuration class_id="DBFilter" instance_id="TargetAddress">
         <ParameterBool active="0"/>
         <ParameterBool changed="1"/>
@@ -63,7 +109,7 @@
             <ParameterString variable_name="target_addr"/>
         </Configuration>
         <Configuration class_id="DBFilterWidget" instance_id="TargetAddressWidget0">
-            <ParameterBool visible="0"/>
+            <ParameterBool visible="1"/>
         </Configuration>
     </Configuration>
     <Configuration class_id="DBFilter" instance_id="Time of Day">
@@ -77,7 +123,7 @@
             <ParameterBool op_and="1"/>
             <ParameterString operator="&gt;="/>
             <ParameterString reset_value="MIN"/>
-            <ParameterString value="08:59:58.000"/>
+            <ParameterString value="12:00:00.000"/>
             <ParameterString variable_dbo_name="Meta"/>
             <ParameterString variable_name="tod"/>
         </Configuration>
@@ -86,16 +132,17 @@
             <ParameterBool op_and="1"/>
             <ParameterString operator="&lt;="/>
             <ParameterString reset_value="MAX"/>
-            <ParameterString value="09:59:59.000"/>
+            <ParameterString value="12:59:50.000"/>
             <ParameterString variable_dbo_name="Meta"/>
             <ParameterString variable_name="tod"/>
         </Configuration>
         <Configuration class_id="DBFilterWidget" instance_id="Time of DayWidget0">
-            <ParameterBool visible="0"/>
+            <ParameterBool visible="1"/>
         </Configuration>
     </Configuration>
     <Configuration class_id="DataSourcesFilter" instance_id="ADSBDataSources">
-        <ParameterBool LoadSensorNumber1="1"/>
+        <ParameterBool LoadSensorNumber0="1"/>
+        <ParameterBool LoadSensorNumber12880="1"/>
         <ParameterBool LoadSensorNumber26="1"/>
         <ParameterBool active="0"/>
         <ParameterBool changed="0"/>
@@ -104,73 +151,6 @@
         <ParameterString dbo_name="ADSB"/>
         <ParameterString name="ADSBDataSources"/>
         <Configuration class_id="DataSourcesFilterWidget" instance_id="ADSBDataSourcesWidget0">
-            <ParameterBool visible="0"/>
-        </Configuration>
-    </Configuration>
-    <Configuration class_id="DataSourcesFilter" instance_id="MLATDataSources">
-        <ParameterBool LoadSensorNumber10="1"/>
-        <ParameterBool LoadSensorNumber17="1"/>
-        <ParameterBool LoadSensorNumber18="1"/>
-        <ParameterBool LoadSensorNumber19="1"/>
-        <ParameterBool LoadSensorNumber2="1"/>
-        <ParameterBool LoadSensorNumber20="1"/>
-        <ParameterBool LoadSensorNumber21="1"/>
-        <ParameterBool LoadSensorNumber22="1"/>
-        <ParameterBool LoadSensorNumber23="1"/>
-        <ParameterBool LoadSensorNumber24="1"/>
-        <ParameterBool LoadSensorNumber25="0"/>
-        <ParameterBool LoadSensorNumber28="1"/>
-        <ParameterBool active="0"/>
-        <ParameterBool changed="0"/>
-        <ParameterBool op_and_="1"/>
-        <ParameterBool visible="0"/>
-        <ParameterString dbo_name="MLAT"/>
-        <ParameterString name="MLATDataSources"/>
-        <Configuration class_id="DataSourcesFilterWidget" instance_id="MLATDataSourcesWidget0">
-            <ParameterBool visible="0"/>
-        </Configuration>
-    </Configuration>
-    <Configuration class_id="DataSourcesFilter" instance_id="RadarDataSources">
-        <ParameterBool LoadSensorNumber1="1"/>
-        <ParameterBool LoadSensorNumber10="1"/>
-        <ParameterBool LoadSensorNumber11="1"/>
-        <ParameterBool LoadSensorNumber12="1"/>
-        <ParameterBool LoadSensorNumber13="1"/>
-        <ParameterBool LoadSensorNumber14="0"/>
-        <ParameterBool LoadSensorNumber15="0"/>
-        <ParameterBool LoadSensorNumber16="1"/>
-        <ParameterBool LoadSensorNumber3="1"/>
-        <ParameterBool LoadSensorNumber4="1"/>
-        <ParameterBool LoadSensorNumber5="1"/>
-        <ParameterBool LoadSensorNumber6="1"/>
-        <ParameterBool LoadSensorNumber7="1"/>
-        <ParameterBool LoadSensorNumber8="1"/>
-        <ParameterBool LoadSensorNumber9="1"/>
-        <ParameterBool active="0"/>
-        <ParameterBool changed="1"/>
-        <ParameterBool op_and_="1"/>
-        <ParameterBool visible="0"/>
-        <ParameterString dbo_name="Radar"/>
-        <ParameterString name="RadarDataSources"/>
-        <Configuration class_id="DataSourcesFilterWidget" instance_id="RadarDataSourcesWidget0">
-            <ParameterBool visible="0"/>
-        </Configuration>
-    </Configuration>
-    <Configuration class_id="DataSourcesFilter" instance_id="TrackerDataSources">
-        <ParameterBool LoadSensorNumber11="1"/>
-        <ParameterBool LoadSensorNumber27="1"/>
-        <ParameterBool LoadSensorNumber33="0"/>
-        <ParameterBool LoadSensorNumber37="0"/>
-        <ParameterBool LoadSensorNumber38="0"/>
-        <ParameterBool LoadSensorNumber39="0"/>
-        <ParameterBool LoadSensorNumber49="1"/>
-        <ParameterBool active="0"/>
-        <ParameterBool changed="0"/>
-        <ParameterBool op_and_="1"/>
-        <ParameterBool visible="0"/>
-        <ParameterString dbo_name="Tracker"/>
-        <ParameterString name="TrackerDataSources"/>
-        <Configuration class_id="DataSourcesFilterWidget" instance_id="TrackerDataSourcesWidget0">
             <ParameterBool visible="0"/>
         </Configuration>
     </Configuration>

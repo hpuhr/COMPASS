@@ -10,6 +10,8 @@
 class Format : public std::string
 {
 public:
+    Format () = default;
+    Format (PropertyDataType data_type, const std::string& value) { set (data_type, value); }
 
     void set(PropertyDataType data_type, const std::string& value);
 

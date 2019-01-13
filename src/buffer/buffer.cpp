@@ -27,6 +27,7 @@
 #include "stringconv.h"
 #include "unitmanager.h"
 #include "unit.h"
+#include "nullablevector.h"
 
 unsigned int Buffer::ids_ = 0;
 
@@ -53,7 +54,6 @@ Buffer::Buffer()
  */
 Buffer::Buffer(PropertyList properties, const std::string &dbo_name)
     : dbo_name_(dbo_name), last_one_(false)
-    //search_active_(false), search_key_pos_(-1), search_key_min_ (-1), search_key_max_ (-1)
 {
     logdbg  << "Buffer: constructor: start";
 
@@ -74,6 +74,7 @@ Buffer::~Buffer()
     logdbg  << "Buffer: destructor: start";
 
     properties_.clear();
+    data_size_ = 0;
 
     logdbg  << "Buffer: destructor: end";
 }
@@ -93,57 +94,61 @@ void Buffer::addProperty (std::string id, PropertyDataType type)
     if (properties_.hasProperty(id))
         throw std::runtime_error ("Buffer: addProperty: property "+id+" already exists");
 
+    Property property = Property (id, type);
+
     switch (type)
     {
     case PropertyDataType::BOOL:
         assert (getArrayListMap<bool>().count(id) == 0);
         getArrayListMap<bool>()[id] =
-                std::shared_ptr<ArrayListTemplate<bool>> (new ArrayListTemplate<bool>());
+                std::shared_ptr<NullableVector<bool>> (new NullableVector<bool>(property, *this));
         break;
     case PropertyDataType::CHAR:
         assert (getArrayListMap<char>().count(id) == 0);
         getArrayListMap<char>() [id] =
-                std::shared_ptr<ArrayListTemplate<char>> (new ArrayListTemplate<char>());
+                std::shared_ptr<NullableVector<char>> (new NullableVector<char>(property, *this));
         break;
     case PropertyDataType::UCHAR:
         assert (getArrayListMap<unsigned char>().count(id) == 0);
         getArrayListMap<unsigned char>() [id] =
-                std::shared_ptr<ArrayListTemplate<unsigned char>> (new ArrayListTemplate<unsigned char>());
+                std::shared_ptr<NullableVector<unsigned char>> (new NullableVector<unsigned char>(property,
+                                                                                                        *this));
         break;
     case PropertyDataType::INT:
         assert (getArrayListMap<int>().count(id) == 0);
         getArrayListMap<int>() [id] =
-                std::shared_ptr<ArrayListTemplate<int>> (new ArrayListTemplate<int>());
+                std::shared_ptr<NullableVector<int>> (new NullableVector<int>(property, *this));
         break;
     case PropertyDataType::UINT:
         assert (getArrayListMap<unsigned int>().count(id) == 0);
         getArrayListMap<unsigned int>() [id] =
-                std::shared_ptr<ArrayListTemplate<unsigned int>> (new ArrayListTemplate<unsigned int>());
+                std::shared_ptr<NullableVector<unsigned int>> (new NullableVector<unsigned int>(property, *this));
         break;
     case PropertyDataType::LONGINT:
         assert (getArrayListMap<long int>().count(id) == 0);
         getArrayListMap<long int>() [id] =
-                std::shared_ptr<ArrayListTemplate<long>> (new ArrayListTemplate<long>());
+                std::shared_ptr<NullableVector<long>> (new NullableVector<long>(property, *this));
         break;
     case PropertyDataType::ULONGINT:
         assert (getArrayListMap<unsigned long int>().count(id) == 0);
         getArrayListMap<unsigned long int>() [id] =
-                std::shared_ptr<ArrayListTemplate<unsigned long>> (new ArrayListTemplate<unsigned long>());
+                std::shared_ptr<NullableVector<unsigned long>> (new NullableVector<unsigned long>(property,
+                                                                                                        *this));
         break;
     case PropertyDataType::FLOAT:
         assert (getArrayListMap<float>().count(id) == 0);
         getArrayListMap<float>() [id] =
-                std::shared_ptr<ArrayListTemplate<float>> (new ArrayListTemplate<float>());
+                std::shared_ptr<NullableVector<float>> (new NullableVector<float>(property, *this));
         break;
     case PropertyDataType::DOUBLE:
         assert (getArrayListMap<double>().count(id) == 0);
         getArrayListMap<double>() [id] =
-                std::shared_ptr<ArrayListTemplate<double>> (new ArrayListTemplate<double>());
+                std::shared_ptr<NullableVector<double>> (new NullableVector<double>(property, *this));
         break;
     case PropertyDataType::STRING:
         assert (getArrayListMap<std::string>().count(id) == 0);
         getArrayListMap<std::string>() [id] =
-                std::shared_ptr<ArrayListTemplate<std::string>> (new ArrayListTemplate<std::string>());
+                std::shared_ptr<NullableVector<std::string>> (new NullableVector<std::string>(property, *this));
         break;
     default:
         logerr  <<  "Buffer: addProperty: unknown property type " << Property::asString(type);
@@ -164,9 +169,7 @@ void Buffer::seizeBuffer (Buffer &org_buffer)
 {
     logdbg  << "Buffer: seizeBuffer: start";
 
-    logdbg  << "Buffer: seizeBuffer: full " << full() << " size " << size() << " first write " << firstWrite();
-
-    assert (full() || firstWrite()); //|| first_write_
+    logdbg  << "Buffer: seizeBuffer: size " << size() << " other size " << org_buffer.size();
 
     org_buffer.properties_.clear();
 
@@ -181,128 +184,92 @@ void Buffer::seizeBuffer (Buffer &org_buffer)
     seizeArrayListMap<double>(org_buffer);
     seizeArrayListMap<std::string>(org_buffer);
 
+    data_size_ += org_buffer.data_size_;
+
     if (org_buffer.lastOne())
         last_one_ = true;
 
     logdbg  << "Buffer: seizeBuffer: end size " << size();
 }
 
-bool Buffer::full ()
-{
-    return size()%BUFFER_ARRAY_SIZE == 0;
-}
-
 const size_t Buffer::size ()
 {
-    size_t size = 0;
+    return data_size_;
+}
 
-    for (auto it : getArrayListMap<bool>())
-        if (it.second->size() > size)
-            size = it.second->size();
-    for (auto it : getArrayListMap<char>())
-        if (it.second->size() > size)
-            size = it.second->size();
-    for (auto it : getArrayListMap<unsigned char>())
-        if (it.second->size() > size)
-            size = it.second->size();
-    for (auto it : getArrayListMap<int>())
-        if (it.second->size() > size)
-            size = it.second->size();
-    for (auto it : getArrayListMap<unsigned int>())
-        if (it.second->size() > size)
-            size = it.second->size();
-    for (auto it : getArrayListMap<long int>())
-        if (it.second->size() > size)
-            size = it.second->size();
-    for (auto it : getArrayListMap<unsigned long int>())
-        if (it.second->size() > size)
-            size = it.second->size();
-    for (auto it : getArrayListMap<float>())
-        if (it.second->size() > size)
-            size = it.second->size();
-    for (auto it : getArrayListMap<double>())
-        if (it.second->size() > size)
-            size = it.second->size();
-    for (auto it : getArrayListMap<std::string>())
-        if (it.second->size() > size)
-            size = it.second->size();
+void Buffer::cutToSize (size_t size)
+{
+    for (auto& it : getArrayListMap<bool>())
+        it.second->cutToSize(size);
+    for (auto& it : getArrayListMap<char>())
+        it.second->cutToSize(size);
+    for (auto& it : getArrayListMap<unsigned char>())
+        it.second->cutToSize(size);
+    for (auto& it : getArrayListMap<int>())
+        it.second->cutToSize(size);
+    for (auto& it : getArrayListMap<unsigned int>())
+        it.second->cutToSize(size);
+    for (auto& it : getArrayListMap<long int>())
+        it.second->cutToSize(size);
+    for (auto& it : getArrayListMap<unsigned long int>())
+        it.second->cutToSize(size);
+    for (auto& it : getArrayListMap<float>())
+        it.second->cutToSize(size);
+    for (auto& it : getArrayListMap<double>())
+        it.second->cutToSize(size);
+    for (auto& it : getArrayListMap<std::string>())
+        it.second->cutToSize(size);
 
-    //loginf << "Buffer: size: " << size;
-    return size;
+    data_size_ = size;
+}
+
+const PropertyList& Buffer::properties ()
+{
+    return properties_;
 }
 
 bool Buffer::firstWrite ()
 {
-    std::vector <ArrayListBase *>::const_iterator it;
-
-    for (auto it : getArrayListMap<bool>())
-        if (it.second->size() > 0)
-            return false;
-    for (auto it : getArrayListMap<char>())
-        if (it.second->size() > 0)
-            return false;
-    for (auto it : getArrayListMap<unsigned char>())
-        if (it.second->size() > 0)
-            return false;
-    for (auto it : getArrayListMap<int>())
-        if (it.second->size() > 0)
-            return false;
-    for (auto it : getArrayListMap<unsigned int>())
-        if (it.second->size() > 0)
-            return false;
-    for (auto it : getArrayListMap<long int>())
-        if (it.second->size() > 0)
-            return false;
-    for (auto it : getArrayListMap<unsigned long int>())
-        if (it.second->size() > 0)
-            return false;
-    for (auto it : getArrayListMap<float>())
-        if (it.second->size() > 0)
-            return false;
-    for (auto it : getArrayListMap<double>())
-        if (it.second->size() > 0)
-            return false;
-    for (auto it : getArrayListMap<std::string>())
-        if (it.second->size() > 0)
-            return false;
-
-    return true;
+    return data_size_ == 0;
 }
 
 bool Buffer::isNone (const Property& property, unsigned int row_cnt)
 {
+    if (BUFFER_PEDANTIC_CHECKING)
+        assert (row_cnt < data_size_);
+
     switch (property.dataType())
     {
     case PropertyDataType::BOOL:
         assert (getArrayListMap<bool>().count(property.name()));
-        return getArrayListMap<bool>().at(property.name())->isNone(row_cnt);
+        return getArrayListMap<bool>().at(property.name())->isNull(row_cnt);
     case PropertyDataType::CHAR:
         assert (getArrayListMap<char>().count(property.name()));
-        return getArrayListMap<char>().at(property.name())->isNone(row_cnt);
+        return getArrayListMap<char>().at(property.name())->isNull(row_cnt);
     case PropertyDataType::UCHAR:
         assert (getArrayListMap<unsigned char>().count(property.name()));
-        return getArrayListMap<unsigned char>().at(property.name())->isNone(row_cnt);
+        return getArrayListMap<unsigned char>().at(property.name())->isNull(row_cnt);
     case PropertyDataType::INT:
         assert (getArrayListMap<int>().count(property.name()));
-        return getArrayListMap<int>().at(property.name())->isNone(row_cnt);
+        return getArrayListMap<int>().at(property.name())->isNull(row_cnt);
     case PropertyDataType::UINT:
         assert (getArrayListMap<unsigned int>().count(property.name()));
-        return getArrayListMap<unsigned int>().at(property.name())->isNone(row_cnt);
+        return getArrayListMap<unsigned int>().at(property.name())->isNull(row_cnt);
     case PropertyDataType::LONGINT:
         assert (getArrayListMap<long int>().count(property.name()));
-        return getArrayListMap<long int>().at(property.name())->isNone(row_cnt);
+        return getArrayListMap<long int>().at(property.name())->isNull(row_cnt);
     case PropertyDataType::ULONGINT:
         assert (getArrayListMap<unsigned long int>().count(property.name()));
-        return getArrayListMap<unsigned long int>().at(property.name())->isNone(row_cnt);
+        return getArrayListMap<unsigned long int>().at(property.name())->isNull(row_cnt);
     case PropertyDataType::FLOAT:
         assert (getArrayListMap<float>().count(property.name()));
-        return getArrayListMap<float>().at(property.name())->isNone(row_cnt);
+        return getArrayListMap<float>().at(property.name())->isNull(row_cnt);
     case PropertyDataType::DOUBLE:
         assert (getArrayListMap<double>().count(property.name()));
-        return getArrayListMap<double>().at(property.name())->isNone(row_cnt);
+        return getArrayListMap<double>().at(property.name())->isNull(row_cnt);
     case PropertyDataType::STRING:
         assert (getArrayListMap<std::string>().count(property.name()));
-        return getArrayListMap<std::string>().at(property.name())->isNone(row_cnt);
+        return getArrayListMap<std::string>().at(property.name())->isNull(row_cnt);
     default:
         logerr  <<  "Buffer: isNone: unknown property type " << Property::asString(property.dataType());
         throw std::runtime_error ("Buffer: isNone: unknown property type "+Property::asString(property.dataType()));
@@ -322,6 +289,9 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
         assert (var_it->hasCurrentDBColumn());
         const DBTableColumn &column = var_it->currentDBColumn ();
 
+        logdbg << "Buffer: transformVariables: variable " << var_it->name() << " col "
+               << column.name();
+
         PropertyDataType data_type = var_it->dataType();
 
         std::string current_var_name;
@@ -338,9 +308,10 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
         else
         {
             assert (properties_.hasProperty(var_it->name()));
-            loginf << "Buffer: transformVariables: var " << var_it->name() << " prop dt "
-                   << Property::asString(properties_.get(var_it->name()).dataType()) << " col dt "
-                   << Property::asString(column.propertyType());
+            logdbg << "Buffer: transformVariables: var " << var_it->name()
+                   << " col " << column.name()
+                   << " prop dt " << Property::asString(properties_.get(var_it->name()).dataType())
+                   << " col dt " << Property::asString(column.propertyType());
             // TODO HACK
             //assert (properties_.get(var_it->name()).dataType() == column.propertyType());
             current_var_name = var_it->name();
@@ -349,7 +320,7 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
 
         if (column.dataFormat() != "") // do format conversion stuff
         {
-            loginf << "Buffer: transformVariables: column " << column.name()
+            logdbg << "Buffer: transformVariables: column " << column.name()
                    << " has to-be-removed format " << column.dataFormat();
 
             switch (data_type)
@@ -357,42 +328,42 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
             case PropertyDataType::CHAR:
             {
                 assert (has<char>(current_var_name));
-                ArrayListTemplate<char> &array_list = get<char> (current_var_name);
+                NullableVector<char> &array_list = get<char> (current_var_name);
                 array_list.convertToStandardFormat(column.dataFormat());
                 break;
             }
             case PropertyDataType::UCHAR:
             {
                 assert (has<unsigned char>(current_var_name));
-                ArrayListTemplate<unsigned char> &array_list = get<unsigned char> (current_var_name);
+                NullableVector<unsigned char> &array_list = get<unsigned char> (current_var_name);
                 array_list.convertToStandardFormat(column.dataFormat());
                 break;
             }
             case PropertyDataType::INT:
             {
                 assert (has<int>(current_var_name));
-                ArrayListTemplate<int> &array_list = get<int> (current_var_name);
+                NullableVector<int> &array_list = get<int> (current_var_name);
                 array_list.convertToStandardFormat(column.dataFormat());
                 break;
             }
             case PropertyDataType::UINT:
             {
                 assert (has<unsigned int>(current_var_name));
-                ArrayListTemplate<unsigned int> &array_list = get<unsigned int> (current_var_name);
+                NullableVector<unsigned int> &array_list = get<unsigned int> (current_var_name);
                 array_list.convertToStandardFormat(column.dataFormat());
                 break;
             }
             case PropertyDataType::LONGINT:
             {
                 assert (has<long int>(current_var_name));
-                ArrayListTemplate<long int> &array_list = get<long int>(current_var_name);
+                NullableVector<long int> &array_list = get<long int>(current_var_name);
                 array_list.convertToStandardFormat(column.dataFormat());
                 break;
             }
             case PropertyDataType::ULONGINT:
             {
                 assert (has<unsigned long>(current_var_name));
-                ArrayListTemplate<unsigned long> &array_list = get<unsigned long>(current_var_name);
+                NullableVector<unsigned long> &array_list = get<unsigned long>(current_var_name);
                 array_list.convertToStandardFormat(column.dataFormat());
                 break;
             }
@@ -427,7 +398,7 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
             case PropertyDataType::BOOL:
             {
                 assert (has<bool>(current_var_name));
-                ArrayListTemplate<bool> &array_list = get<bool>(current_var_name);
+                NullableVector<bool> &array_list = get<bool>(current_var_name);
                 logwrn << "Buffer: transformVariables: double multiplication of boolean variable "
                        << var_it->name();
                 array_list *= factor;
@@ -436,7 +407,7 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
             case PropertyDataType::CHAR:
             {
                 assert (has<char>(current_var_name));
-                ArrayListTemplate<char> &array_list = get<char> (current_var_name);
+                NullableVector<char> &array_list = get<char> (current_var_name);
                 logwrn << "Buffer: transformVariables: double multiplication of char variable "
                        << var_it->name();
                 array_list *= factor;
@@ -445,7 +416,7 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
             case PropertyDataType::UCHAR:
             {
                 assert (has<unsigned char>(current_var_name));
-                ArrayListTemplate<unsigned char> &array_list = get<unsigned char> (current_var_name);
+                NullableVector<unsigned char> &array_list = get<unsigned char> (current_var_name);
                 logwrn << "Buffer: transformVariables: double multiplication of unsigned char variable "
                        << var_it->name();
                 array_list *= factor;
@@ -454,42 +425,42 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
             case PropertyDataType::INT:
             {
                 assert (has<int>(current_var_name));
-                ArrayListTemplate<int> &array_list = get<int> (current_var_name);
+                NullableVector<int> &array_list = get<int> (current_var_name);
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::UINT:
             {
                 assert (has<unsigned int>(current_var_name));
-                ArrayListTemplate<unsigned int> &array_list = get<unsigned int> (current_var_name);
+                NullableVector<unsigned int> &array_list = get<unsigned int> (current_var_name);
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::LONGINT:
             {
                 assert (has<long int>(current_var_name));
-                ArrayListTemplate<long int> &array_list = get<long int>(current_var_name);
+                NullableVector<long int> &array_list = get<long int>(current_var_name);
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::ULONGINT:
             {
                 assert (has<unsigned long>(current_var_name));
-                ArrayListTemplate<unsigned long> &array_list = get<unsigned long>(current_var_name);
+                NullableVector<unsigned long> &array_list = get<unsigned long>(current_var_name);
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::FLOAT:
             {
                 assert (has<float>(current_var_name));
-                ArrayListTemplate<float> &array_list = get<float>(current_var_name);
+                NullableVector<float> &array_list = get<float>(current_var_name);
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::DOUBLE:
             {
                 assert (has<double>(current_var_name));
-                ArrayListTemplate<double> &array_list = get<double>(current_var_name);
+                NullableVector<double> &array_list = get<double>(current_var_name);
                 array_list *= factor;
                 break;
             }
@@ -571,6 +542,60 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
             }
         }
     }
+}
+
+std::shared_ptr<Buffer> Buffer::getPartialCopy (const PropertyList& partial_properties)
+{
+    std::shared_ptr<Buffer> tmp_buffer {new Buffer()};
+
+    for (unsigned int cnt=0; cnt < partial_properties.size(); ++cnt)
+    {
+        Property prop = partial_properties.at(cnt);
+
+        logdbg << "Buffer: getPartialCopy: adding property " << prop.name();
+        tmp_buffer->addProperty(prop);
+
+        switch (prop.dataType())
+        {
+        case PropertyDataType::BOOL:
+            tmp_buffer->get<bool>(prop.name()).copyData(get<bool>(prop.name()));
+            break;
+        case PropertyDataType::CHAR:
+            tmp_buffer->get<char>(prop.name()).copyData(get<char>(prop.name()));
+            break;
+        case PropertyDataType::UCHAR:
+            tmp_buffer->get<unsigned char>(prop.name()).copyData(get<unsigned char>(prop.name()));
+            break;
+        case PropertyDataType::INT:
+            tmp_buffer->get<int>(prop.name()).copyData(get<int>(prop.name()));
+            break;
+        case PropertyDataType::UINT:
+            tmp_buffer->get<unsigned int>(prop.name()).copyData(get<unsigned int>(prop.name()));
+            break;
+        case PropertyDataType::LONGINT:
+            tmp_buffer->get<long int>(prop.name()).copyData(get<long int>(prop.name()));
+            break;
+        case PropertyDataType::ULONGINT:
+            tmp_buffer->get<unsigned long int>(prop.name()).copyData(get<unsigned long int>(prop.name()));
+            break;
+        case PropertyDataType::FLOAT:
+            tmp_buffer->get<float>(prop.name()).copyData(get<float>(prop.name()));
+            break;
+        case PropertyDataType::DOUBLE:
+            tmp_buffer->get<double>(prop.name()).copyData(get<double>(prop.name()));
+            break;
+        case PropertyDataType::STRING:
+            tmp_buffer->get<std::string>(prop.name()).copyData(get<std::string>(prop.name()));
+            break;
+        default:
+            logerr  <<  "Buffer: getPartialCopy: unknown property type "
+                     << Property::asString(prop.dataType());
+            throw std::runtime_error ("Buffer: getPartialCopy: unknown property type "
+                                      + Property::asString(prop.dataType()));
+        }
+    }
+
+    return tmp_buffer;
 }
 
 

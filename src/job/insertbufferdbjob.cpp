@@ -23,16 +23,18 @@
 #include "dbobject.h"
 #include "dbovariable.h"
 #include "metadbtable.h"
+#include "dbtable.h"
+#include "dbtablecolumn.h"
 
 #include "stringconv.h"
 
 using namespace Utils::String;
 
-InsertBufferDBJob::InsertBufferDBJob(DBInterface &db_interface, DBObject &dbobject, std::shared_ptr<Buffer> buffer)
-: Job("InsertBufferDBJob"), db_interface_(db_interface), dbobject_(dbobject), buffer_(buffer)
+InsertBufferDBJob::InsertBufferDBJob(DBInterface &db_interface, DBObject &dbobject, std::shared_ptr<Buffer> buffer,
+                                     bool emit_change)
+: Job("InsertBufferDBJob"), db_interface_(db_interface), dbobject_(dbobject), buffer_(buffer), emit_change_(emit_change)
 {
     assert (buffer_);
-    //assert (dbobject_.existsInDB());
 }
 
 InsertBufferDBJob::~InsertBufferDBJob()
@@ -42,41 +44,17 @@ InsertBufferDBJob::~InsertBufferDBJob()
 
 void InsertBufferDBJob::run ()
 {
-    loginf  << "InsertBufferDBJob: run: start";
+    logdbg  << "InsertBufferDBJob: run: start";
 
     boost::posix_time::ptime loading_start_time_;
     boost::posix_time::ptime loading_stop_time_;
 
     loading_start_time_ = boost::posix_time::microsec_clock::local_time();
 
-    unsigned int insert_size = 20000;
-
-    unsigned int steps = buffer_->size() / insert_size;
-
     loginf  << "InsertBufferDBJob: run: writing object " << dbobject_.name() << " size " << buffer_->size();
     assert (buffer_->size());
 
-    unsigned int index_from = 0;
-    unsigned int index_to = 0;
-
-    DBTable& table = dbobject_.currentMetaTable().mainTable();
-
-    for (unsigned int cnt = 0; cnt <= steps; cnt++)
-    {
-        index_from = cnt * insert_size;
-        index_to = index_from + insert_size -1;
-
-        if (index_to > buffer_->size()-1)
-            index_to = buffer_->size()-1;
-
-        loginf << "InsertBufferDBJob: run: step " << cnt << " steps " << steps << " from " << index_from
-               << " to " << index_to;
-
-        db_interface_.insertBuffer (table, buffer_, index_from, index_to);
-
-        emit insertProgressSignal(100.0*index_to/buffer_->size());
-    }
-
+    db_interface_.insertBuffer(dbobject_.currentMetaTable(), buffer_);
     loading_stop_time_ = boost::posix_time::microsec_clock::local_time();
 
     double load_time;
@@ -86,3 +64,10 @@ void InsertBufferDBJob::run ()
     loginf  << "InsertBufferDBJob: run: buffer write done (" << doubleToStringPrecision(load_time, 2) << " s).";
     done_=true;
 }
+
+bool InsertBufferDBJob::emitChange() const
+{
+    return emit_change_;
+}
+
+

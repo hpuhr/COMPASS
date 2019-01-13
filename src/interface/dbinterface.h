@@ -106,6 +106,7 @@ public:
     bool hasDataSourceTables (DBObject& object);
     /// @brief Returns a container with all data sources for a DBO
     std::map <int, DBODataSource> getDataSources (DBObject &object);
+    void updateDataSource (DBODataSource& data_source);
     bool hasActiveDataSources (DBObject &object);
     /// @brief Returns a set with all active data source ids for a DBO type
     std::set<int> getActiveDataSources (DBObject &object);
@@ -113,13 +114,19 @@ public:
     //    /// @brief Writes a buffer to the database, into a table defined by write_table_names_ and DBO type
     //    void writeBuffer (Buffer *data);
     //    void writeBuffer (Buffer *data, std::string table_name);
-    void insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer, size_t from_index,
-                       size_t to_index);
+//    void insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer, size_t from_index,
+//                       size_t to_index);
+    void insertBuffer (MetaDBTable& meta_table, std::shared_ptr<Buffer> buffer);
+    void insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer);
 
     bool checkUpdateBuffer (DBObject &object, DBOVariable &key_var, DBOVariableSet& list,
                             std::shared_ptr<Buffer> buffer);
-    void updateBuffer (DBObject &object, DBOVariable &key_var, std::shared_ptr<Buffer> buffer, size_t from_index,
-                       size_t to_index);
+    void updateBuffer (MetaDBTable& meta_table, const DBTableColumn& key_col, std::shared_ptr<Buffer> buffer,
+                       int from_index=-1, int to_index=-1); // no indexes means full buffer
+    void updateBuffer (DBTable& table, const DBTableColumn& key_col, std::shared_ptr<Buffer> buffer,
+                       int from_index=-1, int to_index=-1); // no indexes means full buffer
+
+    std::shared_ptr<Buffer> getPartialBuffer (DBTable& table, std::shared_ptr<Buffer> buffer);
 
     //    /// @brief Prepares incremental read of DBO type
     void prepareRead (const DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,

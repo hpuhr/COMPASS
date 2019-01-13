@@ -38,6 +38,13 @@ public:
   ///@brief Re-implementation from QApplication so exceptions can be thrown in slots.
   virtual bool notify(QObject * receiver, QEvent * event);
 
+  bool quitRequested() const;
+
+private:
+  bool quit_requested_ {false};
+
+  void copyConfigurationAndData (const std::string& system_install_path);
+  void copyConfiguration (const std::string& system_install_path);
 };
 //}
 

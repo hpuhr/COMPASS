@@ -396,8 +396,8 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
     if (calculated_) // TODO: done signal comes twice?
         return;
 
-    disconnect (db_object_, SIGNAL(newDataSignal(DBObject&)), this, SLOT(newDataSlot(DBObject&)));
-    disconnect (db_object_, SIGNAL(loadingDoneSignal(DBObject&)), this, SLOT(loadingDoneSlot(DBObject&)));
+    disconnect (db_object_, &DBObject::newDataSignal, this, &RadarPlotPositionCalculatorTask::newDataSlot);
+    disconnect (db_object_, &DBObject::loadingDoneSignal, this, &RadarPlotPositionCalculatorTask::loadingDoneSlot);
 
     //
     //    std::pair<unsigned char, unsigned char> sac_sic_key;
@@ -432,9 +432,8 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
 
     assert (use_ogr_proj || use_sdl_proj || use_rs2g_proj);
 
-    std::map<int, DBODataSource>& data_sources = db_object_->dataSources();
-    for (auto& ds_it : data_sources)
-        assert (ds_it.second.isFinalized()); // has to be done before
+    for (auto ds_it = db_object_->dsBegin(); ds_it != db_object_->dsEnd(); ++ds_it)
+        assert (ds_it->second.isFinalized()); // has to be done before
 
     std::shared_ptr<Buffer> read_buffer = db_object_->data();
     unsigned int read_size = read_buffer->size();
@@ -465,7 +464,7 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
     bool has_altitude;
     //double altitude_angle;
 
-    assert (data_sources.size());
+    assert (db_object_->hasDataSources());
 
     //    std::pair<unsigned char, unsigned char> sac_sic_key;
     double sys_x, sys_y;
@@ -495,14 +494,14 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
             QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         }
 
-        if (read_buffer->get<int>(key_var_str_).isNone(cnt))
+        if (read_buffer->get<int>(key_var_str_).isNull(cnt))
         {
             logerr << "RadarPlotPositionCalculatorTask: loadingDoneSlot: key null";
             continue;
         }
         rec_num = read_buffer->get<int>(key_var_str_).get(cnt);
 
-        if (read_buffer->get<int>(datasource_var_str_).isNone(cnt))
+        if (read_buffer->get<int>(datasource_var_str_).isNull(cnt))
         {
             logerr << "RadarPlotPositionCalculatorTask: loadingDoneSlot: data source null";
             continue;
@@ -512,8 +511,8 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
         //sac = *((unsigned char*)adresses->at(1));
         //sic = *((unsigned char*)adresses->at(2));
 
-        if (read_buffer->get<double>(azimuth_var_str_).isNone(cnt)
-                || read_buffer->get<double>(range_var_str_).isNone(cnt))
+        if (read_buffer->get<double>(azimuth_var_str_).isNull(cnt)
+                || read_buffer->get<double>(range_var_str_).isNull(cnt))
         {
             logdbg << "RadarPlotPositionCalculatorTask: loadingDoneSlot: position null";
             continue;
@@ -522,15 +521,24 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
         pos_azm_deg =  read_buffer->get<double>(azimuth_var_str_).get(cnt);
         pos_range_nm =  read_buffer->get<double>(range_var_str_).get(cnt);
 
-        has_altitude = !read_buffer->get<int>(altitude_var_str_).isNone(cnt);
+        has_altitude = !read_buffer->get<int>(altitude_var_str_).isNull(cnt);
         if (has_altitude)
             altitude_ft = read_buffer->get<int>(altitude_var_str_).get(cnt);
         else
             altitude_ft = 0.0; // has to assumed in projection later on
 
-        if (data_sources.find(sensor_id) == data_sources.end())
+        if (!db_object_->hasDataSource(sensor_id))
         {
             logerr << "RadarPlotPositionCalculatorTask: loadingDoneSlot: sensor id " << sensor_id << " unkown";
+            transformation_errors++;
+            continue;
+        }
+
+        DBODataSource& data_source = db_object_->getDataSource(sensor_id);
+
+        if (!data_source.hasLatitude() || !data_source.hasLongitude())
+        {
+            transformation_errors++;
             continue;
         }
 
@@ -542,8 +550,8 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
 
         if (use_ogr_proj)
         {
-            ret = data_sources.at(sensor_id).calculateOGRSystemCoordinates(pos_azm_rad, pos_range_m, has_altitude,
-                                                                           altitude_ft, sys_x, sys_y);
+            ret = data_source.calculateOGRSystemCoordinates(pos_azm_rad, pos_range_m, has_altitude, altitude_ft,
+                                                            sys_x, sys_y);
             if (ret)
                 ret = proj_man.ogrCart2Geo(sys_x, sys_y, lat, lon);
         }
@@ -552,8 +560,7 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
         {
             t_CPos grs_pos;
 
-            ret = data_sources.at(sensor_id).calculateSDLGRSCoordinates(pos_azm_rad, pos_range_m, has_altitude,
-                                                                        altitude_ft, grs_pos);
+            ret = data_source.calculateSDLGRSCoordinates(pos_azm_rad, pos_range_m, has_altitude, altitude_ft, grs_pos);
             if (ret)
             {
                 t_GPos geo_pos;
@@ -584,7 +591,7 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
 
             logdbg << "local x " << x1 << " y " << y1 << " z " << z1;
 
-            ret = data_sources.at(sensor_id).calculateRadSlt2Geocentric(x1, y1, z1, pos);
+            ret = data_source.calculateRadSlt2Geocentric(x1, y1, z1, pos);
             if (ret)
             {
                 logdbg << "geoc x " << pos[0] << " y " << pos[1] << " z " << pos[2];

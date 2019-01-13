@@ -1,3 +1,20 @@
+/*
+ * This file is part of ATSDB.
+ *
+ * ATSDB is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * ATSDB is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "dbolabeldefinition.h"
 #include "dbolabeldefinitionwidget.h"
 #include "buffer.h"
@@ -225,10 +242,10 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
     std::map<int, std::string> labels;
 
     std::map<int, size_t> rec_num_to_index;
-    ArrayListTemplate<int>& rec_num_list = buffer->get<int>("rec_num");
+    NullableVector<int>& rec_num_list = buffer->get<int>("rec_num");
     for (size_t cnt=0; cnt < rec_num_list.size(); cnt++)
     {
-        assert (!rec_num_list.isNone(cnt));
+        assert (!rec_num_list.isNull(cnt));
         int rec_num = rec_num_list.get(cnt);
         assert (labels.count(rec_num) == 0);
         rec_num_to_index[rec_num] = cnt;
@@ -257,7 +274,7 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
             if (data_type == PropertyDataType::BOOL)
             {
                 assert (buffer->has<bool>(variable->name()));
-                null = buffer->get<bool>(variable->name()).isNone(buffer_index);
+                null = buffer->get<bool>(variable->name()).isNull(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
@@ -267,7 +284,7 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
             else if (data_type == PropertyDataType::CHAR)
             {
                 assert (buffer->has<char>(variable->name()));
-                null = buffer->get<char>(variable->name()).isNone(buffer_index);
+                null = buffer->get<char>(variable->name()).isNull(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
@@ -277,7 +294,7 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
             else if (data_type == PropertyDataType::UCHAR)
             {
                 assert (buffer->has<unsigned char>(variable->name()));
-                null = buffer->get<unsigned char>(variable->name()).isNone(buffer_index);
+                null = buffer->get<unsigned char>(variable->name()).isNull(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
@@ -287,7 +304,7 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
             else if (data_type == PropertyDataType::INT)
             {
                 assert (buffer->has<int>(variable->name()));
-                null = buffer->get<int>(variable->name()).isNone(buffer_index);
+                null = buffer->get<int>(variable->name()).isNull(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
@@ -297,7 +314,7 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
             else if (data_type == PropertyDataType::UINT)
             {
                 assert (buffer->has<unsigned int>(variable->name()));
-                null = buffer->get<unsigned int>(variable->name()).isNone(buffer_index);
+                null = buffer->get<unsigned int>(variable->name()).isNull(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
@@ -307,7 +324,7 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
             else if (data_type == PropertyDataType::LONGINT)
             {
                 assert (buffer->has<long int>(variable->name()));
-                null = buffer->get<long int>(variable->name()).isNone(buffer_index);
+                null = buffer->get<long int>(variable->name()).isNull(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
@@ -317,7 +334,7 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
             else if (data_type == PropertyDataType::ULONGINT)
             {
                 assert (buffer->has<unsigned long int>(variable->name()));
-                null = buffer->get<unsigned long int>(variable->name()).isNone(buffer_index);
+                null = buffer->get<unsigned long int>(variable->name()).isNull(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
@@ -327,7 +344,7 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
             else if (data_type == PropertyDataType::FLOAT)
             {
                 assert (buffer->has<float>(variable->name()));
-                null = buffer->get<float>(variable->name()).isNone(buffer_index);
+                null = buffer->get<float>(variable->name()).isNull(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
@@ -337,7 +354,7 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
             else if (data_type == PropertyDataType::DOUBLE)
             {
                 assert (buffer->has<double>(variable->name()));
-                null = buffer->get<double>(variable->name()).isNone(buffer_index);
+                null = buffer->get<double>(variable->name()).isNull(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(
@@ -347,7 +364,7 @@ std::map<int, std::string> DBOLabelDefinition::generateLabels (
             else if (data_type == PropertyDataType::STRING)
             {
                 assert (buffer->has<std::string>(variable->name()));
-                null = buffer->get<std::string>(variable->name()).isNone(buffer_index);
+                null = buffer->get<std::string>(variable->name()).isNull(buffer_index);
                 if (!null)
                 {
                     value_str = variable->getRepresentationStringFromValue(

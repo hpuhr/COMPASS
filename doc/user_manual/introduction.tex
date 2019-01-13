@@ -10,9 +10,10 @@ In the section \nameref{sec:utils} some information is given how data can be man
 The \textbf{A}ir \textbf{T}raffic \textbf{S}urveillance \textbf{D}ata\textbf{B}ase aims at providing a generalized framework for ATM surveillance data inspection. While its current functionality is somewhat limited, the following features exist:\\\\
 
 \begin{itemize}  
-\item Support of multiple database systems, e.g. SCDB
+\item Support of multiple database systems, e.g. Sqlite3, MySQL
+\item Support of multiple, configurable database schemas, e.g. SCDB, Simple
+\item Dynamic JSON import from SDDL, ADS-B exchange, OpenSky Network
 \item MySQL database import and management of SCDB databases
-\item JSON import from ADS-B exchange
 \item High performance processing, low memory footprint
 \item Utilization of application during loading procedure
 \item Views for data inspection
@@ -45,7 +46,7 @@ The following features currently exist:
 \end{itemize}
 
 \section{General Aspects}
-ATSDB is a highly specialized surveillance data processing framework, with a strong focus on high-performance and  a  low  memory  footprint,  to  process  massive  quantities  of  data.   Surveillance  data  is fetched from a database (limited by a filter system), then processed and displayed using so-called Views (visualization of aspects of the result set).\\\\
+ATSDB is a highly specialized surveillance data processing framework, with a strong focus on high-performance and a low memory footprint,  to process massive quantities of data. Surveillance data is fetched from a database (limited by a filter system), then processed and displayed using so-called Views (visualization of aspects of the result set).\\\\
 
 As storage medium, a database is used.  Different database systems are supported, and a flexible read-out system allows for easy adaptation to different database schemas.  Data in such a database has to be generated in a previous, separate process.  One method would be to use EUROCONTROLS SASS-C  Verif V7/8 framework.\\
 

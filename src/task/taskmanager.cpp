@@ -18,7 +18,9 @@
 #include "atsdb.h"
 #include "taskmanager.h"
 #include "jsonimportertask.h"
+#include "jsonimportertaskwidget.h"
 #include "radarplotpositioncalculatortask.h"
+#include "radarplotpositioncalculatortaskwidget.h"
 
 #include <cassert>
 
@@ -30,17 +32,8 @@ TaskManager::TaskManager(const std::string &class_id, const std::string &instanc
 
 TaskManager::~TaskManager()
 {
-    if (json_importer_task_)
-    {
-        delete json_importer_task_;
-        json_importer_task_ = nullptr;
-    }
-
-    if (radar_plot_position_calculator_task_)
-    {
-        delete radar_plot_position_calculator_task_;
-        radar_plot_position_calculator_task_ = nullptr;
-    }
+    assert (!json_importer_task_);
+    assert (!radar_plot_position_calculator_task_);
 }
 
 JSONImporterTask* TaskManager::getJSONImporterTask()
@@ -88,7 +81,33 @@ void TaskManager::checkSubConfigurables ()
     }
 }
 
+void TaskManager::disable ()
+{
+    if (json_importer_task_)
+    {
+        json_importer_task_->widget()->close();
+    }
+
+    if (radar_plot_position_calculator_task_)
+    {
+        radar_plot_position_calculator_task_->widget()->close();
+    }
+}
+
 void TaskManager::shutdown ()
 {
+    loginf << "TaskManager: shutdown";
     // TODO waiting for tasks?
+
+    if (json_importer_task_)
+    {
+        delete json_importer_task_;
+        json_importer_task_ = nullptr;
+    }
+
+    if (radar_plot_position_calculator_task_)
+    {
+        delete radar_plot_position_calculator_task_;
+        radar_plot_position_calculator_task_ = nullptr;
+    }
 }
