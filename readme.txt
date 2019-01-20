@@ -23,7 +23,7 @@ User Manual: https://github.com/hpuhr/ATSDB/releases/download/v0.2.0-beta/user_m
 
 Newsletter
 ----------
-If you are interested in our bi-weekly newsletter, please send a mail to atsdb@gmx.at with the subject "Register".
+If you are interested in our newsletter, please send a mail to atsdb@gmx.at with the subject "Register".
 
 
 Author
