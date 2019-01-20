@@ -14,12 +14,12 @@ CMakeLists.txt: CMake config file
 gpl.txt: GPL license
 readme.txt: This file
 
-Released Version v0.1.1-beta
+Released Version v0.2.0-beta
 ----------------------------
 
-Stable Appimage: https://github.com/hpuhr/ATSDB/releases/download/0.1.1-beta/ATSDB-x86_64_v0.1.1-beta.AppImage
+Stable Appimage: https://github.com/hpuhr/ATSDB/releases/download/v0.2.0-beta/ATSDB-v0.2.0_beta-x86_64.AppImage
 
-User Manual: https://github.com/hpuhr/ATSDB/releases/download/0.1.1-beta/user_manual_v0.1.1-beta.pdf
+User Manual: https://github.com/hpuhr/ATSDB/releases/download/v0.2.0-beta/user_manual_v0.2.0.pdf
 
 Newsletter
 ----------
