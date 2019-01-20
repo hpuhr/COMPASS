@@ -456,8 +456,6 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
             {
                 assert (has<float>(current_var_name));
                 NullableVector<float> &array_list = get<float>(current_var_name);
-                loginf << "JsonMapping: transformBuffer: double multiplication of float variable "
-                       << current_var_name << " factor " << factor;
                 array_list *= factor;
                 break;
             }

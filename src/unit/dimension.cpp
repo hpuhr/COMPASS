@@ -67,10 +67,12 @@ double Dimension::getFactor (const std::string &unit_source, const std::string &
     assert (units_.find(unit_source) != units_.end());
     assert (units_.find(unit_destination) != units_.end());
     double factor = 1.0;
-    loginf << "Dimension: getFactor: src factor " << units_.at(unit_source)->factor();
+
     factor /= units_.at(unit_source)->factor();
-    loginf << "Dimension: getFactor: dest factor " << units_.at(unit_destination)->factor();
     factor *= units_.at(unit_destination)->factor();
+
+    logdbg << "Dimension: getFactor: src factor " << units_.at(unit_source)->factor()
+           << " dest factor " << units_.at(unit_destination)->factor() << " result " << factor;
 
     assert (factor != 0);
     assert (!std::isinf(factor));

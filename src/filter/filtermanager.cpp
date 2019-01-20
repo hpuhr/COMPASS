@@ -89,7 +89,8 @@ void FilterManager::generateSubConfigurable (const std::string& class_id, const 
         }
         catch (const std::exception& e)
         {
-            loginf << "FilterManager: generateSubConfigurable: data source filter exception '" << e.what() << "', deleting";
+            loginf << "FilterManager: generateSubConfigurable: data source filter exception '"
+                   << e.what() << "', deleting";
             configuration().removeSubConfiguration(class_id, instance_id);
         }
     }
