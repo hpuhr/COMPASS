@@ -1367,6 +1367,8 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex (std::shared_ptr<Buff
                                                static_cast<int> (buffer->get<unsigned char>(property.name()).get(row)));
             break;
         case PropertyDataType::INT:
+            logdbg  << "DBInterface: insertBindStatementUpdateForCurrentIndex: at " << cnt << " is '"
+                    << buffer->get<int>(property.name()).get(row) << "'";
             current_connection_->bindVariable (index_cnt,
                                                static_cast<int> (buffer->get<int>(property.name()).get(row)));
             break;

@@ -24,6 +24,7 @@
 
 #include <string>
 #include <map>
+#include <cmath>
 
 /**
  * @brief Definition of a base unit
@@ -40,7 +41,11 @@ public:
       registerParameter("definition", &definition_, "");
       registerParameter("factor", &factor_, 1.0);
 
-      logdbg << "Unit: constructor: dimension " << parent.instanceId() << " unit " << instance_id << " factor " << factor_;
+      loginf << "Unit: constructor: dimension " << parent.instanceId() << " unit " << instance_id
+             << " factor " << factor_;
+
+      assert (factor_ != 0);
+      assert (!std::isinf(factor_));
   }
   /// @brief Destructor
   virtual ~Unit() {}

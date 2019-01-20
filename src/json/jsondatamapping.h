@@ -252,8 +252,8 @@ public:
                 else
                     array_list.setFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(*val_ptr));
 
-//                logdbg << "JsonKey2DBOVariableMapping: setValue: json " << *val_ptr
-//                       << " buffer " << array_list.get(row_cnt);
+                logdbg << "JsonKey2DBOVariableMapping: setValue: key " << json_key_ << " json " << *val_ptr
+                       << " buffer " << array_list.get(row_cnt);
             }
             catch (nlohmann::json::exception& e)
             {

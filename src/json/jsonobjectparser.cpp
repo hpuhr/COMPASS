@@ -466,7 +466,7 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
                 assert (buffer->has<bool>(current_var_name));
                 NullableVector<bool> &array_list = buffer->get<bool>(current_var_name);
                 logwrn << "JsonMapping: transformBuffer: double multiplication of boolean variable "
-                       << current_var_name;
+                       << current_var_name << " factor " << factor;
                 array_list *= factor;
                 break;
             }
@@ -475,7 +475,7 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
                 assert (buffer->has<char>(current_var_name));
                 NullableVector<char> &array_list = buffer->get<char> (current_var_name);
                 logwrn << "JsonMapping: transformBuffer: double multiplication of char variable "
-                       << current_var_name;
+                       << current_var_name << " factor " << factor;
                 array_list *= factor;
                 break;
             }
@@ -484,7 +484,7 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
                 assert (buffer->has<unsigned char>(current_var_name));
                 NullableVector<unsigned char> &array_list = buffer->get<unsigned char> (current_var_name);
                 logwrn << "JsonMapping: transformBuffer: double multiplication of unsigned char variable "
-                       << current_var_name;
+                       << current_var_name << " factor " << factor;
                 array_list *= factor;
                 break;
             }
@@ -492,6 +492,8 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
             {
                 assert (buffer->has<int>(current_var_name));
                 NullableVector<int> &array_list = buffer->get<int> (current_var_name);
+                logdbg << "JsonMapping: transformBuffer: double multiplication of int variable "
+                       << current_var_name << " factor " << factor;
                 array_list *= factor;
                 break;
             }
@@ -499,6 +501,8 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
             {
                 assert (buffer->has<unsigned int>(current_var_name));
                 NullableVector<unsigned int> &array_list = buffer->get<unsigned int> (current_var_name);
+                logdbg << "JsonMapping: transformBuffer: double multiplication of uint variable "
+                       << current_var_name << " factor " << factor;
                 array_list *= factor;
                 break;
             }
@@ -506,6 +510,8 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
             {
                 assert (buffer->has<long int>(current_var_name));
                 NullableVector<long int> &array_list = buffer->get<long int>(current_var_name);
+                logdbg << "JsonMapping: transformBuffer: double multiplication of long int variable "
+                       << current_var_name << " factor " << factor;
                 array_list *= factor;
                 break;
             }
@@ -513,6 +519,8 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
             {
                 assert (buffer->has<unsigned long>(current_var_name));
                 NullableVector<unsigned long> &array_list = buffer->get<unsigned long>(current_var_name);
+                logdbg << "JsonMapping: transformBuffer: double multiplication of unsigned long int variable "
+                       << current_var_name << " factor " << factor;
                 array_list *= factor;
                 break;
             }
@@ -520,6 +528,8 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
             {
                 assert (buffer->has<float>(current_var_name));
                 NullableVector<float> &array_list = buffer->get<float>(current_var_name);
+                logdbg << "JsonMapping: transformBuffer: double multiplication of float variable "
+                       << current_var_name << " factor " << factor;
                 array_list *= factor;
                 break;
             }
@@ -527,6 +537,8 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
             {
                 assert (buffer->has<double>(current_var_name));
                 NullableVector<double> &array_list = buffer->get<double>(current_var_name);
+                logdbg << "JsonMapping: transformBuffer: double multiplication of double variable "
+                       << current_var_name << " factor " << factor;
                 array_list *= factor;
                 break;
             }

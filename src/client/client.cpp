@@ -31,6 +31,8 @@
 
 #include <string>
 
+#include <locale.h>
+
 #if USE_EXPERIMENTAL_SOURCE == true
 #include <osgDB/Registry>
 #include "cpl_conv.h"
@@ -48,6 +50,10 @@ Client::Client(int& argc, char** argv)
     : QApplication(argc, argv)
 {
     bool reset_config = false;
+
+    setlocale(LC_ALL, "C");
+
+    cout << "UGA " << std::atof("0.23") << " " << 0.23 << endl;
 
     po::options_description desc("Allowed options");
     desc.add_options()
