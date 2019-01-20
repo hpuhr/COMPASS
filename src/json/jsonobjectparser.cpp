@@ -423,11 +423,11 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
 {
     assert (db_object_);
 
-    loginf << "JsonMapping: transformBuffer: object " << db_object_->name();
+    loginf << "JSONObjectParser: transformBuffer: object " << db_object_->name();
 
     if (override_data_source_)
     {
-        loginf << "JsonMapping: transformBuffer: overiding data source for object " << db_object_->name()
+        loginf << "JSONObjectParser: transformBuffer: overiding data source for object " << db_object_->name()
                << " ds id name '" << data_source_variable_name_ << "'";
         assert (data_source_variable_name_.size());
         assert (buffer->has<int>(data_source_variable_name_));
@@ -443,11 +443,11 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
     for (auto& data_it : data_mappings_)
     {
         if (data_it.dimension() != data_it.variable().dimension())
-            logwrn << "JsonMapping: transformBuffer: variable " << data_it.variable().name()
+            logwrn << "JSONObjectParser: transformBuffer: variable " << data_it.variable().name()
                    << " has differing dimensions " << data_it.dimension() << " " << data_it.variable().dimension();
         else if (data_it.unit() != data_it.variable().unit()) // do unit conversion stuff
         {
-            logdbg << "JsonMapping: transformBuffer: variable " << data_it.variable().name()
+            logdbg << "JSONObjectParser: transformBuffer: variable " << data_it.variable().name()
                    << " of same dimension has different units " << data_it.unit() << " " << data_it.variable().unit();
 
             const Dimension &dimension = UnitManager::instance().dimension (data_it.variable().dimension());
@@ -457,7 +457,7 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
             std::string current_var_name = data_it.variable().name();
             PropertyDataType data_type = data_it.variable().dataType();
 
-            logdbg  << "JsonMapping: transformBuffer: correct unit transformation with factor " << factor;
+            logdbg  << "JSONObjectParser: transformBuffer: correct unit transformation with factor " << factor;
 
             switch (data_type)
             {
@@ -465,8 +465,8 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
             {
                 assert (buffer->has<bool>(current_var_name));
                 NullableVector<bool> &array_list = buffer->get<bool>(current_var_name);
-                logwrn << "JsonMapping: transformBuffer: double multiplication of boolean variable "
-                       << current_var_name;
+                logwrn << "JSONObjectParser: transformBuffer: double multiplication of boolean variable "
+                       << current_var_name << " factor " << factor;
                 array_list *= factor;
                 break;
             }
@@ -474,8 +474,8 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
             {
                 assert (buffer->has<char>(current_var_name));
                 NullableVector<char> &array_list = buffer->get<char> (current_var_name);
-                logwrn << "JsonMapping: transformBuffer: double multiplication of char variable "
-                       << current_var_name;
+                logwrn << "JSONObjectParser: transformBuffer: double multiplication of char variable "
+                       << current_var_name << " factor " << factor;
                 array_list *= factor;
                 break;
             }
@@ -483,8 +483,8 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
             {
                 assert (buffer->has<unsigned char>(current_var_name));
                 NullableVector<unsigned char> &array_list = buffer->get<unsigned char> (current_var_name);
-                logwrn << "JsonMapping: transformBuffer: double multiplication of unsigned char variable "
-                       << current_var_name;
+                logwrn << "JSONObjectParser: transformBuffer: double multiplication of unsigned char variable "
+                       << current_var_name << " factor " << factor;
                 array_list *= factor;
                 break;
             }
@@ -492,6 +492,8 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
             {
                 assert (buffer->has<int>(current_var_name));
                 NullableVector<int> &array_list = buffer->get<int> (current_var_name);
+                logdbg << "JSONObjectParser: transformBuffer: double multiplication of int variable "
+                       << current_var_name << " factor " << factor;
                 array_list *= factor;
                 break;
             }
@@ -499,6 +501,8 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
             {
                 assert (buffer->has<unsigned int>(current_var_name));
                 NullableVector<unsigned int> &array_list = buffer->get<unsigned int> (current_var_name);
+                logdbg << "JSONObjectParser: transformBuffer: double multiplication of uint variable "
+                       << current_var_name << " factor " << factor;
                 array_list *= factor;
                 break;
             }
@@ -506,6 +510,8 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
             {
                 assert (buffer->has<long int>(current_var_name));
                 NullableVector<long int> &array_list = buffer->get<long int>(current_var_name);
+                logdbg << "JSONObjectParser: transformBuffer: double multiplication of long int variable "
+                       << current_var_name << " factor " << factor;
                 array_list *= factor;
                 break;
             }
@@ -513,6 +519,8 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
             {
                 assert (buffer->has<unsigned long>(current_var_name));
                 NullableVector<unsigned long> &array_list = buffer->get<unsigned long>(current_var_name);
+                logdbg << "JSONObjectParser: transformBuffer: double multiplication of unsigned long int variable "
+                       << current_var_name << " factor " << factor;
                 array_list *= factor;
                 break;
             }
@@ -520,6 +528,8 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
             {
                 assert (buffer->has<float>(current_var_name));
                 NullableVector<float> &array_list = buffer->get<float>(current_var_name);
+                logdbg << "JSONObjectParser: transformBuffer: double multiplication of float variable "
+                       << current_var_name << " factor " << factor;
                 array_list *= factor;
                 break;
             }
@@ -527,17 +537,19 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
             {
                 assert (buffer->has<double>(current_var_name));
                 NullableVector<double> &array_list = buffer->get<double>(current_var_name);
+                logdbg << "JSONObjectParser: transformBuffer: double multiplication of double variable "
+                       << current_var_name << " factor " << factor;
                 array_list *= factor;
                 break;
             }
             case PropertyDataType::STRING:
-                logerr << "JsonMapping: transformBuffer: unit transformation for string variable "
+                logerr << "JSONObjectParser: transformBuffer: unit transformation for string variable "
                        << data_it.variable().name() << " impossible";
                 break;
             default:
-                logerr  <<  "JsonMapping: transformBuffer: unknown property type "
+                logerr  <<  "JSONObjectParser: transformBuffer: unknown property type "
                          << Property::asString(data_type);
-                throw std::runtime_error ("JsonMapping: transformBuffer: unknown property type "
+                throw std::runtime_error ("JSONObjectParser: transformBuffer: unknown property type "
                                           + Property::asString(data_type));
             }
         }

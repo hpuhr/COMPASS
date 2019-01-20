@@ -1,4 +1,22 @@
 \section{Opening a database}
+
+To run the application, simply execute it. It is recommended to run the application from a console terminal (for issue analysis of the log text), but that is not mandatory.
+
+\subsection{Configuration Upgrade}
+
+If a previous version of ATSDB has been run on the workstation, the configuration (and additional application data) might be out of date. Since the framework of ATSDB is quite sensitive on being run with the latest configuration, the previous one will be overwritten, which will unfortunately clear any previous changes made by the user. \\\\
+
+If an outdated configuration is detected, a dialog will be shown.
+
+\begin{figure}[H]
+    \includegraphics[width=12cm,frame]{../screenshots/config_data_update.png}
+  \caption{Configuration and data update}
+  \label{fig:db_connect}
+\end{figure}
+
+If 'Yes' is selected, the update is performed and the application starts. If 'No' is selected, the application will quit. If previous changes to an outdated configuration are if strong importance, please contact the author for support.
+
+\subsection{Application Startup}
 \label{sec:startup}
 
 While ATSDB is more a database framework, it comes with a dedicated client. When the ATSDB client is started a dialog  for opening a database is shown. 
