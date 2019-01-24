@@ -447,7 +447,7 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
                    << " has differing dimensions " << data_it.dimension() << " " << data_it.variable().dimension();
         else if (data_it.unit() != data_it.variable().unit()) // do unit conversion stuff
         {
-            loginf << "JSONObjectParser: transformBuffer: variable " << data_it.variable().name()
+            logdbg << "JSONObjectParser: transformBuffer: variable " << data_it.variable().name()
                    << " of same dimension has different units " << data_it.unit() << " " << data_it.variable().unit();
 
             const Dimension &dimension = UnitManager::instance().dimension (data_it.variable().dimension());
@@ -457,7 +457,7 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
             std::string current_var_name = data_it.variable().name();
             PropertyDataType data_type = data_it.variable().dataType();
 
-            loginf  << "JSONObjectParser: transformBuffer: correct unit transformation with factor " << factor;
+            logdbg  << "JSONObjectParser: transformBuffer: correct unit transformation with factor " << factor;
 
             switch (data_type)
             {
