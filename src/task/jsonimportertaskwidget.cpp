@@ -24,6 +24,7 @@
 #include "atsdb.h"
 #include "stringconv.h"
 #include "dbobjectmanager.h"
+#include "dbobject.h"
 #include "selectdbobjectdialog.h"
 
 #include <QVBoxLayout>
@@ -417,7 +418,7 @@ void JSONImporterTaskWidget::selectedObjectParserSlot ()
 {
     loginf << "JSONImporterTaskWidget: selectedObjectParserSlot";
 
-   if (object_parser_widget_)
+    if (object_parser_widget_)
         while (object_parser_widget_->count() > 0)
             object_parser_widget_->removeWidget(object_parser_widget_->widget(0));
 
@@ -436,8 +437,8 @@ void JSONImporterTaskWidget::selectedObjectParserSlot ()
         object_parser_widget_->addWidget(task_.currentSchema().parser(name).widget());
         //object_parser_widgets_->show();
     }
-//    else
-//        object_parser_widgets_->hide();
+    //    else
+    //        object_parser_widgets_->hide();
 }
 
 void JSONImporterTaskWidget::createObjectParserWidget()
@@ -517,6 +518,27 @@ void JSONImporterTaskWidget::importSlot ()
                                QMessageBox::Ok);
         m_warning.exec();
         return;
+    }
+
+    for (auto& object_it : ATSDB::instance().objectManager())
+    {
+        if (object_it.second->hasData())
+        {
+            QMessageBox::StandardButton reply;
+            reply = QMessageBox::question(this, "Really Import?", "The database already contains data. "
+                                                                  "A data import might not be successful. Continue?",
+                                          QMessageBox::Yes|QMessageBox::No);
+            if (reply == QMessageBox::Yes)
+            {
+                loginf << "JSONImporterTaskWidget: importSlot: importing although data in database";
+                break;
+            }
+            else
+            {
+                loginf << "JSONImporterTaskWidget: importSlot: quit importing since data in database";
+                return;
+            }
+        }
     }
 
     QString filename = file_list_->currentItem()->text();
