@@ -97,8 +97,22 @@ void ReadJSONFilePartJob::readFilePart ()
         int r;
         bool closed_bracked = false;
 
-        while (entry_not_done_ || archive_read_next_header(a, &entry) == ARCHIVE_OK)
+        while (1)
         {
+            if (entry_done_)
+            {
+                r = archive_read_next_header(a, &entry);
+
+                if (r != ARCHIVE_OK)
+                {
+                    if (r != ARCHIVE_EOF)
+                        throw std::runtime_error("ReadJSONFilePartJob: readFilePart: archive error: "
+                                                 +std::string(archive_error_string(a)));
+
+                    break;
+                }
+            }
+
             loginf << "ReadJSONFilePartJob: readFilePart: parsing archive file: "
                    << archive_entry_pathname(entry) << " size " << archive_entry_size(entry);
 
@@ -108,9 +122,10 @@ void ReadJSONFilePartJob::readFilePart ()
 
                 if (r == ARCHIVE_EOF)
                 {
-                    entry_not_done_ = false;
+                    entry_done_ = true;
                     break;
                 }
+
                 if (r != ARCHIVE_OK)
                     throw std::runtime_error("ReadJSONFilePartJob: readFilePart: archive error: "
                                              +std::string(archive_error_string(a)));
@@ -151,15 +166,15 @@ void ReadJSONFilePartJob::readFilePart ()
                 {
                     //|| (objects_.size() && bytes_read_tmp_ > 1e7)
                     //loginf << "UGA returning " << bytes_read_tmp_;
-                    entry_not_done_ = true;
+                    entry_done_ = false;
                     return;
                 }
                 else // parsed buffer, continue
                 {
-                    entry_not_done_ = false;
+                    entry_done_ = true;
                 }
             }
-            if (!entry_not_done_) // will read next entry
+            if (entry_done_) // will read next entry
             {
                 assert (open_count_ == 0); // nothing left open
                 assert (tmp_stream_.str().size() == 0 || tmp_stream_.str() == "\n");
