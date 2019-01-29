@@ -105,11 +105,17 @@ void ReadJSONFilePartJob::readFilePart ()
 
                 if (r != ARCHIVE_OK)
                 {
-                    if (r != ARCHIVE_EOF)
-                        throw std::runtime_error("ReadJSONFilePartJob: readFilePart: archive error: "
+                    if (r == ARCHIVE_FAILED || r == ARCHIVE_FATAL || ARCHIVE_RETRY)
+                        throw std::runtime_error("ReadJSONFilePartJob: readFilePart: header error: "
                                                  +std::string(archive_error_string(a)));
-
-                    break;
+                    else if (r == ARCHIVE_WARN)
+                        logwrn << "ReadJSONFilePartJob: readFilePart: header error: "
+                               << std::string(archive_error_string(a));
+                    else if (r == ARCHIVE_EOF)
+                        break;
+                    else
+                        throw std::runtime_error("ReadJSONFilePartJob: readFilePart: unknown header error: "
+                                                 +std::string(archive_error_string(a)));
                 }
             }
 
@@ -127,8 +133,17 @@ void ReadJSONFilePartJob::readFilePart ()
                 }
 
                 if (r != ARCHIVE_OK)
-                    throw std::runtime_error("ReadJSONFilePartJob: readFilePart: archive error: "
-                                             +std::string(archive_error_string(a)));
+                {
+                    if (r == ARCHIVE_FAILED || r == ARCHIVE_FATAL || ARCHIVE_RETRY)
+                        throw std::runtime_error("ReadJSONFilePartJob: readFilePart: data block error: "
+                                                 +std::string(archive_error_string(a)));
+                    else if (r == ARCHIVE_WARN)
+                        logwrn << "ReadJSONFilePartJob: readFilePart: header error: "
+                               << std::string(archive_error_string(a));
+                    else
+                        throw std::runtime_error("ReadJSONFilePartJob: readFilePart: unknown data block error: "
+                                                 +std::string(archive_error_string(a)));
+                }
 
                 std::string str (reinterpret_cast<char const*>(buff), size);
 
