@@ -75,39 +75,39 @@ void FilterManager::generateSubConfigurable (const std::string& class_id, const 
                        << " already present";
                 return;
             }
-//            std::string dbo_name = configuration().getSubConfiguration(
-//                        class_id, instance_id).getParameterConfigValueString("dbo_name");
+            std::string dbo_name = configuration().getSubConfiguration(
+                        class_id, instance_id).getParameterConfigValueString("dbo_name");
 
 
-//            if (!ATSDB::instance().objectManager().existsObject(dbo_name))
-//            {
-//                logerr << "FilterManager: generateSubConfigurable: data sources filter " << instance_id
-//                       << " has invalid dbo name '" << dbo_name << "'";
-//                return;
-//            }
+            if (!ATSDB::instance().objectManager().existsObject(dbo_name))
+            {
+                loginf << "FilterManager: generateSubConfigurable: disabling data sources filter " << instance_id
+                       << " because of non-existing dbobject '" << dbo_name << "'";
+                return;
+            }
 
-//            DBObject& object = ATSDB::instance().objectManager().object(dbo_name);
+            DBObject& object = ATSDB::instance().objectManager().object(dbo_name);
 
-//            if (!object.hasCurrentDataSourceDefinition())
-//            {
-//                logerr << "FilterManager: generateSubConfigurable: data sources filter " << instance_id
-//                       << " has no data source definition";
-//                return;
-//            }
+            if (!object.hasCurrentDataSourceDefinition())
+            {
+                loginf << "FilterManager: generateSubConfigurable: disabling data sources filter " << instance_id
+                       << " because of missing data source definition";
+                return;
+            }
 
-//            if (!object.hasDataSources())
-//            {
-//                logerr << "FilterManager: generateSubConfigurable: data sources filter " << instance_id
-//                       << " has no data sources";
-//                return;
-//            }
+            if (!object.hasDataSources())
+            {
+                loginf << "FilterManager: generateSubConfigurable: disabling data sources filter " << instance_id
+                       << " because of missing data sources";
+                return;
+            }
 
-//            if (!object.existsInDB())
-//            {
-//                loginf << "FilterManager: generateSubConfigurable: data sources filter " << instance_id
-//                       << " does not exist in database";
-//                return;
-//            }
+            if (!object.existsInDB())
+            {
+                loginf << "FilterManager: generateSubConfigurable: disabling data sources filter " << instance_id
+                       << " because of empty dbobject '" << dbo_name << "'";
+                return;
+            }
 
             DataSourcesFilter* filter = new DataSourcesFilter (class_id, instance_id, this);
             if (filter->disabled())
