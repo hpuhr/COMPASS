@@ -91,6 +91,8 @@ void ReadJSONFilePartJob::readFilePart ()
 
     if (archive_)
     {
+        logdbg << "ReadJSONFilePartJob: readFilePart: archive";
+
         const void *buff;
         size_t size;
 
@@ -101,22 +103,31 @@ void ReadJSONFilePartJob::readFilePart ()
         {
             if (entry_done_)
             {
+                logdbg << "ReadJSONFilePartJob: readFilePart: reading next archive entry";
+
                 r = archive_read_next_header(a, &entry);
 
                 if (r != ARCHIVE_OK)
                 {
-                    if (r == ARCHIVE_FAILED || r == ARCHIVE_FATAL || ARCHIVE_RETRY)
+                    logdbg << "ReadJSONFilePartJob: readFilePart: reading not ok '" << r << "'";
+
+                    if (r == ARCHIVE_FAILED || r == ARCHIVE_FATAL || r == ARCHIVE_RETRY)
                         throw std::runtime_error("ReadJSONFilePartJob: readFilePart: header error: "
                                                  +std::string(archive_error_string(a)));
                     else if (r == ARCHIVE_WARN)
                         logwrn << "ReadJSONFilePartJob: readFilePart: header error: "
                                << std::string(archive_error_string(a));
                     else if (r == ARCHIVE_EOF)
+                    {
+                        logdbg << "ReadJSONFilePartJob: readFilePart: end of archive";
                         break;
+                    }
                     else
                         throw std::runtime_error("ReadJSONFilePartJob: readFilePart: unknown header error: "
                                                  +std::string(archive_error_string(a)));
                 }
+
+                logdbg << "ReadJSONFilePartJob: readFilePart: reading ok";
             }
 
             loginf << "ReadJSONFilePartJob: readFilePart: parsing archive file: "
@@ -134,7 +145,7 @@ void ReadJSONFilePartJob::readFilePart ()
 
                 if (r != ARCHIVE_OK)
                 {
-                    if (r == ARCHIVE_FAILED || r == ARCHIVE_FATAL || ARCHIVE_RETRY)
+                    if (r == ARCHIVE_FAILED || r == ARCHIVE_FATAL || r == ARCHIVE_RETRY)
                         throw std::runtime_error("ReadJSONFilePartJob: readFilePart: data block error: "
                                                  +std::string(archive_error_string(a)));
                     else if (r == ARCHIVE_WARN)
@@ -193,8 +204,11 @@ void ReadJSONFilePartJob::readFilePart ()
             {
                 assert (open_count_ == 0); // nothing left open
                 assert (tmp_stream_.str().size() == 0 || tmp_stream_.str() == "\n");
+                return;
             }
         }
+
+        loginf << "ReadJSONFilePartJob: readFilePart: archive done";
 
         assert (open_count_ == 0); // nothing left open
         assert (tmp_stream_.str().size() == 0 || tmp_stream_.str() == "\n");
@@ -259,9 +273,9 @@ bool ReadJSONFilePartJob::fileReadDone() const
     return file_read_done_;
 }
 
-std::vector<std::string>& ReadJSONFilePartJob::objects()
+std::vector<std::string>&& ReadJSONFilePartJob::objects()
 {
-    return objects_;
+    return std::move(objects_);
 }
 
 size_t ReadJSONFilePartJob::bytesRead() const

@@ -20,7 +20,7 @@ public:
 
     bool fileReadDone() const;
 
-    std::vector<std::string>& objects(); // for moving out
+    std::vector<std::string>&& objects(); // for moving out
 
     size_t bytesRead() const;
     size_t bytesToRead() const;
