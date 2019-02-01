@@ -307,6 +307,8 @@ void JobManager::shutdown ()
         widget_ = nullptr;
     }
 
+    loginf  << "JobManager: shutdown: setting jobs obsolete";
+
     if (active_db_job_)
         active_db_job_->setObsolete();
 
@@ -319,15 +321,17 @@ void JobManager::shutdown ()
     for (auto job_it = non_blocking_jobs_.unsafe_begin(); job_it != non_blocking_jobs_.unsafe_end(); ++job_it)
         (*job_it)->setObsolete ();
 
-    //    while (jobs_.size() > 0 || active_db_job_ || queued_db_jobs_.size() > 0 )
-    //    {
-    //        mutex_.unlock();
-    //        msleep(update_time_);
-    //        mutex_.lock();
-    //    }
+    loginf  << "JobManager: shutdown: waiting on jobs to quit";
+
+    while (!queued_db_jobs_.empty() || active_db_job_ || !jobs_.empty() || !non_blocking_jobs_.empty())
+    {
+        //mutex_.unlock();
+        msleep(10);
+        //mutex_.lock();
+    }
 
     //mutex_.unlock();
-    logdbg  << "JobManager: shutdown: setting stop requested";
+    loginf  << "JobManager: shutdown: stopping run";
     stop_requested_ = true;
 
     while (!stopped_)
@@ -338,7 +342,7 @@ void JobManager::shutdown ()
         QThread::currentThread()->msleep(10);
     }
 
-    logdbg  << "JobManager: shutdown: done";
+    loginf  << "JobManager: shutdown: done";
 }
 
 JobManagerWidget *JobManager::widget()
