@@ -27,6 +27,8 @@
 #include <QMutex>
 #include <QThread>
 
+#include <tbb/concurrent_queue.h>
+
 #include "singleton.h"
 #include "configurable.h"
 
@@ -79,15 +81,15 @@ protected:
     volatile bool stop_requested_;
     volatile bool stopped_;
 
-    QMutex mutex_;
+    //QMutex mutex_;
 
-    unsigned int update_time_;
+    //unsigned int update_time_;
 
-    std::list <std::shared_ptr<Job>> jobs_;
-    std::list <std::shared_ptr<Job>> non_blocking_jobs_;
+    tbb::concurrent_queue <std::shared_ptr<Job>> jobs_;
+    tbb::concurrent_queue <std::shared_ptr<Job>> non_blocking_jobs_;
 
     std::shared_ptr<Job> active_db_job_;
-    std::list <std::shared_ptr<Job>> queued_db_jobs_;
+    tbb::concurrent_queue <std::shared_ptr<Job>> queued_db_jobs_;
 
     JobManagerWidget *widget_;
 
