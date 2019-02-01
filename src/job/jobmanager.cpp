@@ -139,7 +139,7 @@ void JobManager::run()
         bool changed=false;
         bool really_update_widget=false;
 
-        while (!jobs_.empty())
+        while (!stop_requested_ && !jobs_.empty())
         {
             // process normal jobs
             std::shared_ptr<Job> current = *jobs_.unsafe_begin();
@@ -166,10 +166,7 @@ void JobManager::run()
             really_update_widget = jobs_.empty();
         }
 
-        if (stop_requested_)
-            break;
-
-        while (!non_blocking_jobs_.empty())
+        while (!stop_requested_ && !non_blocking_jobs_.empty())
         {
             // process normal jobs
             std::shared_ptr<Job> current = *non_blocking_jobs_.unsafe_begin();
@@ -195,9 +192,6 @@ void JobManager::run()
 
             really_update_widget = non_blocking_jobs_.empty();
         }
-
-        if (stop_requested_)
-            break;
 
         //        for(auto it = non_blocking_jobs_.unsafe_begin(); it != non_blocking_jobs_.unsafe_end();)
         //        {
@@ -232,7 +226,7 @@ void JobManager::run()
         //            }
         //        }
 
-        if (active_db_job_)
+        if (!stop_requested_ && active_db_job_)
         {
             // see if active db job done or obsolete
             if(active_db_job_->obsolete())
@@ -260,10 +254,7 @@ void JobManager::run()
             }
         }
 
-        if (stop_requested_)
-            break;
-
-        while (!active_db_job_ && !queued_db_jobs_.empty())
+        while (!stop_requested_ && !active_db_job_ && !queued_db_jobs_.empty())
         {
             // start a new one if needed
             std::shared_ptr<Job> current;
@@ -300,6 +291,7 @@ void JobManager::run()
         //QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         msleep(1);
     }
+
     stopped_=true;
     logdbg  << "JobManager: run: stopped";
 }
