@@ -32,11 +32,6 @@ JobManager::JobManager()
       widget_(nullptr)
 {
     logdbg  << "JobManager: constructor";
-    //QMutexLocker locker(&mutex_);
-
-    //registerParameter ("update_time", &update_time_, 10);
-
-    logdbg  << "JobManager: constructor: end";
 }
 
 JobManager::~JobManager()
@@ -46,11 +41,8 @@ JobManager::~JobManager()
 
 void JobManager::addJob (std::shared_ptr<Job> job)
 {
-    //mutex_.lock();
-
     logdbg << "JobManager: addJob: " << job->name() << " num " << jobs_.unsafe_size();
     jobs_.push(job);
-    //mutex_.unlock();
 
     QThreadPool::globalInstance()->start(job.get());
 
@@ -59,11 +51,8 @@ void JobManager::addJob (std::shared_ptr<Job> job)
 
 void JobManager::addNonBlockingJob (std::shared_ptr<Job> job)
 {
-    //mutex_.lock();
-
     loginf << "JobManager: addNonBlockingJob: " << job->name() << " num " << non_blocking_jobs_.unsafe_size();
     non_blocking_jobs_.push(job);
-    //mutex_.unlock();
 
     QThreadPool::globalInstance()->start(job.get());
 
@@ -72,11 +61,7 @@ void JobManager::addNonBlockingJob (std::shared_ptr<Job> job)
 
 void JobManager::addDBJob (std::shared_ptr<Job> job)
 {
-    //mutex_.lock();
-
     queued_db_jobs_.push(job);
-
-    //mutex_.unlock();
 
     updateWidget();
 
@@ -86,41 +71,12 @@ void JobManager::addDBJob (std::shared_ptr<Job> job)
 
 void JobManager::cancelJob (std::shared_ptr<Job> job)
 {
-    //mutex_.lock();
-
     job->setObsolete();
-
-    //    while (!job->done()) // wait for finish
-    //    {
-    //        loginf << "JobManager: cancelJob: waiting to finish";
-    //        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-    //        msleep(10);
-    //    }
-
-    //    if (find(jobs_.begin(), jobs_.end(), job) != jobs_.end())
-    //        jobs_.erase(find(jobs_.begin(), jobs_.end(), job));
-    //    else
-    //    {
-    //        if (active_db_job_ == job)
-    //            active_db_job_ = nullptr;
-    //        else if (find(queued_db_jobs_.begin(), queued_db_jobs_.end(), job) != queued_db_jobs_.end())
-    //            queued_db_jobs_.erase(find(queued_db_jobs_.begin(), queued_db_jobs_.end(), job));
-    //        else
-    //            logwrn << "JobManager: cancelJob: unknown job was to be cancelled";
-    //    }
-
-    //    mutex_.unlock();
-
-    //    job->emitObsolete();
-
-    updateWidget();
 }
 
 bool JobManager::noJobs ()
 {
-    //QMutexLocker locker(&mutex_);
-
-    return jobs_.empty() && !active_db_job_ && queued_db_jobs_.empty();
+    return jobs_.empty() && non_blocking_jobs_.empty() && !active_db_job_ && queued_db_jobs_.empty();
 }
 
 /**
@@ -132,14 +88,15 @@ void JobManager::run()
 {
     logdbg  << "JobManager: run: start";
 
-    while (!stop_requested_)
+    while (1)
     {
-        //mutex_.lock();
+        if (stop_requested_ && noJobs())
+            break;
 
         bool changed=false;
         bool really_update_widget=false;
 
-        while (!stop_requested_ && !jobs_.empty())
+        while (!jobs_.empty())
         {
             // process normal jobs
             std::shared_ptr<Job> current = *jobs_.unsafe_begin();
@@ -152,21 +109,27 @@ void JobManager::run()
 
             changed = true;
             logdbg << "JobManager: run: flushed job "+current->name();
+
             if(current->obsolete())
             {
                 logdbg << "JobManager: run: flushing obsolete job";
-                current->emitObsolete();
+
+                if (!stop_requested_)
+                    current->emitObsolete();
                 continue;
             }
 
             logdbg << "JobManager: run: flushing done job";
-            current->emitDone();
+
+            if (!stop_requested_)
+                current->emitDone();
+
             logdbg << "JobManager: run: done job emitted "+current->name();
 
             really_update_widget = jobs_.empty();
         }
 
-        while (!stop_requested_ && !non_blocking_jobs_.empty())
+        while (!non_blocking_jobs_.empty())
         {
             // process normal jobs
             std::shared_ptr<Job> current = *non_blocking_jobs_.unsafe_begin();
@@ -182,7 +145,10 @@ void JobManager::run()
             if(current->obsolete())
             {
                 logdbg << "JobManager: run: flushing non-blocking obsolete job";
-                current->emitObsolete();
+
+                if (!stop_requested_)
+                    current->emitObsolete();
+
                 continue;
             }
 
@@ -226,7 +192,7 @@ void JobManager::run()
         //            }
         //        }
 
-        if (!stop_requested_ && active_db_job_)
+        if (active_db_job_)
         {
             // see if active db job done or obsolete
             if(active_db_job_->obsolete())
@@ -240,21 +206,27 @@ void JobManager::run()
                     msleep(10);
                 }
 
-                active_db_job_->emitObsolete();
+                if (!stop_requested_)
+                    active_db_job_->emitObsolete();
+
                 active_db_job_ = nullptr;
                 changed = true;
             }
             else if (active_db_job_->done())
             {
                 logdbg << "JobManager: run: flushing db done job";
-                active_db_job_->emitDone();
+
+                if (!stop_requested_)
+                    active_db_job_->emitDone();
+
+
                 active_db_job_ = nullptr;
                 changed = true;
                 really_update_widget = true;
             }
         }
 
-        while (!stop_requested_ && !active_db_job_ && !queued_db_jobs_.empty())
+        while (!active_db_job_ && !queued_db_jobs_.empty())
         {
             // start a new one if needed
             std::shared_ptr<Job> current;
@@ -265,7 +237,9 @@ void JobManager::run()
 
             if (current->obsolete())
             {
-                current->emitObsolete();
+                if (!stop_requested_)
+                    current->emitObsolete();
+
                 continue;
             }
 
@@ -274,40 +248,34 @@ void JobManager::run()
 
             QThreadPool::globalInstance()->start(active_db_job_.get());
             changed = true;
+
             break;
         }
 
-        if (stop_requested_)
-            break;
-
-        if (changed && !active_db_job_ && queued_db_jobs_.empty())
+        if (!stop_requested_ && changed && !active_db_job_ && queued_db_jobs_.empty())
             emit databaseIdle();
 
-        //mutex_.unlock();
-
-        if (changed)
+        if (!stop_requested_ && changed)
             updateWidget(really_update_widget);
 
         //QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         msleep(1);
     }
 
+    assert (jobs_.empty());
+    assert (non_blocking_jobs_.empty());
+    assert (!active_db_job_);
+    assert (queued_db_jobs_.empty());
+
     stopped_=true;
-    logdbg  << "JobManager: run: stopped";
+    loginf  << "JobManager: run: stopped";
 }
 
 void JobManager::shutdown ()
 {
-    loginf  << "JobManager: shutdown";
-    //mutex_.lock();
-
-    if (widget_)
-    {
-        delete widget_;
-        widget_ = nullptr;
-    }
-
     loginf  << "JobManager: shutdown: setting jobs obsolete";
+
+    stop_requested_ = true;
 
     if (active_db_job_)
         active_db_job_->setObsolete();
@@ -325,14 +293,12 @@ void JobManager::shutdown ()
 
     while (!queued_db_jobs_.empty() || active_db_job_ || !jobs_.empty() || !non_blocking_jobs_.empty())
     {
-        //mutex_.unlock();
-        msleep(10);
-        //mutex_.lock();
-    }
+        loginf  << "JobManager: shutdown: waiting on jobs to finish: empty queued " << !queued_db_jobs_.empty()
+                << " db " << (active_db_job_ != nullptr) << " jobs " << !jobs_.empty()
+                                                       << " non-locking " << !non_blocking_jobs_.empty();
 
-    //mutex_.unlock();
-    loginf  << "JobManager: shutdown: stopping run";
-    stop_requested_ = true;
+        msleep(1000);
+    }
 
     while (!stopped_)
     {
@@ -340,6 +306,12 @@ void JobManager::shutdown ()
         while (QCoreApplication::hasPendingEvents())
             QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         QThread::currentThread()->msleep(10);
+    }
+
+    if (widget_)
+    {
+        delete widget_;
+        widget_ = nullptr;
     }
 
     loginf  << "JobManager: shutdown: done";
@@ -359,15 +331,11 @@ JobManagerWidget *JobManager::widget()
 
 unsigned int JobManager::numJobs ()
 {
-    //QMutexLocker locker(&mutex_);
-
     return jobs_.unsafe_size() + non_blocking_jobs_.unsafe_size();
 }
 
 unsigned int JobManager::numDBJobs ()
 {
-    //QMutexLocker locker(&mutex_);
-
     return active_db_job_ ? queued_db_jobs_.unsafe_size()+1 : queued_db_jobs_.unsafe_size();
 }
 

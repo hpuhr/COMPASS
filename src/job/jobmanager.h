@@ -81,10 +81,6 @@ protected:
     volatile bool stop_requested_;
     volatile bool stopped_;
 
-    //QMutex mutex_;
-
-    //unsigned int update_time_;
-
     tbb::concurrent_queue <std::shared_ptr<Job>> jobs_;
     tbb::concurrent_queue <std::shared_ptr<Job>> non_blocking_jobs_;
 
