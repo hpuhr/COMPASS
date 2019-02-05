@@ -302,10 +302,10 @@ void JobManager::shutdown ()
 
     while (!stopped_)
     {
-        logdbg  << "JobManager: shutdown: waiting";
-        while (QCoreApplication::hasPendingEvents())
-            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-        QThread::currentThread()->msleep(10);
+        loginf  << "JobManager: shutdown: waiting on run stop";
+//        while (QCoreApplication::hasPendingEvents())
+//            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        msleep(1000);
     }
 
     if (widget_)

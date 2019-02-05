@@ -395,6 +395,14 @@ std::string DBFilterCondition::getTransformedValue (const std::string& untransfo
             logdbg << "DBFilterCondition: getTransformedValue: variable " << variable->name()
                    << " of same dimension has different units " << column.unit() << " " << variable->unit();
 
+            if (!UnitManager::instance().hasDimension (variable->dimension()))
+            {
+                logerr  <<  "DBFilterCondition: getTransformedValue: unknown dimension '"
+                         << variable->dimension() << "'";
+                throw std::runtime_error ("DBFilterCondition: getTransformedValue: unknown dimension '"
+                                          +variable->dimension()+"'");
+            }
+
             const Dimension &dimension = UnitManager::instance().dimension (variable->dimension());
 
             if (!dimension.hasUnit(column.unit()))

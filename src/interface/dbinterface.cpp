@@ -808,7 +808,22 @@ std::pair<std::string, std::string> DBInterface::getMinMaxString (const DBOVaria
     const DBTableColumn &column = var.currentDBColumn ();
     if (column.unit() != var.unitConst()) // do unit conversion stuff
     {
+        if (!UnitManager::instance().hasDimension (var.dimensionConst()))
+        {
+            logerr  <<  "DBInterface: getMinMaxString: unknown dimension '" << var.dimensionConst() << "'";
+            throw std::runtime_error ("DBInterface: getMinMaxString: unknown dimension '"+var.dimensionConst()+"'");
+        }
+
         const Dimension &dimension = UnitManager::instance().dimension (var.dimensionConst());
+
+        if (!dimension.hasUnit(column.unit()))
+            logerr  <<  "DBInterface: getMinMaxString: dimension '" << var.dimensionConst()
+                     << "' has unknown unit '" << column.unit() << "'";
+
+        if (!dimension.hasUnit(var.unitConst()))
+            logerr  <<  "DBInterface: getMinMaxString: dimension '" << var.dimensionConst()
+                     << "' has unknown unit '"<< var.unitConst() << "'";
+
         double factor = dimension.getFactor (column.unit(), var.unitConst());
 
         min = var.multiplyString(min, factor);

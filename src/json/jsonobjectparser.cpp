@@ -450,8 +450,23 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
             logdbg << "JSONObjectParser: transformBuffer: variable " << data_it.variable().name()
                    << " of same dimension has different units " << data_it.unit() << " " << data_it.variable().unit();
 
+            if (!UnitManager::instance().hasDimension (data_it.dimension()))
+            {
+                logerr  <<  "JSONObjectParser: transformBuffer: unknown dimension '" << data_it.dimension() << "'";
+                throw std::runtime_error ("JSONObjectParser: transformBuffer: unknown dimension '"
+                                          +data_it.dimension()+"'");
+            }
+
             const Dimension &dimension = UnitManager::instance().dimension (data_it.variable().dimension());
             double factor;
+
+            if (!dimension.hasUnit(data_it.unit()))
+                logerr  <<  "JSONObjectParser: transformBuffer: dimension '" << data_it.dimension()
+                         << "' has unknown unit '" << data_it.unit() << "'";
+
+            if (!dimension.hasUnit(data_it.variable().unit()))
+                logerr  <<  "JSONObjectParser: transformBuffer: dimension '" << data_it.variable().dimension()
+                         << "' has unknown unit '"<< data_it.variable().unit() << "'";
 
             factor = dimension.getFactor (data_it.unit(), data_it.variable().unit());
             std::string current_var_name = data_it.variable().name();
