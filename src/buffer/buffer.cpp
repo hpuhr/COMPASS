@@ -383,8 +383,22 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
             logdbg << "Buffer: transformVariables: variable " << var_it->name()
                    << " of same dimension has different units " << column.unit() << " " << var_it->unit();
 
+            if (!UnitManager::instance().hasDimension (var_it->dimension()))
+            {
+                logerr  <<  "Buffer: transformVariables: unknown dimension '" << var_it->dimension() << "'";
+                throw std::runtime_error ("Buffer: transformVariables: unknown dimension '"+var_it->dimension()+"'");
+            }
+
             const Dimension &dimension = UnitManager::instance().dimension (var_it->dimension());
             double factor;
+
+            if (!dimension.hasUnit(column.unit()))
+                logerr  <<  "Buffer: transformVariables: dimension '" << var_it->dimension() << "' has unknown unit '"
+                         << column.unit() << "'";
+
+            if (!dimension.hasUnit(var_it->unit()))
+                logerr  <<  "Buffer: transformVariables: dimension '" << var_it->dimension() << "' has unknown unit '"
+                         << var_it->unit() << "'";
 
             if (tc2dbovar)
                 factor = dimension.getFactor (column.unit(), var_it->unit());

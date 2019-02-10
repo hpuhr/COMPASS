@@ -54,7 +54,7 @@ void UnitManager::checkSubConfigurables ()
         generateSubConfigurable("Dimension", "Angle");
 
         dimensions_.at("Angle")->addUnit ("Degree", 1.0, "");
-        dimensions_.at("Angle")->addUnit ("Radian", 180.0/M_PI, "");
+        dimensions_.at("Angle")->addUnit ("Radian", M_PI/180.0, "");
     }
 
     if (dimensions_.count("Length") == 0)

@@ -28,6 +28,7 @@
 #include "filtermanagerwidget.h"
 #include "datasourcesfilter.h"
 
+using namespace std;
 
 FilterManager::FilterManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb)
 : Configurable (class_id, instance_id, atsdb, "filter.xml")
@@ -72,6 +73,39 @@ void FilterManager::generateSubConfigurable (const std::string& class_id, const 
             {
                 logerr << "FilterManager: generateSubConfigurable: data sources filter " << instance_id
                        << " already present";
+                return;
+            }
+            std::string dbo_name = configuration().getSubConfiguration(
+                        class_id, instance_id).getParameterConfigValueString("dbo_name");
+
+
+            if (!ATSDB::instance().objectManager().existsObject(dbo_name))
+            {
+                loginf << "FilterManager: generateSubConfigurable: disabling data sources filter " << instance_id
+                       << " because of non-existing dbobject '" << dbo_name << "'";
+                return;
+            }
+
+            DBObject& object = ATSDB::instance().objectManager().object(dbo_name);
+
+            if (!object.hasCurrentDataSourceDefinition())
+            {
+                loginf << "FilterManager: generateSubConfigurable: disabling data sources filter " << instance_id
+                       << " because of missing data source definition";
+                return;
+            }
+
+            if (!object.hasDataSources())
+            {
+                loginf << "FilterManager: generateSubConfigurable: disabling data sources filter " << instance_id
+                       << " because of missing data sources";
+                return;
+            }
+
+            if (!object.existsInDB())
+            {
+                loginf << "FilterManager: generateSubConfigurable: disabling data sources filter " << instance_id
+                       << " because of empty dbobject '" << dbo_name << "'";
                 return;
             }
 
@@ -123,7 +157,15 @@ void FilterManager::checkSubConfigurables ()
         loginf << "FilterManager: checkSubConfigurables: generating sensor filter for " << obj_it.first;
 
         std::string instance_id = obj_it.second->name()+"DataSources";
-        Configuration &ds_filter_configuration = addNewSubConfiguration ("DataSourcesFilter", instance_id);
+        unsigned int cnt = 0;
+
+        while(configuration().hasSubConfiguration("DataSourcesFilter", instance_id+to_string(cnt)))
+            ++cnt;
+
+        instance_id += to_string(cnt);
+
+        Configuration &ds_filter_configuration = addNewSubConfiguration ("DataSourcesFilter",instance_id);
+
         ds_filter_configuration.addParameterString ("dbo_name", obj_it.first);
         generateSubConfigurable ("DataSourcesFilter", instance_id);
     }

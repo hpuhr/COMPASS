@@ -627,6 +627,19 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
     delete msg_box_;
     msg_box_ = nullptr;
 
+    if (!update_buffer->size())
+    {
+        std::string text = "There were "+std::to_string(transformation_errors)
+                +" skipped coordinates with transformation errors, no data available for insertion.";
+
+        QMessageBox msgBox;
+        msgBox.setText(text.c_str());
+        msgBox.exec();
+
+        calculated_ = true;
+        return;
+    }
+
     if (transformation_errors)
     {
         QMessageBox::StandardButton reply;

@@ -28,9 +28,13 @@ void handler(int sig) {
   exit(1);
 }
 
+using namespace std;
+
 int main (int argc, char **argv)
 {
     signal(SIGSEGV, handler);   // install our handler
+
+    bool atsdb_initialized = false;
 
     // real atsdb stuff
     try
@@ -42,6 +46,8 @@ int main (int argc, char **argv)
 
         ATSDB::instance().initialize();
 
+        atsdb_initialized = true;
+
         MainWindow window;
 
         window.show();
@@ -51,28 +57,26 @@ int main (int argc, char **argv)
     }
     catch (std::exception& ex)
     {
-        logerr  << "main: caught exception '" << ex.what() << "'";
-        logerr.flush();
+        cerr << "main: caught exception '" << ex.what() << "'" << endl;
 
         //assert (false);
 
-        if (ATSDB::instance().ready())
+        if (atsdb_initialized && ATSDB::instance().ready())
             ATSDB::instance().shutdown();
 
         return -1;
     }
     catch(...)
     {
-        logerr  << "main: caught exception";
-        logerr.flush();
+        cerr  << "main: caught exception" << endl;
 
         //assert (false);
 
-        if (ATSDB::instance().ready())
+        if (atsdb_initialized && ATSDB::instance().ready())
             ATSDB::instance().shutdown();
 
         return -1;
     }
-    loginf << "Main: Shutdown";
+    loginf << "main: shutdown";
     return 0;
 }

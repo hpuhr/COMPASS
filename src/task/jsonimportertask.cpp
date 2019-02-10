@@ -242,6 +242,8 @@ void JSONImporterTask::importFile(const std::string& filename, bool test)
 
     updateMsgBox();
 
+    logdbg << "JSONImporterTask: importFile: filename " << filename << " test " << test << " done";
+
     return;
 }
 
@@ -283,6 +285,8 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
 
     updateMsgBox();
 
+    logdbg << "JSONImporterTask: importFileArchive: filename " << filename << " test " << test << " done";
+
     return;
 }
 
@@ -291,19 +295,21 @@ void JSONImporterTask::readJSONFilePartDoneSlot ()
     loginf << "JSONImporterTask: readJSONFilePartDoneSlot";
 
     assert (read_json_job_);
+
+    loginf << "JSONImporterTask: readJSONFilePartDoneSlot: moving objects";
+    std::vector <std::string> objects = read_json_job_->objects();
+    //assert (!read_json_job_->objects().size());
+
     bytes_read_ = read_json_job_->bytesRead();
     bytes_to_read_ = read_json_job_->bytesToRead();
     read_status_percent_ = read_json_job_->getStatusPercent();
-    objects_read_ += read_json_job_->objects().size();
+    objects_read_ += objects.size();
     loginf << "JSONImporterTask: readJSONFilePartDoneSlot: bytes " << bytes_read_ << " to read " << bytes_to_read_
            << " percent " << read_status_percent_;
 
     //loginf << "got part '" << ss.str() << "'";
 
     // restart read job
-    std::vector <std::string> objects = std::move(read_json_job_->objects());
-    assert (!read_json_job_->objects().size());
-
     if (!read_json_job_->fileReadDone())
     {
         loginf << "JSONImporterTask: readJSONFilePartDoneSlot: read continue";
@@ -314,6 +320,7 @@ void JSONImporterTask::readJSONFilePartDoneSlot ()
         read_json_job_ = nullptr;
 
     // start parse job
+    loginf << "JSONImporterTask: readJSONFilePartDoneSlot: starting parse job";
     std::shared_ptr<JSONParseJob> json_parse_job = std::shared_ptr<JSONParseJob> (
                 new JSONParseJob (std::move(objects)));
     connect (json_parse_job.get(), SIGNAL(obsoleteSignal()), this, SLOT(parseJSONObsoleteSlot()),
@@ -325,7 +332,10 @@ void JSONImporterTask::readJSONFilePartDoneSlot ()
 
     json_parse_jobs_.push_back(json_parse_job);
 
+    loginf << "JSONImporterTask: readJSONFilePartDoneSlot: updating message box";
     updateMsgBox();
+
+    logdbg << "JSONImporterTask: readJSONFilePartDoneSlot: done";
 }
 
 void JSONImporterTask::readJSONFilePartObsoleteSlot ()
@@ -366,6 +376,8 @@ void JSONImporterTask::parseJSONDoneSlot ()
     key_count_ += count;
 
     updateMsgBox();
+
+    logdbg << "JSONImporterTask: parseJSONDoneSlot: done";
 }
 
 void JSONImporterTask::parseJSONObsoleteSlot ()
@@ -437,6 +449,7 @@ void JSONImporterTask::mapJSONDoneSlot ()
         insertData ();
     }
 
+    logdbg << "JSONImporterTask: mapJSONDoneSlot: done";
 }
 
 void JSONImporterTask::mapJSONObsoleteSlot ()
@@ -578,6 +591,8 @@ void JSONImporterTask::insertData ()
 
 void JSONImporterTask::checkAllDone ()
 {
+    logdbg << "JSONImporterTask: checkAllDone";
+
     if (!all_done_ && read_json_job_ == nullptr && json_parse_jobs_.size() == 0 && json_map_jobs_.size() == 0
             && insert_active_ == 0)
     {
@@ -595,10 +610,14 @@ void JSONImporterTask::checkAllDone ()
         if (widget_)
             widget_->importDoneSlot(test_);
     }
+
+    logdbg << "JSONImporterTask: checkAllDone: done";
 }
 
 void JSONImporterTask::updateMsgBox ()
 {
+    logdbg << "JSONImporterTask: updateMsgBox";
+
     if (!msg_box_)
     {
         msg_box_ = new QMessageBox ();
@@ -702,6 +721,8 @@ void JSONImporterTask::updateMsgBox ()
         msg_box_->setStandardButtons(QMessageBox::NoButton);
 
     msg_box_->show();
+
+    logdbg << "JSONImporterTask: updateMsgBox: done";
 }
 
 void JSONImporterTask::insertProgressSlot (float percent)
@@ -716,6 +737,8 @@ void JSONImporterTask::insertDoneSlot (DBObject& object)
 
     checkAllDone();
     updateMsgBox();
+
+    logdbg << "JSONImporterTask: insertDoneSlot: done";
 }
 
 

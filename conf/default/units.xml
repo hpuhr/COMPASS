@@ -5,7 +5,7 @@
             <ParameterString definition=""/>
         </Configuration>
         <Configuration class_id="Unit" instance_id="Radian">
-            <ParameterDouble factor="57.295779513082"/>
+            <ParameterDouble factor="0.017453292510"/>
             <ParameterString definition=""/>
         </Configuration>
     </Configuration>

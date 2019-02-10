@@ -9,7 +9,7 @@ set(CMAKE_CXX_FLAGS_MYREL "-O3")
 project( ATSDB )
 SET(CPACK_PACKAGE_VERSION_MAJOR "0")
 SET(CPACK_PACKAGE_VERSION_MINOR "2")
-SET(CPACK_PACKAGE_VERSION_PATCH "0")
+SET(CPACK_PACKAGE_VERSION_PATCH "1")
 
 message("  System: ${CMAKE_SYSTEM}")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -66,6 +66,8 @@ message("  TINYXML2_LIBRARY: ${TINYXML2_LIBRARY}")
 find_package ( LibArchive REQUIRED )
 message("  LibArchive_INCLUDE_DIRS: ${LibArchive_INCLUDE_DIRS}")
 message("  LibArchive_LIBRARIES: ${LibArchive_LIBRARIES}")
+
+find_package(TBB REQUIRED)
 
 #find_package ( JSONCPP REQUIRED )
 #message("  JSONCPP_INCLUDE_DIR: ${JSONCPP_INCLUDE_DIR}")
@@ -132,7 +134,8 @@ target_link_libraries ( atsdb
     ${GDAL_LIBRARIES}
     ${SQLITE3_LIBRARIES}
     ${LibArchive_LIBRARIES}
-    ${JSONCPP_LIBRARY})
+    ${JSONCPP_LIBRARY}
+    ${TBB_LIBRARIES})
 
 message("Installing using prefix: ${CMAKE_INSTALL_PREFIX}")
 install(DIRECTORY "conf" DESTINATION atsdb)

@@ -267,6 +267,16 @@ void ATSDB::shutdown ()
     JobManager::instance().shutdown();
     ProjectionManager::instance().shutdown();
 
+    assert (task_manager_);
+    task_manager_->shutdown();
+    delete task_manager_;
+    task_manager_ = nullptr;
+
+    assert (view_manager_);
+    view_manager_->close();
+    delete view_manager_;
+    view_manager_ = nullptr;
+
     assert (db_interface_);
     db_interface_->closeConnection();
 
@@ -285,16 +295,6 @@ void ATSDB::shutdown ()
     assert (filter_manager_);
     delete filter_manager_;
     filter_manager_ = nullptr;
-
-    assert (task_manager_);
-    task_manager_->shutdown();
-    delete task_manager_;
-    task_manager_ = nullptr;
-
-    assert (view_manager_);
-    view_manager_->close();
-    delete view_manager_;
-    view_manager_ = nullptr;
 
     initialized_=false;
 
@@ -322,7 +322,7 @@ void ATSDB::shutdown ()
 //            sleep(1);
 //        }
 //    }
-    logdbg  << "ATSDB: shutdown: end";
+    loginf  << "ATSDB: shutdown: end";
 }
 
 ////void ATSDB::insert (const std::string &type, void *data)

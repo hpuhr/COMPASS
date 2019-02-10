@@ -20,7 +20,7 @@ public:
 
     bool fileReadDone() const;
 
-    std::vector<std::string>& objects(); // for moving out
+    std::vector<std::string>&& objects(); // for moving out
 
     size_t bytesRead() const;
     size_t bytesToRead() const;
@@ -43,7 +43,7 @@ protected:
     struct archive *a;
     struct archive_entry *entry;
     int64_t offset;
-    bool entry_not_done_ {false};
+    bool entry_done_ {true}; // init to done to trigger read of next header
 
     size_t bytes_to_read_ {0};
     size_t bytes_read_ {0};

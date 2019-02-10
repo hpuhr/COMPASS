@@ -53,8 +53,6 @@ Client::Client(int& argc, char** argv)
 
     setlocale(LC_ALL, "C");
 
-    cout << "UGA " << std::atof("0.23") << " " << 0.23 << endl;
-
     po::options_description desc("Allowed options");
     desc.add_options()
             ("help", "produce help message")

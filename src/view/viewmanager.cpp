@@ -53,7 +53,7 @@ void ViewManager::init (QTabWidget *tab_widget)
 
 void ViewManager::close ()
 {
-    logdbg  << "ViewManager: close";
+    loginf  << "ViewManager: close";
     initialized_=false;
 
     logdbg  << "ViewManager: close: deleting container widgets";

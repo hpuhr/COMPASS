@@ -7444,8 +7444,8 @@
                 <ParameterString variable_name="ssr_runlength_deg"/>
             </Configuration>
             <Configuration class_id="LabelEntry" instance_id="LabelEntrytarget_addr0">
-                <ParameterBool show="0"/>
-                <ParameterString prefix=""/>
+                <ParameterBool show="1"/>
+                <ParameterString prefix="TA "/>
                 <ParameterString suffix=""/>
                 <ParameterString variable_name="target_addr"/>
             </Configuration>

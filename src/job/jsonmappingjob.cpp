@@ -27,6 +27,7 @@ void JSONMappingJob::run ()
     bool parsed;
     bool parsed_any = false;
 
+    logdbg << "JSONMappingJob: run: mapping json";
     for (auto& j_it : json_objects_)
     {
         parsed = false;
@@ -34,6 +35,7 @@ void JSONMappingJob::run ()
 
         for (auto& map_it : parsers_)
         {
+            logdbg << "JSONMappingJob: run: mapping json: obj " << map_it.second.dbObject().name();
             parsed = map_it.second.parseJSON(j_it, buffers_.at(map_it.second.dbObject().name()));
             parsed_any |= parsed;
         }
@@ -43,9 +45,13 @@ void JSONMappingJob::run ()
             ++num_not_mapped_;
     }
 
+    logdbg << "JSONMappingJob: run: creating buffers";
     for (auto& parser_it : parsers_)
     {
         assert (buffers_.count(parser_it.second.dbObject().name()));
+
+        logdbg << "JSONMappingJob: run: creating buffer for " << parser_it.second.dbObject().name();
+
         std::shared_ptr<Buffer> buffer = buffers_.at(parser_it.second.dbObject().name());
 
         if (buffer && buffer->size())
