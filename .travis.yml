@@ -19,6 +19,7 @@ addons:
      - libtinyxml2-dev
      - libarchive-dev
      - libjsoncpp-dev
+     - libtbb-dev
 
 compiler:
  - gcc
