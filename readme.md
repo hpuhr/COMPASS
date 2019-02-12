@@ -26,11 +26,14 @@ Please refer to the releases page for the user manual and the AppImage. Please d
 ## Contents
 
 - Folder "cmake_modules": Contains cmake find scripts
+- Folder "conf": Contains configuration
+- Folder "data": Contains icons, textures, maps,...
 - Folder "doc": Contains documentation
 - Folder "src": Contains source code
+- Folder "utils": Contains scripts for manual CSV import
 - CMakeLists.txt: CMake config file
-- gpl.txt: GPL license
-- readme.txt: This file
+- LICENSE: GPL license
+- readme.md: This file
 
 ## Released Version v0.2.1-beta
 - [Current Appimage](https://github.com/hpuhr/ATSDB/releases/download/v0.2.1-beta/ATSDB-v0.2.1_beta-x86_64.AppImage)
