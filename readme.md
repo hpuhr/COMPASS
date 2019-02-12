@@ -1,11 +1,9 @@
-Description
------------
+## Description
 Based on a dynamic database schema, recorded air traffic surveillance data can be inserted, retrieved and inspected.
 
 Please refer to the releases page for the user manual and the AppImage. Please do read the user manual before running the application.
 
-Contents
---------
+## Contents
 
 Folder "cmake_modules": Contains cmake find scripts
 Folder "doc": Contains documentation
@@ -14,27 +12,24 @@ CMakeLists.txt: CMake config file
 gpl.txt: GPL license
 readme.txt: This file
 
-Released Version v0.2.1-beta
-----------------------------
+## Released Version v0.2.1-beta
+- [Current Appimage](https://github.com/hpuhr/ATSDB/releases/download/v0.2.1-beta/ATSDB-v0.2.1_beta-x86_64.AppImage)
+- [User Manual](https://github.com/hpuhr/ATSDB/releases/download/v0.2.0-beta/user_manual_v0.2.0.pdf)
 
-Current Appimage: https://github.com/hpuhr/ATSDB/releases/download/v0.2.1-beta/ATSDB-v0.2.1_beta-x86_64.AppImage
+## YouTube Videos
+- [Installation, Import & OSGView](https://youtu.be/hptJHQ5D9hs)
+- [OSGView Display Options](https://youtu.be/vEoT88RGLQo)
+- -[Labeling, Highlighting and Filtering](https://youtu.be/2ewXrWU7KUE)
 
-User Manual: https://github.com/hpuhr/ATSDB/releases/download/v0.2.0-beta/user_manual_v0.2.0.pdf
 
-Newsletter
-----------
+## Newsletter
 If you are interested in our newsletter, please send a mail to atsdb@gmx.at with the subject "Register".
 
-
-Author
-------
+## Author
 Helmut Puhr
-
 Contact: atsdb@gmx.at
 
-Licenses
---------
-
+## Licenses
 The source code is released under GNU GPLv3:
 https://www.gnu.org/licenses/gpl-3.0.en.html
 
