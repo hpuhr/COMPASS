@@ -1,7 +1,27 @@
 ## Description
 Based on a dynamic database schema, recorded air traffic surveillance data can be inserted, retrieved and inspected.
 
+- Support of multiple database systems, e.g. Sqlite3, MySQL
+- Support of multiple, configurable database schemas, e.g. SCDB, Simple
+- Dynamic JSON import from SDDL, ADS-B exchange, OpenSky Network
+- MySQL database import and management of SCDB databases
+- High performance processing, low memory footprint
+- Utilization of application during loading procedure
+- Views for data inspection
+- Simple custom filter generation
+- Supported Database Objects
+  - Radar plots
+  - System Tracks and Reference Trajectories
+  - MLAT & WAM target reports
+  - ADS-B target reports
+- XML-based configuration files
+- Multiple coexisting configurations, usage chosen during runtime
+- Based on Open Source libraries
+- Runs on generic hardware
+
 Please refer to the releases page for the user manual and the AppImage. Please do read the user manual before running the application.
+
+![alt text](https://github.com/hpuhr/ATSDB/blob/master/doc/screenshots/osgview_3d.jpeg)
 
 ## Contents
 
@@ -19,7 +39,7 @@ readme.txt: This file
 ## YouTube Videos
 - [Installation, Import & OSGView](https://youtu.be/hptJHQ5D9hs)
 - [OSGView Display Options](https://youtu.be/vEoT88RGLQo)
-- -[Labeling, Highlighting and Filtering](https://youtu.be/2ewXrWU7KUE)
+- [Labeling, Highlighting and Filtering](https://youtu.be/2ewXrWU7KUE)
 
 
 ## Newsletter
