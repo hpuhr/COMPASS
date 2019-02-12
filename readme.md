@@ -25,12 +25,12 @@ Please refer to the releases page for the user manual and the AppImage. Please d
 
 ## Contents
 
-Folder "cmake_modules": Contains cmake find scripts
-Folder "doc": Contains documentation
-Folder "src": Contains source code
-CMakeLists.txt: CMake config file
-gpl.txt: GPL license
-readme.txt: This file
+- Folder "cmake_modules": Contains cmake find scripts
+- Folder "doc": Contains documentation
+- Folder "src": Contains source code
+- CMakeLists.txt: CMake config file
+- gpl.txt: GPL license
+- readme.txt: This file
 
 ## Released Version v0.2.1-beta
 - [Current Appimage](https://github.com/hpuhr/ATSDB/releases/download/v0.2.1-beta/ATSDB-v0.2.1_beta-x86_64.AppImage)
@@ -50,12 +50,9 @@ Helmut Puhr
 Contact: atsdb@gmx.at
 
 ## Licenses
-The source code is released under GNU GPLv3:
-https://www.gnu.org/licenses/gpl-3.0.en.html
+The source code is released under [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
-The binary is released under Creative Commons Attribution 4.0 International (CC BY 4.0)
-Human readable: https://creativecommons.org/licenses/by/4.0/
-Legal: https://creativecommons.org/licenses/by/4.0/legalcode
+The binary is released under [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/), [Legal Text](https://creativecommons.org/licenses/by/4.0/legalcode)
 
 While it is permitted to use the AppImage for commercial purposes, the used open-source libraries might still prohibit this without further permission. It is the responsibility of the user to inspect the user manual and confirm that their use cases are permitted under the referenced licenses.
 
