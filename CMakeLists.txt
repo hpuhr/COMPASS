@@ -69,6 +69,11 @@ message("  LibArchive_LIBRARIES: ${LibArchive_LIBRARIES}")
 
 find_package(TBB REQUIRED)
 
+find_package ( jASTERIX )
+message("  jASTERIX found: ${jASTERIX_FOUND}")
+message("  jASTERIX_INCLUDE_DIR: ${jASTERIX_INCLUDE_DIR}")
+message("  jASTERIX_LIBRARIES: ${jASTERIX_LIBRARIES}")
+
 #find_package ( JSONCPP REQUIRED )
 #message("  JSONCPP_INCLUDE_DIR: ${JSONCPP_INCLUDE_DIR}")
 #message("  JSONCPP_LIBRARY: ${JSONCPP_LIBRARY}")

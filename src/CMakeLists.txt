@@ -19,6 +19,10 @@ include("${CMAKE_CURRENT_LIST_DIR}/task/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/view/CMakeLists.txt")
 include("${CMAKE_CURRENT_LIST_DIR}/unit/CMakeLists.txt")
 
+IF (jASTERIX_FOUND)
+include("${CMAKE_CURRENT_LIST_DIR}/asterix/CMakeLists.txt")
+ENDIF()
+
 include_directories (
     "${CMAKE_CURRENT_LIST_DIR}"
     )
