@@ -68,6 +68,8 @@ message("  LibArchive_INCLUDE_DIRS: ${LibArchive_INCLUDE_DIRS}")
 message("  LibArchive_LIBRARIES: ${LibArchive_LIBRARIES}")
 
 find_package(TBB REQUIRED)
+message("  TBB_INCLUDE_DIRS: ${TBB_INCLUDE_DIRS}")
+message("  TBB_LIBRARIES: ${TBB_LIBRARIES}")
 
 find_package ( jASTERIX )
 message("  jASTERIX found: ${jASTERIX_FOUND}")
@@ -126,6 +128,16 @@ include_directories (
 link_directories(
     ${Boost_LIBRARY_DIR}
     )
+
+IF (jASTERIX_FOUND)
+include_directories (
+    ${jASTERIX_INCLUDE_DIR}
+    )
+
+link_directories(
+    ${jASTERIX_LIBRARIES}
+    )
+ENDIF()
 
 target_link_libraries ( atsdb
     Qt5::Widgets

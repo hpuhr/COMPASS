@@ -22,7 +22,7 @@
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "dbovariable.h"
-#include "sqlitefile.h"
+#include "savedfile.h"
 #include "files.h"
 #include "stringconv.h"
 #include "metadbtable.h"

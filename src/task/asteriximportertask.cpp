@@ -19,6 +19,11 @@
 #include "asteriximportertaskwidget.h"
 #include "taskmanager.h"
 #include "configurable.h"
+#include "files.h"
+#include "stringconv.h"
+#include "savedfile.h"
+
+#include <jasterix/jasterix.h>
 
 #include "files.h"
 
@@ -29,7 +34,7 @@ ASTERIXImporterTask::ASTERIXImporterTask(const std::string& class_id, const std:
                                    TaskManager* task_manager)
     : Configurable (class_id, instance_id, task_manager)
 {
-//    registerParameter("current_filename", &current_filename_, "");
+    registerParameter("current_filename", &current_filename_, "");
 //    registerParameter("current_schema", &current_schema_, "");
 
     createSubConfigurables();
@@ -44,20 +49,20 @@ ASTERIXImporterTask::~ASTERIXImporterTask()
 //        msg_box_ = nullptr;
 //    }
 
-//    for (auto it : file_list_)
-//        delete it.second;
+    for (auto it : file_list_)
+        delete it.second;
 
-//    file_list_.clear();
+    file_list_.clear();
 }
 
 void ASTERIXImporterTask::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
-//    if (class_id == "JSONFile")
-//    {
-//        SavedFile *file = new SavedFile (class_id, instance_id, this);
-//        assert (file_list_.count (file->name()) == 0);
-//        file_list_.insert (std::pair <std::string, SavedFile*> (file->name(), file));
-//    }
+    if (class_id == "ASTERIXFile")
+    {
+        SavedFile *file = new SavedFile (class_id, instance_id, this);
+        assert (file_list_.count (file->name()) == 0);
+        file_list_.insert (std::pair <std::string, SavedFile*> (file->name(), file));
+    }
 //    else if (class_id == "JSONParsingSchema")
 //    {
 //        std::string name = configuration().getSubConfiguration(
@@ -72,7 +77,7 @@ void ASTERIXImporterTask::generateSubConfigurable (const std::string &class_id, 
 //                     std::forward_as_tuple(name),  // args for key
 //                     std::forward_as_tuple(class_id, instance_id, *this));  // args for mapped value
 //    }
-//    else
+    else
         throw std::runtime_error ("JSONImporterTask: generateSubConfigurable: unknown class_id "+class_id );
 }
 
@@ -85,4 +90,104 @@ ASTERIXImporterTaskWidget* ASTERIXImporterTask::widget()
 
     assert (widget_);
     return widget_.get();
+}
+
+void ASTERIXImporterTask::addFile (const std::string &filename)
+{
+    if (file_list_.count (filename) != 0)
+        throw std::invalid_argument ("ASTERIXImporterTask: addFile: name '"+filename+"' already in use");
+
+    std::string instancename = filename;
+    instancename.erase (std::remove(instancename.begin(), instancename.end(), '/'), instancename.end());
+
+    Configuration &config = addNewSubConfiguration ("ASTERIXFile", "ASTERIXFile"+instancename);
+    config.addParameterString("name", filename);
+    generateSubConfigurable ("ASTERIXFile", "ASTERIXFile"+instancename);
+
+//    if (widget_)
+//        widget_->updateFileListSlot();
+}
+
+void ASTERIXImporterTask::removeCurrentFilename ()
+{
+    assert (current_filename_.size());
+    assert (hasFile(current_filename_));
+
+    if (file_list_.count (current_filename_) != 1)
+        throw std::invalid_argument ("ASTERIXImporterTask: addFile: name '"+current_filename_+"' not in use");
+
+    delete file_list_.at(current_filename_);
+    file_list_.erase(current_filename_);
+
+//    if (widget_)
+//        widget_->updateFileListSlot();
+}
+
+bool ASTERIXImporterTask::canImportFile (const std::string& filename)
+{
+    if (!Files::fileExists(filename))
+    {
+        loginf << "ASTERIXImporterTask: canImportFile: not possible since file does not exist";
+        return false;
+    }
+
+//    if (!ATSDB::instance().objectManager().existsObject("ADSB"))
+//    {
+//        loginf << "ASTERIXImporterTask: canImportFile: not possible since DBObject does not exist";
+//        return false;
+//    }
+
+//    if (!current_schema_.size())
+//        return false;
+
+//    if (!schemas_.count(current_schema_))
+//    {
+//        current_schema_ = "";
+//        return false;
+//    }
+
+    return true;
+}
+
+void ASTERIXImporterTask::importFile(const std::string& filename, bool test)
+{
+    loginf << "ASTERIXImporterTask: importFile: filename " << filename << " test " << test;
+
+    assert (canImportFile(filename));
+
+    filename_ = filename;
+//    archive_ = false;
+//    test_ = test;
+//    all_done_ = false;
+
+//    objects_read_ = 0;
+//    objects_parsed_ = 0;
+//    objects_parse_errors_ = 0;
+
+//    objects_mapped_ = 0;
+//    objects_not_mapped_ = 0;
+
+//    objects_created_ = 0;
+//    objects_inserted_ = 0;
+
+//    assert (schemas_.count(current_schema_));
+
+//    for (auto& map_it : schemas_.at(current_schema_))
+//        if (!map_it.second.initialized())
+//            map_it.second.initialize();
+
+//    start_time_ = boost::posix_time::microsec_clock::local_time();
+
+//    read_json_job_ = std::shared_ptr<ReadJSONFilePartJob> (new ReadJSONFilePartJob (filename, false, 10000));
+//    connect (read_json_job_.get(), SIGNAL(obsoleteSignal()), this, SLOT(readJSONFilePartObsoleteSlot()),
+//             Qt::QueuedConnection);
+//    connect (read_json_job_.get(), SIGNAL(doneSignal()), this, SLOT(readJSONFilePartDoneSlot()), Qt::QueuedConnection);
+
+//    JobManager::instance().addNonBlockingJob(read_json_job_);
+
+//    updateMsgBox();
+
+//    logdbg << "JSONImporterTask: importFile: filename " << filename << " test " << test << " done";
+
+    return;
 }

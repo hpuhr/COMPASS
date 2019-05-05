@@ -6,12 +6,15 @@
 # jASTERIX_LIBRARIES, the libraries to link against to use pwlib.
 # jASTERIX_FOUND, If false, don't try to use pwlib.
 
-FIND_PATH(jASTERIX_INCLUDE_DIR jasterix.h
-PATHS
-"$ENV{jASTERIX}/include"
-/usr/local/include/jasterix
-/usr/local/include
-/usr/include
+#FIND_PATH(jASTERIX_INCLUDE_DIR jasterix/jasterix.h
+#PATHS "$ENV{jASTERIX}/include" /usr/local/include /usr/include
+#PATH_SUFFIXES include
+#)
+
+  find_path(jASTERIX_INCLUDE_DIR jasterix/jasterix.h
+#      HINTS ${TBB_SEARCH_DIR}
+      PATHS /usr/local/include /usr/include
+#      PATH_SUFFIXES jasterix
 )
 
 FIND_LIBRARY(jASTERIX_LIBRARIES jasterix

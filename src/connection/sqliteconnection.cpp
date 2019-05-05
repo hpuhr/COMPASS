@@ -23,7 +23,7 @@
 #include "dbcommandlist.h"
 #include "dbresult.h"
 #include "logger.h"
-#include "sqlitefile.h"
+#include "savedfile.h"
 #include "sqliteconnection.h"
 #include "sqliteconnectionwidget.h"
 #include "sqliteconnectioninfowidget.h"
