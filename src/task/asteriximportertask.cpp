@@ -36,7 +36,7 @@ ASTERIXImporterTask::ASTERIXImporterTask(const std::string& class_id, const std:
 {
     registerParameter("debug_jasterix", &debug_jasterix_, false);
     registerParameter("current_filename", &current_filename_, "");
-//    registerParameter("current_schema", &current_schema_, "");
+    registerParameter("current_framing", &current_framing_, "");
 
     createSubConfigurables();
 
@@ -112,8 +112,8 @@ void ASTERIXImporterTask::addFile (const std::string &filename)
     config.addParameterString("name", filename);
     generateSubConfigurable ("ASTERIXFile", "ASTERIXFile"+instancename);
 
-//    if (widget_)
-//        widget_->updateFileListSlot();
+    if (widget_)
+        widget_->updateFileListSlot();
 }
 
 void ASTERIXImporterTask::removeCurrentFilename ()
@@ -127,8 +127,18 @@ void ASTERIXImporterTask::removeCurrentFilename ()
     delete file_list_.at(current_filename_);
     file_list_.erase(current_filename_);
 
-//    if (widget_)
-//        widget_->updateFileListSlot();
+    if (widget_)
+        widget_->updateFileListSlot();
+}
+
+const std::string& ASTERIXImporterTask::currentFraming() const
+{
+    return current_framing_;
+}
+
+void ASTERIXImporterTask::currentFraming(const std::string &current_framing)
+{
+    current_framing_ = current_framing;
 }
 
 bool ASTERIXImporterTask::canImportFile (const std::string& filename)

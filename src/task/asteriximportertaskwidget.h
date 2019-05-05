@@ -19,21 +19,44 @@
 #define ASTERIXIMPORTERTASKWIDGET_H
 
 #include <QWidget>
+#include <memory>
+
+#include <jasterix/jasterix.h>
 
 class ASTERIXImporterTask;
+class ASTERIXConfigWidget;
+
 class QHBoxLayout;
+class QPushButton;
+class QListWidget;
 
 class ASTERIXImporterTaskWidget : public QWidget
 {
     Q_OBJECT
+
+public slots:
+    void addFileSlot ();
+    void deleteFileSlot ();
+    void selectedFileSlot ();
+    void updateFileListSlot ();
+
 public:
     ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
     virtual ~ASTERIXImporterTaskWidget();
 
+    void update ();
+
 protected:
     ASTERIXImporterTask& task_;
+    std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
 
     QHBoxLayout *main_layout_ {nullptr};
+
+    QListWidget* file_list_ {nullptr};
+    QPushButton* add_file_button_ {nullptr};
+    QPushButton* delete_file_button_ {nullptr};
+
+    ASTERIXConfigWidget* config_widget_ {nullptr};
 };
 
 #endif // ASTERIXIMPORTERTASKWIDGET_H

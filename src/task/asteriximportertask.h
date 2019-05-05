@@ -60,14 +60,22 @@ public:
     void currentFilename (const std::string last_filename) { current_filename_ = last_filename; }
     const std::string &currentFilename () { return current_filename_; }
 
+    std::shared_ptr<jASTERIX::jASTERIX> jASTERIX() { return jasterix_; }
+
+    const std::string& currentFraming() const;
+
+    void currentFraming(const std::string &current_framing);
+
 protected:
     bool debug_jasterix_;
     std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
 
     std::map <std::string, SavedFile*> file_list_;
     std::string current_filename_;
+    std::string current_framing_;
 
     std::string filename_;
+
 
     std::unique_ptr<ASTERIXImporterTaskWidget> widget_;
 
