@@ -33,6 +33,11 @@ class TaskManager;
 class ASTERIXImporterTaskWidget;
 class SavedFile;
 
+namespace jASTERIX
+{
+    class jASTERIX;
+}
+
 class ASTERIXImporterTask: public QObject, public Configurable
 {
     Q_OBJECT
@@ -56,6 +61,9 @@ public:
     const std::string &currentFilename () { return current_filename_; }
 
 protected:
+    bool debug_jasterix_;
+    std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
+
     std::map <std::string, SavedFile*> file_list_;
     std::string current_filename_;
 

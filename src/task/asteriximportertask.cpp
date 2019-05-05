@@ -22,22 +22,30 @@
 #include "files.h"
 #include "stringconv.h"
 #include "savedfile.h"
+#include "logger.h"
 
 #include <jasterix/jasterix.h>
 
-#include "files.h"
-
 using namespace Utils;
 using namespace nlohmann;
+//using namespace jASTERIX;
 
 ASTERIXImporterTask::ASTERIXImporterTask(const std::string& class_id, const std::string& instance_id,
                                    TaskManager* task_manager)
     : Configurable (class_id, instance_id, task_manager)
 {
+    registerParameter("debug_jasterix", &debug_jasterix_, false);
     registerParameter("current_filename", &current_filename_, "");
 //    registerParameter("current_schema", &current_schema_, "");
 
     createSubConfigurables();
+
+    std::string jasterix_definition_path = HOME_DATA_DIRECTORY+"/jasterix_definitions";
+
+    loginf << "ASTERIXImporterTask: contructor: jasterix definition path '" << jasterix_definition_path << "'";
+    assert (Files::directoryExists(jasterix_definition_path));
+
+    jasterix_.reset(new jASTERIX::jASTERIX(jasterix_definition_path, false, debug_jasterix_));
 }
 
 

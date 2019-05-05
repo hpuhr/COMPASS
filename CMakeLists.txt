@@ -30,7 +30,7 @@ set(CMAKE_AUTOMOC ON)
 #add_definitions(${Qt5Widgets_DEFINITIONS})
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 
-find_package ( Boost REQUIRED COMPONENTS regex system program_options)
+find_package ( Boost REQUIRED COMPONENTS regex system program_options filesystem iostreams)
 message("  Boost_INCLUDE_DIR: ${Boost_INCLUDE_DIR}")
 message("  Boost_LIBRARY_DIR: ${Boost_LIBRARY_DIR}")
 
@@ -106,6 +106,8 @@ ENDIF()
 
 configure_file(src/util/global.h.in include/global.h)
 
+# includes and library linking
+
 include_directories (
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
@@ -137,6 +139,9 @@ include_directories (
 link_directories(
     ${jASTERIX_LIBRARIES}
     )
+
+target_link_libraries ( atsdb
+    ${jASTERIX_LIBRARIES})
 ENDIF()
 
 target_link_libraries ( atsdb
@@ -153,6 +158,9 @@ target_link_libraries ( atsdb
     ${LibArchive_LIBRARIES}
     ${JSONCPP_LIBRARY}
     ${TBB_LIBRARIES})
+
+
+# installation stuff
 
 message("Installing using prefix: ${CMAKE_INSTALL_PREFIX}")
 install(DIRECTORY "conf" DESTINATION atsdb)

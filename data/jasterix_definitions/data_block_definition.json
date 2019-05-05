@@ -1,0 +1,23 @@
+{
+  "name": "data_blocks",
+  "items" : [
+    {
+       "name" : "category",
+       "type": "fixed_bytes",
+       "length" : 1,
+       "data_type" : "uint"
+    },
+    {
+       "name" : "length",
+       "type": "fixed_bytes",
+       "length" : 2,
+       "data_type" : "uint"
+    },
+    {
+       "name" : "content",
+       "type": "dynamic_bytes",
+       "substract_previous" : true,
+       "length_variable": "length"
+    }
+  ]
+}
