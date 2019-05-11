@@ -95,6 +95,17 @@ ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, 
         //config_widget_->show();
     }
 
+    // final button stuff
+    {
+        test_button_ = new QPushButton ("Test Import");
+        connect(test_button_, SIGNAL( clicked() ), this, SLOT(testImportSlot()));
+        left_layout->addWidget (test_button_);
+
+        import_button_ = new QPushButton ("Import");
+        connect(import_button_, SIGNAL( clicked() ), this, SLOT(importSlot()));
+        left_layout->addWidget (import_button_);
+    }
+
     main_layout_->addLayout(left_layout);
 
     setLayout (main_layout_);
@@ -157,5 +168,73 @@ void ASTERIXImporterTaskWidget::updateFileListSlot ()
         QListWidgetItem *item = new QListWidgetItem(tr(it.first.c_str()), file_list_);
         if (it.first == task_.currentFilename())
             file_list_->setCurrentItem(item);
+    }
+}
+
+void ASTERIXImporterTaskWidget::testImportSlot()
+{
+    loginf << "ASTERIXImporterTaskWidget: testImportSlot";
+
+    if (!file_list_->currentItem())
+    {
+        QMessageBox m_warning (QMessageBox::Warning, "ASTERIX File Test Import Failed",
+                               "Please select a file in the list.",
+                               QMessageBox::Ok);
+        m_warning.exec();
+        return;
+    }
+
+    QString filename = file_list_->currentItem()->text();
+    if (filename.size() > 0)
+    {
+        assert (task_.hasFile(filename.toStdString()));
+
+        if (!task_.canImportFile(filename.toStdString()))
+        {
+            QMessageBox m_warning (QMessageBox::Warning, "ASTERIX File Test Import Failed",
+                                   "File does not exist.",
+                                   QMessageBox::Ok);
+            m_warning.exec();
+            return;
+        }
+
+        task_.importFile(filename.toStdString(), true);
+
+        test_button_->setDisabled(true);
+        import_button_->setDisabled(true);
+    }
+
+}
+void ASTERIXImporterTaskWidget::importSlot()
+{
+    loginf << "ASTERIXImporterTaskWidget: importSlot";
+
+    if (!file_list_->currentItem())
+    {
+        QMessageBox m_warning (QMessageBox::Warning, "ASTERIX File Import Failed",
+                               "Please select a file in the list.",
+                               QMessageBox::Ok);
+        m_warning.exec();
+        return;
+    }
+
+    QString filename = file_list_->currentItem()->text();
+    if (filename.size() > 0)
+    {
+        assert (task_.hasFile(filename.toStdString()));
+
+        if (!task_.canImportFile(filename.toStdString()))
+        {
+            QMessageBox m_warning (QMessageBox::Warning, "ASTERIX File Import Failed",
+                                   "File does not exist.",
+                                   QMessageBox::Ok);
+            m_warning.exec();
+            return;
+        }
+
+        task_.importFile(filename.toStdString(), false);
+
+        test_button_->setDisabled(true);
+        import_button_->setDisabled(true);
     }
 }

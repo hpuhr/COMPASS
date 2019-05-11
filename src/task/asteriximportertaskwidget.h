@@ -40,6 +40,9 @@ public slots:
     void selectedFileSlot ();
     void updateFileListSlot ();
 
+    void testImportSlot();
+    void importSlot();
+
 public:
     ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
     virtual ~ASTERIXImporterTaskWidget();
@@ -54,6 +57,9 @@ protected:
     QListWidget* file_list_ {nullptr};
     QPushButton* add_file_button_ {nullptr};
     QPushButton* delete_file_button_ {nullptr};
+
+    QPushButton* test_button_ {nullptr};
+    QPushButton* import_button_ {nullptr};
 
     ASTERIXConfigWidget* config_widget_ {nullptr};
 };

@@ -257,3 +257,5 @@ void ASTERIXConfigWidget::categoryEditSlot ()
 
     QDesktopServices::openUrl(QUrl(def_path.c_str()));
 }
+
+

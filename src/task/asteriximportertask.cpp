@@ -267,6 +267,17 @@ void ASTERIXImporterTask::importFile(const std::string& filename, bool test)
     assert (canImportFile(filename));
 
     filename_ = filename;
+
+    num_records_sum_ = 0;
+
+    using namespace std::placeholders;
+    std::function<void(nlohmann::json&, size_t, size_t)> callback = std::bind(&ASTERIXImporterTask::jasterix_callback,
+                                                                              this, _1, _2, _3);
+
+    start_time_ = boost::posix_time::microsec_clock::local_time();
+
+    jasterix_->decodeFile (filename, callback);
+
 //    archive_ = false;
 //    test_ = test;
 //    all_done_ = false;
@@ -301,4 +312,19 @@ void ASTERIXImporterTask::importFile(const std::string& filename, bool test)
 //    logdbg << "JSONImporterTask: importFile: filename " << filename << " test " << test << " done";
 
     return;
+}
+
+void ASTERIXImporterTask::jasterix_callback(nlohmann::json& data, size_t num_frames, size_t num_records)
+{
+    num_records_sum_ += num_records;
+
+    stop_time_ = boost::posix_time::microsec_clock::local_time();
+
+    boost::posix_time::time_duration diff = stop_time_ - start_time_;
+
+    std::string time_str = std::to_string(diff.hours())+"h "+std::to_string(diff.minutes())
+            +"m "+std::to_string(diff.seconds())+"s";
+
+    loginf << "ASTERIXImporterTask: jasterix_callback: num records " << num_records << " after " << time_str
+           << " " << (float)num_records_sum_/diff.total_seconds() << " rec/s";
 }

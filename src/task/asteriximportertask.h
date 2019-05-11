@@ -88,7 +88,14 @@ protected:
 
     std::map <std::string, ASTERIXCategoryConfig> category_configs_;
 
+    size_t num_records_sum_ {0};
+
+    boost::posix_time::ptime start_time_;
+    boost::posix_time::ptime stop_time_;
+
     virtual void checkSubConfigurables () {}
+
+    void jasterix_callback(nlohmann::json& data, size_t num_frames, size_t num_records);
 };
 
 #endif // ASTERIXIMPORTERTASK_H
