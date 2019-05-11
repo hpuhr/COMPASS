@@ -20,6 +20,7 @@
 #include <QComboBox>
 #include <QCheckBox>
 
+
 using namespace std;
 using namespace Utils;
 using namespace jASTERIX;
@@ -60,9 +61,6 @@ ASTERIXConfigWidget::ASTERIXConfigWidget(ASTERIXImporterTask& task, QWidget *par
 
     // categories stuff
     {
-//        QLabel *cat_label = new QLabel ("Categories");
-//        main_layout_->addWidget (cat_label);
-
         categories_grid_ = new QGridLayout ();
         updateCategories();
 
@@ -74,20 +72,21 @@ ASTERIXConfigWidget::ASTERIXConfigWidget(ASTERIXImporterTask& task, QWidget *par
         QGridLayout* button_grid = new QGridLayout ();
 
         QPushButton* edit_db_button = new QPushButton ("Edit Data Block");
+        connect(edit_db_button, SIGNAL( clicked() ), this, SLOT(editDataBlockSlot()));
         button_grid->addWidget (edit_db_button, 0, 0);
 
         QPushButton* edit_cat_button = new QPushButton ("Edit Categories");
+        connect(edit_cat_button, SIGNAL( clicked() ), this, SLOT(editCategoriesSlot()));
         button_grid->addWidget (edit_cat_button, 0, 1);
 
         QPushButton* refresh_button = new QPushButton ("Refresh");
+        connect(refresh_button, SIGNAL( clicked() ), this, SLOT(refreshjASTERIXSlot()));
         button_grid->addWidget (refresh_button, 0, 2);
 
         main_layout_->addLayout(button_grid);
     }
 
     setLayout (main_layout_);
-
-    //QDesktopServices::openUrl(QUrl("file:///home/sk/.atsdb/data/jasterix_definitions/categories/categories.json"));
 }
 
 ASTERIXConfigWidget::~ASTERIXConfigWidget()
@@ -95,9 +94,30 @@ ASTERIXConfigWidget::~ASTERIXConfigWidget()
 
 }
 
+void ASTERIXConfigWidget::editDataBlockSlot()
+{
+    loginf << "ASTERIXConfigWidget: editDataBlockSlot: open '" << jasterix_->dataBlockDefinitionPath() << "'";
+    QDesktopServices::openUrl(QUrl(jasterix_->dataBlockDefinitionPath().c_str()));
+}
+void ASTERIXConfigWidget::editCategoriesSlot()
+{
+    loginf << "ASTERIXConfigWidget: editCategoriesSlot: open '" << jasterix_->categoriesDefinitionPath() << "'";
+    QDesktopServices::openUrl(QUrl(jasterix_->categoriesDefinitionPath().c_str()));
+}
+
+void ASTERIXConfigWidget::refreshjASTERIXSlot()
+{
+    loginf << "ASTERIXConfigWidget: refreshjASTERIXSlot";
+
+    task_.refreshjASTERIX();
+    updateSlot();
+}
+
 void ASTERIXConfigWidget::updateSlot()
 {
-
+    loginf << "ASTERIXConfigWidget: updateSlot";
+    updateFraming();
+    updateCategories();
 }
 
 void ASTERIXConfigWidget::framingChangedSlot()
@@ -148,10 +168,6 @@ void ASTERIXConfigWidget::updateCategories()
     QFont font_bold;
     font_bold.setBold(true);
 
-//    QLabel *use_label = new QLabel ("Use");
-//    use_label->setFont (font_bold);
-//    categories_grid_->addWidget (use_label, 0, 0);
-
     QLabel *cat_label = new QLabel ("Category");
     cat_label->setFont (font_bold);
     categories_grid_->addWidget (cat_label, 0, 0);
@@ -165,7 +181,6 @@ void ASTERIXConfigWidget::updateCategories()
     categories_grid_->addWidget (edit_label, 0, 2);
 
     QIcon edit_icon(Files::getIconFilepath("edit.png").c_str());
-    //QIcon del_icon(Files::getIconFilepath("delete.png").c_str());
 
     unsigned int row=1;
 

@@ -62,6 +62,7 @@ public:
     const std::string &currentFilename () { return current_filename_; }
 
     std::shared_ptr<jASTERIX::jASTERIX> jASTERIX() { return jasterix_; }
+    void refreshjASTERIX();
 
     const std::string& currentFraming() const;
 

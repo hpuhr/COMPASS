@@ -102,6 +102,16 @@ ASTERIXImporterTaskWidget* ASTERIXImporterTask::widget()
     return widget_.get();
 }
 
+void ASTERIXImporterTask::refreshjASTERIX()
+{
+    std::string jasterix_definition_path = HOME_DATA_DIRECTORY+"/jasterix_definitions";
+
+    loginf << "ASTERIXImporterTask: refreshjASTERIX: jasterix definition path '" << jasterix_definition_path << "'";
+    assert (Files::directoryExists(jasterix_definition_path));
+
+    jasterix_.reset(new jASTERIX::jASTERIX(jasterix_definition_path, false, debug_jasterix_));
+}
+
 void ASTERIXImporterTask::addFile (const std::string &filename)
 {
     if (file_list_.count (filename) != 0)

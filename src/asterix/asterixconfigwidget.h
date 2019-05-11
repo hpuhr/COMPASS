@@ -28,6 +28,10 @@ public slots:
     void editionChangedSlot(const std::string& cat_str, const std::string& ed_str);
     void categoryEditSlot ();
 
+    void editDataBlockSlot();
+    void editCategoriesSlot();
+    void refreshjASTERIXSlot();
+
     void updateSlot();
 
 public:
