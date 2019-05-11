@@ -23,6 +23,11 @@ signals:
 public slots:
     void framingChangedSlot();
     void framingEditSlot();
+
+    void categoryCheckedSlot ();
+    void editionChangedSlot(const std::string& cat_str, const std::string& ed_str);
+    void categoryEditSlot ();
+
     void updateSlot();
 
 public:

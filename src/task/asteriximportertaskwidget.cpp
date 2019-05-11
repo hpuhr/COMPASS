@@ -31,9 +31,10 @@
 ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, QWidget* parent, Qt::WindowFlags f)
     : QWidget (parent, f), task_(task)
 {
-    jasterix_ = task_.jASTERIX();
-
+    setWindowTitle ("Import ASTERIX");
     setMinimumSize(QSize(800, 600));
+
+    jasterix_ = task_.jASTERIX();
 
     QFont font_bold;
     font_bold.setBold(true);

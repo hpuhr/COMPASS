@@ -7,9 +7,6 @@
 
 #include <QComboBox>
 
-/**
- *  @brief Property data type selection for a DBOVariable
- */
 class ASTERIXFramingComboBox: public QComboBox
 {
     Q_OBJECT

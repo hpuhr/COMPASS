@@ -9,7 +9,7 @@ target_sources(atsdb
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/asterixconfigwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/asterixframingcombobox.h"
-#        "${CMAKE_CURRENT_LIST_DIR}/jsonparsingschema.h"
+        "${CMAKE_CURRENT_LIST_DIR}/asterixeditioncombobox.h"
 #        "${CMAKE_CURRENT_LIST_DIR}/jsondatamapping.h"
 #        "${CMAKE_CURRENT_LIST_DIR}/jsondatamappingwidget.h"
 #        "${CMAKE_CURRENT_LIST_DIR}/jsonobjectparser.h"

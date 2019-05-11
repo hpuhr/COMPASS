@@ -1,8 +1,11 @@
 #include "asterixconfigwidget.h"
 #include "asteriximportertask.h"
 #include "asterixframingcombobox.h"
+#include "asterixeditioncombobox.h"
 #include "logger.h"
 #include "files.h"
+
+#include <jasterix/category.h>
 
 #include <QVBoxLayout>
 #include <QFormLayout>
@@ -14,9 +17,11 @@
 #include <QDesktopServices>
 #include <QGridLayout>
 #include <QComboBox>
+#include <QCheckBox>
 
 using namespace std;
 using namespace Utils;
+using namespace jASTERIX;
 
 ASTERIXConfigWidget::ASTERIXConfigWidget(ASTERIXImporterTask& task, QWidget *parent)
      : QWidget(parent), task_(task)
@@ -54,8 +59,8 @@ ASTERIXConfigWidget::ASTERIXConfigWidget(ASTERIXImporterTask& task, QWidget *par
 
     // categories stuff
     {
-        QLabel *cat_label = new QLabel ("Categories");
-        main_layout_->addWidget (cat_label);
+//        QLabel *cat_label = new QLabel ("Categories");
+//        main_layout_->addWidget (cat_label);
 
         categories_grid_ = new QGridLayout ();
         updateCategories();
@@ -161,32 +166,57 @@ void ASTERIXConfigWidget::updateCategories()
     QIcon edit_icon(Files::getIconFilepath("edit.png").c_str());
     //QIcon del_icon(Files::getIconFilepath("delete.png").c_str());
 
-//    unsigned int row=1;
+    unsigned int row=1;
 
-//    for (auto& ds_it : object_->dataSourceDefinitions ())
-//    {
-//        QLabel *schema = new QLabel (ds_it.second.schema().c_str());
-//        ds_grid_->addWidget (schema, row, 0);
+    for (auto& cat_it : jasterix_->categories())
+    {
+        QCheckBox* cat_check = new QCheckBox (cat_it.first.c_str());
+        connect(cat_check, SIGNAL(clicked()), this, SLOT(categoryCheckedSlot()));
+        cat_check->setProperty("category", cat_it.first.c_str());
+        categories_grid_->addWidget (cat_check, row, 0);
 
-//        DBODataSourceDefinition* dsdef = &ds_it.second;
-//        QVariant data = QVariant::fromValue(dsdef);
+        const Category& cat = cat_it.second;
 
-//        QPushButton *edit = new QPushButton ();
-//        edit->setIcon(edit_icon);
-//        edit->setFixedSize ( UI_ICON_SIZE );
-//        edit->setFlat(UI_ICON_BUTTON_FLAT);
-//        connect(edit, SIGNAL(clicked()), this, SLOT(editDataSourceSlot()));
-//        edit->setProperty("data_source", data);
-//        ds_grid_->addWidget (edit, row, 1);
+        ASTERIXEditionComboBox* ed_combo = new ASTERIXEditionComboBox(task_, cat);
+        connect(ed_combo, SIGNAL(changedEdition(const std::string&,const std::string&)),
+                this, SLOT(editionChangedSlot(const std::string&,const std::string&)));
+        categories_grid_->addWidget (ed_combo, row, 1);
 
-//        QPushButton *del = new QPushButton ();
-//        del->setIcon(del_icon);
-//        del->setFixedSize ( UI_ICON_SIZE );
-//        del->setFlat(UI_ICON_BUTTON_FLAT);
-//        connect(del, SIGNAL(clicked()), this, SLOT(deleteDataSourceSlot()));
-//        del->setProperty("data_source", data);
-//        ds_grid_->addWidget (del, row, 2);
+        QPushButton *edit = new QPushButton ();
+        edit->setIcon(edit_icon);
+        edit->setFixedSize ( UI_ICON_SIZE );
+        edit->setFlat(UI_ICON_BUTTON_FLAT);
+        connect(edit, SIGNAL(clicked()), this, SLOT(categoryEditSlot()));
+        edit->setProperty("category", cat_it.first.c_str());
+        categories_grid_->addWidget (edit, row, 2);
 
-//        row++;
-//    }
+        row++;
+    }
+}
+
+void ASTERIXConfigWidget::categoryCheckedSlot ()
+{
+    QCheckBox* widget = static_cast<QCheckBox*>(sender());
+    assert (widget);
+
+    QVariant cat = widget->property("category");
+    std::string cat_str = cat.toString().toStdString();
+
+    loginf << "ASTERIXConfigWidget: categoryCheckedSlot: cat " << cat_str;
+}
+
+void ASTERIXConfigWidget::editionChangedSlot(const std::string& cat_str, const std::string& ed_str)
+{
+    loginf << "ASTERIXConfigWidget: editionChangedSlot: cat " << cat_str << " edition " << ed_str;
+}
+
+void ASTERIXConfigWidget::categoryEditSlot ()
+{
+    QPushButton* widget = static_cast<QPushButton*>(sender());
+    assert (widget);
+
+    QVariant cat = widget->property("category");
+    std::string cat_str = cat.toString().toStdString();
+
+    loginf << "ASTERIXConfigWidget: categoryEditSlot: cat " << cat_str;
 }
