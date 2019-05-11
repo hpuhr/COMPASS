@@ -20,7 +20,7 @@
 
 #include "configurable.h"
 #include "json.hpp"
-//#include "jsonparsingschema.h"
+
 //#include "readjsonfilepartjob.h"
 
 #include <QObject>
@@ -31,6 +31,7 @@
 
 class TaskManager;
 class ASTERIXImporterTaskWidget;
+class ASTERIXCategoryConfig;
 class SavedFile;
 
 namespace jASTERIX
@@ -66,6 +67,12 @@ public:
 
     void currentFraming(const std::string &current_framing);
 
+    bool hasConfiguratonFor (const std::string& category);
+    bool decodeCategory (const std::string& category);
+    void decodeCategory (const std::string& category, bool decode);
+    std::string editionForCategory (const std::string& category);
+    void editionForCategory (const std::string& category, const std::string& edition);
+
 protected:
     bool debug_jasterix_;
     std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
@@ -76,8 +83,9 @@ protected:
 
     std::string filename_;
 
-
     std::unique_ptr<ASTERIXImporterTaskWidget> widget_;
+
+    std::map <std::string, ASTERIXCategoryConfig> category_configs_;
 
     virtual void checkSubConfigurables () {}
 };

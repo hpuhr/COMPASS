@@ -10,7 +10,7 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/asterixconfigwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/asterixframingcombobox.h"
         "${CMAKE_CURRENT_LIST_DIR}/asterixeditioncombobox.h"
-#        "${CMAKE_CURRENT_LIST_DIR}/jsondatamapping.h"
+        "${CMAKE_CURRENT_LIST_DIR}/asterixcategoryconfig.h"
 #        "${CMAKE_CURRENT_LIST_DIR}/jsondatamappingwidget.h"
 #        "${CMAKE_CURRENT_LIST_DIR}/jsonobjectparser.h"
 #        "${CMAKE_CURRENT_LIST_DIR}/jsonobjectparserwidget.h"

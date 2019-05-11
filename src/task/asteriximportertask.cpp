@@ -17,6 +17,7 @@
 
 #include "asteriximportertask.h"
 #include "asteriximportertaskwidget.h"
+#include "asterixcategoryconfig.h"
 #include "taskmanager.h"
 #include "configurable.h"
 #include "files.h"
@@ -25,6 +26,7 @@
 #include "logger.h"
 
 #include <jasterix/jasterix.h>
+#include <jasterix/category.h>
 
 using namespace Utils;
 using namespace nlohmann;
@@ -71,20 +73,20 @@ void ASTERIXImporterTask::generateSubConfigurable (const std::string &class_id, 
         assert (file_list_.count (file->name()) == 0);
         file_list_.insert (std::pair <std::string, SavedFile*> (file->name(), file));
     }
-//    else if (class_id == "JSONParsingSchema")
-//    {
-//        std::string name = configuration().getSubConfiguration(
-//                    class_id, instance_id).getParameterConfigValueString("name");
+    else if (class_id == "ASTERIXCategoryConfig")
+    {
+        std::string category = configuration().getSubConfiguration(
+                    class_id, instance_id).getParameterConfigValueString("category");
 
-//        assert (schemas_.find (name) == schemas_.end());
+        assert (category_configs_.find (category) == category_configs_.end());
 
-//        logdbg << "JSONImporterTask: generateSubConfigurable: generating schema " << instance_id
-//               << " with name " << name;
+        logdbg << "ASTERIXImporterTask: generateSubConfigurable: generating asterix config " << instance_id
+               << " with cat " << category;
 
-//        schemas_.emplace(std::piecewise_construct,
-//                     std::forward_as_tuple(name),  // args for key
-//                     std::forward_as_tuple(class_id, instance_id, *this));  // args for mapped value
-//    }
+        category_configs_.emplace(std::piecewise_construct,
+                     std::forward_as_tuple(category),  // args for key
+                     std::forward_as_tuple(category, class_id, instance_id, this));  // args for mapped value
+    }
     else
         throw std::runtime_error ("JSONImporterTask: generateSubConfigurable: unknown class_id "+class_id );
 }
@@ -139,6 +141,63 @@ const std::string& ASTERIXImporterTask::currentFraming() const
 void ASTERIXImporterTask::currentFraming(const std::string &current_framing)
 {
     current_framing_ = current_framing;
+}
+
+bool ASTERIXImporterTask::hasConfiguratonFor (const std::string& category)
+{
+    return category_configs_.count(category) > 0;
+}
+
+bool ASTERIXImporterTask::decodeCategory (const std::string& category)
+{
+    assert (hasConfiguratonFor(category));
+    return category_configs_.at(category).decode();
+}
+
+void ASTERIXImporterTask::decodeCategory (const std::string& category, bool decode)
+{
+    assert (jasterix_->hasCategory(category));
+
+    loginf << "ASTERIXImporterTask: decodeCategory: cat " << category << " decode " << decode;
+
+    if (!hasConfiguratonFor(category))
+    {
+        Configuration &new_cfg = configuration().addNewSubConfiguration ("ASTERIXCategoryConfig");
+        new_cfg.addParameterString ("category", category);
+        new_cfg.addParameterBool ("decode", decode);
+        new_cfg.addParameterString ("edition", jasterix_->categories().at(category).defaultEdition());
+
+        generateSubConfigurable("ASTERIXCategoryConfig", new_cfg.getInstanceId());
+        assert (hasConfiguratonFor(category));
+    }
+    else
+        category_configs_.at(category).decode(decode);
+}
+
+std::string ASTERIXImporterTask::editionForCategory (const std::string& category)
+{
+    assert (hasConfiguratonFor(category));
+    return category_configs_.at(category).edition();
+}
+
+void ASTERIXImporterTask::editionForCategory (const std::string& category, const std::string& edition)
+{
+    assert (jasterix_->hasCategory(category));
+
+    loginf << "ASTERIXImporterTask: decodeCategory: cat " << category << " edition " << edition;
+
+    if (!hasConfiguratonFor(category))
+    {
+        Configuration &new_cfg = configuration().addNewSubConfiguration ("ASTERIXCategoryConfig");
+        new_cfg.addParameterString ("category", category);
+        new_cfg.addParameterBool ("decode", false);
+        new_cfg.addParameterString ("edition", edition);
+
+        generateSubConfigurable("ASTERIXCategoryConfig", new_cfg.getInstanceId());
+        assert (hasConfiguratonFor(category));
+    }
+    else
+        category_configs_.at(category).edition(edition);
 }
 
 bool ASTERIXImporterTask::canImportFile (const std::string& filename)
