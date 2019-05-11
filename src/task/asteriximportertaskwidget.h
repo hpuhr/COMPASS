@@ -48,7 +48,6 @@ public:
 
 protected:
     ASTERIXImporterTask& task_;
-    std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
 
     QHBoxLayout *main_layout_ {nullptr};
 

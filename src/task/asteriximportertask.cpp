@@ -28,6 +28,8 @@
 #include <jasterix/jasterix.h>
 #include <jasterix/category.h>
 
+#include <algorithm>
+
 using namespace Utils;
 using namespace nlohmann;
 //using namespace jASTERIX;
@@ -48,6 +50,13 @@ ASTERIXImporterTask::ASTERIXImporterTask(const std::string& class_id, const std:
     assert (Files::directoryExists(jasterix_definition_path));
 
     jasterix_.reset(new jASTERIX::jASTERIX(jasterix_definition_path, false, debug_jasterix_));
+
+    std::vector<std::string> framings = jasterix_->framings();
+    if (std::find(framings.begin(), framings.end(), current_framing_) == framings.end())
+    {
+        loginf << "ASTERIXImporterTask: contructor: resetting to no framing";
+        current_framing_ = "";
+    }
 }
 
 
@@ -110,6 +119,13 @@ void ASTERIXImporterTask::refreshjASTERIX()
     assert (Files::directoryExists(jasterix_definition_path));
 
     jasterix_.reset(new jASTERIX::jASTERIX(jasterix_definition_path, false, debug_jasterix_));
+
+    std::vector<std::string> framings = jasterix_->framings();
+    if (std::find(framings.begin(), framings.end(), current_framing_) == framings.end())
+    {
+        loginf << "ASTERIXImporterTask: refreshjASTERIX: resetting to no framing";
+        current_framing_ = "";
+    }
 }
 
 void ASTERIXImporterTask::addFile (const std::string &filename)
@@ -187,6 +203,14 @@ void ASTERIXImporterTask::decodeCategory (const std::string& category, bool deco
 std::string ASTERIXImporterTask::editionForCategory (const std::string& category)
 {
     assert (hasConfiguratonFor(category));
+
+    // check if edition exists, otherwise rest to default
+    if (jasterix_->categories().at(category).editions().count(category_configs_.at(category).edition()) == 0)
+    {
+        loginf << "ASTERIXImporterTask: editionForCategory: cat " << category << " reset to default edition";
+        category_configs_.at(category).edition(jasterix_->categories().at(category).defaultEdition());
+    }
+
     return category_configs_.at(category).edition();
 }
 

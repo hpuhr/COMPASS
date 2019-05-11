@@ -40,7 +40,6 @@ public:
 
 protected:
     ASTERIXImporterTask& task_;
-    std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
 
     QVBoxLayout* main_layout_ {nullptr};
     QGridLayout* categories_grid_ {nullptr};

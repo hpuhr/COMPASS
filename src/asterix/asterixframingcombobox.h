@@ -20,19 +20,24 @@ public:
     ASTERIXFramingComboBox(ASTERIXImporterTask& task, QWidget * parent = 0)
     : QComboBox(parent), task_(task)
     {
-        jasterix_ = task_.jASTERIX();
-
-        for (std::string frame_it : jasterix_->framings())
-        {
-            addItem (frame_it.c_str());
-        }
-
-        setCurrentIndex (0);
+        loadFramings();
         connect(this, SIGNAL(activated(const QString &)), this, SIGNAL(changedFraming()));
 
     }
     /// @brief Destructor
     virtual ~ASTERIXFramingComboBox() {}
+
+    void loadFramings ()
+    {
+        clear();
+
+        for (std::string frame_it : task_.jASTERIX()->framings())
+        {
+            addItem (frame_it.c_str());
+        }
+
+        setCurrentIndex (0);
+    }
 
     /// @brief Returns the currently selected framing
     std::string getFraming ()
@@ -50,8 +55,6 @@ public:
 
 protected:
     ASTERIXImporterTask& task_;
-    std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
-
 };
 
 #endif // ASTERIXFRAMINGCOMBOBOX_H

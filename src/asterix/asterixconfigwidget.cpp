@@ -28,8 +28,6 @@ using namespace jASTERIX;
 ASTERIXConfigWidget::ASTERIXConfigWidget(ASTERIXImporterTask& task, QWidget *parent)
      : QWidget(parent), task_(task)
 {
-    jasterix_ = task_.jASTERIX();
-
     QFont font_bold;
     font_bold.setBold(true);
 
@@ -96,13 +94,13 @@ ASTERIXConfigWidget::~ASTERIXConfigWidget()
 
 void ASTERIXConfigWidget::editDataBlockSlot()
 {
-    loginf << "ASTERIXConfigWidget: editDataBlockSlot: open '" << jasterix_->dataBlockDefinitionPath() << "'";
-    QDesktopServices::openUrl(QUrl(jasterix_->dataBlockDefinitionPath().c_str()));
+    loginf << "ASTERIXConfigWidget: editDataBlockSlot: open '" << task_.jASTERIX()->dataBlockDefinitionPath() << "'";
+    QDesktopServices::openUrl(QUrl(task_.jASTERIX()->dataBlockDefinitionPath().c_str()));
 }
 void ASTERIXConfigWidget::editCategoriesSlot()
 {
-    loginf << "ASTERIXConfigWidget: editCategoriesSlot: open '" << jasterix_->categoriesDefinitionPath() << "'";
-    QDesktopServices::openUrl(QUrl(jasterix_->categoriesDefinitionPath().c_str()));
+    loginf << "ASTERIXConfigWidget: editCategoriesSlot: open '" << task_.jASTERIX()->categoriesDefinitionPath() << "'";
+    QDesktopServices::openUrl(QUrl(task_.jASTERIX()->categoriesDefinitionPath().c_str()));
 }
 
 void ASTERIXConfigWidget::refreshjASTERIXSlot()
@@ -135,7 +133,7 @@ void ASTERIXConfigWidget::framingChangedSlot()
 
 void ASTERIXConfigWidget::framingEditSlot()
 {
-    std::string framing_path = "file:///"+jasterix_->framingsFolderPath()+"/"+task_.currentFraming();
+    std::string framing_path = "file:///"+task_.jASTERIX()->framingsFolderPath()+"/"+task_.currentFraming();
     loginf << "ASTERIXConfigWidget: framingEditSlot: path '" << framing_path << "'";
     QDesktopServices::openUrl(QUrl(framing_path.c_str()));
 }
@@ -144,6 +142,8 @@ void ASTERIXConfigWidget::updateFraming ()
 {
     assert (framing_combo_);
     assert (framing_edit_);
+
+    framing_combo_->loadFramings();
     framing_combo_->setFraming(task_.currentFraming());
 
     if (task_.currentFraming() == "")
@@ -184,7 +184,7 @@ void ASTERIXConfigWidget::updateCategories()
 
     unsigned int row=1;
 
-    for (auto& cat_it : jasterix_->categories())
+    for (auto& cat_it : task_.jASTERIX()->categories())
     {
         std::string category = cat_it.first;
         QCheckBox* cat_check = new QCheckBox (category.c_str());
@@ -247,11 +247,11 @@ void ASTERIXConfigWidget::categoryEditSlot ()
     if (task_.hasConfiguratonFor(cat_str))
         edition_str = task_.editionForCategory(cat_str);
     else
-        edition_str = jasterix_->categories().at(cat_str).defaultEdition();
+        edition_str = task_.jASTERIX()->categories().at(cat_str).defaultEdition();
 
-    assert (jasterix_->hasCategory(cat_str));
-    assert (jasterix_->categories().at(cat_str).hasEdition(edition_str));
-    std::string def_path = jasterix_->categories().at(cat_str).editionPath(edition_str);
+    assert (task_.jASTERIX()->hasCategory(cat_str));
+    assert (task_.jASTERIX()->categories().at(cat_str).hasEdition(edition_str));
+    std::string def_path = task_.jASTERIX()->categories().at(cat_str).editionPath(edition_str);
 
     loginf << "ASTERIXConfigWidget: categoryEditSlot: cat " << cat_str << " path '" << def_path << "'";
 

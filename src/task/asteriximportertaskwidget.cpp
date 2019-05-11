@@ -34,8 +34,6 @@ ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, 
     setWindowTitle ("Import ASTERIX");
     setMinimumSize(QSize(800, 600));
 
-    jasterix_ = task_.jASTERIX();
-
     QFont font_bold;
     font_bold.setBold(true);
 
