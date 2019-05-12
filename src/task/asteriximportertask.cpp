@@ -329,7 +329,11 @@ void ASTERIXImporterTask::importFile(const std::string& filename, bool test)
         // TODO mapping
     }
 
-    jasterix_->decodeFile (filename, callback);
+
+    if (current_framing_ == "")
+        jasterix_->decodeFile (filename, callback);
+    else
+        jasterix_->decodeFile (filename, current_framing_, callback);
 
 //    archive_ = false;
 //    test_ = test;
@@ -381,5 +385,48 @@ void ASTERIXImporterTask::jasterix_callback(nlohmann::json& data, size_t num_fra
     loginf << "ASTERIXImporterTask: jasterix_callback: num records " << num_records_sum_ << " after " << time_str
            << " " << (float)num_records_sum_/diff.total_seconds() << " rec/s ";
 
-    loginf << "ASTERIXImporterTask: jasterix_callback: data '" << data.dump(4) << "'";
+    //loginf << "ASTERIXImporterTask: jasterix_callback: framing " << current_framing_ << " data '" << data.dump(4) << "'";
+
+    std::vector <json> extracted_record;
+
+    unsigned int category;
+
+    if (current_framing_ == "")
+    {
+        assert (data.find("data_blocks") != data.end());
+
+        for (json& data_block : data.at("data_blocks"))
+        {
+            category = data_block.at("category");
+
+            assert (data_block.find("content") != data_block.end());
+
+            if (data_block.at("content").find("records") != data_block.at("content").end())
+            {
+                if (category_counts_.count(category) == 0)
+                    category_counts_[category] = 0;
+
+                for (json& record : data_block.at("content").at("records"))
+                {
+                    record["category"] = category;
+
+                    extracted_record.push_back(std::move(record));
+                    category_counts_.at(category) += 1;
+                }
+            }
+        }
+    }
+
+    loginf << "ASTERIXImporterTask: jasterix_callback: got " << extracted_record.size() << " records";
+
+    for (auto& cat_cnt_it : category_counts_)
+    {
+        loginf << "ASTERIXImporterTask: jasterix_callback: cat " << cat_cnt_it.first << " cnt " << cat_cnt_it.second;
+    }
+
+
+//    else
+//    {
+
+//    }
 }

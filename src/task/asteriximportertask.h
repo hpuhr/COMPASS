@@ -91,6 +91,8 @@ protected:
 
     std::shared_ptr<JSONParsingSchema> schema_;
 
+    std::map<unsigned int, size_t> category_counts_;
+
     size_t num_records_sum_ {0};
 
     boost::posix_time::ptime start_time_;
