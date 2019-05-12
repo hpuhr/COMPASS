@@ -276,6 +276,31 @@ void ASTERIXImporterTask::importFile(const std::string& filename, bool test)
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
+    // set category configs
+    jasterix_->decodeNoCategories();
+
+    for (auto& cat_it : category_configs_)
+    {
+        if (!jasterix_->hasCategory(cat_it.first))
+        {
+            logwrn << "ASTERIXImporterTask: importFile: cat " << cat_it.first << " not defined in decoder";
+            continue;
+        }
+
+        if (!jasterix_->hasEdition(cat_it.first, cat_it.second.edition()))
+        {
+            logwrn << "ASTERIXImporterTask: importFile: cat " << cat_it.first << " edition "
+                   << cat_it.second.edition() << " not defined in decoder";
+            continue;
+        }
+
+        jasterix_->setDecodeCategory(cat_it.first, cat_it.second.decode());
+        jasterix_->setEdition(cat_it.first, cat_it.second.edition());
+        loginf << "ASTERIXImporterTask: importFile: set cat " << cat_it.first << " decode " <<  cat_it.second.decode()
+               << " edition " << cat_it.second.edition();
+        // TODO mapping
+    }
+
     jasterix_->decodeFile (filename, callback);
 
 //    archive_ = false;
@@ -325,6 +350,6 @@ void ASTERIXImporterTask::jasterix_callback(nlohmann::json& data, size_t num_fra
     std::string time_str = std::to_string(diff.hours())+"h "+std::to_string(diff.minutes())
             +"m "+std::to_string(diff.seconds())+"s";
 
-    loginf << "ASTERIXImporterTask: jasterix_callback: num records " << num_records << " after " << time_str
+    loginf << "ASTERIXImporterTask: jasterix_callback: num records " << num_records_sum_ << " after " << time_str
            << " " << (float)num_records_sum_/diff.total_seconds() << " rec/s";
 }
