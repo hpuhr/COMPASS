@@ -96,8 +96,31 @@ void ASTERIXImporterTask::generateSubConfigurable (const std::string &class_id, 
                      std::forward_as_tuple(category),  // args for key
                      std::forward_as_tuple(category, class_id, instance_id, this));  // args for mapped value
     }
+    else if (class_id == "JSONParsingSchema")
+    {
+        std::string name = configuration().getSubConfiguration(
+                    class_id, instance_id).getParameterConfigValueString("name");
+
+        assert (schema_ == nullptr);
+        assert (name == "jASTERIX");
+
+        logdbg << "ASTERIXImporterTask: generateSubConfigurable: generating schema " << instance_id
+               << " with name " << name;
+
+        schema_.reset(new JSONParsingSchema(class_id, instance_id, this));
+    }
     else
-        throw std::runtime_error ("JSONImporterTask: generateSubConfigurable: unknown class_id "+class_id );
+        throw std::runtime_error ("ASTERIXImporterTask: generateSubConfigurable: unknown class_id "+class_id );
+}
+
+void ASTERIXImporterTask::checkSubConfigurables ()
+{
+    if (schema_ == nullptr)
+    {
+        Configuration &config = addNewSubConfiguration ("JSONParsingSchema", "JSONParsingSchemajASTERIX0");
+        config.addParameterString("name", "jASTERIX");
+        generateSubConfigurable ("JSONParsingSchema", "JSONParsingSchemajASTERIX0");
+    }
 }
 
 ASTERIXImporterTaskWidget* ASTERIXImporterTask::widget()
@@ -234,6 +257,11 @@ void ASTERIXImporterTask::editionForCategory (const std::string& category, const
         category_configs_.at(category).edition(edition);
 }
 
+std::shared_ptr<JSONParsingSchema> ASTERIXImporterTask::schema() const
+{
+    return schema_;
+}
+
 bool ASTERIXImporterTask::canImportFile (const std::string& filename)
 {
     if (!Files::fileExists(filename))
@@ -351,5 +379,7 @@ void ASTERIXImporterTask::jasterix_callback(nlohmann::json& data, size_t num_fra
             +"m "+std::to_string(diff.seconds())+"s";
 
     loginf << "ASTERIXImporterTask: jasterix_callback: num records " << num_records_sum_ << " after " << time_str
-           << " " << (float)num_records_sum_/diff.total_seconds() << " rec/s";
+           << " " << (float)num_records_sum_/diff.total_seconds() << " rec/s ";
+
+    loginf << "ASTERIXImporterTask: jasterix_callback: data '" << data.dump(4) << "'";
 }

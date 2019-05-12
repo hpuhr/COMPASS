@@ -19,8 +19,8 @@
 #include "jsonimportertask.h"
 
 JSONParsingSchema::JSONParsingSchema(const std::string& class_id, const std::string& instance_id,
-                                     JSONImporterTask& task)
-    : Configurable(class_id, instance_id, &task), task_(&task)
+                                     Configurable* parent)
+    : Configurable(class_id, instance_id, parent)
 {
     registerParameter("name", &name_, "");
 
@@ -31,9 +31,7 @@ JSONParsingSchema::JSONParsingSchema(const std::string& class_id, const std::str
 
 JSONParsingSchema& JSONParsingSchema::operator=(JSONParsingSchema&& other)
 {
-
     name_ = other.name_;
-    task_ = other.task_;
 
     parsers_ = std::move(other.parsers_);
 

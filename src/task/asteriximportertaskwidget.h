@@ -29,6 +29,7 @@ class ASTERIXConfigWidget;
 class QHBoxLayout;
 class QPushButton;
 class QListWidget;
+class QStackedWidget;
 
 class ASTERIXImporterTaskWidget : public QWidget
 {
@@ -39,6 +40,10 @@ public slots:
     void deleteFileSlot ();
     void selectedFileSlot ();
     void updateFileListSlot ();
+
+    void addObjectParserSlot ();
+    void removeObjectParserSlot ();
+    void selectedObjectParserSlot ();
 
     void testImportSlot();
     void importSlot();
@@ -58,10 +63,19 @@ protected:
     QPushButton* add_file_button_ {nullptr};
     QPushButton* delete_file_button_ {nullptr};
 
+    QListWidget* object_parser_list_ {nullptr};
+    QPushButton* add_object_parser_button_ {nullptr};
+    QPushButton* delete_object_parser_button_ {nullptr};
+
+    QStackedWidget* object_parser_widget_ {nullptr};
+
+    ASTERIXConfigWidget* config_widget_ {nullptr};
+
     QPushButton* test_button_ {nullptr};
     QPushButton* import_button_ {nullptr};
 
-    ASTERIXConfigWidget* config_widget_ {nullptr};
+    void updateParserList ();
+    void createObjectParserWidget();
 };
 
 #endif // ASTERIXIMPORTERTASKWIDGET_H

@@ -20,8 +20,7 @@
 
 #include "configurable.h"
 #include "json.hpp"
-
-//#include "readjsonfilepartjob.h"
+#include "jsonparsingschema.h"
 
 #include <QObject>
 
@@ -74,6 +73,8 @@ public:
     std::string editionForCategory (const std::string& category);
     void editionForCategory (const std::string& category, const std::string& edition);
 
+    std::shared_ptr<JSONParsingSchema> schema() const;
+
 protected:
     bool debug_jasterix_;
     std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
@@ -88,12 +89,14 @@ protected:
 
     std::map <std::string, ASTERIXCategoryConfig> category_configs_;
 
+    std::shared_ptr<JSONParsingSchema> schema_;
+
     size_t num_records_sum_ {0};
 
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;
 
-    virtual void checkSubConfigurables () {}
+    virtual void checkSubConfigurables ();
 
     void jasterix_callback(nlohmann::json& data, size_t num_frames, size_t num_records);
 };

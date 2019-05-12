@@ -91,7 +91,7 @@ void JSONImporterTask::generateSubConfigurable (const std::string &class_id, con
 
         schemas_.emplace(std::piecewise_construct,
                      std::forward_as_tuple(name),  // args for key
-                     std::forward_as_tuple(class_id, instance_id, *this));  // args for mapped value
+                     std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
     }
     else
         throw std::runtime_error ("JSONImporterTask: generateSubConfigurable: unknown class_id "+class_id );

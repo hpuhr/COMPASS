@@ -30,7 +30,7 @@ class JSONParsingSchema : public Configurable
     using JSONObjectParserIterator = std::map<std::string, JSONObjectParser>::iterator;
 
 public:
-    JSONParsingSchema(const std::string& class_id, const std::string& instance_id, JSONImporterTask& task);
+    JSONParsingSchema(const std::string& class_id, const std::string& instance_id, Configurable* parent);
     JSONParsingSchema() = default;
     JSONParsingSchema(JSONParsingSchema&& other) { *this = std::move(other); }
 
@@ -52,7 +52,7 @@ public:
 
 private:
     std::string name_;
-    JSONImporterTask* task_ {nullptr};
+    //JSONImporterTask* task_ {nullptr};
     std::map <std::string, JSONObjectParser> parsers_;
 
 protected:

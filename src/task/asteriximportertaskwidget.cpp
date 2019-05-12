@@ -19,6 +19,7 @@
 #include "asteriximportertask.h"
 #include "asterixconfigwidget.h"
 #include "logger.h"
+#include "selectdbobjectdialog.h"
 
 #include <QVBoxLayout>
 #include <QFormLayout>
@@ -27,6 +28,9 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QListWidget>
+#include <QFrame>
+#include <QInputDialog>
+#include <QStackedWidget>
 
 ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, QWidget* parent, Qt::WindowFlags f)
     : QWidget (parent, f), task_(task)
@@ -93,6 +97,44 @@ ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, 
         config_widget_ = new ASTERIXConfigWidget (task_, this);
         left_layout->addWidget(config_widget_);
         //config_widget_->show();
+    }
+
+    // json object parser stuff
+    {
+        QFrame *parsers_frame = new QFrame ();
+        parsers_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
+        parsers_frame->setLineWidth(frame_width_small);
+
+        QVBoxLayout* parsers_layout = new QVBoxLayout();
+
+        QLabel *parser_label = new QLabel ("JSON Object Parsers");
+        parser_label->setFont(font_bold);
+        parsers_layout->addWidget(parser_label);
+
+        object_parser_list_ = new QListWidget ();
+        //file_list_->setTextElideMode (Qt::ElideNone);
+        object_parser_list_->setSelectionBehavior( QAbstractItemView::SelectItems );
+        object_parser_list_->setSelectionMode( QAbstractItemView::SingleSelection );
+        connect (object_parser_list_, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(selectedObjectParserSlot()));
+
+        updateParserList();
+        parsers_layout->addWidget(object_parser_list_);
+
+        QHBoxLayout* button_layout = new QHBoxLayout();
+
+        add_object_parser_button_ = new QPushButton ("Add");
+        connect (add_object_parser_button_, SIGNAL(clicked()), this, SLOT(addObjectParserSlot()));
+        button_layout->addWidget(add_object_parser_button_);
+
+        delete_object_parser_button_ = new QPushButton ("Remove");
+        connect (delete_object_parser_button_, SIGNAL(clicked()), this, SLOT(removeObjectParserSlot()));
+        button_layout->addWidget(delete_object_parser_button_);
+
+        parsers_layout->addLayout(button_layout);
+
+        parsers_frame->setLayout (parsers_layout);
+
+        left_layout->addWidget (parsers_frame, 1);
     }
 
     // final button stuff
@@ -168,6 +210,133 @@ void ASTERIXImporterTaskWidget::updateFileListSlot ()
         QListWidgetItem *item = new QListWidgetItem(tr(it.first.c_str()), file_list_);
         if (it.first == task_.currentFilename())
             file_list_->setCurrentItem(item);
+    }
+}
+
+void ASTERIXImporterTaskWidget::addObjectParserSlot ()
+{
+    if (task_.schema() == nullptr)
+    {
+        QMessageBox m_warning (QMessageBox::Warning, "JSON Object Parser Adding Failed",
+                               "No current JSON Parsing Schema is selected.",
+                               QMessageBox::Ok);
+
+        m_warning.exec();
+        return;
+    }
+
+    SelectDBObjectDialog dialog;
+
+    int ret = dialog.exec();
+
+    if (ret == QDialog::Accepted)
+    {
+        std::string name = dialog.selectedObject();
+        loginf << "ASTERIXImporterTaskWidget: addObjectParserSlot: obj " << name;
+
+        std::shared_ptr<JSONParsingSchema> current = task_.schema();
+
+        if (current->hasObjectParser(name))
+        {
+            QMessageBox m_warning (QMessageBox::Warning, "JSON Object Parser Adding Failed",
+                                   "Object parser is already defined for the selected object.",
+                                   QMessageBox::Ok);
+
+            m_warning.exec();
+            return;
+        }
+
+        std::string instance = "JSONObjectParser"+name+"0";
+
+        Configuration &config = current->addNewSubConfiguration ("JSONObjectParser", instance);
+        config.addParameterString ("db_object_name", name);
+
+        current->generateSubConfigurable("JSONObjectParser", instance);
+        updateParserList();
+    }
+}
+void ASTERIXImporterTaskWidget::removeObjectParserSlot ()
+{
+    loginf << "ASTERIXImporterTaskWidget: removeObjectParserSlot";
+
+    if (object_parser_list_->currentItem())
+    {
+        std::string name = object_parser_list_->currentItem()->text().toStdString();
+
+        assert (task_.schema() != nullptr);
+        std::shared_ptr<JSONParsingSchema> current = task_.schema();
+
+        assert (current->hasObjectParser(name));
+        current->removeParser(name);
+
+        updateParserList();
+        selectedObjectParserSlot();
+    }
+}
+
+
+void ASTERIXImporterTaskWidget::selectedObjectParserSlot ()
+{
+    loginf << "ASTERIXImporterTaskWidget: selectedObjectParserSlot";
+
+    if (object_parser_widget_)
+        while (object_parser_widget_->count() > 0)
+            object_parser_widget_->removeWidget(object_parser_widget_->widget(0));
+
+    assert (object_parser_list_);
+
+    if (object_parser_list_->currentItem())
+    {
+        std::string name = object_parser_list_->currentItem()->text().toStdString();
+
+        assert (task_.schema() != nullptr);
+        assert (task_.schema()->hasObjectParser(name));
+
+        if (!object_parser_widget_)
+            createObjectParserWidget();
+
+        object_parser_widget_->addWidget(task_.schema()->parser(name).widget());
+    }
+}
+
+void ASTERIXImporterTaskWidget::createObjectParserWidget()
+{
+    assert (!object_parser_widget_);
+    assert (main_layout_);
+    setMinimumSize(QSize(1400, 600));
+
+    int frame_width_small = 1;
+
+    QFrame *right_frame = new QFrame ();
+    right_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
+    right_frame->setLineWidth(frame_width_small);
+
+    object_parser_widget_ = new QStackedWidget ();
+
+    object_parser_widget_->setMinimumWidth(800);
+
+    QVBoxLayout* tmp = new QVBoxLayout ();
+    tmp->addWidget(object_parser_widget_);
+
+    right_frame->setLayout(tmp);
+
+    main_layout_->addWidget(right_frame);
+}
+
+void ASTERIXImporterTaskWidget::updateParserList ()
+{
+    loginf << "ASTERIXImporterTaskWidget: updateParserList";
+
+    assert (object_parser_list_);
+    object_parser_list_->clear();
+
+    if (task_.schema() != nullptr)
+    {
+        for (auto& parser_it : *task_.schema()) // over all object parsers
+        {
+            QListWidgetItem* item = new QListWidgetItem(tr(parser_it.first.c_str()), object_parser_list_);
+            assert (item);
+        }
     }
 }
 
