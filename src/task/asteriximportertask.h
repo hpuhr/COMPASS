@@ -21,6 +21,7 @@
 #include "configurable.h"
 #include "json.hpp"
 #include "jsonparsingschema.h"
+#include "asterixdecodejob.h"
 
 #include <QObject>
 
@@ -41,6 +42,11 @@ namespace jASTERIX
 class ASTERIXImporterTask: public QObject, public Configurable
 {
     Q_OBJECT
+
+public slots:
+    void decodeASTERIXDoneSlot ();
+    void decodeASTERIXObsoleteSlot ();
+
 public:
     ASTERIXImporterTask(const std::string& class_id, const std::string& instance_id,
                         TaskManager* task_manager);
@@ -75,6 +81,8 @@ public:
 
     std::shared_ptr<JSONParsingSchema> schema() const;
 
+    void addDecodedASTERIX (std::vector <nlohmann::json>& data); // moved out from refernce
+
 protected:
     bool debug_jasterix_;
     std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
@@ -91,16 +99,16 @@ protected:
 
     std::shared_ptr<JSONParsingSchema> schema_;
 
-    std::map<unsigned int, size_t> category_counts_;
+    std::shared_ptr<ASTERIXDecodeJob> decode_job_;
 
-    size_t num_records_sum_ {0};
+    size_t num_frames_ {0};
+    size_t num_records_ {0};
 
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;
 
     virtual void checkSubConfigurables ();
 
-    void jasterix_callback(nlohmann::json& data, size_t num_frames, size_t num_records);
 };
 
 #endif // ASTERIXIMPORTERTASK_H

@@ -24,6 +24,7 @@
 #include "stringconv.h"
 #include "savedfile.h"
 #include "logger.h"
+#include "jobmanager.h"
 
 #include <jasterix/jasterix.h>
 #include <jasterix/category.h>
@@ -296,11 +297,8 @@ void ASTERIXImporterTask::importFile(const std::string& filename, bool test)
 
     filename_ = filename;
 
-    num_records_sum_ = 0;
-
-    using namespace std::placeholders;
-    std::function<void(nlohmann::json&, size_t, size_t)> callback = std::bind(&ASTERIXImporterTask::jasterix_callback,
-                                                                              this, _1, _2, _3);
+    num_frames_ = 0;
+    num_records_ = 0;
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
@@ -329,51 +327,49 @@ void ASTERIXImporterTask::importFile(const std::string& filename, bool test)
         // TODO mapping
     }
 
+    loginf << "ASTERIXImporterTask: importFile: filename " << filename;
 
-    if (current_framing_ == "")
-        jasterix_->decodeFile (filename, callback);
-    else
-        jasterix_->decodeFile (filename, current_framing_, callback);
 
-//    archive_ = false;
-//    test_ = test;
-//    all_done_ = false;
+    assert (decode_job_ == nullptr);
+    decode_job_.reset(new ASTERIXDecodeJob(*this, filename, current_framing_, test));
 
-//    objects_read_ = 0;
-//    objects_parsed_ = 0;
-//    objects_parse_errors_ = 0;
+    connect (decode_job_.get(), SIGNAL(obsoleteSignal()), this, SLOT(decodeASTERIXDoneSlot()),
+             Qt::QueuedConnection);
+    connect (decode_job_.get(), SIGNAL(doneSignal()), this, SLOT(decodeASTERIXObsoleteSlot()), Qt::QueuedConnection);
 
-//    objects_mapped_ = 0;
-//    objects_not_mapped_ = 0;
-
-//    objects_created_ = 0;
-//    objects_inserted_ = 0;
-
-//    assert (schemas_.count(current_schema_));
-
-//    for (auto& map_it : schemas_.at(current_schema_))
-//        if (!map_it.second.initialized())
-//            map_it.second.initialize();
-
-//    start_time_ = boost::posix_time::microsec_clock::local_time();
-
-//    read_json_job_ = std::shared_ptr<ReadJSONFilePartJob> (new ReadJSONFilePartJob (filename, false, 10000));
-//    connect (read_json_job_.get(), SIGNAL(obsoleteSignal()), this, SLOT(readJSONFilePartObsoleteSlot()),
-//             Qt::QueuedConnection);
-//    connect (read_json_job_.get(), SIGNAL(doneSignal()), this, SLOT(readJSONFilePartDoneSlot()), Qt::QueuedConnection);
-
-//    JobManager::instance().addNonBlockingJob(read_json_job_);
-
-//    updateMsgBox();
-
-//    logdbg << "JSONImporterTask: importFile: filename " << filename << " test " << test << " done";
+    JobManager::instance().addNonBlockingJob(decode_job_);
 
     return;
 }
 
-void ASTERIXImporterTask::jasterix_callback(nlohmann::json& data, size_t num_frames, size_t num_records)
+void ASTERIXImporterTask::decodeASTERIXDoneSlot ()
 {
-    num_records_sum_ += num_records;
+    assert (decode_job_);
+
+    loginf << "ASTERIXImporterTask: decodeASTERIXDoneSlot";
+
+    for (auto& cat_cnt_it : decode_job_->categoryCounts())
+    {
+        loginf << "ASTERIXImporterTask: decodeASTERIXDoneSlot: cat " << cat_cnt_it.first
+               << " cnt " << cat_cnt_it.second;
+    }
+
+    decode_job_ = nullptr;
+}
+void ASTERIXImporterTask::decodeASTERIXObsoleteSlot ()
+{
+    decode_job_ = nullptr;
+}
+
+void ASTERIXImporterTask::addDecodedASTERIX (std::vector <json>& data) // moved out from refernce
+{
+
+    //loginf << "ASTERIXImporterTask: addDecodedASTERIX";
+
+    assert (decode_job_);
+
+    num_frames_ = decode_job_->numFrames();
+    num_records_ = decode_job_->numRecords();
 
     stop_time_ = boost::posix_time::microsec_clock::local_time();
 
@@ -382,51 +378,7 @@ void ASTERIXImporterTask::jasterix_callback(nlohmann::json& data, size_t num_fra
     std::string time_str = std::to_string(diff.hours())+"h "+std::to_string(diff.minutes())
             +"m "+std::to_string(diff.seconds())+"s";
 
-    loginf << "ASTERIXImporterTask: jasterix_callback: num records " << num_records_sum_ << " after " << time_str
-           << " " << (float)num_records_sum_/diff.total_seconds() << " rec/s ";
+    loginf << "ASTERIXImporterTask: addDecodedASTERIX: num frames " << num_frames_ << " records " << num_records_
+           << " after " << time_str << " " << (int)(1000.0*num_records_/diff.total_milliseconds()) << " rec/s ";
 
-    //loginf << "ASTERIXImporterTask: jasterix_callback: framing " << current_framing_ << " data '" << data.dump(4) << "'";
-
-    std::vector <json> extracted_record;
-
-    unsigned int category;
-
-    if (current_framing_ == "")
-    {
-        assert (data.find("data_blocks") != data.end());
-
-        for (json& data_block : data.at("data_blocks"))
-        {
-            category = data_block.at("category");
-
-            assert (data_block.find("content") != data_block.end());
-
-            if (data_block.at("content").find("records") != data_block.at("content").end())
-            {
-                if (category_counts_.count(category) == 0)
-                    category_counts_[category] = 0;
-
-                for (json& record : data_block.at("content").at("records"))
-                {
-                    record["category"] = category;
-
-                    extracted_record.push_back(std::move(record));
-                    category_counts_.at(category) += 1;
-                }
-            }
-        }
-    }
-
-    loginf << "ASTERIXImporterTask: jasterix_callback: got " << extracted_record.size() << " records";
-
-    for (auto& cat_cnt_it : category_counts_)
-    {
-        loginf << "ASTERIXImporterTask: jasterix_callback: cat " << cat_cnt_it.first << " cnt " << cat_cnt_it.second;
-    }
-
-
-//    else
-//    {
-
-//    }
 }
