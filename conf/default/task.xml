@@ -4,37 +4,42 @@
         <ParameterString current_filename="/home/sk/data/datasets/2017-05-04-0930-1020.netto"/>
         <ParameterString current_framing=""/>
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig0">
-            <ParameterBool decode="0"/>
+            <ParameterBool decode="1"/>
             <ParameterString category="001"/>
             <ParameterString edition="1.1"/>
         </Configuration>
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig1">
-            <ParameterBool decode="0"/>
+            <ParameterBool decode="1"/>
             <ParameterString category="020"/>
             <ParameterString edition="1.5"/>
         </Configuration>
+        <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig10">
+            <ParameterBool decode="1"/>
+            <ParameterString category="062"/>
+            <ParameterString edition="1.12"/>
+        </Configuration>
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig2">
-            <ParameterBool decode="0"/>
+            <ParameterBool decode="1"/>
             <ParameterString category="048"/>
             <ParameterString edition="1.15"/>
         </Configuration>
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig3">
-            <ParameterBool decode="0"/>
+            <ParameterBool decode="1"/>
             <ParameterString category="065"/>
             <ParameterString edition="1.3"/>
         </Configuration>
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig4">
-            <ParameterBool decode="0"/>
+            <ParameterBool decode="1"/>
             <ParameterString category="002"/>
             <ParameterString edition="1.0"/>
         </Configuration>
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig5">
-            <ParameterBool decode="0"/>
+            <ParameterBool decode="1"/>
             <ParameterString category="023"/>
             <ParameterString edition="1.2"/>
         </Configuration>
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig6">
-            <ParameterBool decode="0"/>
+            <ParameterBool decode="1"/>
             <ParameterString category="063"/>
             <ParameterString edition="1.0"/>
         </Configuration>
@@ -43,11 +48,30 @@
             <ParameterString category="034"/>
             <ParameterString edition="1.26"/>
         </Configuration>
+        <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig8">
+            <ParameterBool decode="1"/>
+            <ParameterString category="019"/>
+            <ParameterString edition="1.3"/>
+        </Configuration>
+        <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig9">
+            <ParameterBool decode="1"/>
+            <ParameterString category="021"/>
+            <ParameterString edition="2.1"/>
+        </Configuration>
+        <Configuration class_id="ASTERIXFile" instance_id="ASTERIXFilehomeskdatadatasets2017-05-04-0930-1020.ioss">
+            <ParameterString name="/home/sk/data/datasets/2017-05-04-0930-1020.ioss"/>
+        </Configuration>
         <Configuration class_id="ASTERIXFile" instance_id="ASTERIXFilehomeskdatadatasets2017-05-04-0930-1020.netto">
             <ParameterString name="/home/sk/data/datasets/2017-05-04-0930-1020.netto"/>
         </Configuration>
+        <Configuration class_id="ASTERIXFile" instance_id="ASTERIXFilehomeskdatadatasets2017-05-04-0930-1020_1k.ioss">
+            <ParameterString name="/home/sk/data/datasets/2017-05-04-0930-1020_1k.ioss"/>
+        </Configuration>
         <Configuration class_id="ASTERIXFile" instance_id="ASTERIXFilehomeskdatadatasets2017-05-04-0930-1020_1k.netto">
             <ParameterString name="/home/sk/data/datasets/2017-05-04-0930-1020_1k.netto"/>
+        </Configuration>
+        <Configuration class_id="ASTERIXFile" instance_id="ASTERIXFilehomeskdatadatasets2017-05-04-0930-1020_1k.rff">
+            <ParameterString name="/home/sk/data/datasets/2017-05-04-0930-1020_1k.rff"/>
         </Configuration>
         <Configuration class_id="JSONParsingSchema" instance_id="JSONParsingSchemajASTERIX0">
             <ParameterString name="jASTERIX"/>
@@ -56,19 +80,8 @@
                 <ParameterString data_source_variable_name="ds_id"/>
                 <ParameterString db_object_name="ADSB"/>
                 <ParameterString json_container_key=""/>
-                <ParameterString json_key="message_type"/>
-                <ParameterString json_value="ads-b target"/>
-                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping0">
-                    <ParameterBool active="1"/>
-                    <ParameterBool mandatory="1"/>
-                    <ParameterString db_object_name="ADSB"/>
-                    <ParameterString dbovariable_name="rec_num"/>
-                    <ParameterString dimension=""/>
-                    <ParameterString format_data_type=""/>
-                    <ParameterString json_key="rec_num"/>
-                    <ParameterString json_value_format=""/>
-                    <ParameterString unit=""/>
-                </Configuration>
+                <ParameterString json_key="category"/>
+                <ParameterString json_value="21"/>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping1">
                     <ParameterBool active="1"/>
                     <ParameterBool mandatory="1"/>
@@ -76,7 +89,7 @@
                     <ParameterString dbovariable_name="ds_id"/>
                     <ParameterString dimension=""/>
                     <ParameterString format_data_type=""/>
-                    <ParameterString json_key="data_source_identifier.value"/>
+                    <ParameterString json_key="ds_id"/>
                     <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
@@ -87,7 +100,7 @@
                     <ParameterString dbovariable_name="sac"/>
                     <ParameterString dimension=""/>
                     <ParameterString format_data_type=""/>
-                    <ParameterString json_key="data_source_identifier.sac"/>
+                    <ParameterString json_key="010.SAC"/>
                     <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
@@ -98,7 +111,7 @@
                     <ParameterString dbovariable_name="sic"/>
                     <ParameterString dimension=""/>
                     <ParameterString format_data_type=""/>
-                    <ParameterString json_key="data_source_identifier.sic"/>
+                    <ParameterString json_key="010.SIC"/>
                     <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
@@ -109,7 +122,7 @@
                     <ParameterString dbovariable_name="target_addr"/>
                     <ParameterString dimension=""/>
                     <ParameterString format_data_type=""/>
-                    <ParameterString json_key="target_address"/>
+                    <ParameterString json_key="080.Target Address"/>
                     <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
@@ -120,7 +133,7 @@
                     <ParameterString dbovariable_name="callsign"/>
                     <ParameterString dimension=""/>
                     <ParameterString format_data_type=""/>
-                    <ParameterString json_key="target_identification.value_idt"/>
+                    <ParameterString json_key="170.Target Identification"/>
                     <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
@@ -131,9 +144,9 @@
                     <ParameterString dbovariable_name="alt_baro_ft"/>
                     <ParameterString dimension="Height"/>
                     <ParameterString format_data_type=""/>
-                    <ParameterString json_key="mode_c_height.value_ft"/>
+                    <ParameterString json_key="145.Flight Level"/>
                     <ParameterString json_value_format=""/>
-                    <ParameterString unit="Feet"/>
+                    <ParameterString unit="Flight Level"/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping7">
                     <ParameterBool active="1"/>
@@ -142,9 +155,9 @@
                     <ParameterString dbovariable_name="pos_lat_deg"/>
                     <ParameterString dimension="Angle"/>
                     <ParameterString format_data_type=""/>
-                    <ParameterString json_key="wgs84_position.value_lat_rad"/>
+                    <ParameterString json_key="130.Latitude"/>
                     <ParameterString json_value_format=""/>
-                    <ParameterString unit="Radian"/>
+                    <ParameterString unit="Degree"/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping8">
                     <ParameterBool active="1"/>
@@ -153,9 +166,9 @@
                     <ParameterString dbovariable_name="pos_long_deg"/>
                     <ParameterString dimension="Angle"/>
                     <ParameterString format_data_type=""/>
-                    <ParameterString json_key="wgs84_position.value_lon_rad"/>
+                    <ParameterString json_key="130.Longitude"/>
                     <ParameterString json_value_format=""/>
-                    <ParameterString unit="Radian"/>
+                    <ParameterString unit="Degree"/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping9">
                     <ParameterBool active="1"/>
@@ -164,7 +177,7 @@
                     <ParameterString dbovariable_name="tod"/>
                     <ParameterString dimension="Time"/>
                     <ParameterString format_data_type=""/>
-                    <ParameterString json_key="time_of_report"/>
+                    <ParameterString json_key="073.Time of Message Reception for Position"/>
                     <ParameterString json_value_format=""/>
                     <ParameterString unit="Second"/>
                 </Configuration>
@@ -174,19 +187,8 @@
                 <ParameterString data_source_variable_name="ds_id"/>
                 <ParameterString db_object_name="MLAT"/>
                 <ParameterString json_container_key=""/>
-                <ParameterString json_key="message_type"/>
-                <ParameterString json_value="mlat target"/>
-                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping0">
-                    <ParameterBool active="1"/>
-                    <ParameterBool mandatory="1"/>
-                    <ParameterString db_object_name="MLAT"/>
-                    <ParameterString dbovariable_name="rec_num"/>
-                    <ParameterString dimension=""/>
-                    <ParameterString format_data_type=""/>
-                    <ParameterString json_key="rec_num"/>
-                    <ParameterString json_value_format=""/>
-                    <ParameterString unit=""/>
-                </Configuration>
+                <ParameterString json_key="category"/>
+                <ParameterString json_value="20"/>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping1">
                     <ParameterBool active="1"/>
                     <ParameterBool mandatory="1"/>
@@ -303,19 +305,8 @@
                 <ParameterString data_source_variable_name="ds_id"/>
                 <ParameterString db_object_name="Radar"/>
                 <ParameterString json_container_key=""/>
-                <ParameterString json_key="message_type"/>
-                <ParameterString json_value="radar target"/>
-                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping0">
-                    <ParameterBool active="1"/>
-                    <ParameterBool mandatory="1"/>
-                    <ParameterString db_object_name="Radar"/>
-                    <ParameterString dbovariable_name="rec_num"/>
-                    <ParameterString dimension=""/>
-                    <ParameterString format_data_type=""/>
-                    <ParameterString json_key="rec_num"/>
-                    <ParameterString json_value_format=""/>
-                    <ParameterString unit=""/>
-                </Configuration>
+                <ParameterString json_key="category"/>
+                <ParameterString json_value="48"/>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping1">
                     <ParameterBool active="1"/>
                     <ParameterBool mandatory="1"/>
@@ -432,19 +423,8 @@
                 <ParameterString data_source_variable_name="ds_id"/>
                 <ParameterString db_object_name="Tracker"/>
                 <ParameterString json_container_key=""/>
-                <ParameterString json_key="message_type"/>
-                <ParameterString json_value="track update"/>
-                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping0">
-                    <ParameterBool active="1"/>
-                    <ParameterBool mandatory="1"/>
-                    <ParameterString db_object_name="Tracker"/>
-                    <ParameterString dbovariable_name="rec_num"/>
-                    <ParameterString dimension=""/>
-                    <ParameterString format_data_type=""/>
-                    <ParameterString json_key="rec_num"/>
-                    <ParameterString json_value_format=""/>
-                    <ParameterString unit=""/>
-                </Configuration>
+                <ParameterString json_key="category"/>
+                <ParameterString json_value="62"/>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping1">
                     <ParameterBool active="1"/>
                     <ParameterBool mandatory="1"/>
