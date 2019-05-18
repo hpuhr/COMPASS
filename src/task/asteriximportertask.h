@@ -23,6 +23,7 @@
 #include "jsonparsingschema.h"
 #include "asterixdecodejob.h"
 #include "asterixextractrecordsjob.h"
+#include "jsonmappingjob.h"
 
 #include <QObject>
 
@@ -54,6 +55,12 @@ public slots:
 
     void extractASTERIXDoneSlot ();
     void extractASTERIXObsoleteSlot ();
+
+    void mapJSONDoneSlot ();
+    void mapJSONObsoleteSlot ();
+
+    void insertProgressSlot (float percent);
+    void insertDoneSlot (DBObject& object);
 
 public:
     ASTERIXImporterTask(const std::string& class_id, const std::string& instance_id,
@@ -108,13 +115,23 @@ protected:
 
     std::shared_ptr<ASTERIXDecodeJob> decode_job_;
     tbb::concurrent_queue <std::shared_ptr<ASTERIXExtractRecordsJob>> extract_jobs_;
+    tbb::concurrent_queue <std::shared_ptr <JSONMappingJob>> json_map_jobs_;
+    std::map <std::string, std::shared_ptr<Buffer>> buffers_;
 
     QMessageBox* msg_box_ {nullptr};
 
     size_t num_frames_ {0};
     size_t num_records_ {0};
+    size_t records_mapped_ {0};
+    size_t records_not_mapped_ {0};
+    size_t records_created_ {0};
+    size_t records_inserted_ {0};
 
     std::map<unsigned int, size_t> category_counts_;
+    size_t key_count_ {0};
+    size_t insert_active_ {0};
+
+    std::set <int> added_data_sources_;
 
     bool all_done_{false};
 
@@ -123,8 +140,12 @@ protected:
 
     virtual void checkSubConfigurables ();
 
-    void updateMsgBox();
+    void insertData ();
+    //void checkAllDone ();
 
+
+    void updateMsgBox();
+    bool maxLoadReached ();
 };
 
 #endif // ASTERIXIMPORTERTASK_H

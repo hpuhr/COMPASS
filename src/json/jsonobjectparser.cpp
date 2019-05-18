@@ -245,7 +245,7 @@ bool JSONObjectParser::parseJSON (nlohmann::json& j, std::shared_ptr<Buffer> buf
     }
     else
     {
-        //loginf << "found single target report";
+        logdbg << "found single target report";
         assert (j.is_object());
 
         parsed_any = parseTargetReport (j, buffer, row_cnt);
@@ -265,7 +265,7 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
     {
         if (tr.find (json_key_) != tr.end())
         {
-            if (tr.at(json_key_) != json_value_)
+            if (Utils::JSON::toString(tr.at(json_key_)) != json_value_)
             {
                 logdbg << "JsonMapping: parseTargetReport: skipping because of wrong key value " << tr.at(json_key_);
                 return false;
@@ -361,6 +361,7 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
             logdbg << "float " << current_var_name << " format '" << map_it.jsonValueFormat() << "'";
             assert (buffer->has<float>(current_var_name));
             mandatory_missing = map_it.findAndSetValue (tr, buffer->get<float> (current_var_name), row_cnt);
+
             break;
         }
         case PropertyDataType::DOUBLE:
@@ -387,7 +388,10 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
         }
 
         if (mandatory_missing)
+        {
+            logdbg << "JsonMapping: parseTargetReport: mandatory missing";
             break;
+        }
     }
 
     if (mandatory_missing)

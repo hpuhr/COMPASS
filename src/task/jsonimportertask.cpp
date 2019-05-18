@@ -395,7 +395,7 @@ void JSONImporterTask::mapJSONDoneSlot ()
     loginf << "JSONImporterTask: mapJSONDoneSlot: skipped " << map_job->numNotMapped()
            << " all skipped " << objects_not_mapped_;
 
-    objects_mapped_ += map_job->numMapped();
+    objects_mapped_ += map_job->numMapped(); // TODO done twice?
     objects_not_mapped_ += map_job->numNotMapped();
 
     objects_created_ += map_job->numCreated();

@@ -16,8 +16,8 @@ void ASTERIXExtractRecordsJob::run ()
 
     started_ = true;
 
-    extracted_records_.reset(new std::vector <json>());
     unsigned int category;
+    unsigned int sac, sic;
 
     if (framing_ == "")
     {
@@ -38,7 +38,14 @@ void ASTERIXExtractRecordsJob::run ()
                 {
                     record["category"] = category;
 
-                    extracted_records_->push_back(std::move(record));
+                    if (record.find("010") != record.end())
+                    {
+                        sac = record.at("010").at("SAC");
+                        sic = record.at("010").at("SIC");
+                        record["ds_id"] =  sac*255 + sic;
+                    }
+
+                    extracted_records_.push_back(std::move(record));
                     category_counts_.at(category) += 1;
                 }
             }
@@ -55,7 +62,7 @@ void ASTERIXExtractRecordsJob::run ()
     logdbg << "ASTERIXExtractRecordsJob: run: done";
 }
 
-std::shared_ptr<std::vector<nlohmann::json> > ASTERIXExtractRecordsJob::extractedRecords() const
+std::vector<nlohmann::json>& ASTERIXExtractRecordsJob::extractedRecords()
 {
     return extracted_records_;
 }
