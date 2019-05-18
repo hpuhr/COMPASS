@@ -328,7 +328,7 @@ void JSONImporterTask::readJSONFilePartDoneSlot ()
     connect (json_parse_job.get(), SIGNAL(doneSignal()), this, SLOT(parseJSONDoneSlot()),
              Qt::QueuedConnection);
 
-    JobManager::instance().addJob(json_parse_job);
+    JobManager::instance().addBlockingJob(json_parse_job);
 
     json_parse_jobs_.push_back(json_parse_job);
 
@@ -371,7 +371,7 @@ void JSONImporterTask::parseJSONDoneSlot ()
 
     json_map_jobs_.push_back(json_map_job);
 
-    JobManager::instance().addJob(json_map_job);
+    JobManager::instance().addBlockingJob(json_map_job);
 
     key_count_ += count;
 

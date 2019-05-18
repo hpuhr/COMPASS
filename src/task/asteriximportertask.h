@@ -22,6 +22,7 @@
 #include "json.hpp"
 #include "jsonparsingschema.h"
 #include "asterixdecodejob.h"
+#include "asterixextractrecordsjob.h"
 
 #include <QObject>
 
@@ -29,10 +30,13 @@
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
+#include <tbb/concurrent_queue.h>
+
 class TaskManager;
 class ASTERIXImporterTaskWidget;
 class ASTERIXCategoryConfig;
 class SavedFile;
+class QMessageBox;
 
 namespace jASTERIX
 {
@@ -46,6 +50,10 @@ class ASTERIXImporterTask: public QObject, public Configurable
 public slots:
     void decodeASTERIXDoneSlot ();
     void decodeASTERIXObsoleteSlot ();
+    void addDecodedASTERIXSlot (std::shared_ptr<nlohmann::json> data); // moved out from reference
+
+    void extractASTERIXDoneSlot ();
+    void extractASTERIXObsoleteSlot ();
 
 public:
     ASTERIXImporterTask(const std::string& class_id, const std::string& instance_id,
@@ -81,8 +89,6 @@ public:
 
     std::shared_ptr<JSONParsingSchema> schema() const;
 
-    void addDecodedASTERIX (std::vector <nlohmann::json>& data); // moved out from refernce
-
 protected:
     bool debug_jasterix_;
     std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
@@ -92,6 +98,7 @@ protected:
     std::string current_framing_;
 
     std::string filename_;
+    bool test_ {false};
 
     std::unique_ptr<ASTERIXImporterTaskWidget> widget_;
 
@@ -100,14 +107,23 @@ protected:
     std::shared_ptr<JSONParsingSchema> schema_;
 
     std::shared_ptr<ASTERIXDecodeJob> decode_job_;
+    tbb::concurrent_queue <std::shared_ptr<ASTERIXExtractRecordsJob>> extract_jobs_;
+
+    QMessageBox* msg_box_ {nullptr};
 
     size_t num_frames_ {0};
     size_t num_records_ {0};
+
+    std::map<unsigned int, size_t> category_counts_;
+
+    bool all_done_{false};
 
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;
 
     virtual void checkSubConfigurables ();
+
+    void updateMsgBox();
 
 };
 

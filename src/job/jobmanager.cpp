@@ -39,12 +39,10 @@ JobManager::~JobManager()
     logdbg  << "JobManager: destructor";
 }
 
-void JobManager::addJob (std::shared_ptr<Job> job)
+void JobManager::addBlockingJob (std::shared_ptr<Job> job)
 {
-    logdbg << "JobManager: addJob: " << job->name() << " num " << jobs_.unsafe_size();
-    jobs_.push(job);
-
-    QThreadPool::globalInstance()->start(job.get());
+    logdbg << "JobManager: addJob: " << job->name() << " num " << blocking_jobs_.unsafe_size();
+    blocking_jobs_.push(job);
 
     updateWidget();
 }
@@ -53,8 +51,6 @@ void JobManager::addNonBlockingJob (std::shared_ptr<Job> job)
 {
     loginf << "JobManager: addNonBlockingJob: " << job->name() << " num " << non_blocking_jobs_.unsafe_size();
     non_blocking_jobs_.push(job);
-
-    QThreadPool::globalInstance()->start(job.get());
 
     updateWidget();
 }
@@ -74,9 +70,25 @@ void JobManager::cancelJob (std::shared_ptr<Job> job)
     job->setObsolete();
 }
 
-bool JobManager::noJobs ()
+bool JobManager::hasAnyJobs()
 {
-    return jobs_.empty() && non_blocking_jobs_.empty() && !active_db_job_ && queued_db_jobs_.empty();
+    return hasBlockingJobs() || hasNonBlockingJobs() || hasDBJobs();
+}
+
+bool JobManager::hasBlockingJobs ()
+{
+    return active_blocking_job_ || !blocking_jobs_.empty();
+}
+
+bool JobManager::hasNonBlockingJobs ()
+{
+    return active_non_blocking_job_ || !non_blocking_jobs_.empty();
+
+}
+
+bool JobManager::hasDBJobs()
+{
+    return active_db_job_ || !queued_db_jobs_.empty();
 }
 
 /**
@@ -90,186 +102,151 @@ void JobManager::run()
 
     while (1)
     {
-        if (stop_requested_ && noJobs())
+        if (stop_requested_ && !hasAnyJobs())
             break;
 
-        bool changed=false;
-        bool really_update_widget=false;
+        changed_=false;
+        really_update_widget_=false;
 
-        while (!jobs_.empty())
-        {
-            // process normal jobs
-            std::shared_ptr<Job> current = *jobs_.unsafe_begin();
-            assert (current);
+        if (hasBlockingJobs())
+            handleBlockingJobs();
 
-            if (!current->obsolete() && !current->done())
-                break;
+        if (hasNonBlockingJobs())
+            handleNonBlockingJobs();
 
-            jobs_.try_pop(current);
+        if (hasDBJobs())
+            handleDBJobs();
 
-            changed = true;
-            logdbg << "JobManager: run: flushed job "+current->name();
-
-            if(current->obsolete())
-            {
-                logdbg << "JobManager: run: flushing obsolete job";
-
-                if (!stop_requested_)
-                    current->emitObsolete();
-                continue;
-            }
-
-            logdbg << "JobManager: run: flushing done job";
-
-            if (!stop_requested_)
-                current->emitDone();
-
-            logdbg << "JobManager: run: done job emitted "+current->name();
-
-            really_update_widget = jobs_.empty();
-        }
-
-        while (!non_blocking_jobs_.empty())
-        {
-            // process normal jobs
-            std::shared_ptr<Job> current = *non_blocking_jobs_.unsafe_begin();
-            assert (current);
-
-            if (!current->obsolete() && !current->done())
-                break;
-
-            non_blocking_jobs_.try_pop(current);
-
-            changed = true;
-            logdbg << "JobManager: run: flushed non-blocking job "+current->name();
-            if(current->obsolete())
-            {
-                logdbg << "JobManager: run: flushing non-blocking obsolete job";
-
-                if (!stop_requested_)
-                    current->emitObsolete();
-
-                continue;
-            }
-
-            logdbg << "JobManager: run: flushing non-blocking done job";
-            current->emitDone();
-            logdbg << "JobManager: run: non-blocking done job emitted "+current->name();
-
-            really_update_widget = non_blocking_jobs_.empty();
-        }
-
-        //        for(auto it = non_blocking_jobs_.unsafe_begin(); it != non_blocking_jobs_.unsafe_end();)
-        //        {
-        //            assert (*it);
-
-        //            if((*it)->obsolete() || (*it)->done())
-        //            {
-        //                std::shared_ptr<Job> job = *it;
-        //                logdbg << "JobManager: run: processing non-blocking job "+job->name();
-
-        //                it = non_blocking_jobs_.erase(it);
-
-        //                changed = true;
-
-        //                logdbg << "JobManager: run: flushed non-blocking job "+job->name();
-        //                if(job->obsolete())
-        //                {
-        //                    logdbg << "JobManager: run: flushing obsolete non-blocking job";
-        //                    job->emitObsolete();
-        //                    continue;
-        //                }
-
-        //                logdbg << "JobManager: run: flushing done non-blocking job";
-        //                job->emitDone();
-        //                logdbg << "JobManager: run: done non-blocking job emitted "+job->name();
-
-        //                really_update_widget = non_blocking_jobs_.size() == 0;
-        //            }
-        //            else
-        //            {
-        //                ++it;
-        //            }
-        //        }
-
-        if (active_db_job_)
-        {
-            // see if active db job done or obsolete
-            if(active_db_job_->obsolete())
-            {
-                logdbg << "JobManager: run: flushing db obsolete job";
-
-                while (!active_db_job_->done()) // wait for finish
-                {
-                    logdbg << "JobManager: run: waiting to obsolete finish";
-                    //QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-                    msleep(10);
-                }
-
-                if (!stop_requested_)
-                    active_db_job_->emitObsolete();
-
-                active_db_job_ = nullptr;
-                changed = true;
-            }
-            else if (active_db_job_->done())
-            {
-                logdbg << "JobManager: run: flushing db done job";
-
-                if (!stop_requested_)
-                    active_db_job_->emitDone();
-
-
-                active_db_job_ = nullptr;
-                changed = true;
-                really_update_widget = true;
-            }
-        }
-
-        while (!active_db_job_ && !queued_db_jobs_.empty())
-        {
-            // start a new one if needed
-            std::shared_ptr<Job> current;
-            queued_db_jobs_.try_pop(current);
-
-            assert (current);
-            assert (!current->done());
-
-            if (current->obsolete())
-            {
-                if (!stop_requested_)
-                    current->emitObsolete();
-
-                continue;
-            }
-
-            logdbg << "JobManager: run: starting dbjob " << current->name();
-            active_db_job_ = current;
-
-            QThreadPool::globalInstance()->start(active_db_job_.get());
-            changed = true;
-
-            break;
-        }
-
-        if (!stop_requested_ && changed && !active_db_job_ && queued_db_jobs_.empty())
+        if (!stop_requested_ && changed_ && !hasDBJobs())
             emit databaseIdle();
 
-        if (!stop_requested_ && changed)
-            updateWidget(really_update_widget);
+        if (!stop_requested_ && changed_)
+            updateWidget(really_update_widget_);
 
         //QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         msleep(1);
     }
 
-    assert (jobs_.empty());
-    assert (non_blocking_jobs_.empty());
-    assert (!active_db_job_);
-    assert (queued_db_jobs_.empty());
+    assert (!hasBlockingJobs());
+    assert (!hasNonBlockingJobs());
+    assert (!hasDBJobs());
 
     stopped_=true;
     loginf  << "JobManager: run: stopped";
 }
+
+void JobManager::handleBlockingJobs ()
+{
+    if (active_blocking_job_) // see if active one exists
+    {
+        if (active_blocking_job_->obsolete() || active_blocking_job_->done())
+        {
+            if(active_blocking_job_->obsolete())
+            {
+                logdbg << "JobManager: run: flushing obsolete blocking job";
+
+                if (!stop_requested_)
+                    active_blocking_job_->emitObsolete();
+            }
+
+            logdbg << "JobManager: run: flushing blocking done job";
+
+            if (!stop_requested_)
+            {
+                active_blocking_job_->emitDone();
+                logdbg << "JobManager: run: done blocking job emitted "+active_blocking_job_->name();
+            }
+
+            active_blocking_job_ = nullptr;
+        }
+    }
+
+    if (!active_blocking_job_ && !blocking_jobs_.empty())
+    {
+        if (blocking_jobs_.try_pop(active_blocking_job_))
+        {
+            QThreadPool::globalInstance()->start(active_blocking_job_.get());
+
+            changed_ = true;
+            really_update_widget_ = !hasBlockingJobs();
+        }
+    }
+}
+void JobManager::handleNonBlockingJobs ()
+{
+    if (active_non_blocking_job_) // see if active one exists
+    {
+        if (active_non_blocking_job_->obsolete() || active_non_blocking_job_->done())
+        {
+            if(active_non_blocking_job_->obsolete())
+            {
+                logdbg << "JobManager: run: flushing obsolete non-blocking job";
+
+                if (!stop_requested_)
+                    active_non_blocking_job_->emitObsolete();
+            }
+
+            logdbg << "JobManager: run: flushing non-blocking done job";
+
+            if (!stop_requested_)
+            {
+                active_non_blocking_job_->emitDone();
+                logdbg << "JobManager: run: done non-blocking job emitted "+active_non_blocking_job_->name();
+            }
+
+            active_non_blocking_job_ = nullptr;
+        }
+    }
+
+    if (!active_non_blocking_job_ && !non_blocking_jobs_.empty())
+    {
+        if (non_blocking_jobs_.try_pop(active_non_blocking_job_))
+        {
+            QThreadPool::globalInstance()->start(active_non_blocking_job_.get());
+
+            changed_ = true;
+            really_update_widget_ = !hasNonBlockingJobs();
+        }
+    }
+}
+void JobManager::handleDBJobs ()
+{
+    if (active_db_job_) // see if active one exists
+    {
+        if (active_db_job_->obsolete() || active_db_job_->done())
+        {
+            if(active_db_job_->obsolete())
+            {
+                logdbg << "JobManager: run: flushing obsolete non-blocking job";
+
+                if (!stop_requested_)
+                    active_db_job_->emitObsolete();
+            }
+
+            logdbg << "JobManager: run: flushing non-blocking done job";
+
+            if (!stop_requested_)
+            {
+                active_db_job_->emitDone();
+                logdbg << "JobManager: run: done non-blocking job emitted "+active_db_job_->name();
+            }
+
+            active_db_job_ = nullptr;
+        }
+    }
+
+    if (!active_db_job_ && !queued_db_jobs_.empty())
+    {
+        if (queued_db_jobs_.try_pop(active_db_job_))
+        {
+            QThreadPool::globalInstance()->start(active_db_job_.get());
+
+            changed_ = true;
+            really_update_widget_ = !hasDBJobs();
+        }
+    }
+}
+
 
 void JobManager::shutdown ()
 {
@@ -283,7 +260,7 @@ void JobManager::shutdown ()
     for (auto job_it = queued_db_jobs_.unsafe_begin(); job_it != queued_db_jobs_.unsafe_end(); ++job_it)
         (*job_it)->setObsolete ();
 
-    for (auto job_it = jobs_.unsafe_begin(); job_it != jobs_.unsafe_end(); ++job_it)
+    for (auto job_it = blocking_jobs_.unsafe_begin(); job_it != blocking_jobs_.unsafe_end(); ++job_it)
         (*job_it)->setObsolete ();
 
     for (auto job_it = non_blocking_jobs_.unsafe_begin(); job_it != non_blocking_jobs_.unsafe_end(); ++job_it)
@@ -291,11 +268,10 @@ void JobManager::shutdown ()
 
     loginf  << "JobManager: shutdown: waiting on jobs to quit";
 
-    while (!queued_db_jobs_.empty() || active_db_job_ || !jobs_.empty() || !non_blocking_jobs_.empty())
+    while (hasAnyJobs())
     {
-        loginf  << "JobManager: shutdown: waiting on jobs to finish: empty queued " << !queued_db_jobs_.empty()
-                << " db " << (active_db_job_ != nullptr) << " jobs " << !jobs_.empty()
-                                                       << " non-locking " << !non_blocking_jobs_.empty();
+        loginf  << "JobManager: shutdown: waiting on jobs to finish: db " << hasDBJobs()
+                << " blocking " << hasBlockingJobs() << " non-locking " << hasNonBlockingJobs();
 
         msleep(1000);
     }
@@ -329,14 +305,24 @@ JobManagerWidget *JobManager::widget()
     return widget_;
 }
 
-unsigned int JobManager::numJobs ()
+unsigned int JobManager::numBlockingJobs ()
 {
-    return jobs_.unsafe_size() + non_blocking_jobs_.unsafe_size();
+    return active_blocking_job_ ? blocking_jobs_.unsafe_size()+1 : blocking_jobs_.unsafe_size();
+}
+
+unsigned int JobManager::numNonBlockingJobs ()
+{
+    return active_non_blocking_job_ ? non_blocking_jobs_.unsafe_size()+1 : non_blocking_jobs_.unsafe_size();
 }
 
 unsigned int JobManager::numDBJobs ()
 {
     return active_db_job_ ? queued_db_jobs_.unsafe_size()+1 : queued_db_jobs_.unsafe_size();
+}
+
+unsigned int JobManager::numJobs ()
+{
+    return numBlockingJobs() + numNonBlockingJobs();
 }
 
 int JobManager::numThreads ()

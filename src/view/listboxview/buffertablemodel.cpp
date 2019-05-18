@@ -290,7 +290,7 @@ void BufferTableModel::saveAsCSV (const std::string &file_name, bool overwrite)
     connect (export_job, SIGNAL(obsoleteSignal()), this, SLOT(exportJobObsoleteSlot()), Qt::QueuedConnection);
     connect (export_job, SIGNAL(doneSignal()), this, SLOT(exportJobDoneSlot()), Qt::QueuedConnection);
 
-    JobManager::instance().addJob(export_job_);
+    JobManager::instance().addBlockingJob(export_job_);
 }
 
 void BufferTableModel::exportJobObsoleteSlot ()

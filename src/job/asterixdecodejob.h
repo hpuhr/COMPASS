@@ -8,6 +8,10 @@ class ASTERIXImporterTask;
 
 class ASTERIXDecodeJob : public Job
 {
+    Q_OBJECT
+signals:
+    void decodedASTERIXSignal (std::shared_ptr<nlohmann::json> data);
+
 public:
     ASTERIXDecodeJob(ASTERIXImporterTask& task, const std::string& filename, const std::string& framing, bool test);
     virtual ~ASTERIXDecodeJob() {}
@@ -16,7 +20,9 @@ public:
 
     size_t numFrames() const;
     size_t numRecords() const;
-    std::map<unsigned int, size_t> categoryCounts() const;
+
+    void pause() { pause_ = true; }
+    void unpause() { pause_ = false; }
 
 private:
     ASTERIXImporterTask& task_;
@@ -24,10 +30,10 @@ private:
     std::string framing_;
     bool test_ {false};
 
+    volatile bool pause_{false};
+
     size_t num_frames_{0};
     size_t num_records_{0};
-
-    std::map<unsigned int, size_t> category_counts_;
 
     void jasterix_callback(nlohmann::json& data, size_t num_frames, size_t num_records);
 };

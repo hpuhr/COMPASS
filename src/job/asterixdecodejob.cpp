@@ -4,6 +4,8 @@
 
 #include <jasterix/jasterix.h>
 
+#include <QThread>
+
 using namespace nlohmann;
 
 ASTERIXDecodeJob::ASTERIXDecodeJob(ASTERIXImporterTask& task, const std::string& filename, const std::string& framing,
@@ -35,42 +37,21 @@ void ASTERIXDecodeJob::run ()
 
 void ASTERIXDecodeJob::jasterix_callback(nlohmann::json& data, size_t num_frames, size_t num_records)
 {
+    while (pause_) // block decoder until unpaused
+    {
+        QThread::sleep(1);
+    }
+
     num_frames_ = num_frames;
     num_records_ = num_records;
 
-    std::vector <json> extracted_records;
+    std::shared_ptr<json> moved_data {new json()};
 
-    unsigned int category;
+    *moved_data = std::move(data);
 
-    if (framing_ == "")
-    {
-        assert (data.find("data_blocks") != data.end());
+    //loginf << "ASTERIXDecodeJob: jasterix_callback: got " << moved_data.size() << " records";
 
-        for (json& data_block : data.at("data_blocks"))
-        {
-            category = data_block.at("category");
-
-            assert (data_block.find("content") != data_block.end());
-
-            if (data_block.at("content").find("records") != data_block.at("content").end())
-            {
-                if (category_counts_.count(category) == 0)
-                    category_counts_[category] = 0;
-
-                for (json& record : data_block.at("content").at("records"))
-                {
-                    record["category"] = category;
-
-                    extracted_records.push_back(std::move(record));
-                    category_counts_.at(category) += 1;
-                }
-            }
-        }
-    }
-
-    //loginf << "ASTERIXDecodeJob: jasterix_callback: got " << extracted_records.size() << " records";
-
-    task_.addDecodedASTERIX(extracted_records);
+    emit decodedASTERIXSignal(moved_data);
 }
 
 
@@ -84,8 +65,5 @@ size_t ASTERIXDecodeJob::numRecords() const
     return num_records_;
 }
 
-std::map<unsigned int, size_t> ASTERIXDecodeJob::categoryCounts() const
-{
-    return category_counts_;
-}
+
 
