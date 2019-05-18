@@ -12,7 +12,7 @@ ASTERIXExtractRecordsJob::ASTERIXExtractRecordsJob(const std::string& framing, s
 
 void ASTERIXExtractRecordsJob::run ()
 {
-    loginf << "ASTERIXExtractRecordsJob: run";
+    logdbg << "ASTERIXExtractRecordsJob: run";
 
     started_ = true;
 
@@ -45,14 +45,14 @@ void ASTERIXExtractRecordsJob::run ()
         }
     }
 
-    for (auto& cat_cnt_it : category_counts_)
-    {
-        loginf <<  "CAT"+std::to_string(cat_cnt_it.first)+": "+std::to_string(cat_cnt_it.second)+"\n";
-    }
+//    for (auto& cat_cnt_it : category_counts_)
+//    {
+//        loginf <<  "CAT"+std::to_string(cat_cnt_it.first)+": "+std::to_string(cat_cnt_it.second)+"\n";
+//    }
 
     done_ = true;
 
-    loginf << "ASTERIXExtractRecordsJob: run: done";
+    logdbg << "ASTERIXExtractRecordsJob: run: done";
 }
 
 std::shared_ptr<std::vector<nlohmann::json> > ASTERIXExtractRecordsJob::extractedRecords() const

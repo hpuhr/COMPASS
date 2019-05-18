@@ -56,6 +56,9 @@ ASTERIXImporterTask::ASTERIXImporterTask(const std::string& class_id, const std:
     loginf << "ASTERIXImporterTask: contructor: jasterix definition path '" << jasterix_definition_path << "'";
     assert (Files::directoryExists(jasterix_definition_path));
 
+    jASTERIX::frame_chunk_size = 10000;
+    jASTERIX::record_chunk_size = 10000;
+
     jasterix_.reset(new jASTERIX::jASTERIX(jasterix_definition_path, false, debug_jasterix_));
 
     std::vector<std::string> framings = jasterix_->framings();
@@ -336,7 +339,6 @@ void ASTERIXImporterTask::importFile(const std::string& filename, bool test)
 
     loginf << "ASTERIXImporterTask: importFile: filename " << filename;
 
-
     assert (decode_job_ == nullptr);
     decode_job_.reset(new ASTERIXDecodeJob(*this, filename, current_framing_, test));
 
@@ -346,15 +348,14 @@ void ASTERIXImporterTask::importFile(const std::string& filename, bool test)
     connect (decode_job_.get(), SIGNAL(decodedASTERIXSignal(std::shared_ptr<nlohmann::json>)),
              this, SLOT(addDecodedASTERIXSlot(std::shared_ptr<nlohmann::json>)), Qt::QueuedConnection);
 
-    JobManager::instance().addNonBlockingJob(decode_job_);
+    JobManager::instance().addBlockingJob(decode_job_);
 
     return;
 }
 
 void ASTERIXImporterTask::decodeASTERIXDoneSlot ()
 {
-    // TODO never received
-    loginf << "ASTERIXImporterTask: decodeASTERIXDoneSlot";
+    logdbg << "ASTERIXImporterTask: decodeASTERIXDoneSlot";
 
     assert (decode_job_);
 
@@ -370,7 +371,7 @@ void ASTERIXImporterTask::decodeASTERIXObsoleteSlot ()
 
 void ASTERIXImporterTask::addDecodedASTERIXSlot (std::shared_ptr<nlohmann::json> data)
 {
-    loginf << "ASTERIXImporterTask: addDecodedASTERIX";
+    logdbg << "ASTERIXImporterTask: addDecodedASTERIX";
 
     assert (decode_job_);
 
@@ -391,14 +392,14 @@ void ASTERIXImporterTask::addDecodedASTERIXSlot (std::shared_ptr<nlohmann::json>
 
     // create new extract job
     std::shared_ptr<ASTERIXExtractRecordsJob> extract_job {new ASTERIXExtractRecordsJob(current_framing_, data)};
-    loginf << "ASTERIXImporterTask: addDecodedASTERIX: data " << data->size() << " jobs " << extract_jobs_.unsafe_size();
+    logdbg << "ASTERIXImporterTask: addDecodedASTERIX: data " << data->size() << " jobs " << extract_jobs_.unsafe_size();
 
     connect (extract_job.get(), SIGNAL(obsoleteSignal()), this, SLOT(extractASTERIXObsoleteSlot()),
              Qt::QueuedConnection);
     connect (extract_job.get(), SIGNAL(doneSignal()), this, SLOT(extractASTERIXDoneSlot()), Qt::QueuedConnection);
 
     extract_jobs_.push(extract_job);
-    JobManager::instance().addBlockingJob(extract_job);
+    JobManager::instance().addNonBlockingJob(extract_job);
 
     if (extract_jobs_.unsafe_size() >= 10)
         decode_job_->pause();
@@ -408,7 +409,7 @@ void ASTERIXImporterTask::addDecodedASTERIXSlot (std::shared_ptr<nlohmann::json>
 
 void ASTERIXImporterTask::extractASTERIXDoneSlot ()
 {
-    loginf << "ASTERIXImporterTask: extractASTERIXDoneSlot";
+    logdbg << "ASTERIXImporterTask: extractASTERIXDoneSlot";
 
     ASTERIXExtractRecordsJob* extract_job = static_cast<ASTERIXExtractRecordsJob*>(sender());
     std::shared_ptr<ASTERIXExtractRecordsJob> queued_extract_job;
@@ -418,7 +419,7 @@ void ASTERIXImporterTask::extractASTERIXDoneSlot ()
 
     assert (queued_extract_job.get() == extract_job);
 
-    loginf << "ASTERIXImporterTask: extractASTERIXDoneSlot: update";
+    logdbg << "ASTERIXImporterTask: extractASTERIXDoneSlot: update";
 
     for (auto& cat_cnt_it: queued_extract_job->categoryCounts())
     {
@@ -436,12 +437,12 @@ void ASTERIXImporterTask::extractASTERIXDoneSlot ()
 
 void ASTERIXImporterTask::extractASTERIXObsoleteSlot ()
 {
-    loginf << "ASTERIXImporterTask: extractASTERIXObsoleteSlot";
+    logdbg << "ASTERIXImporterTask: extractASTERIXObsoleteSlot";
 }
 
 void ASTERIXImporterTask::updateMsgBox ()
 {
-    loginf << "ASTERIXImporterTask: updateMsgBox";
+    logdbg << "ASTERIXImporterTask: updateMsgBox";
 
     if (!msg_box_)
     {
@@ -565,5 +566,5 @@ void ASTERIXImporterTask::updateMsgBox ()
 
     msg_box_->show();
 
-    loginf << "ASTERIXImporterTask: updateMsgBox: done";
+    logdbg << "ASTERIXImporterTask: updateMsgBox: done";
 }

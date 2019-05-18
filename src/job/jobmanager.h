@@ -58,10 +58,12 @@ public:
 
 
     // all job's done signal order is maintained in the call order
+
+    // blocks started of later ones
     void addBlockingJob (std::shared_ptr<Job> job);
-    // all job's done signal order is NOT maintained
+    // does not block start of later ones
     void addNonBlockingJob (std::shared_ptr<Job> job);
-    // only one can be active
+    // only one db job can be active
     void addDBJob (std::shared_ptr<Job> job);
     void cancelJob (std::shared_ptr<Job> job);
 

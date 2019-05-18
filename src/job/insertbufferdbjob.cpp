@@ -46,6 +46,8 @@ void InsertBufferDBJob::run ()
 {
     logdbg  << "InsertBufferDBJob: run: start";
 
+    started_ = true;
+
     boost::posix_time::ptime loading_start_time_;
     boost::posix_time::ptime loading_stop_time_;
 

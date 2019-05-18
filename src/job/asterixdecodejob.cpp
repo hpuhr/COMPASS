@@ -17,7 +17,7 @@ ASTERIXDecodeJob::ASTERIXDecodeJob(ASTERIXImporterTask& task, const std::string&
 
 void ASTERIXDecodeJob::run ()
 {
-    loginf << "ASTERIXDecodeJob: run";
+    logdbg << "ASTERIXDecodeJob: run";
 
     started_ = true;
 
@@ -32,7 +32,7 @@ void ASTERIXDecodeJob::run ()
 
     done_ = true;
 
-    loginf << "ASTERIXDecodeJob: run: done";
+    logdbg << "ASTERIXDecodeJob: run: done";
 }
 
 void ASTERIXDecodeJob::jasterix_callback(nlohmann::json& data, size_t num_frames, size_t num_records)
