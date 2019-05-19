@@ -17,7 +17,6 @@ void ASTERIXExtractRecordsJob::run ()
     started_ = true;
 
     unsigned int category;
-    unsigned int sac, sic;
 
     if (framing_ == "")
     {
@@ -35,19 +34,7 @@ void ASTERIXExtractRecordsJob::run ()
                     category_counts_[category] = 0;
 
                 for (json& record : data_block.at("content").at("records"))
-                {
-                    record["category"] = category;
-
-                    if (record.find("010") != record.end())
-                    {
-                        sac = record.at("010").at("SAC");
-                        sic = record.at("010").at("SIC");
-                        record["ds_id"] =  sac*255 + sic;
-                    }
-
-                    extracted_records_.push_back(std::move(record));
-                    category_counts_.at(category) += 1;
-                }
+                    processRecord (category, record);
             }
         }
     }
@@ -75,19 +62,7 @@ void ASTERIXExtractRecordsJob::run ()
                         category_counts_[category] = 0;
 
                     for (json& record : data_block.at("content").at("records"))
-                    {
-                        record["category"] = category;
-
-                        if (record.find("010") != record.end())
-                        {
-                            sac = record.at("010").at("SAC");
-                            sic = record.at("010").at("SIC");
-                            record["ds_id"] =  sac*255 + sic;
-                        }
-
-                        extracted_records_.push_back(std::move(record));
-                        category_counts_.at(category) += 1;
-                    }
+                        processRecord (category, record);
                 }
             }
         }
@@ -101,6 +76,31 @@ void ASTERIXExtractRecordsJob::run ()
     done_ = true;
 
     logdbg << "ASTERIXExtractRecordsJob: run: done";
+}
+
+void ASTERIXExtractRecordsJob::processRecord (unsigned int category, nlohmann::json& record)
+{
+    record["category"] = category;
+
+    if (record.find("010") != record.end())
+    {
+        unsigned int sac = record.at("010").at("SAC");
+        unsigned int sic = record.at("010").at("SIC");
+        record["ds_id"] =  sac*255 + sic;
+    }
+
+    if (category == 1) // CAT001 coversion hack
+    {
+        if (record.find("090") != record.end())
+            if (record.at("090").find("Flight Level") != record.at("090").end())
+            {
+                double flight_level = record.at("090").at("Flight Level"); // is mapped in ft
+                record.at("090").at("Flight Level") = flight_level* 1e-2;  // ft to fl
+            }
+    }
+
+    extracted_records_.push_back(std::move(record));
+    category_counts_.at(category) += 1;
 }
 
 std::vector<nlohmann::json>& ASTERIXExtractRecordsJob::extractedRecords()

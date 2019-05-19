@@ -345,8 +345,18 @@ void ASTERIXImporterTask::importFile(const std::string& filename, bool test)
 
         jasterix_->setDecodeCategory(cat_it.first, cat_it.second.decode());
         jasterix_->setEdition(cat_it.first, cat_it.second.edition());
-        loginf << "ASTERIXImporterTask: importFile: set cat " << cat_it.first << " decode " <<  cat_it.second.decode()
-               << " edition " << cat_it.second.edition();
+
+        if (cat_it.first == "001")
+        {
+            jasterix_->setMapping(cat_it.first, "atsdb");
+            loginf << "ASTERIXImporterTask: importFile: set cat " << cat_it.first
+                   << " decode " <<  cat_it.second.decode()
+                   << " edition " << cat_it.second.edition() << " mapping 'atsdb'";
+        }
+        else
+            loginf << "ASTERIXImporterTask: importFile: set cat " << cat_it.first
+                   << " decode " <<  cat_it.second.decode()
+                   << " edition " << cat_it.second.edition();
         // TODO mapping
     }
 
@@ -688,7 +698,6 @@ void ASTERIXImporterTask::insertDoneSlot (DBObject& object)
     logdbg << "ASTERIXImporterTask: insertDoneSlot";
     --insert_active_;
 
-    checkAllDone();
     updateMsgBox();
 
     logdbg << "ASTERIXImporterTask: insertDoneSlot: done";
@@ -728,6 +737,8 @@ void ASTERIXImporterTask::updateMsgBox ()
         msg_box_ = new QMessageBox ();
         assert (msg_box_);
     }
+
+    checkAllDone();
 
     std::string msg;
 

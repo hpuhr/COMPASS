@@ -20,6 +20,8 @@ private:
     std::vector <nlohmann::json> extracted_records_;
 
     std::map<unsigned int, size_t> category_counts_;
+
+    void processRecord (unsigned int category, nlohmann::json& record);
 };
 
 #endif // ASTERIXEXTRACTRECORDSJOB_H

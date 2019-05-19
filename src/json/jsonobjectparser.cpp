@@ -23,10 +23,12 @@
 #include "unit.h"
 #include "dbobjectmanager.h"
 #include "atsdb.h"
+#include "stringconv.h"
 
 #include <algorithm>
 
 using namespace nlohmann;
+using namespace Utils;
 
 JSONObjectParser::JSONObjectParser (const std::string& class_id, const std::string& instance_id, Configurable* parent)
     :  Configurable (class_id, instance_id, parent)
@@ -43,6 +45,8 @@ JSONObjectParser::JSONObjectParser (const std::string& class_id, const std::stri
     assert (db_object_name_.size());
 
     createSubConfigurables ();
+
+    json_values_vector_ = String::split(json_value_, ',');
 }
 
 JSONObjectParser& JSONObjectParser::operator=(JSONObjectParser&& other)
@@ -53,6 +57,7 @@ JSONObjectParser& JSONObjectParser::operator=(JSONObjectParser&& other)
     json_container_key_ = other.json_container_key_;
     json_key_ = other.json_key_;
     json_value_ = other.json_value_;
+    json_values_vector_ = other.json_values_vector_;
 
     data_mappings_ = std::move(other.data_mappings_);
 
@@ -118,6 +123,7 @@ void JSONObjectParser::JSONValue(const std::string& json_value)
     loginf << "JSONObjectParser: JSONValue: " << json_value;
 
     json_value_ = json_value;
+    json_values_vector_ = String::split(json_value_, ',');
 }
 
 std::string JSONObjectParser::JSONContainerKey() const
@@ -265,9 +271,11 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
     {
         if (tr.find (json_key_) != tr.end())
         {
-            if (Utils::JSON::toString(tr.at(json_key_)) != json_value_)
+            if (std::find(json_values_vector_.begin(), json_values_vector_.end(),
+                          Utils::JSON::toString(tr.at(json_key_))) == json_values_vector_.end())
             {
-                logdbg << "JsonMapping: parseTargetReport: skipping because of wrong key value " << tr.at(json_key_);
+                logdbg << "JsonMapping: parseTargetReport: skipping because of wrong key " << tr.at(json_key_)
+                       << " value " << Utils::JSON::toString(tr.at(json_key_));
                 return false;
             }
             else
