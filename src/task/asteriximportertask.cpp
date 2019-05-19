@@ -316,6 +316,18 @@ void ASTERIXImporterTask::importFile(const std::string& filename, bool test)
 
     num_frames_ = 0;
     num_records_ = 0;
+    records_mapped_ = 0;
+    records_not_mapped_ = 0;
+    records_created_ = 0;
+    records_inserted_ = 0;
+
+    category_counts_.clear();
+    key_count_ = 0;
+    insert_active_ = 0;
+
+    all_done_ = false;
+
+    added_data_sources_.clear();
 
     assert (schema_);
 
@@ -514,6 +526,12 @@ void ASTERIXImporterTask::mapJSONDoneSlot ()
             decode_job_->pause();
         else
             decode_job_->unpause();
+    }
+
+    if (test_)
+    {
+        updateMsgBox();
+        return;
     }
 
     for (auto& buf_it : job_buffers)

@@ -369,8 +369,8 @@ void ASTERIXImporterTaskWidget::testImportSlot()
 
         task_.importFile(filename.toStdString(), true);
 
-//        test_button_->setDisabled(true);
-//        import_button_->setDisabled(true);
+        test_button_->setDisabled(true);
+        import_button_->setDisabled(true);
     }
 
 }
@@ -403,7 +403,7 @@ void ASTERIXImporterTaskWidget::importSlot()
 
         task_.importFile(filename.toStdString(), false);
 
-//        test_button_->setDisabled(true);
-//        import_button_->setDisabled(true);
+        test_button_->setDisabled(true);
+        import_button_->setDisabled(true);
     }
 }
