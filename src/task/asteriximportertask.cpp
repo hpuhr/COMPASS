@@ -372,7 +372,6 @@ void ASTERIXImporterTask::decodeASTERIXDoneSlot ()
 
     assert (decode_job_);
 
-    all_done_ = true;
     decode_job_ = nullptr;
 
     updateMsgBox();
@@ -482,7 +481,7 @@ void ASTERIXImporterTask::extractASTERIXObsoleteSlot ()
 
 void ASTERIXImporterTask::mapJSONDoneSlot ()
 {
-    loginf << "ASTERIXImporterTask: mapJSONDoneSlot";
+    logdbg << "ASTERIXImporterTask: mapJSONDoneSlot";
 
     JSONMappingJob* map_job = static_cast<JSONMappingJob*>(sender());
     std::shared_ptr<JSONMappingJob> queued_map_job;
@@ -528,7 +527,7 @@ void ASTERIXImporterTask::mapJSONDoneSlot ()
         {
             if (buf_it.second->size() > 10000)
             {
-                loginf << "ASTERIXImporterTask: mapJSONDoneSlot: inserting part of parsed objects";
+                logdbg << "ASTERIXImporterTask: mapJSONDoneSlot: inserting part of parsed objects";
                 insertData ();
                 return;
             }
@@ -537,7 +536,7 @@ void ASTERIXImporterTask::mapJSONDoneSlot ()
 
     if (decode_job_ == nullptr && extract_jobs_.unsafe_size() == 0 && json_map_jobs_.unsafe_size() == 0)
     {
-        loginf << "ASTERIXImporterTask: mapJSONDoneSlot: inserting parsed objects at end";
+        logdbg << "ASTERIXImporterTask: mapJSONDoneSlot: inserting parsed objects at end";
         insertData ();
     }
 }
@@ -549,7 +548,7 @@ void ASTERIXImporterTask::mapJSONObsoleteSlot ()
 
 void ASTERIXImporterTask::insertData ()
 {
-    loginf << "ASTERIXImporterTask: insertData: inserting into database";
+    logdbg << "ASTERIXImporterTask: insertData: inserting into database";
 
     while (insert_active_)
     {
@@ -689,10 +688,35 @@ void ASTERIXImporterTask::insertDoneSlot (DBObject& object)
     logdbg << "ASTERIXImporterTask: insertDoneSlot";
     --insert_active_;
 
-    //checkAllDone();
+    checkAllDone();
     updateMsgBox();
 
     logdbg << "ASTERIXImporterTask: insertDoneSlot: done";
+}
+
+void ASTERIXImporterTask::checkAllDone ()
+{
+    logdbg << "ASTERIXImporterTask: checkAllDone";
+
+    if (!all_done_ && decode_job_ == nullptr && extract_jobs_.empty() && json_map_jobs_.empty() == 0
+            && insert_active_ == 0)
+    {
+        stop_time_ = boost::posix_time::microsec_clock::local_time();
+
+        boost::posix_time::time_duration diff = stop_time_ - start_time_;
+
+        std::string time_str = std::to_string(diff.hours())+"h "+std::to_string(diff.minutes())
+                +"m "+std::to_string(diff.seconds())+"s";
+
+        loginf << "ASTERIXImporterTask: checkAllDone: read done after " << time_str;
+
+        all_done_ = true;
+
+//        if (widget_)
+//            widget_->importDoneSlot(test_);
+    }
+
+    logdbg << "ASTERIXImporterTask: checkAllDone: done";
 }
 
 void ASTERIXImporterTask::updateMsgBox ()
@@ -724,68 +748,7 @@ void ASTERIXImporterTask::updateMsgBox ()
 
     std::string records_rate_str_ = std::to_string(static_cast<int>(records_per_second));
 
-    // calculate insert rate
-    //    double objects_per_second = 0.0;
-    //    bool objects_per_second_updated = false;
-    //    if (objects_inserted_ && statistics_calc_objects_inserted_ != objects_inserted_)
-    //    {
-    //        objects_per_second = objects_inserted_/(diff.total_milliseconds()/1000.0);
-    //        objects_per_second_updated = true;
-
-    //        statistics_calc_objects_inserted_ = objects_inserted_;
-    //        object_rate_str_ = std::to_string(static_cast<int>(objects_per_second));
-    //    }
-
-    //    // calculate remaining time
-    //    if (objects_per_second_updated && bytes_to_read_ && objects_parsed_ && objects_mapped_)
-    //    {
-    //        double avg_time_per_obj_s = 1.0/objects_per_second;
-
-    //        double avg_mapped_obj_bytes = static_cast<double>(bytes_read_)/static_cast<double>(objects_mapped_);
-    //        double num_obj_total = static_cast<double>(bytes_to_read_)/avg_mapped_obj_bytes;
-
-    //        double remaining_obj_num = 0.0;
-
-    //        if (objects_not_mapped_ < objects_parsed_) // skipped objects ok
-    //        {
-    //            double not_skipped_ratio =
-    //                    static_cast<double>(objects_parsed_-objects_not_mapped_)/static_cast<double>(objects_parsed_);
-    //            remaining_obj_num = (num_obj_total*not_skipped_ratio)-objects_inserted_;
-
-    //    //        loginf << "UGA avg bytes " << avg_obj_bytes << " num total " << num_obj_total << " not skipped ratio "
-    //    //               << not_skipped_ratio << " all mapped " << num_obj_total*not_skipped_ratio
-    //    //               << " obj ins " << objects_inserted_ << " remain obj " << remaining_obj_num;
-    //        }
-    //        else // unknown number of skipped objects
-    //        {
-    //            remaining_obj_num = num_obj_total-objects_inserted_;
-    //        }
-
-    //        if (remaining_obj_num < 0.0)
-    //            remaining_obj_num = 0.0;
-
-    //        double time_remaining_s = remaining_obj_num*avg_time_per_obj_s;
-    //        remaining_time_str_ = String::timeStringFromDouble(time_remaining_s, false);
-    //    }
-
     msg += "Elapsed Time: "+elapsed_time_str+"\n";
-
-    //    if (bytes_read_ > 1e9)
-    //        msg += "Data read: "+String::doubleToStringPrecision(static_cast<double>(bytes_read_)*1e-9,2)+" GB";
-    //    else
-    //        msg += "Data read: "+String::doubleToStringPrecision(static_cast<double>(bytes_read_)*1e-6,2)+" MB";
-
-    //    if (bytes_to_read_)
-    //        msg += " ("+std::to_string(static_cast<int>(read_status_percent_))+"%)\n\n";
-    //    else
-    //        msg += "\n\n";
-
-    //    msg += "Objects read: "+std::to_string(objects_read_)+"\n";
-    //    msg += "Objects parsed: "+std::to_string(objects_parsed_)+"\n";
-    //    msg += "Objects parse errors: "+std::to_string(objects_parse_errors_)+"\n\n";
-
-    //    msg += "Objects mapped: "+std::to_string(objects_mapped_)+"\n";
-    //    msg += "Objects not mapped: "+std::to_string(objects_not_mapped_)+"\n\n";
 
     msg += "Frames read: "+std::to_string(num_frames_)+"\n";
     msg += "Records read: "+std::to_string(num_records_)+"\n";

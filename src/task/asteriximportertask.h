@@ -141,7 +141,7 @@ protected:
     virtual void checkSubConfigurables ();
 
     void insertData ();
-    //void checkAllDone ();
+    void checkAllDone ();
 
 
     void updateMsgBox();

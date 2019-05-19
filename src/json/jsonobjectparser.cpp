@@ -427,11 +427,11 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
 {
     assert (db_object_);
 
-    loginf << "JSONObjectParser: transformBuffer: object " << db_object_->name();
+    logdbg << "JSONObjectParser: transformBuffer: object " << db_object_->name();
 
     if (override_data_source_)
     {
-        loginf << "JSONObjectParser: transformBuffer: overiding data source for object " << db_object_->name()
+        logdbg << "JSONObjectParser: transformBuffer: overiding data source for object " << db_object_->name()
                << " ds id name '" << data_source_variable_name_ << "'";
         assert (data_source_variable_name_.size());
         assert (buffer->has<int>(data_source_variable_name_));
