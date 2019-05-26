@@ -279,6 +279,21 @@ std::shared_ptr<JSONParsingSchema> ASTERIXImporterTask::schema() const
     return schema_;
 }
 
+bool ASTERIXImporterTask::debug() const
+{
+    return debug_jasterix_;
+}
+
+void ASTERIXImporterTask::debug(bool debug_jasterix)
+{
+    debug_jasterix_ = debug_jasterix;
+
+    assert (jasterix_);
+    jasterix_->setDebug(debug_jasterix_);
+
+    loginf << "ASTERIXImporterTask: debug " << debug_jasterix_;
+}
+
 bool ASTERIXImporterTask::canImportFile (const std::string& filename)
 {
     if (!Files::fileExists(filename))
@@ -390,9 +405,20 @@ void ASTERIXImporterTask::importFile(const std::string& filename, bool test)
 
 void ASTERIXImporterTask::decodeASTERIXDoneSlot ()
 {
-    logdbg << "ASTERIXImporterTask: decodeASTERIXDoneSlot";
+    loginf << "ASTERIXImporterTask: decodeASTERIXDoneSlot";
 
     assert (decode_job_);
+
+    if (decode_job_->error())
+    {
+        error_ = decode_job_->error();
+        error_message_ = decode_job_->errorMessage();
+
+        QMessageBox msgBox;
+        msgBox.setText(("Decoding error: "+error_message_+"\n\nPlease quit the application.").c_str());
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.exec();
+    }
 
     decode_job_ = nullptr;
 
@@ -405,7 +431,7 @@ void ASTERIXImporterTask::decodeASTERIXObsoleteSlot ()
 
 void ASTERIXImporterTask::addDecodedASTERIXSlot (std::shared_ptr<nlohmann::json> data)
 {
-    logdbg << "ASTERIXImporterTask: addDecodedASTERIX";
+    loginf << "ASTERIXImporterTask: addDecodedASTERIX";
 
     assert (decode_job_);
 
@@ -749,6 +775,15 @@ void ASTERIXImporterTask::checkAllDone ()
 void ASTERIXImporterTask::updateMsgBox ()
 {
     logdbg << "ASTERIXImporterTask: updateMsgBox";
+
+    if (error_)
+    {
+        if (msg_box_)
+        {
+            msg_box_->close();
+        }
+        return;
+    }
 
     if (!msg_box_)
     {

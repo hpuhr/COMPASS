@@ -30,6 +30,7 @@ class QHBoxLayout;
 class QPushButton;
 class QListWidget;
 class QStackedWidget;
+class QCheckBox;
 
 class ASTERIXImporterTaskWidget : public QWidget
 {
@@ -45,6 +46,7 @@ public slots:
     void removeObjectParserSlot ();
     void selectedObjectParserSlot ();
 
+    void debugChangedSlot ();
     void testImportSlot();
     void importSlot();
 
@@ -71,6 +73,7 @@ protected:
 
     ASTERIXConfigWidget* config_widget_ {nullptr};
 
+    QCheckBox* debug_ {nullptr};
     QPushButton* test_button_ {nullptr};
     QPushButton* import_button_ {nullptr};
 

@@ -41,6 +41,11 @@ public:
     void pause() { pause_ = true; }
     void unpause() { pause_ = false; }
 
+
+
+    bool error() const;
+    std::string errorMessage() const;
+
 private:
     ASTERIXImporterTask& task_;
     std::string filename_;
@@ -51,6 +56,9 @@ private:
 
     size_t num_frames_{0};
     size_t num_records_{0};
+
+    bool error_ {false};
+    std::string error_message_;
 
     void jasterix_callback(nlohmann::json& data, size_t num_frames, size_t num_records);
 };

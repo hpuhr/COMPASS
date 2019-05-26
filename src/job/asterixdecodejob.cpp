@@ -41,19 +41,30 @@ void ASTERIXDecodeJob::run ()
     using namespace std::placeholders;
     std::function<void(nlohmann::json&, size_t, size_t)> callback = std::bind(&ASTERIXDecodeJob::jasterix_callback,
                                                                               this, _1, _2, _3);
-
-    if (framing_ == "")
-        task_.jASTERIX()->decodeFile (filename_, callback);
-    else
-        task_.jASTERIX()->decodeFile (filename_, framing_, callback);
+    try
+    {
+        if (framing_ == "")
+            task_.jASTERIX()->decodeFile (filename_, callback);
+        else
+            task_.jASTERIX()->decodeFile (filename_, framing_, callback);
+    }
+    catch (std::exception& e)
+    {
+        logerr << "ASTERIXDecodeJob: run: decoding error '" << e.what() << "'";
+        error_ = true;
+        error_message_ = e.what();
+    }
 
     done_ = true;
 
-    logdbg << "ASTERIXDecodeJob: run: done";
+    loginf << "ASTERIXDecodeJob: run: done";
 }
 
 void ASTERIXDecodeJob::jasterix_callback(nlohmann::json& data, size_t num_frames, size_t num_records)
 {
+    if (error_)
+        return;
+
     while (pause_) // block decoder until unpaused
     {
         QThread::sleep(1);
@@ -80,6 +91,16 @@ size_t ASTERIXDecodeJob::numFrames() const
 size_t ASTERIXDecodeJob::numRecords() const
 {
     return num_records_;
+}
+
+bool ASTERIXDecodeJob::error() const
+{
+    return error_;
+}
+
+std::string ASTERIXDecodeJob::errorMessage() const
+{
+    return error_message_;
 }
 
 

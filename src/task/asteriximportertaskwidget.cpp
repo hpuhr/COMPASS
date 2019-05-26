@@ -31,6 +31,7 @@
 #include <QFrame>
 #include <QInputDialog>
 #include <QStackedWidget>
+#include <QCheckBox>
 
 ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, QWidget* parent, Qt::WindowFlags f)
     : QWidget (parent, f), task_(task)
@@ -137,8 +138,13 @@ ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, 
         left_layout->addWidget (parsers_frame, 1);
     }
 
-    // final button stuff
+    // final stuff
     {
+        debug_ = new QCheckBox ("Debug in Console");
+        debug_->setChecked(task_.debug());
+        connect(debug_, SIGNAL( clicked() ), this, SLOT(debugChangedSlot()));
+        left_layout->addWidget (debug_);
+
         test_button_ = new QPushButton ("Test Import");
         connect(test_button_, SIGNAL( clicked() ), this, SLOT(testImportSlot()));
         left_layout->addWidget (test_button_);
@@ -338,6 +344,14 @@ void ASTERIXImporterTaskWidget::updateParserList ()
             assert (item);
         }
     }
+}
+
+void ASTERIXImporterTaskWidget::debugChangedSlot ()
+{
+    QCheckBox* box = dynamic_cast<QCheckBox*> (sender());
+    assert (box);
+
+    task_.debug(box->checkState() == Qt::Checked);
 }
 
 void ASTERIXImporterTaskWidget::testImportSlot()

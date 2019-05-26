@@ -96,6 +96,9 @@ public:
 
     std::shared_ptr<JSONParsingSchema> schema() const;
 
+    bool debug() const;
+    void debug(bool debug);
+
 protected:
     bool debug_jasterix_;
     std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
@@ -117,6 +120,9 @@ protected:
     tbb::concurrent_queue <std::shared_ptr<ASTERIXExtractRecordsJob>> extract_jobs_;
     tbb::concurrent_queue <std::shared_ptr <JSONMappingJob>> json_map_jobs_;
     std::map <std::string, std::shared_ptr<Buffer>> buffers_;
+
+    bool error_ {false};
+    std::string error_message_;
 
     QMessageBox* msg_box_ {nullptr};
 
