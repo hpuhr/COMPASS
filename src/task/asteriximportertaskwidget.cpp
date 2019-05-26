@@ -36,8 +36,8 @@
 ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, QWidget* parent, Qt::WindowFlags f)
     : QWidget (parent, f), task_(task)
 {
-    setWindowTitle ("Import ASTERIX");
-    setMinimumSize(QSize(800, 600));
+    setWindowTitle ("Import ASTERIX Data");
+    setMinimumSize(QSize(800, 900));
 
     QFont font_bold;
     font_bold.setBold(true);
@@ -51,9 +51,9 @@ ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, 
 
     QVBoxLayout* left_layout = new QVBoxLayout ();
 
-    QLabel *main_label = new QLabel ("Import ASTERIX data");
-    main_label->setFont (font_big);
-    left_layout->addWidget (main_label);
+//    QLabel *main_label = new QLabel ("Import ASTERIX data");
+//    main_label->setFont (font_big);
+//    left_layout->addWidget (main_label);
 
     // file stuff
     {
