@@ -95,6 +95,8 @@ private:
     std::string json_key_; // * for all
     std::string json_value_;
 
+    std::vector<std::string> json_values_vector_;
+
     DBOVariableSet var_list_;
 
     bool override_data_source_ {false};

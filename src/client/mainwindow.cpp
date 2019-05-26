@@ -59,6 +59,11 @@
 #include "radarplotpositioncalculatortaskwidget.h"
 #include "files.h"
 
+#if USE_JASTERIX
+#include "asteriximportertask.h"
+#include "asteriximportertaskwidget.h"
+#endif
+
 using namespace Utils;
 using namespace std;
 
@@ -200,6 +205,15 @@ void MainWindow::addRadarPlotPositionCalculatorTaskSlot ()
     ATSDB::instance().taskManager().getRadarPlotPositionCalculatorTask()->widget()->show();
 }
 
+#if USE_JASTERIX
+void MainWindow::addASTERIXImporterTaskSlot ()
+{
+    loginf  << "MainWindow: addASTERIXImporterTaskSlot";
+
+    ATSDB::instance().taskManager().getASTERIXImporterTask()->widget()->show();
+}
+#endif
+
 void MainWindow::postProcessingDoneSlot ()
 {
     loginf << "MainWindow: postProcessingDoneSlot: done";
@@ -235,6 +249,11 @@ void MainWindow::createMenus()
     QMenu* file_menu = menuBar()->addMenu(tr("&File"));
     file_menu->addAction(exit_action);
 
+#if USE_JASTERIX
+    QAction* asterix_importer_task_action = new QAction(tr("Import ASTERIX Data"), this);
+    connect(asterix_importer_task_action, &QAction::triggered, this, &MainWindow::addASTERIXImporterTaskSlot);
+#endif
+
     QAction* json_importer_task_action = new QAction(tr("Import JSON Data"), this);
     connect(json_importer_task_action, &QAction::triggered, this, &MainWindow::addJSONImporterTaskSlot);
 
@@ -244,6 +263,9 @@ void MainWindow::createMenus()
             this, &MainWindow::addRadarPlotPositionCalculatorTaskSlot);
 
     task_menu_ = menuBar()->addMenu(tr("&Task"));
+#if USE_JASTERIX
+    task_menu_->addAction(asterix_importer_task_action);
+#endif
     task_menu_->addAction(json_importer_task_action);
     task_menu_->addAction(radar_plot_position_calculator_task_action);
     task_menu_->setDisabled(true);

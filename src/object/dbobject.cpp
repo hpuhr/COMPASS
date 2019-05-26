@@ -1055,7 +1055,7 @@ void DBObject::readJobIntermediateSlot (std::shared_ptr<Buffer> buffer)
     connect (job, SIGNAL(doneSignal()), this, SLOT(finalizeReadJobDoneSlot()), Qt::QueuedConnection);
     finalize_jobs_.push_back(job_ptr);
 
-    JobManager::instance().addJob(job_ptr);
+    JobManager::instance().addBlockingJob(job_ptr);
 
     if (info_widget_)
         info_widget_->updateSlot();

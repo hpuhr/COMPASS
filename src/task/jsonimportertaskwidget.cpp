@@ -45,6 +45,7 @@ using namespace Utils;
 JSONImporterTaskWidget::JSONImporterTaskWidget(JSONImporterTask& task, QWidget* parent, Qt::WindowFlags f)
     : QWidget (parent, f), task_(task)
 {
+    setWindowTitle ("Import JSON Data");
     setMinimumSize(QSize(800, 600));
 
     QFont font_bold;
@@ -59,9 +60,9 @@ JSONImporterTaskWidget::JSONImporterTaskWidget(JSONImporterTask& task, QWidget* 
 
     QVBoxLayout* left_layout = new QVBoxLayout ();
 
-    QLabel *main_label = new QLabel ("Import JSON data");
-    main_label->setFont (font_big);
-    left_layout->addWidget (main_label);
+//    QLabel *main_label = new QLabel ("Import JSON data");
+//    main_label->setFont (font_big);
+//    left_layout->addWidget (main_label);
 
     // file stuff
     {

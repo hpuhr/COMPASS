@@ -8,8 +8,8 @@ set(CMAKE_CXX_FLAGS_MYREL "-O3")
 
 project( ATSDB )
 SET(CPACK_PACKAGE_VERSION_MAJOR "0")
-SET(CPACK_PACKAGE_VERSION_MINOR "2")
-SET(CPACK_PACKAGE_VERSION_PATCH "1")
+SET(CPACK_PACKAGE_VERSION_MINOR "3")
+SET(CPACK_PACKAGE_VERSION_PATCH "0")
 
 message("  System: ${CMAKE_SYSTEM}")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -30,7 +30,7 @@ set(CMAKE_AUTOMOC ON)
 #add_definitions(${Qt5Widgets_DEFINITIONS})
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 
-find_package ( Boost REQUIRED COMPONENTS regex system program_options)
+find_package ( Boost REQUIRED COMPONENTS regex system program_options filesystem iostreams)
 message("  Boost_INCLUDE_DIR: ${Boost_INCLUDE_DIR}")
 message("  Boost_LIBRARY_DIR: ${Boost_LIBRARY_DIR}")
 
@@ -68,6 +68,13 @@ message("  LibArchive_INCLUDE_DIRS: ${LibArchive_INCLUDE_DIRS}")
 message("  LibArchive_LIBRARIES: ${LibArchive_LIBRARIES}")
 
 find_package(TBB REQUIRED)
+message("  TBB_INCLUDE_DIRS: ${TBB_INCLUDE_DIRS}")
+message("  TBB_LIBRARIES: ${TBB_LIBRARIES}")
+
+find_package ( jASTERIX )
+message("  jASTERIX found: ${jASTERIX_FOUND}")
+message("  jASTERIX_INCLUDE_DIR: ${jASTERIX_INCLUDE_DIR}")
+message("  jASTERIX_LIBRARIES: ${jASTERIX_LIBRARIES}")
 
 #find_package ( JSONCPP REQUIRED )
 #message("  JSONCPP_INCLUDE_DIR: ${JSONCPP_INCLUDE_DIR}")
@@ -99,6 +106,8 @@ ENDIF()
 
 configure_file(src/util/global.h.in include/global.h)
 
+# includes and library linking
+
 include_directories (
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
@@ -122,6 +131,19 @@ link_directories(
     ${Boost_LIBRARY_DIR}
     )
 
+IF (jASTERIX_FOUND)
+include_directories (
+    ${jASTERIX_INCLUDE_DIR}
+    )
+
+link_directories(
+    ${jASTERIX_LIBRARIES}
+    )
+
+target_link_libraries ( atsdb
+    ${jASTERIX_LIBRARIES})
+ENDIF()
+
 target_link_libraries ( atsdb
     Qt5::Widgets
     Qt5::Core
@@ -136,6 +158,9 @@ target_link_libraries ( atsdb
     ${LibArchive_LIBRARIES}
     ${JSONCPP_LIBRARY}
     ${TBB_LIBRARIES})
+
+
+# installation stuff
 
 message("Installing using prefix: ${CMAKE_INSTALL_PREFIX}")
 install(DIRECTORY "conf" DESTINATION atsdb)

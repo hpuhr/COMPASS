@@ -18,4 +18,15 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/jsonimportertaskwidget.cpp"
 )
 
+IF (jASTERIX_FOUND)
+	MESSAGE(STATUS "Including ASTERIX Import Task")
 
+target_sources(atsdb
+    PUBLIC
+        "${CMAKE_CURRENT_LIST_DIR}/asteriximportertask.h"
+        "${CMAKE_CURRENT_LIST_DIR}/asteriximportertaskwidget.h"
+    PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/asteriximportertask.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/asteriximportertaskwidget.cpp"
+)
+ENDIF()

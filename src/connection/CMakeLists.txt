@@ -12,7 +12,6 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/dbresult.h"
         "${CMAKE_CURRENT_LIST_DIR}/mysqlserver.h"
         "${CMAKE_CURRENT_LIST_DIR}/mysqlserverwidget.h"
-        "${CMAKE_CURRENT_LIST_DIR}/sqlitefile.h"
         "${CMAKE_CURRENT_LIST_DIR}/sqliteconnection.h"
         "${CMAKE_CURRENT_LIST_DIR}/sqliteconnectionwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/sqliteconnectioninfowidget.h"

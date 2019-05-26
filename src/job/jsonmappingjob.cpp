@@ -30,6 +30,8 @@ void JSONMappingJob::run ()
     logdbg << "JSONMappingJob: run: mapping json";
     for (auto& j_it : json_objects_)
     {
+        //loginf << "UGA '" << j_it.dump(4) << "'";
+
         parsed = false;
         parsed_any = false;
 

@@ -368,6 +368,105 @@ For matching purposes only the SAC/SIC values are of importance, the name inform
 \subsection{Tasks}
 \label{sec:tasks}
 
+\subsubsection{Importing ASTERIX Data}
+\label{sec:asterix_import}
+
+To execute this task select ''Task``->  ''Import ASTERIX Data` in the top menu bar. \\
+
+Please note that the following framings are currently supported:
+\begin{itemize}  
+\item None: Raw, netto, unframed ASTERIX data blocks
+\item IOSS: IOSS Final Format
+\item RFF: Comsoft RFF format
+\end{itemize}
+
+Please note that the following categories and editions are currently supported:
+\begin{itemize}  
+\item 001
+\begin{itemize}  
+\item Edition 1.1
+\end{itemize}
+\item 002
+\begin{itemize}  
+\item Edition 1.0
+\end{itemize}
+\item 019
+\begin{itemize}  
+\item Edition 1.3
+\end{itemize}
+\item 020
+\begin{itemize}  
+\item Edition 1.5
+\end{itemize}
+\item 021
+\begin{itemize}  
+\item Edition 2.1
+\end{itemize}
+\item 023
+\begin{itemize}  
+\item Edition 1.2
+\end{itemize}
+\item 034
+\begin{itemize}  
+\item Edition 1.26
+\end{itemize}
+\item 048
+\begin{itemize}  
+\item Edition 1.15
+\end{itemize}
+\item 062
+\begin{itemize}  
+\item Edition 1.12
+\end{itemize}
+\item 063
+\begin{itemize}  
+\item Edition 1.0
+\end{itemize}
+\item 065
+\begin{itemize}  
+\item Edition 1.1
+\end{itemize}
+\end{itemize}
+
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=14cm,frame]{../screenshots/asterix_import_data.png}
+  \caption{Import ASTERIX Data task}
+\end{figure}
+
+In the 'File Selection' list, a list of available ASTERIX data files is given. Entries can be added using the 'Add' button or removed using the 'Remove' buttons. Please add and select the file to be imported.\\
+
+In the 'ASTERIX Configuration' widget the framing, which categories are to be encoded and the currently acitive editions can be set.
+
+Further below, the list of existing JSON object parsers is shown. Each parser is specialized for a specific DBO. To inspect or edit a JSON object parser, click on it in the list. This step is not required for parsing.
+
+\paragraph{Importing}
+Using the 'Test Import' button, the import function can be tested without inserting the data into the database, the 'Import' imports the selected file with the given options.
+
+During import a status indication will be shown as follows:
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=8cm,frame]{../screenshots/asterix_import_status.png}
+  \caption{Import ASTERIX data task status}
+\end{figure}
+
+After import, a confirmation will be shown as follows:
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=8cm,frame]{../screenshots/asterix_import_done.png}
+  \caption{Import ASTERIX data task done}
+\end{figure}
+
+Please note that importing performance strongly depends on CPU performance (multi-threading very beneficial), but a import of 2.5 million target reports takes about 2 minutes on the author's hardware. \\
+
+Please also note that an import can only be performed once, after that the application has to be closed and started again if additional ASTERIX importing is wanted. \\
+
+Please also note the currently only the main data fields (as shown in the JSON object parsers) are imported, and that the timestamps of CAT001 are still only partial timestamps.
+
+
 \subsubsection{Importing JSON Data}
 \label{sec:json_import}
 

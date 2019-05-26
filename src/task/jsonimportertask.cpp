@@ -22,7 +22,7 @@
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "dbovariable.h"
-#include "sqlitefile.h"
+#include "savedfile.h"
 #include "files.h"
 #include "stringconv.h"
 #include "metadbtable.h"
@@ -91,7 +91,7 @@ void JSONImporterTask::generateSubConfigurable (const std::string &class_id, con
 
         schemas_.emplace(std::piecewise_construct,
                      std::forward_as_tuple(name),  // args for key
-                     std::forward_as_tuple(class_id, instance_id, *this));  // args for mapped value
+                     std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
     }
     else
         throw std::runtime_error ("JSONImporterTask: generateSubConfigurable: unknown class_id "+class_id );
@@ -328,7 +328,7 @@ void JSONImporterTask::readJSONFilePartDoneSlot ()
     connect (json_parse_job.get(), SIGNAL(doneSignal()), this, SLOT(parseJSONDoneSlot()),
              Qt::QueuedConnection);
 
-    JobManager::instance().addJob(json_parse_job);
+    JobManager::instance().addBlockingJob(json_parse_job);
 
     json_parse_jobs_.push_back(json_parse_job);
 
@@ -371,7 +371,7 @@ void JSONImporterTask::parseJSONDoneSlot ()
 
     json_map_jobs_.push_back(json_map_job);
 
-    JobManager::instance().addJob(json_map_job);
+    JobManager::instance().addBlockingJob(json_map_job);
 
     key_count_ += count;
 
@@ -395,7 +395,7 @@ void JSONImporterTask::mapJSONDoneSlot ()
     loginf << "JSONImporterTask: mapJSONDoneSlot: skipped " << map_job->numNotMapped()
            << " all skipped " << objects_not_mapped_;
 
-    objects_mapped_ += map_job->numMapped();
+    objects_mapped_ += map_job->numMapped(); // TODO done twice?
     objects_not_mapped_ += map_job->numNotMapped();
 
     objects_created_ += map_job->numCreated();

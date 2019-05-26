@@ -1,5 +1,5 @@
 <Configuration class_id="FilterManager" instance_id="FilterManager0">
-    <ParameterString db_id="SQLite:_/home/sk/data/test.db"/>
+    <ParameterString db_id="SQLite:_/home/sk/data/datasets/test.db"/>
     <Configuration class_id="DBFilter" instance_id="Barometric Altitude">
         <ParameterBool active="0"/>
         <ParameterBool changed="1"/>
@@ -11,7 +11,7 @@
             <ParameterBool op_and="1"/>
             <ParameterString operator="&gt;="/>
             <ParameterString reset_value="MIN"/>
-            <ParameterString value="-1197"/>
+            <ParameterString value="100"/>
             <ParameterString variable_dbo_name="Meta"/>
             <ParameterString variable_name="modec_code_ft"/>
         </Configuration>
@@ -20,7 +20,7 @@
             <ParameterBool op_and="1"/>
             <ParameterString operator="&lt;="/>
             <ParameterString reset_value="MAX"/>
-            <ParameterString value="126797"/>
+            <ParameterString value="409200"/>
             <ParameterString variable_dbo_name="Meta"/>
             <ParameterString variable_name="modec_code_ft"/>
         </Configuration>
@@ -48,7 +48,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="DBFilter" instance_id="Position">
-        <ParameterBool active="1"/>
+        <ParameterBool active="0"/>
         <ParameterBool changed="1"/>
         <ParameterBool op_and_="1"/>
         <ParameterBool visible="0"/>
@@ -123,7 +123,7 @@
             <ParameterBool op_and="1"/>
             <ParameterString operator="&gt;="/>
             <ParameterString reset_value="MIN"/>
-            <ParameterString value="12:00:00.000"/>
+            <ParameterString value="09:18:19.789"/>
             <ParameterString variable_dbo_name="Meta"/>
             <ParameterString variable_name="tod"/>
         </Configuration>
@@ -132,7 +132,7 @@
             <ParameterBool op_and="1"/>
             <ParameterString operator="&lt;="/>
             <ParameterString reset_value="MAX"/>
-            <ParameterString value="12:59:50.000"/>
+            <ParameterString value="10:33:22.883"/>
             <ParameterString variable_dbo_name="Meta"/>
             <ParameterString variable_name="tod"/>
         </Configuration>
@@ -142,8 +142,10 @@
     </Configuration>
     <Configuration class_id="DataSourcesFilter" instance_id="ADSBDataSources">
         <ParameterBool LoadSensorNumber0="1"/>
+        <ParameterBool LoadSensorNumber12830="1"/>
         <ParameterBool LoadSensorNumber12880="1"/>
         <ParameterBool LoadSensorNumber26="1"/>
+        <ParameterBool LoadSensorNumber5640="1"/>
         <ParameterBool active="0"/>
         <ParameterBool changed="0"/>
         <ParameterBool op_and_="1"/>
@@ -151,6 +153,106 @@
         <ParameterString dbo_name="ADSB"/>
         <ParameterString name="ADSBDataSources"/>
         <Configuration class_id="DataSourcesFilterWidget" instance_id="ADSBDataSourcesWidget0">
+            <ParameterBool visible="0"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DataSourcesFilter" instance_id="MLATDataSources0">
+        <ParameterBool LoadSensorNumber12820="1"/>
+        <ParameterBool LoadSensorNumber12821="1"/>
+        <ParameterBool LoadSensorNumber12822="1"/>
+        <ParameterBool LoadSensorNumber12823="1"/>
+        <ParameterBool LoadSensorNumber12824="1"/>
+        <ParameterBool LoadSensorNumber12825="1"/>
+        <ParameterBool LoadSensorNumber12826="1"/>
+        <ParameterBool LoadSensorNumber12827="1"/>
+        <ParameterBool LoadSensorNumber12828="1"/>
+        <ParameterBool LoadSensorNumber12831="1"/>
+        <ParameterBool LoadSensorNumber12870="1"/>
+        <ParameterBool LoadSensorNumber12871="1"/>
+        <ParameterBool LoadSensorNumber12872="1"/>
+        <ParameterBool LoadSensorNumber12873="1"/>
+        <ParameterBool LoadSensorNumber12874="1"/>
+        <ParameterBool LoadSensorNumber12875="1"/>
+        <ParameterBool LoadSensorNumber12876="1"/>
+        <ParameterBool LoadSensorNumber12877="1"/>
+        <ParameterBool LoadSensorNumber12878="1"/>
+        <ParameterBool LoadSensorNumber12881="1"/>
+        <ParameterBool LoadSensorNumber17="1"/>
+        <ParameterBool LoadSensorNumber18="1"/>
+        <ParameterBool LoadSensorNumber19="1"/>
+        <ParameterBool LoadSensorNumber2="1"/>
+        <ParameterBool LoadSensorNumber20="1"/>
+        <ParameterBool LoadSensorNumber21="1"/>
+        <ParameterBool LoadSensorNumber22="1"/>
+        <ParameterBool LoadSensorNumber23="1"/>
+        <ParameterBool LoadSensorNumber24="1"/>
+        <ParameterBool LoadSensorNumber25="0"/>
+        <ParameterBool LoadSensorNumber28="1"/>
+        <ParameterBool active="0"/>
+        <ParameterBool changed="0"/>
+        <ParameterBool op_and_="1"/>
+        <ParameterBool visible="0"/>
+        <ParameterString dbo_name="MLAT"/>
+        <ParameterString name="MLATDataSources0"/>
+        <Configuration class_id="DataSourcesFilterWidget" instance_id="MLATDataSources0Widget0">
+            <ParameterBool visible="0"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DataSourcesFilter" instance_id="RadarDataSources0">
+        <ParameterBool LoadSensorNumber1="1"/>
+        <ParameterBool LoadSensorNumber10="1"/>
+        <ParameterBool LoadSensorNumber11="1"/>
+        <ParameterBool LoadSensorNumber12="1"/>
+        <ParameterBool LoadSensorNumber12289="1"/>
+        <ParameterBool LoadSensorNumber12290="1"/>
+        <ParameterBool LoadSensorNumber12291="1"/>
+        <ParameterBool LoadSensorNumber12763="1"/>
+        <ParameterBool LoadSensorNumber12770="1"/>
+        <ParameterBool LoadSensorNumber12809="1"/>
+        <ParameterBool LoadSensorNumber12810="1"/>
+        <ParameterBool LoadSensorNumber12813="1"/>
+        <ParameterBool LoadSensorNumber12820="1"/>
+        <ParameterBool LoadSensorNumber13="1"/>
+        <ParameterBool LoadSensorNumber14="0"/>
+        <ParameterBool LoadSensorNumber15="0"/>
+        <ParameterBool LoadSensorNumber16="1"/>
+        <ParameterBool LoadSensorNumber25005="1"/>
+        <ParameterBool LoadSensorNumber25006="1"/>
+        <ParameterBool LoadSensorNumber25103="1"/>
+        <ParameterBool LoadSensorNumber25104="1"/>
+        <ParameterBool LoadSensorNumber3="1"/>
+        <ParameterBool LoadSensorNumber4="1"/>
+        <ParameterBool LoadSensorNumber5="1"/>
+        <ParameterBool LoadSensorNumber5636="1"/>
+        <ParameterBool LoadSensorNumber5637="1"/>
+        <ParameterBool LoadSensorNumber5642="1"/>
+        <ParameterBool LoadSensorNumber5645="1"/>
+        <ParameterBool LoadSensorNumber6="1"/>
+        <ParameterBool LoadSensorNumber7="1"/>
+        <ParameterBool LoadSensorNumber8="1"/>
+        <ParameterBool LoadSensorNumber9="1"/>
+        <ParameterBool LoadSensorNumber9745="1"/>
+        <ParameterBool active="0"/>
+        <ParameterBool changed="0"/>
+        <ParameterBool op_and_="1"/>
+        <ParameterBool visible="0"/>
+        <ParameterString dbo_name="Radar"/>
+        <ParameterString name="RadarDataSources0"/>
+        <Configuration class_id="DataSourcesFilterWidget" instance_id="RadarDataSources0Widget0">
+            <ParameterBool visible="0"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DataSourcesFilter" instance_id="TrackerDataSources0">
+        <ParameterBool LoadSensorNumber12990="1"/>
+        <ParameterBool LoadSensorNumber13040="1"/>
+        <ParameterBool LoadSensorNumber27="1"/>
+        <ParameterBool active="0"/>
+        <ParameterBool changed="0"/>
+        <ParameterBool op_and_="1"/>
+        <ParameterBool visible="0"/>
+        <ParameterString dbo_name="Tracker"/>
+        <ParameterString name="TrackerDataSources0"/>
+        <Configuration class_id="DataSourcesFilterWidget" instance_id="TrackerDataSources0Widget0">
             <ParameterBool visible="0"/>
         </Configuration>
     </Configuration>

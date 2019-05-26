@@ -22,6 +22,11 @@
 #include "radarplotpositioncalculatortask.h"
 #include "radarplotpositioncalculatortaskwidget.h"
 
+#if USE_JASTERIX
+#include "asteriximportertask.h"
+#include "asteriximportertaskwidget.h"
+#endif
+
 #include <cassert>
 
 TaskManager::TaskManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb)
@@ -34,6 +39,10 @@ TaskManager::~TaskManager()
 {
     assert (!json_importer_task_);
     assert (!radar_plot_position_calculator_task_);
+
+#if USE_JASTERIX
+    assert (!asterix_importer_task_);
+#endif
 }
 
 JSONImporterTask* TaskManager::getJSONImporterTask()
@@ -47,6 +56,14 @@ RadarPlotPositionCalculatorTask* TaskManager::getRadarPlotPositionCalculatorTask
     assert (radar_plot_position_calculator_task_);
     return radar_plot_position_calculator_task_;
 }
+
+#if USE_JASTERIX
+ASTERIXImporterTask* TaskManager::getASTERIXImporterTask()
+{
+    assert (asterix_importer_task_);
+    return asterix_importer_task_;
+}
+#endif
 
 void TaskManager::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
@@ -62,6 +79,14 @@ void TaskManager::generateSubConfigurable (const std::string &class_id, const st
         radar_plot_position_calculator_task_ = new RadarPlotPositionCalculatorTask (class_id, instance_id, this);
         assert (radar_plot_position_calculator_task_);
     }
+#if USE_JASTERIX
+    else if (class_id.compare ("ASTERIXImporterTask") == 0)
+    {
+        assert (!asterix_importer_task_);
+        asterix_importer_task_ = new ASTERIXImporterTask (class_id, instance_id, this);
+        assert (asterix_importer_task_);
+    }
+#endif
     else
         throw std::runtime_error ("TaskManager: generateSubConfigurable: unknown class_id "+class_id );
 }
@@ -73,12 +98,22 @@ void TaskManager::checkSubConfigurables ()
         json_importer_task_ = new JSONImporterTask ("JSONImporterTask", "JSONImporterTask", this);
         assert (json_importer_task_);
     }
-    else if (!radar_plot_position_calculator_task_)
+
+    if (!radar_plot_position_calculator_task_)
     {
         radar_plot_position_calculator_task_ = new RadarPlotPositionCalculatorTask (
                     "RadarPlotPositionCalculatorTask", "RadarPlotPositionCalculatorTask0", this);
         assert (radar_plot_position_calculator_task_);
     }
+
+#if USE_JASTERIX
+    if (!asterix_importer_task_)
+    {
+        assert (!asterix_importer_task_);
+        asterix_importer_task_ = new ASTERIXImporterTask ("ASTERIXImporterTask", "ASTERIXImporterTask0", this);
+        assert (asterix_importer_task_);
+    }
+#endif
 }
 
 void TaskManager::disable ()
@@ -92,6 +127,13 @@ void TaskManager::disable ()
     {
         radar_plot_position_calculator_task_->widget()->close();
     }
+
+#if USE_JASTERIX
+    if (asterix_importer_task_)
+    {
+        asterix_importer_task_->widget()->close();
+    }
+#endif
 }
 
 void TaskManager::shutdown ()
@@ -110,4 +152,12 @@ void TaskManager::shutdown ()
         delete radar_plot_position_calculator_task_;
         radar_plot_position_calculator_task_ = nullptr;
     }
+
+#if USE_JASTERIX
+    if (asterix_importer_task_)
+    {
+        delete asterix_importer_task_;
+        asterix_importer_task_ = nullptr;
+    }
+#endif
 }

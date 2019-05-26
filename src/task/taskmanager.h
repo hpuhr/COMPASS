@@ -20,10 +20,15 @@
 
 #include "singleton.h"
 #include "configurable.h"
+#include "global.h"
 
 class ATSDB;
 class JSONImporterTask;
 class RadarPlotPositionCalculatorTask;
+
+#if USE_JASTERIX
+class ASTERIXImporterTask;
+#endif
 
 class TaskManager : public Configurable
 {
@@ -35,6 +40,10 @@ public:
     JSONImporterTask* getJSONImporterTask();
     RadarPlotPositionCalculatorTask* getRadarPlotPositionCalculatorTask();
 
+#if USE_JASTERIX
+    ASTERIXImporterTask* getASTERIXImporterTask();
+#endif
+
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
     void disable ();
@@ -43,6 +52,10 @@ public:
 protected:
     JSONImporterTask* json_importer_task_ {nullptr};
     RadarPlotPositionCalculatorTask* radar_plot_position_calculator_task_ {nullptr};
+
+#if USE_JASTERIX
+    ASTERIXImporterTask* asterix_importer_task_ {nullptr};
+#endif
 
     virtual void checkSubConfigurables ();
 };

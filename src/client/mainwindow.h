@@ -20,6 +20,8 @@
 
 #include <QMainWindow>
 
+#include "global.h"
+
 //#include "JobOrderer.h"
 
 class QPushButton;
@@ -56,6 +58,10 @@ private slots:
     void startSlot ();
     void addJSONImporterTaskSlot ();
     void addRadarPlotPositionCalculatorTaskSlot ();
+#if USE_JASTERIX
+    void addASTERIXImporterTaskSlot ();
+#endif
+
 
     /// @brief Handles key press events
     void keyPressEvent ( QKeyEvent * event );

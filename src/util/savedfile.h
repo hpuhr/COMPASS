@@ -15,8 +15,8 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SQLITE_FILE_H
-#define SQLITE_FILE_H
+#ifndef SAFEDFILE_H
+#define SAFEDFILE_H
 
 #include "configurable.h"
 
