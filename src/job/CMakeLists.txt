@@ -8,8 +8,6 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/job.h"
         "${CMAKE_CURRENT_LIST_DIR}/jobmanager.h"
         "${CMAKE_CURRENT_LIST_DIR}/jobmanagerwidget.h"
-        "${CMAKE_CURRENT_LIST_DIR}/asterixdecodejob.h"
-        "${CMAKE_CURRENT_LIST_DIR}/asterixextractrecordsjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/dboreaddbjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/buffercsvexportjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/dboactivedatasourcesdbjob.h"
@@ -26,8 +24,6 @@ target_sources(atsdb
     #        src/job/writebufferdbjob.h
     #        src/job/transformationjob.h
     PRIVATE
-        "${CMAKE_CURRENT_LIST_DIR}/asterixdecodejob.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/asterixextractrecordsjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dboactivedatasourcesdbjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbominmaxdbjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dboreaddbjob.cpp"
@@ -47,4 +43,15 @@ target_sources(atsdb
     #        src/job/transformationjob.cpp
 )
 
+IF (jASTERIX_FOUND)
+	MESSAGE(STATUS "Including ASTERIX jobs")
 
+target_sources(atsdb
+    PUBLIC
+        "${CMAKE_CURRENT_LIST_DIR}/asterixdecodejob.h"
+        "${CMAKE_CURRENT_LIST_DIR}/asterixextractrecordsjob.h"
+    PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/asterixdecodejob.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/asterixextractrecordsjob.cpp"
+)
+ENDIF()

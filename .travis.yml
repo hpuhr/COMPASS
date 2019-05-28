@@ -10,6 +10,8 @@ addons:
      - libboost-regex-dev
      - libboost-system-dev
      - libboost-program-options-dev
+     - libboost-filesystem-dev
+     - libboost-iostreams-dev
      - libeigen3-dev
      - libmysqlclient-dev
      - libmysql++-dev
