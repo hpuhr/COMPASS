@@ -352,11 +352,15 @@ void ASTERIXImporterTask::importFile(const std::string& filename, bool test)
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
+    loginf << "ASTERIXImporterTask: importFile: setting categories";
+
     // set category configs
     jasterix_->decodeNoCategories();
 
     for (auto& cat_it : category_configs_)
     {
+        loginf << "ASTERIXImporterTask: importFile: setting category " << cat_it.first;
+
         if (!jasterix_->hasCategory(cat_it.first))
         {
             logwrn << "ASTERIXImporterTask: importFile: cat " << cat_it.first << " not defined in decoder";
@@ -370,9 +374,12 @@ void ASTERIXImporterTask::importFile(const std::string& filename, bool test)
             continue;
         }
 
+        loginf << "ASTERIXImporterTask: importFile: setting decode flag";
         jasterix_->setDecodeCategory(cat_it.first, cat_it.second.decode());
+        loginf << "ASTERIXImporterTask: importFile: setting edition";
         jasterix_->setEdition(cat_it.first, cat_it.second.edition());
 
+        loginf << "ASTERIXImporterTask: importFile: setting mapping";
         if (cat_it.first == "001")
         {
             jasterix_->setMapping(cat_it.first, "atsdb");
