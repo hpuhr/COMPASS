@@ -681,8 +681,7 @@
                         "name":"available",
                         "type":"extendable_bits",
                         "data_type":"bitfield",
-                        "reverse_bits":true,
-                        "reverse_order":true
+                        "reverse_bits":true
                     },
                     "items":[
                         {
@@ -690,7 +689,7 @@
                             "comment":"",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":7,
+                            "optional_bitfield_index":0,
                             "data_fields":[
                                 {
                                     "name":"Trajectory Intent Status",
@@ -719,7 +718,7 @@
                             "name":"TID",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":6,
+                            "optional_bitfield_index":1,
                             "data_fields":[
                                 {
                                     "name":"rep",
@@ -1352,15 +1351,14 @@
                         "name":"available",
                         "type":"extendable_bits",
                         "data_type":"bitfield",
-                        "reverse_bits":true,
-                        "reverse_order":true
+                        "reverse_bits":true
                     },
                     "items":[
                         {
                             "name":"WS",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":7,
+                            "optional_bitfield_index":0,
                             "data_fields":[
                                 {
                                     "name":"Wind Speed",
@@ -1376,7 +1374,7 @@
                             "name":"WD",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":6,
+                            "optional_bitfield_index":1,
                             "data_fields":[
                                 {
                                     "name":"Wind Direction",
@@ -1392,7 +1390,7 @@
                             "name":"TMP",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":5,
+                            "optional_bitfield_index":2,
                             "data_fields":[
                                 {
                                     "name":"Temperature",
@@ -1408,7 +1406,7 @@
                             "name":"TRB",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":4,
+                            "optional_bitfield_index":3,
                             "data_fields":[
                                 {
                                     "name":"Turbulence",
@@ -1588,15 +1586,14 @@
                         "name":"available",
                         "type":"extendable_bits",
                         "data_type":"bitfield",
-                        "reverse_bits":true,
-                        "reverse_order":true
+                        "reverse_bits":true
                     },
                     "items":[
                         {
                             "name":"Aircraft Operational Status",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":31,
+                            "optional_bitfield_index":0,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1612,7 +1609,7 @@
                             "name":"Target Report Descriptor",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":30,
+                            "optional_bitfield_index":1,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1628,7 +1625,7 @@
                             "name":"Mode 3/A",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":29,
+                            "optional_bitfield_index":2,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1644,7 +1641,7 @@
                             "name":"Quality Indicators",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":28,
+                            "optional_bitfield_index":3,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1660,7 +1657,7 @@
                             "name":"Trajectory Intent",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":27,
+                            "optional_bitfield_index":4,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1676,7 +1673,7 @@
                             "name":"Message Amplitude",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":26,
+                            "optional_bitfield_index":5,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1692,7 +1689,7 @@
                             "name":"Geometric Height",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":25,
+                            "optional_bitfield_index":6,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1708,7 +1705,7 @@
                             "name":"Flight Level",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":23,
+                            "optional_bitfield_index":8,
                             "data_fields":[
                                 {
                                     "name":"age",
@@ -1724,7 +1721,7 @@
                             "name":"Intermediate State Selected Altitude",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":22,
+                            "optional_bitfield_index":9,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1740,7 +1737,7 @@
                             "name":"Final State Selected Altitude",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":21,
+                            "optional_bitfield_index":10,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1756,7 +1753,7 @@
                             "name":"Air Speed",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":20,
+                            "optional_bitfield_index":11,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1772,7 +1769,7 @@
                             "name":"True Air Speed",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":19,
+                            "optional_bitfield_index":12,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1788,7 +1785,7 @@
                             "name":"Magnetic Heading",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":18,
+                            "optional_bitfield_index":13,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1804,7 +1801,7 @@
                             "name":"Barometric Vertical Rate",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":17,
+                            "optional_bitfield_index":14,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1820,7 +1817,7 @@
                             "name":"Geometric Vertical Rate",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":15,
+                            "optional_bitfield_index":16,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1836,7 +1833,7 @@
                             "name":"Ground Vector",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":14,
+                            "optional_bitfield_index":17,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1852,7 +1849,7 @@
                             "name":"Track Angle Rate",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":13,
+                            "optional_bitfield_index":18,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1868,7 +1865,7 @@
                             "name":"Target Identification",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":12,
+                            "optional_bitfield_index":19,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1884,7 +1881,7 @@
                             "name":"Target Status",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":11,
+                            "optional_bitfield_index":20,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1900,7 +1897,7 @@
                             "name":"Met Information",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":10,
+                            "optional_bitfield_index":21,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1916,7 +1913,7 @@
                             "name":"Roll Angle",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":9,
+                            "optional_bitfield_index":22,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1932,7 +1929,7 @@
                             "name":"ACAS Resolution Advisory",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":7,
+                            "optional_bitfield_index":24,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1948,7 +1945,7 @@
                             "name":"Surface Capabilities and Characteristics",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":6,
+                            "optional_bitfield_index":25,
                             "data_fields":[
                                 {
                                     "name":"Age",

@@ -442,15 +442,14 @@
                         "name":"available",
                         "type":"extendable_bits",
                         "data_type":"bitfield",
-                        "reverse_bits":true,
-                        "reverse_order":true
+                        "reverse_bits":true
                     },
                     "items":[
                         {
                             "name":"SUM",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":7,
+                            "optional_bitfield_index":0,
                             "data_fields":[
                                 {
                                     "name":"SUM",
@@ -522,7 +521,7 @@
                             "comment":"Mode 5 PIN /National Origin/ Mission Code",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":6,
+                            "optional_bitfield_index":1,
                             "data_fields":[
                                 {
                                     "name":"PIN",
@@ -552,7 +551,7 @@
                             "comment":"Mode 5 Reported Position",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":5,
+                            "optional_bitfield_index":2,
                             "data_fields":[
                                 {
                                     "name":"Latitude",
@@ -577,7 +576,7 @@
                             "comment":"Mode 5 GNSS-derived Altitude",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":4,
+                            "optional_bitfield_index":3,
                             "data_fields":[
                                 {
                                     "name":"GA",
@@ -607,7 +606,7 @@
                             "comment":"Extended Mode 1 Code in Octal Representation",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":3,
+                            "optional_bitfield_index":4,
                             "data_fields":[
                                 {
                                     "name":"Extended Mode 1 Code",
@@ -623,7 +622,7 @@
                             "comment":"Time Offset for POS and GA",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":2,
+                            "optional_bitfield_index":5,
                             "data_fields":[
                                 {
                                     "name":"TOS",
@@ -640,7 +639,7 @@
                             "comment":"X Pulse Presence",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":1,
+                            "optional_bitfield_index":6,
                             "data_fields":[
                                 {
                                     "name":"XP",
@@ -1003,15 +1002,14 @@
                         "name":"available",
                         "type":"extendable_bits",
                         "data_type":"bitfield",
-                        "reverse_bits":true,
-                        "reverse_order":true                        
+                        "reverse_bits":true                      
                     },
                     "items":[
                         {
                             "name":"TRK",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":15,
+                            "optional_bitfield_index":0,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1027,7 +1025,7 @@
                             "name":"PSR",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":14,
+                            "optional_bitfield_index":1,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1043,7 +1041,7 @@
                             "name":"SSR",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":13,
+                            "optional_bitfield_index":2,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1059,7 +1057,7 @@
                             "name":"MDS",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":12,
+                            "optional_bitfield_index":3,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1075,7 +1073,7 @@
                             "name":"ADS",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":11,
+                            "optional_bitfield_index":4,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1091,7 +1089,7 @@
                             "name":"ES",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":10,
+                            "optional_bitfield_index":5,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1107,7 +1105,7 @@
                             "name":"VDL",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":9,
+                            "optional_bitfield_index":6,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1123,7 +1121,7 @@
                             "name":"UAT",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":7,
+                            "optional_bitfield_index":8,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1139,7 +1137,7 @@
                             "name":"LOP",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":6,
+                            "optional_bitfield_index":9,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1155,7 +1153,7 @@
                             "name":"MLT",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":5,
+                            "optional_bitfield_index":10,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1184,15 +1182,14 @@
                         "name":"available",
                         "type":"extendable_bits",
                         "data_type":"bitfield",
-                        "reverse_bits":true,
-                        "reverse_order":true
+                        "reverse_bits":true
                     },
                     "items":[
                         {
                             "name":"MFL",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":39,
+                            "optional_bitfield_index":0,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1208,7 +1205,7 @@
                             "name":"MD1",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":38,
+                            "optional_bitfield_index":1,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1224,7 +1221,7 @@
                             "name":"MD2",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":37,
+                            "optional_bitfield_index":2,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1240,7 +1237,7 @@
                             "name":"MDA",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":36,
+                            "optional_bitfield_index":3,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1256,7 +1253,7 @@
                             "name":"MD4",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":35,
+                            "optional_bitfield_index":4,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1272,7 +1269,7 @@
                             "name":"MD5",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":34,
+                            "optional_bitfield_index":5,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1288,7 +1285,7 @@
                             "name":"MHG",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":33,
+                            "optional_bitfield_index":6,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1304,7 +1301,7 @@
                             "name":"IAS",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":31,
+                            "optional_bitfield_index":8,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1320,7 +1317,7 @@
                             "name":"TAS",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":30,
+                            "optional_bitfield_index":9,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1336,7 +1333,7 @@
                             "name":"SAL",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":29,
+                            "optional_bitfield_index":10,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1352,7 +1349,7 @@
                             "name":"FSS",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":28,
+                            "optional_bitfield_index":11,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1368,7 +1365,7 @@
                             "name":"TID",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":27,
+                            "optional_bitfield_index":12,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1384,7 +1381,7 @@
                             "name":"COM",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":26,
+                            "optional_bitfield_index":13,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1400,7 +1397,7 @@
                             "name":"SAB",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":25,
+                            "optional_bitfield_index":14,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1415,7 +1412,7 @@
                             "name":"ACS",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":23,
+                            "optional_bitfield_index":16,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1431,7 +1428,7 @@
                             "name":"BVR",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":22,
+                            "optional_bitfield_index":17,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1447,7 +1444,7 @@
                             "name":"GVR",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":21,
+                            "optional_bitfield_index":18,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1463,7 +1460,7 @@
                             "name":"RAN",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":20,
+                            "optional_bitfield_index":19,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1479,7 +1476,7 @@
                             "name":"TAR",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":19,
+                            "optional_bitfield_index":20,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1494,7 +1491,7 @@
                             "name":"TAN",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":18,
+                            "optional_bitfield_index":21,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1510,7 +1507,7 @@
                             "name":"GSP",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":17,
+                            "optional_bitfield_index":22,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1526,7 +1523,7 @@
                             "name":"VUN",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":15,
+                            "optional_bitfield_index":24,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1542,7 +1539,7 @@
                             "name":"MET",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":14,
+                            "optional_bitfield_index":25,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1558,7 +1555,7 @@
                             "name":"EMC",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":13,
+                            "optional_bitfield_index":26,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1574,7 +1571,7 @@
                             "name":"POS",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":12,
+                            "optional_bitfield_index":27,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1590,7 +1587,7 @@
                             "name":"GAL",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":11,
+                            "optional_bitfield_index":28,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1606,7 +1603,7 @@
                             "name":"PUN",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":10,
+                            "optional_bitfield_index":29,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1622,7 +1619,7 @@
                             "name":"MB",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":9,
+                            "optional_bitfield_index":30,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1638,7 +1635,7 @@
                             "name":"IAR",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":7,
+                            "optional_bitfield_index":32,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1654,7 +1651,7 @@
                             "name":"MAC",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":6,
+                            "optional_bitfield_index":33,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1670,7 +1667,7 @@
                             "name":"BPS",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":5,
+                            "optional_bitfield_index":34,
                             "data_fields":[
                                 {
                                     "name":"Age",
@@ -1714,15 +1711,14 @@
                         "name":"available",
                         "type":"extendable_bits",
                         "data_type":"bitfield",
-                        "reverse_bits":true,
-                        "reverse_order":true
+                        "reverse_bits":true
                     },
                     "items":[
                         {
                             "name":"SID",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":7,
+                            "optional_bitfield_index":0,
                             "data_fields":[
                                 {
                                     "name":"SAC",
@@ -1744,7 +1740,7 @@
                             "name":"POS",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":6,
+                            "optional_bitfield_index":1,
                             "data_fields":[
                                 {
                                     "name":"RHO",
@@ -1768,7 +1764,7 @@
                             "name":"HEI",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":5,
+                            "optional_bitfield_index":2,
                             "data_fields":[
                                 {
                                     "name":"HEIGHT",
@@ -1784,7 +1780,7 @@
                             "name":"MDC",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":4,
+                            "optional_bitfield_index":3,
                             "data_fields":[
                                 {
                                     "name":"MDC",
@@ -1821,7 +1817,7 @@
                             "name":"MDA",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":3,
+                            "optional_bitfield_index":4,
                             "data_fields":[
                                 {
                                     "name":"MDA",
@@ -1867,7 +1863,7 @@
                             "name":"TYP",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":2,
+                            "optional_bitfield_index":5,
                             "data_fields":[
                                 {
                                     "name":"TYP",
@@ -1923,15 +1919,14 @@
                         "name":"available",
                         "type":"extendable_bits",
                         "data_type":"bitfield",
-                        "reverse_bits":true,
-                        "reverse_order":true
+                        "reverse_bits":true
                     },
                     "items":[
                         {
                             "name":"ADR",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":31,
+                            "optional_bitfield_index":0,
                             "data_fields":[
                                 {
                                     "name":"Target Address",
@@ -1946,7 +1941,7 @@
                             "name":"ID",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":30,
+                            "optional_bitfield_index":1,
                             "data_fields":[
                                 {
                                     "name":"ID",
@@ -1971,7 +1966,7 @@
                             "name":"MHG",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":29,
+                            "optional_bitfield_index":2,
                             "data_fields":[
                                 {
                                     "name":"Magnetic Heading",
@@ -1987,7 +1982,7 @@
                             "name":"AIS",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":28,
+                            "optional_bitfield_index":3,
                             "data_fields":[
                                 {
                                     "name":"Indicated Airspeed / Mach No",
@@ -2016,7 +2011,7 @@
                             "name":"TAS",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":27,
+                            "optional_bitfield_index":4,
                             "data_fields":[
                                 {
                                     "name":"True Airspeed",
@@ -2032,7 +2027,7 @@
                             "name":"SAL",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":26,
+                            "optional_bitfield_index":5,
                             "data_fields":[
                                 {
                                     "name":"Selected Altitude",
@@ -2070,7 +2065,7 @@
                             "name":"FSS",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":25,
+                            "optional_bitfield_index":6,
                             "data_fields":[
                                 {
                                     "name":"Final State Selected Altitude",
@@ -2115,7 +2110,7 @@
                             "name":"TIS",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":23,
+                            "optional_bitfield_index":8,
                             "data_fields":[
                                 {
                                     "name":"Trajectory Intent Status",
@@ -2144,7 +2139,7 @@
                             "name":"TID",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":22,
+                            "optional_bitfield_index":9,
                             "data_fields":[
                                 {
                                     "name":"Trajectory Intent Data",
@@ -2267,7 +2262,7 @@
                             "name":"COM",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":21,
+                            "optional_bitfield_index":10,
                             "data_fields":[
                                 {
                                     "name":"Communications/ACAS Capability and Flight Status reported by Mode-S",
@@ -2331,7 +2326,7 @@
                             "name":"SAB",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":20,
+                            "optional_bitfield_index":11,
                             "data_fields":[
                                 {
                                     "name":"Status reported by ADS-B",
@@ -2382,7 +2377,7 @@
                             "comment":"Currently active Resolution Advisory (RA), if any, generated by the ACAS associated with the transponder transmitting the report and threat identity data.",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":19,
+                            "optional_bitfield_index":12,
                             "data_fields":[
                                 {
                                     "name":"MB Data",
@@ -2397,7 +2392,7 @@
                             "name":"BVR",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":18,
+                            "optional_bitfield_index":13,
                             "data_fields":[
                                 {
                                     "name":"Barometric Vertical Rate",
@@ -2413,7 +2408,7 @@
                             "name":"GVR",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":17,
+                            "optional_bitfield_index":14,
                             "data_fields":[
                                 {
                                     "name":"Geometric Vertical Rate",
@@ -2429,7 +2424,7 @@
                             "name":"RAN",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":15,
+                            "optional_bitfield_index":16,
                             "data_fields":[
                                 {
                                     "name":"Roll Angle",
@@ -2445,7 +2440,7 @@
                             "name":"TAR",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":14,
+                            "optional_bitfield_index":17,
                             "data_fields":[
                                 {
                                     "name":"Track Angle Rate",
@@ -2476,7 +2471,7 @@
                             "name":"TAN",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":13,
+                            "optional_bitfield_index":18,
                             "data_fields":[
                                 {
                                     "name":"Track Angle",
@@ -2492,7 +2487,7 @@
                             "name":"GSP",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":12,
+                            "optional_bitfield_index":19,
                             "data_fields":[
                                 {
                                     "name":"Ground Speed",
@@ -2508,7 +2503,7 @@
                             "name":"VUN",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":11,
+                            "optional_bitfield_index":20,
                             "data_fields":[
                                 {
                                     "name":"Velocity Uncertainty Category",
@@ -2523,7 +2518,7 @@
                             "name":"MET",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":10,
+                            "optional_bitfield_index":21,
                             "data_fields":[
                                 {
                                     "name":"MET",
@@ -2532,15 +2527,14 @@
                                         "name":"available",
                                         "type":"extendable_bits",
                                         "data_type":"bitfield",
-                                        "reverse_bits":true,
-                                        "reverse_order":true  
+                                        "reverse_bits":true
                                     },
                                     "items":[
                                         {
                                             "name":"WS",
                                             "type":"optional_item",
                                             "optional_bitfield_name":"available",
-                                            "optional_bitfield_index":7,
+                                            "optional_bitfield_index":0,
                                             "data_fields":[
                                                 {
                                                     "name":"Wind Speed",
@@ -2556,7 +2550,7 @@
                                             "name":"WD",
                                             "type":"optional_item",
                                             "optional_bitfield_name":"available",
-                                            "optional_bitfield_index":6,
+                                            "optional_bitfield_index":1,
                                             "data_fields":[
                                                 {
                                                     "name":"Wind Direction",
@@ -2572,7 +2566,7 @@
                                             "name":"TMP",
                                             "type":"optional_item",
                                             "optional_bitfield_name":"available",
-                                            "optional_bitfield_index":5,
+                                            "optional_bitfield_index":2,
                                             "data_fields":[
                                                 {
                                                     "name":"Temperature",
@@ -2588,7 +2582,7 @@
                                             "name":"TRB",
                                             "type":"optional_item",
                                             "optional_bitfield_name":"available",
-                                            "optional_bitfield_index":4,
+                                            "optional_bitfield_index":3,
                                             "data_fields":[
                                                 {
                                                     "name":"Turbulence",
@@ -2607,7 +2601,7 @@
                             "name":"EMC",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":9,
+                            "optional_bitfield_index":22,
                             "data_fields":[
                                 {
                                     "name":"ECAT",
@@ -2622,7 +2616,7 @@
                             "name":"POS",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":7,
+                            "optional_bitfield_index":24,
                             "data_fields":[
                                 {
                                     "name":"Latitude",
@@ -2646,7 +2640,7 @@
                             "name":"GAL",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":6,
+                            "optional_bitfield_index":25,
                             "data_fields":[
                                 {
                                     "name":"Geometric Altitude",
@@ -2662,7 +2656,7 @@
                             "name":"PUN",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":5,
+                            "optional_bitfield_index":26,
                             "data_fields":[
                                 {
                                     "name":"Position Uncertainty",
@@ -2677,7 +2671,7 @@
                             "name":"MB",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":4,
+                            "optional_bitfield_index":27,
                             "data_fields":[
                                 {
                                     "name":"Mode S MB Data",
@@ -2725,7 +2719,7 @@
                             "name":"IAR",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":3,
+                            "optional_bitfield_index":28,
                             "data_fields":[
                                 {
                                     "name":"Indicated Air Speed",
@@ -2741,7 +2735,7 @@
                             "name":"MAC",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":2,
+                            "optional_bitfield_index":29,
                             "data_fields":[
                                 {
                                     "name":"Mach Number",
@@ -2757,7 +2751,7 @@
                             "name":"BPS",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":1,
+                            "optional_bitfield_index":30,
                             "data_fields":[
                                 {
                                     "name":"Barometric Pressure Setting",
@@ -2786,15 +2780,14 @@
                         "name":"available",
                         "type":"extendable_bits",
                         "data_type":"bitfield",
-                        "reverse_bits":true,
-                        "reverse_order":true                        
+                        "reverse_bits":true
                     },
                     "items":[
                         {
                             "name":"TAG",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":23,
+                            "optional_bitfield_index":0,
                             "data_fields":[
                                 {
                                     "name":"SAC",
@@ -2816,7 +2809,7 @@
                             "name":"CSN",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":22,
+                            "optional_bitfield_index":1,
                             "data_fields":[
                                 {
                                     "name":"CSN",
@@ -2841,7 +2834,7 @@
                             "name":"IFI",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":21,
+                            "optional_bitfield_index":2,
                             "data_fields":[
                                 {
                                     "name":"IFPS_FLIGHT_ID",
@@ -2870,7 +2863,7 @@
                             "name":"FCT",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":20,
+                            "optional_bitfield_index":3,
                             "data_fields":[
                                 {
                                     "name":"Flight Category",
@@ -2913,7 +2906,7 @@
                             "name":"TAC",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":19,
+                            "optional_bitfield_index":4,
                             "data_fields":[
                                 {
                                     "name":"TAC",
@@ -2938,7 +2931,7 @@
                             "name":"WTC",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":18,
+                            "optional_bitfield_index":5,
                             "data_fields":[
                                 {
                                     "name":"WTC",
@@ -2963,7 +2956,7 @@
                             "name":"DEP",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":17,
+                            "optional_bitfield_index":6,
                             "data_fields":[
                                 {
                                     "name":"DEP",
@@ -2988,7 +2981,7 @@
                             "name":"DST",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":15,
+                            "optional_bitfield_index":8,
                             "data_fields":[
                                 {
                                     "name":"DST",
@@ -3014,7 +3007,7 @@
                             "comment":"Runway Designation",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":14,
+                            "optional_bitfield_index":9,
                             "data_fields":[
                                 {
                                     "name":"NU1",
@@ -3044,7 +3037,7 @@
                             "comment":"Current Cleared Flight Level",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":13,
+                            "optional_bitfield_index":10,
                             "data_fields":[
                                 {
                                     "name":"CFL",
@@ -3061,7 +3054,7 @@
                             "comment":"Current Control Position",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":12,
+                            "optional_bitfield_index":11,
                             "data_fields":[
                                 {
                                     "name":"Centre",
@@ -3084,7 +3077,7 @@
                             "comment":"Time of Departure / Arrival",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":11,
+                            "optional_bitfield_index":12,
                             "data_fields":[
                                 {
                                     "name":"Time of Departure / Arrival",
@@ -3153,7 +3146,7 @@
                             "name":"AST",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":10,
+                            "optional_bitfield_index":13,
                             "data_fields":[
                                 {
                                     "name":"AST",
@@ -3179,7 +3172,7 @@
                             "comment":"Stand Status",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":9,
+                            "optional_bitfield_index":14,
                             "data_fields":[
                                 {
                                     "name":"STS",
@@ -3208,7 +3201,7 @@
                             "name":"STD",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":7,
+                            "optional_bitfield_index":16,
                             "data_fields":[
                                 {
                                     "name":"STD",
@@ -3233,7 +3226,7 @@
                             "name":"STA",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":6,
+                            "optional_bitfield_index":17,
                             "data_fields":[
                                 {
                                     "name":"STA",
@@ -3258,7 +3251,7 @@
                             "name":"PEM",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":5,
+                            "optional_bitfield_index":18,
                             "data_fields":[
                                 {
                                     "name":"Pre-Emergency Mode 3/A",
@@ -3290,7 +3283,7 @@
                             "name":"PEC",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":4,
+                            "optional_bitfield_index":19,
                             "data_fields":[
                                 {
                                     "name":"PEC",
@@ -3328,8 +3321,7 @@
                         "name":"available",
                         "type":"extendable_bits",
                         "data_type":"bitfield",
-                        "reverse_bits":true,
-                        "reverse_order":true
+                        "reverse_bits":true
                     },
                     "items":[
                         {
@@ -3337,7 +3329,7 @@
                             "comment":"Estimated Accuracy Of Track Position (Cartesian)",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":15,
+                            "optional_bitfield_index":0,
                             "data_fields":[
                                 {
                                     "name":"APC (X-Component)",
@@ -3362,7 +3354,7 @@
                             "comment":"XY covariance component",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":14,
+                            "optional_bitfield_index":1,
                             "data_fields":[
                                 {
                                     "name":"COV (XY Covariance Component)",
@@ -3379,7 +3371,7 @@
                             "comment":"Estimated Accuracy Of Track Position (WGS-84)",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":13,
+                            "optional_bitfield_index":2,
                             "data_fields":[
                                 {
                                     "name":"APW (Latitude Component)",
@@ -3404,7 +3396,7 @@
                             "comment":"Estimated Accuracy Of Calculated Track Geometric Altitude",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":12,
+                            "optional_bitfield_index":3,
                             "data_fields":[
                                 {
                                     "name":"AGA",
@@ -3421,7 +3413,7 @@
                             "comment":"Estimated Accuracy Of Calculated Track Barometric Altitude",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":11,
+                            "optional_bitfield_index":4,
                             "data_fields":[
                                 {
                                     "name":"ABA",
@@ -3438,7 +3430,7 @@
                             "comment":"Estimated Accuracy Of Track Velocity (Cartesian)",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":10,
+                            "optional_bitfield_index":5,
                             "data_fields":[
                                 {
                                     "name":"ATV (X-Component)",
@@ -3463,7 +3455,7 @@
                             "comment":"Estimated Accuracy Of Acceleration (Cartesian)",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":9,
+                            "optional_bitfield_index":6,
                             "data_fields":[
                                 {
                                     "name":"AA (X-Component)",
@@ -3488,7 +3480,7 @@
                             "comment":"Estimated Accuracy Of Rate Of Climb/Descent",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":7,
+                            "optional_bitfield_index":8,
                             "data_fields":[
                                 {
                                     "name":"ARC",

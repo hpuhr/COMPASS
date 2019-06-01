@@ -66,7 +66,7 @@ ASTERIXImporterTask::ASTERIXImporterTask(const std::string& class_id, const std:
     jASTERIX::frame_chunk_size = 5000;
     jASTERIX::record_chunk_size = 5000;
 
-    jasterix_.reset(new jASTERIX::jASTERIX(jasterix_definition_path, false, debug_jasterix_));
+    jasterix_.reset(new jASTERIX::jASTERIX(jasterix_definition_path, false, debug_jasterix_, true));
 
     std::vector<std::string> framings = jasterix_->framings();
     if (std::find(framings.begin(), framings.end(), current_framing_) == framings.end())
@@ -158,7 +158,7 @@ void ASTERIXImporterTask::refreshjASTERIX()
     loginf << "ASTERIXImporterTask: refreshjASTERIX: jasterix definition path '" << jasterix_definition_path << "'";
     assert (Files::directoryExists(jasterix_definition_path));
 
-    jasterix_.reset(new jASTERIX::jASTERIX(jasterix_definition_path, false, debug_jasterix_));
+    jasterix_.reset(new jASTERIX::jASTERIX(jasterix_definition_path, false, debug_jasterix_, true));
 
     std::vector<std::string> framings = jasterix_->framings();
     if (std::find(framings.begin(), framings.end(), current_framing_) == framings.end())
@@ -866,5 +866,5 @@ void ASTERIXImporterTask::updateMsgBox ()
 
 bool ASTERIXImporterTask::maxLoadReached ()
 {
-    return extract_jobs_.unsafe_size() > 5 || json_map_jobs_.unsafe_size() > 5;
+    return extract_jobs_.unsafe_size() > 2 || json_map_jobs_.unsafe_size() > 2;
 }

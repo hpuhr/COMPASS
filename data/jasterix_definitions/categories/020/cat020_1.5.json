@@ -944,8 +944,7 @@
                         "name":"available",
                         "type":"extendable_bits",
                         "data_type":"bitfield",
-                        "reverse_bits":true,
-                        "reverse_order":true
+                        "reverse_bits":true
                     },
                     "items":[
                         {
@@ -953,7 +952,7 @@
                             "comment":"DOP of Position",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":7,
+                            "optional_bitfield_index":0,
                             "data_fields":[
                                 {
                                     "name":"DOP-x",
@@ -986,7 +985,7 @@
                             "comment":"Standard Deviation of Position",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":6,
+                            "optional_bitfield_index":1,
                             "data_fields":[
                                 {
                                     "name":"sigma-x",
@@ -1019,7 +1018,7 @@
                             "comment":"Standard Deviation of Geometric Height (WGS 84)",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":5,
+                            "optional_bitfield_index":2,
                             "data_fields":[
                                 {
                                     "name":"sigma-gh",
