@@ -50,7 +50,7 @@ ASTERIXImporterTask::ASTERIXImporterTask(const std::string& class_id, const std:
                                          TaskManager* task_manager)
     : Configurable (class_id, instance_id, task_manager)
 {
-    qRegisterMetaType<std::shared_ptr<nlohmann::json>>("std::shared_ptr<nlohmann::json>");
+    qRegisterMetaType<std::shared_ptr<std::vector <nlohmann::json>>>("std::shared_ptr<std::vector <nlohmann::json>>");
 
     registerParameter("debug_jasterix", &debug_jasterix_, false);
     registerParameter("current_filename", &current_filename_, "");
@@ -66,7 +66,7 @@ ASTERIXImporterTask::ASTERIXImporterTask(const std::string& class_id, const std:
     jASTERIX::frame_chunk_size = 5000;
     jASTERIX::record_chunk_size = 5000;
 
-    jasterix_.reset(new jASTERIX::jASTERIX(jasterix_definition_path, false, debug_jasterix_));
+    jasterix_.reset(new jASTERIX::jASTERIX(jasterix_definition_path, false, debug_jasterix_, true));
 
     std::vector<std::string> framings = jasterix_->framings();
     if (std::find(framings.begin(), framings.end(), current_framing_) == framings.end())
@@ -158,7 +158,7 @@ void ASTERIXImporterTask::refreshjASTERIX()
     loginf << "ASTERIXImporterTask: refreshjASTERIX: jasterix definition path '" << jasterix_definition_path << "'";
     assert (Files::directoryExists(jasterix_definition_path));
 
-    jasterix_.reset(new jASTERIX::jASTERIX(jasterix_definition_path, false, debug_jasterix_));
+    jasterix_.reset(new jASTERIX::jASTERIX(jasterix_definition_path, false, debug_jasterix_, true));
 
     std::vector<std::string> framings = jasterix_->framings();
     if (std::find(framings.begin(), framings.end(), current_framing_) == framings.end())
@@ -352,11 +352,15 @@ void ASTERIXImporterTask::importFile(const std::string& filename, bool test)
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
+    loginf << "ASTERIXImporterTask: importFile: setting categories";
+
     // set category configs
     jasterix_->decodeNoCategories();
 
     for (auto& cat_it : category_configs_)
     {
+        loginf << "ASTERIXImporterTask: importFile: setting category " << cat_it.first;
+
         if (!jasterix_->hasCategory(cat_it.first))
         {
             logwrn << "ASTERIXImporterTask: importFile: cat " << cat_it.first << " not defined in decoder";
@@ -370,9 +374,12 @@ void ASTERIXImporterTask::importFile(const std::string& filename, bool test)
             continue;
         }
 
+        loginf << "ASTERIXImporterTask: importFile: setting decode flag";
         jasterix_->setDecodeCategory(cat_it.first, cat_it.second.decode());
+        loginf << "ASTERIXImporterTask: importFile: setting edition";
         jasterix_->setEdition(cat_it.first, cat_it.second.edition());
 
+        loginf << "ASTERIXImporterTask: importFile: setting mapping";
         if (cat_it.first == "001")
         {
             jasterix_->setMapping(cat_it.first, "atsdb");
@@ -395,8 +402,8 @@ void ASTERIXImporterTask::importFile(const std::string& filename, bool test)
     connect (decode_job_.get(), SIGNAL(obsoleteSignal()), this, SLOT(decodeASTERIXObsoleteSlot()),
              Qt::QueuedConnection);
     connect (decode_job_.get(), SIGNAL(doneSignal()), this, SLOT(decodeASTERIXDoneSlot()), Qt::QueuedConnection);
-    connect (decode_job_.get(), SIGNAL(decodedASTERIXSignal(std::shared_ptr<nlohmann::json>)),
-             this, SLOT(addDecodedASTERIXSlot(std::shared_ptr<nlohmann::json>)), Qt::QueuedConnection);
+    connect (decode_job_.get(), SIGNAL(decodedASTERIXSignal(std::shared_ptr<std::vector<nlohmann::json>>)),
+             this, SLOT(addDecodedASTERIXSlot(std::shared_ptr<std::vector<nlohmann::json>>)), Qt::QueuedConnection);
 
     JobManager::instance().addBlockingJob(decode_job_);
 
@@ -429,7 +436,7 @@ void ASTERIXImporterTask::decodeASTERIXObsoleteSlot ()
     decode_job_ = nullptr;
 }
 
-void ASTERIXImporterTask::addDecodedASTERIXSlot (std::shared_ptr<nlohmann::json> data)
+void ASTERIXImporterTask::addDecodedASTERIXSlot (std::shared_ptr<std::vector<nlohmann::json>> extracted_records)
 {
     loginf << "ASTERIXImporterTask: addDecodedASTERIX";
 
@@ -438,51 +445,7 @@ void ASTERIXImporterTask::addDecodedASTERIXSlot (std::shared_ptr<nlohmann::json>
     num_frames_ += decode_job_->numFrames();
     num_records_ += decode_job_->numRecords();
 
-    //category_counts_ = decode_job_->categoryCounts();
-
-    //    stop_time_ = boost::posix_time::microsec_clock::local_time();
-
-    //    boost::posix_time::time_duration diff = stop_time_ - start_time_;
-
-    //    std::string time_str = std::to_string(diff.hours())+"h "+std::to_string(diff.minutes())
-    //            +"m "+std::to_string(diff.seconds())+"s";
-
-    //    loginf << "ASTERIXImporterTask: addDecodedASTERIX: num frames " << num_frames_ << " records " << num_records_
-    //           << " after " << time_str << " " << (int)(1000.0*num_records_/diff.total_milliseconds()) << " rec/s ";
-
-    // create new extract job
-    std::shared_ptr<ASTERIXExtractRecordsJob> extract_job {new ASTERIXExtractRecordsJob(current_framing_, data)};
-    logdbg << "ASTERIXImporterTask: addDecodedASTERIX: data " << data->size() << " jobs " << extract_jobs_.unsafe_size();
-
-    connect (extract_job.get(), SIGNAL(obsoleteSignal()), this, SLOT(extractASTERIXObsoleteSlot()),
-             Qt::QueuedConnection);
-    connect (extract_job.get(), SIGNAL(doneSignal()), this, SLOT(extractASTERIXDoneSlot()), Qt::QueuedConnection);
-
-    extract_jobs_.push(extract_job);
-    JobManager::instance().addNonBlockingJob(extract_job);
-
-    if (decode_job_)
-        if (maxLoadReached())
-            decode_job_->pause();
-
-    updateMsgBox();
-}
-
-void ASTERIXImporterTask::extractASTERIXDoneSlot ()
-{
-    logdbg << "ASTERIXImporterTask: extractASTERIXDoneSlot";
-
-    ASTERIXExtractRecordsJob* extract_job = static_cast<ASTERIXExtractRecordsJob*>(sender());
-    std::shared_ptr<ASTERIXExtractRecordsJob> queued_extract_job;
-
-    while (!extract_jobs_.try_pop(queued_extract_job))
-        QThread::sleep(1);
-
-    assert (queued_extract_job.get() == extract_job);
-
-    logdbg << "ASTERIXImporterTask: extractASTERIXDoneSlot: update";
-
-    for (auto& cat_cnt_it: queued_extract_job->categoryCounts())
+    for (auto& cat_cnt_it: decode_job_->categoryCounts())
     {
         if (category_counts_.count(cat_cnt_it.first) == 0)
             category_counts_[cat_cnt_it.first] = cat_cnt_it.second;
@@ -493,14 +456,20 @@ void ASTERIXImporterTask::extractASTERIXDoneSlot ()
     //    JSONMappingJob(std::vector<nlohmann::json>&& json_objects, const std::map <std::string, JSONObjectParser>& mappings,
     //                   size_t key_count);
 
-    std::vector<json> json_objects = std::move(queued_extract_job->extractedRecords());
-    size_t count = json_objects.size();
+    //std::vector<json> json_objects = std::move(decode_job_->extractedRecords());
+
+    //extract_job_ = nullptr;
+
+    size_t count = extracted_records->size();
 
     assert (schema_);
 
     std::shared_ptr<JSONMappingJob> json_map_job =
-            std::shared_ptr<JSONMappingJob> (new JSONMappingJob (std::move(json_objects),
+            std::shared_ptr<JSONMappingJob> (new JSONMappingJob (std::move(*extracted_records),
                                                                  schema_->parsers(), key_count_));
+
+    extracted_records = nullptr;
+
     connect (json_map_job.get(), SIGNAL(obsoleteSignal()), this, SLOT(mapJSONObsoleteSlot()),
              Qt::QueuedConnection);
     connect (json_map_job.get(), SIGNAL(doneSignal()), this, SLOT(mapJSONDoneSlot()), Qt::QueuedConnection);
@@ -520,12 +489,109 @@ void ASTERIXImporterTask::extractASTERIXDoneSlot ()
     }
 
     updateMsgBox();
+
+    //category_counts_ = decode_job_->categoryCounts();
+
+    //    stop_time_ = boost::posix_time::microsec_clock::local_time();
+
+    //    boost::posix_time::time_duration diff = stop_time_ - start_time_;
+
+    //    std::string time_str = std::to_string(diff.hours())+"h "+std::to_string(diff.minutes())
+    //            +"m "+std::to_string(diff.seconds())+"s";
+
+    //    loginf << "ASTERIXImporterTask: addDecodedASTERIX: num frames " << num_frames_ << " records " << num_records_
+    //           << " after " << time_str << " " << (int)(1000.0*num_records_/diff.total_milliseconds()) << " rec/s ";
+
+//    while (!extract_job_)
+//    {
+//        decode_job_->pause();
+//        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+//        QThread::sleep(1);
+//    }
+//    decode_job_->unpause();
+
+    // create new extract job
+//    extract_job_.reset(new ASTERIXExtractRecordsJob(current_framing_, data));
+
+//    logdbg << "ASTERIXImporterTask: addDecodedASTERIX: data " << data->size();
+
+//    connect (extract_job_.get(), SIGNAL(obsoleteSignal()), this, SLOT(extractASTERIXObsoleteSlot()),
+//             Qt::QueuedConnection);
+//    connect (extract_job_.get(), SIGNAL(doneSignal()), this, SLOT(extractASTERIXDoneSlot()), Qt::QueuedConnection);
+
+//    JobManager::instance().addNonBlockingJob(extract_job_);
+
+//    if (decode_job_)
+//        if (maxLoadReached())
+//            decode_job_->pause();
+
+//    updateMsgBox();
 }
 
-void ASTERIXImporterTask::extractASTERIXObsoleteSlot ()
-{
-    logdbg << "ASTERIXImporterTask: extractASTERIXObsoleteSlot";
-}
+//void ASTERIXImporterTask::extractASTERIXDoneSlot ()
+//{
+//    logdbg << "ASTERIXImporterTask: extractASTERIXDoneSlot";
+
+////    ASTERIXExtractRecordsJob* extract_job = static_cast<ASTERIXExtractRecordsJob*>(sender());
+////    std::shared_ptr<ASTERIXExtractRecordsJob> queued_extract_job;
+
+////    while (!extract_jobs_.try_pop(queued_extract_job))
+////    {
+////        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+////        QThread::sleep(1);
+////    }
+
+////    assert (queued_extract_job.get() == extract_job);
+
+//    logdbg << "ASTERIXImporterTask: extractASTERIXDoneSlot: update";
+
+//    for (auto& cat_cnt_it: extract_job_->categoryCounts())
+//    {
+//        if (category_counts_.count(cat_cnt_it.first) == 0)
+//            category_counts_[cat_cnt_it.first] = cat_cnt_it.second;
+//        else
+//            category_counts_[cat_cnt_it.first] += cat_cnt_it.second;
+//    }
+
+//    //    JSONMappingJob(std::vector<nlohmann::json>&& json_objects, const std::map <std::string, JSONObjectParser>& mappings,
+//    //                   size_t key_count);
+
+//    std::vector<json> json_objects = std::move(extract_job_->extractedRecords());
+
+//    extract_job_ = nullptr;
+
+//    size_t count = json_objects.size();
+
+//    assert (schema_);
+
+//    std::shared_ptr<JSONMappingJob> json_map_job =
+//            std::shared_ptr<JSONMappingJob> (new JSONMappingJob (std::move(json_objects),
+//                                                                 schema_->parsers(), key_count_));
+//    connect (json_map_job.get(), SIGNAL(obsoleteSignal()), this, SLOT(mapJSONObsoleteSlot()),
+//             Qt::QueuedConnection);
+//    connect (json_map_job.get(), SIGNAL(doneSignal()), this, SLOT(mapJSONDoneSlot()), Qt::QueuedConnection);
+
+//    json_map_jobs_.push(json_map_job);
+
+//    JobManager::instance().addNonBlockingJob(json_map_job);
+
+//    key_count_ += count;
+
+//    if (decode_job_)
+//    {
+//        if (maxLoadReached())
+//            decode_job_->pause();
+//        else
+//            decode_job_->unpause();
+//    }
+
+//    updateMsgBox();
+//}
+
+//void ASTERIXImporterTask::extractASTERIXObsoleteSlot ()
+//{
+//    logdbg << "ASTERIXImporterTask: extractASTERIXObsoleteSlot";
+//}
 
 void ASTERIXImporterTask::mapJSONDoneSlot ()
 {
@@ -535,7 +601,10 @@ void ASTERIXImporterTask::mapJSONDoneSlot ()
     std::shared_ptr<JSONMappingJob> queued_map_job;
 
     while (!json_map_jobs_.try_pop(queued_map_job))
+    {
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         QThread::sleep(1);
+    }
 
     assert (queued_map_job.get() == map_job);
 
@@ -588,7 +657,7 @@ void ASTERIXImporterTask::mapJSONDoneSlot ()
         }
     }
 
-    if (decode_job_ == nullptr && extract_jobs_.unsafe_size() == 0 && json_map_jobs_.unsafe_size() == 0)
+    if (decode_job_ == nullptr && json_map_jobs_.unsafe_size() == 0)
     {
         logdbg << "ASTERIXImporterTask: mapJSONDoneSlot: inserting parsed objects at end";
         insertData ();
@@ -611,7 +680,7 @@ void ASTERIXImporterTask::insertData ()
     }
 
     bool has_sac_sic = false;
-    bool emit_change = (decode_job_ == nullptr && extract_jobs_.unsafe_size() == 0 && json_map_jobs_.unsafe_size() == 0);
+    bool emit_change = (decode_job_ == nullptr && json_map_jobs_.unsafe_size() == 0);
 
     assert (schema_);
 
@@ -751,7 +820,7 @@ void ASTERIXImporterTask::checkAllDone ()
 {
     logdbg << "ASTERIXImporterTask: checkAllDone";
 
-    if (!all_done_ && decode_job_ == nullptr && extract_jobs_.empty() && json_map_jobs_.empty() == 0
+    if (!all_done_ && decode_job_ == nullptr && json_map_jobs_.empty() == 0
             && insert_active_ == 0)
     {
         stop_time_ = boost::posix_time::microsec_clock::local_time();
@@ -859,5 +928,5 @@ void ASTERIXImporterTask::updateMsgBox ()
 
 bool ASTERIXImporterTask::maxLoadReached ()
 {
-    return extract_jobs_.unsafe_size() > 5 || json_map_jobs_.unsafe_size() > 5;
+    return json_map_jobs_.unsafe_size() > 3;
 }

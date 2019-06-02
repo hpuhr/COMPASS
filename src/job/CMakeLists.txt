@@ -49,9 +49,9 @@ IF (jASTERIX_FOUND)
 target_sources(atsdb
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/asterixdecodejob.h"
-        "${CMAKE_CURRENT_LIST_DIR}/asterixextractrecordsjob.h"
+#        "${CMAKE_CURRENT_LIST_DIR}/asterixextractrecordsjob.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/asterixdecodejob.cpp"
-        "${CMAKE_CURRENT_LIST_DIR}/asterixextractrecordsjob.cpp"
+#        "${CMAKE_CURRENT_LIST_DIR}/asterixextractrecordsjob.cpp"
 )
 ENDIF()

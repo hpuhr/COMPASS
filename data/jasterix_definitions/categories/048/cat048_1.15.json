@@ -532,15 +532,14 @@
                         "name":"available",
                         "type":"extendable_bits",
                         "data_type":"bitfield",
-                        "reverse_bits":true,
-                        "reverse_order":true
+                        "reverse_bits":true
                     },
                     "items":[
                         {
                             "name":"CAL",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":7,
+                            "optional_bitfield_index":0,
                             "data_fields":[
                                 {
                                     "name":"Calculated Doppler Speed",
@@ -570,7 +569,7 @@
                             "name":"RDS",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":6,
+                            "optional_bitfield_index":1,
                             "data_fields":[
                                 {
                                     "name":"Raw Doppler Speed",
@@ -624,15 +623,14 @@
                         "name":"available",
                         "type":"extendable_bits",
                         "data_type":"bitfield",
-                        "reverse_bits":true,
-                        "reverse_order":true
+                        "reverse_bits":true
                     },
                     "items":[
                         {
                             "name":"SRL",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":7,
+                            "optional_bitfield_index":0,
                             "data_fields":[
                                 {
                                     "name":"value",
@@ -648,7 +646,7 @@
                             "name":"SRR",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":6,
+                            "optional_bitfield_index":1,
                             "data_fields":[
                                 {
                                     "name":"value",
@@ -663,7 +661,7 @@
                             "name":"SAM",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":5,
+                            "optional_bitfield_index":2,
                             "data_fields":[
                                 {
                                     "name":"value",
@@ -678,7 +676,7 @@
                             "name":"PRL",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":4,
+                            "optional_bitfield_index":3,
                             "data_fields":[
                                 {
                                     "name":"value",
@@ -694,7 +692,7 @@
                             "name":"PAM",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":3,
+                            "optional_bitfield_index":4,
                             "data_fields":[
                                 {
                                     "name":"value",
@@ -709,7 +707,7 @@
                             "name":"RPD",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":2,
+                            "optional_bitfield_index":5,
                             "data_fields":[
                                 {
                                     "name":"value",
@@ -725,7 +723,7 @@
                             "name":"APD",
                             "type":"optional_item",
                             "optional_bitfield_name":"available",
-                            "optional_bitfield_index":1,
+                            "optional_bitfield_index":6,
                             "data_fields":[
                                 {
                                     "name":"value",

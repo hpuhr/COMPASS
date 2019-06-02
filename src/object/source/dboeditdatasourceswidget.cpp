@@ -21,6 +21,7 @@
 #include <QLabel>
 #include <QFrame>
 #include <QPushButton>
+#include <QScrollArea>
 
 #include "dboeditdatasourceswidget.h"
 #include "dbobject.h"
@@ -64,7 +65,7 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(DBObject* object, QWidget *pa
     QFrame *config_frame = new QFrame ();
     config_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
     config_frame->setLineWidth(frame_width_small);
-    //config_frame->setMinimumWidth(250);
+    config_frame->setMinimumWidth(900);
 
     QLabel *config_label = new QLabel ("Configuration Data Sources");
     config_label->setFont (font_bold);
@@ -90,7 +91,12 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(DBObject* object, QWidget *pa
 
     config_frame->setLayout (config_layout);
 
-    sources_layout->addWidget(config_frame);
+    QScrollArea *config_scroll = new QScrollArea ();
+    config_scroll->setWidgetResizable (true);
+    config_scroll->setWidget(config_frame);
+
+
+    sources_layout->addWidget(config_scroll);
 
     // action stuff
 
@@ -142,7 +148,7 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(DBObject* object, QWidget *pa
     QFrame *db_frame = new QFrame ();
     db_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
     db_frame->setLineWidth(frame_width_small);
-    //db_frame->setMinimumWidth(250);
+    db_frame->setMinimumWidth(900);
 
     QLabel *db_label = new QLabel ("Database Data Sources");
     db_label->setFont (font_bold);
@@ -164,7 +170,11 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(DBObject* object, QWidget *pa
 
     db_frame->setLayout (db_layout);
 
-    sources_layout->addWidget(db_frame);
+    QScrollArea *db_scroll = new QScrollArea ();
+    db_scroll->setWidgetResizable (true);
+    db_scroll->setWidget(db_frame);
+
+    sources_layout->addWidget(db_scroll);
 
     // rest
 
