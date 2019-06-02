@@ -5,17 +5,15 @@ osgEarth Sample
 <map name="Wordwide Line Vectors" type="geocentric">
   
     <options>
-        <lighting>true</lighting>
+        <lighting>false</lighting>
          <terrain color="#101010ff"/>
     </options>
 
-    <image name="world" driver="gdal">
-    </image>
-    
      <feature_model name="world_boundaries">
         <features name="wolrd" driver="ogr">
             <url>shapefiles/TM_WORLD_BORDERS-0.3.shp</url>
             <build_spatial_index>true</build_spatial_index>
+            <ogr_driver>ESRI Shapefile</ogr_driver>
             <convert type="line"/>
         </features>        
 
@@ -27,11 +25,12 @@ osgEarth Sample
             <style type="text/css">
                 states {
                    stroke:          #ffff00; 
-                   stroke-width:    2px;
-                   render-depth-offset: true;
+                   stroke-width:    1px;
+                   render-depth-test: false;
                 }                    
             </style>
         </styles>        
     </feature_model>
   
+
 </map>
