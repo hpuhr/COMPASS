@@ -36,10 +36,16 @@
         "default_edition":"1.3",
         "default_mapping":"",
         "editions":{
+            "1.2":{
+                "document":"SUR.ET1.ST05.2000-STD-18-02",
+                "date":"August 2009",
+                "file":"019/cat019_1.2.json"
+            },        
             "1.3":{
                 "document":"SUR.ET1.ST05.2000-STD-18-02",
                 "date":"December 2010",
-                "file":"019/cat019_1.3.json"
+                "file":"019/cat019_1.3.json",
+                "comment":"Same as 1.2"
             }
         },
         "mappings":{
@@ -58,7 +64,8 @@
             "1.8":{
                 "document":"SUR.ET1.ST05.2000-STD-14-02",
                 "date":"December 2010",
-                "file":"020/cat020_1.8.json"
+                "file":"020/cat020_1.5.json",
+                "comment":"Same as 1.5"
             }
         },
         "mappings":{
@@ -165,6 +172,12 @@
                 "document":"SUR.ET1.ST05.2000-STD-10-01",
                 "date":"March 2004",
                 "file":"063/cat063_1.0.json"
+            },
+            "1.1":{
+                "document":"SUR.ET1.ST05.2000-STD-10-01",
+                "date":"March 2005",
+                "file":"063/cat063_1.1.json",
+                "comment":"Same as 1.0"
             }
         },
         "mappings":{
@@ -175,10 +188,16 @@
         "default_edition":"1.3",
         "default_mapping":"",
         "editions":{
+            "1.2":{
+                "document":"SUR.ET1.ST05.2000-STD-15-01",
+                "date":"March 2005",
+                "file":"065/cat065_1.2.json"
+            },
             "1.3":{
                 "document":"SUR.ET1.ST05.2000-STD-15-01",
                 "date":"April 2007",
-                "file":"065/cat065_1.3.json"
+                "file":"065/cat065_1.3.json",
+                "comment":"Same as 1.2"
             }
         },
         "mappings":{
