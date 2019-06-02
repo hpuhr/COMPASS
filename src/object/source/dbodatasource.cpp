@@ -494,15 +494,22 @@ double DBODataSource::rs2gElevation(double z, double rho)
 {
     double elevation = 0.0;
 
-    if (rho >= ALMOST_ZERO)
-    {
-        //        elevation = asin((2 * rs2g_Rti_ * (z - rs2g_hi_) + pow(z, 2) - pow(rs2g_hi_, 2) - pow(rho, 2)) /
-        //                         (2 * rho * (rs2g_Rti_ + rs2g_hi_)));
-        elevation = asin((z - rs2g_hi_)/rho);
-
-        //        if (rho < 50000)
-        //            loginf << "DBODataSource: rs2gElevation: z " << z << " rho " << rho << " elev " << elevation;
+    if (rho >= ALMOST_ZERO) {
+       double x = (2 * rs2g_Rti_ * (z - rs2g_hi_) + pow(z, 2) - pow(rs2g_hi_, 2) - pow(rho, 2)) /
+               (2 * rho * (rs2g_Rti_ + rs2g_hi_));
+       if (fabs(x) <= 1.0)
+          elevation = asin(x);
     }
+
+//    if (rho >= ALMOST_ZERO)
+//    {
+//        //        elevation = asin((2 * rs2g_Rti_ * (z - rs2g_hi_) + pow(z, 2) - pow(rs2g_hi_, 2) - pow(rho, 2)) /
+//        //                         (2 * rho * (rs2g_Rti_ + rs2g_hi_)));
+//        elevation = asin((z - rs2g_hi_)/rho);
+
+//        //        if (rho < 50000)
+//        //            loginf << "DBODataSource: rs2gElevation: z " << z << " rho " << rho << " elev " << elevation;
+//    }
 
     return elevation;
 }
