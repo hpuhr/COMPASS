@@ -22,7 +22,7 @@
 #include "json.hpp"
 #include "jsonparsingschema.h"
 #include "asterixdecodejob.h"
-#include "asterixextractrecordsjob.h"
+//#include "asterixextractrecordsjob.h"
 #include "jsonmappingjob.h"
 
 #include <QObject>
@@ -51,10 +51,10 @@ class ASTERIXImporterTask: public QObject, public Configurable
 public slots:
     void decodeASTERIXDoneSlot ();
     void decodeASTERIXObsoleteSlot ();
-    void addDecodedASTERIXSlot (std::shared_ptr<nlohmann::json> data); // moved out from reference
+    void addDecodedASTERIXSlot (std::shared_ptr<std::vector<nlohmann::json>> extracted_records);
 
-    void extractASTERIXDoneSlot ();
-    void extractASTERIXObsoleteSlot ();
+//    void extractASTERIXDoneSlot ();
+//    void extractASTERIXObsoleteSlot ();
 
     void mapJSONDoneSlot ();
     void mapJSONObsoleteSlot ();
@@ -117,7 +117,7 @@ protected:
     std::shared_ptr<JSONParsingSchema> schema_;
 
     std::shared_ptr<ASTERIXDecodeJob> decode_job_;
-    tbb::concurrent_queue <std::shared_ptr<ASTERIXExtractRecordsJob>> extract_jobs_;
+    //std::shared_ptr<ASTERIXExtractRecordsJob> extract_job_;
     tbb::concurrent_queue <std::shared_ptr <JSONMappingJob>> json_map_jobs_;
     std::map <std::string, std::shared_ptr<Buffer>> buffers_;
 

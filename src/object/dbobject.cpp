@@ -566,7 +566,8 @@ void DBObject::addDataSources (std::map <int, std::pair<int,int>>& sources)
                 StoredDBODataSource& src = storedDataSource(stored_id);
 
                 name = src.name();
-                buffer_ptr->get<std::string>(short_name_col.name()).set(cnt, src.shortName());
+                if (src.hasShortName())
+                    buffer_ptr->get<std::string>(short_name_col.name()).set(cnt, src.shortName());
 
                 buffer_ptr->get<char>(sac_col.name()).set(cnt, src.sac());
                 buffer_ptr->get<char>(sic_col.name()).set(cnt, src.sic());
