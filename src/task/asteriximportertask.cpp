@@ -445,13 +445,15 @@ void ASTERIXImporterTask::addDecodedASTERIXSlot (std::shared_ptr<std::vector<nlo
     num_frames_ += decode_job_->numFrames();
     num_records_ += decode_job_->numRecords();
 
-    for (auto& cat_cnt_it: decode_job_->categoryCounts())
-    {
-        if (category_counts_.count(cat_cnt_it.first) == 0)
-            category_counts_[cat_cnt_it.first] = cat_cnt_it.second;
-        else
-            category_counts_[cat_cnt_it.first] += cat_cnt_it.second;
-    }
+    category_counts_ = decode_job_->categoryCounts();
+
+//    for (auto& cat_cnt_it: decode_job_->categoryCounts())
+//    {
+//        if (category_counts_.count(cat_cnt_it.first) == 0)
+//            category_counts_[cat_cnt_it.first] = cat_cnt_it.second;
+//        else
+//            category_counts_[cat_cnt_it.first] += cat_cnt_it.second;
+//    }
 
     //    JSONMappingJob(std::vector<nlohmann::json>&& json_objects, const std::map <std::string, JSONObjectParser>& mappings,
     //                   size_t key_count);

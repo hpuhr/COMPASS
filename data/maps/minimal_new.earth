@@ -26,7 +26,7 @@ osgEarth Sample
                 states {
                    stroke:          #ffff00; 
                    stroke-width:    1px;
-                   render-depth-test: false;
+                   render-depth-offset: true;
                 }                    
             </style>
         </styles>        

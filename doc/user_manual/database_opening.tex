@@ -448,7 +448,7 @@ Further below, the list of existing JSON object parsers is shown. Each parser is
 
 \paragraph{Importing}
 
-Using the 'Debug in ConsoleÄ checkbox, additional debugging information is output to the console, and the ASTERIX decoding is switched to single-threading for easier investigation.
+Using the 'Debug in Console' checkbox, additional debugging information is output to the console, and the ASTERIX decoding is switched to single-threading for easier investigation.
 
 Using the 'Test Import' button, the import function can be tested without inserting the data into the database, the 'Import' imports the selected file with the given options.
 
@@ -474,7 +474,7 @@ Please note that importing performance strongly depends on CPU performance (mult
 
 Please also note that an import can only be performed once, after that the application has to be closed and started again if additional ASTERIX importing is wanted. \\
 
-Please also note the currently only the main data fields (as shown in the JSON object parsers) are imported, and that the timestamps of CAT001 are still only partial timestamps.
+Please also note the currently only the main data fields (as shown in the JSON object parsers) are imported. The (truncated) timestamps of CAT001 are calculated in a simple algorithm based on the CAT002 messages from the same sensor.
 
 
 \subsubsection{Importing JSON Data}

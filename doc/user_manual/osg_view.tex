@@ -117,8 +117,10 @@ To change the background map, click the globe symbol {\includegraphics[scale=0.0
  \item readymap-detailed.earth
 \end{itemize}
 
-The map loading and display in based on the osgEarth library (\url{http://osgearth.org/}), as are to map file definitions. The map which can be set using this dialog is simply a file list from the folder '~/.atsdb/data/maps'. So, changes can be made to the supplied ones or custom user maps can be added to this folder. \\
-Please refer to \url{http://docs.osgearth.org/en/latest/references/earthfile.html} for a definition of an earth file.
+The map loading and display in based on the osgEarth library (\url{http://osgearth.org/}), as are to map file definitions.  \\
+
+The map which can be set using this dialog is simply a file list from the folder '\textasciitilde/.atsdb/data/maps'. So, changes can be made to the supplied ones or custom user maps can be added to this folder. \\
+Please refer to section \nameref{sec:adding_maps} for further details.
 
 \newpage
 \paragraph{ArcGIS Map}
@@ -134,7 +136,7 @@ As supplied in the osgEarth example files, this map data is obtained from ArcGIS
 \newpage
 \paragraph{Minimal Map}
 
-This minimal map shows national borders based on an ESRI shapefile, provided by Bjorn Sandvik on \url{thematicmapping.org}. In the AppImage application use 'minimal.earth', in newer ones the 'minimal\_new.earth' file should be used.
+This minimal map shows national borders based on an ESRI shapefile, provided by Bjorn Sandvik on \url{thematicmapping.org}. In the AppImage application the 'minimal\_new.earth' file should be used.
 
 \begin{figure}[H]
     \hspace*{-2cm}
@@ -191,6 +193,7 @@ This map shows the same data as ReadyMap, but to a higher detail level.
 \end{figure}
 
 \subsubsection{Adding/Changing Map Files}
+\label{sec:adding_maps}
 
 As with all configuration, a local version is kept in the home folder of the user. The map files are loaded from the hidden folder '\textasciitilde/.atsdb/data/maps' ('\textasciitilde' is the user's home directory, like /home/user).
 
