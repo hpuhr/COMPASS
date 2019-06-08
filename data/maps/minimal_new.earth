@@ -9,7 +9,14 @@ osgEarth Sample
          <terrain color="#101010ff"/>
     </options>
 
-     <feature_model name="world_boundaries">
+    <geodetic_graticule name="Graticule" visible="true">
+        <color>#ffff007f</color>
+        <label_color>#ffffffff</label_color>
+        <grid_lines>20</grid_lines>
+        <resolutions>10 5.0 2.0 1.0 0.5</resolutions>
+    </geodetic_graticule>
+
+     <feature_model name="World Borders">
         <features name="wolrd" driver="ogr">
             <url>shapefiles/TM_WORLD_BORDERS-0.3.shp</url>
             <build_spatial_index>true</build_spatial_index>
