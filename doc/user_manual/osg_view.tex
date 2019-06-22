@@ -20,6 +20,46 @@ After loading, the target reports will be shown.
   \caption{OSG View overview after loading}
 \end{figure}
 
+There exist 3 main components:
+\begin{itemize}
+ \item Toolbar (top left): Selects mouse action or set display options.
+ \item Map Widget (lower left): Displays map and geometry data.
+ \item Configuration Widget (right): Displays layer selections and set height configuration.
+\end{itemize}
+
+\subsubsection{Toolbar}
+
+The first 3 symbols switch between the mouse action modes, the others provide specific options.
+
+\begin{table}[H]
+  \center
+  \begin{tabular}{ | l | l | l |}
+    \hline
+    \textbf{Icon} & \textbf{Text} &  \textbf{Description} \\ \hline
+    \includegraphics[width=0.5cm]{../../data/icons/navigate.png} & Navigate & Allows navigation of the map only \\ \hline
+    \includegraphics[width=0.5cm]{../../data/icons/label_action.png} & Label & Allows labeling, group menu and nagivation of the map \\ \hline
+    \includegraphics[width=0.5cm]{../../data/icons/measure_action.png} & Measure & Allows map distance measuring and navigation of the map \\ \hline
+  \end{tabular}
+  \caption{Toolbar mouse action modes}
+\end{table}
+
+The others provide general display modes or operations.
+
+\begin{table}[H]
+  \center
+  \begin{tabular}{ | l | l | l |}
+    \hline
+    \textbf{Icon} & \textbf{Text} &  \textbf{Description} \\ \hline
+    \includegraphics[width=0.5cm]{../../data/icons/time.png} & Toggle Time Filter & Enable/disable time filter \\ \hline
+    \includegraphics[width=0.5cm]{../../data/icons/depth.png} & Toggle Depth Check & Enable/disable depth check \\ \hline
+    \includegraphics[width=0.5cm]{../../data/icons/label_color.png} & Edit Label Color & Set background color for all labels \\ \hline
+    \includegraphics[width=0.5cm]{../../data/icons/label_edit.png} & Edit Label Content & Edit the content for labels \\ \hline
+    \includegraphics[width=0.5cm]{../../data/icons/label_delete.png} & Deletes All Labels & Deletes all existing labels \\ \hline
+    \includegraphics[width=0.5cm]{../../data/icons/measurement_delete.png} & Deletes All Measurements & Deletes all existing measurements \\ \hline
+  \end{tabular}
+  \caption{Toolbar operations}
+\end{table}
+
 
 \subsubsection{Map Widget}
 \label{sec:osgview_map}
@@ -30,25 +70,52 @@ In the map widget, several mouse and key operations are supported. The following
  \item LMB: Left mouse button
  \item MMB: Middle mouse button
  \item RMB: Right mouse button
- \item CTRL: CTRL key
 \end{itemize}
+
+The following operations exist, depending on the mouse action modes:
 
 \begin{table}[H]
   \center
   \begin{tabular}{ | l | l | l |}
     \hline
     \textbf{Mouse Action} & \textbf{Key Action} &  \textbf{Description} \\ \hline
-    Single click & - & - \\ \hline
+    LMB click & - & - \\ \hline
     LMB click \& drag & - & Traverse map \\ \hline
+    LMB double click & - & Zoom to clicked location \\ \hline
     - & Arrows & Traverse map \\ \hline
     MMB click \& drag & - & Rotate map \\ \hline
-    RMB click \& drag & - & Zoom map \\ \hline
     MMB scroll \& drag & - & Zoom map \\ \hline
-    LMB double click & - & Zoom to clicked location \\ \hline
+    RMB click & - & - \\ \hline
+    RMB click \& drag & - & Zoom map \\ \hline
     RMB double click \& drag & - & Zoom away from clicked location \\ \hline
     - & Space bar & Return to home position \\ \hline
   \end{tabular}
-  \caption{Map widget view operations}
+  \caption{Map widget view operations in Navigate mode}
+\end{table}
+
+\begin{table}[H]
+  \center
+  \begin{tabular}{ | l | l | l |}
+    \hline
+    \textbf{Mouse Action} & \textbf{Key Action} &  \textbf{Description} \\ \hline
+    LMB click & - & Create label \\ \hline
+    LMB click \& drag & - & Create label \& traverse map \\ \hline
+    RMB click & - & Open group menu \\ \hline
+    ... & ... & Other operations are the same as in Navigate mode \\ \hline
+  \end{tabular}
+  \caption{Map widget view operations in Label mode}
+\end{table}
+
+\begin{table}[H]
+  \center
+  \begin{tabular}{ | l | l | l |}
+    \hline
+    \textbf{Mouse Action} & \textbf{Key Action} &  \textbf{Description} \\ \hline
+    LMB click & - & Start/end measurement \\ \hline
+    LMB click \& drag & - & Start/end measurement \& traverse map \\ \hline
+    ... & ... & Other operations are the same as in Navigate mode \\ \hline  
+    \end{tabular}
+  \caption{Map widget view operations in Measure mode}
 \end{table}
 
 Further operations are defined in section Map Widget Data Operations. \\
@@ -70,7 +137,7 @@ In the lower-left corner, the data status information is given:
  \item Loaded: Number of drawn target reports
 \end{itemize}
 
-In the lower-right corner, the ATSDB version is shown.
+In the upper-right corner, the ATSDB version is shown. In the lower-right corner, the current coordinates (map coordinates under the mouse cursor) are shown.
 
 \subsubsection{Configuration Widget}
 \label{sec:osgview_config}
@@ -81,9 +148,6 @@ In the configuration widget, several elements exist:
  \item Layer widget: displays all currently existing layers
  \item Configuration area
 \begin{itemize}
- \item Configure labels: Allows configuration of the labels
- \item Time Filter: Activates the Time Window Filter
- \item Use Depth Check: Activates line-of-sight depth check. Only recommended if height is used
  \item Group Variable: Meta DBOVariable used to create groups. Currently, only track number and Mode S address are supported
  \item Connect groups: Whether grouped target reports should be connected using lines
  \item Connect None Height: If groups are connected, whether target reports with not height information should be connected
@@ -101,17 +165,20 @@ In the layer widget, a tree view is given to configure the display of the existi
 \begin{itemize}
  \item Map: Shows current map layers
  \item Geometry: Shows current DBO elements
+ \item Measurements: Shows the current distance measurements
 \end{itemize}
 
 \subsubsection{Changing the Background Map}
 
 Please note that, while the default background map is supplied ATSDB, the other background map types are downloaded from public Internet sources and therefore require an Internet connection. They are then cached locally to facilitate faster access. \\
 
-To change the background map, click the globe symbol {\includegraphics[scale=0.05]{../../data/icons/globe.png} in Map Layer to access the map selection. The following maps are commonly available:
+For each map layer defined in the background map, a checkbox is shown to disable the layer, and by clicking on the map layer symbol it's opacity can be changed.
+
+To change the background map, click the globe symbol {\includegraphics[width=0.5cm]{../../data/icons/globe.png} in root Map layer to access the map selection. The following maps are commonly available:
 
 \begin{itemize}
  \item arcgis.earth
- \item minimal.earth
+ \item minimal\_new.earth
  \item openstreetmap.earth
  \item readymap.earth
  \item readymap-detailed.earth
@@ -181,7 +248,7 @@ This map shows the same data as ReadyMap, but to a higher detail level.
 
 \begin{figure}[H]
     \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/osgview_ready_detail.png}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_ready.png}
   \caption{OSG View ReadyMap detailed}
 \end{figure}
 
@@ -298,7 +365,7 @@ The world background colour is set using the 'terrain color' tag. The name of th
 </map>
 \end{verbatim}
 
-While a number of formats are supported, the one the author could get to work in the easiest way was KML. To add such a file, add the follow part to a 'map' (as previously):
+While a number of formats are supported, to add a KML file, add the following part to a 'map' (as previously):
 
 \begin{verbatim}
      <feature_model name="wam_area">
@@ -319,6 +386,39 @@ While a number of formats are supported, the one the author could get to work in
         </styles>        
     </feature_model>
 \end{verbatim}
+
+To add a GML file, add the following part to a 'map' (as previously):
+
+\begin{verbatim}
+   <model driver="feature_geom" name="gml" cache_enabled="false">
+    <features driver="ogr">
+	<ogr_driver>GML</ogr_driver>
+        <url>shapefiles/example.gml</url>
+        <caching_policy usage="no_cache"/>
+    </features>
+   </model>
+\end{verbatim}
+
+To add a GeoTIFF file, add the following part to a 'map' (as previously):
+
+\begin{verbatim}
+    <image driver="gdal" name="tiff" cache_enabled="false" visible="false">
+        <url>/usr/share/osgearth/data/world.tif</url>
+        <caching_policy usage="no_cache"/>
+    </image>
+\end{verbatim}
+
+To add a graticule (latitude/longitude grid), add the following part to a 'map' (as previously):
+
+\begin{verbatim}
+    <geodetic_graticule name="Graticule" visible="true">
+        <color>#ffff007f</color>
+        <label_color>#ffffffff</label_color>
+        <grid_lines>20</grid_lines>
+        <resolutions>10 5.0 2.0 1.0 0.5 0.25 0.125 0.0625 0.03125</resolutions>
+    </geodetic_graticule>
+\end{verbatim}
+
 
 For further information please refer to the osgEarth user manual \url{https://buildmedia.readthedocs.org/media/pdf/osgearth/latest/osgearth.pdf}, e.g. in section 1.3.5 Features \& Symbology.
 
@@ -390,21 +490,20 @@ The context menu allows several actions to be performed on an item. If an item h
 
 Please note that only the main Map item has a context menu, and only allows setting of map files and changing the opacity.
 
-\subsubsection{Map Widget Data Operations}
-\label{sec:osgview_data_operations}
+\subsubsection{Data Labeling}
 
-Several data-related operations can be also performed in the map widget.
+Labels can be shown for target reports, when the Label mode is active. Simply do a LMB click on a target report symbol.
 
-\begin{table}[H]
-  \center
-  \begin{tabular}{ | l | l | l |}
-    \hline
-    \textbf{Mouse Action} & \textbf{Key Action} &  \textbf{Description} \\ \hline
-    LMB click & CTRL & Toggle label display of a single target report \\ \hline
-    RMB click & CTRL & Show data context menu \\ \hline
-  \end{tabular}
-  \caption{Map widget data operations}
-\end{table}
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_labels.png}
+  \caption{OSG View Labels}
+\end{figure}
+
+\subsubsection{Geometry Context Menu}
+
+Several data-related operations can be also performed in the map widget when the Label mode is active, by a RMB click on a geometry group.
+
 
 \begin{figure}[H]
     \hspace*{-2cm}
@@ -419,47 +518,44 @@ The data context menu allows the following operations:
  \item Group: Same operations as on the item's group layer item
 \end{itemize}
 
-\subsubsection{Data Labeling}
+\subsubsection{Distance Measurement}
 
-Using the operations described in the previous section, labels can be shown for target reports.
+Distance meansurements can be made, when the Measure mode is active. Simply do a LMB click on a position on the map to start the measurement.
 
 \begin{figure}[H]
     \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/osgview_labels.png}
-  \caption{OSG View Labels}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_measure1.png}
+  \caption{OSG View measurement}
 \end{figure}
 
-Using the ``Configure Labels'' button, the following operations are supported:
+During the measurement, the following information is shown in the top-left corner:
 
 \begin{itemize}
- \item Clear: Clears all labels
- \item Edit: Edits which variables are shown, for each DBO
- \item Line Break: Sets after how many variable entries a line break is used
- \item Background color: Sets the background colour of the label
+ \item Distance (km): Great-circle distance using the haversine formula, in meters or kilometers.
+ \item Distance (nm): Great-circle distance using the haversine formula, in nautical miles.
+ \item  Bearing (deg): Bearing from point 1 to point 2, in degrees from true north.
 \end{itemize}
 
-When a edit window for a DBO label definition is opened, a window like the following is shown:
+Then do a second LMB click on the map on a point of interest to finish the measurement.
 
 \begin{figure}[H]
-    \includegraphics[width=12cm,frame]{../screenshots/osgview_label_edit.png}
-  \caption{OSG View Label Editing}
+    \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_measure2.png}
+  \caption{OSG View measurement done}
 \end{figure}
 
-For each DBO, for each variable it can be selected if the value is presented (using the checkbox), and a prefix and suffix can be defined. The changes made to the prefix and suffix are made by double-clicking on the respective field, entering a new value, and setting the value by pressing enter. Upon each change, the existing labels in the OSG View are updated automatically. \\
-
-A few notes about labels:
+The measurement is shown in the Layers tab, and is identified using a number. The visibility for each label can be set using the checkbox, and the layer menu (using the \includegraphics[width=0.5cm]{../../data/icons/measure.png}) symbol) allows the following operations:
 
 \begin{itemize}
- \item The label definition and presentation is persisted in the configuration
- \item The label colour is always the same as the target report's
- \item A variable value is only shown if it is present (not NULL)
- \item Labels are shown at the target reports position, matched to the lower-left corner
- \item A line break is given after the configured number of values. If values are not shown (NULL), the line break is still made at the same postion, to keep the value shown in the same line for all target reports.
+ \item Copy text: Copies the text as well as the point information to the clipboard to be pasted in other applications
+ \item Delete: Deletes the measurement
 \end{itemize}
+
+Please note the the number label background color can be set as with all other labels. 
 
 \subsubsection{Time Filter}
 
-Once activated using the ``Time Filter'' checkbox,  the time filter facilitates that only target reports within a specific time window are shown.
+Once activated using the symbol \includegraphics[width=0.5cm]{../../data/icons/time.png} in the toolbar, the time filter facilitates that only target reports within a specific time window are shown.
 
 
 \begin{figure}[H]
@@ -485,7 +581,7 @@ During usage of the time filter, changes in the Configuration Widget was suppres
 
 \subsubsection{Depth Check}
 
-Once activated using the ``Use Depth Check'' checkbox, during drawing it is checked wether data is occluded in the depicted scene. E.g. if target reports are ``below ground'', they are not shown.
+Once activated using the symbol \includegraphics[width=0.5cm]{../../data/icons/depth.png} in the toolbar, during drawing it is checked wether data is occluded in the depicted scene. E.g. if target reports are ``below ground'', they are not shown.
 
 \begin{figure}[H]
     \hspace*{-2cm}
@@ -493,7 +589,47 @@ Once activated using the ``Use Depth Check'' checkbox, during drawing it is chec
   \caption{OSG View depth check}
 \end{figure}
 
-Please note that this should only be used in 3D, since in a 2D projection graphical artifacts exist. This is currently under investigation.
+\subsubsection{Data Label Background Color}
+
+The background color for existing labels can be configured using the symbol \includegraphics[width=0.5cm]{../../data/icons/label_color.png} in the toolbar.
+
+\subsubsection{Data Label Content Configuration}
+
+Existing labels can be configured using the symbol \includegraphics[width=0.5cm]{../../data/icons/label_edit.png} in the toolbar.
+
+The following operations are supported:
+
+\begin{itemize}
+ \item Edit: Edits which variables are shown, for each DBO
+ \item Line Break: Sets after how many variable entries a line break is used
+\end{itemize}
+
+When a edit window for a DBO label definition is opened, a window like the following is shown:
+
+\begin{figure}[H]
+    \includegraphics[width=12cm,frame]{../screenshots/osgview_label_edit.png}
+  \caption{OSG View Label Editing}
+\end{figure}
+
+For each DBO, for each variable it can be selected if the value is presented (using the checkbox), and a prefix and suffix can be defined. The changes made to the prefix and suffix are made by double-clicking on the respective field, entering a new value, and setting the value by pressing enter. Upon each change, the existing labels in the OSG View are updated automatically. \\
+
+A few notes about labels:
+
+\begin{itemize}
+ \item The label definition and presentation is persisted in the configuration
+ \item The label colour is always the same as the target report's
+ \item A variable value is only shown if it is present (not NULL)
+ \item Labels are shown at the target reports position, matched to the lower-left corner
+ \item A line break is given after the configured number of values. If values are not shown (NULL), the line break is still made at the same postion, to keep the value shown in the same line for all target reports.
+\end{itemize}
+
+\subsubsection{Data Label Deletion}
+
+All existing labels can be deleted using the symbol \includegraphics[width=0.5cm]{../../data/icons/label_delete.png} in the toolbar.
+
+\subsubsection{Measurement Deletion}
+
+All existing measurements can be deleted using the symbol \includegraphics[width=0.5cm]{../../data/icons/measurement_delete.png} in the toolbar.
 
 \subsubsection{Group Variable}
 
