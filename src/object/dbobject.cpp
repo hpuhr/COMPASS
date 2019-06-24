@@ -1117,7 +1117,9 @@ void DBObject::finalizeReadJobDoneSlot()
     assert (found);
 
     if (!data_)
+    {
         data_ = buffer;
+    }
     else
         data_->seizeBuffer (*buffer.get());
 
