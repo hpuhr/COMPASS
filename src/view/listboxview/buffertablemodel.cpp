@@ -52,7 +52,7 @@ int BufferTableModel::rowCount(const QModelIndex & /*parent*/) const
 int BufferTableModel::columnCount(const QModelIndex & /*parent*/) const
 {
     logdbg << "BufferTableModel: columnCount: " << read_set_.getSize();
-    return read_set_.getSize();
+    return read_set_.getSize()+1;
 
 //    if (buffer_)
 //    {
@@ -72,9 +72,14 @@ QVariant BufferTableModel::headerData(int section, Qt::Orientation orientation, 
         logdbg << "BufferTableModel: headerData: section " << section;
         unsigned int col = section;
 
+        if (col == 0)
+            return QString ();
+
 //        const PropertyList &properties = buffer_->properties();
 //        assert (col < properties.size());
 //        return QString (properties.at(col).name().c_str());
+
+        col -= 1; // for the actual properties
 
         assert (col < read_set_.getSize());
         DBOVariable& variable = read_set_.getVariable(col);
@@ -86,22 +91,59 @@ QVariant BufferTableModel::headerData(int section, Qt::Orientation orientation, 
     return QVariant();
 }
 
+Qt::ItemFlags BufferTableModel::flags(const QModelIndex &index) const
+{
+    Qt::ItemFlags flags;
+
+    if (index.column() == 0)
+    {
+        flags |= Qt::ItemIsEnabled;
+        flags |= Qt::ItemIsUserCheckable;
+    }
+    else
+        return Qt::ItemIsEnabled;
+
+    return flags;
+}
+
 QVariant BufferTableModel::data(const QModelIndex &index, int role) const
 {
     logdbg << "BufferTableModel: data: row " << index.row()-1 << " col " << index.column()-1;
-    if (role == Qt::DisplayRole)
+
+    bool null=false;
+
+    unsigned int row = index.row(); // indexes start at 0 in this family
+    unsigned int col = index.column();
+
+    if (role == Qt::CheckStateRole)
+    {
+        if (col == 0) // selected special case
+        {
+            assert (buffer_->has<bool>("selected"));
+
+            if (buffer_->get<bool>("selected").isNull(row))
+                return Qt::Unchecked;
+
+            if (buffer_->get<bool>("selected").get(row))
+                return Qt::Checked;
+            else
+                return Qt::Unchecked;
+        }
+    }
+    else if (role == Qt::DisplayRole)
     {
         assert (buffer_);
 
-        bool null=false;
         std::string value_str;
-
-        unsigned int row = index.row(); // indexes start at 0 in this family
-        unsigned int col = index.column();
 
         const PropertyList &properties = buffer_->properties();
 
         assert (row < buffer_->size());
+
+        if (col == 0) // selected special case
+            return QVariant();
+
+        col -= 1; // for the actual properties
         assert (col < read_set_.getSize());
 
         DBOVariable& variable = read_set_.getVariable(col);
@@ -275,6 +317,12 @@ void BufferTableModel::setData (std::shared_ptr <Buffer> buffer)
     buffer_=buffer;
     read_set_ = data_source_.getSet()->getFor(object_.name());
 
+    endResetModel();
+}
+
+void BufferTableModel::reset ()
+{
+    beginResetModel();
     endResetModel();
 }
 

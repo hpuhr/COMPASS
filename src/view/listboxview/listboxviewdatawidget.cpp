@@ -105,3 +105,9 @@ void ListBoxViewDataWidget::usePresentationSlot (bool use_presentation)
 {
     emit usePresentationSignal(use_presentation);
 }
+
+void ListBoxViewDataWidget::resetModels()
+{
+    for (auto& table_widget_it : buffer_tables_)
+        table_widget_it.second->resetModel();
+}

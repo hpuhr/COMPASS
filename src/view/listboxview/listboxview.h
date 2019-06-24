@@ -40,18 +40,18 @@ class ListBoxView : public View
 {
     Q_OBJECT
 public slots:
-    /// @brief Is executed when selection is changed. Does nothing.
-    void selectionChanged();
-    /// @brief Is executed when selection is to be cleared. Does nothing.
-    void selectionToBeCleared();
+//    /// @brief Is executed when selection is changed. Does nothing.
+//    void selectionChanged();
+//    /// @brief Is executed when selection is to be cleared. Does nothing.
+//    void selectionToBeCleared();
 
 signals:
-    /// @brief Is emitted when selection was changed locally
-    void setSelection (const ViewSelectionEntries& entries);
-    /// @brief Is emitted when somthing was added to the selection
-    void addSelection (const ViewSelectionEntries& entries);
-    /// @brief Is emitted when selection should be cleared
-    void clearSelection();
+//    /// @brief Is emitted when selection was changed locally
+//    void setSelection (const ViewSelectionEntries& entries);
+//    /// @brief Is emitted when somthing was added to the selection
+//    void addSelection (const ViewSelectionEntries& entries);
+//    /// @brief Is emitted when selection should be cleared
+//    void clearSelection();
 
     void usePresentationSignal (bool use_presentation);
 

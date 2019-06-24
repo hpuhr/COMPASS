@@ -69,6 +69,8 @@ public:
     /// @brief Shows Buffer content in table
     void show (std::shared_ptr<Buffer> buffer);
 
+    void resetModel();
+
 protected:
     DBObject& object_;
     ListBoxViewDataSource& data_source_;

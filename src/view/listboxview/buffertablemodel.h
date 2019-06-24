@@ -46,8 +46,10 @@ public:
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const ;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
+    virtual Qt::ItemFlags flags(const QModelIndex &index) const;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+
 
     void clearData ();
     void setData (std::shared_ptr <Buffer> buffer);
@@ -55,6 +57,7 @@ public:
     void saveAsCSV (const std::string& file_name, bool overwrite);
 
     void usePresentation (bool use_presentation);
+    void reset ();
 
 protected:
     DBObject& object_;

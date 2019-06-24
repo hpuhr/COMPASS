@@ -52,6 +52,7 @@ public slots:
 
     void usePresentationSlot (bool use_presentation);
 
+
 public:
     /// @brief Constructor
     ListBoxViewDataWidget(ListBoxViewDataSource* data_source, QWidget* parent=nullptr, Qt::WindowFlags f=0);
@@ -60,6 +61,7 @@ public:
 
     /// @brief Clears the table contents
     void clearTables ();
+    void resetModels();
 
 protected:
     /// Data source

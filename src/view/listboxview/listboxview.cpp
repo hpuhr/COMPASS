@@ -116,15 +116,15 @@ DBOVariableSet ListBoxView::getSet (const std::string& dbo_name)
 }
 
 
-void ListBoxView::selectionChanged()
-{
-    //  assert (data_source_);
-    //  data_source_->updateSelection();
-}
-void ListBoxView::selectionToBeCleared()
-{
+//void ListBoxView::selectionChanged()
+//{
+//    //  assert (data_source_);
+//    //  data_source_->updateSelection();
+//}
+//void ListBoxView::selectionToBeCleared()
+//{
 
-}
+//}
 
 bool ListBoxView::usePresentation() const
 {
@@ -151,5 +151,7 @@ void ListBoxView::overwriteCSV(bool overwrite_csv)
 void ListBoxView::updateSelection ()
 {
     loginf << "ListBoxView: updateSelection";
+    assert (widget_);
+    widget_->getDataWidget()->resetModels();
 }
 

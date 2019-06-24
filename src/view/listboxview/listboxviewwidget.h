@@ -40,7 +40,6 @@ public:
     /// @brief Destructor
     virtual ~ListBoxViewWidget();
 
-    /// @brief Does nothing.
     virtual void updateView();
 
     /// @brief Toggles visibility of the config widget
@@ -56,7 +55,7 @@ public:
 
 protected:
     /// Data widget with data display
-    ListBoxViewDataWidget *data_widget_;
+    ListBoxViewDataWidget* data_widget_;
     /// Config widget with configuration elements
     ListBoxViewConfigWidget* config_widget_;
 };

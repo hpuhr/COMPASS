@@ -156,6 +156,12 @@ void BufferTableWidget::usePresentationSlot (bool use_presentation)
 }
 
 
+void BufferTableWidget::resetModel()
+{
+    assert (model_);
+    model_->reset();
+}
+
 //void BufferTableWidget::itemChanged (QTableWidgetItem *item)
 //{
 //    if (selection_checkboxes_.find (item) != selection_checkboxes_.end())
