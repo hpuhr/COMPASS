@@ -36,7 +36,9 @@ class ViewContainerConfigWidget;
 class ViewContainer : public QObject, public Configurable
 {
     Q_OBJECT
-  public slots:
+
+public slots:
+
     void showMenuSlot ();
     //void saveViewTemplate ();
     void deleteView ();
@@ -61,7 +63,6 @@ public:
 
 protected:
     ViewManager &view_manager_;
-
 
     QTabWidget* tab_widget_ {nullptr};
 

@@ -148,3 +148,8 @@ void ListBoxView::overwriteCSV(bool overwrite_csv)
     overwrite_csv_ = overwrite_csv;
 }
 
+void ListBoxView::updateSelection ()
+{
+    loginf << "ListBoxView: updateSelection";
+}
+

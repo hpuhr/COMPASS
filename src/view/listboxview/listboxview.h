@@ -91,6 +91,7 @@ protected:
     bool overwrite_csv_ {false};
 
     virtual void checkSubConfigurables ();
+    virtual void updateSelection () override;
 };
 
 #endif /* LISTBOXVIEW_H_ */

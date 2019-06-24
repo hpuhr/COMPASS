@@ -339,6 +339,12 @@ void ViewManager::viewShutdown( View* view, const std::string& err )
         QMessageBox::critical( NULL, "View Shutdown", QString::fromStdString( err ) );
 }
 
+void ViewManager::selectionChangedSlot()
+{
+    loginf << "ViewManager: selectionChangedSlot";
+    emit selectionChangedSignal();
+}
+
 //void ViewManager::saveViewAsTemplate (View *view, std::string template_name)
 //{
 //    //view->saveConfigurationAsTemplate("Template"+view->getInstanceId());
