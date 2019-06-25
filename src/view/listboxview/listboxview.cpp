@@ -84,11 +84,11 @@ void ListBoxView::generateSubConfigurable (const std::string &class_id, const st
     if ( class_id == "ListBoxViewDataSource" )
     {
         assert (!data_source_);
-        data_source_ = new ListBoxViewDataSource( class_id, instance_id, this );
+        data_source_ = new ListBoxViewDataSource (class_id, instance_id, this);
     }
     else if( class_id == "ListBoxViewWidget" )
     {
-        widget_ = new ListBoxViewWidget( class_id, instance_id, this, this, central_widget_ );
+        widget_ = new ListBoxViewWidget (class_id, instance_id, this, this, central_widget_);
         setWidget( widget_ );
     }
     else

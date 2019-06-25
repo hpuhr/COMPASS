@@ -24,6 +24,7 @@
 
 #include "global.h"
 
+class ListBoxView;
 class ListBoxViewDataSource;
 class QTabWidget;
 class BufferTableWidget;
@@ -55,7 +56,8 @@ public slots:
 
 public:
     /// @brief Constructor
-    ListBoxViewDataWidget(ListBoxViewDataSource* data_source, QWidget* parent=nullptr, Qt::WindowFlags f=0);
+    ListBoxViewDataWidget(ListBoxView* view, ListBoxViewDataSource* data_source, QWidget* parent=nullptr,
+                          Qt::WindowFlags f=0);
     /// @brief Destructor
     virtual ~ListBoxViewDataWidget();
 
@@ -64,6 +66,7 @@ public:
     void resetModels();
 
 protected:
+    ListBoxView* view_ {nullptr};
     /// Data source
     ListBoxViewDataSource* data_source_ {nullptr};
     /// Main tab widget

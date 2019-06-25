@@ -28,6 +28,7 @@ class Buffer;
 class DBObject;
 class BufferCSVExportJob;
 class ListBoxViewDataSource;
+class BufferTableWidget;
 
 class BufferTableModel : public QAbstractTableModel
 {
@@ -41,13 +42,14 @@ public slots:
     void exportJobDoneSlot();
 
 public:
-    BufferTableModel(QObject* parent, DBObject& object, ListBoxViewDataSource& data_source);
+    BufferTableModel(BufferTableWidget* table_widget, DBObject& object, ListBoxViewDataSource& data_source);
     virtual ~BufferTableModel();
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const ;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
     virtual Qt::ItemFlags flags(const QModelIndex &index) const;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+    virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+    virtual bool setData(const QModelIndex & index, const QVariant& value, int role);
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
 
@@ -60,6 +62,7 @@ public:
     void reset ();
 
 protected:
+    BufferTableWidget* table_widget_ {nullptr};
     DBObject& object_;
     ListBoxViewDataSource& data_source_;
 

@@ -41,9 +41,9 @@
 
 //using namespace Utils;
 
-BufferTableWidget::BufferTableWidget(DBObject &object, ListBoxViewDataSource& data_source, QWidget* parent,
-                                     Qt::WindowFlags f)
-: QWidget (parent, f), object_(object), data_source_(data_source)
+BufferTableWidget::BufferTableWidget(DBObject &object, ListBoxView& view, ListBoxViewDataSource& data_source,
+                                     QWidget* parent, Qt::WindowFlags f)
+: QWidget (parent, f), object_(object), view_(view), data_source_(data_source)
 {
     setAutoFillBackground(true);
 
@@ -160,6 +160,11 @@ void BufferTableWidget::resetModel()
 {
     assert (model_);
     model_->reset();
+}
+
+ListBoxView &BufferTableWidget::view() const
+{
+    return view_;
 }
 
 //void BufferTableWidget::itemChanged (QTableWidgetItem *item)

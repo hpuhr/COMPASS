@@ -26,14 +26,15 @@
 
 /*
  */
-ListBoxViewWidget::ListBoxViewWidget( const std::string& class_id, const std::string& instance_id, Configurable* config_parent, ListBoxView* view, QWidget* parent )
-    :   ViewWidget( class_id, instance_id, config_parent, view, parent ), data_widget_(nullptr), config_widget_(nullptr)
+ListBoxViewWidget::ListBoxViewWidget(const std::string& class_id, const std::string& instance_id,
+                                     Configurable* config_parent, ListBoxView* view, QWidget* parent)
+ : ViewWidget( class_id, instance_id, config_parent, view, parent ), data_widget_(nullptr), config_widget_(nullptr)
 {
     setAutoFillBackground(true);
 
     QHBoxLayout *hlayout = new QHBoxLayout;
 
-    data_widget_ = new ListBoxViewDataWidget (view->getDataSource());
+    data_widget_ = new ListBoxViewDataWidget (getView(), view->getDataSource());
     data_widget_->setAutoFillBackground(true);
     QSizePolicy sp_left(QSizePolicy::Preferred, QSizePolicy::Preferred);
     sp_left.setHorizontalStretch(3);

@@ -23,10 +23,12 @@
 #include "jobmanager.h"
 #include "global.h"
 #include "dbovariableset.h"
+#include "listboxview.h"
 #include "listboxviewdatasource.h"
+#include "buffertablewidget.h"
 
-BufferTableModel::BufferTableModel(QObject *parent, DBObject &object, ListBoxViewDataSource& data_source)
-    : QAbstractTableModel(parent), object_(object), data_source_(data_source)
+BufferTableModel::BufferTableModel(BufferTableWidget* table_widget, DBObject &object, ListBoxViewDataSource& data_source)
+    : QAbstractTableModel(table_widget), table_widget_(table_widget), object_(object), data_source_(data_source)
 {
 }
 
@@ -99,6 +101,7 @@ Qt::ItemFlags BufferTableModel::flags(const QModelIndex &index) const
     {
         flags |= Qt::ItemIsEnabled;
         flags |= Qt::ItemIsUserCheckable;
+        flags |= Qt::ItemIsEditable;
     }
     else
         return Qt::ItemIsEnabled;
@@ -297,6 +300,41 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
         }
     }
     return QVariant();
+}
+
+bool BufferTableModel::setData(const QModelIndex & index, const QVariant & value,int role)
+{
+    loginf << "BufferTableModel: setData: checked row " << index.row() << " col " << index.column();
+
+    if (role == Qt::CheckStateRole && index.column() == 0)
+    {
+//        TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
+//        QTreeWidgetItem *check = static_cast<QTreeWidgetItem*>(index.internalPointer());
+
+        unsigned int row = index.row(); // indexes start at 0 in this family
+        //unsigned int col = index.column();
+
+        assert (buffer_);
+        assert (buffer_->has<bool>("selected"));
+
+        if (value == Qt::Checked)
+        {
+            loginf << "BufferTableModel: setData: checked row " << row;
+//            int i=1;
+//            checkedState_=Qt::Checked;
+            buffer_->get<bool>("selected").set(row, true);
+        }
+        else
+        {
+            loginf << "BufferTableModel: setData: unchecked row " << row;
+//            int i=2;
+//            checkedState_=Qt::Unchecked;
+            buffer_->get<bool>("selected").set(row, false);
+        }
+        assert (table_widget_);
+        table_widget_->view().emitSelectionChange();
+    }
+    return true;
 }
 
 void BufferTableModel::clearData ()
