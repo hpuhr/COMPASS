@@ -28,6 +28,7 @@ ListBoxView::ListBoxView(const std::string& class_id, const std::string& instanc
                          ViewManager &view_manager)
     : View (class_id, instance_id, w, view_manager)
 {
+    registerParameter ("show_only_selected", &show_only_selected_, false);
     registerParameter ("use_presentation", &use_presentation_, true);
     registerParameter ("overwrite_csv", &overwrite_csv_, true);
 }
@@ -71,8 +72,10 @@ bool ListBoxView::init()
     connect (widget_->configWidget(), SIGNAL(exportSignal(bool)), widget_->getDataWidget(), SLOT(exportDataSlot(bool)));
     connect (widget_->getDataWidget(), SIGNAL(exportDoneSignal(bool)), widget_->configWidget(), SLOT(exportDoneSlot(bool)));
 
+    connect (this, SIGNAL(showOnlySelectedSignal(bool)), widget_->getDataWidget(), SLOT(showOnlySelectedSlot(bool)));
     connect (this, SIGNAL(usePresentationSignal(bool)), widget_->getDataWidget(), SLOT(usePresentationSlot(bool)));
 
+    widget_->getDataWidget()->showOnlySelectedSlot(show_only_selected_);
     widget_->getDataWidget()->usePresentationSlot(use_presentation_);
 
     return true;
@@ -146,6 +149,20 @@ bool ListBoxView::overwriteCSV() const
 void ListBoxView::overwriteCSV(bool overwrite_csv)
 {
     overwrite_csv_ = overwrite_csv;
+}
+
+bool ListBoxView::showOnlySelected() const
+{
+    return show_only_selected_;
+}
+
+void ListBoxView::showOnlySelected(bool value)
+{
+    loginf << "ListBoxView: showOnlySelected";
+
+    show_only_selected_ = value;
+
+    emit showOnlySelectedSignal(value);
 }
 
 void ListBoxView::updateSelection ()

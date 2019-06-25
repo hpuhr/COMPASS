@@ -46,6 +46,7 @@ ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxView* view, ListBoxViewDataS
             tab_widget_->addTab (buffer_table , obj_it.first.c_str());
             buffer_tables_[obj_it.first] = buffer_table;
             connect (buffer_table, SIGNAL(exportDoneSignal(bool)), this, SLOT(exportDoneSlot(bool)));
+            connect (this, SIGNAL(showOnlySelectedSignal(bool)), buffer_table, SLOT(showOnlySelectedSlot(bool)));
             connect (this, SIGNAL(usePresentationSignal(bool)), buffer_table, SLOT(usePresentationSlot(bool)));
         }
     }
@@ -102,8 +103,15 @@ void ListBoxViewDataWidget::exportDoneSlot (bool cancelled)
     emit exportDoneSignal(cancelled);
 }
 
+void ListBoxViewDataWidget::showOnlySelectedSlot (bool value)
+{
+    emit showOnlySelectedSignal(value);
+}
+
 void ListBoxViewDataWidget::usePresentationSlot (bool use_presentation)
 {
+    loginf << "ListBoxViewDataWidget: usePresentationSlot";
+
     emit usePresentationSignal(use_presentation);
 }
 

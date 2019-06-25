@@ -58,6 +58,7 @@ public slots:
     void exportSlot(bool overwrite);
     void exportDoneSlot (bool cancelled);
 
+    void showOnlySelectedSlot (bool value);
     void usePresentationSlot (bool use_presentation);
 
 public:

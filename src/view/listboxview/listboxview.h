@@ -53,7 +53,8 @@ signals:
 //    /// @brief Is emitted when selection should be cleared
 //    void clearSelection();
 
-    void usePresentationSignal (bool use_presentation);
+    void showOnlySelectedSignal (bool value);
+    void usePresentationSignal (bool value);
 
 public:
     /// @brief Constructor
@@ -79,12 +80,16 @@ public:
     bool overwriteCSV() const;
     void overwriteCSV(bool overwrite_csv);
 
+    bool showOnlySelected() const;
+    void showOnlySelected(bool value);
+
 protected:
     /// For data display
     ListBoxViewWidget* widget_ {nullptr};
     /// For data loading
     ListBoxViewDataSource* data_source_ {nullptr};
 
+    bool show_only_selected_ {true};
     /// Use presentation
     bool use_presentation_ {true};
     /// Overwrite during export, if not, it appends

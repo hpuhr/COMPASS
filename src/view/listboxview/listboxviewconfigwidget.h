@@ -36,6 +36,7 @@ class ListBoxViewConfigWidget : public QWidget
     Q_OBJECT
 
 public slots:
+    void toggleShowOnlySeletedSlot();
     void toggleUsePresentation();
     void toggleUseOverwrite();
     /// @brief Called when database view checkbox is un/checked
@@ -58,8 +59,9 @@ protected:
     /// Variable read list widget
     DBOVariableOrderedSetWidget *variable_set_widget_{nullptr};
 
-    QCheckBox *presentation_check_ {nullptr};
-    QCheckBox *overwrite_check_ {nullptr};
+    QCheckBox* only_selected_check_ {nullptr};
+    QCheckBox* presentation_check_ {nullptr};
+    QCheckBox* overwrite_check_ {nullptr};
 
     QPushButton *export_button_ {nullptr};
 };

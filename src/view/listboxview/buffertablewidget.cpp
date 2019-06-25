@@ -147,6 +147,11 @@ void BufferTableWidget::exportDoneSlot (bool cancelled)
     emit exportDoneSignal (cancelled);
 }
 
+void BufferTableWidget::showOnlySelectedSlot (bool value)
+{
+    loginf << "BufferTableWidget: showOnlySelectedSlot: " << value;
+}
+
 void BufferTableWidget::usePresentationSlot (bool use_presentation)
 {
     assert (model_);
