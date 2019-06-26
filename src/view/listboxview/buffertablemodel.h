@@ -59,7 +59,10 @@ public:
     void saveAsCSV (const std::string& file_name, bool overwrite);
 
     void usePresentation (bool use_presentation);
+    void showOnlySelected (bool value);
     void reset ();
+
+    void updateToSelection();
 
 protected:
     BufferTableWidget* table_widget_ {nullptr};
@@ -71,7 +74,12 @@ protected:
 
     std::shared_ptr <BufferCSVExportJob> export_job_;
 
+    std::map <unsigned int, unsigned int> row_to_index_;
+
+    bool show_only_selected_ {true};
     bool use_presentation_ {true};
+
+    void updateRows ();
 };
 
 #endif // BUFFERTABLEMODEL_H

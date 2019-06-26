@@ -73,6 +73,7 @@ public:
     void show (std::shared_ptr<Buffer> buffer);
 
     void resetModel();
+    void updateToSelection ();
 
     ListBoxView &view() const;
 

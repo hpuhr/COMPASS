@@ -66,6 +66,7 @@ public:
     /// @brief Clears the table contents
     void clearTables ();
     void resetModels();
+    void updateToSelection ();
 
 protected:
     ListBoxView* view_ {nullptr};

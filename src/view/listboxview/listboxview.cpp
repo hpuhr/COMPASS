@@ -24,6 +24,8 @@
 #include "logger.h"
 #include "viewselection.h"
 
+#include <QApplication>
+
 ListBoxView::ListBoxView(const std::string& class_id, const std::string& instance_id, ViewContainer *w,
                          ViewManager &view_manager)
     : View (class_id, instance_id, w, view_manager)
@@ -160,15 +162,23 @@ void ListBoxView::showOnlySelected(bool value)
 {
     loginf << "ListBoxView: showOnlySelected";
 
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
     show_only_selected_ = value;
 
     emit showOnlySelectedSignal(value);
+
+    QApplication::restoreOverrideCursor();
 }
 
 void ListBoxView::updateSelection ()
 {
     loginf << "ListBoxView: updateSelection";
     assert (widget_);
-    widget_->getDataWidget()->resetModels();
+
+    if (show_only_selected_)
+        widget_->getDataWidget()->updateToSelection();
+    else
+        widget_->getDataWidget()->resetModels(); // just updates the checkboxes
 }
 

@@ -120,3 +120,10 @@ void ListBoxViewDataWidget::resetModels()
     for (auto& table_widget_it : buffer_tables_)
         table_widget_it.second->resetModel();
 }
+
+void ListBoxViewDataWidget::updateToSelection ()
+{
+    for (auto& table_widget_it : buffer_tables_)
+        table_widget_it.second->updateToSelection();
+
+}
