@@ -22,7 +22,9 @@ To limit, order based on a variable or load the dataset, the mechanism described
 
 Once updated, the tables are filled with text representing the values of the DBO variables.  If a value is undefined its cell is empy. \\
 
-Please \textbf{note} that since some variable might only exist in some DBOs, the number of columns for different DBOs may differ.
+Please \textbf{note} that since some variable might only exist in some DBOs, the number of columns for different DBOs may differ. \\
+
+In the first column in the tables, checkboxes are shown, indicating whether that target report is currently selected. Selection may be changed by selecting/de-selecting the respective checkboxes or in other views (cross-selection).
 
 \subsubsection{Variable List}
 All DBO variables which are loaded from the database are shown in the 'Variables' list. This list is ordered,
@@ -31,8 +33,12 @@ and using the up/down triangle buttons.
 When pressing the 'Remove' button, a selected variable is removed.  Pressing the 'Add' button allows
 appending a variable to the list using a context-menu.
 
+\subsubsection{Show Only Selected}
+When this checkbox is checked, only target reports selected in other views are shown. If this is active, de-selecting a target report removes it from the shown data.
+
 \subsubsection{Use Presentation}
 When this checkbox is checked, the so called presentation mode is used. In the database, the variables might have different units or a data representation which is not easy to read. For this purpose, a presentation mode was introduced to e.g. show a Mode A code as octal, or a Time of Day not in seconds since midnight but in HH::MM:SS.SS format. When the ''Use Presentation`` checkbox is not checked, the original database values are presented (and exported).
+
 
 \subsubsection{Exporting}
 \label{sec:exporting}
