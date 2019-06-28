@@ -18,6 +18,7 @@
 #include <QTabWidget>
 #include <QHBoxLayout>
 
+#include "allbuffertablewidget.h"
 #include "buffertablewidget.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
@@ -42,6 +43,15 @@ ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxView* view, ListBoxViewDataS
     {
         if (obj_it.second->hasData())
         {
+            if (!all_buffer_table_widget_)
+            {
+                all_buffer_table_widget_ = new AllBufferTableWidget (*view_, *data_source_);
+                tab_widget_->addTab (all_buffer_table_widget_ , "All");
+                connect (all_buffer_table_widget_, SIGNAL(exportDoneSignal(bool)), this, SLOT(exportDoneSlot(bool)));
+                connect (this, SIGNAL(showOnlySelectedSignal(bool)), all_buffer_table_widget_, SLOT(showOnlySelectedSlot(bool)));
+                connect (this, SIGNAL(usePresentationSignal(bool)), all_buffer_table_widget_, SLOT(usePresentationSlot(bool)));
+            }
+
             BufferTableWidget *buffer_table = new BufferTableWidget (*obj_it.second, *view_, *data_source_);
             tab_widget_->addTab (buffer_table , obj_it.first.c_str());
             buffer_tables_[obj_it.first] = buffer_table;
@@ -76,6 +86,9 @@ void ListBoxViewDataWidget::clearTables ()
 
 void ListBoxViewDataWidget::loadingStartedSlot()
 {
+    if (all_buffer_table_widget_)
+        all_buffer_table_widget_->clear();
+
     for (auto buffer_table : buffer_tables_)
         buffer_table.second->clear();
 }
@@ -83,6 +96,10 @@ void ListBoxViewDataWidget::loadingStartedSlot()
 void ListBoxViewDataWidget::updateData (DBObject &object, std::shared_ptr<Buffer> buffer)
 {
     logdbg  << "ListBoxViewDataWidget: updateTables: start";
+
+    assert (all_buffer_table_widget_);
+    all_buffer_table_widget_->show(buffer);
+
     assert (buffer_tables_.count (object.name()) > 0);
     buffer_tables_.at(object.name())->show(buffer); //, data_source_->getSet()->getFor(type), data_source_->getDatabaseView()
 

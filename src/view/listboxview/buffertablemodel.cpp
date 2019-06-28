@@ -359,7 +359,6 @@ void BufferTableModel::updateRows ()
     }
 
     unsigned int buffer_index {0}; // index in buffer
-    unsigned int row_cnt {0}; // row in table
     unsigned int buffer_size = buffer_->size();
 
     assert (buffer_->has<bool>("selected"));
@@ -368,7 +367,6 @@ void BufferTableModel::updateRows ()
     if (row_indexes_.size()) // get last processed index
     {
         buffer_index = last_processed_index_ + 1; // set to next one
-        //row_cnt = row_indexes_.rbegin()->second + 1; // set to next one
     }
 
     while (buffer_index < buffer_size)
@@ -382,19 +380,10 @@ void BufferTableModel::updateRows ()
             }
 
             if (selected_vec.get(buffer_index)) // add if set
-            {
-                //assert (row_indexes_.count(buffer_index) == 0);
                 row_indexes_.push_back(buffer_index);
-                //++row_cnt;
-            }
         }
-        else
-        {
-            //assert (row_indexes_.count(buffer_index) == 0);
-            //row_indexes_[row_cnt] = buffer_index;
-            //++row_cnt;
+        else // add
             row_indexes_.push_back(buffer_index);
-        }
 
         ++buffer_index;
     }

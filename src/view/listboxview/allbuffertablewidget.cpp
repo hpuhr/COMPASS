@@ -33,23 +33,23 @@
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "logger.h"
-#include "buffertablewidget.h"
-#include "buffertablemodel.h"
+#include "allbuffertablewidget.h"
+#include "allbuffertablemodel.h"
 #include "viewselection.h"
 #include "listboxviewdatasource.h"
 
 //using namespace Utils;
 
-BufferTableWidget::BufferTableWidget(DBObject &object, ListBoxView& view, ListBoxViewDataSource& data_source,
+AllBufferTableWidget::AllBufferTableWidget(ListBoxView& view, ListBoxViewDataSource& data_source,
                                      QWidget* parent, Qt::WindowFlags f)
-: QWidget (parent, f), object_(object), view_(view), data_source_(data_source)
+: QWidget (parent, f), view_(view), data_source_(data_source)
 {
     setAutoFillBackground(true);
 
     QVBoxLayout *layout = new QVBoxLayout ();
 
     table_ = new QTableView (this);
-    model_ = new BufferTableModel (this, object_, data_source_);
+    model_ = new AllBufferTableModel (this, data_source_);
     table_->setModel(model_);
 
     connect (model_, SIGNAL(exportDoneSignal(bool)), this, SLOT(exportDoneSlot(bool)));
@@ -61,54 +61,54 @@ BufferTableWidget::BufferTableWidget(DBObject &object, ListBoxView& view, ListBo
 
 }
 
-BufferTableWidget::~BufferTableWidget()
+AllBufferTableWidget::~AllBufferTableWidget()
 {
 }
 
 
 
-void BufferTableWidget::clear ()
+void AllBufferTableWidget::clear ()
 {
     assert (model_);
 
     model_->clearData();
 }
 
-void BufferTableWidget::show (std::shared_ptr<Buffer> buffer) //, DBOVariableSet *variables, bool database_view
+void AllBufferTableWidget::show (std::shared_ptr<Buffer> buffer) //, DBOVariableSet *variables, bool database_view
 {
     assert (buffer);
 
-    logdbg  << "BufferTableWidget: show: object " << object_.name() << " buffer size " << buffer->size()
-            << " properties " << buffer->properties().size();
+    logdbg  << "AllBufferTableWidget: show: buffer size " << buffer->size() << " properties "
+            << buffer->properties().size();
     assert (table_);
     assert (model_);
 
     model_->setData(buffer);
     table_->resizeColumnsToContents();
 
-    logdbg  << " BufferTableWidget: show: end";
+    logdbg  << " AllBufferTableWidget: show: end";
 }
 
-void BufferTableWidget::exportSlot(bool overwrite)
+void AllBufferTableWidget::exportSlot(bool overwrite)
 {
-    loginf << "BufferTableWidget: exportSlot: object " << object_.name();
+    loginf << "AllBufferTableWidget: exportSlot";
 
     QString file_name;
     if (overwrite)
     {
-        file_name = QFileDialog::getSaveFileName(this, ("Save "+object_.name()+" as CSV").c_str(), "",
+        file_name = QFileDialog::getSaveFileName(this, "Save All as CSV", "",
                                                  tr("Comma-separated values (*.csv);;All Files (*)"));
     }
     else
     {
-        file_name = QFileDialog::getSaveFileName(this, ("Save "+object_.name()+" as CSV").c_str(), "",
+        file_name = QFileDialog::getSaveFileName(this, "Save All as CSV", "",
                                                  tr("Comma-separated values (*.csv);;All Files (*)"), nullptr,
                                                  QFileDialog::DontConfirmOverwrite);
     }
 
     if (file_name.size())
     {
-        loginf << "BufferTableWidget: exportSlot: export filename " << file_name.toStdString();
+        loginf << "AllBufferTableWidget: exportSlot: export filename " << file_name.toStdString();
         assert (model_);
         model_->saveAsCSV(file_name.toStdString(), overwrite);
     }
@@ -118,14 +118,14 @@ void BufferTableWidget::exportSlot(bool overwrite)
     }
 }
 
-void BufferTableWidget::exportDoneSlot (bool cancelled)
+void AllBufferTableWidget::exportDoneSlot (bool cancelled)
 {
     emit exportDoneSignal (cancelled);
 }
 
-void BufferTableWidget::showOnlySelectedSlot (bool value)
+void AllBufferTableWidget::showOnlySelectedSlot (bool value)
 {
-    loginf << "BufferTableWidget: showOnlySelectedSlot: " << value;
+    loginf << "AllBufferTableWidget: showOnlySelectedSlot: " << value;
 
     assert (model_);
     model_->showOnlySelected(value);
@@ -133,7 +133,7 @@ void BufferTableWidget::showOnlySelectedSlot (bool value)
     table_->resizeColumnsToContents();
 }
 
-void BufferTableWidget::usePresentationSlot (bool use_presentation)
+void AllBufferTableWidget::usePresentationSlot (bool use_presentation)
 {
     assert (model_);
     model_->usePresentation(use_presentation);
@@ -142,13 +142,13 @@ void BufferTableWidget::usePresentationSlot (bool use_presentation)
 }
 
 
-void BufferTableWidget::resetModel()
+void AllBufferTableWidget::resetModel()
 {
     assert (model_);
     model_->reset();
 }
 
-void BufferTableWidget::updateToSelection ()
+void AllBufferTableWidget::updateToSelection ()
 {
     assert (model_);
     model_->updateToSelection();
@@ -156,18 +156,18 @@ void BufferTableWidget::updateToSelection ()
     table_->resizeColumnsToContents();
 }
 
-ListBoxView &BufferTableWidget::view() const
+ListBoxView &AllBufferTableWidget::view() const
 {
     return view_;
 }
 
-//void BufferTableWidget::itemChanged (QTableWidgetItem *item)
+//void AllBufferTableWidget::itemChanged (QTableWidgetItem *item)
 //{
 //    if (selection_checkboxes_.find (item) != selection_checkboxes_.end())
 //    {
 //        unsigned int id = selection_checkboxes_[item];
 //        bool checked = item->checkState() == Qt::Checked;
-//        logdbg  << "BufferTableWidget: itemChanged: id " << id << " checked " << checked;
+//        logdbg  << "AllBufferTableWidget: itemChanged: id " << id << " checked " << checked;
 
 //        if (checked) // add
 //        {
@@ -193,23 +193,23 @@ ListBoxView &BufferTableWidget::view() const
 
 //            if (found)
 //            {
-//                logdbg  << "BufferTableWidget: itemChanged: unselecting type " << type_ << " id " << id;
+//                logdbg  << "AllBufferTableWidget: itemChanged: unselecting type " << type_ << " id " << id;
 //                ViewSelection::getInstance().clearSelection();
 //                ViewSelection::getInstance().setSelection(selection_entries);
 //            }
 //            else
 //            {
-//                logwrn  << "BufferTableWidget: itemChanged: unselect failed for type " << type_ << " id " << id;
+//                logwrn  << "AllBufferTableWidget: itemChanged: unselect failed for type " << type_ << " id " << id;
 //            }
 //        }
 //    }
 //    else
-//        logerr << "BufferTableWidget: itemChanged: unknown table item";
+//        logerr << "AllBufferTableWidget: itemChanged: unknown table item";
 //}
 
-//void BufferTableWidget::keyPressEvent ( QKeyEvent * event )
+//void AllBufferTableWidget::keyPressEvent ( QKeyEvent * event )
 //{
-//    logdbg  << "BufferTableWidget: keyPressEvent: got keypressed";
+//    logdbg  << "AllBufferTableWidget: keyPressEvent: got keypressed";
 
 //    assert (table_);
 
@@ -260,17 +260,17 @@ ListBoxView &BufferTableWidget::view() const
 
 //            if (rows < 1)
 //            {
-//                logwrn  << "BufferTableWidget: keyPressEvent: too few rows " << rows;
+//                logwrn  << "AllBufferTableWidget: keyPressEvent: too few rows " << rows;
 //                return;
 //            }
-//            logdbg  << "BufferTableWidget: keyPressEvent: rows " << rows;
+//            logdbg  << "AllBufferTableWidget: keyPressEvent: rows " << rows;
 
 //            if (cols < 1)
 //            {
-//                logwrn  << "BufferTableWidget: keyPressEvent: too few cols " << cols;
+//                logwrn  << "AllBufferTableWidget: keyPressEvent: too few cols " << cols;
 //                return;
 //            }
-//            logdbg  << "BufferTableWidget: keyPressEvent: cols " << cols;
+//            logdbg  << "AllBufferTableWidget: keyPressEvent: cols " << cols;
 
 //            std::vector < std::vector <std::string> > table_strings (rows,std::vector<std::string> (cols));
 

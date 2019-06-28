@@ -15,8 +15,8 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BUFFERTABLEWIDGET_H_
-#define BUFFERTABLEWIDGET_H_
+#ifndef ALLBUFFERTABLEWIDGET_H_
+#define ALLBUFFERTABLEWIDGET_H_
 
 #include <QWidget>
 
@@ -28,7 +28,7 @@
 
 class QTableView;
 //class QTableWidgetItem;
-class BufferTableModel;
+class AllBufferTableModel;
 class QStringList;
 class Buffer;
 class DBOVariableSet;
@@ -47,7 +47,7 @@ class ListBoxViewDataSource;
  * Using the Shift- or Ctrl-key, data items can be selected and copied using Ctrl-C. Such data is stored
  * as comma-separated list in memory and can be inserted in a text file or Excel-like editor.
  */
-class BufferTableWidget : public QWidget
+class AllBufferTableWidget : public QWidget
 {
     Q_OBJECT
 
@@ -63,10 +63,10 @@ public slots:
 
 public:
     /// @brief Constructor
-    BufferTableWidget(DBObject &object, ListBoxView& view, ListBoxViewDataSource& data_source, QWidget* parent=0,
-                      Qt::WindowFlags f=0);
+    AllBufferTableWidget(ListBoxView& view, ListBoxViewDataSource& data_source, QWidget* parent=0,
+                         Qt::WindowFlags f=0);
     /// @brief Destructor
-    virtual ~BufferTableWidget();
+    virtual ~AllBufferTableWidget();
 
     void clear ();
     /// @brief Shows Buffer content in table
@@ -78,15 +78,14 @@ public:
     ListBoxView &view() const;
 
 protected:
-    DBObject& object_;
     ListBoxView& view_;
     ListBoxViewDataSource& data_source_;
     /// Table with items
     QTableView* table_ {nullptr};
-    BufferTableModel* model_ {nullptr};
+    AllBufferTableModel* model_ {nullptr};
 
     /// @brief Is called when keys are pressed
     //virtual void keyPressEvent (QKeyEvent * event);
 };
 
-#endif /* BUFFERTABLEWIDGET_H_ */
+#endif /* ALLBUFFERTABLEWIDGET_H_ */

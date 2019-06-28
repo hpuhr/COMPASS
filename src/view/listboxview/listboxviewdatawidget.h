@@ -27,6 +27,7 @@
 class ListBoxView;
 class ListBoxViewDataSource;
 class QTabWidget;
+class AllBufferTableWidget;
 class BufferTableWidget;
 class Buffer;
 class DBObject;
@@ -75,6 +76,7 @@ protected:
     /// Main tab widget
     QTabWidget* tab_widget_ {nullptr};
     /// Container with all table widgets
+    AllBufferTableWidget* all_buffer_table_widget_ {nullptr};
     std::map <std::string, BufferTableWidget*> buffer_tables_;
 };
 
