@@ -170,20 +170,11 @@ QVariant AllBufferTableModel::data(const QModelIndex &index, int role) const
             assert (manager.object(dbo_name).hasVariable(variable_name));
         }
 
-        //type_set.add (manager.metaVariable(it->second->variableName()).getFor(dbo_name));
-        //bool exists_in_dbo = data_source_.getSet()->variableDefinition(col).
-
-        //return QString (variable_name.c_str());
-
-        //DBOVariableSet dbo_read_set = data_source_.getSet()->getFor(dbo_name);
-
         DBOVariable& variable = (variable_dbo_name == META_OBJECT_NAME)
                 ? manager.metaVariable(variable_name).getFor(dbo_name) : manager.object(dbo_name).variable(variable_name);
         PropertyDataType data_type = variable.dataType();
 
         value_str = NULL_STRING;
-
-        //const DBTableColumn &column = variable.currentDBColumn ();
 
         if (!properties.hasProperty(variable.name()))
         {
@@ -335,39 +326,53 @@ bool AllBufferTableModel::setData(const QModelIndex& index, const QVariant & val
 {
     loginf << "AllBufferTableModel: setData: checked row " << index.row() << " col " << index.column();
 
-//    if (role == Qt::CheckStateRole && index.column() == 0)
-//    {
-//        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+    if (role == Qt::CheckStateRole && index.column() == 0)
+    {
+        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-//        assert (row_to_index_.count(index.row()) == 1);
-//        unsigned int bufferindex = row_to_index_.at(index.row());
+        assert (index.row() >= 0);
+        assert ((unsigned int)index.row() < row_indexes_.size());
+        unsigned int dbo_num = row_indexes_.at(index.row()).first;
+        unsigned int buffer_index = row_indexes_.at(index.row()).second;
 
-//        assert (buffer);
-//        assert (buffer->has<bool>("selected"));
+        assert (number_to_dbo_.count(dbo_num) == 1);
+        std::string dbo_name = number_to_dbo_.at(dbo_num);
 
-//        if (value == Qt::Checked)
-//        {
-//            loginf << "AllBufferTableModel: setData: checked row index" << bufferindex;
-//            buffer->get<bool>("selected").set(bufferindex, true);
-//        }
-//        else
-//        {
-//            loginf << "AllBufferTableModel: setData: unchecked row index " << bufferindex;
-//            buffer->get<bool>("selected").set(bufferindex, false);
-//        }
-//        assert (table_widget_);
-//        table_widget_->view().emitSelectionChange();
+        assert (buffers_.count(dbo_name) == 1);
+        std::shared_ptr <Buffer> buffer = buffers_.at(dbo_name);
 
-//        if (show_only_selected_)
-//        {
-//            beginResetModel();
-//            row_to_index_.clear();
-//            updateRows();
-//            endResetModel();
-//        }
+        assert (buffer);
+        assert (buffer->has<bool>("selected"));
 
-//        QApplication::restoreOverrideCursor();
-//    }
+        if (value == Qt::Checked)
+        {
+            loginf << "AllBufferTableModel: setData: checked row index" << buffer_index;
+            buffer->get<bool>("selected").set(buffer_index, true);
+        }
+        else
+        {
+            loginf << "AllBufferTableModel: setData: unchecked row index " << buffer_index;
+            buffer->get<bool>("selected").set(buffer_index, false);
+        }
+        assert (table_widget_);
+        table_widget_->view().emitSelectionChange();
+
+        if (show_only_selected_)
+        {
+            beginResetModel();
+
+            dbo_last_processed_index_.clear();
+            time_to_indexes_.clear();
+            row_indexes_.clear();
+
+            updateTimeIndexes ();
+            rebuildRowIndexes ();
+
+            endResetModel();
+        }
+
+        QApplication::restoreOverrideCursor();
+    }
     return true;
 }
 
@@ -413,17 +418,16 @@ void AllBufferTableModel::updateTimeIndexes ()
 {
     loginf << "AllBufferTableModel: updateTimeIndexes";
 
-    unsigned int processed_index;
+    unsigned int buffer_index;
     std::string dbo_name;
     unsigned int dbo_num;
-    unsigned int buffersize;
+    unsigned int buffer_size;
 
     unsigned int num_time_none;
-    float tod;
 
     for (auto& buf_it : buffers_)
     {
-        processed_index = 0;
+        buffer_index = 0;
         dbo_name = buf_it.first;
         num_time_none = 0;
 
@@ -431,33 +435,46 @@ void AllBufferTableModel::updateTimeIndexes ()
         dbo_num = dbo_to_number_.at(dbo_name);
 
         if (dbo_last_processed_index_.count(dbo_name) == 1)
-            processed_index = dbo_last_processed_index_.at(dbo_name);
+            buffer_index = dbo_last_processed_index_.at(dbo_name)+1; // last one + 1
 
-        buffersize = buf_it.second->size();
+        buffer_size = buf_it.second->size();
 
-        if (buffersize > processed_index+1) // new data
+        if (buffer_size > buffer_index+1) // new data
         {
             loginf << "AllBufferTableModel: updateTimeIndexes: new " << dbo_name <<  " data, last index "
-                   << processed_index << " size " << buf_it.second->size();
+                   << buffer_index << " size " << buf_it.second->size();
 
             DBObjectManager& object_manager = ATSDB::instance().objectManager();
             const DBOVariable &tod_var = object_manager.metaVariable("tod").getFor(dbo_name);
             assert (buf_it.second->has<float>(tod_var.name()));
             NullableVector<float> &tods = buf_it.second->get<float> (tod_var.name());
 
-            for (unsigned int index=processed_index+1; index < buffersize; ++index)
+            assert (buf_it.second->has<bool>("selected"));
+            NullableVector<bool> selected_vec = buf_it.second->get<bool>("selected");
+
+            for (; buffer_index < buffer_size; ++buffer_index)
             {
-                if (tods.isNull(index))
+                if (tods.isNull(buffer_index))
                 {
                     num_time_none++;
                     continue;
                 }
 
-                tod = tods.get(index);
-                time_to_indexes_.insert(std::make_pair(tod, std::make_pair(dbo_num, index)));
+                if (show_only_selected_)
+                {
+                    if (selected_vec.isNull(buffer_index)) // check if null, skip if so
+                        continue;
+
+                    if (selected_vec.get(buffer_index)) // add if set
+                        time_to_indexes_.insert(
+                                    std::make_pair(tods.get(buffer_index), std::make_pair(dbo_num, buffer_index)));
+                }
+                else
+                    time_to_indexes_.insert(
+                                std::make_pair(tods.get(buffer_index), std::make_pair(dbo_num, buffer_index)));
             }
 
-            dbo_last_processed_index_[dbo_name] = buffersize-1; // set to last index
+            dbo_last_processed_index_[dbo_name] = buffer_size-1; // set to last index
 
             if (num_time_none)
                 loginf << "AllBufferTableModel: updateTimeIndexes: new " << dbo_name << " skipped " << num_time_none
@@ -530,8 +547,12 @@ void AllBufferTableModel::updateToSelection()
 {
     beginResetModel();
 
-//    row_to_index_.clear();
-//    updateRows ();
+    dbo_last_processed_index_.clear();
+    time_to_indexes_.clear();
+    row_indexes_.clear();
+
+    updateTimeIndexes ();
+    rebuildRowIndexes ();
 
     endResetModel();
 }

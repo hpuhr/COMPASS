@@ -17,6 +17,7 @@
 
 #include <QTabWidget>
 #include <QHBoxLayout>
+#include <QMessageBox>
 
 #include "allbuffertablewidget.h"
 #include "buffertablewidget.h"
@@ -110,8 +111,33 @@ void ListBoxViewDataWidget::exportDataSlot(bool overwrite)
 {
     logdbg << "ListBoxViewDataWidget: exportDataSlot";
     assert (tab_widget_);
+
+    AllBufferTableWidget *all_buffer_widget = dynamic_cast<AllBufferTableWidget*> (tab_widget_->currentWidget());
+
     BufferTableWidget *buffer_widget = dynamic_cast<BufferTableWidget*> (tab_widget_->currentWidget());
-    assert (buffer_widget);
+
+    if (all_buffer_widget && !buffer_widget)
+    {
+        QMessageBox msgBox;
+        msgBox.setText("Export can currently not be used for All. Please contact the author and request this feature.");
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.exec();
+
+        exportDoneSignal(true);
+        return;
+    }
+
+    if (!all_buffer_widget && !buffer_widget)
+    {
+        QMessageBox msgBox;
+        msgBox.setText("Export can not be used without loaded data.");
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.exec();
+
+        exportDoneSignal(true);
+        return;
+    }
+
     buffer_widget->exportSlot(overwrite);
 }
 
@@ -134,12 +160,18 @@ void ListBoxViewDataWidget::usePresentationSlot (bool use_presentation)
 
 void ListBoxViewDataWidget::resetModels()
 {
+    if (all_buffer_table_widget_)
+        all_buffer_table_widget_->resetModel();
+
     for (auto& table_widget_it : buffer_tables_)
         table_widget_it.second->resetModel();
 }
 
 void ListBoxViewDataWidget::updateToSelection ()
 {
+    if (all_buffer_table_widget_)
+        all_buffer_table_widget_->updateToSelection();
+
     for (auto& table_widget_it : buffer_tables_)
         table_widget_it.second->updateToSelection();
 

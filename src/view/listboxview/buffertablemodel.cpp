@@ -403,7 +403,7 @@ void BufferTableModel::saveAsCSV (const std::string &file_name, bool overwrite)
 
     assert (buffer_);
     BufferCSVExportJob *export_job = new BufferCSVExportJob (buffer_, read_set_, file_name, overwrite,
-                                                             use_presentation_);
+                                                             show_only_selected_, use_presentation_);
 
     export_job_ = std::shared_ptr<BufferCSVExportJob> (export_job);
     connect (export_job, SIGNAL(obsoleteSignal()), this, SLOT(exportJobObsoleteSlot()), Qt::QueuedConnection);
