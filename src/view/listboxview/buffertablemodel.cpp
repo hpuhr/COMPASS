@@ -41,8 +41,8 @@ BufferTableModel::~BufferTableModel()
 
 int BufferTableModel::rowCount(const QModelIndex & /*parent*/) const
 {
-    logdbg << "BufferTableModel: rowCount: " << row_to_index_.size();
-    return row_to_index_.size();
+    logdbg << "BufferTableModel: rowCount: " << row_indexes_.size();
+    return row_indexes_.size();
 }
 
 int BufferTableModel::columnCount(const QModelIndex & /*parent*/) const
@@ -98,8 +98,9 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
 
     bool null=false;
 
-    assert (row_to_index_.count(index.row()) == 1);
-    unsigned int buffer_index = row_to_index_.at(index.row());
+    assert (index.row() >= 0);
+    assert ((unsigned int)index.row() < row_indexes_.size());
+    unsigned int buffer_index = row_indexes_.at(index.row());
     unsigned int col = index.column();
 
     if (role == Qt::CheckStateRole)
@@ -294,8 +295,9 @@ bool BufferTableModel::setData(const QModelIndex& index, const QVariant & value,
     {
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-        assert (row_to_index_.count(index.row()) == 1);
-        unsigned int buffer_index = row_to_index_.at(index.row());
+        assert (index.row() >= 0);
+        assert ((unsigned int)index.row() < row_indexes_.size());
+        unsigned int buffer_index = row_indexes_.at(index.row());
 
         assert (buffer_);
         assert (buffer_->has<bool>("selected"));
@@ -316,7 +318,7 @@ bool BufferTableModel::setData(const QModelIndex& index, const QVariant & value,
         if (show_only_selected_)
         {
             beginResetModel();
-            row_to_index_.clear();
+            row_indexes_.clear();
             updateRows();
             endResetModel();
         }
@@ -352,7 +354,7 @@ void BufferTableModel::updateRows ()
 {
     if (!buffer_)
     {
-        row_to_index_.clear();
+        row_indexes_.clear();
         return;
     }
 
@@ -363,10 +365,10 @@ void BufferTableModel::updateRows ()
     assert (buffer_->has<bool>("selected"));
     NullableVector<bool> selected_vec = buffer_->get<bool>("selected");
 
-    if (row_to_index_.size()) // get last processed index
+    if (row_indexes_.size()) // get last processed index
     {
-        buffer_index = row_to_index_.rbegin()->first + 1; // set to next one
-        row_cnt = row_to_index_.rbegin()->second + 1; // set to next one
+        buffer_index = last_processed_index_ + 1; // set to next one
+        //row_cnt = row_indexes_.rbegin()->second + 1; // set to next one
     }
 
     while (buffer_index < buffer_size)
@@ -381,20 +383,23 @@ void BufferTableModel::updateRows ()
 
             if (selected_vec.get(buffer_index)) // add if set
             {
-                assert (row_to_index_.count(buffer_index) == 0);
-                row_to_index_[row_cnt] = buffer_index;
-                ++row_cnt;
+                //assert (row_indexes_.count(buffer_index) == 0);
+                row_indexes_.push_back(buffer_index);
+                //++row_cnt;
             }
         }
         else
         {
-            assert (row_to_index_.count(buffer_index) == 0);
-            row_to_index_[row_cnt] = buffer_index;
-            ++row_cnt;
+            //assert (row_indexes_.count(buffer_index) == 0);
+            //row_indexes_[row_cnt] = buffer_index;
+            //++row_cnt;
+            row_indexes_.push_back(buffer_index);
         }
 
         ++buffer_index;
     }
+
+    last_processed_index_ = buffer_index;
 }
 
 void BufferTableModel::reset ()
@@ -451,7 +456,7 @@ void BufferTableModel::updateToSelection()
 {
     beginResetModel();
 
-    row_to_index_.clear();
+    row_indexes_.clear();
     updateRows ();
 
     endResetModel();

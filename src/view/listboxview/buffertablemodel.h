@@ -74,7 +74,8 @@ protected:
 
     std::shared_ptr <BufferCSVExportJob> export_job_;
 
-    std::map <unsigned int, unsigned int> row_to_index_;
+    unsigned int last_processed_index_ {0};
+    std::vector <unsigned int> row_indexes_;
 
     bool show_only_selected_ {true};
     bool use_presentation_ {true};
