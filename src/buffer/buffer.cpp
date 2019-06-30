@@ -284,7 +284,7 @@ void Buffer::transformVariables (DBOVariableSet& list, bool tc2dbovar)
 
     for (auto var_it : variables)
     {
-        logdbg << "Buffer: transformVariables: variable " << var_it->name() << " has representation "
+        loginf << "Buffer: transformVariables: variable " << var_it->name() << " has representation "
                << var_it->representationString();
         assert (var_it->hasCurrentDBColumn());
         const DBTableColumn &column = var_it->currentDBColumn ();

@@ -380,8 +380,9 @@ void AllBufferTableModel::clearData ()
 {
     beginResetModel();
 
-//    buffer=nullptr;
-//    updateRows();
+    dbo_last_processed_index_.clear();
+    time_to_indexes_.clear();
+    row_indexes_.clear();
 
     endResetModel();
 }
