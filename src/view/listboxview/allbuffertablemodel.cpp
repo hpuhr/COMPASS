@@ -138,6 +138,12 @@ QVariant AllBufferTableModel::data(const QModelIndex &index, int role) const
 
         const PropertyList &properties = buffer->properties();
 
+        if (bufferindex >= buffer->size())
+        {
+            logerr << "AllBufferTableModel: data: index " << bufferindex << " too large for " << dbo_name << "  size " << buffer->size();
+            return QVariant();
+        }
+
         assert (bufferindex < buffer->size());
 
         if (col == 0) // selected special case
@@ -378,11 +384,14 @@ bool AllBufferTableModel::setData(const QModelIndex& index, const QVariant & val
 
 void AllBufferTableModel::clearData ()
 {
+    loginf << "AllBufferTableModel: clearData";
+
     beginResetModel();
 
     dbo_last_processed_index_.clear();
     time_to_indexes_.clear();
     row_indexes_.clear();
+    buffers_.clear();
 
     endResetModel();
 }
