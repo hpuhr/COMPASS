@@ -26,6 +26,7 @@
 #include "logger.h"
 #include "buffer.h"
 #include "dbinterface.h"
+#include "dbobjectmanager.h"
 
 /**
  * Registers current_schema as parameter, creates sub-configurables (schemas), checks if current_schema exists (if defined).
@@ -161,12 +162,26 @@ DBSchema& DBSchemaManager::getSchema (const std::string& name)
 
 void DBSchemaManager::deleteCurrentSchema ()
 {
+    loginf << "DBSchemaManager: deleteCurrentSchema: " << current_schema_;
+
     assert (current_schema_.size() != 0);
     assert (hasCurrentSchema());
+
+    ATSDB::instance().objectManager().removeDependenciesForSchema(current_schema_);
+
     delete schemas_.at(current_schema_);
     schemas_.erase(current_schema_);
 
     current_schema_="";
+
+    if (schemas_.size())
+    {
+        current_schema_ = schemas_.begin()->first;
+        loginf << "DBSchemaManager: deleteCurrentSchema: setting current schema" << current_schema_;
+    }
+    else
+        loginf << "DBSchemaManager: deleteCurrentSchema: no current schema exists";
+
     emit schemaChangedSignal();
 }
 

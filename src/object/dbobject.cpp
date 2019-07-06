@@ -274,6 +274,8 @@ void DBObject::deleteMetaTable (const std::string& schema)
     if (current_meta_table_->name() == meta_table_name)
         current_meta_table_ = nullptr;
 
+    removeVariableInfoForSchema (schema);
+
     if (widget_)
         widget_->updateMetaTablesGridSlot();
 }
@@ -1248,4 +1250,35 @@ void DBObject::print ()
 
     loginf << "DBObject " << name() << ":\n" << ss.str();
 
+}
+
+void DBObject::removeDependenciesForSchema (const std::string& schema_name)
+{
+    loginf << "DBObject " << name() << ": removeDependenciesForSchema: " << schema_name;
+
+    if (meta_table_definitions_.count(schema_name))
+    {
+        loginf << "DBObject " << name() << ": removeDependenciesForSchema: removing meta-table";
+        deleteMetaTable(schema_name);
+    }
+}
+
+void DBObject::removeVariableInfoForSchema (const std::string& schema_name)
+{
+    loginf << "DBObject " << name() << ": removeVariableInfoForSchema: " << schema_name;
+
+    for (auto var_it = variables_.begin(); var_it != variables_.end();)
+    {
+        if (var_it->second.onlyExistsInSchema(schema_name))
+        {
+            loginf << "DBObject " << name() << ": removeVariableInfoForSchema: variable" << var_it->first
+                   << " exists only in schema to be removed, deleting";
+            variables_.erase(var_it++);
+        }
+        else
+        {
+            var_it->second.removeInfoForSchema(schema_name);
+            ++var_it;
+        }
+    }
 }

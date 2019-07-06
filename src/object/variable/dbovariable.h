@@ -197,6 +197,9 @@ public:
     void unlock ();
 
     bool existsInDB () const;
+    bool onlyExistsInSchema (const std::string& schema_name);
+
+    void removeInfoForSchema (const std::string& schema_name);
 
 private:
     static std::map<Representation, std::string> representation_2_string_;
