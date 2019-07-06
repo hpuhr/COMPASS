@@ -271,6 +271,7 @@ void DBInterface::createTable (DBTable& table)
     table.updateOnDatabase();
 
     loginf << "DBInterface: createTable: checking " << table.name();
+    assert (existsTable(table.name()));
     assert (table.existsInDB());
     //emit databaseContentChangedSignal();
 }

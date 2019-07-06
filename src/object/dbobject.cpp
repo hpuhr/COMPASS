@@ -650,9 +650,11 @@ void DBObject::addDataSources (std::map <int, std::pair<int,int>>& sources)
 
     DBInterface& db_interface = ATSDB::instance().interface();
     db_interface.insertBuffer(meta_table, buffer_ptr);
+    db_interface.updateTableInfo();
 
-    logdbg << "DBObject: addDataSources: emitting signal";
-    emit db_interface.databaseContentChangedSignal();
+    databaseContentChangedSlot();
+    //logdbg << "DBObject: addDataSources: emitting signal";
+    //emit db_interface.databaseContentChangedSignal();
 
 }
 
@@ -925,13 +927,13 @@ void DBObject::insertProgressSlot (float percent)
 void DBObject::insertDoneSlot ()
 {
     assert (insert_job_);
-    bool emit_change = insert_job_->emitChange();
+//    bool emit_change = insert_job_->emitChange();
     insert_job_ = nullptr;
 
     emit insertDoneSignal (*this);
 
-    if (emit_change)
-        emit ATSDB::instance().interface().databaseContentChangedSignal();
+//    if (emit_change)
+//        emit ATSDB::instance().interface().databaseContentChangedSignal();
 }
 
 void DBObject::updateData (DBOVariable &key_var, DBOVariableSet& list, std::shared_ptr<Buffer> buffer)

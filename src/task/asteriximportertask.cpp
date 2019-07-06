@@ -30,6 +30,8 @@
 #include "dbovariable.h"
 #include "dbtable.h"
 #include "dbtablecolumn.h"
+#include "atsdb.h"
+#include "dbinterface.h"
 
 #include <jasterix/jasterix.h>
 #include <jasterix/category.h>
@@ -63,8 +65,8 @@ ASTERIXImporterTask::ASTERIXImporterTask(const std::string& class_id, const std:
     loginf << "ASTERIXImporterTask: contructor: jasterix definition path '" << jasterix_definition_path << "'";
     assert (Files::directoryExists(jasterix_definition_path));
 
-    jASTERIX::frame_chunk_size = 5000;
-    jASTERIX::record_chunk_size = 5000;
+    jASTERIX::frame_chunk_size = 2000;
+    jASTERIX::record_chunk_size = 2000;
 
     jasterix_.reset(new jASTERIX::jASTERIX(jasterix_definition_path, false, debug_jasterix_, true));
 
@@ -682,7 +684,7 @@ void ASTERIXImporterTask::insertData ()
     }
 
     bool has_sac_sic = false;
-    bool emit_change = (decode_job_ == nullptr && json_map_jobs_.unsafe_size() == 0);
+    //bool emit_change = (decode_job_ == nullptr && json_map_jobs_.unsafe_size() == 0);
 
     assert (schema_);
 
@@ -785,10 +787,10 @@ void ASTERIXImporterTask::insertData ()
                 }
             }
 
-            logdbg << "ASTERIXImporterTask: insertData: " << db_object.name() << " inserting, change" << emit_change;
+            logdbg << "ASTERIXImporterTask: insertData: " << db_object.name() << " inserting";
 
             DBOVariableSet set = parser_it.second.variableList();
-            db_object.insertData(set, buffer, emit_change);
+            db_object.insertData(set, buffer, false);
             records_inserted_ += buffer->size();
 
             logdbg << "ASTERIXImporterTask: insertData: " << db_object.name() << " clearing";
@@ -838,6 +840,7 @@ void ASTERIXImporterTask::checkAllDone ()
 
 //        if (widget_)
 //            widget_->importDoneSlot(test_);
+        emit ATSDB::instance().interface().databaseContentChangedSignal();
     }
 
     logdbg << "ASTERIXImporterTask: checkAllDone: done";
