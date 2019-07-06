@@ -118,12 +118,7 @@ void ListBoxViewDataWidget::exportDataSlot(bool overwrite)
 
     if (all_buffer_widget && !buffer_widget)
     {
-        QMessageBox msgBox;
-        msgBox.setText("Export can currently not be used for All. Please contact the author and request this feature.");
-        msgBox.setIcon(QMessageBox::Warning);
-        msgBox.exec();
-
-        exportDoneSignal(true);
+        all_buffer_widget->exportSlot(overwrite);
         return;
     }
 

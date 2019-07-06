@@ -26,7 +26,7 @@
 
 class Buffer;
 class DBObject;
-class BufferCSVExportJob;
+class AllBufferCSVExportJob;
 class ListBoxViewDataSource;
 class AllBufferTableWidget;
 
@@ -70,7 +70,7 @@ protected:
 
     std::map<std::string, std::shared_ptr <Buffer>> buffers_;
 
-    std::shared_ptr <BufferCSVExportJob> export_job_;
+    std::shared_ptr <AllBufferCSVExportJob> export_job_;
 
     std::map <unsigned int, std::string> number_to_dbo_;
     std::map <std::string, unsigned int> dbo_to_number_;

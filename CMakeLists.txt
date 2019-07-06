@@ -144,7 +144,7 @@ target_link_libraries ( atsdb
     ${jASTERIX_LIBRARIES})
 ENDIF()
 
-target_link_libraries ( atsdb
+target_link_libraries ( atsdb optimized
     Qt5::Widgets
     Qt5::Core
     Qt5::OpenGL
