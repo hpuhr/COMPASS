@@ -22,6 +22,8 @@
 
 #include <jasterix/jasterix.h>
 
+#include <memory>
+
 #include <QThread>
 
 using namespace nlohmann;
@@ -68,14 +70,11 @@ void ASTERIXDecodeJob::jasterix_callback(nlohmann::json& data, size_t num_frames
         return;
 
     assert (!extracted_records_);
-    extracted_records_.reset(new std::vector <nlohmann::json>());
+    extracted_records_ = std::make_shared<std::vector <nlohmann::json>> ();
+    //extracted_records_.reset(new std::vector <nlohmann::json>());
 
     num_frames_ = num_frames;
     num_records_ = num_records;
-
-    //std::shared_ptr<json> moved_data {new json()};
-
-    //*moved_data = std::move(data);
 
     unsigned int category;
 
@@ -129,15 +128,15 @@ void ASTERIXDecodeJob::jasterix_callback(nlohmann::json& data, size_t num_frames
         }
     }
 
-    //loginf << "ASTERIXDecodeJob: jasterix_callback: got " << moved_data.size() << " records";
-
     while (pause_) // block decoder until unpaused
     {
-        QThread::sleep(1);
+        QThread::msleep(1);
     }
 
     emit decodedASTERIXSignal(extracted_records_);
     extracted_records_ = nullptr;
+
+    data.clear();
 }
 
 

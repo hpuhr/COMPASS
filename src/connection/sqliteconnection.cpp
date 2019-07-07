@@ -494,7 +494,8 @@ std::vector <std::string> SQLiteConnection::getTableList()  // buffer of table n
     std::vector <std::string> tables;
 
     DBCommand command;
-    command.set ("SELECT name FROM sqlite_master WHERE name != 'sqlite_sequence' ORDER BY name DESC;");
+    command.set ("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name DESC;");
+    //command.set ("SELECT name FROM sqlite_master WHERE name != 'sqlite_sequence' ORDER BY name DESC;");
     PropertyList list;
     list.addProperty ("name", PropertyDataType::STRING);
     command.list (list);

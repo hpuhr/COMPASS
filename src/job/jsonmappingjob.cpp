@@ -3,9 +3,9 @@
 #include "buffer.h"
 #include "dbobject.h"
 
-JSONMappingJob::JSONMappingJob(std::vector<nlohmann::json>&& json_objects,
+JSONMappingJob::JSONMappingJob(std::shared_ptr<std::vector<nlohmann::json>> extracted_records,
                                const std::map <std::string, JSONObjectParser>& mappings, size_t key_count)
-    : Job ("JSONMappingJob"), json_objects_(json_objects), parsers_(mappings), key_count_(key_count)
+    : Job ("JSONMappingJob"), extracted_records_(extracted_records), parsers_(mappings), key_count_(key_count)
 {
 
 }
@@ -28,7 +28,7 @@ void JSONMappingJob::run ()
     bool parsed_any = false;
 
     logdbg << "JSONMappingJob: run: mapping json";
-    for (auto& j_it : json_objects_)
+    for (auto& j_it : *extracted_records_)
     {
         //loginf << "UGA '" << j_it.dump(4) << "'";
 
@@ -65,11 +65,6 @@ void JSONMappingJob::run ()
     done_ = true;
     logdbg << "JSONMappingJob: run: done: mapped " << num_created_ << " skipped " << num_not_mapped_;
 }
-
-//std::vector <JsonMapping>&& JSONMappingJob::mappings()
-//{
-//    return std::move(mappings_);
-//}
 
 size_t JSONMappingJob::numMapped() const
 {

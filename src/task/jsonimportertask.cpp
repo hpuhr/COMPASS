@@ -46,6 +46,7 @@
 
 using namespace Utils;
 using namespace nlohmann;
+using namespace std;
 
 JSONImporterTask::JSONImporterTask(const std::string& class_id, const std::string& instance_id,
                                    TaskManager* task_manager)
@@ -352,18 +353,19 @@ void JSONImporterTask::parseJSONDoneSlot ()
 
     objects_parsed_ += parse_job->objectsParsed();
     objects_parse_errors_ += parse_job->parseErrors();
-    std::vector<json> json_objects = std::move(parse_job->jsonObjects());
+    std::shared_ptr<std::vector<nlohmann::json>> json_objects =
+            make_shared<std::vector<nlohmann::json>> (std::move(parse_job->jsonObjects()));
 
     json_parse_jobs_.erase(json_parse_jobs_.begin());
 
-    logdbg << "JSONImporterTask: parseJSONDoneSlot: " << json_objects.size() << " parsed objects";
+    logdbg << "JSONImporterTask: parseJSONDoneSlot: " << json_objects->size() << " parsed objects";
 
-    size_t count = json_objects.size();
+    size_t count = json_objects->size();
 
     assert (schemas_.count(current_schema_));
 
     std::shared_ptr<JSONMappingJob> json_map_job =
-            std::shared_ptr<JSONMappingJob> (new JSONMappingJob (std::move(json_objects),
+            std::shared_ptr<JSONMappingJob> (new JSONMappingJob (json_objects,
                                                                  schemas_.at(current_schema_).parsers(), key_count_));
     connect (json_map_job.get(), SIGNAL(obsoleteSignal()), this, SLOT(mapJSONObsoleteSlot()),
              Qt::QueuedConnection);

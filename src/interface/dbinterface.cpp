@@ -267,6 +267,8 @@ void DBInterface::createTable (DBTable& table)
 
     locker.unlock();
 
+    //QThread::msleep(100);
+
     updateTableInfo();
     table.updateOnDatabase();
 
