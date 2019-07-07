@@ -1,7 +1,7 @@
 <Configuration class_id="TaskManager" instance_id="TaskManager0">
     <Configuration class_id="ASTERIXImporterTask" instance_id="ASTERIXImporterTask0">
         <ParameterBool debug_jasterix="0"/>
-        <ParameterString current_filename="/home/sk/data/datasets/20190409_1200.ff"/>
+        <ParameterString current_filename=""/>
         <ParameterString current_framing="ioss"/>
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig0">
             <ParameterBool decode="1"/>
@@ -11,12 +11,12 @@
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig1">
             <ParameterBool decode="1"/>
             <ParameterString category="020"/>
-            <ParameterString edition="1.5"/>
+            <ParameterString edition="1.8"/>
         </Configuration>
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig10">
             <ParameterBool decode="1"/>
             <ParameterString category="062"/>
-            <ParameterString edition="1.12"/>
+            <ParameterString edition="1.16"/>
         </Configuration>
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig2">
             <ParameterBool decode="1"/>
@@ -26,7 +26,7 @@
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig3">
             <ParameterBool decode="1"/>
             <ParameterString category="065"/>
-            <ParameterString edition="1.3"/>
+            <ParameterString edition="1.2"/>
         </Configuration>
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig4">
             <ParameterBool decode="1"/>
@@ -41,7 +41,7 @@
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig6">
             <ParameterBool decode="1"/>
             <ParameterString category="063"/>
-            <ParameterString edition="1.0"/>
+            <ParameterString edition="1.1"/>
         </Configuration>
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig7">
             <ParameterBool decode="1"/>
@@ -51,7 +51,7 @@
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig8">
             <ParameterBool decode="1"/>
             <ParameterString category="019"/>
-            <ParameterString edition="1.3"/>
+            <ParameterString edition="1.2"/>
         </Configuration>
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig9">
             <ParameterBool decode="1"/>
@@ -78,6 +78,116 @@
                     <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping10">
+                    <ParameterBool active="1"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="airspeed_kt"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="150.Air Speed [knots]"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping11">
+                    <ParameterBool active="1"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="airspeed_mach"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="150.Air Speed [mach]"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping12">
+                    <ParameterBool active="1"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="alt_geo_ft"/>
+                    <ParameterString dimension="Height"/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="140.Geometric Height"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit="Feet"/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping13">
+                    <ParameterBool active="1"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="baro_vertical_rate_ftm"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="150.Barometric Vertical Rate"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping14">
+                    <ParameterBool active="1"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="descriptor_atp"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="040.ATP"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping15">
+                    <ParameterBool active="1"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="differential_correction"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="040.DCR"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping16">
+                    <ParameterBool active="1"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="do_260a"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="210.VN"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping17">
+                    <ParameterBool active="1"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="emitter_category"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="020.ECAT"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping18">
+                    <ParameterBool active="1"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="from_fft"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="040.RAB"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping19">
+                    <ParameterBool active="1"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="geo_vertical_rate_ftm"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="157.Geometric Vertical Rate"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping2">
                     <ParameterBool active="1"/>
                     <ParameterBool mandatory="1"/>
@@ -89,6 +199,116 @@
                     <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping20">
+                    <ParameterBool active="1"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="groundspeed_kt"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="160.Ground Speed"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping21">
+                    <ParameterBool active="1"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="ground_bit"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="040.GBS"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping22">
+                    <ParameterBool active="1"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="magnetic_heading_deg"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="152.Magnetic Heading"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping23">
+                    <ParameterBool active="1"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="roll_angle_deg"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="230.Roll Angle"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping24">
+                    <ParameterBool active="1"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="simulated_target"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="040.SIM"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping25">
+                    <ParameterBool active="1"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="position_accuracy"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="090.NACp"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping26">
+                    <ParameterBool active="1"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="spi"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="200.SS"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping27">
+                    <ParameterBool active="1"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="target_status"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="200.PS"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping28">
+                    <ParameterBool active="1"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="test_target"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="040.TST"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping29">
+                    <ParameterBool active="1"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="track_angle_deg"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="160.Track Angle"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping3">
                     <ParameterBool active="1"/>
                     <ParameterBool mandatory="1"/>
@@ -97,6 +317,39 @@
                     <ParameterString dimension=""/>
                     <ParameterString format_data_type=""/>
                     <ParameterString json_key="010.SIC"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping30">
+                    <ParameterBool active="1"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="true_airspeed_kt"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="151.True Airspeed"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping31">
+                    <ParameterBool active="1"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="turnrate_degps"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="165.TAR"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping32">
+                    <ParameterBool active="1"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="ADSB"/>
+                    <ParameterString dbovariable_name="velocity_accuracy"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="090.NUCr or NACv"/>
                     <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
@@ -195,6 +448,17 @@
                     <ParameterString json_key="140.Time of Day"/>
                     <ParameterString json_value_format=""/>
                     <ParameterString unit="Second"/>
+                </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping11">
+                    <ParameterBool active="1"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="MLAT"/>
+                    <ParameterString dbovariable_name="track_num"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="161.track Number"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping2">
                     <ParameterBool active="1"/>
@@ -314,6 +578,17 @@
                     <ParameterString json_value_format=""/>
                     <ParameterString unit="Second"/>
                 </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping11">
+                    <ParameterBool active="1"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="Radar"/>
+                    <ParameterString dbovariable_name="track_num"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="161.TRACK NUMBER"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping2">
                     <ParameterBool active="1"/>
                     <ParameterBool mandatory="1"/>
@@ -432,6 +707,17 @@
                     <ParameterString json_value_format=""/>
                     <ParameterString unit="Second"/>
                 </Configuration>
+                <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping11">
+                    <ParameterBool active="1"/>
+                    <ParameterBool mandatory="0"/>
+                    <ParameterString db_object_name="Tracker"/>
+                    <ParameterString dbovariable_name="track_num"/>
+                    <ParameterString dimension=""/>
+                    <ParameterString format_data_type=""/>
+                    <ParameterString json_key="040.Track Number"/>
+                    <ParameterString json_value_format=""/>
+                    <ParameterString unit=""/>
+                </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping2">
                     <ParameterBool active="1"/>
                     <ParameterBool mandatory="1"/>
@@ -483,7 +769,7 @@
                     <ParameterString dbovariable_name="callsign"/>
                     <ParameterString dimension=""/>
                     <ParameterString format_data_type=""/>
-                    <ParameterString json_key="390.CSN.Callsign"/>
+                    <ParameterString json_key="380.ID.Target Identification"/>
                     <ParameterString json_value_format=""/>
                     <ParameterString unit=""/>
                 </Configuration>
@@ -524,7 +810,7 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="JSONImporterTask" instance_id="JSONImporterTask">
-        <ParameterString current_filename="/home/sk/atsdb_demo/huc-2018-07-10.json.zip"/>
+        <ParameterString current_filename=""/>
         <ParameterString current_schema="SDDL"/>
         <Configuration class_id="JSONParsingSchema" instance_id="JSONParsingSchemaADSBExchange0">
             <ParameterString name="ADSBExchange"/>

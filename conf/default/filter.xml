@@ -1,5 +1,5 @@
 <Configuration class_id="FilterManager" instance_id="FilterManager0">
-    <ParameterString db_id="SQLite:_/home/sk/data/datasets/test.db"/>
+    <ParameterString db_id="SQLite:_/home/sk/data/porto/NAVpt_LisFIR_190401_08-16.db"/>
     <Configuration class_id="DBFilter" instance_id="Barometric Altitude">
         <ParameterBool active="0"/>
         <ParameterBool changed="1"/>
@@ -11,7 +11,7 @@
             <ParameterBool op_and="1"/>
             <ParameterString operator="&gt;="/>
             <ParameterString reset_value="MIN"/>
-            <ParameterString value="100"/>
+            <ParameterString value="-100"/>
             <ParameterString variable_dbo_name="Meta"/>
             <ParameterString variable_name="modec_code_ft"/>
         </Configuration>
@@ -20,12 +20,31 @@
             <ParameterBool op_and="1"/>
             <ParameterString operator="&lt;="/>
             <ParameterString reset_value="MAX"/>
-            <ParameterString value="409200"/>
+            <ParameterString value="102300"/>
             <ParameterString variable_dbo_name="Meta"/>
             <ParameterString variable_name="modec_code_ft"/>
         </Configuration>
         <Configuration class_id="DBFilterWidget" instance_id="Barometric AltitudeWidget0">
-            <ParameterBool visible="0"/>
+            <ParameterBool visible="1"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBFilter" instance_id="Callsign">
+        <ParameterBool active="1"/>
+        <ParameterBool changed="1"/>
+        <ParameterBool op_and_="1"/>
+        <ParameterBool visible="0"/>
+        <ParameterString name="Callsign"/>
+        <Configuration class_id="DBFilterCondition" instance_id="CallsignCondition0">
+            <ParameterBool absolute_value="0"/>
+            <ParameterBool op_and="1"/>
+            <ParameterString operator="LIKE"/>
+            <ParameterString reset_value="%TEST%"/>
+            <ParameterString value="%TEST%"/>
+            <ParameterString variable_dbo_name="Meta"/>
+            <ParameterString variable_name="callsign"/>
+        </Configuration>
+        <Configuration class_id="DBFilterWidget" instance_id="CallsignWidget0">
+            <ParameterBool visible="1"/>
         </Configuration>
     </Configuration>
     <Configuration class_id="DBFilter" instance_id="Mode 3A Codes">
@@ -44,7 +63,7 @@
             <ParameterString variable_name="mode3a_code"/>
         </Configuration>
         <Configuration class_id="DBFilterWidget" instance_id="Mode 3A CodesWidget0">
-            <ParameterBool visible="0"/>
+            <ParameterBool visible="1"/>
         </Configuration>
     </Configuration>
     <Configuration class_id="DBFilter" instance_id="Position">
@@ -123,7 +142,7 @@
             <ParameterBool op_and="1"/>
             <ParameterString operator="&gt;="/>
             <ParameterString reset_value="MIN"/>
-            <ParameterString value="09:18:19.789"/>
+            <ParameterString value="07:57:52.000"/>
             <ParameterString variable_dbo_name="Meta"/>
             <ParameterString variable_name="tod"/>
         </Configuration>
@@ -132,7 +151,7 @@
             <ParameterBool op_and="1"/>
             <ParameterString operator="&lt;="/>
             <ParameterString reset_value="MAX"/>
-            <ParameterString value="10:33:22.883"/>
+            <ParameterString value="16:04:15.953"/>
             <ParameterString variable_dbo_name="Meta"/>
             <ParameterString variable_name="tod"/>
         </Configuration>
@@ -145,6 +164,11 @@
         <ParameterBool LoadSensorNumber12830="1"/>
         <ParameterBool LoadSensorNumber12880="1"/>
         <ParameterBool LoadSensorNumber26="1"/>
+        <ParameterBool LoadSensorNumber26662="1"/>
+        <ParameterBool LoadSensorNumber26694="1"/>
+        <ParameterBool LoadSensorNumber26696="1"/>
+        <ParameterBool LoadSensorNumber26699="1"/>
+        <ParameterBool LoadSensorNumber26701="1"/>
         <ParameterBool LoadSensorNumber5640="1"/>
         <ParameterBool active="0"/>
         <ParameterBool changed="0"/>
@@ -186,7 +210,12 @@
         <ParameterBool LoadSensorNumber22="1"/>
         <ParameterBool LoadSensorNumber23="1"/>
         <ParameterBool LoadSensorNumber24="1"/>
-        <ParameterBool LoadSensorNumber25="0"/>
+        <ParameterBool LoadSensorNumber25="1"/>
+        <ParameterBool LoadSensorNumber26661="1"/>
+        <ParameterBool LoadSensorNumber26695="1"/>
+        <ParameterBool LoadSensorNumber26697="1"/>
+        <ParameterBool LoadSensorNumber26700="1"/>
+        <ParameterBool LoadSensorNumber26702="1"/>
         <ParameterBool LoadSensorNumber28="1"/>
         <ParameterBool active="0"/>
         <ParameterBool changed="0"/>
@@ -208,21 +237,36 @@
         <ParameterBool LoadSensorNumber12291="1"/>
         <ParameterBool LoadSensorNumber12763="1"/>
         <ParameterBool LoadSensorNumber12770="1"/>
+        <ParameterBool LoadSensorNumber12800="1"/>
         <ParameterBool LoadSensorNumber12809="1"/>
         <ParameterBool LoadSensorNumber12810="1"/>
         <ParameterBool LoadSensorNumber12813="1"/>
         <ParameterBool LoadSensorNumber12820="1"/>
+        <ParameterBool LoadSensorNumber12848="1"/>
         <ParameterBool LoadSensorNumber13="1"/>
-        <ParameterBool LoadSensorNumber14="0"/>
-        <ParameterBool LoadSensorNumber15="0"/>
+        <ParameterBool LoadSensorNumber14="1"/>
+        <ParameterBool LoadSensorNumber15="1"/>
         <ParameterBool LoadSensorNumber16="1"/>
         <ParameterBool LoadSensorNumber25005="1"/>
         <ParameterBool LoadSensorNumber25006="1"/>
         <ParameterBool LoadSensorNumber25103="1"/>
         <ParameterBool LoadSensorNumber25104="1"/>
+        <ParameterBool LoadSensorNumber26625="1"/>
+        <ParameterBool LoadSensorNumber26626="1"/>
+        <ParameterBool LoadSensorNumber26627="1"/>
+        <ParameterBool LoadSensorNumber26628="1"/>
+        <ParameterBool LoadSensorNumber26629="1"/>
+        <ParameterBool LoadSensorNumber26631="1"/>
         <ParameterBool LoadSensorNumber3="1"/>
+        <ParameterBool LoadSensorNumber30721="1"/>
+        <ParameterBool LoadSensorNumber30722="1"/>
+        <ParameterBool LoadSensorNumber30723="1"/>
+        <ParameterBool LoadSensorNumber30724="1"/>
+        <ParameterBool LoadSensorNumber37641="1"/>
         <ParameterBool LoadSensorNumber4="1"/>
         <ParameterBool LoadSensorNumber5="1"/>
+        <ParameterBool LoadSensorNumber513="1"/>
+        <ParameterBool LoadSensorNumber514="1"/>
         <ParameterBool LoadSensorNumber5636="1"/>
         <ParameterBool LoadSensorNumber5637="1"/>
         <ParameterBool LoadSensorNumber5642="1"/>
@@ -230,6 +274,7 @@
         <ParameterBool LoadSensorNumber6="1"/>
         <ParameterBool LoadSensorNumber7="1"/>
         <ParameterBool LoadSensorNumber8="1"/>
+        <ParameterBool LoadSensorNumber8715="1"/>
         <ParameterBool LoadSensorNumber9="1"/>
         <ParameterBool LoadSensorNumber9745="1"/>
         <ParameterBool active="0"/>
@@ -245,7 +290,13 @@
     <Configuration class_id="DataSourcesFilter" instance_id="TrackerDataSources0">
         <ParameterBool LoadSensorNumber12990="1"/>
         <ParameterBool LoadSensorNumber13040="1"/>
+        <ParameterBool LoadSensorNumber13044="1"/>
+        <ParameterBool LoadSensorNumber26642="1"/>
+        <ParameterBool LoadSensorNumber26645="1"/>
+        <ParameterBool LoadSensorNumber26646="1"/>
         <ParameterBool LoadSensorNumber27="1"/>
+        <ParameterBool LoadSensorNumber30769="1"/>
+        <ParameterBool LoadSensorNumber30770="1"/>
         <ParameterBool active="0"/>
         <ParameterBool changed="0"/>
         <ParameterBool op_and_="1"/>
