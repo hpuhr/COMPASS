@@ -9,9 +9,9 @@ A Listbox View displays the DBO records as text in tables, to allow full data in
   \label{fig:listbox_start}
 \end{figure}
 
-On the left side, a number of tabs exist for each active DBO, each of which contains a table. On the right side, a configuration area exists. A number of variables is displayed in the 'Variables' list. One can change the order, remove and add variables to be inspected. \\
+On the left side, a number of tabs exist as 'All' and for each active DBO, each of which contains a table. On the right side, a configuration area exists. A number of variables is displayed in the 'Variables' list. One can change the order, remove and add variables to be inspected. \\
 
-To limit, order based on a variable or load the dataset, the mechanism described in Section \nameref{sec:management_dbos} can be used. To filter the dataset, the mechanism described in Section \nameref{sec:filtering} can be used.
+To limit or order based on a variable or load the dataset, the mechanism described in Section \nameref{sec:management_dbos} can be used. To filter the dataset, the mechanism described in Section \nameref{sec:filtering} can be used.
 
 \begin{figure}[H]
     \hspace*{-2cm}
@@ -20,19 +20,23 @@ To limit, order based on a variable or load the dataset, the mechanism described
   \label{fig:listbox_load}
 \end{figure}
 
-Once updated, the tables are filled with text representing the values of the DBO variables.  If a value is undefined its cell is empy. \\
+Once updated, the tables are filled with text representing the values of the DBO variables.  If a value is undefined its cell is empy. For each DBO, a dedicated table is shown, as well as the 'All' table, where data from all DBOs are collectively shown. \\
 
-Please \textbf{note} that since some variable might only exist in some DBOs, the number of columns for different DBOs may differ.
+Please \textbf{note} that since some variable might only exist in some DBOs, the number of columns for different DBOs may differ. \\
+
+In the first column in the tables, checkboxes are shown, indicating whether that target report is currently selected. Selection may be changed by selecting/de-selecting the respective checkboxes or in other views (cross-selection). If the selection is changed in one of the other views, this view is updated automatically.
 
 \subsubsection{Variable List}
-All DBO variables which are loaded from the database are shown in the 'Variables' list. This list is ordered,
-and like all configuration elements persistent. Ordering can be changed by selecting (clicking on) a variable
-and using the up/down triangle buttons.
-When pressing the 'Remove' button, a selected variable is removed.  Pressing the 'Add' button allows
-appending a variable to the list using a context-menu.
+All DBO variables which are loaded from the database are shown in the 'Variables' list. This list is ordered, and like all configuration elements persistent. Ordering can be changed by selecting (clicking on) a variable and using the up/down triangle buttons. \\
+
+When pressing the 'Remove' button, a selected variable is removed.  Pressing the 'Add' button allows appending a variable to the list using a context-menu.
+
+\subsubsection{Show Only Selected}
+When this checkbox is checked, only target reports selected in other views are shown. If this is active, de-selecting a target report removes it from the shown data.
 
 \subsubsection{Use Presentation}
 When this checkbox is checked, the so called presentation mode is used. In the database, the variables might have different units or a data representation which is not easy to read. For this purpose, a presentation mode was introduced to e.g. show a Mode A code as octal, or a Time of Day not in seconds since midnight but in HH::MM:SS.SS format. When the ''Use Presentation`` checkbox is not checked, the original database values are presented (and exported).
+
 
 \subsubsection{Exporting}
 \label{sec:exporting}
@@ -49,6 +53,7 @@ When pressing the ''Export`` button, a dialog is opened.
 \end{figure}
 
 Choose a filename, and press ''Save`` to save the data. If the ''Overwrite Exported File`` checkbox was checked, an existing file is automatically overwritten. Please \textbf{note} that exporting might take some time for larger datasets, and currently no status indication is given.\\
+
 After export, a dialog is shown indicating that the export was completed.
 
 \begin{figure}[H]

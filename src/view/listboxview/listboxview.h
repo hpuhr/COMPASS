@@ -40,20 +40,21 @@ class ListBoxView : public View
 {
     Q_OBJECT
 public slots:
-    /// @brief Is executed when selection is changed. Does nothing.
-    void selectionChanged();
-    /// @brief Is executed when selection is to be cleared. Does nothing.
-    void selectionToBeCleared();
+//    /// @brief Is executed when selection is changed. Does nothing.
+//    void selectionChanged();
+//    /// @brief Is executed when selection is to be cleared. Does nothing.
+//    void selectionToBeCleared();
 
 signals:
-    /// @brief Is emitted when selection was changed locally
-    void setSelection (const ViewSelectionEntries& entries);
-    /// @brief Is emitted when somthing was added to the selection
-    void addSelection (const ViewSelectionEntries& entries);
-    /// @brief Is emitted when selection should be cleared
-    void clearSelection();
+//    /// @brief Is emitted when selection was changed locally
+//    void setSelection (const ViewSelectionEntries& entries);
+//    /// @brief Is emitted when somthing was added to the selection
+//    void addSelection (const ViewSelectionEntries& entries);
+//    /// @brief Is emitted when selection should be cleared
+//    void clearSelection();
 
-    void usePresentationSignal (bool use_presentation);
+    void showOnlySelectedSignal (bool value);
+    void usePresentationSignal (bool value);
 
 public:
     /// @brief Constructor
@@ -79,18 +80,23 @@ public:
     bool overwriteCSV() const;
     void overwriteCSV(bool overwrite_csv);
 
+    bool showOnlySelected() const;
+    void showOnlySelected(bool value);
+
 protected:
     /// For data display
     ListBoxViewWidget* widget_ {nullptr};
     /// For data loading
     ListBoxViewDataSource* data_source_ {nullptr};
 
+    bool show_only_selected_ {true};
     /// Use presentation
     bool use_presentation_ {true};
     /// Overwrite during export, if not, it appends
     bool overwrite_csv_ {false};
 
     virtual void checkSubConfigurables ();
+    virtual void updateSelection () override;
 };
 
 #endif /* LISTBOXVIEW_H_ */

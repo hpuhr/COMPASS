@@ -201,7 +201,7 @@ std::shared_ptr<Buffer> JSONObjectParser::getNewBuffer () const
 {
     assert (initialized_);
     assert (db_object_);
-    return std::shared_ptr<Buffer> {new Buffer (list_, db_object_->name())};
+    return std::make_shared<Buffer> (list_, db_object_->name());
 }
 
 bool JSONObjectParser::parseJSON (nlohmann::json& j, std::shared_ptr<Buffer> buffer) const

@@ -35,6 +35,13 @@ class QTabWidget;
 class ViewManager : public QObject, public Configurable
 {
     Q_OBJECT
+
+signals:
+    void selectionChangedSignal();
+
+public slots:
+    void selectionChangedSlot();
+
 public:
     ViewManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb);
     virtual ~ViewManager();

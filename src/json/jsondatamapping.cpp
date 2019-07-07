@@ -37,9 +37,6 @@ JSONDataMapping::JSONDataMapping (const std::string& class_id, const std::string
 
     registerParameter ("format_data_type", &format_data_type_, "");
     registerParameter ("json_value_format", &json_value_format_, "");
-    //registerParameter("json_value_format_str", &json_value_format_str_, "");
-    //if (variable_)
-    //    json_value_format_.reset(new Format (variable_->dataType(), json_value_format_str_));
 
     registerParameter("dimension", &dimension_, "");
     registerParameter("unit", &unit_, "");

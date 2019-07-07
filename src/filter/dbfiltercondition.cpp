@@ -440,7 +440,11 @@ std::string DBFilterCondition::getTransformedValue (const std::string& untransfo
                    << column.dataFormat() << "'";
 
         logdbg << "DBFilterCondition: getTransformedValue: data format transformed value string " << value_str;
-        transformed_value_strings.push_back(value_str);
+
+        if (variable->dataType() == PropertyDataType::STRING)
+            transformed_value_strings.push_back("'"+value_str+"'");
+        else
+            transformed_value_strings.push_back(value_str);
     }
 
     assert (transformed_value_strings.size());

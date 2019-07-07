@@ -9,9 +9,18 @@ osgEarth Sample
          <terrain color="#101010ff"/>
     </options>
 
-    <image name="world" driver="gdal">
+    <image driver="gdal" name="world-tiff" cache_enabled="false">
+        <url>shapefiles/example.tif</url>
+        <caching_policy usage="no_cache"/>
     </image>
     
+    <geodetic_graticule name="Graticule" visible="true">
+        <color>#ffff007f</color>
+        <label_color>#ffffffff</label_color>
+        <grid_lines>20</grid_lines>
+        <resolutions>10 5.0 2.0 1.0 0.5</resolutions>
+    </geodetic_graticule>
+
     <model name="world_boundaries" driver="feature_geom">
             
         <features name="world" driver="ogr">

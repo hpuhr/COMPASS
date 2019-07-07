@@ -33,6 +33,7 @@ class QStringList;
 class Buffer;
 class DBOVariableSet;
 class DBObject;
+class ListBoxView;
 class ListBoxViewDataSource;
 
 /**
@@ -57,11 +58,13 @@ public slots:
     void exportSlot(bool overwrite);
     void exportDoneSlot (bool cancelled);
 
+    void showOnlySelectedSlot (bool value);
     void usePresentationSlot (bool use_presentation);
 
 public:
     /// @brief Constructor
-    BufferTableWidget(DBObject &object, ListBoxViewDataSource& data_source, QWidget * parent = 0, Qt::WindowFlags f = 0);
+    BufferTableWidget(DBObject &object, ListBoxView& view, ListBoxViewDataSource& data_source, QWidget* parent=0,
+                      Qt::WindowFlags f=0);
     /// @brief Destructor
     virtual ~BufferTableWidget();
 
@@ -69,8 +72,14 @@ public:
     /// @brief Shows Buffer content in table
     void show (std::shared_ptr<Buffer> buffer);
 
+    void resetModel();
+    void updateToSelection ();
+
+    ListBoxView &view() const;
+
 protected:
     DBObject& object_;
+    ListBoxView& view_;
     ListBoxViewDataSource& data_source_;
     /// Table with items
     QTableView* table_ {nullptr};

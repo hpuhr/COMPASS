@@ -24,10 +24,13 @@
 #include "logger.h"
 #include "viewselection.h"
 
+#include <QApplication>
+
 ListBoxView::ListBoxView(const std::string& class_id, const std::string& instance_id, ViewContainer *w,
                          ViewManager &view_manager)
     : View (class_id, instance_id, w, view_manager)
 {
+    registerParameter ("show_only_selected", &show_only_selected_, false);
     registerParameter ("use_presentation", &use_presentation_, true);
     registerParameter ("overwrite_csv", &overwrite_csv_, true);
 }
@@ -71,8 +74,10 @@ bool ListBoxView::init()
     connect (widget_->configWidget(), SIGNAL(exportSignal(bool)), widget_->getDataWidget(), SLOT(exportDataSlot(bool)));
     connect (widget_->getDataWidget(), SIGNAL(exportDoneSignal(bool)), widget_->configWidget(), SLOT(exportDoneSlot(bool)));
 
+    connect (this, SIGNAL(showOnlySelectedSignal(bool)), widget_->getDataWidget(), SLOT(showOnlySelectedSlot(bool)));
     connect (this, SIGNAL(usePresentationSignal(bool)), widget_->getDataWidget(), SLOT(usePresentationSlot(bool)));
 
+    widget_->getDataWidget()->showOnlySelectedSlot(show_only_selected_);
     widget_->getDataWidget()->usePresentationSlot(use_presentation_);
 
     return true;
@@ -84,11 +89,11 @@ void ListBoxView::generateSubConfigurable (const std::string &class_id, const st
     if ( class_id == "ListBoxViewDataSource" )
     {
         assert (!data_source_);
-        data_source_ = new ListBoxViewDataSource( class_id, instance_id, this );
+        data_source_ = new ListBoxViewDataSource (class_id, instance_id, this);
     }
     else if( class_id == "ListBoxViewWidget" )
     {
-        widget_ = new ListBoxViewWidget( class_id, instance_id, this, this, central_widget_ );
+        widget_ = new ListBoxViewWidget (class_id, instance_id, this, this, central_widget_);
         setWidget( widget_ );
     }
     else
@@ -116,15 +121,15 @@ DBOVariableSet ListBoxView::getSet (const std::string& dbo_name)
 }
 
 
-void ListBoxView::selectionChanged()
-{
-    //  assert (data_source_);
-    //  data_source_->updateSelection();
-}
-void ListBoxView::selectionToBeCleared()
-{
+//void ListBoxView::selectionChanged()
+//{
+//    //  assert (data_source_);
+//    //  data_source_->updateSelection();
+//}
+//void ListBoxView::selectionToBeCleared()
+//{
 
-}
+//}
 
 bool ListBoxView::usePresentation() const
 {
@@ -146,5 +151,34 @@ bool ListBoxView::overwriteCSV() const
 void ListBoxView::overwriteCSV(bool overwrite_csv)
 {
     overwrite_csv_ = overwrite_csv;
+}
+
+bool ListBoxView::showOnlySelected() const
+{
+    return show_only_selected_;
+}
+
+void ListBoxView::showOnlySelected(bool value)
+{
+    loginf << "ListBoxView: showOnlySelected";
+
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+    show_only_selected_ = value;
+
+    emit showOnlySelectedSignal(value);
+
+    QApplication::restoreOverrideCursor();
+}
+
+void ListBoxView::updateSelection ()
+{
+    loginf << "ListBoxView: updateSelection";
+    assert (widget_);
+
+    if (show_only_selected_)
+        widget_->getDataWidget()->updateToSelection();
+    else
+        widget_->getDataWidget()->resetModels(); // just updates the checkboxes
 }
 

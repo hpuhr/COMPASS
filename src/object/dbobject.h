@@ -278,6 +278,8 @@ public:
 
     void print ();
 
+    void removeDependenciesForSchema (const std::string& schema_name);
+
 protected:
     /// DBO name
     std::string name_;
@@ -323,6 +325,7 @@ protected:
 
     ///@brief Generates data sources information from previous post-processing.
     void buildDataSources();
+    void removeVariableInfoForSchema (const std::string& schema_name);
 };
 
 #endif /* DBOBJECT_H_ */

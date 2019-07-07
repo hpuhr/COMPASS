@@ -121,6 +121,8 @@ public:
 
     void quitLoading ();
 
+    void removeDependenciesForSchema (const std::string& schema_name);
+
 protected:
     bool use_filters_ {false};
 

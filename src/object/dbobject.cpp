@@ -274,6 +274,8 @@ void DBObject::deleteMetaTable (const std::string& schema)
     if (current_meta_table_->name() == meta_table_name)
         current_meta_table_ = nullptr;
 
+    removeVariableInfoForSchema (schema);
+
     if (widget_)
         widget_->updateMetaTablesGridSlot();
 }
@@ -648,9 +650,11 @@ void DBObject::addDataSources (std::map <int, std::pair<int,int>>& sources)
 
     DBInterface& db_interface = ATSDB::instance().interface();
     db_interface.insertBuffer(meta_table, buffer_ptr);
+    db_interface.updateTableInfo();
 
-    logdbg << "DBObject: addDataSources: emitting signal";
-    emit db_interface.databaseContentChangedSignal();
+    databaseContentChangedSlot();
+    //logdbg << "DBObject: addDataSources: emitting signal";
+    //emit db_interface.databaseContentChangedSignal();
 
 }
 
@@ -923,13 +927,13 @@ void DBObject::insertProgressSlot (float percent)
 void DBObject::insertDoneSlot ()
 {
     assert (insert_job_);
-    bool emit_change = insert_job_->emitChange();
+//    bool emit_change = insert_job_->emitChange();
     insert_job_ = nullptr;
 
     emit insertDoneSignal (*this);
 
-    if (emit_change)
-        emit ATSDB::instance().interface().databaseContentChangedSignal();
+//    if (emit_change)
+//        emit ATSDB::instance().interface().databaseContentChangedSignal();
 }
 
 void DBObject::updateData (DBOVariable &key_var, DBOVariableSet& list, std::shared_ptr<Buffer> buffer)
@@ -1117,7 +1121,9 @@ void DBObject::finalizeReadJobDoneSlot()
     assert (found);
 
     if (!data_)
+    {
         data_ = buffer;
+    }
     else
         data_->seizeBuffer (*buffer.get());
 
@@ -1246,4 +1252,35 @@ void DBObject::print ()
 
     loginf << "DBObject " << name() << ":\n" << ss.str();
 
+}
+
+void DBObject::removeDependenciesForSchema (const std::string& schema_name)
+{
+    loginf << "DBObject " << name() << ": removeDependenciesForSchema: " << schema_name;
+
+    if (meta_table_definitions_.count(schema_name))
+    {
+        loginf << "DBObject " << name() << ": removeDependenciesForSchema: removing meta-table";
+        deleteMetaTable(schema_name);
+    }
+}
+
+void DBObject::removeVariableInfoForSchema (const std::string& schema_name)
+{
+    loginf << "DBObject " << name() << ": removeVariableInfoForSchema: " << schema_name;
+
+    for (auto var_it = variables_.begin(); var_it != variables_.end();)
+    {
+        if (var_it->second.onlyExistsInSchema(schema_name))
+        {
+            loginf << "DBObject " << name() << ": removeVariableInfoForSchema: variable" << var_it->first
+                   << " exists only in schema to be removed, deleting";
+            variables_.erase(var_it++);
+        }
+        else
+        {
+            var_it->second.removeInfoForSchema(schema_name);
+            ++var_it;
+        }
+    }
 }

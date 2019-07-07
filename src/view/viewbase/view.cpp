@@ -37,13 +37,18 @@ unsigned int View::cnt_=0;
 @param instance_id Configurable instance id.
 @param w ViewContainerWidget the view is embedded in, configurable parent.
  */
-View::View (const std::string& class_id, const std::string& instance_id, ViewContainer *container, ViewManager &view_manager)
-:   Configurable( class_id, instance_id, container), view_manager_(view_manager), model_(nullptr), widget_(nullptr), container_(container)
+View::View (const std::string& class_id, const std::string& instance_id, ViewContainer *container,
+            ViewManager &view_manager)
+: Configurable( class_id, instance_id, container), view_manager_(view_manager), model_(nullptr), widget_(nullptr),
+  container_(container)
 {
     logdbg  << "View: constructor";
 
     central_widget_ = new QWidget();
     central_widget_->setAutoFillBackground(true);
+
+    connect (this, &View::selectionChangedSignal, &view_manager_, &ViewManager::selectionChangedSlot);
+    connect (&view_manager_, &ViewManager::selectionChangedSignal, this, &View::selectionChangedSlot);
 }
 
 /**
@@ -155,4 +160,20 @@ void View::constructWidget()
 void View::viewShutdown( const std::string& err )
 {
     view_manager_.viewShutdown( this, err );
+}
+
+void View::emitSelectionChange ()
+{
+    assert (!selection_change_emitted_);
+    selection_change_emitted_ = true;
+
+    emit selectionChangedSignal();
+}
+
+void View::selectionChangedSlot()
+{
+    if (selection_change_emitted_)
+        selection_change_emitted_ = false;
+    else // only update if not self-emitted
+        updateSelection();
 }

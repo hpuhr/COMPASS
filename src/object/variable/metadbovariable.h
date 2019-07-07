@@ -70,6 +70,8 @@ public:
 
     bool existsInDB () const;
 
+    void removeOutdatedVariables ();
+
 protected:
     std::string name_;
     std::string description_;

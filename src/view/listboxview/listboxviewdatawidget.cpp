@@ -17,7 +17,9 @@
 
 #include <QTabWidget>
 #include <QHBoxLayout>
+#include <QMessageBox>
 
+#include "allbuffertablewidget.h"
 #include "buffertablewidget.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
@@ -27,8 +29,9 @@
 #include "logger.h"
 #include "atsdb.h"
 
-ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxViewDataSource* data_source, QWidget * parent, Qt::WindowFlags f)
-    : QWidget (parent, f), data_source_ (data_source)
+ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxView* view, ListBoxViewDataSource* data_source, QWidget * parent,
+                                             Qt::WindowFlags f)
+    : QWidget(parent, f), view_(view), data_source_ (data_source)
 {
     assert (data_source_);
 
@@ -41,10 +44,20 @@ ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxViewDataSource* data_source,
     {
         if (obj_it.second->hasData())
         {
-            BufferTableWidget *buffer_table = new BufferTableWidget (*obj_it.second, *data_source_);
+            if (!all_buffer_table_widget_)
+            {
+                all_buffer_table_widget_ = new AllBufferTableWidget (*view_, *data_source_);
+                tab_widget_->addTab (all_buffer_table_widget_ , "All");
+                connect (all_buffer_table_widget_, SIGNAL(exportDoneSignal(bool)), this, SLOT(exportDoneSlot(bool)));
+                connect (this, SIGNAL(showOnlySelectedSignal(bool)), all_buffer_table_widget_, SLOT(showOnlySelectedSlot(bool)));
+                connect (this, SIGNAL(usePresentationSignal(bool)), all_buffer_table_widget_, SLOT(usePresentationSlot(bool)));
+            }
+
+            BufferTableWidget *buffer_table = new BufferTableWidget (*obj_it.second, *view_, *data_source_);
             tab_widget_->addTab (buffer_table , obj_it.first.c_str());
             buffer_tables_[obj_it.first] = buffer_table;
             connect (buffer_table, SIGNAL(exportDoneSignal(bool)), this, SLOT(exportDoneSlot(bool)));
+            connect (this, SIGNAL(showOnlySelectedSignal(bool)), buffer_table, SLOT(showOnlySelectedSlot(bool)));
             connect (this, SIGNAL(usePresentationSignal(bool)), buffer_table, SLOT(usePresentationSlot(bool)));
         }
     }
@@ -74,6 +87,9 @@ void ListBoxViewDataWidget::clearTables ()
 
 void ListBoxViewDataWidget::loadingStartedSlot()
 {
+    if (all_buffer_table_widget_)
+        all_buffer_table_widget_->clear();
+
     for (auto buffer_table : buffer_tables_)
         buffer_table.second->clear();
 }
@@ -81,6 +97,10 @@ void ListBoxViewDataWidget::loadingStartedSlot()
 void ListBoxViewDataWidget::updateData (DBObject &object, std::shared_ptr<Buffer> buffer)
 {
     logdbg  << "ListBoxViewDataWidget: updateTables: start";
+
+    assert (all_buffer_table_widget_);
+    all_buffer_table_widget_->show(buffer);
+
     assert (buffer_tables_.count (object.name()) > 0);
     buffer_tables_.at(object.name())->show(buffer); //, data_source_->getSet()->getFor(type), data_source_->getDatabaseView()
 
@@ -91,8 +111,28 @@ void ListBoxViewDataWidget::exportDataSlot(bool overwrite)
 {
     logdbg << "ListBoxViewDataWidget: exportDataSlot";
     assert (tab_widget_);
+
+    AllBufferTableWidget *all_buffer_widget = dynamic_cast<AllBufferTableWidget*> (tab_widget_->currentWidget());
+
     BufferTableWidget *buffer_widget = dynamic_cast<BufferTableWidget*> (tab_widget_->currentWidget());
-    assert (buffer_widget);
+
+    if (all_buffer_widget && !buffer_widget)
+    {
+        all_buffer_widget->exportSlot(overwrite);
+        return;
+    }
+
+    if (!all_buffer_widget && !buffer_widget)
+    {
+        QMessageBox msgBox;
+        msgBox.setText("Export can not be used without loaded data.");
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.exec();
+
+        exportDoneSignal(true);
+        return;
+    }
+
     buffer_widget->exportSlot(overwrite);
 }
 
@@ -101,7 +141,33 @@ void ListBoxViewDataWidget::exportDoneSlot (bool cancelled)
     emit exportDoneSignal(cancelled);
 }
 
+void ListBoxViewDataWidget::showOnlySelectedSlot (bool value)
+{
+    emit showOnlySelectedSignal(value);
+}
+
 void ListBoxViewDataWidget::usePresentationSlot (bool use_presentation)
 {
+    loginf << "ListBoxViewDataWidget: usePresentationSlot";
+
     emit usePresentationSignal(use_presentation);
+}
+
+void ListBoxViewDataWidget::resetModels()
+{
+    if (all_buffer_table_widget_)
+        all_buffer_table_widget_->resetModel();
+
+    for (auto& table_widget_it : buffer_tables_)
+        table_widget_it.second->resetModel();
+}
+
+void ListBoxViewDataWidget::updateToSelection ()
+{
+    if (all_buffer_table_widget_)
+        all_buffer_table_widget_->updateToSelection();
+
+    for (auto& table_widget_it : buffer_tables_)
+        table_widget_it.second->updateToSelection();
+
 }

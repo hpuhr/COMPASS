@@ -36,11 +36,11 @@ class ListBoxViewWidget : public ViewWidget
 {
 public:
     /// @brief Constructor
-    ListBoxViewWidget( const std::string& class_id, const std::string& instance_id, Configurable* config_parent, ListBoxView* view, QWidget* parent=NULL );
+    ListBoxViewWidget( const std::string& class_id, const std::string& instance_id, Configurable* config_parent,
+                       ListBoxView* view, QWidget* parent=NULL );
     /// @brief Destructor
     virtual ~ListBoxViewWidget();
 
-    /// @brief Does nothing.
     virtual void updateView();
 
     /// @brief Toggles visibility of the config widget
@@ -56,9 +56,9 @@ public:
 
 protected:
     /// Data widget with data display
-    ListBoxViewDataWidget *data_widget_;
+    ListBoxViewDataWidget* data_widget_ {nullptr};
     /// Config widget with configuration elements
-    ListBoxViewConfigWidget* config_widget_;
+    ListBoxViewConfigWidget* config_widget_ {nullptr};
 };
 
 #endif /* LISTBOXVIEWWIDGET_H_ */

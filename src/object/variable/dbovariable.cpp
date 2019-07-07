@@ -920,3 +920,23 @@ std::string DBOVariable::getDataSourcesAsString (const std::string& value) const
     return value;
 }
 
+bool DBOVariable::onlyExistsInSchema (const std::string& schema_name)
+{
+    for (auto& def_it : schema_variables_)
+    {
+        if (def_it.first != schema_name) // other found
+            return false;
+    }
+    return true; // no other found
+}
+
+void DBOVariable::removeInfoForSchema (const std::string& schema_name)
+{
+    loginf << "DBOVariable " << name() << ": removeVariableInfoForSchema: " << schema_name;
+
+    if (schema_variables_.count(schema_name))
+    {
+        delete schema_variables_.at(schema_name);
+        schema_variables_.erase(schema_name);
+    }
+}

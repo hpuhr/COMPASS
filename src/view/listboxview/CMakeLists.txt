@@ -5,6 +5,8 @@ include_directories (
 
 target_sources(atsdb
     PUBLIC
+        "${CMAKE_CURRENT_LIST_DIR}/allbuffertablemodel.h"
+        "${CMAKE_CURRENT_LIST_DIR}/allbuffertablewidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/buffertablemodel.h"
         "${CMAKE_CURRENT_LIST_DIR}/buffertablewidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/listboxviewdatasource.h"
@@ -13,6 +15,8 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/listboxviewdatawidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/listboxviewwidget.h"
     PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/allbuffertablemodel.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/allbuffertablewidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/buffertablemodel.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/buffertablewidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/listboxview.cpp"

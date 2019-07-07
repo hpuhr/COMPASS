@@ -22,6 +22,8 @@
 
 #include <jasterix/jasterix.h>
 
+#include <memory>
+
 #include <QThread>
 
 using namespace nlohmann;
@@ -68,14 +70,11 @@ void ASTERIXDecodeJob::jasterix_callback(nlohmann::json& data, size_t num_frames
         return;
 
     assert (!extracted_records_);
-    extracted_records_.reset(new std::vector <nlohmann::json>());
+    extracted_records_ = std::make_shared<std::vector <nlohmann::json>> ();
+    //extracted_records_.reset(new std::vector <nlohmann::json>());
 
     num_frames_ = num_frames;
     num_records_ = num_records;
-
-    //std::shared_ptr<json> moved_data {new json()};
-
-    //*moved_data = std::move(data);
 
     unsigned int category;
 
@@ -129,15 +128,15 @@ void ASTERIXDecodeJob::jasterix_callback(nlohmann::json& data, size_t num_frames
         }
     }
 
-    //loginf << "ASTERIXDecodeJob: jasterix_callback: got " << moved_data.size() << " records";
-
     while (pause_) // block decoder until unpaused
     {
-        QThread::sleep(1);
+        QThread::msleep(1);
     }
 
     emit decodedASTERIXSignal(extracted_records_);
     extracted_records_ = nullptr;
+
+    data.clear();
 }
 
 
@@ -228,6 +227,40 @@ void ASTERIXDecodeJob::processRecord (unsigned int category, nlohmann::json& rec
                 cat002_last_tod_period = 512.0 * ((int)(cat002_last_tod_period / 512));
                 cat002_last_tod_period_ [std::make_pair(sac, sic)] = cat002_last_tod_period;
             }
+        }
+    }
+    else if (category == 21)
+    {
+        //"030": "Time of Day": 33501.4140625
+
+        if (record.find("150") != record.end()) // true airspeed
+        {
+            json& air_speed_item = record.at("150");
+            assert (air_speed_item.find("IM") != air_speed_item.end());
+            assert (air_speed_item.find("Air Speed") != air_speed_item.end());
+
+            bool mach = air_speed_item.at("IM") == 1;
+            double airspeed = air_speed_item.at("Air Speed");
+
+            if (mach)
+            {
+                air_speed_item["Air Speed [knots]"] = airspeed*666.739;
+                air_speed_item["Air Speed [mach]"] = airspeed;
+            }
+            else
+            {
+                air_speed_item["Air Speed [knots]"] = airspeed;
+                air_speed_item["Air Speed [mach]"] = airspeed/666.739;
+            }
+        }
+        else if (record.find("150") != record.end())
+        {
+            json& ground_speed_item = record.at("160");
+            assert (ground_speed_item.find("IM") != ground_speed_item.end());
+            assert (ground_speed_item.find("Air Speed") != ground_speed_item.end());
+
+            double ground_speed = ground_speed_item.at("Ground Speed");
+            ground_speed_item.at("Ground Speed") = ground_speed * 3600;
         }
     }
 

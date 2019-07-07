@@ -131,19 +131,21 @@ DBTableWidget* DBTable::widget ()
 
 void DBTable::updateOnDatabase()
 {
-    bool exists = false;
+    exists_in_db_ = false;
+
+    loginf << "DBTable: updateOnDatabase: " << name_;
 
     for (auto col_it : columns_)
     {
         col_it.second->updateOnDatabase();
 
-        exists = exists_in_db_ | col_it.second->existsInDB(); // exists if any exist
-        logdbg << "DBTable " << name_ << "::updateOnDatabase: exists " << exists_in_db_
+        exists_in_db_ |= col_it.second->existsInDB(); // exists if any exist
+        loginf << "DBTable " << name_ << "::updateOnDatabase: exists " << exists_in_db_
                << " col " << col_it.first << " exists " << col_it.second->existsInDB();
     }
 
-    exists_in_db_ = exists;
+    //exists_in_db_ = exists;
 
-    logdbg << "DBTable: updateOnDatabase: " << name_ << " exists in db " << exists_in_db_;
+    loginf << "DBTable: updateOnDatabase: " << name_ << " exists in db " << exists_in_db_;
 }
 

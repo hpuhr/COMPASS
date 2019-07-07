@@ -267,10 +267,13 @@ void DBInterface::createTable (DBTable& table)
 
     locker.unlock();
 
+    //QThread::msleep(100);
+
     updateTableInfo();
     table.updateOnDatabase();
 
     loginf << "DBInterface: createTable: checking " << table.name();
+    assert (existsTable(table.name()));
     assert (table.existsInDB());
     //emit databaseContentChangedSignal();
 }

@@ -8,8 +8,8 @@ set(CMAKE_CXX_FLAGS_MYREL "-O3")
 
 project( ATSDB )
 SET(CPACK_PACKAGE_VERSION_MAJOR "0")
-SET(CPACK_PACKAGE_VERSION_MINOR "3")
-SET(CPACK_PACKAGE_VERSION_PATCH "1")
+SET(CPACK_PACKAGE_VERSION_MINOR "4")
+SET(CPACK_PACKAGE_VERSION_PATCH "0")
 
 message("  System: ${CMAKE_SYSTEM}")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -144,7 +144,7 @@ target_link_libraries ( atsdb
     ${jASTERIX_LIBRARIES})
 ENDIF()
 
-target_link_libraries ( atsdb
+target_link_libraries ( atsdb optimized
     Qt5::Widgets
     Qt5::Core
     Qt5::OpenGL

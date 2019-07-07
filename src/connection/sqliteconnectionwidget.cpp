@@ -30,6 +30,7 @@
 #include <QListWidget>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QApplication>
 
 SQLiteConnectionWidget::SQLiteConnectionWidget(SQLiteConnection &connection, QWidget *parent)
     : QWidget(parent), connection_(connection)
@@ -117,6 +118,8 @@ void SQLiteConnectionWidget::deleteFileSlot ()
 
 void SQLiteConnectionWidget::openFileSlot ()
 {
+    loginf << "SQLiteConnectionWidget: openFileSlot";
+
     if (!file_list_->currentItem())
     {
         QMessageBox m_warning (QMessageBox::Warning, "SQLite3 Database Open Failed",
@@ -126,18 +129,20 @@ void SQLiteConnectionWidget::openFileSlot ()
         return;
     }
 
+    //QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     QString filename = file_list_->currentItem()->text();
     if (filename.size() > 0)
     {
+        open_button_->setDisabled(true);
+
         assert (connection_.hasFile(filename.toStdString()));
         connection_.openFile(filename.toStdString());
 
-        open_button_->setDisabled(true);
-
         emit databaseOpenedSignal();
     }
-
+    //QApplication::restoreOverrideCursor();
+    loginf << "SQLiteConnectionWidget: openFileSlot: done";
 }
 
 void SQLiteConnectionWidget::updateFileListSlot ()

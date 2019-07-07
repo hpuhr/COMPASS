@@ -42,9 +42,14 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget( ListBoxView* view, QWidget* pa
     variable_set_widget_ = view_->getDataSource()->getSet()->widget();
     vlayout->addWidget (variable_set_widget_);
 
+    only_selected_check_ = new QCheckBox("Show Only Selected");
+    only_selected_check_->setChecked(view_->showOnlySelected());
+    connect(only_selected_check_, SIGNAL(clicked()), this, SLOT(toggleShowOnlySeletedSlot()));
+    vlayout->addWidget(only_selected_check_);
+
     presentation_check_ = new QCheckBox("Use Presentation");
     presentation_check_->setChecked(view_->usePresentation());
-    connect(presentation_check_, SIGNAL( clicked() ), this, SLOT( toggleUsePresentation() ));
+    connect(presentation_check_, SIGNAL(clicked()), this, SLOT(toggleUsePresentation()));
     vlayout->addWidget(presentation_check_);
 
     vlayout->addStretch();
@@ -63,6 +68,14 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget( ListBoxView* view, QWidget* pa
 
 ListBoxViewConfigWidget::~ListBoxViewConfigWidget()
 {
+}
+
+void ListBoxViewConfigWidget::toggleShowOnlySeletedSlot()
+{
+    assert (only_selected_check_);
+    bool checked = only_selected_check_->checkState() == Qt::Checked;
+    loginf  << "ListBoxViewConfigWidget: toggleShowOnlySeletedSlot: setting to " << checked;
+    view_->showOnlySelected(checked);
 }
 
 void ListBoxViewConfigWidget::toggleUsePresentation()

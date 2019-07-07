@@ -21,6 +21,8 @@
 #include "metadbovariablewidget.h"
 #include "dbovariable.h"
 #include "dbobject.h"
+#include "atsdb.h"
+#include "dbobjectmanager.h"
 
 MetaDBOVariable::MetaDBOVariable(const std::string &class_id, const std::string &instance_id, DBObjectManager *object_manager)
     :Configurable (class_id, instance_id, object_manager), object_manager_(*object_manager), widget_(nullptr)
@@ -281,4 +283,35 @@ bool MetaDBOVariable::existsInDB () const
         exists_in_db = exists_in_db | variable_it.second.existsInDB();
 
     return exists_in_db;
+}
+
+void MetaDBOVariable::removeOutdatedVariables ()
+{
+    loginf << "MetaDBOVariable " << name() << ": removeOutdatedVariables";
+
+    bool delete_var;
+
+    DBObjectManager& obj_man = ATSDB::instance().objectManager();
+
+    for (auto var_it = definitions_.begin(); var_it != definitions_.end();)
+    {
+        delete_var = false;
+
+        if (!obj_man.existsObject(var_it->second->dboName()))
+            delete_var = true;
+        else if (!obj_man.object(var_it->second->dboName()).hasVariable(var_it->second->variableName()))
+            delete_var = true;
+
+        if (delete_var)
+        {
+            loginf << "MetaDBOVariable: removeOutdatedVariables: removing var " << var_it->first;
+            assert (variables_.count(var_it->first));
+            variables_.erase(var_it->first);
+
+            delete var_it->second;
+            definitions_.erase(var_it++);
+        }
+        else
+            ++var_it;
+    }
 }

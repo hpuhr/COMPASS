@@ -54,7 +54,12 @@ signals:
     /// @brief Signals that loading has finished in the view
     void loadingFinished();
     /// @brief Signals the current loading time
-    void loadingTime( double s );
+    void loadingTime (double s);
+
+    void selectionChangedSignal(); // do not emit manually, call emitSelectionChange()
+
+public slots:
+    void selectionChangedSlot();
 
 public:
     View (const std::string& class_id, const std::string& instance_id, ViewContainer *container, ViewManager &view_manager);
@@ -82,6 +87,7 @@ public:
     virtual DBOVariableSet getSet (const std::string &dbo_name)=0;
 
     void viewShutdown( const std::string& err );
+    void emitSelectionChange ();
 
 protected:
     ViewManager &view_manager_;
@@ -95,9 +101,13 @@ protected:
     /// The widget containing the view's widget
     QWidget* central_widget_;
 
+    bool selection_change_emitted_ {false};
+
     void constructWidget();
-    void setModel( ViewModel* model );
-    void setWidget( ViewWidget* widget );
+    void setModel (ViewModel* model);
+    void setWidget (ViewWidget* widget);
+
+    virtual void updateSelection ()=0;
 
 private:
     unsigned int getInstanceKey();

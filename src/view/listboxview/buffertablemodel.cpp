@@ -23,10 +23,14 @@
 #include "jobmanager.h"
 #include "global.h"
 #include "dbovariableset.h"
+#include "listboxview.h"
 #include "listboxviewdatasource.h"
+#include "buffertablewidget.h"
 
-BufferTableModel::BufferTableModel(QObject *parent, DBObject &object, ListBoxViewDataSource& data_source)
-    : QAbstractTableModel(parent), object_(object), data_source_(data_source)
+#include <QApplication>
+
+BufferTableModel::BufferTableModel(BufferTableWidget* table_widget, DBObject &object, ListBoxViewDataSource& data_source)
+    : QAbstractTableModel(table_widget), table_widget_(table_widget), object_(object), data_source_(data_source)
 {
 }
 
@@ -37,29 +41,14 @@ BufferTableModel::~BufferTableModel()
 
 int BufferTableModel::rowCount(const QModelIndex & /*parent*/) const
 {
-    if (buffer_)
-    {
-        logdbg << "BufferTableModel: rowCount: " << buffer_->size();
-        return buffer_->size();
-    }
-    else
-    {
-        logdbg << "BufferTableModel: rowCount: 0";
-        return 0;
-    }
+    logdbg << "BufferTableModel: rowCount: " << row_indexes_.size();
+    return row_indexes_.size();
 }
 
 int BufferTableModel::columnCount(const QModelIndex & /*parent*/) const
 {
     logdbg << "BufferTableModel: columnCount: " << read_set_.getSize();
-    return read_set_.getSize();
-
-//    if (buffer_)
-//    {
-//        return buffer_->properties().size();
-//    }
-//    else
-//        return 0;
+    return read_set_.getSize()+1;
 }
 
 QVariant BufferTableModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -72,9 +61,10 @@ QVariant BufferTableModel::headerData(int section, Qt::Orientation orientation, 
         logdbg << "BufferTableModel: headerData: section " << section;
         unsigned int col = section;
 
-//        const PropertyList &properties = buffer_->properties();
-//        assert (col < properties.size());
-//        return QString (properties.at(col).name().c_str());
+        if (col == 0)
+            return QString ();
+
+        col -= 1; // for the actual properties
 
         assert (col < read_set_.getSize());
         DBOVariable& variable = read_set_.getVariable(col);
@@ -86,22 +76,62 @@ QVariant BufferTableModel::headerData(int section, Qt::Orientation orientation, 
     return QVariant();
 }
 
+Qt::ItemFlags BufferTableModel::flags(const QModelIndex &index) const
+{
+    Qt::ItemFlags flags;
+
+    if (index.column() == 0)
+    {
+        flags |= Qt::ItemIsEnabled;
+        flags |= Qt::ItemIsUserCheckable;
+        flags |= Qt::ItemIsEditable;
+    }
+    else
+        return Qt::ItemIsEnabled;
+
+    return flags;
+}
+
 QVariant BufferTableModel::data(const QModelIndex &index, int role) const
 {
     logdbg << "BufferTableModel: data: row " << index.row()-1 << " col " << index.column()-1;
-    if (role == Qt::DisplayRole)
+
+    bool null=false;
+
+    assert (index.row() >= 0);
+    assert ((unsigned int)index.row() < row_indexes_.size());
+    unsigned int buffer_index = row_indexes_.at(index.row());
+    unsigned int col = index.column();
+
+    if (role == Qt::CheckStateRole)
+    {
+        if (col == 0) // selected special case
+        {
+            assert (buffer_->has<bool>("selected"));
+
+            if (buffer_->get<bool>("selected").isNull(buffer_index))
+                return Qt::Unchecked;
+
+            if (buffer_->get<bool>("selected").get(buffer_index))
+                return Qt::Checked;
+            else
+                return Qt::Unchecked;
+        }
+    }
+    else if (role == Qt::DisplayRole)
     {
         assert (buffer_);
 
-        bool null=false;
         std::string value_str;
-
-        unsigned int row = index.row(); // indexes start at 0 in this family
-        unsigned int col = index.column();
 
         const PropertyList &properties = buffer_->properties();
 
-        assert (row < buffer_->size());
+        assert (buffer_index < buffer_->size());
+
+        if (col == 0) // selected special case
+            return QVariant();
+
+        col -= 1; // for the actual properties
         assert (col < read_set_.getSize());
 
         DBOVariable& variable = read_set_.getVariable(col);
@@ -122,127 +152,127 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
             if (data_type == PropertyDataType::BOOL)
             {
                 assert (buffer_->has<bool>(property_name));
-                null = buffer_->get<bool>(property_name).isNull(row);
+                null = buffer_->get<bool>(property_name).isNull(buffer_index);
                 if (!null)
                 {
                     if (use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
-                                    buffer_->get<bool>(property_name).getAsString(row));
+                                    buffer_->get<bool>(property_name).getAsString(buffer_index));
                     else
-                        value_str = buffer_->get<bool>(property_name).getAsString(row);
+                        value_str = buffer_->get<bool>(property_name).getAsString(buffer_index);
                 }
             }
             else if (data_type == PropertyDataType::CHAR)
             {
                 assert (buffer_->has<char>(property_name));
-                null = buffer_->get<char>(property_name).isNull(row);
+                null = buffer_->get<char>(property_name).isNull(buffer_index);
                 if (!null)
                 {
                     if (use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
-                                    buffer_->get<char>(property_name).getAsString(row));
+                                    buffer_->get<char>(property_name).getAsString(buffer_index));
                     else
-                        value_str = buffer_->get<char>(property_name).getAsString(row);
+                        value_str = buffer_->get<char>(property_name).getAsString(buffer_index);
                 }
             }
             else if (data_type == PropertyDataType::UCHAR)
             {
                 assert (buffer_->has<unsigned char>(property_name));
-                null = buffer_->get<unsigned char>(property_name).isNull(row);
+                null = buffer_->get<unsigned char>(property_name).isNull(buffer_index);
                 if (!null)
                 {
                     if (use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
-                                    buffer_->get<unsigned char>(property_name).getAsString(row));
+                                    buffer_->get<unsigned char>(property_name).getAsString(buffer_index));
                     else
-                        value_str = buffer_->get<unsigned char>(property_name).getAsString(row);
+                        value_str = buffer_->get<unsigned char>(property_name).getAsString(buffer_index);
                 }
             }
             else if (data_type == PropertyDataType::INT)
             {
                 assert (buffer_->has<int>(property_name));
-                null = buffer_->get<int>(property_name).isNull(row);
+                null = buffer_->get<int>(property_name).isNull(buffer_index);
                 if (!null)
                 {
                     if (use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
-                                    buffer_->get<int>(property_name).getAsString(row));
+                                    buffer_->get<int>(property_name).getAsString(buffer_index));
                     else
-                        value_str = buffer_->get<int>(property_name).getAsString(row);
+                        value_str = buffer_->get<int>(property_name).getAsString(buffer_index);
                 }
             }
             else if (data_type == PropertyDataType::UINT)
             {
                 assert (buffer_->has<unsigned int>(property_name));
-                null = buffer_->get<unsigned int>(properties.at(col).name()).isNull(row);
+                null = buffer_->get<unsigned int>(properties.at(col).name()).isNull(buffer_index);
                 if (!null)
                 {
                     if (use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
-                                    buffer_->get<unsigned int>(property_name).getAsString(row));
+                                    buffer_->get<unsigned int>(property_name).getAsString(buffer_index));
                     else
-                        value_str = buffer_->get<unsigned int>(property_name).getAsString(row);
+                        value_str = buffer_->get<unsigned int>(property_name).getAsString(buffer_index);
                 }
             }
             else if (data_type == PropertyDataType::LONGINT)
             {
                 assert (buffer_->has<long int>(property_name));
-                null = buffer_->get<long int>(property_name).isNull(row);
+                null = buffer_->get<long int>(property_name).isNull(buffer_index);
                 if (!null)
                 {
                     if (use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
-                                    buffer_->get<long int>(property_name).getAsString(row));
+                                    buffer_->get<long int>(property_name).getAsString(buffer_index));
                     else
-                        value_str = buffer_->get<long int>(property_name).getAsString(row);
+                        value_str = buffer_->get<long int>(property_name).getAsString(buffer_index);
                 }
             }
             else if (data_type == PropertyDataType::ULONGINT)
             {
                 assert (buffer_->has<unsigned long int>(property_name));
-                null = buffer_->get<unsigned long int>(property_name).isNull(row);
+                null = buffer_->get<unsigned long int>(property_name).isNull(buffer_index);
                 if (!null)
                 {
                     if (use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
-                                    buffer_->get<unsigned long int>(property_name).getAsString(row));
+                                    buffer_->get<unsigned long int>(property_name).getAsString(buffer_index));
                     else
-                        value_str = buffer_->get<unsigned long int>(property_name).getAsString(row);
+                        value_str = buffer_->get<unsigned long int>(property_name).getAsString(buffer_index);
                 }
             }
             else if (data_type == PropertyDataType::FLOAT)
             {
                 assert (buffer_->has<float>(property_name));
-                null = buffer_->get<float>(property_name).isNull(row);
+                null = buffer_->get<float>(property_name).isNull(buffer_index);
                 if (!null)
                 {
                     if (use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
-                                    buffer_->get<float>(property_name).getAsString(row));
+                                    buffer_->get<float>(property_name).getAsString(buffer_index));
                     else
-                        value_str = buffer_->get<float>(property_name).getAsString(row);
+                        value_str = buffer_->get<float>(property_name).getAsString(buffer_index);
                 }
             }
             else if (data_type == PropertyDataType::DOUBLE)
             {
                 assert (buffer_->has<double>(property_name));
-                null = buffer_->get<double>(property_name).isNull(row);
+                null = buffer_->get<double>(property_name).isNull(buffer_index);
                 if (!null)
                 {
                     if (use_presentation_)
                         value_str = variable.getRepresentationStringFromValue(
-                                    buffer_->get<double>(property_name).getAsString(row));
+                                    buffer_->get<double>(property_name).getAsString(buffer_index));
                     else
-                        value_str = buffer_->get<double>(property_name).getAsString(row);
+                        value_str = buffer_->get<double>(property_name).getAsString(buffer_index);
                 }
             }
             else if (data_type == PropertyDataType::STRING)
             {
                 assert (buffer_->has<std::string>(property_name));
-                null = buffer_->get<std::string>(property_name).isNull(row);
+                null = buffer_->get<std::string>(property_name).isNull(buffer_index);
                 if (!null)
                 {
-                    value_str = buffer_->get<std::string>(property_name).getAsString(row);
+                    value_str = buffer_->get<std::string>(property_name).getAsString(buffer_index);
                 }
             }
             else
@@ -257,14 +287,55 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
+bool BufferTableModel::setData(const QModelIndex& index, const QVariant & value,int role)
+{
+    loginf << "BufferTableModel: setData: checked row " << index.row() << " col " << index.column();
+
+    if (role == Qt::CheckStateRole && index.column() == 0)
+    {
+        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+        assert (index.row() >= 0);
+        assert ((unsigned int)index.row() < row_indexes_.size());
+        unsigned int buffer_index = row_indexes_.at(index.row());
+
+        assert (buffer_);
+        assert (buffer_->has<bool>("selected"));
+
+        if (value == Qt::Checked)
+        {
+            loginf << "BufferTableModel: setData: checked row index" << buffer_index;
+            buffer_->get<bool>("selected").set(buffer_index, true);
+        }
+        else
+        {
+            loginf << "BufferTableModel: setData: unchecked row index " << buffer_index;
+            buffer_->get<bool>("selected").set(buffer_index, false);
+        }
+        assert (table_widget_);
+        table_widget_->view().emitSelectionChange();
+
+        if (show_only_selected_)
+        {
+            beginResetModel();
+            row_indexes_.clear();
+            updateRows();
+            endResetModel();
+        }
+
+        QApplication::restoreOverrideCursor();
+    }
+    return true;
+}
+
 void BufferTableModel::clearData ()
 {
     beginResetModel();
 
     buffer_=nullptr;
+    updateRows();
 
     endResetModel();
-
 }
 
 void BufferTableModel::setData (std::shared_ptr <Buffer> buffer)
@@ -272,9 +343,57 @@ void BufferTableModel::setData (std::shared_ptr <Buffer> buffer)
     assert (buffer);
     beginResetModel();
 
-    buffer_=buffer;
+    buffer_ = buffer;
+    updateRows();
     read_set_ = data_source_.getSet()->getFor(object_.name());
 
+    endResetModel();
+}
+
+void BufferTableModel::updateRows ()
+{
+    if (!buffer_)
+    {
+        row_indexes_.clear();
+        return;
+    }
+
+    unsigned int buffer_index {0}; // index in buffer
+    unsigned int buffer_size = buffer_->size();
+
+    assert (buffer_->has<bool>("selected"));
+    NullableVector<bool> selected_vec = buffer_->get<bool>("selected");
+
+    if (row_indexes_.size()) // get last processed index
+    {
+        buffer_index = last_processed_index_ + 1; // set to next one
+    }
+
+    while (buffer_index < buffer_size)
+    {
+        if (show_only_selected_)
+        {
+            if (selected_vec.isNull(buffer_index)) // check if null, skip if so
+            {
+                ++buffer_index;
+                continue;
+            }
+
+            if (selected_vec.get(buffer_index)) // add if set
+                row_indexes_.push_back(buffer_index);
+        }
+        else // add
+            row_indexes_.push_back(buffer_index);
+
+        ++buffer_index;
+    }
+
+    last_processed_index_ = buffer_index;
+}
+
+void BufferTableModel::reset ()
+{
+    beginResetModel();
     endResetModel();
 }
 
@@ -284,7 +403,7 @@ void BufferTableModel::saveAsCSV (const std::string &file_name, bool overwrite)
 
     assert (buffer_);
     BufferCSVExportJob *export_job = new BufferCSVExportJob (buffer_, read_set_, file_name, overwrite,
-                                                             use_presentation_);
+                                                             show_only_selected_, use_presentation_);
 
     export_job_ = std::shared_ptr<BufferCSVExportJob> (export_job);
     connect (export_job, SIGNAL(obsoleteSignal()), this, SLOT(exportJobObsoleteSlot()), Qt::QueuedConnection);
@@ -310,7 +429,25 @@ void BufferTableModel::exportJobDoneSlot()
 void BufferTableModel::usePresentation (bool use_presentation)
 {
     beginResetModel();
-    use_presentation_=use_presentation;
+    use_presentation_ = use_presentation;
+    endResetModel();
+}
+
+void BufferTableModel::showOnlySelected (bool value)
+{
+    loginf << "BufferTableModel: showOnlySelected: " << value;
+    show_only_selected_ = value;
+
+    updateToSelection();
+}
+
+void BufferTableModel::updateToSelection()
+{
+    beginResetModel();
+
+    row_indexes_.clear();
+    updateRows ();
+
     endResetModel();
 }
 

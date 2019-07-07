@@ -4,7 +4,9 @@ To run the application, simply execute it. It is recommended to run the applicat
 
 \subsection{Configuration Upgrade}
 
-If a previous version of ATSDB has been run on the workstation, the configuration (and additional application data) might be out of date. Since the framework of ATSDB is quite sensitive on being run with the latest configuration, the previous one will be overwritten, which will unfortunately clear any previous changes made by the user. \\\\
+If a previous version of ATSDB has been run on the workstation, the configuration (and additional application data) might be out of date. Since the framework of ATSDB is quite sensitive on being run with the latest configuration an upgrade must be performed. \\
+
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please note that this means that the previous configuration will be overwritten, which will unfortunately clear any previous changes made by the user. \\\\
 
 If an outdated configuration is detected, a dialog will be shown.
 
@@ -233,7 +235,7 @@ For a common user, usage of the pre-configured database schema 'SCDB' is recomme
   \label{fig:db_schema_select}
 \end{figure}
 
-For experienced users, a database schema can be created, edited and selected, which is currently not recommended (since it is not user friendly and might crash if used in the ``wrong'' manner).
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} For experienced users, a database schema can be created, edited and selected, which is currently not recommended (since it is not user friendly and might crash if used in the ``wrong'' manner).
 
 \begin{figure}[H]
   \hspace*{-1cm}
@@ -448,7 +450,7 @@ Further below, the list of existing JSON object parsers is shown. Each parser is
 
 \paragraph{Importing}
 
-Using the 'Debug in ConsoleÄ checkbox, additional debugging information is output to the console, and the ASTERIX decoding is switched to single-threading for easier investigation.
+Using the 'Debug in Console' checkbox, additional debugging information is output to the console, and the ASTERIX decoding is switched to single-threading for easier investigation.
 
 Using the 'Test Import' button, the import function can be tested without inserting the data into the database, the 'Import' imports the selected file with the given options.
 
@@ -470,11 +472,17 @@ After import, a confirmation will be shown as follows:
   \caption{Import ASTERIX data task done}
 \end{figure}
 
-Please note that importing performance strongly depends on CPU performance (multi-threading very beneficial), but a import of 2.5 million target reports takes about 2 minutes on the author's hardware. \\
+Importing performance strongly depends on CPU performance (multi-threading very beneficial), but a import of 2.5 million target reports takes about 1 minute on the author's hardware. \\
 
-Please also note that an import can only be performed once, after that the application has to be closed and started again if additional ASTERIX importing is wanted. \\
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please also note that an import can only be performed once, after that the application has to be closed and started again if additional ASTERIX importing is wanted. \\
 
-Please also note the currently only the main data fields (as shown in the JSON object parsers) are imported, and that the timestamps of CAT001 are still only partial timestamps.
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please also note the currently only the main data fields (as shown in the JSON object parsers) are imported. This will be improved with the next version. \\
+
+The (truncated) timestamps of CAT001 are calculated in a simple algorithm based on the CAT002 messages from the same sensor. \\\\
+
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} After the import it is recommended to re-start the application, since currently a memory leak during import exists. While this does not affect the import process, usage of the application directly after the import process will be slower than usual. A re-start of the application resolves this issue. This will be fixed in the next version. \\
+
+
 
 
 \subsubsection{Importing JSON Data}
@@ -499,9 +507,9 @@ Below, the JSON parsing schema can be selected, the following options exist:
 \item OpenSkyNetwork: Import JSON from the OpenSky Network platform
 \end{itemize}
 
-A new schema can be added using the ``Add'' button, or an existing removed using the ``Remove'' button.
+A new schema can be added using the ``Add'' button, or an existing removed using the ``Remove'' button. \\
 
-Further below, for the selected parsing schema, the list of existing JSON object parsers is shown. Each parser is specialized for a specific DBO, in the shown example of OpenSkyNetwork, only ADSB exists, since no other data is provdided.
+Further below, for the selected parsing schema, the list of existing JSON object parsers is shown. Each parser is specialized for a specific DBO, in the shown example of OpenSkyNetwork, only ADSB exists, since no other data is provdided. \\
 
 To inspect or edit a JSON object parser, click on it in the list. This step is not required for parsing.
 
@@ -559,11 +567,9 @@ After import, a confirmation will be shown as follows:
   \caption{Import JSON data task done}
 \end{figure}
 
-Please note that importing performance strongly depends on CPU performance (multi-threading very beneficial), but a SDDL JSON import of 2.5 million target reports takes about 7 minutes on the author's hardware. \\
+Importing performance strongly depends on CPU performance (multi-threading very beneficial), but a SDDL JSON import of 2.5 million target reports takes about 7 minutes on the author's hardware. \\
 
-Please note that, since ADSBexchange JSON is not compliant to JSON standard (at least from the used test datasets), parsing errors will be shown and only a small percentage of target reports is imported. This will be improved in the near future.\\
-
-Please also note that importing in the 'Simple' database schema will currently not work.  This will be improved in the near future.
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please note that, since ADSBexchange JSON is not compliant to JSON standard (at least from the used test datasets), parsing errors will be shown and only a small percentage of target reports is imported. This will be improved in the near future.\\
 
 \subsubsection{Calculate Radar Plot Position}
 
@@ -571,7 +577,7 @@ Please note that if no Radar target reports exist in the database, this steps do
 
 Since in SASS-C Verif radar plot coordinates are not given as latitude/longitude, which are the main coordinates for all processing in ATSDB, optionally these coordinates can be re-calculated and set in the database using the ''Calculate Radar Plot Position`` Task. \\
 
-To execute this task select ''Task``->  ''Calculate Radar Plot Position` in the top menu bar. \\
+To execute this task select 'Task'->  'Calculate Radar Plot Position' in the top menu bar. \\
 
 Please note that for this step the data source positions have to set in the database, otherwise no plot position can be calculated. If a database generated by SASS-C is used, this should already be the case. For ones created by SDDL JSON, the steps described in \nameref{sec:data_source_editing} have to be performed once.
 
@@ -592,11 +598,11 @@ The WGS84 latitude/longitude coordinates are then calculated using the radar pos
 
 \paragraph{RS2G Projection}
 
-For this projection, no additional attributes must be given. Please \textbf{note} that while this projection is based on a common ``radar slant to geodesic transformation'', it is also not equivalent to e.g. the ARTAS projection. This will be improved in the near future, but validation was estimated to not to be taken lightly, and therefore the additional effort will be done before the next major release.
+For this projection, no additional attributes must be given. Please \textbf{note} that this projection is based on a common 'radar slant to geodesic transformation', it should be equvalent to the ARTAS projection. A verification is still needed, please contact the author if you would be willing to support this.
 
 \paragraph{Calculation}
 
-Press ``Calculate'' to start the calculation process, which will take a few minutes depending on the data size. \\
+Press 'Calculate' to start the calculation process, which will take a few minutes depending on the data size. \\
 
 Messages like these will be printed in the text console, the last one indicates completion of the task:
 
@@ -671,7 +677,7 @@ The following information is generated and stored in the database:
 \item List with all minima/maxima for all variables of all DBOs
 \end{itemize}
 
-Please \textbf{note} that this step has to be performed only once for each database, and may take up to a few minutes for large datasets. \\
+This step has to be performed only once for each database, and may take up to a few minutes for large datasets. \\
 
-Please also \textbf{note} that during this step, no DBO data itself is changed, but only additional information is generated and stored in separate database tables.
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please \textbf{note} that during this step, no DBO data itself is changed, but only additional information is generated and stored in separate database tables.
  

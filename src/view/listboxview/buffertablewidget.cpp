@@ -37,13 +37,12 @@
 #include "buffertablemodel.h"
 #include "viewselection.h"
 #include "listboxviewdatasource.h"
-//#include "Data.h"
 
 //using namespace Utils;
 
-BufferTableWidget::BufferTableWidget(DBObject &object, ListBoxViewDataSource& data_source, QWidget* parent,
-                                     Qt::WindowFlags f)
-: QWidget (parent, f), object_(object), data_source_(data_source)
+BufferTableWidget::BufferTableWidget(DBObject &object, ListBoxView& view, ListBoxViewDataSource& data_source,
+                                     QWidget* parent, Qt::WindowFlags f)
+: QWidget (parent, f), object_(object), view_(view), data_source_(data_source)
 {
     setAutoFillBackground(true);
 
@@ -87,29 +86,6 @@ void BufferTableWidget::show (std::shared_ptr<Buffer> buffer) //, DBOVariableSet
     model_->setData(buffer);
     table_->resizeColumnsToContents();
 
-//    ViewSelectionEntries &selection_entries = ViewSelection::getInstance().getEntries();
-//    ViewSelectionEntries::iterator it;
-//    std::map <unsigned int, QTableWidgetItem*>::iterator it2;
-
-//    logdbg  << "BufferTableWidget: show: selection size " << selection_entries.size();
-
-//    for (it = selection_entries.begin(); it != selection_entries.end(); it++)
-//    {
-//        ViewSelectionEntry &entry=*it;
-//        if (entry.isDBO())
-//        {
-//            if ((unsigned int) entry.id_.first == type_)
-//            {
-//                //loginf << "BufferTableWidget: show: check at " << entry.id_.second << " is correct type"<< endl;
-//                it2 = selected_items.find(entry.id_.second);
-//                if (it2 != selected_items.end())
-//                {
-//                    it2->second->setCheckState ( Qt::Checked );
-//                }
-//            }
-//        }
-//    }
-
     logdbg  << " BufferTableWidget: show: end";
 }
 
@@ -147,6 +123,16 @@ void BufferTableWidget::exportDoneSlot (bool cancelled)
     emit exportDoneSignal (cancelled);
 }
 
+void BufferTableWidget::showOnlySelectedSlot (bool value)
+{
+    loginf << "BufferTableWidget: showOnlySelectedSlot: " << value;
+
+    assert (model_);
+    model_->showOnlySelected(value);
+    assert (table_);
+    table_->resizeColumnsToContents();
+}
+
 void BufferTableWidget::usePresentationSlot (bool use_presentation)
 {
     assert (model_);
@@ -155,6 +141,25 @@ void BufferTableWidget::usePresentationSlot (bool use_presentation)
     table_->resizeColumnsToContents();
 }
 
+
+void BufferTableWidget::resetModel()
+{
+    assert (model_);
+    model_->reset();
+}
+
+void BufferTableWidget::updateToSelection ()
+{
+    assert (model_);
+    model_->updateToSelection();
+    assert (table_);
+    table_->resizeColumnsToContents();
+}
+
+ListBoxView &BufferTableWidget::view() const
+{
+    return view_;
+}
 
 //void BufferTableWidget::itemChanged (QTableWidgetItem *item)
 //{

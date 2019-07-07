@@ -43,15 +43,16 @@ ViewContainerWidget::ViewContainerWidget(const std::string &class_id, const std:
 
   name_ = "Window"+std::to_string(String::getAppendedInt (instanceId()));
 
-  QHBoxLayout *layout = new QHBoxLayout ();
-  layout->setSpacing(0);
-  layout->setMargin(0);
+  QHBoxLayout *layout = new QHBoxLayout (this);
+  layout->setContentsMargins(0, 0, 0, 0);
+  //layout->setSpacing(0);
+  //layout->setMargin(0);
 
   tab_widget_ = new QTabWidget();
   assert (tab_widget_);
   layout->addWidget(tab_widget_);
 
-  setLayout (layout);
+  //setLayout (layout);
   setMinimumSize(QSize(min_width_, min_height_));
   setGeometry(pos_x_, pos_y_, width_, height_);
 

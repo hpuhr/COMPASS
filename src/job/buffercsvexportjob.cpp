@@ -22,9 +22,10 @@
 #include "dbovariable.h"
 
 BufferCSVExportJob::BufferCSVExportJob(std::shared_ptr<Buffer> buffer, const DBOVariableSet& read_set,
-                                       const std::string& file_name, bool overwrite, bool use_presentation)
+                                       const std::string& file_name, bool overwrite, bool only_selected,
+                                       bool use_presentation)
     : Job("BufferCSVExportJob"), buffer_(buffer), read_set_(read_set), file_name_(file_name), overwrite_(overwrite),
-      use_presentation_(use_presentation)
+      only_selected_(only_selected), use_presentation_(use_presentation)
 {
     assert (file_name_.size());
 }
@@ -58,19 +59,30 @@ void BufferCSVExportJob::run ()
         std::string value_str;
         size_t row=0;
 
+        ss << "Selected";
+
         for (size_t col=0; col < read_set_size; col++)
         {
-            if (col != 0)
-                ss << ";";
-
+            //if (col != 0)
+            ss << ";";
             ss << read_set_.getVariable(col).name();
         }
         output_file << ss.str() << "\n";
 
+        assert (buffer_->has<bool>("selected"));
+        NullableVector<bool> selected_vec = buffer_->get<bool>("selected");
 
-        for (; row < buffer_size; row++)
+        for (; row < buffer_size; ++row)
         {
+            if (only_selected_ && (selected_vec.isNull(row) || !selected_vec.get(row)))
+                continue;
+
             ss.str("");
+
+            if (selected_vec.isNull(row))
+                ss << "0;";
+            else
+                ss << selected_vec.get(row)<< ";";
 
             for (size_t col=0; col < read_set_size; col++)
             {
@@ -83,7 +95,12 @@ void BufferCSVExportJob::run ()
 
                 if (data_type == PropertyDataType::BOOL)
                 {
-                    assert (buffer_->has<bool>(property_name));
+                    if (!buffer_->has<bool>(property_name))
+                    {
+                        ss << ";";
+                        continue;
+                    }
+
                     null = buffer_->get<bool>(property_name).isNull(row);
                     if (!null)
                     {
@@ -96,7 +113,12 @@ void BufferCSVExportJob::run ()
                 }
                 else if (data_type == PropertyDataType::CHAR)
                 {
-                    assert (buffer_->has<char>(property_name));
+                    if (!buffer_->has<char>(property_name))
+                    {
+                        ss << ";";
+                        continue;
+                    }
+
                     null = buffer_->get<char>(property_name).isNull(row);
                     if (!null)
                     {
@@ -109,7 +131,12 @@ void BufferCSVExportJob::run ()
                 }
                 else if (data_type == PropertyDataType::UCHAR)
                 {
-                    assert (buffer_->has<unsigned char>(property_name));
+                    if (!buffer_->has<unsigned char>(property_name))
+                    {
+                        ss << ";";
+                        continue;
+                    }
+
                     null = buffer_->get<unsigned char>(property_name).isNull(row);
                     if (!null)
                     {
@@ -122,7 +149,12 @@ void BufferCSVExportJob::run ()
                 }
                 else if (data_type == PropertyDataType::INT)
                 {
-                    assert (buffer_->has<int>(property_name));
+                    if (!buffer_->has<int>(property_name))
+                    {
+                        ss << ";";
+                        continue;
+                    }
+
                     null = buffer_->get<int>(property_name).isNull(row);
                     if (!null)
                     {
@@ -135,7 +167,12 @@ void BufferCSVExportJob::run ()
                 }
                 else if (data_type == PropertyDataType::UINT)
                 {
-                    assert (buffer_->has<unsigned int>(property_name));
+                    if (!buffer_->has<unsigned int>(property_name))
+                    {
+                        ss << ";";
+                        continue;
+                    }
+
                     null = buffer_->get<unsigned int>(properties.at(col).name()).isNull(row);
                     if (!null)
                     {
@@ -148,7 +185,12 @@ void BufferCSVExportJob::run ()
                 }
                 else if (data_type == PropertyDataType::LONGINT)
                 {
-                    assert (buffer_->has<long int>(property_name));
+                    if (!buffer_->has<long int>(property_name))
+                    {
+                        ss << ";";
+                        continue;
+                    }
+
                     null = buffer_->get<long int>(property_name).isNull(row);
                     if (!null)
                     {
@@ -161,7 +203,12 @@ void BufferCSVExportJob::run ()
                 }
                 else if (data_type == PropertyDataType::ULONGINT)
                 {
-                    assert (buffer_->has<unsigned long int>(property_name));
+                    if (!buffer_->has<unsigned long int>(property_name))
+                    {
+                        ss << ";";
+                        continue;
+                    }
+
                     null = buffer_->get<unsigned long int>(property_name).isNull(row);
                     if (!null)
                     {
@@ -174,7 +221,12 @@ void BufferCSVExportJob::run ()
                 }
                 else if (data_type == PropertyDataType::FLOAT)
                 {
-                    assert (buffer_->has<float>(property_name));
+                    if (!buffer_->has<float>(property_name))
+                    {
+                        ss << ";";
+                        continue;
+                    }
+
                     null = buffer_->get<float>(properties.at(col).name()).isNull(row);
                     if (!null)
                     {
@@ -187,7 +239,12 @@ void BufferCSVExportJob::run ()
                 }
                 else if (data_type == PropertyDataType::DOUBLE)
                 {
-                    assert (buffer_->has<double>(property_name));
+                    if (!buffer_->has<double>(property_name))
+                    {
+                        ss << ";";
+                        continue;
+                    }
+
                     null = buffer_->get<double>(property_name).isNull(row);
                     if (!null)
                     {
@@ -200,7 +257,12 @@ void BufferCSVExportJob::run ()
                 }
                 else if (data_type == PropertyDataType::STRING)
                 {
-                    assert (buffer_->has<std::string>(property_name));
+                    if (!buffer_->has<std::string>(property_name))
+                    {
+                        ss << ";";
+                        continue;
+                    }
+
                     null = buffer_->get<std::string>(property_name).isNull(row);
                     if (!null)
                     {
@@ -210,9 +272,7 @@ void BufferCSVExportJob::run ()
                 else
                     throw std::domain_error ("BufferCSVExportJob: run: unknown property data type");
 
-                if (col != 0)
-                    ss << ";";
-
+                ss << ";";
                 ss << value_str;
             }
 

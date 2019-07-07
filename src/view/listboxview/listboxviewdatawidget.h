@@ -24,8 +24,10 @@
 
 #include "global.h"
 
+class ListBoxView;
 class ListBoxViewDataSource;
 class QTabWidget;
+class AllBufferTableWidget;
 class BufferTableWidget;
 class Buffer;
 class DBObject;
@@ -40,6 +42,7 @@ class ListBoxViewDataWidget : public QWidget
 
 signals:
     void exportDoneSignal (bool cancelled);
+    void showOnlySelectedSignal (bool value);
     void usePresentationSignal (bool use_presentation);
 
 public slots:
@@ -50,23 +53,30 @@ public slots:
     void exportDataSlot(bool overwrite);
     void exportDoneSlot (bool cancelled);
 
+    void showOnlySelectedSlot (bool value);
     void usePresentationSlot (bool use_presentation);
+
 
 public:
     /// @brief Constructor
-    ListBoxViewDataWidget(ListBoxViewDataSource* data_source, QWidget* parent=nullptr, Qt::WindowFlags f=0);
+    ListBoxViewDataWidget(ListBoxView* view, ListBoxViewDataSource* data_source, QWidget* parent=nullptr,
+                          Qt::WindowFlags f=0);
     /// @brief Destructor
     virtual ~ListBoxViewDataWidget();
 
     /// @brief Clears the table contents
     void clearTables ();
+    void resetModels();
+    void updateToSelection ();
 
 protected:
+    ListBoxView* view_ {nullptr};
     /// Data source
     ListBoxViewDataSource* data_source_ {nullptr};
     /// Main tab widget
     QTabWidget* tab_widget_ {nullptr};
     /// Container with all table widgets
+    AllBufferTableWidget* all_buffer_table_widget_ {nullptr};
     std::map <std::string, BufferTableWidget*> buffer_tables_;
 };
 
