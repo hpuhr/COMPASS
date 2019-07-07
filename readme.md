@@ -9,6 +9,7 @@ Based on a dynamic database schema, recorded air traffic surveillance data can b
 - High performance processing, low memory footprint
 - Utilization of application during loading procedure
 - Views for data inspection
+- Target report cross-selection
 - Simple custom filter generation
 - Supported Database Objects
   - Radar plots
@@ -36,9 +37,9 @@ Please refer to the releases page for the user manual and the AppImage. Please d
 - LICENSE: GPL license
 - readme.md: This file
 
-## Released Experimental Version v0.3.1-beta
-- [Current Appimage](https://github.com/hpuhr/ATSDB/releases/download/v0.3.1-beta/ATSDB-v0.3.1_x86_64.AppImage)
-- [User Manual](https://github.com/hpuhr/ATSDB/releases/download/v0.3.1-beta/user_manual_v0.3.1.pdf)
+## Released Experimental Version v0.4.0-beta
+- [Current Appimage](https://github.com/hpuhr/ATSDB/releases/download/v0.4.0-beta/ATSDB-v0.4.0-x86_64.AppImage)
+- [User Manual](https://github.com/hpuhr/ATSDB/releases/download/v0.4.0-beta/user_manual_v0.4.0.pdf)
 
 ## YouTube Videos
 - [Installation, Import & OSGView](https://youtu.be/hptJHQ5D9hs)
