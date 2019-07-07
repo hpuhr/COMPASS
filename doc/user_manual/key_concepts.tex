@@ -22,6 +22,9 @@ A Database Object (\textbf{DBO}) is defined by a name and has a collection of va
 
 To allow displaying data from different DBOs in the same system, so-called meta-variables were  introduced, which hold variables that are present in some or all DBOs (with a possibly different name or unit).  For example, there meta-variable 'tod', which is a collection of sub-variables for each existing DBO and the respective ``Time of Day'' variable.
 
+\section*{ASTERIX Data Import}
+If surveillance data is given in EUROCONTROL's ASTERIX format, it can be decoded using the jASTERIX library. This library allows adding new framings, categories and editions based on configuration only. The resulting JSON data is then mapped to DBO variables and imported to a selected schema. Currently, only SCDB is supported for importing, but this will be extended in the future. The mapping between JSON keys and DBO variables is configurable, allowing for a broad usage spectrum.
+
 \section*{JSON Data Import}
 If surveillance data is given in the JSON format, it can be mapped to DBO variables and imported to a selected schema. Currently, only SCDB is supported for importing, but this will be extended in the future. The mapping between JSON keys and DBO variables is configurable, allowing for a broad usage spectrum.
 
