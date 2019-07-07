@@ -229,6 +229,40 @@ void ASTERIXDecodeJob::processRecord (unsigned int category, nlohmann::json& rec
             }
         }
     }
+    else if (category == 21)
+    {
+        //"030": "Time of Day": 33501.4140625
+
+        if (record.find("150") != record.end()) // true airspeed
+        {
+            json& air_speed_item = record.at("150");
+            assert (air_speed_item.find("IM") != air_speed_item.end());
+            assert (air_speed_item.find("Air Speed") != air_speed_item.end());
+
+            bool mach = air_speed_item.at("IM") == 1;
+            double airspeed = air_speed_item.at("Air Speed");
+
+            if (mach)
+            {
+                air_speed_item["Air Speed [knots]"] = airspeed*666.739;
+                air_speed_item["Air Speed [mach]"] = airspeed;
+            }
+            else
+            {
+                air_speed_item["Air Speed [knots]"] = airspeed;
+                air_speed_item["Air Speed [mach]"] = airspeed/666.739;
+            }
+        }
+        else if (record.find("150") != record.end())
+        {
+            json& ground_speed_item = record.at("160");
+            assert (ground_speed_item.find("IM") != ground_speed_item.end());
+            assert (ground_speed_item.find("Air Speed") != ground_speed_item.end());
+
+            double ground_speed = ground_speed_item.at("Ground Speed");
+            ground_speed_item.at("Ground Speed") = ground_speed * 3600;
+        }
+    }
 
     extracted_records_->push_back(std::move(record));
     category_counts_.at(category) += 1;

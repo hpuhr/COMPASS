@@ -707,7 +707,7 @@ void ASTERIXImporterTask::checkAllDone ()
 {
     logdbg << "ASTERIXImporterTask: checkAllDone";
 
-    if (!all_done_ && decode_job_ == nullptr && json_map_jobs_.empty() == 0
+    if (!all_done_ && decode_job_ == nullptr && json_map_jobs_.empty() && buffers_.size() == 0
             && insert_active_ == 0)
     {
         stop_time_ = boost::posix_time::microsec_clock::local_time();
