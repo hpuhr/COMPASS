@@ -45,6 +45,7 @@ Please refer to the releases page for the user manual and the AppImage. Please d
 # Current
 - [v0.4.0: Import ASTERIX & Setup](https://youtu.be/QIMVb9HNBJc)
 - [v0.4.0: Basics](https://youtu.be/ny47qrBlyfM)
+- [v0.4.0: Advanced Usage](https://youtu.be/_L65VO8TsyE)
 
 # Previous
 - [v0.2.1: Installation, Import & OSGView](https://youtu.be/hptJHQ5D9hs)
