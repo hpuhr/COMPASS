@@ -103,8 +103,8 @@ void ASTERIXImporterTask::generateSubConfigurable (const std::string &class_id, 
     }
     else if (class_id == "ASTERIXCategoryConfig")
     {
-        std::string category = configuration().getSubConfiguration(
-                    class_id, instance_id).getParameterConfigValueString("category");
+        unsigned int category = configuration().getSubConfiguration(
+                    class_id, instance_id).getParameterConfigValueUint("category");
 
         assert (category_configs_.find (category) == category_configs_.end());
 
@@ -211,18 +211,18 @@ void ASTERIXImporterTask::currentFraming(const std::string &current_framing)
     current_framing_ = current_framing;
 }
 
-bool ASTERIXImporterTask::hasConfiguratonFor (const std::string& category)
+bool ASTERIXImporterTask::hasConfiguratonFor (unsigned int category)
 {
     return category_configs_.count(category) > 0;
 }
 
-bool ASTERIXImporterTask::decodeCategory (const std::string& category)
+bool ASTERIXImporterTask::decodeCategory (unsigned int category)
 {
     assert (hasConfiguratonFor(category));
     return category_configs_.at(category).decode();
 }
 
-void ASTERIXImporterTask::decodeCategory (const std::string& category, bool decode)
+void ASTERIXImporterTask::decodeCategory (unsigned int category, bool decode)
 {
     assert (jasterix_->hasCategory(category));
 
@@ -231,9 +231,9 @@ void ASTERIXImporterTask::decodeCategory (const std::string& category, bool deco
     if (!hasConfiguratonFor(category))
     {
         Configuration &new_cfg = configuration().addNewSubConfiguration ("ASTERIXCategoryConfig");
-        new_cfg.addParameterString ("category", category);
+        new_cfg.addParameterUnsignedInt ("category", category);
         new_cfg.addParameterBool ("decode", decode);
-        new_cfg.addParameterString ("edition", jasterix_->categories().at(category).defaultEdition());
+        new_cfg.addParameterString ("edition", jasterix_->category(category)->defaultEdition());
 
         generateSubConfigurable("ASTERIXCategoryConfig", new_cfg.getInstanceId());
         assert (hasConfiguratonFor(category));
@@ -242,21 +242,21 @@ void ASTERIXImporterTask::decodeCategory (const std::string& category, bool deco
         category_configs_.at(category).decode(decode);
 }
 
-std::string ASTERIXImporterTask::editionForCategory (const std::string& category)
+std::string ASTERIXImporterTask::editionForCategory (unsigned int category)
 {
     assert (hasConfiguratonFor(category));
 
     // check if edition exists, otherwise rest to default
-    if (jasterix_->categories().at(category).editions().count(category_configs_.at(category).edition()) == 0)
+    if (jasterix_->category(category)->editions().count(category_configs_.at(category).edition()) == 0)
     {
         loginf << "ASTERIXImporterTask: editionForCategory: cat " << category << " reset to default edition";
-        category_configs_.at(category).edition(jasterix_->categories().at(category).defaultEdition());
+        category_configs_.at(category).edition(jasterix_->category(category)->defaultEdition());
     }
 
     return category_configs_.at(category).edition();
 }
 
-void ASTERIXImporterTask::editionForCategory (const std::string& category, const std::string& edition)
+void ASTERIXImporterTask::editionForCategory (unsigned int category, const std::string& edition)
 {
     assert (jasterix_->hasCategory(category));
 
@@ -265,7 +265,7 @@ void ASTERIXImporterTask::editionForCategory (const std::string& category, const
     if (!hasConfiguratonFor(category))
     {
         Configuration &new_cfg = configuration().addNewSubConfiguration ("ASTERIXCategoryConfig");
-        new_cfg.addParameterString ("category", category);
+        new_cfg.addParameterUnsignedInt ("category", category);
         new_cfg.addParameterBool ("decode", false);
         new_cfg.addParameterString ("edition", edition);
 
@@ -369,7 +369,7 @@ void ASTERIXImporterTask::importFile(const std::string& filename, bool test)
             continue;
         }
 
-        if (!jasterix_->hasEdition(cat_it.first, cat_it.second.edition()))
+        if (!jasterix_->category(cat_it.first)->hasEdition(cat_it.second.edition()))
         {
             logwrn << "ASTERIXImporterTask: importFile: cat " << cat_it.first << " edition "
                    << cat_it.second.edition() << " not defined in decoder";
@@ -379,12 +379,12 @@ void ASTERIXImporterTask::importFile(const std::string& filename, bool test)
         loginf << "ASTERIXImporterTask: importFile: setting decode flag";
         jasterix_->setDecodeCategory(cat_it.first, cat_it.second.decode());
         loginf << "ASTERIXImporterTask: importFile: setting edition";
-        jasterix_->setEdition(cat_it.first, cat_it.second.edition());
+        jasterix_->category(cat_it.first)->setCurrentEdition(cat_it.second.edition());
 
         loginf << "ASTERIXImporterTask: importFile: setting mapping";
-        if (cat_it.first == "001")
+        if (cat_it.first == 1)
         {
-            jasterix_->setMapping(cat_it.first, "atsdb");
+            jasterix_->category(cat_it.first)->setCurrentMapping("atsdb");
             loginf << "ASTERIXImporterTask: importFile: set cat " << cat_it.first
                    << " decode " <<  cat_it.second.decode()
                    << " edition " << cat_it.second.edition() << " mapping 'atsdb'";

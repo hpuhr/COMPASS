@@ -25,7 +25,7 @@ void JSONParseJob::run ()
         {
             json_objects_.push_back(json::parse(str_it));
         }
-        catch (nlohmann::detail::parse_error e)
+        catch (nlohmann::detail::parse_error& e)
         {
             logwrn << "JSONParseJob: run: parse error " << e.what() << " in '" << str_it << "'";
             ++parse_errors_;

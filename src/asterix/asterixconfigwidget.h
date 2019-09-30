@@ -42,7 +42,7 @@ public slots:
     void framingEditSlot();
 
     void categoryCheckedSlot ();
-    void editionChangedSlot(const std::string& cat_str, const std::string& ed_str);
+    void editionChangedSlot(unsigned int cat, const std::string& ed_str);
     void categoryEditSlot ();
 
     void editDataBlockSlot();

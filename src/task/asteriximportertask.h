@@ -53,9 +53,6 @@ public slots:
     void decodeASTERIXObsoleteSlot ();
     void addDecodedASTERIXSlot (std::shared_ptr<std::vector<nlohmann::json>> extracted_records);
 
-//    void extractASTERIXDoneSlot ();
-//    void extractASTERIXObsoleteSlot ();
-
     void mapJSONDoneSlot ();
     void mapJSONObsoleteSlot ();
 
@@ -88,11 +85,11 @@ public:
 
     void currentFraming(const std::string &current_framing);
 
-    bool hasConfiguratonFor (const std::string& category);
-    bool decodeCategory (const std::string& category);
-    void decodeCategory (const std::string& category, bool decode);
-    std::string editionForCategory (const std::string& category);
-    void editionForCategory (const std::string& category, const std::string& edition);
+    bool hasConfiguratonFor (unsigned int category);
+    bool decodeCategory (unsigned int category);
+    void decodeCategory (unsigned int category, bool decode);
+    std::string editionForCategory (unsigned int category);
+    void editionForCategory (unsigned int category, const std::string& edition);
 
     std::shared_ptr<JSONParsingSchema> schema() const;
 
@@ -112,7 +109,7 @@ protected:
 
     std::unique_ptr<ASTERIXImporterTaskWidget> widget_;
 
-    std::map <std::string, ASTERIXCategoryConfig> category_configs_;
+    std::map <unsigned int, ASTERIXCategoryConfig> category_configs_;
 
     std::shared_ptr<JSONParsingSchema> schema_;
 

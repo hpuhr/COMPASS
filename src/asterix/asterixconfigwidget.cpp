@@ -21,6 +21,7 @@
 #include "asterixeditioncombobox.h"
 #include "logger.h"
 #include "files.h"
+#include "stringconv.h"
 
 #include <jasterix/category.h>
 #include <jasterix/edition.h>
@@ -175,7 +176,7 @@ void ASTERIXConfigWidget::updateCategories()
     assert (categories_grid_);
 
     QLayoutItem *child;
-    while ((child = categories_grid_->takeAt(0)) != 0)
+    while ((child = categories_grid_->takeAt(0)) != nullptr)
     {
         if (child->widget())
             delete child->widget();
@@ -203,15 +204,16 @@ void ASTERIXConfigWidget::updateCategories()
 
     for (auto& cat_it : task_.jASTERIX()->categories())
     {
-        std::string category = cat_it.first;
-        QCheckBox* cat_check = new QCheckBox (category.c_str());
+        unsigned int category = cat_it.first;
+
+        QCheckBox* cat_check = new QCheckBox (String::categoryString(category).c_str());
         connect(cat_check, SIGNAL(clicked()), this, SLOT(categoryCheckedSlot()));
-        cat_check->setProperty("category", category.c_str());
+        cat_check->setProperty("category", category);
         if (task_.hasConfiguratonFor(category))
             cat_check->setChecked(task_.decodeCategory(category));
         categories_grid_->addWidget (cat_check, row, 0);
 
-        const Category& cat = cat_it.second;
+        const std::shared_ptr<Category> cat = cat_it.second;
 
         ASTERIXEditionComboBox* ed_combo = new ASTERIXEditionComboBox(task_, cat);
         if (task_.hasConfiguratonFor(category))
@@ -225,7 +227,7 @@ void ASTERIXConfigWidget::updateCategories()
         edit->setFixedSize ( UI_ICON_SIZE );
         edit->setFlat(UI_ICON_BUTTON_FLAT);
         connect(edit, SIGNAL(clicked()), this, SLOT(categoryEditSlot()));
-        edit->setProperty("category", cat_it.first.c_str());
+        edit->setProperty("category", category);
         categories_grid_->addWidget (edit, row, 2);
 
         row++;
@@ -237,20 +239,20 @@ void ASTERIXConfigWidget::categoryCheckedSlot ()
     QCheckBox* widget = static_cast<QCheckBox*>(sender());
     assert (widget);
 
-    QVariant cat = widget->property("category");
+    QVariant cat_var = widget->property("category");
     bool decode = widget->checkState() == Qt::Checked;
-    std::string cat_str = cat.toString().toStdString();
+    unsigned int cat = cat_var.toUInt();
 
-    loginf << "ASTERIXConfigWidget: categoryCheckedSlot: cat " << cat_str;
+    loginf << "ASTERIXConfigWidget: categoryCheckedSlot: cat " << cat;
 
-    task_.decodeCategory(cat_str, decode);
+    task_.decodeCategory(cat, decode);
 }
 
-void ASTERIXConfigWidget::editionChangedSlot(const std::string& cat_str, const std::string& ed_str)
+void ASTERIXConfigWidget::editionChangedSlot(unsigned int cat, const std::string& ed_str)
 {
-    loginf << "ASTERIXConfigWidget: editionChangedSlot: cat " << cat_str << " edition " << ed_str;
+    loginf << "ASTERIXConfigWidget: editionChangedSlot: cat " << cat << " edition " << ed_str;
 
-    task_.editionForCategory(cat_str, ed_str);
+    task_.editionForCategory(cat, ed_str);
 }
 
 void ASTERIXConfigWidget::categoryEditSlot ()
@@ -258,19 +260,19 @@ void ASTERIXConfigWidget::categoryEditSlot ()
     QPushButton* widget = static_cast<QPushButton*>(sender());
     assert (widget);
 
-    QVariant cat = widget->property("category");
-    std::string cat_str = cat.toString().toStdString();
+    QVariant cat_var = widget->property("category");
+    unsigned int cat = cat_var.toUInt();
     std::string edition_str;
-    if (task_.hasConfiguratonFor(cat_str))
-        edition_str = task_.editionForCategory(cat_str);
+    if (task_.hasConfiguratonFor(cat))
+        edition_str = task_.editionForCategory(cat);
     else
-        edition_str = task_.jASTERIX()->categories().at(cat_str).defaultEdition();
+        edition_str = task_.jASTERIX()->category(cat)->defaultEdition();
 
-    assert (task_.jASTERIX()->hasCategory(cat_str));
-    assert (task_.jASTERIX()->categories().at(cat_str).hasEdition(edition_str));
-    std::string def_path = task_.jASTERIX()->categories().at(cat_str).editionPath(edition_str);
+    assert (task_.jASTERIX()->hasCategory(cat));
+    assert (task_.jASTERIX()->category(cat)->hasEdition(edition_str));
+    std::string def_path = task_.jASTERIX()->category(cat)->editionPath(edition_str);
 
-    loginf << "ASTERIXConfigWidget: categoryEditSlot: cat " << cat_str << " path '" << def_path << "'";
+    loginf << "ASTERIXConfigWidget: categoryEditSlot: cat " << cat << " path '" << def_path << "'";
 
     QDesktopServices::openUrl(QUrl(def_path.c_str()));
 }

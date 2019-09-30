@@ -268,11 +268,6 @@ void ASTERIXDecodeJob::processRecord (unsigned int category, nlohmann::json& rec
     category_counts_.at(category) += 1;
 }
 
-//std::vector<nlohmann::json>& ASTERIXDecodeJob::extractedRecords()
-//{
-//    return extracted_records_;
-//}
-
 std::map<unsigned int, size_t> ASTERIXDecodeJob::categoryCounts() const
 {
     return category_counts_;

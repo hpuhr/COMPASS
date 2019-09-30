@@ -40,7 +40,7 @@ inline bool isNumber (const std::string& number_str)
     {
         std::stoi(number_str);
     }
-    catch (std::invalid_argument e)
+    catch (std::invalid_argument& e)
     {
         return false;
     }
@@ -51,6 +51,13 @@ inline std::string intToString(int number, int width, char c)
 {
     std::ostringstream out;
     out << std::setfill(c) << std::setw(width) << number;
+    return out.str();
+}
+
+inline std::string categoryString(unsigned int cat)
+{
+    std::ostringstream out;
+    out << std::setfill('0') << std::setw(3) << cat;
     return out.str();
 }
 

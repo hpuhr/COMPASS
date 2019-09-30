@@ -1,62 +1,74 @@
 <Configuration class_id="TaskManager" instance_id="TaskManager0">
     <Configuration class_id="ASTERIXImporterTask" instance_id="ASTERIXImporterTask0">
         <ParameterBool debug_jasterix="0"/>
-        <ParameterString current_filename=""/>
+        <ParameterString current_filename="/home/sk/data/austria/20190109_0800_20190109_0820.ff"/>
         <ParameterString current_framing="ioss"/>
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig0">
             <ParameterBool decode="1"/>
-            <ParameterString category="001"/>
+            <ParameterUnsignedInt category="1"/>
             <ParameterString edition="1.1"/>
         </Configuration>
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig1">
             <ParameterBool decode="1"/>
-            <ParameterString category="020"/>
+            <ParameterUnsignedInt category="20"/>
             <ParameterString edition="1.8"/>
         </Configuration>
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig10">
             <ParameterBool decode="1"/>
-            <ParameterString category="062"/>
+            <ParameterUnsignedInt category="62"/>
             <ParameterString edition="1.16"/>
         </Configuration>
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig2">
             <ParameterBool decode="1"/>
-            <ParameterString category="048"/>
+            <ParameterUnsignedInt category="48"/>
             <ParameterString edition="1.15"/>
         </Configuration>
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig3">
             <ParameterBool decode="1"/>
-            <ParameterString category="065"/>
+            <ParameterUnsignedInt category="65"/>
             <ParameterString edition="1.2"/>
         </Configuration>
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig4">
             <ParameterBool decode="1"/>
-            <ParameterString category="002"/>
+            <ParameterUnsignedInt category="2"/>
             <ParameterString edition="1.0"/>
         </Configuration>
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig5">
             <ParameterBool decode="1"/>
-            <ParameterString category="023"/>
+            <ParameterUnsignedInt category="23"/>
             <ParameterString edition="1.2"/>
         </Configuration>
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig6">
             <ParameterBool decode="1"/>
-            <ParameterString category="063"/>
+            <ParameterUnsignedInt category="63"/>
             <ParameterString edition="1.1"/>
         </Configuration>
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig7">
             <ParameterBool decode="1"/>
-            <ParameterString category="034"/>
+            <ParameterUnsignedInt category="34"/>
             <ParameterString edition="1.26"/>
         </Configuration>
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig8">
             <ParameterBool decode="1"/>
-            <ParameterString category="019"/>
+            <ParameterUnsignedInt category="19"/>
             <ParameterString edition="1.2"/>
         </Configuration>
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig9">
             <ParameterBool decode="1"/>
-            <ParameterString category="021"/>
+            <ParameterUnsignedInt category="21"/>
             <ParameterString edition="2.1"/>
+        </Configuration>
+        <Configuration class_id="ASTERIXFile" instance_id="ASTERIXFilehomeskatsdb_demo20190506.ff">
+            <ParameterString name="/home/sk/atsdb_demo/20190506.ff"/>
+        </Configuration>
+        <Configuration class_id="ASTERIXFile" instance_id="ASTERIXFilehomeskdataaustria2017-05-04-0930-1020_10k.rff">
+            <ParameterString name="/home/sk/data/austria/2017-05-04-0930-1020_10k.rff"/>
+        </Configuration>
+        <Configuration class_id="ASTERIXFile" instance_id="ASTERIXFilehomeskdataaustria20190109_0800_20190109_0820.ff">
+            <ParameterString name="/home/sk/data/austria/20190109_0800_20190109_0820.ff"/>
+        </Configuration>
+        <Configuration class_id="ASTERIXFile" instance_id="ASTERIXFilehomeskdatacat048.raw">
+            <ParameterString name="/home/sk/data/cat048.raw"/>
         </Configuration>
         <Configuration class_id="JSONParsingSchema" instance_id="JSONParsingSchemajASTERIX0">
             <ParameterString name="jASTERIX"/>
@@ -810,8 +822,11 @@
         </Configuration>
     </Configuration>
     <Configuration class_id="JSONImporterTask" instance_id="JSONImporterTask">
-        <ParameterString current_filename=""/>
+        <ParameterString current_filename="/home/sk/atsdb_demo/huc-2018-07-10.json.zip"/>
         <ParameterString current_schema="SDDL"/>
+        <Configuration class_id="JSONFile" instance_id="JSONFilehomeskatsdb_demohuc-2018-07-10.json.zip">
+            <ParameterString name="/home/sk/atsdb_demo/huc-2018-07-10.json.zip"/>
+        </Configuration>
         <Configuration class_id="JSONParsingSchema" instance_id="JSONParsingSchemaADSBExchange0">
             <ParameterString name="ADSBExchange"/>
             <Configuration class_id="JSONObjectParser" instance_id="JSONObjectParserADSB0">
