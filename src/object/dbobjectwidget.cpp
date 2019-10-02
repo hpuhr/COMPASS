@@ -94,29 +94,29 @@ DBObjectWidget::DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager
         grid_layout->addWidget (name_label, 0, 0);
 
         name_edit_ = new QLineEdit (object_->name().c_str());
-        connect(name_edit_, SIGNAL( returnPressed() ), this, SLOT( editNameSlot() ));
+        connect(name_edit_, &QLineEdit::returnPressed, this, &DBObjectWidget::editNameSlot);
         grid_layout->addWidget (name_edit_, 0, 1);
 
         QLabel *info_label = new QLabel ("Description");
         grid_layout->addWidget (info_label, 1, 0);
 
         info_edit_ = new QLineEdit (object_->info().c_str());
-        connect(info_edit_, SIGNAL(returnPressed()), this, SLOT(editInfoSlot()));
+        connect(info_edit_, &QLineEdit::returnPressed, this, &DBObjectWidget::editInfoSlot);
         grid_layout->addWidget (info_edit_, 1, 1);
 
         properties_layout->addLayout (grid_layout);
 
         edit_label_button_ = new QPushButton ("Edit Label Definition");
-        connect(edit_label_button_, SIGNAL( clicked() ), this, SLOT( showLabelDefinitionWidgetSlot() ));
+        connect(edit_label_button_, &QPushButton::clicked, this, &DBObjectWidget::showLabelDefinitionWidgetSlot);
         properties_layout->addWidget(edit_label_button_);
 
         edit_ds_button_ = new QPushButton ("Edit Data Sources");
-        connect(edit_ds_button_, SIGNAL( clicked() ), this, SLOT( editDataSourcesSlot() ));
+        connect(edit_ds_button_, &QPushButton::clicked, this, &DBObjectWidget::editDataSourcesSlot);
         properties_layout->addWidget(edit_ds_button_);
 
 
         QPushButton* print_button_ = new QPushButton ("Print");
-        connect(print_button_, SIGNAL( clicked() ), this, SLOT( printSlot() ));
+        connect(print_button_, &QPushButton::clicked, this, &DBObjectWidget::printSlot);
         properties_layout->addWidget(print_button_);
 
         properties_frame->setLayout (properties_layout);
@@ -429,7 +429,7 @@ void DBObjectWidget::updateDataSourcesGridSlot ()
     assert (ds_grid_);
 
     QLayoutItem *child;
-    while ((child = ds_grid_->takeAt(0)) != 0)
+    while ((child = ds_grid_->takeAt(0)) != nullptr)
     {
         if (child->widget())
             delete child->widget();

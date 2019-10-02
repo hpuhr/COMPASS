@@ -22,22 +22,20 @@
 #include "json.hpp"
 #include "jsonparsingschema.h"
 #include "asterixdecodejob.h"
-//#include "asterixextractrecordsjob.h"
 #include "jsonmappingjob.h"
 
 #include <QObject>
 
 #include <memory>
 
-#include "boost/date_time/posix_time/posix_time.hpp"
-
 #include <tbb/concurrent_queue.h>
 
 class TaskManager;
 class ASTERIXImporterTaskWidget;
 class ASTERIXCategoryConfig;
+class ASTERIXStatusDialog;
 class SavedFile;
-class QMessageBox;
+//class QMessageBox;
 
 namespace jASTERIX
 {
@@ -58,6 +56,8 @@ public slots:
 
     void insertProgressSlot (float percent);
     void insertDoneSlot (DBObject& object);
+
+    void closeStatusDialogSlot();
 
 public:
     ASTERIXImporterTask(const std::string& class_id, const std::string& instance_id,
@@ -114,23 +114,15 @@ protected:
     std::shared_ptr<JSONParsingSchema> schema_;
 
     std::shared_ptr<ASTERIXDecodeJob> decode_job_;
-    //std::shared_ptr<ASTERIXExtractRecordsJob> extract_job_;
     tbb::concurrent_queue <std::shared_ptr <JSONMappingJob>> json_map_jobs_;
     std::map <std::string, std::shared_ptr<Buffer>> buffers_;
 
     bool error_ {false};
     std::string error_message_;
 
-    QMessageBox* msg_box_ {nullptr};
+    //QMessageBox* msg_box_ {nullptr};
+    ASTERIXStatusDialog* status_widget_{nullptr};
 
-    size_t num_frames_ {0};
-    size_t num_records_ {0};
-    size_t records_mapped_ {0};
-    size_t records_not_mapped_ {0};
-    size_t records_created_ {0};
-    size_t records_inserted_ {0};
-
-    std::map<unsigned int, size_t> category_counts_;
     size_t key_count_ {0};
     size_t insert_active_ {0};
 
@@ -138,16 +130,12 @@ protected:
 
     bool all_done_{false};
 
-    boost::posix_time::ptime start_time_;
-    boost::posix_time::ptime stop_time_;
-
     virtual void checkSubConfigurables ();
 
     void insertData ();
     void checkAllDone ();
 
-
-    void updateMsgBox();
+    //void updateMsgBox();
     bool maxLoadReached ();
 };
 

@@ -27,10 +27,25 @@ void JSONMappingJob::run ()
     bool parsed;
     bool parsed_any = false;
 
+    bool has_cat;
+    unsigned int category;
+
     logdbg << "JSONMappingJob: run: mapping json";
     for (auto& j_it : *extracted_records_)
     {
         //loginf << "UGA '" << j_it.dump(4) << "'";
+
+        has_cat = j_it.find("category") != j_it.end();
+
+        if (has_cat)
+            category = j_it.at("category");
+
+//        if (j_it.find("010") != j_it.end())
+//        {
+//            has_sac_sic = true;
+//            sac = j_it.at("010").at("SAC");
+//            sic = j_it.at("010").at("SIC");
+//        }
 
         parsed = false;
         parsed_any = false;
@@ -42,9 +57,17 @@ void JSONMappingJob::run ()
             parsed_any |= parsed;
         }
         if (parsed_any)
+        {
+            if (has_cat)
+                category_mapped_counts_[category].first += 1;
             ++num_mapped_;
+        }
         else
+        {
+            if (has_cat)
+                category_mapped_counts_[category].second += 1;
             ++num_not_mapped_;
+        }
     }
 
     logdbg << "JSONMappingJob: run: creating buffers";
@@ -80,4 +103,9 @@ size_t JSONMappingJob::numNotMapped() const
 size_t JSONMappingJob::numCreated() const
 {
     return num_created_;
+}
+
+std::map<unsigned int, std::pair<size_t, size_t> > JSONMappingJob::categoryMappedCounts() const
+{
+    return category_mapped_counts_;
 }

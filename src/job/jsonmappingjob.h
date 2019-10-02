@@ -20,15 +20,16 @@ public:
 
     virtual void run ();
 
-    //std::vector <JsonMapping>&& mappings(); // to be moved out
-
     size_t numMapped() const;
     size_t numNotMapped() const;
     size_t numCreated() const;
 
     std::map<std::string, std::shared_ptr<Buffer>> buffers () { return buffers_; }
 
+    std::map<unsigned int, std::pair<size_t, size_t> > categoryMappedCounts() const;
+
 private:
+    std::map<unsigned int, std::pair<size_t,size_t>> category_mapped_counts_; // mapped, not mapped
     size_t num_mapped_ {0}; // number of parsed where a parse was successful
     size_t num_not_mapped_ {0}; // number of parsed where no parse was successful
     size_t num_created_ {0}; // number of created objects from parsing
