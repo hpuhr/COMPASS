@@ -129,12 +129,12 @@ void JSONObjectParserWidget::update ()
 
 void JSONObjectParserWidget::updateMappingsGrid()
 {
-    logdbg  << "DBObjectWidget: updateSchemaMetaTables";
+    loginf  << "JSONObjectParserWidget: updateMappingsGrid";
     assert (parser_);
     assert (mappings_grid_);
 
     QLayoutItem *child;
-    while ((child = mappings_grid_->takeAt(0)) != 0)
+    while ((child = mappings_grid_->takeAt(0)) != nullptr)
     {
         if (child->widget())
             delete child->widget();
@@ -175,49 +175,59 @@ void JSONObjectParserWidget::updateMappingsGrid()
     mappings_grid_->addWidget (format_label, row, 5);
 
     ++row;
+
+    std::multimap<std::string, JSONDataMapping*> sorted_mappings;
+
     for (auto& map_it : *parser_)
     {
         map_it.initializeIfRequired();
+        sorted_mappings.insert({map_it.jsonKey(), &map_it});
+        loginf << "UGA insert " << map_it.jsonKey();
+    }
 
-        QVariant data = QVariant::fromValue(&map_it);
+
+    for (auto& map_it : sorted_mappings)
+    {
+        QVariant data = QVariant::fromValue(map_it.second);
 
         QCheckBox* active_check = new QCheckBox ();
-        active_check->setChecked(map_it.active());
+        active_check->setChecked(map_it.second->active());
         connect(active_check, SIGNAL(stateChanged(int)), this, SLOT(mappingActiveChangedSlot()));
         active_check->setProperty("mapping", data);
         mappings_grid_->addWidget(active_check, row, 0);
 
-        QLineEdit* key_edit = new QLineEdit (map_it.jsonKey().c_str());
+        QLineEdit* key_edit = new QLineEdit (map_it.first.c_str());
         connect(key_edit, SIGNAL(textEdited(const QString&)), this, SLOT(mappingKeyChangedSlot()));
         key_edit->setProperty("mapping", data);
         mappings_grid_->addWidget(key_edit, row, 1);
 
         DBOVariableSelectionWidget* var_sel = new DBOVariableSelectionWidget ();
         var_sel->showMetaVariables(false);
-        var_sel->showDBOOnly (map_it.dbObjectName());
+        var_sel->showDBOOnly (map_it.second->dbObjectName());
         var_sel->showEmptyVariable(true);
-        if (map_it.hasVariable())
-            var_sel->selectedVariable(map_it.variable());
+        if (map_it.second->hasVariable())
+            var_sel->selectedVariable(map_it.second->variable());
         connect(var_sel, SIGNAL(selectionChanged()), this, SLOT(mappingDBOVariableChangedSlot()));
         var_sel->setProperty("mapping", data);
         //var_sel->setProperty("row", row);
         mappings_grid_->addWidget(var_sel, row, 2);
 
         QCheckBox* mandatory_check = new QCheckBox ();
-        mandatory_check->setChecked(map_it.mandatory());
+        mandatory_check->setChecked(map_it.second->mandatory());
         connect(mandatory_check, SIGNAL(stateChanged(int)), this, SLOT(mappingMandatoryChangedSlot()));
         mandatory_check->setProperty("mapping", data);
         mappings_grid_->addWidget(mandatory_check, row, 3);
 
-        UnitSelectionWidget* unit_sel = new UnitSelectionWidget(map_it.dimensionRef(), map_it.unitRef());
+        UnitSelectionWidget* unit_sel = new UnitSelectionWidget(map_it.second->dimensionRef(),
+                                                                map_it.second->unitRef());
         mappings_grid_->addWidget (unit_sel, row, 4);
         //column_unit_selection_widgets_[unit_widget] = it.second;
 
 //        if (map_it.hasVariable())
 //        {
             DataTypeFormatSelectionWidget* data_format_widget
-                    = new DataTypeFormatSelectionWidget (map_it.formatDataTypeRef(),
-                                                         map_it.jsonValueFormatRef());
+                    = new DataTypeFormatSelectionWidget (map_it.second->formatDataTypeRef(),
+                                                         map_it.second->jsonValueFormatRef());
 
             mappings_grid_->addWidget (data_format_widget, row, 5);
 //            format_selections_[row-1] = data_format_widget;

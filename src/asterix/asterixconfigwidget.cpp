@@ -248,10 +248,11 @@ void ASTERIXConfigWidget::categoryCheckedSlot ()
     task_.decodeCategory(cat, decode);
 }
 
-void ASTERIXConfigWidget::editionChangedSlot(unsigned int cat, const std::string& ed_str)
+void ASTERIXConfigWidget::editionChangedSlot(const std::string& cat_str, const std::string& ed_str)
 {
-    loginf << "ASTERIXConfigWidget: editionChangedSlot: cat " << cat << " edition " << ed_str;
+    loginf << "ASTERIXConfigWidget: editionChangedSlot: cat " << cat_str << " edition " << ed_str;
 
+    unsigned int cat = std::stoul(cat_str);
     task_.editionForCategory(cat, ed_str);
 }
 

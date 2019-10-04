@@ -24,6 +24,7 @@
 #include "dbobjectmanager.h"
 #include "atsdb.h"
 #include "stringconv.h"
+#include "configuration.h"
 
 #include <algorithm>
 
@@ -90,6 +91,16 @@ void JSONObjectParser::generateSubConfigurable (const std::string& class_id, con
     if (class_id == "JSONDataMapping")
     {
         data_mappings_.emplace_back (class_id, instance_id, *this);
+
+//        assert (configuration().hasSubConfiguration(class_id, instance_id));
+//        Configuration& subcfg = configuration().getSubConfiguration(class_id, instance_id);
+//        std::string json_key = subcfg.getParameterConfigValueString("json_key");
+
+        // registerParameter("json_key", &json_key_, "");
+
+//        data_mappings_.emplace(std::piecewise_construct,
+//                             std::forward_as_tuple(name),  // args for key
+//                             std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
     }
     else
         throw std::runtime_error ("DBObject: generateSubConfigurable: unknown class_id "+class_id );
@@ -291,7 +302,7 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
     PropertyDataType data_type;
     std::string current_var_name;
 
-    bool mandatory_missing;
+    bool mandatory_missing{false};
 
     for (const auto& map_it : data_mappings_)
     {
