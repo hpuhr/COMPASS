@@ -23,6 +23,7 @@
 #include "jsonparsingschema.h"
 #include "asterixdecodejob.h"
 #include "jsonmappingjob.h"
+#include "jsonmappingstubsjob.h"
 
 #include <QObject>
 
@@ -54,6 +55,9 @@ public slots:
     void mapJSONDoneSlot ();
     void mapJSONObsoleteSlot ();
 
+    void mapStubsDoneSlot ();
+    void mapStubsObsoleteSlot ();
+
     void insertProgressSlot (float percent);
     void insertDoneSlot (DBObject& object);
 
@@ -69,7 +73,7 @@ public:
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
     bool canImportFile (const std::string& filename);
-    void importFile (const std::string& filename, bool test);
+    void importFile (const std::string& filename);
 
     const std::map <std::string, SavedFile*> &fileList () { return file_list_; }
     bool hasFile (const std::string &filename) { return file_list_.count (filename) > 0; }
@@ -96,6 +100,12 @@ public:
     bool debug() const;
     void debug(bool debug);
 
+    bool test() const;
+    void test(bool test);
+
+    bool createMappingStubs() const;
+    void createMappingStubs(bool createMappingStubs);
+
 protected:
     bool debug_jasterix_;
     std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
@@ -106,6 +116,7 @@ protected:
 
     std::string filename_;
     bool test_ {false};
+    bool create_mapping_stubs_ {false};
 
     std::unique_ptr<ASTERIXImporterTaskWidget> widget_;
 
@@ -115,12 +126,12 @@ protected:
 
     std::shared_ptr<ASTERIXDecodeJob> decode_job_;
     tbb::concurrent_queue <std::shared_ptr <JSONMappingJob>> json_map_jobs_;
+    std::shared_ptr <JSONMappingStubsJob> json_map_stub_job_;
     std::map <std::string, std::shared_ptr<Buffer>> buffers_;
 
     bool error_ {false};
     std::string error_message_;
 
-    //QMessageBox* msg_box_ {nullptr};
     ASTERIXStatusDialog* status_widget_{nullptr};
 
     size_t key_count_ {0};

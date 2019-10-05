@@ -4,8 +4,8 @@
 #include "dbobject.h"
 
 JSONMappingJob::JSONMappingJob(std::shared_ptr<std::vector<nlohmann::json>> extracted_records,
-                               const std::map <std::string, JSONObjectParser>& mappings, size_t key_count)
-    : Job ("JSONMappingJob"), extracted_records_(extracted_records), parsers_(mappings), key_count_(key_count)
+                               const std::map <std::string, JSONObjectParser>& parsers, size_t key_count)
+    : Job ("JSONMappingJob"), extracted_records_(extracted_records), parsers_(parsers), key_count_(key_count)
 {
 
 }

@@ -40,7 +40,7 @@ public:
     JSONObjectParserIterator begin() { return parsers_.begin(); }
     JSONObjectParserIterator end() { return parsers_.end(); }
 
-    const std::map<std::string, JSONObjectParser>& parsers () { return parsers_; }
+    std::map<std::string, JSONObjectParser>& parsers () { return parsers_; }
     bool hasObjectParser (const std::string& name) { return parsers_.count(name) > 0; }
     JSONObjectParser& parser (const std::string& name);
     void removeParser (const std::string& name);
@@ -52,7 +52,6 @@ public:
 
 private:
     std::string name_;
-    //JSONImporterTask* task_ {nullptr};
     std::map <std::string, JSONObjectParser> parsers_;
 
 protected:

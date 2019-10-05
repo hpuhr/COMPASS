@@ -65,6 +65,7 @@ public:
 
     // returs true on successful parse
     bool parseJSON (nlohmann::json& j, std::shared_ptr<Buffer> buffer) const;
+    void createMappingStubs (nlohmann::json& j);
 
     const DBOVariableSet& variableList() const;
 
@@ -114,6 +115,7 @@ private:
 
     // returns true on successful parse
     bool parseTargetReport (const nlohmann::json& tr, std::shared_ptr<Buffer> buffer, size_t row_cnt) const;
+    void createMappingsFromTargetReport (const nlohmann::json& tr);
 
 protected:
     virtual void checkSubConfigurables () {}

@@ -81,12 +81,6 @@ ASTERIXImporterTask::ASTERIXImporterTask(const std::string& class_id, const std:
 
 ASTERIXImporterTask::~ASTERIXImporterTask()
 {
-    //    if (msg_box_)
-    //    {
-    //        delete msg_box_;
-    //        msg_box_ = nullptr;
-    //    }
-
     for (auto it : file_list_)
         delete it.second;
 
@@ -296,6 +290,26 @@ void ASTERIXImporterTask::debug(bool debug_jasterix)
     loginf << "ASTERIXImporterTask: debug " << debug_jasterix_;
 }
 
+bool ASTERIXImporterTask::test() const
+{
+    return test_;
+}
+
+void ASTERIXImporterTask::test(bool test)
+{
+    test_ = test;
+}
+
+bool ASTERIXImporterTask::createMappingStubs() const
+{
+    return create_mapping_stubs_;
+}
+
+void ASTERIXImporterTask::createMappingStubs(bool create_mapping_stubs)
+{
+    create_mapping_stubs_ = create_mapping_stubs;
+}
+
 bool ASTERIXImporterTask::canImportFile (const std::string& filename)
 {
     if (!Files::fileExists(filename))
@@ -304,41 +318,17 @@ bool ASTERIXImporterTask::canImportFile (const std::string& filename)
         return false;
     }
 
-    //    if (!ATSDB::instance().objectManager().existsObject("ADSB"))
-    //    {
-    //        loginf << "ASTERIXImporterTask: canImportFile: not possible since DBObject does not exist";
-    //        return false;
-    //    }
-
-    //    if (!current_schema_.size())
-    //        return false;
-
-    //    if (!schemas_.count(current_schema_))
-    //    {
-    //        current_schema_ = "";
-    //        return false;
-    //    }
-
     return true;
 }
 
-void ASTERIXImporterTask::importFile(const std::string& filename, bool test)
+void ASTERIXImporterTask::importFile(const std::string& filename)
 {
-    loginf << "ASTERIXImporterTask: importFile: filename " << filename << " test " << test;
+    loginf << "ASTERIXImporterTask: importFile: filename " << filename << " test " << test_;
 
     assert (canImportFile(filename));
 
     filename_ = filename;
-    test_ = test;
 
-//    num_frames_ = 0;
-//    num_records_ = 0;
-//    records_mapped_ = 0;
-//    records_not_mapped_ = 0;
-//    records_created_ = 0;
-//    records_inserted_ = 0;
-
-//    category_read_counts_.clear();
     assert (!status_widget_);
 
     status_widget_ = new ASTERIXStatusDialog (filename_, test_);
@@ -357,8 +347,6 @@ void ASTERIXImporterTask::importFile(const std::string& filename, bool test)
     for (auto& map_it : *schema_)
         if (!map_it.second.initialized())
             map_it.second.initialize();
-
-    //start_time_ = boost::posix_time::microsec_clock::local_time();
 
     loginf << "ASTERIXImporterTask: importFile: setting categories";
 
@@ -399,13 +387,13 @@ void ASTERIXImporterTask::importFile(const std::string& filename, bool test)
             loginf << "ASTERIXImporterTask: importFile: set cat " << cat_it.first
                    << " decode " <<  cat_it.second.decode()
                    << " edition " << cat_it.second.edition();
-        // TODO mapping
+        // TODO mapping?
     }
 
     loginf << "ASTERIXImporterTask: importFile: filename " << filename;
 
     assert (decode_job_ == nullptr);
-    decode_job_ = make_shared<ASTERIXDecodeJob> (*this, filename, current_framing_, test);
+    decode_job_ = make_shared<ASTERIXDecodeJob> (*this, filename, current_framing_, test_);
 
     connect (decode_job_.get(), SIGNAL(obsoleteSignal()), this, SLOT(decodeASTERIXObsoleteSlot()),
              Qt::QueuedConnection);
@@ -436,8 +424,6 @@ void ASTERIXImporterTask::decodeASTERIXDoneSlot ()
     }
 
     decode_job_ = nullptr;
-
-    //updateMsgBox();
 }
 void ASTERIXImporterTask::decodeASTERIXObsoleteSlot ()
 {
@@ -457,29 +443,51 @@ void ASTERIXImporterTask::addDecodedASTERIXSlot (std::shared_ptr<std::vector<nlo
 
     status_widget_->show();
 
-//    num_frames_ += decode_job_->numFrames();
-//    num_records_ += decode_job_->numRecords();
+    if (!create_mapping_stubs_) // test or import
+    {
+        size_t count = extracted_records->size();
 
-//    category_read_counts_ = decode_job_->categoryCounts();
+        assert (schema_);
 
-    size_t count = extracted_records->size();
+        std::shared_ptr<JSONMappingJob> json_map_job =
+                std::shared_ptr<JSONMappingJob> (new JSONMappingJob (extracted_records, schema_->parsers(),
+                                                                     key_count_));
 
-    assert (schema_);
+        extracted_records = nullptr;
 
-    std::shared_ptr<JSONMappingJob> json_map_job =
-            std::shared_ptr<JSONMappingJob> (new JSONMappingJob (extracted_records, schema_->parsers(), key_count_));
+        connect (json_map_job.get(), &JSONMappingJob::obsoleteSignal, this, &ASTERIXImporterTask::mapJSONObsoleteSlot,
+                 Qt::QueuedConnection);
+        connect (json_map_job.get(), &JSONMappingJob::doneSignal, this, &ASTERIXImporterTask::mapJSONDoneSlot,
+                 Qt::QueuedConnection);
 
-    extracted_records = nullptr;
+        json_map_jobs_.push(json_map_job);
 
-    connect (json_map_job.get(), SIGNAL(obsoleteSignal()), this, SLOT(mapJSONObsoleteSlot()),
-             Qt::QueuedConnection);
-    connect (json_map_job.get(), SIGNAL(doneSignal()), this, SLOT(mapJSONDoneSlot()), Qt::QueuedConnection);
+        JobManager::instance().addNonBlockingJob(json_map_job);
 
-    json_map_jobs_.push(json_map_job);
+        key_count_ += count;
+    }
+    else // create mappings
+    {
+        while (json_map_stub_job_) // only one can exist at a time
+        {
+            QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            QThread::msleep(1);
+        }
 
-    JobManager::instance().addNonBlockingJob(json_map_job);
+        assert (json_map_stub_job_ == nullptr);
 
-    key_count_ += count;
+        json_map_stub_job_ = std::shared_ptr<JSONMappingStubsJob> (
+                    new JSONMappingStubsJob (extracted_records, schema_->parsers()));
+
+        connect (json_map_stub_job_.get(), &JSONMappingStubsJob::obsoleteSignal,
+                 this, &ASTERIXImporterTask::mapJSONObsoleteSlot, Qt::QueuedConnection);
+        connect (json_map_stub_job_.get(), &JSONMappingStubsJob::doneSignal,
+                 this, &ASTERIXImporterTask::mapJSONDoneSlot, Qt::QueuedConnection);
+
+        //json_map_stubs_jobs_.push(json_map_stubs_job);
+
+        JobManager::instance().addNonBlockingJob(json_map_stub_job_);
+    }
 
     if (decode_job_)
     {
@@ -488,9 +496,6 @@ void ASTERIXImporterTask::addDecodedASTERIXSlot (std::shared_ptr<std::vector<nlo
         else
             decode_job_->unpause();
     }
-
-    //updateMsgBox();
-
 }
 
 void ASTERIXImporterTask::mapJSONDoneSlot ()
@@ -515,17 +520,6 @@ void ASTERIXImporterTask::mapJSONDoneSlot ()
     status_widget_->addMappedCounts(queued_map_job->categoryMappedCounts());
     status_widget_->addNumCreated(map_job->numCreated());
 
-//    records_mapped_ += map_job->numMapped();
-//    records_not_mapped_ += map_job->numNotMapped();
-
-//    for (auto& mapped_cnt_it : queued_map_job->categoryMappedCounts())
-//    {
-//        category_mapped_counts_[mapped_cnt_it.first].first += mapped_cnt_it.second.first;
-//        category_mapped_counts_[mapped_cnt_it.first].second += mapped_cnt_it.second.second;
-//    }
-
-    //records_created_ += map_job->numCreated();
-
     std::map <std::string, std::shared_ptr<Buffer>> job_buffers = map_job->buffers();
 
     if (decode_job_)
@@ -536,9 +530,8 @@ void ASTERIXImporterTask::mapJSONDoneSlot ()
             decode_job_->unpause();
     }
 
-    if (test_)
+    if (test_) // ???
     {
-        //updateMsgBox();
         status_widget_->setDone();
         return;
     }
@@ -555,8 +548,6 @@ void ASTERIXImporterTask::mapJSONDoneSlot ()
                 buffers_.at(buf_it.first)->seizeBuffer(*job_buffer.get());
         }
     }
-
-    //updateMsgBox();
 
     if (!insert_active_)
     {
@@ -581,6 +572,29 @@ void ASTERIXImporterTask::mapJSONDoneSlot ()
 void ASTERIXImporterTask::mapJSONObsoleteSlot ()
 {
     logdbg << "ASTERIXImporterTask: mapJSONObsoleteSlot";
+}
+
+void ASTERIXImporterTask::mapStubsDoneSlot ()
+{
+    logdbg << "ASTERIXImporterTask: mapStubsDoneSlot";
+
+    JSONMappingStubsJob* map_stubs_job = static_cast<JSONMappingStubsJob*>(sender());
+    assert (json_map_stub_job_.get() == map_stubs_job);
+
+    json_map_stub_job_ = nullptr;
+
+    if (decode_job_)
+    {
+        if (maxLoadReached())
+            decode_job_->pause();
+        else
+            decode_job_->unpause();
+    }
+}
+void ASTERIXImporterTask::mapStubsObsoleteSlot ()
+{
+    logdbg << "ASTERIXImporterTask: mapStubsObsoleteSlot";
+    json_map_stub_job_ = nullptr;
 }
 
 void ASTERIXImporterTask::insertData ()
@@ -703,7 +717,6 @@ void ASTERIXImporterTask::insertData ()
 
             DBOVariableSet set = parser_it.second.variableList();
             db_object.insertData(set, buffer, false);
-            //records_inserted_ += buffer->size();
 
             status_widget_->addNumInserted(db_object.name(), buffer->size());
 
@@ -731,8 +744,6 @@ void ASTERIXImporterTask::insertDoneSlot (DBObject& object)
 
     checkAllDone ();
 
-    //updateMsgBox();
-
     logdbg << "ASTERIXImporterTask: insertDoneSlot: done";
 }
 
@@ -746,19 +757,8 @@ void ASTERIXImporterTask::checkAllDone ()
         assert (status_widget_);
         status_widget_->setDone();
 
-//        stop_time_ = boost::posix_time::microsec_clock::local_time();
-
-//        boost::posix_time::time_duration diff = stop_time_ - start_time_;
-
-//        std::string time_str = std::to_string(diff.hours())+"h "+std::to_string(diff.minutes())
-//                +"m "+std::to_string(diff.seconds())+"s";
-
-//        loginf << "ASTERIXImporterTask: checkAllDone: read done after " << time_str;
-
         all_done_ = true;
 
-//        if (widget_)
-//            widget_->importDoneSlot(test_);
         buffers_.clear();
         refreshjASTERIX();
 
@@ -775,100 +775,6 @@ void ASTERIXImporterTask::closeStatusDialogSlot()
     delete status_widget_;
     status_widget_ = nullptr;
 }
-
-//void ASTERIXImporterTask::updateMsgBox ()
-//{
-//    logdbg << "ASTERIXImporterTask: updateMsgBox";
-
-//    if (error_)
-//    {
-//        if (msg_box_)
-//        {
-//            msg_box_->close();
-//        }
-//        return;
-//    }
-
-//    if (!msg_box_)
-//    {
-//        msg_box_ = new QMessageBox ();
-//        assert (msg_box_);
-//    }
-
-//    checkAllDone();
-
-//    std::string msg;
-
-//    if (test_)
-//        msg = "Testing import of";
-//    else
-//        msg = "Importing";
-
-//    msg += " file '"+filename_+"'\n";
-
-//    stop_time_ = boost::posix_time::microsec_clock::local_time();
-
-//    boost::posix_time::time_duration diff = stop_time_ - start_time_;
-
-//    std::string elapsed_time_str = String::timeStringFromDouble(diff.total_milliseconds()/1000.0, false);
-
-//    double records_per_second = num_records_/(diff.total_milliseconds()/1000.0);
-
-//    std::string records_rate_str_ = std::to_string(static_cast<int>(records_per_second));
-
-//    msg += "Elapsed Time: "+elapsed_time_str+"\n";
-
-//    msg += "Frames read: "+std::to_string(num_frames_)+"\n";
-//    msg += "Records read: "+std::to_string(num_records_)+" ("+records_rate_str_+" e/s)\n";
-
-//    msg += "\n";
-
-//    stringstream ss;
-
-//    for (auto& cat_cnt_it : category_read_counts_)
-//    {
-//        //        loginf << "ASTERIXImporterTask: decodeASTERIXDoneSlot: cat " << cat_cnt_it.first
-//        //               << " cnt " << cat_cnt_it.second;
-//        ss.str("");
-
-//        ss << setfill('0') << setw(3) << cat_cnt_it.first;
-
-//        msg += "CAT"+ss.str()+": "+std::to_string(cat_cnt_it.second)+"\tMapped "
-//                +std::to_string(category_mapped_counts_[cat_cnt_it.first].first)+"\tNot Mapped "
-//                +std::to_string(category_mapped_counts_[cat_cnt_it.first].second)
-//                +"\n";
-//    }
-
-//    msg += "SUM: "+std::to_string(num_records_)+"\tMapped "
-//            +std::to_string(records_mapped_)+"\tNot Mapped "
-//            +std::to_string(records_not_mapped_)
-//            +"\n";
-
-//    msg += "\n";
-
-////    msg += "Records mapped: "+std::to_string(records_mapped_)+"\n";
-////    msg += "Records not mapped: "+std::to_string(records_not_mapped_)+"\n\n";
-
-//    msg += "Records created: "+std::to_string(records_created_)+"\n";
-
-//    double inserts_per_second = records_inserted_/(diff.total_milliseconds()/1000.0);
-//    std::string insert_rate_str_ = std::to_string(static_cast<int>(inserts_per_second));
-//    msg += "Records inserted: "+std::to_string(records_inserted_)+" ("+insert_rate_str_+" e/s)\n\n";
-
-//    //    if (!all_done_ && remaining_time_str_.size())
-//    //        msg += "\nEstimated remaining time: "+remaining_time_str_;
-
-//    msg_box_->setText(msg.c_str());
-
-//    if (all_done_)
-//        msg_box_->setStandardButtons(QMessageBox::Ok);
-//    else
-//        msg_box_->setStandardButtons(QMessageBox::NoButton);
-
-//    msg_box_->show();
-
-//    logdbg << "ASTERIXImporterTask: updateMsgBox: done";
-//}
 
 bool ASTERIXImporterTask::maxLoadReached ()
 {

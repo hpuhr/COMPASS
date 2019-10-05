@@ -262,7 +262,7 @@ bool JSONObjectParser::parseJSON (nlohmann::json& j, std::shared_ptr<Buffer> buf
     }
     else
     {
-        logdbg << "found single target report";
+        logdbg << "JSONObjectParser: parseJSON: found single target report";
         assert (j.is_object());
 
         parsed_any = parseTargetReport (j, buffer, row_cnt);
@@ -272,6 +272,44 @@ bool JSONObjectParser::parseJSON (nlohmann::json& j, std::shared_ptr<Buffer> buf
     }
 
     return parsed_any;
+}
+
+void JSONObjectParser::createMappingStubs (nlohmann::json& j)
+{
+    assert (initialized_);
+
+    if (json_container_key_.size())
+    {
+        if (j.find(json_container_key_) != j.end())
+        {
+            json& ac_list = j.at(json_container_key_);
+            assert (ac_list.is_array());
+
+            //loginf << "found target report array in '" << json_container_key_  << "', parsing";
+
+            for (auto tr_it = ac_list.begin(); tr_it != ac_list.end(); ++tr_it)
+            {
+                //logdbg << "new target report";
+
+                json& tr = tr_it.value();
+                assert (tr.is_object());
+
+                createMappingsFromTargetReport (tr);
+            }
+        }
+        else // parsed stays false
+            loginf << "JSONObjectParser: createMappingStubs: found target report array but '"
+                   << json_container_key_  << "' not found";
+    }
+    else
+    {
+        logdbg << "JSONObjectParser: createMappingStubs: found single target report";
+        assert (j.is_object());
+
+        createMappingsFromTargetReport (j);
+    }
+
+    return;
 }
 
 bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_ptr<Buffer> buffer,
@@ -421,6 +459,11 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
     }
 
     return !mandatory_missing;
+}
+
+void JSONObjectParser::createMappingsFromTargetReport (const nlohmann::json& tr)
+{
+
 }
 
 bool JSONObjectParser::hasMapping (unsigned int index) const

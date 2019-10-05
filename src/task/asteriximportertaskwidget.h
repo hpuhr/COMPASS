@@ -47,6 +47,7 @@ public slots:
     void selectedObjectParserSlot ();
 
     void debugChangedSlot ();
+    void createMappingsSlot();
     void testImportSlot();
     void importSlot();
 
@@ -74,6 +75,7 @@ protected:
     ASTERIXConfigWidget* config_widget_ {nullptr};
 
     QCheckBox* debug_ {nullptr};
+    QPushButton* create_mapping_stubs_button_ {nullptr};
     QPushButton* test_button_ {nullptr};
     QPushButton* import_button_ {nullptr};
 

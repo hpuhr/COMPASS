@@ -142,15 +142,20 @@ ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, 
     {
         debug_ = new QCheckBox ("Debug in Console");
         debug_->setChecked(task_.debug());
-        connect(debug_, SIGNAL( clicked() ), this, SLOT(debugChangedSlot()));
+        connect(debug_, &QCheckBox::clicked, this, &ASTERIXImporterTaskWidget::debugChangedSlot);
         left_layout->addWidget (debug_);
 
+        create_mapping_stubs_button_ = new QPushButton ("Create Mapping Stubs");
+        connect(create_mapping_stubs_button_, &QPushButton::clicked,
+                this, &ASTERIXImporterTaskWidget::createMappingsSlot);
+        left_layout->addWidget (create_mapping_stubs_button_);
+
         test_button_ = new QPushButton ("Test Import");
-        connect(test_button_, SIGNAL( clicked() ), this, SLOT(testImportSlot()));
+        connect(test_button_, &QPushButton::clicked, this, &ASTERIXImporterTaskWidget::testImportSlot);
         left_layout->addWidget (test_button_);
 
         import_button_ = new QPushButton ("Import");
-        connect(import_button_, SIGNAL( clicked() ), this, SLOT(importSlot()));
+        connect(import_button_, &QPushButton::clicked, this, &ASTERIXImporterTaskWidget::importSlot);
         left_layout->addWidget (import_button_);
     }
 
@@ -354,6 +359,42 @@ void ASTERIXImporterTaskWidget::debugChangedSlot ()
     task_.debug(box->checkState() == Qt::Checked);
 }
 
+void ASTERIXImporterTaskWidget::createMappingsSlot()
+{
+    loginf << "ASTERIXImporterTaskWidget: createMappingsSlot";
+
+    if (!file_list_->currentItem())
+    {
+        QMessageBox m_warning (QMessageBox::Warning, "ASTERIX File Create Mapping Stubs Failed",
+                               "Please select a file in the list.",
+                               QMessageBox::Ok);
+        m_warning.exec();
+        return;
+    }
+
+    QString filename = file_list_->currentItem()->text();
+    if (filename.size() > 0)
+    {
+        assert (task_.hasFile(filename.toStdString()));
+
+        if (!task_.canImportFile(filename.toStdString()))
+        {
+            QMessageBox m_warning (QMessageBox::Warning, "ASTERIX File Create Mapping Stubs Failed",
+                                   "File does not exist.",
+                                   QMessageBox::Ok);
+            m_warning.exec();
+            return;
+        }
+
+        task_.test(false);
+        task_.createMappingStubs(true);
+        task_.importFile(filename.toStdString());
+
+        test_button_->setDisabled(true);
+        import_button_->setDisabled(true);
+    }
+}
+
 void ASTERIXImporterTaskWidget::testImportSlot()
 {
     loginf << "ASTERIXImporterTaskWidget: testImportSlot";
@@ -381,7 +422,9 @@ void ASTERIXImporterTaskWidget::testImportSlot()
             return;
         }
 
-        task_.importFile(filename.toStdString(), true);
+        task_.test(true);
+        task_.createMappingStubs(false);
+        task_.importFile(filename.toStdString());
 
         test_button_->setDisabled(true);
         import_button_->setDisabled(true);
@@ -415,7 +458,9 @@ void ASTERIXImporterTaskWidget::importSlot()
             return;
         }
 
-        task_.importFile(filename.toStdString(), false);
+        task_.test(false);
+        task_.createMappingStubs(false);
+        task_.importFile(filename.toStdString());
 
         test_button_->setDisabled(true);
         import_button_->setDisabled(true);

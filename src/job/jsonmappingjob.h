@@ -14,7 +14,7 @@ class JSONMappingJob : public Job
 {
 public:
     JSONMappingJob(std::shared_ptr<std::vector<nlohmann::json>> extracted_records,
-                   const std::map <std::string, JSONObjectParser>& mappings, size_t key_count);
+                   const std::map <std::string, JSONObjectParser>& parsers, size_t key_count);
     // json obj moved, mappings referenced
     virtual ~JSONMappingJob();
 
