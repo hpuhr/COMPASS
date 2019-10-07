@@ -88,6 +88,8 @@ public:
 
     void setMappingActive (JSONDataMapping& mapping, bool active);
 
+    void updateMappings ();
+
 private:
     std::string db_object_name_;
     DBObject* db_object_ {nullptr};

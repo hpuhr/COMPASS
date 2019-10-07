@@ -55,8 +55,6 @@ public:
     ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
     virtual ~ASTERIXImporterTaskWidget();
 
-    void update ();
-
 protected:
     ASTERIXImporterTask& task_;
 

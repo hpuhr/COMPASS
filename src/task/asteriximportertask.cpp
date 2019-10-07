@@ -465,11 +465,22 @@ void ASTERIXImporterTask::addDecodedASTERIXSlot (std::shared_ptr<std::vector<nlo
         JobManager::instance().addNonBlockingJob(json_map_job);
 
         key_count_ += count;
+
+        if (decode_job_)
+        {
+            if (maxLoadReached())
+                decode_job_->pause();
+            else
+                decode_job_->unpause();
+        }
     }
     else // create mappings
     {
         while (json_map_stub_job_) // only one can exist at a time
         {
+            if (decode_job_)
+                decode_job_->pause();
+
             QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
             QThread::msleep(1);
         }
@@ -487,13 +498,8 @@ void ASTERIXImporterTask::addDecodedASTERIXSlot (std::shared_ptr<std::vector<nlo
         //json_map_stubs_jobs_.push(json_map_stubs_job);
 
         JobManager::instance().addNonBlockingJob(json_map_stub_job_);
-    }
 
-    if (decode_job_)
-    {
-        if (maxLoadReached())
-            decode_job_->pause();
-        else
+        if (decode_job_)
             decode_job_->unpause();
     }
 }
@@ -583,13 +589,7 @@ void ASTERIXImporterTask::mapStubsDoneSlot ()
 
     json_map_stub_job_ = nullptr;
 
-    if (decode_job_)
-    {
-        if (maxLoadReached())
-            decode_job_->pause();
-        else
-            decode_job_->unpause();
-    }
+    schema_->updateMappings();
 
     checkAllDone ();
 }

@@ -520,26 +520,36 @@ void JSONObjectParser::checkIfKeysExistsInMappings (const std::string& location,
 
     bool found = false;
 
-    for (const auto& map_it : data_mappings_)
+    for (auto& map_it : data_mappings_)
     {
         if (map_it.jsonKey() == location)
         {
             found = true;
+
+            if (!map_it.comment().size())
+            {
+                std::stringstream ss;
+                ss << "Type " << j.type_name() << ", value " <<j.dump();
+                map_it.comment (ss.str());
+            }
             break;
         }
     }
 
     if (!found)
     {
-        loginf << "JSONObjectParser: checkIfKeysExistsInMappings: creating new mapping for '" << location << "'";
+        loginf << "JSONObjectParser: checkIfKeysExistsInMappings: creating new mapping for dbo " << db_object_name_
+               << "'" << location << "'  type " << j.type_name() << " value "  << j.dump() ;
+
         Configuration &new_cfg = configuration().addNewSubConfiguration ("JSONDataMapping");
         new_cfg.addParameterString ("json_key", location);
         new_cfg.addParameterString ("db_object_name", db_object_name_);
 
-        generateSubConfigurable("JSONDataMapping", new_cfg.getInstanceId());
+        std::stringstream ss;
+        ss << "Type " << j.type_name() << ", value " <<j.dump();
+        new_cfg.addParameterString ("comment", ss.str());
 
-        if (widget_)
-            widget_->updateMappingsGrid();
+        generateSubConfigurable("JSONDataMapping", new_cfg.getInstanceId());
     }
 }
 
@@ -778,5 +788,9 @@ void JSONObjectParser::setMappingActive (JSONDataMapping& mapping, bool active)
     mapping.active(active);
 }
 
-
+void JSONObjectParser::updateMappings ()
+{
+    if (widget_)
+        widget_->updateMappingsGrid();
+}
 

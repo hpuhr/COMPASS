@@ -296,6 +296,9 @@ public:
 
     bool initialized() const;
 
+    std::string comment() const;
+    void comment(const std::string &comment);
+
 private:
     bool initialized_ {false};
 
@@ -307,6 +310,8 @@ private:
     DBOVariable* variable_ {nullptr};
 
     bool mandatory_ {false};
+
+    std::string comment_;
 
     std::string format_data_type_;
     Format json_value_format_;

@@ -37,7 +37,7 @@ ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, 
     : QWidget (parent, f), task_(task)
 {
     setWindowTitle ("Import ASTERIX Data");
-    setMinimumSize(QSize(800, 900));
+    setMinimumSize(QSize(600, 800));
 
     QFont font_bold;
     font_bold.setBold(true);
@@ -50,6 +50,15 @@ ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, 
     main_layout_ = new QHBoxLayout ();
 
     QVBoxLayout* left_layout = new QVBoxLayout ();
+
+    QFrame *left_frame = new QFrame ();
+    left_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
+    left_frame->setLineWidth(frame_width_small);
+    left_frame->setLayout(left_layout);
+
+    QSizePolicy sp_left(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    sp_left.setHorizontalStretch(1);
+    left_frame->setSizePolicy(sp_left);
 
 //    QLabel *main_label = new QLabel ("Import ASTERIX data");
 //    main_label->setFont (font_big);
@@ -159,7 +168,8 @@ ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, 
         left_layout->addWidget (import_button_);
     }
 
-    main_layout_->addLayout(left_layout);
+    //main_layout_->addLayout(left_layout);
+    main_layout_->addWidget(left_frame);
 
     setLayout (main_layout_);
 
@@ -314,13 +324,17 @@ void ASTERIXImporterTaskWidget::createObjectParserWidget()
 {
     assert (!object_parser_widget_);
     assert (main_layout_);
-    setMinimumSize(QSize(1400, 600));
+    setMinimumSize(QSize(1800, 800));
 
     int frame_width_small = 1;
 
     QFrame *right_frame = new QFrame ();
     right_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
     right_frame->setLineWidth(frame_width_small);
+
+    QSizePolicy sp_right(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    sp_right.setHorizontalStretch(2);
+    right_frame->setSizePolicy(sp_right);
 
     object_parser_widget_ = new QStackedWidget ();
 
@@ -390,6 +404,7 @@ void ASTERIXImporterTaskWidget::createMappingsSlot()
         task_.createMappingStubs(true);
         task_.importFile(filename.toStdString());
 
+        create_mapping_stubs_button_->setDisabled(true);
         test_button_->setDisabled(true);
         import_button_->setDisabled(true);
     }
@@ -426,6 +441,7 @@ void ASTERIXImporterTaskWidget::testImportSlot()
         task_.createMappingStubs(false);
         task_.importFile(filename.toStdString());
 
+        create_mapping_stubs_button_->setDisabled(true);
         test_button_->setDisabled(true);
         import_button_->setDisabled(true);
     }
@@ -462,6 +478,7 @@ void ASTERIXImporterTaskWidget::importSlot()
         task_.createMappingStubs(false);
         task_.importFile(filename.toStdString());
 
+        create_mapping_stubs_button_->setDisabled(true);
         test_button_->setDisabled(true);
         import_button_->setDisabled(true);
     }

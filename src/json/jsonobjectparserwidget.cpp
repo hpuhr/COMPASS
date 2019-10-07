@@ -158,21 +158,25 @@ void JSONObjectParserWidget::updateMappingsGrid()
     key_label->setFont (font_bold);
     mappings_grid_->addWidget (key_label, row, 1);
 
+    QLabel *comment_label = new QLabel ("Comment");
+    comment_label->setFont (font_bold);
+    mappings_grid_->addWidget (comment_label, row, 2);
+
     QLabel *dbovar_label = new QLabel ("DBOVariable");
     dbovar_label->setFont (font_bold);
-    mappings_grid_->addWidget (dbovar_label, row, 2);
+    mappings_grid_->addWidget (dbovar_label, row, 3);
 
     QLabel *mandatory_label = new QLabel ("Mandatory");
     mandatory_label->setFont (font_bold);
-    mappings_grid_->addWidget (mandatory_label, row, 3);
+    mappings_grid_->addWidget (mandatory_label, row, 4);
 
     QLabel *unit_label = new QLabel ("Unit");
     unit_label->setFont (font_bold);
-    mappings_grid_->addWidget (unit_label, row, 4);
+    mappings_grid_->addWidget (unit_label, row, 5);
 
     QLabel *format_label = new QLabel ("Format");
     format_label->setFont (font_bold);
-    mappings_grid_->addWidget (format_label, row, 5);
+    mappings_grid_->addWidget (format_label, row, 6);
 
     ++row;
 
@@ -201,6 +205,12 @@ void JSONObjectParserWidget::updateMappingsGrid()
         key_edit->setProperty("mapping", data);
         mappings_grid_->addWidget(key_edit, row, 1);
 
+        QLineEdit* comment_edit = new QLineEdit (map_it.second->comment().c_str());
+        connect(comment_edit, SIGNAL(textEdited(const QString&)), this, SLOT(mappingCommentChangedSlot()));
+        comment_edit->setProperty("mapping", data);
+        mappings_grid_->addWidget(comment_edit, row, 2);
+
+
         DBOVariableSelectionWidget* var_sel = new DBOVariableSelectionWidget ();
         var_sel->showMetaVariables(false);
         var_sel->showDBOOnly (map_it.second->dbObjectName());
@@ -210,17 +220,17 @@ void JSONObjectParserWidget::updateMappingsGrid()
         connect(var_sel, SIGNAL(selectionChanged()), this, SLOT(mappingDBOVariableChangedSlot()));
         var_sel->setProperty("mapping", data);
         //var_sel->setProperty("row", row);
-        mappings_grid_->addWidget(var_sel, row, 2);
+        mappings_grid_->addWidget(var_sel, row, 3);
 
         QCheckBox* mandatory_check = new QCheckBox ();
         mandatory_check->setChecked(map_it.second->mandatory());
         connect(mandatory_check, SIGNAL(stateChanged(int)), this, SLOT(mappingMandatoryChangedSlot()));
         mandatory_check->setProperty("mapping", data);
-        mappings_grid_->addWidget(mandatory_check, row, 3);
+        mappings_grid_->addWidget(mandatory_check, row, 4);
 
         UnitSelectionWidget* unit_sel = new UnitSelectionWidget(map_it.second->dimensionRef(),
                                                                 map_it.second->unitRef());
-        mappings_grid_->addWidget (unit_sel, row, 4);
+        mappings_grid_->addWidget (unit_sel, row, 5);
         //column_unit_selection_widgets_[unit_widget] = it.second;
 
 //        if (map_it.hasVariable())
@@ -229,7 +239,7 @@ void JSONObjectParserWidget::updateMappingsGrid()
                     = new DataTypeFormatSelectionWidget (map_it.second->formatDataTypeRef(),
                                                          map_it.second->jsonValueFormatRef());
 
-            mappings_grid_->addWidget (data_format_widget, row, 5);
+            mappings_grid_->addWidget (data_format_widget, row, 6);
 //            format_selections_[row-1] = data_format_widget;
 //        }
 
@@ -240,7 +250,7 @@ void JSONObjectParserWidget::updateMappingsGrid()
         connect(del, SIGNAL(clicked()), this, SLOT(mappingDeleteSlot()));
         del->setProperty("mapping", data);
         del->setProperty("row", row-1);
-        mappings_grid_->addWidget (del, row, 6);
+        mappings_grid_->addWidget (del, row, 7);
 
         row++;
     }
@@ -343,6 +353,20 @@ void JSONObjectParserWidget::mappingKeyChangedSlot()
     assert (mapping);
 
     mapping->jsonKey (widget->text().toStdString());
+}
+
+void JSONObjectParserWidget::mappingCommentChangedSlot()
+{
+    loginf << "JSONObjectParserWidget: mappingCommentChangedSlot";
+
+    QLineEdit* widget = static_cast<QLineEdit*>(sender());
+    assert (widget);
+    QVariant data = widget->property("mapping");
+
+    JSONDataMapping* mapping = data.value<JSONDataMapping*>();
+    assert (mapping);
+
+    mapping->comment (widget->text().toStdString());
 }
 
 void JSONObjectParserWidget::mappingDBOVariableChangedSlot()

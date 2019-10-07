@@ -50,6 +50,8 @@ public:
     std::string name() const;
     void name(const std::string &name);
 
+    void updateMappings ();
+
 private:
     std::string name_;
     std::map <std::string, JSONObjectParser> parsers_;

@@ -86,3 +86,9 @@ void JSONParsingSchema::removeParser (const std::string& name)
     assert (hasObjectParser(name));
     parsers_.erase(name);
 }
+
+void JSONParsingSchema::updateMappings ()
+{
+    for (auto& p_it : parsers_)
+        p_it.second.updateMappings();
+}

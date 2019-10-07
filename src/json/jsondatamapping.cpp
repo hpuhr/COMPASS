@@ -33,6 +33,8 @@ JSONDataMapping::JSONDataMapping (const std::string& class_id, const std::string
     registerParameter("db_object_name", &db_object_name_, "");
     registerParameter("dbovariable_name", &dbovariable_name_, "");
 
+    registerParameter("comment", &comment_, "");
+
     registerParameter("mandatory", &mandatory_, false);
 
     registerParameter ("format_data_type", &format_data_type_, "");
@@ -104,6 +106,16 @@ std::string& JSONDataMapping::formatDataTypeRef()
 bool JSONDataMapping::initialized() const
 {
     return initialized_;
+}
+
+std::string JSONDataMapping::comment() const
+{
+    return comment_;
+}
+
+void JSONDataMapping::comment(const std::string &comment)
+{
+    comment_ = comment;
 }
 
 DBOVariable& JSONDataMapping::variable() const
