@@ -117,6 +117,8 @@ private:
     bool parseTargetReport (const nlohmann::json& tr, std::shared_ptr<Buffer> buffer, size_t row_cnt) const;
     void createMappingsFromTargetReport (const nlohmann::json& tr);
 
+    void checkIfKeysExistsInMappings (const std::string& location, const nlohmann::json& tr);
+
 protected:
     virtual void checkSubConfigurables () {}
 };

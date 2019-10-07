@@ -480,9 +480,9 @@ void ASTERIXImporterTask::addDecodedASTERIXSlot (std::shared_ptr<std::vector<nlo
                     new JSONMappingStubsJob (extracted_records, schema_->parsers()));
 
         connect (json_map_stub_job_.get(), &JSONMappingStubsJob::obsoleteSignal,
-                 this, &ASTERIXImporterTask::mapJSONObsoleteSlot, Qt::QueuedConnection);
+                 this, &ASTERIXImporterTask::mapStubsObsoleteSlot, Qt::QueuedConnection);
         connect (json_map_stub_job_.get(), &JSONMappingStubsJob::doneSignal,
-                 this, &ASTERIXImporterTask::mapJSONDoneSlot, Qt::QueuedConnection);
+                 this, &ASTERIXImporterTask::mapStubsDoneSlot, Qt::QueuedConnection);
 
         //json_map_stubs_jobs_.push(json_map_stubs_job);
 
@@ -590,6 +590,8 @@ void ASTERIXImporterTask::mapStubsDoneSlot ()
         else
             decode_job_->unpause();
     }
+
+    checkAllDone ();
 }
 void ASTERIXImporterTask::mapStubsObsoleteSlot ()
 {
@@ -751,8 +753,8 @@ void ASTERIXImporterTask::checkAllDone ()
 {
     logdbg << "ASTERIXImporterTask: checkAllDone";
 
-    if (!all_done_ && decode_job_ == nullptr && json_map_jobs_.empty() && buffers_.size() == 0
-            && insert_active_ == 0)
+    if (!all_done_ && decode_job_ == nullptr && json_map_jobs_.empty() && json_map_stub_job_ == nullptr
+            && buffers_.size() == 0 && insert_active_ == 0)
     {
         assert (status_widget_);
         status_widget_->setDone();
@@ -762,7 +764,9 @@ void ASTERIXImporterTask::checkAllDone ()
         buffers_.clear();
         refreshjASTERIX();
 
-        emit ATSDB::instance().interface().databaseContentChangedSignal();
+
+        if (!create_mapping_stubs_)
+            emit ATSDB::instance().interface().databaseContentChangedSignal();
     }
 
     logdbg << "ASTERIXImporterTask: checkAllDone: done";

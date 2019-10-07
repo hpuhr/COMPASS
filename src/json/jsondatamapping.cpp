@@ -163,7 +163,7 @@ std::string JSONDataMapping::dboVariableName() const
     return dbovariable_name_;
 }
 
-std::string JSONDataMapping::jsonKey() const
+const std::string& JSONDataMapping::jsonKey() const
 {
     return json_key_;
 }
