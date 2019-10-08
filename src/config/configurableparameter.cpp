@@ -144,7 +144,10 @@ template<> std::string ConfigurableParameter<std::string>::getParameterType () c
 template<> std::string ConfigurableParameter<bool>::getParameterValue () const
 {
     if (pointer_)
+    {
+        assert (pointer_);
         return std::to_string(*pointer_);
+    }
     else
         return std::to_string(config_value_);
 }
@@ -152,7 +155,10 @@ template<> std::string ConfigurableParameter<bool>::getParameterValue () const
 template<> std::string ConfigurableParameter<int>::getParameterValue () const
 {
     if (pointer_)
+    {
+        assert (pointer_);
         return std::to_string(*pointer_);
+    }
     else
         return std::to_string(config_value_);
 }
@@ -160,7 +166,10 @@ template<> std::string ConfigurableParameter<int>::getParameterValue () const
 template<> std::string ConfigurableParameter<unsigned int>::getParameterValue () const
 {
     if (pointer_)
+    {
+        assert (pointer_);
         return std::to_string(*pointer_);
+    }
     else
         return std::to_string(config_value_);
 }
@@ -168,7 +177,10 @@ template<> std::string ConfigurableParameter<unsigned int>::getParameterValue ()
 template<> std::string ConfigurableParameter<float>::getParameterValue () const
 {
     if (pointer_)
+    {
+        assert (pointer_);
         return Utils::String::doubleToStringPrecision(*pointer_, 8);
+    }
     else
         return Utils::String::doubleToStringPrecision(config_value_, 8);
 }
@@ -176,7 +188,10 @@ template<> std::string ConfigurableParameter<float>::getParameterValue () const
 template<> std::string ConfigurableParameter<double>::getParameterValue () const
 {
     if (pointer_)
+    {
+        assert (pointer_);
         return Utils::String::doubleToStringPrecision(*pointer_, 12);
+    }
     else
         return Utils::String::doubleToStringPrecision(config_value_, 12);
 }
@@ -184,9 +199,14 @@ template<> std::string ConfigurableParameter<double>::getParameterValue () const
 template<> std::string ConfigurableParameter<std::string>::getParameterValue () const
 {
     if (pointer_)
+    {
+        assert (pointer_);
         return *pointer_;
+    }
     else
+    {
         return config_value_;
+    }
 }
 
 template class ConfigurableParameter<bool>;

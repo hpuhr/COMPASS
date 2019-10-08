@@ -27,7 +27,7 @@
 #define logwrn log4cpp::Category::getRoot().warnStream()
 #define loginf log4cpp::Category::getRoot().infoStream()
 //#define logdbg log4cpp::Category::getRoot().debugStream()
-#define logdbg if(0) log4cpp::Category::getRoot().debugStream() // for improved performance
+#define logdbg if(false) log4cpp::Category::getRoot().debugStream() // for improved performance
 
 /**
  * @brief Thread-safe logger

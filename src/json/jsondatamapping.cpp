@@ -61,6 +61,7 @@ JSONDataMapping& JSONDataMapping::operator=(JSONDataMapping&& other)
     variable_ = other.variable_;
 
     mandatory_ = other.mandatory_;
+    comment_ = other.comment_;
     //json_value_format_ = other.json_value_format_;
     format_data_type_ = other.format_data_type_;
     json_value_format_ = std::move(other.json_value_format_);
@@ -77,6 +78,7 @@ JSONDataMapping& JSONDataMapping::operator=(JSONDataMapping&& other)
     other.configuration().updateParameterPointer ("db_object_name", &db_object_name_);
     other.configuration().updateParameterPointer ("dbovariable_name", &dbovariable_name_);
     other.configuration().updateParameterPointer ("mandatory", &mandatory_);
+    other.configuration().updateParameterPointer ("comment", &comment_);
     other.configuration().updateParameterPointer ("format_data_type", &format_data_type_);
     other.configuration().updateParameterPointer ("json_value_format", &json_value_format_);
     other.configuration().updateParameterPointer ("dimension", &dimension_);

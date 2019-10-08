@@ -125,6 +125,7 @@ void Configurable::registerParameter (const std::string &parameter_id, bool* poi
 {
     logdbg << "Configurable " << instance_id_ << ": registerParameter: bool parameter_id " << parameter_id;
     assert (configuration_);
+    assert (pointer);
     configuration_->registerParameter (parameter_id, pointer, default_value);
 }
 
@@ -132,6 +133,7 @@ void Configurable::registerParameter (const std::string &parameter_id, int* poin
 {
     logdbg << "Configurable " << instance_id_ << ": registerParameter: int parameter_id " << parameter_id;
     assert (configuration_);
+    assert (pointer);
     configuration_->registerParameter (parameter_id, pointer, default_value);
 }
 
@@ -140,6 +142,7 @@ void Configurable::registerParameter (const std::string &parameter_id, unsigned 
 {
     logdbg << "Configurable " << instance_id_ << ": registerParameter: unsigned int parameter_id " << parameter_id;
     assert (configuration_);
+    assert (pointer);
     configuration_->registerParameter (parameter_id, pointer, default_value);
 }
 
@@ -147,6 +150,7 @@ void Configurable::registerParameter (const std::string &parameter_id, float* po
 {
     logdbg << "Configurable " << instance_id_ << ": registerParameter: float parameter_id " << parameter_id;
     assert (configuration_);
+    assert (pointer);
     configuration_->registerParameter (parameter_id, pointer, default_value);
 }
 
@@ -154,6 +158,7 @@ void Configurable::registerParameter (const std::string &parameter_id, double* p
 {
     logdbg << "Configurable " << instance_id_ << ": registerParameter: double parameter_id " << parameter_id;
     assert (configuration_);
+    assert (pointer);
     configuration_->registerParameter (parameter_id, pointer, default_value);
 }
 
@@ -162,6 +167,7 @@ void Configurable::registerParameter (const std::string &parameter_id, std::stri
 {
     logdbg << "Configurable " << instance_id_ << ": registerParameter: string parameter_id " << parameter_id;
     assert (configuration_);
+    assert (pointer);
     configuration_->registerParameter (parameter_id, pointer, default_value);
 }
 
