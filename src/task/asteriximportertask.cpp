@@ -626,7 +626,7 @@ void ASTERIXImporterTask::insertData ()
             std::shared_ptr<Buffer> buffer = buffers_.at(parser_it.second.dbObject().name());
 
             has_sac_sic = db_object.hasVariable("sac") && db_object.hasVariable("sic")
-                    && buffer->has<char>("sac") && buffer->has<char>("sic");
+                    && buffer->has<unsigned char>("sac") && buffer->has<unsigned char>("sic");
 
             logdbg << "ASTERIXImporterTask: insertData: " << db_object.name() << " has sac/sic " << has_sac_sic;
 
@@ -659,12 +659,12 @@ void ASTERIXImporterTask::insertData ()
                 NullableVector<int>& data_source_key_list = buffer->get<int> (data_source_var_name);
                 std::set<int> data_source_keys = data_source_key_list.distinctValues();
 
-                std::map <int, std::pair<char, char>> sac_sics; // keyvar->(sac,sic)
+                std::map <int, std::pair<unsigned char, unsigned char>> sac_sics; // keyvar->(sac,sic)
                 // collect sac/sics
                 if (has_sac_sic)
                 {
-                    NullableVector<char>& sac_list = buffer->get<char> ("sac");
-                    NullableVector<char>& sic_list = buffer->get<char> ("sic");
+                    NullableVector<unsigned char>& sac_list = buffer->get<unsigned char> ("sac");
+                    NullableVector<unsigned char>& sic_list = buffer->get<unsigned char> ("sic");
 
                     size_t size = buffer->size();
                     int key_val;
@@ -680,7 +680,7 @@ void ASTERIXImporterTask::insertData ()
                             logdbg << "ASTERIXImporterTask: insertData: found new ds " << key_val << " for sac/sic";
 
                             assert (!sac_list.isNull(cnt) && !sic_list.isNull(cnt));
-                            sac_sics[key_val] = std::pair<char, char> (sac_list.get(cnt), sic_list.get(cnt));
+                            sac_sics[key_val] = std::pair<unsigned char, unsigned char> (sac_list.get(cnt), sic_list.get(cnt));
 
                             loginf << "ASTERIXImporterTask: insertData: source " << key_val
                                    << " sac " << static_cast<int>(sac_list.get(cnt))
