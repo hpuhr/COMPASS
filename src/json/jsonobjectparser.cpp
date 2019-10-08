@@ -595,6 +595,9 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
 
     for (auto& data_it : data_mappings_)
     {
+        if (!data_it.active())
+            continue;
+
         if (data_it.dimension() != data_it.variable().dimension())
             logwrn << "JSONObjectParser: transformBuffer: variable " << data_it.variable().name()
                    << " has differing dimensions " << data_it.dimension() << " " << data_it.variable().dimension();
