@@ -87,8 +87,11 @@ DBTableWidget::DBTableWidget(DBTable &table, QWidget * parent, Qt::WindowFlags f
     column_scroll->setWidgetResizable (true);
     column_scroll->setWidget(colum_frame);
 
-
     main_layout->addWidget (column_scroll);
+
+    QPushButton* update_button = new QPushButton("Update");
+    connect (update_button, &QPushButton::clicked, this, &DBTableWidget::updateSlot);
+    main_layout->addWidget (update_button);
 
     setLayout (main_layout);
 
@@ -119,15 +122,25 @@ void DBTableWidget::infoSlot (const QString& value)
     table_.info (value.toStdString());
 }
 
+void DBTableWidget::updateSlot ()
+{
+    table_.update();
+    updateColumnGrid();
+}
+
 void DBTableWidget::updateColumnGrid ()
 {
     assert (column_grid_);
 
     QLayoutItem *child;
-    while ((child = column_grid_->takeAt(0)) != 0)
+    while ((child = column_grid_->takeAt(0)) != nullptr)
     {
         if (child->widget())
-            delete child->widget();
+        {
+            if (!dynamic_cast<UnitSelectionWidget*>(child->widget())
+                    && !dynamic_cast<FormatSelectionWidget*>(child->widget()))
+                delete child->widget();
+        }
         delete child;
     }
 
@@ -164,7 +177,6 @@ void DBTableWidget::updateColumnGrid ()
     QLabel* comment_label = new QLabel ("Comment");
     comment_label->setFont(font_bold);
     column_grid_->addWidget (comment_label, 0,5);
-
 
     unsigned int row=1;
     for (auto& it : table_.columns ())

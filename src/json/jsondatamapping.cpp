@@ -92,6 +92,11 @@ JSONDataMapping& JSONDataMapping::operator=(JSONDataMapping&& other)
     return static_cast<JSONDataMapping&>(Configurable::operator=(std::move(other)));
 }
 
+JSONDataMapping::~JSONDataMapping()
+{
+    //loginf << "JSONDataMapping: ~JSONDataMapping: instance " << instanceId();
+}
+
 void JSONDataMapping::initializeIfRequired ()
 {
     if (!initialized_)

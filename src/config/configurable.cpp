@@ -62,7 +62,7 @@ Configurable::Configurable(const std::string &class_id, const std::string &insta
 
 Configurable& Configurable::operator=(Configurable&& other)
 {
-    logdbg << "Configurable: move operator: moving";
+    //loginf << "Configurable: move operator: moving instance " << other.instance_id_;
 
     parent_ = other.parent_;
     if (parent_)

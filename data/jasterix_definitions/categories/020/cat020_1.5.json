@@ -1008,7 +1008,7 @@
                                     "comment":"Correlation coefficient in two’s complement",
                                     "type":"fixed_bytes",
                                     "length":2,
-                                    "data_type":"uint",
+                                    "data_type":"int",
                                     "lsb":0.25
                                 }
                             ]

@@ -43,7 +43,7 @@ void DataTypeFormatSelectionWidget::showValues()
 
 void DataTypeFormatSelectionWidget::createMenu()
 {
-    loginf  << "DataTypeFormatSelectionWidget: createMenu";
+    logdbg  << "DataTypeFormatSelectionWidget: createMenu";
     //    menu_.addAction( "" );
 
     for (auto dt_it : format_.getAllFormatOptions())
@@ -68,7 +68,7 @@ void DataTypeFormatSelectionWidget::createMenu()
 
 void DataTypeFormatSelectionWidget::showMenuSlot()
 {
-    loginf  << "DataTypeFormatSelectionWidget: showMenuSlot";
+    logdbg  << "DataTypeFormatSelectionWidget: showMenuSlot";
 
     menu_.exec( QCursor::pos() );
 }

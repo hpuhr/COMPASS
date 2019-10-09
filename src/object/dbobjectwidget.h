@@ -51,7 +51,7 @@ signals:
 
 public slots:
     /// @brief Adds all new DBOVariables
-    void addNewVariablesSlot ();
+    void updateVariablesSlot ();
     /// @brief Adds a MetaDBTable
     void addMetaTableSlot();
 
@@ -126,7 +126,7 @@ private:
 
     /// @brief Add all variables schema box
     //DBSchemaSelectionComboBox* all_schemas_box_ {nullptr};
-    QPushButton* add_schema_button_ {nullptr};
+    QPushButton* update_variables_button_ {nullptr};
 
     bool locked_ {false};
 };
