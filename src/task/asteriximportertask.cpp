@@ -370,12 +370,14 @@ void ASTERIXImporterTask::importFile(const std::string& filename)
             continue;
         }
 
-        loginf << "ASTERIXImporterTask: importFile: setting decode flag";
+        loginf << "ASTERIXImporterTask: importFile: setting cat " <<  cat_it.first
+               << " decode flag " << cat_it.second.decode();
         jasterix_->setDecodeCategory(cat_it.first, cat_it.second.decode());
-        loginf << "ASTERIXImporterTask: importFile: setting edition";
+        loginf << "ASTERIXImporterTask: importFile: setting cat " <<  cat_it.first
+               << " edition " << cat_it.second.edition();
         jasterix_->category(cat_it.first)->setCurrentEdition(cat_it.second.edition());
 
-        loginf << "ASTERIXImporterTask: importFile: setting mapping";
+        loginf << "ASTERIXImporterTask: importFile: setting cat " <<  cat_it.first << " mapping";
         if (cat_it.first == 1)
         {
             jasterix_->category(cat_it.first)->setCurrentMapping("atsdb");
@@ -744,6 +746,14 @@ void ASTERIXImporterTask::insertDoneSlot (DBObject& object)
     logdbg << "ASTERIXImporterTask: insertDoneSlot";
     --insert_active_;
 
+//    if (decode_job_)
+//    {
+//        if (maxLoadReached())
+//            decode_job_->pause();
+//        else
+//            decode_job_->unpause();
+//    }
+
     checkAllDone ();
 
     logdbg << "ASTERIXImporterTask: insertDoneSlot: done";
@@ -752,6 +762,10 @@ void ASTERIXImporterTask::insertDoneSlot (DBObject& object)
 void ASTERIXImporterTask::checkAllDone ()
 {
     logdbg << "ASTERIXImporterTask: checkAllDone";
+
+    loginf << "ASTERIXImporterTask: checkAllDone: all done " << all_done_ << " decode " << (decode_job_ == nullptr)
+           << " map jobs " << json_map_jobs_.empty() << " map stubs " << (json_map_stub_job_ == nullptr)
+           << " buffers " << (buffers_.size() == 0) << " insert active " << (insert_active_ == 0);
 
     if (!all_done_ && decode_job_ == nullptr && json_map_jobs_.empty() && json_map_stub_job_ == nullptr
             && buffers_.size() == 0 && insert_active_ == 0)

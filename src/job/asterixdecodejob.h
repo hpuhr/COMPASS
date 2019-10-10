@@ -65,6 +65,7 @@ private:
 
     std::map<unsigned int, size_t> category_counts_;
     std::map<std::pair<unsigned int, unsigned int>, double> cat002_last_tod_period_;
+    std::map<std::pair<unsigned int, unsigned int>, double> cat002_last_tod_;
 
     void jasterix_callback(nlohmann::json& data, size_t num_frames, size_t num_records);
     void processRecord (unsigned int category, nlohmann::json& record);

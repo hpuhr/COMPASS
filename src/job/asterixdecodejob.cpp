@@ -180,7 +180,8 @@ void ASTERIXDecodeJob::processRecord (unsigned int category, nlohmann::json& rec
 
         // "141":  "Truncated Time of Day": 221.4296875 mapped to "140.Time-of-Day"
 
-        if (record.find("140") != record.end())
+        if (record.find("141") != record.end()
+                && record.at("141").find("Truncated Time of Day") != record.at("141").end())
         {
             if (sac > -1 && sic > -1 ) // bingo
             {
@@ -188,21 +189,22 @@ void ASTERIXDecodeJob::processRecord (unsigned int category, nlohmann::json& rec
 
                 if (cat002_last_tod_period_.count(sac_sic) > 0)
                 {
-                    double tod = record.at("140").at("Time-of-Day");
+                    double tod = record.at("141").at("Truncated Time of Day");
+                    //double tod = record.at("140").at("Time-of-Day");
                     tod += cat002_last_tod_period_.at(sac_sic);
 
 //                    loginf << "corrected " << String::timeStringFromDouble(record.at("140").at("Time-of-Day"))
 //                           << " to " << String::timeStringFromDouble(tod)
 //                           << " last update " << cat002_last_tod_period_.at(sac_sic);
 
-                    record.at("140").at("Time-of-Day") = tod;
+                    record["140"]["Time-of-Day"] = tod;
                 }
                 else
                 {
                     loginf << "ASTERIXDecodeJob: processRecord: removing truncated tod "
-                           << String::timeStringFromDouble(record.at("140").at("Time-of-Day"))
-                           << " since to CAT002 from sensor "<< sac << "/" << sic << " present";
-                    record.at("140").at("Time-of-Day") = nullptr;
+                           << String::timeStringFromDouble(record.at("141").at("Truncated Time of Day"))
+                           << " since to CAT002 from sensor "<< sac << "/" << sic << " is not present";
+                    record["140"]["Time-of-Day"] = nullptr;
                 }
 
 //                loginf << "UGA " << String::timeStringFromDouble(record.at("140").at("Time-of-Day"))
@@ -211,7 +213,28 @@ void ASTERIXDecodeJob::processRecord (unsigned int category, nlohmann::json& rec
 //                assert (record.at("140").at("Time-of-Day") > 3600.0);
             }
             else
-                record.at("140").at("Time-of-Day") = nullptr;
+            {
+                loginf << "ASTERIXDecodeJob: processRecord: skipping cat001 report without sac/sic";
+                record["140"]["Time-of-Day"] = nullptr;
+            }
+        }
+        else
+        {
+            if (sac > -1 && sic > -1 )
+            {
+                std::pair<unsigned int, unsigned int> sac_sic ({sac, sic});
+
+                if (cat002_last_tod_.count(sac_sic) > 0)
+                {
+                    record["140"]["Time-of-Day"] = cat002_last_tod_.at(sac_sic); // set tod, better than nothing
+                }
+                else
+                    logdbg << "ASTERIXDecodeJob: processRecord: skipping cat001 report without truncated time of day"
+                           << " or last cat002 time";
+            }
+            else
+                logdbg << "ASTERIXDecodeJob: processRecord: skipping cat001 report without truncated time of day"
+                       << " or sac/sic";
         }
     }
     else if (category == 2) // save last tods
@@ -223,9 +246,10 @@ void ASTERIXDecodeJob::processRecord (unsigned int category, nlohmann::json& rec
             if (sac > -1 && sic > -1) // bingo
             {
                 //std::pair<unsigned int, unsigned int> sac_sic ({sac, sic});
-                double cat002_last_tod_period = record.at("030").at("Time of Day");
-                cat002_last_tod_period = 512.0 * ((int)(cat002_last_tod_period / 512));
+                double cat002_last_tod = record.at("030").at("Time of Day");
+                double cat002_last_tod_period = 512.0 * ((int)(cat002_last_tod / 512));
                 cat002_last_tod_period_ [std::make_pair(sac, sic)] = cat002_last_tod_period;
+                cat002_last_tod_ [std::make_pair(sac, sic)] = cat002_last_tod;
             }
         }
     }
