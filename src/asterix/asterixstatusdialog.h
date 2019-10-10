@@ -25,8 +25,9 @@ public:
     void markStartTime ();
     void setDone ();
 
-    void addNumFrames (unsigned int cnt);
-    void addNumRecords (unsigned int cnt);
+    void numFrames (unsigned int cnt);
+    void numRecords (unsigned int cnt);
+    void numErrors (unsigned int cnt);
     void addNumMapped (unsigned int cnt);
     void addNumNotMapped (unsigned int cnt);
     void addNumCreated (unsigned int cnt);
@@ -41,6 +42,7 @@ private:
 
     size_t num_frames_ {0};
     size_t num_records_ {0};
+    size_t num_errors_ {0};
     size_t records_mapped_ {0};
     size_t records_not_mapped_ {0};
     size_t records_created_ {0};
@@ -58,6 +60,7 @@ private:
 
     QLabel* num_frames_label_ {nullptr};
     QLabel* num_records_label_ {nullptr};
+    QLabel* num_errors_label_ {nullptr};
     QLabel* num_records_rate_label_ {nullptr};
     QLabel* records_mapped_label_ {nullptr};
     QLabel* records_not_mapped_label_ {nullptr};

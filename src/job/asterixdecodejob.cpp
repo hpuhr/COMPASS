@@ -43,8 +43,8 @@ void ASTERIXDecodeJob::run ()
     started_ = true;
 
     using namespace std::placeholders;
-    std::function<void(nlohmann::json&, size_t, size_t)> callback = std::bind(&ASTERIXDecodeJob::jasterix_callback,
-                                                                              this, _1, _2, _3);
+    std::function<void(nlohmann::json&, size_t, size_t, size_t)> callback =
+            std::bind(&ASTERIXDecodeJob::jasterix_callback, this, _1, _2, _3, _4);
     try
     {
         if (framing_ == "")
@@ -64,7 +64,7 @@ void ASTERIXDecodeJob::run ()
     loginf << "ASTERIXDecodeJob: run: done";
 }
 
-void ASTERIXDecodeJob::jasterix_callback(nlohmann::json& data, size_t num_frames, size_t num_records)
+void ASTERIXDecodeJob::jasterix_callback(nlohmann::json& data, size_t num_frames, size_t num_records, size_t num_errors)
 {
     if (error_)
         return;
@@ -75,6 +75,9 @@ void ASTERIXDecodeJob::jasterix_callback(nlohmann::json& data, size_t num_frames
 
     num_frames_ = num_frames;
     num_records_ = num_records;
+    num_errors_ = num_errors;
+
+    loginf << "ASTERIXDecodeJob: jasterix_callback: num errors " << num_errors_;
 
     unsigned int category;
 
@@ -295,6 +298,11 @@ void ASTERIXDecodeJob::processRecord (unsigned int category, nlohmann::json& rec
 std::map<unsigned int, size_t> ASTERIXDecodeJob::categoryCounts() const
 {
     return category_counts_;
+}
+
+size_t ASTERIXDecodeJob::numErrors() const
+{
+    return num_errors_;
 }
 
 std::string ASTERIXDecodeJob::errorMessage() const

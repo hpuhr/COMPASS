@@ -70,6 +70,12 @@ ASTERIXStatusDialog::ASTERIXStatusDialog(const std::string& filename, bool test,
         count_grid->addWidget(num_records_label_, row, 1);
 
         ++row;
+        count_grid->addWidget(new QLabel("Decoding Errors"), row, 0);
+        num_errors_label_ = new QLabel ();
+        num_errors_label_->setAlignment(Qt::AlignRight);
+        count_grid->addWidget(num_errors_label_, row, 1);
+
+        ++row;
         count_grid->addWidget(new QLabel("Records Read Rate"), row, 0);
         num_records_rate_label_ = new QLabel ();
         num_records_rate_label_->setAlignment(Qt::AlignRight);
@@ -173,21 +179,21 @@ void ASTERIXStatusDialog::setDone ()
     ok_button_->setVisible(true);
 }
 
-void ASTERIXStatusDialog::addNumFrames (unsigned int cnt)
+void ASTERIXStatusDialog::numFrames (unsigned int cnt)
 {
     assert (num_frames_label_);
 
-    num_frames_ += cnt;
+    num_frames_ = cnt;
     num_frames_label_->setText(QString::number(num_frames_));
 
     updateTime();
 }
-void ASTERIXStatusDialog::addNumRecords (unsigned int cnt)
+void ASTERIXStatusDialog::numRecords (unsigned int cnt)
 {
     assert (num_records_label_);
     assert (num_records_rate_label_);
 
-    num_records_ += cnt;
+    num_records_ = cnt;
     num_records_label_->setText(QString::number(num_records_));
 
     updateTime();
@@ -196,6 +202,19 @@ void ASTERIXStatusDialog::addNumRecords (unsigned int cnt)
     std::string records_rate_str_ = std::to_string(static_cast<int>(records_per_second))+" (e/s)";
     num_records_rate_label_->setText(records_rate_str_.c_str());
 }
+
+void ASTERIXStatusDialog::numErrors (unsigned int cnt)
+{
+    logdbg << "ASTERIXStatusDialog: addNumErrors: " << cnt;
+
+    assert (num_errors_label_);
+
+    num_errors_ = cnt;
+    num_errors_label_->setText(QString::number(num_errors_));
+
+    updateTime();
+}
+
 void ASTERIXStatusDialog::addNumMapped (unsigned int cnt)
 {
     assert (records_mapped_label_);

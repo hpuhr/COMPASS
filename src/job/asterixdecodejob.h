@@ -37,6 +37,7 @@ public:
 
     size_t numFrames() const;
     size_t numRecords() const;
+    size_t numErrors() const;
 
     void pause() { pause_ = true; }
     void unpause() { pause_ = false; }
@@ -57,6 +58,7 @@ private:
 
     size_t num_frames_{0};
     size_t num_records_{0};
+    size_t num_errors_{0};
 
     bool error_ {false};
     std::string error_message_;
@@ -67,7 +69,7 @@ private:
     std::map<std::pair<unsigned int, unsigned int>, double> cat002_last_tod_period_;
     std::map<std::pair<unsigned int, unsigned int>, double> cat002_last_tod_;
 
-    void jasterix_callback(nlohmann::json& data, size_t num_frames, size_t num_records);
+    void jasterix_callback(nlohmann::json& data, size_t num_frames, size_t num_records, size_t numErrors);
     void processRecord (unsigned int category, nlohmann::json& record);
 };
 

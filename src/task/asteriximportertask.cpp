@@ -439,8 +439,11 @@ void ASTERIXImporterTask::addDecodedASTERIXSlot (std::shared_ptr<std::vector<nlo
     assert (decode_job_);
     assert (status_widget_);
 
-    status_widget_->addNumFrames(decode_job_->numFrames());
-    status_widget_->addNumRecords(decode_job_->numRecords());
+    loginf << "ASTERIXImporterTask: addDecodedASTERIX: errors " << decode_job_->numErrors();
+
+    status_widget_->numFrames(jasterix_->numFrames());
+    status_widget_->numRecords(jasterix_->numRecords());
+    status_widget_->numErrors(jasterix_->numErrors());
     status_widget_->setCategoryCounts(decode_job_->categoryCounts());
 
     status_widget_->show();
