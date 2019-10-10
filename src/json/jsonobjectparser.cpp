@@ -806,10 +806,12 @@ void JSONObjectParser::setMappingActive (JSONDataMapping& mapping, bool active)
         list_.addProperty(mapping.variable().name(), mapping.variable().dataType());
         var_list_.add(mapping.variable());
     }
-    else
+    else if (mapping.hasVariable()) // remove if was added
     {
-        list_.removeProperty(mapping.variable().name());
-        var_list_.removeVariable(mapping.variable());
+        if (list_.hasProperty(mapping.variable().name()))
+            list_.removeProperty(mapping.variable().name());
+        if (var_list_.hasVariable(mapping.variable()))
+            var_list_.removeVariable(mapping.variable());
     }
 
     mapping.active(active);
