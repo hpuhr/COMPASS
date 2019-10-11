@@ -160,7 +160,15 @@ void DBOVariableOrderedSet::add (MetaDBOVariable &var)
 
 void DBOVariableOrderedSet::removeVariableAt (unsigned int index)
 {
+    loginf << "DBOVariableOrderedSet: removeVariableAt: index " << index;
+
     assert (index < variable_definitions_.size());
+
+//    unsigned int tmp_i = variable_definitions_.rbegin()->first;
+//    DBOVariableOrderDefinition* tmp = variable_definitions_.rbegin()->second;
+//    delete tmp;
+
+//    variable_definitions_.erase(tmp_i);
 
     auto it = variable_definitions_.find(index);
     assert (it != variable_definitions_.end());
