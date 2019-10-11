@@ -38,6 +38,7 @@ signals:
     void exportDoneSignal (bool cancelled);
 
 public slots:
+    void setChangedSlot ();
     void exportJobObsoleteSlot ();
     void exportJobDoneSlot();
 

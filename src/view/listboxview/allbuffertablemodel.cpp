@@ -36,10 +36,20 @@
 AllBufferTableModel::AllBufferTableModel(AllBufferTableWidget* table_widget, ListBoxViewDataSource& data_source)
     : QAbstractTableModel(table_widget), table_widget_(table_widget), data_source_(data_source)
 {
+    connect (data_source_.getSet(), &DBOVariableOrderedSet::setChangedSignal,
+             this, &AllBufferTableModel::setChangedSlot);
 }
 
 AllBufferTableModel::~AllBufferTableModel()
 {
+}
+
+void AllBufferTableModel::setChangedSlot ()
+{
+    beginResetModel();
+    endResetModel();
+    assert (table_widget_);
+    table_widget_->resizeColumns();
 }
 
 int AllBufferTableModel::rowCount(const QModelIndex & /*parent*/) const

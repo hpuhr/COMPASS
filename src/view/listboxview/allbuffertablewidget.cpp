@@ -156,6 +156,12 @@ void AllBufferTableWidget::updateToSelection ()
     table_->resizeColumnsToContents();
 }
 
+void AllBufferTableWidget::resizeColumns()
+{
+    assert (table_);
+    table_->resizeColumnsToContents();
+}
+
 ListBoxView &AllBufferTableWidget::view() const
 {
     return view_;
