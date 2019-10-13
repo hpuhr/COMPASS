@@ -567,12 +567,13 @@ void JSONObjectParser::removeMapping (unsigned int index)
            << " instance " << mapping.instanceId();
 
     loginf << "JSONObjectParser: removeMapping: size " << data_mappings_.size();
-    unsigned int i = 0;
-    for (auto &map_it : data_mappings_)
-    {
-        loginf << "JSONObjectParser: removeMapping: index " << i << " mapping " << map_it.instanceId();
-        ++i;
-    }
+//    unsigned int i = 0;
+//    for (auto &map_it : data_mappings_)
+//    {
+//        loginf << "JSONObjectParser: removeMapping: index " << i  << " ptr " << &map_it
+//               << " mapping " << map_it.instanceId();
+//        ++i;
+//    }
 
     if (mapping.active() && mapping.initialized())
     {
@@ -582,18 +583,19 @@ void JSONObjectParser::removeMapping (unsigned int index)
             var_list_.removeVariable(mapping.variable());
     }
 
-    Configurable::removeChildConfigurable(mapping, false); // extra remove since destructor called after moving over
+    //Configurable::removeChildConfigurable(mapping, false); // extra remove since destructor called after moving over
 
     loginf << "JSONObjectParser: removeMapping: removing";
     data_mappings_.erase(data_mappings_.begin()+index);
 
     loginf << "JSONObjectParser: removeMapping: size " << data_mappings_.size();
-    i = 0;
-    for (auto &map_it : data_mappings_)
-    {
-        loginf << "JSONObjectParser: removeMapping: index " << i << " mapping " << map_it.instanceId();
-        ++i;
-    }
+//    i = 0;
+//    for (auto &map_it : data_mappings_)
+//    {
+//        loginf << "JSONObjectParser: removeMapping: index " << i  << " ptr " << &map_it
+//               << " mapping " << map_it.instanceId();
+//        ++i;
+//    }
 }
 
 void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key_begin) const

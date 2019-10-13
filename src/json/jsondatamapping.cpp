@@ -27,6 +27,8 @@ JSONDataMapping::JSONDataMapping (const std::string& class_id, const std::string
                                   JSONObjectParser& parent)
     : Configurable (class_id, instance_id, &parent)
 {
+    logdbg << "JSONDataMapping: constructor: this " << this;
+
     registerParameter("active", &active_, false);
     registerParameter("json_key", &json_key_, "");
 
@@ -54,6 +56,8 @@ JSONDataMapping::JSONDataMapping (const std::string& class_id, const std::string
 
 JSONDataMapping& JSONDataMapping::operator=(JSONDataMapping&& other)
 {
+    logdbg << "JSONDataMapping: operator=: this " << this << " other " << &other;
+
     active_ = other.active_;
     json_key_ = other.json_key_;
     db_object_name_ = other.db_object_name_;
@@ -94,7 +98,7 @@ JSONDataMapping& JSONDataMapping::operator=(JSONDataMapping&& other)
 
 JSONDataMapping::~JSONDataMapping()
 {
-    //loginf << "JSONDataMapping: ~JSONDataMapping: instance " << instanceId();
+    logdbg << "JSONDataMapping: destructor: this " << this;
 }
 
 void JSONDataMapping::initializeIfRequired ()

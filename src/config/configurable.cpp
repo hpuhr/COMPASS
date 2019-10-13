@@ -62,12 +62,29 @@ Configurable::Configurable(const std::string &class_id, const std::string &insta
 
 Configurable& Configurable::operator=(Configurable&& other)
 {
-    //loginf << "Configurable: move operator: moving instance " << other.instance_id_;
+    logdbg << "Configurable: operator=: this " << this << " other " << &other;
+
+    if (parent_) // this instance will be cleared, remove from parent and delete config if required
+    {
+        parent_->removeChildConfigurable(*this, true);
+    }
 
     parent_ = other.parent_;
     if (parent_)
+    {
+        logdbg << "Configurable: operator=: unregistering other from parent";
         parent_->removeChildConfigurable(other, false);
+    }
     other.parent_ = nullptr;
+
+    if (children_.size())
+        logwrn << "Configurable: operator=: class_id " << class_id_ << " instance_id " << instance_id_ << " still "
+               << children_.size() << " undeleted";
+
+    for (auto& child_it : children_)
+    {
+        delete &child_it.second;
+    }
 
     children_ = other.children_;
     for (auto& child_it : children_)
@@ -83,11 +100,14 @@ Configurable& Configurable::operator=(Configurable&& other)
     key_id_ = other.key_id_;
     other.key_id_ = "";
 
-    if (parent_)
-        parent_->registerSubConfigurable(*this, true);
-
     configuration_ = other.configuration_;
     other.configuration_ = nullptr;
+
+    if (parent_)
+    {
+        logdbg << "Configurable: operator=: registering this at parent";
+        parent_->registerSubConfigurable(*this, true);
+    }
 
     other.is_root_ = is_root_;
     other.is_root_ = false;
@@ -118,6 +138,12 @@ Configurable::~Configurable()
     {
         logwrn << "Configurable: destructor: class_id " << class_id_ << " instance_id " << instance_id_ << " still "
                << children_.size() << " undeleted";
+
+        for (auto& child_it : children_)
+        {
+            logwrn << "Configurable: destructor: class_id " << class_id_ << " instance_id " << instance_id_
+                   << " undelete child ptr " << &child_it.second;
+        }
     }
 }
 
