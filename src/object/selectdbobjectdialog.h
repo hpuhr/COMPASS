@@ -23,6 +23,7 @@
 #include <QComboBox>
 #include <QLabel>
 #include <QDialog>
+#include <QLineEdit>
 
 #include "dbobjectcombobox.h"
 
@@ -37,6 +38,9 @@ public:
 
         QVBoxLayout* main_layout = new QVBoxLayout ();
 
+        name_edit_ = new QLineEdit ("Name");
+        main_layout->addWidget (name_edit_);
+
         object_box_ = new DBObjectComboBox (false);
         main_layout->addWidget (object_box_);
 
@@ -48,7 +52,13 @@ public:
 
         setLayout(main_layout);
 
-        setWindowTitle(tr("Select DBObject"));
+        setWindowTitle(tr("Select Name and DBObject"));
+    }
+
+    std::string name ()
+    {
+        assert (name_edit_);
+        return name_edit_->text().toStdString();
     }
 
     std::string selectedObject ()
@@ -58,40 +68,8 @@ public:
     }
 
 protected:
+    QLineEdit* name_edit_ {nullptr};
     DBObjectComboBox* object_box_ {nullptr};
-
-//    void updateMetaTableSelection ()
-//    {
-//        logdbg  << "DBOAddSchemaMetaTableDialog: updateMetaTableSelection";
-//        assert (meta_table_box_);
-
-//        std::string selection;
-
-//        if (meta_table_box_->count() > 0)
-//            selection = meta_table_box_->currentText().toStdString();
-
-//        while (meta_table_box_->count() > 0)
-//            meta_table_box_->removeItem (0);
-
-//        auto metas = ATSDB::instance().schemaManager().getCurrentSchema().metaTables ();
-
-//        int index_cnt=-1;
-//        unsigned int cnt=0;
-//        for (auto it = metas.begin(); it != metas.end(); it++)
-//        {
-//            if (selection.size()>0 && selection.compare(it->second->name()) == 0)
-//                index_cnt=cnt;
-
-//            meta_table_box_->addItem (it->second->name().c_str());
-
-//            cnt++;
-//        }
-
-//        if (index_cnt != -1)
-//        {
-//            meta_table_box_->setCurrentIndex (index_cnt);
-//        }
-//    }
 };
 
 #endif // SELECTDBOBJECTDIALOG_H

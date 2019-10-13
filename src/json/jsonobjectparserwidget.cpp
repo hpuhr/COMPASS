@@ -44,47 +44,57 @@ JSONObjectParserWidget::JSONObjectParserWidget(JSONObjectParser& parser, QWidget
 
     QVBoxLayout *main_layout = new QVBoxLayout ();
 
-    std::string tmp ="JSON Object Parser " + parser_->dbObjectName();
+    std::string tmp ="JSON Object Parser " + parser_->name();
     QLabel *main_label = new QLabel (tmp.c_str());
     main_label->setFont (font_bold);
     main_layout->addWidget (main_label);
 
-    QGridLayout* grid = new QGridLayout ();
+    {
+        QGridLayout* grid = new QGridLayout ();
 
-    int row = 0;
+        int row = 0;
 
-    grid->addWidget(new QLabel("JSON Container Key"), row, 0);
+        grid->addWidget(new QLabel("DBObject"), row, 0);
+        grid->addWidget(new QLabel(parser_->dbObjectName().c_str()), row, 0);
 
-    json_container_key_edit_ = new QLineEdit ();
-    connect(json_container_key_edit_, SIGNAL(textEdited(const QString&)), this, SLOT(jsonContainerKeyChangedSlot()));
-    grid->addWidget(json_container_key_edit_, row++, 1);
+        ++row;
+        grid->addWidget(new QLabel("JSON Container Key"), row, 0);
 
-    grid->addWidget(new QLabel("JSON Key"));
+        json_container_key_edit_ = new QLineEdit ();
+        connect(json_container_key_edit_, SIGNAL(textEdited(const QString&)), this, SLOT(jsonContainerKeyChangedSlot()));
+        grid->addWidget(json_container_key_edit_, row, 1);
 
-    json_key_edit_ = new QLineEdit ();
-    connect(json_key_edit_, SIGNAL(textEdited(const QString&)), this, SLOT(jsonKeyChangedSlot()));
-    grid->addWidget(json_key_edit_, row++, 1);
+        ++row;
+        grid->addWidget(new QLabel("JSON Key"));
 
-    grid->addWidget(new QLabel("JSON Value"));
+        json_key_edit_ = new QLineEdit ();
+        connect(json_key_edit_, SIGNAL(textEdited(const QString&)), this, SLOT(jsonKeyChangedSlot()));
+        grid->addWidget(json_key_edit_, row, 1);
 
-    json_value_edit_ = new QLineEdit ();
-    connect(json_value_edit_, SIGNAL(textEdited(const QString&)), this, SLOT(jsonValueChangedSlot()));
-    grid->addWidget(json_value_edit_, row++, 1);
+        ++row;
+        grid->addWidget(new QLabel("JSON Value"));
 
-    grid->addWidget(new QLabel("Override Data Source"));
+        json_value_edit_ = new QLineEdit ();
+        connect(json_value_edit_, SIGNAL(textEdited(const QString&)), this, SLOT(jsonValueChangedSlot()));
+        grid->addWidget(json_value_edit_, row, 1);
 
-    override_data_source_check_ = new QCheckBox ();
-    connect(override_data_source_check_, SIGNAL(stateChanged(int)), this, SLOT(overrideDataSourceChangedSlot()));
-    grid->addWidget(override_data_source_check_, row++, 1);
+        ++row;
+        grid->addWidget(new QLabel("Override Data Source"));
 
-    grid->addWidget(new QLabel("Data Source Variable"));
+        override_data_source_check_ = new QCheckBox ();
+        connect(override_data_source_check_, SIGNAL(stateChanged(int)), this, SLOT(overrideDataSourceChangedSlot()));
+        grid->addWidget(override_data_source_check_, row, 1);
 
-    data_source_variable_name_edit_ = new QLineEdit ();
-    connect(data_source_variable_name_edit_, SIGNAL(textEdited(const QString&)),
-            this, SLOT(dataSourceVariableChangedSlot()));
-    grid->addWidget(data_source_variable_name_edit_, row++, 1);
+        ++row;
+        grid->addWidget(new QLabel("Data Source Variable"));
 
-    main_layout->addLayout(grid);
+        data_source_variable_name_edit_ = new QLineEdit ();
+        connect(data_source_variable_name_edit_, SIGNAL(textEdited(const QString&)),
+                this, SLOT(dataSourceVariableChangedSlot()));
+        grid->addWidget(data_source_variable_name_edit_, row, 1);
+
+        main_layout->addLayout(grid);
+    }
 
     QScrollArea* scroll_area = new QScrollArea();
     scroll_area->setWidgetResizable (true);
@@ -235,15 +245,15 @@ void JSONObjectParserWidget::updateMappingsGrid()
         mappings_grid_->addWidget (unit_sel, row, 5);
         //column_unit_selection_widgets_[unit_widget] = it.second;
 
-//        if (map_it.hasVariable())
-//        {
-            DataTypeFormatSelectionWidget* data_format_widget
-                    = new DataTypeFormatSelectionWidget (map_it.second.second->formatDataTypeRef(),
-                                                         map_it.second.second->jsonValueFormatRef());
+        //        if (map_it.hasVariable())
+        //        {
+        DataTypeFormatSelectionWidget* data_format_widget
+                = new DataTypeFormatSelectionWidget (map_it.second.second->formatDataTypeRef(),
+                                                     map_it.second.second->jsonValueFormatRef());
 
-            mappings_grid_->addWidget (data_format_widget, row, 6);
-//            format_selections_[row-1] = data_format_widget;
-//        }
+        mappings_grid_->addWidget (data_format_widget, row, 6);
+        //            format_selections_[row-1] = data_format_widget;
+        //        }
 
         QPushButton *del = new QPushButton ();
         del->setIcon(del_icon);
@@ -388,18 +398,18 @@ void JSONObjectParserWidget::mappingDBOVariableChangedSlot()
         loginf << "JSONObjectParserWidget: mappingDBOVariableChangedSlot: variable set";
 
         mapping->dboVariableName(var_widget->selectedVariable().name());
-//        if (format_selections_.count(row) == 1)
-//            format_selections_.at(row)->update(mapping->formatDataTypeRef(),
-//                                               mapping->jsonValueFormatRef());
-//        else
-//        {
-//            DataTypeFormatSelectionWidget* data_format_widget
-//                    = new DataTypeFormatSelectionWidget (mapping->formatDataTypeRef(),
-//                                                         mapping->jsonValueFormatRef());
+        //        if (format_selections_.count(row) == 1)
+        //            format_selections_.at(row)->update(mapping->formatDataTypeRef(),
+        //                                               mapping->jsonValueFormatRef());
+        //        else
+        //        {
+        //            DataTypeFormatSelectionWidget* data_format_widget
+        //                    = new DataTypeFormatSelectionWidget (mapping->formatDataTypeRef(),
+        //                                                         mapping->jsonValueFormatRef());
 
-//            mappings_grid_->addWidget (data_format_widget, row, 5);
-//            format_selections_[row] = data_format_widget;
-//        }
+        //            mappings_grid_->addWidget (data_format_widget, row, 5);
+        //            format_selections_[row] = data_format_widget;
+        //        }
     }
     else
     {
@@ -407,12 +417,12 @@ void JSONObjectParserWidget::mappingDBOVariableChangedSlot()
 
         mapping->dboVariableName("");
 
-//        if (format_selections_.count(row) == 1)
-//        {
-//            mappings_grid_->removeWidget(format_selections_.at(row));
-//            delete format_selections_.at(row);
-//            format_selections_.erase(row);
-//        }
+        //        if (format_selections_.count(row) == 1)
+        //        {
+        //            mappings_grid_->removeWidget(format_selections_.at(row));
+        //            delete format_selections_.at(row);
+        //            format_selections_.erase(row);
+        //        }
     }
 }
 

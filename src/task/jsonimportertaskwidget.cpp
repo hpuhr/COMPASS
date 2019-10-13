@@ -372,25 +372,27 @@ void JSONImporterTaskWidget::addObjectParserSlot ()
 
     if (ret == QDialog::Accepted)
     {
-        std::string name = dialog.selectedObject();
-        loginf << "JSONImporterTaskWidget: addObjectParserSlot: obj " << name;
+        std::string name = dialog.name();
+        std::string dbo_name = dialog.selectedObject();
+        loginf << "JSONImporterTaskWidget: addObjectParserSlot: name " << name << " obj " << dbo_name;
 
         JSONParsingSchema& current = task_.currentSchema();
 
-        if (current.hasObjectParser(name))
+        if (!name.size() || current.hasObjectParser(name))
         {
             QMessageBox m_warning (QMessageBox::Warning, "JSON Object Parser Adding Failed",
-                                   "Object parser is already defined for the selected object.",
+                                   "Object parser name empty or already defined.",
                                    QMessageBox::Ok);
 
             m_warning.exec();
             return;
         }
 
-        std::string instance = "JSONObjectParser"+name+"0";
+        std::string instance = "JSONObjectParser"+name+dbo_name+"0";
 
         Configuration &config = current.addNewSubConfiguration ("JSONObjectParser", instance);
-        config.addParameterString ("db_object_name", name);
+        config.addParameterString ("name", name);
+        config.addParameterString ("db_object_name", dbo_name);
 
         current.generateSubConfigurable("JSONObjectParser", instance);
         updateParserList();

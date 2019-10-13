@@ -378,14 +378,14 @@ void ASTERIXImporterTask::importFile(const std::string& filename)
         jasterix_->category(cat_it.first)->setCurrentEdition(cat_it.second.edition());
 
         loginf << "ASTERIXImporterTask: importFile: setting cat " <<  cat_it.first << " mapping";
-        if (cat_it.first == 1)
-        {
-            jasterix_->category(cat_it.first)->setCurrentMapping("atsdb");
-            loginf << "ASTERIXImporterTask: importFile: set cat " << cat_it.first
-                   << " decode " <<  cat_it.second.decode()
-                   << " edition " << cat_it.second.edition() << " mapping 'atsdb'";
-        }
-        else
+//        if (cat_it.first == 1)
+//        {
+//            jasterix_->category(cat_it.first)->setCurrentMapping("atsdb");
+//            loginf << "ASTERIXImporterTask: importFile: set cat " << cat_it.first
+//                   << " decode " <<  cat_it.second.decode()
+//                   << " edition " << cat_it.second.edition() << " mapping 'atsdb'";
+//        }
+//        else
             loginf << "ASTERIXImporterTask: importFile: set cat " << cat_it.first
                    << " decode " <<  cat_it.second.decode()
                    << " edition " << cat_it.second.edition();

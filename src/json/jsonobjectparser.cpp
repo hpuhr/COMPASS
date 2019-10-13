@@ -34,6 +34,7 @@ using namespace Utils;
 JSONObjectParser::JSONObjectParser (const std::string& class_id, const std::string& instance_id, Configurable* parent)
     :  Configurable (class_id, instance_id, parent)
 {
+    registerParameter("name", &name_, "");
     registerParameter("db_object_name", &db_object_name_, "");
 
     registerParameter("json_container_key", &json_container_key_, "");
@@ -45,6 +46,11 @@ JSONObjectParser::JSONObjectParser (const std::string& class_id, const std::stri
 
     assert (db_object_name_.size());
 
+    if (!name_.size())
+        name_ = db_object_name_;
+
+    assert (name_.size());
+
     createSubConfigurables ();
 
     json_values_vector_ = String::split(json_value_, ',');
@@ -52,6 +58,7 @@ JSONObjectParser::JSONObjectParser (const std::string& class_id, const std::stri
 
 JSONObjectParser& JSONObjectParser::operator=(JSONObjectParser&& other)
 {
+    name_ = other.name_;
     db_object_name_ = other.db_object_name_;
     db_object_ = other.db_object_;
 
@@ -73,6 +80,7 @@ JSONObjectParser& JSONObjectParser::operator=(JSONObjectParser&& other)
 
     list_ = other.list_;
 
+    other.configuration().updateParameterPointer ("name", &name_);
     other.configuration().updateParameterPointer ("db_object_name", &db_object_name_);
     other.configuration().updateParameterPointer ("json_key", &json_key_);
     other.configuration().updateParameterPointer ("json_value", &json_value_);
@@ -170,7 +178,7 @@ void JSONObjectParser::initialize ()
     DBObjectManager& obj_man = ATSDB::instance().objectManager();
 
     if (!obj_man.existsObject(db_object_name_))
-        logwrn << "JSONObjectParser: ctor: dbobject '" << db_object_name_ << "' does not exist";
+        logwrn << "JSONObjectParser: initialize: dbobject '" << db_object_name_ << "' does not exist";
     else
         db_object_ = &obj_man.object(db_object_name_);
 
@@ -566,7 +574,7 @@ void JSONObjectParser::removeMapping (unsigned int index)
     loginf << "JSONObjectParser: removeMapping: index " << index << " key " << mapping.jsonKey()
            << " instance " << mapping.instanceId();
 
-    loginf << "JSONObjectParser: removeMapping: size " << data_mappings_.size();
+    logdbg << "JSONObjectParser: removeMapping: size " << data_mappings_.size();
 //    unsigned int i = 0;
 //    for (auto &map_it : data_mappings_)
 //    {
@@ -585,10 +593,10 @@ void JSONObjectParser::removeMapping (unsigned int index)
 
     //Configurable::removeChildConfigurable(mapping, false); // extra remove since destructor called after moving over
 
-    loginf << "JSONObjectParser: removeMapping: removing";
+    logdbg << "JSONObjectParser: removeMapping: removing";
     data_mappings_.erase(data_mappings_.begin()+index);
 
-    loginf << "JSONObjectParser: removeMapping: size " << data_mappings_.size();
+    logdbg << "JSONObjectParser: removeMapping: size " << data_mappings_.size();
 //    i = 0;
 //    for (auto &map_it : data_mappings_)
 //    {
@@ -823,5 +831,15 @@ void JSONObjectParser::updateMappings ()
 {
     if (widget_)
         widget_->updateMappingsGrid();
+}
+
+std::string JSONObjectParser::name() const
+{
+    return name_;
+}
+
+void JSONObjectParser::name(const std::string &name)
+{
+    name_ = name;
 }
 

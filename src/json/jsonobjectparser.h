@@ -90,7 +90,12 @@ public:
 
     void updateMappings ();
 
+    std::string name() const;
+    void name(const std::string &name);
+
 private:
+    std::string name_;
+
     std::string db_object_name_;
     DBObject* db_object_ {nullptr};
 
