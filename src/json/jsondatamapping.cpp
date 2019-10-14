@@ -45,6 +45,9 @@ JSONDataMapping::JSONDataMapping (const std::string& class_id, const std::string
     registerParameter("dimension", &dimension_, "");
     registerParameter("unit", &unit_, "");
 
+    logdbg << "JSONDataMapping: ctor: dbo " << db_object_name_ << " var " << dbovariable_name_
+           << " dim " << dimension_ << " unit " << unit_;
+
     sub_keys_ = Utils::String::split(json_key_, '.');
     has_sub_keys_ = sub_keys_.size() > 1;
     num_sub_keys_ = sub_keys_.size();

@@ -55,7 +55,7 @@ JSONObjectParserWidget::JSONObjectParserWidget(JSONObjectParser& parser, QWidget
         int row = 0;
 
         grid->addWidget(new QLabel("DBObject"), row, 0);
-        grid->addWidget(new QLabel(parser_->dbObjectName().c_str()), row, 0);
+        grid->addWidget(new QLabel(parser_->dbObjectName().c_str()), row, 1);
 
         ++row;
         grid->addWidget(new QLabel("JSON Container Key"), row, 0);
@@ -336,6 +336,18 @@ void JSONObjectParserWidget::mappingActiveChangedSlot()
 
     JSONDataMapping* mapping = data.value<JSONDataMapping*>();
     assert (mapping);
+
+    if (!mapping->hasVariable() && widget->checkState() == Qt::Checked)
+    {
+        QMessageBox m_warning (QMessageBox::Warning, "Activation failed",
+                               "DBOVariable not defined.",
+                               QMessageBox::Ok);
+
+        m_warning.exec();
+
+        widget->setChecked(false);
+        return;
+    }
 
     if (mapping->mandatory() && widget->checkState() != Qt::Checked)
     {

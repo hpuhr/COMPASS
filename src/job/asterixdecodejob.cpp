@@ -174,12 +174,12 @@ void ASTERIXDecodeJob::processRecord (unsigned int category, nlohmann::json& rec
 
     if (category == 1) // CAT001 coversion hack
     {
-        if (record.find("090") != record.end())
-            if (record.at("090").find("Flight Level") != record.at("090").end())
-            {
-                double flight_level = record.at("090").at("Flight Level"); // is mapped in ft
-                record.at("090").at("Flight Level") = flight_level* 1e-2;  // ft to fl
-            }
+//        if (record.find("090") != record.end())
+//            if (record.at("090").find("Flight Level") != record.at("090").end())
+//            {
+//                double flight_level = record.at("090").at("Flight Level"); // is mapped in ft
+//                record.at("090").at("Flight Level") = flight_level* 1e-2;  // ft to fl
+//            }
 
         // "141":  "Truncated Time of Day": 221.4296875 mapped to "140.Time-of-Day"
 

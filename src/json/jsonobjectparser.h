@@ -61,7 +61,7 @@ public:
     bool hasMapping (unsigned int index) const;
     void removeMapping (unsigned int index);
 
-    void transformBuffer (std::shared_ptr<Buffer> buffer, long key_begin=-1) const;
+    void transformBuffer (std::shared_ptr<Buffer> buffer, size_t index) const;
 
     // returs true on successful parse
     bool parseJSON (nlohmann::json& j, std::shared_ptr<Buffer> buffer) const;
@@ -79,6 +79,7 @@ public:
     void initialize ();
 
     std::shared_ptr<Buffer> getNewBuffer () const;
+    void appendVariablesToBuffer (std::shared_ptr<Buffer> buffer) const;
 
     virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
 
