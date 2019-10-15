@@ -42,6 +42,7 @@
 #include <QMessageBox>
 #include <QCoreApplication>
 #include <QThread>
+#include <QApplication>
 
 using namespace Utils;
 using namespace nlohmann;
@@ -330,6 +331,8 @@ void ASTERIXImporterTask::importFile(const std::string& filename)
     filename_ = filename;
 
     assert (!status_widget_);
+
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     status_widget_ = new ASTERIXStatusDialog (filename_, test_);
     connect(status_widget_, &ASTERIXStatusDialog::closeSignal, this, &ASTERIXImporterTask::closeStatusDialogSlot);
@@ -777,6 +780,8 @@ void ASTERIXImporterTask::checkAllDone ()
         status_widget_->setDone();
 
         all_done_ = true;
+
+        QApplication::restoreOverrideCursor();
 
         buffers_.clear();
         refreshjASTERIX();

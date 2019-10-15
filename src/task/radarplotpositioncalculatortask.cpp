@@ -34,6 +34,7 @@
 
 #include <QCoreApplication>
 #include <QMessageBox>
+#include <QApplication>
 
 using namespace Utils;
 
@@ -311,10 +312,12 @@ void RadarPlotPositionCalculatorTask::calculate ()
     assert (canCalculate());
 
     calculating_=true;
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     std::string msg = "Loading object data.";
     msg_box_ = new QMessageBox;
     assert (msg_box_);
+    msg_box_->setWindowTitle("Calculating Radar Plot Positions");
     msg_box_->setText(msg.c_str());
     msg_box_->setStandardButtons(QMessageBox::NoButton);
     msg_box_->show();
@@ -642,6 +645,8 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
 
     if (transformation_errors)
     {
+        QApplication::restoreOverrideCursor();
+
         QMessageBox::StandardButton reply;
 
         std::string question = "There were "+std::to_string(transformation_errors)
@@ -657,10 +662,13 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
             calculated_ = true;
             return;
         }
+
+        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     }
 
     msg_box_ = new QMessageBox;
     assert (msg_box_);
+    msg_box_->setWindowTitle("Calculating Radar Plot Positions");
     msg = "Writing object data";
     msg_box_->setText(msg.c_str());
     msg_box_->setStandardButtons(QMessageBox::NoButton);
@@ -705,9 +713,12 @@ void RadarPlotPositionCalculatorTask::updateDoneSlot (DBObject& object)
     job_ptr_ = nullptr;
     db_object_->clearData();
 
+    QApplication::restoreOverrideCursor();
+
     msg_box_ = new QMessageBox;
     assert (msg_box_);
-    msg_box_->setText("Plot position calculation successfull.\nIt is recommended to force a post-processing step now.");
+    msg_box_->setWindowTitle("Calculating Radar Plot Positions");
+    msg_box_->setText("Writing of object data done.\nIt is recommended to force a post-processing step now.");
     msg_box_->setStandardButtons(QMessageBox::Ok);
     msg_box_->exec();
 

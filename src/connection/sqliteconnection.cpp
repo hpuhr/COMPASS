@@ -17,6 +17,8 @@
 
 #include <cstring>
 
+#include <QApplication>
+
 #include "property.h"
 #include "buffer.h"
 #include "dbcommand.h"
@@ -57,6 +59,8 @@ void SQLiteConnection::openFile (const std::string &file_name)
     last_filename_=file_name;
     assert (last_filename_.size() > 0);
 
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
     int result = sqlite3_open_v2(last_filename_.c_str(), &db_handle_, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
 
     if (result != SQLITE_OK)
@@ -79,6 +83,8 @@ void SQLiteConnection::openFile (const std::string &file_name)
 
     if (info_widget_)
         info_widget_->updateSlot();
+
+    QApplication::restoreOverrideCursor();
 }
 
 void SQLiteConnection::disconnect()

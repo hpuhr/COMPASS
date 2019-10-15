@@ -43,6 +43,7 @@
 #include <QProgressDialog>
 #include <QMessageBox>
 #include <QCoreApplication>
+#include <QApplication>
 
 using namespace Utils;
 
@@ -74,6 +75,8 @@ void MySQLppConnection::connectServer ()
     assert (servers_.count(used_server_) == 1);
     connected_server_ = servers_.at(used_server_);
 
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
     loginf << "MySQLppConnection: connectServer: host " << connected_server_->host() << " port "
            << connected_server_->port() << " user " << connected_server_->user() << " pw "
            << connected_server_->password();
@@ -83,6 +86,8 @@ void MySQLppConnection::connectServer ()
 
     bool ret = connection_.connect("", connected_server_->host().c_str(), connected_server_->user().c_str(),
                                    connected_server_->password().c_str(), connected_server_->port());
+
+    QApplication::restoreOverrideCursor();
 
     if (!ret)
         throw std::runtime_error("MySQL server connect failed with error "
