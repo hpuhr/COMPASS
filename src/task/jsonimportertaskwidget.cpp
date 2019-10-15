@@ -549,6 +549,15 @@ void JSONImporterTaskWidget::importSlot ()
     {
         assert (task_.hasFile(filename.toStdString()));
 
+        if (!task_.canImportFile(filename.toStdString()))
+        {
+            QMessageBox m_warning (QMessageBox::Warning, "JSON File Import Failed",
+                                   "File does not exist.",
+                                   QMessageBox::Ok);
+            m_warning.exec();
+            return;
+        }
+
         if (filename.endsWith(".zip") || filename.endsWith(".gz") || filename.endsWith(".tgz"))
             task_.importFileArchive(filename.toStdString(), false);
         else

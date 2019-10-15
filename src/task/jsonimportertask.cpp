@@ -33,6 +33,8 @@
 #include "jobmanager.h"
 #include "jsonparsejob.h"
 #include "jsonmappingjob.h"
+#include "atsdb.h"
+#include "dbinterface.h"
 
 #include <stdexcept>
 #include <fstream>
@@ -43,6 +45,7 @@
 #include <QCoreApplication>
 #include <QThread>
 #include <QMessageBox>
+#include <QApplication>
 
 using namespace Utils;
 using namespace nlohmann;
@@ -211,6 +214,8 @@ void JSONImporterTask::importFile(const std::string& filename, bool test)
 
     assert (canImportFile(filename));
 
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
     filename_ = filename;
     archive_ = false;
     test_ = test;
@@ -253,6 +258,8 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
     loginf << "JSONImporterTask: importFileArchive: filename " << filename << " test " << test;
 
     assert (canImportFile(filename));
+
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     filename_ = filename;
     archive_ = true;
@@ -470,7 +477,7 @@ void JSONImporterTask::insertData ()
     }
 
     bool has_sac_sic = false;
-    bool emit_change = (read_json_job_ == nullptr && json_parse_jobs_.size() == 0 && json_map_jobs_.size() == 0);
+    //bool emit_change = (read_json_job_ == nullptr && json_parse_jobs_.size() == 0 && json_map_jobs_.size() == 0);
 
     assert (schemas_.count(current_schema_));
 
@@ -573,10 +580,10 @@ void JSONImporterTask::insertData ()
                 }
             }
 
-            logdbg << "JSONImporterTask: insertData: " << db_object.name() << " inserting, change" << emit_change;
+            logdbg << "JSONImporterTask: insertData: " << db_object.name() << " inserting";
 
             DBOVariableSet set = parser_it.second.variableList();
-            db_object.insertData(set, buffer, emit_change);
+            db_object.insertData(set, buffer, false);
             objects_inserted_ += buffer->size();
 
             logdbg << "JSONImporterTask: insertData: " << db_object.name() << " clearing";
@@ -595,6 +602,10 @@ void JSONImporterTask::checkAllDone ()
 {
     logdbg << "JSONImporterTask: checkAllDone";
 
+    loginf << "JSONImporterTask: checkAllDone: all done " << all_done_ << " read " << (read_json_job_ == nullptr)
+           << " parse jobs " << json_parse_jobs_.empty() << " map jobs " << json_map_jobs_.empty()
+           << " insert active " << (insert_active_ == 0);
+
     if (!all_done_ && read_json_job_ == nullptr && json_parse_jobs_.size() == 0 && json_map_jobs_.size() == 0
             && insert_active_ == 0)
     {
@@ -608,6 +619,10 @@ void JSONImporterTask::checkAllDone ()
         loginf << "JSONImporterTask: checkAllDone: read done after " << time_str;
 
         all_done_ = true;
+
+        QApplication::restoreOverrideCursor();
+
+        emit ATSDB::instance().interface().databaseContentChangedSignal();
 
         if (widget_)
             widget_->importDoneSlot(test_);
