@@ -42,7 +42,7 @@ class MySQLppConnection : public DBConnection
 {
 public:
     MySQLppConnection(const std::string& class_id, const std::string& instance_id, DBInterface* interface);
-    virtual ~MySQLppConnection();
+    virtual ~MySQLppConnection() override;
 
     void addServer (const std::string& name);
     void deleteUsedServer ();

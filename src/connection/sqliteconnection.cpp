@@ -76,6 +76,9 @@ void SQLiteConnection::openFile (const std::string &file_name)
     interface_.databaseContentChanged();
 
     emit connectedSignal();
+
+    if (info_widget_)
+        info_widget_->updateSlot();
 }
 
 void SQLiteConnection::disconnect()
@@ -610,12 +613,7 @@ QWidget *SQLiteConnection::infoWidget ()
 std::string SQLiteConnection::status () const
 {
     if (connection_ready_)
-    {
-        if (!prepared_command_done_)
-            return "Working";
-        else
-            return "Idle";
-    }
+        return "Ready";
     else
         return "Not connected";
 }
@@ -624,7 +622,7 @@ std::string SQLiteConnection::identifier () const
 {
     assert (connection_ready_);
 
-    return "SQLite: "+last_filename_;
+    return last_filename_;
 }
 
 void SQLiteConnection::addFile (const std::string &filename)

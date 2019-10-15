@@ -776,12 +776,7 @@ QWidget *MySQLppConnection::infoWidget ()
 std::string MySQLppConnection::status () const
 {
     if (connection_ready_)
-    {
-        if (query_used_ || !prepared_command_done_)
-            return "Working";
-        else
-            return "Idle";
-    }
+        return "Ready";
     else
         return "Not connected";
 }
@@ -790,7 +785,7 @@ std::string MySQLppConnection::identifier () const
 {
     assert (connection_ready_);
 
-    return "MySQL: "+used_server_+": "+used_database_;
+    return used_server_+": "+used_database_;
 }
 
 void MySQLppConnection::addServer (const std::string& name)

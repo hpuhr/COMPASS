@@ -14,14 +14,13 @@ public slots:
     void updateSlot ();
 
 public:
-    explicit SQLiteConnectionInfoWidget(SQLiteConnection &connection, QWidget *parent = 0);
+    explicit SQLiteConnectionInfoWidget(SQLiteConnection& connection, QWidget* parent=nullptr);
 
 protected:
-    SQLiteConnection &connection_;
+    SQLiteConnection& connection_;
 
-    //QLabel *server_;
-    QLabel *database_;
-    QLabel *status_;
+    QLabel* database_label_ {nullptr};
+    QLabel* status_label_ {nullptr};
 };
 
 #endif // SQLiteCONNECTIONINFOWIDGET_H
