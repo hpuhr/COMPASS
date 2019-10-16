@@ -94,6 +94,8 @@ public:
     void decodeCategory (unsigned int category, bool decode);
     std::string editionForCategory (unsigned int category);
     void editionForCategory (unsigned int category, const std::string& edition);
+    std::string refEditionForCategory (unsigned int category);
+    void refEditionForCategory (unsigned int category, const std::string& ref);
 
     std::shared_ptr<JSONParsingSchema> schema() const;
 

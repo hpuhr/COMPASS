@@ -19,12 +19,14 @@
 #include "asteriximportertask.h"
 #include "asterixframingcombobox.h"
 #include "asterixeditioncombobox.h"
+#include "asterixrefeditioncombobox.h"
 #include "logger.h"
 #include "files.h"
 #include "stringconv.h"
 
 #include <jasterix/category.h>
 #include <jasterix/edition.h>
+#include <jasterix/refedition.h>
 
 #include <QVBoxLayout>
 #include <QFormLayout>
@@ -194,9 +196,18 @@ void ASTERIXConfigWidget::updateCategories()
     edition_label->setFont (font_bold);
     categories_grid_->addWidget (edition_label, 0, 1);
 
-    QLabel *edit_label = new QLabel ("Edit");
-    edit_label->setFont (font_bold);
-    categories_grid_->addWidget (edit_label, 0, 2);
+    QLabel *edition_edit_label = new QLabel ("Edit");
+    edition_edit_label->setFont (font_bold);
+    categories_grid_->addWidget (edition_edit_label, 0, 2);
+
+    QLabel *ref_label = new QLabel ("REF");
+    ref_label->setFont (font_bold);
+    categories_grid_->addWidget (ref_label, 0, 3);
+
+    QLabel *ref_edit_label = new QLabel ("Edit");
+    ref_edit_label->setFont (font_bold);
+    categories_grid_->addWidget (ref_edit_label, 0, 4);
+
 
     QIcon edit_icon(Files::getIconFilepath("edit.png").c_str());
 
@@ -207,7 +218,7 @@ void ASTERIXConfigWidget::updateCategories()
         unsigned int category = cat_it.first;
 
         QCheckBox* cat_check = new QCheckBox (String::categoryString(category).c_str());
-        connect(cat_check, SIGNAL(clicked()), this, SLOT(categoryCheckedSlot()));
+        connect(cat_check, &QCheckBox::clicked, this, &ASTERIXConfigWidget::categoryCheckedSlot);
         cat_check->setProperty("category", category);
         if (task_.hasConfiguratonFor(category))
             cat_check->setChecked(task_.decodeCategory(category));
@@ -218,17 +229,32 @@ void ASTERIXConfigWidget::updateCategories()
         ASTERIXEditionComboBox* ed_combo = new ASTERIXEditionComboBox(task_, cat);
         if (task_.hasConfiguratonFor(category))
             ed_combo->setEdition(task_.editionForCategory(category));
-        connect(ed_combo, SIGNAL(changedEdition(const std::string&,const std::string&)),
-                this, SLOT(editionChangedSlot(const std::string&,const std::string&)));
+        connect(ed_combo, &ASTERIXEditionComboBox::changedEdition, this, &ASTERIXConfigWidget::editionChangedSlot);
         categories_grid_->addWidget (ed_combo, row, 1);
 
-        QPushButton *edit = new QPushButton ();
-        edit->setIcon(edit_icon);
-        edit->setFixedSize ( UI_ICON_SIZE );
-        edit->setFlat(UI_ICON_BUTTON_FLAT);
-        connect(edit, SIGNAL(clicked()), this, SLOT(categoryEditSlot()));
-        edit->setProperty("category", category);
-        categories_grid_->addWidget (edit, row, 2);
+        QPushButton *ed_edit = new QPushButton ();
+        ed_edit->setIcon(edit_icon);
+        ed_edit->setFixedSize(UI_ICON_SIZE);
+        ed_edit->setFlat(UI_ICON_BUTTON_FLAT);
+        connect(ed_edit, &QPushButton::clicked, this, &ASTERIXConfigWidget::categoryEditSlot);
+        ed_edit->setProperty("category", category);
+        categories_grid_->addWidget (ed_edit, row, 2);
+
+        ASTERIXREFEditionComboBox* ref_combo = new ASTERIXREFEditionComboBox(task_, cat);
+        if (task_.hasConfiguratonFor(category))
+            ref_combo->setREFEdition(task_.refEditionForCategory(category));
+        connect(ref_combo, &ASTERIXREFEditionComboBox::changedREFSignal,
+                this, &ASTERIXConfigWidget::refEditionChangedSlot);
+        categories_grid_->addWidget (ref_combo, row, 3);
+
+        QPushButton *ref_edit = new QPushButton ();
+        ref_edit->setIcon(edit_icon);
+        ref_edit->setFixedSize(UI_ICON_SIZE);
+        ref_edit->setFlat(UI_ICON_BUTTON_FLAT);
+        //connect(ed_edit, SIGNAL(clicked()), this, SLOT(categoryEditSlot()));
+        //ed_edit->setProperty("category", category);
+        ref_edit->setDisabled(true); // TODO
+        categories_grid_->addWidget (ref_edit, row, 4);
 
         row++;
     }
@@ -254,6 +280,14 @@ void ASTERIXConfigWidget::editionChangedSlot(const std::string& cat_str, const s
 
     unsigned int cat = std::stoul(cat_str);
     task_.editionForCategory(cat, ed_str);
+}
+
+void ASTERIXConfigWidget::refEditionChangedSlot(const std::string& cat_str, const std::string& ref_ed_str)
+{
+    loginf << "ASTERIXConfigWidget: refChangedSlot: cat " << cat_str << " ref '" << ref_ed_str << "'";
+
+    unsigned int cat = std::stoul(cat_str);
+    task_.refEditionForCategory(cat, ref_ed_str);
 }
 
 void ASTERIXConfigWidget::categoryEditSlot ()

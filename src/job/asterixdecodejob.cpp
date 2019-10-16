@@ -89,7 +89,8 @@ void ASTERIXDecodeJob::jasterix_callback(nlohmann::json& data, size_t num_frames
         {
             category = data_block.at("category");
 
-            assert (data_block.find("content") != data_block.end());
+            if (data_block.find("content") == data_block.end()) // data blocks with errors
+                continue;
 
             if (data_block.at("content").find("records") != data_block.at("content").end())
             {
@@ -108,16 +109,25 @@ void ASTERIXDecodeJob::jasterix_callback(nlohmann::json& data, size_t num_frames
 
         for (json& frame : data.at("frames"))
         {
-            assert (frame.find("content") != frame.end());
+            if (frame.find("content") == frame.end()) // frame with errors
+                continue;
+
             assert (frame.at("content").is_object());
-            assert (frame.at("content").find("data_blocks") != frame.at("content").end());
+
+            if (frame.at("content").find("data_blocks") == frame.at("content").end()) // frame with errors
+                continue;
+
             assert (frame.at("content").at("data_blocks").is_array());
 
             for (json& data_block : frame.at("content").at("data_blocks"))
             {
+                if (data_block.find("category") == data_block.end()) // data block with errors
+                    continue;
+
                 category = data_block.at("category");
 
-                assert (data_block.find("content") != data_block.end());
+                if (data_block.find("content") == data_block.end()) // data block with errors
+                    continue;
 
                 if (data_block.at("content").find("records") != data_block.at("content").end())
                 {
