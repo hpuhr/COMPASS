@@ -211,7 +211,9 @@ void ASTERIXConfigWidget::updateCategories()
 
     QIcon edit_icon(Files::getIconFilepath("edit.png").c_str());
 
-    unsigned int row=1;
+    int row=1;
+
+    ref_edit_buttons_.clear();
 
     for (auto& cat_it : task_.jASTERIX()->categories())
     {
@@ -236,7 +238,7 @@ void ASTERIXConfigWidget::updateCategories()
         ed_edit->setIcon(edit_icon);
         ed_edit->setFixedSize(UI_ICON_SIZE);
         ed_edit->setFlat(UI_ICON_BUTTON_FLAT);
-        connect(ed_edit, &QPushButton::clicked, this, &ASTERIXConfigWidget::categoryEditSlot);
+        connect(ed_edit, &QPushButton::clicked, this, &ASTERIXConfigWidget::categoryEditionEditSlot);
         ed_edit->setProperty("category", category);
         categories_grid_->addWidget (ed_edit, row, 2);
 
@@ -251,10 +253,15 @@ void ASTERIXConfigWidget::updateCategories()
         ref_edit->setIcon(edit_icon);
         ref_edit->setFixedSize(UI_ICON_SIZE);
         ref_edit->setFlat(UI_ICON_BUTTON_FLAT);
-        //connect(ed_edit, SIGNAL(clicked()), this, SLOT(categoryEditSlot()));
-        //ed_edit->setProperty("category", category);
-        ref_edit->setDisabled(true); // TODO
+        connect(ref_edit, &QPushButton::clicked, this, &ASTERIXConfigWidget::categoryREFEditionEditSlot);
+        ref_edit->setProperty("category", category);
+
+        if (!ref_combo->isEnabled()) // is disabled when no refs exist
+            ref_edit->setDisabled(true);
+
         categories_grid_->addWidget (ref_edit, row, 4);
+        assert (!ref_edit_buttons_.count(category));
+        ref_edit_buttons_[category] = ref_edit;
 
         row++;
     }
@@ -288,10 +295,19 @@ void ASTERIXConfigWidget::refEditionChangedSlot(const std::string& cat_str, cons
 
     unsigned int cat = std::stoul(cat_str);
     task_.refEditionForCategory(cat, ref_ed_str);
+
+    assert (ref_edit_buttons_.count(cat));
+    if (ref_ed_str.size()) // enable or disable button if edition is empty
+        ref_edit_buttons_.at(cat)->setDisabled(false);
+    else {
+        ref_edit_buttons_.at(cat)->setDisabled(true);
+    }
 }
 
-void ASTERIXConfigWidget::categoryEditSlot ()
+void ASTERIXConfigWidget::categoryEditionEditSlot ()
 {
+    loginf << "ASTERIXConfigWidget: categoryEditionEditSlot";
+
     QPushButton* widget = static_cast<QPushButton*>(sender());
     assert (widget);
 
@@ -312,4 +328,28 @@ void ASTERIXConfigWidget::categoryEditSlot ()
     QDesktopServices::openUrl(QUrl(def_path.c_str()));
 }
 
+void ASTERIXConfigWidget::categoryREFEditionEditSlot ()
+{
+    loginf << "ASTERIXConfigWidget: categoryREFEditionEditSlot";
 
+    QPushButton* widget = static_cast<QPushButton*>(sender());
+    assert (widget);
+
+    QVariant cat_var = widget->property("category");
+    unsigned int cat = cat_var.toUInt();
+    std::string ref_edition_str;
+    if (task_.hasConfiguratonFor(cat))
+        ref_edition_str = task_.refEditionForCategory(cat);
+    else
+        ref_edition_str = task_.jASTERIX()->category(cat)->defaultREFEdition();
+
+    loginf << "ASTERIXConfigWidget: categoryREFEditionEditSlot: ref '" << ref_edition_str << "'";
+
+    assert (task_.jASTERIX()->hasCategory(cat));
+    assert (task_.jASTERIX()->category(cat)->hasREFEdition(ref_edition_str));
+    std::string def_path = task_.jASTERIX()->category(cat)->refEditionPath(ref_edition_str);
+
+    loginf << "ASTERIXConfigWidget: categoryEditSlot: cat " << cat << " ref path '" << def_path << "'";
+
+    QDesktopServices::openUrl(QUrl(def_path.c_str()));
+}

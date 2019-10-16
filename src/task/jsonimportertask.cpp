@@ -125,6 +125,8 @@ void JSONImporterTask::addFile (const std::string &filename)
     config.addParameterString("name", filename);
     generateSubConfigurable ("JSONFile", "JSONFile"+instancename);
 
+    current_filename_ = filename; // set as current
+
     if (widget_)
         widget_->updateFileListSlot();
 }

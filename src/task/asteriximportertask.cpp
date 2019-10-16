@@ -184,6 +184,8 @@ void ASTERIXImporterTask::addFile (const std::string &filename)
     config.addParameterString("name", filename);
     generateSubConfigurable ("ASTERIXFile", "ASTERIXFile"+instancename);
 
+    current_filename_ = filename;
+
     if (widget_)
         widget_->updateFileListSlot();
 }
