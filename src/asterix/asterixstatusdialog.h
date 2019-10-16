@@ -20,7 +20,8 @@ public slots:
     void okClickedSlot();
 
 public:
-    explicit ASTERIXStatusDialog(const std::string& filename, bool test, QWidget* parent=nullptr, Qt::WindowFlags f=0);
+    explicit ASTERIXStatusDialog(const std::string& filename, bool test, bool mapping_stubs,
+                                 QWidget* parent=nullptr, Qt::WindowFlags f=0);
 
     void markStartTime ();
     void setDone ();
@@ -39,6 +40,7 @@ public:
 private:
     std::string filename_;
     bool test_ {false};
+    bool mapping_stubs_ {false};
 
     size_t num_frames_ {0};
     size_t num_records_ {0};

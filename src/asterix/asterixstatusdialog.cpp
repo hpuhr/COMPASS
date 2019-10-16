@@ -13,11 +13,21 @@
 using namespace std;
 using namespace Utils;
 
-ASTERIXStatusDialog::ASTERIXStatusDialog(const std::string& filename, bool test, QWidget *parent, Qt::WindowFlags f)
-    : QDialog(parent, f), filename_(filename), test_(test)
+ASTERIXStatusDialog::ASTERIXStatusDialog(const std::string& filename, bool test, bool mapping_stubs,
+                                         QWidget *parent, Qt::WindowFlags f)
+    : QDialog(parent, f), filename_(filename), test_(test), mapping_stubs_(mapping_stubs)
 {
     setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
-    setWindowTitle ("Import ASTERIX Data Status");
+
+    assert (!(test_ && mapping_stubs_)); // not at same time
+
+    if (test_)
+        setWindowTitle ("Test ASTERIX Data Status");
+    else if (mapping_stubs_)
+        setWindowTitle ("Map ASTERIX Data Status");
+    else
+        setWindowTitle ("Import ASTERIX Data Status");
+
     setModal(true);
 
     setMinimumSize(QSize(600, 800));
@@ -86,26 +96,29 @@ ASTERIXStatusDialog::ASTERIXStatusDialog(const std::string& filename, bool test,
 
     main_layout->addStretch();
 
-    QLabel* map_label = new QLabel("Mapping Status");
-    map_label->setFont(font_big);
-    main_layout->addWidget(map_label);
-
-    row = 0;
+    if (!mapping_stubs_)
     {
-        QGridLayout* count_grid = new QGridLayout();
+        QLabel* map_label = new QLabel("Mapping Status");
+        map_label->setFont(font_big);
+        main_layout->addWidget(map_label);
 
-        count_grid->addWidget(new QLabel("Records Mapped"), row, 0);
-        records_mapped_label_ = new QLabel ();
-        records_mapped_label_->setAlignment(Qt::AlignRight);
-        count_grid->addWidget(records_mapped_label_, row, 1);
+        row = 0;
+        {
+            QGridLayout* count_grid = new QGridLayout();
 
-        ++row;
-        count_grid->addWidget(new QLabel("Records Not Mapped"), row, 0);
-        records_not_mapped_label_ = new QLabel ();
-        records_not_mapped_label_->setAlignment(Qt::AlignRight);
-        count_grid->addWidget(records_not_mapped_label_, row, 1);
+            count_grid->addWidget(new QLabel("Records Mapped"), row, 0);
+            records_mapped_label_ = new QLabel ();
+            records_mapped_label_->setAlignment(Qt::AlignRight);
+            count_grid->addWidget(records_mapped_label_, row, 1);
 
-        main_layout->addLayout(count_grid);
+            ++row;
+            count_grid->addWidget(new QLabel("Records Not Mapped"), row, 0);
+            records_not_mapped_label_ = new QLabel ();
+            records_not_mapped_label_->setAlignment(Qt::AlignRight);
+            count_grid->addWidget(records_not_mapped_label_, row, 1);
+
+            main_layout->addLayout(count_grid);
+        }
     }
 
     cat_counters_grid_ = new QGridLayout();
@@ -113,33 +126,39 @@ ASTERIXStatusDialog::ASTERIXStatusDialog(const std::string& filename, bool test,
 
     main_layout->addStretch();
 
-    QLabel* db_label = new QLabel("DB Insert Status");
-    db_label->setFont(font_big);
-    main_layout->addWidget(db_label);
 
-    row = 0;
+    if (!mapping_stubs_)
     {
-        QGridLayout* count2_grid = new QGridLayout();
-        count2_grid->addWidget(new QLabel("Records Created"), row, 0);
-        records_created_label_ = new QLabel ();
-        records_created_label_->setAlignment(Qt::AlignRight);
-        count2_grid->addWidget(records_created_label_, row, 1);
+        QLabel* db_label = new QLabel("DB Insert Status");
+        db_label->setFont(font_big);
+        main_layout->addWidget(db_label);
 
-        ++row;
-        count2_grid->addWidget(new QLabel("Records Inserted"), row, 0);
-        records_inserted_label_ = new QLabel ();
-        records_inserted_label_->setAlignment(Qt::AlignRight);
-        count2_grid->addWidget(records_inserted_label_, row, 1);
+        row = 0;
+        {
+            QGridLayout* count2_grid = new QGridLayout();
+            count2_grid->addWidget(new QLabel("Records Created"), row, 0);
+            records_created_label_ = new QLabel ();
+            records_created_label_->setAlignment(Qt::AlignRight);
+            count2_grid->addWidget(records_created_label_, row, 1);
 
-        ++row;
-        count2_grid->addWidget(new QLabel("Records Inserted Rate"), row, 0);
-        records_inserted_rate_label_ = new QLabel ();
-        records_inserted_rate_label_->setAlignment(Qt::AlignRight);
-        count2_grid->addWidget(records_inserted_rate_label_, row, 1);
+            if (!test_)
+            {
+                ++row;
+                count2_grid->addWidget(new QLabel("Records Inserted"), row, 0);
+                records_inserted_label_ = new QLabel ();
+                records_inserted_label_->setAlignment(Qt::AlignRight);
+                count2_grid->addWidget(records_inserted_label_, row, 1);
 
-        main_layout->addLayout(count2_grid);
+                ++row;
+                count2_grid->addWidget(new QLabel("Records Inserted Rate"), row, 0);
+                records_inserted_rate_label_ = new QLabel ();
+                records_inserted_rate_label_->setAlignment(Qt::AlignRight);
+                count2_grid->addWidget(records_inserted_rate_label_, row, 1);
+            }
+
+            main_layout->addLayout(count2_grid);
+        }
     }
-
     dbo_counters_grid_ = new QGridLayout();
     main_layout->addLayout(dbo_counters_grid_);
 
@@ -217,6 +236,7 @@ void ASTERIXStatusDialog::numErrors (unsigned int cnt)
 
 void ASTERIXStatusDialog::addNumMapped (unsigned int cnt)
 {
+    assert (!mapping_stubs_);
     assert (records_mapped_label_);
 
     records_mapped_ += cnt;
@@ -226,6 +246,7 @@ void ASTERIXStatusDialog::addNumMapped (unsigned int cnt)
 }
 void ASTERIXStatusDialog::addNumNotMapped (unsigned int cnt)
 {
+    assert (!mapping_stubs_);
     assert (records_not_mapped_label_);
 
     records_not_mapped_ += cnt;
@@ -235,6 +256,7 @@ void ASTERIXStatusDialog::addNumNotMapped (unsigned int cnt)
 }
 void ASTERIXStatusDialog::addNumCreated (unsigned int cnt)
 {
+    assert (!mapping_stubs_);
     assert (records_created_label_);
 
     records_created_ += cnt;
@@ -244,6 +266,7 @@ void ASTERIXStatusDialog::addNumCreated (unsigned int cnt)
 }
 void ASTERIXStatusDialog::addNumInserted (const std::string& dbo_name, unsigned int cnt)
 {
+    assert (!(test_ || mapping_stubs_));
     assert (records_inserted_label_);
     assert (records_inserted_rate_label_);
 
@@ -267,6 +290,8 @@ void ASTERIXStatusDialog::setCategoryCounts (const std::map<unsigned int, size_t
 }
 void ASTERIXStatusDialog::addMappedCounts (const std::map<unsigned int, std::pair<size_t,size_t>>& counts)
 {
+    assert (!mapping_stubs_);
+
     for (auto& mapped_cnt_it : counts)
     {
         category_mapped_counts_[mapped_cnt_it.first].first += mapped_cnt_it.second.first;
@@ -310,15 +335,18 @@ void ASTERIXStatusDialog::updateCategoryGrid ()
         count_label->setAlignment(Qt::AlignRight);
         cat_counters_grid_->addWidget(count_label, row, 1);
 
-        QLabel* mapped_label = new QLabel("Mapped");
-        mapped_label->setFont(font_bold);
-        mapped_label->setAlignment(Qt::AlignRight);
-        cat_counters_grid_->addWidget(mapped_label, row, 2);
+        if (!mapping_stubs_)
+        {
+            QLabel* mapped_label = new QLabel("Mapped");
+            mapped_label->setFont(font_bold);
+            mapped_label->setAlignment(Qt::AlignRight);
+            cat_counters_grid_->addWidget(mapped_label, row, 2);
 
-        QLabel* not_mapped_label = new QLabel("Not Mapped");
-        not_mapped_label->setFont(font_bold);
-        not_mapped_label->setAlignment(Qt::AlignRight);
-        cat_counters_grid_->addWidget(not_mapped_label, row, 3);
+            QLabel* not_mapped_label = new QLabel("Not Mapped");
+            not_mapped_label->setFont(font_bold);
+            not_mapped_label->setAlignment(Qt::AlignRight);
+            cat_counters_grid_->addWidget(not_mapped_label, row, 3);
+        }
     }
 
     for (auto& cat_cnt_it : category_read_counts_)
@@ -335,13 +363,16 @@ void ASTERIXStatusDialog::updateCategoryGrid ()
             count_label->setAlignment(Qt::AlignRight);
             cat_counters_grid_->addWidget(count_label, row, 1);
 
-            QLabel* mapped_label = new QLabel();
-            mapped_label->setAlignment(Qt::AlignRight);
-            cat_counters_grid_->addWidget(mapped_label, row, 2);
+            if (!mapping_stubs_)
+            {
+                QLabel* mapped_label = new QLabel();
+                mapped_label->setAlignment(Qt::AlignRight);
+                cat_counters_grid_->addWidget(mapped_label, row, 2);
 
-            QLabel* not_mapped_label = new QLabel();
-            not_mapped_label->setAlignment(Qt::AlignRight);
-            cat_counters_grid_->addWidget(not_mapped_label, row, 3);
+                QLabel* not_mapped_label = new QLabel();
+                not_mapped_label->setAlignment(Qt::AlignRight);
+                cat_counters_grid_->addWidget(not_mapped_label, row, 3);
+            }
         }
 
         //loginf << "ASTERIXStatusDialog: updateCategoryGrid: setting row " << row;
@@ -354,13 +385,16 @@ void ASTERIXStatusDialog::updateCategoryGrid ()
         assert (count_label);
         count_label->setText(std::to_string(cat_cnt_it.second).c_str());
 
-        QLabel* mapped_label = dynamic_cast<QLabel*>(cat_counters_grid_->itemAtPosition(row, 2)->widget());
-        assert (mapped_label);
-        mapped_label->setText(std::to_string(category_mapped_counts_[cat_cnt_it.first].first).c_str());
+        if (!mapping_stubs_)
+        {
+            QLabel* mapped_label = dynamic_cast<QLabel*>(cat_counters_grid_->itemAtPosition(row, 2)->widget());
+            assert (mapped_label);
+            mapped_label->setText(std::to_string(category_mapped_counts_[cat_cnt_it.first].first).c_str());
 
-        QLabel* not_mapped_label = dynamic_cast<QLabel*>(cat_counters_grid_->itemAtPosition(row, 3)->widget());
-        assert (not_mapped_label);
-        not_mapped_label->setText(std::to_string(category_mapped_counts_[cat_cnt_it.first].second).c_str());
+            QLabel* not_mapped_label = dynamic_cast<QLabel*>(cat_counters_grid_->itemAtPosition(row, 3)->widget());
+            assert (not_mapped_label);
+            not_mapped_label->setText(std::to_string(category_mapped_counts_[cat_cnt_it.first].second).c_str());
+        }
     }
 }
 

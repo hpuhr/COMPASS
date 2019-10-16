@@ -485,3 +485,12 @@ void ASTERIXImporterTaskWidget::importSlot()
         import_button_->setDisabled(true);
     }
 }
+
+void ASTERIXImporterTaskWidget::importDone ()
+{
+       loginf << "ASTERIXImporterTaskWidget: importDone";
+
+       create_mapping_stubs_button_->setDisabled(false);
+       test_button_->setDisabled(false);
+       import_button_->setDisabled(false);
+}

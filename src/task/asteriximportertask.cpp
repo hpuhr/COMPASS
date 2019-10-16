@@ -381,7 +381,7 @@ void ASTERIXImporterTask::importFile(const std::string& filename)
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    status_widget_ = new ASTERIXStatusDialog (filename_, test_);
+    status_widget_ = new ASTERIXStatusDialog (filename_, test_, create_mapping_stubs_);
     connect(status_widget_, &ASTERIXStatusDialog::closeSignal, this, &ASTERIXImporterTask::closeStatusDialogSlot);
     status_widget_->markStartTime();
 
@@ -596,7 +596,7 @@ void ASTERIXImporterTask::mapJSONDoneSlot ()
 
     if (test_) // ???
     {
-        status_widget_->setDone();
+        checkAllDone();
         return;
     }
 
@@ -836,6 +836,8 @@ void ASTERIXImporterTask::checkAllDone ()
         buffers_.clear();
         refreshjASTERIX();
 
+        assert (widget_);
+        widget_->importDone();
 
         if (!create_mapping_stubs_)
             emit ATSDB::instance().interface().databaseContentChangedSignal();
