@@ -466,7 +466,7 @@ void ASTERIXImporterTask::importFile(const std::string& filename)
 
 void ASTERIXImporterTask::decodeASTERIXDoneSlot ()
 {
-    loginf << "ASTERIXImporterTask: decodeASTERIXDoneSlot";
+    logdbg << "ASTERIXImporterTask: decodeASTERIXDoneSlot";
 
     assert (decode_job_);
 
@@ -487,18 +487,18 @@ void ASTERIXImporterTask::decodeASTERIXDoneSlot ()
 }
 void ASTERIXImporterTask::decodeASTERIXObsoleteSlot ()
 {
-    loginf << "ASTERIXImporterTask: decodeASTERIXObsoleteSlot UGA";
+    logdbg << "ASTERIXImporterTask: decodeASTERIXObsoleteSlot";
     decode_job_ = nullptr;
 }
 
 void ASTERIXImporterTask::addDecodedASTERIXSlot ()
 {
-    loginf << "ASTERIXImporterTask: addDecodedASTERIX";
+    logdbg << "ASTERIXImporterTask: addDecodedASTERIX";
 
     assert (decode_job_);
     assert (status_widget_);
 
-    loginf << "ASTERIXImporterTask: addDecodedASTERIX: errors " << decode_job_->numErrors();
+    logdbg << "ASTERIXImporterTask: addDecodedASTERIX: errors " << decode_job_->numErrors();
 
     status_widget_->numFrames(jasterix_->numFrames());
     status_widget_->numRecords(jasterix_->numRecords());
@@ -574,7 +574,7 @@ void ASTERIXImporterTask::addDecodedASTERIXSlot ()
 
 void ASTERIXImporterTask::mapJSONDoneSlot ()
 {
-    loginf << "ASTERIXImporterTask: mapJSONDoneSlot";
+    logdbg << "ASTERIXImporterTask: mapJSONDoneSlot";
 
     assert (status_widget_);
 
@@ -832,7 +832,7 @@ void ASTERIXImporterTask::checkAllDone ()
 
     loginf << "ASTERIXImporterTask: checkAllDone: all done " << all_done_ << " decode " << (decode_job_ == nullptr)
            << " map jobs " << json_map_jobs_.empty() << " map stubs " << (json_map_stub_job_ == nullptr)
-           << " buffers " << (buffers_.size() == 0) << " insert active " << (insert_active_ == 0) << " UGA";
+           << " buffers " << (buffers_.size() == 0) << " insert active " << (insert_active_ == 0);
 
     if (!all_done_ && decode_job_ == nullptr && json_map_jobs_.empty() && json_map_stub_job_ == nullptr
             && buffers_.size() == 0 && insert_active_ == 0)
