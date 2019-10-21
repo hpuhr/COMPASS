@@ -9,6 +9,7 @@ Based on a dynamic database schema, recorded air traffic surveillance data can b
 - High performance processing, low memory footprint
 - Utilization of application during loading procedure
 - Views for data inspection
+- Target report cross-selection
 - Simple custom filter generation
 - Supported Database Objects
   - Radar plots
@@ -36,14 +37,20 @@ Please refer to the releases page for the user manual and the AppImage. Please d
 - LICENSE: GPL license
 - readme.md: This file
 
-## Released Experimental Version v0.3.1-beta
-- [Current Appimage](https://github.com/hpuhr/ATSDB/releases/download/v0.3.1-beta/ATSDB-v0.3.1_x86_64.AppImage)
-- [User Manual](https://github.com/hpuhr/ATSDB/releases/download/v0.3.1-beta/user_manual_v0.3.1.pdf)
+## Released Experimental Version v0.4.1-beta
+- [Current Appimage](https://github.com/hpuhr/ATSDB/releases/download/v0.4.1-beta/ATSDB-v0.4.1-x86_64.AppImage)
+- [User Manual v0.4.0](https://github.com/hpuhr/ATSDB/releases/download/v0.4.0-beta/user_manual_v0.4.0.pdf)
 
 ## YouTube Videos
-- [Installation, Import & OSGView](https://youtu.be/hptJHQ5D9hs)
-- [OSGView Display Options](https://youtu.be/vEoT88RGLQo)
-- [Labeling, Highlighting and Filtering](https://youtu.be/2ewXrWU7KUE)
+### Current
+- [v0.4.0: Import ASTERIX & Setup](https://youtu.be/QIMVb9HNBJc)
+- [v0.4.0: Basics](https://youtu.be/ny47qrBlyfM)
+- [v0.4.0: Advanced Usage](https://youtu.be/_L65VO8TsyE)
+
+### Previous
+- [v0.2.1: Installation, Import & OSGView](https://youtu.be/hptJHQ5D9hs)
+- [v0.2.1: OSGView Display Options](https://youtu.be/vEoT88RGLQo)
+- [v0.2.1: Labeling, Highlighting and Filtering](https://youtu.be/2ewXrWU7KUE)
 
 
 ## Newsletter
