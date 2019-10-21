@@ -2198,6 +2198,16 @@
             <ParameterString info=""/>
             <ParameterString key_name="REC_NUM"/>
             <ParameterString name="sd_ads"/>
+            <Configuration class_id="DBTableColumn" instance_id="AIRCRAFT_LENG_WIDTH">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Aircraft L+W"/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="AIRCRAFT_LENG_WIDTH"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="AIRSPEED_KT">
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
@@ -2262,6 +2272,16 @@
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="BARO_VERTICAL_RATE_RE">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Range Exceeded?"/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="BARO_VERTICAL_RATE_RE"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="enum"/>
                 <ParameterString unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="CALC_ALT_GEO_FT">
@@ -2339,17 +2359,6 @@
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
-                <ParameterString unit=""/>
-            </Configuration>
-            <Configuration class_id="DBTableColumn" instance_id="DO_260A">
-                <ParameterBool is_key="0"/>
-                <ParameterString comment=" "/>
-                <ParameterString data_format=""/>
-                <ParameterString dimension=""/>
-                <ParameterString name="DO_260A"/>
-                <ParameterString number_conversion_type=""/>
-                <ParameterString special_null=""/>
-                <ParameterString type="enum"/>
                 <ParameterString unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="DS_ID">
@@ -2473,6 +2482,16 @@
                 <ParameterString type="bigint"/>
                 <ParameterString unit=""/>
             </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="GEO_HEIGHT_ACCURACY">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Geometric Altitude Accuracy"/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="GEO_HEIGHT_ACCURACY"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="GEO_VERTICAL_RATE_FTM">
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
@@ -2482,6 +2501,16 @@
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="GEO_VERTICAL_RATE_RE">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Range Exceeded?"/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="GEO_VERTICAL_RATE_RE"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="enum"/>
                 <ParameterString unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="GROUNDSPEED_KT">
@@ -2627,6 +2656,116 @@
                 <ParameterString type="double"/>
                 <ParameterString unit=""/>
             </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="MILITARY_EMERGENCY">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Target Status Military Emergency"/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="MILITARY_EMERGENCY"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="enum"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="MODE3A_CODE">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="MODE3A_CODE"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="MOPS_VERSION">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=" "/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="MOPS_VERSION"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="int"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="NAC_P">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Navigation Accuracy Category for Position"/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="NAC_P"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="NIC_BARO">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Navigation Integrity Category for Barometric Altitude"/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="NIC_BARO"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="enum"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="NUCP_NIC">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="NUCp or NIC"/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="NUCP_NIC"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="NUCR_NACV">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="NUCr or NACv"/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="NUCR_NACV"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="OP_STATUS_RA">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Resolution Advisory?"/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="OP_STATUS_RA"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="enum"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="OP_STATUS_SA">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Single Antenna?"/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="OP_STATUS_SA"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="enum"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="OP_STATUS_TCAS">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="TCAS System Status?"/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="OP_STATUS_TCAS"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="enum"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="PIC">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Position Integrity Category"/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="PIC"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POSITION_ACCURACY">
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
@@ -2660,6 +2799,16 @@
                 <ParameterString type="double"/>
                 <ParameterString unit="Degree"/>
             </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="POS_OFFSET_APPLIED">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Position Offset Applied"/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="POS_OFFSET_APPLIED"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="enum"/>
+                <ParameterString unit=""/>
+            </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="POS_SYS_X_NM">
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="System coordinate x"/>
@@ -2691,6 +2840,16 @@
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="blob"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="RECEIVER_ID">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Receiver Identification"/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="RECEIVER_ID"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
                 <ParameterString unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="REC_NUM">
@@ -2759,6 +2918,16 @@
                 <ParameterString type="tinyint"/>
                 <ParameterString unit=""/>
             </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="SAM">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Signal Amplitude"/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="SAM"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="SELECTED_ALT_CAPABILITY">
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
@@ -2770,6 +2939,16 @@
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
             </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="SERVICE_ID">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Service identification"/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="SERVICE_ID"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="SIC">
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="ASTERIX SIC"/>
@@ -2779,6 +2958,26 @@
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="SIL">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Surveillance Integrity Level"/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="SIL"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="tinyint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="SILS">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="SIL-Supplement"/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="SILS"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="enum"/>
                 <ParameterString unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="SIMULATED_TARGET">
@@ -2799,6 +2998,16 @@
                 <ParameterString dimension=""/>
                 <ParameterString name="SPI"/>
                 <ParameterString number_conversion_type=""/>
+                <ParameterString special_null=""/>
+                <ParameterString type="enum"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="SURVEILLANCE_STATUS">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Target Surveillance Status"/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="SURVEILLANCE_STATUS"/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
@@ -2836,6 +3045,26 @@
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
             </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="TOAP">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="TOAP"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="int"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="TOAV">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="TOAV"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="int"/>
+                <ParameterString unit=""/>
+            </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="TOD">
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Time of Day (1/128 sec from midnight)"/>
@@ -2867,6 +3096,66 @@
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="TORP">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="TORP"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="int"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="TORP_FSI">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Time of Reception HP Full Second Indication"/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="TORP_FSI"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="int"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="TORP_PRECISE">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Time of Reception HP"/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="TORP_PRECISE"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="TORV">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="TORV"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="int"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="TORV_FSI">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Time of Velocity HP Full Second Indication"/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="TORV_FSI"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="int"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="TORV_PRECISE">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment="Time of Velocity HP"/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="TORV_PRECISE"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
                 <ParameterString unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="TRACK_ANGLE_DEG">
@@ -3026,6 +3315,36 @@
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ALT_BARO_FT">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ALT_BARO_FT"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="mediumint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ALT_BARO_G">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ALT_BARO_G"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="enum"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ALT_BARO_V">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ALT_BARO_V"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="enum"/>
                 <ParameterString unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="ALT_GEO_FT">
@@ -4045,6 +4364,36 @@
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
             </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ALT_BARO_FT">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ALT_BARO_FT"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="mediumint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ALT_BARO_G">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ALT_BARO_G"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="enum"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="ALT_BARO_V">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="ALT_BARO_V"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="enum"/>
+                <ParameterString unit=""/>
+            </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="ANTENNA">
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Antenna 1 or 2"/>
@@ -4164,6 +4513,16 @@
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="bigint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="GROUND_BIT">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="GROUND_BIT"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="enum"/>
                 <ParameterString unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="HASH_CODE">
@@ -5238,6 +5597,16 @@
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
             </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="FPL_CALLSIGN">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="FPL_CALLSIGN"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="varchar"/>
+                <ParameterString unit=""/>
+            </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="GEO_AREA_MASK">
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Geographical area bit mask"/>
@@ -5304,6 +5673,86 @@
                 <ParameterString type="int"/>
                 <ParameterString unit=""/>
             </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="LM_ALT_BARO_FT">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="LM_ALT_BARO_FT"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="LM_ALT_BARO_G">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="LM_ALT_BARO_G"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="enum"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="LM_ALT_BARO_V">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="LM_ALT_BARO_V"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="enum"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="LM_ALT_GEO_FT">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="LM_ALT_GEO_FT"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="LM_MODE3A_CODE">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="LM_MODE3A_CODE"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="LM_MODE3A_G">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="LM_MODE3A_G"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="enum"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="LM_MODE3A_S">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="LM_MODE3A_S"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="enum"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="LM_MODE3A_V">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="LM_MODE3A_V"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="enum"/>
+                <ParameterString unit=""/>
+            </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MAS_TRACK_NUM">
                 <ParameterBool is_key="0"/>
                 <ParameterString comment=" "/>
@@ -5313,6 +5762,36 @@
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="int"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="MEASURED_ALT_BARO_AGE_S">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="MEASURED_ALT_BARO_AGE_S"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="MEASURED_ALT_BARO_FT">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="MEASURED_ALT_BARO_FT"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="MEASURED_MODE3A_AGE_S">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="MEASURED_MODE3A_AGE_S"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
                 <ParameterString unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="MIL_EMERGENCY">
@@ -5656,6 +6135,26 @@
                 <ParameterString type="tinyint"/>
                 <ParameterString unit=""/>
             </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="SELECTED_ALT_BARO_FT">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="SELECTED_ALT_BARO_FT"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="SELECTED_ALT_BARO_SOURCE">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="SELECTED_ALT_BARO_SOURCE"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="SIC">
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="ASTERIX System Identification Code [I030/010, I062/010]"/>
@@ -5720,6 +6219,36 @@
                 <ParameterString number_conversion_type=""/>
                 <ParameterString special_null=""/>
                 <ParameterString type="enum"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="TRACKED_ALT_BARO_FT">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="TRACKED_ALT_BARO_FT"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="mediumint"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="TRACKED_ALT_GEO_FT">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="TRACKED_ALT_GEO_FT"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="double"/>
+                <ParameterString unit=""/>
+            </Configuration>
+            <Configuration class_id="DBTableColumn" instance_id="TRACKED_MODE3A_CODE">
+                <ParameterBool is_key="0"/>
+                <ParameterString comment=""/>
+                <ParameterString data_format=""/>
+                <ParameterString dimension=""/>
+                <ParameterString name="TRACKED_MODE3A_CODE"/>
+                <ParameterString special_null=""/>
+                <ParameterString type="smallint"/>
                 <ParameterString unit=""/>
             </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="TRACK_AMALGAMATED">

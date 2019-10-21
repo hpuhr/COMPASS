@@ -6,14 +6,14 @@
             <ParameterString used_server="Localhost"/>
             <Configuration class_id="MySQLServer" instance_id="Localhost">
                 <ParameterUnsignedInt port="3306"/>
-                <ParameterString database="example"/>
+                <ParameterString database="skeyes"/>
                 <ParameterString host="localhost"/>
                 <ParameterString password="sassc"/>
                 <ParameterString user="sassc"/>
             </Configuration>
         </Configuration>
         <Configuration class_id="SQLiteConnection" instance_id="SQLite Connection">
-            <ParameterString last_filename="/home/sk/data/porto/NAVpt_LisFIR_190401_08-16.db"/>
+            <ParameterString last_filename="/home/sk/data/test.db"/>
         </Configuration>
     </Configuration>
     <SubConfigurationFile class_id="DBObjectManager" instance_id="DBObjectManager0" path="db_object.xml"/>

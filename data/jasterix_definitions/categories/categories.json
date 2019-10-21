@@ -11,10 +11,6 @@
             }
         },
         "mappings":{
-            "atsdb":{
-                "comment":"conversion to atsdb cat048",
-                "file":"001/cat001_1.1_to_cat048_.1.15_mapping.json"
-            }
         }
     },
     "002":{
