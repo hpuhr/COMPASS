@@ -37,9 +37,9 @@ Please refer to the releases page for the user manual and the AppImage. Please d
 - LICENSE: GPL license
 - readme.md: This file
 
-## Released Experimental Version v0.4.0-beta
-- [Current Appimage](https://github.com/hpuhr/ATSDB/releases/download/v0.4.0-beta/ATSDB-v0.4.0-x86_64.AppImage)
-- [User Manual](https://github.com/hpuhr/ATSDB/releases/download/v0.4.0-beta/user_manual_v0.4.0.pdf)
+## Released Experimental Version v0.4.1-beta
+- [Current Appimage](https://github.com/hpuhr/ATSDB/releases/download/v0.4.1-beta/ATSDB-v0.4.1-x86_64.AppImage)
+- [User Manual v0.4.0](https://github.com/hpuhr/ATSDB/releases/download/v0.4.0-beta/user_manual_v0.4.0.pdf)
 
 ## YouTube Videos
 ### Current
