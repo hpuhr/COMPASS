@@ -33,6 +33,8 @@
 #include "jobmanager.h"
 #include "jsonparsejob.h"
 #include "jsonmappingjob.h"
+#include "atsdb.h"
+#include "dbinterface.h"
 
 #include <stdexcept>
 #include <fstream>
@@ -43,6 +45,7 @@
 #include <QCoreApplication>
 #include <QThread>
 #include <QMessageBox>
+#include <QApplication>
 
 using namespace Utils;
 using namespace nlohmann;
@@ -121,6 +124,8 @@ void JSONImporterTask::addFile (const std::string &filename)
     Configuration &config = addNewSubConfiguration ("JSONFile", "JSONFile"+instancename);
     config.addParameterString("name", filename);
     generateSubConfigurable ("JSONFile", "JSONFile"+instancename);
+
+    current_filename_ = filename; // set as current
 
     if (widget_)
         widget_->updateFileListSlot();
@@ -211,6 +216,8 @@ void JSONImporterTask::importFile(const std::string& filename, bool test)
 
     assert (canImportFile(filename));
 
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
     filename_ = filename;
     archive_ = false;
     test_ = test;
@@ -253,6 +260,8 @@ void JSONImporterTask::importFileArchive (const std::string& filename, bool test
     loginf << "JSONImporterTask: importFileArchive: filename " << filename << " test " << test;
 
     assert (canImportFile(filename));
+
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     filename_ = filename;
     archive_ = true;
@@ -353,8 +362,7 @@ void JSONImporterTask::parseJSONDoneSlot ()
 
     objects_parsed_ += parse_job->objectsParsed();
     objects_parse_errors_ += parse_job->parseErrors();
-    std::shared_ptr<std::vector<nlohmann::json>> json_objects =
-            make_shared<std::vector<nlohmann::json>> (std::move(parse_job->jsonObjects()));
+    std::unique_ptr<std::vector<nlohmann::json>> json_objects {std::move(parse_job->jsonObjects())};
 
     json_parse_jobs_.erase(json_parse_jobs_.begin());
 
@@ -365,7 +373,7 @@ void JSONImporterTask::parseJSONDoneSlot ()
     assert (schemas_.count(current_schema_));
 
     std::shared_ptr<JSONMappingJob> json_map_job =
-            std::shared_ptr<JSONMappingJob> (new JSONMappingJob (json_objects,
+            std::shared_ptr<JSONMappingJob> (new JSONMappingJob (std::move(json_objects),
                                                                  schemas_.at(current_schema_).parsers(), key_count_));
     connect (json_map_job.get(), SIGNAL(obsoleteSignal()), this, SLOT(mapJSONObsoleteSlot()),
              Qt::QueuedConnection);
@@ -465,12 +473,12 @@ void JSONImporterTask::insertData ()
 
     while (insert_active_)
     {
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-        QThread::msleep (10);
+        //QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QThread::msleep (1);
     }
 
     bool has_sac_sic = false;
-    bool emit_change = (read_json_job_ == nullptr && json_parse_jobs_.size() == 0 && json_map_jobs_.size() == 0);
+    //bool emit_change = (read_json_job_ == nullptr && json_parse_jobs_.size() == 0 && json_map_jobs_.size() == 0);
 
     assert (schemas_.count(current_schema_));
 
@@ -573,10 +581,10 @@ void JSONImporterTask::insertData ()
                 }
             }
 
-            logdbg << "JSONImporterTask: insertData: " << db_object.name() << " inserting, change" << emit_change;
+            logdbg << "JSONImporterTask: insertData: " << db_object.name() << " inserting";
 
             DBOVariableSet set = parser_it.second.variableList();
-            db_object.insertData(set, buffer, emit_change);
+            db_object.insertData(set, buffer, false);
             objects_inserted_ += buffer->size();
 
             logdbg << "JSONImporterTask: insertData: " << db_object.name() << " clearing";
@@ -595,6 +603,10 @@ void JSONImporterTask::checkAllDone ()
 {
     logdbg << "JSONImporterTask: checkAllDone";
 
+    loginf << "JSONImporterTask: checkAllDone: all done " << all_done_ << " read " << (read_json_job_ == nullptr)
+           << " parse jobs " << json_parse_jobs_.empty() << " map jobs " << json_map_jobs_.empty()
+           << " insert active " << (insert_active_ == 0);
+
     if (!all_done_ && read_json_job_ == nullptr && json_parse_jobs_.size() == 0 && json_map_jobs_.size() == 0
             && insert_active_ == 0)
     {
@@ -608,6 +620,11 @@ void JSONImporterTask::checkAllDone ()
         loginf << "JSONImporterTask: checkAllDone: read done after " << time_str;
 
         all_done_ = true;
+        assert (buffers_.size() == 0);
+
+        QApplication::restoreOverrideCursor();
+
+        emit ATSDB::instance().interface().databaseContentChangedSignal();
 
         if (widget_)
             widget_->importDoneSlot(test_);

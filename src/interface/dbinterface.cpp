@@ -21,6 +21,7 @@
 #include <QMessageBox>
 #include <QThread>
 #include <QProgressDialog>
+#include <QApplication>
 
 #include "atsdb.h"
 #include "buffer.h"
@@ -870,6 +871,21 @@ void DBInterface::postProcess ()
         return;
     }
 
+    unsigned int dbos_with_data=0;
+
+    for (auto obj_it : ATSDB::instance().objectManager())
+        if (obj_it.second->hasData())
+            ++dbos_with_data;
+
+    assert (!postprocess_dialog_);
+    postprocess_dialog_ = new QProgressDialog (tr(""), tr(""), 0, static_cast<int>(2*dbos_with_data));
+    postprocess_dialog_->setWindowTitle("Post-Processing Status");
+    postprocess_dialog_->setCancelButton(nullptr);
+    postprocess_dialog_->setWindowModality(Qt::ApplicationModal);
+    postprocess_dialog_->show();
+
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
     if (!existsMinMaxTable())
         createMinMaxTable();
     else
@@ -898,13 +914,7 @@ void DBInterface::postProcess ()
         }
     }
 
-    assert (!postprocess_dialog_);
-    postprocess_dialog_ = new QProgressDialog (tr("Post-Processing"), tr(""), 0,
-                                               static_cast<int>(postprocess_jobs_.size()));
-    postprocess_dialog_->setCancelButton(0);
-    postprocess_dialog_->setWindowModality(Qt::ApplicationModal);
-    postprocess_dialog_->show();
-
+    assert (postprocess_jobs_.size() == 2*dbos_with_data);
     postprocess_job_num_ = postprocess_jobs_.size();
 }
 
@@ -937,6 +947,8 @@ void DBInterface::postProcessingJobDoneSlot()
 
         delete postprocess_dialog_;
         postprocess_dialog_=nullptr;
+
+        QApplication::restoreOverrideCursor();
 
         emit postProcessingDoneSignal();
     }

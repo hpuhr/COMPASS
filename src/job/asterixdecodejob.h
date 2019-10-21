@@ -27,16 +27,17 @@ class ASTERIXDecodeJob : public Job
 {
     Q_OBJECT
 signals:
-    void decodedASTERIXSignal (std::shared_ptr<std::vector <nlohmann::json>> extracted_records);
+    void decodedASTERIXSignal ();
 
 public:
     ASTERIXDecodeJob(ASTERIXImporterTask& task, const std::string& filename, const std::string& framing, bool test);
-    virtual ~ASTERIXDecodeJob() {}
+    virtual ~ASTERIXDecodeJob();
 
     virtual void run ();
 
     size_t numFrames() const;
     size_t numRecords() const;
+    size_t numErrors() const;
 
     void pause() { pause_ = true; }
     void unpause() { pause_ = false; }
@@ -46,6 +47,9 @@ public:
 
     //std::vector<nlohmann::json>& extractedRecords(); // to be moved out
     std::map<unsigned int, size_t> categoryCounts() const;
+
+    void clearExtractedRecords ();
+    std::unique_ptr<std::vector<nlohmann::json>>& extractedRecords();
 
 private:
     ASTERIXImporterTask& task_;
@@ -57,16 +61,19 @@ private:
 
     size_t num_frames_{0};
     size_t num_records_{0};
+    size_t num_errors_{0};
 
     bool error_ {false};
     std::string error_message_;
 
-    std::shared_ptr<std::vector <nlohmann::json>> extracted_records_;
+    std::unique_ptr<std::vector <nlohmann::json>> extracted_records_;
 
     std::map<unsigned int, size_t> category_counts_;
     std::map<std::pair<unsigned int, unsigned int>, double> cat002_last_tod_period_;
+    std::map<std::pair<unsigned int, unsigned int>, double> cat002_last_tod_;
 
-    void jasterix_callback(nlohmann::json& data, size_t num_frames, size_t num_records);
+    void jasterix_callback(std::unique_ptr<nlohmann::json> data, size_t num_frames, size_t num_records,
+                           size_t numErrors);
     void processRecord (unsigned int category, nlohmann::json& record);
 };
 

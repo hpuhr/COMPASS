@@ -76,6 +76,7 @@ public:
     void updateToSelection ();
 
     ListBoxView &view() const;
+    void resizeColumns();
 
 protected:
     ListBoxView& view_;

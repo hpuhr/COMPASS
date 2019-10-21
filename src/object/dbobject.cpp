@@ -895,8 +895,15 @@ void DBObject::quitLoading ()
 
 void DBObject::clearData ()
 {
+    loginf << "DBObject " << name_ << ": clearData";
+
     if (data_)
+    {
         data_ = nullptr;
+
+        if (info_widget_)
+            info_widget_->updateSlot();
+    }
 }
 
 void DBObject::insertData (DBOVariableSet& list, std::shared_ptr<Buffer> buffer, bool emit_change)
@@ -1096,7 +1103,7 @@ void DBObject::readJobDoneSlot()
 
 void DBObject::finalizeReadJobDoneSlot()
 {
-    logdbg << "DBObject: " << name_ << " finalizeReadJobDoneSlot";
+    loginf << "DBObject: " << name_ << " finalizeReadJobDoneSlot";
 
     FinalizeDBOReadJob* sender = dynamic_cast <FinalizeDBOReadJob*> (QObject::sender());
 

@@ -27,11 +27,15 @@ JSONDataMapping::JSONDataMapping (const std::string& class_id, const std::string
                                   JSONObjectParser& parent)
     : Configurable (class_id, instance_id, &parent)
 {
+    logdbg << "JSONDataMapping: constructor: this " << this;
+
     registerParameter("active", &active_, false);
     registerParameter("json_key", &json_key_, "");
 
     registerParameter("db_object_name", &db_object_name_, "");
     registerParameter("dbovariable_name", &dbovariable_name_, "");
+
+    registerParameter("comment", &comment_, "");
 
     registerParameter("mandatory", &mandatory_, false);
 
@@ -40,6 +44,9 @@ JSONDataMapping::JSONDataMapping (const std::string& class_id, const std::string
 
     registerParameter("dimension", &dimension_, "");
     registerParameter("unit", &unit_, "");
+
+    logdbg << "JSONDataMapping: ctor: dbo " << db_object_name_ << " var " << dbovariable_name_
+           << " dim " << dimension_ << " unit " << unit_;
 
     sub_keys_ = Utils::String::split(json_key_, '.');
     has_sub_keys_ = sub_keys_.size() > 1;
@@ -52,6 +59,8 @@ JSONDataMapping::JSONDataMapping (const std::string& class_id, const std::string
 
 JSONDataMapping& JSONDataMapping::operator=(JSONDataMapping&& other)
 {
+    logdbg << "JSONDataMapping: operator=: this " << this << " other " << &other;
+
     active_ = other.active_;
     json_key_ = other.json_key_;
     db_object_name_ = other.db_object_name_;
@@ -59,6 +68,7 @@ JSONDataMapping& JSONDataMapping::operator=(JSONDataMapping&& other)
     variable_ = other.variable_;
 
     mandatory_ = other.mandatory_;
+    comment_ = other.comment_;
     //json_value_format_ = other.json_value_format_;
     format_data_type_ = other.format_data_type_;
     json_value_format_ = std::move(other.json_value_format_);
@@ -75,6 +85,7 @@ JSONDataMapping& JSONDataMapping::operator=(JSONDataMapping&& other)
     other.configuration().updateParameterPointer ("db_object_name", &db_object_name_);
     other.configuration().updateParameterPointer ("dbovariable_name", &dbovariable_name_);
     other.configuration().updateParameterPointer ("mandatory", &mandatory_);
+    other.configuration().updateParameterPointer ("comment", &comment_);
     other.configuration().updateParameterPointer ("format_data_type", &format_data_type_);
     other.configuration().updateParameterPointer ("json_value_format", &json_value_format_);
     other.configuration().updateParameterPointer ("dimension", &dimension_);
@@ -86,6 +97,11 @@ JSONDataMapping& JSONDataMapping::operator=(JSONDataMapping&& other)
     other.widget_ = nullptr;
 
     return static_cast<JSONDataMapping&>(Configurable::operator=(std::move(other)));
+}
+
+JSONDataMapping::~JSONDataMapping()
+{
+    logdbg << "JSONDataMapping: destructor: this " << this;
 }
 
 void JSONDataMapping::initializeIfRequired ()
@@ -104,6 +120,16 @@ std::string& JSONDataMapping::formatDataTypeRef()
 bool JSONDataMapping::initialized() const
 {
     return initialized_;
+}
+
+std::string JSONDataMapping::comment() const
+{
+    return comment_;
+}
+
+void JSONDataMapping::comment(const std::string &comment)
+{
+    comment_ = comment;
 }
 
 DBOVariable& JSONDataMapping::variable() const
@@ -163,7 +189,7 @@ std::string JSONDataMapping::dboVariableName() const
     return dbovariable_name_;
 }
 
-std::string JSONDataMapping::jsonKey() const
+const std::string& JSONDataMapping::jsonKey() const
 {
     return json_key_;
 }

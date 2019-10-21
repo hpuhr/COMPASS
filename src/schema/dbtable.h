@@ -68,6 +68,7 @@ public:
     const std::string& key () const { return key_name_; }
 
     void populate ();
+    void update ();
 
     void lock ();
     bool isLocked () { return locked_; }

@@ -37,7 +37,7 @@ ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, 
     : QWidget (parent, f), task_(task)
 {
     setWindowTitle ("Import ASTERIX Data");
-    setMinimumSize(QSize(800, 900));
+    setMinimumSize(QSize(600, 800));
 
     QFont font_bold;
     font_bold.setBold(true);
@@ -50,6 +50,15 @@ ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, 
     main_layout_ = new QHBoxLayout ();
 
     QVBoxLayout* left_layout = new QVBoxLayout ();
+
+    QFrame *left_frame = new QFrame ();
+    left_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
+    left_frame->setLineWidth(frame_width_small);
+    left_frame->setLayout(left_layout);
+
+    QSizePolicy sp_left(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    sp_left.setHorizontalStretch(1);
+    left_frame->setSizePolicy(sp_left);
 
 //    QLabel *main_label = new QLabel ("Import ASTERIX data");
 //    main_label->setFont (font_big);
@@ -142,19 +151,25 @@ ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, 
     {
         debug_ = new QCheckBox ("Debug in Console");
         debug_->setChecked(task_.debug());
-        connect(debug_, SIGNAL( clicked() ), this, SLOT(debugChangedSlot()));
+        connect(debug_, &QCheckBox::clicked, this, &ASTERIXImporterTaskWidget::debugChangedSlot);
         left_layout->addWidget (debug_);
 
+        create_mapping_stubs_button_ = new QPushButton ("Create Mapping Stubs");
+        connect(create_mapping_stubs_button_, &QPushButton::clicked,
+                this, &ASTERIXImporterTaskWidget::createMappingsSlot);
+        left_layout->addWidget (create_mapping_stubs_button_);
+
         test_button_ = new QPushButton ("Test Import");
-        connect(test_button_, SIGNAL( clicked() ), this, SLOT(testImportSlot()));
+        connect(test_button_, &QPushButton::clicked, this, &ASTERIXImporterTaskWidget::testImportSlot);
         left_layout->addWidget (test_button_);
 
         import_button_ = new QPushButton ("Import");
-        connect(import_button_, SIGNAL( clicked() ), this, SLOT(importSlot()));
+        connect(import_button_, &QPushButton::clicked, this, &ASTERIXImporterTaskWidget::importSlot);
         left_layout->addWidget (import_button_);
     }
 
-    main_layout_->addLayout(left_layout);
+    //main_layout_->addLayout(left_layout);
+    main_layout_->addWidget(left_frame);
 
     setLayout (main_layout_);
 
@@ -237,25 +252,27 @@ void ASTERIXImporterTaskWidget::addObjectParserSlot ()
 
     if (ret == QDialog::Accepted)
     {
-        std::string name = dialog.selectedObject();
-        loginf << "ASTERIXImporterTaskWidget: addObjectParserSlot: obj " << name;
+        std::string name = dialog.name();
+        std::string dbo_name = dialog.selectedObject();
+        loginf << "ASTERIXImporterTaskWidget: addObjectParserSlot: name " << name << " obj " << dbo_name;
 
         std::shared_ptr<JSONParsingSchema> current = task_.schema();
 
-        if (current->hasObjectParser(name))
+        if (!name.size() || current->hasObjectParser(name))
         {
             QMessageBox m_warning (QMessageBox::Warning, "JSON Object Parser Adding Failed",
-                                   "Object parser is already defined for the selected object.",
+                                   "Object parser name empty or already defined.",
                                    QMessageBox::Ok);
 
             m_warning.exec();
             return;
         }
 
-        std::string instance = "JSONObjectParser"+name+"0";
+        std::string instance = "JSONObjectParser"+name+dbo_name+"0";
 
         Configuration &config = current->addNewSubConfiguration ("JSONObjectParser", instance);
-        config.addParameterString ("db_object_name", name);
+        config.addParameterString ("name", name);
+        config.addParameterString ("db_object_name", dbo_name);
 
         current->generateSubConfigurable("JSONObjectParser", instance);
         updateParserList();
@@ -309,13 +326,17 @@ void ASTERIXImporterTaskWidget::createObjectParserWidget()
 {
     assert (!object_parser_widget_);
     assert (main_layout_);
-    setMinimumSize(QSize(1400, 600));
+    setMinimumSize(QSize(1800, 800));
 
     int frame_width_small = 1;
 
     QFrame *right_frame = new QFrame ();
     right_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
     right_frame->setLineWidth(frame_width_small);
+
+    QSizePolicy sp_right(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    sp_right.setHorizontalStretch(2);
+    right_frame->setSizePolicy(sp_right);
 
     object_parser_widget_ = new QStackedWidget ();
 
@@ -354,6 +375,43 @@ void ASTERIXImporterTaskWidget::debugChangedSlot ()
     task_.debug(box->checkState() == Qt::Checked);
 }
 
+void ASTERIXImporterTaskWidget::createMappingsSlot()
+{
+    loginf << "ASTERIXImporterTaskWidget: createMappingsSlot";
+
+    if (!file_list_->currentItem())
+    {
+        QMessageBox m_warning (QMessageBox::Warning, "ASTERIX File Create Mapping Stubs Failed",
+                               "Please select a file in the list.",
+                               QMessageBox::Ok);
+        m_warning.exec();
+        return;
+    }
+
+    QString filename = file_list_->currentItem()->text();
+    if (filename.size() > 0)
+    {
+        assert (task_.hasFile(filename.toStdString()));
+
+        if (!task_.canImportFile(filename.toStdString()))
+        {
+            QMessageBox m_warning (QMessageBox::Warning, "ASTERIX File Create Mapping Stubs Failed",
+                                   "File does not exist.",
+                                   QMessageBox::Ok);
+            m_warning.exec();
+            return;
+        }
+
+        task_.test(false);
+        task_.createMappingStubs(true);
+        task_.importFile(filename.toStdString());
+
+        create_mapping_stubs_button_->setDisabled(true);
+        test_button_->setDisabled(true);
+        import_button_->setDisabled(true);
+    }
+}
+
 void ASTERIXImporterTaskWidget::testImportSlot()
 {
     loginf << "ASTERIXImporterTaskWidget: testImportSlot";
@@ -381,8 +439,11 @@ void ASTERIXImporterTaskWidget::testImportSlot()
             return;
         }
 
-        task_.importFile(filename.toStdString(), true);
+        task_.test(true);
+        task_.createMappingStubs(false);
+        task_.importFile(filename.toStdString());
 
+        create_mapping_stubs_button_->setDisabled(true);
         test_button_->setDisabled(true);
         import_button_->setDisabled(true);
     }
@@ -415,9 +476,21 @@ void ASTERIXImporterTaskWidget::importSlot()
             return;
         }
 
-        task_.importFile(filename.toStdString(), false);
+        task_.test(false);
+        task_.createMappingStubs(false);
+        task_.importFile(filename.toStdString());
 
+        create_mapping_stubs_button_->setDisabled(true);
         test_button_->setDisabled(true);
         import_button_->setDisabled(true);
     }
+}
+
+void ASTERIXImporterTaskWidget::importDone ()
+{
+       loginf << "ASTERIXImporterTaskWidget: importDone";
+
+       create_mapping_stubs_button_->setDisabled(false);
+       test_button_->setDisabled(false);
+       import_button_->setDisabled(false);
 }

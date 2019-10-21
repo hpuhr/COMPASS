@@ -61,8 +61,8 @@ protected:
     QMenu menu_;
 
     /// Variable list
-    QListWidget *list_widget_;
-    int current_index_;
+    QListWidget* list_widget_ {nullptr};
+    int current_index_ {-1};
 
     /// @brief Updates variables list
     void updateMenuEntries();

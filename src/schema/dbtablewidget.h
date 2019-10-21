@@ -44,6 +44,7 @@ signals:
 public slots:
     void infoSlot (const QString& value);
 //    void setSpecialNull (const QString &text);
+    void updateSlot ();
 
 public:
     /// @brief Constructor

@@ -303,6 +303,15 @@ void JobManager::shutdown ()
         widget_ = nullptr;
     }
 
+    assert (!active_blocking_job_);
+    assert (blocking_jobs_.empty());
+
+    assert (!active_non_blocking_job_);
+    assert (non_blocking_jobs_.empty());
+
+    assert (!active_db_job_);
+    assert (queued_db_jobs_.empty());
+
     loginf  << "JobManager: shutdown: done";
 }
 

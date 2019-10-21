@@ -94,29 +94,29 @@ DBObjectWidget::DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager
         grid_layout->addWidget (name_label, 0, 0);
 
         name_edit_ = new QLineEdit (object_->name().c_str());
-        connect(name_edit_, SIGNAL( returnPressed() ), this, SLOT( editNameSlot() ));
+        connect(name_edit_, &QLineEdit::returnPressed, this, &DBObjectWidget::editNameSlot);
         grid_layout->addWidget (name_edit_, 0, 1);
 
         QLabel *info_label = new QLabel ("Description");
         grid_layout->addWidget (info_label, 1, 0);
 
         info_edit_ = new QLineEdit (object_->info().c_str());
-        connect(info_edit_, SIGNAL(returnPressed()), this, SLOT(editInfoSlot()));
+        connect(info_edit_, &QLineEdit::returnPressed, this, &DBObjectWidget::editInfoSlot);
         grid_layout->addWidget (info_edit_, 1, 1);
 
         properties_layout->addLayout (grid_layout);
 
         edit_label_button_ = new QPushButton ("Edit Label Definition");
-        connect(edit_label_button_, SIGNAL( clicked() ), this, SLOT( showLabelDefinitionWidgetSlot() ));
+        connect(edit_label_button_, &QPushButton::clicked, this, &DBObjectWidget::showLabelDefinitionWidgetSlot);
         properties_layout->addWidget(edit_label_button_);
 
         edit_ds_button_ = new QPushButton ("Edit Data Sources");
-        connect(edit_ds_button_, SIGNAL( clicked() ), this, SLOT( editDataSourcesSlot() ));
+        connect(edit_ds_button_, &QPushButton::clicked, this, &DBObjectWidget::editDataSourcesSlot);
         properties_layout->addWidget(edit_ds_button_);
 
 
         QPushButton* print_button_ = new QPushButton ("Print");
-        connect(print_button_, SIGNAL( clicked() ), this, SLOT( printSlot() ));
+        connect(print_button_, &QPushButton::clicked, this, &DBObjectWidget::printSlot);
         properties_layout->addWidget(print_button_);
 
         properties_frame->setLayout (properties_layout);
@@ -167,7 +167,7 @@ DBObjectWidget::DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager
         ds_layout->addLayout(ds_grid_);
 
         new_ds_button_ = new QPushButton ("Add");
-        connect(new_ds_button_, SIGNAL( clicked() ), this, SLOT( addDataSourceSlot() ));
+        connect(new_ds_button_, &QPushButton::clicked, this, &DBObjectWidget::addDataSourceSlot);
         ds_layout->addWidget (new_ds_button_);
 
         ds_frame->setLayout(ds_layout);
@@ -202,9 +202,9 @@ DBObjectWidget::DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager
 
     all_var_layout->addStretch();
 
-    QLabel *all_var_label = new QLabel ("Add unused DBOVariables in current schema");
-    all_var_label->setFont (font_bold);
-    all_var_layout->addWidget (all_var_label);
+//    QLabel *all_var_label = new QLabel ("Add unused DBOVariables in current schema");
+//    all_var_label->setFont (font_bold);
+//    all_var_layout->addWidget (all_var_label);
 
 //    QLabel *all_var_schema_label = new QLabel ("Schema");
 //    all_var_layout->addWidget (all_var_schema_label);
@@ -214,10 +214,9 @@ DBObjectWidget::DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager
 //    all_schemas_box_->update();
 //    all_var_layout->addWidget (all_schemas_box_);
 
-    add_schema_button_ = new QPushButton ("Add New");
-    connect(add_schema_button_, SIGNAL( clicked() ), this, SLOT( addNewVariablesSlot() ));
-    all_var_layout->addWidget (add_schema_button_);
-
+    update_variables_button_ = new QPushButton ("Update Variables");
+    connect(update_variables_button_, &QPushButton::clicked, this, &DBObjectWidget::updateVariablesSlot);
+    all_var_layout->addWidget (update_variables_button_);
 
     main_layout->addLayout (all_var_layout);
 
@@ -260,7 +259,7 @@ void DBObjectWidget::lock ()
     }
 
     //all_schemas_box_->setDisabled (true);
-    add_schema_button_->setDisabled (true);
+    update_variables_button_->setDisabled (true);
 
     locked_ = true;
 }
@@ -294,7 +293,7 @@ void DBObjectWidget::unlock ()
     }
 
     //all_schemas_box_->setDisabled (false);
-    add_schema_button_->setDisabled (false);
+    update_variables_button_->setDisabled (false);
 
     locked_ = false;
 }
@@ -429,7 +428,7 @@ void DBObjectWidget::updateDataSourcesGridSlot ()
     assert (ds_grid_);
 
     QLayoutItem *child;
-    while ((child = ds_grid_->takeAt(0)) != 0)
+    while ((child = ds_grid_->takeAt(0)) != nullptr)
     {
         if (child->widget())
             delete child->widget();
@@ -624,7 +623,7 @@ void DBObjectWidget::printSlot ()
     object_->print();
 }
 
-void DBObjectWidget::addNewVariablesSlot ()
+void DBObjectWidget::updateVariablesSlot ()
 {
     assert (object_);
     //assert (all_schemas_box_);
@@ -634,26 +633,47 @@ void DBObjectWidget::addNewVariablesSlot ()
 
     if (!schema_manager_.hasCurrentSchema())
     {
-        logerr  << "DBObjectWidget: addNewVariables: no current schema defined";
+        logerr  << "DBObjectWidget: updateVariablesSlot: no current schema defined";
         return;
     }
 
     std::string schema_name = schema_manager_.getCurrentSchema().name();
 
-    loginf  << "DBObjectWidget: addNewVariables: object " << object_->name() << " schema " << schema_name;
+    loginf  << "DBObjectWidget: updateVariablesSlot: object " << object_->name() << " schema " << schema_name;
 
     assert (object_->hasMetaTable(schema_name));
     std::string meta_name = object_->metaTable (schema_name);
-    logdbg  << "DBObjectWidget: addNewVariables: for meta " << meta_name;
+    logdbg  << "DBObjectWidget: updateVariablesSlot: for meta " << meta_name;
 
     assert (schema_manager_.getCurrentSchema().hasMetaTable(meta_name));
     const MetaDBTable &meta = schema_manager_.getCurrentSchema().metaTable(meta_name);
 
-    logdbg  << "DBObjectWidget: addNewVariables: traversing columns";
-    for (auto& col_it : meta.columns())
+    const std::map <std::string, const DBTableColumn&> &meta_columns = meta.columns();
+
+    loginf  << "DBObjectWidget: updateVariablesSlot: updating variables";
+
+    std::vector <std::string> vars_to_be_removed;
+
+    for (auto& dbovar_it : *object_)
+    {
+        if (!dbovar_it.second.hasCurrentDBColumn())
+        {
+            loginf  << "DBObjectWidget: updateVariablesSlot: variable '" << dbovar_it.first << "' has no DBTableColumn";
+            vars_to_be_removed.push_back(dbovar_it.first);
+        }
+    }
+
+    for (auto& dbovar_name : vars_to_be_removed)
+    {
+        loginf  << "DBObjectWidget: updateVariablesSlot: removing variable '" << dbovar_name;
+        object_->deleteVariable(dbovar_name);
+    }
+
+    loginf  << "DBObjectWidget: updateVariablesSlot: updating columns";
+    for (auto& col_it : meta_columns)
     {
         const DBTableColumn& col = col_it.second;
-        logdbg  << "DBObjectWidget: addNewVariables: checking column " << col.name();
+        logdbg  << "DBObjectWidget: updateVariablesSlot: checking column " << col.name();
 
         std::string column_name = col.name();
         boost::algorithm::to_lower(column_name);
@@ -662,12 +682,12 @@ void DBObjectWidget::addNewVariablesSlot ()
 
         if (object_->uses(col))
         {
-            loginf  << "DBObjectWidget: addNewVariables: not adding column '" << column_name
+            logdbg  << "DBObjectWidget: updateVariablesSlot: not adding column '" << column_name
                     << "' since already used";
             continue;
         }
         else
-            loginf  << "DBObjectWidget: addNewVariables: adding column '" << column_name;
+            loginf  << "DBObjectWidget: updateVariablesSlot: adding column '" << column_name;
 
         std::string column_name_to_use;
 
@@ -694,7 +714,7 @@ void DBObjectWidget::addNewVariablesSlot ()
 
         object_->generateSubConfigurable("DBOVariable", instance);
 
-        loginf  << "DBObjectWidget: addNewVariables: added column '" << column_name_to_use
+        loginf  << "DBObjectWidget: updateVariablesSlot: added column '" << column_name_to_use
                 << "' as variable";
     }
     updateDBOVarsGridSlot();

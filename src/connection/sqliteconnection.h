@@ -39,42 +39,42 @@ class SQLiteConnection : public DBConnection
 {
 public:
     SQLiteConnection(const std::string &class_id, const std::string &instance_id, DBInterface *interface);
-    virtual ~SQLiteConnection();
+    virtual ~SQLiteConnection() override;
 
     void openFile (const std::string &file_name);
 
-    virtual void disconnect ();
+    virtual void disconnect () override;
 
-    void executeSQL(const std::string &sql);
+    void executeSQL(const std::string &sql) override;
 
-    void prepareBindStatement (const std::string &statement);
-    void beginBindTransaction ();
-    void stepAndClearBindings ();
-    void endBindTransaction ();
-    void finalizeBindStatement ();
+    void prepareBindStatement (const std::string &statement) override;
+    void beginBindTransaction () override;
+    void stepAndClearBindings () override;
+    void endBindTransaction () override;
+    void finalizeBindStatement () override;
 
-    void bindVariable (unsigned int index, int value);
-    void bindVariable (unsigned int index, double value);
-    void bindVariable (unsigned int index, const std::string &value);
-    void bindVariableNull (unsigned int index);
+    void bindVariable (unsigned int index, int value) override;
+    void bindVariable (unsigned int index, double value) override;
+    void bindVariable (unsigned int index, const std::string &value) override;
+    void bindVariableNull (unsigned int index) override;
 
-    std::shared_ptr <DBResult> execute (const DBCommand &command);
-    std::shared_ptr <DBResult> execute (const DBCommandList &command_list);
+    std::shared_ptr <DBResult> execute (const DBCommand &command) override;
+    std::shared_ptr <DBResult> execute (const DBCommandList &command_list) override;
 
-    void prepareCommand (const std::shared_ptr<DBCommand> command);
-    std::shared_ptr <DBResult> stepPreparedCommand (unsigned int max_results=0);
-    void finalizeCommand ();
-    bool getPreparedCommandDone () { return prepared_command_done_; }
+    void prepareCommand (const std::shared_ptr<DBCommand> command) override;
+    std::shared_ptr <DBResult> stepPreparedCommand (unsigned int max_results=0) override;
+    void finalizeCommand () override;
+    bool getPreparedCommandDone () override { return prepared_command_done_; }
 
-    std::map <std::string, DBTableInfo> getTableInfo ();
-    virtual std::vector <std::string> getDatabases();
+    std::map <std::string, DBTableInfo> getTableInfo () override;
+    virtual std::vector <std::string> getDatabases() override;
 
-    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
+    virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id) override;
 
-    QWidget *widget ();
-    QWidget *infoWidget ();
-    std::string status () const;
-    std::string identifier () const;
+    QWidget *widget () override;
+    QWidget *infoWidget () override;
+    std::string status () const override;
+    std::string identifier () const override;
     std::string type () const override { return SQLITE_IDENTIFIER; }
 
     const std::map <std::string, SavedFile*> &fileList () { return file_list_; }
@@ -105,8 +105,8 @@ protected:
     void execute (const std::string &command, std::shared_ptr <Buffer> buffer);
     void readRowIntoBuffer (const PropertyList &list, unsigned int num_properties, std::shared_ptr <Buffer> buffer, unsigned int index);
 
-    void prepareStatement (const std::string &sql);
-    void finalizeStatement ();
+    void prepareStatement (const std::string &sql) override ;
+    void finalizeStatement ()  override;
 
     std::vector<std::string> getTableList();
     DBTableInfo getColumnList(const std::string &table);

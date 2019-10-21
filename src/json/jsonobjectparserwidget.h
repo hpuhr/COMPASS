@@ -41,6 +41,7 @@ public slots:
 
     void mappingActiveChangedSlot();
     void mappingKeyChangedSlot();
+    void mappingCommentChangedSlot();
     void mappingDBOVariableChangedSlot();
     void mappingMandatoryChangedSlot();
     void mappingDeleteSlot();
@@ -49,6 +50,8 @@ public:
     explicit JSONObjectParserWidget(JSONObjectParser& parser, QWidget *parent = nullptr);
 
     void setParser (JSONObjectParser& parser);
+    void updateMappingsGrid();
+
 private:
     JSONObjectParser* parser_ {nullptr};
 
@@ -64,8 +67,6 @@ private:
     //std::map<unsigned int, DataTypeFormatSelectionWidget*> format_selections_;
 
     void update ();
-
-    void updateMappingsGrid();
 };
 
 #endif // JSONOBJECTPARSERWIDGET_H

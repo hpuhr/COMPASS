@@ -112,7 +112,7 @@ public:
 
 protected:
     /// Container with ordered variable definitions (index -> definition pointer)
-    std::map <unsigned int, DBOVariableOrderDefinition *> variable_definitions_;
+    std::map <unsigned int, DBOVariableOrderDefinition*> variable_definitions_;
 
     DBOVariableOrderedSetWidget *widget_;
 

@@ -47,6 +47,7 @@ public slots:
     void selectedObjectParserSlot ();
 
     void debugChangedSlot ();
+    void createMappingsSlot();
     void testImportSlot();
     void importSlot();
 
@@ -54,7 +55,7 @@ public:
     ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
     virtual ~ASTERIXImporterTaskWidget();
 
-    void update ();
+    void importDone ();
 
 protected:
     ASTERIXImporterTask& task_;
@@ -74,6 +75,7 @@ protected:
     ASTERIXConfigWidget* config_widget_ {nullptr};
 
     QCheckBox* debug_ {nullptr};
+    QPushButton* create_mapping_stubs_button_ {nullptr};
     QPushButton* test_button_ {nullptr};
     QPushButton* import_button_ {nullptr};
 

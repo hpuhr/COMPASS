@@ -97,5 +97,8 @@ void DBObjectInfoWidget::updateSlot()
     main_check_->setEnabled(object_.hasData());
     main_check_->setChecked(object_.loadingWanted());
     status_label_->setText(object_.status().c_str());
+
+    logdbg << "DBObjectInfoWidget: updateSlot: " << object_.name() << " loaded " << object_.loadedCount();
+
     loaded_count_label_->setText(QString::number(object_.loadedCount())+" / "+QString::number(object_.count()));
 }

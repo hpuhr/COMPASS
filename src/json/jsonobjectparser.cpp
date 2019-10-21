@@ -24,6 +24,7 @@
 #include "dbobjectmanager.h"
 #include "atsdb.h"
 #include "stringconv.h"
+#include "configuration.h"
 
 #include <algorithm>
 
@@ -33,6 +34,7 @@ using namespace Utils;
 JSONObjectParser::JSONObjectParser (const std::string& class_id, const std::string& instance_id, Configurable* parent)
     :  Configurable (class_id, instance_id, parent)
 {
+    registerParameter("name", &name_, "");
     registerParameter("db_object_name", &db_object_name_, "");
 
     registerParameter("json_container_key", &json_container_key_, "");
@@ -44,6 +46,11 @@ JSONObjectParser::JSONObjectParser (const std::string& class_id, const std::stri
 
     assert (db_object_name_.size());
 
+    if (!name_.size())
+        name_ = db_object_name_;
+
+    assert (name_.size());
+
     createSubConfigurables ();
 
     json_values_vector_ = String::split(json_value_, ',');
@@ -51,6 +58,7 @@ JSONObjectParser::JSONObjectParser (const std::string& class_id, const std::stri
 
 JSONObjectParser& JSONObjectParser::operator=(JSONObjectParser&& other)
 {
+    name_ = other.name_;
     db_object_name_ = other.db_object_name_;
     db_object_ = other.db_object_;
 
@@ -72,6 +80,7 @@ JSONObjectParser& JSONObjectParser::operator=(JSONObjectParser&& other)
 
     list_ = other.list_;
 
+    other.configuration().updateParameterPointer ("name", &name_);
     other.configuration().updateParameterPointer ("db_object_name", &db_object_name_);
     other.configuration().updateParameterPointer ("json_key", &json_key_);
     other.configuration().updateParameterPointer ("json_value", &json_value_);
@@ -90,6 +99,16 @@ void JSONObjectParser::generateSubConfigurable (const std::string& class_id, con
     if (class_id == "JSONDataMapping")
     {
         data_mappings_.emplace_back (class_id, instance_id, *this);
+
+//        assert (configuration().hasSubConfiguration(class_id, instance_id));
+//        Configuration& subcfg = configuration().getSubConfiguration(class_id, instance_id);
+//        std::string json_key = subcfg.getParameterConfigValueString("json_key");
+
+        // registerParameter("json_key", &json_key_, "");
+
+//        data_mappings_.emplace(std::piecewise_construct,
+//                             std::forward_as_tuple(name),  // args for key
+//                             std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
     }
     else
         throw std::runtime_error ("DBObject: generateSubConfigurable: unknown class_id "+class_id );
@@ -159,7 +178,7 @@ void JSONObjectParser::initialize ()
     DBObjectManager& obj_man = ATSDB::instance().objectManager();
 
     if (!obj_man.existsObject(db_object_name_))
-        logwrn << "JSONObjectParser: ctor: dbobject '" << db_object_name_ << "' does not exist";
+        logwrn << "JSONObjectParser: initialize: dbobject '" << db_object_name_ << "' does not exist";
     else
         db_object_ = &obj_man.object(db_object_name_);
 
@@ -204,7 +223,21 @@ std::shared_ptr<Buffer> JSONObjectParser::getNewBuffer () const
     return std::make_shared<Buffer> (list_, db_object_->name());
 }
 
-bool JSONObjectParser::parseJSON (nlohmann::json& j, std::shared_ptr<Buffer> buffer) const
+void JSONObjectParser::appendVariablesToBuffer (std::shared_ptr<Buffer>& buffer) const
+{
+    assert (initialized_);
+    assert (db_object_);
+
+    for (auto& p_it : list_.properties())
+    {
+        if (!buffer->properties().hasProperty(p_it.name()))
+        {
+            buffer->addProperty(p_it.name(), p_it.dataType());
+        }
+    }
+}
+
+bool JSONObjectParser::parseJSON (nlohmann::json& j, std::shared_ptr<Buffer>& buffer) const
 {
     assert (initialized_);
 
@@ -221,7 +254,7 @@ bool JSONObjectParser::parseJSON (nlohmann::json& j, std::shared_ptr<Buffer> buf
     {
         bool parsed = false;
 
-        if (j.find(json_container_key_) != j.end())
+        if (j.contains(json_container_key_))
         {
             json& ac_list = j.at(json_container_key_);
             assert (ac_list.is_array());
@@ -251,7 +284,7 @@ bool JSONObjectParser::parseJSON (nlohmann::json& j, std::shared_ptr<Buffer> buf
     }
     else
     {
-        logdbg << "found single target report";
+        logdbg << "JSONObjectParser: parseJSON: found single target report";
         assert (j.is_object());
 
         parsed_any = parseTargetReport (j, buffer, row_cnt);
@@ -263,27 +296,65 @@ bool JSONObjectParser::parseJSON (nlohmann::json& j, std::shared_ptr<Buffer> buf
     return parsed_any;
 }
 
-bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_ptr<Buffer> buffer,
+void JSONObjectParser::createMappingStubs (nlohmann::json& j)
+{
+    assert (initialized_);
+
+    if (json_container_key_.size())
+    {
+        if (j.contains(json_container_key_))
+        {
+            json& ac_list = j.at(json_container_key_);
+            assert (ac_list.is_array());
+
+            //loginf << "found target report array in '" << json_container_key_  << "', parsing";
+
+            for (auto tr_it = ac_list.begin(); tr_it != ac_list.end(); ++tr_it)
+            {
+                //logdbg << "new target report";
+
+                json& tr = tr_it.value();
+                assert (tr.is_object());
+
+                createMappingsFromTargetReport (tr);
+            }
+        }
+        else // parsed stays false
+            loginf << "JSONObjectParser: createMappingStubs: found target report array but '"
+                   << json_container_key_  << "' not found";
+    }
+    else
+    {
+        logdbg << "JSONObjectParser: createMappingStubs: found single target report";
+        assert (j.is_object());
+
+        createMappingsFromTargetReport (j);
+    }
+
+    return;
+}
+
+bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_ptr<Buffer>& buffer,
                                           size_t row_cnt) const
 {
     // check key match
     if (not_parse_all_)
     {
-        if (tr.find (json_key_) != tr.end())
+        if (tr.contains (json_key_))
         {
             if (std::find(json_values_vector_.begin(), json_values_vector_.end(),
                           Utils::JSON::toString(tr.at(json_key_))) == json_values_vector_.end())
             {
-                logdbg << "JsonMapping: parseTargetReport: skipping because of wrong key " << tr.at(json_key_)
+                logdbg << "JSONObjectParser: parseTargetReport: skipping because of wrong key " << tr.at(json_key_)
                        << " value " << Utils::JSON::toString(tr.at(json_key_));
                 return false;
             }
             else
-                logdbg << "JsonMapping: parseTargetReport: parsing with correct key and value";
+                logdbg << "JSONObjectParser: parseTargetReport: parsing with correct key and value";
         }
         else
         {
-            logdbg << "JsonMapping: parseTargetReport: skipping because of missing key '" << json_key_ << "'";
+            logdbg << "JSONObjectParser: parseTargetReport: skipping because of missing key '" << json_key_ << "'";
             return false;
         }
     }
@@ -291,7 +362,7 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
     PropertyDataType data_type;
     std::string current_var_name;
 
-    bool mandatory_missing;
+    bool mandatory_missing{false};
 
     for (const auto& map_it : data_mappings_)
     {
@@ -310,7 +381,8 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
         {
         case PropertyDataType::BOOL:
         {
-            logdbg << "bool " << current_var_name << " format '" << map_it.jsonValueFormat() << "'";
+            logdbg << "JSONObjectParser: parseTargetReport: bool " << current_var_name << " format '"
+                   << map_it.jsonValueFormat() << "'";
             assert (buffer->has<bool>(current_var_name));
             mandatory_missing = map_it.findAndSetValue (tr, buffer->get<bool> (current_var_name), row_cnt);
 
@@ -318,7 +390,8 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
         }
         case PropertyDataType::CHAR:
         {
-            logdbg << "char " << current_var_name << " format '" << map_it.jsonValueFormat() << "'";
+            logdbg << "JSONObjectParser: parseTargetReport: char " << current_var_name << " format '"
+                   << map_it.jsonValueFormat() << "'";
             assert (buffer->has<char>(current_var_name));
             mandatory_missing = map_it.findAndSetValue (tr, buffer->get<char> (current_var_name), row_cnt);
 
@@ -326,7 +399,8 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
         }
         case PropertyDataType::UCHAR:
         {
-            logdbg << "uchar " << current_var_name << " format '" << map_it.jsonValueFormat() << "'";
+            logdbg << "JSONObjectParser: parseTargetReport: uchar " << current_var_name << " format '"
+                   << map_it.jsonValueFormat() << "'";
             assert (buffer->has<unsigned char>(current_var_name));
             mandatory_missing = map_it.findAndSetValue (tr, buffer->get<unsigned char> (current_var_name), row_cnt);
 
@@ -334,7 +408,8 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
         }
         case PropertyDataType::INT:
         {
-            logdbg << "int " << current_var_name << " format '" << map_it.jsonValueFormat() << "'";
+            logdbg << "JSONObjectParser: parseTargetReport: int " << current_var_name << " format '"
+                   << map_it.jsonValueFormat() << "'";
             assert (buffer->has<int>(current_var_name));
             mandatory_missing = map_it.findAndSetValue (tr, buffer->get<int> (current_var_name), row_cnt);
 
@@ -342,7 +417,8 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
         }
         case PropertyDataType::UINT:
         {
-            logdbg << "uint " << current_var_name << " format '" << map_it.jsonValueFormat() << "'";
+            logdbg << "JSONObjectParser: parseTargetReport: uint " << current_var_name << " format '"
+                   << map_it.jsonValueFormat() << "'";
             assert (buffer->has<unsigned int>(current_var_name));
             mandatory_missing = map_it.findAndSetValue (tr, buffer->get<unsigned int> (current_var_name), row_cnt);
 
@@ -350,7 +426,8 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
         }
         case PropertyDataType::LONGINT:
         {
-            logdbg << "long " << current_var_name << " format '" << map_it.jsonValueFormat() << "'";
+            logdbg << "JSONObjectParser: parseTargetReport: long " << current_var_name << " format '"
+                   << map_it.jsonValueFormat() << "'";
             assert (buffer->has<long int>(current_var_name));
             mandatory_missing = map_it.findAndSetValue (tr, buffer->get<long int> (current_var_name), row_cnt);
 
@@ -358,7 +435,8 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
         }
         case PropertyDataType::ULONGINT:
         {
-            logdbg << "ulong " << current_var_name << " format '" << map_it.jsonValueFormat() << "'";
+            logdbg << "JSONObjectParser: parseTargetReport: ulong " << current_var_name << " format '"
+                   << map_it.jsonValueFormat() << "'";
             assert (buffer->has<unsigned long>(current_var_name));
             mandatory_missing = map_it.findAndSetValue (tr, buffer->get<unsigned long> (current_var_name), row_cnt);
 
@@ -366,7 +444,8 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
         }
         case PropertyDataType::FLOAT:
         {
-            logdbg << "float " << current_var_name << " format '" << map_it.jsonValueFormat() << "'";
+            logdbg << "JSONObjectParser: parseTargetReport: float " << current_var_name << " format '"
+                   << map_it.jsonValueFormat() << "'";
             assert (buffer->has<float>(current_var_name));
             mandatory_missing = map_it.findAndSetValue (tr, buffer->get<float> (current_var_name), row_cnt);
 
@@ -374,7 +453,8 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
         }
         case PropertyDataType::DOUBLE:
         {
-            logdbg << "double " << current_var_name << " format '" << map_it.jsonValueFormat() << "'";
+            logdbg << "JSONObjectParser: parseTargetReport: double " << current_var_name << " format '"
+                   << map_it.jsonValueFormat() << "'";
             assert (buffer->has<double>(current_var_name));
             mandatory_missing = map_it.findAndSetValue (tr, buffer->get<double> (current_var_name), row_cnt);
 
@@ -382,14 +462,15 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
         }
         case PropertyDataType::STRING:
         {
-            logdbg << "string " << current_var_name << " format '" << map_it.jsonValueFormat() << "'";
+            logdbg << "JSONObjectParser: parseTargetReport: string " << current_var_name << " format '"
+                   << map_it.jsonValueFormat() << "'";
             assert (buffer->has<std::string>(current_var_name));
             mandatory_missing = map_it.findAndSetValue (tr, buffer->get<std::string> (current_var_name), row_cnt);
 
             break;
         }
         default:
-            logerr  <<  "JsonMapping: parseTargetReport: impossible for property type "
+            logerr  <<  "JSONObjectParser: parseTargetReport: impossible for property type "
                      << Property::asString(data_type);
             throw std::runtime_error ("JsonMapping: parseTargetReport: impossible property type "
                                       + Property::asString(data_type));
@@ -397,7 +478,7 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
 
         if (mandatory_missing)
         {
-            logdbg << "JsonMapping: parseTargetReport: mandatory missing";
+            logdbg << "JSONObjectParser: parseTargetReport: mandatory missing";
             break;
         }
     }
@@ -412,6 +493,88 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
     return !mandatory_missing;
 }
 
+void JSONObjectParser::createMappingsFromTargetReport (const nlohmann::json& tr)
+{
+    // check key match
+    if (not_parse_all_)
+    {
+        if (tr.contains (json_key_))
+        {
+            if (std::find(json_values_vector_.begin(), json_values_vector_.end(),
+                          Utils::JSON::toString(tr.at(json_key_))) == json_values_vector_.end())
+            {
+                logdbg << "JSONObjectParser: createMappingsFromTargetReport: skipping because of wrong key "
+                       << tr.at(json_key_) << " value " << Utils::JSON::toString(tr.at(json_key_));
+                return;
+            }
+            else
+                logdbg << "JSONObjectParser: createMappingsFromTargetReport: parsing with correct key and value";
+        }
+        else
+        {
+            logdbg << "JSONObjectParser: createMappingsFromTargetReport: skipping because of missing key '"
+                   << json_key_ << "'";
+            return;
+        }
+    }
+
+    checkIfKeysExistsInMappings ("", tr);
+}
+
+void JSONObjectParser::checkIfKeysExistsInMappings (const std::string& location, const nlohmann::json& j)
+{
+    if (j.is_array()) // do not map arrays
+        return;
+
+    if (j.is_object())
+    {
+        for (auto& j_it : j.get<json::object_t>())
+        {
+            if (location.size())
+                checkIfKeysExistsInMappings (location+"."+j_it.first, j_it.second);
+            else
+                checkIfKeysExistsInMappings (j_it.first, j_it.second);
+        }
+        return;
+    }
+
+    //loginf << "JSONObjectParser: checkIfKeysExistsInMappings: checking key '" << location << "'";
+
+    bool found = false;
+
+    for (auto& map_it : data_mappings_)
+    {
+        if (map_it.jsonKey() == location)
+        {
+            found = true;
+
+            if (!map_it.comment().size())
+            {
+                std::stringstream ss;
+                ss << "Type " << j.type_name() << ", value " <<j.dump();
+                map_it.comment (ss.str());
+            }
+            break;
+        }
+    }
+
+    if (!found)
+    {
+        loginf << "JSONObjectParser: checkIfKeysExistsInMappings: creating new mapping for dbo " << db_object_name_
+               << "'" << location << "'  type " << j.type_name() << " value "  << j.dump() ;
+
+        Configuration &new_cfg = configuration().addNewSubConfiguration ("JSONDataMapping");
+        new_cfg.addParameterString ("json_key", location);
+        new_cfg.addParameterString ("db_object_name", db_object_name_);
+
+        std::stringstream ss;
+        ss << "Type " << j.type_name() << ", value " <<j.dump();
+        new_cfg.addParameterString ("comment", ss.str());
+
+        generateSubConfigurable("JSONDataMapping", new_cfg.getInstanceId());
+    }
+}
+
 bool JSONObjectParser::hasMapping (unsigned int index) const
 {
     return index < data_mappings_.size();
@@ -422,20 +585,49 @@ void JSONObjectParser::removeMapping (unsigned int index)
 
     JSONDataMapping& mapping = data_mappings_.at(index);
 
-    if (mapping.initialized())
+    loginf << "JSONObjectParser: removeMapping: index " << index << " key " << mapping.jsonKey()
+           << " instance " << mapping.instanceId();
+
+    logdbg << "JSONObjectParser: removeMapping: size " << data_mappings_.size();
+//    unsigned int i = 0;
+//    for (auto &map_it : data_mappings_)
+//    {
+//        loginf << "JSONObjectParser: removeMapping: index " << i  << " ptr " << &map_it
+//               << " mapping " << map_it.instanceId();
+//        ++i;
+//    }
+
+    if (mapping.active() && mapping.initialized())
     {
-        list_.removeProperty(mapping.variable().name());
-        var_list_.removeVariable(mapping.variable());
+        if (list_.hasProperty(mapping.variable().name()))
+            list_.removeProperty(mapping.variable().name());
+        if (mapping.hasVariable() && var_list_.hasVariable(mapping.variable()))
+            var_list_.removeVariable(mapping.variable());
     }
 
+    //Configurable::removeChildConfigurable(mapping, false); // extra remove since destructor called after moving over
+
+    logdbg << "JSONObjectParser: removeMapping: removing";
     data_mappings_.erase(data_mappings_.begin()+index);
+
+    logdbg << "JSONObjectParser: removeMapping: size " << data_mappings_.size();
+//    i = 0;
+//    for (auto &map_it : data_mappings_)
+//    {
+//        loginf << "JSONObjectParser: removeMapping: index " << i  << " ptr " << &map_it
+//               << " mapping " << map_it.instanceId();
+//        ++i;
+//    }
 }
 
-void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key_begin) const
+void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer>& buffer, size_t index) const
 {
     assert (db_object_);
 
     logdbg << "JSONObjectParser: transformBuffer: object " << db_object_->name();
+
+    assert (buffer);
+    assert (index < buffer->size());
 
     if (override_data_source_)
     {
@@ -446,14 +638,17 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
 
         //buffer->addProperty(data_source_variable_name_, PropertyDataType::INT);
         NullableVector<int>& ds_id_vector = buffer->get<int> (data_source_variable_name_);
-        size_t size = buffer->size();
+        //size_t size = buffer->size();
 
-        for (size_t cnt=0; cnt < size; ++cnt)
-            ds_id_vector.set(cnt, 0);
+        //for (size_t cnt=0; cnt < size; ++cnt)
+        ds_id_vector.set(index, 0);
     }
 
     for (auto& data_it : data_mappings_)
     {
+        if (!data_it.active())
+            continue;
+
         if (data_it.dimension() != data_it.variable().dimension())
             logwrn << "JSONObjectParser: transformBuffer: variable " << data_it.variable().name()
                    << " has differing dimensions " << data_it.dimension() << " " << data_it.variable().dimension();
@@ -484,89 +679,128 @@ void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, long key
             std::string current_var_name = data_it.variable().name();
             PropertyDataType data_type = data_it.variable().dataType();
 
-            logdbg  << "JSONObjectParser: transformBuffer: correct unit transformation with factor " << factor;
+            logdbg  << "JSONObjectParser: transformBuffer: variable " << data_it.variable().name()
+                    << " correct unit transformation with factor " << factor << " data unit " << data_it.unit()
+                    << " variable unit " << data_it.variable().unit();
 
             switch (data_type)
             {
             case PropertyDataType::BOOL:
             {
                 assert (buffer->has<bool>(current_var_name));
+
                 NullableVector<bool> &array_list = buffer->get<bool>(current_var_name);
+
+                if (array_list.isNull(index))
+                    break;
+
                 logwrn << "JSONObjectParser: transformBuffer: double multiplication of boolean variable "
                        << current_var_name << " factor " << factor;
-                array_list *= factor;
+                array_list.set(index, array_list.get(index) * factor);
                 break;
             }
             case PropertyDataType::CHAR:
             {
                 assert (buffer->has<char>(current_var_name));
                 NullableVector<char> &array_list = buffer->get<char> (current_var_name);
+
+                if (array_list.isNull(index))
+                    break;
+
                 logwrn << "JSONObjectParser: transformBuffer: double multiplication of char variable "
                        << current_var_name << " factor " << factor;
-                array_list *= factor;
+                array_list.set(index, array_list.get(index) * factor);
                 break;
             }
             case PropertyDataType::UCHAR:
             {
                 assert (buffer->has<unsigned char>(current_var_name));
                 NullableVector<unsigned char> &array_list = buffer->get<unsigned char> (current_var_name);
+
+                if (array_list.isNull(index))
+                    break;
+
                 logwrn << "JSONObjectParser: transformBuffer: double multiplication of unsigned char variable "
                        << current_var_name << " factor " << factor;
-                array_list *= factor;
+                array_list.set(index, array_list.get(index) * factor);
                 break;
             }
             case PropertyDataType::INT:
             {
                 assert (buffer->has<int>(current_var_name));
                 NullableVector<int> &array_list = buffer->get<int> (current_var_name);
+
+                if (array_list.isNull(index))
+                    break;
+
                 logdbg << "JSONObjectParser: transformBuffer: double multiplication of int variable "
                        << current_var_name << " factor " << factor;
-                array_list *= factor;
+                array_list.set(index, array_list.get(index) * factor);
                 break;
             }
             case PropertyDataType::UINT:
             {
                 assert (buffer->has<unsigned int>(current_var_name));
                 NullableVector<unsigned int> &array_list = buffer->get<unsigned int> (current_var_name);
+
+                if (array_list.isNull(index))
+                    break;
+
                 logdbg << "JSONObjectParser: transformBuffer: double multiplication of uint variable "
                        << current_var_name << " factor " << factor;
-                array_list *= factor;
+                array_list.set(index, array_list.get(index) * factor);
                 break;
             }
             case PropertyDataType::LONGINT:
             {
                 assert (buffer->has<long int>(current_var_name));
                 NullableVector<long int> &array_list = buffer->get<long int>(current_var_name);
+
+                if (array_list.isNull(index))
+                    break;
+
                 logdbg << "JSONObjectParser: transformBuffer: double multiplication of long int variable "
                        << current_var_name << " factor " << factor;
-                array_list *= factor;
+                array_list.set(index, array_list.get(index) * factor);
                 break;
             }
             case PropertyDataType::ULONGINT:
             {
                 assert (buffer->has<unsigned long>(current_var_name));
                 NullableVector<unsigned long> &array_list = buffer->get<unsigned long>(current_var_name);
+
+                if (array_list.isNull(index))
+                    break;
+
                 logdbg << "JSONObjectParser: transformBuffer: double multiplication of unsigned long int variable "
                        << current_var_name << " factor " << factor;
-                array_list *= factor;
+                array_list.set(index, array_list.get(index) * factor);
                 break;
             }
             case PropertyDataType::FLOAT:
             {
                 assert (buffer->has<float>(current_var_name));
                 NullableVector<float> &array_list = buffer->get<float>(current_var_name);
+
+                if (array_list.isNull(index))
+                    break;
+
                 logdbg << "JSONObjectParser: transformBuffer: double multiplication of float variable "
                        << current_var_name << " factor " << factor;
-                array_list *= factor;
+                array_list.set(index, array_list.get(index) * factor);
                 break;
             }
             case PropertyDataType::DOUBLE:
             {
                 assert (buffer->has<double>(current_var_name));
                 NullableVector<double> &array_list = buffer->get<double>(current_var_name);
+
+                if (array_list.isNull(index))
+                    break;
+
                 logdbg << "JSONObjectParser: transformBuffer: double multiplication of double variable "
                        << current_var_name << " factor " << factor;
-                array_list *= factor;
+                array_list.set(index, array_list.get(index) * factor);
                 break;
             }
             case PropertyDataType::STRING:
@@ -638,14 +872,30 @@ void JSONObjectParser::setMappingActive (JSONDataMapping& mapping, bool active)
         list_.addProperty(mapping.variable().name(), mapping.variable().dataType());
         var_list_.add(mapping.variable());
     }
-    else
+    else if (mapping.hasVariable()) // remove if was added
     {
-        list_.removeProperty(mapping.variable().name());
-        var_list_.removeVariable(mapping.variable());
+        if (list_.hasProperty(mapping.variable().name()))
+            list_.removeProperty(mapping.variable().name());
+        if (var_list_.hasVariable(mapping.variable()))
+            var_list_.removeVariable(mapping.variable());
     }
 
     mapping.active(active);
 }
 
+void JSONObjectParser::updateMappings ()
+{
+    if (widget_)
+        widget_->updateMappingsGrid();
+}
 
+std::string JSONObjectParser::name() const
+{
+    return name_;
+}
+
+void JSONObjectParser::name(const std::string &name)
+{
+    name_ = name;
+}
 

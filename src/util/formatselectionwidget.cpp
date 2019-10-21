@@ -37,7 +37,7 @@ FormatSelectionWidget::~FormatSelectionWidget()
 
 void FormatSelectionWidget::update (PropertyDataType data_type, Format& format)
 {
-    loginf << "FormatSelectionWidget: update: data type '" << Property::asString(data_type)
+    logdbg << "FormatSelectionWidget: update: data type '" << Property::asString(data_type)
            << "' format '" << format << "'";
 
     if (format_.size() > 0)
@@ -49,7 +49,7 @@ void FormatSelectionWidget::update (PropertyDataType data_type, Format& format)
         setText("");
 
     data_type_ = data_type;
-    format_ = format_;
+    format_ = format;
 }
 
 void FormatSelectionWidget::createMenu()
@@ -75,9 +75,9 @@ void FormatSelectionWidget::showMenuSlot()
     menu_.exec( QCursor::pos() );
 }
 
-void FormatSelectionWidget::triggerSlot( QAction* action )
+void FormatSelectionWidget::triggerSlot (QAction* action)
 {
-    loginf  << "FormatSelectionWidget: triggerSlot";
+    logdbg  << "FormatSelectionWidget: triggerSlot";
 
     QVariantMap vmap = action->data().toMap();
     std::string data_type_str, format_str;

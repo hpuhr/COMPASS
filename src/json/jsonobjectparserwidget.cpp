@@ -44,47 +44,57 @@ JSONObjectParserWidget::JSONObjectParserWidget(JSONObjectParser& parser, QWidget
 
     QVBoxLayout *main_layout = new QVBoxLayout ();
 
-    std::string tmp ="JSON Object Parser " + parser_->dbObjectName();
+    std::string tmp ="JSON Object Parser " + parser_->name();
     QLabel *main_label = new QLabel (tmp.c_str());
     main_label->setFont (font_bold);
     main_layout->addWidget (main_label);
 
-    QGridLayout* grid = new QGridLayout ();
+    {
+        QGridLayout* grid = new QGridLayout ();
 
-    int row = 0;
+        int row = 0;
 
-    grid->addWidget(new QLabel("JSON Container Key"), row, 0);
+        grid->addWidget(new QLabel("DBObject"), row, 0);
+        grid->addWidget(new QLabel(parser_->dbObjectName().c_str()), row, 1);
 
-    json_container_key_edit_ = new QLineEdit ();
-    connect(json_container_key_edit_, SIGNAL(textEdited(const QString&)), this, SLOT(jsonContainerKeyChangedSlot()));
-    grid->addWidget(json_container_key_edit_, row++, 1);
+        ++row;
+        grid->addWidget(new QLabel("JSON Container Key"), row, 0);
 
-    grid->addWidget(new QLabel("JSON Key"));
+        json_container_key_edit_ = new QLineEdit ();
+        connect(json_container_key_edit_, SIGNAL(textEdited(const QString&)), this, SLOT(jsonContainerKeyChangedSlot()));
+        grid->addWidget(json_container_key_edit_, row, 1);
 
-    json_key_edit_ = new QLineEdit ();
-    connect(json_key_edit_, SIGNAL(textEdited(const QString&)), this, SLOT(jsonKeyChangedSlot()));
-    grid->addWidget(json_key_edit_, row++, 1);
+        ++row;
+        grid->addWidget(new QLabel("JSON Key"));
 
-    grid->addWidget(new QLabel("JSON Value"));
+        json_key_edit_ = new QLineEdit ();
+        connect(json_key_edit_, SIGNAL(textEdited(const QString&)), this, SLOT(jsonKeyChangedSlot()));
+        grid->addWidget(json_key_edit_, row, 1);
 
-    json_value_edit_ = new QLineEdit ();
-    connect(json_value_edit_, SIGNAL(textEdited(const QString&)), this, SLOT(jsonValueChangedSlot()));
-    grid->addWidget(json_value_edit_, row++, 1);
+        ++row;
+        grid->addWidget(new QLabel("JSON Value"));
 
-    grid->addWidget(new QLabel("Override Data Source"));
+        json_value_edit_ = new QLineEdit ();
+        connect(json_value_edit_, SIGNAL(textEdited(const QString&)), this, SLOT(jsonValueChangedSlot()));
+        grid->addWidget(json_value_edit_, row, 1);
 
-    override_data_source_check_ = new QCheckBox ();
-    connect(override_data_source_check_, SIGNAL(stateChanged(int)), this, SLOT(overrideDataSourceChangedSlot()));
-    grid->addWidget(override_data_source_check_, row++, 1);
+        ++row;
+        grid->addWidget(new QLabel("Override Data Source"));
 
-    grid->addWidget(new QLabel("Data Source Variable"));
+        override_data_source_check_ = new QCheckBox ();
+        connect(override_data_source_check_, SIGNAL(stateChanged(int)), this, SLOT(overrideDataSourceChangedSlot()));
+        grid->addWidget(override_data_source_check_, row, 1);
 
-    data_source_variable_name_edit_ = new QLineEdit ();
-    connect(data_source_variable_name_edit_, SIGNAL(textEdited(const QString&)),
-            this, SLOT(dataSourceVariableChangedSlot()));
-    grid->addWidget(data_source_variable_name_edit_, row++, 1);
+        ++row;
+        grid->addWidget(new QLabel("Data Source Variable"));
 
-    main_layout->addLayout(grid);
+        data_source_variable_name_edit_ = new QLineEdit ();
+        connect(data_source_variable_name_edit_, SIGNAL(textEdited(const QString&)),
+                this, SLOT(dataSourceVariableChangedSlot()));
+        grid->addWidget(data_source_variable_name_edit_, row, 1);
+
+        main_layout->addLayout(grid);
+    }
 
     QScrollArea* scroll_area = new QScrollArea();
     scroll_area->setWidgetResizable (true);
@@ -129,12 +139,12 @@ void JSONObjectParserWidget::update ()
 
 void JSONObjectParserWidget::updateMappingsGrid()
 {
-    logdbg  << "DBObjectWidget: updateSchemaMetaTables";
+    loginf  << "JSONObjectParserWidget: updateMappingsGrid";
     assert (parser_);
     assert (mappings_grid_);
 
     QLayoutItem *child;
-    while ((child = mappings_grid_->takeAt(0)) != 0)
+    while ((child = mappings_grid_->takeAt(0)) != nullptr)
     {
         if (child->widget())
             delete child->widget();
@@ -158,70 +168,92 @@ void JSONObjectParserWidget::updateMappingsGrid()
     key_label->setFont (font_bold);
     mappings_grid_->addWidget (key_label, row, 1);
 
+    QLabel *comment_label = new QLabel ("Comment");
+    comment_label->setFont (font_bold);
+    mappings_grid_->addWidget (comment_label, row, 2);
+
     QLabel *dbovar_label = new QLabel ("DBOVariable");
     dbovar_label->setFont (font_bold);
-    mappings_grid_->addWidget (dbovar_label, row, 2);
+    mappings_grid_->addWidget (dbovar_label, row, 3);
 
     QLabel *mandatory_label = new QLabel ("Mandatory");
     mandatory_label->setFont (font_bold);
-    mappings_grid_->addWidget (mandatory_label, row, 3);
+    mappings_grid_->addWidget (mandatory_label, row, 4);
 
     QLabel *unit_label = new QLabel ("Unit");
     unit_label->setFont (font_bold);
-    mappings_grid_->addWidget (unit_label, row, 4);
+    mappings_grid_->addWidget (unit_label, row, 5);
 
     QLabel *format_label = new QLabel ("Format");
     format_label->setFont (font_bold);
-    mappings_grid_->addWidget (format_label, row, 5);
+    mappings_grid_->addWidget (format_label, row, 6);
 
     ++row;
+
+    std::multimap<std::string, std::pair<unsigned int,JSONDataMapping*>> sorted_mappings;
+
+    unsigned int index = 0;
     for (auto& map_it : *parser_)
     {
         map_it.initializeIfRequired();
+        sorted_mappings.insert({map_it.jsonKey(), {index, &map_it}});
+        ++index;
+        //loginf << "UGA insert " << map_it.jsonKey();
+    }
 
-        QVariant data = QVariant::fromValue(&map_it);
+
+    for (auto& map_it : sorted_mappings)
+    {
+        QVariant data = QVariant::fromValue(map_it.second.second); // JSONDataMapping* as QVariant
 
         QCheckBox* active_check = new QCheckBox ();
-        active_check->setChecked(map_it.active());
+        active_check->setChecked(map_it.second.second->active());
         connect(active_check, SIGNAL(stateChanged(int)), this, SLOT(mappingActiveChangedSlot()));
         active_check->setProperty("mapping", data);
         mappings_grid_->addWidget(active_check, row, 0);
 
-        QLineEdit* key_edit = new QLineEdit (map_it.jsonKey().c_str());
+        QLineEdit* key_edit = new QLineEdit (map_it.first.c_str());
         connect(key_edit, SIGNAL(textEdited(const QString&)), this, SLOT(mappingKeyChangedSlot()));
         key_edit->setProperty("mapping", data);
         mappings_grid_->addWidget(key_edit, row, 1);
 
+        QLineEdit* comment_edit = new QLineEdit (map_it.second.second->comment().c_str());
+        connect(comment_edit, SIGNAL(textEdited(const QString&)), this, SLOT(mappingCommentChangedSlot()));
+        comment_edit->setProperty("mapping", data);
+        mappings_grid_->addWidget(comment_edit, row, 2);
+
+
         DBOVariableSelectionWidget* var_sel = new DBOVariableSelectionWidget ();
         var_sel->showMetaVariables(false);
-        var_sel->showDBOOnly (map_it.dbObjectName());
+        var_sel->showDBOOnly (map_it.second.second->dbObjectName());
         var_sel->showEmptyVariable(true);
-        if (map_it.hasVariable())
-            var_sel->selectedVariable(map_it.variable());
+        if (map_it.second.second->hasVariable())
+            var_sel->selectedVariable(map_it.second.second->variable());
         connect(var_sel, SIGNAL(selectionChanged()), this, SLOT(mappingDBOVariableChangedSlot()));
         var_sel->setProperty("mapping", data);
         //var_sel->setProperty("row", row);
-        mappings_grid_->addWidget(var_sel, row, 2);
+        mappings_grid_->addWidget(var_sel, row, 3);
 
         QCheckBox* mandatory_check = new QCheckBox ();
-        mandatory_check->setChecked(map_it.mandatory());
+        mandatory_check->setChecked(map_it.second.second->mandatory());
         connect(mandatory_check, SIGNAL(stateChanged(int)), this, SLOT(mappingMandatoryChangedSlot()));
         mandatory_check->setProperty("mapping", data);
-        mappings_grid_->addWidget(mandatory_check, row, 3);
+        mappings_grid_->addWidget(mandatory_check, row, 4);
 
-        UnitSelectionWidget* unit_sel = new UnitSelectionWidget(map_it.dimensionRef(), map_it.unitRef());
-        mappings_grid_->addWidget (unit_sel, row, 4);
+        UnitSelectionWidget* unit_sel = new UnitSelectionWidget(map_it.second.second->dimensionRef(),
+                                                                map_it.second.second->unitRef());
+        mappings_grid_->addWidget (unit_sel, row, 5);
         //column_unit_selection_widgets_[unit_widget] = it.second;
 
-//        if (map_it.hasVariable())
-//        {
-            DataTypeFormatSelectionWidget* data_format_widget
-                    = new DataTypeFormatSelectionWidget (map_it.formatDataTypeRef(),
-                                                         map_it.jsonValueFormatRef());
+        //        if (map_it.hasVariable())
+        //        {
+        DataTypeFormatSelectionWidget* data_format_widget
+                = new DataTypeFormatSelectionWidget (map_it.second.second->formatDataTypeRef(),
+                                                     map_it.second.second->jsonValueFormatRef());
 
-            mappings_grid_->addWidget (data_format_widget, row, 5);
-//            format_selections_[row-1] = data_format_widget;
-//        }
+        mappings_grid_->addWidget (data_format_widget, row, 6);
+        //            format_selections_[row-1] = data_format_widget;
+        //        }
 
         QPushButton *del = new QPushButton ();
         del->setIcon(del_icon);
@@ -229,8 +261,8 @@ void JSONObjectParserWidget::updateMappingsGrid()
         del->setFlat(UI_ICON_BUTTON_FLAT);
         connect(del, SIGNAL(clicked()), this, SLOT(mappingDeleteSlot()));
         del->setProperty("mapping", data);
-        del->setProperty("row", row-1);
-        mappings_grid_->addWidget (del, row, 6);
+        del->setProperty("index", map_it.second.first);
+        mappings_grid_->addWidget (del, row, 7);
 
         row++;
     }
@@ -305,6 +337,18 @@ void JSONObjectParserWidget::mappingActiveChangedSlot()
     JSONDataMapping* mapping = data.value<JSONDataMapping*>();
     assert (mapping);
 
+    if (!mapping->hasVariable() && widget->checkState() == Qt::Checked)
+    {
+        QMessageBox m_warning (QMessageBox::Warning, "Activation failed",
+                               "DBOVariable not defined.",
+                               QMessageBox::Ok);
+
+        m_warning.exec();
+
+        widget->setChecked(false);
+        return;
+    }
+
     if (mapping->mandatory() && widget->checkState() != Qt::Checked)
     {
         QMessageBox m_warning (QMessageBox::Warning, "Deactivation failed",
@@ -335,6 +379,20 @@ void JSONObjectParserWidget::mappingKeyChangedSlot()
     mapping->jsonKey (widget->text().toStdString());
 }
 
+void JSONObjectParserWidget::mappingCommentChangedSlot()
+{
+    loginf << "JSONObjectParserWidget: mappingCommentChangedSlot";
+
+    QLineEdit* widget = static_cast<QLineEdit*>(sender());
+    assert (widget);
+    QVariant data = widget->property("mapping");
+
+    JSONDataMapping* mapping = data.value<JSONDataMapping*>();
+    assert (mapping);
+
+    mapping->comment (widget->text().toStdString());
+}
+
 void JSONObjectParserWidget::mappingDBOVariableChangedSlot()
 {
     loginf << "JSONObjectParserWidget: mappingDBOVariableChangedSlot";
@@ -352,18 +410,18 @@ void JSONObjectParserWidget::mappingDBOVariableChangedSlot()
         loginf << "JSONObjectParserWidget: mappingDBOVariableChangedSlot: variable set";
 
         mapping->dboVariableName(var_widget->selectedVariable().name());
-//        if (format_selections_.count(row) == 1)
-//            format_selections_.at(row)->update(mapping->formatDataTypeRef(),
-//                                               mapping->jsonValueFormatRef());
-//        else
-//        {
-//            DataTypeFormatSelectionWidget* data_format_widget
-//                    = new DataTypeFormatSelectionWidget (mapping->formatDataTypeRef(),
-//                                                         mapping->jsonValueFormatRef());
+        //        if (format_selections_.count(row) == 1)
+        //            format_selections_.at(row)->update(mapping->formatDataTypeRef(),
+        //                                               mapping->jsonValueFormatRef());
+        //        else
+        //        {
+        //            DataTypeFormatSelectionWidget* data_format_widget
+        //                    = new DataTypeFormatSelectionWidget (mapping->formatDataTypeRef(),
+        //                                                         mapping->jsonValueFormatRef());
 
-//            mappings_grid_->addWidget (data_format_widget, row, 5);
-//            format_selections_[row] = data_format_widget;
-//        }
+        //            mappings_grid_->addWidget (data_format_widget, row, 5);
+        //            format_selections_[row] = data_format_widget;
+        //        }
     }
     else
     {
@@ -371,12 +429,12 @@ void JSONObjectParserWidget::mappingDBOVariableChangedSlot()
 
         mapping->dboVariableName("");
 
-//        if (format_selections_.count(row) == 1)
-//        {
-//            mappings_grid_->removeWidget(format_selections_.at(row));
-//            delete format_selections_.at(row);
-//            format_selections_.erase(row);
-//        }
+        //        if (format_selections_.count(row) == 1)
+        //        {
+        //            mappings_grid_->removeWidget(format_selections_.at(row));
+        //            delete format_selections_.at(row);
+        //            format_selections_.erase(row);
+        //        }
     }
 }
 
@@ -405,10 +463,10 @@ void JSONObjectParserWidget::mappingDeleteSlot()
     JSONDataMapping* mapping = data.value<JSONDataMapping*>();
     assert (mapping);
 
-    unsigned int row = widget->property("row").toUInt();
+    unsigned int index = widget->property("index").toUInt();
 
-    assert (parser_->hasMapping(row));
-    parser_->removeMapping(row);
+    assert (parser_->hasMapping(index));
+    parser_->removeMapping(index);
 
     updateMappingsGrid();
 }

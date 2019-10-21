@@ -49,9 +49,17 @@ void JSONParsingSchema::generateSubConfigurable (const std::string &class_id, co
 {
     if (class_id == "JSONObjectParser")
     {
-        std::string name = configuration().getSubConfiguration(
-                    class_id, instance_id).getParameterConfigValueString("db_object_name");
+        Configuration& sub_config = configuration().getSubConfiguration(class_id, instance_id);
 
+        std::string name;
+
+        if (sub_config.hasParameterConfigValueString("name"))
+            name = sub_config.getParameterConfigValueString("name");
+
+        if (!name.size() && sub_config.hasParameterConfigValueString("db_object_name")) // name not set hack
+            name = sub_config.getParameterConfigValueString("db_object_name");
+
+        assert (name.size());
         assert (parsers_.find (name) == parsers_.end());
 
         logdbg << "JSONParsingSchema: generateSubConfigurable: generating schema " << instance_id
@@ -85,4 +93,10 @@ void JSONParsingSchema::removeParser (const std::string& name)
 {
     assert (hasObjectParser(name));
     parsers_.erase(name);
+}
+
+void JSONParsingSchema::updateMappings ()
+{
+    for (auto& p_it : parsers_)
+        p_it.second.updateMappings();
 }

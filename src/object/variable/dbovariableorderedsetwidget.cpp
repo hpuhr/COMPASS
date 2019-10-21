@@ -31,7 +31,7 @@
 using namespace Utils;
 
 DBOVariableOrderedSetWidget::DBOVariableOrderedSetWidget(DBOVariableOrderedSet &set, QWidget * parent, Qt::WindowFlags f)
-: QWidget (parent, f), set_(set), list_widget_(nullptr), current_index_(-1)
+: QWidget (parent, f), set_(set)
 {
     QVBoxLayout *main_layout = new QVBoxLayout ();
 
@@ -211,9 +211,15 @@ void DBOVariableOrderedSetWidget::remove ()
 {
     assert (list_widget_);
     int index = list_widget_->currentRow ();
+    //list_widget_->re
+
+    loginf << "DBOVariableOrderedSetWidget: remove: index " << index;
 
     if (index < 0)
         return;
+
+    //list_widget_->clearSelection();
+    //list_widget_->clear();
 
     set_.removeVariableAt (index);
     current_index_ = -1;
@@ -223,6 +229,7 @@ void DBOVariableOrderedSetWidget::moveUp ()
 {
     assert (list_widget_);
     int index = list_widget_->currentRow ();
+    loginf << "DBOVariableOrderedSetWidget: moveUp: index " << index;
 
     if (index < 0 || index == (int)set_.getSize()-1)
         return;
@@ -230,11 +237,13 @@ void DBOVariableOrderedSetWidget::moveUp ()
     set_.moveVariableUp (index);
 
     current_index_ = index+1;
+    list_widget_->setCurrentRow(current_index_);
 }
 void DBOVariableOrderedSetWidget::moveDown ()
 {
     assert (list_widget_);
     int index = list_widget_->currentRow ();
+    loginf << "DBOVariableOrderedSetWidget: moveDown: index " << index;
 
     if (index <= 0)
         return;
@@ -242,12 +251,23 @@ void DBOVariableOrderedSetWidget::moveDown ()
     set_.moveVariableDown (index);
 
     current_index_ = index-1;
+    list_widget_->setCurrentRow(current_index_);
 }
 
 void DBOVariableOrderedSetWidget::updateVariableListSlot ()
 {
+    loginf << "DBOVariableOrderedSetWidget: updateVariableListSlot";
+
     assert (list_widget_);
+
+//    while (list_widget_->count())
+//        delete list_widget_->takeItem(0);
+
+    //qDeleteAll(list_widget_->selectedItems());
+
     list_widget_->clear();
+
+    loginf << "DBOVariableOrderedSetWidget: updateVariableListSlot: clear done";
 
     const std::map <unsigned int, DBOVariableOrderDefinition*> &variables = set_.definitions();
     std::map <unsigned int, DBOVariableOrderDefinition*>::const_iterator it;
@@ -270,6 +290,7 @@ void DBOVariableOrderedSetWidget::updateVariableListSlot ()
 
     if (current_index_ != -1)
     {
+        loginf << "DBOVariableOrderedSetWidget: updateVariableListSlot: current index " << current_index_;
         list_widget_->setCurrentRow(current_index_);
         current_index_=-1;
     }

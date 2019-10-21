@@ -25,18 +25,19 @@
 class ASTERIXCategoryConfig : public Configurable
 {
 public:
-    ASTERIXCategoryConfig (const std::string& category, const std::string& class_id, const std::string& instance_id,
+    ASTERIXCategoryConfig (unsigned int category, const std::string& class_id, const std::string& instance_id,
                            Configurable* parent)
-        : Configurable (class_id, instance_id,parent)
+        : Configurable (class_id, instance_id,parent), category_(category)
     {
-        registerParameter("category", &category_, "");
+        registerParameter("category", &category_, 0);
         registerParameter("decode", &decode_, false);
         registerParameter("edition", &edition_, "");
+        registerParameter("ref", &ref_, "");
     }
 
     virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id) {}
 
-    std::string category() const
+    unsigned int category() const
     {
         return category_;
     }
@@ -50,7 +51,6 @@ public:
         decode_ = decode;
     }
 
-
     std::string edition() const
     {
         return edition_;
@@ -61,13 +61,26 @@ public:
         edition_ = edition;
     }
 
+    std::string ref() const
+    {
+        return ref_;
+    }
+
+    void ref(const std::string &ref)
+    {
+        ref_ = ref;
+    }
+
 private:
-    std::string category_;
+    unsigned int category_;
     bool decode_ {false};
     std::string edition_;
+    std::string ref_;
 
 protected:
     virtual void checkSubConfigurables () {}
 };
 
 #endif // ASTERIXCATEGORYCONFIG_H
+
+

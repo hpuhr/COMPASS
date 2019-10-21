@@ -43,6 +43,7 @@
 #include <QProgressDialog>
 #include <QMessageBox>
 #include <QCoreApplication>
+#include <QApplication>
 
 using namespace Utils;
 
@@ -74,6 +75,8 @@ void MySQLppConnection::connectServer ()
     assert (servers_.count(used_server_) == 1);
     connected_server_ = servers_.at(used_server_);
 
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
     loginf << "MySQLppConnection: connectServer: host " << connected_server_->host() << " port "
            << connected_server_->port() << " user " << connected_server_->user() << " pw "
            << connected_server_->password();
@@ -83,6 +86,8 @@ void MySQLppConnection::connectServer ()
 
     bool ret = connection_.connect("", connected_server_->host().c_str(), connected_server_->user().c_str(),
                                    connected_server_->password().c_str(), connected_server_->port());
+
+    QApplication::restoreOverrideCursor();
 
     if (!ret)
         throw std::runtime_error("MySQL server connect failed with error "
@@ -776,12 +781,7 @@ QWidget *MySQLppConnection::infoWidget ()
 std::string MySQLppConnection::status () const
 {
     if (connection_ready_)
-    {
-        if (query_used_ || !prepared_command_done_)
-            return "Working";
-        else
-            return "Idle";
-    }
+        return "Ready";
     else
         return "Not connected";
 }
@@ -790,7 +790,7 @@ std::string MySQLppConnection::identifier () const
 {
     assert (connection_ready_);
 
-    return "MySQL: "+used_server_+": "+used_database_;
+    return used_server_+": "+used_database_;
 }
 
 void MySQLppConnection::addServer (const std::string& name)

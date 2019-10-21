@@ -43,7 +43,9 @@ public slots:
 
     void categoryCheckedSlot ();
     void editionChangedSlot(const std::string& cat_str, const std::string& ed_str);
-    void categoryEditSlot ();
+    void refEditionChangedSlot(const std::string& cat_str, const std::string& ed_str);
+    void categoryEditionEditSlot ();
+    void categoryREFEditionEditSlot ();
 
     void editDataBlockSlot();
     void editCategoriesSlot();
@@ -63,6 +65,8 @@ protected:
 
     ASTERIXFramingComboBox* framing_combo_ {nullptr};
     QPushButton* framing_edit_ {nullptr};
+
+    std::map<unsigned int, QPushButton*> ref_edit_buttons_;
 
     void updateFraming ();
     void updateCategories ();

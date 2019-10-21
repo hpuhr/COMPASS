@@ -24,6 +24,7 @@
 #include <jasterix/category.h>
 
 #include <QComboBox>
+#include <memory>
 
 class ASTERIXEditionComboBox: public QComboBox
 {
@@ -32,7 +33,7 @@ class ASTERIXEditionComboBox: public QComboBox
 public slots:
     void changedEditionSlot(const QString &edition)
     {
-        emit changedEdition(category_.number(), edition.toStdString());
+        emit changedEdition(category_->number(), edition.toStdString());
     }
 
 signals:
@@ -41,11 +42,12 @@ signals:
 
 public:
     /// @brief Constructor
-    ASTERIXEditionComboBox(ASTERIXImporterTask& task, const jASTERIX::Category& category, QWidget * parent = 0)
+    ASTERIXEditionComboBox(ASTERIXImporterTask& task, const std::shared_ptr<jASTERIX::Category> category,
+                           QWidget* parent = nullptr)
     : QComboBox(parent), task_(task), category_(category)
     {
         //const std::map<std::string, std::shared_ptr<Edition>>& editions() const;
-        for (auto& ed_it : category_.editions())
+        for (auto& ed_it : category_->editions())
         {
             addItem (ed_it.first.c_str());
         }
@@ -73,7 +75,7 @@ public:
 
 protected:
     ASTERIXImporterTask& task_;
-    const jASTERIX::Category& category_;
+    const std::shared_ptr<jASTERIX::Category> category_;
 
 };
 

@@ -160,21 +160,53 @@ void DBOVariableOrderedSet::add (MetaDBOVariable &var)
 
 void DBOVariableOrderedSet::removeVariableAt (unsigned int index)
 {
+    loginf << "DBOVariableOrderedSet: removeVariableAt: index " << index;
+
     assert (index < variable_definitions_.size());
+    assert (variable_definitions_.count(index) == 1);
 
-    auto it = variable_definitions_.find(index);
-    assert (it != variable_definitions_.end());
-    delete it->second;
+    //unsigned int tmp_i = variable_definitions_.at(index);
+    DBOVariableOrderDefinition* tmp = variable_definitions_.at(index);
+    variable_definitions_.erase(index);
 
-    auto it_tobeerased=it;
+    delete tmp;
 
-    for (; it != variable_definitions_.end(); it++)
+    std::map <unsigned int, DBOVariableOrderDefinition*> new_variable_definitions;
+
+    unsigned int key {0};
+
+    for (auto& def_it : variable_definitions_)
     {
-        it->second->setIndex(it->first-1);
-        const_cast<unsigned int&>(it->first) = it->first-1;
+        def_it.second->setIndex(key);
+        new_variable_definitions[key] = def_it.second;
+        ++key;
     }
 
-    variable_definitions_.erase(it_tobeerased);
+    variable_definitions_ = new_variable_definitions;
+
+//    auto it = variable_definitions_.find(index);
+//    if (it != variable_definitions_.end())
+//    {
+//        for (; it != variable_definitions_.end(); it++)
+//        {
+//            it->second->setIndex(it->first-1);
+//            const_cast<unsigned int&>(it->first) = it->first-1;
+//        }
+//    }
+
+//    auto it = variable_definitions_.find(index);
+//    assert (it != variable_definitions_.end());
+//    delete it->second;
+
+//    auto it_tobeerased=it;
+
+//    for (; it != variable_definitions_.end(); it++)
+//    {
+//        it->second->setIndex(it->first-1);
+//        const_cast<unsigned int&>(it->first) = it->first-1;
+//    }
+
+//    variable_definitions_.erase(it_tobeerased);
 
     emit setChangedSignal();
 }

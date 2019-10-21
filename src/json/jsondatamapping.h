@@ -38,6 +38,8 @@ public:
     JSONDataMapping() = default;
     JSONDataMapping(JSONDataMapping&& other) { *this = std::move(other); }
 
+    virtual ~JSONDataMapping();
+
     /// @brief Move constructor
     JSONDataMapping& operator=(JSONDataMapping&& other);
 
@@ -51,7 +53,7 @@ public:
         {
             for (const std::string& sub_key : sub_keys_)
             {
-                if (val_ptr->find (sub_key) != val_ptr->end())
+                if (val_ptr->contains (sub_key))
                 {
                     if (sub_key == sub_keys_.back()) // last found
                     {
@@ -76,7 +78,7 @@ public:
         }
         else
         {
-            if (val_ptr->find (json_key_) != val_ptr->end())
+            if (val_ptr->contains (json_key_))
                 val_ptr = &val_ptr->at(json_key_);
             else
                 val_ptr = nullptr;
@@ -116,7 +118,7 @@ public:
         return false; // everything ok
     }
 
-    bool findAndSetValue(const nlohmann::json& j, NullableVector<char>& array_list, unsigned int row_cnt) const
+    bool findAndSetValue(const nlohmann::json& j, NullableVector<bool>& array_list, unsigned int row_cnt) const
     {
         const nlohmann::json* val_ptr = &j;
 
@@ -124,7 +126,7 @@ public:
         {
             for (const std::string& sub_key : sub_keys_)
             {
-                if (val_ptr->find (sub_key) != val_ptr->end())
+                if (val_ptr->contains (sub_key))
                 {
                     if (sub_key == sub_keys_.back()) // last found
                     {
@@ -149,7 +151,91 @@ public:
         }
         else
         {
-            if (val_ptr->find (json_key_) != val_ptr->end())
+            if (val_ptr->contains (json_key_))
+                val_ptr = &val_ptr->at(json_key_);
+            else
+                val_ptr = nullptr;
+        }
+
+        if (val_ptr == nullptr || *val_ptr == nullptr)
+        {
+            if (mandatory_)
+                return true;
+
+            //array_list.setNull(row_cnt);
+            return false;
+        }
+        else
+        {
+            try
+            {
+                bool tmp_bool;
+
+                if (val_ptr->is_number())
+                {
+                    unsigned int tmp = *val_ptr;
+                    assert (tmp == 0 || tmp == 1);
+                    tmp_bool = static_cast<bool> (tmp);
+                }
+                else
+                {
+                    tmp_bool = *val_ptr; // works for bool, throws for rest
+                }
+
+                if (json_value_format_ == "")
+                    array_list.set(row_cnt, tmp_bool);
+                else
+                    array_list.setFromFormat(row_cnt, json_value_format_,
+                                             Utils::JSON::toString(tmp_bool));
+
+                logdbg << "JSONDataMapping: findAndSetValue(bool): json " << tmp_bool << " buffer "
+                       << array_list.get(row_cnt);
+            }
+            catch (nlohmann::json::exception& e)
+            {
+                logerr  <<  "JSONDataMapping: findAndSetValue(bool): key " << json_key_ << " json exception "
+                         << e.what();
+                array_list.setNull(row_cnt);
+            }
+        }
+
+        return false; // everything ok
+    }
+
+    bool findAndSetValue(const nlohmann::json& j, NullableVector<char>& array_list, unsigned int row_cnt) const
+    {
+        const nlohmann::json* val_ptr = &j;
+
+        if (has_sub_keys_)
+        {
+            for (const std::string& sub_key : sub_keys_)
+            {
+                if (val_ptr->contains (sub_key))
+                {
+                    if (sub_key == sub_keys_.back()) // last found
+                    {
+                        val_ptr = &val_ptr->at(sub_key);
+                        break;
+                    }
+
+                    if (val_ptr->at(sub_key).is_object()) // not last, step in
+                        val_ptr = &val_ptr->at(sub_key);
+                    else // not last key, and not object
+                    {
+                        val_ptr = nullptr;
+                        break;
+                    }
+                }
+                else // not found
+                {
+                    val_ptr = nullptr;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            if (val_ptr->contains (json_key_))
                 val_ptr = &val_ptr->at(json_key_);
             else
                 val_ptr = nullptr;
@@ -195,7 +281,7 @@ public:
         {
             for (const std::string& sub_key : sub_keys_)
             {
-                if (val_ptr->find (sub_key) != val_ptr->end())
+                if (val_ptr->contains (sub_key))
                 {
                     if (sub_key == sub_keys_.back()) // last found
                     {
@@ -220,7 +306,7 @@ public:
         }
         else
         {
-            if (val_ptr->find (json_key_) != val_ptr->end())
+            if (val_ptr->contains (json_key_))
                 val_ptr = &val_ptr->at(json_key_);
             else
                 val_ptr = nullptr;
@@ -265,7 +351,7 @@ public:
     std::string& unitRef () { return unit_; }
     const std::string& unit () const { return unit_; }
 
-    std::string jsonKey() const;
+    const std::string& jsonKey() const;
     void jsonKey(const std::string &json_key);
 
     bool active() const;
@@ -296,6 +382,9 @@ public:
 
     bool initialized() const;
 
+    std::string comment() const;
+    void comment(const std::string &comment);
+
 private:
     bool initialized_ {false};
 
@@ -307,6 +396,8 @@ private:
     DBOVariable* variable_ {nullptr};
 
     bool mandatory_ {false};
+
+    std::string comment_;
 
     std::string format_data_type_;
     Format json_value_format_;

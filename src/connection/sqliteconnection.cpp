@@ -17,6 +17,8 @@
 
 #include <cstring>
 
+#include <QApplication>
+
 #include "property.h"
 #include "buffer.h"
 #include "dbcommand.h"
@@ -57,6 +59,8 @@ void SQLiteConnection::openFile (const std::string &file_name)
     last_filename_=file_name;
     assert (last_filename_.size() > 0);
 
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
     int result = sqlite3_open_v2(last_filename_.c_str(), &db_handle_, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
 
     if (result != SQLITE_OK)
@@ -76,6 +80,11 @@ void SQLiteConnection::openFile (const std::string &file_name)
     interface_.databaseContentChanged();
 
     emit connectedSignal();
+
+    if (info_widget_)
+        info_widget_->updateSlot();
+
+    QApplication::restoreOverrideCursor();
 }
 
 void SQLiteConnection::disconnect()
@@ -610,12 +619,7 @@ QWidget *SQLiteConnection::infoWidget ()
 std::string SQLiteConnection::status () const
 {
     if (connection_ready_)
-    {
-        if (!prepared_command_done_)
-            return "Working";
-        else
-            return "Idle";
-    }
+        return "Ready";
     else
         return "Not connected";
 }
@@ -624,7 +628,7 @@ std::string SQLiteConnection::identifier () const
 {
     assert (connection_ready_);
 
-    return "SQLite: "+last_filename_;
+    return last_filename_;
 }
 
 void SQLiteConnection::addFile (const std::string &filename)

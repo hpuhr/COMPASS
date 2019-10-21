@@ -22,22 +22,21 @@
 #include "json.hpp"
 #include "jsonparsingschema.h"
 #include "asterixdecodejob.h"
-//#include "asterixextractrecordsjob.h"
 #include "jsonmappingjob.h"
+#include "jsonmappingstubsjob.h"
 
 #include <QObject>
 
 #include <memory>
-
-#include "boost/date_time/posix_time/posix_time.hpp"
 
 #include <tbb/concurrent_queue.h>
 
 class TaskManager;
 class ASTERIXImporterTaskWidget;
 class ASTERIXCategoryConfig;
+class ASTERIXStatusDialog;
 class SavedFile;
-class QMessageBox;
+//class QMessageBox;
 
 namespace jASTERIX
 {
@@ -51,16 +50,18 @@ class ASTERIXImporterTask: public QObject, public Configurable
 public slots:
     void decodeASTERIXDoneSlot ();
     void decodeASTERIXObsoleteSlot ();
-    void addDecodedASTERIXSlot (std::shared_ptr<std::vector<nlohmann::json>> extracted_records);
-
-//    void extractASTERIXDoneSlot ();
-//    void extractASTERIXObsoleteSlot ();
+    void addDecodedASTERIXSlot ();
 
     void mapJSONDoneSlot ();
     void mapJSONObsoleteSlot ();
 
+    void mapStubsDoneSlot ();
+    void mapStubsObsoleteSlot ();
+
     void insertProgressSlot (float percent);
     void insertDoneSlot (DBObject& object);
+
+    void closeStatusDialogSlot();
 
 public:
     ASTERIXImporterTask(const std::string& class_id, const std::string& instance_id,
@@ -72,7 +73,7 @@ public:
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
     bool canImportFile (const std::string& filename);
-    void importFile (const std::string& filename, bool test);
+    void importFile (const std::string& filename);
 
     const std::map <std::string, SavedFile*> &fileList () { return file_list_; }
     bool hasFile (const std::string &filename) { return file_list_.count (filename) > 0; }
@@ -88,16 +89,24 @@ public:
 
     void currentFraming(const std::string &current_framing);
 
-    bool hasConfiguratonFor (const std::string& category);
-    bool decodeCategory (const std::string& category);
-    void decodeCategory (const std::string& category, bool decode);
-    std::string editionForCategory (const std::string& category);
-    void editionForCategory (const std::string& category, const std::string& edition);
+    bool hasConfiguratonFor (unsigned int category);
+    bool decodeCategory (unsigned int category);
+    void decodeCategory (unsigned int category, bool decode);
+    std::string editionForCategory (unsigned int category);
+    void editionForCategory (unsigned int category, const std::string& edition);
+    std::string refEditionForCategory (unsigned int category);
+    void refEditionForCategory (unsigned int category, const std::string& ref);
 
     std::shared_ptr<JSONParsingSchema> schema() const;
 
     bool debug() const;
     void debug(bool debug);
+
+    bool test() const;
+    void test(bool test);
+
+    bool createMappingStubs() const;
+    void createMappingStubs(bool createMappingStubs);
 
 protected:
     bool debug_jasterix_;
@@ -109,31 +118,24 @@ protected:
 
     std::string filename_;
     bool test_ {false};
+    bool create_mapping_stubs_ {false};
 
     std::unique_ptr<ASTERIXImporterTaskWidget> widget_;
 
-    std::map <std::string, ASTERIXCategoryConfig> category_configs_;
+    std::map <unsigned int, ASTERIXCategoryConfig> category_configs_;
 
     std::shared_ptr<JSONParsingSchema> schema_;
 
     std::shared_ptr<ASTERIXDecodeJob> decode_job_;
-    //std::shared_ptr<ASTERIXExtractRecordsJob> extract_job_;
     tbb::concurrent_queue <std::shared_ptr <JSONMappingJob>> json_map_jobs_;
+    std::shared_ptr <JSONMappingStubsJob> json_map_stub_job_;
     std::map <std::string, std::shared_ptr<Buffer>> buffers_;
 
     bool error_ {false};
     std::string error_message_;
 
-    QMessageBox* msg_box_ {nullptr};
+    std::unique_ptr<ASTERIXStatusDialog> status_widget_;
 
-    size_t num_frames_ {0};
-    size_t num_records_ {0};
-    size_t records_mapped_ {0};
-    size_t records_not_mapped_ {0};
-    size_t records_created_ {0};
-    size_t records_inserted_ {0};
-
-    std::map<unsigned int, size_t> category_counts_;
     size_t key_count_ {0};
     size_t insert_active_ {0};
 
@@ -141,16 +143,12 @@ protected:
 
     bool all_done_{false};
 
-    boost::posix_time::ptime start_time_;
-    boost::posix_time::ptime stop_time_;
-
     virtual void checkSubConfigurables ();
 
     void insertData ();
     void checkAllDone ();
 
-
-    void updateMsgBox();
+    //void updateMsgBox();
     bool maxLoadReached ();
 };
 

@@ -86,7 +86,9 @@ const DBTableColumn& DBTable::column (const std::string& name) const
 void DBTable::deleteColumn (const std::string &name)
 {
     assert (hasColumn(name));
+    DBTableColumn* col = columns_.at(name);
     columns_.erase(columns_.find(name));
+    delete col;
 }
 
 void DBTable::populate ()
@@ -98,6 +100,8 @@ void DBTable::populate ()
     {
         if (columns_.count(it.first) == 0)
         {
+            loginf << "DBTable: populate: table " << name_ << ": adding new column " << it.first;
+
             Configuration &config = addNewSubConfiguration ("DBTableColumn", it.first);
             config.addParameterString ("name", it.first);
             config.addParameterString ("type", it.second.type());
@@ -107,6 +111,51 @@ void DBTable::populate ()
         }
     }
 }
+
+void DBTable::update ()
+{
+    assert (ATSDB::instance().ready());
+
+    loginf << "DBTable: update: table " << name_;
+
+    const std::map <std::string, DBTableColumnInfo> db_table_columns =
+            ATSDB::instance().interface().tableInfo().at(name_).columns ();
+
+    std::vector<std::string> cols_to_be_removed;
+
+    for (auto& col_it : columns_) // check if defined columns still exist in DB
+    {
+        if (db_table_columns.count(col_it.first) != 1)
+        {
+            loginf << "DBTable: update: table " << name_ << ": column '" << col_it.first << "' not defined in database";
+            cols_to_be_removed.push_back(col_it.first);
+        }
+    }
+
+    for (auto& col_name_it : cols_to_be_removed)
+    {
+        loginf << "DBTable: update: table " << name_ << ": deleting column '" << col_name_it << "'";
+        deleteColumn(col_name_it);
+    }
+
+    for (auto col_it : db_table_columns)
+    {
+        if (columns_.count(col_it.first) == 0)
+        {
+            loginf << "DBTable: update: table " << name_ << ": adding new column " << col_it.first;
+
+            Configuration &config = addNewSubConfiguration ("DBTableColumn", col_it.first);
+            config.addParameterString ("name", col_it.first);
+            config.addParameterString ("type", col_it.second.type());
+            config.addParameterBool ("is_key", col_it.second.key());
+            config.addParameterString ("comment", col_it.second.comment());
+            generateSubConfigurable("DBTableColumn", col_it.first);
+        }
+    }
+
+    loginf << "DBTable: update: table " << name_ << " done";
+}
+
 
 void DBTable::lock ()
 {
@@ -133,14 +182,14 @@ void DBTable::updateOnDatabase()
 {
     exists_in_db_ = false;
 
-    loginf << "DBTable: updateOnDatabase: " << name_;
+    logdbg << "DBTable: updateOnDatabase: " << name_;
 
     for (auto col_it : columns_)
     {
         col_it.second->updateOnDatabase();
 
         exists_in_db_ |= col_it.second->existsInDB(); // exists if any exist
-        loginf << "DBTable " << name_ << "::updateOnDatabase: exists " << exists_in_db_
+        logdbg << "DBTable " << name_ << "::updateOnDatabase: exists " << exists_in_db_
                << " col " << col_it.first << " exists " << col_it.second->existsInDB();
     }
 

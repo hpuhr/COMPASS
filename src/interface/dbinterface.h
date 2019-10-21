@@ -232,7 +232,7 @@ protected:
 
     std::vector <std::shared_ptr<Job>> postprocess_jobs_;
     QProgressDialog* postprocess_dialog_ {nullptr};
-    unsigned int postprocess_job_num_{0};
+    size_t postprocess_job_num_{0};
 
     virtual void checkSubConfigurables ();
 
