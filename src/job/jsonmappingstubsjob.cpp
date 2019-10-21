@@ -3,9 +3,9 @@
 #include "buffer.h"
 #include "dbobject.h"
 
-JSONMappingStubsJob::JSONMappingStubsJob(std::shared_ptr<std::vector<nlohmann::json>> extracted_records,
+JSONMappingStubsJob::JSONMappingStubsJob(std::unique_ptr<std::vector<nlohmann::json>> extracted_records,
                                std::map <std::string, JSONObjectParser>& parsers)
-    : Job ("JSONMappingStubsJob"), extracted_records_(extracted_records), parsers_(parsers)
+    : Job ("JSONMappingStubsJob"), extracted_records_(std::move(extracted_records)), parsers_(parsers)
 {
 
 }

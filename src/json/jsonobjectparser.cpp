@@ -223,7 +223,7 @@ std::shared_ptr<Buffer> JSONObjectParser::getNewBuffer () const
     return std::make_shared<Buffer> (list_, db_object_->name());
 }
 
-void JSONObjectParser::appendVariablesToBuffer (std::shared_ptr<Buffer> buffer) const
+void JSONObjectParser::appendVariablesToBuffer (std::shared_ptr<Buffer>& buffer) const
 {
     assert (initialized_);
     assert (db_object_);
@@ -237,7 +237,7 @@ void JSONObjectParser::appendVariablesToBuffer (std::shared_ptr<Buffer> buffer) 
     }
 }
 
-bool JSONObjectParser::parseJSON (nlohmann::json& j, std::shared_ptr<Buffer> buffer) const
+bool JSONObjectParser::parseJSON (nlohmann::json& j, std::shared_ptr<Buffer>& buffer) const
 {
     assert (initialized_);
 
@@ -254,7 +254,7 @@ bool JSONObjectParser::parseJSON (nlohmann::json& j, std::shared_ptr<Buffer> buf
     {
         bool parsed = false;
 
-        if (j.find(json_container_key_) != j.end())
+        if (j.contains(json_container_key_))
         {
             json& ac_list = j.at(json_container_key_);
             assert (ac_list.is_array());
@@ -302,7 +302,7 @@ void JSONObjectParser::createMappingStubs (nlohmann::json& j)
 
     if (json_container_key_.size())
     {
-        if (j.find(json_container_key_) != j.end())
+        if (j.contains(json_container_key_))
         {
             json& ac_list = j.at(json_container_key_);
             assert (ac_list.is_array());
@@ -334,13 +334,13 @@ void JSONObjectParser::createMappingStubs (nlohmann::json& j)
     return;
 }
 
-bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_ptr<Buffer> buffer,
+bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_ptr<Buffer>& buffer,
                                           size_t row_cnt) const
 {
     // check key match
     if (not_parse_all_)
     {
-        if (tr.find (json_key_) != tr.end())
+        if (tr.contains (json_key_))
         {
             if (std::find(json_values_vector_.begin(), json_values_vector_.end(),
                           Utils::JSON::toString(tr.at(json_key_))) == json_values_vector_.end())
@@ -498,7 +498,7 @@ void JSONObjectParser::createMappingsFromTargetReport (const nlohmann::json& tr)
     // check key match
     if (not_parse_all_)
     {
-        if (tr.find (json_key_) != tr.end())
+        if (tr.contains (json_key_))
         {
             if (std::find(json_values_vector_.begin(), json_values_vector_.end(),
                           Utils::JSON::toString(tr.at(json_key_))) == json_values_vector_.end())
@@ -620,7 +620,7 @@ void JSONObjectParser::removeMapping (unsigned int index)
 //    }
 }
 
-void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer> buffer, size_t index) const
+void JSONObjectParser::transformBuffer (std::shared_ptr<Buffer>& buffer, size_t index) const
 {
     assert (db_object_);
 

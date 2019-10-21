@@ -55,7 +55,7 @@ ASTERIXImporterTask::ASTERIXImporterTask(const std::string& class_id, const std:
                                          TaskManager* task_manager)
     : Configurable (class_id, instance_id, task_manager)
 {
-    qRegisterMetaType<std::shared_ptr<std::vector <nlohmann::json>>>("std::shared_ptr<std::vector <nlohmann::json>>");
+    //qRegisterMetaType<std::unique_ptr<std::vector <nlohmann::json>>>("std::unique_ptr<std::vector <nlohmann::json>>");
 
     registerParameter("debug_jasterix", &debug_jasterix_, false);
     registerParameter("current_filename", &current_filename_, "");
@@ -381,8 +381,10 @@ void ASTERIXImporterTask::importFile(const std::string& filename)
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    status_widget_ = new ASTERIXStatusDialog (filename_, test_, create_mapping_stubs_);
-    connect(status_widget_, &ASTERIXStatusDialog::closeSignal, this, &ASTERIXImporterTask::closeStatusDialogSlot);
+    status_widget_ = nullptr;
+
+    status_widget_.reset(new ASTERIXStatusDialog (filename_, test_, create_mapping_stubs_));
+    connect(status_widget_.get(), &ASTERIXStatusDialog::closeSignal, this, &ASTERIXImporterTask::closeStatusDialogSlot);
     status_widget_->markStartTime();
 
     key_count_ = 0;
@@ -450,11 +452,12 @@ void ASTERIXImporterTask::importFile(const std::string& filename)
     assert (decode_job_ == nullptr);
     decode_job_ = make_shared<ASTERIXDecodeJob> (*this, filename, current_framing_, test_);
 
-    connect (decode_job_.get(), SIGNAL(obsoleteSignal()), this, SLOT(decodeASTERIXObsoleteSlot()),
+    connect (decode_job_.get(), &ASTERIXDecodeJob::obsoleteSignal, this,
+             &ASTERIXImporterTask::decodeASTERIXObsoleteSlot, Qt::QueuedConnection);
+    connect (decode_job_.get(), &ASTERIXDecodeJob::doneSignal, this, &ASTERIXImporterTask::decodeASTERIXDoneSlot,
              Qt::QueuedConnection);
-    connect (decode_job_.get(), SIGNAL(doneSignal()), this, SLOT(decodeASTERIXDoneSlot()), Qt::QueuedConnection);
-    connect (decode_job_.get(), SIGNAL(decodedASTERIXSignal(std::shared_ptr<std::vector<nlohmann::json>>)),
-             this, SLOT(addDecodedASTERIXSlot(std::shared_ptr<std::vector<nlohmann::json>>)), Qt::QueuedConnection);
+    connect (decode_job_.get(), &ASTERIXDecodeJob::decodedASTERIXSignal,
+             this, &ASTERIXImporterTask::addDecodedASTERIXSlot, Qt::QueuedConnection);
 
     JobManager::instance().addBlockingJob(decode_job_);
 
@@ -479,13 +482,16 @@ void ASTERIXImporterTask::decodeASTERIXDoneSlot ()
     }
 
     decode_job_ = nullptr;
+
+    checkAllDone();
 }
 void ASTERIXImporterTask::decodeASTERIXObsoleteSlot ()
 {
+    loginf << "ASTERIXImporterTask: decodeASTERIXObsoleteSlot UGA";
     decode_job_ = nullptr;
 }
 
-void ASTERIXImporterTask::addDecodedASTERIXSlot (std::shared_ptr<std::vector<nlohmann::json>> extracted_records)
+void ASTERIXImporterTask::addDecodedASTERIXSlot ()
 {
     loginf << "ASTERIXImporterTask: addDecodedASTERIX";
 
@@ -501,6 +507,12 @@ void ASTERIXImporterTask::addDecodedASTERIXSlot (std::shared_ptr<std::vector<nlo
 
     status_widget_->show();
 
+//    decode_job_->clearExtractedRecords();
+
+//    return;
+
+    std::unique_ptr<std::vector<nlohmann::json>> extracted_records {std::move (decode_job_->extractedRecords())};
+
     if (!create_mapping_stubs_) // test or import
     {
         size_t count = extracted_records->size();
@@ -508,8 +520,7 @@ void ASTERIXImporterTask::addDecodedASTERIXSlot (std::shared_ptr<std::vector<nlo
         assert (schema_);
 
         std::shared_ptr<JSONMappingJob> json_map_job =
-                std::shared_ptr<JSONMappingJob> (new JSONMappingJob (extracted_records, schema_->parsers(),
-                                                                     key_count_));
+                make_shared<JSONMappingJob> (std::move(extracted_records), schema_->parsers(), key_count_);
 
         extracted_records = nullptr;
 
@@ -545,8 +556,7 @@ void ASTERIXImporterTask::addDecodedASTERIXSlot (std::shared_ptr<std::vector<nlo
 
         assert (json_map_stub_job_ == nullptr);
 
-        json_map_stub_job_ = std::shared_ptr<JSONMappingStubsJob> (
-                    new JSONMappingStubsJob (extracted_records, schema_->parsers()));
+        json_map_stub_job_ = make_shared<JSONMappingStubsJob> (std::move(extracted_records), schema_->parsers());
 
         connect (json_map_stub_job_.get(), &JSONMappingStubsJob::obsoleteSignal,
                  this, &ASTERIXImporterTask::mapStubsObsoleteSlot, Qt::QueuedConnection);
@@ -573,7 +583,7 @@ void ASTERIXImporterTask::mapJSONDoneSlot ()
 
     while (!json_map_jobs_.try_pop(queued_map_job))
     {
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        //QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         QThread::msleep(1);
     }
 
@@ -584,7 +594,7 @@ void ASTERIXImporterTask::mapJSONDoneSlot ()
     status_widget_->addMappedCounts(queued_map_job->categoryMappedCounts());
     status_widget_->addNumCreated(map_job->numCreated());
 
-    std::map <std::string, std::shared_ptr<Buffer>> job_buffers = map_job->buffers();
+    std::map <std::string, std::shared_ptr<Buffer>> job_buffers = std::move(map_job->buffers());
 
     if (decode_job_)
     {
@@ -636,6 +646,7 @@ void ASTERIXImporterTask::mapJSONDoneSlot ()
 void ASTERIXImporterTask::mapJSONObsoleteSlot ()
 {
     logdbg << "ASTERIXImporterTask: mapJSONObsoleteSlot";
+    // TODO
 }
 
 void ASTERIXImporterTask::mapStubsDoneSlot ()
@@ -821,11 +832,13 @@ void ASTERIXImporterTask::checkAllDone ()
 
     loginf << "ASTERIXImporterTask: checkAllDone: all done " << all_done_ << " decode " << (decode_job_ == nullptr)
            << " map jobs " << json_map_jobs_.empty() << " map stubs " << (json_map_stub_job_ == nullptr)
-           << " buffers " << (buffers_.size() == 0) << " insert active " << (insert_active_ == 0);
+           << " buffers " << (buffers_.size() == 0) << " insert active " << (insert_active_ == 0) << " UGA";
 
     if (!all_done_ && decode_job_ == nullptr && json_map_jobs_.empty() && json_map_stub_job_ == nullptr
             && buffers_.size() == 0 && insert_active_ == 0)
     {
+        loginf << "ASTERIXImporterTask: checkAllDone: all done";
+
         assert (status_widget_);
         status_widget_->setDone();
 
@@ -850,7 +863,6 @@ void ASTERIXImporterTask::closeStatusDialogSlot()
 {
     assert (status_widget_);
     status_widget_->close();
-    delete status_widget_;
     status_widget_ = nullptr;
 }
 

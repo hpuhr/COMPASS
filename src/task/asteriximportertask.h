@@ -50,7 +50,7 @@ class ASTERIXImporterTask: public QObject, public Configurable
 public slots:
     void decodeASTERIXDoneSlot ();
     void decodeASTERIXObsoleteSlot ();
-    void addDecodedASTERIXSlot (std::shared_ptr<std::vector<nlohmann::json>> extracted_records);
+    void addDecodedASTERIXSlot ();
 
     void mapJSONDoneSlot ();
     void mapJSONObsoleteSlot ();
@@ -134,7 +134,7 @@ protected:
     bool error_ {false};
     std::string error_message_;
 
-    ASTERIXStatusDialog* status_widget_{nullptr};
+    std::unique_ptr<ASTERIXStatusDialog> status_widget_;
 
     size_t key_count_ {0};
     size_t insert_active_ {0};

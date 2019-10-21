@@ -53,7 +53,7 @@ public:
         {
             for (const std::string& sub_key : sub_keys_)
             {
-                if (val_ptr->find (sub_key) != val_ptr->end())
+                if (val_ptr->contains (sub_key))
                 {
                     if (sub_key == sub_keys_.back()) // last found
                     {
@@ -78,7 +78,7 @@ public:
         }
         else
         {
-            if (val_ptr->find (json_key_) != val_ptr->end())
+            if (val_ptr->contains (json_key_))
                 val_ptr = &val_ptr->at(json_key_);
             else
                 val_ptr = nullptr;
@@ -126,7 +126,7 @@ public:
         {
             for (const std::string& sub_key : sub_keys_)
             {
-                if (val_ptr->find (sub_key) != val_ptr->end())
+                if (val_ptr->contains (sub_key))
                 {
                     if (sub_key == sub_keys_.back()) // last found
                     {
@@ -151,7 +151,7 @@ public:
         }
         else
         {
-            if (val_ptr->find (json_key_) != val_ptr->end())
+            if (val_ptr->contains (json_key_))
                 val_ptr = &val_ptr->at(json_key_);
             else
                 val_ptr = nullptr;
@@ -210,7 +210,7 @@ public:
         {
             for (const std::string& sub_key : sub_keys_)
             {
-                if (val_ptr->find (sub_key) != val_ptr->end())
+                if (val_ptr->contains (sub_key))
                 {
                     if (sub_key == sub_keys_.back()) // last found
                     {
@@ -235,7 +235,7 @@ public:
         }
         else
         {
-            if (val_ptr->find (json_key_) != val_ptr->end())
+            if (val_ptr->contains (json_key_))
                 val_ptr = &val_ptr->at(json_key_);
             else
                 val_ptr = nullptr;
@@ -281,7 +281,7 @@ public:
         {
             for (const std::string& sub_key : sub_keys_)
             {
-                if (val_ptr->find (sub_key) != val_ptr->end())
+                if (val_ptr->contains (sub_key))
                 {
                     if (sub_key == sub_keys_.back()) // last found
                     {
@@ -306,7 +306,7 @@ public:
         }
         else
         {
-            if (val_ptr->find (json_key_) != val_ptr->end())
+            if (val_ptr->contains (json_key_))
                 val_ptr = &val_ptr->at(json_key_);
             else
                 val_ptr = nullptr;

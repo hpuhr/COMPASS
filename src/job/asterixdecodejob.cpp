@@ -33,7 +33,12 @@ ASTERIXDecodeJob::ASTERIXDecodeJob(ASTERIXImporterTask& task, const std::string&
                                    bool test)
     : Job ("ASTERIXDecodeJob"), task_(task), filename_(filename), framing_(framing), test_(test)
 {
+    logdbg << "ASTERIXDecodeJob: ctor";
+}
 
+ASTERIXDecodeJob::~ASTERIXDecodeJob()
+{
+    logdbg << "ASTERIXDecodeJob: dtor";
 }
 
 void ASTERIXDecodeJob::run ()
@@ -43,7 +48,7 @@ void ASTERIXDecodeJob::run ()
     started_ = true;
 
     using namespace std::placeholders;
-    std::function<void(nlohmann::json&, size_t, size_t, size_t)> callback =
+    std::function<void(std::unique_ptr<nlohmann::json>, size_t, size_t, size_t)> callback =
             std::bind(&ASTERIXDecodeJob::jasterix_callback, this, _1, _2, _3, _4);
     try
     {
@@ -59,19 +64,20 @@ void ASTERIXDecodeJob::run ()
         error_message_ = e.what();
     }
 
+    assert (extracted_records_ == nullptr);
+
     done_ = true;
 
-    loginf << "ASTERIXDecodeJob: run: done";
+    logdbg << "ASTERIXDecodeJob: run: done";
 }
 
-void ASTERIXDecodeJob::jasterix_callback(nlohmann::json& data, size_t num_frames, size_t num_records, size_t num_errors)
+void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, size_t num_frames, size_t num_records, size_t num_errors)
 {
     if (error_)
         return;
 
     assert (!extracted_records_);
-    extracted_records_ = std::make_shared<std::vector <nlohmann::json>> ();
-    //extracted_records_.reset(new std::vector <nlohmann::json>());
+    extracted_records_.reset(new std::vector <nlohmann::json>());
 
     num_frames_ = num_frames;
     num_records_ = num_records;
@@ -83,9 +89,9 @@ void ASTERIXDecodeJob::jasterix_callback(nlohmann::json& data, size_t num_frames
 
     if (framing_ == "")
     {
-        assert (data.find("data_blocks") != data.end());
+        assert (data->find("data_blocks") != data->end());
 
-        for (json& data_block : data.at("data_blocks"))
+        for (json& data_block : data->at("data_blocks"))
         {
             category = data_block.at("category");
 
@@ -104,10 +110,10 @@ void ASTERIXDecodeJob::jasterix_callback(nlohmann::json& data, size_t num_frames
     }
     else
     {
-        assert (data.find("frames") != data.end());
-        assert (data.at("frames").is_array());
+        assert (data->find("frames") != data->end());
+        assert (data->at("frames").is_array());
 
-        for (json& frame : data.at("frames"))
+        for (json& frame : data->at("frames"))
         {
             if (frame.find("content") == frame.end()) // frame with errors
                 continue;
@@ -141,15 +147,16 @@ void ASTERIXDecodeJob::jasterix_callback(nlohmann::json& data, size_t num_frames
         }
     }
 
-    while (pause_) // block decoder until unpaused
+    //data->clear();
+
+    emit decodedASTERIXSignal();
+
+    while (pause_ || extracted_records_) // block decoder until unpaused and extracted records moved out
     {
         QThread::msleep(1);
     }
 
-    emit decodedASTERIXSignal(extracted_records_);
-    extracted_records_ = nullptr;
-
-    data.clear();
+    assert (extracted_records_ == nullptr);
 }
 
 
@@ -301,13 +308,23 @@ void ASTERIXDecodeJob::processRecord (unsigned int category, nlohmann::json& rec
         }
     }
 
-    extracted_records_->push_back(std::move(record));
+    extracted_records_->emplace_back(std::move(record));
     category_counts_.at(category) += 1;
 }
 
 std::map<unsigned int, size_t> ASTERIXDecodeJob::categoryCounts() const
 {
     return category_counts_;
+}
+
+void ASTERIXDecodeJob::clearExtractedRecords ()
+{
+    extracted_records_ = nullptr;
+}
+
+std::unique_ptr<std::vector<nlohmann::json>>& ASTERIXDecodeJob::extractedRecords()
+{
+    return extracted_records_;
 }
 
 size_t ASTERIXDecodeJob::numErrors() const

@@ -362,8 +362,7 @@ void JSONImporterTask::parseJSONDoneSlot ()
 
     objects_parsed_ += parse_job->objectsParsed();
     objects_parse_errors_ += parse_job->parseErrors();
-    std::shared_ptr<std::vector<nlohmann::json>> json_objects =
-            make_shared<std::vector<nlohmann::json>> (std::move(parse_job->jsonObjects()));
+    std::unique_ptr<std::vector<nlohmann::json>> json_objects {std::move(parse_job->jsonObjects())};
 
     json_parse_jobs_.erase(json_parse_jobs_.begin());
 
@@ -374,7 +373,7 @@ void JSONImporterTask::parseJSONDoneSlot ()
     assert (schemas_.count(current_schema_));
 
     std::shared_ptr<JSONMappingJob> json_map_job =
-            std::shared_ptr<JSONMappingJob> (new JSONMappingJob (json_objects,
+            std::shared_ptr<JSONMappingJob> (new JSONMappingJob (std::move(json_objects),
                                                                  schemas_.at(current_schema_).parsers(), key_count_));
     connect (json_map_job.get(), SIGNAL(obsoleteSignal()), this, SLOT(mapJSONObsoleteSlot()),
              Qt::QueuedConnection);
@@ -474,8 +473,8 @@ void JSONImporterTask::insertData ()
 
     while (insert_active_)
     {
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-        QThread::msleep (10);
+        //QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QThread::msleep (1);
     }
 
     bool has_sac_sic = false;
@@ -621,6 +620,7 @@ void JSONImporterTask::checkAllDone ()
         loginf << "JSONImporterTask: checkAllDone: read done after " << time_str;
 
         all_done_ = true;
+        assert (buffers_.size() == 0);
 
         QApplication::restoreOverrideCursor();
 

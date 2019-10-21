@@ -13,7 +13,7 @@ class Buffer;
 class JSONMappingStubsJob : public Job
 {
 public:
-    JSONMappingStubsJob(std::shared_ptr<std::vector<nlohmann::json>> extracted_records,
+    JSONMappingStubsJob(std::unique_ptr<std::vector<nlohmann::json>> extracted_records,
                    std::map <std::string, JSONObjectParser>& parsers);
     // json obj moved, mappings referenced
     virtual ~JSONMappingStubsJob();
@@ -21,7 +21,7 @@ public:
     virtual void run ();
 
 private:
-    std::shared_ptr<std::vector<nlohmann::json>> extracted_records_;
+    std::unique_ptr<std::vector<nlohmann::json>> extracted_records_;
     std::map <std::string, JSONObjectParser>& parsers_;
 };
 

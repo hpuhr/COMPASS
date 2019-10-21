@@ -13,7 +13,7 @@ class Buffer;
 class JSONMappingJob : public Job
 {
 public:
-    JSONMappingJob(std::shared_ptr<std::vector<nlohmann::json>> extracted_records,
+    JSONMappingJob(std::unique_ptr<std::vector<nlohmann::json>> extracted_records,
                    const std::map <std::string, JSONObjectParser>& parsers, size_t key_count);
     // json obj moved, mappings referenced
     virtual ~JSONMappingJob();
@@ -24,7 +24,7 @@ public:
     size_t numNotMapped() const;
     size_t numCreated() const;
 
-    std::map<std::string, std::shared_ptr<Buffer>> buffers () { return buffers_; }
+    std::map<std::string, std::shared_ptr<Buffer>>& buffers () { return buffers_; }
 
     std::map<unsigned int, std::pair<size_t, size_t> > categoryMappedCounts() const;
 
@@ -34,7 +34,7 @@ private:
     size_t num_not_mapped_ {0}; // number of parsed where no parse was successful
     size_t num_created_ {0}; // number of created objects from parsing
 
-    std::shared_ptr<std::vector<nlohmann::json>> extracted_records_;
+    std::unique_ptr<std::vector<nlohmann::json>> extracted_records_;
     const std::map <std::string, JSONObjectParser>& parsers_;
     size_t key_count_;
 
