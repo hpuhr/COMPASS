@@ -18,6 +18,8 @@
 #include <algorithm>
 #include <memory>
 
+#include <boost/algorithm/string.hpp>
+
 #include "dbtable.h"
 #include "dbschema.h"
 #include "dbschemamanager.h"
@@ -49,7 +51,7 @@
  * Registers parameters, creates sub configurables
  */
 DBObject::DBObject(const std::string& class_id, const std::string& instance_id, Configurable* parent)
-    : Configurable (class_id, instance_id, parent)
+    : Configurable (class_id, instance_id, parent, "db_object_"+boost::algorithm::to_lower_copy(instance_id)+".xml")
 {
     registerParameter ("name" , &name_, "Undefined");
     registerParameter ("info" , &info_, "");

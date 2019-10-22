@@ -26,13 +26,13 @@
  * \param parent Parent, default null (if Singleton)
  * \param configuration_filename special XML configuration filename, default ""
  *
- * Initializes members, adds itself to parent, retrieves filename from parent (if set). Registers itself as child on either
- * the parent or as root configurable, which at the same time sets the configuration reference.
+ * Initializes members, adds itself to parent, retrieves filename from parent (if set). Registers itself as child on
+ * either the parent or as root configurable, which at the same time sets the configuration reference.
  *
  * \todo Extend registerParameter to template function.
  */
-Configurable::Configurable(const std::string &class_id, const std::string &instance_id, Configurable* parent,
-                           const std::string &root_configuration_filename)
+Configurable::Configurable(const std::string& class_id, const std::string& instance_id, Configurable* parent,
+                           const std::string& root_configuration_filename)
 : class_id_(class_id), instance_id_(instance_id), key_id_(class_id+instance_id), parent_(parent)
 {
     logdbg  << "Configurable: constructor: class_id " << class_id_ << " instance_id " << instance_id_;
@@ -147,7 +147,7 @@ Configurable::~Configurable()
     }
 }
 
-void Configurable::registerParameter (const std::string &parameter_id, bool* pointer, bool default_value)
+void Configurable::registerParameter (const std::string& parameter_id, bool* pointer, bool default_value)
 {
     logdbg << "Configurable " << instance_id_ << ": registerParameter: bool parameter_id " << parameter_id;
     assert (configuration_);
@@ -155,7 +155,7 @@ void Configurable::registerParameter (const std::string &parameter_id, bool* poi
     configuration_->registerParameter (parameter_id, pointer, default_value);
 }
 
-void Configurable::registerParameter (const std::string &parameter_id, int* pointer, int default_value)
+void Configurable::registerParameter (const std::string& parameter_id, int* pointer, int default_value)
 {
     logdbg << "Configurable " << instance_id_ << ": registerParameter: int parameter_id " << parameter_id;
     assert (configuration_);
@@ -163,7 +163,7 @@ void Configurable::registerParameter (const std::string &parameter_id, int* poin
     configuration_->registerParameter (parameter_id, pointer, default_value);
 }
 
-void Configurable::registerParameter (const std::string &parameter_id, unsigned int* pointer,
+void Configurable::registerParameter (const std::string& parameter_id, unsigned int* pointer,
                                       unsigned int default_value)
 {
     logdbg << "Configurable " << instance_id_ << ": registerParameter: unsigned int parameter_id " << parameter_id;
@@ -172,7 +172,7 @@ void Configurable::registerParameter (const std::string &parameter_id, unsigned 
     configuration_->registerParameter (parameter_id, pointer, default_value);
 }
 
-void Configurable::registerParameter (const std::string &parameter_id, float* pointer, float default_value)
+void Configurable::registerParameter (const std::string& parameter_id, float* pointer, float default_value)
 {
     logdbg << "Configurable " << instance_id_ << ": registerParameter: float parameter_id " << parameter_id;
     assert (configuration_);
@@ -180,7 +180,7 @@ void Configurable::registerParameter (const std::string &parameter_id, float* po
     configuration_->registerParameter (parameter_id, pointer, default_value);
 }
 
-void Configurable::registerParameter (const std::string &parameter_id, double* pointer, double default_value)
+void Configurable::registerParameter (const std::string& parameter_id, double* pointer, double default_value)
 {
     logdbg << "Configurable " << instance_id_ << ": registerParameter: double parameter_id " << parameter_id;
     assert (configuration_);
@@ -188,8 +188,8 @@ void Configurable::registerParameter (const std::string &parameter_id, double* p
     configuration_->registerParameter (parameter_id, pointer, default_value);
 }
 
-void Configurable::registerParameter (const std::string &parameter_id, std::string* pointer,
-                                      const std::string &default_value)
+void Configurable::registerParameter (const std::string& parameter_id, std::string* pointer,
+                                      const std::string& default_value)
 {
     logdbg << "Configurable " << instance_id_ << ": registerParameter: string parameter_id " << parameter_id;
     assert (configuration_);
@@ -202,7 +202,7 @@ Configuration &Configurable::registerSubConfigurable (Configurable& child, bool 
     logdbg  << "Configurable " << instance_id_ << " registerSubConfigurable: child " << child.instanceId();
     assert (configuration_);
 
-    const std::string &key = child.keyId();
+    const std::string& key = child.keyId();
 
     if (children_.find (key) != children_.end())
     {
@@ -218,13 +218,13 @@ Configuration &Configurable::registerSubConfigurable (Configurable& child, bool 
     return configuration_->getSubConfiguration(child.classId(), child.instanceId());
 }
 
-void Configurable::removeChildConfigurable (Configurable &child, bool remove_config)
+void Configurable::removeChildConfigurable (Configurable& child, bool remove_config)
 {
     logdbg  << "Configurable " << instance_id_ << " removeChildConfigurable: child " << child.instanceId();
 
     assert (configuration_);
 
-    const std::string &key = child.keyId();
+    const std::string& key = child.keyId();
     assert (children_.find (key) != children_.end());
     logdbg  << "Configurable " << instance_id_ << ": removeChildConfigurable: " << key;
     children_.erase(children_.find(key));
@@ -252,13 +252,13 @@ void Configurable::resetToDefault ()
     }
 }
 
-Configuration &Configurable::addNewSubConfiguration (const std::string &class_id, const std::string &instance_id)
+Configuration &Configurable::addNewSubConfiguration (const std::string& class_id, const std::string& instance_id)
 {
     assert (configuration_);
     return configuration_->addNewSubConfiguration (class_id, instance_id);
 }
 
-Configuration &Configurable::addNewSubConfiguration (const std::string &class_id)
+Configuration &Configurable::addNewSubConfiguration (const std::string& class_id)
 {
     assert (configuration_);
     return configuration_->addNewSubConfiguration (class_id);
@@ -282,25 +282,25 @@ void Configurable::checkSubConfigurables ()
     logerr  << "Configurable: checkSubConfigurables: class " << class_id_ << " failed to override me";
 }
 
-void Configurable::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
+void Configurable::generateSubConfigurable (const std::string& class_id, const std::string& instance_id)
 {
     loginf  << "Configurable: generateSubConfigurable: class " << class_id_
-            << " failed to override me to generate subconfigurable " << class_id;
+            << " does not override ";
 }
 
-bool Configurable::hasSubConfigurable(const std::string &class_id, const std::string &instance_id)
+bool Configurable::hasSubConfigurable(const std::string& class_id, const std::string& instance_id)
 {
     assert (configuration_);
     return (children_.find(class_id+instance_id) != children_.end());
 }
 
-//void Configurable::saveConfigurationAsTemplate (const std::string &template_name)
+//void Configurable::saveConfigurationAsTemplate (const std::string& template_name)
 //{
 //    assert (parent_);
 //    parent_->saveTemplateConfiguration(this, template_name);
 //}
 
-//void Configurable::saveTemplateConfiguration (Configurable *child, const std::string &template_name)
+//void Configurable::saveTemplateConfiguration (Configurable *child, const std::string& template_name)
 //{
 //    assert (configuration_.getSubTemplateNameFree(template_name));
 //    configuration_.addSubTemplate(child->getConfiguration().clone(), template_name);
