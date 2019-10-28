@@ -96,6 +96,8 @@ public:
     void editionForCategory (unsigned int category, const std::string& edition);
     std::string refEditionForCategory (unsigned int category);
     void refEditionForCategory (unsigned int category, const std::string& ref);
+    std::string spfEditionForCategory (unsigned int category);
+    void spfEditionForCategory (unsigned int category, const std::string& spf);
 
     std::shared_ptr<JSONParsingSchema> schema() const;
 

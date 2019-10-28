@@ -76,6 +76,10 @@ message("  jASTERIX found: ${jASTERIX_FOUND}")
 message("  jASTERIX_INCLUDE_DIR: ${jASTERIX_INCLUDE_DIR}")
 message("  jASTERIX_LIBRARIES: ${jASTERIX_LIBRARIES}")
 
+find_package ( OpenSSL REQUIRED )
+message("  OPENSSL_INCLUDE_DIR: ${OPENSSL_INCLUDE_DIR}")
+message("  OPENSSL_CRYPTO_LIBRARY: ${OPENSSL_CRYPTO_LIBRARY}")
+
 #find_package ( JSONCPP REQUIRED )
 #message("  JSONCPP_INCLUDE_DIR: ${JSONCPP_INCLUDE_DIR}")
 #message("  JSONCPP_LIBRARY: ${JSONCPP_LIBRARY}")
@@ -157,7 +161,9 @@ target_link_libraries ( atsdb optimized
     ${SQLITE3_LIBRARIES}
     ${LibArchive_LIBRARIES}
     ${JSONCPP_LIBRARY}
-    ${TBB_LIBRARIES})
+    ${TBB_LIBRARIES}
+    ${OPENSSL_CRYPTO_LIBRARY}
+    )
 
 
 # installation stuff

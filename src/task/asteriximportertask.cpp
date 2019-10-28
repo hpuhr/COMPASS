@@ -318,6 +318,42 @@ void ASTERIXImporterTask::refEditionForCategory (unsigned int category, const st
         category_configs_.at(category).ref(ref);
 }
 
+std::string ASTERIXImporterTask::spfEditionForCategory (unsigned int category)
+{
+    assert (hasConfiguratonFor(category));
+
+    // check if edition exists, otherwise rest to default
+    if (category_configs_.at(category).spf().size() && // if value set and not exist in jASTERIX
+            jasterix_->category(category)->spfEditions().count(category_configs_.at(category).spf()) == 0)
+    {
+        loginf << "ASTERIXImporterTask: spfEditionForCategory: cat " << category << " reset to default spf";
+        category_configs_.at(category).spf(jasterix_->category(category)->defaultSPFEdition());
+    }
+
+    return category_configs_.at(category).spf();
+}
+
+void ASTERIXImporterTask::spfEditionForCategory (unsigned int category, const std::string& spf)
+{
+    assert (jasterix_->hasCategory(category));
+
+    loginf << "ASTERIXImporterTask: spfEditionForCategory: cat " << category << " spf '" << spf << "'";
+
+    if (!hasConfiguratonFor(category))
+    {
+        Configuration &new_cfg = configuration().addNewSubConfiguration ("ASTERIXCategoryConfig");
+        new_cfg.addParameterUnsignedInt ("category", category);
+        new_cfg.addParameterBool ("decode", false);
+        new_cfg.addParameterString ("edition", jasterix_->category(category)->defaultEdition());
+        new_cfg.addParameterString ("spf", spf);
+
+        generateSubConfigurable("ASTERIXCategoryConfig", new_cfg.getInstanceId());
+        assert (hasConfiguratonFor(category));
+    }
+    else
+        category_configs_.at(category).spf(spf);
+}
+
 std::shared_ptr<JSONParsingSchema> ASTERIXImporterTask::schema() const
 {
     return schema_;
@@ -402,6 +438,8 @@ void ASTERIXImporterTask::importFile(const std::string& filename)
 
     loginf << "ASTERIXImporterTask: importFile: setting categories";
 
+    jASTERIX::add_artas_md5_hash = true;
+
     // set category configs
     jasterix_->decodeNoCategories();
 
@@ -435,6 +473,14 @@ void ASTERIXImporterTask::importFile(const std::string& filename)
             continue;
         }
 
+        if (cat_it.second.spf().size() && // only if value set
+                !jasterix_->category(cat_it.first)->hasSPFEdition(cat_it.second.spf()))
+        {
+            logwrn << "ASTERIXImporterTask: importFile: cat " << cat_it.first << " spf '"
+                   << cat_it.second.spf() << "' not defined in decoder";
+            continue;
+        }
+
 //        loginf << "ASTERIXImporterTask: importFile: setting cat " <<  cat_it.first
 //               << " decode flag " << cat_it.second.decode();
         jasterix_->setDecodeCategory(cat_it.first, cat_it.second.decode());
@@ -442,7 +488,7 @@ void ASTERIXImporterTask::importFile(const std::string& filename)
 //               << " edition " << cat_it.second.edition();
         jasterix_->category(cat_it.first)->setCurrentEdition(cat_it.second.edition());
         jasterix_->category(cat_it.first)->setCurrentREFEdition(cat_it.second.ref());
-
+        jasterix_->category(cat_it.first)->setCurrentSPFEdition(cat_it.second.spf());
 
         // TODO mapping?
     }

@@ -33,6 +33,7 @@ public:
         registerParameter("decode", &decode_, false);
         registerParameter("edition", &edition_, "");
         registerParameter("ref", &ref_, "");
+        registerParameter("spf", &spf_, "");
     }
 
     virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id) {}
@@ -56,7 +57,7 @@ public:
         return edition_;
     }
 
-    void edition(const std::string &edition)
+    void edition(const std::string& edition)
     {
         edition_ = edition;
     }
@@ -66,9 +67,19 @@ public:
         return ref_;
     }
 
-    void ref(const std::string &ref)
+    void ref(const std::string& ref)
     {
         ref_ = ref;
+    }
+
+    std::string spf() const
+    {
+        return spf_;
+    }
+
+    void spf(const std::string& spf)
+    {
+        spf_ = spf;
     }
 
 private:
@@ -76,6 +87,7 @@ private:
     bool decode_ {false};
     std::string edition_;
     std::string ref_;
+    std::string spf_;
 
 protected:
     virtual void checkSubConfigurables () {}
