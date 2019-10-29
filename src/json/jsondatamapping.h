@@ -45,7 +45,7 @@ public:
 
     // return bool mandatory missing
     template<typename T>
-    bool findAndSetValue(const nlohmann::json& j, NullableVector<T>& array_list, unsigned int row_cnt) const
+    bool findAndSetValue(const nlohmann::json& j, NullableVector<T>& array_list, size_t row_cnt) const
     {
         const nlohmann::json* val_ptr = &j;
 
@@ -99,18 +99,29 @@ public:
                 logdbg << "JSONDataMapping: findAndSetValue: key " << json_key_ << " json " << val_ptr->type_name()
                        << " '" << val_ptr->dump() << "' format '" << json_value_format_ << "'";
 
-                //T tmp = val_ptr->get<T>();
-                if (json_value_format_ == "")
-                    array_list.set(row_cnt, *val_ptr);
+                if (append_value_)
+                {
+                    if (json_value_format_ == "")
+                        array_list.append(row_cnt, *val_ptr);
+                    else
+                        array_list.appendFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(*val_ptr));
+                }
                 else
-                    array_list.setFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(*val_ptr));
+                {
+                    if (json_value_format_ == "")
+                        array_list.set(row_cnt, *val_ptr);
+                    else
+                        array_list.setFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(*val_ptr));
+
+                }
 
                 logdbg << "JSONDataMapping: findAndSetValue: key " << json_key_ << " json " << *val_ptr
                        << " buffer " << array_list.get(row_cnt);
             }
             catch (nlohmann::json::exception& e)
             {
-                logerr  <<  "JSONDataMapping: findAndSetValue: key " << json_key_ << " json exception " << e.what();
+                logerr  <<  "JSONDataMapping: findAndSetValue: key " << json_key_ << " json exception " << e.what()
+                             << " property " << array_list.propertyName();
                 array_list.setNull(row_cnt);
             }
         }
@@ -118,7 +129,7 @@ public:
         return false; // everything ok
     }
 
-    bool findAndSetValue(const nlohmann::json& j, NullableVector<bool>& array_list, unsigned int row_cnt) const
+    bool findAndSetValue(const nlohmann::json& j, NullableVector<bool>& array_list, size_t row_cnt) const
     {
         const nlohmann::json* val_ptr = &j;
 
@@ -182,11 +193,22 @@ public:
                     tmp_bool = *val_ptr; // works for bool, throws for rest
                 }
 
-                if (json_value_format_ == "")
-                    array_list.set(row_cnt, tmp_bool);
+                if (append_value_)
+                {
+                    if (json_value_format_ == "")
+                        array_list.append(row_cnt, tmp_bool);
+                    else
+                        array_list.appendFromFormat(row_cnt, json_value_format_,
+                                                 Utils::JSON::toString(tmp_bool));
+                }
                 else
-                    array_list.setFromFormat(row_cnt, json_value_format_,
-                                             Utils::JSON::toString(tmp_bool));
+                {
+                    if (json_value_format_ == "")
+                        array_list.set(row_cnt, tmp_bool);
+                    else
+                        array_list.setFromFormat(row_cnt, json_value_format_,
+                                                 Utils::JSON::toString(tmp_bool));
+                }
 
                 logdbg << "JSONDataMapping: findAndSetValue(bool): json " << tmp_bool << " buffer "
                        << array_list.get(row_cnt);
@@ -194,7 +216,7 @@ public:
             catch (nlohmann::json::exception& e)
             {
                 logerr  <<  "JSONDataMapping: findAndSetValue(bool): key " << json_key_ << " json exception "
-                         << e.what();
+                         << e.what() << " property " << array_list.propertyName();
                 array_list.setNull(row_cnt);
             }
         }
@@ -202,7 +224,7 @@ public:
         return false; // everything ok
     }
 
-    bool findAndSetValue(const nlohmann::json& j, NullableVector<char>& array_list, unsigned int row_cnt) const
+    bool findAndSetValue(const nlohmann::json& j, NullableVector<char>& array_list, size_t row_cnt) const
     {
         const nlohmann::json* val_ptr = &j;
 
@@ -253,11 +275,22 @@ public:
         {
             try
             {
-                if (json_value_format_ == "")
-                    array_list.set(row_cnt, static_cast<int> (*val_ptr));
+                if (append_value_)
+                {
+                    if (json_value_format_ == "")
+                        array_list.append(row_cnt, static_cast<int> (*val_ptr));
+                    else
+                        array_list.appendFromFormat(row_cnt, json_value_format_,
+                                                 Utils::JSON::toString(static_cast<int> (*val_ptr)));
+                }
                 else
-                    array_list.setFromFormat(row_cnt, json_value_format_,
-                                             Utils::JSON::toString(static_cast<int> (*val_ptr)));
+                {
+                    if (json_value_format_ == "")
+                        array_list.set(row_cnt, static_cast<int> (*val_ptr));
+                    else
+                        array_list.setFromFormat(row_cnt, json_value_format_,
+                                                 Utils::JSON::toString(static_cast<int> (*val_ptr)));
+                }
 
                 logdbg << "JSONDataMapping: findAndSetValue(char): json " << static_cast<int> (*val_ptr) << " buffer "
                        << array_list.get(row_cnt);
@@ -265,7 +298,7 @@ public:
             catch (nlohmann::json::exception& e)
             {
                 logerr  <<  "JSONDataMapping: findAndSetValue(char): key " << json_key_ << " json exception "
-                         << e.what();
+                         << e.what() << " property " << array_list.propertyName();
                 array_list.setNull(row_cnt);
             }
         }
@@ -273,7 +306,7 @@ public:
         return false; // everything ok
     }
 
-    bool findAndSetValue(const nlohmann::json& j, NullableVector<std::string>& array_list, unsigned int row_cnt) const
+    bool findAndSetValue(const nlohmann::json& j, NullableVector<std::string>& array_list, size_t row_cnt) const
     {
         const nlohmann::json* val_ptr = &j;
 
@@ -324,18 +357,27 @@ public:
         {
             try
             {
-                if (json_value_format_ == "")
-                    array_list.set(row_cnt, Utils::JSON::toString(*val_ptr));
+                if (append_value_)
+                {
+                    if (json_value_format_ == "")
+                        array_list.append(row_cnt, Utils::JSON::toString(*val_ptr));
+                    else
+                        array_list.appendFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(*val_ptr));
+                }
                 else
-                    array_list.setFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(*val_ptr));
-
+                {
+                    if (json_value_format_ == "")
+                        array_list.set(row_cnt, Utils::JSON::toString(*val_ptr));
+                    else
+                        array_list.setFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(*val_ptr));
+                }
                 logdbg << "JSONDataMapping: findAndSetValue(string): json " << Utils::JSON::toString(*val_ptr)
                        << " buffer " << array_list.get(row_cnt);
             }
             catch (nlohmann::json::exception& e)
             {
                 logerr  <<  "JSONDataMapping: findAndSetValue(string): key " << json_key_ << " json exception "
-                         << e.what();
+                         << e.what() << " property " << array_list.propertyName();
                 array_list.setNull(row_cnt);
             }
         }
@@ -385,6 +427,9 @@ public:
     std::string comment() const;
     void comment(const std::string &comment);
 
+    bool appendValue() const;
+    void appendValue(bool appendValue);
+
 private:
     bool initialized_ {false};
 
@@ -407,6 +452,8 @@ private:
     std::string dimension_;
     /// Unit
     std::string unit_;
+
+    bool append_value_ {false};
 
     bool has_sub_keys_ {false};
     std::vector<std::string> sub_keys_;

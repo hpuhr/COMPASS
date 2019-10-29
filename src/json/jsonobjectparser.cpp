@@ -462,7 +462,7 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
         }
         case PropertyDataType::STRING:
         {
-            logdbg << "JSONObjectParser: parseTargetReport: string " << current_var_name << " format '"
+            loginf << "JSONObjectParser: parseTargetReport: string " << current_var_name << " format '"
                    << map_it.jsonValueFormat() << "'";
             assert (buffer->has<std::string>(current_var_name));
             mandatory_missing = map_it.findAndSetValue (tr, buffer->get<std::string> (current_var_name), row_cnt);
@@ -523,8 +523,37 @@ void JSONObjectParser::createMappingsFromTargetReport (const nlohmann::json& tr)
 
 void JSONObjectParser::checkIfKeysExistsInMappings (const std::string& location, const nlohmann::json& j)
 {
-    if (j.is_array()) // do not map arrays
-        return;
+    //bool j_is_array = false; // indicated if j contains array
+    //std::string j_array_type;
+
+    if (j.is_array()) // do map arrays
+    {
+        //j_is_array = true;
+
+        if (!j.size()) // do not map if empty
+            return;
+
+        bool j_array_contains_only_primitives = true; // only
+
+        for (auto& j_it : j.get<json::array_t>()) // iterate over array
+        {
+            if (j_it.is_object()) // only parse sub-objects
+            {
+                j_array_contains_only_primitives = false;
+                checkIfKeysExistsInMappings (location, j_it);
+            }
+            else if (j_it.is_array())
+                j_array_contains_only_primitives = false;
+
+//            if (!j_array_type.size())
+//                j_array_type = j_it.type_name();
+//            else if (j_array_type != "mixed" && j_array_type != j_it.type_name())
+//                j_array_type = "mixed";
+        }
+
+        if (!j_array_contains_only_primitives)
+            return; // if objects inside, only parse objects
+    }
 
     if (j.is_object())
     {
@@ -551,7 +580,10 @@ void JSONObjectParser::checkIfKeysExistsInMappings (const std::string& location,
             if (!map_it.comment().size())
             {
                 std::stringstream ss;
-                ss << "Type " << j.type_name() << ", value " <<j.dump();
+//                if (j_is_array)
+//                    ss << "Type Array[" << j_array_type << "], value " << j.dump();
+//                else
+                ss << "Type " << j.type_name() << ", value " << j.dump();
                 map_it.comment (ss.str());
             }
             break;
@@ -568,7 +600,7 @@ void JSONObjectParser::checkIfKeysExistsInMappings (const std::string& location,
         new_cfg.addParameterString ("db_object_name", db_object_name_);
 
         std::stringstream ss;
-        ss << "Type " << j.type_name() << ", value " <<j.dump();
+        ss << "Type " << j.type_name() << ", value " << j.dump();
         new_cfg.addParameterString ("comment", ss.str());
 
         generateSubConfigurable("JSONDataMapping", new_cfg.getInstanceId());

@@ -188,6 +188,10 @@ void JSONObjectParserWidget::updateMappingsGrid()
     format_label->setFont (font_bold);
     mappings_grid_->addWidget (format_label, row, 6);
 
+    QLabel *append_label = new QLabel ("Append");
+    append_label->setFont (font_bold);
+    mappings_grid_->addWidget (append_label, row, 7);
+
     ++row;
 
     std::multimap<std::string, std::pair<unsigned int,JSONDataMapping*>> sorted_mappings;
@@ -243,17 +247,18 @@ void JSONObjectParserWidget::updateMappingsGrid()
         UnitSelectionWidget* unit_sel = new UnitSelectionWidget(map_it.second.second->dimensionRef(),
                                                                 map_it.second.second->unitRef());
         mappings_grid_->addWidget (unit_sel, row, 5);
-        //column_unit_selection_widgets_[unit_widget] = it.second;
 
-        //        if (map_it.hasVariable())
-        //        {
         DataTypeFormatSelectionWidget* data_format_widget
                 = new DataTypeFormatSelectionWidget (map_it.second.second->formatDataTypeRef(),
                                                      map_it.second.second->jsonValueFormatRef());
 
         mappings_grid_->addWidget (data_format_widget, row, 6);
-        //            format_selections_[row-1] = data_format_widget;
-        //        }
+
+        QCheckBox* append_check = new QCheckBox ();
+        append_check->setChecked(map_it.second.second->appendValue());
+        connect(append_check, SIGNAL(stateChanged(int)), this, SLOT(mappingAppendChangedSlot()));
+        append_check->setProperty("mapping", data);
+        mappings_grid_->addWidget(append_check, row, 7);
 
         QPushButton *del = new QPushButton ();
         del->setIcon(del_icon);
@@ -262,7 +267,7 @@ void JSONObjectParserWidget::updateMappingsGrid()
         connect(del, SIGNAL(clicked()), this, SLOT(mappingDeleteSlot()));
         del->setProperty("mapping", data);
         del->setProperty("index", map_it.second.first);
-        mappings_grid_->addWidget (del, row, 7);
+        mappings_grid_->addWidget (del, row, 8);
 
         row++;
     }
@@ -450,6 +455,20 @@ void JSONObjectParserWidget::mappingMandatoryChangedSlot()
     assert (mapping);
 
     mapping->mandatory(widget->checkState() == Qt::Checked);
+}
+
+void JSONObjectParserWidget::mappingAppendChangedSlot()
+{
+    loginf << "JSONObjectParserWidget: mappingAppendChangedSlot";
+
+    QCheckBox* widget = static_cast<QCheckBox*>(sender());
+    assert (widget);
+    QVariant data = widget->property("mapping");
+
+    JSONDataMapping* mapping = data.value<JSONDataMapping*>();
+    assert (mapping);
+
+    mapping->appendValue(widget->checkState() == Qt::Checked);
 }
 
 void JSONObjectParserWidget::mappingDeleteSlot()

@@ -60,8 +60,11 @@ public:
 
     /// @brief Sets specific value
     void set (size_t index, T value);
-
     void setFromFormat (size_t index, const std::string& format, const std::string& value_str);
+
+    /// @brief Appends specific value
+    void append (size_t index, T value);
+    void appendFromFormat (size_t index, const std::string& format, const std::string& value_str);
 
     /// @brief Sets specific element to Null value
     void setNull(size_t index);
@@ -81,6 +84,7 @@ public:
 
     void checkNotNull ();
 
+    std::string propertyName () const { return property_.name()+"("+property_.dataTypeString()+")"; }
 
 private:
     Property property_;
@@ -206,6 +210,68 @@ template <class T> void NullableVector<T>::setFromFormat (size_t index, const st
     }
 
     set (index, value);
+}
+
+template <class T> void NullableVector<T>::append (size_t index, T value)
+{
+    logdbg << "ArrayListTemplate " << property_.name() << ": append: index " << index << " value '" << value << "'";
+
+    if (BUFFER_PEDANTIC_CHECKING)
+    {
+        assert (data_.size() <= buffer_.data_size_);
+        assert (null_flags_.size() <= buffer_.data_size_);
+    }
+
+    if (index >= data_.size()) // allocate new stuff, fill all new with not null
+    {
+        if (index != data_.size()) // some where left out
+            resizeNullTo(index+1);
+
+        resizeDataTo (index+1);
+    }
+
+    if (BUFFER_PEDANTIC_CHECKING)
+        assert (index < data_.size());
+
+    data_.at(index) += value;
+    unsetNull(index);
+
+    //logdbg << "ArrayListTemplate: set: size " << size_ << " max_size " << max_size_;
+}
+
+template <class T> void NullableVector<T>::appendFromFormat (size_t index, const std::string& format,
+                                                             const std::string& value_str)
+{
+    logdbg << "ArrayListTemplate " << property_.name() << ": appendFromFormat";
+    T value;
+
+    if (format == "octal")
+    {
+        value = std::stoi(value_str, 0, 8);
+    }
+    else if (format == "hexadecimal")
+    {
+        value = std::stoi(value_str, 0, 16);
+    }
+    else if (format == "epoch_tod_ms")
+    {
+        QDateTime date_time;
+        date_time.setMSecsSinceEpoch(std::stoul(value_str));
+        value = Utils::String::timeFromString(date_time.toString("hh:mm:ss.zzz").toStdString());
+    }
+    else if (format == "epoch_tod_s")
+    {
+        QDateTime date_time;
+        date_time.setMSecsSinceEpoch(1000*std::stoul(value_str));
+        value = Utils::String::timeFromString(date_time.toString("hh:mm:ss.zzz").toStdString());
+    }
+    else
+    {
+        logerr << "ArrayListTemplate: setFromFormat: unknown format '" << format << "'";
+        assert (false);
+    }
+
+    append (index, value);
 }
 
 template <class T> void NullableVector<T>::setNull(size_t index)
@@ -516,6 +582,12 @@ template <class T> void NullableVector<T>::unsetNull (size_t index)
 
 template <>
 NullableVector<bool>& NullableVector<bool>::operator*=(double factor);
+
+template <>
+void NullableVector<bool>::append (size_t index, bool value);
+
+template <>
+void NullableVector<std::string>::append (size_t index, std::string value);
 
 
 

@@ -39,7 +39,6 @@ public:
     {
         loadFramings();
         connect(this, SIGNAL(activated(const QString &)), this, SIGNAL(changedFraming()));
-
     }
     /// @brief Destructor
     virtual ~ASTERIXFramingComboBox() {}

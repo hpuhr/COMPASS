@@ -7,6 +7,7 @@
 #include <jasterix/spfedition.h>
 
 #include <QComboBox>
+
 #include <memory>
 
 class ASTERIXSPFEditionComboBox: public QComboBox
@@ -29,8 +30,6 @@ public:
                            QWidget* parent = nullptr)
     : QComboBox(parent), task_(task), category_(category)
     {
-        //const std::map<std::string, std::shared_ptr<Edition>>& editions() const;
-
         addItem ("");
 
         if (category_->spfEditions().size())

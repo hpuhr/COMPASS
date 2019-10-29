@@ -44,6 +44,7 @@ public slots:
     void mappingCommentChangedSlot();
     void mappingDBOVariableChangedSlot();
     void mappingMandatoryChangedSlot();
+    void mappingAppendChangedSlot();
     void mappingDeleteSlot();
 
 public:

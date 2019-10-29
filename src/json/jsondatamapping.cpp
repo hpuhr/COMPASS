@@ -45,6 +45,8 @@ JSONDataMapping::JSONDataMapping (const std::string& class_id, const std::string
     registerParameter("dimension", &dimension_, "");
     registerParameter("unit", &unit_, "");
 
+    registerParameter("append_value", &append_value_, false);
+
     logdbg << "JSONDataMapping: ctor: dbo " << db_object_name_ << " var " << dbovariable_name_
            << " dim " << dimension_ << " unit " << unit_;
 
@@ -76,6 +78,8 @@ JSONDataMapping& JSONDataMapping::operator=(JSONDataMapping&& other)
     dimension_ = other.dimension_;
     unit_ = other.unit_;
 
+    append_value_ = other.append_value_;
+
     has_sub_keys_ = other.has_sub_keys_;
     sub_keys_ = std::move(other.sub_keys_);
     num_sub_keys_ = other.num_sub_keys_;
@@ -90,6 +94,7 @@ JSONDataMapping& JSONDataMapping::operator=(JSONDataMapping&& other)
     other.configuration().updateParameterPointer ("json_value_format", &json_value_format_);
     other.configuration().updateParameterPointer ("dimension", &dimension_);
     other.configuration().updateParameterPointer ("unit", &unit_);
+    other.configuration().updateParameterPointer ("append_value", &append_value_);
 
     widget_ = std::move(other.widget_);
     if (widget_)
@@ -130,6 +135,16 @@ std::string JSONDataMapping::comment() const
 void JSONDataMapping::comment(const std::string &comment)
 {
     comment_ = comment;
+}
+
+bool JSONDataMapping::appendValue() const
+{
+    return append_value_;
+}
+
+void JSONDataMapping::appendValue(bool append_value)
+{
+    append_value_ = append_value;
 }
 
 DBOVariable& JSONDataMapping::variable() const
@@ -255,11 +270,21 @@ void JSONDataMapping::initialize ()
     }
     else if (variable_)
     {
-        loginf << "JSONDataMapping: updateVariable: setting format from variable "<< variable_->name();
+        loginf << "JSONDataMapping: initialize: setting format from variable "<< variable_->name();
         json_value_format_ = Format (variable_->dataType(), json_value_format_);
     }
     else
-        loginf << "JSONDataMapping: updateVariable: variable not set";
+        loginf << "JSONDataMapping: initialize: variable not set";
+
+    if (append_value_)
+    {
+        if (sub_keys_.size() < 2)
+            logwrn << "JSONDataMapping: initialize: append set but olny " << sub_keys_.size() << " sub keys";
+
+        if (!variable_)
+            logwrn << "JSONDataMapping: initialize: append set not variable set";
+
+    }
 
     initialized_ =  true;
 }

@@ -48,6 +48,7 @@ std::map<std::string, PropertyDataType> Property::strings_2_data_types_ = boost:
 Property::Property(std::string id, PropertyDataType type)
     : data_type_(type), name_(id)
 {
+    data_type_str_ = asString(data_type_);
     //size_ = MemoryManager::getInstance().getBaseSizesInBytes(data_type_int_);
 }
 

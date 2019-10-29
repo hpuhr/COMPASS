@@ -28,5 +28,64 @@ NullableVector<bool>& NullableVector<bool>::operator*=(double factor)
     return *this;
 }
 
+template <>
+void NullableVector<bool>::append (size_t index, bool value)
+{
+    logdbg << "ArrayListTemplate " << property_.name() << ": append: index " << index << " value '" << value << "'";
 
+    if (BUFFER_PEDANTIC_CHECKING)
+    {
+        assert (data_.size() <= buffer_.data_size_);
+        assert (null_flags_.size() <= buffer_.data_size_);
+    }
+
+    if (index >= data_.size()) // allocate new stuff, fill all new with not null
+    {
+        if (index != data_.size()) // some where left out
+            resizeNullTo(index+1);
+
+        resizeDataTo (index+1);
+    }
+
+    if (BUFFER_PEDANTIC_CHECKING)
+        assert (index < data_.size());
+
+    data_.at(index) = data_.at(index) || value;
+
+    unsetNull(index);
+
+    //logdbg << "ArrayListTemplate: append: size " << size_ << " max_size " << max_size_;
+}
+
+template <>
+void NullableVector<std::string>::append (size_t index, std::string value)
+{
+    logdbg << "ArrayListTemplate " << property_.name() << ": append: index " << index << " value '" << value << "'";
+
+    if (BUFFER_PEDANTIC_CHECKING)
+    {
+        assert (data_.size() <= buffer_.data_size_);
+        assert (null_flags_.size() <= buffer_.data_size_);
+    }
+
+    if (index >= data_.size()) // allocate new stuff, fill all new with not null
+    {
+        if (index != data_.size()) // some where left out
+            resizeNullTo(index+1);
+
+        resizeDataTo (index+1);
+    }
+
+    if (BUFFER_PEDANTIC_CHECKING)
+        assert (index < data_.size());
+
+    if (data_.at(index).size())
+        data_.at(index) += ";"+value;
+    else
+        data_.at(index) = value;
+
+    unsetNull(index);
+
+    //logdbg << "ArrayListTemplate: append: size " << size_ << " max_size " << max_size_;
+}
 
