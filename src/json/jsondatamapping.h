@@ -47,42 +47,7 @@ public:
     template<typename T>
     bool findAndSetValue(const nlohmann::json& j, NullableVector<T>& array_list, size_t row_cnt) const
     {
-        const nlohmann::json* val_ptr = &j;
-
-        if (has_sub_keys_)
-        {
-            for (const std::string& sub_key : sub_keys_)
-            {
-                if (val_ptr->contains (sub_key))
-                {
-                    if (sub_key == sub_keys_.back()) // last found
-                    {
-                        val_ptr = &val_ptr->at(sub_key);
-                        break;
-                    }
-
-                    if (val_ptr->at(sub_key).is_object()) // not last, step in
-                        val_ptr = &val_ptr->at(sub_key);
-                    else // not last key, and not object
-                    {
-                        val_ptr = nullptr;
-                        break;
-                    }
-                }
-                else // not found
-                {
-                    val_ptr = nullptr;
-                    break;
-                }
-            }
-        }
-        else
-        {
-            if (val_ptr->contains (json_key_))
-                val_ptr = &val_ptr->at(json_key_);
-            else
-                val_ptr = nullptr;
-        }
+        const nlohmann::json* val_ptr = findKey(j);
 
         if (val_ptr == nullptr || *val_ptr == nullptr)
         {
@@ -96,293 +61,17 @@ public:
         {
             try
             {
-                logdbg << "JSONDataMapping: findAndSetValue: key " << json_key_ << " json " << val_ptr->type_name()
-                       << " '" << val_ptr->dump() << "' format '" << json_value_format_ << "'";
-
-                if (append_value_)
-                {
-                    if (json_value_format_ == "")
-                        array_list.append(row_cnt, *val_ptr);
-                    else
-                        array_list.appendFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(*val_ptr));
-                }
-                else
-                {
-                    if (json_value_format_ == "")
-                        array_list.set(row_cnt, *val_ptr);
-                    else
-                        array_list.setFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(*val_ptr));
-
-                }
-
-                logdbg << "JSONDataMapping: findAndSetValue: key " << json_key_ << " json " << *val_ptr
-                       << " buffer " << array_list.get(row_cnt);
+                setValue(val_ptr, array_list, row_cnt);
+                return false; // everything ok
             }
             catch (nlohmann::json::exception& e)
             {
-                logerr  <<  "JSONDataMapping: findAndSetValue: key " << json_key_ << " json exception " << e.what()
-                             << " property " << array_list.propertyName();
-                array_list.setNull(row_cnt);
-            }
-        }
-
-        return false; // everything ok
-    }
-
-    bool findAndSetValue(const nlohmann::json& j, NullableVector<bool>& array_list, size_t row_cnt) const
-    {
-        const nlohmann::json* val_ptr = &j;
-
-        if (has_sub_keys_)
-        {
-            for (const std::string& sub_key : sub_keys_)
-            {
-                if (val_ptr->contains (sub_key))
-                {
-                    if (sub_key == sub_keys_.back()) // last found
-                    {
-                        val_ptr = &val_ptr->at(sub_key);
-                        break;
-                    }
-
-                    if (val_ptr->at(sub_key).is_object()) // not last, step in
-                        val_ptr = &val_ptr->at(sub_key);
-                    else // not last key, and not object
-                    {
-                        val_ptr = nullptr;
-                        break;
-                    }
-                }
-                else // not found
-                {
-                    val_ptr = nullptr;
-                    break;
-                }
-            }
-        }
-        else
-        {
-            if (val_ptr->contains (json_key_))
-                val_ptr = &val_ptr->at(json_key_);
-            else
-                val_ptr = nullptr;
-        }
-
-        if (val_ptr == nullptr || *val_ptr == nullptr)
-        {
-            if (mandatory_)
-                return true;
-
-            //array_list.setNull(row_cnt);
-            return false;
-        }
-        else
-        {
-            try
-            {
-                bool tmp_bool;
-
-                if (val_ptr->is_number())
-                {
-                    unsigned int tmp = *val_ptr;
-                    assert (tmp == 0 || tmp == 1);
-                    tmp_bool = static_cast<bool> (tmp);
-                }
-                else
-                {
-                    tmp_bool = *val_ptr; // works for bool, throws for rest
-                }
-
-                if (append_value_)
-                {
-                    if (json_value_format_ == "")
-                        array_list.append(row_cnt, tmp_bool);
-                    else
-                        array_list.appendFromFormat(row_cnt, json_value_format_,
-                                                 Utils::JSON::toString(tmp_bool));
-                }
-                else
-                {
-                    if (json_value_format_ == "")
-                        array_list.set(row_cnt, tmp_bool);
-                    else
-                        array_list.setFromFormat(row_cnt, json_value_format_,
-                                                 Utils::JSON::toString(tmp_bool));
-                }
-
-                logdbg << "JSONDataMapping: findAndSetValue(bool): json " << tmp_bool << " buffer "
-                       << array_list.get(row_cnt);
-            }
-            catch (nlohmann::json::exception& e)
-            {
-                logerr  <<  "JSONDataMapping: findAndSetValue(bool): key " << json_key_ << " json exception "
+                logerr  <<  "JSONDataMapping: setValue: key " << json_key_ << " json exception "
                          << e.what() << " property " << array_list.propertyName();
                 array_list.setNull(row_cnt);
+                return true; // last entry might be wrong
             }
         }
-
-        return false; // everything ok
-    }
-
-    bool findAndSetValue(const nlohmann::json& j, NullableVector<char>& array_list, size_t row_cnt) const
-    {
-        const nlohmann::json* val_ptr = &j;
-
-        if (has_sub_keys_)
-        {
-            for (const std::string& sub_key : sub_keys_)
-            {
-                if (val_ptr->contains (sub_key))
-                {
-                    if (sub_key == sub_keys_.back()) // last found
-                    {
-                        val_ptr = &val_ptr->at(sub_key);
-                        break;
-                    }
-
-                    if (val_ptr->at(sub_key).is_object()) // not last, step in
-                        val_ptr = &val_ptr->at(sub_key);
-                    else // not last key, and not object
-                    {
-                        val_ptr = nullptr;
-                        break;
-                    }
-                }
-                else // not found
-                {
-                    val_ptr = nullptr;
-                    break;
-                }
-            }
-        }
-        else
-        {
-            if (val_ptr->contains (json_key_))
-                val_ptr = &val_ptr->at(json_key_);
-            else
-                val_ptr = nullptr;
-        }
-
-        if (val_ptr == nullptr || *val_ptr == nullptr)
-        {
-            if (mandatory_)
-                return true;
-
-            //array_list.setNull(row_cnt);
-            return false;
-        }
-        else
-        {
-            try
-            {
-                if (append_value_)
-                {
-                    if (json_value_format_ == "")
-                        array_list.append(row_cnt, static_cast<int> (*val_ptr));
-                    else
-                        array_list.appendFromFormat(row_cnt, json_value_format_,
-                                                 Utils::JSON::toString(static_cast<int> (*val_ptr)));
-                }
-                else
-                {
-                    if (json_value_format_ == "")
-                        array_list.set(row_cnt, static_cast<int> (*val_ptr));
-                    else
-                        array_list.setFromFormat(row_cnt, json_value_format_,
-                                                 Utils::JSON::toString(static_cast<int> (*val_ptr)));
-                }
-
-                logdbg << "JSONDataMapping: findAndSetValue(char): json " << static_cast<int> (*val_ptr) << " buffer "
-                       << array_list.get(row_cnt);
-            }
-            catch (nlohmann::json::exception& e)
-            {
-                logerr  <<  "JSONDataMapping: findAndSetValue(char): key " << json_key_ << " json exception "
-                         << e.what() << " property " << array_list.propertyName();
-                array_list.setNull(row_cnt);
-            }
-        }
-
-        return false; // everything ok
-    }
-
-    bool findAndSetValue(const nlohmann::json& j, NullableVector<std::string>& array_list, size_t row_cnt) const
-    {
-        const nlohmann::json* val_ptr = &j;
-
-        if (has_sub_keys_)
-        {
-            for (const std::string& sub_key : sub_keys_)
-            {
-                if (val_ptr->contains (sub_key))
-                {
-                    if (sub_key == sub_keys_.back()) // last found
-                    {
-                        val_ptr = &val_ptr->at(sub_key);
-                        break;
-                    }
-
-                    if (val_ptr->at(sub_key).is_object()) // not last, step in
-                        val_ptr = &val_ptr->at(sub_key);
-                    else // not last key, and not object
-                    {
-                        val_ptr = nullptr;
-                        break;
-                    }
-                }
-                else // not found
-                {
-                    val_ptr = nullptr;
-                    break;
-                }
-            }
-        }
-        else
-        {
-            if (val_ptr->contains (json_key_))
-                val_ptr = &val_ptr->at(json_key_);
-            else
-                val_ptr = nullptr;
-        }
-
-        if (val_ptr == nullptr || *val_ptr == nullptr)
-        {
-            if (mandatory_)
-                return true;
-
-            //array_list.setNull(row_cnt);
-            return false;
-        }
-        else
-        {
-            try
-            {
-                if (append_value_)
-                {
-                    if (json_value_format_ == "")
-                        array_list.append(row_cnt, Utils::JSON::toString(*val_ptr));
-                    else
-                        array_list.appendFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(*val_ptr));
-                }
-                else
-                {
-                    if (json_value_format_ == "")
-                        array_list.set(row_cnt, Utils::JSON::toString(*val_ptr));
-                    else
-                        array_list.setFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(*val_ptr));
-                }
-                logdbg << "JSONDataMapping: findAndSetValue(string): json " << Utils::JSON::toString(*val_ptr)
-                       << " buffer " << array_list.get(row_cnt);
-            }
-            catch (nlohmann::json::exception& e)
-            {
-                logerr  <<  "JSONDataMapping: findAndSetValue(string): key " << json_key_ << " json exception "
-                         << e.what() << " property " << array_list.propertyName();
-                array_list.setNull(row_cnt);
-            }
-        }
-
-        return false; // everything ok
     }
 
     bool hasDimension () const { return dimension_.size() > 0; }
@@ -465,6 +154,121 @@ private:
 
 protected:
     virtual void checkSubConfigurables () {}
+
+    const nlohmann::json* findKey (const nlohmann::json& j) const;
+
+    template<typename T>
+    void setValue(const nlohmann::json* val_ptr, NullableVector<T>& array_list, size_t row_cnt) const
+    {
+        assert (val_ptr);
+
+        logdbg << "JSONDataMapping: setValue: key " << json_key_ << " json " << val_ptr->type_name()
+               << " '" << val_ptr->dump() << "' format '" << json_value_format_ << "'";
+
+        if (append_value_)
+        {
+            if (json_value_format_ == "")
+                array_list.append(row_cnt, *val_ptr);
+            else
+                array_list.appendFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(*val_ptr));
+        }
+        else
+        {
+            if (json_value_format_ == "")
+                array_list.set(row_cnt, *val_ptr);
+            else
+                array_list.setFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(*val_ptr));
+
+        }
+
+        logdbg << "JSONDataMapping: setValue: key " << json_key_ << " json " << *val_ptr
+               << " buffer " << array_list.get(row_cnt);
+    }
+
+    void setValue(const nlohmann::json* val_ptr, NullableVector<bool>& array_list, size_t row_cnt) const
+    {
+        assert (val_ptr);
+
+        bool tmp_bool;
+
+        if (val_ptr->is_number())
+        {
+            unsigned int tmp = *val_ptr;
+            assert (tmp == 0 || tmp == 1);
+            tmp_bool = static_cast<bool> (tmp);
+        }
+        else
+        {
+            tmp_bool = *val_ptr; // works for bool, throws for rest
+        }
+
+        if (append_value_)
+        {
+            if (json_value_format_ == "")
+                array_list.append(row_cnt, tmp_bool);
+            else
+                array_list.appendFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(tmp_bool));
+        }
+        else
+        {
+            if (json_value_format_ == "")
+                array_list.set(row_cnt, tmp_bool);
+            else
+                array_list.setFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(tmp_bool));
+        }
+
+        logdbg << "JSONDataMapping: setValue(bool): json " << tmp_bool << " buffer "
+               << array_list.get(row_cnt);
+    }
+
+    void setValue(const nlohmann::json* val_ptr, NullableVector<char>& array_list, size_t row_cnt) const
+    {
+        assert (val_ptr);
+
+        if (append_value_)
+        {
+            if (json_value_format_ == "")
+                array_list.append(row_cnt, static_cast<int> (*val_ptr));
+            else
+                array_list.appendFromFormat(row_cnt, json_value_format_,
+                                            Utils::JSON::toString(static_cast<int> (*val_ptr)));
+        }
+        else
+        {
+            if (json_value_format_ == "")
+                array_list.set(row_cnt, static_cast<int> (*val_ptr));
+            else
+                array_list.setFromFormat(row_cnt, json_value_format_,
+                                         Utils::JSON::toString(static_cast<int> (*val_ptr)));
+        }
+
+        logdbg << "JSONDataMapping: setValue(char): json " << static_cast<int> (*val_ptr) << " buffer "
+               << array_list.get(row_cnt);
+    }
+
+    void setValue(const nlohmann::json* val_ptr, NullableVector<std::string>& array_list, size_t row_cnt) const
+    {
+        assert (val_ptr);
+
+        if (append_value_)
+        {
+            if (json_value_format_ == "")
+                array_list.append(row_cnt, Utils::JSON::toString(*val_ptr));
+            else
+                array_list.appendFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(*val_ptr));
+        }
+        else
+        {
+            if (json_value_format_ == "")
+                array_list.set(row_cnt, Utils::JSON::toString(*val_ptr));
+            else
+                array_list.setFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(*val_ptr));
+        }
+        logdbg << "JSONDataMapping: setValue(string): json " << Utils::JSON::toString(*val_ptr)
+               << " buffer " << array_list.get(row_cnt);
+
+    }
+
 };
 
 Q_DECLARE_METATYPE(JSONDataMapping*)

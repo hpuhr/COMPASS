@@ -289,3 +289,43 @@ void JSONDataMapping::initialize ()
     initialized_ =  true;
 }
 
+const nlohmann::json* JSONDataMapping::findKey (const nlohmann::json& j) const
+{
+    const nlohmann::json* val_ptr = &j;
+
+    if (has_sub_keys_)
+    {
+        for (const std::string& sub_key : sub_keys_)
+        {
+            if (val_ptr->contains (sub_key))
+            {
+                if (sub_key == sub_keys_.back()) // last found
+                {
+                    val_ptr = &val_ptr->at(sub_key);
+                    break;
+                }
+
+                if (val_ptr->at(sub_key).is_object()) // not last, step in
+                    val_ptr = &val_ptr->at(sub_key);
+                else // not last key, and not object
+                {
+                    val_ptr = nullptr;
+                    break;
+                }
+            }
+            else // not found
+            {
+                val_ptr = nullptr;
+                break;
+            }
+        }
+    }
+    else
+    {
+        if (val_ptr->contains (json_key_))
+            val_ptr = &val_ptr->at(json_key_);
+        else
+            val_ptr = nullptr;
+    }
+    return val_ptr;
+}

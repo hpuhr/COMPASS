@@ -462,7 +462,7 @@ bool JSONObjectParser::parseTargetReport (const nlohmann::json& tr, std::shared_
         }
         case PropertyDataType::STRING:
         {
-            loginf << "JSONObjectParser: parseTargetReport: string " << current_var_name << " format '"
+            logdbg << "JSONObjectParser: parseTargetReport: string " << current_var_name << " format '"
                    << map_it.jsonValueFormat() << "'";
             assert (buffer->has<std::string>(current_var_name));
             mandatory_missing = map_it.findAndSetValue (tr, buffer->get<std::string> (current_var_name), row_cnt);
