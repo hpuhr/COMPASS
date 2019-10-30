@@ -45,6 +45,7 @@ JSONDataMapping::JSONDataMapping (const std::string& class_id, const std::string
     registerParameter("dimension", &dimension_, "");
     registerParameter("unit", &unit_, "");
 
+    registerParameter("in_array", &in_array_, false);
     registerParameter("append_value", &append_value_, false);
 
     logdbg << "JSONDataMapping: ctor: dbo " << db_object_name_ << " var " << dbovariable_name_
@@ -53,6 +54,11 @@ JSONDataMapping::JSONDataMapping (const std::string& class_id, const std::string
     sub_keys_ = Utils::String::split(json_key_, '.');
     has_sub_keys_ = sub_keys_.size() > 1;
     num_sub_keys_ = sub_keys_.size();
+
+    if (sub_keys_.size())
+        last_key_ = sub_keys_.end()-1;
+    if (sub_keys_.size() > 1)
+        second_to_last_key_ = sub_keys_.end()-2;
 
     logdbg << "JSONDataMapping: ctor: key " << json_key_ << " num subkeys " << sub_keys_.size();
 
@@ -78,11 +84,17 @@ JSONDataMapping& JSONDataMapping::operator=(JSONDataMapping&& other)
     dimension_ = other.dimension_;
     unit_ = other.unit_;
 
+    in_array_ = other.in_array_;
     append_value_ = other.append_value_;
 
     has_sub_keys_ = other.has_sub_keys_;
     sub_keys_ = std::move(other.sub_keys_);
     num_sub_keys_ = other.num_sub_keys_;
+
+    if (sub_keys_.size())
+        last_key_ = sub_keys_.end()-1;
+    if (sub_keys_.size() > 1)
+        second_to_last_key_ = sub_keys_.end()-2;
 
     other.configuration().updateParameterPointer ("active", &active_);
     other.configuration().updateParameterPointer ("json_key", &json_key_);
@@ -94,6 +106,7 @@ JSONDataMapping& JSONDataMapping::operator=(JSONDataMapping&& other)
     other.configuration().updateParameterPointer ("json_value_format", &json_value_format_);
     other.configuration().updateParameterPointer ("dimension", &dimension_);
     other.configuration().updateParameterPointer ("unit", &unit_);
+    other.configuration().updateParameterPointer ("in_array", &in_array_);
     other.configuration().updateParameterPointer ("append_value", &append_value_);
 
     widget_ = std::move(other.widget_);
@@ -145,6 +158,16 @@ bool JSONDataMapping::appendValue() const
 void JSONDataMapping::appendValue(bool append_value)
 {
     append_value_ = append_value;
+}
+
+bool JSONDataMapping::inArray() const
+{
+    return in_array_;
+}
+
+void JSONDataMapping::inArray(bool in_array)
+{
+    in_array_ = in_array;
 }
 
 DBOVariable& JSONDataMapping::variable() const
@@ -218,6 +241,11 @@ void JSONDataMapping::jsonKey(const std::string &json_key)
     sub_keys_ = Utils::String::split(json_key_, '.');
     has_sub_keys_ = sub_keys_.size() > 1;
     num_sub_keys_ = sub_keys_.size();
+
+    if (sub_keys_.size())
+        last_key_ = sub_keys_.end()-1;
+    if (sub_keys_.size() > 1)
+        second_to_last_key_ = sub_keys_.end()-2;
 }
 
 //JSONDataMappingWidget* JSONDataMapping::widget ()
@@ -292,33 +320,82 @@ void JSONDataMapping::initialize ()
 template<typename T>
 bool JSONDataMapping::findAndSetValue(const nlohmann::json& j, NullableVector<T>& array_list, size_t row_cnt) const
 {
-    const nlohmann::json* val_ptr = findKey(j);
-
-    if (val_ptr == nullptr || *val_ptr == nullptr)
+    if (in_array_)
     {
-        if (mandatory_)
-            return true;
+        const nlohmann::json* val_ptr = findParentKey(j);
 
-        //array_list.setNull(row_cnt);
-        return false;
+        if (val_ptr == nullptr || *val_ptr == nullptr)
+        {
+            if (mandatory_)
+                return true;
+
+            return false;
+        }
+        else
+        {
+            if (!val_ptr->is_array())
+            {
+                logerr  <<  "JSONDataMapping: findAndSetValue: key " << json_key_ << " not in array '"
+                         << val_ptr->dump(4) << "'";
+                return true;
+            }
+
+            try
+            {
+                std::string last_key = sub_keys_.back();
+
+                for (auto& j_it : val_ptr->get<nlohmann::json::array_t>()) // iterate over array
+                {
+                    if (j_it.contains(last_key))
+                    {
+                        if (append_value_)
+                            appendValue(&j_it.at(last_key), array_list, row_cnt);
+                        else
+                            setValue(&j_it.at(last_key), array_list, row_cnt);
+                    }
+                }
+
+                return false; // everything ok
+            }
+            catch (nlohmann::json::exception& e)
+            {
+                logerr  <<  "JSONDataMapping: findAndSetValue: key " << json_key_ << " json exception "
+                         << e.what() << " property " << array_list.propertyName();
+                array_list.setNull(row_cnt);
+                return true; // last entry might be wrong
+            }
+        }
+
     }
     else
     {
-        try
-        {
-            if (append_value_)
-                appendValue(val_ptr, array_list, row_cnt);
-            else
-                setValue(val_ptr, array_list, row_cnt);
+        const nlohmann::json* val_ptr = findKey(j);
 
-            return false; // everything ok
-        }
-        catch (nlohmann::json::exception& e)
+        if (val_ptr == nullptr || *val_ptr == nullptr)
         {
-            logerr  <<  "JSONDataMapping: setValue: key " << json_key_ << " json exception "
-                     << e.what() << " property " << array_list.propertyName();
-            array_list.setNull(row_cnt);
-            return true; // last entry might be wrong
+            if (mandatory_)
+                return true;
+
+            return false;
+        }
+        else
+        {
+            try
+            {
+                if (append_value_)
+                    appendValue(val_ptr, array_list, row_cnt);
+                else
+                    setValue(val_ptr, array_list, row_cnt);
+
+                return false; // everything ok
+            }
+            catch (nlohmann::json::exception& e)
+            {
+                logerr  <<  "JSONDataMapping: findAndSetValue: key " << json_key_ << " json exception "
+                         << e.what() << " property " << array_list.propertyName();
+                array_list.setNull(row_cnt);
+                return true; // last entry might be wrong
+            }
         }
     }
 }
@@ -352,18 +429,20 @@ const nlohmann::json* JSONDataMapping::findKey (const nlohmann::json& j) const
 
     if (has_sub_keys_)
     {
-        for (const std::string& sub_key : sub_keys_)
+
+
+        for (auto sub_it=sub_keys_.begin(); sub_it != sub_keys_.end(); ++sub_it)
         {
-            if (val_ptr->contains (sub_key))
+            if (val_ptr->contains (*sub_it))
             {
-                if (sub_key == sub_keys_.back()) // last found
+                if (sub_it == last_key_) // last found
                 {
-                    val_ptr = &val_ptr->at(sub_key);
+                    val_ptr = &val_ptr->at(*sub_it);
                     break;
                 }
 
-                if (val_ptr->at(sub_key).is_object()) // not last, step in
-                    val_ptr = &val_ptr->at(sub_key);
+                if (val_ptr->at(*sub_it).is_object()) // not last, step in
+                    val_ptr = &val_ptr->at(*sub_it);
                 else // not last key, and not object
                 {
                     val_ptr = nullptr;
@@ -384,6 +463,41 @@ const nlohmann::json* JSONDataMapping::findKey (const nlohmann::json& j) const
         else
             val_ptr = nullptr;
     }
+    return val_ptr;
+}
+
+const nlohmann::json* JSONDataMapping::findParentKey (const nlohmann::json& j) const
+{
+    const nlohmann::json* val_ptr = &j;
+
+    if (has_sub_keys_)
+    {
+        for (auto sub_it=sub_keys_.begin(); sub_it != sub_keys_.end(); ++sub_it)
+        {
+            if (val_ptr->contains (*sub_it))
+            {
+                if (sub_it == second_to_last_key_) // second to last found
+                {
+                    val_ptr = &val_ptr->at(*sub_it);
+                    break;
+                }
+
+                if (val_ptr->at(*sub_it).is_object()) // not second to last, step in
+                    val_ptr = &val_ptr->at(*sub_it);
+                else // not last key, and not object
+                {
+                    val_ptr = nullptr;
+                    break;
+                }
+            }
+            else // not found
+            {
+                val_ptr = nullptr;
+                break;
+            }
+        }
+    } // else path means j is already parent
+
     return val_ptr;
 }
 

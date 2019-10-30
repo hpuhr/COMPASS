@@ -33,6 +33,7 @@
 #include "dbtablecolumn.h"
 #include "atsdb.h"
 #include "dbinterface.h"
+#include "buffer.h"
 
 #include <jasterix/jasterix.h>
 #include <jasterix/category.h>
