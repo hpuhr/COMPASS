@@ -1046,7 +1046,7 @@ void DBInterface::insertBuffer (MetaDBTable& meta_table, std::shared_ptr<Buffer>
 
 void DBInterface::insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer)
 {
-    loginf << "DBInterface: partialInsertBuffer: table " << table.name() << " buffer size " << buffer->size();
+    loginf << "DBInterface: insertBuffer: table " << table.name() << " buffer size " << buffer->size();
 
     assert (current_connection_);
     assert (buffer);
@@ -1055,10 +1055,10 @@ void DBInterface::insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer)
 
     for (unsigned int cnt=0; cnt < properties.size(); ++cnt)
     {
-        logdbg << "DBInterface: partialInsertBuffer: checking column '" << properties.at(cnt).name() << "'";
+        logdbg << "DBInterface: insertBuffer: checking column '" << properties.at(cnt).name() << "'";
 
         if (!table.hasColumn(properties.at(cnt).name()))
-            throw std::runtime_error ("DBInterface: partialInsertBuffer: column '"+properties.at(cnt).name()
+            throw std::runtime_error ("DBInterface: insertBuffer: column '"+properties.at(cnt).name()
                                       +"' does not exist in table "+table.name());
     }
 
@@ -1071,20 +1071,67 @@ void DBInterface::insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer)
 
     QMutexLocker locker(&connection_mutex_);
 
-    logdbg  << "DBInterface: partialInsertBuffer: preparing bind statement";
+    logdbg  << "DBInterface: insertBuffer: preparing bind statement";
     current_connection_->prepareBindStatement(bind_statement);
     current_connection_->beginBindTransaction();
 
-    logdbg  << "DBInterface: partialInsertBuffer: starting inserts";
+    logdbg  << "DBInterface: insertBuffer: starting inserts";
     size_t size = buffer->size();
     for (unsigned int cnt=0; cnt < size; ++cnt)
     {
         insertBindStatementUpdateForCurrentIndex(buffer, cnt);
     }
 
-    logdbg  << "DBInterface: partialInsertBuffer: ending bind transactions";
+    logdbg  << "DBInterface: insertBuffer: ending bind transactions";
     current_connection_->endBindTransaction();
-    logdbg  << "DBInterface: partialInsertBuffer: finalizing bind statement";
+    logdbg  << "DBInterface: insertBuffer: finalizing bind statement";
+    current_connection_->finalizeBindStatement();
+}
+
+void DBInterface::insertBuffer (const std::string& table_name, std::shared_ptr<Buffer> buffer)
+{
+    loginf << "DBInterface: insertBuffer: table name " << table_name << " buffer size " << buffer->size();
+
+    assert (current_connection_);
+    assert (buffer);
+
+    if (!existsTable(table_name))
+        throw std::runtime_error ("DBInterface: insertBuffer: table with name '"+table_name+"' does not exist");
+
+    const PropertyList &properties = buffer->properties();
+
+    assert (table_info_.count(table_name));
+
+    DBTableInfo& table_info = table_info_.at(table_name);
+
+    for (unsigned int cnt=0; cnt < properties.size(); ++cnt)
+    {
+        logdbg << "DBInterface: insertBuffer: checking column '" << properties.at(cnt).name() << "'";
+
+        if (!table_info.hasColumn(properties.at(cnt).name()))
+            throw std::runtime_error ("DBInterface: insertBuffer: column '"+properties.at(cnt).name()
+                                      +"' does not exist in table "+table_name);
+    }
+
+    std::string bind_statement = sql_generator_.insertDBUpdateStringBind(buffer, table_name);
+
+    QMutexLocker locker(&connection_mutex_);
+
+    logdbg  << "DBInterface: insertBuffer: preparing bind statement";
+    current_connection_->prepareBindStatement(bind_statement);
+    current_connection_->beginBindTransaction();
+
+    logdbg  << "DBInterface: insertBuffer: starting inserts";
+    size_t size = buffer->size();
+
+    for (unsigned int cnt=0; cnt < size; ++cnt)
+    {
+        insertBindStatementUpdateForCurrentIndex(buffer, cnt);
+    }
+
+    logdbg  << "DBInterface: insertBuffer: ending bind transactions";
+    current_connection_->endBindTransaction();
+    logdbg  << "DBInterface: insertBuffer: finalizing bind statement";
     current_connection_->finalizeBindStatement();
 }
 
@@ -1317,6 +1364,7 @@ void DBInterface::createPropertiesTable ()
 
     updateTableInfo ();
 }
+
 void DBInterface::createMinMaxTable ()
 {
     assert (!existsMinMaxTable());
@@ -1435,6 +1483,16 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex (std::shared_ptr<Buff
     current_connection_->stepAndClearBindings();
 
     logdbg  << "DBInterface: insertBindStatementUpdateForCurrentIndex: done";
+}
+
+void DBInterface::createAssociationsTable (const std::string &table)
+{
+    assert (!existsTable(table));
+    connection_mutex_.lock();
+    current_connection_->executeSQL(sql_generator_.getCreateAssociationTableStatement(table));
+    connection_mutex_.unlock();
+
+    updateTableInfo ();
 }
 
 //DBResult *DBInterface::getDistinctStatistics (const std::string &type, DBOVariable *variable, unsigned int sensor_number)

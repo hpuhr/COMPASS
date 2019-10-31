@@ -20,6 +20,7 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/jsonparsejob.h"
         "${CMAKE_CURRENT_LIST_DIR}/jsonmappingjob.h"
         "${CMAKE_CURRENT_LIST_DIR}/jsonmappingstubsjob.h"
+        "${CMAKE_CURRENT_LIST_DIR}/createartasassociationsjob.h"
     #        src/job/dbovariabledistinctstatisticsdbjob.h
     #        src/job/dbocountdbjob.h
     #        src/job/dboinfodbjob.h
@@ -40,6 +41,7 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/jsonparsejob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/jsonmappingjob.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/jsonmappingstubsjob.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/createartasassociationsjob.cpp"
     #        src/job/dbovariabledistinctstatisticsdbjob.cpp
     #        src/job/dbocountdbjob.cpp
     #        src/job/dboinfodbjob.cpp

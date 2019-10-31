@@ -40,7 +40,7 @@ signals:
     void insertProgressSignal (float percent);
 
 public:
-    InsertBufferDBJob(DBInterface &db_interface, DBObject &dbobject, std::shared_ptr<Buffer> buffer,
+    InsertBufferDBJob(DBInterface& db_interface, DBObject& dbobject, std::shared_ptr<Buffer> buffer,
                       bool emit_change=true);
 
     virtual ~InsertBufferDBJob();
@@ -52,8 +52,8 @@ public:
     bool emitChange() const;
 
 protected:
-    DBInterface &db_interface_;
-    DBObject &dbobject_;
+    DBInterface& db_interface_;
+    DBObject& dbobject_;
     std::shared_ptr<Buffer> buffer_;
     bool emit_change_ {true};
 

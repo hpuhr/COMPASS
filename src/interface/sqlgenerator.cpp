@@ -31,7 +31,6 @@
 #include "logger.h"
 #include "sqlgenerator.h"
 #include "propertylist.h"
-//#include "StructureDescriptionManager.h"
 #include "dbtablecolumn.h"
 #include "dbtable.h"
 #include "metadbtable.h"
@@ -290,6 +289,15 @@ std::shared_ptr<DBCommand> SQLGenerator::getDistinctDataSourcesSelectCommand (DB
     list.addProperty (local_key_col.name(), PropertyDataType::INT);
 
     return getSelectCommand (object.currentMetaTable(), columns, true);
+}
+
+std::string SQLGenerator::getCreateAssociationTableStatement (const std::string& table_name)
+{
+    std::stringstream ss;
+
+    ss << "CREATE TABLE " << table_name << " (assoc_id PRIMARY KEY AUTOINCREMENT, rec_num INT, utn INT, PRIMARY KEY (assoc_id));";
+
+    return ss.str();
 }
 
 //DBCommand *SQLGenerator::getCountStatement (const std::string &dbo_type, unsigned int sensor_number)

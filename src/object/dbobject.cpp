@@ -818,15 +818,22 @@ void DBObject::schemaChangedSlot ()
         {
             logwrn << "DBObject: schemaChangedSlot: object " << name_ << " has not main meta table for current schema";
             current_meta_table_ = nullptr;
+            associations_table_name_ = "";
+
             return;
         }
 
         std::string meta_table_name = meta_table_definitions_.at(schema.name()).metaTable();
         assert (schema.hasMetaTable (meta_table_name));
         current_meta_table_ = &schema.metaTable (meta_table_name);
+
+        associations_table_name_ = current_meta_table_->mainTableName() + "_assoc";
     }
     else
+    {
         current_meta_table_ = nullptr;
+        associations_table_name_ = "";
+    }
 
     databaseContentChangedSlot ();
 }
@@ -1163,6 +1170,7 @@ void DBObject::databaseContentChangedSlot ()
 
     assert (current_meta_table_);
     std::string table_name = current_meta_table_->mainTableName();
+    associations_table_name_ = table_name + "_assoc";
 
     is_loadable_ = current_meta_table_->existsInDB() && ATSDB::instance().interface().tableInfo().count(table_name) > 0;
 
@@ -1298,20 +1306,63 @@ void DBObject::removeVariableInfoForSchema (const std::string& schema_name)
 
 //}
 
-//bool DBObject::hasAssociations ()
-//{
+bool DBObject::hasAssociations ()
+{
+    return associations_.size() > 0;
+}
 
-//}
+void DBObject::addAssociation (unsigned int rec_num, unsigned int utn)
+{
+    associations_.emplace(rec_num, utn);
+    associations_changed_ = true;
+}
 
-//void DBObject::addAssociation (unsigned int rec_num, unsigned int utn)
-//{
+void DBObject::clearAssociations ()
+{
+    associations_.clear();
+    associations_changed_ = true;
+}
 
-//}
-//void DBObject::clearAssociations ()
-//{
+void DBObject::saveAssociations ()
+{
+    loginf << "DBObject " << name_ << ": saveAssociations";
 
-//}
-//void DBObject::saveAssociations ()
-//{
+    DBInterface& db_interface = ATSDB::instance().interface();
 
-//}
+    assert (associations_table_name_.size());
+
+    if (db_interface.existsTable(associations_table_name_))
+        db_interface.clearTableContent(associations_table_name_);
+    else
+        db_interface.createAssociationsTable(associations_table_name_);
+
+    if (!hasAssociations())
+        return;
+
+    assert (db_interface.existsTable(associations_table_name_));
+
+    //assoc_id INT, rec_num INT, utn INT
+
+    PropertyList list;
+    list.addProperty("rec_num", PropertyDataType::INT);
+    list.addProperty("utn", PropertyDataType::INT);
+
+    std::shared_ptr<Buffer> buffer_ptr = std::shared_ptr<Buffer> (new Buffer (list, name_));
+
+    NullableVector<int>& rec_nums = buffer_ptr->get<int>("rec_num");
+    NullableVector<int>& utns = buffer_ptr->get<int>("utn");
+
+    size_t cnt = 0;
+    for (auto& assoc_it : associations_)
+    {
+        rec_nums.set(cnt, assoc_it.first);
+        utns.set(cnt, assoc_it.second);
+        ++cnt;
+    }
+
+    db_interface.insertBuffer(associations_table_name_, buffer_ptr);
+
+    associations_changed_ = false;
+
+    loginf << "DBObject " << name_ << ": saveAssociations: done";
+}

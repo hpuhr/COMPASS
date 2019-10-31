@@ -70,6 +70,8 @@ public:
     /// @brief Returns command for active data sources select
     std::shared_ptr<DBCommand> getDistinctDataSourcesSelectCommand (DBObject &object);
 
+    std::string getCreateAssociationTableStatement (const std::string& table_name);
+
 //    DBCommand *getDistinctStatistics (const std::string &dbo_type, DBOVariable *variable, unsigned int sensor_number);
 
 //    /// @brief Returns statement to check table existence

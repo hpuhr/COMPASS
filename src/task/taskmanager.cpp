@@ -21,6 +21,8 @@
 #include "jsonimportertaskwidget.h"
 #include "radarplotpositioncalculatortask.h"
 #include "radarplotpositioncalculatortaskwidget.h"
+#include "createartasassociationstask.h"
+#include "createartasassociationstaskwidget.h"
 
 #if USE_JASTERIX
 #include "asteriximportertask.h"
@@ -57,6 +59,12 @@ RadarPlotPositionCalculatorTask* TaskManager::getRadarPlotPositionCalculatorTask
     return radar_plot_position_calculator_task_;
 }
 
+CreateARTASAssociationsTask* TaskManager::getCreateARTASAssociationsTask()
+{
+    assert (create_artas_associations_task_);
+    return create_artas_associations_task_;
+}
+
 #if USE_JASTERIX
 ASTERIXImporterTask* TaskManager::getASTERIXImporterTask()
 {
@@ -78,6 +86,12 @@ void TaskManager::generateSubConfigurable (const std::string &class_id, const st
         assert (!radar_plot_position_calculator_task_);
         radar_plot_position_calculator_task_ = new RadarPlotPositionCalculatorTask (class_id, instance_id, this);
         assert (radar_plot_position_calculator_task_);
+    }
+    else if (class_id.compare ("CreateARTASAssociationsTask") == 0)
+    {
+        assert (!create_artas_associations_task_);
+        create_artas_associations_task_ = new CreateARTASAssociationsTask (class_id, instance_id, this);
+        assert (create_artas_associations_task_);
     }
 #if USE_JASTERIX
     else if (class_id.compare ("ASTERIXImporterTask") == 0)
@@ -106,6 +120,13 @@ void TaskManager::checkSubConfigurables ()
         assert (radar_plot_position_calculator_task_);
     }
 
+    if (!create_artas_associations_task_)
+    {
+        create_artas_associations_task_ = new CreateARTASAssociationsTask (
+                    "CreateARTASAssociationsTask", "CreateARTASAssociationsTask0", this);
+        assert (create_artas_associations_task_);
+    }
+
 #if USE_JASTERIX
     if (!asterix_importer_task_)
     {
@@ -126,6 +147,11 @@ void TaskManager::disable ()
     if (radar_plot_position_calculator_task_)
     {
         radar_plot_position_calculator_task_->widget()->close();
+    }
+
+    if (create_artas_associations_task_)
+    {
+        create_artas_associations_task_->widget()->close();
     }
 
 #if USE_JASTERIX
@@ -152,6 +178,13 @@ void TaskManager::shutdown ()
         delete radar_plot_position_calculator_task_;
         radar_plot_position_calculator_task_ = nullptr;
     }
+
+    if (create_artas_associations_task_)
+    {
+        delete create_artas_associations_task_;
+        create_artas_associations_task_ = nullptr;
+    }
+
 
 #if USE_JASTERIX
     if (asterix_importer_task_)

@@ -118,6 +118,7 @@ public:
 //                       size_t to_index);
     void insertBuffer (MetaDBTable& meta_table, std::shared_ptr<Buffer> buffer);
     void insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer);
+    void insertBuffer (const std::string& table_name, std::shared_ptr<Buffer> buffer);
 
     bool checkUpdateBuffer (DBObject &object, DBOVariable &key_var, DBOVariableSet& list,
                             std::shared_ptr<Buffer> buffer);
@@ -205,6 +206,8 @@ public:
 
     //    Buffer *getTrackMatches (bool has_mode_a, unsigned int mode_a, bool has_ta, unsigned int ta, bool has_ti, std::string ti,
     //            bool has_tod, double tod_min, double tod_max);
+
+    void createAssociationsTable (const std::string &table);
 
 protected:
     std::map <std::string, DBConnection*> connections_;

@@ -18,7 +18,6 @@
 #include "jsonimportertask.h"
 #include "jsonimportertaskwidget.h"
 #include "taskmanager.h"
-#include "atsdb.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
 #include "dbovariable.h"

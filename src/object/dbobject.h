@@ -254,10 +254,10 @@ public:
 
     // association stuff
 //    void loadAssociations ();
-//    bool hasAssociations ();
-//    void addAssociation (unsigned int rec_num, unsigned int utn);
-//    void clearAssociations ();
-//    void saveAssociations ();
+    bool hasAssociations ();
+    void addAssociation (unsigned int rec_num, unsigned int utn);
+    void clearAssociations ();
+    void saveAssociations ();
 
 protected:
     /// DBO name
@@ -296,10 +296,12 @@ protected:
 
     /// Current (in the current schema) main meta table
     MetaDBTable* current_meta_table_ {nullptr}; // TODO rework const?
+    std::string associations_table_name_;
 
     std::unique_ptr<DBObjectWidget> widget_;
     std::unique_ptr<DBObjectInfoWidget> info_widget_;
 
+    bool associations_changed_ {false};
     DBOAssociationCollection associations_;
 
     virtual void checkSubConfigurables ();
