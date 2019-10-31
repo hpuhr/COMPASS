@@ -2,7 +2,7 @@
     <Configuration class_id="ViewContainer" instance_id="ViewContainer0">
         <Configuration class_id="ListBoxView" instance_id="ListBoxView2">
             <ParameterBool overwrite_csv="1"/>
-            <ParameterBool show_only_selected="0"/>
+            <ParameterBool show_only_selected="1"/>
             <ParameterBool use_presentation="1"/>
             <Configuration class_id="ListBoxViewDataSource" instance_id="ListBoxViewDataSource0">
                 <Configuration class_id="DBOVariableOrderedSet" instance_id="DBOVariableOrderedSet0">
@@ -79,6 +79,419 @@
                 </Configuration>
             </Configuration>
             <Configuration class_id="ListBoxViewWidget" instance_id="ListBoxViewWidget0"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="ViewContainerWidget" instance_id="ViewWindow1">
+        <ParameterUnsignedInt height="1023"/>
+        <ParameterUnsignedInt min_height="700"/>
+        <ParameterUnsignedInt min_width="1000"/>
+        <ParameterUnsignedInt pos_x="1091"/>
+        <ParameterUnsignedInt pos_y="189"/>
+        <ParameterUnsignedInt width="1609"/>
+        <Configuration class_id="ViewContainer" instance_id="ViewWindow1ViewContainer0">
+            <Configuration class_id="OSGView" instance_id="OSGView3">
+                <ParameterBool connect_groups="1"/>
+                <ParameterBool connect_height_none="0"/>
+                <ParameterBool overlay_text_color_invert="1"/>
+                <ParameterBool use_depth_check="0"/>
+                <ParameterBool use_height="1"/>
+                <ParameterInt label_break_item_count="3"/>
+                <ParameterFloat height_offset_factor="0.00000000"/>
+                <ParameterFloat height_scale_factor="2.00000000"/>
+                <ParameterFloat map_opacity="0.30000001"/>
+                <ParameterFloat null_height_offset="0.00000000"/>
+                <ParameterString group_variable="target_addr"/>
+                <ParameterString label_bg_color="#ffffff"/>
+                <ParameterString map_name="openstreetmap.earth"/>
+                <ParameterString selection_color="#ffff00"/>
+                <Configuration class_id="GeometryStyle" instance_id="ADSBStyle0">
+                    <ParameterBool hidden="0"/>
+                    <ParameterUnsignedInt style="2"/>
+                    <ParameterFloat line_width="1.00000000"/>
+                    <ParameterFloat opacity="0.00000000"/>
+                    <ParameterFloat size="5.00000000"/>
+                    <ParameterString color_str="#0000FF"/>
+                    <ParameterString name="ADSB"/>
+                    <Configuration class_id="GeometryStyle" instance_id="ADSBStyle0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="2"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="5.00000000"/>
+                        <ParameterString color_str="#0000FF"/>
+                        <ParameterString name=""/>
+                    </Configuration>
+                </Configuration>
+                <Configuration class_id="GeometryStyle" instance_id="MLATStyle0">
+                    <ParameterBool hidden="0"/>
+                    <ParameterUnsignedInt style="3"/>
+                    <ParameterFloat line_width="1.00000000"/>
+                    <ParameterFloat opacity="0.00000000"/>
+                    <ParameterFloat size="6.00000000"/>
+                    <ParameterString color_str="#FF0000"/>
+                    <ParameterString name="MLAT"/>
+                    <Configuration class_id="GeometryStyle" instance_id="MLATStyle0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="3"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="6.00000000"/>
+                        <ParameterString color_str="#FF0000"/>
+                        <ParameterString name=""/>
+                    </Configuration>
+                </Configuration>
+                <Configuration class_id="GeometryStyle" instance_id="RadarStyle0">
+                    <ParameterBool hidden="0"/>
+                    <ParameterUnsignedInt style="0"/>
+                    <ParameterFloat line_width="1.00000000"/>
+                    <ParameterFloat opacity="0.00000000"/>
+                    <ParameterFloat size="8.00000000"/>
+                    <ParameterString color_str="#00ff00"/>
+                    <ParameterString name="Radar"/>
+                    <Configuration class_id="GeometryStyle" instance_id="Radar12809Style0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="0"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="8.00000000"/>
+                        <ParameterString color_str="#00ff00"/>
+                        <ParameterString name="12809"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="RadarASR_Muenchen_SuedStyle0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="0"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="8.00000000"/>
+                        <ParameterString color_str="#00ff00"/>
+                        <ParameterString name="ASR_Muenchen_Sued"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="RadarDingliStyle0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="0"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="8.00000000"/>
+                        <ParameterString color_str="#00ff00"/>
+                        <ParameterString name="Dingli"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="RadarFawwaraStyle0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="0"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="8.00000000"/>
+                        <ParameterString color_str="#00ff00"/>
+                        <ParameterString name="Fawwara"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="RadarFeichtbergStyle0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="0"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="8.00000000"/>
+                        <ParameterString color_str="#00ff00"/>
+                        <ParameterString name="Feichtberg"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="RadarHal-FarStyle0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="0"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="8.00000000"/>
+                        <ParameterString color_str="#00ff00"/>
+                        <ParameterString name="Hal-Far"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="RadarHaunsbergStyle0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="0"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="8.00000000"/>
+                        <ParameterString color_str="#00ff00"/>
+                        <ParameterString name="Haunsberg"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="RadarKityraStyle0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="0"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="8.00000000"/>
+                        <ParameterString color_str="#00ff00"/>
+                        <ParameterString name="Kityra"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="RadarLefkasStyle0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="0"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="8.00000000"/>
+                        <ParameterString color_str="#00ff00"/>
+                        <ParameterString name="Lefkas"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="RadarLinzStyle0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="0"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="8.00000000"/>
+                        <ParameterString color_str="#00ff00"/>
+                        <ParameterString name="Linz"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="RadarLuqaStyle0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="0"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="8.00000000"/>
+                        <ParameterString color_str="#00ff00"/>
+                        <ParameterString name="Luqa"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="RadarMode-S_SchwechatStyle0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="0"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="8.00000000"/>
+                        <ParameterString color_str="#00ff00"/>
+                        <ParameterString name="Mode-S_Schwechat"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="RadarModeS_KoralpeStyle0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="0"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="8.00000000"/>
+                        <ParameterString color_str="#00ff00"/>
+                        <ParameterString name="ModeS_Koralpe"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="RadarMuenchen_NordStyle0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="0"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="8.00000000"/>
+                        <ParameterString color_str="#00ff00"/>
+                        <ParameterString name="Muenchen_Nord"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="RadarMuenchen_SuedStyle0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="0"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="8.00000000"/>
+                        <ParameterString color_str="#00ff00"/>
+                        <ParameterString name="Muenchen_Sued"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="RadarOljska GoraStyle0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="0"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="8.00000000"/>
+                        <ParameterString color_str="#00ff00"/>
+                        <ParameterString name="Oljska Gora"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="RadarSchwechatStyle0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="0"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="8.00000000"/>
+                        <ParameterString color_str="#00ff00"/>
+                        <ParameterString name="Schwechat"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="RadarStyle0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="0"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="8.00000000"/>
+                        <ParameterString color_str="#00ff00"/>
+                        <ParameterString name=""/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="RadarUsticaStyle0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="0"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="8.00000000"/>
+                        <ParameterString color_str="#00ff00"/>
+                        <ParameterString name="Ustica"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="RadarVelky JavornikStyle0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="0"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="8.00000000"/>
+                        <ParameterString color_str="#00ff00"/>
+                        <ParameterString name="Velky Javornik"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="RadarVrhnikaStyle0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="0"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="8.00000000"/>
+                        <ParameterString color_str="#00ff00"/>
+                        <ParameterString name="Vrhnika"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="RadarZeltwegStyle0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="0"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="8.00000000"/>
+                        <ParameterString color_str="#00ff00"/>
+                        <ParameterString name="Zeltweg"/>
+                    </Configuration>
+                </Configuration>
+                <Configuration class_id="GeometryStyle" instance_id="TrackerStyle0">
+                    <ParameterBool hidden="0"/>
+                    <ParameterUnsignedInt style="1"/>
+                    <ParameterFloat line_width="1.00000000"/>
+                    <ParameterFloat opacity="0.00000000"/>
+                    <ParameterFloat size="6.00000000"/>
+                    <ParameterString color_str="#343534"/>
+                    <ParameterString name="Tracker"/>
+                    <Configuration class_id="GeometryStyle" instance_id="Tracker13044Style0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="1"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="6.00000000"/>
+                        <ParameterString color_str="#343534"/>
+                        <ParameterString name="13044"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="Tracker30769Style0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="1"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="6.00000000"/>
+                        <ParameterString color_str="#343534"/>
+                        <ParameterString name="30769"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="Tracker30770Style0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="1"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="6.00000000"/>
+                        <ParameterString color_str="#343534"/>
+                        <ParameterString name="30770"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="TrackerARTAS OPSStyle0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="1"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="6.00000000"/>
+                        <ParameterString color_str="#343534"/>
+                        <ParameterString name="ARTAS OPS"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="TrackerARTAS TestStyle0">
+                        <ParameterBool hidden="1"/>
+                        <ParameterUnsignedInt style="1"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="6.00000000"/>
+                        <ParameterString color_str="#343534"/>
+                        <ParameterString name="ARTAS Test"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="TrackerARTASStyle0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="1"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="6.00000000"/>
+                        <ParameterString color_str="#343534"/>
+                        <ParameterString name="ARTAS"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="TrackerMSTSStyle0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="1"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="6.00000000"/>
+                        <ParameterString color_str="#343534"/>
+                        <ParameterString name="MSTS"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="TrackerOTHERStyle0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="1"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="6.00000000"/>
+                        <ParameterString color_str="#343534"/>
+                        <ParameterString name="OTHER"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="TrackerOTR - otr1Style0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="1"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="6.00000000"/>
+                        <ParameterString color_str="#343534"/>
+                        <ParameterString name="OTR - otr1"/>
+                    </Configuration>
+                    <Configuration class_id="GeometryStyle" instance_id="TrackerStyle0">
+                        <ParameterBool hidden="0"/>
+                        <ParameterUnsignedInt style="1"/>
+                        <ParameterFloat line_width="1.00000000"/>
+                        <ParameterFloat opacity="0.00000000"/>
+                        <ParameterFloat size="6.00000000"/>
+                        <ParameterString color_str="#343534"/>
+                        <ParameterString name=""/>
+                    </Configuration>
+                </Configuration>
+                <Configuration class_id="OSGViewDataSource" instance_id="OSGViewDataSource0">
+                    <Configuration class_id="DBOVariableOrderedSet" instance_id="DBOVariableOrderedSet0">
+                        <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionds_id0">
+                            <ParameterUnsignedInt index="1"/>
+                            <ParameterString dbo_name="Meta"/>
+                            <ParameterString dbo_variable_name="ds_id"/>
+                        </Configuration>
+                        <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionmodec_code_ft0">
+                            <ParameterUnsignedInt index="5"/>
+                            <ParameterString dbo_name="Meta"/>
+                            <ParameterString dbo_variable_name="modec_code_ft"/>
+                        </Configuration>
+                        <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionpos_lat_deg0">
+                            <ParameterUnsignedInt index="3"/>
+                            <ParameterString dbo_name="Meta"/>
+                            <ParameterString dbo_variable_name="pos_lat_deg"/>
+                        </Configuration>
+                        <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionpos_long_deg0">
+                            <ParameterUnsignedInt index="4"/>
+                            <ParameterString dbo_name="Meta"/>
+                            <ParameterString dbo_variable_name="pos_long_deg"/>
+                        </Configuration>
+                        <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitionrec_num0">
+                            <ParameterUnsignedInt index="0"/>
+                            <ParameterString dbo_name="Meta"/>
+                            <ParameterString dbo_variable_name="rec_num"/>
+                        </Configuration>
+                        <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitiontarget_addr0">
+                            <ParameterUnsignedInt index="7"/>
+                            <ParameterString dbo_name="Meta"/>
+                            <ParameterString dbo_variable_name="target_addr"/>
+                        </Configuration>
+                        <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitiontod0">
+                            <ParameterUnsignedInt index="2"/>
+                            <ParameterString dbo_name="Meta"/>
+                            <ParameterString dbo_variable_name="tod"/>
+                        </Configuration>
+                        <Configuration class_id="DBOVariableOrderDefinition" instance_id="DBOVariableOrderDefinitiontrack_num0">
+                            <ParameterUnsignedInt index="6"/>
+                            <ParameterString dbo_name="Meta"/>
+                            <ParameterString dbo_variable_name="track_num"/>
+                        </Configuration>
+                    </Configuration>
+                </Configuration>
+                <Configuration class_id="OSGViewWidget" instance_id="OSGViewWidget0"/>
+            </Configuration>
         </Configuration>
     </Configuration>
 </Configuration>

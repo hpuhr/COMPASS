@@ -2,6 +2,6 @@
 <Configuration>
     <SubConfigurationFile class_id="ATSDB" instance_id="ATSDB0" path="atsdb.xml"/>
     <SubConfigurationFile class_id="JobManager" instance_id="JobManager0" path="threads.xml"/>
-    <SubConfigurationFile class_id="UnitManager" instance_id="UnitManager0" path="units.xml"/>
     <SubConfigurationFile class_id="ProjectionManager" instance_id="ProjectionManager0" path="projection.xml"/>
+    <SubConfigurationFile class_id="UnitManager" instance_id="UnitManager0" path="units.xml"/>
 </Configuration>

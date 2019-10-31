@@ -132,7 +132,7 @@ protected:
     //void saveTemplateConfiguration (Configurable *child, const std::string& template_name);
 
     /// @brief Adds a configurable as a child
-    Configuration &registerSubConfigurable (Configurable& child, bool config_must_exist=false);
+    Configuration& registerSubConfigurable (Configurable& child, bool config_must_exist=false);
     /// @brief Removes a child configurable
     void removeChildConfigurable (Configurable& child, bool remove_config=true);
 

@@ -30,7 +30,6 @@
 #include "dbovariable.h"
 #include "buffer.h"
 #include "filtermanager.h"
-//#include "StructureDescriptionManager.h"
 #include "propertylist.h"
 #include "metadbtable.h"
 #include "dboreaddbjob.h"
@@ -1293,3 +1292,26 @@ void DBObject::removeVariableInfoForSchema (const std::string& schema_name)
         }
     }
 }
+
+//void DBObject::loadAssociations ()
+//{
+
+//}
+
+//bool DBObject::hasAssociations ()
+//{
+
+//}
+
+//void DBObject::addAssociation (unsigned int rec_num, unsigned int utn)
+//{
+
+//}
+//void DBObject::clearAssociations ()
+//{
+
+//}
+//void DBObject::saveAssociations ()
+//{
+
+//}

@@ -30,39 +30,10 @@
 #include "dboeditdatasourceactionoptions.h"
 #include "configurable.h"
 #include "dbovariable.h"
+#include "dboschemametatabledefinition.h"
 
 class PropertyList;
 class MetaDBTable;
-//class ActiveSourcesObserver;
-
-/**
- * @brief Definition of a meta table in a schema in a DBObject
- *
- * Simple storage class for a schema and a meta table, as strings. Used in a DBObject to save the definitions
- * into the configuration, and generate the pointers to the defined structures at from them.
- */
-class DBOSchemaMetaTableDefinition : public Configurable
-{
-public:
-    /// @brief Constructor, registers parameters
-    DBOSchemaMetaTableDefinition(const std::string& class_id, const std::string& instance_id, Configurable* parent)
-        : Configurable (class_id, instance_id, parent)
-    {
-        registerParameter ("schema", &schema_, "");
-        registerParameter ("meta_table", &meta_table_, "");
-    }
-    /// @brief Destructor
-    virtual ~DBOSchemaMetaTableDefinition() {}
-
-    const std::string& schema () const { return schema_; }
-    const std::string& metaTable () const { return meta_table_; }
-
-protected:
-    /// DBSchema identifier
-    std::string schema_;
-    /// MetaDBTable identifier
-    std::string meta_table_;
-};
 
 class DBObjectWidget;
 class DBObjectInfoWidget;
@@ -78,6 +49,7 @@ class DBOLabelDefinition;
 class DBOLabelDefinitionWidget;
 
 using DBOEditDataSourceActionOptionsCollection = typename std::map<unsigned int, DBOEditDataSourceActionOptions>;
+using DBOAssociationCollection = typename std::multimap<unsigned int, unsigned int>; // rec_num -> utn
 
 /**
  * @brief Abstract data description of an object stored in a database
@@ -280,6 +252,13 @@ public:
 
     void removeDependenciesForSchema (const std::string& schema_name);
 
+    // association stuff
+//    void loadAssociations ();
+//    bool hasAssociations ();
+//    void addAssociation (unsigned int rec_num, unsigned int utn);
+//    void clearAssociations ();
+//    void saveAssociations ();
+
 protected:
     /// DBO name
     std::string name_;
@@ -320,6 +299,8 @@ protected:
 
     std::unique_ptr<DBObjectWidget> widget_;
     std::unique_ptr<DBObjectInfoWidget> info_widget_;
+
+    DBOAssociationCollection associations_;
 
     virtual void checkSubConfigurables ();
 

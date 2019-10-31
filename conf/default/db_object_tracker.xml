@@ -1672,6 +1672,19 @@
             <ParameterString variable_identifier="sd_track.TRANSPONDER_DELAY_CORR"/>
         </Configuration>
     </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackertris_compound0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="Tracker"/>
+        <ParameterString description=""/>
+        <ParameterString dimension=""/>
+        <ParameterString name="tris_compound"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackertris_compound0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_track.TRIS_COMPOUND"/>
+        </Configuration>
+    </Configuration>
     <Configuration class_id="DBOVariable" instance_id="DBOVariableTrackerturnrate_degps0">
         <ParameterString data_type_str="DOUBLE"/>
         <ParameterString dbo_name="Tracker"/>
