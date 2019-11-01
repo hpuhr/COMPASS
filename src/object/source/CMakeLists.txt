@@ -16,6 +16,7 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/dboeditdatasourceactionoptionswidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/storeddbodatasource.h"
         "${CMAKE_CURRENT_LIST_DIR}/storeddbodatasourcewidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/dbodatasourceselectioncombobox.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/dbodatasource.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbodatasourcewidget.cpp"

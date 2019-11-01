@@ -1,5 +1,6 @@
 #include "createartasassociationstaskwidget.h"
 #include "createartasassociationstask.h"
+#include "dbodatasourceselectioncombobox.h"
 #include "logger.h"
 
 #include <QVBoxLayout>
@@ -26,6 +27,29 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(CreateARTAS
     main_label->setFont (font_big);
     main_layout->addWidget (main_label);
 
+    {
+        QGridLayout *grid = new QGridLayout ();
+        int row_cnt=0;
+
+        grid->addWidget (new QLabel ("Tracker Data Source"), row_cnt, 0);
+
+        assert (ATSDB::instance().objectManager().existsObject("Tracker"));
+        DBObject& dbo_tracker = ATSDB::instance().objectManager().object("Tracker");
+
+        ds_combo_ = new DBODataSourceSelectionComboBox(dbo_tracker);
+
+        if (task_.currentDataSourceName().size())
+            ds_combo_->setDataSource(task_.currentDataSourceName());
+        task_.currentDataSourceName(ds_combo_->getDSName());
+
+        connect (ds_combo_, &DBODataSourceSelectionComboBox::changedDataSourceSignal,
+                 this, &CreateARTASAssociationsTaskWidget::currentDataSourceChangedSlot);
+
+        grid->addWidget (ds_combo_, row_cnt, 1);
+
+        main_layout->addLayout(grid);
+    }
+
     calc_button_ = new QPushButton ("Calculate");
     connect(calc_button_, SIGNAL( clicked() ), this, SLOT( runSlot() ));
     main_layout->addWidget(calc_button_);
@@ -42,45 +66,51 @@ CreateARTASAssociationsTaskWidget::~CreateARTASAssociationsTaskWidget()
 {
 }
 
+void CreateARTASAssociationsTaskWidget::currentDataSourceChangedSlot ()
+{
+    assert (ds_combo_);
+    task_.currentDataSourceName(ds_combo_->getDSName());
+}
+
 void CreateARTASAssociationsTaskWidget::runSlot ()
 {
     loginf << "CreateARTASAssociationsTaskWidget: calculateSlot";
 
-//    if (!task_.canCalculate())
-//    {
-//        QMessageBox::warning (this, "Unable to Calculate",
-//                              "The task can not be peformed with the entered items.\n"
-//                              "The following conditions have to be met: The DBObject must exist, must have data, and"
-//                              " all variables have to be set and exist in the current schema and database");
-//        return;
-//    }
+    //    if (!task_.canCalculate())
+    //    {
+    //        QMessageBox::warning (this, "Unable to Calculate",
+    //                              "The task can not be peformed with the entered items.\n"
+    //                              "The following conditions have to be met: The DBObject must exist, must have data, and"
+    //                              " all variables have to be set and exist in the current schema and database");
+    //        return;
+    //    }
 
     assert (calc_button_);
 
-//    std::string db_object_str = task_.dbObjectStr();
-//    DBObjectManager& obj_man = ATSDB::instance().objectManager();
+    //    std::string db_object_str = task_.dbObjectStr();
+    //    DBObjectManager& obj_man = ATSDB::instance().objectManager();
 
-//    assert (obj_man.existsObject(db_object_str));
-//    DBObject& db_object = obj_man.object(db_object_str);
+    //    assert (obj_man.existsObject(db_object_str));
+    //    DBObject& db_object = obj_man.object(db_object_str);
 
-//    bool not_final = false;
-//    for (auto ds_it = db_object.dsBegin(); ds_it != db_object.dsEnd(); ++ds_it)
-//    {
-//        ds_it->second.finalize();
-//        if (!ds_it->second.isFinalized())
-//        {
-//            not_final = true;
-//            break;
-//        }
-//    }
+    //    bool not_final = false;
+    //    for (auto ds_it = db_object.dsBegin(); ds_it != db_object.dsEnd(); ++ds_it)
+    //    {
+    //        ds_it->second.finalize();
+    //        if (!ds_it->second.isFinalized())
+    //        {
+    //            not_final = true;
+    //            break;
+    //        }
+    //    }
 
-//    if (not_final)
-//    {
-//        QMessageBox::warning (this, "EPSG Value Wrong",
-//                              "The coordinates of the data sources of selected database object could not be calculated."
-//                              " Please select a suitable EPSG value and try again");
-//        return;
-//    }
+    //    if (not_final)
+    //    {
+    //        QMessageBox::warning (this, "EPSG Value Wrong",
+    //                              "The coordinates of the data sources of selected database object could not be calculated."
+    //                              " Please select a suitable EPSG value and try again");
+    //        return;
+    //    }
 
     loginf << "CreateARTASAssociationsTaskWidget: calculateSlot: starting run";
 

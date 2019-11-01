@@ -223,6 +223,7 @@ public:
     void updateDataSource (int id);
     ///@brief Returns data source name for a DBO type and data source number.
     const std::string& getNameOfSensor (int id);
+    const std::map<int, DBODataSource>& dataSources() const { return data_sources_; }
 
     DBOEditDataSourceActionOptionsCollection getSyncOptionsFromDB ();
     DBOEditDataSourceActionOptionsCollection getSyncOptionsFromCfg ();

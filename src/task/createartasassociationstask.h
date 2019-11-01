@@ -26,7 +26,12 @@ public:
 
     void run ();
 
+    std::string currentDataSourceName() const;
+    void currentDataSourceName(const std::string &currentDataSourceName);
+
 protected:
+    std::string current_data_source_name_;
+
     CreateARTASAssociationsTaskWidget* widget_ {nullptr};
 
     std::shared_ptr<CreateARTASAssociationsJob> create_job_;

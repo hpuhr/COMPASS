@@ -33,6 +33,19 @@ void CreateARTASAssociationsJob::run ()
 
     loading_start_time = boost::posix_time::microsec_clock::local_time();
 
+    // load artas data rec_num, track_num, tris_compound, track_begin, track_end
+
+    // create utns
+
+    // create associations for artas tracks
+
+    // for each rec_num + tri, find sensor hash + rec_num
+
+    // create associations for sensors
+
+    // save associations
+
+
 //    loginf  << "CreateARTASAssociationsJob: run: writing object " << dbobject_.name() << " size " << buffer_->size();
 //    assert (buffer_->size());
 

@@ -9,7 +9,7 @@ CreateARTASAssociationsTask::CreateARTASAssociationsTask(const std::string& clas
                                                          TaskManager* task_manager)
     : Configurable (class_id, instance_id, task_manager)
 {
-
+    registerParameter ("current_data_source_name", &current_data_source_name_, "");
 }
 
 CreateARTASAssociationsTask::~CreateARTASAssociationsTask()
@@ -44,6 +44,18 @@ void CreateARTASAssociationsTask::run ()
              this, &CreateARTASAssociationsTask::createObsoleteSlot, Qt::QueuedConnection);
 
     JobManager::instance().addDBJob(create_job_);
+}
+
+std::string CreateARTASAssociationsTask::currentDataSourceName() const
+{
+    return current_data_source_name_;
+}
+
+void CreateARTASAssociationsTask::currentDataSourceName(const std::string &current_data_source_name)
+{
+    loginf << "CreateARTASAssociationsTask: currentDataSourceName: " << current_data_source_name;
+
+    current_data_source_name_ = current_data_source_name;
 }
 
 
