@@ -27,6 +27,7 @@
 #include "propertylist.h"
 #include "dbovariableset.h"
 #include "sqlgenerator.h"
+#include "dbobject.h"
 
 static const std::string ACTIVE_DATA_SOURCES_PROPERTY_PREFIX="activeDataSources_";
 static const std::string TABLE_NAME_PROPERTIES = "atsdb_properties";
@@ -196,7 +197,7 @@ public:
     //    DBResult *getDistinctStatistics (const std::string &dbo_type, DBOVariable *variable, unsigned int sensor_number);
 
     /// @brief Executes query and returns numbers for all active sensors
-    std::set<int> queryActiveSensorNumbers (DBObject &object);
+    std::set<int> queryActiveSensorNumbers (DBObject& object);
 
     //    void deleteAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string filter);
     //    void updateAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string new_value, std::string filter);
@@ -207,14 +208,15 @@ public:
     //    Buffer *getTrackMatches (bool has_mode_a, unsigned int mode_a, bool has_ta, unsigned int ta, bool has_ti, std::string ti,
     //            bool has_tod, double tod_min, double tod_max);
 
-    void createAssociationsTable (const std::string &table);
+    void createAssociationsTable (const std::string& table_name);
+    DBOAssociationCollection getAssociations (const std::string& table_name);
 
 protected:
     std::map <std::string, DBConnection*> connections_;
 
     std::string used_connection_;
     /// Connection to database, created based on DBConnectionInfo
-    DBConnection *current_connection_;
+    DBConnection* current_connection_ {nullptr};
 
     /// Interface initialized (after opening database)
     bool initialized_;
@@ -228,8 +230,8 @@ protected:
     /// Generates SQL statements
     SQLGenerator sql_generator_;
 
-    DBInterfaceWidget *widget_;
-    DBInterfaceInfoWidget *info_widget_;
+    DBInterfaceWidget*widget_ {nullptr};
+    DBInterfaceInfoWidget* info_widget_ {nullptr};
 
     std::map <std::string, DBTableInfo> table_info_;
 

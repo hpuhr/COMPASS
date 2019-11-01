@@ -52,7 +52,7 @@ public slots:
 
 signals:
     void dbObjectsChangedSignal ();
-    void databaseContentChangedSignal ();
+    //void databaseContentChangedSignal ();
     void schemaChangedSignal ();
 
     void loadingStartedSignal ();

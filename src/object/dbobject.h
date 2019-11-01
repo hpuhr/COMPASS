@@ -107,7 +107,6 @@ public slots:
     void updateProgressSlot (float percent);
     void updateDoneSlot ();
 
-    void databaseContentChangedSlot ();
     void dataSourceDefinitionChanged ();
 
 public:
@@ -253,11 +252,13 @@ public:
     void removeDependenciesForSchema (const std::string& schema_name);
 
     // association stuff
-//    void loadAssociations ();
     bool hasAssociations ();
     void addAssociation (unsigned int rec_num, unsigned int utn);
     void clearAssociations ();
     void saveAssociations ();
+
+    void updateToDatabaseContent ();
+
 
 protected:
     /// DBO name
@@ -308,6 +309,7 @@ protected:
 
     ///@brief Generates data sources information from previous post-processing.
     void buildDataSources();
+    void loadAssociations ();
     void removeVariableInfoForSchema (const std::string& schema_name);
 };
 

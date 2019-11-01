@@ -1485,14 +1485,50 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex (std::shared_ptr<Buff
     logdbg  << "DBInterface: insertBindStatementUpdateForCurrentIndex: done";
 }
 
-void DBInterface::createAssociationsTable (const std::string &table)
+void DBInterface::createAssociationsTable (const std::string &table_name)
 {
-    assert (!existsTable(table));
+    assert (!existsTable(table_name));
     connection_mutex_.lock();
-    current_connection_->executeSQL(sql_generator_.getCreateAssociationTableStatement(table));
+    current_connection_->executeSQL(sql_generator_.getCreateAssociationTableStatement(table_name));
     connection_mutex_.unlock();
 
     updateTableInfo ();
+}
+
+DBOAssociationCollection DBInterface::getAssociations (const std::string &table_name)
+{
+    assert (existsTable(table_name));
+
+    DBOAssociationCollection associations;
+    std::shared_ptr<DBCommand> command = sql_generator_.getSelectAssociationsCommand(table_name);
+
+    connection_mutex_.lock();
+
+    std::shared_ptr <DBResult> result = current_connection_->execute (*command.get());
+
+    connection_mutex_.unlock();
+
+    if (result->containsData())
+    {
+        std::shared_ptr<Buffer> buffer = result->buffer();
+
+        if (buffer->size())
+        {
+            size_t num_associations = buffer->size();
+            assert (buffer->has<int>("rec_num"));
+            assert (buffer->has<int>("utn"));
+
+            NullableVector<int>& rec_nums = buffer->get<int>("rec_num");
+            NullableVector<int>& utns = buffer->get<int>("utn");
+
+            for (size_t cnt=0; cnt < num_associations; ++cnt)
+            {
+                associations.emplace(rec_nums.get(cnt), utns.get(cnt));
+            }
+        }
+    }
+
+    return associations;
 }
 
 //DBResult *DBInterface::getDistinctStatistics (const std::string &type, DBOVariable *variable, unsigned int sensor_number)

@@ -28,6 +28,8 @@
 #include "dbinterface.h"
 #include "dbobjectmanager.h"
 
+#include <QApplication>
+
 /**
  * Registers current_schema as parameter, creates sub-configurables (schemas), checks if current_schema exists (if defined).
  */
@@ -233,11 +235,15 @@ void DBSchemaManager::lock ()
 
 void DBSchemaManager::databaseContentChangedSlot ()
 {
-    logdbg << "DBSchemaManager: databaseContentChangedSlot";
+    loginf << "DBSchemaManager: databaseContentChangedSlot";
+
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     for (auto& schema_it : schemas_)
         schema_it.second->updateOnDatabase();
 
     if (widget_)
         widget_->updateSchemas();
+
+    QApplication::restoreOverrideCursor();
 }

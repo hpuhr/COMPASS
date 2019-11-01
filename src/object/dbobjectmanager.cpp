@@ -29,6 +29,8 @@
 #include "stringconv.h"
 #include "viewmanager.h"
 
+#include <QApplication>
+
 using namespace Utils::String;
 
 /**
@@ -93,7 +95,7 @@ void DBObjectManager::generateSubConfigurable (const std::string& class_id, cons
         assert (objects_.find(object->name()) == objects_.end());
         objects_.insert(std::pair <std::string, DBObject*> (object->name(), object));
         connect (this, &DBObjectManager::schemaChangedSignal, object, &DBObject::schemaChangedSlot);
-        connect (this, &DBObjectManager::databaseContentChangedSignal, object, &DBObject::databaseContentChangedSlot);
+        //connect (this, &DBObjectManager::databaseContentChangedSignal, object, &DBObject::databaseContentChangedSlot);
         connect (object, &DBObject::loadingDoneSignal, this, &DBObjectManager::loadingDoneSlot);
         // TODO what if generation after db opening?
     }
@@ -410,7 +412,16 @@ void DBObjectManager::updateSchemaInformationSlot ()
 
 void DBObjectManager::databaseContentChangedSlot ()
 {
-    emit databaseContentChangedSignal();
+    //emit databaseContentChangedSignal();
+
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+    loginf << "DBObjectManager: databaseContentChangedSlot";
+
+    for (auto& object : objects_)
+        object.second->updateToDatabaseContent();
+
+    QApplication::restoreOverrideCursor();
 }
 
 void DBObjectManager::loadingDoneSlot (DBObject& object)

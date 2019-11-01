@@ -71,6 +71,7 @@ public:
     std::shared_ptr<DBCommand> getDistinctDataSourcesSelectCommand (DBObject &object);
 
     std::string getCreateAssociationTableStatement (const std::string& table_name);
+    std::shared_ptr<DBCommand> getSelectAssociationsCommand (const std::string& table_name);
 
 //    DBCommand *getDistinctStatistics (const std::string &dbo_type, DBOVariable *variable, unsigned int sensor_number);
 

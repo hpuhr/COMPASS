@@ -45,6 +45,9 @@
 #include "dboeditdatasourceswidget.h"
 #include "dboeditdatasourceactionoptionswidget.h"
 #include "storeddbodatasourcewidget.h"
+#include "stringconv.h"
+
+using namespace Utils;
 
 /**
  * Registers parameters, creates sub configurables
@@ -653,7 +656,7 @@ void DBObject::addDataSources (std::map <int, std::pair<int,int>>& sources)
     db_interface.insertBuffer(meta_table, buffer_ptr);
     db_interface.updateTableInfo();
 
-    databaseContentChangedSlot();
+    updateToDatabaseContent();
     //logdbg << "DBObject: addDataSources: emitting signal";
     //emit db_interface.databaseContentChangedSignal();
 
@@ -835,7 +838,7 @@ void DBObject::schemaChangedSlot ()
         associations_table_name_ = "";
     }
 
-    databaseContentChangedSlot ();
+    updateToDatabaseContent ();
 }
 
 void DBObject::load (DBOVariableSet& read_set, bool use_filters, bool use_order, DBOVariable* order_variable,
@@ -1157,13 +1160,13 @@ void DBObject::finalizeReadJobDoneSlot()
 }
 
 
-void DBObject::databaseContentChangedSlot ()
+void DBObject::updateToDatabaseContent ()
 {
-    logdbg << "DBObject: databaseContentChangedSlot";
+    logdbg << "DBObject: updateToDatabaseContent";
 
     if (!current_meta_table_)
     {
-        logdbg << "DBObject: databaseContentChangedSlot: object " << name_ << " has no current meta table";
+        logdbg << "DBObject: updateToDatabaseContent: object " << name_ << " has no current meta table";
         is_loadable_ = false;
         return;
     }
@@ -1177,7 +1180,7 @@ void DBObject::databaseContentChangedSlot ()
     if (is_loadable_)
         count_ = ATSDB::instance().interface().count (table_name);
 
-    logdbg << "DBObject: " << name_ << " databaseContentChangedSlot: exists in db "
+    logdbg << "DBObject: " << name_ << " updateToDatabaseContent: exists in db "
            << current_meta_table_->existsInDB() << " count " << count_;
 
     data_sources_.clear();
@@ -1187,7 +1190,9 @@ void DBObject::databaseContentChangedSlot ()
     if (info_widget_)
         info_widget_->updateSlot();
 
-    logdbg << "DBObject: " << name_ << " databaseContentChangedSlot: loadable " << is_loadable_ << " count " << count_;
+    loadAssociations();
+
+    logdbg << "DBObject: " << name_ << " updateToDatabaseContent: loadable " << is_loadable_ << " count " << count_;
 }
 
 bool DBObject::isLoading ()
@@ -1301,10 +1306,31 @@ void DBObject::removeVariableInfoForSchema (const std::string& schema_name)
     }
 }
 
-//void DBObject::loadAssociations ()
-//{
+void DBObject::loadAssociations ()
+{
+    associations_.clear();
 
-//}
+    boost::posix_time::ptime loading_start_time;
+    boost::posix_time::ptime loading_stop_time;
+
+    loading_start_time = boost::posix_time::microsec_clock::local_time();
+
+    DBInterface& db_interface = ATSDB::instance().interface();
+
+    assert (associations_table_name_.size());
+
+    if (db_interface.existsTable(associations_table_name_))
+        associations_ = db_interface.getAssociations(associations_table_name_);
+
+    loading_stop_time = boost::posix_time::microsec_clock::local_time();
+
+    double load_time;
+    boost::posix_time::time_duration diff = loading_stop_time - loading_start_time;
+    load_time= diff.total_milliseconds()/1000.0;
+
+    loginf  << "DBObject " << name_ << ": loadAssociations: " << associations_.size()
+            << " associactions done (" << String::doubleToStringPrecision(load_time, 2) << " s).";
+}
 
 bool DBObject::hasAssociations ()
 {

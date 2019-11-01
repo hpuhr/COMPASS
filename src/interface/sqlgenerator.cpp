@@ -295,9 +295,29 @@ std::string SQLGenerator::getCreateAssociationTableStatement (const std::string&
 {
     std::stringstream ss;
 
-    ss << "CREATE TABLE " << table_name << " (assoc_id PRIMARY KEY AUTOINCREMENT, rec_num INT, utn INT, PRIMARY KEY (assoc_id));";
+    ss << "CREATE TABLE " << table_name
+       << " (assoc_id INTEGER PRIMARY KEY AUTOINCREMENT, rec_num INTEGER, utn INTEGER);";
 
     return ss.str();
+}
+
+std::shared_ptr<DBCommand> SQLGenerator::getSelectAssociationsCommand (const std::string& table_name)
+{
+    std::shared_ptr<DBCommand> command = std::make_shared<DBCommand>(DBCommand());
+
+    std::stringstream ss;
+
+    ss << "SELECT assoc_id, rec_num, utn FROM " << table_name;
+
+    PropertyList property_list;
+    property_list.addProperty("assoc_id", PropertyDataType::INT);
+    property_list.addProperty("rec_num", PropertyDataType::INT);
+    property_list.addProperty("utn", PropertyDataType::INT);
+
+    command->set(ss.str());
+    command->list(property_list);
+
+    return command;
 }
 
 //DBCommand *SQLGenerator::getCountStatement (const std::string &dbo_type, unsigned int sensor_number)
