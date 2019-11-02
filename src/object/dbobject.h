@@ -31,6 +31,7 @@
 #include "configurable.h"
 #include "dbovariable.h"
 #include "dboschemametatabledefinition.h"
+#include "dboassociationentry.h"
 
 class PropertyList;
 class MetaDBTable;
@@ -49,7 +50,6 @@ class DBOLabelDefinition;
 class DBOLabelDefinitionWidget;
 
 using DBOEditDataSourceActionOptionsCollection = typename std::map<unsigned int, DBOEditDataSourceActionOptions>;
-using DBOAssociationCollection = typename std::multimap<unsigned int, unsigned int>; // rec_num -> utn
 
 /**
  * @brief Abstract data description of an object stored in a database
@@ -254,7 +254,7 @@ public:
 
     // association stuff
     bool hasAssociations ();
-    void addAssociation (unsigned int rec_num, unsigned int utn);
+    void addAssociation (unsigned int rec_num, unsigned int utn, unsigned int src_rec_num);
     void clearAssociations ();
     void saveAssociations ();
 

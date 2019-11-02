@@ -7,6 +7,7 @@
 class CreateARTASAssociationsTask;
 class QPushButton;
 class DBODataSourceSelectionComboBox;
+class DBOVariableSelectionWidget;
 
 class CreateARTASAssociationsTaskWidget : public QWidget
 {
@@ -14,6 +15,7 @@ class CreateARTASAssociationsTaskWidget : public QWidget
 
 public slots:
     void currentDataSourceChangedSlot ();
+    void anyVariableChangedSlot();
 
     void runSlot ();
     void runDoneSlot ();
@@ -31,6 +33,14 @@ protected:
     CreateARTASAssociationsTask& task_;
 
     DBODataSourceSelectionComboBox* ds_combo_ {nullptr};
+    DBOVariableSelectionWidget* tri_box_ {nullptr};
+    DBOVariableSelectionWidget* track_num_box_ {nullptr};
+    DBOVariableSelectionWidget* track_begin_box_ {nullptr};
+    DBOVariableSelectionWidget* track_end_box_ {nullptr};
+
+    DBOVariableSelectionWidget* key_box_ {nullptr};
+    DBOVariableSelectionWidget* hash_box_ {nullptr};
+    DBOVariableSelectionWidget* tod_box_ {nullptr};
 
     QPushButton* calc_button_ {nullptr};
 };

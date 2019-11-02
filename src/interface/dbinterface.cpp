@@ -1517,13 +1517,15 @@ DBOAssociationCollection DBInterface::getAssociations (const std::string &table_
             size_t num_associations = buffer->size();
             assert (buffer->has<int>("rec_num"));
             assert (buffer->has<int>("utn"));
+            assert (buffer->has<int>("src_rec_num"));
 
             NullableVector<int>& rec_nums = buffer->get<int>("rec_num");
             NullableVector<int>& utns = buffer->get<int>("utn");
+            NullableVector<int>& src_rec_nums = buffer->get<int>("src_rec_num");
 
             for (size_t cnt=0; cnt < num_associations; ++cnt)
             {
-                associations.emplace(rec_nums.get(cnt), utns.get(cnt));
+                associations.emplace(rec_nums.get(cnt), DBOAssociationEntry(utns.get(cnt), src_rec_nums.get(cnt)));
             }
         }
     }

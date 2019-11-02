@@ -1190,7 +1190,7 @@ void DBObject::updateToDatabaseContent ()
     if (info_widget_)
         info_widget_->updateSlot();
 
-    loadAssociations();
+    //loadAssociations(); //TODO
 
     logdbg << "DBObject: " << name_ << " updateToDatabaseContent: loadable " << is_loadable_ << " count " << count_;
 }
@@ -1337,9 +1337,9 @@ bool DBObject::hasAssociations ()
     return associations_.size() > 0;
 }
 
-void DBObject::addAssociation (unsigned int rec_num, unsigned int utn)
+void DBObject::addAssociation (unsigned int rec_num, unsigned int utn, unsigned int src_rec_num)
 {
-    associations_.emplace(rec_num, utn);
+    associations_.emplace(rec_num, DBOAssociationEntry(utn, src_rec_num));
     associations_changed_ = true;
 }
 
@@ -1372,17 +1372,20 @@ void DBObject::saveAssociations ()
     PropertyList list;
     list.addProperty("rec_num", PropertyDataType::INT);
     list.addProperty("utn", PropertyDataType::INT);
+    list.addProperty("src_rec_num", PropertyDataType::INT);
 
     std::shared_ptr<Buffer> buffer_ptr = std::shared_ptr<Buffer> (new Buffer (list, name_));
 
     NullableVector<int>& rec_nums = buffer_ptr->get<int>("rec_num");
     NullableVector<int>& utns = buffer_ptr->get<int>("utn");
+    NullableVector<int>& src_rec_nums = buffer_ptr->get<int>("src_rec_num");
 
     size_t cnt = 0;
     for (auto& assoc_it : associations_)
     {
         rec_nums.set(cnt, assoc_it.first);
-        utns.set(cnt, assoc_it.second);
+        utns.set(cnt, assoc_it.second.utn_);
+        src_rec_nums.set(cnt, assoc_it.second.src_rec_num_);
         ++cnt;
     }
 

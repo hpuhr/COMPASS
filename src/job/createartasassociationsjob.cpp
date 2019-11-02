@@ -6,13 +6,15 @@
 #include "dbobjectmanager.h"
 #include "dbobject.h"
 #include "atsdb.h"
+#include "buffer.h"
 
 #include "stringconv.h"
 
 using namespace Utils::String;
 
-CreateARTASAssociationsJob::CreateARTASAssociationsJob(DBInterface& db_interface)
-: Job("CreateARTASAssociationsJob"), db_interface_(db_interface)
+CreateARTASAssociationsJob::CreateARTASAssociationsJob(DBInterface& db_interface,
+                                                       std::map<std::string, std::shared_ptr<Buffer>> buffers)
+: Job("CreateARTASAssociationsJob"), db_interface_(db_interface), buffers_(buffers)
 {
 
 }
@@ -28,12 +30,10 @@ void CreateARTASAssociationsJob::run ()
 
     started_ = true;
 
-    boost::posix_time::ptime loading_start_time;
-    boost::posix_time::ptime loading_stop_time;
+    boost::posix_time::ptime start_time;
+    boost::posix_time::ptime stop_time;
 
-    loading_start_time = boost::posix_time::microsec_clock::local_time();
-
-    // load artas data rec_num, track_num, tris_compound, track_begin, track_end
+    start_time = boost::posix_time::microsec_clock::local_time();
 
     // create utns
 
@@ -58,17 +58,17 @@ void CreateARTASAssociationsJob::run ()
         size_t size = object->count();
 
         for (unsigned int cnt=0; cnt < size; ++cnt)
-            object->addAssociation(cnt, cnt);
+            object->addAssociation(cnt, cnt, cnt);
 
         object->saveAssociations();
     }
 
 
 //    db_interface_.insertBuffer(dbobject_.currentMetaTable(), buffer_);
-    loading_stop_time = boost::posix_time::microsec_clock::local_time();
+    stop_time = boost::posix_time::microsec_clock::local_time();
 
     double load_time;
-    boost::posix_time::time_duration diff = loading_stop_time - loading_start_time;
+    boost::posix_time::time_duration diff = stop_time - start_time;
     load_time= diff.total_milliseconds()/1000.0;
 
     loginf  << "CreateARTASAssociationsJob: run: done (" << doubleToStringPrecision(load_time, 2) << " s).";

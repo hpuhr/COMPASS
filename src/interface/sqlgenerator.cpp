@@ -296,7 +296,8 @@ std::string SQLGenerator::getCreateAssociationTableStatement (const std::string&
     std::stringstream ss;
 
     ss << "CREATE TABLE " << table_name
-       << " (assoc_id INTEGER PRIMARY KEY AUTOINCREMENT, rec_num INTEGER, utn INTEGER);";
+       << " (assoc_id INTEGER PRIMARY KEY AUTOINCREMENT, rec_num INTEGER, utn INTEGER, src_rec_num INTEGER,"
+          " ds_id INTEGER);";
 
     return ss.str();
 }
@@ -313,6 +314,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectAssociationsCommand (const std
     property_list.addProperty("assoc_id", PropertyDataType::INT);
     property_list.addProperty("rec_num", PropertyDataType::INT);
     property_list.addProperty("utn", PropertyDataType::INT);
+    property_list.addProperty("src_rec_num", PropertyDataType::INT);
 
     command->set(ss.str());
     command->list(property_list);
