@@ -13,6 +13,9 @@
 
 #include "stringconv.h"
 
+#include <algorithm>
+#include <math.h>
+
 using namespace Utils;
 
 CreateARTASAssociationsJob::CreateARTASAssociationsJob(CreateARTASAssociationsTask& task, DBInterface& db_interface,
@@ -38,37 +41,32 @@ void CreateARTASAssociationsJob::run ()
 
     start_time = boost::posix_time::microsec_clock::local_time();
 
+    // clear previous associations
+
+    loginf  << "CreateARTASAssociationsJob: run: clearing associations";
+
+    DBObjectManager& object_man = ATSDB::instance().objectManager();
+
+    for (auto& dbo_it : object_man)
+        dbo_it.second->clearAssociations();
+
     // create utns
     createUTNS();
 
     // create associations for artas tracks
-
-    // for each rec_num + tri, find sensor hash + rec_num
+    createARTASAssociations();
 
     // create associations for sensors
+    createSensorAssociations();
 
     // save associations
-
-
-//    loginf  << "CreateARTASAssociationsJob: run: writing object " << dbobject_.name() << " size " << buffer_->size();
-//    assert (buffer_->size());
-
-    for (auto& dbo_it : ATSDB::instance().objectManager())
+    for (auto& dbo_it : object_man)
     {
-        logdbg  << "CreateARTASAssociationsJob: run: processing object " << dbo_it.first;
-
-        DBObject* object = dbo_it.second;
-
-        size_t size = object->count();
-
-        for (unsigned int cnt=0; cnt < size; ++cnt)
-            object->addAssociation(cnt, cnt, cnt);
-
-        object->saveAssociations();
+        loginf  << "CreateARTASAssociationsJob: run: processing object " << dbo_it.first << " associated "
+                << dbo_it.second->associations().size() << " of " << dbo_it.second->count();
+        dbo_it.second->saveAssociations();
     }
 
-
-//    db_interface_.insertBuffer(dbobject_.currentMetaTable(), buffer_);
     stop_time = boost::posix_time::microsec_clock::local_time();
 
     double load_time;
@@ -78,16 +76,6 @@ void CreateARTASAssociationsJob::run ()
     loginf  << "CreateARTASAssociationsJob: run: done (" << String::doubleToStringPrecision(load_time, 2) << " s).";
     done_=true;
 }
-
-struct UniqueTrack
-{
-    int utn;
-    int track_num;
-    std::vector<int> rec_nums_;
-    //std::vector<int> track_nums_;
-    float first_tod_;
-    float last_tod_;
-};
 
 void CreateARTASAssociationsJob::createUTNS ()
 {
@@ -118,8 +106,7 @@ void CreateARTASAssociationsJob::createUTNS ()
     NullableVector<std::string> hashes = buffer->get<std::string>(task_.hashVar()->getNameFor(tracker_dbo_name_));
     NullableVector<float> tods = buffer->get<float>(task_.todVar()->getNameFor(tracker_dbo_name_));
 
-    std::vector <std::pair<int, UniqueTrack>> finished_tracks; // utn -> unique track
-    std::map<int, UniqueTrack> current_tracks; // utn -> unique track
+    std::map<int, UniqueARTASTrack> current_tracks; // utn -> unique track
     std::map<int, int> current_track_mappings; // track_num -> utn
 
     int utn_cnt {0};
@@ -147,6 +134,8 @@ void CreateARTASAssociationsJob::createUTNS ()
         tri_set = !tris.isNull(cnt);
         if (tri_set)
             tri = tris.get(cnt);
+        else
+            tri = "";
 
         assert (!track_nums.isNull(cnt));
         track_num = track_nums.get(cnt);
@@ -194,7 +183,8 @@ void CreateARTASAssociationsJob::createUTNS ()
         {
             // finalize old track
             utn = current_track_mappings.at(track_num);
-            finished_tracks.push_back(std::make_pair(utn, current_tracks.at(utn)));
+            assert (!finished_tracks_.count(utn));
+            finished_tracks_[utn] = current_tracks.at(utn);
             current_tracks.erase(utn);
             current_track_mappings.erase(track_num);
         }
@@ -221,9 +211,9 @@ void CreateARTASAssociationsJob::createUTNS ()
 
 
         assert (current_tracks.count (utn));
-        UniqueTrack& unique_track = current_tracks.at(utn);
+        UniqueARTASTrack& unique_track = current_tracks.at(utn);
         unique_track.last_tod_ = tod;
-        unique_track.rec_nums_.push_back(rec_num);
+        unique_track.rec_nums_tris_[rec_num] = std::make_pair(tri, tod);
 
         if (track_end_set && track_end)
         {
@@ -231,7 +221,8 @@ void CreateARTASAssociationsJob::createUTNS ()
                    << " since track end is set";
 
             // finalize old track
-            finished_tracks.push_back(std::make_pair(utn, current_tracks.at(utn)));
+            assert (!finished_tracks_.count(utn));
+            finished_tracks_[utn] = current_tracks.at(utn);
             current_tracks.erase(utn);
             current_track_mappings.erase(track_num);
         }
@@ -239,10 +230,173 @@ void CreateARTASAssociationsJob::createUTNS ()
 
     // finish all and clean up
     for (auto& ut_it : current_tracks)
-        finished_tracks.push_back(std::make_pair(ut_it.first, ut_it.second));
+    {
+        assert (!finished_tracks_.count(ut_it.first));
+        finished_tracks_[ut_it.first] = ut_it.second;
+    }
 
     current_tracks.clear();
     current_track_mappings.clear();
 
-    loginf << "CreateARTASAssociationsJob: createUTNS: found " << finished_tracks.size() << " finished tracks ";
+    loginf << "CreateARTASAssociationsJob: createUTNS: found " << finished_tracks_.size() << " finished tracks ";
+}
+
+void CreateARTASAssociationsJob::createARTASAssociations()
+{
+    loginf << "CreateARTASAssociationsJob: createARTASAssociations";
+
+    DBObjectManager& object_man = ATSDB::instance().objectManager();
+    DBObject& tracker_object = object_man.object(tracker_dbo_name_);
+
+    for (auto& ut_it : finished_tracks_) // utn -> UAT
+        for (auto& assoc_it : ut_it.second.rec_nums_tris_) // rec_num -> tri
+            tracker_object.addAssociation(assoc_it.first, ut_it.first, assoc_it.first);
+}
+
+void CreateARTASAssociationsJob::createSensorAssociations()
+{
+    loginf << "CreateARTASAssociationsJob: createSensorAssociations";
+    // for each rec_num + tri, find sensor hash + rec_num
+
+    DBObjectManager& object_man = ATSDB::instance().objectManager();
+
+    for (auto& dbo_it : object_man)
+        if (dbo_it.first != tracker_dbo_name_)
+            createSensorHashes(*dbo_it.second);
+
+    std::vector<std::string> tri_splits;
+    bool match_found;
+    std::string best_match_dbo_name;
+    int best_match_rec_num{-1};
+    float best_match_tod{0};
+    float tri_tod;
+    //float tod_diff;
+
+    typedef std::multimap<std::string, std::pair<int, float>>::iterator HashIterator;
+    std::pair<HashIterator, HashIterator> possible_hash_matches;
+
+    size_t missing_hashes {0};
+    size_t found_hashes {0};
+    size_t found_duplicates {0};
+
+    for (auto& ut_it : finished_tracks_) // utn -> UAT
+    {
+        logdbg << "CreateARTASAssociationsJob: createSensorAssociations: utn " << ut_it.first;
+
+        for (auto& assoc_it : ut_it.second.rec_nums_tris_) // rec_num -> (tri, tod)
+        {
+            tri_splits = String::split(assoc_it.second.first, ';');
+            tri_tod = assoc_it.second.second;
+
+            for (auto& tri : tri_splits) // for each referenced hash
+            {
+                match_found = false;
+
+                for (auto& dbo_it : object_man) // iterate over all dbos
+                {
+                    if (sensor_hashes_.count(dbo_it.first)) // if dbo has hash values
+                    {
+                        possible_hash_matches = sensor_hashes_.at(dbo_it.first).equal_range(tri);
+
+                        for (HashIterator it = possible_hash_matches.first; it != possible_hash_matches.second; ++it)
+                        {
+                            std::pair<int, float>& match = it->second; // rec_num, tod
+
+                            if (match_found)
+                            {
+                                loginf << "CreateARTASAssociationsJob: createSensorAssociations: found duplicate hash '"
+                                       << tri << "' in dbo " << dbo_it.first << " rec num " << match.first;
+
+                                // store if closer in time
+                                if (fabs (tri_tod-match.second) < fabs (tri_tod-best_match_tod))
+                                {
+                                    best_match_dbo_name = dbo_it.first;
+                                    best_match_rec_num = match.first; // rec_num
+                                    best_match_tod = match.second; // tod
+                                    match_found = true;
+                                }
+
+
+                                found_duplicates++;
+                            }
+                            else // store as best match
+                            {
+                                best_match_dbo_name = dbo_it.first;
+                                best_match_rec_num = match.first; // rec_num
+                                best_match_tod = match.second; // tod
+                                match_found = true;
+                            }
+
+                        }
+                    }
+                }
+
+                if (match_found)
+                {
+                    if (fabs (tri_tod-best_match_tod) > 30.0)
+                        loginf << "CreateARTASAssociationsJob: createSensorAssociations: utn " << ut_it.first
+                               << " has best matching hash " << fabs (tri_tod-best_match_tod) << "s apart from "
+                               << String::timeStringFromDouble(tri_tod);
+
+                    object_man.object(best_match_dbo_name).addAssociation(best_match_rec_num, ut_it.first,
+                                                                          assoc_it.first);
+                    ++found_hashes;
+                }
+                else
+                {
+                    loginf << "CreateARTASAssociationsJob: createSensorAssociations: utn " << ut_it.first
+                           << " has missing hash '" << tri << "' at " << String::timeStringFromDouble(tri_tod);
+                    ++missing_hashes;
+                }
+
+            }
+        }
+    }
+
+    loginf << "CreateARTASAssociationsJob: createSensorAssociations: done with " << found_hashes << " found, "
+           << missing_hashes << " missing, " << found_duplicates << " duplicates";
+
+}
+
+void CreateARTASAssociationsJob::createSensorHashes (DBObject& object)
+{
+    loginf << "CreateARTASAssociationsJob: createSensorHashes: object " << object.name();
+
+    if (!buffers_.count(object.name()))
+    {
+        logwrn << "CreateARTASAssociationsJob: createSensorHashes: no data found";
+        return;
+    }
+
+    std::string dbo_name = object.name();
+    std::shared_ptr<Buffer> buffer = buffers_.at(dbo_name);
+    size_t buffer_size = buffer->size();
+
+    MetaDBOVariable* key_meta_var = task_.keyVar();
+    MetaDBOVariable* hash_meta_var = task_.hashVar();
+    MetaDBOVariable* tod_meta_var = task_.todVar();
+
+    DBOVariable& key_var = key_meta_var->getFor(dbo_name);
+    DBOVariable& hash_var = hash_meta_var->getFor(dbo_name);
+    DBOVariable& tod_var = tod_meta_var->getFor(dbo_name);
+
+    assert (buffer->has<int>(key_var.name()));
+    assert (buffer->has<std::string>(hash_var.name()));
+    assert (buffer->has<float>(tod_var.name()));
+
+    NullableVector<int> rec_nums = buffer->get<int>(key_var.name());
+    NullableVector<std::string> hashes = buffer->get<std::string>(hash_var.name());
+    NullableVector<float> tods = buffer->get<float>(tod_var.name());
+
+    for (size_t cnt=0; cnt < buffer_size; ++cnt)
+    {
+        assert (!rec_nums.isNull(cnt));
+        assert (!hashes.isNull(cnt));
+        assert (!tods.isNull(cnt));
+
+        // dbo -> hash -> rec_num, tod
+        //std::map <std::string, std::multimap<std::string, std::pair<int, float>>> sensor_hashes_;
+
+        sensor_hashes_[dbo_name].emplace(hashes.get(cnt), std::make_pair(rec_nums.get(cnt), tods.get(cnt)));
+    }
 }

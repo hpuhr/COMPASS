@@ -284,10 +284,20 @@ void CreateARTASAssociationsTask::updateProgressSlot()
         }
     }
 
-    //        std::string msg = "Loading object data: " + String::doubleToStringPrecision(done_percent, 2) + "%";
-    //        msg_box_->setText(msg.c_str());
     if (create_job_done_)
     {
+        for (auto& dbo_it : ATSDB::instance().objectManager())
+        {
+            ss << dbo_it.first << ": Associated " << dbo_it.second->associations().size()
+               << "/" << dbo_it.second->count();
+
+            if (dbo_it.second->count())
+                ss << " (" << String::percentToString(
+                          100.0*dbo_it.second->associations().size()/dbo_it.second->count()) << "%)\n";
+            else
+                ss << "\n";
+        }
+
         assert (msg_box_);
 
         QApplication::restoreOverrideCursor();

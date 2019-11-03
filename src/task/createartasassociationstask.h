@@ -65,11 +65,11 @@ public:
     std::string todVarStr() const;
     void todVarStr(const std::string &todVarStr);
 
-    MetaDBOVariable *keyVar() const;
+    MetaDBOVariable* keyVar() const;
 
-    MetaDBOVariable *hashVar() const;
+    MetaDBOVariable* hashVar() const;
 
-    MetaDBOVariable *todVar() const;
+    MetaDBOVariable* todVar() const;
 
 
 protected:
