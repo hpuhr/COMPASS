@@ -40,6 +40,10 @@ public:
     std::string currentDataSourceName() const;
     void currentDataSourceName(const std::string &currentDataSourceName);
 
+    std::string trackerDsIdVarStr() const;
+    void trackerDsIdVarStr(const std::string &tracker_ds_id_var_str);
+    DBOVariable *trackerDsIdVar() const;
+
     std::string trackerTRIVarStr() const;
     void trackerTRIVarStr(const std::string &trackerTRIVarStr);
 
@@ -61,8 +65,18 @@ public:
     std::string todVarStr() const;
     void todVarStr(const std::string &todVarStr);
 
+    MetaDBOVariable *keyVar() const;
+
+    MetaDBOVariable *hashVar() const;
+
+    MetaDBOVariable *todVar() const;
+
+
 protected:
     std::string current_data_source_name_;
+
+    std::string tracker_ds_id_var_str_;
+    DBOVariable* tracker_ds_id_var_ {nullptr};
 
     std::string tracker_tri_var_str_;
     DBOVariable* tracker_tri_var_ {nullptr};
@@ -91,8 +105,6 @@ protected:
 
     std::map<std::string, bool> dbo_loading_done_flags_;
     bool dbo_loading_done_ {false};
-
-    //std::map<std::string, std::shared_ptr<Buffer>> buffers_;
 
     std::shared_ptr<CreateARTASAssociationsJob> create_job_;
     bool create_job_done_ {false};

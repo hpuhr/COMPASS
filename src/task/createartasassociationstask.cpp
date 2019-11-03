@@ -10,6 +10,7 @@
 #include "dbovariable.h"
 #include "metadbovariable.h"
 #include "stringconv.h"
+#include "dbodatasource.h"
 
 #include <sstream>
 
@@ -26,6 +27,7 @@ CreateARTASAssociationsTask::CreateARTASAssociationsTask(const std::string& clas
     registerParameter ("current_data_source_name", &current_data_source_name_, "");
 
     // tracker vars
+    registerParameter ("tracker_ds_id_var_str", &tracker_ds_id_var_str_, "ds_id");
     registerParameter ("tracker_tri_var_str", &tracker_tri_var_str_, "tris_compound");
     registerParameter ("tracker_track_num_var_str", &tracker_track_num_var_str_, "track_num");
     registerParameter ("tracker_track_begin_var_str", &tracker_track_begin_var_str_, "track_created");
@@ -74,6 +76,18 @@ bool CreateARTASAssociationsTask::canRun ()
     if (!tracker_object.count())
         return false;
 
+    bool ds_found {false};
+    for (auto ds_it = tracker_object.dsBegin(); ds_it != tracker_object.dsEnd(); ++ds_it)
+    {
+        if (ds_it->second.name() == current_data_source_name_)
+        {
+            ds_found = true;
+            break;
+        }
+    }
+    if (!ds_found)
+        return false;
+
     if (!tracker_object.hasVariable(tracker_tri_var_str_)
             || !tracker_object.hasVariable(tracker_track_num_var_str_)
             || !tracker_object.hasVariable(tracker_track_begin_var_str_)
@@ -116,6 +130,7 @@ void CreateARTASAssociationsTask::run ()
     //msg_box_->setText(msg.c_str());
     msg_box_->setStandardButtons(QMessageBox::NoButton);
 
+    checkAndSetVariable (tracker_ds_id_var_str_, &tracker_ds_id_var_);
     checkAndSetVariable (tracker_tri_var_str_, &tracker_tri_var_);
     checkAndSetVariable (tracker_track_num_var_str_, &tracker_track_num_var_);
     checkAndSetVariable (tracker_track_begin_var_str_, &tracker_track_begin_var_);
@@ -133,7 +148,38 @@ void CreateARTASAssociationsTask::run ()
         connect (dbo_it.second, &DBObject::newDataSignal, this, &CreateARTASAssociationsTask::newDataSlot);
         connect (dbo_it.second, &DBObject::loadingDoneSignal, this, &CreateARTASAssociationsTask::loadingDoneSlot);
 
-        dbo_it.second->load (read_set, false, false, nullptr, false); //"0,100000"
+        if (dbo_it.first == "Tracker")
+        {
+            DBObject& tracker_object = object_man.object("Tracker");
+
+            bool ds_found {false};
+            int ds_id{-1};
+            for (auto ds_it = tracker_object.dsBegin(); ds_it != tracker_object.dsEnd(); ++ds_it)
+            {
+                if (ds_it->second.name() == current_data_source_name_)
+                {
+                    ds_found = true;
+                    ds_id = ds_it->first;
+                    break;
+                }
+            }
+
+            assert (ds_found);
+            std::string custom_filter_clause {tracker_ds_id_var_str_+" in ("+std::to_string(ds_id)+")"};
+
+            assert (tracker_ds_id_var_);
+
+            //        void DBObject::load (DBOVariableSet& read_set,  std::string custom_filter_clause,
+            //                             std::vector <DBOVariable*> filtered_variables, bool use_order,
+            //                             DBOVariable* order_variable,
+            //                             bool use_order_ascending, const std::string &limit_str)
+
+            dbo_it.second->load (read_set, custom_filter_clause, {tracker_ds_id_var_}, false,
+                                 &tod_var_->getFor("Tracker"), false);
+        }
+        else
+            dbo_it.second->load (read_set, false, false, nullptr, false);
+
         dbo_loading_done_flags_[dbo_it.first] = false;
     }
 
@@ -172,8 +218,7 @@ void CreateARTASAssociationsTask::loadingDoneSlot (DBObject& object)
         }
 
 
-        create_job_ = std::shared_ptr<CreateARTASAssociationsJob> (
-                    new CreateARTASAssociationsJob(ATSDB::instance().interface(), buffers));
+        create_job_ = std::make_shared<CreateARTASAssociationsJob> (*this, ATSDB::instance().interface(), buffers);
 
         connect (create_job_.get(), &CreateARTASAssociationsJob::doneSignal,
                  this, &CreateARTASAssociationsTask::createDoneSlot, Qt::QueuedConnection);
@@ -215,11 +260,11 @@ void CreateARTASAssociationsTask::updateProgressSlot()
     {
         if (done_it.second)
         {
-            ss << done_it.first << ": Done\n";
+            ss << "  " << done_it.first << ": Done\n";
         }
         else
         {
-            ss << done_it.first << ": In Progress\n";
+            ss << "  " << done_it.first << ": In Progress\n";
             dbo_loading_done_ = false;
         }
     }
@@ -244,16 +289,10 @@ void CreateARTASAssociationsTask::updateProgressSlot()
     if (create_job_done_)
     {
         assert (msg_box_);
-        msg_box_->close();
-        delete msg_box_;
-        msg_box_ = nullptr;
 
         QApplication::restoreOverrideCursor();
 
-        msg_box_ = new QMessageBox;
-        assert (msg_box_);
-        msg_box_->setWindowTitle("Creating ARTAS Associations");
-        msg_box_->setText("Done.");
+        msg_box_->setText(ss.str().c_str());
         msg_box_->setStandardButtons(QMessageBox::Ok);
         msg_box_->exec();
 
@@ -279,12 +318,29 @@ void CreateARTASAssociationsTask::currentDataSourceName(const std::string& curre
     current_data_source_name_ = current_data_source_name;
 }
 
+DBOVariable *CreateARTASAssociationsTask::trackerDsIdVar() const
+{
+    return tracker_ds_id_var_;
+}
+
+std::string CreateARTASAssociationsTask::trackerDsIdVarStr() const
+{
+    return tracker_ds_id_var_str_;
+}
+
+void CreateARTASAssociationsTask::trackerDsIdVarStr(const std::string& tracker_ds_id_var_str)
+{
+    loginf << "CreateARTASAssociationsTask: trackerDsIdVarStr: '" << tracker_ds_id_var_str << "'";
+    tracker_ds_id_var_str_ = tracker_ds_id_var_str;
+}
+
+
 std::string CreateARTASAssociationsTask::trackerTRIVarStr() const
 {
     return tracker_tri_var_str_;
 }
 
-void CreateARTASAssociationsTask::trackerTRIVarStr(const std::string &tracker_tri_var_str)
+void CreateARTASAssociationsTask::trackerTRIVarStr(const std::string& tracker_tri_var_str)
 {
     loginf << "CreateARTASAssociationsTask: trackerTRIVarStr: '" << tracker_tri_var_str << "'";
 
@@ -296,7 +352,7 @@ std::string CreateARTASAssociationsTask::trackerTrackNumVarStr() const
     return tracker_track_num_var_str_;
 }
 
-void CreateARTASAssociationsTask::trackerTrackNumVarStr(const std::string &tracker_track_num_var_str)
+void CreateARTASAssociationsTask::trackerTrackNumVarStr(const std::string& tracker_track_num_var_str)
 {
     tracker_track_num_var_str_ = tracker_track_num_var_str;
 }
@@ -306,7 +362,7 @@ std::string CreateARTASAssociationsTask::trackerTrackBeginVarStr() const
     return tracker_track_begin_var_str_;
 }
 
-void CreateARTASAssociationsTask::trackerTrackBeginVarStr(const std::string &tracker_track_begin_var_str)
+void CreateARTASAssociationsTask::trackerTrackBeginVarStr(const std::string& tracker_track_begin_var_str)
 {
     tracker_track_begin_var_str_ = tracker_track_begin_var_str;
 }
@@ -316,7 +372,7 @@ std::string CreateARTASAssociationsTask::trackerTrackEndVarStr() const
     return tracker_track_end_var_str_;
 }
 
-void CreateARTASAssociationsTask::trackerTrackEndVarStr(const std::string &tracker_track_end_var_str)
+void CreateARTASAssociationsTask::trackerTrackEndVarStr(const std::string& tracker_track_end_var_str)
 {
     tracker_track_end_var_str_ = tracker_track_end_var_str;
 }
@@ -355,6 +411,21 @@ void CreateARTASAssociationsTask::todVarStr(const std::string& tod_var_str)
     loginf << "CreateARTASAssociationsTask: todVarStr: '" << tod_var_str << "'";
 
     tod_var_str_ = tod_var_str;
+}
+
+MetaDBOVariable *CreateARTASAssociationsTask::keyVar() const
+{
+    return key_var_;
+}
+
+MetaDBOVariable *CreateARTASAssociationsTask::hashVar() const
+{
+    return hash_var_;
+}
+
+MetaDBOVariable *CreateARTASAssociationsTask::todVar() const
+{
+    return tod_var_;
 }
 
 void CreateARTASAssociationsTask::checkAndSetVariable (std::string& name_str, DBOVariable** var)

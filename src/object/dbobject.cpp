@@ -844,6 +844,25 @@ void DBObject::schemaChangedSlot ()
 void DBObject::load (DBOVariableSet& read_set, bool use_filters, bool use_order, DBOVariable* order_variable,
                      bool use_order_ascending, const std::string &limit_str)
 {
+    std::string custom_filter_clause;
+    std::vector <DBOVariable*> filtered_variables;
+
+    if (use_filters)
+    {
+        custom_filter_clause = ATSDB::instance().filterManager().getSQLCondition (name_, filtered_variables);
+    }
+
+    for (auto& var_it : filtered_variables)
+        assert (var_it->existsInDB());
+
+    load (read_set, custom_filter_clause, filtered_variables, use_order, order_variable, use_order_ascending,
+          limit_str);
+}
+
+void DBObject::load (DBOVariableSet& read_set,  std::string custom_filter_clause,
+                     std::vector <DBOVariable*> filtered_variables, bool use_order, DBOVariable* order_variable,
+                     bool use_order_ascending, const std::string &limit_str)
+{
     assert (is_loadable_);
     assert (existsInDB());
 
@@ -865,17 +884,6 @@ void DBObject::load (DBOVariableSet& read_set, bool use_filters, bool use_order,
     finalize_jobs_.clear();
 
     clearData ();
-
-    std::string custom_filter_clause;
-    std::vector <DBOVariable*> filtered_variables;
-
-    if (use_filters)
-    {
-        custom_filter_clause = ATSDB::instance().filterManager().getSQLCondition (name_, filtered_variables);
-    }
-
-    for (auto& var_it : filtered_variables)
-        assert (var_it->existsInDB());
 
     //    DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
     //    DBOVariable *order, const std::string &limit_str

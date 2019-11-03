@@ -48,6 +48,13 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(CreateARTAS
 
         // tracker vars
         row_cnt++;
+        grid->addWidget (new QLabel ("Tracker Data Source ID Variable"), row_cnt, 0);
+        ds_id_box_ = new DBOVariableSelectionWidget ();
+        ds_id_box_->showDBOOnly("Tracker");
+        connect (ds_id_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
+        grid->addWidget (ds_id_box_, row_cnt, 1);
+
+        row_cnt++;
         grid->addWidget (new QLabel ("Tracker TRI Variable"), row_cnt, 0);
         tri_box_ = new DBOVariableSelectionWidget ();
         tri_box_->showDBOOnly("Tracker");
@@ -164,6 +171,10 @@ void CreateARTASAssociationsTaskWidget::update ()
     DBObject& track_object = object_man.object("Tracker");
 
     // tracker vats
+    assert (ds_id_box_);
+    if (task_.trackerDsIdVarStr().size() && track_object.hasVariable(task_.trackerDsIdVarStr()))
+        ds_id_box_->selectedVariable(track_object.variable(task_.trackerDsIdVarStr()));
+
     assert (tri_box_);
     if (task_.trackerTRIVarStr().size() && track_object.hasVariable(task_.trackerTRIVarStr()))
         tri_box_->selectedVariable(track_object.variable(task_.trackerTRIVarStr()));
@@ -198,6 +209,13 @@ void CreateARTASAssociationsTaskWidget::update ()
 void CreateARTASAssociationsTaskWidget::anyVariableChangedSlot()
 {
     // tracker vars
+    assert (ds_id_box_);
+    if (ds_id_box_->hasVariable())
+        task_.trackerDsIdVarStr(ds_id_box_->selectedVariable().name());
+    else
+        task_.trackerTRIVarStr("");
+
+
     assert (tri_box_);
     if (tri_box_->hasVariable())
         task_.trackerTRIVarStr(tri_box_->selectedVariable().name());
