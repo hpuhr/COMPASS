@@ -10,9 +10,10 @@
 
 class TaskManager;
 class CreateARTASAssociationsTaskWidget;
+class CreateARTASAssociationsStatusDialog;
 class DBOVariable;
 class MetaDBOVariable;
-class QMessageBox;
+//class QMessageBox;
 class DBObject;
 class Buffer;
 
@@ -26,6 +27,8 @@ public slots:
 
     void newDataSlot (DBObject& object);
     void loadingDoneSlot (DBObject& object);
+
+    void closeStatusDialogSlot();
 
 public:
     CreateARTASAssociationsTask(const std::string& class_id, const std::string& instance_id,
@@ -101,7 +104,8 @@ protected:
 
     CreateARTASAssociationsTaskWidget* widget_ {nullptr};
 
-    QMessageBox* msg_box_ {nullptr};
+    //QMessageBox* msg_box_ {nullptr};
+    std::unique_ptr<CreateARTASAssociationsStatusDialog> status_dialog_ {nullptr};
 
     std::map<std::string, bool> dbo_loading_done_flags_;
     bool dbo_loading_done_ {false};
@@ -114,7 +118,7 @@ protected:
 
     DBOVariableSet getReadSetFor (const std::string& dbo_name);
 
-    void updateProgressSlot();
+    //void updateProgressSlot();
 };
 
 #endif // CREATEARTASASSOCIATIONSTASK_H

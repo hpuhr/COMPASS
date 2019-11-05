@@ -35,6 +35,7 @@ public:
     size_t missingHashes() const;
     size_t foundHashes() const;
     size_t foundDuplicates() const;
+    size_t dubiousAssociations() const;
 
 protected:
     CreateARTASAssociationsTask& task_;
@@ -52,6 +53,7 @@ protected:
     size_t missing_hashes_at_beginning_ {0};
     size_t missing_hashes_ {0};
     size_t found_hashes_ {0}; // dbo name -> cnt
+    size_t dubious_associations_ {0}; // time difference > 30s
     size_t found_duplicates_ {0};
 
     void createUTNS ();

@@ -12,6 +12,7 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/jsonimportertaskwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/createartasassociationstask.h"
         "${CMAKE_CURRENT_LIST_DIR}/createartasassociationstaskwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/createartasassociationsstatusdialog.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/taskmanager.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/radarplotpositioncalculatortask.cpp"
@@ -20,6 +21,7 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/jsonimportertaskwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/createartasassociationstask.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/createartasassociationstaskwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/createartasassociationsstatusdialog.cpp"
 )
 
 IF (jASTERIX_FOUND)

@@ -1,5 +1,6 @@
 #include "createartasassociationstask.h"
 #include "createartasassociationstaskwidget.h"
+#include "createartasassociationsstatusdialog.h"
 #include "atsdb.h"
 #include "dbinterface.h"
 #include "taskmanager.h"
@@ -123,12 +124,18 @@ void CreateARTASAssociationsTask::run ()
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    std::string msg = "Loading object data.";
-    msg_box_ = new QMessageBox;
-    assert (msg_box_);
-    msg_box_->setWindowTitle("Creating ARTAS Associations");
-    //msg_box_->setText(msg.c_str());
-    msg_box_->setStandardButtons(QMessageBox::NoButton);
+//    std::string msg = "Loading object data.";
+//    msg_box_ = new QMessageBox;
+//    assert (msg_box_);
+//    msg_box_->setWindowTitle("Creating ARTAS Associations");
+//    //msg_box_->setText(msg.c_str());
+//    msg_box_->setStandardButtons(QMessageBox::NoButton);
+
+    assert (!status_dialog_);
+    status_dialog_.reset(new CreateARTASAssociationsStatusDialog());
+    connect(status_dialog_.get(), &CreateARTASAssociationsStatusDialog::closeSignal,
+            this, &CreateARTASAssociationsTask::closeStatusDialogSlot);
+    status_dialog_->markStartTime();
 
     checkAndSetVariable (tracker_ds_id_var_str_, &tracker_ds_id_var_);
     checkAndSetVariable (tracker_tri_var_str_, &tracker_tri_var_);
@@ -183,13 +190,16 @@ void CreateARTASAssociationsTask::run ()
         dbo_loading_done_flags_[dbo_it.first] = false;
     }
 
-    updateProgressSlot();
-    msg_box_->show();
+//    updateProgressSlot();
+//    msg_box_->show();
+
+    status_dialog_->setDBODoneFlags(dbo_loading_done_flags_);
+    status_dialog_->show();
 }
 
 void CreateARTASAssociationsTask::newDataSlot (DBObject& object)
 {
-    updateProgressSlot();
+    //updateProgressSlot();
 }
 
 void CreateARTASAssociationsTask::loadingDoneSlot (DBObject& object)
@@ -201,7 +211,15 @@ void CreateARTASAssociationsTask::loadingDoneSlot (DBObject& object)
 
     dbo_loading_done_flags_.at(object.name()) = true;
 
-    updateProgressSlot();
+    assert (status_dialog_);
+    status_dialog_->setDBODoneFlags(dbo_loading_done_flags_);
+    //updateProgressSlot();
+
+    dbo_loading_done_ = true;
+
+    for (auto& done_it : dbo_loading_done_flags_)
+        if (!done_it.second)
+            dbo_loading_done_ = false;
 
     if (dbo_loading_done_)
     {
@@ -217,7 +235,6 @@ void CreateARTASAssociationsTask::loadingDoneSlot (DBObject& object)
             dbo_it.second->clearData();
         }
 
-
         create_job_ = std::make_shared<CreateARTASAssociationsJob> (*this, ATSDB::instance().interface(), buffers);
 
         connect (create_job_.get(), &CreateARTASAssociationsJob::doneSignal,
@@ -227,9 +244,11 @@ void CreateARTASAssociationsTask::loadingDoneSlot (DBObject& object)
                  Qt::QueuedConnection);
 
         JobManager::instance().addDBJob(create_job_);
+
+        status_dialog_->setAssociationStatus("In Progress");
     }
 
-    updateProgressSlot();
+    //updateProgressSlot();
 }
 
 void CreateARTASAssociationsTask::createDoneSlot ()
@@ -237,8 +256,23 @@ void CreateARTASAssociationsTask::createDoneSlot ()
     loginf << "CreateARTASAssociationsTask: createDoneSlot";
 
     create_job_done_ = true;
-    updateProgressSlot();
+
+    status_dialog_->setAssociationStatus("Done");
+    status_dialog_->setFoundHashes(create_job_->foundHashes());
+    status_dialog_->setMissingHashesAtBeginning(create_job_->missingHashesAtBeginning());
+    status_dialog_->setMissingHashes(create_job_->missingHashes());
+    status_dialog_->setDubiousAssociations(create_job_->dubiousAssociations());
+    status_dialog_->setFoundDuplicates(create_job_->foundDuplicates());
+
+    status_dialog_->setDone();
+
+    //updateProgressSlot();
     create_job_ = nullptr;
+
+    QApplication::restoreOverrideCursor();
+
+    if (widget_)
+        widget_->runDoneSlot();
 }
 
 void CreateARTASAssociationsTask::createObsoleteSlot ()
@@ -246,78 +280,77 @@ void CreateARTASAssociationsTask::createObsoleteSlot ()
     create_job_ = nullptr;
 }
 
+//void CreateARTASAssociationsTask::updateProgressSlot()
+//{
+//    dbo_loading_done_ = true;
 
-void CreateARTASAssociationsTask::updateProgressSlot()
-{
-    dbo_loading_done_ = true;
+//    assert (msg_box_);
+//    stringstream ss;
 
-    assert (msg_box_);
-    stringstream ss;
+//    ss << "DBObject Loading:\n";
 
-    ss << "DBObject Loading:\n";
+//    for (auto& done_it : dbo_loading_done_flags_)
+//    {
+//        if (done_it.second)
+//        {
+//            ss << "  " << done_it.first << ": Done\n";
+//        }
+//        else
+//        {
+//            ss << "  " << done_it.first << ": In Progress\n";
+//            dbo_loading_done_ = false;
+//        }
+//    }
 
-    for (auto& done_it : dbo_loading_done_flags_)
-    {
-        if (done_it.second)
-        {
-            ss << "  " << done_it.first << ": Done\n";
-        }
-        else
-        {
-            ss << "  " << done_it.first << ": In Progress\n";
-            dbo_loading_done_ = false;
-        }
-    }
+//    ss << "\nCreating Associations: ";
 
-    ss << "\nCreating Associations: ";
+//    if (create_job_done_)
+//    {
+//        ss << "Done\n";
 
-    if (create_job_done_)
-    {
-        ss << "Done\n";
+//        assert (create_job_);
 
-        assert (create_job_);
+//        ss << "Created Associations: " << create_job_->foundHashes() << "\n";
+//        ss << "Missing Hashes at beginning: " << create_job_->missingHashesAtBeginning() << "\n";
+//        ss << "Missing Hashes not at beginning: " << create_job_->missingHashes() << "\n";
+//        ss << "Duplicate Hashes: " << create_job_->foundDuplicates() << "\n\n";
 
-        ss << "Created Associations: " << create_job_->foundHashes() << "\n";
-        ss << "Missing Hashes at beginning: " << create_job_->missingHashesAtBeginning() << "\n";
-        ss << "Missing Hashes not at beginning: " << create_job_->missingHashes() << "\n";
-        ss << "Duplicate Hashes: " << create_job_->foundDuplicates() << "\n\n";
+//        for (auto& dbo_it : ATSDB::instance().objectManager())
+//        {
+//            ss << dbo_it.first << ": Associated " << dbo_it.second->associations().size()
+//               << "/" << dbo_it.second->count();
 
-        for (auto& dbo_it : ATSDB::instance().objectManager())
-        {
-            ss << dbo_it.first << ": Associated " << dbo_it.second->associations().size()
-               << "/" << dbo_it.second->count();
+//            if (dbo_it.second->count())
+//                ss << " (" << String::percentToString(
+//                          100.0*dbo_it.second->associations().size()/dbo_it.second->count()) << "%)\n";
+//            else
+//                ss << "\n";
+//        }
 
-            if (dbo_it.second->count())
-                ss << " (" << String::percentToString(
-                          100.0*dbo_it.second->associations().size()/dbo_it.second->count()) << "%)\n";
-            else
-                ss << "\n";
-        }
+//        assert (msg_box_);
 
-        assert (msg_box_);
+//        QApplication::restoreOverrideCursor();
 
-        QApplication::restoreOverrideCursor();
+//        msg_box_->setText(ss.str().c_str());
+//        msg_box_->setStandardButtons(QMessageBox::Ok);
+//        msg_box_->exec();
 
-        msg_box_->setText(ss.str().c_str());
-        msg_box_->setStandardButtons(QMessageBox::Ok);
-        msg_box_->exec();
+//        delete msg_box_;
+//        msg_box_ = nullptr;
 
-        delete msg_box_;
-        msg_box_ = nullptr;
-
-        if (widget_)
-            widget_->runDoneSlot();
-    }
-    else
-    {
-        if (create_job_)
-            ss << "In Progress\n";
-        else {
-            ss << "Waiting\n";
-        }
-        msg_box_->setText(ss.str().c_str());
-    }
-}
+//        if (widget_)
+//            widget_->runDoneSlot();
+//    }
+//    else
+//    {
+//        if (create_job_)
+//            ss << "In Progress\n";
+//        else {
+//            ss << "Waiting\n";
+//        }
+//        msg_box_->setText(ss.str().c_str());
+//    }
+//}
 
 std::string CreateARTASAssociationsTask::currentDataSourceName() const
 {
@@ -511,4 +544,11 @@ DBOVariableSet CreateARTASAssociationsTask::getReadSetFor (const std::string& db
     }
 
     return read_set;
+}
+
+void CreateARTASAssociationsTask::closeStatusDialogSlot()
+{
+    assert (status_dialog_);
+    status_dialog_->close();
+    status_dialog_ = nullptr;
 }

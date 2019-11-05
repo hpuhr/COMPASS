@@ -92,6 +92,11 @@ size_t CreateARTASAssociationsJob::foundDuplicates() const
     return found_duplicates_;
 }
 
+size_t CreateARTASAssociationsJob::dubiousAssociations() const
+{
+    return dubious_associations_;
+}
+
 size_t CreateARTASAssociationsJob::missingHashesAtBeginning() const
 {
     return missing_hashes_at_beginning_;
@@ -355,9 +360,12 @@ void CreateARTASAssociationsJob::createSensorAssociations()
                 if (match_found)
                 {
                     if (fabs (tri_tod-best_match_tod) > 30.0)
+                    {
                         loginf << "CreateARTASAssociationsJob: createSensorAssociations: utn " << ut_it.first
                                << " has best matching hash " << fabs (tri_tod-best_match_tod) << "s apart from "
                                << String::timeStringFromDouble(tri_tod);
+                        ++dubious_associations_;
+                    }
 
                     object_man.object(best_match_dbo_name).addAssociation(best_match_rec_num, ut_it.first,
                                                                           assoc_it.first);
