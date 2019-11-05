@@ -77,11 +77,31 @@ void CreateARTASAssociationsJob::run ()
     done_=true;
 }
 
+size_t CreateARTASAssociationsJob::missingHashes() const
+{
+    return missing_hashes_;
+}
+
+size_t CreateARTASAssociationsJob::foundHashes() const
+{
+    return found_hashes_;
+}
+
+size_t CreateARTASAssociationsJob::foundDuplicates() const
+{
+    return found_duplicates_;
+}
+
+size_t CreateARTASAssociationsJob::missingHashesAtBeginning() const
+{
+    return missing_hashes_at_beginning_;
+}
+
 void CreateARTASAssociationsJob::createUTNS ()
 {
     loginf << "CreateARTASAssociationsJob: createUTNS";
 
-    if (!buffers_.count("Tracker"))
+    if (!buffers_.count(tracker_dbo_name_))
     {
         logwrn << "CreateARTASAssociationsJob: createUTNS: no tracker data found";
         return;
@@ -161,9 +181,12 @@ void CreateARTASAssociationsJob::createUTNS ()
         assert (!tods.isNull(cnt));
         tod = tods.get(cnt);
 
+        if (cnt == 0) // store first time, was loaded as sorted in time
+            first_tod_ = tod;
+
         if (track_begin_set && track_begin && current_track_mappings.count(track_num))
         {
-            loginf << "CreateARTASAssociationsJob: createUTNS: finalizing track utn " << utn << " track end is set";
+            logdbg << "CreateARTASAssociationsJob: createUTNS: finalizing track utn " << utn << " track end is set";
 
             finish_previous_track = true;
         }
@@ -172,7 +195,7 @@ void CreateARTASAssociationsJob::createUTNS ()
         if (!finish_previous_track && current_track_mappings.count(track_num) &&
                 tod - current_tracks.at(current_track_mappings.at(track_num)).last_tod_ > 600.0)
         {
-            loginf << "CreateARTASAssociationsJob: createUTNS: finalizing track utn "
+            logdbg << "CreateARTASAssociationsJob: createUTNS: finalizing track utn "
                    << current_track_mappings.at(track_num) << " since tod difference "
                    << tod - current_tracks.at(current_track_mappings.at(track_num)).last_tod_;
 
@@ -191,7 +214,7 @@ void CreateARTASAssociationsJob::createUTNS ()
 
         if (!current_track_mappings.count(track_num)) // new track where none existed
         {
-            loginf << "CreateARTASAssociationsJob: createUTNS: new track utn " << utn_cnt << " track num " << track_num
+            logdbg << "CreateARTASAssociationsJob: createUTNS: new track utn " << utn_cnt << " track num " << track_num
                    << " tod " << String::timeStringFromDouble(tod)
                    << " begin " << (track_begin_set ? std::to_string(track_begin) : " not set");
 
@@ -217,7 +240,7 @@ void CreateARTASAssociationsJob::createUTNS ()
 
         if (track_end_set && track_end)
         {
-            loginf << "CreateARTASAssociationsJob: createUTNS: finalizing track utn " << utn
+            logdbg << "CreateARTASAssociationsJob: createUTNS: finalizing track utn " << utn
                    << " since track end is set";
 
             // finalize old track
@@ -275,9 +298,7 @@ void CreateARTASAssociationsJob::createSensorAssociations()
     typedef std::multimap<std::string, std::pair<int, float>>::iterator HashIterator;
     std::pair<HashIterator, HashIterator> possible_hash_matches;
 
-    size_t missing_hashes {0};
-    size_t found_hashes {0};
-    size_t found_duplicates {0};
+    assert (first_tod_ > 0); // has to be set
 
     for (auto& ut_it : finished_tracks_) // utn -> UAT
     {
@@ -304,7 +325,7 @@ void CreateARTASAssociationsJob::createSensorAssociations()
 
                             if (match_found)
                             {
-                                loginf << "CreateARTASAssociationsJob: createSensorAssociations: found duplicate hash '"
+                                logdbg << "CreateARTASAssociationsJob: createSensorAssociations: found duplicate hash '"
                                        << tri << "' in dbo " << dbo_it.first << " rec num " << match.first;
 
                                 // store if closer in time
@@ -317,7 +338,7 @@ void CreateARTASAssociationsJob::createSensorAssociations()
                                 }
 
 
-                                found_duplicates++;
+                                found_duplicates_++;
                             }
                             else // store as best match
                             {
@@ -340,21 +361,31 @@ void CreateARTASAssociationsJob::createSensorAssociations()
 
                     object_man.object(best_match_dbo_name).addAssociation(best_match_rec_num, ut_it.first,
                                                                           assoc_it.first);
-                    ++found_hashes;
+                    ++found_hashes_;
                 }
                 else
                 {
-                    loginf << "CreateARTASAssociationsJob: createSensorAssociations: utn " << ut_it.first
+                    logdbg << "CreateARTASAssociationsJob: createSensorAssociations: utn " << ut_it.first
                            << " has missing hash '" << tri << "' at " << String::timeStringFromDouble(tri_tod);
-                    ++missing_hashes;
+
+                    if (fabs (tri_tod-first_tod_) <= 30.0)
+                        ++missing_hashes_at_beginning_;
+                    else
+                    {
+                        loginf << "CreateARTASAssociationsJob: createSensorAssociations: utn " << ut_it.first
+                               << " has missing hash '" << tri << "' at " << String::timeStringFromDouble(tri_tod);
+
+                        ++missing_hashes_;
+                    }
                 }
 
             }
         }
     }
 
-    loginf << "CreateARTASAssociationsJob: createSensorAssociations: done with " << found_hashes << " found, "
-           << missing_hashes << " missing, " << found_duplicates << " duplicates";
+    loginf << "CreateARTASAssociationsJob: createSensorAssociations: done with " << found_hashes_ << " found, "
+           << missing_hashes_at_beginning_ << " missing at beginning, " << missing_hashes_ << " missing, "
+           << found_duplicates_ << " duplicates";
 
 }
 

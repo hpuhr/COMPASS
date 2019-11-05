@@ -31,6 +31,11 @@ public:
 
     virtual void run ();
 
+    size_t missingHashesAtBeginning() const;
+    size_t missingHashes() const;
+    size_t foundHashes() const;
+    size_t foundDuplicates() const;
+
 protected:
     CreateARTASAssociationsTask& task_;
     DBInterface& db_interface_;
@@ -41,6 +46,13 @@ protected:
 
     // dbo -> hash -> rec_num, tod
     std::map <std::string, std::multimap<std::string, std::pair<int, float>>> sensor_hashes_;
+
+    float first_tod_ {-1.0};
+
+    size_t missing_hashes_at_beginning_ {0};
+    size_t missing_hashes_ {0};
+    size_t found_hashes_ {0}; // dbo name -> cnt
+    size_t found_duplicates_ {0};
 
     void createUTNS ();
     void createARTASAssociations();

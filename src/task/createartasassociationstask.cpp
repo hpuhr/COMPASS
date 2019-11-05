@@ -236,14 +236,14 @@ void CreateARTASAssociationsTask::createDoneSlot ()
 {
     loginf << "CreateARTASAssociationsTask: createDoneSlot";
 
-    create_job_ = nullptr;
     create_job_done_ = true;
-
     updateProgressSlot();
+    create_job_ = nullptr;
 }
 
 void CreateARTASAssociationsTask::createObsoleteSlot ()
 {
+    create_job_ = nullptr;
 }
 
 
@@ -274,18 +274,14 @@ void CreateARTASAssociationsTask::updateProgressSlot()
     if (create_job_done_)
     {
         ss << "Done\n";
-    }
-    else
-    {
-        if (create_job_)
-            ss << "In Progress\n";
-        else {
-            ss << "Waiting\n";
-        }
-    }
 
-    if (create_job_done_)
-    {
+        assert (create_job_);
+
+        ss << "Created Associations: " << create_job_->foundHashes() << "\n";
+        ss << "Missing Hashes at beginning: " << create_job_->missingHashesAtBeginning() << "\n";
+        ss << "Missing Hashes not at beginning: " << create_job_->missingHashes() << "\n";
+        ss << "Duplicate Hashes: " << create_job_->foundDuplicates() << "\n\n";
+
         for (auto& dbo_it : ATSDB::instance().objectManager())
         {
             ss << dbo_it.first << ": Associated " << dbo_it.second->associations().size()
@@ -313,7 +309,14 @@ void CreateARTASAssociationsTask::updateProgressSlot()
             widget_->runDoneSlot();
     }
     else
+    {
+        if (create_job_)
+            ss << "In Progress\n";
+        else {
+            ss << "Waiting\n";
+        }
         msg_box_->setText(ss.str().c_str());
+    }
 }
 
 std::string CreateARTASAssociationsTask::currentDataSourceName() const
