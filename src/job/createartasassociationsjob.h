@@ -23,6 +23,9 @@ class CreateARTASAssociationsJob : public Job
 {
     Q_OBJECT
 
+signals:
+    void statusSignal (QString status);
+
 public:
     CreateARTASAssociationsJob(CreateARTASAssociationsTask& task, DBInterface& db_interface,
                                std::map<std::string, std::shared_ptr<Buffer>> buffers);
@@ -41,6 +44,11 @@ protected:
     CreateARTASAssociationsTask& task_;
     DBInterface& db_interface_;
     std::map<std::string, std::shared_ptr<Buffer>> buffers_;
+
+    float end_track_time_ {0};
+    float beginning_time_ {0};
+    float dubious_time_ {0};
+    float future_time_ {0};
 
     const std::string tracker_dbo_name_{"Tracker"};
     std::map<int, UniqueARTASTrack> finished_tracks_; // utn -> unique track

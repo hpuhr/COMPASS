@@ -1,4 +1,5 @@
 #include "createartasassociationsstatusdialog.h"
+#include "createartasassociationstask.h"
 #include "logger.h"
 #include "stringconv.h"
 #include "atsdb.h"
@@ -16,8 +17,9 @@
 using namespace std;
 using namespace Utils;
 
-CreateARTASAssociationsStatusDialog::CreateARTASAssociationsStatusDialog(QWidget *parent, Qt::WindowFlags f)
-: QDialog(parent, f)
+CreateARTASAssociationsStatusDialog::CreateARTASAssociationsStatusDialog(CreateARTASAssociationsTask& task,
+                                                                         QWidget *parent, Qt::WindowFlags f)
+: QDialog(parent, f), task_(task)
 {
     setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
 
@@ -62,7 +64,7 @@ CreateARTASAssociationsStatusDialog::CreateARTASAssociationsStatusDialog(QWidget
 
     // associations
 
-    QLabel* map_label = new QLabel("Associations");
+    QLabel* map_label = new QLabel("TRI Associations");
     map_label->setFont(font_big);
     main_layout->addWidget(map_label);
 
@@ -76,7 +78,8 @@ CreateARTASAssociationsStatusDialog::CreateARTASAssociationsStatusDialog(QWidget
         association_grid->addWidget(association_status_label_, row, 1);
 
         ++row;
-        association_grid->addWidget(new QLabel("Missing Hashes at Beginning"), row, 0);
+        association_grid->addWidget(new QLabel("Missing Hashes at Beginning (<"+QString::number(task_.beginningTime())
+                                               +"s)"), row, 0);
         missing_hashes_at_beginning_label_ = new QLabel ();
         missing_hashes_at_beginning_label_->setAlignment(Qt::AlignRight);
         association_grid->addWidget(missing_hashes_at_beginning_label_, row, 1);
@@ -94,7 +97,8 @@ CreateARTASAssociationsStatusDialog::CreateARTASAssociationsStatusDialog(QWidget
         association_grid->addWidget(found_hashes_label_, row, 1);
 
         ++row;
-        association_grid->addWidget(new QLabel("Dubious Associations"), row, 0);
+        association_grid->addWidget(new QLabel("Dubious Associations (>"+QString::number(task_.dubiousTime())
+                                               +"s)"), row, 0);
         dubious_label_ = new QLabel ();
         dubious_label_->setAlignment(Qt::AlignRight);
         association_grid->addWidget(dubious_label_, row, 1);
@@ -116,6 +120,7 @@ CreateARTASAssociationsStatusDialog::CreateARTASAssociationsStatusDialog(QWidget
 //    main_layout->addWidget(dbo_associated_label);
 
     dbo_associated_grid_ = new QGridLayout();
+    updateDBOAssociatedGrid();
     main_layout->addLayout(dbo_associated_grid_);
 
     main_layout->addStretch();
@@ -313,6 +318,9 @@ void CreateARTASAssociationsStatusDialog::updateDBOAssociatedGrid ()
 
     for (auto& dbo_it : ATSDB::instance().objectManager())
     {
+        if (dbo_it.first == "Tracker")
+            continue;
+
         ++row;
 
         if (dbo_associated_grid_->rowCount() < row+1)

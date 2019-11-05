@@ -8,6 +8,7 @@
 class QLabel;
 class QPushButton;
 class QGridLayout;
+class CreateARTASAssociationsTask;
 
 class CreateARTASAssociationsStatusDialog : public QDialog
 {
@@ -20,7 +21,8 @@ public slots:
     void okClickedSlot();
 
 public:
-    CreateARTASAssociationsStatusDialog(QWidget* parent=nullptr, Qt::WindowFlags f=0);
+    CreateARTASAssociationsStatusDialog(CreateARTASAssociationsTask& task, QWidget* parent=nullptr,
+                                        Qt::WindowFlags f=0);
 
     void markStartTime ();
     void setDone ();
@@ -36,6 +38,8 @@ public:
     void setFoundDuplicates(const size_t& found_duplicates);
 
 private:
+    CreateARTASAssociationsTask& task_;
+
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;
     boost::posix_time::time_duration time_diff_;

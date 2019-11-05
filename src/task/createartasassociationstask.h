@@ -28,6 +28,8 @@ public slots:
     void newDataSlot (DBObject& object);
     void loadingDoneSlot (DBObject& object);
 
+    void associationStatusSlot (QString status);
+
     void closeStatusDialogSlot();
 
 public:
@@ -75,6 +77,18 @@ public:
     MetaDBOVariable* todVar() const;
 
 
+    float beginningTime() const;
+    void beginningTime(float beginning_time);
+
+    float dubiousTime() const;
+    void dubiousTime(float dubious_time);
+
+    float endTrackTime() const;
+    void endTrackTime(float end_track_time);
+
+    float futureTime() const;
+    void futureTime(float future_time);
+
 protected:
     std::string current_data_source_name_;
 
@@ -101,6 +115,11 @@ protected:
 
     std::string tod_var_str_;
     MetaDBOVariable* tod_var_ {nullptr};
+
+    float end_track_time_ {0};
+    float beginning_time_ {0};
+    float dubious_time_ {0};
+    float future_time_ {0};
 
     CreateARTASAssociationsTaskWidget* widget_ {nullptr};
 

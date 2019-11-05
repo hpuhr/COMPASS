@@ -11,6 +11,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QMessageBox>
+#include <QLineEdit>
 
 CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(CreateARTASAssociationsTask& task, QWidget* parent,
                                                                      Qt::WindowFlags f)
@@ -105,6 +106,41 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(CreateARTAS
         tod_box_->showMetaVariablesOnly(true);
         connect (tod_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
         grid->addWidget (tod_box_, row_cnt, 1);
+
+        // time stuff
+        row_cnt++;
+        grid->addWidget (new QLabel ("End Track Time (s)"), row_cnt, 0);
+        end_track_time_edit_ = new QLineEdit (QString::number(task.endTrackTime()));
+        end_track_time_edit_->setValidator( new QDoubleValidator(10, 60*3600, 2, this) );
+        connect (end_track_time_edit_, &QLineEdit::textEdited,
+                 this, &CreateARTASAssociationsTaskWidget::endTrackTimeEditSlot);
+        grid->addWidget (end_track_time_edit_, row_cnt, 1);
+
+        row_cnt++;
+        grid->addWidget (new QLabel ("Beginning Time (s)"), row_cnt, 0);
+        beginning_time_edit_ = new QLineEdit (QString::number(task.beginningTime()));
+        beginning_time_edit_->setValidator( new QDoubleValidator(0, 600, 2, this) );
+        connect (beginning_time_edit_, &QLineEdit::textEdited,
+                 this, &CreateARTASAssociationsTaskWidget::beginningTimeEditSlot);
+        grid->addWidget (beginning_time_edit_, row_cnt, 1);
+
+
+        row_cnt++;
+        grid->addWidget (new QLabel ("Dubious Time (s)"), row_cnt, 0);
+        dubious_time_edit_ = new QLineEdit (QString::number(task.dubiousTime()));
+        dubious_time_edit_->setValidator( new QDoubleValidator(0, 600, 2, this) );
+        connect (dubious_time_edit_, &QLineEdit::textEdited,
+                 this, &CreateARTASAssociationsTaskWidget::dubiousTimeEditSlot);
+        grid->addWidget (dubious_time_edit_, row_cnt, 1);
+
+        row_cnt++;
+        grid->addWidget (new QLabel ("Future Time (s)"), row_cnt, 0);
+        future_time_edit_ = new QLineEdit (QString::number(task.futureTime()));
+        future_time_edit_->setValidator( new QDoubleValidator(0, 10, 2, this) );
+        connect (future_time_edit_, &QLineEdit::textEdited,
+                 this, &CreateARTASAssociationsTaskWidget::futureTimeEditSlot);
+        grid->addWidget (future_time_edit_, row_cnt, 1);
+
 
         main_layout->addLayout(grid);
     }
@@ -258,4 +294,36 @@ void CreateARTASAssociationsTaskWidget::anyVariableChangedSlot()
         task_.todVarStr(tod_box_->selectedMetaVariable().name());
     else
         task_.todVarStr("");
+}
+
+void CreateARTASAssociationsTaskWidget::endTrackTimeEditSlot(QString value)
+{
+    bool ok;
+    float val = value.toFloat(&ok);
+    assert (ok);
+    task_.endTrackTime(val);
+}
+
+void CreateARTASAssociationsTaskWidget::beginningTimeEditSlot(QString value)
+{
+    bool ok;
+    float val = value.toFloat(&ok);
+    assert (ok);
+    task_.beginningTime(val);
+}
+
+void CreateARTASAssociationsTaskWidget::dubiousTimeEditSlot(QString value)
+{
+    bool ok;
+    float val = value.toFloat(&ok);
+    assert (ok);
+    task_.dubiousTime(val);
+}
+
+void CreateARTASAssociationsTaskWidget::futureTimeEditSlot(QString value)
+{
+    bool ok;
+    float val = value.toFloat(&ok);
+    assert (ok);
+    task_.futureTime(val);
 }

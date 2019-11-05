@@ -22,12 +22,14 @@ CreateARTASAssociationsJob::CreateARTASAssociationsJob(CreateARTASAssociationsTa
                                                        std::map<std::string, std::shared_ptr<Buffer>> buffers)
 : Job("CreateARTASAssociationsJob"), task_(task), db_interface_(db_interface), buffers_(buffers)
 {
-
+    end_track_time_ = task_.endTrackTime();
+    beginning_time_ = task_.beginningTime();
+    dubious_time_ = task_.dubiousTime();
+    future_time_ = -task_.futureTime();
 }
 
 CreateARTASAssociationsJob::~CreateARTASAssociationsJob()
 {
-
 }
 
 void CreateARTASAssociationsJob::run ()
@@ -51,15 +53,18 @@ void CreateARTASAssociationsJob::run ()
         dbo_it.second->clearAssociations();
 
     // create utns
+    emit statusSignal("Creating UTNs");
     createUTNS();
 
     // create associations for artas tracks
+    emit statusSignal("Creating ARTAS Associations");
     createARTASAssociations();
 
     // create associations for sensors
     createSensorAssociations();
 
     // save associations
+    emit statusSignal("Saving Associations");
     for (auto& dbo_it : object_man)
     {
         loginf  << "CreateARTASAssociationsJob: run: processing object " << dbo_it.first << " associated "
@@ -198,7 +203,7 @@ void CreateARTASAssociationsJob::createUTNS ()
 
         // check if existed but last update was more than 10m ago
         if (!finish_previous_track && current_track_mappings.count(track_num) &&
-                tod - current_tracks.at(current_track_mappings.at(track_num)).last_tod_ > 600.0)
+                tod - current_tracks.at(current_track_mappings.at(track_num)).last_tod_ > end_track_time_)
         {
             logdbg << "CreateARTASAssociationsJob: createUTNS: finalizing track utn "
                    << current_track_mappings.at(track_num) << " since tod difference "
@@ -290,7 +295,11 @@ void CreateARTASAssociationsJob::createSensorAssociations()
 
     for (auto& dbo_it : object_man)
         if (dbo_it.first != tracker_dbo_name_)
+        {
+            std::string status = "Creating "+dbo_it.first+" Hash List";
+            emit statusSignal(status.c_str());
             createSensorHashes(*dbo_it.second);
+        }
 
     std::vector<std::string> tri_splits;
     bool match_found;
@@ -305,6 +314,7 @@ void CreateARTASAssociationsJob::createSensorAssociations()
 
     assert (first_tod_ > 0); // has to be set
 
+    emit statusSignal("Creating Associations");
     for (auto& ut_it : finished_tracks_) // utn -> UAT
     {
         logdbg << "CreateARTASAssociationsJob: createSensorAssociations: utn " << ut_it.first;
@@ -328,13 +338,16 @@ void CreateARTASAssociationsJob::createSensorAssociations()
                         {
                             std::pair<int, float>& match = it->second; // rec_num, tod
 
+                            if (tri_tod-match.second < 0 && tri_tod-match.second < future_time_) // tri_tod must be later than match
+                                continue;
+
                             if (match_found)
                             {
                                 logdbg << "CreateARTASAssociationsJob: createSensorAssociations: found duplicate hash '"
                                        << tri << "' in dbo " << dbo_it.first << " rec num " << match.first;
 
                                 // store if closer in time
-                                if (fabs (tri_tod-match.second) < fabs (tri_tod-best_match_tod))
+                                if (fabs(tri_tod-match.second) < fabs(tri_tod-best_match_tod))
                                 {
                                     best_match_dbo_name = dbo_it.first;
                                     best_match_rec_num = match.first; // rec_num
@@ -359,7 +372,9 @@ void CreateARTASAssociationsJob::createSensorAssociations()
 
                 if (match_found)
                 {
-                    if (fabs (tri_tod-best_match_tod) > 30.0)
+                    //assert (tri_tod-best_match_tod >= 0);
+
+                    if (fabs(tri_tod-best_match_tod) > dubious_time_)
                     {
                         loginf << "CreateARTASAssociationsJob: createSensorAssociations: utn " << ut_it.first
                                << " has best matching hash " << fabs (tri_tod-best_match_tod) << "s apart from "
@@ -376,7 +391,9 @@ void CreateARTASAssociationsJob::createSensorAssociations()
                     logdbg << "CreateARTASAssociationsJob: createSensorAssociations: utn " << ut_it.first
                            << " has missing hash '" << tri << "' at " << String::timeStringFromDouble(tri_tod);
 
-                    if (fabs (tri_tod-first_tod_) <= 30.0)
+                    assert (tri_tod-first_tod_ >= 0);
+
+                    if (tri_tod-first_tod_ <= beginning_time_)
                         ++missing_hashes_at_beginning_;
                     else
                     {
