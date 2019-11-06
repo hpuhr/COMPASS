@@ -49,8 +49,7 @@ void CreateARTASAssociationsJob::run ()
 
     DBObjectManager& object_man = ATSDB::instance().objectManager();
 
-    for (auto& dbo_it : object_man)
-        dbo_it.second->clearAssociations();
+    object_man.removeAssociations();
 
     // create utns
     emit statusSignal("Creating UTNs");
@@ -71,6 +70,8 @@ void CreateARTASAssociationsJob::run ()
                 << dbo_it.second->associations().size() << " of " << dbo_it.second->count();
         dbo_it.second->saveAssociations();
     }
+
+    object_man.setAssociations(tracker_dbo_name_, task_.currentDataSourceName());
 
     stop_time = boost::posix_time::microsec_clock::local_time();
 

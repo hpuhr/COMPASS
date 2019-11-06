@@ -701,6 +701,7 @@ std::string DBInterface::getProperty (const std::string& id)
         throw std::invalid_argument ("DBInterface: getProperty: id "+id+" does not exist");
 
     assert (buffer->size() == 1);
+    assert (!buffer->get<std::string>("property").isNull(0));
 
     text = buffer->get<std::string>("property").get(0);
 
@@ -729,7 +730,7 @@ bool DBInterface::hasProperty (const std::string& id)
 
     assert (buffer);
 
-    return buffer->size() == 1;
+    return buffer->size() == 1 && !buffer->get<std::string>("property").isNull(0);
 }
 
 void DBInterface::insertMinMax (const std::string& id, const std::string& object_name, const std::string& min,
@@ -1525,6 +1526,10 @@ DBOAssociationCollection DBInterface::getAssociations (const std::string &table_
 
             for (size_t cnt=0; cnt < num_associations; ++cnt)
             {
+                assert (!rec_nums.isNull(cnt));
+                assert (!utns.isNull(cnt));
+                assert (!src_rec_nums.isNull(cnt));
+
                 associations.emplace(rec_nums.get(cnt), DBOAssociationEntry(utns.get(cnt), src_rec_nums.get(cnt)));
             }
         }

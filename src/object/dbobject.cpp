@@ -52,8 +52,9 @@ using namespace Utils;
 /**
  * Registers parameters, creates sub configurables
  */
-DBObject::DBObject(const std::string& class_id, const std::string& instance_id, Configurable* parent)
-    : Configurable (class_id, instance_id, parent, "db_object_"+boost::algorithm::to_lower_copy(instance_id)+".xml")
+DBObject::DBObject(const std::string& class_id, const std::string& instance_id, DBObjectManager* manager)
+    : Configurable (class_id, instance_id, manager, "db_object_"+boost::algorithm::to_lower_copy(instance_id)+".xml"),
+      manager_(*manager)
 {
     registerParameter ("name" , &name_, "Undefined");
     registerParameter ("info" , &info_, "");
@@ -554,7 +555,7 @@ void DBObject::addDataSources (std::map <int, std::pair<int,int>>& sources)
         if (has_sac_sic)
         {
             bool stored_found = false;
-            unsigned int stored_id;
+            unsigned int stored_id {0};
 
             for (auto& stored_it : stored_data_sources_)
             {
@@ -1170,7 +1171,7 @@ void DBObject::finalizeReadJobDoneSlot()
 
 void DBObject::updateToDatabaseContent ()
 {
-    logdbg << "DBObject: updateToDatabaseContent";
+    loginf << "DBObject " << name_ << ": updateToDatabaseContent";
 
     if (!current_meta_table_)
     {
@@ -1198,9 +1199,11 @@ void DBObject::updateToDatabaseContent ()
     if (info_widget_)
         info_widget_->updateSlot();
 
-    //loadAssociations(); //TODO
+    if (manager_.hasAssociations())
+        loadAssociations();
 
-    logdbg << "DBObject: " << name_ << " updateToDatabaseContent: loadable " << is_loadable_ << " count " << count_;
+    loginf << "DBObject: " << name_ << " updateToDatabaseContent: done, loadable " << is_loadable_
+           << " count " << count_;
 }
 
 bool DBObject::isLoading ()
@@ -1316,6 +1319,8 @@ void DBObject::removeVariableInfoForSchema (const std::string& schema_name)
 
 void DBObject::loadAssociations ()
 {
+    loginf << "DBObject " << name_ << ": loadAssociations";
+
     associations_.clear();
 
     boost::posix_time::ptime loading_start_time;

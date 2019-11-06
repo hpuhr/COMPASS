@@ -48,6 +48,7 @@ class FinalizeDBOReadJob;
 class DBOVariableSet;
 class DBOLabelDefinition;
 class DBOLabelDefinitionWidget;
+class DBObjectManager;
 
 using DBOEditDataSourceActionOptionsCollection = typename std::map<unsigned int, DBOEditDataSourceActionOptions>;
 
@@ -111,7 +112,7 @@ public slots:
 
 public:
     /// @brief Constructor
-    DBObject(const std::string& class_id, const std::string& instance_id, Configurable* parent);
+    DBObject(const std::string& class_id, const std::string& instance_id, DBObjectManager* manager);
     /// @brief Desctructor
     virtual ~DBObject();
 
@@ -264,8 +265,8 @@ public:
 
     void updateToDatabaseContent ();
 
-
 protected:
+    DBObjectManager& manager_;
     /// DBO name
     std::string name_;
     /// DBO description

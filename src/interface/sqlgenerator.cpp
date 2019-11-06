@@ -308,7 +308,7 @@ std::shared_ptr<DBCommand> SQLGenerator::getSelectAssociationsCommand (const std
 
     std::stringstream ss;
 
-    ss << "SELECT assoc_id, rec_num, utn FROM " << table_name;
+    ss << "SELECT assoc_id, rec_num, utn, src_rec_num FROM " << table_name;
 
     PropertyList property_list;
     property_list.addProperty("assoc_id", PropertyDataType::INT);
