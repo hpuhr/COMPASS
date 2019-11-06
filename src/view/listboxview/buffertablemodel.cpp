@@ -441,6 +441,14 @@ void BufferTableModel::showOnlySelected (bool value)
     updateToSelection();
 }
 
+void BufferTableModel::showAssociations (bool value)
+{
+    loginf << "BufferTableModel: showAssociations: " << value;
+    beginResetModel();
+    show_associations_ = value;
+    endResetModel();
+}
+
 void BufferTableModel::updateToSelection()
 {
     beginResetModel();

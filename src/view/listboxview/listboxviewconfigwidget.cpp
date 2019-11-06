@@ -44,20 +44,28 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget( ListBoxView* view, QWidget* pa
 
     only_selected_check_ = new QCheckBox("Show Only Selected");
     only_selected_check_->setChecked(view_->showOnlySelected());
-    connect(only_selected_check_, SIGNAL(clicked()), this, SLOT(toggleShowOnlySeletedSlot()));
+    connect(only_selected_check_, &QCheckBox::clicked, this, &ListBoxViewConfigWidget::toggleShowOnlySeletedSlot);
     vlayout->addWidget(only_selected_check_);
 
     presentation_check_ = new QCheckBox("Use Presentation");
     presentation_check_->setChecked(view_->usePresentation());
-    connect(presentation_check_, SIGNAL(clicked()), this, SLOT(toggleUsePresentation()));
+    connect(presentation_check_, &QCheckBox::clicked, this, &ListBoxViewConfigWidget::toggleUsePresentation);
     vlayout->addWidget(presentation_check_);
+
+    associations_check_= new QCheckBox("Show Associations");
+    associations_check_->setChecked(view_->showAssociations());
+    connect(associations_check_, &QCheckBox::clicked, this, &ListBoxViewConfigWidget::showAssociationsSlot);
+    if (!view_->canShowAssociations())
+        associations_check_->setDisabled(true);
+    vlayout->addWidget(associations_check_);
 
     vlayout->addStretch();
 
     overwrite_check_ = new QCheckBox("Overwrite Exported File");
     overwrite_check_->setChecked(view_->overwriteCSV());
-    connect(overwrite_check_, SIGNAL( clicked() ), this, SLOT( toggleUseOverwrite() ));
+    connect(overwrite_check_, &QCheckBox::clicked, this, &ListBoxViewConfigWidget::toggleUseOverwrite);
     vlayout->addWidget(overwrite_check_);
+
 
     export_button_ = new QPushButton ("Export");
     connect(export_button_, SIGNAL(clicked(bool)), this, SLOT(exportSlot()));
@@ -93,6 +101,14 @@ void ListBoxViewConfigWidget::toggleUseOverwrite()
     logdbg  << "ListBoxViewConfigWidget: toggleUseOverwrite: setting overwrite to " << checked;
     view_->overwriteCSV (checked);
 
+}
+
+void ListBoxViewConfigWidget::showAssociationsSlot()
+{
+    assert (associations_check_);
+    bool checked = associations_check_->checkState() == Qt::Checked;
+    logdbg  << "ListBoxViewConfigWidget: showAssociationsSlot: setting to " << checked;
+    view_->showAssociations(checked);
 }
 
 void ListBoxViewConfigWidget::exportSlot()

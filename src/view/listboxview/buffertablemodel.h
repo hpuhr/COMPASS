@@ -60,6 +60,7 @@ public:
 
     void usePresentation (bool use_presentation);
     void showOnlySelected (bool value);
+    void showAssociations (bool value);
     void reset ();
 
     void updateToSelection();
@@ -79,6 +80,7 @@ protected:
 
     bool show_only_selected_ {true};
     bool use_presentation_ {true};
+    bool show_associations_ {false};
 
     void updateRows ();
 };

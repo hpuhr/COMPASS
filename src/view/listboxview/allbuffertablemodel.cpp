@@ -554,6 +554,7 @@ void AllBufferTableModel::exportJobDoneSlot()
 
 void AllBufferTableModel::usePresentation (bool use_presentation)
 {
+    loginf << "AllBufferTableModel: usePresentation: " << use_presentation;
     beginResetModel();
     use_presentation_ = use_presentation;
     endResetModel();
@@ -565,6 +566,14 @@ void AllBufferTableModel::showOnlySelected (bool value)
     show_only_selected_ = value;
 
     updateToSelection();
+}
+
+void AllBufferTableModel::showAssociations (bool value)
+{
+    loginf << "AllBufferTableModel: showAssociations: " << value;
+    beginResetModel();
+    show_associations_ = value;
+    endResetModel();
 }
 
 void AllBufferTableModel::updateToSelection()
