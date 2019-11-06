@@ -579,7 +579,8 @@ void AllBufferTableModel::saveAsCSV (const std::string &file_name, bool overwrit
 
     AllBufferCSVExportJob *export_job = new AllBufferCSVExportJob (buffers_, data_source_.getSet(), number_to_dbo_,
                                                                    row_indexes_, file_name, overwrite,
-                                                                   show_only_selected_, use_presentation_);
+                                                                   show_only_selected_, use_presentation_,
+                                                                   show_associations_);
 
     export_job_ = std::shared_ptr<AllBufferCSVExportJob> (export_job);
     connect (export_job, SIGNAL(obsoleteSignal()), this, SLOT(exportJobObsoleteSlot()), Qt::QueuedConnection);
