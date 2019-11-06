@@ -126,6 +126,7 @@ public:
     bool hasAssociations() const;
     void setAssociations (const std::string& dbo, const std::string& data_source_name);
     void removeAssociations ();
+
     std::string associationsDBObject() const;
     std::string associationsDataSourceName() const;
 
