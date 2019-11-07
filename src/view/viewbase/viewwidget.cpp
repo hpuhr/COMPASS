@@ -32,6 +32,7 @@ ViewWidget::ViewWidget( const std::string& class_id, const std::string& instance
 :   QWidget( parent ), Configurable( class_id, instance_id, config_parent ), event_processor_( nullptr ), view_( view )
 {
     setAutoFillBackground(true);
+    setContentsMargins(0, 0, 0, 0);
 }
 
 /**
