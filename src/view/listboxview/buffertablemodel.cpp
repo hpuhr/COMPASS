@@ -18,7 +18,6 @@
 #include "buffertablemodel.h"
 
 #include "buffer.h"
-#include "dbobject.h"
 #include "buffercsvexportjob.h"
 #include "jobmanager.h"
 #include "global.h"
@@ -26,6 +25,9 @@
 #include "listboxview.h"
 #include "listboxviewdatasource.h"
 #include "buffertablewidget.h"
+#include "atsdb.h"
+#include "dbobject.h"
+#include "dbobjectmanager.h"
 
 #include <QApplication>
 
@@ -48,7 +50,11 @@ int BufferTableModel::rowCount(const QModelIndex & /*parent*/) const
 int BufferTableModel::columnCount(const QModelIndex & /*parent*/) const
 {
     logdbg << "BufferTableModel: columnCount: " << read_set_.getSize();
-    return read_set_.getSize()+1;
+
+    if (show_associations_) // selected, utn
+        return read_set_.getSize()+2;
+    else // selected
+        return read_set_.getSize()+1;
 }
 
 QVariant BufferTableModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -64,6 +70,14 @@ QVariant BufferTableModel::headerData(int section, Qt::Orientation orientation, 
         if (col == 0)
             return QString ();
 
+        if (show_associations_)
+        {
+            if (col == 1)
+                return QString ("UTN");
+
+            col -= 2; // for the actual properties
+        }
+        else
         col -= 1; // for the actual properties
 
         assert (col < read_set_.getSize());
@@ -131,7 +145,49 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
         if (col == 0) // selected special case
             return QVariant();
 
-        col -= 1; // for the actual properties
+        if (show_associations_)
+        {
+            if (col == 1)
+            {
+                DBObjectManager& manager = ATSDB::instance().objectManager();
+
+                std::string dbo_name = buffer_->dboName();
+                assert (dbo_name.size());
+
+                const DBOAssociationCollection& associations = manager.object(dbo_name).associations();
+
+                assert (buffer_->has<int>("rec_num"));
+                assert (!buffer_->get<int>("rec_num").isNull(buffer_index));
+                unsigned int rec_num = buffer_->get<int>("rec_num").get(buffer_index);
+
+                if (associations.count(rec_num))
+                {
+                    QString utns;
+
+                    typedef DBOAssociationCollection::const_iterator MMAPIterator;
+
+                    // It returns a pair representing the range of elements with key equal to 'c'
+                    std::pair<MMAPIterator, MMAPIterator> result = associations.equal_range(rec_num);
+
+                    // Iterate over the range
+                    for (MMAPIterator it = result.first; it != result.second; it++)
+                        if (it == result.first)
+                            utns = QString::number(it->second.utn_);
+                        else
+                            utns += ","+QString::number(it->second.utn_);
+
+                    return QVariant(utns);
+                }
+                else
+                    return QVariant();
+
+            }
+
+            col -= 2; // for the actual properties
+        }
+        else
+            col -= 1; // for the actual properties
+
         assert (col < read_set_.getSize());
 
         DBOVariable& variable = read_set_.getVariable(col);
@@ -403,11 +459,14 @@ void BufferTableModel::saveAsCSV (const std::string &file_name, bool overwrite)
 
     assert (buffer_);
     BufferCSVExportJob *export_job = new BufferCSVExportJob (buffer_, read_set_, file_name, overwrite,
-                                                             show_only_selected_, use_presentation_);
+                                                             show_only_selected_, use_presentation_,
+                                                             show_associations_);
 
     export_job_ = std::shared_ptr<BufferCSVExportJob> (export_job);
-    connect (export_job, SIGNAL(obsoleteSignal()), this, SLOT(exportJobObsoleteSlot()), Qt::QueuedConnection);
-    connect (export_job, SIGNAL(doneSignal()), this, SLOT(exportJobDoneSlot()), Qt::QueuedConnection);
+    connect (export_job, &BufferCSVExportJob::obsoleteSignal, this, &BufferTableModel::exportJobObsoleteSlot,
+             Qt::QueuedConnection);
+    connect (export_job, &BufferCSVExportJob::doneSignal, this, &BufferTableModel::exportJobDoneSlot,
+             Qt::QueuedConnection);
 
     JobManager::instance().addBlockingJob(export_job_);
 }

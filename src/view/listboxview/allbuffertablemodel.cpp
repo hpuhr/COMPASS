@@ -61,6 +61,7 @@ int AllBufferTableModel::rowCount(const QModelIndex & /*parent*/) const
 int AllBufferTableModel::columnCount(const QModelIndex & /*parent*/) const
 {
     logdbg << "AllBufferTableModel: columnCount: " << data_source_.getSet()->getSize();
+
     if (show_associations_) // selected, DBO, UTN
         return data_source_.getSet()->getSize()+3;
     else // cnt, DBO
@@ -583,8 +584,10 @@ void AllBufferTableModel::saveAsCSV (const std::string &file_name, bool overwrit
                                                                    show_associations_);
 
     export_job_ = std::shared_ptr<AllBufferCSVExportJob> (export_job);
-    connect (export_job, SIGNAL(obsoleteSignal()), this, SLOT(exportJobObsoleteSlot()), Qt::QueuedConnection);
-    connect (export_job, SIGNAL(doneSignal()), this, SLOT(exportJobDoneSlot()), Qt::QueuedConnection);
+    connect (export_job, &AllBufferCSVExportJob::obsoleteSignal, this, &AllBufferTableModel::exportJobObsoleteSlot,
+             Qt::QueuedConnection);
+    connect (export_job, &AllBufferCSVExportJob::doneSignal, this, &AllBufferTableModel::exportJobDoneSlot,
+             Qt::QueuedConnection);
 
     JobManager::instance().addBlockingJob(export_job_);
 }
