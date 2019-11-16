@@ -68,6 +68,7 @@ public:
                         TaskManager* task_manager);
     virtual ~ASTERIXImporterTask();
 
+    bool hasOpenWidget() { return widget_ != nullptr; }
     ASTERIXImporterTaskWidget* widget();
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);

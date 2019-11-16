@@ -37,6 +37,7 @@ public:
                                 TaskManager* task_manager);
     virtual ~CreateARTASAssociationsTask();
 
+    bool hasOpenWidget() { return widget_ != nullptr; }
     CreateARTASAssociationsTaskWidget* widget();
 
     bool canRun ();

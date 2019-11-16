@@ -74,6 +74,9 @@ public:
     std::set<T> distinctValues (size_t index=0);
 
     std::map<T, std::vector<size_t>> distinctValuesWithIndexes (size_t from_index, size_t to_index);
+    std::map<T, std::vector<size_t>> distinctValuesWithIndexes (const std::vector<size_t>& indexes);
+    std::vector<size_t> nullValueIndexes (size_t from_index, size_t to_index);
+    std::vector<size_t> nullValueIndexes (const std::vector<size_t>& indexes);
 
     void convertToStandardFormat(const std::string& from_format);
 
@@ -495,6 +498,91 @@ template <class T> std::map<T, std::vector<size_t>> NullableVector<T>::distinctV
 
     logdbg << "ArrayListTemplate " << property_.name() << ": distinctValuesWithIndexes: done with " << values.size();
     return values;
+}
+
+template <class T> std::map<T, std::vector<size_t>> NullableVector<T>::distinctValuesWithIndexes (
+        const std::vector<size_t>& indexes)
+{
+    logdbg << "ArrayListTemplate " << property_.name() << ": distinctValuesWithIndexes";
+
+    std::map<T, std::vector<size_t>> values;
+
+    if (BUFFER_PEDANTIC_CHECKING)
+    {
+        assert (data_.size() <= buffer_.data_size_);
+        assert (null_flags_.size() <= buffer_.data_size_);
+    }
+
+    for (auto index : indexes)
+    {
+        if (!isNull(index)) // not for null
+        {
+            if (BUFFER_PEDANTIC_CHECKING)
+                assert (index < data_.size());
+
+            values[data_.at(index)].push_back(index);
+        }
+    }
+
+    logdbg << "ArrayListTemplate " << property_.name() << ": distinctValuesWithIndexes: done with " << values.size();
+    return values;
+}
+
+template <class T> std::vector<size_t>  NullableVector<T>::nullValueIndexes (size_t from_index,
+                                                                             size_t to_index)
+{
+    logdbg << "ArrayListTemplate " << property_.name() << ": nullValueIndexes";
+
+    std::vector<size_t> indexes;
+
+    assert (from_index < to_index);
+
+    if (BUFFER_PEDANTIC_CHECKING)
+    {
+        assert (to_index);
+        assert (from_index < buffer_.data_size_);
+        assert (to_index < buffer_.data_size_);
+        assert (data_.size() <= buffer_.data_size_);
+        assert (null_flags_.size() <= buffer_.data_size_);
+    }
+
+    if (from_index+1 > data_.size()) // no data
+        return indexes;
+
+    for (size_t index = from_index; index <= to_index; ++index)
+    {
+        if (isNull(index)) // not for null
+        {
+            if (BUFFER_PEDANTIC_CHECKING)
+                assert (index < data_.size());
+
+            indexes.push_back(index);
+        }
+    }
+
+    logdbg << "ArrayListTemplate " << property_.name() << ": nullValueIndexes: done with " << indexes.size();
+    return indexes;
+}
+
+template <class T> std::vector<size_t>  NullableVector<T>::nullValueIndexes (const std::vector<size_t>& indexes)
+{
+    logdbg << "ArrayListTemplate " << property_.name() << ": nullValueIndexes";
+
+    std::vector<size_t> ret_indexes;
+
+    for (auto index : indexes)
+    {
+        if (isNull(index)) // not for null
+        {
+            if (BUFFER_PEDANTIC_CHECKING)
+                assert (index < data_.size());
+
+            ret_indexes.push_back(index);
+        }
+    }
+
+    logdbg << "ArrayListTemplate " << property_.name() << ": nullValueIndexes: done with " << ret_indexes.size();
+    return ret_indexes;
 }
 
 template <class T> void NullableVector<T>::convertToStandardFormat(const std::string& from_format)

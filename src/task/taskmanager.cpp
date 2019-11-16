@@ -139,26 +139,18 @@ void TaskManager::checkSubConfigurables ()
 
 void TaskManager::disable ()
 {
-    if (json_importer_task_)
-    {
+    if (json_importer_task_ && json_importer_task_->hasOpenWidget())
         json_importer_task_->widget()->close();
-    }
 
-    if (radar_plot_position_calculator_task_)
-    {
+    if (radar_plot_position_calculator_task_ && radar_plot_position_calculator_task_->hasOpenWidget())
         radar_plot_position_calculator_task_->widget()->close();
-    }
 
-    if (create_artas_associations_task_)
-    {
+    if (create_artas_associations_task_ && create_artas_associations_task_->hasOpenWidget())
         create_artas_associations_task_->widget()->close();
-    }
 
 #if USE_JASTERIX
-    if (asterix_importer_task_)
-    {
+    if (asterix_importer_task_ && asterix_importer_task_->hasOpenWidget())
         asterix_importer_task_->widget()->close();
-    }
 #endif
 }
 

@@ -213,7 +213,6 @@ public:
 //    /// @brief Deletes a variable identified by id
     void deleteStoredDataSource (unsigned int id);
 
-
     using DataSourceIterator = typename std::map<int, DBODataSource>::iterator;
     DataSourceIterator dsBegin() { return data_sources_.begin(); }
     DataSourceIterator dsEnd() { return data_sources_.end(); }

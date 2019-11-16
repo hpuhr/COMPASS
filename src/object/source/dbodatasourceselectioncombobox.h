@@ -46,6 +46,12 @@ public:
         return currentText().toStdString();
     }
 
+    bool hasDataSource (const std::string &ds_name)
+    {
+        int index = findText(QString(ds_name.c_str()));
+        return index >= 0;
+    }
+
     /// @brief Sets the currently selected data type
     void setDataSource (const std::string &ds_name)
     {

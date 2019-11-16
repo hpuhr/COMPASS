@@ -196,7 +196,7 @@ void CreateARTASAssociationsTaskWidget::runDoneSlot ()
 
 void CreateARTASAssociationsTaskWidget::update ()
 {
-    if (task_.currentDataSourceName().size())
+    if (task_.currentDataSourceName().size() && ds_combo_->hasDataSource(task_.currentDataSourceName()))
         ds_combo_->setDataSource(task_.currentDataSourceName());
 
     if (ds_combo_->getDSName() != task_.currentDataSourceName())
