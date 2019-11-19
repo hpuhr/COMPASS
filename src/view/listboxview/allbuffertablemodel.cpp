@@ -488,7 +488,7 @@ void AllBufferTableModel::setData (std::shared_ptr <Buffer> buffer)
 
 void AllBufferTableModel::updateTimeIndexes ()
 {
-    loginf << "AllBufferTableModel: updateTimeIndexes";
+    logdbg << "AllBufferTableModel: updateTimeIndexes";
 
     unsigned int buffer_index;
     std::string dbo_name;
@@ -513,7 +513,7 @@ void AllBufferTableModel::updateTimeIndexes ()
 
         if (buffer_size > buffer_index+1) // new data
         {
-            loginf << "AllBufferTableModel: updateTimeIndexes: new " << dbo_name <<  " data, last index "
+            logdbg << "AllBufferTableModel: updateTimeIndexes: new " << dbo_name <<  " data, last index "
                    << buffer_index << " size " << buf_it.second->size();
 
             DBObjectManager& object_manager = ATSDB::instance().objectManager();
@@ -549,7 +549,7 @@ void AllBufferTableModel::updateTimeIndexes ()
             dbo_last_processed_index_[dbo_name] = buffer_size-1; // set to last index
 
             if (num_time_none)
-                loginf << "AllBufferTableModel: updateTimeIndexes: new " << dbo_name << " skipped " << num_time_none
+                logwrn << "AllBufferTableModel: updateTimeIndexes: new " << dbo_name << " skipped " << num_time_none
                        << " indexes with no time";
         }
     }
