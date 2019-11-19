@@ -239,6 +239,8 @@ protected:
     QProgressDialog* postprocess_dialog_ {nullptr};
     size_t postprocess_job_num_{0};
 
+    std::map <std::string, std::string> properties_;
+
     virtual void checkSubConfigurables ();
 
     void insertBindStatementUpdateForCurrentIndex (std::shared_ptr<Buffer> buffer, unsigned int row);
@@ -246,6 +248,9 @@ protected:
     void setPostProcessed (bool value);
     //    /// @brief Returns buffer with min/max data from another Buffer with the string contents. Delete returned buffer yourself.
     //    Buffer *createFromMinMaxStringBuffer (Buffer *string_buffer, PropertyDataType data_type);
+
+    void loadProperties ();
+    void saveProperties ();
 };
 
 #endif /* SQLITE3CONNECTION_H_ */

@@ -116,6 +116,8 @@ void DBInterface::databaseContentChanged ()
     if (!existsPropertiesTable())
         createPropertiesTable();
 
+    loadProperties();
+
     loginf << "DBInterface: databaseOpened: post-processed " << isPostProcessed ();
 
     emit databaseContentChangedSignal();
@@ -124,6 +126,8 @@ void DBInterface::databaseContentChanged ()
 void DBInterface::closeConnection ()
 {
     QMutexLocker locker(&connection_mutex_);
+
+    saveProperties();
 
     logdbg  << "DBInterface: closeConnection";
     for (auto it : connections_)
@@ -668,58 +672,32 @@ size_t DBInterface::count (const std::string &table)
 
 void DBInterface::setProperty (const std::string& id, const std::string& value)
 {
-    QMutexLocker locker(&connection_mutex_);
-    assert (current_connection_);
-
-    std::string str = sql_generator_.getInsertPropertyStatement(id, value);
-    current_connection_->executeSQL (str);
+    properties_[id] = value;
 }
 
 std::string DBInterface::getProperty (const std::string& id)
 {
-    logdbg  << "DBInterface: getProperty: start";
-
-    QMutexLocker locker(&connection_mutex_);
-
-    DBCommand command;
-    command.set(sql_generator_.getSelectPropertyStatement(id));
-
-    PropertyList list;
-    list.addProperty("property", PropertyDataType::STRING);
-    command.list(list);
-
-    std::shared_ptr <DBResult> result = current_connection_->execute(command);
-
-    assert (result->containsData());
-
-    std::string text;
-    std::shared_ptr <Buffer> buffer = result->buffer();
-
-    assert (buffer);
-
-    if (buffer->firstWrite())
-        throw std::invalid_argument ("DBInterface: getProperty: id "+id+" does not exist");
-
-    assert (buffer->size() == 1);
-    assert (!buffer->get<std::string>("property").isNull(0));
-
-    text = buffer->get<std::string>("property").get(0);
-
-    logdbg  << "DBInterface: getProperty: end id " << id << " value " << text;
-    return text;
+    assert (hasProperty(id));
+    return properties_.at(id);
 }
 
 bool DBInterface::hasProperty (const std::string& id)
 {
-    logdbg  << "DBInterface: hasProperty: start";
+    return properties_.count(id);
+}
+
+void DBInterface::loadProperties ()
+{
+    loginf  << "DBInterface: loadProperties";
 
     QMutexLocker locker(&connection_mutex_);
 
     DBCommand command;
-    command.set(sql_generator_.getSelectPropertyStatement(id));
+    command.set(sql_generator_.getSelectAllPropertiesStatement());
 
     PropertyList list;
-    list.addProperty("property", PropertyDataType::STRING);
+    list.addProperty("id", PropertyDataType::STRING);
+    list.addProperty("value", PropertyDataType::STRING);
     command.list(list);
 
     std::shared_ptr <DBResult> result = current_connection_->execute(command);
@@ -729,8 +707,40 @@ bool DBInterface::hasProperty (const std::string& id)
     std::shared_ptr <Buffer> buffer = result->buffer();
 
     assert (buffer);
+    assert (buffer->has<std::string> ("id"));
+    assert (buffer->has<std::string> ("value"));
 
-    return buffer->size() == 1 && !buffer->get<std::string>("property").isNull(0);
+    NullableVector<std::string> id_vec = buffer->get<std::string> ("id");
+    NullableVector<std::string> value_vec = buffer->get<std::string> ("value");
+
+    for (size_t cnt=0; cnt < buffer->size(); ++cnt)
+    {
+        assert (!id_vec.isNull(cnt));
+        assert (!properties_.count(id_vec.get(cnt)));
+        if (!value_vec.isNull(cnt))
+            properties_[id_vec.get(cnt)] = value_vec.get(cnt);
+    }
+
+    for (auto& prop_it : properties_)
+        loginf << "DBInterface: loadProperties: id '" << prop_it.first << "' value '" << prop_it.second << "'";
+}
+
+void DBInterface::saveProperties ()
+{
+    loginf << "DBInterface: saveProperties";
+
+    //QMutexLocker locker(&connection_mutex_); // done in closeConnection
+    assert (current_connection_);
+
+    std::string str;
+
+    for (auto& prop_it : properties_)
+    {
+        std::string str = sql_generator_.getInsertPropertyStatement(prop_it.first, prop_it.second);
+        current_connection_->executeSQL (str);
+    }
+
+    loginf << "DBInterface: saveProperties: done";
 }
 
 void DBInterface::insertMinMax (const std::string& id, const std::string& object_name, const std::string& min,

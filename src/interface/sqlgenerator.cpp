@@ -571,6 +571,13 @@ std::string SQLGenerator::getSelectPropertyStatement (const std::string &id)
     return ss.str();
 }
 
+std::string SQLGenerator::getSelectAllPropertiesStatement ()
+{
+    stringstream ss;
+    ss << "SELECT id, value FROM " << TABLE_NAME_PROPERTIES << ";";
+    return ss.str();
+}
+
 std::string SQLGenerator::getInsertMinMaxStatement (const std::string& variable_name, const std::string& object_name,
                                                     const std::string& min, const std::string& max)
 {
