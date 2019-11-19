@@ -29,6 +29,7 @@ class QPushButton;
 class QCheckBox;
 class QLineEdit;
 class DBOVariableSelectionWidget;
+class QLabel;
 
 /**
  * @brief Shows all DBObjects, allows editing and adding new ones
@@ -66,6 +67,8 @@ public:
 private:
     DBObjectManager& object_manager_;
     QVBoxLayout* info_layout_ {nullptr};
+
+    QLabel* associations_label_ {nullptr};
 
     QCheckBox* filters_check_ {nullptr};
     QCheckBox* order_check_ {nullptr};

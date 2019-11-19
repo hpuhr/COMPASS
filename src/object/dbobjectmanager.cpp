@@ -440,6 +440,9 @@ void DBObjectManager::databaseContentChangedSlot ()
 
     QApplication::restoreOverrideCursor();
 
+    if (load_widget_)
+        load_widget_->updateSlot();
+
     loginf << "DBObjectManager: databaseContentChangedSlot: done";
 }
 
