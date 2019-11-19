@@ -392,7 +392,7 @@ QVariant AllBufferTableModel::data(const QModelIndex &index, int role) const
 
 bool AllBufferTableModel::setData(const QModelIndex& index, const QVariant & value,int role)
 {
-    loginf << "AllBufferTableModel: setData: checked row " << index.row() << " col " << index.column();
+    logdbg << "AllBufferTableModel: setData: checked row " << index.row() << " col " << index.column();
 
     if (role == Qt::CheckStateRole && index.column() == 0)
     {
@@ -414,12 +414,12 @@ bool AllBufferTableModel::setData(const QModelIndex& index, const QVariant & val
 
         if (value == Qt::Checked)
         {
-            loginf << "AllBufferTableModel: setData: checked row index" << buffer_index;
+            logdbg << "AllBufferTableModel: setData: checked row index" << buffer_index;
             buffer->get<bool>("selected").set(buffer_index, true);
         }
         else
         {
-            loginf << "AllBufferTableModel: setData: unchecked row index " << buffer_index;
+            logdbg << "AllBufferTableModel: setData: unchecked row index " << buffer_index;
             buffer->get<bool>("selected").set(buffer_index, false);
         }
         assert (table_widget_);
@@ -446,7 +446,7 @@ bool AllBufferTableModel::setData(const QModelIndex& index, const QVariant & val
 
 void AllBufferTableModel::clearData ()
 {
-    loginf << "AllBufferTableModel: clearData";
+    logdbg << "AllBufferTableModel: clearData";
 
     beginResetModel();
 

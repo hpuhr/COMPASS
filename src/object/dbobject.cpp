@@ -915,7 +915,7 @@ void DBObject::quitLoading ()
 
 void DBObject::clearData ()
 {
-    loginf << "DBObject " << name_ << ": clearData";
+    logdbg << "DBObject " << name_ << ": clearData";
 
     if (data_)
     {
@@ -928,7 +928,7 @@ void DBObject::clearData ()
 
 void DBObject::insertData (DBOVariableSet& list, std::shared_ptr<Buffer> buffer, bool emit_change)
 {
-    loginf << "DBObject " << name_ << ": insertData";
+    logdbg << "DBObject " << name_ << ": insertData";
 
     assert (!insert_job_);
 
@@ -1108,7 +1108,7 @@ void DBObject::readJobObsoleteSlot ()
 
 void DBObject::readJobDoneSlot()
 {
-    loginf << "DBObject: " << name_ << " readJobDoneSlot";
+    logdbg << "DBObject: " << name_ << " readJobDoneSlot";
     read_job_ = nullptr;
 
     if (info_widget_)
@@ -1116,14 +1116,14 @@ void DBObject::readJobDoneSlot()
 
     if (!isLoading())
     {
-        loginf << "DBObject: " << name_ << " readJobDoneSlot: no jobs left, done";
+        loginf << "DBObject: " << name_ << " readJobDoneSlot: done";
         emit loadingDoneSignal(*this);
     }
 }
 
 void DBObject::finalizeReadJobDoneSlot()
 {
-    loginf << "DBObject: " << name_ << " finalizeReadJobDoneSlot";
+    logdbg << "DBObject: " << name_ << " finalizeReadJobDoneSlot";
 
     FinalizeDBOReadJob* sender = dynamic_cast <FinalizeDBOReadJob*> (QObject::sender());
 
@@ -1163,7 +1163,7 @@ void DBObject::finalizeReadJobDoneSlot()
 
     if (!isLoading())
     {
-        loginf << "DBObject: " << name_ << " finalizeReadJobDoneSlot: no jobs left, done";
+        loginf << "DBObject: " << name_ << " finalizeReadJobDoneSlot: loading done";
         emit loadingDoneSignal(*this);
     }
 }
