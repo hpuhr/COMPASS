@@ -85,7 +85,8 @@ bool CreateARTASAssociationsTask::canRun ()
     bool ds_found {false};
     for (auto ds_it = tracker_object.dsBegin(); ds_it != tracker_object.dsEnd(); ++ds_it)
     {
-        if (ds_it->second.name() == current_data_source_name_)
+        if ((ds_it->second.hasShortName() && ds_it->second.shortName() == current_data_source_name_)
+                || (!ds_it->second.hasShortName() && ds_it->second.name() == current_data_source_name_))
         {
             ds_found = true;
             break;
@@ -168,7 +169,8 @@ void CreateARTASAssociationsTask::run ()
             int ds_id{-1};
             for (auto ds_it = tracker_object.dsBegin(); ds_it != tracker_object.dsEnd(); ++ds_it)
             {
-                if (ds_it->second.name() == current_data_source_name_)
+                if ((ds_it->second.hasShortName() && ds_it->second.shortName() == current_data_source_name_)
+                        || (!ds_it->second.hasShortName() && ds_it->second.name() == current_data_source_name_))
                 {
                     ds_found = true;
                     ds_id = ds_it->first;

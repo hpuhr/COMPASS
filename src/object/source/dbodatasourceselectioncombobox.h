@@ -31,7 +31,10 @@ public:
 
             for (auto& ds_it : data_sources)
             {
-                addItem (ds_it.second.name().c_str());
+                if (ds_it.second.hasShortName())
+                    addItem (ds_it.second.shortName().c_str());
+                else
+                    addItem (ds_it.second.name().c_str());
             }
         }
         connect(this, SIGNAL(activated(const QString &)), this, SIGNAL(changedDataSourceSignal()));
