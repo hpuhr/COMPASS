@@ -25,6 +25,7 @@ class CreateARTASAssociationsJob : public Job
 
 signals:
     void statusSignal (QString status);
+    void saveAssociationsQuestionSignal (QString question);
 
 public:
     CreateARTASAssociationsJob(CreateARTASAssociationsTask& task, DBInterface& db_interface,
@@ -33,6 +34,8 @@ public:
     virtual ~CreateARTASAssociationsJob();
 
     virtual void run ();
+
+    void setSaveQuestionAnswer (bool value);
 
     size_t missingHashesAtBeginning() const;
     size_t missingHashes() const;
@@ -74,6 +77,9 @@ protected:
 
     size_t dubious_associations_cnt_ {0}; // counter for all dubious
     size_t found_hash_duplicates_cnt_ {0};
+
+    volatile bool save_question_answered_ {false};
+    volatile bool save_question_answer_ {false};
 
     void createUTNS ();
     void createARTASAssociations();

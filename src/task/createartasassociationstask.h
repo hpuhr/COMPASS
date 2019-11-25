@@ -28,6 +28,7 @@ public slots:
     void loadingDoneSlot (DBObject& object);
 
     void associationStatusSlot (QString status);
+    void saveAssociationsQuestionSlot (QString question_str);
 
     void closeStatusDialogSlot();
 

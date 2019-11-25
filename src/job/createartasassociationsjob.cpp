@@ -13,6 +13,8 @@
 
 #include "stringconv.h"
 
+#include <QThread>
+
 #include <algorithm>
 #include <math.h>
 
@@ -65,6 +67,37 @@ void CreateARTASAssociationsJob::run ()
 
     // create associations for sensors
     createSensorAssociations();
+
+    if (missing_hashes_cnt_ || dubious_associations_cnt_)
+    {
+        std::stringstream ss;
+        ss << "There are " << missing_hashes_cnt_ << " missing hashes and " << dubious_associations_cnt_
+           << " dubious associations.\nDo you want to still save the associations?";
+        emit saveAssociationsQuestionSignal(ss.str().c_str());
+
+        while (!save_question_answered_)
+            QThread::msleep (1);
+
+        if (!save_question_answer_) // nope
+        {
+            emit statusSignal("Clearing created Associations");
+
+            object_man.removeAssociations();
+
+            stop_time = boost::posix_time::microsec_clock::local_time();
+
+            double load_time;
+            boost::posix_time::time_duration diff = stop_time - start_time;
+            load_time= diff.total_milliseconds()/1000.0;
+
+            loginf  << "CreateARTASAssociationsJob: run: done ("
+                    << String::doubleToStringPrecision(load_time, 2) << " s).";
+            done_=true;
+
+            return;
+        }
+        // else simply continue
+    }
 
     // save associations
     emit statusSignal("Saving Associations");
@@ -165,7 +198,7 @@ void CreateARTASAssociationsJob::createUTNS ()
     float tod;
 
     int utn;
-    bool new_track_created;
+    //bool new_track_created;
     bool finish_previous_track;
     bool ignore_update;
 
@@ -173,7 +206,7 @@ void CreateARTASAssociationsJob::createUTNS ()
 
     for (size_t cnt=0; cnt < buffer_size; ++cnt)
     {
-        new_track_created = false;
+        //new_track_created = false;
         finish_previous_track = false;
 
         tri_set = !hashes.isNull(cnt);
@@ -258,7 +291,7 @@ void CreateARTASAssociationsJob::createUTNS ()
             current_tracks[utn].track_num = track_num;
             current_tracks[utn].first_tod_ = tod;
 
-            new_track_created = true;
+            //new_track_created = true;
         }
         else
             utn = current_track_mappings.at(track_num);
@@ -335,8 +368,8 @@ void CreateARTASAssociationsJob::createSensorAssociations()
 
     std::vector<std::string> tri_splits;
     bool match_found;
-    bool match_dubious;
-    std::string match_dubious_comment;
+    bool best_match_dubious;
+    std::string best_match_dubious_comment;
 
     std::string best_match_dbo_name;
     int best_match_rec_num{-1};
@@ -361,8 +394,8 @@ void CreateARTASAssociationsJob::createSensorAssociations()
             for (auto& tri : tri_splits) // for each referenced hash
             {
                 match_found = false; // indicates if there was already a (previous) match found
-                match_dubious = false; // indicates if the association is dubious
-                match_dubious_comment = "";
+                best_match_dubious = false; // indicates if the association is dubious
+                best_match_dubious_comment = "";
 
                 for (auto& dbo_it : object_man) // iterate over all dbos
                 {
@@ -385,8 +418,14 @@ void CreateARTASAssociationsJob::createSensorAssociations()
                                 if (isAssociationHashCollisionInDubiousTime(tri_tod, best_match_tod) &&
                                         isAssociationHashCollisionInDubiousTime(tri_tod, match.second))
                                 {
-                                    match_dubious = true;
-                                    match_dubious_comment = tri+" has multiple matches in close time";
+                                    best_match_dubious = true;
+                                    best_match_dubious_comment = tri+" has multiple matches in close time at "
+                                            +String::timeStringFromDouble(tri_tod);
+                                }
+                                else // not dubious
+                                {
+                                    best_match_dubious = false;
+                                    best_match_dubious_comment = "";
                                 }
 
                                 // store if closer in time
@@ -394,8 +433,15 @@ void CreateARTASAssociationsJob::createSensorAssociations()
                                 {
                                     if (isAssociationInDubiousDistantTime(tri_tod, match.second))
                                     {
-                                        match_dubious = true;
-                                        match_dubious_comment = tri+" in too distant time";
+                                        best_match_dubious = true;
+                                        best_match_dubious_comment = tri+" in too distant time ("
+                                                +std::to_string(tri_tod-match.second)+"s) at "
+                                                +String::timeStringFromDouble(tri_tod);
+                                    }
+                                    else // not dubious
+                                    {
+                                        best_match_dubious = false;
+                                        best_match_dubious_comment = "";
                                     }
 
                                     best_match_dbo_name = dbo_it.first;
@@ -410,8 +456,10 @@ void CreateARTASAssociationsJob::createSensorAssociations()
                             {
                                 if (isAssociationInDubiousDistantTime(tri_tod, match.second))
                                 {
-                                    match_dubious = true;
-                                    match_dubious_comment = "in too distant time";
+                                    best_match_dubious = true;
+                                    best_match_dubious_comment = tri+" in too distant time ("
+                                            +std::to_string(tri_tod-match.second)+"s) at "
+                                            +String::timeStringFromDouble(tri_tod);
                                 }
 
                                 best_match_dbo_name = dbo_it.first;
@@ -426,11 +474,11 @@ void CreateARTASAssociationsJob::createSensorAssociations()
 
                 if (match_found)
                 {
-                    if (match_dubious)
+                    if (best_match_dubious)
                     {
                         loginf << "CreateARTASAssociationsJob: createSensorAssociations: utn " << ut_it.first
                                << " match rec_num " << best_match_rec_num << " is dubious because "
-                               << match_dubious_comment;
+                               << best_match_dubious_comment;
                         ++dubious_associations_cnt_;
                     }
 
@@ -443,7 +491,7 @@ void CreateARTASAssociationsJob::createSensorAssociations()
                     logdbg << "CreateARTASAssociationsJob: createSensorAssociations: utn " << ut_it.first
                            << " has missing hash '" << tri << "' at " << String::timeStringFromDouble(tri_tod);
 
-                    assert (tri_tod-first_track_tod_ >= 0);
+                    //assert (tri_tod-first_track_tod_ >= 0);
 
                     if (isTimeAtBeginningOrEnd(tri_tod))
                         ++acceptable_missing_hashes_cnt_;
@@ -546,4 +594,12 @@ void CreateARTASAssociationsJob::createSensorHashes (DBObject& object)
 
         sensor_hashes_[dbo_name].emplace(hashes.get(cnt), std::make_pair(rec_nums.get(cnt), tods.get(cnt)));
     }
+}
+
+void CreateARTASAssociationsJob::setSaveQuestionAnswer (bool value)
+{
+    loginf << "CreateARTASAssociationsJob: setSaveQuestionAnswer: value " << value;
+
+    save_question_answer_ = value;
+    save_question_answered_ = true;
 }

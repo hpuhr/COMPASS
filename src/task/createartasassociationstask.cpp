@@ -203,8 +203,8 @@ void CreateARTASAssociationsTask::run ()
         dbo_loading_done_flags_[dbo_it.first] = false;
     }
 
-//    updateProgressSlot();
-//    msg_box_->show();
+    //    updateProgressSlot();
+    //    msg_box_->show();
 
     status_dialog_->setDBODoneFlags(dbo_loading_done_flags_);
     status_dialog_->show();
@@ -257,6 +257,9 @@ void CreateARTASAssociationsTask::loadingDoneSlot (DBObject& object)
                  Qt::QueuedConnection);
         connect (create_job_.get(), &CreateARTASAssociationsJob::statusSignal,
                  this, &CreateARTASAssociationsTask::associationStatusSlot,
+                 Qt::QueuedConnection);
+        connect (create_job_.get(), &CreateARTASAssociationsJob::saveAssociationsQuestionSignal,
+                 this, &CreateARTASAssociationsTask::saveAssociationsQuestionSlot,
                  Qt::QueuedConnection);
 
         JobManager::instance().addDBJob(create_job_);
@@ -624,6 +627,15 @@ void CreateARTASAssociationsTask::associationStatusSlot (QString status)
 {
     assert (status_dialog_);
     status_dialog_->setAssociationStatus(status.toStdString());
+}
+
+void CreateARTASAssociationsTask::saveAssociationsQuestionSlot (QString question_str)
+{
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(nullptr, "Malformed Associations", question_str, QMessageBox::Yes|QMessageBox::No);
+
+    assert (create_job_);
+    create_job_->setSaveQuestionAnswer(reply == QMessageBox::Yes);
 }
 
 void CreateARTASAssociationsTask::closeStatusDialogSlot()
