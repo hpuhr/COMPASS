@@ -13,7 +13,6 @@ class CreateARTASAssociationsTaskWidget;
 class CreateARTASAssociationsStatusDialog;
 class DBOVariable;
 class MetaDBOVariable;
-//class QMessageBox;
 class DBObject;
 class Buffer;
 
@@ -74,18 +73,26 @@ public:
 
     MetaDBOVariable* todVar() const;
 
-
-    float beginningTime() const;
-    void beginningTime(float beginning_time);
-
-    float dubiousTime() const;
-    void dubiousTime(float dubious_time);
-
     float endTrackTime() const;
     void endTrackTime(float end_track_time);
 
-    float futureTime() const;
-    void futureTime(float future_time);
+    float associationTimePast() const;
+    void associationTimePast(float association_time_past);
+
+    float associationTimeFuture() const;
+    void associationTimeFuture(float association_time_future);
+
+    float missesAcceptableTime() const;
+    void missesAcceptableTime(float misses_acceptable_time);
+
+    float associationsDubiousDistantTime() const;
+    void associationsDubiousDistantTime(float associations_dubious_distant_time);
+
+    float associationDubiousCloseTimePast() const;
+    void associationDubiousCloseTimePast(float association_dubious_close_time_past);
+
+    float associationDubiousCloseTimeFuture() const;
+    void associationDubiousCloseTimeFuture(float association_dubious_close_time_future);
 
 protected:
     std::string current_data_source_name_;
@@ -112,14 +119,22 @@ protected:
     std::string tod_var_str_;
     MetaDBOVariable* tod_var_ {nullptr};
 
-    float end_track_time_ {0};
-    float beginning_time_ {0};
-    float dubious_time_ {0};
-    float future_time_ {0};
+    float end_track_time_ {0}; // time-delta after which begin a new track
+
+    float association_time_past_ {0}; // time_delta for which associations are considered into past time
+    float association_time_future_ {0}; // time_delta for which associations are considered into future time
+
+    float misses_acceptable_time_ {0}; // time delta at beginning/end of recording where misses are acceptable
+
+    float associations_dubious_distant_time_ {0};
+    // time delta of tou where association is dubious bc too distant in time
+    float association_dubious_close_time_past_ {0};
+    // time delta of tou where association is dubious when multible hashes exist
+    float association_dubious_close_time_future_ {0};
+    // time delta of tou where association is dubious when multible hashes exist
 
     CreateARTASAssociationsTaskWidget* widget_ {nullptr};
 
-    //QMessageBox* msg_box_ {nullptr};
     std::unique_ptr<CreateARTASAssociationsStatusDialog> status_dialog_ {nullptr};
 
     std::map<std::string, bool> dbo_loading_done_flags_;

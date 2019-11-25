@@ -40,9 +40,16 @@ CreateARTASAssociationsTask::CreateARTASAssociationsTask(const std::string& clas
 
     // time stuff
     registerParameter ("end_track_time", &end_track_time_, 300.0);
-    registerParameter ("beginning_time", &beginning_time_, 30.0);
-    registerParameter ("dubious_time", &dubious_time_, 30.0);
-    registerParameter ("future_time", &future_time_, 1.0);
+
+    registerParameter ("association_time_past", &association_time_past_, 60.0);
+    registerParameter ("association_time_future", &association_time_future_, 2.0);
+
+    registerParameter ("misses_acceptable_time", &misses_acceptable_time_, 60.0);
+
+    registerParameter ("associations_dubious_distant_time", &associations_dubious_distant_time_, 30.0);
+    registerParameter ("association_dubious_close_time_past", &association_dubious_close_time_past_, 20.0);
+    registerParameter ("association_dubious_close_time_future", &association_dubious_close_time_future_, 1.0);
+
 }
 
 CreateARTASAssociationsTask::~CreateARTASAssociationsTask()
@@ -269,7 +276,7 @@ void CreateARTASAssociationsTask::createDoneSlot ()
     status_dialog_->setMissingHashesAtBeginning(create_job_->missingHashesAtBeginning());
     status_dialog_->setMissingHashes(create_job_->missingHashes());
     status_dialog_->setDubiousAssociations(create_job_->dubiousAssociations());
-    status_dialog_->setFoundDuplicates(create_job_->foundDuplicates());
+    status_dialog_->setFoundDuplicates(create_job_->foundHashDuplicates());
 
     status_dialog_->setDone();
 
@@ -396,26 +403,6 @@ MetaDBOVariable *CreateARTASAssociationsTask::todVar() const
     return tod_var_;
 }
 
-float CreateARTASAssociationsTask::beginningTime() const
-{
-    return beginning_time_;
-}
-
-void CreateARTASAssociationsTask::beginningTime(float beginning_time)
-{
-    beginning_time_ = beginning_time;
-}
-
-float CreateARTASAssociationsTask::dubiousTime() const
-{
-    return dubious_time_;
-}
-
-void CreateARTASAssociationsTask::dubiousTime(float dubious_time)
-{
-    dubious_time_ = dubious_time;
-}
-
 float CreateARTASAssociationsTask::endTrackTime() const
 {
     return end_track_time_;
@@ -423,17 +410,82 @@ float CreateARTASAssociationsTask::endTrackTime() const
 
 void CreateARTASAssociationsTask::endTrackTime(float end_track_time)
 {
+    loginf << "CreateARTASAssociationsTask: endTrackTime: " << end_track_time;
+
     end_track_time_ = end_track_time;
 }
 
-float CreateARTASAssociationsTask::futureTime() const
+float CreateARTASAssociationsTask::associationTimePast() const
 {
-    return future_time_;
+    return association_time_past_;
 }
 
-void CreateARTASAssociationsTask::futureTime(float future_time)
+void CreateARTASAssociationsTask::associationTimePast(float association_time_past)
 {
-    future_time_ = future_time;
+    loginf << "CreateARTASAssociationsTask: associationTimePast: " << association_time_past;
+
+    association_time_past_ = association_time_past;
+}
+
+float CreateARTASAssociationsTask::associationTimeFuture() const
+{
+    return association_time_future_;
+}
+
+void CreateARTASAssociationsTask::associationTimeFuture(float association_time_future)
+{
+    loginf << "CreateARTASAssociationsTask: associationTimeFuture: " << association_time_future;
+
+    association_time_future_ = association_time_future;
+}
+
+float CreateARTASAssociationsTask::missesAcceptableTime() const
+{
+    return misses_acceptable_time_;
+}
+
+void CreateARTASAssociationsTask::missesAcceptableTime(float misses_acceptable_time)
+{
+    loginf << "CreateARTASAssociationsTask: missesAcceptableTime: " << misses_acceptable_time;
+
+    misses_acceptable_time_ = misses_acceptable_time;
+}
+
+float CreateARTASAssociationsTask::associationsDubiousDistantTime() const
+{
+    return associations_dubious_distant_time_;
+}
+
+void CreateARTASAssociationsTask::associationsDubiousDistantTime(float associations_dubious_distant_time)
+{
+    loginf << "CreateARTASAssociationsTask: associationsDubiousDistantTime: " << associations_dubious_distant_time;
+
+    associations_dubious_distant_time_ = associations_dubious_distant_time;
+}
+
+float CreateARTASAssociationsTask::associationDubiousCloseTimePast() const
+{
+    return association_dubious_close_time_past_;
+}
+
+void CreateARTASAssociationsTask::associationDubiousCloseTimePast(float association_dubious_close_time_past)
+{
+    loginf << "CreateARTASAssociationsTask:: associationDubiousCloseTimePast: " << association_dubious_close_time_past;
+
+    association_dubious_close_time_past_ = association_dubious_close_time_past;
+}
+
+float CreateARTASAssociationsTask::associationDubiousCloseTimeFuture() const
+{
+    return association_dubious_close_time_future_;
+}
+
+void CreateARTASAssociationsTask::associationDubiousCloseTimeFuture(float association_dubious_close_time_future)
+{
+    loginf << "CreateARTASAssociationsTask: associationDubiousCloseTimeFuture: "
+           << association_dubious_close_time_future;
+
+    association_dubious_close_time_future_ = association_dubious_close_time_future;
 }
 
 void CreateARTASAssociationsTask::checkAndSetVariable (std::string& name_str, DBOVariable** var)

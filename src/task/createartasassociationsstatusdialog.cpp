@@ -78,8 +78,8 @@ CreateARTASAssociationsStatusDialog::CreateARTASAssociationsStatusDialog(CreateA
         association_grid->addWidget(association_status_label_, row, 1);
 
         ++row;
-        association_grid->addWidget(new QLabel("Missing Hashes at Beginning (<"+QString::number(task_.beginningTime())
-                                               +"s)"), row, 0);
+        association_grid->addWidget(new QLabel("Acceptable Missing Hashes (in Beginning/End "
+                                               +QString::number(task_.missesAcceptableTime())+"s)"), row, 0);
         missing_hashes_at_beginning_label_ = new QLabel ();
         missing_hashes_at_beginning_label_->setAlignment(Qt::AlignRight);
         association_grid->addWidget(missing_hashes_at_beginning_label_, row, 1);
@@ -97,8 +97,7 @@ CreateARTASAssociationsStatusDialog::CreateARTASAssociationsStatusDialog(CreateA
         association_grid->addWidget(found_hashes_label_, row, 1);
 
         ++row;
-        association_grid->addWidget(new QLabel("Dubious Associations (>"+QString::number(task_.dubiousTime())
-                                               +"s)"), row, 0);
+        association_grid->addWidget(new QLabel("Dubious Associations"), row, 0);
         dubious_label_ = new QLabel ();
         dubious_label_->setAlignment(Qt::AlignRight);
         association_grid->addWidget(dubious_label_, row, 1);

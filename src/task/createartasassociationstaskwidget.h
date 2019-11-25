@@ -19,9 +19,13 @@ public slots:
     void anyVariableChangedSlot();
 
     void endTrackTimeEditSlot(QString value);
-    void beginningTimeEditSlot(QString value);
-    void dubiousTimeEditSlot(QString value);
-    void futureTimeEditSlot(QString value);
+
+    void associationTimePastEditSlot(QString value);
+    void associationTimeFutureEditSlot(QString value);
+    void missesAcceptableTimeEditSlot(QString value);
+    void associationsDubiousDistantTimeEditSlot(QString value);
+    void associationDubiousCloseTimePastEditSlot(QString value);
+    void associationDubiousCloseTimeFutureEditSlot(QString value);
 
     void runSlot ();
     void runDoneSlot ();
@@ -49,9 +53,15 @@ protected:
     DBOVariableSelectionWidget* tod_box_ {nullptr};
 
     QLineEdit* end_track_time_edit_ {nullptr};
-    QLineEdit* beginning_time_edit_ {nullptr};
-    QLineEdit* dubious_time_edit_ {nullptr};
-    QLineEdit* future_time_edit_ {nullptr};
+
+    QLineEdit* association_time_past_edit_ {nullptr};
+    QLineEdit* association_time_future_edit_ {nullptr};
+
+    QLineEdit* misses_acceptable_time_edit_ {nullptr};
+
+    QLineEdit* associations_dubious_distant_time_edit_ {nullptr};
+    QLineEdit* association_dubious_close_time_past_edit_ {nullptr};
+    QLineEdit* association_dubious_close_time_future_edit_ {nullptr};
 
     QPushButton* calc_button_ {nullptr};
 };

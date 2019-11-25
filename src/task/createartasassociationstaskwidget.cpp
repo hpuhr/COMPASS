@@ -104,35 +104,61 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(CreateARTAS
         row_cnt++;
         grid->addWidget (new QLabel ("End Track Time (s)"), row_cnt, 0);
         end_track_time_edit_ = new QLineEdit (QString::number(task.endTrackTime()));
-        end_track_time_edit_->setValidator( new QDoubleValidator(10, 60*3600, 2, this) );
+        end_track_time_edit_->setValidator(new QDoubleValidator(10, 60*3600, 2, this));
         connect (end_track_time_edit_, &QLineEdit::textEdited,
                  this, &CreateARTASAssociationsTaskWidget::endTrackTimeEditSlot);
         grid->addWidget (end_track_time_edit_, row_cnt, 1);
 
         row_cnt++;
-        grid->addWidget (new QLabel ("Beginning Time (s)"), row_cnt, 0);
-        beginning_time_edit_ = new QLineEdit (QString::number(task.beginningTime()));
-        beginning_time_edit_->setValidator( new QDoubleValidator(0, 600, 2, this) );
-        connect (beginning_time_edit_, &QLineEdit::textEdited,
-                 this, &CreateARTASAssociationsTaskWidget::beginningTimeEditSlot);
-        grid->addWidget (beginning_time_edit_, row_cnt, 1);
+        grid->addWidget (new QLabel ("Association Time Past (s)"), row_cnt, 0);
+        association_time_past_edit_ = new QLineEdit (QString::number(task.associationTimePast()));
+        association_time_past_edit_->setValidator(new QDoubleValidator(0, 600, 2, this));
+        connect (association_time_past_edit_, &QLineEdit::textEdited,
+                 this, &CreateARTASAssociationsTaskWidget::associationTimePastEditSlot);
+        grid->addWidget (association_time_past_edit_, row_cnt, 1);
 
 
         row_cnt++;
-        grid->addWidget (new QLabel ("Dubious Time (s)"), row_cnt, 0);
-        dubious_time_edit_ = new QLineEdit (QString::number(task.dubiousTime()));
-        dubious_time_edit_->setValidator( new QDoubleValidator(0, 600, 2, this) );
-        connect (dubious_time_edit_, &QLineEdit::textEdited,
-                 this, &CreateARTASAssociationsTaskWidget::dubiousTimeEditSlot);
-        grid->addWidget (dubious_time_edit_, row_cnt, 1);
+        grid->addWidget (new QLabel ("Association Time Future (s)"), row_cnt, 0);
+        association_time_future_edit_ = new QLineEdit (QString::number(task.associationTimeFuture()));
+        association_time_future_edit_->setValidator(new QDoubleValidator(0, 600, 2, this));
+        connect (association_time_future_edit_, &QLineEdit::textEdited,
+                 this, &CreateARTASAssociationsTaskWidget::associationTimeFutureEditSlot);
+        grid->addWidget (association_time_future_edit_, row_cnt, 1);
 
         row_cnt++;
-        grid->addWidget (new QLabel ("Future Time (s)"), row_cnt, 0);
-        future_time_edit_ = new QLineEdit (QString::number(task.futureTime()));
-        future_time_edit_->setValidator( new QDoubleValidator(0, 10, 2, this) );
-        connect (future_time_edit_, &QLineEdit::textEdited,
-                 this, &CreateARTASAssociationsTaskWidget::futureTimeEditSlot);
-        grid->addWidget (future_time_edit_, row_cnt, 1);
+        grid->addWidget (new QLabel ("Acceptable Time for Misses (s)"), row_cnt, 0);
+        misses_acceptable_time_edit_ = new QLineEdit (QString::number(task.missesAcceptableTime()));
+        misses_acceptable_time_edit_->setValidator (new QDoubleValidator(0, 600, 2, this));
+        connect (misses_acceptable_time_edit_, &QLineEdit::textEdited,
+                 this, &CreateARTASAssociationsTaskWidget::missesAcceptableTimeEditSlot);
+        grid->addWidget (misses_acceptable_time_edit_, row_cnt, 1);
+
+        row_cnt++;
+        grid->addWidget (new QLabel ("Dubious Association Distant Time (s)"), row_cnt, 0);
+        associations_dubious_distant_time_edit_ = new QLineEdit (QString::number(task.associationsDubiousDistantTime()));
+        associations_dubious_distant_time_edit_->setValidator (new QDoubleValidator(0, 600, 2, this));
+        connect (associations_dubious_distant_time_edit_, &QLineEdit::textEdited,
+                 this, &CreateARTASAssociationsTaskWidget::associationsDubiousDistantTimeEditSlot);
+        grid->addWidget (associations_dubious_distant_time_edit_, row_cnt, 1);
+
+        row_cnt++;
+        grid->addWidget (new QLabel ("Dubious Association Close Time Past (s)"), row_cnt, 0);
+        association_dubious_close_time_past_edit_ = new QLineEdit (
+                    QString::number(task.associationDubiousCloseTimePast()));
+        association_dubious_close_time_past_edit_->setValidator (new QDoubleValidator(0, 600, 2, this));
+        connect (association_dubious_close_time_past_edit_, &QLineEdit::textEdited,
+                 this, &CreateARTASAssociationsTaskWidget::associationDubiousCloseTimePastEditSlot);
+        grid->addWidget (association_dubious_close_time_past_edit_, row_cnt, 1);
+
+        row_cnt++;
+        grid->addWidget (new QLabel ("Dubious Association Close Time Future (s)"), row_cnt, 0);
+        association_dubious_close_time_future_edit_ = new QLineEdit (
+                    QString::number(task.associationDubiousCloseTimeFuture()));
+        association_dubious_close_time_future_edit_->setValidator (new QDoubleValidator(0, 600, 2, this));
+        connect (association_dubious_close_time_future_edit_, &QLineEdit::textEdited,
+                 this, &CreateARTASAssociationsTaskWidget::associationDubiousCloseTimeFutureEditSlot);
+        grid->addWidget (association_dubious_close_time_future_edit_, row_cnt, 1);
 
 
         main_layout->addLayout(grid);
@@ -287,26 +313,51 @@ void CreateARTASAssociationsTaskWidget::endTrackTimeEditSlot(QString value)
     task_.endTrackTime(val);
 }
 
-void CreateARTASAssociationsTaskWidget::beginningTimeEditSlot(QString value)
+void CreateARTASAssociationsTaskWidget::associationTimePastEditSlot(QString value)
 {
     bool ok;
     float val = value.toFloat(&ok);
     assert (ok);
-    task_.beginningTime(val);
+    task_.associationTimePast(val);
 }
 
-void CreateARTASAssociationsTaskWidget::dubiousTimeEditSlot(QString value)
+void CreateARTASAssociationsTaskWidget::associationTimeFutureEditSlot(QString value)
 {
     bool ok;
     float val = value.toFloat(&ok);
     assert (ok);
-    task_.dubiousTime(val);
+    task_.associationTimeFuture(val);
 }
 
-void CreateARTASAssociationsTaskWidget::futureTimeEditSlot(QString value)
+void CreateARTASAssociationsTaskWidget::missesAcceptableTimeEditSlot(QString value)
 {
     bool ok;
     float val = value.toFloat(&ok);
     assert (ok);
-    task_.futureTime(val);
+    task_.missesAcceptableTime(val);
 }
+
+void CreateARTASAssociationsTaskWidget::associationsDubiousDistantTimeEditSlot(QString value)
+{
+    bool ok;
+    float val = value.toFloat(&ok);
+    assert (ok);
+    task_.associationsDubiousDistantTime(val);
+}
+
+void CreateARTASAssociationsTaskWidget::associationDubiousCloseTimePastEditSlot(QString value)
+{
+    bool ok;
+    float val = value.toFloat(&ok);
+    assert (ok);
+    task_.associationDubiousCloseTimePast(val);
+}
+
+void CreateARTASAssociationsTaskWidget::associationDubiousCloseTimeFutureEditSlot(QString value)
+{
+    bool ok;
+    float val = value.toFloat(&ok);
+    assert (ok);
+    task_.associationDubiousCloseTimeFuture(val);
+}
+
