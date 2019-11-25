@@ -75,8 +75,16 @@ ASTERIXImporterTask::ASTERIXImporterTask(const std::string& class_id, const std:
     loginf << "ASTERIXImporterTask: contructor: jasterix definition path '" << jasterix_definition_path << "'";
     assert (Files::directoryExists(jasterix_definition_path));
 
-    jASTERIX::frame_chunk_size = unlimited_chunk_size;
-    jASTERIX::record_chunk_size = unlimited_chunk_size;
+    if (limit_ram_)
+    {
+        jASTERIX::frame_chunk_size = limited_chunk_size;
+        jASTERIX::record_chunk_size = limited_chunk_size;
+    }
+    else
+    {
+        jASTERIX::frame_chunk_size = unlimited_chunk_size;
+        jASTERIX::record_chunk_size = unlimited_chunk_size;
+    }
 
     jasterix_ = std::make_shared<jASTERIX::jASTERIX> (jasterix_definition_path, false, debug_jasterix_, true);
 
