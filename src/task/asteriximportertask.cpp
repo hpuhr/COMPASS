@@ -50,7 +50,12 @@
 using namespace Utils;
 using namespace nlohmann;
 using namespace std;
-//using namespace jASTERIX;
+
+const unsigned int unlimited_chunk_size=10000;
+const unsigned int limited_chunk_size=5000;
+
+const unsigned int unlimited_num_json_jobs_=2;
+const unsigned int limited_num_json_jobs_=1;
 
 ASTERIXImporterTask::ASTERIXImporterTask(const std::string& class_id, const std::string& instance_id,
                                          TaskManager* task_manager)
@@ -59,6 +64,7 @@ ASTERIXImporterTask::ASTERIXImporterTask(const std::string& class_id, const std:
     //qRegisterMetaType<std::unique_ptr<std::vector <nlohmann::json>>>("std::unique_ptr<std::vector <nlohmann::json>>");
 
     registerParameter("debug_jasterix", &debug_jasterix_, false);
+    registerParameter("limit_ram", &limit_ram_, false);
     registerParameter("current_filename", &current_filename_, "");
     registerParameter("current_framing", &current_framing_, "");
 
@@ -69,8 +75,8 @@ ASTERIXImporterTask::ASTERIXImporterTask(const std::string& class_id, const std:
     loginf << "ASTERIXImporterTask: contructor: jasterix definition path '" << jasterix_definition_path << "'";
     assert (Files::directoryExists(jasterix_definition_path));
 
-    jASTERIX::frame_chunk_size = 10000;
-    jASTERIX::record_chunk_size = 10000;
+    jASTERIX::frame_chunk_size = unlimited_chunk_size;
+    jASTERIX::record_chunk_size = unlimited_chunk_size;
 
     jasterix_ = std::make_shared<jASTERIX::jASTERIX> (jasterix_definition_path, false, debug_jasterix_, true);
 
@@ -393,6 +399,27 @@ bool ASTERIXImporterTask::createMappingStubs() const
 void ASTERIXImporterTask::createMappingStubs(bool create_mapping_stubs)
 {
     create_mapping_stubs_ = create_mapping_stubs;
+}
+
+bool ASTERIXImporterTask::limitRAM() const
+{
+    return limit_ram_;
+}
+
+void ASTERIXImporterTask::limitRAM(bool limit_ram)
+{
+    limit_ram_ = limit_ram;
+
+    if (limit_ram_)
+    {
+        jASTERIX::frame_chunk_size = limited_chunk_size;
+        jASTERIX::record_chunk_size = limited_chunk_size;
+    }
+    else
+    {
+        jASTERIX::frame_chunk_size = unlimited_chunk_size;
+        jASTERIX::record_chunk_size = unlimited_chunk_size;
+    }
 }
 
 bool ASTERIXImporterTask::canImportFile (const std::string& filename)
@@ -915,5 +942,8 @@ void ASTERIXImporterTask::closeStatusDialogSlot()
 
 bool ASTERIXImporterTask::maxLoadReached ()
 {
-    return json_map_jobs_.unsafe_size() > 3;
+    if (limit_ram_)
+        return json_map_jobs_.unsafe_size() > limited_num_json_jobs_;
+    else
+        return json_map_jobs_.unsafe_size() > unlimited_num_json_jobs_;
 }

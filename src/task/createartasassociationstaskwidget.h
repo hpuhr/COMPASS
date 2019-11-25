@@ -40,7 +40,6 @@ protected:
 
     DBODataSourceSelectionComboBox* ds_combo_ {nullptr};
     DBOVariableSelectionWidget* ds_id_box_ {nullptr};
-    DBOVariableSelectionWidget* tri_box_ {nullptr};
     DBOVariableSelectionWidget* track_num_box_ {nullptr};
     DBOVariableSelectionWidget* track_begin_box_ {nullptr};
     DBOVariableSelectionWidget* track_end_box_ {nullptr};

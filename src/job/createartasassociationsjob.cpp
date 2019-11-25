@@ -121,7 +121,6 @@ void CreateARTASAssociationsJob::createUTNS ()
     std::shared_ptr<Buffer> buffer = buffers_.at(tracker_dbo_name_);
     size_t buffer_size = buffer->size();
 
-    assert (buffer->has<std::string>(task_.trackerTRIVarStr()));
     assert (buffer->has<int>(task_.trackerTrackNumVarStr()));
     assert (buffer->has<std::string>(task_.trackerTrackBeginVarStr()));
     assert (buffer->has<std::string>(task_.trackerTrackEndVarStr()));
@@ -129,7 +128,6 @@ void CreateARTASAssociationsJob::createUTNS ()
     assert (buffer->has<std::string>(task_.hashVar()->getNameFor(tracker_dbo_name_)));
     assert (buffer->has<float>(task_.todVar()->getNameFor(tracker_dbo_name_)));
 
-    NullableVector<std::string> tris = buffer->get<std::string>(task_.trackerTRIVarStr());
     NullableVector<int> track_nums = buffer->get<int>(task_.trackerTrackNumVarStr());
     NullableVector<std::string> track_begins = buffer->get<std::string>(task_.trackerTrackBeginVarStr());
     NullableVector<std::string> track_ends = buffer->get<std::string>(task_.trackerTrackEndVarStr());
@@ -150,7 +148,7 @@ void CreateARTASAssociationsJob::createUTNS ()
     bool track_end_set;
     bool track_end;
     int rec_num;
-    std::string hash;
+    //std::string hash;
     float tod;
 
     int utn;
@@ -162,9 +160,9 @@ void CreateARTASAssociationsJob::createUTNS ()
         new_track_created = false;
         finish_previous_track = false;
 
-        tri_set = !tris.isNull(cnt);
+        tri_set = !hashes.isNull(cnt);
         if (tri_set)
-            tri = tris.get(cnt);
+            tri = hashes.get(cnt);
         else
             tri = "";
 
@@ -186,8 +184,8 @@ void CreateARTASAssociationsJob::createUTNS ()
         assert (!rec_nums.isNull(cnt));
         rec_num = rec_nums.get(cnt);
 
-        assert (!hashes.isNull(cnt));
-        hash = hashes.get(cnt);
+//        assert (!hashes.isNull(cnt));
+//        hash = hashes.get(cnt);
 
         assert (!tods.isNull(cnt));
         tod = tods.get(cnt);
@@ -449,6 +447,14 @@ void CreateARTASAssociationsJob::createSensorHashes (DBObject& object)
     {
         assert (!rec_nums.isNull(cnt));
         assert (!hashes.isNull(cnt));
+
+        if (tods.isNull(cnt))
+        {
+            logwrn << "CreateARTASAssociationsJob: createSensorHashes: rec_num " << rec_nums.get(cnt)
+                   << " of dbo " << object.name()<< " has no time, skipping";
+            continue;
+        }
+
         assert (!tods.isNull(cnt));
 
         // dbo -> hash -> rec_num, tod

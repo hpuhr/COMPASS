@@ -111,8 +111,12 @@ public:
     bool createMappingStubs() const;
     void createMappingStubs(bool createMappingStubs);
 
+    bool limitRAM() const;
+    void limitRAM(bool value);
+
 protected:
     bool debug_jasterix_;
+    bool limit_ram_;
     std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
 
     std::map <std::string, SavedFile*> file_list_;

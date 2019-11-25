@@ -29,7 +29,6 @@ CreateARTASAssociationsTask::CreateARTASAssociationsTask(const std::string& clas
 
     // tracker vars
     registerParameter ("tracker_ds_id_var_str", &tracker_ds_id_var_str_, "ds_id");
-    registerParameter ("tracker_tri_var_str", &tracker_tri_var_str_, "tris_compound");
     registerParameter ("tracker_track_num_var_str", &tracker_track_num_var_str_, "track_num");
     registerParameter ("tracker_track_begin_var_str", &tracker_track_begin_var_str_, "track_created");
     registerParameter ("tracker_track_end_var_str", &tracker_track_end_var_str_, "track_end");
@@ -95,8 +94,7 @@ bool CreateARTASAssociationsTask::canRun ()
     if (!ds_found)
         return false;
 
-    if (!tracker_object.hasVariable(tracker_tri_var_str_)
-            || !tracker_object.hasVariable(tracker_track_num_var_str_)
+    if (!tracker_object.hasVariable(tracker_track_num_var_str_)
             || !tracker_object.hasVariable(tracker_track_begin_var_str_)
             || !tracker_object.hasVariable(tracker_track_end_var_str_))
         return false;
@@ -144,7 +142,6 @@ void CreateARTASAssociationsTask::run ()
     status_dialog_->markStartTime();
 
     checkAndSetVariable (tracker_ds_id_var_str_, &tracker_ds_id_var_);
-    checkAndSetVariable (tracker_tri_var_str_, &tracker_tri_var_);
     checkAndSetVariable (tracker_track_num_var_str_, &tracker_track_num_var_);
     checkAndSetVariable (tracker_track_begin_var_str_, &tracker_track_begin_var_);
     checkAndSetVariable (tracker_track_end_var_str_, &tracker_track_end_var_);
@@ -316,19 +313,6 @@ void CreateARTASAssociationsTask::trackerDsIdVarStr(const std::string& tracker_d
 {
     loginf << "CreateARTASAssociationsTask: trackerDsIdVarStr: '" << tracker_ds_id_var_str << "'";
     tracker_ds_id_var_str_ = tracker_ds_id_var_str;
-}
-
-
-std::string CreateARTASAssociationsTask::trackerTRIVarStr() const
-{
-    return tracker_tri_var_str_;
-}
-
-void CreateARTASAssociationsTask::trackerTRIVarStr(const std::string& tracker_tri_var_str)
-{
-    loginf << "CreateARTASAssociationsTask: trackerTRIVarStr: '" << tracker_tri_var_str << "'";
-
-    tracker_tri_var_str_ = tracker_tri_var_str;
 }
 
 std::string CreateARTASAssociationsTask::trackerTrackNumVarStr() const
@@ -508,9 +492,6 @@ DBOVariableSet CreateARTASAssociationsTask::getReadSetFor (const std::string& db
 
     if (dbo_name == "Tracker")
     {
-        assert (tracker_tri_var_);
-        read_set.add(*tracker_tri_var_);
-
         assert (tracker_track_num_var_);
         read_set.add(*tracker_track_num_var_);
 

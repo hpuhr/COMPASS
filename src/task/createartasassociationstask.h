@@ -50,9 +50,6 @@ public:
     void trackerDsIdVarStr(const std::string &tracker_ds_id_var_str);
     DBOVariable *trackerDsIdVar() const;
 
-    std::string trackerTRIVarStr() const;
-    void trackerTRIVarStr(const std::string &trackerTRIVarStr);
-
     std::string trackerTrackNumVarStr() const;
     void trackerTrackNumVarStr(const std::string &tracker_track_num_var_str);
 
@@ -96,9 +93,6 @@ protected:
     std::string tracker_ds_id_var_str_;
     DBOVariable* tracker_ds_id_var_ {nullptr};
 
-    std::string tracker_tri_var_str_;
-    DBOVariable* tracker_tri_var_ {nullptr};
-
     std::string tracker_track_num_var_str_;
     DBOVariable* tracker_track_num_var_ {nullptr};
 
@@ -111,6 +105,7 @@ protected:
     std::string key_var_str_;
     MetaDBOVariable* key_var_ {nullptr};
 
+    // contains artas md5 for target reports, tris for tracker
     std::string hash_var_str_;
     MetaDBOVariable* hash_var_ {nullptr};
 
