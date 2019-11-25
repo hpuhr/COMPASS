@@ -66,6 +66,7 @@ protected:
     float first_track_tod_ {0};
     float last_track_tod_ {0};
 
+    size_t ignored_track_updates_cnt_ {0};
     size_t acceptable_missing_hashes_cnt_ {0};
     size_t missing_hashes_cnt_ {0};
     std::multimap<std::string, std::pair<int, int>> missing_hashes_; // hash -> (utn, rec_num)

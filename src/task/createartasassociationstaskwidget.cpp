@@ -12,6 +12,7 @@
 #include <QPushButton>
 #include <QMessageBox>
 #include <QLineEdit>
+#include <QCheckBox>
 
 CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(CreateARTASAssociationsTask& task, QWidget* parent,
                                                                      Qt::WindowFlags f)
@@ -75,6 +76,13 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(CreateARTAS
         track_end_box_->showDBOOnly("Tracker");
         connect (track_end_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
         grid->addWidget (track_end_box_, row_cnt, 1);
+
+        row_cnt++;
+        grid->addWidget (new QLabel ("Tracker Track Coasting Variable"), row_cnt, 0);
+        track_coasting_box_ = new DBOVariableSelectionWidget ();
+        track_coasting_box_->showDBOOnly("Tracker");
+        connect (track_coasting_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
+        grid->addWidget (track_coasting_box_, row_cnt, 1);
 
         // meta key var
         row_cnt++;
@@ -164,6 +172,31 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(CreateARTAS
         main_layout->addLayout(grid);
     }
 
+    // track flag stuff
+    ignore_track_end_associations_check_ = new QCheckBox ("Ignore Track End Associations");
+    ignore_track_end_associations_check_->setChecked(task_.ignoreTrackEndAssociations());
+    connect (ignore_track_end_associations_check_, &QCheckBox::clicked,
+             this, &CreateARTASAssociationsTaskWidget::anyTrackFlagChangedSlot);
+    main_layout->addWidget(ignore_track_end_associations_check_);
+
+    mark_track_end_associations_dubious_check_ = new QCheckBox ("Mark Track End Associations Dubious");
+    mark_track_end_associations_dubious_check_->setChecked(task_.markTrackEndAssociationsDubious());
+    connect (mark_track_end_associations_dubious_check_, &QCheckBox::clicked,
+             this, &CreateARTASAssociationsTaskWidget::anyTrackFlagChangedSlot);
+    main_layout->addWidget(mark_track_end_associations_dubious_check_);
+
+    ignore_track_coasting_associations_check_ = new QCheckBox ("Ignore Track Coasting Associations");
+    ignore_track_coasting_associations_check_->setChecked(task_.ignoreTrackCoastingAssociations());
+    connect (ignore_track_coasting_associations_check_, &QCheckBox::clicked,
+             this, &CreateARTASAssociationsTaskWidget::anyTrackFlagChangedSlot);
+    main_layout->addWidget(ignore_track_coasting_associations_check_);
+
+    mark_track_coasting_associations_dubious_check_ = new QCheckBox ("Mark Track Costing Associations Dubious");
+    mark_track_coasting_associations_dubious_check_->setChecked(task_.markTrackCoastingAssociationsDubious());
+    connect (mark_track_coasting_associations_dubious_check_, &QCheckBox::clicked,
+             this, &CreateARTASAssociationsTaskWidget::anyTrackFlagChangedSlot);
+    main_layout->addWidget(mark_track_coasting_associations_dubious_check_);
+
     calc_button_ = new QPushButton ("Calculate");
     connect(calc_button_, SIGNAL( clicked() ), this, SLOT( runSlot() ));
     main_layout->addWidget(calc_button_);
@@ -242,6 +275,10 @@ void CreateARTASAssociationsTaskWidget::update ()
     if (task_.trackerTrackEndVarStr().size() && track_object.hasVariable(task_.trackerTrackEndVarStr()))
         track_end_box_->selectedVariable(track_object.variable(task_.trackerTrackEndVarStr()));
 
+    assert (track_coasting_box_);
+    if (task_.trackerTrackCoastingVarStr().size() && track_object.hasVariable(task_.trackerTrackCoastingVarStr()))
+        track_coasting_box_->selectedVariable(track_object.variable(task_.trackerTrackCoastingVarStr()));
+
     // meta vars
     assert (key_box_);
     if (task_.keyVarStr().size() && object_man.existsMetaVariable(task_.keyVarStr()))
@@ -255,6 +292,7 @@ void CreateARTASAssociationsTaskWidget::update ()
     if (task_.todVarStr().size() && object_man.existsMetaVariable(task_.todVarStr()))
         tod_box_->selectedMetaVariable(object_man.metaVariable(task_.todVarStr()));
 
+    // track flag stuff
 }
 
 void CreateARTASAssociationsTaskWidget::anyVariableChangedSlot()
@@ -284,6 +322,12 @@ void CreateARTASAssociationsTaskWidget::anyVariableChangedSlot()
         task_.trackerTrackEndVarStr(track_end_box_->selectedVariable().name());
     else
         task_.trackerTrackEndVarStr("");
+
+    assert (track_coasting_box_);
+    if (track_coasting_box_->hasVariable())
+        task_.trackerTrackCoastingVarStr(track_coasting_box_->selectedVariable().name());
+    else
+        task_.trackerTrackCoastingVarStr("");
 
     // meta vars
     assert (key_box_);
@@ -361,3 +405,26 @@ void CreateARTASAssociationsTaskWidget::associationDubiousCloseTimeFutureEditSlo
     task_.associationDubiousCloseTimeFuture(val);
 }
 
+void CreateARTASAssociationsTaskWidget::anyTrackFlagChangedSlot()
+{
+    assert (ignore_track_end_associations_check_);
+    if ((ignore_track_end_associations_check_->checkState() == Qt::Checked)
+            != task_.ignoreTrackEndAssociations())
+        task_.ignoreTrackEndAssociations(ignore_track_end_associations_check_->checkState() == Qt::Checked);
+
+    assert (mark_track_end_associations_dubious_check_);
+    if ((mark_track_end_associations_dubious_check_->checkState() == Qt::Checked)
+            != task_.markTrackEndAssociationsDubious())
+        task_.markTrackEndAssociationsDubious(mark_track_end_associations_dubious_check_->checkState() == Qt::Checked);
+
+    assert (ignore_track_coasting_associations_check_);
+    if ((ignore_track_coasting_associations_check_->checkState() == Qt::Checked)
+            != task_.ignoreTrackCoastingAssociations())
+        task_.ignoreTrackCoastingAssociations(ignore_track_coasting_associations_check_->checkState() == Qt::Checked);
+
+    assert (mark_track_coasting_associations_dubious_check_);
+    if ((mark_track_coasting_associations_dubious_check_->checkState() == Qt::Checked)
+            != task_.markTrackCoastingAssociationsDubious())
+        task_.markTrackCoastingAssociationsDubious(
+                    mark_track_coasting_associations_dubious_check_->checkState() == Qt::Checked);
+}

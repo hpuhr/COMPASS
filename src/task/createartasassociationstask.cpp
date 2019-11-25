@@ -32,6 +32,7 @@ CreateARTASAssociationsTask::CreateARTASAssociationsTask(const std::string& clas
     registerParameter ("tracker_track_num_var_str", &tracker_track_num_var_str_, "track_num");
     registerParameter ("tracker_track_begin_var_str", &tracker_track_begin_var_str_, "track_created");
     registerParameter ("tracker_track_end_var_str", &tracker_track_end_var_str_, "track_end");
+    registerParameter ("tracker_track_coasting_var_str", &tracker_track_coasting_var_str_, "track_coasted");
 
     // meta vars
     registerParameter ("key_var_str", &key_var_str_, "rec_num");
@@ -49,6 +50,12 @@ CreateARTASAssociationsTask::CreateARTASAssociationsTask(const std::string& clas
     registerParameter ("associations_dubious_distant_time", &associations_dubious_distant_time_, 30.0);
     registerParameter ("association_dubious_close_time_past", &association_dubious_close_time_past_, 20.0);
     registerParameter ("association_dubious_close_time_future", &association_dubious_close_time_future_, 1.0);
+
+    // track flag stuff
+    registerParameter ("ignore_track_end_associations", &ignore_track_end_associations_, true);
+    registerParameter ("mark_track_end_associations_dubious", &mark_track_end_associations_dubious_, false);
+    registerParameter ("ignore_track_coasting_associations", &ignore_track_coasting_associations_, true);
+    registerParameter ("mark_track_coasting_associations_dubious", &mark_track_coasting_associations_dubious_, false);
 
 }
 
@@ -103,7 +110,8 @@ bool CreateARTASAssociationsTask::canRun ()
 
     if (!tracker_object.hasVariable(tracker_track_num_var_str_)
             || !tracker_object.hasVariable(tracker_track_begin_var_str_)
-            || !tracker_object.hasVariable(tracker_track_end_var_str_))
+            || !tracker_object.hasVariable(tracker_track_end_var_str_)
+            || !tracker_object.hasVariable(tracker_track_coasting_var_str_))
         return false;
 
     // meta var stuff
@@ -135,13 +143,6 @@ void CreateARTASAssociationsTask::run ()
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-//    std::string msg = "Loading object data.";
-//    msg_box_ = new QMessageBox;
-//    assert (msg_box_);
-//    msg_box_->setWindowTitle("Creating ARTAS Associations");
-//    //msg_box_->setText(msg.c_str());
-//    msg_box_->setStandardButtons(QMessageBox::NoButton);
-
     assert (!status_dialog_);
     status_dialog_.reset(new CreateARTASAssociationsStatusDialog(*this));
     connect(status_dialog_.get(), &CreateARTASAssociationsStatusDialog::closeSignal,
@@ -152,6 +153,7 @@ void CreateARTASAssociationsTask::run ()
     checkAndSetVariable (tracker_track_num_var_str_, &tracker_track_num_var_);
     checkAndSetVariable (tracker_track_begin_var_str_, &tracker_track_begin_var_);
     checkAndSetVariable (tracker_track_end_var_str_, &tracker_track_end_var_);
+    checkAndSetVariable (tracker_track_coasting_var_str_, &tracker_track_coasting_var_);
 
     checkAndSetMetaVariable (key_var_str_, &key_var_);
     checkAndSetMetaVariable (hash_var_str_, &hash_var_);
@@ -316,10 +318,10 @@ std::string CreateARTASAssociationsTask::trackerDsIdVarStr() const
     return tracker_ds_id_var_str_;
 }
 
-void CreateARTASAssociationsTask::trackerDsIdVarStr(const std::string& tracker_ds_id_var_str)
+void CreateARTASAssociationsTask::trackerDsIdVarStr(const std::string& var_str)
 {
-    loginf << "CreateARTASAssociationsTask: trackerDsIdVarStr: '" << tracker_ds_id_var_str << "'";
-    tracker_ds_id_var_str_ = tracker_ds_id_var_str;
+    loginf << "CreateARTASAssociationsTask: trackerDsIdVarStr: '" << var_str << "'";
+    tracker_ds_id_var_str_ = var_str;
 }
 
 std::string CreateARTASAssociationsTask::trackerTrackNumVarStr() const
@@ -327,9 +329,10 @@ std::string CreateARTASAssociationsTask::trackerTrackNumVarStr() const
     return tracker_track_num_var_str_;
 }
 
-void CreateARTASAssociationsTask::trackerTrackNumVarStr(const std::string& tracker_track_num_var_str)
+void CreateARTASAssociationsTask::trackerTrackNumVarStr(const std::string& var_str)
 {
-    tracker_track_num_var_str_ = tracker_track_num_var_str;
+    loginf << "CreateARTASAssociationsTask: trackerTrackNumVarStr: '" << var_str << "'";
+    tracker_track_num_var_str_ = var_str;
 }
 
 std::string CreateARTASAssociationsTask::trackerTrackBeginVarStr() const
@@ -337,9 +340,10 @@ std::string CreateARTASAssociationsTask::trackerTrackBeginVarStr() const
     return tracker_track_begin_var_str_;
 }
 
-void CreateARTASAssociationsTask::trackerTrackBeginVarStr(const std::string& tracker_track_begin_var_str)
+void CreateARTASAssociationsTask::trackerTrackBeginVarStr(const std::string& var_str)
 {
-    tracker_track_begin_var_str_ = tracker_track_begin_var_str;
+    loginf << "CreateARTASAssociationsTask: trackerTrackBeginVarStr: '" << var_str << "'";
+    tracker_track_begin_var_str_ = var_str;
 }
 
 std::string CreateARTASAssociationsTask::trackerTrackEndVarStr() const
@@ -347,9 +351,21 @@ std::string CreateARTASAssociationsTask::trackerTrackEndVarStr() const
     return tracker_track_end_var_str_;
 }
 
-void CreateARTASAssociationsTask::trackerTrackEndVarStr(const std::string& tracker_track_end_var_str)
+void CreateARTASAssociationsTask::trackerTrackEndVarStr(const std::string& var_str)
 {
-    tracker_track_end_var_str_ = tracker_track_end_var_str;
+    loginf << "CreateARTASAssociationsTask: trackerTrackEndVarStr: '" << var_str << "'";
+    tracker_track_end_var_str_ = var_str;
+}
+
+std::string CreateARTASAssociationsTask::trackerTrackCoastingVarStr() const
+{
+    return tracker_track_coasting_var_str_;
+}
+
+void CreateARTASAssociationsTask::trackerTrackCoastingVarStr(const std::string& var_str)
+{
+    loginf << "CreateARTASAssociationsTask: trackerTrackCoastingVarStr: '" << var_str << "'";
+    tracker_track_coasting_var_str_ = var_str;
 }
 
 std::string CreateARTASAssociationsTask::keyVarStr() const
@@ -488,6 +504,50 @@ void CreateARTASAssociationsTask::associationDubiousCloseTimeFuture(float associ
     association_dubious_close_time_future_ = association_dubious_close_time_future;
 }
 
+bool CreateARTASAssociationsTask::ignoreTrackEndAssociations() const
+{
+    return ignore_track_end_associations_;
+}
+
+void CreateARTASAssociationsTask::ignoreTrackEndAssociations(bool value)
+{
+    loginf << "CreateARTASAssociationsTask: ignoreTrackEndAssociations: value " << value;
+    ignore_track_end_associations_ = value;
+}
+
+bool CreateARTASAssociationsTask::markTrackEndAssociationsDubious() const
+{
+    return mark_track_end_associations_dubious_;
+}
+
+void CreateARTASAssociationsTask::markTrackEndAssociationsDubious(bool value)
+{
+    loginf << "CreateARTASAssociationsTask: markTrackEndAssociationsDubious: value " << value;
+    mark_track_end_associations_dubious_ = value;
+}
+
+bool CreateARTASAssociationsTask::ignoreTrackCoastingAssociations() const
+{
+    return ignore_track_coasting_associations_;
+}
+
+void CreateARTASAssociationsTask::ignoreTrackCoastingAssociations(bool value)
+{
+    loginf << "CreateARTASAssociationsTask: ignoreTrackCoastingAssociations: value " << value;
+    ignore_track_coasting_associations_ = value;
+}
+
+bool CreateARTASAssociationsTask::markTrackCoastingAssociationsDubious() const
+{
+    return mark_track_coasting_associations_dubious_;
+}
+
+void CreateARTASAssociationsTask::markTrackCoastingAssociationsDubious(bool value)
+{
+    loginf << "CreateARTASAssociationsTask: markTrackCoastingAssociationsDubious: value " << value;
+    mark_track_coasting_associations_dubious_ = value;
+}
+
 void CreateARTASAssociationsTask::checkAndSetVariable (std::string& name_str, DBOVariable** var)
 {
     DBObjectManager& object_man = ATSDB::instance().objectManager();
@@ -552,6 +612,9 @@ DBOVariableSet CreateARTASAssociationsTask::getReadSetFor (const std::string& db
 
         assert (tracker_track_end_var_);
         read_set.add(*tracker_track_end_var_);
+
+        assert (tracker_track_coasting_var_);
+        read_set.add(*tracker_track_coasting_var_);
     }
 
     return read_set;

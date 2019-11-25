@@ -9,6 +9,7 @@ class QPushButton;
 class DBODataSourceSelectionComboBox;
 class DBOVariableSelectionWidget;
 class QLineEdit;
+class QCheckBox;
 
 class CreateARTASAssociationsTaskWidget : public QWidget
 {
@@ -26,6 +27,8 @@ public slots:
     void associationsDubiousDistantTimeEditSlot(QString value);
     void associationDubiousCloseTimePastEditSlot(QString value);
     void associationDubiousCloseTimeFutureEditSlot(QString value);
+
+    void anyTrackFlagChangedSlot();
 
     void runSlot ();
     void runDoneSlot ();
@@ -47,6 +50,7 @@ protected:
     DBOVariableSelectionWidget* track_num_box_ {nullptr};
     DBOVariableSelectionWidget* track_begin_box_ {nullptr};
     DBOVariableSelectionWidget* track_end_box_ {nullptr};
+    DBOVariableSelectionWidget* track_coasting_box_ {nullptr};
 
     DBOVariableSelectionWidget* key_box_ {nullptr};
     DBOVariableSelectionWidget* hash_box_ {nullptr};
@@ -62,6 +66,11 @@ protected:
     QLineEdit* associations_dubious_distant_time_edit_ {nullptr};
     QLineEdit* association_dubious_close_time_past_edit_ {nullptr};
     QLineEdit* association_dubious_close_time_future_edit_ {nullptr};
+
+    QCheckBox* ignore_track_end_associations_check_ {nullptr};
+    QCheckBox* mark_track_end_associations_dubious_check_ {nullptr};
+    QCheckBox* ignore_track_coasting_associations_check_ {nullptr};
+    QCheckBox* mark_track_coasting_associations_dubious_check_ {nullptr};
 
     QPushButton* calc_button_ {nullptr};
 };

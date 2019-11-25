@@ -46,17 +46,20 @@ public:
     void currentDataSourceName(const std::string &currentDataSourceName);
 
     std::string trackerDsIdVarStr() const;
-    void trackerDsIdVarStr(const std::string &tracker_ds_id_var_str);
+    void trackerDsIdVarStr(const std::string& var_str);
     DBOVariable *trackerDsIdVar() const;
 
     std::string trackerTrackNumVarStr() const;
-    void trackerTrackNumVarStr(const std::string &tracker_track_num_var_str);
+    void trackerTrackNumVarStr(const std::string& var_str);
 
     std::string trackerTrackBeginVarStr() const;
-    void trackerTrackBeginVarStr(const std::string &tracker_track_begin_var_str);
+    void trackerTrackBeginVarStr(const std::string& var_str);
 
     std::string trackerTrackEndVarStr() const;
-    void trackerTrackEndVarStr(const std::string &tracker_track_end_var_str);
+    void trackerTrackEndVarStr(const std::string& var_str);
+
+    std::string trackerTrackCoastingVarStr() const;
+    void trackerTrackCoastingVarStr(const std::string& var_str);
 
     std::string keyVarStr() const;
     void keyVarStr(const std::string &keyVarStr);
@@ -94,6 +97,18 @@ public:
     float associationDubiousCloseTimeFuture() const;
     void associationDubiousCloseTimeFuture(float association_dubious_close_time_future);
 
+    bool ignoreTrackEndAssociations() const;
+    void ignoreTrackEndAssociations(bool value);
+
+    bool markTrackEndAssociationsDubious() const;
+    void markTrackEndAssociationsDubious(bool value);
+
+    bool ignoreTrackCoastingAssociations() const;
+    void ignoreTrackCoastingAssociations(bool value);
+
+    bool markTrackCoastingAssociationsDubious() const;
+    void markTrackCoastingAssociationsDubious(bool value);
+
 protected:
     std::string current_data_source_name_;
 
@@ -108,6 +123,9 @@ protected:
 
     std::string tracker_track_end_var_str_;
     DBOVariable* tracker_track_end_var_ {nullptr};
+
+    std::string tracker_track_coasting_var_str_;
+    DBOVariable* tracker_track_coasting_var_ {nullptr};
 
     std::string key_var_str_;
     MetaDBOVariable* key_var_ {nullptr};
@@ -132,6 +150,12 @@ protected:
     // time delta of tou where association is dubious when multible hashes exist
     float association_dubious_close_time_future_ {0};
     // time delta of tou where association is dubious when multible hashes exist
+
+    bool ignore_track_end_associations_ {false};
+    bool mark_track_end_associations_dubious_ {false};
+
+    bool ignore_track_coasting_associations_ {false};
+    bool mark_track_coasting_associations_dubious_ {false};
 
     CreateARTASAssociationsTaskWidget* widget_ {nullptr};
 

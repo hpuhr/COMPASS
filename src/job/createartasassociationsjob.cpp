@@ -128,6 +128,8 @@ void CreateARTASAssociationsJob::createUTNS ()
     assert (buffer->has<int>(task_.trackerTrackNumVarStr()));
     assert (buffer->has<std::string>(task_.trackerTrackBeginVarStr()));
     assert (buffer->has<std::string>(task_.trackerTrackEndVarStr()));
+    assert (buffer->has<std::string>(task_.trackerTrackCoastingVarStr()));
+
     assert (buffer->has<int>(task_.keyVar()->getNameFor(tracker_dbo_name_)));
     assert (buffer->has<std::string>(task_.hashVar()->getNameFor(tracker_dbo_name_)));
     assert (buffer->has<float>(task_.todVar()->getNameFor(tracker_dbo_name_)));
@@ -135,6 +137,8 @@ void CreateARTASAssociationsJob::createUTNS ()
     NullableVector<int> track_nums = buffer->get<int>(task_.trackerTrackNumVarStr());
     NullableVector<std::string> track_begins = buffer->get<std::string>(task_.trackerTrackBeginVarStr());
     NullableVector<std::string> track_ends = buffer->get<std::string>(task_.trackerTrackEndVarStr());
+    NullableVector<std::string> track_coastings = buffer->get<std::string>(task_.trackerTrackCoastingVarStr());
+
     NullableVector<int> rec_nums = buffer->get<int>(task_.keyVar()->getNameFor(tracker_dbo_name_));
     NullableVector<std::string> hashes = buffer->get<std::string>(task_.hashVar()->getNameFor(tracker_dbo_name_));
     NullableVector<float> tods = buffer->get<float>(task_.todVar()->getNameFor(tracker_dbo_name_));
@@ -151,12 +155,19 @@ void CreateARTASAssociationsJob::createUTNS ()
     bool track_begin;
     bool track_end_set;
     bool track_end;
+    bool track_coasting_set;
+    bool track_coasting;
+
+    bool ignore_track_end_associations = task_.ignoreTrackEndAssociations();
+    bool ignore_track_coasting_associations = task_.ignoreTrackCoastingAssociations();
+
     int rec_num;
     float tod;
 
     int utn;
     bool new_track_created;
     bool finish_previous_track;
+    bool ignore_update;
 
     float track_end_time = task_.endTrackTime(); // time-delta after which begin a new track
 
@@ -185,6 +196,12 @@ void CreateARTASAssociationsJob::createUTNS ()
             track_end = track_ends.get(cnt) == "1";
         else
             track_end = false;
+
+        track_coasting_set = !track_coastings.isNull(cnt);
+        if (track_coasting_set)
+            track_coasting = track_coastings.get(cnt) == "1";
+        else
+            track_coasting = false;
 
         assert (!rec_nums.isNull(cnt));
         rec_num = rec_nums.get(cnt);
@@ -250,7 +267,18 @@ void CreateARTASAssociationsJob::createUTNS ()
         assert (current_tracks.count (utn));
         UniqueARTASTrack& unique_track = current_tracks.at(utn);
         unique_track.last_tod_ = tod;
-        unique_track.rec_nums_tris_[rec_num] = std::make_pair(tri, tod);
+
+        // add tris if not to be ignored
+        ignore_update = ((track_end_set && track_end && ignore_track_end_associations)
+                || (track_coasting_set && track_coasting && ignore_track_coasting_associations));
+
+        if (ignore_update)
+        {
+            logdbg << "CreateARTASAssociationsJob: createUTNS: ignoring rec num " << rec_num;
+            ++ignored_track_updates_cnt_;
+        }
+        else
+            unique_track.rec_nums_tris_[rec_num] = std::make_pair(tri, tod);
 
         if (track_end_set && track_end)
         {
@@ -358,7 +386,7 @@ void CreateARTASAssociationsJob::createSensorAssociations()
                                         isAssociationHashCollisionInDubiousTime(tri_tod, match.second))
                                 {
                                     match_dubious = true;
-                                    match_dubious_comment = "multiple has matches in close time";
+                                    match_dubious_comment = tri+" has multiple matches in close time";
                                 }
 
                                 // store if closer in time
@@ -367,7 +395,7 @@ void CreateARTASAssociationsJob::createSensorAssociations()
                                     if (isAssociationInDubiousDistantTime(tri_tod, match.second))
                                     {
                                         match_dubious = true;
-                                        match_dubious_comment = "in too distant time";
+                                        match_dubious_comment = tri+" in too distant time";
                                     }
 
                                     best_match_dbo_name = dbo_it.first;
