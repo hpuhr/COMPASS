@@ -34,6 +34,8 @@
 #include <QStackedWidget>
 #include <QCheckBox>
 
+using namespace Utils;
+
 ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, QWidget* parent, Qt::WindowFlags f)
     : QWidget (parent, f), task_(task)
 {
@@ -476,7 +478,7 @@ void ASTERIXImporterTaskWidget::importSlot()
         return;
     }
 
-    float free_ram = getFreeRAMinGB();
+    float free_ram = System::getFreeRAMinGB();
 
     if (free_ram < 8.0 && !task_.limitRAM())
     {
@@ -485,6 +487,7 @@ void ASTERIXImporterTaskWidget::importSlot()
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(this, "RAM Limiting",
                                       "There is only "+QString::number(free_ram)+" GB free RAM available.\n"
+                                      +"This will result in decreased decoding performance.\n\n"
                                       +"Do you agree to limiting RAM usage?",
                                       QMessageBox::Yes|QMessageBox::No);
         if (reply == QMessageBox::Yes)
@@ -500,6 +503,7 @@ void ASTERIXImporterTaskWidget::importSlot()
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(this, "RAM Limiting",
                                       "There is "+QString::number(free_ram)+" GB free RAM available.\n"
+                                      +"This will result in increased decoding performance.\n\n"
                                       +"Do you agree to increased RAM usage?",
                                       QMessageBox::Yes|QMessageBox::No);
         if (reply == QMessageBox::Yes)
