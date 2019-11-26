@@ -36,11 +36,11 @@ public slots:
     /// @brief Updates the variables list
     void updateVariableListSlot ();
     /// @brief Removes the selected variable
-    void remove ();
+    void removeSlot ();
     /// @brief Moves the selected variable up
-    void moveUp ();
+    void moveUpSlot ();
     /// @brief Moves the selected variable down
-    void moveDown ();
+    void moveDownSlot ();
 
 protected slots:
     /// @brief Called when menu action is executed
@@ -50,7 +50,7 @@ protected slots:
 
 public:
     /// @brief Constructor
-    DBOVariableOrderedSetWidget(DBOVariableOrderedSet &set, QWidget * parent = 0, Qt::WindowFlags f = 0);
+    DBOVariableOrderedSetWidget(DBOVariableOrderedSet& set, QWidget* parent=0, Qt::WindowFlags f=0);
     /// @brief Destructor
     virtual ~DBOVariableOrderedSetWidget();
 

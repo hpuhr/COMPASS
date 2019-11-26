@@ -184,30 +184,6 @@ void DBOVariableOrderedSet::removeVariableAt (unsigned int index)
 
     variable_definitions_ = new_variable_definitions;
 
-//    auto it = variable_definitions_.find(index);
-//    if (it != variable_definitions_.end())
-//    {
-//        for (; it != variable_definitions_.end(); it++)
-//        {
-//            it->second->setIndex(it->first-1);
-//            const_cast<unsigned int&>(it->first) = it->first-1;
-//        }
-//    }
-
-//    auto it = variable_definitions_.find(index);
-//    assert (it != variable_definitions_.end());
-//    delete it->second;
-
-//    auto it_tobeerased=it;
-
-//    for (; it != variable_definitions_.end(); it++)
-//    {
-//        it->second->setIndex(it->first-1);
-//        const_cast<unsigned int&>(it->first) = it->first-1;
-//    }
-
-//    variable_definitions_.erase(it_tobeerased);
-
     emit setChangedSignal();
 }
 
@@ -216,23 +192,21 @@ void DBOVariableOrderedSet::moveVariableUp (unsigned int index)
     logdbg  << "DBOVariableOrderedSet: moveVariableUp: index " << index;
     assert (index < variable_definitions_.size());
 
-    std::map <unsigned int, DBOVariableOrderDefinition*>::iterator it, itnext;
-
-    it = variable_definitions_.find(index);
+    auto it = variable_definitions_.find(index);
     assert (it != variable_definitions_.end());
 
-    if (index == variable_definitions_.size() - 1)
+    if (index == 0)
     {
-        logerr  << "DBOVariableOrderedSet: moveVariableUp: tried to move up last variable";
+        logwrn  << "DBOVariableOrderedSet: moveVariableUp: tried to move up first variable";
         return;
     }
 
-    itnext = variable_definitions_.find(index+1);
-    assert (itnext != variable_definitions_.end());
+    auto itprev = variable_definitions_.find(index-1);
+    assert (itprev != variable_definitions_.end());
 
-    std::swap (it->second, itnext->second);
+    std::swap (it->second, itprev->second);
     it->second->setIndex(it->first);
-    itnext->second->setIndex(itnext->first);
+    itprev->second->setIndex(itprev->first);
 
     emit setChangedSignal();
 }
@@ -241,23 +215,21 @@ void DBOVariableOrderedSet::moveVariableDown (unsigned int index)
     logdbg  << "DBOVariableOrderedSet: moveVariableDown: index " << index;
     assert (index < variable_definitions_.size());
 
-    std::map <unsigned int, DBOVariableOrderDefinition*>::iterator it, itprev;
-
-    it = variable_definitions_.find(index);
+    auto it = variable_definitions_.find(index);
     assert (it != variable_definitions_.end());
 
-    if (index == 0)
+    if (index == variable_definitions_.size() - 1)
     {
-        logwrn  << "DBOVariableOrderedSet: moveVariableDown: tried to move down first variable";
+        logerr  << "DBOVariableOrderedSet: moveVariableDown: tried to down up last variable";
         return;
     }
 
-    itprev = variable_definitions_.find(index-1);
-    assert (itprev != variable_definitions_.end());
+    auto itnext = variable_definitions_.find(index+1);
+    assert (itnext != variable_definitions_.end());
 
-    std::swap (it->second, itprev->second);
+    std::swap (it->second, itnext->second);
     it->second->setIndex(it->first);
-    itprev->second->setIndex(itprev->first);
+    itnext->second->setIndex(itnext->first);
 
     emit setChangedSignal();
 }
