@@ -50,48 +50,54 @@ DBOVariableOrderedSetWidget::DBOVariableOrderedSetWidget(DBOVariableOrderedSet& 
     vvars_layout->addWidget (list_widget_);
     hvars_layout->addLayout (vvars_layout);
 
-    QVBoxLayout *vupdown_layout = new QVBoxLayout();
 
+    // up/down buttons
+    {
+        QVBoxLayout *vupdown_layout = new QVBoxLayout();
 
-    QPushButton *up = new QPushButton ();
-    up->setIcon(QIcon(Files::getIconFilepath("up.png").c_str()));
-    up->setFixedSize (UI_ICON_SIZE);
-    up->setFlat(UI_ICON_BUTTON_FLAT);
-    up->setToolTip(tr("Move variable up"));
-    connect(up, &QPushButton::clicked, this, &DBOVariableOrderedSetWidget::moveUpSlot);
+        QPushButton *up = new QPushButton ();
+        up->setIcon(QIcon(Files::getIconFilepath("up.png").c_str()));
+        up->setFixedSize (UI_ICON_SIZE);
+        up->setFlat(UI_ICON_BUTTON_FLAT);
+        up->setToolTip(tr("Move variable up"));
+        connect(up, &QPushButton::clicked, this, &DBOVariableOrderedSetWidget::moveUpSlot);
 
-    vupdown_layout->addWidget (up);
+        vupdown_layout->addWidget (up);
 
-    vupdown_layout->addStretch();
+        vupdown_layout->addStretch();
 
-    QPushButton *down = new QPushButton ();
-    down->setIcon(QIcon(Files::getIconFilepath("down.png").c_str()));
-    down->setFixedSize (UI_ICON_SIZE);
-    down->setFlat(UI_ICON_BUTTON_FLAT);
-    down->setToolTip(tr("Move variable down"));
-    connect (down, &QPushButton::clicked, this, &DBOVariableOrderedSetWidget::moveDownSlot);
+        QPushButton *down = new QPushButton ();
+        down->setIcon(QIcon(Files::getIconFilepath("down.png").c_str()));
+        down->setFixedSize (UI_ICON_SIZE);
+        down->setFlat(UI_ICON_BUTTON_FLAT);
+        down->setToolTip(tr("Move variable down"));
+        connect (down, &QPushButton::clicked, this, &DBOVariableOrderedSetWidget::moveDownSlot);
 
-    vupdown_layout->addWidget (down);
+        vupdown_layout->addWidget (down);
 
-    hvars_layout->addLayout (vupdown_layout);
+        hvars_layout->addLayout (vupdown_layout);
+    }
 
     main_layout->addLayout (hvars_layout);
 
-    QHBoxLayout *button_layout = new QHBoxLayout ();
+    // buttons
+    {
+        QHBoxLayout *button_layout = new QHBoxLayout ();
 
-    QPushButton *remove_button = new QPushButton ();
-    remove_button->setText( "Remove" );
-    connect( remove_button, SIGNAL(clicked()), this, SLOT(removeSlot()) );
-    button_layout->addWidget( remove_button);
+        QPushButton *remove_button = new QPushButton ();
+        remove_button->setText( "Remove" );
+        connect (remove_button, &QPushButton::clicked, this, &DBOVariableOrderedSetWidget::removeSlot);
+        button_layout->addWidget( remove_button);
 
-    QPushButton *add_button = new QPushButton();
-    add_button->setText( "Add" );
-    connect( add_button, SIGNAL(clicked()), this, SLOT(showMenuSlot()) );
-    button_layout->addWidget( add_button);
+        QPushButton *add_button = new QPushButton();
+        add_button->setText( "Add" );
+        connect (add_button, &QPushButton::clicked, this, &DBOVariableOrderedSetWidget::showMenuSlot);
+        button_layout->addWidget( add_button);
 
-    main_layout->addLayout (button_layout);
+        main_layout->addLayout (button_layout);
+    }
 
-    connect( &menu_, SIGNAL(triggered(QAction*)), this, SLOT(triggerSlot(QAction*)));
+    connect (&menu_, &QMenu::triggered, this, &DBOVariableOrderedSetWidget::triggerSlot);
 
     setLayout (main_layout);
     updateMenuEntries ();

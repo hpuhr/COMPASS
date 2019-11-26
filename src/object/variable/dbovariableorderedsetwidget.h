@@ -44,7 +44,7 @@ public slots:
 
 protected slots:
     /// @brief Called when menu action is executed
-    void triggerSlot( QAction* action );
+    void triggerSlot (QAction* action);
     /// @brief Shows the context menu
     void showMenuSlot();
 
