@@ -558,8 +558,8 @@ template <class T> std::vector<size_t>  NullableVector<T>::nullValueIndexes (siz
         assert (null_flags_.size() <= buffer_.data_size_);
     }
 
-    if (from_index+1 >= data_.size()) // no data
-        return indexes;
+//    if (from_index+1 >= data_.size()) // no data
+//        return indexes;
 
     for (size_t index = from_index; index <= to_index; ++index)
     {

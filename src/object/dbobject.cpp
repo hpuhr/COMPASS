@@ -869,7 +869,7 @@ void DBObject::load (DBOVariableSet& read_set,  std::string custom_filter_clause
 
     // load associations first
 
-    if (manager_.hasAssociations() && associations_loaded_)
+    if (manager_.hasAssociations() && !associations_loaded_)
         loadAssociations();
 
     for (auto& var_it : read_set.getSet())
