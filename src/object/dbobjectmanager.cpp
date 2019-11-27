@@ -533,6 +533,9 @@ void DBObjectManager::setAssociations (const std::string& dbo, const std::string
     associations_dbo_ = dbo;
     assert (existsObject(associations_dbo_));
     associations_ds_ = data_source_name;
+
+    if (load_widget_)
+        loadWidget()->updateSlot();
 }
 
 void DBObjectManager::removeAssociations ()
@@ -547,6 +550,9 @@ void DBObjectManager::removeAssociations ()
 
     for (auto& dbo_it : objects_)
         dbo_it.second->clearAssociations();
+
+    if (load_widget_)
+        loadWidget()->updateSlot();
 }
 
 std::string DBObjectManager::associationsDBObject() const

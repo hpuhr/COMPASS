@@ -867,6 +867,11 @@ void DBObject::load (DBOVariableSet& read_set,  std::string custom_filter_clause
     assert (is_loadable_);
     assert (existsInDB());
 
+    // load associations first
+
+    if (manager_.hasAssociations() && associations_loaded_)
+        loadAssociations();
+
     for (auto& var_it : read_set.getSet())
         assert (var_it->existsInDB());
 
@@ -1199,9 +1204,6 @@ void DBObject::updateToDatabaseContent ()
     if (info_widget_)
         info_widget_->updateSlot();
 
-    if (manager_.hasAssociations())
-        loadAssociations();
-
     loginf << "DBObject: " << name_ << " updateToDatabaseContent: done, loadable " << is_loadable_
            << " count " << count_;
 }
@@ -1335,6 +1337,8 @@ void DBObject::loadAssociations ()
     if (db_interface.existsTable(associations_table_name_))
         associations_ = db_interface.getAssociations(associations_table_name_);
 
+    associations_loaded_ = true;
+
     loading_stop_time = boost::posix_time::microsec_clock::local_time();
 
     double load_time;
@@ -1354,12 +1358,14 @@ void DBObject::addAssociation (unsigned int rec_num, unsigned int utn, unsigned 
 {
     associations_.emplace(rec_num, DBOAssociationEntry(utn, src_rec_num));
     associations_changed_ = true;
+    associations_loaded_ = true;
 }
 
 void DBObject::clearAssociations ()
 {
     associations_.clear();
     associations_changed_ = true;
+    associations_loaded_ = false;
 }
 
 void DBObject::saveAssociations ()

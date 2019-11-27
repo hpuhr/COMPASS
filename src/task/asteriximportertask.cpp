@@ -51,11 +51,11 @@ using namespace Utils;
 using namespace nlohmann;
 using namespace std;
 
-const unsigned int unlimited_chunk_size=10000;
-const unsigned int limited_chunk_size=5000;
+const unsigned int unlimited_chunk_size = 10000;
+const unsigned int limited_chunk_size = 5000;
 
-const unsigned int unlimited_num_json_jobs_=2;
-const unsigned int limited_num_json_jobs_=1;
+const unsigned int unlimited_num_json_jobs_ = 2;
+const unsigned int limited_num_json_jobs_ = 1;
 
 ASTERIXImporterTask::ASTERIXImporterTask(const std::string& class_id, const std::string& instance_id,
                                          TaskManager* task_manager)

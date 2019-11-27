@@ -308,6 +308,7 @@ protected:
     std::unique_ptr<DBObjectInfoWidget> info_widget_;
 
     bool associations_changed_ {false};
+    bool associations_loaded_ {false};
     DBOAssociationCollection associations_;
 
     virtual void checkSubConfigurables ();

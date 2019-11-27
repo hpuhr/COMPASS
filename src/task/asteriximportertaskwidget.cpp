@@ -36,6 +36,8 @@
 
 using namespace Utils;
 
+const float ram_threshold = 4.0;
+
 ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, QWidget* parent, Qt::WindowFlags f)
     : QWidget (parent, f), task_(task)
 {
@@ -480,7 +482,7 @@ void ASTERIXImporterTaskWidget::importSlot()
 
     float free_ram = System::getFreeRAMinGB();
 
-    if (free_ram < 8.0 && !task_.limitRAM())
+    if (free_ram < ram_threshold && !task_.limitRAM())
     {
         loginf << "ASTERIXImporterTaskWidget: importSlot: only " << free_ram << " GB free ram, recommending limiting";
 
@@ -496,7 +498,7 @@ void ASTERIXImporterTaskWidget::importSlot()
             limit_ram_check_->setChecked(true);
         }
     }
-    else if (free_ram >= 8.0 && task_.limitRAM())
+    else if (free_ram >= ram_threshold && task_.limitRAM())
     {
         loginf << "ASTERIXImporterTaskWidget: importSlot: " << free_ram << " GB free ram, recommending not limiting";
 
