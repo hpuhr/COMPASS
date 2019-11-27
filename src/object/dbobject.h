@@ -256,7 +256,8 @@ public:
     void removeDependenciesForSchema (const std::string& schema_name);
 
     // association stuff
-    void loadAssociationsIfRequired ();
+    void loadAssociationsIfRequired (); // starts loading job if required
+    void loadAssociations (); // actually loads associations, should be called from job
     bool hasAssociations ();
     void addAssociation (unsigned int rec_num, unsigned int utn, unsigned int src_rec_num);
     const DBOAssociationCollection& associations() { return associations_; }
@@ -316,7 +317,6 @@ protected:
 
     ///@brief Generates data sources information from previous post-processing.
     void buildDataSources();
-    void loadAssociations ();
     void removeVariableInfoForSchema (const std::string& schema_name);
 };
 

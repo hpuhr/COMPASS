@@ -357,6 +357,9 @@ void DBObjectManager::loadSlot ()
     {
         object.second->clearData(); // clear previous data
 
+        if (object.second->loadable())
+            object.second->loadAssociationsIfRequired();
+
         if (object.second->loadable() && object.second->loadingWanted())
         {
             loginf << "DBObjectManager: loadSlot: loading object " << object.first;

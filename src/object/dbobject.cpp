@@ -34,6 +34,7 @@
 #include "metadbtable.h"
 #include "dboreaddbjob.h"
 #include "finalizedboreadjob.h"
+#include "dboreadassociationsjob.h"
 #include "atsdb.h"
 #include "dbinterface.h"
 #include "jobmanager.h"
@@ -867,6 +868,8 @@ void DBObject::load (DBOVariableSet& read_set,  std::string custom_filter_clause
     assert (is_loadable_);
     assert (existsInDB());
 
+    // do not load associations, should be done in DBObjectManager::load
+
     for (auto& var_it : read_set.getSet())
         assert (var_it->existsInDB());
 
@@ -1314,6 +1317,16 @@ void DBObject::removeVariableInfoForSchema (const std::string& schema_name)
     }
 }
 
+void DBObject::loadAssociationsIfRequired ()
+{
+    if (manager_.hasAssociations() && !associations_loaded_)
+    {
+        std::shared_ptr<DBOReadAssociationsJob> read_job = std::make_shared<DBOReadAssociationsJob> (*this);
+        JobManager::instance().addDBJob(read_job); // fire and forget
+    }
+}
+
+
 void DBObject::loadAssociations ()
 {
     loginf << "DBObject " << name_ << ": loadAssociations";
@@ -1342,12 +1355,6 @@ void DBObject::loadAssociations ()
 
     loginf  << "DBObject " << name_ << ": loadAssociations: " << associations_.size()
             << " associactions done (" << String::doubleToStringPrecision(load_time, 2) << " s).";
-}
-
-void DBObject::loadAssociationsIfRequired ()
-{
-    if (manager_.hasAssociations() && !associations_loaded_)
-        loadAssociations();
 }
 
 bool DBObject::hasAssociations ()
