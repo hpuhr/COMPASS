@@ -22,8 +22,18 @@ NullableVector<bool>& NullableVector<bool>::operator*=(double factor)
 {
     bool tmp_factor = static_cast<bool> (factor);
 
-    for (auto data_it : data_)
-        data_it = data_it && tmp_factor;
+//    for (auto data_it : data_)
+//        data_it = data_it && tmp_factor;
+
+    size_t data_size = data_.size();
+
+    tbb::parallel_for( size_t(0), data_size, [&] (size_t cnt)
+    {
+        if (!isNull(cnt))
+        {
+            data_.at(cnt) = data_.at(cnt) && tmp_factor;
+        }
+    });
 
     return *this;
 }
