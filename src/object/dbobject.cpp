@@ -867,11 +867,6 @@ void DBObject::load (DBOVariableSet& read_set,  std::string custom_filter_clause
     assert (is_loadable_);
     assert (existsInDB());
 
-    // load associations first
-
-    if (manager_.hasAssociations() && !associations_loaded_)
-        loadAssociations();
-
     for (auto& var_it : read_set.getSet())
         assert (var_it->existsInDB());
 
@@ -1347,6 +1342,12 @@ void DBObject::loadAssociations ()
 
     loginf  << "DBObject " << name_ << ": loadAssociations: " << associations_.size()
             << " associactions done (" << String::doubleToStringPrecision(load_time, 2) << " s).";
+}
+
+void DBObject::loadAssociationsIfRequired ()
+{
+    if (manager_.hasAssociations() && !associations_loaded_)
+        loadAssociations();
 }
 
 bool DBObject::hasAssociations ()

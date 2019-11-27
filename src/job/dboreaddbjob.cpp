@@ -63,6 +63,9 @@ void DBOReadDBJob::run ()
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
+    // load associations first
+    dbobject_.loadAssociationsIfRequired ();
+
     db_interface_.prepareRead (dbobject_, read_list_, custom_filter_clause_, filtered_variables_, use_order_,
                                order_variable_, use_order_ascending_, limit_str_);
 

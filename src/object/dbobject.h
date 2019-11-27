@@ -256,6 +256,7 @@ public:
     void removeDependenciesForSchema (const std::string& schema_name);
 
     // association stuff
+    void loadAssociationsIfRequired ();
     bool hasAssociations ();
     void addAssociation (unsigned int rec_num, unsigned int utn, unsigned int src_rec_num);
     const DBOAssociationCollection& associations() { return associations_; }

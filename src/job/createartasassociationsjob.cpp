@@ -308,6 +308,8 @@ void CreateARTASAssociationsJob::createUTNS ()
         if (ignore_update)
         {
             logdbg << "CreateARTASAssociationsJob: createUTNS: ignoring rec num " << rec_num;
+            // add empty tri so that at least track update is associated
+            unique_track.rec_nums_tris_[rec_num] = std::make_pair("", tod);
             ++ignored_track_updates_cnt_;
         }
         else
@@ -388,6 +390,9 @@ void CreateARTASAssociationsJob::createSensorAssociations()
 
         for (auto& assoc_it : ut_it.second.rec_nums_tris_) // rec_num -> (tri, tod), for each TRIs compound string
         {
+            if (!assoc_it.second.first.size()) // empty tri, ignored update
+                continue;
+
             tri_splits = String::split(assoc_it.second.first, ';');
             tri_tod = assoc_it.second.second;
 
