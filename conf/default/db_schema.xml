@@ -6350,16 +6350,6 @@
                 <ParameterString type="enum"/>
                 <ParameterString unit=""/>
             </Configuration>
-            <Configuration class_id="DBTableColumn" instance_id="TRIS_COMPOUND">
-                <ParameterBool is_key="0"/>
-                <ParameterString comment=""/>
-                <ParameterString data_format=""/>
-                <ParameterString dimension=""/>
-                <ParameterString name="TRIS_COMPOUND"/>
-                <ParameterString special_null=""/>
-                <ParameterString type="varchar"/>
-                <ParameterString unit=""/>
-            </Configuration>
             <Configuration class_id="DBTableColumn" instance_id="TURNRATE_DEGPS">
                 <ParameterBool is_key="0"/>
                 <ParameterString comment="Turn rate in Deg/sec"/>
