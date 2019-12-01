@@ -23,6 +23,7 @@
 #include "global.h"
 
 class ATSDB;
+class CreateARTASAssociationsTask;
 class JSONImporterTask;
 class RadarPlotPositionCalculatorTask;
 
@@ -39,6 +40,7 @@ public:
 
     JSONImporterTask* getJSONImporterTask();
     RadarPlotPositionCalculatorTask* getRadarPlotPositionCalculatorTask();
+    CreateARTASAssociationsTask* getCreateARTASAssociationsTask();
 
 #if USE_JASTERIX
     ASTERIXImporterTask* getASTERIXImporterTask();
@@ -52,6 +54,7 @@ public:
 protected:
     JSONImporterTask* json_importer_task_ {nullptr};
     RadarPlotPositionCalculatorTask* radar_plot_position_calculator_task_ {nullptr};
+    CreateARTASAssociationsTask* create_artas_associations_task_{nullptr};
 
 #if USE_JASTERIX
     ASTERIXImporterTask* asterix_importer_task_ {nullptr};

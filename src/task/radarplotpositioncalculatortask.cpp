@@ -29,7 +29,6 @@
 #include "propertylist.h"
 #include "taskmanager.h"
 #include "projectionmanager.h"
-#include "jobmanager.h"
 #include "stringconv.h"
 
 #include <QCoreApplication>

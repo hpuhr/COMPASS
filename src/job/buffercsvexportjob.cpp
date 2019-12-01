@@ -20,12 +20,15 @@
 
 #include "buffercsvexportjob.h"
 #include "dbovariable.h"
+#include "dbobjectmanager.h"
+#include "dbobject.h"
+#include "atsdb.h"
 
 BufferCSVExportJob::BufferCSVExportJob(std::shared_ptr<Buffer> buffer, const DBOVariableSet& read_set,
                                        const std::string& file_name, bool overwrite, bool only_selected,
-                                       bool use_presentation)
+                                       bool use_presentation, bool show_associations)
     : Job("BufferCSVExportJob"), buffer_(buffer), read_set_(read_set), file_name_(file_name), overwrite_(overwrite),
-      only_selected_(only_selected), use_presentation_(use_presentation)
+      only_selected_(only_selected), use_presentation_(use_presentation), show_associations_(show_associations)
 {
     assert (file_name_.size());
 }
@@ -61,6 +64,9 @@ void BufferCSVExportJob::run ()
 
         ss << "Selected";
 
+        if (show_associations_)
+            ss << ";UTN";
+
         for (size_t col=0; col < read_set_size; col++)
         {
             //if (col != 0)
@@ -72,6 +78,14 @@ void BufferCSVExportJob::run ()
         assert (buffer_->has<bool>("selected"));
         NullableVector<bool> selected_vec = buffer_->get<bool>("selected");
 
+        assert (buffer_->has<int>("rec_num"));
+        NullableVector<int> rec_num_vec = buffer_->get<int>("rec_num");
+
+        std::string dbo_name = buffer_->dboName();
+        assert (dbo_name.size());
+
+        DBObjectManager& manager = ATSDB::instance().objectManager();
+
         for (; row < buffer_size; ++row)
         {
             if (only_selected_ && (selected_vec.isNull(row) || !selected_vec.get(row)))
@@ -80,9 +94,28 @@ void BufferCSVExportJob::run ()
             ss.str("");
 
             if (selected_vec.isNull(row))
-                ss << "0;";
+                ss << "0";
             else
-                ss << selected_vec.get(row)<< ";";
+                ss << selected_vec.get(row);
+
+            if (show_associations_)
+            {
+                ss << ";";
+
+                assert (!rec_num_vec.isNull(row));
+                unsigned int rec_num = rec_num_vec.get(row);
+
+                typedef DBOAssociationCollection::const_iterator MMAPIterator;
+                const DBOAssociationCollection& associations = manager.object(dbo_name).associations();
+
+                std::pair<MMAPIterator, MMAPIterator> result = associations.equal_range(rec_num);
+
+                for (MMAPIterator it = result.first; it != result.second; it++)
+                    if (it == result.first)
+                        ss << std::to_string(it->second.utn_);
+                    else
+                        ss << "," << std::to_string(it->second.utn_);
+            }
 
             for (size_t col=0; col < read_set_size; col++)
             {

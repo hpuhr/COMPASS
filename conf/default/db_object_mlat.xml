@@ -106,6 +106,24 @@
             <ParameterString suffix=""/>
             <ParameterString variable_name="along_track_error_m"/>
         </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryalt_baro_ft0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="alt_baro_ft"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryalt_baro_g0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="alt_baro_g"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryalt_baro_v0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="alt_baro_v"/>
+        </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntryalt_geo_ft0">
             <ParameterBool show="0"/>
             <ParameterString prefix=""/>
@@ -143,8 +161,8 @@
             <ParameterString variable_name="calc_alt_geo_ft"/>
         </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntrycallsign0">
-            <ParameterBool show="0"/>
-            <ParameterString prefix=""/>
+            <ParameterBool show="1"/>
+            <ParameterString prefix="CS "/>
             <ParameterString suffix=""/>
             <ParameterString variable_name="callsign"/>
         </Configuration>
@@ -719,7 +737,7 @@
             <ParameterString variable_name="rdp_chain"/>
         </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntryrec_num0">
-            <ParameterBool show="1"/>
+            <ParameterBool show="0"/>
             <ParameterString prefix="R "/>
             <ParameterString suffix=""/>
             <ParameterString variable_name="rec_num"/>
@@ -1344,7 +1362,7 @@
         <ParameterString description="Common Source Description ID, derived from SAC/SIC, Station Code etc."/>
         <ParameterString dimension=""/>
         <ParameterString name="ds_id"/>
-        <ParameterString representation_str="STANDARD"/>
+        <ParameterString representation_str="DATA_SRC_NAME"/>
         <ParameterString unit=""/>
         <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionMLATds_id0">
             <ParameterString meta_table="MLAT"/>
@@ -2443,5 +2461,245 @@
             <ParameterString schema="SCDB"/>
             <ParameterString variable_identifier="sd_mlat.VELOCITY_VY_MS"/>
         </Configuration>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource0">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="0"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="0"/>
+        <ParameterUnsignedInt sac="104"/>
+        <ParameterUnsignedInt sic="37"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="Lisbon"/>
+        <ParameterString short_name=""/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource1">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="0"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="1"/>
+        <ParameterUnsignedInt sac="104"/>
+        <ParameterUnsignedInt sic="73"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="North"/>
+        <ParameterString short_name=""/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource10">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="1"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="10"/>
+        <ParameterUnsignedInt sac="50"/>
+        <ParameterUnsignedInt sic="75"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="AWAM-GRZ"/>
+        <ParameterString short_name="WGRZ"/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource11">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="1"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="11"/>
+        <ParameterUnsignedInt sac="50"/>
+        <ParameterUnsignedInt sic="76"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="AWAM-LOWER-WEST"/>
+        <ParameterString short_name="WWES"/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource12">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="1"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="12"/>
+        <ParameterUnsignedInt sac="50"/>
+        <ParameterUnsignedInt sic="77"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="AWAM-LOWER-EAST"/>
+        <ParameterString short_name="WEAS"/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource13">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="1"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="13"/>
+        <ParameterUnsignedInt sac="50"/>
+        <ParameterUnsignedInt sic="78"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="AWAM-UPPER"/>
+        <ParameterString short_name="WUPP"/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource14">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="1"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="14"/>
+        <ParameterUnsignedInt sac="50"/>
+        <ParameterUnsignedInt sic="81"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="AWAM-GND"/>
+        <ParameterString short_name="WGND"/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource2">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="0"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="2"/>
+        <ParameterUnsignedInt sac="104"/>
+        <ParameterUnsignedInt sic="78"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="Madeira"/>
+        <ParameterString short_name=""/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource3">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="0"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="3"/>
+        <ParameterUnsignedInt sac="104"/>
+        <ParameterUnsignedInt sic="71"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="North"/>
+        <ParameterString short_name=""/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource4">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="0"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="4"/>
+        <ParameterUnsignedInt sac="104"/>
+        <ParameterUnsignedInt sic="76"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="Madeira"/>
+        <ParameterString short_name=""/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource5">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="1"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="5"/>
+        <ParameterUnsignedInt sac="50"/>
+        <ParameterUnsignedInt sic="70"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="AWAM-VIE"/>
+        <ParameterString short_name="WVIE"/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource6">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="1"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="6"/>
+        <ParameterUnsignedInt sac="50"/>
+        <ParameterUnsignedInt sic="71"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="AWAM-LNZ"/>
+        <ParameterString short_name="WLNZ"/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource7">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="1"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="7"/>
+        <ParameterUnsignedInt sac="50"/>
+        <ParameterUnsignedInt sic="72"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="AWAM-SBG"/>
+        <ParameterString short_name="WSBG"/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource8">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="1"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="8"/>
+        <ParameterUnsignedInt sac="50"/>
+        <ParameterUnsignedInt sic="73"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="AWAM-IN"/>
+        <ParameterString short_name="WINN"/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource9">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="1"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="9"/>
+        <ParameterUnsignedInt sac="50"/>
+        <ParameterUnsignedInt sic="74"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="AWAM-KFT"/>
+        <ParameterString short_name="WKFT"/>
     </Configuration>
 </Configuration>

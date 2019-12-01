@@ -23,6 +23,8 @@
 #include "listboxviewconfigwidget.h"
 #include "logger.h"
 #include "viewselection.h"
+#include "atsdb.h"
+#include "dbobjectmanager.h"
 
 #include <QApplication>
 
@@ -33,6 +35,12 @@ ListBoxView::ListBoxView(const std::string& class_id, const std::string& instanc
     registerParameter ("show_only_selected", &show_only_selected_, false);
     registerParameter ("use_presentation", &use_presentation_, true);
     registerParameter ("overwrite_csv", &overwrite_csv_, true);
+    registerParameter ("show_associations", &show_associations_, false);
+
+    can_show_associations_ = ATSDB::instance().objectManager().hasAssociations();
+
+    if (!can_show_associations_)
+        show_associations_ = false;
 }
 
 ListBoxView::~ListBoxView()
@@ -50,7 +58,7 @@ ListBoxView::~ListBoxView()
     }
 }
 
-void ListBoxView::update( bool atOnce )
+void ListBoxView::update (bool atOnce)
 {
 
 }
@@ -68,17 +76,26 @@ bool ListBoxView::init()
 
     assert (data_source_);
 
-    connect( data_source_, SIGNAL(loadingStartedSignal ()), widget_->getDataWidget (), SLOT(loadingStartedSlot()));
-    connect( data_source_, SIGNAL(updateData (DBObject&, std::shared_ptr<Buffer>)), widget_->getDataWidget (), SLOT(updateData (DBObject&, std::shared_ptr<Buffer>)) );
+    connect (data_source_, &ListBoxViewDataSource::loadingStartedSignal,
+             widget_->getDataWidget(), &ListBoxViewDataWidget::loadingStartedSlot);
+    connect (data_source_, &ListBoxViewDataSource::updateData,
+             widget_->getDataWidget(), &ListBoxViewDataWidget::updateData);
 
-    connect (widget_->configWidget(), SIGNAL(exportSignal(bool)), widget_->getDataWidget(), SLOT(exportDataSlot(bool)));
-    connect (widget_->getDataWidget(), SIGNAL(exportDoneSignal(bool)), widget_->configWidget(), SLOT(exportDoneSlot(bool)));
+    connect (widget_->configWidget(), &ListBoxViewConfigWidget::exportSignal,
+             widget_->getDataWidget(), &ListBoxViewDataWidget::exportDataSlot);
+    connect (widget_->getDataWidget(), &ListBoxViewDataWidget::exportDoneSignal,
+             widget_->configWidget(), &ListBoxViewConfigWidget::exportDoneSlot);
 
-    connect (this, SIGNAL(showOnlySelectedSignal(bool)), widget_->getDataWidget(), SLOT(showOnlySelectedSlot(bool)));
-    connect (this, SIGNAL(usePresentationSignal(bool)), widget_->getDataWidget(), SLOT(usePresentationSlot(bool)));
+    connect (this, &ListBoxView::showOnlySelectedSignal,
+             widget_->getDataWidget(), &ListBoxViewDataWidget::showOnlySelectedSlot);
+    connect (this, &ListBoxView::usePresentationSignal,
+             widget_->getDataWidget(), &ListBoxViewDataWidget::usePresentationSlot);
+    connect (this, &ListBoxView::showAssociationsSignal,
+             widget_->getDataWidget(), &ListBoxViewDataWidget::showAssociationsSlot);
 
     widget_->getDataWidget()->showOnlySelectedSlot(show_only_selected_);
     widget_->getDataWidget()->usePresentationSlot(use_presentation_);
+    widget_->getDataWidget()->showAssociationsSlot(show_associations_);
 
     return true;
 }
@@ -160,7 +177,7 @@ bool ListBoxView::showOnlySelected() const
 
 void ListBoxView::showOnlySelected(bool value)
 {
-    loginf << "ListBoxView: showOnlySelected";
+    loginf << "ListBoxView: showOnlySelected: " << value;
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -169,6 +186,24 @@ void ListBoxView::showOnlySelected(bool value)
     emit showOnlySelectedSignal(value);
 
     QApplication::restoreOverrideCursor();
+}
+
+bool ListBoxView::showAssociations() const
+{
+    return show_associations_;
+}
+
+void ListBoxView::showAssociations(bool show_associations)
+{
+    loginf << "ListBoxView: showAssociations: " << show_associations;
+    show_associations_ = show_associations;
+
+    emit showAssociationsSignal(show_associations_);
+}
+
+bool ListBoxView::canShowAssociations() const
+{
+    return can_show_associations_;
 }
 
 void ListBoxView::updateSelection ()

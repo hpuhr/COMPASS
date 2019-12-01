@@ -30,7 +30,7 @@
 
 using namespace Utils::String;
 
-InsertBufferDBJob::InsertBufferDBJob(DBInterface &db_interface, DBObject &dbobject, std::shared_ptr<Buffer> buffer,
+InsertBufferDBJob::InsertBufferDBJob(DBInterface& db_interface, DBObject& dbobject, std::shared_ptr<Buffer> buffer,
                                      bool emit_change)
 : Job("InsertBufferDBJob"), db_interface_(db_interface), dbobject_(dbobject), buffer_(buffer), emit_change_(emit_change)
 {
@@ -48,19 +48,19 @@ void InsertBufferDBJob::run ()
 
     started_ = true;
 
-    boost::posix_time::ptime loading_start_time_;
-    boost::posix_time::ptime loading_stop_time_;
+    boost::posix_time::ptime loading_start_time;
+    boost::posix_time::ptime loading_stop_time;
 
-    loading_start_time_ = boost::posix_time::microsec_clock::local_time();
+    loading_start_time = boost::posix_time::microsec_clock::local_time();
 
     loginf  << "InsertBufferDBJob: run: writing object " << dbobject_.name() << " size " << buffer_->size();
     assert (buffer_->size());
 
     db_interface_.insertBuffer(dbobject_.currentMetaTable(), buffer_);
-    loading_stop_time_ = boost::posix_time::microsec_clock::local_time();
+    loading_stop_time = boost::posix_time::microsec_clock::local_time();
 
     double load_time;
-    boost::posix_time::time_duration diff = loading_stop_time_ - loading_start_time_;
+    boost::posix_time::time_duration diff = loading_stop_time - loading_start_time;
     load_time= diff.total_milliseconds()/1000.0;
 
     loginf  << "InsertBufferDBJob: run: buffer write done (" << doubleToStringPrecision(load_time, 2) << " s).";

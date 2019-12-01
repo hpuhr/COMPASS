@@ -46,6 +46,12 @@
             <ParameterString suffix=""/>
             <ParameterString variable_name="adsb"/>
         </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryaircraft_leng_width0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="aircraft_leng_width"/>
+        </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntryairspeed_kt0">
             <ParameterBool show="0"/>
             <ParameterString prefix=""/>
@@ -111,6 +117,12 @@
             <ParameterString prefix=""/>
             <ParameterString suffix=""/>
             <ParameterString variable_name="baro_vertical_rate_ftm"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrybaro_vertical_rate_re0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="baro_vertical_rate_re"/>
         </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntrycalc_alt_geo_ft0">
             <ParameterBool show="0"/>
@@ -310,11 +322,23 @@
             <ParameterString suffix=""/>
             <ParameterString variable_name="geo_area_mask"/>
         </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrygeo_height_accuracy0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="geo_height_accuracy"/>
+        </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntrygeo_vertical_rate_ftm0">
             <ParameterBool show="0"/>
             <ParameterString prefix=""/>
             <ParameterString suffix=""/>
             <ParameterString variable_name="geo_vertical_rate_ftm"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrygeo_vertical_rate_re0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="geo_vertical_rate_re"/>
         </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntryground0">
             <ParameterBool show="0"/>
@@ -454,11 +478,23 @@
             <ParameterString suffix=""/>
             <ParameterString variable_name="magnetic_heading_deg"/>
         </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrymilitary_emergency0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="military_emergency"/>
+        </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntrymlat0">
             <ParameterBool show="0"/>
             <ParameterString prefix=""/>
             <ParameterString suffix=""/>
             <ParameterString variable_name="mlat"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrymode3a_code0">
+            <ParameterBool show="1"/>
+            <ParameterString prefix="A "/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="mode3a_code"/>
         </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntrymode_a_code0">
             <ParameterBool show="0"/>
@@ -478,6 +514,54 @@
             <ParameterString suffix=""/>
             <ParameterString variable_name="mode_s"/>
         </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrymops_version0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="mops_version"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrynac_p0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="nac_p"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrynic_baro0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="nic_baro"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrynucp_nic0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="nucp_nic"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrynucr_nacv0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="nucr_nacv"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryop_status_ra0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="op_status_ra"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryop_status_sa0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="op_status_sa"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryop_status_tcas0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="op_status_tcas"/>
+        </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntryorientation0">
             <ParameterBool show="0"/>
             <ParameterString prefix=""/>
@@ -489,6 +573,12 @@
             <ParameterString prefix=""/>
             <ParameterString suffix=""/>
             <ParameterString variable_name="parking"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrypic0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="pic"/>
         </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntryplot_id0">
             <ParameterBool show="0"/>
@@ -513,6 +603,12 @@
             <ParameterString prefix=""/>
             <ParameterString suffix=""/>
             <ParameterString variable_name="pos_long_deg"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrypos_offset_applied0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="pos_offset_applied"/>
         </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntrypos_sys_x_nm0">
             <ParameterBool show="0"/>
@@ -593,7 +689,7 @@
             <ParameterString variable_name="raw_msg"/>
         </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntryrec_num0">
-            <ParameterBool show="1"/>
+            <ParameterBool show="0"/>
             <ParameterString prefix="R "/>
             <ParameterString suffix=""/>
             <ParameterString variable_name="rec_num"/>
@@ -609,6 +705,12 @@
             <ParameterString prefix=""/>
             <ParameterString suffix=""/>
             <ParameterString variable_name="rec_time_posix"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryreceiver_id0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="receiver_id"/>
         </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntryreport_type0">
             <ParameterBool show="0"/>
@@ -634,6 +736,12 @@
             <ParameterString suffix=""/>
             <ParameterString variable_name="sac"/>
         </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrysam0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="sam"/>
+        </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntrysd_adsb.spi0">
             <ParameterBool show="0"/>
             <ParameterString prefix=""/>
@@ -646,11 +754,29 @@
             <ParameterString suffix=""/>
             <ParameterString variable_name="selected_alt_capability"/>
         </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryservice_id0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="service_id"/>
+        </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntrysic0">
             <ParameterBool show="0"/>
             <ParameterString prefix=""/>
             <ParameterString suffix=""/>
             <ParameterString variable_name="sic"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrysil0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="sil"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrysils0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="sils"/>
         </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntrysimulated0">
             <ParameterBool show="0"/>
@@ -681,6 +807,12 @@
             <ParameterString prefix=""/>
             <ParameterString suffix=""/>
             <ParameterString variable_name="ssr"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrysurveillance_status0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="surveillance_status"/>
         </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntrytarget_addr0">
             <ParameterBool show="1"/>
@@ -754,6 +886,18 @@
             <ParameterString suffix=""/>
             <ParameterString variable_name="time_recording_daq_pos"/>
         </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytoap0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="toap"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytoav0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="toav"/>
+        </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntrytod0">
             <ParameterBool show="1"/>
             <ParameterString prefix="T "/>
@@ -771,6 +915,42 @@
             <ParameterString prefix=""/>
             <ParameterString suffix=""/>
             <ParameterString variable_name="tod_calculated"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytorp0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="torp"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytorp_fsi0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="torp_fsi"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytorp_precise0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="torp_precise"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytorv0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="torv"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytorv_fsi0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="torv_fsi"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytorv_precise0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="torv_precise"/>
         </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntrytouchdown_runway_id0">
             <ParameterBool show="0"/>
@@ -1147,7 +1327,7 @@
         <ParameterString description="Common Source Description ID, derived from SAC/SIC, Station Code etc."/>
         <ParameterString dimension=""/>
         <ParameterString name="ds_id"/>
-        <ParameterString representation_str="STANDARD"/>
+        <ParameterString representation_str="DATA_SRC_NAME"/>
         <ParameterString unit=""/>
         <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBds_id0">
             <ParameterString meta_table="ADSB"/>
@@ -1536,7 +1716,7 @@
         <ParameterString description=""/>
         <ParameterString dimension=""/>
         <ParameterString name="mode3a_code"/>
-        <ParameterString representation_str="STANDARD"/>
+        <ParameterString representation_str="DEC_TO_OCTAL"/>
         <ParameterString unit=""/>
         <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBmode3a_code0">
             <ParameterString schema="SCDB"/>
@@ -2232,5 +2412,117 @@
             <ParameterString schema="SCDB"/>
             <ParameterString variable_identifier="sd_ads.VELOCITY_ACCURACY"/>
         </Configuration>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource0">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="1"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="0"/>
+        <ParameterUnsignedInt sac="104"/>
+        <ParameterUnsignedInt sic="38"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="Lisbon"/>
+        <ParameterString short_name=""/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource1">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="0"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="1"/>
+        <ParameterUnsignedInt sac="104"/>
+        <ParameterUnsignedInt sic="72"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="North"/>
+        <ParameterString short_name=""/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource2">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="0"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="2"/>
+        <ParameterUnsignedInt sac="104"/>
+        <ParameterUnsignedInt sic="77"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="Madeira"/>
+        <ParameterString short_name=""/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource3">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="0"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="3"/>
+        <ParameterUnsignedInt sac="104"/>
+        <ParameterUnsignedInt sic="70"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="North"/>
+        <ParameterString short_name=""/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource4">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="0"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="4"/>
+        <ParameterUnsignedInt sac="104"/>
+        <ParameterUnsignedInt sic="75"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="Madeira"/>
+        <ParameterString short_name=""/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource5">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="1"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="5"/>
+        <ParameterUnsignedInt sac="22"/>
+        <ParameterUnsignedInt sic="8"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="ADSB"/>
+        <ParameterString short_name="ADSB"/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource6">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="1"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="6"/>
+        <ParameterUnsignedInt sac="50"/>
+        <ParameterUnsignedInt sic="80"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="AWAM-ADS-B"/>
+        <ParameterString short_name="WADS"/>
     </Configuration>
 </Configuration>

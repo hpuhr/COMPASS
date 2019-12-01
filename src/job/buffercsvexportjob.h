@@ -29,7 +29,7 @@ class BufferCSVExportJob : public Job
 {
 public:
     BufferCSVExportJob(std::shared_ptr<Buffer> buffer, const DBOVariableSet& read_set, const std::string& file_name,
-                       bool overwrite, bool only_selected, bool use_presentation);
+                       bool overwrite, bool only_selected, bool use_presentation, bool show_associations);
     virtual ~BufferCSVExportJob();
 
     virtual void run ();
@@ -42,6 +42,7 @@ protected:
     bool overwrite_;
     bool only_selected_;
     bool use_presentation_;
+    bool show_associations_;
 
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;

@@ -71,7 +71,8 @@ void ASTERIXDecodeJob::run ()
     logdbg << "ASTERIXDecodeJob: run: done";
 }
 
-void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, size_t num_frames, size_t num_records, size_t num_errors)
+void ASTERIXDecodeJob::jasterix_callback(std::unique_ptr<nlohmann::json> data, size_t num_frames, size_t num_records,
+                                         size_t num_errors)
 {
     if (error_)
         return;

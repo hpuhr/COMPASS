@@ -25,9 +25,12 @@
 #include "logger.h"
 #include "dbobjectmanagerwidget.h"
 #include "dbobjectmanagerloadwidget.h"
-//#include "structureDescriptionManager.h"
+#include "atsdb.h"
+#include "dbinterface.h"
 #include "stringconv.h"
 #include "viewmanager.h"
+
+#include <QApplication>
 
 using namespace Utils::String;
 
@@ -93,7 +96,7 @@ void DBObjectManager::generateSubConfigurable (const std::string& class_id, cons
         assert (objects_.find(object->name()) == objects_.end());
         objects_.insert(std::pair <std::string, DBObject*> (object->name(), object));
         connect (this, &DBObjectManager::schemaChangedSignal, object, &DBObject::schemaChangedSlot);
-        connect (this, &DBObjectManager::databaseContentChangedSignal, object, &DBObject::databaseContentChangedSlot);
+        //connect (this, &DBObjectManager::databaseContentChangedSignal, object, &DBObject::databaseContentChangedSlot);
         connect (object, &DBObject::loadingDoneSignal, this, &DBObjectManager::loadingDoneSlot);
         // TODO what if generation after db opening?
     }
@@ -354,6 +357,9 @@ void DBObjectManager::loadSlot ()
     {
         object.second->clearData(); // clear previous data
 
+        if (object.second->loadable())
+            object.second->loadAssociationsIfRequired();
+
         if (object.second->loadable() && object.second->loadingWanted())
         {
             loginf << "DBObjectManager: loadSlot: loading object " << object.first;
@@ -410,7 +416,37 @@ void DBObjectManager::updateSchemaInformationSlot ()
 
 void DBObjectManager::databaseContentChangedSlot ()
 {
-    emit databaseContentChangedSignal();
+    //emit databaseContentChangedSignal();
+
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+    loginf << "DBObjectManager: databaseContentChangedSlot";
+
+    if (ATSDB::instance().interface().hasProperty("associations_generated"))
+    {
+        assert (ATSDB::instance().interface().hasProperty("associations_dbo"));
+        assert (ATSDB::instance().interface().hasProperty("associations_ds"));
+
+        has_associations_ = ATSDB::instance().interface().getProperty("associations_generated") == "1";
+        associations_dbo_ = ATSDB::instance().interface().getProperty("associations_dbo");
+        associations_ds_ = ATSDB::instance().interface().getProperty("associations_ds");
+    }
+    else
+    {
+        has_associations_ = false;
+        associations_dbo_ = "";
+        associations_ds_ = "";
+    }
+
+    for (auto& object : objects_)
+        object.second->updateToDatabaseContent();
+
+    QApplication::restoreOverrideCursor();
+
+    if (load_widget_)
+        load_widget_->updateSlot();
+
+    loginf << "DBObjectManager: databaseContentChangedSlot: done";
 }
 
 void DBObjectManager::loadingDoneSlot (DBObject& object)
@@ -483,4 +519,51 @@ void DBObjectManager::removeDependenciesForSchema (const std::string& schema_nam
     }
 
     emit updateSchemaInformationSlot ();
+}
+
+bool DBObjectManager::hasAssociations() const
+{
+    return has_associations_;
+}
+
+void DBObjectManager::setAssociations (const std::string& dbo, const std::string& data_source_name)
+{
+    ATSDB::instance().interface().setProperty("associations_generated", "1");
+    ATSDB::instance().interface().setProperty("associations_dbo", dbo);
+    ATSDB::instance().interface().setProperty("associations_ds", data_source_name);
+
+    has_associations_ = true;
+    associations_dbo_ = dbo;
+    assert (existsObject(associations_dbo_));
+    associations_ds_ = data_source_name;
+
+    if (load_widget_)
+        loadWidget()->updateSlot();
+}
+
+void DBObjectManager::removeAssociations ()
+{
+    ATSDB::instance().interface().setProperty("associations_generated", "0");
+    ATSDB::instance().interface().setProperty("associations_dbo", "");
+    ATSDB::instance().interface().setProperty("associations_ds", "");
+
+    has_associations_ = false;
+    associations_dbo_ = "";
+    associations_ds_ = "";
+
+    for (auto& dbo_it : objects_)
+        dbo_it.second->clearAssociations();
+
+    if (load_widget_)
+        loadWidget()->updateSlot();
+}
+
+std::string DBObjectManager::associationsDBObject() const
+{
+    return associations_dbo_;
+}
+
+std::string DBObjectManager::associationsDataSourceName() const
+{
+    return associations_ds_;
 }

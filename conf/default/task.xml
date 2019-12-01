@@ -1,7 +1,8 @@
 <Configuration class_id="TaskManager" instance_id="TaskManager0">
     <Configuration class_id="ASTERIXImporterTask" instance_id="ASTERIXImporterTask0">
         <ParameterBool debug_jasterix="0"/>
-        <ParameterString current_filename=""/>
+        <ParameterBool limit_ram="0"/>
+        <ParameterString current_filename="/home/sk/data/austria/2017-05-04-0930-1020.ioss"/>
         <ParameterString current_framing="ioss"/>
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig0">
             <ParameterBool decode="1"/>
@@ -21,7 +22,7 @@
             <ParameterBool decode="1"/>
             <ParameterUnsignedInt category="62"/>
             <ParameterString edition="1.16"/>
-            <ParameterString ref=""/>
+            <ParameterString ref="1.2"/>
             <ParameterString spf="ARTAS"/>
         </Configuration>
         <Configuration class_id="ASTERIXCategoryConfig" instance_id="ASTERIXCategoryConfig2">
@@ -549,7 +550,7 @@
                     <ParameterString dimension=""/>
                     <ParameterString format_data_type=""/>
                     <ParameterString json_key="070.Mode-3/A"/>
-                    <ParameterString json_value_format=""/>
+                    <ParameterString json_value_format="octal"/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping42">
@@ -1076,7 +1077,7 @@
                     <ParameterString dimension=""/>
                     <ParameterString format_data_type=""/>
                     <ParameterString json_key="070.Mode-3/A reply"/>
-                    <ParameterString json_value_format=""/>
+                    <ParameterString json_value_format="octal"/>
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping14">
@@ -4509,13 +4510,13 @@
                     <ParameterString unit=""/>
                 </Configuration>
                 <Configuration class_id="JSONDataMapping" instance_id="JSONDataMapping156">
-                    <ParameterBool active="1"/>
+                    <ParameterBool active="0"/>
                     <ParameterBool append_value="0"/>
                     <ParameterBool in_array="0"/>
                     <ParameterBool mandatory="0"/>
                     <ParameterString comment="Type string, value &quot;7a08f115&quot;"/>
                     <ParameterString db_object_name="Tracker"/>
-                    <ParameterString dbovariable_name="hash_code"/>
+                    <ParameterString dbovariable_name=""/>
                     <ParameterString dimension=""/>
                     <ParameterString format_data_type=""/>
                     <ParameterString json_key="artas_md5"/>
@@ -4739,7 +4740,7 @@
                     <ParameterBool mandatory="0"/>
                     <ParameterString comment="Type string, value &quot;6556e4c2&quot;"/>
                     <ParameterString db_object_name="Tracker"/>
-                    <ParameterString dbovariable_name="tris_compound"/>
+                    <ParameterString dbovariable_name="hash_code"/>
                     <ParameterString dimension=""/>
                     <ParameterString format_data_type=""/>
                     <ParameterString json_key="SPF.Target Report Identifiers.TRI"/>
@@ -6008,6 +6009,31 @@
                 </Configuration>
             </Configuration>
         </Configuration>
+    </Configuration>
+    <Configuration class_id="CreateARTASAssociationsTask" instance_id="CreateARTASAssociationsTask0">
+        <ParameterBool ignore_track_coasting_associations="1"/>
+        <ParameterBool ignore_track_end_associations="1"/>
+        <ParameterBool mark_track_coasting_associations_dubious="0"/>
+        <ParameterBool mark_track_end_associations_dubious="0"/>
+        <ParameterFloat association_dubious_close_time_future="1.00000000"/>
+        <ParameterFloat association_dubious_close_time_past="8.00000000"/>
+        <ParameterFloat association_time_future="2.00000000"/>
+        <ParameterFloat association_time_past="20.00000000"/>
+        <ParameterFloat associations_dubious_distant_time="12.00000000"/>
+        <ParameterFloat beginning_time="30.00000000"/>
+        <ParameterFloat dubious_time="30.00000000"/>
+        <ParameterFloat end_track_time="300.00000000"/>
+        <ParameterFloat future_time="2.00000000"/>
+        <ParameterFloat misses_acceptable_time="60.00000000"/>
+        <ParameterString current_data_source_name="ARTS"/>
+        <ParameterString hash_var_str="hash_code"/>
+        <ParameterString key_var_str="rec_num"/>
+        <ParameterString tod_var_str="tod"/>
+        <ParameterString tracker_ds_id_var_str="ds_id"/>
+        <ParameterString tracker_track_begin_var_str="track_created"/>
+        <ParameterString tracker_track_coasting_var_str="track_coasted"/>
+        <ParameterString tracker_track_end_var_str="track_end"/>
+        <ParameterString tracker_track_num_var_str="track_num"/>
     </Configuration>
     <Configuration class_id="JSONImporterTask" instance_id="JSONImporterTask">
         <ParameterString current_filename="/home/sk/data/austria/json_10k.json"/>

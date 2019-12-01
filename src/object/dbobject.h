@@ -31,6 +31,7 @@
 #include "configurable.h"
 #include "dbovariable.h"
 #include "dboschemametatabledefinition.h"
+#include "dboassociationentry.h"
 
 class PropertyList;
 class MetaDBTable;
@@ -47,9 +48,9 @@ class FinalizeDBOReadJob;
 class DBOVariableSet;
 class DBOLabelDefinition;
 class DBOLabelDefinitionWidget;
+class DBObjectManager;
 
 using DBOEditDataSourceActionOptionsCollection = typename std::map<unsigned int, DBOEditDataSourceActionOptions>;
-using DBOAssociationCollection = typename std::multimap<unsigned int, unsigned int>; // rec_num -> utn
 
 /**
  * @brief Abstract data description of an object stored in a database
@@ -107,12 +108,11 @@ public slots:
     void updateProgressSlot (float percent);
     void updateDoneSlot ();
 
-    void databaseContentChangedSlot ();
     void dataSourceDefinitionChanged ();
 
 public:
     /// @brief Constructor
-    DBObject(const std::string& class_id, const std::string& instance_id, Configurable* parent);
+    DBObject(const std::string& class_id, const std::string& instance_id, DBObjectManager* manager);
     /// @brief Desctructor
     virtual ~DBObject();
 
@@ -150,6 +150,9 @@ public:
     bool loadingWanted () { return loading_wanted_; }
 
     void load (DBOVariableSet& read_set, bool use_filters, bool use_order, DBOVariable* order_variable,
+               bool use_order_ascending, const std::string& limit_str="");
+    void load (DBOVariableSet& read_set, std::string custom_filter_clause,
+               std::vector <DBOVariable*> filtered_variables, bool use_order, DBOVariable* order_variable,
                bool use_order_ascending, const std::string& limit_str="");
     void quitLoading ();
     void clearData ();
@@ -210,7 +213,6 @@ public:
 //    /// @brief Deletes a variable identified by id
     void deleteStoredDataSource (unsigned int id);
 
-
     using DataSourceIterator = typename std::map<int, DBODataSource>::iterator;
     DataSourceIterator dsBegin() { return data_sources_.begin(); }
     DataSourceIterator dsEnd() { return data_sources_.end(); }
@@ -224,6 +226,7 @@ public:
     void updateDataSource (int id);
     ///@brief Returns data source name for a DBO type and data source number.
     const std::string& getNameOfSensor (int id);
+    const std::map<int, DBODataSource>& dataSources() const { return data_sources_; }
 
     DBOEditDataSourceActionOptionsCollection getSyncOptionsFromDB ();
     DBOEditDataSourceActionOptionsCollection getSyncOptionsFromCfg ();
@@ -253,13 +256,18 @@ public:
     void removeDependenciesForSchema (const std::string& schema_name);
 
     // association stuff
-//    void loadAssociations ();
-//    bool hasAssociations ();
-//    void addAssociation (unsigned int rec_num, unsigned int utn);
-//    void clearAssociations ();
-//    void saveAssociations ();
+    void loadAssociationsIfRequired (); // starts loading job if required
+    void loadAssociations (); // actually loads associations, should be called from job
+    bool hasAssociations ();
+    void addAssociation (unsigned int rec_num, unsigned int utn, unsigned int src_rec_num);
+    const DBOAssociationCollection& associations() { return associations_; }
+    void clearAssociations ();
+    void saveAssociations ();
+
+    void updateToDatabaseContent ();
 
 protected:
+    DBObjectManager& manager_;
     /// DBO name
     std::string name_;
     /// DBO description
@@ -296,10 +304,13 @@ protected:
 
     /// Current (in the current schema) main meta table
     MetaDBTable* current_meta_table_ {nullptr}; // TODO rework const?
+    std::string associations_table_name_;
 
     std::unique_ptr<DBObjectWidget> widget_;
     std::unique_ptr<DBObjectInfoWidget> info_widget_;
 
+    bool associations_changed_ {false};
+    bool associations_loaded_ {false};
     DBOAssociationCollection associations_;
 
     virtual void checkSubConfigurables ();

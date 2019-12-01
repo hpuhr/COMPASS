@@ -52,7 +52,7 @@ public slots:
 
 signals:
     void dbObjectsChangedSignal ();
-    void databaseContentChangedSignal ();
+    //void databaseContentChangedSignal ();
     void schemaChangedSignal ();
 
     void loadingStartedSignal ();
@@ -123,6 +123,13 @@ public:
 
     void removeDependenciesForSchema (const std::string& schema_name);
 
+    bool hasAssociations() const;
+    void setAssociations (const std::string& dbo, const std::string& data_source_name);
+    void removeAssociations ();
+
+    std::string associationsDBObject() const;
+    std::string associationsDataSourceName() const;
+
 protected:
     bool use_filters_ {false};
 
@@ -136,6 +143,10 @@ protected:
     unsigned int limit_max_ {100000};
 
     bool locked_ {false};
+
+    bool has_associations_ {false};
+    std::string associations_dbo_;
+    std::string associations_ds_;
 
     /// Container with all DBOs (DBO name -> DBO pointer)
     std::map <std::string, DBObject*> objects_;
