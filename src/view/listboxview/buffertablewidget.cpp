@@ -141,6 +141,14 @@ void BufferTableWidget::usePresentationSlot (bool use_presentation)
     table_->resizeColumnsToContents();
 }
 
+void BufferTableWidget::showAssociationsSlot (bool value)
+{
+    assert (model_);
+    model_->showAssociations(value);
+    assert (table_);
+    table_->resizeColumnsToContents();
+}
+
 
 void BufferTableWidget::resetModel()
 {

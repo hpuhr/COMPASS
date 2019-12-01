@@ -53,7 +53,7 @@ class DBOVariable : public QObject, public Property, public Configurable
 {
     Q_OBJECT
 public:
-    enum class Representation {
+    enum class Representation { // TODO rework to m3a/ta
         STANDARD,
         SECONDS_TO_TIME,
         DEC_TO_OCTAL,
@@ -158,7 +158,7 @@ public:
             }
             else if (representation_ == DBOVariable::Representation::DEC_TO_HEX)
             {
-                out << std::uppercase << std::hex << value;
+                out << std::uppercase << std::hex << std::setfill ('0') << std::setw (6) << value;
             }
             else if (representation_ == DBOVariable::Representation::FEET_TO_FLIGHTLEVEL)
             {

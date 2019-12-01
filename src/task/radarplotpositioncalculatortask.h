@@ -58,6 +58,7 @@ public:
     bool isCalculating ();
     unsigned int getNumLoaded () { return num_loaded_; }
 
+    bool hasOpenWidget() { return widget_ != nullptr; }
     RadarPlotPositionCalculatorTaskWidget* widget();
 
     std::string dbObjectStr() const;

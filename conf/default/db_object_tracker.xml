@@ -113,8 +113,8 @@
             <ParameterString variable_name="dom_posix"/>
         </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntryds_id0">
-            <ParameterBool show="0"/>
-            <ParameterString prefix=""/>
+            <ParameterBool show="1"/>
+            <ParameterString prefix="DS "/>
             <ParameterString suffix=""/>
             <ParameterString variable_name="ds_id"/>
         </Configuration>
@@ -123,6 +123,12 @@
             <ParameterString prefix=""/>
             <ParameterString suffix=""/>
             <ParameterString variable_name="formation_flight"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryfpl_callsign0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="fpl_callsign"/>
         </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntrygeo_area_mask0">
             <ParameterBool show="0"/>
@@ -196,11 +202,77 @@
             <ParameterString suffix=""/>
             <ParameterString variable_name="line_id"/>
         </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrylm_alt_baro_ft0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="lm_alt_baro_ft"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrylm_alt_baro_g0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="lm_alt_baro_g"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrylm_alt_baro_v0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="lm_alt_baro_v"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrylm_alt_geo_ft0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="lm_alt_geo_ft"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrylm_mode3a_code0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="lm_mode3a_code"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrylm_mode3a_g0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="lm_mode3a_g"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrylm_mode3a_s0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="lm_mode3a_s"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrylm_mode3a_v0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="lm_mode3a_v"/>
+        </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntrymas_track_num0">
             <ParameterBool show="0"/>
             <ParameterString prefix=""/>
             <ParameterString suffix=""/>
             <ParameterString variable_name="mas_track_num"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrymeasured_alt_baro_age_s0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="measured_alt_baro_age_s"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrymeasured_alt_baro_ft0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="measured_alt_baro_ft"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrymeasured_mode3a_age_s0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="measured_mode3a_age_s"/>
         </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntrymil_emergency0">
             <ParameterBool show="0"/>
@@ -365,7 +437,7 @@
             <ParameterString variable_name="raw_msg"/>
         </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntryrec_num0">
-            <ParameterBool show="1"/>
+            <ParameterBool show="0"/>
             <ParameterString prefix="R "/>
             <ParameterString suffix=""/>
             <ParameterString variable_name="rec_num"/>
@@ -393,6 +465,18 @@
             <ParameterString prefix=""/>
             <ParameterString suffix=""/>
             <ParameterString variable_name="sac"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryselected_alt_baro_ft0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="selected_alt_baro_ft"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryselected_alt_baro_source0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="selected_alt_baro_source"/>
         </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntrysic0">
             <ParameterBool show="0"/>
@@ -437,7 +521,7 @@
             <ParameterString variable_name="track_amalgamated"/>
         </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack_coasted0">
-            <ParameterBool show="0"/>
+            <ParameterBool show="1"/>
             <ParameterString prefix=""/>
             <ParameterString suffix=""/>
             <ParameterString variable_name="track_coasted"/>
@@ -455,7 +539,7 @@
             <ParameterString variable_name="track_created"/>
         </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack_end0">
-            <ParameterBool show="0"/>
+            <ParameterBool show="1"/>
             <ParameterString prefix=""/>
             <ParameterString suffix=""/>
             <ParameterString variable_name="track_end"/>
@@ -477,6 +561,24 @@
             <ParameterString prefix=""/>
             <ParameterString suffix=""/>
             <ParameterString variable_name="track_slant_corr_type"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytracked_alt_baro_ft0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="tracked_alt_baro_ft"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytracked_alt_geo_ft0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="tracked_alt_geo_ft"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytracked_mode3a_code0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="tracked_mode3a_code"/>
         </Configuration>
         <Configuration class_id="LabelEntry" instance_id="LabelEntrytransponder_delay_corr0">
             <ParameterBool show="0"/>
@@ -687,7 +789,7 @@
         <ParameterString description="DATA SOURCE ID, is derived from table DS and its sub tables"/>
         <ParameterString dimension=""/>
         <ParameterString name="ds_id"/>
-        <ParameterString representation_str="STANDARD"/>
+        <ParameterString representation_str="DATA_SRC_NAME"/>
         <ParameterString unit=""/>
         <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionTrackerds_id0">
             <ParameterString meta_table="Tracker"/>
@@ -1685,5 +1787,85 @@
             <ParameterString schema="SCDB"/>
             <ParameterString variable_identifier="sd_track.TURNRATE_DEGPS"/>
         </Configuration>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource0">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="0"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="0"/>
+        <ParameterUnsignedInt sac="120"/>
+        <ParameterUnsignedInt sic="49"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="ARTAS"/>
+        <ParameterString short_name=""/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource1">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="0"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="1"/>
+        <ParameterUnsignedInt sac="120"/>
+        <ParameterUnsignedInt sic="50"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="OTHER"/>
+        <ParameterString short_name=""/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource2">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="1"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="2"/>
+        <ParameterUnsignedInt sac="50"/>
+        <ParameterUnsignedInt sic="240"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="ARTAS"/>
+        <ParameterString short_name="ARTS"/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource3">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="0"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="3"/>
+        <ParameterUnsignedInt sac="104"/>
+        <ParameterUnsignedInt sic="18"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="ARTAS OPS"/>
+        <ParameterString short_name=""/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource4">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="0"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="4"/>
+        <ParameterUnsignedInt sac="104"/>
+        <ParameterUnsignedInt sic="22"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="ARTAS Test"/>
+        <ParameterString short_name=""/>
     </Configuration>
 </Configuration>

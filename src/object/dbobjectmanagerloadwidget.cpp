@@ -55,8 +55,21 @@ DBObjectManagerLoadWidget::DBObjectManagerLoadWidget(DBObjectManager &object_man
     main_layout->addWidget (main_label);
 
     info_layout_ = new QVBoxLayout ();
-    updateSlot();
     main_layout->addLayout(info_layout_);
+
+    QGridLayout* assoc_layout = new QGridLayout();
+
+    QLabel* assoc_label = new QLabel ("Associations");
+    assoc_label->setFont(font_bold);
+    assoc_layout->addWidget(assoc_label, 0, 0);
+
+    associations_label_ = new QLabel ();
+    associations_label_->setAlignment(Qt::AlignRight);
+    assoc_layout->addWidget(associations_label_, 0, 1);
+
+    main_layout->addLayout(assoc_layout);
+
+    updateSlot();
 
     QFrame *line = new QFrame(this);
     line->setFrameShape(QFrame::HLine); // Horizontal line
@@ -264,4 +277,14 @@ void DBObjectManagerLoadWidget::updateSlot ()
     {
         info_layout_->addWidget(obj_it.second->infoWidget());
     }
+
+    assert (associations_label_);
+    if (object_manager_.hasAssociations())
+    {
+        std::string tmp = "From "+object_manager_.associationsDBObject()
+                +":"+object_manager_.associationsDataSourceName();
+        associations_label_->setText(tmp.c_str());
+    }
+    else
+        associations_label_->setText("None");
 }

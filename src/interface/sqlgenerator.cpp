@@ -31,7 +31,6 @@
 #include "logger.h"
 #include "sqlgenerator.h"
 #include "propertylist.h"
-//#include "StructureDescriptionManager.h"
 #include "dbtablecolumn.h"
 #include "dbtable.h"
 #include "metadbtable.h"
@@ -292,6 +291,37 @@ std::shared_ptr<DBCommand> SQLGenerator::getDistinctDataSourcesSelectCommand (DB
     return getSelectCommand (object.currentMetaTable(), columns, true);
 }
 
+std::string SQLGenerator::getCreateAssociationTableStatement (const std::string& table_name)
+{
+    std::stringstream ss;
+
+    ss << "CREATE TABLE " << table_name
+       << " (assoc_id INTEGER PRIMARY KEY AUTOINCREMENT, rec_num INTEGER, utn INTEGER, src_rec_num INTEGER,"
+          " ds_id INTEGER);";
+
+    return ss.str();
+}
+
+std::shared_ptr<DBCommand> SQLGenerator::getSelectAssociationsCommand (const std::string& table_name)
+{
+    std::shared_ptr<DBCommand> command = std::make_shared<DBCommand>(DBCommand());
+
+    std::stringstream ss;
+
+    ss << "SELECT assoc_id, rec_num, utn, src_rec_num FROM " << table_name;
+
+    PropertyList property_list;
+    property_list.addProperty("assoc_id", PropertyDataType::INT);
+    property_list.addProperty("rec_num", PropertyDataType::INT);
+    property_list.addProperty("utn", PropertyDataType::INT);
+    property_list.addProperty("src_rec_num", PropertyDataType::INT);
+
+    command->set(ss.str());
+    command->list(property_list);
+
+    return command;
+}
+
 //DBCommand *SQLGenerator::getCountStatement (const std::string &dbo_type, unsigned int sensor_number)
 //{
 //    assert (ATSDB::getInstance().existsDBObject(dbo_type));
@@ -538,6 +568,13 @@ std::string SQLGenerator::getSelectPropertyStatement (const std::string &id)
 {
     stringstream ss;
     ss << "SELECT value FROM " << TABLE_NAME_PROPERTIES << " WHERE id = '" << id << "';";
+    return ss.str();
+}
+
+std::string SQLGenerator::getSelectAllPropertiesStatement ()
+{
+    stringstream ss;
+    ss << "SELECT id, value FROM " << TABLE_NAME_PROPERTIES << ";";
     return ss.str();
 }
 

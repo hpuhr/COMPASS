@@ -57,7 +57,7 @@ RadarPlotPositionCalculatorTaskWidget::RadarPlotPositionCalculatorTaskWidget(Rad
     main_layout->addWidget(ProjectionManager::instance().widget());
 
     QGridLayout *grid = new QGridLayout ();
-    unsigned int row_cnt=0;
+    int row_cnt=0;
 
     grid->addWidget (new QLabel ("DBObject"), row_cnt, 0);
 

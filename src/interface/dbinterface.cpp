@@ -116,6 +116,8 @@ void DBInterface::databaseContentChanged ()
     if (!existsPropertiesTable())
         createPropertiesTable();
 
+    loadProperties();
+
     loginf << "DBInterface: databaseOpened: post-processed " << isPostProcessed ();
 
     emit databaseContentChangedSignal();
@@ -124,6 +126,8 @@ void DBInterface::databaseContentChanged ()
 void DBInterface::closeConnection ()
 {
     QMutexLocker locker(&connection_mutex_);
+
+    saveProperties();
 
     logdbg  << "DBInterface: closeConnection";
     for (auto it : connections_)
@@ -668,57 +672,32 @@ size_t DBInterface::count (const std::string &table)
 
 void DBInterface::setProperty (const std::string& id, const std::string& value)
 {
-    QMutexLocker locker(&connection_mutex_);
-    assert (current_connection_);
-
-    std::string str = sql_generator_.getInsertPropertyStatement(id, value);
-    current_connection_->executeSQL (str);
+    properties_[id] = value;
 }
 
 std::string DBInterface::getProperty (const std::string& id)
 {
-    logdbg  << "DBInterface: getProperty: start";
-
-    QMutexLocker locker(&connection_mutex_);
-
-    DBCommand command;
-    command.set(sql_generator_.getSelectPropertyStatement(id));
-
-    PropertyList list;
-    list.addProperty("property", PropertyDataType::STRING);
-    command.list(list);
-
-    std::shared_ptr <DBResult> result = current_connection_->execute(command);
-
-    assert (result->containsData());
-
-    std::string text;
-    std::shared_ptr <Buffer> buffer = result->buffer();
-
-    assert (buffer);
-
-    if (buffer->firstWrite())
-        throw std::invalid_argument ("DBInterface: getProperty: id "+id+" does not exist");
-
-    assert (buffer->size() == 1);
-
-    text = buffer->get<std::string>("property").get(0);
-
-    logdbg  << "DBInterface: getProperty: end id " << id << " value " << text;
-    return text;
+    assert (hasProperty(id));
+    return properties_.at(id);
 }
 
 bool DBInterface::hasProperty (const std::string& id)
 {
-    logdbg  << "DBInterface: hasProperty: start";
+    return properties_.count(id);
+}
+
+void DBInterface::loadProperties ()
+{
+    loginf  << "DBInterface: loadProperties";
 
     QMutexLocker locker(&connection_mutex_);
 
     DBCommand command;
-    command.set(sql_generator_.getSelectPropertyStatement(id));
+    command.set(sql_generator_.getSelectAllPropertiesStatement());
 
     PropertyList list;
-    list.addProperty("property", PropertyDataType::STRING);
+    list.addProperty("id", PropertyDataType::STRING);
+    list.addProperty("value", PropertyDataType::STRING);
     command.list(list);
 
     std::shared_ptr <DBResult> result = current_connection_->execute(command);
@@ -728,8 +707,40 @@ bool DBInterface::hasProperty (const std::string& id)
     std::shared_ptr <Buffer> buffer = result->buffer();
 
     assert (buffer);
+    assert (buffer->has<std::string> ("id"));
+    assert (buffer->has<std::string> ("value"));
 
-    return buffer->size() == 1;
+    NullableVector<std::string> id_vec = buffer->get<std::string> ("id");
+    NullableVector<std::string> value_vec = buffer->get<std::string> ("value");
+
+    for (size_t cnt=0; cnt < buffer->size(); ++cnt)
+    {
+        assert (!id_vec.isNull(cnt));
+        assert (!properties_.count(id_vec.get(cnt)));
+        if (!value_vec.isNull(cnt))
+            properties_[id_vec.get(cnt)] = value_vec.get(cnt);
+    }
+
+    for (auto& prop_it : properties_)
+        loginf << "DBInterface: loadProperties: id '" << prop_it.first << "' value '" << prop_it.second << "'";
+}
+
+void DBInterface::saveProperties ()
+{
+    loginf << "DBInterface: saveProperties";
+
+    //QMutexLocker locker(&connection_mutex_); // done in closeConnection
+    assert (current_connection_);
+
+    std::string str;
+
+    for (auto& prop_it : properties_)
+    {
+        std::string str = sql_generator_.getInsertPropertyStatement(prop_it.first, prop_it.second);
+        current_connection_->executeSQL (str);
+    }
+
+    loginf << "DBInterface: saveProperties: done";
 }
 
 void DBInterface::insertMinMax (const std::string& id, const std::string& object_name, const std::string& min,
@@ -1046,7 +1057,7 @@ void DBInterface::insertBuffer (MetaDBTable& meta_table, std::shared_ptr<Buffer>
 
 void DBInterface::insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer)
 {
-    loginf << "DBInterface: partialInsertBuffer: table " << table.name() << " buffer size " << buffer->size();
+    loginf << "DBInterface: insertBuffer: table " << table.name() << " buffer size " << buffer->size();
 
     assert (current_connection_);
     assert (buffer);
@@ -1055,10 +1066,10 @@ void DBInterface::insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer)
 
     for (unsigned int cnt=0; cnt < properties.size(); ++cnt)
     {
-        logdbg << "DBInterface: partialInsertBuffer: checking column '" << properties.at(cnt).name() << "'";
+        logdbg << "DBInterface: insertBuffer: checking column '" << properties.at(cnt).name() << "'";
 
         if (!table.hasColumn(properties.at(cnt).name()))
-            throw std::runtime_error ("DBInterface: partialInsertBuffer: column '"+properties.at(cnt).name()
+            throw std::runtime_error ("DBInterface: insertBuffer: column '"+properties.at(cnt).name()
                                       +"' does not exist in table "+table.name());
     }
 
@@ -1071,20 +1082,67 @@ void DBInterface::insertBuffer (DBTable& table, std::shared_ptr<Buffer> buffer)
 
     QMutexLocker locker(&connection_mutex_);
 
-    logdbg  << "DBInterface: partialInsertBuffer: preparing bind statement";
+    logdbg  << "DBInterface: insertBuffer: preparing bind statement";
     current_connection_->prepareBindStatement(bind_statement);
     current_connection_->beginBindTransaction();
 
-    logdbg  << "DBInterface: partialInsertBuffer: starting inserts";
+    logdbg  << "DBInterface: insertBuffer: starting inserts";
     size_t size = buffer->size();
     for (unsigned int cnt=0; cnt < size; ++cnt)
     {
         insertBindStatementUpdateForCurrentIndex(buffer, cnt);
     }
 
-    logdbg  << "DBInterface: partialInsertBuffer: ending bind transactions";
+    logdbg  << "DBInterface: insertBuffer: ending bind transactions";
     current_connection_->endBindTransaction();
-    logdbg  << "DBInterface: partialInsertBuffer: finalizing bind statement";
+    logdbg  << "DBInterface: insertBuffer: finalizing bind statement";
+    current_connection_->finalizeBindStatement();
+}
+
+void DBInterface::insertBuffer (const std::string& table_name, std::shared_ptr<Buffer> buffer)
+{
+    loginf << "DBInterface: insertBuffer: table name " << table_name << " buffer size " << buffer->size();
+
+    assert (current_connection_);
+    assert (buffer);
+
+    if (!existsTable(table_name))
+        throw std::runtime_error ("DBInterface: insertBuffer: table with name '"+table_name+"' does not exist");
+
+    const PropertyList &properties = buffer->properties();
+
+    assert (table_info_.count(table_name));
+
+    DBTableInfo& table_info = table_info_.at(table_name);
+
+    for (unsigned int cnt=0; cnt < properties.size(); ++cnt)
+    {
+        logdbg << "DBInterface: insertBuffer: checking column '" << properties.at(cnt).name() << "'";
+
+        if (!table_info.hasColumn(properties.at(cnt).name()))
+            throw std::runtime_error ("DBInterface: insertBuffer: column '"+properties.at(cnt).name()
+                                      +"' does not exist in table "+table_name);
+    }
+
+    std::string bind_statement = sql_generator_.insertDBUpdateStringBind(buffer, table_name);
+
+    QMutexLocker locker(&connection_mutex_);
+
+    logdbg  << "DBInterface: insertBuffer: preparing bind statement";
+    current_connection_->prepareBindStatement(bind_statement);
+    current_connection_->beginBindTransaction();
+
+    logdbg  << "DBInterface: insertBuffer: starting inserts";
+    size_t size = buffer->size();
+
+    for (unsigned int cnt=0; cnt < size; ++cnt)
+    {
+        insertBindStatementUpdateForCurrentIndex(buffer, cnt);
+    }
+
+    logdbg  << "DBInterface: insertBuffer: ending bind transactions";
+    current_connection_->endBindTransaction();
+    logdbg  << "DBInterface: insertBuffer: finalizing bind statement";
     current_connection_->finalizeBindStatement();
 }
 
@@ -1317,6 +1375,7 @@ void DBInterface::createPropertiesTable ()
 
     updateTableInfo ();
 }
+
 void DBInterface::createMinMaxTable ()
 {
     assert (!existsMinMaxTable());
@@ -1435,6 +1494,58 @@ void DBInterface::insertBindStatementUpdateForCurrentIndex (std::shared_ptr<Buff
     current_connection_->stepAndClearBindings();
 
     logdbg  << "DBInterface: insertBindStatementUpdateForCurrentIndex: done";
+}
+
+void DBInterface::createAssociationsTable (const std::string &table_name)
+{
+    assert (!existsTable(table_name));
+    connection_mutex_.lock();
+    current_connection_->executeSQL(sql_generator_.getCreateAssociationTableStatement(table_name));
+    connection_mutex_.unlock();
+
+    updateTableInfo ();
+}
+
+DBOAssociationCollection DBInterface::getAssociations (const std::string &table_name)
+{
+    assert (existsTable(table_name));
+
+    DBOAssociationCollection associations;
+    std::shared_ptr<DBCommand> command = sql_generator_.getSelectAssociationsCommand(table_name);
+
+    connection_mutex_.lock();
+
+    std::shared_ptr <DBResult> result = current_connection_->execute (*command.get());
+
+    connection_mutex_.unlock();
+
+    if (result->containsData())
+    {
+        std::shared_ptr<Buffer> buffer = result->buffer();
+
+        if (buffer->size())
+        {
+            size_t num_associations = buffer->size();
+            assert (buffer->has<int>("rec_num"));
+            assert (buffer->has<int>("utn"));
+            assert (buffer->has<int>("src_rec_num"));
+
+            NullableVector<int>& rec_nums = buffer->get<int>("rec_num");
+            NullableVector<int>& utns = buffer->get<int>("utn");
+            NullableVector<int>& src_rec_nums = buffer->get<int>("src_rec_num");
+
+            for (size_t cnt=0; cnt < num_associations; ++cnt)
+            {
+                assert (!rec_nums.isNull(cnt));
+                assert (!utns.isNull(cnt));
+                assert (!src_rec_nums.isNull(cnt));
+
+                associations.emplace(rec_nums.get(cnt), DBOAssociationEntry(utns.get(cnt), src_rec_nums.get(cnt)));
+            }
+        }
+    }
+
+    return associations;
 }
 
 //DBResult *DBInterface::getDistinctStatistics (const std::string &type, DBOVariable *variable, unsigned int sensor_number)

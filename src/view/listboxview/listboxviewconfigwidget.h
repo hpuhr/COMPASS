@@ -39,10 +39,12 @@ public slots:
     void toggleShowOnlySeletedSlot();
     void toggleUsePresentation();
     void toggleUseOverwrite();
+    void showAssociationsSlot();
     /// @brief Called when database view checkbox is un/checked
     //void toggleDatabaseView ();
     void exportSlot();
     void exportDoneSlot(bool cancelled);
+
 
 signals:
      void exportSignal (bool overwrite);
@@ -61,6 +63,8 @@ protected:
 
     QCheckBox* only_selected_check_ {nullptr};
     QCheckBox* presentation_check_ {nullptr};
+    QCheckBox* associations_check_ {nullptr};
+
     QCheckBox* overwrite_check_ {nullptr};
 
     QPushButton *export_button_ {nullptr};

@@ -13,7 +13,7 @@
             </Configuration>
         </Configuration>
         <Configuration class_id="SQLiteConnection" instance_id="SQLite Connection">
-            <ParameterString last_filename="/home/sk/data/test.db"/>
+            <ParameterString last_filename="/home/sk/data/austria/20190602-0900-0930.db"/>
         </Configuration>
     </Configuration>
     <SubConfigurationFile class_id="DBObjectManager" instance_id="DBObjectManager0" path="db_object.xml"/>
