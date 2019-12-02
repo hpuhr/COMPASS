@@ -382,63 +382,29 @@ Please note that the following framings are currently supported:
 \item RFF: Comsoft RFF format
 \end{itemize}
 
-Please note that the following categories and editions are currently supported:
-\begin{itemize}  
-\item 001
-\begin{itemize}  
-\item Edition 1.1
-\end{itemize}
-\item 002
-\begin{itemize}  
-\item Edition 1.0
-\end{itemize}
-\item 019
-\begin{itemize}  
-\item Edition 1.2
-\item Edition 1.3
-\end{itemize}
-\item 020
-\begin{itemize}  
-\item Edition 1.5
-\item Edition 1.8
-\end{itemize}
-\item 021
-\begin{itemize}  
-\item Edition 2.1
-\end{itemize}
-\item 023
-\begin{itemize}  
-\item Edition 1.2
-\end{itemize}
-\item 034
-\begin{itemize}  
-\item Edition 1.26
-\end{itemize}
-\item 048
-\begin{itemize}  
-\item Edition 1.15
-\end{itemize}
-\item 062
-\begin{itemize}  
-\item Edition 1.12
-\item Edition 1.16
-\end{itemize}
-\item 063
-\begin{itemize}  
-\item Edition 1.0
-\item Edition 1.1
-\end{itemize}
-\item 065
-\begin{itemize}  
-\item Edition 1.2
-\item Edition 1.3
-\end{itemize}
-\end{itemize}
+Please note that the following ASTERIX categories, editions, reserved expansion fields and special purpose fields are currently supported: \\\\
 
+\begin{tabular}{ | l | r | r | r |}
+\hline
+  CAT & Editions & REFs & SPFs  \\ \hline
+  001 & 1.1 &  &  \\ \hline
+  002 & 1.0 &  &  \\ \hline
+  019 & 1.2, 1.3 & & \\ \hline
+  020 & 1.5, 1.8 & 1.3 & \\ \hline
+  021 & 2.1 & & \\ \hline
+  023 & 1.2 & & \\ \hline
+  034 & 1.26 & & \\ \hline
+  048 & 1.15 & & \\ \hline
+  062 & 1.12, 1.16 & 1.2 & ARTAS TRIs \\ \hline
+  063 & 1.0, 1.1 & & \\ \hline
+  065 & 1.2, 1.3 & & \\ \hline
+\end{tabular} \\
+
+Please note that sensor status messages currently are decoded, but not inserted into the database.
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=14cm,frame]{../screenshots/asterix_import_data.png}
+    \includegraphics[width=10cm]{../screenshots/asterix_import_data.png}
   \caption{Import ASTERIX Data task}
 \end{figure}
 
@@ -446,7 +412,9 @@ In the 'File Selection' list, a list of available ASTERIX data files is given. E
 
 In the 'ASTERIX Configuration' widget the framing, which categories are to be encoded and the currently acitive editions can be set.
 
-Further below, the list of existing JSON object parsers is shown. Each parser is specialized for a specific DBO. To inspect or edit a JSON object parser, click on it in the list. This step is not required for parsing.
+Further below, the list of existing JSON object parsers is shown. Each parser parses JSON data and maps to a specific DBO. 
+
+To inspect or edit a JSON object parser, click on it in the list. This step is not required for parsing, but it does give information which ASTERIX content is skipped and which is parsed, and to DBObject variable it is written.
 
 \paragraph{Importing}
 
@@ -458,7 +426,7 @@ During import a status indication will be shown as follows:
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=8cm,frame]{../screenshots/asterix_import_status.png}
+    \includegraphics[width=12cm]{../screenshots/asterix_import_status.png}
   \caption{Import ASTERIX data task status}
 \end{figure}
 
@@ -468,22 +436,19 @@ After import, a confirmation will be shown as follows:
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=8cm,frame]{../screenshots/asterix_import_done.png}
+    \includegraphics[width=10cm]{../screenshots/asterix_import_done.png}
   \caption{Import ASTERIX data task done}
 \end{figure}
 
-Importing performance strongly depends on CPU performance (multi-threading very beneficial), but a import of 2.5 million target reports takes about 1 minute on the author's hardware. \\
+Importing performance strongly depends on CPU performance (multi-threading very beneficial), but a import of 2.8 million target reports takes about 2 minutes on the author's hardware. \\
 
 \includegraphics[width=0.5cm]{../../data/icons/hint.png} Please also note that an import can only be performed once, after that the application has to be closed and started again if additional ASTERIX importing is wanted. \\
 
-\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please also note the currently only the main data fields (as shown in the JSON object parsers) are imported. This will be improved with the next version. \\
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please also note the currently not all data fields (as shown in the JSON object parsers) are imported.\\
 
 The (truncated) timestamps of CAT001 are calculated in a simple algorithm based on the CAT002 messages from the same sensor. \\\\
 
 \includegraphics[width=0.5cm]{../../data/icons/hint.png} After the import it is recommended to re-start the application, since currently a memory leak during import exists. While this does not affect the import process, usage of the application directly after the import process will be slower than usual. A re-start of the application resolves this issue. This will be fixed in the next version. \\
-
-
-
 
 \subsubsection{Importing JSON Data}
 \label{sec:json_import}
@@ -646,7 +611,92 @@ After running this task once (per database), the radar plots also have a set lat
 Please \textbf{note} that this task can be re-run with different projections if wanted.
 
 Please \textbf{note} that no additional Radar plot information is changed, only the latitude/longitude variables are updated.
- 
+
+\subsubsection{Calculate ARTAS Associations Information}
+
+Please note that if no ARTAS TRI SPF information exists in the database, this steps does not have to be performed.\\
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=12cm]{../screenshots/artas_association_config.png}
+  \caption{Calculate ARTAS associations task: Configuration}
+\end{figure}
+
+In this task, the ARTAS association information stored in system track updates can be used to create UTN which associate each system track update to the used sensor target reports.
+
+The following configuration options exist
+
+\begin{itemize}  
+\item Tracker Data Source: Name of tracker data source from which associations shall be created.
+\item Data Variables: Definition of variables to be used in processing. Does not have to be changed.
+\item End Track Time (s): Track update gap time (in seconds) after which a new UTN will be created (even if no track begin/end flag is set).
+\item Association Time Past (s): Time window length (in seconds) into the past where sensor target reports are considered for association.
+\item Association Time Future (s): Time window length (in seconds) into the future where sensor target reports are considered for association.
+\item Acceptable Time for Misses (s): Time window length at the beginning and end of the recording (in seconds) where misses (not found hash codes) are acceptable.
+\item Dubious Association Distant Time (s): Maximum age of made associations (in seconds), if older they are considered as dubious associations.
+\item Dubious Association Close Time Past (s): Time window length (in seconds) into the past where made associations are considered as dubious if multiple sensor hashes exist.
+\item Dubious Association Close Time Future (s): Time window length (in seconds) into the future where made associations are considered as dubious if multiple sensor hashes exist.
+\item Ignore Track End Associations: If set, no assocations for system track updates where the track end flag is set are created.
+\item Mark Track End Associations Dubious: If set, assocations for system track updates where the track end flag is set are counted as dubious.
+\item Ignore Track Coasting Associations: If set, no assocations for system track updates where the track coasted flag is set are created.
+\item Mark Track Coasting Associations Dubious: If set, assocations for system track updates where the track coasted flag is set are counted as dubious.
+\end{itemize}
+
+\paragraph{UTN Creation from System Track Numbers and End Track Time}: 
+
+The task should create a unique target number (UTN) for every ARTAS track. The track begin/end flags therefore are used to create new UTNs or finalize existing ones. To cover the case when such information is wrong or missing, the 'End Track Time' is used to check the time between track updates from one track number. If the gap is larger then the defined time, a new UTN is created even if no track begin/end flag was set.
+
+\paragraph{Association Time Window}
+
+Consider the following figure: In a timeline, a system track update exists at time \textbf{0}, while referenced sensor target reports exist at the times \textbf{1,2,3}.
+
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=12cm]{../screenshots/artas_assoc_timeline.png}
+\end{figure}
+
+
+The time window defined by [\textit{Association Time Past, Association Time Future}] defines which referenced sensor target reports are considered for association. In this case, 1 and 2 are considered, while 3 is disregarded. Since 1 is closer in time to the system track update, the association between (0,1) is made.
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=12cm]{../screenshots/artas_assoc_window.png}
+\end{figure}
+
+The time defined by \textit{Dubious Association Distant Time} is used to mark assocations which are older than the defined time as dubious. The associations are still created, but counted as dubious. Since 2 is still in the association time window, the assocation (0,2) is made but counted as dubious.
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=12cm]{../screenshots/artas_assoc_dubious_distant_window.png}
+\end{figure}
+
+
+The time window defined by [\textit{Dubious Association Close Time Past, Dubious Association Close Time Future}] defines when assocations are counted as dubious if multiple referenced sensor target reports exist in it. In this case, 1 and 2 are considered for association, and since 1 is closer in time to the system track update, the association between (0,1) is made. But, since 2 also falls into this time window, the association of (0,1) is counted as dubious association.
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=12cm]{../screenshots/artas_assoc_dubious_close_window.png}
+\end{figure}
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=10cm,frame]{../screenshots/artas_assoc_status.png}
+  \caption{Calculate ARTAS associations task: Status}
+\end{figure}
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=8cm]{../screenshots/artas_assoc_question.png}
+  \caption{Calculate ARTAS associations task: Save question}
+\end{figure}
+
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=10cm]{../screenshots/artas_assoc_done.png}
+  \caption{Calculate ARTAS associations task: Done}
+\end{figure}
 
 \subsection{Starting}
 
