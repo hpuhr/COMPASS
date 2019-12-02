@@ -38,12 +38,7 @@ In this widget, general information about the database is given.
   \label{fig:management_database}
 \end{figure}
 
-This also includes the working status, which can be:
-
-\begin{itemize}
- \item Idle: Nothing to do at the moment
- \item Working: Database read/write in progress
-\end{itemize}
+This also includes the database status.
 
 \subsection{Database Objects}
 \label{sec:management_dbos}
@@ -71,16 +66,22 @@ Each existing DBO is listed, and active ones have the following items:
 
 If a DBO exists, but has no data in the database, it is shown as inactive (greyed out, like ADSB in the screenshot).\\
 
+The following important elements exits:
+\begin{itemize}
+ \item 'Associations' label: Indicates if association information exists, and from which data source
+ \item 'Use Filters' checkbox: Whether filtering should be performed
+\end{itemize}
+
+
 Additionally, parameters which configure the loading process exist:
 
 \begin{itemize}
- \item ``Use Filters'' checkbox: Whether filtering should be performed
- \item ``Use order'' checkbox: Whether the dataset should be ordered by a DBO variable
- \item ``Use Ascending`` checkbox: If ordered, defines if it should be ascending or descending
- \item ''Order Variable`` selection: If ordered, what variable should be used
- \item ''Use Limit`` checkbox: If the data size should be limited
- \item ''Limit Min``: If limited, the data set will start at the n-th index given here. If 0, it will be loaded from the beginning, if e.g. 100, the first 100 entries will be skipped and the 101st entry will be the first in the dataset.
-\item ''Limit Max'': If limited, the number given here will be the number of loaded entries.
+ \item 'Use order' checkbox: Whether the dataset should be ordered by a DBO variable
+ \item 'Use Ascending' checkbox: If ordered, defines if it should be ascending or descending
+ \item 'Order Variable' selection: If ordered, what variable should be used
+ \item 'Use Limit' checkbox: If the data size should be limited
+ \item 'Limit Min': If limited, the data set will start at the n-th index given here. If 0, it will be loaded from the beginning, if e.g. 100, the first 100 entries will be skipped and the 101st entry will be the first in the dataset.
+\item 'Limit Max': If limited, the number given here will be the number of loaded entries.
 \end{itemize}
 
 Using the ``Load'' button , a loading process using the current configuration is started. When a loading process is in progress, the button displays ``Stop'' and can be used to abort the current loading process. Please note that aborting can take a few seconds during which the button is inactive, after successful abort the button states ``Load'' and is usable again.

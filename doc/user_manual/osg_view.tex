@@ -1,7 +1,7 @@
 \subsection{OSG View}
 \label{sec:osgview}
 
-The OSG View allows a graphical representation of target reports from the Database Objects. After creation, it displays a world map in the map widget on the left, supported by a configuration panel on the right hand side.
+The OSG View allows a graphical representation of target reports from the Database Objects. After creation, it displays a world map in the map widget on the left, and a configuration panel on the right hand side.
 
 \begin{figure}[H]
     \hspace*{-2cm}
@@ -24,7 +24,7 @@ There exist 3 main components:
 \begin{itemize}
  \item Toolbar (top left): Selects mouse action or set display options.
  \item Map Widget (lower left): Displays map and geometry data.
- \item Configuration Widget (right): Displays layer selections and set height configuration.
+ \item Configuration panel (right): Displays layer selections and configuration tabs.
 \end{itemize}
 
 \subsubsection{Toolbar}
@@ -156,14 +156,27 @@ In the lower-left corner, the data status information is given:
 
 In the upper-right corner, the ATSDB version is shown. In the lower-right corner, the current coordinates (map coordinates under the mouse cursor) are shown.
 
-\subsubsection{Configuration Widget}
+\subsubsection{Layers Tab}
+
+In the 'Layers' tab, a tree view is given to configure the display of the existing elements. The following main tree elements are:
+\begin{itemize}
+ \item Geometry: Shows current DBO elements
+ \item Measurements: Shows the current distance measurements
+ \item Map: Shows current map layers
+\end{itemize}
+
+\subsubsection{Configuration Tab}
 \label{sec:osgview_config}
 
-In the configuration widget, several elements exist:
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=10cm,frame]{../screenshots/osgview_config_tab.png}
+  \caption{OSG View Config tab}
+\end{figure}
 
-\begin{itemize}
- \item Layer widget: displays all currently existing layers
- \item Configuration area
+
+In the 'Config' tab, several elements exist:
+
 \begin{itemize}
  \item Group Variable: Meta DBOVariable used to create groups. Currently, only track number and Mode S address are supported
  \item Connect groups: Whether grouped target reports should be connected using lines
@@ -173,16 +186,6 @@ In the configuration widget, several elements exist:
  \item Scale Factor: If height information is used, this factor is used to multiply the height
  \item Null Offset: If height information is used, this factor is used for target reports without height information
  \item Redraw button: Triggers a re-draw of the geometry, e.g. after a one of the above options was used
-\end{itemize}
-\end{itemize}
-
-\subsubsection{Layer Widget}
-
-In the layer widget, a tree view is given to configure the display of the existing elements. The following main tree elements are:
-\begin{itemize}
- \item Geometry: Shows current DBO elements
- \item Measurements: Shows the current distance measurements
- \item Map: Shows current map layers
 \end{itemize}
 
 \subsubsection{Changing the Background Map}

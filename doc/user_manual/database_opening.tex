@@ -442,8 +442,6 @@ After import, a confirmation will be shown as follows:
 
 Importing performance strongly depends on CPU performance (multi-threading very beneficial), but a import of 2.8 million target reports takes about 2 minutes on the author's hardware. \\
 
-\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please also note that an import can only be performed once, after that the application has to be closed and started again if additional ASTERIX importing is wanted. \\
-
 \includegraphics[width=0.5cm]{../../data/icons/hint.png} Please also note the currently not all data fields (as shown in the JSON object parsers) are imported.\\
 
 The (truncated) timestamps of CAT001 are calculated in a simple algorithm based on the CAT002 messages from the same sensor. \\\\
@@ -648,7 +646,7 @@ The task should create a unique target number (UTN) for every ARTAS track. The t
 
 \paragraph{Association Time Window}
 
-Consider the following figure: In a timeline, a system track update exists at time \textbf{0}, while referenced sensor target reports exist at the times \textbf{1,2,3}.
+Consider the following figure: In a timeline, a system track update exists at time \textbf{0}, while referenced sensor target reports exist at the times \textbf{1,2,3}. In this description, it is assued that all sensor target reports have the same referenced ARTAS MD5 hash value.
 
 
 \begin{figure}[H]
@@ -679,11 +677,21 @@ The time window defined by [\textit{Dubious Association Close Time Past, Dubious
     \includegraphics[width=12cm]{../screenshots/artas_assoc_dubious_close_window.png}
 \end{figure}
 
+
+\paragraph{Ignore Track End/Coasting Associations}
+
+Currently in ARTAS, (according to the authors information) track end or coasted updates contain wrong TRI information (from previous updates). If the respective checkboxes are set, this TRI information is disregarded. If they are not checked, the associations are made and can be investigated.
+
+\paragraph{Running the task}
+When the 'Calculate' button is clicked, the task is started and the status dialog is shown.
+
 \begin{figure}[H]
   \center
     \includegraphics[width=10cm,frame]{../screenshots/artas_assoc_status.png}
   \caption{Calculate ARTAS associations task: Status}
 \end{figure}
+
+When the calculation of the ARTAS associations is completed, the assocaition information is written into the database. If there where missed or dubious associations, the user is asked if this is still wanted. Please be aware that it is possible to not save the association information, and to re-run the task with a different configuration.
 
 \begin{figure}[H]
   \center
@@ -691,6 +699,7 @@ The time window defined by [\textit{Dubious Association Close Time Past, Dubious
   \caption{Calculate ARTAS associations task: Save question}
 \end{figure}
 
+After the assocations are saved, the task is done.
 
 \begin{figure}[H]
   \center
