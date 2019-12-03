@@ -35,10 +35,19 @@ When pressing the 'Remove' button, a selected variable is removed.  Pressing the
 When this checkbox is checked, only target reports selected in other views are shown. If this is active, de-selecting a target report removes it from the shown data.
 
 \subsubsection{Use Presentation}
-When this checkbox is checked, the so called presentation mode is used. In the database, the variables might have different units or a data representation which is not easy to read. For this purpose, a presentation mode was introduced to e.g. show a Mode A code as octal, or a Time of Day not in seconds since midnight but in HH::MM:SS.SS format. When the ''Use Presentation`` checkbox is not checked, the original database values are presented (and exported).
+When this checkbox is checked, the so called presentation mode is used. In the database, the variables might have different units or a data representation which is not easy to read. For this purpose, a presentation mode was introduced to e.g. show a Mode A code as octal, or a Time of Day not in seconds since midnight but in HH::MM:SS.SS format. When the 'Use Presentation' checkbox is not checked, the original database values are presented (and exported).
 
 \subsubsection{Show Associations}
-When this checkbox is checked, the associated UTN is shown for each target report. This can only be used if association informatin is present in the database.
+When this checkbox is checked, the associated UTNs are shown for each target report. If no UTN is shown, this target reports was never associated to an UTN, if several are shown (e.g. '1,2,4) this target report was used in several UTNs. 
+
+This checkbox can only be used if association information is present in the database.
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/listbox_loaded_assoc.png}
+  \caption{Listbox View after loading with associated UTNs}
+  \label{fig:listbox_load}
+\end{figure}
 
 
 \subsubsection{Exporting}
@@ -46,7 +55,7 @@ When this checkbox is checked, the associated UTN is shown for each target repor
 
 The data from the current DBO table can be exported to a comma-separated value (CSV) text file. 
 
-When pressing the ''Export`` button, a dialog is opened.
+When pressing the 'Export' button, a dialog is opened.
 
 \begin{figure}[H]
     \hspace*{-2cm}
@@ -55,13 +64,12 @@ When pressing the ''Export`` button, a dialog is opened.
   \label{fig:listbox_export}
 \end{figure}
 
-Choose a filename, and press ''Save`` to save the data. If the ''Overwrite Exported File`` checkbox was checked, an existing file is automatically overwritten. Please \textbf{note} that exporting might take some time for larger datasets, and currently no status indication is given.\\
+Choose a filename, and press 'Save' to save the data. If the 'Overwrite Exported File' checkbox was checked, an existing file is automatically overwritten. Please \textbf{note} that exporting might take some time for larger datasets, and currently no status indication is given.\\
 
 After export, a dialog is shown indicating that the export was completed.
 
 \begin{figure}[H]
-    \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/listbox_exported.png}
+    \includegraphics[width=4cm,frame]{../screenshots/listbox_exported.png}
   \caption{Listbox View export done}
   \label{fig:listbox_exported}
 \end{figure}
