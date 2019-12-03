@@ -483,6 +483,8 @@ Please note that the style (hidden, color, symbol, size etc.) is only persisted 
 
 \subsubsection{Layer Operations}
 
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please note that the layers are generated based on the 'Group Mode' in the Config tab. Please refer to the Section \nameref{sec:group_mode} for details.
+
 In the Layers widget, a number of operations are possible for each tree item.
 
 \begin{table}[H]
@@ -504,19 +506,6 @@ The context menu allows several actions to be performed on an item. If an item h
   \caption{OSG View layer context menu}
 \end{figure}
 
-\paragraph{Special DBO Operations}
-
-\begin{itemize}
- \item Move to Top: Move DBO to first position
- \item Move Up: Move DBO one position up
- \item Move Down: Move DBO one position down
- \item Move to Bottom: Move DBO to the last position
-\end{itemize}
-
-The other operations are the same as in the following common operations.
-
-\paragraph{Common Operations}
-
 \begin{itemize}
  \item Set Color: Open colour dialog to set the items colour
  \item Set Symbol: Set the items symbol to one of the following values:
@@ -529,12 +518,26 @@ The other operations are the same as in the following common operations.
  \item Set Symbol Size: Set the symbols size
  \item Set Line Width: Set the line width
  \item Set Opacity: Set the items opacity
- \item Hide children: Disable display off all children
+ \item Hide: Disable display of this item
+ \item Show: Enable display of this item
+ \item Hide Children: Disable display of all children
  \item Show Children: Enable display of all children
+ \item Hide Children Containing: Disable display of all children containing a specific DBObject
+ \item Show Children Containing: Enable display of all children containing a specific DBObject
+ \item Hide Siblings: Disable display of all sibling items (children of parent except this one)
+ \item Show Siblings: Enable display of all sibling items (children of parent except this one)
  \item Clear Labels: Removes all labels
 \end{itemize}
 
 Please note that only the main Map item has a context menu, and only allows setting of map files and changing the opacity.
+
+\paragraph{Special Root Geometry Layer Operations}
+
+\begin{itemize}
+ \item Reset All Styles: Sets all style information to default (including make all data visible)
+ \item Clear All Assocations: Removes display of all shown associations of all data
+\end{itemize}
+
 
 \subsubsection{Data Labeling}
 
@@ -757,7 +760,8 @@ The selection can be erased using the symbol \includegraphics[width=0.5cm]{../..
 
 The overlay text color can be toggled between black on white or white on black using the symbol \includegraphics[width=0.5cm]{../../data/icons/text_invert.png} in the toolbar. Depending on the map background one or the other is more suitable.
 
-\subsubsection{Group Variable}
+\subsubsection{Group Mode}
+\label{sec:group_mode}
 
 In this selectection the Meta DBOVariable used to create groups can be changed. Currently, only track number and Mode S address are supported. If e.g. data is shown, that has no track number but a Mode S address, this can be used to connect the respective targets.
 
@@ -812,4 +816,16 @@ Please note that upon changes to the height usage, a manual redraw has to be per
   \caption{OSG View use height}
 \end{figure}
 
- 
+\subsubsection{Render Order}
+
+In the render order widget, the drawing order of all DBObjects is specified. The one at the top is drawn last (over all others), so it is useful to move the most important DBObject (for the current inspection) to the top.
+
+To change the drawing order click on the DBObject to move and use the buttons on the right side. Please note that no redraw is required and that the drawing order is persisted in the configuration.
+
+ \begin{itemize}
+ \item \includegraphics[width=0.5cm]{../../data/icons/top.png} Move to Top: Move DBO to top position
+ \item \includegraphics[width=0.5cm]{../../data/icons/up.png} Move Up: Move DBO one position up
+ \item \includegraphics[width=0.5cm]{../../data/icons/down.png} Move Down: Move DBO one position down
+ \item \includegraphics[width=0.5cm]{../../data/icons/bottom.png} Move to Bottom: Move DBO to the bottom position
+\end{itemize}
+
