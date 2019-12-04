@@ -11,15 +11,15 @@
 \documentclass[10pt,letterpaper,extrafontsizes]{memoir}
 \listfiles
 \usepackage{comment}
-
+\usepackage{subfiles}
 
 % For (non-printing) notes  \PWnote{date}{text}
-\newcommand{\PWnote}[2]{} 
-\PWnote{2009/04/29}{Added fonttable to the used packages}
-\PWnote{2009/08/19}{Made Part I a separate doc (memdesign.tex).}
+%\newcommand{\PWnote}[2]{} 
+%\PWnote{2009/04/29}{Added fonttable to the used packages}
+%\PWnote{2009/08/19}{Made Part I a separate doc (memdesign.tex).}
 
 % same
-\newcommand{\LMnote}[2]{} 
+%\newcommand{\LMnote}[2]{} 
 
 
 \usepackage{memsty}
@@ -170,7 +170,7 @@
 \end{center}
 
 \begin{center}
-\Huge\textsf{User Guide}\par
+\Huge\textsf{User Manual}\par
 \end{center}
 \begin{center}
 \normalsize\textsf{by Helmut Puhr}\par
@@ -208,32 +208,28 @@
 
 \pagenumbering{arabic} 
 
-\include{introduction}
+\subfile{introduction}
 
-\include{key_concepts}
+\subfile{installation}
 
-\include{installation}
+\subfile{test_data}
 
-\chapter{Usage}
-\label{sec:usage}
+\subfile{startup}
 
-\include{test_data}
-
-\include{database_opening}
-\include{management}
-\include{filtering}
+\subfile{management}
+\subfile{filtering}
 
 \section{Inspection}
 \label{sec:inspection}
 
-\include {listbox_view}
-\include {osg_view}
+\subfile {listbox_view}
+\subfile {osg_view}
 
-\include {issues}
+\subfile {issues}
 
-\include {utils}
+\subfile {utils}
 
-\include {licensing}
+\subfile {licensing}
 
 %\section{Glossary}
 %Buffer

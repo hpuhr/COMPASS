@@ -1,0 +1,65 @@
+\section{Use Cases}
+
+Depending on the use case, different options exist. Please follow the listed references in your respective use case. Optional steps are marked with an asterisk \textbf{*}.
+
+\subsection{Accessing a Database}
+
+\paragraph{Acessing an existing Verif Database}
+
+\begin{itemize}
+ \item \nameref{sec:mysql_connect}
+ \item \nameref{sec:mysql_open_db}
+ \item \nameref{sec:schema_select}*
+ \item \nameref{sec:manage_dbo}*
+\end{itemize}
+
+\paragraph{Creating a new MySQL Database from Verif Export}
+
+\begin{itemize}
+ \item \nameref{sec:mysql_connect}
+ \item \nameref{sec:mysql_open_db}
+ \item \nameref{sec:mysql_import}
+ \item \nameref{sec:schema_select}*
+ \item \nameref{sec:manage_dbo}*
+\end{itemize}
+
+\paragraph{Creating a new SQLite Database}
+
+\begin{itemize}
+ \item \nameref{sec:sqlite_open}
+ \item \nameref{sec:schema_select}*
+ \item \nameref{sec:manage_dbo}*
+\end{itemize}
+
+\paragraph{Acessing a previously created SQLite Database} 
+
+\begin{itemize}
+ \item \nameref{sec:sqlite_open}
+ \item \nameref{sec:schema_select}*
+ \item \nameref{sec:manage_dbo}*
+\end{itemize}
+\ \\
+
+\subsection{Importing Data}
+
+After such steps, data can be imported if wanted:
+
+\paragraph{Import ASTERIX Data} 
+
+\begin{itemize}
+ \item \nameref{sec:asterix_import}
+ \item \nameref{sec:manage_datasources}*
+ \item \nameref{sec:calc_radar_pos}* (If Radar data was imported)
+ \item \nameref{sec:calc_artas_assoc}* (If ARTAS data with TRIs was imported)
+\end{itemize}
+
+\paragraph{Import JSON Data} 
+
+\begin{itemize}
+ \item \nameref{sec:json_import}
+ \item \nameref{sec:manage_datasources}*
+ \item \nameref{sec:calc_radar_pos}* (If Radar data was imported)
+\end{itemize}
+
+\subsection{Starting}
+After such steps, the database is usable and usage can be started using \nameref{sec:startup_starting}.
