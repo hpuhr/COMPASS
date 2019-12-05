@@ -1,0 +1,319 @@
+\section{Data Widget}
+\label{sec:osgview_data}
+
+\subsection{Mouse/Keyboard Operations}
+In the data widget, several mouse and key operations are supported. The following terms are used:
+
+\begin{itemize}
+ \item LMB: Left mouse button
+ \item MMB: Middle mouse button
+ \item RMB: Right mouse button
+\end{itemize}
+
+The following operations exist, depending on the mouse action modes (set in the toolbar):
+
+\begin{table}[H]
+  \center
+  \begin{tabular}{ | l | l | l |}
+    \hline
+    \textbf{Mouse Action} & \textbf{Key Action} &  \textbf{Description} \\ \hline
+    LMB click & - & - \\ \hline
+    LMB click \& drag & - & Traverse map \\ \hline
+    LMB double click & - & Zoom to clicked location \\ \hline
+    - & Arrows & Traverse map \\ \hline
+    MMB click \& drag & - & Rotate map \\ \hline
+    MMB scroll \& drag & - & Zoom map \\ \hline
+    RMB click & - & - \\ \hline
+    RMB click \& drag & - & Zoom map \\ \hline
+    RMB double click \& drag & - & Zoom away from clicked location \\ \hline
+    - & Space bar & Return to home position \\ \hline
+  \end{tabular}
+  \caption{Map widget view operations in Navigate mode}
+\end{table}
+
+\begin{table}[H]
+  \center
+  \begin{tabular}{ | l | l | l |}
+    \hline
+    \textbf{Mouse Action} & \textbf{Key Action} &  \textbf{Description} \\ \hline
+    LMB click & - & Create label \\ \hline
+    LMB click \& drag & - & Create label \& traverse map \\ \hline
+    RMB click & - & Open group menu \\ \hline
+    ... & ... & Other operations are the same as in Navigate mode \\ \hline
+  \end{tabular}
+  \caption{Map widget view operations in Label mode}
+\end{table}
+
+\begin{table}[H]
+  \center
+  \begin{tabular}{ | l | l | l |}
+    \hline
+    \textbf{Mouse Action} & \textbf{Key Action} &  \textbf{Description} \\ \hline
+    LMB click & - & Start/end measurement \\ \hline
+    LMB click \& drag & - & Traverse map \\ \hline
+    ... & ... & Other operations are the same as in Navigate mode \\ \hline  
+    \end{tabular}
+  \caption{Map widget view operations in Measure mode}
+\end{table}
+
+\begin{table}[H]
+  \center
+  \begin{tabular}{ | l | l | l |}
+    \hline
+    \textbf{Mouse Action} & \textbf{Key Action} &  \textbf{Description} \\ \hline
+    LMB click & - & Start/end selection box \\ \hline
+    LMB click \& drag & - & Traverse map \\ \hline
+    ... & ... & Other operations are the same as in Navigate mode \\ \hline  
+    \end{tabular}
+  \caption{Map widget view operations in Select mode}
+\end{table}
+
+\subsection{Status Information}
+
+In the lower-left corner, the data status information is given:
+
+\begin{itemize}
+ \item Status
+\begin{itemize}
+ \item Idle: Nothing to do
+ \item Loading: Loading in progress
+ \item Done: Loading/redraw done
+ \item Redrawing: Redraw in progress
+\end{itemize}
+ \item Time Begin: First timestamp in the data, in HH:MM:SS
+ \item Time End: last timestamp in the data, in HH:MM:SS
+ \item Loaded: Number of loaded target reports (from the database)
+ \item Skipped: Number of not-drawn target reports
+ \item Drawn: Number of drawn target reports
+ \item Selected: Number of selected target reports
+\end{itemize}
+\  \\
+
+In the upper-right corner, the ATSDB version is shown. In the lower-right corner, the current coordinates (map coordinates under the mouse cursor) are shown. 
+
+\subsection{Data Operations}
+
+\subsubsection{Data Labeling}
+
+Labels can be shown for target reports, when the Label mode is active. Simply do a LMB click on a target report symbol.
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_labels.png}
+  \caption{OSG View Labels}
+\end{figure}
+
+Please note that if association information is present, the UTN is always shown in first position ('UTN XXX') in the label.
+
+\subsubsection{Geometry Menu}
+
+Several data-related operations can be also performed in the data widget when the Label mode is active, by a RMB click on a target report symbol.
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_data_operations.png}
+  \caption{OSG View geometry operations}
+\end{figure}
+
+The data context menu allows the following operations:
+
+\begin{itemize}
+ \item Toogle Label: Toggle label display of a single target report
+ \item Group: Same operations as on the item group's layer menu
+ \item Parents: Same operations as on the item's parent layer menu
+\end{itemize}
+
+Depending on the grouping mode in the 'Config' tab, different parent layer items are shown. For each of this parents the same menu entries exist as if they where clicked in the 'Layers' tab. Please refer to \nameref{sec:geometry_operations} for details.
+
+\subsubsection{Distance Measurement}
+
+Distance measurements can be made when the Measure mode is active. If 'Use height' is not checked, measurements are done as follows:
+
+Simply do a LMB click on a target report or a position on the map to start the measurement.
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_measure1.png}
+  \caption{OSG View measurement}
+\end{figure}
+
+During the measurement, the following information is shown in the top-left corner:
+
+\begin{itemize}
+ \item Distance (km): Great-circle distance using the haversine formula, in meters or kilometers.
+ \item Distance (nm): Great-circle distance using the haversine formula, in nautical miles.
+ \item  Bearing (deg): Bearing from point 1 to point 2, in degrees from true north.
+\end{itemize}
+
+Then do a second LMB click on the map on a point of interest to finish the measurement.
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_measure2.png}
+  \caption{OSG View measurement done}
+\end{figure}
+
+If 'Use height' is checked, measurements are calculated in the same way as previously (ground distance), but for each target report with height a connecting line to the respective ground position is displayed. \\
+
+For a measurement between two target reports with height information, the measurement will be displayed as follows:
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_measure3d.png}
+  \caption{OSG View measurement with height information}
+\end{figure}
+
+The measurements is shown in the Layers tab, and is identified using a number. The visibility for each label can be set using the checkbox, and the layer menu (using the \includegraphics[width=0.5cm]{../../data/icons/measure.png}) symbol) allows the following operations:
+
+\begin{itemize}
+ \item Copy text: Copies the text as well as the point information to the clipboard to be pasted in other applications
+ \item Delete: Deletes the measurement
+\end{itemize}
+
+Please note the the number label background color can be set as with all other labels. 
+
+\subsubsection{Selection}
+
+Target reports can be selected when the Select mode is active. If 'Use height' is not checked, measurements are done as follows:
+
+Simply do a LMB click on a target report or a position on the map to start the selection. Move the mouse to another location to create a red selection rectangle.
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_select1.png}
+  \caption{OSG View selection}
+\end{figure}
+
+With a second LMB click the selection is finalized and all target reports in the created latitude/longitude rectangle are selection. This is shown by a different color (yellow by default), and the 'Selected' counter in the lower-left corner shows the current selection size.
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_select2.png}
+  \caption{OSG View selection done}
+\end{figure}
+
+If another selection is done, the previous one is cleared by default. If another selection shown be \textit{added} to the current one, hold down the control key when doing the second LMB click.
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_select_add1.png}
+  \caption{OSG View selection with adding}
+\end{figure}
+
+This adds the target reports within the new red rectangle to the current selecion.
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_select_add2.png}
+  \caption{OSG View selection with adding done}
+\end{figure}
+
+If 'Use height' is checked, selection can be done with height information, which is shown as a box. Simply do a LMB click on the map for a target report, and move the cursor to another target report or map location. If both locations have zero height (map location or no height information in target report), again a rectangle is shown. If one or both locations have a non-zero height, a 3D box is displayed.
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_select3d.png}
+  \caption{OSG View selection with height}
+\end{figure}
+
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_select3d_2.png}
+  \caption{OSG View selection with height done}
+\end{figure}
+
+
+\subsubsection{Time Filter}
+
+Once activated using the symbol \includegraphics[width=0.5cm]{../../data/icons/time.png} in the toolbar, the time filter facilitates that only target reports within a specific time window are shown.
+
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_time_filter.png}
+  \caption{OSG View time filter}
+  \label{fig:osgview_time_filter}
+\end{figure}
+
+The following items exist:
+
+\begin{itemize}
+ \item Current: The start of the time window
+ \item Window length (s): Duration of the display time window
+ \item Current End: The end of the time window
+ \item Play button: Start/Stop the auto-play mode
+ \item Update interval [s]: Auto-play mode update interval
+ \item Update step [s]: Auto-play mode update step
+ \item Scrollbar: Manual time-scrolling
+\end{itemize}
+
+During usage of the time filter, changes in the Configuration Widget was suppressed, but changes in the Layers Widgets are possible.
+
+\subsubsection{Depth Check}
+
+Once activated using the symbol \includegraphics[width=0.5cm]{../../data/icons/depth.png} in the toolbar, during drawing it is checked wether data is occluded in the depicted scene. E.g. if target reports are 'below ground', they are not shown.
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/osgview_depth_check.png}
+  \caption{OSG View depth check}
+\end{figure}
+
+\subsubsection{Data Label Background Color}
+
+The background color for existing labels can be configured using the symbol \includegraphics[width=0.5cm]{../../data/icons/label_color.png} in the toolbar.
+
+\subsubsection{Data Label Content Configuration}
+
+Existing labels can be configured using the symbol \includegraphics[width=0.5cm]{../../data/icons/label_edit.png} in the toolbar.
+
+The following operations are supported:
+
+\begin{itemize}
+ \item Edit: Edits which variables are shown, for each DBO
+ \item Line Break: Sets after how many variable entries a line break is used
+\end{itemize}
+
+When a edit window for a DBO label definition is opened, a window like the following is shown:
+
+\begin{figure}[H]
+    \includegraphics[width=12cm,frame]{../screenshots/osgview_label_edit.png}
+  \caption{OSG View Label Editing}
+\end{figure}
+
+For each DBO, for each variable it can be selected if the value is presented (using the checkbox), and a prefix and suffix can be defined. The changes made to the prefix and suffix are made by double-clicking on the respective field, entering a new value, and setting the value by pressing enter. Upon each change, the existing labels in the OSG View are updated automatically. \\
+
+A few notes about labels:
+
+\begin{itemize}
+ \item The label definition and presentation is persisted in the configuration
+ \item The label colour is always the same as the target report's
+ \item A variable value is only shown if it is present (not NULL)
+ \item Labels are shown at the target reports position, matched to the lower-left corner
+ \item A line break is given after the configured number of values. If values are not shown (NULL), the line break is still made at the same postion, to keep the value shown in the same line for all target reports.
+\end{itemize}
+
+\subsubsection{Data Label Deletion}
+
+All existing labels can be deleted using the symbol \includegraphics[width=0.5cm]{../../data/icons/label_delete.png} in the toolbar.
+
+\subsubsection{Measurement Deletion}
+
+All existing measurements can be deleted using the symbol \includegraphics[width=0.5cm]{../../data/icons/measurement_delete.png} in the toolbar.
+
+\subsubsection{Selection Color}
+
+The color for selection highlighting can be configured using the symbol \includegraphics[width=0.5cm]{../../data/icons/select_color.png} in the toolbar.
+
+\subsubsection{Selection Invert}
+
+The selection can be inverted using the symbol \includegraphics[width=0.5cm]{../../data/icons/select_invert.png} in the toolbar.
+
+\subsubsection{Selection Deletion}
+
+The selection can be erased using the symbol \includegraphics[width=0.5cm]{../../data/icons/select_delete.png} in the toolbar.
+
+\subsubsection{Overlay Text Color Invert}
+
+The overlay text color can be toggled between black on white or white on black using the symbol \includegraphics[width=0.5cm]{../../data/icons/text_invert.png} in the toolbar. Depending on the map background one or the other is more suitable.
