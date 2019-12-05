@@ -1,13 +1,38 @@
 \section{Display}
-There also exists an integrated display solution, called the OSGView (OpenSceneGraph View). Currently it is experimental, and still under heavy development. For this reasons, it is not released as source code, but can be downloaded as an AppImage as binary component only. Please note that the display functionality is described in the later chapter OSG View (in section \nameref{sec:osgview}).\\\\
+
+\subsection{Textual Display}
+
+For textual analysis of the data, the Listbox View gives a highly configurable tabular text representation of the ATC surveillance data. \\
 
 The following features currently exist:
 
 \begin{itemize}  
-\item Usage of data based on the highly flexible ATSDB framework
+\item Display of data as text tables
+\item Configurable data loading of data of interest
+\item Exporting of data as CSV
+\end{itemize} 
+\ \\
+
+For further details please refer to \nameref{sec:listbox_view}.
+
+\subsection{Graphical Display}
+There also exists an integrated display solution, called the OSGView (\textbf{O}pen\textbf{S}cene\textbf{G}raph View). It is not released as source code, and is included in the AppImage as binary component only. \\
+
+The following features currently exist:
+
+\begin{itemize}  
 \item High-performance display based on OpenSceneGraph
 \item Customizable map/terrain display based on osgEarth
-\item Customizable display of Database Objects
-\item Highlighting and labeling
+\item Customizable display of ATC surveillance data
+\item Numerous operations for analysis, e.g. data selection, labeling, distance measurement
 \item Relatively low memory footprint (e.g. 17 million target reports in ~6 GB RAM)
 \end{itemize} 
+\ \\
+
+For further details please refer to \nameref{sec:osg_view}).
+
+\subsection{Cross-Selection}
+
+For detailed analysis, functionality exists to inspect data of interest across all existing Views. For each View, what data is currently 'selected' can be chosen and automatically updates all other Views. In each View, the currently selected data is given in a special representation. \\
+
+Details on the data cross-selection features are given in each View.

@@ -12,16 +12,18 @@ The binary will currently only be provided to (somehwat current) Linux 64-bit op
 \item Ubuntu 19.04
 \item Linux Mint 18.3
 \end{itemize}
+\ \\
 
 For the following distributions, the AppImage was reported to have issues:
 
 \begin{itemize}  
 \item CentOS 6.*: Unfortunately the operating system's glibc versions are too old.
 \end{itemize}
+\ \\
 
 If you have tried other OS as the ones listed here, it would be appreciated if you could provide feedback about your experiences to \href{mailto:atsdb@gmx.at}{atsdb@gmx.at}.\\
 
-Other OS (e.g. Windows or Mac) are currently not be supported.
+Other OS (e.g. Windows or Mac) are currently not supported.
 
 \subsection{Recommended Hardware}
 
@@ -32,6 +34,7 @@ The application will perform best on a workstation with at least the following m
 \item Dedicated NVidia or ATI graphics card
 \item 8GB of RAM or more
 \end{itemize}
+\ \\
 
 Depending on the loaded datasize, more RAM or a better graphics card might be of advantage. \\
 
@@ -40,7 +43,7 @@ Depending on the loaded datasize, more RAM or a better graphics card might be of
 A recommended setup could be similiar to:
 
 \begin{itemize}  
-\item Intel i5 or better
+\item Intel i5 or better (at least 2 physical cores)
 \item Decent NVidia or ATI graphics card, e.g.
 \begin{itemize}  
 \item Nvidia Quattro, GT 740 or later, GTX 660 or later
@@ -50,10 +53,11 @@ A recommended setup could be similiar to:
 \item 16GB of RAM or more
 \end{itemize}
 
+
 \subsection{Graphics Cards \& Drivers}
 \label{sec:graphics_installation}
 
-Since there exist hundreds of different graphics card types, and several possible drivers for each of them, support will only be given for ATI or Nvidia graphics cards, with their native drivers.
+Since there exist hundreds of different graphics card types, and numerous possible drivers for each of them, support will only be given for ATI or NVidia graphics cards, with their native drivers.
 
 To find out what graphics cards are available in the system, use \textit{lspci} (might have to be installed):
 
@@ -93,7 +97,7 @@ OpenGL ES profile shading language version string: OpenGL ES GLSL ES 3.20
 OpenGL ES profile extensions:
 \end{verbatim}
 
-This gives several important pointer:
+This gives several important points:
 
 \begin{itemize}  
 \item OpenGL vendor string: This is the grapics card driver. Only NVidia or ATI ones are supported.
@@ -103,7 +107,7 @@ This gives several important pointer:
 
 \paragraph{Unsupported Graphics Cards or Drivers}
 
-If different graphics cards or driver are in use, the output of glxinfo might be similiar to this:
+If different graphics cards or drivers are in use, the output of glxinfo might be similiar to this:
 
 \begin{verbatim}
 OpenGL vendor string: nouveau
