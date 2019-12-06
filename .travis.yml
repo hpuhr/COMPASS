@@ -4,6 +4,8 @@ addons:
   apt:
     packages:
      - cmake
+     - gcc-6.5
+     - g++-6.5
      - qtbase5-dev
      - libqt5opengl5-dev
      - libboost-dev
@@ -25,9 +27,11 @@ addons:
 
 compiler:
  - gcc
- - clang
+# - clang
 
 script:
+ - export CC=gcc-6
+ - export CXX=g++-6
  - mkdir build
  - cd build
  - cmake ..
