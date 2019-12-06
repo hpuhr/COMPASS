@@ -10,7 +10,7 @@
 
 Several MySQL servers can be defined, each one has a specific set of parameters. To add a new server, press the 'Add' button and enter a unique server name. To select the currently used server, use the dropdown menu. To delete the currently used server, press the 'Delete' button.
 
-For connecting to a MySQL database, several parameters have to be entered:
+For connecting to a MySQL server, several parameters have to be entered:
 
 \begin{table}[H]
   \center
@@ -30,33 +30,34 @@ To connect to a defined MySQL server, press the 'Connect' button.\\
 
 \subsection{Access to SASS-C MySQL Servers}
 
-Please note that it is not recommended to use SASS-C databases on which actual performance evaluations are to be performed. Using ATSDB, database operations can be performed which might impede results later obtained by using SASS-C. For this reason, it is recommended to either clone an evaluation or use one on which no later SASS-C evaluations are performed.
+Please note that it is not recommended to use SASS-C databases on which actual performance evaluations are to be performed. \\
+Using ATSDB, database operations can be performed which might impede results later obtained by using SASS-C. For this reason, it is recommended to either clone an evaluation or use one on which no later SASS-C evaluations are performed.
 
 If a remote server is used, e.g. a SASS-C workstation, remote access might be prohibited, which will result in an access permissions error during connecting. To resolve this, (generally) remote access can be enabled in the servers MySQL configuration. As a superuser, edit the file 'my.cnf', which is commonly found under '/etc/mysql/my.cnf'. 
 
 Find the line that states:
-\begin{verbatim}
+\begin{cverbatim}
 bind-address = 127.0.0.1
-\end{verbatim}
+\end{cverbatim}
 
 Change the line to:
 
-\begin{verbatim}
+\begin{cverbatim}
 #bind-address = 127.0.0.1
-\end{verbatim}
+\end{cverbatim}
 
 Then, restart the MySQL server using one the following commands:
 
-\begin{verbatim}
+\begin{cverbatim}
 /etc/init.d/mysqld restart
 
 #OR, depending on your distribution
 service mysql restart
-\end{verbatim}
+\end{cverbatim}
 
 Then, to allow access to the databases, log into a MySQL client on the server as root and execute the following commands:
 
-\begin{verbatim}
+\begin{cverbatim}
 # log in as root, must be done as superuser
 mysql -u root
 
@@ -70,7 +71,7 @@ FLUSH PRIVILEGES;
 
 # exit the MySQL client
 exit
-\end{verbatim}
+\end{cverbatim}
 
 After executing these steps once, remote access to this MySQL server from the specified IP address is enabled.
 
@@ -86,7 +87,7 @@ It might also be the case that your installation of SASS-C has an enabled firewa
 
 \subsection{Error Messages}
 
-If  a  wrong  database  name  or  IP  address  is  used,  error  messages  can  be  e.g.  \\
+If a wrong database name or IP address is used, error messages can be e.g. \\
 
 \begin{figure}[H]
   \center

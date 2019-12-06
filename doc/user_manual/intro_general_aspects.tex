@@ -1,7 +1,7 @@
 \section{General Aspects}
-ATSDB is a highly specialized surveillance data processing framework, with a strong focus on high-performance and a low memory footprint,  to process large quantities of data. Surveillance data is fetched from a database (limited by a filter system), then processed and displayed using so-called Views (visualization of aspects of the result set).\\
+ATSDB is a highly specialized surveillance data processing framework, with a strong focus on high-performance and a low memory footprint,  to process large quantities of data. Surveillance data is fetched from a database (limited by a filter system), then processed and displayed using so-called Views (specific visualizations of the result set).\\
 
-As storage medium, a database is used.  Different database systems are supported, and a flexible read-out system allows for easy adaptation to different database schemas.  Data in such a database can be generated in a previous, separate process e.g. EUROCONTROL's SASS-C Verif V7/8 framework. Another option is to use the ASTERIX or JSON import, preferably in a SQLite3 database (although MySQL would also be possible).\\
+As storage medium, a database is used.  Different database systems are supported, and a flexible read-out system allows for easy adaptation to different database schemas.  Data in such a database can be generated in a previous, separate process e.g. EUROCONTROL's SASS-C Verif V8 framework. Another option is to use the ASTERIX or JSON import, preferably in a SQLite3 database (although MySQL would also be possible).\\
 
 When such a previously generated database is opened for the first time, some post-processing is performed, to ease usage and to increase startup speed.  When data is loaded using a database query, a filter configuration may restrict the data leading to a result set.  Such a result set can be analyzed using the exsting Views.\\
 

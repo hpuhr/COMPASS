@@ -1,7 +1,7 @@
 \section{Importing ASTERIX Data}
 \label{sec:asterix_import}
 
-To execute this task select ''Task``->  ''Import ASTERIX Data` in the top menu bar. \\
+To execute this task select 'Task'->  'Import ASTERIX Data` in the top menu bar. \\
 
 Please note that the following framings are currently supported:
 \begin{itemize}  
@@ -9,8 +9,9 @@ Please note that the following framings are currently supported:
 \item IOSS: IOSS Final Format
 \item RFF: Comsoft RFF format
 \end{itemize}
+\ \\
 
-Please note that the following ASTERIX categories, editions, reserved expansion fields and special purpose fields are currently supported: \\\\
+Please note that the following ASTERIX categories, editions, reserved expansion fields and special purpose fields are currently supported: \\
 
 \begin{tabular}{ | l | r | r | r |}
 \hline
@@ -27,6 +28,7 @@ Please note that the following ASTERIX categories, editions, reserved expansion 
   063 & 1.0, 1.1 & & \\ \hline
   065 & 1.2, 1.3 & & \\ \hline
 \end{tabular} \\
+\  \\
 
 Please note that sensor status messages currently are decoded, but not inserted into the database.
 
@@ -46,7 +48,7 @@ To inspect or edit a JSON object parser, click on it in the list. This step is n
 
 Using the 'Debug in Console' checkbox, additional debugging information is output to the console, and the ASTERIX decoding is switched to single-threading for easier investigation.
 
-Using the 'Test Import' button, the import function can be tested without inserting the data into the database, the 'Import' imports the selected file with the given options.
+Using the 'Test Import' button, the import function can be tested without inserting the data into the database, the 'Import' imports the selected file with the given options. \\
 
 During import a status indication will be shown:
 
@@ -56,7 +58,7 @@ During import a status indication will be shown:
   \caption{Import ASTERIX data task status}
 \end{figure}
 
-If an decoding error occurs, a brief message box is shown, after which the application has to be closed. Please make sure that the correct framing and edition versions are selected, or contact the author for support if this does not resolve the issue.
+If an decoding error occurs, a brief message box is shown, after which the application has to be closed. Please make sure that the correct framing and edition versions are selected, or contact the author for support if this does not resolve the issue. \\
 
 After import, a confirmation will be shown:
 
@@ -70,6 +72,6 @@ Importing performance strongly depends on CPU performance (multi-threading very 
 
 \includegraphics[width=0.5cm]{../../data/icons/hint.png} Please also note the currently not all data fields (as shown in the JSON object parsers) are imported.\\
 
-The (truncated) timestamps of CAT001 are calculated in a simple algorithm based on the CAT002 messages from the same sensor. \\\\
+The (truncated) timestamps of CAT001 are calculated in a simple algorithm based on the CAT002 messages from the same sensor, so their timestamp data is slightly unreliable, but exact enough for e.g. time window filtering. \\\\
 
 \includegraphics[width=0.5cm]{../../data/icons/hint.png} After the import it is recommended to re-start the application, since currently a memory leak during import exists. While this does not affect the import process, usage of the application directly after the import process will be slower than usual. A re-start of the application resolves this issue. This will be fixed in the next version. \\ 

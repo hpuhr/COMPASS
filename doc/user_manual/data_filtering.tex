@@ -3,8 +3,8 @@
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=8cm,frame]{../screenshots/filtering_details.png}
-  \caption{Default Filters}
+    \includegraphics[width=6cm,frame]{../screenshots/filtering_details.png}
+  \caption{Default filters}
   \label{fig:filter_default}
 \end{figure}
 
@@ -15,6 +15,10 @@ When active, this filter forces loading of data with a barometric altitude insid
 \subsection{Callsign Filter}
 
 When active, this filter forces loading of data only from callsigns matching the given expression. The percent operator denotes a 'any characters' placeholder. So e.g. '\%TEST\%' will match 'TEST123' or 'TEST123   ' (with spaces) or 'MYTEST'. Target reports without a given callsign will not be loaded.
+
+\subsection{HashCode Filter}
+
+When active, this filter forces loading of data only from target reports with a specific ARTAS MD5 hash code, or system track updates referencing this hash code (in their TRI information). If no hash information is available (e.g. in SASS-C Verif databases or when this information was not present in the ASTERIX data), this filter should not be used.
 
 \subsection{Mode 3/A Codes Filter}
 

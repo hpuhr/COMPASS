@@ -3,7 +3,7 @@
 
 \begin{figure}[H]
     \hspace*{-2cm}
-    \includegraphics[width=10cm,frame]{../screenshots/osgview_config_tab.png}
+    \includegraphics[width=8cm,frame]{../screenshots/osgview_config_tab.png}
   \caption{OSG View Config tab}
 \end{figure}
 
@@ -37,6 +37,7 @@ The following items can be present in the list:
  \item mode3a\_code: Mode 3/A code
  \item UTN: Unique Target Number, only available if association information is present
 \end{itemize}
+\ \\
 
 The group mode defines what layers are generated, e.g. for 'A' only layers for all values of 'A' are created, for 'A:B' layers for all values of 'A' are created, each with sub-layers for all values of 'B'. In this case, 'A' is the parent, 'B' is the child. \\\\
 
@@ -158,6 +159,11 @@ Please note that upon changes to the height usage, a manual redraw has to be per
 \subsection{Render Order}
 
 In the render order widget, the drawing order of all DBObjects is specified. The one at the top is drawn last (over all others), so it is useful to move the most important DBObject (for the current inspection) to the top.
+
+\begin{figure}[H]
+    \includegraphics[width=10cm,frame]{../screenshots/osgview_render_order.png}
+  \caption{OSG View render order}
+\end{figure}
 
 To change the drawing order click on the DBObject to move and use the buttons on the right side. Please note that no redraw is required and that the drawing order is persisted in the configuration.
 % 

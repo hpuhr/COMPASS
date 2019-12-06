@@ -31,6 +31,33 @@
 \usepackage{dpfloat}     % floats on facing pages
 \usepackage{fonttable}[2009/04/01]   % font tables
 \usepackage[export]{adjustbox}
+
+\usepackage{fancyvrb,newverbs,xcolor}
+
+\definecolor{cverbbg}{gray}{0.93}
+
+\newenvironment{cverbatim}
+ {\SaveVerbatim{cverb}}
+ {\endSaveVerbatim
+  \flushleft\fboxrule=0pt\fboxsep=.5em
+  \colorbox{cverbbg}{\BUseVerbatim{cverb}}%
+  \endflushleft
+}
+\newenvironment{lcverbatim}
+ {\SaveVerbatim{cverb}}
+ {\endSaveVerbatim
+  \flushleft\fboxrule=0pt\fboxsep=.5em
+  \colorbox{cverbbg}{%
+    \makebox[\dimexpr\linewidth-2\fboxsep][l]{\BUseVerbatim{cverb}}%
+  }
+  \endflushleft
+}
+
+\newcommand{\ctexttt}[1]{\colorbox{cverbbg}{\texttt{#1}}}
+\newverbcommand{\cverb}
+  {\setbox\verbbox\hbox\bgroup}
+  {\egroup\colorbox{cverbbg}{\box\verbbox}}
+
 %%%%\usepackage{xr-hyper} \externaldocument{memdesign} Doesn't work, 
 %%%%                      Idea won't work in general for memman/memdesign
 %%%%                      as at display time, who knows where everything

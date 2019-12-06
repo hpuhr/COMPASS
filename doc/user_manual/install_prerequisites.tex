@@ -2,14 +2,11 @@
 
 \subsection{Operating System}
 
-The binary will currently only be provided to (somehwat current) Linux 64-bit operating systems. For the following distributions, the AppImage was reported to be working correctly:
+The binary will currently only be provided to (somewhat current) Linux 64-bit operating systems. For the following distributions, the AppImage was reported to be working correctly:
 
 \begin{itemize}  
 \item CentOS 7.3
-\item Ubuntu 14.04
-\item Ubuntu 17.10
-\item Ubuntu 18.04
-\item Ubuntu 19.04
+\item Ubuntu 14.04, 16.04, 17.04, 18.04, 19.04
 \item Linux Mint 18.3
 \end{itemize}
 \ \\
@@ -40,7 +37,7 @@ Depending on the loaded datasize, more RAM or a better graphics card might be of
 
 \includegraphics[width=0.5cm]{../../data/icons/hint.png} Please note that other graphics cards (Intel, Matrox) will in good probability also work, but are not supported. \\\\
 
-A recommended setup could be similiar to:
+An optimal setup could be similiar to:
 
 \begin{itemize}  
 \item Intel i5 or better (at least 2 physical cores)
@@ -61,25 +58,25 @@ Since there exist hundreds of different graphics card types, and numerous possib
 
 To find out what graphics cards are available in the system, use \textit{lspci} (might have to be installed):
 
-\begin{verbatim}
+\begin{cverbatim}
 lspci | grep VGA
-\end{verbatim}
+\end{cverbatim}
 
 Output might look like this:
 
-\begin{verbatim}
+\begin{cverbatim}
 01:00.0 VGA compatible controller: NVIDIA Corporation GP104 [GeForce GTX 1080]
-\end{verbatim}
+\end{cverbatim}
 
 To find out which graphics card and driver are being used, the program \textit{glxinfo} can to be used (might have to be installed). Please execute the following command:
 
-\begin{verbatim}
+\begin{cverbatim}
 glxinfo | grep OpenGL
-\end{verbatim}
+\end{cverbatim}
 
 The output might look something like this:
 
-\begin{verbatim}
+\begin{cverbatim}
 OpenGL vendor string: NVIDIA Corporation
 OpenGL renderer string: GeForce GTX 1080/PCIe/SSE2
 OpenGL core profile version string: 4.5.0 NVIDIA 384.111
@@ -95,7 +92,7 @@ OpenGL extensions:
 OpenGL ES profile version string: OpenGL ES 3.2 NVIDIA 384.111
 OpenGL ES profile shading language version string: OpenGL ES GLSL ES 3.20
 OpenGL ES profile extensions:
-\end{verbatim}
+\end{cverbatim}
 
 This gives several important points:
 
@@ -109,7 +106,7 @@ This gives several important points:
 
 If different graphics cards or drivers are in use, the output of glxinfo might be similiar to this:
 
-\begin{verbatim}
+\begin{cverbatim}
 OpenGL vendor string: nouveau
 OpenGL renderer string: Gallium 0.4 on NVE6
 OpenGL core profile version string: 3.1 (Core Profile) Mesa 9.2.5
@@ -120,11 +117,11 @@ OpenGL version string: 3.0 Mesa 9.2.5
 OpenGL shading language version string: 1.30
 OpenGL context flags: (none)
 OpenGL extensions:
-\end{verbatim}
+\end{cverbatim}
 
 Or this:
 
-\begin{verbatim}
+\begin{cverbatim}
 OpenGL vendor string: Intel Open Source Technology Center
 OpenGL renderer string: Mesa DRI Intel(R) Ivybridge Desktop 
 OpenGL core profile version string: 3.3 (Core Profile) Mesa 11.0.6
@@ -139,7 +136,7 @@ OpenGL extensions:
 OpenGL ES profile version string: OpenGL ES 3.0 Mesa 11.0.6
 OpenGL ES profile shading language version string: OpenGL ES GLSL ES 3.00
 OpenGL ES profile extensions:
-\end{verbatim}
+\end{cverbatim}
 
 In such cases, the following issues can be expected and will currently not be addressed:
 

@@ -3,7 +3,7 @@
 
 For information about test dataset please refer to \nameref{sec:test_data}. \\
 
-To execute this task select ''Task``->  ''Import JSON Data` in the top menu bar.
+To execute this task select 'Task'->  'Import JSON Data' in the top menu bar.
 
 \begin{figure}[H]
   \center
@@ -20,7 +20,7 @@ Below, the JSON parsing schema can be selected, the following options exist:
 \item OpenSkyNetwork: Import JSON from the OpenSky Network platform
 \end{itemize}
 
-A new schema can be added using the ``Add'' button, or an existing removed using the ``Remove'' button. \\
+A new schema can be added using the 'Add' button, or an existing removed using the 'Remove' button. \\
 
 Further below, for the selected parsing schema, the list of existing JSON object parsers is shown. Each parser is specialized for a specific DBO, in the shown example of OpenSkyNetwork, only ADSB exists, since no other data is provdided. \\
 
@@ -57,7 +57,7 @@ Below list of JSON to DBO variable mappings, with the following options:
 \item Format: Parsing specialization for JSON value
 \end{itemize}
 
-A new mapping can be added using the ``Add'' button. \\\\
+A new mapping can be added using the 'Add' button. \\\\
 
 Using the 'Test Import' button, the import function can be tested without inserting the data into the database, the 'Import' imports the selected file with the given options.
 
@@ -81,4 +81,4 @@ After import, a confirmation will be shown as follows:
 
 Importing performance strongly depends on CPU performance (multi-threading very beneficial), but a SDDL JSON import of 2.5 million target reports takes about 7 minutes on the author's hardware. \\
 
-\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please note that, since ADSBexchange JSON is not compliant to JSON standard (at least from the used test datasets), parsing errors will be shown and only a small percentage of target reports is imported. This will be improved in the near future.\\ 
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please note that, since ADSBexchange JSON is not compliant to JSON standard (at least from the used test datasets), parsing errors will be shown and only a small percentage of target reports is imported.

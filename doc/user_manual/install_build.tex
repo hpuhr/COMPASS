@@ -32,18 +32,18 @@ To build the source code with the ASTERIX decoder jASTERIX, follow the instructi
 To install the ATSDB source code, either download the latest released version from \\ \url{https://github.com/hpuhr/ATSDB/releases} \\
 or use the following command (git required) to clone the current repository:
 
-\begin{verbatim}
+\begin{cverbatim}
 git clone https://github.com/hpuhr/ATSDB.git
-\end{verbatim}
+\end{cverbatim}
 
 Enter the ATSDB source folder, create a subfolder 'build', enter it and execute cmake to create a Makefile:
 
-\begin{verbatim}
+\begin{cverbatim}
 cmake ..
-\end{verbatim}
+\end{cverbatim}
 
 The output should look like this:
-\begin{verbatim}
+\begin{cverbatim}
 sk@golem:~/test/ATSDB$ cmake .
   Path: /home/sk/test/ATSDB
 -- The C compiler identification is GNU 7.2.0
@@ -83,40 +83,21 @@ sk@golem:~/test/ATSDB$ cmake .
   Boost_INCLUDE_DIR: /usr/include
   Boost_LIBRARY_DIR: 
   CMAKE_MODULE_PATH: /home/sk/test/ATSDB/cmake_modules
--- Found MySQL: /usr/lib/libmysqlpp.so
-  MySQLpp_INCLUDE_DIR: /usr/include/mysql++
-  MySQLpp_LIBRARY: /usr/lib/libmysqlpp.so
--- Found MySQL: /usr/lib/x86_64-linux-gnu/libmysqlclient.so
-  MYSQL_INCLUDE_DIR: /usr/include/mysql
--- Found Sqlite3 header file in /usr/include
--- Found Sqlite3 libraries: /usr/lib/x86_64-linux-gnu/libsqlite3.so
-  SQLite3_INCLUDE_DIR: /usr/include
-  SQLite3_LIBRARY_DIR: /usr/lib/x86_64-linux-gnu/libsqlite3.so
--- Found Log4CPP
-  LOG4CPP_INCLUDE_DIR: /usr/include
-  LOG4CPP_LIBRARY: /usr/lib/x86_64-linux-gnu/liblog4cpp.so
--- Found GDAL: /usr/lib/libgdal.so  
-  GDAL_INCLUDE_DIRS: /usr/include/gdal
-  GDAL_LIBRARIES: /usr/lib/libgdal.so
-  TINYXML2_INCLUDE_DIR: /usr/include
-  TINYXML2_LIBRARY: /usr/lib/x86_64-linux-gnu/libtinyxml2.so
--- Found Doxygen: /usr/bin/doxygen (found version "1.8.13") found components:
-    doxygen 
-CPACK_SOURCE_IGNORE_FILES = /CMakeFiles/;/_CPack_Packages/;/dist/;/.git/;
+...
 -- Configuring done
 -- Generating done
 -- Build files have been written to: /home/sk/test/ATSDB
-\end{verbatim}
+\end{cverbatim}
 
 Then, compile the source by executing:
 
-\begin{verbatim}
+\begin{cverbatim}
 make
-\end{verbatim}
+\end{cverbatim}
 
 The output should look like this:
 
-\begin{verbatim}
+\begin{cverbatim}
 Scanning dependencies of target atsdb_autogen
 [  1%] Automatic MOC for target atsdb
 Generating MOC predefs moc_predefs.h
@@ -143,17 +124,17 @@ Scanning dependencies of target atsdb_client
 ...
 [100%] Linking CXX executable atsdb_client
 [100%] Built target atsdb_client
-\end{verbatim}
+\end{cverbatim}
 
 To install the ATSDB client, execute the following command in the build folder:
 
-\begin{verbatim}
+\begin{cverbatim}
 sudo make install
-\end{verbatim}
+\end{cverbatim}
 
 This will install binary and a data folder to your system directories, commonly in '/usr/local/bin/', '/usr/local/lib/' and '/usr/local/atsdb/' (or similiar, depending on you Linux distribution.
 
 To start the ATSDB client run:
-\begin{verbatim}
+\begin{cverbatim}
 atsdb_client
-\end{verbatim}  
+\end{cverbatim}  

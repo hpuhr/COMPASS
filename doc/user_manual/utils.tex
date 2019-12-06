@@ -4,7 +4,7 @@
 \section{jASTERIX}
 \label{sec:jasterix}
 
-TODO
+For usage of the jASTERIX library/tool please refer to \href{https://github.com/hpuhr/jASTERIX}{jASTERIX}.
 
 \section{SDDL}
 \label{sec:sddl}
@@ -15,27 +15,27 @@ While it is possible to download and build from the source code, this usage guid
 
 After downloading, set the executable flag on the file: 
 
-\begin{verbatim}
+\begin{cverbatim}
 $ chmod +x SDDL-json-x86_64.AppImage
-\end{verbatim}
+\end{cverbatim}
 
 After this, the file can be executed. The help text can be obtained with the following command:
-\begin{verbatim}
-$ ./SDDL-json-x86_64.AppImage
+\begin{cverbatim}
+./SDDL-json-x86_64.AppImage
 *** Surveillance Data Decoder and Lister			   v1.1.0 ***
 2000-2018 by Helmut Kobelbauer, Sinabelkirchen/Austria.
 
 SDDL is free software: you can redistribute it and/or modify it under
- the terms of the GNU General Public License as published by the Free Software
- Foundation, either version 3 of the License, or (at your option) any later version.
+ the terms of the GNU General Public License as published by the 
+ Free Software Foundation, either version 3 of the License, 
+ or (at your option) any later version.
 
 SDDL is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
+ or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ for more details
 
-Users are invited to report issues or requests for improvement
- however the provider has no obligation to process users' requests and
- provide fixes and/or enhancements.
+...
 
 The 'Surveillance Data Decoder and Lister' utility may be used as follows:
 
@@ -61,29 +61,7 @@ where the following options are supported:
                 none,test,print,text,cbor,msgpack,ubjson,
                 zip-text,zip-cbor,zip-msgpack,zip-ubjson
  -json-file=pathname	path name of json file to be written
- -list_065		list ASTERIX category 065 messages
- -list_dsi		list data source identifiers (SAC/SIC)
- -list_gh		list geometric height
- -list_lus		list last updating sensor (for system tracks)
- -list_only_bg		list only system tracks from background service
- -list_only_cy		list only system tracks from complementary service
- -list_service_id	list service identification (for system tracks)
- -ll=nn			length limit (only first nn bytes are listed)
- -ml			handle multiple lines (per sensor)
- -mof			list mode of flight (for system tracks)
- -nft			don't list frame time
- -no_utc		No UTC time of day in list file
- -progress		show some progress indication
- -reftrj		input file holds reference trajectories
- -soe			stop on (ASTERIX) error
- -sqn			with sequence numbers
- -srv_id=xxx		filter ARTAS output by service_identification
- -ssta			list sensor status information
- -start_date=yyyy-mm-dd	start date
- -start_offset=nnn	start offset in input file
- -subtypes		print list of supported format subtypes
- -timebias=ttt		time bias (milliseconds)
- -tn12			system track number with 12 bits (legacy)
+...
  -utc			UTC time of day in list file (default)
  -wgs84			list WGS-84 position
 
@@ -94,28 +72,13 @@ For comments or questions our e-mail address is: sddl@gmx.at
 Thank you for using this software.
 
 *** End of Surveillance Data Decoder and Lister ***
-\end{verbatim}
+\end{cverbatim}
 
 To print the list of supported ASTERIX categories and editions, use:
-\begin{verbatim}
-$ ./SDDL-json-x86_64.AppImage -categories
-*** Surveillance Data Decoder and Lister			   v1.1.0 ***
-2000-2018 by Helmut Kobelbauer, Sinabelkirchen/Austria.
-
-SDDL is free software: you can redistribute it and/or modify it under
- the terms of the GNU General Public License as published by the Free Software
- Foundation, either version 3 of the License, or (at your option) any later version.
-
-SDDL is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details
-
-Users are invited to report issues or requests for improvement
- however the provider has no obligation to process users' requests and
- provide fixes and/or enhancements.
-
+\begin{cverbatim}
+ ./SDDL-json-x86_64.AppImage -categories
+...
 The 'sddl' utility at the moment supports the following ASTERIX categories:
-
  ASTERIX category 000	n.a.	April 1998
  ASTERIX category 001	1.1 	August 2002
  ASTERIX category 002	1.0 	November 1997
@@ -167,30 +130,15 @@ The 'sddl' utility at the moment supports the following ASTERIX categories:
  ASTERIX category 221	?	?
  ASTERIX category 247	1.2	February 2008
  ASTERIX category 252	2.8.1	26 February 1999
-
-If you need additional categories or versions, please send us an e-mail:
- sddl@gmx.at
-
-*** End of Surveillance Data Decoder and Lister ***
-\end{verbatim}
+\end{cverbatim}
 
 To list the supported framing formats, use:
-\begin{verbatim}
+\begin{cverbatim}
 ./SDDL-json-x86_64.AppImage -formats
 *** Surveillance Data Decoder and Lister			   v1.1.0 ***
 2000-2018 by Helmut Kobelbauer, Sinabelkirchen/Austria.
 
-SDDL is free software: you can redistribute it and/or modify it under
- the terms of the GNU General Public License as published by the Free Software
- Foundation, either version 3 of the License, or (at your option) any later version.
-
-SDDL is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details
-
-Users are invited to report issues or requests for improvement
- however the provider has no obligation to process users' requests and
- provide fixes and/or enhancements.
+...
 
 The 'sddl' utility at the moment supports the following recording formats:
 
@@ -212,35 +160,25 @@ Please be aware that NOT EVERY combination of recording and data formats
 Thank you for using our software.
 
 *** End of Surveillance Data Decoder and Lister ***
-\end{verbatim}
+\end{cverbatim}
 
 To list an existing ASTERIX recording 'test.rff' with RFF framing, use:
-\begin{verbatim}
+\begin{cverbatim}
 ./SDDL-json-x86_64.AppImage -rff test.rff
-\end{verbatim}
+\end{cverbatim}
 
 This will output the contained ASTERIX data with one line per target report/status message. To limit parsing to the first 10000 bytes (for testing), use:
-\begin{verbatim}
+\begin{cverbatim}
 ./SDDL-json-x86_64.AppImage -rff test.rff -ll=10000
-\end{verbatim}
+\end{cverbatim}
 
 To limit text output (for testing/benchmarking) with enable progress, use:
-\begin{verbatim}
+\begin{cverbatim}
 ./SDDL-json-x86_64.AppImage -rff test.rff -l=0 -progress
 *** Surveillance Data Decoder and Lister			   v1.1.0 ***
 2000-2018 by Helmut Kobelbauer, Sinabelkirchen/Austria.
 
-SDDL is free software: you can redistribute it and/or modify it under
- the terms of the GNU General Public License as published by the Free Software
- Foundation, either version 3 of the License, or (at your option) any later version.
-
-SDDL is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details
-
-Users are invited to report issues or requests for improvement
- however the provider has no obligation to process users' requests and
- provide fixes and/or enhancements.
+...
 
 -> List level set to 0
 -> Show progress indication
@@ -257,7 +195,7 @@ Users are invited to report issues or requests for improvement
 163279 frames/sec)
 
 *** End of Surveillance Data Decoder and Lister ***
-\end{verbatim}
+\end{cverbatim}
 
 JSON output can be obtained in several ways:
 \begin{itemize}
@@ -277,23 +215,13 @@ JSON output can be obtained in several ways:
 For parsing in ATSDB, only the 'text' or 'zip-text' mode are currently supported. Use the first only for smaller dataset, the latter provides good compression. The resulting ZIP file will be about twice the size of the original ASTERIX file.
 
 To decode and write a JSON zip-text file 'test\_json.zip', use:
-\begin{verbatim}
+\begin{cverbatim}
 ./SDDL-json-x86_64.AppImage -rff test.rff -l=0 -progress -json-type=zip-text 
 -json-file=test_json.zip
 *** Surveillance Data Decoder and Lister			   v1.1.0 ***
 2000-2018 by Helmut Kobelbauer, Sinabelkirchen/Austria.
 
-SDDL is free software: you can redistribute it and/or modify it under
- the terms of the GNU General Public License as published by the Free Software
- Foundation, either version 3 of the License, or (at your option) any later version.
-
-SDDL is distributed in the hope that it will be useful, but WITHOUT
- ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details
-
-Users are invited to report issues or requests for improvement
- however the provider has no obligation to process users' requests and
- provide fixes and/or enhancements.
+...
 
 -> List level set to 0
 -> Show progress indication
@@ -311,7 +239,7 @@ Users are invited to report issues or requests for improvement
 -> Processed 227970515 bytes in 106.411 seconds (about 2.043 MB/sec; 19669 frames/sec)
 
 *** End of Surveillance Data Decoder and Lister ***
-\end{verbatim}
+\end{cverbatim}
 
 For the used example file, this will result in a 420 MB ZIP file, which contains a text file with 7GB of JSON text. This ZIP archive can then be used in ATSB, according to the procedure described in \nameref{sec:json_import}
 
@@ -378,9 +306,9 @@ It is also assumed that \textbf{bash} is being used as the shell. \\
 
 Please note that the termsql script expects a python package 'sqlparse' with a version greater than 0.1.14. To install, commonly a command like the following can be used:
 
-\begin{verbatim}
+\begin{cverbatim}
 $ sudo pip install sqlparse
-\end{verbatim}
+\end{cverbatim}
 
 For more information on how to install python packages refer to \url{https://packaging.python.org/tutorials/installing-packages/}.
 
@@ -404,7 +332,7 @@ The script expects a mandatory CSV file name and at least the datasource type, w
 
 The following are examples of the four accepted datasources.
 
-\begin{verbatim}
+\begin{cverbatim}
 # loading an ADS-B file
 
 $ csv2atsdb -f ADS-B.csv -t A
@@ -423,7 +351,7 @@ $ csv2atsdb -f Radar.csv -t R
 # loading a Tracker file
 
 $ csv2atsdb -f Tracker.csv -t T
-\end{verbatim}
+\end{cverbatim}
 
 It is also possible to combine several datasources and import them into ATSDB by using the option \textbf{-l}. This option requires a file where each row holds a datasource definition. \\
 
@@ -440,7 +368,7 @@ If a row is not correctly defined its contents shall be discarded. Comments can 
 The following is an example of loading a list of datasources. \\
 Please note that an \textit{output file name} \textbf{must} be specified.
 
-\begin{verbatim}
+\begin{cverbatim}
 $ cat ImportList
 A;ADS-B;ads-b_only.csv; This is a comment
 R;RAD;radar_only.csv
@@ -448,11 +376,11 @@ W;WAM;wam_only.csv; COMMENT number 2
 T;ARTAS;tracker_only.csv
 
 $ csv2atsdb -l ImportList -o mixing_datasources.db
-\end{verbatim}
+\end{cverbatim}
 
 The option \textbf{-h} or the lack of parameters prints a summary of the switches one can use with the script csv2atsdb.
 
-\begin{verbatim}
+\begin{cverbatim}
 $ csv2atsdb
 usage: /path-to-script/csv2atsdb ( -f <file> | -l <file list> ) [ -o <file> ]
                                  [ -n <name> ] [ -t <type> ] [ -keep ]
@@ -487,11 +415,11 @@ usage: /path-to-script/csv2atsdb ( -f <file> | -l <file list> ) [ -o <file> ]
        -keep ::= keep the existing database and append new data to it
 
        -h ::= this help
-\end{verbatim}
+\end{cverbatim}
 
 By default and after converting the CSV file(s) an SQLite3 file container is created in the current working directory with the same name as the CSV file and extension '.db'. \\
 
-This file can be loaded into ATSDB by choosing the option 'Opening a SQLite3 File Container' (refer to section \nameref{sec:sqlite_fc}).
+This file can be loaded into ATSDB by \nameref{sec:sqlite_open}.
 
 \subsection{ADS-B exchange}
 
@@ -504,9 +432,9 @@ The data contents is coded in JSON and is described in \url{https://www.adsbexch
 Please be aware that using the produced data for commercial purposes (without a specific agreement) would violate the ADSB exchange terms \& conditions. Please refer to \url{https://www.adsbexchange.com/legal-and-privacy/} for additional information.\\
 
 The user could try to obtain a day with:
-\begin{verbatim}
+\begin{cverbatim}
 $ wget http://history.adsbexchange.com/Aircraftlist.json/2016-06-20.zip
-\end{verbatim}
+\end{cverbatim}
 
 The time taken to get the file depends on the user's internet provider. The files are usually around 8G bytes.
 

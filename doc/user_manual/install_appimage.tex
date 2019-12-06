@@ -2,20 +2,21 @@
 
 To summarize, an AppImage is a form of binary distribution in one complete package, which does not require installation of any libraries or alteration of the operating system. Please refer to \url{https://appimage.org/} to get additional information. \\
 
-To obtain the ATSDB AppImage, download the most current AppImage from \url{https://github.com/hpuhr/ATSDB/releases}. Before executing, it has to be made executable (once after download) using the following command:
-\begin{verbatim}
+To obtain the ATSDB AppImage, download the most current AppImage from \url{https://github.com/hpuhr/ATSDB/releases}. \\
+
+Before executing, it has to be made executable (once after download) using the following command:
+\begin{cverbatim}
 chmod +x ATSDB-x86_64_release.AppImage
-\end{verbatim}
+\end{cverbatim}
 
 That is it. The application can be run using the following command:
-\begin{verbatim}
+\begin{cverbatim}
 ./ATSDB-x86_64_release.AppImage
-\end{verbatim}
+\end{cverbatim}
 
 The following notes that should be considered:
 
 \begin{itemize}  
 \item The AppImage should run under any Linux distribution of similiar date to Ubuntu 14.04 or later, but no guarantees can be made.
-\item The AppImage performance is somewhat lessened in comparison to the a later Ubuntu version, which in all probability is just that the graphics system is that outdated. This will be investigated further.
 \item OSG View rendering is performed according to the local graphics card and driver, and might be limited by their capabilities.
 \end{itemize} 
