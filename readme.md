@@ -2,15 +2,17 @@
 Based on a dynamic database schema, recorded air traffic surveillance data can be inserted, retrieved and inspected.
 
 - Support of multiple database systems, e.g. Sqlite3, MySQL
-- Support of multiple, configurable database schemas, e.g. SCDB, Simple
+- Support of multiple, configurable database schemas, e.g. SCDB
 - Dynamic JSON import from SDDL, ADS-B exchange, OpenSky Network
 - Dynamic ASTERIX import using [jASTERIX](https://github.com/hpuhr/jASTERIX)
 - MySQL database import and management of SCDB databases
 - High performance processing, low memory footprint
 - Utilization of application during loading procedure
 - Views for data inspection
-- Target report cross-selection
+- Cross-view data selection and inspection
+- Filtering for detailed analysis
 - Simple custom filter generation
+- ARTAS track association (TRI) analysis
 - Supported Database Objects
   - Radar plots
   - System Tracks and Reference Trajectories
@@ -19,11 +21,10 @@ Based on a dynamic database schema, recorded air traffic surveillance data can b
 - XML-based configuration files
 - Multiple coexisting configurations, usage chosen during runtime
 - Based on Open Source libraries
-- Runs on generic hardware
 
 Please refer to the releases page for the user manual and the AppImage. Please do read the user manual before running the application.
 
-![alt text](https://github.com/hpuhr/ATSDB/blob/master/doc/screenshots/osgview_3d.jpeg)
+![alt text](https://github.com/hpuhr/ATSDB/blob/master/doc/screenshots/osgview_measure3d.png)
 
 ## Contents
 
@@ -37,12 +38,12 @@ Please refer to the releases page for the user manual and the AppImage. Please d
 - LICENSE: GPL license
 - readme.md: This file
 
-## Released Experimental Version v0.4.1-beta
-- [Current Appimage](https://github.com/hpuhr/ATSDB/releases/download/v0.4.1-beta/ATSDB-v0.4.1-x86_64.AppImage)
-- [User Manual v0.4.0](https://github.com/hpuhr/ATSDB/releases/download/v0.4.0-beta/user_manual_v0.4.0.pdf)
+## Released Experimental Version v0.4.2-beta
+- [Current Appimage](https://github.com/hpuhr/ATSDB/releases/download/v0.4.2-beta/ATSDB-v0.4.2-x86_64.AppImage)
+- [User Manual](https://github.com/hpuhr/ATSDB/releases/download/v0.4.2-beta/user_manual_v0.4.2.pdf)
 
 ## YouTube Videos
-### Current
+### Current from v0.4.0
 - [v0.4.0: Import ASTERIX & Setup](https://youtu.be/QIMVb9HNBJc)
 - [v0.4.0: Basics](https://youtu.be/ny47qrBlyfM)
 - [v0.4.0: Advanced Usage](https://youtu.be/_L65VO8TsyE)
