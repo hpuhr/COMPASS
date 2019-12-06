@@ -31,10 +31,10 @@ AllBufferCSVExportJob::AllBufferCSVExportJob(std::map<std::string, std::shared_p
                                              std::map <unsigned int, std::string> number_to_dbo,
                                              const std::vector <std::pair<unsigned int, unsigned int>>& row_indexes,
                                              const std::string& file_name, bool overwrite, bool only_selected,
-                                             bool use_presentation)
+                                             bool use_presentation, bool show_associations)
     : Job("AllBufferCSVExportJob"), buffers_(buffers), read_set_(read_set), number_to_dbo_(number_to_dbo),
       row_indexes_(row_indexes), file_name_(file_name), overwrite_(overwrite),
-      only_selected_(only_selected), use_presentation_(use_presentation)
+      only_selected_(only_selected), use_presentation_(use_presentation), show_associations_(show_associations)
 {
     assert (read_set_);
     assert (file_name_.size());
@@ -78,6 +78,9 @@ void AllBufferCSVExportJob::run ()
         // write the columns
         ss << "Selected;DBObject";
 
+        if (show_associations_)
+            ss << ";UTN";
+
         for (size_t col=0; col < read_set_size; col++)
         {
             ss << ";" << read_set_->variableDefinition(col).variableName();
@@ -85,7 +88,7 @@ void AllBufferCSVExportJob::run ()
         output_file << ss.str() << "\n";
 
         // write the data
-        DBObjectManager &manager = ATSDB::instance().objectManager();
+        DBObjectManager& manager = ATSDB::instance().objectManager();
 
         for (auto& row_index_it : row_indexes_)
         {
@@ -104,6 +107,10 @@ void AllBufferCSVExportJob::run ()
             assert (buffer->has<bool>("selected"));
             NullableVector<bool> selected_vec = buffer->get<bool>("selected");
 
+            assert (buffer->has<int>("rec_num"));
+            NullableVector<int> rec_num_vec = buffer->get<int>("rec_num");
+
+
             // check if skipped because not selected
             if (only_selected_ && (selected_vec.isNull(buffer_index) || !selected_vec.get(buffer_index)))
                 continue;
@@ -118,6 +125,25 @@ void AllBufferCSVExportJob::run ()
                 ss << selected_vec.get(buffer_index)<< ";";
 
             ss << dbo_name; // set dboname
+
+            if (show_associations_)
+            {
+                ss << ";";
+
+                assert (!rec_num_vec.isNull(buffer_index));
+                unsigned int rec_num = rec_num_vec.get(buffer_index);
+
+                typedef DBOAssociationCollection::const_iterator MMAPIterator;
+                const DBOAssociationCollection& associations = manager.object(dbo_name).associations();
+
+                std::pair<MMAPIterator, MMAPIterator> result = associations.equal_range(rec_num);
+
+                for (MMAPIterator it = result.first; it != result.second; it++)
+                    if (it == result.first)
+                        ss << std::to_string(it->second.utn_);
+                    else
+                        ss << "," << std::to_string(it->second.utn_);
+            }
 
             for (unsigned int col=0; col < read_set_size; ++col)
             {

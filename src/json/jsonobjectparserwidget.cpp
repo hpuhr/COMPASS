@@ -158,7 +158,7 @@ void JSONObjectParserWidget::updateMappingsGrid()
 
     QIcon del_icon(Files::getIconFilepath("delete.png").c_str());
 
-    unsigned int row=0;
+    int row=0;
 
     QLabel *active_label = new QLabel ("Active");
     active_label->setFont (font_bold);
@@ -187,6 +187,15 @@ void JSONObjectParserWidget::updateMappingsGrid()
     QLabel *format_label = new QLabel ("Format");
     format_label->setFont (font_bold);
     mappings_grid_->addWidget (format_label, row, 6);
+
+    QLabel *array_label = new QLabel ("In Array");
+    array_label->setFont (font_bold);
+    mappings_grid_->addWidget (array_label, row, 7);
+
+
+    QLabel *append_label = new QLabel ("Append");
+    append_label->setFont (font_bold);
+    mappings_grid_->addWidget (append_label, row, 8);
 
     ++row;
 
@@ -243,17 +252,25 @@ void JSONObjectParserWidget::updateMappingsGrid()
         UnitSelectionWidget* unit_sel = new UnitSelectionWidget(map_it.second.second->dimensionRef(),
                                                                 map_it.second.second->unitRef());
         mappings_grid_->addWidget (unit_sel, row, 5);
-        //column_unit_selection_widgets_[unit_widget] = it.second;
 
-        //        if (map_it.hasVariable())
-        //        {
         DataTypeFormatSelectionWidget* data_format_widget
                 = new DataTypeFormatSelectionWidget (map_it.second.second->formatDataTypeRef(),
                                                      map_it.second.second->jsonValueFormatRef());
 
         mappings_grid_->addWidget (data_format_widget, row, 6);
-        //            format_selections_[row-1] = data_format_widget;
-        //        }
+
+        QCheckBox* in_array_check = new QCheckBox ();
+        in_array_check->setChecked(map_it.second.second->inArray());
+        connect(in_array_check, SIGNAL(stateChanged(int)), this, SLOT(mappingInArrayChangedSlot()));
+        in_array_check->setProperty("mapping", data);
+        mappings_grid_->addWidget(in_array_check, row, 7);
+
+
+        QCheckBox* append_check = new QCheckBox ();
+        append_check->setChecked(map_it.second.second->appendValue());
+        connect(append_check, SIGNAL(stateChanged(int)), this, SLOT(mappingAppendChangedSlot()));
+        append_check->setProperty("mapping", data);
+        mappings_grid_->addWidget(append_check, row, 8);
 
         QPushButton *del = new QPushButton ();
         del->setIcon(del_icon);
@@ -262,7 +279,7 @@ void JSONObjectParserWidget::updateMappingsGrid()
         connect(del, SIGNAL(clicked()), this, SLOT(mappingDeleteSlot()));
         del->setProperty("mapping", data);
         del->setProperty("index", map_it.second.first);
-        mappings_grid_->addWidget (del, row, 7);
+        mappings_grid_->addWidget (del, row, 9);
 
         row++;
     }
@@ -410,31 +427,12 @@ void JSONObjectParserWidget::mappingDBOVariableChangedSlot()
         loginf << "JSONObjectParserWidget: mappingDBOVariableChangedSlot: variable set";
 
         mapping->dboVariableName(var_widget->selectedVariable().name());
-        //        if (format_selections_.count(row) == 1)
-        //            format_selections_.at(row)->update(mapping->formatDataTypeRef(),
-        //                                               mapping->jsonValueFormatRef());
-        //        else
-        //        {
-        //            DataTypeFormatSelectionWidget* data_format_widget
-        //                    = new DataTypeFormatSelectionWidget (mapping->formatDataTypeRef(),
-        //                                                         mapping->jsonValueFormatRef());
-
-        //            mappings_grid_->addWidget (data_format_widget, row, 5);
-        //            format_selections_[row] = data_format_widget;
-        //        }
     }
     else
     {
         loginf << "JSONObjectParserWidget: mappingDBOVariableChangedSlot: variable removed";
 
         mapping->dboVariableName("");
-
-        //        if (format_selections_.count(row) == 1)
-        //        {
-        //            mappings_grid_->removeWidget(format_selections_.at(row));
-        //            delete format_selections_.at(row);
-        //            format_selections_.erase(row);
-        //        }
     }
 }
 
@@ -450,6 +448,34 @@ void JSONObjectParserWidget::mappingMandatoryChangedSlot()
     assert (mapping);
 
     mapping->mandatory(widget->checkState() == Qt::Checked);
+}
+
+void JSONObjectParserWidget::mappingInArrayChangedSlot()
+{
+    loginf << "JSONObjectParserWidget: mappingInArrayChangedSlot";
+
+    QCheckBox* widget = static_cast<QCheckBox*>(sender());
+    assert (widget);
+    QVariant data = widget->property("mapping");
+
+    JSONDataMapping* mapping = data.value<JSONDataMapping*>();
+    assert (mapping);
+
+    mapping->inArray(widget->checkState() == Qt::Checked);
+}
+
+void JSONObjectParserWidget::mappingAppendChangedSlot()
+{
+    loginf << "JSONObjectParserWidget: mappingAppendChangedSlot";
+
+    QCheckBox* widget = static_cast<QCheckBox*>(sender());
+    assert (widget);
+    QVariant data = widget->property("mapping");
+
+    JSONDataMapping* mapping = data.value<JSONDataMapping*>();
+    assert (mapping);
+
+    mapping->appendValue(widget->checkState() == Qt::Checked);
 }
 
 void JSONObjectParserWidget::mappingDeleteSlot()

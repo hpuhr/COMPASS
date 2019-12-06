@@ -2,8 +2,12 @@ language: c++
 
 addons:
   apt:
+    sources:
+     - ubuntu-toolchain-r-test
     packages:
      - cmake
+     - gcc-6
+     - g++-6
      - qtbase5-dev
      - libqt5opengl5-dev
      - libboost-dev
@@ -25,9 +29,11 @@ addons:
 
 compiler:
  - gcc
- - clang
+# - clang
 
 script:
+ - export CC=gcc-6
+ - export CXX=g++-6
  - mkdir build
  - cd build
  - cmake ..

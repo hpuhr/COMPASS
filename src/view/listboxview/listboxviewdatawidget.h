@@ -44,6 +44,7 @@ signals:
     void exportDoneSignal (bool cancelled);
     void showOnlySelectedSignal (bool value);
     void usePresentationSignal (bool use_presentation);
+    void showAssociationsSignal (bool value);
 
 public slots:
     void loadingStartedSlot();
@@ -55,6 +56,7 @@ public slots:
 
     void showOnlySelectedSlot (bool value);
     void usePresentationSlot (bool use_presentation);
+    void showAssociationsSlot (bool value);
 
 
 public:

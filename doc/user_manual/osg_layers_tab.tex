@@ -1,0 +1,39 @@
+\section{Layers Tab}
+
+In the 'Layers' tab, a tree view is given to configure the display of the existing elements. 
+
+\begin{figure}[H]
+    \includegraphics[width=8cm,frame]{../screenshots/osgview_layers.png}
+  \caption{OSG View layers}
+\end{figure}
+
+The following main tree elements are:\\
+
+\begin{itemize}
+ \item Geometry: Shows current DBO elements
+ \item Measurements: Shows the current distance measurements
+ \item Map: Shows current map layers
+\end{itemize} 
+ \ \\
+
+In the Layers widget, a number of operations are possible for each tree item.
+
+\begin{table}[H]
+  \center
+  \begin{tabular}{ | l | l | l |}
+    \hline
+    \textbf{Operation} & \textbf{Trigger} &  \textbf{Description} \\ \hline
+    View sub-items & Triangle & Opens or closes view of the sub-items \\ \hline
+    Display item & Checkbox & Enables or disables display of items (and all sub-items) \\ \hline
+    Display context menu & Click on symbol & Opens the items context menu \\ \hline
+  \end{tabular}
+  \caption{Layer operations}
+\end{table}
+
+The context menu allows several actions to be performed on an item. If an item has sub-items, the same action will automatically be performed on the child items.
+
+\subfile{osg_layers_geo_ops}
+
+\subfile{osg_layers_measure_ops}
+
+\subfile{osg_layers_map_ops}

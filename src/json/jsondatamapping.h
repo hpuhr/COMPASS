@@ -45,303 +45,7 @@ public:
 
     // return bool mandatory missing
     template<typename T>
-    bool findAndSetValue(const nlohmann::json& j, NullableVector<T>& array_list, unsigned int row_cnt) const
-    {
-        const nlohmann::json* val_ptr = &j;
-
-        if (has_sub_keys_)
-        {
-            for (const std::string& sub_key : sub_keys_)
-            {
-                if (val_ptr->contains (sub_key))
-                {
-                    if (sub_key == sub_keys_.back()) // last found
-                    {
-                        val_ptr = &val_ptr->at(sub_key);
-                        break;
-                    }
-
-                    if (val_ptr->at(sub_key).is_object()) // not last, step in
-                        val_ptr = &val_ptr->at(sub_key);
-                    else // not last key, and not object
-                    {
-                        val_ptr = nullptr;
-                        break;
-                    }
-                }
-                else // not found
-                {
-                    val_ptr = nullptr;
-                    break;
-                }
-            }
-        }
-        else
-        {
-            if (val_ptr->contains (json_key_))
-                val_ptr = &val_ptr->at(json_key_);
-            else
-                val_ptr = nullptr;
-        }
-
-        if (val_ptr == nullptr || *val_ptr == nullptr)
-        {
-            if (mandatory_)
-                return true;
-
-            //array_list.setNull(row_cnt);
-            return false;
-        }
-        else
-        {
-            try
-            {
-                logdbg << "JSONDataMapping: findAndSetValue: key " << json_key_ << " json " << val_ptr->type_name()
-                       << " '" << val_ptr->dump() << "' format '" << json_value_format_ << "'";
-
-                //T tmp = val_ptr->get<T>();
-                if (json_value_format_ == "")
-                    array_list.set(row_cnt, *val_ptr);
-                else
-                    array_list.setFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(*val_ptr));
-
-                logdbg << "JSONDataMapping: findAndSetValue: key " << json_key_ << " json " << *val_ptr
-                       << " buffer " << array_list.get(row_cnt);
-            }
-            catch (nlohmann::json::exception& e)
-            {
-                logerr  <<  "JSONDataMapping: findAndSetValue: key " << json_key_ << " json exception " << e.what();
-                array_list.setNull(row_cnt);
-            }
-        }
-
-        return false; // everything ok
-    }
-
-    bool findAndSetValue(const nlohmann::json& j, NullableVector<bool>& array_list, unsigned int row_cnt) const
-    {
-        const nlohmann::json* val_ptr = &j;
-
-        if (has_sub_keys_)
-        {
-            for (const std::string& sub_key : sub_keys_)
-            {
-                if (val_ptr->contains (sub_key))
-                {
-                    if (sub_key == sub_keys_.back()) // last found
-                    {
-                        val_ptr = &val_ptr->at(sub_key);
-                        break;
-                    }
-
-                    if (val_ptr->at(sub_key).is_object()) // not last, step in
-                        val_ptr = &val_ptr->at(sub_key);
-                    else // not last key, and not object
-                    {
-                        val_ptr = nullptr;
-                        break;
-                    }
-                }
-                else // not found
-                {
-                    val_ptr = nullptr;
-                    break;
-                }
-            }
-        }
-        else
-        {
-            if (val_ptr->contains (json_key_))
-                val_ptr = &val_ptr->at(json_key_);
-            else
-                val_ptr = nullptr;
-        }
-
-        if (val_ptr == nullptr || *val_ptr == nullptr)
-        {
-            if (mandatory_)
-                return true;
-
-            //array_list.setNull(row_cnt);
-            return false;
-        }
-        else
-        {
-            try
-            {
-                bool tmp_bool;
-
-                if (val_ptr->is_number())
-                {
-                    unsigned int tmp = *val_ptr;
-                    assert (tmp == 0 || tmp == 1);
-                    tmp_bool = static_cast<bool> (tmp);
-                }
-                else
-                {
-                    tmp_bool = *val_ptr; // works for bool, throws for rest
-                }
-
-                if (json_value_format_ == "")
-                    array_list.set(row_cnt, tmp_bool);
-                else
-                    array_list.setFromFormat(row_cnt, json_value_format_,
-                                             Utils::JSON::toString(tmp_bool));
-
-                logdbg << "JSONDataMapping: findAndSetValue(bool): json " << tmp_bool << " buffer "
-                       << array_list.get(row_cnt);
-            }
-            catch (nlohmann::json::exception& e)
-            {
-                logerr  <<  "JSONDataMapping: findAndSetValue(bool): key " << json_key_ << " json exception "
-                         << e.what();
-                array_list.setNull(row_cnt);
-            }
-        }
-
-        return false; // everything ok
-    }
-
-    bool findAndSetValue(const nlohmann::json& j, NullableVector<char>& array_list, unsigned int row_cnt) const
-    {
-        const nlohmann::json* val_ptr = &j;
-
-        if (has_sub_keys_)
-        {
-            for (const std::string& sub_key : sub_keys_)
-            {
-                if (val_ptr->contains (sub_key))
-                {
-                    if (sub_key == sub_keys_.back()) // last found
-                    {
-                        val_ptr = &val_ptr->at(sub_key);
-                        break;
-                    }
-
-                    if (val_ptr->at(sub_key).is_object()) // not last, step in
-                        val_ptr = &val_ptr->at(sub_key);
-                    else // not last key, and not object
-                    {
-                        val_ptr = nullptr;
-                        break;
-                    }
-                }
-                else // not found
-                {
-                    val_ptr = nullptr;
-                    break;
-                }
-            }
-        }
-        else
-        {
-            if (val_ptr->contains (json_key_))
-                val_ptr = &val_ptr->at(json_key_);
-            else
-                val_ptr = nullptr;
-        }
-
-        if (val_ptr == nullptr || *val_ptr == nullptr)
-        {
-            if (mandatory_)
-                return true;
-
-            //array_list.setNull(row_cnt);
-            return false;
-        }
-        else
-        {
-            try
-            {
-                if (json_value_format_ == "")
-                    array_list.set(row_cnt, static_cast<int> (*val_ptr));
-                else
-                    array_list.setFromFormat(row_cnt, json_value_format_,
-                                             Utils::JSON::toString(static_cast<int> (*val_ptr)));
-
-                logdbg << "JSONDataMapping: findAndSetValue(char): json " << static_cast<int> (*val_ptr) << " buffer "
-                       << array_list.get(row_cnt);
-            }
-            catch (nlohmann::json::exception& e)
-            {
-                logerr  <<  "JSONDataMapping: findAndSetValue(char): key " << json_key_ << " json exception "
-                         << e.what();
-                array_list.setNull(row_cnt);
-            }
-        }
-
-        return false; // everything ok
-    }
-
-    bool findAndSetValue(const nlohmann::json& j, NullableVector<std::string>& array_list, unsigned int row_cnt) const
-    {
-        const nlohmann::json* val_ptr = &j;
-
-        if (has_sub_keys_)
-        {
-            for (const std::string& sub_key : sub_keys_)
-            {
-                if (val_ptr->contains (sub_key))
-                {
-                    if (sub_key == sub_keys_.back()) // last found
-                    {
-                        val_ptr = &val_ptr->at(sub_key);
-                        break;
-                    }
-
-                    if (val_ptr->at(sub_key).is_object()) // not last, step in
-                        val_ptr = &val_ptr->at(sub_key);
-                    else // not last key, and not object
-                    {
-                        val_ptr = nullptr;
-                        break;
-                    }
-                }
-                else // not found
-                {
-                    val_ptr = nullptr;
-                    break;
-                }
-            }
-        }
-        else
-        {
-            if (val_ptr->contains (json_key_))
-                val_ptr = &val_ptr->at(json_key_);
-            else
-                val_ptr = nullptr;
-        }
-
-        if (val_ptr == nullptr || *val_ptr == nullptr)
-        {
-            if (mandatory_)
-                return true;
-
-            //array_list.setNull(row_cnt);
-            return false;
-        }
-        else
-        {
-            try
-            {
-                if (json_value_format_ == "")
-                    array_list.set(row_cnt, Utils::JSON::toString(*val_ptr));
-                else
-                    array_list.setFromFormat(row_cnt, json_value_format_, Utils::JSON::toString(*val_ptr));
-
-                logdbg << "JSONDataMapping: findAndSetValue(string): json " << Utils::JSON::toString(*val_ptr)
-                       << " buffer " << array_list.get(row_cnt);
-            }
-            catch (nlohmann::json::exception& e)
-            {
-                logerr  <<  "JSONDataMapping: findAndSetValue(string): key " << json_key_ << " json exception "
-                         << e.what();
-                array_list.setNull(row_cnt);
-            }
-        }
-
-        return false; // everything ok
-    }
+    bool findAndSetValue(const nlohmann::json& j, NullableVector<T>& array_list, size_t row_cnt) const;
 
     bool hasDimension () const { return dimension_.size() > 0; }
     /// @brief Returns dimension contained in the column
@@ -385,6 +89,12 @@ public:
     std::string comment() const;
     void comment(const std::string &comment);
 
+    bool appendValue() const;
+    void appendValue(bool appendValue);
+
+    bool inArray() const;
+    void inArray(bool inArray);
+
 private:
     bool initialized_ {false};
 
@@ -408,9 +118,14 @@ private:
     /// Unit
     std::string unit_;
 
+    bool in_array_ {false};
+    bool append_value_ {false};
+
     bool has_sub_keys_ {false};
     std::vector<std::string> sub_keys_;
-    unsigned int num_sub_keys_;
+    size_t num_sub_keys_;
+    std::vector<std::string>::iterator last_key_;
+    std::vector<std::string>::iterator second_to_last_key_;
 
     std::unique_ptr<JSONDataMappingWidget> widget_;
 
@@ -418,6 +133,25 @@ private:
 
 protected:
     virtual void checkSubConfigurables () {}
+
+    const nlohmann::json* findKey (const nlohmann::json& j) const;
+    const nlohmann::json* findParentKey (const nlohmann::json& j) const;
+
+    // generic template functions
+    template<typename T>
+    void setValue(const nlohmann::json* val_ptr, NullableVector<T>& array_list, size_t row_cnt) const;
+
+    template<typename T>
+    void appendValue(const nlohmann::json* val_ptr, NullableVector<T>& array_list, size_t row_cnt) const;
+    // bool template functions
+    void setValue(const nlohmann::json* val_ptr, NullableVector<bool>& array_list, size_t row_cnt) const;
+    void appendValue(const nlohmann::json* val_ptr, NullableVector<bool>& array_list, size_t row_cnt) const;
+    // char template functions
+    void setValue(const nlohmann::json* val_ptr, NullableVector<char>& array_list, size_t row_cnt) const;
+    void appendValue(const nlohmann::json* val_ptr, NullableVector<char>& array_list, size_t row_cnt) const;
+    // string template functions
+    void setValue(const nlohmann::json* val_ptr, NullableVector<std::string>& array_list, size_t row_cnt) const;
+    void appendValue(const nlohmann::json* val_ptr, NullableVector<std::string>& array_list, size_t row_cnt) const;
 };
 
 Q_DECLARE_METATYPE(JSONDataMapping*)

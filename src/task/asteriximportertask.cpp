@@ -33,6 +33,7 @@
 #include "dbtablecolumn.h"
 #include "atsdb.h"
 #include "dbinterface.h"
+#include "buffer.h"
 
 #include <jasterix/jasterix.h>
 #include <jasterix/category.h>
@@ -49,7 +50,12 @@
 using namespace Utils;
 using namespace nlohmann;
 using namespace std;
-//using namespace jASTERIX;
+
+const unsigned int unlimited_chunk_size = 10000;
+const unsigned int limited_chunk_size = 5000;
+
+const unsigned int unlimited_num_json_jobs_ = 2;
+const unsigned int limited_num_json_jobs_ = 1;
 
 ASTERIXImporterTask::ASTERIXImporterTask(const std::string& class_id, const std::string& instance_id,
                                          TaskManager* task_manager)
@@ -58,6 +64,7 @@ ASTERIXImporterTask::ASTERIXImporterTask(const std::string& class_id, const std:
     //qRegisterMetaType<std::unique_ptr<std::vector <nlohmann::json>>>("std::unique_ptr<std::vector <nlohmann::json>>");
 
     registerParameter("debug_jasterix", &debug_jasterix_, false);
+    registerParameter("limit_ram", &limit_ram_, false);
     registerParameter("current_filename", &current_filename_, "");
     registerParameter("current_framing", &current_framing_, "");
 
@@ -68,8 +75,16 @@ ASTERIXImporterTask::ASTERIXImporterTask(const std::string& class_id, const std:
     loginf << "ASTERIXImporterTask: contructor: jasterix definition path '" << jasterix_definition_path << "'";
     assert (Files::directoryExists(jasterix_definition_path));
 
-    jASTERIX::frame_chunk_size = 10000;
-    jASTERIX::record_chunk_size = 10000;
+    if (limit_ram_)
+    {
+        jASTERIX::frame_chunk_size = limited_chunk_size;
+        jASTERIX::record_chunk_size = limited_chunk_size;
+    }
+    else
+    {
+        jASTERIX::frame_chunk_size = unlimited_chunk_size;
+        jASTERIX::record_chunk_size = unlimited_chunk_size;
+    }
 
     jasterix_ = std::make_shared<jASTERIX::jASTERIX> (jasterix_definition_path, false, debug_jasterix_, true);
 
@@ -318,6 +333,42 @@ void ASTERIXImporterTask::refEditionForCategory (unsigned int category, const st
         category_configs_.at(category).ref(ref);
 }
 
+std::string ASTERIXImporterTask::spfEditionForCategory (unsigned int category)
+{
+    assert (hasConfiguratonFor(category));
+
+    // check if edition exists, otherwise rest to default
+    if (category_configs_.at(category).spf().size() && // if value set and not exist in jASTERIX
+            jasterix_->category(category)->spfEditions().count(category_configs_.at(category).spf()) == 0)
+    {
+        loginf << "ASTERIXImporterTask: spfEditionForCategory: cat " << category << " reset to default spf";
+        category_configs_.at(category).spf(jasterix_->category(category)->defaultSPFEdition());
+    }
+
+    return category_configs_.at(category).spf();
+}
+
+void ASTERIXImporterTask::spfEditionForCategory (unsigned int category, const std::string& spf)
+{
+    assert (jasterix_->hasCategory(category));
+
+    loginf << "ASTERIXImporterTask: spfEditionForCategory: cat " << category << " spf '" << spf << "'";
+
+    if (!hasConfiguratonFor(category))
+    {
+        Configuration &new_cfg = configuration().addNewSubConfiguration ("ASTERIXCategoryConfig");
+        new_cfg.addParameterUnsignedInt ("category", category);
+        new_cfg.addParameterBool ("decode", false);
+        new_cfg.addParameterString ("edition", jasterix_->category(category)->defaultEdition());
+        new_cfg.addParameterString ("spf", spf);
+
+        generateSubConfigurable("ASTERIXCategoryConfig", new_cfg.getInstanceId());
+        assert (hasConfiguratonFor(category));
+    }
+    else
+        category_configs_.at(category).spf(spf);
+}
+
 std::shared_ptr<JSONParsingSchema> ASTERIXImporterTask::schema() const
 {
     return schema_;
@@ -356,6 +407,27 @@ bool ASTERIXImporterTask::createMappingStubs() const
 void ASTERIXImporterTask::createMappingStubs(bool create_mapping_stubs)
 {
     create_mapping_stubs_ = create_mapping_stubs;
+}
+
+bool ASTERIXImporterTask::limitRAM() const
+{
+    return limit_ram_;
+}
+
+void ASTERIXImporterTask::limitRAM(bool limit_ram)
+{
+    limit_ram_ = limit_ram;
+
+    if (limit_ram_)
+    {
+        jASTERIX::frame_chunk_size = limited_chunk_size;
+        jASTERIX::record_chunk_size = limited_chunk_size;
+    }
+    else
+    {
+        jASTERIX::frame_chunk_size = unlimited_chunk_size;
+        jASTERIX::record_chunk_size = unlimited_chunk_size;
+    }
 }
 
 bool ASTERIXImporterTask::canImportFile (const std::string& filename)
@@ -402,6 +474,8 @@ void ASTERIXImporterTask::importFile(const std::string& filename)
 
     loginf << "ASTERIXImporterTask: importFile: setting categories";
 
+    jASTERIX::add_artas_md5_hash = true;
+
     // set category configs
     jasterix_->decodeNoCategories();
 
@@ -435,6 +509,14 @@ void ASTERIXImporterTask::importFile(const std::string& filename)
             continue;
         }
 
+        if (cat_it.second.spf().size() && // only if value set
+                !jasterix_->category(cat_it.first)->hasSPFEdition(cat_it.second.spf()))
+        {
+            logwrn << "ASTERIXImporterTask: importFile: cat " << cat_it.first << " spf '"
+                   << cat_it.second.spf() << "' not defined in decoder";
+            continue;
+        }
+
 //        loginf << "ASTERIXImporterTask: importFile: setting cat " <<  cat_it.first
 //               << " decode flag " << cat_it.second.decode();
         jasterix_->setDecodeCategory(cat_it.first, cat_it.second.decode());
@@ -442,7 +524,7 @@ void ASTERIXImporterTask::importFile(const std::string& filename)
 //               << " edition " << cat_it.second.edition();
         jasterix_->category(cat_it.first)->setCurrentEdition(cat_it.second.edition());
         jasterix_->category(cat_it.first)->setCurrentREFEdition(cat_it.second.ref());
-
+        jasterix_->category(cat_it.first)->setCurrentSPFEdition(cat_it.second.spf());
 
         // TODO mapping?
     }
@@ -868,5 +950,8 @@ void ASTERIXImporterTask::closeStatusDialogSlot()
 
 bool ASTERIXImporterTask::maxLoadReached ()
 {
-    return json_map_jobs_.unsafe_size() > 3;
+    if (limit_ram_)
+        return json_map_jobs_.unsafe_size() > limited_num_json_jobs_;
+    else
+        return json_map_jobs_.unsafe_size() > unlimited_num_json_jobs_;
 }

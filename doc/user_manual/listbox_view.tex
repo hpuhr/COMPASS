@@ -1,6 +1,8 @@
-\subsection{Listbox View}
+\chapter{Listbox View}
 \label{sec:listbox_view}
-A Listbox View displays the DBO records as text in tables, to allow full data inspection. When started, it presents itself in the following manner.
+A Listbox View displays the DBObject data as text in tables, to allow textual data inspection. When started, it presents itself in the following manner.
+
+\section{Layout}
 
 \begin{figure}[H]
     \hspace*{-2cm}
@@ -11,7 +13,9 @@ A Listbox View displays the DBO records as text in tables, to allow full data in
 
 On the left side, a number of tabs exist as 'All' and for each active DBO, each of which contains a table. On the right side, a configuration area exists. A number of variables is displayed in the 'Variables' list. One can change the order, remove and add variables to be inspected. \\
 
-To limit or order based on a variable or load the dataset, the mechanism described in Section \nameref{sec:management_dbos} can be used. To filter the dataset, the mechanism described in Section \nameref{sec:filtering} can be used.
+\section{Data Loading}
+
+To load the data use the the mechanism described in Section \nameref{sec:management_dbos} can be used. To filter the dataset, the mechanism described in Section \nameref{sec:filtering} can be used.
 
 \begin{figure}[H]
     \hspace*{-2cm}
@@ -24,26 +28,54 @@ Once updated, the tables are filled with text representing the values of the DBO
 
 Please \textbf{note} that since some variable might only exist in some DBOs, the number of columns for different DBOs may differ. \\
 
+
+\section{Usage}
+
+\subsection{Selection}
 In the first column in the tables, checkboxes are shown, indicating whether that target report is currently selected. Selection may be changed by selecting/de-selecting the respective checkboxes or in other views (cross-selection). If the selection is changed in one of the other views, this view is updated automatically.
 
-\subsubsection{Variable List}
-All DBO variables which are loaded from the database are shown in the 'Variables' list. This list is ordered, and like all configuration elements persistent. Ordering can be changed by selecting (clicking on) a variable and using the up/down triangle buttons. \\
 
-When pressing the 'Remove' button, a selected variable is removed.  Pressing the 'Add' button allows appending a variable to the list using a context-menu.
+\subsection{Variable List}
+All DBO variables which are loaded from the database are shown in the 'Variables' list. This list is ordered, and like all configuration elements persistent. Ordering can be changed by selecting (clicking on) a variable and using the up/down buttons. \\
 
-\subsubsection{Show Only Selected}
+When pressing the 'Remove' button, a selected variable is removed.  Pressing the 'Add' button allows appending a variable to the list using a context-menu. \\
+
+If Meta variables are used, they are display in all DObjects they exist. If DBObject variable is used, it is only displayed in it's native object.
+
+\begin{figure}[H]
+    \includegraphics[width=16cm,frame]{../screenshots/listbox_add.png}
+  \caption{Listbox View adding of variables}
+  \label{fig:listbox_load}
+\end{figure}
+
+
+\subsection{Show Only Selected}
 When this checkbox is checked, only target reports selected in other views are shown. If this is active, de-selecting a target report removes it from the shown data.
 
-\subsubsection{Use Presentation}
-When this checkbox is checked, the so called presentation mode is used. In the database, the variables might have different units or a data representation which is not easy to read. For this purpose, a presentation mode was introduced to e.g. show a Mode A code as octal, or a Time of Day not in seconds since midnight but in HH::MM:SS.SS format. When the ''Use Presentation`` checkbox is not checked, the original database values are presented (and exported).
+\subsection{Use Presentation}
+When this checkbox is checked, the so called presentation mode is used. In the database, the variables might have different units or a data representation which is not easy to read. For this purpose, a presentation mode was introduced to e.g. show a Mode A code as octal, or a Time of Day not in seconds since midnight but in HH::MM:SS.SS format. \\
+
+When the 'Use Presentation' checkbox is not checked, the original database values are presented (and exported).
+
+\subsection{Show Associations}
+When this checkbox is checked, the associated UTNs are shown for each target report. If no UTN is shown, this target reports was never associated to an UTN, if several are shown (e.g. '1,2,4') this target report was used in several UTNs. \\
+
+This checkbox can only be used if association information is present in the database.
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm,frame]{../screenshots/listbox_loaded_assoc.png}
+  \caption{Listbox View after loading with associated UTNs}
+  \label{fig:listbox_load}
+\end{figure}
 
 
-\subsubsection{Exporting}
+\subsection{Exporting}
 \label{sec:exporting}
 
 The data from the current DBO table can be exported to a comma-separated value (CSV) text file. 
 
-When pressing the ''Export`` button, a dialog is opened.
+When pressing the 'Export' button, a dialog is opened.
 
 \begin{figure}[H]
     \hspace*{-2cm}
@@ -52,13 +84,12 @@ When pressing the ''Export`` button, a dialog is opened.
   \label{fig:listbox_export}
 \end{figure}
 
-Choose a filename, and press ''Save`` to save the data. If the ''Overwrite Exported File`` checkbox was checked, an existing file is automatically overwritten. Please \textbf{note} that exporting might take some time for larger datasets, and currently no status indication is given.\\
+Choose a filename, and press 'Save' to save the data. If the 'Overwrite Exported File' checkbox was checked, an existing file is automatically overwritten. Please \textbf{note} that exporting might take some time for larger datasets, and currently no status indication is given.\\
 
 After export, a dialog is shown indicating that the export was completed.
 
 \begin{figure}[H]
-    \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/listbox_exported.png}
+    \includegraphics[width=4cm,frame]{../screenshots/listbox_exported.png}
   \caption{Listbox View export done}
   \label{fig:listbox_exported}
 \end{figure}

@@ -63,6 +63,7 @@ void DBOReadDBJob::run ()
 
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
+
     db_interface_.prepareRead (dbobject_, read_list_, custom_filter_clause_, filtered_variables_, use_order_,
                                order_variable_, use_order_ascending_, limit_str_);
 
@@ -92,7 +93,7 @@ void DBOReadDBJob::run ()
             break;
     }
 
-    loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": finalizing statement";
+    logdbg << "DBOReadDBJob: run: " << dbobject_.name() << ": finalizing statement";
     db_interface_.finalizeReadStatement(dbobject_);
 
     stop_time_ = boost::posix_time::microsec_clock::local_time();
@@ -101,10 +102,10 @@ void DBOReadDBJob::run ()
     if (diff.total_seconds() > 0)
         loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": done after " << diff << ", "
                << 1000.0*row_count/diff.total_milliseconds() << " el/s";
-
+    else
+        loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": done";
 
     done_=true;
 
-    loginf << "DBOReadDBJob: run: " << dbobject_.name() << ": done";
     return;
 }

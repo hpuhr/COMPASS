@@ -47,6 +47,7 @@ public slots:
     void selectedObjectParserSlot ();
 
     void debugChangedSlot ();
+    void limitRAMChangedSlot ();
     void createMappingsSlot();
     void testImportSlot();
     void importSlot();
@@ -74,7 +75,8 @@ protected:
 
     ASTERIXConfigWidget* config_widget_ {nullptr};
 
-    QCheckBox* debug_ {nullptr};
+    QCheckBox* debug_check_ {nullptr};
+    QCheckBox* limit_ram_check_ {nullptr};
     QPushButton* create_mapping_stubs_button_ {nullptr};
     QPushButton* test_button_ {nullptr};
     QPushButton* import_button_ {nullptr};

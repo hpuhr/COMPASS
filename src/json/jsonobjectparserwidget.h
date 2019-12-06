@@ -44,6 +44,8 @@ public slots:
     void mappingCommentChangedSlot();
     void mappingDBOVariableChangedSlot();
     void mappingMandatoryChangedSlot();
+    void mappingInArrayChangedSlot();
+    void mappingAppendChangedSlot();
     void mappingDeleteSlot();
 
 public:
@@ -63,8 +65,6 @@ private:
     QLineEdit* data_source_variable_name_edit_ {nullptr};
 
     QGridLayout* mappings_grid_ {nullptr};
-
-    //std::map<unsigned int, DataTypeFormatSelectionWidget*> format_selections_;
 
     void update ();
 };

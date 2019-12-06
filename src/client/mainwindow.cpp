@@ -57,6 +57,8 @@
 #include "jsonimportertaskwidget.h"
 #include "radarplotpositioncalculatortask.h"
 #include "radarplotpositioncalculatortaskwidget.h"
+#include "createartasassociationstask.h"
+#include "createartasassociationstaskwidget.h"
 #include "files.h"
 
 #if USE_JASTERIX
@@ -205,6 +207,14 @@ void MainWindow::addRadarPlotPositionCalculatorTaskSlot ()
     ATSDB::instance().taskManager().getRadarPlotPositionCalculatorTask()->widget()->show();
 }
 
+void MainWindow::addCreateARTASAssociationsTaskSlot ()
+{
+    loginf  << "MainWindow: addCreateARTASAssociationsTaskSlot";
+
+    ATSDB::instance().taskManager().getCreateARTASAssociationsTask()->widget()->show();
+}
+
+
 #if USE_JASTERIX
 void MainWindow::addASTERIXImporterTaskSlot ()
 {
@@ -262,12 +272,19 @@ void MainWindow::createMenus()
     connect(radar_plot_position_calculator_task_action, &QAction::triggered,
             this, &MainWindow::addRadarPlotPositionCalculatorTaskSlot);
 
+    QAction* create_artas_associations_task_action = new QAction(
+                tr("Create ARTAS Associations"), this);
+    connect(create_artas_associations_task_action, &QAction::triggered,
+            this, &MainWindow::addCreateARTASAssociationsTaskSlot);
+
     task_menu_ = menuBar()->addMenu(tr("&Task"));
 #if USE_JASTERIX
     task_menu_->addAction(asterix_importer_task_action);
 #endif
     task_menu_->addAction(json_importer_task_action);
     task_menu_->addAction(radar_plot_position_calculator_task_action);
+    task_menu_->addAction(create_artas_associations_task_action);
+
     task_menu_->setDisabled(true);
 }
 

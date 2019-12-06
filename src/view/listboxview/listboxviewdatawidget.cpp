@@ -48,18 +48,27 @@ ListBoxViewDataWidget::ListBoxViewDataWidget(ListBoxView* view, ListBoxViewDataS
             {
                 all_buffer_table_widget_ = new AllBufferTableWidget (*view_, *data_source_);
                 tab_widget_->addTab (all_buffer_table_widget_ , "All");
-                connect (all_buffer_table_widget_, SIGNAL(exportDoneSignal(bool)), this, SLOT(exportDoneSlot(bool)));
-                connect (this, SIGNAL(showOnlySelectedSignal(bool)), all_buffer_table_widget_, SLOT(showOnlySelectedSlot(bool)));
-                connect (this, SIGNAL(usePresentationSignal(bool)), all_buffer_table_widget_, SLOT(usePresentationSlot(bool)));
+                connect (all_buffer_table_widget_, &AllBufferTableWidget::exportDoneSignal,
+                         this, &ListBoxViewDataWidget::exportDoneSlot);
+                connect (this, &ListBoxViewDataWidget::showOnlySelectedSignal,
+                         all_buffer_table_widget_, &AllBufferTableWidget::showOnlySelectedSlot);
+                connect (this, &ListBoxViewDataWidget::usePresentationSignal,
+                         all_buffer_table_widget_, &AllBufferTableWidget::usePresentationSlot);
+                connect (this, &ListBoxViewDataWidget::showAssociationsSignal,
+                         all_buffer_table_widget_, &AllBufferTableWidget::showAssociationsSlot);
             }
 
             BufferTableWidget *buffer_table = new BufferTableWidget (*obj_it.second, *view_, *data_source_);
             tab_widget_->addTab (buffer_table , obj_it.first.c_str());
             buffer_tables_[obj_it.first] = buffer_table;
-            connect (buffer_table, SIGNAL(exportDoneSignal(bool)), this, SLOT(exportDoneSlot(bool)));
-            connect (this, SIGNAL(showOnlySelectedSignal(bool)), buffer_table, SLOT(showOnlySelectedSlot(bool)));
-            connect (this, SIGNAL(usePresentationSignal(bool)), buffer_table, SLOT(usePresentationSlot(bool)));
-        }
+            connect (buffer_table, &BufferTableWidget::exportDoneSignal,
+                     this, &ListBoxViewDataWidget::exportDoneSlot);
+            connect (this, &ListBoxViewDataWidget::showOnlySelectedSignal,
+                     buffer_table, &BufferTableWidget::showOnlySelectedSlot);
+            connect (this, &ListBoxViewDataWidget::usePresentationSignal,
+                     buffer_table, &BufferTableWidget::usePresentationSlot);
+            connect (this, &ListBoxViewDataWidget::showAssociationsSignal,
+                     buffer_table, &BufferTableWidget::showAssociationsSlot);}
     }
 
     setLayout (layout);
@@ -143,6 +152,7 @@ void ListBoxViewDataWidget::exportDoneSlot (bool cancelled)
 
 void ListBoxViewDataWidget::showOnlySelectedSlot (bool value)
 {
+    loginf << "ListBoxViewDataWidget: showOnlySelectedSlot: " << value;
     emit showOnlySelectedSignal(value);
 }
 
@@ -151,6 +161,12 @@ void ListBoxViewDataWidget::usePresentationSlot (bool use_presentation)
     loginf << "ListBoxViewDataWidget: usePresentationSlot";
 
     emit usePresentationSignal(use_presentation);
+}
+
+void ListBoxViewDataWidget::showAssociationsSlot (bool value)
+{
+    loginf << "ListBoxViewDataWidget: showAssociationsSlot: " << value;
+    emit showAssociationsSignal(value);
 }
 
 void ListBoxViewDataWidget::resetModels()

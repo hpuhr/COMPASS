@@ -61,7 +61,11 @@ int AllBufferTableModel::rowCount(const QModelIndex & /*parent*/) const
 int AllBufferTableModel::columnCount(const QModelIndex & /*parent*/) const
 {
     logdbg << "AllBufferTableModel: columnCount: " << data_source_.getSet()->getSize();
-    return data_source_.getSet()->getSize()+2;
+
+    if (show_associations_) // selected, DBO, UTN
+        return data_source_.getSet()->getSize()+3;
+    else // cnt, DBO
+        return data_source_.getSet()->getSize()+2;
 }
 
 QVariant AllBufferTableModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -79,7 +83,15 @@ QVariant AllBufferTableModel::headerData(int section, Qt::Orientation orientatio
         if (col == 1)
             return QString ("DBObject");
 
-        col -= 2; // for the actual properties
+        if (show_associations_)
+        {
+            if (col == 2)
+                return QString ("UTN");
+
+            col -= 3; // for the actual properties
+        }
+        else
+            col -= 2; // for the actual properties
 
         assert (col < data_source_.getSet()->getSize());
         std::string variable_name = data_source_.getSet()->variableDefinition(col).variableName();
@@ -161,8 +173,47 @@ QVariant AllBufferTableModel::data(const QModelIndex &index, int role) const
         if (col == 1) // selected special case
             return QVariant(dbo_name.c_str());
 
-        col -= 2; // for the actual properties
+        if (show_associations_)
+        {
+            if (col == 2)
+            {
+                DBObjectManager& manager = ATSDB::instance().objectManager();
+                const DBOAssociationCollection& associations = manager.object(dbo_name).associations();
 
+                assert (buffer->has<int>("rec_num"));
+                assert (!buffer->get<int>("rec_num").isNull(buffer_index));
+                unsigned int rec_num = buffer->get<int>("rec_num").get(buffer_index);
+
+                if (associations.count(rec_num))
+                {
+                    QString utns;
+
+                    typedef DBOAssociationCollection::const_iterator MMAPIterator;
+
+                    // It returns a pair representing the range of elements with key equal to 'c'
+                    std::pair<MMAPIterator, MMAPIterator> result = associations.equal_range(rec_num);
+
+                    // Iterate over the range
+                    for (MMAPIterator it = result.first; it != result.second; it++)
+                        if (it == result.first)
+                            utns = QString::number(it->second.utn_);
+                        else
+                            utns += ","+QString::number(it->second.utn_);
+
+                    return QVariant(utns);
+                }
+                else
+                    return QVariant();
+
+            }
+
+            col -= 3; // for the actual properties
+        }
+        else
+            col -= 2; // for the actual properties
+
+//        loginf << "AllBufferTableModel: data: col " << col << " set size " << data_source_.getSet()->getSize()
+//               << " show assoc " << show_associations_;
         assert (col < data_source_.getSet()->getSize());
 
         std::string variable_dbo_name = data_source_.getSet()->variableDefinition(col).dboName();
@@ -341,7 +392,7 @@ QVariant AllBufferTableModel::data(const QModelIndex &index, int role) const
 
 bool AllBufferTableModel::setData(const QModelIndex& index, const QVariant & value,int role)
 {
-    loginf << "AllBufferTableModel: setData: checked row " << index.row() << " col " << index.column();
+    logdbg << "AllBufferTableModel: setData: checked row " << index.row() << " col " << index.column();
 
     if (role == Qt::CheckStateRole && index.column() == 0)
     {
@@ -363,12 +414,12 @@ bool AllBufferTableModel::setData(const QModelIndex& index, const QVariant & val
 
         if (value == Qt::Checked)
         {
-            loginf << "AllBufferTableModel: setData: checked row index" << buffer_index;
+            logdbg << "AllBufferTableModel: setData: checked row index" << buffer_index;
             buffer->get<bool>("selected").set(buffer_index, true);
         }
         else
         {
-            loginf << "AllBufferTableModel: setData: unchecked row index " << buffer_index;
+            logdbg << "AllBufferTableModel: setData: unchecked row index " << buffer_index;
             buffer->get<bool>("selected").set(buffer_index, false);
         }
         assert (table_widget_);
@@ -395,7 +446,7 @@ bool AllBufferTableModel::setData(const QModelIndex& index, const QVariant & val
 
 void AllBufferTableModel::clearData ()
 {
-    loginf << "AllBufferTableModel: clearData";
+    logdbg << "AllBufferTableModel: clearData";
 
     beginResetModel();
 
@@ -437,7 +488,7 @@ void AllBufferTableModel::setData (std::shared_ptr <Buffer> buffer)
 
 void AllBufferTableModel::updateTimeIndexes ()
 {
-    loginf << "AllBufferTableModel: updateTimeIndexes";
+    logdbg << "AllBufferTableModel: updateTimeIndexes";
 
     unsigned int buffer_index;
     std::string dbo_name;
@@ -462,7 +513,7 @@ void AllBufferTableModel::updateTimeIndexes ()
 
         if (buffer_size > buffer_index+1) // new data
         {
-            loginf << "AllBufferTableModel: updateTimeIndexes: new " << dbo_name <<  " data, last index "
+            logdbg << "AllBufferTableModel: updateTimeIndexes: new " << dbo_name <<  " data, last index "
                    << buffer_index << " size " << buf_it.second->size();
 
             DBObjectManager& object_manager = ATSDB::instance().objectManager();
@@ -498,7 +549,7 @@ void AllBufferTableModel::updateTimeIndexes ()
             dbo_last_processed_index_[dbo_name] = buffer_size-1; // set to last index
 
             if (num_time_none)
-                loginf << "AllBufferTableModel: updateTimeIndexes: new " << dbo_name << " skipped " << num_time_none
+                logwrn << "AllBufferTableModel: updateTimeIndexes: new " << dbo_name << " skipped " << num_time_none
                        << " indexes with no time";
         }
     }
@@ -529,11 +580,14 @@ void AllBufferTableModel::saveAsCSV (const std::string &file_name, bool overwrit
 
     AllBufferCSVExportJob *export_job = new AllBufferCSVExportJob (buffers_, data_source_.getSet(), number_to_dbo_,
                                                                    row_indexes_, file_name, overwrite,
-                                                                   show_only_selected_, use_presentation_);
+                                                                   show_only_selected_, use_presentation_,
+                                                                   show_associations_);
 
     export_job_ = std::shared_ptr<AllBufferCSVExportJob> (export_job);
-    connect (export_job, SIGNAL(obsoleteSignal()), this, SLOT(exportJobObsoleteSlot()), Qt::QueuedConnection);
-    connect (export_job, SIGNAL(doneSignal()), this, SLOT(exportJobDoneSlot()), Qt::QueuedConnection);
+    connect (export_job, &AllBufferCSVExportJob::obsoleteSignal, this, &AllBufferTableModel::exportJobObsoleteSlot,
+             Qt::QueuedConnection);
+    connect (export_job, &AllBufferCSVExportJob::doneSignal, this, &AllBufferTableModel::exportJobDoneSlot,
+             Qt::QueuedConnection);
 
     JobManager::instance().addBlockingJob(export_job_);
 }
@@ -554,6 +608,7 @@ void AllBufferTableModel::exportJobDoneSlot()
 
 void AllBufferTableModel::usePresentation (bool use_presentation)
 {
+    loginf << "AllBufferTableModel: usePresentation: " << use_presentation;
     beginResetModel();
     use_presentation_ = use_presentation;
     endResetModel();
@@ -565,6 +620,14 @@ void AllBufferTableModel::showOnlySelected (bool value)
     show_only_selected_ = value;
 
     updateToSelection();
+}
+
+void AllBufferTableModel::showAssociations (bool value)
+{
+    loginf << "AllBufferTableModel: showAssociations: " << value;
+    beginResetModel();
+    show_associations_ = value;
+    endResetModel();
 }
 
 void AllBufferTableModel::updateToSelection()

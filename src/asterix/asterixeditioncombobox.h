@@ -24,6 +24,7 @@
 #include <jasterix/category.h>
 
 #include <QComboBox>
+
 #include <memory>
 
 class ASTERIXEditionComboBox: public QComboBox
@@ -46,7 +47,6 @@ public:
                            QWidget* parent = nullptr)
     : QComboBox(parent), task_(task), category_(category)
     {
-        //const std::map<std::string, std::shared_ptr<Edition>>& editions() const;
         for (auto& ed_it : category_->editions())
         {
             addItem (ed_it.first.c_str());

@@ -20,6 +20,7 @@
 #include "asterixconfigwidget.h"
 #include "logger.h"
 #include "selectdbobjectdialog.h"
+#include "system.h"
 
 #include <QVBoxLayout>
 #include <QFormLayout>
@@ -32,6 +33,10 @@
 #include <QInputDialog>
 #include <QStackedWidget>
 #include <QCheckBox>
+
+using namespace Utils;
+
+const float ram_threshold = 4.0;
 
 ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, QWidget* parent, Qt::WindowFlags f)
     : QWidget (parent, f), task_(task)
@@ -60,9 +65,9 @@ ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, 
     sp_left.setHorizontalStretch(1);
     left_frame->setSizePolicy(sp_left);
 
-//    QLabel *main_label = new QLabel ("Import ASTERIX data");
-//    main_label->setFont (font_big);
-//    left_layout->addWidget (main_label);
+    //    QLabel *main_label = new QLabel ("Import ASTERIX data");
+    //    main_label->setFont (font_big);
+    //    left_layout->addWidget (main_label);
 
     // file stuff
     {
@@ -149,10 +154,15 @@ ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, 
 
     // final stuff
     {
-        debug_ = new QCheckBox ("Debug in Console");
-        debug_->setChecked(task_.debug());
-        connect(debug_, &QCheckBox::clicked, this, &ASTERIXImporterTaskWidget::debugChangedSlot);
-        left_layout->addWidget (debug_);
+        debug_check_ = new QCheckBox ("Debug in Console");
+        debug_check_->setChecked(task_.debug());
+        connect(debug_check_, &QCheckBox::clicked, this, &ASTERIXImporterTaskWidget::debugChangedSlot);
+        left_layout->addWidget (debug_check_);
+
+        limit_ram_check_ = new QCheckBox ("Limit RAM Usage");
+        limit_ram_check_->setChecked(task_.limitRAM());
+        connect(limit_ram_check_, &QCheckBox::clicked, this, &ASTERIXImporterTaskWidget::limitRAMChangedSlot);
+        left_layout->addWidget (limit_ram_check_);
 
         create_mapping_stubs_button_ = new QPushButton ("Create Mapping Stubs");
         connect(create_mapping_stubs_button_, &QPushButton::clicked,
@@ -375,6 +385,14 @@ void ASTERIXImporterTaskWidget::debugChangedSlot ()
     task_.debug(box->checkState() == Qt::Checked);
 }
 
+void ASTERIXImporterTaskWidget::limitRAMChangedSlot ()
+{
+    QCheckBox* box = dynamic_cast<QCheckBox*> (sender());
+    assert (box);
+
+    task_.limitRAM(box->checkState() == Qt::Checked);
+}
+
 void ASTERIXImporterTaskWidget::createMappingsSlot()
 {
     loginf << "ASTERIXImporterTaskWidget: createMappingsSlot";
@@ -462,6 +480,41 @@ void ASTERIXImporterTaskWidget::importSlot()
         return;
     }
 
+    float free_ram = System::getFreeRAMinGB();
+
+    if (free_ram < ram_threshold && !task_.limitRAM())
+    {
+        loginf << "ASTERIXImporterTaskWidget: importSlot: only " << free_ram << " GB free ram, recommending limiting";
+
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "RAM Limiting",
+                                      "There is only "+QString::number(free_ram)+" GB free RAM available.\n"
+                                      +"This will result in decreased decoding performance.\n\n"
+                                      +"Do you agree to limiting RAM usage?",
+                                      QMessageBox::Yes|QMessageBox::No);
+        if (reply == QMessageBox::Yes)
+        {
+            task_.limitRAM(true);
+            limit_ram_check_->setChecked(true);
+        }
+    }
+    else if (free_ram >= ram_threshold && task_.limitRAM())
+    {
+        loginf << "ASTERIXImporterTaskWidget: importSlot: " << free_ram << " GB free ram, recommending not limiting";
+
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "RAM Limiting",
+                                      "There is "+QString::number(free_ram)+" GB free RAM available.\n"
+                                      +"This will result in increased decoding performance.\n\n"
+                                      +"Do you agree to increased RAM usage?",
+                                      QMessageBox::Yes|QMessageBox::No);
+        if (reply == QMessageBox::Yes)
+        {
+            task_.limitRAM(false);
+            limit_ram_check_->setChecked(false);
+        }
+    }
+
     QString filename = file_list_->currentItem()->text();
     if (filename.size() > 0)
     {
@@ -488,9 +541,9 @@ void ASTERIXImporterTaskWidget::importSlot()
 
 void ASTERIXImporterTaskWidget::importDone ()
 {
-       loginf << "ASTERIXImporterTaskWidget: importDone";
+    loginf << "ASTERIXImporterTaskWidget: importDone";
 
-       create_mapping_stubs_button_->setDisabled(false);
-       test_button_->setDisabled(false);
-       import_button_->setDisabled(false);
+    create_mapping_stubs_button_->setDisabled(false);
+    test_button_->setDisabled(false);
+    import_button_->setDisabled(false);
 }

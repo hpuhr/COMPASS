@@ -521,19 +521,49 @@ void JSONObjectParser::createMappingsFromTargetReport (const nlohmann::json& tr)
     checkIfKeysExistsInMappings ("", tr);
 }
 
-void JSONObjectParser::checkIfKeysExistsInMappings (const std::string& location, const nlohmann::json& j)
+void JSONObjectParser::checkIfKeysExistsInMappings (const std::string& location, const nlohmann::json& j,
+                                                    bool is_in_array)
 {
-    if (j.is_array()) // do not map arrays
-        return;
+    //bool j_is_array = false; // indicated if j contains array
+    //std::string j_array_type;
+
+    if (j.is_array()) // do map arrays
+    {
+        //j_is_array = true;
+
+        if (!j.size()) // do not map if empty
+            return;
+
+        bool j_array_contains_only_primitives = true; // only
+
+        for (auto& j_it : j.get<json::array_t>()) // iterate over array
+        {
+            if (j_it.is_object()) // only parse sub-objects
+            {
+                j_array_contains_only_primitives = false;
+                checkIfKeysExistsInMappings (location, j_it, true);
+            }
+            else if (j_it.is_array())
+                j_array_contains_only_primitives = false;
+
+//            if (!j_array_type.size())
+//                j_array_type = j_it.type_name();
+//            else if (j_array_type != "mixed" && j_array_type != j_it.type_name())
+//                j_array_type = "mixed";
+        }
+
+        if (!j_array_contains_only_primitives)
+            return; // if objects inside, only parse objects
+    }
 
     if (j.is_object())
     {
         for (auto& j_it : j.get<json::object_t>())
         {
             if (location.size())
-                checkIfKeysExistsInMappings (location+"."+j_it.first, j_it.second);
+                checkIfKeysExistsInMappings (location+"."+j_it.first, j_it.second, is_in_array);
             else
-                checkIfKeysExistsInMappings (j_it.first, j_it.second);
+                checkIfKeysExistsInMappings (j_it.first, j_it.second, is_in_array);
         }
         return;
     }
@@ -551,7 +581,10 @@ void JSONObjectParser::checkIfKeysExistsInMappings (const std::string& location,
             if (!map_it.comment().size())
             {
                 std::stringstream ss;
-                ss << "Type " << j.type_name() << ", value " <<j.dump();
+//                if (j_is_array)
+//                    ss << "Type Array[" << j_array_type << "], value " << j.dump();
+//                else
+                ss << "Type " << j.type_name() << ", value " << j.dump();
                 map_it.comment (ss.str());
             }
             break;
@@ -561,14 +594,18 @@ void JSONObjectParser::checkIfKeysExistsInMappings (const std::string& location,
     if (!found)
     {
         loginf << "JSONObjectParser: checkIfKeysExistsInMappings: creating new mapping for dbo " << db_object_name_
-               << "'" << location << "'  type " << j.type_name() << " value "  << j.dump() ;
+               << "'" << location << "' type " << j.type_name() << " value "  << j.dump()
+               << " in array " << is_in_array;
 
         Configuration &new_cfg = configuration().addNewSubConfiguration ("JSONDataMapping");
         new_cfg.addParameterString ("json_key", location);
         new_cfg.addParameterString ("db_object_name", db_object_name_);
 
+        if (is_in_array)
+            new_cfg.addParameterBool ("in_array", true);
+
         std::stringstream ss;
-        ss << "Type " << j.type_name() << ", value " <<j.dump();
+        ss << "Type " << j.type_name() << ", value " << j.dump();
         new_cfg.addParameterString ("comment", ss.str());
 
         generateSubConfigurable("JSONDataMapping", new_cfg.getInstanceId());

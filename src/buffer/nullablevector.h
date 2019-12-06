@@ -27,6 +27,8 @@
 #include <set>
 #include <map>
 
+#include <tbb/tbb.h>
+
 #include <QDateTime>
 
 #include "stringconv.h"
@@ -60,8 +62,11 @@ public:
 
     /// @brief Sets specific value
     void set (size_t index, T value);
-
     void setFromFormat (size_t index, const std::string& format, const std::string& value_str);
+
+    /// @brief Appends specific value
+    void append (size_t index, T value);
+    void appendFromFormat (size_t index, const std::string& format, const std::string& value_str);
 
     /// @brief Sets specific element to Null value
     void setNull(size_t index);
@@ -71,6 +76,9 @@ public:
     std::set<T> distinctValues (size_t index=0);
 
     std::map<T, std::vector<size_t>> distinctValuesWithIndexes (size_t from_index, size_t to_index);
+    std::map<T, std::vector<size_t>> distinctValuesWithIndexes (const std::vector<size_t>& indexes);
+    std::vector<size_t> nullValueIndexes (size_t from_index, size_t to_index);
+    std::vector<size_t> nullValueIndexes (const std::vector<size_t>& indexes);
 
     void convertToStandardFormat(const std::string& from_format);
 
@@ -81,6 +89,7 @@ public:
 
     void checkNotNull ();
 
+    std::string propertyName () const { return property_.name()+"("+property_.dataTypeString()+")"; }
 
 private:
     Property property_;
@@ -174,7 +183,7 @@ template <class T> void NullableVector<T>::set (size_t index, T value)
 }
 
 template <class T> void NullableVector<T>::setFromFormat (size_t index, const std::string& format,
-                                                             const std::string& value_str)
+                                                          const std::string& value_str)
 {
     logdbg << "ArrayListTemplate " << property_.name() << ": setFromFormat";
     T value;
@@ -206,6 +215,68 @@ template <class T> void NullableVector<T>::setFromFormat (size_t index, const st
     }
 
     set (index, value);
+}
+
+template <class T> void NullableVector<T>::append (size_t index, T value)
+{
+    logdbg << "ArrayListTemplate " << property_.name() << ": append: index " << index << " value '" << value << "'";
+
+    if (BUFFER_PEDANTIC_CHECKING)
+    {
+        assert (data_.size() <= buffer_.data_size_);
+        assert (null_flags_.size() <= buffer_.data_size_);
+    }
+
+    if (index >= data_.size()) // allocate new stuff, fill all new with not null
+    {
+        if (index != data_.size()) // some where left out
+            resizeNullTo(index+1);
+
+        resizeDataTo (index+1);
+    }
+
+    if (BUFFER_PEDANTIC_CHECKING)
+        assert (index < data_.size());
+
+    data_.at(index) += value;
+    unsetNull(index);
+
+    //logdbg << "ArrayListTemplate: set: size " << size_ << " max_size " << max_size_;
+}
+
+template <class T> void NullableVector<T>::appendFromFormat (size_t index, const std::string& format,
+                                                             const std::string& value_str)
+{
+    logdbg << "ArrayListTemplate " << property_.name() << ": appendFromFormat";
+    T value;
+
+    if (format == "octal")
+    {
+        value = std::stoi(value_str, 0, 8);
+    }
+    else if (format == "hexadecimal")
+    {
+        value = std::stoi(value_str, 0, 16);
+    }
+    else if (format == "epoch_tod_ms")
+    {
+        QDateTime date_time;
+        date_time.setMSecsSinceEpoch(std::stoul(value_str));
+        value = Utils::String::timeFromString(date_time.toString("hh:mm:ss.zzz").toStdString());
+    }
+    else if (format == "epoch_tod_s")
+    {
+        QDateTime date_time;
+        date_time.setMSecsSinceEpoch(1000*std::stoul(value_str));
+        value = Utils::String::timeFromString(date_time.toString("hh:mm:ss.zzz").toStdString());
+    }
+    else
+    {
+        logerr << "ArrayListTemplate: setFromFormat: unknown format '" << format << "'";
+        assert (false);
+    }
+
+    append (index, value);
 }
 
 template <class T> void NullableVector<T>::setNull(size_t index)
@@ -368,8 +439,18 @@ template <class T> NullableVector<T>& NullableVector<T>::operator*=(double facto
 {
     logdbg << "ArrayListTemplate " << property_.name() << ": operator*=";
 
-    for (auto &data_it : data_)
-        data_it *= factor;
+    size_t data_size = data_.size();
+
+    tbb::parallel_for( size_t(0), data_size, [&] (size_t cnt)
+    {
+        if (!isNull(cnt))
+        {
+            data_.at(cnt) *= factor;
+        }
+    });
+
+//    for (auto &data_it : data_)
+//        data_it *= factor;
 
     return *this;
 }
@@ -396,7 +477,7 @@ template <class T> std::set<T> NullableVector<T>::distinctValues (size_t index)
 }
 
 template <class T> std::map<T, std::vector<size_t>> NullableVector<T>::distinctValuesWithIndexes (size_t from_index,
-                                                                                                     size_t to_index)
+                                                                                                  size_t to_index)
 {
     logdbg << "ArrayListTemplate " << property_.name() << ": distinctValuesWithIndexes";
 
@@ -431,33 +512,135 @@ template <class T> std::map<T, std::vector<size_t>> NullableVector<T>::distinctV
     return values;
 }
 
+template <class T> std::map<T, std::vector<size_t>> NullableVector<T>::distinctValuesWithIndexes (
+        const std::vector<size_t>& indexes)
+{
+    logdbg << "ArrayListTemplate " << property_.name() << ": distinctValuesWithIndexes";
+
+    std::map<T, std::vector<size_t>> values;
+
+    if (BUFFER_PEDANTIC_CHECKING)
+    {
+        assert (data_.size() <= buffer_.data_size_);
+        assert (null_flags_.size() <= buffer_.data_size_);
+    }
+
+    for (auto index : indexes)
+    {
+        if (!isNull(index)) // not for null
+        {
+            if (BUFFER_PEDANTIC_CHECKING)
+                assert (index < data_.size());
+
+            values[data_.at(index)].push_back(index);
+        }
+    }
+
+    logdbg << "ArrayListTemplate " << property_.name() << ": distinctValuesWithIndexes: done with " << values.size();
+    return values;
+}
+
+template <class T> std::vector<size_t>  NullableVector<T>::nullValueIndexes (size_t from_index,
+                                                                             size_t to_index)
+{
+    logdbg << "ArrayListTemplate " << property_.name() << ": nullValueIndexes";
+
+    std::vector<size_t> indexes;
+
+    assert (from_index < to_index);
+
+    if (BUFFER_PEDANTIC_CHECKING)
+    {
+        assert (to_index);
+        assert (from_index < buffer_.data_size_);
+        assert (to_index < buffer_.data_size_);
+        assert (data_.size() <= buffer_.data_size_);
+        assert (null_flags_.size() <= buffer_.data_size_);
+    }
+
+//    if (from_index+1 >= data_.size()) // no data
+//        return indexes;
+
+    for (size_t index = from_index; index <= to_index; ++index)
+    {
+        if (isNull(index)) // not for null
+        {
+            if (BUFFER_PEDANTIC_CHECKING)
+                assert (index < data_.size());
+
+            indexes.push_back(index);
+        }
+    }
+
+    logdbg << "ArrayListTemplate " << property_.name() << ": nullValueIndexes: done with " << indexes.size();
+    return indexes;
+}
+
+template <class T> std::vector<size_t>  NullableVector<T>::nullValueIndexes (const std::vector<size_t>& indexes)
+{
+    logdbg << "ArrayListTemplate " << property_.name() << ": nullValueIndexes";
+
+    std::vector<size_t> ret_indexes;
+
+    for (auto index : indexes)
+    {
+        if (isNull(index)) // not for null
+        {
+            if (BUFFER_PEDANTIC_CHECKING)
+                assert (index < data_.size());
+
+            ret_indexes.push_back(index);
+        }
+    }
+
+    logdbg << "ArrayListTemplate " << property_.name() << ": nullValueIndexes: done with " << ret_indexes.size();
+    return ret_indexes;
+}
+
 template <class T> void NullableVector<T>::convertToStandardFormat(const std::string& from_format)
 {
     logdbg << "ArrayListTemplate " << property_.name() << ": convertToStandardFormat";
 
     static_assert (std::is_integral<T>::value, "only defined for integer types");
 
-    std::string value_str;
+    //std::string value_str;
     //T value;
 
-    size_t data_size = data_.size();
-    for (size_t cnt=0; cnt < data_size; cnt++)
+    if (from_format != "octal")
     {
-        if (isNull(cnt))
-            continue;
-
-        value_str = std::to_string(data_.at(cnt));
-
-        if (from_format == "octal")
-        {
-            data_.at(cnt) = std::stoi(value_str, 0, 8);
-        }
-        else
-        {
-            logerr << "ArrayListTemplate: convertToStandardFormat: unknown format '" << from_format << "'";
-            assert (false);
-        }
+        logerr << "ArrayListTemplate: convertToStandardFormat: unknown format '" << from_format << "'";
+        assert (false);
     }
+
+    size_t data_size = data_.size();
+
+    tbb::parallel_for( size_t(0), data_size, [&] (size_t cnt)
+    {
+        if (!isNull(cnt))
+        {
+            //value_str = std::to_string(data_.at(cnt));
+            data_.at(cnt) = std::stoi(std::to_string(data_.at(cnt)), 0, 8);
+        }
+    });
+
+
+    //    for (size_t cnt=0; cnt < data_size; cnt++)
+    //    {
+    //        if (isNull(cnt))
+    //            continue;
+
+    //        value_str = std::to_string(data_.at(cnt));
+
+    //        if (from_format == "octal")
+    //        {
+    //            data_.at(cnt) = std::stoi(value_str, 0, 8);
+    //        }
+    //        else
+    //        {
+    //            logerr << "ArrayListTemplate: convertToStandardFormat: unknown format '" << from_format << "'";
+    //            assert (false);
+    //        }
+    //    }
 }
 
 template <class T> size_t NullableVector<T>::size() { return data_.size(); }
@@ -487,11 +670,11 @@ template <class T> void NullableVector<T>::checkNotNull ()
 
     for (size_t cnt=0; cnt < null_flags_.size(); cnt++)
     {
-       if (null_flags_.at(cnt))
-       {
-           logerr << "cnt " << cnt << " null";
-           assert (false);
-       }
+        if (null_flags_.at(cnt))
+        {
+            logerr << "cnt " << cnt << " null";
+            assert (false);
+        }
     }
 }
 
@@ -516,6 +699,12 @@ template <class T> void NullableVector<T>::unsetNull (size_t index)
 
 template <>
 NullableVector<bool>& NullableVector<bool>::operator*=(double factor);
+
+template <>
+void NullableVector<bool>::append (size_t index, bool value);
+
+template <>
+void NullableVector<std::string>::append (size_t index, std::string value);
 
 
 

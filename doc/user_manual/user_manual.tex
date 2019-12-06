@@ -11,15 +11,15 @@
 \documentclass[10pt,letterpaper,extrafontsizes]{memoir}
 \listfiles
 \usepackage{comment}
-
+\usepackage{subfiles}
 
 % For (non-printing) notes  \PWnote{date}{text}
-\newcommand{\PWnote}[2]{} 
-\PWnote{2009/04/29}{Added fonttable to the used packages}
-\PWnote{2009/08/19}{Made Part I a separate doc (memdesign.tex).}
+%\newcommand{\PWnote}[2]{} 
+%\PWnote{2009/04/29}{Added fonttable to the used packages}
+%\PWnote{2009/08/19}{Made Part I a separate doc (memdesign.tex).}
 
 % same
-\newcommand{\LMnote}[2]{} 
+%\newcommand{\LMnote}[2]{} 
 
 
 \usepackage{memsty}
@@ -31,6 +31,33 @@
 \usepackage{dpfloat}     % floats on facing pages
 \usepackage{fonttable}[2009/04/01]   % font tables
 \usepackage[export]{adjustbox}
+
+\usepackage{fancyvrb,newverbs,xcolor}
+
+\definecolor{cverbbg}{gray}{0.93}
+
+\newenvironment{cverbatim}
+ {\SaveVerbatim{cverb}}
+ {\endSaveVerbatim
+  \flushleft\fboxrule=0pt\fboxsep=.5em
+  \colorbox{cverbbg}{\BUseVerbatim{cverb}}%
+  \endflushleft
+}
+\newenvironment{lcverbatim}
+ {\SaveVerbatim{cverb}}
+ {\endSaveVerbatim
+  \flushleft\fboxrule=0pt\fboxsep=.5em
+  \colorbox{cverbbg}{%
+    \makebox[\dimexpr\linewidth-2\fboxsep][l]{\BUseVerbatim{cverb}}%
+  }
+  \endflushleft
+}
+
+\newcommand{\ctexttt}[1]{\colorbox{cverbbg}{\texttt{#1}}}
+\newverbcommand{\cverb}
+  {\setbox\verbbox\hbox\bgroup}
+  {\egroup\colorbox{cverbbg}{\box\verbbox}}
+
 %%%%\usepackage{xr-hyper} \externaldocument{memdesign} Doesn't work, 
 %%%%                      Idea won't work in general for memman/memdesign
 %%%%                      as at display time, who knows where everything
@@ -170,12 +197,12 @@
 \end{center}
 
 \begin{center}
-\Huge\textsf{User Guide}\par
+\Huge\textsf{User Manual}\par
 \end{center}
 \begin{center}
 \normalsize\textsf{by Helmut Puhr}\par
 \medskip
-\normalsize\textsf{Version 0.4.0 \textit{Gallant Gerbil}}\par
+\normalsize\textsf{Version 0.4.2 \textit{Ironic Ibis}}\par
 \end{center}
 \vspace*{\fill}
 \begin{center}
@@ -208,32 +235,25 @@
 
 \pagenumbering{arabic} 
 
-\include{introduction}
+\subfile{introduction}
 
-\include{key_concepts}
+\subfile{installation}
 
-\include{installation}
+\subfile{test_data}
 
-\chapter{Usage}
-\label{sec:usage}
+\subfile{startup}
 
-\include{test_data}
+\subfile{data_loading}
 
-\include{database_opening}
-\include{management}
-\include{filtering}
+\subfile {listbox_view}
 
-\section{Inspection}
-\label{sec:inspection}
+\subfile {osg_view}
 
-\include {listbox_view}
-\include {osg_view}
+\subfile {issues}
 
-\include {issues}
+\subfile {utils}
 
-\include {utils}
-
-\include {licensing}
+\subfile {licensing}
 
 %\section{Glossary}
 %Buffer

@@ -9,7 +9,7 @@ set(CMAKE_CXX_FLAGS_MYREL "-O3")
 project( ATSDB )
 SET(CPACK_PACKAGE_VERSION_MAJOR "0")
 SET(CPACK_PACKAGE_VERSION_MINOR "4")
-SET(CPACK_PACKAGE_VERSION_PATCH "1")
+SET(CPACK_PACKAGE_VERSION_PATCH "2")
 
 message("  System: ${CMAKE_SYSTEM}")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -17,7 +17,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 message("  Platform: Linux")
-add_definitions ( -Wall -std=c++11 -Wno-int-in-bool-context)
+add_definitions ( -Wall -std=c++11)
 
 find_package(Qt5Widgets)
 find_package(Qt5Core)
@@ -75,6 +75,10 @@ find_package ( jASTERIX )
 message("  jASTERIX found: ${jASTERIX_FOUND}")
 message("  jASTERIX_INCLUDE_DIR: ${jASTERIX_INCLUDE_DIR}")
 message("  jASTERIX_LIBRARIES: ${jASTERIX_LIBRARIES}")
+
+find_package ( OpenSSL REQUIRED )
+message("  OPENSSL_INCLUDE_DIR: ${OPENSSL_INCLUDE_DIR}")
+message("  OPENSSL_CRYPTO_LIBRARY: ${OPENSSL_CRYPTO_LIBRARY}")
 
 #find_package ( JSONCPP REQUIRED )
 #message("  JSONCPP_INCLUDE_DIR: ${JSONCPP_INCLUDE_DIR}")
@@ -157,7 +161,9 @@ target_link_libraries ( atsdb optimized
     ${SQLITE3_LIBRARIES}
     ${LibArchive_LIBRARIES}
     ${JSONCPP_LIBRARY}
-    ${TBB_LIBRARIES})
+    ${TBB_LIBRARIES}
+    ${OPENSSL_CRYPTO_LIBRARY}
+    )
 
 
 # installation stuff

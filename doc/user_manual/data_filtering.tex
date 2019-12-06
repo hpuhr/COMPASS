@@ -3,8 +3,8 @@
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=8cm,frame]{../screenshots/filtering_details.png}
-  \caption{Default Filters}
+    \includegraphics[width=6cm,frame]{../screenshots/filtering_details.png}
+  \caption{Default filters}
   \label{fig:filter_default}
 \end{figure}
 
@@ -16,17 +16,21 @@ When active, this filter forces loading of data with a barometric altitude insid
 
 When active, this filter forces loading of data only from callsigns matching the given expression. The percent operator denotes a 'any characters' placeholder. So e.g. '\%TEST\%' will match 'TEST123' or 'TEST123   ' (with spaces) or 'MYTEST'. Target reports without a given callsign will not be loaded.
 
-\subsection{Mode 3A Codes Filter}
+\subsection{HashCode Filter}
+
+When active, this filter forces loading of data only from target reports with a specific ARTAS MD5 hash code, or system track updates referencing this hash code (in their TRI information). If no hash information is available (e.g. in SASS-C Verif databases or when this information was not present in the ASTERIX data), this filter should not be used.
+
+\subsection{Mode 3/A Codes Filter}
 
 When active, this filter forces loading of data with the given Mode A code(s), so it is possible to give multiple values (in octal notation, separated by commas). E.g. '7000' is possible, or '7000,7777'. Target reports without a given Mode A will not be loaded. \\
 
-\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please note that in the current database schema, the ADS-B Mode 3/A code is not defined, and therefore this filter will not filter any ADS-B target reports. This will be improved in the next version.
+Please note that ADS-B target reports can also contain Mode 3/A code information.
 
 \subsection{Position Filter}
 
 When active, this filter forces loading of data with latitude/longitude inside the given thresholds (in degrees).
 
-\subsection{TargetAddress Filter}
+\subsection{Target Address Filter}
 
 When active, this filter forces loading of data with the given Mode S address(es), so it is possible to give multiple values (in hexadecimal notation, irrespective of upper or lower case characters, separated by commas). E.g. 'FEFE10' is possible, or 'FEFE10,FEFE11,FEFE12'. Target reports without a given Mode S address will not be loaded.
 
@@ -96,7 +100,7 @@ for persistence.
 \subsection{Managing Filters}
 \label{sec:filter_management}
 
-By clicking on the gear symbold {\includegraphics[scale=0.025]{../../data/icons/edit.png}, a menu allows the following operations on the filter:
+By clicking on the gear symbol \includegraphics[scale=0.025]{../../data/icons/edit.png}, a menu allows the following operations on the filter:
 
 \begin{itemize}  
 \item Reset: Resets the filter to its default values.

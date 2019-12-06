@@ -58,6 +58,8 @@ private slots:
     void startSlot ();
     void addJSONImporterTaskSlot ();
     void addRadarPlotPositionCalculatorTaskSlot ();
+    void addCreateARTASAssociationsTaskSlot ();
+
 #if USE_JASTERIX
     void addASTERIXImporterTaskSlot ();
 #endif

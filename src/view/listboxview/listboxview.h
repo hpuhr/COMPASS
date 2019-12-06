@@ -55,24 +55,25 @@ signals:
 
     void showOnlySelectedSignal (bool value);
     void usePresentationSignal (bool value);
+    void showAssociationsSignal (bool value);
 
 public:
     /// @brief Constructor
     ListBoxView(const std::string& class_id, const std::string& instance_id, ViewContainer* w,
                 ViewManager& view_manager);
     /// @brief Destructor
-    virtual ~ListBoxView();
+    virtual ~ListBoxView() override;
 
-    void update (bool atOnce=false);
-    void clearData();
-    bool init();
+    void update (bool atOnce=false) override;
+    void clearData() override;
+    bool init() override;
 
-    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id);
+    virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id) override;
 
     /// @brief Returns the used data source
     ListBoxViewDataSource *getDataSource () { assert (data_source_); return data_source_; }
 
-    virtual DBOVariableSet getSet (const std::string& dbo_name);
+    virtual DBOVariableSet getSet (const std::string& dbo_name) override;
 
     bool usePresentation() const;
     void usePresentation(bool use_presentation);
@@ -82,6 +83,10 @@ public:
 
     bool showOnlySelected() const;
     void showOnlySelected(bool value);
+
+    bool canShowAssociations() const;
+    bool showAssociations() const;
+    void showAssociations(bool show_associations);
 
 protected:
     /// For data display
@@ -94,8 +99,10 @@ protected:
     bool use_presentation_ {true};
     /// Overwrite during export, if not, it appends
     bool overwrite_csv_ {false};
+    bool can_show_associations_ {false};
+    bool show_associations_ {false};
 
-    virtual void checkSubConfigurables ();
+    virtual void checkSubConfigurables () override;
     virtual void updateSelection () override;
 };
 

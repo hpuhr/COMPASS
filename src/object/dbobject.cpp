@@ -18,6 +18,8 @@
 #include <algorithm>
 #include <memory>
 
+#include <boost/algorithm/string.hpp>
+
 #include "dbtable.h"
 #include "dbschema.h"
 #include "dbschemamanager.h"
@@ -28,11 +30,11 @@
 #include "dbovariable.h"
 #include "buffer.h"
 #include "filtermanager.h"
-//#include "StructureDescriptionManager.h"
 #include "propertylist.h"
 #include "metadbtable.h"
 #include "dboreaddbjob.h"
 #include "finalizedboreadjob.h"
+#include "dboreadassociationsjob.h"
 #include "atsdb.h"
 #include "dbinterface.h"
 #include "jobmanager.h"
@@ -44,12 +46,16 @@
 #include "dboeditdatasourceswidget.h"
 #include "dboeditdatasourceactionoptionswidget.h"
 #include "storeddbodatasourcewidget.h"
+#include "stringconv.h"
+
+using namespace Utils;
 
 /**
  * Registers parameters, creates sub configurables
  */
-DBObject::DBObject(const std::string& class_id, const std::string& instance_id, Configurable* parent)
-    : Configurable (class_id, instance_id, parent)
+DBObject::DBObject(const std::string& class_id, const std::string& instance_id, DBObjectManager* manager)
+    : Configurable (class_id, instance_id, manager, "db_object_"+boost::algorithm::to_lower_copy(instance_id)+".xml"),
+      manager_(*manager)
 {
     registerParameter ("name" , &name_, "Undefined");
     registerParameter ("info" , &info_, "");
@@ -550,7 +556,7 @@ void DBObject::addDataSources (std::map <int, std::pair<int,int>>& sources)
         if (has_sac_sic)
         {
             bool stored_found = false;
-            unsigned int stored_id;
+            unsigned int stored_id {0};
 
             for (auto& stored_it : stored_data_sources_)
             {
@@ -652,7 +658,7 @@ void DBObject::addDataSources (std::map <int, std::pair<int,int>>& sources)
     db_interface.insertBuffer(meta_table, buffer_ptr);
     db_interface.updateTableInfo();
 
-    databaseContentChangedSlot();
+    updateToDatabaseContent();
     //logdbg << "DBObject: addDataSources: emitting signal";
     //emit db_interface.databaseContentChangedSignal();
 
@@ -817,24 +823,52 @@ void DBObject::schemaChangedSlot ()
         {
             logwrn << "DBObject: schemaChangedSlot: object " << name_ << " has not main meta table for current schema";
             current_meta_table_ = nullptr;
+            associations_table_name_ = "";
+
             return;
         }
 
         std::string meta_table_name = meta_table_definitions_.at(schema.name()).metaTable();
         assert (schema.hasMetaTable (meta_table_name));
         current_meta_table_ = &schema.metaTable (meta_table_name);
+
+        associations_table_name_ = current_meta_table_->mainTableName() + "_assoc";
     }
     else
+    {
         current_meta_table_ = nullptr;
+        associations_table_name_ = "";
+    }
 
-    databaseContentChangedSlot ();
+    updateToDatabaseContent ();
 }
 
 void DBObject::load (DBOVariableSet& read_set, bool use_filters, bool use_order, DBOVariable* order_variable,
                      bool use_order_ascending, const std::string &limit_str)
 {
+    std::string custom_filter_clause;
+    std::vector <DBOVariable*> filtered_variables;
+
+    if (use_filters)
+    {
+        custom_filter_clause = ATSDB::instance().filterManager().getSQLCondition (name_, filtered_variables);
+    }
+
+    for (auto& var_it : filtered_variables)
+        assert (var_it->existsInDB());
+
+    load (read_set, custom_filter_clause, filtered_variables, use_order, order_variable, use_order_ascending,
+          limit_str);
+}
+
+void DBObject::load (DBOVariableSet& read_set,  std::string custom_filter_clause,
+                     std::vector <DBOVariable*> filtered_variables, bool use_order, DBOVariable* order_variable,
+                     bool use_order_ascending, const std::string &limit_str)
+{
     assert (is_loadable_);
     assert (existsInDB());
+
+    // do not load associations, should be done in DBObjectManager::load
 
     for (auto& var_it : read_set.getSet())
         assert (var_it->existsInDB());
@@ -854,17 +888,6 @@ void DBObject::load (DBOVariableSet& read_set, bool use_filters, bool use_order,
     finalize_jobs_.clear();
 
     clearData ();
-
-    std::string custom_filter_clause;
-    std::vector <DBOVariable*> filtered_variables;
-
-    if (use_filters)
-    {
-        custom_filter_clause = ATSDB::instance().filterManager().getSQLCondition (name_, filtered_variables);
-    }
-
-    for (auto& var_it : filtered_variables)
-        assert (var_it->existsInDB());
 
     //    DBInterface &db_interface, DBObject &dbobject, DBOVariableSet read_list, std::string custom_filter_clause,
     //    DBOVariable *order, const std::string &limit_str
@@ -895,7 +918,7 @@ void DBObject::quitLoading ()
 
 void DBObject::clearData ()
 {
-    loginf << "DBObject " << name_ << ": clearData";
+    logdbg << "DBObject " << name_ << ": clearData";
 
     if (data_)
     {
@@ -908,7 +931,7 @@ void DBObject::clearData ()
 
 void DBObject::insertData (DBOVariableSet& list, std::shared_ptr<Buffer> buffer, bool emit_change)
 {
-    loginf << "DBObject " << name_ << ": insertData";
+    logdbg << "DBObject " << name_ << ": insertData";
 
     assert (!insert_job_);
 
@@ -1088,7 +1111,7 @@ void DBObject::readJobObsoleteSlot ()
 
 void DBObject::readJobDoneSlot()
 {
-    loginf << "DBObject: " << name_ << " readJobDoneSlot";
+    logdbg << "DBObject: " << name_ << " readJobDoneSlot";
     read_job_ = nullptr;
 
     if (info_widget_)
@@ -1096,14 +1119,14 @@ void DBObject::readJobDoneSlot()
 
     if (!isLoading())
     {
-        loginf << "DBObject: " << name_ << " readJobDoneSlot: no jobs left, done";
+        loginf << "DBObject: " << name_ << " readJobDoneSlot: done";
         emit loadingDoneSignal(*this);
     }
 }
 
 void DBObject::finalizeReadJobDoneSlot()
 {
-    loginf << "DBObject: " << name_ << " finalizeReadJobDoneSlot";
+    logdbg << "DBObject: " << name_ << " finalizeReadJobDoneSlot";
 
     FinalizeDBOReadJob* sender = dynamic_cast <FinalizeDBOReadJob*> (QObject::sender());
 
@@ -1143,32 +1166,33 @@ void DBObject::finalizeReadJobDoneSlot()
 
     if (!isLoading())
     {
-        loginf << "DBObject: " << name_ << " finalizeReadJobDoneSlot: no jobs left, done";
+        loginf << "DBObject: " << name_ << " finalizeReadJobDoneSlot: loading done";
         emit loadingDoneSignal(*this);
     }
 }
 
 
-void DBObject::databaseContentChangedSlot ()
+void DBObject::updateToDatabaseContent ()
 {
-    logdbg << "DBObject: databaseContentChangedSlot";
+    loginf << "DBObject " << name_ << ": updateToDatabaseContent";
 
     if (!current_meta_table_)
     {
-        logdbg << "DBObject: databaseContentChangedSlot: object " << name_ << " has no current meta table";
+        logdbg << "DBObject: updateToDatabaseContent: object " << name_ << " has no current meta table";
         is_loadable_ = false;
         return;
     }
 
     assert (current_meta_table_);
     std::string table_name = current_meta_table_->mainTableName();
+    associations_table_name_ = table_name + "_assoc";
 
     is_loadable_ = current_meta_table_->existsInDB() && ATSDB::instance().interface().tableInfo().count(table_name) > 0;
 
     if (is_loadable_)
         count_ = ATSDB::instance().interface().count (table_name);
 
-    logdbg << "DBObject: " << name_ << " databaseContentChangedSlot: exists in db "
+    logdbg << "DBObject: " << name_ << " updateToDatabaseContent: exists in db "
            << current_meta_table_->existsInDB() << " count " << count_;
 
     data_sources_.clear();
@@ -1178,7 +1202,8 @@ void DBObject::databaseContentChangedSlot ()
     if (info_widget_)
         info_widget_->updateSlot();
 
-    logdbg << "DBObject: " << name_ << " databaseContentChangedSlot: loadable " << is_loadable_ << " count " << count_;
+    loginf << "DBObject: " << name_ << " updateToDatabaseContent: done, loadable " << is_loadable_
+           << " count " << count_;
 }
 
 bool DBObject::isLoading ()
@@ -1290,4 +1315,110 @@ void DBObject::removeVariableInfoForSchema (const std::string& schema_name)
             ++var_it;
         }
     }
+}
+
+void DBObject::loadAssociationsIfRequired ()
+{
+    if (manager_.hasAssociations() && !associations_loaded_)
+    {
+        std::shared_ptr<DBOReadAssociationsJob> read_job = std::make_shared<DBOReadAssociationsJob> (*this);
+        JobManager::instance().addDBJob(read_job); // fire and forget
+    }
+}
+
+
+void DBObject::loadAssociations ()
+{
+    loginf << "DBObject " << name_ << ": loadAssociations";
+
+    associations_.clear();
+
+    boost::posix_time::ptime loading_start_time;
+    boost::posix_time::ptime loading_stop_time;
+
+    loading_start_time = boost::posix_time::microsec_clock::local_time();
+
+    DBInterface& db_interface = ATSDB::instance().interface();
+
+    assert (associations_table_name_.size());
+
+    if (db_interface.existsTable(associations_table_name_))
+        associations_ = db_interface.getAssociations(associations_table_name_);
+
+    associations_loaded_ = true;
+
+    loading_stop_time = boost::posix_time::microsec_clock::local_time();
+
+    double load_time;
+    boost::posix_time::time_duration diff = loading_stop_time - loading_start_time;
+    load_time= diff.total_milliseconds()/1000.0;
+
+    loginf  << "DBObject " << name_ << ": loadAssociations: " << associations_.size()
+            << " associactions done (" << String::doubleToStringPrecision(load_time, 2) << " s).";
+}
+
+bool DBObject::hasAssociations ()
+{
+    return associations_.size() > 0;
+}
+
+void DBObject::addAssociation (unsigned int rec_num, unsigned int utn, unsigned int src_rec_num)
+{
+    associations_.emplace(rec_num, DBOAssociationEntry(utn, src_rec_num));
+    associations_changed_ = true;
+    associations_loaded_ = true;
+}
+
+void DBObject::clearAssociations ()
+{
+    associations_.clear();
+    associations_changed_ = true;
+    associations_loaded_ = false;
+}
+
+void DBObject::saveAssociations ()
+{
+    loginf << "DBObject " << name_ << ": saveAssociations";
+
+    DBInterface& db_interface = ATSDB::instance().interface();
+
+    assert (associations_table_name_.size());
+
+    if (db_interface.existsTable(associations_table_name_))
+        db_interface.clearTableContent(associations_table_name_);
+    else
+        db_interface.createAssociationsTable(associations_table_name_);
+
+    if (!hasAssociations())
+        return;
+
+    assert (db_interface.existsTable(associations_table_name_));
+
+    //assoc_id INT, rec_num INT, utn INT
+
+    PropertyList list;
+    list.addProperty("rec_num", PropertyDataType::INT);
+    list.addProperty("utn", PropertyDataType::INT);
+    list.addProperty("src_rec_num", PropertyDataType::INT);
+
+    std::shared_ptr<Buffer> buffer_ptr = std::shared_ptr<Buffer> (new Buffer (list, name_));
+
+    NullableVector<int>& rec_nums = buffer_ptr->get<int>("rec_num");
+    NullableVector<int>& utns = buffer_ptr->get<int>("utn");
+    NullableVector<int>& src_rec_nums = buffer_ptr->get<int>("src_rec_num");
+
+    size_t cnt = 0;
+    for (auto& assoc_it : associations_)
+    {
+        rec_nums.set(cnt, assoc_it.first);
+        utns.set(cnt, assoc_it.second.utn_);
+        src_rec_nums.set(cnt, assoc_it.second.src_rec_num_);
+        ++cnt;
+    }
+
+    db_interface.insertBuffer(associations_table_name_, buffer_ptr);
+
+    associations_changed_ = false;
+
+    loginf << "DBObject " << name_ << ": saveAssociations: done";
 }

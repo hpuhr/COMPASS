@@ -44,8 +44,10 @@ public slots:
     void categoryCheckedSlot ();
     void editionChangedSlot(const std::string& cat_str, const std::string& ed_str);
     void refEditionChangedSlot(const std::string& cat_str, const std::string& ed_str);
+    void spfEditionChangedSlot(const std::string& cat_str, const std::string& ed_str);
     void categoryEditionEditSlot ();
     void categoryREFEditionEditSlot ();
+    void categorySPFEditionEditSlot ();
 
     void editDataBlockSlot();
     void editCategoriesSlot();
@@ -67,6 +69,7 @@ protected:
     QPushButton* framing_edit_ {nullptr};
 
     std::map<unsigned int, QPushButton*> ref_edit_buttons_;
+    std::map<unsigned int, QPushButton*> spf_edit_buttons_;
 
     void updateFraming ();
     void updateCategories ();

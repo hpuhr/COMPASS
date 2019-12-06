@@ -60,6 +60,7 @@ public:
                      TaskManager* task_manager);
     virtual ~JSONImporterTask();
 
+    bool hasOpenWidget() { return widget_ != nullptr; }
     JSONImporterTaskWidget* widget();
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);

@@ -68,6 +68,7 @@ public:
                         TaskManager* task_manager);
     virtual ~ASTERIXImporterTask();
 
+    bool hasOpenWidget() { return widget_ != nullptr; }
     ASTERIXImporterTaskWidget* widget();
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
@@ -96,6 +97,8 @@ public:
     void editionForCategory (unsigned int category, const std::string& edition);
     std::string refEditionForCategory (unsigned int category);
     void refEditionForCategory (unsigned int category, const std::string& ref);
+    std::string spfEditionForCategory (unsigned int category);
+    void spfEditionForCategory (unsigned int category, const std::string& spf);
 
     std::shared_ptr<JSONParsingSchema> schema() const;
 
@@ -108,8 +111,12 @@ public:
     bool createMappingStubs() const;
     void createMappingStubs(bool createMappingStubs);
 
+    bool limitRAM() const;
+    void limitRAM(bool value);
+
 protected:
     bool debug_jasterix_;
+    bool limit_ram_;
     std::shared_ptr<jASTERIX::jASTERIX> jasterix_;
 
     std::map <std::string, SavedFile*> file_list_;

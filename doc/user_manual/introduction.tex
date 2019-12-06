@@ -1,84 +1,26 @@
 \chapter{Introduction}
 
 This document has its focus on interaction and working procedures required to make use of the existing
-functionality. In this introduction, feature highlights are listed, followed by a brief summary of important aspects of  ATSDB in \nameref{sec:key_concepts}. In the later section \nameref{sec:usage}, a functional, task-oriented overview is given. In the section \nameref{sec:troubleshooting} details about reported isses are collected, as well as details on how to report new issues.
+functionality. In this introduction, feature highlights and ackknowledgments are listed, followed by a brief summary of important aspects of  ATSDB in \nameref{sec:key_concepts}. \\
+
+In the section \nameref{sec:installation}, prerequisites are listed and installation instructions are given. In the section \nameref{sec:test_data}, a few comments about how to obtain/use test data are given. \\
+
+In the larger section \nameref{sec:startup}, first steps are described to run the application, create a database or access an existing one, import data and start the management GUI. \\
+
+How data can be loaded is described in the secion \nameref{sec:data_loading}, inspection of loaded data using the two existing views is described in the secions \nameref{sec:listbox_view} and \nameref{sec:osg_view}. \\
+
+In the section \nameref{sec:troubleshooting} details about reported isses are collected, as well as details on how to report new issues. \\
 
 In the section \nameref{sec:utils} some information is given how data can be manually imported into ATSDB. In the last section \nameref{sec:licensing} information is given about under what conditions ATSDB can be used and what libraries with what licences are used in the background.
 
-\section{Feature highlights}
+\subfile{intro_feature_highlights}
 
-The \textbf{A}ir \textbf{T}raffic \textbf{S}urveillance \textbf{D}ata\textbf{B}ase aims at providing a generalized framework for ATM surveillance data inspection. While its current functionality is somewhat limited, the following features exist:\\\\
+\subfile{intro_display}
 
-\begin{itemize}  
-\item Support of multiple database systems, e.g. Sqlite3, MySQL
-\item Support of multiple, configurable database schemas, e.g. SCDB
-\item Dynamic JSON import from SDDL, ADS-B exchange, OpenSky Network
-\item MySQL database import and management of SCDB databases
-\item High performance processing, low memory footprint
-\item Utilization of application during loading procedure
-\item Views for data inspection
-\item Cross-view data selection and inspection
-\item Simple custom filter generation
-\item Supported Database Objects
-\begin{itemize}  
-\item Radar plots
-\item System Tracks and Reference Trajectories
-\item MLAT \& WAM target reports
-\item ADS-B target reports
-\end{itemize}
-\item XML-based configuration files
-\item Multiple coexisting configurations, usage chosen during runtime
-\item Based on Open Source libraries
-\item Runs on generic hardware
-\end{itemize}
+\subfile{intro_general_aspects}
 
-\subsection{Display}
-There also exists an integrated display solution, called the OSGView (OpenSceneGraph View). Currently it is experimental, and still under heavy development. For this reasons, it is not released as source code, but can be downloaded as an AppImage as binary component only. Please note that the display functionality is described in the later chapter OSG View (in section \nameref{sec:osgview}).\\\\
+\subfile{intro_acknowledgements}
 
-The following features currently exist:
-
-\begin{itemize}  
-\item Usage of data based on the highly flexible ATSDB framework
-\item High-performance display based on OpenSceneGraph
-\item Customizable map/terrain display based on osgEarth
-\item Customizable display of Database Objects
-\item Highlighting and labeling
-\item Relatively low memory footprint (e.g. 17 million target reports in ~6 GB RAM)
-\end{itemize}
-
-\section{General Aspects}
-ATSDB is a highly specialized surveillance data processing framework, with a strong focus on high-performance and a low memory footprint,  to process massive quantities of data. Surveillance data is fetched from a database (limited by a filter system), then processed and displayed using so-called Views (visualization of aspects of the result set).\\\\
-
-As storage medium, a database is used.  Different database systems are supported, and a flexible read-out system allows for easy adaptation to different database schemas.  Data in such a database has to be generated in a previous, separate process.  One method would be to use EUROCONTROLS SASS-C  Verif V7/8 framework.\\
-
-When such a previously generated database is opened for the first time, some post-processing is performed, to ease usage and to increase startup speed.  When data is loaded using a database query, a filter configuration may restrict the data leading to a result set.  Such a result set can be analyzed using Views, e.g. the Listbox view.\\
-
-Each View defines which parts of the database are required to fulfill its purpose, and only such parts are loaded.  During a loading process from the database, subsets of the query result are immediately added to the current result set and all views are updated. 
-
-\section{Acknowledgments}
-
-The following libraries are used in the project (list not exhaustive):
-
-\begin{itemize}  
-\item Qt5
-\item Boost
-\item MySQL++
-\item MySQLClient
-\item SQLite3
-\item GDAL
-\item TinyXML2
-\item Log4Cpp
-\item LibArchive
-\item Eigen3
-\item OpenSceneGraph
-\item OSGEarth
-\item nlohmann::json
-\end{itemize}
-
-Many thanks to the developers of those. Your work is awesome.
-
-\subsection{Contributors}
-
-Also, several persons were involved during testing of ATSDB. Many thanks to you as well, if you'd like to be named please let me know.
+\subfile{intro_key_concepts}
 
 

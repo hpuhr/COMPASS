@@ -1,5 +1,5 @@
 <Configuration class_id="FilterManager" instance_id="FilterManager0">
-    <ParameterString db_id="/home/sk/data/test.db"/>
+    <ParameterString db_id="/home/sk/data/austria/20190602-0900-0930.db"/>
     <Configuration class_id="DBFilter" instance_id="Barometric Altitude">
         <ParameterBool active="0"/>
         <ParameterBool changed="1"/>
@@ -44,6 +44,25 @@
             <ParameterString variable_name="callsign"/>
         </Configuration>
         <Configuration class_id="DBFilterWidget" instance_id="CallsignWidget0">
+            <ParameterBool visible="1"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBFilter" instance_id="HashCode">
+        <ParameterBool active="0"/>
+        <ParameterBool changed="1"/>
+        <ParameterBool op_and_="1"/>
+        <ParameterBool visible="0"/>
+        <ParameterString name="HashCode"/>
+        <Configuration class_id="DBFilterCondition" instance_id="HashCodeCondition0">
+            <ParameterBool absolute_value="0"/>
+            <ParameterBool op_and="1"/>
+            <ParameterString operator="LIKE"/>
+            <ParameterString reset_value="%81c20819%"/>
+            <ParameterString value="%81c20819%"/>
+            <ParameterString variable_dbo_name="Meta"/>
+            <ParameterString variable_name="hash_code"/>
+        </Configuration>
+        <Configuration class_id="DBFilterWidget" instance_id="HashCodeWidget0">
             <ParameterBool visible="1"/>
         </Configuration>
     </Configuration>
@@ -285,20 +304,20 @@
         <ParameterBool LoadSensorNumber8715="0"/>
         <ParameterBool LoadSensorNumber9="1"/>
         <ParameterBool LoadSensorNumber9745="1"/>
-        <ParameterBool active="1"/>
+        <ParameterBool active="0"/>
         <ParameterBool changed="1"/>
         <ParameterBool op_and_="1"/>
         <ParameterBool visible="0"/>
         <ParameterString dbo_name="Radar"/>
         <ParameterString name="RadarDataSources0"/>
         <Configuration class_id="DataSourcesFilterWidget" instance_id="RadarDataSources0Widget0">
-            <ParameterBool visible="1"/>
+            <ParameterBool visible="0"/>
         </Configuration>
     </Configuration>
     <Configuration class_id="DataSourcesFilter" instance_id="TrackerDataSources0">
         <ParameterBool LoadSensorNumber12990="1"/>
         <ParameterBool LoadSensorNumber13040="1"/>
-        <ParameterBool LoadSensorNumber13044="1"/>
+        <ParameterBool LoadSensorNumber13044="0"/>
         <ParameterBool LoadSensorNumber21="1"/>
         <ParameterBool LoadSensorNumber22="1"/>
         <ParameterBool LoadSensorNumber23="1"/>
@@ -307,10 +326,10 @@
         <ParameterBool LoadSensorNumber26="1"/>
         <ParameterBool LoadSensorNumber26642="1"/>
         <ParameterBool LoadSensorNumber26645="1"/>
-        <ParameterBool LoadSensorNumber26646="1"/>
+        <ParameterBool LoadSensorNumber26646="0"/>
         <ParameterBool LoadSensorNumber27="1"/>
-        <ParameterBool LoadSensorNumber30769="0"/>
-        <ParameterBool LoadSensorNumber30770="0"/>
+        <ParameterBool LoadSensorNumber30769="1"/>
+        <ParameterBool LoadSensorNumber30770="1"/>
         <ParameterBool active="1"/>
         <ParameterBool changed="1"/>
         <ParameterBool op_and_="1"/>

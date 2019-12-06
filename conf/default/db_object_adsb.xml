@@ -1,0 +1,2528 @@
+<Configuration class_id="DBObject" instance_id="ADSB">
+    <ParameterString info=""/>
+    <ParameterString name="ADSB"/>
+    <Configuration class_id="DBODataSourceDefinition" instance_id="DBODataSourceDefinitionADSBSCDB0">
+        <ParameterString altitude_column=""/>
+        <ParameterString foreign_key="le_ds.DS_ID"/>
+        <ParameterString latitude_column="ds_ads.POS_LAT_DEG"/>
+        <ParameterString local_key="ds_id"/>
+        <ParameterString longitude_column="ds_ads.POS_LONG_DEG"/>
+        <ParameterString meta_table="ADSBDataSources"/>
+        <ParameterString name_column="le_ds.DS_NAME"/>
+        <ParameterString sac_column="le_ds.SAC"/>
+        <ParameterString schema="SCDB"/>
+        <ParameterString short_name_column="le_ds.DS_SHORT_NAME"/>
+        <ParameterString sic_column="le_ds.SIC"/>
+    </Configuration>
+    <Configuration class_id="DBODataSourceDefinition" instance_id="DBODataSourceDefinitionADSBSimple0">
+        <ParameterString altitude_column=""/>
+        <ParameterString foreign_key="sensors.sensor_id"/>
+        <ParameterString latitude_column="sensors.latitude"/>
+        <ParameterString local_key="ds_id"/>
+        <ParameterString longitude_column="sensors.longitude"/>
+        <ParameterString meta_table="DataSources"/>
+        <ParameterString name_column="sensors.name"/>
+        <ParameterString sac_column="sensors.sac"/>
+        <ParameterString schema="Simple"/>
+        <ParameterString short_name_column="sensors.shortname"/>
+        <ParameterString sic_column="sensors.sic"/>
+    </Configuration>
+    <Configuration class_id="DBOLabelDefinition" instance_id="DBOLabelDefinition0">
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryaccelerating0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="accelerating"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryacceleration0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="acceleration"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryadsb0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="adsb"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryaircraft_leng_width0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="aircraft_leng_width"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryairspeed_kt0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="airspeed_kt"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryairspeed_mach0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="airspeed_mach"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryalong_track_error_m0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="along_track_error_m"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryalt_baro_ft0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="alt_baro_ft"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryalt_geo_ft0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="alt_geo_ft"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryalt_reporting_capability_ft0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="alt_reporting_capability_ft"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryaltitude_geometric0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="altitude_geometric"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryamplitude_max0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="amplitude_max"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryazimuth0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="azimuth"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryazimuth_error_deg0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="azimuth_error_deg"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrybaro_vertical_rate_ftm0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="baro_vertical_rate_ftm"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrybaro_vertical_rate_re0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="baro_vertical_rate_re"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrycalc_alt_geo_ft0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="calc_alt_geo_ft"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrycallsign0">
+            <ParameterBool show="1"/>
+            <ParameterString prefix="CS "/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="callsign"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrycat0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="cat"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrychain0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="chain"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryclimbing0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="climbing"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrycoasting0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="coasting"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrydate0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="date"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrydecelerating0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="decelerating"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrydescending0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="descending"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrydescriptor_atp0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="descriptor_atp"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrydifferential_correction0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="differential_correction"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrydisplay_state0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="display_state"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrydo_260a0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="do_260a"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrydo_never_show0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="do_never_show"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrydo_not_show0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="do_not_show"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrydom_posix0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="dom_posix"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryds_id0">
+            <ParameterBool show="1"/>
+            <ParameterString prefix="DS "/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="ds_id"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryemergency0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="emergency"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryemitter_category0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="emitter_category"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryextrapolated0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="extrapolated"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryfigure_of_merit_acas0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="figure_of_merit_acas"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryfigure_of_merit_differential0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="figure_of_merit_differential"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryfigure_of_merit_multiple0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="figure_of_merit_multiple"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryfinal_sel_altitude_approach0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="final_sel_altitude_approach"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryfinal_sel_altitude_ft0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="final_sel_altitude_ft"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryfinal_sel_altitude_hold0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="final_sel_altitude_hold"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryfinal_sel_altitude_vertical0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="final_sel_altitude_vertical"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryflightplan_ext_id0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="flightplan_ext_id"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryflightplan_id0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="flightplan_id"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryflightplan_target_identification0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="flightplan_target_identification"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryfrom_fft0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="from_fft"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryfused0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="fused"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrygeo_area_mask0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="geo_area_mask"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrygeo_height_accuracy0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="geo_height_accuracy"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrygeo_vertical_rate_ftm0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="geo_vertical_rate_ftm"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrygeo_vertical_rate_re0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="geo_vertical_rate_re"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryground0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="ground"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryground_bit0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="ground_bit"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrygroundcourse_error_deg0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="groundcourse_error_deg"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrygroundspeed_error_kt0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="groundspeed_error_kt"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrygroundspeed_kt0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="groundspeed_kt"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrygroundspeed_x0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="groundspeed_x"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrygroundspeed_y0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="groundspeed_y"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryhash_code0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="hash_code"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryhijack0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="hijack"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryhorizontal_error_m0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="horizontal_error_m"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryinter_sel_altitude_ft0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="inter_sel_altitude_ft"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryinter_sel_altitude_info0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="inter_sel_altitude_info"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryinter_sel_altitude_source0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="inter_sel_altitude_source"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryis_consec_large_error0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="is_consec_large_error"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryis_jump0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="is_jump"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrylatency_s0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="latency_s"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryline_id0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="line_id"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrylink_technology_cdti0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="link_technology_cdti"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrylink_technology_mds0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="link_technology_mds"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrylink_technology_other0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="link_technology_other"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrylink_technology_uat0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="link_technology_uat"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrylink_technology_vdl0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="link_technology_vdl"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrymagnetic_heading_deg0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="magnetic_heading_deg"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrymilitary_emergency0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="military_emergency"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrymlat0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="mlat"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrymode3a_code0">
+            <ParameterBool show="1"/>
+            <ParameterString prefix="A "/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="mode3a_code"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrymode_a_code0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="mode_a_code"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrymode_a_code_changed0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="mode_a_code_changed"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrymode_s0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="mode_s"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrymops_version0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="mops_version"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrynac_p0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="nac_p"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrynic_baro0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="nic_baro"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrynucp_nic0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="nucp_nic"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrynucr_nacv0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="nucr_nacv"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryop_status_ra0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="op_status_ra"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryop_status_sa0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="op_status_sa"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryop_status_tcas0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="op_status_tcas"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryorientation0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="orientation"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryparking0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="parking"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrypic0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="pic"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryplot_id0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="plot_id"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryplot_id_chain0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="plot_id_chain"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrypos_lat_deg0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="pos_lat_deg"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrypos_long_deg0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="pos_long_deg"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrypos_offset_applied0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="pos_offset_applied"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrypos_sys_x_nm0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="pos_sys_x_nm"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrypos_sys_y_nm0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="pos_sys_y_nm"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryposition_accuracy0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="position_accuracy"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryposition_x0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="position_x"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryposition_x_variance0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="position_x_variance"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryposition_xy_covariance0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="position_xy_covariance"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryposition_y0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="position_y"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryposition_y_variance0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="position_y_variance"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrypsr0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="psr"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryradiofailure0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="radiofailure"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryrange_error_m0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="range_error_m"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryrange_slant0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="range_slant"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryraw_msg0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="raw_msg"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryrec_num0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix="R "/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="rec_num"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryrec_time_ms0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="rec_time_ms"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryrec_time_posix0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="rec_time_posix"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryreceiver_id0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="receiver_id"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryreport_type0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="report_type"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryrocd0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="rocd"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryroll_angle_deg0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="roll_angle_deg"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrysac0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="sac"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrysam0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="sam"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrysd_adsb.spi0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="sd_adsb.spi"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryselected_alt_capability0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="selected_alt_capability"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryservice_id0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="service_id"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrysic0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="sic"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrysil0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="sil"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrysils0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="sils"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrysimulated0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="simulated"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrysimulated_target0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="simulated_target"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrysmoothed0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="smoothed"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryspi0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="spi"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryssr0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="ssr"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrysurveillance_status0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="surveillance_status"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytarget_addr0">
+            <ParameterBool show="1"/>
+            <ParameterString prefix="TA "/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="target_addr"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytarget_length0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="target_length"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytarget_status0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="target_status"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytarget_width0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="target_width"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytentative0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="tentative"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytest_target0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="test_target"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytime_last_flightlevel0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="time_last_flightlevel"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytime_last_geometric_altitude0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="time_last_geometric_altitude"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytime_last_mode_a0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="time_last_mode_a"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytime_last_target_address0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="time_last_target_address"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytime_recording0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="time_recording"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytime_recording_daq_pos0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="time_recording_daq_pos"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytoap0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="toap"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytoav0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="toav"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytod0">
+            <ParameterBool show="1"/>
+            <ParameterString prefix="T "/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="tod"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytod_accuracy0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="tod_accuracy"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytod_calculated0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="tod_calculated"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytorp0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="torp"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytorp_fsi0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="torp_fsi"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytorp_precise0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="torp_precise"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytorv0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="torv"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytorv_fsi0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="torv_fsi"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytorv_precise0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="torv_precise"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytouchdown_runway_id0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="touchdown_runway_id"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytouchdown_t0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="touchdown_t"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytouchdown_thres_dist0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="touchdown_thres_dist"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytouchdown_x0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="touchdown_x"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytouchdown_y0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="touchdown_y"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="track"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack_angle_deg0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="track_angle_deg"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack_begin0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="track_begin"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack_comments0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="track_comments"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack_end0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="track_end"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack_id0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="track_id"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack_num0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="track_num"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytrack_recovered0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="track_recovered"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntrytrue_airspeed_kt0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="true_airspeed_kt"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryturn_left0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="turn_left"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryturn_right0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="turn_right"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryturnrate0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="turnrate"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryturnrate_degps0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="turnrate_degps"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryturnrate_indicator0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="turnrate_indicator"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryuncooperative0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="uncooperative"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryvehicle0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="vehicle"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryvehicle_type0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="vehicle_type"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryvelocity_accuracy0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="velocity_accuracy"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryverticalspeed_error_ftm0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="verticalspeed_error_ftm"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryx_error_m0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="x_error_m"/>
+        </Configuration>
+        <Configuration class_id="LabelEntry" instance_id="LabelEntryy_error_m0">
+            <ParameterBool show="0"/>
+            <ParameterString prefix=""/>
+            <ParameterString suffix=""/>
+            <ParameterString variable_name="y_error_m"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOSchemaMetaTableDefinition" instance_id="DBOSchemaMetaTableDefinition0">
+        <ParameterString meta_table="ADSB"/>
+        <ParameterString schema="SCDB"/>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBaircraft_leng_width0">
+        <ParameterString data_type_str="CHAR"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Aircraft L+W"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="aircraft_leng_width"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBaircraft_leng_width0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.AIRCRAFT_LENG_WIDTH"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBairspeed_kt0">
+        <ParameterString data_type_str="DOUBLE"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="airspeed_kt"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBairspeed_kt0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.AIRSPEED_KT"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBairspeed_mach0">
+        <ParameterString data_type_str="DOUBLE"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="airspeed_mach"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBairspeed_mach0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.AIRSPEED_MACH"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBalt_baro_ft0">
+        <ParameterString data_type_str="INT"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Barometric altitude, Mode C"/>
+        <ParameterString dimension="Height"/>
+        <ParameterString name="alt_baro_ft"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit="Feet"/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBalt_baro_ft0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.ALT_BARO_FT"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBalt_geo_ft0">
+        <ParameterString data_type_str="DOUBLE"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Geometric altitude, 3D Height"/>
+        <ParameterString dimension="Height"/>
+        <ParameterString name="alt_geo_ft"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit="Feet"/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBalt_geo_ft0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.ALT_GEO_FT"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBalt_reporting_capability_ft0">
+        <ParameterString data_type_str="DOUBLE"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="currently 25 or 100"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="alt_reporting_capability_ft"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBalt_reporting_capability_ft0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.ALT_REPORTING_CAPABILITY_FT"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBbaro_vertical_rate_ftm0">
+        <ParameterString data_type_str="DOUBLE"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="baro_vertical_rate_ftm"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBbaro_vertical_rate_ftm0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.BARO_VERTICAL_RATE_FTM"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBbaro_vertical_rate_re0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Range Exceeded?"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="baro_vertical_rate_re"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBbaro_vertical_rate_re0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.BARO_VERTICAL_RATE_RE"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBcalc_alt_geo_ft0">
+        <ParameterString data_type_str="DOUBLE"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Calculated Geographical Altitude"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="calc_alt_geo_ft"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBcalc_alt_geo_ft0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.CALC_ALT_GEO_FT"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBcallsign0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="callsign"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBcallsign0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.CALLSIGN"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBcat0">
+        <ParameterString data_type_str="CHAR"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="ASTERIX CAT"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="cat"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBcat0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.CAT"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBdescriptor_atp0">
+        <ParameterString data_type_str="CHAR"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Non unique, 24-bit ICAO, surface vehicle or anonymous address.!!! 24 bit? !!!"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="descriptor_atp"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBdescriptor_atp0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.DESCRIPTOR_ATP"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBdifferential_correction0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="differential_correction"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBdifferential_correction0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.DIFFERENTIAL_CORRECTION"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBdisplay_state0">
+        <ParameterString data_type_str="INT"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="display_state"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBdisplay_state0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.DISPLAY_STATE"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBdom_posix0">
+        <ParameterString data_type_str="INT"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Day of message in posix time."/>
+        <ParameterString dimension=""/>
+        <ParameterString name="dom_posix"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBdom_posix0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.DOM_POSIX"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBds_id0">
+        <ParameterString data_type_str="INT"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Common Source Description ID, derived from SAC/SIC, Station Code etc."/>
+        <ParameterString dimension=""/>
+        <ParameterString name="ds_id"/>
+        <ParameterString representation_str="DATA_SRC_NAME"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBds_id0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.DS_ID"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBemitter_category0">
+        <ParameterString data_type_str="CHAR"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="emitter_category"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBemitter_category0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.EMITTER_CATEGORY"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBfigure_of_merit_acas0">
+        <ParameterString data_type_str="CHAR"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="unknown, ACAS (not) operational"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="figure_of_merit_acas"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBfigure_of_merit_acas0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.FIGURE_OF_MERIT_ACAS"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBfigure_of_merit_differential0">
+        <ParameterString data_type_str="CHAR"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="unknown, (no) differential correction"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="figure_of_merit_differential"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBfigure_of_merit_differential0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.FIGURE_OF_MERIT_DIFFERENTIAL"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBfigure_of_merit_multiple0">
+        <ParameterString data_type_str="CHAR"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="unknown, multiple navigational aids (not) operational"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="figure_of_merit_multiple"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBfigure_of_merit_multiple0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.FIGURE_OF_MERIT_MULTIPLE"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBfinal_sel_altitude_approach0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="final_sel_altitude_approach"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBfinal_sel_altitude_approach0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.FINAL_SEL_ALTITUDE_APPROACH"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBfinal_sel_altitude_ft0">
+        <ParameterString data_type_str="INT"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="final_sel_altitude_ft"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBfinal_sel_altitude_ft0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.FINAL_SEL_ALTITUDE_FT"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBfinal_sel_altitude_hold0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="final_sel_altitude_hold"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBfinal_sel_altitude_hold0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.FINAL_SEL_ALTITUDE_HOLD"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBfinal_sel_altitude_vertical0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="final_sel_altitude_vertical"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBfinal_sel_altitude_vertical0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.FINAL_SEL_ALTITUDE_VERTICAL"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBfrom_fft0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="from_fft"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBfrom_fft0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.FROM_FFT"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBgeo_area_mask0">
+        <ParameterString data_type_str="LONGINT"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Geographical area bit mask"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="geo_area_mask"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBgeo_area_mask0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.GEO_AREA_MASK"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBgeo_height_accuracy0">
+        <ParameterString data_type_str="CHAR"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Geometric Altitude Accuracy"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="geo_height_accuracy"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBgeo_height_accuracy0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.GEO_HEIGHT_ACCURACY"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBgeo_vertical_rate_ftm0">
+        <ParameterString data_type_str="DOUBLE"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="geo_vertical_rate_ftm"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBgeo_vertical_rate_ftm0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.GEO_VERTICAL_RATE_FTM"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBgeo_vertical_rate_re0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Range Exceeded?"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="geo_vertical_rate_re"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBgeo_vertical_rate_re0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.GEO_VERTICAL_RATE_RE"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBground_bit0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="ground_bit"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBground_bit0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.GROUND_BIT"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBgroundspeed_kt0">
+        <ParameterString data_type_str="DOUBLE"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="groundspeed_kt"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBgroundspeed_kt0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.GROUNDSPEED_KT"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBhash_code0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="ARTAS MD5 Hash Code "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="hash_code"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBhash_code0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.HASH_CODE"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBinter_sel_altitude_ft0">
+        <ParameterString data_type_str="INT"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="inter_sel_altitude_ft"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBinter_sel_altitude_ft0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.INTER_SEL_ALTITUDE_FT"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBinter_sel_altitude_info0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="inter_sel_altitude_info"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBinter_sel_altitude_info0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.INTER_SEL_ALTITUDE_INFO"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBinter_sel_altitude_source0">
+        <ParameterString data_type_str="CHAR"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="unknown, aircraft, FCU/MSP selected, FMS selected altitude"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="inter_sel_altitude_source"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBinter_sel_altitude_source0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.INTER_SEL_ALTITUDE_SOURCE"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBline_id0">
+        <ParameterString data_type_str="INT"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Communication line ID"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="line_id"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBline_id0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.LINE_ID"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBlink_technology_cdti0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="link_technology_cdti"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBlink_technology_cdti0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.LINK_TECHNOLOGY_CDTI"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBlink_technology_mds0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="link_technology_mds"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBlink_technology_mds0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.LINK_TECHNOLOGY_MDS"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBlink_technology_other0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="link_technology_other"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBlink_technology_other0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.LINK_TECHNOLOGY_OTHER"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBlink_technology_uat0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="link_technology_uat"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBlink_technology_uat0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.LINK_TECHNOLOGY_UAT"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBlink_technology_vdl0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="link_technology_vdl"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBlink_technology_vdl0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.LINK_TECHNOLOGY_VDL"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBmagnetic_heading_deg0">
+        <ParameterString data_type_str="DOUBLE"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="magnetic_heading_deg"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBmagnetic_heading_deg0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.MAGNETIC_HEADING_DEG"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBmilitary_emergency0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Target Status Military Emergency"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="military_emergency"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBmilitary_emergency0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.MILITARY_EMERGENCY"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBmode3a_code0">
+        <ParameterString data_type_str="INT"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=""/>
+        <ParameterString dimension=""/>
+        <ParameterString name="mode3a_code"/>
+        <ParameterString representation_str="DEC_TO_OCTAL"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBmode3a_code0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.MODE3A_CODE"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBmops_version0">
+        <ParameterString data_type_str="INT"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="mops_version"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBmops_version0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.MOPS_VERSION"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBnac_p0">
+        <ParameterString data_type_str="CHAR"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Navigation Accuracy Category for Position"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="nac_p"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBnac_p0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.NAC_P"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBnic_baro0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Navigation Integrity Category for Barometric Altitude"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="nic_baro"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBnic_baro0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.NIC_BARO"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBnucp_nic0">
+        <ParameterString data_type_str="CHAR"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="NUCp or NIC"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="nucp_nic"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBnucp_nic0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.NUCP_NIC"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBnucr_nacv0">
+        <ParameterString data_type_str="CHAR"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="NUCr or NACv"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="nucr_nacv"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBnucr_nacv0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.NUCR_NACV"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBop_status_ra0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Resolution Advisory?"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="op_status_ra"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBop_status_ra0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.OP_STATUS_RA"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBop_status_sa0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Single Antenna?"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="op_status_sa"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBop_status_sa0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.OP_STATUS_SA"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBop_status_tcas0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="TCAS System Status?"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="op_status_tcas"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBop_status_tcas0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.OP_STATUS_TCAS"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBpic0">
+        <ParameterString data_type_str="CHAR"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Position Integrity Category"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="pic"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBpic0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.PIC"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBpos_lat_deg0">
+        <ParameterString data_type_str="DOUBLE"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="WGS84 coordinate latitude"/>
+        <ParameterString dimension="Angle"/>
+        <ParameterString name="pos_lat_deg"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit="Degree"/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBpos_lat_deg0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.POS_LAT_DEG"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBpos_long_deg0">
+        <ParameterString data_type_str="DOUBLE"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="WGS84 coordinate longitude"/>
+        <ParameterString dimension="Angle"/>
+        <ParameterString name="pos_long_deg"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit="Degree"/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBpos_long_deg0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.POS_LONG_DEG"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBpos_offset_applied0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Position Offset Applied"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="pos_offset_applied"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBpos_offset_applied0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.POS_OFFSET_APPLIED"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBpos_sys_x_nm0">
+        <ParameterString data_type_str="DOUBLE"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="System coordinate x"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="pos_sys_x_nm"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBpos_sys_x_nm0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.POS_SYS_X_NM"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBpos_sys_y_nm0">
+        <ParameterString data_type_str="DOUBLE"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="System coordinate y"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="pos_sys_y_nm"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBpos_sys_y_nm0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.POS_SYS_Y_NM"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBposition_accuracy0">
+        <ParameterString data_type_str="CHAR"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="position_accuracy"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBposition_accuracy0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.POSITION_ACCURACY"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBraw_msg0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Binary represetation"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="raw_msg"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBraw_msg0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.RAW_MSG"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBrec_num0">
+        <ParameterString data_type_str="INT"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Ascending record number"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="rec_num"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBrec_num0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.REC_NUM"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBrec_time_ms0">
+        <ParameterString data_type_str="INT"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="ms fraction"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="rec_time_ms"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBrec_time_ms0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.REC_TIME_MS"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBrec_time_posix0">
+        <ParameterString data_type_str="INT"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="POSIX recording time stamped by I/O process"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="rec_time_posix"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBrec_time_posix0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.REC_TIME_POSIX"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBreceiver_id0">
+        <ParameterString data_type_str="CHAR"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Receiver Identification"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="receiver_id"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBreceiver_id0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.RECEIVER_ID"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBreport_type0">
+        <ParameterString data_type_str="CHAR"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="ADS-B only"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="report_type"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBreport_type0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.REPORT_TYPE"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBroll_angle_deg0">
+        <ParameterString data_type_str="DOUBLE"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=""/>
+        <ParameterString dimension=""/>
+        <ParameterString name="roll_angle_deg"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBroll_angle_deg0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.ROLL_ANGLE_DEG"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBsac0">
+        <ParameterString data_type_str="UCHAR"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="ASTERIX SAC"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="sac"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBsac0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.SAC"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBsam0">
+        <ParameterString data_type_str="CHAR"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Signal Amplitude"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="sam"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBsam0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.SAM"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBselected_alt_capability0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="selected_alt_capability"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBselected_alt_capability0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.SELECTED_ALT_CAPABILITY"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBservice_id0">
+        <ParameterString data_type_str="CHAR"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Service identification"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="service_id"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBservice_id0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.SERVICE_ID"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBsic0">
+        <ParameterString data_type_str="UCHAR"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="ASTERIX SIC"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="sic"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBsic0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.SIC"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBsil0">
+        <ParameterString data_type_str="CHAR"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Surveillance Integrity Level"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="sil"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBsil0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.SIL"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBsils0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="SIL-Supplement"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="sils"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBsils0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.SILS"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBsimulated_target0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Simulated Plot/Track?"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="simulated_target"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBsimulated_target0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.SIMULATED_TARGET"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBspi0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="spi"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBspi0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.SPI"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBsurveillance_status0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Target Surveillance Status"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="surveillance_status"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBsurveillance_status0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.SURVEILLANCE_STATUS"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBtarget_addr0">
+        <ParameterString data_type_str="INT"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="24 bit target address / aircraft address / Mode-S address"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="target_addr"/>
+        <ParameterString representation_str="DEC_TO_HEX"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBtarget_addr0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.TARGET_ADDR"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBtarget_status0">
+        <ParameterString data_type_str="CHAR"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="target_status"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBtarget_status0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.TARGET_STATUS"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBtest_target0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Test Plot/Track?"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="test_target"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBtest_target0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.TEST_TARGET"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBtoap0">
+        <ParameterString data_type_str="INT"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=""/>
+        <ParameterString dimension=""/>
+        <ParameterString name="toap"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBtoap0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.TOAP"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBtoav0">
+        <ParameterString data_type_str="INT"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=""/>
+        <ParameterString dimension=""/>
+        <ParameterString name="toav"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBtoav0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.TOAV"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBtod0">
+        <ParameterString data_type_str="FLOAT"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Time of Day (1/128 sec from midnight)"/>
+        <ParameterString dimension="Time"/>
+        <ParameterString name="tod"/>
+        <ParameterString representation_str="SECONDS_TO_TIME"/>
+        <ParameterString unit="Second"/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBtod0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.TOD"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBtod_accuracy0">
+        <ParameterString data_type_str="CHAR"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="in 1/256 secs"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="tod_accuracy"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBtod_accuracy0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.TOD_ACCURACY"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBtod_calculated0">
+        <ParameterString data_type_str="STRING"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="C:Calculated, R:Recording time, N:From data, L:Local time transform"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="tod_calculated"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBtod_calculated0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.TOD_CALCULATED"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBtorp0">
+        <ParameterString data_type_str="INT"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=""/>
+        <ParameterString dimension=""/>
+        <ParameterString name="torp"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBtorp0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.TORP"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBtorp_fsi0">
+        <ParameterString data_type_str="INT"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Time of Reception HP Full Second Indication"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="torp_fsi"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBtorp_fsi0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.TORP_FSI"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBtorp_precise0">
+        <ParameterString data_type_str="DOUBLE"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Time of Reception HP"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="torp_precise"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBtorp_precise0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.TORP_PRECISE"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBtorv0">
+        <ParameterString data_type_str="INT"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=""/>
+        <ParameterString dimension=""/>
+        <ParameterString name="torv"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBtorv0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.TORV"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBtorv_fsi0">
+        <ParameterString data_type_str="INT"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Time of Velocity HP Full Second Indication"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="torv_fsi"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBtorv_fsi0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.TORV_FSI"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBtorv_precise0">
+        <ParameterString data_type_str="DOUBLE"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="Time of Velocity HP"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="torv_precise"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBtorv_precise0">
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.TORV_PRECISE"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBtrack_angle_deg0">
+        <ParameterString data_type_str="DOUBLE"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="track_angle_deg"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBtrack_angle_deg0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.TRACK_ANGLE_DEG"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBtrue_airspeed_kt0">
+        <ParameterString data_type_str="DOUBLE"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="true_airspeed_kt"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBtrue_airspeed_kt0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.TRUE_AIRSPEED_KT"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBturnrate_degps0">
+        <ParameterString data_type_str="DOUBLE"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="turn rate in Deg/sec"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="turnrate_degps"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBturnrate_degps0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.TURNRATE_DEGPS"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBturnrate_indicator0">
+        <ParameterString data_type_str="CHAR"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description="N/A, left, right, straight"/>
+        <ParameterString dimension=""/>
+        <ParameterString name="turnrate_indicator"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBturnrate_indicator0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.TURNRATE_INDICATOR"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="DBOVariable" instance_id="DBOVariableADSBvelocity_accuracy0">
+        <ParameterString data_type_str="CHAR"/>
+        <ParameterString dbo_name="ADSB"/>
+        <ParameterString description=" "/>
+        <ParameterString dimension=""/>
+        <ParameterString name="velocity_accuracy"/>
+        <ParameterString representation_str="STANDARD"/>
+        <ParameterString unit=""/>
+        <Configuration class_id="DBOSchemaVariableDefinition" instance_id="DBOSchemaVariableDefinitionADSBvelocity_accuracy0">
+            <ParameterString meta_table="ADSB"/>
+            <ParameterString schema="SCDB"/>
+            <ParameterString variable_identifier="sd_ads.VELOCITY_ACCURACY"/>
+        </Configuration>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource0">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="1"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="0"/>
+        <ParameterUnsignedInt sac="104"/>
+        <ParameterUnsignedInt sic="38"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="Lisbon"/>
+        <ParameterString short_name=""/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource1">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="0"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="1"/>
+        <ParameterUnsignedInt sac="104"/>
+        <ParameterUnsignedInt sic="72"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="North"/>
+        <ParameterString short_name=""/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource2">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="0"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="2"/>
+        <ParameterUnsignedInt sac="104"/>
+        <ParameterUnsignedInt sic="77"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="Madeira"/>
+        <ParameterString short_name=""/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource3">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="0"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="3"/>
+        <ParameterUnsignedInt sac="104"/>
+        <ParameterUnsignedInt sic="70"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="North"/>
+        <ParameterString short_name=""/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource4">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="0"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="4"/>
+        <ParameterUnsignedInt sac="104"/>
+        <ParameterUnsignedInt sic="75"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="Madeira"/>
+        <ParameterString short_name=""/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource5">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="1"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="5"/>
+        <ParameterUnsignedInt sac="22"/>
+        <ParameterUnsignedInt sic="8"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="ADSB"/>
+        <ParameterString short_name="ADSB"/>
+    </Configuration>
+    <Configuration class_id="StoredDBODataSource" instance_id="StoredDBODataSource6">
+        <ParameterBool has_altitude="0"/>
+        <ParameterBool has_latitude="0"/>
+        <ParameterBool has_longitude="0"/>
+        <ParameterBool has_sac="1"/>
+        <ParameterBool has_short_name="1"/>
+        <ParameterBool has_sic="1"/>
+        <ParameterUnsignedInt id="6"/>
+        <ParameterUnsignedInt sac="50"/>
+        <ParameterUnsignedInt sic="80"/>
+        <ParameterDouble altitude="0.000000000000"/>
+        <ParameterDouble latitude="0.000000000000"/>
+        <ParameterDouble longitude="0.000000000000"/>
+        <ParameterString name="AWAM-ADS-B"/>
+        <ParameterString short_name="WADS"/>
+    </Configuration>
+</Configuration>

@@ -70,6 +70,9 @@ public:
     /// @brief Returns command for active data sources select
     std::shared_ptr<DBCommand> getDistinctDataSourcesSelectCommand (DBObject &object);
 
+    std::string getCreateAssociationTableStatement (const std::string& table_name);
+    std::shared_ptr<DBCommand> getSelectAssociationsCommand (const std::string& table_name);
+
 //    DBCommand *getDistinctStatistics (const std::string &dbo_type, DBOVariable *variable, unsigned int sensor_number);
 
 //    /// @brief Returns statement to check table existence
@@ -87,6 +90,7 @@ public:
     std::string getInsertPropertyStatement (const std::string &id, const std::string &value);
     /// @brief Returns property selection statement
     std::string getSelectPropertyStatement (const std::string &id);
+    std::string getSelectAllPropertiesStatement ();
 
     /// @brief Returns minimum/maximum insertion statement
     std::string getInsertMinMaxStatement (const std::string& variable_name, const std::string& object_name, const std::string& min, const std::string &max);
