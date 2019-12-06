@@ -4,8 +4,8 @@ addons:
   apt:
     packages:
      - cmake
-     - gcc-6.5
-     - g++-6.5
+     - gcc-6
+     - g++-6
      - qtbase5-dev
      - libqt5opengl5-dev
      - libboost-dev
