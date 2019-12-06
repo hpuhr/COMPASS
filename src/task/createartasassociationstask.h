@@ -3,6 +3,7 @@
 
 #include "configurable.h"
 #include "createartasassociationsjob.h"
+#include "createartasassociationsstatusdialog.h"
 #include "dbovariableset.h"
 
 #include <QObject>
@@ -10,7 +11,6 @@
 
 class TaskManager;
 class CreateARTASAssociationsTaskWidget;
-class CreateARTASAssociationsStatusDialog;
 class DBOVariable;
 class MetaDBOVariable;
 class DBObject;
