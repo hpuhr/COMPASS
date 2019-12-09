@@ -24,9 +24,12 @@
 
 #include "stringconv.h"
 
+#include <fstream>
+
 using namespace Utils;
 
 using namespace tinyxml2;
+using namespace nlohmann;
 
 /*
 *  Initializes members
@@ -974,6 +977,87 @@ XMLElement* Configuration::generateXMLElement (tinyxml2::XMLDocument* parent_doc
     else
         return element;
 }
+
+void Configuration::generateJSON (nlohmann::json& parent_json) const
+{
+    logdbg  << "Configuration: generateJSON: in class " << instance_id_ ;
+
+    // create a new target if configuration should be written to custom filename, otherwise use parent
+    json* target_json = configuration_filename_.size() > 0 ? new json() : &parent_json;
+
+    json& config = (*target_json)["sub_configs"][class_id_][instance_id_];
+
+    for (auto& par_it : parameters_bool_)
+    {
+        assert (!config.contains(par_it.second.getParameterId()));
+        config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
+    }
+
+    for (auto& par_it : parameters_int_)
+    {
+        assert (!config.contains(par_it.second.getParameterId()));
+        config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
+    }
+
+    for (auto& par_it : parameters_uint_)
+    {
+        assert (!config.contains(par_it.second.getParameterId()));
+        config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
+    }
+
+    for (auto& par_it : parameters_float_)
+    {
+        assert (!config.contains(par_it.second.getParameterId()));
+        config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
+    }
+
+    for (auto& par_it : parameters_double_)
+    {
+        assert (!config.contains(par_it.second.getParameterId()));
+        config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
+    }
+
+    for (auto& par_it : parameters_string_)
+    {
+        assert (!config.contains(par_it.second.getParameterId()));
+        config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
+    }
+
+
+    for (auto& config_it : sub_configurations_)
+    {
+        config_it.second.generateJSON(config);
+    }
+
+    if (configuration_filename_.size() > 0) // if we had custom filename
+    {
+        std::string file_path = CURRENT_CONF_DIRECTORY+configuration_filename_;
+
+        String::replace(file_path, ".xml", ".json");
+
+        loginf  << "Configuration: generateElement: saving sub-configuration file '" << file_path << "'";
+        //Files::verifyFileExists(file_path);
+
+        // save file
+        std::ofstream file(file_path);
+        file << target_json->dump(4);
+
+        // add SubConfigurationFile to parent
+
+        if (!parent_json.contains("sub_config_files"))
+            parent_json["sub_config_files"] = json::array();
+
+        assert (parent_json["sub_config_files"].is_array());
+
+        json sub_file_json = json::object();
+        sub_file_json["class_id"] =class_id_;
+        sub_file_json["instance_id"] =instance_id_;
+        sub_file_json["path"] =configuration_filename_;
+
+        parent_json["sub_config_files"][parent_json["sub_config_files"].size()] = sub_file_json;
+    }
+}
+
 
 void Configuration::createSubConfigurables (Configurable* configurable)
 {

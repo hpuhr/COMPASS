@@ -25,6 +25,8 @@
 
 #include <tinyxml2.h>
 
+#include "json.hpp"
+
 #include "string.h"
 #include "configurableparameter.h"
 
@@ -122,6 +124,7 @@ public:
     void parseXMLElement (tinyxml2::XMLElement* element);
     /// @brief Generates an XML configuration element
     tinyxml2::XMLElement* generateXMLElement (tinyxml2::XMLDocument* parent_document) const;
+    void generateJSON (nlohmann::json& parent_json) const;
 
     /// @brief Resets all values to their default values
     void resetToDefault ();

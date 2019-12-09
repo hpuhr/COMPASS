@@ -23,8 +23,11 @@
 #include "config.h"
 #include "global.h"
 #include "files.h"
+#include "stringconv.h"
+#include "json.hpp"
 
 using namespace tinyxml2;
+using namespace nlohmann;
 
 using namespace Utils;
 
@@ -36,7 +39,7 @@ ConfigurationManager::ConfigurationManager()
 {
 }
 
-void ConfigurationManager::init (const std::string &main_config_filename)
+void ConfigurationManager::init (const std::string& main_config_filename)
 {
     assert (!initialized_);
     assert (main_config_filename.size() > 0);
@@ -61,7 +64,7 @@ ConfigurationManager::~ConfigurationManager()
  * Adds Configurable to the root_configurables_ container, return either Configuration from root_configurations_
  * (if exists) or generates a new one.
  */
-Configuration& ConfigurationManager::registerRootConfigurable(Configurable &configurable)
+Configuration& ConfigurationManager::registerRootConfigurable(Configurable& configurable)
 {
     assert (initialized_);
 
@@ -100,7 +103,7 @@ void ConfigurationManager::unregisterRootConfigurable(Configurable &configurable
 /**
  * Assumes a root Configuration, which is parsed with the appropriate functions.
  */
-void ConfigurationManager::parseConfigurationFile (std::string filename)
+void ConfigurationManager::parseConfigurationFile (const std::string& filename)
 {
     assert (initialized_);
 
@@ -183,9 +186,15 @@ void ConfigurationManager::parseConfigurationFile (std::string filename)
 
 void ConfigurationManager::saveConfiguration ()
 {
+    saveXMLConfiguration();
+    saveJSONConfiguration();
+}
+
+void ConfigurationManager::saveXMLConfiguration ()
+{
     assert (initialized_);
 
-    logdbg << "ConfigurationManager: saveConfiguration: creating main document";
+    loginf << "ConfigurationManager: saveXMLConfiguration";
 
     tinyxml2::XMLDocument *document = new tinyxml2::XMLDocument ();
     XMLDeclaration* decl = document->NewDeclaration( "1.0");
@@ -215,5 +224,42 @@ void ConfigurationManager::saveConfiguration ()
     document->SaveFile(main_config_path.c_str());
 
     delete document;
+}
+void ConfigurationManager::saveJSONConfiguration ()
+{
+    assert (initialized_);
+
+    json main_config;
+
+    loginf << "ConfigurationManager: saveJSONConfiguration";
+
+    for (auto& it : root_configurables_) //iterate over root configurables
+    {
+        loginf << "ConfigurationManager: saveJSONConfiguration: for configurable " << it.first.second;
+        it.second.configuration().generateJSON(main_config);
+        //root_element->LinkEndChild(it.second.configuration().generateXMLElement(document));
+    }
+
+    for (auto& it : root_configurations_) // iterate over root configurations
+    {
+        if (root_configurables_.find (it.first) == root_configurables_.end()) // unused root configuration, not yet in save_info
+        {
+            loginf << "ConfigurationManager: saveJSONConfiguration: configuration " << it.second.getInstanceId()
+                    << " unused";
+            it.second.generateJSON(main_config);
+            //root_element->LinkEndChild(it.second.generateXMLElement(document));
+        }
+    }
+
+    std::string main_config_path = CURRENT_CONF_DIRECTORY+main_config_filename_;
+    String::replace(main_config_path, ".xml", ".json");
+
+    loginf  << "ConfigurationManager: saveJSONConfiguration: saving main configuration file '" << main_config_path << "'";
+
+    // save file
+    std::ofstream file(main_config_path);
+    file << main_config.dump(4);
+
+    //document->SaveFile(main_config_path.c_str());
 }
 
