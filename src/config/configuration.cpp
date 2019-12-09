@@ -892,7 +892,7 @@ XMLElement* Configuration::generateXMLElement (tinyxml2::XMLDocument* parent_doc
     {
         logdbg  << "Configuration: generateXMLElement: bool param " << it->first;
         XMLElement* parameter = document->NewElement(it->second.getParameterType().c_str());
-        parameter->SetAttribute(it->second.getParameterId().c_str(), it->second.getParameterValue().c_str());
+        parameter->SetAttribute(it->second.getParameterId().c_str(), it->second.getParameterValueString().c_str());
         element->LinkEndChild(parameter);
     }
 
@@ -900,7 +900,7 @@ XMLElement* Configuration::generateXMLElement (tinyxml2::XMLDocument* parent_doc
     {
         logdbg  << "Configuration: generateXMLElement: int param " << it->first;
         XMLElement* parameter = document->NewElement(it->second.getParameterType().c_str());
-        parameter->SetAttribute(it->second.getParameterId().c_str(), it->second.getParameterValue().c_str());
+        parameter->SetAttribute(it->second.getParameterId().c_str(), it->second.getParameterValueString().c_str());
         element->LinkEndChild(parameter);
     }
 
@@ -908,7 +908,7 @@ XMLElement* Configuration::generateXMLElement (tinyxml2::XMLDocument* parent_doc
     {
         logdbg  << "Configuration: generateXMLElement: uint param " << it->first;
         XMLElement* parameter = document->NewElement(it->second.getParameterType().c_str());
-        parameter->SetAttribute(it->second.getParameterId().c_str(), it->second.getParameterValue().c_str());
+        parameter->SetAttribute(it->second.getParameterId().c_str(), it->second.getParameterValueString().c_str());
         element->LinkEndChild(parameter);
     }
 
@@ -916,7 +916,7 @@ XMLElement* Configuration::generateXMLElement (tinyxml2::XMLDocument* parent_doc
     {
         logdbg  << "Configuration: generateXMLElement: float param " << it->first;
         XMLElement* parameter = document->NewElement(it->second.getParameterType().c_str());
-        parameter->SetAttribute(it->second.getParameterId().c_str(), it->second.getParameterValue().c_str());
+        parameter->SetAttribute(it->second.getParameterId().c_str(), it->second.getParameterValueString().c_str());
         element->LinkEndChild(parameter);
     }
 
@@ -924,7 +924,7 @@ XMLElement* Configuration::generateXMLElement (tinyxml2::XMLDocument* parent_doc
     {
         logdbg  << "Configuration: generateXMLElement: double param " << it->first;
         XMLElement* parameter = document->NewElement(it->second.getParameterType().c_str());
-        parameter->SetAttribute(it->second.getParameterId().c_str(), it->second.getParameterValue().c_str());
+        parameter->SetAttribute(it->second.getParameterId().c_str(), it->second.getParameterValueString().c_str());
         element->LinkEndChild(parameter);
     }
 
@@ -935,8 +935,8 @@ XMLElement* Configuration::generateXMLElement (tinyxml2::XMLDocument* parent_doc
         logdbg  << "Configuration: generateXMLElement: 2string param " << it->first << " id "
                 << it->second.getParameterId();
         logdbg  << "Configuration: generateXMLElement: 2string param " << it->first << " val "
-                << it->second.getParameterValue();
-        parameter->SetAttribute(it->second.getParameterId().c_str(), it->second.getParameterValue().c_str());
+                << it->second.getParameterValueString();
+        parameter->SetAttribute(it->second.getParameterId().c_str(), it->second.getParameterValueString().c_str());
         logdbg  << "Configuration: generateXMLElement: 3string param " << it->first;
         element->LinkEndChild(parameter);
     }

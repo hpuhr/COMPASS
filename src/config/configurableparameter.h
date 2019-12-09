@@ -52,7 +52,8 @@ public:
     const std::string& getParameterId () const;
 
     /// Returns parameter value as string (using a stringstream)
-    std::string getParameterValue () const;
+    std::string getParameterValueString () const;
+    T getParameterValue () const;
 
     /// Sets pointer_ to default value if valid, otherwise sets config_value_ to default_value_
     void resetToDefault ();
@@ -77,11 +78,11 @@ template<> std::string ConfigurableParameter<float>::getParameterType () const;
 template<> std::string ConfigurableParameter<double>::getParameterType () const;
 template<> std::string ConfigurableParameter<std::string>::getParameterType () const;
 
-template<> std::string ConfigurableParameter<bool>::getParameterValue () const;
-template<> std::string ConfigurableParameter<int>::getParameterValue () const;
-template<> std::string ConfigurableParameter<unsigned int>::getParameterValue () const;
-template<> std::string ConfigurableParameter<float>::getParameterValue () const;
-template<> std::string ConfigurableParameter<double>::getParameterValue () const;
-template<> std::string ConfigurableParameter<std::string>::getParameterValue () const;
+template<> std::string ConfigurableParameter<bool>::getParameterValueString () const;
+template<> std::string ConfigurableParameter<int>::getParameterValueString () const;
+template<> std::string ConfigurableParameter<unsigned int>::getParameterValueString () const;
+template<> std::string ConfigurableParameter<float>::getParameterValueString () const;
+template<> std::string ConfigurableParameter<double>::getParameterValueString () const;
+template<> std::string ConfigurableParameter<std::string>::getParameterValueString () const;
 
 #endif // CONFIGURABLPPARAMETER_H

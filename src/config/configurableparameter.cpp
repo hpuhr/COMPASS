@@ -55,7 +55,20 @@ const std::string& ConfigurableParameter<T>::getParameterId () const
 }
 
 template <typename T>
-std::string ConfigurableParameter<T>::getParameterValue () const
+T ConfigurableParameter<T>::getParameterValue () const
+{
+    if (pointer_)
+    {
+        assert (pointer_);
+        return *pointer_;
+    }
+    else
+        return config_value_;
+}
+
+
+template <typename T>
+std::string ConfigurableParameter<T>::getParameterValueString () const
 {
     throw std::runtime_error ("ConfigurableParameter: getParameterValue: unknown class type");
 }
@@ -141,7 +154,7 @@ template<> std::string ConfigurableParameter<std::string>::getParameterType () c
     return "ParameterString";
 }
 
-template<> std::string ConfigurableParameter<bool>::getParameterValue () const
+template<> std::string ConfigurableParameter<bool>::getParameterValueString () const
 {
     if (pointer_)
     {
@@ -152,7 +165,7 @@ template<> std::string ConfigurableParameter<bool>::getParameterValue () const
         return std::to_string(config_value_);
 }
 
-template<> std::string ConfigurableParameter<int>::getParameterValue () const
+template<> std::string ConfigurableParameter<int>::getParameterValueString () const
 {
     if (pointer_)
     {
@@ -163,7 +176,7 @@ template<> std::string ConfigurableParameter<int>::getParameterValue () const
         return std::to_string(config_value_);
 }
 
-template<> std::string ConfigurableParameter<unsigned int>::getParameterValue () const
+template<> std::string ConfigurableParameter<unsigned int>::getParameterValueString () const
 {
     if (pointer_)
     {
@@ -174,7 +187,7 @@ template<> std::string ConfigurableParameter<unsigned int>::getParameterValue ()
         return std::to_string(config_value_);
 }
 
-template<> std::string ConfigurableParameter<float>::getParameterValue () const
+template<> std::string ConfigurableParameter<float>::getParameterValueString () const
 {
     if (pointer_)
     {
@@ -185,7 +198,7 @@ template<> std::string ConfigurableParameter<float>::getParameterValue () const
         return Utils::String::doubleToStringPrecision(config_value_, 8);
 }
 
-template<> std::string ConfigurableParameter<double>::getParameterValue () const
+template<> std::string ConfigurableParameter<double>::getParameterValueString () const
 {
     if (pointer_)
     {
@@ -196,7 +209,7 @@ template<> std::string ConfigurableParameter<double>::getParameterValue () const
         return Utils::String::doubleToStringPrecision(config_value_, 12);
 }
 
-template<> std::string ConfigurableParameter<std::string>::getParameterValue () const
+template<> std::string ConfigurableParameter<std::string>::getParameterValueString () const
 {
     if (pointer_)
     {
