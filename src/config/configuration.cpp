@@ -985,7 +985,13 @@ void Configuration::generateJSON (nlohmann::json& parent_json) const
     // create a new target if configuration should be written to custom filename, otherwise use parent
     json* target_json = configuration_filename_.size() > 0 ? new json() : &parent_json;
 
-    json& config = (*target_json)["sub_configs"][class_id_][instance_id_];
+    if (!target_json->contains("sub_configs"))
+        (*target_json)["sub_configs"] = json::array();
+
+    if (target_json->at("sub_configs").contains(class_id_))
+        assert (!target_json->at("sub_configs").at(class_id_).contains(instance_id_));
+
+    json& config = target_json->at("sub_configs")[class_id_][instance_id_];
 
     for (auto& par_it : parameters_bool_)
     {
@@ -1022,7 +1028,6 @@ void Configuration::generateJSON (nlohmann::json& parent_json) const
         assert (!config.contains(par_it.second.getParameterId()));
         config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
     }
-
 
     for (auto& config_it : sub_configurations_)
     {
