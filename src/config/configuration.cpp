@@ -697,8 +697,8 @@ void Configuration::parseXMLConfigurationElement (tinyxml2::XMLElement* element)
 
             const char* class_id=nullptr;
             const char* instance_id=nullptr;
-            bool template_flag=false;
-            const char* template_name=nullptr;
+            //bool template_flag=false;
+            //const char* template_name=nullptr;
 
             const XMLAttribute* attribute=parameter_element->FirstAttribute();
             while (attribute)
@@ -710,11 +710,11 @@ void Configuration::parseXMLConfigurationElement (tinyxml2::XMLElement* element)
                     instance_id=attribute->Value();
                 else if (strcmp ("class_id", attribute->Name()) == 0)
                     class_id=attribute->Value();
-                else if (strcmp ("template", attribute->Name()) == 0)
-                {
-                    template_flag = true;
-                    template_name=attribute->Value();
-                }
+//                else if (strcmp ("template", attribute->Name()) == 0)
+//                {
+//                    template_flag = true;
+//                    template_name=attribute->Value();
+//                }
                 else
                     throw std::runtime_error ("Configuration: parseXMLConfigurationElement: unknown attribute");
 
@@ -730,27 +730,27 @@ void Configuration::parseXMLConfigurationElement (tinyxml2::XMLElement* element)
             //                    << instance_id_ << " found sub-configuration class " << class_id << " instance " << instance_id
             //                    << " template " << template_flag << " template name " << template_name;
 
-            if (template_flag)
-            {
-                loginf << "Configuration: parseXMLConfigurationElement: found template class " << class_id
-                       << " instance " << instance_id;
+//            if (template_flag)
+//            {
+//                loginf << "Configuration: parseXMLConfigurationElement: found template class " << class_id
+//                       << " instance " << instance_id;
 
-                assert (configuration_templates_.find(template_name) == configuration_templates_.end());
-                configuration_templates_.insert(std::pair <std::string, Configuration> (template_name, Configuration (
-                                                                                            class_id, instance_id)));
+//                assert (configuration_templates_.find(template_name) == configuration_templates_.end());
+//                configuration_templates_.insert(std::pair <std::string, Configuration> (template_name, Configuration (
+//                                                                                            class_id, instance_id)));
 
-                configuration_templates_.at(template_name).parseXMLElement(parameter_element);
-                configuration_templates_.at(template_name).setTemplate(true, template_name);
-            }
-            else
-            {
+//                configuration_templates_.at(template_name).parseXMLElement(parameter_element);
+//                configuration_templates_.at(template_name).setTemplate(true, template_name);
+//            }
+//            else
+//            {
                 std::pair <std::string, std::string> key (class_id, instance_id);
                 assert (sub_configurations_.find(key) == sub_configurations_.end());
                 sub_configurations_.insert(std::pair <std::pair<std::string, std::string>, Configuration> (
                                                key, Configuration (class_id, instance_id)));
 
                 sub_configurations_.at(key).parseXMLElement(parameter_element);
-            }
+            //}
         }
         else if (std::strcmp (parameter_element->Value(), "SubConfigurationFile") == 0)
         {
@@ -806,9 +806,9 @@ void Configuration::parseXMLConfigurationElement (tinyxml2::XMLElement* element)
         }
     }
 
-    if (template_flag_)
-        loginf << "Configuration: parseXMLConfigurationElement: class " << class_id_ << " instance " << instance_id_ <<
-                  " is template " << template_name_;
+//    if (template_flag_)
+//        loginf << "Configuration: parseXMLConfigurationElement: class " << class_id_ << " instance " << instance_id_ <<
+//                  " is template " << template_name_;
 
 }
 
@@ -878,12 +878,12 @@ XMLElement* Configuration::generateXMLElement (tinyxml2::XMLDocument* parent_doc
     element->SetAttribute("class_id", class_id_.c_str());
     element->SetAttribute("instance_id", instance_id_.c_str());
 
-    if (template_flag_)
-    {
-        loginf << "Configuration: generateXMLElement: class " << class_id_ << " instance " << instance_id_ <<
-                  " is template " << template_name_;
-        element->SetAttribute("template", template_name_.c_str());
-    }
+//    if (template_flag_)
+//    {
+//        loginf << "Configuration: generateXMLElement: class " << class_id_ << " instance " << instance_id_ <<
+//                  " is template " << template_name_;
+//        element->SetAttribute("template", template_name_.c_str());
+//    }
 
     for (auto it = parameters_bool_.begin(); it != parameters_bool_.end(); it++)
     {
@@ -938,13 +938,13 @@ XMLElement* Configuration::generateXMLElement (tinyxml2::XMLDocument* parent_doc
         element->LinkEndChild(parameter);
     }
 
-    std::map<std::string, Configuration>::const_iterator tit; // coincidence
-    for (tit = configuration_templates_.begin(); tit != configuration_templates_.end(); tit++)
-    {
-        assert (tit->second.getTemplateFlag());
-        XMLElement* config = tit->second.generateXMLElement(document);
-        element->LinkEndChild(config);
-    }
+//    std::map<std::string, Configuration>::const_iterator tit; // coincidence
+//    for (tit = configuration_templates_.begin(); tit != configuration_templates_.end(); tit++)
+//    {
+//        assert (tit->second.getTemplateFlag());
+//        XMLElement* config = tit->second.generateXMLElement(document);
+//        element->LinkEndChild(config);
+//    }
 
     std::map<std::pair<std::string, std::string>, Configuration >::const_iterator cit;
     for (cit = sub_configurations_.begin(); cit != sub_configurations_.end(); cit++)
@@ -1088,26 +1088,26 @@ void Configuration::removeSubConfiguration (const std::string& class_id, const s
     sub_configurations_.erase(sub_configurations_.find (key));
 }
 
-void Configuration::setTemplate (bool template_flag, const std::string& template_name)
-{
-    template_flag_ = template_flag;
-    template_name_ = template_name;
+//void Configuration::setTemplate (bool template_flag, const std::string& template_name)
+//{
+//    template_flag_ = template_flag;
+//    template_name_ = template_name;
 
-    loginf << "Configuration: setTemplate: " << class_id_ << " instance " << instance_id_ << " flag " << template_flag
-           << " name " << template_name;
+//    loginf << "Configuration: setTemplate: " << class_id_ << " instance " << instance_id_ << " flag " << template_flag
+//           << " name " << template_name;
 
-}
+//}
 
-bool Configuration::getSubTemplateNameFree (const std::string& template_name)
-{
-    return configuration_templates_.find (template_name) == configuration_templates_.end();
-}
+//bool Configuration::getSubTemplateNameFree (const std::string& template_name)
+//{
+//    return configuration_templates_.find (template_name) == configuration_templates_.end();
+//}
 
-void Configuration::addSubTemplate (Configuration* configuration, const std::string& template_name)
-{
-    assert (getSubTemplateNameFree(template_name));
-    configuration_templates_.insert (std::pair<std::string, Configuration> (template_name,* configuration));
-    configuration_templates_.at(template_name).setTemplate(true, template_name);
-    delete configuration;
-}
+//void Configuration::addSubTemplate (Configuration* configuration, const std::string& template_name)
+//{
+//    assert (getSubTemplateNameFree(template_name));
+//    configuration_templates_.insert (std::pair<std::string, Configuration> (template_name,* configuration));
+//    configuration_templates_.at(template_name).setTemplate(true, template_name);
+//    delete configuration;
+//}
 

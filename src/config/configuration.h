@@ -157,11 +157,11 @@ public:
     const std::string& getClassId () { return class_id_; }
 
     /// @brief Sets the template flag and name
-    void setTemplate (bool template_flag, const std::string& template_name_);
+    //void setTemplate (bool template_flag, const std::string& template_name_);
     /// @brief Returns the template flag
-    bool getTemplateFlag () const { return template_flag_; }
+    //bool getTemplateFlag () const { return template_flag_; }
     /// @brief Returns the template name
-    const std::string& getTemplateName () { return template_name_; }
+    //const std::string& getTemplateName () { return template_name_; }
 
     /// @brief Checks if a specific template_name is already taken, true if free
     bool getSubTemplateNameFree (const std::string&  template_name);
@@ -169,7 +169,7 @@ public:
     void addSubTemplate (Configuration* configuration, const std::string& template_name);
 
     /// @brief Return contaienr with all configuration templates
-    std::map<std::string, Configuration>& getConfigurationTemplates () { return configuration_templates_; }
+    //std::map<std::string, Configuration>& getConfigurationTemplates () { return configuration_templates_; }
 
     // only use in special case of configuration copy
     void setInstanceId (const std::string& instance_id) { instance_id_ = instance_id; }
@@ -195,12 +195,12 @@ protected:
     std::map<std::pair<std::string, std::string>, Configuration> sub_configurations_;
 
     /// Flag which indicates if instance is a template
-    bool template_flag_ {false};
+    //bool template_flag_ {false};
     /// Template name, empty if no template
-    std::string template_name_;
+    //std::string template_name_;
 
     /// Container with all configuration templates
-    std::map<std::string, Configuration> configuration_templates_;
+    //std::map<std::string, Configuration> configuration_templates_;
 
     /// @brief Parses an XML configuration element
     void parseXMLConfigurationElement (tinyxml2::XMLElement* element);
