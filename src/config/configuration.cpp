@@ -985,48 +985,46 @@ void Configuration::generateJSON (nlohmann::json& parent_json) const
     // create a new target if configuration should be written to custom filename, otherwise use parent
     json* target_json = configuration_filename_.size() > 0 ? new json() : &parent_json;
 
-    if (!target_json->contains("sub_configs"))
-        (*target_json)["sub_configs"] = json::array();
-
-    if (target_json->at("sub_configs").contains(class_id_))
+    if (target_json->contains("sub_configs") && target_json->at("sub_configs").contains(class_id_))
         assert (!target_json->at("sub_configs").at(class_id_).contains(instance_id_));
 
-    json& config = target_json->at("sub_configs")[class_id_][instance_id_];
+    json& config = (*target_json)["sub_configs"][class_id_][instance_id_];
+    json& param_config = config["parameters"];
 
     for (auto& par_it : parameters_bool_)
     {
-        assert (!config.contains(par_it.second.getParameterId()));
-        config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
+        assert (!param_config.contains(par_it.second.getParameterId()));
+        param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
     }
 
     for (auto& par_it : parameters_int_)
     {
-        assert (!config.contains(par_it.second.getParameterId()));
-        config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
+        assert (!param_config.contains(par_it.second.getParameterId()));
+        param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
     }
 
     for (auto& par_it : parameters_uint_)
     {
-        assert (!config.contains(par_it.second.getParameterId()));
-        config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
+        assert (!param_config.contains(par_it.second.getParameterId()));
+        param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
     }
 
     for (auto& par_it : parameters_float_)
     {
-        assert (!config.contains(par_it.second.getParameterId()));
-        config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
+        assert (!param_config.contains(par_it.second.getParameterId()));
+        param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
     }
 
     for (auto& par_it : parameters_double_)
     {
-        assert (!config.contains(par_it.second.getParameterId()));
-        config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
+        assert (!param_config.contains(par_it.second.getParameterId()));
+        param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
     }
 
     for (auto& par_it : parameters_string_)
     {
-        assert (!config.contains(par_it.second.getParameterId()));
-        config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
+        assert (!param_config.contains(par_it.second.getParameterId()));
+        param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
     }
 
     for (auto& config_it : sub_configurations_)

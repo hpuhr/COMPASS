@@ -78,7 +78,8 @@ protected:
     ConfigurationManager();
 
     /// @brief Parses a configuration file
-    void parseConfigurationFile (const std::string& filename);
+    void parseXMLConfigurationFile (const std::string& filename);
+    void parseJSONConfigurationFile (const std::string& filename);
 
     void saveXMLConfiguration ();
     void saveJSONConfiguration ();

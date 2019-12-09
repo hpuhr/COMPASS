@@ -51,7 +51,7 @@ void ConfigurationManager::init (const std::string& main_config_filename)
     Files::verifyFileExists(path_filename);
 
     loginf << "ConfigurationManager: init: opening main configuration file '" << path_filename << "'";
-    parseConfigurationFile (path_filename);
+    parseXMLConfigurationFile (path_filename);
 }
 
 ConfigurationManager::~ConfigurationManager()
@@ -103,15 +103,15 @@ void ConfigurationManager::unregisterRootConfigurable(Configurable &configurable
 /**
  * Assumes a root Configuration, which is parsed with the appropriate functions.
  */
-void ConfigurationManager::parseConfigurationFile (const std::string& filename)
+void ConfigurationManager::parseXMLConfigurationFile (const std::string& filename)
 {
     assert (initialized_);
 
-    logdbg  << "ConfigurationManager: parseConfigurationFile: opening '" << filename << "'";
+    logdbg  << "ConfigurationManager: parseXMLConfigurationFile: opening '" << filename << "'";
     XMLDocument *config_file_doc = new XMLDocument ();
 
     Files::verifyFileExists(filename);
-    logdbg  << "ConfigurationManager: parseConfigurationFile: opening file '" << filename << "'";
+    logdbg  << "ConfigurationManager: parseXMLConfigurationFile: opening file '" << filename << "'";
 
     if (config_file_doc->LoadFile(filename.c_str()) == 0)
     {
@@ -122,15 +122,15 @@ void ConfigurationManager::parseConfigurationFile (const std::string& filename)
                 doc_main_conf = doc_main_conf->NextSiblingElement())
         {
             assert (strcmp ("Configuration", doc_main_conf->Value() ) == 0);
-            logdbg  << "ConfigurationManager: parseConfigurationFile: found Configuration";
+            logdbg  << "ConfigurationManager: parseXMLConfigurationFile: found Configuration";
 
             for (main_conf_child = doc_main_conf->FirstChildElement(); main_conf_child != 0;
                  main_conf_child = main_conf_child->NextSiblingElement())
             {
-                logdbg  << "ConfigurationManager: parseConfigurationFile: found element '" << main_conf_child->Value() << "'";
+                logdbg  << "ConfigurationManager: parseXMLConfigurationFile: found element '" << main_conf_child->Value() << "'";
                 if (strcmp ("SubConfigurationFile", main_conf_child->Value() ) == 0)
                 {
-                    logdbg  << "ConfigurationManager: parseConfigurationFile: is SubConfigurationFile";
+                    logdbg  << "ConfigurationManager: parseXMLConfigurationFile: is SubConfigurationFile";
 
                     std::string class_id;
                     std::string instance_id;
@@ -139,7 +139,7 @@ void ConfigurationManager::parseConfigurationFile (const std::string& filename)
                     const XMLAttribute* attribute=main_conf_child->FirstAttribute();
                     while (attribute)
                     {
-                        logdbg  << "ConfigurationManager: parseConfigurationFile: attribute '" << attribute->Name()
+                        logdbg  << "ConfigurationManager: parseXMLConfigurationFile: attribute '" << attribute->Name()
                                         << "'' value '"<< attribute->Value() << "'";
                         if (strcmp ("class_id", attribute->Name()) == 0)
                             class_id=attribute->Value();
@@ -148,7 +148,7 @@ void ConfigurationManager::parseConfigurationFile (const std::string& filename)
                         else if (strcmp ("path", attribute->Name()) == 0)
                             path=attribute->Value();
                         else
-                            throw std::runtime_error (std::string ("ConfigurationManager: parseConfigurationFile: unknown attribute ")
+                            throw std::runtime_error (std::string ("ConfigurationManager: parseXMLConfigurationFile: unknown attribute ")
                                 +attribute->Name());
 
                         attribute=attribute->Next();
@@ -159,33 +159,172 @@ void ConfigurationManager::parseConfigurationFile (const std::string& filename)
                         std::pair<std::string, std::string> key (class_id, instance_id);
                         assert (root_configurations_.find (key) == root_configurations_.end()); // should not exist
 
-                        logdbg << "ConfigurationManager: parseConfigurationFile: creating new configuration for class " << class_id <<
+                        logdbg << "ConfigurationManager: parseXMLConfigurationFile: creating new configuration for class " << class_id <<
                                 " instance " << instance_id;
                         root_configurations_.insert (std::pair<std::pair<std::string, std::string>, Configuration> (key, Configuration (class_id, instance_id)));
                         root_configurations_.at(key).setConfigurationFilename (path);
                         root_configurations_.at(key).parseXMLElement(main_conf_child);
                     }
                     else
-                        throw std::runtime_error ("error: ConfigurationManager: parseConfigurationFile: configuration misses attributes");
+                        throw std::runtime_error ("error: ConfigurationManager: parseXMLConfigurationFile: configuration misses attributes");
                 }
                 else
                 {
-                    throw std::runtime_error (std::string("ConfigurationManager: parseConfigurationFile: unknown section '")+main_conf_child->Value()+"'");
+                    throw std::runtime_error (std::string("ConfigurationManager: parseXMLConfigurationFile: unknown section '")+main_conf_child->Value()+"'");
                 }
             }
         }
     }
     else
     {
-        logerr << "ConfigurationManager: parseConfigurationFile: could not load file '" << filename<< "'";
-        throw std::runtime_error ("ConfigurationManager: parseConfigurationFile: load error");
+        logerr << "ConfigurationManager: parseXMLConfigurationFile: could not load file '" << filename<< "'";
+        throw std::runtime_error ("ConfigurationManager: parseXMLConfigurationFile: load error");
     }
-    logdbg  << "ConfigurationManager: parseConfigurationFile: file '" << filename << "' done";
+    logdbg  << "ConfigurationManager: parseXMLConfigurationFile: file '" << filename << "' done";
     delete config_file_doc;
 }
 
+void ConfigurationManager::parseJSONConfigurationFile (const std::string& filename)
+{
+    assert (initialized_);
+
+    logdbg  << "ConfigurationManager: parseJSONConfigurationFile: opening '" << filename << "'";
+    //XMLDocument *config_file_doc = new XMLDocument ();
+
+    Files::verifyFileExists(filename);
+    logdbg  << "ConfigurationManager: parseJSONConfigurationFile: opening file '" << filename << "'";
+
+    std::ifstream config_file (filename, std::ifstream::in);
+
+    try
+    {
+        json config = json::parse(config_file);
+
+        assert (config.is_object());
+
+        std::string class_id;
+        std::string instance_id;
+        std::string path;
+
+
+        for (auto& it : config.items())
+        {
+            if (it.key() == "SubConfigurationFile")
+            {
+                json& sub_file_config = it.value();
+
+                assert (sub_file_config.contains("class_id"));
+                assert (sub_file_config.contains("instance_id"));
+                assert (sub_file_config.contains("path"));
+
+                class_id = sub_file_config.at("class_id");
+                instance_id = sub_file_config.at("instance_id");
+                path = sub_file_config.at("path");
+
+                assert (class_id.size() && instance_id.size() && path.size());
+
+                std::pair<std::string, std::string> key (class_id, instance_id);
+                assert (root_configurations_.find (key) == root_configurations_.end()); // should not exist
+
+                logdbg << "ConfigurationManager: parseJSONConfigurationFile: creating new configuration for class " << class_id <<
+                          " instance " << instance_id;
+                root_configurations_.insert (std::pair<std::pair<std::string, std::string>, Configuration>
+                                             (key, Configuration (class_id, instance_id)));
+
+                root_configurations_.at(key).setConfigurationFilename (path);
+                //root_configurations_.at(key).parseJSONElement(main_conf_child);
+
+            }
+            else
+                throw std::runtime_error ("ConfigurationManager: parseJSONConfigurationFile: unknown key '"
+                                          +it.key()+"'");
+        }
+
+    }
+    catch (json::exception& e)
+    {
+        logerr << "ConfigurationManager: parseJSONConfigurationFile: could not load file '" << filename << "'";
+        throw e;
+    }
+
+
+//    if (config_file_doc->LoadFile(filename.c_str()) == 0)
+//    {
+//        XMLElement *doc_main_conf;
+//        XMLElement *main_conf_child;
+
+//        for ( doc_main_conf = config_file_doc->FirstChildElement(); doc_main_conf != 0;
+//                doc_main_conf = doc_main_conf->NextSiblingElement())
+//        {
+//            assert (strcmp ("Configuration", doc_main_conf->Value() ) == 0);
+//            logdbg  << "ConfigurationManager: parseJSONConfigurationFile: found Configuration";
+
+//            for (main_conf_child = doc_main_conf->FirstChildElement(); main_conf_child != 0;
+//                 main_conf_child = main_conf_child->NextSiblingElement())
+//            {
+//                logdbg  << "ConfigurationManager: parseJSONConfigurationFile: found element '" << main_conf_child->Value() << "'";
+//                if (strcmp ("SubConfigurationFile", main_conf_child->Value() ) == 0)
+//                {
+//                    logdbg  << "ConfigurationManager: parseJSONConfigurationFile: is SubConfigurationFile";
+
+//                    std::string class_id;
+//                    std::string instance_id;
+//                    std::string path;
+
+//                    const XMLAttribute* attribute=main_conf_child->FirstAttribute();
+//                    while (attribute)
+//                    {
+//                        logdbg  << "ConfigurationManager: parseJSONConfigurationFile: attribute '" << attribute->Name()
+//                                        << "'' value '"<< attribute->Value() << "'";
+//                        if (strcmp ("class_id", attribute->Name()) == 0)
+//                            class_id=attribute->Value();
+//                        else if (strcmp ("instance_id", attribute->Name()) == 0)
+//                            instance_id=attribute->Value();
+//                        else if (strcmp ("path", attribute->Name()) == 0)
+//                            path=attribute->Value();
+//                        else
+//                            throw std::runtime_error (std::string ("ConfigurationManager: parseConfigurationFile: unknown attribute ")
+//                                +attribute->Name());
+
+//                        attribute=attribute->Next();
+//                    }
+
+//                    if (class_id.size() && instance_id.size() && path.size())
+//                    {
+//                        std::pair<std::string, std::string> key (class_id, instance_id);
+//                        assert (root_configurations_.find (key) == root_configurations_.end()); // should not exist
+
+//                        logdbg << "ConfigurationManager: parseJSONConfigurationFile: creating new configuration for class " << class_id <<
+//                                " instance " << instance_id;
+//                        root_configurations_.insert (std::pair<std::pair<std::string, std::string>, Configuration> (key, Configuration (class_id, instance_id)));
+//                        root_configurations_.at(key).setConfigurationFilename (path);
+//                        root_configurations_.at(key).parseXMLElement(main_conf_child);
+//                    }
+//                    else
+//                        throw std::runtime_error ("error: ConfigurationManager: parseJSONConfigurationFile: configuration misses attributes");
+//                }
+//                else
+//                {
+//                    throw std::runtime_error (std::string("ConfigurationManager: parseJSONConfigurationFile: unknown section '")+main_conf_child->Value()+"'");
+//                }
+//            }
+//        }
+//    }
+//    else
+//    {
+//        logerr << "ConfigurationManager: parseJSONConfigurationFile: could not load file '" << filename<< "'";
+//        throw std::runtime_error ("ConfigurationManager: parseJSONConfigurationFile: load error");
+//    }
+//    logdbg  << "ConfigurationManager: parseJSONConfigurationFile: file '" << filename << "' done";
+//    delete config_file_doc;
+}
+
+
+
 void ConfigurationManager::saveConfiguration ()
 {
+    loginf << "ConfigurationManager: saveConfiguration NOT ACTIVE";
+  // TODO deactivated
     saveXMLConfiguration();
     saveJSONConfiguration();
 }
