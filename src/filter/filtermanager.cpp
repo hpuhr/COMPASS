@@ -31,7 +31,7 @@
 using namespace std;
 
 FilterManager::FilterManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb)
-: Configurable (class_id, instance_id, atsdb, "filter.xml")
+: Configurable (class_id, instance_id, atsdb, "filter.json")
 {
     logdbg  << "FilterManager: constructor";
 

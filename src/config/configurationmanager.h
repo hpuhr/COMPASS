@@ -18,7 +18,6 @@
 #ifndef CONFIGURATIONMANAGER_H_
 #define CONFIGURATIONMANAGER_H_
 
-#include <tinyxml2.h>
 #include <vector>
 #include <map>
 
@@ -48,9 +47,9 @@ public:
     virtual ~ConfigurationManager();
 
     /// @brief Registers a configurable as root (no parent)
-    Configuration &registerRootConfigurable(Configurable &configurable);
+    Configuration &registerRootConfigurable(Configurable& configurable);
     /// @brief Unregisters a configurable as root
-    void unregisterRootConfigurable(Configurable &configurable);
+    void unregisterRootConfigurable(Configurable& configurable);
 
     /// @brief Saves the current configuration
     void saveConfiguration ();
@@ -69,7 +68,7 @@ protected:
     bool initialized_;
     std::string main_config_filename_;
     /// Container with all root configurables (class id, instance id) -> Configurable
-    std::map <std::pair<std::string, std::string>, Configurable &> root_configurables_;
+    std::map <std::pair<std::string, std::string>, Configurable&> root_configurables_;
     /// Container with all root configurations (class id, instance id) -> Configuration
     std::map <std::pair<std::string, std::string>, Configuration> root_configurations_;
     //Configuration dummy_configuration_;
@@ -78,7 +77,9 @@ protected:
     ConfigurationManager();
 
     /// @brief Parses a configuration file
-    void parseConfigurationFile (std::string filename);
+    void parseJSONConfigurationFile (const std::string& filename);
+
+    void saveJSONConfiguration ();
 };
 
 #endif /* CONFIGURATIONMANAGER_H_ */

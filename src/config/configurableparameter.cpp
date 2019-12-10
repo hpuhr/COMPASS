@@ -25,24 +25,6 @@ ConfigurableParameter<T>& ConfigurableParameter<T>::operator= (const Configurabl
 }
 
 template <typename T>
-void ConfigurableParameter<T>::parseElement (const tinyxml2::XMLElement* element)
-{
-    std::string configuration_id = element->Value();
-    const tinyxml2::XMLAttribute* attribute=element->FirstAttribute();
-    while (attribute)
-    {
-        logdbg  << "ConfigurableParameter " << configuration_id << ": parseElement: attribute " << attribute->Name()
-                << "  value "<< attribute->Value();
-
-        parameter_id_=attribute->Name();
-        setConfigValue (attribute);
-
-        attribute=attribute->Next();
-        assert (!attribute);
-    }
-}
-
-template <typename T>
 std::string ConfigurableParameter<T>::getParameterType () const
 {
     throw std::runtime_error ("ConfigurableParameter: getParameterType: unknown class type");
@@ -55,7 +37,20 @@ const std::string& ConfigurableParameter<T>::getParameterId () const
 }
 
 template <typename T>
-std::string ConfigurableParameter<T>::getParameterValue () const
+T ConfigurableParameter<T>::getParameterValue () const
+{
+    if (pointer_)
+    {
+        assert (pointer_);
+        return *pointer_;
+    }
+    else
+        return config_value_;
+}
+
+
+template <typename T>
+std::string ConfigurableParameter<T>::getParameterValueString () const
 {
     throw std::runtime_error ("ConfigurableParameter: getParameterValue: unknown class type");
 }
@@ -78,37 +73,6 @@ void ConfigurableParameter<T>::resetToDefault ()
     }
 
     loginf  << ss.str();
-}
-
-
-template<> void ConfigurableParameter<bool>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
-{
-    config_value_ = attribute->BoolValue();
-}
-
-template<> void ConfigurableParameter<int>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
-{
-    config_value_ = attribute->IntValue();
-}
-
-template<> void ConfigurableParameter<unsigned int>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
-{
-    config_value_ = attribute->UnsignedValue();
-}
-
-template<> void ConfigurableParameter<float>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
-{
-    config_value_ = attribute->FloatValue();
-}
-
-template<> void ConfigurableParameter<double>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
-{
-    config_value_ = attribute->DoubleValue();
-}
-
-template<> void ConfigurableParameter<std::string>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
-{
-    config_value_ = attribute->Value();
 }
 
 template<> std::string ConfigurableParameter<bool>::getParameterType () const
@@ -141,7 +105,7 @@ template<> std::string ConfigurableParameter<std::string>::getParameterType () c
     return "ParameterString";
 }
 
-template<> std::string ConfigurableParameter<bool>::getParameterValue () const
+template<> std::string ConfigurableParameter<bool>::getParameterValueString () const
 {
     if (pointer_)
     {
@@ -152,7 +116,7 @@ template<> std::string ConfigurableParameter<bool>::getParameterValue () const
         return std::to_string(config_value_);
 }
 
-template<> std::string ConfigurableParameter<int>::getParameterValue () const
+template<> std::string ConfigurableParameter<int>::getParameterValueString () const
 {
     if (pointer_)
     {
@@ -163,7 +127,7 @@ template<> std::string ConfigurableParameter<int>::getParameterValue () const
         return std::to_string(config_value_);
 }
 
-template<> std::string ConfigurableParameter<unsigned int>::getParameterValue () const
+template<> std::string ConfigurableParameter<unsigned int>::getParameterValueString () const
 {
     if (pointer_)
     {
@@ -174,7 +138,7 @@ template<> std::string ConfigurableParameter<unsigned int>::getParameterValue ()
         return std::to_string(config_value_);
 }
 
-template<> std::string ConfigurableParameter<float>::getParameterValue () const
+template<> std::string ConfigurableParameter<float>::getParameterValueString () const
 {
     if (pointer_)
     {
@@ -185,7 +149,7 @@ template<> std::string ConfigurableParameter<float>::getParameterValue () const
         return Utils::String::doubleToStringPrecision(config_value_, 8);
 }
 
-template<> std::string ConfigurableParameter<double>::getParameterValue () const
+template<> std::string ConfigurableParameter<double>::getParameterValueString () const
 {
     if (pointer_)
     {
@@ -196,7 +160,7 @@ template<> std::string ConfigurableParameter<double>::getParameterValue () const
         return Utils::String::doubleToStringPrecision(config_value_, 12);
 }
 
-template<> std::string ConfigurableParameter<std::string>::getParameterValue () const
+template<> std::string ConfigurableParameter<std::string>::getParameterValueString () const
 {
     if (pointer_)
     {

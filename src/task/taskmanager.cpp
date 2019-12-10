@@ -32,7 +32,7 @@
 #include <cassert>
 
 TaskManager::TaskManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb)
-: Configurable (class_id, instance_id, atsdb, "task.xml")
+: Configurable (class_id, instance_id, atsdb, "task.json")
 {
     createSubConfigurables();
 }

@@ -1,0 +1,24 @@
+{
+    "sub_config_files": [
+        {
+            "class_id": "ATSDB",
+            "instance_id": "ATSDB0",
+            "path": "atsdb.json"
+        },
+        {
+            "class_id": "JobManager",
+            "instance_id": "JobManager0",
+            "path": "threads.json"
+        },
+        {
+            "class_id": "ProjectionManager",
+            "instance_id": "ProjectionManager0",
+            "path": "projection.json"
+        },
+        {
+            "class_id": "UnitManager",
+            "instance_id": "UnitManager0",
+            "path": "units.json"
+        }
+    ]
+}

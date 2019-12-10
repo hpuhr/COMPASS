@@ -130,7 +130,7 @@ Client::Client(int& argc, char** argv)
         }
 
         {
-            SimpleConfig config ("main.conf");
+            SimpleConfig config ("config.json");
             string config_version;
 
             if (config.existsId("version"))
@@ -164,7 +164,7 @@ Client::Client(int& argc, char** argv)
 
         cout << "ATSDBClient: opening simple config file at '" << HOME_CONF_DIRECTORY+"main.conf'" << endl;
 
-        SimpleConfig config ("main.conf");
+        SimpleConfig config ("config.json");
         assert (config.existsId("version"));
         assert (config.existsId("configuration_path"));
         assert (config.existsId("save_config_on_exit"));
