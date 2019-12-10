@@ -327,7 +327,7 @@ void ConfigurationManager::saveConfiguration ()
     loginf << "ConfigurationManager: saveConfiguration NOT ACTIVE";
   // TODO deactivated
 //    saveXMLConfiguration();
-//    saveJSONConfiguration();
+    saveJSONConfiguration();
 }
 
 void ConfigurationManager::saveXMLConfiguration ()
@@ -376,7 +376,7 @@ void ConfigurationManager::saveJSONConfiguration ()
     for (auto& it : root_configurables_) //iterate over root configurables
     {
         loginf << "ConfigurationManager: saveJSONConfiguration: for configurable " << it.first.second;
-        it.second.configuration().generateJSON(main_config);
+        it.second.configuration().writeJSON(main_config);
         //root_element->LinkEndChild(it.second.configuration().generateXMLElement(document));
     }
 
@@ -386,7 +386,7 @@ void ConfigurationManager::saveJSONConfiguration ()
         {
             loginf << "ConfigurationManager: saveJSONConfiguration: configuration " << it.second.getInstanceId()
                     << " unused";
-            it.second.generateJSON(main_config);
+            it.second.writeJSON(main_config);
             //root_element->LinkEndChild(it.second.generateXMLElement(document));
         }
     }

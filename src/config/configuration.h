@@ -128,7 +128,10 @@ public:
     // parses the member config file
     void parseJSONConfigFile();
     void parseJSONConfig(nlohmann::json& config);
-    void generateJSON (nlohmann::json& parent_json) const;
+    // writes full json config or sub-file to parent
+    void writeJSON (nlohmann::json& parent_json) const;
+    // generates the full json config
+    void generateJSON (nlohmann::json& target) const;
 
     /// @brief Resets all values to their default values
     void resetToDefault ();

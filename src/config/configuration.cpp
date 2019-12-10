@@ -128,6 +128,7 @@ void Configuration::registerParameter (const std::string& parameter_id, bool* po
     {
         parameters_bool_.insert (std::make_pair (parameter_id, ConfigurableParameter<bool>()));
         assert (org_config_parameters_.at(parameter_id).is_boolean());
+        parameters_bool_.at(parameter_id).parameter_id_=parameter_id;
         parameters_bool_.at(parameter_id).config_value_ = org_config_parameters_.at(parameter_id);
     }
 
@@ -161,6 +162,7 @@ void Configuration::registerParameter (const std::string& parameter_id, int* poi
     {
         parameters_int_.insert (std::make_pair (parameter_id, ConfigurableParameter<int>()));
         assert (org_config_parameters_.at(parameter_id).is_number());
+        parameters_int_.at(parameter_id).parameter_id_=parameter_id;
         parameters_int_.at(parameter_id).config_value_ = org_config_parameters_.at(parameter_id);
     }
 
@@ -194,6 +196,7 @@ void Configuration::registerParameter (const std::string& parameter_id, unsigned
     {
         parameters_uint_.insert (std::make_pair (parameter_id, ConfigurableParameter<unsigned int>()));
         assert (org_config_parameters_.at(parameter_id).is_number_unsigned());
+        parameters_uint_.at(parameter_id).parameter_id_=parameter_id;
         parameters_uint_.at(parameter_id).config_value_ = org_config_parameters_.at(parameter_id);
     }
 
@@ -228,6 +231,7 @@ void Configuration::registerParameter (const std::string& parameter_id, float* p
     {
         parameters_float_.insert (std::make_pair (parameter_id, ConfigurableParameter<float>()));
         assert (org_config_parameters_.at(parameter_id).is_number_float());
+        parameters_float_.at(parameter_id).parameter_id_=parameter_id;
         parameters_float_.at(parameter_id).config_value_ = org_config_parameters_.at(parameter_id);
     }
 
@@ -261,6 +265,7 @@ void Configuration::registerParameter (const std::string& parameter_id, double* 
     {
         parameters_double_.insert (std::make_pair (parameter_id, ConfigurableParameter<double>()));
         assert (org_config_parameters_.at(parameter_id).is_number_float());
+        parameters_double_.at(parameter_id).parameter_id_=parameter_id;
         parameters_double_.at(parameter_id).config_value_ = org_config_parameters_.at(parameter_id);
     }
 
@@ -294,6 +299,7 @@ void Configuration::registerParameter (const std::string& parameter_id, std::str
     {
         parameters_string_.insert (std::make_pair (parameter_id, ConfigurableParameter<std::string>()));
         assert (org_config_parameters_.at(parameter_id).is_string());
+        parameters_string_.at(parameter_id).parameter_id_=parameter_id;
         parameters_string_.at(parameter_id).config_value_ = org_config_parameters_.at(parameter_id);
     }
 
@@ -1249,75 +1255,25 @@ void Configuration::parseJSONSubConfigs (nlohmann::json& sub_configs_config)
     }
 }
 
-void Configuration::generateJSON (nlohmann::json& parent_json) const
+// writes full json config or sub-file to parent
+void Configuration::writeJSON (nlohmann::json& parent_json) const
 {
-    logdbg  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
-            << ": generateJSON: in class " << instance_id_ ;
+    logdbg  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_ << ": writeJSON";
 
-    // create a new target if configuration should be written to custom filename, otherwise use parent
-    json* target_json = configuration_filename_.size() > 0 ? new json() : &parent_json;
-
-    if (target_json->contains("sub_configs") && target_json->at("sub_configs").contains(class_id_))
-        assert (!target_json->at("sub_configs").at(class_id_).contains(instance_id_));
-
-    json& config = (*target_json)["sub_configs"][class_id_][instance_id_];
-    json& param_config = config["parameters"];
-
-    for (auto& par_it : parameters_bool_)
-    {
-        assert (!param_config.contains(par_it.second.getParameterId()));
-        param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
-    }
-
-    for (auto& par_it : parameters_int_)
-    {
-        assert (!param_config.contains(par_it.second.getParameterId()));
-        param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
-    }
-
-    for (auto& par_it : parameters_uint_)
-    {
-        assert (!param_config.contains(par_it.second.getParameterId()));
-        param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
-    }
-
-    for (auto& par_it : parameters_float_)
-    {
-        assert (!param_config.contains(par_it.second.getParameterId()));
-        param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
-    }
-
-    for (auto& par_it : parameters_double_)
-    {
-        assert (!param_config.contains(par_it.second.getParameterId()));
-        param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
-    }
-
-    for (auto& par_it : parameters_string_)
-    {
-        assert (!param_config.contains(par_it.second.getParameterId()));
-        param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
-    }
-
-    for (auto& config_it : sub_configurations_)
-    {
-        config_it.second.generateJSON(config);
-    }
+    json config; // my config
+    generateJSON (config);
 
     if (configuration_filename_.size() > 0) // if we had custom filename
     {
         std::string file_path = CURRENT_CONF_DIRECTORY+configuration_filename_;
 
-        //String::replace(file_path, ".xml", ".json");
-
-        loginf  << "Configuration: generateElement: saving sub-configuration file '" << file_path << "'";
+        loginf  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+                << ": writeJSON: saving sub-configuration file '" << file_path << "'";
         //Files::verifyFileExists(file_path);
 
         // save file
         std::ofstream file(file_path);
-        file << target_json->dump(4);
-
-        // add SubConfigurationFile to parent
+        file << config.dump(4);
 
         if (!parent_json.contains("sub_config_files"))
             parent_json["sub_config_files"] = json::array();
@@ -1331,8 +1287,73 @@ void Configuration::generateJSON (nlohmann::json& parent_json) const
 
         parent_json["sub_config_files"][parent_json["sub_config_files"].size()] = sub_file_json;
     }
+    else // add full config to parent
+    {
+        parent_json["sub_configs"][class_id_][instance_id_] = std::move (config);
+    }
 }
 
+// generates the full json config
+void Configuration::generateJSON (nlohmann::json& target) const
+{
+    loginf  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+            << ": generateJSON: writing into '" << target.dump(4) << "'";
+
+    json& param_config = target["parameters"];
+
+    for (auto& par_it : parameters_bool_)
+    {
+        loginf  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+                << ": generateJSON: writing bool '" << par_it.second.getParameterId() << "'";
+        assert (!param_config.contains(par_it.second.getParameterId()));
+        param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
+    }
+
+    for (auto& par_it : parameters_int_)
+    {
+        loginf  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+                << ": generateJSON: writing int '" << par_it.second.getParameterId() << "'";
+        assert (!param_config.contains(par_it.second.getParameterId()));
+        param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
+    }
+
+    for (auto& par_it : parameters_uint_)
+    {
+        loginf  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+                << ": generateJSON: writing uint '" << par_it.second.getParameterId() << "'";
+        assert (!param_config.contains(par_it.second.getParameterId()));
+        param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
+    }
+
+    for (auto& par_it : parameters_float_)
+    {
+        loginf  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+                << ": generateJSON: writing float '" << par_it.second.getParameterId() << "'";
+        assert (!param_config.contains(par_it.second.getParameterId()));
+        param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
+    }
+
+    for (auto& par_it : parameters_double_)
+    {
+        loginf  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+                << ": generateJSON: writing double '" << par_it.second.getParameterId() << "'";
+        assert (!param_config.contains(par_it.second.getParameterId()));
+        param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
+    }
+
+    for (auto& par_it : parameters_string_)
+    {
+        loginf  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+                << ": generateJSON: writing string '" << par_it.second.getParameterId() << "'";
+        assert (!param_config.contains(par_it.second.getParameterId()));
+        param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
+    }
+
+    for (auto& config_it : sub_configurations_)
+    {
+        config_it.second.writeJSON(target);
+    }
+}
 
 void Configuration::createSubConfigurables (Configurable* configurable)
 {
