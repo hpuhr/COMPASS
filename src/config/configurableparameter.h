@@ -1,7 +1,6 @@
 #ifndef CONFIGURABLPPARAMETER_H
 #define CONFIGURABLPPARAMETER_H
 
-#include <tinyxml2.h>
 #include <string>
 
 class Configurable;
@@ -38,9 +37,6 @@ public:
     /// Template default value as given by registerParameter
     T default_value_;
 
-    /// Parses an element from the XML configuration and sets parameter_id_ and config_value_ (using a stringstream)
-    void parseElement (const tinyxml2::XMLElement *element);
-
     /**
      * Returns the parameter type as string
      *
@@ -58,18 +54,9 @@ public:
     /// Sets pointer_ to default value if valid, otherwise sets config_value_ to default_value_
     void resetToDefault ();
 
-protected:
-    void setConfigValue (const tinyxml2::XMLAttribute* attribute);
 };
 
 //template<> void A<int>::AFnc(); // <- note, no function body
-
-template<> void ConfigurableParameter<bool>::setConfigValue (const tinyxml2::XMLAttribute* attribute);
-template<> void ConfigurableParameter<int>::setConfigValue (const tinyxml2::XMLAttribute* attribute);
-template<> void ConfigurableParameter<unsigned int>::setConfigValue (const tinyxml2::XMLAttribute* attribute);
-template<> void ConfigurableParameter<float>::setConfigValue (const tinyxml2::XMLAttribute* attribute);
-template<> void ConfigurableParameter<double>::setConfigValue (const tinyxml2::XMLAttribute* attribute);
-template<> void ConfigurableParameter<std::string>::setConfigValue (const tinyxml2::XMLAttribute* attribute);
 
 template<> std::string ConfigurableParameter<bool>::getParameterType () const;
 template<> std::string ConfigurableParameter<int>::getParameterType () const;

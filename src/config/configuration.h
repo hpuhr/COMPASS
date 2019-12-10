@@ -23,8 +23,6 @@
 #include <typeinfo>
 #include <vector>
 
-#include <tinyxml2.h>
-
 #include "json.hpp"
 
 #include "string.h"
@@ -120,11 +118,6 @@ public:
     bool hasParameterConfigValueString (const std::string& parameter_id);
     std::string getParameterConfigValueString (const std::string& parameter_id);
 
-    /// @brief Parses an XML element
-    void parseXMLElement (tinyxml2::XMLElement* element);
-    /// @brief Generates an XML configuration element
-    tinyxml2::XMLElement* generateXMLElement (tinyxml2::XMLDocument* parent_document) const;
-
     // parses the member config file
     void parseJSONConfigFile();
     void parseJSONConfig(nlohmann::json& config);
@@ -215,11 +208,6 @@ protected:
 
     /// Container with all configuration templates
     //std::map<std::string, Configuration> configuration_templates_;
-
-    /// @brief Parses an XML configuration element
-    void parseXMLConfigurationElement (tinyxml2::XMLElement* element);
-    /// @brief Parses an XML configuration element
-    void parseXMLFileElement (tinyxml2::XMLElement* element);
 
     void parseJSONSubConfigFile (const std::string& class_id, const std::string& instance_id,
                                  const std::string& path);

@@ -18,7 +18,6 @@
 #ifndef CONFIGURATIONMANAGER_H_
 #define CONFIGURATIONMANAGER_H_
 
-#include <tinyxml2.h>
 #include <vector>
 #include <map>
 
@@ -78,10 +77,8 @@ protected:
     ConfigurationManager();
 
     /// @brief Parses a configuration file
-    void parseXMLConfigurationFile (const std::string& filename);
     void parseJSONConfigurationFile (const std::string& filename);
 
-    void saveXMLConfiguration ();
     void saveJSONConfiguration ();
 };
 

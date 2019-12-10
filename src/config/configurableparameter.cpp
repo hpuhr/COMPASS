@@ -25,24 +25,6 @@ ConfigurableParameter<T>& ConfigurableParameter<T>::operator= (const Configurabl
 }
 
 template <typename T>
-void ConfigurableParameter<T>::parseElement (const tinyxml2::XMLElement* element)
-{
-    std::string configuration_id = element->Value();
-    const tinyxml2::XMLAttribute* attribute=element->FirstAttribute();
-    while (attribute)
-    {
-        logdbg  << "ConfigurableParameter " << configuration_id << ": parseElement: attribute " << attribute->Name()
-                << "  value "<< attribute->Value();
-
-        parameter_id_=attribute->Name();
-        setConfigValue (attribute);
-
-        attribute=attribute->Next();
-        assert (!attribute);
-    }
-}
-
-template <typename T>
 std::string ConfigurableParameter<T>::getParameterType () const
 {
     throw std::runtime_error ("ConfigurableParameter: getParameterType: unknown class type");
@@ -91,37 +73,6 @@ void ConfigurableParameter<T>::resetToDefault ()
     }
 
     loginf  << ss.str();
-}
-
-
-template<> void ConfigurableParameter<bool>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
-{
-    config_value_ = attribute->BoolValue();
-}
-
-template<> void ConfigurableParameter<int>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
-{
-    config_value_ = attribute->IntValue();
-}
-
-template<> void ConfigurableParameter<unsigned int>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
-{
-    config_value_ = attribute->UnsignedValue();
-}
-
-template<> void ConfigurableParameter<float>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
-{
-    config_value_ = attribute->FloatValue();
-}
-
-template<> void ConfigurableParameter<double>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
-{
-    config_value_ = attribute->DoubleValue();
-}
-
-template<> void ConfigurableParameter<std::string>::setConfigValue (const tinyxml2::XMLAttribute* attribute)
-{
-    config_value_ = attribute->Value();
 }
 
 template<> std::string ConfigurableParameter<bool>::getParameterType () const
