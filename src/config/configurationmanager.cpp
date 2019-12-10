@@ -51,7 +51,7 @@ void ConfigurationManager::init (const std::string& main_config_filename)
     Files::verifyFileExists(path_filename);
 
     loginf << "ConfigurationManager: init: opening main configuration file '" << path_filename << "'";
-    parseXMLConfigurationFile (path_filename);
+    parseJSONConfigurationFile (path_filename);
 }
 
 ConfigurationManager::~ConfigurationManager()
@@ -206,34 +206,35 @@ void ConfigurationManager::parseJSONConfigurationFile (const std::string& filena
         std::string instance_id;
         std::string path;
 
-
         for (auto& it : config.items())
         {
-            if (it.key() == "SubConfigurationFile")
+            if (it.key() == "sub_config_files")
             {
-                json& sub_file_config = it.value();
+                assert (it.value().is_array());
 
-                assert (sub_file_config.contains("class_id"));
-                assert (sub_file_config.contains("instance_id"));
-                assert (sub_file_config.contains("path"));
+                for (auto& file_cfg_it : it.value().get<json::array_t>())
+                {
+                    assert (file_cfg_it.contains("class_id"));
+                    assert (file_cfg_it.contains("instance_id"));
+                    assert (file_cfg_it.contains("path"));
 
-                class_id = sub_file_config.at("class_id");
-                instance_id = sub_file_config.at("instance_id");
-                path = sub_file_config.at("path");
+                    class_id = file_cfg_it.at("class_id");
+                    instance_id = file_cfg_it.at("instance_id");
+                    path = file_cfg_it.at("path");
 
-                assert (class_id.size() && instance_id.size() && path.size());
+                    assert (class_id.size() && instance_id.size() && path.size());
 
-                std::pair<std::string, std::string> key (class_id, instance_id);
-                assert (root_configurations_.find (key) == root_configurations_.end()); // should not exist
+                    std::pair<std::string, std::string> key (class_id, instance_id);
+                    assert (root_configurations_.find (key) == root_configurations_.end()); // should not exist
 
-                logdbg << "ConfigurationManager: parseJSONConfigurationFile: creating new configuration for class " << class_id <<
-                          " instance " << instance_id;
-                root_configurations_.insert (std::pair<std::pair<std::string, std::string>, Configuration>
-                                             (key, Configuration (class_id, instance_id)));
+                    logdbg << "ConfigurationManager: parseJSONConfigurationFile: creating new configuration for class " << class_id <<
+                              " instance " << instance_id;
+                    root_configurations_.insert (std::pair<std::pair<std::string, std::string>, Configuration>
+                                                 (key, Configuration (class_id, instance_id)));
 
-                root_configurations_.at(key).setConfigurationFilename (path);
-                //root_configurations_.at(key).parseJSONElement(main_conf_child);
-
+                    root_configurations_.at(key).setConfigurationFilename (path);
+                    root_configurations_.at(key).parseJSONConfigFile();
+                }
             }
             else
                 throw std::runtime_error ("ConfigurationManager: parseJSONConfigurationFile: unknown key '"
@@ -325,8 +326,8 @@ void ConfigurationManager::saveConfiguration ()
 {
     loginf << "ConfigurationManager: saveConfiguration NOT ACTIVE";
   // TODO deactivated
-    saveXMLConfiguration();
-    saveJSONConfiguration();
+//    saveXMLConfiguration();
+//    saveJSONConfiguration();
 }
 
 void ConfigurationManager::saveXMLConfiguration ()
@@ -391,7 +392,7 @@ void ConfigurationManager::saveJSONConfiguration ()
     }
 
     std::string main_config_path = CURRENT_CONF_DIRECTORY+main_config_filename_;
-    String::replace(main_config_path, ".xml", ".json");
+    //String::replace(main_config_path, ".xml", ".json");
 
     loginf  << "ConfigurationManager: saveJSONConfiguration: saving main configuration file '" << main_config_path << "'";
 

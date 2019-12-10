@@ -122,6 +122,15 @@ void Configuration::registerParameter (const std::string& parameter_id, bool* po
 
     assert (pointer);
 
+    if (org_config_parameters_.contains(parameter_id) &&
+            parameters_bool_.find(parameter_id) == parameters_bool_.end())
+        // if exists in org json config and not yet stored in parameters
+    {
+        parameters_bool_.insert (std::make_pair (parameter_id, ConfigurableParameter<bool>()));
+        assert (org_config_parameters_.at(parameter_id).is_boolean());
+        parameters_bool_.at(parameter_id).config_value_ = org_config_parameters_.at(parameter_id);
+    }
+
     if (parameters_bool_.find(parameter_id) == parameters_bool_.end()) // new parameter, didnt exist in config
     {
         parameters_bool_.insert (std::pair<std::string, ConfigurableParameter<bool>> (parameter_id,
@@ -146,10 +155,19 @@ void Configuration::registerParameter (const std::string& parameter_id, int* poi
 
     assert (pointer);
 
+    if (org_config_parameters_.contains(parameter_id) &&
+            parameters_int_.find(parameter_id) == parameters_int_.end())
+        // if exists in org json config and not yet stored in parameters
+    {
+        parameters_int_.insert (std::make_pair (parameter_id, ConfigurableParameter<int>()));
+        assert (org_config_parameters_.at(parameter_id).is_number());
+        parameters_int_.at(parameter_id).config_value_ = org_config_parameters_.at(parameter_id);
+    }
+
     if (parameters_int_.find(parameter_id) == parameters_int_.end()) // new parameter, didnt exist in config
     {
         parameters_int_.insert (std::pair<std::string, ConfigurableParameter<int>> (parameter_id,
-                                                                                     ConfigurableParameter<int>()));
+                                                                                    ConfigurableParameter<int>()));
         parameters_int_.at(parameter_id).parameter_id_=parameter_id;
         parameters_int_.at(parameter_id).config_value_=default_value;
     }
@@ -169,6 +187,15 @@ void Configuration::registerParameter (const std::string& parameter_id, unsigned
     logdbg  << "Configuration " << instance_id_ << ": registerParameter: unsigned int: " << parameter_id;
 
     assert (pointer);
+
+    if (org_config_parameters_.contains(parameter_id) &&
+            parameters_uint_.find(parameter_id) == parameters_uint_.end())
+        // if exists in org json config and not yet stored in parameters
+    {
+        parameters_uint_.insert (std::make_pair (parameter_id, ConfigurableParameter<unsigned int>()));
+        assert (org_config_parameters_.at(parameter_id).is_number_unsigned());
+        parameters_uint_.at(parameter_id).config_value_ = org_config_parameters_.at(parameter_id);
+    }
 
     if (parameters_uint_.find(parameter_id) == parameters_uint_.end()) // new parameter, didnt exist in config
     {
@@ -195,6 +222,15 @@ void Configuration::registerParameter (const std::string& parameter_id, float* p
 
     assert (pointer);
 
+    if (org_config_parameters_.contains(parameter_id) &&
+            parameters_float_.find(parameter_id) == parameters_float_.end())
+        // if exists in org json config and not yet stored in parameters
+    {
+        parameters_float_.insert (std::make_pair (parameter_id, ConfigurableParameter<float>()));
+        assert (org_config_parameters_.at(parameter_id).is_number_float());
+        parameters_float_.at(parameter_id).config_value_ = org_config_parameters_.at(parameter_id);
+    }
+
     if (parameters_float_.find(parameter_id) == parameters_float_.end()) // new parameter, didnt exist in config
     {
         parameters_float_.insert (std::pair<std::string, ConfigurableParameter<float>> (
@@ -219,6 +255,15 @@ void Configuration::registerParameter (const std::string& parameter_id, double* 
 
     assert (pointer);
 
+    if (org_config_parameters_.contains(parameter_id) &&
+            parameters_double_.find(parameter_id) == parameters_double_.end())
+        // if exists in org json config and not yet stored in parameters
+    {
+        parameters_double_.insert (std::make_pair (parameter_id, ConfigurableParameter<double>()));
+        assert (org_config_parameters_.at(parameter_id).is_number_float());
+        parameters_double_.at(parameter_id).config_value_ = org_config_parameters_.at(parameter_id);
+    }
+
     if (parameters_double_.find(parameter_id) == parameters_double_.end()) // new parameter, didnt exist in config
     {
         parameters_double_.insert (std::pair<std::string, ConfigurableParameter<double>> (
@@ -242,6 +287,15 @@ void Configuration::registerParameter (const std::string& parameter_id, std::str
     logdbg  << "Configuration " << instance_id_ << ": registerParameter: string: " << parameter_id;
 
     assert (pointer);
+
+    if (org_config_parameters_.contains(parameter_id) &&
+            parameters_string_.find(parameter_id) == parameters_string_.end())
+        // if exists in org json config and not yet stored in parameters
+    {
+        parameters_string_.insert (std::make_pair (parameter_id, ConfigurableParameter<std::string>()));
+        assert (org_config_parameters_.at(parameter_id).is_string());
+        parameters_string_.at(parameter_id).config_value_ = org_config_parameters_.at(parameter_id);
+    }
 
     if (parameters_string_.find(parameter_id) == parameters_string_.end()) // new parameter, didnt exist in config
     {
@@ -515,14 +569,25 @@ void Configuration::getParameter (const std::string& parameter_id, std::string& 
 
 bool Configuration::hasParameterConfigValueBool (const std::string& parameter_id)
 {
+    if (org_config_parameters_.contains(parameter_id) &&
+            parameters_bool_.find(parameter_id) == parameters_bool_.end())
+        // if exists in org json config and not yet stored in parameters
+    return true;
+
     return parameters_bool_.count(parameter_id);
 }
 
 bool Configuration::getParameterConfigValueBool (const std::string& parameter_id)
 {
-    if (parameters_bool_.count(parameter_id) == 0)
-        throw std::runtime_error ("Configuration: getParameterConfigValueBool: unknown parameter id " + parameter_id);
+    if (org_config_parameters_.contains(parameter_id) &&
+            parameters_bool_.find(parameter_id) == parameters_bool_.end())
+        // if exists in org json config and not yet stored in parameters
+    {
+        assert (org_config_parameters_.at(parameter_id).is_boolean());
+        return org_config_parameters_.at(parameter_id).get<bool>();
+    }
 
+    assert (parameters_bool_.count(parameter_id));
     assert (parameters_bool_.at(parameter_id).getParameterType().compare ("ParameterBool") == 0);
 
     return parameters_bool_.at(parameter_id).config_value_;
@@ -530,14 +595,25 @@ bool Configuration::getParameterConfigValueBool (const std::string& parameter_id
 
 bool Configuration::hasParameterConfigValueInt (const std::string& parameter_id)
 {
+    if (org_config_parameters_.contains(parameter_id) &&
+            parameters_int_.find(parameter_id) == parameters_int_.end())
+        // if exists in org json config and not yet stored in parameters
+    return true;
+
     return parameters_int_.count(parameter_id);
 }
 
 int Configuration::getParameterConfigValueInt (const std::string& parameter_id)
 {
-    if (parameters_int_.count(parameter_id) == 0)
-        throw std::runtime_error ("Configuration: getParameterConfigValueInt: unknown parameter id " + parameter_id);
+    if (org_config_parameters_.contains(parameter_id) &&
+            parameters_int_.find(parameter_id) == parameters_int_.end())
+        // if exists in org json config and not yet stored in parameters
+    {
+        assert (org_config_parameters_.at(parameter_id).is_number_integer());
+        return org_config_parameters_.at(parameter_id).get<int>();
+    }
 
+    assert (parameters_int_.count(parameter_id));
     assert (parameters_int_.at(parameter_id).getParameterType().compare ("ParameterInt") == 0);
 
     return parameters_int_.at(parameter_id).config_value_;
@@ -545,14 +621,25 @@ int Configuration::getParameterConfigValueInt (const std::string& parameter_id)
 
 bool Configuration::hasParameterConfigValueUint (const std::string& parameter_id)
 {
+    if (org_config_parameters_.contains(parameter_id) &&
+            parameters_uint_.find(parameter_id) == parameters_uint_.end())
+        // if exists in org json config and not yet stored in parameters
+    return true;
+
     return parameters_uint_.count(parameter_id);
 }
 
 unsigned int Configuration::getParameterConfigValueUint (const std::string& parameter_id)
 {
-    if (parameters_uint_.count(parameter_id) == 0)
-        throw std::runtime_error ("Configuration: getParameterConfigValueUint: unknown parameter id " + parameter_id);
+    if (org_config_parameters_.contains(parameter_id) &&
+            parameters_uint_.find(parameter_id) == parameters_uint_.end())
+        // if exists in org json config and not yet stored in parameters
+    {
+        assert (org_config_parameters_.at(parameter_id).is_number_unsigned());
+        return org_config_parameters_.at(parameter_id).get<unsigned int>();
+    }
 
+    assert (parameters_uint_.count(parameter_id));
     assert (parameters_uint_.at(parameter_id).getParameterType().compare ("ParameterUnsignedInt") == 0);
 
     return parameters_uint_.at(parameter_id).config_value_;
@@ -560,14 +647,25 @@ unsigned int Configuration::getParameterConfigValueUint (const std::string& para
 
 bool Configuration::hasParameterConfigValueFloat (const std::string& parameter_id)
 {
+    if (org_config_parameters_.contains(parameter_id) &&
+            parameters_float_.find(parameter_id) == parameters_float_.end())
+        // if exists in org json config and not yet stored in parameters
+    return true;
+
     return parameters_float_.count(parameter_id);
 }
 
 float Configuration::getParameterConfigValueFloat (const std::string& parameter_id)
 {
-    if (parameters_float_.count(parameter_id) == 0)
-        throw std::runtime_error ("Configuration: getParameterConfigValueFloat: unknown parameter id " + parameter_id);
+    if (org_config_parameters_.contains(parameter_id) &&
+            parameters_float_.find(parameter_id) == parameters_float_.end())
+        // if exists in org json config and not yet stored in parameters
+    {
+        assert (org_config_parameters_.at(parameter_id).is_number_float());
+        return org_config_parameters_.at(parameter_id).get<float>();
+    }
 
+    assert (parameters_float_.count(parameter_id));
     assert (parameters_float_.at(parameter_id).getParameterType().compare ("ParameterFloat") == 0);
 
     return parameters_float_.at(parameter_id).config_value_;
@@ -575,15 +673,26 @@ float Configuration::getParameterConfigValueFloat (const std::string& parameter_
 
 bool Configuration::hasParameterConfigValueDouble (const std::string& parameter_id)
 {
+    if (org_config_parameters_.contains(parameter_id) &&
+            parameters_double_.find(parameter_id) == parameters_double_.end())
+        // if exists in org json config and not yet stored in parameters
+    return true;
+
     return parameters_double_.count(parameter_id);
 }
 
 
 double Configuration::getParameterConfigValueDouble (const std::string& parameter_id)
 {
-    if (parameters_double_.count(parameter_id) == 0)
-        throw std::runtime_error ("Configuration: getParameterConfigValueDouble: unknown parameter id " + parameter_id);
+    if (org_config_parameters_.contains(parameter_id) &&
+            parameters_double_.find(parameter_id) == parameters_double_.end())
+        // if exists in org json config and not yet stored in parameters
+    {
+        assert (org_config_parameters_.at(parameter_id).is_number_float());
+        return org_config_parameters_.at(parameter_id).get<double>();
+    }
 
+    assert (parameters_double_.count(parameter_id));
     assert (parameters_double_.at(parameter_id).getParameterType().compare ("ParameterDouble") == 0);
 
     return parameters_double_.at(parameter_id).config_value_;
@@ -591,16 +700,26 @@ double Configuration::getParameterConfigValueDouble (const std::string& paramete
 
 bool Configuration::hasParameterConfigValueString (const std::string& parameter_id)
 {
+    if (org_config_parameters_.contains(parameter_id) &&
+            parameters_string_.find(parameter_id) == parameters_string_.end())
+        // if exists in org json config and not yet stored in parameters
+    return true;
+
     return parameters_string_.count(parameter_id);
 }
 
 
 std::string Configuration::getParameterConfigValueString (const std::string& parameter_id)
 {
-    if (parameters_string_.count(parameter_id) == 0)
-        throw std::runtime_error ("Configuration: getParameterConfigValueString: string: unknown parameter id "
-                                  + parameter_id);
+    if (org_config_parameters_.contains(parameter_id) &&
+            parameters_string_.find(parameter_id) == parameters_string_.end())
+        // if exists in org json config and not yet stored in parameters
+    {
+        assert (org_config_parameters_.at(parameter_id).is_string());
+        return org_config_parameters_.at(parameter_id).get<std::string>();
+    }
 
+    assert (parameters_string_.count(parameter_id));
     assert (parameters_string_.at(parameter_id).getParameterType().compare ("ParameterString") == 0);
 
     return parameters_string_.at(parameter_id).config_value_;
@@ -695,8 +814,8 @@ void Configuration::parseXMLConfigurationElement (tinyxml2::XMLElement* element)
         }
         else if (std::strcmp ("Configuration", parameter_element->Value() ) == 0)
         {
-                logdbg << "Configuration: parseXMLConfigurationElement: parsing configuration " << class_id_
-                       << " instance " << instance_id_;
+            logdbg << "Configuration: parseXMLConfigurationElement: parsing configuration " << class_id_
+                   << " instance " << instance_id_;
 
             const char* class_id=nullptr;
             const char* instance_id=nullptr;
@@ -713,11 +832,11 @@ void Configuration::parseXMLConfigurationElement (tinyxml2::XMLElement* element)
                     instance_id=attribute->Value();
                 else if (strcmp ("class_id", attribute->Name()) == 0)
                     class_id=attribute->Value();
-//                else if (strcmp ("template", attribute->Name()) == 0)
-//                {
-//                    template_flag = true;
-//                    template_name=attribute->Value();
-//                }
+                //                else if (strcmp ("template", attribute->Name()) == 0)
+                //                {
+                //                    template_flag = true;
+                //                    template_name=attribute->Value();
+                //                }
                 else
                     throw std::runtime_error ("Configuration: parseXMLConfigurationElement: unknown attribute");
 
@@ -733,26 +852,26 @@ void Configuration::parseXMLConfigurationElement (tinyxml2::XMLElement* element)
             //                    << instance_id_ << " found sub-configuration class " << class_id << " instance " << instance_id
             //                    << " template " << template_flag << " template name " << template_name;
 
-//            if (template_flag)
-//            {
-//                loginf << "Configuration: parseXMLConfigurationElement: found template class " << class_id
-//                       << " instance " << instance_id;
+            //            if (template_flag)
+            //            {
+            //                loginf << "Configuration: parseXMLConfigurationElement: found template class " << class_id
+            //                       << " instance " << instance_id;
 
-//                assert (configuration_templates_.find(template_name) == configuration_templates_.end());
-//                configuration_templates_.insert(std::pair <std::string, Configuration> (template_name, Configuration (
-//                                                                                            class_id, instance_id)));
+            //                assert (configuration_templates_.find(template_name) == configuration_templates_.end());
+            //                configuration_templates_.insert(std::pair <std::string, Configuration> (template_name, Configuration (
+            //                                                                                            class_id, instance_id)));
 
-//                configuration_templates_.at(template_name).parseXMLElement(parameter_element);
-//                configuration_templates_.at(template_name).setTemplate(true, template_name);
-//            }
-//            else
-//            {
-                std::pair <std::string, std::string> key (class_id, instance_id);
-                assert (sub_configurations_.find(key) == sub_configurations_.end());
-                sub_configurations_.insert(std::pair <std::pair<std::string, std::string>, Configuration> (
-                                               key, Configuration (class_id, instance_id)));
+            //                configuration_templates_.at(template_name).parseXMLElement(parameter_element);
+            //                configuration_templates_.at(template_name).setTemplate(true, template_name);
+            //            }
+            //            else
+            //            {
+            std::pair <std::string, std::string> key (class_id, instance_id);
+            assert (sub_configurations_.find(key) == sub_configurations_.end());
+            sub_configurations_.insert(std::pair <std::pair<std::string, std::string>, Configuration> (
+                                           key, Configuration (class_id, instance_id)));
 
-                sub_configurations_.at(key).parseXMLElement(parameter_element);
+            sub_configurations_.at(key).parseXMLElement(parameter_element);
             //}
         }
         else if (std::strcmp (parameter_element->Value(), "SubConfigurationFile") == 0)
@@ -809,9 +928,9 @@ void Configuration::parseXMLConfigurationElement (tinyxml2::XMLElement* element)
         }
     }
 
-//    if (template_flag_)
-//        loginf << "Configuration: parseXMLConfigurationElement: class " << class_id_ << " instance " << instance_id_ <<
-//                  " is template " << template_name_;
+    //    if (template_flag_)
+    //        loginf << "Configuration: parseXMLConfigurationElement: class " << class_id_ << " instance " << instance_id_ <<
+    //                  " is template " << template_name_;
 
 }
 
@@ -881,12 +1000,12 @@ XMLElement* Configuration::generateXMLElement (tinyxml2::XMLDocument* parent_doc
     element->SetAttribute("class_id", class_id_.c_str());
     element->SetAttribute("instance_id", instance_id_.c_str());
 
-//    if (template_flag_)
-//    {
-//        loginf << "Configuration: generateXMLElement: class " << class_id_ << " instance " << instance_id_ <<
-//                  " is template " << template_name_;
-//        element->SetAttribute("template", template_name_.c_str());
-//    }
+    //    if (template_flag_)
+    //    {
+    //        loginf << "Configuration: generateXMLElement: class " << class_id_ << " instance " << instance_id_ <<
+    //                  " is template " << template_name_;
+    //        element->SetAttribute("template", template_name_.c_str());
+    //    }
 
     for (auto it = parameters_bool_.begin(); it != parameters_bool_.end(); it++)
     {
@@ -941,13 +1060,13 @@ XMLElement* Configuration::generateXMLElement (tinyxml2::XMLDocument* parent_doc
         element->LinkEndChild(parameter);
     }
 
-//    std::map<std::string, Configuration>::const_iterator tit; // coincidence
-//    for (tit = configuration_templates_.begin(); tit != configuration_templates_.end(); tit++)
-//    {
-//        assert (tit->second.getTemplateFlag());
-//        XMLElement* config = tit->second.generateXMLElement(document);
-//        element->LinkEndChild(config);
-//    }
+    //    std::map<std::string, Configuration>::const_iterator tit; // coincidence
+    //    for (tit = configuration_templates_.begin(); tit != configuration_templates_.end(); tit++)
+    //    {
+    //        assert (tit->second.getTemplateFlag());
+    //        XMLElement* config = tit->second.generateXMLElement(document);
+    //        element->LinkEndChild(config);
+    //    }
 
     std::map<std::pair<std::string, std::string>, Configuration >::const_iterator cit;
     for (cit = sub_configurations_.begin(); cit != sub_configurations_.end(); cit++)
@@ -978,9 +1097,162 @@ XMLElement* Configuration::generateXMLElement (tinyxml2::XMLDocument* parent_doc
         return element;
 }
 
+void Configuration::parseJSONConfigFile()
+{
+    assert (hasConfigurationFilename());
+
+
+    std::string file_path = CURRENT_CONF_DIRECTORY+configuration_filename_;
+
+    Files::verifyFileExists(file_path);
+    loginf  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+            << ": parseJSONConfigFile: opening file '" << file_path << "'";
+
+    std::ifstream config_file (file_path, std::ifstream::in);
+
+    try
+    {
+        json config = json::parse(config_file);
+        parseJSONConfig (config);
+    }
+    catch (json::exception& e)
+    {
+        logerr << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+               << ": parseJSONConfigFile: could not load file '" << file_path << "'";
+        throw e;
+    }
+}
+
+void Configuration::parseJSONConfig(nlohmann::json& config)
+{
+    loginf << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+           << ": parseJSONConfig";
+
+    assert (config.is_object());
+
+    for (auto& it : config.items())
+    {
+        if (it.value() == nullptr) // empty
+            continue;
+
+        if (it.key() == "parameters")
+        {
+            assert (it.value().is_object());
+            parseJSONParameters (it.value());
+        }
+        else if (it.key() == "sub_config_files")
+        {
+            std::string class_id;
+            std::string instance_id;
+            std::string path;
+
+            assert (it.value().is_array());
+
+            for (auto& file_cfg_it : it.value().get<json::array_t>())
+            {
+                assert (file_cfg_it.contains("class_id"));
+                assert (file_cfg_it.contains("instance_id"));
+                assert (file_cfg_it.contains("path"));
+
+                class_id = file_cfg_it.at("class_id");
+                instance_id = file_cfg_it.at("instance_id");
+                path = file_cfg_it.at("path");
+
+                assert (class_id.size() && instance_id.size() && path.size());
+                parseJSONSubConfigFile (class_id, instance_id, path);
+            }
+        }
+        else if (it.key() == "sub_configs")
+        {
+            assert (it.value().is_object());
+            parseJSONSubConfigs (it.value());
+        }
+        else
+            throw std::runtime_error ("Configuration class_id"+class_id_+" instance_id "+instance_id_
+                                      +": parseJSONConfig: unknown key '"+it.key()+"'");
+    }
+}
+
+void Configuration::parseJSONSubConfigFile (const std::string& class_id, const std::string& instance_id,
+                                            const std::string& path)
+{
+    loginf << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+           << ": parseJSONSubConfigFile: class_id " << class_id << " instance_id " << instance_id
+           << " path '" << path << "'";
+
+    std::pair<std::string, std::string> key (class_id, instance_id);
+    assert (sub_configurations_.find (key) == sub_configurations_.end()); // should not exist
+
+    logdbg << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+           << ": parseJSONConfigurationFile: creating new configuration for class " << class_id
+           << " instance " << instance_id;
+    sub_configurations_.insert (std::pair<std::pair<std::string, std::string>, Configuration>
+                                (key, Configuration (class_id, instance_id)));
+    sub_configurations_.at(key).setConfigurationFilename (path);
+    sub_configurations_.at(key).parseJSONConfigFile();
+}
+
+void Configuration::parseJSONParameters (nlohmann::json& parameters_config)
+{
+    loginf << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+           << ": parseJSONParameters";
+
+    // is object
+    assert (parameters_config.is_object());
+
+    // store paramaters in member
+    for (auto& it : parameters_config.items())
+    {
+        assert (it.value().is_primitive());
+        assert (!org_config_parameters_.contains(it.key()));
+        loginf << "param key " << it.key() << " value '" << it.value() << "'";
+        org_config_parameters_[it.key()] = it.value();
+    }
+}
+
+void Configuration::parseJSONSubConfigs (nlohmann::json& sub_configs_config)
+{
+    loginf << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+           << ": parseJSONSubConfigs";
+
+    // is object
+    assert (sub_configs_config.is_object());
+
+    std::string class_id;
+    std::string instance_id;
+
+    // sub-configs in member
+    for (auto& sub_cfg_class_it : sub_configs_config.items())
+    {
+        assert (sub_cfg_class_it.value().is_object());
+        class_id = sub_cfg_class_it.key();
+
+        for (auto& sub_cfg_instance_it : sub_cfg_class_it.value().items())
+        {
+            assert (sub_cfg_instance_it.value().is_object());
+            instance_id = sub_cfg_instance_it.key();
+
+            //        assert (!org_config_sub_configs_.contains(it.key()));
+            //        loginf << "sub-config key " << it.key();
+            //        org_config_sub_configs_[it.key()] = std::move(it.value()); // move out, might be big
+
+            std::pair<std::string, std::string> key (class_id, instance_id);
+            assert (sub_configurations_.find (key) == sub_configurations_.end()); // should not exist
+
+            loginf << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+                   << ": parseJSONSubConfigs: creating new configuration for class " << class_id
+                   << " instance " << instance_id;
+            sub_configurations_.insert (std::pair<std::pair<std::string, std::string>, Configuration>
+                                        (key, Configuration (class_id, instance_id)));
+            sub_configurations_.at(key).parseJSONConfig(sub_cfg_instance_it.value());
+        }
+    }
+}
+
 void Configuration::generateJSON (nlohmann::json& parent_json) const
 {
-    logdbg  << "Configuration: generateJSON: in class " << instance_id_ ;
+    logdbg  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+            << ": generateJSON: in class " << instance_id_ ;
 
     // create a new target if configuration should be written to custom filename, otherwise use parent
     json* target_json = configuration_filename_.size() > 0 ? new json() : &parent_json;
@@ -1036,7 +1308,7 @@ void Configuration::generateJSON (nlohmann::json& parent_json) const
     {
         std::string file_path = CURRENT_CONF_DIRECTORY+configuration_filename_;
 
-        String::replace(file_path, ".xml", ".json");
+        //String::replace(file_path, ".xml", ".json");
 
         loginf  << "Configuration: generateElement: saving sub-configuration file '" << file_path << "'";
         //Files::verifyFileExists(file_path);

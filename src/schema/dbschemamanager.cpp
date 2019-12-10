@@ -35,7 +35,7 @@
  */
 DBSchemaManager::DBSchemaManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb,
                                  DBInterface& db_interface)
-: Configurable (class_id, instance_id, atsdb, "db_schema.xml"), db_interface_(db_interface)
+: Configurable (class_id, instance_id, atsdb, "db_schema.json"), db_interface_(db_interface)
 {
     registerParameter ("current_schema", &current_schema_, (std::string)"");
 

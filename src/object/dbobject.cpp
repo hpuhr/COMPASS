@@ -54,7 +54,7 @@ using namespace Utils;
  * Registers parameters, creates sub configurables
  */
 DBObject::DBObject(const std::string& class_id, const std::string& instance_id, DBObjectManager* manager)
-    : Configurable (class_id, instance_id, manager, "db_object_"+boost::algorithm::to_lower_copy(instance_id)+".xml"),
+    : Configurable (class_id, instance_id, manager, "db_object_"+boost::algorithm::to_lower_copy(instance_id)+".json"),
       manager_(*manager)
 {
     registerParameter ("name" , &name_, "Undefined");

@@ -124,6 +124,10 @@ public:
     void parseXMLElement (tinyxml2::XMLElement* element);
     /// @brief Generates an XML configuration element
     tinyxml2::XMLElement* generateXMLElement (tinyxml2::XMLDocument* parent_document) const;
+
+    // parses the member config file
+    void parseJSONConfigFile();
+    void parseJSONConfig(nlohmann::json& config);
     void generateJSON (nlohmann::json& parent_json) const;
 
     /// @brief Resets all values to their default values
@@ -187,6 +191,10 @@ protected:
     /// Special XML configuration filename
     std::string configuration_filename_;
 
+    nlohmann::json org_config_parameters_;
+    //nlohmann::json org_config_sub_files_;
+    //nlohmann::json org_config_sub_configs_;
+
     /// Container for all parameters (parameter identifier -> ConfigurableParameterBase)
     std::map <std::string, ConfigurableParameter<bool> > parameters_bool_;
     std::map <std::string, ConfigurableParameter<int> > parameters_int_;
@@ -209,6 +217,11 @@ protected:
     void parseXMLConfigurationElement (tinyxml2::XMLElement* element);
     /// @brief Parses an XML configuration element
     void parseXMLFileElement (tinyxml2::XMLElement* element);
+
+    void parseJSONSubConfigFile (const std::string& class_id, const std::string& instance_id,
+                                 const std::string& path);
+    void parseJSONParameters (nlohmann::json& parameters_config);
+    void parseJSONSubConfigs (nlohmann::json& sub_configs_config);
 };
 
 #endif /* CONFIGURATION_H_ */

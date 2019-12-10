@@ -22,7 +22,7 @@
 #include <math.h>
 
 UnitManager::UnitManager()
-: Configurable ("UnitManager", "UnitManager0", 0, "units.xml")
+: Configurable ("UnitManager", "UnitManager0", 0, "units.json")
 {
     createSubConfigurables ();
 }
