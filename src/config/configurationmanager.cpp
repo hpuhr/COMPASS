@@ -166,11 +166,9 @@ void ConfigurationManager::parseJSONConfigurationFile (const std::string& filena
 
 }
 
-
-
 void ConfigurationManager::saveConfiguration ()
 {
-    loginf << "ConfigurationManager: saveConfiguration NOT ACTIVE";
+    loginf << "ConfigurationManager: saveConfiguration";
     saveJSONConfiguration();
 }
 
@@ -180,7 +178,7 @@ void ConfigurationManager::saveJSONConfiguration ()
 
     json main_config;
 
-    loginf << "ConfigurationManager: saveJSONConfiguration";
+    logdbg << "ConfigurationManager: saveJSONConfiguration";
 
     for (auto& it : root_configurables_) //iterate over root configurables
     {

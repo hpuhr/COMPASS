@@ -134,7 +134,7 @@ void DBObject::generateSubConfigurable (const std::string &class_id, const std::
 
         assert (stored_data_sources_.find (id) == stored_data_sources_.end());
 
-        loginf << "DBObject: generateSubConfigurable: generating stored DS " << instance_id << " with id " << id;
+        logdbg << "DBObject: generateSubConfigurable: generating stored DS " << instance_id << " with id " << id;
 
         stored_data_sources_.emplace(std::piecewise_construct,
                                      std::forward_as_tuple(id),  // args for key

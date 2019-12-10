@@ -737,7 +737,7 @@ void Configuration::parseJSONConfigFile()
     std::string file_path = CURRENT_CONF_DIRECTORY+configuration_filename_;
 
     Files::verifyFileExists(file_path);
-    loginf  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+    logdbg  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
             << ": parseJSONConfigFile: opening file '" << file_path << "'";
 
     std::ifstream config_file (file_path, std::ifstream::in);
@@ -757,7 +757,7 @@ void Configuration::parseJSONConfigFile()
 
 void Configuration::parseJSONConfig(nlohmann::json& config)
 {
-    loginf << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+    logdbg << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
            << ": parseJSONConfig";
 
     assert (config.is_object());
@@ -808,7 +808,7 @@ void Configuration::parseJSONConfig(nlohmann::json& config)
 void Configuration::parseJSONSubConfigFile (const std::string& class_id, const std::string& instance_id,
                                             const std::string& path)
 {
-    loginf << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+    logdbg << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
            << ": parseJSONSubConfigFile: class_id " << class_id << " instance_id " << instance_id
            << " path '" << path << "'";
 
@@ -826,7 +826,7 @@ void Configuration::parseJSONSubConfigFile (const std::string& class_id, const s
 
 void Configuration::parseJSONParameters (nlohmann::json& parameters_config)
 {
-    loginf << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+    logdbg << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
            << ": parseJSONParameters";
 
     // is object
@@ -837,14 +837,14 @@ void Configuration::parseJSONParameters (nlohmann::json& parameters_config)
     {
         assert (it.value().is_primitive());
         assert (!org_config_parameters_.contains(it.key()));
-        loginf << "param key " << it.key() << " value '" << it.value() << "'";
+        //logdbg << "param key " << it.key() << " value '" << it.value() << "'";
         org_config_parameters_[it.key()] = it.value();
     }
 }
 
 void Configuration::parseJSONSubConfigs (nlohmann::json& sub_configs_config)
 {
-    loginf << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+    logdbg << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
            << ": parseJSONSubConfigs";
 
     // is object
@@ -871,7 +871,7 @@ void Configuration::parseJSONSubConfigs (nlohmann::json& sub_configs_config)
             std::pair<std::string, std::string> key (class_id, instance_id);
             assert (sub_configurations_.find (key) == sub_configurations_.end()); // should not exist
 
-            loginf << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+            logdbg << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
                    << ": parseJSONSubConfigs: creating new configuration for class " << class_id
                    << " instance " << instance_id;
             sub_configurations_.insert (std::pair<std::pair<std::string, std::string>, Configuration>
@@ -893,7 +893,7 @@ void Configuration::writeJSON (nlohmann::json& parent_json) const
     {
         std::string file_path = CURRENT_CONF_DIRECTORY+configuration_filename_;
 
-        loginf  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+        logdbg  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
                 << ": writeJSON: saving sub-configuration file '" << file_path << "'";
         //Files::verifyFileExists(file_path);
 
@@ -922,14 +922,14 @@ void Configuration::writeJSON (nlohmann::json& parent_json) const
 // generates the full json config
 void Configuration::generateJSON (nlohmann::json& target) const
 {
-    loginf  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+    logdbg  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
             << ": generateJSON: writing into '" << target.dump(4) << "'";
 
     json& param_config = target["parameters"];
 
     for (auto& par_it : parameters_bool_)
     {
-        loginf  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+        logdbg  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
                 << ": generateJSON: writing bool '" << par_it.second.getParameterId() << "'";
         assert (!param_config.contains(par_it.second.getParameterId()));
         param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
@@ -937,7 +937,7 @@ void Configuration::generateJSON (nlohmann::json& target) const
 
     for (auto& par_it : parameters_int_)
     {
-        loginf  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+        logdbg  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
                 << ": generateJSON: writing int '" << par_it.second.getParameterId() << "'";
         assert (!param_config.contains(par_it.second.getParameterId()));
         param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
@@ -945,7 +945,7 @@ void Configuration::generateJSON (nlohmann::json& target) const
 
     for (auto& par_it : parameters_uint_)
     {
-        loginf  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+        logdbg  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
                 << ": generateJSON: writing uint '" << par_it.second.getParameterId() << "'";
         assert (!param_config.contains(par_it.second.getParameterId()));
         param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
@@ -953,7 +953,7 @@ void Configuration::generateJSON (nlohmann::json& target) const
 
     for (auto& par_it : parameters_float_)
     {
-        loginf  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+        logdbg  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
                 << ": generateJSON: writing float '" << par_it.second.getParameterId() << "'";
         assert (!param_config.contains(par_it.second.getParameterId()));
         param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
@@ -961,7 +961,7 @@ void Configuration::generateJSON (nlohmann::json& target) const
 
     for (auto& par_it : parameters_double_)
     {
-        loginf  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+        logdbg  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
                 << ": generateJSON: writing double '" << par_it.second.getParameterId() << "'";
         assert (!param_config.contains(par_it.second.getParameterId()));
         param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
@@ -969,7 +969,7 @@ void Configuration::generateJSON (nlohmann::json& target) const
 
     for (auto& par_it : parameters_string_)
     {
-        loginf  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
+        logdbg  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
                 << ": generateJSON: writing string '" << par_it.second.getParameterId() << "'";
         assert (!param_config.contains(par_it.second.getParameterId()));
         param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
@@ -1065,7 +1065,7 @@ Configuration& Configuration::getSubConfiguration (const std::string& class_id, 
 
     if (sub_configurations_.find (key) == sub_configurations_.end())
     {
-        loginf << "Configuration instance " << instance_id_
+        logdbg << "Configuration instance " << instance_id_
                << ": getSubConfiguration: creating new (empty) configuration for class " << class_id
                << " instance " << instance_id;
         addNewSubConfiguration(class_id, instance_id);

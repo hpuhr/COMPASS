@@ -53,7 +53,6 @@ public:
 
     /// Sets pointer_ to default value if valid, otherwise sets config_value_ to default_value_
     void resetToDefault ();
-
 };
 
 //template<> void A<int>::AFnc(); // <- note, no function body
