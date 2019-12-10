@@ -1,0 +1,19 @@
+{
+    "parameters":{
+        "center_latitude":47.5,
+        "center_longitude":14.0,
+        "epsg_value":20790,
+        "height_scale":2000.0,
+        "minimal_height":0.0,
+        "projection_plane_width":1000000.0,
+        "rs2g_system_height":0.0,
+        "rs2g_system_latitude":47.5,
+        "rs2g_system_longitude":14.0,
+        "sdl_system_latitude":47.5,
+        "sdl_system_longitude":14.0,
+        "use_ogr_projection":false,
+        "use_rs2g_projection_":true,
+        "use_sdl_projection":false,
+        "world_scale":2000.0
+    }
+}
