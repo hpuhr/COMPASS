@@ -27,7 +27,7 @@
 #include "logger.h"
 
 ProjectionManager::ProjectionManager()
-    : Configurable ("ProjectionManager", "ProjectionManager0", 0, "projection.xml")
+    : Configurable ("ProjectionManager", "ProjectionManager0", 0, "projection.json")
 {
     loginf  << "ProjectionManager: constructor";
 

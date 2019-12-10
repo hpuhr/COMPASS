@@ -28,7 +28,7 @@
 using namespace Utils;
 
 JobManager::JobManager()
-    : Configurable ("JobManager", "JobManager0", 0, "threads.xml"), stop_requested_(false), stopped_(false),
+    : Configurable ("JobManager", "JobManager0", 0, "threads.json"), stop_requested_(false), stopped_(false),
       widget_(nullptr)
 {
     logdbg  << "JobManager: constructor";

@@ -54,7 +54,7 @@ using namespace Utils;
  * Registers parameters, creates sub configurables
  */
 DBObject::DBObject(const std::string& class_id, const std::string& instance_id, DBObjectManager* manager)
-    : Configurable (class_id, instance_id, manager, "db_object_"+boost::algorithm::to_lower_copy(instance_id)+".xml"),
+    : Configurable (class_id, instance_id, manager, "db_object_"+boost::algorithm::to_lower_copy(instance_id)+".json"),
       manager_(*manager)
 {
     registerParameter ("name" , &name_, "Undefined");
@@ -134,7 +134,7 @@ void DBObject::generateSubConfigurable (const std::string &class_id, const std::
 
         assert (stored_data_sources_.find (id) == stored_data_sources_.end());
 
-        loginf << "DBObject: generateSubConfigurable: generating stored DS " << instance_id << " with id " << id;
+        logdbg << "DBObject: generateSubConfigurable: generating stored DS " << instance_id << " with id " << id;
 
         stored_data_sources_.emplace(std::piecewise_construct,
                                      std::forward_as_tuple(id),  // args for key

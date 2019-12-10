@@ -125,6 +125,25 @@ The data context menu allows the following operations:
 
 Depending on the grouping mode in the 'Config' tab, different parent layer items are shown. For each of this parents the same menu entries exist as if they where clicked in the 'Layers' tab. Please refer to \nameref{sec:geometry_operations} for details.
 
+\subsubsection{Show Associations}
+
+Of special interest is of the case when association information is present and a 'UTN' group mode is used. Using the Geometry Menu of a layer item which generated the associations (e.g. ARTAS Tracker), the association information can be shown for each target report of the layer.
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm]{../screenshots/osgview_assoc.png}
+  \caption{OSG View show ARTAS association information}
+\end{figure}
+
+These associations are gradient-coloured from the color of the system track update to color of the associated target report. Additionally, the time window filter can be used to show the timing of the data.
+
+\begin{figure}[H]
+    \hspace*{-2cm}
+    \includegraphics[width=18cm]{../screenshots/osgview_assoc_time_window.png}
+  \caption{OSG View show ARTAS association information in time window}
+\end{figure}
+
+
 \subsubsection{Distance Measurement}
 
 Distance measurements can be made when the Measure mode \includegraphics[width=0.5cm,frame]{../../data/icons/measure_action.png} is active. If 'Use height' is not checked, measurements are done as follows:

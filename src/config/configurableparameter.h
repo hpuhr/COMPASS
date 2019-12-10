@@ -1,7 +1,6 @@
 #ifndef CONFIGURABLPPARAMETER_H
 #define CONFIGURABLPPARAMETER_H
 
-#include <tinyxml2.h>
 #include <string>
 
 class Configurable;
@@ -38,9 +37,6 @@ public:
     /// Template default value as given by registerParameter
     T default_value_;
 
-    /// Parses an element from the XML configuration and sets parameter_id_ and config_value_ (using a stringstream)
-    void parseElement (const tinyxml2::XMLElement *element);
-
     /**
      * Returns the parameter type as string
      *
@@ -52,23 +48,14 @@ public:
     const std::string& getParameterId () const;
 
     /// Returns parameter value as string (using a stringstream)
-    std::string getParameterValue () const;
+    std::string getParameterValueString () const;
+    T getParameterValue () const;
 
     /// Sets pointer_ to default value if valid, otherwise sets config_value_ to default_value_
     void resetToDefault ();
-
-protected:
-    void setConfigValue (const tinyxml2::XMLAttribute* attribute);
 };
 
 //template<> void A<int>::AFnc(); // <- note, no function body
-
-template<> void ConfigurableParameter<bool>::setConfigValue (const tinyxml2::XMLAttribute* attribute);
-template<> void ConfigurableParameter<int>::setConfigValue (const tinyxml2::XMLAttribute* attribute);
-template<> void ConfigurableParameter<unsigned int>::setConfigValue (const tinyxml2::XMLAttribute* attribute);
-template<> void ConfigurableParameter<float>::setConfigValue (const tinyxml2::XMLAttribute* attribute);
-template<> void ConfigurableParameter<double>::setConfigValue (const tinyxml2::XMLAttribute* attribute);
-template<> void ConfigurableParameter<std::string>::setConfigValue (const tinyxml2::XMLAttribute* attribute);
 
 template<> std::string ConfigurableParameter<bool>::getParameterType () const;
 template<> std::string ConfigurableParameter<int>::getParameterType () const;
@@ -77,11 +64,11 @@ template<> std::string ConfigurableParameter<float>::getParameterType () const;
 template<> std::string ConfigurableParameter<double>::getParameterType () const;
 template<> std::string ConfigurableParameter<std::string>::getParameterType () const;
 
-template<> std::string ConfigurableParameter<bool>::getParameterValue () const;
-template<> std::string ConfigurableParameter<int>::getParameterValue () const;
-template<> std::string ConfigurableParameter<unsigned int>::getParameterValue () const;
-template<> std::string ConfigurableParameter<float>::getParameterValue () const;
-template<> std::string ConfigurableParameter<double>::getParameterValue () const;
-template<> std::string ConfigurableParameter<std::string>::getParameterValue () const;
+template<> std::string ConfigurableParameter<bool>::getParameterValueString () const;
+template<> std::string ConfigurableParameter<int>::getParameterValueString () const;
+template<> std::string ConfigurableParameter<unsigned int>::getParameterValueString () const;
+template<> std::string ConfigurableParameter<float>::getParameterValueString () const;
+template<> std::string ConfigurableParameter<double>::getParameterValueString () const;
+template<> std::string ConfigurableParameter<std::string>::getParameterValueString () const;
 
 #endif // CONFIGURABLPPARAMETER_H

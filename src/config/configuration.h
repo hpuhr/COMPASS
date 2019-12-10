@@ -23,7 +23,7 @@
 #include <typeinfo>
 #include <vector>
 
-#include <tinyxml2.h>
+#include "json.hpp"
 
 #include "string.h"
 #include "configurableparameter.h"
@@ -118,10 +118,13 @@ public:
     bool hasParameterConfigValueString (const std::string& parameter_id);
     std::string getParameterConfigValueString (const std::string& parameter_id);
 
-    /// @brief Parses an XML element
-    void parseXMLElement (tinyxml2::XMLElement* element);
-    /// @brief Generates an XML configuration element
-    tinyxml2::XMLElement* generateXMLElement (tinyxml2::XMLDocument* parent_document) const;
+    // parses the member config file
+    void parseJSONConfigFile();
+    void parseJSONConfig(nlohmann::json& config);
+    // writes full json config or sub-file to parent
+    void writeJSON (nlohmann::json& parent_json) const;
+    // generates the full json config
+    void generateJSON (nlohmann::json& target) const;
 
     /// @brief Resets all values to their default values
     void resetToDefault ();
@@ -157,11 +160,11 @@ public:
     const std::string& getClassId () { return class_id_; }
 
     /// @brief Sets the template flag and name
-    void setTemplate (bool template_flag, const std::string& template_name_);
+    //void setTemplate (bool template_flag, const std::string& template_name_);
     /// @brief Returns the template flag
-    bool getTemplateFlag () const { return template_flag_; }
+    //bool getTemplateFlag () const { return template_flag_; }
     /// @brief Returns the template name
-    const std::string& getTemplateName () { return template_name_; }
+    //const std::string& getTemplateName () { return template_name_; }
 
     /// @brief Checks if a specific template_name is already taken, true if free
     bool getSubTemplateNameFree (const std::string&  template_name);
@@ -169,7 +172,7 @@ public:
     void addSubTemplate (Configuration* configuration, const std::string& template_name);
 
     /// @brief Return contaienr with all configuration templates
-    std::map<std::string, Configuration>& getConfigurationTemplates () { return configuration_templates_; }
+    //std::map<std::string, Configuration>& getConfigurationTemplates () { return configuration_templates_; }
 
     // only use in special case of configuration copy
     void setInstanceId (const std::string& instance_id) { instance_id_ = instance_id; }
@@ -184,6 +187,10 @@ protected:
     /// Special XML configuration filename
     std::string configuration_filename_;
 
+    nlohmann::json org_config_parameters_;
+    //nlohmann::json org_config_sub_files_;
+    //nlohmann::json org_config_sub_configs_;
+
     /// Container for all parameters (parameter identifier -> ConfigurableParameterBase)
     std::map <std::string, ConfigurableParameter<bool> > parameters_bool_;
     std::map <std::string, ConfigurableParameter<int> > parameters_int_;
@@ -195,17 +202,17 @@ protected:
     std::map<std::pair<std::string, std::string>, Configuration> sub_configurations_;
 
     /// Flag which indicates if instance is a template
-    bool template_flag_ {false};
+    //bool template_flag_ {false};
     /// Template name, empty if no template
-    std::string template_name_;
+    //std::string template_name_;
 
     /// Container with all configuration templates
-    std::map<std::string, Configuration> configuration_templates_;
+    //std::map<std::string, Configuration> configuration_templates_;
 
-    /// @brief Parses an XML configuration element
-    void parseXMLConfigurationElement (tinyxml2::XMLElement* element);
-    /// @brief Parses an XML configuration element
-    void parseXMLFileElement (tinyxml2::XMLElement* element);
+    void parseJSONSubConfigFile (const std::string& class_id, const std::string& instance_id,
+                                 const std::string& path);
+    void parseJSONParameters (nlohmann::json& parameters_config);
+    void parseJSONSubConfigs (nlohmann::json& sub_configs_config);
 };
 
 #endif /* CONFIGURATION_H_ */
