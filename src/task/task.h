@@ -3,13 +3,14 @@
 
 #include <QObject>
 
+class TaskManager;
 class QWidget;
 
-class Task : public QObject
+class Task //: public QObject
 {
 public:
-    Task(const std::string& name, bool can_run)
-        : name_(name), can_run_(can_run)
+    Task(const std::string& name, const std::string& gui_name, bool gui_only, TaskManager& task_manager)
+        : name_(name), gui_name_(gui_name), gui_only_(gui_only), task_manager_(task_manager)
     {
 
     }
@@ -22,11 +23,26 @@ public:
 
     virtual QWidget* widget ()=0;
 
+    bool guiOnly() const
+    {
+        return gui_only_;
+    }
+
+    std::string guiName() const
+    {
+        return gui_name_;
+    }
+
 protected:
     std::string name_;
-
-    bool can_run_ {false};
+    std::string gui_name_;
+    bool gui_only_ {false};
+    TaskManager& task_manager_;
 };
 
 #endif // TASK_H
+
+
+
+
 

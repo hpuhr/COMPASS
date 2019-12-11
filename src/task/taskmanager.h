@@ -21,8 +21,10 @@
 #include "singleton.h"
 #include "configurable.h"
 #include "global.h"
+#include "task.h"
 
 class ATSDB;
+class DatabaseOpenTask;
 class CreateARTASAssociationsTask;
 class JSONImporterTask;
 class RadarPlotPositionCalculatorTask;
@@ -32,12 +34,10 @@ class TaskManagerWidget;
 class ASTERIXImporterTask;
 #endif
 
-
-
 class TaskManager : public Configurable
 {
 public:
-    TaskManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb);
+    TaskManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb);
 
     virtual ~TaskManager();
 
@@ -56,7 +56,12 @@ public:
 
     TaskManagerWidget* widget(); // owned here
 
+    std::vector<std::string> taskList() const;
+    std::map<std::string, Task *> tasks() const;
+
 protected:
+    std::unique_ptr<DatabaseOpenTask> database_open_task_;
+
     JSONImporterTask* json_importer_task_ {nullptr};
     RadarPlotPositionCalculatorTask* radar_plot_position_calculator_task_ {nullptr};
     CreateARTASAssociationsTask* create_artas_associations_task_{nullptr};
@@ -68,6 +73,9 @@ protected:
 #endif
 
     virtual void checkSubConfigurables ();
+
+    std::vector <std::string> task_list_;
+    std::map <std::string, Task*> tasks_;
 };
 
 #endif // TASKMANAGER_H

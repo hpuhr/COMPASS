@@ -18,6 +18,7 @@
 #include "atsdb.h"
 #include "taskmanager.h"
 #include "taskmanagerwidget.h"
+#include "databaseopentask.h"
 #include "jsonimportertask.h"
 #include "jsonimportertaskwidget.h"
 #include "radarplotpositioncalculatortask.h"
@@ -36,6 +37,11 @@ TaskManager::TaskManager(const std::string &class_id, const std::string &instanc
 : Configurable (class_id, instance_id, atsdb, "task.json")
 {
     createSubConfigurables();
+
+    task_list_ = {"DatabaseOpenTask"}; // defines order of tasks
+
+    for (auto& task_it : task_list_) // check that all tasks in list exist
+        assert (tasks_.count(task_it));
 }
 
 TaskManager::~TaskManager()
@@ -76,7 +82,16 @@ ASTERIXImporterTask* TaskManager::getASTERIXImporterTask()
 
 void TaskManager::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
-    if (class_id.compare ("JSONImporterTask") == 0)
+    if (class_id.compare ("DatabaseOpenTask") == 0)
+    {
+        assert (!database_open_task_);
+        database_open_task_.reset (new DatabaseOpenTask (class_id, instance_id, *this));
+        assert (database_open_task_);
+
+        assert (!tasks_.count(class_id));
+        tasks_[class_id] = database_open_task_.get();
+    }
+    else if (class_id.compare ("JSONImporterTask") == 0)
     {
         assert (!json_importer_task_);
         json_importer_task_ = new JSONImporterTask (class_id, instance_id, this);
@@ -108,6 +123,12 @@ void TaskManager::generateSubConfigurable (const std::string &class_id, const st
 
 void TaskManager::checkSubConfigurables ()
 {
+    if (!database_open_task_)
+    {
+        generateSubConfigurable("DatabaseOpenTask", "DatabaseOpenTask0");
+        assert (database_open_task_);
+    }
+
     if (!json_importer_task_)
     {
         json_importer_task_ = new JSONImporterTask ("JSONImporterTask", "JSONImporterTask", this);
@@ -138,8 +159,20 @@ void TaskManager::checkSubConfigurables ()
 #endif
 }
 
+std::map<std::string, Task *> TaskManager::tasks() const
+{
+    return tasks_;
+}
+
+std::vector<std::string> TaskManager::taskList() const
+{
+    return task_list_;
+}
+
 void TaskManager::disable ()
 {
+    loginf << "TaskManager: disable";
+
     if (json_importer_task_ && json_importer_task_->hasOpenWidget())
         json_importer_task_->widget()->close();
 
@@ -159,6 +192,9 @@ void TaskManager::shutdown ()
 {
     loginf << "TaskManager: shutdown";
     // TODO waiting for tasks?
+
+    if (database_open_task_)
+        database_open_task_.reset(nullptr);
 
     if (json_importer_task_)
     {

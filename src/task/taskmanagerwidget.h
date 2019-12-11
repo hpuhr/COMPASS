@@ -6,6 +6,7 @@
 class QListWidget;
 class QListWidgetItem;
 class QStackedWidget;
+class Task;
 class TaskManagerLogWidget;
 class TaskManager;
 
@@ -19,7 +20,7 @@ public slots:
     void taskClicked(QListWidgetItem* item);
 
 public:
-    explicit TaskManagerWidget(TaskManager& task_manager, QWidget *parent=nullptr);
+    explicit TaskManagerWidget(TaskManager& task_manager, QWidget* parent=nullptr);
 
     void updateTaskList ();
 
@@ -29,6 +30,8 @@ protected:
     QListWidget* task_list_ {nullptr};
     QStackedWidget* tasks_widget_ {nullptr};
     TaskManagerLogWidget* log_widget_ {nullptr};
+
+    std::map <QListWidgetItem*, Task*> item_task_mappings_;
 };
 
 #endif // TASKMANAGERWIDGET_H
