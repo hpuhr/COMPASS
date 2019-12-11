@@ -18,7 +18,6 @@
 TaskManagerWidget::TaskManagerWidget(TaskManager& task_manager, QWidget *parent)
     : QWidget(parent), task_manager_(task_manager)
 {
-
     QFont font_bold;
     font_bold.setBold(true);
 
@@ -31,17 +30,6 @@ TaskManagerWidget::TaskManagerWidget(TaskManager& task_manager, QWidget *parent)
     main_splitter_->setOrientation(Qt::Vertical);
 
     QVBoxLayout* main_layout_ = new QVBoxLayout ();
-
-    //QHBoxLayout* top_layout = new QHBoxLayout ();
-
-    //    QFrame *left_frame = new QFrame ();
-    //    left_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
-    //    left_frame->setLineWidth(frame_width_small);
-    //    left_frame->setLayout(left_layout);
-
-    //    QSizePolicy sp_left(QSizePolicy::Preferred, QSizePolicy::Preferred);
-    //    sp_left.setHorizontalStretch(1);
-    //    left_frame->setSizePolicy(sp_left);
 
     QSettings settings ("ATSDB", "TaskManagerWidget");
 
@@ -73,7 +61,6 @@ TaskManagerWidget::TaskManagerWidget(TaskManager& task_manager, QWidget *parent)
         }
         top_splitter_->addWidget(tasks_widget_);
         top_splitter_->restoreState(settings.value("topSplitterSizes").toByteArray());
-        //settings.setValue("topSplitterSizes", top_splitter->saveState());
 
         top_container_layout->addWidget(top_splitter_);
         top_container->setLayout(top_container_layout);
@@ -81,16 +68,12 @@ TaskManagerWidget::TaskManagerWidget(TaskManager& task_manager, QWidget *parent)
         main_splitter_->addWidget(top_container);
     }
 
-    //main_layout_->addLayout(top_layout);
-
     log_widget_ = new TaskManagerLogWidget ();
 
     main_splitter_->addWidget(log_widget_);
     main_splitter_->restoreState(settings.value("mainSplitterSizes").toByteArray());
 
     main_layout_->addWidget(main_splitter_);
-
-    //main_layout_->addWidget(log_widget_);
 
     setLayout (main_layout_);
 
@@ -103,10 +86,6 @@ TaskManagerWidget::~TaskManagerWidget ()
     QSettings settings ("ATSDB", "TaskManagerWidget");
     settings.setValue("topSplitterSizes", top_splitter_->saveState());
     settings.setValue("mainSplitterSizes", main_splitter_->saveState());
-
-    //event->accept();
-
-    //QWidget::closeEvent(event);
 }
 
 void TaskManagerWidget::updateTaskList ()

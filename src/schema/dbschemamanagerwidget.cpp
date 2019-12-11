@@ -38,14 +38,16 @@
 #include <QMessageBox>
 
 DBSchemaManagerWidget::DBSchemaManagerWidget(DBSchemaManager &manager, QWidget* parent, Qt::WindowFlags f)
- : QFrame(parent), manager_(manager)
+ : QWidget(parent), manager_(manager)
 {
-    unsigned int frame_width = FRAME_SIZE;
+    //unsigned int frame_width = FRAME_SIZE;
+    setContentsMargins(0, 0, 0, 0);
+
     QFont font_bold;
     font_bold.setBold(true);
 
-    setFrameStyle(QFrame::Panel | QFrame::Raised);
-    setLineWidth(frame_width);
+//    setFrameStyle(QFrame::Panel | QFrame::Raised);
+//    setLineWidth(frame_width);
 
     QVBoxLayout *layout = new QVBoxLayout ();
 

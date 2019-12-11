@@ -15,6 +15,7 @@ DatabaseOpenTaskWidget::DatabaseOpenTaskWidget(DatabaseOpenTask& task, QWidget* 
     //main_layout_->addWidget(new QLabel("DatabaseOpenTaskWidget"));
 
     dbinterface_widget_ = ATSDB::instance().interface().widget();
+    //    QObject::connect(dbinterface_widget_, SIGNAL(databaseOpenedSignal()), this, SLOT(databaseOpenedSlot()));
     main_layout_->addWidget(dbinterface_widget_);
 
     setLayout (main_layout_);

@@ -12,6 +12,8 @@ public:
 
 protected:
     ManageSchemaTask& task_;
+
+    QWidget* dbschema_manager_widget_ {nullptr};
 };
 
 #endif // MANAGESCHEMATASKWIDGET_H

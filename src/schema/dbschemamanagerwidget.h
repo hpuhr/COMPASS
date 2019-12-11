@@ -18,7 +18,7 @@
 #ifndef DBSCHEMAMANAGERWIDGET_H
 #define DBSCHEMAMANAGERWIDGET_H
 
-#include <QFrame>
+#include <QWidget>
 
 class DBSchemaManager;
 
@@ -27,7 +27,7 @@ class QComboBox;
 class QPushButton;
 class QStackedWidget;
 
-class DBSchemaManagerWidget : public QFrame
+class DBSchemaManagerWidget : public QWidget
 {
     Q_OBJECT
 

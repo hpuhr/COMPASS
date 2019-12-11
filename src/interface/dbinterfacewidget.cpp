@@ -53,6 +53,7 @@ DBInterfaceWidget::DBInterfaceWidget(DBInterface &interface, QWidget* parent, Qt
     QVBoxLayout *layout = new QVBoxLayout ();
 
     QGroupBox *groupBox = new QGroupBox(tr("Database System"));
+    groupBox->setFont(font_bold);
     QVBoxLayout *grplayout = new QVBoxLayout ();
 
     connection_stack_ = new QStackedWidget ();

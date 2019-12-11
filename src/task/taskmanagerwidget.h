@@ -37,8 +37,6 @@ protected:
     QSplitter* main_splitter_ {nullptr};
 
     std::map <QListWidgetItem*, Task*> item_task_mappings_;
-
-    //void closeEvent(QCloseEvent* event);
 };
 
 #endif // TASKMANAGERWIDGET_H
