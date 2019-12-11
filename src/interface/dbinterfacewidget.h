@@ -18,7 +18,7 @@
 #ifndef DBINTERFACEWIDGET_H_
 #define DBINTERFACEWIDGET_H_
 
-#include <QFrame>
+#include <QWidget>
 #include <QComboBox>
 
 class DBInterface;
@@ -27,7 +27,7 @@ class QStackedWidget;
 /**
  * @brief Widget for choosing a database system and parameters
  */
-class DBInterfaceWidget : public QFrame
+class DBInterfaceWidget : public QWidget
 {
     Q_OBJECT
 

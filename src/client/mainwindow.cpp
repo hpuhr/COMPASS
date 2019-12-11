@@ -80,7 +80,7 @@ MainWindow::MainWindow()
 {
     logdbg  << "MainWindow: constructor";
 
-    setMinimumSize(QSize(1200, 800));
+    setMinimumSize(QSize(1200, 900));
 
     QIcon atsdb_icon(Files::getIconFilepath("atsdb.png").c_str());
     setWindowIcon(atsdb_icon); // for the glory of the empire

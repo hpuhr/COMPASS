@@ -11,7 +11,10 @@ const std::map<QString, QColor> m_colours {{"red", QColor(Qt::red)},
 TaskManagerLogWidget::TaskManagerLogWidget(QWidget* parent)
     : QPlainTextEdit(parent)
 {
-
+    appendSuccess ("Sucess");
+    appendInfo ("Info");
+    appendWarning ("Warning");
+    appendError ("Error");
 }
 
 void TaskManagerLogWidget::appendSuccess(const std::string& text)

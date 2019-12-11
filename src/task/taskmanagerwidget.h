@@ -6,6 +6,7 @@
 class QListWidget;
 class QListWidgetItem;
 class QStackedWidget;
+class QSplitter;
 class Task;
 class TaskManagerLogWidget;
 class TaskManager;
@@ -21,6 +22,7 @@ public slots:
 
 public:
     explicit TaskManagerWidget(TaskManager& task_manager, QWidget* parent=nullptr);
+    ~TaskManagerWidget ();
 
     void updateTaskList ();
 
@@ -31,7 +33,12 @@ protected:
     QStackedWidget* tasks_widget_ {nullptr};
     TaskManagerLogWidget* log_widget_ {nullptr};
 
+    QSplitter* top_splitter_ {nullptr};
+    QSplitter* main_splitter_ {nullptr};
+
     std::map <QListWidgetItem*, Task*> item_task_mappings_;
+
+    //void closeEvent(QCloseEvent* event);
 };
 
 #endif // TASKMANAGERWIDGET_H

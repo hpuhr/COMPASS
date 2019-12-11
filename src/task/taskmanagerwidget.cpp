@@ -10,6 +10,8 @@
 #include <QHBoxLayout>
 #include <QFormLayout>
 #include <QLabel>
+#include <QSplitter>
+#include <QSettings>
 
 #include "taskmanagerlogwidget.h"
 
@@ -25,9 +27,12 @@ TaskManagerWidget::TaskManagerWidget(TaskManager& task_manager, QWidget *parent)
 
     int frame_width_small = 1;
 
+    main_splitter_ = new QSplitter();
+    main_splitter_->setOrientation(Qt::Vertical);
+
     QVBoxLayout* main_layout_ = new QVBoxLayout ();
 
-    QHBoxLayout* top_layout = new QHBoxLayout ();
+    //QHBoxLayout* top_layout = new QHBoxLayout ();
 
     //    QFrame *left_frame = new QFrame ();
     //    left_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
@@ -38,18 +43,24 @@ TaskManagerWidget::TaskManagerWidget(TaskManager& task_manager, QWidget *parent)
     //    sp_left.setHorizontalStretch(1);
     //    left_frame->setSizePolicy(sp_left);
 
+    QSettings settings ("ATSDB", "TaskManagerWidget");
+
     // top
     {
+        QWidget* top_container = new QWidget;
+        QVBoxLayout* top_container_layout = new QVBoxLayout;
+
+        top_splitter_ = new QSplitter();
+
         task_list_ = new QListWidget ();
         task_list_->setSelectionBehavior(QAbstractItemView::SelectItems);
         task_list_->setSelectionMode(QAbstractItemView::SingleSelection);
         updateTaskList();
         connect (task_list_, &QListWidget::itemClicked, this, &TaskManagerWidget::taskClicked);
 
-        top_layout->addWidget(task_list_);
+        top_splitter_->addWidget(task_list_);
 
         tasks_widget_ = new QStackedWidget ();
-        top_layout->addWidget(tasks_widget_);
 
         for (auto& task_map_it : item_task_mappings_) // select "Open a Database"
         {
@@ -60,16 +71,42 @@ TaskManagerWidget::TaskManagerWidget(TaskManager& task_manager, QWidget *parent)
                 break;
             }
         }
+        top_splitter_->addWidget(tasks_widget_);
+        top_splitter_->restoreState(settings.value("topSplitterSizes").toByteArray());
+        //settings.setValue("topSplitterSizes", top_splitter->saveState());
+
+        top_container_layout->addWidget(top_splitter_);
+        top_container->setLayout(top_container_layout);
+
+        main_splitter_->addWidget(top_container);
     }
 
-    main_layout_->addLayout(top_layout);
+    //main_layout_->addLayout(top_layout);
 
     log_widget_ = new TaskManagerLogWidget ();
 
-    main_layout_->addWidget(log_widget_);
+    main_splitter_->addWidget(log_widget_);
+    main_splitter_->restoreState(settings.value("mainSplitterSizes").toByteArray());
+
+    main_layout_->addWidget(main_splitter_);
+
+    //main_layout_->addWidget(log_widget_);
 
     setLayout (main_layout_);
 
+}
+
+TaskManagerWidget::~TaskManagerWidget ()
+{
+    loginf  << "TaskManagerWidget: destructor";
+
+    QSettings settings ("ATSDB", "TaskManagerWidget");
+    settings.setValue("topSplitterSizes", top_splitter_->saveState());
+    settings.setValue("mainSplitterSizes", main_splitter_->saveState());
+
+    //event->accept();
+
+    //QWidget::closeEvent(event);
 }
 
 void TaskManagerWidget::updateTaskList ()

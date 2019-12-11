@@ -19,6 +19,7 @@
 #include "taskmanager.h"
 #include "taskmanagerwidget.h"
 #include "databaseopentask.h"
+#include "manageschematask.h"
 #include "jsonimportertask.h"
 #include "jsonimportertaskwidget.h"
 #include "radarplotpositioncalculatortask.h"
@@ -38,7 +39,7 @@ TaskManager::TaskManager(const std::string &class_id, const std::string &instanc
 {
     createSubConfigurables();
 
-    task_list_ = {"DatabaseOpenTask"}; // defines order of tasks
+    task_list_ = {"DatabaseOpenTask", "ManageSchemaTask"}; // defines order of tasks
 
     for (auto& task_it : task_list_) // check that all tasks in list exist
         assert (tasks_.count(task_it));
@@ -91,6 +92,15 @@ void TaskManager::generateSubConfigurable (const std::string &class_id, const st
         assert (!tasks_.count(class_id));
         tasks_[class_id] = database_open_task_.get();
     }
+    else if (class_id.compare ("ManageSchemaTask") == 0)
+    {
+        assert (!manage_schema_task_);
+        manage_schema_task_.reset (new ManageSchemaTask (class_id, instance_id, *this));
+        assert (manage_schema_task_);
+
+        assert (!tasks_.count(class_id));
+        tasks_[class_id] = manage_schema_task_.get();
+    }
     else if (class_id.compare ("JSONImporterTask") == 0)
     {
         assert (!json_importer_task_);
@@ -127,6 +137,12 @@ void TaskManager::checkSubConfigurables ()
     {
         generateSubConfigurable("DatabaseOpenTask", "DatabaseOpenTask0");
         assert (database_open_task_);
+    }
+
+    if (!manage_schema_task_)
+    {
+        generateSubConfigurable("ManageSchemaTask", "ManageSchemaTask0");
+        assert (manage_schema_task_);
     }
 
     if (!json_importer_task_)

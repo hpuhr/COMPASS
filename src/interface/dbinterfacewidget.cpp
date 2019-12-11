@@ -41,12 +41,14 @@ using namespace Utils;
 DBInterfaceWidget::DBInterfaceWidget(DBInterface &interface, QWidget* parent, Qt::WindowFlags f)
     : interface_(interface), connection_stack_ (nullptr)
 {
-    unsigned int frame_width = FRAME_SIZE;
+    //unsigned int frame_width = FRAME_SIZE;
+    setContentsMargins(0, 0, 0, 0);
+
     QFont font_bold;
     font_bold.setBold(true);
 
-    setFrameStyle(QFrame::Panel | QFrame::Raised);
-    setLineWidth(frame_width);
+//    setFrameStyle(QFrame::Panel | QFrame::Raised);
+//    setLineWidth(frame_width);
 
     QVBoxLayout *layout = new QVBoxLayout ();
 

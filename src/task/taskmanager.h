@@ -25,6 +25,7 @@
 
 class ATSDB;
 class DatabaseOpenTask;
+class ManageSchemaTask;
 class CreateARTASAssociationsTask;
 class JSONImporterTask;
 class RadarPlotPositionCalculatorTask;
@@ -61,6 +62,7 @@ public:
 
 protected:
     std::unique_ptr<DatabaseOpenTask> database_open_task_;
+    std::unique_ptr<ManageSchemaTask> manage_schema_task_;
 
     JSONImporterTask* json_importer_task_ {nullptr};
     RadarPlotPositionCalculatorTask* radar_plot_position_calculator_task_ {nullptr};

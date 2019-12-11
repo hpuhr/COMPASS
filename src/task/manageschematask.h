@@ -1,9 +1,9 @@
-#ifndef DATABASEOPENTASK_H
-#define DATABASEOPENTASK_H
+#ifndef MANAGESCHEMATASK_H
+#define MANAGESCHEMATASK_H
 
 #include "configurable.h"
 #include "task.h"
-#include "databaseopentaskwidget.h"
+#include "manageschemataskwidget.h"
 
 #include <QObject>
 
@@ -11,10 +11,11 @@
 
 class TaskManager;
 
-class DatabaseOpenTask : public QObject, public Configurable, public Task
+
+class ManageSchemaTask: public QObject, public Configurable, public Task
 {
 public:
-    DatabaseOpenTask(const std::string& class_id, const std::string& instance_id,
+    ManageSchemaTask(const std::string& class_id, const std::string& instance_id,
                      TaskManager& task_manager);
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
@@ -22,9 +23,9 @@ public:
     virtual QWidget* widget ();
 
 protected:
-    std::unique_ptr<DatabaseOpenTaskWidget> widget_;
+    std::unique_ptr<ManageSchemaTaskWidget> widget_;
 
     virtual void checkSubConfigurables () {}
 };
 
-#endif // DATABASEOPENTASK_H
+#endif // MANAGESCHEMATASK_H

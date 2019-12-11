@@ -1,5 +1,4 @@
 #include "databaseopentask.h"
-//#include "databaseopentaskwidget.h"
 #include "taskmanager.h"
 
 DatabaseOpenTask::DatabaseOpenTask(const std::string& class_id, const std::string& instance_id,
