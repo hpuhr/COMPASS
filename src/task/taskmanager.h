@@ -44,13 +44,13 @@ public:
 
     virtual ~TaskManager();
 
-    JSONImporterTask* getJSONImporterTask();
-    RadarPlotPositionCalculatorTask* getRadarPlotPositionCalculatorTask();
-    CreateARTASAssociationsTask* getCreateARTASAssociationsTask();
+    //JSONImporterTask* getJSONImporterTask();
+    //RadarPlotPositionCalculatorTask* getRadarPlotPositionCalculatorTask();
+    //CreateARTASAssociationsTask* getCreateARTASAssociationsTask();
 
-#if USE_JASTERIX
-    ASTERIXImporterTask* getASTERIXImporterTask();
-#endif
+//#if USE_JASTERIX
+//    ASTERIXImporterTask* getASTERIXImporterTask();
+//#endif
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
@@ -66,16 +66,14 @@ protected:
     std::unique_ptr<DatabaseOpenTask> database_open_task_;
     std::unique_ptr<ManageSchemaTask> manage_schema_task_;
     std::unique_ptr<ManageDBObjectsTask> manage_dbobjects_task_;
-
-    JSONImporterTask* json_importer_task_ {nullptr};
-    RadarPlotPositionCalculatorTask* radar_plot_position_calculator_task_ {nullptr};
-    CreateARTASAssociationsTask* create_artas_associations_task_{nullptr};
+#if USE_JASTERIX
+    std::unique_ptr<ASTERIXImporterTask> asterix_importer_task_;
+#endif
+    std::unique_ptr<JSONImporterTask> json_importer_task_;
+    std::unique_ptr<RadarPlotPositionCalculatorTask> radar_plot_position_calculator_task_;
+    std::unique_ptr<CreateARTASAssociationsTask> create_artas_associations_task_;
 
     std::unique_ptr<TaskManagerWidget> widget_;
-
-#if USE_JASTERIX
-    ASTERIXImporterTask* asterix_importer_task_ {nullptr};
-#endif
 
     virtual void checkSubConfigurables ();
 

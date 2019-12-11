@@ -45,8 +45,10 @@ using namespace Utils;
 JSONImporterTaskWidget::JSONImporterTaskWidget(JSONImporterTask& task, QWidget* parent, Qt::WindowFlags f)
     : QWidget (parent, f), task_(task)
 {
-    setWindowTitle ("Import JSON Data");
-    setMinimumSize(QSize(800, 600));
+    //setWindowTitle ("Import JSON Data");
+    //setMinimumSize(QSize(800, 600));
+
+    setContentsMargins(0, 0, 0, 0);
 
     QFont font_bold;
     font_bold.setBold(true);

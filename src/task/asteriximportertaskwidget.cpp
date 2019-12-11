@@ -41,8 +41,9 @@ const float ram_threshold = 4.0;
 ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, QWidget* parent, Qt::WindowFlags f)
     : QWidget (parent, f), task_(task)
 {
-    setWindowTitle ("Import ASTERIX Data");
-    setMinimumSize(QSize(600, 800));
+    setContentsMargins(0, 0, 0, 0);
+//    setWindowTitle ("Import ASTERIX Data");
+//    setMinimumSize(QSize(600, 800));
 
     QFont font_bold;
     font_bold.setBold(true);

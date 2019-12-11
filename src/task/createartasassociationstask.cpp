@@ -22,8 +22,9 @@ using namespace std;
 using namespace Utils;
 
 CreateARTASAssociationsTask::CreateARTASAssociationsTask(const std::string& class_id, const std::string& instance_id,
-                                                         TaskManager* task_manager)
-    : Configurable (class_id, instance_id, task_manager)
+                                                         TaskManager& task_manager)
+    : Configurable (class_id, instance_id, &task_manager),
+      Task("CreateARTASAssociationsTask", "Calculate ARTAS Associations", true, task_manager)
 {
     registerParameter ("current_data_source_name", &current_data_source_name_, "");
 
@@ -68,7 +69,7 @@ CreateARTASAssociationsTask::~CreateARTASAssociationsTask()
     }
 }
 
-CreateARTASAssociationsTaskWidget* CreateARTASAssociationsTask::widget()
+QWidget* CreateARTASAssociationsTask::widget()
 {
     if (!widget_)
     {

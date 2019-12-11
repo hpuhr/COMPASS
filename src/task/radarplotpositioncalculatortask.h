@@ -20,6 +20,7 @@
 
 #include "configurable.h"
 #include "dbodatasource.h"
+#include "task.h"
 
 #include <QObject>
 #include <memory>
@@ -33,7 +34,7 @@ class UpdateBufferDBJob;
 
 class QMessageBox;
 
-class RadarPlotPositionCalculatorTask : public QObject, public Configurable
+class RadarPlotPositionCalculatorTask : public QObject, public Configurable, public Task
 {
     Q_OBJECT
 
@@ -49,7 +50,7 @@ public slots:
 
 public:
     RadarPlotPositionCalculatorTask(const std::string& class_id, const std::string& instance_id,
-                                    TaskManager* task_manager);
+                                    TaskManager& task_manager);
     virtual ~RadarPlotPositionCalculatorTask();
 
     bool canCalculate ();
@@ -59,7 +60,7 @@ public:
     unsigned int getNumLoaded () { return num_loaded_; }
 
     bool hasOpenWidget() { return widget_ != nullptr; }
-    RadarPlotPositionCalculatorTaskWidget* widget();
+    QWidget* widget();
 
     std::string dbObjectStr() const;
     void dbObjectStr(const std::string& db_object_str);

@@ -57,13 +57,13 @@ private slots:
     void databaseOpenedSlot();
     /// @brief If database is open, switch to ManagementWidget
     void startSlot ();
-    void addJSONImporterTaskSlot ();
-    void addRadarPlotPositionCalculatorTaskSlot ();
-    void addCreateARTASAssociationsTaskSlot ();
+//    void addJSONImporterTaskSlot ();
+//    void addRadarPlotPositionCalculatorTaskSlot ();
+//    void addCreateARTASAssociationsTaskSlot ();
 
-#if USE_JASTERIX
-    void addASTERIXImporterTaskSlot ();
-#endif
+//#if USE_JASTERIX
+//    void addASTERIXImporterTaskSlot ();
+//#endif
 
 
     /// @brief Handles key press events

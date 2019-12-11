@@ -5,6 +5,7 @@
 #include "createartasassociationsjob.h"
 #include "createartasassociationsstatusdialog.h"
 #include "dbovariableset.h"
+#include "task.h"
 
 #include <QObject>
 #include <memory>
@@ -16,7 +17,7 @@ class MetaDBOVariable;
 class DBObject;
 class Buffer;
 
-class CreateARTASAssociationsTask : public QObject, public Configurable
+class CreateARTASAssociationsTask : public QObject, public Configurable, public Task
 {
     Q_OBJECT
 
@@ -34,11 +35,11 @@ public slots:
 
 public:
     CreateARTASAssociationsTask(const std::string& class_id, const std::string& instance_id,
-                                TaskManager* task_manager);
+                                TaskManager& task_manager);
     virtual ~CreateARTASAssociationsTask();
 
     bool hasOpenWidget() { return widget_ != nullptr; }
-    CreateARTASAssociationsTaskWidget* widget();
+    QWidget* widget();
 
     bool canRun ();
     void run ();

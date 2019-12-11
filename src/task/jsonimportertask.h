@@ -22,6 +22,7 @@
 #include "json.hpp"
 #include "jsonparsingschema.h"
 #include "readjsonfilepartjob.h"
+#include "task.h"
 
 #include <QObject>
 
@@ -36,7 +37,7 @@ class QMessageBox;
 class JSONParseJob;
 class JSONMappingJob;
 
-class JSONImporterTask : public QObject, public Configurable
+class JSONImporterTask : public QObject, public Configurable, public Task
 {
     Q_OBJECT
 
@@ -57,11 +58,11 @@ public slots:
 
 public:
     JSONImporterTask(const std::string& class_id, const std::string& instance_id,
-                     TaskManager* task_manager);
+                     TaskManager& task_manager);
     virtual ~JSONImporterTask();
 
     bool hasOpenWidget() { return widget_ != nullptr; }
-    JSONImporterTaskWidget* widget();
+    virtual QWidget* widget ();
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 

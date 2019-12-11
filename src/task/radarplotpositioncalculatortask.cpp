@@ -37,10 +37,10 @@
 
 using namespace Utils;
 
-RadarPlotPositionCalculatorTask::RadarPlotPositionCalculatorTask(const std::string& class_id,
-                                                                 const std::string& instance_id,
-                                                                 TaskManager* task_manager)
-    : Configurable (class_id, instance_id, task_manager)
+RadarPlotPositionCalculatorTask::RadarPlotPositionCalculatorTask(
+        const std::string& class_id, const std::string& instance_id, TaskManager& task_manager)
+    : Configurable (class_id, instance_id, &task_manager),
+      Task("RadarPlotPositionCalculatorTask", "Calculate Radar Plot Positions", true, task_manager)
 {
     qRegisterMetaType<std::shared_ptr<Buffer>>("std::shared_ptr<Buffer>");
     //qRegisterMetaType<DBObject>("DBObject");
@@ -62,10 +62,9 @@ RadarPlotPositionCalculatorTask::~RadarPlotPositionCalculatorTask()
         delete widget_;
         widget_ = nullptr;
     }
-
 }
 
-RadarPlotPositionCalculatorTaskWidget* RadarPlotPositionCalculatorTask::widget()
+QWidget* RadarPlotPositionCalculatorTask::widget()
 {
     if (!widget_)
     {

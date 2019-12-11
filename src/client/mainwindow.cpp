@@ -203,36 +203,36 @@ void MainWindow::startSlot ()
 //        initAfterStart ();
 }
 
-void MainWindow::addJSONImporterTaskSlot ()
-{
-    loginf  << "MainWindow: addJSONImporterTaskSlot";
+//void MainWindow::addJSONImporterTaskSlot ()
+//{
+//    loginf  << "MainWindow: addJSONImporterTaskSlot";
 
-    ATSDB::instance().taskManager().getJSONImporterTask()->widget()->show();
-}
+//    ATSDB::instance().taskManager().getJSONImporterTask()->widget()->show();
+//}
 
-void MainWindow::addRadarPlotPositionCalculatorTaskSlot ()
-{
-    loginf  << "MainWindow: addRadarPlotPositionCalculatorTaskSlot";
+//void MainWindow::addRadarPlotPositionCalculatorTaskSlot ()
+//{
+//    loginf  << "MainWindow: addRadarPlotPositionCalculatorTaskSlot";
 
-    ATSDB::instance().taskManager().getRadarPlotPositionCalculatorTask()->widget()->show();
-}
+//    ATSDB::instance().taskManager().getRadarPlotPositionCalculatorTask()->widget()->show();
+//}
 
-void MainWindow::addCreateARTASAssociationsTaskSlot ()
-{
-    loginf  << "MainWindow: addCreateARTASAssociationsTaskSlot";
+//void MainWindow::addCreateARTASAssociationsTaskSlot ()
+//{
+//    loginf  << "MainWindow: addCreateARTASAssociationsTaskSlot";
 
-    ATSDB::instance().taskManager().getCreateARTASAssociationsTask()->widget()->show();
-}
+//    ATSDB::instance().taskManager().getCreateARTASAssociationsTask()->widget()->show();
+//}
 
 
-#if USE_JASTERIX
-void MainWindow::addASTERIXImporterTaskSlot ()
-{
-    loginf  << "MainWindow: addASTERIXImporterTaskSlot";
+//#if USE_JASTERIX
+//void MainWindow::addASTERIXImporterTaskSlot ()
+//{
+//    loginf  << "MainWindow: addASTERIXImporterTaskSlot";
 
-    ATSDB::instance().taskManager().getASTERIXImporterTask()->widget()->show();
-}
-#endif
+//    ATSDB::instance().taskManager().getASTERIXImporterTask()->widget()->show();
+//}
+//#endif
 
 void MainWindow::postProcessingDoneSlot ()
 {

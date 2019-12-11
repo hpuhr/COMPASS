@@ -18,19 +18,20 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(CreateARTAS
                                                                      Qt::WindowFlags f)
     : QWidget (parent, f), task_(task)
 {
-    setMinimumSize(QSize(800, 600));
+    //setMinimumSize(QSize(800, 600));
+    setContentsMargins(0, 0, 0, 0);
 
     QFont font_bold;
     font_bold.setBold(true);
 
-    QFont font_big;
-    font_big.setPointSize(18);
+//    QFont font_big;
+//    font_big.setPointSize(18);
 
     QVBoxLayout *main_layout = new QVBoxLayout ();
 
-    QLabel *main_label = new QLabel ("Create ARTAS Associations");
-    main_label->setFont (font_big);
-    main_layout->addWidget (main_label);
+//    QLabel *main_label = new QLabel ("Create ARTAS Associations");
+//    main_label->setFont (font_big);
+//    main_layout->addWidget (main_label);
 
     {
         QGridLayout *grid = new QGridLayout ();

@@ -42,6 +42,13 @@ TaskManager::TaskManager(const std::string &class_id, const std::string &instanc
 
     task_list_ = {"DatabaseOpenTask", "ManageSchemaTask", "ManageDBObjectsTask"}; // defines order of tasks
 
+#if USE_JASTERIX
+    task_list_.push_back("ASTERIXImporterTask");
+#endif
+
+    task_list_.insert (task_list_.end(), {"JSONImporterTask", "RadarPlotPositionCalculatorTask",
+                       "CreateARTASAssociationsTask"});
+
     for (auto& task_it : task_list_) // check that all tasks in list exist
         assert (tasks_.count(task_it));
 }
@@ -49,38 +56,38 @@ TaskManager::TaskManager(const std::string &class_id, const std::string &instanc
 TaskManager::~TaskManager()
 {
     assert (!json_importer_task_);
-    assert (!radar_plot_position_calculator_task_);
+    //assert (!radar_plot_position_calculator_task_);
 
-#if USE_JASTERIX
-    assert (!asterix_importer_task_);
-#endif
+//#if USE_JASTERIX
+//    assert (!asterix_importer_task_);
+//#endif
 }
 
-JSONImporterTask* TaskManager::getJSONImporterTask()
-{
-    assert (json_importer_task_);
-    return json_importer_task_;
-}
+//JSONImporterTask* TaskManager::getJSONImporterTask()
+//{
+//    assert (json_importer_task_);
+//    return json_importer_task_;
+//}
 
-RadarPlotPositionCalculatorTask* TaskManager::getRadarPlotPositionCalculatorTask()
-{
-    assert (radar_plot_position_calculator_task_);
-    return radar_plot_position_calculator_task_;
-}
+//RadarPlotPositionCalculatorTask* TaskManager::getRadarPlotPositionCalculatorTask()
+//{
+//    assert (radar_plot_position_calculator_task_);
+//    return radar_plot_position_calculator_task_;
+//}
 
-CreateARTASAssociationsTask* TaskManager::getCreateARTASAssociationsTask()
-{
-    assert (create_artas_associations_task_);
-    return create_artas_associations_task_;
-}
+//CreateARTASAssociationsTask* TaskManager::getCreateARTASAssociationsTask()
+//{
+//    assert (create_artas_associations_task_);
+//    return create_artas_associations_task_;
+//}
 
-#if USE_JASTERIX
-ASTERIXImporterTask* TaskManager::getASTERIXImporterTask()
-{
-    assert (asterix_importer_task_);
-    return asterix_importer_task_;
-}
-#endif
+//#if USE_JASTERIX
+//ASTERIXImporterTask* TaskManager::getASTERIXImporterTask()
+//{
+//    assert (asterix_importer_task_);
+//    return asterix_importer_task_;
+//}
+//#endif
 
 void TaskManager::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
@@ -111,32 +118,44 @@ void TaskManager::generateSubConfigurable (const std::string &class_id, const st
         assert (!tasks_.count(class_id));
         tasks_[class_id] = manage_dbobjects_task_.get();
     }
-    else if (class_id.compare ("JSONImporterTask") == 0)
-    {
-        assert (!json_importer_task_);
-        json_importer_task_ = new JSONImporterTask (class_id, instance_id, this);
-        assert (json_importer_task_);
-    }
-    else if (class_id.compare ("RadarPlotPositionCalculatorTask") == 0)
-    {
-        assert (!radar_plot_position_calculator_task_);
-        radar_plot_position_calculator_task_ = new RadarPlotPositionCalculatorTask (class_id, instance_id, this);
-        assert (radar_plot_position_calculator_task_);
-    }
-    else if (class_id.compare ("CreateARTASAssociationsTask") == 0)
-    {
-        assert (!create_artas_associations_task_);
-        create_artas_associations_task_ = new CreateARTASAssociationsTask (class_id, instance_id, this);
-        assert (create_artas_associations_task_);
-    }
 #if USE_JASTERIX
     else if (class_id.compare ("ASTERIXImporterTask") == 0)
     {
         assert (!asterix_importer_task_);
-        asterix_importer_task_ = new ASTERIXImporterTask (class_id, instance_id, this);
+        asterix_importer_task_.reset(new ASTERIXImporterTask (class_id, instance_id, *this));
         assert (asterix_importer_task_);
+
+        assert (!tasks_.count(class_id));
+        tasks_[class_id] = asterix_importer_task_.get();
     }
 #endif
+    else if (class_id.compare ("JSONImporterTask") == 0)
+    {
+        assert (!json_importer_task_);
+        json_importer_task_.reset(new JSONImporterTask (class_id, instance_id, *this));
+        assert (json_importer_task_);
+
+        assert (!tasks_.count(class_id));
+        tasks_[class_id] = json_importer_task_.get();
+    }
+    else if (class_id.compare ("RadarPlotPositionCalculatorTask") == 0)
+    {
+        assert (!radar_plot_position_calculator_task_);
+        radar_plot_position_calculator_task_.reset(new RadarPlotPositionCalculatorTask (class_id, instance_id, *this));
+        assert (radar_plot_position_calculator_task_);
+
+        assert (!tasks_.count(class_id));
+        tasks_[class_id] = radar_plot_position_calculator_task_.get();
+    }
+    else if (class_id.compare ("CreateARTASAssociationsTask") == 0)
+    {
+        assert (!create_artas_associations_task_);
+        create_artas_associations_task_.reset(new CreateARTASAssociationsTask (class_id, instance_id, *this));
+        assert (create_artas_associations_task_);
+
+        assert (!tasks_.count(class_id));
+        tasks_[class_id] = create_artas_associations_task_.get();
+    }
     else
         throw std::runtime_error ("TaskManager: generateSubConfigurable: unknown class_id "+class_id );
 }
@@ -161,34 +180,31 @@ void TaskManager::checkSubConfigurables ()
         assert (manage_dbobjects_task_);
     }
 
+#if USE_JASTERIX
+    if (!asterix_importer_task_)
+    {
+        generateSubConfigurable("ASTERIXImporterTask", "ASTERIXImporterTask0");
+        assert (asterix_importer_task_);
+    }
+#endif
+
     if (!json_importer_task_)
     {
-        json_importer_task_ = new JSONImporterTask ("JSONImporterTask", "JSONImporterTask", this);
+        generateSubConfigurable("JSONImporterTask", "JSONImporterTask0");
         assert (json_importer_task_);
     }
 
     if (!radar_plot_position_calculator_task_)
     {
-        radar_plot_position_calculator_task_ = new RadarPlotPositionCalculatorTask (
-                    "RadarPlotPositionCalculatorTask", "RadarPlotPositionCalculatorTask0", this);
+        generateSubConfigurable("RadarPlotPositionCalculatorTask", "RadarPlotPositionCalculatorTask0");
         assert (radar_plot_position_calculator_task_);
     }
 
     if (!create_artas_associations_task_)
     {
-        create_artas_associations_task_ = new CreateARTASAssociationsTask (
-                    "CreateARTASAssociationsTask", "CreateARTASAssociationsTask0", this);
+        generateSubConfigurable("CreateARTASAssociationsTask", "CreateARTASAssociationsTask0");
         assert (create_artas_associations_task_);
     }
-
-#if USE_JASTERIX
-    if (!asterix_importer_task_)
-    {
-        assert (!asterix_importer_task_);
-        asterix_importer_task_ = new ASTERIXImporterTask ("ASTERIXImporterTask", "ASTERIXImporterTask0", this);
-        assert (asterix_importer_task_);
-    }
-#endif
 }
 
 std::map<std::string, Task *> TaskManager::tasks() const
@@ -223,36 +239,29 @@ void TaskManager::disable ()
 void TaskManager::shutdown ()
 {
     loginf << "TaskManager: shutdown";
-    // TODO waiting for tasks?
 
     if (database_open_task_)
         database_open_task_.reset(nullptr);
 
-    if (json_importer_task_)
-    {
-        delete json_importer_task_;
-        json_importer_task_ = nullptr;
-    }
+    if (manage_schema_task_)
+        manage_schema_task_.reset(nullptr);
 
-    if (radar_plot_position_calculator_task_)
-    {
-        delete radar_plot_position_calculator_task_;
-        radar_plot_position_calculator_task_ = nullptr;
-    }
-
-    if (create_artas_associations_task_)
-    {
-        delete create_artas_associations_task_;
-        create_artas_associations_task_ = nullptr;
-    }
+    if (manage_dbobjects_task_)
+        manage_dbobjects_task_.reset(nullptr);
 
 #if USE_JASTERIX
     if (asterix_importer_task_)
-    {
-        delete asterix_importer_task_;
-        asterix_importer_task_ = nullptr;
-    }
+        asterix_importer_task_.reset(nullptr);
 #endif
+
+    if (json_importer_task_)
+        json_importer_task_.reset(nullptr);
+
+    if (radar_plot_position_calculator_task_)
+        radar_plot_position_calculator_task_.reset(nullptr);
+
+    if (create_artas_associations_task_)
+        create_artas_associations_task_.reset(nullptr);
 
     widget_ = nullptr;
 }

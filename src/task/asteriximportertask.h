@@ -24,6 +24,7 @@
 #include "asterixdecodejob.h"
 #include "jsonmappingjob.h"
 #include "jsonmappingstubsjob.h"
+#include "task.h"
 
 #include <QObject>
 
@@ -43,7 +44,7 @@ namespace jASTERIX
     class jASTERIX;
 }
 
-class ASTERIXImporterTask: public QObject, public Configurable
+class ASTERIXImporterTask: public QObject, public Configurable, public Task
 {
     Q_OBJECT
 
@@ -65,11 +66,11 @@ public slots:
 
 public:
     ASTERIXImporterTask(const std::string& class_id, const std::string& instance_id,
-                        TaskManager* task_manager);
+                        TaskManager& task_manager);
     virtual ~ASTERIXImporterTask();
 
     bool hasOpenWidget() { return widget_ != nullptr; }
-    ASTERIXImporterTaskWidget* widget();
+    virtual QWidget* widget ();
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 

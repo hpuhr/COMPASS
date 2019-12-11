@@ -58,8 +58,9 @@ const unsigned int unlimited_num_json_jobs_ = 2;
 const unsigned int limited_num_json_jobs_ = 1;
 
 ASTERIXImporterTask::ASTERIXImporterTask(const std::string& class_id, const std::string& instance_id,
-                                         TaskManager* task_manager)
-    : Configurable (class_id, instance_id, task_manager)
+                                         TaskManager& task_manager)
+    : Configurable (class_id, instance_id, &task_manager),
+      Task("ASTERIXImportTask", "Import ASTERIX Data", true, task_manager)
 {
     //qRegisterMetaType<std::unique_ptr<std::vector <nlohmann::json>>>("std::unique_ptr<std::vector <nlohmann::json>>");
 
@@ -159,7 +160,7 @@ void ASTERIXImporterTask::checkSubConfigurables ()
     }
 }
 
-ASTERIXImporterTaskWidget* ASTERIXImporterTask::widget()
+QWidget* ASTERIXImporterTask::widget()
 {
     if (!widget_)
     {

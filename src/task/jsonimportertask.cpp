@@ -51,8 +51,9 @@ using namespace nlohmann;
 using namespace std;
 
 JSONImporterTask::JSONImporterTask(const std::string& class_id, const std::string& instance_id,
-                                   TaskManager* task_manager)
-    : Configurable (class_id, instance_id, task_manager)
+                                   TaskManager& task_manager)
+    : Configurable (class_id, instance_id, &task_manager),
+      Task("JSONImporterTask", "Import JSON Data", true, task_manager)
 {
     registerParameter("current_filename", &current_filename_, "");
     registerParameter("current_schema", &current_schema_, "");
@@ -101,7 +102,7 @@ void JSONImporterTask::generateSubConfigurable (const std::string &class_id, con
 }
 
 
-JSONImporterTaskWidget* JSONImporterTask::widget()
+QWidget* JSONImporterTask::widget()
 {
     if (!widget_)
     {
