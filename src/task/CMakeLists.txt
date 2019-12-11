@@ -6,6 +6,9 @@ include_directories (
 target_sources(atsdb
     PUBLIC
         "${CMAKE_CURRENT_LIST_DIR}/taskmanager.h"
+        "${CMAKE_CURRENT_LIST_DIR}/taskmanagerwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/taskmanagerlogwidget.h"
+        "${CMAKE_CURRENT_LIST_DIR}/task.h"
         "${CMAKE_CURRENT_LIST_DIR}/radarplotpositioncalculatortask.h"
         "${CMAKE_CURRENT_LIST_DIR}/radarplotpositioncalculatortaskwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/jsonimportertask.h"
@@ -15,6 +18,8 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/createartasassociationsstatusdialog.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/taskmanager.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/taskmanagerwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/taskmanagerlogwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/radarplotpositioncalculatortask.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/radarplotpositioncalculatortaskwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/jsonimportertask.cpp"

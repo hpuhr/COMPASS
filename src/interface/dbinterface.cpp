@@ -729,6 +729,12 @@ void DBInterface::saveProperties ()
 {
     loginf << "DBInterface: saveProperties";
 
+    if (!current_connection_)
+    {
+        logwrn << "DBInterface: saveProperties: failed since no database connection exists";
+        return;
+    }
+
     //QMutexLocker locker(&connection_mutex_); // done in closeConnection
     assert (current_connection_);
 

@@ -26,10 +26,13 @@ class ATSDB;
 class CreateARTASAssociationsTask;
 class JSONImporterTask;
 class RadarPlotPositionCalculatorTask;
+class TaskManagerWidget;
 
 #if USE_JASTERIX
 class ASTERIXImporterTask;
 #endif
+
+
 
 class TaskManager : public Configurable
 {
@@ -51,10 +54,14 @@ public:
     void disable ();
     void shutdown ();
 
+    TaskManagerWidget* widget(); // owned here
+
 protected:
     JSONImporterTask* json_importer_task_ {nullptr};
     RadarPlotPositionCalculatorTask* radar_plot_position_calculator_task_ {nullptr};
     CreateARTASAssociationsTask* create_artas_associations_task_{nullptr};
+
+    std::unique_ptr<TaskManagerWidget> widget_;
 
 #if USE_JASTERIX
     ASTERIXImporterTask* asterix_importer_task_ {nullptr};

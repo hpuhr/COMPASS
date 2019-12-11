@@ -17,6 +17,7 @@
 
 #include "atsdb.h"
 #include "taskmanager.h"
+#include "taskmanagerwidget.h"
 #include "jsonimportertask.h"
 #include "jsonimportertaskwidget.h"
 #include "radarplotpositioncalculatortask.h"
@@ -177,7 +178,6 @@ void TaskManager::shutdown ()
         create_artas_associations_task_ = nullptr;
     }
 
-
 #if USE_JASTERIX
     if (asterix_importer_task_)
     {
@@ -185,4 +185,16 @@ void TaskManager::shutdown ()
         asterix_importer_task_ = nullptr;
     }
 #endif
+
+    widget_ = nullptr;
+}
+
+TaskManagerWidget* TaskManager::widget()
+{
+    if (!widget_)
+    {
+        widget_.reset(new TaskManagerWidget(*this));
+    }
+
+    return widget_.get();
 }
