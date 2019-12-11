@@ -47,10 +47,11 @@ using namespace Utils;
 DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager &object_manager)
     : object_manager_(object_manager), schema_manager_(ATSDB::instance().schemaManager())
 {
-    unsigned int frame_width = FRAME_SIZE;
+    //unsigned int frame_width = FRAME_SIZE;
+    setContentsMargins(0, 0, 0, 0);
 
-    setFrameStyle(QFrame::Panel | QFrame::Raised);
-    setLineWidth(frame_width);
+//    setFrameStyle(QFrame::Panel | QFrame::Raised);
+//    setLineWidth(frame_width);
 
     QFont font_bold;
     font_bold.setBold(true);

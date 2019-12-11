@@ -20,6 +20,7 @@
 #include "taskmanagerwidget.h"
 #include "databaseopentask.h"
 #include "manageschematask.h"
+#include "managedbobjectstask.h"
 #include "jsonimportertask.h"
 #include "jsonimportertaskwidget.h"
 #include "radarplotpositioncalculatortask.h"
@@ -39,7 +40,7 @@ TaskManager::TaskManager(const std::string &class_id, const std::string &instanc
 {
     createSubConfigurables();
 
-    task_list_ = {"DatabaseOpenTask", "ManageSchemaTask"}; // defines order of tasks
+    task_list_ = {"DatabaseOpenTask", "ManageSchemaTask", "ManageDBObjectsTask"}; // defines order of tasks
 
     for (auto& task_it : task_list_) // check that all tasks in list exist
         assert (tasks_.count(task_it));
@@ -101,6 +102,15 @@ void TaskManager::generateSubConfigurable (const std::string &class_id, const st
         assert (!tasks_.count(class_id));
         tasks_[class_id] = manage_schema_task_.get();
     }
+    else if (class_id.compare ("ManageDBObjectsTask") == 0)
+    {
+        assert (!manage_dbobjects_task_);
+        manage_dbobjects_task_.reset (new ManageDBObjectsTask (class_id, instance_id, *this));
+        assert (manage_dbobjects_task_);
+
+        assert (!tasks_.count(class_id));
+        tasks_[class_id] = manage_dbobjects_task_.get();
+    }
     else if (class_id.compare ("JSONImporterTask") == 0)
     {
         assert (!json_importer_task_);
@@ -143,6 +153,12 @@ void TaskManager::checkSubConfigurables ()
     {
         generateSubConfigurable("ManageSchemaTask", "ManageSchemaTask0");
         assert (manage_schema_task_);
+    }
+
+    if (!manage_dbobjects_task_)
+    {
+        generateSubConfigurable("ManageDBObjectsTask", "ManageDBObjectsTask0");
+        assert (manage_dbobjects_task_);
     }
 
     if (!json_importer_task_)

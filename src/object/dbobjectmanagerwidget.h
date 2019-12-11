@@ -18,7 +18,7 @@
 #ifndef DBOBJECTMANAGERWIDGET_H_
 #define DBOBJECTMANAGERWIDGET_H_
 
-#include <QFrame>
+#include <QWidget>
 #include <map>
 
 class DBObject;
@@ -36,7 +36,7 @@ class QComboBox;
 /**
  * @brief Shows all DBObjects, allows editing and adding new ones
  */
-class DBObjectManagerWidget : public QFrame
+class DBObjectManagerWidget : public QWidget
 {
     Q_OBJECT
 
