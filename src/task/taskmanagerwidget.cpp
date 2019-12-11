@@ -1,5 +1,7 @@
 #include "taskmanagerwidget.h"
 #include "taskmanager.h"
+#include "global.h"
+#include "logger.h"
 
 #include <QListWidget>
 #include <QStackedWidget>
@@ -39,10 +41,10 @@ TaskManagerWidget::TaskManagerWidget(TaskManager& task_manager, QWidget *parent)
     // top
     {
         task_list_ = new QListWidget ();
-        task_list_->setSelectionBehavior( QAbstractItemView::SelectItems );
-        task_list_->setSelectionMode( QAbstractItemView::SingleSelection );
-        //connect (object_parser_list_, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(selectedObjectParserSlot()));
-        // updateTasklist
+        task_list_->setSelectionBehavior(QAbstractItemView::SelectItems);
+        task_list_->setSelectionMode(QAbstractItemView::SingleSelection);
+        updateTaskList();
+        connect (task_list_, &QListWidget::itemClicked, this, &TaskManagerWidget::taskClicked);
 
         top_layout->addWidget(task_list_);
 
@@ -58,4 +60,39 @@ TaskManagerWidget::TaskManagerWidget(TaskManager& task_manager, QWidget *parent)
 
     setLayout (main_layout_);
 
+}
+
+void TaskManagerWidget::updateTaskList ()
+{
+    assert (task_list_);
+
+    task_list_->clear();
+
+#if USE_JASTERIX
+    QListWidgetItem* import_asterix_item = new QListWidgetItem("Import ASTERIX Recording", task_list_); // icon,
+    import_asterix_item->setFlags(import_asterix_item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
+    import_asterix_item->setCheckState(Qt::Unchecked); // AND initialize check state
+#endif
+
+    QListWidgetItem* import_json_item = new QListWidgetItem("Import JSON data", task_list_); // icon,
+    import_json_item->setFlags(import_asterix_item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
+    import_json_item->setCheckState(Qt::Unchecked); // AND initialize check state
+
+    QListWidgetItem* calc_radar_pos_item = new QListWidgetItem("Calculate Radar Plot Positions", task_list_); // icon,
+    calc_radar_pos_item->setFlags(import_asterix_item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
+    calc_radar_pos_item->setCheckState(Qt::Unchecked); // AND initialize check state
+
+    QListWidgetItem* calc_artas_assoc_item = new QListWidgetItem("Calculate ARTAS Associations", task_list_); // icon,
+    calc_artas_assoc_item->setFlags(import_asterix_item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
+    calc_artas_assoc_item->setCheckState(Qt::Unchecked); // AND initialize check state
+
+    //        QListWidgetItem* item = new QListWidgetItem(icon, "item", listWidget);
+    //        item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
+    //        item->setCheckState(Qt::Unchecked); // AND initialize check state
+}
+
+void TaskManagerWidget::taskClicked(QListWidgetItem* item)
+{
+    assert (item);
+    loginf << "TaskManagerWidget: taskClicked: " << item->text().toStdString();
 }

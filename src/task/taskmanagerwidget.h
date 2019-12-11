@@ -4,6 +4,7 @@
 #include <QWidget>
 
 class QListWidget;
+class QListWidgetItem;
 class QStackedWidget;
 class TaskManagerLogWidget;
 class TaskManager;
@@ -11,12 +12,16 @@ class TaskManager;
 class TaskManagerWidget : public QWidget
 {
     Q_OBJECT
-public:
-    explicit TaskManagerWidget(TaskManager& task_manager, QWidget *parent=nullptr);
 
 signals:
 
 public slots:
+    void taskClicked(QListWidgetItem* item);
+
+public:
+    explicit TaskManagerWidget(TaskManager& task_manager, QWidget *parent=nullptr);
+
+    void updateTaskList ();
 
 protected:
     TaskManager& task_manager_;
