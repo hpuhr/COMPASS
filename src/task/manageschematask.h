@@ -23,6 +23,8 @@ public:
     virtual QWidget* widget ();
 
     virtual bool checkPrerequisites ();
+    virtual bool isRecommended () { return false; }
+    virtual bool isRequired () { return false; }
 
 protected:
     std::unique_ptr<ManageSchemaTaskWidget> widget_;

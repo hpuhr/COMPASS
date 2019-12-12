@@ -87,6 +87,8 @@ public:
     void longitudeVarStr(const std::string& longitude_var_str);
 
     virtual bool checkPrerequisites ();
+    virtual bool isRecommended ();
+    virtual bool isRequired ();
 
 protected:
     std::string db_object_str_;

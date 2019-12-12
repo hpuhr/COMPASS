@@ -2,6 +2,7 @@
 #include "taskmanager.h"
 #include "global.h"
 #include "logger.h"
+#include "files.h"
 
 #include <QListWidget>
 #include <QStackedWidget>
@@ -15,6 +16,8 @@
 #include <QCheckBox>
 
 #include "taskmanagerlogwidget.h"
+
+using namespace Utils;
 
 TaskManagerWidget::TaskManagerWidget(TaskManager& task_manager, QWidget *parent)
     : QWidget(parent), task_manager_(task_manager)
@@ -133,12 +136,29 @@ void TaskManagerWidget::updateTaskStates ()
         //item->setFlags(item->flags() & ~Qt::ItemIsSelectable); Qt::ItemIsEnabled
 
         loginf << "TaskManagerWidget: updateTaskStates: item " << item_it.first->text().toStdString()
-               << " enabled " << enabled;
+               << " enabled " << enabled << " recommended " << item_it.second->isRecommended()
+               << " required " << item_it.second->isRequired() << " done " << item_it.second->done();
 
         if (enabled) // can be run
+        {
             item_it.first->setFlags(item_it.first->flags() | Qt::ItemIsEnabled);
+
+            if (item_it.second->done())
+                item_it.first->setIcon(QIcon(Files::getIconFilepath("done.png").c_str()));
+            else if (!item_it.second->isRecommended())
+                item_it.first->setIcon(QIcon(Files::getIconFilepath("not_recommended.png").c_str()));
+            else
+                item_it.first->setIcon(QIcon(Files::getIconFilepath("todo.png").c_str()));
+        }
         else
+        {
             item_it.first->setFlags(item_it.first->flags() & ~Qt::ItemIsEnabled);
+
+            if (item_it.second->done())
+                item_it.first->setIcon(QIcon(Files::getIconFilepath("done.png").c_str()));
+            else
+                item_it.first->setIcon(QIcon(Files::getIconFilepath("todo_maybe.png").c_str()));
+        }
     }
 }
 

@@ -27,6 +27,8 @@ public:
     virtual QWidget* widget ();
 
     virtual bool checkPrerequisites ();
+    virtual bool isRecommended ();
+    virtual bool isRequired ();
 
 protected:
     std::unique_ptr<DatabaseOpenTaskWidget> widget_;

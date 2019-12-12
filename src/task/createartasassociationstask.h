@@ -112,6 +112,8 @@ public:
     void markTrackCoastingAssociationsDubious(bool value);
 
     virtual bool checkPrerequisites ();
+    virtual bool isRecommended ();
+    virtual bool isRequired ()  { return false; }
 
 protected:
     std::string current_data_source_name_;

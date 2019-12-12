@@ -18,6 +18,7 @@
 #include "atsdb.h"
 #include "taskmanager.h"
 #include "taskmanagerwidget.h"
+#include "dbobjectmanager.h"
 #include "databaseopentask.h"
 #include "manageschematask.h"
 #include "managedbobjectstask.h"
@@ -53,6 +54,7 @@ TaskManager::TaskManager(const std::string &class_id, const std::string &instanc
 
     for (auto& task_it : task_list_) // check that all tasks in list exist
         assert (tasks_.count(task_it));
+
 }
 
 TaskManager::~TaskManager()
@@ -216,6 +218,28 @@ std::vector<std::string> TaskManager::taskList() const
 void TaskManager::taskDoneSlot (std::string task_name)
 {
     loginf << "TaskManager: taskDoneSlot: task " << task_name;
+
+    if (widget_)
+    {
+        widget_->updateTaskStates();
+        widget_->selectNextTask();
+    }
+}
+
+void TaskManager::dbObjectsChangedSlot ()
+{
+    loginf << "TaskManager: dbObjectsChangedSlot";
+
+    if (widget_)
+    {
+        widget_->updateTaskStates();
+        widget_->selectNextTask();
+    }
+}
+
+void TaskManager::schemaChangedSlot ()
+{
+    loginf << "TaskManager: schemaChangedSlot";
 
     if (widget_)
     {

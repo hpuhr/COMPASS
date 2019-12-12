@@ -192,6 +192,22 @@ bool JSONImporterTask::checkPrerequisites ()
     return canImportFile(current_filename_);
 }
 
+bool JSONImporterTask::isRecommended ()
+{
+    if (!checkPrerequisites())
+        return false;
+
+    if (ATSDB::instance().objectManager().hasData())
+        return false;
+
+    return true;
+}
+
+bool JSONImporterTask::isRequired ()
+{
+    return false;
+}
+
 bool JSONImporterTask::canImportFile (const std::string& filename)
 {
     if (!Files::fileExists(filename))

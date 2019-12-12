@@ -46,6 +46,9 @@ class TaskManager : public QObject, public Configurable
 public slots:
     void taskDoneSlot (std::string task_name);
 
+    void dbObjectsChangedSlot ();
+    void schemaChangedSlot ();
+
 public:
     TaskManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb);
 

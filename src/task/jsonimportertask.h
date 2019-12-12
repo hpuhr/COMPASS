@@ -88,6 +88,8 @@ public:
     void currentSchemaName(const std::string &currentSchema);
 
     virtual bool checkPrerequisites ();
+    virtual bool isRecommended ();
+    virtual bool isRequired ();
 
 protected:
     std::map <std::string, SavedFile*> file_list_;

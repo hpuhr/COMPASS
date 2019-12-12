@@ -116,6 +116,8 @@ public:
     void limitRAM(bool value);
 
     virtual bool checkPrerequisites ();
+    virtual bool isRecommended ();
+    virtual bool isRequired ();
 
 protected:
     bool debug_jasterix_;

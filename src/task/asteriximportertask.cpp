@@ -439,6 +439,22 @@ bool ASTERIXImporterTask::checkPrerequisites ()
     return canImportFile(current_filename_);
 }
 
+bool ASTERIXImporterTask::isRecommended ()
+{
+    if (!checkPrerequisites())
+        return false;
+
+    if (ATSDB::instance().objectManager().hasData())
+        return false;
+
+    return true;
+}
+
+bool ASTERIXImporterTask::isRequired ()
+{
+    return false;
+}
+
 bool ASTERIXImporterTask::canImportFile (const std::string& filename)
 {
     if (!Files::fileExists(filename))

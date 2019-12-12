@@ -199,7 +199,7 @@ bool DBInterface::ready ()
 {
     if (!current_connection_)
     {
-        logwrn << "DBInterface: ready: no connection";
+        logdbg << "DBInterface: ready: no connection";
         return false;
     }
 

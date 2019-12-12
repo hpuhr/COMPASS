@@ -560,6 +560,18 @@ bool CreateARTASAssociationsTask::checkPrerequisites ()
     return canRun();
 }
 
+bool CreateARTASAssociationsTask::isRecommended ()
+{
+    if (!checkPrerequisites())
+        return false;
+
+    if (ATSDB::instance().objectManager().hasData()) // todo further checks
+        return true;
+
+    return true;
+}
+
+
 void CreateARTASAssociationsTask::checkAndSetVariable (std::string& name_str, DBOVariable** var)
 {
     DBObjectManager& object_man = ATSDB::instance().objectManager();

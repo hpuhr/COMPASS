@@ -146,6 +146,15 @@ void DBObjectManager::deleteObject (const std::string& dbo_name)
     emit dbObjectsChangedSignal();
 }
 
+bool DBObjectManager::hasData()
+{
+    for (auto& object_it : objects_)
+        if (object_it.second->hasData())
+            return true;
+
+    return false;
+}
+
 bool DBObjectManager::existsMetaVariable (const std::string& var_name)
 {
     return (meta_variables_.find(var_name) != meta_variables_.end());
@@ -445,6 +454,8 @@ void DBObjectManager::databaseContentChangedSlot ()
 
     if (load_widget_)
         load_widget_->updateSlot();
+
+    emit dbObjectsChangedSignal();
 
     loginf << "DBObjectManager: databaseContentChangedSlot: done";
 }

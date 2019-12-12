@@ -242,6 +242,23 @@ bool RadarPlotPositionCalculatorTask::checkPrerequisites ()
     return ATSDB::instance().objectManager().object("Radar").hasData();
 }
 
+bool RadarPlotPositionCalculatorTask::isRecommended ()
+{
+    if (!checkPrerequisites())
+        return false;
+
+//    if (ATSDB::instance().objectManager().hasData()) TODO further checks
+//        return false;
+
+    return true;
+}
+
+bool RadarPlotPositionCalculatorTask::isRequired ()
+{
+    return false;
+}
+
+
 
 void RadarPlotPositionCalculatorTask::checkAndSetVariable (std::string& name_str, DBOVariable** var)
 {

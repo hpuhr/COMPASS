@@ -37,9 +37,26 @@ bool DatabaseOpenTask::checkPrerequisites ()
     return true;
 }
 
+bool DatabaseOpenTask::isRecommended ()
+{
+    if (!checkPrerequisites())
+        return false;
+
+    return true;
+}
+
+bool DatabaseOpenTask::isRequired ()
+{
+    if (!checkPrerequisites())
+        return false;
+
+    return true;
+}
+
 void DatabaseOpenTask::databaseOpenedSlot()
 {
     loginf << "DatabaseOpenTask: databaseOpenedSlot";
+    done_ = true;
 
     emit doneSignal(name_);
 }

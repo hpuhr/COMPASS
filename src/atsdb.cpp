@@ -68,6 +68,11 @@ ATSDB::ATSDB()
                       SLOT(databaseContentChangedSlot()), Qt::QueuedConnection);
     //QObject::connect(db_interface_, SIGNAL(databaseOpenedSignal()), filter_manager_, SLOT(databaseOpenedSlot()));
 
+    QObject::connect(dbo_manager_, &DBObjectManager::dbObjectsChangedSignal,
+                     task_manager_, &TaskManager::dbObjectsChangedSlot);
+    QObject::connect(dbo_manager_, &DBObjectManager::schemaChangedSignal,
+                     task_manager_, &TaskManager::schemaChangedSlot);
+
     //reference_point_defined_=false;
 
     logdbg  << "ATSDB: constructor: end";

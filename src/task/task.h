@@ -40,6 +40,8 @@ public:
     }
 
     virtual bool checkPrerequisites ()=0; // returns true if can be performed, false if not met
+    virtual bool isRecommended ()=0; // returns true if it is recommended to run this task
+    virtual bool isRequired ()=0; // returns true if it is required to run this task
 
     bool expertOnly() const
     {
@@ -47,12 +49,20 @@ public:
     }
 
 
+    bool done() const
+    {
+        return done_;
+    }
+
 protected:
     std::string name_;
     std::string gui_name_;
     bool gui_only_ {false};
     bool expert_only_ {false};
+    bool done_ {false};
+
     TaskManager& task_manager_;
 };
 
 #endif // TASK_H
+
