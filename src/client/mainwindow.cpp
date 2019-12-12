@@ -47,7 +47,7 @@
 //#include "dbinterfacewidget.h"
 //#include "dbschemamanager.h"
 //#include "dbschemamanagerwidget.h"
-//#include "filtermanager.h"
+#include "filtermanager.h"
 #include "managementwidget.h"
 #include "stringconv.h"
 #include "jobmanager.h"
@@ -104,6 +104,9 @@ MainWindow::MainWindow()
     task_manager_widget_ = ATSDB::instance().taskManager().widget();
     tab_widget_->addTab(task_manager_widget_, "Tasks");
 
+    connect (&ATSDB::instance().taskManager(), &TaskManager::startInspectionSignal,
+             this, &MainWindow::startSlot);
+
     // for se widgets
 //    QHBoxLayout *widget_layout = new QHBoxLayout();
 //    dbinterface_widget_ = ATSDB::instance().interface().widget();
@@ -136,7 +139,7 @@ MainWindow::MainWindow()
 
 //    main_widget->setLayout(main_layout);
 
-    tab_widget_->setAutoFillBackground(true);
+    setAutoFillBackground(true);
 //    tab_widget_->addTab(main_widget, "DB Config");
 
     // management widget
@@ -147,7 +150,8 @@ MainWindow::MainWindow()
 
     tab_widget_->setCurrentIndex(0);
 
-    //QObject::connect (this, SIGNAL(startedSignal()), &ATSDB::instance().filterManager(), SLOT(startedSlot()));
+   QObject::connect (this, &MainWindow::startedSignal,
+                     &ATSDB::instance().filterManager(), &FilterManager::startedSlot);
 }
 
 MainWindow::~MainWindow()
@@ -171,7 +175,7 @@ void MainWindow::databaseOpenedSlot()
 
 void MainWindow::startSlot ()
 {
-    logdbg  << "MainWindow: startSlot";
+    loginf  << "MainWindow: startSlot";
 
 //    assert (start_button_);
 //    assert (postprocess_check_);
@@ -200,7 +204,21 @@ void MainWindow::startSlot ()
 //        }
 //    }
 //    else
-//        initAfterStart ();
+
+    emit startedSignal ();
+
+    assert (task_manager_widget_);
+    tab_widget_->removeTab(0);
+    ATSDB::instance().taskManager().shutdown();
+
+    assert (management_widget_);
+    tab_widget_->addTab (management_widget_, "Management");
+
+    ATSDB::instance().viewManager().init(tab_widget_);
+
+    tab_widget_->setCurrentIndex(0);
+
+    // TODO lock stuff?
 }
 
 //void MainWindow::addJSONImporterTaskSlot ()

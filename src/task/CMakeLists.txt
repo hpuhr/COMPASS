@@ -22,6 +22,8 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/createartasassociationstask.h"
         "${CMAKE_CURRENT_LIST_DIR}/createartasassociationstaskwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/createartasassociationsstatusdialog.h"
+        "${CMAKE_CURRENT_LIST_DIR}/postprocesstask.h"
+        "${CMAKE_CURRENT_LIST_DIR}/postprocesstaskwidget.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/taskmanager.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/taskmanagerwidget.cpp"
@@ -39,6 +41,8 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/createartasassociationstask.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/createartasassociationstaskwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/createartasassociationsstatusdialog.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/postprocesstask.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/postprocesstaskwidget.cpp"
 )
 
 IF (jASTERIX_FOUND)

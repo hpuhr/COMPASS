@@ -168,8 +168,8 @@ void ConfigurationManager::parseJSONConfigurationFile (const std::string& filena
 
 void ConfigurationManager::saveConfiguration ()
 {
-    loginf << "ConfigurationManager: saveConfiguration";
-    saveJSONConfiguration();
+    loginf << "ConfigurationManager: saveConfiguration DISABLED";
+    //saveJSONConfiguration();
 }
 
 void ConfigurationManager::saveJSONConfiguration ()

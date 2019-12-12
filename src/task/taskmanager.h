@@ -33,6 +33,7 @@ class ManageDBObjectsTask;
 class CreateARTASAssociationsTask;
 class JSONImporterTask;
 class RadarPlotPositionCalculatorTask;
+class PostProcessTask;
 class TaskManagerWidget;
 
 #if USE_JASTERIX
@@ -42,6 +43,9 @@ class ASTERIXImporterTask;
 class TaskManager : public QObject, public Configurable
 {
     Q_OBJECT
+
+signals:
+    void startInspectionSignal ();
 
 public slots:
     void taskDoneSlot (std::string task_name);
@@ -56,7 +60,7 @@ public:
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
-    void disable ();
+    //void disable ();
     void shutdown ();
 
     TaskManagerWidget* widget(); // owned here
@@ -79,6 +83,7 @@ protected:
     std::unique_ptr<JSONImporterTask> json_importer_task_;
     std::unique_ptr<RadarPlotPositionCalculatorTask> radar_plot_position_calculator_task_;
     std::unique_ptr<CreateARTASAssociationsTask> create_artas_associations_task_;
+    std::unique_ptr<PostProcessTask> post_process_task_;
 
     std::unique_ptr<TaskManagerWidget> widget_;
 

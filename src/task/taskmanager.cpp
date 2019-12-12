@@ -28,6 +28,7 @@
 #include "radarplotpositioncalculatortaskwidget.h"
 #include "createartasassociationstask.h"
 #include "createartasassociationstaskwidget.h"
+#include "postprocesstask.h"
 
 #if USE_JASTERIX
 #include "asteriximportertask.h"
@@ -50,7 +51,7 @@ TaskManager::TaskManager(const std::string &class_id, const std::string &instanc
 #endif
 
     task_list_.insert (task_list_.end(), {"JSONImporterTask", "RadarPlotPositionCalculatorTask",
-                       "CreateARTASAssociationsTask"});
+                       "CreateARTASAssociationsTask", "PostProcessTask"});
 
     for (auto& task_it : task_list_) // check that all tasks in list exist
         assert (tasks_.count(task_it));
@@ -138,6 +139,17 @@ void TaskManager::generateSubConfigurable (const std::string &class_id, const st
         connect (create_artas_associations_task_.get(), &DatabaseOpenTask::doneSignal,
                  this, &TaskManager::taskDoneSlot);
     }
+    else if (class_id.compare ("PostProcessTask") == 0)
+    {
+        assert (!post_process_task_);
+        post_process_task_.reset(new PostProcessTask (class_id, instance_id, *this));
+        assert (post_process_task_);
+
+        assert (!tasks_.count(class_id));
+        tasks_[class_id] = post_process_task_.get();
+        connect (post_process_task_.get(), &PostProcessTask::doneSignal,
+                 this, &TaskManager::taskDoneSlot);
+    }
     else
         throw std::runtime_error ("TaskManager: generateSubConfigurable: unknown class_id "+class_id );
 }
@@ -186,6 +198,12 @@ void TaskManager::checkSubConfigurables ()
     {
         generateSubConfigurable("CreateARTASAssociationsTask", "CreateARTASAssociationsTask0");
         assert (create_artas_associations_task_);
+    }
+
+    if (!post_process_task_)
+    {
+        generateSubConfigurable("PostProcessTask", "PostProcessTask0");
+        assert (post_process_task_);
     }
 }
 
@@ -248,24 +266,24 @@ void TaskManager::schemaChangedSlot ()
     }
 }
 
-void TaskManager::disable ()
-{
-    loginf << "TaskManager: disable";
+//void TaskManager::disable ()
+//{
+//    loginf << "TaskManager: disable";
 
-    if (json_importer_task_ && json_importer_task_->hasOpenWidget())
-        json_importer_task_->widget()->close();
+//    if (json_importer_task_ && json_importer_task_->hasOpenWidget())
+//        json_importer_task_->widget()->close();
 
-    if (radar_plot_position_calculator_task_ && radar_plot_position_calculator_task_->hasOpenWidget())
-        radar_plot_position_calculator_task_->widget()->close();
+//    if (radar_plot_position_calculator_task_ && radar_plot_position_calculator_task_->hasOpenWidget())
+//        radar_plot_position_calculator_task_->widget()->close();
 
-    if (create_artas_associations_task_ && create_artas_associations_task_->hasOpenWidget())
-        create_artas_associations_task_->widget()->close();
+//    if (create_artas_associations_task_ && create_artas_associations_task_->hasOpenWidget())
+//        create_artas_associations_task_->widget()->close();
 
-#if USE_JASTERIX
-    if (asterix_importer_task_ && asterix_importer_task_->hasOpenWidget())
-        asterix_importer_task_->widget()->close();
-#endif
-}
+//#if USE_JASTERIX
+//    if (asterix_importer_task_ && asterix_importer_task_->hasOpenWidget())
+//        asterix_importer_task_->widget()->close();
+//#endif
+//}
 
 void TaskManager::shutdown ()
 {
@@ -293,6 +311,9 @@ void TaskManager::shutdown ()
 
     if (create_artas_associations_task_)
         create_artas_associations_task_.reset(nullptr);
+
+    if (post_process_task_)
+        post_process_task_.reset(nullptr);
 
     widget_ = nullptr;
 }

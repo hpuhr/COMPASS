@@ -14,6 +14,7 @@
 #include <QSplitter>
 #include <QSettings>
 #include <QCheckBox>
+#include <QPushButton>
 
 #include "taskmanagerlogwidget.h"
 
@@ -58,6 +59,12 @@ TaskManagerWidget::TaskManagerWidget(TaskManager& task_manager, QWidget *parent)
         connect (expert_check_, &QCheckBox::clicked, this, &TaskManagerWidget::expertModeToggledSlot);
         task_stuff_container_layout->addWidget(expert_check_);
 
+        task_stuff_container_layout->addStretch();
+
+        start_button_ = new QPushButton ("Start");
+        start_button_->setDisabled(true);
+        QObject::connect(start_button_, &QPushButton::clicked, this, &TaskManagerWidget::startSlot);
+        task_stuff_container_layout->addWidget(start_button_);
 
         task_stuff_container->setLayout(task_stuff_container_layout);
 
@@ -126,6 +133,8 @@ void TaskManagerWidget::updateTaskStates ()
     bool enabled;
     bool expert_mode = task_manager_.expertMode();
 
+    bool all_required_done = true;
+
     for (auto& item_it : item_task_mappings_)
     {
         if (!expert_mode && item_it.second->expertOnly())
@@ -159,7 +168,15 @@ void TaskManagerWidget::updateTaskStates ()
             else
                 item_it.first->setIcon(QIcon(Files::getIconFilepath("todo_maybe.png").c_str()));
         }
+
+        if (item_it.second->isRequired() && !item_it.second->done())
+            all_required_done = false;
     }
+
+    loginf << "TaskManagerWidget: updateTaskStates: all required done " << all_required_done;
+
+    if (start_button_ && all_required_done)
+        start_button_->setDisabled(false);
 }
 
 void TaskManagerWidget::selectNextTask ()
@@ -201,4 +218,9 @@ void TaskManagerWidget::expertModeToggledSlot ()
     task_manager_.expertMode(expert_check_->checkState() == Qt::Checked);
 }
 
+void TaskManagerWidget::startSlot ()
+{
+    loginf << "TaskManagerWidget: startSlot";
 
+    emit task_manager_.startInspectionSignal();
+}

@@ -7,8 +7,10 @@ class QListWidget;
 class QListWidgetItem;
 class QStackedWidget;
 class QSplitter;
-class Task;
+class QPushButton;
 class QCheckBox;
+
+class Task;
 class TaskManagerLogWidget;
 class TaskManager;
 
@@ -21,6 +23,7 @@ signals:
 public slots:
     void taskClickedSlot(QListWidgetItem* item);
     void expertModeToggledSlot ();
+    void startSlot ();
 
 public:
     explicit TaskManagerWidget(TaskManager& task_manager, QWidget* parent=nullptr);
@@ -35,6 +38,8 @@ protected:
 
     QListWidget* task_list_ {nullptr};
     QCheckBox* expert_check_ {nullptr};
+    QPushButton* start_button_ {nullptr};
+
     QStackedWidget* tasks_widget_ {nullptr};
     TaskManagerLogWidget* log_widget_ {nullptr};
 
