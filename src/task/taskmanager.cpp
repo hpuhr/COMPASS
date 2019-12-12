@@ -18,6 +18,7 @@
 #include "atsdb.h"
 #include "taskmanager.h"
 #include "taskmanagerwidget.h"
+#include "taskmanagerlogwidget.h"
 #include "dbobjectmanager.h"
 #include "databaseopentask.h"
 #include "manageschematask.h"
@@ -327,3 +328,25 @@ TaskManagerWidget* TaskManager::widget()
 
     return widget_.get();
 }
+
+void TaskManager::appendSuccess(const std::string& text)
+{
+    if (widget_)
+        widget_->logWidget()->appendSuccess(text);
+}
+void TaskManager::appendInfo(const std::string& text)
+{
+    if (widget_)
+        widget_->logWidget()->appendInfo(text);
+}
+void TaskManager::appendWarning(const std::string& text)
+{
+    if (widget_)
+        widget_->logWidget()->appendWarning(text);
+}
+void TaskManager::appendError(const std::string& text)
+{
+    if (widget_)
+        widget_->logWidget()->appendError(text);
+}
+

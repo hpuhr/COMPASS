@@ -37,6 +37,15 @@ public:
     void setCategoryCounts (const std::map<unsigned int, size_t>& counts);
     void addMappedCounts (const std::map<unsigned int, std::pair<size_t,size_t>>& counts);
 
+    size_t numFrames() const;
+    size_t numRecords() const;
+    size_t numErrors() const;
+    std::map<std::string, size_t> dboInsertedCounts() const;
+    std::string elapsedTimeStr() const;
+
+    std::string recordsInsertedRateStr() const;
+    size_t numRecordsInserted() const;
+
 private:
     std::string filename_;
     bool test_ {false};
@@ -69,6 +78,8 @@ private:
     QLabel* records_created_label_ {nullptr};
     QLabel* records_inserted_label_ {nullptr};
     QLabel* records_inserted_rate_label_ {nullptr};
+
+    std::string records_inserted_rate_str_;
 
     std::map<std::string, size_t> dbo_inserted_counts_;
 

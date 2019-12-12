@@ -71,6 +71,11 @@ public:
     bool expertMode() const;
     void expertMode(bool value);
 
+    void appendSuccess(const std::string& text);
+    void appendInfo(const std::string& text);
+    void appendWarning(const std::string& text);
+    void appendError(const std::string& text);
+
 protected:
     bool expert_mode_ {false};
 

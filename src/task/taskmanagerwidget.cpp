@@ -36,6 +36,8 @@ TaskManagerWidget::TaskManagerWidget(TaskManager& task_manager, QWidget *parent)
 
     QSettings settings ("ATSDB", "TaskManagerWidget");
 
+    setAutoFillBackground(true);
+
     // top
     {
         QWidget* top_container = new QWidget;
@@ -59,7 +61,7 @@ TaskManagerWidget::TaskManagerWidget(TaskManager& task_manager, QWidget *parent)
         connect (expert_check_, &QCheckBox::clicked, this, &TaskManagerWidget::expertModeToggledSlot);
         task_stuff_container_layout->addWidget(expert_check_);
 
-        task_stuff_container_layout->addStretch();
+        //task_stuff_container_layout->addStretch();
 
         start_button_ = new QPushButton ("Start");
         start_button_->setDisabled(true);
@@ -130,25 +132,26 @@ void TaskManagerWidget::updateTaskList ()
 
 void TaskManagerWidget::updateTaskStates ()
 {
-    bool enabled;
     bool expert_mode = task_manager_.expertMode();
+
+    bool expert_mode_missing;
+    bool prerequisites_missing;
 
     bool all_required_done = true;
 
     for (auto& item_it : item_task_mappings_)
     {
-        if (!expert_mode && item_it.second->expertOnly())
-            enabled = false;
-        else
-            enabled = item_it.second->checkPrerequisites();
+        expert_mode_missing = !expert_mode && item_it.second->expertOnly();
+        prerequisites_missing = !item_it.second->checkPrerequisites();
 
         //item->setFlags(item->flags() & ~Qt::ItemIsSelectable); Qt::ItemIsEnabled
 
         loginf << "TaskManagerWidget: updateTaskStates: item " << item_it.first->text().toStdString()
-               << " enabled " << enabled << " recommended " << item_it.second->isRecommended()
+               << " expert missing " << expert_mode_missing << " prereq. missing " << prerequisites_missing
+               << " recommended " << item_it.second->isRecommended()
                << " required " << item_it.second->isRequired() << " done " << item_it.second->done();
 
-        if (enabled) // can be run
+        if (!expert_mode_missing && !prerequisites_missing) // can be run
         {
             item_it.first->setFlags(item_it.first->flags() | Qt::ItemIsEnabled);
 
@@ -165,6 +168,8 @@ void TaskManagerWidget::updateTaskStates ()
 
             if (item_it.second->done())
                 item_it.first->setIcon(QIcon(Files::getIconFilepath("done.png").c_str()));
+            else if (expert_mode_missing)
+                item_it.first->setIcon(QIcon(Files::getIconFilepath("not_todo.png").c_str()));
             else
                 item_it.first->setIcon(QIcon(Files::getIconFilepath("todo_maybe.png").c_str()));
         }
@@ -183,7 +188,7 @@ void TaskManagerWidget::selectNextTask ()
 {
     for (auto& task_map_it : item_task_mappings_)
     {
-        if (task_map_it.first->flags() & Qt::ItemIsEnabled)
+        if ((task_map_it.first->flags() & Qt::ItemIsEnabled) && task_map_it.second->isRecommended())
         {
             task_list_->setCurrentItem(task_map_it.first);
             taskClickedSlot (task_map_it.first);

@@ -20,6 +20,7 @@
 #include "asterixstatusdialog.h"
 #include "asterixcategoryconfig.h"
 #include "taskmanager.h"
+#include "taskmanagerwidget.h"
 #include "configurable.h"
 #include "files.h"
 #include "stringconv.h"
@@ -470,6 +471,8 @@ void ASTERIXImporterTask::importFile(const std::string& filename)
 {
     loginf << "ASTERIXImporterTask: importFile: filename " << filename << " test " << test_;
 
+    task_manager_.appendInfo("ASTERIXImporterTask: import of file '"+filename+"' started");
+
     assert (canImportFile(filename));
 
     filename_ = filename;
@@ -587,6 +590,15 @@ void ASTERIXImporterTask::decodeASTERIXDoneSlot ()
         msgBox.setIcon(QMessageBox::Warning);
         msgBox.exec();
     }
+
+    assert (status_widget_);
+
+    if (status_widget_->numErrors())
+        task_manager_.appendError("ASTERIXImporterTask: "+std::to_string(status_widget_->numErrors())
+                                  +" decoding errors occured");
+
+    task_manager_.appendInfo("ASTERIXImporterTask: decoding done with "+std::to_string(status_widget_->numFrames())
+                                +" frames, "+std::to_string(status_widget_->numRecords())+" records");
 
     decode_job_ = nullptr;
 
@@ -961,6 +973,15 @@ void ASTERIXImporterTask::checkAllDone ()
 
         if (!create_mapping_stubs_)
             emit ATSDB::instance().interface().databaseContentChangedSignal();
+
+        task_manager_.appendInfo("ASTERIXImporterTask: inserted "+std::to_string(status_widget_->numRecordsInserted())
+                                 +" records ("+status_widget_->recordsInsertedRateStr()+" rec/s)");
+
+        for (auto& db_cnt_it : status_widget_->dboInsertedCounts())
+            task_manager_.appendInfo("ASTERIXImporterTask: inserted "+std::to_string(db_cnt_it.second)
+                                        +" "+db_cnt_it.first+" records");
+
+        task_manager_.appendSuccess("ASTERIXImporterTask: import done after "+status_widget_->elapsedTimeStr());
     }
 
     logdbg << "ASTERIXImporterTask: checkAllDone: done";

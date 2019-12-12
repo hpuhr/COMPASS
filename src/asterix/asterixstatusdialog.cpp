@@ -278,8 +278,8 @@ void ASTERIXStatusDialog::addNumInserted (const std::string& dbo_name, unsigned 
     updateTime();
 
     double records_per_second = records_inserted_/(time_diff_.total_milliseconds()/1000.0);
-    std::string records_rate_str_ = std::to_string(static_cast<int>(records_per_second))+" (e/s)";
-    records_inserted_rate_label_->setText(records_rate_str_.c_str());
+    records_inserted_rate_str_ = std::to_string(static_cast<int>(records_per_second))+" (e/s)";
+    records_inserted_rate_label_->setText(records_inserted_rate_str_.c_str());
 }
 
 void ASTERIXStatusDialog::setCategoryCounts (const std::map<unsigned int, size_t>& counts)
@@ -299,6 +299,41 @@ void ASTERIXStatusDialog::addMappedCounts (const std::map<unsigned int, std::pai
     }
 
     updateCategoryGrid();
+}
+
+size_t ASTERIXStatusDialog::numFrames() const
+{
+    return num_frames_;
+}
+
+size_t ASTERIXStatusDialog::numRecords() const
+{
+    return num_records_;
+}
+
+size_t ASTERIXStatusDialog::numErrors() const
+{
+    return num_errors_;
+}
+
+std::map<std::string, size_t> ASTERIXStatusDialog::dboInsertedCounts() const
+{
+    return dbo_inserted_counts_;
+}
+
+std::string ASTERIXStatusDialog::elapsedTimeStr() const
+{
+    return elapsed_time_str_;
+}
+
+std::string ASTERIXStatusDialog::recordsInsertedRateStr() const
+{
+    return records_inserted_rate_str_;
+}
+
+size_t ASTERIXStatusDialog::numRecordsInserted() const
+{
+    return records_inserted_;
 }
 
 void ASTERIXStatusDialog::updateTime ()

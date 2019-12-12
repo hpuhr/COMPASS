@@ -33,6 +33,8 @@ public:
     void updateTaskStates ();
     void selectNextTask ();
 
+    TaskManagerLogWidget* logWidget() { assert (log_widget_); return log_widget_; }
+
 protected:
     TaskManager& task_manager_;
 

@@ -97,6 +97,7 @@ MainWindow::MainWindow()
     //createMenus();
 
     tab_widget_ = new QTabWidget ();
+    tab_widget_->setAutoFillBackground(true);
 
 //    QWidget *main_widget = new QWidget ();
 //    QVBoxLayout *main_layout = new QVBoxLayout ();
@@ -144,7 +145,7 @@ MainWindow::MainWindow()
 
     // management widget
     management_widget_ = new ManagementWidget ();
-    //management_widget_->setAutoFillBackground(true);
+    management_widget_->setAutoFillBackground(true);
 
     setCentralWidget(tab_widget_);
 
