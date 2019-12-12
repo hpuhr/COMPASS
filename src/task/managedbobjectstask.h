@@ -11,7 +11,7 @@
 
 class TaskManager;
 
-class ManageDBObjectsTask : public QObject, public Configurable, public Task
+class ManageDBObjectsTask : public Task, public Configurable
 {
 public:
     ManageDBObjectsTask(const std::string& class_id, const std::string& instance_id,
@@ -20,6 +20,8 @@ public:
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
     virtual QWidget* widget ();
+
+    virtual bool checkPrerequisites ();
 
 protected:
     std::unique_ptr<ManageDBObjectsTaskWidget> widget_;

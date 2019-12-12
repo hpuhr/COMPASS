@@ -85,7 +85,7 @@ DBSchemaManagerWidget::DBSchemaManagerWidget(DBSchemaManager &manager, QWidget* 
 
     setLayout (layout);
 
-    setDisabled(true);
+    //setDisabled(true);
 }
 
 DBSchemaManagerWidget::~DBSchemaManagerWidget()

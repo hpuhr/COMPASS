@@ -44,7 +44,7 @@ namespace jASTERIX
     class jASTERIX;
 }
 
-class ASTERIXImporterTask: public QObject, public Configurable, public Task
+class ASTERIXImporterTask: public Task, public Configurable
 {
     Q_OBJECT
 
@@ -114,6 +114,8 @@ public:
 
     bool limitRAM() const;
     void limitRAM(bool value);
+
+    virtual bool checkPrerequisites ();
 
 protected:
     bool debug_jasterix_;

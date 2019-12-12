@@ -136,7 +136,7 @@ MainWindow::MainWindow()
 
 //    main_widget->setLayout(main_layout);
 
-//    main_widget->setAutoFillBackground(true);
+    tab_widget_->setAutoFillBackground(true);
 //    tab_widget_->addTab(main_widget, "DB Config");
 
     // management widget

@@ -38,6 +38,8 @@
 TaskManager::TaskManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb)
 : Configurable (class_id, instance_id, atsdb, "task.json")
 {
+    registerParameter("expert_mode", &expert_mode_, false);
+
     createSubConfigurables();
 
     task_list_ = {"DatabaseOpenTask", "ManageSchemaTask", "ManageDBObjectsTask"}; // defines order of tasks
@@ -55,39 +57,7 @@ TaskManager::TaskManager(const std::string &class_id, const std::string &instanc
 
 TaskManager::~TaskManager()
 {
-    assert (!json_importer_task_);
-    //assert (!radar_plot_position_calculator_task_);
-
-//#if USE_JASTERIX
-//    assert (!asterix_importer_task_);
-//#endif
 }
-
-//JSONImporterTask* TaskManager::getJSONImporterTask()
-//{
-//    assert (json_importer_task_);
-//    return json_importer_task_;
-//}
-
-//RadarPlotPositionCalculatorTask* TaskManager::getRadarPlotPositionCalculatorTask()
-//{
-//    assert (radar_plot_position_calculator_task_);
-//    return radar_plot_position_calculator_task_;
-//}
-
-//CreateARTASAssociationsTask* TaskManager::getCreateARTASAssociationsTask()
-//{
-//    assert (create_artas_associations_task_);
-//    return create_artas_associations_task_;
-//}
-
-//#if USE_JASTERIX
-//ASTERIXImporterTask* TaskManager::getASTERIXImporterTask()
-//{
-//    assert (asterix_importer_task_);
-//    return asterix_importer_task_;
-//}
-//#endif
 
 void TaskManager::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
@@ -99,6 +69,8 @@ void TaskManager::generateSubConfigurable (const std::string &class_id, const st
 
         assert (!tasks_.count(class_id));
         tasks_[class_id] = database_open_task_.get();
+
+        connect (database_open_task_.get(), &DatabaseOpenTask::doneSignal, this, &TaskManager::taskDoneSlot);
     }
     else if (class_id.compare ("ManageSchemaTask") == 0)
     {
@@ -108,6 +80,7 @@ void TaskManager::generateSubConfigurable (const std::string &class_id, const st
 
         assert (!tasks_.count(class_id));
         tasks_[class_id] = manage_schema_task_.get();
+        connect (manage_schema_task_.get(), &DatabaseOpenTask::doneSignal, this, &TaskManager::taskDoneSlot);
     }
     else if (class_id.compare ("ManageDBObjectsTask") == 0)
     {
@@ -117,6 +90,7 @@ void TaskManager::generateSubConfigurable (const std::string &class_id, const st
 
         assert (!tasks_.count(class_id));
         tasks_[class_id] = manage_dbobjects_task_.get();
+        connect (manage_dbobjects_task_.get(), &DatabaseOpenTask::doneSignal, this, &TaskManager::taskDoneSlot);
     }
 #if USE_JASTERIX
     else if (class_id.compare ("ASTERIXImporterTask") == 0)
@@ -127,6 +101,7 @@ void TaskManager::generateSubConfigurable (const std::string &class_id, const st
 
         assert (!tasks_.count(class_id));
         tasks_[class_id] = asterix_importer_task_.get();
+        connect (asterix_importer_task_.get(), &DatabaseOpenTask::doneSignal, this, &TaskManager::taskDoneSlot);
     }
 #endif
     else if (class_id.compare ("JSONImporterTask") == 0)
@@ -137,6 +112,7 @@ void TaskManager::generateSubConfigurable (const std::string &class_id, const st
 
         assert (!tasks_.count(class_id));
         tasks_[class_id] = json_importer_task_.get();
+        connect (json_importer_task_.get(), &DatabaseOpenTask::doneSignal, this, &TaskManager::taskDoneSlot);
     }
     else if (class_id.compare ("RadarPlotPositionCalculatorTask") == 0)
     {
@@ -146,6 +122,8 @@ void TaskManager::generateSubConfigurable (const std::string &class_id, const st
 
         assert (!tasks_.count(class_id));
         tasks_[class_id] = radar_plot_position_calculator_task_.get();
+        connect (radar_plot_position_calculator_task_.get(), &DatabaseOpenTask::doneSignal,
+                 this, &TaskManager::taskDoneSlot);
     }
     else if (class_id.compare ("CreateARTASAssociationsTask") == 0)
     {
@@ -155,6 +133,8 @@ void TaskManager::generateSubConfigurable (const std::string &class_id, const st
 
         assert (!tasks_.count(class_id));
         tasks_[class_id] = create_artas_associations_task_.get();
+        connect (create_artas_associations_task_.get(), &DatabaseOpenTask::doneSignal,
+                 this, &TaskManager::taskDoneSlot);
     }
     else
         throw std::runtime_error ("TaskManager: generateSubConfigurable: unknown class_id "+class_id );
@@ -212,9 +192,36 @@ std::map<std::string, Task *> TaskManager::tasks() const
     return tasks_;
 }
 
+bool TaskManager::expertMode() const
+{
+    return expert_mode_;
+}
+
+void TaskManager::expertMode(bool value)
+{
+    expert_mode_ = value;
+
+    if (widget_)
+    {
+        widget_->updateTaskStates();
+        widget_->selectNextTask();
+    }
+}
+
 std::vector<std::string> TaskManager::taskList() const
 {
     return task_list_;
+}
+
+void TaskManager::taskDoneSlot (std::string task_name)
+{
+    loginf << "TaskManager: taskDoneSlot: task " << task_name;
+
+    if (widget_)
+    {
+        widget_->updateTaskStates();
+        widget_->selectNextTask();
+    }
 }
 
 void TaskManager::disable ()

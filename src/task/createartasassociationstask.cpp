@@ -23,8 +23,8 @@ using namespace Utils;
 
 CreateARTASAssociationsTask::CreateARTASAssociationsTask(const std::string& class_id, const std::string& instance_id,
                                                          TaskManager& task_manager)
-    : Configurable (class_id, instance_id, &task_manager),
-      Task("CreateARTASAssociationsTask", "Calculate ARTAS Associations", true, task_manager)
+    : Task("CreateARTASAssociationsTask", "Calculate ARTAS Associations", true, false, task_manager),
+      Configurable (class_id, instance_id, &task_manager)
 {
     registerParameter ("current_data_source_name", &current_data_source_name_, "");
 
@@ -550,6 +550,14 @@ void CreateARTASAssociationsTask::markTrackCoastingAssociationsDubious(bool valu
 {
     loginf << "CreateARTASAssociationsTask: markTrackCoastingAssociationsDubious: value " << value;
     mark_track_coasting_associations_dubious_ = value;
+}
+
+bool CreateARTASAssociationsTask::checkPrerequisites ()
+{
+    if (!ATSDB::instance().interface().ready())
+        return false;
+
+    return canRun();
 }
 
 void CreateARTASAssociationsTask::checkAndSetVariable (std::string& name_str, DBOVariable** var)

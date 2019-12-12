@@ -12,6 +12,7 @@
 #include <QLabel>
 #include <QSplitter>
 #include <QSettings>
+#include <QCheckBox>
 
 #include "taskmanagerlogwidget.h"
 
@@ -23,8 +24,6 @@ TaskManagerWidget::TaskManagerWidget(TaskManager& task_manager, QWidget *parent)
 
     QFont font_big;
     font_big.setPointSize(18);
-
-    int frame_width_small = 1;
 
     main_splitter_ = new QSplitter();
     main_splitter_->setOrientation(Qt::Vertical);
@@ -40,25 +39,30 @@ TaskManagerWidget::TaskManagerWidget(TaskManager& task_manager, QWidget *parent)
 
         top_splitter_ = new QSplitter();
 
+        QWidget* task_stuff_container = new QWidget;
+        QVBoxLayout* task_stuff_container_layout = new QVBoxLayout;
+
         task_list_ = new QListWidget ();
         task_list_->setSelectionBehavior(QAbstractItemView::SelectItems);
         task_list_->setSelectionMode(QAbstractItemView::SingleSelection);
         updateTaskList();
-        connect (task_list_, &QListWidget::itemClicked, this, &TaskManagerWidget::taskClicked);
+        updateTaskStates();
+        connect (task_list_, &QListWidget::itemClicked, this, &TaskManagerWidget::taskClickedSlot);
 
-        top_splitter_->addWidget(task_list_);
+        task_stuff_container_layout->addWidget(task_list_);
+
+        expert_check_ = new QCheckBox("Expert Mode");
+        connect (expert_check_, &QCheckBox::clicked, this, &TaskManagerWidget::expertModeToggledSlot);
+        task_stuff_container_layout->addWidget(expert_check_);
+
+
+        task_stuff_container->setLayout(task_stuff_container_layout);
+
+        top_splitter_->addWidget(task_stuff_container);
 
         tasks_widget_ = new QStackedWidget ();
 
-        for (auto& task_map_it : item_task_mappings_) // select "Open a Database"
-        {
-            if (task_map_it.first->text() == "Open a Database")
-            {
-                task_list_->setCurrentItem(task_map_it.first);
-                taskClicked (task_map_it.first);
-                break;
-            }
-        }
+        selectNextTask();
         top_splitter_->addWidget(tasks_widget_);
         top_splitter_->restoreState(settings.value("topSplitterSizes").toByteArray());
 
@@ -107,39 +111,57 @@ void TaskManagerWidget::updateTaskList ()
         assert (current_task);
 
         QListWidgetItem* item = new QListWidgetItem(current_task->guiName().c_str(), task_list_); // icon,
-        item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
-        item->setCheckState(Qt::Unchecked); // AND initialize check state
+        //item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
+        //item->setCheckState(Qt::Unchecked); // AND initialize check state
 
         item_task_mappings_[item] = current_task;
     }
-
-//#if USE_JASTERIX
-//    QListWidgetItem* import_asterix_item = new QListWidgetItem("Import ASTERIX Recording", task_list_); // icon,
-//    import_asterix_item->setFlags(import_asterix_item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
-//    import_asterix_item->setCheckState(Qt::Unchecked); // AND initialize check state
-//#endif
-
-//    QListWidgetItem* import_json_item = new QListWidgetItem("Import JSON data", task_list_); // icon,
-//    import_json_item->setFlags(import_asterix_item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
-//    import_json_item->setCheckState(Qt::Unchecked); // AND initialize check state
-
-//    QListWidgetItem* calc_radar_pos_item = new QListWidgetItem("Calculate Radar Plot Positions", task_list_); // icon,
-//    calc_radar_pos_item->setFlags(import_asterix_item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
-//    calc_radar_pos_item->setCheckState(Qt::Unchecked); // AND initialize check state
-
-//    QListWidgetItem* calc_artas_assoc_item = new QListWidgetItem("Calculate ARTAS Associations", task_list_); // icon,
-//    calc_artas_assoc_item->setFlags(import_asterix_item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
-//    calc_artas_assoc_item->setCheckState(Qt::Unchecked); // AND initialize check state
-
-    //        QListWidgetItem* item = new QListWidgetItem(icon, "item", listWidget);
-    //        item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
-    //        item->setCheckState(Qt::Unchecked); // AND initialize check state
 }
 
-void TaskManagerWidget::taskClicked(QListWidgetItem* item)
+void TaskManagerWidget::updateTaskStates ()
+{
+    bool enabled;
+    bool expert_mode = task_manager_.expertMode();
+
+    for (auto& item_it : item_task_mappings_)
+    {
+        if (!expert_mode && item_it.second->expertOnly())
+            enabled = false;
+        else
+            enabled = item_it.second->checkPrerequisites();
+
+        //item->setFlags(item->flags() & ~Qt::ItemIsSelectable); Qt::ItemIsEnabled
+
+        loginf << "TaskManagerWidget: updateTaskStates: item " << item_it.first->text().toStdString()
+               << " enabled " << enabled;
+
+        if (enabled) // can be run
+            item_it.first->setFlags(item_it.first->flags() | Qt::ItemIsEnabled);
+        else
+            item_it.first->setFlags(item_it.first->flags() & ~Qt::ItemIsEnabled);
+    }
+}
+
+void TaskManagerWidget::selectNextTask ()
+{
+    for (auto& task_map_it : item_task_mappings_)
+    {
+        if (task_map_it.first->flags() & Qt::ItemIsEnabled)
+        {
+            task_list_->setCurrentItem(task_map_it.first);
+            taskClickedSlot (task_map_it.first);
+            break;
+        }
+    }
+}
+
+void TaskManagerWidget::taskClickedSlot(QListWidgetItem* item)
 {
     assert (item);
-    loginf << "TaskManagerWidget: taskClicked: item '" << item->text().toStdString() << "'";
+    loginf << "TaskManagerWidget: taskClickedSlot: item '" << item->text().toStdString() << "'";
+
+    if (!(item->flags() & Qt::ItemIsEnabled)) // do nothing if not enabled
+        return;
 
     assert (item_task_mappings_.count(item));
     Task* current_task = item_task_mappings_.at(item);
@@ -150,3 +172,13 @@ void TaskManagerWidget::taskClicked(QListWidgetItem* item)
 
     tasks_widget_->setCurrentWidget(current_task->widget());
 }
+
+void TaskManagerWidget::expertModeToggledSlot ()
+{
+    loginf << "TaskManagerWidget: expertModeToggledSlot";
+
+    assert (expert_check_);
+    task_manager_.expertMode(expert_check_->checkState() == Qt::Checked);
+}
+
+

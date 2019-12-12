@@ -59,8 +59,8 @@ const unsigned int limited_num_json_jobs_ = 1;
 
 ASTERIXImporterTask::ASTERIXImporterTask(const std::string& class_id, const std::string& instance_id,
                                          TaskManager& task_manager)
-    : Configurable (class_id, instance_id, &task_manager),
-      Task("ASTERIXImportTask", "Import ASTERIX Data", true, task_manager)
+    : Task("ASTERIXImportTask", "Import ASTERIX Data", true, false, task_manager),
+      Configurable (class_id, instance_id, &task_manager)
 {
     //qRegisterMetaType<std::unique_ptr<std::vector <nlohmann::json>>>("std::unique_ptr<std::vector <nlohmann::json>>");
 
@@ -429,6 +429,14 @@ void ASTERIXImporterTask::limitRAM(bool limit_ram)
         jASTERIX::frame_chunk_size = unlimited_chunk_size;
         jASTERIX::record_chunk_size = unlimited_chunk_size;
     }
+}
+
+bool ASTERIXImporterTask::checkPrerequisites ()
+{
+    if (!ATSDB::instance().interface().ready())
+        return false;
+
+    return canImportFile(current_filename_);
 }
 
 bool ASTERIXImporterTask::canImportFile (const std::string& filename)

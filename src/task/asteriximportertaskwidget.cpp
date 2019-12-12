@@ -337,7 +337,7 @@ void ASTERIXImporterTaskWidget::createObjectParserWidget()
 {
     assert (!object_parser_widget_);
     assert (main_layout_);
-    setMinimumSize(QSize(1800, 800));
+    //setMinimumSize(QSize(1800, 800));
 
     int frame_width_small = 1;
 
@@ -351,7 +351,7 @@ void ASTERIXImporterTaskWidget::createObjectParserWidget()
 
     object_parser_widget_ = new QStackedWidget ();
 
-    object_parser_widget_->setMinimumWidth(800);
+    //object_parser_widget_->setMinimumWidth(800);
 
     QVBoxLayout* tmp = new QVBoxLayout ();
     tmp->addWidget(object_parser_widget_);

@@ -1,10 +1,13 @@
 #include "managedbobjectstask.h"
 #include "taskmanager.h"
+#include "atsdb.h"
+#include "dbinterface.h"
+#include "dbschemamanager.h"
 
 ManageDBObjectsTask::ManageDBObjectsTask(const std::string& class_id, const std::string& instance_id,
                                    TaskManager& task_manager)
-    : Configurable (class_id, instance_id, &task_manager), Task("ManageDBObjectsTask", "Manage DBObjects", true,
-                                                                task_manager)
+    : Task("ManageDBObjectsTask", "Manage DBObjects", true, true, task_manager),
+      Configurable (class_id, instance_id, &task_manager)
 {
 }
 
@@ -22,3 +25,12 @@ void ManageDBObjectsTask::generateSubConfigurable (const std::string &class_id, 
 {
     throw std::runtime_error ("ManageDBObjectsTask: generateSubConfigurable: unknown class_id "+class_id );
 }
+
+bool ManageDBObjectsTask::checkPrerequisites ()
+{
+    if (!ATSDB::instance().interface().ready())
+        return false;
+
+    return ATSDB::instance().schemaManager().isLocked();
+}
+

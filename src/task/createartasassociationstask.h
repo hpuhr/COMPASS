@@ -17,7 +17,7 @@ class MetaDBOVariable;
 class DBObject;
 class Buffer;
 
-class CreateARTASAssociationsTask : public QObject, public Configurable, public Task
+class CreateARTASAssociationsTask : public Task, public Configurable
 {
     Q_OBJECT
 
@@ -110,6 +110,8 @@ public:
 
     bool markTrackCoastingAssociationsDubious() const;
     void markTrackCoastingAssociationsDubious(bool value);
+
+    virtual bool checkPrerequisites ();
 
 protected:
     std::string current_data_source_name_;

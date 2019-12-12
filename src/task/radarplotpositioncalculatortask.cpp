@@ -30,6 +30,7 @@
 #include "taskmanager.h"
 #include "projectionmanager.h"
 #include "stringconv.h"
+#include "dbinterface.h"
 
 #include <QCoreApplication>
 #include <QMessageBox>
@@ -39,8 +40,8 @@ using namespace Utils;
 
 RadarPlotPositionCalculatorTask::RadarPlotPositionCalculatorTask(
         const std::string& class_id, const std::string& instance_id, TaskManager& task_manager)
-    : Configurable (class_id, instance_id, &task_manager),
-      Task("RadarPlotPositionCalculatorTask", "Calculate Radar Plot Positions", true, task_manager)
+    : Task("RadarPlotPositionCalculatorTask", "Calculate Radar Plot Positions", true, false, task_manager),
+      Configurable (class_id, instance_id, &task_manager)
 {
     qRegisterMetaType<std::shared_ptr<Buffer>>("std::shared_ptr<Buffer>");
     //qRegisterMetaType<DBObject>("DBObject");
@@ -229,6 +230,18 @@ void RadarPlotPositionCalculatorTask::longitudeVarStr(const std::string& longitu
     else
         longitude_var_ = nullptr;
 }
+
+bool RadarPlotPositionCalculatorTask::checkPrerequisites ()
+{
+    if (!ATSDB::instance().interface().ready())
+        return false;
+
+    if (!ATSDB::instance().objectManager().existsObject("Radar"))
+        return false;
+
+    return ATSDB::instance().objectManager().object("Radar").hasData();
+}
+
 
 void RadarPlotPositionCalculatorTask::checkAndSetVariable (std::string& name_str, DBOVariable** var)
 {

@@ -1,4 +1,5 @@
 #include "databaseopentaskwidget.h"
+#include "databaseopentask.h"
 #include "atsdb.h"
 #include "dbinterface.h"
 #include "dbinterfacewidget.h"
@@ -15,7 +16,6 @@ DatabaseOpenTaskWidget::DatabaseOpenTaskWidget(DatabaseOpenTask& task, QWidget* 
     //main_layout_->addWidget(new QLabel("DatabaseOpenTaskWidget"));
 
     dbinterface_widget_ = ATSDB::instance().interface().widget();
-    //    QObject::connect(dbinterface_widget_, SIGNAL(databaseOpenedSignal()), this, SLOT(databaseOpenedSlot()));
     main_layout_->addWidget(dbinterface_widget_);
 
     setLayout (main_layout_);

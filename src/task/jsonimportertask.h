@@ -37,7 +37,7 @@ class QMessageBox;
 class JSONParseJob;
 class JSONMappingJob;
 
-class JSONImporterTask : public QObject, public Configurable, public Task
+class JSONImporterTask : public Task, public Configurable
 {
     Q_OBJECT
 
@@ -86,6 +86,8 @@ public:
 
     std::string currentSchemaName() const;
     void currentSchemaName(const std::string &currentSchema);
+
+    virtual bool checkPrerequisites ();
 
 protected:
     std::map <std::string, SavedFile*> file_list_;

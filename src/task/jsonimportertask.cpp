@@ -52,8 +52,8 @@ using namespace std;
 
 JSONImporterTask::JSONImporterTask(const std::string& class_id, const std::string& instance_id,
                                    TaskManager& task_manager)
-    : Configurable (class_id, instance_id, &task_manager),
-      Task("JSONImporterTask", "Import JSON Data", true, task_manager)
+    : Task("JSONImporterTask", "Import JSON Data", true, false, task_manager),
+      Configurable (class_id, instance_id, &task_manager)
 {
     registerParameter("current_filename", &current_filename_, "");
     registerParameter("current_schema", &current_schema_, "");
@@ -182,6 +182,14 @@ std::string JSONImporterTask::currentSchemaName() const
 void JSONImporterTask::currentSchemaName(const std::string &current_schema)
 {
     current_schema_ = current_schema;
+}
+
+bool JSONImporterTask::checkPrerequisites ()
+{
+    if (!ATSDB::instance().interface().ready())
+        return false;
+
+    return canImportFile(current_filename_);
 }
 
 bool JSONImporterTask::canImportFile (const std::string& filename)

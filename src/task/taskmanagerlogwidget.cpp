@@ -5,7 +5,7 @@
 
 const std::map<QString, QColor> m_colours {{"red", QColor(Qt::red)},
                                            {"orange", QColor(255,165,0)},
-                                           {"green", QColor(Qt::green)}
+                                           {"green", QColor(0,150,0)}
                                           };
 
 TaskManagerLogWidget::TaskManagerLogWidget(QWidget* parent)

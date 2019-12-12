@@ -34,7 +34,7 @@ class UpdateBufferDBJob;
 
 class QMessageBox;
 
-class RadarPlotPositionCalculatorTask : public QObject, public Configurable, public Task
+class RadarPlotPositionCalculatorTask : public Task, public Configurable
 {
     Q_OBJECT
 
@@ -85,6 +85,8 @@ public:
 
     std::string longitudeVarStr() const;
     void longitudeVarStr(const std::string& longitude_var_str);
+
+    virtual bool checkPrerequisites ();
 
 protected:
     std::string db_object_str_;

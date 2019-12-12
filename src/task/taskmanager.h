@@ -23,6 +23,8 @@
 #include "global.h"
 #include "task.h"
 
+#include <QObject>
+
 class ATSDB;
 class DatabaseOpenTask;
 class ManageSchemaTask;
@@ -37,20 +39,17 @@ class TaskManagerWidget;
 class ASTERIXImporterTask;
 #endif
 
-class TaskManager : public Configurable
+class TaskManager : public QObject, public Configurable
 {
+    Q_OBJECT
+
+public slots:
+    void taskDoneSlot (std::string task_name);
+
 public:
     TaskManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb);
 
     virtual ~TaskManager();
-
-    //JSONImporterTask* getJSONImporterTask();
-    //RadarPlotPositionCalculatorTask* getRadarPlotPositionCalculatorTask();
-    //CreateARTASAssociationsTask* getCreateARTASAssociationsTask();
-
-//#if USE_JASTERIX
-//    ASTERIXImporterTask* getASTERIXImporterTask();
-//#endif
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
@@ -62,7 +61,12 @@ public:
     std::vector<std::string> taskList() const;
     std::map<std::string, Task *> tasks() const;
 
+    bool expertMode() const;
+    void expertMode(bool value);
+
 protected:
+    bool expert_mode_ {false};
+
     std::unique_ptr<DatabaseOpenTask> database_open_task_;
     std::unique_ptr<ManageSchemaTask> manage_schema_task_;
     std::unique_ptr<ManageDBObjectsTask> manage_dbobjects_task_;

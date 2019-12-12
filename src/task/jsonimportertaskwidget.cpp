@@ -450,7 +450,7 @@ void JSONImporterTaskWidget::createObjectParserWidget()
 {
     assert (!object_parser_widget_);
     assert (main_layout_);
-    setMinimumSize(QSize(1200, 600));
+    //setMinimumSize(QSize(1200, 600));
 
     int frame_width_small = 1;
 
@@ -460,7 +460,7 @@ void JSONImporterTaskWidget::createObjectParserWidget()
 
     object_parser_widget_ = new QStackedWidget ();
 
-    object_parser_widget_->setMinimumWidth(800);
+    //object_parser_widget_->setMinimumWidth(800);
 
     QVBoxLayout* tmp = new QVBoxLayout ();
     tmp->addWidget(object_parser_widget_);
