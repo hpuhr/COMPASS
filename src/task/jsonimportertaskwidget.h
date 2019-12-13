@@ -39,8 +39,8 @@ class JSONImporterTaskWidget : public QWidget
 
 public slots:
     void testImportSlot ();
-    void importSlot ();
-    void importDoneSlot (bool test);
+    //void importSlot ();
+    //void importDoneSlot ();
 
     void addFileSlot ();
     void deleteFileSlot ();
@@ -59,12 +59,14 @@ public:
     JSONImporterTaskWidget(JSONImporterTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
     virtual ~JSONImporterTaskWidget();
 
-    void update ();
+    //void update ();
+    void runStarted ();
+    void runDone ();
 
 protected:
     JSONImporterTask& task_;
 
-    QHBoxLayout *main_layout_ {nullptr};
+    QHBoxLayout* main_layout_ {nullptr};
 
     QListWidget* file_list_ {nullptr};
     QPushButton* add_file_button_ {nullptr};
@@ -82,7 +84,7 @@ protected:
     //QHBoxLayout* object_parser_layout_ {nullptr};
 
     QPushButton* test_button_ {nullptr};
-    QPushButton* import_button_ {nullptr};
+    //QPushButton* import_button_ {nullptr};
 
     void updateSchemasBox();
     void updateParserList ();

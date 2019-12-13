@@ -66,15 +66,15 @@ public:
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
-    bool canImportFile (const std::string& filename);
-    void importFile (const std::string& filename, bool test);
-    void importFileArchive (const std::string& filename, bool test);
+    bool canImportFile ();
+    virtual bool canRun();
+    virtual void run ();
 
     const std::map <std::string, SavedFile*> &fileList () { return file_list_; }
     bool hasFile (const std::string &filename) { return file_list_.count (filename) > 0; }
     void addFile (const std::string &filename);
     void removeCurrentFilename ();
-    void currentFilename (const std::string last_filename) { current_filename_ = last_filename; }
+    void currentFilename (const std::string filename, bool archive);
     const std::string &currentFilename () { return current_filename_; }
 
     JSONParsingSchemaIterator begin() { return schemas_.begin(); }
@@ -90,6 +90,8 @@ public:
     virtual bool checkPrerequisites ();
     virtual bool isRecommended ();
     virtual bool isRequired ();
+
+    void test(bool test);
 
 protected:
     std::map <std::string, SavedFile*> file_list_;
@@ -109,7 +111,6 @@ protected:
     std::vector<std::shared_ptr <JSONParseJob>> json_parse_jobs_;
     std::vector<std::shared_ptr <JSONMappingJob>> json_map_jobs_;
 
-    std::string filename_;
     bool test_ {false};
     bool archive_ {false};
 

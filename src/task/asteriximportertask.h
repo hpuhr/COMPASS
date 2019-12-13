@@ -37,7 +37,6 @@ class ASTERIXImporterTaskWidget;
 class ASTERIXCategoryConfig;
 class ASTERIXStatusDialog;
 class SavedFile;
-//class QMessageBox;
 
 namespace jASTERIX
 {

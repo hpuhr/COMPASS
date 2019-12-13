@@ -245,7 +245,7 @@ const std::string& ASTERIXImporterTask::currentFraming() const
     return current_framing_;
 }
 
-void ASTERIXImporterTask::currentFraming(const std::string &current_framing)
+void ASTERIXImporterTask::currentFraming(const std::string& current_framing)
 {
     current_framing_ = current_framing;
 }
@@ -1002,7 +1002,7 @@ void ASTERIXImporterTask::checkAllDone ()
         assert (widget_);
         widget_->runDone();
 
-        if (!create_mapping_stubs_)
+        if (!create_mapping_stubs_ && !test_)
             emit ATSDB::instance().interface().databaseContentChangedSignal();
 
         task_manager_.appendInfo("ASTERIXImporterTask: inserted "+std::to_string(status_widget_->numRecordsInserted())

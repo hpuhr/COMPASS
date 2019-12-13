@@ -45,9 +45,6 @@ using namespace Utils;
 JSONImporterTaskWidget::JSONImporterTaskWidget(JSONImporterTask& task, QWidget* parent, Qt::WindowFlags f)
     : QWidget (parent, f), task_(task)
 {
-    //setWindowTitle ("Import JSON Data");
-    //setMinimumSize(QSize(800, 600));
-
     setContentsMargins(0, 0, 0, 0);
 
     QFont font_bold;
@@ -61,10 +58,6 @@ JSONImporterTaskWidget::JSONImporterTaskWidget(JSONImporterTask& task, QWidget* 
     main_layout_ = new QHBoxLayout ();
 
     QVBoxLayout* left_layout = new QVBoxLayout ();
-
-//    QLabel *main_label = new QLabel ("Import JSON data");
-//    main_label->setFont (font_big);
-//    left_layout->addWidget (main_label);
 
     // file stuff
     {
@@ -107,8 +100,6 @@ JSONImporterTaskWidget::JSONImporterTaskWidget(JSONImporterTask& task, QWidget* 
 
     // schema selection
     {
-        //
-
         QFrame *schemas_frame = new QFrame ();
         schemas_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
         schemas_frame->setLineWidth(frame_width_small);
@@ -179,20 +170,13 @@ JSONImporterTaskWidget::JSONImporterTaskWidget(JSONImporterTask& task, QWidget* 
         left_layout->addWidget (parsers_frame, 1);
     }
 
-    //    QFormLayout *stuff_layout = new QFormLayout;
-    //    stuff_layout->setFormAlignment(Qt::AlignRight | Qt::AlignTop);
-    //    stuff_layout->addLayout(left_layout);
-
-    //    main_layout->addLayout(stuff_layout);
-
-
     test_button_ = new QPushButton ("Test Import");
     connect(test_button_, &QPushButton::clicked, this, &JSONImporterTaskWidget::testImportSlot);
     left_layout->addWidget(test_button_);
 
-    import_button_ = new QPushButton ("Import");
-    connect(import_button_, &QPushButton::clicked, this, &JSONImporterTaskWidget::importSlot);
-    left_layout->addWidget(import_button_);
+//    import_button_ = new QPushButton ("Import");
+//    connect(import_button_, &QPushButton::clicked, this, &JSONImporterTaskWidget::importSlot);
+//    left_layout->addWidget(import_button_);
 
     main_layout_->addLayout(left_layout);
 
@@ -244,7 +228,9 @@ void JSONImporterTaskWidget::selectedFileSlot ()
 
     QString filename = file_list_->currentItem()->text();
     assert (task_.hasFile(filename.toStdString()));
-    task_.currentFilename (filename.toStdString());
+
+    bool archive = (filename.endsWith(".zip") || filename.endsWith(".gz") || filename.endsWith(".tgz"));
+    task_.currentFilename (filename.toStdString(), archive);
 }
 
 void JSONImporterTaskWidget::updateFileListSlot ()
@@ -440,17 +426,13 @@ void JSONImporterTaskWidget::selectedObjectParserSlot ()
             createObjectParserWidget();
 
         object_parser_widget_->addWidget(task_.currentSchema().parser(name).widget());
-        //object_parser_widgets_->show();
     }
-    //    else
-    //        object_parser_widgets_->hide();
 }
 
 void JSONImporterTaskWidget::createObjectParserWidget()
 {
     assert (!object_parser_widget_);
     assert (main_layout_);
-    //setMinimumSize(QSize(1200, 600));
 
     int frame_width_small = 1;
 
@@ -460,8 +442,6 @@ void JSONImporterTaskWidget::createObjectParserWidget()
 
     object_parser_widget_ = new QStackedWidget ();
 
-    //object_parser_widget_->setMinimumWidth(800);
-
     QVBoxLayout* tmp = new QVBoxLayout ();
     tmp->addWidget(object_parser_widget_);
 
@@ -470,16 +450,16 @@ void JSONImporterTaskWidget::createObjectParserWidget()
     main_layout_->addWidget(right_frame);
 }
 
-void JSONImporterTaskWidget::update ()
-{
-    loginf << "JSONImporterTaskWidget: update";
-}
+//void JSONImporterTaskWidget::update ()
+//{
+//    loginf << "JSONImporterTaskWidget: update";
+//}
 
 void JSONImporterTaskWidget::testImportSlot ()
 {
     loginf << "JSONImporterTaskWidget: testImportSlot";
 
-    if (!file_list_->currentItem())
+    if (!task_.canImportFile())
     {
         QMessageBox m_warning (QMessageBox::Warning, "JSON File Test Import Failed",
                                "Please select a file in the list.",
@@ -488,94 +468,80 @@ void JSONImporterTaskWidget::testImportSlot ()
         return;
     }
 
-    QString filename = file_list_->currentItem()->text();
-    if (filename.size() > 0)
-    {
-        assert (task_.hasFile(filename.toStdString()));
-
-        if (!task_.canImportFile(filename.toStdString()))
-        {
-            QMessageBox m_warning (QMessageBox::Warning, "JSON File Test Import Failed",
-                                   "File does not exist.",
-                                   QMessageBox::Ok);
-            m_warning.exec();
-            return;
-        }
-
-        if (filename.endsWith(".zip") || filename.endsWith(".gz") || filename.endsWith(".tgz"))
-            task_.importFileArchive(filename.toStdString(), true);
-        else
-            task_.importFile(filename.toStdString(), true);
-
-        test_button_->setDisabled(true);
-        import_button_->setDisabled(true);
-    }
+    task_.test(true);
+    task_.run();
 }
 
-void JSONImporterTaskWidget::importSlot ()
+//void JSONImporterTaskWidget::importSlot ()
+//{
+//    loginf << "JSONImporterTaskWidget: importSlot";
+
+//    if (!file_list_->currentItem())
+//    {
+//        QMessageBox m_warning (QMessageBox::Warning, "JSON File Import Failed",
+//                               "Please select a file in the list.",
+//                               QMessageBox::Ok);
+//        m_warning.exec();
+//        return;
+//    }
+
+//    for (auto& object_it : ATSDB::instance().objectManager())
+//    {
+//        if (object_it.second->hasData())
+//        {
+//            QMessageBox::StandardButton reply;
+//            reply = QMessageBox::question(this, "Really Import?", "The database already contains data. "
+//                                                                  "A data import might not be successful. Continue?",
+//                                          QMessageBox::Yes|QMessageBox::No);
+//            if (reply == QMessageBox::Yes)
+//            {
+//                loginf << "JSONImporterTaskWidget: importSlot: importing although data in database";
+//                break;
+//            }
+//            else
+//            {
+//                loginf << "JSONImporterTaskWidget: importSlot: quit importing since data in database";
+//                return;
+//            }
+//        }
+//    }
+
+//    QString filename = file_list_->currentItem()->text();
+//    if (filename.size() > 0)
+//    {
+//        assert (task_.hasFile(filename.toStdString()));
+
+//        if (!task_.canImportFile(filename.toStdString()))
+//        {
+//            QMessageBox m_warning (QMessageBox::Warning, "JSON File Import Failed",
+//                                   "File does not exist.",
+//                                   QMessageBox::Ok);
+//            m_warning.exec();
+//            return;
+//        }
+
+//        if (filename.endsWith(".zip") || filename.endsWith(".gz") || filename.endsWith(".tgz"))
+//            task_.importFileArchive(filename.toStdString(), false);
+//        else
+//            task_.importFile(filename.toStdString(), false);
+
+//        test_button_->setDisabled(true);
+//        import_button_->setDisabled(true);
+//    }
+//}
+
+void JSONImporterTaskWidget::runStarted ()
 {
-    loginf << "JSONImporterTaskWidget: importSlot";
+    loginf << "JSONImporterTaskWidget: runStarted";
 
-    if (!file_list_->currentItem())
-    {
-        QMessageBox m_warning (QMessageBox::Warning, "JSON File Import Failed",
-                               "Please select a file in the list.",
-                               QMessageBox::Ok);
-        m_warning.exec();
-        return;
-    }
-
-    for (auto& object_it : ATSDB::instance().objectManager())
-    {
-        if (object_it.second->hasData())
-        {
-            QMessageBox::StandardButton reply;
-            reply = QMessageBox::question(this, "Really Import?", "The database already contains data. "
-                                                                  "A data import might not be successful. Continue?",
-                                          QMessageBox::Yes|QMessageBox::No);
-            if (reply == QMessageBox::Yes)
-            {
-                loginf << "JSONImporterTaskWidget: importSlot: importing although data in database";
-                break;
-            }
-            else
-            {
-                loginf << "JSONImporterTaskWidget: importSlot: quit importing since data in database";
-                return;
-            }
-        }
-    }
-
-    QString filename = file_list_->currentItem()->text();
-    if (filename.size() > 0)
-    {
-        assert (task_.hasFile(filename.toStdString()));
-
-        if (!task_.canImportFile(filename.toStdString()))
-        {
-            QMessageBox m_warning (QMessageBox::Warning, "JSON File Import Failed",
-                                   "File does not exist.",
-                                   QMessageBox::Ok);
-            m_warning.exec();
-            return;
-        }
-
-        if (filename.endsWith(".zip") || filename.endsWith(".gz") || filename.endsWith(".tgz"))
-            task_.importFileArchive(filename.toStdString(), false);
-        else
-            task_.importFile(filename.toStdString(), false);
-
-        test_button_->setDisabled(true);
-        import_button_->setDisabled(true);
-    }
+    test_button_->setDisabled(true);
 }
 
-void JSONImporterTaskWidget::importDoneSlot (bool test)
+void JSONImporterTaskWidget::runDone ()
 {
-    loginf << "JSONImporterTaskWidget: importDoneSlot: test " << test;
+    loginf << "JSONImporterTaskWidget: runDone";
 
     test_button_->setDisabled(false);
-    import_button_->setDisabled(false);
 }
 
 void JSONImporterTaskWidget::updateParserList ()
