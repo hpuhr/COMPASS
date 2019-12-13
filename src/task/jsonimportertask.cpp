@@ -52,7 +52,7 @@ using namespace std;
 
 JSONImporterTask::JSONImporterTask(const std::string& class_id, const std::string& instance_id,
                                    TaskManager& task_manager)
-    : Task("JSONImporterTask", "Import JSON Data", true, false, task_manager),
+    : Task("JSONImportTask", "Import JSON Data", true, false, task_manager),
       Configurable (class_id, instance_id, &task_manager)
 {
     registerParameter("current_filename", &current_filename_, "");

@@ -74,8 +74,10 @@ public:
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
-    bool canImportFile (const std::string& filename);
-    void importFile (const std::string& filename);
+    bool canImportFile ();
+    void createMappingStubsRun ();
+    void testRun ();
+    virtual void run ();
 
     const std::map <std::string, SavedFile*> &fileList () { return file_list_; }
     bool hasFile (const std::string &filename) { return file_list_.count (filename) > 0; }
@@ -128,7 +130,6 @@ protected:
     std::string current_filename_;
     std::string current_framing_;
 
-    std::string filename_;
     bool test_ {false};
     bool create_mapping_stubs_ {false};
 

@@ -63,6 +63,11 @@ TaskManagerWidget::TaskManagerWidget(TaskManager& task_manager, QWidget *parent)
 
         //task_stuff_container_layout->addStretch();
 
+        run_current_task_button_ = new QPushButton ("Run Current Task");
+        run_current_task_button_->setDisabled(true);
+        QObject::connect(run_current_task_button_, &QPushButton::clicked, this, &TaskManagerWidget::runCurrentTaskSlot);
+        task_stuff_container_layout->addWidget(run_current_task_button_);
+
         start_button_ = new QPushButton ("Start");
         start_button_->setDisabled(true);
         QObject::connect(start_button_, &QPushButton::clicked, this, &TaskManagerWidget::startSlot);
@@ -197,6 +202,15 @@ void TaskManagerWidget::selectNextTask ()
     }
 }
 
+std::string TaskManagerWidget::getCurrentTask ()
+{
+    QListWidgetItem* current_item = task_list_->currentItem();
+    assert (current_item);
+
+    assert (item_task_mappings_.count(current_item));
+    return item_task_mappings_.at(current_item)->name();
+}
+
 void TaskManagerWidget::taskClickedSlot(QListWidgetItem* item)
 {
     assert (item);
@@ -213,6 +227,8 @@ void TaskManagerWidget::taskClickedSlot(QListWidgetItem* item)
         tasks_widget_->addWidget(current_task->widget());
 
     tasks_widget_->setCurrentWidget(current_task->widget());
+
+    run_current_task_button_->setEnabled(current_task->checkPrerequisites());
 }
 
 void TaskManagerWidget::expertModeToggledSlot ()
@@ -221,6 +237,13 @@ void TaskManagerWidget::expertModeToggledSlot ()
 
     assert (expert_check_);
     task_manager_.expertMode(expert_check_->checkState() == Qt::Checked);
+}
+
+void TaskManagerWidget::runCurrentTaskSlot()
+{
+    loginf << "TaskManagerWidget: runCurrentTaskSlot";
+
+    task_manager_.runTask(getCurrentTask());
 }
 
 void TaskManagerWidget::startSlot ()

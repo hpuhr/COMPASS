@@ -23,6 +23,7 @@ signals:
 public slots:
     void taskClickedSlot(QListWidgetItem* item);
     void expertModeToggledSlot ();
+    void runCurrentTaskSlot();
     void startSlot ();
 
 public:
@@ -33,6 +34,8 @@ public:
     void updateTaskStates ();
     void selectNextTask ();
 
+    std::string getCurrentTask ();
+
     TaskManagerLogWidget* logWidget() { assert (log_widget_); return log_widget_; }
 
 protected:
@@ -40,6 +43,7 @@ protected:
 
     QListWidget* task_list_ {nullptr};
     QCheckBox* expert_check_ {nullptr};
+    QPushButton* run_current_task_button_ {nullptr};
     QPushButton* start_button_ {nullptr};
 
     QStackedWidget* tasks_widget_ {nullptr};

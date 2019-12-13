@@ -42,8 +42,8 @@ ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, 
     : QWidget (parent, f), task_(task)
 {
     setContentsMargins(0, 0, 0, 0);
-//    setWindowTitle ("Import ASTERIX Data");
-//    setMinimumSize(QSize(600, 800));
+    //    setWindowTitle ("Import ASTERIX Data");
+    //    setMinimumSize(QSize(600, 800));
 
     QFont font_bold;
     font_bold.setBold(true);
@@ -174,9 +174,9 @@ ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, 
         connect(test_button_, &QPushButton::clicked, this, &ASTERIXImporterTaskWidget::testImportSlot);
         left_layout->addWidget (test_button_);
 
-        import_button_ = new QPushButton ("Import");
-        connect(import_button_, &QPushButton::clicked, this, &ASTERIXImporterTaskWidget::importSlot);
-        left_layout->addWidget (import_button_);
+        //        import_button_ = new QPushButton ("Import");
+        //        connect(import_button_, &QPushButton::clicked, this, &ASTERIXImporterTaskWidget::importSlot);
+        //        left_layout->addWidget (import_button_);
     }
 
     //main_layout_->addLayout(left_layout);
@@ -398,7 +398,7 @@ void ASTERIXImporterTaskWidget::createMappingsSlot()
 {
     loginf << "ASTERIXImporterTaskWidget: createMappingsSlot";
 
-    if (!file_list_->currentItem())
+    if (!task_.canImportFile())
     {
         QMessageBox m_warning (QMessageBox::Warning, "ASTERIX File Create Mapping Stubs Failed",
                                "Please select a file in the list.",
@@ -407,35 +407,19 @@ void ASTERIXImporterTaskWidget::createMappingsSlot()
         return;
     }
 
-    QString filename = file_list_->currentItem()->text();
-    if (filename.size() > 0)
-    {
-        assert (task_.hasFile(filename.toStdString()));
+    task_.test(false);
+    task_.createMappingStubs(true);
+    task_.run();
 
-        if (!task_.canImportFile(filename.toStdString()))
-        {
-            QMessageBox m_warning (QMessageBox::Warning, "ASTERIX File Create Mapping Stubs Failed",
-                                   "File does not exist.",
-                                   QMessageBox::Ok);
-            m_warning.exec();
-            return;
-        }
-
-        task_.test(false);
-        task_.createMappingStubs(true);
-        task_.importFile(filename.toStdString());
-
-        create_mapping_stubs_button_->setDisabled(true);
-        test_button_->setDisabled(true);
-        import_button_->setDisabled(true);
-    }
+//    create_mapping_stubs_button_->setDisabled(true);
+//    test_button_->setDisabled(true);
 }
 
 void ASTERIXImporterTaskWidget::testImportSlot()
 {
     loginf << "ASTERIXImporterTaskWidget: testImportSlot";
 
-    if (!file_list_->currentItem())
+    if (!task_.canImportFile())
     {
         QMessageBox m_warning (QMessageBox::Warning, "ASTERIX File Test Import Failed",
                                "Please select a file in the list.",
@@ -444,107 +428,99 @@ void ASTERIXImporterTaskWidget::testImportSlot()
         return;
     }
 
-    QString filename = file_list_->currentItem()->text();
-    if (filename.size() > 0)
-    {
-        assert (task_.hasFile(filename.toStdString()));
+    task_.test(true);
+    task_.createMappingStubs(false);
+    task_.run();
 
-        if (!task_.canImportFile(filename.toStdString()))
-        {
-            QMessageBox m_warning (QMessageBox::Warning, "ASTERIX File Test Import Failed",
-                                   "File does not exist.",
-                                   QMessageBox::Ok);
-            m_warning.exec();
-            return;
-        }
-
-        task_.test(true);
-        task_.createMappingStubs(false);
-        task_.importFile(filename.toStdString());
-
-        create_mapping_stubs_button_->setDisabled(true);
-        test_button_->setDisabled(true);
-        import_button_->setDisabled(true);
-    }
-
-}
-void ASTERIXImporterTaskWidget::importSlot()
-{
-    loginf << "ASTERIXImporterTaskWidget: importSlot";
-
-    if (!file_list_->currentItem())
-    {
-        QMessageBox m_warning (QMessageBox::Warning, "ASTERIX File Import Failed",
-                               "Please select a file in the list.",
-                               QMessageBox::Ok);
-        m_warning.exec();
-        return;
-    }
-
-    float free_ram = System::getFreeRAMinGB();
-
-    if (free_ram < ram_threshold && !task_.limitRAM())
-    {
-        loginf << "ASTERIXImporterTaskWidget: importSlot: only " << free_ram << " GB free ram, recommending limiting";
-
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, "RAM Limiting",
-                                      "There is only "+QString::number(free_ram)+" GB free RAM available.\n"
-                                      +"This will result in decreased decoding performance.\n\n"
-                                      +"Do you agree to limiting RAM usage?",
-                                      QMessageBox::Yes|QMessageBox::No);
-        if (reply == QMessageBox::Yes)
-        {
-            task_.limitRAM(true);
-            limit_ram_check_->setChecked(true);
-        }
-    }
-    else if (free_ram >= ram_threshold && task_.limitRAM())
-    {
-        loginf << "ASTERIXImporterTaskWidget: importSlot: " << free_ram << " GB free ram, recommending not limiting";
-
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, "RAM Limiting",
-                                      "There is "+QString::number(free_ram)+" GB free RAM available.\n"
-                                      +"This will result in increased decoding performance.\n\n"
-                                      +"Do you agree to increased RAM usage?",
-                                      QMessageBox::Yes|QMessageBox::No);
-        if (reply == QMessageBox::Yes)
-        {
-            task_.limitRAM(false);
-            limit_ram_check_->setChecked(false);
-        }
-    }
-
-    QString filename = file_list_->currentItem()->text();
-    if (filename.size() > 0)
-    {
-        assert (task_.hasFile(filename.toStdString()));
-
-        if (!task_.canImportFile(filename.toStdString()))
-        {
-            QMessageBox m_warning (QMessageBox::Warning, "ASTERIX File Import Failed",
-                                   "File does not exist.",
-                                   QMessageBox::Ok);
-            m_warning.exec();
-            return;
-        }
-
-        task_.test(false);
-        task_.createMappingStubs(false);
-        task_.importFile(filename.toStdString());
-
-        create_mapping_stubs_button_->setDisabled(true);
-        test_button_->setDisabled(true);
-        import_button_->setDisabled(true);
-    }
+//    create_mapping_stubs_button_->setDisabled(true);
+//    test_button_->setDisabled(true);
 }
 
-void ASTERIXImporterTaskWidget::importDone ()
+//void ASTERIXImporterTaskWidget::importSlot()
+//{
+//    loginf << "ASTERIXImporterTaskWidget: importSlot";
+
+//    if (!file_list_->currentItem())
+//    {
+//        QMessageBox m_warning (QMessageBox::Warning, "ASTERIX File Import Failed",
+//                               "Please select a file in the list.",
+//                               QMessageBox::Ok);
+//        m_warning.exec();
+//        return;
+//    }
+
+//    float free_ram = System::getFreeRAMinGB();
+
+//    if (free_ram < ram_threshold && !task_.limitRAM())
+//    {
+//        loginf << "ASTERIXImporterTaskWidget: importSlot: only " << free_ram << " GB free ram, recommending limiting";
+
+//        QMessageBox::StandardButton reply;
+//        reply = QMessageBox::question(this, "RAM Limiting",
+//                                      "There is only "+QString::number(free_ram)+" GB free RAM available.\n"
+//                                      +"This will result in decreased decoding performance.\n\n"
+//                                      +"Do you agree to limiting RAM usage?",
+//                                      QMessageBox::Yes|QMessageBox::No);
+//        if (reply == QMessageBox::Yes)
+//        {
+//            task_.limitRAM(true);
+//            limit_ram_check_->setChecked(true);
+//        }
+//    }
+//    else if (free_ram >= ram_threshold && task_.limitRAM())
+//    {
+//        loginf << "ASTERIXImporterTaskWidget: importSlot: " << free_ram << " GB free ram, recommending not limiting";
+
+//        QMessageBox::StandardButton reply;
+//        reply = QMessageBox::question(this, "RAM Limiting",
+//                                      "There is "+QString::number(free_ram)+" GB free RAM available.\n"
+//                                      +"This will result in increased decoding performance.\n\n"
+//                                      +"Do you agree to increased RAM usage?",
+//                                      QMessageBox::Yes|QMessageBox::No);
+//        if (reply == QMessageBox::Yes)
+//        {
+//            task_.limitRAM(false);
+//            limit_ram_check_->setChecked(false);
+//        }
+//    }
+
+//    QString filename = file_list_->currentItem()->text();
+//    if (filename.size() > 0)
+//    {
+//        assert (task_.hasFile(filename.toStdString()));
+
+//        if (!task_.canImportFile(filename.toStdString()))
+//        {
+//            QMessageBox m_warning (QMessageBox::Warning, "ASTERIX File Import Failed",
+//                                   "File does not exist.",
+//                                   QMessageBox::Ok);
+//            m_warning.exec();
+//            return;
+//        }
+
+//        task_.test(false);
+//        task_.createMappingStubs(false);
+//        task_.importFile(filename.toStdString());
+
+//        create_mapping_stubs_button_->setDisabled(true);
+//        test_button_->setDisabled(true);
+//        import_button_->setDisabled(true);
+//    }
+//}
+
+void ASTERIXImporterTaskWidget::runStarted ()
 {
-    loginf << "ASTERIXImporterTaskWidget: importDone";
+    loginf << "ASTERIXImporterTaskWidget: runStarted";
+
+    create_mapping_stubs_button_->setDisabled(true);
+    test_button_->setDisabled(true);
+}
+
+void ASTERIXImporterTaskWidget::runDone ()
+{
+    loginf << "ASTERIXImporterTaskWidget: runDone";
 
     create_mapping_stubs_button_->setDisabled(false);
     test_button_->setDisabled(false);
-    import_button_->setDisabled(false);
+    //import_button_->setDisabled(false);
 }

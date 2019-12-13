@@ -76,6 +76,8 @@ public:
     void appendWarning(const std::string& text);
     void appendError(const std::string& text);
 
+    void runTask (const std::string& task_name);
+
 protected:
     bool expert_mode_ {false};
 

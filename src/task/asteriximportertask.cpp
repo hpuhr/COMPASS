@@ -217,6 +217,7 @@ void ASTERIXImporterTask::removeCurrentFilename ()
 
     delete file_list_.at(current_filename_);
     file_list_.erase(current_filename_);
+    current_filename_ = "";
 
     if (widget_)
         widget_->updateFileListSlot();
@@ -437,7 +438,7 @@ bool ASTERIXImporterTask::checkPrerequisites ()
     if (!ATSDB::instance().interface().ready())
         return false;
 
-    return canImportFile(current_filename_);
+    return canImportFile();
 }
 
 bool ASTERIXImporterTask::isRecommended ()
@@ -456,34 +457,45 @@ bool ASTERIXImporterTask::isRequired ()
     return false;
 }
 
-bool ASTERIXImporterTask::canImportFile (const std::string& filename)
+bool ASTERIXImporterTask::canImportFile ()
 {
-    if (!Files::fileExists(filename))
+    if (!current_filename_.size())
+        return false;
+
+    if (!Files::fileExists(current_filename_))
     {
-        loginf << "ASTERIXImporterTask: canImportFile: not possible since file does not exist";
+        loginf << "ASTERIXImporterTask: canImportFile: not possible since file '" << current_filename_
+               << "'does not exist";
         return false;
     }
 
     return true;
 }
 
-void ASTERIXImporterTask::importFile(const std::string& filename)
+void ASTERIXImporterTask::run()
 {
-    loginf << "ASTERIXImporterTask: importFile: filename " << filename << " test " << test_;
+    loginf << "ASTERIXImporterTask: run: filename " << current_filename_ << " test " << test_
+           << " create stubs " << create_mapping_stubs_;
 
-    task_manager_.appendInfo("ASTERIXImporterTask: import of file '"+filename+"' started");
+    if (test_)
+        task_manager_.appendInfo("ASTERIXImporterTask: test import of file '"+current_filename_+"' started");
+    else if (create_mapping_stubs_)
+        task_manager_.appendInfo("ASTERIXImporterTask: create mappings stubs using file '"+current_filename_
+                                 +"' started");
+    else
+        task_manager_.appendInfo("ASTERIXImporterTask: import of file '"+current_filename_+"' started");
 
-    assert (canImportFile(filename));
+    if (widget_)
+        widget_->runStarted();
 
-    filename_ = filename;
-
+    assert (canImportFile());
     assert (!status_widget_);
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     status_widget_ = nullptr;
 
-    status_widget_.reset(new ASTERIXStatusDialog (filename_, test_, create_mapping_stubs_));
+    status_widget_.reset(new ASTERIXStatusDialog (current_filename_, test_, create_mapping_stubs_));
     connect(status_widget_.get(), &ASTERIXStatusDialog::closeSignal, this, &ASTERIXImporterTask::closeStatusDialogSlot);
     status_widget_->markStartTime();
 
@@ -500,7 +512,7 @@ void ASTERIXImporterTask::importFile(const std::string& filename)
         if (!map_it.second.initialized())
             map_it.second.initialize();
 
-    loginf << "ASTERIXImporterTask: importFile: setting categories";
+    loginf << "ASTERIXImporterTask: run: setting categories";
 
     jASTERIX::add_artas_md5_hash = true;
 
@@ -511,20 +523,20 @@ void ASTERIXImporterTask::importFile(const std::string& filename)
     {
         //loginf << "ASTERIXImporterTask: importFile: setting category " << cat_it.first;
 
-        loginf << "ASTERIXImporterTask: importFile: setting cat " << cat_it.first
+        loginf << "ASTERIXImporterTask: run: setting cat " << cat_it.first
                << " decode " <<  cat_it.second.decode()
                << " edition '" << cat_it.second.edition()
                << "' ref '" << cat_it.second.ref() << "'";
 
         if (!jasterix_->hasCategory(cat_it.first))
         {
-            logwrn << "ASTERIXImporterTask: importFile: cat '" << cat_it.first << "' not defined in decoder";
+            logwrn << "ASTERIXImporterTask: run: cat '" << cat_it.first << "' not defined in decoder";
             continue;
         }
 
         if (!jasterix_->category(cat_it.first)->hasEdition(cat_it.second.edition()))
         {
-            logwrn << "ASTERIXImporterTask: importFile: cat " << cat_it.first << " edition '"
+            logwrn << "ASTERIXImporterTask: run: cat " << cat_it.first << " edition '"
                    << cat_it.second.edition() << "' not defined in decoder";
             continue;
         }
@@ -532,7 +544,7 @@ void ASTERIXImporterTask::importFile(const std::string& filename)
         if (cat_it.second.ref().size() && // only if value set
                 !jasterix_->category(cat_it.first)->hasREFEdition(cat_it.second.ref()))
         {
-            logwrn << "ASTERIXImporterTask: importFile: cat " << cat_it.first << " ref '"
+            logwrn << "ASTERIXImporterTask: run: cat " << cat_it.first << " ref '"
                    << cat_it.second.ref() << "' not defined in decoder";
             continue;
         }
@@ -540,7 +552,7 @@ void ASTERIXImporterTask::importFile(const std::string& filename)
         if (cat_it.second.spf().size() && // only if value set
                 !jasterix_->category(cat_it.first)->hasSPFEdition(cat_it.second.spf()))
         {
-            logwrn << "ASTERIXImporterTask: importFile: cat " << cat_it.first << " spf '"
+            logwrn << "ASTERIXImporterTask: run: cat " << cat_it.first << " spf '"
                    << cat_it.second.spf() << "' not defined in decoder";
             continue;
         }
@@ -557,10 +569,10 @@ void ASTERIXImporterTask::importFile(const std::string& filename)
         // TODO mapping?
     }
 
-    loginf << "ASTERIXImporterTask: importFile: filename " << filename;
+    loginf << "ASTERIXImporterTask: run: starting decode job";
 
     assert (decode_job_ == nullptr);
-    decode_job_ = make_shared<ASTERIXDecodeJob> (*this, filename, current_framing_, test_);
+    decode_job_ = make_shared<ASTERIXDecodeJob> (*this, current_filename_, current_framing_, test_);
 
     connect (decode_job_.get(), &ASTERIXDecodeJob::obsoleteSignal, this,
              &ASTERIXImporterTask::decodeASTERIXObsoleteSlot, Qt::QueuedConnection);
@@ -969,7 +981,7 @@ void ASTERIXImporterTask::checkAllDone ()
         refreshjASTERIX();
 
         assert (widget_);
-        widget_->importDone();
+        widget_->runDone();
 
         if (!create_mapping_stubs_)
             emit ATSDB::instance().interface().databaseContentChangedSignal();
@@ -981,7 +993,17 @@ void ASTERIXImporterTask::checkAllDone ()
             task_manager_.appendInfo("ASTERIXImporterTask: inserted "+std::to_string(db_cnt_it.second)
                                         +" "+db_cnt_it.first+" records");
 
-        task_manager_.appendSuccess("ASTERIXImporterTask: import done after "+status_widget_->elapsedTimeStr());
+        if (test_)
+            task_manager_.appendSuccess("ASTERIXImporterTask: import test done after "
+                                        +status_widget_->elapsedTimeStr());
+        else if (create_mapping_stubs_)
+                task_manager_.appendSuccess("ASTERIXImporterTask: create mapping stubs done after "
+                                            +status_widget_->elapsedTimeStr());
+        else
+        {
+            task_manager_.appendSuccess("ASTERIXImporterTask: import done after "+status_widget_->elapsedTimeStr());
+            done_ = true;
+        }
     }
 
     logdbg << "ASTERIXImporterTask: checkAllDone: done";

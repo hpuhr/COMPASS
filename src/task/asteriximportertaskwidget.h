@@ -50,13 +50,14 @@ public slots:
     void limitRAMChangedSlot ();
     void createMappingsSlot();
     void testImportSlot();
-    void importSlot();
+    //void importSlot();
 
 public:
     ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
     virtual ~ASTERIXImporterTaskWidget();
 
-    void importDone ();
+    void runStarted ();
+    void runDone ();
 
 protected:
     ASTERIXImporterTask& task_;
@@ -79,7 +80,7 @@ protected:
     QCheckBox* limit_ram_check_ {nullptr};
     QPushButton* create_mapping_stubs_button_ {nullptr};
     QPushButton* test_button_ {nullptr};
-    QPushButton* import_button_ {nullptr};
+    //QPushButton* import_button_ {nullptr};
 
     void updateParserList ();
     void createObjectParserWidget();

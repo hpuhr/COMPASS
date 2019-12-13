@@ -54,7 +54,7 @@ public:
         return done_;
     }
 
-    //virtual void run () { assert(!gui_only_); } // to be overriden by tasks that can run TODO
+    virtual void run () { assert(!gui_only_); } // to be overriden by tasks that can run TODO
 
 protected:
     std::string name_;

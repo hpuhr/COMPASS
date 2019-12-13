@@ -48,10 +48,10 @@ TaskManager::TaskManager(const std::string &class_id, const std::string &instanc
     task_list_ = {"DatabaseOpenTask", "ManageSchemaTask", "ManageDBObjectsTask"}; // defines order of tasks
 
 #if USE_JASTERIX
-    task_list_.push_back("ASTERIXImporterTask");
+    task_list_.push_back("ASTERIXImportTask");
 #endif
 
-    task_list_.insert (task_list_.end(), {"JSONImporterTask", "RadarPlotPositionCalculatorTask",
+    task_list_.insert (task_list_.end(), {"JSONImportTask", "RadarPlotPositionCalculatorTask",
                        "CreateARTASAssociationsTask", "PostProcessTask"});
 
     for (auto& task_it : task_list_) // check that all tasks in list exist
@@ -97,7 +97,7 @@ void TaskManager::generateSubConfigurable (const std::string &class_id, const st
         connect (manage_dbobjects_task_.get(), &DatabaseOpenTask::doneSignal, this, &TaskManager::taskDoneSlot);
     }
 #if USE_JASTERIX
-    else if (class_id.compare ("ASTERIXImporterTask") == 0)
+    else if (class_id.compare ("ASTERIXImportTask") == 0)
     {
         assert (!asterix_importer_task_);
         asterix_importer_task_.reset(new ASTERIXImporterTask (class_id, instance_id, *this));
@@ -108,7 +108,7 @@ void TaskManager::generateSubConfigurable (const std::string &class_id, const st
         connect (asterix_importer_task_.get(), &DatabaseOpenTask::doneSignal, this, &TaskManager::taskDoneSlot);
     }
 #endif
-    else if (class_id.compare ("JSONImporterTask") == 0)
+    else if (class_id.compare ("JSONImportTask") == 0)
     {
         assert (!json_importer_task_);
         json_importer_task_.reset(new JSONImporterTask (class_id, instance_id, *this));
@@ -178,14 +178,14 @@ void TaskManager::checkSubConfigurables ()
 #if USE_JASTERIX
     if (!asterix_importer_task_)
     {
-        generateSubConfigurable("ASTERIXImporterTask", "ASTERIXImporterTask0");
+        generateSubConfigurable("ASTERIXImportTask", "ASTERIXImportTask0");
         assert (asterix_importer_task_);
     }
 #endif
 
     if (!json_importer_task_)
     {
-        generateSubConfigurable("JSONImporterTask", "JSONImporterTask0");
+        generateSubConfigurable("JSONImportTask", "JSONImportTask0");
         assert (json_importer_task_);
     }
 
@@ -348,5 +348,15 @@ void TaskManager::appendError(const std::string& text)
 {
     if (widget_)
         widget_->logWidget()->appendError(text);
+}
+
+void TaskManager::runTask (const std::string& task_name)
+{
+    loginf << "TaskManager: runTask: name " << task_name;
+
+    assert (tasks_.count(task_name));
+    assert (tasks_.at(task_name)->checkPrerequisites());
+
+    tasks_.at(task_name)->run();
 }
 
