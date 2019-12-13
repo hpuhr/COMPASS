@@ -2,7 +2,7 @@
 #include "taskmanager.h"
 #include "atsdb.h"
 #include "dbinterface.h"
-//#include "dbinterfacewidget.h"
+#include "dbconnection.h"
 
 DatabaseOpenTask::DatabaseOpenTask(const std::string& class_id, const std::string& instance_id,
                                    TaskManager& task_manager)
@@ -54,6 +54,9 @@ void DatabaseOpenTask::databaseOpenedSlot()
 {
     loginf << "DatabaseOpenTask: databaseOpenedSlot";
     done_ = true;
+
+    task_manager_.appendSuccess("DatabaseOpenTask: database '"+ATSDB::instance().interface().connection().type()+":"
+                                +ATSDB::instance().interface().connection().identifier()+"' opened");
 
     emit doneSignal(name_);
 }

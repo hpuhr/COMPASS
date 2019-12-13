@@ -29,8 +29,10 @@ class ASTERIXConfigWidget;
 class QHBoxLayout;
 class QPushButton;
 class QListWidget;
+class QComboBox;
 class QStackedWidget;
 class QCheckBox;
+class QTabWidget;
 
 class ASTERIXImporterTaskWidget : public QWidget
 {
@@ -44,13 +46,12 @@ public slots:
 
     void addObjectParserSlot ();
     void removeObjectParserSlot ();
-    void selectedObjectParserSlot ();
+    void selectedObjectParserSlot (const QString& text);
 
     void debugChangedSlot ();
     void limitRAMChangedSlot ();
     void createMappingsSlot();
     void testImportSlot();
-    //void importSlot();
 
 public:
     ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
@@ -64,11 +65,13 @@ protected:
 
     QHBoxLayout *main_layout_ {nullptr};
 
+    QTabWidget* tab_widget_ {nullptr};
+
     QListWidget* file_list_ {nullptr};
     QPushButton* add_file_button_ {nullptr};
     QPushButton* delete_file_button_ {nullptr};
 
-    QListWidget* object_parser_list_ {nullptr};
+    QComboBox* object_parser_box_ {nullptr};
     QPushButton* add_object_parser_button_ {nullptr};
     QPushButton* delete_object_parser_button_ {nullptr};
 
@@ -80,10 +83,12 @@ protected:
     QCheckBox* limit_ram_check_ {nullptr};
     QPushButton* create_mapping_stubs_button_ {nullptr};
     QPushButton* test_button_ {nullptr};
-    //QPushButton* import_button_ {nullptr};
 
-    void updateParserList ();
-    void createObjectParserWidget();
+    void addMainTab ();
+    void addASTERIXConfigTab();
+    void addMappingsTab();
+
+    void updateParserBox ();
 };
 
 #endif // ASTERIXIMPORTERTASKWIDGET_H

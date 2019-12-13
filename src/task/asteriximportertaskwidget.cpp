@@ -33,6 +33,7 @@
 #include <QInputDialog>
 #include <QStackedWidget>
 #include <QCheckBox>
+#include <QComboBox>
 
 using namespace Utils;
 
@@ -42,8 +43,6 @@ ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, 
     : QWidget (parent, f), task_(task)
 {
     setContentsMargins(0, 0, 0, 0);
-    //    setWindowTitle ("Import ASTERIX Data");
-    //    setMinimumSize(QSize(600, 800));
 
     QFont font_bold;
     font_bold.setBold(true);
@@ -51,31 +50,32 @@ ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, 
     QFont font_big;
     font_big.setPointSize(18);
 
-    int frame_width_small = 1;
-
     main_layout_ = new QHBoxLayout ();
 
-    QVBoxLayout* left_layout = new QVBoxLayout ();
+    tab_widget_ = new QTabWidget ();
 
-    QFrame *left_frame = new QFrame ();
-    left_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
-    left_frame->setLineWidth(frame_width_small);
-    left_frame->setLayout(left_layout);
+    main_layout_->addWidget(tab_widget_);
 
-    QSizePolicy sp_left(QSizePolicy::Preferred, QSizePolicy::Preferred);
-    sp_left.setHorizontalStretch(1);
-    left_frame->setSizePolicy(sp_left);
+    addMainTab();
+    addASTERIXConfigTab();
+    addMappingsTab();
 
-    //    QLabel *main_label = new QLabel ("Import ASTERIX data");
-    //    main_label->setFont (font_big);
-    //    left_layout->addWidget (main_label);
+    setLayout (main_layout_);
+
+    show();
+}
+
+void ASTERIXImporterTaskWidget::addMainTab ()
+{
+    assert (tab_widget_);
+
+    QFont font_bold;
+    font_bold.setBold(true);
+
+    QVBoxLayout* main_tab_layout = new QVBoxLayout ();
 
     // file stuff
     {
-        QFrame *file_frame = new QFrame ();
-        file_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
-        file_frame->setLineWidth(frame_width_small);
-
         QVBoxLayout* files_layout = new QVBoxLayout();
 
         QLabel *files_label = new QLabel ("File Selection");
@@ -104,53 +104,7 @@ ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, 
 
         files_layout->addLayout(button_layout);
 
-        file_frame->setLayout (files_layout);
-
-        left_layout->addWidget (file_frame, 1);
-    }
-
-    {
-        config_widget_ = new ASTERIXConfigWidget (task_, this);
-        left_layout->addWidget(config_widget_);
-        //config_widget_->show();
-    }
-
-    // json object parser stuff
-    {
-        QFrame *parsers_frame = new QFrame ();
-        parsers_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
-        parsers_frame->setLineWidth(frame_width_small);
-
-        QVBoxLayout* parsers_layout = new QVBoxLayout();
-
-        QLabel *parser_label = new QLabel ("JSON Object Parsers");
-        parser_label->setFont(font_bold);
-        parsers_layout->addWidget(parser_label);
-
-        object_parser_list_ = new QListWidget ();
-        //file_list_->setTextElideMode (Qt::ElideNone);
-        object_parser_list_->setSelectionBehavior( QAbstractItemView::SelectItems );
-        object_parser_list_->setSelectionMode( QAbstractItemView::SingleSelection );
-        connect (object_parser_list_, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(selectedObjectParserSlot()));
-
-        updateParserList();
-        parsers_layout->addWidget(object_parser_list_);
-
-        QHBoxLayout* button_layout = new QHBoxLayout();
-
-        add_object_parser_button_ = new QPushButton ("Add");
-        connect (add_object_parser_button_, SIGNAL(clicked()), this, SLOT(addObjectParserSlot()));
-        button_layout->addWidget(add_object_parser_button_);
-
-        delete_object_parser_button_ = new QPushButton ("Remove");
-        connect (delete_object_parser_button_, SIGNAL(clicked()), this, SLOT(removeObjectParserSlot()));
-        button_layout->addWidget(delete_object_parser_button_);
-
-        parsers_layout->addLayout(button_layout);
-
-        parsers_frame->setLayout (parsers_layout);
-
-        left_layout->addWidget (parsers_frame, 1);
+        main_tab_layout->addLayout(files_layout);
     }
 
     // final stuff
@@ -158,33 +112,72 @@ ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, 
         debug_check_ = new QCheckBox ("Debug in Console");
         debug_check_->setChecked(task_.debug());
         connect(debug_check_, &QCheckBox::clicked, this, &ASTERIXImporterTaskWidget::debugChangedSlot);
-        left_layout->addWidget (debug_check_);
+        main_tab_layout->addWidget (debug_check_);
 
         limit_ram_check_ = new QCheckBox ("Limit RAM Usage");
         limit_ram_check_->setChecked(task_.limitRAM());
         connect(limit_ram_check_, &QCheckBox::clicked, this, &ASTERIXImporterTaskWidget::limitRAMChangedSlot);
-        left_layout->addWidget (limit_ram_check_);
+        main_tab_layout->addWidget (limit_ram_check_);
 
         create_mapping_stubs_button_ = new QPushButton ("Create Mapping Stubs");
         connect(create_mapping_stubs_button_, &QPushButton::clicked,
                 this, &ASTERIXImporterTaskWidget::createMappingsSlot);
-        left_layout->addWidget (create_mapping_stubs_button_);
+        main_tab_layout->addWidget (create_mapping_stubs_button_);
 
         test_button_ = new QPushButton ("Test Import");
         connect(test_button_, &QPushButton::clicked, this, &ASTERIXImporterTaskWidget::testImportSlot);
-        left_layout->addWidget (test_button_);
-
-        //        import_button_ = new QPushButton ("Import");
-        //        connect(import_button_, &QPushButton::clicked, this, &ASTERIXImporterTaskWidget::importSlot);
-        //        left_layout->addWidget (import_button_);
+        main_tab_layout->addWidget (test_button_);
     }
 
-    //main_layout_->addLayout(left_layout);
-    main_layout_->addWidget(left_frame);
+    QWidget* main_tab_widget = new QWidget();
+    main_tab_widget->setContentsMargins(0, 0, 0, 0);
+    main_tab_widget->setLayout(main_tab_layout);
+    tab_widget_->addTab(main_tab_widget, "Main");
+}
+void ASTERIXImporterTaskWidget::addASTERIXConfigTab()
+{
+    assert (tab_widget_);
 
-    setLayout (main_layout_);
+    config_widget_ = new ASTERIXConfigWidget (task_, this);
+    tab_widget_->addTab(config_widget_, "Decoder");
+}
 
-    show();
+void ASTERIXImporterTaskWidget::addMappingsTab()
+{
+    QVBoxLayout* parsers_layout = new QVBoxLayout();
+
+    QHBoxLayout* parser_manage_layout = new QHBoxLayout();
+
+    object_parser_box_ = new QComboBox ();
+    //file_list_->setTextElideMode (Qt::ElideNone);
+    //    object_parser_list_->setSelectionBehavior( QAbstractItemView::SelectItems );
+    //    object_parser_list_->setSelectionMode( QAbstractItemView::SingleSelection );
+    connect (object_parser_box_, SIGNAL(currentIndexChanged(const QString&)),
+             this, SLOT(selectedObjectParserSlot(const QString&)));
+
+    parser_manage_layout->addWidget(object_parser_box_);
+
+    //QHBoxLayout* button_layout = new QHBoxLayout();
+
+    add_object_parser_button_ = new QPushButton ("Add");
+    connect (add_object_parser_button_, SIGNAL(clicked()), this, SLOT(addObjectParserSlot()));
+    parser_manage_layout->addWidget(add_object_parser_button_);
+
+    delete_object_parser_button_ = new QPushButton ("Remove");
+    connect (delete_object_parser_button_, SIGNAL(clicked()), this, SLOT(removeObjectParserSlot()));
+    parser_manage_layout->addWidget(delete_object_parser_button_);
+
+    parsers_layout->addLayout(parser_manage_layout);
+
+    object_parser_widget_ = new QStackedWidget ();
+    parsers_layout->addWidget(object_parser_widget_);
+
+    updateParserBox();
+
+    QWidget* mappings_tab_widget = new QWidget();
+    mappings_tab_widget->setContentsMargins(0, 0, 0, 0);
+    mappings_tab_widget->setLayout(parsers_layout);
+    tab_widget_->addTab(mappings_tab_widget, "Mappings");
 }
 
 ASTERIXImporterTaskWidget::~ASTERIXImporterTaskWidget()
@@ -286,16 +279,18 @@ void ASTERIXImporterTaskWidget::addObjectParserSlot ()
         config.addParameterString ("db_object_name", dbo_name);
 
         current->generateSubConfigurable("JSONObjectParser", instance);
-        updateParserList();
+        updateParserBox();
     }
 }
 void ASTERIXImporterTaskWidget::removeObjectParserSlot ()
 {
     loginf << "ASTERIXImporterTaskWidget: removeObjectParserSlot";
 
-    if (object_parser_list_->currentItem())
+    assert (object_parser_box_);
+
+    if (object_parser_box_->currentIndex() >= 0)
     {
-        std::string name = object_parser_list_->currentItem()->text().toStdString();
+        std::string name = object_parser_box_->currentText().toStdString();
 
         assert (task_.schema() != nullptr);
         std::shared_ptr<JSONParsingSchema> current = task_.schema();
@@ -303,77 +298,53 @@ void ASTERIXImporterTaskWidget::removeObjectParserSlot ()
         assert (current->hasObjectParser(name));
         current->removeParser(name);
 
-        updateParserList();
-        selectedObjectParserSlot();
+        updateParserBox();
+        selectedObjectParserSlot(object_parser_box_->currentText());
     }
 }
 
 
-void ASTERIXImporterTaskWidget::selectedObjectParserSlot ()
+void ASTERIXImporterTaskWidget::selectedObjectParserSlot (const QString& text)
 {
-    loginf << "ASTERIXImporterTaskWidget: selectedObjectParserSlot";
+    loginf << "ASTERIXImporterTaskWidget: selectedObjectParserSlot: text '" << text.toStdString() << "'";
 
-    if (object_parser_widget_)
-        while (object_parser_widget_->count() > 0)
-            object_parser_widget_->removeWidget(object_parser_widget_->widget(0));
+    assert (object_parser_widget_);
 
-    assert (object_parser_list_);
-
-    if (object_parser_list_->currentItem())
+    if (!text.size())
     {
-        std::string name = object_parser_list_->currentItem()->text().toStdString();
-
-        assert (task_.schema() != nullptr);
-        assert (task_.schema()->hasObjectParser(name));
-
-        if (!object_parser_widget_)
-            createObjectParserWidget();
-
-        object_parser_widget_->addWidget(task_.schema()->parser(name).widget());
+        while (object_parser_widget_->count() > 0) // remove all widgets
+            object_parser_widget_->removeWidget(object_parser_widget_->widget(0));
+        return;
     }
+
+    assert (text.size());
+
+    assert (object_parser_box_);
+    std::string name = text.toStdString();
+
+    assert (task_.schema() != nullptr);
+    assert (task_.schema()->hasObjectParser(name));
+
+    if (object_parser_widget_->indexOf(task_.schema()->parser(name).widget()) < 0)
+        object_parser_widget_->addWidget(task_.schema()->parser(name).widget());
+
+    object_parser_widget_->setCurrentWidget(task_.schema()->parser(name).widget());
 }
 
-void ASTERIXImporterTaskWidget::createObjectParserWidget()
-{
-    assert (!object_parser_widget_);
-    assert (main_layout_);
-    //setMinimumSize(QSize(1800, 800));
-
-    int frame_width_small = 1;
-
-    QFrame *right_frame = new QFrame ();
-    right_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
-    right_frame->setLineWidth(frame_width_small);
-
-    QSizePolicy sp_right(QSizePolicy::Preferred, QSizePolicy::Preferred);
-    sp_right.setHorizontalStretch(2);
-    right_frame->setSizePolicy(sp_right);
-
-    object_parser_widget_ = new QStackedWidget ();
-
-    //object_parser_widget_->setMinimumWidth(800);
-
-    QVBoxLayout* tmp = new QVBoxLayout ();
-    tmp->addWidget(object_parser_widget_);
-
-    right_frame->setLayout(tmp);
-
-    main_layout_->addWidget(right_frame);
-}
-
-void ASTERIXImporterTaskWidget::updateParserList ()
+void ASTERIXImporterTaskWidget::updateParserBox ()
 {
     loginf << "ASTERIXImporterTaskWidget: updateParserList";
 
-    assert (object_parser_list_);
-    object_parser_list_->clear();
+    assert (object_parser_box_);
+    object_parser_box_->clear();
 
     if (task_.schema() != nullptr)
     {
         for (auto& parser_it : *task_.schema()) // over all object parsers
         {
-            QListWidgetItem* item = new QListWidgetItem(tr(parser_it.first.c_str()), object_parser_list_);
-            assert (item);
+            object_parser_box_->addItem(parser_it.first.c_str());
+            //            QListWidgetItem* item = new QListWidgetItem(tr(parser_it.first.c_str()), object_parser_list_);
+            //            assert (item);
         }
     }
 }
@@ -411,8 +382,8 @@ void ASTERIXImporterTaskWidget::createMappingsSlot()
     task_.createMappingStubs(true);
     task_.run();
 
-//    create_mapping_stubs_button_->setDisabled(true);
-//    test_button_->setDisabled(true);
+    //    create_mapping_stubs_button_->setDisabled(true);
+    //    test_button_->setDisabled(true);
 }
 
 void ASTERIXImporterTaskWidget::testImportSlot()
@@ -432,8 +403,8 @@ void ASTERIXImporterTaskWidget::testImportSlot()
     task_.createMappingStubs(false);
     task_.run();
 
-//    create_mapping_stubs_button_->setDisabled(true);
-//    test_button_->setDisabled(true);
+    //    create_mapping_stubs_button_->setDisabled(true);
+    //    test_button_->setDisabled(true);
 }
 
 //void ASTERIXImporterTaskWidget::importSlot()

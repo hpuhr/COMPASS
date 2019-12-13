@@ -49,14 +49,14 @@ using namespace jASTERIX;
 ASTERIXConfigWidget::ASTERIXConfigWidget(ASTERIXImporterTask& task, QWidget *parent)
      : QWidget(parent), task_(task)
 {
-    QFont font_bold;
-    font_bold.setBold(true);
+//    QFont font_bold;
+//    font_bold.setBold(true);
 
     main_layout_ = new QVBoxLayout ();
 
-    QLabel *main_label = new QLabel ("ASTERIX Configuration");
-    main_label->setFont (font_bold);
-    main_layout_->addWidget (main_label);
+//    QLabel *main_label = new QLabel ("ASTERIX Configuration");
+//    main_label->setFont (font_bold);
+//    main_layout_->addWidget (main_label);
 
     // framing stuff
     {
@@ -85,6 +85,8 @@ ASTERIXConfigWidget::ASTERIXConfigWidget(ASTERIXImporterTask& task, QWidget *par
 
         main_layout_->addLayout(categories_grid_);
     }
+
+    main_layout_->addStretch();
 
     // button stuff
     {
