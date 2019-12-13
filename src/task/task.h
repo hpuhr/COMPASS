@@ -11,7 +11,8 @@ class Task : public QObject
     Q_OBJECT
 
 signals:
-    void doneSignal (std::string task_name);
+    void statusChangedSignal (std::string task_name); // emitted when settings where changes which influence the prerequisites
+    void doneSignal (std::string task_name); // emitted when task is done
 
 public:
     Task(const std::string& name, const std::string& gui_name, bool gui_only, bool expert_only,
@@ -39,7 +40,8 @@ public:
         return gui_name_;
     }
 
-    virtual bool checkPrerequisites ()=0; // returns true if can be performed, false if not met
+    virtual bool checkPrerequisites ()=0; // returns true can be shown, false if not yet
+    virtual bool canRun() { return !gui_only_; } // returns true if can be run, to be overriden
     virtual bool isRecommended ()=0; // returns true if it is recommended to run this task
     virtual bool isRequired ()=0; // returns true if it is required to run this task
 

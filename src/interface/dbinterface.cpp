@@ -34,7 +34,7 @@
 #include "dbconnection.h"
 #include "mysqlppconnection.h"
 #include "sqliteconnection.h"
-#include "dbinterfacewidget.h"
+//#include "dbinterfacewidget.h"
 #include "dbinterfaceinfowidget.h"
 #include "dbinterface.h"
 #include "dbobjectmanager.h"
@@ -63,8 +63,8 @@ using namespace Utils;
  * write_table_names_,
  */
 DBInterface::DBInterface(std::string class_id, std::string instance_id, ATSDB *atsdb)
-    : Configurable (class_id, instance_id, atsdb), current_connection_(nullptr), sql_generator_(*this),
-      widget_(nullptr), info_widget_(nullptr)
+    : Configurable (class_id, instance_id, atsdb), sql_generator_(*this)
+      //info_widget_(nullptr) // widget_(nullptr),
 {
     QMutexLocker locker(&connection_mutex_);
 
@@ -88,7 +88,7 @@ DBInterface::~DBInterface()
 
     connections_.clear();
 
-    assert (!widget_);
+    //assert (!widget_);
 
     logdbg  << "DBInterface: desctructor: end";
 }
@@ -133,11 +133,11 @@ void DBInterface::closeConnection ()
     for (auto it : connections_)
         it.second->disconnect ();
 
-    if (widget_)
-    {
-        delete widget_;
-        widget_ = nullptr;
-    }
+//    if (widget_)
+//    {
+//        delete widget_;
+//        widget_ = nullptr;
+//    }
 
     if (info_widget_)
     {
@@ -161,16 +161,16 @@ void DBInterface::updateTableInfo ()
     loginf << "DBInterface: updateTableInfo: found " << table_info_.size() << " tables";
 }
 
-DBInterfaceWidget *DBInterface::widget()
-{
-    if (!widget_)
-    {
-        widget_ = new DBInterfaceWidget (*this);
-    }
+//DBInterfaceWidget *DBInterface::widget()
+//{
+//    if (!widget_)
+//    {
+//        widget_ = new DBInterfaceWidget (*this);
+//    }
 
-    assert (widget_);
-    return widget_;
-}
+//    assert (widget_);
+//    return widget_;
+//}
 
 DBInterfaceInfoWidget *DBInterface::infoWidget()
 {

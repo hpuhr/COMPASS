@@ -2,21 +2,95 @@
 #include "databaseopentask.h"
 #include "atsdb.h"
 #include "dbinterface.h"
-#include "dbinterfacewidget.h"
+//#include "dbinterfacewidget.h"
+//#include "dbinterface.h"
+#include "dbconnection.h"
+#include "logger.h"
+#include "stringconv.h"
+#include "global.h"
+
+#include <QFileDialog>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QRadioButton>
+#include <QTextEdit>
+#include <QPushButton>
+#include <QLineEdit>
+#include <QComboBox>
+#include <QGroupBox>
+#include <QStackedWidget>
+
+
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
 
-DatabaseOpenTaskWidget::DatabaseOpenTaskWidget(DatabaseOpenTask& task, QWidget* parent)
-    : QWidget(parent), task_(task)
+DatabaseOpenTaskWidget::DatabaseOpenTaskWidget(DatabaseOpenTask& task, DBInterface& db_interface, QWidget* parent)
+    : QWidget(parent), task_(task), db_interface_(db_interface)
 {
+    setContentsMargins(0, 0, 0, 0);
+
+    QFont font_bold;
+    font_bold.setBold(true);
+
     QVBoxLayout* main_layout_ = new QVBoxLayout ();
 
-    //main_layout_->addWidget(new QLabel("DatabaseOpenTaskWidget"));
+    QGroupBox *group_box = new QGroupBox(tr("Database System"));
+    group_box->setFont(font_bold);
+    QVBoxLayout *grplayout = new QVBoxLayout ();
 
-    dbinterface_widget_ = ATSDB::instance().interface().widget();
-    main_layout_->addWidget(dbinterface_widget_);
+    connection_stack_ = new QStackedWidget ();
+
+    const std::map<std::string, DBConnection*> &types = db_interface_.connections();
+
+    for (auto& con_it : types)
+    {
+        QRadioButton *radio = new QRadioButton(con_it.first.c_str(), this);
+        connect(radio, SIGNAL(pressed()), this, SLOT(databaseTypeSelectSlot()));
+
+        if (db_interface_.usedConnection() == con_it.first)
+            radio->setChecked (true);
+
+        grplayout->addWidget (radio);
+
+        connection_stack_->addWidget(con_it.second->widget());
+        connect(con_it.second->widget(), SIGNAL(databaseOpenedSignal()),
+                         this, SLOT(databaseOpenedSlot()), static_cast<Qt::ConnectionType>(Qt::UniqueConnection));
+    }
+    group_box->setLayout(grplayout);
+    main_layout_->addWidget(group_box);
+
+    main_layout_->addStretch();
+
+    main_layout_->addWidget(connection_stack_);
 
     setLayout (main_layout_);
+
+    if (db_interface_.usedConnection().size() > 0)
+    {
+        useConnection (db_interface_.usedConnection());
+    }
+}
+
+void DatabaseOpenTaskWidget::databaseTypeSelectSlot ()
+{
+    QRadioButton *radio = dynamic_cast <QRadioButton *> (QObject::sender());
+    useConnection(radio->text().toStdString());
+}
+
+void DatabaseOpenTaskWidget::useConnection (const std::string& connection_type)
+{
+    db_interface_.useConnection(connection_type);
+
+    assert (connection_stack_);
+
+    connection_stack_->setCurrentWidget(db_interface_.connectionWidget());
+}
+
+void DatabaseOpenTaskWidget::databaseOpenedSlot ()
+{
+    logdbg << "DatabaseOpenTaskWidget: databaseOpenedSlot";
+    emit databaseOpenedSignal();
 }

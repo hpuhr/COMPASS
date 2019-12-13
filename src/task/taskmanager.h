@@ -48,6 +48,7 @@ signals:
     void startInspectionSignal ();
 
 public slots:
+    void taskStatusChangesSlot (std::string task_name);
     void taskDoneSlot (std::string task_name);
 
     void dbObjectsChangedSlot ();
@@ -98,6 +99,8 @@ protected:
 
     std::vector <std::string> task_list_;
     std::map <std::string, Task*> tasks_;
+
+    void addTask (const std::string& class_id, Task* task);
 };
 
 #endif // TASKMANAGER_H

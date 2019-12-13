@@ -45,7 +45,7 @@ class DBODataSource;
 class DBResult;
 class DBTableColumn;
 class DBTableInfo;
-class DBInterfaceWidget;
+//class DBInterfaceWidget;
 class DBInterfaceInfoWidget;
 class Job;
 class BufferWriter;
@@ -93,7 +93,7 @@ public:
 
     std::vector <std::string> getDatabases ();
 
-    DBInterfaceWidget *widget();
+    //DBInterfaceWidget *widget();
     DBInterfaceInfoWidget *infoWidget();
 
     QWidget *connectionWidget ();
@@ -230,7 +230,7 @@ protected:
     /// Generates SQL statements
     SQLGenerator sql_generator_;
 
-    DBInterfaceWidget*widget_ {nullptr};
+    //DBInterfaceWidget*widget_ {nullptr};
     DBInterfaceInfoWidget* info_widget_ {nullptr};
 
     std::map <std::string, DBTableInfo> table_info_;

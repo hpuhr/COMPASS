@@ -2,7 +2,7 @@
 #include "taskmanager.h"
 #include "atsdb.h"
 #include "dbinterface.h"
-#include "dbinterfacewidget.h"
+//#include "dbinterfacewidget.h"
 
 DatabaseOpenTask::DatabaseOpenTask(const std::string& class_id, const std::string& instance_id,
                                    TaskManager& task_manager)
@@ -15,9 +15,9 @@ QWidget* DatabaseOpenTask::widget ()
 {
     if (!widget_)
     {
-        widget_.reset(new DatabaseOpenTaskWidget(*this));
+        widget_.reset(new DatabaseOpenTaskWidget(*this, ATSDB::instance().interface()));
 
-        QObject::connect(ATSDB::instance().interface().widget(), &DBInterfaceWidget::databaseOpenedSignal,
+        QObject::connect(widget_.get(), &DatabaseOpenTaskWidget::databaseOpenedSignal,
                          this, &DatabaseOpenTask::databaseOpenedSlot);
     }
 
@@ -31,10 +31,7 @@ void DatabaseOpenTask::generateSubConfigurable (const std::string &class_id, con
 
 bool DatabaseOpenTask::checkPrerequisites ()
 {
-    if (ATSDB::instance().interface().ready())
-        return false;
-
-    return true;
+    return !ATSDB::instance().interface().ready(); // only usable if not already connected
 }
 
 bool DatabaseOpenTask::isRecommended ()

@@ -227,8 +227,7 @@ void TaskManagerWidget::taskClickedSlot(QListWidgetItem* item)
         tasks_widget_->addWidget(current_task->widget());
 
     tasks_widget_->setCurrentWidget(current_task->widget());
-
-    run_current_task_button_->setEnabled(current_task->checkPrerequisites());
+    run_current_task_button_->setEnabled(current_task->canRun());
 }
 
 void TaskManagerWidget::expertModeToggledSlot ()

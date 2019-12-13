@@ -60,7 +60,7 @@ const unsigned int limited_num_json_jobs_ = 1;
 
 ASTERIXImporterTask::ASTERIXImporterTask(const std::string& class_id, const std::string& instance_id,
                                          TaskManager& task_manager)
-    : Task("ASTERIXImportTask", "Import ASTERIX Data", true, false, task_manager),
+    : Task("ASTERIXImportTask", "Import ASTERIX Data", false, false, task_manager),
       Configurable (class_id, instance_id, &task_manager)
 {
     //qRegisterMetaType<std::unique_ptr<std::vector <nlohmann::json>>>("std::unique_ptr<std::vector <nlohmann::json>>");
@@ -189,8 +189,10 @@ void ASTERIXImporterTask::refreshjASTERIX()
     }
 }
 
-void ASTERIXImporterTask::addFile (const std::string &filename)
+void ASTERIXImporterTask::addFile (const std::string& filename)
 {
+    loginf << "ASTERIXImporterTask: addFile: filename '" << filename << "'";
+
     if (file_list_.count (filename) != 0)
         throw std::invalid_argument ("ASTERIXImporterTask: addFile: name '"+filename+"' already in use");
 
@@ -203,12 +205,16 @@ void ASTERIXImporterTask::addFile (const std::string &filename)
 
     current_filename_ = filename;
 
+    emit statusChangedSignal(name_);
+
     if (widget_)
         widget_->updateFileListSlot();
 }
 
 void ASTERIXImporterTask::removeCurrentFilename ()
 {
+    loginf << "ASTERIXImporterTask: removeCurrentFilename: filename '" << current_filename_ << "'";
+
     assert (current_filename_.size());
     assert (hasFile(current_filename_));
 
@@ -219,8 +225,19 @@ void ASTERIXImporterTask::removeCurrentFilename ()
     file_list_.erase(current_filename_);
     current_filename_ = "";
 
+    emit statusChangedSignal(name_);
+
     if (widget_)
         widget_->updateFileListSlot();
+}
+
+void ASTERIXImporterTask::currentFilename (const std::string& filename)
+{
+    loginf << "ASTERIXImporterTask: currentFilename: filename '" << filename << "'";
+
+    current_filename_ = filename;
+
+    emit statusChangedSignal(name_);
 }
 
 const std::string& ASTERIXImporterTask::currentFraming() const
@@ -435,10 +452,7 @@ void ASTERIXImporterTask::limitRAM(bool limit_ram)
 
 bool ASTERIXImporterTask::checkPrerequisites ()
 {
-    if (!ATSDB::instance().interface().ready())
-        return false;
-
-    return canImportFile();
+    return ATSDB::instance().interface().ready(); // must be connected
 }
 
 bool ASTERIXImporterTask::isRecommended ()
@@ -470,6 +484,11 @@ bool ASTERIXImporterTask::canImportFile ()
     }
 
     return true;
+}
+
+bool ASTERIXImporterTask::canRun()
+{
+    return canImportFile();
 }
 
 void ASTERIXImporterTask::run()
