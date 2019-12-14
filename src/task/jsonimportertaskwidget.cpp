@@ -47,29 +47,31 @@ JSONImporterTaskWidget::JSONImporterTaskWidget(JSONImporterTask& task, QWidget* 
 {
     setContentsMargins(0, 0, 0, 0);
 
+    main_layout_ = new QHBoxLayout ();
+
+    tab_widget_ = new QTabWidget ();
+    main_layout_->addWidget(tab_widget_);
+
+    addMainTab();
+    addMappingsTab();
+
+    setLayout (main_layout_);
+}
+
+void JSONImporterTaskWidget::addMainTab ()
+{
+    assert (tab_widget_);
+
     QFont font_bold;
     font_bold.setBold(true);
 
-    QFont font_big;
-    font_big.setPointSize(18);
-
-    int frame_width_small = 1;
-
-    main_layout_ = new QHBoxLayout ();
-
-    QVBoxLayout* left_layout = new QVBoxLayout ();
+    QVBoxLayout* main_tab_layout = new QVBoxLayout ();
 
     // file stuff
     {
-        QFrame *file_frame = new QFrame ();
-        file_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
-        file_frame->setLineWidth(frame_width_small);
-
-        QVBoxLayout* files_layout = new QVBoxLayout();
-
         QLabel *files_label = new QLabel ("File Selection");
         files_label->setFont(font_bold);
-        files_layout->addWidget(files_label);
+        main_tab_layout->addWidget(files_label);
 
         file_list_ = new QListWidget ();
         file_list_->setWordWrap(true);
@@ -79,8 +81,11 @@ JSONImporterTaskWidget::JSONImporterTaskWidget(JSONImporterTask& task, QWidget* 
         connect (file_list_, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(selectedFileSlot()));
 
         updateFileListSlot ();
-        files_layout->addWidget(file_list_);
+        main_tab_layout->addWidget(file_list_);
+    }
 
+    // file button stuff
+    {
         QHBoxLayout* button_layout = new QHBoxLayout();
 
         add_file_button_ = new QPushButton ("Add");
@@ -91,67 +96,72 @@ JSONImporterTaskWidget::JSONImporterTaskWidget(JSONImporterTask& task, QWidget* 
         connect (delete_file_button_, SIGNAL(clicked()), this, SLOT(deleteFileSlot()));
         button_layout->addWidget(delete_file_button_);
 
-        files_layout->addLayout(button_layout);
-
-        file_frame->setLayout (files_layout);
-
-        left_layout->addWidget (file_frame, 1);
+        main_tab_layout->addLayout(button_layout);
     }
+
+    main_tab_layout->addStretch();
+
+    // button stuff
+    {
+        test_button_ = new QPushButton ("Test Import");
+        connect(test_button_, &QPushButton::clicked, this, &JSONImporterTaskWidget::testImportSlot);
+        main_tab_layout->addWidget(test_button_);
+    }
+
+    QWidget* main_tab_widget = new QWidget();
+    main_tab_widget->setContentsMargins(0, 0, 0, 0);
+    main_tab_widget->setLayout(main_tab_layout);
+    tab_widget_->addTab(main_tab_widget, "Main");
+}
+
+void JSONImporterTaskWidget::addMappingsTab ()
+{
+    QVBoxLayout* mappings_layout = new QVBoxLayout();
+
+    QFont font_bold;
+    font_bold.setBold(true);
 
     // schema selection
     {
-        QFrame *schemas_frame = new QFrame ();
-        schemas_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
-        schemas_frame->setLineWidth(frame_width_small);
+        QHBoxLayout* schema_layout = new QHBoxLayout();
 
-        QVBoxLayout* schemas_layout = new QVBoxLayout();
-
-        QLabel *schemas_label = new QLabel ("JSON Parsing Schema");
+        QLabel *schemas_label = new QLabel ("Schema");
         schemas_label->setFont(font_bold);
-        schemas_layout->addWidget(schemas_label);
+        schema_layout->addWidget(schemas_label);
 
         schema_box_ = new QComboBox ();
         connect (schema_box_, SIGNAL(activated(const QString&)), this, SLOT(selectedSchemaChangedSlot(const QString&)));
         updateSchemasBox();
-        schemas_layout->addWidget(schema_box_);
-
-        QHBoxLayout* button_layout = new QHBoxLayout();
+        schema_layout->addWidget(schema_box_);
 
         add_schema_button_ = new QPushButton ("Add");
         connect (add_schema_button_, SIGNAL(clicked()), this, SLOT(addSchemaSlot()));
-        button_layout->addWidget(add_schema_button_);
+        schema_layout->addWidget(add_schema_button_);
 
         delete_schema_button_ = new QPushButton ("Remove");
         connect (delete_schema_button_, SIGNAL(clicked()), this, SLOT(removeSchemaSlot()));
-        button_layout->addWidget(delete_schema_button_);
+        schema_layout->addWidget(delete_schema_button_);
 
-        schemas_layout->addLayout(button_layout);
-
-        schemas_frame->setLayout (schemas_layout);
-
-        left_layout->addWidget (schemas_frame);
+        mappings_layout->addLayout(schema_layout);
     }
 
     // json object parser stuff
     {
-        QFrame *parsers_frame = new QFrame ();
-        parsers_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
-        parsers_frame->setLineWidth(frame_width_small);
-
         QVBoxLayout* parsers_layout = new QVBoxLayout();
 
         QLabel *parser_label = new QLabel ("JSON Object Parsers");
         parser_label->setFont(font_bold);
         parsers_layout->addWidget(parser_label);
 
-        object_parser_list_ = new QListWidget ();
-        //file_list_->setTextElideMode (Qt::ElideNone);
-        object_parser_list_->setSelectionBehavior( QAbstractItemView::SelectItems );
-        object_parser_list_->setSelectionMode( QAbstractItemView::SingleSelection );
-        connect (object_parser_list_, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(selectedObjectParserSlot()));
+        object_parser_box_ = new QComboBox ();
+//        object_parser_box_->setSelectionBehavior( QAbstractItemView::SelectItems );
+//        object_parser_box_->setSelectionMode( QAbstractItemView::SingleSelection );
+//        connect (object_parser_box_, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(selectedObjectParserSlot()));
+        connect (object_parser_box_, SIGNAL(currentIndexChanged(const QString&)),
+                 this, SLOT(selectedObjectParserSlot(const QString&)));
 
-        updateParserList();
-        parsers_layout->addWidget(object_parser_list_);
+        //updateParserList();
+        parsers_layout->addWidget(object_parser_box_);
 
         QHBoxLayout* button_layout = new QHBoxLayout();
 
@@ -165,26 +175,18 @@ JSONImporterTaskWidget::JSONImporterTaskWidget(JSONImporterTask& task, QWidget* 
 
         parsers_layout->addLayout(button_layout);
 
-        parsers_frame->setLayout (parsers_layout);
+        object_parser_widget_ = new QStackedWidget ();
+        parsers_layout->addWidget(object_parser_widget_);
 
-        left_layout->addWidget (parsers_frame, 1);
+        updateParserBox();
+
+        mappings_layout->addLayout(parsers_layout);
     }
 
-    test_button_ = new QPushButton ("Test Import");
-    connect(test_button_, &QPushButton::clicked, this, &JSONImporterTaskWidget::testImportSlot);
-    left_layout->addWidget(test_button_);
-
-//    import_button_ = new QPushButton ("Import");
-//    connect(import_button_, &QPushButton::clicked, this, &JSONImporterTaskWidget::importSlot);
-//    left_layout->addWidget(import_button_);
-
-    main_layout_->addLayout(left_layout);
-
-    setLayout (main_layout_);
-
-    update();
-
-    show();
+    QWidget* mappings_tab_widget = new QWidget();
+    mappings_tab_widget->setContentsMargins(0, 0, 0, 0);
+    mappings_tab_widget->setLayout(mappings_layout);
+    tab_widget_->addTab(mappings_tab_widget, "Mappings");
 }
 
 JSONImporterTaskWidget::~JSONImporterTaskWidget()
@@ -306,8 +308,8 @@ void JSONImporterTaskWidget::removeSchemaSlot()
 
     task_.removeCurrentSchema();
     updateSchemasBox();
-    updateParserList();
-    selectedObjectParserSlot ();
+    updateParserBox();
+    //selectedObjectParserSlot ();
 }
 
 void JSONImporterTaskWidget::selectedSchemaChangedSlot(const QString& text)
@@ -317,8 +319,8 @@ void JSONImporterTaskWidget::selectedSchemaChangedSlot(const QString& text)
     assert (task_.hasSchema(text.toStdString()));
     task_.currentSchemaName(text.toStdString());
 
-    updateParserList();
-    selectedObjectParserSlot ();
+    updateParserBox();
+    //selectedObjectParserSlot ();
 }
 
 void JSONImporterTaskWidget::updateSchemasBox()
@@ -383,16 +385,16 @@ void JSONImporterTaskWidget::addObjectParserSlot ()
         config.addParameterString ("db_object_name", dbo_name);
 
         current.generateSubConfigurable("JSONObjectParser", instance);
-        updateParserList();
+        updateParserBox();
     }
 }
 void JSONImporterTaskWidget::removeObjectParserSlot ()
 {
     loginf << "JSONImporterTaskWidget: removeObjectParserSlot";
 
-    if (object_parser_list_->currentItem())
+    if (object_parser_box_->currentIndex() >= 0)
     {
-        std::string name = object_parser_list_->currentItem()->text().toStdString();
+        std::string name = object_parser_box_->currentText().toStdString();
 
         assert (task_.hasCurrentSchema());
         JSONParsingSchema& current = task_.currentSchema();
@@ -400,55 +402,56 @@ void JSONImporterTaskWidget::removeObjectParserSlot ()
         assert (current.hasObjectParser(name));
         current.removeParser(name);
 
-        updateParserList();
-        selectedObjectParserSlot();
+        updateParserBox();
+        //selectedObjectParserSlot();
     }
 }
 
-void JSONImporterTaskWidget::selectedObjectParserSlot ()
+void JSONImporterTaskWidget::selectedObjectParserSlot (const QString& text)
 {
-    loginf << "JSONImporterTaskWidget: selectedObjectParserSlot";
+    loginf << "JSONImporterTaskWidget: selectedObjectParserSlot: text " << text.toStdString();
 
     if (object_parser_widget_)
         while (object_parser_widget_->count() > 0)
             object_parser_widget_->removeWidget(object_parser_widget_->widget(0));
 
-    assert (object_parser_list_);
+    assert (object_parser_box_);
 
-    if (object_parser_list_->currentItem())
+    if (object_parser_box_->currentIndex() >= 0)
     {
-        std::string name = object_parser_list_->currentItem()->text().toStdString();
+        std::string name = object_parser_box_->currentText().toStdString();
 
         assert (task_.hasCurrentSchema());
         assert (task_.currentSchema().hasObjectParser(name));
+        assert (object_parser_widget_);
 
-        if (!object_parser_widget_)
-            createObjectParserWidget();
+        if (object_parser_widget_->indexOf(task_.currentSchema().parser(name).widget()) < 0)
+            object_parser_widget_->addWidget(task_.currentSchema().parser(name).widget());
 
-        object_parser_widget_->addWidget(task_.currentSchema().parser(name).widget());
+        object_parser_widget_->setCurrentWidget(task_.currentSchema().parser(name).widget());
     }
 }
 
-void JSONImporterTaskWidget::createObjectParserWidget()
-{
-    assert (!object_parser_widget_);
-    assert (main_layout_);
+//void JSONImporterTaskWidget::createObjectParserWidget()
+//{
+//    assert (!object_parser_widget_);
+//    assert (main_layout_);
 
-    int frame_width_small = 1;
+//    int frame_width_small = 1;
 
-    QFrame *right_frame = new QFrame ();
-    right_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
-    right_frame->setLineWidth(frame_width_small);
+//    QFrame *right_frame = new QFrame ();
+//    right_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
+//    right_frame->setLineWidth(frame_width_small);
 
-    object_parser_widget_ = new QStackedWidget ();
+//    object_parser_widget_ = new QStackedWidget ();
 
-    QVBoxLayout* tmp = new QVBoxLayout ();
-    tmp->addWidget(object_parser_widget_);
+//    QVBoxLayout* tmp = new QVBoxLayout ();
+//    tmp->addWidget(object_parser_widget_);
 
-    right_frame->setLayout(tmp);
+//    right_frame->setLayout(tmp);
 
-    main_layout_->addWidget(right_frame);
-}
+//    main_layout_->addWidget(right_frame);
+//}
 
 //void JSONImporterTaskWidget::update ()
 //{
@@ -544,19 +547,20 @@ void JSONImporterTaskWidget::runDone ()
     test_button_->setDisabled(false);
 }
 
-void JSONImporterTaskWidget::updateParserList ()
+void JSONImporterTaskWidget::updateParserBox ()
 {
-    loginf << "JSONImporterTaskWidget: updateParserList";
+    loginf << "JSONImporterTaskWidget: updateParserBox";
 
-    assert (object_parser_list_);
-    object_parser_list_->clear();
+    assert (object_parser_box_);
+    object_parser_box_->clear();
 
     if (task_.hasCurrentSchema())
     {
         for (auto& parser_it : task_.currentSchema())
         {
-            QListWidgetItem* item = new QListWidgetItem(tr(parser_it.first.c_str()), object_parser_list_);
-            assert (item);
+            object_parser_box_->addItem(parser_it.first.c_str());
+//            QListWidgetItem* item = new QListWidgetItem(tr(parser_it.first.c_str()), object_parser_box_);
+//            assert (item);
         }
     }
 }

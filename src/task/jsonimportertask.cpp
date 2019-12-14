@@ -369,7 +369,7 @@ void JSONImporterTask::readJSONFilePartDoneSlot ()
     connect (json_parse_job.get(), &JSONParseJob::doneSignal,
              this, &JSONImporterTask::parseJSONDoneSlot,Qt::QueuedConnection);
 
-    JobManager::instance().addBlockingJob(json_parse_job);
+    JobManager::instance().addNonBlockingJob(json_parse_job);
 
     json_parse_jobs_.push_back(json_parse_job);
 
@@ -413,7 +413,7 @@ void JSONImporterTask::parseJSONDoneSlot ()
 
     json_map_jobs_.push_back(json_map_job);
 
-    JobManager::instance().addBlockingJob(json_map_job);
+    JobManager::instance().addNonBlockingJob(json_map_job);
 
     key_count_ += count;
 
@@ -505,7 +505,7 @@ void JSONImporterTask::insertData ()
 
     while (insert_active_)
     {
-        //QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         QThread::msleep (1);
     }
 
@@ -687,19 +687,21 @@ void JSONImporterTask::updateMsgBox ()
     if (!msg_box_)
     {
         msg_box_ = new QMessageBox ();
+
+        if (test_)
+            msg_box_->setWindowTitle("Test Import JSON Data Status");
+        else
+            msg_box_->setWindowTitle("Import JSON Data Status");
+
         assert (msg_box_);
     }
 
     std::string msg;
 
-    if (test_)
-        msg = "Testing import of";
-    else
-        msg = "Importing";
-
     if (archive_)
-        msg += " archive";
-    msg += " file '"+current_filename_+"'\n";
+        msg = "Archive '"+current_filename_+"'\n";
+    else
+        msg = "File '"+current_filename_+"'\n";
 
     stop_time_ = boost::posix_time::microsec_clock::local_time();
 

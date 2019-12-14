@@ -44,12 +44,6 @@ ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, 
 {
     setContentsMargins(0, 0, 0, 0);
 
-    QFont font_bold;
-    font_bold.setBold(true);
-
-    QFont font_big;
-    font_big.setPointSize(18);
-
     main_layout_ = new QHBoxLayout ();
 
     tab_widget_ = new QTabWidget ();
@@ -61,8 +55,6 @@ ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, 
     addMappingsTab();
 
     setLayout (main_layout_);
-
-    show();
 }
 
 void ASTERIXImporterTaskWidget::addMainTab ()

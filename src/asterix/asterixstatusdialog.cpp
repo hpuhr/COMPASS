@@ -22,7 +22,7 @@ ASTERIXStatusDialog::ASTERIXStatusDialog(const std::string& filename, bool test,
     assert (!(test_ && mapping_stubs_)); // not at same time
 
     if (test_)
-        setWindowTitle ("Test ASTERIX Data Status");
+        setWindowTitle ("Test Import ASTERIX Data Status");
     else if (mapping_stubs_)
         setWindowTitle ("Map ASTERIX Data Status");
     else

@@ -32,6 +32,7 @@ class QLineEdit;
 class QComboBox;
 class QHBoxLayout;
 class QStackedWidget;
+class QTabWidget;
 
 class JSONImporterTaskWidget : public QWidget
 {
@@ -53,7 +54,7 @@ public slots:
 
     void addObjectParserSlot ();
     void removeObjectParserSlot ();
-    void selectedObjectParserSlot ();
+    void selectedObjectParserSlot(const QString& text);
 
 public:
     JSONImporterTaskWidget(JSONImporterTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
@@ -68,6 +69,8 @@ protected:
 
     QHBoxLayout* main_layout_ {nullptr};
 
+    QTabWidget* tab_widget_ {nullptr};
+
     QListWidget* file_list_ {nullptr};
     QPushButton* add_file_button_ {nullptr};
     QPushButton* delete_file_button_ {nullptr};
@@ -76,7 +79,7 @@ protected:
     QPushButton* add_schema_button_ {nullptr};
     QPushButton* delete_schema_button_ {nullptr};
 
-    QListWidget* object_parser_list_ {nullptr};
+    QComboBox* object_parser_box_ {nullptr};
     QPushButton* add_object_parser_button_ {nullptr};
     QPushButton* delete_object_parser_button_ {nullptr};
 
@@ -86,9 +89,12 @@ protected:
     QPushButton* test_button_ {nullptr};
     //QPushButton* import_button_ {nullptr};
 
+    void addMainTab ();
+    void addMappingsTab ();
+
     void updateSchemasBox();
-    void updateParserList ();
-    void createObjectParserWidget();
+    void updateParserBox ();
+    //void createObjectParserWidget();
 };
 
 #endif // JSONIMPORTERTASKWIDGET_H
