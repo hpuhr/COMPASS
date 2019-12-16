@@ -38,6 +38,9 @@
 
 using namespace Utils;
 
+//const std::string DONE_PROPERTY_NAME = "radar_plot_positions_calculated";
+const std::string RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME = "radar_plot_positions_calculated";
+
 RadarPlotPositionCalculatorTask::RadarPlotPositionCalculatorTask(
         const std::string& class_id, const std::string& instance_id, TaskManager& task_manager)
     : Task("RadarPlotPositionCalculatorTask", "Calculate Radar Plot Positions", true, false, task_manager),
@@ -89,6 +92,8 @@ void RadarPlotPositionCalculatorTask::dbObjectStr(const std::string& db_object_s
 
     assert (ATSDB::instance().objectManager().existsObject(db_object_str_));
     db_object_ = &ATSDB::instance().objectManager().object(db_object_str_);
+
+    emit statusChangedSignal(name_);
 }
 
 std::string RadarPlotPositionCalculatorTask::keyVarStr() const
@@ -109,6 +114,8 @@ void RadarPlotPositionCalculatorTask::keyVarStr(const std::string& key_var_str)
     }
     else
         key_var_ = nullptr;
+
+    emit statusChangedSignal(name_);
 }
 
 std::string RadarPlotPositionCalculatorTask::datasourceVarStr() const
@@ -129,6 +136,8 @@ void RadarPlotPositionCalculatorTask::datasourceVarStr(const std::string& dataso
     }
     else
         datasource_var_ = nullptr;
+
+    emit statusChangedSignal(name_);
 }
 
 std::string RadarPlotPositionCalculatorTask::rangeVarStr() const
@@ -149,6 +158,8 @@ void RadarPlotPositionCalculatorTask::rangeVarStr(const std::string& range_var_s
     }
     else
         range_var_ = nullptr;
+
+    emit statusChangedSignal(name_);
 }
 
 std::string RadarPlotPositionCalculatorTask::azimuthVarStr() const
@@ -169,6 +180,8 @@ void RadarPlotPositionCalculatorTask::azimuthVarStr(const std::string& azimuth_v
     }
     else
         azimuth_var_ = nullptr;
+
+    emit statusChangedSignal(name_);
 }
 
 std::string RadarPlotPositionCalculatorTask::altitudeVarStr() const
@@ -189,6 +202,8 @@ void RadarPlotPositionCalculatorTask::altitudeVarStr(const std::string& altitude
     }
     else
         altitude_var_ = nullptr;
+
+    emit statusChangedSignal(name_);
 }
 
 std::string RadarPlotPositionCalculatorTask::latitudeVarStr() const
@@ -209,6 +224,8 @@ void RadarPlotPositionCalculatorTask::latitudeVarStr(const std::string& latitude
     }
     else
         latitude_var_ = nullptr;
+
+    emit statusChangedSignal(name_);
 }
 
 std::string RadarPlotPositionCalculatorTask::longitudeVarStr() const
@@ -229,12 +246,17 @@ void RadarPlotPositionCalculatorTask::longitudeVarStr(const std::string& longitu
     }
     else
         longitude_var_ = nullptr;
+
+    emit statusChangedSignal(name_);
 }
 
 bool RadarPlotPositionCalculatorTask::checkPrerequisites ()
 {
     if (!ATSDB::instance().interface().ready())
         return false;
+
+    if (ATSDB::instance().interface().hasProperty(DONE_PROPERTY_NAME))
+        done_ = ATSDB::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1"; // set done flag
 
     if (!ATSDB::instance().objectManager().existsObject("Radar"))
         return false;
@@ -247,18 +269,13 @@ bool RadarPlotPositionCalculatorTask::isRecommended ()
     if (!checkPrerequisites())
         return false;
 
-//    if (ATSDB::instance().objectManager().hasData()) TODO further checks
-//        return false;
-
-    return true;
+    return !done_;
 }
 
 bool RadarPlotPositionCalculatorTask::isRequired ()
 {
     return false;
 }
-
-
 
 void RadarPlotPositionCalculatorTask::checkAndSetVariable (std::string& name_str, DBOVariable** var)
 {
@@ -287,7 +304,7 @@ void RadarPlotPositionCalculatorTask::checkAndSetVariable (std::string& name_str
     }
 }
 
-bool RadarPlotPositionCalculatorTask::canCalculate ()
+bool RadarPlotPositionCalculatorTask::canRun ()
 {
     if (!db_object_str_.size())
         return false;
@@ -333,11 +350,39 @@ bool RadarPlotPositionCalculatorTask::canCalculate ()
     return true;
 }
 
-void RadarPlotPositionCalculatorTask::calculate ()
+void RadarPlotPositionCalculatorTask::run ()
 {
-    loginf << "RadarPlotPositionCalculatorTask: calculate: start";
+    loginf << "RadarPlotPositionCalculatorTask: run: start";
 
-    assert (canCalculate());
+    assert (canRun());
+
+    task_manager_.appendInfo("RadarPlotPositionCalculatorTask: started");
+
+    start_time_ = boost::posix_time::microsec_clock::local_time();
+
+    DBObjectManager& obj_man = ATSDB::instance().objectManager();
+
+    assert (obj_man.existsObject(db_object_str_));
+    DBObject& db_object = obj_man.object(db_object_str_);
+
+    bool not_final = false;
+    for (auto ds_it = db_object.dsBegin(); ds_it != db_object.dsEnd(); ++ds_it)
+    {
+        ds_it->second.finalize();
+        if (!ds_it->second.isFinalized())
+        {
+            not_final = true;
+            break;
+        }
+    }
+
+    if (not_final)
+    {
+        QMessageBox::warning (nullptr, "EPSG Value Wrong",
+                              "The coordinates of the data sources of selected database object could not be calculated."
+                              " Please select a suitable EPSG value and try again");
+        return;
+    }
 
     calculating_=true;
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -479,8 +524,7 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
     update_buffer_list.addProperty(longitude_var_str_, PropertyDataType::DOUBLE);
     update_buffer_list.addProperty(key_var_str_, PropertyDataType::INT);
 
-    std::shared_ptr<Buffer> update_buffer = std::shared_ptr<Buffer> (new Buffer (
-                                                                         update_buffer_list,db_object_->name()));
+    std::shared_ptr<Buffer> update_buffer = std::make_shared<Buffer> (update_buffer_list,db_object_->name());
 
     int rec_num;
     int sensor_id;
@@ -686,13 +730,21 @@ void RadarPlotPositionCalculatorTask::loadingDoneSlot (DBObject& object)
 
         if (reply == QMessageBox::No)
         {
-            loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: aborted by user because of errors";
+            loginf << "RadarPlotPositionCalculatorTask: loadingDoneSlot: aborted by user because of "
+                      "transformation errors";
+            task_manager_.appendInfo("RadarPlotPositionCalculatorTask: aborted by user because of "
+                                     "transformation errors");
             calculated_ = true;
             return;
         }
+        else
+            task_manager_.appendWarning("RadarPlotPositionCalculatorTask: continued by user ignoring"
+                                        +std::to_string(transformation_errors)+" transformation errors");
 
         QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     }
+    else
+        task_manager_.appendInfo("RadarPlotPositionCalculatorTask: no transformation errors");
 
     msg_box_ = new QMessageBox;
     assert (msg_box_);
@@ -741,20 +793,31 @@ void RadarPlotPositionCalculatorTask::updateDoneSlot (DBObject& object)
     job_ptr_ = nullptr;
     db_object_->clearData();
 
+    stop_time_ = boost::posix_time::microsec_clock::local_time();
+    boost::posix_time::time_duration time_diff = stop_time_ - start_time_;
+    std::string elapsed_time_str = String::timeStringFromDouble(time_diff.total_milliseconds()/1000.0, false);
+
+    done_ = true;
+    ATSDB::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+
+    task_manager_.appendSuccess("RadarPlotPositionCalculatorTask: done after "+elapsed_time_str);
+
     QApplication::restoreOverrideCursor();
 
     msg_box_ = new QMessageBox;
     assert (msg_box_);
     msg_box_->setWindowTitle("Calculating Radar Plot Positions");
-    msg_box_->setText("Writing of object data done.\nIt is recommended to force a post-processing step now.");
+    msg_box_->setText("Writing of object data done.");
     msg_box_->setStandardButtons(QMessageBox::Ok);
     msg_box_->exec();
 
     delete msg_box_;
     msg_box_ = nullptr;
 
-    if (widget_)
-        widget_->calculationDoneSlot();
+    emit doneSignal(name_);
+
+//    if (widget_)
+//        widget_->calculationDoneSlot();
 }
 
 //void RadarPlotPositionCalculatorTask::updateBufferJobStatusSlot ()

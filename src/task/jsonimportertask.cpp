@@ -34,6 +34,7 @@
 #include "jsonmappingjob.h"
 #include "atsdb.h"
 #include "dbinterface.h"
+#include "radarplotpositioncalculatortask.h"
 
 #include <stdexcept>
 #include <fstream>
@@ -51,6 +52,8 @@ using namespace nlohmann;
 using namespace std;
 
 const unsigned int num_objects_chunk = 10000;
+
+const std::string DONE_PROPERTY_NAME = "json_data_imported";
 
 JSONImporterTask::JSONImporterTask(const std::string& class_id, const std::string& instance_id,
                                    TaskManager& task_manager)
@@ -194,6 +197,8 @@ void JSONImporterTask::removeCurrentSchema ()
         current_schema_ = schemas_.begin()->first;
 
     loginf << "JSONImporterTask: removeCurrentSchema: set current schema '" << currentSchemaName() << "'";
+
+    emit statusChangedSignal(name_);
 }
 
 std::string JSONImporterTask::currentSchemaName() const
@@ -204,11 +209,19 @@ std::string JSONImporterTask::currentSchemaName() const
 void JSONImporterTask::currentSchemaName(const std::string& current_schema)
 {
     current_schema_ = current_schema;
+
+    emit statusChangedSignal(name_);
 }
 
 bool JSONImporterTask::checkPrerequisites ()
 {
-    return ATSDB::instance().interface().ready();  // must be connected
+    if (!ATSDB::instance().interface().ready())  // must be connected
+        return false;
+
+    if (ATSDB::instance().interface().hasProperty(DONE_PROPERTY_NAME))
+        done_ = ATSDB::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
+
+    return true;
 }
 
 bool JSONImporterTask::isRecommended ()
@@ -242,12 +255,6 @@ bool JSONImporterTask::canImportFile ()
         loginf << "JSONImporterTask: canImportFile: not possible since file '" << current_filename_ << "does not exist";
         return false;
     }
-
-//    if (!ATSDB::instance().objectManager().existsObject("ADSB"))
-//    {
-//        loginf << "JSONImporterTask: canImportFile: not possible since DBObject does not exist";
-//        return false;
-//    }
 
     if (!current_schema_.size())
         return false;
@@ -672,6 +679,12 @@ void JSONImporterTask::checkAllDone ()
         {
             task_manager_.appendSuccess("JSONImporterTask: import done after "+time_str);
             done_ = true;
+
+            // in case radar data was imported
+            ATSDB::instance().interface().setProperty(RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME, "0");
+            ATSDB::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+
+            emit doneSignal(name_);
         }
 
         test_ = false; // is set again in case of test import

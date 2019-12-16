@@ -141,15 +141,10 @@ void ASTERIXImporterTaskWidget::addMappingsTab()
     QHBoxLayout* parser_manage_layout = new QHBoxLayout();
 
     object_parser_box_ = new QComboBox ();
-    //file_list_->setTextElideMode (Qt::ElideNone);
-    //    object_parser_list_->setSelectionBehavior( QAbstractItemView::SelectItems );
-    //    object_parser_list_->setSelectionMode( QAbstractItemView::SingleSelection );
     connect (object_parser_box_, SIGNAL(currentIndexChanged(const QString&)),
              this, SLOT(selectedObjectParserSlot(const QString&)));
 
     parser_manage_layout->addWidget(object_parser_box_);
-
-    //QHBoxLayout* button_layout = new QHBoxLayout();
 
     add_object_parser_button_ = new QPushButton ("Add");
     connect (add_object_parser_button_, SIGNAL(clicked()), this, SLOT(addObjectParserSlot()));
@@ -160,6 +155,11 @@ void ASTERIXImporterTaskWidget::addMappingsTab()
     parser_manage_layout->addWidget(delete_object_parser_button_);
 
     parsers_layout->addLayout(parser_manage_layout);
+
+    QFrame* line = new QFrame();
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
+    parsers_layout->addWidget(line);
 
     object_parser_widget_ = new QStackedWidget ();
     parsers_layout->addWidget(object_parser_widget_);

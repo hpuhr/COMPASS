@@ -34,9 +34,13 @@ class RadarPlotPositionCalculatorTaskWidget : public QWidget
 
 public slots:
     void dbObjectChangedSlot();
-    void anyVariableChangedSlot();
-    void calculateSlot ();
-    void calculationDoneSlot ();
+    void keyVarChangedSlot();
+    void datasourceVarChangedSlot();
+    void rangeVarChangedSlot();
+    void azimuthVarChangedSlot();
+    void altitudeVarChangedSlot();
+    void latitudeVarChangedSlot();
+    void longitudeVarChangedSlot();
 
 public:
     RadarPlotPositionCalculatorTaskWidget(RadarPlotPositionCalculatorTask& task, QWidget* parent=0,
@@ -58,7 +62,7 @@ protected:
     DBOVariableSelectionWidget* latitude_box_ {nullptr};
     DBOVariableSelectionWidget* longitude_box_ {nullptr};
 
-    QPushButton* calc_button_ {nullptr};
+    //QPushButton* calc_button_ {nullptr};
 
     void setDBOBject (const std::string& object_name);
 };

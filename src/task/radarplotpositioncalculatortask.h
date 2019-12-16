@@ -23,7 +23,10 @@
 #include "task.h"
 
 #include <QObject>
+
 #include <memory>
+
+#include "boost/date_time/posix_time/posix_time.hpp"
 
 class Buffer;
 class DBObject;
@@ -53,8 +56,8 @@ public:
                                     TaskManager& task_manager);
     virtual ~RadarPlotPositionCalculatorTask();
 
-    bool canCalculate ();
-    void calculate ();
+    virtual bool canRun();
+    virtual void run ();
 
     bool isCalculating ();
     unsigned int getNumLoaded () { return num_loaded_; }
@@ -90,6 +93,8 @@ public:
     virtual bool isRecommended ();
     virtual bool isRequired ();
 
+    static const std::string DONE_PROPERTY_NAME;
+
 protected:
     std::string db_object_str_;
     DBObject* db_object_{nullptr};
@@ -116,6 +121,9 @@ protected:
     DBOVariable* longitude_var_{nullptr};
 
     std::shared_ptr<UpdateBufferDBJob> job_ptr_;
+
+    boost::posix_time::ptime start_time_;
+    boost::posix_time::ptime stop_time_;
 
     bool calculating_ {false};
     bool calculated_ {false};

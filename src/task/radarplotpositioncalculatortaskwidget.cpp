@@ -41,19 +41,8 @@ RadarPlotPositionCalculatorTaskWidget::RadarPlotPositionCalculatorTaskWidget(Rad
 : QWidget (parent, f), task_(task)
 {
     setContentsMargins(0, 0, 0, 0);
-    //setMinimumSize(QSize(800, 600));
-
-    QFont font_bold;
-    font_bold.setBold(true);
-
-//    QFont font_big;
-//    font_big.setPointSize(18);
 
     QVBoxLayout *main_layout = new QVBoxLayout ();
-
-//    QLabel *main_label = new QLabel ("Calculate radar plot positions");
-//    main_label->setFont (font_big);
-//    main_layout->addWidget (main_label);
 
     main_layout->addWidget(ProjectionManager::instance().widget());
 
@@ -63,62 +52,64 @@ RadarPlotPositionCalculatorTaskWidget::RadarPlotPositionCalculatorTaskWidget(Rad
     grid->addWidget (new QLabel ("DBObject"), row_cnt, 0);
 
     object_box_ = new DBObjectComboBox (false);
-    connect (object_box_, SIGNAL(changedObject()), this, SLOT(dbObjectChangedSlot()));
+    connect (object_box_, &DBObjectComboBox::changedObject,
+             this, &RadarPlotPositionCalculatorTaskWidget::dbObjectChangedSlot);
     grid->addWidget (object_box_, row_cnt, 1);
 
     row_cnt++;
     grid->addWidget (new QLabel ("Key Variable"), row_cnt, 0);
     key_box_ = new DBOVariableSelectionWidget ();
-    connect (key_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
+    connect (key_box_, &DBOVariableSelectionWidget::selectionChanged,
+             this, &RadarPlotPositionCalculatorTaskWidget::keyVarChangedSlot);
     grid->addWidget (key_box_, row_cnt, 1);
 
     row_cnt++;
     grid->addWidget (new QLabel ("Data Source Variable"), row_cnt, 0);
     datasource_box_ = new DBOVariableSelectionWidget ();
-    connect (datasource_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
+    connect (datasource_box_, &DBOVariableSelectionWidget::selectionChanged,
+             this, &RadarPlotPositionCalculatorTaskWidget::datasourceVarChangedSlot);
     grid->addWidget (datasource_box_, row_cnt, 1);
 
     row_cnt++;
     grid->addWidget (new QLabel ("Range Variable"), row_cnt, 0);
     range_box_ = new DBOVariableSelectionWidget ();
-    connect (range_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
+    connect (range_box_, &DBOVariableSelectionWidget::selectionChanged,
+             this, &RadarPlotPositionCalculatorTaskWidget::rangeVarChangedSlot);
     grid->addWidget (range_box_, row_cnt, 1);
 
     row_cnt++;
     grid->addWidget (new QLabel ("Azimuth Variable"), row_cnt, 0);
     azimuth_box_ = new DBOVariableSelectionWidget ();
-    connect (azimuth_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
+    connect (azimuth_box_, &DBOVariableSelectionWidget::selectionChanged,
+             this, &RadarPlotPositionCalculatorTaskWidget::azimuthVarChangedSlot);
     grid->addWidget (azimuth_box_, row_cnt, 1);
 
     row_cnt++;
     grid->addWidget (new QLabel ("Altitude Variable"), row_cnt, 0);
     altitude_box_ = new DBOVariableSelectionWidget ();
-    connect (altitude_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
+    connect (altitude_box_, &DBOVariableSelectionWidget::selectionChanged,
+             this, &RadarPlotPositionCalculatorTaskWidget::altitudeVarChangedSlot);
     grid->addWidget (altitude_box_, row_cnt, 1);
 
     row_cnt++;
     grid->addWidget (new QLabel ("Latitude Variable"), row_cnt, 0);
     latitude_box_ = new DBOVariableSelectionWidget ();
-    connect (latitude_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
+    connect (latitude_box_, &DBOVariableSelectionWidget::selectionChanged,
+             this, &RadarPlotPositionCalculatorTaskWidget::latitudeVarChangedSlot);
     grid->addWidget (latitude_box_, row_cnt, 1);
 
     row_cnt++;
     grid->addWidget (new QLabel ("Longitude"), row_cnt, 0);
     longitude_box_ = new DBOVariableSelectionWidget ();
-    connect (longitude_box_, SIGNAL(selectionChanged()), this, SLOT(anyVariableChangedSlot()));
+    connect (longitude_box_, &DBOVariableSelectionWidget::selectionChanged,
+             this, &RadarPlotPositionCalculatorTaskWidget::longitudeVarChangedSlot);
     grid->addWidget (longitude_box_, row_cnt, 1);
 
     main_layout->addLayout(grid);
 
-    calc_button_ = new QPushButton ("Calculate");
-    connect(calc_button_, SIGNAL( clicked() ), this, SLOT( calculateSlot() ));
-    main_layout->addWidget(calc_button_);
-
     setLayout (main_layout);
 
     update();
-
-    show();
 }
 
 RadarPlotPositionCalculatorTaskWidget::~RadarPlotPositionCalculatorTaskWidget()
@@ -178,109 +169,143 @@ void RadarPlotPositionCalculatorTaskWidget::dbObjectChangedSlot()
     setDBOBject (object_name);
 }
 
-void RadarPlotPositionCalculatorTaskWidget::anyVariableChangedSlot()
+void RadarPlotPositionCalculatorTaskWidget::keyVarChangedSlot()
 {
     assert (key_box_);
     if (key_box_->hasVariable())
-        task_.keyVarStr(key_box_->selectedVariable().name());
+    {
+        if ((task_.keyVarStr() != key_box_->selectedVariable().name()))
+            task_.keyVarStr(key_box_->selectedVariable().name());
+    }
     else
         task_.keyVarStr("");
+}
 
+void RadarPlotPositionCalculatorTaskWidget::datasourceVarChangedSlot()
+{
     assert (datasource_box_);
     if (datasource_box_->hasVariable())
-        task_.datasourceVarStr(datasource_box_->selectedVariable().name());
+    {
+        if ((task_.datasourceVarStr() != datasource_box_->selectedVariable().name()))
+            task_.datasourceVarStr(datasource_box_->selectedVariable().name());
+    }
     else
         task_.datasourceVarStr("");
-
+}
+void RadarPlotPositionCalculatorTaskWidget::rangeVarChangedSlot()
+{
     assert (range_box_);
     if (range_box_->hasVariable())
-        task_.rangeVarStr(range_box_->selectedVariable().name());
+    {
+        if ((task_.rangeVarStr() != range_box_->selectedVariable().name()))
+            task_.rangeVarStr(range_box_->selectedVariable().name());
+    }
     else
         task_.rangeVarStr("");
-
+}
+void RadarPlotPositionCalculatorTaskWidget::azimuthVarChangedSlot()
+{
     assert (azimuth_box_);
     if (azimuth_box_->hasVariable())
-        task_.azimuthVarStr(azimuth_box_->selectedVariable().name());
+    {
+        if ((task_.azimuthVarStr() != azimuth_box_->selectedVariable().name()))
+           task_.azimuthVarStr(azimuth_box_->selectedVariable().name());
+    }
     else
         task_.azimuthVarStr("");
-
+}
+void RadarPlotPositionCalculatorTaskWidget::altitudeVarChangedSlot()
+{
     assert (altitude_box_);
     if (altitude_box_->hasVariable())
-        task_.altitudeVarStr(altitude_box_->selectedVariable().name());
+    {
+        if ((task_.altitudeVarStr() != altitude_box_->selectedVariable().name()))
+            task_.altitudeVarStr(altitude_box_->selectedVariable().name());
+    }
     else
         task_.altitudeVarStr("");
-
+}
+void RadarPlotPositionCalculatorTaskWidget::latitudeVarChangedSlot()
+{
     assert (latitude_box_);
     if (latitude_box_->hasVariable())
+    {
+        if ((task_.latitudeVarStr() != latitude_box_->selectedVariable().name()))
         task_.latitudeVarStr(latitude_box_->selectedVariable().name());
+    }
     else
         task_.latitudeVarStr("");
-
+}
+void RadarPlotPositionCalculatorTaskWidget::longitudeVarChangedSlot()
+{
     assert (longitude_box_);
     if (longitude_box_->hasVariable())
+    {
+        if ((task_.longitudeVarStr() != longitude_box_->selectedVariable().name()))
         task_.longitudeVarStr(longitude_box_->selectedVariable().name());
+    }
     else
         task_.longitudeVarStr("");
 }
 
-void RadarPlotPositionCalculatorTaskWidget::calculateSlot ()
-{
-    loginf << "RadarPlotPositionCalculatorTaskWidget: calculateSlot";
+//void RadarPlotPositionCalculatorTaskWidget::calculateSlot ()
+//{
+//    loginf << "RadarPlotPositionCalculatorTaskWidget: calculateSlot";
 
-    if (!task_.canCalculate())
-    {
-        QMessageBox::warning (this, "Unable to Calculate",
-                              "The task can not be peformed with the entered items.\n"
-                              "The following conditions have to be met: The DBObject must exist, must have data, and"
-                              " all variables have to be set and exist in the current schema and database");
-        return;
-    }
+//    if (!task_.canCalculate())
+//    {
+//        QMessageBox::warning (this, "Unable to Calculate",
+//                              "The task can not be peformed with the entered items.\n"
+//                              "The following conditions have to be met: The DBObject must exist, must have data, and"
+//                              " all variables have to be set and exist in the current schema and database");
+//        return;
+//    }
 
-    assert (calc_button_);
+//    assert (calc_button_);
 
-    std::string db_object_str = task_.dbObjectStr();
-    DBObjectManager& obj_man = ATSDB::instance().objectManager();
+//    std::string db_object_str = task_.dbObjectStr();
+//    DBObjectManager& obj_man = ATSDB::instance().objectManager();
 
-    assert (obj_man.existsObject(db_object_str));
-    DBObject& db_object = obj_man.object(db_object_str);
+//    assert (obj_man.existsObject(db_object_str));
+//    DBObject& db_object = obj_man.object(db_object_str);
 
-    bool not_final = false;
-    for (auto ds_it = db_object.dsBegin(); ds_it != db_object.dsEnd(); ++ds_it)
-    {
-        ds_it->second.finalize();
-        if (!ds_it->second.isFinalized())
-        {
-            not_final = true;
-            break;
-        }
-    }
+//    bool not_final = false;
+//    for (auto ds_it = db_object.dsBegin(); ds_it != db_object.dsEnd(); ++ds_it)
+//    {
+//        ds_it->second.finalize();
+//        if (!ds_it->second.isFinalized())
+//        {
+//            not_final = true;
+//            break;
+//        }
+//    }
 
-    if (not_final)
-    {
-        QMessageBox::warning (this, "EPSG Value Wrong",
-                              "The coordinates of the data sources of selected database object could not be calculated."
-                              " Please select a suitable EPSG value and try again");
-        return;
-    }
+//    if (not_final)
+//    {
+//        QMessageBox::warning (this, "EPSG Value Wrong",
+//                              "The coordinates of the data sources of selected database object could not be calculated."
+//                              " Please select a suitable EPSG value and try again");
+//        return;
+//    }
 
-    loginf << "RadarPlotPositionCalculatorTaskWidget: calculateSlot: starting calculation";
+//    loginf << "RadarPlotPositionCalculatorTaskWidget: calculateSlot: starting calculation";
 
-    calc_button_->setDisabled(true);
+//    calc_button_->setDisabled(true);
 
-    assert (!task_.isCalculating());
-    task_.calculate();
-}
+//    assert (!task_.isCalculating());
+//    task_.calculate();
+//}
 
-void RadarPlotPositionCalculatorTaskWidget::calculationDoneSlot ()
-{
-    assert (calc_button_);
-    calc_button_->setDisabled(false);
-}
-
+//void RadarPlotPositionCalculatorTaskWidget::calculationDoneSlot ()
+//{
+//    assert (calc_button_);
+//    calc_button_->setDisabled(false);
+//}
 
 void RadarPlotPositionCalculatorTaskWidget::setDBOBject (const std::string& object_name)
 {
-    task_.dbObjectStr(object_name);
+    if (task_.dbObjectStr() != object_name)
+        task_.dbObjectStr(object_name);
 
     key_box_->showDBOOnly(object_name);
     datasource_box_->showDBOOnly(object_name);

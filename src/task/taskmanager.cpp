@@ -51,8 +51,8 @@ TaskManager::TaskManager(const std::string &class_id, const std::string &instanc
     task_list_.push_back("ASTERIXImportTask");
 #endif
 
-    task_list_.insert (task_list_.end(), {"JSONImportTask", "RadarPlotPositionCalculatorTask",
-                       "CreateARTASAssociationsTask", "PostProcessTask"});
+    task_list_.insert (task_list_.end(), {"JSONImportTask", "RadarPlotPositionCalculatorTask", "PostProcessTask",
+                       "CreateARTASAssociationsTask"});
 
     for (auto& task_it : task_list_) // check that all tasks in list exist
         assert (tasks_.count(task_it));

@@ -143,6 +143,11 @@ void JSONImporterTaskWidget::addMappingsTab ()
         schema_layout->addWidget(delete_schema_button_);
 
         mappings_layout->addLayout(schema_layout);
+
+        QFrame* line = new QFrame();
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+        mappings_layout->addWidget(line);
     }
 
     // json object parser stuff
@@ -154,13 +159,9 @@ void JSONImporterTaskWidget::addMappingsTab ()
         parsers_layout->addWidget(parser_label);
 
         object_parser_box_ = new QComboBox ();
-//        object_parser_box_->setSelectionBehavior( QAbstractItemView::SelectItems );
-//        object_parser_box_->setSelectionMode( QAbstractItemView::SingleSelection );
-//        connect (object_parser_box_, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(selectedObjectParserSlot()));
         connect (object_parser_box_, SIGNAL(currentIndexChanged(const QString&)),
                  this, SLOT(selectedObjectParserSlot(const QString&)));
 
-        //updateParserList();
         parsers_layout->addWidget(object_parser_box_);
 
         QHBoxLayout* button_layout = new QHBoxLayout();
@@ -174,6 +175,11 @@ void JSONImporterTaskWidget::addMappingsTab ()
         button_layout->addWidget(delete_object_parser_button_);
 
         parsers_layout->addLayout(button_layout);
+
+        QFrame* line = new QFrame();
+        line->setFrameShape(QFrame::HLine);
+        line->setFrameShadow(QFrame::Sunken);
+        parsers_layout->addWidget(line);
 
         object_parser_widget_ = new QStackedWidget ();
         parsers_layout->addWidget(object_parser_widget_);

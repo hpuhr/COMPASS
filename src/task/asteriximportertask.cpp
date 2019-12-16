@@ -35,6 +35,7 @@
 #include "atsdb.h"
 #include "dbinterface.h"
 #include "buffer.h"
+#include "radarplotpositioncalculatortask.h"
 
 #include <jasterix/jasterix.h>
 #include <jasterix/category.h>
@@ -57,6 +58,8 @@ const unsigned int limited_chunk_size = 5000;
 
 const unsigned int unlimited_num_json_jobs_ = 2;
 const unsigned int limited_num_json_jobs_ = 1;
+
+const std::string DONE_PROPERTY_NAME = "asterix_data_imported";
 
 ASTERIXImporterTask::ASTERIXImporterTask(const std::string& class_id, const std::string& instance_id,
                                          TaskManager& task_manager)
@@ -452,7 +455,13 @@ void ASTERIXImporterTask::limitRAM(bool limit_ram)
 
 bool ASTERIXImporterTask::checkPrerequisites ()
 {
-    return ATSDB::instance().interface().ready(); // must be connected
+    if (!ATSDB::instance().interface().ready())  // must be connected
+        return false;
+
+    if (ATSDB::instance().interface().hasProperty(DONE_PROPERTY_NAME))
+        done_ = ATSDB::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
+
+    return true;
 }
 
 bool ASTERIXImporterTask::isRecommended ()
@@ -901,7 +910,7 @@ void ASTERIXImporterTask::insertData ()
                             assert (!sac_list.isNull(cnt) && !sic_list.isNull(cnt));
                             sac_sics[key_val] = std::pair<unsigned char, unsigned char> (sac_list.get(cnt), sic_list.get(cnt));
 
-                            loginf << "ASTERIXImporterTask: insertData: source " << key_val
+                            logdbg << "ASTERIXImporterTask: insertData: source " << key_val
                                    << " sac " << static_cast<int>(sac_list.get(cnt))
                                    << " sic " << static_cast<int>(sic_list.get(cnt));
                         }
@@ -1022,7 +1031,15 @@ void ASTERIXImporterTask::checkAllDone ()
         {
             task_manager_.appendSuccess("ASTERIXImporterTask: import done after "+status_widget_->elapsedTimeStr());
             done_ = true;
+
+            if (status_widget_->dboInsertedCounts().count("Radar")) // in case Radar data was imported
+                ATSDB::instance().interface().setProperty(RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME, "0");
+
+            ATSDB::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+            emit doneSignal(name_);
         }
+
+        test_ = false; // set again by widget
     }
 
     logdbg << "ASTERIXImporterTask: checkAllDone: done";
