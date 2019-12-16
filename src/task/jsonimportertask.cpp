@@ -35,6 +35,7 @@
 #include "atsdb.h"
 #include "dbinterface.h"
 #include "radarplotpositioncalculatortask.h"
+#include "createartasassociationstask.h"
 
 #include <stdexcept>
 #include <fstream>
@@ -680,8 +681,10 @@ void JSONImporterTask::checkAllDone ()
             task_manager_.appendSuccess("JSONImporterTask: import done after "+time_str);
             done_ = true;
 
-            // in case radar data was imported
+            // in case data was imported, clear other task done properties
             ATSDB::instance().interface().setProperty(RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME, "0");
+            ATSDB::instance().interface().setProperty(CreateARTASAssociationsTask::DONE_PROPERTY_NAME, "0");
+
             ATSDB::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
 
             emit doneSignal(name_);

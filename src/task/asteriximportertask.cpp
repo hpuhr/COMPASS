@@ -36,6 +36,7 @@
 #include "dbinterface.h"
 #include "buffer.h"
 #include "radarplotpositioncalculatortask.h"
+#include "createartasassociationstask.h"
 
 #include <jasterix/jasterix.h>
 #include <jasterix/category.h>
@@ -1032,8 +1033,11 @@ void ASTERIXImporterTask::checkAllDone ()
             task_manager_.appendSuccess("ASTERIXImporterTask: import done after "+status_widget_->elapsedTimeStr());
             done_ = true;
 
-            if (status_widget_->dboInsertedCounts().count("Radar")) // in case Radar data was imported
+            // in case data was imported, clear other task done properties
+            if (status_widget_->dboInsertedCounts().count("Radar"))
                 ATSDB::instance().interface().setProperty(RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME, "0");
+
+            ATSDB::instance().interface().setProperty(CreateARTASAssociationsTask::DONE_PROPERTY_NAME, "0");
 
             ATSDB::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
             emit doneSignal(name_);

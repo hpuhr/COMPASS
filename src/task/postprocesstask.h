@@ -19,13 +19,8 @@ class PostProcessTask: public Task, public Configurable
 {
     Q_OBJECT
 
-//signals:
-//    void postProcessingDoneSignal ();
-
 public slots:
     void postProcessingJobDoneSlot();
-
-    //void postProcessingDoneSlot ();
 
 public:
     PostProcessTask(const std::string& class_id, const std::string& instance_id,

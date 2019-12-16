@@ -47,8 +47,6 @@ bool PostProcessTask::checkPrerequisites ()
     if (ATSDB::instance().interface().hasProperty(DONE_PROPERTY_NAME))
         done_ = ATSDB::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
 
-    //done_ = ATSDB::instance().interface().isPostProcessed();
-
     return ATSDB::instance().objectManager().hasData();
 }
 
@@ -74,8 +72,6 @@ void PostProcessTask::run ()
     assert (!done_);
 
     loginf << "PostProcessTask: run: post-processing started";
-//    connect (&ATSDB::instance().interface(), &DBInterface::postProcessingDoneSignal,
-//             this, &PostProcessTask::postProcessingDoneSlot, Qt::UniqueConnection);
 
     task_manager_.appendInfo("PostProcessTask: started");
 
@@ -159,7 +155,6 @@ void PostProcessTask::postProcessingJobDoneSlot()
     if (postprocess_jobs_.size() == 0)
     {
         loginf << "PostProcessTask: postProcessingJobDoneSlot: done";
-        //setPostProcessed(true);
 
         stop_time_ = boost::posix_time::microsec_clock::local_time();
 
@@ -177,16 +172,9 @@ void PostProcessTask::postProcessingJobDoneSlot()
 
         QApplication::restoreOverrideCursor();
 
-        //emit postProcessingDoneSignal();
-
         emit doneSignal(name_);
     }
     else
         postprocess_dialog_->setValue(postprocess_job_num_-postprocess_jobs_.size());
 }
 
-//void PostProcessTask::postProcessingDoneSlot ()
-//{
-//    loginf << "PostProcessTask: postProcessingDoneSlot";
-//    done_ = true;
-//}

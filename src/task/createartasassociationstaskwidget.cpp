@@ -14,8 +14,8 @@
 #include <QLineEdit>
 #include <QCheckBox>
 
-CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(CreateARTASAssociationsTask& task, QWidget* parent,
-                                                                     Qt::WindowFlags f)
+CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
+        CreateARTASAssociationsTask& task, QWidget* parent, Qt::WindowFlags f)
     : QWidget (parent, f), task_(task)
 {
     //setMinimumSize(QSize(800, 600));
@@ -198,10 +198,6 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(CreateARTAS
              this, &CreateARTASAssociationsTaskWidget::anyTrackFlagChangedSlot);
     main_layout->addWidget(mark_track_coasting_associations_dubious_check_);
 
-    calc_button_ = new QPushButton ("Calculate");
-    connect(calc_button_, SIGNAL( clicked() ), this, SLOT( runSlot() ));
-    main_layout->addWidget(calc_button_);
-
     setLayout (main_layout);
 
     update();
@@ -217,34 +213,6 @@ void CreateARTASAssociationsTaskWidget::currentDataSourceChangedSlot ()
 {
     assert (ds_combo_);
     task_.currentDataSourceName(ds_combo_->getDSName());
-}
-
-void CreateARTASAssociationsTaskWidget::runSlot ()
-{
-    loginf << "CreateARTASAssociationsTaskWidget: runSlot";
-
-        if (!task_.canRun())
-        {
-            QMessageBox::warning (this, "Unable to Run",
-                                  "The task can not be peformed with the entered items.\n"
-                                  "The following conditions have to be met: The TrackerDBObject must exist,"
-                                  " must have data, and all meta variables have to be set and exist");
-            return;
-        }
-
-    assert (calc_button_);
-
-    loginf << "CreateARTASAssociationsTaskWidget: runSlot: starting run";
-
-    calc_button_->setDisabled(true);
-
-    task_.run();
-}
-
-void CreateARTASAssociationsTaskWidget::runDoneSlot ()
-{
-    assert (calc_button_);
-    calc_button_->setDisabled(false);
 }
 
 void CreateARTASAssociationsTaskWidget::update ()

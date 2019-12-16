@@ -12,6 +12,7 @@
 #include "metadbovariable.h"
 #include "stringconv.h"
 #include "dbodatasource.h"
+#include "postprocesstask.h"
 
 #include <sstream>
 
@@ -20,6 +21,8 @@
 
 using namespace std;
 using namespace Utils;
+
+const std::string CreateARTASAssociationsTask::DONE_PROPERTY_NAME = "artas_associations_created";
 
 CreateARTASAssociationsTask::CreateARTASAssociationsTask(const std::string& class_id, const std::string& instance_id,
                                                          TaskManager& task_manager)
@@ -80,9 +83,50 @@ QWidget* CreateARTASAssociationsTask::widget()
     return widget_;
 }
 
+bool CreateARTASAssociationsTask::checkPrerequisites ()
+{
+    if (!ATSDB::instance().interface().ready())
+        return false;
+
+    if (ATSDB::instance().interface().hasProperty(DONE_PROPERTY_NAME))
+        done_ = ATSDB::instance().interface().getProperty(DONE_PROPERTY_NAME) == "1";
+
+    if (!canRun())
+        return false;
+
+    // check if was post-processed
+    if (!ATSDB::instance().interface().hasProperty(PostProcessTask::DONE_PROPERTY_NAME))
+        return false;
+
+    if (ATSDB::instance().interface().getProperty(PostProcessTask::DONE_PROPERTY_NAME) != "1")
+        return false;
+
+    // check if hash var exists in all data
+    DBObjectManager& object_man = ATSDB::instance().objectManager();
+
+    for (auto& dbo_it : object_man)
+    {
+        DBOVariable& hash_var = object_man.metaVariable(hash_var_str_).getFor(dbo_it.first);
+        if (hash_var.getMinString() == NULL_STRING || hash_var.getMaxString() == NULL_STRING)
+            return false;
+    }
+
+    return true;
+}
+
+bool CreateARTASAssociationsTask::isRecommended ()
+{
+    if (!checkPrerequisites())
+        return false;
+
+    return !done_;
+}
+
 bool CreateARTASAssociationsTask::canRun ()
 {
     DBObjectManager& object_man = ATSDB::instance().objectManager();
+
+    //ATSDB::instance().interface().hasProperty(DONE_PROPERTY_NAME)
 
     if (!object_man.existsObject("Tracker"))
         return false;
@@ -128,7 +172,6 @@ bool CreateARTASAssociationsTask::canRun ()
 
     for (auto& dbo_it : object_man)
     {
-
         if (!object_man.metaVariable(key_var_str_).existsIn(dbo_it.first)
                 || !object_man.metaVariable(hash_var_str_).existsIn(dbo_it.first)
                 || !object_man.metaVariable(tod_var_str_).existsIn(dbo_it.first))
@@ -141,6 +184,14 @@ bool CreateARTASAssociationsTask::canRun ()
 void CreateARTASAssociationsTask::run ()
 {
     assert (canRun());
+
+    loginf << "CreateARTASAssociationsTask: run: post-processing started";
+
+    task_manager_.appendInfo("CreateARTASAssociationsTask: started");
+
+    save_associations_ = true;
+
+    start_time_ = boost::posix_time::microsec_clock::local_time();
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -289,10 +340,27 @@ void CreateARTASAssociationsTask::createDoneSlot ()
     //updateProgressSlot();
     create_job_ = nullptr;
 
+    stop_time_ = boost::posix_time::microsec_clock::local_time();
+
+    boost::posix_time::time_duration diff = stop_time_ - start_time_;
+
+    std::string time_str = String::timeStringFromDouble(diff.total_milliseconds()/1000.0, false);
+
+    if (save_associations_)
+    {
+        ATSDB::instance().interface().setProperty(DONE_PROPERTY_NAME, "1");
+
+        task_manager_.appendSuccess("CreateARTASAssociationsTask: done after "+time_str);
+        done_ = true;
+    }
+    else
+    {
+        task_manager_.appendWarning("CreateARTASAssociationsTask: done after "+time_str+" without saving");
+    }
+
     QApplication::restoreOverrideCursor();
 
-    if (widget_)
-        widget_->runDoneSlot();
+    emit doneSignal(name_);
 }
 
 void CreateARTASAssociationsTask::createObsoleteSlot ()
@@ -552,26 +620,6 @@ void CreateARTASAssociationsTask::markTrackCoastingAssociationsDubious(bool valu
     mark_track_coasting_associations_dubious_ = value;
 }
 
-bool CreateARTASAssociationsTask::checkPrerequisites ()
-{
-    if (!ATSDB::instance().interface().ready())
-        return false;
-
-    return canRun();
-}
-
-bool CreateARTASAssociationsTask::isRecommended ()
-{
-    if (!checkPrerequisites())
-        return false;
-
-    if (ATSDB::instance().objectManager().hasData()) // todo further checks
-        return true;
-
-    return true;
-}
-
-
 void CreateARTASAssociationsTask::checkAndSetVariable (std::string& name_str, DBOVariable** var)
 {
     DBObjectManager& object_man = ATSDB::instance().objectManager();
@@ -655,8 +703,10 @@ void CreateARTASAssociationsTask::saveAssociationsQuestionSlot (QString question
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(nullptr, "Malformed Associations", question_str, QMessageBox::Yes|QMessageBox::No);
 
+    save_associations_ = reply == QMessageBox::Yes;
+
     assert (create_job_);
-    create_job_->setSaveQuestionAnswer(reply == QMessageBox::Yes);
+    create_job_->setSaveQuestionAnswer(save_associations_);
 }
 
 void CreateARTASAssociationsTask::closeStatusDialogSlot()

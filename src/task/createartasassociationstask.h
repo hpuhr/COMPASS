@@ -8,7 +8,10 @@
 #include "task.h"
 
 #include <QObject>
+
 #include <memory>
+
+#include "boost/date_time/posix_time/posix_time.hpp"
 
 class TaskManager;
 class CreateARTASAssociationsTaskWidget;
@@ -40,9 +43,6 @@ public:
 
     bool hasOpenWidget() { return widget_ != nullptr; }
     QWidget* widget();
-
-    bool canRun ();
-    void run ();
 
     std::string currentDataSourceName() const;
     void currentDataSourceName(const std::string &currentDataSourceName);
@@ -115,6 +115,11 @@ public:
     virtual bool isRecommended ();
     virtual bool isRequired ()  { return false; }
 
+    bool canRun ();
+    void run ();
+
+    static const std::string DONE_PROPERTY_NAME;
+
 protected:
     std::string current_data_source_name_;
 
@@ -143,6 +148,9 @@ protected:
     std::string tod_var_str_;
     MetaDBOVariable* tod_var_ {nullptr};
 
+    boost::posix_time::ptime start_time_;
+    boost::posix_time::ptime stop_time_;
+
     float end_track_time_ {0}; // time-delta after which begin a new track
 
     float association_time_past_ {0}; // time_delta for which associations are considered into past time
@@ -164,6 +172,8 @@ protected:
     bool mark_track_coasting_associations_dubious_ {false};
 
     CreateARTASAssociationsTaskWidget* widget_ {nullptr};
+
+    bool save_associations_ {true};
 
     std::unique_ptr<CreateARTASAssociationsStatusDialog> status_dialog_ {nullptr};
 

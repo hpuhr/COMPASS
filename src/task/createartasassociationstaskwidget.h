@@ -30,9 +30,6 @@ public slots:
 
     void anyTrackFlagChangedSlot();
 
-    void runSlot ();
-    void runDoneSlot ();
-
 public:
 
     CreateARTASAssociationsTaskWidget(CreateARTASAssociationsTask& task, QWidget* parent=0,
@@ -71,8 +68,6 @@ protected:
     QCheckBox* mark_track_end_associations_dubious_check_ {nullptr};
     QCheckBox* ignore_track_coasting_associations_check_ {nullptr};
     QCheckBox* mark_track_coasting_associations_dubious_check_ {nullptr};
-
-    QPushButton* calc_button_ {nullptr};
 };
 
 #endif // CREATEARTASASSOCIATIONSTASKWIDGET_H
