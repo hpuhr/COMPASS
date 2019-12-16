@@ -56,9 +56,6 @@ public:
                                     TaskManager& task_manager);
     virtual ~RadarPlotPositionCalculatorTask();
 
-    virtual bool canRun();
-    virtual void run ();
-
     bool isCalculating ();
     unsigned int getNumLoaded () { return num_loaded_; }
 
@@ -92,6 +89,9 @@ public:
     virtual bool checkPrerequisites ();
     virtual bool isRecommended ();
     virtual bool isRequired ();
+
+    virtual bool canRun();
+    virtual void run ();
 
     static const std::string DONE_PROPERTY_NAME;
 

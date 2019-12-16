@@ -16,9 +16,9 @@ PostProcessTaskWidget::PostProcessTaskWidget(PostProcessTask& task, QWidget* par
 
     //main_layout->addWidget(new QLabel(""));
 
-    QPushButton* run_button = new QPushButton ("Run");
-    connect (run_button, &QPushButton::clicked, this, &PostProcessTaskWidget::runSlot);
-    main_layout->addWidget(run_button);
+//    QPushButton* run_button = new QPushButton ("Run");
+//    connect (run_button, &QPushButton::clicked, this, &PostProcessTaskWidget::runSlot);
+//    main_layout->addWidget(run_button);
 
 //    dbschema_manager_widget_ = ATSDB::instance().schemaManager().widget();
 //    //    QObject::connect(dbinterface_widget_, SIGNAL(databaseOpenedSignal()), dbschema_manager_widget_, SLOT(databaseOpenedSlot()));
@@ -27,9 +27,9 @@ PostProcessTaskWidget::PostProcessTaskWidget(PostProcessTask& task, QWidget* par
     setLayout (main_layout);
 }
 
-void PostProcessTaskWidget::runSlot ()
-{
-    loginf << "PostProcessTaskWidget: runSlot";
+//void PostProcessTaskWidget::runSlot ()
+//{
+//    loginf << "PostProcessTaskWidget: runSlot";
 
-    task_.run();
-}
+//    task_.run();
+//}

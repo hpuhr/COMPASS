@@ -38,7 +38,6 @@
 
 using namespace Utils;
 
-//const std::string DONE_PROPERTY_NAME = "radar_plot_positions_calculated";
 const std::string RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME = "radar_plot_positions_calculated";
 
 RadarPlotPositionCalculatorTask::RadarPlotPositionCalculatorTask(

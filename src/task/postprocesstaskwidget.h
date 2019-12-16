@@ -9,8 +9,8 @@ class PostProcessTask;
 class PostProcessTaskWidget : public QWidget
 {
     Q_OBJECT
-public slots:
-    void runSlot ();
+//public slots:
+//    void runSlot ();
 
 public:
     PostProcessTaskWidget(PostProcessTask& task, QWidget *parent=nullptr);

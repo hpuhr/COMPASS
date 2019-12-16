@@ -20,7 +20,7 @@
 #include <QMutexLocker>
 #include <QMessageBox>
 #include <QThread>
-#include <QProgressDialog>
+//#include <QProgressDialog>
 #include <QApplication>
 
 #include "atsdb.h"
@@ -46,8 +46,8 @@
 #include "dbschema.h"
 //#include "StructureDescriptionManager.h"
 #include "jobmanager.h"
-#include "dboactivedatasourcesdbjob.h"
-#include "dbominmaxdbjob.h"
+//#include "dboactivedatasourcesdbjob.h"
+//#include "dbominmaxdbjob.h"
 #include "dimension.h"
 #include "unit.h"
 #include "unitmanager.h"
@@ -118,7 +118,7 @@ void DBInterface::databaseContentChanged ()
 
     loadProperties();
 
-    loginf << "DBInterface: databaseOpened: post-processed " << isPostProcessed ();
+    //loginf << "DBInterface: databaseOpened: post-processed " << isPostProcessed ();
 
     emit databaseContentChangedSignal();
 }
@@ -855,123 +855,123 @@ std::pair<std::string, std::string> DBInterface::getMinMaxString (const DBOVaria
     return std::pair <std::string, std::string> (min, max);
 }
 
-bool DBInterface::isPostProcessed ()
-{
-    return hasProperty("postProcessed") && getProperty("postProcessed") == "Yes";
+//bool DBInterface::isPostProcessed ()
+//{
+//    return hasProperty("postProcessed") && getProperty("postProcessed") == "Yes";
 
-    //return existsMinMaxTable ();// && existsPropertiesTable();
-}
+//    //return existsMinMaxTable ();// && existsPropertiesTable();
+//}
 
-void DBInterface::setPostProcessed (bool value)
-{
-    setProperty("postProcessed", value ? "Yes" : "Nope");
-}
+//void DBInterface::setPostProcessed (bool value)
+//{
+//    setProperty("postProcessed", value ? "Yes" : "Nope");
+//}
 
-void DBInterface::postProcess ()
-{
-    loginf << "DBInterface: postProcess: creating jobs";
+//void DBInterface::postProcess ()
+//{
+//    loginf << "DBInterface: postProcess: creating jobs";
 
-    bool any_data=false;
+//    bool any_data=false;
 
-    for (auto obj_it : ATSDB::instance().objectManager())
-        if (obj_it.second->hasData())
-            any_data=true;
+//    for (auto obj_it : ATSDB::instance().objectManager())
+//        if (obj_it.second->hasData())
+//            any_data=true;
 
-    if (!any_data)
-    {
-        logwrn << "DBInterface: postProcess: no data in objects";
+//    if (!any_data)
+//    {
+//        logwrn << "DBInterface: postProcess: no data in objects";
 
-        QMessageBox m_warning (QMessageBox::Warning, "No Data in Objects",
-                               "None of the database objects contains any data. Post-processing was not performed.",
-                               QMessageBox::Ok);
-        m_warning.exec();
-        return;
-    }
+//        QMessageBox m_warning (QMessageBox::Warning, "No Data in Objects",
+//                               "None of the database objects contains any data. Post-processing was not performed.",
+//                               QMessageBox::Ok);
+//        m_warning.exec();
+//        return;
+//    }
 
-    unsigned int dbos_with_data=0;
+//    unsigned int dbos_with_data=0;
 
-    for (auto obj_it : ATSDB::instance().objectManager())
-        if (obj_it.second->hasData())
-            ++dbos_with_data;
+//    for (auto obj_it : ATSDB::instance().objectManager())
+//        if (obj_it.second->hasData())
+//            ++dbos_with_data;
 
-    assert (!postprocess_dialog_);
-    postprocess_dialog_ = new QProgressDialog (tr(""), tr(""), 0, static_cast<int>(2*dbos_with_data));
-    postprocess_dialog_->setWindowTitle("Post-Processing Status");
-    postprocess_dialog_->setCancelButton(nullptr);
-    postprocess_dialog_->setWindowModality(Qt::ApplicationModal);
-    postprocess_dialog_->show();
+//    assert (!postprocess_dialog_);
+//    postprocess_dialog_ = new QProgressDialog (tr(""), tr(""), 0, static_cast<int>(2*dbos_with_data));
+//    postprocess_dialog_->setWindowTitle("Post-Processing Status");
+//    postprocess_dialog_->setCancelButton(nullptr);
+//    postprocess_dialog_->setWindowModality(Qt::ApplicationModal);
+//    postprocess_dialog_->show();
 
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+//    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    if (!existsMinMaxTable())
-        createMinMaxTable();
-    else
-        clearTableContent (TABLE_NAME_MINMAX);
+//    if (!existsMinMaxTable())
+//        createMinMaxTable();
+//    else
+//        clearTableContent (TABLE_NAME_MINMAX);
 
-    for (auto obj_it : ATSDB::instance().objectManager())
-    {
-        if (!obj_it.second->hasData())
-            continue;
+//    for (auto obj_it : ATSDB::instance().objectManager())
+//    {
+//        if (!obj_it.second->hasData())
+//            continue;
 
-        {
-            DBOActiveDataSourcesDBJob* job = new DBOActiveDataSourcesDBJob (ATSDB::instance().interface(),
-                                                                            *obj_it.second);
+//        {
+//            DBOActiveDataSourcesDBJob* job = new DBOActiveDataSourcesDBJob (ATSDB::instance().interface(),
+//                                                                            *obj_it.second);
 
-            std::shared_ptr<Job> shared_job = std::shared_ptr<Job> (job);
-            connect (job, SIGNAL(doneSignal()), this, SLOT(postProcessingJobDoneSlot()), Qt::QueuedConnection);
-            JobManager::instance().addDBJob(shared_job);
-            postprocess_jobs_.push_back(shared_job);
-        }
-        {
-            DBOMinMaxDBJob* job = new DBOMinMaxDBJob (ATSDB::instance().interface(), *obj_it.second);
-            std::shared_ptr<Job> shared_job = std::shared_ptr<Job> (job);
-            connect (job, SIGNAL(doneSignal()), this, SLOT(postProcessingJobDoneSlot()), Qt::QueuedConnection);
-            JobManager::instance().addDBJob(shared_job);
-            postprocess_jobs_.push_back(shared_job);
-        }
-    }
+//            std::shared_ptr<Job> shared_job = std::shared_ptr<Job> (job);
+//            connect (job, SIGNAL(doneSignal()), this, SLOT(postProcessingJobDoneSlot()), Qt::QueuedConnection);
+//            JobManager::instance().addDBJob(shared_job);
+//            postprocess_jobs_.push_back(shared_job);
+//        }
+//        {
+//            DBOMinMaxDBJob* job = new DBOMinMaxDBJob (ATSDB::instance().interface(), *obj_it.second);
+//            std::shared_ptr<Job> shared_job = std::shared_ptr<Job> (job);
+//            connect (job, SIGNAL(doneSignal()), this, SLOT(postProcessingJobDoneSlot()), Qt::QueuedConnection);
+//            JobManager::instance().addDBJob(shared_job);
+//            postprocess_jobs_.push_back(shared_job);
+//        }
+//    }
 
-    assert (postprocess_jobs_.size() == 2*dbos_with_data);
-    postprocess_job_num_ = postprocess_jobs_.size();
-}
+//    assert (postprocess_jobs_.size() == 2*dbos_with_data);
+//    postprocess_job_num_ = postprocess_jobs_.size();
+//}
 
-void DBInterface::postProcessingJobDoneSlot()
-{
-    loginf << "DBInterface: postProcessingJobDoneSlot: " << postprocess_jobs_.size() << " active jobs" ;
+//void DBInterface::postProcessingJobDoneSlot()
+//{
+//    loginf << "DBInterface: postProcessingJobDoneSlot: " << postprocess_jobs_.size() << " active jobs" ;
 
-    Job* job_sender = static_cast <Job*> (QObject::sender());
-    assert (job_sender);
-    assert (postprocess_jobs_.size() > 0);
-    assert (postprocess_dialog_);
+//    Job* job_sender = static_cast <Job*> (QObject::sender());
+//    assert (job_sender);
+//    assert (postprocess_jobs_.size() > 0);
+//    assert (postprocess_dialog_);
 
-    bool found=false;
-    for (auto job_it = postprocess_jobs_.begin(); job_it != postprocess_jobs_.end(); job_it++)
-    {
-        Job *current = job_it->get();
-        if (current == job_sender)
-        {
-            postprocess_jobs_.erase(job_it);
-            found = true;
-            break;
-        }
-    }
-    assert (found);
+//    bool found=false;
+//    for (auto job_it = postprocess_jobs_.begin(); job_it != postprocess_jobs_.end(); job_it++)
+//    {
+//        Job *current = job_it->get();
+//        if (current == job_sender)
+//        {
+//            postprocess_jobs_.erase(job_it);
+//            found = true;
+//            break;
+//        }
+//    }
+//    assert (found);
 
-    if (postprocess_jobs_.size() == 0)
-    {
-        loginf << "DBInterface: postProcessingJobDoneSlot: done";
-        setPostProcessed(true);
+//    if (postprocess_jobs_.size() == 0)
+//    {
+//        loginf << "DBInterface: postProcessingJobDoneSlot: done";
+//        setPostProcessed(true);
 
-        delete postprocess_dialog_;
-        postprocess_dialog_=nullptr;
+//        delete postprocess_dialog_;
+//        postprocess_dialog_=nullptr;
 
-        QApplication::restoreOverrideCursor();
+//        QApplication::restoreOverrideCursor();
 
-        emit postProcessingDoneSignal();
-    }
-    else
-        postprocess_dialog_->setValue(postprocess_job_num_-postprocess_jobs_.size());
-}
+//        emit postProcessingDoneSignal();
+//    }
+//    else
+//        postprocess_dialog_->setValue(postprocess_job_num_-postprocess_jobs_.size());
+//}
 
 bool DBInterface::hasActiveDataSources (DBObject &object)
 {

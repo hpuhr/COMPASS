@@ -52,7 +52,7 @@ class BufferWriter;
 
 class SQLGenerator;
 class QWidget;
-class QProgressDialog;
+//class QProgressDialog;
 
 /**
  * @brief Encapsulates all dedicated database functionality
@@ -67,10 +67,10 @@ class DBInterface : public QObject, public Configurable
     Q_OBJECT
 signals:
     void databaseContentChangedSignal ();
-    void postProcessingDoneSignal ();
+//    void postProcessingDoneSignal ();
 
 public slots:
-    void postProcessingJobDoneSlot();
+    //void postProcessingJobDoneSlot();
     //void updateDBObjectInformationSlot ();
 
 public:
@@ -171,8 +171,8 @@ public:
                        const std::string& max);
 
     /// @brief Returns if database was post processed
-    bool isPostProcessed ();
-    void postProcess ();
+//    bool isPostProcessed ();
+//    void postProcess ();
 
     //    /// @brief Returns variable values for a number of DBO type elements
     //    Buffer *getInfo (const std::string &dbo_type, std::vector<unsigned int> ids, DBOVariableSet read_list, bool use_filters,
@@ -235,10 +235,6 @@ protected:
 
     std::map <std::string, DBTableInfo> table_info_;
 
-    std::vector <std::shared_ptr<Job>> postprocess_jobs_;
-    QProgressDialog* postprocess_dialog_ {nullptr};
-    size_t postprocess_job_num_{0};
-
     std::map <std::string, std::string> properties_;
 
     virtual void checkSubConfigurables ();
@@ -253,4 +249,4 @@ protected:
     void saveProperties ();
 };
 
-#endif /* SQLITE3CONNECTION_H_ */
+#endif /* DBINTERFACE_H_ */
