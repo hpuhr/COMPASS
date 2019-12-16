@@ -1,4 +1,5 @@
 #include "databaseopentask.h"
+#include "databaseopentaskwidget.h"
 #include "taskmanager.h"
 #include "atsdb.h"
 #include "dbinterface.h"
@@ -23,6 +24,12 @@ QWidget* DatabaseOpenTask::widget ()
 
     return widget_.get();
 }
+
+void DatabaseOpenTask::deleteWidget ()
+{
+    widget_.reset(nullptr);
+}
+
 
 void DatabaseOpenTask::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {

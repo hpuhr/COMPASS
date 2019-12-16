@@ -57,12 +57,11 @@ public slots:
     void mapJSONObsoleteSlot ();
 
 public:
-    JSONImporterTask(const std::string& class_id, const std::string& instance_id,
-                     TaskManager& task_manager);
+    JSONImporterTask(const std::string& class_id, const std::string& instance_id, TaskManager& task_manager);
     virtual ~JSONImporterTask();
 
-    bool hasOpenWidget() { return widget_ != nullptr; }
     virtual QWidget* widget ();
+    virtual void deleteWidget ();
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 

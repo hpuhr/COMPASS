@@ -41,8 +41,8 @@ public:
                                 TaskManager& task_manager);
     virtual ~CreateARTASAssociationsTask();
 
-    bool hasOpenWidget() { return widget_ != nullptr; }
     QWidget* widget();
+    virtual void deleteWidget ();
 
     std::string currentDataSourceName() const;
     void currentDataSourceName(const std::string &currentDataSourceName);
@@ -171,7 +171,7 @@ protected:
     bool ignore_track_coasting_associations_ {false};
     bool mark_track_coasting_associations_dubious_ {false};
 
-    CreateARTASAssociationsTaskWidget* widget_ {nullptr};
+    std::unique_ptr<CreateARTASAssociationsTaskWidget> widget_;
 
     bool save_associations_ {true};
 
@@ -187,8 +187,6 @@ protected:
     void checkAndSetMetaVariable (std::string &name_str, MetaDBOVariable** var);
 
     DBOVariableSet getReadSetFor (const std::string& dbo_name);
-
-    //void updateProgressSlot();
 };
 
 #endif // CREATEARTASASSOCIATIONSTASK_H

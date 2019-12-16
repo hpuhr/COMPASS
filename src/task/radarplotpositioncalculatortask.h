@@ -42,14 +42,11 @@ class RadarPlotPositionCalculatorTask : public Task, public Configurable
     Q_OBJECT
 
 public slots:
-    //void newDataSlot (DBObject &object);
     void newDataSlot (DBObject& object);
     void loadingDoneSlot (DBObject& object);
 
     void updateProgressSlot (float percent);
     void updateDoneSlot (DBObject& object);
-
-    //void updateBufferJobStatusSlot ();
 
 public:
     RadarPlotPositionCalculatorTask(const std::string& class_id, const std::string& instance_id,
@@ -59,8 +56,8 @@ public:
     bool isCalculating ();
     unsigned int getNumLoaded () { return num_loaded_; }
 
-    bool hasOpenWidget() { return widget_ != nullptr; }
     QWidget* widget();
+    virtual void deleteWidget ();
 
     std::string dbObjectStr() const;
     void dbObjectStr(const std::string& db_object_str);
@@ -130,7 +127,7 @@ protected:
 
     unsigned int num_loaded_ {0};
 
-    RadarPlotPositionCalculatorTaskWidget* widget_ {nullptr};
+    std::unique_ptr<RadarPlotPositionCalculatorTaskWidget> widget_;
 
     QMessageBox* msg_box_ {nullptr};
     size_t target_report_count_{0};

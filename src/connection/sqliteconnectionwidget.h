@@ -26,6 +26,7 @@ public slots:
 
 public:
     explicit SQLiteConnectionWidget(SQLiteConnection& connection, QWidget* parent=0);
+    virtual ~SQLiteConnectionWidget();
 
 protected:
     SQLiteConnection& connection_;

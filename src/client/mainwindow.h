@@ -49,9 +49,6 @@ class MainWindow : public QMainWindow
 signals:
     void startedSignal ();
 
-public slots:
-    void postProcessingDoneSlot ();
-
 private slots:
     /// @brief Called when database was opened
     void databaseOpenedSlot();

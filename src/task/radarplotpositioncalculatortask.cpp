@@ -60,22 +60,22 @@ RadarPlotPositionCalculatorTask::RadarPlotPositionCalculatorTask(
 
 RadarPlotPositionCalculatorTask::~RadarPlotPositionCalculatorTask()
 {
-    if (widget_)
-    {
-        delete widget_;
-        widget_ = nullptr;
-    }
 }
 
 QWidget* RadarPlotPositionCalculatorTask::widget()
 {
     if (!widget_)
     {
-        widget_ = new RadarPlotPositionCalculatorTaskWidget (*this);
+        widget_.reset(new RadarPlotPositionCalculatorTaskWidget (*this));
     }
 
     assert (widget_);
-    return widget_;
+    return widget_.get();
+}
+
+void RadarPlotPositionCalculatorTask::deleteWidget ()
+{
+    widget_.reset(nullptr);
 }
 
 std::string RadarPlotPositionCalculatorTask::dbObjectStr() const

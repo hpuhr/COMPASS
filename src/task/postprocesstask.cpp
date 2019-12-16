@@ -1,4 +1,5 @@
 #include "postprocesstask.h"
+#include "postprocesstaskwidget.h"
 #include "taskmanager.h"
 #include "atsdb.h"
 #include "dbinterface.h"
@@ -18,7 +19,7 @@ using namespace Utils;
 const std::string PostProcessTask::DONE_PROPERTY_NAME = "post_processed";
 
 PostProcessTask::PostProcessTask(const std::string& class_id, const std::string& instance_id,
-                                   TaskManager& task_manager)
+                                 TaskManager& task_manager)
     : Task("PostProcessTask", "Post-Process", false, false, task_manager),
       Configurable (class_id, instance_id, &task_manager)
 {
@@ -32,6 +33,11 @@ QWidget* PostProcessTask::widget ()
     }
 
     return widget_.get();
+}
+
+void PostProcessTask::deleteWidget ()
+{
+    widget_.reset(nullptr);
 }
 
 void PostProcessTask::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)

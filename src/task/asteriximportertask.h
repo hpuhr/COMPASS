@@ -64,12 +64,11 @@ public slots:
     void closeStatusDialogSlot();
 
 public:
-    ASTERIXImporterTask(const std::string& class_id, const std::string& instance_id,
-                        TaskManager& task_manager);
+    ASTERIXImporterTask(const std::string& class_id, const std::string& instance_id, TaskManager& task_manager);
     virtual ~ASTERIXImporterTask();
 
-    bool hasOpenWidget() { return widget_ != nullptr; }
     virtual QWidget* widget ();
+    virtual void deleteWidget ();
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 

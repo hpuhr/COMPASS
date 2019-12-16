@@ -47,6 +47,7 @@ public slots:
 
 public:
     explicit MySQLppConnectionWidget(MySQLppConnection& connection, QWidget* parent = 0);
+    virtual ~MySQLppConnectionWidget();
 
 protected:
     MySQLppConnection& connection_;

@@ -119,6 +119,11 @@ QWidget* JSONImporterTask::widget()
     return widget_.get();
 }
 
+void JSONImporterTask::deleteWidget ()
+{
+    widget_.reset(nullptr);
+}
+
 void JSONImporterTask::addFile (const std::string &filename)
 {
     loginf << "JSONImporterTask: addFile: filename '" << filename << "'";

@@ -82,6 +82,11 @@ MySQLppConnectionWidget::MySQLppConnectionWidget(MySQLppConnection &connection, 
     setLayout (layout);
 }
 
+MySQLppConnectionWidget::~MySQLppConnectionWidget()
+{
+    loginf << "MySQLppConnectionWidget: destructor";
+}
+
 void MySQLppConnectionWidget::addServerSlot ()
 {
     logdbg << "MySQLppConnectionWidget: addServerSlot";

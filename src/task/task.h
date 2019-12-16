@@ -29,6 +29,7 @@ public:
     }
 
     virtual QWidget* widget ()=0;
+    virtual void deleteWidget ()=0;
 
     bool guiOnly() const
     {
@@ -56,7 +57,7 @@ public:
         return done_;
     }
 
-    virtual void run () { assert(!gui_only_); } // to be overriden by tasks that can run TODO
+    virtual void run () { assert(!gui_only_); } // to be overriden by tasks that can run
 
 protected:
     std::string name_;

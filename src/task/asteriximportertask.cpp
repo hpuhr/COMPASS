@@ -481,6 +481,11 @@ bool ASTERIXImporterTask::isRequired ()
     return false;
 }
 
+void ASTERIXImporterTask::deleteWidget ()
+{
+    widget_.reset(nullptr);
+}
+
 bool ASTERIXImporterTask::canImportFile ()
 {
     if (!current_filename_.size())

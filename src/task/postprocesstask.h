@@ -3,7 +3,6 @@
 
 #include "configurable.h"
 #include "task.h"
-#include "postprocesstaskwidget.h"
 #include "job.h"
 
 #include <QObject>
@@ -13,6 +12,7 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 class TaskManager;
+class PostProcessTaskWidget;
 class QProgressDialog;
 
 class PostProcessTask: public Task, public Configurable
@@ -29,6 +29,7 @@ public:
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
     virtual QWidget* widget ();
+    virtual void deleteWidget ();
 
     virtual bool checkPrerequisites ();
     virtual bool isRecommended();

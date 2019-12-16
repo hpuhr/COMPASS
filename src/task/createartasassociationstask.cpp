@@ -24,8 +24,8 @@ using namespace Utils;
 
 const std::string CreateARTASAssociationsTask::DONE_PROPERTY_NAME = "artas_associations_created";
 
-CreateARTASAssociationsTask::CreateARTASAssociationsTask(const std::string& class_id, const std::string& instance_id,
-                                                         TaskManager& task_manager)
+CreateARTASAssociationsTask::CreateARTASAssociationsTask(
+        const std::string& class_id, const std::string& instance_id, TaskManager& task_manager)
     : Task("CreateARTASAssociationsTask", "Calculate ARTAS Associations", true, false, task_manager),
       Configurable (class_id, instance_id, &task_manager)
 {
@@ -65,22 +65,20 @@ CreateARTASAssociationsTask::CreateARTASAssociationsTask(const std::string& clas
 
 CreateARTASAssociationsTask::~CreateARTASAssociationsTask()
 {
-    if (widget_)
-    {
-        delete widget_;
-        widget_ = nullptr;
-    }
 }
 
 QWidget* CreateARTASAssociationsTask::widget()
 {
     if (!widget_)
-    {
-        widget_ = new CreateARTASAssociationsTaskWidget (*this);
-    }
+        widget_.reset(new CreateARTASAssociationsTaskWidget (*this));
 
     assert (widget_);
-    return widget_;
+    return widget_.get();
+}
+
+void CreateARTASAssociationsTask::deleteWidget ()
+{
+    widget_.reset(nullptr);
 }
 
 bool CreateARTASAssociationsTask::checkPrerequisites ()

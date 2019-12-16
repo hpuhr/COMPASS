@@ -3,12 +3,12 @@
 
 #include "configurable.h"
 #include "task.h"
-#include "databaseopentaskwidget.h"
 
 #include <QObject>
 
 #include <memory>
 
+class DatabaseOpenTaskWidget;
 class TaskManager;
 
 class DatabaseOpenTask : public Task, public Configurable
@@ -25,6 +25,7 @@ public:
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
     virtual QWidget* widget ();
+    virtual void deleteWidget ();
 
     virtual bool checkPrerequisites ();
     virtual bool isRecommended ();

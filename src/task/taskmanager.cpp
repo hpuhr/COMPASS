@@ -21,8 +21,11 @@
 #include "taskmanagerlogwidget.h"
 #include "dbobjectmanager.h"
 #include "databaseopentask.h"
+#include "databaseopentaskwidget.h"
 #include "manageschematask.h"
+#include "manageschemataskwidget.h"
 #include "managedbobjectstask.h"
+#include "managedbobjectstaskwidget.h"
 #include "jsonimportertask.h"
 #include "jsonimportertaskwidget.h"
 #include "radarplotpositioncalculatortask.h"
@@ -30,6 +33,7 @@
 #include "createartasassociationstask.h"
 #include "createartasassociationstaskwidget.h"
 #include "postprocesstask.h"
+#include "postprocesstaskwidget.h"
 
 #if USE_JASTERIX
 #include "asteriximportertask.h"
@@ -277,6 +281,37 @@ void TaskManager::schemaChangedSlot ()
 //        asterix_importer_task_->widget()->close();
 //#endif
 //}
+
+void TaskManager::deleteWidgets ()
+{
+    loginf << "TaskManager: deleteWidgets";
+
+    if (database_open_task_)
+        database_open_task_->deleteWidget();
+
+    if (manage_schema_task_)
+        manage_schema_task_->deleteWidget();
+
+    if (manage_dbobjects_task_)
+        manage_dbobjects_task_->deleteWidget();
+
+#if USE_JASTERIX
+    if (asterix_importer_task_)
+        asterix_importer_task_->deleteWidget();
+#endif
+
+    if (json_importer_task_)
+        json_importer_task_->deleteWidget();
+
+    if (radar_plot_position_calculator_task_)
+        radar_plot_position_calculator_task_->deleteWidget();
+
+    if (create_artas_associations_task_)
+        create_artas_associations_task_->deleteWidget();
+
+    if (post_process_task_)
+        post_process_task_->deleteWidget();
+}
 
 void TaskManager::shutdown ()
 {

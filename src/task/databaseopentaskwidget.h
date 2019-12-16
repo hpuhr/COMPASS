@@ -22,6 +22,7 @@ signals:
 
 public:
     DatabaseOpenTaskWidget(DatabaseOpenTask& task, DBInterface& db_interface, QWidget *parent=nullptr);
+    virtual ~DatabaseOpenTaskWidget();
 
 protected:
     DatabaseOpenTask& task_;

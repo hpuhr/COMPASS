@@ -74,6 +74,17 @@ DatabaseOpenTaskWidget::DatabaseOpenTaskWidget(DatabaseOpenTask& task, DBInterfa
     }
 }
 
+DatabaseOpenTaskWidget::~DatabaseOpenTaskWidget()
+{
+    loginf << "DatabaseOpenTaskWidget: destructor";
+
+    // remove all connection widgets, are deleted by connections
+    const std::map<std::string, DBConnection*> &types = db_interface_.connections();
+
+    for (auto& con_it : types)
+        connection_stack_->removeWidget(con_it.second->widget());
+}
+
 void DatabaseOpenTaskWidget::databaseTypeSelectSlot ()
 {
     QRadioButton *radio = dynamic_cast <QRadioButton *> (QObject::sender());

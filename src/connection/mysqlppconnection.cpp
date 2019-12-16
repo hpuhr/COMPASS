@@ -138,6 +138,8 @@ void MySQLppConnection::openDatabase (const std::string &database_name)
 
 void MySQLppConnection::disconnect()
 {
+    loginf << "MySQLppConnection: disconnect";
+
     connection_.disconnect();
     connection_ready_ = false;
 

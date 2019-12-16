@@ -1,4 +1,5 @@
 #include "managedbobjectstask.h"
+#include "managedbobjectstaskwidget.h"
 #include "taskmanager.h"
 #include "atsdb.h"
 #include "dbinterface.h"
@@ -19,6 +20,11 @@ QWidget* ManageDBObjectsTask::widget ()
     }
 
     return widget_.get();
+}
+
+void ManageDBObjectsTask::deleteWidget ()
+{
+    widget_.reset(nullptr);
 }
 
 void ManageDBObjectsTask::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)

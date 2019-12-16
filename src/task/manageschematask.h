@@ -3,14 +3,13 @@
 
 #include "configurable.h"
 #include "task.h"
-#include "manageschemataskwidget.h"
 
 #include <QObject>
 
 #include <memory>
 
 class TaskManager;
-
+class ManageSchemaTaskWidget;
 
 class ManageSchemaTask: public Task, public Configurable
 {
@@ -21,6 +20,7 @@ public:
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
     virtual QWidget* widget ();
+    virtual void deleteWidget ();
 
     virtual bool checkPrerequisites ();
     virtual bool isRecommended () { return false; }
