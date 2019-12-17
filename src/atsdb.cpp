@@ -59,13 +59,13 @@ ATSDB::ATSDB()
     assert (task_manager_);
     assert (view_manager_);
 
-    QObject::connect (db_schema_manager_, SIGNAL(schemaChangedSignal()), dbo_manager_,
-                      SLOT(updateSchemaInformationSlot()));
-    QObject::connect (db_schema_manager_, SIGNAL(schemaLockedSignal()), dbo_manager_, SLOT(schemaLockedSlot()));
-    QObject::connect (db_interface_, SIGNAL(databaseContentChangedSignal()), db_schema_manager_,
-                      SLOT(databaseContentChangedSlot()), Qt::QueuedConnection);
-    QObject::connect (db_interface_, SIGNAL(databaseContentChangedSignal()), dbo_manager_,
-                      SLOT(databaseContentChangedSlot()), Qt::QueuedConnection);
+    QObject::connect (db_schema_manager_, &DBSchemaManager::schemaChangedSignal,
+                      dbo_manager_,  &DBObjectManager::updateSchemaInformationSlot);
+    //QObject::connect (db_schema_manager_, SIGNAL(schemaLockedSignal()), dbo_manager_, SLOT(schemaLockedSlot()));
+    QObject::connect (db_interface_, &DBInterface::databaseContentChangedSignal,
+                      db_schema_manager_, &DBSchemaManager::databaseContentChangedSlot, Qt::QueuedConnection);
+    QObject::connect (db_interface_, &DBInterface::databaseContentChangedSignal,
+                      dbo_manager_, &DBObjectManager::databaseContentChangedSlot, Qt::QueuedConnection);
     //QObject::connect(db_interface_, SIGNAL(databaseOpenedSignal()), filter_manager_, SLOT(databaseOpenedSlot()));
 
     QObject::connect(dbo_manager_, &DBObjectManager::dbObjectsChangedSignal,

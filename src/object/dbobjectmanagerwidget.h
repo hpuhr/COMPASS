@@ -59,7 +59,7 @@ public slots:
     void updateMetaVariablesSlot ();
 
     /// @brief Unlocks editing functionality
-    void databaseOpenedSlot ();
+    //void databaseOpenedSlot ();
 
 public:
     /// @brief Constructor
@@ -67,8 +67,8 @@ public:
     /// @brief Destructor
     virtual ~DBObjectManagerWidget();
 
-    void lock ();
-    void unlock ();
+//    void lock ();
+//    void unlock ();
 
 private:
     DBObjectManager& object_manager_;
@@ -78,7 +78,7 @@ private:
     QGridLayout* meta_variables_grid_ {nullptr};
 
     /// Editing functionality unlocked flag
-    bool locked_ {false};
+    //bool locked_ {false};
 
     /// New DBO add button
     QPushButton* add_dbo_button_ {nullptr};

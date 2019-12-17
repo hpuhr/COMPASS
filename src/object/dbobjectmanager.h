@@ -44,7 +44,7 @@ class DBObjectManager : public QObject, public Configurable
     Q_OBJECT
 
 public slots:
-    void schemaLockedSlot ();
+    //void schemaLockedSlot ();
     void loadSlot ();
     void updateSchemaInformationSlot ();
     void databaseContentChangedSlot ();
@@ -116,8 +116,8 @@ public:
     void orderMetaVariable(MetaDBOVariable& variable);
     void clearOrderVariable ();
 
-    void lock ();
-    void unlock ();
+//    void lock ();
+//    void unlock ();
 
     void quitLoading ();
 
