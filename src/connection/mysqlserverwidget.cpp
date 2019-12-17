@@ -27,6 +27,7 @@
 #include <QComboBox>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QApplication>
 
 MySQLServerWidget::MySQLServerWidget(MySQLppConnection& connection, MySQLServer& server, QWidget* parent)
     : QWidget (parent), connection_(connection), server_(server)
@@ -225,9 +226,13 @@ void MySQLServerWidget::clearDatabaseSlot ()
 
     if (reply == QMessageBox::Yes)
     {
+        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
         connection_.deleteDatabase(server_.database());
         connection_.createDatabase(server_.database());
         updateDatabases();
+
+        QApplication::restoreOverrideCursor();
     }
 }
 

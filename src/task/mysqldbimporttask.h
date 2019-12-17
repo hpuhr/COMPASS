@@ -11,9 +11,19 @@
 class TaskManager;
 class SavedFile;
 class MySQLDBImportTaskWidget;
+class MySQLDBImportJob;
+
+class QMessageBox;
 
 class MySQLDBImportTask : public Task, public Configurable
 {
+    Q_OBJECT
+
+public slots:
+    void importDoneSlot ();
+    void importObsoleteSlot ();
+    void importStatusSlot (std::string message);
+
 public:
     MySQLDBImportTask(const std::string& class_id, const std::string& instance_id, TaskManager& task_manager);
     virtual ~MySQLDBImportTask();
@@ -43,6 +53,9 @@ protected:
     std::string current_filename_;
 
     std::unique_ptr<MySQLDBImportTaskWidget> widget_;
+    std::shared_ptr<MySQLDBImportJob> import_job_;
+
+    QMessageBox* msg_box_;
 
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;

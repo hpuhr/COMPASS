@@ -11,8 +11,11 @@
 #include "dbconnection.h"
 #include "mysqlppconnection.h"
 #include "stringconv.h"
+#include "mysqldbimportjob.h"
+#include "jobmanager.h"
 
 #include <QApplication>
+#include <QMessageBox>
 
 using namespace Utils;
 using namespace std;
@@ -24,6 +27,8 @@ MySQLDBImportTask::MySQLDBImportTask(const std::string& class_id, const std::str
     : Task("MySQLDBImportTask", "Import MySQL DB", false, false, task_manager),
       Configurable (class_id, instance_id, &task_manager)
 {
+    qRegisterMetaType<std::string>("std::string");
+
     registerParameter("current_filename", &current_filename_, "");
 
     createSubConfigurables();
@@ -174,6 +179,7 @@ void MySQLDBImportTask::run()
     start_time_ = boost::posix_time::microsec_clock::local_time();
 
     assert (canImportFile());
+    assert (!import_job_);
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -181,14 +187,45 @@ void MySQLDBImportTask::run()
     assert (connection);
 
     QString tmp = current_filename_.c_str();
+    bool archive = tmp.endsWith(".gz") || tmp.endsWith(".tar") || tmp.endsWith(".zip") || tmp.endsWith(".tgz")
+            || tmp.endsWith(".rar");
 
-    loginf << "MySQLDBImportTask: run: starting import";
+    import_job_ = make_shared<MySQLDBImportJob> (current_filename_, archive, *connection);
 
-    if (tmp.endsWith(".gz") || tmp.endsWith(".tar") || tmp.endsWith(".zip") || tmp.endsWith(".tgz")
-            || tmp.endsWith(".rar"))
-        connection->importSQLArchiveFile(current_filename_);
-    else
-        connection->importSQLFile(current_filename_);
+    connect (import_job_.get(), &MySQLDBImportJob::obsoleteSignal, this,
+             &MySQLDBImportTask::importObsoleteSlot, Qt::QueuedConnection);
+    connect (import_job_.get(), &MySQLDBImportJob::doneSignal, this, &MySQLDBImportTask::importDoneSlot,
+             Qt::QueuedConnection);
+    connect (import_job_.get(), &MySQLDBImportJob::statusSignal,
+             this, &MySQLDBImportTask::importStatusSlot, Qt::QueuedConnection);
+
+    JobManager::instance().addBlockingJob(import_job_);
+
+
+//    if (tmp.endsWith(".gz") || tmp.endsWith(".tar") || tmp.endsWith(".zip") || tmp.endsWith(".tgz")
+//            || tmp.endsWith(".rar"))
+//        connection->importSQLArchiveFile(current_filename_);
+//    else
+//        connection->importSQLFile(current_filename_);
+
+
+}
+
+void MySQLDBImportTask::importDoneSlot ()
+{
+    assert (import_job_);
+
+    if (msg_box_)
+    {
+        delete msg_box_;
+        msg_box_ = nullptr;
+    }
+
+    size_t num_lines = import_job_->numLines();
+    size_t num_errors = import_job_->numErrors();
+    bool error_quit = import_job_->quitBecauseOfErrors();
+
+    import_job_ = nullptr;
 
     QApplication::restoreOverrideCursor();
 
@@ -198,7 +235,29 @@ void MySQLDBImportTask::run()
 
     std::string time_str = String::timeStringFromDouble(diff.total_milliseconds()/1000.0, false);
 
-    task_manager_.appendSuccess("MySQLDBImportTask: done after "+time_str);
+    QMessageBox msg_box;
+    std::string message;
+
+    if (error_quit)
+    {
+        task_manager_.appendError("MySQLDBImportTask: failed because of too many errors after "+time_str);
+        message = "The MySQL DB file import failed because of too many errors.";
+    }
+    else if (num_errors)
+    {
+        task_manager_.appendWarning("MySQLDBImportTask: done with "+std::to_string(num_errors)
+                                   +" errors after "+time_str);
+        message = "The MySQL DB file import succeeded with "+std::to_string(num_errors)+" errors.";
+    }
+    else
+    {
+        task_manager_.appendSuccess("MySQLDBImportTask: done after "+time_str);
+        message = "The MySQL DB file import succeeded with no errors.";
+    }
+
+    msg_box.setWindowTitle("Import of MySQL DB Status");
+    msg_box.setText(message.c_str());
+    msg_box.exec();
 
     done_ = true;
 
@@ -206,3 +265,23 @@ void MySQLDBImportTask::run()
     emit doneSignal(name_);
 }
 
+void MySQLDBImportTask::importObsoleteSlot ()
+{
+    import_job_ = nullptr;
+    QApplication::restoreOverrideCursor();
+
+    done_ = true;
+}
+
+void MySQLDBImportTask::importStatusSlot (std::string message)
+{
+    if (!msg_box_)
+    {
+        msg_box_ = new QMessageBox ();
+        msg_box_->setWindowTitle("Import of MySQL DB Status");
+        msg_box_->setStandardButtons(QMessageBox::NoButton);
+        msg_box_->show();
+    }
+
+    msg_box_->setText(message.c_str());
+}

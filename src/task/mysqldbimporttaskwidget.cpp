@@ -67,10 +67,8 @@ void MySQLDBImportTaskWidget::addFileSlot ()
     QFileDialog dialog(this, "Add Database File");
     dialog.setFileMode(QFileDialog::ExistingFile);
 
-
     QStringList filters;
-    filters << "SQL (*.sql)"
-            << "Archives (*.tar.gz *.gz *.tar *.zip *.tgz *.rar)";
+    filters << "DB Files (*.sql *.tar.gz *.gz *.tar *.tgz)";
 
     dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);
