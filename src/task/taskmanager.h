@@ -29,7 +29,7 @@ class ATSDB;
 class DatabaseOpenTask;
 class ManageSchemaTask;
 class ManageDBObjectsTask;
-
+class MySQLDBImportTask;
 class CreateARTASAssociationsTask;
 class JSONImporterTask;
 class RadarPlotPositionCalculatorTask;
@@ -89,6 +89,7 @@ protected:
     std::unique_ptr<ASTERIXImporterTask> asterix_importer_task_;
 #endif
     std::unique_ptr<JSONImporterTask> json_importer_task_;
+    std::unique_ptr<MySQLDBImportTask> mysqldb_import_task_;
     std::unique_ptr<RadarPlotPositionCalculatorTask> radar_plot_position_calculator_task_;
     std::unique_ptr<CreateARTASAssociationsTask> create_artas_associations_task_;
     std::unique_ptr<PostProcessTask> post_process_task_;

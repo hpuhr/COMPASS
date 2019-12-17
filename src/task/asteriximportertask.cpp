@@ -223,7 +223,8 @@ void ASTERIXImporterTask::removeCurrentFilename ()
     assert (hasFile(current_filename_));
 
     if (file_list_.count (current_filename_) != 1)
-        throw std::invalid_argument ("ASTERIXImporterTask: addFile: name '"+current_filename_+"' not in use");
+        throw std::invalid_argument ("ASTERIXImporterTask: removeCurrentFilename: name '"
+                                     +current_filename_+"' not in use");
 
     delete file_list_.at(current_filename_);
     file_list_.erase(current_filename_);

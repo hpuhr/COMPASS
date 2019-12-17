@@ -34,6 +34,8 @@
 #include "createartasassociationstaskwidget.h"
 #include "postprocesstask.h"
 #include "postprocesstaskwidget.h"
+#include "mysqldbimporttask.h"
+#include "mysqldbimporttaskwidget.h"
 
 #if USE_JASTERIX
 #include "asteriximportertask.h"
@@ -55,8 +57,8 @@ TaskManager::TaskManager(const std::string &class_id, const std::string &instanc
     task_list_.push_back("ASTERIXImportTask");
 #endif
 
-    task_list_.insert (task_list_.end(), {"JSONImportTask", "RadarPlotPositionCalculatorTask", "PostProcessTask",
-                       "CreateARTASAssociationsTask"});
+    task_list_.insert (task_list_.end(), {"JSONImportTask", "MySQLDBImportTask", "RadarPlotPositionCalculatorTask",
+                                          "PostProcessTask", "CreateARTASAssociationsTask"});
 
     for (auto& task_it : task_list_) // check that all tasks in list exist
         assert (tasks_.count(task_it));
@@ -105,6 +107,13 @@ void TaskManager::generateSubConfigurable (const std::string &class_id, const st
         json_importer_task_.reset(new JSONImporterTask (class_id, instance_id, *this));
         assert (json_importer_task_);
         addTask (class_id, json_importer_task_.get());
+    }
+    else if (class_id.compare ("MySQLDBImportTask") == 0)
+    {
+        assert (!mysqldb_import_task_);
+        mysqldb_import_task_.reset(new MySQLDBImportTask (class_id, instance_id, *this));
+        assert (mysqldb_import_task_);
+        addTask (class_id, mysqldb_import_task_.get());
     }
     else if (class_id.compare ("RadarPlotPositionCalculatorTask") == 0)
     {
@@ -172,6 +181,12 @@ void TaskManager::checkSubConfigurables ()
     {
         generateSubConfigurable("JSONImportTask", "JSONImportTask0");
         assert (json_importer_task_);
+    }
+
+    if (!mysqldb_import_task_)
+    {
+        generateSubConfigurable("MySQLDBImportTask", "MySQLDBImportTask0");
+        assert (mysqldb_import_task_);
     }
 
     if (!radar_plot_position_calculator_task_)
@@ -318,7 +333,7 @@ void TaskManager::shutdown ()
     loginf << "TaskManager: shutdown";
 
     if (database_open_task_)
-        database_open_task_.reset(nullptr);
+        database_open_task_ = nullptr;
 
     if (manage_schema_task_)
         manage_schema_task_.reset(nullptr);
@@ -333,6 +348,9 @@ void TaskManager::shutdown ()
 
     if (json_importer_task_)
         json_importer_task_.reset(nullptr);
+
+    if (mysqldb_import_task_)
+        mysqldb_import_task_.reset(nullptr);
 
     if (radar_plot_position_calculator_task_)
         radar_plot_position_calculator_task_.reset(nullptr);
