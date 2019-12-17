@@ -1,4 +1,5 @@
 #include "manageschemataskwidget.h"
+#include "manageschematask.h"
 #include "atsdb.h"
 #include "dbschemamanager.h"
 #include "dbschemamanagerwidget.h"
@@ -14,9 +15,17 @@ ManageSchemaTaskWidget::ManageSchemaTaskWidget(ManageSchemaTask& task, QWidget* 
 
     //main_layout_->addWidget(new QLabel("ManageSchemaTaskWidget"));
 
-    dbschema_manager_widget_ = ATSDB::instance().schemaManager().widget();
-    //    QObject::connect(dbinterface_widget_, SIGNAL(databaseOpenedSignal()), dbschema_manager_widget_, SLOT(databaseOpenedSlot()));
-    main_layout->addWidget(dbschema_manager_widget_);
+    DBSchemaManagerWidget* dbschema_manager_widget = ATSDB::instance().schemaManager().widget();
+    connect(dbschema_manager_widget, &DBSchemaManagerWidget::schemaLockedSignal,
+            this, &ManageSchemaTaskWidget::schemaLockedSlot);
+    main_layout->addWidget(dbschema_manager_widget);
 
     setLayout (main_layout);
+}
+
+
+void ManageSchemaTaskWidget::schemaLockedSlot ()
+{
+    loginf << "ManageSchemaTaskWidget: schemaLockedSlot";
+    emit task_.statusChangedSignal(task_.name());
 }

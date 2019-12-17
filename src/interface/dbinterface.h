@@ -86,9 +86,10 @@ public:
 
     std::vector <std::string> getDatabases ();
 
-    DBInterfaceInfoWidget *infoWidget();
+    DBInterfaceInfoWidget* infoWidget();
 
-    QWidget *connectionWidget ();
+    QWidget* connectionWidget ();
+    //void deleteConnectionWidgets ();
 
     const std::map <std::string, DBTableInfo> &tableInfo () { return table_info_; }
 
@@ -198,7 +199,6 @@ protected:
 
     void insertBindStatementUpdateForCurrentIndex (std::shared_ptr<Buffer> buffer, unsigned int row);
 
-    //void setPostProcessed (bool value);
     //    /// @brief Returns buffer with min/max data from another Buffer with the string contents. Delete returned buffer yourself.
     //    Buffer *createFromMinMaxStringBuffer (Buffer *string_buffer, PropertyDataType data_type);
 

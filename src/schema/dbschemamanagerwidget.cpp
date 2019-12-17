@@ -130,6 +130,7 @@ void DBSchemaManagerWidget::lockSchemaSlot ()
     }
 
     manager_.lock();
+    emit schemaLockedSignal();
 }
 
 void DBSchemaManagerWidget::schemaSelectedSlot (const QString &value)

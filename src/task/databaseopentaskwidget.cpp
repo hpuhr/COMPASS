@@ -57,7 +57,7 @@ DatabaseOpenTaskWidget::DatabaseOpenTaskWidget(DatabaseOpenTask& task, DBInterfa
 
         connection_stack_->addWidget(con_it.second->widget());
         connect(con_it.second->widget(), SIGNAL(databaseOpenedSignal()),
-                         this, SLOT(databaseOpenedSlot()), static_cast<Qt::ConnectionType>(Qt::UniqueConnection));
+                this, SLOT(databaseOpenedSlot()), Qt::UniqueConnection);
     }
     group_box->setLayout(grplayout);
     main_layout_->addWidget(group_box);
@@ -79,10 +79,16 @@ DatabaseOpenTaskWidget::~DatabaseOpenTaskWidget()
     loginf << "DatabaseOpenTaskWidget: destructor";
 
     // remove all connection widgets, are deleted by connections
-    const std::map<std::string, DBConnection*> &types = db_interface_.connections();
+    //db_interface_.deleteConnectionWidgets();
 
-    for (auto& con_it : types)
-        connection_stack_->removeWidget(con_it.second->widget());
+    //connection_stack_->remo
+
+//    const std::map<std::string, DBConnection*> &types = db_interface_.connections();
+//    for (auto& con_it : types)
+//        connection_stack_->removeWidget(con_it.second->widget());
+
+    while (connection_stack_->count())
+        connection_stack_->removeWidget(connection_stack_->widget(0));
 }
 
 void DatabaseOpenTaskWidget::databaseTypeSelectSlot ()

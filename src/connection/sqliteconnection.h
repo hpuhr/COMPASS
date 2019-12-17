@@ -72,6 +72,7 @@ public:
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id) override;
 
     QWidget *widget () override;
+    //void deleteWidget () override;
     QWidget *infoWidget () override;
     std::string status () const override;
     std::string identifier () const override;
@@ -89,15 +90,15 @@ protected:
     std::string last_filename_;
 
     /// Database handle to execute queries
-    sqlite3* db_handle_;
+    sqlite3* db_handle_ {nullptr};
     /// Statement for binding variables to.
-    sqlite3_stmt *statement_;
+    sqlite3_stmt* statement_ {nullptr};
 
     std::shared_ptr<DBCommand> prepared_command_;
     bool prepared_command_done_;
 
-    SQLiteConnectionWidget *widget_;
-    SQLiteConnectionInfoWidget *info_widget_;
+    std::unique_ptr<SQLiteConnectionWidget> widget_;
+    std::unique_ptr<SQLiteConnectionInfoWidget> info_widget_;
 
     std::map <std::string, SavedFile*> file_list_;
 

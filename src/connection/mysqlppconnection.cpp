@@ -150,16 +150,10 @@ void MySQLppConnection::disconnect()
     connected_server_ = nullptr;
 
     if (widget_)
-    {
-        delete widget_;
         widget_ = nullptr;
-    }
 
     if (info_widget_)
-    {
-        delete info_widget_;
         info_widget_ = nullptr;
-    }
 }
 
 void MySQLppConnection::executeSQL(const std::string &sql)
@@ -758,26 +752,30 @@ void MySQLppConnection::performanceTest ()
     loginf  << "MySQLppConnection: performanceTest: end after load time " << load_time << "s rows " << rows << " " << rows/load_time << " r/s";
 }
 
-QWidget *MySQLppConnection::widget ()
+QWidget* MySQLppConnection::widget ()
 {
     if (!widget_)
-    {
-        widget_ = new MySQLppConnectionWidget(*this);
-    }
+        widget_.reset(new MySQLppConnectionWidget(*this));
 
     assert (widget_);
-    return widget_;
+    return widget_.get();
 }
+
+//void MySQLppConnection::deleteWidget ()
+//{
+//    for (auto& server_it : servers_)
+//        server_it.second->deleteWidget();
+
+//    widget_ = nullptr;
+//}
 
 QWidget *MySQLppConnection::infoWidget ()
 {
     if (!info_widget_)
-    {
-        info_widget_ = new MySQLppConnectionInfoWidget(*this);
-    }
+        info_widget_.reset(new MySQLppConnectionInfoWidget(*this));
 
     assert (info_widget_);
-    return info_widget_;
+    return info_widget_.get();
 }
 
 std::string MySQLppConnection::status () const

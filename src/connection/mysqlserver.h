@@ -40,10 +40,7 @@ public:
     virtual ~MySQLServer ()
     {
         if (widget_)
-        {
-            delete widget_;
             widget_=nullptr;
-        }
     }
 
     /// Returns the database server name or IP address
@@ -65,19 +62,19 @@ public:
     const std::string database () const { return database_; }
     void database (const std::string &database) { database_ = database; }
 
-    MySQLServerWidget *widget()
+    MySQLServerWidget* widget()
     {
         if (!widget_)
-        {
-            widget_ = new MySQLServerWidget (connection_, *this);
-        }
+            widget_.reset(new MySQLServerWidget (connection_, *this));
 
         assert (widget_);
-        return widget_;
+        return widget_.get();
     }
 
+    void deleteWidget () {  widget_=nullptr; }
+
 protected:
-    MySQLppConnection &connection_;
+    MySQLppConnection& connection_;
     /// Database server name or IP address
     std::string host_;
     /// Username
@@ -89,7 +86,7 @@ protected:
 
     std::string database_;
 
-    MySQLServerWidget *widget_;
+    std::unique_ptr<MySQLServerWidget> widget_;
 };
 
 #endif // MYSQLSERVER_H

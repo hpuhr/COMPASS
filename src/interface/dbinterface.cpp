@@ -164,6 +164,12 @@ QWidget *DBInterface::connectionWidget()
     return current_connection_->widget();
 }
 
+//void DBInterface::deleteConnectionWidgets ()
+//{
+//    for (auto& con_it : connections_)
+//        con_it.second->deleteWidget();
+//}
+
 std::vector <std::string> DBInterface::getDatabases ()
 {
     assert (current_connection_);

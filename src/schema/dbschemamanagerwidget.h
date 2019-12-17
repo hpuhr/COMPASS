@@ -31,6 +31,9 @@ class DBSchemaManagerWidget : public QWidget
 {
     Q_OBJECT
 
+signals:
+    void schemaLockedSignal();
+
 public:
     explicit DBSchemaManagerWidget(DBSchemaManager &manager, QWidget* parent=0, Qt::WindowFlags f=0);
     virtual ~DBSchemaManagerWidget();

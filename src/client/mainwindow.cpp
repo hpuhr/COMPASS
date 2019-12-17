@@ -129,7 +129,7 @@ void MainWindow::startSlot ()
 
     assert (task_manager_widget_);
     tab_widget_->removeTab(0);
-    ATSDB::instance().taskManager().deleteWidgets();
+    //ATSDB::instance().taskManager().deleteWidgets();
 
     assert (management_widget_);
     tab_widget_->addTab (management_widget_, "Management");

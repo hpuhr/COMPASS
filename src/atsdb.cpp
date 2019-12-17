@@ -272,18 +272,13 @@ void ATSDB::shutdown ()
     JobManager::instance().shutdown();
     ProjectionManager::instance().shutdown();
 
-    assert (task_manager_);
-    task_manager_->shutdown();
-    delete task_manager_;
-    task_manager_ = nullptr;
+    assert (db_interface_);
+    db_interface_->closeConnection(); // removes connection widgets, needs to be before
 
     assert (view_manager_);
     view_manager_->close();
     delete view_manager_;
     view_manager_ = nullptr;
-
-    assert (db_interface_);
-    db_interface_->closeConnection();
 
     assert (dbo_manager_);
     delete dbo_manager_;
@@ -292,6 +287,11 @@ void ATSDB::shutdown ()
     assert (db_schema_manager_);
     delete db_schema_manager_;
     db_schema_manager_ = nullptr;
+
+    assert (task_manager_);
+    task_manager_->shutdown();
+    delete task_manager_;
+    task_manager_ = nullptr;
 
     assert (db_interface_);
     delete db_interface_;
