@@ -927,11 +927,19 @@ void Configuration::generateJSON (nlohmann::json& target) const
 
     json& param_config = target["parameters"];
 
+    // original parameters, in case config was not used
+
+    for (auto& par_it : org_config_parameters_.items())
+    {
+        param_config[par_it.key()] = par_it.value();
+    }
+
+    // overwrite new parameter values
     for (auto& par_it : parameters_bool_)
     {
         logdbg  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
                 << ": generateJSON: writing bool '" << par_it.second.getParameterId() << "'";
-        assert (!param_config.contains(par_it.second.getParameterId()));
+        //assert (!param_config.contains(par_it.second.getParameterId()));
         param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
     }
 
@@ -939,7 +947,7 @@ void Configuration::generateJSON (nlohmann::json& target) const
     {
         logdbg  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
                 << ": generateJSON: writing int '" << par_it.second.getParameterId() << "'";
-        assert (!param_config.contains(par_it.second.getParameterId()));
+        //assert (!param_config.contains(par_it.second.getParameterId()));
         param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
     }
 
@@ -947,7 +955,7 @@ void Configuration::generateJSON (nlohmann::json& target) const
     {
         logdbg  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
                 << ": generateJSON: writing uint '" << par_it.second.getParameterId() << "'";
-        assert (!param_config.contains(par_it.second.getParameterId()));
+        //assert (!param_config.contains(par_it.second.getParameterId()));
         param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
     }
 
@@ -955,7 +963,7 @@ void Configuration::generateJSON (nlohmann::json& target) const
     {
         logdbg  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
                 << ": generateJSON: writing float '" << par_it.second.getParameterId() << "'";
-        assert (!param_config.contains(par_it.second.getParameterId()));
+        //assert (!param_config.contains(par_it.second.getParameterId()));
         param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
     }
 
@@ -963,7 +971,7 @@ void Configuration::generateJSON (nlohmann::json& target) const
     {
         logdbg  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
                 << ": generateJSON: writing double '" << par_it.second.getParameterId() << "'";
-        assert (!param_config.contains(par_it.second.getParameterId()));
+        //assert (!param_config.contains(par_it.second.getParameterId()));
         param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
     }
 
@@ -971,7 +979,7 @@ void Configuration::generateJSON (nlohmann::json& target) const
     {
         logdbg  << "Configuration class_id " << class_id_ << " instance_id " << instance_id_
                 << ": generateJSON: writing string '" << par_it.second.getParameterId() << "'";
-        assert (!param_config.contains(par_it.second.getParameterId()));
+        //assert (!param_config.contains(par_it.second.getParameterId()));
         param_config[par_it.second.getParameterId()] = par_it.second.getParameterValue();
     }
 
