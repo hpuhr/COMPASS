@@ -18,10 +18,12 @@
 #ifndef ASTERIXIMPORTTASKWIDGET_H
 #define ASTERIXIMPORTTASKWIDGET_H
 
-#include <QWidget>
-#include <memory>
+#include <taskwidget.h>
 
 #include <jasterix/jasterix.h>
+
+#include <memory>
+
 
 class ASTERIXImportTask;
 class ASTERIXConfigWidget;
@@ -34,7 +36,7 @@ class QStackedWidget;
 class QCheckBox;
 class QTabWidget;
 
-class ASTERIXImportTaskWidget : public QWidget
+class ASTERIXImportTaskWidget : public TaskWidget
 {
     Q_OBJECT
 
@@ -52,6 +54,8 @@ public slots:
     void limitRAMChangedSlot ();
     void createMappingsSlot();
     void testImportSlot();
+
+    void expertModeChangedSlot ();
 
 public:
     ASTERIXImportTaskWidget(ASTERIXImportTask& task, QWidget* parent=0, Qt::WindowFlags f=0);

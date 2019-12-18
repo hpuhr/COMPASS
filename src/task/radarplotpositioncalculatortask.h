@@ -56,7 +56,7 @@ public:
     bool isCalculating ();
     unsigned int getNumLoaded () { return num_loaded_; }
 
-    QWidget* widget();
+    TaskWidget* widget();
     virtual void deleteWidget ();
 
     std::string dbObjectStr() const;

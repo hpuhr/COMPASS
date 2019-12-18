@@ -3,6 +3,7 @@
 #include "global.h"
 #include "logger.h"
 #include "files.h"
+#include "taskwidget.h"
 
 #include <QListWidget>
 #include <QStackedWidget>
@@ -102,7 +103,7 @@ TaskManagerWidget::TaskManagerWidget(TaskManager& task_manager, QWidget *parent)
 
 TaskManagerWidget::~TaskManagerWidget ()
 {
-    loginf  << "TaskManagerWidget: destructor";
+    logdbg  << "TaskManagerWidget: destructor";
 
     QSettings settings ("ATSDB", "TaskManagerWidget");
     settings.setValue("topSplitterSizes", top_splitter_->saveState());

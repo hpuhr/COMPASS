@@ -58,11 +58,14 @@ void MySQLDBImportTask::checkSubConfigurables ()
 {
 }
 
-QWidget* MySQLDBImportTask::widget()
+TaskWidget* MySQLDBImportTask::widget()
 {
     if (!widget_)
     {
         widget_.reset(new MySQLDBImportTaskWidget (*this));
+
+        connect (&task_manager_, &TaskManager::expertModeChangedSignal,
+                 widget_.get(), &MySQLDBImportTaskWidget::expertModeChangedSlot);
     }
 
     assert (widget_);

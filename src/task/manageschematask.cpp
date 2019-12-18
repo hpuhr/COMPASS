@@ -11,11 +11,14 @@ ManageSchemaTask::ManageSchemaTask(const std::string& class_id, const std::strin
 {
 }
 
-QWidget* ManageSchemaTask::widget ()
+TaskWidget* ManageSchemaTask::widget ()
 {
     if (!widget_)
     {
         widget_.reset(new ManageSchemaTaskWidget(*this));
+
+        connect (&task_manager_, &TaskManager::expertModeChangedSignal,
+                 widget_.get(), &ManageSchemaTaskWidget::expertModeChangedSlot);
     }
 
     return widget_.get();

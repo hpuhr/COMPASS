@@ -12,14 +12,16 @@ DatabaseOpenTask::DatabaseOpenTask(const std::string& class_id, const std::strin
 {
 }
 
-QWidget* DatabaseOpenTask::widget ()
+TaskWidget* DatabaseOpenTask::widget ()
 {
     if (!widget_)
     {
         widget_.reset(new DatabaseOpenTaskWidget(*this, ATSDB::instance().interface()));
 
-        QObject::connect(widget_.get(), &DatabaseOpenTaskWidget::databaseOpenedSignal,
+        connect(widget_.get(), &DatabaseOpenTaskWidget::databaseOpenedSignal,
                          this, &DatabaseOpenTask::databaseOpenedSlot);
+        connect (&task_manager_, &TaskManager::expertModeChangedSignal,
+                 widget_.get(), &DatabaseOpenTaskWidget::expertModeChangedSlot);
     }
 
     return widget_.get();

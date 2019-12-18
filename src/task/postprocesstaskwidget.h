@@ -1,16 +1,16 @@
 #ifndef POSTPROCESSTASKWIDGET_H
 #define POSTPROCESSTASKWIDGET_H
 
-
-#include <QWidget>
+#include <taskwidget.h>
 
 class PostProcessTask;
 
-class PostProcessTaskWidget : public QWidget
+class PostProcessTaskWidget : public TaskWidget
 {
     Q_OBJECT
-//public slots:
-//    void runSlot ();
+
+public slots:
+    void expertModeChangedSlot ();
 
 public:
     PostProcessTaskWidget(PostProcessTask& task, QWidget *parent=nullptr);

@@ -62,11 +62,14 @@ RadarPlotPositionCalculatorTask::~RadarPlotPositionCalculatorTask()
 {
 }
 
-QWidget* RadarPlotPositionCalculatorTask::widget()
+TaskWidget* RadarPlotPositionCalculatorTask::widget()
 {
     if (!widget_)
     {
         widget_.reset(new RadarPlotPositionCalculatorTaskWidget (*this));
+
+        connect (&task_manager_, &TaskManager::expertModeChangedSignal,
+                 widget_.get(), &RadarPlotPositionCalculatorTaskWidget::expertModeChangedSlot);
     }
 
     assert (widget_);

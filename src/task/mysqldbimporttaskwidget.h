@@ -1,14 +1,14 @@
 #ifndef MYSQLDBIMPORTTASKWIDGET_H
 #define MYSQLDBIMPORTTASKWIDGET_H
 
-#include <QWidget>
+#include <taskwidget.h>
 
 class MySQLDBImportTask;
 
 class QPushButton;
 class QListWidget;
 
-class MySQLDBImportTaskWidget : public QWidget
+class MySQLDBImportTaskWidget : public TaskWidget
 {
     Q_OBJECT
 
@@ -17,6 +17,8 @@ public slots:
     void deleteFileSlot ();
     void selectedFileSlot ();
     void updateFileListSlot ();
+
+    void expertModeChangedSlot ();
 
 public:
     MySQLDBImportTaskWidget(MySQLDBImportTask& task, QWidget* parent=0, Qt::WindowFlags f=0);

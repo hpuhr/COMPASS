@@ -75,7 +75,7 @@ SQLiteConnectionWidget::SQLiteConnectionWidget(SQLiteConnection &connection, QWi
 
 SQLiteConnectionWidget::~SQLiteConnectionWidget()
 {
-    loginf << "SQLiteConnectionWidget: destructor";
+    logdbg << "SQLiteConnectionWidget: destructor";
 }
 
 void SQLiteConnectionWidget::newFileSlot ()

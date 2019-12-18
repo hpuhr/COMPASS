@@ -165,11 +165,14 @@ void ASTERIXImportTask::checkSubConfigurables ()
     }
 }
 
-QWidget* ASTERIXImportTask::widget()
+TaskWidget* ASTERIXImportTask::widget()
 {
     if (!widget_)
     {
         widget_.reset(new ASTERIXImportTaskWidget (*this));
+
+        connect (&task_manager_, &TaskManager::expertModeChangedSignal,
+                 widget_.get(), &ASTERIXImportTaskWidget::expertModeChangedSlot);
     }
 
     assert (widget_);

@@ -41,7 +41,7 @@ public:
                                 TaskManager& task_manager);
     virtual ~CreateARTASAssociationsTask();
 
-    QWidget* widget();
+    TaskWidget* widget();
     virtual void deleteWidget ();
 
     std::string currentDataSourceName() const;

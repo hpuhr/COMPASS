@@ -26,6 +26,7 @@
 #include "projectionmanager.h"
 #include "projectionmanagerwidget.h"
 #include "dbobjectmanager.h"
+#include "taskmanager.h"
 
 #include <QVBoxLayout>
 #include <QGridLayout>
@@ -38,10 +39,8 @@ using namespace Utils::String;
 
 RadarPlotPositionCalculatorTaskWidget::RadarPlotPositionCalculatorTaskWidget(RadarPlotPositionCalculatorTask& task,
                                                                              QWidget* parent, Qt::WindowFlags f)
-: QWidget (parent, f), task_(task)
+: TaskWidget (parent, f), task_(task)
 {
-    setContentsMargins(0, 0, 0, 0);
-
     QVBoxLayout *main_layout = new QVBoxLayout ();
 
     main_layout->addWidget(ProjectionManager::instance().widget());
@@ -107,9 +106,10 @@ RadarPlotPositionCalculatorTaskWidget::RadarPlotPositionCalculatorTaskWidget(Rad
 
     main_layout->addLayout(grid);
 
-    setLayout (main_layout);
-
+    expertModeChangedSlot();
     update();
+
+    setLayout (main_layout);
 }
 
 RadarPlotPositionCalculatorTaskWidget::~RadarPlotPositionCalculatorTaskWidget()
@@ -248,59 +248,34 @@ void RadarPlotPositionCalculatorTaskWidget::longitudeVarChangedSlot()
         task_.longitudeVarStr("");
 }
 
-//void RadarPlotPositionCalculatorTaskWidget::calculateSlot ()
-//{
-//    loginf << "RadarPlotPositionCalculatorTaskWidget: calculateSlot";
+void RadarPlotPositionCalculatorTaskWidget::expertModeChangedSlot ()
+{
+    bool expert_mode = task_.manager().expertMode();
 
-//    if (!task_.canCalculate())
-//    {
-//        QMessageBox::warning (this, "Unable to Calculate",
-//                              "The task can not be peformed with the entered items.\n"
-//                              "The following conditions have to be met: The DBObject must exist, must have data, and"
-//                              " all variables have to be set and exist in the current schema and database");
-//        return;
-//    }
+    assert (object_box_);
+    object_box_->setEnabled(expert_mode);
 
-//    assert (calc_button_);
+    assert (key_box_);
+    key_box_->setEnabled(expert_mode);
 
-//    std::string db_object_str = task_.dbObjectStr();
-//    DBObjectManager& obj_man = ATSDB::instance().objectManager();
+    assert (datasource_box_);
+    datasource_box_->setEnabled(expert_mode);
 
-//    assert (obj_man.existsObject(db_object_str));
-//    DBObject& db_object = obj_man.object(db_object_str);
+    assert (range_box_);
+    range_box_->setEnabled(expert_mode);
 
-//    bool not_final = false;
-//    for (auto ds_it = db_object.dsBegin(); ds_it != db_object.dsEnd(); ++ds_it)
-//    {
-//        ds_it->second.finalize();
-//        if (!ds_it->second.isFinalized())
-//        {
-//            not_final = true;
-//            break;
-//        }
-//    }
+    assert (azimuth_box_);
+    azimuth_box_->setEnabled(expert_mode);
 
-//    if (not_final)
-//    {
-//        QMessageBox::warning (this, "EPSG Value Wrong",
-//                              "The coordinates of the data sources of selected database object could not be calculated."
-//                              " Please select a suitable EPSG value and try again");
-//        return;
-//    }
+    assert (altitude_box_);
+    altitude_box_->setEnabled(expert_mode);
 
-//    loginf << "RadarPlotPositionCalculatorTaskWidget: calculateSlot: starting calculation";
+    assert (latitude_box_);
+    latitude_box_->setEnabled(expert_mode);
 
-//    calc_button_->setDisabled(true);
-
-//    assert (!task_.isCalculating());
-//    task_.calculate();
-//}
-
-//void RadarPlotPositionCalculatorTaskWidget::calculationDoneSlot ()
-//{
-//    assert (calc_button_);
-//    calc_button_->setDisabled(false);
-//}
+    assert (longitude_box_);
+    longitude_box_->setEnabled(expert_mode);
+}
 
 void RadarPlotPositionCalculatorTaskWidget::setDBOBject (const std::string& object_name)
 {

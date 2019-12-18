@@ -24,7 +24,7 @@ public:
 
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
-    virtual QWidget* widget ();
+    virtual TaskWidget* widget ();
     virtual void deleteWidget ();
 
     virtual bool checkPrerequisites ();

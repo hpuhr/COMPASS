@@ -4,7 +4,7 @@
 #include <QObject>
 
 class TaskManager;
-class QWidget;
+class TaskWidget;
 
 class Task : public QObject
 {
@@ -28,7 +28,7 @@ public:
         return name_;
     }
 
-    virtual QWidget* widget ()=0;
+    virtual TaskWidget* widget ()=0;
     virtual void deleteWidget ()=0;
 
     bool guiOnly() const
@@ -59,6 +59,11 @@ public:
 
     virtual void run () { assert(!gui_only_); } // to be overriden by tasks that can run
 
+    TaskManager& manager() const
+    {
+        return task_manager_;
+    }
+
 protected:
     std::string name_;
     std::string gui_name_;
@@ -70,4 +75,6 @@ protected:
 };
 
 #endif // TASK_H
+
+
 

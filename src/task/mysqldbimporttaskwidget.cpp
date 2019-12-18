@@ -13,10 +13,8 @@
 //using namespace Utils;
 
 MySQLDBImportTaskWidget::MySQLDBImportTaskWidget(MySQLDBImportTask& task, QWidget* parent, Qt::WindowFlags f)
-    : QWidget (parent, f), task_(task)
+    : TaskWidget (parent, f), task_(task)
 {
-    setContentsMargins(0, 0, 0, 0);
-
     QFont font_bold;
     font_bold.setBold(true);
 
@@ -54,6 +52,8 @@ MySQLDBImportTaskWidget::MySQLDBImportTaskWidget(MySQLDBImportTask& task, QWidge
 
         main_layout->addLayout(files_layout);
     }
+
+    expertModeChangedSlot();
 
     setLayout (main_layout);
 }
@@ -95,8 +95,6 @@ void MySQLDBImportTaskWidget::addFileSlot ()
             if (!task_.hasFile(filename))
                 task_.addFile(filename);
         }
-
-        //connection_.importSQLFile(filename);
     }
 }
 
@@ -140,4 +138,9 @@ void MySQLDBImportTaskWidget::updateFileListSlot ()
         if (it.first == task_.currentFilename())
             file_list_->setCurrentItem(item);
     }
+}
+
+void MySQLDBImportTaskWidget::expertModeChangedSlot ()
+{
+
 }

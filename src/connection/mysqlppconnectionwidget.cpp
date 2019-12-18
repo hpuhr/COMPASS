@@ -84,7 +84,7 @@ MySQLppConnectionWidget::MySQLppConnectionWidget(MySQLppConnection &connection, 
 
 MySQLppConnectionWidget::~MySQLppConnectionWidget()
 {
-    loginf << "MySQLppConnectionWidget: destructor";
+    logdbg << "MySQLppConnectionWidget: destructor";
 
 //    while (server_widgets_->count())
 //        server_widgets_->removeWidget(server_widgets_->widget(0));

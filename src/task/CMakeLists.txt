@@ -9,6 +9,7 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/taskmanagerwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/taskmanagerlogwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/task.h"
+        "${CMAKE_CURRENT_LIST_DIR}/taskwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/databaseopentask.h"
         "${CMAKE_CURRENT_LIST_DIR}/databaseopentaskwidget.h"
         "${CMAKE_CURRENT_LIST_DIR}/manageschematask.h"

@@ -43,10 +43,8 @@
 using namespace Utils;
 
 JSONImportTaskWidget::JSONImportTaskWidget(JSONImportTask& task, QWidget* parent, Qt::WindowFlags f)
-    : QWidget (parent, f), task_(task)
+    : TaskWidget (parent, f), task_(task)
 {
-    setContentsMargins(0, 0, 0, 0);
-
     main_layout_ = new QHBoxLayout ();
 
     tab_widget_ = new QTabWidget ();
@@ -54,6 +52,8 @@ JSONImportTaskWidget::JSONImportTaskWidget(JSONImportTask& task, QWidget* parent
 
     addMainTab();
     addMappingsTab();
+
+    expertModeChangedSlot();
 
     setLayout (main_layout_);
 }
@@ -315,7 +315,6 @@ void JSONImportTaskWidget::removeSchemaSlot()
     task_.removeCurrentSchema();
     updateSchemasBox();
     updateParserBox();
-    //selectedObjectParserSlot ();
 }
 
 void JSONImportTaskWidget::selectedSchemaChangedSlot(const QString& text)
@@ -326,7 +325,6 @@ void JSONImportTaskWidget::selectedSchemaChangedSlot(const QString& text)
     task_.currentSchemaName(text.toStdString());
 
     updateParserBox();
-    //selectedObjectParserSlot ();
 }
 
 void JSONImportTaskWidget::updateSchemasBox()
@@ -409,7 +407,6 @@ void JSONImportTaskWidget::removeObjectParserSlot ()
         current.removeParser(name);
 
         updateParserBox();
-        //selectedObjectParserSlot();
     }
 }
 
@@ -438,31 +435,10 @@ void JSONImportTaskWidget::selectedObjectParserSlot (const QString& text)
     }
 }
 
-//void JSONImporterTaskWidget::createObjectParserWidget()
-//{
-//    assert (!object_parser_widget_);
-//    assert (main_layout_);
+void JSONImportTaskWidget::expertModeChangedSlot ()
+{
 
-//    int frame_width_small = 1;
-
-//    QFrame *right_frame = new QFrame ();
-//    right_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
-//    right_frame->setLineWidth(frame_width_small);
-
-//    object_parser_widget_ = new QStackedWidget ();
-
-//    QVBoxLayout* tmp = new QVBoxLayout ();
-//    tmp->addWidget(object_parser_widget_);
-
-//    right_frame->setLayout(tmp);
-
-//    main_layout_->addWidget(right_frame);
-//}
-
-//void JSONImporterTaskWidget::update ()
-//{
-//    loginf << "JSONImporterTaskWidget: update";
-//}
+}
 
 void JSONImportTaskWidget::testImportSlot ()
 {
@@ -480,64 +456,6 @@ void JSONImportTaskWidget::testImportSlot ()
     task_.test(true);
     task_.run();
 }
-
-//void JSONImporterTaskWidget::importSlot ()
-//{
-//    loginf << "JSONImporterTaskWidget: importSlot";
-
-//    if (!file_list_->currentItem())
-//    {
-//        QMessageBox m_warning (QMessageBox::Warning, "JSON File Import Failed",
-//                               "Please select a file in the list.",
-//                               QMessageBox::Ok);
-//        m_warning.exec();
-//        return;
-//    }
-
-//    for (auto& object_it : ATSDB::instance().objectManager())
-//    {
-//        if (object_it.second->hasData())
-//        {
-//            QMessageBox::StandardButton reply;
-//            reply = QMessageBox::question(this, "Really Import?", "The database already contains data. "
-//                                                                  "A data import might not be successful. Continue?",
-//                                          QMessageBox::Yes|QMessageBox::No);
-//            if (reply == QMessageBox::Yes)
-//            {
-//                loginf << "JSONImporterTaskWidget: importSlot: importing although data in database";
-//                break;
-//            }
-//            else
-//            {
-//                loginf << "JSONImporterTaskWidget: importSlot: quit importing since data in database";
-//                return;
-//            }
-//        }
-//    }
-
-//    QString filename = file_list_->currentItem()->text();
-//    if (filename.size() > 0)
-//    {
-//        assert (task_.hasFile(filename.toStdString()));
-
-//        if (!task_.canImportFile(filename.toStdString()))
-//        {
-//            QMessageBox m_warning (QMessageBox::Warning, "JSON File Import Failed",
-//                                   "File does not exist.",
-//                                   QMessageBox::Ok);
-//            m_warning.exec();
-//            return;
-//        }
-
-//        if (filename.endsWith(".zip") || filename.endsWith(".gz") || filename.endsWith(".tgz"))
-//            task_.importFileArchive(filename.toStdString(), false);
-//        else
-//            task_.importFile(filename.toStdString(), false);
-
-//        test_button_->setDisabled(true);
-//        import_button_->setDisabled(true);
-//    }
-//}
 
 void JSONImportTaskWidget::runStarted ()
 {
@@ -565,8 +483,6 @@ void JSONImportTaskWidget::updateParserBox ()
         for (auto& parser_it : task_.currentSchema())
         {
             object_parser_box_->addItem(parser_it.first.c_str());
-//            QListWidgetItem* item = new QListWidgetItem(tr(parser_it.first.c_str()), object_parser_box_);
-//            assert (item);
         }
     }
 }

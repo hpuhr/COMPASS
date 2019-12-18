@@ -67,10 +67,15 @@ CreateARTASAssociationsTask::~CreateARTASAssociationsTask()
 {
 }
 
-QWidget* CreateARTASAssociationsTask::widget()
+TaskWidget* CreateARTASAssociationsTask::widget()
 {
     if (!widget_)
+    {
         widget_.reset(new CreateARTASAssociationsTaskWidget (*this));
+
+        connect (&task_manager_, &TaskManager::expertModeChangedSignal,
+                 widget_.get(), &CreateARTASAssociationsTaskWidget::expertModeChangedSlot);
+    }
 
     assert (widget_);
     return widget_.get();

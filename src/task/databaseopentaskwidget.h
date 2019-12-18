@@ -1,7 +1,8 @@
 #ifndef DATABASEOPENTASKWIDGET_H
 #define DATABASEOPENTASKWIDGET_H
 
-#include <QWidget>
+#include <taskwidget.h>
+
 #include <QComboBox>
 
 class DBInterface;
@@ -9,13 +10,15 @@ class QStackedWidget;
 
 class DatabaseOpenTask;
 
-class DatabaseOpenTaskWidget : public QWidget
+class DatabaseOpenTaskWidget : public TaskWidget
 {
     Q_OBJECT
 
 public slots:
     void databaseTypeSelectSlot ();
     void databaseOpenedSlot ();
+
+    void expertModeChangedSlot ();
 
 signals:
     void databaseOpenedSignal ();

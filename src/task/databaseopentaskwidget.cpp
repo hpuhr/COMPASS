@@ -2,8 +2,6 @@
 #include "databaseopentask.h"
 #include "atsdb.h"
 #include "dbinterface.h"
-//#include "dbinterfacewidget.h"
-//#include "dbinterface.h"
 #include "dbconnection.h"
 #include "logger.h"
 #include "stringconv.h"
@@ -28,10 +26,8 @@
 #include <QLabel>
 
 DatabaseOpenTaskWidget::DatabaseOpenTaskWidget(DatabaseOpenTask& task, DBInterface& db_interface, QWidget* parent)
-    : QWidget(parent), task_(task), db_interface_(db_interface)
+    : TaskWidget(parent), task_(task), db_interface_(db_interface)
 {
-    setContentsMargins(0, 0, 0, 0);
-
     QFont font_bold;
     font_bold.setBold(true);
 
@@ -66,6 +62,8 @@ DatabaseOpenTaskWidget::DatabaseOpenTaskWidget(DatabaseOpenTask& task, DBInterfa
 
     main_layout_->addWidget(connection_stack_);
 
+    expertModeChangedSlot();
+
     setLayout (main_layout_);
 
     if (db_interface_.usedConnection().size() > 0)
@@ -76,7 +74,7 @@ DatabaseOpenTaskWidget::DatabaseOpenTaskWidget(DatabaseOpenTask& task, DBInterfa
 
 DatabaseOpenTaskWidget::~DatabaseOpenTaskWidget()
 {
-    loginf << "DatabaseOpenTaskWidget: destructor";
+    logdbg << "DatabaseOpenTaskWidget: destructor";
 
     // remove all connection widgets, are deleted by connections
     //db_interface_.deleteConnectionWidgets();
@@ -110,4 +108,9 @@ void DatabaseOpenTaskWidget::databaseOpenedSlot ()
 {
     logdbg << "DatabaseOpenTaskWidget: databaseOpenedSlot";
     emit databaseOpenedSignal();
+}
+
+void DatabaseOpenTaskWidget::expertModeChangedSlot ()
+{
+
 }

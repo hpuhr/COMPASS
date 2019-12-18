@@ -227,6 +227,8 @@ void TaskManager::expertMode(bool value)
         widget_->updateTaskStates();
         widget_->selectNextTask();
     }
+
+    emit expertModeChangedSignal();
 }
 
 std::vector<std::string> TaskManager::taskList() const

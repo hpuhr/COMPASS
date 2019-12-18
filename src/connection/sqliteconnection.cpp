@@ -88,7 +88,7 @@ void SQLiteConnection::openFile (const std::string &file_name)
 
 void SQLiteConnection::disconnect()
 {
-    loginf << "SQLiteConnection: disconnect";
+    logdbg << "SQLiteConnection: disconnect";
 
     connection_ready_ = false;
 

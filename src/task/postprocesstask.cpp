@@ -25,11 +25,14 @@ PostProcessTask::PostProcessTask(const std::string& class_id, const std::string&
 {
 }
 
-QWidget* PostProcessTask::widget ()
+TaskWidget* PostProcessTask::widget ()
 {
     if (!widget_)
     {
         widget_.reset(new PostProcessTaskWidget(*this));
+
+        connect (&task_manager_, &TaskManager::expertModeChangedSignal,
+                 widget_.get(), &PostProcessTaskWidget::expertModeChangedSlot);
     }
 
     return widget_.get();

@@ -12,11 +12,14 @@ ManageDBObjectsTask::ManageDBObjectsTask(const std::string& class_id, const std:
 {
 }
 
-QWidget* ManageDBObjectsTask::widget ()
+TaskWidget* ManageDBObjectsTask::widget ()
 {
     if (!widget_)
     {
         widget_.reset(new ManageDBObjectsTaskWidget(*this));
+
+        connect (&task_manager_, &TaskManager::expertModeChangedSignal,
+                 widget_.get(), &ManageDBObjectsTaskWidget::expertModeChangedSlot);
     }
 
     return widget_.get();

@@ -40,10 +40,8 @@ using namespace Utils;
 const float ram_threshold = 4.0;
 
 ASTERIXImportTaskWidget::ASTERIXImportTaskWidget(ASTERIXImportTask& task, QWidget* parent, Qt::WindowFlags f)
-    : QWidget (parent, f), task_(task)
+    : TaskWidget (parent, f), task_(task)
 {
-    setContentsMargins(0, 0, 0, 0);
-
     main_layout_ = new QHBoxLayout ();
 
     tab_widget_ = new QTabWidget ();
@@ -53,6 +51,8 @@ ASTERIXImportTaskWidget::ASTERIXImportTaskWidget(ASTERIXImportTask& task, QWidge
     addMainTab();
     addASTERIXConfigTab();
     addMappingsTab();
+
+    expertModeChangedSlot();
 
     setLayout (main_layout_);
 }
@@ -397,6 +397,11 @@ void ASTERIXImportTaskWidget::testImportSlot()
 
     //    create_mapping_stubs_button_->setDisabled(true);
     //    test_button_->setDisabled(true);
+}
+
+void ASTERIXImportTaskWidget::expertModeChangedSlot ()
+{
+
 }
 
 //void ASTERIXImporterTaskWidget::importSlot()

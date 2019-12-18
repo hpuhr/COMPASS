@@ -5,6 +5,7 @@
 #include "dbovariable.h"
 #include "metadbovariable.h"
 #include "logger.h"
+#include "taskmanager.h"
 
 #include <QVBoxLayout>
 #include <QGridLayout>
@@ -16,22 +17,12 @@
 
 CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
         CreateARTASAssociationsTask& task, QWidget* parent, Qt::WindowFlags f)
-    : QWidget (parent, f), task_(task)
+    : TaskWidget (parent, f), task_(task)
 {
-    //setMinimumSize(QSize(800, 600));
-    setContentsMargins(0, 0, 0, 0);
-
     QFont font_bold;
     font_bold.setBold(true);
 
-//    QFont font_big;
-//    font_big.setPointSize(18);
-
     QVBoxLayout *main_layout = new QVBoxLayout ();
-
-//    QLabel *main_label = new QLabel ("Create ARTAS Associations");
-//    main_label->setFont (font_big);
-//    main_layout->addWidget (main_label);
 
     {
         QGridLayout *grid = new QGridLayout ();
@@ -198,11 +189,10 @@ CreateARTASAssociationsTaskWidget::CreateARTASAssociationsTaskWidget(
              this, &CreateARTASAssociationsTaskWidget::anyTrackFlagChangedSlot);
     main_layout->addWidget(mark_track_coasting_associations_dubious_check_);
 
-    setLayout (main_layout);
-
     update();
+    expertModeChangedSlot();
 
-    show();
+    setLayout (main_layout);
 }
 
 CreateARTASAssociationsTaskWidget::~CreateARTASAssociationsTaskWidget()
@@ -396,4 +386,33 @@ void CreateARTASAssociationsTaskWidget::anyTrackFlagChangedSlot()
             != task_.markTrackCoastingAssociationsDubious())
         task_.markTrackCoastingAssociationsDubious(
                     mark_track_coasting_associations_dubious_check_->checkState() == Qt::Checked);
+}
+
+void CreateARTASAssociationsTaskWidget::expertModeChangedSlot ()
+{
+    bool expert_mode = task_.manager().expertMode();
+
+    assert (ds_id_box_);
+    ds_id_box_->setEnabled(expert_mode);
+
+    assert (track_num_box_);
+    track_num_box_->setEnabled(expert_mode);
+
+    assert (track_begin_box_);
+    track_begin_box_->setEnabled(expert_mode);
+
+    assert (track_end_box_);
+    track_end_box_->setEnabled(expert_mode);
+
+    assert (track_coasting_box_);
+    track_coasting_box_->setEnabled(expert_mode);
+
+    assert (key_box_);
+    key_box_->setEnabled(expert_mode);
+
+    assert (hash_box_);
+    hash_box_->setEnabled(expert_mode);
+
+    assert (tod_box_);
+    tod_box_->setEnabled(expert_mode);
 }

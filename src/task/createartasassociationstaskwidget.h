@@ -1,8 +1,7 @@
 #ifndef CREATEARTASASSOCIATIONSTASKWIDGET_H
 #define CREATEARTASASSOCIATIONSTASKWIDGET_H
 
-
-#include <QWidget>
+#include <taskwidget.h>
 
 class CreateARTASAssociationsTask;
 class QPushButton;
@@ -11,7 +10,7 @@ class DBOVariableSelectionWidget;
 class QLineEdit;
 class QCheckBox;
 
-class CreateARTASAssociationsTaskWidget : public QWidget
+class CreateARTASAssociationsTaskWidget : public TaskWidget
 {
     Q_OBJECT
 
@@ -29,6 +28,8 @@ public slots:
     void associationDubiousCloseTimeFutureEditSlot(QString value);
 
     void anyTrackFlagChangedSlot();
+
+    void expertModeChangedSlot ();
 
 public:
 

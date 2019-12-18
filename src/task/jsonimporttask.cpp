@@ -108,11 +108,14 @@ void JSONImportTask::generateSubConfigurable (const std::string &class_id, const
 }
 
 
-QWidget* JSONImportTask::widget()
+TaskWidget* JSONImportTask::widget()
 {
     if (!widget_)
     {
         widget_.reset(new JSONImportTaskWidget (*this));
+
+        connect (&task_manager_, &TaskManager::expertModeChangedSignal,
+                 widget_.get(), &JSONImportTaskWidget::expertModeChangedSlot);
     }
 
     assert (widget_);

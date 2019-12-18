@@ -18,7 +18,7 @@
 #ifndef JSONIMPORTERTASKWIDGET_H
 #define JSONIMPORTERTASKWIDGET_H
 
-#include <QWidget>
+#include <taskwidget.h>
 
 class JSONImportTask;
 class RadarPlotPositionCalculatorTask;
@@ -34,7 +34,7 @@ class QHBoxLayout;
 class QStackedWidget;
 class QTabWidget;
 
-class JSONImportTaskWidget : public QWidget
+class JSONImportTaskWidget : public TaskWidget
 {
     Q_OBJECT
 
@@ -56,11 +56,12 @@ public slots:
     void removeObjectParserSlot ();
     void selectedObjectParserSlot(const QString& text);
 
+    void expertModeChangedSlot ();
+
 public:
     JSONImportTaskWidget(JSONImportTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
     virtual ~JSONImportTaskWidget();
 
-    //void update ();
     void runStarted ();
     void runDone ();
 

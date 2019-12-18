@@ -9,16 +9,16 @@
 #include <QLabel>
 
 ManageSchemaTaskWidget::ManageSchemaTaskWidget(ManageSchemaTask& task, QWidget* parent)
-    : QWidget(parent), task_(task)
+    : TaskWidget(parent), task_(task)
 {
     QVBoxLayout* main_layout = new QVBoxLayout ();
-
-    //main_layout_->addWidget(new QLabel("ManageSchemaTaskWidget"));
 
     DBSchemaManagerWidget* dbschema_manager_widget = ATSDB::instance().schemaManager().widget();
     connect(dbschema_manager_widget, &DBSchemaManagerWidget::schemaLockedSignal,
             this, &ManageSchemaTaskWidget::schemaLockedSlot);
     main_layout->addWidget(dbschema_manager_widget);
+
+    expertModeChangedSlot();
 
     setLayout (main_layout);
 }
@@ -28,4 +28,9 @@ void ManageSchemaTaskWidget::schemaLockedSlot ()
 {
     loginf << "ManageSchemaTaskWidget: schemaLockedSlot";
     emit task_.statusChangedSignal(task_.name());
+}
+
+void ManageSchemaTaskWidget::expertModeChangedSlot ()
+{
+
 }

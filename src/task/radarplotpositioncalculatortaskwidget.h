@@ -18,7 +18,7 @@
 #ifndef RADARPLOTPOSITIONCALCULATORTASKWIDGET_H_
 #define RADARPLOTPOSITIONCALCULATORTASKWIDGET_H_
 
-#include <QWidget>
+#include <taskwidget.h>
 
 class Buffer;
 class QLabel;
@@ -28,7 +28,7 @@ class DBOVariableSelectionWidget;
 
 class QPushButton;
 
-class RadarPlotPositionCalculatorTaskWidget : public QWidget
+class RadarPlotPositionCalculatorTaskWidget : public TaskWidget
 {
     Q_OBJECT
 
@@ -41,6 +41,8 @@ public slots:
     void altitudeVarChangedSlot();
     void latitudeVarChangedSlot();
     void longitudeVarChangedSlot();
+
+    void expertModeChangedSlot ();
 
 public:
     RadarPlotPositionCalculatorTaskWidget(RadarPlotPositionCalculatorTask& task, QWidget* parent=0,
@@ -61,8 +63,6 @@ protected:
 
     DBOVariableSelectionWidget* latitude_box_ {nullptr};
     DBOVariableSelectionWidget* longitude_box_ {nullptr};
-
-    //QPushButton* calc_button_ {nullptr};
 
     void setDBOBject (const std::string& object_name);
 };

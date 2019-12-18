@@ -46,6 +46,7 @@ class TaskManager : public QObject, public Configurable
 
 signals:
     void startInspectionSignal ();
+    void expertModeChangedSignal();
 
 public slots:
     void taskStatusChangesSlot (std::string task_name);

@@ -1,13 +1,18 @@
 #ifndef MANAGEDBOBJECTSTASKWIDGET_H
 #define MANAGEDBOBJECTSTASKWIDGET_H
 
-#include <QWidget>
+#include <taskwidget.h>
 
 class ManageDBObjectsTask;
 class DBObjectManagerWidget;
 
-class ManageDBObjectsTaskWidget : public QWidget
+class ManageDBObjectsTaskWidget : public TaskWidget
 {
+    Q_OBJECT
+
+public slots:
+    void expertModeChangedSlot ();
+
 public:
     ManageDBObjectsTaskWidget(ManageDBObjectsTask& task, QWidget *parent=nullptr);
 
