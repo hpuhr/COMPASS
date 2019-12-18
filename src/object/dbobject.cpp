@@ -753,12 +753,14 @@ DBObjectWidget* DBObject::widget ()
     {
         widget_.reset(new DBObjectWidget (this, ATSDB::instance().schemaManager()));
         assert (widget_);
-
-        if (locked_)
-            widget_->lock();
     }
 
     return widget_.get(); // needed for qt integration, not pretty
+}
+
+void DBObject::closeWidget ()
+{
+    widget_ = nullptr;
 }
 
 DBObjectInfoWidget *DBObject::infoWidget ()
@@ -788,27 +790,27 @@ DBOEditDataSourcesWidget* DBObject::editDataSourcesWidget()
     return edit_ds_widget_.get();
 }
 
-void DBObject::lock ()
-{
-    locked_ = true;
+//void DBObject::lock ()
+//{
+//    locked_ = true;
 
-    for (auto& var_it : variables_)
-        var_it.second.lock();
+//    for (auto& var_it : variables_)
+//        var_it.second.lock();
 
-    if (widget_)
-        widget_->lock();
-}
+////    if (widget_)
+////        widget_->lock();
+//}
 
-void DBObject::unlock ()
-{
-    locked_ = false;
+//void DBObject::unlock ()
+//{
+//    locked_ = false;
 
-    for (auto& var_it : variables_)
-        var_it.second.unlock();
+//    for (auto& var_it : variables_)
+//        var_it.second.unlock();
 
-    if (widget_)
-        widget_->unlock();
-}
+////    if (widget_)
+////        widget_->unlock();
+//}
 
 
 void DBObject::schemaChangedSlot ()

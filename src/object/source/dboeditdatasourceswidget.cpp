@@ -38,7 +38,7 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(DBObject* object, QWidget *pa
     assert (object_);
     action_heading_ = "No actions defined";
 
-    setMinimumSize(QSize(1000, 800));
+    //setMinimumSize(QSize(1000, 800));
 
     QFont font_bold;
     font_bold.setBold(true);

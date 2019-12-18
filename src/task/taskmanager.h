@@ -35,6 +35,7 @@ class JSONImportTask;
 class RadarPlotPositionCalculatorTask;
 class PostProcessTask;
 class TaskManagerWidget;
+class ManageDataSourcesTask;
 
 #if USE_JASTERIX
 class ASTERIXImportTask;
@@ -91,6 +92,7 @@ protected:
 #endif
     std::unique_ptr<JSONImportTask> json_importer_task_;
     std::unique_ptr<MySQLDBImportTask> mysqldb_import_task_;
+    std::unique_ptr<ManageDataSourcesTask> manage_datasources_task_;
     std::unique_ptr<RadarPlotPositionCalculatorTask> radar_plot_position_calculator_task_;
     std::unique_ptr<CreateARTASAssociationsTask> create_artas_associations_task_;
     std::unique_ptr<PostProcessTask> post_process_task_;

@@ -48,19 +48,21 @@
 #include "viewmanager.h"
 #include "taskmanager.h"
 #include "taskmanagerwidget.h"
-#include "jsonimporttask.h"
-#include "jsonimporttaskwidget.h"
-#include "radarplotpositioncalculatortask.h"
-#include "radarplotpositioncalculatortaskwidget.h"
-#include "createartasassociationstask.h"
-#include "createartasassociationstaskwidget.h"
+#include "dbobjectmanager.h"
+#include "dbobject.h"
+//#include "jsonimporttask.h"
+//#include "jsonimporttaskwidget.h"
+//#include "radarplotpositioncalculatortask.h"
+//#include "radarplotpositioncalculatortaskwidget.h"
+//#include "createartasassociationstask.h"
+//#include "createartasassociationstaskwidget.h"
 #include "files.h"
 #include "config.h"
 
-#if USE_JASTERIX
-#include "asteriximporttask.h"
-#include "asteriximporttaskwidget.h"
-#endif
+//#if USE_JASTERIX
+//#include "asteriximporttask.h"
+//#include "asteriximporttaskwidget.h"
+//#endif
 
 using namespace Utils;
 using namespace std;
@@ -129,7 +131,10 @@ void MainWindow::startSlot ()
 
     assert (task_manager_widget_);
     tab_widget_->removeTab(0);
-    //ATSDB::instance().taskManager().deleteWidgets();
+
+    // close any opened dbobject widgets
+    for (auto& obj_it : ATSDB::instance().objectManager())
+        obj_it.second->closeWidget();
 
     assert (management_widget_);
     tab_widget_->addTab (management_widget_, "Management");

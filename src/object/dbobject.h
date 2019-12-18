@@ -240,14 +240,16 @@ public:
     std::string status ();
 
     DBObjectWidget* widget ();
+    void closeWidget ();
+
     DBObjectInfoWidget* infoWidget ();
     DBOLabelDefinitionWidget* labelDefinitionWidget();
     DBOEditDataSourcesWidget* editDataSourcesWidget();
 
     std::shared_ptr<Buffer> data () { return data_; }
 
-    void lock ();
-    void unlock ();
+//    void lock ();
+//    void unlock ();
 
     bool existsInDB () const;
 
@@ -288,7 +290,7 @@ protected:
 
     std::shared_ptr<Buffer> data_;
 
-    bool locked_ {false};
+//    bool locked_ {false};
 
     /// Container with all DBOSchemaMetaTableDefinitions
     std::map <std::string, DBOSchemaMetaTableDefinition> meta_table_definitions_;

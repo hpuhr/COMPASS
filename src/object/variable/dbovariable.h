@@ -193,8 +193,8 @@ public:
     const std::string& getLargerValueString (const std::string& value_a_str, const std::string& value_b_str) const;
     const std::string& getSmallerValueString (const std::string& value_a_str, const std::string& value_b_str) const;
 
-    void lock ();
-    void unlock ();
+//    void lock ();
+//    void unlock ();
 
     bool existsInDB () const;
     bool onlyExistsInSchema (const std::string& schema_name);
@@ -230,7 +230,7 @@ private:
 
     DBOVariableWidget* widget_ {nullptr};
 
-    bool locked_ {false};
+    //bool locked_ {false};
 
     std::string getDataSourcesAsString(const std::string& value) const;
 

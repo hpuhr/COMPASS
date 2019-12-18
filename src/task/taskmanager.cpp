@@ -28,6 +28,8 @@
 #include "managedbobjectstaskwidget.h"
 #include "jsonimporttask.h"
 #include "jsonimporttaskwidget.h"
+#include "managedatasourcestask.h"
+#include "managedatasourcestaskwidget.h"
 #include "radarplotpositioncalculatortask.h"
 #include "radarplotpositioncalculatortaskwidget.h"
 #include "createartasassociationstask.h"
@@ -57,8 +59,9 @@ TaskManager::TaskManager(const std::string &class_id, const std::string &instanc
     task_list_.push_back("ASTERIXImportTask");
 #endif
 
-    task_list_.insert (task_list_.end(), {"JSONImportTask", "MySQLDBImportTask", "RadarPlotPositionCalculatorTask",
-                                          "PostProcessTask", "CreateARTASAssociationsTask"});
+    task_list_.insert (task_list_.end(), {"JSONImportTask", "MySQLDBImportTask", "ManageDataSourcesTask",
+                                          "RadarPlotPositionCalculatorTask", "PostProcessTask",
+                                          "CreateARTASAssociationsTask"});
 
     for (auto& task_it : task_list_) // check that all tasks in list exist
         assert (tasks_.count(task_it));
@@ -114,6 +117,13 @@ void TaskManager::generateSubConfigurable (const std::string &class_id, const st
         mysqldb_import_task_.reset(new MySQLDBImportTask (class_id, instance_id, *this));
         assert (mysqldb_import_task_);
         addTask (class_id, mysqldb_import_task_.get());
+    }
+    else if (class_id.compare ("ManageDataSourcesTask") == 0)
+    {
+        assert (!manage_datasources_task_);
+        manage_datasources_task_.reset(new ManageDataSourcesTask (class_id, instance_id, *this));
+        assert (manage_datasources_task_);
+        addTask (class_id, manage_datasources_task_.get());
     }
     else if (class_id.compare ("RadarPlotPositionCalculatorTask") == 0)
     {
@@ -187,6 +197,12 @@ void TaskManager::checkSubConfigurables ()
     {
         generateSubConfigurable("MySQLDBImportTask", "MySQLDBImportTask0");
         assert (mysqldb_import_task_);
+    }
+
+    if (!manage_datasources_task_)
+    {
+        generateSubConfigurable("ManageDataSourcesTask", "ManageDataSourcesTask0");
+        assert (manage_datasources_task_);
     }
 
     if (!radar_plot_position_calculator_task_)
@@ -284,34 +300,20 @@ void TaskManager::shutdown ()
 {
     loginf << "TaskManager: shutdown";
 
-    if (database_open_task_)
-        database_open_task_ = nullptr;
-
-    if (manage_schema_task_)
-        manage_schema_task_.reset(nullptr);
-
-    if (manage_dbobjects_task_)
-        manage_dbobjects_task_.reset(nullptr);
+    database_open_task_ = nullptr;
+    manage_schema_task_ = nullptr;
+    manage_dbobjects_task_ = nullptr;
 
 #if USE_JASTERIX
-    if (asterix_importer_task_)
-        asterix_importer_task_.reset(nullptr);
+    asterix_importer_task_ = nullptr;
 #endif
 
-    if (json_importer_task_)
-        json_importer_task_.reset(nullptr);
-
-    if (mysqldb_import_task_)
-        mysqldb_import_task_.reset(nullptr);
-
-    if (radar_plot_position_calculator_task_)
-        radar_plot_position_calculator_task_.reset(nullptr);
-
-    if (create_artas_associations_task_)
-        create_artas_associations_task_.reset(nullptr);
-
-    if (post_process_task_)
-        post_process_task_.reset(nullptr);
+    json_importer_task_ = nullptr;
+    mysqldb_import_task_ = nullptr;
+    manage_datasources_task_ = nullptr;
+    radar_plot_position_calculator_task_ = nullptr;
+    create_artas_associations_task_ = nullptr;
+    post_process_task_ = nullptr;
 
     widget_ = nullptr;
 }

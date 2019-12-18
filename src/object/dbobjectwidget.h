@@ -86,7 +86,7 @@ public slots:
     void updateMetaTablesGridSlot();
 
     void showLabelDefinitionWidgetSlot();
-    void editDataSourcesSlot();
+    //void editDataSourcesSlot();
     void printSlot ();
 
 public:
@@ -95,8 +95,8 @@ public:
     /// @brief Destructor
     virtual ~DBObjectWidget();
 
-    void lock ();
-    void unlock ();
+//    void lock ();
+//    void unlock ();
 
 private:
     /// @brief DBObject to be managed
@@ -109,7 +109,7 @@ private:
     QLineEdit* info_edit_ {nullptr};
 
     QPushButton* edit_label_button_ {nullptr};
-    QPushButton* edit_ds_button_ {nullptr};
+    //QPushButton* edit_ds_button_ {nullptr};
 
     /// @brief Grid with all data sources
     QGridLayout* ds_grid_ {nullptr};
@@ -128,7 +128,7 @@ private:
     //DBSchemaSelectionComboBox* all_schemas_box_ {nullptr};
     QPushButton* update_variables_button_ {nullptr};
 
-    bool locked_ {false};
+    //bool locked_ {false};
 };
 
 #endif /* DBOBJECTEDITWIDGET_H_ */

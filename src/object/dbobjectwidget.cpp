@@ -110,10 +110,9 @@ DBObjectWidget::DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager
         connect(edit_label_button_, &QPushButton::clicked, this, &DBObjectWidget::showLabelDefinitionWidgetSlot);
         properties_layout->addWidget(edit_label_button_);
 
-        edit_ds_button_ = new QPushButton ("Edit Data Sources");
-        connect(edit_ds_button_, &QPushButton::clicked, this, &DBObjectWidget::editDataSourcesSlot);
-        properties_layout->addWidget(edit_ds_button_);
-
+//        edit_ds_button_ = new QPushButton ("Edit Data Sources");
+//        connect(edit_ds_button_, &QPushButton::clicked, this, &DBObjectWidget::editDataSourcesSlot);
+//        properties_layout->addWidget(edit_ds_button_);
 
         QPushButton* print_button_ = new QPushButton ("Print");
         connect(print_button_, &QPushButton::clicked, this, &DBObjectWidget::printSlot);
@@ -230,73 +229,73 @@ DBObjectWidget::~DBObjectWidget()
 
 }
 
-void DBObjectWidget::lock ()
-{
-    if (locked_)
-        return;
+//void DBObjectWidget::lock ()
+//{
+//    if (locked_)
+//        return;
 
-    name_edit_->setDisabled (true);
-    info_edit_->setDisabled (true);
-    edit_label_button_->setDisabled (true);
-    edit_ds_button_->setDisabled (true);
+//    name_edit_->setDisabled (true);
+//    info_edit_->setDisabled (true);
+//    edit_label_button_->setDisabled (true);
+//    edit_ds_button_->setDisabled (true);
 
-    for (int i = 0; i < ds_grid_->count(); ++i)
-    {
-        QWidget *widget = ds_grid_->itemAt(i)->widget();
-        if (widget != nullptr)
-            widget->setDisabled(true);
-    }
+//    for (int i = 0; i < ds_grid_->count(); ++i)
+//    {
+//        QWidget *widget = ds_grid_->itemAt(i)->widget();
+//        if (widget != nullptr)
+//            widget->setDisabled(true);
+//    }
 
-    new_ds_button_->setDisabled (true);
+//    new_ds_button_->setDisabled (true);
 
-    new_meta_button_->setDisabled (true);
+//    new_meta_button_->setDisabled (true);
 
-    for (int i = 0; i < dbovars_grid_->count(); ++i)
-    {
-        QWidget *widget = dbovars_grid_->itemAt(i)->widget();
-        if (widget != nullptr)
-            widget->setDisabled(true);
-    }
+//    for (int i = 0; i < dbovars_grid_->count(); ++i)
+//    {
+//        QWidget *widget = dbovars_grid_->itemAt(i)->widget();
+//        if (widget != nullptr)
+//            widget->setDisabled(true);
+//    }
 
-    //all_schemas_box_->setDisabled (true);
-    update_variables_button_->setDisabled (true);
+//    //all_schemas_box_->setDisabled (true);
+//    update_variables_button_->setDisabled (true);
 
-    locked_ = true;
-}
+//    locked_ = true;
+//}
 
-void DBObjectWidget::unlock ()
-{
-    if (!locked_)
-        return;
+//void DBObjectWidget::unlock ()
+//{
+//    if (!locked_)
+//        return;
 
-    name_edit_->setDisabled (false);
-    info_edit_->setDisabled (false);
-    edit_label_button_->setDisabled (false);
-    edit_ds_button_->setDisabled (false);
+//    name_edit_->setDisabled (false);
+//    info_edit_->setDisabled (false);
+//    edit_label_button_->setDisabled (false);
+//    edit_ds_button_->setDisabled (false);
 
-    for (int i = 0; i < ds_grid_->count(); ++i)
-    {
-        QWidget *widget = ds_grid_->itemAt(i)->widget();
-        if (widget != nullptr)
-            widget->setDisabled(false);
-    }
+//    for (int i = 0; i < ds_grid_->count(); ++i)
+//    {
+//        QWidget *widget = ds_grid_->itemAt(i)->widget();
+//        if (widget != nullptr)
+//            widget->setDisabled(false);
+//    }
 
-    new_ds_button_->setDisabled (false);
+//    new_ds_button_->setDisabled (false);
 
-    new_meta_button_->setDisabled (false);
+//    new_meta_button_->setDisabled (false);
 
-    for (int i = 0; i < dbovars_grid_->count(); ++i)
-    {
-        QWidget *widget = dbovars_grid_->itemAt(i)->widget();
-        if (widget != nullptr)
-            widget->setDisabled(false);
-    }
+//    for (int i = 0; i < dbovars_grid_->count(); ++i)
+//    {
+//        QWidget *widget = dbovars_grid_->itemAt(i)->widget();
+//        if (widget != nullptr)
+//            widget->setDisabled(false);
+//    }
 
-    //all_schemas_box_->setDisabled (false);
-    update_variables_button_->setDisabled (false);
+//    //all_schemas_box_->setDisabled (false);
+//    update_variables_button_->setDisabled (false);
 
-    locked_ = false;
-}
+//    locked_ = false;
+//}
 
 //void DBObjectWidget::updateAllVarsSchemaSelectionSlot ()
 //{
@@ -611,11 +610,11 @@ void DBObjectWidget::showLabelDefinitionWidgetSlot()
     object_->labelDefinitionWidget()->show();
 }
 
-void DBObjectWidget::editDataSourcesSlot()
-{
-    assert (object_);
-    object_->editDataSourcesWidget()->show();
-}
+//void DBObjectWidget::editDataSourcesSlot()
+//{
+//    assert (object_);
+//    object_->editDataSourcesWidget()->show();
+//}
 
 void DBObjectWidget::printSlot ()
 {
