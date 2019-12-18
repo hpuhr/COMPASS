@@ -191,6 +191,15 @@ void TaskManagerWidget::updateTaskStates ()
 
 void TaskManagerWidget::selectNextTask ()
 {
+    QListWidgetItem* current_item = task_list_->currentItem();
+
+    if (current_item && (current_item->flags() & Qt::ItemIsEnabled)
+            && item_task_mappings_.at(current_item)->isRecommended()) // stay on current item uf still recommended
+    {
+        taskClickedSlot (current_item);
+        return;
+    }
+
     for (auto& task_map_it : item_task_mappings_)
     {
         if ((task_map_it.first->flags() & Qt::ItemIsEnabled) && task_map_it.second->isRecommended())

@@ -976,8 +976,7 @@ void DBObject::updateData (DBOVariable &key_var, DBOVariableSet& list, std::shar
 
     buffer->transformVariables(list, false); // back again
 
-    update_job_ = std::shared_ptr<UpdateBufferDBJob> (new UpdateBufferDBJob(ATSDB::instance().interface(),
-                                                                            *this, key_var, buffer));
+    update_job_ = std::make_shared<UpdateBufferDBJob> (ATSDB::instance().interface(), *this, key_var, buffer);
 
     connect (update_job_.get(), &UpdateBufferDBJob::doneSignal, this, &DBObject::updateDoneSlot, Qt::QueuedConnection);
     connect (update_job_.get(), &UpdateBufferDBJob::updateProgressSignal, this, &DBObject::updateProgressSlot,
