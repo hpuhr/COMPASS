@@ -20,7 +20,7 @@
 
 #include <QWidget>
 
-class JSONImporterTask;
+class JSONImportTask;
 class RadarPlotPositionCalculatorTask;
 class DBObjectComboBox;
 class DBOVariableSelectionWidget;
@@ -34,7 +34,7 @@ class QHBoxLayout;
 class QStackedWidget;
 class QTabWidget;
 
-class JSONImporterTaskWidget : public QWidget
+class JSONImportTaskWidget : public QWidget
 {
     Q_OBJECT
 
@@ -57,15 +57,15 @@ public slots:
     void selectedObjectParserSlot(const QString& text);
 
 public:
-    JSONImporterTaskWidget(JSONImporterTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
-    virtual ~JSONImporterTaskWidget();
+    JSONImportTaskWidget(JSONImportTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
+    virtual ~JSONImportTaskWidget();
 
     //void update ();
     void runStarted ();
     void runDone ();
 
 protected:
-    JSONImporterTask& task_;
+    JSONImportTask& task_;
 
     QHBoxLayout* main_layout_ {nullptr};
 

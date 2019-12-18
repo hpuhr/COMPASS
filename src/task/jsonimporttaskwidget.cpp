@@ -15,8 +15,8 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "jsonimportertaskwidget.h"
-#include "jsonimportertask.h"
+#include "jsonimporttaskwidget.h"
+#include "jsonimporttask.h"
 #include "dbobjectcombobox.h"
 #include "dbovariable.h"
 #include "dbovariableselectionwidget.h"
@@ -42,7 +42,7 @@
 
 using namespace Utils;
 
-JSONImporterTaskWidget::JSONImporterTaskWidget(JSONImporterTask& task, QWidget* parent, Qt::WindowFlags f)
+JSONImportTaskWidget::JSONImportTaskWidget(JSONImportTask& task, QWidget* parent, Qt::WindowFlags f)
     : QWidget (parent, f), task_(task)
 {
     setContentsMargins(0, 0, 0, 0);
@@ -58,7 +58,7 @@ JSONImporterTaskWidget::JSONImporterTaskWidget(JSONImporterTask& task, QWidget* 
     setLayout (main_layout_);
 }
 
-void JSONImporterTaskWidget::addMainTab ()
+void JSONImportTaskWidget::addMainTab ()
 {
     assert (tab_widget_);
 
@@ -104,7 +104,7 @@ void JSONImporterTaskWidget::addMainTab ()
     // button stuff
     {
         test_button_ = new QPushButton ("Test Import");
-        connect(test_button_, &QPushButton::clicked, this, &JSONImporterTaskWidget::testImportSlot);
+        connect(test_button_, &QPushButton::clicked, this, &JSONImportTaskWidget::testImportSlot);
         main_tab_layout->addWidget(test_button_);
     }
 
@@ -114,7 +114,7 @@ void JSONImporterTaskWidget::addMainTab ()
     tab_widget_->addTab(main_tab_widget, "Main");
 }
 
-void JSONImporterTaskWidget::addMappingsTab ()
+void JSONImportTaskWidget::addMappingsTab ()
 {
     QVBoxLayout* mappings_layout = new QVBoxLayout();
 
@@ -195,12 +195,12 @@ void JSONImporterTaskWidget::addMappingsTab ()
     tab_widget_->addTab(mappings_tab_widget, "Mappings");
 }
 
-JSONImporterTaskWidget::~JSONImporterTaskWidget()
+JSONImportTaskWidget::~JSONImportTaskWidget()
 {
 
 }
 
-void JSONImporterTaskWidget::addFileSlot ()
+void JSONImportTaskWidget::addFileSlot ()
 {
     QString filename = QFileDialog::getOpenFileName(this, tr("Add JSON File"));
 
@@ -211,7 +211,7 @@ void JSONImporterTaskWidget::addFileSlot ()
     }
 }
 
-void JSONImporterTaskWidget::deleteFileSlot ()
+void JSONImportTaskWidget::deleteFileSlot ()
 {
     loginf << "JSONImporterTaskWidget: deleteFileSlot";
 
@@ -229,7 +229,7 @@ void JSONImporterTaskWidget::deleteFileSlot ()
     task_.removeCurrentFilename();
 }
 
-void JSONImporterTaskWidget::selectedFileSlot ()
+void JSONImportTaskWidget::selectedFileSlot ()
 {
     loginf << "JSONImporterTaskWidget: selectedFileSlot";
     assert (file_list_->currentItem());
@@ -241,7 +241,7 @@ void JSONImporterTaskWidget::selectedFileSlot ()
     task_.currentFilename (filename.toStdString(), archive);
 }
 
-void JSONImporterTaskWidget::updateFileListSlot ()
+void JSONImportTaskWidget::updateFileListSlot ()
 {
     assert (file_list_);
 
@@ -255,7 +255,7 @@ void JSONImporterTaskWidget::updateFileListSlot ()
     }
 }
 
-void JSONImporterTaskWidget::addSchemaSlot()
+void JSONImportTaskWidget::addSchemaSlot()
 {
     loginf << "JSONImporterTaskWidget: addSchemaSlot";
 
@@ -299,7 +299,7 @@ void JSONImporterTaskWidget::addSchemaSlot()
     }
 }
 
-void JSONImporterTaskWidget::removeSchemaSlot()
+void JSONImportTaskWidget::removeSchemaSlot()
 {
     loginf << "JSONImporterTaskWidget: removeSchemaSlot";
 
@@ -318,7 +318,7 @@ void JSONImporterTaskWidget::removeSchemaSlot()
     //selectedObjectParserSlot ();
 }
 
-void JSONImporterTaskWidget::selectedSchemaChangedSlot(const QString& text)
+void JSONImportTaskWidget::selectedSchemaChangedSlot(const QString& text)
 {
     loginf << "JSONImporterTaskWidget: selectedSchemaChangedSlot: text " << text.toStdString();
 
@@ -329,7 +329,7 @@ void JSONImporterTaskWidget::selectedSchemaChangedSlot(const QString& text)
     //selectedObjectParserSlot ();
 }
 
-void JSONImporterTaskWidget::updateSchemasBox()
+void JSONImportTaskWidget::updateSchemasBox()
 {
     loginf << "JSONImporterTaskWidget: updateSchemasBox";
 
@@ -350,7 +350,7 @@ void JSONImporterTaskWidget::updateSchemasBox()
     }
 }
 
-void JSONImporterTaskWidget::addObjectParserSlot ()
+void JSONImportTaskWidget::addObjectParserSlot ()
 {
     if (!task_.hasCurrentSchema())
     {
@@ -394,7 +394,7 @@ void JSONImporterTaskWidget::addObjectParserSlot ()
         updateParserBox();
     }
 }
-void JSONImporterTaskWidget::removeObjectParserSlot ()
+void JSONImportTaskWidget::removeObjectParserSlot ()
 {
     loginf << "JSONImporterTaskWidget: removeObjectParserSlot";
 
@@ -413,7 +413,7 @@ void JSONImporterTaskWidget::removeObjectParserSlot ()
     }
 }
 
-void JSONImporterTaskWidget::selectedObjectParserSlot (const QString& text)
+void JSONImportTaskWidget::selectedObjectParserSlot (const QString& text)
 {
     loginf << "JSONImporterTaskWidget: selectedObjectParserSlot: text " << text.toStdString();
 
@@ -464,7 +464,7 @@ void JSONImporterTaskWidget::selectedObjectParserSlot (const QString& text)
 //    loginf << "JSONImporterTaskWidget: update";
 //}
 
-void JSONImporterTaskWidget::testImportSlot ()
+void JSONImportTaskWidget::testImportSlot ()
 {
     loginf << "JSONImporterTaskWidget: testImportSlot";
 
@@ -539,21 +539,21 @@ void JSONImporterTaskWidget::testImportSlot ()
 //    }
 //}
 
-void JSONImporterTaskWidget::runStarted ()
+void JSONImportTaskWidget::runStarted ()
 {
     loginf << "JSONImporterTaskWidget: runStarted";
 
     test_button_->setDisabled(true);
 }
 
-void JSONImporterTaskWidget::runDone ()
+void JSONImportTaskWidget::runDone ()
 {
     loginf << "JSONImporterTaskWidget: runDone";
 
     test_button_->setDisabled(false);
 }
 
-void JSONImporterTaskWidget::updateParserBox ()
+void JSONImportTaskWidget::updateParserBox ()
 {
     loginf << "JSONImporterTaskWidget: updateParserBox";
 

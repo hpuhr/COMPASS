@@ -15,8 +15,8 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "jsonimportertask.h"
-#include "jsonimportertaskwidget.h"
+#include "jsonimporttask.h"
+#include "jsonimporttaskwidget.h"
 #include "taskmanager.h"
 #include "dbobject.h"
 #include "dbobjectmanager.h"
@@ -56,7 +56,7 @@ const unsigned int num_objects_chunk = 10000;
 
 const std::string DONE_PROPERTY_NAME = "json_data_imported";
 
-JSONImporterTask::JSONImporterTask(const std::string& class_id, const std::string& instance_id,
+JSONImportTask::JSONImportTask(const std::string& class_id, const std::string& instance_id,
                                    TaskManager& task_manager)
     : Task("JSONImportTask", "Import JSON Data", true, false, task_manager),
       Configurable (class_id, instance_id, &task_manager)
@@ -67,7 +67,7 @@ JSONImporterTask::JSONImporterTask(const std::string& class_id, const std::strin
     createSubConfigurables();
 }
 
-JSONImporterTask::~JSONImporterTask()
+JSONImportTask::~JSONImportTask()
 {
     if (msg_box_)
     {
@@ -81,7 +81,7 @@ JSONImporterTask::~JSONImporterTask()
     file_list_.clear();
 }
 
-void JSONImporterTask::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
+void JSONImportTask::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
     if (class_id == "JSONFile")
     {
@@ -108,23 +108,23 @@ void JSONImporterTask::generateSubConfigurable (const std::string &class_id, con
 }
 
 
-QWidget* JSONImporterTask::widget()
+QWidget* JSONImportTask::widget()
 {
     if (!widget_)
     {
-        widget_.reset(new JSONImporterTaskWidget (*this));
+        widget_.reset(new JSONImportTaskWidget (*this));
     }
 
     assert (widget_);
     return widget_.get();
 }
 
-void JSONImporterTask::deleteWidget ()
+void JSONImportTask::deleteWidget ()
 {
     widget_.reset(nullptr);
 }
 
-void JSONImporterTask::addFile (const std::string &filename)
+void JSONImportTask::addFile (const std::string &filename)
 {
     loginf << "JSONImporterTask: addFile: filename '" << filename << "'";
 
@@ -146,7 +146,7 @@ void JSONImporterTask::addFile (const std::string &filename)
         widget_->updateFileListSlot();
 }
 
-void JSONImporterTask::removeCurrentFilename ()
+void JSONImportTask::removeCurrentFilename ()
 {
     loginf << "JSONImporterTask: removeCurrentFilename: filename '" << current_filename_ << "'";
 
@@ -166,7 +166,7 @@ void JSONImporterTask::removeCurrentFilename ()
         widget_->updateFileListSlot();
 }
 
-void JSONImporterTask::currentFilename (const std::string filename, bool archive)
+void JSONImportTask::currentFilename (const std::string filename, bool archive)
 {
 
     loginf << "JSONImporterTask: currentFilename: filename '" << filename << "' archive " << archive;
@@ -177,7 +177,7 @@ void JSONImporterTask::currentFilename (const std::string filename, bool archive
     emit statusChangedSignal(name_);
 }
 
-bool JSONImporterTask::hasCurrentSchema ()
+bool JSONImportTask::hasCurrentSchema ()
 {
     if (!current_schema_.size())
         return false;
@@ -185,13 +185,13 @@ bool JSONImporterTask::hasCurrentSchema ()
     return schemas_.count(current_schema_) > 0;
 }
 
-JSONParsingSchema& JSONImporterTask::currentSchema()
+JSONParsingSchema& JSONImportTask::currentSchema()
 {
     assert (hasCurrentSchema());
     return schemas_.at(current_schema_);
 }
 
-void JSONImporterTask::removeCurrentSchema ()
+void JSONImportTask::removeCurrentSchema ()
 {
     assert (hasSchema(current_schema_));
     schemas_.erase(current_schema_);
@@ -207,19 +207,19 @@ void JSONImporterTask::removeCurrentSchema ()
     emit statusChangedSignal(name_);
 }
 
-std::string JSONImporterTask::currentSchemaName() const
+std::string JSONImportTask::currentSchemaName() const
 {
     return current_schema_;
 }
 
-void JSONImporterTask::currentSchemaName(const std::string& current_schema)
+void JSONImportTask::currentSchemaName(const std::string& current_schema)
 {
     current_schema_ = current_schema;
 
     emit statusChangedSignal(name_);
 }
 
-bool JSONImporterTask::checkPrerequisites ()
+bool JSONImportTask::checkPrerequisites ()
 {
     if (!ATSDB::instance().interface().ready())  // must be connected
         return false;
@@ -230,7 +230,7 @@ bool JSONImporterTask::checkPrerequisites ()
     return true;
 }
 
-bool JSONImporterTask::isRecommended ()
+bool JSONImportTask::isRecommended ()
 {
     if (!checkPrerequisites())
         return false;
@@ -241,17 +241,17 @@ bool JSONImporterTask::isRecommended ()
     return true;
 }
 
-bool JSONImporterTask::isRequired ()
+bool JSONImportTask::isRequired ()
 {
     return false;
 }
 
-void JSONImporterTask::test(bool test)
+void JSONImportTask::test(bool test)
 {
     test_ = test;
 }
 
-bool JSONImporterTask::canImportFile ()
+bool JSONImportTask::canImportFile ()
 {
     if (!current_filename_.size())
         return false;
@@ -274,13 +274,13 @@ bool JSONImporterTask::canImportFile ()
     return true;
 }
 
-bool JSONImporterTask::canRun()
+bool JSONImportTask::canRun()
 {
     return canImportFile();
 }
 
 
-void JSONImporterTask::run()
+void JSONImportTask::run()
 {
     loginf << "JSONImporterTask: run: filename '" << current_filename_ << "' archive " << archive_ << " test " << test_;
 
@@ -328,9 +328,9 @@ void JSONImporterTask::run()
     read_json_job_ = std::make_shared<ReadJSONFilePartJob> (current_filename_, archive_, num_objects_chunk);
 
     connect (read_json_job_.get(), &ReadJSONFilePartJob::obsoleteSignal,
-             this, &JSONImporterTask::readJSONFilePartObsoleteSlot, Qt::QueuedConnection);
+             this, &JSONImportTask::readJSONFilePartObsoleteSlot, Qt::QueuedConnection);
     connect (read_json_job_.get(), &ReadJSONFilePartJob::doneSignal,
-             this, &JSONImporterTask::readJSONFilePartDoneSlot, Qt::QueuedConnection);
+             this, &JSONImportTask::readJSONFilePartDoneSlot, Qt::QueuedConnection);
 
     JobManager::instance().addNonBlockingJob(read_json_job_);
 
@@ -339,7 +339,7 @@ void JSONImporterTask::run()
     logdbg << "JSONImporterTask: run done";
 }
 
-void JSONImporterTask::readJSONFilePartDoneSlot ()
+void JSONImportTask::readJSONFilePartDoneSlot ()
 {
     loginf << "JSONImporterTask: readJSONFilePartDoneSlot";
 
@@ -378,9 +378,9 @@ void JSONImporterTask::readJSONFilePartDoneSlot ()
     std::shared_ptr<JSONParseJob> json_parse_job = std::make_shared<JSONParseJob> (std::move(objects));
 
     connect (json_parse_job.get(), &JSONParseJob::obsoleteSignal,
-             this, &JSONImporterTask::parseJSONObsoleteSlot, Qt::QueuedConnection);
+             this, &JSONImportTask::parseJSONObsoleteSlot, Qt::QueuedConnection);
     connect (json_parse_job.get(), &JSONParseJob::doneSignal,
-             this, &JSONImporterTask::parseJSONDoneSlot,Qt::QueuedConnection);
+             this, &JSONImportTask::parseJSONDoneSlot,Qt::QueuedConnection);
 
     JobManager::instance().addNonBlockingJob(json_parse_job);
 
@@ -392,12 +392,12 @@ void JSONImporterTask::readJSONFilePartDoneSlot ()
     logdbg << "JSONImporterTask: readJSONFilePartDoneSlot: done";
 }
 
-void JSONImporterTask::readJSONFilePartObsoleteSlot ()
+void JSONImportTask::readJSONFilePartObsoleteSlot ()
 {
     logdbg << "JSONImporterTask: readJSONFilePartObsoleteSlot";
 }
 
-void JSONImporterTask::parseJSONDoneSlot ()
+void JSONImportTask::parseJSONDoneSlot ()
 {
     logdbg << "JSONImporterTask: parseJSONDoneSlot";
 
@@ -420,9 +420,9 @@ void JSONImporterTask::parseJSONDoneSlot ()
                 std::move(json_objects), schemas_.at(current_schema_).parsers(), key_count_);
 
     connect (json_map_job.get(), &JSONMappingJob::obsoleteSignal,
-             this, &JSONImporterTask::mapJSONObsoleteSlot, Qt::QueuedConnection);
+             this, &JSONImportTask::mapJSONObsoleteSlot, Qt::QueuedConnection);
     connect (json_map_job.get(), &JSONMappingJob::doneSignal,
-             this, &JSONImporterTask::mapJSONDoneSlot, Qt::QueuedConnection);
+             this, &JSONImportTask::mapJSONDoneSlot, Qt::QueuedConnection);
 
     json_map_jobs_.push_back(json_map_job);
 
@@ -435,12 +435,12 @@ void JSONImporterTask::parseJSONDoneSlot ()
     logdbg << "JSONImporterTask: parseJSONDoneSlot: done";
 }
 
-void JSONImporterTask::parseJSONObsoleteSlot ()
+void JSONImportTask::parseJSONObsoleteSlot ()
 {
     logdbg << "JSONImporterTask: parseJSONObsoleteSlot";
 }
 
-void JSONImporterTask::mapJSONDoneSlot ()
+void JSONImportTask::mapJSONDoneSlot ()
 {
     loginf << "JSONImporterTask: mapJSONDoneSlot";
 
@@ -507,12 +507,12 @@ void JSONImporterTask::mapJSONDoneSlot ()
     logdbg << "JSONImporterTask: mapJSONDoneSlot: done";
 }
 
-void JSONImporterTask::mapJSONObsoleteSlot ()
+void JSONImportTask::mapJSONObsoleteSlot ()
 {
     logdbg << "JSONImporterTask: mapJSONObsoleteSlot";
 }
 
-void JSONImporterTask::insertData ()
+void JSONImportTask::insertData ()
 {
     loginf << "JSONImporterTask: insertData: inserting into database";
 
@@ -543,9 +543,9 @@ void JSONImporterTask::insertData ()
 
             logdbg << "JSONImporterTask: insertData: " << db_object.name() << " buffer " << buffer->size();
 
-            connect (&db_object, &DBObject::insertDoneSignal, this, &JSONImporterTask::insertDoneSlot,
+            connect (&db_object, &DBObject::insertDoneSignal, this, &JSONImportTask::insertDoneSlot,
                      Qt::UniqueConnection);
-            connect (&db_object, &DBObject::insertProgressSignal, this, &JSONImporterTask::insertProgressSlot,
+            connect (&db_object, &DBObject::insertProgressSignal, this, &JSONImportTask::insertProgressSlot,
                      Qt::UniqueConnection);
 
 
@@ -644,7 +644,7 @@ void JSONImporterTask::insertData ()
     logdbg << "JSONImporterTask: insertData: done";
 }
 
-void JSONImporterTask::checkAllDone ()
+void JSONImportTask::checkAllDone ()
 {
     logdbg << "JSONImporterTask: checkAllDone";
 
@@ -701,7 +701,7 @@ void JSONImporterTask::checkAllDone ()
     logdbg << "JSONImporterTask: checkAllDone: done";
 }
 
-void JSONImporterTask::updateMsgBox ()
+void JSONImportTask::updateMsgBox ()
 {
     logdbg << "JSONImporterTask: updateMsgBox";
 
@@ -814,12 +814,12 @@ void JSONImporterTask::updateMsgBox ()
     logdbg << "JSONImporterTask: updateMsgBox: done";
 }
 
-void JSONImporterTask::insertProgressSlot (float percent)
+void JSONImportTask::insertProgressSlot (float percent)
 {
     logdbg << "JSONImporterTask: insertProgressSlot: " << String::percentToString(percent) << "%";
 }
 
-void JSONImporterTask::insertDoneSlot (DBObject& object)
+void JSONImportTask::insertDoneSlot (DBObject& object)
 {
     logdbg << "JSONImporterTask: insertDoneSlot";
     --insert_active_;

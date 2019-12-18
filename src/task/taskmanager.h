@@ -31,7 +31,7 @@ class ManageSchemaTask;
 class ManageDBObjectsTask;
 class MySQLDBImportTask;
 class CreateARTASAssociationsTask;
-class JSONImporterTask;
+class JSONImportTask;
 class RadarPlotPositionCalculatorTask;
 class PostProcessTask;
 class TaskManagerWidget;
@@ -88,7 +88,7 @@ protected:
 #if USE_JASTERIX
     std::unique_ptr<ASTERIXImportTask> asterix_importer_task_;
 #endif
-    std::unique_ptr<JSONImporterTask> json_importer_task_;
+    std::unique_ptr<JSONImportTask> json_importer_task_;
     std::unique_ptr<MySQLDBImportTask> mysqldb_import_task_;
     std::unique_ptr<RadarPlotPositionCalculatorTask> radar_plot_position_calculator_task_;
     std::unique_ptr<CreateARTASAssociationsTask> create_artas_associations_task_;

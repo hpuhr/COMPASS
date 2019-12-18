@@ -31,13 +31,13 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 class TaskManager;
-class JSONImporterTaskWidget;
+class JSONImportTaskWidget;
 class SavedFile;
 class QMessageBox;
 class JSONParseJob;
 class JSONMappingJob;
 
-class JSONImporterTask : public Task, public Configurable
+class JSONImportTask : public Task, public Configurable
 {
     Q_OBJECT
 
@@ -57,8 +57,8 @@ public slots:
     void mapJSONObsoleteSlot ();
 
 public:
-    JSONImporterTask(const std::string& class_id, const std::string& instance_id, TaskManager& task_manager);
-    virtual ~JSONImporterTask();
+    JSONImportTask(const std::string& class_id, const std::string& instance_id, TaskManager& task_manager);
+    virtual ~JSONImportTask();
 
     virtual QWidget* widget ();
     virtual void deleteWidget ();
@@ -96,7 +96,7 @@ protected:
     std::map <std::string, SavedFile*> file_list_;
     std::string current_filename_;
 
-    std::unique_ptr<JSONImporterTaskWidget> widget_;
+    std::unique_ptr<JSONImportTaskWidget> widget_;
 
     std::string current_schema_;
     std::map <std::string, JSONParsingSchema> schemas_;

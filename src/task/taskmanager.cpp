@@ -26,8 +26,8 @@
 #include "manageschemataskwidget.h"
 #include "managedbobjectstask.h"
 #include "managedbobjectstaskwidget.h"
-#include "jsonimportertask.h"
-#include "jsonimportertaskwidget.h"
+#include "jsonimporttask.h"
+#include "jsonimporttaskwidget.h"
 #include "radarplotpositioncalculatortask.h"
 #include "radarplotpositioncalculatortaskwidget.h"
 #include "createartasassociationstask.h"
@@ -104,7 +104,7 @@ void TaskManager::generateSubConfigurable (const std::string &class_id, const st
     else if (class_id.compare ("JSONImportTask") == 0)
     {
         assert (!json_importer_task_);
-        json_importer_task_.reset(new JSONImporterTask (class_id, instance_id, *this));
+        json_importer_task_.reset(new JSONImportTask (class_id, instance_id, *this));
         assert (json_importer_task_);
         addTask (class_id, json_importer_task_.get());
     }
