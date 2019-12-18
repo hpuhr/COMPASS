@@ -393,77 +393,6 @@ void ASTERIXImportTaskWidget::expertModeChangedSlot ()
 
 }
 
-//void ASTERIXImporterTaskWidget::importSlot()
-//{
-//    loginf << "ASTERIXImporterTaskWidget: importSlot";
-
-//    if (!file_list_->currentItem())
-//    {
-//        QMessageBox m_warning (QMessageBox::Warning, "ASTERIX File Import Failed",
-//                               "Please select a file in the list.",
-//                               QMessageBox::Ok);
-//        m_warning.exec();
-//        return;
-//    }
-
-//    float free_ram = System::getFreeRAMinGB();
-
-//    if (free_ram < ram_threshold && !task_.limitRAM())
-//    {
-//        loginf << "ASTERIXImporterTaskWidget: importSlot: only " << free_ram << " GB free ram, recommending limiting";
-
-//        QMessageBox::StandardButton reply;
-//        reply = QMessageBox::question(this, "RAM Limiting",
-//                                      "There is only "+QString::number(free_ram)+" GB free RAM available.\n"
-//                                      +"This will result in decreased decoding performance.\n\n"
-//                                      +"Do you agree to limiting RAM usage?",
-//                                      QMessageBox::Yes|QMessageBox::No);
-//        if (reply == QMessageBox::Yes)
-//        {
-//            task_.limitRAM(true);
-//            limit_ram_check_->setChecked(true);
-//        }
-//    }
-//    else if (free_ram >= ram_threshold && task_.limitRAM())
-//    {
-//        loginf << "ASTERIXImporterTaskWidget: importSlot: " << free_ram << " GB free ram, recommending not limiting";
-
-//        QMessageBox::StandardButton reply;
-//        reply = QMessageBox::question(this, "RAM Limiting",
-//                                      "There is "+QString::number(free_ram)+" GB free RAM available.\n"
-//                                      +"This will result in increased decoding performance.\n\n"
-//                                      +"Do you agree to increased RAM usage?",
-//                                      QMessageBox::Yes|QMessageBox::No);
-//        if (reply == QMessageBox::Yes)
-//        {
-//            task_.limitRAM(false);
-//            limit_ram_check_->setChecked(false);
-//        }
-//    }
-
-//    QString filename = file_list_->currentItem()->text();
-//    if (filename.size() > 0)
-//    {
-//        assert (task_.hasFile(filename.toStdString()));
-
-//        if (!task_.canImportFile(filename.toStdString()))
-//        {
-//            QMessageBox m_warning (QMessageBox::Warning, "ASTERIX File Import Failed",
-//                                   "File does not exist.",
-//                                   QMessageBox::Ok);
-//            m_warning.exec();
-//            return;
-//        }
-
-//        task_.test(false);
-//        task_.createMappingStubs(false);
-//        task_.importFile(filename.toStdString());
-
-//        create_mapping_stubs_button_->setDisabled(true);
-//        test_button_->setDisabled(true);
-//        import_button_->setDisabled(true);
-//    }
-//}
 void ASTERIXImportTaskWidget::updateLimitRAM ()
 {
     assert (limit_ram_check_);
@@ -484,5 +413,4 @@ void ASTERIXImportTaskWidget::runDone ()
 
     create_mapping_stubs_button_->setDisabled(false);
     test_button_->setDisabled(false);
-    //import_button_->setDisabled(false);
 }

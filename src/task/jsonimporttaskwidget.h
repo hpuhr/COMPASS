@@ -40,8 +40,6 @@ class JSONImportTaskWidget : public TaskWidget
 
 public slots:
     void testImportSlot ();
-    //void importSlot ();
-    //void importDoneSlot ();
 
     void addFileSlot ();
     void deleteFileSlot ();
@@ -85,17 +83,14 @@ protected:
     QPushButton* delete_object_parser_button_ {nullptr};
 
     QStackedWidget* object_parser_widget_ {nullptr};
-    //QHBoxLayout* object_parser_layout_ {nullptr};
 
     QPushButton* test_button_ {nullptr};
-    //QPushButton* import_button_ {nullptr};
 
     void addMainTab ();
     void addMappingsTab ();
 
     void updateSchemasBox();
     void updateParserBox ();
-    //void createObjectParserWidget();
 };
 
 #endif // JSONIMPORTERTASKWIDGET_H

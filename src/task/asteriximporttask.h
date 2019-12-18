@@ -158,7 +158,6 @@ protected:
     void insertData ();
     void checkAllDone ();
 
-    //void updateMsgBox();
     bool maxLoadReached ();
 };
 

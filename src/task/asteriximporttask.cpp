@@ -717,8 +717,6 @@ void ASTERIXImportTask::addDecodedASTERIXSlot ()
 
 //    decode_job_->clearExtractedRecords();
 
-//    return;
-
     std::unique_ptr<std::vector<nlohmann::json>> extracted_records {std::move (decode_job_->extractedRecords())};
 
     if (!create_mapping_stubs_) // test or import
@@ -771,8 +769,6 @@ void ASTERIXImportTask::addDecodedASTERIXSlot ()
         connect (json_map_stub_job_.get(), &JSONMappingStubsJob::doneSignal,
                  this, &ASTERIXImportTask::mapStubsDoneSlot, Qt::QueuedConnection);
 
-        //json_map_stubs_jobs_.push(json_map_stubs_job);
-
         JobManager::instance().addNonBlockingJob(json_map_stub_job_);
 
         if (decode_job_)
@@ -791,7 +787,6 @@ void ASTERIXImportTask::mapJSONDoneSlot ()
 
     while (!json_map_jobs_.try_pop(queued_map_job))
     {
-        //QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         QThread::msleep(1);
     }
 
@@ -812,7 +807,7 @@ void ASTERIXImportTask::mapJSONDoneSlot ()
             decode_job_->unpause();
     }
 
-    if (test_) // ???
+    if (test_)
     {
         checkAllDone();
         return;
@@ -889,7 +884,6 @@ void ASTERIXImportTask::insertData ()
     }
 
     bool has_sac_sic = false;
-    //bool emit_change = (decode_job_ == nullptr && json_map_jobs_.unsafe_size() == 0);
 
     assert (schema_);
 
@@ -1020,14 +1014,6 @@ void ASTERIXImportTask::insertDoneSlot (DBObject& object)
 {
     logdbg << "ASTERIXImporterTask: insertDoneSlot";
     --insert_active_;
-
-//    if (decode_job_)
-//    {
-//        if (maxLoadReached())
-//            decode_job_->pause();
-//        else
-//            decode_job_->unpause();
-//    }
 
     checkAllDone ();
 

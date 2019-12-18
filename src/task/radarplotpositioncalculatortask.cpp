@@ -817,15 +817,7 @@ void RadarPlotPositionCalculatorTask::updateDoneSlot (DBObject& object)
     msg_box_ = nullptr;
 
     emit doneSignal(name_);
-
-//    if (widget_)
-//        widget_->calculationDoneSlot();
 }
-
-//void RadarPlotPositionCalculatorTask::updateBufferJobStatusSlot ()
-//{
-
-//}
 
 bool RadarPlotPositionCalculatorTask::isCalculating ()
 {

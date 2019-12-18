@@ -82,8 +82,6 @@ DBInterface::~DBInterface()
 
     connections_.clear();
 
-    //assert (!widget_);
-
     logdbg  << "DBInterface: desctructor: end";
 }
 
@@ -163,12 +161,6 @@ QWidget *DBInterface::connectionWidget()
     assert (current_connection_);
     return current_connection_->widget();
 }
-
-//void DBInterface::deleteConnectionWidgets ()
-//{
-//    for (auto& con_it : connections_)
-//        con_it.second->deleteWidget();
-//}
 
 std::vector <std::string> DBInterface::getDatabases ()
 {

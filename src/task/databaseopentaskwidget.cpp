@@ -1,3 +1,20 @@
+/*
+ * This file is part of ATSDB.
+ *
+ * ATSDB is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * ATSDB is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "databaseopentaskwidget.h"
 #include "databaseopentask.h"
 #include "atsdb.h"
@@ -75,15 +92,6 @@ DatabaseOpenTaskWidget::DatabaseOpenTaskWidget(DatabaseOpenTask& task, DBInterfa
 DatabaseOpenTaskWidget::~DatabaseOpenTaskWidget()
 {
     logdbg << "DatabaseOpenTaskWidget: destructor";
-
-    // remove all connection widgets, are deleted by connections
-    //db_interface_.deleteConnectionWidgets();
-
-    //connection_stack_->remo
-
-//    const std::map<std::string, DBConnection*> &types = db_interface_.connections();
-//    for (auto& con_it : types)
-//        connection_stack_->removeWidget(con_it.second->widget());
 
     while (connection_stack_->count())
         connection_stack_->removeWidget(connection_stack_->widget(0));

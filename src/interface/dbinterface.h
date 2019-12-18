@@ -89,7 +89,6 @@ public:
     DBInterfaceInfoWidget* infoWidget();
 
     QWidget* connectionWidget ();
-    //void deleteConnectionWidgets ();
 
     const std::map <std::string, DBTableInfo> &tableInfo () { return table_info_; }
 

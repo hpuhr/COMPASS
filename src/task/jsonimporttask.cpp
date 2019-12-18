@@ -526,7 +526,6 @@ void JSONImportTask::insertData ()
     }
 
     bool has_sac_sic = false;
-    //bool emit_change = (read_json_job_ == nullptr && json_parse_jobs_.size() == 0 && json_map_jobs_.size() == 0);
 
     assert (schemas_.count(current_schema_));
 
