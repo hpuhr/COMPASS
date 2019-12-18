@@ -37,7 +37,7 @@ class PostProcessTask;
 class TaskManagerWidget;
 
 #if USE_JASTERIX
-class ASTERIXImporterTask;
+class ASTERIXImportTask;
 #endif
 
 class TaskManager : public QObject, public Configurable
@@ -86,7 +86,7 @@ protected:
     std::unique_ptr<ManageSchemaTask> manage_schema_task_;
     std::unique_ptr<ManageDBObjectsTask> manage_dbobjects_task_;
 #if USE_JASTERIX
-    std::unique_ptr<ASTERIXImporterTask> asterix_importer_task_;
+    std::unique_ptr<ASTERIXImportTask> asterix_importer_task_;
 #endif
     std::unique_ptr<JSONImporterTask> json_importer_task_;
     std::unique_ptr<MySQLDBImportTask> mysqldb_import_task_;

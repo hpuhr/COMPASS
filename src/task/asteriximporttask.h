@@ -15,8 +15,8 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ASTERIXIMPORTERTASK_H
-#define ASTERIXIMPORTERTASK_H
+#ifndef ASTERIXIMPORTTASK_H
+#define ASTERIXIMPORTTASK_H
 
 #include "configurable.h"
 #include "json.hpp"
@@ -33,7 +33,7 @@
 #include <tbb/concurrent_queue.h>
 
 class TaskManager;
-class ASTERIXImporterTaskWidget;
+class ASTERIXImportTaskWidget;
 class ASTERIXCategoryConfig;
 class ASTERIXStatusDialog;
 class SavedFile;
@@ -43,7 +43,7 @@ namespace jASTERIX
     class jASTERIX;
 }
 
-class ASTERIXImporterTask: public Task, public Configurable
+class ASTERIXImportTask: public Task, public Configurable
 {
     Q_OBJECT
 
@@ -64,8 +64,8 @@ public slots:
     void closeStatusDialogSlot();
 
 public:
-    ASTERIXImporterTask(const std::string& class_id, const std::string& instance_id, TaskManager& task_manager);
-    virtual ~ASTERIXImporterTask();
+    ASTERIXImportTask(const std::string& class_id, const std::string& instance_id, TaskManager& task_manager);
+    virtual ~ASTERIXImportTask();
 
     virtual QWidget* widget ();
     virtual void deleteWidget ();
@@ -130,7 +130,7 @@ protected:
     bool test_ {false};
     bool create_mapping_stubs_ {false};
 
-    std::unique_ptr<ASTERIXImporterTaskWidget> widget_;
+    std::unique_ptr<ASTERIXImportTaskWidget> widget_;
 
     std::map <unsigned int, ASTERIXCategoryConfig> category_configs_;
 
@@ -162,4 +162,4 @@ protected:
     bool maxLoadReached ();
 };
 
-#endif // ASTERIXIMPORTERTASK_H
+#endif // ASTERIXIMPORTTASK_H

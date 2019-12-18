@@ -15,8 +15,8 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "asteriximportertask.h"
-#include "asteriximportertaskwidget.h"
+#include "asteriximporttask.h"
+#include "asteriximporttaskwidget.h"
 #include "asterixstatusdialog.h"
 #include "asterixcategoryconfig.h"
 #include "taskmanager.h"
@@ -62,7 +62,7 @@ const unsigned int limited_num_json_jobs_ = 1;
 
 const std::string DONE_PROPERTY_NAME = "asterix_data_imported";
 
-ASTERIXImporterTask::ASTERIXImporterTask(const std::string& class_id, const std::string& instance_id,
+ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::string& instance_id,
                                          TaskManager& task_manager)
     : Task("ASTERIXImportTask", "Import ASTERIX Data", false, false, task_manager),
       Configurable (class_id, instance_id, &task_manager)
@@ -103,7 +103,7 @@ ASTERIXImporterTask::ASTERIXImporterTask(const std::string& class_id, const std:
 }
 
 
-ASTERIXImporterTask::~ASTERIXImporterTask()
+ASTERIXImportTask::~ASTERIXImportTask()
 {
     for (auto it : file_list_)
         delete it.second;
@@ -111,7 +111,7 @@ ASTERIXImporterTask::~ASTERIXImporterTask()
     file_list_.clear();
 }
 
-void ASTERIXImporterTask::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
+void ASTERIXImportTask::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
     if (class_id == "ASTERIXFile")
     {
@@ -155,7 +155,7 @@ void ASTERIXImporterTask::generateSubConfigurable (const std::string &class_id, 
         throw std::runtime_error ("ASTERIXImporterTask: generateSubConfigurable: unknown class_id "+class_id );
 }
 
-void ASTERIXImporterTask::checkSubConfigurables ()
+void ASTERIXImportTask::checkSubConfigurables ()
 {
     if (schema_ == nullptr)
     {
@@ -165,18 +165,18 @@ void ASTERIXImporterTask::checkSubConfigurables ()
     }
 }
 
-QWidget* ASTERIXImporterTask::widget()
+QWidget* ASTERIXImportTask::widget()
 {
     if (!widget_)
     {
-        widget_.reset(new ASTERIXImporterTaskWidget (*this));
+        widget_.reset(new ASTERIXImportTaskWidget (*this));
     }
 
     assert (widget_);
     return widget_.get();
 }
 
-void ASTERIXImporterTask::refreshjASTERIX()
+void ASTERIXImportTask::refreshjASTERIX()
 {
     std::string jasterix_definition_path = HOME_DATA_DIRECTORY+"/jasterix_definitions";
 
@@ -193,7 +193,7 @@ void ASTERIXImporterTask::refreshjASTERIX()
     }
 }
 
-void ASTERIXImporterTask::addFile (const std::string& filename)
+void ASTERIXImportTask::addFile (const std::string& filename)
 {
     loginf << "ASTERIXImporterTask: addFile: filename '" << filename << "'";
 
@@ -215,7 +215,7 @@ void ASTERIXImporterTask::addFile (const std::string& filename)
         widget_->updateFileListSlot();
 }
 
-void ASTERIXImporterTask::removeCurrentFilename ()
+void ASTERIXImportTask::removeCurrentFilename ()
 {
     loginf << "ASTERIXImporterTask: removeCurrentFilename: filename '" << current_filename_ << "'";
 
@@ -236,7 +236,7 @@ void ASTERIXImporterTask::removeCurrentFilename ()
         widget_->updateFileListSlot();
 }
 
-void ASTERIXImporterTask::currentFilename (const std::string& filename)
+void ASTERIXImportTask::currentFilename (const std::string& filename)
 {
     loginf << "ASTERIXImporterTask: currentFilename: filename '" << filename << "'";
 
@@ -245,28 +245,28 @@ void ASTERIXImporterTask::currentFilename (const std::string& filename)
     emit statusChangedSignal(name_);
 }
 
-const std::string& ASTERIXImporterTask::currentFraming() const
+const std::string& ASTERIXImportTask::currentFraming() const
 {
     return current_framing_;
 }
 
-void ASTERIXImporterTask::currentFraming(const std::string& current_framing)
+void ASTERIXImportTask::currentFraming(const std::string& current_framing)
 {
     current_framing_ = current_framing;
 }
 
-bool ASTERIXImporterTask::hasConfiguratonFor (unsigned int category)
+bool ASTERIXImportTask::hasConfiguratonFor (unsigned int category)
 {
     return category_configs_.count(category) > 0;
 }
 
-bool ASTERIXImporterTask::decodeCategory (unsigned int category)
+bool ASTERIXImportTask::decodeCategory (unsigned int category)
 {
     assert (hasConfiguratonFor(category));
     return category_configs_.at(category).decode();
 }
 
-void ASTERIXImporterTask::decodeCategory (unsigned int category, bool decode)
+void ASTERIXImportTask::decodeCategory (unsigned int category, bool decode)
 {
     assert (jasterix_->hasCategory(category));
 
@@ -287,7 +287,7 @@ void ASTERIXImporterTask::decodeCategory (unsigned int category, bool decode)
         category_configs_.at(category).decode(decode);
 }
 
-std::string ASTERIXImporterTask::editionForCategory (unsigned int category)
+std::string ASTERIXImportTask::editionForCategory (unsigned int category)
 {
     assert (hasConfiguratonFor(category));
 
@@ -301,7 +301,7 @@ std::string ASTERIXImporterTask::editionForCategory (unsigned int category)
     return category_configs_.at(category).edition();
 }
 
-void ASTERIXImporterTask::editionForCategory (unsigned int category, const std::string& edition)
+void ASTERIXImportTask::editionForCategory (unsigned int category, const std::string& edition)
 {
     assert (jasterix_->hasCategory(category));
 
@@ -322,7 +322,7 @@ void ASTERIXImporterTask::editionForCategory (unsigned int category, const std::
         category_configs_.at(category).edition(edition);
 }
 
-std::string ASTERIXImporterTask::refEditionForCategory (unsigned int category)
+std::string ASTERIXImportTask::refEditionForCategory (unsigned int category)
 {
     assert (hasConfiguratonFor(category));
 
@@ -337,7 +337,7 @@ std::string ASTERIXImporterTask::refEditionForCategory (unsigned int category)
     return category_configs_.at(category).ref();
 }
 
-void ASTERIXImporterTask::refEditionForCategory (unsigned int category, const std::string& ref)
+void ASTERIXImportTask::refEditionForCategory (unsigned int category, const std::string& ref)
 {
     assert (jasterix_->hasCategory(category));
 
@@ -358,7 +358,7 @@ void ASTERIXImporterTask::refEditionForCategory (unsigned int category, const st
         category_configs_.at(category).ref(ref);
 }
 
-std::string ASTERIXImporterTask::spfEditionForCategory (unsigned int category)
+std::string ASTERIXImportTask::spfEditionForCategory (unsigned int category)
 {
     assert (hasConfiguratonFor(category));
 
@@ -373,7 +373,7 @@ std::string ASTERIXImporterTask::spfEditionForCategory (unsigned int category)
     return category_configs_.at(category).spf();
 }
 
-void ASTERIXImporterTask::spfEditionForCategory (unsigned int category, const std::string& spf)
+void ASTERIXImportTask::spfEditionForCategory (unsigned int category, const std::string& spf)
 {
     assert (jasterix_->hasCategory(category));
 
@@ -394,17 +394,17 @@ void ASTERIXImporterTask::spfEditionForCategory (unsigned int category, const st
         category_configs_.at(category).spf(spf);
 }
 
-std::shared_ptr<JSONParsingSchema> ASTERIXImporterTask::schema() const
+std::shared_ptr<JSONParsingSchema> ASTERIXImportTask::schema() const
 {
     return schema_;
 }
 
-bool ASTERIXImporterTask::debug() const
+bool ASTERIXImportTask::debug() const
 {
     return debug_jasterix_;
 }
 
-void ASTERIXImporterTask::debug(bool debug_jasterix)
+void ASTERIXImportTask::debug(bool debug_jasterix)
 {
     debug_jasterix_ = debug_jasterix;
 
@@ -414,32 +414,32 @@ void ASTERIXImporterTask::debug(bool debug_jasterix)
     loginf << "ASTERIXImporterTask: debug " << debug_jasterix_;
 }
 
-bool ASTERIXImporterTask::test() const
+bool ASTERIXImportTask::test() const
 {
     return test_;
 }
 
-void ASTERIXImporterTask::test(bool test)
+void ASTERIXImportTask::test(bool test)
 {
     test_ = test;
 }
 
-bool ASTERIXImporterTask::createMappingStubs() const
+bool ASTERIXImportTask::createMappingStubs() const
 {
     return create_mapping_stubs_;
 }
 
-void ASTERIXImporterTask::createMappingStubs(bool create_mapping_stubs)
+void ASTERIXImportTask::createMappingStubs(bool create_mapping_stubs)
 {
     create_mapping_stubs_ = create_mapping_stubs;
 }
 
-bool ASTERIXImporterTask::limitRAM() const
+bool ASTERIXImportTask::limitRAM() const
 {
     return limit_ram_;
 }
 
-void ASTERIXImporterTask::limitRAM(bool limit_ram)
+void ASTERIXImportTask::limitRAM(bool limit_ram)
 {
     limit_ram_ = limit_ram;
 
@@ -455,7 +455,7 @@ void ASTERIXImporterTask::limitRAM(bool limit_ram)
     }
 }
 
-bool ASTERIXImporterTask::checkPrerequisites ()
+bool ASTERIXImportTask::checkPrerequisites ()
 {
     if (!ATSDB::instance().interface().ready())  // must be connected
         return false;
@@ -466,7 +466,7 @@ bool ASTERIXImporterTask::checkPrerequisites ()
     return true;
 }
 
-bool ASTERIXImporterTask::isRecommended ()
+bool ASTERIXImportTask::isRecommended ()
 {
     if (!checkPrerequisites())
         return false;
@@ -477,17 +477,17 @@ bool ASTERIXImporterTask::isRecommended ()
     return true;
 }
 
-bool ASTERIXImporterTask::isRequired ()
+bool ASTERIXImportTask::isRequired ()
 {
     return false;
 }
 
-void ASTERIXImporterTask::deleteWidget ()
+void ASTERIXImportTask::deleteWidget ()
 {
     widget_.reset(nullptr);
 }
 
-bool ASTERIXImporterTask::canImportFile ()
+bool ASTERIXImportTask::canImportFile ()
 {
     if (!current_filename_.size())
         return false;
@@ -502,12 +502,12 @@ bool ASTERIXImporterTask::canImportFile ()
     return true;
 }
 
-bool ASTERIXImporterTask::canRun()
+bool ASTERIXImportTask::canRun()
 {
     return canImportFile();
 }
 
-void ASTERIXImporterTask::run()
+void ASTERIXImportTask::run()
 {
     loginf << "ASTERIXImporterTask: run: filename " << current_filename_ << " test " << test_
            << " create stubs " << create_mapping_stubs_;
@@ -531,7 +531,7 @@ void ASTERIXImporterTask::run()
     status_widget_ = nullptr;
 
     status_widget_.reset(new ASTERIXStatusDialog (current_filename_, test_, create_mapping_stubs_));
-    connect(status_widget_.get(), &ASTERIXStatusDialog::closeSignal, this, &ASTERIXImporterTask::closeStatusDialogSlot);
+    connect(status_widget_.get(), &ASTERIXStatusDialog::closeSignal, this, &ASTERIXImportTask::closeStatusDialogSlot);
     status_widget_->markStartTime();
 
     key_count_ = 0;
@@ -610,18 +610,18 @@ void ASTERIXImporterTask::run()
     decode_job_ = make_shared<ASTERIXDecodeJob> (*this, current_filename_, current_framing_, test_);
 
     connect (decode_job_.get(), &ASTERIXDecodeJob::obsoleteSignal, this,
-             &ASTERIXImporterTask::decodeASTERIXObsoleteSlot, Qt::QueuedConnection);
-    connect (decode_job_.get(), &ASTERIXDecodeJob::doneSignal, this, &ASTERIXImporterTask::decodeASTERIXDoneSlot,
+             &ASTERIXImportTask::decodeASTERIXObsoleteSlot, Qt::QueuedConnection);
+    connect (decode_job_.get(), &ASTERIXDecodeJob::doneSignal, this, &ASTERIXImportTask::decodeASTERIXDoneSlot,
              Qt::QueuedConnection);
     connect (decode_job_.get(), &ASTERIXDecodeJob::decodedASTERIXSignal,
-             this, &ASTERIXImporterTask::addDecodedASTERIXSlot, Qt::QueuedConnection);
+             this, &ASTERIXImportTask::addDecodedASTERIXSlot, Qt::QueuedConnection);
 
     JobManager::instance().addBlockingJob(decode_job_);
 
     return;
 }
 
-void ASTERIXImporterTask::decodeASTERIXDoneSlot ()
+void ASTERIXImportTask::decodeASTERIXDoneSlot ()
 {
     logdbg << "ASTERIXImporterTask: decodeASTERIXDoneSlot";
 
@@ -651,13 +651,13 @@ void ASTERIXImporterTask::decodeASTERIXDoneSlot ()
 
     checkAllDone();
 }
-void ASTERIXImporterTask::decodeASTERIXObsoleteSlot ()
+void ASTERIXImportTask::decodeASTERIXObsoleteSlot ()
 {
     logdbg << "ASTERIXImporterTask: decodeASTERIXObsoleteSlot";
     decode_job_ = nullptr;
 }
 
-void ASTERIXImporterTask::addDecodedASTERIXSlot ()
+void ASTERIXImportTask::addDecodedASTERIXSlot ()
 {
     logdbg << "ASTERIXImporterTask: addDecodedASTERIX";
 
@@ -690,9 +690,9 @@ void ASTERIXImporterTask::addDecodedASTERIXSlot ()
 
         extracted_records = nullptr;
 
-        connect (json_map_job.get(), &JSONMappingJob::obsoleteSignal, this, &ASTERIXImporterTask::mapJSONObsoleteSlot,
+        connect (json_map_job.get(), &JSONMappingJob::obsoleteSignal, this, &ASTERIXImportTask::mapJSONObsoleteSlot,
                  Qt::QueuedConnection);
-        connect (json_map_job.get(), &JSONMappingJob::doneSignal, this, &ASTERIXImporterTask::mapJSONDoneSlot,
+        connect (json_map_job.get(), &JSONMappingJob::doneSignal, this, &ASTERIXImportTask::mapJSONDoneSlot,
                  Qt::QueuedConnection);
 
         json_map_jobs_.push(json_map_job);
@@ -725,9 +725,9 @@ void ASTERIXImporterTask::addDecodedASTERIXSlot ()
         json_map_stub_job_ = make_shared<JSONMappingStubsJob> (std::move(extracted_records), schema_->parsers());
 
         connect (json_map_stub_job_.get(), &JSONMappingStubsJob::obsoleteSignal,
-                 this, &ASTERIXImporterTask::mapStubsObsoleteSlot, Qt::QueuedConnection);
+                 this, &ASTERIXImportTask::mapStubsObsoleteSlot, Qt::QueuedConnection);
         connect (json_map_stub_job_.get(), &JSONMappingStubsJob::doneSignal,
-                 this, &ASTERIXImporterTask::mapStubsDoneSlot, Qt::QueuedConnection);
+                 this, &ASTERIXImportTask::mapStubsDoneSlot, Qt::QueuedConnection);
 
         //json_map_stubs_jobs_.push(json_map_stubs_job);
 
@@ -738,7 +738,7 @@ void ASTERIXImporterTask::addDecodedASTERIXSlot ()
     }
 }
 
-void ASTERIXImporterTask::mapJSONDoneSlot ()
+void ASTERIXImportTask::mapJSONDoneSlot ()
 {
     logdbg << "ASTERIXImporterTask: mapJSONDoneSlot";
 
@@ -809,13 +809,13 @@ void ASTERIXImporterTask::mapJSONDoneSlot ()
     }
 }
 
-void ASTERIXImporterTask::mapJSONObsoleteSlot ()
+void ASTERIXImportTask::mapJSONObsoleteSlot ()
 {
     logdbg << "ASTERIXImporterTask: mapJSONObsoleteSlot";
     // TODO
 }
 
-void ASTERIXImporterTask::mapStubsDoneSlot ()
+void ASTERIXImportTask::mapStubsDoneSlot ()
 {
     logdbg << "ASTERIXImporterTask: mapStubsDoneSlot";
 
@@ -828,13 +828,13 @@ void ASTERIXImporterTask::mapStubsDoneSlot ()
 
     checkAllDone ();
 }
-void ASTERIXImporterTask::mapStubsObsoleteSlot ()
+void ASTERIXImportTask::mapStubsObsoleteSlot ()
 {
     logdbg << "ASTERIXImporterTask: mapStubsObsoleteSlot";
     json_map_stub_job_ = nullptr;
 }
 
-void ASTERIXImporterTask::insertData ()
+void ASTERIXImportTask::insertData ()
 {
     loginf << "ASTERIXImporterTask: insertData: inserting into database";
 
@@ -867,9 +867,9 @@ void ASTERIXImporterTask::insertData ()
 
             logdbg << "ASTERIXImporterTask: insertData: " << db_object.name() << " buffer " << buffer->size();
 
-            connect (&db_object, &DBObject::insertDoneSignal, this, &ASTERIXImporterTask::insertDoneSlot,
+            connect (&db_object, &DBObject::insertDoneSignal, this, &ASTERIXImportTask::insertDoneSlot,
                      Qt::UniqueConnection);
-            connect (&db_object, &DBObject::insertProgressSignal, this, &ASTERIXImporterTask::insertProgressSlot,
+            connect (&db_object, &DBObject::insertProgressSignal, this, &ASTERIXImportTask::insertProgressSlot,
                      Qt::UniqueConnection);
 
 
@@ -969,12 +969,12 @@ void ASTERIXImporterTask::insertData ()
     logdbg << "JSONImporterTask: insertData: done";
 }
 
-void ASTERIXImporterTask::insertProgressSlot (float percent)
+void ASTERIXImportTask::insertProgressSlot (float percent)
 {
     logdbg << "ASTERIXImporterTask: insertProgressSlot: " << String::percentToString(percent) << "%";
 }
 
-void ASTERIXImporterTask::insertDoneSlot (DBObject& object)
+void ASTERIXImportTask::insertDoneSlot (DBObject& object)
 {
     logdbg << "ASTERIXImporterTask: insertDoneSlot";
     --insert_active_;
@@ -992,7 +992,7 @@ void ASTERIXImporterTask::insertDoneSlot (DBObject& object)
     logdbg << "ASTERIXImporterTask: insertDoneSlot: done";
 }
 
-void ASTERIXImporterTask::checkAllDone ()
+void ASTERIXImportTask::checkAllDone ()
 {
     logdbg << "ASTERIXImporterTask: checkAllDone";
 
@@ -1055,14 +1055,14 @@ void ASTERIXImporterTask::checkAllDone ()
     logdbg << "ASTERIXImporterTask: checkAllDone: done";
 }
 
-void ASTERIXImporterTask::closeStatusDialogSlot()
+void ASTERIXImportTask::closeStatusDialogSlot()
 {
     assert (status_widget_);
     status_widget_->close();
     status_widget_ = nullptr;
 }
 
-bool ASTERIXImporterTask::maxLoadReached ()
+bool ASTERIXImportTask::maxLoadReached ()
 {
     if (limit_ram_)
         return json_map_jobs_.unsafe_size() > limited_num_json_jobs_;

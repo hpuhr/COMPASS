@@ -58,8 +58,8 @@
 #include "config.h"
 
 #if USE_JASTERIX
-#include "asteriximportertask.h"
-#include "asteriximportertaskwidget.h"
+#include "asteriximporttask.h"
+#include "asteriximporttaskwidget.h"
 #endif
 
 using namespace Utils;

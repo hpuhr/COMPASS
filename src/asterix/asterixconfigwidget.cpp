@@ -16,7 +16,7 @@
  */
 
 #include "asterixconfigwidget.h"
-#include "asteriximportertask.h"
+#include "asteriximporttask.h"
 #include "asterixframingcombobox.h"
 #include "asterixeditioncombobox.h"
 #include "asterixrefeditioncombobox.h"
@@ -46,7 +46,7 @@ using namespace std;
 using namespace Utils;
 using namespace jASTERIX;
 
-ASTERIXConfigWidget::ASTERIXConfigWidget(ASTERIXImporterTask& task, QWidget *parent)
+ASTERIXConfigWidget::ASTERIXConfigWidget(ASTERIXImportTask& task, QWidget *parent)
      : QWidget(parent), task_(task)
 {
 //    QFont font_bold;

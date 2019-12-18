@@ -15,8 +15,8 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "asteriximportertaskwidget.h"
-#include "asteriximportertask.h"
+#include "asteriximporttaskwidget.h"
+#include "asteriximporttask.h"
 #include "asterixconfigwidget.h"
 #include "logger.h"
 #include "selectdbobjectdialog.h"
@@ -39,7 +39,7 @@ using namespace Utils;
 
 const float ram_threshold = 4.0;
 
-ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, QWidget* parent, Qt::WindowFlags f)
+ASTERIXImportTaskWidget::ASTERIXImportTaskWidget(ASTERIXImportTask& task, QWidget* parent, Qt::WindowFlags f)
     : QWidget (parent, f), task_(task)
 {
     setContentsMargins(0, 0, 0, 0);
@@ -57,7 +57,7 @@ ASTERIXImporterTaskWidget::ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, 
     setLayout (main_layout_);
 }
 
-void ASTERIXImporterTaskWidget::addMainTab ()
+void ASTERIXImportTaskWidget::addMainTab ()
 {
     assert (tab_widget_);
 
@@ -103,21 +103,21 @@ void ASTERIXImporterTaskWidget::addMainTab ()
     {
         debug_check_ = new QCheckBox ("Debug in Console");
         debug_check_->setChecked(task_.debug());
-        connect(debug_check_, &QCheckBox::clicked, this, &ASTERIXImporterTaskWidget::debugChangedSlot);
+        connect(debug_check_, &QCheckBox::clicked, this, &ASTERIXImportTaskWidget::debugChangedSlot);
         main_tab_layout->addWidget (debug_check_);
 
         limit_ram_check_ = new QCheckBox ("Limit RAM Usage");
         limit_ram_check_->setChecked(task_.limitRAM());
-        connect(limit_ram_check_, &QCheckBox::clicked, this, &ASTERIXImporterTaskWidget::limitRAMChangedSlot);
+        connect(limit_ram_check_, &QCheckBox::clicked, this, &ASTERIXImportTaskWidget::limitRAMChangedSlot);
         main_tab_layout->addWidget (limit_ram_check_);
 
         create_mapping_stubs_button_ = new QPushButton ("Create Mapping Stubs");
         connect(create_mapping_stubs_button_, &QPushButton::clicked,
-                this, &ASTERIXImporterTaskWidget::createMappingsSlot);
+                this, &ASTERIXImportTaskWidget::createMappingsSlot);
         main_tab_layout->addWidget (create_mapping_stubs_button_);
 
         test_button_ = new QPushButton ("Test Import");
-        connect(test_button_, &QPushButton::clicked, this, &ASTERIXImporterTaskWidget::testImportSlot);
+        connect(test_button_, &QPushButton::clicked, this, &ASTERIXImportTaskWidget::testImportSlot);
         main_tab_layout->addWidget (test_button_);
     }
 
@@ -126,7 +126,7 @@ void ASTERIXImporterTaskWidget::addMainTab ()
     main_tab_widget->setLayout(main_tab_layout);
     tab_widget_->addTab(main_tab_widget, "Main");
 }
-void ASTERIXImporterTaskWidget::addASTERIXConfigTab()
+void ASTERIXImportTaskWidget::addASTERIXConfigTab()
 {
     assert (tab_widget_);
 
@@ -134,7 +134,7 @@ void ASTERIXImporterTaskWidget::addASTERIXConfigTab()
     tab_widget_->addTab(config_widget_, "Decoder");
 }
 
-void ASTERIXImporterTaskWidget::addMappingsTab()
+void ASTERIXImportTaskWidget::addMappingsTab()
 {
     QVBoxLayout* parsers_layout = new QVBoxLayout();
 
@@ -172,12 +172,12 @@ void ASTERIXImporterTaskWidget::addMappingsTab()
     tab_widget_->addTab(mappings_tab_widget, "Mappings");
 }
 
-ASTERIXImporterTaskWidget::~ASTERIXImporterTaskWidget()
+ASTERIXImportTaskWidget::~ASTERIXImportTaskWidget()
 {
     config_widget_ = nullptr;
 }
 
-void ASTERIXImporterTaskWidget::addFileSlot ()
+void ASTERIXImportTaskWidget::addFileSlot ()
 {
     QString filename = QFileDialog::getOpenFileName(this, tr("Add ASTERIX File"));
 
@@ -188,7 +188,7 @@ void ASTERIXImporterTaskWidget::addFileSlot ()
     }
 }
 
-void ASTERIXImporterTaskWidget::deleteFileSlot ()
+void ASTERIXImportTaskWidget::deleteFileSlot ()
 {
     loginf << "ASTERIXImporterTaskWidget: deleteFileSlot";
 
@@ -206,7 +206,7 @@ void ASTERIXImporterTaskWidget::deleteFileSlot ()
     task_.removeCurrentFilename();
 }
 
-void ASTERIXImporterTaskWidget::selectedFileSlot ()
+void ASTERIXImportTaskWidget::selectedFileSlot ()
 {
     loginf << "ASTERIXImporterTaskWidget: selectedFileSlot";
     assert (file_list_->currentItem());
@@ -216,7 +216,7 @@ void ASTERIXImporterTaskWidget::selectedFileSlot ()
     task_.currentFilename (filename.toStdString());
 }
 
-void ASTERIXImporterTaskWidget::updateFileListSlot ()
+void ASTERIXImportTaskWidget::updateFileListSlot ()
 {
     assert (file_list_);
 
@@ -230,7 +230,7 @@ void ASTERIXImporterTaskWidget::updateFileListSlot ()
     }
 }
 
-void ASTERIXImporterTaskWidget::addObjectParserSlot ()
+void ASTERIXImportTaskWidget::addObjectParserSlot ()
 {
     if (task_.schema() == nullptr)
     {
@@ -274,7 +274,7 @@ void ASTERIXImporterTaskWidget::addObjectParserSlot ()
         updateParserBox();
     }
 }
-void ASTERIXImporterTaskWidget::removeObjectParserSlot ()
+void ASTERIXImportTaskWidget::removeObjectParserSlot ()
 {
     loginf << "ASTERIXImporterTaskWidget: removeObjectParserSlot";
 
@@ -296,7 +296,7 @@ void ASTERIXImporterTaskWidget::removeObjectParserSlot ()
 }
 
 
-void ASTERIXImporterTaskWidget::selectedObjectParserSlot (const QString& text)
+void ASTERIXImportTaskWidget::selectedObjectParserSlot (const QString& text)
 {
     loginf << "ASTERIXImporterTaskWidget: selectedObjectParserSlot: text '" << text.toStdString() << "'";
 
@@ -323,7 +323,7 @@ void ASTERIXImporterTaskWidget::selectedObjectParserSlot (const QString& text)
     object_parser_widget_->setCurrentWidget(task_.schema()->parser(name).widget());
 }
 
-void ASTERIXImporterTaskWidget::updateParserBox ()
+void ASTERIXImportTaskWidget::updateParserBox ()
 {
     loginf << "ASTERIXImporterTaskWidget: updateParserList";
 
@@ -341,7 +341,7 @@ void ASTERIXImporterTaskWidget::updateParserBox ()
     }
 }
 
-void ASTERIXImporterTaskWidget::debugChangedSlot ()
+void ASTERIXImportTaskWidget::debugChangedSlot ()
 {
     QCheckBox* box = dynamic_cast<QCheckBox*> (sender());
     assert (box);
@@ -349,7 +349,7 @@ void ASTERIXImporterTaskWidget::debugChangedSlot ()
     task_.debug(box->checkState() == Qt::Checked);
 }
 
-void ASTERIXImporterTaskWidget::limitRAMChangedSlot ()
+void ASTERIXImportTaskWidget::limitRAMChangedSlot ()
 {
     QCheckBox* box = dynamic_cast<QCheckBox*> (sender());
     assert (box);
@@ -357,7 +357,7 @@ void ASTERIXImporterTaskWidget::limitRAMChangedSlot ()
     task_.limitRAM(box->checkState() == Qt::Checked);
 }
 
-void ASTERIXImporterTaskWidget::createMappingsSlot()
+void ASTERIXImportTaskWidget::createMappingsSlot()
 {
     loginf << "ASTERIXImporterTaskWidget: createMappingsSlot";
 
@@ -378,7 +378,7 @@ void ASTERIXImporterTaskWidget::createMappingsSlot()
     //    test_button_->setDisabled(true);
 }
 
-void ASTERIXImporterTaskWidget::testImportSlot()
+void ASTERIXImportTaskWidget::testImportSlot()
 {
     loginf << "ASTERIXImporterTaskWidget: testImportSlot";
 
@@ -471,7 +471,7 @@ void ASTERIXImporterTaskWidget::testImportSlot()
 //    }
 //}
 
-void ASTERIXImporterTaskWidget::runStarted ()
+void ASTERIXImportTaskWidget::runStarted ()
 {
     loginf << "ASTERIXImporterTaskWidget: runStarted";
 
@@ -479,7 +479,7 @@ void ASTERIXImporterTaskWidget::runStarted ()
     test_button_->setDisabled(true);
 }
 
-void ASTERIXImporterTaskWidget::runDone ()
+void ASTERIXImportTaskWidget::runDone ()
 {
     loginf << "ASTERIXImporterTaskWidget: runDone";
 

@@ -15,15 +15,15 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ASTERIXIMPORTERTASKWIDGET_H
-#define ASTERIXIMPORTERTASKWIDGET_H
+#ifndef ASTERIXIMPORTTASKWIDGET_H
+#define ASTERIXIMPORTTASKWIDGET_H
 
 #include <QWidget>
 #include <memory>
 
 #include <jasterix/jasterix.h>
 
-class ASTERIXImporterTask;
+class ASTERIXImportTask;
 class ASTERIXConfigWidget;
 
 class QHBoxLayout;
@@ -34,7 +34,7 @@ class QStackedWidget;
 class QCheckBox;
 class QTabWidget;
 
-class ASTERIXImporterTaskWidget : public QWidget
+class ASTERIXImportTaskWidget : public QWidget
 {
     Q_OBJECT
 
@@ -54,14 +54,14 @@ public slots:
     void testImportSlot();
 
 public:
-    ASTERIXImporterTaskWidget(ASTERIXImporterTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
-    virtual ~ASTERIXImporterTaskWidget();
+    ASTERIXImportTaskWidget(ASTERIXImportTask& task, QWidget* parent=0, Qt::WindowFlags f=0);
+    virtual ~ASTERIXImportTaskWidget();
 
     void runStarted ();
     void runDone ();
 
 protected:
-    ASTERIXImporterTask& task_;
+    ASTERIXImportTask& task_;
 
     QHBoxLayout *main_layout_ {nullptr};
 
@@ -91,4 +91,4 @@ protected:
     void updateParserBox ();
 };
 
-#endif // ASTERIXIMPORTERTASKWIDGET_H
+#endif // ASTERIXIMPORTTASKWIDGET_H

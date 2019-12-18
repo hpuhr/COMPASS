@@ -38,8 +38,8 @@
 #include "mysqldbimporttaskwidget.h"
 
 #if USE_JASTERIX
-#include "asteriximportertask.h"
-#include "asteriximportertaskwidget.h"
+#include "asteriximporttask.h"
+#include "asteriximporttaskwidget.h"
 #endif
 
 #include <cassert>
@@ -96,7 +96,7 @@ void TaskManager::generateSubConfigurable (const std::string &class_id, const st
     else if (class_id.compare ("ASTERIXImportTask") == 0)
     {
         assert (!asterix_importer_task_);
-        asterix_importer_task_.reset(new ASTERIXImporterTask (class_id, instance_id, *this));
+        asterix_importer_task_.reset(new ASTERIXImportTask (class_id, instance_id, *this));
         assert (asterix_importer_task_);
         addTask (class_id, asterix_importer_task_.get());
     }
