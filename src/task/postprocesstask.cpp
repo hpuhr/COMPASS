@@ -21,7 +21,7 @@ const std::string PostProcessTask::DONE_PROPERTY_NAME = "post_processed";
 PostProcessTask::PostProcessTask(const std::string& class_id, const std::string& instance_id,
                                  TaskManager& task_manager)
     : Task("PostProcessTask", "Post-Process", false, false, task_manager),
-      Configurable (class_id, instance_id, &task_manager)
+      Configurable (class_id, instance_id, &task_manager, "task_postprocess.json")
 {
 }
 

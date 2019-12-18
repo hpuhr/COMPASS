@@ -8,7 +8,7 @@
 DatabaseOpenTask::DatabaseOpenTask(const std::string& class_id, const std::string& instance_id,
                                    TaskManager& task_manager)
     : Task("DatabaseOpenTask", "Open a Database", true, false, task_manager),
-      Configurable (class_id, instance_id, &task_manager)
+      Configurable (class_id, instance_id, &task_manager, "task_db_open.json")
 {
 }
 

@@ -25,7 +25,7 @@ const std::string DONE_PROPERTY_NAME = "mysql_db_imported";
 MySQLDBImportTask::MySQLDBImportTask(const std::string& class_id, const std::string& instance_id,
                                      TaskManager& task_manager)
     : Task("MySQLDBImportTask", "Import MySQL DB", false, false, task_manager),
-      Configurable (class_id, instance_id, &task_manager)
+      Configurable (class_id, instance_id, &task_manager, "task_import_mysqldb.json")
 {
     qRegisterMetaType<std::string>("std::string");
 

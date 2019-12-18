@@ -59,7 +59,7 @@ const std::string DONE_PROPERTY_NAME = "json_data_imported";
 JSONImportTask::JSONImportTask(const std::string& class_id, const std::string& instance_id,
                                    TaskManager& task_manager)
     : Task("JSONImportTask", "Import JSON Data", true, false, task_manager),
-      Configurable (class_id, instance_id, &task_manager)
+      Configurable (class_id, instance_id, &task_manager, "task_import_json.json")
 {
     registerParameter("current_filename", &current_filename_, "");
     registerParameter("current_schema", &current_schema_, "");

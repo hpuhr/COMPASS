@@ -7,7 +7,7 @@
 ManageSchemaTask::ManageSchemaTask(const std::string& class_id, const std::string& instance_id,
                                    TaskManager& task_manager)
     : Task("ManageSchemaTask", "Manage DB Schema", true, true, task_manager),
-      Configurable (class_id, instance_id, &task_manager)
+      Configurable (class_id, instance_id, &task_manager, "task_manage_schema.json")
 {
 }
 

@@ -8,7 +8,7 @@
 ManageDBObjectsTask::ManageDBObjectsTask(const std::string& class_id, const std::string& instance_id,
                                    TaskManager& task_manager)
     : Task("ManageDBObjectsTask", "Manage DBObjects", true, true, task_manager),
-      Configurable (class_id, instance_id, &task_manager)
+      Configurable (class_id, instance_id, &task_manager, "task_manage_dbojects.json")
 {
 }
 

@@ -65,7 +65,7 @@ const std::string DONE_PROPERTY_NAME = "asterix_data_imported";
 ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::string& instance_id,
                                          TaskManager& task_manager)
     : Task("ASTERIXImportTask", "Import ASTERIX Data", false, false, task_manager),
-      Configurable (class_id, instance_id, &task_manager)
+      Configurable (class_id, instance_id, &task_manager, "task_import_asterix.json")
 {
     //qRegisterMetaType<std::unique_ptr<std::vector <nlohmann::json>>>("std::unique_ptr<std::vector <nlohmann::json>>");
 

@@ -43,7 +43,7 @@ const std::string RadarPlotPositionCalculatorTask::DONE_PROPERTY_NAME = "radar_p
 RadarPlotPositionCalculatorTask::RadarPlotPositionCalculatorTask(
         const std::string& class_id, const std::string& instance_id, TaskManager& task_manager)
     : Task("RadarPlotPositionCalculatorTask", "Calculate Radar Plot Positions", true, false, task_manager),
-      Configurable (class_id, instance_id, &task_manager)
+      Configurable (class_id, instance_id, &task_manager, "task_calc_radar_pos.json")
 {
     qRegisterMetaType<std::shared_ptr<Buffer>>("std::shared_ptr<Buffer>");
     //qRegisterMetaType<DBObject>("DBObject");
