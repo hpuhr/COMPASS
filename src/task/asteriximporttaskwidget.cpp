@@ -20,7 +20,6 @@
 #include "asterixconfigwidget.h"
 #include "logger.h"
 #include "selectdbobjectdialog.h"
-#include "system.h"
 
 #include <QVBoxLayout>
 #include <QFormLayout>
@@ -36,8 +35,6 @@
 #include <QComboBox>
 
 using namespace Utils;
-
-const float ram_threshold = 4.0;
 
 ASTERIXImportTaskWidget::ASTERIXImportTaskWidget(ASTERIXImportTask& task, QWidget* parent, Qt::WindowFlags f)
     : TaskWidget (parent, f), task_(task)
@@ -335,8 +332,6 @@ void ASTERIXImportTaskWidget::updateParserBox ()
         for (auto& parser_it : *task_.schema()) // over all object parsers
         {
             object_parser_box_->addItem(parser_it.first.c_str());
-            //            QListWidgetItem* item = new QListWidgetItem(tr(parser_it.first.c_str()), object_parser_list_);
-            //            assert (item);
         }
     }
 }
@@ -373,9 +368,6 @@ void ASTERIXImportTaskWidget::createMappingsSlot()
     task_.test(false);
     task_.createMappingStubs(true);
     task_.run();
-
-    //    create_mapping_stubs_button_->setDisabled(true);
-    //    test_button_->setDisabled(true);
 }
 
 void ASTERIXImportTaskWidget::testImportSlot()
@@ -394,9 +386,6 @@ void ASTERIXImportTaskWidget::testImportSlot()
     task_.test(true);
     task_.createMappingStubs(false);
     task_.run();
-
-    //    create_mapping_stubs_button_->setDisabled(true);
-    //    test_button_->setDisabled(true);
 }
 
 void ASTERIXImportTaskWidget::expertModeChangedSlot ()
@@ -475,6 +464,11 @@ void ASTERIXImportTaskWidget::expertModeChangedSlot ()
 //        import_button_->setDisabled(true);
 //    }
 //}
+void ASTERIXImportTaskWidget::updateLimitRAM ()
+{
+    assert (limit_ram_check_);
+    limit_ram_check_->setChecked(task_.limitRAM());
+}
 
 void ASTERIXImportTaskWidget::runStarted ()
 {

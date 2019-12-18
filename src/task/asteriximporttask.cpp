@@ -37,6 +37,7 @@
 #include "buffer.h"
 #include "radarplotpositioncalculatortask.h"
 #include "createartasassociationstask.h"
+#include "system.h"
 
 #include <jasterix/jasterix.h>
 #include <jasterix/category.h>
@@ -61,6 +62,8 @@ const unsigned int unlimited_num_json_jobs_ = 2;
 const unsigned int limited_num_json_jobs_ = 1;
 
 const std::string DONE_PROPERTY_NAME = "asterix_data_imported";
+
+const float ram_threshold = 4.0;
 
 ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::string& instance_id,
                                          TaskManager& task_manager)
@@ -456,6 +459,9 @@ void ASTERIXImportTask::limitRAM(bool limit_ram)
         jASTERIX::frame_chunk_size = unlimited_chunk_size;
         jASTERIX::record_chunk_size = unlimited_chunk_size;
     }
+
+    if (widget_)
+        widget_->updateLimitRAM();
 }
 
 bool ASTERIXImportTask::checkPrerequisites ()
@@ -512,8 +518,41 @@ bool ASTERIXImportTask::canRun()
 
 void ASTERIXImportTask::run()
 {
+    float free_ram = System::getFreeRAMinGB();
+
     loginf << "ASTERIXImporterTask: run: filename " << current_filename_ << " test " << test_
-           << " create stubs " << create_mapping_stubs_;
+           << " create stubs " << create_mapping_stubs_ << " free RAM " << free_ram << " GB";
+
+    if (free_ram < ram_threshold && !limit_ram_)
+    {
+        loginf << "ASTERIXImporterTask: run: only " << free_ram << " GB free ram, recommending limiting";
+
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(nullptr, "RAM Limiting",
+                                      "There is only "+QString::number(free_ram)+" GB free RAM available.\n"
+                                      +"This will result in decreased decoding performance.\n\n"
+                                      +"Do you agree to limiting RAM usage?",
+                                      QMessageBox::Yes|QMessageBox::No);
+        if (reply == QMessageBox::Yes)
+        {
+            limitRAM(true);
+        }
+    }
+    else if (free_ram >= ram_threshold && limit_ram_)
+    {
+        loginf << "ASTERIXImporterTask: ASTERIXImporterTask: " << free_ram << " GB free ram, recommending not limiting";
+
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(nullptr, "RAM Limiting",
+                                      "There is "+QString::number(free_ram)+" GB free RAM available.\n"
+                                      +"This will result in increased decoding performance.\n\n"
+                                      +"Do you agree to increased RAM usage?",
+                                      QMessageBox::Yes|QMessageBox::No);
+        if (reply == QMessageBox::Yes)
+        {
+            limitRAM(false);
+        }
+    }
 
     if (test_)
         task_manager_.appendInfo("ASTERIXImporterTask: test import of file '"+current_filename_+"' started");
