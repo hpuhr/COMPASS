@@ -248,9 +248,6 @@ public:
 
     std::shared_ptr<Buffer> data () { return data_; }
 
-//    void lock ();
-//    void unlock ();
-
     bool existsInDB () const;
 
     void print ();
@@ -289,8 +286,6 @@ protected:
     std::shared_ptr <UpdateBufferDBJob> update_job_ {nullptr};
 
     std::shared_ptr<Buffer> data_;
-
-//    bool locked_ {false};
 
     /// Container with all DBOSchemaMetaTableDefinitions
     std::map <std::string, DBOSchemaMetaTableDefinition> meta_table_definitions_;

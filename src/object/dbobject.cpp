@@ -790,29 +790,6 @@ DBOEditDataSourcesWidget* DBObject::editDataSourcesWidget()
     return edit_ds_widget_.get();
 }
 
-//void DBObject::lock ()
-//{
-//    locked_ = true;
-
-//    for (auto& var_it : variables_)
-//        var_it.second.lock();
-
-////    if (widget_)
-////        widget_->lock();
-//}
-
-//void DBObject::unlock ()
-//{
-//    locked_ = false;
-
-//    for (auto& var_it : variables_)
-//        var_it.second.unlock();
-
-////    if (widget_)
-////        widget_->unlock();
-//}
-
-
 void DBObject::schemaChangedSlot ()
 {
     loginf << "DBObject: schemaChangedSlot";
@@ -959,13 +936,10 @@ void DBObject::insertProgressSlot (float percent)
 void DBObject::insertDoneSlot ()
 {
     assert (insert_job_);
-//    bool emit_change = insert_job_->emitChange();
+
     insert_job_ = nullptr;
 
     emit insertDoneSignal (*this);
-
-//    if (emit_change)
-//        emit ATSDB::instance().interface().databaseContentChangedSignal();
 }
 
 void DBObject::updateData (DBOVariable &key_var, DBOVariableSet& list, std::shared_ptr<Buffer> buffer)

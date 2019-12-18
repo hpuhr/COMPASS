@@ -79,14 +79,11 @@ public slots:
 
     /// @brief Updates the DBOVariables grid
     void updateDBOVarsGridSlot ();
-    /// @brief Updates the schema selection for adding all variables
-    //void updateAllVarsSchemaSelectionSlot ();
     void deleteMetaTableSlot();
     /// @brief Updates meta tables grid
     void updateMetaTablesGridSlot();
 
     void showLabelDefinitionWidgetSlot();
-    //void editDataSourcesSlot();
     void printSlot ();
 
 public:
@@ -94,9 +91,6 @@ public:
     DBObjectWidget(DBObject* object, DBSchemaManager& schema_manager, QWidget* parent=0, Qt::WindowFlags f=0);
     /// @brief Destructor
     virtual ~DBObjectWidget();
-
-//    void lock ();
-//    void unlock ();
 
 private:
     /// @brief DBObject to be managed
@@ -109,7 +103,6 @@ private:
     QLineEdit* info_edit_ {nullptr};
 
     QPushButton* edit_label_button_ {nullptr};
-    //QPushButton* edit_ds_button_ {nullptr};
 
     /// @brief Grid with all data sources
     QGridLayout* ds_grid_ {nullptr};
@@ -124,11 +117,8 @@ private:
     /// @brief Grid with all DBOVariables
     QGridLayout* dbovars_grid_ {nullptr};
 
-    /// @brief Add all variables schema box
-    //DBSchemaSelectionComboBox* all_schemas_box_ {nullptr};
     QPushButton* update_variables_button_ {nullptr};
 
-    //bool locked_ {false};
 };
 
 #endif /* DBOBJECTEDITWIDGET_H_ */
