@@ -46,36 +46,39 @@ public:
     bool operator!=(DBODataSource& other) { return !(*this == other); }
 
     unsigned int id() const;
-    //void id(unsigned int id);
 
     void name(const std::string &name);
     const std::string &name() const;
 
     bool hasShortName() const;
+    void removeShortName();
     void shortName(const std::string &short_name);
     const std::string &shortName() const;
 
     bool hasSac() const;
+    void removeSac();
     void sac(unsigned char sac);
     unsigned char sac() const;
 
     bool hasSic() const;
+    void removeSic();
     void sic(unsigned char sic);
     unsigned char sic() const;
 
     bool hasLatitude() const;
+    void removeLatitude();
     void latitude(double latitiude);
     double latitude() const;
 
     bool hasLongitude() const;
+    void removeLongitude();
     void longitude(double longitude_);
     double longitude() const;
 
     bool hasAltitude() const;
+    void removeAltitude();
     void altitude(double altitude);
     double altitude() const;
-
-    //StoredDBODataSourceWidget* widget (bool add_headers=false, QWidget* parent=0, Qt::WindowFlags f=0);
 
     DBObject& object () { assert (object_); return *object_; }
 
@@ -96,8 +99,6 @@ private:
     double longitude_ {0}; // degrees
     bool has_altitude_ {false};
     double altitude_ {0};  // meter above msl
-
-    //std::unique_ptr<StoredDBODataSourceWidget> widget_;
 
 protected:
     virtual void checkSubConfigurables () {}

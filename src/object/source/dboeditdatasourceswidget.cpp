@@ -43,18 +43,9 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(DBObject* object, QWidget *pa
     QFont font_bold;
     font_bold.setBold(true);
 
-    QFont font_big;
-    font_big.setPointSize(18);
-
     int frame_width_small = 1;
 
     QHBoxLayout* main_layout = new QHBoxLayout ();
-
-    //std::string caption = "Edit DBObject " +object_->name()+ " DataSources";
-
-    //    QLabel *main_label = new QLabel (caption.c_str());
-    //    main_label->setFont (font_big);
-    //    main_layout->addWidget (main_label);
 
     QVBoxLayout* sources_layout = new QVBoxLayout();
 
@@ -65,7 +56,6 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(DBObject* object, QWidget *pa
         QFrame *config_frame = new QFrame ();
         config_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
         config_frame->setLineWidth(frame_width_small);
-        //config_frame->setMinimumWidth(900);
 
         QHBoxLayout* top_layout = new QHBoxLayout();
 
@@ -81,36 +71,26 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(DBObject* object, QWidget *pa
 
         sync_from_cfg_button_ = new QPushButton ("Sync to DB");
         sync_from_cfg_button_->setIcon(down_icon);
-        //sync_from_cfg_button_->setMaximumWidth(200);
-        //sync_from_cfg_button_->setLayoutDirection(Qt::RightToLeft);
         connect(sync_from_cfg_button_, SIGNAL(clicked()), this, SLOT(syncOptionsFromCfgSlot()));
         top_layout->addWidget(sync_from_cfg_button_);
 
         config_layout->addLayout(top_layout);
 
         config_ds_table_ = new QTableWidget ();
+        config_ds_table_->setEditTriggers(QAbstractItemView::AllEditTriggers);
+        config_ds_table_->setColumnCount(table_columns_.size());
+        config_ds_table_->setHorizontalHeaderLabels(table_columns_);
+        config_ds_table_->verticalHeader()->setVisible(false);
+        connect (config_ds_table_, &QTableWidget::itemChanged, this, &DBOEditDataSourcesWidget::configItemChanged);
         // update done later
-        //updateConfigDSTable ();
 
         config_layout->addWidget(config_ds_table_);
-
-        //    config_ds_layout_ = new QVBoxLayout();
-        //    config_layout->addLayout(config_ds_layout_);
-
-        //config_layout->addStretch();
-
-        //QHBoxLayout* button_layout = new QHBoxLayout();
-
-
-
-        //config_layout->addLayout(button_layout);
 
         config_frame->setLayout (config_layout);
 
         QScrollArea *config_scroll = new QScrollArea ();
         config_scroll->setWidgetResizable (true);
         config_scroll->setWidget(config_frame);
-
 
         sources_layout->addWidget(config_scroll);
     }
@@ -122,7 +102,6 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(DBObject* object, QWidget *pa
         QFrame *db_frame = new QFrame ();
         db_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
         db_frame->setLineWidth(frame_width_small);
-        //db_frame->setMinimumWidth(900);
 
         QHBoxLayout* top_layout = new QHBoxLayout();
 
@@ -134,25 +113,20 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(DBObject* object, QWidget *pa
 
         sync_from_db_button_ = new QPushButton ("Sync To Config");
         sync_from_db_button_->setIcon(up_icon);
-        //sync_from_db_button_->setMaximumWidth(200);
-        //sync_from_db_button_->setLayoutDirection(Qt::LeftToRight);
         connect(sync_from_db_button_, SIGNAL(clicked()), this, SLOT(syncOptionsFromDBSlot()));
         top_layout->addWidget(sync_from_db_button_);
 
         db_layout->addLayout(top_layout);
 
         db_ds_table_ = new QTableWidget ();
+        db_ds_table_->setEditTriggers(QAbstractItemView::AllEditTriggers);
+        db_ds_table_->setColumnCount(table_columns_.size());
+        db_ds_table_->setHorizontalHeaderLabels(table_columns_);
+        db_ds_table_->verticalHeader()->setVisible(false);
+        connect (db_ds_table_, &QTableWidget::itemChanged, this, &DBOEditDataSourcesWidget::dbItemChanged);
         // update done later
-        //updateDBDSTable ();
 
         db_layout->addWidget(db_ds_table_);
-
-        //    db_ds_layout_ = new QGridLayout();
-        //    db_layout->addLayout(db_ds_layout_);
-
-        //db_layout->addStretch();
-
-
 
         db_frame->setLayout (db_layout);
 
@@ -172,7 +146,6 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(DBObject* object, QWidget *pa
         QFrame *action_frame = new QFrame ();
         action_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
         action_frame->setLineWidth(frame_width_small);
-        //action_frame->setMinimumWidth(250);
 
         action_heading_label_ = new QLabel (action_heading_.c_str());
         action_heading_label_->setFont (font_bold);
@@ -185,8 +158,6 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(DBObject* object, QWidget *pa
 
         // action selection buttons
         QHBoxLayout* action_select_layout = new QHBoxLayout();
-
-        //action_layout->addStretch();
 
         select_all_actions_ = new QPushButton ("Select All");
         connect(select_all_actions_, &QPushButton::clicked, this, &DBOEditDataSourcesWidget::selectAllActionsSlot);
@@ -206,18 +177,13 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(DBObject* object, QWidget *pa
         updateActionButtons();
         action_frame->setLayout (action_layout);
 
-        //sources_layout->addWidget(action_frame);
         main_layout->addWidget(action_frame);
     }
 
-    // rest
-
     update ();
 
-    main_layout->addLayout(sources_layout);
+    //main_layout->addLayout(sources_layout);
     setLayout (main_layout);
-
-    show();
 }
 
 DBOEditDataSourcesWidget::~DBOEditDataSourcesWidget()
@@ -227,38 +193,20 @@ DBOEditDataSourcesWidget::~DBOEditDataSourcesWidget()
 
 void DBOEditDataSourcesWidget::update ()
 {
-    loginf << "DBOEditDataSourcesWidget: update";
+    logdbg << "DBOEditDataSourcesWidget: update";
+
+    assert (config_ds_table_);
+    assert (db_ds_table_);
+
+    config_ds_table_->blockSignals(true);
+    db_ds_table_->blockSignals(true);
 
     updateConfigDSTable ();
     updateDBDSTable ();
     updateColumnSizes();
 
-    //    QLayoutItem *child;
-    //    while ((child = config_ds_layout_->takeAt(0)) != 0)
-    //    {
-    //        config_ds_layout_->removeItem(child);
-    //        delete child;
-    //    }
-
-    //    while ((child = db_ds_layout_->takeAt(0)) != 0)
-    //    {
-    //        db_ds_layout_->removeItem(child);
-    //        delete child;
-    //    }
-
-    //    assert (object_);
-
-    //    for (auto ds_it = object_->storedDSBegin(); ds_it != object_->storedDSEnd(); ++ds_it)
-    //    {
-    //        loginf << "DBOEditDataSourcesWidget: update: config ds " << ds_it->first;
-    //        config_ds_layout_->addWidget(ds_it->second.widget(ds_it == object_->storedDSBegin()));
-    //    }
-
-    //    for (auto ds_it = object_->dsBegin(); ds_it != object_->dsEnd(); ++ds_it)
-    //    {
-    //        loginf << "DBOEditDataSourcesWidget: update: db ds " << ds_it->first;
-    //        db_ds_layout_->addWidget(ds_it->second.widget(ds_it == object_->dsBegin()));
-    //    }
+    config_ds_table_->blockSignals(false);
+    db_ds_table_->blockSignals(false);
 }
 
 void DBOEditDataSourcesWidget::syncOptionsFromDBSlot()
@@ -328,176 +276,276 @@ void DBOEditDataSourcesWidget::performActionsSlot()
 
 void DBOEditDataSourcesWidget::updateConfigDSTable ()
 {
-    loginf << "DBOEditDataSourcesWidget: updateConfigDSTable";
+    logdbg << "DBOEditDataSourcesWidget: updateConfigDSTable";
 
     assert (object_);
     assert (config_ds_table_);
 
-    config_ds_table_->clear();
-
-    config_ds_table_->setRowCount(object_->dataSources().size());
-    config_ds_table_->setColumnCount(8);
-
-    config_ds_table_->setHorizontalHeaderLabels(table_columns_);
-
-    config_ds_table_->verticalHeader()->setVisible(false);
-    config_ds_table_->setEditTriggers(QAbstractItemView::NoEditTriggers);
-
-    int row = 0;
-    int col = 0;
-    for (auto& ds_it : object_->dataSources())
-    {
-        col = 0;
-        config_ds_table_->setItem(row, col, new QTableWidgetItem(QString::number(ds_it.second.id())));
-
-        ++col;
-        config_ds_table_->setItem(row, col, new QTableWidgetItem(ds_it.second.name().c_str()));
-
-        ++col;
-        if (ds_it.second.hasShortName())
-            config_ds_table_->setItem(row, col, new QTableWidgetItem(ds_it.second.shortName().c_str()));
-        else
-        {
-            config_ds_table_->setItem(row, col, new QTableWidgetItem);
-            config_ds_table_->item(row, col)->setBackground(Qt::darkGray);
-        }
-
-        ++col;
-        if (ds_it.second.hasSac())
-            config_ds_table_->setItem(row, col, new QTableWidgetItem(QString::number((uint)ds_it.second.sac())));
-        else
-        {
-            config_ds_table_->setItem(row, col, new QTableWidgetItem);
-            config_ds_table_->item(row, col)->setBackground(Qt::darkGray);
-        }
-
-        ++col;
-        if (ds_it.second.hasSic())
-            config_ds_table_->setItem(row, col, new QTableWidgetItem(QString::number((uint)ds_it.second.sic())));
-        else
-        {
-            config_ds_table_->setItem(row, col, new QTableWidgetItem);
-            config_ds_table_->item(row, col)->setBackground(Qt::darkGray);
-        }
-
-        ++col;
-        if (ds_it.second.hasLatitude())
-            config_ds_table_->setItem(row, col, new QTableWidgetItem(QString::number(ds_it.second.latitude(), 'g', 10)));
-        else
-        {
-            config_ds_table_->setItem(row, col, new QTableWidgetItem);
-            config_ds_table_->item(row, col)->setBackground(Qt::darkGray);
-        }
-
-        ++col;
-        if (ds_it.second.hasLongitude())
-            config_ds_table_->setItem(row, col, new QTableWidgetItem(QString::number(ds_it.second.longitude(), 'g', 10)));
-        else
-        {
-            config_ds_table_->setItem(row, col, new QTableWidgetItem);
-            config_ds_table_->item(row, col)->setBackground(Qt::darkGray);
-        }
-
-        ++col;
-        if (ds_it.second.hasAltitude())
-            config_ds_table_->setItem(row, col, new QTableWidgetItem(QString::number(ds_it.second.altitude())));
-        else
-        {
-            config_ds_table_->setItem(row, col, new QTableWidgetItem);
-            config_ds_table_->item(row, col)->setBackground(Qt::darkGray);
-        }
-
-        ++row;
-    }
-
-    //    config_ds_table_->resizeRowsToContents();
-    //    config_ds_table_->resizeColumnsToContents();
-}
-void DBOEditDataSourcesWidget::updateDBDSTable ()
-{
-    loginf << "DBOEditDataSourcesWidget: updateDBDSTable";
-
-    assert (db_ds_table_);
-
-    db_ds_table_->clear();
-
-    db_ds_table_->setRowCount(object_->storedDataSources().size());
-    db_ds_table_->setColumnCount(8);
-
-    db_ds_table_->setHorizontalHeaderLabels(table_columns_);
-
-    db_ds_table_->verticalHeader()->setVisible(false);
-    db_ds_table_->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    config_ds_table_->clearContents();
+    config_ds_table_->setRowCount(object_->storedDataSources().size());
 
     int row = 0;
     int col = 0;
     for (auto& ds_it : object_->storedDataSources())
     {
+        unsigned int id = ds_it.second.id();
+
         col = 0;
-        db_ds_table_->setItem(row, col, new QTableWidgetItem(QString::number(ds_it.second.id())));
-
-        ++col;
-        db_ds_table_->setItem(row, col, new QTableWidgetItem(ds_it.second.name().c_str()));
-
-        ++col;
-        if (ds_it.second.hasShortName())
-            db_ds_table_->setItem(row, col, new QTableWidgetItem(ds_it.second.shortName().c_str()));
-        else
-        {
-            db_ds_table_->setItem(row, col, new QTableWidgetItem);
-            db_ds_table_->item(row, col)->setBackground(Qt::darkGray);
+        { // ID
+            QTableWidgetItem* item = new QTableWidgetItem(QString::number(id));
+            item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+            item->setData(Qt::UserRole, QVariant(id));
+            config_ds_table_->setItem(row, col, item);
         }
 
-        ++col;
-        if (ds_it.second.hasSac())
-            db_ds_table_->setItem(row, col, new QTableWidgetItem(QString::number((uint)ds_it.second.sac())));
-        else
-        {
-            db_ds_table_->setItem(row, col, new QTableWidgetItem);
-            db_ds_table_->item(row, col)->setBackground(Qt::darkGray);
+        { // name
+            ++col;
+            QTableWidgetItem* item = new QTableWidgetItem(ds_it.second.name().c_str());
+            item->setData(Qt::UserRole, QVariant(id));
+            config_ds_table_->setItem(row, col, item);
         }
 
-        ++col;
-        if (ds_it.second.hasSic())
-            db_ds_table_->setItem(row, col, new QTableWidgetItem(QString::number((uint)ds_it.second.sic())));
-        else
-        {
-            db_ds_table_->setItem(row, col, new QTableWidgetItem);
-            db_ds_table_->item(row, col)->setBackground(Qt::darkGray);
+        { // short name
+            ++col;
+            if (ds_it.second.hasShortName())
+            {
+                QTableWidgetItem* item = new QTableWidgetItem(ds_it.second.shortName().c_str());
+                item->setData(Qt::UserRole, QVariant(id));
+                config_ds_table_->setItem(row, col, item);
+            }
+            else
+            {
+                QTableWidgetItem* item = new QTableWidgetItem ();
+                item->setData(Qt::UserRole, QVariant(id));
+                item->setBackground(Qt::darkGray);
+                config_ds_table_->setItem(row, col, item);
+            }
         }
 
-        ++col;
-        if (ds_it.second.hasLatitude())
-            db_ds_table_->setItem(row, col, new QTableWidgetItem(QString::number(ds_it.second.latitude(), 'g', 10)));
-        else
-        {
-            db_ds_table_->setItem(row, col, new QTableWidgetItem);
-            db_ds_table_->item(row, col)->setBackground(Qt::darkGray);
+
+        { // sac
+            ++col;
+            if (ds_it.second.hasSac())
+            {
+                QTableWidgetItem* item = new QTableWidgetItem(QString::number((uint)ds_it.second.sac()));
+                item->setData(Qt::UserRole, QVariant(id));
+                config_ds_table_->setItem(row, col, item);
+            }
+            else
+            {
+                QTableWidgetItem* item = new QTableWidgetItem ();
+                item->setData(Qt::UserRole, QVariant(id));
+                item->setBackground(Qt::darkGray);
+                config_ds_table_->setItem(row, col, item);
+            }
         }
 
-        ++col;
-        if (ds_it.second.hasLongitude())
-            db_ds_table_->setItem(row, 6, new QTableWidgetItem(QString::number(ds_it.second.longitude(), 'g', 10)));
-        else
-        {
-            db_ds_table_->setItem(row, 6, new QTableWidgetItem);
-            db_ds_table_->item(row, 6)->setBackground(Qt::darkGray);
+        { // sic
+            ++col;
+            if (ds_it.second.hasSic())
+            {
+                QTableWidgetItem* item = new QTableWidgetItem(QString::number((uint)ds_it.second.sic()));
+                item->setData(Qt::UserRole, QVariant(id));
+                config_ds_table_->setItem(row, col, item);
+            }
+            else
+            {
+                QTableWidgetItem* item = new QTableWidgetItem ();
+                item->setData(Qt::UserRole, QVariant(id));
+                item->setBackground(Qt::darkGray);
+                config_ds_table_->setItem(row, col, item);
+            }
         }
 
-        ++col;
-        if (ds_it.second.hasAltitude())
-            db_ds_table_->setItem(row, 7, new QTableWidgetItem(QString::number(ds_it.second.altitude())));
-        else
-        {
-            db_ds_table_->setItem(row, 7, new QTableWidgetItem);
-            db_ds_table_->item(row, 7)->setBackground(Qt::darkGray);
+        { // latitude
+            ++col;
+            if (ds_it.second.hasLatitude())
+            {
+                QTableWidgetItem* item = new QTableWidgetItem(QString::number(ds_it.second.latitude(), 'g', 10));
+                item->setData(Qt::UserRole, QVariant(id));
+                config_ds_table_->setItem(row, col, item);
+            }
+            else
+            {
+                QTableWidgetItem* item = new QTableWidgetItem ();
+                item->setData(Qt::UserRole, QVariant(id));
+                item->setBackground(Qt::darkGray);
+                config_ds_table_->setItem(row, col, item);
+            }
+        }
+
+        { // longitude
+            ++col;
+            if (ds_it.second.hasLongitude())
+            {
+                QTableWidgetItem* item = new QTableWidgetItem(QString::number(ds_it.second.longitude(), 'g', 10));
+                item->setData(Qt::UserRole, QVariant(id));
+                config_ds_table_->setItem(row, col, item);
+            }
+            else
+            {
+                QTableWidgetItem* item = new QTableWidgetItem ();
+                item->setData(Qt::UserRole, QVariant(id));
+                item->setBackground(Qt::darkGray);
+                config_ds_table_->setItem(row, col, item);
+            }
+        }
+
+        { // altitude
+            ++col;
+            if (ds_it.second.hasAltitude())
+            {
+                QTableWidgetItem* item = new QTableWidgetItem(QString::number(ds_it.second.altitude()));
+                item->setData(Qt::UserRole, QVariant(id));
+                config_ds_table_->setItem(row, col, item);
+            }
+            else
+            {
+                QTableWidgetItem* item = new QTableWidgetItem ();
+                item->setData(Qt::UserRole, QVariant(id));
+                item->setBackground(Qt::darkGray);
+                config_ds_table_->setItem(row, col, item);;
+            }
         }
 
         ++row;
     }
+}
+void DBOEditDataSourcesWidget::updateDBDSTable ()
+{
+    logdbg << "DBOEditDataSourcesWidget: updateDBDSTable";
 
-    //    db_ds_table_->resizeRowsToContents();
-    //    db_ds_table_->resizeColumnsToContents();
+    assert (db_ds_table_);
+
+    db_ds_table_->clearContents();
+
+    db_ds_table_->setRowCount(object_->dataSources().size());
+
+    int row = 0;
+    int col = 0;
+    for (auto& ds_it : object_->dataSources())
+    {
+        unsigned int id = ds_it.second.id();
+
+        col = 0;
+        { // ID
+            QTableWidgetItem* item = new QTableWidgetItem(QString::number(id));
+            item->setData(Qt::UserRole, QVariant(id));
+            item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+            db_ds_table_->setItem(row, col, item);
+        }
+
+        { // name
+            ++col;
+            QTableWidgetItem* item = new QTableWidgetItem(ds_it.second.name().c_str());
+            item->setData(Qt::UserRole, QVariant(id));
+            db_ds_table_->setItem(row, col, item);
+        }
+
+        { // short namme
+            ++col;
+            if (ds_it.second.hasShortName())
+            {
+                QTableWidgetItem* item = new QTableWidgetItem(ds_it.second.shortName().c_str());
+                item->setData(Qt::UserRole, QVariant(id));
+                db_ds_table_->setItem(row, col, item);
+            }
+            else
+            {
+                QTableWidgetItem* item = new QTableWidgetItem ();
+                item->setData(Qt::UserRole, QVariant(id));
+                item->setBackground(Qt::darkGray);
+                db_ds_table_->setItem(row, col, item);
+            }
+        }
+
+
+        { // sac
+            ++col;
+            if (ds_it.second.hasSac())
+            {
+                QTableWidgetItem* item = new QTableWidgetItem(QString::number((uint)ds_it.second.sac()));
+                item->setData(Qt::UserRole, QVariant(id));
+                db_ds_table_->setItem(row, col, item);
+            }
+            else
+            {
+                QTableWidgetItem* item = new QTableWidgetItem ();
+                item->setData(Qt::UserRole, QVariant(id));
+                item->setBackground(Qt::darkGray);
+                db_ds_table_->setItem(row, col, item);
+            }
+        }
+
+        { // sic
+            ++col;
+            if (ds_it.second.hasSic())
+            {
+                QTableWidgetItem* item = new QTableWidgetItem(QString::number((uint)ds_it.second.sic()));
+                item->setData(Qt::UserRole, QVariant(id));
+                db_ds_table_->setItem(row, col, item);
+            }
+            else
+            {
+                QTableWidgetItem* item = new QTableWidgetItem ();
+                item->setData(Qt::UserRole, QVariant(id));
+                item->setBackground(Qt::darkGray);
+                db_ds_table_->setItem(row, col, item);
+            }
+        }
+
+        { // latitude
+            ++col;
+            if (ds_it.second.hasLatitude())
+            {
+                QTableWidgetItem* item = new QTableWidgetItem(QString::number(ds_it.second.latitude(), 'g', 10));
+                item->setData(Qt::UserRole, QVariant(id));
+                db_ds_table_->setItem(row, col, item);
+            }
+            else
+            {
+                QTableWidgetItem* item = new QTableWidgetItem ();
+                item->setData(Qt::UserRole, QVariant(id));
+                item->setBackground(Qt::darkGray);
+                db_ds_table_->setItem(row, col, item);
+            }
+        }
+
+        { // longitude
+            ++col;
+            if (ds_it.second.hasLongitude())
+            {
+                QTableWidgetItem* item = new QTableWidgetItem(QString::number(ds_it.second.longitude(), 'g', 10));
+                item->setData(Qt::UserRole, QVariant(id));
+                db_ds_table_->setItem(row, col, item);
+            }
+            else
+            {
+                QTableWidgetItem* item = new QTableWidgetItem ();
+                item->setData(Qt::UserRole, QVariant(id));
+                item->setBackground(Qt::darkGray);
+                db_ds_table_->setItem(row, col, item);
+            }
+        }
+
+        { // altitude
+            ++col;
+            if (ds_it.second.hasAltitude())
+            {
+                QTableWidgetItem* item = new QTableWidgetItem(QString::number(ds_it.second.altitude()));
+                item->setData(Qt::UserRole, QVariant(id));
+                db_ds_table_->setItem(row, col, item);
+            }
+            else
+            {
+                QTableWidgetItem* item = new QTableWidgetItem ();
+                item->setData(Qt::UserRole, QVariant(id));
+                item->setBackground(Qt::darkGray);
+                db_ds_table_->setItem(row, col, item);
+            }
+        }
+        ++row;
+    }
 }
 
 void DBOEditDataSourcesWidget::updateColumnSizes ()
@@ -519,6 +567,234 @@ void DBOEditDataSourcesWidget::updateColumnSizes ()
     }
     config_ds_table_->horizontalHeader()->blockSignals(false);
     db_ds_table_->horizontalHeader()->blockSignals(false);
+}
+
+
+void DBOEditDataSourcesWidget::configItemChanged(QTableWidgetItem *item)
+{
+    assert (item);
+    assert (config_ds_table_);
+
+    bool ok;
+    unsigned int id = item->data(Qt::UserRole).toUInt(&ok);
+    assert (ok);
+    int col = config_ds_table_->currentColumn();
+
+    std::string text = item->text().toStdString();
+
+    loginf << "DBOEditDataSourcesWidget: configItemChanged: id " << id << " col " << col << " text '" << text << "'";
+
+    assert (object_->hasStoredDataSource(id));
+
+    StoredDBODataSource& ds = object_->storedDataSource (id);
+
+    if (col == 1)
+    {
+        if (text.size())
+            ds.name(text);
+    }
+    else if (col == 2)
+    {
+        if (!text.size())
+            ds.removeShortName();
+        else
+            ds.shortName(text);
+    }
+    else if (col == 3)
+    {
+        if (!text.size())
+            ds.removeSac();
+        else
+        {
+            int sac = item->text().toInt(&ok);
+
+            if (ok && sac >= 0 && sac <= 255)
+                ds.sac(sac);
+        }
+    }
+    else if (col == 4)
+    {
+        if (!text.size())
+            ds.removeSic();
+        else
+        {
+            int sic = item->text().toInt(&ok);
+
+            if (ok && sic >= 0 && sic <= 255)
+                ds.sic(sic);
+        }
+    }
+    else if (col == 5)
+    {
+        if (!text.size())
+            ds.removeLatitude();
+        else
+        {
+            double latitude = item->text().toDouble(&ok);
+
+            if (ok)
+                ds.latitude(latitude);
+        }
+    }
+    else if (col == 6)
+    {
+        if (!text.size())
+            ds.removeLongitude();
+        else
+        {
+            double longitude = item->text().toDouble(&ok);
+
+            if (ok)
+                ds.longitude(longitude);
+        }
+    }
+    else if (col == 7)
+    {
+        if (!text.size())
+            ds.removeAltitude();
+        else
+        {
+            double altitude = item->text().toDouble(&ok);
+
+            if (ok)
+                ds.altitude(altitude);
+        }
+    }
+    else
+        assert (false); // impossible
+
+    update();
+}
+
+void DBOEditDataSourcesWidget::dbItemChanged(QTableWidgetItem* item)
+{
+    assert (item);
+    assert (db_ds_table_);
+
+    bool ok;
+    unsigned int id = item->data(Qt::UserRole).toUInt(&ok);
+    assert (ok);
+    int col = db_ds_table_->currentColumn();
+
+    std::string text = item->text().toStdString();
+
+    loginf << "DBOEditDataSourcesWidget: dbItemChanged: id " << id << " col " << col << " text '" << text << "'";
+
+    assert (object_->hasDataSource(id));
+
+    DBODataSource& ds = object_->getDataSource(id);
+
+    if (col == 1)
+    {
+        if (text.size())
+        {
+            ds.name(text);
+            ds.updateInDatabase();
+        }
+    }
+    else if (col == 2)
+    {
+        if (!text.size())
+            ds.removeShortName();
+        else
+            ds.shortName(text);
+
+        ds.updateInDatabase();
+    }
+    else if (col == 3)
+    {
+        if (!text.size())
+        {
+            ds.removeSac();
+            ds.updateInDatabase();
+        }
+        else
+        {
+            int sac = item->text().toInt(&ok);
+
+            if (ok && sac >= 0 && sac <= 255)
+            {
+                ds.sac(sac);
+                ds.updateInDatabase();
+            }
+        }
+    }
+    else if (col == 4)
+    {
+        if (!text.size())
+        {
+            ds.removeSic();
+            ds.updateInDatabase();
+        }
+        else
+        {
+            int sic = item->text().toInt(&ok);
+
+            if (ok && sic >= 0 && sic <= 255)
+            {
+                ds.sic(sic);
+                ds.updateInDatabase();
+            }
+        }
+    }
+    else if (col == 5)
+    {
+        if (!text.size())
+        {
+            ds.removeLatitude();
+            ds.updateInDatabase();
+        }
+        else
+        {
+            double latitude = item->text().toDouble(&ok);
+
+            if (ok)
+            {
+                ds.latitude(latitude);
+                ds.updateInDatabase();
+            }
+        }
+    }
+    else if (col == 6)
+    {
+        if (!text.size())
+        {
+            ds.removeLongitude();
+            ds.updateInDatabase();
+        }
+        else
+        {
+            double longitude = item->text().toDouble(&ok);
+
+            if (ok)
+            {
+                ds.longitude(longitude);
+                ds.updateInDatabase();
+            }
+        }
+    }
+    else if (col == 7)
+    {
+        if (!text.size())
+        {
+            ds.removeAltitude();
+            ds.updateInDatabase();
+        }
+        else
+        {
+            double altitude = item->text().toDouble(&ok);
+
+            if (ok)
+            {
+                ds.altitude(altitude);
+                ds.updateInDatabase();
+            }
+        }
+    }
+    else
+        assert (false); // impossible
+
+    update();
 }
 
 void DBOEditDataSourcesWidget::clearSyncOptions()

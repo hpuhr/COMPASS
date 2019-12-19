@@ -22,10 +22,11 @@
 #include "dbobject.h"
 
 class DBObject;
-class QVBoxLayout;
+
 class QTableWidget;
 class QLabel;
 class QPushButton;
+class QTableWidgetItem;
 
 class DBOEditDataSourcesWidget : public QWidget
 {
@@ -40,6 +41,9 @@ public slots:
     void deselectAllActionsSlot();
     void performActionsSlot();
 
+    void configItemChanged(QTableWidgetItem *item);
+    void dbItemChanged(QTableWidgetItem *item);
+
 public:
     DBOEditDataSourcesWidget(DBObject* object, QWidget* parent=0, Qt::WindowFlags f=0);
     virtual ~DBOEditDataSourcesWidget();
@@ -52,7 +56,6 @@ private:
 
     const QStringList table_columns_ {"ID", "Name", "Short Name", "SAC", "SIC", "Latitude", "Longitude", "Altitude"};
 
-    //QVBoxLayout* config_ds_layout_ {nullptr};
     QTableWidget* config_ds_table_ {nullptr};
     QPushButton* sync_from_cfg_button_ {nullptr};
 
@@ -65,7 +68,6 @@ private:
     QPushButton* deselect_all_actions_ {nullptr};
     QPushButton* perform_actions_button_ {nullptr};
 
-    //QGridLayout* db_ds_layout_ {nullptr};
     QTableWidget* db_ds_table_ {nullptr};
     QPushButton* sync_from_db_button_ {nullptr};
 
