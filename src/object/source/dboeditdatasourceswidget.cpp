@@ -22,6 +22,8 @@
 #include <QFrame>
 #include <QPushButton>
 #include <QScrollArea>
+#include <QTableWidget>
+#include <QHeaderView>
 
 #include "dboeditdatasourceswidget.h"
 #include "dbobject.h"
@@ -38,8 +40,6 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(DBObject* object, QWidget *pa
     assert (object_);
     action_heading_ = "No actions defined";
 
-    //setMinimumSize(QSize(1000, 800));
-
     QFont font_bold;
     font_bold.setBold(true);
 
@@ -48,133 +48,167 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(DBObject* object, QWidget *pa
 
     int frame_width_small = 1;
 
-    QVBoxLayout *main_layout = new QVBoxLayout ();
+    QHBoxLayout* main_layout = new QHBoxLayout ();
 
-    std::string caption = "Edit DBObject " +object_->name()+ " DataSources";
+    //std::string caption = "Edit DBObject " +object_->name()+ " DataSources";
 
-    QLabel *main_label = new QLabel (caption.c_str());
-    main_label->setFont (font_big);
-    main_layout->addWidget (main_label);
+    //    QLabel *main_label = new QLabel (caption.c_str());
+    //    main_label->setFont (font_big);
+    //    main_layout->addWidget (main_label);
 
-    QHBoxLayout* sources_layout = new QHBoxLayout();
+    QVBoxLayout* sources_layout = new QVBoxLayout();
 
-    // config stuff
+    // config ds stuff
+    {
+        QVBoxLayout* config_layout = new QVBoxLayout();
 
-    QVBoxLayout* config_layout = new QVBoxLayout();
+        QFrame *config_frame = new QFrame ();
+        config_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
+        config_frame->setLineWidth(frame_width_small);
+        //config_frame->setMinimumWidth(900);
 
-    QFrame *config_frame = new QFrame ();
-    config_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
-    config_frame->setLineWidth(frame_width_small);
-    config_frame->setMinimumWidth(900);
+        QHBoxLayout* top_layout = new QHBoxLayout();
 
-    QLabel *config_label = new QLabel ("Configuration Data Sources");
-    config_label->setFont (font_bold);
-    config_layout->addWidget (config_label);
+        QLabel *config_label = new QLabel ("Configuration Data Sources");
+        config_label->setFont (font_bold);
+        top_layout->addWidget (config_label);
 
-    config_ds_layout_ = new QVBoxLayout();
-    config_layout->addLayout(config_ds_layout_);
+        QPushButton* add_stored_button = new QPushButton ("Add New");
+        connect(add_stored_button, &QPushButton::clicked, this, &DBOEditDataSourcesWidget::addStoredDSSlot);
+        top_layout->addWidget(add_stored_button);
 
-    config_layout->addStretch();
+        QIcon down_icon(Files::getIconFilepath("down.png").c_str());
 
-    QPushButton* add_stored_button = new QPushButton ("Add New");
-    connect(add_stored_button, &QPushButton::clicked, this, &DBOEditDataSourcesWidget::addStoredDSSlot);
-    config_layout->addWidget(add_stored_button);
+        sync_from_cfg_button_ = new QPushButton ("Sync to DB");
+        sync_from_cfg_button_->setIcon(down_icon);
+        //sync_from_cfg_button_->setMaximumWidth(200);
+        //sync_from_cfg_button_->setLayoutDirection(Qt::RightToLeft);
+        connect(sync_from_cfg_button_, SIGNAL(clicked()), this, SLOT(syncOptionsFromCfgSlot()));
+        top_layout->addWidget(sync_from_cfg_button_);
 
-    QIcon right_icon(Files::getIconFilepath("arrow_to_right.png").c_str());
+        config_layout->addLayout(top_layout);
 
-    sync_from_cfg_button_ = new QPushButton ("Sync to DB");
-    sync_from_cfg_button_->setIcon(right_icon);
-    //sync_from_cfg_button_->setMaximumWidth(200);
-    //sync_from_cfg_button_->setLayoutDirection(Qt::RightToLeft);
-    connect(sync_from_cfg_button_, SIGNAL(clicked()), this, SLOT(syncOptionsFromCfgSlot()));
-    config_layout->addWidget(sync_from_cfg_button_);
+        config_ds_table_ = new QTableWidget ();
+        // update done later
+        //updateConfigDSTable ();
 
-    config_frame->setLayout (config_layout);
+        config_layout->addWidget(config_ds_table_);
 
-    QScrollArea *config_scroll = new QScrollArea ();
-    config_scroll->setWidgetResizable (true);
-    config_scroll->setWidget(config_frame);
+        //    config_ds_layout_ = new QVBoxLayout();
+        //    config_layout->addLayout(config_ds_layout_);
+
+        //config_layout->addStretch();
+
+        //QHBoxLayout* button_layout = new QHBoxLayout();
 
 
-    sources_layout->addWidget(config_scroll);
 
-    // action stuff
+        //config_layout->addLayout(button_layout);
 
-    QVBoxLayout* action_layout = new QVBoxLayout();
+        config_frame->setLayout (config_layout);
 
-    QFrame *action_frame = new QFrame ();
-    action_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
-    action_frame->setLineWidth(frame_width_small);
-    //action_frame->setMinimumWidth(250);
+        QScrollArea *config_scroll = new QScrollArea ();
+        config_scroll->setWidgetResizable (true);
+        config_scroll->setWidget(config_frame);
 
-    action_heading_label_ = new QLabel (action_heading_.c_str());
-    action_heading_label_->setFont (font_bold);
-    action_layout->addWidget (action_heading_label_);
 
-    action_layout->addWidget(new QLabel());
-
-    action_layout_ = new QGridLayout();
-    action_layout->addLayout(action_layout_);
-
-    // action selection buttons
-    QHBoxLayout* action_select_layout = new QHBoxLayout();
-
-    action_layout->addStretch();
-
-    select_all_actions_ = new QPushButton ("Select All");
-    connect(select_all_actions_, &QPushButton::clicked, this, &DBOEditDataSourcesWidget::selectAllActionsSlot);
-    action_select_layout->addWidget(select_all_actions_);
-
-    deselect_all_actions_ = new QPushButton ("Select None");
-    connect(deselect_all_actions_, &QPushButton::clicked, this, &DBOEditDataSourcesWidget::deselectAllActionsSlot);
-    action_select_layout->addWidget(deselect_all_actions_);
-
-    action_layout->addLayout(action_select_layout);
-
-    // perform actions
-    perform_actions_button_ = new QPushButton ("Perform Actions");
-    connect(perform_actions_button_, &QPushButton::clicked, this, &DBOEditDataSourcesWidget::performActionsSlot);
-    action_layout->addWidget(perform_actions_button_);
-
-    updateActionButtons();
-    action_frame->setLayout (action_layout);
-
-    sources_layout->addWidget(action_frame);
+        sources_layout->addWidget(config_scroll);
+    }
 
     // db stuff
+    {
+        QVBoxLayout* db_layout = new QVBoxLayout();
 
-    QVBoxLayout* db_layout = new QVBoxLayout();
+        QFrame *db_frame = new QFrame ();
+        db_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
+        db_frame->setLineWidth(frame_width_small);
+        //db_frame->setMinimumWidth(900);
 
-    QFrame *db_frame = new QFrame ();
-    db_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
-    db_frame->setLineWidth(frame_width_small);
-    db_frame->setMinimumWidth(900);
+        QHBoxLayout* top_layout = new QHBoxLayout();
 
-    QLabel *db_label = new QLabel ("Database Data Sources");
-    db_label->setFont (font_bold);
-    db_layout->addWidget (db_label);
+        QLabel *db_label = new QLabel ("Database Data Sources");
+        db_label->setFont (font_bold);
+        top_layout->addWidget (db_label);
 
-    db_ds_layout_ = new QGridLayout();
-    db_layout->addLayout(db_ds_layout_);
+        QIcon up_icon(Files::getIconFilepath("up.png").c_str());
 
-    db_layout->addStretch();
+        sync_from_db_button_ = new QPushButton ("Sync To Config");
+        sync_from_db_button_->setIcon(up_icon);
+        //sync_from_db_button_->setMaximumWidth(200);
+        //sync_from_db_button_->setLayoutDirection(Qt::LeftToRight);
+        connect(sync_from_db_button_, SIGNAL(clicked()), this, SLOT(syncOptionsFromDBSlot()));
+        top_layout->addWidget(sync_from_db_button_);
 
-    QIcon left_icon(Files::getIconFilepath("arrow_to_left.png").c_str());
+        db_layout->addLayout(top_layout);
 
-    sync_from_db_button_ = new QPushButton ("Sync To Config");
-    sync_from_db_button_->setIcon(left_icon);
-    //sync_from_db_button_->setMaximumWidth(200);
-    //sync_from_db_button_->setLayoutDirection(Qt::LeftToRight);
-    connect(sync_from_db_button_, SIGNAL(clicked()), this, SLOT(syncOptionsFromDBSlot()));
-    db_layout->addWidget(sync_from_db_button_);
+        db_ds_table_ = new QTableWidget ();
+        // update done later
+        //updateDBDSTable ();
 
-    db_frame->setLayout (db_layout);
+        db_layout->addWidget(db_ds_table_);
 
-    QScrollArea *db_scroll = new QScrollArea ();
-    db_scroll->setWidgetResizable (true);
-    db_scroll->setWidget(db_frame);
+        //    db_ds_layout_ = new QGridLayout();
+        //    db_layout->addLayout(db_ds_layout_);
 
-    sources_layout->addWidget(db_scroll);
+        //db_layout->addStretch();
+
+
+
+        db_frame->setLayout (db_layout);
+
+        QScrollArea *db_scroll = new QScrollArea ();
+        db_scroll->setWidgetResizable (true);
+        db_scroll->setWidget(db_frame);
+
+        sources_layout->addWidget(db_scroll);
+    }
+
+    main_layout->addLayout(sources_layout);
+
+    // action stuff
+    {
+        QVBoxLayout* action_layout = new QVBoxLayout();
+
+        QFrame *action_frame = new QFrame ();
+        action_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
+        action_frame->setLineWidth(frame_width_small);
+        //action_frame->setMinimumWidth(250);
+
+        action_heading_label_ = new QLabel (action_heading_.c_str());
+        action_heading_label_->setFont (font_bold);
+        action_layout->addWidget (action_heading_label_);
+
+        action_layout->addWidget(new QLabel());
+
+        action_layout_ = new QGridLayout();
+        action_layout->addLayout(action_layout_);
+
+        // action selection buttons
+        QHBoxLayout* action_select_layout = new QHBoxLayout();
+
+        //action_layout->addStretch();
+
+        select_all_actions_ = new QPushButton ("Select All");
+        connect(select_all_actions_, &QPushButton::clicked, this, &DBOEditDataSourcesWidget::selectAllActionsSlot);
+        action_select_layout->addWidget(select_all_actions_);
+
+        deselect_all_actions_ = new QPushButton ("Select None");
+        connect(deselect_all_actions_, &QPushButton::clicked, this, &DBOEditDataSourcesWidget::deselectAllActionsSlot);
+        action_select_layout->addWidget(deselect_all_actions_);
+
+        action_layout->addLayout(action_select_layout);
+
+        // perform actions
+        perform_actions_button_ = new QPushButton ("Perform Actions");
+        connect(perform_actions_button_, &QPushButton::clicked, this, &DBOEditDataSourcesWidget::performActionsSlot);
+        action_layout->addWidget(perform_actions_button_);
+
+        updateActionButtons();
+        action_frame->setLayout (action_layout);
+
+        //sources_layout->addWidget(action_frame);
+        main_layout->addWidget(action_frame);
+    }
 
     // rest
 
@@ -195,32 +229,36 @@ void DBOEditDataSourcesWidget::update ()
 {
     loginf << "DBOEditDataSourcesWidget: update";
 
-    QLayoutItem *child;
-    while ((child = config_ds_layout_->takeAt(0)) != 0)
-    {
-        config_ds_layout_->removeItem(child);
-        delete child;
-    }
+    updateConfigDSTable ();
+    updateDBDSTable ();
+    updateColumnSizes();
 
-    while ((child = db_ds_layout_->takeAt(0)) != 0)
-    {
-        db_ds_layout_->removeItem(child);
-        delete child;
-    }
+    //    QLayoutItem *child;
+    //    while ((child = config_ds_layout_->takeAt(0)) != 0)
+    //    {
+    //        config_ds_layout_->removeItem(child);
+    //        delete child;
+    //    }
 
-    assert (object_);
+    //    while ((child = db_ds_layout_->takeAt(0)) != 0)
+    //    {
+    //        db_ds_layout_->removeItem(child);
+    //        delete child;
+    //    }
 
-    for (auto ds_it = object_->storedDSBegin(); ds_it != object_->storedDSEnd(); ++ds_it)
-    {
-        loginf << "DBOEditDataSourcesWidget: update: config ds " << ds_it->first;
-        config_ds_layout_->addWidget(ds_it->second.widget(ds_it == object_->storedDSBegin()));
-    }
+    //    assert (object_);
 
-    for (auto ds_it = object_->dsBegin(); ds_it != object_->dsEnd(); ++ds_it)
-    {
-        loginf << "DBOEditDataSourcesWidget: update: db ds " << ds_it->first;
-        db_ds_layout_->addWidget(ds_it->second.widget(ds_it == object_->dsBegin()));
-    }
+    //    for (auto ds_it = object_->storedDSBegin(); ds_it != object_->storedDSEnd(); ++ds_it)
+    //    {
+    //        loginf << "DBOEditDataSourcesWidget: update: config ds " << ds_it->first;
+    //        config_ds_layout_->addWidget(ds_it->second.widget(ds_it == object_->storedDSBegin()));
+    //    }
+
+    //    for (auto ds_it = object_->dsBegin(); ds_it != object_->dsEnd(); ++ds_it)
+    //    {
+    //        loginf << "DBOEditDataSourcesWidget: update: db ds " << ds_it->first;
+    //        db_ds_layout_->addWidget(ds_it->second.widget(ds_it == object_->dsBegin()));
+    //    }
 }
 
 void DBOEditDataSourcesWidget::syncOptionsFromDBSlot()
@@ -288,6 +326,201 @@ void DBOEditDataSourcesWidget::performActionsSlot()
     update();
 }
 
+void DBOEditDataSourcesWidget::updateConfigDSTable ()
+{
+    loginf << "DBOEditDataSourcesWidget: updateConfigDSTable";
+
+    assert (object_);
+    assert (config_ds_table_);
+
+    config_ds_table_->clear();
+
+    config_ds_table_->setRowCount(object_->dataSources().size());
+    config_ds_table_->setColumnCount(8);
+
+    config_ds_table_->setHorizontalHeaderLabels(table_columns_);
+
+    config_ds_table_->verticalHeader()->setVisible(false);
+    config_ds_table_->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    int row = 0;
+    int col = 0;
+    for (auto& ds_it : object_->dataSources())
+    {
+        col = 0;
+        config_ds_table_->setItem(row, col, new QTableWidgetItem(QString::number(ds_it.second.id())));
+
+        ++col;
+        config_ds_table_->setItem(row, col, new QTableWidgetItem(ds_it.second.name().c_str()));
+
+        ++col;
+        if (ds_it.second.hasShortName())
+            config_ds_table_->setItem(row, col, new QTableWidgetItem(ds_it.second.shortName().c_str()));
+        else
+        {
+            config_ds_table_->setItem(row, col, new QTableWidgetItem);
+            config_ds_table_->item(row, col)->setBackground(Qt::darkGray);
+        }
+
+        ++col;
+        if (ds_it.second.hasSac())
+            config_ds_table_->setItem(row, col, new QTableWidgetItem(QString::number((uint)ds_it.second.sac())));
+        else
+        {
+            config_ds_table_->setItem(row, col, new QTableWidgetItem);
+            config_ds_table_->item(row, col)->setBackground(Qt::darkGray);
+        }
+
+        ++col;
+        if (ds_it.second.hasSic())
+            config_ds_table_->setItem(row, col, new QTableWidgetItem(QString::number((uint)ds_it.second.sic())));
+        else
+        {
+            config_ds_table_->setItem(row, col, new QTableWidgetItem);
+            config_ds_table_->item(row, col)->setBackground(Qt::darkGray);
+        }
+
+        ++col;
+        if (ds_it.second.hasLatitude())
+            config_ds_table_->setItem(row, col, new QTableWidgetItem(QString::number(ds_it.second.latitude(), 'g', 10)));
+        else
+        {
+            config_ds_table_->setItem(row, col, new QTableWidgetItem);
+            config_ds_table_->item(row, col)->setBackground(Qt::darkGray);
+        }
+
+        ++col;
+        if (ds_it.second.hasLongitude())
+            config_ds_table_->setItem(row, col, new QTableWidgetItem(QString::number(ds_it.second.longitude(), 'g', 10)));
+        else
+        {
+            config_ds_table_->setItem(row, col, new QTableWidgetItem);
+            config_ds_table_->item(row, col)->setBackground(Qt::darkGray);
+        }
+
+        ++col;
+        if (ds_it.second.hasAltitude())
+            config_ds_table_->setItem(row, col, new QTableWidgetItem(QString::number(ds_it.second.altitude())));
+        else
+        {
+            config_ds_table_->setItem(row, col, new QTableWidgetItem);
+            config_ds_table_->item(row, col)->setBackground(Qt::darkGray);
+        }
+
+        ++row;
+    }
+
+    //    config_ds_table_->resizeRowsToContents();
+    //    config_ds_table_->resizeColumnsToContents();
+}
+void DBOEditDataSourcesWidget::updateDBDSTable ()
+{
+    loginf << "DBOEditDataSourcesWidget: updateDBDSTable";
+
+    assert (db_ds_table_);
+
+    db_ds_table_->clear();
+
+    db_ds_table_->setRowCount(object_->storedDataSources().size());
+    db_ds_table_->setColumnCount(8);
+
+    db_ds_table_->setHorizontalHeaderLabels(table_columns_);
+
+    db_ds_table_->verticalHeader()->setVisible(false);
+    db_ds_table_->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    int row = 0;
+    int col = 0;
+    for (auto& ds_it : object_->storedDataSources())
+    {
+        col = 0;
+        db_ds_table_->setItem(row, col, new QTableWidgetItem(QString::number(ds_it.second.id())));
+
+        ++col;
+        db_ds_table_->setItem(row, col, new QTableWidgetItem(ds_it.second.name().c_str()));
+
+        ++col;
+        if (ds_it.second.hasShortName())
+            db_ds_table_->setItem(row, col, new QTableWidgetItem(ds_it.second.shortName().c_str()));
+        else
+        {
+            db_ds_table_->setItem(row, col, new QTableWidgetItem);
+            db_ds_table_->item(row, col)->setBackground(Qt::darkGray);
+        }
+
+        ++col;
+        if (ds_it.second.hasSac())
+            db_ds_table_->setItem(row, col, new QTableWidgetItem(QString::number((uint)ds_it.second.sac())));
+        else
+        {
+            db_ds_table_->setItem(row, col, new QTableWidgetItem);
+            db_ds_table_->item(row, col)->setBackground(Qt::darkGray);
+        }
+
+        ++col;
+        if (ds_it.second.hasSic())
+            db_ds_table_->setItem(row, col, new QTableWidgetItem(QString::number((uint)ds_it.second.sic())));
+        else
+        {
+            db_ds_table_->setItem(row, col, new QTableWidgetItem);
+            db_ds_table_->item(row, col)->setBackground(Qt::darkGray);
+        }
+
+        ++col;
+        if (ds_it.second.hasLatitude())
+            db_ds_table_->setItem(row, col, new QTableWidgetItem(QString::number(ds_it.second.latitude(), 'g', 10)));
+        else
+        {
+            db_ds_table_->setItem(row, col, new QTableWidgetItem);
+            db_ds_table_->item(row, col)->setBackground(Qt::darkGray);
+        }
+
+        ++col;
+        if (ds_it.second.hasLongitude())
+            db_ds_table_->setItem(row, 6, new QTableWidgetItem(QString::number(ds_it.second.longitude(), 'g', 10)));
+        else
+        {
+            db_ds_table_->setItem(row, 6, new QTableWidgetItem);
+            db_ds_table_->item(row, 6)->setBackground(Qt::darkGray);
+        }
+
+        ++col;
+        if (ds_it.second.hasAltitude())
+            db_ds_table_->setItem(row, 7, new QTableWidgetItem(QString::number(ds_it.second.altitude())));
+        else
+        {
+            db_ds_table_->setItem(row, 7, new QTableWidgetItem);
+            db_ds_table_->item(row, 7)->setBackground(Qt::darkGray);
+        }
+
+        ++row;
+    }
+
+    //    db_ds_table_->resizeRowsToContents();
+    //    db_ds_table_->resizeColumnsToContents();
+}
+
+void DBOEditDataSourcesWidget::updateColumnSizes ()
+{
+    assert (config_ds_table_);
+    assert (db_ds_table_);
+
+    config_ds_table_->horizontalHeader()->blockSignals(true);
+    db_ds_table_->horizontalHeader()->blockSignals(true);
+
+    for (int cnt=0; cnt < table_columns_.size(); ++cnt)
+    {
+        config_ds_table_->resizeColumnToContents(cnt);
+        db_ds_table_->resizeColumnToContents(cnt);
+        int cfgsize = config_ds_table_->horizontalHeader()->sectionSize(cnt);
+        int dbsize = db_ds_table_->horizontalHeader()->sectionSize(cnt);
+        config_ds_table_->horizontalHeader()->resizeSection(cnt, qMax(cfgsize, dbsize));
+        db_ds_table_->horizontalHeader()->resizeSection(cnt, qMax(cfgsize, dbsize));
+    }
+    config_ds_table_->horizontalHeader()->blockSignals(false);
+    db_ds_table_->horizontalHeader()->blockSignals(false);
+}
+
 void DBOEditDataSourcesWidget::clearSyncOptions()
 {
     action_heading_ = "No actions defined";
@@ -335,9 +568,9 @@ void DBOEditDataSourcesWidget::updateActionButtons()
 
 bool DBOEditDataSourcesWidget::haveActionsToPerform ()
 {
-//    for (auto& opt_it : action_collection_)
-//        if (opt_it.second.performFlag() && opt_it.second.currentActionId() != 0)
-//            return true;
+    //    for (auto& opt_it : action_collection_)
+    //        if (opt_it.second.performFlag() && opt_it.second.currentActionId() != 0)
+    //            return true;
 
     return action_collection_.size() > 0;
 }

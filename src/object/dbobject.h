@@ -212,6 +212,7 @@ public:
     StoredDBODataSource& addNewStoredDataSource ();
 //    /// @brief Deletes a variable identified by id
     void deleteStoredDataSource (unsigned int id);
+    const std::map<unsigned int, StoredDBODataSource>& storedDataSources() const { return stored_data_sources_; }
 
     using DataSourceIterator = typename std::map<int, DBODataSource>::iterator;
     DataSourceIterator dsBegin() { return data_sources_.begin(); }

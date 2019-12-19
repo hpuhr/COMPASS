@@ -23,7 +23,7 @@
 
 class DBObject;
 class QVBoxLayout;
-class QGridLayout;
+class QTableWidget;
 class QLabel;
 class QPushButton;
 
@@ -50,7 +50,10 @@ private:
     /// @brief DBObject to be managed
     DBObject* object_ {nullptr};
 
-    QVBoxLayout* config_ds_layout_ {nullptr};
+    const QStringList table_columns_ {"ID", "Name", "Short Name", "SAC", "SIC", "Latitude", "Longitude", "Altitude"};
+
+    //QVBoxLayout* config_ds_layout_ {nullptr};
+    QTableWidget* config_ds_table_ {nullptr};
     QPushButton* sync_from_cfg_button_ {nullptr};
 
     QLabel* action_heading_label_ {nullptr};
@@ -62,8 +65,13 @@ private:
     QPushButton* deselect_all_actions_ {nullptr};
     QPushButton* perform_actions_button_ {nullptr};
 
-    QGridLayout* db_ds_layout_ {nullptr};
+    //QGridLayout* db_ds_layout_ {nullptr};
+    QTableWidget* db_ds_table_ {nullptr};
     QPushButton* sync_from_db_button_ {nullptr};
+
+    void updateConfigDSTable ();
+    void updateDBDSTable ();
+    void updateColumnSizes ();
 
     void clearSyncOptions();
     void displaySyncOptions ();
