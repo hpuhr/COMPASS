@@ -27,7 +27,7 @@
 
 class DBObject;
 class DBODataSource;
-class StoredDBODataSourceWidget;
+//class StoredDBODataSourceWidget;
 
 class StoredDBODataSource : public Configurable
 {
@@ -75,7 +75,7 @@ public:
     void altitude(double altitude);
     double altitude() const;
 
-    StoredDBODataSourceWidget* widget (bool add_headers=false, QWidget* parent=0, Qt::WindowFlags f=0);
+    //StoredDBODataSourceWidget* widget (bool add_headers=false, QWidget* parent=0, Qt::WindowFlags f=0);
 
     DBObject& object () { assert (object_); return *object_; }
 
@@ -97,7 +97,7 @@ private:
     bool has_altitude_ {false};
     double altitude_ {0};  // meter above msl
 
-    std::unique_ptr<StoredDBODataSourceWidget> widget_;
+    //std::unique_ptr<StoredDBODataSourceWidget> widget_;
 
 protected:
     virtual void checkSubConfigurables () {}

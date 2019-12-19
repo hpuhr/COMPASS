@@ -26,7 +26,7 @@
 #include "dboeditdatasourceactionoptions.h"
 
 class DBObject;
-class DBODataSourceWidget;
+//class DBODataSourceWidget;
 class QGridLayout;
 
 class DBODataSource
@@ -75,7 +75,7 @@ public:
     void altitude(double altitude);
     double altitude() const;
 
-    DBODataSourceWidget* widget (bool add_headers=false, QWidget* parent=0, Qt::WindowFlags f=0);
+    //DBODataSourceWidget* widget (bool add_headers=false, QWidget* parent=0, Qt::WindowFlags f=0);
 
     void finalize ();
 
@@ -117,7 +117,7 @@ protected:
     bool has_altitude_ {false};
     double altitude_ {0};  // meter above msl
 
-    std::unique_ptr<DBODataSourceWidget> widget_;
+    //std::unique_ptr<DBODataSourceWidget> widget_;
 
     bool finalized_ {false};
 

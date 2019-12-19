@@ -16,7 +16,7 @@
  */
 
 #include "dbodatasource.h"
-#include "dbodatasourcewidget.h"
+//#include "dbodatasourcewidget.h"
 #include "dbobject.h"
 #include "projectionmanager.h"
 #include "rs2g.h"
@@ -53,8 +53,8 @@ DBODataSource& DBODataSource::operator=(StoredDBODataSource& other)
     if (has_altitude_)
         altitude_ = other.altitude();
 
-    if (widget_)
-        widget_->update();
+//    if (widget_)
+//        widget_->update();
 
     loginf << "DBODataSource: operator=: name " << name_
            << " short name " << (has_short_name_ ? short_name_ : "false")
@@ -88,9 +88,9 @@ DBODataSource& DBODataSource::operator=(DBODataSource&& other)
     has_altitude_ = other.has_altitude_;
     altitude_ = other.altitude_;
 
-    widget_ = std::move(other.widget_);
-    if (widget_)
-        widget_->setDataSource(*this);
+//    widget_ = std::move(other.widget_);
+//    if (widget_)
+//        widget_->setDataSource(*this);
 
     return *this;
 }
@@ -718,15 +718,15 @@ void DBODataSource::sic(unsigned char sic)
     this->sic_ = sic;
 }
 
-DBODataSourceWidget* DBODataSource::widget (bool add_headers, QWidget* parent, Qt::WindowFlags f)
-{
-    if (!widget_)
-    {
-        widget_.reset(new DBODataSourceWidget (*this, add_headers, parent, f));
-        assert (widget_);
-    }
-    return widget_.get();
-}
+//DBODataSourceWidget* DBODataSource::widget (bool add_headers, QWidget* parent, Qt::WindowFlags f)
+//{
+//    if (!widget_)
+//    {
+//        widget_.reset(new DBODataSourceWidget (*this, add_headers, parent, f));
+//        assert (widget_);
+//    }
+//    return widget_.get();
+//}
 
 void DBODataSource::updateInDatabase ()
 {

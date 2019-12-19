@@ -16,7 +16,7 @@
  */
 
 #include "storeddbodatasource.h"
-#include "storeddbodatasourcewidget.h"
+//#include "storeddbodatasourcewidget.h"
 #include "dbodatasource.h"
 
 #include "dbobject.h"
@@ -68,8 +68,8 @@ StoredDBODataSource& StoredDBODataSource::operator=(DBODataSource& other)
     if (has_altitude_)
         altitude_ = other.altitude();
 
-    if (widget_)
-        widget_->update();
+//    if (widget_)
+//        widget_->update();
 
     return *this;
 }
@@ -103,9 +103,9 @@ StoredDBODataSource& StoredDBODataSource::operator=(StoredDBODataSource&& other)
     has_altitude_ = other.has_altitude_;
     altitude_ = other.altitude_;
 
-    widget_ = std::move(other.widget_);
-    if (widget_)
-        widget_->setDataSource(*this);
+//    widget_ = std::move(other.widget_);
+//    if (widget_)
+//        widget_->setDataSource(*this);
 
     other.configuration().updateParameterPointer ("id", &id_);
     other.configuration().updateParameterPointer ("name", &name_);
@@ -245,15 +245,15 @@ void StoredDBODataSource::sic(unsigned char sic)
     this->sic_ = sic;
 }
 
-StoredDBODataSourceWidget* StoredDBODataSource::widget (bool add_headers, QWidget* parent, Qt::WindowFlags f)
-{
-    if (!widget_)
-    {
-        widget_.reset (new StoredDBODataSourceWidget (*this, add_headers, parent, f));
-        assert (widget_);
-    }
-    return widget_.get();
-}
+//StoredDBODataSourceWidget* StoredDBODataSource::widget (bool add_headers, QWidget* parent, Qt::WindowFlags f)
+//{
+//    if (!widget_)
+//    {
+//        widget_.reset (new StoredDBODataSourceWidget (*this, add_headers, parent, f));
+//        assert (widget_);
+//    }
+//    return widget_.get();
+//}
 
 bool StoredDBODataSource::hasSac() const
 {
