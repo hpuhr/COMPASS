@@ -1,4 +1,5 @@
 #include "managedatasourcestaskwidget.h"
+#include "managedatasourcestask.h"
 #include "atsdb.h"
 #include "dbobjectmanager.h"
 #include "dbobject.h"
@@ -19,7 +20,7 @@ ManageDataSourcesTaskWidget::ManageDataSourcesTaskWidget(ManageDataSourcesTask& 
 
     for (auto& dbo_it : ATSDB::instance().objectManager())
     {
-        tab_widget_->addTab(dbo_it.second->editDataSourcesWidget(), dbo_it.first.c_str());
+        tab_widget_->addTab(task_.editDataSourcesWidget(dbo_it.first), dbo_it.first.c_str());
     }
 
     expertModeChangedSlot();

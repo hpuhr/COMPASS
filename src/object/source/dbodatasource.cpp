@@ -88,7 +88,7 @@ DBODataSource& DBODataSource::operator=(DBODataSource&& other)
     return *this;
 }
 
-bool DBODataSource::operator==(StoredDBODataSource& other)
+bool DBODataSource::operator==(const StoredDBODataSource& other) const
 {
     logdbg << "DBODataSource: operator==: name " << (name_ == other.name())
            << " short " << (short_name_ == other.shortName())
@@ -597,6 +597,12 @@ double DBODataSource::altitude() const
 {
     assert (has_altitude_);
     return altitude_;
+}
+
+const std::string DBODataSource::dboName () const
+{
+    assert (object_);
+    return object_->name();
 }
 
 unsigned int DBODataSource::id() const

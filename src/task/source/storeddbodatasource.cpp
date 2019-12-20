@@ -17,12 +17,15 @@
 
 #include "storeddbodatasource.h"
 #include "dbodatasource.h"
+#include "managedatasourcestask.h"
 
 #include "dbobject.h"
 
-StoredDBODataSource::StoredDBODataSource(const std::string& class_id, const std::string& instance_id, DBObject* object)
-    : Configurable(class_id, instance_id, object), object_(object)
+StoredDBODataSource::StoredDBODataSource(const std::string& class_id, const std::string& instance_id,
+                                         ManageDataSourcesTask& task)
+    : Configurable(class_id, instance_id, &task)
 {
+    registerParameter ("dbo_name", &dbo_name_, "");
     registerParameter ("id", &id_, 0);
     registerParameter ("name", &name_, "");
     registerParameter ("has_short_name", &has_short_name_,  false);
@@ -47,6 +50,7 @@ StoredDBODataSource& StoredDBODataSource::operator=(DBODataSource& other)
 {
     //id_ = other.id(); not copied, keep own
 
+    dbo_name_ = other.dboName();
     name_ = other.name();
     has_short_name_ = other.hasShortName();
     if (has_short_name_)
@@ -74,8 +78,10 @@ StoredDBODataSource& StoredDBODataSource::operator=(StoredDBODataSource&& other)
 {
     loginf << "StoredDBODataSource: move operator: moving";
 
-    object_ = other.object_;
-    other.object_ = nullptr;
+//    object_ = other.object_;
+//    other.object_ = nullptr;
+
+    dbo_name_ = other.dbo_name_;
 
     //id_ = other.id_; do not use others id, keep your own
 
@@ -99,6 +105,7 @@ StoredDBODataSource& StoredDBODataSource::operator=(StoredDBODataSource&& other)
     has_altitude_ = other.has_altitude_;
     altitude_ = other.altitude_;
 
+    other.configuration().updateParameterPointer ("dbo_name", &dbo_name_);
     other.configuration().updateParameterPointer ("id", &id_);
     other.configuration().updateParameterPointer ("name", &name_);
     other.configuration().updateParameterPointer ("has_short_name", &has_short_name_);
@@ -117,7 +124,7 @@ StoredDBODataSource& StoredDBODataSource::operator=(StoredDBODataSource&& other)
     return static_cast<StoredDBODataSource&>(Configurable::operator=(std::move(other)));
 }
 
-bool StoredDBODataSource::operator==(DBODataSource& other)
+bool StoredDBODataSource::operator==(const DBODataSource& other) const
 {
     logdbg << "StoredDBODataSource: operator==: name " << (name_ == other.name())
            << " short " << (short_name_ == other.shortName())
@@ -127,7 +134,8 @@ bool StoredDBODataSource::operator==(DBODataSource& other)
            << " long " << (fabs(longitude_ - other.longitude()) < 1e-10)
            << " alt " << (fabs(altitude_ - other.altitude()) < 1e-10);
 
-    return (name_ == other.name()) &&
+    return (dbo_name_ == other.dboName()) &&
+            (name_ == other.name()) &&
             (has_short_name_ == other.hasShortName()) &&
             (has_short_name_ ? short_name_ == other.shortName() : true) &&
             (has_sac_ == other.hasSac()) &&
@@ -146,6 +154,11 @@ double StoredDBODataSource::altitude() const
 {
     assert (has_altitude_);
     return altitude_;
+}
+
+std::string StoredDBODataSource::dboName() const
+{
+    return dbo_name_;
 }
 
 unsigned int StoredDBODataSource::id() const

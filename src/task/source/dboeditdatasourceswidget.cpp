@@ -29,13 +29,14 @@
 #include "dbobject.h"
 #include "dboeditdatasourceactionoptionswidget.h"
 #include "files.h"
+#include "managedatasourcestask.h"
 
 using namespace Utils;
 
-DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(DBObject* object, QWidget *parent, Qt::WindowFlags f)
-    : QWidget (parent, f), object_(object)
+DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(ManageDataSourcesTask& task, DBObject& object,
+                                                   QWidget *parent, Qt::WindowFlags f)
+    : QWidget (parent, f), task_(task), object_(object)
 {
-    assert (object_);
     action_heading_ = "No actions defined";
 
     QFont font_bold;
@@ -211,8 +212,7 @@ void DBOEditDataSourcesWidget::syncOptionsFromDBSlot()
 {
     loginf << "DBOEditDataSourcesWidget: syncOptionsFromDBSlot";
 
-    assert (object_);
-    action_collection_ = object_->getSyncOptionsFromDB();
+    action_collection_ = task_.getSyncOptionsFromDB(object_.name());
 
     action_heading_ = "Actions: From DB to Config";
     displaySyncOptions ();
@@ -221,8 +221,7 @@ void DBOEditDataSourcesWidget::syncOptionsFromDBSlot()
 void DBOEditDataSourcesWidget::addStoredDSSlot ()
 {
     loginf << "DBOEditDataSourcesWidget: addStoredDSSlot";
-    assert (object_);
-    object_->addNewStoredDataSource ();
+    task_.addNewStoredDataSource (object_.name());
 
     update();
 }
@@ -231,8 +230,7 @@ void DBOEditDataSourcesWidget::syncOptionsFromCfgSlot()
 {
     loginf << "DBOEditDataSourcesWidget: syncOptionsFromCfgSlot";
 
-    assert (object_);
-    action_collection_ = object_->getSyncOptionsFromCfg();
+    action_collection_ = task_.getSyncOptionsFromCfg(object_.name());
 
     action_heading_ = "Actions: From Config to DB";
     displaySyncOptions ();
@@ -276,15 +274,14 @@ void DBOEditDataSourcesWidget::updateConfigDSTable ()
 {
     logdbg << "DBOEditDataSourcesWidget: updateConfigDSTable";
 
-    assert (object_);
     assert (config_ds_table_);
 
     config_ds_table_->clearContents();
-    config_ds_table_->setRowCount(object_->storedDataSources().size());
+    config_ds_table_->setRowCount(task_.storedDataSources(object_.name()).size());
 
     int row = 0;
     int col = 0;
-    for (auto& ds_it : object_->storedDataSources())
+    for (auto& ds_it : task_.storedDataSources(object_.name()))
     {
         unsigned int id = ds_it.second.id();
 
@@ -417,11 +414,11 @@ void DBOEditDataSourcesWidget::updateDBDSTable ()
 
     db_ds_table_->clearContents();
 
-    db_ds_table_->setRowCount(object_->dataSources().size());
+    db_ds_table_->setRowCount(object_.dataSources().size());
 
     int row = 0;
     int col = 0;
-    for (auto& ds_it : object_->dataSources())
+    for (auto& ds_it : object_.dataSources())
     {
         unsigned int id = ds_it.second.id();
 
@@ -582,9 +579,9 @@ void DBOEditDataSourcesWidget::configItemChanged(QTableWidgetItem *item)
 
     loginf << "DBOEditDataSourcesWidget: configItemChanged: id " << id << " col " << col << " text '" << text << "'";
 
-    assert (object_->hasStoredDataSource(id));
+    assert (task_.hasStoredDataSource(object_.name(), id));
 
-    StoredDBODataSource& ds = object_->storedDataSource (id);
+    StoredDBODataSource& ds = task_.storedDataSource (object_.name(), id);
 
     if (col == 1)
     {
@@ -678,9 +675,9 @@ void DBOEditDataSourcesWidget::dbItemChanged(QTableWidgetItem* item)
 
     loginf << "DBOEditDataSourcesWidget: dbItemChanged: id " << id << " col " << col << " text '" << text << "'";
 
-    assert (object_->hasDataSource(id));
+    assert (object_.hasDataSource(id));
 
-    DBODataSource& ds = object_->getDataSource(id);
+    DBODataSource& ds = object_.getDataSource(id);
 
     if (col == 1)
     {

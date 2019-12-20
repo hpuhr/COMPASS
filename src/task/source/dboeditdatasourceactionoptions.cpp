@@ -20,6 +20,9 @@
 #include "dbodatasource.h"
 #include "storeddbodatasource.h"
 #include "dboeditdatasourceactionoptionswidget.h"
+#include "atsdb.h"
+#include "taskmanager.h"
+#include "managedatasourcestask.h"
 
 DBOEditDataSourceActionOptions::DBOEditDataSourceActionOptions(DBObject& object, const std::string& source_type,
                                                                const std::string& source_id)
@@ -102,19 +105,22 @@ void DBOEditDataSourceActionOptions::perform ()
 namespace DBOEditDataSourceActionOptionsCreator
 {
 
-DBOEditDataSourceActionOptions getSyncOptionsFromDB (DBObject& object, DBODataSource& source)
+DBOEditDataSourceActionOptions getSyncOptionsFromDB (DBObject& object, const DBODataSource& source)
 {
     DBOEditDataSourceActionOptions options {object, "DB", std::to_string(source.id())};
     options.addPossibleAction("Add", "Config", "New");
 
     bool found_equivalent = false;
 
-    for (auto stored_it = object.storedDSBegin(); stored_it != object.storedDSEnd(); ++stored_it)
+    const std::map<unsigned int, StoredDBODataSource>& stored_data_sources =
+            ATSDB::instance().taskManager().manageDataSourcesTask().storedDataSources(object.name());
+
+    for (auto& ds_it : stored_data_sources)
     {
-        if (stored_it->second.sac() == source.sac() && stored_it->second.sic() == source.sic())
+        if (ds_it.second.sac() == source.sac() && ds_it.second.sic() == source.sic())
         {
-            if (stored_it->second != source)
-                options.addPossibleAction("Overwrite", "Config", std::to_string(stored_it->second.id()));
+            if (ds_it.second != source)
+                options.addPossibleAction("Overwrite", "Config", std::to_string(ds_it.second.id()));
             else
                 found_equivalent = true;
         }
@@ -136,7 +142,7 @@ DBOEditDataSourceActionOptions getSyncOptionsFromDB (DBObject& object, DBODataSo
     return options;
 }
 
-DBOEditDataSourceActionOptions getSyncOptionsFromCfg (DBObject& object, StoredDBODataSource& source)
+DBOEditDataSourceActionOptions getSyncOptionsFromCfg (DBObject& object, const StoredDBODataSource& source)
 {
     DBOEditDataSourceActionOptions options {object, "Config", std::to_string(source.id())};
     //options.addPossibleAction("Add", "DB", "New");

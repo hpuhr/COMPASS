@@ -20,7 +20,9 @@
 
 #include <QWidget>
 #include "dbobject.h"
+#include "dboeditdatasourceactionoptions.h"
 
+class ManageDataSourcesTask;
 class DBObject;
 
 class QTableWidget;
@@ -45,14 +47,14 @@ public slots:
     void dbItemChanged(QTableWidgetItem *item);
 
 public:
-    DBOEditDataSourcesWidget(DBObject* object, QWidget* parent=0, Qt::WindowFlags f=0);
+    DBOEditDataSourcesWidget(ManageDataSourcesTask& task, DBObject& object, QWidget* parent=0, Qt::WindowFlags f=0);
     virtual ~DBOEditDataSourcesWidget();
 
     void update ();
 
 private:
-    /// @brief DBObject to be managed
-    DBObject* object_ {nullptr};
+    ManageDataSourcesTask& task_;
+    DBObject& object_;
 
     const QStringList table_columns_ {"ID", "Name", "Short Name", "SAC", "SIC", "Latitude", "Longitude", "Altitude"};
 

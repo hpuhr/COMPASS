@@ -40,10 +40,12 @@ public:
     DBODataSource& operator=(DBODataSource&& other);
 
     // comparison
-    bool operator==(StoredDBODataSource& other);
-    bool operator!=(StoredDBODataSource& other) { return !(*this == other); }
+    bool operator==(const StoredDBODataSource& other) const;
+    bool operator!=(const StoredDBODataSource& other) const { return !(*this == other); }
 
     virtual ~DBODataSource();
+
+    const std::string dboName () const;
 
     unsigned int id() const;
     //void id(unsigned int id);

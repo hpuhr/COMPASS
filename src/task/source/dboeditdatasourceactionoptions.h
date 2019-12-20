@@ -75,10 +75,12 @@ private:
     std::unique_ptr<DBOEditDataSourceActionOptionsWidget> widget_;
 };
 
+using DBOEditDataSourceActionOptionsCollection = typename std::map<unsigned int, DBOEditDataSourceActionOptions>;
+
 namespace DBOEditDataSourceActionOptionsCreator
 {
-    DBOEditDataSourceActionOptions getSyncOptionsFromDB (DBObject& object, DBODataSource& source);
-    DBOEditDataSourceActionOptions getSyncOptionsFromCfg (DBObject& object, StoredDBODataSource& source);
+    DBOEditDataSourceActionOptions getSyncOptionsFromDB (DBObject& object, const DBODataSource& source);
+    DBOEditDataSourceActionOptions getSyncOptionsFromCfg (DBObject& object, const StoredDBODataSource& source);
 }
 
 

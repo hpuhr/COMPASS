@@ -38,13 +38,13 @@
 #include "atsdb.h"
 #include "dbinterface.h"
 #include "jobmanager.h"
+#include "taskmanager.h"
+#include "managedatasourcestask.h"
 #include "dbtableinfo.h"
 #include "dbolabeldefinition.h"
 #include "dbolabeldefinitionwidget.h"
 #include "insertbufferdbjob.h"
 #include "updatebufferdbjob.h"
-#include "dboeditdatasourceswidget.h"
-#include "dboeditdatasourceactionoptionswidget.h"
 #include "stringconv.h"
 
 using namespace Utils;
@@ -126,19 +126,6 @@ void DBObject::generateSubConfigurable (const std::string &class_id, const std::
         assert (!label_definition_);
         label_definition_.reset (new DBOLabelDefinition (class_id, instance_id, this));
     }
-    else if (class_id == "StoredDBODataSource")
-    {
-        unsigned int id = configuration().getSubConfiguration(
-                    class_id, instance_id).getParameterConfigValueUint("id");
-
-        assert (stored_data_sources_.find (id) == stored_data_sources_.end());
-
-        logdbg << "DBObject: generateSubConfigurable: generating stored DS " << instance_id << " with id " << id;
-
-        stored_data_sources_.emplace(std::piecewise_construct,
-                                     std::forward_as_tuple(id),  // args for key
-                                     std::forward_as_tuple(class_id, instance_id, this));  // args for mapped value
-    }
     else
         throw std::runtime_error ("DBObject: generateSubConfigurable: unknown class_id "+class_id );
 }
@@ -204,58 +191,7 @@ bool DBObject::uses (const DBTableColumn& column) const
     return false;
 }
 
-bool DBObject::hasStoredDataSource (unsigned int id) const
-{
-    return stored_data_sources_.find (id) != stored_data_sources_.end();
-}
 
-StoredDBODataSource& DBObject::storedDataSource (unsigned int id)
-{
-    assert (hasStoredDataSource (id));
-    return stored_data_sources_.at(id);
-}
-
-StoredDBODataSource& DBObject::addNewStoredDataSource ()
-{
-    unsigned int id = stored_data_sources_.size() ? stored_data_sources_.rbegin()->first+1 : 0;
-
-    loginf << "DBObject: addNewStoredDataSource: new id " << id;
-
-    assert (!hasStoredDataSource (id));
-
-    Configuration& config = configuration().addNewSubConfiguration("StoredDBODataSource",
-                                                                   "StoredDBODataSource"+std::to_string(id));
-    config.addParameterUnsignedInt ("id", id);
-
-    generateSubConfigurable("StoredDBODataSource", "StoredDBODataSource"+std::to_string(id));
-
-    return storedDataSource(id);
-}
-
-//void DBObject::renameStoredDataSource (const std::string& name, const std::string& new_name)
-//{
-//    loginf << "DBObject: renameStoredDataSource: name " << name << " new_name " << new_name;
-
-//    assert (hasStoredDataSource (name));
-//    assert (!hasStoredDataSource (new_name));
-
-//    stored_data_sources_[new_name] = std::move(stored_data_sources_.at(name));
-
-//    stored_data_sources_.erase(name);
-
-//    assert (hasStoredDataSource (new_name));
-//    stored_data_sources_.at(new_name).name(new_name);
-//}
-
-void DBObject::deleteStoredDataSource (unsigned int id)
-{
-    assert (hasStoredDataSource (id));
-    stored_data_sources_.erase(id);
-    assert (!hasStoredDataSource (id));
-
-    if (edit_ds_widget_)
-        edit_ds_widget_->update();
-}
 
 bool DBObject::hasMetaTable (const std::string& schema) const
 {
@@ -539,6 +475,9 @@ void DBObject::addDataSources (std::map <int, std::pair<int,int>>& sources)
 
     std::shared_ptr<Buffer> buffer_ptr = std::shared_ptr<Buffer> (new Buffer (list, name_));
 
+    ManageDataSourcesTask& ds_task = ATSDB::instance().taskManager().manageDataSourcesTask();
+    const std::map<unsigned int, StoredDBODataSource>&  stored_data_sources = ds_task.storedDataSources(name_);
+
     unsigned int cnt=0;
     int sac, sic;
     bool has_sac_sic;
@@ -557,7 +496,7 @@ void DBObject::addDataSources (std::map <int, std::pair<int,int>>& sources)
             bool stored_found = false;
             unsigned int stored_id {0};
 
-            for (auto& stored_it : stored_data_sources_)
+            for (auto& stored_it : stored_data_sources)
             {
                 if (stored_it.second.sac() == sac && stored_it.second.sic() == sic)
                 {
@@ -569,8 +508,8 @@ void DBObject::addDataSources (std::map <int, std::pair<int,int>>& sources)
 
             if (stored_found)
             {
-                assert (hasStoredDataSource(stored_id));
-                StoredDBODataSource& src = storedDataSource(stored_id);
+                assert (ds_task.hasStoredDataSource(name_, stored_id));
+                StoredDBODataSource& src = ds_task.storedDataSource(name_, stored_id);
 
                 name = src.name();
                 if (src.hasShortName())
@@ -687,33 +626,7 @@ const std::string& DBObject::getNameOfSensor (int id)
     return data_sources_.at(id).name();
 }
 
-DBOEditDataSourceActionOptionsCollection DBObject::getSyncOptionsFromDB ()
-{
-    DBOEditDataSourceActionOptionsCollection options_collection;
 
-    for (auto& ds_it : data_sources_)
-    {
-        assert (ds_it.first >= 0); // todo refactor to uint?
-        unsigned int id = ds_it.first;
-        options_collection [id] = DBOEditDataSourceActionOptionsCreator::getSyncOptionsFromDB (*this, ds_it.second);
-    }
-
-    return options_collection;
-}
-
-DBOEditDataSourceActionOptionsCollection DBObject::getSyncOptionsFromCfg ()
-{
-    DBOEditDataSourceActionOptionsCollection options_collection;
-
-    for (auto& ds_it : stored_data_sources_)
-    {
-        assert (ds_it.first >= 0); // todo refactor to uint?
-        unsigned int id = ds_it.first;
-        options_collection [id] = DBOEditDataSourceActionOptionsCreator::getSyncOptionsFromCfg (*this, ds_it.second);
-    }
-
-    return options_collection;
-}
 
 bool DBObject::hasActiveDataSourcesInfo ()
 {
@@ -777,16 +690,6 @@ DBOLabelDefinitionWidget* DBObject::labelDefinitionWidget()
 {
     assert (label_definition_);
     return label_definition_->widget();
-}
-
-DBOEditDataSourcesWidget* DBObject::editDataSourcesWidget()
-{
-    if (!edit_ds_widget_)
-    {
-        edit_ds_widget_.reset(new DBOEditDataSourcesWidget (this));
-    }
-
-    return edit_ds_widget_.get();
 }
 
 void DBObject::schemaChangedSlot ()

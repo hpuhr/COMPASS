@@ -19,6 +19,9 @@
 #include "dbobject.h"
 #include "logger.h"
 #include "stringconv.h"
+#include "atsdb.h"
+#include "taskmanager.h"
+#include "managedatasourcestask.h"
 
 using namespace Utils;
 
@@ -51,6 +54,10 @@ void DBOEditDataSourceAction::perform (DBObject& object, const std::string& sour
 
     assert (action_ != "None");
 
+    ManageDataSourcesTask& manage_ds_task = ATSDB::instance().taskManager().manageDataSourcesTask();
+
+    std::string dbo_name = object.name();
+
     if (action_ == "Add")
     {
         if (source_type == "DB" && target_type_ == "Config")
@@ -58,7 +65,7 @@ void DBOEditDataSourceAction::perform (DBObject& object, const std::string& sour
             assert (String::isNumber(source_id));
             unsigned int id = std::stoi(source_id);
             assert (object.hasDataSource(id));
-            object.addNewStoredDataSource() = object.getDataSource(id);
+            manage_ds_task.addNewStoredDataSource(dbo_name) = object.getDataSource(id);
         }
         else
             logerr << "DBOEditDataSourceAction: perform: unsupported action Add src " << source_type
@@ -74,21 +81,21 @@ void DBOEditDataSourceAction::perform (DBObject& object, const std::string& sour
 
             assert (String::isNumber(target_id_));
             unsigned int tgt_id = std::stoi(target_id_);
-            assert (object.hasStoredDataSource(tgt_id));
+            assert (manage_ds_task.hasStoredDataSource(dbo_name, tgt_id));
 
-            object.storedDataSource(tgt_id) = object.getDataSource(src_id);
+            manage_ds_task.storedDataSource(object.name(), tgt_id) = object.getDataSource(src_id);
         }
         else if (source_type == "Config" && target_type_ == "DB")
         {
             assert (String::isNumber(source_id));
             unsigned int src_id = std::stoi(source_id);
-            assert (object.hasStoredDataSource(src_id));
+            assert (manage_ds_task.hasStoredDataSource(dbo_name, src_id));
 
             assert (String::isNumber(target_id_));
             unsigned int tgt_id = std::stoi(target_id_);
             assert (object.hasDataSource(tgt_id));
 
-            object.getDataSource(tgt_id) = object.storedDataSource(src_id);
+            object.getDataSource(tgt_id) = manage_ds_task.storedDataSource(dbo_name, src_id);
             object.updateDataSource(tgt_id);
         }
         else

@@ -38,6 +38,7 @@
 #include "postprocesstaskwidget.h"
 #include "mysqldbimporttask.h"
 #include "mysqldbimporttaskwidget.h"
+#include "dboeditdatasourceswidget.h"
 
 #if USE_JASTERIX
 #include "asteriximporttask.h"
@@ -359,3 +360,8 @@ void TaskManager::runTask (const std::string& task_name)
     tasks_.at(task_name)->run();
 }
 
+ManageDataSourcesTask& TaskManager::manageDataSourcesTask ()
+{
+    assert (manage_datasources_task_);
+    return *manage_datasources_task_.get();
+}

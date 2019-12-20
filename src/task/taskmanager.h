@@ -81,6 +81,8 @@ public:
 
     void runTask (const std::string& task_name);
 
+    ManageDataSourcesTask& manageDataSourcesTask ();
+
 protected:
     bool expert_mode_ {false};
 

@@ -25,14 +25,14 @@
 
 #include <QWidget>
 
-class DBObject;
+class ManageDataSourcesTask;
 class DBODataSource;
 //class StoredDBODataSourceWidget;
 
 class StoredDBODataSource : public Configurable
 {
 public:
-    StoredDBODataSource(const std::string& class_id, const std::string& instance_id, DBObject* object);
+    StoredDBODataSource(const std::string& class_id, const std::string& instance_id, ManageDataSourcesTask& task);
     StoredDBODataSource() = default;
     virtual ~StoredDBODataSource ();
 
@@ -42,8 +42,8 @@ public:
     StoredDBODataSource& operator=(StoredDBODataSource&& other);
 
     // comparison
-    bool operator==(DBODataSource& other);
-    bool operator!=(DBODataSource& other) { return !(*this == other); }
+    bool operator==(const DBODataSource& other) const;
+    bool operator!=(const DBODataSource& other) const { return !(*this == other); }
 
     unsigned int id() const;
 
@@ -80,11 +80,14 @@ public:
     void altitude(double altitude);
     double altitude() const;
 
-    DBObject& object () { assert (object_); return *object_; }
+    //DBObject& object () { assert (object_); return *object_; }
+
+    std::string dboName() const;
 
 private:
-    DBObject* object_ {nullptr};
+    //DBObject* object_ {nullptr};
 
+    std::string dbo_name_;
     unsigned int id_{0};
     std::string name_;
     bool has_short_name_ {false};
