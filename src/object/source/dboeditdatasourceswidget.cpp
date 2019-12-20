@@ -27,9 +27,7 @@
 
 #include "dboeditdatasourceswidget.h"
 #include "dbobject.h"
-#include "dbodatasourcewidget.h"
 #include "dboeditdatasourceactionoptionswidget.h"
-#include "storeddbodatasourcewidget.h"
 #include "files.h"
 
 using namespace Utils;

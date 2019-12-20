@@ -45,7 +45,6 @@
 #include "updatebufferdbjob.h"
 #include "dboeditdatasourceswidget.h"
 #include "dboeditdatasourceactionoptionswidget.h"
-#include "storeddbodatasourcewidget.h"
 #include "stringconv.h"
 
 using namespace Utils;
