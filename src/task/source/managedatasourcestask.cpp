@@ -31,6 +31,7 @@ ManageDataSourcesTask::ManageDataSourcesTask(const std::string& class_id, const 
     : Task("ManageDataSourcesTask", "Manage Data Sources", true, false, task_manager),
       Configurable (class_id, instance_id, &task_manager, "task_manage_datasources.json")
 {
+    createSubConfigurables();
 }
 
 TaskWidget* ManageDataSourcesTask::widget ()
@@ -62,7 +63,7 @@ void ManageDataSourcesTask::generateSubConfigurable (const std::string &class_id
 
         assert (stored_data_sources_[dbo_name].find (id) == stored_data_sources_[dbo_name].end());
 
-        logdbg << "ManageDataSourcesTask: generateSubConfigurable: generating stored DS " << instance_id
+        loginf << "ManageDataSourcesTask: generateSubConfigurable: generating stored DS " << instance_id
                << " with object " << dbo_name << " id " << id;
 
         stored_data_sources_[dbo_name].emplace(std::piecewise_construct,
@@ -70,7 +71,8 @@ void ManageDataSourcesTask::generateSubConfigurable (const std::string &class_id
                                                std::forward_as_tuple(class_id, instance_id, *this));
         // args for mapped value
     }
-    throw std::runtime_error ("ManageDataSourcesTask: generateSubConfigurable: unknown class_id "+class_id );
+    else
+        throw std::runtime_error ("ManageDataSourcesTask: generateSubConfigurable: unknown class_id "+class_id );
 }
 
 bool ManageDataSourcesTask::checkPrerequisites ()
@@ -105,12 +107,13 @@ StoredDBODataSource& ManageDataSourcesTask::addNewStoredDataSource (const std::s
 
     assert (!hasStoredDataSource (dbo_name, id));
 
-    Configuration& config = configuration().addNewSubConfiguration("StoredDBODataSource",
-                                                                   "StoredDBODataSource"+std::to_string(id));
+    std::string instance_id = "StoredDBODataSource"+dbo_name+std::to_string(id);
+
+    Configuration& config = configuration().addNewSubConfiguration("StoredDBODataSource", instance_id);
     config.addParameterUnsignedInt ("id", id);
     config.addParameterString ("dbo_name", dbo_name);
 
-    generateSubConfigurable("StoredDBODataSource", "StoredDBODataSource"+std::to_string(id));
+    generateSubConfigurable("StoredDBODataSource", instance_id);
 
     return storedDataSource(dbo_name, id);
 }
