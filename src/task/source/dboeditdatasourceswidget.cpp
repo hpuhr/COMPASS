@@ -144,7 +144,6 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(ManageDataSourcesTask& task, 
 
         QFrame *action_frame = new QFrame ();
         action_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
-        //action_frame->setLineWidth(frame_width_small);
 
         action_heading_label_ = new QLabel (action_heading_.c_str());
         action_heading_label_->setFont (font_bold);
@@ -176,7 +175,14 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(ManageDataSourcesTask& task, 
         updateActionButtons();
         action_frame->setLayout (action_layout);
 
-        main_layout->addWidget(action_frame);
+        QScrollArea *action_scroll = new QScrollArea ();
+        action_scroll->setMaximumWidth(250);
+        action_scroll->setWidgetResizable (true);
+        action_scroll->setWidget(action_frame);
+
+        //sources_layout->addWidget(action_scroll);
+
+        main_layout->addWidget(action_scroll);
     }
 
     update ();
