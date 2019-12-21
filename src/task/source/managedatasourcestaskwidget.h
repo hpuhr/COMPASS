@@ -14,6 +14,10 @@ class ManageDataSourcesTaskWidget : public TaskWidget
 public slots:
     void expertModeChangedSlot ();
 
+    void exportConfigDataSourcesSlot ();
+    void clearConfigDataSourcesSlot ();
+    void importConfigDataSourcesSlot ();
+
 public:
     ManageDataSourcesTaskWidget(ManageDataSourcesTask& task, QWidget *parent=nullptr);
 

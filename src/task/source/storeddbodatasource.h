@@ -80,13 +80,12 @@ public:
     void altitude(double altitude);
     double altitude() const;
 
-    //DBObject& object () { assert (object_); return *object_; }
-
     std::string dboName() const;
 
-private:
-    //DBObject* object_ {nullptr};
+    nlohmann::json getAsJSON ();
+    void setFromJSON (nlohmann::json& j);
 
+private:
     std::string dbo_name_;
     unsigned int id_{0};
     std::string name_;

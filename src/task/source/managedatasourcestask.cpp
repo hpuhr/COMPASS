@@ -25,6 +25,13 @@
 #include "dboeditdatasourceactionoptionswidget.h"
 #include "dbobjectmanager.h"
 #include "dbobject.h"
+#include "json.hpp"
+
+#include <QFileDialog>
+
+#include <fstream>
+
+using namespace nlohmann;
 
 ManageDataSourcesTask::ManageDataSourcesTask(const std::string& class_id, const std::string& instance_id,
                                    TaskManager& task_manager)
@@ -198,4 +205,181 @@ DBOEditDataSourcesWidget* ManageDataSourcesTask::editDataSourcesWidget(const std
     }
 
     return edit_ds_widgets_[dbo_name].get();
+}
+
+void ManageDataSourcesTask::exportConfigDataSources ()
+{
+    loginf << "ManageDataSourcesTask: exportConfigDataSources";
+
+    json j;
+
+    for (auto& dbo_ds_it : stored_data_sources_)
+    {
+        unsigned int cnt = 0;
+
+        for (auto& ds_it : dbo_ds_it.second)
+        {
+            j[dbo_ds_it.first][cnt] = ds_it.second.getAsJSON();
+            ++cnt;
+        }
+    }
+
+    logdbg << "ManageDataSourcesTask: exportConfigDataSources: json '" << j.dump(4) << "'";
+
+    QString filename = QFileDialog::getSaveFileName(nullptr, tr("Save Data Sources as JSON"),
+                                                    "", "*.json");
+
+    if (filename.size() > 0)
+    {
+        loginf << "ManageDataSourcesTask: exportConfigDataSources: saving in filename '"
+               << filename.toStdString() << "'";
+
+        std::ofstream output_file;
+        output_file.open(filename.toStdString(), std::ios_base::out);
+
+        output_file << j.dump(4);
+    }
+    else
+        loginf << "ManageDataSourcesTask: exportConfigDataSources: cancelled";
+}
+
+void ManageDataSourcesTask::clearConfigDataSources ()
+{
+    loginf << "ManageDataSourcesTask: clearConfigDataSources";
+
+    for (auto& dbo_ds_it : stored_data_sources_)
+        dbo_ds_it.second.clear();
+
+    for (auto& edit_it : edit_ds_widgets_)
+        edit_it.second->update();
+}
+
+void ManageDataSourcesTask::importConfigDataSources ()
+{
+    loginf << "ManageDataSourcesTask: importConfigDataSources";
+
+    QString filename = QFileDialog::getOpenFileName(nullptr, "Add Data Sources as JSON", "", "*.json");
+
+    if (filename.size() > 0)
+    {
+        loginf << "ManageDataSourcesTask: importConfigDataSources: importing filename '"
+               << filename.toStdString() << "'";
+
+        std::ifstream input_file (filename.toStdString(), std::ifstream::in);
+
+        try
+        {
+            json j = json::parse(input_file);
+
+            for (auto& j_dbo_it : j.items())
+            {
+                std::string dbo_name = j_dbo_it.key();
+
+                for (auto& j_ds_it : j_dbo_it.value().get<json::array_t>())
+                {
+                    loginf << "ManageDataSourcesTask: importConfigDataSources: found dbo " << dbo_name
+                           << " ds '" << j_ds_it.dump(4) << "'";
+
+                    assert (j_ds_it.contains("dbo_name"));
+                    assert (j_ds_it.contains("name"));
+
+                    if (j_ds_it.contains("sac") && j_ds_it.contains("sic"))
+                    {
+                        unsigned int sac = j_ds_it.at("sac");
+                        unsigned int sic = j_ds_it.at("sic");
+
+                        if (hasDataSource(dbo_name, sac, sic))
+                        {
+                            loginf << "ManageDataSourcesTask: importConfigDataSources: setting existing by sac/sic "
+                                   << sac << "/" << sic;
+                            getDataSource(dbo_name, sac, sic).setFromJSON(j_ds_it);
+                            continue;
+                        }
+                    }
+
+                    std::string name = j_ds_it.at("name");
+
+                    if (hasDataSource(dbo_name, name))
+                    {
+                        loginf << "ManageDataSourcesTask: importConfigDataSources: setting existing by name " << name;
+                        getDataSource(dbo_name, name).setFromJSON(j_ds_it);
+                        continue;
+                    }
+
+                    loginf << "ManageDataSourcesTask: importConfigDataSources: no equivalent found, creating new";
+
+                    StoredDBODataSource& new_ds = addNewStoredDataSource(dbo_name);
+                    new_ds.setFromJSON(j_ds_it);
+                }
+            }
+
+            for (auto& edit_it : edit_ds_widgets_)
+                edit_it.second->update();
+        }
+        catch (json::exception& e)
+        {
+            logerr << "ManageDataSourcesTask: importConfigDataSources: could not load file '"
+                   << filename.toStdString() << "'";
+            throw e;
+        }
+    }
+    else
+        loginf << "ManageDataSourcesTask: importConfigDataSources: cancelled";
+}
+
+bool ManageDataSourcesTask::hasDataSource (const std::string& dbo_name, unsigned int sac, unsigned int sic)
+{
+    if (!stored_data_sources_.count(dbo_name))
+        return false;
+
+    for (auto& ds_it : stored_data_sources_.at(dbo_name))
+    {
+        if (ds_it.second.hasSac() && ds_it.second.sac() == sac
+                && ds_it.second.hasSic() && ds_it.second.sic() == sic)
+            return true;
+    }
+
+    return false;
+}
+
+StoredDBODataSource& ManageDataSourcesTask::getDataSource (const std::string& dbo_name, unsigned int sac,
+                                                           unsigned int sic)
+{
+    assert (hasDataSource(dbo_name, sac, sic));
+
+    for (auto& ds_it : stored_data_sources_.at(dbo_name))
+    {
+        if (ds_it.second.hasSac() && ds_it.second.sac() == sac
+                && ds_it.second.hasSic() && ds_it.second.sic() == sic)
+            return ds_it.second;
+    }
+
+    throw std::runtime_error ("ManageDataSourcesTask: getDataSource: sac/sic not found");
+}
+
+bool ManageDataSourcesTask::hasDataSource (const std::string& dbo_name, const std::string& name)
+{
+    if (!stored_data_sources_.count(dbo_name))
+        return false;
+
+    for (auto& ds_it : stored_data_sources_.at(dbo_name))
+    {
+        if (ds_it.second.name() == name)
+            return true;
+    }
+
+    return false;
+}
+
+StoredDBODataSource& ManageDataSourcesTask::getDataSource (const std::string& dbo_name, const std::string& name)
+{
+    assert (hasDataSource(dbo_name, name));
+
+    for (auto& ds_it : stored_data_sources_.at(dbo_name))
+    {
+        if (ds_it.second.name() == name)
+            return ds_it.second;
+    }
+
+    throw std::runtime_error ("ManageDataSourcesTask: getDataSource: name not found");
 }

@@ -18,8 +18,11 @@
 #include "storeddbodatasource.h"
 #include "dbodatasource.h"
 #include "managedatasourcestask.h"
+#include "json.hpp"
 
 #include "dbobject.h"
+
+using namespace nlohmann;
 
 StoredDBODataSource::StoredDBODataSource(const std::string& class_id, const std::string& instance_id,
                                          ManageDataSourcesTask& task)
@@ -314,4 +317,57 @@ void StoredDBODataSource::removeAltitude()
 {
     has_altitude_ = false;
     altitude_ = 0;
+}
+
+json StoredDBODataSource::getAsJSON ()
+{
+    json j;
+
+    j["dbo_name"] = dbo_name_;
+    j["name"] = name_;
+
+    if (has_short_name_)
+        j["short_name"] = short_name_;
+    if (has_sac_)
+        j["sac"] = sac_;
+    if (has_sic_)
+        j["sic"] = sic_;
+    if (has_latitude_)
+        j["latitude"] = latitude_;
+    if (has_longitude_)
+        j["longitude"] = longitude_;
+    if (has_altitude_)
+        j["altitude"] = altitude_;
+
+    return j;
+}
+
+void StoredDBODataSource::setFromJSON (json& j)
+{
+    dbo_name_ = j.at("dbo_name");
+    name_ = j.at("name");
+
+    has_short_name_ = j.contains("short_name");
+    if (has_short_name_)
+        short_name_ = j.at("short_name");
+
+    has_sac_ = j.contains("sac");
+    if (has_sac_)
+        sac_ = j.at("sac");
+
+    has_sic_ = j.contains("sic");
+    if (has_sic_)
+        sic_ = j.at("sic");
+
+    has_latitude_ = j.contains("latitude");
+    if (has_latitude_)
+        latitude_ = j.at("latitude");
+
+    has_longitude_ = j.contains("longitude");
+    if (has_longitude_)
+        longitude_ = j.at("longitude");
+
+    has_altitude_ = j.contains("altitude");
+    if (has_altitude_)
+        altitude_ = j.at("altitude");
 }

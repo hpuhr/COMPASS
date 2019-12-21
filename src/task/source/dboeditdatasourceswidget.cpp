@@ -42,7 +42,7 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(ManageDataSourcesTask& task, 
     QFont font_bold;
     font_bold.setBold(true);
 
-    int frame_width_small = 1;
+    //int frame_width_small = 1;
 
     QHBoxLayout* main_layout = new QHBoxLayout ();
 
@@ -54,7 +54,7 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(ManageDataSourcesTask& task, 
 
         QFrame *config_frame = new QFrame ();
         config_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
-        config_frame->setLineWidth(frame_width_small);
+        //config_frame->setLineWidth(frame_width_small);
 
         QHBoxLayout* top_layout = new QHBoxLayout();
 
@@ -100,7 +100,7 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(ManageDataSourcesTask& task, 
 
         QFrame *db_frame = new QFrame ();
         db_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
-        db_frame->setLineWidth(frame_width_small);
+        //db_frame->setLineWidth(frame_width_small);
 
         QHBoxLayout* top_layout = new QHBoxLayout();
 
@@ -144,7 +144,7 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(ManageDataSourcesTask& task, 
 
         QFrame *action_frame = new QFrame ();
         action_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
-        action_frame->setLineWidth(frame_width_small);
+        //action_frame->setLineWidth(frame_width_small);
 
         action_heading_label_ = new QLabel (action_heading_.c_str());
         action_heading_label_->setFont (font_bold);

@@ -61,6 +61,14 @@ public:
 
     DBOEditDataSourcesWidget* editDataSourcesWidget(const std::string& dbo_name);
 
+    void exportConfigDataSources ();
+    void clearConfigDataSources ();
+    void importConfigDataSources ();
+
+    bool hasDataSource (const std::string& dbo_name, unsigned int sac, unsigned int sic);
+    StoredDBODataSource& getDataSource (const std::string& dbo_name, unsigned int sac, unsigned int sic);
+    bool hasDataSource (const std::string& dbo_name, const std::string& name);
+    StoredDBODataSource& getDataSource (const std::string& dbo_name, const std::string& name);
 
 protected:
     std::unique_ptr<ManageDataSourcesTaskWidget> widget_;
