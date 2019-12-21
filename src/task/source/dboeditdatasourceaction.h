@@ -35,6 +35,8 @@ public:
 
     void perform (DBObject& object, const std::string& source_type, const std::string& source_id);
 
+    std::string targetType() const;
+
 private:
     std::string action_; // "None", "Add", "Overwrite"
     std::string target_type_; // "Config", "DB"

@@ -27,6 +27,8 @@ ManageDataSourcesTaskWidget::ManageDataSourcesTaskWidget(ManageDataSourcesTask& 
     for (auto& dbo_it : ATSDB::instance().objectManager())
     {
         tab_widget_->addTab(task_.editDataSourcesWidget(dbo_it.first), dbo_it.first.c_str());
+        connect (task_.editDataSourcesWidget(dbo_it.first), &DBOEditDataSourcesWidget::dbItemChangedSignal,
+                 this, &ManageDataSourcesTaskWidget::dbItemChangedSlot);
     }
 
     expertModeChangedSlot();
@@ -77,5 +79,11 @@ void ManageDataSourcesTaskWidget::importConfigDataSourcesSlot ()
 {
     loginf << "ManageDataSourcesTaskWidget: importConfigDataSourcesSlot";
     task_.importConfigDataSources();
+}
+
+void ManageDataSourcesTaskWidget::dbItemChangedSlot ()
+{
+    loginf << "ManageDataSourcesTaskWidget: dbItemChangedSlot";
+    emit task_.statusChangedSignal(task_.name());
 }
 

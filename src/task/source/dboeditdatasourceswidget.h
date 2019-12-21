@@ -33,6 +33,9 @@ class QTableWidgetItem;
 class DBOEditDataSourcesWidget : public QWidget
 {
     Q_OBJECT
+signals:
+    void dbItemChangedSignal ();
+
 public slots:
     void syncOptionsFromDBSlot();
     void addStoredDSSlot ();
@@ -43,8 +46,8 @@ public slots:
     void deselectAllActionsSlot();
     void performActionsSlot();
 
-    void configItemChanged(QTableWidgetItem *item);
-    void dbItemChanged(QTableWidgetItem *item);
+    void configItemChangedSlot(QTableWidgetItem *item);
+    void dbItemChangedSlot(QTableWidgetItem *item);
 
 public:
     DBOEditDataSourcesWidget(ManageDataSourcesTask& task, DBObject& object, QWidget* parent=0, Qt::WindowFlags f=0);

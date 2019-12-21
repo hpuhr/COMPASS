@@ -18,6 +18,8 @@ public slots:
     void clearConfigDataSourcesSlot ();
     void importConfigDataSourcesSlot ();
 
+    void dbItemChangedSlot ();
+
 public:
     ManageDataSourcesTaskWidget(ManageDataSourcesTask& task, QWidget *parent=nullptr);
 

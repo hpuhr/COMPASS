@@ -56,6 +56,8 @@ public:
     unsigned int currentActionId() const;
     void currentActionId(unsigned int current_action_id);
 
+    DBOEditDataSourceAction& currentAction();
+
     DBOEditDataSourceActionOptionsWidget* widget ();
 
     void perform ();

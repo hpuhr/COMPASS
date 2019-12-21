@@ -80,6 +80,11 @@ void DBOEditDataSourceActionOptions::currentActionId(unsigned int current_action
     current_action_id_ = current_action_id;
 }
 
+DBOEditDataSourceAction& DBOEditDataSourceActionOptions::currentAction()
+{
+    return possible_actions_.at(current_action_id_);
+}
+
 DBOEditDataSourceActionOptionsWidget* DBOEditDataSourceActionOptions::widget ()
 {
     if (!widget_)

@@ -80,7 +80,7 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(ManageDataSourcesTask& task, 
         config_ds_table_->setColumnCount(table_columns_.size());
         config_ds_table_->setHorizontalHeaderLabels(table_columns_);
         config_ds_table_->verticalHeader()->setVisible(false);
-        connect (config_ds_table_, &QTableWidget::itemChanged, this, &DBOEditDataSourcesWidget::configItemChanged);
+        connect (config_ds_table_, &QTableWidget::itemChanged, this, &DBOEditDataSourcesWidget::configItemChangedSlot);
         // update done later
 
         config_layout->addWidget(config_ds_table_);
@@ -122,7 +122,7 @@ DBOEditDataSourcesWidget::DBOEditDataSourcesWidget(ManageDataSourcesTask& task, 
         db_ds_table_->setColumnCount(table_columns_.size());
         db_ds_table_->setHorizontalHeaderLabels(table_columns_);
         db_ds_table_->verticalHeader()->setVisible(false);
-        connect (db_ds_table_, &QTableWidget::itemChanged, this, &DBOEditDataSourcesWidget::dbItemChanged);
+        connect (db_ds_table_, &QTableWidget::itemChanged, this, &DBOEditDataSourcesWidget::dbItemChangedSlot);
         // update done later
 
         db_layout->addWidget(db_ds_table_);
@@ -260,14 +260,26 @@ void DBOEditDataSourcesWidget::performActionsSlot()
 {
     loginf << "DBOEditDataSourcesWidget: performActionsSlot";
 
+    bool db_action_performed = false;
+
     for (auto& opt_it : action_collection_)
+    {
         if (opt_it.second.performFlag())
+        {
             opt_it.second.perform();
+
+            if (opt_it.second.currentAction().targetType() == "DB")
+                db_action_performed = true;
+        }
+    }
 
     clearSyncOptions();
     displaySyncOptions();
 
     update();
+
+    if (db_action_performed)
+        emit dbItemChangedSignal();
 }
 
 void DBOEditDataSourcesWidget::updateConfigDSTable ()
@@ -565,7 +577,7 @@ void DBOEditDataSourcesWidget::updateColumnSizes ()
 }
 
 
-void DBOEditDataSourcesWidget::configItemChanged(QTableWidgetItem *item)
+void DBOEditDataSourcesWidget::configItemChangedSlot(QTableWidgetItem *item)
 {
     assert (item);
     assert (config_ds_table_);
@@ -661,7 +673,7 @@ void DBOEditDataSourcesWidget::configItemChanged(QTableWidgetItem *item)
     update();
 }
 
-void DBOEditDataSourcesWidget::dbItemChanged(QTableWidgetItem* item)
+void DBOEditDataSourcesWidget::dbItemChangedSlot(QTableWidgetItem* item)
 {
     assert (item);
     assert (db_ds_table_);
@@ -790,6 +802,7 @@ void DBOEditDataSourcesWidget::dbItemChanged(QTableWidgetItem* item)
         assert (false); // impossible
 
     update();
+    emit dbItemChangedSignal();
 }
 
 void DBOEditDataSourcesWidget::clearSyncOptions()

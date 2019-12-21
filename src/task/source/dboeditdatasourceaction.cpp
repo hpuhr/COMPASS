@@ -104,10 +104,15 @@ void DBOEditDataSourceAction::perform (DBObject& object, const std::string& sour
     }
 }
 
+std::string DBOEditDataSourceAction::targetType() const
+{
+    return target_type_;
+}
+
 void DBOEditDataSourceAction::refreshActionString ()
 {
     action_str_ = action_;
-
+    
     if (action_ != "None")
     {
         if (action_ == "Add")

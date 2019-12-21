@@ -92,6 +92,21 @@ bool ManageDataSourcesTask::checkPrerequisites ()
 
 bool ManageDataSourcesTask::isRecommended ()
 {
+    for (auto& dbo_it : ATSDB::instance().objectManager())
+    {
+        for (auto& ds_it : dbo_it.second->dataSources())
+        {
+            if (ds_it.second.name() == std::to_string(ds_it.second.id())) // check if name is not set
+                return true;
+
+            if (dbo_it.first == "Radar")
+            {
+                if (!ds_it.second.hasLatitude() || !ds_it.second.hasLongitude() || !ds_it.second.hasAltitude())
+                    return true;
+            }
+        }
+    }
+
     return false;
 }
 
@@ -252,6 +267,8 @@ void ManageDataSourcesTask::clearConfigDataSources ()
 
     for (auto& edit_it : edit_ds_widgets_)
         edit_it.second->update();
+
+    emit statusChangedSignal(name_);
 }
 
 void ManageDataSourcesTask::importConfigDataSources ()
