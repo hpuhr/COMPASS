@@ -19,6 +19,7 @@
 #define TASKMANAGERWIDGET_H
 
 #include <QWidget>
+#include <cassert>
 
 class QListWidget;
 class QListWidgetItem;
