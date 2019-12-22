@@ -26,7 +26,7 @@
 #include "dboeditdatasourceactionoptions.h"
 
 class DBObject;
-class DBODataSourceWidget;
+//class DBODataSourceWidget;
 class QGridLayout;
 
 class DBODataSource
@@ -40,10 +40,12 @@ public:
     DBODataSource& operator=(DBODataSource&& other);
 
     // comparison
-    bool operator==(StoredDBODataSource& other);
-    bool operator!=(StoredDBODataSource& other) { return !(*this == other); }
+    bool operator==(const StoredDBODataSource& other) const;
+    bool operator!=(const StoredDBODataSource& other) const { return !(*this == other); }
 
     virtual ~DBODataSource();
+
+    const std::string dboName () const;
 
     unsigned int id() const;
     //void id(unsigned int id);
@@ -52,30 +54,34 @@ public:
     void name(const std::string &name);
 
     bool hasShortName() const;
+    void removeShortName();
     void shortName(const std::string &short_name);
     const std::string &shortName() const;
 
     bool hasSac() const;
+    void removeSac();
     void sac(unsigned char sac);
     unsigned char sac() const;
 
     bool hasSic() const;
+    void removeSic();
     void sic(unsigned char sic);
     unsigned char sic() const;
 
     bool hasLatitude() const;
+    void removeLatitude();
     void latitude(double latitiude);
     double latitude() const;
 
     bool hasLongitude() const;
+    void removeLongitude();
     void longitude(double longitude_);
     double longitude() const;
 
     bool hasAltitude() const;
+    void removeAltitude();
     void altitude(double altitude);
     double altitude() const;
-
-    DBODataSourceWidget* widget (bool add_headers=false, QWidget* parent=0, Qt::WindowFlags f=0);
 
     void finalize ();
 
@@ -116,8 +122,6 @@ protected:
 
     bool has_altitude_ {false};
     double altitude_ {0};  // meter above msl
-
-    std::unique_ptr<DBODataSourceWidget> widget_;
 
     bool finalized_ {false};
 

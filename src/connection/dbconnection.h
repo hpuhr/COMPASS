@@ -100,6 +100,7 @@ public:
   /// @brief Return the DBConnectionInfo defining the database system and parameters
 
   virtual QWidget *widget ()=0;
+  //virtual void deleteWidget ()=0;
   virtual QWidget *infoWidget ()=0;
 
   virtual std::string status () const=0;

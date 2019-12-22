@@ -21,7 +21,7 @@
 #include "job.h"
 #include "json.hpp"
 
-class ASTERIXImporterTask;
+class ASTERIXImportTask;
 
 class ASTERIXDecodeJob : public Job
 {
@@ -30,7 +30,7 @@ signals:
     void decodedASTERIXSignal ();
 
 public:
-    ASTERIXDecodeJob(ASTERIXImporterTask& task, const std::string& filename, const std::string& framing, bool test);
+    ASTERIXDecodeJob(ASTERIXImportTask& task, const std::string& filename, const std::string& framing, bool test);
     virtual ~ASTERIXDecodeJob();
 
     virtual void run ();
@@ -52,7 +52,7 @@ public:
     std::unique_ptr<std::vector<nlohmann::json>>& extractedRecords();
 
 private:
-    ASTERIXImporterTask& task_;
+    ASTERIXImportTask& task_;
     std::string filename_;
     std::string framing_;
     bool test_ {false};

@@ -23,7 +23,7 @@
 
 #include <jasterix/jasterix.h>
 
-class ASTERIXImporterTask;
+class ASTERIXImportTask;
 
 class QVBoxLayout;
 class QGridLayout;
@@ -56,11 +56,11 @@ public slots:
     void updateSlot();
 
 public:
-    ASTERIXConfigWidget(ASTERIXImporterTask& task, QWidget* parent=nullptr);
+    ASTERIXConfigWidget(ASTERIXImportTask& task, QWidget* parent=nullptr);
     virtual ~ASTERIXConfigWidget();
 
 protected:
-    ASTERIXImporterTask& task_;
+    ASTERIXImportTask& task_;
 
     QVBoxLayout* main_layout_ {nullptr};
     QGridLayout* categories_grid_ {nullptr};

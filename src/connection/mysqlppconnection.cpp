@@ -33,12 +33,6 @@
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
-#include <archive.h>
-#include <archive_entry.h>
-
-#include <iostream>
-#include <fstream>
-
 #include <QMessageBox>
 #include <QProgressDialog>
 #include <QMessageBox>
@@ -138,6 +132,8 @@ void MySQLppConnection::openDatabase (const std::string &database_name)
 
 void MySQLppConnection::disconnect()
 {
+    logdbg << "MySQLppConnection: disconnect";
+
     connection_.disconnect();
     connection_ready_ = false;
 
@@ -148,16 +144,10 @@ void MySQLppConnection::disconnect()
     connected_server_ = nullptr;
 
     if (widget_)
-    {
-        delete widget_;
         widget_ = nullptr;
-    }
 
     if (info_widget_)
-    {
-        delete info_widget_;
         info_widget_ = nullptr;
-    }
 }
 
 void MySQLppConnection::executeSQL(const std::string &sql)
@@ -756,26 +746,30 @@ void MySQLppConnection::performanceTest ()
     loginf  << "MySQLppConnection: performanceTest: end after load time " << load_time << "s rows " << rows << " " << rows/load_time << " r/s";
 }
 
-QWidget *MySQLppConnection::widget ()
+QWidget* MySQLppConnection::widget ()
 {
     if (!widget_)
-    {
-        widget_ = new MySQLppConnectionWidget(*this);
-    }
+        widget_.reset(new MySQLppConnectionWidget(*this));
 
     assert (widget_);
-    return widget_;
+    return widget_.get();
 }
+
+//void MySQLppConnection::deleteWidget ()
+//{
+//    for (auto& server_it : servers_)
+//        server_it.second->deleteWidget();
+
+//    widget_ = nullptr;
+//}
 
 QWidget *MySQLppConnection::infoWidget ()
 {
     if (!info_widget_)
-    {
-        info_widget_ = new MySQLppConnectionInfoWidget(*this);
-    }
+        info_widget_.reset(new MySQLppConnectionInfoWidget(*this));
 
     assert (info_widget_);
-    return info_widget_;
+    return info_widget_.get();
 }
 
 std::string MySQLppConnection::status () const
@@ -832,298 +826,298 @@ void MySQLppConnection::generateSubConfigurable (const std::string &class_id, co
         throw std::runtime_error ("MySQLppConnection: generateSubConfigurable: unknown class_id "+class_id );
 }
 
-void MySQLppConnection::importSQLFile (const std::string& filename)
-{
-    loginf  << "MySQLppConnection: importSQLFile: importing " << filename;
-    assert (Files::fileExists(filename));
-
-    QProgressDialog* progress_dialog = new QProgressDialog (tr("Importing SQL File"), tr(""), 0, 100);
-    progress_dialog->setCancelButton(0);
-    progress_dialog->setModal(true);
-    progress_dialog->setWindowModality(Qt::ApplicationModal);
-    progress_dialog->show();
-
-    for (unsigned int cnt=0; cnt < 10; cnt++)
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-    std::ifstream is;
-    is.open (filename.c_str(), std::ios::binary );
-    is.seekg (0, std::ios::end);
-    size_t file_byte_size = is.tellg();
-    is.close();
-    assert (file_byte_size);
-    loginf  << "MySQLppConnection: importSQLFile: file_byte_size: " << file_byte_size;
-
-    for (unsigned int cnt=0; cnt < 10; cnt++)
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-    std::ifstream sql_file (filename);
-    assert (sql_file.is_open());
-
-    std::string line;
-    std::stringstream ss;
-    size_t line_cnt = 0;
-    size_t byte_cnt = 0;
-    size_t error_cnt = 0;
-
-    while (getline (sql_file,line))
-    {
-        try
-        {
-            byte_cnt += line.size();
-
-            if (line.find ("delimiter") != std::string::npos || line.find ("DELIMITER") != std::string::npos
-                    || line.find ("VIEW") != std::string::npos)
-            {
-                loginf << "MySQLppConnection: importSQLFile: breaking at delimiter, bytes " << byte_cnt;
-                break;
-            }
-
-            ss << line << '\n';
-
-            if (line.back() == ';')
-            {
-                //                loginf << "MySQLppConnection: importSQLFile: line cnt " << line_cnt << " of " << line_count
-                //                       << " strlen " << ss.str().size() << "'";
-
-                if (ss.str().size())
-                    executeSQL (ss.str());
-
-                ss.str("");
-            }
-
-            if (line_cnt % 10 == 0)
-            {
-                progress_dialog->setValue(100*byte_cnt/file_byte_size);
-                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-            }
-
-            line_cnt ++;
-        }
-        catch (std::exception& e)
-        {
-            logwrn << "MySQLppConnection: importSQLFile: sql error '" << e.what() << "'";
-            ss.str("");
-            error_cnt++;
-
-            if (error_cnt > 3)
-            {
-                logwrn << "MySQLppConnection: importSQLFile: quit after too many errors";
-
-                QMessageBox m_warning (QMessageBox::Warning, "MySQL Text Import Failed",
-                                       "Quit after too many SQL errors. Please make sure that"
-                                       " the SQL file is correct.",
-                                       QMessageBox::Ok);
-                m_warning.exec();
-
-                break;
-            }
-        }
-
-    }
-    delete progress_dialog;
-    progress_dialog = nullptr;
-
-    QMessageBox msgBox;
-    std::string msg;
-    if (error_cnt)
-        msg = "The SQL file was imported with "+std::to_string(error_cnt)+" SQL errors.";
-    else
-        msg = "The SQL file was imported without SQL errors.";
-
-    msgBox.setText(msg.c_str());
-    msgBox.exec();
+//void MySQLppConnection::importSQLFile (const std::string& filename)
+//{
+//    loginf  << "MySQLppConnection: importSQLFile: importing " << filename;
+//    assert (Files::fileExists(filename));
+
+//    QProgressDialog* progress_dialog = new QProgressDialog (tr("Importing SQL File"), tr(""), 0, 100);
+//    progress_dialog->setCancelButton(0);
+//    progress_dialog->setModal(true);
+//    progress_dialog->setWindowModality(Qt::ApplicationModal);
+//    progress_dialog->show();
+
+//    for (unsigned int cnt=0; cnt < 10; cnt++)
+//        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+//    std::ifstream is;
+//    is.open (filename.c_str(), std::ios::binary );
+//    is.seekg (0, std::ios::end);
+//    size_t file_byte_size = is.tellg();
+//    is.close();
+//    assert (file_byte_size);
+//    loginf  << "MySQLppConnection: importSQLFile: file_byte_size: " << file_byte_size;
+
+//    for (unsigned int cnt=0; cnt < 10; cnt++)
+//        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+//    std::ifstream sql_file (filename);
+//    assert (sql_file.is_open());
+
+//    std::string line;
+//    std::stringstream ss;
+//    size_t line_cnt = 0;
+//    size_t byte_cnt = 0;
+//    size_t error_cnt = 0;
+
+//    while (getline (sql_file,line))
+//    {
+//        try
+//        {
+//            byte_cnt += line.size();
+
+//            if (line.find ("delimiter") != std::string::npos || line.find ("DELIMITER") != std::string::npos
+//                    || line.find ("VIEW") != std::string::npos)
+//            {
+//                loginf << "MySQLppConnection: importSQLFile: breaking at delimiter, bytes " << byte_cnt;
+//                break;
+//            }
+
+//            ss << line << '\n';
+
+//            if (line.back() == ';')
+//            {
+//                //                loginf << "MySQLppConnection: importSQLFile: line cnt " << line_cnt << " of " << line_count
+//                //                       << " strlen " << ss.str().size() << "'";
+
+//                if (ss.str().size())
+//                    executeSQL (ss.str());
+
+//                ss.str("");
+//            }
+
+//            if (line_cnt % 10 == 0)
+//            {
+//                progress_dialog->setValue(100*byte_cnt/file_byte_size);
+//                QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+//            }
+
+//            line_cnt ++;
+//        }
+//        catch (std::exception& e)
+//        {
+//            logwrn << "MySQLppConnection: importSQLFile: sql error '" << e.what() << "'";
+//            ss.str("");
+//            error_cnt++;
+
+//            if (error_cnt > 3)
+//            {
+//                logwrn << "MySQLppConnection: importSQLFile: quit after too many errors";
+
+//                QMessageBox m_warning (QMessageBox::Warning, "MySQL Text Import Failed",
+//                                       "Quit after too many SQL errors. Please make sure that"
+//                                       " the SQL file is correct.",
+//                                       QMessageBox::Ok);
+//                m_warning.exec();
+
+//                break;
+//            }
+//        }
+
+//    }
+//    delete progress_dialog;
+//    progress_dialog = nullptr;
+
+//    QMessageBox msgBox;
+//    std::string msg;
+//    if (error_cnt)
+//        msg = "The SQL file was imported with "+std::to_string(error_cnt)+" SQL errors.";
+//    else
+//        msg = "The SQL file was imported without SQL errors.";
+
+//    msgBox.setText(msg.c_str());
+//    msgBox.exec();
 
-    sql_file.close();
-    interface_.databaseContentChanged();
-}
+//    sql_file.close();
+//    interface_.databaseContentChanged();
+//}
 
-void MySQLppConnection::importSQLArchiveFile(const std::string& filename)
-{
-    loginf  << "MySQLppConnection: importSQLArchiveFile: importing " << filename;
-    assert (Files::fileExists(filename));
+//void MySQLppConnection::importSQLArchiveFile(const std::string& filename)
+//{
+//    loginf  << "MySQLppConnection: importSQLArchiveFile: importing " << filename;
+//    assert (Files::fileExists(filename));
 
-    // if gz but not tar.gz or tgz
-    bool raw = String::hasEnding (filename, ".gz") && !String::hasEnding (filename, ".tar.gz");
+//    // if gz but not tar.gz or tgz
+//    bool raw = String::hasEnding (filename, ".gz") && !String::hasEnding (filename, ".tar.gz");
 
-    loginf  << "MySQLppConnection: importSQLArchiveFile: importing " << filename << " raw " << raw;
+//    loginf  << "MySQLppConnection: importSQLArchiveFile: importing " << filename << " raw " << raw;
 
-    struct archive *a;
-    struct archive_entry *entry;
-    int r;
+//    struct archive *a;
+//    struct archive_entry *entry;
+//    int r;
 
-    a = archive_read_new();
+//    a = archive_read_new();
 
-    if (raw)
-    {
-        archive_read_support_filter_gzip(a);
-        archive_read_support_filter_bzip2(a);
-        archive_read_support_format_raw(a);
-    }
-    else
-    {
-        archive_read_support_filter_all(a);
-        archive_read_support_format_all(a);
+//    if (raw)
+//    {
+//        archive_read_support_filter_gzip(a);
+//        archive_read_support_filter_bzip2(a);
+//        archive_read_support_format_raw(a);
+//    }
+//    else
+//    {
+//        archive_read_support_filter_all(a);
+//        archive_read_support_format_all(a);
 
-    }
-    r = archive_read_open_filename(a, filename.c_str(), 10240); // Note 1
+//    }
+//    r = archive_read_open_filename(a, filename.c_str(), 10240); // Note 1
 
-    if (r != ARCHIVE_OK)
-        throw std::runtime_error("MySQLppConnection: importSQLArchiveFile: archive error: "
-                                 +std::string(archive_error_string(a)));
-
-    const void *buff;
-    size_t size;
-    int64_t offset;
-
-    size_t line_cnt = 0;
-    size_t error_cnt = 0;
-    size_t byte_cnt = 0;
-
-    QMessageBox msg_box;
-    std::string msg = "Importing archive '"+filename+"'.";
-    msg_box.setText(msg.c_str());
-    msg_box.setStandardButtons(QMessageBox::NoButton);
-    msg_box.show();
-
-    for (unsigned int cnt=0; cnt < 10; cnt++)
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-    while (archive_read_next_header(a, &entry) == ARCHIVE_OK)
-    {
-        loginf << "Archive file found: " << archive_entry_pathname(entry) << " size " << archive_entry_size(entry);
-
-        msg_box.setInformativeText(archive_entry_pathname(entry));
-
-        bool done=false;
-
-        std::stringstream ss;
-
-        for (;;)
-        {
-            r = archive_read_data_block(a, &buff, &size, &offset);
-
-            if (r == ARCHIVE_EOF)
-                break;
-            if (r != ARCHIVE_OK)
-                throw std::runtime_error("MySQLppConnection: importSQLArchiveFile: archive error: "
-                                         +std::string(archive_error_string(a)));
-
-            std::string str (reinterpret_cast<char const*>(buff), size);
-
-            //loginf << "UGA read offset " << offset << " size " << size;
-
-            std::vector<std::string> lines = String::split(str, '\n');
-            std::string line;
-
-            //loginf << "UGA read str has " << lines.size() << " lines";
-
-            for (std::vector<std::string>::iterator line_it = lines.begin(); line_it != lines.end(); line_it++)
-            {
-                if (line_it + 1 == lines.end() )
-                {
-                    //loginf << "last one";
-                    ss << *line_it;
-                    break;
-                }
-
-                try
-                {
-                    ss << *line_it << '\n';
-
-                    line = ss.str();
-
-                    byte_cnt += line.size();
-
-                    if (line.find ("delimiter") != std::string::npos || line.find ("DELIMITER") != std::string::npos
-                            || line.find ("VIEW") != std::string::npos)
-                    {
-                        loginf << "MySQLppConnection: importSQLArchiveFile: breaking at delimiter, bytes " << byte_cnt;
-                        done = true;
-                        break;
-                    }
-
-                    if (line_it->back() == ';')
-                    {
-                        //                        loginf << "MySQLppConnection: importSQLArchiveFile: line cnt " << line_cnt
-                        //                               <<  " strlen " << ss.str().size() << "'";
-
-                        if (line.size())
-                            executeSQL (line+"\n");
-
-                        ss.str("");
-                    }
-
-                    if (line_cnt % 10 == 0)
-                    {
-                        logdbg << "MySQLppConnection: importSQLArchiveFile: line cnt " << line_cnt;
-                        msg = "Read " + std::to_string(line_cnt) + " lines from "
-                                + std::string(archive_entry_pathname(entry)) + " archive entry.";
-
-                        msg_box.setInformativeText(msg.c_str());
-                        msg_box.show();
-                        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-                        //                        progress_dialog->setValue(100*byte_cnt/file_byte_size);
-                        //                        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-                    }
-
-                    line_cnt ++;
-                }
-                catch (std::exception& e)
-                {
-                    logwrn << "MySQLppConnection: importSQLArchiveFile: sql error '" << e.what() << "'";
-                    ss.str("");
-                    error_cnt++;
-
-                    if (error_cnt > 3)
-                    {
-                        logwrn << "MySQLppConnection: importSQLArchiveFile: quit after too many errors";
-
-                        QMessageBox m_warning (QMessageBox::Warning, "MySQL Archive Import Failed",
-                                               "Quit after too many SQL errors. Please make sure that"
-                                               " the archive is correct as specified in the user manual.",
-                                               QMessageBox::Ok);
-                        m_warning.exec();
-                        done=true;
-                        break;
-                    }
-                }
-            }
-
-            if (done)
-                break;
-        }
-
-        if (done)
-            break;
-
-        loginf << "MySQLppConnection: importSQLArchiveFile: archive file " << archive_entry_pathname(entry) << " imported";
-    }
-
-    msg_box.close();
-
-    QMessageBox msgBox;
-    if (error_cnt)
-        msg = "The SQL archive file was imported with "+std::to_string(error_cnt)+" SQL errors.";
-    else
-        msg = "The SQL archive file was imported without SQL errors.";
-
-    msgBox.setText(msg.c_str());
-    msgBox.exec();
-
-    r = archive_read_close(a);
-    if (r != ARCHIVE_OK)
-        throw std::runtime_error("MySQLppConnection: importSQLArchiveFile: archive read close error: "
-                                 +std::string(archive_error_string(a)));
-
-    r = archive_read_free(a);
-
-    if (r != ARCHIVE_OK)
-        throw std::runtime_error("MySQLppConnection: importSQLArchiveFile: archive read free error: "
-                                 +std::string(archive_error_string(a)));
-
-    interface_.databaseContentChanged();
-}
+//    if (r != ARCHIVE_OK)
+//        throw std::runtime_error("MySQLppConnection: importSQLArchiveFile: archive error: "
+//                                 +std::string(archive_error_string(a)));
+
+//    const void *buff;
+//    size_t size;
+//    int64_t offset;
+
+//    size_t line_cnt = 0;
+//    size_t error_cnt = 0;
+//    size_t byte_cnt = 0;
+
+//    QMessageBox msg_box;
+//    std::string msg = "Importing archive '"+filename+"'.";
+//    msg_box.setText(msg.c_str());
+//    msg_box.setStandardButtons(QMessageBox::NoButton);
+//    msg_box.show();
+
+//    for (unsigned int cnt=0; cnt < 10; cnt++)
+//        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+//    while (archive_read_next_header(a, &entry) == ARCHIVE_OK)
+//    {
+//        loginf << "Archive file found: " << archive_entry_pathname(entry) << " size " << archive_entry_size(entry);
+
+//        msg_box.setInformativeText(archive_entry_pathname(entry));
+
+//        bool done=false;
+
+//        std::stringstream ss;
+
+//        for (;;)
+//        {
+//            r = archive_read_data_block(a, &buff, &size, &offset);
+
+//            if (r == ARCHIVE_EOF)
+//                break;
+//            if (r != ARCHIVE_OK)
+//                throw std::runtime_error("MySQLppConnection: importSQLArchiveFile: archive error: "
+//                                         +std::string(archive_error_string(a)));
+
+//            std::string str (reinterpret_cast<char const*>(buff), size);
+
+//            //loginf << "UGA read offset " << offset << " size " << size;
+
+//            std::vector<std::string> lines = String::split(str, '\n');
+//            std::string line;
+
+//            //loginf << "UGA read str has " << lines.size() << " lines";
+
+//            for (std::vector<std::string>::iterator line_it = lines.begin(); line_it != lines.end(); line_it++)
+//            {
+//                if (line_it + 1 == lines.end() )
+//                {
+//                    //loginf << "last one";
+//                    ss << *line_it;
+//                    break;
+//                }
+
+//                try
+//                {
+//                    ss << *line_it << '\n';
+
+//                    line = ss.str();
+
+//                    byte_cnt += line.size();
+
+//                    if (line.find ("delimiter") != std::string::npos || line.find ("DELIMITER") != std::string::npos
+//                            || line.find ("VIEW") != std::string::npos)
+//                    {
+//                        loginf << "MySQLppConnection: importSQLArchiveFile: breaking at delimiter, bytes " << byte_cnt;
+//                        done = true;
+//                        break;
+//                    }
+
+//                    if (line_it->back() == ';')
+//                    {
+//                        //                        loginf << "MySQLppConnection: importSQLArchiveFile: line cnt " << line_cnt
+//                        //                               <<  " strlen " << ss.str().size() << "'";
+
+//                        if (line.size())
+//                            executeSQL (line+"\n");
+
+//                        ss.str("");
+//                    }
+
+//                    if (line_cnt % 10 == 0)
+//                    {
+//                        logdbg << "MySQLppConnection: importSQLArchiveFile: line cnt " << line_cnt;
+//                        msg = "Read " + std::to_string(line_cnt) + " lines from "
+//                                + std::string(archive_entry_pathname(entry)) + " archive entry.";
+
+//                        msg_box.setInformativeText(msg.c_str());
+//                        msg_box.show();
+//                        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+//                        //                        progress_dialog->setValue(100*byte_cnt/file_byte_size);
+//                        //                        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+//                    }
+
+//                    line_cnt ++;
+//                }
+//                catch (std::exception& e)
+//                {
+//                    logwrn << "MySQLppConnection: importSQLArchiveFile: sql error '" << e.what() << "'";
+//                    ss.str("");
+//                    error_cnt++;
+
+//                    if (error_cnt > 3)
+//                    {
+//                        logwrn << "MySQLppConnection: importSQLArchiveFile: quit after too many errors";
+
+//                        QMessageBox m_warning (QMessageBox::Warning, "MySQL Archive Import Failed",
+//                                               "Quit after too many SQL errors. Please make sure that"
+//                                               " the archive is correct as specified in the user manual.",
+//                                               QMessageBox::Ok);
+//                        m_warning.exec();
+//                        done=true;
+//                        break;
+//                    }
+//                }
+//            }
+
+//            if (done)
+//                break;
+//        }
+
+//        if (done)
+//            break;
+
+//        loginf << "MySQLppConnection: importSQLArchiveFile: archive file " << archive_entry_pathname(entry) << " imported";
+//    }
+
+//    msg_box.close();
+
+//    QMessageBox msgBox;
+//    if (error_cnt)
+//        msg = "The SQL archive file was imported with "+std::to_string(error_cnt)+" SQL errors.";
+//    else
+//        msg = "The SQL archive file was imported without SQL errors.";
+
+//    msgBox.setText(msg.c_str());
+//    msgBox.exec();
+
+//    r = archive_read_close(a);
+//    if (r != ARCHIVE_OK)
+//        throw std::runtime_error("MySQLppConnection: importSQLArchiveFile: archive read close error: "
+//                                 +std::string(archive_error_string(a)));
+
+//    r = archive_read_free(a);
+
+//    if (r != ARCHIVE_OK)
+//        throw std::runtime_error("MySQLppConnection: importSQLArchiveFile: archive read free error: "
+//                                 +std::string(archive_error_string(a)));
+
+//    interface_.databaseContentChanged();
+//}
 
 //DBResult *MySQLppConnection::readBulkCommand (DBCommand *command, std::string main_statement,
 //std::string order_statement, unsigned int max_results)

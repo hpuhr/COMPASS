@@ -47,10 +47,11 @@ using namespace Utils;
 DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager &object_manager)
     : object_manager_(object_manager), schema_manager_(ATSDB::instance().schemaManager())
 {
-    unsigned int frame_width = FRAME_SIZE;
+    //unsigned int frame_width = FRAME_SIZE;
+    setContentsMargins(0, 0, 0, 0);
 
-    setFrameStyle(QFrame::Panel | QFrame::Raised);
-    setLineWidth(frame_width);
+//    setFrameStyle(QFrame::Panel | QFrame::Raised);
+//    setLineWidth(frame_width);
 
     QFont font_bold;
     font_bold.setBold(true);
@@ -110,7 +111,7 @@ DBObjectManagerWidget::DBObjectManagerWidget(DBObjectManager &object_manager)
 
     setLayout (main_layout);
 
-    lock();
+    //lock();
 }
 
 DBObjectManagerWidget::~DBObjectManagerWidget()
@@ -120,42 +121,42 @@ DBObjectManagerWidget::~DBObjectManagerWidget()
     edit_dbo_widgets_.clear();
 }
 
-void DBObjectManagerWidget::lock ()
-{
-//    for (auto it : edit_dbo_buttons_)
+//void DBObjectManagerWidget::lock ()
+//{
+////    for (auto it : edit_dbo_buttons_)
+////        it.first->setDisabled (true);
+
+//    for (auto it : delete_dbo_buttons_)
 //        it.first->setDisabled (true);
 
-    for (auto it : delete_dbo_buttons_)
-        it.first->setDisabled (true);
+//    add_dbo_button_->setDisabled (true);
 
-    add_dbo_button_->setDisabled (true);
+//    for (auto it : delete_meta_buttons_)
+//        it.first->setDisabled (true);
 
-    for (auto it : delete_meta_buttons_)
-        it.first->setDisabled (true);
+//    add_metavar_button_->setDisabled (true);
+//}
 
-    add_metavar_button_->setDisabled (true);
-}
+//void DBObjectManagerWidget::unlock ()
+//{
+////    for (auto it : edit_dbo_buttons_)
+////        it.first->setDisabled (!it.second->hasCurrentMetaTable());
 
-void DBObjectManagerWidget::unlock ()
-{
-//    for (auto it : edit_dbo_buttons_)
-//        it.first->setDisabled (!it.second->hasCurrentMetaTable());
+//    for (auto it : delete_dbo_buttons_)
+//        it.first->setDisabled (false);
 
-    for (auto it : delete_dbo_buttons_)
-        it.first->setDisabled (false);
+//    add_dbo_button_->setDisabled (false);
 
-    add_dbo_button_->setDisabled (false);
+//    for (auto it : delete_meta_buttons_)
+//        it.first->setDisabled (false);
 
-    for (auto it : delete_meta_buttons_)
-        it.first->setDisabled (false);
+//    add_metavar_button_->setDisabled (false);
+//}
 
-    add_metavar_button_->setDisabled (false);
-}
-
-void DBObjectManagerWidget::databaseOpenedSlot ()
-{
-    loginf << "DBObjectManagerWidget: databaseOpenedSlot";
-}
+//void DBObjectManagerWidget::databaseOpenedSlot ()
+//{
+//    loginf << "DBObjectManagerWidget: databaseOpenedSlot";
+//}
 
 void DBObjectManagerWidget::addDBOSlot ()
 {

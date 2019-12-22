@@ -59,14 +59,19 @@ ATSDB::ATSDB()
     assert (task_manager_);
     assert (view_manager_);
 
-    QObject::connect (db_schema_manager_, SIGNAL(schemaChangedSignal()), dbo_manager_,
-                      SLOT(updateSchemaInformationSlot()));
-    QObject::connect (db_schema_manager_, SIGNAL(schemaLockedSignal()), dbo_manager_, SLOT(schemaLockedSlot()));
-    QObject::connect (db_interface_, SIGNAL(databaseContentChangedSignal()), db_schema_manager_,
-                      SLOT(databaseContentChangedSlot()), Qt::QueuedConnection);
-    QObject::connect (db_interface_, SIGNAL(databaseContentChangedSignal()), dbo_manager_,
-                      SLOT(databaseContentChangedSlot()), Qt::QueuedConnection);
+    QObject::connect (db_schema_manager_, &DBSchemaManager::schemaChangedSignal,
+                      dbo_manager_,  &DBObjectManager::updateSchemaInformationSlot);
+    //QObject::connect (db_schema_manager_, SIGNAL(schemaLockedSignal()), dbo_manager_, SLOT(schemaLockedSlot()));
+    QObject::connect (db_interface_, &DBInterface::databaseContentChangedSignal,
+                      db_schema_manager_, &DBSchemaManager::databaseContentChangedSlot, Qt::QueuedConnection);
+    QObject::connect (db_interface_, &DBInterface::databaseContentChangedSignal,
+                      dbo_manager_, &DBObjectManager::databaseContentChangedSlot, Qt::QueuedConnection);
     //QObject::connect(db_interface_, SIGNAL(databaseOpenedSignal()), filter_manager_, SLOT(databaseOpenedSlot()));
+
+    QObject::connect(dbo_manager_, &DBObjectManager::dbObjectsChangedSignal,
+                     task_manager_, &TaskManager::dbObjectsChangedSlot);
+    QObject::connect(dbo_manager_, &DBObjectManager::schemaChangedSignal,
+                     task_manager_, &TaskManager::schemaChangedSlot);
 
     //reference_point_defined_=false;
 
@@ -267,18 +272,13 @@ void ATSDB::shutdown ()
     JobManager::instance().shutdown();
     ProjectionManager::instance().shutdown();
 
-    assert (task_manager_);
-    task_manager_->shutdown();
-    delete task_manager_;
-    task_manager_ = nullptr;
+    assert (db_interface_);
+    db_interface_->closeConnection(); // removes connection widgets, needs to be before
 
     assert (view_manager_);
     view_manager_->close();
     delete view_manager_;
     view_manager_ = nullptr;
-
-    assert (db_interface_);
-    db_interface_->closeConnection();
 
     assert (dbo_manager_);
     delete dbo_manager_;
@@ -287,6 +287,11 @@ void ATSDB::shutdown ()
     assert (db_schema_manager_);
     delete db_schema_manager_;
     db_schema_manager_ = nullptr;
+
+    assert (task_manager_);
+    task_manager_->shutdown();
+    delete task_manager_;
+    task_manager_ = nullptr;
 
     assert (db_interface_);
     delete db_interface_;

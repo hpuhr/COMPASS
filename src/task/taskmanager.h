@@ -21,46 +21,92 @@
 #include "singleton.h"
 #include "configurable.h"
 #include "global.h"
+#include "task.h"
+
+#include <QObject>
 
 class ATSDB;
+class DatabaseOpenTask;
+class ManageSchemaTask;
+class ManageDBObjectsTask;
+class MySQLDBImportTask;
 class CreateARTASAssociationsTask;
-class JSONImporterTask;
+class JSONImportTask;
 class RadarPlotPositionCalculatorTask;
+class PostProcessTask;
+class TaskManagerWidget;
+class ManageDataSourcesTask;
 
 #if USE_JASTERIX
-class ASTERIXImporterTask;
+class ASTERIXImportTask;
 #endif
 
-class TaskManager : public Configurable
+class TaskManager : public QObject, public Configurable
 {
+    Q_OBJECT
+
+signals:
+    void startInspectionSignal ();
+    void expertModeChangedSignal();
+
+public slots:
+    void taskStatusChangesSlot (std::string task_name);
+    void taskDoneSlot (std::string task_name);
+
+    void dbObjectsChangedSlot ();
+    void schemaChangedSlot ();
+
 public:
-    TaskManager(const std::string &class_id, const std::string &instance_id, ATSDB *atsdb);
+    TaskManager(const std::string& class_id, const std::string& instance_id, ATSDB* atsdb);
 
     virtual ~TaskManager();
 
-    JSONImporterTask* getJSONImporterTask();
-    RadarPlotPositionCalculatorTask* getRadarPlotPositionCalculatorTask();
-    CreateARTASAssociationsTask* getCreateARTASAssociationsTask();
-
-#if USE_JASTERIX
-    ASTERIXImporterTask* getASTERIXImporterTask();
-#endif
-
     virtual void generateSubConfigurable (const std::string &class_id, const std::string &instance_id);
 
-    void disable ();
+    //void deleteWidgets ();
     void shutdown ();
 
-protected:
-    JSONImporterTask* json_importer_task_ {nullptr};
-    RadarPlotPositionCalculatorTask* radar_plot_position_calculator_task_ {nullptr};
-    CreateARTASAssociationsTask* create_artas_associations_task_{nullptr};
+    TaskManagerWidget* widget(); // owned here
 
+    std::vector<std::string> taskList() const;
+    std::map<std::string, Task *> tasks() const;
+
+    bool expertMode() const;
+    void expertMode(bool value);
+
+    void appendSuccess(const std::string& text);
+    void appendInfo(const std::string& text);
+    void appendWarning(const std::string& text);
+    void appendError(const std::string& text);
+
+    void runTask (const std::string& task_name);
+
+    ManageDataSourcesTask& manageDataSourcesTask ();
+
+protected:
+    bool expert_mode_ {false};
+
+    std::unique_ptr<DatabaseOpenTask> database_open_task_;
+    std::unique_ptr<ManageSchemaTask> manage_schema_task_;
+    std::unique_ptr<ManageDBObjectsTask> manage_dbobjects_task_;
 #if USE_JASTERIX
-    ASTERIXImporterTask* asterix_importer_task_ {nullptr};
+    std::unique_ptr<ASTERIXImportTask> asterix_importer_task_;
 #endif
+    std::unique_ptr<JSONImportTask> json_importer_task_;
+    std::unique_ptr<MySQLDBImportTask> mysqldb_import_task_;
+    std::unique_ptr<ManageDataSourcesTask> manage_datasources_task_;
+    std::unique_ptr<RadarPlotPositionCalculatorTask> radar_plot_position_calculator_task_;
+    std::unique_ptr<CreateARTASAssociationsTask> create_artas_associations_task_;
+    std::unique_ptr<PostProcessTask> post_process_task_;
+
+    std::unique_ptr<TaskManagerWidget> widget_;
 
     virtual void checkSubConfigurables ();
+
+    std::vector <std::string> task_list_;
+    std::map <std::string, Task*> tasks_;
+
+    void addTask (const std::string& class_id, Task* task);
 };
 
 #endif // TASKMANAGER_H

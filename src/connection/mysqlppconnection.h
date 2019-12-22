@@ -86,6 +86,7 @@ public:
     virtual void generateSubConfigurable (const std::string& class_id, const std::string& instance_id) override;
 
     QWidget* widget () override;
+    //void deleteWidget () override;
     QWidget* infoWidget () override;
     std::string status () const override;
     std::string identifier () const override;
@@ -98,8 +99,8 @@ public:
 
     MySQLServer& connectedServer () { assert (connected_server_); return *connected_server_; }
 
-    void importSQLFile (const std::string& filename);
-    void importSQLArchiveFile (const std::string& filename);
+//    void importSQLFile (const std::string& filename);
+//    void importSQLArchiveFile (const std::string& filename);
 
 protected:
     DBInterface& interface_;
@@ -128,8 +129,8 @@ protected:
     /// Prepared command finished flag.
     bool prepared_command_done_ {true};
 
-    MySQLppConnectionWidget* widget_ {nullptr};
-    MySQLppConnectionInfoWidget* info_widget_ {nullptr};
+    std::unique_ptr<MySQLppConnectionWidget> widget_;
+    std::unique_ptr<MySQLppConnectionInfoWidget> info_widget_;
 
     std::map <std::string, MySQLServer*> servers_;
 

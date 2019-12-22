@@ -82,6 +82,7 @@ public:
     DBSchemaManagerWidget* widget();
 
     void lock ();
+    bool isLocked () { return locked_; }
 
 protected:
     DBInterface& db_interface_;

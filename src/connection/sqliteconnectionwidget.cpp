@@ -73,6 +73,11 @@ SQLiteConnectionWidget::SQLiteConnectionWidget(SQLiteConnection &connection, QWi
     setLayout (layout);
 }
 
+SQLiteConnectionWidget::~SQLiteConnectionWidget()
+{
+    logdbg << "SQLiteConnectionWidget: destructor";
+}
+
 void SQLiteConnectionWidget::newFileSlot ()
 {
     QString filename = QFileDialog::getSaveFileName(this, tr("New SQLite3 File"),

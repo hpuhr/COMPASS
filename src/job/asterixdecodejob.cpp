@@ -16,7 +16,7 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "asteriximportertask.h"
+#include "asteriximporttask.h"
 #include "stringconv.h"
 #include "logger.h"
 
@@ -29,7 +29,7 @@
 using namespace nlohmann;
 using namespace Utils;
 
-ASTERIXDecodeJob::ASTERIXDecodeJob(ASTERIXImporterTask& task, const std::string& filename, const std::string& framing,
+ASTERIXDecodeJob::ASTERIXDecodeJob(ASTERIXImportTask& task, const std::string& filename, const std::string& framing,
                                    bool test)
     : Job ("ASTERIXDecodeJob"), task_(task), filename_(filename), framing_(framing), test_(test)
 {

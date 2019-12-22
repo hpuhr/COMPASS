@@ -20,7 +20,6 @@
 #include <QMutexLocker>
 #include <QMessageBox>
 #include <QThread>
-#include <QProgressDialog>
 #include <QApplication>
 
 #include "atsdb.h"
@@ -34,7 +33,6 @@
 #include "dbconnection.h"
 #include "mysqlppconnection.h"
 #include "sqliteconnection.h"
-#include "dbinterfacewidget.h"
 #include "dbinterfaceinfowidget.h"
 #include "dbinterface.h"
 #include "dbobjectmanager.h"
@@ -44,10 +42,7 @@
 #include "metadbtable.h"
 #include "dbschemamanager.h"
 #include "dbschema.h"
-//#include "StructureDescriptionManager.h"
 #include "jobmanager.h"
-#include "dboactivedatasourcesdbjob.h"
-#include "dbominmaxdbjob.h"
 #include "dimension.h"
 #include "unit.h"
 #include "unitmanager.h"
@@ -63,8 +58,7 @@ using namespace Utils;
  * write_table_names_,
  */
 DBInterface::DBInterface(std::string class_id, std::string instance_id, ATSDB *atsdb)
-    : Configurable (class_id, instance_id, atsdb), current_connection_(nullptr), sql_generator_(*this),
-      widget_(nullptr), info_widget_(nullptr)
+    : Configurable (class_id, instance_id, atsdb), sql_generator_(*this)
 {
     QMutexLocker locker(&connection_mutex_);
 
@@ -87,8 +81,6 @@ DBInterface::~DBInterface()
         delete it.second;
 
     connections_.clear();
-
-    assert (!widget_);
 
     logdbg  << "DBInterface: desctructor: end";
 }
@@ -118,8 +110,6 @@ void DBInterface::databaseContentChanged ()
 
     loadProperties();
 
-    loginf << "DBInterface: databaseOpened: post-processed " << isPostProcessed ();
-
     emit databaseContentChangedSignal();
 }
 
@@ -132,12 +122,6 @@ void DBInterface::closeConnection ()
     logdbg  << "DBInterface: closeConnection";
     for (auto it : connections_)
         it.second->disconnect ();
-
-    if (widget_)
-    {
-        delete widget_;
-        widget_ = nullptr;
-    }
 
     if (info_widget_)
     {
@@ -159,17 +143,6 @@ void DBInterface::updateTableInfo ()
     table_info_ = current_connection_->getTableInfo();
 
     loginf << "DBInterface: updateTableInfo: found " << table_info_.size() << " tables";
-}
-
-DBInterfaceWidget *DBInterface::widget()
-{
-    if (!widget_)
-    {
-        widget_ = new DBInterfaceWidget (*this);
-    }
-
-    assert (widget_);
-    return widget_;
 }
 
 DBInterfaceInfoWidget *DBInterface::infoWidget()
@@ -199,7 +172,7 @@ bool DBInterface::ready ()
 {
     if (!current_connection_)
     {
-        logwrn << "DBInterface: ready: no connection";
+        logdbg << "DBInterface: ready: no connection";
         return false;
     }
 
@@ -272,15 +245,12 @@ void DBInterface::createTable (DBTable& table)
 
     locker.unlock();
 
-    //QThread::msleep(100);
-
     updateTableInfo();
     table.updateOnDatabase();
 
     loginf << "DBInterface: createTable: checking " << table.name();
     assert (existsTable(table.name()));
     assert (table.existsInDB());
-    //emit databaseContentChangedSignal();
 }
 
 /**
@@ -344,9 +314,6 @@ std::set<int> DBInterface::queryActiveSensorNumbers(DBObject &object)
 
 bool DBInterface::hasDataSourceTables (DBObject& object)
 {
-    //    if (!object.existsInDB())
-    //        return false;
-
     if (!object.hasCurrentDataSourceDefinition())
         return false;
 
@@ -478,8 +445,6 @@ void DBInterface::updateDataSource (DBODataSource& data_source)
 std::map <int, DBODataSource> DBInterface::getDataSources (DBObject &object)
 {
     logdbg  << "DBInterface: getDataSources: start";
-
-    //assert (object.existsInDB());
 
     QMutexLocker locker(&connection_mutex_);
 
@@ -729,6 +694,12 @@ void DBInterface::saveProperties ()
 {
     loginf << "DBInterface: saveProperties";
 
+    if (!current_connection_)
+    {
+        logwrn << "DBInterface: saveProperties: failed since no database connection exists";
+        return;
+    }
+
     //QMutexLocker locker(&connection_mutex_); // done in closeConnection
     assert (current_connection_);
 
@@ -802,8 +773,6 @@ std::pair<std::string, std::string> DBInterface::getMinMaxString (const DBOVaria
     assert (buffer);
     if (buffer->size() != 1)
     {
-        //        throw std::invalid_argument ("DBInterface: getMinMaxString: string buffer for variable "
-        //                                     + var.name() + " empty");
         logerr << "DBInterface: getMinMaxString: variable " << var.name() << " has " << buffer->size()
                << " minmax values";
         return std::pair <std::string, std::string> (NULL_STRING, NULL_STRING);
@@ -849,124 +818,6 @@ std::pair<std::string, std::string> DBInterface::getMinMaxString (const DBOVaria
     return std::pair <std::string, std::string> (min, max);
 }
 
-bool DBInterface::isPostProcessed ()
-{
-    return hasProperty("postProcessed") && getProperty("postProcessed") == "Yes";
-
-    //return existsMinMaxTable ();// && existsPropertiesTable();
-}
-
-void DBInterface::setPostProcessed (bool value)
-{
-    setProperty("postProcessed", value ? "Yes" : "Nope");
-}
-
-void DBInterface::postProcess ()
-{
-    loginf << "DBInterface: postProcess: creating jobs";
-
-    bool any_data=false;
-
-    for (auto obj_it : ATSDB::instance().objectManager())
-        if (obj_it.second->hasData())
-            any_data=true;
-
-    if (!any_data)
-    {
-        logwrn << "DBInterface: postProcess: no data in objects";
-
-        QMessageBox m_warning (QMessageBox::Warning, "No Data in Objects",
-                               "None of the database objects contains any data. Post-processing was not performed.",
-                               QMessageBox::Ok);
-        m_warning.exec();
-        return;
-    }
-
-    unsigned int dbos_with_data=0;
-
-    for (auto obj_it : ATSDB::instance().objectManager())
-        if (obj_it.second->hasData())
-            ++dbos_with_data;
-
-    assert (!postprocess_dialog_);
-    postprocess_dialog_ = new QProgressDialog (tr(""), tr(""), 0, static_cast<int>(2*dbos_with_data));
-    postprocess_dialog_->setWindowTitle("Post-Processing Status");
-    postprocess_dialog_->setCancelButton(nullptr);
-    postprocess_dialog_->setWindowModality(Qt::ApplicationModal);
-    postprocess_dialog_->show();
-
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-    if (!existsMinMaxTable())
-        createMinMaxTable();
-    else
-        clearTableContent (TABLE_NAME_MINMAX);
-
-    for (auto obj_it : ATSDB::instance().objectManager())
-    {
-        if (!obj_it.second->hasData())
-            continue;
-
-        {
-            DBOActiveDataSourcesDBJob* job = new DBOActiveDataSourcesDBJob (ATSDB::instance().interface(),
-                                                                            *obj_it.second);
-
-            std::shared_ptr<Job> shared_job = std::shared_ptr<Job> (job);
-            connect (job, SIGNAL(doneSignal()), this, SLOT(postProcessingJobDoneSlot()), Qt::QueuedConnection);
-            JobManager::instance().addDBJob(shared_job);
-            postprocess_jobs_.push_back(shared_job);
-        }
-        {
-            DBOMinMaxDBJob* job = new DBOMinMaxDBJob (ATSDB::instance().interface(), *obj_it.second);
-            std::shared_ptr<Job> shared_job = std::shared_ptr<Job> (job);
-            connect (job, SIGNAL(doneSignal()), this, SLOT(postProcessingJobDoneSlot()), Qt::QueuedConnection);
-            JobManager::instance().addDBJob(shared_job);
-            postprocess_jobs_.push_back(shared_job);
-        }
-    }
-
-    assert (postprocess_jobs_.size() == 2*dbos_with_data);
-    postprocess_job_num_ = postprocess_jobs_.size();
-}
-
-void DBInterface::postProcessingJobDoneSlot()
-{
-    loginf << "DBInterface: postProcessingJobDoneSlot: " << postprocess_jobs_.size() << " active jobs" ;
-
-    Job* job_sender = static_cast <Job*> (QObject::sender());
-    assert (job_sender);
-    assert (postprocess_jobs_.size() > 0);
-    assert (postprocess_dialog_);
-
-    bool found=false;
-    for (auto job_it = postprocess_jobs_.begin(); job_it != postprocess_jobs_.end(); job_it++)
-    {
-        Job *current = job_it->get();
-        if (current == job_sender)
-        {
-            postprocess_jobs_.erase(job_it);
-            found = true;
-            break;
-        }
-    }
-    assert (found);
-
-    if (postprocess_jobs_.size() == 0)
-    {
-        loginf << "DBInterface: postProcessingJobDoneSlot: done";
-        setPostProcessed(true);
-
-        delete postprocess_dialog_;
-        postprocess_dialog_=nullptr;
-
-        QApplication::restoreOverrideCursor();
-
-        emit postProcessingDoneSignal();
-    }
-    else
-        postprocess_dialog_->setValue(postprocess_job_num_-postprocess_jobs_.size());
-}
-
 bool DBInterface::hasActiveDataSources (DBObject &object)
 {
     if (!object.existsInDB())
@@ -1005,39 +856,6 @@ std::set<int> DBInterface::getActiveDataSources (DBObject &object)
     logdbg  << "DBInterface: getActiveDataSources: end";
     return ret;
 }
-
-//void DBInterface::writeBuffer (Buffer *data)
-//{
-//    if (!buffer_writer_)
-//        buffer_writer_ = new BufferWriter (connection_, sql_generator_);
-
-//    std::scoped_lock l(mutex_);
-
-//    assert (buffer_writer_);
-//    assert (data);
-
-//    std::string type = data->dboType();
-
-//    //TODO FIXME
-//    assert (false);
-
-//    //assert (write_table_names_.find(type) != write_table_names_.end());
-
-//    //buffer_writer_->write (data, write_table_names_[type]);
-//}
-
-//void DBInterface::writeBuffer (Buffer *data, std::string table_name)
-//{
-//    if (!buffer_writer_)
-//        buffer_writer_ = new BufferWriter (connection_, sql_generator_);
-
-//    std::scoped_lock l(mutex_);
-
-//    assert (buffer_writer_);
-//    assert (data);
-
-//    buffer_writer_->write (data, table_name);
-//}
 
 void DBInterface::insertBuffer (MetaDBTable& meta_table, std::shared_ptr<Buffer> buffer)
 {
@@ -1356,13 +1174,12 @@ std::shared_ptr <Buffer> DBInterface::readDataChunk (const DBObject &dbobject)
 }
 
 
-void DBInterface::finalizeReadStatement (const DBObject &dbobject)
+void DBInterface::finalizeReadStatement (const DBObject& dbobject)
 {
     connection_mutex_.unlock();
     assert (current_connection_);
 
     logdbg  << "DBInterface: finishReadSystemTracks: start ";
-    //prepared_.at(dbobject.name())=false;
     current_connection_->finalizeCommand();
 }
 
@@ -1548,18 +1365,6 @@ DBOAssociationCollection DBInterface::getAssociations (const std::string &table_
     return associations;
 }
 
-//DBResult *DBInterface::getDistinctStatistics (const std::string &type, DBOVariable *variable, unsigned int sensor_number)
-//{
-//    std::scoped_lock l(mutex_);
-
-//    assert (DBObjectManager::getInstance().existsDBObject(type));
-//    assert (variable->existsIn(type));
-
-//    DBCommand *command = sql_generator_->getDistinctStatistics(type, variable, sensor_number);
-//    DBResult *result = connection_->execute(command);
-//    return result;
-//}
-
 //void DBInterface::deleteAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string filter)
 //{
 //    assert (sql_generator_);
@@ -1581,128 +1386,6 @@ DBOAssociationCollection DBInterface::getAssociations (const std::string &table_
 
 //    connection_->executeSQL(sql_generator_->getUpdateStatement(variable->getCurrentDBColumn(), value, new_value,
 //filter));
-//}
-
-//void DBInterface::getMinMaxOfVariable (DBOVariable *variable, std::string filter_condition, std::string &min,
-//std::string &max)
-//{
-//    assert (sql_generator_);
-
-//    assert (!variable->isMetaVariable());
-//    assert (variable->hasCurrentDBColumn());
-
-//    DBCommand command;
-//    command.setCommandString(sql_generator_->getMinMaxSelectStatement(variable->getCurrentDBColumn()->getName(),
-//            variable->getCurrentDBColumn()->getDBTableName(), filter_condition));
-
-//    PropertyList list;
-//    list.addProperty("min", PropertyDataType::STRING);
-//    list.addProperty("max", PropertyDataType::STRING);
-//    command.setPropertyList(list);
-
-//    DBResult *result = connection_->execute (&command);
-//    assert (result->containsData());
-//    Buffer *buffer = result->getBuffer();
-//    assert (!buffer->firstWrite());
-//    assert (buffer->size() == 1);
-//    min = buffer->getString("min").get(0);
-//    max = buffer->getString("max").get(0);
-
-//    delete result;
-//    delete buffer;
-
-//    loginf << "DBInterface: getMinMaxOfVariable: variable " << variable->getName() << " min " << min << " max "
-//<< max;
-//}
-
-////void DBInterface::getDistinctValues (DBOVariable *variable, std::string filter_condition,
-/// std::vector<std::string> &values)
-////{
-////    assert (sql_generator_);
-////
-////    assert (!variable->isMetaVariable());
-////    assert (variable->hasCurrentDBColumn());
-////
-////    DBCommand command;
-////    command.setCommandString(sql_generator_->getMinMaxSelectStatement(variable->getCurrentDBColumn()->getName(),
-////            variable->getCurrentDBColumn()->getDBTableName(), filter_condition));
-////
-////    PropertyList list;
-////    list.addProperty("value", P_TYPE_STRING);
-////    command.setPropertyList(list);
-////
-////    DBResult *result = connection_->execute (&command);
-////    assert (result->containsData());
-////    Buffer *buffer = result->getBuffer();
-////    assert (!buffer->getFirstWrite());
-////
-////    for (unsigned int cnt=0; cnt < buffer->getSize(); cnt++)
-////    {
-////        values.push_back(*(std::string *) (buffer->get(0, cnt)));
-////        loginf << "DBInterface: getDistinctValues: variable " << variable->getName() << " value: "
-/// << *(std::string *) (buffer->get(0, cnt));
-////    }
-////
-////
-////}
-
-//Buffer *DBInterface::getTrackMatches (bool has_mode_a, unsigned int mode_a, bool has_ta, unsigned int ta,
-// bool has_ti, std::string ti,
-//        bool has_tod, double tod_min, double tod_max)
-//{
-//    assert (sql_generator_);
-//    assert (has_mode_a || has_ta || has_ti);
-
-
-//    std::stringstream ss;
-
-//    ss << "select track_num, min(tod), max(tod) from sd_track where mode3a_code";
-
-//    if (has_mode_a)
-//        ss << "=" << String::intToString(mode_a);
-//    else
-//        ss << " IS NULL";
-
-//    ss << " AND target_addr";
-
-//    if (has_ta)
-//        ss << "=" << String::intToString(ta);
-//    else
-//        ss << " IS NULL";
-
-//    ss << " AND callsign";
-
-//    if (has_ti)
-//        ss << "='" << ti <<"'";
-//    else
-//        ss << "='        '";
-
-//    if (has_tod)
-//        ss << " AND TOD>"+String::doubleToStringNoScientific(tod_min)+" AND TOD<"
-//+String::doubleToStringNoScientific(tod_max);
-
-//    ss << " group by track_num;";
-
-//    loginf << "DBInterface: getTrackMatches: sql " << ss.str() << "'";
-
-//    DBCommand command;
-//    command.setCommandString(ss.str());
-
-//    PropertyList list;
-//    list.addProperty("track_num", PropertyDataType::INT);
-//    list.addProperty("tod_min", PropertyDataType::DOUBLE);
-//    list.addProperty("tod_max", PropertyDataType::DOUBLE);
-//    command.setPropertyList(list);
-
-//    DBResult *result = connection_->execute (&command);
-//    assert (result->containsData());
-//    Buffer *buffer = result->getBuffer();
-
-//    delete result;
-
-//    loginf << "DBInterface: getTrackMatches: done";
-
-//    return buffer;
 //}
 
 //void DBInterface::testReading ()

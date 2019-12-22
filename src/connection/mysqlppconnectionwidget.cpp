@@ -68,18 +68,26 @@ MySQLppConnectionWidget::MySQLppConnectionWidget(MySQLppConnection &connection, 
 
     updateServers ();
 
-    import_button_ = new QPushButton ("Import");
-    connect (import_button_, SIGNAL(clicked()), this, SLOT(showImportMenuSlot()));
-    import_button_->setDisabled (true);
-    layout->addWidget(import_button_);
+//    import_button_ = new QPushButton ("Import");
+//    connect (import_button_, SIGNAL(clicked()), this, SLOT(showImportMenuSlot()));
+//    import_button_->setDisabled (true);
+//    layout->addWidget(import_button_);
 
-    QAction* import_action = import_menu_.addAction("Import MySQL Text File");
-    connect(import_action, &QAction::triggered, this, &MySQLppConnectionWidget::importSQLTextSlot);
+//    QAction* import_action = import_menu_.addAction("Import MySQL Text File");
+//    connect(import_action, &QAction::triggered, this, &MySQLppConnectionWidget::importSQLTextSlot);
 
-    QAction* import_archive_action = import_menu_.addAction("Import MySQL Text Archive File");
-    connect(import_archive_action, &QAction::triggered, this, &MySQLppConnectionWidget::importSQLTextFromArchiveSlot);
+//    QAction* import_archive_action = import_menu_.addAction("Import MySQL Text Archive File");
+//    connect(import_archive_action, &QAction::triggered, this, &MySQLppConnectionWidget::importSQLTextFromArchiveSlot);
 
     setLayout (layout);
+}
+
+MySQLppConnectionWidget::~MySQLppConnectionWidget()
+{
+    logdbg << "MySQLppConnectionWidget: destructor";
+
+//    while (server_widgets_->count())
+//        server_widgets_->removeWidget(server_widgets_->widget(0));
 }
 
 void MySQLppConnectionWidget::addServerSlot ()
@@ -144,112 +152,112 @@ void MySQLppConnectionWidget::databaseOpenedSlot()
 {
     logdbg << "MySQLppConnectionWidget: databaseOpenedSlot";
 
-    import_button_->setDisabled(false);
+    //import_button_->setDisabled(false);
 
     emit databaseOpenedSignal ();
 }
 
-void MySQLppConnectionWidget::showImportMenuSlot ()
-{
-    logdbg << "MySQLppConnectionWidget: showImportMenuSlot";
-    import_menu_.exec(QCursor::pos());
-}
+//void MySQLppConnectionWidget::showImportMenuSlot ()
+//{
+//    logdbg << "MySQLppConnectionWidget: showImportMenuSlot";
+//    import_menu_.exec(QCursor::pos());
+//}
 
-void MySQLppConnectionWidget::importSQLTextSlot()
-{
-    logdbg << "MySQLppConnectionWidget: importSQLTextSlot";
+//void MySQLppConnectionWidget::importSQLTextSlot()
+//{
+//    logdbg << "MySQLppConnectionWidget: importSQLTextSlot";
 
-    bool any_data=false;
+//    bool any_data=false;
 
-    for (auto obj_it : ATSDB::instance().objectManager())
-        if (obj_it.second->hasData())
-            any_data=true;
+//    for (auto obj_it : ATSDB::instance().objectManager())
+//        if (obj_it.second->hasData())
+//            any_data=true;
 
-    if (any_data)
-    {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, "Import SQL Text", "There is already data in the database. Please "
-                                                               " confirm with 'Yes' to continue, cancel with 'No'"
-                                                               " to abort import.",
-                                      QMessageBox::Yes|QMessageBox::No);
+//    if (any_data)
+//    {
+//        QMessageBox::StandardButton reply;
+//        reply = QMessageBox::question(this, "Import SQL Text", "There is already data in the database. Please "
+//                                                               " confirm with 'Yes' to continue, cancel with 'No'"
+//                                                               " to abort import.",
+//                                      QMessageBox::Yes|QMessageBox::No);
 
-        if (reply == QMessageBox::No)
-            return;
-    }
+//        if (reply == QMessageBox::No)
+//            return;
+//    }
 
-    QFileDialog dialog(this);
-    dialog.setFileMode(QFileDialog::ExistingFile);
-    dialog.setNameFilter(tr("SQL (*.sql)"));
-    dialog.setViewMode(QFileDialog::Detail);
+//    QFileDialog dialog(this);
+//    dialog.setFileMode(QFileDialog::ExistingFile);
+//    dialog.setNameFilter(tr("SQL (*.sql)"));
+//    dialog.setViewMode(QFileDialog::Detail);
 
-    QStringList filenames;
-    if (dialog.exec())
-    {
-        filenames = dialog.selectedFiles();
+//    QStringList filenames;
+//    if (dialog.exec())
+//    {
+//        filenames = dialog.selectedFiles();
 
-        if (filenames.size() > 1)
-        {
-            QMessageBox msgBox;
-            msgBox.setText("Only one file can be selected.");
-            msgBox.exec();
-            return;
-        }
+//        if (filenames.size() > 1)
+//        {
+//            QMessageBox msgBox;
+//            msgBox.setText("Only one file can be selected.");
+//            msgBox.exec();
+//            return;
+//        }
 
-        std::string filename = filenames.at(0).toStdString();
+//        std::string filename = filenames.at(0).toStdString();
 
-        loginf << "MySQLppConnectionWidget: importSQLTextSlot: file '" << filename << "'";
+//        loginf << "MySQLppConnectionWidget: importSQLTextSlot: file '" << filename << "'";
 
-        connection_.importSQLFile(filename);
-    }
-}
+//        connection_.importSQLFile(filename);
+//    }
+//}
 
-void MySQLppConnectionWidget::importSQLTextFromArchiveSlot()
-{
-    logdbg << "MySQLppConnectionWidget: importSQLTextFromArchiveSlot";
+//void MySQLppConnectionWidget::importSQLTextFromArchiveSlot()
+//{
+//    logdbg << "MySQLppConnectionWidget: importSQLTextFromArchiveSlot";
 
-    bool any_data=false;
+//    bool any_data=false;
 
-    for (auto obj_it : ATSDB::instance().objectManager())
-        if (obj_it.second->hasData())
-            any_data=true;
+//    for (auto obj_it : ATSDB::instance().objectManager())
+//        if (obj_it.second->hasData())
+//            any_data=true;
 
-    if (any_data)
-    {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, "Import SQL Text Archive", "There is already data in the database. Please "
-                                                               " confirm with 'Yes' to continue, cancel with 'No'"
-                                                               " to abort import.",
-                                      QMessageBox::Yes|QMessageBox::No);
+//    if (any_data)
+//    {
+//        QMessageBox::StandardButton reply;
+//        reply = QMessageBox::question(this, "Import SQL Text Archive", "There is already data in the database. Please "
+//                                                               " confirm with 'Yes' to continue, cancel with 'No'"
+//                                                               " to abort import.",
+//                                      QMessageBox::Yes|QMessageBox::No);
 
-        if (reply == QMessageBox::No)
-            return;
-    }
+//        if (reply == QMessageBox::No)
+//            return;
+//    }
 
-    QFileDialog dialog(this);
-    dialog.setFileMode(QFileDialog::ExistingFile);
-    dialog.setNameFilter(tr("Archives (*.tar.gz *.gz *.tar *.zip *.tgz *.rar)"));
-    dialog.setViewMode(QFileDialog::Detail);
+//    QFileDialog dialog(this);
+//    dialog.setFileMode(QFileDialog::ExistingFile);
+//    dialog.setNameFilter(tr("Archives (*.tar.gz *.gz *.tar *.zip *.tgz *.rar)"));
+//    dialog.setViewMode(QFileDialog::Detail);
 
-    QStringList filenames;
-    if (dialog.exec())
-    {
-        filenames = dialog.selectedFiles();
+//    QStringList filenames;
+//    if (dialog.exec())
+//    {
+//        filenames = dialog.selectedFiles();
 
-        if (filenames.size() > 1)
-        {
-            QMessageBox msgBox;
-            msgBox.setText("Only one file can be selected.");
-            msgBox.exec();
-            return;
-        }
+//        if (filenames.size() > 1)
+//        {
+//            QMessageBox msgBox;
+//            msgBox.setText("Only one file can be selected.");
+//            msgBox.exec();
+//            return;
+//        }
 
-        std::string filename = filenames.at(0).toStdString();
+//        std::string filename = filenames.at(0).toStdString();
 
-        loginf << "MySQLppConnectionWidget: importSQLTextFromArchiveSlot: file '" << filename << "'";
+//        loginf << "MySQLppConnectionWidget: importSQLTextFromArchiveSlot: file '" << filename << "'";
 
-        connection_.importSQLArchiveFile(filename);
-    }
-}
+//        connection_.importSQLArchiveFile(filename);
+//    }
+//}
 
 void MySQLppConnectionWidget::updateServers()
 {

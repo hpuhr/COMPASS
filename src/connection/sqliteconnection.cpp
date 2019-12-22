@@ -34,8 +34,7 @@
 #include "stringconv.h"
 
 SQLiteConnection::SQLiteConnection(const std::string &class_id, const std::string &instance_id, DBInterface *interface)
-: DBConnection (class_id, instance_id, interface), interface_(*interface), db_handle_(nullptr), prepared_command_(nullptr), prepared_command_done_(false),
-  widget_(nullptr), info_widget_(nullptr)
+: DBConnection (class_id, instance_id, interface), interface_(*interface)
 {
     registerParameter("last_filename", &last_filename_, "");
 
@@ -89,26 +88,20 @@ void SQLiteConnection::openFile (const std::string &file_name)
 
 void SQLiteConnection::disconnect()
 {
-    loginf << "SQLiteConnection: disconnect";
+    logdbg << "SQLiteConnection: disconnect";
 
     connection_ready_ = false;
 
     if (widget_)
-    {
-        delete widget_;
         widget_ = nullptr;
-    }
 
     if (info_widget_)
-    {
-        delete info_widget_;
         info_widget_ = nullptr;
-    }
 
     if (db_handle_)
     {
         sqlite3_close(db_handle_);
-        db_handle_=nullptr;
+        db_handle_ = nullptr;
     }
 }
 
@@ -594,26 +587,27 @@ void SQLiteConnection::generateSubConfigurable (const std::string &class_id, con
         throw std::runtime_error ("SQLiteConnection: generateSubConfigurable: unknown class_id "+class_id );
 }
 
-QWidget *SQLiteConnection::widget ()
+QWidget* SQLiteConnection::widget ()
 {
     if (!widget_)
-    {
-        widget_ = new SQLiteConnectionWidget(*this);
-    }
+        widget_.reset(new SQLiteConnectionWidget(*this));
 
     assert (widget_);
-    return widget_;
+    return widget_.get();
 }
+
+//void SQLiteConnection::deleteWidget ()
+//{
+//    widget_ = nullptr;
+//}
 
 QWidget *SQLiteConnection::infoWidget ()
 {
     if (!info_widget_)
-    {
-        info_widget_ = new SQLiteConnectionInfoWidget(*this);
-    }
+        info_widget_.reset(new SQLiteConnectionInfoWidget(*this));
 
     assert (info_widget_);
-    return info_widget_;
+    return info_widget_.get();
 }
 
 std::string SQLiteConnection::status () const
