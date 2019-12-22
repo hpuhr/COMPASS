@@ -1,0 +1,1051 @@
+{
+    "parameters": {
+        "current_filename": "/home/sk/data/austria/json_10k.json",
+        "current_schema": "SDDL"
+    },
+    "sub_configs": {
+        "JSONFile": {
+            "JSONFilehomeskdataaustriajson_10k.json": {
+                "parameters": {
+                    "name": "/home/sk/data/austria/json_10k.json"
+                }
+            },
+            "JSONFilehomeskdataaustriajson_10k.zip": {
+                "parameters": {
+                    "name": "/home/sk/data/austria/json_10k.zip"
+                }
+            }
+        },
+        "JSONParsingSchema": {
+            "JSONParsingSchemaADSBExchange0": {
+                "parameters": {
+                    "name": "ADSBExchange"
+                },
+                "sub_configs": {
+                    "JSONObjectParser": {
+                        "JSONObjectParserADSB0": {
+                            "parameters": {
+                                "data_source_variable_name": "ds_id",
+                                "db_object_name": "ADSB",
+                                "json_container_key": "acList",
+                                "json_key": "*",
+                                "json_value": "*",
+                                "name": "ADSB",
+                                "override_data_source": true
+                            },
+                            "sub_configs": {
+                                "JSONDataMapping": {
+                                    "JSONDataMapping0": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "target_addr",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "Icao",
+                                            "json_value_format": "hexadecimal",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping1": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "callsign",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "Reg",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping2": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "alt_baro_ft",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "Alt",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping3": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "alt_geo_ft",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "GAlt",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping4": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "pos_lat_deg",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "Lat",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping5": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "pos_long_deg",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "Long",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping6": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "tod",
+                                            "dimension": "Time",
+                                            "format_data_type": "STRING",
+                                            "in_array": false,
+                                            "json_key": "PosTime",
+                                            "json_value_format": "epoch_tod_ms",
+                                            "mandatory": false,
+                                            "unit": "Second"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "JSONParsingSchemaOpenSkyNetwork0": {
+                "parameters": {
+                    "name": "OpenSkyNetwork"
+                },
+                "sub_configs": {
+                    "JSONObjectParser": {
+                        "JSONObjectParserADSB0": {
+                            "parameters": {
+                                "data_source_variable_name": "ds_id",
+                                "db_object_name": "ADSB",
+                                "json_container_key": "",
+                                "json_key": "*",
+                                "json_value": "*",
+                                "name": "ADSB",
+                                "override_data_source": true
+                            },
+                            "sub_configs": {
+                                "JSONDataMapping": {
+                                    "JSONDataMapping0": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "target_addr",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "icao24",
+                                            "json_value_format": "hexadecimal",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping1": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "pos_lat_deg",
+                                            "dimension": "Angle",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "lat",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": "Degree"
+                                        }
+                                    },
+                                    "JSONDataMapping2": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "pos_long_deg",
+                                            "dimension": "Angle",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "lon",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": "Degree"
+                                        }
+                                    },
+                                    "JSONDataMapping3": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "tod",
+                                            "dimension": "Time",
+                                            "format_data_type": "STRING",
+                                            "in_array": false,
+                                            "json_key": "time",
+                                            "json_value_format": "epoch_tod_s",
+                                            "mandatory": false,
+                                            "unit": "Second"
+                                        }
+                                    },
+                                    "JSONDataMapping4": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "callsign",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "callsign",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping5": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "alt_baro_ft",
+                                            "dimension": "Height",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "baroaltitude",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Meter"
+                                        }
+                                    },
+                                    "JSONDataMapping6": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "alt_geo_ft",
+                                            "dimension": "Height",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "geoaltitude",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Meter"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "JSONParsingSchemaSDDL0": {
+                "parameters": {
+                    "name": "SDDL"
+                },
+                "sub_configs": {
+                    "JSONObjectParser": {
+                        "JSONObjectParserADSB0": {
+                            "parameters": {
+                                "data_source_variable_name": "ds_id",
+                                "db_object_name": "ADSB",
+                                "json_container_key": "",
+                                "json_key": "message_type",
+                                "json_value": "ads-b target",
+                                "name": "ADSB",
+                                "override_data_source": false
+                            },
+                            "sub_configs": {
+                                "JSONDataMapping": {
+                                    "JSONDataMapping0": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "rec_num",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "rec_num",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping1": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "ds_id",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "data_source_identifier.value",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping2": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "sac",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "data_source_identifier.sac",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping3": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "sic",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "data_source_identifier.sic",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping4": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "target_addr",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "target_address",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping5": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "callsign",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "target_identification.value_idt",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping6": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "alt_baro_ft",
+                                            "dimension": "Height",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "mode_c_height.value_ft",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Feet"
+                                        }
+                                    },
+                                    "JSONDataMapping7": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "pos_lat_deg",
+                                            "dimension": "Angle",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "wgs84_position.value_lat_rad",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": "Radian"
+                                        }
+                                    },
+                                    "JSONDataMapping8": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "pos_long_deg",
+                                            "dimension": "Angle",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "wgs84_position.value_lon_rad",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": "Radian"
+                                        }
+                                    },
+                                    "JSONDataMapping9": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "tod",
+                                            "dimension": "Time",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "time_of_report",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": "Second"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "JSONObjectParserMLAT0": {
+                            "parameters": {
+                                "data_source_variable_name": "ds_id",
+                                "db_object_name": "MLAT",
+                                "json_container_key": "",
+                                "json_key": "message_type",
+                                "json_value": "mlat target",
+                                "name": "MLAT",
+                                "override_data_source": false
+                            },
+                            "sub_configs": {
+                                "JSONDataMapping": {
+                                    "JSONDataMapping0": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "MLAT",
+                                            "dbovariable_name": "rec_num",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "rec_num",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping1": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "MLAT",
+                                            "dbovariable_name": "ds_id",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "data_source_identifier.value",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping10": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "MLAT",
+                                            "dbovariable_name": "tod",
+                                            "dimension": "Time",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "detection_time",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": "Second"
+                                        }
+                                    },
+                                    "JSONDataMapping2": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "MLAT",
+                                            "dbovariable_name": "sac",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "data_source_identifier.sac",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping3": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "MLAT",
+                                            "dbovariable_name": "sic",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "data_source_identifier.sic",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping4": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "MLAT",
+                                            "dbovariable_name": "mode3a_code",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "mode_3a_info.code",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping5": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "MLAT",
+                                            "dbovariable_name": "target_addr",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "target_address",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping6": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "MLAT",
+                                            "dbovariable_name": "callsign",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "target_identification.value_idt",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping7": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "MLAT",
+                                            "dbovariable_name": "flight_level_ft",
+                                            "dimension": "Height",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "mode_c_height.value_ft",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Feet"
+                                        }
+                                    },
+                                    "JSONDataMapping8": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "MLAT",
+                                            "dbovariable_name": "pos_lat_deg",
+                                            "dimension": "Angle",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "wgs84_position.value_lat_rad",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Radian"
+                                        }
+                                    },
+                                    "JSONDataMapping9": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "MLAT",
+                                            "dbovariable_name": "pos_long_deg",
+                                            "dimension": "Angle",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "wgs84_position.value_lon_rad",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": "Radian"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "JSONObjectParserRadar0": {
+                            "parameters": {
+                                "data_source_variable_name": "ds_id",
+                                "db_object_name": "Radar",
+                                "json_container_key": "",
+                                "json_key": "message_type",
+                                "json_value": "radar target",
+                                "name": "Radar",
+                                "override_data_source": false
+                            },
+                            "sub_configs": {
+                                "JSONDataMapping": {
+                                    "JSONDataMapping0": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "rec_num",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "rec_num",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping1": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "ds_id",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "data_source_identifier.value",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping10": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "tod",
+                                            "dimension": "Time",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "detection_time",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Second"
+                                        }
+                                    },
+                                    "JSONDataMapping2": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "sac",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "data_source_identifier.sac",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping3": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "sic",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "data_source_identifier.sic",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping4": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "mode3a_code",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "mode_3_info.code",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping5": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "target_addr",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "target_address",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping6": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "callsign",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "aircraft_identification.value_idt",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping7": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "modec_code_ft",
+                                            "dimension": "Height",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "mode_c_height.value_ft",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Feet"
+                                        }
+                                    },
+                                    "JSONDataMapping8": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "pos_azm_deg",
+                                            "dimension": "Angle",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "measured_azm_rad",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": "Radian"
+                                        }
+                                    },
+                                    "JSONDataMapping9": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "pos_range_nm",
+                                            "dimension": "Length",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "measured_rng_m",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": "Meter"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "JSONObjectParserTracker0": {
+                            "parameters": {
+                                "data_source_variable_name": "ds_id",
+                                "db_object_name": "Tracker",
+                                "json_container_key": "",
+                                "json_key": "message_type",
+                                "json_value": "track update",
+                                "name": "Tracker",
+                                "override_data_source": false
+                            },
+                            "sub_configs": {
+                                "JSONDataMapping": {
+                                    "JSONDataMapping0": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "rec_num",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "rec_num",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping1": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "ds_id",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "server_sacsic.value",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping10": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "tod",
+                                            "dimension": "Time",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "time_of_last_update",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": "Second"
+                                        }
+                                    },
+                                    "JSONDataMapping2": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "sac",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "server_sacsic.sac",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping3": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "sic",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "server_sacsic.sic",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping4": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "mode3a_code",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "mode_3a_info.code",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping5": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "target_addr",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "aircraft_address",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping6": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "callsign",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "aircraft_identification.value_idt",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping7": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "modec_code_ft",
+                                            "dimension": "Height",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "calculated_track_flight_level.value_feet",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Feet"
+                                        }
+                                    },
+                                    "JSONDataMapping8": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "pos_lat_deg",
+                                            "dimension": "Angle",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "calculated_wgs84_position.value_latitude_rad",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": "Radian"
+                                        }
+                                    },
+                                    "JSONDataMapping9": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "pos_long_deg",
+                                            "dimension": "Angle",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "calculated_wgs84_position.value_longitude_rad",
+                                            "json_value_format": "",
+                                            "mandatory": true,
+                                            "unit": "Radian"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

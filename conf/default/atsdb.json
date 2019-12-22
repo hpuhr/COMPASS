@@ -1,80 +1,80 @@
 {
-    "parameters":null,
-    "sub_config_files":[
+    "parameters": null,
+    "sub_config_files": [
         {
-            "class_id":"DBObjectManager",
-            "instance_id":"DBObjectManager0",
-            "path":"db_object.json"
+            "class_id": "DBObjectManager",
+            "instance_id": "DBObjectManager0",
+            "path": "db_object.json"
         },
         {
-            "class_id":"DBSchemaManager",
-            "instance_id":"DBSchemaManager0",
-            "path":"db_schema.json"
+            "class_id": "DBSchemaManager",
+            "instance_id": "DBSchemaManager0",
+            "path": "db_schema.json"
         },
         {
-            "class_id":"FilterManager",
-            "instance_id":"FilterManager0",
-            "path":"filter.json"
+            "class_id": "FilterManager",
+            "instance_id": "FilterManager0",
+            "path": "filter.json"
         },
         {
-            "class_id":"TaskManager",
-            "instance_id":"TaskManager0",
-            "path":"task.json"
+            "class_id": "TaskManager",
+            "instance_id": "TaskManager0",
+            "path": "task.json"
         },
         {
-            "class_id":"ViewManager",
-            "instance_id":"ViewManager0",
-            "path":"views.json"
+            "class_id": "ViewManager",
+            "instance_id": "ViewManager0",
+            "path": "views.json"
         }
     ],
-    "sub_configs":{
-        "DBInterface":{
-            "DBInterface0":{
-                "parameters":{
-                    "read_chunk_size":100000,
-                    "used_connection":"SQLite Connection"
+    "sub_configs": {
+        "DBInterface": {
+            "DBInterface0": {
+                "parameters": {
+                    "read_chunk_size": 100000,
+                    "used_connection": "SQLite Connection"
                 },
-                "sub_configs":{
-                    "MySQLppConnection":{
-                        "MySQL++ Connection":{
-                            "parameters":{
-                                "used_server":"Localhost"
+                "sub_configs": {
+                    "MySQLppConnection": {
+                        "MySQL++ Connection": {
+                            "parameters": {
+                                "used_server": "Localhost"
                             },
-                            "sub_configs":{
-                                "MySQLServer":{
-                                    "Localhost":{
-                                        "parameters":{
-                                            "database":"skeyes",
-                                            "host":"localhost",
-                                            "password":"sassc",
-                                            "port":3306,
-                                            "user":"sassc"
+                            "sub_configs": {
+                                "MySQLServer": {
+                                    "Localhost": {
+                                        "parameters": {
+                                            "database": "skeyes2",
+                                            "host": "localhost",
+                                            "password": "sassc",
+                                            "port": 3306,
+                                            "user": "sassc"
                                         }
                                     }
                                 }
                             }
                         }
                     },
-                    "SQLiteConnection":{
-                        "SQLite Connection":{
-                            "parameters":{
-                                "last_filename":"/home/sk/atsdb_demo/test.db"
+                    "SQLiteConnection": {
+                        "SQLite Connection": {
+                            "parameters": {
+                                "last_filename": "/home/sk/atsdb_demo/test.db"
                             },
-                            "sub_configs":{
-                                "SQLiteFile":{
-                                    "SQLiteFilehomeskatsdb_demotest.db":{
-                                        "parameters":{
-                                            "name":"/home/sk/atsdb_demo/test.db"
+                            "sub_configs": {
+                                "SQLiteFile": {
+                                    "SQLiteFilehomeskatsdb_demotest.db": {
+                                        "parameters": {
+                                            "name": "/home/sk/atsdb_demo/test.db"
                                         }
                                     },
-                                    "SQLiteFilehomeskdatamalta20190506.db":{
-                                        "parameters":{
-                                            "name":"/home/sk/data/malta/20190506.db"
+                                    "SQLiteFilehomeskdatamalta20190506.db": {
+                                        "parameters": {
+                                            "name": "/home/sk/data/malta/20190506.db"
                                         }
                                     },
-                                    "SQLiteFilehomeskdataportoNAVpt_LisFIR_190401_08-16.db":{
-                                        "parameters":{
-                                            "name":"/home/sk/data/porto/NAVpt_LisFIR_190401_08-16.db"
+                                    "SQLiteFilehomeskdataportoNAVpt_LisFIR_190401_08-16.db": {
+                                        "parameters": {
+                                            "name": "/home/sk/data/porto/NAVpt_LisFIR_190401_08-16.db"
                                         }
                                     }
                                 }

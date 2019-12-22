@@ -1,0 +1,12 @@
+{
+    "parameters": {
+        "altitude_var_str": "modec_code_ft",
+        "azimuth_var_str": "pos_azm_deg",
+        "datasource_var_str": "ds_id",
+        "db_object_str": "Radar",
+        "key_var_str": "rec_num",
+        "latitude_var_str": "pos_lat_deg",
+        "longitude_var_str": "pos_long_deg",
+        "range_var_str": "pos_range_nm"
+    }
+}
