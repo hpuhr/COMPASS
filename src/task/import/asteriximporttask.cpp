@@ -136,7 +136,7 @@ void ASTERIXImportTask::generateSubConfigurable (const std::string &class_id, co
                                   std::forward_as_tuple(category),  // args for key
                                   std::forward_as_tuple(category, class_id, instance_id, this));  // args for mapped value
 
-        loginf << "ASTERIXImporterTask: generateSubConfigurable: cat " << category
+        logdbg << "ASTERIXImporterTask: generateSubConfigurable: cat " << category
                << " decode " <<  category_configs_.at(category).decode()
                << " edition '" << category_configs_.at(category).edition()
                << "' ref '" << category_configs_.at(category).ref() << "'";
