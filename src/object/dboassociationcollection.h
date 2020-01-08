@@ -45,7 +45,8 @@ public:
 //    ConstDBOAssociationEntryIterator const_end() const { return entries_.end(); }
 
     bool contains (unsigned int rec_num) const;
-    std::vector<unsigned int> getUTNSFor (unsigned int rec_num) const;
+    std::vector<unsigned int> getUTNsFor (unsigned int rec_num) const;
+    std::string getUTNsStringFor (unsigned int rec_num) const;
 
 protected:
     // rec_num -> assoc entry
