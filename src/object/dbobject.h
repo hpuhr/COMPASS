@@ -29,7 +29,7 @@
 #include "configurable.h"
 #include "dbovariable.h"
 #include "dboschemametatabledefinition.h"
-#include "dboassociationentry.h"
+#include "dboassociationcollection.h"
 
 class PropertyList;
 class MetaDBTable;

@@ -105,16 +105,26 @@ void BufferCSVExportJob::run ()
                 assert (!rec_num_vec.isNull(row));
                 unsigned int rec_num = rec_num_vec.get(row);
 
-                typedef DBOAssociationCollection::const_iterator MMAPIterator;
-                const DBOAssociationCollection& associations = manager.object(dbo_name).associations();
+                std::vector<unsigned int> utns = manager.object(dbo_name).associations().getUTNSFor(rec_num);
 
-                std::pair<MMAPIterator, MMAPIterator> result = associations.equal_range(rec_num);
-
-                for (MMAPIterator it = result.first; it != result.second; it++)
-                    if (it == result.first)
-                        ss << std::to_string(it->second.utn_);
+                for (unsigned int cnt=0; cnt < utns.size(); ++cnt)
+                {
+                    if (cnt == 0)
+                        ss << std::to_string(utns.at(cnt));
                     else
-                        ss << "," << std::to_string(it->second.utn_);
+                        ss << "," << std::to_string(utns.at(cnt));
+                }
+
+//                typedef DBOAssociationCollection::const_iterator MMAPIterator;
+//                const DBOAssociationCollection& associations = manager.object(dbo_name).associations();
+
+//                std::pair<MMAPIterator, MMAPIterator> result = associations.equal_range(rec_num);
+
+//                for (MMAPIterator it = result.first; it != result.second; it++)
+//                    if (it == result.first)
+//                        ss << std::to_string(it->second.utn_);
+//                    else
+//                        ss << "," << std::to_string(it->second.utn_);
             }
 
             for (size_t col=0; col < read_set_size; col++)

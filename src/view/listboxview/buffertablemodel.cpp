@@ -160,23 +160,32 @@ QVariant BufferTableModel::data(const QModelIndex &index, int role) const
                 assert (!buffer_->get<int>("rec_num").isNull(buffer_index));
                 unsigned int rec_num = buffer_->get<int>("rec_num").get(buffer_index);
 
-                if (associations.count(rec_num))
+                if (associations.contains(rec_num))
                 {
-                    QString utns;
+                    QString utns_str;
 
-                    typedef DBOAssociationCollection::const_iterator MMAPIterator;
+//                    typedef DBOAssociationCollection::const_iterator MMAPIterator;
 
-                    // It returns a pair representing the range of elements with key equal to 'c'
-                    std::pair<MMAPIterator, MMAPIterator> result = associations.equal_range(rec_num);
+//                    // It returns a pair representing the range of elements with key equal to 'c'
+//                    std::pair<MMAPIterator, MMAPIterator> result = associations.equal_range(rec_num);
+//                    // Iterate over the range
+//                    for (MMAPIterator it = result.first; it != result.second; it++)
+//                        if (it == result.first)
+//                            utns = QString::number(it->second.utn_);
+//                        else
+//                            utns += ","+QString::number(it->second.utn_);
 
-                    // Iterate over the range
-                    for (MMAPIterator it = result.first; it != result.second; it++)
-                        if (it == result.first)
-                            utns = QString::number(it->second.utn_);
+                    std::vector<unsigned int> utns = manager.object(dbo_name).associations().getUTNSFor(rec_num);
+
+                    for (unsigned int cnt=0; cnt < utns.size(); ++cnt)
+                    {
+                        if (cnt == 0)
+                            utns_str = QString::number(utns.at(cnt));
                         else
-                            utns += ","+QString::number(it->second.utn_);
+                            utns_str += "," + QString::number(utns.at(cnt));
+                    }
 
-                    return QVariant(utns);
+                    return QVariant(utns_str);
                 }
                 else
                     return QVariant();

@@ -1241,7 +1241,7 @@ bool DBObject::hasAssociations ()
 
 void DBObject::addAssociation (unsigned int rec_num, unsigned int utn, unsigned int src_rec_num)
 {
-    associations_.emplace(rec_num, DBOAssociationEntry(utn, src_rec_num));
+    associations_.add(rec_num, DBOAssociationEntry(utn, src_rec_num));
     associations_changed_ = true;
     associations_loaded_ = true;
 }

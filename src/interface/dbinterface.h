@@ -27,7 +27,7 @@
 #include "propertylist.h"
 #include "dbovariableset.h"
 #include "sqlgenerator.h"
-#include "dboassociationentry.h"
+#include "dboassociationcollection.h"
 
 static const std::string ACTIVE_DATA_SOURCES_PROPERTY_PREFIX="activeDataSources_";
 static const std::string TABLE_NAME_PROPERTIES = "atsdb_properties";
