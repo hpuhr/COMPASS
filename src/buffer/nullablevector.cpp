@@ -25,9 +25,9 @@ NullableVector<bool>& NullableVector<bool>::operator*=(double factor)
 //    for (auto data_it : data_)
 //        data_it = data_it && tmp_factor;
 
-    size_t data_size = data_.size();
+    unsigned int data_size = data_.size();
 
-    tbb::parallel_for( size_t(0), data_size, [&] (size_t cnt)
+    tbb::parallel_for( uint(0), data_size, [&] (unsigned int cnt)
     {
         if (!isNull(cnt))
         {
@@ -39,7 +39,7 @@ NullableVector<bool>& NullableVector<bool>::operator*=(double factor)
 }
 
 template <>
-void NullableVector<bool>::append (size_t index, bool value)
+void NullableVector<bool>::append (unsigned int index, bool value)
 {
     logdbg << "ArrayListTemplate " << property_.name() << ": append: index " << index << " value '" << value << "'";
 
@@ -68,7 +68,7 @@ void NullableVector<bool>::append (size_t index, bool value)
 }
 
 template <>
-void NullableVector<std::string>::append (size_t index, std::string value)
+void NullableVector<std::string>::append (unsigned int index, std::string value)
 {
     logdbg << "ArrayListTemplate " << property_.name() << ": append: index " << index << " value '" << value << "'";
 

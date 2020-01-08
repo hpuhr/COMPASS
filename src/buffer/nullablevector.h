@@ -55,37 +55,37 @@ public:
     void clear();
 
     /// @brief Returns const reference to a specific value
-    const T get (size_t index);
+    const T get (unsigned int index);
 
     /// @brief Returns string of a specific value
-    const std::string getAsString (size_t index);
+    const std::string getAsString (unsigned int index);
 
     /// @brief Sets specific value
-    void set (size_t index, T value);
-    void setFromFormat (size_t index, const std::string& format, const std::string& value_str);
+    void set (unsigned int index, T value);
+    void setFromFormat (unsigned int index, const std::string& format, const std::string& value_str);
 
     /// @brief Appends specific value
-    void append (size_t index, T value);
-    void appendFromFormat (size_t index, const std::string& format, const std::string& value_str);
+    void append (unsigned int index, T value);
+    void appendFromFormat (unsigned int index, const std::string& format, const std::string& value_str);
 
     /// @brief Sets specific element to Null value
-    void setNull(size_t index);
+    void setNull(unsigned int index);
 
     NullableVector<T>& operator*=(double factor);
 
-    std::set<T> distinctValues (size_t index=0);
+    std::set<T> distinctValues (unsigned int index=0);
 
-    std::map<T, std::vector<size_t>> distinctValuesWithIndexes (size_t from_index, size_t to_index);
-    std::map<T, std::vector<size_t>> distinctValuesWithIndexes (const std::vector<size_t>& indexes);
-    std::vector<size_t> nullValueIndexes (size_t from_index, size_t to_index);
-    std::vector<size_t> nullValueIndexes (const std::vector<size_t>& indexes);
+    std::map<T, std::vector<unsigned int>> distinctValuesWithIndexes (unsigned int from_index, unsigned int to_index);
+    std::map<T, std::vector<unsigned int>> distinctValuesWithIndexes (const std::vector<unsigned int>& indexes);
+    std::vector<unsigned int> nullValueIndexes (unsigned int from_index, unsigned int to_index);
+    std::vector<unsigned int> nullValueIndexes (const std::vector<unsigned int>& indexes);
 
     void convertToStandardFormat(const std::string& from_format);
 
-    size_t size();
+    unsigned int size();
 
     /// @brief Checks if specific element is Null
-    bool isNull(size_t index);
+    bool isNull(unsigned int index);
 
     void checkNotNull ();
 
@@ -100,13 +100,13 @@ private:
     std::vector <bool> null_flags_;
 
     /// @brief Sets specific element to not Null value
-    void unsetNull (size_t index);
+    void unsetNull (unsigned int index);
 
-    void resizeDataTo (size_t size);
-    void resizeNullTo (size_t size);
+    void resizeDataTo (unsigned int size);
+    void resizeNullTo (unsigned int size);
     void addData (NullableVector<T>& other);
     void copyData (NullableVector<T>& other);
-    void cutToSize (size_t size);
+    void cutToSize (unsigned int size);
 
     /// @brief Constructor, only for friend Buffer
     NullableVector (Property& property, Buffer& buffer);
@@ -124,7 +124,7 @@ template <class T> void NullableVector<T>::clear()
     std::fill (null_flags_.begin(), null_flags_.end(), true);
 }
 
-template <class T> const T NullableVector<T>::get (size_t index)
+template <class T> const T NullableVector<T>::get (unsigned int index)
 {
     logdbg << "ArrayListTemplate " << property_.name() << ": get: index " << index;
     if (BUFFER_PEDANTIC_CHECKING)
@@ -149,13 +149,13 @@ template <class T> const T NullableVector<T>::get (size_t index)
     return data_.at(index);
 }
 
-template <class T> const std::string NullableVector<T>::getAsString (size_t index)
+template <class T> const std::string NullableVector<T>::getAsString (unsigned int index)
 {
     logdbg << "ArrayListTemplate " << property_.name() << ": getAsString";
     return Utils::String::getValueString (get(index));
 }
 
-template <class T> void NullableVector<T>::set (size_t index, T value)
+template <class T> void NullableVector<T>::set (unsigned int index, T value)
 {
     logdbg << "ArrayListTemplate " << property_.name() << ": set: index " << index << " value '" << value << "'";
 
@@ -182,7 +182,7 @@ template <class T> void NullableVector<T>::set (size_t index, T value)
     //logdbg << "ArrayListTemplate: set: size " << size_ << " max_size " << max_size_;
 }
 
-template <class T> void NullableVector<T>::setFromFormat (size_t index, const std::string& format,
+template <class T> void NullableVector<T>::setFromFormat (unsigned int index, const std::string& format,
                                                           const std::string& value_str)
 {
     logdbg << "ArrayListTemplate " << property_.name() << ": setFromFormat";
@@ -217,7 +217,7 @@ template <class T> void NullableVector<T>::setFromFormat (size_t index, const st
     set (index, value);
 }
 
-template <class T> void NullableVector<T>::append (size_t index, T value)
+template <class T> void NullableVector<T>::append (unsigned int index, T value)
 {
     logdbg << "ArrayListTemplate " << property_.name() << ": append: index " << index << " value '" << value << "'";
 
@@ -244,7 +244,7 @@ template <class T> void NullableVector<T>::append (size_t index, T value)
     //logdbg << "ArrayListTemplate: set: size " << size_ << " max_size " << max_size_;
 }
 
-template <class T> void NullableVector<T>::appendFromFormat (size_t index, const std::string& format,
+template <class T> void NullableVector<T>::appendFromFormat (unsigned int index, const std::string& format,
                                                              const std::string& value_str)
 {
     logdbg << "ArrayListTemplate " << property_.name() << ": appendFromFormat";
@@ -279,7 +279,7 @@ template <class T> void NullableVector<T>::appendFromFormat (size_t index, const
     append (index, value);
 }
 
-template <class T> void NullableVector<T>::setNull(size_t index)
+template <class T> void NullableVector<T>::setNull(unsigned int index)
 {
     logdbg << "ArrayListTemplate " << property_.name() << ": setNull: index " << index;
 
@@ -299,7 +299,7 @@ template <class T> void NullableVector<T>::setNull(size_t index)
 }
 
 /// @brief Checks if specific element is Null
-template <class T> bool NullableVector<T>::isNull(size_t index)
+template <class T> bool NullableVector<T>::isNull(unsigned int index)
 {
     logdbg << "ArrayListTemplate " << property_.name() << ": isNull: index " << index;
 
@@ -322,7 +322,7 @@ template <class T> bool NullableVector<T>::isNull(size_t index)
     return false;
 }
 
-template <class T> void NullableVector<T>::resizeDataTo (size_t size)
+template <class T> void NullableVector<T>::resizeDataTo (unsigned int size)
 {
     logdbg << "ArrayListTemplate " << property_.name() << ": resizeDataTo: size " << size;
 
@@ -338,7 +338,7 @@ template <class T> void NullableVector<T>::resizeDataTo (size_t size)
         buffer_.data_size_ = data_.size();
 }
 
-template <class T> void NullableVector<T>::resizeNullTo (size_t size)
+template <class T> void NullableVector<T>::resizeNullTo (unsigned int size)
 {
     logdbg << "ArrayListTemplate " << property_.name() << ": resizeNullTo: size " << size;
 
@@ -439,9 +439,9 @@ template <class T> NullableVector<T>& NullableVector<T>::operator*=(double facto
 {
     logdbg << "ArrayListTemplate " << property_.name() << ": operator*=";
 
-    size_t data_size = data_.size();
+    unsigned int data_size = data_.size();
 
-    tbb::parallel_for( size_t(0), data_size, [&] (size_t cnt)
+    tbb::parallel_for( uint(0), data_size, [&] (unsigned int cnt)
     {
         if (!isNull(cnt))
         {
@@ -455,7 +455,7 @@ template <class T> NullableVector<T>& NullableVector<T>::operator*=(double facto
     return *this;
 }
 
-template <class T> std::set<T> NullableVector<T>::distinctValues (size_t index)
+template <class T> std::set<T> NullableVector<T>::distinctValues (unsigned int index)
 {
     logdbg << "ArrayListTemplate " << property_.name() << ": distinctValues";
 
@@ -476,12 +476,12 @@ template <class T> std::set<T> NullableVector<T>::distinctValues (size_t index)
     return values;
 }
 
-template <class T> std::map<T, std::vector<size_t>> NullableVector<T>::distinctValuesWithIndexes (size_t from_index,
-                                                                                                  size_t to_index)
+template <class T> std::map<T, std::vector<unsigned int>> NullableVector<T>::distinctValuesWithIndexes (unsigned int from_index,
+                                                                                                  unsigned int to_index)
 {
     logdbg << "ArrayListTemplate " << property_.name() << ": distinctValuesWithIndexes";
 
-    std::map<T, std::vector<size_t>> values;
+    std::map<T, std::vector<unsigned int>> values;
 
     assert (from_index < to_index);
 
@@ -497,7 +497,7 @@ template <class T> std::map<T, std::vector<size_t>> NullableVector<T>::distinctV
     if (from_index+1 > data_.size()) // no data
         return values;
 
-    for (size_t index = from_index; index <= to_index; ++index)
+    for (unsigned int index = from_index; index <= to_index; ++index)
     {
         if (!isNull(index)) // not for null
         {
@@ -512,12 +512,12 @@ template <class T> std::map<T, std::vector<size_t>> NullableVector<T>::distinctV
     return values;
 }
 
-template <class T> std::map<T, std::vector<size_t>> NullableVector<T>::distinctValuesWithIndexes (
-        const std::vector<size_t>& indexes)
+template <class T> std::map<T, std::vector<unsigned int>> NullableVector<T>::distinctValuesWithIndexes (
+        const std::vector<unsigned int>& indexes)
 {
     logdbg << "ArrayListTemplate " << property_.name() << ": distinctValuesWithIndexes";
 
-    std::map<T, std::vector<size_t>> values;
+    std::map<T, std::vector<unsigned int>> values;
 
     if (BUFFER_PEDANTIC_CHECKING)
     {
@@ -540,12 +540,12 @@ template <class T> std::map<T, std::vector<size_t>> NullableVector<T>::distinctV
     return values;
 }
 
-template <class T> std::vector<size_t>  NullableVector<T>::nullValueIndexes (size_t from_index,
-                                                                             size_t to_index)
+template <class T> std::vector<unsigned int>  NullableVector<T>::nullValueIndexes (unsigned int from_index,
+                                                                             unsigned int to_index)
 {
     logdbg << "ArrayListTemplate " << property_.name() << ": nullValueIndexes";
 
-    std::vector<size_t> indexes;
+    std::vector<unsigned int> indexes;
 
     assert (from_index < to_index);
 
@@ -561,7 +561,7 @@ template <class T> std::vector<size_t>  NullableVector<T>::nullValueIndexes (siz
 //    if (from_index+1 >= data_.size()) // no data
 //        return indexes;
 
-    for (size_t index = from_index; index <= to_index; ++index)
+    for (unsigned int index = from_index; index <= to_index; ++index)
     {
         if (isNull(index)) // not for null
         {
@@ -576,11 +576,11 @@ template <class T> std::vector<size_t>  NullableVector<T>::nullValueIndexes (siz
     return indexes;
 }
 
-template <class T> std::vector<size_t>  NullableVector<T>::nullValueIndexes (const std::vector<size_t>& indexes)
+template <class T> std::vector<unsigned int>  NullableVector<T>::nullValueIndexes (const std::vector<unsigned int>& indexes)
 {
     logdbg << "ArrayListTemplate " << property_.name() << ": nullValueIndexes";
 
-    std::vector<size_t> ret_indexes;
+    std::vector<unsigned int> ret_indexes;
 
     for (auto index : indexes)
     {
@@ -612,9 +612,9 @@ template <class T> void NullableVector<T>::convertToStandardFormat(const std::st
         assert (false);
     }
 
-    size_t data_size = data_.size();
+    unsigned int data_size = data_.size();
 
-    tbb::parallel_for( size_t(0), data_size, [&] (size_t cnt)
+    tbb::parallel_for( uint(0), data_size, [&] (unsigned int cnt)
     {
         if (!isNull(cnt))
         {
@@ -624,7 +624,7 @@ template <class T> void NullableVector<T>::convertToStandardFormat(const std::st
     });
 
 
-    //    for (size_t cnt=0; cnt < data_size; cnt++)
+    //    for (unsigned int cnt=0; cnt < data_size; cnt++)
     //    {
     //        if (isNull(cnt))
     //            continue;
@@ -643,9 +643,9 @@ template <class T> void NullableVector<T>::convertToStandardFormat(const std::st
     //    }
 }
 
-template <class T> size_t NullableVector<T>::size() { return data_.size(); }
+template <class T> unsigned int NullableVector<T>::size() { return data_.size(); }
 
-template <class T> void NullableVector<T>::cutToSize (size_t size)
+template <class T> void NullableVector<T>::cutToSize (unsigned int size)
 {
     logdbg << "ArrayListTemplate " << property_.name() << ": cutToSize: size " << size;
 
@@ -668,7 +668,7 @@ template <class T> void NullableVector<T>::checkNotNull ()
 {
     logdbg << "ArrayListTemplate " << property_.name() << ": checkNotNull";
 
-    for (size_t cnt=0; cnt < null_flags_.size(); cnt++)
+    for (unsigned int cnt=0; cnt < null_flags_.size(); cnt++)
     {
         if (null_flags_.at(cnt))
         {
@@ -681,7 +681,7 @@ template <class T> void NullableVector<T>::checkNotNull ()
 // private stuff
 
 /// @brief Sets specific element to not Null value
-template <class T> void NullableVector<T>::unsetNull (size_t index)
+template <class T> void NullableVector<T>::unsetNull (unsigned int index)
 {
     logdbg << "ArrayListTemplate " << property_.name() << ": unsetNull";
 
@@ -701,10 +701,10 @@ template <>
 NullableVector<bool>& NullableVector<bool>::operator*=(double factor);
 
 template <>
-void NullableVector<bool>::append (size_t index, bool value);
+void NullableVector<bool>::append (unsigned int index, bool value);
 
 template <>
-void NullableVector<std::string>::append (size_t index, std::string value);
+void NullableVector<std::string>::append (unsigned int index, std::string value);
 
 
 
