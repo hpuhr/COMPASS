@@ -1028,9 +1028,7 @@ void DBObject::finalizeReadJobDoneSlot()
     assert (found);
 
     if (!data_)
-    {
         data_ = buffer;
-    }
     else
         data_->seizeBuffer (*buffer.get());
 
@@ -1039,26 +1037,33 @@ void DBObject::finalizeReadJobDoneSlot()
     if (info_widget_)
         info_widget_->updateSlot();
 
-    if (read_job_) // drawing overload detection
+    if (!isLoading()) // should be last one
     {
-        unsigned int row_count = read_job_->rowCount();
-
-        if (data_->size() < row_count)
-        {
-            logdbg << "DBObject: " << name_ << " finalizeReadJobDoneSlot: delaying drawing read " << row_count
-                   << " data " << data_->size();
-        }
-        else
-            emit newDataSignal(*this);
-    }
-    else // should be last one
         emit newDataSignal(*this);
-
-    if (!isLoading())
-    {
         loginf << "DBObject: " << name_ << " finalizeReadJobDoneSlot: loading done";
         emit loadingDoneSignal(*this);
+        return;
     }
+
+    // read job or finalize jobs exist
+
+    // check if other is still loading
+    if (manager_.isOtherDBObjectPostProcessing(*this))
+    {
+        logdbg << "DBObject: " << name_ << " finalizeReadJobDoneSlot: delaying new data since other is loading";
+        return;
+    }
+
+    // check if more data can immediately loaded from read job
+    if (read_job_ && data_->size() < read_job_->rowCount())
+    {
+        logdbg << "DBObject: " << name_ << " finalizeReadJobDoneSlot: delaying new data since more data can be read";
+        return;
+    }
+
+    // exact data from read job or finalize jobs still active
+    emit newDataSignal(*this);
+    return;
 }
 
 
@@ -1099,6 +1104,11 @@ void DBObject::updateToDatabaseContent ()
 bool DBObject::isLoading ()
 {
     return read_job_ || finalize_jobs_.size();
+}
+
+bool DBObject::isPostProcessing ()
+{
+    return  finalize_jobs_.size();
 }
 
 bool DBObject::hasData ()

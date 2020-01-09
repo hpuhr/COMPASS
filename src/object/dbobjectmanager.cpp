@@ -578,3 +578,12 @@ std::string DBObjectManager::associationsDataSourceName() const
 {
     return associations_ds_;
 }
+
+bool DBObjectManager::isOtherDBObjectPostProcessing (DBObject& object)
+{
+    for (auto& dbo_it : objects_)
+        if (dbo_it.second != &object && dbo_it.second->isPostProcessing())
+            return true;
+
+    return false;
+}
