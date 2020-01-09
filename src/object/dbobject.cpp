@@ -1039,7 +1039,20 @@ void DBObject::finalizeReadJobDoneSlot()
     if (info_widget_)
         info_widget_->updateSlot();
 
-    emit newDataSignal(*this);
+    if (read_job_) // drawing overload detection
+    {
+        unsigned int row_count = read_job_->rowCount();
+
+        if (data_->size() < row_count)
+        {
+            logdbg << "DBObject: " << name_ << " finalizeReadJobDoneSlot: delaying drawing read " << row_count
+                   << " data " << data_->size();
+        }
+        else
+            emit newDataSignal(*this);
+    }
+    else // should be last one
+        emit newDataSignal(*this);
 
     if (!isLoading())
     {

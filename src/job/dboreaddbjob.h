@@ -49,6 +49,8 @@ public:
 
     DBOVariableSet &readList () { return read_list_; }
 
+    unsigned int rowCount() const;
+
 protected:
     DBInterface &db_interface_;
     DBObject &dbobject_;
@@ -59,6 +61,8 @@ protected:
     DBOVariable *order_variable_;
     bool use_order_ascending_;
     std::string limit_str_;
+
+    unsigned int row_count_ {0};
 
     boost::posix_time::ptime start_time_;
     boost::posix_time::ptime stop_time_;
