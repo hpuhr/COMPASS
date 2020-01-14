@@ -50,7 +50,9 @@ DBOVariableOrderedSet::~DBOVariableOrderedSet()
 
 void DBOVariableOrderedSet::generateSubConfigurable (const std::string &class_id, const std::string &instance_id)
 {
-    logdbg  << "DBOVariableOrderedSet: generateSubConfigurable: class_id " << class_id << " instance_id " << instance_id;
+    logdbg  << "DBOVariableOrderedSet: generateSubConfigurable: class_id " << class_id
+            << " instance_id " << instance_id;
+
     if (class_id.compare("DBOVariableOrderDefinition") == 0)
     {
         DBOVariableOrderDefinition *definition = new DBOVariableOrderDefinition (class_id, instance_id, this);
@@ -67,9 +69,11 @@ void DBOVariableOrderedSet::generateSubConfigurable (const std::string &class_id
                 return;
             }
         }
-        else if (!manager.existsObject(definition->dboName()) || !manager.object(definition->dboName()).hasVariable(definition->variableName()))
+        else if (!manager.existsObject(definition->dboName())
+                 || !manager.object(definition->dboName()).hasVariable(definition->variableName()))
         {
-            logwrn << "DBOVariableOrderedSet: generateSubConfigurable: outdated name " << definition->dboName() << " variable "
+            logwrn << "DBOVariableOrderedSet: generateSubConfigurable: outdated name " << definition->dboName()
+                   << " variable "
                    << definition->variableName();
             delete definition;
             return;
@@ -94,11 +98,11 @@ void DBOVariableOrderedSet::add (DBOVariable &var)
     {
         std::string var_name = var.name();
 
-        Configuration &id_configuration = addNewSubConfiguration ("DBOVariableOrderDefinition", "DBOVariableOrderDefinition"+var_name+"0");
+        Configuration &id_configuration = addNewSubConfiguration ("DBOVariableOrderDefinition");
         id_configuration.addParameterString ("dbo_name", var.dboName());
         id_configuration.addParameterString ("dbo_variable_name", var_name);
         id_configuration.addParameterUnsignedInt ("index", (unsigned int)variable_definitions_.size());
-        generateSubConfigurable("DBOVariableOrderDefinition", "DBOVariableOrderDefinition"+var_name+"0");
+        generateSubConfigurable("DBOVariableOrderDefinition", id_configuration.getInstanceId());
 
         emit setChangedSignal();
     }
@@ -110,11 +114,11 @@ void DBOVariableOrderedSet::add (MetaDBOVariable &var)
     {
         std::string var_name = var.name();
 
-        Configuration &id_configuration = addNewSubConfiguration ("DBOVariableOrderDefinition", "DBOVariableOrderDefinition"+var_name+"0");
+        Configuration &id_configuration = addNewSubConfiguration ("DBOVariableOrderDefinition");
         id_configuration.addParameterString ("dbo_name", META_OBJECT_NAME);
         id_configuration.addParameterString ("dbo_variable_name", var_name);
         id_configuration.addParameterUnsignedInt ("index", (unsigned int)variable_definitions_.size());
-        generateSubConfigurable("DBOVariableOrderDefinition", "DBOVariableOrderDefinition"+var_name+"0");
+        generateSubConfigurable("DBOVariableOrderDefinition", id_configuration.getInstanceId());
 
         emit setChangedSignal();
     }

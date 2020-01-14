@@ -141,12 +141,12 @@ void DBOVariableOrderedSetWidget::updateMenuEntries()
 
 void DBOVariableOrderedSetWidget::showMenuSlot()
 {
-    menu_.exec( QCursor::pos() );
+    menu_.exec(QCursor::pos());
 }
 
 /*
  */
-void DBOVariableOrderedSetWidget::triggerSlot( QAction* action )
+void DBOVariableOrderedSetWidget::triggerSlot(QAction* action)
 {
     QVariantMap vmap = action->data().toMap();
     std::string var_name = vmap.begin().key().toStdString();
