@@ -58,7 +58,7 @@ public:
   /// @brief Removes all variables
   void clear ();
   /// @brief Returns if given variable is in the set
-  bool hasVariable (DBOVariable &variable);
+  bool hasVariable (const DBOVariable& variable);
 
   DBOVariableSet& operator= (const DBOVariableSet &source);
   //DBOVariableSet *clone ();

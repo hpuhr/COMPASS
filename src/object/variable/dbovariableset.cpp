@@ -202,7 +202,7 @@ void DBOVariableSet::clear ()
     changed_=true;
 }
 
-bool DBOVariableSet::hasVariable (DBOVariable &variable)
+bool DBOVariableSet::hasVariable (const DBOVariable& variable)
 {
     return find (set_.begin(), set_.end(), &variable) != set_.end();
 }
