@@ -317,7 +317,7 @@ void ASTERIXDecodeJob::processRecord (unsigned int category, nlohmann::json& rec
             double v_x = speed_item.at("Vx");
             double v_y = speed_item.at("Vy");
 
-            double speed = sqrt(pow(v_x, 2) + pow(v_x, 2)) * 1.94384; // ms2kn
+            double speed = sqrt(pow(v_x, 2) + pow(v_y, 2)) * 1.94384; // ms2kn
             double track_angle = atan2(v_x, v_y) * RAD2DEG;
 
             speed_item["Ground Speed"] = speed;
