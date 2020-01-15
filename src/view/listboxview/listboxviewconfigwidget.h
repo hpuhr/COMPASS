@@ -45,9 +45,13 @@ public slots:
     void exportSlot();
     void exportDoneSlot(bool cancelled);
 
+    void reloadWantedSlot ();
+    void reloadRequestedSlot ();
+    void loadingStartedSlot ();
 
 signals:
      void exportSignal (bool overwrite);
+     void reloadRequestedSignal (); // reload from database
 
 public:
     /// @brief Constructor
@@ -67,7 +71,12 @@ protected:
 
     QCheckBox* overwrite_check_ {nullptr};
 
-    QPushButton *export_button_ {nullptr};
+    QPushButton* export_button_ {nullptr};
+
+    QPushButton* update_button_ {nullptr};
+    bool reload_needed_ {false};
+
+    void updateUpdateButton ();
 };
 
 #endif /* LISTBOXVIEWCONFIGWIDGET_H_ */

@@ -105,6 +105,7 @@ void DBOVariableOrderedSet::add (DBOVariable &var)
         generateSubConfigurable("DBOVariableOrderDefinition", id_configuration.getInstanceId());
 
         emit setChangedSignal();
+        emit variableAddedChangedSignal();
     }
 }
 
@@ -121,6 +122,7 @@ void DBOVariableOrderedSet::add (MetaDBOVariable &var)
         generateSubConfigurable("DBOVariableOrderDefinition", id_configuration.getInstanceId());
 
         emit setChangedSignal();
+        emit variableAddedChangedSignal();
     }
 }
 
