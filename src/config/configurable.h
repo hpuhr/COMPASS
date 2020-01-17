@@ -18,7 +18,7 @@
 #ifndef CONFIGURABLE_H_
 #define CONFIGURABLE_H_
 
-#include <tinyxml2.h>
+//#include <tinyxml2.h>
 #include <vector>
 #include <map>
 #include <assert.h>
