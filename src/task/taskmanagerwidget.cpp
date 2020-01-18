@@ -49,6 +49,18 @@ TaskManagerWidget::TaskManagerWidget(TaskManager& task_manager, QWidget *parent)
 
     main_splitter_ = new QSplitter();
     main_splitter_->setOrientation(Qt::Vertical);
+    //main_splitter_->setStyleSheet("QSplitter::handle {background: gray;} ");
+    //main_splitter_->setHandleWidth(7);
+
+//    QSplitterHandle *handle = main_splitter_->handle(1);
+//    QVBoxLayout *layout = new QVBoxLayout(handle);
+//    layout->setSpacing(0);
+//    layout->setMargin(0);
+
+//    QFrame *line = new QFrame(handle);
+//    line->setFrameShape(QFrame::HLine);
+//    line->setFrameShadow(QFrame::Sunken);
+//    layout->addWidget(line);
 
     QVBoxLayout* main_layout_ = new QVBoxLayout ();
 
@@ -204,7 +216,13 @@ void TaskManagerWidget::updateTaskStates ()
     loginf << "TaskManagerWidget: updateTaskStates: all required done " << all_required_done;
 
     if (start_button_ && all_required_done)
+    {
+        QFont font_bold;
+        font_bold.setBold(true);
+
         start_button_->setDisabled(false);
+        start_button_->setFont(font_bold);
+    }
 }
 
 void TaskManagerWidget::selectNextTask ()
@@ -224,9 +242,11 @@ void TaskManagerWidget::selectNextTask ()
         {
             task_list_->setCurrentItem(task_map_it.first);
             taskClickedSlot (task_map_it.first);
-            break;
+            return;
         }
     }
+
+    taskClickedSlot (task_list_->currentItem()); // update to change buttons
 }
 
 std::string TaskManagerWidget::getCurrentTask ()
@@ -254,7 +274,28 @@ void TaskManagerWidget::taskClickedSlot(QListWidgetItem* item)
         tasks_widget_->addWidget(current_task->widget());
 
     tasks_widget_->setCurrentWidget(current_task->widget());
-    run_current_task_button_->setEnabled(current_task->canRun());
+
+    loginf << "TaskManagerWidget: taskClickedSlot: item '" << item->text().toStdString()
+           << "' can run " << current_task->canRun() << " done " << current_task->done()
+           << " is recommended " << current_task->isRecommended();
+
+    if (current_task->canRun())
+    {
+        QFont font_bold;
+        font_bold.setBold(true);
+
+        run_current_task_button_->setEnabled(true);
+
+        if (!current_task->done() && current_task->isRecommended())
+            run_current_task_button_->setFont(font_bold);
+        else
+            run_current_task_button_->setFont(QFont());
+    }
+    else
+    {
+        run_current_task_button_->setEnabled(false);
+        run_current_task_button_->setFont(QFont());
+    }
 }
 
 void TaskManagerWidget::expertModeToggledSlot ()
