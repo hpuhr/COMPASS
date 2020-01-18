@@ -27,7 +27,7 @@ public:
 
         if (decimals())
         {
-            if ((s.startsWith(".") && s.size() == 1)
+            if ((s.startsWith("0") && s.size() == 1)
                     || (s.startsWith("0.") && s.size() == 2))
                 return QValidator::Intermediate;
 
