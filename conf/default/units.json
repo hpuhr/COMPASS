@@ -108,6 +108,37 @@
                     }
                 }
             },
+            "Speed": {
+                "parameters": null,
+                "sub_configs": {
+                    "Unit": {
+                        "Konts": {
+                            "parameters": {
+                                "definition": "",
+                                "factor": 1.0
+                            }
+                        },
+                        "Mach": {
+                            "parameters": {
+                                "definition": "",
+                                "factor": 0.00149984
+                            }
+                        },
+                        "Meter/Second": {
+                            "parameters": {
+                                "definition": "",
+                                "factor": 0.514444
+                            }
+                        },
+                        "NM/Second": {
+                            "parameters": {
+                                "definition": "",
+                                "factor": 0.00027777777
+                            }
+                        }
+                    }
+                }
+            },
             "Time": {
                 "parameters": null,
                 "sub_configs": {

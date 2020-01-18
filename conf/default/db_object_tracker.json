@@ -1171,10 +1171,10 @@
                     "data_type_str": "DOUBLE",
                     "dbo_name": "Tracker",
                     "description": " ",
-                    "dimension": "",
+                    "dimension": "Speed",
                     "name": "groundspeed_kt",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Konts"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
@@ -1215,10 +1215,10 @@
                     "data_type_str": "DOUBLE",
                     "dbo_name": "Tracker",
                     "description": " ",
-                    "dimension": "",
+                    "dimension": "Angle",
                     "name": "heading_deg",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Degree"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {

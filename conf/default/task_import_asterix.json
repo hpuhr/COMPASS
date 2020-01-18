@@ -46,7 +46,7 @@
             "ASTERIXCategoryConfig3": {
                 "parameters": {
                     "category": 65,
-                    "decode": true,
+                    "decode": false,
                     "edition": "1.3",
                     "ref": "",
                     "spf": ""
@@ -64,7 +64,7 @@
             "ASTERIXCategoryConfig5": {
                 "parameters": {
                     "category": 23,
-                    "decode": true,
+                    "decode": false,
                     "edition": "1.2",
                     "ref": "",
                     "spf": ""
@@ -73,7 +73,7 @@
             "ASTERIXCategoryConfig6": {
                 "parameters": {
                     "category": 63,
-                    "decode": true,
+                    "decode": false,
                     "edition": "1.0",
                     "ref": "",
                     "spf": ""
@@ -82,7 +82,7 @@
             "ASTERIXCategoryConfig7": {
                 "parameters": {
                     "category": 34,
-                    "decode": true,
+                    "decode": false,
                     "edition": "1.26",
                     "ref": "",
                     "spf": ""
@@ -91,7 +91,7 @@
             "ASTERIXCategoryConfig8": {
                 "parameters": {
                     "category": 19,
-                    "decode": true,
+                    "decode": false,
                     "edition": "1.3",
                     "ref": "",
                     "spf": ""
@@ -161,13 +161,13 @@
                                             "comment": "Type number, value 0.0",
                                             "db_object_name": "ADSB",
                                             "dbovariable_name": "airspeed_kt",
-                                            "dimension": "",
+                                            "dimension": "Speed",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "150.Air Speed [knots]",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Konts"
                                         }
                                     },
                                     "JSONDataMapping11": {
@@ -177,13 +177,13 @@
                                             "comment": "Type number, value 0.0",
                                             "db_object_name": "ADSB",
                                             "dbovariable_name": "airspeed_mach",
-                                            "dimension": "",
+                                            "dimension": "Speed",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "150.Air Speed [mach]",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Mach"
                                         }
                                     },
                                     "JSONDataMapping12": {
@@ -337,13 +337,13 @@
                                             "comment": "Type number, value 0.1116943245",
                                             "db_object_name": "ADSB",
                                             "dbovariable_name": "groundspeed_kt",
-                                            "dimension": "",
+                                            "dimension": "Speed",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "160.Ground Speed",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "NM/Second"
                                         }
                                     },
                                     "JSONDataMapping21": {
@@ -481,13 +481,13 @@
                                             "comment": "Type number, value 102.2003173363",
                                             "db_object_name": "ADSB",
                                             "dbovariable_name": "track_angle_deg",
-                                            "dimension": "",
+                                            "dimension": "Angle",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "160.Track Angle",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Degree"
                                         }
                                     },
                                     "JSONDataMapping3": {
@@ -961,13 +961,13 @@
                                             "comment": "Type number, value 150.0",
                                             "db_object_name": "ADSB",
                                             "dbovariable_name": "true_airspeed_kt",
-                                            "dimension": "",
+                                            "dimension": "Speed",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "151.True Air Speed",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Konts"
                                         }
                                     },
                                     "JSONDataMapping61": {
@@ -1128,6 +1128,38 @@
                                             "json_value_format": "",
                                             "mandatory": true,
                                             "unit": "Degree"
+                                        }
+                                    },
+                                    "JSONDataMapping70": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 131",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "index",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping71": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 54",
+                                            "db_object_name": "ADSB",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "length",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
                                         }
                                     },
                                     "JSONDataMapping8": {
@@ -1705,6 +1737,22 @@
                                             "unit": ""
                                         }
                                     },
+                                    "JSONDataMapping39": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 1400",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "index",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
                                     "JSONDataMapping4": {
                                         "parameters": {
                                             "active": true,
@@ -1716,6 +1764,22 @@
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "020.RAB",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping40": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 14",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "length",
                                             "json_value_format": "",
                                             "mandatory": false,
                                             "unit": ""
@@ -2367,13 +2431,13 @@
                                             "comment": "Type number, value -13.75",
                                             "db_object_name": "MLAT",
                                             "dbovariable_name": "velocity_vx_ms",
-                                            "dimension": "",
+                                            "dimension": "Speed",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "202.Vx",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Meter/Second"
                                         }
                                     },
                                     "JSONDataMapping44": {
@@ -2383,13 +2447,13 @@
                                             "comment": "Type number, value -9.25",
                                             "db_object_name": "MLAT",
                                             "dbovariable_name": "velocity_vy_ms",
-                                            "dimension": "",
+                                            "dimension": "Speed",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "202.Vy",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Meter/Second"
                                         }
                                     },
                                     "JSONDataMapping45": {
@@ -2952,6 +3016,38 @@
                                             "unit": ""
                                         }
                                     },
+                                    "JSONDataMapping77": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 11",
+                                            "db_object_name": "MLAT",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "index",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping78": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 105",
+                                            "db_object_name": "MLAT",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "length",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
                                     "JSONDataMapping8": {
                                         "parameters": {
                                             "active": true,
@@ -3406,13 +3502,13 @@
                                             "comment": "Type number, value 506.4696751375547",
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "track_groundspeed_kt",
-                                            "dimension": "",
+                                            "dimension": "Speed",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "200.CALCULATED GROUNDSPEED",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Konts"
                                         }
                                     },
                                     "JSONDataMapping4": {
@@ -3438,13 +3534,13 @@
                                             "comment": "Type number, value 288.94042955599997",
                                             "db_object_name": "Radar",
                                             "dbovariable_name": "track_heading_deg",
-                                            "dimension": "",
+                                            "dimension": "Angle",
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "200.CALCULATED HEADING",
                                             "json_value_format": "",
                                             "mandatory": false,
-                                            "unit": ""
+                                            "unit": "Degree"
                                         }
                                     },
                                     "JSONDataMapping41": {
@@ -4178,6 +4274,38 @@
                                             "format_data_type": "",
                                             "in_array": false,
                                             "json_key": "030.Warning/Error Conditions.extend",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping85": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 562",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "index",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping86": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 49",
+                                            "db_object_name": "Radar",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "length",
                                             "json_value_format": "",
                                             "mandatory": false,
                                             "unit": ""
@@ -5473,6 +5601,70 @@
                                             "format_data_type": "",
                                             "in_array": true,
                                             "json_key": "SPF.Target Report Identifiers.TRI",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping172": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type number, value 640.5181396224128",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "groundspeed_kt",
+                                            "dimension": "Speed",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "185.Ground Speed",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Konts"
+                                        }
+                                    },
+                                    "JSONDataMapping173": {
+                                        "parameters": {
+                                            "active": true,
+                                            "append_value": false,
+                                            "comment": "Type number, value 1.8458335860267208",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "heading_deg",
+                                            "dimension": "Angle",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "185.Track Angle",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": "Degree"
+                                        }
+                                    },
+                                    "JSONDataMapping174": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 4454",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "index",
+                                            "json_value_format": "",
+                                            "mandatory": false,
+                                            "unit": ""
+                                        }
+                                    },
+                                    "JSONDataMapping175": {
+                                        "parameters": {
+                                            "active": false,
+                                            "append_value": false,
+                                            "comment": "Type number, value 155",
+                                            "db_object_name": "Tracker",
+                                            "dbovariable_name": "",
+                                            "dimension": "",
+                                            "format_data_type": "",
+                                            "in_array": false,
+                                            "json_key": "length",
                                             "json_value_format": "",
                                             "mandatory": false,
                                             "unit": ""

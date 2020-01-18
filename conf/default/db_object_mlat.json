@@ -3563,10 +3563,10 @@
                     "data_type_str": "DOUBLE",
                     "dbo_name": "MLAT",
                     "description": "x velocity in meters per second",
-                    "dimension": "",
+                    "dimension": "Speed",
                     "name": "velocity_vx_ms",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Meter/Second"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
@@ -3585,10 +3585,10 @@
                     "data_type_str": "DOUBLE",
                     "dbo_name": "MLAT",
                     "description": "y velocity in meters per second",
-                    "dimension": "",
+                    "dimension": "Speed",
                     "name": "velocity_vy_ms",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Meter/Second"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {

@@ -2650,26 +2650,26 @@
                                         "parameters": {
                                             "comment": " ",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Speed",
                                             "is_key": false,
                                             "name": "AIRSPEED_KT",
                                             "number_conversion_type": "",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": ""
+                                            "unit": "Konts"
                                         }
                                     },
                                     "AIRSPEED_MACH": {
                                         "parameters": {
                                             "comment": " ",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Speed",
                                             "is_key": false,
                                             "name": "AIRSPEED_MACH",
                                             "number_conversion_type": "",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": ""
+                                            "unit": "Mach"
                                         }
                                     },
                                     "ALT_BARO_FT": {
@@ -3011,13 +3011,13 @@
                                         "parameters": {
                                             "comment": " ",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Speed",
                                             "is_key": false,
                                             "name": "GROUNDSPEED_KT",
                                             "number_conversion_type": "",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": ""
+                                            "unit": "Konts"
                                         }
                                     },
                                     "GROUND_BIT": {
@@ -3778,26 +3778,26 @@
                                         "parameters": {
                                             "comment": " ",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Angle",
                                             "is_key": false,
                                             "name": "TRACK_ANGLE_DEG",
                                             "number_conversion_type": "",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": ""
+                                            "unit": "Degree"
                                         }
                                     },
                                     "TRUE_AIRSPEED_KT": {
                                         "parameters": {
                                             "comment": " ",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Speed",
                                             "is_key": false,
                                             "name": "TRUE_AIRSPEED_KT",
                                             "number_conversion_type": "",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": ""
+                                            "unit": "Konts"
                                         }
                                     },
                                     "TURNRATE_DEGPS": {
@@ -5086,26 +5086,26 @@
                                         "parameters": {
                                             "comment": "x velocity in meters per second",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Speed",
                                             "is_key": false,
                                             "name": "VELOCITY_VX_MS",
                                             "number_conversion_type": "",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": ""
+                                            "unit": "Meter/Second"
                                         }
                                     },
                                     "VELOCITY_VY_MS": {
                                         "parameters": {
                                             "comment": "y velocity in meters per second",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Speed",
                                             "is_key": false,
                                             "name": "VELOCITY_VY_MS",
                                             "number_conversion_type": "",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": ""
+                                            "unit": "Meter/Second"
                                         }
                                     }
                                 }
@@ -6328,26 +6328,26 @@
                                         "parameters": {
                                             "comment": "Calculated track velocity expressed in polar coordinates, groundspeed in Kt [I001/200, I021/160, I048/200]",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Speed",
                                             "is_key": false,
                                             "name": "TRACK_GROUNDSPEED_KT",
                                             "number_conversion_type": "",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": ""
+                                            "unit": "Konts"
                                         }
                                     },
                                     "TRACK_HEADING_DEG": {
                                         "parameters": {
                                             "comment": "Calculated track velocity expressed in polar coordinates, angle in ¿¿ [I001/200, I021/160, I048/200]",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Angle",
                                             "is_key": false,
                                             "name": "TRACK_HEADING_DEG",
                                             "number_conversion_type": "",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": ""
+                                            "unit": "Degree"
                                         }
                                     },
                                     "TRACK_MANOEUVRE_HORI": {
@@ -6702,13 +6702,13 @@
                                         "parameters": {
                                             "comment": " ",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Speed",
                                             "is_key": false,
                                             "name": "GROUNDSPEED_KT",
                                             "number_conversion_type": "",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": ""
+                                            "unit": "Konts"
                                         }
                                     },
                                     "HASH_CODE": {
@@ -6728,13 +6728,13 @@
                                         "parameters": {
                                             "comment": " ",
                                             "data_format": "",
-                                            "dimension": "",
+                                            "dimension": "Angle",
                                             "is_key": false,
                                             "name": "HEADING_DEG",
                                             "number_conversion_type": "",
                                             "special_null": "",
                                             "type": "double",
-                                            "unit": ""
+                                            "unit": "Degree"
                                         }
                                     },
                                     "IC_CODE": {

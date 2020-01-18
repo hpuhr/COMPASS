@@ -6,7 +6,7 @@
         "DBFilter": {
             "Barometric Altitude": {
                 "parameters": {
-                    "active": false,
+                    "active": true,
                     "changed": true,
                     "name": "Barometric Altitude",
                     "op_and_": true,
@@ -236,7 +236,7 @@
             },
             "Time of Day": {
                 "parameters": {
-                    "active": true,
+                    "active": false,
                     "changed": true,
                     "name": "Time of Day",
                     "op_and_": true,
@@ -442,7 +442,7 @@
                 "parameters": {
                     "LoadSensorNumber12990": true,
                     "LoadSensorNumber13040": true,
-                    "LoadSensorNumber13044": false,
+                    "LoadSensorNumber13044": true,
                     "LoadSensorNumber21": false,
                     "LoadSensorNumber22": true,
                     "LoadSensorNumber23": false,
@@ -454,8 +454,8 @@
                     "LoadSensorNumber26646": true,
                     "LoadSensorNumber27": true,
                     "LoadSensorNumber30769": true,
-                    "LoadSensorNumber30770": false,
-                    "active": true,
+                    "LoadSensorNumber30770": true,
+                    "active": false,
                     "changed": true,
                     "dbo_name": "Tracker",
                     "name": "TrackerDataSources0",

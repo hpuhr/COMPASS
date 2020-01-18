@@ -3076,10 +3076,10 @@
                     "data_type_str": "DOUBLE",
                     "dbo_name": "Radar",
                     "description": "Calculated track velocity expressed in polar coordinates, groundspeed in Kt [I001/200, I021/160, I048/200]",
-                    "dimension": "",
+                    "dimension": "Speed",
                     "name": "track_groundspeed_kt",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Konts"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
@@ -3098,10 +3098,10 @@
                     "data_type_str": "DOUBLE",
                     "dbo_name": "Radar",
                     "description": "Calculated track velocity expressed in polar coordinates, angle in ¿¿ [I001/200, I021/160, I048/200]",
-                    "dimension": "",
+                    "dimension": "Angle",
                     "name": "track_heading_deg",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Degree"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {

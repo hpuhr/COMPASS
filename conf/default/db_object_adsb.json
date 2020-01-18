@@ -1505,10 +1505,10 @@
                     "data_type_str": "DOUBLE",
                     "dbo_name": "ADSB",
                     "description": " ",
-                    "dimension": "",
+                    "dimension": "Speed",
                     "name": "airspeed_kt",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Konts"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
@@ -1527,10 +1527,10 @@
                     "data_type_str": "DOUBLE",
                     "dbo_name": "ADSB",
                     "description": " ",
-                    "dimension": "",
+                    "dimension": "Speed",
                     "name": "airspeed_mach",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Mach"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
@@ -2140,10 +2140,10 @@
                     "data_type_str": "DOUBLE",
                     "dbo_name": "ADSB",
                     "description": " ",
-                    "dimension": "",
+                    "dimension": "Speed",
                     "name": "groundspeed_kt",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Konts"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
@@ -3434,10 +3434,10 @@
                     "data_type_str": "DOUBLE",
                     "dbo_name": "ADSB",
                     "description": " ",
-                    "dimension": "",
+                    "dimension": "Angle",
                     "name": "track_angle_deg",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Degree"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {
@@ -3456,10 +3456,10 @@
                     "data_type_str": "DOUBLE",
                     "dbo_name": "ADSB",
                     "description": " ",
-                    "dimension": "",
+                    "dimension": "Speed",
                     "name": "true_airspeed_kt",
                     "representation_str": "STANDARD",
-                    "unit": ""
+                    "unit": "Konts"
                 },
                 "sub_configs": {
                     "DBOSchemaVariableDefinition": {

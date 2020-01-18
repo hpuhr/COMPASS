@@ -71,11 +71,6 @@
                                         "parameters": {
                                             "name": "/home/sk/data/malta/20190506.db"
                                         }
-                                    },
-                                    "SQLiteFilehomeskdataportoNAVpt_LisFIR_190401_08-16.db": {
-                                        "parameters": {
-                                            "name": "/home/sk/data/porto/NAVpt_LisFIR_190401_08-16.db"
-                                        }
                                     }
                                 }
                             }
