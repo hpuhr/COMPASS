@@ -6,8 +6,8 @@ addons:
      - ubuntu-toolchain-r-test
     packages:
      - cmake
-     - gcc-6
-     - g++-6
+     - gcc-9
+     - g++-9
      - qtbase5-dev
      - libqt5opengl5-dev
      - libboost-dev
@@ -22,9 +22,7 @@ addons:
      - libsqlite3-dev
      - liblog4cpp5-dev
      - libgdal-dev
-     - libtinyxml2-dev
      - libarchive-dev
-     - libjsoncpp-dev
      - libtbb-dev
 
 compiler:
@@ -32,8 +30,8 @@ compiler:
 # - clang
 
 script:
- - export CC=gcc-6
- - export CXX=g++-6
+ - export CC=gcc-9
+ - export CXX=g++-9
  - mkdir build
  - cd build
  - cmake ..

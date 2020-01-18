@@ -70,6 +70,8 @@ ASTERIXImportTask::ASTERIXImportTask(const std::string& class_id, const std::str
     : Task("ASTERIXImportTask", "Import ASTERIX Data", false, false, task_manager),
       Configurable (class_id, instance_id, &task_manager, "task_import_asterix.json")
 {
+    tooltip_ = "Allows importing of ASTERIX data recording files into the opened database.";
+
     //qRegisterMetaType<std::unique_ptr<std::vector <nlohmann::json>>>("std::unique_ptr<std::vector <nlohmann::json>>");
 
     registerParameter("debug_jasterix", &debug_jasterix_, false);
@@ -136,7 +138,7 @@ void ASTERIXImportTask::generateSubConfigurable (const std::string &class_id, co
                                   std::forward_as_tuple(category),  // args for key
                                   std::forward_as_tuple(category, class_id, instance_id, this));  // args for mapped value
 
-        loginf << "ASTERIXImporterTask: generateSubConfigurable: cat " << category
+        logdbg << "ASTERIXImporterTask: generateSubConfigurable: cat " << category
                << " decode " <<  category_configs_.at(category).decode()
                << " edition '" << category_configs_.at(category).edition()
                << "' ref '" << category_configs_.at(category).ref() << "'";

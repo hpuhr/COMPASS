@@ -15,24 +15,10 @@
  * along with ATSDB.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <boost/bind.hpp>
-
-#include <QMenuBar>
-#include <QMessageBox>
-#include <QAction>
-#include <QMoveEvent>
-#include <QResizeEvent>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QTextEdit>
-#include <QPushButton>
-#include <QCheckBox>
+#include <QCloseEvent>
 #include <QStackedWidget>
-#include <QLineEdit>
-#include <QGridLayout>
 #include <QSettings>
-#include <QThread>
+#include <QApplication>
 #include <QTabWidget>
 
 #include "mainwindow.h"
@@ -44,31 +30,17 @@
 #include "filtermanager.h"
 #include "managementwidget.h"
 #include "stringconv.h"
-#include "jobmanager.h"
 #include "viewmanager.h"
 #include "taskmanager.h"
 #include "taskmanagerwidget.h"
 #include "dbobjectmanager.h"
 #include "dbobject.h"
-//#include "jsonimporttask.h"
-//#include "jsonimporttaskwidget.h"
-//#include "radarplotpositioncalculatortask.h"
-//#include "radarplotpositioncalculatortaskwidget.h"
-//#include "createartasassociationstask.h"
-//#include "createartasassociationstaskwidget.h"
 #include "files.h"
 #include "config.h"
-
-//#if USE_JASTERIX
-//#include "asteriximporttask.h"
-//#include "asteriximporttaskwidget.h"
-//#endif
 
 using namespace Utils;
 using namespace std;
 
-//namespace ATSDB
-//{
 
 MainWindow::MainWindow()
 {
@@ -127,6 +99,8 @@ void MainWindow::startSlot ()
 {
     loginf  << "MainWindow: startSlot";
 
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
     emit startedSignal ();
 
     assert (task_manager_widget_);
@@ -142,6 +116,8 @@ void MainWindow::startSlot ()
     ATSDB::instance().viewManager().init(tab_widget_);
 
     tab_widget_->setCurrentIndex(0);
+
+    QApplication::restoreOverrideCursor();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -171,13 +147,5 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::keyPressEvent ( QKeyEvent * event )
 {
     logdbg  << "MainWindow: keyPressEvent '" << event->text().toStdString() << "'";
-
-    //    if (event->modifiers()  & Qt::ControlModifier)
-    //    {
-    //        if (event->key() == Qt::Key_U)
-    //        {
-    //            unlockSchemaGui();
-    //        }
-    //    }
 }
 

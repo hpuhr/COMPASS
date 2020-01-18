@@ -272,7 +272,7 @@ void JSONDataMapping::active(bool active)
 
 void JSONDataMapping::initialize ()
 {
-    loginf << "JSONDataMapping: initialize";
+    logdbg << "JSONDataMapping: initialize";
 
     assert (!initialized_);
 
@@ -292,17 +292,17 @@ void JSONDataMapping::initialize ()
 
     if (format_data_type_.size())
     {
-        loginf << "JSONDataMapping: initialize: setting format from dt " << format_data_type_
+        logdbg << "JSONDataMapping: initialize: setting format from dt " << format_data_type_
                << " format " << json_value_format_;
         json_value_format_ = Format (Property::asDataType(format_data_type_), json_value_format_);
     }
     else if (variable_)
     {
-        loginf << "JSONDataMapping: initialize: setting format from variable "<< variable_->name();
+        logdbg << "JSONDataMapping: initialize: setting format from variable "<< variable_->name();
         json_value_format_ = Format (variable_->dataType(), json_value_format_);
     }
     else
-        loginf << "JSONDataMapping: initialize: variable not set";
+        logdbg << "JSONDataMapping: initialize: variable not set";
 
     if (append_value_)
     {

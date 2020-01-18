@@ -60,6 +60,7 @@ class DBOVariableOrderedSet : public QObject, public Configurable
 
 signals:
     void setChangedSignal ();
+    void variableAddedChangedSignal ();
 
 public:
     /// @brief Constructor

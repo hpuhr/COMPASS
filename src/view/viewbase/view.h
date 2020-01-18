@@ -101,7 +101,7 @@ protected:
     /// The widget containing the view's widget
     QWidget* central_widget_;
 
-    bool selection_change_emitted_ {false};
+    //bool selection_change_emitted_ {false};
 
     void constructWidget();
     void setModel (ViewModel* model);

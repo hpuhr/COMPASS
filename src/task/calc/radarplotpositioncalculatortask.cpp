@@ -45,6 +45,8 @@ RadarPlotPositionCalculatorTask::RadarPlotPositionCalculatorTask(
     : Task("RadarPlotPositionCalculatorTask", "Calculate Radar Plot Positions", true, false, task_manager),
       Configurable (class_id, instance_id, &task_manager, "task_calc_radar_pos.json")
 {
+    tooltip_ = "Allows calculation of Radar plot position information based on the defined data sources.";
+
     qRegisterMetaType<std::shared_ptr<Buffer>>("std::shared_ptr<Buffer>");
     //qRegisterMetaType<DBObject>("DBObject");
 

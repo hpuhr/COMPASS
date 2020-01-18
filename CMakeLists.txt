@@ -17,11 +17,13 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 message("  Platform: Linux")
-add_definitions ( -Wall -std=c++11)
+add_definitions ( -Wall -Wno-deprecated-declarations -Wno-ignored-attributes -Wno-misleading-indentation -std=c++11)
 
 find_package(Qt5Widgets)
 find_package(Qt5Core)
 find_package(Qt5OpenGL)
+
+set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS ON)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Instruct CMake to run moc automatically when needed.

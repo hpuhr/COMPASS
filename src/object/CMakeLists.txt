@@ -21,7 +21,7 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/stringrepresentationcombobox.h"
         "${CMAKE_CURRENT_LIST_DIR}/selectdbobjectdialog.h"
         "${CMAKE_CURRENT_LIST_DIR}/dboschemametatabledefinition.h"
-        "${CMAKE_CURRENT_LIST_DIR}/dboassociationentry.h"
+        "${CMAKE_CURRENT_LIST_DIR}/dboassociationcollection.h"
     PRIVATE
         "${CMAKE_CURRENT_LIST_DIR}/dbobject.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbobjectwidget.cpp"
@@ -31,6 +31,7 @@ target_sources(atsdb
         "${CMAKE_CURRENT_LIST_DIR}/dbobjectmanagerloadwidget.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbolabeldefinition.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/dbolabeldefinitionwidget.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/dboassociationcollection.cpp"
 )
 
 

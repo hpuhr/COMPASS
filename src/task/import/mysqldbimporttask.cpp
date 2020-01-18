@@ -44,6 +44,8 @@ MySQLDBImportTask::MySQLDBImportTask(const std::string& class_id, const std::str
     : Task("MySQLDBImportTask", "Import MySQL DB", false, false, task_manager),
       Configurable (class_id, instance_id, &task_manager, "task_import_mysqldb.json")
 {
+    tooltip_ = "Allows importing of an exported SASS-C Verif job database.";
+
     qRegisterMetaType<std::string>("std::string");
 
     registerParameter("current_filename", &current_filename_, "");

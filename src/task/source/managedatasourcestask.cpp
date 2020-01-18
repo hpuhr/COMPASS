@@ -38,6 +38,8 @@ ManageDataSourcesTask::ManageDataSourcesTask(const std::string& class_id, const 
     : Task("ManageDataSourcesTask", "Manage Data Sources", true, false, task_manager),
       Configurable (class_id, instance_id, &task_manager, "task_manage_datasources.json")
 {
+    tooltip_ = "Allows management of data sources, as stored in the configuration as well as the database.";
+
     createSubConfigurables();
 }
 
@@ -70,7 +72,7 @@ void ManageDataSourcesTask::generateSubConfigurable (const std::string &class_id
 
         assert (stored_data_sources_[dbo_name].find (id) == stored_data_sources_[dbo_name].end());
 
-        loginf << "ManageDataSourcesTask: generateSubConfigurable: generating stored DS " << instance_id
+        logdbg << "ManageDataSourcesTask: generateSubConfigurable: generating stored DS " << instance_id
                << " with object " << dbo_name << " id " << id;
 
         stored_data_sources_[dbo_name].emplace(std::piecewise_construct,

@@ -164,16 +164,16 @@ void View::viewShutdown( const std::string& err )
 
 void View::emitSelectionChange ()
 {
-    assert (!selection_change_emitted_);
-    selection_change_emitted_ = true;
+//    assert (!selection_change_emitted_);
+//    selection_change_emitted_ = true;
 
     emit selectionChangedSignal();
 }
 
 void View::selectionChangedSlot()
 {
-    if (selection_change_emitted_)
-        selection_change_emitted_ = false;
-    else // only update if not self-emitted
+//    if (selection_change_emitted_)
+//        selection_change_emitted_ = false;
+//    else // only update if not self-emitted
         updateSelection();
 }

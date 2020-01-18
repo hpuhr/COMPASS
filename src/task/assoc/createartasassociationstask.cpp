@@ -43,9 +43,11 @@ const std::string CreateARTASAssociationsTask::DONE_PROPERTY_NAME = "artas_assoc
 
 CreateARTASAssociationsTask::CreateARTASAssociationsTask(
         const std::string& class_id, const std::string& instance_id, TaskManager& task_manager)
-    : Task("CreateARTASAssociationsTask", "Calculate ARTAS Associations", true, false, task_manager),
+    : Task("CreateARTASAssociationsTask", "Associate ARTAS TRIs", true, false, task_manager),
       Configurable (class_id, instance_id, &task_manager, "task_calc_artas_assoc.json")
 {
+    tooltip_ = "Allows creation of UTNs and target report association based on ARTAS tracks and the TRI information.";
+
     registerParameter ("current_data_source_name", &current_data_source_name_, "");
 
     // tracker vars

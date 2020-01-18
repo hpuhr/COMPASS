@@ -1357,7 +1357,7 @@ DBOAssociationCollection DBInterface::getAssociations (const std::string &table_
                 assert (!utns.isNull(cnt));
                 assert (!src_rec_nums.isNull(cnt));
 
-                associations.emplace(rec_nums.get(cnt), DBOAssociationEntry(utns.get(cnt), src_rec_nums.get(cnt)));
+                associations.add(rec_nums.get(cnt), DBOAssociationEntry(utns.get(cnt), src_rec_nums.get(cnt)));
             }
         }
     }

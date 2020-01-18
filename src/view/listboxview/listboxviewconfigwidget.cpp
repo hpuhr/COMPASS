@@ -40,6 +40,8 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget( ListBoxView* view, QWidget* pa
     assert (view_);
 
     variable_set_widget_ = view_->getDataSource()->getSet()->widget();
+    connect(view_->getDataSource()->getSet(), &DBOVariableOrderedSet::variableAddedChangedSignal,
+            this, &ListBoxViewConfigWidget::reloadWantedSlot);
     vlayout->addWidget (variable_set_widget_);
 
     only_selected_check_ = new QCheckBox("Show Only Selected");
@@ -70,6 +72,13 @@ ListBoxViewConfigWidget::ListBoxViewConfigWidget( ListBoxView* view, QWidget* pa
     export_button_ = new QPushButton ("Export");
     connect(export_button_, SIGNAL(clicked(bool)), this, SLOT(exportSlot()));
     vlayout->addWidget(export_button_);
+
+    vlayout->addStretch();
+
+    update_button_ = new QPushButton ("Reload");
+    connect (update_button_, &QPushButton::clicked, this, &ListBoxViewConfigWidget::reloadRequestedSlot);
+    update_button_->setDisabled(true);
+    vlayout->addWidget(update_button_);
 
     setLayout( vlayout );
 }
@@ -133,4 +142,32 @@ void ListBoxViewConfigWidget::exportDoneSlot(bool cancelled)
         msgBox.setText("Export complete.");
         msgBox.exec();
     }
+}
+
+void ListBoxViewConfigWidget::reloadWantedSlot ()
+{
+    reload_needed_ = true;
+    updateUpdateButton();
+}
+
+void ListBoxViewConfigWidget::reloadRequestedSlot ()
+{
+    assert (reload_needed_);
+    emit reloadRequestedSignal();
+    reload_needed_ = false;
+
+    updateUpdateButton();
+}
+
+void ListBoxViewConfigWidget::updateUpdateButton ()
+{
+    assert (update_button_);
+    update_button_->setEnabled(reload_needed_);
+}
+
+void ListBoxViewConfigWidget::loadingStartedSlot ()
+{
+    reload_needed_ = false;
+
+    updateUpdateButton();
 }

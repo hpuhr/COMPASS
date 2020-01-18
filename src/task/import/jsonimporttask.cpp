@@ -61,6 +61,8 @@ JSONImportTask::JSONImportTask(const std::string& class_id, const std::string& i
     : Task("JSONImportTask", "Import JSON Data", true, false, task_manager),
       Configurable (class_id, instance_id, &task_manager, "task_import_json.json")
 {
+    tooltip_ = "Allows importing of JSON data in several variants into the opened database.";
+
     registerParameter("current_filename", &current_filename_, "");
     registerParameter("current_schema", &current_schema_, "");
 

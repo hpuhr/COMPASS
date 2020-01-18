@@ -130,6 +130,8 @@ public:
     std::string associationsDBObject() const;
     std::string associationsDataSourceName() const;
 
+    bool isOtherDBObjectPostProcessing (DBObject& object);
+
 protected:
     bool use_filters_ {false};
 

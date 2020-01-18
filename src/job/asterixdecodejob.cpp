@@ -183,7 +183,7 @@ void ASTERIXDecodeJob::processRecord (unsigned int category, nlohmann::json& rec
     int sac {-1};
     int sic {-1};
 
-    if (record.find("010") != record.end())
+    if (record.contains("010"))
     {
         sac = record.at("010").at("SAC");
         sic = record.at("010").at("SIC");
@@ -192,17 +192,16 @@ void ASTERIXDecodeJob::processRecord (unsigned int category, nlohmann::json& rec
 
     if (category == 1) // CAT001 coversion hack
     {
-//        if (record.find("090") != record.end())
-//            if (record.at("090").find("Flight Level") != record.at("090").end())
-//            {
-//                double flight_level = record.at("090").at("Flight Level"); // is mapped in ft
-//                record.at("090").at("Flight Level") = flight_level* 1e-2;  // ft to fl
-//            }
+        //        if (record.find("090") != record.end())
+        //            if (record.at("090").find("Flight Level") != record.at("090").end())
+        //            {
+        //                double flight_level = record.at("090").at("Flight Level"); // is mapped in ft
+        //                record.at("090").at("Flight Level") = flight_level* 1e-2;  // ft to fl
+        //            }
 
         // "141":  "Truncated Time of Day": 221.4296875 mapped to "140.Time-of-Day"
 
-        if (record.find("141") != record.end()
-                && record.at("141").find("Truncated Time of Day") != record.at("141").end())
+        if (record.contains("141") && record.at("141").contains("Truncated Time of Day"))
         {
             if (sac > -1 && sic > -1 ) // bingo
             {
@@ -214,9 +213,9 @@ void ASTERIXDecodeJob::processRecord (unsigned int category, nlohmann::json& rec
                     //double tod = record.at("140").at("Time-of-Day");
                     tod += cat002_last_tod_period_.at(sac_sic);
 
-//                    loginf << "corrected " << String::timeStringFromDouble(record.at("140").at("Time-of-Day"))
-//                           << " to " << String::timeStringFromDouble(tod)
-//                           << " last update " << cat002_last_tod_period_.at(sac_sic);
+                    //                    loginf << "corrected " << String::timeStringFromDouble(record.at("140").at("Time-of-Day"))
+                    //                           << " to " << String::timeStringFromDouble(tod)
+                    //                           << " last update " << cat002_last_tod_period_.at(sac_sic);
 
                     record["140"]["Time-of-Day"] = tod;
                 }
@@ -228,10 +227,10 @@ void ASTERIXDecodeJob::processRecord (unsigned int category, nlohmann::json& rec
                     record["140"]["Time-of-Day"] = nullptr;
                 }
 
-//                loginf << "UGA " << String::timeStringFromDouble(record.at("140").at("Time-of-Day"))
-//                       << " sac " << sac << " sic " << sic << " cnt " << cat002_last_tod_period_.count(sac_sic);
+                //                loginf << "UGA " << String::timeStringFromDouble(record.at("140").at("Time-of-Day"))
+                //                       << " sac " << sac << " sic " << sic << " cnt " << cat002_last_tod_period_.count(sac_sic);
 
-//                assert (record.at("140").at("Time-of-Day") > 3600.0);
+                //                assert (record.at("140").at("Time-of-Day") > 3600.0);
             }
             else
             {
@@ -262,7 +261,7 @@ void ASTERIXDecodeJob::processRecord (unsigned int category, nlohmann::json& rec
     {
         //"030": "Time of Day": 33501.4140625
 
-        if (record.find("030") != record.end())
+        if (record.contains("030"))
         {
             if (sac > -1 && sic > -1) // bingo
             {
@@ -276,13 +275,11 @@ void ASTERIXDecodeJob::processRecord (unsigned int category, nlohmann::json& rec
     }
     else if (category == 21)
     {
-        //"030": "Time of Day": 33501.4140625
-
-        if (record.find("150") != record.end()) // true airspeed
+        if (record.contains("150")) // true airspeed
         {
             json& air_speed_item = record.at("150");
-            assert (air_speed_item.find("IM") != air_speed_item.end());
-            assert (air_speed_item.find("Air Speed") != air_speed_item.end());
+            assert (air_speed_item.contains("IM"));
+            assert (air_speed_item.contains("Air Speed"));
 
             bool mach = air_speed_item.at("IM") == 1;
             double airspeed = air_speed_item.at("Air Speed");
@@ -298,14 +295,33 @@ void ASTERIXDecodeJob::processRecord (unsigned int category, nlohmann::json& rec
                 air_speed_item["Air Speed [mach]"] = airspeed/666.739;
             }
         }
-        else if (record.find("150") != record.end())
-        {
-            json& ground_speed_item = record.at("160");
-            assert (ground_speed_item.find("IM") != ground_speed_item.end());
-            assert (ground_speed_item.find("Air Speed") != ground_speed_item.end());
+//        else if (record.contains("160"))
+//        {
+//            json& ground_speed_item = record.at("160");
+//            //assert (ground_speed_item.contains("IM"));
+//            assert (ground_speed_item.contains("Air Speed));
 
-            double ground_speed = ground_speed_item.at("Ground Speed");
-            ground_speed_item.at("Ground Speed") = ground_speed * 3600;
+//            double ground_speed = ground_speed_item.at("Ground Speed");
+//            ground_speed_item.at("Ground Speed") = ground_speed * 3600;
+//        }
+    }
+    else if (category == 62)
+    {
+        if (record.contains("185"))
+        {
+            //185.Vx Vy
+            json& speed_item = record.at("185");
+            assert (speed_item.contains("Vx"));
+            assert (speed_item.contains("Vy"));
+
+            double v_x = speed_item.at("Vx");
+            double v_y = speed_item.at("Vy");
+
+            double speed = sqrt(pow(v_x, 2) + pow(v_y, 2)) * 1.94384; // ms2kn
+            double track_angle = atan2(v_x, v_y) * RAD2DEG;
+
+            speed_item["Ground Speed"] = speed;
+            speed_item["Track Angle"] = track_angle;
         }
     }
 

@@ -50,7 +50,7 @@ DBOMinMaxDBJob::~DBOMinMaxDBJob()
 
 void DBOMinMaxDBJob::run ()
 {
-    loginf  << "PostProcessDBJob: run: start";
+    loginf  << "DBOMinMaxDBJob: run: start";
 
     started_ = true;
 
@@ -70,7 +70,7 @@ void DBOMinMaxDBJob::run ()
     boost::posix_time::time_duration diff = loading_stop_time_ - loading_start_time_;
     load_time= diff.total_milliseconds()/1000.0;
 
-    loginf  << "PostProcessDBJob: run: db postprocessing done (" << load_time << " s).";
+    loginf  << "DBOMinMaxDBJob: run: db postprocessing done (" << load_time << " s).";
     done_=true;
 }
 
@@ -91,14 +91,14 @@ void DBOMinMaxDBJob::createMinMaxValuesNormal ()
 
 void DBOMinMaxDBJob::processTable (const DBTable& table)
 {
-    loginf  << "DBInterface: processTable: getting minimum and maximum of all variables of table " << table.name();
+    loginf  << "DBOMinMaxDBJob: processTable: getting minimum and maximum of all variables of table " << table.name();
 
     assert (table.existsInDB());
     std::vector <std::string> minmax;
 
     std::vector <std::pair <std::string, std::string> > inserted_variable_names; // object name, variable
 
-    logdbg  << "DBInterface: createMinMaxValues: executing command";
+    logdbg  << "DBOMinMaxDBJob: processTable: executing command";
     std::shared_ptr<DBResult> result = db_interface_.queryMinMaxNormalForTable (table);
 
     assert (result);
@@ -107,7 +107,7 @@ void DBOMinMaxDBJob::processTable (const DBTable& table)
     //std::string text;
     std::shared_ptr<Buffer> buffer = result->buffer();
 
-    logdbg  << "DBInterface: createMinMaxValues: setting variables";
+    logdbg  << "DBOMinMaxDBJob: processTable: setting variables";
 
     assert (buffer);
 
@@ -178,7 +178,7 @@ void DBOMinMaxDBJob::processTable (const DBTable& table)
 
         if (minmax.at(0) == NULL_STRING || minmax.at(1) == NULL_STRING)
         {
-            loginf << "DBInterface: createMinMaxValues: id " << col_it.first << " object " << object_.name()
+            logdbg << "DBOMinMaxDBJob: processTable: id " << col_it.first << " object " << object_.name()
                    << " has NULL values";
             continue;
         }
@@ -186,7 +186,7 @@ void DBOMinMaxDBJob::processTable (const DBTable& table)
         if (find(inserted_variable_names.begin(), inserted_variable_names.end(),
                  std::pair<std::string, std::string> (object_.name(), col_it.first)) == inserted_variable_names.end())
         {
-            loginf << "DBInterface: createMinMaxValues: inserting id " << col_it.first << " object " <<  object_.name()
+            logdbg << "DBOMinMaxDBJob: processTable: inserting id " << col_it.first << " object " <<  object_.name()
                    << " min " << minmax.at(0) << " max " << minmax.at(1);
             db_interface_.insertMinMax(col_it.first, object_.name(), minmax.at(0), minmax.at(1));
             inserted_variable_names.push_back (std::pair<std::string, std::string> (object_.name(), col_it.first));

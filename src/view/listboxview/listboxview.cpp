@@ -86,6 +86,11 @@ bool ListBoxView::init()
     connect (widget_->getDataWidget(), &ListBoxViewDataWidget::exportDoneSignal,
              widget_->configWidget(), &ListBoxViewConfigWidget::exportDoneSlot);
 
+    connect (widget_->configWidget(), &ListBoxViewConfigWidget::reloadRequestedSignal,
+             &ATSDB::instance().objectManager(), &DBObjectManager::loadSlot);
+    connect (data_source_, &ListBoxViewDataSource::loadingStartedSignal,
+             widget_->configWidget(), &ListBoxViewConfigWidget::loadingStartedSlot);
+
     connect (this, &ListBoxView::showOnlySelectedSignal,
              widget_->getDataWidget(), &ListBoxViewDataWidget::showOnlySelectedSlot);
     connect (this, &ListBoxView::usePresentationSignal,

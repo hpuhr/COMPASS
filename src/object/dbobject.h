@@ -29,7 +29,7 @@
 #include "configurable.h"
 #include "dbovariable.h"
 #include "dboschemametatabledefinition.h"
-#include "dboassociationentry.h"
+#include "dboassociationcollection.h"
 
 class PropertyList;
 class MetaDBTable;
@@ -161,6 +161,7 @@ public:
 
     /// @brief Returns if incremental read for DBO type was prepared
     bool isLoading ();
+    bool isPostProcessing ();
     /// @brief Returns if DBO exists and has data in the database
     bool hasData ();
     /// @brief Returns number of elements for DBO type

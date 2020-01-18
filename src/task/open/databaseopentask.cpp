@@ -27,6 +27,8 @@ DatabaseOpenTask::DatabaseOpenTask(const std::string& class_id, const std::strin
     : Task("DatabaseOpenTask", "Open a Database", true, false, task_manager),
       Configurable (class_id, instance_id, &task_manager, "task_db_open.json")
 {
+    tooltip_ = "Allows creating new databases, or managing and accessing existing ones. This task can not be run,"
+               " but is performed using the 'Open' button.";
 }
 
 TaskWidget* DatabaseOpenTask::widget ()

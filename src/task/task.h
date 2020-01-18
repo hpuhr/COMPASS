@@ -81,6 +81,11 @@ public:
         return task_manager_;
     }
 
+    std::string tooltip() const
+    {
+        return tooltip_;
+    }
+
 protected:
     std::string name_;
     std::string gui_name_;
@@ -88,10 +93,9 @@ protected:
     bool expert_only_ {false};
     bool done_ {false};
 
+    std::string tooltip_;
+
     TaskManager& task_manager_;
 };
 
 #endif // TASK_H
-
-
-
