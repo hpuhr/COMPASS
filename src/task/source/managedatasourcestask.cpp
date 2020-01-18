@@ -38,6 +38,8 @@ ManageDataSourcesTask::ManageDataSourcesTask(const std::string& class_id, const 
     : Task("ManageDataSourcesTask", "Manage Data Sources", true, false, task_manager),
       Configurable (class_id, instance_id, &task_manager, "task_manage_datasources.json")
 {
+    tooltip_ = "Allows management of data sources, as stored in the configuration as well as the database.";
+
     createSubConfigurables();
 }
 

@@ -26,6 +26,8 @@ ManageSchemaTask::ManageSchemaTask(const std::string& class_id, const std::strin
     : Task("ManageSchemaTask", "Manage DB Schema", true, true, task_manager),
       Configurable (class_id, instance_id, &task_manager, "task_manage_schema.json")
 {
+    tooltip_ = "Allows management of the database schema configuration and is reserved for expert users. "
+               "This task can not be run, but is performed using the GUI elements.";
 }
 
 TaskWidget* ManageSchemaTask::widget ()

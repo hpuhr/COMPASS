@@ -27,6 +27,8 @@ ManageDBObjectsTask::ManageDBObjectsTask(const std::string& class_id, const std:
     : Task("ManageDBObjectsTask", "Manage DBObjects", true, true, task_manager),
       Configurable (class_id, instance_id, &task_manager, "task_manage_dbojects.json")
 {
+    tooltip_ ="Allows management of DBObjects and is reserved for expert users. This task can not be run,"
+              " but is performed using the GUI elements.";
 }
 
 TaskWidget* ManageDBObjectsTask::widget ()

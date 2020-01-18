@@ -40,6 +40,7 @@ PostProcessTask::PostProcessTask(const std::string& class_id, const std::string&
     : Task("PostProcessTask", "Post-Process", false, false, task_manager),
       Configurable (class_id, instance_id, &task_manager, "task_postprocess.json")
 {
+    tooltip_ = "Allows calculation which data sources were active and of minimum/maximum data information.";
 }
 
 TaskWidget* PostProcessTask::widget ()

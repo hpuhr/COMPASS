@@ -158,6 +158,8 @@ void TaskManagerWidget::updateTaskList ()
         assert (current_task);
 
         QListWidgetItem* item = new QListWidgetItem(current_task->guiName().c_str(), task_list_); // icon,
+        if (current_task->tooltip().size())
+            item->setToolTip(current_task->tooltip().c_str());
         //item->setFlags(item->flags() | Qt::ItemIsUserCheckable); // set checkable flag
         //item->setCheckState(Qt::Unchecked); // AND initialize check state
 
