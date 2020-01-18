@@ -295,6 +295,34 @@ inline bool replace(std::string& str, const std::string& from, const std::string
     return true;
 }
 
+// 0 if same, -1 if v1 > v2, 1 if v1 < v2
+inline int compareVersions (const std::string& v1_str, const std::string& v2_str)
+{
+    std::vector<std::string> v1_parts = split (v1_str, '.');
+    std::vector<std::string> v2_parts = split (v2_str, '.');
+
+    assert (v1_parts.size() == v2_parts.size());
+
+    int v1_part;
+    int v2_part;
+    for (unsigned int cnt=0; cnt < v1_parts.size(); ++cnt)
+    {
+        v1_part = std::stoi(v1_parts.at(cnt));
+        v2_part = std::stoi(v2_parts.at(cnt));
+
+        if (v1_part > v2_part) // -1 if v1 > v2
+            return -1;
+
+        if (v1_part < v2_part) // 1 if v1 < v2
+            return 1;
+
+        //  if (v1_part == v2_part)
+        //      continue;
+    }
+
+    return 0; // same
+}
+
 }
 
 //template <typename T> std::string formatBinaryString (T val)

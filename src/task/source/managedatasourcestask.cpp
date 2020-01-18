@@ -168,10 +168,9 @@ void ManageDataSourcesTask::deleteStoredDataSource (const std::string& dbo_name,
 }
 
 const std::map<unsigned int, StoredDBODataSource>& ManageDataSourcesTask::storedDataSources(
-        const std::string& dbo_name) const
+        const std::string& dbo_name)
 {
-    assert (stored_data_sources_.count(dbo_name));
-    return stored_data_sources_.at(dbo_name);
+    return stored_data_sources_[dbo_name]; // might not have ones, so use []
 }
 
 DBOEditDataSourceActionOptionsCollection ManageDataSourcesTask::getSyncOptionsFromDB (const std::string& dbo_name)

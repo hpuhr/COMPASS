@@ -54,7 +54,7 @@ public:
     StoredDBODataSource& storedDataSource (const std::string& dbo_name, unsigned int id);
     StoredDBODataSource& addNewStoredDataSource (const std::string& dbo_name);
     void deleteStoredDataSource (const std::string& dbo_name, unsigned int id);
-    const std::map<unsigned int, StoredDBODataSource>& storedDataSources(const std::string& dbo_name) const;
+    const std::map<unsigned int, StoredDBODataSource>& storedDataSources(const std::string& dbo_name);
 
     DBOEditDataSourceActionOptionsCollection getSyncOptionsFromDB (const std::string& dbo_name);
     DBOEditDataSourceActionOptionsCollection getSyncOptionsFromCfg (const std::string& dbo_name);

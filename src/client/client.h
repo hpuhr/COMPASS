@@ -31,20 +31,33 @@ class Client : public QApplication
 {
 public:
     ///@brief Constructor.
-  Client(int& argc, char ** argv);
+  Client(int& argc, char** argv);
   ///@brief Destructor.
   virtual ~Client() { }
 
   ///@brief Re-implementation from QApplication so exceptions can be thrown in slots.
-  virtual bool notify(QObject * receiver, QEvent * event);
+  virtual bool notify(QObject* receiver, QEvent* event);
 
   bool quitRequested() const;
 
 private:
+  std::string system_install_path_;
   bool quit_requested_ {false};
 
-  void copyConfigurationAndData (const std::string& system_install_path);
-  void copyConfiguration (const std::string& system_install_path);
+  bool config_and_data_reset_wanted_ {false};
+
+  bool config_and_data_exists_ {false};
+  bool config_and_data_copied_ {false};
+
+  bool upgrade_needed_ {false};
+  bool config_and_data_deletion_wanted_ {false};
+
+  void checkNeededActions ();
+  void performNeededActions ();
+
+  void deleteConfigurationAndData ();
+  void copyConfigurationAndData ();
+  void copyConfiguration ();
 };
 //}
 
