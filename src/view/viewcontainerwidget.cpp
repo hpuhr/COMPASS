@@ -20,6 +20,8 @@
 #include "viewmanager.h"
 #include "logger.h"
 #include "stringconv.h"
+#include "atsdb.h"
+#include "config.h"
 
 #include <QTabWidget>
 #include <QVBoxLayout>
@@ -29,7 +31,8 @@
 using namespace Utils;
 
 
-ViewContainerWidget::ViewContainerWidget(const std::string &class_id, const std::string &instance_id, ViewManager *view_manager)
+ViewContainerWidget::ViewContainerWidget(const std::string &class_id, const std::string &instance_id,
+                                         ViewManager *view_manager)
 :   QWidget(nullptr), Configurable(class_id, instance_id, view_manager), view_manager_(*view_manager)
 {
   logdbg  << "ViewContainerWidget: constructor: instance " << instanceId();
@@ -42,6 +45,9 @@ ViewContainerWidget::ViewContainerWidget(const std::string &class_id, const std:
   registerParameter ("min_height", &min_height_, 700);
 
   name_ = "Window"+std::to_string(String::getAppendedInt (instanceId()));
+
+  std::string title =  "ATSDB v"+ATSDB::instance().config().getString("version")+" "+name_;
+  QWidget::setWindowTitle (title.c_str());
 
   QHBoxLayout *layout = new QHBoxLayout (this);
   layout->setContentsMargins(0, 0, 0, 0);

@@ -37,6 +37,7 @@
 #include "dbobject.h"
 #include "files.h"
 #include "config.h"
+#include "jobmanager.h"
 
 using namespace Utils;
 using namespace std;
@@ -54,9 +55,8 @@ MainWindow::MainWindow()
     QSettings settings("ATSDB", "Client");
     restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
 
-    SimpleConfig config ("config.json"); // TODO move to ATSDB
-    assert (config.existsId("version"));
-    std::string title =  "ATSDB v"+config.getString("version");
+    assert (ATSDB::instance().config().existsId("version"));
+    std::string title =  "ATSDB v"+ATSDB::instance().config().getString("version");
 
     QWidget::setWindowTitle (title.c_str());
 
@@ -116,6 +116,8 @@ void MainWindow::startSlot ()
     ATSDB::instance().viewManager().init(tab_widget_);
 
     tab_widget_->setCurrentIndex(0);
+
+    emit JobManager::instance().databaseIdle(); // to enable ViewManager add button, slightly HACKY
 
     QApplication::restoreOverrideCursor();
 }

@@ -20,27 +20,19 @@
 
 #include "propertylist.h"
 #include "singleton.h"
-//#include "dbovariableset.h"
 #include "configurable.h"
 
 #include <set>
 #include <map>
 #include <vector>
 
-//class Buffer;
-//class DataSource;
 class DBInterface;
-//class DBTableInfo;
-//class DBObject;
 class DBObjectManager;
-//class DBSchema;
 class DBSchemaManager;
 class FilterManager;
 class TaskManager;
 class ViewManager;
-//class StructureReader;
-//class Job;
-//class BufferReceiver;
+class SimpleConfig;
 
 /**
  * @mainpage  ATSDB Main Page
@@ -48,7 +40,7 @@ class ViewManager;
  * This library encapsulates a database system and allows reading and writing of flight surveillance data.
  *
  * The main access point is the class ATSDB. Using this singleton, surveillance data can be written using the RDL
- * tool and SQLite3 file containers or a MySQL database. Such databases can be opened using the tool Palantir.
+ * tool and SQLite3 file containers or a MySQL database.
  *
  * Most of the classes were written to be persistent, meaning that local parameters can saved/restored using a sophisticated
  * Configuration framework. Also, there exists a mechanism for dynamic creation of instances based on such a Configuration,
@@ -105,51 +97,21 @@ public:
     FilterManager& filterManager ();
     TaskManager& taskManager ();
     ViewManager& viewManager ();
+    SimpleConfig& config ();
 
     bool ready ();
 
-    ///@brief Adds data to a DBO from a C struct data pointer.
-    //void insert (const std::string &dbo_type, void *data);
-    //void insert (Buffer *buffer, std::string table_name);
-
-    ///@brief Returns flag indicating if error state was set.
-    //bool error();
-
-    ///@brief Returns buffer with data from a DBO type, from a specific id and variables.
-//    void getInfo (JobOrderer *orderer, boost::function<void (Job*)> done_function,
-//            boost::function<void (Job*)> obsolete_function, const std::string &dbo_type, unsigned int id, DBOVariableSet read_list);
-//    ///@brief Returns buffer with data from a DBO type, from specific ids and other parameters.
-//    void getInfo (JobOrderer *orderer, boost::function<void (Job*)> done_function,
-//            boost::function<void (Job*)> obsolete_function, const std::string &dbo_type,
-//            std::vector<unsigned int> ids, DBOVariableSet read_list, bool use_filters, std::string order_by_variable,
-//            bool ascending, unsigned int limit_min=0, unsigned int limit_max=0, bool finalize=true);
-
-//    void getDistinctStatistics (JobOrderer *orderer, boost::function<void (Job*)> done_function,
-//            boost::function<void (Job*)> obsolete_function, const std::string &dbo_type, DBOVariable *variable,
-//            unsigned int sensor_number);
-
-//    void deleteAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string filter);
-//    void updateAllRowsWithVariableValue (DBOVariable *variable, std::string value, std::string new_value, std::string filter);
-//    void getMinMaxOfVariable (DBOVariable *variable, std::string filter_condition, std::string &min, std::string &max);
-//    //void getDistinctValues (DBOVariable *variable, std::string filter_condition, std::vector<std::string> &values);
-
-//    // Parameters in decimal, return buffer with track_num, min(tod), max(tod)
-//    Buffer *getTrackMatches (bool has_mode_a, unsigned int mode_a, bool has_ta, unsigned int ta, bool has_ti, std::string ti,
-//            bool has_tod, double tod_min, double tod_max);
-
-
 protected:
-    bool initialized_;
+    bool initialized_ {false};
 
+    std::unique_ptr<SimpleConfig> simple_config_;
     /// DB interface, encapsulating all database functionality.
-    DBInterface* db_interface_;
-    DBObjectManager* dbo_manager_;
-    DBSchemaManager* db_schema_manager_;
-    FilterManager* filter_manager_;
-    TaskManager* task_manager_;
-    ViewManager* view_manager_;
-    /// Structure reader, can read data from defined C structs.
-    //StructureReader *struct_reader_;
+    std::unique_ptr<DBInterface> db_interface_;
+    std::unique_ptr<DBObjectManager> dbo_manager_;
+    std::unique_ptr<DBSchemaManager> db_schema_manager_;
+    std::unique_ptr<FilterManager> filter_manager_;
+    std::unique_ptr<TaskManager> task_manager_;
+    std::unique_ptr<ViewManager> view_manager_;
 
     virtual void checkSubConfigurables ();
 
