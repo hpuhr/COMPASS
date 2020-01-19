@@ -23,6 +23,8 @@ find_package(Qt5Widgets)
 find_package(Qt5Core)
 find_package(Qt5OpenGL)
 
+message("Qt Widgets version: ${Qt5Widgets_VERSION}")
+
 set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS ON)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)

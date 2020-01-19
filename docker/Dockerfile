@@ -92,7 +92,8 @@ RUN updatedb
 RUN apt-get install chrpath
 
 ENV UBUNTU_MENUPROXY=
-ENV QT_QPA_PLATFORMTHEME=
+#ENV QT_QPA_PLATFORMTHEME=
+ENV QT_STYLE_OVERRIDE=adwaita
 
 USER sk
 WORKDIR /app/workspace/atsdb/docker
