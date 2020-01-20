@@ -41,19 +41,18 @@ If an outdated configuration is detected, one of the following dialogs will be s
 
 If 'Yes' is selected, the update is performed and the application starts. If 'No' is selected, the application will quit. If previous changes to an outdated configuration are of strong importance, please contact the author for support. 
 
-\section{First Dialog}
+\section{Tasks}
 
-When the application is started a first dialog is shown. 
+When the application is started the Task window is shown. 
 
 \begin{figure}[H]
-  \hspace*{-2cm}
-    \includegraphics[width=18cm]{../screenshots/db_config_connect.png}
-  \caption{Connecting to a database}
+  \hspace*{-2.5cm}
+    \includegraphics[width=19cm]{../screenshots/task_open_database.png}
+  \caption{Startup: Task Window}
 \end{figure}
 
 On the left-hand side a number of tasks are listed (task list), on the right hand side a GUI of the currently selected task is shown. On the bottom, a log window is shown. All of these GUI elements can be resized, hidden and shown a again if wanted. \\
 
-\section{Tasks}
 
 The following tasks exist:
 \begin{itemize}
@@ -72,6 +71,8 @@ The following tasks exist:
 
 A task (in this context) is an action that has to be performed with interaction of the user. The GUI was designed to guide a user through the workflow of their respective use-case, giving hints about what tasks can and should be performed. \\
 
+If the mouse cursor is hovered over a task, a short tooltip description is given. \\
+
 The following task states are possible:
 
 \begin{itemize}
@@ -87,7 +88,7 @@ Tasks which are not available are deactivated (shown in lighter color) and can n
 
 Active tasks can be selected and performed, either by using the 'Run Current Task' button or respective buttons elements in the task's GUI. \\
 
-Whenever a task is performed, the state of all other tasks is updated. The states of the tasks are persisted (at correct application shutdown) in the database, so when re-opening existing ones the task states are shown correctly. \\
+Whenever a task is done, the state of all other tasks is updated and the next recommended task is selected (if available). The states of the tasks are persisted (at correct application shutdown) in the database, so when re-opening existing ones the task states are shown correctly. \\
 
 Depending on the use-case, some tasks are required, e.g. the Post-Process task. When all required tasks have been performed, the 'Start' button can be used to proceed to the Management window.
 

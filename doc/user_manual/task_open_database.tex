@@ -1,6 +1,16 @@
 \section{Task: Open a Database}
 \label{sec:task_open_database}
 
+This task allows creating new databases, or managing and accessing existing ones. This task can not be run, but is performed using the 'Open' button (as indicated by the inactive 'Run Current Task' button).
+
+\begin{figure}[H]
+  \hspace*{-2.5cm}
+    \includegraphics[width=19cm]{../screenshots/task_open_database.png}
+  \caption{Task: Open a database}
+\end{figure}
+
+Two options exist: Either a MySQL++ connection is used (MySQL or MariaDB server needed) or an SQLite3 database file container is used (no additional setup needed).
+
 \subsection{Opening a SQLite3 File Container}
 \label{sec:sqlite_open}
 For opening a file container, three actions are available:
@@ -15,7 +25,7 @@ After selection of the wanted database container, the 'Open' button can be used 
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=8cm,frame]{../screenshots/sqlite3_open.png}
+    \includegraphics[width=16cm,frame]{../screenshots/sqlite3_open.png}
   \caption{Opening a SQLite3 file container}
   \label{fig:sqlite3_open}
 \end{figure} 
@@ -26,7 +36,7 @@ After selection of the wanted database container, the 'Open' button can be used 
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=7cm,frame]{../screenshots/mysql_server_selection.png}
+    \includegraphics[width=16cm,frame]{../screenshots/mysql_server_selection.png}
   \caption{Connecting to a MySQL server}
   \label{fig:mysql_connect}
 \end{figure}
@@ -51,7 +61,7 @@ For connecting to a MySQL server, several parameters have to be entered:
 
 To connect to a defined MySQL server, press the 'Connect' button.\\
 
-\subsubsection{Access to SASS-C MySQL Servers}
+\paragraph{Access to SASS-C MySQL Servers}
 
 Please note that it is not recommended to use SASS-C databases on which actual performance evaluations are to be performed. \\
 Using ATSDB, database operations can be performed which might impede results later obtained by using SASS-C. For this reason, it is recommended to either clone an evaluation or use one on which no later SASS-C evaluations are performed.
@@ -105,17 +115,17 @@ It might also be the case that your installation of SASS-C has an enabled firewa
 \begin{figure}[H]
   \center
     \includegraphics[width=15cm,frame]{../screenshots/centos_firewall.png}
-  \caption{MySQL Server firewall example}
+  \caption{CentOS MySQL Server firewall example}
 \end{figure}
 
-\subsubsection{Error Messages}
+\paragraph{Error Messages}
 
 If a wrong database name or IP address is used, error messages can be e.g. \\
 
 \begin{figure}[H]
   \center
     \includegraphics[width=9cm,frame]{../screenshots/mysql_connect_error.png}
-  \caption{MySQL Server not found error.}
+  \caption{MySQL Server not found error}
 \end{figure}
 
  or 
@@ -123,7 +133,7 @@ If a wrong database name or IP address is used, error messages can be e.g. \\
 \begin{figure}[H]
   \center
     \includegraphics[width=9cm,frame]{../screenshots/mysql_user_error.png}
-  \caption{MySQL user incorrect error.}
+  \caption{MySQL user incorrect error}
 \end{figure}
 
 If such an error occurs, correcting the server host name and or user/password should solve the problem. 
@@ -136,7 +146,7 @@ After successful connection, all existing databases in the server are shown in t
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=5.5cm,frame]{../screenshots/mysql_database_selection.png}
+    \includegraphics[width=16cm,frame]{../screenshots/mysql_database_selection.png}
   \caption{Selecting a MySQL database.}
   \label{fig:mysql_db_select}
 \end{figure}
