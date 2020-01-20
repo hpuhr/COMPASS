@@ -1,4 +1,27 @@
-\section{Connecting to a MySQL Server}
+\section{Task: Open a Database}
+\label{sec:task_open_database}
+
+\subsection{Opening a SQLite3 File Container}
+\label{sec:sqlite_open}
+For opening a file container, three actions are available:
+
+\begin{itemize}  
+\item New: Creates a new (empty) SQLite3 container and adds it to the 'File Selection' list
+\item Add: Adds an existing  SQLite3 container and adds it to the 'File Selection' list
+\item Remove: Removes an entry from the 'File Selection' list
+\end{itemize}
+
+After selection of the wanted database container, the 'Open' button can be used for opening the database container.
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=8cm,frame]{../screenshots/sqlite3_open.png}
+  \caption{Opening a SQLite3 file container}
+  \label{fig:sqlite3_open}
+\end{figure} 
+
+
+\subsection{Connecting to a MySQL Server}
 \label{sec:mysql_connect}
 
 \begin{figure}[H]
@@ -28,7 +51,7 @@ For connecting to a MySQL server, several parameters have to be entered:
 
 To connect to a defined MySQL server, press the 'Connect' button.\\
 
-\subsection{Access to SASS-C MySQL Servers}
+\subsubsection{Access to SASS-C MySQL Servers}
 
 Please note that it is not recommended to use SASS-C databases on which actual performance evaluations are to be performed. \\
 Using ATSDB, database operations can be performed which might impede results later obtained by using SASS-C. For this reason, it is recommended to either clone an evaluation or use one on which no later SASS-C evaluations are performed.
@@ -75,7 +98,7 @@ exit
 
 After executing these steps once, remote access to this MySQL server from the specified IP address is enabled.
 
-\subsubsection{Firewall}
+\paragraph{Firewall}
 
 It might also be the case that your installation of SASS-C has an enabled firewall. If that is the case, access to be MySQL ports must be enabled.
 
@@ -85,7 +108,7 @@ It might also be the case that your installation of SASS-C has an enabled firewa
   \caption{MySQL Server firewall example}
 \end{figure}
 
-\subsection{Error Messages}
+\subsubsection{Error Messages}
 
 If a wrong database name or IP address is used, error messages can be e.g. \\
 
@@ -104,3 +127,26 @@ If a wrong database name or IP address is used, error messages can be e.g. \\
 \end{figure}
 
 If such an error occurs, correcting the server host name and or user/password should solve the problem. 
+
+
+\subsection{Opening a MySQL Database}
+\label{sec:mysql_open_db}
+
+After successful connection, all existing databases in the server are shown in the 'Database name' drop-down menu. The last used one is selected automatically.
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=5.5cm,frame]{../screenshots/mysql_database_selection.png}
+  \caption{Selecting a MySQL database.}
+  \label{fig:mysql_db_select}
+\end{figure}
+
+Several actions are available:
+
+\begin{itemize}  
+\item Drop-down selection: Selects the current database
+\item New button: Allows creation of a new database
+\item Clear button: Deletes all data with current database (after confirmation)
+\item Delete button: Deletes current database (after confirmation)
+\item Open button: Opens the current database
+\end{itemize} 

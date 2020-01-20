@@ -1,6 +1,6 @@
 {
     "parameters": {
-        "current_filename": "/home/sk/atsdb_demo/test.ff",
+        "current_filename": "",
         "current_framing": "ioss",
         "debug_jasterix": false,
         "limit_ram": false
@@ -104,18 +104,6 @@
                     "edition": "2.1",
                     "ref": "",
                     "spf": ""
-                }
-            }
-        },
-        "ASTERIXFile": {
-            "ASTERIXFilehomeskatsdb_demotest.ff": {
-                "parameters": {
-                    "name": "/home/sk/atsdb_demo/test.ff"
-                }
-            },
-            "ASTERIXFilehomeskdatamalta20190506.ff": {
-                "parameters": {
-                    "name": "/home/sk/data/malta/20190506.ff"
                 }
             }
         },

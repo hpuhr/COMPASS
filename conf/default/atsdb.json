@@ -58,21 +58,9 @@
                     "SQLiteConnection": {
                         "SQLite Connection": {
                             "parameters": {
-                                "last_filename": "/home/sk/atsdb_demo/test.db"
+                                "last_filename": ""
                             },
                             "sub_configs": {
-                                "SQLiteFile": {
-                                    "SQLiteFilehomeskatsdb_demotest.db": {
-                                        "parameters": {
-                                            "name": "/home/sk/atsdb_demo/test.db"
-                                        }
-                                    },
-                                    "SQLiteFilehomeskdatamalta20190506.db": {
-                                        "parameters": {
-                                            "name": "/home/sk/data/malta/20190506.db"
-                                        }
-                                    }
-                                }
                             }
                         }
                     }
