@@ -41,6 +41,7 @@ layout crop_features="true"
                    stroke-tessellation-size: 1km;
                    render-lighting:          false;
                    altitude-clamping:        none;
+                   render-depth-test: false;
                 }            
             </style>
         </styles>
