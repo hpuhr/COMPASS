@@ -88,6 +88,7 @@ TaskManagerWidget::TaskManagerWidget(TaskManager& task_manager, QWidget *parent)
         task_stuff_container_layout->addWidget(task_list_);
 
         expert_check_ = new QCheckBox("Expert Mode");
+        expert_check_->setChecked(task_manager_.expertMode());
         connect (expert_check_, &QCheckBox::clicked, this, &TaskManagerWidget::expertModeToggledSlot);
         task_stuff_container_layout->addWidget(expert_check_);
 

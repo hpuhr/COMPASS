@@ -1,7 +1,7 @@
 \section{Task: Import ASTERIX Data}
 \label{sec:task_import_asterix}
 
-To execute this task select 'Task'->  'Import ASTERIX Data` in the top menu bar. \\
+This tash allows importing of ASTERIX data recording files into the opened database. \\
 
 Please note that the following framings are currently supported:
 \begin{itemize}  
@@ -30,27 +30,119 @@ Please note that the following ASTERIX categories, editions, reserved expansion 
 \end{tabular} \\
 \  \\
 
-Please note that sensor status messages currently are decoded, but not inserted into the database.
+Please note that sensor status messages can be decoded, but are not inserted into the database. Decoding of ASTERIX CAT002 is recommended if CAT001 data is imported, since the timestamps are derived from it (if not available in CAT001).
+
+\begin{figure}[H]
+  \hspace*{-2.5cm}
+    \includegraphics[width=19cm]{../screenshots/asterix_import_data.png}
+  \caption{Task: Import ASTERIX data}
+\end{figure}
+
+There exist 3 tabs:
+
+\begin{itemize}  
+\item Main: File list and support functions/parameters
+\item Decoder: jASTERIX decoder settings
+\item Mappings: Defintion of created database content based on decoded data
+\end{itemize}
+\ \\
+
+\subsection{Main Tab}
+
+In the 'File Selection' list, a list of available ASTERIX data files is given. Entries can be added using the 'Add' button or removed using the 'Remove' buttons. \\
+
+Please add and select the file to be imported, after which the 'Run Current Task' button will become available. \\
+
+\begin{figure}[H]
+  \hspace*{-2.5cm}
+    \includegraphics[width=19cm]{../screenshots/asterix_import_data_ready.png}
+  \caption{Task: Import ASTERIX data available}
+\end{figure}
+
+Using the 'Debug in Console' checkbox, additional debugging information is output to the console, and the ASTERIX decoding is switched to single-threading for easier investigation. \\
+
+Using the 'Limit RAM Usage' checkbox, parallel processing is limited (decreasing RAM usage and processing speed) for usage on smaller workstations. \\
+
+Using the 'Create Mapping Stubs' button, the selected file can be processed and unmapped data entries (which could be mapped to database content) are created in the 'Mappings' definition. \\
+
+Using the 'Test Import' button, the import function can be tested without inserting the data into the 
+database, the 'Import' imports the selected file with the given options. This function can be run multiple times. \\
+
+\subsection{Decoder Tab}
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=10cm]{../screenshots/asterix_import_data.png}
-  \caption{Import ASTERIX Data task}
+    \includegraphics[width=16cm,frame]{../screenshots/asterix_import_data_decoder.png}
+  \caption{Task: Import ASTERIX data decoder}
 \end{figure}
 
-In the 'File Selection' list, a list of available ASTERIX data files is given. Entries can be added using the 'Add' button or removed using the 'Remove' buttons. Please add and select the file to be imported.\\
+\paragraph{Framing}
+Using the 'Framing' drop-down menu, the current framing can be selected. Using the 'Edit' button, the current framing definition is opened in a text editor.
 
-In the 'ASTERIX Configuration' widget the framing, which categories are to be encoded and the currently acitive editions can be set.
+\paragraph{Categories}
 
-Further below, the list of existing JSON object parsers is shown. Each parser parses JSON data and maps to a specific DBO. 
+For each category, a number of elements exist:
 
-To inspect or edit a JSON object parser, click on it in the list. This step is not required for parsing, but it does give information which ASTERIX content is skipped and which is parsed, and to DBObject variable it is written. \\\\
+\begin{itemize}  
+\item Category checkbox: Number of category and checkbox defining if it should be decoded
+\item Edition: Drop-down menu to select the edition number to be used
+\item Edition Edit Button \includegraphics[width=0.5cm]{../../data/icons/edit.png}: Opens the current edition definition in a text editor
+\item REF: Drop-down menu to select the Reserved Expansion Field defition (if available)
+\item REF Edit Button \includegraphics[width=0.5cm]{../../data/icons/edit.png}: Opens the current REF definition in a text editor
+\item SPF: Drop-down menu to select the Special Purpose Field defition (if available)
+\item SPF Edit Button \includegraphics[width=0.5cm]{../../data/icons/edit.png}: Opens the current SPF definition in a text editor
+\end{itemize}
+\ \\
 
-Using the 'Debug in Console' checkbox, additional debugging information is output to the console, and the ASTERIX decoding is switched to single-threading for easier investigation.
+\paragraph{Additional}
 
-Using the 'Test Import' button, the import function can be tested without inserting the data into the database, the 'Import' imports the selected file with the given options. \\
+Using the 'Edit Data Block' button, the ASTERIX data block definition is opened in a text editor. \\
 
-During import a status indication will be shown:
+Using the 'Edit Categories' button, the ASTERIX definitions file is opened in a text editor. \\
+
+Using the 'Refresh' button, the all of the jASTERIX definitions are re-loaded from the harddisk (e.g. to update after file changes were made). \\
+
+\subsection{Mappings Tab}
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=16cm,frame]{../screenshots/asterix_import_data_mappings.png}
+  \caption{Task: Import ASTERIX data mappings}
+\end{figure}
+
+At the top, the GUI elements can be used to show/add/remove JSON objects parsers. Below that, the currently selected JSON object parser is shown and can be configured. \\
+
+A JSON object parser in this context is the function that parses the JSON content created by the jASTERIX parser, and creates database content from it. For each category a dedicated parser defines the mapping from JSON to database content. \\
+
+For common users normally no interaction is required, but it might be sometimes interesting what database content is created from which ASTERIX data.
+
+\paragraph{Top Elements}
+
+Using the drop-down menu, the to-be-shown parser can be selected. The buttons allow for adding and removing JSON object parsers.
+
+\paragraph{Parser GUI Elements}
+
+The exact definition of how the parsing works is out of scope for this document, so only a short summy is given here. For more information please contact the author.
+
+
+\begin{itemize}  
+\item JSON Object Parser Name: Named after the ASTERIX category and the DBObject to which it is mapped
+\item Variable List:
+\begin{itemize}  
+\item Active checkbox: Defines if the specific mapping is used
+\item JSON Key: JSON location and name of the data to be mapped, commonly 'Data Item Number'.'variable'
+\item Comment: Additional information with example values
+\item DBOVariable: Target variable to which this data is mapped
+\item Mandatory checkbox: Defines if the JSON object (from the ASTERIX record) is skipped if the JSON key is not found
+\item Unit: Unit and dimension of the JSON data, only defined if conversion is needed
+\item Format: Special format of the JSON data, only defined if conversion is needed
+\end{itemize}
+\end{itemize}
+\ \\
+
+\subsection{Running}
+
+Using the 'Run Current Task' button the task can be performed. During import a status indication will be shown:
 
 \begin{figure}[H]
   \center
@@ -64,14 +156,17 @@ After import, a confirmation will be shown:
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=10cm]{../screenshots/asterix_import_done.png}
+    \includegraphics[width=12cm]{../screenshots/asterix_import_done.png}
   \caption{Import ASTERIX data task done}
 \end{figure}
 
+\paragraph{Comments}
 Importing performance strongly depends on CPU performance (multi-threading very beneficial), but a import of 2.8 million target reports takes about 2 minutes on the author's hardware. \\
 
-\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please also note the currently not all data fields (as shown in the JSON object parsers) are imported.\\
+The (truncated) timestamps of CAT001 are calculated in a simple algorithm based on the CAT002 messages from the same sensor, so their timestamp data is slightly unreliable, but exact enough for e.g. time window filtering. \\
 
-The (truncated) timestamps of CAT001 are calculated in a simple algorithm based on the CAT002 messages from the same sensor, so their timestamp data is slightly unreliable, but exact enough for e.g. time window filtering. \\\\
+This task can be run several times, e.g. if multiple ASTERIX recordings from different data sources are to be imported. \\
 
-\includegraphics[width=0.5cm]{../../data/icons/hint.png} After the import it is recommended to re-start the application, since currently a memory leak during import exists. While this does not affect the import process, usage of the application directly after the import process will be slower than usual. A re-start of the application resolves this issue. This will be fixed in the next version. \\ 
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please note the currently not all data fields (as shown in the JSON object parsers) are imported.\\
+
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} After the import it is recommended to re-start the application after executing all tasks, since currently a memory leak during import exists. While this does not cause any issues, usage of the application directly after the import process may be slower than usual for very large datasets. A re-start of the application resolves this issue. \\ 
