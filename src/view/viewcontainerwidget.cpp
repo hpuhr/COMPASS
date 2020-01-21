@@ -22,6 +22,7 @@
 #include "stringconv.h"
 #include "atsdb.h"
 #include "config.h"
+#include "files.h"
 
 #include <QTabWidget>
 #include <QVBoxLayout>
@@ -45,6 +46,9 @@ ViewContainerWidget::ViewContainerWidget(const std::string &class_id, const std:
   registerParameter ("min_height", &min_height_, 700);
 
   name_ = "Window"+std::to_string(String::getAppendedInt (instanceId()));
+
+  QIcon atsdb_icon(Files::getIconFilepath("atsdb.png").c_str());
+  setWindowIcon(atsdb_icon); // for the glory of the empire
 
   std::string title =  "ATSDB v"+ATSDB::instance().config().getString("version")+" "+name_;
   QWidget::setWindowTitle (title.c_str());

@@ -927,7 +927,7 @@ std::map<int, std::string> DBObject::loadLabelData (std::vector<int> rec_nums, i
     boost::posix_time::ptime stop_time = boost::posix_time::microsec_clock::local_time();
     boost::posix_time::time_duration diff = stop_time - start_time;
 
-    loginf  << "DBObject: loadLabelData: done after " << diff.total_milliseconds() << " ms";
+    logdbg  << "DBObject: loadLabelData: done after " << diff.total_milliseconds() << " ms";
 
     return labels;
 }

@@ -1135,7 +1135,7 @@ void DBInterface::prepareRead (const DBObject &dbobject, DBOVariableSet read_lis
                 dbobject.currentMetaTable(), read_list, custom_filter_clause, filtered_variables, use_order,
                 order_variable, use_order_ascending, limit, true);
 
-    loginf  << "DBInterface: prepareRead: dbo " << dbobject.name() << " sql '" << read->get() << "'";
+    logdbg  << "DBInterface: prepareRead: dbo " << dbobject.name() << " sql '" << read->get() << "'";
     current_connection_->prepareCommand(read);
 }
 
