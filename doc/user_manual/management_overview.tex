@@ -1,29 +1,15 @@
-\section{Management}
-\label{sec:management}
+\section{Overview}
+\label{sec:management_overview}
 
 \begin{figure}[H]
-  \hspace*{-2cm}
-    \includegraphics[width=18cm]{../screenshots/management.png}
-  \caption{Main management window}
-  \label{fig:management}
+  \hspace*{-2.5cm}
+    \includegraphics[width=19cm]{../screenshots/management.png}
+  \caption{Management window}
 \end{figure}
 
-In the uppermost part, the current tab can be selected. The following tabs exist:
+In the uppermost part, the current tab can be selected. In addition to the 'Management' tab, views can be added to main window, per default a ListBox view exists. \\
 
-\begin{table}[h]
-  \center
-  \begin{tabular}{ | l | l |}
-    \hline
-    \textbf{Tab} & \textbf{Description} \\ \hline
-    DB Config & Database configuration, used during startup \\ \hline
-    Management & Manages loading and inspection of data \\ \hline
-    ... & Additional tabs with Views \\
-    \hline
-  \end{tabular}
-  \caption{Main window tab list}
-\end{table}
-
-Located in the main window, a management tab exists.  It shows general database information, a list of database objects with loading functions, a filter system and so on.
+The 'Management' tab shows general database information, a list of database objects with loading functions, a filter system and so on.
 
 \subsection{Database Information}
 
@@ -33,7 +19,6 @@ In this widget, general information about the database is given.
   \center
     \includegraphics[width=8cm,frame]{../screenshots/management_database.png}
   \caption{Management: Database Information}
-  \label{fig:management_database}
 \end{figure}
 
 This also includes the database status.
@@ -41,29 +26,28 @@ This also includes the database status.
 \subsection{Database Objects}
 \label{sec:management_dbos}
 
-In this widget, information about the DBO's, the loaded dataset, and the loading parameters are given.
+In this widget, information about the DBObjects, the loaded dataset, and the loading parameters are given.
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=6cm,frame]{../screenshots/management_dbos.png}
-  \caption{Management: Database Objects}
-  \label{fig:management_objects}
+    \includegraphics[width=8cm,frame]{../screenshots/management_dbos.png}
+  \caption{Management: DBObjects}
 \end{figure}
 
-Each existing DBO is listed, and active ones have the following items:
+Each existing DBObject is listed, and active ones have the following items:
 
 \begin{itemize}
- \item Name checkbox: Defines whether data from this DBO should be loaded
+ \item Name checkbox: Defines whether data from this DBObject should be loaded
  \item Loading status information
   \begin{itemize}
   \item Idle: Nothing to do at the moment
-  \item Loading: DBO read/write in progress
+  \item Loading: DBObject read/write in progress
   \end{itemize}
  \item Loaded data size: Number of loaded items / Number of existing items
 \end{itemize}
 \ \\
 
-If a DBO exists, but has no data in the database, it is shown as inactive (greyed out, like ADSB in the screenshot).\\
+If a DBObject exists, but has no data in the database, it is shown as inactive (greyed out, like ADSB and MLAT in the screenshot).\\
 
 The following important elements exits:
 \begin{itemize}
@@ -75,16 +59,21 @@ The following important elements exits:
 Additionally, parameters which configure the loading process exist:
 
 \begin{itemize}
+\item The following elements should not be used (exist for testing purposes):
+\begin{itemize}
  \item 'Use order' checkbox: Whether the dataset should be ordered by a DBO variable
  \item 'Use Ascending' checkbox: If ordered, defines if it should be ascending or descending
- \item 'Order Variable' selection: If ordered, what variable should be used
+ \item 'Order Variable' selection: If ordered, what variable should be used.
+\end{itemize}
  \item 'Use Limit' checkbox: If the data size should be limited
  \item 'Limit Min': If limited, the data set will start at the n-th index given here. If 0, it will be loaded from the beginning, if e.g. 100, the first 100 entries will be skipped and the 101st entry will be the first in the dataset.
 \item 'Limit Max': If limited, the number given here will be the number of loaded entries.
 \end{itemize}
 \ \\
 
-Using the 'Load' button , a loading process using the current configuration is started. When a loading process is in progress, the button displays 'Stop' and can be used to abort the current loading process. Please note that aborting can take a few seconds during which the button is inactive, after successful abort the button states 'Load' and is usable again.
+Using the 'Load' button, a loading process using the current configuration is started.  \\
+
+When a loading process is in progress, the button displays 'Stop' and can be used to abort the current loading process. Please note that aborting can take a few seconds during which the button is inactive, after successful abort the button states 'Load' and is usable again.
 
 \subsection{Filters}
 
@@ -92,13 +81,11 @@ Using the 'Load' button , a loading process using the current configuration is s
   \center
     \includegraphics[width=7cm,frame]{../screenshots/management_filters.png}
   \caption{Management: Filters}
-  \label{fig:management_filters}
 \end{figure}
 
 Each filter consists of a checkbox, defining if a filter is active (contributes to the search query), a triangle-button (to show/hide the filter configuration elements), a unique name, and a manage button (activates a context menu). At the bottom an 'Add filter' button exists, which can be used to add new filters. \\
 
-Please \textbf{note} that the filter configuration will be saved at program shutdown, which is also true for new
-filters.   At  startup,  all  filters  from  the  configuration  are  generated  and  restored  to  their  previous  state. However, when the database was changed (usage of different data source), all filters are reset to an initial
+Please \textbf{note} that the filter configuration will be saved at program shutdown, which is also true for new filters.   At  startup,  all  filters  from  the  configuration  are  generated  and  restored  to  their  previous  state. However, when the database was changed (usage of different data source), all filters are reset to an initial
 state (since their previous configuration may be senseless). \\
 
 Please also \textbf{note} that active filters, at the moment, are always combined with a logical AND. Therefore,
@@ -123,7 +110,6 @@ For more information about filtering, please refer to Section \nameref{sec:filte
   \center
     \includegraphics[width=8cm,frame]{../screenshots/management_views.png}
   \caption{Management: Views}
-  \label{fig:management_views}
 \end{figure}
 
 This element allows generation and management of all active Views and windows. Each View is contained
@@ -148,7 +134,6 @@ The ATSDB framework supports multi-threading. A number of processing steps ('Job
   \center
     \includegraphics[width=8cm,frame]{../screenshots/management_jobs.png}
   \caption{Management: Jobs}
-  \label{fig:management_jobs}
 \end{figure}
 
 In the Job element the number of database jobs is listed under 'DB Jobs', the number of other Jobs is listed under 'Jobs'. The number of active processing threads is listed under 'Threads'.
