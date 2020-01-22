@@ -3,6 +3,21 @@
 
 This tash allows importing of ASTERIX data recording files into the opened database. \\
 
+\begin{figure}[H]
+  \hspace*{-2.5cm}
+    \includegraphics[width=19cm]{../screenshots/asterix_import_data.png}
+  \caption{Task: Import ASTERIX data}
+\end{figure}
+
+There exist 3 tabs:
+
+\begin{itemize}  
+\item Main: File list and support functions/parameters
+\item Decoder: jASTERIX decoder settings
+\item Mappings: Defintion of created database content based on decoded data
+\end{itemize}
+\ \\
+
 Please note that the following framings are currently supported:
 \begin{itemize}  
 \item None: Raw, netto, unframed ASTERIX data blocks
@@ -31,21 +46,6 @@ Please note that the following ASTERIX categories, editions, reserved expansion 
 \  \\
 
 Please note that sensor status messages can be decoded, but are not inserted into the database. Decoding of ASTERIX CAT002 is recommended if CAT001 data is imported, since the timestamps are derived from it (if not available in CAT001).
-
-\begin{figure}[H]
-  \hspace*{-2.5cm}
-    \includegraphics[width=19cm]{../screenshots/asterix_import_data.png}
-  \caption{Task: Import ASTERIX data}
-\end{figure}
-
-There exist 3 tabs:
-
-\begin{itemize}  
-\item Main: File list and support functions/parameters
-\item Decoder: jASTERIX decoder settings
-\item Mappings: Defintion of created database content based on decoded data
-\end{itemize}
-\ \\
 
 \subsection{Main Tab}
 
@@ -114,7 +114,7 @@ At the top, the GUI elements can be used to show/add/remove JSON objects parsers
 
 A JSON object parser in this context is the function that parses the JSON content created by the jASTERIX parser, and creates database content from it. For each category a dedicated parser defines the mapping from JSON to database content. \\
 
-For common users normally no interaction is required, but it might be sometimes interesting what database content is created from which ASTERIX data.
+For common users normally no interaction is recommended, but it might be sometimes interesting what database content is created from which ASTERIX data.
 
 \paragraph{Top Elements}
 
@@ -130,7 +130,7 @@ The exact definition of how the parsing works is out of scope for this document,
 \item Variable List:
 \begin{itemize}  
 \item Active checkbox: Defines if the specific mapping is used
-\item JSON Key: JSON location and name of the data to be mapped, commonly 'Data Item Number'.'variable'
+\item JSON Key: JSON location and name of the data to be mapped, commonly in 'Data Item Number'.'variable' or 'Data Item Number'.'Sub Item'.'variable' format
 \item Comment: Additional information with example values
 \item DBOVariable: Target variable to which this data is mapped
 \item Mandatory checkbox: Defines if the JSON object (from the ASTERIX record) is skipped if the JSON key is not found
@@ -161,7 +161,7 @@ After import, a confirmation will be shown:
 \end{figure}
 
 \paragraph{Comments}
-Importing performance strongly depends on CPU performance (multi-threading very beneficial), but a import of 2.8 million target reports takes about 2 minutes on the author's hardware. \\
+Importing performance strongly depends on CPU performance (multi-threading very beneficial), but a import of 5 million target reports takes about 3:30 minutes on the author's hardware. \\
 
 The (truncated) timestamps of CAT001 are calculated in a simple algorithm based on the CAT002 messages from the same sensor, so their timestamp data is slightly unreliable, but exact enough for e.g. time window filtering. \\
 

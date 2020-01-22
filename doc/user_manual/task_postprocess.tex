@@ -1,13 +1,12 @@
 \section{Task: Post-Process} 
 \label{sec:task_postprocess}
 
-When a database is imported, some information that eases usage of the software does not exist. This information is generated once during a post-processing step, which is automatically performed the first opening of a new database. If wanted, it can always performed using the 'Force post-processing' checkbox.
+This task allows calculation which data sources were active and of minimum/maximum data information, which is required for that later tasks or analysis functions.
 
 \begin{figure}[H]
-  \hspace*{-2cm}
-    \includegraphics[width=18cm,frame]{../screenshots/db_postprocessing.png}
-  \caption{Post-processing a database}
-  \label{fig:db_postprocessing}
+  \hspace*{-2.5cm}
+    \includegraphics[width=19cm]{../screenshots/db_postprocessing.png}
+  \caption{Task: Post-process}
 \end{figure}
 
 The following information is generated and stored in the database:
@@ -19,4 +18,16 @@ The following information is generated and stored in the database:
 
 This step has to be performed only once for each database, and may take up to a few minutes for large datasets. \\
 
-\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please \textbf{note} that during this step, no DBO data itself is changed, but only additional information is generated and stored in separate database tables.
+\subsection{Running}
+
+Using the 'Run Current Task' button the task can be performed. During import a status indication will be shown:
+
+\begin{figure}[H]
+  \center
+    \includegraphics[width=5cm]{../screenshots/postprocess_status.png}
+  \caption{Post-processing task status}
+\end{figure}
+
+After completion the status window closes and no additional confirmation will be given. \\
+
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please \textbf{note} that during this step, no DBObject data itself is changed, but only additional information is generated and stored in separate database tables.

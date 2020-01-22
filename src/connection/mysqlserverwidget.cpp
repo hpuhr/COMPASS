@@ -249,8 +249,12 @@ void MySQLServerWidget::deleteDatabaseSlot ()
 
     if (reply == QMessageBox::Yes)
     {
+        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
         connection_.deleteDatabase(server_.database());
         updateDatabases();
+
+        QApplication::restoreOverrideCursor();
     }
 }
 

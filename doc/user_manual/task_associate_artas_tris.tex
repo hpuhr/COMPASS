@@ -1,12 +1,14 @@
 \section{Task: Associate ARTAS TRIs}
 \label{sec:task_associate_artas_tris}
 
+This task allows creation of UTNs and target report association based on ARTAS tracks and the TRI information.
+
 Please note that if no ARTAS TRI SPF information exists in the database, these steps do not have to be performed.\\
 
 \begin{figure}[H]
-  \center
-    \includegraphics[width=12cm]{../screenshots/artas_association_config.png}
-  \caption{Calculate ARTAS Associations task: Configuration}
+  \hspace*{-2.5cm}
+    \includegraphics[width=19cm]{../screenshots/artas_association_config.png}
+  \caption{Task: Associate ARTAS TRIs}
 \end{figure}
 
 In this task, the ARTAS association information stored in system track updates can be used to create UTN which associate each system track update to the used sensor target reports.
@@ -73,13 +75,14 @@ The time window defined by [\textit{Dubious Association Close Time Past, Dubious
 
 Currently in ARTAS, (according to the authors information) track end or coasted updates contain wrong TRI information (from previous updates). If the respective checkboxes are set, this TRI information is disregarded. If they are not checked, the associations are made and can be investigated.
 
-\paragraph{Running the task}
-When the 'Calculate' button is clicked, the task is started and the status dialog is shown.
+\paragraph{Running}
+
+Using the 'Run Current Task' button the task can be performed. During import a status indication will be shown:
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=10cm]{../screenshots/artas_assoc_status.png}
-  \caption{Calculate ARTAS Associations task: Status}
+    \includegraphics[width=11cm]{../screenshots/artas_assoc_status.png}
+  \caption{Associate ARTAS TRIs tatus}
 \end{figure}
 
 When the calculation of the ARTAS associations is completed, the assocaition information is written into the database. If there where missed or dubious associations, the user is asked if this is still wanted. Please be aware that it is possible to not save the association information, and to re-run the task with a different configuration.
@@ -87,15 +90,15 @@ When the calculation of the ARTAS associations is completed, the assocaition inf
 \begin{figure}[H]
   \center
     \includegraphics[width=8cm]{../screenshots/artas_assoc_question.png}
-  \caption{Calculate ARTAS Associations task: Save question}
+  \caption{Associate ARTAS TRIs save question}
 \end{figure}
 
 After the assocations are saved, the task is done:
 
 \begin{figure}[H]
   \center
-    \includegraphics[width=10cm]{../screenshots/artas_assoc_done.png}
-  \caption{Calculate ARTAS Associations task: Done}
+    \includegraphics[width=11cm]{../screenshots/artas_assoc_done.png}
+  \caption{Associate ARTAS TRIs done}
 \end{figure}
 
 

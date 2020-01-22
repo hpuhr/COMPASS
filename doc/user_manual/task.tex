@@ -23,9 +23,11 @@ It is recommended to run the application from a console terminal (for issue anal
 
 If a previous version of ATSDB has been run on the workstation, the configuration (and additional application data) might be out of date. Since the framework of ATSDB is quite sensitive on being run with the latest configuration an upgrade must be performed. \\
 
-\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please note that this means that the previous configuration will be overwritten, which will unfortunately clear any previous changes made by the user. \\\\
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please note that this means that the previous configuration will be overwritten, which will unfortunately clear any previous changes made by the user. \\
 
-\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please note that of the previous configuration is older than from v0.5.0 (or newer than the current one), the previous configuration and data folders have to be deleted, clearing any previous changes made by the user. \\\\
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please note that of the previous configuration is older than from v0.5.0 (or newer than the current one), the previous configuration and data folders have to be deleted, clearing any previous changes made by the user. \\
+
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please note that with ATSDB version 0.5 (or later) stored configuration data sources can be exported (see \nameref{sec:config_ds_export} and imported again after the upgrade. \\
 
 If an outdated configuration is detected, one of the following dialogs will be shown.
 
@@ -90,7 +92,9 @@ Active tasks can be selected and performed, either by using the 'Run Current Tas
 
 Whenever a task is done, the state of all other tasks is updated and the next recommended task is selected (if available). The states of the tasks are persisted (at correct application shutdown) in the database, so when re-opening existing ones the task states are shown correctly. \\
 
-Depending on the use-case, some tasks are required, e.g. the Post-Process task. When all required tasks have been performed, the 'Start' button can be used to proceed to the Management window.
+Depending on the use-case, some tasks are required, e.g. the Post-Process task. When all required tasks have been performed, the 'Start' button can be used to proceed to the Management window. \\
+
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} Please note that if a previously finalized database is re-opened the 'Start' button is available immediately.
 
 \subfile{task_use_cases}
 
@@ -107,8 +111,8 @@ Depending on the use-case, some tasks are required, e.g. the Post-Process task. 
 
 \subfile{task_calc_radar_pos}
 
-\subfile{task_associate_artas_tris}
-
 \subfile{task_postprocess}
+
+\subfile{task_associate_artas_tris}
 
 \subfile{task_starting}
