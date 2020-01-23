@@ -10,11 +10,11 @@
 In the 'Style' tab, several elements exist:
 
 \begin{itemize}
- \item Layer Mode: Defines how layers are generated. Please refer to Section \ref{sec:layer_mode} for details.
+ \item Layer Mode: Defines how layers are generated. Please refer to Section \nameref{sec:layer_mode} for details.
  \item Connect Last Layer: Whether grouped target reports in the last layer should be connected using lines
  \item Connect None Height: If groups are connected, whether target reports with not height information should be connected
  \item Blend Mode: Defines the drawing blend mode, allowing clearer symbols (contour) or colors (src-over).
- \item Style: Defines how geometry is styled. Please refer to Section \ref{sec:style} for details.
+ \item Style: Defines how geometry is styled. Please refer to Section \nameref{sec:style} for details.
  \item Render Order: Defines the drawing order of DBObjects. To bottom one is drawn first, the top one last (over all others)
  \item Update button: Triggers a redraw or reload of the geometry, becomes available after a change if needed.
 \end{itemize} 
@@ -24,7 +24,7 @@ In the 'Style' tab, several elements exist:
 
 In this selection the way layers are generated can be changed. \\\\
 
-The following items can be present in the list:
+The following items can be present in the list:\\
 
 \begin{itemize}
  \item DBObject: DBObject type, e.g. Radar, MLAT, ...
@@ -76,7 +76,7 @@ In this layer mode the DBObject name is used to create the first layer, with sub
 
 \begin{figure}[H]
     \center
-    \includegraphics[width=10cm,frame]{../screenshots/osgview_group_dbo_ds.png}
+    \includegraphics[width=8cm,frame]{../screenshots/osgview_group_dbo_ds.png}
   \caption{OSG View layer mode DBObject:ds\_id}
 \end{figure}
 
@@ -86,7 +86,7 @@ In this layer mode the Mode 3/A code is used to create the first layer, with sub
 
 \begin{figure}[H]
 \center
-    \includegraphics[width=10cm,frame]{../screenshots/osgview_group_ma_dbo.png}
+    \includegraphics[width=8cm,frame]{../screenshots/osgview_group_ma_dbo.png}
   \caption{OSG View layer mode mode3a\_code:DBObject}
 \end{figure}
 
@@ -101,7 +101,9 @@ An example of this mode is shown in the styling section.
 
 If the 'Connect Last Layer' checkbox is set, connection lines between all target reports in the last layer are drawn, except for the 'None' layer. \\
 
-\includegraphics[width=0.5cm]{../../data/icons/hint.png} If this is activated for a Layer mode in which the last layer is not target-specific, this will lead to a sub-optimal representation. This mode /(normally) makes sense in one of the following Layer modes:
+\includegraphics[width=0.5cm]{../../data/icons/hint.png} If this is activated for a Layer mode in which the last layer is not target-specific, this will lead to a sub-optimal representation. \\
+
+This mode (normally) makes sense in one of the following Layer modes:
 
 \begin{itemize}
  \item DBObject:ds\_id:callsign
@@ -129,8 +131,8 @@ Please \textbf{note} that changes both these values requires a manual redraw usi
 
 There exist 3 main elements for styling:
 \begin{itemize}
- \item Preset drop-down menu: Selected currently active style
- \item Style configuration area: Area below the preset menu
+ \item Preset drop-down menu: Selects currently active style
+ \item Style configuration area: Area below the preset menu, allows configuration of the current style
  \item Reset Styles button: Clears all style presets to their default values
 \end{itemize}
 \  \\
@@ -181,9 +183,13 @@ The following Target report based style presets exist:
 
 Please note that after changing the style to one of these value a reload has to be triggered. \\
 
+\subsubsection{Customized Styling}
+
+While the presets come with (mostly) reasonable default values, adaptation can be performed by clicking on the value that should be changed, either in the Default Style or the Generated rules. Any changes are applied immediately to the geometry.
+
 \subsubsection{Style Examples}
 
-To give a few examples, some interesting Layer modes and Style presets are given:
+To give a few examples, some interesting Layer modes and Style preset combinations are given:
 
 \begin{figure}[H]
     \hspace*{-2.5cm}
